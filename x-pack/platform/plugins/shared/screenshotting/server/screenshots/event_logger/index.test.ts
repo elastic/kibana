@@ -6,7 +6,8 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import type { ConfigType } from '@kbn/screenshotting-server';
+import { SpanStatusCode, trace } from '@opentelemetry/api';
+import { tracing } from '@elastic/opentelemetry-node/sdk';
 import moment from 'moment';
 import type { ScreenshottingAction } from '.';
 import { Actions, EventLogger, Transactions } from '.';
@@ -16,13 +17,28 @@ jest.mock('uuid', () => ({
   v4: () => 'NEW_UUID',
 }));
 
+let otelExporter: tracing.InMemorySpanExporter;
+let otelProvider: tracing.BasicTracerProvider;
+
+beforeAll(() => {
+  otelExporter = new tracing.InMemorySpanExporter();
+  otelProvider = new tracing.BasicTracerProvider({
+    spanProcessors: [new tracing.SimpleSpanProcessor(otelExporter)],
+  });
+  trace.setGlobalTracerProvider(otelProvider);
+});
+
+afterAll(async () => {
+  await otelProvider.shutdown();
+});
+
 type EventLoggerArgs = [message: string, meta: ScreenshottingAction];
 describe('Event Logger', () => {
   let eventLogger: EventLogger;
-  let config: ConfigType;
   let logSpy: jest.SpyInstance<void, EventLoggerArgs>;
 
   beforeEach(() => {
+    otelExporter?.reset();
     const testDate = moment(new Date('2021-04-12T16:00:00.000Z'));
     let delaySeconds = 1;
 
@@ -31,50 +47,75 @@ describe('Event Logger', () => {
     });
 
     const logger = loggingSystemMock.createLogger();
-    config = { capture: { zoom: 2 } } as ConfigType;
-    eventLogger = new EventLogger(logger, config);
+    eventLogger = new EventLogger(logger);
 
     logSpy = jest.spyOn(logger, 'debug') as jest.SpyInstance<void, EventLoggerArgs>;
   });
 
   it('creates logs for the events and includes durations and event payload data', () => {
-    const screenshottingEnd = eventLogger.startTransaction(Transactions.SCREENSHOTTING);
-    const openUrlEnd = eventLogger.logScreenshottingEvent(
-      'open the url to the Kibana application',
-      Actions.OPEN_URL,
-      'wait'
-    );
-    openUrlEnd();
-    const getElementPositionsEnd = eventLogger.logScreenshottingEvent(
-      'scan the page to find the boundaries of visualization elements',
-      Actions.GET_ELEMENT_POSITION_DATA,
-      'wait'
-    );
-    getElementPositionsEnd();
-    screenshottingEnd({
-      labels: {
+    eventLogger.withTransaction(Transactions.SCREENSHOTTING, (setScreenshottingLabels) => {
+      const openUrlEnd = eventLogger.logScreenshottingEvent(
+        'open the url to the Kibana application',
+        Actions.OPEN_URL,
+        'wait'
+      );
+      openUrlEnd();
+      const getElementPositionsEnd = eventLogger.logScreenshottingEvent(
+        'scan the page to find the boundaries of visualization elements',
+        Actions.GET_ELEMENT_POSITION_DATA,
+        'wait'
+      );
+      getElementPositionsEnd();
+      setScreenshottingLabels({
         cpu: 12,
         cpu_percentage: 0,
         memory: 450789,
         memory_mb: 449,
         byte_length: 14000,
-      },
+      });
     });
 
-    const pdfEnd = eventLogger.startTransaction(Transactions.PDF);
-    const addImageEnd = eventLogger.logPdfEvent(
-      'add image to the PDF file',
-      Actions.ADD_IMAGE,
-      'output'
-    );
-    addImageEnd();
-    pdfEnd({ labels: { pdf_pages: 1, byte_length_pdf: 6666 } });
+    eventLogger.withTransaction(Transactions.PDF, (setPdfLabels) => {
+      const addImageEnd = eventLogger.logPdfEvent(
+        'add image to the PDF file',
+        Actions.ADD_IMAGE,
+        'output'
+      );
+      addImageEnd();
+      setPdfLabels({ pdf_pages: 1, byte_length_pdf: 6666 });
+    });
 
     const logs = logSpy.mock.calls.map(([message, data]) => ({
       message,
       duration: data?.event?.duration,
       screenshotting: data?.kibana?.screenshotting,
     }));
+
+    const spans = otelExporter.getFinishedSpans();
+
+    const screenshottingSpan = spans.find((s) => s.name === Transactions.SCREENSHOTTING);
+    expect(screenshottingSpan).toBeDefined();
+    expect(screenshottingSpan!.attributes['transaction.type']).toBe('screenshotting');
+    expect(screenshottingSpan!.attributes.cpu).toBe(12);
+    expect(screenshottingSpan!.attributes.memory).toBe(450789);
+    expect(screenshottingSpan!.status.code).not.toBe(SpanStatusCode.ERROR);
+
+    const pdfSpan = spans.find((s) => s.name === Transactions.PDF);
+    expect(pdfSpan).toBeDefined();
+    expect(pdfSpan!.attributes['transaction.type']).toBe('screenshotting');
+    expect(pdfSpan!.attributes.pdf_pages).toBe(1);
+    expect(pdfSpan!.attributes.byte_length_pdf).toBe(6666);
+
+    const openUrlSpan = spans.find((s) => s.name === Actions.OPEN_URL);
+    expect(openUrlSpan).toBeDefined();
+    expect(openUrlSpan!.attributes['span.type']).toBe('wait');
+
+    const getPositionsSpan = spans.find((s) => s.name === Actions.GET_ELEMENT_POSITION_DATA);
+    expect(getPositionsSpan).toBeDefined();
+
+    const addImageSpan = spans.find((s) => s.name === Actions.ADD_IMAGE);
+    expect(addImageSpan).toBeDefined();
+    expect(addImageSpan!.attributes['span.type']).toBe('output');
 
     expect(logs.length).toBe(10);
     expect(logs).toMatchInlineSnapshot(`
@@ -96,7 +137,7 @@ describe('Event Logger', () => {
           },
         },
         Object {
-          "duration": 3000,
+          "duration": 5000,
           "message": "completed: open the url to the Kibana application",
           "screenshotting": Object {
             "action": "open-url-complete",
@@ -112,7 +153,7 @@ describe('Event Logger', () => {
           },
         },
         Object {
-          "duration": 5000,
+          "duration": 8000,
           "message": "completed: scan the page to find the boundaries of visualization elements",
           "screenshotting": Object {
             "action": "get-element-position-data-complete",
@@ -120,7 +161,7 @@ describe('Event Logger', () => {
           },
         },
         Object {
-          "duration": 20000,
+          "duration": 44000,
           "message": "completed: screenshot-pipeline",
           "screenshotting": Object {
             "action": "screenshot-pipeline-complete",
@@ -149,7 +190,7 @@ describe('Event Logger', () => {
           },
         },
         Object {
-          "duration": 9000,
+          "duration": 14000,
           "message": "completed: add image to the PDF file",
           "screenshotting": Object {
             "action": "add-pdf-image-complete",
@@ -157,7 +198,7 @@ describe('Event Logger', () => {
           },
         },
         Object {
-          "duration": 27000,
+          "duration": 65000,
           "message": "completed: generate-pdf",
           "screenshotting": Object {
             "action": "generate-pdf-complete",
@@ -179,9 +220,14 @@ describe('Event Logger', () => {
       'screenshot capture test',
       Actions.GET_SCREENSHOT,
       'read',
-      eventLogger.getPixelsFromElementPosition(elementPosition)
+      eventLogger.getPixelsFromElementPosition(elementPosition, 2)
     );
     endScreenshot({ byte_length: 4444 });
+
+    const spans = otelExporter.getFinishedSpans();
+    const screenshotSpan = spans.find((s) => s.name === Actions.GET_SCREENSHOT);
+    expect(screenshotSpan).toBeDefined();
+    expect(screenshotSpan!.attributes['span.type']).toBe('read');
 
     const logData = logSpy.mock.calls.map(([message, data]) => ({
       message,
@@ -201,7 +247,7 @@ describe('Event Logger', () => {
           },
         },
         Object {
-          "duration": 2000,
+          "duration": 3000,
           "message": "completed: screenshot capture test",
           "screenshotting": Object {
             "action": "get-screenshots-complete",
@@ -215,9 +261,10 @@ describe('Event Logger', () => {
   });
 
   it('creates helpful error logs', () => {
-    eventLogger.startTransaction(Transactions.SCREENSHOTTING);
-    eventLogger.logScreenshottingEvent('opening the url', Actions.OPEN_URL, 'wait');
-    eventLogger.error(new Error('Something erroneous happened'), Transactions.SCREENSHOTTING);
+    eventLogger.withTransaction(Transactions.SCREENSHOTTING, () => {
+      eventLogger.logScreenshottingEvent('opening the url', Actions.OPEN_URL, 'wait');
+      eventLogger.error(new Error('Something erroneous happened'), Transactions.SCREENSHOTTING);
+    });
 
     const logData = logSpy.mock.calls.map(([message, data]) => ({
       message,

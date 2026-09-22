@@ -9,8 +9,10 @@
 
 import type { IRouter, PluginInitializerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
+import { isRequestAbortedError } from '@kbn/es-errors';
 import { SOURCES_AUTOCOMPLETE_ROUTE } from '@kbn/esql-types';
-import { EsqlService } from '../services/esql_service';
+import { EsqlService } from '@kbn/esql-server-utils';
 
 export const registerGetSourcesRoute = (router: IRouter, { logger }: PluginInitializerContext) => {
   router.get(
@@ -18,9 +20,15 @@ export const registerGetSourcesRoute = (router: IRouter, { logger }: PluginIniti
       path: `${SOURCES_AUTOCOMPLETE_ROUTE}{scope}`,
       validate: {
         params: schema.object({
-          scope: schema.oneOf([schema.literal('all'), schema.literal('local')], {
-            defaultValue: 'local', // Default to 'local' if no scope is provided
-          }),
+          scope: schema.oneOf(
+            [schema.literal('all'), schema.literal('local'), schema.literal('remote')],
+            {
+              defaultValue: 'local', // Default to 'local' if no scope is provided
+            }
+          ),
+        }),
+        query: schema.object({
+          projectRouting: schema.maybe(schema.string({ maxLength: 1024 })),
         }),
       },
       security: {
@@ -31,16 +39,28 @@ export const registerGetSourcesRoute = (router: IRouter, { logger }: PluginIniti
       },
     },
     async (requestHandlerContext, request, response) => {
+      const signal = getRequestAbortedSignal(request.events.aborted$);
+
       try {
         const { scope } = request.params;
+        const { projectRouting } = request.query;
         const core = await requestHandlerContext.core;
-        const service = new EsqlService({ client: core.elasticsearch.client.asCurrentUser });
-        const result = await service.getAllIndices(scope);
+        const service = new EsqlService({
+          client: core.elasticsearch.client.asCurrentUser,
+        });
+        const result = await service.getAllIndices(scope, projectRouting, signal);
 
         return response.ok({
           body: result,
         });
       } catch (error) {
+        if (signal.aborted && isRequestAbortedError(error)) {
+          return response.custom({
+            statusCode: 499,
+            body: { message: 'Client closed request' },
+          });
+        }
+
         logger.get().debug(error);
         throw error;
       }

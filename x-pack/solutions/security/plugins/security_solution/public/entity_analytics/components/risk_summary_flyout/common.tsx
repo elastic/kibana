@@ -86,8 +86,9 @@ export const columnsArray: Array<EuiBasicTableColumn<TableItem>> = [
 
 export const getItems: (
   entityData: EntityData | undefined,
-  isPrivmonEnabled: boolean
-) => TableItem[] = (entityData, isPrivmonEnabled) => {
+  isPrivmonEnabled: boolean,
+  isWatchlistEnabled: boolean
+) => TableItem[] = (entityData, isPrivmonEnabled, isWatchlistEnabled) => {
   const items = [
     {
       category: i18n.translate('xpack.securitySolution.flyout.entityDetails.alertsGroupLabel', {
@@ -113,19 +114,34 @@ export const getItems: (
   ];
 
   if (isPrivmonEnabled) {
-    items.push({
-      category: i18n.translate(
-        'xpack.securitySolution.flyout.entityDetails.privilegedUserGroupLabel',
-        {
-          defaultMessage: 'Privileged User',
-        }
-      ),
-      score:
-        entityData?.risk.modifiers?.find(
-          (modifier) => modifier.type === 'watchlist' && modifier.subtype === 'privmon'
-        )?.contribution ?? 0,
-      count: undefined,
-    });
+    if (isWatchlistEnabled) {
+      const watchlistModifiers =
+        entityData?.risk.modifiers?.filter((modifier) => modifier.type === 'watchlist') ?? [];
+      items.push({
+        category: i18n.translate(
+          'xpack.securitySolution.flyout.entityDetails.watchlistsGroupLabel',
+          {
+            defaultMessage: 'Watchlists',
+          }
+        ),
+        score: watchlistModifiers.reduce((sum, mod) => sum + mod.contribution, 0),
+        count: undefined,
+      });
+    } else {
+      items.push({
+        category: i18n.translate(
+          'xpack.securitySolution.flyout.entityDetails.privilegedUserGroupLabel',
+          {
+            defaultMessage: 'Privileged User',
+          }
+        ),
+        score:
+          entityData?.risk.modifiers?.find(
+            (modifier) => modifier.type === 'watchlist' && modifier.subtype === 'privmon'
+          )?.contribution ?? 0,
+        count: undefined,
+      });
+    }
   }
 
   return items;

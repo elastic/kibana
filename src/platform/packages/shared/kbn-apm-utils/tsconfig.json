@@ -10,6 +10,9 @@
   "include": [
     "**/*.ts"
   ],
+  "kbn_references": [
+    "@kbn/tracing-utils"
+  ],
   "exclude": [
     "target/**/*",
   ]

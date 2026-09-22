@@ -74,7 +74,7 @@ export const AgentsApp: React.FunctionComponent = () => {
         <EuiFlexItem grow={false}>
           <EuiButton
             fill
-            iconType="plusInCircle"
+            iconType="plusCircle"
             onClick={() => flyoutContext.openEnrollmentFlyout()}
             data-test-subj="addAgentBtnTop"
           >

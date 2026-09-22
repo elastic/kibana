@@ -108,7 +108,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
           label: i18n.translate('xpack.securitySolution.endpoint.effectedPolicySelect.global', {
             defaultMessage: 'Global',
           }),
-          iconType: selectedAssignmentType === 'globalPolicy' ? 'checkInCircleFilled' : 'empty',
+          iconType: selectedAssignmentType === 'globalPolicy' ? 'checkCircleFill' : 'empty',
           'data-test-subj': getTestId('global'),
           isDisabled: isGlobalButtonDisabled,
           toolTipContent: isGlobalButtonDisabled
@@ -120,7 +120,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
           label: i18n.translate('xpack.securitySolution.endpoint.effectedPolicySelect.perPolicy', {
             defaultMessage: 'Per Policy',
           }),
-          iconType: selectedAssignmentType === 'perPolicy' ? 'checkInCircleFilled' : 'empty',
+          iconType: selectedAssignmentType === 'perPolicy' ? 'checkCircleFill' : 'empty',
           'data-test-subj': getTestId('perPolicy'),
         },
       ];
@@ -225,7 +225,6 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
                 options={toggleGlobal}
                 idSelected={selectedAssignmentType}
                 onChange={handleGlobalButtonChange}
-                color="primary"
                 data-test-subj={getTestId('byPolicyGlobalButtonGroup')}
                 isDisabled={disabled}
               />
@@ -241,7 +240,6 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
               additionalListItems={unAccessiblePolicies}
               onChange={handleOnPolicySelectChange}
               data-test-subj={getTestId('policiesSelector')}
-              useCheckbox={true}
               showPolicyLink={true}
               isDisabled={isGlobal || !isPlatinumPlus || disabled}
             />

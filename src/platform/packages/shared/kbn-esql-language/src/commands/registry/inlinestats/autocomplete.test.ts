@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
-import { Parser } from '../../../parser';
+import { Parser } from '@elastic/esql';
 import { mockContext, getMockCallbacks } from '../../../__tests__/commands/context_fixtures';
 import { autocomplete } from './autocomplete';
 import { expectSuggestions } from '../../../__tests__/commands/autocomplete';
@@ -79,14 +79,14 @@ describe('INLINE STATS Multi-token Autocomplete', () => {
       previousCommandFields,
       queryString,
       additionalFieldsMock,
-      UnmappedFieldsStrategy.FAIL
+      UnmappedFieldsStrategy.DEFAULT
     );
     const statsResult = statsColumnsAfter(
       statsCommand,
       previousCommandFields,
       statsQueryString,
       additionalFieldsMock,
-      UnmappedFieldsStrategy.FAIL
+      UnmappedFieldsStrategy.DEFAULT
     );
 
     expect(inlineStatsResult).toEqual<ESQLColumnData[]>([
@@ -99,5 +99,26 @@ describe('INLINE STATS Multi-token Autocomplete', () => {
     expect(statsResult).toEqual<ESQLColumnData[]>([
       { name: 'avg_field1', type: 'double', userDefined: true, location: { min: 15, max: 24 } },
     ]);
+  });
+
+  test('suggests subqueries after IN in WHERE', async () => {
+    await inlineStatsExpectSuggestions(
+      'FROM a | INLINE STATS MIN(b) WHERE keywordField IN ',
+      ['($0)', '(FROM $0)', '(ROW $0)', '(TS $0)'],
+      mockCallbacks
+    );
+    await inlineStatsExpectSuggestions(
+      'FROM a | INLINE STATS MIN(b) WHERE keywordField NOT IN ',
+      ['($0)', '(FROM $0)', '(ROW $0)', '(TS $0)'],
+      mockCallbacks
+    );
+  });
+
+  test('does not suggest subqueries after IN outside WHERE', async () => {
+    await inlineStatsExpectSuggestions(
+      'FROM a | INLINE STATS MIN(b) BY keywordField IN ',
+      ['($0)'],
+      mockCallbacks
+    );
   });
 });

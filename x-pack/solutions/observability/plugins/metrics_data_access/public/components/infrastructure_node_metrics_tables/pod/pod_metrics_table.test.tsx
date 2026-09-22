@@ -13,6 +13,7 @@ import { createStartServicesAccessorMock, createMetricsClientMock } from '../tes
 import { createLazyPodMetricsTable } from './create_lazy_pod_metrics_table';
 import IntegratedPodMetricsTable from './integrated_pod_metrics_table';
 import { PodMetricsTable } from './pod_metrics_table';
+import { ECS_POD_CPU_USAGE_LIMIT_PCT, MEMORY_LIMIT_UTILIZATION } from '../shared/constants';
 import { metricByField } from './use_pod_metrics_table';
 
 jest.mock('../../../pages/link_to/use_asset_details_redirect', () => ({
@@ -31,18 +32,7 @@ describe('PodMetricsTable', () => {
     to: 'now',
   };
 
-  const filterClauseDsl = {
-    bool: {
-      should: [
-        {
-          match: {
-            'pod.name': 'gke-edge-oblt-pool-1-9a60016d-lgg9',
-          },
-        },
-      ],
-      minimum_should_match: 1,
-    },
-  };
+  const kuery = `pod.name: "gke-edge-oblt-pool-1-9a60016d-lgg9"`;
 
   const mockData = {
     series: [
@@ -60,7 +50,7 @@ describe('PodMetricsTable', () => {
       const metricsClient = getMetricsClient();
       const LazyPodMetricsTable = createLazyPodMetricsTable(getStartServices()[0], metricsClient);
 
-      render(<LazyPodMetricsTable timerange={timerange} filterClauseDsl={filterClauseDsl} />);
+      render(<LazyPodMetricsTable timerange={timerange} kuery={kuery} />);
 
       expect(screen.queryByTestId(loadingIndicatorTestId)).not.toBeInTheDocument();
       expect(screen.queryByTestId('podMetricsTable')).not.toBeInTheDocument();
@@ -90,7 +80,7 @@ describe('PodMetricsTable', () => {
       const { findByText } = render(
         <IntegratedPodMetricsTable
           timerange={timerange}
-          filterClauseDsl={filterClauseDsl}
+          kuery={kuery}
           sourceId="default"
           metricsClient={metricsClient}
           {...coreProvidersPropsMock}
@@ -156,8 +146,8 @@ function createPod(
     keys: [id, name],
     rows: [
       {
-        [metricByField['kubernetes.pod.cpu.usage.limit.pct']]: cpuUsagePct,
-        [metricByField['kubernetes.pod.memory.usage.bytes']]: memoryUsageBytes,
+        [metricByField[ECS_POD_CPU_USAGE_LIMIT_PCT]]: cpuUsagePct,
+        [metricByField[MEMORY_LIMIT_UTILIZATION]]: memoryUsageBytes,
       } as MetricsExplorerSeries['rows'][number],
     ],
   };

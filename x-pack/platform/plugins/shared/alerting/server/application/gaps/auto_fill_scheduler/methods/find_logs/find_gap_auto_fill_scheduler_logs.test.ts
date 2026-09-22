@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { IValidatedEventInternalDocInfo } from '@kbn/event-log-plugin/server';
@@ -27,7 +28,6 @@ import { ReadOperations, AlertingAuthorizationEntity } from '../../../../../auth
 import { ConnectorAdapterRegistry } from '../../../../../connector_adapters/connector_adapter_registry';
 import { GapAutoFillSchedulerAuditAction } from '../../../../../rules_client/common/audit_events';
 import type { FindGapAutoFillSchedulerLogsParams } from './types';
-
 const kibanaVersion = 'v8.0.0';
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -99,6 +99,7 @@ describe('findGapAutoFillSchedulerLogs()', () => {
     jest.resetAllMocks();
 
     rulesClient = new RulesClient({
+      request: httpServerMock.createKibanaRequest(),
       taskManager,
       ruleTypeRegistry,
       unsecuredSavedObjectsClient,
@@ -108,6 +109,7 @@ describe('findGapAutoFillSchedulerLogs()', () => {
       namespace: 'default',
       getUserName: jest.fn(),
       createAPIKey: jest.fn(),
+      cloneAPIKey: jest.fn(),
       logger: loggingSystemMock.create().get(),
       internalSavedObjectsRepository,
       encryptedSavedObjectsClient: encryptedSavedObjects,
@@ -125,6 +127,7 @@ describe('findGapAutoFillSchedulerLogs()', () => {
       isSystemAction: jest.fn(),
       connectorAdapterRegistry: new ConnectorAdapterRegistry(),
       uiSettings: uiSettingsServiceMock.createStartContract(),
+      isServerless: false,
     });
 
     unsecuredSavedObjectsClient.get.mockResolvedValue(schedulerSO);
@@ -154,18 +157,18 @@ describe('findGapAutoFillSchedulerLogs()', () => {
       'gap-1'
     );
 
-    // Authorization is checked for each rule type
-    expect(authorization.ensureAuthorized).toHaveBeenCalledTimes(
-      schedulerSO.attributes.ruleTypes!.length
-    );
-    for (const ruleType of schedulerSO.attributes.ruleTypes ?? []) {
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-        ruleTypeId: ruleType.type,
-        consumer: ruleType.consumer,
-        operation: ReadOperations.FindGapAutoFillSchedulerLogs,
-        entity: AlertingAuthorizationEntity.Rule,
-      });
-    }
+    expect(authorization.bulkEnsureAuthorized).toHaveBeenCalledTimes(1);
+
+    const ruleTypeIdConsumersPairs = schedulerSO.attributes.ruleTypes.map((ruleType) => ({
+      ruleTypeId: ruleType.type,
+      consumers: [ruleType.consumer],
+    }));
+
+    expect(authorization.bulkEnsureAuthorized).toHaveBeenCalledWith({
+      ruleTypeIdConsumersPairs,
+      operation: ReadOperations.FindGapAutoFillSchedulerLogs,
+      entity: AlertingAuthorizationEntity.Rule,
+    });
 
     // Event log client is called with correct params
     expect(getEventLogClient).toHaveBeenCalledTimes(1);
@@ -248,11 +251,11 @@ describe('findGapAutoFillSchedulerLogs()', () => {
           sortField: '@timestamp',
           sortDirection: 'desc',
         })
-      ).rejects.toThrowError(/error getting SO!/);
+      ).rejects.toThrow(/error getting SO!/);
     });
 
     test('should audit and throw when authorization fails', async () => {
-      (authorization.ensureAuthorized as jest.Mock).mockImplementationOnce(() => {
+      (authorization.bulkEnsureAuthorized as jest.Mock).mockImplementationOnce(() => {
         throw new Error('Unauthorized');
       });
 
@@ -266,7 +269,7 @@ describe('findGapAutoFillSchedulerLogs()', () => {
           sortField: '@timestamp',
           sortDirection: 'desc',
         })
-      ).rejects.toThrowError(/Failed to get gap fill auto scheduler logs by id: gap-1/);
+      ).rejects.toThrow(/Failed to get gap fill auto scheduler logs by id: gap-1/);
 
       // Audit contains the error
       expect(auditLogger.log).toHaveBeenCalledWith(
@@ -285,7 +288,7 @@ describe('findGapAutoFillSchedulerLogs()', () => {
           page: 1,
           perPage: 10,
         } as unknown as FindGapAutoFillSchedulerLogsParams)
-      ).rejects.toThrowError(/Error validating gap auto fill scheduler logs parameters/);
+      ).rejects.toThrow(/Error validating gap auto fill scheduler logs parameters/);
     });
   });
 });

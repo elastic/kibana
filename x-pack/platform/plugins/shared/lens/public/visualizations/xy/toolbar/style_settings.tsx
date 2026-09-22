@@ -16,7 +16,7 @@ import type {
   AxesSettingsConfig,
   FramePublicAPI,
   VisualizationToolbarProps,
-  XYState,
+  XYVisualizationState,
 } from '@kbn/lens-common';
 import {
   hasNumericHistogramDimension,
@@ -72,7 +72,7 @@ export const getDataBounds = function (
 export function hasPercentageAxis(
   axisGroups: AxisGroupConfiguration[],
   groupId: string,
-  state: XYState
+  state: XYVisualizationState
 ) {
   return Boolean(
     axisGroups
@@ -94,7 +94,7 @@ export const axisKeyToTitleMapping: Record<
   yRight: 'yRightTitle',
 };
 
-type Props = VisualizationToolbarProps<XYState>;
+type Props = VisualizationToolbarProps<XYVisualizationState>;
 
 export const XyStyleSettings: React.FC<Props> = (props) => {
   const { state, setState, frame } = props;

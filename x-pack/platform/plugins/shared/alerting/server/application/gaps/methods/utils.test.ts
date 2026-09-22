@@ -10,6 +10,8 @@ import {
   calculateHighestPriorityGapFillStatus,
   hasMatchedGapFillStatus,
   RULE_GAP_AGGREGATIONS,
+  buildExhaustedRetryGapsAgg,
+  getExhaustedRetryGapsInfo,
   type GapDurationBucket,
 } from './utils';
 
@@ -146,6 +148,145 @@ describe('utils', () => {
     });
   });
 
+  describe('calculateHighestPriorityGapFillStatus - error status', () => {
+    it('returns error when hasExhaustedRetryGaps is true', () => {
+      expect(
+        calculateHighestPriorityGapFillStatus(
+          {
+            totalUnfilledDurationMs: 100,
+            totalInProgressDurationMs: 0,
+            totalFilledDurationMs: 50,
+            totalDurationMs: 150,
+          },
+          true
+        )
+      ).toBe('error');
+    });
+
+    it('returns error even when there is also in_progress and filled duration', () => {
+      expect(
+        calculateHighestPriorityGapFillStatus(
+          {
+            totalUnfilledDurationMs: 100,
+            totalInProgressDurationMs: 50,
+            totalFilledDurationMs: 200,
+            totalDurationMs: 350,
+          },
+          true
+        )
+      ).toBe('error');
+    });
+
+    it('returns unfilled when hasExhaustedRetryGaps is false', () => {
+      expect(
+        calculateHighestPriorityGapFillStatus(
+          {
+            totalUnfilledDurationMs: 100,
+            totalInProgressDurationMs: 0,
+            totalFilledDurationMs: 0,
+            totalDurationMs: 100,
+          },
+          false
+        )
+      ).toBe('unfilled');
+    });
+
+    it('defaults hasExhaustedRetryGaps to false when not provided', () => {
+      expect(
+        calculateHighestPriorityGapFillStatus({
+          totalUnfilledDurationMs: 100,
+          totalInProgressDurationMs: 0,
+          totalFilledDurationMs: 0,
+          totalDurationMs: 100,
+        })
+      ).toBe('unfilled');
+    });
+  });
+
+  describe('buildExhaustedRetryGapsAgg', () => {
+    it('builds a filter agg with the correct numRetries threshold', () => {
+      const result = buildExhaustedRetryGapsAgg({ enabled: true, numRetries: 3 });
+      expect(result).toEqual({
+        exhaustedRetryGaps: {
+          filter: {
+            bool: {
+              must: [
+                { range: { 'kibana.alert.rule.gap.unfilled_duration_ms': { gt: 0 } } },
+                {
+                  range: {
+                    'kibana.alert.rule.gap.failed_auto_fill_attempts': { gte: 3 },
+                  },
+                },
+              ],
+            },
+          },
+          aggs: {
+            totalUnfilledDurationMs: {
+              sum: { field: 'kibana.alert.rule.gap.unfilled_duration_ms' },
+            },
+          },
+        },
+      });
+    });
+
+    it('uses the provided numRetries value', () => {
+      const result = buildExhaustedRetryGapsAgg({ enabled: true, numRetries: 7 });
+      const filter = result.exhaustedRetryGaps.filter.bool.must[1];
+      expect(filter).toEqual({
+        range: {
+          'kibana.alert.rule.gap.failed_auto_fill_attempts': { gte: 7 },
+        },
+      });
+    });
+  });
+
+  describe('getExhaustedRetryGapsInfo', () => {
+    it('returns hasExhaustedRetryGaps=true and duration when gaps exist', () => {
+      const bucket = {
+        exhaustedRetryGaps: {
+          doc_count: 2,
+          totalUnfilledDurationMs: { value: 300 },
+        },
+      };
+      expect(getExhaustedRetryGapsInfo(bucket)).toEqual({
+        hasExhaustedRetryGaps: true,
+        exhaustedRetryUnfilledDurationMs: 300,
+      });
+    });
+
+    it('returns hasExhaustedRetryGaps=false and 0 duration when no gaps match', () => {
+      const bucket = {
+        exhaustedRetryGaps: {
+          doc_count: 0,
+          totalUnfilledDurationMs: { value: 0 },
+        },
+      };
+      expect(getExhaustedRetryGapsInfo(bucket)).toEqual({
+        hasExhaustedRetryGaps: false,
+        exhaustedRetryUnfilledDurationMs: 0,
+      });
+    });
+
+    it('handles missing exhaustedRetryGaps field', () => {
+      expect(getExhaustedRetryGapsInfo({})).toEqual({
+        hasExhaustedRetryGaps: false,
+        exhaustedRetryUnfilledDurationMs: 0,
+      });
+    });
+
+    it('handles missing sub-agg value', () => {
+      const bucket = {
+        exhaustedRetryGaps: {
+          doc_count: 1,
+        },
+      };
+      expect(getExhaustedRetryGapsInfo(bucket)).toEqual({
+        hasExhaustedRetryGaps: true,
+        exhaustedRetryUnfilledDurationMs: 0,
+      });
+    });
+  });
+
   describe('hasMatchedGapFillStatus', () => {
     it('returns true when the gap fill status of the bucket matches the given gap fill statuses', () => {
       expect(
@@ -158,6 +299,26 @@ describe('utils', () => {
     it('returns false when the gap fill status of the bucket does not match the given gap fill statuses', () => {
       expect(
         hasMatchedGapFillStatus({ key: 'test', totalUnfilledDurationMs: { value: 1 } }, ['filled'])
+      ).toBe(false);
+    });
+
+    it('matches error status when hasExhaustedRetryGaps is true', () => {
+      expect(
+        hasMatchedGapFillStatus(
+          { key: 'test', totalUnfilledDurationMs: { value: 1 } },
+          ['error'],
+          true
+        )
+      ).toBe(true);
+    });
+
+    it('does not match error when hasExhaustedRetryGaps is false', () => {
+      expect(
+        hasMatchedGapFillStatus(
+          { key: 'test', totalUnfilledDurationMs: { value: 1 } },
+          ['error'],
+          false
+        )
       ).toBe(false);
     });
   });

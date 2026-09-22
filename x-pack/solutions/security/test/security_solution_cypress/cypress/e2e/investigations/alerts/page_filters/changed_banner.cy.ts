@@ -26,31 +26,31 @@ import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 
 const customFilters = [
   {
-    fieldName: 'kibana.alert.workflow_status',
+    field_name: 'kibana.alert.workflow_status',
     title: 'Workflow Status',
   },
   {
-    fieldName: 'kibana.alert.severity',
+    field_name: 'kibana.alert.severity',
     title: 'Severity',
   },
   {
-    fieldName: 'user.name',
+    field_name: 'user.name',
     title: 'User Name',
   },
   {
-    fieldName: 'process.name',
+    field_name: 'process.name',
     title: 'ProcessName',
   },
   {
-    fieldName: '@timestamp',
+    field_name: '@timestamp',
     title: '@timestamp',
   },
   {
-    fieldName: 'agent.type',
+    field_name: 'agent.type',
     title: 'AgentType',
   },
   {
-    fieldName: 'kibana.alert.rule.name',
+    field_name: 'kibana.alert.rule.name',
     title: 'Rule Name',
   },
 ];

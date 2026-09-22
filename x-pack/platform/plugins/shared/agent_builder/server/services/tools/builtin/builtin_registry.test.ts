@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { ToolType } from '@kbn/agent-builder-common';
@@ -19,12 +19,21 @@ describe('BuiltinToolRegistry', () => {
     registry = createBuiltinToolRegistry();
   });
 
+  const mockAnnotations = {
+    title: 'Test Tool',
+    readOnlyHint: true as const,
+    destructiveHint: false as const,
+    idempotentHint: true as const,
+    openWorldHint: false as const,
+  };
+
   const mockTool: BuiltinToolDefinition = {
     id: 'test-tool',
     type: ToolType.builtin,
     description: 'A test tool',
     schema: z.object({}),
     tags: [],
+    annotations: mockAnnotations,
     handler: async () => ({
       results: [{ type: ToolResultType.other, data: { someProp: 'someValue' } }],
     }),
@@ -82,6 +91,7 @@ describe('BuiltinToolRegistry', () => {
         type: ToolType.builtin,
         description: 'A test tool',
         tags: [],
+        annotations: mockAnnotations,
         schema: z.object({}),
         handler: async () => ({
           results: [{ type: ToolResultType.other, data: { value: 'test1' } }],
@@ -93,6 +103,7 @@ describe('BuiltinToolRegistry', () => {
         type: ToolType.builtin,
         description: 'Another test tool',
         tags: [],
+        annotations: mockAnnotations,
         schema: z.object({}),
         handler: async () => ({
           results: [{ type: ToolResultType.other, data: { value: 'test1' } }],

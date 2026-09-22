@@ -76,6 +76,7 @@ describe('AgentService', () => {
               readSettings: false,
               addAgents: false,
               addFleetServers: false,
+              generateAgentReports: false,
             },
             integrations: {
               all: true,
@@ -101,7 +102,7 @@ describe('AgentService', () => {
       it('rejects on listAgents', async () => {
         await expect(
           agentClient.listAgents({ showAgentless: true, showInactive: true })
-        ).rejects.toThrowError(
+        ).rejects.toThrow(
           new FleetUnauthorizedError(
             `User does not have adequate permissions to access Fleet agents.`
           )
@@ -109,7 +110,7 @@ describe('AgentService', () => {
       });
 
       it('rejects on getAgent', async () => {
-        await expect(agentClient.getAgent('foo')).rejects.toThrowError(
+        await expect(agentClient.getAgent('foo')).rejects.toThrow(
           new FleetUnauthorizedError(
             `User does not have adequate permissions to access Fleet agents.`
           )
@@ -117,7 +118,7 @@ describe('AgentService', () => {
       });
 
       it('rejects on getAgentStatusById', async () => {
-        await expect(agentClient.getAgentStatusById('foo')).rejects.toThrowError(
+        await expect(agentClient.getAgentStatusById('foo')).rejects.toThrow(
           new FleetUnauthorizedError(
             `User does not have adequate permissions to access Fleet agents.`
           )
@@ -125,7 +126,7 @@ describe('AgentService', () => {
       });
 
       it('rejects on getAgentStatusForAgentPolicy', async () => {
-        await expect(agentClient.getAgentStatusForAgentPolicy()).rejects.toThrowError(
+        await expect(agentClient.getAgentStatusForAgentPolicy()).rejects.toThrow(
           new FleetUnauthorizedError(
             `User does not have adequate permissions to access Fleet agents.`
           )
@@ -133,7 +134,7 @@ describe('AgentService', () => {
       });
 
       it('rejects on getLatestAgentAvailableVersion', async () => {
-        await expect(agentClient.getLatestAgentAvailableVersion()).rejects.toThrowError(
+        await expect(agentClient.getLatestAgentAvailableVersion()).rejects.toThrow(
           new FleetUnauthorizedError(
             `User does not have adequate permissions to access Fleet agents.`
           )
@@ -196,7 +197,7 @@ describe('AgentService', () => {
         savedObjectsClientMock.create()
       );
 
-      expect(() => agentService.asInternalScopedUser('')).toThrowError(TypeError);
+      expect(() => agentService.asInternalScopedUser('')).toThrow(TypeError);
     });
 
     {
@@ -252,15 +253,16 @@ function expectApisToCallServicesSuccessfully(
 
   test('client.getAgentStatusForAgentPolicy calls getAgentStatusForAgentPolicy and returns results', async () => {
     mockGetAgentStatusForAgentPolicy.mockResolvedValue('getAgentStatusForAgentPolicy success');
-    await expect(agentClient.getAgentStatusForAgentPolicy('foo-id', 'foo-filter')).resolves.toEqual(
-      'getAgentStatusForAgentPolicy success'
-    );
+    await expect(
+      agentClient.getAgentStatusForAgentPolicy('foo-id', 'foo-filter', ['foo-id', 'bar-id'])
+    ).resolves.toEqual('getAgentStatusForAgentPolicy success');
     expect(mockGetAgentStatusForAgentPolicy).toHaveBeenCalledWith(
       mockEsClient,
       mockSoClient,
       'foo-id',
       'foo-filter',
-      spaceId
+      spaceId,
+      ['foo-id', 'bar-id']
     );
   });
 

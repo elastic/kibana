@@ -27,6 +27,7 @@ import {
   getConfigurationRequest,
   updateCase,
   deleteAllCaseAnalyticsItems,
+  elasticUserProfileId,
 } from '../../../../../common/lib/api';
 import {
   postCaseReq,
@@ -42,7 +43,8 @@ export default ({ getService }: FtrProviderContext): void => {
   const retry = getService('retry');
   const authSpace1 = getAuthWithSuperUser();
 
-  describe('analytics indexes synchronization task', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/227734
+  describe.skip('analytics indexes synchronization task', () => {
     beforeEach(async () => {
       await deleteAllCaseAnalyticsItems(esClient);
       await deleteAllCaseItems(esClient);
@@ -128,7 +130,7 @@ export default ({ getService }: FtrProviderContext): void => {
           created_by: {
             email: null,
             full_name: null,
-            profile_uid: null,
+            profile_uid: elasticUserProfileId,
             username: 'elastic',
           },
           custom_fields: [
@@ -246,6 +248,7 @@ export default ({ getService }: FtrProviderContext): void => {
             email: null,
             full_name: null,
             username: 'elastic',
+            profile_uid: elasticUserProfileId,
           },
           owner: 'securitySolution',
           space_ids: ['default'],

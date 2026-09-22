@@ -8,6 +8,7 @@
 import { useQuery } from '@kbn/react-query';
 
 import { i18n } from '@kbn/i18n';
+import type { Filter } from '@kbn/es-query';
 import { useKibana } from '../common/lib/kibana';
 import type { ResultEdges, Direction, ResultsStrategyResponse } from '../../common/search_strategy';
 import { API_VERSIONS } from '../../common/constants';
@@ -28,8 +29,11 @@ interface UseAllResults {
   startDate?: string;
   limit: number;
   sort: Array<{ field: string; direction: Direction }>;
-  kuery?: string;
+  userKuery?: string;
+  esFilters?: Filter[];
   isLive?: boolean;
+  scheduleId?: string;
+  executionCount?: number;
 }
 
 export const useAllResults = ({
@@ -39,16 +43,56 @@ export const useAllResults = ({
   startDate,
   limit,
   sort,
-  kuery,
+  userKuery,
+  esFilters,
   isLive = false,
+  scheduleId,
+  executionCount,
 }: UseAllResults) => {
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
 
+  const isScheduled = !!scheduleId && executionCount != null;
+
+  const serializedFilters =
+    esFilters && esFilters.length > 0 ? JSON.stringify(esFilters) : undefined;
+
   return useQuery<{ data: ResultsStrategyResponse }, Error, ResultsArgs>(
-    ['allActionResults', { actionId, liveQueryActionId, activePage, limit, sort }],
-    () =>
-      http.get<{ data: ResultsStrategyResponse }>(
+    [
+      'allActionResults',
+      {
+        actionId,
+        liveQueryActionId,
+        activePage,
+        limit,
+        sort,
+        userKuery,
+        serializedFilters,
+        scheduleId,
+        executionCount,
+      },
+    ],
+    () => {
+      if (isScheduled) {
+        return http.get<{ data: ResultsStrategyResponse }>(
+          `/api/osquery/scheduled_results/${scheduleId}/${executionCount}/results`,
+          {
+            version: API_VERSIONS.public.v1,
+            query: {
+              page: activePage,
+              pageSize: limit,
+              ...(sort.length > 0 && {
+                sort: sort[0].field,
+                sortOrder: sort[0].direction,
+              }),
+              ...(userKuery && { kuery: userKuery }),
+              ...(serializedFilters && { esFilters: serializedFilters }),
+            },
+          }
+        );
+      }
+
+      return http.get<{ data: ResultsStrategyResponse }>(
         `/api/osquery/live_queries/${liveQueryActionId}/results/${actionId}`,
         {
           version: API_VERSIONS.public.v1,
@@ -59,11 +103,13 @@ export const useAllResults = ({
               sort: sort[0].field,
               sortOrder: sort[0].direction,
             }),
-            ...(kuery && { kuery }),
+            ...(userKuery && { kuery: userKuery }),
+            ...(serializedFilters && { esFilters: serializedFilters }),
             ...(startDate && { startDate }),
           },
         }
-      ),
+      );
+    },
     {
       select: (response) => ({
         id: actionId,

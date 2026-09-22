@@ -10,33 +10,69 @@
 import type { ScoutPage } from '..';
 import type { ScoutLogger } from '../../common';
 import type { ScoutTestConfig } from '../../types';
+import { AppMenu } from './app_menu';
+import { Chrome } from './chrome';
 import { CollapsibleNav } from './collapsible_nav';
 import { DashboardApp } from './dashboard_app';
+import { DataGrid } from './data_grid';
+import { DataViewsManagementPage } from './data_views_management_page';
 import { DatePicker } from './date_picker';
-import { DiscoverApp } from './discover_app';
-import { FilterBar } from './fiter_bar';
+import { DiscoverApp } from './discover';
+import { FilterBar } from './filter_bar';
 import { MapsPage } from './maps_page';
-import { RenderablePage } from './renderable_page';
+import { QueryBar } from './query_bar';
 import { Toasts } from './toasts';
 import { createLazyPageObject } from './utils';
-import { Inspector } from './inspector';
+import { LensApp } from './lens_app';
+import { ListingTable } from './listing_table';
+import { LoginPage } from './login_page';
+import { HomePage } from './home_page';
+import { SavedObjectSaveModal } from './saved_object_save_modal';
+import { VisualizeApp } from './visualize_app';
+import { UnifiedTabs } from './unified_tabs';
+import { ContentListWrapper } from './content_list';
+import type { KibanaUrl } from '../../common/services/kibana_url';
+
+export {
+  AppMenu,
+  ContentListWrapper,
+  DiscoverApp,
+  FilterBar,
+  DataGrid,
+  DataViewsManagementPage,
+  LensApp,
+  QueryBar,
+  UnifiedTabs,
+  ListingTable,
+};
 
 export interface PageObjectsFixtures {
   page: ScoutPage;
   config: ScoutTestConfig;
   log: ScoutLogger;
+  kbnUrl: KibanaUrl;
 }
 
 export interface PageObjects {
   datePicker: DatePicker;
+  dataGrid: DataGrid;
+  dataViewsManagement: DataViewsManagementPage;
   discover: DiscoverApp;
   dashboard: DashboardApp;
   filterBar: FilterBar;
+  listingTable: ListingTable;
+  home: HomePage;
   maps: MapsPage;
-  renderable: RenderablePage;
+  queryBar: QueryBar;
+  chrome: Chrome;
+  appMenu: AppMenu;
   collapsibleNav: CollapsibleNav;
   toasts: Toasts;
-  inspector: Inspector;
+  lens: LensApp;
+  login: LoginPage;
+  visualize: VisualizeApp;
+  saveModal: SavedObjectSaveModal;
+  unifiedTabs: UnifiedTabs;
 }
 
 /**
@@ -48,14 +84,23 @@ export interface PageObjects {
 export function createCorePageObjects(fixtures: PageObjectsFixtures): PageObjects {
   return {
     datePicker: createLazyPageObject(DatePicker, fixtures.page),
+    dataGrid: createLazyPageObject(DataGrid, fixtures.page),
+    dataViewsManagement: createLazyPageObject(DataViewsManagementPage, fixtures.page),
     dashboard: createLazyPageObject(DashboardApp, fixtures.page),
     discover: createLazyPageObject(DiscoverApp, fixtures.page),
     filterBar: createLazyPageObject(FilterBar, fixtures.page),
+    listingTable: createLazyPageObject(ListingTable, fixtures.page),
+    home: createLazyPageObject(HomePage, fixtures.page),
     maps: createLazyPageObject(MapsPage, fixtures.page),
-    renderable: createLazyPageObject(RenderablePage, fixtures.page),
+    queryBar: createLazyPageObject(QueryBar, fixtures.page),
+    chrome: createLazyPageObject(Chrome, fixtures.page),
+    appMenu: createLazyPageObject(AppMenu, fixtures.page),
     collapsibleNav: createLazyPageObject(CollapsibleNav, fixtures.page, fixtures.config),
     toasts: createLazyPageObject(Toasts, fixtures.page),
-    inspector: createLazyPageObject(Inspector, fixtures.page),
-    // Add new page objects here
+    lens: createLazyPageObject(LensApp, fixtures.page),
+    login: createLazyPageObject(LoginPage, fixtures.page, fixtures.kbnUrl),
+    visualize: createLazyPageObject(VisualizeApp, fixtures.page),
+    saveModal: createLazyPageObject(SavedObjectSaveModal, fixtures.page),
+    unifiedTabs: createLazyPageObject(UnifiedTabs, fixtures.page),
   };
 }

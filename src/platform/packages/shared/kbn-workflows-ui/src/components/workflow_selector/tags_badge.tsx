@@ -9,6 +9,7 @@
 
 import { EuiBadge, EuiBadgeGroup, EuiPopover } from '@elastic/eui';
 import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
 
 interface TagsBadgeProps {
   tags: string[];
@@ -29,6 +30,9 @@ export const TagsBadge: React.FC<TagsBadgeProps> = ({ tags }) => {
 
   return (
     <EuiPopover
+      aria-label={i18n.translate('workflows.tagsBadge.popoverAriaLabel', {
+        defaultMessage: 'Tags',
+      })}
       button={
         <EuiBadge
           color="hollow"

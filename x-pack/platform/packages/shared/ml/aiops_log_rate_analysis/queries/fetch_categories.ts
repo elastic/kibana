@@ -63,7 +63,7 @@ export const getCategoryRequest = (
   fieldName: string,
   { wrap }: RandomSamplerWrapper
 ): estypes.SearchRequest => {
-  const { index, timeFieldName } = params;
+  const { index, timeFieldName, projectRouting } = params;
 
   const query = getQueryWithParams({
     params,
@@ -81,6 +81,7 @@ export const getCategoryRequest = (
     undefined,
     query,
     undefined,
+    projectRouting,
     wrap,
     undefined,
     undefined,
@@ -119,8 +120,11 @@ export const fetchCategories = async (
   const result: FetchCategoriesResponse[] = [];
 
   const searches: estypes.MsearchRequestItem[] = fieldNames.flatMap((fieldName) => [
-    { index: params.index },
-    omit(getCategoryRequest(params, fieldName, randomSamplerWrapper), ['index']),
+    {
+      index: params.index,
+      ...(params.projectRouting ? { project_routing: params.projectRouting } : {}),
+    },
+    omit(getCategoryRequest(params, fieldName, randomSamplerWrapper), ['index', 'project_routing']),
   ]);
 
   let mSearchResponse;

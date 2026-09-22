@@ -7,11 +7,11 @@
 
 import expect from '@kbn/expect';
 import { emptyAssets, type Streams } from '@kbn/streams-schema';
-import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
 import type { StreamlangProcessorDefinition } from '@kbn/streamlang';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
+import { bulkQueries, getQueries } from '../significant_events/helpers/requests';
 import {
   disableStreams,
   enableStreams,
@@ -26,7 +26,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esClient = getService('es');
   const alertingApi = getService('alertingApiCommon');
   const samlAuth = getService('samlAuth');
-  const kibanaServer = getService('kibanaServer');
   let apiClient: StreamsSupertestRepositoryClient;
   let roleAuthc: Awaited<ReturnType<typeof samlAuth.createM2mApiKeyWithRoleScope>>;
 
@@ -41,16 +40,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     before(async () => {
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
-      await kibanaServer.uiSettings.update({
-        [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: true,
-      });
     });
 
     after(async () => {
       await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
-      await kibanaServer.uiSettings.update({
-        [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: false,
-      });
     });
 
     describe('Full workflow with snapshot and restore', () => {
@@ -103,7 +96,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         // Step 2: Fork a child stream with routing condition
         const forkBody = {
           stream: {
-            name: 'logs.web-app',
+            name: 'logs.otel.web-app',
           },
           where: {
             field: 'resource.attributes.service.name',
@@ -112,7 +105,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           status: 'enabled' as const,
         };
 
-        const forkResponse = await forkStream(apiClient, 'logs', forkBody);
+        const forkResponse = await forkStream(apiClient, 'logs.otel', forkBody);
         expect(forkResponse).to.have.property('acknowledged', true);
 
         // Step 3: Configure processing steps and custom field mappings on the child stream
@@ -120,6 +113,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const streamConfigBody: Streams.WiredStream.UpsertRequest = {
           ...emptyAssets,
           stream: {
+            type: 'wired',
             description: 'Web app stream with processing and custom fields',
             ingest: {
               lifecycle: { inherit: {} },
@@ -168,37 +162,45 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               failure_store: { inherit: {} },
             },
           },
-          // Add a significant event query that should survive snapshot/restore
-          queries: [
-            {
-              id: 'slow-requests',
-              title: 'Slow Requests',
-              kql: { query: 'attributes.response_time_ms > 100' },
-            },
-          ],
         };
 
         const configResponse = await apiClient.fetch('PUT /api/streams/{name} 2023-10-31', {
           params: {
-            path: { name: 'logs.web-app' },
+            path: { name: 'logs.otel.web-app' },
             body: streamConfigBody,
           },
         });
         expect(configResponse.status).to.eql(200);
 
+        // Add a significant event query that should survive snapshot/restore
+        await bulkQueries(apiClient, 'logs.otel.web-app', [
+          {
+            index: {
+              id: 'slow-requests',
+              title: 'Slow Requests',
+              description: '',
+              esql: {
+                query:
+                  'FROM logs.otel.web-app,logs.otel.web-app.* | WHERE KQL("attributes.response_time_ms > 100")',
+              },
+            },
+          },
+        ]);
+
         // Verify query was created
-        const streamWithQuery = await getStream(apiClient, 'logs.web-app');
+        const streamWithQuery = await getQueries(apiClient, 'logs.otel.web-app');
         expect(streamWithQuery.queries).to.have.length(1);
         expect(streamWithQuery.queries[0].title).to.eql('Slow Requests');
 
         // Verify the underlying alerting rule was created
-        const rulesBeforeSnapshot = await alertingApi.searchRules(
-          roleAuthc,
-          'alert.attributes.name:"Slow Requests"'
+        const rulesBeforeSnapshot = await alertingApi.searchRulesV2(roleAuthc, {
+          search: 'Slow Requests',
+        });
+        expect(rulesBeforeSnapshot.body.items).to.have.length(1);
+        expect(rulesBeforeSnapshot.body.items[0].metadata.name).to.eql(
+          'Slow Requests (match count)'
         );
-        expect(rulesBeforeSnapshot.body.data).to.have.length(1);
-        expect(rulesBeforeSnapshot.body.data[0].name).to.eql('Slow Requests');
-        expect(rulesBeforeSnapshot.body.data[0].enabled).to.be(true);
+        expect(rulesBeforeSnapshot.body.items[0].enabled).to.be(true);
 
         // Step 4: Index documents to test processing and routing
         const parentDoc = {
@@ -223,8 +225,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         };
 
         // Index documents and verify they go to correct streams with processing applied
-        await indexAndAssertTargetStream(esClient, 'logs', parentDoc);
-        const childResult = await indexAndAssertTargetStream(esClient, 'logs.web-app', childDoc);
+        await indexAndAssertTargetStream(esClient, 'logs.otel', parentDoc);
+        const childResult = await indexAndAssertTargetStream(
+          esClient,
+          'logs.otel.web-app',
+          childDoc
+        );
 
         // Verify processing was applied (grok extracted request_method and request_path)
         expect(childResult._source).to.eql({
@@ -243,20 +249,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             endpoint: 'users',
             response_time_ms: 45,
           },
-          stream: { name: 'logs.web-app' },
+          stream: { name: 'logs.otel.web-app' },
         });
 
         // Step 5: Verify stream definitions exist and have correct configuration
-        const logsDefinition = await getStream(apiClient, 'logs');
+        const logsDefinition = await getStream(apiClient, 'logs.otel');
         expect(logsDefinition).to.have.property('stream');
 
-        const logsWebAppDefinition = await getStream(apiClient, 'logs.web-app');
+        const logsWebAppDefinition = await getStream(apiClient, 'logs.otel.web-app');
         expect(logsWebAppDefinition).to.have.property('stream');
 
         // Verify routing configuration on parent stream
         const logsStream = logsDefinition.stream as Streams.WiredStream.Definition;
         expect(logsStream.ingest.wired.routing).to.have.length(1);
-        expect(logsStream.ingest.wired.routing[0].destination).to.eql('logs.web-app');
+        expect(logsStream.ingest.wired.routing[0].destination).to.eql('logs.otel.web-app');
 
         // Verify processing configuration on child stream
         const webAppStream = logsWebAppDefinition.stream as Streams.WiredStream.Definition;
@@ -281,7 +287,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           repository: REPO_NAME,
           snapshot: SNAPSHOT_NAME,
           wait_for_completion: true,
-          indices: 'logs*,.streams*',
+          indices: 'logs.otel*,.streams*,.significant_events*',
           include_global_state: true,
         });
 
@@ -291,12 +297,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         // Disable streams to delete everything
         await disableStreams(apiClient);
 
+        // disableStreams does not remove the global significant-events data stream; delete it so
+        // the restore below can recreate it without an "index already exists" conflict.
+        await esClient.indices.deleteDataStream(
+          { name: '.significant_events*' },
+          { ignore: [404] }
+        );
+
         // Step 8: Restore from snapshot
         const restoreResponse = await esClient.snapshot.restore({
           repository: REPO_NAME,
           snapshot: SNAPSHOT_NAME,
           wait_for_completion: true,
-          indices: 'logs*,.streams*',
+          indices: 'logs.otel*,.streams*,.significant_events*',
           include_global_state: true,
         });
 
@@ -304,16 +317,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(restoreResponse.snapshot?.shards?.failed).to.eql(0);
 
         // Step 9: Verify the API and configuration still work after restore
-        const restoredLogsDefinition = await getStream(apiClient, 'logs');
+        const restoredLogsDefinition = await getStream(apiClient, 'logs.otel');
         expect(restoredLogsDefinition).to.have.property('stream');
 
-        const restoredWebAppDefinition = await getStream(apiClient, 'logs.web-app');
+        const restoredWebAppDefinition = await getStream(apiClient, 'logs.otel.web-app');
         expect(restoredWebAppDefinition).to.have.property('stream');
 
         // Verify routing is still configured on parent
         const restoredLogsStream = restoredLogsDefinition.stream as Streams.WiredStream.Definition;
         expect(restoredLogsStream.ingest.wired.routing).to.have.length(1);
-        expect(restoredLogsStream.ingest.wired.routing[0].destination).to.eql('logs.web-app');
+        expect(restoredLogsStream.ingest.wired.routing[0].destination).to.eql('logs.otel.web-app');
 
         // Verify processing steps are still configured on child
         const restoredWebAppStream =
@@ -335,20 +348,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         // Verify significant event query survived the restore
-        expect(restoredWebAppDefinition.queries).to.have.length(1);
-        expect(restoredWebAppDefinition.queries[0].title).to.eql('Slow Requests');
-        expect(restoredWebAppDefinition.queries[0].kql.query).to.eql(
-          'attributes.response_time_ms > 100'
+        const restoredQueries = await getQueries(apiClient, 'logs.otel.web-app');
+        expect(restoredQueries.queries).to.have.length(1);
+        expect(restoredQueries.queries[0].title).to.eql('Slow Requests');
+        expect(restoredQueries.queries[0].esql.query).to.eql(
+          'FROM logs.otel.web-app,logs.otel.web-app.* | WHERE KQL("attributes.response_time_ms > 100")'
         );
 
         // Verify the underlying alerting rule also survived and is still enabled
-        const rulesAfterRestore = await alertingApi.searchRules(
-          roleAuthc,
-          'alert.attributes.name:"Slow Requests"'
-        );
-        expect(rulesAfterRestore.body.data).to.have.length(1);
-        expect(rulesAfterRestore.body.data[0].name).to.eql('Slow Requests');
-        expect(rulesAfterRestore.body.data[0].enabled).to.be(true);
+        const rulesAfterRestore = await alertingApi.searchRulesV2(roleAuthc, {
+          search: 'Slow Requests',
+        });
+        expect(rulesAfterRestore.body.items).to.have.length(1);
+        expect(rulesAfterRestore.body.items[0].metadata.name).to.eql('Slow Requests (match count)');
+        expect(rulesAfterRestore.body.items[0].enabled).to.be(true);
 
         // Step 10: Verify processing still works after restore by indexing new documents
         const newParentDoc = {
@@ -373,10 +386,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         };
 
         // Index new documents after restore and verify processing is applied
-        await indexAndAssertTargetStream(esClient, 'logs', newParentDoc);
+        await indexAndAssertTargetStream(esClient, 'logs.otel', newParentDoc);
         const newChildResult = await indexAndAssertTargetStream(
           esClient,
-          'logs.web-app',
+          'logs.otel.web-app',
           newChildDoc
         );
 
@@ -397,12 +410,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             endpoint: 'orders',
             response_time_ms: 350,
           },
-          stream: { name: 'logs.web-app' },
+          stream: { name: 'logs.otel.web-app' },
         });
 
         // Step 11: Verify we can query the data and processing was applied to both pre and post-snapshot docs
         const searchResponse = await esClient.search({
-          index: 'logs.web-app',
+          index: 'logs.otel.web-app',
           query: {
             match_all: {},
           },
@@ -430,6 +443,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const updatedStreamBody: Streams.WiredStream.UpsertRequest = {
           ...emptyAssets,
           stream: {
+            type: 'wired',
             description: 'Updated description after restore',
             ingest: {
               lifecycle: { inherit: {} },
@@ -486,7 +500,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         const updateResponse = await apiClient.fetch('PUT /api/streams/{name} 2023-10-31', {
           params: {
-            path: { name: 'logs.web-app' },
+            path: { name: 'logs.otel.web-app' },
             body: updatedStreamBody,
           },
         });
@@ -495,7 +509,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(updateResponse.body.acknowledged).to.eql(true);
 
         // Verify the update was applied
-        const updatedDefinition = await getStream(apiClient, 'logs.web-app');
+        const updatedDefinition = await getStream(apiClient, 'logs.otel.web-app');
         expect(updatedDefinition.stream.description).to.eql('Updated description after restore');
         const updatedStream = updatedDefinition.stream as Streams.WiredStream.Definition;
         expect(updatedStream.ingest.processing.steps).to.have.length(2);
@@ -517,7 +531,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         const processedResult = await indexAndAssertTargetStream(
           esClient,
-          'logs.web-app',
+          'logs.otel.web-app',
           docWithNewField
         );
 

@@ -1,0 +1,28 @@
+{
+  "type": "plugin",
+  "id": "@kbn/evals-plugin",
+  "owner": ["@elastic/nightshift-context-and-research-team", "@elastic/security-genai-research-and-development"],
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "evals",
+    "server": true,
+    "browser": true,
+    "configPath": ["xpack", "evals"],
+    "requiredPlugins": [
+      "features",
+      "encryptedSavedObjects",
+      "inference",
+      "lens",
+      "dataViews"
+    ],
+    "optionalPlugins": [
+      "management",
+      "spaces",
+      "security",
+      "workflowsExtensions",
+      "workflowsManagement"
+    ],
+    "requiredBundles": ["kibanaReact", "data", "spaces", "workflowsExtensions"]
+  }
+}

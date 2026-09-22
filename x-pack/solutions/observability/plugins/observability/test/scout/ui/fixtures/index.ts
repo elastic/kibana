@@ -6,7 +6,9 @@
  */
 
 import type { ScoutPage, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout-oblt';
-import { test as baseTest } from '@kbn/scout-oblt';
+import { mergeTests, test as baseTest } from '@kbn/scout-oblt';
+import type { SynthtraceFixture } from '@kbn/scout-synthtrace';
+import { synthtraceFixture } from '@kbn/scout-synthtrace';
 import type { TriggersActionsPageObjects } from './page_objects';
 import { extendPageObjects } from './page_objects';
 
@@ -14,7 +16,12 @@ export interface TriggersActionsTestFixtures extends ScoutTestFixtures {
   pageObjects: TriggersActionsPageObjects;
 }
 
-export const test = baseTest.extend<TriggersActionsTestFixtures, ScoutWorkerFixtures>({
+const baseWithSynthtrace = mergeTests(baseTest, synthtraceFixture);
+
+export const test = baseWithSynthtrace.extend<
+  TriggersActionsTestFixtures,
+  ScoutWorkerFixtures & SynthtraceFixture
+>({
   pageObjects: async (
     {
       pageObjects,

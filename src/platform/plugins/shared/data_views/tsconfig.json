@@ -41,6 +41,9 @@
     "@kbn/logging-mocks",
     "@kbn/doc-links",
     "@kbn/core-deprecations-common",
+    "@kbn/cps",
+    "@kbn/cps-utils",
+    "@kbn/as-code-data-views-schema",
   ],
   "exclude": [
     "target/**/*",

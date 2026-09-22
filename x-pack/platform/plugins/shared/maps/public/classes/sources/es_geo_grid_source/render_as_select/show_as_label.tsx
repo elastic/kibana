@@ -57,7 +57,7 @@ export function ShowAsLabel(props: Props) {
     >
       <span tabIndex={0}>
         <FormattedMessage id="xpack.maps.source.esGeoGrid.showAsLabel" defaultMessage="Show as" />{' '}
-        <EuiIcon type="question" color="subdued" />
+        <EuiIcon type="question" color="subdued" aria-hidden={true} />
       </span>
     </EuiToolTip>
   );

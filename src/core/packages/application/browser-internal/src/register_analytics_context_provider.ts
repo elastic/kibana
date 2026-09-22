@@ -19,9 +19,9 @@ export function registerAnalyticsContextProvider({
 }) {
   analytics.registerContextProvider({
     name: 'page url',
-    context$: location$.pipe(map((location) => ({ page_url: location }))),
+    context$: location$.pipe(map((location) => ({ page_url: location.split('?')[0] }))),
     schema: {
-      page_url: { type: 'text', _meta: { description: 'The page url' } },
+      page_url: { type: 'text', _meta: { description: 'The page url without the query params' } },
     },
   });
 }

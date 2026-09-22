@@ -34,6 +34,7 @@ interface Deps {
   spacesLicense: SpacesLicense;
   logger: Logger;
   solution?: SolutionId;
+  solutionSetupRequired?: boolean;
 }
 
 export const RETRY_SCALE_DURATION = 100;
@@ -66,7 +67,15 @@ export class DefaultSpaceService {
 
   private serviceStatus$?: BehaviorSubject<ServiceStatus>;
 
-  public setup({ coreStatus, getSavedObjects, license$, spacesLicense, logger, solution }: Deps) {
+  public setup({
+    coreStatus,
+    getSavedObjects,
+    license$,
+    spacesLicense,
+    logger,
+    solution,
+    solutionSetupRequired,
+  }: Deps) {
     const statusLogger = logger.get('status');
 
     this.serviceStatus$ = new BehaviorSubject({
@@ -99,6 +108,7 @@ export class DefaultSpaceService {
               getSavedObjects,
               logger,
               solution,
+              solutionSetupRequired,
             }).then(() => {
               return {
                 level: ServiceStatusLevels.available,

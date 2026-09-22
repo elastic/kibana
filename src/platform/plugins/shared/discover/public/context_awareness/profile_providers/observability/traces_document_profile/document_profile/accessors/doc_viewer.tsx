@@ -9,15 +9,30 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { UnifiedDocViewerObservabilityTracesOverview } from '@kbn/unified-doc-viewer-plugin/public';
+import {
+  GenAiTabImpression,
+  GenAiTechnicalPreviewBadge,
+  GENAI_EBT_CLICK_ACTIONS,
+  hasGenAiData,
+} from '@kbn/apm-ui-shared';
+import type { AnalyticsServiceStart } from '@kbn/core/public';
+import {
+  TRACES_DOC_VIEWER_EBT_ELEMENTS,
+  UnifiedDocViewerObservabilityTracesGenAi,
+  UnifiedDocViewerObservabilityTracesOverview,
+} from '@kbn/unified-doc-viewer-plugin/public';
 import type { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import type { ObservabilityIndexes } from '@kbn/discover-utils/src';
 import type { DocumentProfileProvider } from '../../../../../profiles';
-import type { DocViewerExtensionParams, DocViewerExtension } from '../../../../../types';
+import type { DocViewerExtensionParams } from '../../../../../types';
 
 export const createGetDocViewer =
-  (indexes: ObservabilityIndexes): DocumentProfileProvider['profile']['getDocViewer'] =>
-  (prev: (params: DocViewerExtensionParams) => DocViewerExtension) =>
+  (
+    indexes: ObservabilityIndexes,
+    profileId: string,
+    reportEvent: AnalyticsServiceStart['reportEvent']
+  ): DocumentProfileProvider['profile']['getDocViewer'] =>
+  (prev, { toolkit }) =>
   (params: DocViewerExtensionParams) => {
     const prevDocViewer = prev(params);
     const tabTitle = i18n.translate('discover.docViews.observability.traces.overview.title', {
@@ -31,9 +46,39 @@ export const createGetDocViewer =
           title: tabTitle,
           order: 0,
           render: (props) => (
-            <UnifiedDocViewerObservabilityTracesOverview {...props} indexes={indexes} />
+            <UnifiedDocViewerObservabilityTracesOverview
+              {...props}
+              indexes={indexes}
+              profileId={profileId}
+              docViewActions={toolkit.actions}
+            />
           ),
         });
+
+        if (hasGenAiData(params.record.flattened)) {
+          registry.add({
+            id: 'doc_view_obs_traces_genai',
+            title: i18n.translate('discover.docViews.observability.traces.genAi.title', {
+              defaultMessage: 'GenAI',
+            }),
+            order: 5,
+            prepend: (
+              <>
+                <GenAiTabImpression
+                  reportEvent={reportEvent}
+                  element={TRACES_DOC_VIEWER_EBT_ELEMENTS.TABS}
+                  resourceId={params.record.id}
+                />
+                <GenAiTechnicalPreviewBadge />
+              </>
+            ),
+            ebt: {
+              action: GENAI_EBT_CLICK_ACTIONS.VIEW_GENAI,
+              element: TRACES_DOC_VIEWER_EBT_ELEMENTS.TABS,
+            },
+            render: (props) => <UnifiedDocViewerObservabilityTracesGenAi {...props} />,
+          });
+        }
 
         return prevDocViewer.docViewsRegistry(registry);
       },

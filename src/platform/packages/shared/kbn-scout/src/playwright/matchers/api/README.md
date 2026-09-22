@@ -48,12 +48,14 @@ Custom asymmetric matchers for use with `toMatchObject`:
 
 - **`expect.toBeGreaterThan(n)`** - Matches if value > n
 - **`expect.toBeLessThan(n)`** - Matches if value < n
+- **`expect.stringContaining(s)`** - Matches a string that contains the given substring
 
 ```typescript
 expect(response).toMatchObject({
   body: {
     count: expect.toBeGreaterThan(0),
     limit: expect.toBeLessThan(100),
+    message: expect.stringContaining('method [get] exists'),
   },
 });
 ```
@@ -69,17 +71,27 @@ The following [Playwright matchers](https://playwright.dev/docs/api/class-generi
 - `toBe(expected)` - compares using `Object.is`, use for primitive literals
 - `toBeDefined()` - value is not `undefined`
 - `toBeUndefined()` - value is `undefined`
+- `toBeNull()` - value is `null`
+- `toBeCloseTo(expected, numDigits?)` - compares floating point numbers for approximate equality
+- `toBeGreaterThan(n)` - value > n
+- `toBeGreaterThanOrEqual(n)` - value >= n
+- `toBeLessThan(n)` - value < n
+- `toBeLessThanOrEqual(n)` - value <= n
+- `toBeInstanceOf(expected)` - value is an instance of a class (uses `instanceof`)
 - `toContain(expected)` - string contains substring, or Array/Set contains item
 - `toHaveLength(n)` - value has `.length` property equal to n
-- `toStrictEqual(expected)` - deep equality with type checking
-- `toBeGreaterThan(n)` - value > n
-- `toBeLessThan(n)` - value < n
+- `toMatch(expected)` - string value matches a regular expression or substring
 - `toMatchObject(expected)` - partial object matching
+- `toStrictEqual(expected)` - deep equality with type checking
+- `toThrow(expected?)` - function throws; supports string, regex, or error
+- `toThrowError(expected?)` - alias for `toThrow`
+- `rejects.toThrow(expected?)` - promise rejects with an error; supports string, regex, or error
 
 **Asymmetric matchers:**
 
 - `expect.arrayContaining(array)` - array contains all expected elements
 - `expect.objectContaining(object)` - object contains expected properties
+- `expect.stringContaining(string)` - string contains the expected substring
 
 ---
 
@@ -99,6 +111,9 @@ expect(exists).toBe(true); // ✅ be explicit
 
 expect(response.apiKey).not.toBeDefined(); // ❌ not available
 expect(response.apiKey).toBeUndefined(); // ✅ preferred by playwright
+
+expect(value).not.toBeNull(); // ❌ not available
+expect(value).toBe(true); // ✅ be explicit
 ```
 
 **UI-specific matchers** like `toBeVisible`, `toBeEnabled`, `toHaveAttribute`, etc. are not available for API tests.

@@ -11,8 +11,13 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { isImpliedDefaultElserInferenceId } from '@kbn/product-doc-common/src/is_default_inference_endpoint';
+import type { ResourceType } from '@kbn/product-doc-common';
 import type { InternalServices } from '../types';
-import { isTaskCurrentlyRunningError } from './utils';
+import {
+  isTaskCurrentlyRunningError,
+  runTaskUnderInstallLock,
+  type InstallLockManager,
+} from './utils';
 
 export const UNINSTALL_ALL_TASK_TYPE = 'ProductDocBase:UninstallAll';
 export const UNINSTALL_ALL_TASK_ID = 'ProductDocBase:UninstallAll';
@@ -21,9 +26,11 @@ export const UNINSTALL_ALL_TASK_ID_MULTILINGUAL = 'ProductDocBase:UninstallAllMu
 export const registerUninstallAllTaskDefinition = ({
   getServices,
   taskManager,
+  lockManager,
 }: {
   getServices: () => InternalServices;
   taskManager: TaskManagerSetupContract;
+  lockManager: InstallLockManager;
 }) => {
   taskManager.registerTaskDefinitions({
     [UNINSTALL_ALL_TASK_TYPE]: {
@@ -31,11 +38,20 @@ export const registerUninstallAllTaskDefinition = ({
       timeout: '10m',
       maxAttempts: 3,
       createTaskRunner: (context) => {
+        const inferenceId = context.taskInstance?.params?.inferenceId;
+        const resourceType = context.taskInstance?.params?.resourceType;
         return {
           async run() {
             const { packageInstaller } = getServices();
-            return packageInstaller.uninstallAll({
-              inferenceId: context.taskInstance?.params?.inferenceId,
+            // Holding the install lock keeps an uninstall from interleaving with an in-flight install
+            return runTaskUnderInstallLock({
+              lockManager,
+              run: () =>
+                packageInstaller.uninstallAll({
+                  inferenceId,
+                  ...(resourceType ? { resourceType } : {}),
+                }),
+              metadata: { taskType: UNINSTALL_ALL_TASK_TYPE, inferenceId },
             });
           },
         };
@@ -49,10 +65,12 @@ export const scheduleUninstallAllTask = async ({
   taskManager,
   logger,
   inferenceId,
+  resourceType,
 }: {
   taskManager: TaskManagerStartContract;
   logger: Logger;
   inferenceId: string;
+  resourceType?: ResourceType;
 }) => {
   // To avoid conflicts between the default ELSER model and small E5 inference IDs running at the same time,
   // we use different task IDs for each inference ID.
@@ -64,7 +82,7 @@ export const scheduleUninstallAllTask = async ({
     await taskManager.ensureScheduled({
       id: taskId,
       taskType: UNINSTALL_ALL_TASK_TYPE,
-      params: { inferenceId },
+      params: { inferenceId, resourceType },
       state: {},
       scope: ['productDoc'],
     });

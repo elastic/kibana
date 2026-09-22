@@ -11,6 +11,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { LinkEditor } from './link_editor';
+import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-navigation-options-common';
 
 jest.mock('./link_destination', () => {
   // mock this component to prevent handleDestinationPicked from being called on mount
@@ -30,6 +31,7 @@ describe('LinksEditor', () => {
       type: 'dashboardLink' as const,
       destination: '123',
       title: 'dashboard 01',
+      options: DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
     },
     parentDashboardId: 'test',
     onSave: jest.fn(),
@@ -95,7 +97,7 @@ describe('LinksEditor', () => {
       await userEvent.keyboard('test label');
       await userEvent.click(screen.getByTestId('links--linkEditor--saveBtn'));
 
-      expect(defaultProps.onSave).toBeCalledWith({
+      expect(defaultProps.onSave).toHaveBeenCalledWith({
         ...defaultProps.link,
         label: 'test label',
         options: nonDefaultOptions,

@@ -42,6 +42,21 @@ const SECURITY_SOLUTION_TAG_NAME = 'Security Solution';
 const SECURITY_SOLUTION_TAG_ID_BASE = 'security-solution';
 const TAG_CREATION_CONFLICT_RETRIES = 3;
 
+const onlyRetryConflictErrors = (err: Error) => {
+  if (!SavedObjectsErrorHelpers.isConflictError(err)) {
+    throw err;
+  }
+};
+
+const withConflictRetry = async <T>(operation: () => Promise<T>): Promise<T> => {
+  return await pRetry(operation, {
+    retries: TAG_CREATION_CONFLICT_RETRIES,
+    minTimeout: 0,
+    maxTimeout: 100,
+    onFailedAttempt: onlyRetryConflictErrors,
+  });
+};
+
 // the tag service only accepts 6-digits hex colors
 const TAG_COLORS = [
   '#FEC514',
@@ -168,14 +183,26 @@ async function ensureManagedTag(
 
   if (legacyManagedTag) return LEGACY_MANAGED_TAG_ID;
 
-  await savedObjectTagClient.create(
-    {
-      name: MANAGED_TAG_NAME,
-      description: '',
-      color: MANAGED_TAG_COLOR,
-    },
-    { id: managedTagId, overwrite: true, refresh: false, managed: true }
-  );
+  await withConflictRetry(async () => {
+    try {
+      await savedObjectTagClient.create(
+        {
+          name: MANAGED_TAG_NAME,
+          description: '',
+          color: MANAGED_TAG_COLOR,
+        },
+        { id: managedTagId, overwrite: true, refresh: false, managed: true }
+      );
+    } catch (error) {
+      // Another concurrent install may have created the tag between our `get()` and `create()`.
+      // If so, just treat it as success.
+      if (SavedObjectsErrorHelpers.isConflictError(error as Error)) {
+        const existing = await savedObjectTagClient.get(managedTagId).catch(() => {});
+        if (existing) return;
+      }
+      throw error;
+    }
+  });
 
   return managedTagId;
 }
@@ -195,14 +222,26 @@ async function ensurePackageTag(
 
   if (legacyPackageTag) return legacyPackageTagId;
 
-  await savedObjectTagClient.create(
-    {
-      name: pkgTitle,
-      description: '',
-      color: PACKAGE_TAG_COLOR,
-    },
-    { id: packageTagId, overwrite: true, refresh: false, managed: true }
-  );
+  await withConflictRetry(async () => {
+    try {
+      await savedObjectTagClient.create(
+        {
+          name: pkgTitle,
+          description: '',
+          color: PACKAGE_TAG_COLOR,
+        },
+        { id: packageTagId, overwrite: true, refresh: false, managed: true }
+      );
+    } catch (error) {
+      // Another concurrent install may have created the tag between our `get()` and `create()`.
+      // If so, just treat it as success.
+      if (SavedObjectsErrorHelpers.isConflictError(error as Error)) {
+        const existing = await savedObjectTagClient.get(packageTagId).catch(() => {});
+        if (existing) return;
+      }
+      throw error;
+    }
+  });
 
   return packageTagId;
 }
@@ -223,28 +262,15 @@ async function getPackageSpecTags(
       if (!existingPackageSpecTag) {
         // Retry tag creation on conflict errors to handle race conditions when multiple packages
         // are installed in parallel
-        const onlyRetryConflictErrors = (err: Error) => {
-          if (!SavedObjectsErrorHelpers.isConflictError(err)) {
-            throw err;
-          }
-        };
-
-        await pRetry(
-          () =>
-            savedObjectTagClient.create(
-              {
-                name: tag.text,
-                description: 'Tag defined in package-spec',
-                color: getRandomColor(),
-              },
-              { id: uniqueTagId, overwrite: true, refresh: false, managed: true }
-            ),
-          {
-            retries: TAG_CREATION_CONFLICT_RETRIES,
-            minTimeout: 0,
-            maxTimeout: 100,
-            onFailedAttempt: onlyRetryConflictErrors,
-          }
+        await withConflictRetry(() =>
+          savedObjectTagClient.create(
+            {
+              name: tag.text,
+              description: 'Tag defined in package-spec',
+              color: getRandomColor(),
+            },
+            { id: uniqueTagId, overwrite: true, refresh: false, managed: true }
+          )
         );
       }
       const assetTypes = getAssetTypesObjectReferences(tag?.asset_types, taggableAssets);

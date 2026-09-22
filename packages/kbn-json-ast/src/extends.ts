@@ -9,6 +9,13 @@
 
 import { setProp } from './props';
 
+/**
+ * Sets the `extends` property at the top of a JSONC tsconfig source string.
+ * If the property already exists, its value is replaced.
+ * @param jsonc - The JSONC tsconfig source text to modify.
+ * @param value - The path to set as the `extends` value.
+ * @returns The modified JSONC source text.
+ */
 export function setExtends(jsonc: string, value: string) {
   return setProp(jsonc, 'extends', value, {
     insertAtTop: true,

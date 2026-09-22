@@ -10,6 +10,7 @@
 import React, { lazy, Suspense } from 'react';
 import { EuiPortal, EuiProgress } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import type { EmbeddableEditorBreadcrumb } from '@kbn/embeddable-plugin/public';
 import {
   getHttp,
   getTypes,
@@ -31,6 +32,8 @@ export interface ShowNewVisModalParams {
   editorParams?: string[];
   onClose?: () => void;
   originatingApp?: string;
+  originatingPath?: string;
+  breadcrumbs?: EmbeddableEditorBreadcrumb[];
   outsideVisualizeApp?: boolean;
   createByValue?: boolean;
   showAggsSelection?: boolean;
@@ -46,6 +49,8 @@ export function showNewVisModal({
   editorParams = [],
   onClose,
   originatingApp,
+  originatingPath,
+  breadcrumbs,
   outsideVisualizeApp,
   showAggsSelection,
   selectedVisType,
@@ -80,6 +85,8 @@ export function showNewVisModal({
             isOpen={true}
             onClose={handleClose}
             originatingApp={originatingApp}
+            originatingPath={originatingPath}
+            breadcrumbs={breadcrumbs}
             stateTransfer={getEmbeddable().getStateTransfer()}
             outsideVisualizeApp={outsideVisualizeApp}
             editorParams={editorParams}

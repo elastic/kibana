@@ -4,29 +4,27 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/plugin-helpers'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-operations'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/plugin-helpers'
+  title: '@kbn/plugin-helpers'
   description: Moon project for @kbn/plugin-helpers
   channel: ''
   owner: '@elastic/kibana-operations'
-  metadata:
-    sourceRoot: packages/kbn-plugin-helpers
+  sourceRoot: packages/kbn-plugin-helpers
 dependsOn:
   - '@kbn/dev-utils'
-  - '@kbn/optimizer'
+  - '@kbn/rspack-optimizer'
   - '@kbn/tooling-log'
   - '@kbn/dev-cli-runner'
   - '@kbn/dev-cli-errors'
   - '@kbn/repo-info'
-  - '@kbn/jest-serializers'
   - '@kbn/repo-packages'
-  - '@kbn/stdio-dev-helpers'
+  - '@kbn/utils'
 tags:
   - shared-server
   - package

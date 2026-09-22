@@ -12,6 +12,7 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBasicTable, EuiFieldPassword, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { secretTokenKeys } from './commands/get_apm_agent_commands';
+import { SECRET_TOKEN_COMMAND_PLACEHOLDER } from './agent_config_instructions';
 
 export function AgentConfigurationTable({
   variables,
@@ -40,8 +41,24 @@ export function AgentConfigurationTable({
         defaultMessage: 'Configuration value',
       }),
       render: (_, { value, setting }) => {
-        if (secretTokenKeys.includes(setting) && !!value)
-          return <EuiFieldPassword type="dual" value={value ?? ''} data-test-subj="secret_key" />;
+        if (secretTokenKeys.includes(setting)) {
+          if (value) {
+            return (
+              <EuiFieldPassword
+                data-test-subj="secret_key"
+                readOnly={true}
+                type="dual"
+                value={value}
+              />
+            );
+          } else {
+            return (
+              <EuiText size="s" color="accent">
+                <em>{SECRET_TOKEN_COMMAND_PLACEHOLDER}</em>
+              </EuiText>
+            );
+          }
+        }
         return (
           <EuiText size="s" color="accent">
             {value}
@@ -55,5 +72,13 @@ export function AgentConfigurationTable({
     setting: variables[k],
     value: get(data, k), // TODO do we want default values?
   }));
-  return <EuiBasicTable items={items} columns={columns} />;
+  return (
+    <EuiBasicTable
+      items={items}
+      columns={columns}
+      tableCaption={i18n.translate('xpack.apm.tutorial.agent.configurationCaption', {
+        defaultMessage: 'Agent configuration settings',
+      })}
+    />
+  );
 }

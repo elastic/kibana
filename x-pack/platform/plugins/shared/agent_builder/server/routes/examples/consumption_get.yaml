@@ -1,0 +1,83 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        consumptionDefaultExample:
+          description: "Get consumption data for an agent with default pagination"
+          value:
+            size: 25
+            sort_field: updated_at
+            sort_order: desc
+        consumptionFilteredExample:
+          description: "Get consumption data filtered by username with warnings"
+          value:
+            size: 10
+            sort_field: total_tokens
+            sort_order: desc
+            usernames:
+            - elastic
+            - admin
+            has_warnings: true
+responses:
+  200:
+    description: "Indicates a successful response"
+    content:
+      application/json:
+        examples:
+          consumptionResponseExample:
+            description: "Example response with per-conversation token usage data"
+            value:
+              results:
+              - conversation_id: conv-abc123
+                title: Help me search my data
+                user:
+                  id: uid-1
+                  username: elastic
+                created_at: "2025-03-01T10:00:00Z"
+                updated_at: "2025-03-01T10:15:00Z"
+                token_usage:
+                  input_tokens: 15000
+                  output_tokens: 3000
+                  total_tokens: 18000
+                round_count: 5
+                llm_calls: 8
+                warnings: []
+              - conversation_id: conv-def456
+                title: Analyze server logs
+                user:
+                  id: uid-2
+                  username: admin
+                created_at: "2025-03-02T14:00:00Z"
+                updated_at: "2025-03-02T14:30:00Z"
+                token_usage:
+                  input_tokens: 250000
+                  output_tokens: 8000
+                  total_tokens: 258000
+                round_count: 12
+                llm_calls: 20
+                warnings:
+                - type: high_input_tokens
+                  round_id: round-7
+                  input_tokens: 250000
+              total: 2
+              aggregations:
+                usernames:
+                - elastic
+                - admin
+                total_with_warnings: 0
+              search_after:
+              - 1709391000000
+              - "2025-03-02T14:30:00Z"
+x-codeSamples:
+- lang: curl
+  source: |
+    curl \
+     -X POST "${KIBANA_URL}/api/agent_builder/agents/elastic-ai-agent/consumption" \
+     -H "Authorization: ApiKey ${API_KEY}" \
+     -H "Content-Type: application/json" \
+     -H "elastic-api-version: 2023-10-31" \
+     -d '{"size": 25, "sort_field": "updated_at", "sort_order": "desc"}'
+- lang: Console
+  source: |
+    POST kbn://api/agent_builder/agents/elastic-ai-agent/consumption
+    {"size": 25, "sort_field": "updated_at", "sort_order": "desc"}

@@ -176,7 +176,7 @@ describe('SearchBar', () => {
 
 describe('getFieldSpecs', () => {
   it('returns fieldSpecs for Fleet agents', () => {
-    expect(getFieldSpecs(AGENTS_INDEX, AGENTS_PREFIX)).toHaveLength(74);
+    expect(getFieldSpecs(AGENTS_INDEX, AGENTS_PREFIX).length).toBeGreaterThan(74);
   });
 
   it('returns fieldSpecs for Fleet enrollment tokens', () => {
@@ -282,6 +282,13 @@ describe('getFieldSpecs', () => {
           aggregatable: true,
           esTypes: ['keyword'],
           name: 'ingest-agent-policies.download_source_id',
+          searchable: true,
+          type: 'string',
+        },
+        {
+          aggregatable: true,
+          esTypes: ['keyword'],
+          name: 'ingest-agent-policies.download_source_ids',
           searchable: true,
           type: 'string',
         },

@@ -11,7 +11,7 @@ import dedent from 'dedent';
 import { i18n } from '@kbn/i18n';
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { AlertingConnectorFeatureId } from '@kbn/actions-plugin/common';
 import type {
@@ -73,9 +73,10 @@ const ParamsSchema = schema.object({
   prompts: schema.maybe(
     schema.arrayOf(
       schema.object({
-        statuses: schema.arrayOf(schema.string()),
+        statuses: schema.arrayOf(schema.string(), { maxSize: 3 }),
         message: schema.string({ minLength: 1 }),
-      })
+      }),
+      { maxSize: 3 }
     )
   ),
   status: schema.maybe(schema.string()),

@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('../src/cli/verification_code/dev');
+require('@kbn/cli/verification_code/dev');

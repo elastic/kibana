@@ -169,11 +169,27 @@ describe('Summary Action Scheduler', () => {
     expect(logger.error).toHaveBeenCalledTimes(2);
     expect(logger.error).toHaveBeenNthCalledWith(
       1,
-      `Skipping action \"action-2\" for rule \"rule-id-1\" because the rule type \"Test\" does not support alert-as-data.`
+      `Skipping action \"action-2\" for rule \"rule-id-1\" because the rule type \"Test\" does not support alert-as-data.`,
+      {
+        labels: {
+          actionId: 'action-2',
+          ruleId: 'rule-id-1',
+          ruleType: 'test',
+          spaceId: 'test1',
+        },
+      }
     );
     expect(logger.error).toHaveBeenNthCalledWith(
       2,
-      `Skipping action \"action-3\" for rule \"rule-id-1\" because the rule type \"Test\" does not support alert-as-data.`
+      `Skipping action \"action-3\" for rule \"rule-id-1\" because the rule type \"Test\" does not support alert-as-data.`,
+      {
+        labels: {
+          actionId: 'action-3',
+          ruleId: 'rule-id-1',
+          ruleType: 'test',
+          spaceId: 'test1',
+        },
+      }
     );
   });
 
@@ -270,6 +286,29 @@ describe('Summary Action Scheduler', () => {
       ]);
     });
 
+    test('should include snoozed alert IDs in excludedAlertInstanceIds when querying summarized alerts', async () => {
+      alertsClient.getProcessedAlerts.mockReturnValue(alerts);
+      const summarizedAlerts = {
+        new: { count: 2, data: [mockAAD, mockAAD] },
+        ongoing: { count: 0, data: [] },
+        recovered: { count: 0, data: [] },
+      };
+      alertsClient.getSummarizedAlerts.mockResolvedValue(summarizedAlerts);
+
+      const throttledSummaryActions = {};
+      const scheduler = new SummaryActionScheduler({
+        ...getSchedulerContext(),
+        activeSnoozedIds: new Set(['alert-snoozed-1']),
+      });
+      await scheduler.getActionsToSchedule({ activeAlerts: alerts, throttledSummaryActions });
+
+      expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledWith(
+        expect.objectContaining({
+          excludedAlertInstanceIds: expect.arrayContaining(['alert-snoozed-1']),
+        })
+      );
+    });
+
     test('should create action to schedule with priority if specified for summary action when summary action is per rule run', async () => {
       alertsClient.getProcessedAlerts.mockReturnValue(alerts);
       const summarizedAlerts = {
@@ -282,7 +321,7 @@ describe('Summary Action Scheduler', () => {
       const throttledSummaryActions = {};
       const scheduler = new SummaryActionScheduler({
         ...getSchedulerContext(),
-        priority: TaskPriority.Low,
+        priority: TaskPriority.Maintenance,
       });
       const results = await scheduler.getActionsToSchedule({
         activeAlerts: alerts,
@@ -526,11 +565,13 @@ describe('Summary Action Scheduler', () => {
       expect(logger.debug).toHaveBeenCalledTimes(2);
       expect(logger.debug).toHaveBeenNthCalledWith(
         1,
-        `(1) alert has been filtered out for: test:222-222`
+        `(1) alert has been filtered out for: test:222-222`,
+        { labels: { actionId: 'action-2', actionTypeId: 'test' } }
       );
       expect(logger.debug).toHaveBeenNthCalledWith(
         2,
-        `(1) alert has been filtered out for: test:333-333`
+        `(1) alert has been filtered out for: test:333-333`,
+        { labels: { actionId: 'action-3', actionTypeId: 'test' } }
       );
 
       expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(2);
@@ -586,7 +627,8 @@ describe('Summary Action Scheduler', () => {
       });
       expect(logger.debug).toHaveBeenCalledTimes(1);
       expect(logger.debug).toHaveBeenCalledWith(
-        `(2) alerts have been filtered out for: test:333-333`
+        `(2) alerts have been filtered out for: test:333-333`,
+        { labels: { actionId: 'action-3', actionTypeId: 'test' } }
       );
 
       expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(1);
@@ -704,7 +746,8 @@ describe('Summary Action Scheduler', () => {
       });
 
       expect(logger.debug).toHaveBeenCalledWith(
-        `Rule "rule-id-1" skipped scheduling action "action-3" because the maximum number of allowed actions has been reached.`
+        `Rule "rule-id-1" skipped scheduling action "action-3" because the maximum number of allowed actions has been reached.`,
+        { labels: { actionId: 'action-3', ruleId: 'rule-id-1', actionTypeId: 'test' } }
       );
 
       expect(results).toHaveLength(1);
@@ -761,7 +804,8 @@ describe('Summary Action Scheduler', () => {
       });
 
       expect(logger.debug).toHaveBeenCalledWith(
-        `Rule "rule-id-1" skipped scheduling action "action-3" because the maximum number of allowed actions for connector type test has been reached.`
+        `Rule "rule-id-1" skipped scheduling action "action-3" because the maximum number of allowed actions for connector type test has been reached.`,
+        { labels: { actionId: 'action-3', actionTypeId: 'test', ruleId: 'rule-id-1' } }
       );
 
       expect(results).toHaveLength(1);

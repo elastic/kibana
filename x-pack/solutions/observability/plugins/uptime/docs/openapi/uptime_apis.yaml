@@ -73,6 +73,8 @@ paths:
                   default: 30
                 defaultConnectors:
                   type: array
+                  items:
+                    type: string
                   description: A list of connector IDs to be used as default connectors for new alerts.
                   default: []
                 defaultEmail:

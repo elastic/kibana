@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import type { Filter } from '@kbn/es-query';
 import { EuiSpacer, EuiTabs, EuiTab, EuiNotificationBadge } from '@elastic/eui';
 
+import { useKibana } from '../../../../../common/lib/kibana';
+import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
 import { useLocalStorage } from '../../../../../common/components/local_storage';
 import { getSettingKey } from '../../../../../common/components/local_storage/helpers';
 import {
@@ -42,8 +44,6 @@ interface AttackDetailsContainerProps {
   attack: AttackDiscoveryAlert;
   /** Whether to show anonymized values instead of replacements */
   showAnonymized?: boolean;
-  /** Filters applied from grouping */
-  groupingFilters: Filter[];
   /** Default filters to apply to the alerts table */
   defaultFilters: Filter[];
   /** Whether the alerts table is in a loading state */
@@ -57,7 +57,11 @@ interface AttackDetailsContainerProps {
  * If attack is undefined, only the Alerts tab will be rendered.
  */
 export const AttackDetailsContainer = React.memo<AttackDetailsContainerProps>(
-  ({ attack, groupingFilters, defaultFilters, isTableLoading, showAnonymized }) => {
+  ({ attack, defaultFilters, isTableLoading, showAnonymized }) => {
+    const {
+      services: { telemetry },
+    } = useKibana();
+
     const [selectedTabId, setSelectedTabId] = useLocalStorage<string>({
       defaultValue: ATTACK_SUMMARY_TAB,
       key: getSettingKey({
@@ -86,7 +90,7 @@ export const AttackDetailsContainer = React.memo<AttackDetailsContainerProps>(
             <>
               <EuiSpacer size="s" />
               <AlertsTab
-                groupingFilters={groupingFilters}
+                attackAlertIds={attack.alertIds}
                 defaultFilters={defaultFilters}
                 isTableLoading={isTableLoading}
               />
@@ -99,12 +103,22 @@ export const AttackDetailsContainer = React.memo<AttackDetailsContainerProps>(
           ) : undefined,
         },
       ],
-      [attack, groupingFilters, defaultFilters, isTableLoading, showAnonymized]
+      [attack, showAnonymized, defaultFilters, isTableLoading]
     );
 
     const selectedTabContent = useMemo(() => {
       return tabs.find((obj) => obj.id === selectedTabId)?.content;
     }, [selectedTabId, tabs]);
+
+    const onTabClick = useCallback(
+      (tabId: string) => {
+        setSelectedTabId(tabId);
+        telemetry.reportEvent(AttacksEventTypes.ExpandedViewTabClicked, {
+          tab: tabId === ATTACK_SUMMARY_TAB ? 'summary' : 'alerts',
+        });
+      },
+      [setSelectedTabId, telemetry]
+    );
 
     return (
       <>
@@ -113,7 +127,7 @@ export const AttackDetailsContainer = React.memo<AttackDetailsContainerProps>(
             <EuiTab
               key={index}
               isSelected={tab.id === selectedTabId}
-              onClick={() => setSelectedTabId(tab.id)}
+              onClick={() => onTabClick(tab.id)}
               append={tab.append}
             >
               {tab.name}

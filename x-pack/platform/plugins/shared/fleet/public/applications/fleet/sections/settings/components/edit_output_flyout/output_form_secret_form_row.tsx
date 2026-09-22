@@ -7,7 +7,6 @@
 
 import {
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -19,6 +18,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import React, { useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -26,9 +26,10 @@ import { i18n } from '@kbn/i18n';
 import {
   SSL_SECRETS_MINIMUM_FLEET_SERVER_VERSION,
   OUTPUT_SECRETS_MINIMUM_FLEET_SERVER_VERSION,
+  DOWNLOAD_SOURCE_AUTH_SECRETS_MINIMUM_FLEET_SERVER_VERSION,
 } from '../../../../../../../common/constants';
 
-export type SecretType = 'output' | 'ssl';
+export type SecretType = 'output' | 'ssl' | 'download_source_auth';
 
 export const SecretFormRow: React.FC<{
   fullWidth?: boolean;
@@ -64,6 +65,8 @@ export const SecretFormRow: React.FC<{
   const minVersion =
     secretType === 'output'
       ? OUTPUT_SECRETS_MINIMUM_FLEET_SERVER_VERSION
+      : secretType === 'download_source_auth'
+      ? DOWNLOAD_SOURCE_AUTH_SECRETS_MINIMUM_FLEET_SERVER_VERSION
       : SSL_SECRETS_MINIMUM_FLEET_SERVER_VERSION;
   const hasInitialValue = !!initialValue;
   const [editMode, setEditMode] = useState(isConvertedToSecret || !initialValue);
@@ -150,7 +153,7 @@ export const SecretFormRow: React.FC<{
 
   const secretLabel = (
     <>
-      <EuiIcon type="lock" data-test-subj="lockIcon" />
+      <EuiIcon type="lock" data-test-subj="lockIcon" aria-hidden={true} />
       &nbsp;
       {title}
       &nbsp;
@@ -168,13 +171,21 @@ export const SecretFormRow: React.FC<{
     if (disabled) return null;
     if (isConvertedToSecret)
       return (
-        <EuiCallOut announceOnMount size="s" color="warning">
-          <FormattedMessage
-            id="xpack.fleet.settings.editOutputFlyout.sslKeySecretInputConvertedCalloutTitle"
-            defaultMessage="This field will be re-saved using secret storage from plain text storage. Secrets storage requires Fleet Server v{minVersion} and above."
-            values={{ minVersion }}
-          />
-        </EuiCallOut>
+        <KbnWarningCallout
+          announceOnMount
+          size="s"
+          title={i18n.translate(
+            'xpack.fleet.settings.editOutputFlyout.sslKeySecretInputConvertedCalloutTitle',
+            { defaultMessage: 'Converting to secret storage' }
+          )}
+          text={
+            <FormattedMessage
+              id="xpack.fleet.settings.editOutputFlyout.sslKeySecretInputConvertedCalloutBody"
+              defaultMessage="Saving this field stores it as a secret instead of plain text. Secret storage requires Fleet Server v{minVersion} or later."
+              values={{ minVersion }}
+            />
+          }
+        />
       );
 
     if (!initialValue)

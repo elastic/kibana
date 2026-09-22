@@ -1,0 +1,2 @@
+Performs root cause analysis (RCA) for incidents, outages, errors, and service degradations.
+Use when a user asks why something is broken, failing, erroring, crashing, or slow; when they report an alert firing, an SLA breach, or users complaining about errors; when they want to understand what happened during an outage or performance regression; when they see anomalies or spikes in logs or metrics; or when they need to trace a cascading failure across services.

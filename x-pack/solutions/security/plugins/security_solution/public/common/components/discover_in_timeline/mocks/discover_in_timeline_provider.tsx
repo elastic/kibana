@@ -18,17 +18,28 @@ type Props = PropsWithChildren<{}>;
 
 jest.mock('../use_discover_in_timeline_actions');
 
+export const createMockDiscoverStateContainer = (
+  discoverServices: ReturnType<typeof createDiscoverServicesMock>
+) => {
+  const stateContainer = getDiscoverStateMock({ services: discoverServices });
+  return getExtendedDiscoverStateContainer({
+    internalState: stateContainer.internalState,
+    injectCurrentTab: stateContainer.injectCurrentTab,
+    getCurrentTab: stateContainer.getCurrentTab,
+    runtimeStateManager: stateContainer.runtimeStateManager,
+    stateStorage: stateContainer.stateStorage,
+    services: discoverServices,
+  });
+};
+
 export const MockDiscoverInTimelineContext: FC<Props> = ({ children }) => {
   const discoverServices = createDiscoverServicesMock();
-  const discoverStateContainer = useRef(
-    getExtendedDiscoverStateContainer(
-      getDiscoverStateMock({ services: discoverServices }),
-      discoverServices
-    )
+  const discoverStateContainer = useRef<ExtendedDiscoverStateContainer | undefined>(
+    createMockDiscoverStateContainer(discoverServices)
   );
 
   const setDiscoverStateContainer = useCallback(
-    (stateContainer: ExtendedDiscoverStateContainer) => {
+    (stateContainer: ExtendedDiscoverStateContainer | undefined) => {
       discoverStateContainer.current = stateContainer;
     },
     []

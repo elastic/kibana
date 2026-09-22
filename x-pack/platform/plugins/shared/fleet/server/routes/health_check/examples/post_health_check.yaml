@@ -1,0 +1,47 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        postHealthCheckRequestExample:
+          description: 'Check the health of a Fleet Server instance by its host ID'
+          value:
+            id: fleet-server-host-id-1
+
+responses:
+  200:
+    description: 'Successful health check response'
+    content:
+      application/json:
+        examples:
+          postHealthCheckHealthyExample:
+            description: 'Fleet Server is online and healthy'
+            value:
+              status: ONLINE
+              name: fleet-server-1
+          postHealthCheckUnreachableExample:
+            description: 'Fleet Server host is not reachable (request timed out or aborted)'
+            value:
+              status: OFFLINE
+              host_id: fleet-server-host-id-1
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          badRequestExample:
+            description: 'The host ID exists but has no associated host URLs configured'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'The requested host id fleet-server-host-id-1 does not have associated host urls.'
+  404:
+    description: 'Not Found'
+    content:
+      application/json:
+        examples:
+          notFoundExample:
+            description: 'No Fleet Server host was found with the given ID'
+            value:
+              statusCode: 404
+              error: 'Not Found'
+              message: 'The requested host id fleet-server-host-id-1 does not exist.'

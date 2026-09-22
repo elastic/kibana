@@ -42,13 +42,20 @@ export function SeriesColorPicker({ seriesId, series }: { seriesId: number; seri
         onClick={() => setIsOpen((prevState) => !prevState)}
         flush="both"
       >
-        <EuiIcon type="stopFilled" size="l" color={color} />
+        <EuiIcon type="stopFill" size="l" color={color} aria-hidden={true} />
       </EuiButtonEmpty>
     </EuiToolTip>
   );
 
   return (
-    <EuiPopover button={button} isOpen={isOpen} closePopover={() => setIsOpen(false)}>
+    <EuiPopover
+      aria-label={i18n.translate('xpack.exploratoryView.seriesColorPicker.popoverAriaLabel', {
+        defaultMessage: 'Pick a color',
+      })}
+      button={button}
+      isOpen={isOpen}
+      closePopover={() => setIsOpen(false)}
+    >
       <EuiFormRow label={PICK_A_COLOR_LABEL}>
         <EuiColorPicker onChange={onChange} color={color} />
       </EuiFormRow>

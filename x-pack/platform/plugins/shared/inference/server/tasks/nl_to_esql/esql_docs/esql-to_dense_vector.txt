@@ -1,0 +1,25 @@
+# TO_DENSE_VECTOR
+
+The TO_DENSE_VECTOR function converts a multi-valued input of numbers or a hexadecimal string into a dense_vector.
+
+## Syntax
+
+`TO_DENSE_VECTOR(field)`
+
+### Parameters
+
+#### field
+
+The multi-valued input of numbers or hexadecimal string to convert.
+
+## Examples
+
+Convert an array of integers into a dense_vector:
+
+Takes an array of integers and converts it into a dense_vector, keeping only the resulting vector.
+
+```esql
+ROW ints = [1, 2, 3]
+| EVAL vector = TO_DENSE_VECTOR(ints)
+| KEEP vector
+```

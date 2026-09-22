@@ -8,6 +8,8 @@
 import { EuiLoadingSpinner } from '@elastic/eui';
 import React, { lazy, Suspense } from 'react';
 import type { OsqueryResponseActionsParamsFormProps } from './osquery_response_action_type';
+import { ExperimentalFeaturesProvider } from '../common/experimental_features_context';
+import { ExperimentalFeaturesService } from '../common/experimental_features_service';
 
 const OsqueryResponseActionParamsForm = lazy(() => import('./osquery_response_action_type'));
 
@@ -18,11 +20,13 @@ export const getLazyOsqueryResponseActionTypeForm =
 
     return (
       <Suspense fallback={<EuiLoadingSpinner />}>
-        <OsqueryResponseActionParamsForm
-          onChange={onChange}
-          defaultValues={defaultValues}
-          onError={onError}
-        />
+        <ExperimentalFeaturesProvider value={ExperimentalFeaturesService.get()}>
+          <OsqueryResponseActionParamsForm
+            onChange={onChange}
+            defaultValues={defaultValues}
+            onError={onError}
+          />
+        </ExperimentalFeaturesProvider>
       </Suspense>
     );
   };

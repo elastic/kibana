@@ -15,7 +15,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { ProfilingEmptyState } from '@kbn/observability-shared-plugin/public';
-import { useApmParams } from '../../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useProfilingPlugin } from '../../../hooks/use_profiling_plugin';
 import { ProfilingFlamegraph } from '../../shared/profiling/flamegraph';
 import { ProfilingTopNFunctions } from '../../shared/profiling/top_functions';
@@ -24,7 +24,10 @@ function ProfilingTab() {
   const {
     query: { rangeFrom, rangeTo, environment, kuery, transactionName, transactionType },
     path: { serviceName },
-  } = useApmParams('/services/{serviceName}/transactions/view');
+  } = useAnyOfApmParams(
+    '/services/{serviceName}/transactions/view',
+    '/mobile-services/{serviceName}/transactions/view'
+  );
   const { isProfilingAvailable, isLoading } = useProfilingPlugin();
 
   const tabs = useMemo((): EuiTabbedContentProps['tabs'] => {

@@ -22,7 +22,7 @@ export const registerCleanRoute = (router: IRouter) => {
       },
       validate: {
         body: schema.object({
-          types: schema.arrayOf(schema.string()),
+          types: schema.arrayOf(schema.string({ maxLength: 256 }), { maxSize: 1000 }),
         }),
       },
     },

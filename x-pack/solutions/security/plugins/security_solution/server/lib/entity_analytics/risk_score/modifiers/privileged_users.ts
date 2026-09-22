@@ -88,21 +88,14 @@ const buildModifier = (
 
   const weightedModifier =
     globalWeight !== undefined ? PRIVILEGED_USER_MODIFIER * globalWeight : PRIVILEGED_USER_MODIFIER;
-  // const weightedNormalizedScore =
-  //   globalWeight !== undefined ? normalizedBaseScore * globalWeight : normalizedBaseScore;
-
-  // const updatedNormalizedScore = bayesianUpdate({
-  //   modifier: PRIVILEGED_USER_MODIFIER,
-  //   score: weightedNormalizedScore,
-  // });
-
-  // const contribution = updatedNormalizedScore - weightedNormalizedScore;
 
   return {
     type: 'watchlist',
     subtype: 'privmon',
     modifier_value: weightedModifier,
     metadata: {
+      // Keep both keys during migration so legacy UI and new watchlist consumers remain compatible.
+      watchlist_id: 'privmon',
       is_privileged_user: true,
     },
   };

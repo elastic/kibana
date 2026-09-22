@@ -43,6 +43,8 @@ export const TimeSeriesQuerySchema = schema.object(
     // this value indicates the amount of time between time series dates
     // that will be calculated.
     interval: schema.maybe(schema.string({ validate: validateDuration })),
+    // Cross-project search (serverless): aligns ES scope with the CPS picker / _indices route.
+    project_routing: schema.maybe(schema.string()),
   },
   {
     validate: validateBody,

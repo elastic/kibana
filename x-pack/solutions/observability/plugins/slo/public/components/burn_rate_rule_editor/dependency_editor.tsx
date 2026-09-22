@@ -13,6 +13,7 @@ import {
   EuiForm,
   EuiFormRow,
   EuiPopover,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -100,24 +101,31 @@ export function DependencyEditor({
   };
 
   const button = isEditMode ? (
-    <EuiButtonIcon
-      isDisabled={isLoading}
-      data-test-subj="sloBurnRateRuleEditDependencyButton"
-      color={'primary'}
-      size="s"
-      iconType={'pencil'}
-      onClick={handleOpenPopover}
-      aria-label={i18n.translate('xpack.slo.rules.editDependencyAriaLabel', {
+    <EuiToolTip
+      content={i18n.translate('xpack.slo.rules.editDependencyAriaLabel', {
         defaultMessage: 'Edit dependency',
       })}
-    />
+      disableScreenReaderOutput
+    >
+      <EuiButtonIcon
+        isDisabled={isLoading}
+        data-test-subj="sloBurnRateRuleEditDependencyButton"
+        color={'primary'}
+        size="s"
+        iconType={'pencil'}
+        onClick={handleOpenPopover}
+        aria-label={i18n.translate('xpack.slo.rules.editDependencyAriaLabel', {
+          defaultMessage: 'Edit dependency',
+        })}
+      />
+    </EuiToolTip>
   ) : (
     <EuiButtonEmpty
       isDisabled={isLoading || rules?.length === 0}
       data-test-subj="sloBurnRateRuleAddDependencyButton"
       color={'primary'}
       size="s"
-      iconType={'plusInCircleFilled'}
+      iconType={'plusCircle'}
       onClick={handleOpenPopover}
       aria-label={i18n.translate('xpack.slo.rules.addDependencyAriaLabel', {
         defaultMessage: 'Add dependency',
@@ -128,7 +136,14 @@ export function DependencyEditor({
   );
 
   return (
-    <EuiPopover button={button} isOpen={isOpen} closePopover={handleSubmit}>
+    <EuiPopover
+      aria-label={i18n.translate('xpack.slo.dependencyEditor.popoverAriaLabel', {
+        defaultMessage: 'Dependency editor',
+      })}
+      button={button}
+      isOpen={isOpen}
+      closePopover={handleSubmit}
+    >
       <div style={{ width: 400 }}>
         <EuiForm component="form">
           <EuiFormRow

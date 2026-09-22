@@ -19,12 +19,21 @@ export const selectESOutput = () => {
   visit('/app/fleet/settings');
   cy.getBySel(SETTINGS_OUTPUTS.ADD_BTN).click();
   cy.getBySel(SETTINGS_OUTPUTS.TYPE_INPUT).select('elasticsearch');
+  // Wait for the preset input to reach its initial 'balanced' state before
+  // proceeding. The preset is controlled by a useEffect that depends on the yaml
+  // module, which loads asynchronously via useYaml(). This assertion ensures the
+  // component has fully rendered and the async yaml load has been initiated before
+  // any YAML is typed, so subsequent preset assertions wait only for the yaml
+  // module to complete loading rather than racing with component initialization.
+  cy.getBySel(SETTINGS_OUTPUTS.PRESET_INPUT).should('have.value', 'balanced');
 };
 
 export const selectRemoteESOutput = () => {
   visit('/app/fleet/settings');
   cy.getBySel(SETTINGS_OUTPUTS.ADD_BTN).click();
   cy.getBySel(SETTINGS_OUTPUTS.TYPE_INPUT).select('remote_elasticsearch');
+  // Same async yaml concern as selectESOutput above.
+  cy.getBySel(SETTINGS_OUTPUTS.PRESET_INPUT).should('have.value', 'balanced');
 };
 
 export const selectKafkaOutput = () => {

@@ -16,16 +16,20 @@ import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 
 import { createDefaultSpace } from './default_space/create_default_space';
-import type { PluginsStart } from './plugin';
 import { SpacesPlugin } from './plugin';
+import type { SpacesPluginStartDeps } from './types';
 
 jest.mock('./default_space/create_default_space');
 
 describe('Spaces plugin', () => {
   describe('#setup', () => {
+    beforeEach(() => {
+      jest.mocked(createDefaultSpace).mockClear();
+    });
+
     it('can setup with all optional plugins disabled, exposing the expected contract', () => {
       const initializerContext = coreMock.createPluginInitializerContext({});
-      const core = coreMock.createSetup() as CoreSetup<PluginsStart>;
+      const core = coreMock.createSetup() as CoreSetup<SpacesPluginStartDeps>;
       const features = featuresPluginMock.createSetup();
       const licensing = licensingMock.createSetup();
 
@@ -55,7 +59,7 @@ describe('Spaces plugin', () => {
     // Joe removed this test, but we're not sure why...
     it('registers the capabilities provider and switcher', () => {
       const initializerContext = coreMock.createPluginInitializerContext({});
-      const core = coreMock.createSetup() as CoreSetup<PluginsStart>;
+      const core = coreMock.createSetup() as CoreSetup<SpacesPluginStartDeps>;
       const features = featuresPluginMock.createSetup();
       const licensing = licensingMock.createSetup();
 
@@ -69,7 +73,7 @@ describe('Spaces plugin', () => {
 
     it('registers the usage collector if the usageCollection plugin is enabled', () => {
       const initializerContext = coreMock.createPluginInitializerContext({});
-      const core = coreMock.createSetup() as CoreSetup<PluginsStart>;
+      const core = coreMock.createSetup() as CoreSetup<SpacesPluginStartDeps>;
       const features = featuresPluginMock.createSetup();
       const licensing = licensingMock.createSetup();
 
@@ -84,7 +88,7 @@ describe('Spaces plugin', () => {
 
     it('can setup space with default solution for cloud', async () => {
       const initializerContext = coreMock.createPluginInitializerContext({ maxSpaces: 1000 });
-      const core = coreMock.createSetup() as CoreSetup<PluginsStart>;
+      const core = coreMock.createSetup() as CoreSetup<SpacesPluginStartDeps>;
       const features = featuresPluginMock.createSetup();
       const licensing = licensingMock.createSetup();
       const cloud = {
@@ -97,7 +101,7 @@ describe('Spaces plugin', () => {
       plugin.setup(core, { features, licensing, cloud });
 
       expect(createDefaultSpace).toHaveBeenCalledWith(
-        expect.objectContaining({ solution: 'security' })
+        expect.objectContaining({ solution: 'security', solutionSetupRequired: false })
       );
     });
 
@@ -106,7 +110,7 @@ describe('Spaces plugin', () => {
         maxSpaces: 1000,
         defaultSolution: 'oblt',
       });
-      const core = coreMock.createSetup() as CoreSetup<PluginsStart>;
+      const core = coreMock.createSetup() as CoreSetup<SpacesPluginStartDeps>;
       const features = featuresPluginMock.createSetup();
       const licensing = licensingMock.createSetup();
 
@@ -114,15 +118,81 @@ describe('Spaces plugin', () => {
       plugin.setup(core, { features, licensing });
 
       expect(createDefaultSpace).toHaveBeenCalledWith(
-        expect.objectContaining({ solution: 'oblt' })
+        expect.objectContaining({ solution: 'oblt', solutionSetupRequired: false })
       );
+    });
+
+    it.each`
+      label                                                                | config                                                          | solutionSetupRequired
+      ${'initial solution setup is disabled'}                              | ${{ maxSpaces: 1000 }}                                          | ${false}
+      ${'initial solution setup is enabled without a configured solution'} | ${{ maxSpaces: 1000, initialSolutionSetup: { enabled: true } }} | ${true}
+    `(
+      'when $label, passes solutionSetupRequired=$solutionSetupRequired',
+      ({ config, solutionSetupRequired }) => {
+        const initializerContext = coreMock.createPluginInitializerContext(config);
+        const core = coreMock.createSetup() as CoreSetup<SpacesPluginStartDeps>;
+        const features = featuresPluginMock.createSetup();
+        const licensing = licensingMock.createSetup();
+
+        const plugin = new SpacesPlugin(initializerContext);
+        plugin.setup(core, { features, licensing });
+
+        expect(createDefaultSpace).toHaveBeenLastCalledWith(
+          expect.objectContaining({ solutionSetupRequired })
+        );
+      }
+    );
+
+    it('does not register Elasticsearch feature when CPS is disabled', () => {
+      const initializerContext = coreMock.createPluginInitializerContext({ maxSpaces: 1000 });
+      const core = coreMock.createSetup() as CoreSetup<SpacesPluginStartDeps>;
+      const features = featuresPluginMock.createSetup();
+      const licensing = licensingMock.createSetup();
+      const cps = {
+        getCpsEnabled: jest.fn().mockReturnValue(false),
+        isTierEligible: jest.fn().mockResolvedValue(false),
+      };
+
+      const plugin = new SpacesPlugin(initializerContext);
+      plugin.setup(core, { features, licensing, cps });
+
+      expect(features.registerElasticsearchFeature).not.toHaveBeenCalled();
+    });
+
+    it('registers Elasticsearch feature when CPS plugin is enabled', () => {
+      const initializerContext = coreMock.createPluginInitializerContext({ maxSpaces: 1000 });
+      const core = coreMock.createSetup() as CoreSetup<SpacesPluginStartDeps>;
+      const features = featuresPluginMock.createSetup();
+      const licensing = licensingMock.createSetup();
+      const cps = {
+        getCpsEnabled: jest.fn().mockReturnValue(true),
+        isTierEligible: jest.fn().mockResolvedValue(true),
+      };
+
+      const plugin = new SpacesPlugin(initializerContext);
+      plugin.setup(core, { features, licensing, cps });
+
+      expect(features.registerElasticsearchFeature).toHaveBeenCalledTimes(1);
+      expect(features.registerElasticsearchFeature).toHaveBeenCalledWith({
+        id: 'project_routing',
+        privileges: [
+          {
+            requiredClusterPrivileges: ['cluster:admin/project_routing/put'],
+            ui: ['manage_space_default'],
+          },
+          {
+            requiredClusterPrivileges: ['cluster:monitor/project_routing/get'],
+            ui: ['read_space_default'],
+          },
+        ],
+      });
     });
   });
 
   describe('#start', () => {
     it('can start with all optional plugins disabled, exposing the expected contract', () => {
       const initializerContext = coreMock.createPluginInitializerContext({});
-      const coreSetup = coreMock.createSetup() as CoreSetup<PluginsStart>;
+      const coreSetup = coreMock.createSetup() as CoreSetup<SpacesPluginStartDeps>;
       const features = featuresPluginMock.createSetup();
       const licensing = licensingMock.createSetup();
 
@@ -151,11 +221,48 @@ describe('Spaces plugin', () => {
         }
       `);
     });
+
+    it('can start with CPS plugin provided', () => {
+      const initializerContext = coreMock.createPluginInitializerContext({});
+      const coreSetup = coreMock.createSetup() as CoreSetup<SpacesPluginStartDeps>;
+      const features = featuresPluginMock.createSetup();
+      const licensing = licensingMock.createSetup();
+      const cpsSetup = {
+        getCpsEnabled: jest.fn().mockReturnValue(true),
+        isTierEligible: jest.fn().mockResolvedValue(true),
+      };
+
+      const plugin = new SpacesPlugin(initializerContext);
+      plugin.setup(coreSetup, { features, licensing, cps: cpsSetup });
+
+      const coreStart = coreMock.createStart();
+      const cpsStart = {
+        createNpreClient: jest.fn().mockReturnValue({
+          getNpre: jest.fn(),
+          canGetNpre: jest.fn(),
+          putNpre: jest.fn(),
+          deleteNpre: jest.fn(),
+          canPutNpre: jest.fn(),
+        }),
+        getLinkedProjects: jest.fn().mockResolvedValue([]),
+        isCpsActive: jest.fn().mockResolvedValue(false),
+      };
+
+      const spacesStart = plugin.start(coreStart, {
+        features: featuresPluginMock.createStart(),
+        cps: cpsStart,
+      });
+
+      const request = {} as any;
+
+      spacesStart.spacesService.createSpacesClient(request);
+      expect(cpsStart.createNpreClient).toHaveBeenCalledWith(request);
+    });
   });
 
   it('determines hasOnlyDefaultSpace$ correctly when maxSpaces=1', async () => {
     const initializerContext = coreMock.createPluginInitializerContext({ maxSpaces: 1 });
-    const core = coreMock.createSetup() as CoreSetup<PluginsStart>;
+    const core = coreMock.createSetup() as CoreSetup<SpacesPluginStartDeps>;
     const features = featuresPluginMock.createSetup();
     const licensing = licensingMock.createSetup();
 
@@ -173,7 +280,7 @@ describe('Spaces plugin', () => {
 
   it('determines hasOnlyDefaultSpace$ correctly when maxSpaces=1000', async () => {
     const initializerContext = coreMock.createPluginInitializerContext({ maxSpaces: 1000 });
-    const core = coreMock.createSetup() as CoreSetup<PluginsStart>;
+    const core = coreMock.createSetup() as CoreSetup<SpacesPluginStartDeps>;
     const features = featuresPluginMock.createSetup();
     const licensing = licensingMock.createSetup();
 

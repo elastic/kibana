@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ZodObject } from '@kbn/zod';
+import type { ZodObject } from '@kbn/zod/v4';
 import type { EsqlToolDefinition, ToolDefinition } from '@kbn/agent-builder-common';
 import type {
   IndexSearchToolDefinition,
@@ -15,7 +15,7 @@ import type { BuiltinToolDefinition } from '../tools/builtin';
 
 export type BuiltinAttachmentBoundedTool<RunInput extends ZodObject<any> = ZodObject<any>> = Omit<
   BuiltinToolDefinition<RunInput>,
-  'tags' | 'availability'
+  'tags' | 'availability' | 'annotations'
 >;
 
 type AttBoundToolMixin<T extends ToolDefinition> = Omit<T, 'readonly' | 'tags'>;

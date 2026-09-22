@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import {
   KnowledgeBaseEntryCreateProps,
@@ -25,165 +25,223 @@ import {
 /**
  * Reason why a Knowledge Base Entry was skipped during the bulk action.
  */
+export const KnowledgeBaseEntryBulkActionSkipReason = lazySchema(() =>
+  z.literal('KNOWLEDGE_BASE_ENTRY_NOT_MODIFIED')
+);
 export type KnowledgeBaseEntryBulkActionSkipReason = z.infer<
   typeof KnowledgeBaseEntryBulkActionSkipReason
 >;
-export const KnowledgeBaseEntryBulkActionSkipReason = z.literal(
-  'KNOWLEDGE_BASE_ENTRY_NOT_MODIFIED'
-);
 
+export const KnowledgeBaseEntryBulkActionSkipResult = lazySchema(() =>
+  z.object({
+    /**
+     * ID of the skipped Knowledge Base Entry.
+     */
+    id: z.string().describe('ID of the skipped Knowledge Base Entry.'),
+    /**
+     * Name of the skipped Knowledge Base Entry.
+     */
+    name: z.string().optional().describe('Name of the skipped Knowledge Base Entry.'),
+    skip_reason: KnowledgeBaseEntryBulkActionSkipReason,
+  })
+);
 export type KnowledgeBaseEntryBulkActionSkipResult = z.infer<
   typeof KnowledgeBaseEntryBulkActionSkipResult
 >;
-export const KnowledgeBaseEntryBulkActionSkipResult = z.object({
-  /**
-   * ID of the skipped Knowledge Base Entry.
-   */
-  id: z.string(),
-  /**
-   * Name of the skipped Knowledge Base Entry.
-   */
-  name: z.string().optional(),
-  skip_reason: KnowledgeBaseEntryBulkActionSkipReason,
-});
 
+export const KnowledgeBaseEntryDetailsInError = lazySchema(() =>
+  z.object({
+    /**
+     * ID of the Knowledge Base Entry that encountered an error.
+     */
+    id: z.string().describe('ID of the Knowledge Base Entry that encountered an error.'),
+    /**
+     * Name of the Knowledge Base Entry that encountered an error.
+     */
+    name: z
+      .string()
+      .optional()
+      .describe('Name of the Knowledge Base Entry that encountered an error.'),
+  })
+);
 export type KnowledgeBaseEntryDetailsInError = z.infer<typeof KnowledgeBaseEntryDetailsInError>;
-export const KnowledgeBaseEntryDetailsInError = z.object({
-  /**
-   * ID of the Knowledge Base Entry that encountered an error.
-   */
-  id: z.string(),
-  /**
-   * Name of the Knowledge Base Entry that encountered an error.
-   */
-  name: z.string().optional(),
-});
 
+export const NormalizedKnowledgeBaseEntryError = lazySchema(() =>
+  z.object({
+    /**
+     * Error message describing the issue.
+     */
+    message: z.string().describe('Error message describing the issue.'),
+    /**
+     * HTTP status code associated with the error.
+     */
+    statusCode: z.number().int().describe('HTTP status code associated with the error.'),
+    /**
+     * Specific error code for the issue.
+     */
+    err_code: z.string().optional().describe('Specific error code for the issue.'),
+    /**
+     * List of Knowledge Base Entries that encountered the error.
+     */
+    knowledgeBaseEntries: z
+      .array(KnowledgeBaseEntryDetailsInError)
+      .describe('List of Knowledge Base Entries that encountered the error.'),
+  })
+);
 export type NormalizedKnowledgeBaseEntryError = z.infer<typeof NormalizedKnowledgeBaseEntryError>;
-export const NormalizedKnowledgeBaseEntryError = z.object({
-  /**
-   * Error message describing the issue.
-   */
-  message: z.string(),
-  /**
-   * HTTP status code associated with the error.
-   */
-  statusCode: z.number().int(),
-  /**
-   * Specific error code for the issue.
-   */
-  err_code: z.string().optional(),
-  /**
-   * List of Knowledge Base Entries that encountered the error.
-   */
-  knowledgeBaseEntries: z.array(KnowledgeBaseEntryDetailsInError),
-});
 
+export const KnowledgeBaseEntryBulkCrudActionResults = lazySchema(() =>
+  z.object({
+    /**
+     * List of Knowledge Base Entries that were successfully updated.
+     */
+    updated: z
+      .array(KnowledgeBaseEntryResponse)
+      .describe('List of Knowledge Base Entries that were successfully updated.'),
+    /**
+     * List of Knowledge Base Entries that were successfully created.
+     */
+    created: z
+      .array(KnowledgeBaseEntryResponse)
+      .describe('List of Knowledge Base Entries that were successfully created.'),
+    /**
+     * List of IDs of Knowledge Base Entries that were successfully deleted.
+     */
+    deleted: z
+      .array(z.string())
+      .describe('List of IDs of Knowledge Base Entries that were successfully deleted.'),
+    /**
+     * List of Knowledge Base Entries that were skipped during the bulk action.
+     */
+    skipped: z
+      .array(KnowledgeBaseEntryBulkActionSkipResult)
+      .describe('List of Knowledge Base Entries that were skipped during the bulk action.'),
+  })
+);
 export type KnowledgeBaseEntryBulkCrudActionResults = z.infer<
   typeof KnowledgeBaseEntryBulkCrudActionResults
 >;
-export const KnowledgeBaseEntryBulkCrudActionResults = z.object({
-  /**
-   * List of Knowledge Base Entries that were successfully updated.
-   */
-  updated: z.array(KnowledgeBaseEntryResponse),
-  /**
-   * List of Knowledge Base Entries that were successfully created.
-   */
-  created: z.array(KnowledgeBaseEntryResponse),
-  /**
-   * List of IDs of Knowledge Base Entries that were successfully deleted.
-   */
-  deleted: z.array(z.string()),
-  /**
-   * List of Knowledge Base Entries that were skipped during the bulk action.
-   */
-  skipped: z.array(KnowledgeBaseEntryBulkActionSkipResult),
-});
 
+export const KnowledgeBaseEntryBulkCrudActionSummary = lazySchema(() =>
+  z.object({
+    /**
+     * Number of Knowledge Base Entries that failed during the bulk action.
+     */
+    failed: z
+      .number()
+      .int()
+      .describe('Number of Knowledge Base Entries that failed during the bulk action.'),
+    /**
+     * Number of Knowledge Base Entries that were skipped during the bulk action.
+     */
+    skipped: z
+      .number()
+      .int()
+      .describe('Number of Knowledge Base Entries that were skipped during the bulk action.'),
+    /**
+     * Number of Knowledge Base Entries that were successfully processed during the bulk action.
+     */
+    succeeded: z
+      .number()
+      .int()
+      .describe(
+        'Number of Knowledge Base Entries that were successfully processed during the bulk action.'
+      ),
+    /**
+     * Total number of Knowledge Base Entries involved in the bulk action.
+     */
+    total: z
+      .number()
+      .int()
+      .describe('Total number of Knowledge Base Entries involved in the bulk action.'),
+  })
+);
 export type KnowledgeBaseEntryBulkCrudActionSummary = z.infer<
   typeof KnowledgeBaseEntryBulkCrudActionSummary
 >;
-export const KnowledgeBaseEntryBulkCrudActionSummary = z.object({
-  /**
-   * Number of Knowledge Base Entries that failed during the bulk action.
-   */
-  failed: z.number().int(),
-  /**
-   * Number of Knowledge Base Entries that were skipped during the bulk action.
-   */
-  skipped: z.number().int(),
-  /**
-   * Number of Knowledge Base Entries that were successfully processed during the bulk action.
-   */
-  succeeded: z.number().int(),
-  /**
-   * Total number of Knowledge Base Entries involved in the bulk action.
-   */
-  total: z.number().int(),
-});
 
+export const KnowledgeBaseEntryBulkCrudActionResponse = lazySchema(() =>
+  z.object({
+    /**
+     * Indicates whether the bulk action was successful.
+     */
+    success: z.boolean().optional().describe('Indicates whether the bulk action was successful.'),
+    /**
+     * HTTP status code of the response.
+     */
+    statusCode: z.number().int().optional().describe('HTTP status code of the response.'),
+    /**
+     * Message describing the result of the bulk action.
+     */
+    message: z.string().optional().describe('Message describing the result of the bulk action.'),
+    /**
+     * Total number of Knowledge Base Entries processed.
+     */
+    knowledgeBaseEntriesCount: z
+      .number()
+      .int()
+      .optional()
+      .describe('Total number of Knowledge Base Entries processed.'),
+    attributes: z.object({
+      results: KnowledgeBaseEntryBulkCrudActionResults,
+      summary: KnowledgeBaseEntryBulkCrudActionSummary,
+      /**
+       * List of errors encountered during the bulk action.
+       */
+      errors: z
+        .array(NormalizedKnowledgeBaseEntryError)
+        .optional()
+        .describe('List of errors encountered during the bulk action.'),
+    }),
+  })
+);
 export type KnowledgeBaseEntryBulkCrudActionResponse = z.infer<
   typeof KnowledgeBaseEntryBulkCrudActionResponse
 >;
-export const KnowledgeBaseEntryBulkCrudActionResponse = z.object({
-  /**
-   * Indicates whether the bulk action was successful.
-   */
-  success: z.boolean().optional(),
-  /**
-   * HTTP status code of the response.
-   */
-  statusCode: z.number().int().optional(),
-  /**
-   * Message describing the result of the bulk action.
-   */
-  message: z.string().optional(),
-  /**
-   * Total number of Knowledge Base Entries processed.
-   */
-  knowledgeBaseEntriesCount: z.number().int().optional(),
-  attributes: z.object({
-    results: KnowledgeBaseEntryBulkCrudActionResults,
-    summary: KnowledgeBaseEntryBulkCrudActionSummary,
+
+export const KnowledgeBaseEntryBulkActionBase = lazySchema(() =>
+  z.object({
     /**
-     * List of errors encountered during the bulk action.
+     * Query to filter Knowledge Base Entries.
      */
-    errors: z.array(NormalizedKnowledgeBaseEntryError).optional(),
-  }),
-});
-
+    query: z.string().optional().describe('Query to filter Knowledge Base Entries.'),
+    /**
+     * Array of Knowledge Base Entry IDs.
+     */
+    ids: z.array(z.string()).min(1).optional().describe('Array of Knowledge Base Entry IDs.'),
+  })
+);
 export type KnowledgeBaseEntryBulkActionBase = z.infer<typeof KnowledgeBaseEntryBulkActionBase>;
-export const KnowledgeBaseEntryBulkActionBase = z.object({
-  /**
-   * Query to filter Knowledge Base Entries.
-   */
-  query: z.string().optional(),
-  /**
-   * Array of Knowledge Base Entry IDs.
-   */
-  ids: z.array(z.string()).min(1).optional(),
-});
 
+export const PerformKnowledgeBaseEntryBulkActionRequestBody = lazySchema(() =>
+  z.object({
+    delete: KnowledgeBaseEntryBulkActionBase.optional(),
+    /**
+     * List of Knowledge Base Entries to create.
+     */
+    create: z
+      .array(KnowledgeBaseEntryCreateProps)
+      .optional()
+      .describe('List of Knowledge Base Entries to create.'),
+    /**
+     * List of Knowledge Base Entries to update.
+     */
+    update: z
+      .array(KnowledgeBaseEntryUpdateProps)
+      .optional()
+      .describe('List of Knowledge Base Entries to update.'),
+  })
+);
 export type PerformKnowledgeBaseEntryBulkActionRequestBody = z.infer<
   typeof PerformKnowledgeBaseEntryBulkActionRequestBody
 >;
-export const PerformKnowledgeBaseEntryBulkActionRequestBody = z.object({
-  delete: KnowledgeBaseEntryBulkActionBase.optional(),
-  /**
-   * List of Knowledge Base Entries to create.
-   */
-  create: z.array(KnowledgeBaseEntryCreateProps).optional(),
-  /**
-   * List of Knowledge Base Entries to update.
-   */
-  update: z.array(KnowledgeBaseEntryUpdateProps).optional(),
-});
 export type PerformKnowledgeBaseEntryBulkActionRequestBodyInput = z.input<
   typeof PerformKnowledgeBaseEntryBulkActionRequestBody
 >;
 
+export const PerformKnowledgeBaseEntryBulkActionResponse = lazySchema(
+  () => KnowledgeBaseEntryBulkCrudActionResponse
+);
 export type PerformKnowledgeBaseEntryBulkActionResponse = z.infer<
   typeof PerformKnowledgeBaseEntryBulkActionResponse
 >;
-export const PerformKnowledgeBaseEntryBulkActionResponse = KnowledgeBaseEntryBulkCrudActionResponse;

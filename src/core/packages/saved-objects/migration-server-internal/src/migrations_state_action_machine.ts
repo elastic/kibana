@@ -18,7 +18,7 @@ import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import type { MigrationResult } from '@kbn/core-saved-objects-base-server-internal';
 import { logActionResponse, logStateTransition } from './common/utils/logs';
 import { type Model, type Next, stateActionMachine } from './state_action_machine';
-import type { ReindexSourceToTempTransform, ReindexSourceToTempIndexBulk, State } from './state';
+import type { OutdatedDocumentsTransform, TransformedDocumentsBulkIndex, State } from './state';
 import { redactBulkOperationBatches } from './common/redact_state';
 
 /**
@@ -65,7 +65,7 @@ export async function migrationStateActionMachine({
           ...newState,
           ...{
             outdatedDocuments: (
-              (newState as ReindexSourceToTempTransform).outdatedDocuments ?? []
+              (newState as OutdatedDocumentsTransform).outdatedDocuments ?? []
             ).map(
               (doc) =>
                 ({
@@ -75,7 +75,7 @@ export async function migrationStateActionMachine({
           },
           ...{
             bulkOperationBatches: redactBulkOperationBatches(
-              (newState as ReindexSourceToTempIndexBulk).bulkOperationBatches ?? [[]]
+              (newState as TransformedDocumentsBulkIndex).bulkOperationBatches ?? [[]]
             ),
           },
         };

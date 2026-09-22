@@ -51,6 +51,7 @@ export * from './agent_policy_selection';
 export * from './agent_policy_select_create';
 export * from './instructions';
 export * from './steps';
+export { usePollingAgentCount } from './confirm_agent_enrollment';
 
 export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
   onClose,
@@ -59,6 +60,10 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
   defaultMode = 'managed',
   isIntegrationFlow,
   installedPackagePolicy,
+  hideIncomingDataStep,
+  onAgentPolicyCreated,
+  defaultAgentPolicyName,
+  forceCreatePolicy,
 }) => {
   const authz = useAuthz();
 
@@ -236,6 +241,10 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
             setSelectedAPIKeyId={setSelectedAPIKeyId}
             onClickViewAgents={onClose}
             installedPackagePolicy={installedPackagePolicy}
+            hideIncomingDataStep={hideIncomingDataStep}
+            onAgentPolicyCreated={onAgentPolicyCreated}
+            defaultAgentPolicyName={defaultAgentPolicyName}
+            forceCreatePolicy={forceCreatePolicy}
           />
         )}
       </EuiFlyoutBody>

@@ -11,7 +11,7 @@ import { disableAttackDiscoverySchedulesRoute } from './disable';
 import { serverMock } from '../../../../../__mocks__/server';
 import { requestContextMock } from '../../../../../__mocks__/request_context';
 import { disableAttackDiscoverySchedulesRequest } from '../../../../../__mocks__/request';
-import type { AttackDiscoveryScheduleDataClient } from '../../../../../lib/attack_discovery/schedules/data_client';
+import type { AttackDiscoveryScheduleDataClient } from '@kbn/attack-discovery-schedules-common';
 import { performChecks } from '../../../../helpers';
 
 jest.mock('../../../../helpers', () => ({

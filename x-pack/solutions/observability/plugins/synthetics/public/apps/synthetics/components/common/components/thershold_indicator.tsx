@@ -32,6 +32,7 @@ export const ThresholdIndicator = ({
   previousFormatted,
   currentFormatted,
   asStat = false,
+  dataTestSubj,
 }: {
   description?: string;
   helpText?: string;
@@ -42,6 +43,7 @@ export const ThresholdIndicator = ({
   currentFormatted: string | number;
   setHasAnyDelta?: (hasDelta: boolean) => void;
   asStat?: boolean;
+  dataTestSubj?: string;
 }) => {
   if (loading) {
     return <EuiSkeletonText lines={1} />;
@@ -81,7 +83,7 @@ export const ThresholdIndicator = ({
 
   const content =
     previous === null ? (
-      <EuiIcon type="minus" size={asStat ? 'l' : 'm'} color="subdued" />
+      <EuiIcon type="minus" size={asStat ? 'l' : 'm'} color="subdued" aria-hidden={true} />
     ) : (
       <EuiToolTip
         content={getToolTipContent()}
@@ -95,9 +97,10 @@ export const ThresholdIndicator = ({
             type={delta > 0 ? 'sortUp' : 'sortDown'}
             size={asStat ? 'l' : 'm'}
             color={getColor()}
+            aria-hidden={true}
           />
         ) : (
-          <EuiIcon type="minus" size={asStat ? 'l' : 'm'} color="subdued" />
+          <EuiIcon type="minus" size={asStat ? 'l' : 'm'} color="subdued" aria-hidden={true} />
         )}
       </EuiToolTip>
     );
@@ -105,6 +108,7 @@ export const ThresholdIndicator = ({
   if (asStat) {
     return (
       <EuiStat
+        data-test-subj={dataTestSubj}
         titleSize="s"
         titleColor={getColor()}
         description={

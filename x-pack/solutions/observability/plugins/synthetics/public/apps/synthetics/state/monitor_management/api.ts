@@ -15,6 +15,8 @@ import type {
   SyntheticsMonitorWithId,
 } from '../../../../../common/runtime_types';
 import { INITIAL_REST_VERSION, SYNTHETICS_API_URLS } from '../../../../../common/constants';
+import type { PackagePolicyLink } from '../../../../../common/types';
+export type { PackagePolicyLink };
 
 export type UpsertMonitorResponse = ServiceLocationErrorsResponse | SyntheticsMonitorWithId;
 
@@ -23,7 +25,7 @@ export const createMonitorAPI = async ({
 }: {
   monitor: SyntheticsMonitor | EncryptedSyntheticsMonitor;
 }): Promise<UpsertMonitorResponse> => {
-  return await apiService.post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS, monitor, null, {
+  return await apiService.post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS, monitor, {
     version: INITIAL_REST_VERSION,
     internal: true,
   });
@@ -34,16 +36,29 @@ export interface MonitorInspectResponse {
   privateConfig: PackagePolicy | null;
 }
 
+export interface InspectMonitorAPIResponse {
+  result: MonitorInspectResponse;
+  decodedCode: string;
+  packagePolicyLinks: PackagePolicyLink[];
+  hasMissingReferences: boolean;
+}
+
 export const inspectMonitorAPI = async ({
   monitor,
   hideParams,
 }: {
   hideParams?: boolean;
   monitor: SyntheticsMonitor | EncryptedSyntheticsMonitor;
-}): Promise<{ result: MonitorInspectResponse; decodedCode: string }> => {
-  return await apiService.post(SYNTHETICS_API_URLS.SYNTHETICS_MONITOR_INSPECT, monitor, undefined, {
+}): Promise<InspectMonitorAPIResponse> => {
+  return await apiService.post(SYNTHETICS_API_URLS.SYNTHETICS_MONITOR_INSPECT, monitor, {
     hideParams,
   });
+};
+
+export const fetchMonitorAPI = async ({ id }: { id: string }): Promise<SyntheticsMonitorWithId> => {
+  return await apiService.get<SyntheticsMonitorWithId>(
+    SYNTHETICS_API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', id)
+  );
 };
 
 export const updateMonitorAPI = async ({
@@ -55,7 +70,7 @@ export const updateMonitorAPI = async ({
   spaceId?: string;
   id: string;
 }): Promise<UpsertMonitorResponse> => {
-  return await apiService.put(`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${id}`, monitor, null, {
+  return await apiService.put(`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${id}`, monitor, {
     spaceId,
     internal: true,
     version: INITIAL_REST_VERSION,
@@ -70,6 +85,28 @@ export const fetchProjectAPIKey = async (
     accessToElasticManagedLocations,
     spaces: JSON.stringify(spaces),
   });
+};
+
+export const resetMonitorAPI = async ({
+  id,
+  force = false,
+}: {
+  id: string;
+  force?: boolean;
+}): Promise<{ id: string; reset: boolean } | ServiceLocationErrorsResponse> => {
+  const url = SYNTHETICS_API_URLS.SYNTHETICS_MONITOR_RESET.replace('{monitorId}', id);
+  return await apiService.post(url, undefined, { force });
+};
+
+export const resetMonitorBulkAPI = async ({
+  ids,
+}: {
+  ids: string[];
+}): Promise<{
+  result: Array<{ id: string; reset: boolean; error?: string }>;
+  errors?: unknown[];
+}> => {
+  return await apiService.post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_BULK_RESET, { ids });
 };
 
 export const deletePackagePolicy = async (

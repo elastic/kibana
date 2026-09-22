@@ -37,10 +37,11 @@ describe('TrialCompanionMilestoneServiceImpl', () => {
     abortController = new AbortController();
     jest.clearAllMocks();
   });
+
   describe('setup', () => {
-    it.each([true, false])('should register a task when enabled: %s', (enabled) => {
+    it('should register a task when enabled', () => {
       sut.setup({
-        enabled,
+        enabled: true,
         taskManager: taskManagerSetup,
         telemetry: mockTelemetry,
       });
@@ -53,7 +54,17 @@ describe('TrialCompanionMilestoneServiceImpl', () => {
         },
       });
     });
+
+    it('should not register a task when disabled', () => {
+      sut.setup({
+        enabled: false,
+        taskManager: taskManagerSetup,
+        telemetry: mockTelemetry,
+      });
+      expect(taskManagerSetup.registerTaskDefinitions).not.toHaveBeenCalled();
+    });
   });
+
   describe('start', () => {
     it.each([true, false])('should start the task only when enabled: %s', async (enabled) => {
       sut.setup({
@@ -66,11 +77,14 @@ describe('TrialCompanionMilestoneServiceImpl', () => {
         detectors: [],
         repo,
       });
-      const assertion = expect(taskManagerStart.ensureScheduled);
+      const ensureScheduledAssertion = expect(taskManagerStart.ensureScheduled);
+      const removeIfExistsAssertion = expect(taskManagerStart.removeIfExists);
       if (!enabled) {
-        assertion.not.toHaveBeenCalled();
+        ensureScheduledAssertion.not.toHaveBeenCalled();
+        removeIfExistsAssertion.toHaveBeenCalledWith('security:trial-companion-milestone:1.0.0');
       } else {
-        assertion.toHaveBeenCalledWith({
+        removeIfExistsAssertion.not.toHaveBeenCalled();
+        ensureScheduledAssertion.toHaveBeenCalledWith({
           id: 'security:trial-companion-milestone:1.0.0',
           taskType: 'security:trial-companion-milestone',
           schedule: { interval: '1m' },
@@ -81,6 +95,7 @@ describe('TrialCompanionMilestoneServiceImpl', () => {
       }
     });
   });
+
   describe('refreshMilestones', () => {
     beforeEach(() => {
       sut.setup({
@@ -222,7 +237,7 @@ describe('TrialCompanionMilestoneServiceImpl', () => {
         detectors: [mockDetectorM2],
         repo,
       });
-      await expect(sut.refreshMilestones(abortController.signal)).resolves.not.toThrowError();
+      await expect(sut.refreshMilestones(abortController.signal)).resolves.not.toThrow();
       expect(repo.getCurrent).toHaveBeenCalledTimes(1);
       expect(mockTelemetry.reportEvent).toHaveBeenCalledWith(
         TRIAL_COMPANION_MILESTONE_REFRESH_ERROR.eventType,
@@ -241,7 +256,7 @@ describe('TrialCompanionMilestoneServiceImpl', () => {
         detectors: [mockDetectorM2],
         repo,
       });
-      await expect(sut.refreshMilestones(abortController.signal)).resolves.not.toThrowError();
+      await expect(sut.refreshMilestones(abortController.signal)).resolves.not.toThrow();
       expect(repo.update).toHaveBeenCalledTimes(1);
     });
 
@@ -254,7 +269,7 @@ describe('TrialCompanionMilestoneServiceImpl', () => {
         detectors: [mockDetectorM2],
         repo,
       });
-      await expect(sut.refreshMilestones(abortController.signal)).resolves.not.toThrowError();
+      await expect(sut.refreshMilestones(abortController.signal)).resolves.not.toThrow();
       expect(repo.create).toHaveBeenCalledTimes(1);
     });
 
@@ -266,7 +281,7 @@ describe('TrialCompanionMilestoneServiceImpl', () => {
         detectors: [mockDetectorError],
         repo,
       });
-      await expect(sut.refreshMilestones(abortController.signal)).resolves.not.toThrowError();
+      await expect(sut.refreshMilestones(abortController.signal)).resolves.not.toThrow();
       expect(repo.getCurrent).toHaveBeenCalledTimes(1);
       expect(mockDetectorError).toHaveBeenCalledTimes(1);
       expect(repo.create).not.toHaveBeenCalled();

@@ -7,15 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
 import type { CoreSetup, Plugin } from '@kbn/core/server';
 import type { PluginSetup as DataSetup } from '@kbn/data-plugin/server';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import type { PluginSetup as KqlSetup } from '@kbn/kql/server';
 
-import { registerDataControlTransforms } from '../common/transforms/data_controls/register_data_control_transforms';
-import { setupOptionsListClusterSettingsRoute } from './options_list/options_list_cluster_settings_route';
+import type { DataPluginStart } from '@kbn/data-plugin/server/plugin';
+import { registerESQLControlTransforms } from './transforms/esql_control_transforms';
+import { registerOptionsListControlTransforms } from './transforms/options_list_control_transforms';
+import { registerRangeSliderControlTransforms } from './transforms/range_slider_control_transforms';
+import { registerTimeSliderControlTransforms } from './transforms/time_slider_control_transforms';
 import { setupOptionsListSuggestionsRoute } from './options_list/options_list_suggestions_route';
+
+export interface StartDeps {
+  data: DataPluginStart;
+}
 
 interface SetupDeps {
   embeddable: EmbeddableSetup;
@@ -23,19 +29,13 @@ interface SetupDeps {
   kql: KqlSetup;
 }
 
-export class ControlsPlugin implements Plugin<object, object, SetupDeps> {
-  public setup(core: CoreSetup, { embeddable, kql }: SetupDeps) {
-    registerDataControlTransforms(embeddable, OPTIONS_LIST_CONTROL, 'optionsListDataView', [
-      'optionsListDataView',
-      'optionsListControlDataView',
-    ]);
+export class ControlsPlugin implements Plugin<object, object, SetupDeps, StartDeps> {
+  public setup(core: CoreSetup<StartDeps>, { embeddable, kql }: SetupDeps) {
+    registerESQLControlTransforms(embeddable);
+    registerOptionsListControlTransforms(embeddable);
+    registerRangeSliderControlTransforms(embeddable);
+    registerTimeSliderControlTransforms(embeddable);
 
-    registerDataControlTransforms(embeddable, RANGE_SLIDER_CONTROL, 'rangeSliderDataView', [
-      'rangeSliderDataView',
-      'rangeSliderControlDataView',
-    ]);
-
-    setupOptionsListClusterSettingsRoute(core);
     setupOptionsListSuggestionsRoute(core, kql.autocomplete.getAutocompleteSettings);
     return {};
   }

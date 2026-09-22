@@ -10,8 +10,9 @@ import React, { useEffect, useState } from 'react';
 import type { SLODefinitionResponse } from '@kbn/slo-schema';
 import { ALL_VALUE } from '@kbn/slo-schema';
 
-import { EuiCallOut, EuiLoadingSpinner, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { useFetchSloDetails } from '../../hooks/use_fetch_slo_details';
 import type { BurnRateRuleParams, WindowSchema, Dependency } from '../../typings';
 import { SloSelector } from './slo_selector';
@@ -39,6 +40,7 @@ export function BurnRateRuleEditor(props: Props) {
   const [selectedSlo, setSelectedSlo] = useState<SLODefinitionResponse | undefined>(undefined);
   const [windowDefs, setWindowDefs] = useState<WindowSchema[]>(ruleParams?.windows || []);
   const [dependencies, setDependencies] = useState<Dependency[]>(ruleParams?.dependencies || []);
+  const [hasInteracted, setHasInteracted] = useState(false);
   const { isLoading, data } = useFetchSloDefinitions({});
 
   useEffect(() => {
@@ -50,6 +52,10 @@ export function BurnRateRuleEditor(props: Props) {
       return createDefaultWindows(initialSlo);
     });
   }, [initialSlo]);
+
+  const setHasInteractedField = () => {
+    setHasInteracted(true);
+  };
 
   const onSelectedSlo = (slo: SLODefinitionResponse | undefined) => {
     setSelectedSlo(slo);
@@ -77,7 +83,12 @@ export function BurnRateRuleEditor(props: Props) {
     }
 
     return (
-      <SloSelector initialSlo={selectedSlo} onSelected={onSelectedSlo} errors={errors.sloId} />
+      <SloSelector
+        initialSlo={selectedSlo}
+        onSelected={onSelectedSlo}
+        errors={hasInteracted ? errors.sloId : undefined}
+        onBlur={setHasInteractedField}
+      />
     );
   };
 
@@ -95,9 +106,8 @@ export function BurnRateRuleEditor(props: Props) {
       {selectedSlo?.groupBy && ![selectedSlo.groupBy].flat().includes(ALL_VALUE) && (
         <>
           <EuiSpacer size="l" />
-          <EuiCallOut
+          <KbnWarningCallout
             announceOnMount
-            color="warning"
             size="s"
             title={i18n.translate('xpack.slo.rules.groupByMessage', {
               defaultMessage:

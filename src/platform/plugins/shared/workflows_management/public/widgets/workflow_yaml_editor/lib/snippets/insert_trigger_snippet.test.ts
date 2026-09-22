@@ -28,11 +28,14 @@ describe('insertTriggerSnippet', () => {
 
     insertTriggerSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'manual');
 
-    expect(generateTriggerSnippetSpy).toHaveBeenCalledWith('manual', {
-      full: true,
-      monacoSuggestionFormat: false,
-      withTriggersSection: false,
-    });
+    expect(generateTriggerSnippetSpy).toHaveBeenCalledWith(
+      'manual',
+      expect.objectContaining({
+        full: true,
+        monacoSuggestionFormat: false,
+        withTriggersSection: false,
+      })
+    );
 
     const expectedSnippet = generateTriggerSnippetModule.generateTriggerSnippet('manual', {
       full: true,
@@ -52,6 +55,45 @@ describe('insertTriggerSnippet', () => {
       expect.any(Function)
     );
   });
+
+  it('should insert a scheduled trigger outside manual trigger inputs', () => {
+    const inputYaml = `name: New workflow
+enabled: false
+description: This is a new workflow
+triggers:
+  - type: manual
+    inputs:
+      - name: message
+        type: string
+        default: "hello world"
+
+steps:
+  - name: hello_world_step
+    type: console
+    with:
+      message: "{{ inputs.message }}"
+`;
+    const model = createFakeMonacoModel(inputYaml);
+    const yamlDocument = parseDocument(inputYaml);
+
+    insertTriggerSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'scheduled');
+
+    expect(model.pushEditOperations).toHaveBeenCalledWith(
+      null,
+      [
+        {
+          // Insert at the start of the existing steps line.
+          range: new monaco.Range(11, 1, 11, 1),
+          text: `  - type: scheduled
+    with:
+      every: 5m
+`,
+        },
+      ],
+      expect.any(Function)
+    );
+  });
+
   it('should not override existing trigger of the same type', () => {
     const inputYaml = `triggers:\n  - type: manual`;
     const model = createFakeMonacoModel(inputYaml);
@@ -61,6 +103,55 @@ describe('insertTriggerSnippet', () => {
     expect(generateTriggerSnippetSpy).not.toHaveBeenCalled();
     expect(model.pushEditOperations).not.toHaveBeenCalled();
   });
+
+  it('should pass defaultCondition to generateTriggerSnippet when provided', () => {
+    const inputYaml = `triggers:\n  - type: alert\n`;
+    const model = createFakeMonacoModel(inputYaml);
+    const yamlDocument = parseDocument(inputYaml);
+    const defaultCondition = 'event.source:ui and event.message:*important*';
+
+    insertTriggerSnippet(
+      model as unknown as monaco.editor.ITextModel,
+      yamlDocument,
+      'custom.trigger',
+      undefined,
+      { defaultCondition }
+    );
+
+    expect(generateTriggerSnippetSpy).toHaveBeenCalledWith(
+      'custom.trigger',
+      expect.objectContaining({
+        full: true,
+        monacoSuggestionFormat: false,
+        withTriggersSection: false,
+        defaultCondition,
+      })
+    );
+  });
+
+  it('should pass requiresConnectorId to generateTriggerSnippet when provided', () => {
+    const inputYaml = `triggers:\n  - type: alert\n`;
+    const model = createFakeMonacoModel(inputYaml);
+    const yamlDocument = parseDocument(inputYaml);
+    const connectorEventTriggerId = 'example.connector_event';
+
+    insertTriggerSnippet(
+      model as unknown as monaco.editor.ITextModel,
+      yamlDocument,
+      connectorEventTriggerId,
+      undefined,
+      { requiresConnectorId: true }
+    );
+
+    expect(generateTriggerSnippetSpy).toHaveBeenCalledWith(
+      connectorEventTriggerId,
+      expect.objectContaining({
+        full: true,
+        requiresConnectorId: true,
+      })
+    );
+  });
+
   it('should add the triggers section if it does not exist', () => {
     const inputYaml = `steps:\n  - type: http`;
     const model = createFakeMonacoModel(inputYaml);
@@ -68,11 +159,14 @@ describe('insertTriggerSnippet', () => {
 
     insertTriggerSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'manual');
 
-    expect(generateTriggerSnippetSpy).toHaveBeenCalledWith('manual', {
-      full: true,
-      monacoSuggestionFormat: false,
-      withTriggersSection: true,
-    });
+    expect(generateTriggerSnippetSpy).toHaveBeenCalledWith(
+      'manual',
+      expect.objectContaining({
+        full: true,
+        monacoSuggestionFormat: false,
+        withTriggersSection: true,
+      })
+    );
 
     const expectedSnippet = generateTriggerSnippetModule.generateTriggerSnippet('manual', {
       full: true,
@@ -113,11 +207,14 @@ describe('insertTriggerSnippet', () => {
 
       insertTriggerSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'manual');
 
-      expect(generateTriggerSnippetSpy).toHaveBeenCalledWith('manual', {
-        full: true,
-        monacoSuggestionFormat: false,
-        withTriggersSection: false,
-      });
+      expect(generateTriggerSnippetSpy).toHaveBeenCalledWith(
+        'manual',
+        expect.objectContaining({
+          full: true,
+          monacoSuggestionFormat: false,
+          withTriggersSection: false,
+        })
+      );
 
       const expectedSnippet = generateTriggerSnippetModule.generateTriggerSnippet('manual', {
         full: true,
@@ -143,11 +240,14 @@ describe('insertTriggerSnippet', () => {
 
       insertTriggerSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'manual');
 
-      expect(generateTriggerSnippetSpy).toHaveBeenCalledWith('manual', {
-        full: true,
-        monacoSuggestionFormat: false,
-        withTriggersSection: false,
-      });
+      expect(generateTriggerSnippetSpy).toHaveBeenCalledWith(
+        'manual',
+        expect.objectContaining({
+          full: true,
+          monacoSuggestionFormat: false,
+          withTriggersSection: false,
+        })
+      );
 
       const expectedSnippet = generateTriggerSnippetModule.generateTriggerSnippet('manual', {
         full: true,
@@ -173,11 +273,14 @@ describe('insertTriggerSnippet', () => {
 
       insertTriggerSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'alert');
 
-      expect(generateTriggerSnippetSpy).toHaveBeenCalledWith('alert', {
-        full: true,
-        monacoSuggestionFormat: false,
-        withTriggersSection: false,
-      });
+      expect(generateTriggerSnippetSpy).toHaveBeenCalledWith(
+        'alert',
+        expect.objectContaining({
+          full: true,
+          monacoSuggestionFormat: false,
+          withTriggersSection: false,
+        })
+      );
 
       const expectedSnippet = generateTriggerSnippetModule.generateTriggerSnippet('alert', {
         full: true,
@@ -203,11 +306,14 @@ describe('insertTriggerSnippet', () => {
 
       insertTriggerSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'manual');
 
-      expect(generateTriggerSnippetSpy).toHaveBeenCalledWith('manual', {
-        full: true,
-        monacoSuggestionFormat: false,
-        withTriggersSection: false,
-      });
+      expect(generateTriggerSnippetSpy).toHaveBeenCalledWith(
+        'manual',
+        expect.objectContaining({
+          full: true,
+          monacoSuggestionFormat: false,
+          withTriggersSection: false,
+        })
+      );
 
       const expectedSnippet = generateTriggerSnippetModule.generateTriggerSnippet('manual', {
         full: true,
@@ -233,11 +339,14 @@ describe('insertTriggerSnippet', () => {
 
       insertTriggerSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'manual');
 
-      expect(generateTriggerSnippetSpy).toHaveBeenCalledWith('manual', {
-        full: true,
-        monacoSuggestionFormat: false,
-        withTriggersSection: false,
-      });
+      expect(generateTriggerSnippetSpy).toHaveBeenCalledWith(
+        'manual',
+        expect.objectContaining({
+          full: true,
+          monacoSuggestionFormat: false,
+          withTriggersSection: false,
+        })
+      );
 
       const expectedSnippet = generateTriggerSnippetModule.generateTriggerSnippet('manual', {
         full: true,
@@ -263,11 +372,14 @@ describe('insertTriggerSnippet', () => {
 
       insertTriggerSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'manual');
 
-      expect(generateTriggerSnippetSpy).toHaveBeenCalledWith('manual', {
-        full: true,
-        monacoSuggestionFormat: false,
-        withTriggersSection: false,
-      });
+      expect(generateTriggerSnippetSpy).toHaveBeenCalledWith(
+        'manual',
+        expect.objectContaining({
+          full: true,
+          monacoSuggestionFormat: false,
+          withTriggersSection: false,
+        })
+      );
 
       const expectedSnippet = generateTriggerSnippetModule.generateTriggerSnippet('manual', {
         full: true,
@@ -293,11 +405,14 @@ describe('insertTriggerSnippet', () => {
 
       insertTriggerSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'manual');
 
-      expect(generateTriggerSnippetSpy).toHaveBeenCalledWith('manual', {
-        full: true,
-        monacoSuggestionFormat: false,
-        withTriggersSection: false,
-      });
+      expect(generateTriggerSnippetSpy).toHaveBeenCalledWith(
+        'manual',
+        expect.objectContaining({
+          full: true,
+          monacoSuggestionFormat: false,
+          withTriggersSection: false,
+        })
+      );
 
       const expectedSnippet = generateTriggerSnippetModule.generateTriggerSnippet('manual', {
         full: true,
@@ -323,11 +438,14 @@ describe('insertTriggerSnippet', () => {
 
       insertTriggerSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'manual');
 
-      expect(generateTriggerSnippetSpy).toHaveBeenCalledWith('manual', {
-        full: true,
-        monacoSuggestionFormat: false,
-        withTriggersSection: false,
-      });
+      expect(generateTriggerSnippetSpy).toHaveBeenCalledWith(
+        'manual',
+        expect.objectContaining({
+          full: true,
+          monacoSuggestionFormat: false,
+          withTriggersSection: false,
+        })
+      );
 
       const expectedSnippet = generateTriggerSnippetModule.generateTriggerSnippet('manual', {
         full: true,
@@ -355,11 +473,14 @@ describe('insertTriggerSnippet', () => {
 
       insertTriggerSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'manual');
 
-      expect(generateTriggerSnippetSpy).toHaveBeenCalledWith('manual', {
-        full: true,
-        monacoSuggestionFormat: false,
-        withTriggersSection: false,
-      });
+      expect(generateTriggerSnippetSpy).toHaveBeenCalledWith(
+        'manual',
+        expect.objectContaining({
+          full: true,
+          monacoSuggestionFormat: false,
+          withTriggersSection: false,
+        })
+      );
 
       const expectedSnippet = generateTriggerSnippetModule.generateTriggerSnippet('manual', {
         full: true,
@@ -385,11 +506,14 @@ describe('insertTriggerSnippet', () => {
 
       insertTriggerSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'manual');
 
-      expect(generateTriggerSnippetSpy).toHaveBeenCalledWith('manual', {
-        full: true,
-        monacoSuggestionFormat: false,
-        withTriggersSection: false,
-      });
+      expect(generateTriggerSnippetSpy).toHaveBeenCalledWith(
+        'manual',
+        expect.objectContaining({
+          full: true,
+          monacoSuggestionFormat: false,
+          withTriggersSection: false,
+        })
+      );
 
       const expectedSnippet = generateTriggerSnippetModule.generateTriggerSnippet('manual', {
         full: true,
@@ -415,11 +539,14 @@ describe('insertTriggerSnippet', () => {
 
       insertTriggerSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'manual');
 
-      expect(generateTriggerSnippetSpy).toHaveBeenCalledWith('manual', {
-        full: true,
-        monacoSuggestionFormat: false,
-        withTriggersSection: false,
-      });
+      expect(generateTriggerSnippetSpy).toHaveBeenCalledWith(
+        'manual',
+        expect.objectContaining({
+          full: true,
+          monacoSuggestionFormat: false,
+          withTriggersSection: false,
+        })
+      );
 
       const expectedSnippet = generateTriggerSnippetModule.generateTriggerSnippet('manual', {
         full: true,
@@ -471,11 +598,14 @@ describe('insertTriggerSnippet', () => {
 
       insertTriggerSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'manual');
 
-      expect(generateTriggerSnippetSpy).toHaveBeenCalledWith('manual', {
-        full: true,
-        monacoSuggestionFormat: false,
-        withTriggersSection: false,
-      });
+      expect(generateTriggerSnippetSpy).toHaveBeenCalledWith(
+        'manual',
+        expect.objectContaining({
+          full: true,
+          monacoSuggestionFormat: false,
+          withTriggersSection: false,
+        })
+      );
 
       const expectedSnippet = generateTriggerSnippetModule.generateTriggerSnippet('manual', {
         full: true,
@@ -501,11 +631,14 @@ describe('insertTriggerSnippet', () => {
 
       insertTriggerSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'manual');
 
-      expect(generateTriggerSnippetSpy).toHaveBeenCalledWith('manual', {
-        full: true,
-        monacoSuggestionFormat: false,
-        withTriggersSection: false,
-      });
+      expect(generateTriggerSnippetSpy).toHaveBeenCalledWith(
+        'manual',
+        expect.objectContaining({
+          full: true,
+          monacoSuggestionFormat: false,
+          withTriggersSection: false,
+        })
+      );
 
       const expectedSnippet = generateTriggerSnippetModule.generateTriggerSnippet('manual', {
         full: true,
@@ -531,11 +664,14 @@ describe('insertTriggerSnippet', () => {
 
       insertTriggerSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'manual');
 
-      expect(generateTriggerSnippetSpy).toHaveBeenCalledWith('manual', {
-        full: true,
-        monacoSuggestionFormat: false,
-        withTriggersSection: false,
-      });
+      expect(generateTriggerSnippetSpy).toHaveBeenCalledWith(
+        'manual',
+        expect.objectContaining({
+          full: true,
+          monacoSuggestionFormat: false,
+          withTriggersSection: false,
+        })
+      );
 
       const expectedSnippet = generateTriggerSnippetModule.generateTriggerSnippet('manual', {
         full: true,
@@ -563,11 +699,14 @@ describe('insertTriggerSnippet', () => {
 
       insertTriggerSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'manual');
 
-      expect(generateTriggerSnippetSpy).toHaveBeenCalledWith('manual', {
-        full: true,
-        monacoSuggestionFormat: false,
-        withTriggersSection: true,
-      });
+      expect(generateTriggerSnippetSpy).toHaveBeenCalledWith(
+        'manual',
+        expect.objectContaining({
+          full: true,
+          monacoSuggestionFormat: false,
+          withTriggersSection: true,
+        })
+      );
 
       const expectedSnippet = generateTriggerSnippetModule.generateTriggerSnippet('manual', {
         full: true,
@@ -594,11 +733,14 @@ describe('insertTriggerSnippet', () => {
 
       insertTriggerSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'manual');
 
-      expect(generateTriggerSnippetSpy).toHaveBeenCalledWith('manual', {
-        full: true,
-        monacoSuggestionFormat: false,
-        withTriggersSection: true,
-      });
+      expect(generateTriggerSnippetSpy).toHaveBeenCalledWith(
+        'manual',
+        expect.objectContaining({
+          full: true,
+          monacoSuggestionFormat: false,
+          withTriggersSection: true,
+        })
+      );
 
       const expectedSnippet = generateTriggerSnippetModule.generateTriggerSnippet('manual', {
         full: true,

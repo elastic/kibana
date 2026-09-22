@@ -8,7 +8,6 @@
     "integration_tests/**/*"
   ],
   "kbn_references": [
-    "@kbn/security-plugin",
     "@kbn/config-schema",
     "@kbn/core",
     "@kbn/utility-types",
@@ -23,6 +22,7 @@
     "@kbn/core-root-server-internal",
     "@kbn/core-test-helpers-kbn-server",
     "@kbn/core-test-helpers-so-type-serializer",
+    "@kbn/std",
   ],
   "exclude": [
     "target/**/*",

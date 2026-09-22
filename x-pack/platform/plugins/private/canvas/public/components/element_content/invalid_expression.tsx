@@ -11,8 +11,6 @@
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 
 import React from 'react';
-import PropTypes from 'prop-types';
-
 export interface Props {
   selectElement: () => void;
 }
@@ -20,7 +18,3 @@ export interface Props {
 export const InvalidExpression = ({ selectElement }: Props) => (
   <h3 onClick={selectElement}>Invalid expression</h3>
 );
-
-InvalidExpression.propTypes = {
-  selectElement: PropTypes.func,
-};

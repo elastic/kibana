@@ -129,10 +129,11 @@ export const ChartGridEmbeddableWrapper: FC<ChangePointDetectionProps> = ({
 
   return (
     <div
-      css={css`
-        overflow: auto;
-        width: 100%;
-      `}
+      css={{
+        width: '100%',
+        height: '100%',
+        overflowY: 'auto',
+      }}
     >
       {isUsingSampleData && (
         <div css={css({ padding: `${euiTheme.size.s}` })}>

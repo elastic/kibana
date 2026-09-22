@@ -6,7 +6,11 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { QueryDslQueryContainer, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  OpenPointInTimeResponse,
+  QueryDslQueryContainer,
+  SearchRequest,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/core/server';
 import { calculatePostureScore } from '../../../common/utils/helpers';
@@ -81,14 +85,18 @@ export const getStatsFromFindingsEvaluationsAggs = (
 export const getStats = async (
   esClient: ElasticsearchClient,
   query: QueryDslQueryContainer,
-  pitId: string,
+  pit: OpenPointInTimeResponse,
   runtimeMappings: MappingRuntimeFields,
   logger: Logger
 ): Promise<ComplianceDashboardData['stats']> => {
   try {
     const evaluationsQueryResult = await esClient.search<unknown, FindingsEvaluationsQueryResult>(
-      getEvaluationsQuery(query, pitId, runtimeMappings)
+      getEvaluationsQuery(query, pit.id, runtimeMappings)
     );
+
+    if (evaluationsQueryResult.pit_id) {
+      pit.id = evaluationsQueryResult.pit_id;
+    }
 
     const findingsEvaluations = evaluationsQueryResult.aggregations;
     if (!findingsEvaluations) throw new Error('missing findings evaluations');

@@ -221,7 +221,6 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       legacy: deps.elasticsearch.legacy,
       publicBaseUrl: deps.elasticsearch.publicBaseUrl,
       setUnauthorizedErrorHandler: deps.elasticsearch.setUnauthorizedErrorHandler,
-      setCpsFeatureFlag: deps.elasticsearch.setCpsFeatureFlag,
     },
     executionContext: {
       withContext: deps.executionContext.withContext,
@@ -298,6 +297,9 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       return new CoreRouteHandlerContext(coreStart as unknown as InternalCoreStart, request);
     },
     deprecations: deps.deprecations.getRegistry(plugin.name),
+    userActivity: {
+      trackUserAction: deps.userActivity.trackUserAction,
+    },
     coreUsageData: {
       registerUsageCounter: deps.coreUsageData.registerUsageCounter,
       registerDeprecatedUsageFetch: deps.coreUsageData.registerDeprecatedUsageFetch,
@@ -313,6 +315,11 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
     security: {
       registerSecurityDelegate: (api) => deps.security.registerSecurityDelegate(api),
       fips: deps.security.fips,
+      acquireFakeRequestEnricher: () => deps.security.acquireFakeRequestEnricher(),
+      serviceAccounts: {
+        registerWorkloadType: (registration) =>
+          deps.security.serviceAccounts.registerWorkloadType(plugin.name, registration),
+      },
     },
     userProfile: {
       registerUserProfileDelegate: (delegate) =>
@@ -323,6 +330,9 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
     },
     dataStreams: {
       registerDataStream: (dataStream) => deps.dataStreams.registerDataStream(dataStream),
+    },
+    userStorage: {
+      register: deps.userStorage.register,
     },
   };
 }
@@ -378,6 +388,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
       auth: deps.http.auth,
       basePath: deps.http.basePath,
       getServerInfo: deps.http.getServerInfo,
+      selfClient: deps.http.selfClient,
       staticAssets: {
         prependPublicUrl: (pathname: string) => deps.http.staticAssets.prependPublicUrl(pathname),
         getPluginAssetHref: (assetPath: string) =>
@@ -408,6 +419,9 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
       globalAsScopedToClient: deps.uiSettings.globalAsScopedToClient,
     },
     coreUsageData: deps.coreUsageData,
+    userActivity: {
+      trackUserAction: deps.userActivity.trackUserAction,
+    },
     plugins: {
       onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
     },
@@ -415,6 +429,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
     security: {
       authc: deps.security.authc,
       audit: deps.security.audit,
+      serviceAccounts: deps.security.serviceAccounts.asScopedToPlugin(plugin.name),
     },
     userProfile: deps.userProfile,
     injection: {
@@ -423,6 +438,9 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
     },
     dataStreams: {
       initializeClient: (dataStream) => deps.dataStreams.initializeClient(dataStream),
+    },
+    userStorage: {
+      asScoped: deps.userStorage.asScoped,
     },
   };
 }

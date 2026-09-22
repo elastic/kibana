@@ -5,10 +5,12 @@
  * 2.0.
  */
 import type { SavedObject } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import pMap from 'p-map';
 import type { SavedObjectsBulkResponse } from '@kbn/core-saved-objects-api-server';
 import { v4 as uuidV4 } from 'uuid';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
+import { getPackagePolicySavedObjectType } from '@kbn/fleet-plugin/server/services/package_policy';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import type { SyntheticsServerSetup } from '../../../types';
 import type { RouteContext } from '../../types';
@@ -42,8 +44,17 @@ export const syncNewMonitorBulk = async ({
   const { query } = request;
   let newMonitors: CreatedMonitors | null = null;
 
+  const packagePolicySoType = await getPackagePolicySavedObjectType();
   const monitorsToCreate = normalizedMonitors.map((monitor) => {
     const monitorSavedObjectId = uuidV4();
+    const monitorPrivateLocations = monitor[ConfigKey.LOCATIONS].filter(
+      (loc) => !loc.isServiceManaged
+    );
+    const references = monitorPrivateLocations.map((loc) => ({
+      id: `${monitorSavedObjectId}-${loc.id}`,
+      name: `${monitorSavedObjectId}-${loc.id}`,
+      type: packagePolicySoType,
+    }));
     return {
       id: monitorSavedObjectId,
       monitor: {
@@ -52,6 +63,7 @@ export const syncNewMonitorBulk = async ({
         [ConfigKey.MONITOR_QUERY_ID]:
           monitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || monitorSavedObjectId,
       } as MonitorFields,
+      ...(references.length > 0 && { references }),
     };
   });
 
@@ -102,7 +114,9 @@ const handlePrivateConfigErrors = async (
     const vars = stream?.vars;
     const monitorId = vars?.[ConfigKey.CONFIG_ID]?.value;
     const monitor = createdMonitors.find(
-      (savedObject) => savedObject.attributes[ConfigKey.CONFIG_ID] === monitorId
+      (savedObject): savedObject is MonitorSavedObject =>
+        !isSavedObjectErrorResult(savedObject) &&
+        savedObject.attributes[ConfigKey.CONFIG_ID] === monitorId
     );
     if (monitor) {
       failedMonitors.push({ monitor, error });
@@ -134,10 +148,13 @@ const rollBackNewMonitorBulk = async (
 
 const sendNewMonitorTelemetry = (
   server: SyntheticsServerSetup,
-  monitors: Array<SavedObject<EncryptedSyntheticsMonitorAttributes>>,
+  monitors: CreatedMonitors,
   errors?: ServiceLocationErrors | null
 ) => {
   for (const monitor of monitors) {
+    if (isSavedObjectErrorResult(monitor)) {
+      continue;
+    }
     sendTelemetryEvents(
       server.logger,
       server.telemetry,

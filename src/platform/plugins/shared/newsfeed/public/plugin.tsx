@@ -8,16 +8,16 @@
  */
 
 import * as Rx from 'rxjs';
-import { catchError, takeUntil } from 'rxjs';
-import ReactDOM from 'react-dom';
+import { catchError, shareReplay, takeUntil } from 'rxjs';
 import React from 'react';
 import moment from 'moment';
 import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import type { SidebarComponentProps } from '@kbn/core-chrome-sidebar';
 import type { NewsfeedPluginBrowserConfig, NewsfeedPluginStartDependencies } from './types';
-import { NewsfeedNavButton } from './components/newsfeed_header_nav_button';
 import type { NewsfeedApi } from './lib/api';
 import { getApi, NewsfeedApiEndpoint } from './lib/api';
+import { registerNewsfeedHandler } from './register_newsfeed_handler';
+import { createNewsfeedSidebarController } from './sidebar/controller';
 
 export type NewsfeedPublicPluginSetup = ReturnType<NewsfeedPublicPlugin['setup']>;
 export type NewsfeedPublicPluginStart = ReturnType<NewsfeedPublicPlugin['start']>;
@@ -25,13 +25,12 @@ export type NewsfeedPublicPluginStart = ReturnType<NewsfeedPublicPlugin['start']
 export class NewsfeedPublicPlugin
   implements Plugin<NewsfeedPublicPluginSetup, NewsfeedPublicPluginStart>
 {
-  private readonly isServerless: boolean;
   private readonly kibanaVersion: string;
   private readonly config: NewsfeedPluginBrowserConfig;
   private readonly stop$ = new Rx.ReplaySubject<void>(1);
+  private newsfeedApi?: NewsfeedApi;
 
   constructor(initializerContext: PluginInitializerContext<NewsfeedPluginBrowserConfig>) {
-    this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
     this.kibanaVersion = initializerContext.env.packageInfo.version;
     const config = initializerContext.config.get();
     this.config = Object.freeze({
@@ -42,7 +41,38 @@ export class NewsfeedPublicPlugin
     });
   }
 
-  public setup(_core: CoreSetup) {
+  public setup(core: CoreSetup) {
+    // loadComponent is defined once here so its identity is stable — core uses it as a WeakMap
+    // key for the lazy-component cache.
+    const loadComponent = async () => {
+      const [{ NewsfeedSidebar }, [coreStart]] = await Promise.all([
+        import('./sidebar/newsfeed_sidebar'),
+        core.getStartServices(),
+      ]);
+
+      const newsfeedApi = this.newsfeedApi;
+      if (!newsfeedApi) {
+        throw new Error(
+          'Newsfeed API is not initialized. Ensure NewsfeedPublicPlugin.start() runs before loading the newsfeed sidebar.'
+        );
+      }
+      const { hasCustomBranding$ } = coreStart.customBranding;
+
+      return (props: SidebarComponentProps) => (
+        <NewsfeedSidebar
+          {...props}
+          newsfeedApi={newsfeedApi}
+          hasCustomBranding$={hasCustomBranding$}
+        />
+      );
+    };
+
+    core.chrome.sidebar.registerApp({
+      appId: 'newsfeed',
+      restoreOnReload: false,
+      loadComponent,
+    });
+
     return {};
   }
 
@@ -50,10 +80,22 @@ export class NewsfeedPublicPlugin
     const isScreenshotMode = screenshotMode.isScreenshotMode();
 
     const api = this.createNewsfeedApi(this.config, NewsfeedApiEndpoint.KIBANA, isScreenshotMode);
-    core.chrome.navControls.registerRight({
-      order: 1000,
-      mount: (target) => this.mount(api, target, core),
+
+    // The source fetches at most once per fetchInterval, so a second cold subscription would
+    // never emit. The help menu and sidebar share one subscription instead, and late
+    // subscribers replay the last result.
+    const sharedApi: NewsfeedApi = {
+      ...api,
+      fetchResults$: api.fetchResults$.pipe(shareReplay({ bufferSize: 1, refCount: false })),
+    };
+    this.newsfeedApi = sharedApi;
+
+    const sidebarController = createNewsfeedSidebarController({
+      sidebar: core.chrome.sidebar,
+      newsfeedApi: sharedApi,
     });
+
+    registerNewsfeedHandler({ core, api: sharedApi, sidebarController });
 
     return {
       createNewsFeed$: (endpoint: NewsfeedApiEndpoint) => {
@@ -86,20 +128,5 @@ export class NewsfeedPublicPlugin
         catchError(() => Rx.of(null)) // do not throw error
       ),
     };
-  }
-
-  private mount(api: NewsfeedApi, targetDomElement: HTMLElement, core: CoreStart) {
-    const hasCustomBranding$ = core.customBranding.hasCustomBranding$;
-    ReactDOM.render(
-      <KibanaRenderContextProvider {...core}>
-        <NewsfeedNavButton
-          newsfeedApi={api}
-          hasCustomBranding$={hasCustomBranding$}
-          isServerless={this.isServerless}
-        />
-      </KibanaRenderContextProvider>,
-      targetDomElement
-    );
-    return () => ReactDOM.unmountComponentAtNode(targetDomElement);
   }
 }

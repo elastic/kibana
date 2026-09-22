@@ -195,6 +195,72 @@ describe('ToolbarSelector', () => {
     );
     await user.click(screen.getByTestId('toolbarSelectorOptionalPropsButton'));
     expect(screen.getByText('Maximum selection limit reached')).toBeInTheDocument();
-    expect(screen.getAllByLabelText('My Popover Title')).toHaveLength(3);
+    expect(screen.getByRole('button', { name: 'My Popover Title' })).toBeInTheDocument();
+    expect(screen.getByRole('combobox', { name: 'My Popover Title' })).toBeInTheDocument();
+    expect(screen.getByRole('listbox', { name: 'My Popover Title' })).toBeInTheDocument();
+  });
+
+  it('uses buttonTooltipContent when provided instead of buttonLabel for tooltip', async () => {
+    const user = userEvent.setup();
+    render(
+      <ToolbarSelector
+        data-test-subj="toolbarSelectorTooltipTest"
+        buttonLabel="Button Label"
+        buttonTooltipContent="Custom Tooltip Content"
+        options={options}
+        searchable={false}
+        singleSelection={true}
+      />
+    );
+
+    const button = screen.getByTestId('toolbarSelectorTooltipTestButton');
+    expect(screen.getByText('Button Label')).toBeInTheDocument();
+
+    await user.hover(button);
+
+    await waitFor(() => {
+      expect(screen.getByText('Custom Tooltip Content')).toBeInTheDocument();
+    });
+  });
+
+  it('falls back to popoverTitle for tooltip when buttonTooltipContent is not provided', async () => {
+    const user = userEvent.setup();
+    render(
+      <ToolbarSelector
+        data-test-subj="toolbarSelectorDefaultTooltipTest"
+        buttonLabel="Default Label"
+        popoverTitle="Select an option"
+        options={options}
+        searchable={false}
+        singleSelection={true}
+      />
+    );
+
+    const button = screen.getByTestId('toolbarSelectorDefaultTooltipTestButton');
+    expect(screen.getByText('Default Label')).toBeInTheDocument();
+
+    await user.hover(button);
+
+    await waitFor(() => {
+      expect(screen.getByRole('tooltip', { hidden: true })).toHaveTextContent('Select an option');
+    });
+  });
+
+  it('shows no tooltip when neither buttonTooltipContent nor popoverTitle is provided', async () => {
+    const user = userEvent.setup();
+    render(
+      <ToolbarSelector
+        data-test-subj="toolbarSelectorNoTooltipTest"
+        buttonLabel="No Tooltip"
+        options={options}
+        searchable={false}
+        singleSelection={true}
+      />
+    );
+
+    const button = screen.getByTestId('toolbarSelectorNoTooltipTestButton');
+    await user.hover(button);
+
+    expect(screen.queryByRole('tooltip', { hidden: true })).not.toBeInTheDocument();
   });
 });

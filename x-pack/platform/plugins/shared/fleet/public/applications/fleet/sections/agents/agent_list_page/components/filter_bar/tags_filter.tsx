@@ -6,10 +6,10 @@
  */
 import React, { useCallback, useEffect, useState } from 'react';
 import type { EuiSelectableOption } from '@elastic/eui';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
-import { EuiHorizontalRule } from '@elastic/eui';
+import { EuiButton, EuiPopoverFooter, EuiPopoverTitle, useEuiTheme } from '@elastic/eui';
 import { EuiFilterButton, EuiPopover, EuiSelectable } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
 interface Props {
   tags: string[];
@@ -50,11 +50,14 @@ export const TagsFilter: React.FunctionComponent<Props> = ({
 
   return (
     <EuiPopover
+      aria-label={i18n.translate('xpack.fleet.agentList.tagsFilterAriaLabel', {
+        defaultMessage: 'Tags filter',
+      })}
       ownFocus
       zIndex={Number(euiTheme.levels.header) - 1}
       button={
         <EuiFilterButton
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           onClick={() => setIsTagsFilterOpen(!isTagsFilterOpen)}
           isSelected={isTagsFilterOpen}
           hasActiveFilters={selectedTags.length > 0}
@@ -68,7 +71,7 @@ export const TagsFilter: React.FunctionComponent<Props> = ({
       }
       isOpen={isTagsFilterOpen}
       closePopover={() => setIsTagsFilterOpen(false)}
-      panelPaddingSize="none"
+      panelPaddingSize="s"
     >
       <EuiSelectable
         options={options}
@@ -90,7 +93,6 @@ export const TagsFilter: React.FunctionComponent<Props> = ({
         }}
         data-test-subj="agentList.agentPolicyFilterOptions"
         listProps={{
-          paddingSize: 's',
           style: {
             minWidth: 140,
           },
@@ -98,29 +100,27 @@ export const TagsFilter: React.FunctionComponent<Props> = ({
       >
         {(list, search) => (
           <>
-            {search}
+            <EuiPopoverTitle>{search}</EuiPopoverTitle>
             {list}
+            <EuiPopoverFooter>
+              <EuiButton
+                size="s"
+                fullWidth
+                iconType="cross"
+                data-test-subj="agentList.tagFilterClearAllBtn"
+                onClick={() => {
+                  onSelectedTagsChange([]);
+                }}
+              >
+                <FormattedMessage
+                  id="xpack.fleet.agentList.tagsFilterClearAllBtnText"
+                  defaultMessage="Clear all"
+                />
+              </EuiButton>
+            </EuiPopoverFooter>
           </>
         )}
       </EuiSelectable>
-      <EuiHorizontalRule margin="none" />
-      <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            iconType="error"
-            color="danger"
-            data-test-subj="agentList.tagFilterClearAllBtn"
-            onClick={() => {
-              onSelectedTagsChange([]);
-            }}
-          >
-            <FormattedMessage
-              id="xpack.fleet.agentList.tagsFilterClearAllBtnText"
-              defaultMessage="Clear all"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
     </EuiPopover>
   );
 };

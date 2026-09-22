@@ -9,7 +9,21 @@ import type { EuiStepProps } from '@elastic/eui';
 
 import type React from 'react';
 
-import type { AgentPolicy, PackagePolicy } from '../../../../../../common';
+import type {
+  AgentPolicy,
+  NewPackagePolicy,
+  PackagePolicy,
+  AgentlessPolicy,
+} from '../../../../../../common';
+
+/**
+ * Result of saving a policy from the create flow, tagged by the API that produced it.
+ * The `type` tag lets callers branch on the policy shape without probing fields.
+ */
+export type SavedPolicyResult =
+  | { type: 'packagePolicy'; policy: PackagePolicy }
+  | { type: 'agentless'; policy: AgentlessPolicy };
+
 export type EditPackagePolicyFrom =
   | 'package'
   | 'package-edit'
@@ -49,7 +63,7 @@ export type CreatePackagePolicyParams = React.FunctionComponent<{
   pkgVersion?: string;
   integration?: string;
   pkgLabel?: string;
-  defaultPolicyData?: Partial<PackagePolicy>;
+  defaultPolicyData?: Partial<NewPackagePolicy>;
   noBreadcrumb?: boolean;
   addIntegrationFlyoutProps?: {
     selectIntegrationStep: EuiStepProps;

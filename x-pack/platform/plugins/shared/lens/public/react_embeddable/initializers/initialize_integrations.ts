@@ -10,27 +10,17 @@ import {
   getLanguageDisplayName,
   isOfAggregateQueryType,
 } from '@kbn/es-query';
-import { omit } from 'lodash';
-import type { HasSerializableState } from '@kbn/presentation-publishing';
-import type {
-  GetStateType,
-  LensRuntimeState,
-  IntegrationCallbacks,
-  LensSerializedState,
-} from '@kbn/lens-common';
+import type { GetStateType, IntegrationCallbacks, LensSerializedState } from '@kbn/lens-common';
+import { getRepresentativeQuery, withLegacyAggregateQuerySlot } from '@kbn/lens-common';
 import type {
   LegacyLensStateApi,
-  LensSerializedAPIConfig,
   LensByRefSerializedAPIConfig,
-  LensByValueSerializedAPIConfig,
+  LensWireAPIConfig,
 } from '@kbn/lens-common-2';
+import type { HasSerializableState } from '@kbn/presentation-publishing';
+import { stripInheritedContext } from '../../../common/transforms/helpers';
+import { flattenAPIConfig } from '../../../common/transforms/utils';
 import { isTextBasedLanguage, transformToApiConfig } from '../helper';
-
-function cleanupSerializedState(state: LensRuntimeState) {
-  const cleanedState = omit(state, 'searchSessionId');
-
-  return cleanedState;
-}
 
 export function initializeIntegrations(getLatestState: GetStateType): {
   api: Omit<
@@ -38,12 +28,12 @@ export function initializeIntegrations(getLatestState: GetStateType): {
     | 'updateState'
     | 'updateAttributes'
     | 'updateDataViews'
-    | 'updateSavedObjectId'
+    | 'updateRefId'
     | 'updateOverrides'
     | 'updateDataLoading'
     | 'getTriggerCompatibleActions'
   > &
-    HasSerializableState<LensSerializedAPIConfig> &
+    Pick<HasSerializableState<LensWireAPIConfig>, 'serializeState'> &
     LegacyLensStateApi;
 } {
   return {
@@ -52,35 +42,34 @@ export function initializeIntegrations(getLatestState: GetStateType): {
        * This API is used by the parent to serialize the panel state to save it into its saved object.
        * Make sure to remove the attributes when the panel is by reference.
        */
-      serializeState: (): LensSerializedAPIConfig => {
-        const currentState = cleanupSerializedState(getLatestState());
+      serializeState: (): LensWireAPIConfig => {
+        const currentState = stripInheritedContext(getLatestState());
 
-        const { savedObjectId, attributes, ...state } = currentState;
-        if (savedObjectId) {
+        const { ref_id: refId, attributes, ...state } = currentState;
+        if (refId) {
           return {
             ...state,
-            savedObjectId,
+            ref_id: refId,
           } satisfies LensByRefSerializedAPIConfig;
         }
 
-        const transformedState = transformToApiConfig(currentState);
-
-        return transformedState satisfies LensByValueSerializedAPIConfig;
+        return flattenAPIConfig(transformToApiConfig(currentState));
       },
       getLegacySerializedState: (): LensSerializedState => {
-        const currentState = cleanupSerializedState(getLatestState());
-        const { savedObjectId, attributes, ...state } = currentState;
+        const currentState = getLatestState();
+        const { ref_id: refId, attributes, ...state } = currentState;
 
-        if (savedObjectId) {
+        if (refId) {
           return {
             ...state,
-            savedObjectId,
+            ref_id: refId,
           };
         }
 
         return {
           ...state,
-          attributes,
+          // mixed-version compat: mirror the ES|QL layer query into the legacy slot
+          attributes: attributes && withLegacyAggregateQuerySlot(attributes),
         };
       },
       // TODO: workout why we have this duplicated
@@ -88,7 +77,7 @@ export function initializeIntegrations(getLatestState: GetStateType): {
       getSavedVis: () => getLatestState().attributes,
       isTextBasedLanguage: () => isTextBasedLanguage(getLatestState()),
       getTextBasedLanguage: () => {
-        const query = getLatestState().attributes?.state.query;
+        const query = getRepresentativeQuery(getLatestState().attributes);
         if (!query || !isOfAggregateQueryType(query)) {
           return;
         }

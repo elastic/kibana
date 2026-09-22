@@ -1,0 +1,14 @@
+{
+  "type": "plugin",
+  "id": "@kbn/evals-skills-plugin",
+  "owner": ["@elastic/nightshift-context-and-research-team"],
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "evalsSkills",
+    "server": true,
+    "browser": false,
+    "requiredPlugins": ["agentBuilder", "workflowsManagement", "evals"],
+    "optionalPlugins": ["spaces", "security"]
+  }
+}

@@ -42,14 +42,10 @@ export function TransformTableProvider({ getPageObject, getService }: FtrProvide
         rows.push({
           id: $tr
             .findTestSubject('transformListColumnId')
-            .find('.euiTableCellContent')
+            .findTestSubject('transformListColumnIdText')
             .text()
             .trim(),
-          description: $tr
-            .findTestSubject('transformListColumnDescription')
-            .find('.euiTableCellContent')
-            .text()
-            .trim(),
+          description: $tr.findTestSubject('transformListColumnDescriptionText').text().trim(),
           type: $tr
             .findTestSubject('transformListColumnType')
             .find('.euiTableCellContent')

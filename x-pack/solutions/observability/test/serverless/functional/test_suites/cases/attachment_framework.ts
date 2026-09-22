@@ -93,11 +93,16 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           await testSubjects.click('confirmModalConfirmButton');
         }
 
-        const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
-        expect(await title.getVisibleText()).toEqual(caseTitle);
+        if (await cases.common.isRedesignEnabled()) {
+          const redesignTitle = await testSubjects.find('appHeaderTitle');
+          expect(await redesignTitle.getVisibleText()).toContain(caseTitle);
+        } else {
+          const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
+          expect(await title.getVisibleText()).toEqual(caseTitle);
+        }
 
-        await retry.waitFor('wait for the visualization to exist', async () => {
-          return testSubjects.exists('comment-persistableState-.lens');
+        await retry.waitFor('lens attachment comment renders after navigation', async () => {
+          return testSubjects.exists('comment-lens-lens');
         });
       });
 
@@ -126,10 +131,15 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           await testSubjects.click('confirmModalConfirmButton');
         }
 
-        const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
-        expect(await title.getVisibleText()).toEqual(theCaseTitle);
+        if (await cases.common.isRedesignEnabled()) {
+          const redesignTitle = await testSubjects.find('appHeaderTitle');
+          expect(await redesignTitle.getVisibleText()).toContain(theCaseTitle);
+        } else {
+          const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
+          expect(await title.getVisibleText()).toEqual(theCaseTitle);
+        }
 
-        await testSubjects.existOrFail('comment-persistableState-.lens');
+        await testSubjects.existOrFail('comment-lens-lens');
       });
     });
   });

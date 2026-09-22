@@ -10,20 +10,24 @@
 import React from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { render, screen, waitFor, fireEvent, within } from '@testing-library/react';
 import {
   QueryHistoryAction,
   getTableColumns,
   QueryColumn,
   HistoryAndStarredQueriesTabs,
 } from './history_starred_queries';
-import { of } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { act } from 'react-dom/test-utils';
 import { getHistoryItems, getStorageStats } from '../history_local_storage';
+import { EsqlStarredQueriesService } from './esql_starred_queries_service';
+import type { StarredQueryItem } from './esql_starred_queries_service';
 
 jest.mock('../history_local_storage', () => ({
   getHistoryItems: jest.fn(),
   getStorageStats: jest.fn(() => ({ queryCount: 0, storageSizeKB: 0 })),
+  getTrimmedQuery: jest.fn((query: string) => query.trim()),
   dateFormat: 'MMM. DD, YY HH:mm:ss',
 }));
 
@@ -54,6 +58,15 @@ const mockManyHistoryItems = Array.from({ length: 25 }, (_, i) => ({
   timeRan: '',
   status: 'success' as const,
 }));
+
+const createMockStarredQueriesService = (items: StarredQueryItem[] = []) =>
+  ({
+    queries$: new BehaviorSubject(items),
+    discardModalVisibility$: new BehaviorSubject(false),
+    renderStarredButton: jest.fn(() => null),
+    checkIfQueryIsStarred: jest.fn(() => false),
+    onDiscardModalClose: jest.fn(async () => {}),
+  } as unknown as EsqlStarredQueriesService);
 
 describe('Starred and History queries components', () => {
   const services = {
@@ -95,20 +108,15 @@ describe('Starred and History queries components', () => {
       const columns = getTableColumns(50, false, []);
       expect(columns).toEqual([
         {
-          'data-test-subj': 'favoriteBtn',
-          render: expect.anything(),
-          width: '40px',
-        },
-        {
           css: {
             height: '100%',
           },
           'data-test-subj': 'status',
           field: 'status',
-          name: '',
+          name: 'Status',
           render: expect.anything(),
           sortable: false,
-          width: '40px',
+          width: '55px',
         },
         {
           'data-test-subj': 'queryString',
@@ -128,7 +136,7 @@ describe('Starred and History queries components', () => {
         {
           actions: [],
           'data-test-subj': 'actions',
-          name: '',
+          name: 'Actions',
           width: '60px',
         },
       ]);
@@ -138,20 +146,15 @@ describe('Starred and History queries components', () => {
       const columns = getTableColumns(50, false, [], true);
       expect(columns).toEqual([
         {
-          'data-test-subj': 'favoriteBtn',
-          render: expect.anything(),
-          width: '40px',
-        },
-        {
           css: {
             height: '100%',
           },
           'data-test-subj': 'status',
           field: 'status',
-          name: '',
+          name: 'Status',
           render: expect.anything(),
           sortable: false,
-          width: '40px',
+          width: '55px',
         },
         {
           'data-test-subj': 'queryString',
@@ -171,7 +174,7 @@ describe('Starred and History queries components', () => {
         {
           actions: [],
           'data-test-subj': 'actions',
-          name: '',
+          name: 'Actions',
           width: '60px',
         },
       ]);
@@ -182,27 +185,14 @@ describe('Starred and History queries components', () => {
     const columns = getTableColumns(50, true, []);
     expect(columns).toEqual([
       {
-        'data-test-subj': 'favoriteBtn',
-        render: expect.anything(),
-        width: 'auto',
-      },
-      {
         css: {
           height: '100%',
         },
         'data-test-subj': 'status',
         field: 'status',
-        name: '',
+        name: 'Status',
         render: expect.anything(),
         sortable: false,
-        width: 'auto',
-      },
-      {
-        'data-test-subj': 'timeRan',
-        field: 'timeRan',
-        name: 'Time ran',
-        render: expect.anything(),
-        sortable: true,
         width: 'auto',
       },
       {
@@ -215,7 +205,15 @@ describe('Starred and History queries components', () => {
       {
         actions: [],
         'data-test-subj': 'actions',
-        name: '',
+        name: 'Actions',
+        width: 'auto',
+      },
+      {
+        'data-test-subj': 'timeRan',
+        field: 'timeRan',
+        name: 'Time ran',
+        render: expect.anything(),
+        sortable: true,
         width: 'auto',
       },
     ]);
@@ -256,6 +254,61 @@ describe('Starred and History queries components', () => {
   });
 
   describe('HistoryAndStarredQueriesTabs', () => {
+    it('removes a starred query after confirming discard', async () => {
+      const core = coreMock.createStart();
+      const queryString = 'FROM logstash-* | SORT @timestamp DESC';
+      core.userProfile.getEnabled$.mockReturnValue(new BehaviorSubject(true));
+      core.http.get.mockResolvedValue({
+        favoriteIds: ['starred-query'],
+        favoriteMetadata: {
+          'starred-query': {
+            queryString,
+            createdAt: '2026-01-01T00:00:00Z',
+            status: 'success',
+          },
+        },
+      });
+      core.http.post.mockResolvedValue({ favoriteIds: [], favoriteMetadata: {} });
+      const starredQueriesService = await EsqlStarredQueriesService.initialize({
+        http: core.http,
+        userProfile: core.userProfile,
+        storage: new Storage(window.sessionStorage),
+      });
+
+      render(
+        <KibanaContextProvider services={{ ...services, core }}>
+          <HistoryAndStarredQueriesTabs
+            containerCSS={{}}
+            containerWidth={1024}
+            onUpdateAndSubmit={jest.fn()}
+            onClose={jest.fn()}
+            height={200}
+            starredQueriesService={starredQueriesService}
+          />
+        </KibanaContextProvider>
+      );
+
+      fireEvent.click(screen.getByTestId('starred-queries-tab'));
+      const starredTable = within(screen.getByTestId('ESQLEditor-starredQueries'));
+      expect(starredTable.getByText(queryString)).toBeInTheDocument();
+      fireEvent.click(
+        starredTable.getByRole('button', { name: 'Remove ES|QL query from Starred' })
+      );
+
+      const dialog = await screen.findByRole('dialog', { name: 'Discard starred query' });
+      expect(core.http.post).not.toHaveBeenCalled();
+      fireEvent.click(within(dialog).getByRole('button', { name: 'Discard query' }));
+
+      await waitFor(() => {
+        expect(core.http.post).toHaveBeenCalledWith(
+          '/internal/content_management/favorites/esql_query/starred-query/unfavorite'
+        );
+        expect(starredTable.queryByText(queryString)).not.toBeInTheDocument();
+        expect(starredTable.getByText('No items found')).toBeInTheDocument();
+        expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+      });
+    });
+
     it('should render two tabs', () => {
       render(
         <KibanaContextProvider services={services}>
@@ -263,7 +316,9 @@ describe('Starred and History queries components', () => {
             containerCSS={{}}
             containerWidth={1024}
             onUpdateAndSubmit={jest.fn()}
+            onClose={jest.fn()}
             height={200}
+            starredQueriesService={createMockStarredQueriesService()}
           />
         </KibanaContextProvider>
       );
@@ -280,7 +335,9 @@ describe('Starred and History queries components', () => {
             containerCSS={{}}
             containerWidth={1024}
             onUpdateAndSubmit={jest.fn()}
+            onClose={jest.fn()}
             height={200}
+            starredQueriesService={createMockStarredQueriesService()}
           />
         </KibanaContextProvider>
       );
@@ -298,7 +355,9 @@ describe('Starred and History queries components', () => {
             containerWidth={1024}
             isSpaceReduced={true}
             onUpdateAndSubmit={jest.fn()}
+            onClose={jest.fn()}
             height={200}
+            starredQueriesService={createMockStarredQueriesService()}
           />
         </KibanaContextProvider>
       );
@@ -315,7 +374,9 @@ describe('Starred and History queries components', () => {
             containerCSS={{}}
             containerWidth={1024}
             onUpdateAndSubmit={jest.fn()}
+            onClose={jest.fn()}
             height={200}
+            starredQueriesService={createMockStarredQueriesService()}
           />
         </KibanaContextProvider>
       );
@@ -330,29 +391,23 @@ describe('Starred and History queries components', () => {
       );
     });
 
-    it('should hide starred tab if starred service failed to initialize', async () => {
-      jest.spyOn(services.core.userProfile, 'getEnabled$').mockImplementation(() => of(false));
-
+    it('should not render the starred tab without a service', () => {
       render(
         <KibanaContextProvider services={services}>
           <HistoryAndStarredQueriesTabs
             containerCSS={{}}
             containerWidth={1024}
             onUpdateAndSubmit={jest.fn()}
+            onClose={jest.fn()}
             height={200}
+            starredQueriesService={null}
           />
         </KibanaContextProvider>
       );
 
-      // initial render two tabs are shown
       expect(screen.getByTestId('history-queries-tab')).toBeInTheDocument();
       expect(screen.getByTestId('history-queries-tab')).toHaveTextContent('Recent');
-      expect(screen.getByTestId('starred-queries-tab')).toBeInTheDocument();
-      expect(screen.getByTestId('starred-queries-tab')).toHaveTextContent('Starred');
-
-      await waitFor(() => {
-        expect(screen.queryByText('starred-queries-tab')).not.toBeInTheDocument();
-      });
+      expect(screen.queryByTestId('starred-queries-tab')).not.toBeInTheDocument();
     });
 
     it('should render search input only in Recent tab', async () => {
@@ -362,7 +417,9 @@ describe('Starred and History queries components', () => {
             containerCSS={{}}
             containerWidth={800}
             onUpdateAndSubmit={jest.fn()}
+            onClose={jest.fn()}
             height={400}
+            starredQueriesService={createMockStarredQueriesService()}
           />
         </KibanaContextProvider>
       );
@@ -379,7 +436,9 @@ describe('Starred and History queries components', () => {
             containerCSS={{}}
             containerWidth={800}
             onUpdateAndSubmit={jest.fn()}
+            onClose={jest.fn()}
             height={400}
+            starredQueriesService={createMockStarredQueriesService()}
           />
         </KibanaContextProvider>
       );
@@ -428,7 +487,9 @@ describe('Starred and History queries components', () => {
             containerCSS={{}}
             containerWidth={800}
             onUpdateAndSubmit={jest.fn()}
+            onClose={jest.fn()}
             height={400}
+            starredQueriesService={createMockStarredQueriesService()}
           />
         </KibanaContextProvider>
       );
@@ -462,7 +523,9 @@ describe('Starred and History queries components', () => {
             containerCSS={{}}
             containerWidth={800}
             onUpdateAndSubmit={jest.fn()}
+            onClose={jest.fn()}
             height={400}
+            starredQueriesService={createMockStarredQueriesService()}
           />
         </KibanaContextProvider>
       );
@@ -491,7 +554,9 @@ describe('Starred and History queries components', () => {
             containerCSS={{}}
             containerWidth={800}
             onUpdateAndSubmit={jest.fn()}
+            onClose={jest.fn()}
             height={400}
+            starredQueriesService={createMockStarredQueriesService()}
           />
         </KibanaContextProvider>
       );
@@ -523,7 +588,9 @@ describe('Starred and History queries components', () => {
             containerCSS={{}}
             containerWidth={800}
             onUpdateAndSubmit={jest.fn()}
+            onClose={jest.fn()}
             height={400}
+            starredQueriesService={createMockStarredQueriesService()}
           />
         </KibanaContextProvider>
       );
@@ -547,7 +614,9 @@ describe('Starred and History queries components', () => {
             containerCSS={{}}
             containerWidth={800}
             onUpdateAndSubmit={jest.fn()}
+            onClose={jest.fn()}
             height={400}
+            starredQueriesService={null}
           />
         </KibanaContextProvider>
       );

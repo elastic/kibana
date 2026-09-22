@@ -1,5 +1,102 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Field Renderers #HostIdRenderer it renders correctly against snapshot 1`] = `
+<DocumentFragment>
+  <span
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
+    data-test-subj="DefaultFieldRendererComponent"
+  >
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <div
+        class="euiFlexItem emotion-euiFlexItem-growZero"
+      >
+        <div
+          data-test-subj="cellActions-renderContent-host.id"
+        >
+          <div>
+            <div
+              class="euiPopover emotion-euiPopover-inline-block"
+            >
+              <div>
+                <div
+                  tabindex="-1"
+                >
+                  <span
+                    class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                    data-test-subj="render-content-host.id"
+                  >
+                    <span
+                      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                      id="generated-id-wrapper"
+                    >
+                      <button
+                        class="euiLink emotion-euiLink-primary"
+                        data-test-subj="securitySolutionFlyoutLink"
+                        type="button"
+                      >
+                        b19a781f683541a7a25ee345133aa399
+                      </button>
+                    </span>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+       
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <div
+        class="euiFlexItem emotion-euiFlexItem-growZero"
+      />
+    </div>
+  </span>
+</DocumentFragment>
+`;
+
+exports[`Field Renderers #HostNameRenderer it renders correctly against snapshot 1`] = `
+<DocumentFragment>
+  <div
+    data-test-subj="cellActions-renderContent-host.name"
+  >
+    <div>
+      <div
+        class="euiPopover emotion-euiPopover-inline-block"
+      >
+        <div>
+          <div
+            tabindex="-1"
+          >
+            <span
+              class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+              data-test-subj="render-content-host.name"
+            >
+              <span
+                class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                id="generated-id-wrapper"
+              >
+                <button
+                  class="euiLink emotion-euiLink-primary"
+                  data-test-subj="securitySolutionFlyoutLink"
+                  type="button"
+                >
+                  raspberrypi
+                </button>
+              </span>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</DocumentFragment>
+`;
+
 exports[`Field Renderers #autonomousSystemRenderer it renders correctly against snapshot 1`] = `
 <DocumentFragment>
   <div
@@ -20,7 +117,7 @@ exports[`Field Renderers #autonomousSystemRenderer it renders correctly against 
                 tabindex="-1"
               >
                 <span
-                  class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
+                  class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                   data-test-subj="render-content-source.as.organization.name"
                 >
                   <span
@@ -56,7 +153,7 @@ exports[`Field Renderers #autonomousSystemRenderer it renders correctly against 
                 tabindex="-1"
               >
                 <span
-                  class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
+                  class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                   data-test-subj="render-content-source.as.number"
                 >
                   <span
@@ -68,103 +165,6 @@ exports[`Field Renderers #autonomousSystemRenderer it renders correctly against 
                 </span>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</DocumentFragment>
-`;
-
-exports[`Field Renderers #hostIdRenderer it renders correctly against snapshot 1`] = `
-<DocumentFragment>
-  <span
-    class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-DefaultFieldRendererComponent"
-    data-test-subj="DefaultFieldRendererComponent"
-  >
-    <div
-      class="euiFlexItem emotion-euiFlexItem-growZero"
-    >
-      <div
-        class="euiFlexItem emotion-euiFlexItem-growZero"
-      >
-        <div
-          data-test-subj="cellActions-renderContent-host.id"
-        >
-          <div>
-            <div
-              class="euiPopover emotion-euiPopover-inline-block"
-            >
-              <div>
-                <div
-                  tabindex="-1"
-                >
-                  <span
-                    class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
-                    data-test-subj="render-content-host.id"
-                  >
-                    <span
-                      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-                      id="generated-id-wrapper"
-                    >
-                      <button
-                        class="euiLink emotion-euiLink-primary"
-                        data-test-subj="securitySolutionFlyoutLink"
-                        type="button"
-                      >
-                        b19a781f683541a7a25ee345133aa399
-                      </button>
-                    </span>
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-       
-    </div>
-    <div
-      class="euiFlexItem emotion-euiFlexItem-growZero"
-    >
-      <div
-        class="euiFlexItem emotion-euiFlexItem-growZero"
-      />
-    </div>
-  </span>
-</DocumentFragment>
-`;
-
-exports[`Field Renderers #hostNameRenderer it renders correctly against snapshot 1`] = `
-<DocumentFragment>
-  <div
-    data-test-subj="cellActions-renderContent-host.name"
-  >
-    <div>
-      <div
-        class="euiPopover emotion-euiPopover-inline-block"
-      >
-        <div>
-          <div
-            tabindex="-1"
-          >
-            <span
-              class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
-              data-test-subj="render-content-host.name"
-            >
-              <span
-                class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-                id="generated-id-wrapper"
-              >
-                <button
-                  class="euiLink emotion-euiLink-primary"
-                  data-test-subj="securitySolutionFlyoutLink"
-                  type="button"
-                >
-                  raspberrypi
-                </button>
-              </span>
-            </span>
           </div>
         </div>
       </div>
@@ -193,7 +193,7 @@ exports[`Field Renderers #locationRenderer it renders correctly against snapshot
                 tabindex="-1"
               >
                 <span
-                  class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
+                  class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                   data-test-subj="render-content-source.geo.city_name"
                 >
                   <span
@@ -225,7 +225,7 @@ exports[`Field Renderers #locationRenderer it renders correctly against snapshot
                 tabindex="-1"
               >
                 <span
-                  class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
+                  class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                   data-test-subj="render-content-source.geo.region_name"
                 >
                   <span
@@ -262,8 +262,8 @@ exports[`Field Renderers #whoisRenderer it renders correctly against snapshot 1`
     >
       iana.org
       <span
-        class="emotion-EuiExternalLinkIcon"
-        data-euiicon-type="popout"
+        class="css-1j75qc1"
+        data-euiicon-type="external"
         role="presentation"
       />
       <span

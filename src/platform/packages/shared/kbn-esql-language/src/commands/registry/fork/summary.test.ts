@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { synth } from '../../../..';
+import { synth } from '@elastic/esql';
 import { summary } from './summary';
 
 describe('FORK > summary', () => {
@@ -37,6 +37,13 @@ describe('FORK > summary', () => {
     const result = summary(command, '');
 
     expect(result.newColumns).toEqual(new Set(['_fork', 'count', 'avg']));
+    expect(result.aggregates).toEqual(
+      new Set([
+        expect.objectContaining({ field: 'count' }),
+        expect.objectContaining({ field: 'avg' }),
+      ])
+    );
+    expect(result.grouping).toEqual(new Set());
   });
 
   it('handles more complex scenarios', () => {
@@ -45,5 +52,7 @@ describe('FORK > summary', () => {
 
     expect(result.newColumns).toEqual(new Set(['_fork', 'temp', 'result', 'total', 'x']));
     expect(result.renamedColumnsPairs).toEqual(new Set([['result', 'temp']]));
+    expect(result.aggregates).toEqual(new Set([expect.objectContaining({ field: 'total' })]));
+    expect(result.grouping).toEqual(new Set());
   });
 });

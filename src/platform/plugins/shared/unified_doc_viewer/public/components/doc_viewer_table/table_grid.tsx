@@ -10,28 +10,31 @@
 import type {
   EuiDataGridCellPopoverElementProps,
   EuiDataGridProps,
+  EuiDataGridRefProps,
   EuiDataGridStyle,
   RenderCellValue,
   UseEuiTheme,
 } from '@elastic/eui';
-import { EuiCallOut, EuiDataGrid, EuiSpacer, EuiText, euiFontSize } from '@elastic/eui';
+import { EuiDataGrid, EuiSpacer, EuiText, euiFontSize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { usePager } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import React, { useCallback, useMemo } from 'react';
+import { KbnWarningCallout } from '@kbn/ui-callout';
+import React, { useCallback, useMemo, useRef } from 'react';
 import { getUnifiedDocViewerServices } from '../../plugin';
 import type { FieldRow } from './field_row';
 import { getPinColumnControl } from './get_pin_control';
 import { TableCell } from './table_cell';
+import { getCellPositionAfterPinToggle } from './utils';
 import {
   getFieldCellActions,
   getFieldValueCellActions,
   getFilterExistsDisabledWarning,
   getFilterInOutPairDisabledWarning,
 } from './table_cell_actions';
-import type { UseTableFiltersReturn } from './table_filters';
+import type { UseTableFiltersCallbacksReturn } from './table_filters';
+import { useRestorableRef } from './table';
 
 function getGridProps(
   gridStyle?: EuiDataGridStyle
@@ -63,22 +66,20 @@ export interface TableGridProps {
   onAddColumn?: (columnName: string) => void;
   onRemoveColumn?: (columnName: string) => void;
   columns?: string[];
-  onFindSearchTermMatch?: UseTableFiltersReturn['onFindSearchTermMatch'];
+  onFindSearchTermMatch?: UseTableFiltersCallbacksReturn['onFindSearchTermMatch'];
   searchTerm?: string;
-  initialPageSize: number;
-  onChangePageSize?: (newPageSize: number) => void;
   pinnedFields?: string[];
   onTogglePinned?: (field: string) => void;
   hidePinColumn?: boolean;
   customRenderCellValue?: RenderCellValue;
   customRenderCellPopover?: React.JSXElementConstructor<EuiDataGridCellPopoverElementProps>;
   gridStyle?: EuiDataGridStyle;
+  headerVisibility?: boolean;
   hideFilteringOnComputedColumns?: boolean;
 }
 
 const MIN_NAME_COLUMN_WIDTH = 150;
 const MAX_NAME_COLUMN_WIDTH = 350;
-export const PAGE_SIZE_OPTIONS = [25, 50, 100, 250, 500];
 
 export const GRID_COLUMN_FIELD_NAME = 'name';
 export const GRID_COLUMN_FIELD_VALUE = 'value';
@@ -94,13 +95,12 @@ export function TableGrid({
   columns,
   onFindSearchTermMatch,
   searchTerm,
-  initialPageSize,
-  onChangePageSize,
   onTogglePinned,
   hidePinColumn = false,
   customRenderCellValue,
   customRenderCellPopover,
   gridStyle,
+  headerVisibility,
   hideFilteringOnComputedColumns,
 }: TableGridProps) {
   const styles = useMemoCss(componentStyles);
@@ -142,33 +142,6 @@ export function TableGrid({
       }),
     [rows, isEsqlMode, toasts, filter, hideFilteringOnComputedColumns]
   );
-
-  const { curPageIndex, pageSize, totalPages, changePageIndex, changePageSize } = usePager({
-    initialPageSize,
-    totalItems: rows.length,
-  });
-
-  const handleChangePageSize = useCallback(
-    (newPageSize: number) => {
-      onChangePageSize?.(newPageSize);
-      changePageSize(newPageSize);
-    },
-    [changePageSize, onChangePageSize]
-  );
-
-  const showPagination = totalPages !== 0;
-
-  const pagination = useMemo(() => {
-    return showPagination
-      ? {
-          onChangeItemsPerPage: handleChangePageSize,
-          onChangePage: changePageIndex,
-          pageIndex: curPageIndex,
-          pageSize,
-          pageSizeOptions: PAGE_SIZE_OPTIONS,
-        }
-      : undefined;
-  }, [showPagination, handleChangePageSize, changePageIndex, curPageIndex, pageSize]);
 
   const gridColumns: EuiDataGridProps['columns'] = useMemo(
     () => [
@@ -220,11 +193,17 @@ export function TableGrid({
       const { columnId, children, cellActions, rowIndex } = props;
       const row = rows[rowIndex];
 
+      const params = {
+        row,
+        onFilter: filter,
+        hideFilteringOnComputedColumns,
+      };
+
       let warningMessage: string | undefined;
       if (columnId === GRID_COLUMN_FIELD_VALUE) {
-        warningMessage = getFilterInOutPairDisabledWarning(row, filter);
+        warningMessage = getFilterInOutPairDisabledWarning(params);
       } else if (columnId === GRID_COLUMN_FIELD_NAME) {
-        warningMessage = getFilterExistsDisabledWarning(row, filter);
+        warningMessage = getFilterExistsDisabledWarning(params);
       }
 
       return (
@@ -234,22 +213,63 @@ export function TableGrid({
           {Boolean(warningMessage) && (
             <div>
               <EuiSpacer size="xs" />
-              <EuiCallOut announceOnMount={false} title={warningMessage} color="warning" size="s" />
+              <KbnWarningCallout announceOnMount={false} title={warningMessage} size="s" />
             </div>
           )}
         </>
       );
     },
-    [rows, filter]
+    [rows, filter, hideFilteringOnComputedColumns]
   );
 
+  const dataGridRef = useRef<EuiDataGridRefProps>(null);
+
   const leadingControlColumns = useMemo(() => {
-    return onTogglePinned && !hidePinColumn ? [getPinColumnControl({ rows, onTogglePinned })] : [];
+    if (!onTogglePinned || hidePinColumn) {
+      return [];
+    }
+
+    return [
+      getPinColumnControl({
+        rows,
+        onTogglePinned: (field, { isKeyboardEvent }) => {
+          onTogglePinned(field);
+
+          if (!isKeyboardEvent) {
+            return;
+          }
+
+          const pinnedRows = rows.filter((row) => row.isPinned);
+          const restRows = rows.filter((row) => !row.isPinned);
+          const rowIndex = getCellPositionAfterPinToggle({ field, pinnedRows, restRows });
+          dataGridRef.current?.setFocusedCell({ rowIndex, colIndex: 0 });
+        },
+      }),
+    ];
   }, [onTogglePinned, hidePinColumn, rows]);
+
+  const scrollTopRef = useRestorableRef('scrollTop', 0);
+  const isScrollRestored = useRef(false);
+  const virtualizationOptions = useMemo<EuiDataGridProps['virtualizationOptions']>(
+    () => ({
+      onScroll: ({ scrollTop }) => {
+        if (isScrollRestored.current) {
+          scrollTopRef.current = scrollTop;
+        } else {
+          requestAnimationFrame(() => {
+            dataGridRef.current?.scrollTo?.({ scrollTop: scrollTopRef.current });
+            isScrollRestored.current = true;
+          });
+        }
+      },
+    }),
+    [scrollTopRef]
+  );
 
   return (
     <EuiDataGrid
       key={`fields-table-${id}`}
+      ref={dataGridRef}
       data-test-subj="UnifiedDocViewerTableGrid"
       {...getGridProps(gridStyle)}
       aria-label={i18n.translate('unifiedDocViewer.fieldsTable.ariaLabel', {
@@ -258,12 +278,13 @@ export function TableGrid({
       className="kbnDocViewer__fieldsGrid"
       css={styles.fieldsGrid}
       columns={gridColumns}
+      headerVisibility={headerVisibility}
       toolbarVisibility={false}
       rowCount={rows.length}
       renderCellValue={customRenderCellValue ? customRenderCellValue : renderCellValue}
       renderCellPopover={customRenderCellPopover ? customRenderCellPopover : renderCellPopover}
-      pagination={pagination}
       leadingControlColumns={leadingControlColumns}
+      virtualizationOptions={virtualizationOptions}
     />
   );
 }
@@ -277,6 +298,22 @@ const componentStyles = {
     return css({
       '&.euiDataGrid--noControls.euiDataGrid--bordersHorizontal .euiDataGridHeader': {
         borderTop: 'none',
+      },
+
+      '&.euiDataGrid--noHeader': {
+        overflow: 'visible',
+      },
+
+      '&.euiDataGrid--noHeader .euiDataGrid__content': {
+        overflow: 'visible',
+      },
+
+      '&.euiDataGrid--noHeader .euiDataGrid__virtualized': {
+        overflow: 'visible !important',
+      },
+
+      '&.euiDataGrid--noHeader .euiDataGridRow:first-of-type .euiDataGridRowCell': {
+        borderBlockStart: 'none',
       },
 
       '&.euiDataGrid--headerUnderline .euiDataGridHeader': {

@@ -41,9 +41,13 @@ export type OverlayFlyoutOpenOptions = Omit<
   onClose?: (flyout: OverlayRef) => void;
   /**
    * If the `session` field is provided in options, it must be set to 'never'. If you need a session-based flyout,
-   * use overlays.openSystemFlyout instead.
+   * use overlays.openFlyoutTemplate instead.
    */
   session?: 'never';
+  /**
+   * Whether the flyout should be resizable. See {@link EuiFlyoutProps.resizable}
+   */
+  resizable?: boolean;
   /**
    * @deprecated Use `resizable` instead.
    */

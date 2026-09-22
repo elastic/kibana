@@ -36,8 +36,10 @@ jest.mock('./aws_credential_type_selector', () => ({
   AwsCredentialTypeSelector: (props: unknown) => mockAwsCredentialTypeSelector(),
 }));
 
-jest.mock('../cloud_connector/cloud_connector_setup', () => ({
-  CloudConnectorSetup: (props: unknown) => mockCloudConnectorSetup(),
+// Mock CloudConnectorSetup (lazy loaded from Fleet)
+jest.mock('@kbn/fleet-plugin/public', () => ({
+  ...jest.requireActual('@kbn/fleet-plugin/public'),
+  LazyCloudConnectorSetup: (props: unknown) => mockCloudConnectorSetup(),
 }));
 
 jest.mock('./aws_setup_info', () => ({

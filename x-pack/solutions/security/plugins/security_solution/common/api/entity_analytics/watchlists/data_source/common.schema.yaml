@@ -1,0 +1,159 @@
+openapi: 3.0.0
+info:
+  title: Watchlists Entity Source Common Schema
+  description: Common schema for Watchlists Entity Source
+  version: "1"
+
+paths: {}
+components:
+  schemas:
+    EntitySourceType:
+      type: string
+      enum:
+        - index
+        - entity_analytics_integration
+        - store
+
+    UpdateableMonitoringEntitySourceProperties:
+      type: object
+      properties:
+        type:
+          $ref: "#/components/schemas/EntitySourceType"
+        name:
+          type: string
+          maxLength: 256
+        indexPattern:
+          type: string
+          maxLength: 1000
+        integrationName:
+          type: string
+          maxLength: 256
+        enabled:
+          type: boolean
+        identifierField:
+          type: string
+          maxLength: 256
+          description: Field used to query the entity store for index-type sources
+        queryRule:
+          type: string
+          maxLength: 4096
+          description: KQL query used to filter data from the provided index patterns
+        matchers:
+          type: array
+          maxItems: 100
+          items:
+            $ref: "#/components/schemas/Matcher"
+        filter:
+          $ref: "#/components/schemas/Filter"
+        integrations:
+          $ref: "#/components/schemas/Integrations"
+        range:
+          $ref: "#/components/schemas/DateRange"
+
+    UpdateEntitySourceNoadditionalProps:
+      allOf:
+        - $ref: "#/components/schemas/UpdateableMonitoringEntitySourceProperties"
+        - type: object
+          additionalProperties: false
+
+    MonitoringEntitySourceProperties:
+      allOf:
+        - $ref: "#/components/schemas/UpdateableMonitoringEntitySourceProperties"
+        - type: object
+          properties:
+            managed:
+              type: boolean
+
+    Matcher:
+      type: object
+      required:
+        - fields
+        - values
+      properties:
+        fields:
+          type: array
+          maxItems: 100
+          items:
+            type: string
+            maxLength: 256
+        values:
+          description: >
+            Matcher values. Must be either an array of strings
+            (e.g. group or role names) or an array of booleans
+            (e.g. integration-derived flags like privileged_group_member).
+            Mixed types are intentionally not supported for simplicity and predictability.
+          oneOf:
+            - type: array
+              maxItems: 1000
+              items:
+                type: string
+                maxLength: 256
+            - type: array
+              maxItems: 1000
+              items:
+                type: boolean
+    Filter:
+      type: object
+      properties:
+        kuery:
+          oneOf:
+            - type: string
+              maxLength: 4096
+            - type: object
+              additionalProperties: false
+
+    MonitoringEntitySourceAttributes:
+      allOf:
+        - $ref: "#/components/schemas/MonitoringEntitySourceProperties"
+        - type: object
+          required: [type, name, managed]
+
+    MonitoringEntitySource:
+      allOf:
+        - $ref: "#/components/schemas/MonitoringEntitySourceProperties"
+        - type: object
+          required: [type, name, id, managed]
+          properties:
+            id:
+              type: string
+            apiKeyId:
+              type: string
+              nullable: true
+              maxLength: 64
+              description: ID of the API key used for scoped reads from the source index. Only present for index-type sources.
+
+    DateRange:
+      description: Defines the lookback period for filtering source data by timestamp.
+      type: object
+      required:
+        - start
+        - end
+      properties:
+        start:
+          type: string
+          maxLength: 256
+          description: Start of the lookback period (date math or ISO string, e.g. "now-10d")
+        end:
+          type: string
+          maxLength: 256
+          description: End of the lookback period (date math or ISO string, e.g. "now")
+
+    Integrations:
+      type: object
+      properties:
+        syncMarkerIndex:
+          type: string
+          maxLength: 1000
+          description: Index to read latest sync markers from
+        syncData:
+          type: object
+          description: integrations latest full sync and update syncData
+          properties:
+            lastFullSync:
+              type: string
+              format: date-time
+              description: Timestamp of the last full sync from integrations
+            lastUpdateProcessed:
+              type: string
+              format: date-time
+              description: Timestamp of the last update processed from integrations

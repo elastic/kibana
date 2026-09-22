@@ -8,11 +8,11 @@
 import React, { useEffect } from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { RuleForm, useRuleTemplate } from '@kbn/response-ops-rule-form';
-import { AlertConsumers, getRuleDetailsRoute, getRulesAppDetailsRoute } from '@kbn/rule-data-utils';
-import { useLocation, useParams, useHistory } from 'react-router-dom';
-import useObservable from 'react-use/lib/useObservable';
+import { AlertConsumers, getRulesAppDetailsRoute } from '@kbn/rule-data-utils';
+import { useHistory, useLocation, useParams } from 'react-router-dom';
+import { ProjectRoutingAccess, useRouteBasedCpsPickerAccess } from '@kbn/cps-utils';
 import { useKibana } from '../../../common/lib/kibana';
-import { getAlertingSectionBreadcrumb } from '../../lib/breadcrumb';
+import { getAlertingSectionBreadcrumb, getRulesBreadcrumbWithHref } from '../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../lib/doc_title';
 import { RuleTemplateError } from './components/rule_template_error';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
@@ -21,6 +21,7 @@ export const RuleFormRoute = () => {
   const {
     http,
     application,
+    cps,
     notifications,
     charts,
     settings,
@@ -36,9 +37,6 @@ export const RuleFormRoute = () => {
     setBreadcrumbs,
     ...startServices
   } = useKibana().services;
-  const { currentAppId$, navigateToApp, getUrlForApp } = application;
-  const currentAppId = useObservable(currentAppId$, undefined);
-  const isInRulesApp = currentAppId === 'rules';
 
   const location = useLocation<{ returnApp?: string; returnPath?: string }>();
   const history = useHistory();
@@ -51,7 +49,7 @@ export const RuleFormRoute = () => {
     ruleTypeId?: string;
     templateId?: string;
   }>();
-  const { returnApp, returnPath } = location.state || {};
+  const { returnPath } = location.state || {};
 
   const templateId = templateIdParams;
 
@@ -65,19 +63,13 @@ export const RuleFormRoute = () => {
     templateId,
   });
 
+  useRouteBasedCpsPickerAccess(ProjectRoutingAccess.READONLY, { application, cps });
+
   const ruleTypeId = ruleTypeIdParams ?? ruleTemplate?.ruleTypeId;
 
   // Set breadcrumb and page title
   useEffect(() => {
-    const rulesBreadcrumb = getAlertingSectionBreadcrumb('rules', true);
-    const breadcrumbHref = isInRulesApp
-      ? getUrlForApp('rules', { path: '/' })
-      : getUrlForApp('management', { path: 'insightsAndAlerting/triggersActions/rules' });
-
-    const rulesBreadcrumbWithAppPath = {
-      ...rulesBreadcrumb,
-      href: breadcrumbHref,
-    };
+    const rulesBreadcrumbWithAppPath = getRulesBreadcrumbWithHref();
 
     if (id) {
       setBreadcrumbs([rulesBreadcrumbWithAppPath, getAlertingSectionBreadcrumb('editRule')]);
@@ -88,7 +80,7 @@ export const RuleFormRoute = () => {
       chrome.docTitle.change(getCurrentDocTitle('createRule'));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ruleTypeId, templateId, id, getUrlForApp, isInRulesApp]);
+  }, [ruleTypeId, templateId, id]);
 
   if (isLoadingRuleTemplate) {
     return <CenterJustifiedSpinner />;
@@ -120,39 +112,15 @@ export const RuleFormRoute = () => {
         initialValues={ruleTemplate}
         id={id}
         ruleTypeId={ruleTypeId}
+        templateId={templateId}
         onCancel={() => {
-          if (isInRulesApp) {
-            // Use history.push when in rules app
-            // Use returnPath if available, otherwise default to root
-            history.push(returnPath || '/');
-          } else if (returnApp && returnPath) {
-            // Navigate to other apps using navigateToApp
-            navigateToApp(returnApp, { path: returnPath });
-          } else {
-            // Default: navigate to management app rules list
-            navigateToApp('management', {
-              path: `insightsAndAlerting/triggersActions/rules`,
-            });
-          }
+          history.push(returnPath || '/');
         }}
         onSubmit={(ruleId) => {
-          if (isInRulesApp) {
-            // After editing, navigate back to where we came from (returnPath)
-            // For new rules, returnPath won't be set, so go to details
-            if (id && returnPath) {
-              history.push(returnPath);
-            } else {
-              // For new rules, navigate to rule details page
-              history.push(getRulesAppDetailsRoute(ruleId));
-            }
-          } else if (returnApp && returnPath) {
-            // Navigate back to the original app/path for other apps
-            navigateToApp(returnApp, { path: returnPath });
+          if (id && returnPath) {
+            history.push(returnPath);
           } else {
-            // Default: navigate to management app rule details (existing behavior)
-            navigateToApp('management', {
-              path: `insightsAndAlerting/triggersActions/${getRuleDetailsRoute(ruleId)}`,
-            });
+            history.push(getRulesAppDetailsRoute(ruleId));
           }
         }}
         multiConsumerSelection={AlertConsumers.ALERTS}

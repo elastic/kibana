@@ -54,7 +54,7 @@ export function useActions(
         {
           name: openInDiscoverLabels.singleSelect.in,
           description: openInDiscoverLabels.singleSelect.in,
-          icon: 'plusInCircle',
+          icon: 'plusCircle',
           type: 'icon',
           'data-test-subj': 'aiopsLogPatternsActionFilterInButton',
           onClick: (category) =>
@@ -63,7 +63,7 @@ export function useActions(
         {
           name: openInDiscoverLabels.singleSelect.out,
           description: openInDiscoverLabels.singleSelect.out,
-          icon: 'minusInCircle',
+          icon: 'minusCircle',
           type: 'icon',
           'data-test-subj': 'aiopsLogPatternsActionFilterOutButton',
           onClick: (category) =>

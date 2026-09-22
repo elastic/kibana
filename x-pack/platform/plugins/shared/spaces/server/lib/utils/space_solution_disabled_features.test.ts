@@ -60,7 +60,7 @@ describe('#withSpaceSolutionDisabledFeatures', () => {
   });
 
   describe('when the space solution is "oblt"', () => {
-    test('it removes the "security" and "workplaceai" features', () => {
+    test('it removes the "enterpriseSearch", "security" and "workplaceai" features', () => {
       const spaceDisabledFeatures: string[] = [];
       const spaceSolution = 'oblt';
 
@@ -70,7 +70,7 @@ describe('#withSpaceSolutionDisabledFeatures', () => {
         spaceSolution
       );
 
-      expect(result).toEqual(['feature3', 'feature5']);
+      expect(result).toEqual(['feature2', 'feature3', 'feature5']);
     });
   });
 
@@ -115,6 +115,22 @@ describe('#withSpaceSolutionDisabledFeatures', () => {
 
       // merges the spaceDisabledFeatures with the disabledFeatureKeysFromSolution
       expect(result).toEqual(['feature1', 'feature2', 'feature3']); // "foo" from the spaceDisabledFeatures should not be removed
+    });
+  });
+
+  describe('when the space solution is "vectordb"', () => {
+    test('it removes the "oblt", "security" and "workplaceai" features', () => {
+      const spaceDisabledFeatures: string[] = ['foo'];
+      const spaceSolution = 'vectordb';
+
+      const result = withSpaceSolutionDisabledFeatures(
+        features,
+        spaceDisabledFeatures,
+        spaceSolution
+      );
+
+      // merges the spaceDisabledFeatures with the disabledFeatureKeysFromSolution
+      expect(result).toEqual(['feature1', 'feature3', 'feature5']); // "foo" from the spaceDisabledFeatures should not be removed
     });
   });
 });

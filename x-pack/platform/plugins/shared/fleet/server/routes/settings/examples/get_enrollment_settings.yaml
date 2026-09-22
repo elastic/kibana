@@ -1,0 +1,48 @@
+responses:
+  200:
+    description: 'Successful response'
+    content:
+      application/json:
+        examples:
+          getEnrollmentSettingsExample:
+            description: 'Enrollment settings including Fleet Server and download source configuration'
+            value:
+              fleet_server:
+                policies:
+                  - id: 'fleet-server-policy-id-1'
+                    name: 'Fleet Server Policy'
+                    is_managed: false
+                    is_default_fleet_server: true
+                    has_fleet_server: true
+                has_active: true
+                host:
+                  id: 'fleet-server-host-id-1'
+                  name: 'Default Fleet Server'
+                  host_urls:
+                    - 'https://fleet-server.example.com:8220'
+                  is_default: true
+                  is_preconfigured: false
+                es_output:
+                  id: 'output-id-1'
+                  name: 'Default output'
+                  type: 'elasticsearch'
+                  is_default: true
+                  is_default_monitoring: true
+                  hosts:
+                    - 'https://elasticsearch.example.com:9200'
+              download_source:
+                id: 'download-source-id-1'
+                name: 'Elastic artifacts'
+                host: 'https://artifacts.elastic.co/downloads/'
+                is_default: true
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'

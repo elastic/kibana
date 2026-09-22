@@ -38,7 +38,7 @@ export function IconPanel({
 
   return (
     <Panel>
-      <EuiIcon type={iconType} size="original" />
+      <EuiIcon type={iconType} size="original" aria-hidden={true} />
     </Panel>
   );
 }
@@ -54,7 +54,7 @@ export function LoadingIconPanel() {
 export function ErrorIconPanel() {
   return (
     <Panel>
-      <EuiIcon type="error" size="original" />
+      <EuiIcon type="error" size="original" aria-hidden={true} />
     </Panel>
   );
 }
@@ -67,5 +67,5 @@ export interface MiniIconProps
 export function MiniIcon({ packageName, integrationName, version, icons }: MiniIconProps) {
   const iconType = usePackageIconType({ packageName, integrationName, version, icons });
 
-  return <EuiIcon type={iconType} size="l" />;
+  return <EuiIcon type={iconType} size="l" aria-hidden={true} />;
 }

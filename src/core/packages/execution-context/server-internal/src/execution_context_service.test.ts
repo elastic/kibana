@@ -402,6 +402,116 @@ describe('ExecutionContextService', () => {
       });
     });
 
+    describe('getAsLabels', () => {
+      it('returns empty object when no context is set', () => {
+        expect(service.getAsLabels()).toEqual({});
+      });
+
+      it('returns name, id, and page from the context', () => {
+        service.set({
+          type: 'type-a',
+          name: 'name-a',
+          id: 'id-a',
+          page: 'page-a',
+          description: 'description-a',
+        });
+
+        expect(service.getAsLabels()).toEqual({
+          name: 'name-a',
+          id: 'id-a',
+          page: 'page-a',
+        });
+      });
+
+      it('omits undefined fields', () => {
+        service.set({
+          type: 'type-a',
+          name: undefined,
+          id: 'id-a',
+          description: 'description-a',
+        });
+
+        expect(service.getAsLabels()).toEqual({
+          id: 'id-a',
+        });
+      });
+
+      it('flattens meta fields with kibana.meta. prefix', () => {
+        service.set({
+          type: 'type-a',
+          name: 'name-a',
+          id: 'id-a',
+          page: 'page-a',
+          meta: {
+            profile_id: 'metrics-data-source-profile',
+            metric_name: 'system.cpu.total.norm.pct',
+          },
+        });
+
+        expect(service.getAsLabels()).toEqual({
+          name: 'name-a',
+          id: 'id-a',
+          page: 'page-a',
+          kibana_meta_profile_id: 'metrics-data-source-profile',
+          kibana_meta_metric_name: 'system.cpu.total.norm.pct',
+        });
+      });
+
+      it('handles meta with numeric and boolean values', () => {
+        service.set({
+          type: 'type-a',
+          name: 'name-a',
+          id: 'id-a',
+          meta: {
+            count: 42,
+            enabled: true,
+          },
+        });
+
+        expect(service.getAsLabels()).toEqual({
+          name: 'name-a',
+          id: 'id-a',
+          kibana_meta_count: 42,
+          kibana_meta_enabled: true,
+        });
+      });
+
+      it('omits undefined values in meta', () => {
+        service.set({
+          type: 'type-a',
+          name: 'name-a',
+          id: 'id-a',
+          meta: {
+            present: 'value',
+            missing: undefined,
+          },
+        });
+
+        expect(service.getAsLabels()).toEqual({
+          name: 'name-a',
+          id: 'id-a',
+          kibana_meta_present: 'value',
+        });
+      });
+
+      it('can be disabled', () => {
+        const coreWithDisabledService = mockCoreContext.create();
+        coreWithDisabledService.configService.atPath.mockReturnValue(
+          new BehaviorSubject({ enabled: false })
+        );
+        const disabledService = new ExecutionContextService(coreWithDisabledService).setup();
+        disabledService.set({
+          type: 'type-a',
+          name: 'name-a',
+          id: 'id-a',
+          page: 'page-a',
+          meta: { profile_id: 'test' },
+        });
+
+        expect(disabledService.getAsLabels()).toEqual({});
+      });
+    });
+
     describe('getAsHeader', () => {
       it('returns request id if no context provided', async () => {
         service.setRequestId('1234');

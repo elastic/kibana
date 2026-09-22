@@ -20,7 +20,6 @@ import type { PluginSetupDependencies, SecurityPluginSetup } from './plugin';
 
 // These exports are part of public Security plugin contract, any change in signature of exported
 // functions or removal of exports should be considered as a breaking change.
-export { HTTPAuthorizationHeader } from './authentication';
 export type { CasesSupportedOperations } from './authorization';
 export type { SecurityPluginSetup, SecurityPluginStart };
 export type { AuthenticatedUser } from '../common';
@@ -36,8 +35,12 @@ export type {
   AuditServiceSetup,
   NativeAPIKeysType,
   AuthenticationServiceStart,
+  SystemIdentity,
   InvalidateAPIKeyResult,
+  GrantAPIKeyOptions,
   GrantAPIKeyResult,
+  CloneAPIKeyParams,
+  CloneAPIKeyResult,
   ValidateAPIKeyParams,
   CreateAPIKeyResult,
   InvalidateAPIKeysParams,
@@ -76,6 +79,7 @@ export type {
   UserProfileSuggestParams,
   UserProfileRequiredPrivileges,
   UserProfileGetCurrentParams,
+  UserProfileGetCurrentProfileIdParams,
   UserProfileServiceStart,
 } from '@kbn/security-plugin-types-server';
 
@@ -89,6 +93,8 @@ export const config: PluginConfigDescriptor<TypeOf<typeof ConfigSchema>> = {
     showNavLinks: true,
     ui: true,
     roleManagementEnabled: true,
+    uiam: { enabled: true },
+    serviceAccounts: { enabled: true },
   },
 };
 export const plugin: PluginInitializer<

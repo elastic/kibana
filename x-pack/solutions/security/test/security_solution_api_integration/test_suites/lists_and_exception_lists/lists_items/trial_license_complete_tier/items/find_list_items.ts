@@ -46,7 +46,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(body).toEqual({
           error: 'Bad Request',
-          message: '[request query]: list_id: Required',
+          message: '[request query]: list_id: Invalid input: expected string, received undefined',
           statusCode: 400,
         });
       });

@@ -5,7 +5,6 @@
  * 2.0.
  */
 import moment from 'moment';
-import { isRight } from 'fp-ts/Either';
 import Mustache from 'mustache';
 import type { IBasePath } from '@kbn/core/server';
 import type {
@@ -15,7 +14,7 @@ import type {
   IRuleTypeAlerts,
 } from '@kbn/alerting-plugin/server';
 import { getAlertDetailsUrl } from '@kbn/observability-plugin/common';
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import { i18n } from '@kbn/i18n';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
@@ -43,8 +42,11 @@ import type {
   SyntheticsCommonState,
   SyntheticsMonitorStatusAlertState,
 } from '../../common/runtime_types/alert_rules/common';
-import { SyntheticsCommonStateCodec } from '../../common/runtime_types/alert_rules/common';
-import { getSyntheticsErrorRouteFromMonitorId } from '../../common/utils/get_synthetics_monitor_url';
+import { SyntheticsCommonStateCodec } from '../../common/runtime_types/zod/alert_rules_common';
+import {
+  getSyntheticsErrorRouteFromMonitorId,
+  getSyntheticsCertificatesRoute,
+} from '../../common/utils/get_synthetics_monitor_url';
 import { ALERT_DETAILS_URL, RECOVERY_REASON } from './action_variables';
 import type { MonitorStatusAlertDocument, MonitorSummaryStatusRule } from './status_rule/types';
 
@@ -54,8 +56,8 @@ export const updateState = (
   meta?: SyntheticsCommonState['meta']
 ): SyntheticsCommonState => {
   const now = new Date().toISOString();
-  const decoded = SyntheticsCommonStateCodec.decode(state);
-  if (!isRight(decoded)) {
+  const decoded = SyntheticsCommonStateCodec.safeParse(state);
+  if (!decoded.success) {
     const triggerVal = isTriggeredNow ? now : undefined;
     return {
       firstCheckedAt: now,
@@ -64,7 +66,9 @@ export const updateState = (
       lastTriggeredAt: triggerVal,
       lastCheckedAt: now,
       lastResolvedAt: undefined,
-      meta: {},
+      // Keep caller meta on the first run; `pendingCount` lives here and must
+      // survive so consecutive pending evaluations can cross pendingThreshold.
+      meta: meta ?? {},
     };
   }
   const {
@@ -75,7 +79,7 @@ export const updateState = (
     // to differentiate it from the `isTriggeredNow` param
     isTriggered: wasTriggered,
     lastResolvedAt,
-  } = decoded.right;
+  } = decoded.data;
 
   return {
     meta,
@@ -137,6 +141,27 @@ export const getRelativeViewInAppUrl = ({
     locationId,
   });
 };
+
+export const getRelativeCertificatesViewInAppUrl = ({
+  commonName,
+  issuer,
+}: {
+  commonName?: string;
+  issuer?: string;
+}) => getSyntheticsCertificatesRoute({ commonName, issuer });
+
+/**
+ * For ungrouped alerts, the alert ID is just the configId (no location suffix),
+ * but config maps are keyed by `${configId}-${locationId}`. This helper tries
+ * an exact match first, then falls back to a prefix match.
+ */
+function findConfigKeyByAlertId<T>(
+  configs: Record<string, T>,
+  alertId: string
+): string | undefined {
+  if (configs[alertId]) return alertId;
+  return Object.keys(configs).find((key) => key.startsWith(`${alertId}-`));
+}
 
 export const setRecoveredAlertsContext = ({
   alertsClient,
@@ -215,14 +240,14 @@ export const setRecoveredAlertsContext = ({
       monitorSummary.locationId = formattedLocationIds;
     }
 
-    if (
-      recoveredAlertId &&
-      locationIds &&
-      (staleDownConfigs[recoveredAlertId] || stalePendingConfigs[recoveredAlertId])
-    ) {
+    const staleDownKey = findConfigKeyByAlertId(staleDownConfigs, recoveredAlertId);
+    const stalePendingKey = findConfigKeyByAlertId(stalePendingConfigs, recoveredAlertId);
+
+    if (recoveredAlertId && locationIds && (staleDownKey || stalePendingKey)) {
+      const effectiveKey = (staleDownKey || stalePendingKey)!;
       const summary = getDeletedMonitorOrLocationSummary({
-        staleConfigs: staleDownConfigs[recoveredAlertId] ? staleDownConfigs : stalePendingConfigs,
-        recoveredAlertId,
+        staleConfigs: staleDownKey ? staleDownConfigs : stalePendingConfigs,
+        recoveredAlertId: effectiveKey,
         locationIds,
         dateFormat,
         tz,
@@ -242,10 +267,12 @@ export const setRecoveredAlertsContext = ({
       linkMessage = '';
     }
 
-    if (configId && recoveredAlertId && locationIds && upConfigs[recoveredAlertId]) {
+    const upConfigKey = findConfigKeyByAlertId(upConfigs, recoveredAlertId);
+
+    if (configId && recoveredAlertId && locationIds && upConfigKey) {
       const summary = getUpMonitorRecoverySummary({
         upConfigs,
-        recoveredAlertId,
+        recoveredAlertId: upConfigKey,
         alertHit,
         locationIds,
         configId,
@@ -256,10 +283,12 @@ export const setRecoveredAlertsContext = ({
         params,
       });
       if (summary) {
-        monitorSummary = {
-          ...monitorSummary,
-          ...summary.monitorSummary,
-        };
+        if (groupByLocation) {
+          monitorSummary = {
+            ...monitorSummary,
+            ...summary.monitorSummary,
+          };
+        }
         recoveryStatus = summary.recoveryStatus;
         recoveryReason = summary.recoveryReason;
         isUp = summary.isUp;

@@ -44,7 +44,6 @@ export class ESQLValidationExamplePlugin
           label: 'README',
           href: 'https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/kbn-esql-language/src/language/README.md',
           iconType: 'logoGithub',
-          size: 's',
           target: '_blank',
         },
       ],

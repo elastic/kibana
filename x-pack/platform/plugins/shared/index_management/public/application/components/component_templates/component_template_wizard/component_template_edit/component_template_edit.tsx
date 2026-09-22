@@ -7,9 +7,12 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiPageSection, EuiPageHeader, EuiSpacer, EuiCallOut } from '@elastic/eui';
+import { EuiPageSection, EuiSpacer } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
+import { AppHeader } from '@kbn/app-header';
 import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../services/breadcrumbs';
 import { useComponentTemplatesContext } from '../../component_templates_context';
 import type { ComponentTemplateDeserialized, Error } from '../../shared_imports';
@@ -114,57 +117,59 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
   }
 
   return (
-    <EuiPageSection restrictWidth style={{ width: '100%' }}>
-      <EuiPageHeader
-        pageTitle={
-          <span data-test-subj="pageTitle">
-            <FormattedMessage
-              id="xpack.idxMgmt.componentTemplateEdit.editPageTitle"
-              defaultMessage="Edit component template ''{name}''"
-              values={{ name: decodedName }}
-            />
-          </span>
-        }
-        bottomBorder
+    <>
+      <AppHeader
+        title={i18n.translate('xpack.idxMgmt.componentTemplateEdit.editPageTitle', {
+          defaultMessage: "Edit component template ''{name}''",
+          values: { name: decodedName },
+        })}
+        back={{
+          href: '/app/management/data/index_management/component_templates',
+          label: i18n.translate('xpack.idxMgmt.componentTemplateEdit.backToListLabel', {
+            defaultMessage: 'Component templates',
+          }),
+        }}
+        spacing="bleed"
       />
 
-      <EuiSpacer size="l" />
+      <EuiPageSection restrictWidth style={{ width: '100%' }} paddingSize="none">
+        <EuiSpacer size="l" />
 
-      {componentTemplate?.deprecated && (
-        <>
-          <EuiCallOut
-            announceOnMount
-            title={
-              <FormattedMessage
-                id="xpack.idxMgmt.componentTemplateEdit.deprecatedTemplateWarningTitle"
-                defaultMessage="This component template is deprecated"
-              />
-            }
-            iconType="warning"
-            color="warning"
-            data-test-subj="deprecatedTemplateCallout"
-          >
-            <FormattedMessage
-              id="xpack.idxMgmt.componentTemplateEdit.deprecatedTemplateWarningDescription"
-              defaultMessage="This component template is no longer supported and might be removed in a future release. Instead, use one of the other component templates available or create a new one."
+        {componentTemplate?.deprecated && (
+          <>
+            <KbnWarningCallout
+              announceOnMount
+              title={
+                <FormattedMessage
+                  id="xpack.idxMgmt.componentTemplateEdit.deprecatedTemplateWarningTitle"
+                  defaultMessage="This component template is deprecated"
+                />
+              }
+              data-test-subj="deprecatedTemplateCallout"
+              text={
+                <FormattedMessage
+                  id="xpack.idxMgmt.componentTemplateEdit.deprecatedTemplateWarningDescription"
+                  defaultMessage="This component template is no longer supported and might be removed in a future release. Instead, use one of the other component templates available or create a new one."
+                />
+              }
             />
-          </EuiCallOut>
-          <EuiSpacer size="l" />
-        </>
-      )}
+            <EuiSpacer size="l" />
+          </>
+        )}
 
-      <ComponentTemplateForm
-        defaultValue={componentTemplate!}
-        dataStreams={dataStreams}
-        canRollover={canRollover}
-        defaultActiveWizardSection={defaultActiveStep}
-        onStepChange={updateStep}
-        onSave={onSave}
-        isSaving={isSaving}
-        saveError={saveError}
-        clearSaveError={clearSaveError}
-        isEditing={true}
-      />
-    </EuiPageSection>
+        <ComponentTemplateForm
+          defaultValue={componentTemplate!}
+          dataStreams={dataStreams}
+          canRollover={canRollover}
+          defaultActiveWizardSection={defaultActiveStep}
+          onStepChange={updateStep}
+          onSave={onSave}
+          isSaving={isSaving}
+          saveError={saveError}
+          clearSaveError={clearSaveError}
+          isEditing={true}
+        />
+      </EuiPageSection>
+    </>
   );
 };

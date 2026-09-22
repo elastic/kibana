@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
 import type {
   ESQLAstAllCommands,
   ESQLAstForkCommand,
   ESQLAstQueryExpression,
-} from '../../../types';
-import { pipeCompleteItem, getCommandAutocompleteDefinitions } from '../complete_items';
+} from '@elastic/esql/types';
+import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
+import { newLineAndPipeCompleteItems, getCommandAutocompleteDefinitions } from '../complete_items';
 import { pipePrecedesCurrentWord } from '../../definitions/utils/shared';
 import type { ICommandCallbacks } from '../types';
 import { type ISuggestionItem, type ICommandContext } from '../types';
@@ -41,8 +41,8 @@ export async function autocomplete(
 
   if (!withinActiveBranch && /\)\s+$/i.test(innerText)) {
     const suggestions = [newBranchSuggestion];
-    if (forkCommand.args.length > 1) {
-      suggestions.push(pipeCompleteItem);
+    if (forkCommand.args.length > 0) {
+      suggestions.push(...newLineAndPipeCompleteItems);
     }
     return suggestions;
   }

@@ -14,6 +14,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
 import type { InstalledPackageUIPackageListItem } from '../types';
 import { useInstalledIntegrationsActions } from '../hooks/use_installed_integrations_actions';
@@ -38,7 +39,11 @@ export const InstalledIntegrationsActionMenu: React.FunctionComponent<{
       ctaLink={docLinks.links.enterpriseSearch.elasticInferenceService}
       isCloudEnabled={cloud?.isCloudEnabled ?? false}
     >
-      <EuiButton iconType="arrowDown" iconSide="right" onClick={() => setIsPopoverOpen((s) => !s)}>
+      <EuiButton
+        iconType="chevronSingleDown"
+        iconSide="right"
+        onClick={() => setIsPopoverOpen((s) => !s)}
+      >
         <FormattedMessage
           id="xpack.fleet.epmInstalledIntegrations.actionButton"
           defaultMessage="Actions"
@@ -166,7 +171,7 @@ export const InstalledIntegrationsActionMenu: React.FunctionComponent<{
             ? [
                 <EuiContextMenuItem
                   key="rollback"
-                  icon="returnKey"
+                  icon="return"
                   disabled={!hasRollbackableIntegrations}
                   onClick={openRollbackModal}
                 >
@@ -201,6 +206,10 @@ export const InstalledIntegrationsActionMenu: React.FunctionComponent<{
   return (
     <>
       <EuiPopover
+        aria-label={i18n.translate(
+          'xpack.fleet.epmInstalledIntegrations.bulkActionPopoverAriaLabel',
+          { defaultMessage: 'Actions menu' }
+        )}
         id="fleet.epmInstalledIntegrations.bulkActionPopover"
         button={button}
         isOpen={isPopoverOpen}
@@ -208,7 +217,7 @@ export const InstalledIntegrationsActionMenu: React.FunctionComponent<{
         panelPaddingSize="none"
         anchorPosition="downLeft"
       >
-        <EuiContextMenuPanel size="s" items={items} />
+        <EuiContextMenuPanel items={items} />
       </EuiPopover>
       {showIntegrationKnowledgeFlyout && (
         <IntegrationKnowledgeFlyout onClose={() => setShowIntegrationKnowledgeFlyout(false)} />

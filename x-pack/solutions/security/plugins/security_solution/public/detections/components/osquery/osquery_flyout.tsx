@@ -18,6 +18,7 @@ import {
 import { useQueryClient } from '@kbn/react-query';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { useKibana } from '../../../common/lib/kibana';
+import { useAddToTimeline } from '../../../common/hooks/use_add_to_timeline';
 import { OsqueryEventDetailsFooter } from './osquery_flyout_footer';
 import { ACTION_OSQUERY } from './translations';
 
@@ -50,6 +51,7 @@ const OsqueryFlyoutComponent: React.FC<OsqueryFlyoutProps> = ({
     services: { osquery },
   } = useKibana();
   const queryClient = useQueryClient();
+  const addToTimeline = useAddToTimeline();
 
   const invalidateQueries = useCallback(() => {
     queryClient.invalidateQueries({
@@ -63,7 +65,7 @@ const OsqueryFlyoutComponent: React.FC<OsqueryFlyoutProps> = ({
 
   if (osquery?.OsqueryAction) {
     return (
-      <EuiFlyout size="m" onClose={onClose} aria-labelledby={osqueryFlyoutTitleId}>
+      <EuiFlyout size="m" session="never" onClose={onClose} aria-labelledby={osqueryFlyoutTitleId}>
         <EuiFlyoutHeader hasBorder data-test-subj="flyout-header-osquery">
           <EuiTitle>
             <h2 id={osqueryFlyoutTitleId}>{ACTION_OSQUERY}</h2>
@@ -77,6 +79,7 @@ const OsqueryFlyoutComponent: React.FC<OsqueryFlyoutProps> = ({
               defaultValues={defaultValues}
               ecsData={ecsData}
               onSuccess={invalidateQueries}
+              addToTimeline={addToTimeline}
             />
           </OsqueryActionWrapper>
         </EuiFlyoutBody>

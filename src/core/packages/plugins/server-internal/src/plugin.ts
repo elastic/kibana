@@ -24,6 +24,7 @@ import type {
   PrebootPlugin,
 } from '@kbn/core-plugins-server';
 import type { CorePreboot, CoreSetup, CoreStart } from '@kbn/core-lifecycle-server';
+import type { ServiceToken } from '@kbn/core-di';
 import { Setup, Start } from '@kbn/core-di';
 import { createSetupModule, createStartModule } from '@kbn/core-di-internal';
 
@@ -107,7 +108,7 @@ export class PluginWrapper<
   public async init() {
     this.log.debug('Initializing plugin');
 
-    this.definition = this.getPluginDefinition();
+    this.definition = await this.getPluginDefinition();
     this.instance = await this.createPluginInstance();
 
     if (!('plugin' in this.definition || 'module' in this.definition)) {
@@ -138,13 +139,13 @@ export class PluginWrapper<
 
     if (this.definition.module) {
       this.container = (setupContext as CoreSetup).injection.getContainer();
-      this.container.loadSync(this.definition.module);
-      this.container.loadSync(createSetupModule(this.initializerContext, setupContext, plugins));
+      this.container.load(this.definition.module);
+      this.container.load(createSetupModule(this.initializerContext, setupContext, plugins));
     }
 
     return [
       this.instance?.setup(setupContext as CoreSetup<TPluginsStart, TStart>, plugins),
-      this.container?.get<TSetup>(Setup),
+      this.container?.get(Setup as ServiceToken<TSetup>),
     ].find(Boolean)!;
   }
 
@@ -164,10 +165,10 @@ export class PluginWrapper<
       throw new Error(`Plugin "${this.name}" is a preboot plugin and cannot be started.`);
     }
 
-    this.container?.loadSync(createStartModule(startContext, plugins));
+    this.container?.load(createStartModule(startContext, plugins));
     const contract = [
       this.instance?.start(startContext, plugins),
-      this.container?.get<TStart>(Start),
+      this.container?.get(Start as ServiceToken<TStart>),
     ].find(Boolean)!;
 
     if (isPromise(contract)) {
@@ -191,16 +192,16 @@ export class PluginWrapper<
     }
 
     await this.instance?.stop?.();
-    await this.container?.unbindAll();
+    await this.container?.unbindAllAsync();
     this.instance = undefined;
     this.container = undefined;
   }
 
-  public getConfigDescriptor(): PluginConfigDescriptor | null {
+  public async getConfigDescriptor(): Promise<PluginConfigDescriptor | null> {
     if (!this.manifest.server) {
       return null;
     }
-    const definition = this.getPluginDefinition();
+    const definition = await this.getPluginDefinition();
     if (!definition.config) {
       this.log.debug(`Plugin "${this.name}" does not export "config" (${this.path}).`);
       return null;
@@ -213,8 +214,10 @@ export class PluginWrapper<
     return config;
   }
 
-  protected getPluginDefinition(): PluginDefinition<TSetup, TStart, TPluginsSetup, TPluginsStart> {
-    return require(join(this.path, 'server')) ?? {};
+  protected async getPluginDefinition(): Promise<
+    PluginDefinition<TSetup, TStart, TPluginsSetup, TPluginsStart>
+  > {
+    return (await import(join(this.path, 'server'))) ?? {};
   }
 
   protected async createPluginInstance() {

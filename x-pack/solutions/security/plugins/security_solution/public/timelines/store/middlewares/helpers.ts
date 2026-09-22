@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MiddlewareAPI, Dispatch, AnyAction } from 'redux';
+import type { MiddlewareAPI, Dispatch, AnyAction } from 'redux-v4';
 import { v4 as uuidv4 } from 'uuid';
 
 import type { IHttpFetchError } from '@kbn/core/public';

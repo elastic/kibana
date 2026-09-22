@@ -13,6 +13,9 @@ export const findPacksRequestQuerySchema = t.type({
   pageSize: t.union([toNumberRt, t.undefined]),
   sort: t.union([t.string, t.undefined]),
   sortOrder: t.union([t.union([t.literal('asc'), t.literal('desc')]), t.undefined]),
+  search: t.union([t.string, t.undefined]),
+  enabled: t.union([t.union([t.literal('true'), t.literal('false')]), t.undefined]),
+  createdBy: t.union([t.string, t.undefined]),
 });
 
 export type FindPacksRequestQuerySchema = t.OutputOf<typeof findPacksRequestQuerySchema>;

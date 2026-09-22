@@ -7,15 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { render, screen } from '@testing-library/react';
 import { take } from 'lodash';
-import { getOptionsListContextMock } from '../../mocks/api_mocks';
-import { OptionsListControlContext } from '../options_list_context_provider';
-import type { OptionsListComponentApi } from '../types';
-import { OptionsListPopoverActionBar } from './options_list_popover_action_bar';
+import React from 'react';
 import type { OptionsListDisplaySettings } from '@kbn/controls-schemas';
+import { render, screen } from '@testing-library/react';
+
+import type { OptionsListComponentApi } from '../../../types';
+import { getOptionsListContextMock } from '../../mocks/api_mocks';
 import { MAX_OPTIONS_LIST_BULK_SELECT_SIZE } from '../constants';
+import { OptionsListControlContext } from '../options_list_context_provider';
+import { OptionsListPopoverActionBar } from './options_list_popover_action_bar';
 
 const allOptions = [
   { value: 'moo', docCount: 1 },

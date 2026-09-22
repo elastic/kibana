@@ -20,13 +20,16 @@ export class NewsFeedSimulatorPlugin implements Plugin {
       {
         path: `/api/_newsfeed-FTS-external-service-simulators/kibana/v${version}.json`,
         security: {
+          authc: {
+            enabled: false,
+            reason: 'This route simulates a newsfeed endpoint and does not require authentication.',
+          },
           authz: {
             enabled: false,
             reason: 'This route is opted out from authorization',
           },
         },
         validate: false,
-        options: { authRequired: false },
       },
       (context, req, res) => {
         return res.ok({ body: this.mockNewsfeed() });
@@ -37,13 +40,16 @@ export class NewsFeedSimulatorPlugin implements Plugin {
       {
         path: '/api/_newsfeed-FTS-external-service-simulators/kibana/crash.json',
         security: {
+          authc: {
+            enabled: false,
+            reason: 'This route simulates a newsfeed endpoint and does not require authentication.',
+          },
           authz: {
             enabled: false,
             reason: 'This route is opted out from authorization',
           },
         },
         validate: false,
-        options: { authRequired: false },
       },
       (context, req, res) => {
         throw new Error('Internal server error');

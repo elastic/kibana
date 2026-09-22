@@ -12,20 +12,20 @@ import {
   apiServicesFixture,
   coreWorkerFixtures,
   esArchiverFixture,
+  linkedEsFixtures,
   uiSettingsFixture,
-  synthtraceFixture,
   lighthouseFixture,
 } from '../../fixtures/scope/worker';
 import type {
   ApiServicesFixture,
   EsArchiverFixture,
+  LinkedProjectFixture,
   EsClient,
   KbnClient,
   KibanaUrl,
   ScoutLogger,
   ScoutTestConfig,
   UiSettingsFixture,
-  SynthtraceFixture,
 } from '../../fixtures/scope/worker';
 import {
   pageContextFixture,
@@ -35,12 +35,14 @@ import {
   validateTagsFixture,
   persistentContextFixture,
   perfTrackerFixture,
+  networkFixture,
 } from '../../fixtures/scope/test';
 import type {
   BrowserAuthFixture,
   ScoutPage,
   PageObjects,
   PerfTrackerFixture,
+  NetworkFixture,
 } from '../../fixtures/scope/test';
 export type { ScoutPage, PageObjects, BrowserAuthFixture } from '../../fixtures/scope/test';
 export type { ApiServicesFixture, LighthouseAuditOptions } from '../../fixtures/scope/worker';
@@ -49,8 +51,8 @@ export const scoutFixtures = mergeTests(
   // worker scope fixtures
   coreWorkerFixtures,
   esArchiverFixture,
+  linkedEsFixtures,
   uiSettingsFixture,
-  synthtraceFixture,
   // api fixtures
   apiServicesFixture,
   // test scope fixtures
@@ -58,6 +60,7 @@ export const scoutFixtures = mergeTests(
   browserAuthFixture,
   scoutPageFixture,
   pageObjectsFixture,
+  networkFixture,
   validateTagsFixture,
   // performance fixtures
   perfTrackerFixture
@@ -67,6 +70,7 @@ export interface ScoutTestFixtures {
   browserAuth: BrowserAuthFixture;
   page: ScoutPage;
   pageObjects: PageObjects;
+  network: NetworkFixture;
   perfTracker: PerfTrackerFixture;
 }
 
@@ -77,10 +81,10 @@ export interface ScoutWorkerFixtures extends ApiServicesFixture {
   kbnClient: KbnClient;
   esClient: EsClient;
   esArchiver: EsArchiverFixture;
+  linkedProject: LinkedProjectFixture;
   uiSettings: UiSettingsFixture;
   apiServices: ApiServicesFixture;
-  apmSynthtraceEsClient: SynthtraceFixture['apmSynthtraceEsClient'];
-  infraSynthtraceEsClient: SynthtraceFixture['infraSynthtraceEsClient'];
+  isSnapshotBuild: boolean;
 }
 
 export const lighthouseFixtures = mergeTests(

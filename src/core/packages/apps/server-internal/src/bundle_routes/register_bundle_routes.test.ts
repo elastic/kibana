@@ -7,6 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Fs from 'fs';
+import Path from 'path';
+
+import { fromRoot } from '@kbn/repo-info';
+
 import { registerRouteForBundleMock } from './register_bundle_routes.test.mocks';
 
 import type { PackageInfo } from '@kbn/config';
@@ -43,6 +48,20 @@ const createUiPlugins = (...ids: string[]): UiPlugins => ({
   }, new Map<string, InternalPluginInfo>()),
 });
 
+const createExternalPluginsUiPlugins = (...ids: string[]): UiPlugins => ({
+  browserConfigs: new Map(),
+  public: new Map(),
+  internal: ids.reduce((map, id) => {
+    map.set(id, {
+      publicTargetDir: Path.join(fromRoot('plugins'), id, 'target'),
+      publicAssetsDir: Path.join(fromRoot('plugins'), id, 'assets'),
+      version: '8.0.0',
+      requiredBundles: [],
+    });
+    return map;
+  }, new Map<string, InternalPluginInfo>()),
+});
+
 describe('registerBundleRoutes', () => {
   let router: ReturnType<typeof httpServiceMock.createRouter>;
   let staticAssets: StaticAssets;
@@ -54,10 +73,11 @@ describe('registerBundleRoutes', () => {
   });
 
   afterEach(() => {
+    jest.restoreAllMocks();
     registerRouteForBundleMock.mockReset();
   });
 
-  it('registers core and shared-dep bundles', () => {
+  it('registers shared-dep bundles and the unified /bundles/ route', () => {
     registerBundleRoutes({
       router,
       staticAssets,
@@ -70,14 +90,6 @@ describe('registerBundleRoutes', () => {
     expect(registerRouteForBundleMock).toHaveBeenCalledWith(router, {
       fileHashCache: expect.any(FileHashCache),
       isDist: true,
-      bundlesPath: 'uiSharedDepsSrcDistDir',
-      publicPath: '/server-base-path/sha/bundles/kbn-ui-shared-deps-src/',
-      routePath: '/sha/bundles/kbn-ui-shared-deps-src/',
-    });
-
-    expect(registerRouteForBundleMock).toHaveBeenCalledWith(router, {
-      fileHashCache: expect.any(FileHashCache),
-      isDist: true,
       bundlesPath: 'uiSharedDepsNpmDistDir',
       publicPath: '/server-base-path/sha/bundles/kbn-ui-shared-deps-npm/',
       routePath: '/sha/bundles/kbn-ui-shared-deps-npm/',
@@ -86,9 +98,9 @@ describe('registerBundleRoutes', () => {
     expect(registerRouteForBundleMock).toHaveBeenCalledWith(router, {
       fileHashCache: expect.any(FileHashCache),
       isDist: true,
-      bundlesPath: expect.stringMatching(/\/@kbn\/core\/target\/public$/),
-      publicPath: '/server-base-path/sha/bundles/core/',
-      routePath: '/sha/bundles/core/',
+      bundlesPath: 'uiSharedDepsSrcDistDir',
+      publicPath: '/server-base-path/sha/bundles/kbn-ui-shared-deps-src/',
+      routePath: '/sha/bundles/kbn-ui-shared-deps-src/',
     });
 
     expect(registerRouteForBundleMock).toHaveBeenCalledWith(router, {
@@ -98,9 +110,17 @@ describe('registerBundleRoutes', () => {
       publicPath: '/server-base-path/sha/bundles/kbn-monaco/',
       routePath: '/sha/bundles/kbn-monaco/',
     });
+
+    expect(registerRouteForBundleMock).toHaveBeenCalledWith(router, {
+      fileHashCache: expect.any(FileHashCache),
+      isDist: true,
+      bundlesPath: fromRoot('target/public/bundles'),
+      publicPath: '/server-base-path/sha/bundles/',
+      routePath: '/sha/bundles/',
+    });
   });
 
-  it('registers plugin bundles', () => {
+  it('does not register per-plugin routes for internal plugins', () => {
     registerBundleRoutes({
       router,
       staticAssets,
@@ -108,22 +128,52 @@ describe('registerBundleRoutes', () => {
       uiPlugins: createUiPlugins('plugin-a', 'plugin-b'),
     });
 
-    expect(registerRouteForBundleMock).toHaveBeenCalledTimes(6);
+    expect(registerRouteForBundleMock).toHaveBeenCalledTimes(4);
+    expect(registerRouteForBundleMock).not.toHaveBeenCalledWith(
+      router,
+      expect.objectContaining({
+        routePath: expect.stringContaining('/bundles/plugin/'),
+      })
+    );
+  });
 
-    expect(registerRouteForBundleMock).toHaveBeenCalledWith(router, {
-      fileHashCache: expect.any(FileHashCache),
-      isDist: true,
-      bundlesPath: '/plugins/plugin-a/public-target-dir',
-      publicPath: '/server-base-path/sha/bundles/plugin/plugin-a/8.0.0/',
-      routePath: '/sha/bundles/plugin/plugin-a/8.0.0/',
+  it('registers external plugin bundle route only when standalone bundle exists on disk', () => {
+    jest.spyOn(Fs, 'existsSync').mockReturnValue(false);
+
+    registerBundleRoutes({
+      router,
+      staticAssets,
+      packageInfo: createPackageInfo(),
+      uiPlugins: createExternalPluginsUiPlugins('ext-plugin'),
     });
 
+    expect(registerRouteForBundleMock).toHaveBeenCalledTimes(4);
+    expect(registerRouteForBundleMock).not.toHaveBeenCalledWith(
+      router,
+      expect.objectContaining({
+        routePath: '/sha/bundles/plugin/ext-plugin/8.0.0/',
+      })
+    );
+
+    registerRouteForBundleMock.mockClear();
+    jest.restoreAllMocks();
+
+    jest.spyOn(Fs, 'existsSync').mockReturnValue(true);
+
+    registerBundleRoutes({
+      router,
+      staticAssets,
+      packageInfo: createPackageInfo(),
+      uiPlugins: createExternalPluginsUiPlugins('ext-plugin'),
+    });
+
+    expect(registerRouteForBundleMock).toHaveBeenCalledTimes(5);
     expect(registerRouteForBundleMock).toHaveBeenCalledWith(router, {
       fileHashCache: expect.any(FileHashCache),
       isDist: true,
-      bundlesPath: '/plugins/plugin-b/public-target-dir',
-      publicPath: '/server-base-path/sha/bundles/plugin/plugin-b/8.0.0/',
-      routePath: '/sha/bundles/plugin/plugin-b/8.0.0/',
+      bundlesPath: Path.join(fromRoot('plugins'), 'ext-plugin', 'target'),
+      publicPath: '/server-base-path/sha/bundles/plugin/ext-plugin/8.0.0/',
+      routePath: '/sha/bundles/plugin/ext-plugin/8.0.0/',
     });
   });
 });

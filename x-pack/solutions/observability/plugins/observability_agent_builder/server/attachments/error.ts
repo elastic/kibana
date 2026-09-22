@@ -5,34 +5,33 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import type { Logger } from '@kbn/core/server';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID } from '../../common';
-import type { ObservabilityAgentBuilderCoreSetup } from '../types';
 import type { ObservabilityAgentBuilderDataRegistry } from '../data_registry/data_registry';
+import { MAX_SHORT_STRING_LENGTH } from '../utils/schema_limits';
+import { observabilityAttachmentDataSchema } from './observability_attachment_data_schema';
 
 const GET_ERROR_DETAILS_TOOL_ID = 'get_error_details';
 
-const errorDataSchema = z.object({
-  errorId: z.string(),
-  serviceName: z.string().optional(),
-  environment: z.string().nullable().optional(),
-  start: z.string().optional(),
-  end: z.string().optional(),
+const errorDataSchema = observabilityAttachmentDataSchema.extend({
+  errorId: z.string().max(MAX_SHORT_STRING_LENGTH),
+  serviceName: z.string().max(MAX_SHORT_STRING_LENGTH).optional(),
+  environment: z.string().max(MAX_SHORT_STRING_LENGTH).nullable().optional(),
+  start: z.string().max(MAX_SHORT_STRING_LENGTH).optional(),
+  end: z.string().max(MAX_SHORT_STRING_LENGTH).optional(),
 });
 
 export type ErrorAttachmentData = z.infer<typeof errorDataSchema>;
 
 export function createErrorAttachmentType({
-  core,
   logger,
   dataRegistry,
 }: {
-  core: ObservabilityAgentBuilderCoreSetup;
   logger: Logger;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
 }): AttachmentTypeDefinition<typeof OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID, ErrorAttachmentData> {
@@ -69,6 +68,19 @@ export function createErrorAttachmentType({
                   end,
                   serviceEnvironment: environment ?? '',
                 });
+
+                if (!errorDetails) {
+                  return {
+                    results: [
+                      {
+                        type: ToolResultType.error,
+                        data: {
+                          message: `Error details not found for ${errorId}`,
+                        },
+                      },
+                    ],
+                  };
+                }
 
                 return {
                   results: [

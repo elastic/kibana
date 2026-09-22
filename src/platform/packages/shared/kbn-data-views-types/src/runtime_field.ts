@@ -7,20 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { RUNTIME_FIELD_TYPES } from '@kbn/as-code-data-views-schema';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 
 /**
  * Runtime field types
  */
-export type RuntimeType =
-  | 'keyword'
-  | 'long'
-  | 'double'
-  | 'date'
-  | 'ip'
-  | 'boolean'
-  | 'geo_point'
-  | 'composite';
+export type RuntimeType = (typeof RUNTIME_FIELD_TYPES)[number];
 
 /**
  * Runtime field primitive types - excluding composite

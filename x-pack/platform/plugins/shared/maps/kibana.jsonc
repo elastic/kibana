@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/maps-plugin",
   "owner": [
-    "@elastic/kibana-presentation"
+    "@elastic/kibana-dashboards"
   ],
   "group": "platform",
   "visibility": "shared",
@@ -33,14 +33,12 @@
       "embeddable",
       "mapsEms",
       "share",
-      "presentationUtil",
       "contentManagement"
     ],
     "optionalPlugins": [
       "cloud",
       "cps",
       "customIntegrations",
-      "embeddableEnhanced",
       "home",
       "savedObjectsTagging",
       "charts",
@@ -57,7 +55,8 @@
       "unifiedSearch",
       "fieldFormats",
       "esql",
-      "savedObjects"
+      "savedObjects",
+      "presentationUtil"
     ],
     "extraPublicDirs": [
       "common"

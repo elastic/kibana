@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { CtiQueries } from '../model/factory_query_type';
 import { requestBasicOptionsSchema } from '../model/request_basic_options';
 import { timerange } from '../model/timerange';
 
 export const eventEnrichmentRequestOptionsSchema = requestBasicOptionsSchema.extend({
-  eventFields: z.record(z.unknown()),
+  eventFields: z.record(z.string(), z.unknown()),
   timerange,
   factoryQueryType: z.literal(CtiQueries.eventEnrichment),
 });

@@ -144,7 +144,7 @@ export const ConnectorsTable: React.FC = () => {
       name: connectedLabel,
       render: (status: ConnectorStatus) =>
         status === ConnectorStatus.CONNECTED ? (
-          <EuiIcon aria-label={connectedLabel} color="success" type="checkInCircleFilled" />
+          <EuiIcon aria-label={connectedLabel} color="success" type="checkCircleFill" />
         ) : (
           <EuiBadge>
             {i18n.translate('xpack.serverlessSearch.connectors.notConnectedLabel', {
@@ -158,7 +158,7 @@ export const ConnectorsTable: React.FC = () => {
       name: configuredLabel,
       render: (status: ConnectorStatus) =>
         [ConnectorStatus.CONNECTED, ConnectorStatus.CONFIGURED].includes(status) ? (
-          <EuiIcon aria-label={configuredLabel} color="success" type="checkInCircleFilled" />
+          <EuiIcon aria-label={configuredLabel} color="success" type="checkCircleFill" />
         ) : (
           <EuiBadge>
             {i18n.translate('xpack.serverlessSearch.connectors.notConfiguredLabel', {

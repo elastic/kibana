@@ -30,10 +30,12 @@ import type { IEventLogClientService, IEventLogService } from '@kbn/event-log-pl
 import type { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import { FLAGS as CHANGE_HISTORY_FLAGS } from '@kbn/change-history';
 import { defineRoutes } from './routes';
 import { defineActionTypes } from './action_types';
 import { defineRuleTypes } from './rule_types';
 import { defineConnectorAdapters } from './connector_adapters';
+import { defineTaskTypes } from './task_types';
 
 export interface FixtureSetupDeps {
   features: FeaturesPluginSetup;
@@ -59,6 +61,7 @@ export interface FixtureStartDeps {
 const testRuleTypes = [
   'test.always-firing',
   'test.cumulative-firing',
+  'test.consumer-metrics',
   'test.never-firing',
   'test.failing',
   'test.authorization',
@@ -107,8 +110,9 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
 
   public setup(
     core: CoreSetup<FixtureStartDeps>,
-    { features, actions, alerting, ruleRegistry, eventLog }: FixtureSetupDeps
+    { features, actions, alerting, taskManager, ruleRegistry, eventLog }: FixtureSetupDeps
   ) {
+    CHANGE_HISTORY_FLAGS.FEATURE_ENABLED = true;
     features.registerKibanaFeature({
       id: 'alertsFixture',
       name: 'Alerts',
@@ -180,12 +184,31 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
             },
           ],
         },
+        {
+          name: 'Manage rule settings',
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  name: 'Manage rule settings',
+                  id: 'manage_rule_settings',
+                  includeIn: 'all',
+                  savedObject: { all: [], read: [] },
+                  alerting: { rule: { manage_rule_settings: testAlertingFeatures } },
+                  ui: [],
+                },
+              ],
+            },
+          ],
+        },
       ],
     });
 
     defineActionTypes(core, { actions });
     defineRuleTypes(core, { alerting, ruleRegistry }, this.logger);
     defineConnectorAdapters(core, { alerting });
+    defineTaskTypes(core, taskManager, this.alertingStart);
     const eventLogger = eventLog.getLogger({
       event: { provider: 'alerting' },
     });
@@ -205,5 +228,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
     this.notificationsStart$.next(notifications);
     this.notificationsStart$.complete();
   }
-  public stop() {}
+  public stop() {
+    CHANGE_HISTORY_FLAGS.FEATURE_ENABLED = false;
+  }
 }

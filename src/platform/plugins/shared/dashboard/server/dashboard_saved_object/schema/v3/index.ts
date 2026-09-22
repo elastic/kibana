@@ -12,7 +12,5 @@ export type {
   GridData,
   SavedDashboardPanel,
   SavedDashboardSection,
-  StoredControlState,
-  StoredControlGroupInput,
 } from './types';
 export { dashboardAttributesSchema } from './v3';

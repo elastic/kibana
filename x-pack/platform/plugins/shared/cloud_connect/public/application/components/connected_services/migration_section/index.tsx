@@ -10,6 +10,7 @@ import { css } from '@emotion/react';
 import {
   EuiTitle,
   EuiText,
+  EuiTextColor,
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
@@ -97,7 +98,7 @@ export const MigrationSection: React.FC = () => {
             color="text"
             href={docLinks.links.cloud.cloudConnect}
             target="_blank"
-            iconType="popout"
+            iconType="external"
             iconSide="right"
             onClick={() => {
               // Track telemetry for migration learn more link
@@ -145,7 +146,7 @@ export const MigrationSection: React.FC = () => {
               paddingSize="l"
               layout="horizontal"
               title={benefit.title}
-              description={benefit.description}
+              description={<EuiTextColor color="subdued">{benefit.description}</EuiTextColor>}
               titleSize="xs"
               css={css`
                 box-shadow: none !important;

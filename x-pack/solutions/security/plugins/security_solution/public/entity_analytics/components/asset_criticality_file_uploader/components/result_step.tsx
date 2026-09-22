@@ -70,14 +70,17 @@ export const AssetCriticalityResultStep: React.FC<{
             />
           }
           color="success"
-          iconType="checkInCircleFilled"
+          iconType="checkCircleFill"
         >
           <FormattedMessage
             defaultMessage="Your asset criticality levels have been assigned. Note that your assignments can take a few moments to populate."
             id="xpack.securitySolution.entityAnalytics.assetCriticalityResultStep.successMessage"
           />
           <EuiSpacer size="s" />
-          <SecuritySolutionLinkButton deepLinkId={SecurityPageName.entityAnalytics} color="success">
+          <SecuritySolutionLinkButton
+            deepLinkId={SecurityPageName.entityAnalyticsHomePage}
+            color="success"
+          >
             {
               <FormattedMessage
                 defaultMessage="View asset criticality assignments."

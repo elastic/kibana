@@ -9,12 +9,17 @@
 
 import React, { memo, useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
+import { KillSuspendProcessActionResult } from '../../kill_process_action_result';
+import { CancelActionResults } from '../../cancel_action_results';
 import {
+  isCancelAction,
   isExecuteAction,
   isGetFileAction,
+  isKillProcessAction,
   isMemoryDumpAction,
   isProcessesAction,
   isRunScriptAction,
+  isSuspendProcessAction,
   isUploadAction,
 } from '../../../../../common/endpoint/service/response_actions/type_guards';
 import { ResponseActionFileDownloadLink } from '../../response_action_file_download_link';
@@ -113,6 +118,16 @@ export const ActionResponseOutputs = memo<ActionResponseOutputsProps>(
                 );
               }
 
+              if (isCancelAction(action)) {
+                hostOutput = (
+                  <CancelActionResults
+                    action={action}
+                    agentId={agentId}
+                    data-test-subj={getTestId('cancelOutput')}
+                    textSize="xs"
+                  />
+                );
+              }
               if (isProcessesAction(action)) {
                 hostOutput = (
                   <RunningProcessesActionResults
@@ -128,6 +143,7 @@ export const ActionResponseOutputs = memo<ActionResponseOutputsProps>(
                 hostOutput = (
                   <RunscriptActionResult
                     action={action}
+                    agentId={agentId}
                     data-test-subj={getTestId('actionsLogTray')}
                     textSize="xs"
                   />
@@ -145,8 +161,19 @@ export const ActionResponseOutputs = memo<ActionResponseOutputsProps>(
                 );
               }
 
-              // CrowdStrike Isolate/Release actions
-              if (action.agentType === 'crowdstrike') {
+              if (isKillProcessAction(action) || isSuspendProcessAction(action)) {
+                hostOutput = (
+                  <KillSuspendProcessActionResult
+                    action={action}
+                    agentId={agentId}
+                    textSize="xs"
+                    data-test-subj={getTestId('killProcessOutput')}
+                  />
+                );
+              }
+
+              if (action.agentType === 'crowdstrike' && !isRunScriptAction(action)) {
+                // CrowdStrike Isolate/Release actions (runscript has its own output via RunscriptActionResult)
                 hostOutput = <>{OUTPUT_MESSAGES.submittedSuccessfully(consoleCommandName)}</>;
               }
             }

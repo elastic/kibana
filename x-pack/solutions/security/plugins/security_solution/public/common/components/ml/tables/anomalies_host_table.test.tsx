@@ -22,6 +22,9 @@ jest.mock('../anomaly/use_anomalies_table_data');
 jest.mock('../../../../../common/machine_learning/has_ml_user_permissions');
 jest.mock('../hooks/use_installed_security_jobs');
 jest.mock('@kbn/ml-plugin/public');
+jest.mock('@kbn/entity-store/public', () => ({
+  useEntityStoreEuidApi: jest.fn(() => ({ euid: undefined })),
+}));
 
 const mockUseQueryToggle = useQueryToggle as jest.Mock;
 const mockUseAnomaliesTableData = useAnomaliesTableData as jest.Mock;
@@ -88,7 +91,7 @@ describe('Anomalies host table', () => {
       expect(mockUseAnomaliesTableData.mock.calls[0][0].skip).toEqual(false);
       fireEvent.click(getByTestId('query-toggle-header'));
 
-      expect(mockSetToggle).toBeCalledWith(false);
+      expect(mockSetToggle).toHaveBeenCalledWith(false);
       expect(mockUseAnomaliesTableData.mock.calls[1][0].skip).toEqual(true);
     });
 

@@ -10,21 +10,17 @@ import styled from 'styled-components';
 import {
   EuiCallOut,
   EuiFlexGroup,
-  EuiIcon,
   EuiPanel,
   EuiSpacer,
   EuiText,
   EuiHorizontalRule,
-  EuiLink,
 } from '@elastic/eui';
-import { DefendInsightType } from '@kbn/elastic-assistant-common';
+import { WorkflowInsightType } from '../../../../../../../../common/endpoint/types/workflow_insights';
 
 import type { SecurityWorkflowInsight } from '../../../../../../../../common/endpoint/types/workflow_insights';
-import { WORKFLOW_INSIGHTS_SURVEY_URL } from '../../../../constants';
 import { WORKFLOW_INSIGHTS } from '../../../translations';
 import { WorkflowInsightsIncompatibleAntivirusResult } from './results/incompatible_antivirus';
 import { WorkflowInsightsPolicyResponseFailureResult } from './results/policy_response_failure';
-
 interface WorkflowInsightsResultsProps {
   results?: SecurityWorkflowInsight[];
   scanCompleted: boolean;
@@ -69,7 +65,7 @@ export const WorkflowInsightsResults = ({
     } else if (results?.length) {
       return results.flatMap((insight, index) => {
         switch (insight.type) {
-          case DefendInsightType.Enum.incompatible_antivirus:
+          case WorkflowInsightType.enum.incompatible_antivirus:
             return (
               <WorkflowInsightsIncompatibleAntivirusResult
                 insight={insight}
@@ -77,7 +73,7 @@ export const WorkflowInsightsResults = ({
                 endpointId={endpointId}
               />
             );
-          case DefendInsightType.Enum.policy_response_failure:
+          case WorkflowInsightType.enum.policy_response_failure:
             return <WorkflowInsightsPolicyResponseFailureResult insight={insight} index={index} />;
           default:
             return null;
@@ -86,33 +82,6 @@ export const WorkflowInsightsResults = ({
     }
     return null;
   }, [endpointId, results, showEmptyResultsCallout]);
-
-  const surveyLink = useMemo(() => {
-    if (!results?.length) {
-      return null;
-    }
-
-    return (
-      <>
-        <EuiSpacer size={'xs'} />
-        <EuiFlexGroup
-          gutterSize={'xs'}
-          alignItems={'center'}
-          data-test-subj={'workflowInsightsSurveySection'}
-        >
-          <EuiIcon type="discuss" size="m" />
-          <EuiText size={'xs'} data-test-subj={'workflowInsightsSurveyLink'}>
-            <p>
-              {WORKFLOW_INSIGHTS.issues.survey.description}
-              <EuiLink target="_blank" href={WORKFLOW_INSIGHTS_SURVEY_URL}>
-                {WORKFLOW_INSIGHTS.issues.survey.callToAction}
-              </EuiLink>
-            </p>
-          </EuiText>
-        </EuiFlexGroup>
-      </>
-    );
-  }, [results]);
 
   const showInsights = !!(showEmptyResultsCallout || results?.length);
 
@@ -123,7 +92,6 @@ export const WorkflowInsightsResults = ({
           <EuiText size={'s'}>
             <h4>{WORKFLOW_INSIGHTS.issues.title}</h4>
           </EuiText>
-          {surveyLink}
           <EuiSpacer size={'s'} />
         </>
       )}

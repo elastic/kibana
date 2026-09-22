@@ -18,9 +18,9 @@ import type {
   InferenceSetupDependencies,
   InferenceStartDependencies,
 } from './types';
-import { InferencePlugin } from './plugin';
 
 export type { InferenceServerSetup, InferenceServerStart };
+export type { InferenceEndpoint } from './util/get_inference_endpoints';
 
 export {
   naturalLanguageToEsql,
@@ -33,8 +33,10 @@ export const plugin: PluginInitializer<
   InferenceServerStart,
   InferenceSetupDependencies,
   InferenceStartDependencies
-> = async (pluginInitializerContext: PluginInitializerContext<InferenceConfig>) =>
-  new InferencePlugin(pluginInitializerContext);
+> = async (pluginInitializerContext: PluginInitializerContext<InferenceConfig>) => {
+  const { InferencePlugin } = await import('./plugin');
+  return new InferencePlugin(pluginInitializerContext);
+};
 
 export const config: PluginConfigDescriptor<InferenceConfig> = {
   schema: configSchema,

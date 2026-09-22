@@ -21,15 +21,13 @@
                                 "query": {
                                     "esql": ""
                                 },
-                                "columns": [],
-                                "timeField": "@timestamp"
+                                "columns": []
                             }
                         },
                         "indexPatternRefs": [
                             {
                                 "id": "d6c911aa50e2dafcebcedfa50190d5c03bbac0070c96d6b16feb18aa1f84b5da",
-                                "title": "logs-*",
-                                "timeField": "@timestamp"
+                                "title": "logs-*"
                             }
                         ]
                     }
@@ -100,7 +98,6 @@
                     "d6c911aa50e2dafcebcedfa50190d5c03bbac0070c96d6b16feb18aa1f84b5da": {
                         "id": "d6c911aa50e2dafcebcedfa50190d5c03bbac0070c96d6b16feb18aa1f84b5da",
                         "title": "logs-*",
-                        "timeFieldName": "@timestamp",
                         "sourceFilters": [],
                         "type": "esql",
                         "fieldFormats": {},

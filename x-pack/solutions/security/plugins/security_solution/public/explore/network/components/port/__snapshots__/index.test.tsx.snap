@@ -2,7 +2,7 @@
 
 exports[`Port renders correctly against snapshot 1`] = `
 <div
-  class="css-q5yr96-PortContainer etea1110"
+  class="css-p0iey-PortContainer equgoob1"
 >
   <a
     class="euiLink emotion-euiLink-primary"
@@ -13,8 +13,8 @@ exports[`Port renders correctly against snapshot 1`] = `
   >
     443
     <span
-      class="emotion-EuiExternalLinkIcon"
-      data-euiicon-type="popout"
+      class="css-1j75qc1"
+      data-euiicon-type="external"
       role="presentation"
     />
     <span

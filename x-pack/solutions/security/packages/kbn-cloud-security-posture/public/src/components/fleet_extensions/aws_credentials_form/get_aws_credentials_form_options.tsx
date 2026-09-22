@@ -318,7 +318,7 @@ export const getAwsCloudConnectorsCredentialsFormOptions = (
       label: i18n.translate(
         'securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.cloudConnectorsRoleLabel',
         {
-          defaultMessage: 'Cloud Connectors (recommended)',
+          defaultMessage: 'Federated Identity (recommended)',
         }
       ),
       info: AssumeRoleDescription,

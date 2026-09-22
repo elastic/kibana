@@ -4,14 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiPageHeaderContentProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import type { AppHeaderTab } from '@kbn/app-header';
 import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
 import { RedirectTo } from '../../components/redirect_to';
 import { useProfilingParams } from '../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
 import { useProfilingRoutePath } from '../../hooks/use_profiling_route_path';
+import { DifferentialFlameGraphSearchPanel } from './differential_flamegraphs/differential_flame_graph_search_panel';
 
 export function FlameGraphsView({ children }: { children: React.ReactElement }) {
   const { query } = useProfilingParams('/flamegraphs/*');
@@ -24,8 +25,9 @@ export function FlameGraphsView({ children }: { children: React.ReactElement }) 
 
   const isDifferentialView = routePath === '/flamegraphs/differential';
 
-  const tabs: Required<EuiPageHeaderContentProps>['tabs'] = [
+  const tabs: AppHeaderTab[] = [
     {
+      id: 'flamegraph',
       label: i18n.translate('xpack.profiling.flameGraphsView.flameGraphTabLabel', {
         defaultMessage: 'Flamegraph',
       }),
@@ -33,6 +35,7 @@ export function FlameGraphsView({ children }: { children: React.ReactElement }) 
       href: profilingRouter.link('/flamegraphs/flamegraph', { query }),
     },
     {
+      id: 'differential-flamegraph',
       label: i18n.translate('xpack.profiling.flameGraphsView.differentialFlameGraphTabLabel', {
         defaultMessage: 'Differential flamegraph',
       }),
@@ -50,7 +53,13 @@ export function FlameGraphsView({ children }: { children: React.ReactElement }) 
   ];
 
   return (
-    <ProfilingAppPageTemplate tabs={tabs} hideSearchBar={isDifferentialView}>
+    <ProfilingAppPageTemplate
+      tabs={tabs}
+      customSearchBar={isDifferentialView ? <DifferentialFlameGraphSearchPanel /> : undefined}
+      pageTitle={i18n.translate('xpack.profiling.flameGraphsView.pageTitle', {
+        defaultMessage: 'Flamegraphs',
+      })}
+    >
       {children}
     </ProfilingAppPageTemplate>
   );

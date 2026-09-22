@@ -6,12 +6,12 @@
  */
 
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import type { LensInternalApi } from '@kbn/lens-common';
 import type { LensApi } from '@kbn/lens-common-2';
 import { ExpressionWrapper } from '../expression_wrapper';
 import { UserMessages } from '../user_messages/container';
-import { useMessages, useDispatcher } from './hooks';
+import { useMessages } from './hooks';
 import { getViewMode } from '../helper';
 import { addLog } from '../logger';
 
@@ -27,18 +27,16 @@ export function LensEmbeddableComponent({
   const [
     // Pick up updated params from the observable
     expressionParams,
-    // used for functional tests
-    renderCount,
     // these are blocking errors that can be shown in a badge
     // without replacing the entire panel
     blockingErrors,
-    // has the render completed?
-    hasRendered,
+    hideTitle,
+    panelTitle,
   ] = useBatchedPublishingSubjects(
     internalApi.expressionParams$,
-    internalApi.renderCount$,
     internalApi.validationMessages$,
-    api.rendered$,
+    api.hideTitle$,
+    api.title$,
     // listen to view change mode but do not use its actual value
     // just call the Lens API to know whether it's in edit mode
     api.viewMode$
@@ -53,35 +51,10 @@ export function LensEmbeddableComponent({
     return onUnmount;
   }, [api, onUnmount]);
 
-  // take care of dispatching the event from the DOM node
-  const rootRef = useDispatcher(hasRendered, api);
-
-  // Publish the data attributes only if avaialble/visible
-  const title = useMemo(
-    () =>
-      internalApi.getDisplayOptions()?.noPanelTitle
-        ? undefined
-        : { 'data-title': api.title$?.getValue() ?? api.defaultTitle$?.getValue() },
-    [api.defaultTitle$, api.title$, internalApi]
-  );
-  const description = api.description$?.getValue()
-    ? {
-        'data-description': api.description$?.getValue() ?? api.defaultDescription$?.getValue(),
-      }
-    : undefined;
-
   return (
-    <div
-      css={{ width: '100%', height: '100%', position: 'relative' }}
-      data-rendering-count={renderCount + 1}
-      data-render-complete={hasRendered}
-      {...title}
-      {...description}
-      data-shared-item
-      ref={rootRef}
-    >
+    <div css={{ width: '100%', height: '100%', position: 'relative' }}>
       {expressionParams == null || blockingErrors.length ? null : (
-        <ExpressionWrapper {...expressionParams} />
+        <ExpressionWrapper {...expressionParams} paddingTop={hideTitle || !panelTitle?.length} />
       )}
       <UserMessages
         blockingErrors={blockingErrors}

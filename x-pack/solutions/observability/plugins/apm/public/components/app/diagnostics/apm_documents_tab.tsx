@@ -11,8 +11,8 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { orderBy } from 'lodash';
 import React, { useMemo, useState } from 'react';
+import type { ApmEvent } from '@kbn/apm-types';
 import { asBigNumber, asInteger } from '../../../../common/utils/formatters';
-import type { ApmEvent } from '../../../../server/routes/diagnostics/bundle/get_apm_events';
 import { useAdHocApmDataView } from '../../../hooks/use_adhoc_apm_data_view';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import type { ApmPluginStartDeps } from '../../../plugin';
@@ -167,6 +167,9 @@ export function DiagnosticsApmDocuments() {
         }}
         rowHeader="firstName"
         columns={columns}
+        tableCaption={i18n.translate('xpack.apm.diagnosticsApmDocuments.documentsCaption', {
+          defaultMessage: 'Diagnostic document overview',
+        })}
         onChange={({ sort }) => {
           if (sort) {
             setSortField(sort.field);

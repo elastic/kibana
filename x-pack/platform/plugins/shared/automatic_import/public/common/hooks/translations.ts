@@ -1,0 +1,107 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { i18n } from '@kbn/i18n';
+
+export const INDEX_MISSING_EVENT_ORIGINAL = i18n.translate(
+  'xpack.automaticImport.dataStreams.indexMissingEventOriginal',
+  {
+    defaultMessage:
+      'The selected index does not contain the `event.original` field. Please select another index to continue.',
+  }
+);
+
+export const INDEX_VALIDATION_FAILED = i18n.translate(
+  'xpack.automaticImport.dataStreams.indexValidationFailed',
+  {
+    defaultMessage: 'Failed to validate index mapping',
+  }
+);
+
+export const SAVE_INTEGRATION_SUCCESS = i18n.translate(
+  'xpack.automaticImport.saveIntegration.success',
+  {
+    defaultMessage: 'Integration saved successfully',
+  }
+);
+
+export const SAVE_PIPELINE_SUCCESS = i18n.translate('xpack.automaticImport.savePipeline.success', {
+  defaultMessage: 'Pipeline saved successfully',
+});
+
+export const SAVE_PIPELINE_ERROR = i18n.translate('xpack.automaticImport.savePipeline.error', {
+  defaultMessage: 'Failed to save pipeline',
+});
+
+export const SAVE_INTEGRATION_SUCCESS_DESCRIPTION = (integrationId: string) =>
+  i18n.translate('xpack.automaticImport.saveIntegration.successDescription', {
+    defaultMessage: 'Integration {integrationId} is now being processed.',
+    values: { integrationId },
+  });
+
+export const SAVE_INTEGRATION_ERROR = i18n.translate(
+  'xpack.automaticImport.saveIntegration.error',
+  {
+    defaultMessage: 'Failed to save integration',
+  }
+);
+
+export const UPLOAD_SAMPLES_SUCCESS = i18n.translate(
+  'xpack.automaticImport.hooks.uploadSamples.success',
+  {
+    defaultMessage: 'Samples uploaded successfully',
+  }
+);
+
+export const UPLOAD_SAMPLES_ERROR = i18n.translate(
+  'xpack.automaticImport.hooks.uploadSamples.error',
+  {
+    defaultMessage: 'Failed to upload samples',
+  }
+);
+
+export const DELETE_DATA_STREAM_SUCCESS = i18n.translate(
+  'xpack.automaticImport.hooks.deleteDataStream.success',
+  {
+    defaultMessage: 'Data stream deleted successfully',
+  }
+);
+
+export const DELETE_INTEGRATION_SUCCESS = i18n.translate(
+  'xpack.automaticImport.hooks.deleteIntegration.success',
+  {
+    defaultMessage: 'Integration deleted successfully',
+  }
+);
+
+export const DELETE_INTEGRATION_ERROR = i18n.translate(
+  'xpack.automaticImport.hooks.deleteIntegration.error',
+  {
+    defaultMessage: 'Failed to delete integration',
+  }
+);
+
+export const DELETE_DATA_STREAM_ERROR = i18n.translate(
+  'xpack.automaticImport.hooks.deleteDataStream.error',
+  {
+    defaultMessage: 'Failed to delete data stream',
+  }
+);
+
+export const REANALYZE_DATA_STREAM_SUCCESS = i18n.translate(
+  'xpack.automaticImport.hooks.reanalyzeDataStream.success',
+  {
+    defaultMessage: 'Data stream analysis restarted',
+  }
+);
+
+export const REANALYZE_DATA_STREAM_ERROR = i18n.translate(
+  'xpack.automaticImport.hooks.reanalyzeDataStream.error',
+  {
+    defaultMessage: 'Failed to restart data stream analysis',
+  }
+);

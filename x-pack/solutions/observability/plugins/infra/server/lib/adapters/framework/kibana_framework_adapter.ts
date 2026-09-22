@@ -21,8 +21,9 @@ import type {
 } from '@kbn/core/server';
 import { UI_SETTINGS } from '@kbn/data-plugin/server';
 import type { TimeseriesVisData } from '@kbn/vis-type-timeseries-plugin/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { TSVBMetricModel } from '@kbn/metrics-data-access-plugin/common';
+import { getProjectRoutingFromRequest } from '@kbn/observability-utils-server/es/get_project_routing_from_request';
 import type { InfraConfig, InfraPluginRequestHandlerContext } from '../../../types';
 import type {
   CallWithRequestParams,
@@ -169,9 +170,14 @@ export class KibanaFramework {
   public async callWithRequest(
     requestContext: InfraPluginRequestHandlerContext,
     endpoint: string,
-    params: CallWithRequestParams,
+    rawParams: CallWithRequestParams,
     request?: KibanaRequest
   ) {
+    // `requestTimeout` is a transport-level option, not part of the request
+    // body, so it must be pulled off before `params` gets spread into the
+    // Elasticsearch client call bodies below.
+    const { requestTimeout, ...paramsWithoutTimeout } = rawParams ?? {};
+    let params: CallWithRequestParams = paramsWithoutTimeout;
     const { elasticsearch, uiSettings } = await requestContext.core;
 
     const includeFrozen = await uiSettings.client.get<boolean>(UI_SETTINGS.SEARCH_INCLUDE_FROZEN);
@@ -206,6 +212,9 @@ export class KibanaFramework {
       frozenIndicesParams.ignore_throttled = false;
     }
 
+    const projectRouting = getProjectRoutingFromRequest(request);
+    const projectRoutingParams = projectRouting ? { project_routing: projectRouting } : {};
+
     let apiResult;
     switch (endpoint) {
       case 'search':
@@ -215,8 +224,9 @@ export class KibanaFramework {
               {
                 ...params,
                 ...frozenIndicesParams,
+                ...projectRoutingParams,
               } as estypes.SearchRequest,
-              { signal }
+              { signal, ...(requestTimeout ? { requestTimeout } : {}) }
             ),
         });
 
@@ -228,6 +238,7 @@ export class KibanaFramework {
               {
                 ...params,
                 ...frozenIndicesParams,
+                ...projectRoutingParams,
               } as estypes.MsearchRequest,
               { signal }
             ),

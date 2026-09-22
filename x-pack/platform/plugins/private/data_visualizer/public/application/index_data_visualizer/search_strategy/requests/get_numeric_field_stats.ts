@@ -43,7 +43,7 @@ export const getNumericFieldsStatsRequest = (
   params: FieldStatsCommonRequestParams,
   fields: Field[]
 ) => {
-  const { index, query, runtimeFieldMap } = params;
+  const { index, query, runtimeFieldMap, projectRouting } = params;
 
   const size = 0;
 
@@ -117,6 +117,7 @@ export const getNumericFieldsStatsRequest = (
     query,
     aggs: buildAggregationWithSamplingOption(aggs, params.samplingOption),
     ...(isPopulatedObject(runtimeFieldMap) ? { runtime_mappings: runtimeFieldMap } : {}),
+    ...(projectRouting ? { project_routing: projectRouting } : {}),
   };
 
   return {

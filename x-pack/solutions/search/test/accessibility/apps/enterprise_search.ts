@@ -67,8 +67,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('newPlaygroundButton');
 
         await retry.waitFor(
-          'playground docs link',
-          async () => await testSubjects.exists('playground-documentation-link')
+          'playground header menu',
+          async () => await testSubjects.exists('app-menu')
         );
         await a11y.testAppSnapshot();
       });
@@ -124,20 +124,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor(
           'query rules docs link',
           async () => await testSubjects.exists('searchQueryRulesEmptyPromptFooterLink')
-        );
-        await a11y.testAppSnapshot();
-      });
-    });
-
-    describe('Search inference endpoints', () => {
-      before(async () => {
-        await common.navigateToApp('elasticsearch/relevance/inference_endpoints');
-      });
-
-      it('loads inference endpoints page', async function () {
-        await retry.waitFor(
-          'Inference endpoints page header',
-          async () => await testSubjects.exists('allInferenceEndpointsPage')
         );
         await a11y.testAppSnapshot();
       });

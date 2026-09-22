@@ -8,6 +8,7 @@
  */
 
 import dateMath from '@kbn/datemath';
+import type { TimeRange } from '@kbn/es-query';
 
 const unitMap = new Map([
   ['s', 'second'],
@@ -30,7 +31,7 @@ export const getRelativeTimeValueAndUnitFromTimeString = (dateString?: string) =
     return {
       value: 0,
       unit: 'second',
-      roundingUnit: undefined,
+      roundingUnit: roundingPart ? unitMap.get(roundingPart) : undefined,
     };
   }
 
@@ -46,19 +47,24 @@ export const getRelativeTimeValueAndUnitFromTimeString = (dateString?: string) =
   };
 };
 
-export const convertRelativeTimeStringToAbsoluteTimeDate = (dateString?: string) => {
+export const convertRelativeTimeStringToAbsoluteTimeDate = (
+  dateString?: string,
+  options?: { roundUp?: boolean }
+) => {
   if (!dateString) return;
-  const valueParsed = dateMath.parse(dateString);
+  const valueParsed = dateMath.parse(dateString, options);
 
   return valueParsed?.isValid() ? valueParsed.toDate() : undefined;
 };
 
-export const convertRelativeTimeStringToAbsoluteTimeString = (dateString?: string) => {
-  if (!dateString) return dateString;
-  const valueParsed = dateMath.parse(dateString);
+export const convertRelativeTimeStringToAbsoluteTimeString = (
+  dateString: string,
+  options?: { roundUp?: boolean }
+) => {
+  const valueParsed = dateMath.parse(dateString, options);
 
   return valueParsed && valueParsed.isValid() ? valueParsed.toISOString() : dateString;
 };
 
-export const isTimeRangeAbsoluteTime = (timeRange?: { from: string; to: string }) =>
+export const isTimeRangeAbsoluteTime = (timeRange?: TimeRange) =>
   !(timeRange?.from?.includes('now') || timeRange?.to?.includes('now'));

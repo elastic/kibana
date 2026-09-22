@@ -131,6 +131,9 @@ export type {
   SecurityServiceStart,
   CoreAuthenticationService,
   CoreAuditService,
+  CoreServiceAccountsService,
+  ServiceAccount,
+  CreateServiceAccountParams,
   AuditEvent,
   AuditHttp,
   AuditKibana,
@@ -226,6 +229,7 @@ export type {
   IStaticAssets,
   SessionStorage,
   SessionStorageCookieOptions,
+  SessionStorageSetOptions,
   SessionCookieValidationResult,
   SessionStorageFactory,
   GetAuthState,
@@ -237,6 +241,12 @@ export type {
   HttpServerInfo,
   HttpServicePreboot,
   HttpServiceStart,
+  HttpSelfFetchHeaders,
+  HttpSelfFetchOptions,
+  HttpSelfFetchQuery,
+  HttpSelfResponse,
+  HttpSelfScopedClient,
+  HttpSelfService,
   RawRequest,
   FakeRawRequest,
   HttpProtocol,
@@ -261,6 +271,13 @@ export type {
   LoggerContextConfigInput,
   LoggerConfigType,
   AppenderConfigType,
+  PluginAppenderConfigType,
+  FileAppenderPluginConfig,
+  LogFileWriteError,
+  LogFileWriteErrorHandler,
+  OtelAppenderPluginConfig,
+  OtelAttributesTransform,
+  RollingFileAppenderPluginConfig,
 } from '@kbn/core-logging-server';
 export type { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from '@kbn/logging';
 export type { Ecs, EcsEvent } from '@elastic/ecs';
@@ -365,6 +382,8 @@ export type {
 } from '@kbn/core-saved-objects-api-server';
 export type {
   SavedObject,
+  SavedObjectErrorResult,
+  SavedObjectBulkResult,
   SavedObjectAccessControl,
   SavedObjectAttribute,
   SavedObjectAttributes,
@@ -430,6 +449,7 @@ export {
   SPACES_EXTENSION_ID,
   SavedObjectsErrorHelpers,
 } from '@kbn/core-saved-objects-server';
+export { isSavedObjectErrorResult } from '@kbn/core-saved-objects-server';
 export {
   SavedObjectsUtils,
   mergeSavedObjectMigrationMaps,

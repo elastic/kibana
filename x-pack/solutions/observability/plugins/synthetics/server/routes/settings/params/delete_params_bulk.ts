@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-import { getExistingParamsSpaces } from './delete_param';
+import { z } from '@kbn/zod';
+import { MAX_PARAM_BULK_SIZE, routeId } from '../../zod_query';
+import { getExistingParamsInfo } from './delete_param';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
@@ -24,15 +25,18 @@ export const deleteSyntheticsParamsBulkRoute: SyntheticsRestApiRouteFactory<
   validate: {},
   validation: {
     request: {
-      body: schema.object({
-        ids: schema.arrayOf(schema.string()),
+      body: z.strictObject({
+        ids: z.array(routeId).max(MAX_PARAM_BULK_SIZE),
       }),
     },
   },
   handler: async ({ savedObjectsClient, request, server, spaceId }) => {
     const { ids } = request.body;
 
-    const existingParamsSpaces = await getExistingParamsSpaces(savedObjectsClient, ids);
+    const { spaces: existingParamsSpaces, keys: modifiedParamKeys } = await getExistingParamsInfo(
+      savedObjectsClient,
+      ids
+    );
 
     const result = await savedObjectsClient.bulkDelete(
       ids.map((id) => ({ type: syntheticsParamType, id })),
@@ -42,6 +46,7 @@ export const deleteSyntheticsParamsBulkRoute: SyntheticsRestApiRouteFactory<
     await asyncGlobalParamsPropagation({
       server,
       paramsSpacesToSync: existingParamsSpaces,
+      modifiedParamKeys,
     });
 
     return result.statuses.map(({ id, success }) => ({ id, deleted: success }));

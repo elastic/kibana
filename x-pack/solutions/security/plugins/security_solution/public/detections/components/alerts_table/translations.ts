@@ -164,21 +164,21 @@ export const ALERTS_HEADERS_SERVICE_CRITICALITY = i18n.translate(
 export const ACTION_INVESTIGATE_IN_TIMELINE = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.actions.investigateInTimelineTitle',
   {
-    defaultMessage: 'Investigate in timeline',
+    defaultMessage: 'Investigate in Timeline',
   }
 );
 
 export const ACTION_CANNOT_INVESTIGATE_IN_TIMELINE = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.actions.cannotInvestigateInTimelineTitle',
   {
-    defaultMessage: 'Please navigate to a page with timeline to investigate',
+    defaultMessage: 'Please navigate to a page with Timeline to investigate',
   }
 );
 
 export const ACTION_INVESTIGATE_IN_TIMELINE_ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.actions.investigateInTimelineAriaLabel',
   {
-    defaultMessage: 'Send alert to timeline',
+    defaultMessage: 'Send alert to Timeline',
   }
 );
 
@@ -232,24 +232,10 @@ export const CLICK_TO_CHANGE_ALERT_STATUS = i18n.translate(
   }
 );
 
-export const ADD_TO_EXISTING_CASE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.actions.addToCase',
-  {
-    defaultMessage: 'Add to existing case',
-  }
-);
-
-export const ADD_TO_NEW_CASE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.actions.addToNewCase',
-  {
-    defaultMessage: 'Add to new case',
-  }
-);
-
 export const INVESTIGATE_BULK_IN_TIMELINE = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.actions.addBulkToTimeline',
   {
-    defaultMessage: 'Investigate in timeline',
+    defaultMessage: 'Investigate in Timeline',
   }
 );
 
@@ -357,5 +343,26 @@ export const INSUFFICIENT_PRIVILEGES = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.insufficientPrivileges',
   {
     defaultMessage: 'Insufficient privileges',
+  }
+);
+
+export const REMOTE_DOCUMENT_ACTIONS_UNAVAILABLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.remoteDocumentActionsUnavailable',
+  {
+    defaultMessage: 'Unavailable for remote documents',
+  }
+);
+
+export const CONTEXT_MENU_RUN_WORKFLOW = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.workflow.menu.run.workflow',
+  {
+    defaultMessage: 'Run workflow',
+  }
+);
+
+export const SELECT_WORKFLOW_PANEL_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.workflow.select.title',
+  {
+    defaultMessage: 'Select workflow',
   }
 );

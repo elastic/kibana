@@ -25,6 +25,7 @@ import type {
   INDEX_PATTERN_TYPE,
   MatchedItem,
 } from '@kbn/data-views-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import type { DataViewEditorService } from './data_view_editor_service';
 import type { DataPublicPluginStart, IndexPatternAggRestrictions } from './shared_imports';
 
@@ -37,6 +38,7 @@ export interface DataViewEditorContext {
   overlays: OverlayStart;
   dataViews: DataViewsServicePublic;
   searchClient: DataPublicPluginStart['search']['search'];
+  cps?: CPSPluginStart;
 }
 
 /** @public */
@@ -110,6 +112,7 @@ export interface SetupPlugins {}
 export interface StartPlugins {
   data: DataPublicPluginStart;
   dataViews: DataViewsServicePublic;
+  cps?: CPSPluginStart;
 }
 
 export type CloseEditor = () => void;

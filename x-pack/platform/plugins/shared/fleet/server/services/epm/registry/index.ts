@@ -95,6 +95,12 @@ export async function fetchList(
     if (params.type) {
       url.searchParams.set('type', params.type);
     }
+    if (params.package) {
+      url.searchParams.set('package', params.package);
+    }
+    if (params.all) {
+      url.searchParams.set('all', params.all.toString());
+    }
   }
 
   setConstraints(url);
@@ -105,6 +111,7 @@ export async function fetchList(
 export interface FetchFindLatestPackageOptions {
   ignoreConstraints?: boolean;
   prerelease?: boolean;
+  throwOnError?: boolean;
 }
 
 async function _fetchFindLatestPackage(
@@ -113,7 +120,7 @@ async function _fetchFindLatestPackage(
 ): Promise<RegistryPackage | BundledPackage | null> {
   return withPackageSpan(`Find latest package ${packageName}`, async () => {
     const logger = appContextService.getLogger();
-    const { ignoreConstraints = false, prerelease = false } = options ?? {};
+    const { ignoreConstraints = false, prerelease = false, throwOnError = false } = options ?? {};
 
     const bundledPackage = await getBundledPackageByName(packageName);
 
@@ -154,6 +161,10 @@ async function _fetchFindLatestPackage(
       logger.error(
         `Failed to fetch latest version of ${packageName} from registry: ${error.message}`
       );
+
+      if (throwOnError) {
+        throw error;
+      }
 
       // Fall back to the bundled version of the package if it exists
       if (bundledPackage) {

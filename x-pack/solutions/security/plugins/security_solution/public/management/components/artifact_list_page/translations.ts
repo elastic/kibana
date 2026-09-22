@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { ARTIFACT_FLYOUT_LABELS } from './components/artifact_flyout';
 import { ARTIFACT_DELETE_LABELS } from './components/artifact_delete_modal';
 import { ARTIFACT_DELETE_ACTION_LABELS } from './hooks/use_with_artifact_delete_item';
+import { ARTIFACT_ENABLE_DISABLE_ACTION_LABELS } from './hooks/use_with_artifact_enable_disable';
 
 export const artifactListPageLabels = Object.freeze({
   // ------------------------------
@@ -26,7 +27,7 @@ export const artifactListPageLabels = Object.freeze({
   pageImportButtonTitle: i18n.translate(
     'xpack.securitySolution.artifactListPage.importButtonTitle',
     {
-      defaultMessage: 'Import artifact list',
+      defaultMessage: 'Import artifacts',
     }
   ),
   pageExportButtonTitle: i18n.translate(
@@ -45,6 +46,73 @@ export const artifactListPageLabels = Object.freeze({
     'xpack.securitySolution.artifactListPage.exportErrorToastTitle',
     {
       defaultMessage: 'Artifact list export failed',
+    }
+  ),
+  pageImportSuccessToastTitle: i18n.translate(
+    'xpack.securitySolution.artifactListPage.importSuccessToastTitle',
+    {
+      defaultMessage: 'Artifacts imported',
+    }
+  ),
+  pageImportSuccessToastText: i18n.translate(
+    'xpack.securitySolution.artifactListPage.importSuccessToastText',
+    {
+      defaultMessage: 'All artifacts were imported successfully.',
+    }
+  ),
+  pageImportCompletedWithErrorsToastTitle: i18n.translate(
+    'xpack.securitySolution.artifactListPage.importCompletedWithErrorsToastTitle',
+    {
+      defaultMessage: 'Import completed with errors',
+    }
+  ),
+  getPageImportCompletedWithErrorsToastText: (
+    importedCount: number,
+    failedCount: number
+  ): string => {
+    return i18n.translate(
+      'xpack.securitySolution.artifactListPage.importCompletedWithErrorsToastText',
+      {
+        defaultMessage:
+          '{importedCount} imported, {failedCount} failed. Review the errors for details.',
+        values: { importedCount, failedCount },
+      }
+    );
+  },
+  pageImportAllItemsFailedToastText: i18n.translate(
+    'xpack.securitySolution.artifactListPage.importAllItemsFailedToastText',
+    {
+      defaultMessage: "The artifacts couldn't be imported. Review the errors and try again.",
+    }
+  ),
+  pageImportViewErrorsButton: i18n.translate(
+    'xpack.securitySolution.artifactListPage.importViewErrorsButton',
+    {
+      defaultMessage: 'View errors',
+    }
+  ),
+  pageImportErrorToastTitle: i18n.translate(
+    'xpack.securitySolution.artifactListPage.importErrorToastTitle',
+    {
+      defaultMessage: "Artifacts weren't imported",
+    }
+  ),
+  pageImportOnlyCurrentArtifactCanBeImportedError: i18n.translate(
+    'xpack.securitySolution.artifactListPage.importOnlyCurrentArtifactCanBeImportedToastMessage',
+    {
+      defaultMessage: 'You can only import the current artifact type here.',
+    }
+  ),
+  importFlyoutDetails: i18n.translate(
+    'xpack.securitySolution.artifactListPage.importFlyoutDetails',
+    {
+      defaultMessage: 'Import artifacts to your artifact list.',
+    }
+  ),
+  importFlyoutImportSubmitButtonLabel: i18n.translate(
+    'xpack.securitySolution.artifactListPage.importFlyoutImportSubmitButtonLabel',
+    {
+      defaultMessage: 'Import artifacts',
     }
   ),
 
@@ -66,6 +134,10 @@ export const artifactListPageLabels = Object.freeze({
   emptyStatePrimaryButtonLabel: i18n.translate(
     'xpack.securitySolution.artifactListPage.emptyStatePrimaryButtonLabel',
     { defaultMessage: 'Add' }
+  ),
+  emptyStateImportButtonLabel: i18n.translate(
+    'xpack.securitySolution.artifactListPage.emptyStateImportButtonLabel',
+    { defaultMessage: 'Import artifacts' }
   ),
 
   // ------------------------------
@@ -106,7 +178,101 @@ export const artifactListPageLabels = Object.freeze({
   cardActionDeleteLabel: i18n.translate(
     'xpack.securitySolution.artifactListPage.cardActionDeleteLabel',
     {
-      defaultMessage: 'Delete event filter',
+      defaultMessage: 'Delete artifact',
+    }
+  ),
+
+  // ------------------------------
+  // TABLE labels
+  // ------------------------------
+  tableColumnNameLabel: i18n.translate(
+    'xpack.securitySolution.artifactListPage.table.columnNameLabel',
+    {
+      defaultMessage: 'Name',
+    }
+  ),
+  tableColumnPolicyAssignmentLabel: i18n.translate(
+    'xpack.securitySolution.artifactListPage.table.columnPolicyAssignmentLabel',
+    {
+      defaultMessage: 'Policy assignment',
+    }
+  ),
+  tablePolicyAssignmentGlobalLabel: i18n.translate(
+    'xpack.securitySolution.artifactListPage.table.policyAssignmentGlobalLabel',
+    {
+      defaultMessage: 'Global',
+    }
+  ),
+  tablePolicyAssignmentNoneLabel: i18n.translate(
+    'xpack.securitySolution.artifactListPage.table.policyAssignmentNoneLabel',
+    {
+      defaultMessage: 'None',
+    }
+  ),
+  getTablePolicyAssignmentAdditionalCountLabel: (count: number): string => {
+    return i18n.translate(
+      'xpack.securitySolution.artifactListPage.table.policyAssignmentAdditionalCountLabel',
+      {
+        defaultMessage: '+{count}',
+        values: { count },
+      }
+    );
+  },
+  getTablePolicyAssignmentAdditionalCountAriaLabel: (count: number): string => {
+    return i18n.translate(
+      'xpack.securitySolution.artifactListPage.table.policyAssignmentAdditionalCountAriaLabel',
+      {
+        defaultMessage: '{count, plural, one {# more policy} other {# more policies}}',
+        values: { count },
+      }
+    );
+  },
+  tableColumnOperatingSystemsLabel: i18n.translate(
+    'xpack.securitySolution.artifactListPage.table.columnOperatingSystemsLabel',
+    {
+      defaultMessage: 'Operating systems',
+    }
+  ),
+  tableColumnUpdatedByLabel: i18n.translate(
+    'xpack.securitySolution.artifactListPage.table.columnUpdatedByLabel',
+    {
+      defaultMessage: 'Updated by',
+    }
+  ),
+  tableColumnLastUpdatedLabel: i18n.translate(
+    'xpack.securitySolution.artifactListPage.table.columnLastUpdatedLabel',
+    {
+      defaultMessage: 'Last updated',
+    }
+  ),
+  tableColumnEnabledLabel: i18n.translate(
+    'xpack.securitySolution.artifactListPage.table.columnEnabledLabel',
+    {
+      defaultMessage: 'Enabled',
+    }
+  ),
+  tableEnabledStatusLabel: i18n.translate(
+    'xpack.securitySolution.artifactListPage.table.enabledStatusLabel',
+    {
+      defaultMessage: 'Enabled',
+    }
+  ),
+  tableDisabledStatusLabel: i18n.translate(
+    'xpack.securitySolution.artifactListPage.table.disabledStatusLabel',
+    {
+      defaultMessage: 'Disabled',
+    }
+  ),
+  tableColumnActionsLabel: i18n.translate(
+    'xpack.securitySolution.artifactListPage.table.columnActionsLabel',
+    {
+      defaultMessage: 'Actions',
+    }
+  ),
+  tableNoItemsMessage: i18n.translate(
+    'xpack.securitySolution.artifactListPage.table.noItemsMessage',
+    {
+      defaultMessage: 'No items found',
     }
   ),
 
@@ -120,6 +286,11 @@ export const artifactListPageLabels = Object.freeze({
   // ------------------------------
   ...ARTIFACT_DELETE_LABELS,
   ...ARTIFACT_DELETE_ACTION_LABELS,
+
+  // ------------------------------
+  // ARTIFACT ENABLE / DISABLE
+  // ------------------------------
+  ...ARTIFACT_ENABLE_DISABLE_ACTION_LABELS,
 });
 
 type IAllLabels = typeof artifactListPageLabels;
@@ -136,6 +307,7 @@ export type ArtifactListPageRequiredLabels = Pick<
   | 'pageExportButtonTitle'
   | 'pageExportSuccessToastTitle'
   | 'pageExportErrorToastTitle'
+  | 'pageImportOnlyCurrentArtifactCanBeImportedError'
   | 'getShowingCountLabel'
   | 'cardActionEditLabel'
   | 'cardActionDeleteLabel'
@@ -150,6 +322,7 @@ export type ArtifactListPageRequiredLabels = Pick<
   | 'emptyStateTitle'
   | 'emptyStateInfo'
   | 'emptyStatePrimaryButtonLabel'
+  | 'emptyStateImportButtonLabel'
 >;
 
 export type ArtifactListPageOptionalLabels = Omit<IAllLabels, keyof ArtifactListPageRequiredLabels>;

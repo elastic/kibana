@@ -7,6 +7,7 @@
 
 import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { CPSServerSetup } from '@kbn/cps/server';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
@@ -24,6 +25,8 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import type { ObservabilityAgentBuilderPluginSetup } from '@kbn/observability-agent-builder-plugin/server';
 import type { SloClient } from './client';
 
 export type { SLOConfig } from '../common/config';
@@ -43,11 +46,14 @@ export interface SLOPluginSetupDependencies {
   taskManager: TaskManagerSetupContract;
   spaces?: SpacesPluginSetup;
   cloud?: CloudSetup;
+  cps?: CPSServerSetup;
   usageCollection: UsageCollectionSetup;
   licensing: LicensingPluginSetup;
   dataViews: DataViewsServerPluginStart;
   security: SecurityPluginStart;
   sloShared: SloSharedPluginSetup;
+  embeddable: EmbeddableSetup;
+  observabilityAgentBuilder?: ObservabilityAgentBuilderPluginSetup;
 }
 
 export interface SLOPluginStartDependencies {

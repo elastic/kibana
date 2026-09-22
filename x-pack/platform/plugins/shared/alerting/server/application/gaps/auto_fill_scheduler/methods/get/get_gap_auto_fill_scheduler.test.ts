@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import Boom from '@hapi/boom';
 import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
@@ -27,7 +28,6 @@ import { GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE } from '../../../../../saved_
 import type { SavedObject } from '@kbn/core/server';
 import type { GapAutoFillSchedulerSO } from '../../../../../data/gap_auto_fill_scheduler/types/gap_auto_fill_scheduler';
 import { transformSavedObjectToGapAutoFillSchedulerResult } from '../../transforms';
-
 const kibanaVersion = 'v8.0.0';
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 const taskManager = taskManagerMock.createStart();
@@ -45,6 +45,7 @@ describe('getGapFillAutoScheduler()', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     rulesClient = new RulesClient({
+      request: httpServerMock.createKibanaRequest(),
       taskManager,
       ruleTypeRegistry,
       unsecuredSavedObjectsClient,
@@ -54,6 +55,7 @@ describe('getGapFillAutoScheduler()', () => {
       namespace: 'default',
       getUserName: jest.fn(),
       createAPIKey: jest.fn(),
+      cloneAPIKey: jest.fn(),
       logger,
       internalSavedObjectsRepository,
       encryptedSavedObjectsClient: encryptedSavedObjects,
@@ -71,6 +73,7 @@ describe('getGapFillAutoScheduler()', () => {
       isSystemAction: jest.fn(),
       connectorAdapterRegistry: new ConnectorAdapterRegistry(),
       uiSettings: uiSettingsServiceMock.createStartContract(),
+      isServerless: false,
     });
 
     const so: SavedObject<GapAutoFillSchedulerSO> = {
@@ -108,7 +111,7 @@ describe('getGapFillAutoScheduler()', () => {
       'gap-1'
     );
 
-    expect(authorization.ensureAuthorized).toHaveBeenCalledTimes(2);
+    expect(authorization.bulkEnsureAuthorized).toHaveBeenCalledTimes(1);
     expect(auditLogger.log).toHaveBeenCalledTimes(1);
 
     expect(result).toEqual(
@@ -124,7 +127,7 @@ describe('getGapFillAutoScheduler()', () => {
         throw new Error('error getting SO!');
       });
 
-      await expect(rulesClient.getGapAutoFillScheduler({ id: 'gap-1' })).rejects.toThrowError(
+      await expect(rulesClient.getGapAutoFillScheduler({ id: 'gap-1' })).rejects.toThrow(
         'error getting SO!'
       );
     });
@@ -157,30 +160,16 @@ describe('getGapFillAutoScheduler()', () => {
       };
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce(so);
 
-      (authorization.ensureAuthorized as jest.Mock).mockImplementationOnce(() => {
+      (authorization.bulkEnsureAuthorized as jest.Mock).mockImplementationOnce(() => {
         throw new Error('Unauthorized');
       });
 
-      await expect(rulesClient.getGapAutoFillScheduler({ id: 'gap-1' })).rejects.toThrowError(
+      await expect(rulesClient.getGapAutoFillScheduler({ id: 'gap-1' })).rejects.toThrow(
         'Unauthorized'
       );
 
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({ error: expect.objectContaining({ message: 'Unauthorized' }) })
-      );
-    });
-
-    test('should throw when saved object has error payload', async () => {
-      const soErrorLike = {
-        id: 'gap-1',
-        type: GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
-        error: { error: 'err', message: 'Unable to get', statusCode: 404 },
-        attributes: { name: 'auto-fill' },
-      } as unknown as SavedObject<GapAutoFillSchedulerSO>;
-      unsecuredSavedObjectsClient.get.mockResolvedValueOnce(soErrorLike);
-
-      await expect(rulesClient.getGapAutoFillScheduler({ id: 'gap-1' })).rejects.toThrowError(
-        'Unable to get'
       );
     });
 

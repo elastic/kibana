@@ -9,6 +9,8 @@ export type * from './api';
 
 export * from '@kbn/index-lifecycle-management-common-shared';
 
+export type { Index } from '@kbn/index-management-plugin/common';
+
 /**
  * These roles reflect how nodes are stratified into different data tiers.
  */

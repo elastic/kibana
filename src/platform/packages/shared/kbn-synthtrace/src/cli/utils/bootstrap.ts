@@ -23,11 +23,16 @@ export async function bootstrap({
   const logger = createLogger(runOptions.logLevel);
   setIdGeneratorStrategy(runOptions.uniqueIds ? 'random' : 'sequential');
 
-  const { kibanaUrl, esUrl } = await getServiceUrls({ ...runOptions, logger });
+  const { kibanaUrl, esUrl, username, password, apiKey } = await getServiceUrls({
+    ...runOptions,
+    logger,
+  });
 
   const kibanaClient = getKibanaClient({
     target: kibanaUrl,
-    apiKey: runOptions.apiKey,
+    username,
+    password,
+    apiKey,
     logger,
   });
 

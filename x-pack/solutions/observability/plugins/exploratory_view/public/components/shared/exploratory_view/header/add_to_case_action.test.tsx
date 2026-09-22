@@ -123,6 +123,7 @@ describe('AddToCaseAction', function () {
           createComment: false,
           reopenCase: false,
           assign: false,
+          manageTemplates: false,
         },
       })
     );

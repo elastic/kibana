@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import React, { memo } from 'react';
 import { EuiBadge } from '@elastic/eui';
 
-import type { MlSummaryJob } from '@kbn/ml-plugin/public';
+import type { MlSummaryJob } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';
 
 import * as i18n from './translations';

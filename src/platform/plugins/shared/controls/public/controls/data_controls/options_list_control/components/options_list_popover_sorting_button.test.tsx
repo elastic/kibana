@@ -9,14 +9,14 @@
 
 import React from 'react';
 
+import type { OptionsListDisplaySettings } from '@kbn/controls-schemas';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { render, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type { OptionsListDisplaySettings } from '@kbn/controls-schemas';
 
+import type { OptionsListComponentApi } from '../../../types';
 import { getOptionsListContextMock } from '../../mocks/api_mocks';
 import { OptionsListControlContext } from '../options_list_context_provider';
-import type { OptionsListComponentApi } from '../types';
 import { OptionsListPopoverSortingButton } from './options_list_popover_sorting_button';
 
 describe('Options list sorting button', () => {
@@ -57,7 +57,7 @@ describe('Options list sorting button', () => {
     const optionsText = within(sortingOptionsDiv)
       .getAllByRole('option')
       .map((el) => el.textContent);
-    expect(optionsText).toEqual(['By document count. Checked option.', 'Alphabetically']);
+    expect(optionsText).toEqual(['By document count', 'Alphabetically']);
   });
 
   test('sorting popover selects appropriate sorting type on load', async () => {
@@ -73,7 +73,7 @@ describe('Options list sorting button', () => {
     const optionsText = within(sortingOptionsDiv)
       .getAllByRole('option')
       .map((el) => el.textContent);
-    expect(optionsText).toEqual(['By document count', 'Alphabetically. Checked option.']);
+    expect(optionsText).toEqual(['By document count', 'Alphabetically']);
 
     const ascendingButton = component.getByTestId('optionsList__sortOrder_asc');
     expect(ascendingButton).toHaveClass('euiButtonGroupButton-isSelected');
@@ -90,7 +90,7 @@ describe('Options list sorting button', () => {
     const optionsText = within(sortingOptionsDiv)
       .getAllByRole('option')
       .map((el) => el.textContent);
-    expect(optionsText).toEqual(['By document count. Checked option.']);
+    expect(optionsText).toEqual(['By document count']);
   });
 
   test('when sorting suggestions, show "By date" sorting option for date fields', async () => {
@@ -105,7 +105,7 @@ describe('Options list sorting button', () => {
     const optionsText = within(sortingOptionsDiv)
       .getAllByRole('option')
       .map((el) => el.textContent);
-    expect(optionsText).toEqual(['By document count. Checked option.', 'By date']);
+    expect(optionsText).toEqual(['By document count', 'By date']);
   });
 
   test('when sorting suggestions, show "Numerically" sorting option for number fields', async () => {
@@ -120,6 +120,6 @@ describe('Options list sorting button', () => {
     const optionsText = within(sortingOptionsDiv)
       .getAllByRole('option')
       .map((el) => el.textContent);
-    expect(optionsText).toEqual(['By document count. Checked option.', 'Numerically']);
+    expect(optionsText).toEqual(['By document count', 'Numerically']);
   });
 });

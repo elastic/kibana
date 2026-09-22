@@ -34,7 +34,7 @@ export interface TryInConsoleButtonProps {
   color?: EuiButtonColor;
   showIcon?: boolean;
   iconType?: string;
-  type?: 'link' | 'button' | 'emptyButton' | 'contextMenuItem';
+  type?: 'link' | 'button' | 'emptyButton' | 'contextMenuItem' | 'tableActionItem';
   telemetryId?: string;
   onClick?: (e: SyntheticEvent<Element>) => void;
   disabled?: boolean;
@@ -49,7 +49,7 @@ export const TryInConsoleButton = ({
   content = RUN_IN_CONSOLE,
   color,
   showIcon = true,
-  iconType = 'console',
+  iconType = 'commandLine',
   type = 'emptyButton',
   telemetryId,
   onClick: onClickProp,
@@ -128,9 +128,15 @@ export const TryInConsoleButton = ({
           {content}
         </EuiButton>
       );
-    case 'contextMenuItem':
+    case 'tableActionItem':
       return (
         <EuiContextMenuItem icon={iconType} hasPanel={false} css={noPadding} {...commonProps}>
+          {content}
+        </EuiContextMenuItem>
+      );
+    case 'contextMenuItem':
+      return (
+        <EuiContextMenuItem icon={iconType} hasPanel={false} {...commonProps}>
           {content}
         </EuiContextMenuItem>
       );

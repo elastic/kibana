@@ -7,15 +7,13 @@
 
 import { schema, type TypeOf } from '@kbn/config-schema';
 import {
-  ScriptDescriptionSchema,
-  ScriptExampleSchema,
   ScriptFileSchema,
-  ScriptInstructionsSchema,
+  ScriptFileTypeSchema,
   ScriptNameSchema,
   ScriptPathToExecutableSchema,
   ScriptPlatformSchema,
   ScriptRequiresInputSchema,
-  ScriptTagsSchema,
+  getScriptsTagSchema,
 } from './common';
 import type { DeepMutable } from '../../../endpoint/types';
 import { validateNonEmptyString } from '../schema_utils';
@@ -26,13 +24,21 @@ export const PatchUpdateScriptRequestSchema = {
       name: schema.maybe(ScriptNameSchema),
       platform: schema.maybe(ScriptPlatformSchema),
       file: schema.maybe(ScriptFileSchema),
+      fileType: schema.maybe(ScriptFileTypeSchema),
       requiresInput: schema.maybe(ScriptRequiresInputSchema),
-      description: schema.maybe(ScriptDescriptionSchema),
-      instructions: schema.maybe(ScriptInstructionsSchema),
-      example: schema.maybe(ScriptExampleSchema),
-      pathToExecutable: schema.maybe(ScriptPathToExecutableSchema),
-      tags: schema.maybe(ScriptTagsSchema),
-      version: schema.maybe(schema.string({ minLength: 1, validate: validateNonEmptyString })),
+      description: schema.maybe(schema.string({ maxLength: 10000 })),
+      instructions: schema.maybe(schema.string({ maxLength: 10000 })),
+      example: schema.maybe(schema.string({ maxLength: 10000 })),
+      pathToExecutable: schema.conditional(
+        schema.siblingRef('fileType'),
+        'archive',
+        ScriptPathToExecutableSchema,
+        schema.never()
+      ),
+      tags: schema.maybe(getScriptsTagSchema('patch')),
+      version: schema.maybe(
+        schema.string({ minLength: 1, maxLength: 256, validate: validateNonEmptyString })
+      ),
     },
     {
       validate: ({ version, ...updates }) => {
@@ -43,7 +49,7 @@ export const PatchUpdateScriptRequestSchema = {
     }
   ),
   params: schema.object({
-    script_id: schema.string({ validate: validateNonEmptyString }),
+    script_id: schema.string({ maxLength: 256, validate: validateNonEmptyString }),
   }),
 };
 

@@ -82,6 +82,7 @@ describe('StatusService', () => {
       },
       metrics: metricsServiceMock.createInternalSetupContract(),
       coreUsageData: coreUsageDataServiceMock.createSetupContract(),
+      loggingSystem: loggingSystemMock.create(),
       ...overrides,
     };
   };
@@ -620,6 +621,17 @@ describe('StatusService', () => {
             },
           ]
         `);
+      });
+    });
+
+    describe('logging service.state extension', () => {
+      it('should extend the logging service.state global info once it resolves a status', async () => {
+        const deps = setupDeps();
+        const setupContract = await service.setup(deps);
+        await firstValueFrom(setupContract.overall$);
+        expect(deps.loggingSystem.setGlobalContext).toHaveBeenCalledWith({
+          service: { state: 'available' },
+        });
       });
     });
   });

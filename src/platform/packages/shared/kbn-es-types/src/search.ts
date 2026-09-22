@@ -658,11 +658,14 @@ export interface ESQLColumn {
   name: string;
   type: string;
   original_types?: string[];
+  suggested_cast?: string;
+  _meta?: estypes.Metadata;
 }
 
 export type ESQLRow = unknown[];
 
 export interface ESQLSearchResponse {
+  approximation_applied?: boolean;
   columns: ESQLColumn[];
   // In case of ?drop_null_columns in the query, then
   // all_columns will have available and empty fields
@@ -675,16 +678,21 @@ export interface ESQLSearchResponse {
 }
 
 export interface ESQLSearchParams {
-  // TODO: time_zone support was temporarily removed from ES|QL,
-  // we will need to add it back in once it is supported again.
-  // https://github.com/elastic/elasticsearch/pull/102767
-  // time_zone?: string;
+  time_zone?: string;
   query: string;
   filter?: unknown;
   project_routing?: string;
   locale?: string;
   include_execution_metadata?: boolean;
   dropNullColumns?: boolean;
+  approximation?: boolean;
+  /**
+   * Request-level settings. `column_metadata` must be explicitly requested to receive
+   * the `_meta` field on columns in the response.
+   */
+  settings?: {
+    column_metadata?: boolean;
+  };
   params?:
     | estypes.ScalarValue[]
     | Array<

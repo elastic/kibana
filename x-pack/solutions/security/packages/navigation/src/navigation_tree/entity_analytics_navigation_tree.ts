@@ -6,34 +6,12 @@
  */
 
 import type { NodeDefinition } from '@kbn/core-chrome-browser';
-import { lazy } from 'react';
-import { SecurityGroupName, SecurityPageName } from '../constants';
-import { SecurityLinkGroup } from '../link_groups';
+import { SecurityPageName } from '../constants';
 import { securityLink } from '../links';
 
-const LazyIconEntityAnalytics = lazy(() =>
-  import('./custom_icons/entity_analytics').then(({ iconEntityAnalytics }) => ({
-    default: iconEntityAnalytics,
-  }))
-);
-
 export const createEntityAnalyticsNavigationTree = (): NodeDefinition => ({
-  id: SecurityGroupName.entityAnalytics,
-  icon: LazyIconEntityAnalytics,
-  title: SecurityLinkGroup[SecurityGroupName.entityAnalytics].title,
-  renderAs: 'panelOpener',
-  children: [
-    {
-      id: SecurityPageName.entityAnalyticsOverview,
-      link: securityLink(SecurityPageName.entityAnalyticsOverview),
-    },
-    {
-      id: SecurityPageName.entityAnalyticsPrivilegedUserMonitoring,
-      link: securityLink(SecurityPageName.entityAnalyticsPrivilegedUserMonitoring),
-    },
-    {
-      id: SecurityPageName.entityAnalyticsThreatHunting,
-      link: securityLink(SecurityPageName.entityAnalyticsThreatHunting),
-    },
-  ],
+  id: SecurityPageName.entityAnalyticsHomePage,
+  icon: 'chartBarVerticalStack',
+  link: securityLink(SecurityPageName.entityAnalyticsHomePage),
+  badgeType: 'new',
 });

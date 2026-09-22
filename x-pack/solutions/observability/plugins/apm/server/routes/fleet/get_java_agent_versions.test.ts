@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-jest.mock('node-fetch');
-import fetch from 'node-fetch';
-const { Response } = jest.requireActual('node-fetch');
 import { getJavaAgentVersionsFromRegistry } from './get_java_agent_versions';
+
+const mockFetch = jest.spyOn(global, 'fetch');
 
 const javaVersionsXML = `<?xml version="1.0" encoding="UTF-8"?>
 <metadata>
@@ -28,16 +27,15 @@ const javaVersionsXML = `<?xml version="1.0" encoding="UTF-8"?>
 `;
 
 describe('getJavaAgentVersionsFromRegistry', () => {
-  const mockFetch = fetch as jest.MockedFunction<typeof fetch>;
   describe('With valid API return type', () => {
     it('returns latest as first option', async () => {
-      mockFetch.mockReturnValue(new Response(javaVersionsXML));
+      mockFetch.mockResolvedValue(new Response(javaVersionsXML));
       const versions = await getJavaAgentVersionsFromRegistry();
       expect(versions?.[0]).toEqual('latest');
     });
 
     it('returns versions in descending order', async () => {
-      mockFetch.mockReturnValue(new Response(javaVersionsXML));
+      mockFetch.mockResolvedValue(new Response(javaVersionsXML));
       const versions = await getJavaAgentVersionsFromRegistry();
       expect(versions).toEqual(['latest', '1.32.0', '1.31.0', '1.30.1']);
     });
@@ -45,7 +43,7 @@ describe('getJavaAgentVersionsFromRegistry', () => {
 
   describe('With invalid API return type', () => {
     it('returns versions in descending order', async () => {
-      mockFetch.mockReturnValue(new Response(`404`));
+      mockFetch.mockResolvedValue(new Response(`404`));
       const versions = await getJavaAgentVersionsFromRegistry();
       expect(versions).toBeUndefined();
     });

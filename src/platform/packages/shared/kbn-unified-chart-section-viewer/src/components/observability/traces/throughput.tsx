@@ -8,11 +8,13 @@
  */
 
 import React from 'react';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { useTraceMetricsContext } from './context/trace_metrics_context';
 import { Chart } from '../../chart';
 import { useChartLayers } from '../../chart/hooks/use_chart_layers';
 import { ACTION_OPEN_IN_DISCOVER } from '../../../common/constants';
 import { getThroughputChart } from './trace_charts_definition';
+import { BREAKDOWN_LEGEND_CONFIG } from './constants';
 
 type ThroughputChartContentProps = NonNullable<ReturnType<typeof getThroughputChart>>;
 
@@ -23,25 +25,34 @@ const ThroughputChartContent = ({
   color,
   title,
 }: ThroughputChartContentProps) => {
-  const { services, fetchParams, discoverFetch$, indexes, onBrushEnd, onFilter, actions } =
-    useTraceMetricsContext();
+  const {
+    services,
+    fetchParams,
+    discoverFetch$,
+    onBrushEnd,
+    onFilter,
+    actions,
+    profileId,
+    breakdownField,
+  } = useTraceMetricsContext();
 
   const chartLayers = useChartLayers({
-    metric: {
-      name: 'id',
-      instrument: 'histogram',
-      unit,
-      index: indexes,
-      dimensions: [],
-      type: 'metric',
+    metricItem: {
+      metricName: 'id',
+      metricTypes: ['counter'],
+      units: ['count'],
+      fieldTypes: [ES_FIELD_TYPES.DOUBLE],
     },
     color,
     seriesType,
     customFunction: 'COUNT',
+    dimensions: breakdownField ? [{ name: breakdownField }] : [],
   });
 
   return (
     <Chart
+      id="throughput"
+      isSelected={false}
       esqlQuery={esqlQuery}
       size="s"
       discoverFetch$={discoverFetch$}
@@ -52,18 +63,21 @@ const ThroughputChartContent = ({
       onExploreInDiscoverTab={actions.openInNewTab}
       title={title}
       chartLayers={chartLayers}
-      syncTooltips
+      legend={breakdownField ? BREAKDOWN_LEGEND_CONFIG : undefined}
       syncCursor
       extraDisabledActions={[ACTION_OPEN_IN_DISCOVER]}
+      profileId={profileId}
     />
   );
 };
 
 export const ThroughputChart = () => {
-  const { filters, indexes } = useTraceMetricsContext();
+  const { filters, indexes, metadataFields, breakdownField } = useTraceMetricsContext();
   const throughputChart = getThroughputChart({
     indexes,
     filters,
+    metadataFields,
+    breakdownField,
   });
 
   if (!throughputChart) {

@@ -7,10 +7,37 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { get } = require('lodash');
-const memoizeOne = require('memoize-one');
-const { functions: includedFunctions } = require('./functions');
-const { parse: parseFn } = require('./grammar.peggy');
+import { get } from 'lodash';
+import memoizeOne from 'memoize-one';
+import { functions as includedFunctions } from './functions';
+import { parse as parseFn } from './grammar.peggy';
+
+const MAX_EXPRESSION_LENGTH = 8 * 1024;
+const MAX_NESTING_DEPTH = 20;
+
+// Matches single- and double-quoted strings, including escaped quotes (\' and \").
+// Used to strip quoted spans (KQL/Lucene filters, quoted field names) before
+// applying structural limits, so that parentheses and characters inside
+// count(kql='(a or b)') are not counted as math nesting or expression length.
+const QUOTED_STRINGS_RE = /"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'/g;
+
+/** Returns the expression with quoted spans removed, used for structural length and nesting checks. */
+function getUnquoted(input) {
+  return input.replace(QUOTED_STRINGS_RE, '');
+}
+
+function checkNestingDepth(unquoted) {
+  let depth = 0;
+  for (let i = 0; i < unquoted.length; i++) {
+    if (unquoted[i] === '(') {
+      if (++depth > MAX_NESTING_DEPTH) {
+        throw new Error(`Expression exceeds maximum nesting depth of ${MAX_NESTING_DEPTH}`);
+      }
+    } else if (unquoted[i] === ')') {
+      depth--;
+    }
+  }
+}
 
 function parse(input, options) {
   if (input == null) {
@@ -20,6 +47,14 @@ function parse(input, options) {
   if (typeof input !== 'string') {
     throw new Error('Expression must be a string');
   }
+
+  const unquoted = getUnquoted(input);
+
+  if (unquoted.length > MAX_EXPRESSION_LENGTH) {
+    throw new Error(`Expression exceeds maximum length of ${MAX_EXPRESSION_LENGTH} characters`);
+  }
+
+  checkNestingDepth(unquoted);
 
   try {
     return parseFn(input, options);
@@ -81,4 +116,4 @@ function isOperable(args) {
   });
 }
 
-module.exports = { parse: memoizedParse, evaluate, interpret };
+export { memoizedParse as parse, evaluate, interpret, MAX_EXPRESSION_LENGTH, getUnquoted };

@@ -23,7 +23,7 @@ export function registerSampleData(home: HomeServerPluginSetup, logger: Logger) 
           sampleObject: null,
           getPath: () => AGENTBUILDER_PATH,
           label: agentBuilderDataLinkLabel,
-          icon: 'productRobot',
+          icon: 'productAgent',
         },
       ]);
     } catch (error) {

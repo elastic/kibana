@@ -104,7 +104,6 @@ export default function ({ getService }: FtrProviderContext) {
         .post('/internal/security/api_key/_query')
         .set('kbn-xsrf', 'xxx')
         .send({
-          from: 0,
           size: 100,
         })
         .expect(200);
@@ -115,34 +114,38 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    it('should paginate keys', async () => {
+    it('should paginate keys using searchAfter', async () => {
       await createKey('first-api-key', 'rest', false);
       await createKey('second-api-key', 'rest', false);
-      const { body: keys } = await supertest
-        .post('/internal/security/api_key/_query')
-        .set('kbn-xsrf', 'xxx')
-        .send({
-          from: 0,
-          size: 1,
-          sort: { field: 'name', direction: 'asc' },
-        })
-        .expect(200);
-      expect(keys.apiKeys.length).to.be(1);
-      expect(keys.total).to.be(2);
-      expect(keys.apiKeys[0].name).to.be('first-api-key');
 
-      const { body: paginatedKeys } = await supertest
+      // Get the first page
+      const { body: firstPage } = await supertest
         .post('/internal/security/api_key/_query')
         .set('kbn-xsrf', 'xxx')
         .send({
-          from: 1,
           size: 1,
           sort: { field: 'name', direction: 'asc' },
         })
         .expect(200);
-      expect(keys.apiKeys.length).to.be(1);
-      expect(keys.total).to.be(2);
-      expect(paginatedKeys.apiKeys[0].name).to.be('second-api-key');
+      expect(firstPage.apiKeys.length).to.be(1);
+      expect(firstPage.total).to.be(2);
+      expect(firstPage.apiKeys[0].name).to.be('first-api-key');
+      expect(firstPage.searchAfter).to.be.an('array');
+      expect(firstPage.searchAfter.length).to.be.greaterThan(0);
+
+      // Use searchAfter to get the next page
+      const { body: secondPage } = await supertest
+        .post('/internal/security/api_key/_query')
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          size: 1,
+          sort: { field: 'name', direction: 'asc' },
+          searchAfter: firstPage.searchAfter,
+        })
+        .expect(200);
+      expect(secondPage.apiKeys.length).to.be(1);
+      expect(secondPage.total).to.be(2);
+      expect(secondPage.apiKeys[0].name).to.be('second-api-key');
     });
 
     it('should return the correct aggregations', async () => {

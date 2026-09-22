@@ -17,6 +17,7 @@ const defaultMessage = i18n.translate('xpack.streams.cancelModal.message', {
   defaultMessage: 'Are you sure you want to discard your changes?',
 });
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const useDiscardConfirm = <THandler extends (..._args: any[]) => any>(
   handler: THandler,
   options: OverlayModalConfirmOptions & { message?: string; enabled?: boolean } = {}

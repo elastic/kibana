@@ -24,8 +24,8 @@ import { useAgentless } from '../hooks/setup_technology';
 import { WithHeaderLayout } from '../../../../../layouts';
 import type {
   AgentPolicy,
+  NewPackagePolicy,
   PackageInfo,
-  PackagePolicy,
   RegistryPolicyTemplate,
 } from '../../../../../types';
 import { PackageIcon } from '../../../../../components';
@@ -46,7 +46,7 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
   agentPolicy?: AgentPolicy;
   packageInfo?: PackageInfo;
   integrationInfo?: RegistryPolicyTemplate;
-  defaultPolicyData?: Partial<PackagePolicy>;
+  defaultPolicyData?: Partial<NewPackagePolicy>;
   'data-test-subj'?: string;
   tabs?: Array<{
     title: string;
@@ -54,6 +54,7 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
     onClick: React.ReactEventHandler;
   }>;
   children: React.ReactNode;
+  useWidePageLayout?: boolean;
 }> = memo(
   ({
     from,
@@ -66,6 +67,7 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
     defaultPolicyData,
     'data-test-subj': dataTestSubj,
     tabs = [],
+    useWidePageLayout,
   }) => {
     const isAdd = useMemo(() => ['package', 'policy'].includes(from), [from]);
     const isEdit = useMemo(() => ['edit', 'package-edit'].includes(from), [from]);
@@ -246,7 +248,7 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
           {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
           <EuiButtonEmpty
             size="xs"
-            iconType="arrowLeft"
+            iconType="chevronSingleLeft"
             flush="left"
             href={cancelUrl}
             onClick={onCancel}
@@ -286,7 +288,7 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
       </EuiDescriptionList>
     ) : undefined;
 
-    const maxWidth = 800;
+    const maxWidth = useWidePageLayout ? 1200 : 800;
     return (
       <WithHeaderLayout
         restrictHeaderWidth={maxWidth}

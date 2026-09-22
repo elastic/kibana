@@ -12,6 +12,7 @@ export {
   apiHasEditorConfig,
   type ControlGroupRendererProps,
   controlGroupStateBuilder,
+  isControlGroupRendererApi,
 } from './src';
 export type {
   ControlGroupRendererApi,

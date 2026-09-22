@@ -55,6 +55,9 @@ export function SloEditFormObjectiveSectionTimeslices() {
                 min={0}
                 max={100}
                 step={0.001}
+                aria-label={i18n.translate('xpack.slo.sloEdit.timeSliceTarget.ariaLabel', {
+                  defaultMessage: 'Timeslice target (%)',
+                })}
                 onChange={(event) => onChange(event.target.value)}
               />
             )}
@@ -94,6 +97,9 @@ export function SloEditFormObjectiveSectionTimeslices() {
                 min={1}
                 max={120}
                 step={1}
+                aria-label={i18n.translate('xpack.slo.sloEdit.timesliceWindow.ariaLabel', {
+                  defaultMessage: 'Timeslice window (in minutes)',
+                })}
                 onChange={(event) => onChange(String(parseInt(event.target.value, 10)))}
               />
             )}

@@ -6,6 +6,7 @@
  */
 
 import type { FieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
+import { OTEL_CONTENT_FIELD, ECS_CONTENT_FIELD } from '@kbn/streams-schema';
 import { mapFields } from './grok_suggestions_handler';
 import { prefixOTelField } from '@kbn/otel-semantic-conventions';
 
@@ -41,7 +42,7 @@ describe('mapFields', () => {
 
   describe('non-otel (useOtelFieldNames = false)', () => {
     it('maps @timestamp and normal fields as expected', () => {
-      const result = mapFields(reviewResults.slice(0, 2), fieldMetadata, false);
+      const result = mapFields(reviewResults.slice(0, 2), fieldMetadata, false, ECS_CONTENT_FIELD);
       expect(result).toEqual([
         {
           name: 'custom.timestamp',
@@ -59,7 +60,7 @@ describe('mapFields', () => {
 
   describe('otel (useOtelFieldNames = true)', () => {
     it('maps @timestamp, otel_equivalent, and calls prefixOTelField for missing otel_equivalent', () => {
-      const result = mapFields(reviewResults, fieldMetadata, true);
+      const result = mapFields(reviewResults, fieldMetadata, true, OTEL_CONTENT_FIELD);
       expect(result).toEqual([
         {
           name: prefixOTelField('custom.timestamp'),

@@ -1,0 +1,22 @@
+responses:
+  200:
+    description: 'Successful response'
+    content:
+      application/json:
+        examples:
+          deleteAgentUploadFileExample:
+            description: 'Uploaded file successfully deleted'
+            value:
+              id: 'file-id-1'
+              deleted: true
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'

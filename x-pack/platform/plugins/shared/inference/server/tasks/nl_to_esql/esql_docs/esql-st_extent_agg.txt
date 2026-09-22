@@ -1,6 +1,6 @@
 # ST_EXTENT_AGG
 
-Calculates the spatial extent over a field with a geometry type, returning a bounding box for all values of the field.
+Calculates the spatial extent over a field containing geometry data, returning a bounding box that encompasses all values in the field.
 
 ## Syntax
 
@@ -8,18 +8,16 @@ Calculates the spatial extent over a field with a geometry type, returning a bou
 
 ### Parameters
 
-#### `field`
+#### field
 
-The field containing geometry data over which the spatial extent is calculated.
+The column containing geometry values for which the spatial extent (bounding box) will be calculated.
 
 ## Examples
 
-Calculate the spatial extent of airport locations in India
+Finds the bounding box that contains all airport locations in India.
 
 ```esql
 FROM airports
 | WHERE country == "India"
 | STATS extent = ST_EXTENT_AGG(location)
 ```
-
-This example calculates the bounding box for the `location` field of airports in India.

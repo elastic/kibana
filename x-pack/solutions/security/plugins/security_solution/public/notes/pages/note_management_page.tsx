@@ -15,7 +15,7 @@ import {
   EuiFlexItem,
   EuiSpacer,
 } from '@elastic/eui';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { css } from '@emotion/react';
 import { DeleteNoteButtonIcon } from '../components/delete_note_button';
 import { Title } from '../../common/components/header_page/title';
@@ -66,7 +66,7 @@ const columns: Array<EuiBasicTableColumn<Note>> = [
             <OpenFlyoutButtonIcon
               eventId={note.eventId}
               timelineId={note.timelineId}
-              iconType="expand"
+              iconType="maximize"
             />
           ) : null}
         </EuiFlexItem>
@@ -251,6 +251,7 @@ export const NoteManagementPage = () => {
       <EuiSpacer size="m" />
       <NotesUtilityBar />
       <EuiBasicTable
+        tableCaption={i18n.NOTES}
         items={tableNotes}
         pagination={currentPagination}
         columns={columns}

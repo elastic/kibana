@@ -170,9 +170,9 @@ LEAST: returns the smallest value from multiple columns
 ### Search functions
 
 Search functions perform full-text search against the data
-
-MATCH: execute a match query on a specified field (tech preview)
-QSTR: performs a Lucene query string query (tech preview)
+MATCH: execute a match query on a specified field - equivalent to match query for Elasticsearch Query DSL
+QSTR: perform a Lucene query string query. It can also be used to search for patterns in complete Event.
+KQL: perform a KQL query. KQL is a simple text-based query language for filtering data. It can also be used to search for patterns in complete Event
 
 ### Date-time functions
 

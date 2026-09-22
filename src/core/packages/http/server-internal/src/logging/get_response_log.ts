@@ -13,6 +13,7 @@ import type { Request } from '@hapi/hapi';
 import numeral from '@elastic/numeral';
 import type { LogMeta, Logger } from '@kbn/logging';
 import type { KibanaRequestState } from '@kbn/core-http-server';
+import { UIAM_INTERNAL_CALLER_ATTESTATION_HEADER } from '@kbn/core-security-server';
 import { getResponsePayloadBytes } from './get_payload_size';
 
 // If you are updating these, consider whether they should also be updated in the
@@ -23,10 +24,11 @@ const FORBIDDEN_HEADERS = [
   'set-cookie',
   'x-elastic-app-auth',
   'es-client-authentication',
+  UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
 ];
 const REDACTED_HEADER_TEXT = '[REDACTED]';
 
-type HapiHeaders = Record<string, string | string[]>;
+type HapiHeaders = Record<string, string | string[] | undefined>;
 
 // We are excluding sensitive headers by default, until we have a log filtering mechanism.
 function redactSensitiveHeaders(key: string, value: string | string[]): string | string[] {
@@ -35,13 +37,13 @@ function redactSensitiveHeaders(key: string, value: string | string[]): string |
 
 // Shallow clone the headers so they are not mutated if filtered by a RewriteAppender.
 function cloneAndFilterHeaders(headers?: HapiHeaders) {
-  const result = {} as HapiHeaders;
+  const result = {} as Record<string, string | string[]>;
   if (headers) {
     for (const key of Object.keys(headers)) {
-      result[key] = redactSensitiveHeaders(
-        key,
-        Array.isArray(headers[key]) ? [...headers[key]] : headers[key]
-      );
+      const value = headers[key];
+      if (value !== undefined) {
+        result[key] = redactSensitiveHeaders(key, Array.isArray(value) ? [...value] : value);
+      }
     }
   }
   return result;
@@ -68,7 +70,7 @@ export function getEcsResponseLog(request: Request, log: Logger) {
   const bytes = response ? getResponsePayloadBytes(response, log) : undefined;
   const bytesMsg = bytes ? ` - ${numeral(bytes).format('0.0b')}` : '';
 
-  const traceId = (request.app as KibanaRequestState).traceId;
+  const { traceId, requestId } = (request.app as KibanaRequestState) ?? {};
 
   const responseLogObj = response
     ? {
@@ -98,6 +100,7 @@ export function getEcsResponseLog(request: Request, log: Logger) {
         method,
         mime_type: request.mime,
         referrer: request.info.referrer,
+        ...(requestId !== undefined ? { id: requestId } : {}),
         // @ts-expect-error ECS custom field: https://github.com/elastic/ecs/issues/232.
         headers: requestHeaders,
       },
@@ -108,7 +111,9 @@ export function getEcsResponseLog(request: Request, log: Logger) {
       query,
     },
     user_agent: {
-      original: request.headers['user-agent'],
+      original: Array.isArray(request.headers['user-agent'])
+        ? request.headers['user-agent'][0]
+        : request.headers['user-agent'],
     },
     trace: traceId ? { id: traceId } : undefined,
   };
@@ -116,5 +121,32 @@ export function getEcsResponseLog(request: Request, log: Logger) {
   return {
     message,
     meta,
+  };
+}
+
+export function getSlimInfoResponseLog(request: Request): { message: string; meta: LogMeta } {
+  const { path, response } = request;
+  const method = request.method.toUpperCase();
+  const statusCode = response
+    ? isBoom(response)
+      ? response.output.statusCode
+      : response.statusCode
+    : undefined;
+  const { requestId } = (request.app as KibanaRequestState) ?? {};
+
+  return {
+    message: statusCode !== undefined ? `${method} ${path} ${statusCode}` : `${method} ${path}`,
+    meta: {
+      http: {
+        request: {
+          method,
+          ...(requestId !== undefined ? { id: requestId } : {}),
+        },
+        ...(statusCode !== undefined ? { response: { status_code: statusCode } } : {}),
+      },
+      url: {
+        path,
+      },
+    },
   };
 }

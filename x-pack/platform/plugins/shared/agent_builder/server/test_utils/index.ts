@@ -16,6 +16,11 @@ export {
   type CreateScopedRunnerDepsMock,
   createRunnerDepsMock,
   type CreateRunnerDepsMock,
+  createToolHandlerContextMock,
+  type ToolHandlerContextMock,
+  createAgentHandlerContextMock,
+  type AgentHandlerContextMock,
+  createInMemoryConversationTemplates,
 } from './runner';
 export {
   createToolsServiceStartMock,
@@ -47,4 +52,12 @@ export {
   type ConversationServiceMock,
   type ConversationClientMock,
 } from './conversations';
-export { createFormatContextMock } from './attachments';
+export { createFormatContextMock, createResolveContextMock } from './attachments';
+export {
+  createReadonlySkillProviderMock,
+  createWritableSkillProviderMock,
+  createMockedInternalSkill,
+  createMockedPersistedSkillDefinition,
+  type ReadonlySkillProviderMock,
+  type WritableSkillProviderMock,
+} from './skills';

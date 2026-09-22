@@ -5,20 +5,15 @@
  * 2.0.
  */
 
-import type { RequestInit, Response } from 'node-fetch';
-
-import fetch from 'node-fetch';
-import https from 'https';
+import { Agent } from 'undici';
 
 import { SslConfig, sslSchema } from '@kbn/server-http-tools';
 
 import type { UsageRecord } from '../../types';
 import type { UsageApiConfigSchema, TlsConfigSchema } from '../../config';
 
-import { USAGE_REPORTING_ENDPOINT } from '../../constants';
-
 export class UsageReportingService {
-  private agent: https.Agent | undefined;
+  private agent: Agent | undefined;
 
   constructor(
     private readonly config: UsageApiConfigSchema,
@@ -35,7 +30,7 @@ export class UsageReportingService {
       },
     };
     if (this.usageApiUrl.includes('https')) {
-      reqArgs.agent = this.httpAgent;
+      (reqArgs as RequestInit & { dispatcher: Agent }).dispatcher = this.httpAgent;
     }
     return fetch(this.usageApiUrl, reqArgs);
   }
@@ -53,10 +48,10 @@ export class UsageReportingService {
       throw new Error('usage-api url not provided');
     }
 
-    return `${this.config.url}${USAGE_REPORTING_ENDPOINT}`;
+    return this.config.url;
   }
 
-  private get httpAgent(): https.Agent {
+  private get httpAgent(): Agent {
     if (this.agent) {
       return this.agent;
     }
@@ -70,12 +65,14 @@ export class UsageReportingService {
       })
     );
 
-    this.agent = new https.Agent({
-      rejectUnauthorized: tlsConfig.rejectUnauthorized,
-      cert: tlsConfig.certificate,
-      key: tlsConfig.key,
-      ca: tlsConfig.certificateAuthorities,
-      allowPartialTrustChain: true,
+    this.agent = new Agent({
+      connect: {
+        rejectUnauthorized: tlsConfig.rejectUnauthorized,
+        cert: tlsConfig.certificate,
+        key: tlsConfig.key,
+        ca: tlsConfig.certificateAuthorities,
+        allowPartialTrustChain: true,
+      },
     });
 
     return this.agent;

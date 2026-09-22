@@ -15,11 +15,12 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { useMonitorDetailsPage } from '../use_monitor_details_page';
+import { MonitorDetailsPage } from '../../common/app_header';
 import { useMonitorErrors } from '../hooks/use_monitor_errors';
 import { SyntheticsDatePicker } from '../../common/date_picker/synthetics_date_picker';
 import { ErrorsTabContent } from './errors_tab_content';
 import { MonitorPendingWrapper } from '../monitor_pending_wrapper';
+import { useMonitorAttachmentConfig } from '../hooks/use_monitor_attachment_config';
 
 export const MonitorErrors = () => {
   const { errorStates, upStates, loading, data } = useMonitorErrors();
@@ -27,21 +28,21 @@ export const MonitorErrors = () => {
 
   const emptyState = !loading && errorStates && errorStates?.length === 0;
 
-  const redirect = useMonitorDetailsPage();
-  if (redirect) {
-    return redirect;
-  }
+  // Configure the agent builder flyout with the monitor details
+  useMonitorAttachmentConfig();
 
   return (
-    <MonitorPendingWrapper>
-      <SyntheticsDatePicker fullWidth={true} />
-      <EuiSpacer size="m" />
-      {initialLoading && <LoadingErrors />}
-      {emptyState && <EmptyErrors />}
-      <div style={{ visibility: initialLoading || emptyState ? 'collapse' : 'initial' }}>
-        <ErrorsTabContent errorStates={errorStates} upStates={upStates} loading={loading} />
-      </div>
-    </MonitorPendingWrapper>
+    <MonitorDetailsPage selectedTab="errors">
+      <MonitorPendingWrapper>
+        <SyntheticsDatePicker fullWidth={true} />
+        <EuiSpacer size="m" />
+        {initialLoading && <LoadingErrors />}
+        {emptyState && <EmptyErrors />}
+        <div style={{ visibility: initialLoading || emptyState ? 'collapse' : 'initial' }}>
+          <ErrorsTabContent errorStates={errorStates} upStates={upStates} loading={loading} />
+        </div>
+      </MonitorPendingWrapper>
+    </MonitorDetailsPage>
   );
 };
 
@@ -70,7 +71,7 @@ const EmptyErrors = () => {
     <EuiFlexGroup alignItems="center" justifyContent="center" style={{ height: '65vh' }}>
       <EuiFlexItem grow={false} style={{ textAlign: 'center' }}>
         <span>
-          <EuiIcon type="checkInCircleFilled" color="success" size="xl" />
+          <EuiIcon type="checkCircleFill" color="success" size="xl" aria-hidden={true} />
         </span>
         <EuiSpacer size="m" />
         <EuiTitle size="m">

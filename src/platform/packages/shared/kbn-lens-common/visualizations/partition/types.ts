@@ -36,13 +36,13 @@ export interface SharedPartitionLayerState {
   categoryDisplay: CategoryDisplayType;
   legendDisplay: LegendDisplayType;
   legendPosition?: Position;
+  legendSize?: LegendSize;
   legendStats?: PartitionLegendValue[];
+  truncateLegend?: boolean;
+  legendMaxLines?: number;
   nestedLegend?: boolean;
   percentDecimals?: number;
   emptySizeRatio?: number;
-  legendMaxLines?: number;
-  legendSize?: LegendSize;
-  truncateLegend?: boolean;
   colorMapping?: ColorMapping.Config;
 }
 

@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/discover-enhanced-plugin",
   "owner": [
-    "@elastic/kibana-data-discovery"
+    "@elastic/kibana-discover"
   ],
   "group": "platform",
   "visibility": "private",
@@ -16,7 +16,6 @@
     ],
     "requiredPlugins": [
       "uiActions",
-      "embeddable",
       "discover"
     ],
     "optionalPlugins": [
@@ -24,9 +23,7 @@
       "usageCollection"
     ],
     "requiredBundles": [
-      "kibanaUtils",
-      "data",
-      "lens"
+      "kibanaUtils"
     ]
   }
 }

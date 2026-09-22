@@ -20,17 +20,22 @@ export {
   createToolResultEvent,
   createThinkingCompleteEvent,
   createPromptRequestEvent,
+  createBackgroundAgentCompleteEvent,
+  createSubagentRosterUpdatedEvent,
 } from './graph_events';
 export {
   extractTextContent,
   extractToolCalls,
+  extractToolCallsWithReasoning,
   extractToolReturn,
   createUserMessage,
   createAIMessage,
   createToolResultMessage,
   createToolCallMessage,
   generateFakeToolCallId,
+  wrapToolResultContent,
   type ToolCall,
+  type ToolCallWithReasoning,
 } from './messages';
 export {
   toolsToLangchain,
@@ -38,6 +43,9 @@ export {
   toolIdentifierFromToolCall,
   sanitizeToolId,
   createToolIdMappings,
+  reverseMap,
   type ToolIdMapping,
   type ToolsAndMappings,
+  type BuildToolContentParams,
+  type BuildToolContentFn,
 } from './tools';

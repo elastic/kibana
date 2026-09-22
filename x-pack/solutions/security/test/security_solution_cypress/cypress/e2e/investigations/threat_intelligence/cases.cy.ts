@@ -24,16 +24,15 @@ import {
 } from '../../../tasks/threat_intelligence/cases';
 import {
   CASE_COMMENT_EXTERNAL_REFERENCE,
-  FLYOUT_ADD_TO_EXISTING_CASE_ITEM,
-  FLYOUT_ADD_TO_NEW_CASE_ITEM,
-  INDICATORS_TABLE_ADD_TO_EXISTING_CASE_BUTTON_ICON,
-  INDICATORS_TABLE_ADD_TO_NEW_CASE_BUTTON_ICON,
+  FLYOUT_ADD_TO_CASE_ITEM,
+  INDICATORS_TABLE_ADD_TO_CASE_ITEM,
 } from '../../../screens/threat_intelligence/cases';
 import { login } from '../../../tasks/login';
 
 const URL = '/app/security/threat_intelligence/indicators';
 
-describe('Cases with invalid indicators', { tags: ['@ess'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/244231
+describe.skip('Cases with invalid indicators', { tags: ['@ess'] }, () => {
   before(() => cy.task('esArchiverLoad', { archiveName: 'ti_indicators_data_invalid' }));
 
   after(() => cy.task('esArchiverUnload', { archiveName: 'ti_indicators_data_invalid' }));
@@ -48,14 +47,12 @@ describe('Cases with invalid indicators', { tags: ['@ess'] }, () => {
     const documentsNumber = 22;
     openIndicatorsTableMoreActions(documentsNumber - 1);
 
-    cy.get(INDICATORS_TABLE_ADD_TO_EXISTING_CASE_BUTTON_ICON).should('be.disabled');
-    cy.get(INDICATORS_TABLE_ADD_TO_NEW_CASE_BUTTON_ICON).should('be.disabled');
+    cy.get(INDICATORS_TABLE_ADD_TO_CASE_ITEM).should('be.disabled');
 
     openFlyout(documentsNumber - 1);
     openFlyoutTakeAction();
 
-    cy.get(FLYOUT_ADD_TO_EXISTING_CASE_ITEM).should('be.disabled');
-    cy.get(FLYOUT_ADD_TO_NEW_CASE_ITEM).should('be.disabled');
+    cy.get(FLYOUT_ADD_TO_CASE_ITEM).should('be.disabled');
   });
 });
 

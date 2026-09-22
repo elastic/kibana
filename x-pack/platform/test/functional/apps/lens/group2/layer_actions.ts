@@ -14,8 +14,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const retry = getService('retry');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/244198
-  describe.skip('lens layer actions tests', () => {
+  describe('lens layer actions tests', () => {
+    afterEach(async () => {
+      // A failed test can leave the layer settings flyout open, covering the buttons the next test clicks.
+      await lens.closeFlyoutWithBackButton();
+    });
+
     it('should allow creation of lens xy chart', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
@@ -69,9 +73,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('lnsLayerSettings');
       // annotations settings have only ignore filters
       await testSubjects.click('lns-layerSettings-ignoreGlobalFilters');
-      expect(
-        await testSubjects.exists('lns-layerPanel-0 > lnsChangeIndexPatternIgnoringFilters')
-      ).to.be(true);
+      await testSubjects.existOrFail('lns-layerPanel-0 > lnsChangeIndexPatternIgnoringFilters');
       await testSubjects.click('lns-indexPattern-dimensionContainerBack');
     });
 
@@ -171,13 +173,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should switch to pie chart and have layer settings available', async () => {
-      await retry.try(async () => {
-        // click on the tab navigation left button 10 times to make the first tab visible
-        for (let i = 0; i < 10; i++) {
-          await testSubjects.click('unifiedTabs_tabsBar_scrollLeftBtn');
-        }
-        await lens.ensureLayerTabIsActive(0);
-      });
+      await lens.ensureLayerTabIsActive(0);
+
       await lens.switchToVisualization('pie');
       // layer settings still available
       // open the panel
@@ -250,6 +247,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // by default annotations ignore global filters
       await lens.createLayer('annotations');
 
+      await lens.ensureLayerTabIsActive(2);
       await testSubjects.click('lns-layerPanel-2 > lnsXY_xAnnotationsPanel > lns-dimensionTrigger');
 
       await testSubjects.click('lnsXY_annotation_query');
@@ -272,15 +270,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // click on the badge and check the popover
       await testSubjects.click('lns-feature-badges-trigger');
-      expect(
-        (await testSubjects.getVisibleText('lns-feature-badges-reducedSampling-0')).split('\n')
-      ).to.contain('1%');
-      expect(
-        (await testSubjects.getVisibleText('lns-feature-badges-reducedSampling-1')).split('\n')
-      ).to.contain('0.1%');
-      expect(
-        (await testSubjects.getVisibleText('lns-feature-badges-ignoreGlobalFilters-0')).split('\n')
-      ).to.contain('Annotations');
+
+      // Wait for popover content to render and verify badge contents
+      await retry.try(async () => {
+        const samplingText0 = await testSubjects.getVisibleText(
+          'lns-feature-badges-reducedSampling-0'
+        );
+        expect(samplingText0.split('\n')).to.contain('1%');
+      });
+      await retry.try(async () => {
+        const samplingText1 = await testSubjects.getVisibleText(
+          'lns-feature-badges-reducedSampling-1'
+        );
+        expect(samplingText1.split('\n')).to.contain('0.1%');
+      });
+      await retry.try(async () => {
+        const filtersText = await testSubjects.getVisibleText(
+          'lns-feature-badges-ignoreGlobalFilters-0'
+        );
+        expect(filtersText.split('\n')).to.contain('Annotations');
+      });
     });
   });
 }

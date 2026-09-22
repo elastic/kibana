@@ -56,6 +56,12 @@ export interface TabbedContentProps
   services: TabsServices;
   hideTabsBar?: boolean;
   renderContent?: (selectedItem: TabItem) => React.ReactNode;
+  /**
+   * Optional wrapper for the tabs bar. Receives the tabs bar node
+   * and returns a node to render in its place.
+   * When omitted, the default tabs bar is rendered as-is.
+   */
+  wrapTabsBar?: (tabsBar: React.ReactNode) => React.ReactNode;
   createItem: () => TabItem;
   customNewTabButton?: React.ReactElement;
   onChanged: (state: TabbedContentState) => void;
@@ -63,8 +69,12 @@ export interface TabbedContentProps
   onEBTEvent: (event: TabsEBTEvent) => void;
   tabContentIdOverride?: string;
   appendRight?: React.ReactNode;
-  /** Optional function to provide additional menu items for tabs */
+  /** Optional function to provide menu items placed after rename/duplicate */
+  getTopTabMenuItems?: (item: TabItem) => TabMenuItem[];
+  /** Optional function to provide additional menu items placed at the end of the menu */
   getAdditionalTabMenuItems?: (item: TabItem) => TabMenuItem[];
+  /** Optional callback invoked when tabs are dropped due to the max tab limit */
+  onTabLimitReached?: (droppedCount: number) => void;
 }
 
 export interface TabbedContentState {
@@ -95,6 +105,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   services,
   hideTabsBar = false,
   renderContent,
+  wrapTabsBar,
   createItem,
   onChanged,
   tabContentIdOverride,
@@ -107,7 +118,9 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   disableDragAndDrop = false,
   disableTabsBarMenu = false,
   appendRight,
+  getTopTabMenuItems,
   getAdditionalTabMenuItems,
+  onTabLimitReached,
 }) => {
   const { euiTheme } = useEuiTheme();
   const tabsBarApi = useRef<TabsBarApi | null>(null);
@@ -188,13 +201,20 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   );
 
   const onSelectRecentlyClosed = useCallback(
-    async (item: TabItem) => {
-      const newItem = createItem();
-      const restoredItem = { ...omit(item, 'closedAt'), id: newItem.id, restoredFromId: item.id };
-      tabsBarApi.current?.moveFocusToNextSelectedItem(restoredItem);
-
+    async (item: RecentlyClosedTabItem) => {
       changeState((prevState) => {
-        const nextState = selectRecentlyClosedTab(prevState, restoredItem);
+        if (maxItemsCount && prevState.items.length >= maxItemsCount) {
+          return prevState;
+        }
+
+        const newItem = createItem();
+        const restoredItem = {
+          ...omit(item, 'closedAt'),
+          id: newItem.id,
+          restoredFromId: item.id,
+        };
+
+        tabsBarApi.current?.moveFocusToNextSelectedItem(restoredItem);
 
         onEBTEvent({
           [TabsEventDataKeys.TABS_EVENT_NAME]: TabsEventName.tabSelectRecentlyClosed,
@@ -202,10 +222,59 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
           [TabsEventDataKeys.TOTAL_TABS_OPEN]: prevState.items.length,
         });
 
-        return nextState;
+        return selectRecentlyClosedTab(prevState, restoredItem);
       });
     },
-    [changeState, createItem, onEBTEvent]
+    [changeState, createItem, maxItemsCount, onEBTEvent]
+  );
+
+  const onRestoreRecentlyClosedGroup = useCallback(
+    async (itemsToRestore: RecentlyClosedTabItem[]) => {
+      if (itemsToRestore.length === 0) {
+        return;
+      }
+
+      changeState((prevState) => {
+        const remainingCapacity = maxItemsCount
+          ? Math.max(0, maxItemsCount - prevState.items.length)
+          : itemsToRestore.length;
+
+        const droppedCount =
+          itemsToRestore.length - Math.min(itemsToRestore.length, remainingCapacity);
+
+        const restoredItems = itemsToRestore.slice(0, remainingCapacity).map((item) => {
+          const newItem = createItem();
+          return { ...omit(item, 'closedAt'), id: newItem.id, restoredFromId: item.id };
+        });
+
+        if (restoredItems.length === 0) {
+          return prevState;
+        }
+
+        if (droppedCount > 0) {
+          onTabLimitReached?.(droppedCount);
+        }
+
+        const nextSelectedItem = restoredItems.at(0) ?? prevState.selectedItem;
+        if (nextSelectedItem) {
+          tabsBarApi.current?.moveFocusToNextSelectedItem(nextSelectedItem);
+        }
+
+        restoredItems.forEach((restoredItem) => {
+          onEBTEvent({
+            [TabsEventDataKeys.TABS_EVENT_NAME]: TabsEventName.tabSelectRecentlyClosed,
+            [TabsEventDataKeys.TAB_ID]: restoredItem.restoredFromId ?? restoredItem.id,
+            [TabsEventDataKeys.TOTAL_TABS_OPEN]: prevState.items.length,
+          });
+        });
+
+        return {
+          items: [...prevState.items, ...restoredItems],
+          selectedItem: nextSelectedItem,
+        };
+      });
+    },
+    [changeState, createItem, maxItemsCount, onEBTEvent, onTabLimitReached]
   );
 
   const onClose = useCallback(
@@ -347,6 +416,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
       onDuplicate,
       onCloseOtherTabs,
       onCloseTabsToTheRight,
+      getTopTabMenuItems,
       getAdditionalTabMenuItems,
     });
   }, [
@@ -355,11 +425,14 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
     onDuplicate,
     onCloseOtherTabs,
     onCloseTabsToTheRight,
+    getTopTabMenuItems,
     getAdditionalTabMenuItems,
   ]);
 
   const tabsBarContainerCss = css`
-    background-color: ${euiTheme.colors.lightestShade};
+    width: 100%;
+    min-width: 0;
+    background-color: ${euiTheme.colors.backgroundBasePlain};
   `;
 
   const tabsBarComponentCss = css`
@@ -393,6 +466,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
           onLabelEdited={onLabelEdited}
           onSelect={onSelect}
           onSelectRecentlyClosed={onSelectRecentlyClosed}
+          onRestoreRecentlyClosedGroup={onRestoreRecentlyClosedGroup}
           onClearRecentlyClosed={onClearRecentlyClosed}
           onReorder={onReorder}
           onClose={onClose}
@@ -426,8 +500,16 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
     </EuiFlexGroup>
   );
 
+  const tabsBarNode = hideTabsBar ? null : tabsBar;
+  const renderedTabsBar = wrapTabsBar ? wrapTabsBar(tabsBarNode) : tabsBarNode;
+
+  // The separating line between tabs and content
+  const tabsBarSeparatorCss = css`
+    border-bottom: ${euiTheme.border.thin};
+  `;
+
   if (!renderContent) {
-    return tabsBar;
+    return <div css={tabsBarSeparatorCss}>{renderedTabsBar}</div>;
   }
 
   return (
@@ -437,7 +519,11 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
       gutterSize="none"
       className="eui-fullHeight"
     >
-      {!hideTabsBar && <EuiFlexItem grow={false}>{tabsBar}</EuiFlexItem>}
+      {renderedTabsBar && (
+        <EuiFlexItem grow={false} css={tabsBarSeparatorCss}>
+          {renderedTabsBar}
+        </EuiFlexItem>
+      )}
       {selectedItem ? (
         <EuiFlexItem
           data-test-subj="unifiedTabs_selectedTabContent"

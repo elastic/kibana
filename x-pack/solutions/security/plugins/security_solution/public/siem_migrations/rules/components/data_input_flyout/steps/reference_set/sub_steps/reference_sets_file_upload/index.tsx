@@ -12,21 +12,24 @@ import { LookupsFileUpload } from '../../../../../../../common/components';
 import type { SiemMigrationResourceData } from '../../../../../../../../../common/siem_migrations/model/common.gen';
 import { useUpsertResources } from '../../../../../../service/hooks/use_upsert_resources';
 import type { RuleMigrationTaskStats } from '../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
-import * as i18n from './translations';
 import { MigrationSource } from '../../../../../../../common/types';
+import { useRuleMigrationVendorCopy } from '../../../../../../hooks/use_rule_migration_vendor_copy';
 
 export interface RulesFileUploadStepProps {
   status: EuiStepStatus;
   migrationStats: RuleMigrationTaskStats;
   missingLookups: string[];
   addUploadedLookups: AddUploadedLookups;
+  onSkip?: () => void;
 }
 export const useReferencesFileUploadStep = ({
   status,
   migrationStats,
   addUploadedLookups,
+  onSkip,
 }: RulesFileUploadStepProps): EuiStepProps => {
   const { upsertResources, isLoading, error } = useUpsertResources(addUploadedLookups);
+  const { resourceDataInputStep } = useRuleMigrationVendorCopy(MigrationSource.QRADAR);
 
   const upsertMigrationResources = useCallback(
     (lookupsFromFile: SiemMigrationResourceData[]) => {
@@ -53,7 +56,7 @@ export const useReferencesFileUploadStep = ({
   }, [isLoading, error, status]);
 
   return {
-    title: i18n.REFERENCE_SETS_DATA_INPUT_FILE_UPLOAD_TITLE,
+    title: resourceDataInputStep.fileUploadTitle,
     status: uploadStepStatus,
     children: (
       <LookupsFileUpload
@@ -61,6 +64,7 @@ export const useReferencesFileUploadStep = ({
         isLoading={isLoading}
         apiError={error?.message}
         migrationSource={MigrationSource.QRADAR}
+        onSkip={onSkip}
       />
     ),
   };

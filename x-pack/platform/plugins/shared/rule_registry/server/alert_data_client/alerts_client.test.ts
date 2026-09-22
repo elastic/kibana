@@ -69,6 +69,10 @@ describe('AlertsClient', () => {
         Object {
           "_source": undefined,
           "aggs": undefined,
+          "expand_wildcards": Array [
+            "open",
+            "hidden",
+          ],
           "fields": Array [
             "kibana.alert.rule.rule_type_id",
             "kibana.alert.rule.consumer",
@@ -163,6 +167,10 @@ describe('AlertsClient', () => {
         Object {
           "_source": undefined,
           "aggs": undefined,
+          "expand_wildcards": Array [
+            "open",
+            "hidden",
+          ],
           "fields": Array [
             "kibana.alert.rule.rule_type_id",
             "kibana.alert.rule.consumer",
@@ -299,8 +307,11 @@ describe('AlertsClient', () => {
       expect(getRuleListMock).not.toHaveBeenCalled();
 
       expect(getAlertIndicesAliasMock).toHaveBeenCalledTimes(2);
-      expect(getAlertIndicesAliasMock).nthCalledWith(1, ['siem.esqlRule']);
-      expect(getAlertIndicesAliasMock).nthCalledWith(2, ['.es-query', 'logs.alert.document.count']);
+      expect(getAlertIndicesAliasMock).toHaveBeenNthCalledWith(1, ['siem.esqlRule']);
+      expect(getAlertIndicesAliasMock).toHaveBeenNthCalledWith(2, [
+        '.es-query',
+        'logs.alert.document.count',
+      ]);
     });
 
     test('should fetch alert fields correctly', async () => {
@@ -632,6 +643,24 @@ describe('AlertsClient', () => {
         expect(esClientMock.updateByQuery).toHaveBeenCalledTimes(1);
       });
 
+      it('should scope the updateByQuery to the current space', async () => {
+        await alertsClient.bulkUpdateTags({
+          alertIds: ['alert-1', 'alert-2'],
+          index: '.alerts-security.alerts-default',
+          add: ['urgent'],
+        });
+
+        const query = esClientMock.updateByQuery.mock.calls[0][0].query;
+        expect(query).toEqual({
+          bool: {
+            filter: [
+              { ids: { values: ['alert-1', 'alert-2'] } },
+              { terms: { 'kibana.space_ids': ['space-1', '*'] } },
+            ],
+          },
+        });
+      });
+
       it('should construct the query and aggs correctly when getting the rule type ids and consumers', async () => {
         await alertsClient.bulkUpdateTags({
           alertIds: ['alert-1', 'alert-2'],
@@ -800,54 +829,68 @@ describe('AlertsClient', () => {
             "bool": Object {
               "filter": Array [
                 Object {
-                  "multi_match": Object {
-                    "lenient": true,
-                    "query": "some-query",
-                    "type": "best_fields",
+                  "bool": Object {
+                    "filter": Array [
+                      Object {
+                        "multi_match": Object {
+                          "lenient": true,
+                          "query": "some-query",
+                          "type": "best_fields",
+                        },
+                      },
+                      Object {
+                        "arguments": Array [
+                          Object {
+                            "arguments": Array [
+                              Object {
+                                "isQuoted": false,
+                                "type": "literal",
+                                "value": "alert.attributes.alertTypeId",
+                              },
+                              Object {
+                                "isQuoted": false,
+                                "type": "literal",
+                                "value": "test-rule-type-1",
+                              },
+                            ],
+                            "function": "is",
+                            "type": "function",
+                          },
+                          Object {
+                            "arguments": Array [
+                              Object {
+                                "isQuoted": false,
+                                "type": "literal",
+                                "value": "alert.attributes.consumer",
+                              },
+                              Object {
+                                "isQuoted": false,
+                                "type": "literal",
+                                "value": "foo",
+                              },
+                            ],
+                            "function": "is",
+                            "type": "function",
+                          },
+                        ],
+                        "function": "and",
+                        "type": "function",
+                      },
+                    ],
+                    "must": Array [],
+                    "must_not": Array [],
+                    "should": Array [],
                   },
                 },
                 Object {
-                  "arguments": Array [
-                    Object {
-                      "arguments": Array [
-                        Object {
-                          "isQuoted": false,
-                          "type": "literal",
-                          "value": "alert.attributes.alertTypeId",
-                        },
-                        Object {
-                          "isQuoted": false,
-                          "type": "literal",
-                          "value": "test-rule-type-1",
-                        },
-                      ],
-                      "function": "is",
-                      "type": "function",
-                    },
-                    Object {
-                      "arguments": Array [
-                        Object {
-                          "isQuoted": false,
-                          "type": "literal",
-                          "value": "alert.attributes.consumer",
-                        },
-                        Object {
-                          "isQuoted": false,
-                          "type": "literal",
-                          "value": "foo",
-                        },
-                      ],
-                      "function": "is",
-                      "type": "function",
-                    },
-                  ],
-                  "function": "and",
-                  "type": "function",
+                  "terms": Object {
+                    "kibana.space_ids": Array [
+                      "space-1",
+                      "*",
+                    ],
+                  },
                 },
               ],
-              "must": Array [],
-              "must_not": Array [],
-              "should": Array [],
             },
           }
         `);

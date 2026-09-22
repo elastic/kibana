@@ -6,6 +6,12 @@
  */
 
 import type { RequiredPaletteParamTypes } from '@kbn/coloring';
+import { KbnPalette } from '@kbn/palettes';
+import type { SecondaryTrend, SecondaryTrendType } from '@kbn/lens-common';
+import {
+  LENS_METRIC_SECONDARY_DEFAULT_STATIC_COLOR,
+  LENS_METRIC_DEFAULT_COLOR_STEPS,
+} from '@kbn/lens-common';
 import { defaultPaletteParams as sharedDefaultParams } from '../../shared_components';
 
 export const RANGE_MIN = 0;
@@ -14,7 +20,7 @@ export const defaultPercentagePaletteParams: RequiredPaletteParamTypes = {
   ...sharedDefaultParams,
   name: 'status',
   rangeType: 'percent',
-  steps: 3,
+  steps: LENS_METRIC_DEFAULT_COLOR_STEPS,
   maxSteps: 5,
   continuity: 'all',
   colorStops: [],
@@ -27,9 +33,29 @@ export const defaultNumberPaletteParams: RequiredPaletteParamTypes = {
   rangeType: 'number',
   rangeMin: -Infinity,
   rangeMax: Infinity,
-  steps: 3,
+  steps: LENS_METRIC_DEFAULT_COLOR_STEPS,
   maxSteps: 5,
   continuity: 'all',
   colorStops: [],
   stops: [],
 };
+
+export const DEFAULT_PALETTE_ID = KbnPalette.CompareTo;
+export function getDefaultConfigForMode(mode: SecondaryTrendType): SecondaryTrend {
+  if (mode === 'none') {
+    return { type: 'none' };
+  }
+  if (mode === 'static') {
+    return {
+      type: 'static',
+      color: LENS_METRIC_SECONDARY_DEFAULT_STATIC_COLOR,
+    };
+  }
+  return {
+    type: 'dynamic',
+    visuals: 'both',
+    paletteId: DEFAULT_PALETTE_ID,
+    reversed: false,
+    baselineValue: 0,
+  };
+}

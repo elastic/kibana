@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/import-resolver'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-operations'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/import-resolver'
+  title: '@kbn/import-resolver'
   description: Moon project for @kbn/import-resolver
   channel: ''
   owner: '@elastic/kibana-operations'
-  metadata:
-    sourceRoot: src/platform/packages/private/kbn-import-resolver
+  sourceRoot: src/platform/packages/private/kbn-import-resolver
 dependsOn:
   - '@kbn/repo-info'
   - '@kbn/jest-serializers'

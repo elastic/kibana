@@ -10,7 +10,6 @@ import {
   EuiText,
   EuiSpacer,
   EuiCodeBlock,
-  EuiCallOut,
   EuiButton,
   EuiCopy,
   EuiFilterGroup,
@@ -21,6 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import {
   FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE,
@@ -88,46 +88,38 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
   const [copyButtonClicked, setCopyButtonClicked] = useState(false);
 
   const systemPackageCallout = (
-    <EuiCallOut
+    <KbnWarningCallout
       title={i18n.translate('xpack.fleet.enrollmentInstructions.callout', {
         defaultMessage:
           'We recommend using the installers (TAR/ZIP) over system packages (RPM/DEB) because they provide the ability to upgrade your agent with Fleet.',
       })}
-      color="warning"
-      iconType="warning"
     />
   );
 
   const k8sCallout = (
-    <EuiCallOut
+    <KbnWarningCallout
       title={i18n.translate('xpack.fleet.enrollmentInstructions.k8sCallout', {
         defaultMessage:
           'We recommend adding the Kubernetes integration to your agent policy in order to get useful metrics and logs from your Kubernetes clusters.',
       })}
-      color="warning"
-      iconType="warning"
     />
   );
 
   const k8sCSPMCallout = (
-    <EuiCallOut
+    <KbnWarningCallout
       title={i18n.translate('xpack.fleet.enrollmentInstructions.placeHolderCallout', {
         defaultMessage:
           'We strongly advise against deploying CSPM within a Kubernetes cluster. Doing so may lead to redundant data fetching, which can cause increased consumption costs within your Elastic account and potentially trigger API rate limiting in your cloud account(s).',
       })}
-      color="warning"
-      iconType="warning"
     />
   );
 
   const macCallout = (
-    <EuiCallOut
+    <KbnWarningCallout
       title={i18n.translate('xpack.fleet.enrollmentInstructions.macCallout', {
         defaultMessage:
           'We recommend against deploying this integration within Mac as it is currently not being supported.',
       })}
-      color="warning"
-      iconType="warning"
     />
   );
 
@@ -162,14 +154,20 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
               </EuiFilterButton>
             ))}
             <EuiPopover
+              aria-label={i18n.translate('xpack.fleet.agentEnrollment.morePlatformsLabel', {
+                defaultMessage: 'More platforms',
+              })}
               button={
                 <EuiFilterButton
-                  iconType="arrowDown"
+                  iconType="chevronSingleDown"
                   data-test-subj="platformSelectorExtended"
                   onClick={() => setShowExtendedPlatforms(!showExtendedPlatforms)}
                   isSelected={showExtendedPlatforms}
                   hasActiveFilters={extendedPlatforms.includes(platform)}
                   numActiveFilters={extendedPlatforms.includes(platform) ? 1 : 0}
+                  aria-label={i18n.translate('xpack.fleet.agentEnrollment.morePlatformsLabel', {
+                    defaultMessage: 'More platforms',
+                  })}
                   css={css`
                     .euiFilterButton__text {
                       min-inline-size: 0;
@@ -181,7 +179,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
               }
               isOpen={showExtendedPlatforms}
               closePopover={() => setShowExtendedPlatforms(false)}
-              panelPaddingSize="none"
+              panelPaddingSize="s"
               repositionOnScroll={true}
             >
               <EuiSelectable
@@ -198,9 +196,12 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
                   checked: platform === option.id ? 'on' : undefined,
                   'data-test-subj': option['data-test-subj'],
                 }))}
-                onChange={(_allOptions, _event, option) => setPlatform(option.key)}
+                onChange={(_allOptions, _event, option) => {
+                  setPlatform(option.key);
+                  setShowExtendedPlatforms(false);
+                }}
                 css={{ width: 150 }}
-                listProps={{ paddingSize: 'none', onFocusBadge: false }}
+                listProps={{ onFocusBadge: false }}
               >
                 {(list) => list}
               </EuiSelectable>
@@ -282,7 +283,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
                 {(copy) => (
                   <EuiButton
                     color="primary"
-                    iconType="copyClipboard"
+                    iconType="copy"
                     size="m"
                     onClick={() => onCopyButtonClick(copy)}
                   >

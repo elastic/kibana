@@ -16,7 +16,10 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { estypes } from '@elastic/elasticsearch';
 import type { SiemMigrationVendor } from '../../../../../common/siem_migrations/model/common.gen';
-import type { MigrationType } from '../../../../../common/siem_migrations/types';
+import type {
+  MigrationType,
+  SiemMigrationFilters,
+} from '../../../../../common/siem_migrations/types';
 import type { ItemDocument, Stored } from '../types';
 import {
   SiemMigrationStatus,
@@ -27,7 +30,6 @@ import { MAX_ES_SEARCH_SIZE } from './constants';
 import type {
   SiemMigrationAllDataStats,
   SiemMigrationDataStats,
-  SiemMigrationFilters,
   SiemMigrationGetItemsOptions,
   SiemMigrationSort,
 } from './types';
@@ -200,7 +202,7 @@ export abstract class SiemMigrationsDataItemClient<
   /** Retrieves the stats for the migrations items with the provided id */
   public async getStats(migrationId: string): Promise<SiemMigrationDataStats> {
     const index = await this.getIndexName();
-    const query = this.getFilterQuery(migrationId);
+    const query = this.getFilterQuery(migrationId, { isEligibleForTranslation: true });
     const aggregations = {
       status: { terms: { field: 'status' } },
       createdAt: { min: { field: '@timestamp' } },
@@ -241,8 +243,10 @@ export abstract class SiemMigrationsDataItemClient<
         },
       },
     };
+
+    const query = this.getFilterQuery(undefined, { isEligibleForTranslation: true });
     const result = await this.esClient
-      .search({ index, aggregations, _source: false })
+      .search({ index, query, aggregations, _source: false })
       .catch((error) => {
         this.logger.error(`Error getting all migration ${this.type} stats: ${error.message}`);
         throw error;
@@ -380,10 +384,14 @@ export abstract class SiemMigrationsDataItemClient<
   }
 
   protected getFilterQuery(
-    migrationId: string,
+    migrationId?: string,
     filters: SiemMigrationFilters = {}
   ): { bool: { filter: QueryDslQueryContainer[] } } {
-    const filter: QueryDslQueryContainer[] = [{ term: { migration_id: migrationId } }];
+    const filter: QueryDslQueryContainer[] = [];
+
+    if (migrationId) {
+      filter.push({ term: { migration_id: migrationId } });
+    }
 
     if (filters.status) {
       if (Array.isArray(filters.status)) {
@@ -408,6 +416,10 @@ export abstract class SiemMigrationsDataItemClient<
     }
     if (filters.untranslatable != null) {
       filter.push(filters.untranslatable ? dsl.isUntranslatable() : dsl.isNotUntranslatable());
+    }
+
+    if (filters.isEligibleForTranslation) {
+      filter.push(dsl.isEligibleForTranslation());
     }
     return { bool: { filter } };
   }

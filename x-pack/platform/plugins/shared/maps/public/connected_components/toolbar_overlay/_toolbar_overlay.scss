@@ -7,12 +7,12 @@
 
 .mapToolbarOverlay__button,
 .mapToolbarOverlay__buttonGroup {
-  @include euiBottomShadowLarge;
   position: relative;
   transition: transform $euiAnimSpeedNormal ease-in-out, background $euiAnimSpeedNormal ease-in-out;
 
   .mapToolbarOverlay__buttonIcon-empty {
     color: $euiTextColor !important;
+    display: inline;
   }
 
   &:hover {
@@ -35,6 +35,12 @@
 .mapToolbarOverlay__button {
   @include size($euiSizeXL);
   overflow: hidden;
+
+  .mapToolbarOverlay__buttonAnchor--fill {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
 
   .euiButtonIcon {
     width: 100%;

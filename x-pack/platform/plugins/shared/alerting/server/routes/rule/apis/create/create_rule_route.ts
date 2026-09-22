@@ -7,6 +7,7 @@
 
 import type { RouteOptions } from '../../..';
 import type {
+  CreateRuleActionV1,
   CreateRuleRequestBodyV1,
   CreateRuleRequestParamsV1,
   CreateRuleResponseV1,
@@ -18,6 +19,7 @@ import {
 } from '../../../../../common/routes/rule/apis/create';
 import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
 import { ruleResponseSchemaV1 } from '../../../../../common/routes/rule/response';
+import { ALERTING_CLONE_API_KEY_HEADER } from '../../../../../common';
 import type { Rule } from '../../../../application/rule/types';
 import { RuleTypeDisabledError } from '../../../../lib';
 import { BASE_ALERTING_API_PATH } from '../../../../types';
@@ -74,8 +76,14 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
           const ruleTypes = alertingContext.listTypes();
 
           // Assert versioned inputs
-          const createRuleData: CreateRuleRequestBodyV1<RuleParamsV1> = req.body;
+          const createRuleData = req.body as CreateRuleRequestBodyV1<RuleParamsV1>;
           const params: CreateRuleRequestParamsV1 = req.params;
+
+          // A Kibana-internal caller running on a borrowed API key (e.g. an Agent Builder task)
+          // declares it with this header so the rule is minted its own key instead of keeping the
+          // caller's. A header rather than a body field: it is a directive between Kibana
+          // services, not rule content, and stays out of the public create-rule contract.
+          const cloneApiKey = req.headers?.[ALERTING_CLONE_API_KEY_HEADER] === 'true';
 
           countUsageOfPredefinedIds({
             predefinedId: params?.id,
@@ -99,8 +107,10 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
               isSystemAction: (connectorId: string) => actionsClient.isSystemAction(connectorId),
             });
 
-            const actions = allActions.filter((action) => !actionsClient.isSystemAction(action.id));
-            const systemActions = allActions.filter((action) =>
+            const actions = allActions.filter(
+              (action: CreateRuleActionV1) => !actionsClient.isSystemAction(action.id)
+            );
+            const systemActions = allActions.filter((action: CreateRuleActionV1) =>
               actionsClient.isSystemAction(action.id)
             );
 
@@ -112,7 +122,11 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
                 actions,
                 systemActions,
               }),
-              options: { id: params?.id },
+              options: {
+                id: params?.id,
+                ...(cloneApiKey ? { cloneApiKey } : {}),
+              },
+              ...(createRuleData.template_id ? { templateId: createRuleData.template_id } : {}),
             })) as Rule<RuleParamsV1>;
 
             // Assert versioned response type

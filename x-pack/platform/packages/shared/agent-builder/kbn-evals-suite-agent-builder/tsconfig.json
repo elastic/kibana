@@ -13,5 +13,6 @@
     "@kbn/core",
     "@kbn/scout",
     "@kbn/inference-common",
+    "@kbn/test",
   ]
 }

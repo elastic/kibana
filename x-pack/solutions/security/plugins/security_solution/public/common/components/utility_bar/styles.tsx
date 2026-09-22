@@ -23,7 +23,7 @@ export interface BarGroupProps {
   grow?: boolean;
 }
 
-export const Bar = styled.aside.attrs({
+export const Bar = styled.div.attrs({
   className: 'siemUtilityBar',
 })<BarProps>`
   ${({ border, theme }) => css`

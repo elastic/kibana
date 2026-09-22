@@ -16,6 +16,20 @@
         "chat_completion"
       ]
     },
+    "data_autocomplete_rules": {
+      "service": {
+        "__one_of": [
+          "groq"
+        ]
+      },
+      "service_settings": {
+        "model_id": "",
+        "api_key": "",
+        "rate_limit": {
+          "requests_per_minute": ""
+        }
+      }
+    },
     "methods": [
       "PUT"
     ],
@@ -23,6 +37,7 @@
       "_inference/{task_type}/{groq_inference_id}"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-groq",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-inference-put-groq",
     "availability": {
       "stack": true,
       "serverless": true

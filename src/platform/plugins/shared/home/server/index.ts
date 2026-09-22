@@ -8,7 +8,7 @@
  */
 
 export type { HomeServerPluginSetup, HomeServerPluginStart } from './plugin';
-export { EmbeddableTypes, TutorialsCategory } from './services';
+export { TutorialsCategory } from './services';
 export type {
   AppLinkData,
   ArtifactsSchema,

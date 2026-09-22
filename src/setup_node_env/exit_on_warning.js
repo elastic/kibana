@@ -54,6 +54,13 @@ var IGNORE_WARNINGS = [
     message:
       'The URL https://github.com:crypto-browserify/browserify-rsa.git is invalid. Future versions of Node.js will throw an error.',
   },
+  // cliui has a malformed repository URL in its package.json
+  {
+    name: 'DeprecationWarning',
+    code: 'DEP0170',
+    message:
+      'The URL git+ssh://git@github.com:isaacs/cliui is invalid. Future versions of Node.js will throw an error.',
+  },
   // supertest in HTTP2 mode uses 0.0.0.0 as the server's name
   {
     name: 'DeprecationWarning',
@@ -76,8 +83,8 @@ var IGNORE_WARNINGS = [
     message:
       "Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to '0' makes TLS connections and HTTPS requests insecure by disabling certificate verification.",
   },
-  // from node_modules/node-fetch, fix available but requires es modules, or yarn resolution on whatwg-url
-  // from node_modules/tough-cookie < 5.  fix requires yarn resolution
+  // from node_modules/node-fetch, fix available but requires es modules, or a pnpm override on whatwg-url
+  // from node_modules/tough-cookie < 5.  fix requires a pnpm override
   {
     name: 'DeprecationWarning',
     code: 'DEP0040',
@@ -99,6 +106,16 @@ var IGNORE_WARNINGS = [
   {
     messageContains:
       'Keys with collection values will be stringified due to JS Object restrictions',
+  },
+  // url.parse deprecated. migrate to WHATWG URL API.
+  {
+    name: 'DeprecationWarning',
+    code: 'DEP0169',
+  },
+  // child_process: passing args with shell option true. emitted by storybook's bundled execa.
+  {
+    name: 'DeprecationWarning',
+    code: 'DEP0190',
   },
 ];
 

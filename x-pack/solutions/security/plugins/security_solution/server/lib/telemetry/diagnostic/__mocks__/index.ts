@@ -8,11 +8,19 @@
 import type { AnalyticsServiceStart, Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { CircuitBreakingQueryExecutorImpl } from '../health_diagnostic_receiver';
-import { QueryType, Action } from '../health_diagnostic_service.types';
+import {
+  QueryType,
+  Action,
+  type IndexQuery,
+  type ApiQuery,
+} from '../health_diagnostic_service.types';
+
+export type { IndexQuery, ApiQuery };
 import type { TelemetryConfigProvider } from '../../../../../common/telemetry_config/telemetry_config_provider';
 
 export const createMockLogger = (): jest.Mocked<Logger> =>
   ({
+    trace: jest.fn(),
     debug: jest.fn(),
     info: jest.fn(),
     warn: jest.fn(),
@@ -43,6 +51,7 @@ export const createMockTelemetryConfigProvider = (
 export const createMockQueryExecutor = (): jest.Mocked<CircuitBreakingQueryExecutorImpl> =>
   ({
     search: jest.fn(),
+    searchApi: jest.fn(),
   } as any); // eslint-disable-line @typescript-eslint/no-explicit-any
 
 export const createMockDocument = (overrides = {}) => ({
@@ -69,9 +78,15 @@ export const createMockEsClient = () => {
     ilm: {
       explainLifecycle: jest.fn(),
     },
+    security: {
+      hasPrivileges: jest.fn(),
+    },
     helpers: mockHelpers,
     cluster: { health: jest.fn() },
     nodes: { stats: jest.fn() },
+    transport: {
+      request: jest.fn(),
+    },
   };
 };
 
@@ -96,6 +111,64 @@ export const createMockQuery = (type: QueryType, overrides = {}) => ({
   enabled: true,
   size: 100,
   ...overrides,
+});
+
+export const createMockQueryV1 = (
+  type: QueryType,
+  overrides: Partial<IndexQuery> = {}
+): IndexQuery => ({
+  kind: 'index',
+  id: 'mock-v1-query',
+  name: 'mock-v1-query',
+  index: 'test-index',
+  type,
+  query: '{"query": {"match_all": {}}}',
+  scheduleCron: '5m',
+  filterlist: { 'user.name': Action.KEEP },
+  enabled: true,
+  size: 100,
+  ...overrides,
+});
+
+export const createMockQueryV2 = (
+  type: QueryType,
+  overrides: Partial<IndexQuery> = {}
+): IndexQuery => ({
+  kind: 'index',
+  id: 'mock-v2-query',
+  name: 'mock-v2-query',
+  integrations: ['endpoint'],
+  type,
+  query: '{"query": {"match_all": {}}}',
+  scheduleCron: '5m',
+  filterlist: { 'user.name': Action.KEEP },
+  enabled: true,
+  ...overrides,
+});
+
+export const createMockApiQueryV3 = (overrides: Partial<ApiQuery> = {}): ApiQuery => ({
+  kind: 'api',
+  id: 'mock-api-query',
+  name: 'mock-api-query',
+  api: '_cat/tasks',
+  scheduleCron: '1h',
+  filterlist: {},
+  enabled: true,
+  ...overrides,
+});
+
+export const createMockPackageService = (
+  packages: Array<{
+    name: string;
+    version: string;
+    status: string;
+    data_streams?: Array<{ dataset: string; type: string }>;
+  }> = []
+) => ({
+  asInternalUser: {
+    getPackages: jest.fn().mockResolvedValue(packages),
+    getInstallation: jest.fn().mockResolvedValue(null),
+  },
 });
 
 export const createMockArtifactData = (
@@ -137,10 +210,11 @@ enabled: ${config.enabled}`;
 
 // Helper functions for common test patterns
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const createMockSearchResponse = (hits: any[] = [], aggregations?: any) => ({
+export const createMockSearchResponse = (hits: any[] = [], aggregations?: any, pitId?: string) => ({
   hits: {
     hits: hits.map((hit) => ({ _source: hit, sort: ['sort1'] })),
   },
+  ...(pitId && { pit_id: pitId }),
   ...(aggregations && { aggregations }),
 });
 
@@ -160,6 +234,7 @@ export const setupPointInTime = (
 ) => {
   mockEsClient.openPointInTime.mockResolvedValue({ id: pitId });
   mockEsClient.closePointInTime.mockResolvedValue({});
+  mockEsClient.security.hasPrivileges.mockResolvedValue({ has_all_requested: true });
 };
 
 export const createTestObserver = () => {

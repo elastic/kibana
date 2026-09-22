@@ -214,7 +214,6 @@ const SlackParamsFieldsComponent: React.FunctionComponent<ParamsProps> = ({
         <EuiButtonGroup
           isFullWidth
           buttonSize="m"
-          color="primary"
           legend=""
           options={[
             {
@@ -240,6 +239,7 @@ const SlackParamsFieldsComponent: React.FunctionComponent<ParamsProps> = ({
         <TextMessage
           index={index}
           onChange={onTextChange}
+          messageVariables={messageVariables}
           value={textValue}
           errors={(errors.text ?? []) as string[]}
         />

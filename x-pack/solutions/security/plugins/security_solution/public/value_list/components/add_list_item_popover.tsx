@@ -20,11 +20,11 @@ import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
 import {
   ADD_LIST_ITEM,
-  SUCCESSFULLY_ADDED_ITEM,
-  VALUE_REQUIRED,
-  VALUE_LABEL,
-  ADDING_LIST_ITEM_BUTTON,
   ADD_LIST_ITEM_BUTTON,
+  ADDING_LIST_ITEM_BUTTON,
+  SUCCESSFULLY_ADDED_ITEM,
+  VALUE_LABEL,
+  VALUE_REQUIRED,
 } from '../translations';
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../common/lib/telemetry';
 
@@ -62,12 +62,13 @@ export const AddListItemPopover = ({ listId }: { listId: string }) => {
 
   return (
     <EuiPopover
+      aria-label={ADD_LIST_ITEM}
       initialFocus="#value-list-item-value"
       button={
         <EuiButton
           iconSide="right"
           fill
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           data-test-subj="value-list-item-add-button-show-popover"
           onClick={() => setIsPopoverOpen(true)}
         >
@@ -92,7 +93,7 @@ export const AddListItemPopover = ({ listId }: { listId: string }) => {
                   onChange={formik.handleChange}
                   value={formik.values.value}
                   name="value"
-                  icon="listAdd"
+                  icon="indexOpen"
                   data-test-subj="value-list-item-add-input"
                   isInvalid={!!formik.errors.value}
                 />

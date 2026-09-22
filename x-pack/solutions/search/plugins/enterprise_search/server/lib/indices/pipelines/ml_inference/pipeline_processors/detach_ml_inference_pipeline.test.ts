@@ -71,6 +71,50 @@ describe('detachMlInferencePipeline', () => {
     });
   });
 
+  it('should strip system-managed date fields before updating the parent pipeline', async () => {
+    const mockGetPipelineWithManagedFields = {
+      'my-index@ml-inference': {
+        id: 'my-index@ml-inference',
+        description: 'Parent ML inference pipeline',
+        processors: [
+          {
+            pipeline: {
+              name: 'my-ml-pipeline',
+            },
+          },
+        ],
+        created_date: '2025-01-01T12:00:00.000Z',
+        created_date_millis: 1704110400000,
+        modified_date: '2025-01-15T12:00:00.000Z',
+        modified_date_millis: 1705320000000,
+      },
+    };
+    mockClient.ingest.getPipeline.mockImplementation(() =>
+      Promise.resolve(mockGetPipelineWithManagedFields)
+    );
+    mockClient.ingest.putPipeline.mockImplementation(() => Promise.resolve({ acknowledged: true }));
+
+    await detachMlInferencePipeline(
+      'my-index',
+      'my-ml-pipeline',
+      mockClient as unknown as ElasticsearchClient
+    );
+
+    // Verify the system-managed fields are NOT included in the PUT request
+    expect(mockClient.ingest.putPipeline).toHaveBeenCalledWith({
+      id: 'my-index@ml-inference',
+      description: 'Parent ML inference pipeline',
+      processors: [],
+    });
+
+    // Verify the managed fields are NOT in the call
+    const putPipelineCall = mockClient.ingest.putPipeline.mock.calls[0][0];
+    expect(putPipelineCall).not.toHaveProperty('created_date');
+    expect(putPipelineCall).not.toHaveProperty('created_date_millis');
+    expect(putPipelineCall).not.toHaveProperty('modified_date');
+    expect(putPipelineCall).not.toHaveProperty('modified_date_millis');
+  });
+
   it('should only remove provided pipeline from parent', async () => {
     mockClient.ingest.getPipeline.mockImplementation(() =>
       Promise.resolve({

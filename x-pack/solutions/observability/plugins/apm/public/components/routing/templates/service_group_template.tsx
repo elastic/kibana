@@ -5,40 +5,40 @@
  * 2.0.
  */
 
-import type { EuiPageHeaderProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiSkeletonTitle, EuiIcon } from '@elastic/eui';
-import React from 'react';
+import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import type { AppHeaderTab } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
-import { useFetcher } from '../../../hooks/use_fetcher';
-import { useApmRouter } from '../../../hooks/use_apm_router';
-import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
-import { ApmMainTemplate } from './apm_main_template';
+import React, { useMemo, useState } from 'react';
+import { ApmIndexSettingsContextProvider } from '../../../context/apm_index_settings/apm_index_settings_context';
 import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
+import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
+import { useApmRouter } from '../../../hooks/use_apm_router';
+import { isPending, useFetcher } from '../../../hooks/use_fetcher';
+import { SaveGroupModal } from '../../app/service_groups/service_group_save/save_modal';
+import { ApmMainTemplate } from './apm_main_template';
 
 export function ServiceGroupTemplate({
   pageTitle,
-  pageHeader,
   pagePath,
   children,
-  environmentFilter = true,
+  searchBar,
   serviceGroupContextTab,
   ...pageTemplateProps
 }: {
   pageTitle: string;
-  pageHeader?: EuiPageHeaderProps;
   pagePath: string;
   children: React.ReactNode;
-  environmentFilter?: boolean;
-  serviceGroupContextTab: ServiceGroupContextTab['key'];
+  searchBar?: React.ReactNode;
+  serviceGroupContextTab: ServiceGroupContextTabKey;
 } & KibanaPageTemplateProps) {
   const router = useApmRouter();
   const {
     query,
     query: { serviceGroup: serviceGroupId },
-  } = useAnyOfApmParams('/services', '/service-map');
+  } = useAnyOfApmParams('/services', '/service-map', '/service-groups');
 
-  const { data } = useFetcher(
+  const { data, status } = useFetcher(
     (callApmApi) => {
       if (serviceGroupId) {
         return callApmApi('GET /internal/apm/service-group', {
@@ -48,37 +48,23 @@ export function ServiceGroupTemplate({
     },
     [serviceGroupId]
   );
-
   const serviceGroupName = data?.serviceGroup.groupName;
-  const loadingServiceGroupName = !!serviceGroupId && !serviceGroupName;
+  const savedServiceGroup = data?.serviceGroup;
   const isAllServices = !serviceGroupId;
+  const linkQuery = useMemo(
+    () => ({ ...query, serviceGroup: serviceGroupId ?? '' }),
+    [query, serviceGroupId]
+  );
   const serviceGroupsLink = router.link('/service-groups', {
-    query: { ...query, serviceGroup: '' },
+    query: { ...linkQuery, serviceGroup: '' },
   });
 
-  const serviceGroupsPageTitle = (
-    <EuiFlexGroup
-      direction="row"
-      gutterSize="m"
-      alignItems="center"
-      justifyContent="flexStart"
-      responsive={false}
-    >
-      <EuiFlexItem grow={false}>
-        <EuiSkeletonTitle size="l" style={{ width: 180 }} isLoading={loadingServiceGroupName}>
-          {serviceGroupName ||
-            i18n.translate('xpack.apm.serviceGroup.allServices.title', {
-              defaultMessage: 'Service inventory',
-            })}
-        </EuiSkeletonTitle>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
+  const [isEditGroupModalOpen, setIsEditGroupModalOpen] = useState(false);
 
-  const tabs = useTabs(serviceGroupContextTab);
+  const tabs = useTabs(serviceGroupContextTab, isAllServices);
   const selectedTab = tabs.find(({ isSelected }) => isSelected);
 
-  // this is only used for building the breadcrumbs for the service group page
+  // Classic chrome breadcrumbs only — AppHeader uses explicit `back` when filtered.
   useBreadcrumb(
     () =>
       !serviceGroupName
@@ -93,7 +79,7 @@ export function ServiceGroupTemplate({
               title: i18n.translate('xpack.apm.serviceInventory.breadcrumb.title', {
                 defaultMessage: 'Service inventory',
               }),
-              href: router.link('/services', { query }),
+              href: router.link('/services', { query: linkQuery }),
             },
             {
               title: i18n.translate('xpack.apm.serviceGroups.breadcrumb.title', {
@@ -101,9 +87,9 @@ export function ServiceGroupTemplate({
               }),
               href: serviceGroupsLink,
             },
+            // No href on the current entity — Chrome Next Back would self-link.
             {
               title: serviceGroupName,
-              href: router.link('/services', { query }),
             },
             ...(selectedTab
               ? [
@@ -114,88 +100,134 @@ export function ServiceGroupTemplate({
                 ]
               : []),
           ],
-    [pagePath, pageTitle, query, router, selectedTab, serviceGroupName, serviceGroupsLink],
+    [pagePath, pageTitle, linkQuery, router, selectedTab, serviceGroupName, serviceGroupsLink],
     {
       omitRootOnServerless: true,
     }
   );
 
+  const headerTitle = serviceGroupName ?? (!isAllServices && isPending(status) ? '' : pageTitle);
+
+  const pageMenu = useMemo<AppMenuConfig | undefined>(() => {
+    if (isAllServices) {
+      return undefined;
+    }
+
+    return {
+      primaryActionItem: {
+        id: 'editServiceGroup',
+        label: i18n.translate('xpack.apm.serviceGroups.editGroupLabel', {
+          defaultMessage: 'Edit group',
+        }),
+        iconType: 'pencil',
+        testId: 'apmEditButtonEditGroupButton',
+        disableButton: !savedServiceGroup,
+        isLoading: isPending(status),
+        run: () => {
+          setIsEditGroupModalOpen(true);
+        },
+      },
+    };
+  }, [isAllServices, savedServiceGroup, status]);
+
+  const appHeaderTabs: AppHeaderTab[] = tabs.map(
+    ({ id, label, href, isSelected, 'data-test-subj': dataTestSubj }) => ({
+      id,
+      label,
+      href,
+      isSelected,
+      'data-test-subj': dataTestSubj,
+    })
+  );
+
   return (
-    <ApmMainTemplate
-      pageTitle={serviceGroupsPageTitle}
-      pageHeader={{
-        tabs,
-        breadcrumbs: !isAllServices
-          ? [
-              {
-                text: (
-                  <>
-                    <EuiIcon size="s" type="arrowLeft" />{' '}
-                    {i18n.translate('xpack.apm.serviceGroups.breadcrumb.return', {
-                      defaultMessage: 'Return to service groups',
-                    })}
-                  </>
-                ),
-                color: 'primary',
-                'aria-current': false,
+    <ApmIndexSettingsContextProvider>
+      <ApmMainTemplate
+        header={{
+          title: headerTitle,
+          tabs: appHeaderTabs,
+          back: isAllServices
+            ? undefined
+            : {
                 href: serviceGroupsLink,
+                label: i18n.translate('xpack.apm.serviceGroups.breadcrumb.title', {
+                  defaultMessage: 'Service groups',
+                }),
               },
-            ]
-          : undefined,
-        ...pageHeader,
-      }}
-      environmentFilter={environmentFilter}
-      showServiceGroupSaveButton={!isAllServices}
-      showServiceGroupsNav={isAllServices}
-      selectedNavButton={isAllServices ? 'allServices' : 'serviceGroups'}
-      {...pageTemplateProps}
-    >
-      {children}
-    </ApmMainTemplate>
+          menu: pageMenu,
+        }}
+        searchBar={searchBar}
+        {...pageTemplateProps}
+      >
+        {children}
+      </ApmMainTemplate>
+      {isEditGroupModalOpen && (
+        <SaveGroupModal
+          savedServiceGroup={savedServiceGroup}
+          onClose={() => {
+            setIsEditGroupModalOpen(false);
+          }}
+        />
+      )}
+    </ApmIndexSettingsContextProvider>
   );
 }
 
-type ServiceGroupContextTab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
-  key: 'service-inventory' | 'service-map';
+type ServiceGroupContextTabKey = 'service-inventory' | 'service-map' | 'service-groups';
+
+type ServiceGroupContextTab = AppHeaderTab & {
+  id: ServiceGroupContextTabKey;
   breadcrumbLabel?: string;
+  hidden?: boolean;
 };
 
-function useTabs(selectedTab: ServiceGroupContextTab['key']) {
+function useTabs(
+  selectedTab: ServiceGroupContextTabKey,
+  isAllServices?: boolean
+): ServiceGroupContextTab[] {
   const router = useApmRouter();
-  const { query } = useAnyOfApmParams('/services', '/service-map');
+  const {
+    query,
+    query: { serviceGroup: serviceGroupId },
+  } = useAnyOfApmParams('/services', '/service-map', '/service-groups');
+
+  const linkQuery = { ...query, serviceGroup: serviceGroupId ?? '' };
 
   const tabs: ServiceGroupContextTab[] = [
     {
-      key: 'service-inventory',
+      id: 'service-inventory',
+      'data-test-subj': 'serviceInventoryTab',
       breadcrumbLabel: i18n.translate('xpack.apm.serviceGroup.serviceInventory', {
         defaultMessage: 'Inventory',
       }),
-      label: (
-        <EuiFlexGroup justifyContent="flexStart" alignItems="baseline" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            {i18n.translate('xpack.apm.serviceGroup.serviceInventory', {
-              defaultMessage: 'Inventory',
-            })}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ),
-      href: router.link('/services', { query }),
+      label: i18n.translate('xpack.apm.serviceGroup.serviceInventory', {
+        defaultMessage: 'Inventory',
+      }),
+      href: router.link('/services', { query: linkQuery }),
     },
     {
-      key: 'service-map',
+      id: 'service-map',
+      'data-test-subj': 'serviceMapTab',
       label: i18n.translate('xpack.apm.serviceGroup.serviceMap', {
         defaultMessage: 'Service map',
       }),
-      href: router.link('/service-map', { query }),
+      href: router.link('/service-map', { query: linkQuery }),
+    },
+    {
+      id: 'service-groups',
+      'data-test-subj': 'serviceGroupsTab',
+      label: i18n.translate('xpack.apm.serviceGroup.serviceGroups', {
+        defaultMessage: 'Service groups',
+      }),
+      href: router.link('/service-groups', { query: linkQuery }),
+      hidden: isAllServices === false,
     },
   ];
 
   return tabs
     .filter((t) => !t.hidden)
-    .map(({ href, key, label, breadcrumbLabel }) => ({
-      href,
-      label,
-      isSelected: key === selectedTab,
-      breadcrumbLabel,
+    .map((tab) => ({
+      ...tab,
+      isSelected: tab.id === selectedTab,
     }));
 }

@@ -9,12 +9,8 @@ import type { KueryNode } from '@kbn/es-query';
 import type { Readable } from 'stream';
 import type { ReplaySubject } from 'rxjs';
 import type { AttachmentType } from '../../../common';
-import type {
-  BulkCreateAttachmentsRequest,
-  AttachmentPatchRequest,
-  AttachmentRequest,
-  FindAttachmentsQueryParams,
-} from '../../../common/types/api';
+import type { FindAttachmentsQueryParams } from '../../../common/types/api';
+import type { UnifiedAttachmentPayload } from '../../../common/types/domain/attachment/v2';
 
 /**
  * The arguments needed for creating a new attachment to a case.
@@ -25,14 +21,19 @@ export interface AddArgs {
    */
   caseId: string;
   /**
-   * The attachment values.
+   * Unified payload. Public POST /comments converts first via
+   * toUnifiedAttachmentRequest.
    */
-  comment: AttachmentRequest;
+  comment: UnifiedAttachmentPayload;
 }
 
 export interface BulkCreateArgs {
   caseId: string;
-  attachments: BulkCreateAttachmentsRequest;
+  /**
+   * Unified payloads only. Callers with mixed wire shapes convert first via
+   * toUnifiedAttachmentRequest.
+   */
+  attachments: UnifiedAttachmentPayload[];
 }
 
 /**
@@ -68,9 +69,9 @@ export interface DeleteArgs {
    */
   caseID: string;
   /**
-   * The attachment ID to delete
+   * The attachment saved object id to delete
    */
-  attachmentID: string;
+  savedObjectId: string;
 }
 
 /**
@@ -105,15 +106,15 @@ export interface GetArgs {
   /**
    * The ID of the attachment to retrieve
    */
-  attachmentID: string;
+  savedObjectId: string;
 }
 
 export interface BulkGetArgs {
   caseID: string;
   /**
-   * The ids of the attachments
+   * The saved object ids of the attachments
    */
-  attachmentIDs: string[];
+  savedObjectIds: string[];
 }
 
 export interface GetAllDocumentsAttachedToCase {
@@ -123,6 +124,11 @@ export interface GetAllDocumentsAttachedToCase {
   caseId: string;
   filter?: KueryNode;
   attachmentTypes?: AttachmentType[];
+  /**
+   * Extra unified attachment `type` values (e.g. `security.entity`) to include alongside
+   * the alert/event types, so non-alert unified attachments participate in the query.
+   */
+  unifiedAttachmentTypes?: string[];
 }
 
 /**
@@ -134,9 +140,10 @@ export interface UpdateArgs {
    */
   caseID: string;
   /**
-   * The full attachment request with the fields updated with appropriate values
+   * Unified payload. Public PATCH /comments converts first via
+   * toUnifiedAttachmentPatchRequest.
    */
-  updateRequest: AttachmentPatchRequest;
+  updateRequest: UnifiedAttachmentPayload & { id: string; version: string };
 }
 
 export interface HapiReadableStream extends Readable {

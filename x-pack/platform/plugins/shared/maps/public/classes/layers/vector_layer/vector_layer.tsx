@@ -135,7 +135,9 @@ export interface IVectorLayer extends ILayer {
   getMasks(): Mask[];
 }
 
-export const noResultsIcon = <EuiIcon size="m" color="subdued" type="minusInCircle" />;
+export const noResultsIcon = (
+  <EuiIcon size="m" color="subdued" type="minusCircle" aria-hidden={true} />
+);
 export const NO_RESULTS_ICON_AND_TOOLTIPCONTENT = {
   icon: noResultsIcon,
   tooltipContent: i18n.translate('xpack.maps.vectorLayer.noResultsFoundTooltip', {
@@ -322,7 +324,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
   }
 
   getLayerTypeIconName() {
-    return 'vector';
+    return 'vectorSquare';
   }
 
   async hasLegendDetails() {
@@ -506,6 +508,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     startLoading,
     stopLoading,
     onLoadError,
+    onLoadAbort,
     registerCancelCallback,
     inspectorAdapters,
   }: {
@@ -555,7 +558,9 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
 
       stopLoading(dataRequestId, requestToken, styleMeta, { ...nextMeta, warnings });
     } catch (error) {
-      if (!(error instanceof DataRequestAbortError)) {
+      if (error instanceof DataRequestAbortError) {
+        onLoadAbort(dataRequestId, requestToken);
+      } else {
         onLoadError(dataRequestId, requestToken, error);
       }
       throw error;
@@ -638,6 +643,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     startLoading,
     stopLoading,
     onLoadError,
+    onLoadAbort,
     registerCancelCallback,
     dataFilters,
     isForceRefresh,
@@ -698,7 +704,9 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
         joinMetrics,
       };
     } catch (error) {
-      if (!(error instanceof DataRequestAbortError)) {
+      if (error instanceof DataRequestAbortError) {
+        onLoadAbort(sourceDataId, requestToken);
+      } else {
         onLoadError(sourceDataId, requestToken, error);
       }
       throw error;

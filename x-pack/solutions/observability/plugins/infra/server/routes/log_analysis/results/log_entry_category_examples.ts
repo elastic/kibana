@@ -17,7 +17,8 @@ import { assertHasInfraMlPlugins } from '../../../utils/request_context';
 export const initGetLogEntryCategoryExamplesRoute = ({
   framework,
   getStartServices,
-}: Pick<InfraBackendLibs, 'framework' | 'getStartServices'>) => {
+  isCpsPlatformGateEnabled,
+}: Pick<InfraBackendLibs, 'framework' | 'getStartServices' | 'isCpsPlatformGateEnabled'>) => {
   framework
     .registerVersionedRoute({
       access: 'internal',
@@ -62,7 +63,8 @@ export const initGetLogEntryCategoryExamplesRoute = ({
             endTime,
             categoryId,
             exampleCount,
-            resolvedLogView
+            resolvedLogView,
+            isCpsPlatformGateEnabled
           );
 
           return response.ok({

@@ -14,10 +14,10 @@ import { Router, Routes, Route } from '@kbn/shared-ux-router';
 
 import { i18n } from '@kbn/i18n';
 import type { StartServicesAccessor } from '@kbn/core/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { NoDataViewsPromptKibanaProvider } from '@kbn/shared-ux-prompt-no-data-views';
+import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import {
   EditIndexPatternContainer,
   CreateEditFieldContainer,
@@ -30,6 +30,7 @@ import type {
 } from '../plugin';
 import type { IndexPatternManagmentContext } from '../types';
 import { DataViewMgmtService } from './data_view_management_service';
+import { NEW_APP_PATH } from '../constants';
 
 const readOnlyBadge = {
   text: i18n.translate('indexPatternManagement.indexPatterns.badge.readOnly.text', {
@@ -38,7 +39,7 @@ const readOnlyBadge = {
   tooltip: i18n.translate('indexPatternManagement.dataViews.badge.readOnly.tooltip', {
     defaultMessage: 'Unable to save data views',
   }),
-  iconType: 'glasses',
+  iconType: 'readOnly',
 };
 
 export async function mountManagementSection(
@@ -69,9 +70,15 @@ export async function mountManagementSection(
       spaces,
       savedObjectsManagement,
       savedObjectsTagging,
+      cps,
     },
     indexPatternManagementStart,
   ] = await getStartServices();
+
+  // Register CPS app access for the data view management pages
+  cps?.cpsManager?.registerAppAccess('management', (location: string) =>
+    location.includes(NEW_APP_PATH) ? ProjectRoutingAccess.EDITABLE : ProjectRoutingAccess.DISABLED
+  );
 
   const canSave = dataViews.getCanSaveSync();
 
@@ -119,7 +126,7 @@ export async function mountManagementSection(
   const createEditPath = dataViews.scriptedFieldsEnabled ? [editPath, createPath] : [editPath];
 
   ReactDOM.render(
-    <KibanaRenderContextProvider {...startServices}>
+    startServices.rendering.addContext(
       <KibanaContextProvider services={deps}>
         <NoDataViewsPromptKibanaProvider
           coreStart={{ ...startServices, docLinks, application }}
@@ -145,7 +152,7 @@ export async function mountManagementSection(
           </Router>
         </NoDataViewsPromptKibanaProvider>
       </KibanaContextProvider>
-    </KibanaRenderContextProvider>,
+    ),
     params.element
   );
 

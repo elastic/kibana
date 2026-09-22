@@ -8,7 +8,6 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
-import fetch from 'node-fetch';
 
 interface EnableStreamsOptions {
   kibanaUrl: string;
@@ -68,9 +67,11 @@ export async function enableStreams({
     }
 
     throw new Error(`Failed to enable streams: ${response.status} ${responseText}`);
-  } catch (error: any) {
-    // Handle connection errors (Kibana not running)
-    if (error.code === 'ECONNREFUSED') {
+  } catch (error: unknown) {
+    const code =
+      (error as NodeJS.ErrnoException).code ??
+      (error as { cause?: NodeJS.ErrnoException }).cause?.code;
+    if (code === 'ECONNREFUSED' || code === 'UND_ERR_SOCKET') {
       log.warning(
         `Could not connect to Kibana at ${kibanaUrl}. Make sure Kibana is running before starting the OTel Demo.`
       );

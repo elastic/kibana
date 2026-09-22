@@ -6,8 +6,7 @@
  */
 
 import type { InferenceTaskEventBase } from '../inference_task';
-import type { Deanonymization } from './anonymization';
-import type { Message } from './messages';
+import type { AnonymizationResponseMetadata, DeanonymizedMessageData } from './anonymization';
 import type { ToolOptions } from './tools';
 import type { ToolCallOfToolOptions } from './tools_of';
 
@@ -39,11 +38,15 @@ export type ChatCompletionMessageEvent<TToolOptions extends ToolOptions = ToolOp
       /**
        * Optional deanonymized input messages metadata
        */
-      deanonymized_input?: Array<{ message: Message; deanonymizations: Deanonymization[] }>;
+      deanonymized_input?: DeanonymizedMessageData[];
       /**
        * Optional deanonymized output metadata
        */
-      deanonymized_output?: { message: Message; deanonymizations: Deanonymization[] };
+      deanonymized_output?: DeanonymizedMessageData;
+      /**
+       * Optional metadata attached by inference runtime.
+       */
+      metadata?: AnonymizationResponseMetadata;
       /**
        * Tool calls from the LLM
        */
@@ -99,11 +102,15 @@ export type ChatCompletionChunkEvent = InferenceTaskEventBase<
     /**
      * Optional deanonymized input messages metadata
      */
-    deanonymized_input?: Array<{ message: Message; deanonymizations: Deanonymization[] }>;
+    deanonymized_input?: DeanonymizedMessageData[];
     /**
      * Optional deanonymized output metadata
      */
-    deanonymized_output?: { message: Message; deanonymizations: Deanonymization[] };
+    deanonymized_output?: DeanonymizedMessageData;
+    /**
+     * Optional metadata attached by inference runtime.
+     */
+    metadata?: AnonymizationResponseMetadata;
   }
 >;
 
@@ -112,7 +119,7 @@ export type ChatCompletionChunkEvent = InferenceTaskEventBase<
  */
 export interface ChatCompletionTokenCount {
   /**
-   * Input token count
+   * Total input token count, including tokens served from or written to the prompt cache.
    */
   prompt: number;
   /**
@@ -128,7 +135,7 @@ export interface ChatCompletionTokenCount {
    */
   total: number;
   /**
-   * Cached prompt tokens
+   * Input tokens served from the prompt cache. Subset of `prompt`, not additive.
    */
   cached?: number;
 }

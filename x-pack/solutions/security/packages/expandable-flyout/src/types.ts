@@ -85,6 +85,10 @@ export interface Panel {
    * Component to be rendered
    */
   component: (props: FlyoutPanelProps) => React.ReactElement;
+  /**
+   * Human-readable label for the panel
+   */
+  'aria-label'?: string;
 }
 
 export interface FlyoutPanelHistory {

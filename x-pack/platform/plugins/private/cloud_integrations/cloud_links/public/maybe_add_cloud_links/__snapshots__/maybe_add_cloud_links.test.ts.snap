@@ -11,7 +11,7 @@ Array [
   },
   Object {
     "href": "billing-url",
-    "iconType": "visGauge",
+    "iconType": "chartGauge",
     "label": "Billing",
     "order": 200,
   },
@@ -22,6 +22,14 @@ Array [
     "order": 300,
   },
   Any<Object>,
+  Any<Object>,
+  Object {
+    "content": Any<Function>,
+    "href": "",
+    "iconType": "",
+    "label": "",
+    "order": 600,
+  },
 ]
 `;
 
@@ -36,7 +44,7 @@ Array [
   },
   Object {
     "href": "billing-url",
-    "iconType": "visGauge",
+    "iconType": "chartGauge",
     "label": "Billing",
     "order": 200,
   },
@@ -47,5 +55,13 @@ Array [
     "order": 300,
   },
   Any<Object>,
+  Any<Object>,
+  Object {
+    "content": Any<Function>,
+    "href": "",
+    "iconType": "",
+    "label": "",
+    "order": 600,
+  },
 ]
 `;

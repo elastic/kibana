@@ -146,4 +146,25 @@ describe('decorateShards', () => {
       type: 'shard',
     });
   });
+
+  it('shard with node id but node missing from nodes map (fallback to node id)', () => {
+    const shard = {
+      index: 'test',
+      node: 'UnknownNodeId',
+      primary: true,
+      relocating_node: null,
+      shard: 0,
+      state: 'STARTED',
+    };
+    const result = decorateShards([shard], {});
+    expect(result[0]).toMatchObject({
+      index: 'test',
+      node: 'UnknownNodeId',
+      nodeName: 'UnknownNodeId',
+      primary: true,
+      shard: 0,
+      state: 'STARTED',
+      type: 'shard',
+    });
+  });
 });

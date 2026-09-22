@@ -20,7 +20,6 @@ import { PlaygroundLicensingCTA } from './components/licensing_cta';
 
 // Override styling for empty state to allow it to grow wider for content we provide
 const EmptyStateStyle = css`
-  min-inline-size: 64rem;
   .euiCard__content {
     max-inline-size: 60em;
   }

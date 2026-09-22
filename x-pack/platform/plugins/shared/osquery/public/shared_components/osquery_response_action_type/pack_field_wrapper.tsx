@@ -13,6 +13,7 @@ import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { PackQueriesStatusTable } from '../../live_queries/form/pack_queries_status_table';
 import { usePacks } from '../../packs/use_packs';
 import { PacksComboBoxField } from '../../live_queries/form/packs_combobox_field';
+import type { AddToTimelineHandler } from '../../types';
 
 interface PackFieldWrapperProps {
   liveQueryDetails?: {
@@ -23,15 +24,19 @@ interface PackFieldWrapperProps {
     }>;
     action_id?: string;
     agents?: string[];
+    '@timestamp'?: string;
+    expiration?: string;
   };
   submitButtonContent?: React.ReactNode;
   showResultsHeader?: boolean;
+  addToTimeline?: AddToTimelineHandler;
 }
 
 export const PackFieldWrapper = ({
   liveQueryDetails,
   submitButtonContent,
   showResultsHeader,
+  addToTimeline,
 }: PackFieldWrapperProps) => {
   const { data: packsData } = usePacks({});
   const { packId } = useWatch<{ packId: string[] }>();
@@ -56,14 +61,17 @@ export const PackFieldWrapper = ({
       {submitButtonContent}
       <EuiSpacer />
 
-      {liveQueryDetails?.queries?.length || selectedPackData?.queries?.length ? (
+      {(actionId && liveQueryDetails?.queries?.length) || selectedPackData?.queries?.length ? (
         <EuiFlexItem>
           <PackQueriesStatusTable
             actionId={actionId}
             agentIds={agentIds}
+            startDate={liveQueryDetails?.['@timestamp']}
+            expirationDate={liveQueryDetails?.expiration}
             // @ts-expect-error update types
             data={liveQueryDetails?.queries ?? selectedPackData?.queries}
             showResultsHeader={showResultsHeader}
+            addToTimeline={addToTimeline}
           />
         </EuiFlexItem>
       ) : null}

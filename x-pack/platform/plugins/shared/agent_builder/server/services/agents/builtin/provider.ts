@@ -6,10 +6,10 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { AgentType, createAgentNotFoundError } from '@kbn/agent-builder-common';
-import type { BuiltInAgentDefinition } from '@kbn/agent-builder-server/agents';
+import { chatAgentTypeId, createAgentNotFoundError } from '@kbn/agent-builder-common';
+import type { BuiltInAgentDefinition, AgentConfigContext } from '@kbn/agent-builder-server/agents';
 import type { BuiltinAgentRegistry } from './registry';
-import type { AgentProviderFn, ReadonlyAgentProvider } from '../agent_source';
+import type { AgentProviderFn, GetAgentOptions, ReadonlyAgentProvider } from '../agent_source';
 import type { InternalAgentDefinition } from '../agent_registry';
 import { AgentAvailabilityCache } from './availability_cache';
 
@@ -19,37 +19,43 @@ export const createBuiltinProviderFn = ({
   registry: BuiltinAgentRegistry;
 }): AgentProviderFn<true> => {
   const availabilityCache = new AgentAvailabilityCache();
-  return ({ request }) => {
-    return registryToProvider({ registry, request, availabilityCache });
+  return ({ request, space }) => {
+    return registryToProvider({ registry, request, space, availabilityCache });
   };
 };
 
 const registryToProvider = ({
   registry,
   request,
+  space,
   availabilityCache,
 }: {
   registry: BuiltinAgentRegistry;
   request: KibanaRequest;
+  space: string;
   availabilityCache: AgentAvailabilityCache;
 }): ReadonlyAgentProvider => {
+  const configContext: AgentConfigContext = { request, spaceId: space };
+
   return {
     id: 'builtin',
     readonly: true,
     has: (agentId: string) => {
       return registry.has(agentId);
     },
-    get: (agentId: string) => {
+    get: (agentId: string, _opts?: GetAgentOptions) => {
       const definition = registry.get(agentId);
       if (!definition) {
         throw createAgentNotFoundError({ agentId });
       }
-      return toInternalDefinition({ definition, availabilityCache });
+      return toInternalDefinition({ definition, availabilityCache, configContext });
     },
     list: (opts) => {
       const definitions = registry.list();
       return Promise.all(
-        definitions.map((definition) => toInternalDefinition({ definition, availabilityCache }))
+        definitions.map((definition) =>
+          toInternalDefinition({ definition, availabilityCache, configContext })
+        )
       );
     },
   };
@@ -58,14 +64,36 @@ const registryToProvider = ({
 export const toInternalDefinition = async ({
   definition,
   availabilityCache,
+  configContext,
 }: {
   definition: BuiltInAgentDefinition;
   availabilityCache: AgentAvailabilityCache;
+  configContext: AgentConfigContext;
 }): Promise<InternalAgentDefinition> => {
+  const configuration =
+    typeof definition.configuration === 'function'
+      ? await definition.configuration(configContext)
+      : definition.configuration;
+  const type = definition.type ?? chatAgentTypeId;
+
   return {
     ...definition,
-    type: AgentType.chat,
+    configuration: {
+      ...configuration,
+      // Only chat agents get the legacy default: for typed agents the flag must stay
+      // unset when not explicitly declared, so the type's base can control it.
+      ...(type === chatAgentTypeId
+        ? { enable_elastic_capabilities: configuration.enable_elastic_capabilities ?? true }
+        : {}),
+    },
+    type,
+    access_control: undefined,
+    created_by: undefined,
     readonly: true,
+    permissions: {
+      update_agent: false,
+      update_access_control: false,
+    },
     isAvailable: async (ctx) => {
       if (definition.availability) {
         return availabilityCache.getOrCompute(definition.id, definition.availability, ctx);

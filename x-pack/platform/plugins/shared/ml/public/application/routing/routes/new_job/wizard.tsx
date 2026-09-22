@@ -11,6 +11,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Redirect } from 'react-router-dom';
 import { dynamic } from '@kbn/shared-ux-utility';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { DataSourceContextProvider } from '../../../contexts/ml/data_source_context';
 import { useMlKibana } from '../../../contexts/kibana';
 import { basicResolvers } from '../../resolvers';
@@ -29,7 +30,7 @@ import {
   getMlManagementBreadcrumb,
 } from '../../breadcrumbs';
 import { useCreateAndNavigateToMlLink } from '../../../contexts/kibana/use_create_url';
-import { ML_PAGES } from '../../../../../common/constants/locator';
+import { getIsMlCpsEnabled } from '../../../services/ml_server_info';
 
 interface WizardPageProps extends PageProps {
   jobType: JOB_TYPE;
@@ -191,7 +192,11 @@ const PageWrapper: FC<WizardPageProps> = ({ location, jobType }) => {
     ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE
   );
 
-  const { index, savedSearchId }: Record<string, any> = parse(location.search, { sort: false });
+  const {
+    index,
+    savedSearchId,
+    project_routing: projectRoutingFromUrl,
+  }: Record<string, any> = parse(location.search, { sort: false });
 
   const {
     services: {
@@ -199,8 +204,18 @@ const PageWrapper: FC<WizardPageProps> = ({ location, jobType }) => {
       savedSearch: savedSearchService,
       mlServices: { mlApi },
       notifications,
+      cps,
     },
   } = useMlKibana();
+  const isMlCpsEnabled = getIsMlCpsEnabled();
+
+  const projectRouting =
+    typeof projectRoutingFromUrl === 'string' && projectRoutingFromUrl !== ''
+      ? projectRoutingFromUrl
+      : isMlCpsEnabled && cps?.cpsManager
+      ? cps?.cpsManager?.getDefaultProjectRouting() ?? undefined
+      : undefined;
+
   const { context, results } = useRouteResolver('full', ['canGetJobs', 'canCreateJob'], {
     ...basicResolvers(),
     // TODO useRouteResolver should be responsible for the redirect
@@ -213,7 +228,8 @@ const PageWrapper: FC<WizardPageProps> = ({ location, jobType }) => {
         dataViewsService,
         savedSearchService,
         ANOMALY_DETECTOR,
-        notifications
+        notifications,
+        projectRouting
       ),
     existingJobsAndGroups: () => mlApi.jobs.getAllJobAndGroupIds(),
   });

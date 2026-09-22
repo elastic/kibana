@@ -96,3 +96,4 @@ export interface WaterfallError {
 }
 
 export type IWaterfallGetRelatedErrorsHref = (docId: string) => string;
+export type WaterfallGetServiceBadgeHref = (serviceName: string) => string;

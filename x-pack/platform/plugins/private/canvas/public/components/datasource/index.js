@@ -7,7 +7,7 @@
 
 import React, { useState, useCallback } from 'react';
 import { PropTypes } from 'prop-types';
-import { connect } from 'react-redux';
+import { connect } from 'react-redux-v7';
 import { get } from 'lodash';
 import { datasourceRegistry } from '../../expression_types';
 import { getServerFunctions } from '../../state/selectors/app';

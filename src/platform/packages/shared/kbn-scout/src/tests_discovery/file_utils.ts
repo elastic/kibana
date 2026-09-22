@@ -40,7 +40,7 @@ export const saveFlattenedConfigGroups = (
   let totalConfigs = 0;
 
   for (const group of flattenedConfigs) {
-    if (group.mode === 'stateful') {
+    if (group.testTarget.arch === 'stateful') {
       statefulCount++;
     } else {
       serverlessCount++;

@@ -7,7 +7,7 @@
 
 import { set } from '@kbn/safer-lodash-set';
 
-import type { AgentlessPolicy, GlobalDataTag } from '../../../common/types';
+import type { AgentlessAgentPolicyConfig, GlobalDataTag } from '../../../common/types';
 import { getSettings } from '../../services/form_settings';
 
 import { AgentPolicyBaseSchema, FullAgentPolicyResponseSchema } from './agent_policy';
@@ -97,7 +97,7 @@ describe('AgentPolicyBaseSchema', () => {
     });
 
     it('should not throw an error if provided with empty agentless resources', () => {
-      const agentless: AgentlessPolicy = {};
+      const agentless: AgentlessAgentPolicyConfig = {};
 
       expect(() => {
         AgentPolicyBaseSchema.agentless.validate(agentless);
@@ -105,7 +105,7 @@ describe('AgentPolicyBaseSchema', () => {
     });
 
     it('should not throw an error if provided with valid agentless resources', () => {
-      const agentless: AgentlessPolicy = {
+      const agentless: AgentlessAgentPolicyConfig = {
         resources: {
           requests: {
             memory: '1Gi',
@@ -120,7 +120,7 @@ describe('AgentPolicyBaseSchema', () => {
     });
 
     it('should throw an error if provided with invalid agentless memory', () => {
-      const agentless: AgentlessPolicy = {
+      const agentless: AgentlessAgentPolicyConfig = {
         resources: {
           requests: {
             memory: '1',
@@ -134,7 +134,7 @@ describe('AgentPolicyBaseSchema', () => {
     });
 
     it('should throw an error if provided with invalid agentless CPU', () => {
-      const agentless: AgentlessPolicy = {
+      const agentless: AgentlessAgentPolicyConfig = {
         resources: {
           requests: {
             cpu: '1CPU',
@@ -145,6 +145,32 @@ describe('AgentPolicyBaseSchema', () => {
       expect(() => {
         AgentPolicyBaseSchema.agentless.validate(agentless);
       }).toThrow();
+    });
+  });
+
+  describe('overrides validations', () => {
+    it('should throw an error if inputs key is provided', () => {
+      expect(() => {
+        AgentPolicyBaseSchema.overrides.validate({ 'inputs.foo': 'bar' });
+      }).toThrow('inputs overrides is not allowed');
+    });
+
+    it('should throw an error if output_permissions key is provided', () => {
+      expect(() => {
+        AgentPolicyBaseSchema.overrides.validate({ output_permissions: { _fallback: {} } });
+      }).toThrow('output_permissions overrides is not allowed');
+    });
+
+    it('should throw an error if nested output_permissions key is provided', () => {
+      expect(() => {
+        AgentPolicyBaseSchema.overrides.validate({ 'output_permissions.someOutput': {} });
+      }).toThrow('output_permissions overrides is not allowed');
+    });
+
+    it('should not throw for valid overrides keys', () => {
+      expect(() => {
+        AgentPolicyBaseSchema.overrides.validate({ 'agent.monitoring.use_output': 'custom' });
+      }).not.toThrow();
     });
   });
 });

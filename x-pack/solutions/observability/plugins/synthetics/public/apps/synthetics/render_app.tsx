@@ -16,8 +16,15 @@ import { DEFAULT_TIMEPICKER_QUICK_RANGES, INTEGRATED_SOLUTIONS } from '../../../
 import { SyntheticsApp } from './synthetics_app';
 
 export const getSyntheticsAppProps = (): SyntheticsAppProps => {
-  const { isDev, isServerless, coreStart, startPlugins, setupPlugins, appMountParameters } =
-    kibanaService;
+  const {
+    isDev,
+    isServerless,
+    isCCSEnabled,
+    coreStart,
+    startPlugins,
+    setupPlugins,
+    appMountParameters,
+  } = kibanaService;
 
   const {
     application: { capabilities },
@@ -57,15 +64,12 @@ export const getSyntheticsAppProps = (): SyntheticsAppProps => {
             linkType: 'documentation',
             href: `${docLinks.links.observability.monitorUptimeSynthetics}`,
           },
-          {
-            linkType: 'discuss',
-            href: 'https://discuss.elastic.co/c/uptime', // Redirects to https://discuss.elastic.co/c/observability/synthetics/75
-          },
         ],
       }),
     setBadge,
     appMountParameters,
     isServerless,
+    isCCSEnabled,
   };
 };
 

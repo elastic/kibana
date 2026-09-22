@@ -39,14 +39,12 @@ export class RoutingExamplePlugin implements Plugin<{}, {}, SetupDeps, {}> {
           href: 'https://github.com/elastic/kibana/blob/8.3/docs/development/core/server/kibana-plugin-core-server.irouter.md',
           iconType: 'logoGithub',
           target: '_blank',
-          size: 's',
         },
         {
           label: 'HttpHandler (core.http.fetch)',
           href: 'https://github.com/elastic/kibana/blob/8.3/docs/development/core/public/kibana-plugin-core-public.httphandler.md',
           iconType: 'logoGithub',
           target: '_blank',
-          size: 's',
         },
       ],
     });

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import type { Criteria } from '@elastic/eui';
 import type { QueryContainer } from '@elastic/eui/src/components/search_bar/query/ast_to_es_query_dsl';
 
@@ -37,10 +38,10 @@ export type QueryApiKeySortOptions = Required<Criteria<CategorizedApiKey>>['sort
 
 export interface QueryApiKeyParams {
   query: QueryContainer;
-  from: number;
   size: number;
   sort: QueryApiKeySortOptions;
   filters: QueryFilters;
+  searchAfter?: estypes.SortResults;
 }
 
 const apiKeysUrl = '/internal/security/api_key';

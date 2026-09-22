@@ -7,13 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { monaco } from '@kbn/monaco';
+
 /**
  * Simple mock for monaco model, partially compatible with the real model to be use in tests
  * @param value - The content to create the model from
  * @param cursorOffset - The offset of the cursor in the model
  * @returns The mock monaco model with getValue, getLineCount, getOffsetAt, getPositionAt, getLineContent, getLineMaxColumn, getWordUntilPosition, getWordAtPosition, pushEditOperations methods
  */
-export function createFakeMonacoModel(value: string, cursorOffset: number = 0) {
+export function createFakeMonacoModel(
+  value: string,
+  cursorOffset: number = 0
+): monaco.editor.ITextModel {
   const lines = value.split('\n');
   let position = { lineNumber: 1, column: 1 };
 
@@ -131,5 +136,5 @@ export function createFakeMonacoModel(value: string, cursorOffset: number = 0) {
       return null;
     },
     pushEditOperations: jest.fn(),
-  };
+  } as unknown as monaco.editor.ITextModel;
 }

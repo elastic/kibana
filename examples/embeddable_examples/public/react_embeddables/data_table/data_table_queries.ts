@@ -12,8 +12,11 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
 import type { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { listenForCompatibleApi } from '@kbn/presentation-containers';
-import { apiPublishesDataViews, fetch$ } from '@kbn/presentation-publishing';
+import {
+  listenForCompatibleApi,
+  apiPublishesDataViews,
+  fetch$,
+} from '@kbn/presentation-publishing';
 import { BehaviorSubject, combineLatest, lastValueFrom, map, Subscription, switchMap } from 'rxjs';
 import type { StartDeps } from '../../plugin';
 import { apiPublishesSelectedFields } from './publishes_selected_fields';

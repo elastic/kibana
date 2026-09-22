@@ -26,6 +26,7 @@ describe('findInternalRuleTemplatesRoute', () => {
   const mockedTemplate1: RuleTemplate = {
     id: '1',
     name: 'My rule template 1',
+    description: 'My rule template description 1',
     ruleTypeId: 'test.rule.type',
     schedule: { interval: '10s' },
     params: {
@@ -37,6 +38,7 @@ describe('findInternalRuleTemplatesRoute', () => {
   const mockedTemplate2: RuleTemplate = {
     id: '2',
     name: 'My rule template 2',
+    description: 'My rule template description 2',
     ruleTypeId: 'test.rule.type',
     schedule: { interval: '5m' },
     params: {
@@ -80,7 +82,6 @@ describe('findInternalRuleTemplatesRoute', () => {
       perPage: 10,
       page: 1,
       search: undefined,
-      defaultSearchOperator: undefined,
       sortField: undefined,
       sortOrder: undefined,
       ruleTypeId: undefined,
@@ -96,6 +97,7 @@ describe('findInternalRuleTemplatesRoute', () => {
           {
             id: '1',
             name: 'My rule template 1',
+            description: 'My rule template description 1',
             rule_type_id: 'test.rule.type',
             schedule: { interval: '10s' },
             params: { bar: true },
@@ -104,6 +106,7 @@ describe('findInternalRuleTemplatesRoute', () => {
           {
             id: '2',
             name: 'My rule template 2',
+            description: 'My rule template description 2',
             rule_type_id: 'test.rule.type',
             schedule: { interval: '5m' },
             params: { baz: 123 },
@@ -144,7 +147,6 @@ describe('findInternalRuleTemplatesRoute', () => {
       perPage: 5,
       page: 2,
       search: 'test',
-      defaultSearchOperator: undefined,
       sortField: 'name',
       sortOrder: 'desc',
       ruleTypeId: 'test.rule.type',
@@ -206,37 +208,6 @@ describe('findInternalRuleTemplatesRoute', () => {
     expect(rulesClient.findTemplates.mock.calls[0][0]).toEqual(
       expect.objectContaining({
         tags: ['tag1'],
-      })
-    );
-  });
-
-  it('handles default_search_operator parameter', async () => {
-    const licenseState = licenseStateMock.create();
-    const router = httpServiceMock.createRouter();
-
-    findInternalRuleTemplatesRoute(router, licenseState);
-    const [, handler] = router.get.mock.calls[0];
-
-    rulesClient.findTemplates.mockResolvedValueOnce(findResult);
-
-    const [context, req, res] = mockHandlerArguments(
-      { rulesClient },
-      {
-        query: {
-          per_page: 10,
-          page: 1,
-          search: 'test',
-          default_search_operator: 'AND',
-        },
-      },
-      ['ok']
-    );
-    await handler(context, req, res);
-
-    expect(rulesClient.findTemplates.mock.calls[0][0]).toEqual(
-      expect.objectContaining({
-        search: 'test',
-        defaultSearchOperator: 'AND',
       })
     );
   });

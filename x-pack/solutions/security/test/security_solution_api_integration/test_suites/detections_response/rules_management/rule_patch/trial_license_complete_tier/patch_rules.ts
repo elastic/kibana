@@ -18,13 +18,25 @@ import type {
   RuleActionThrottle,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-
+import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import {
   createAlertsIndex,
   deleteAllRules,
   deleteAllAlerts,
   createRule,
 } from '@kbn/detections-response-ftr-services';
+
+import type TestAgent from 'supertest/lib/agent';
+import { v4 as uuidV4 } from 'uuid';
+import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import { createSupertestErrorLogger } from '../../../../edr_workflows/utils';
+import { ROLE } from '../../../../../config/services/security_solution_edr_workflows_roles_users';
+import type { FtrProviderContext } from '../../../../../ftr_provider_context';
+import {
+  createUserAndRole,
+  deleteUserAndRole,
+  deleteAndReCreateUserRole,
+} from '../../../../../config/services/common';
 import {
   getSimpleRule,
   getSimpleRuleOutput,
@@ -39,14 +51,19 @@ import {
   getActionsWithoutFrequencies,
   getSomeActionsWithFrequencies,
   updateUsername,
+  getCustomQueryRuleParams,
+  getNewTermsRuleParams,
+  getThreatMatchRuleParams,
+  getThresholdRuleParams,
 } from '../../../utils';
-import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
+  const detectionsApi = getService('detectionsApi');
   const log = getService('log');
   const es = getService('es');
   const utils = getService('securitySolutionUtils');
+  const rolesUsersProvider = getService('rolesUsersProvider');
 
   describe('@ess @serverless @skipInServerlessMKI patch_rules', () => {
     describe('patch rules', () => {
@@ -86,13 +103,131 @@ export default ({ getService }: FtrProviderContext) => {
           .patch(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31')
-          .send({ rule_id: 'rule-1', machine_learning_job_id: 'some_job_id' })
+          .send({
+            rule_id: 'rule-1',
+            machine_learning_job_id: 'some_job_id',
+            type: 'machine_learning',
+          })
           .expect(200);
 
         const outputRule = updateUsername(getSimpleMlRuleOutput(), await utils.getUsername());
 
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare).to.eql(outputRule);
+      });
+
+      it("should patch a threshold rule's threshold when `type` is included in the body", async () => {
+        await createRule(supertest, log, getThresholdRuleParams({ rule_id: 'rule-1' }));
+
+        const { body } = await supertest
+          .patch(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send({
+            rule_id: 'rule-1',
+            type: 'threshold',
+            threshold: { field: ['host.name'], value: 200 },
+          })
+          .expect(200);
+
+        expect(body.threshold).to.eql({ field: ['host.name'], value: 200 });
+      });
+
+      it("should patch a threshold rule's threshold when `type` is omitted from the body", async () => {
+        await createRule(supertest, log, getThresholdRuleParams({ rule_id: 'rule-1' }));
+
+        const { body } = await supertest
+          .patch(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send({
+            rule_id: 'rule-1',
+            threshold: { field: ['host.name'], value: 200 },
+          })
+          .expect(200);
+
+        expect(body.threshold).to.eql({ field: ['host.name'], value: 200 });
+      });
+
+      // A `type` that contradicts the existing rule's type must be rejected, not silently
+      // validated against the wrong schema.
+      it('should reject with a 400 when `type` does not match the existing rule', async () => {
+        await createRule(supertest, log, getThresholdRuleParams({ rule_id: 'rule-1' }));
+
+        const { body } = await supertest
+          .patch(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send({ rule_id: 'rule-1', type: 'query' })
+          .expect(400);
+
+        expect(body.message).to.contain('type');
+      });
+
+      // The case reported in https://github.com/elastic/kibana/issues/287579: a type specific
+      // field patched without `type`. Covered by unit tests too, but this exercises the whole
+      // route path end to end.
+      it("should patch a new_terms rule's new_terms_fields when `type` is omitted from the body", async () => {
+        await createRule(supertest, log, getNewTermsRuleParams({ rule_id: 'rule-1' }));
+
+        const { body } = await supertest
+          .patch(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send({
+            rule_id: 'rule-1',
+            new_terms_fields: ['host.name'],
+          })
+          .expect(200);
+
+        expect(body.new_terms_fields).to.eql(['host.name']);
+      });
+
+      it("should patch a threat_match rule's threat_mapping when `type` is omitted from the body", async () => {
+        await createRule(supertest, log, getThreatMatchRuleParams({ rule_id: 'rule-1' }));
+
+        const threatMapping = [
+          {
+            entries: [
+              { field: 'host.name', type: 'mapping' as const, value: 'host.name', negate: false },
+            ],
+          },
+        ];
+
+        const { body } = await supertest
+          .patch(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send({ rule_id: 'rule-1', threat_mapping: threatMapping })
+          .expect(200);
+
+        expect(body.threat_mapping).to.eql(threatMapping);
+      });
+
+      // Type specific semantic validation now runs for typeless bodies as well, so a mapping
+      // that only negates is rejected instead of being applied.
+      it('should reject a typeless threat_mapping patch whose only entry is negated', async () => {
+        await createRule(supertest, log, getThreatMatchRuleParams({ rule_id: 'rule-1' }));
+
+        const { body } = await supertest
+          .patch(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send({
+            rule_id: 'rule-1',
+            threat_mapping: [
+              {
+                entries: [
+                  { field: 'host.name', type: 'mapping', value: 'host.name', negate: true },
+                ],
+              },
+            ],
+          })
+          .expect(400);
+
+        expect(body.message).to.contain(
+          'Negate mappings cannot be used as a single entry in the AND condition'
+        );
       });
 
       it('should patch a single rule property of name using a rule_id of type "machine learning"', async () => {
@@ -263,9 +398,151 @@ export default ({ getService }: FtrProviderContext) => {
           })
           .expect(200);
 
-        expect(body.exceptions_list).to.eql([
-          { id: '2', list_id: '123', namespace_type: 'single', type: 'detection' },
-        ]);
+        expect(body.exceptions_list).to.have.length(1);
+        expect(body.exceptions_list[0].id).to.eql('2');
+        expect(body.exceptions_list[0].list_id).to.eql('123');
+        expect(body.exceptions_list[0].namespace_type).to.eql('single');
+        expect(body.exceptions_list[0].type).to.eql('detection');
+      });
+      describe('@skipInServerless with rules_read_exceptions_all user role', () => {
+        const role = ROLES.rules_read_exceptions_all;
+
+        beforeEach(async () => {
+          await deleteAndReCreateUserRole(getService, role);
+        });
+
+        afterEach(async () => {
+          await deleteUserAndRole(getService, role);
+        });
+        it('should overwrite exception list value on patch with a user role of read-rules and exceptions-all', async () => {
+          await createRule(supertest, log, getSimpleRule('rule-1'));
+
+          const restrictedUser = { username: 'rules_read_exceptions_all', password: 'changeme' };
+          const restrictedApis = detectionsApi.withUser(restrictedUser);
+          await restrictedApis
+            .patchRule({
+              body: {
+                rule_id: 'rule-1',
+                exceptions_list: [
+                  {
+                    id: '1',
+                    list_id: '123',
+                    namespace_type: 'single',
+                    type: ExceptionListTypeEnum.RULE_DEFAULT,
+                  },
+                ],
+              },
+            })
+            .expect(200);
+          const { body } = await restrictedApis
+            .patchRule({
+              body: {
+                rule_id: 'rule-1',
+                exceptions_list: [
+                  {
+                    id: '2',
+                    list_id: '123',
+                    namespace_type: 'single',
+                    type: ExceptionListTypeEnum.DETECTION,
+                  },
+                ],
+              },
+            })
+            .expect(200);
+
+          expect(body.exceptions_list).to.have.length(1);
+          expect(body.exceptions_list[0].id).to.eql('2');
+          expect(body.exceptions_list[0].list_id).to.eql('123');
+          expect(body.exceptions_list[0].namespace_type).to.eql('single');
+          expect(body.exceptions_list[0].type).to.eql('detection');
+        });
+        it('should throw error when patching exception list and non-valid read authz field "query"', async () => {
+          await createRule(supertest, log, getSimpleRule('rule-1'));
+
+          const restrictedUser = { username: 'rules_read_exceptions_all', password: 'changeme' };
+          const restrictedApis = detectionsApi.withUser(restrictedUser);
+          const { body } = await restrictedApis
+            .patchRule({
+              body: {
+                rule_id: 'rule-1',
+                query: 'this should fail in the patch route',
+                exceptions_list: [
+                  {
+                    id: '1',
+                    list_id: '123',
+                    namespace_type: 'single',
+                    type: ExceptionListTypeEnum.RULE_DEFAULT,
+                  },
+                ],
+              },
+            })
+            .expect(403);
+          expect(body.message).to.eql('Unauthorized by "siem" to update "siem.queryRule" rule');
+        });
+        it('should throw error when patching one non-valid read authz field "query"', async () => {
+          await createRule(supertest, log, getSimpleRule('rule-1'));
+
+          const restrictedUser = { username: 'rules_read_exceptions_all', password: 'changeme' };
+          const restrictedApis = detectionsApi.withUser(restrictedUser);
+          const { body } = await restrictedApis
+            .patchRule({
+              body: {
+                rule_id: 'rule-1',
+                query: 'this should fail in the patch route',
+              },
+            })
+            .expect(403);
+          expect(body.message).to.eql('Unauthorized by "siem" to update "siem.queryRule" rule');
+        });
+        it('should throw error when patching multiple non-valid read authz field "query" and "description" and "author"', async () => {
+          await createRule(supertest, log, getSimpleRule('rule-1'));
+
+          const restrictedUser = { username: 'rules_read_exceptions_all', password: 'changeme' };
+          const restrictedApis = detectionsApi.withUser(restrictedUser);
+          const { body } = await restrictedApis
+            .patchRule({
+              body: {
+                rule_id: 'rule-1',
+                query: 'this query patch should fail in the patch route',
+                description: 'this description patch should fail in the patch route',
+                author: ['myfakeauthor'],
+              },
+            })
+            .expect(403);
+          expect(body.message).to.eql('Unauthorized by "siem" to update "siem.queryRule" rule');
+        });
+      });
+      describe('@skipInServerless with rules_read_exceptions_read user role', () => {
+        const role = ROLES.rules_read_exceptions_read;
+
+        beforeEach(async () => {
+          await createUserAndRole(getService, role);
+        });
+
+        afterEach(async () => {
+          await deleteUserAndRole(getService, role);
+        });
+        it('should return unauthorized when patching exception list value', async () => {
+          await createRule(supertest, log, getSimpleRule('rule-1'));
+
+          const restrictedUser = { username: 'rules_read_exceptions_all', password: 'changeme' };
+          const restrictedApis = detectionsApi.withUser(restrictedUser);
+          await restrictedApis
+            .patchRule({
+              body: {
+                rule_id: 'rule-1',
+                exceptions_list: [
+                  {
+                    id: '1',
+                    list_id: '123',
+                    namespace_type: 'single',
+                    type: ExceptionListTypeEnum.RULE_DEFAULT,
+                  },
+                ],
+              },
+            })
+            .expect(401);
+        });
       });
 
       it('should throw error if trying to add more than one default exception list', async () => {
@@ -580,6 +857,90 @@ export default ({ getService }: FtrProviderContext) => {
               expect(patchedRule).to.eql(expectedRule);
             });
           });
+        });
+      });
+
+      describe('path action with endpoint response actions', () => {
+        let superTestResponseActionsNoAuthz: TestAgent;
+        let ruleToUpdate: RuleResponse;
+
+        before(async () => {
+          superTestResponseActionsNoAuthz = await utils.createSuperTestWithCustomRole({
+            name: ROLE.endpoint_response_actions_no_access,
+            privileges: rolesUsersProvider.loader.getPreDefinedRole(
+              ROLE.endpoint_response_actions_no_access
+            ),
+          });
+        });
+
+        beforeEach(async () => {
+          ruleToUpdate = await createRule(
+            supertest,
+            log,
+            getCustomQueryRuleParams({
+              rule_id: uuidV4(),
+              response_actions: [
+                {
+                  action_type_id: '.endpoint',
+                  params: { command: 'kill-process', config: { field: '', overwrite: true } },
+                },
+              ],
+            })
+          );
+        });
+
+        afterEach(async () => {
+          await deleteAllRules(supertest, log);
+        });
+
+        it('should update rule response actions when user has authz', async () => {
+          const { body } = await supertest
+            .patch(DETECTION_ENGINE_RULES_URL)
+            .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
+            .on('error', createSupertestErrorLogger(log))
+            .send({ id: ruleToUpdate.id, response_actions: [] })
+            .expect(200);
+
+          expect(body.response_actions).to.eql([]);
+        });
+
+        it('should not update rule response actions when user does not have authz', async () => {
+          const { body } = await superTestResponseActionsNoAuthz
+            .patch(DETECTION_ENGINE_RULES_URL)
+            .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
+            .on('error', createSupertestErrorLogger(log).ignoreCodes([403]))
+            .send({ id: ruleToUpdate.id, response_actions: [] })
+            .expect(403);
+
+          expect(body).to.eql({
+            message: 'User is not authorized to create/update kill-process response action',
+            status_code: 403,
+          });
+        });
+
+        it('should replace response actions with a process action that has a custom field', async () => {
+          const responseActions = [
+            {
+              action_type_id: '.endpoint',
+              params: {
+                command: 'suspend-process',
+                comment: 'example1',
+                config: { field: 'process.entity_id', overwrite: false },
+              },
+            },
+          ];
+
+          const { body } = await supertest
+            .patch(DETECTION_ENGINE_RULES_URL)
+            .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
+            .on('error', createSupertestErrorLogger(log))
+            .send({ id: ruleToUpdate.id, response_actions: responseActions })
+            .expect(200);
+
+          expect(body.response_actions).to.eql(responseActions);
         });
       });
     });

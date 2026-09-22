@@ -7,6 +7,13 @@
 
 import * as rt from 'io-ts';
 import { UserRt } from '../user/v1';
+import {
+  ActionSourceRt,
+  ActionSourceTypes,
+  isActionSource,
+  isHeaderActionSource,
+  toActionSource,
+} from './source/v1';
 import { UserActionActionsRt } from './action/v1';
 import { AssigneesUserActionRt } from './assignees/v1';
 import { CategoryUserActionRt } from './category/v1';
@@ -25,17 +32,28 @@ import { TagsUserActionRt } from './tags/v1';
 import { TitleUserActionRt } from './title/v1';
 import { CustomFieldsUserActionRt } from './custom_fields/v1';
 import { ObservablesUserActionRt } from './observables/v1';
+import { ExtendedFieldsUserActionRt } from './extended_fields/v1';
+import { TemplateUserActionRt } from './template/v1';
 export { UserActionTypes, UserActionActions } from './action/v1';
 export { StatusUserActionRt } from './status/v1';
+export { ActionSourceRt, ActionSourceTypes, isActionSource, isHeaderActionSource, toActionSource };
+export type { ActionSource, ActionSourceType } from './source/v1';
 
 export type { UserActionType, UserActionAction } from './action/v1';
 
-const UserActionCommonAttributesRt = rt.strict({
-  created_at: rt.string,
-  created_by: UserRt,
-  owner: rt.string,
-  action: UserActionActionsRt,
-});
+const UserActionCommonAttributesRt = rt.intersection([
+  rt.strict({
+    created_at: rt.string,
+    created_by: UserRt,
+    owner: rt.string,
+    action: UserActionActionsRt,
+  }),
+  rt.exact(
+    rt.partial({
+      source: rt.union([ActionSourceRt, rt.null]),
+    })
+  ),
+]);
 
 /**
  * This should only be used for the getAll route and it should be removed when the route is removed
@@ -63,6 +81,8 @@ const BasicUserActionsRt = rt.union([
   CategoryUserActionRt,
   CustomFieldsUserActionRt,
   ObservablesUserActionRt,
+  ExtendedFieldsUserActionRt,
+  TemplateUserActionRt,
 ]);
 
 const CommonUserActionsWithIdsRt = rt.union([BasicUserActionsRt, CommentUserActionRt]);
@@ -158,3 +178,6 @@ export type CreateCaseUserActionWithoutConnectorId = UserActionWithAttributes<
 >;
 export type CustomFieldsUserAction = UserAction<rt.TypeOf<typeof CustomFieldsUserActionRt>>;
 export type ObservablesUserAction = UserAction<rt.TypeOf<typeof ObservablesUserActionRt>>;
+export type ExtendedFieldsUserAction = UserAction<rt.TypeOf<typeof ExtendedFieldsUserActionRt>>;
+export { ExtendedFieldsRt } from './extended_fields/v1';
+export type TemplateUserAction = UserAction<rt.TypeOf<typeof TemplateUserActionRt>>;

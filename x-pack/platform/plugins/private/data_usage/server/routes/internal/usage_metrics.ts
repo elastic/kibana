@@ -45,6 +45,7 @@ export const registerUsageMetricsRoute = (
 };
 
 const DateSchema = schema.string({
+  maxLength: 64,
   minLength: 1,
   validate: (v) => (v.trim().length ? undefined : 'Date ISO string must not be empty'),
 });
@@ -52,8 +53,9 @@ const DateSchema = schema.string({
 export const UsageMetricsRequestSchema = schema.object({
   from: DateSchema,
   to: DateSchema,
-  metricTypes: schema.arrayOf(schema.string(), {
+  metricTypes: schema.arrayOf(schema.string({ maxLength: 1000 }), {
     minSize: 1,
+    maxSize: 1000,
     validate: (values) => {
       const trimmedValues = values.map((v) => v.trim());
       if (trimmedValues.some((v) => !v.length)) {
@@ -63,7 +65,8 @@ export const UsageMetricsRequestSchema = schema.object({
       }
     },
   }),
-  dataStreams: schema.arrayOf(schema.string(), {
+  dataStreams: schema.arrayOf(schema.string({ maxLength: 1000 }), {
+    maxSize: 1000,
     validate: (values) => {
       if (values.map((v) => v.trim()).some((v) => !v.length)) {
         return 'list cannot contain empty values';
@@ -86,9 +89,11 @@ const UsageMetricsResponseSchema = {
             schema.object({
               x: schema.number(),
               y: schema.number(),
-            })
+            }),
+            { maxSize: 1000 }
           ),
-        })
+        }),
+        { maxSize: 1000 }
       )
     ),
 };

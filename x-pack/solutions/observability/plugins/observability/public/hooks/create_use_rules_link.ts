@@ -8,17 +8,12 @@ import type { UseLinkPropsOptions } from '@kbn/observability-shared-plugin/publi
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 
 export const createUseRulesLink =
-  (unifiedRulesPage: boolean) =>
+  () =>
   (options: UseLinkPropsOptions = {}) => {
-    const linkProps = unifiedRulesPage
-      ? {
-          app: 'rules',
-          pathname: '/',
-        }
-      : {
-          app: 'observability',
-          pathname: '/alerts/rules',
-        };
+    const linkProps = {
+      app: 'rules',
+      pathname: '/',
+    };
 
     return useLinkProps(linkProps, options);
   };

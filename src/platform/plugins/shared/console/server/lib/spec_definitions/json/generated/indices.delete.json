@@ -32,6 +32,7 @@
       "{index}"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-delete",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-indices-delete",
     "availability": {
       "stack": true,
       "serverless": true

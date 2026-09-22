@@ -142,7 +142,6 @@ describe('APM service template', () => {
       'Errors',
       'Metrics',
       'Infrastructure',
-      'Service map',
       'Logs',
       'Alerts',
       'Universal Profiling',
@@ -180,14 +179,6 @@ describe('APM service template', () => {
           transactionTypes: [],
           fallbackToTransactions: true,
           serviceAgentStatus: FETCH_STATUS.SUCCESS,
-          indexSettings: [
-            {
-              configurationName: 'span',
-              defaultValue: 'traces-*',
-              savedValue: 'traces-*, apm-*',
-            },
-          ],
-          indexSettingsStatus: FETCH_STATUS.SUCCESS,
         });
       });
 
@@ -196,6 +187,17 @@ describe('APM service template', () => {
           wrapper,
         });
         expect(result.current.map((tab) => tab.label)).toEqual(standardTabOrder);
+      });
+
+      it('maps technical preview tabs to AppHeader flask badges', () => {
+        const { result } = renderHook(() => useTabs({ selectedTab: 'overview' }), {
+          wrapper,
+        });
+        const dashboardsTab = result.current.find((tab) => tab.id === 'dashboards');
+        expect(dashboardsTab?.badge).toEqual({
+          iconType: 'flask',
+          tooltip: expect.any(String),
+        });
       });
     });
   });

@@ -69,4 +69,29 @@ describe('getUserInfo', () => {
       profile_uid: null,
     });
   });
+
+  it('uses profile_uid from authc fallback when available', async () => {
+    const security = {
+      userProfiles: {
+        getCurrent: jest.fn().mockResolvedValue(null),
+      },
+      authc: {
+        getCurrentUser: jest.fn().mockReturnValue({
+          username: 'cloud-user',
+          full_name: null,
+          email: 'cloud-user@example.com',
+          profile_uid: 'u_cloud_profile_123',
+        }),
+      },
+    } as unknown as SecurityPluginStart;
+
+    const result = await getUserInfo({ request, security, logger });
+
+    expect(result).toEqual({
+      username: 'cloud-user@example.com',
+      full_name: null,
+      email: 'cloud-user@example.com',
+      profile_uid: 'u_cloud_profile_123',
+    });
+  });
 });

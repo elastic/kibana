@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { getRepresentativeQuery } from '@kbn/lens-common';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { deepMockedFields, buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { allSuggestionsMock } from '../__mocks__/suggestions';
 import { getLensVisMock } from '../__mocks__/lens_vis';
 import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
-import { UnifiedHistogramSuggestionType, type UnifiedHistogramVisContext } from '../types';
-import { ChartType } from '@kbn/visualization-utils';
+import { UnifiedHistogramSuggestionType } from '../types';
 
 describe('LensVisService suggestions', () => {
   const dataViewMock = buildDataViewMock({
@@ -129,7 +129,7 @@ describe('LensVisService suggestions', () => {
 | STATS results = COUNT(*) BY timestamp = BUCKET(@timestamp, 30 minute)`,
     };
 
-    expect(lensVis.visContext?.attributes.state.query).toStrictEqual(histogramQuery);
+    expect(getRepresentativeQuery(lensVis.visContext?.attributes)).toStrictEqual(histogramQuery);
   });
 
   test('should return histogramSuggestion even if the ESQL query contains a DROP @timestamp statement', async () => {
@@ -167,7 +167,7 @@ describe('LensVisService suggestions', () => {
 | STATS results = COUNT(*) BY timestamp = BUCKET(@timestamp, 30 minute)`,
     };
 
-    expect(lensVis.visContext?.attributes.state.query).toStrictEqual(histogramQuery);
+    expect(getRepresentativeQuery(lensVis.visContext?.attributes)).toStrictEqual(histogramQuery);
   });
 
   test('should return histogramSuggestion with FROM for a timeseries user query', async () => {
@@ -205,7 +205,7 @@ describe('LensVisService suggestions', () => {
 | STATS results = COUNT(*) BY timestamp = BUCKET(@timestamp, 30 minute)`,
     };
 
-    expect(lensVis.visContext?.attributes.state.query).toStrictEqual(histogramQuery);
+    expect(getRepresentativeQuery(lensVis.visContext?.attributes)).toStrictEqual(histogramQuery);
   });
 
   test('should not return histogramSuggestion if no suggestions returned by the api and transformational commands', async () => {
@@ -231,6 +231,64 @@ describe('LensVisService suggestions', () => {
       isPlainRecord: true,
       allSuggestions: [],
       isTransformationalESQL: true,
+    });
+
+    expect(lensVis.currentSuggestionContext?.type).toBe(UnifiedHistogramSuggestionType.unsupported);
+    expect(lensVis.currentSuggestionContext?.suggestion).not.toBeDefined();
+  });
+
+  test('should not append histogram for METRICS_INFO command queries', async () => {
+    const lensVis = await getLensVisMock({
+      filters: [],
+      query: { esql: 'TS metrics-* | METRICS_INFO | LIMIT 100' },
+      dataView: dataViewMock,
+      timeInterval: 'auto',
+      timeRange: {
+        from: '2023-09-03T08:00:00.000Z',
+        to: '2023-09-04T08:56:28.274Z',
+      },
+      breakdownField: undefined,
+      columns: [
+        {
+          id: 'var0',
+          name: 'var0',
+          meta: {
+            type: 'number',
+          },
+        },
+      ],
+      isPlainRecord: true,
+      allSuggestions: [],
+      isTransformationalESQL: false,
+    });
+
+    expect(lensVis.currentSuggestionContext?.type).toBe(UnifiedHistogramSuggestionType.unsupported);
+    expect(lensVis.currentSuggestionContext?.suggestion).not.toBeDefined();
+  });
+
+  test('should not append histogram for TS_INFO command queries', async () => {
+    const lensVis = await getLensVisMock({
+      filters: [],
+      query: { esql: 'TS metrics-* | TS_INFO | LIMIT 100' },
+      dataView: dataViewMock,
+      timeInterval: 'auto',
+      timeRange: {
+        from: '2023-09-03T08:00:00.000Z',
+        to: '2023-09-04T08:56:28.274Z',
+      },
+      breakdownField: undefined,
+      columns: [
+        {
+          id: 'var0',
+          name: 'var0',
+          meta: {
+            type: 'number',
+          },
+        },
+      ],
+      isPlainRecord: true,
+      allSuggestions: [],
+      isTransformationalESQL: false,
     });
 
     expect(lensVis.currentSuggestionContext?.type).toBe(UnifiedHistogramSuggestionType.unsupported);
@@ -290,7 +348,7 @@ describe('LensVisService suggestions', () => {
 | STATS results = COUNT(*) BY \`var0\`, timestamp = BUCKET(@timestamp, 30 minute) | sort \`var0\` asc`,
     };
 
-    expect(lensVis.visContext?.attributes.state.query).toStrictEqual(histogramQuery);
+    expect(getRepresentativeQuery(lensVis.visContext?.attributes)).toStrictEqual(histogramQuery);
   });
 
   test('should return histogramSuggestion even if suggestions returned by the api', async () => {
@@ -371,89 +429,6 @@ describe('LensVisService suggestions', () => {
 | STATS results = COUNT(*) BY \`coordinates\`, timestamp = BUCKET(@timestamp, 30 minute)`,
     };
 
-    expect(lensVis.visContext?.attributes.state.query).toStrictEqual(histogramQuery);
-  });
-
-  test('should use ChartType.Line as preferred chart type when query has timeseries bucket aggregation and no preferred vis attributes', async () => {
-    let capturedPreferredChartType: ChartType | undefined;
-
-    await getLensVisMock({
-      filters: [],
-      query: { esql: 'TS the-data-view | STATS COUNT() BY bucket(@timestamp, 1h)' },
-      dataView: dataViewMock,
-      timeInterval: 'auto',
-      timeRange: {
-        from: '2023-09-03T08:00:00.000Z',
-        to: '2023-09-04T08:56:28.274Z',
-      },
-      breakdownField: undefined,
-      columns: [
-        {
-          id: 'BUCKET(@timestamp, 1h)',
-          name: 'BUCKET(@timestamp, 1h)',
-          meta: { type: 'date', esType: 'date' },
-        },
-        {
-          id: 'COUNT()',
-          name: 'COUNT()',
-          meta: { type: 'number', esType: 'long' },
-        },
-      ],
-      isPlainRecord: true,
-      allSuggestions: allSuggestionsMock,
-      onLensSuggestionsApiCall: (preferredChartType) => {
-        capturedPreferredChartType = preferredChartType;
-      },
-    });
-
-    expect(capturedPreferredChartType).toBe(ChartType.Line);
-  });
-
-  test('should use preferred vis attributes chart type instead of Line for timeseries bucket aggregation queries when externalVisContext is provided', async () => {
-    let capturedPreferredChartType: ChartType | undefined;
-
-    const externalVisContext = {
-      attributes: {
-        visualizationType: 'lnsHeatmap',
-        state: {
-          query: { esql: 'TS the-data-view | STATS COUNT() BY bucket(@timestamp, 1h)' },
-          datasourceStates: { formBased: { layers: {} } },
-        },
-      },
-      requestData: {},
-      suggestionType: UnifiedHistogramSuggestionType.lensSuggestion,
-    } as UnifiedHistogramVisContext;
-
-    await getLensVisMock({
-      filters: [],
-      query: { esql: 'TS the-data-view | STATS COUNT() BY bucket(@timestamp, 1h)' },
-      dataView: dataViewMock,
-      timeInterval: 'auto',
-      timeRange: {
-        from: '2023-09-03T08:00:00.000Z',
-        to: '2023-09-04T08:56:28.274Z',
-      },
-      breakdownField: undefined,
-      columns: [
-        {
-          id: 'BUCKET(@timestamp, 1h)',
-          name: 'BUCKET(@timestamp, 1h)',
-          meta: { type: 'date', esType: 'date' },
-        },
-        {
-          id: 'COUNT()',
-          name: 'COUNT()',
-          meta: { type: 'number', esType: 'long' },
-        },
-      ],
-      isPlainRecord: true,
-      allSuggestions: allSuggestionsMock,
-      externalVisContext,
-      onLensSuggestionsApiCall: (preferredChartType) => {
-        capturedPreferredChartType = preferredChartType;
-      },
-    });
-
-    expect(capturedPreferredChartType).toBe(ChartType.Heatmap);
+    expect(getRepresentativeQuery(lensVis.visContext?.attributes)).toStrictEqual(histogramQuery);
   });
 });

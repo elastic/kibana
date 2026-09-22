@@ -30,6 +30,7 @@
         "query_then_fetch",
         "dfs_query_then_fetch"
       ],
+      "_slice": "",
       "typed_keys": "__flag__"
     },
     "methods": [
@@ -41,6 +42,7 @@
       "{index}/_msearch"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-msearch",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-msearch",
     "availability": {
       "stack": true,
       "serverless": true

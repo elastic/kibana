@@ -6,20 +6,32 @@
  */
 
 import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
+import { css } from '@emotion/react';
 
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { EuiButton, EuiFlexGroup, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiText,
+  EuiTextColor,
+} from '@elastic/eui';
+import type {
+  BulkErrorSchema,
+  ExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 import type { EuiFlyoutSize } from '@elastic/eui/src/components/flyout/flyout';
 import { useLocation } from 'react-router-dom';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 import { HeaderMenu } from '@kbn/securitysolution-exception-list-components';
 import { useApi } from '@kbn/securitysolution-list-hooks';
+import type { Action } from '@kbn/securitysolution-exception-list-components';
 import { AutoDownload } from '../../../common/components/auto_download/auto_download';
 import type { ServerApiError } from '../../../common/types';
 import { AdministrationListPage } from '../administration_list_page';
 
-import type { PaginatedContentProps } from '../paginated_content';
 import { PaginatedContent } from '../paginated_content';
+import { ArtifactSimpleTable } from './components/artifact_simple_table';
 
 import type { ArtifactEntryCardDecoratorProps } from '../artifact_entry_card';
 import { ArtifactEntryCard } from '../artifact_entry_card';
@@ -42,34 +54,26 @@ import type { ExceptionsListApiClient } from '../../services/exceptions_list/exc
 import type { ArtifactListPageUrlParams } from './types';
 import { useUrlParams } from '../../hooks/use_url_params';
 import type { ListPageRouteState, MaybeImmutable } from '../../../../common/endpoint/types';
+import type { XOR } from '../../../../common/utility_types';
 import { DEFAULT_EXCEPTION_LIST_ITEM_SEARCHABLE_FIELDS } from '../../../../common/endpoint/service/artifacts/constants';
 import { ArtifactDeleteModal } from './components/artifact_delete_modal';
 import { useKibana, useToasts } from '../../../common/lib/kibana';
 import { useMemoizedRouteState } from '../../common/hooks';
-import { BackToExternalAppSecondaryButton } from '../back_to_external_app_secondary_button';
+import { BackToExternalAppLink } from '../back_to_external_app_link';
 import { BackToExternalAppButton } from '../back_to_external_app_button';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { ArtifactImportFlyout } from './components/artifact_import_flyout';
+import { useIsImportFlyoutOpened } from './hooks/use_is_import_flyout_opened';
+import { ArtifactImportErrorsModal } from './components/artifact_import_errors_modal';
 
 type ArtifactEntryCardType = typeof ArtifactEntryCard;
 
-type ArtifactListPagePaginatedContentComponent = PaginatedContentProps<
-  ExceptionListItemSchema,
-  ArtifactEntryCardType
->;
-
-export interface ArtifactListPageProps {
+interface ArtifactListPageBaseProps {
   apiClient: ExceptionsListApiClient;
   /** The artifact Component that will be displayed in the Flyout for Create and Edit flows */
   ArtifactFormComponent: ArtifactFlyoutProps['FormComponent'];
   /** A list of labels for the given artifact page. Not all have to be defined, only those that should override the defaults */
   labels: ArtifactListPageLabels;
-  /**
-   * Define a callback to handle the submission of the form data instead of the internal one in
-   * `ArtifactListPage` being used.
-   * @param item
-   * @param mode
-   */
-  onFormSubmit?: Required<ArtifactFlyoutProps>['submitHandler'];
   /** A list of fields that will be used by the search functionality when a user enters a value in the searchbar */
   searchableFields?: MaybeImmutable<string[]>;
   flyoutSize?: EuiFlyoutSize;
@@ -78,8 +82,45 @@ export interface ArtifactListPageProps {
   allowCardDeleteAction?: boolean;
   allowCardCreateAction?: boolean;
   secondaryPageInfo?: React.ReactNode;
+  callout?: React.ReactNode;
+  additionalActions?: Action[];
+}
+
+interface ArtifactListPageWithCardProps {
+  /**
+   * A component that will be used to decorate the artifact cards.
+   *
+   * Cannot be used in combination with `showAsSimpleTable`.
+   */
   CardDecorator?: React.ComponentType<ArtifactEntryCardDecoratorProps>;
 }
+
+interface ArtifactListPageWithSimpleTableProps {
+  /**
+   * When set, artifacts are rendered as a compact `EuiBasicTable` instead of cards.
+   * Create/edit/delete/import/export still use the same flyouts and modals.
+   *
+   * Cannot be used in combination with `CardDecorator`.
+   */
+  showAsSimpleTable: true;
+  /**
+   * When true, the simple table shows an Enabled column for toggling artifacts.
+   * Only applicable when `showAsSimpleTable` is true.
+   *
+   * Important: this just a UI flag - ManifestManager must also support enabling/disabling
+   * the given artifact type.
+   */
+  showEnabledColumn?: boolean;
+}
+
+export type ArtifactListPageProps = ArtifactListPageBaseProps &
+  XOR<ArtifactListPageWithCardProps, ArtifactListPageWithSimpleTableProps>;
+
+/**
+ * Column fields that can be sorted when artifacts are shown as a simple table.
+ * Has no effect on the card list view.
+ */
+const SORTABLE_FIELDS: readonly string[] = ['name', 'updated_by', 'updated_at'];
 
 export const ArtifactListPage = memo<ArtifactListPageProps>(
   ({
@@ -88,29 +129,39 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
     searchableFields = DEFAULT_EXCEPTION_LIST_ITEM_SEARCHABLE_FIELDS,
     labels: _labels = {},
     secondaryPageInfo,
-    onFormSubmit,
+    callout,
     flyoutSize,
     'data-test-subj': dataTestSubj,
     allowCardEditAction = true,
     allowCardCreateAction = true,
     allowCardDeleteAction = true,
     CardDecorator,
+    additionalActions,
+    showAsSimpleTable = false,
+    showEnabledColumn = false,
   }) => {
+    const areEndpointExceptionsMovedUnderManagementFFEnabled = useIsExperimentalFeatureEnabled(
+      'endpointExceptionsMovedUnderManagement'
+    );
     const { services } = useKibana();
     const { http } = services;
     const { state: routeState } = useLocation<ListPageRouteState | undefined>();
     const getTestId = useTestIdGenerator(dataTestSubj);
     const toasts = useToasts();
     const isMounted = useIsMounted();
+
     const isFlyoutOpened = useIsFlyoutOpened(allowCardEditAction, allowCardCreateAction);
+    const isImportFlyoutOpened =
+      useIsImportFlyoutOpened(allowCardCreateAction) &&
+      areEndpointExceptionsMovedUnderManagementFFEnabled;
+
+    const [importErrors, setImportErrors] = useState<BulkErrorSchema[] | undefined>(undefined);
+
     const setUrlParams = useSetUrlParams();
     const {
-      urlParams: { filter, includedPolicies },
+      urlParams: { filter, includedPolicies, sortField, sortOrder },
     } = useUrlParams<ArtifactListPageUrlParams>();
     const { exportExceptionList } = useApi(http);
-    const areEndpointExceptionsMovedUnderManagementFFEnabled = useIsExperimentalFeatureEnabled(
-      'endpointExceptionsMovedUnderManagement'
-    );
 
     const {
       isPageInitializing,
@@ -121,7 +172,11 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
       error,
       refetch: refetchListData,
       dataUpdatedAt,
-    } = useWithArtifactListData(apiClient, searchableFields);
+    } = useWithArtifactListData(
+      apiClient,
+      searchableFields,
+      showAsSimpleTable ? SORTABLE_FIELDS : undefined
+    );
 
     useEffect(() => {
       if (!isLoading && error) {
@@ -174,13 +229,14 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
       dataTestSubj: getTestId('card'),
       allowCardDeleteAction,
       allowCardEditAction,
+      disabled: showAsSimpleTable,
     });
 
     const memoizedRouteState = useMemoizedRouteState(routeState);
 
-    const backButtonEmptyComponent = useMemo(() => {
+    const backLinkComponent = useMemo(() => {
       if (memoizedRouteState && memoizedRouteState.onBackButtonNavigateTo) {
-        return <BackToExternalAppSecondaryButton {...memoizedRouteState} />;
+        return <BackToExternalAppLink {...memoizedRouteState} />;
       }
     }, [memoizedRouteState]);
 
@@ -194,20 +250,35 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
       setUrlParams({ show: 'create' });
     }, [setUrlParams]);
 
-    const handlePaginationChange: ArtifactListPagePaginatedContentComponent['onChange'] =
-      useCallback(
-        ({ pageIndex, pageSize }) => {
-          setUrlParams({
-            page: pageIndex + 1,
-            pageSize,
-          });
+    const handlePaginationChange = useCallback(
+      ({
+        pageIndex,
+        pageSize,
+        sortField: nextSortField,
+        sortOrder: nextSortOrder,
+      }: {
+        pageIndex: number;
+        pageSize: number;
+        sortField?: string;
+        sortOrder?: 'asc' | 'desc';
+      }) => {
+        const resolvedSortField = nextSortField ?? sortField;
+        const resolvedSortOrder = nextSortOrder ?? sortOrder;
+        const didSortChange = resolvedSortField !== sortField || resolvedSortOrder !== sortOrder;
 
-          // Scroll to the top to ensure that when new set of data is received and list updated,
-          // the user is back at the top of the list
-          window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-        },
-        [setUrlParams]
-      );
+        setUrlParams({
+          page: didSortChange ? 1 : pageIndex + 1,
+          pageSize,
+          sortField: resolvedSortField,
+          sortOrder: resolvedSortOrder,
+        });
+
+        // Scroll to the top to ensure that when new set of data is received and list updated,
+        // the user is back at the top of the list
+        window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+      },
+      [setUrlParams, sortField, sortOrder]
+    );
 
     const handleOnSearch = useCallback<SearchExceptionsProps['onSearch']>(
       (filterValue: string, selectedPolicies: string, doHardRefresh) => {
@@ -250,6 +321,12 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
       setSelectedItemForEdit(undefined);
     }, []);
 
+    const handleEnabledChangeSuccess = useCallback(async () => {
+      if (isMounted()) {
+        await refetchListData();
+      }
+    }, [isMounted, refetchListData]);
+
     const handleExport = useCallback(
       () =>
         exportExceptionList({
@@ -277,6 +354,21 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
 
     const handleOnDownload = useCallback(() => setExportedData(undefined), []);
 
+    const handleImport = useCallback(() => setUrlParams({ show: 'import' }), [setUrlParams]);
+
+    const closeImportFlyout = useCallback(() => setUrlParams({ show: undefined }), [setUrlParams]);
+
+    const handleImportFlyoutOnSuccess = useCallback(() => {
+      closeImportFlyout();
+      refetchListData();
+    }, [closeImportFlyout, refetchListData]);
+
+    const handleImportFlyoutOnShowErrors = useCallback((errors: BulkErrorSchema[]) => {
+      setImportErrors(errors);
+    }, []);
+
+    const handleCloseImportErrorsModal = useCallback(() => setImportErrors(undefined), []);
+
     const description = useMemo(() => {
       const subtitleText = labels.pageAboutInfo ? (
         <span data-test-subj="header-panel-subtitle">{labels.pageAboutInfo}</span>
@@ -288,12 +380,45 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
         </>
       ) : undefined;
       return (
-        <>
+        <EuiTextColor color="subdued">
           {subtitleText}
           {detailedPageInfoElement}
-        </>
+        </EuiTextColor>
       );
     }, [labels.pageAboutInfo, secondaryPageInfo]);
+
+    const actionsToDisplay: Action[] = useMemo(
+      () => [
+        ...(areEndpointExceptionsMovedUnderManagementFFEnabled
+          ? [
+              {
+                key: 'ImportButton',
+                icon: 'download',
+                label: labels.pageImportButtonTitle,
+                onClick: handleImport,
+                disabled: !allowCardCreateAction,
+              },
+              {
+                key: 'ExportButton',
+                icon: 'upload',
+                label: labels.pageExportButtonTitle,
+                onClick: handleExport,
+              },
+            ]
+          : []),
+
+        ...(additionalActions ?? []),
+      ],
+      [
+        additionalActions,
+        allowCardCreateAction,
+        areEndpointExceptionsMovedUnderManagementFFEnabled,
+        handleExport,
+        handleImport,
+        labels.pageExportButtonTitle,
+        labels.pageImportButtonTitle,
+      ]
+    );
 
     if (isPageInitializing) {
       return <ManagementPageLoader data-test-subj={getTestId('pageLoader')} />;
@@ -302,47 +427,8 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
     return (
       <AdministrationListPage
         headerBackComponent={backButtonHeaderComponent}
-        hideHeader={!doesDataExist}
+        hideHeader={true}
         title={labels.pageTitle}
-        subtitle={description}
-        actions={
-          <EuiFlexGroup alignItems="center">
-            {allowCardCreateAction && (
-              <EuiButton
-                fill
-                iconType="plusInCircle"
-                isDisabled={isFlyoutOpened}
-                onClick={handleOpenCreateFlyoutClick}
-                data-test-subj={getTestId('pageAddButton')}
-              >
-                {labels.pageAddButtonTitle}
-              </EuiButton>
-            )}
-
-            {areEndpointExceptionsMovedUnderManagementFFEnabled && (
-              <HeaderMenu
-                iconType="boxesHorizontal"
-                dataTestSubj={getTestId('exportImportMenu')}
-                actions={[
-                  {
-                    key: 'ImportButton',
-                    icon: 'importAction',
-                    label: labels.pageImportButtonTitle,
-                    onClick: () => {},
-                    disabled: !allowCardCreateAction,
-                  },
-                  {
-                    key: 'ExportButton',
-                    icon: 'exportAction',
-                    label: labels.pageExportButtonTitle,
-                    onClick: handleExport,
-                  },
-                ]}
-                disableActions={isLoading}
-              />
-            )}
-          </EuiFlexGroup>
-        }
         data-test-subj={getTestId('container')}
       >
         <AutoDownload
@@ -360,9 +446,23 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
             FormComponent={ArtifactFormComponent}
             labels={labels}
             size={flyoutSize}
-            submitHandler={onFormSubmit}
             data-test-subj={getTestId('flyout')}
+            canCreateArtifactAsDisabled={showEnabledColumn}
           />
+        )}
+
+        {isImportFlyoutOpened && (
+          <ArtifactImportFlyout
+            onCancel={closeImportFlyout}
+            onSuccess={handleImportFlyoutOnSuccess}
+            onShowErrors={handleImportFlyoutOnShowErrors}
+            apiClient={apiClient}
+            labels={labels}
+          />
+        )}
+
+        {importErrors && (
+          <ArtifactImportErrorsModal errors={importErrors} onClose={handleCloseImportErrorsModal} />
         )}
 
         {selectedItemForDelete && (
@@ -377,26 +477,72 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
         )}
 
         {!doesDataExist ? (
-          <NoDataEmptyState
-            onAdd={handleOpenCreateFlyoutClick}
-            titleNoEntriesLabel={labels.emptyStateTitleNoEntries}
-            titleLabel={labels.emptyStateTitle}
-            aboutInfo={labels.emptyStateInfo}
-            primaryButtonLabel={labels.emptyStatePrimaryButtonLabel}
-            backComponent={backButtonEmptyComponent}
-            data-test-subj={getTestId('emptyState')}
-            secondaryAboutInfo={secondaryPageInfo}
-            canCreateItems={allowCardCreateAction}
-          />
+          <div
+            css={css`
+              > * {
+                justify-content: flex-start;
+                padding-top: calc((100vh - 140px) / 6);
+                box-sizing: border-box;
+              }
+            `}
+          >
+            <NoDataEmptyState
+              onAdd={handleOpenCreateFlyoutClick}
+              onImport={handleImport}
+              titleNoEntriesLabel={labels.emptyStateTitleNoEntries}
+              titleLabel={labels.emptyStateTitle}
+              aboutInfo={labels.emptyStateInfo}
+              primaryButtonLabel={labels.emptyStatePrimaryButtonLabel}
+              importButtonLabel={labels.emptyStateImportButtonLabel}
+              backComponent={backLinkComponent}
+              data-test-subj={getTestId('emptyState')}
+              secondaryAboutInfo={secondaryPageInfo}
+              canCreateItems={allowCardCreateAction}
+              isAddDisabled={isFlyoutOpened || isImportFlyoutOpened}
+            />
+          </div>
         ) : (
           <>
-            <SearchExceptions
-              defaultValue={filter}
-              onSearch={handleOnSearch}
-              placeholder={labels.searchPlaceholderInfo}
-              hasPolicyFilter
-              defaultIncludedPolicies={includedPolicies}
-            />
+            {backButtonHeaderComponent}
+            {description}
+            <EuiSpacer size="m" />
+            {callout}
+            <EuiSpacer size="m" />
+            <EuiFlexGroup direction="row" alignItems="center" gutterSize="m">
+              <EuiFlexItem grow={true}>
+                <SearchExceptions
+                  defaultValue={filter}
+                  onSearch={handleOnSearch}
+                  placeholder={labels.searchPlaceholderInfo}
+                  hasPolicyFilter
+                  defaultIncludedPolicies={includedPolicies}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup alignItems="center" gutterSize="s">
+                  {allowCardCreateAction && (
+                    <EuiButton
+                      fill
+                      iconType="plusCircle"
+                      isDisabled={isFlyoutOpened}
+                      onClick={handleOpenCreateFlyoutClick}
+                      data-test-subj={getTestId('pageAddButton')}
+                    >
+                      {labels.pageAddButtonTitle}
+                    </EuiButton>
+                  )}
+
+                  {actionsToDisplay.length > 0 && (
+                    <HeaderMenu
+                      iconType="boxesVertical"
+                      dataTestSubj={getTestId('overflowMenu')}
+                      actions={actionsToDisplay}
+                      disableActions={isLoading}
+                    />
+                  )}
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
 
             <EuiSpacer size="m" />
 
@@ -406,19 +552,40 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
 
             <EuiSpacer size="s" />
 
-            <PaginatedContent<ExceptionListItemSchema, ArtifactEntryCardType>
-              items={items}
-              ItemComponent={ArtifactEntryCard}
-              itemComponentProps={handleCardProps}
-              onChange={handlePaginationChange}
-              error={error as React.ReactNode}
-              loading={isLoading}
-              pagination={uiPagination}
-              contentClassName="card-container"
-              data-test-subj={getTestId('list')}
-              CardDecorator={CardDecorator}
-              dataUpdatedAt={dataUpdatedAt}
-            />
+            {showAsSimpleTable ? (
+              <ArtifactSimpleTable
+                items={items}
+                pagination={uiPagination}
+                onChange={handlePaginationChange}
+                onAction={handleOnCardActionClick}
+                labels={labels}
+                loading={isLoading}
+                error={(error?.body as ServerApiError)?.message || error?.message}
+                allowCardEditAction={allowCardEditAction}
+                allowCardDeleteAction={allowCardDeleteAction}
+                showEnabledColumn={showEnabledColumn}
+                apiClient={apiClient}
+                onEnabledChangeSuccess={handleEnabledChangeSuccess}
+                sortField={sortField}
+                sortOrder={sortOrder}
+                sortableFields={SORTABLE_FIELDS}
+                data-test-subj={getTestId('simpleTable')}
+              />
+            ) : (
+              <PaginatedContent<ExceptionListItemSchema, ArtifactEntryCardType>
+                items={items}
+                ItemComponent={ArtifactEntryCard}
+                itemComponentProps={handleCardProps}
+                onChange={handlePaginationChange}
+                error={error as React.ReactNode}
+                loading={isLoading}
+                pagination={uiPagination}
+                contentClassName="card-container"
+                data-test-subj={getTestId('list')}
+                CardDecorator={CardDecorator}
+                dataUpdatedAt={dataUpdatedAt}
+              />
+            )}
           </>
         )}
       </AdministrationListPage>

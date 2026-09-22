@@ -22,6 +22,7 @@
       "_connector"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-list",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-connector-list",
     "availability": {
       "stack": true,
       "serverless": true

@@ -26,9 +26,38 @@ interface UserAuthenticationAttributes extends BasicAttributes {
   providerType: string;
 }
 
-export type SecurityTelemetryAttributes = BasicAttributes &
+interface GetCurrentProfileAttributes extends BasicAttributes {
+  profileActivationRequired?: boolean;
+  apiKeyRetrievalRequired?: boolean;
+  fakeRequestProfileResolution?: boolean;
+}
+
+interface OAuthTokenExchangeAttributes extends BasicAttributes {
+  oauthErrorType?: string;
+  oauthErrorCode?: string;
+}
+
+interface ServiceAccountCreationAttributes extends BasicAttributes {
+  /** Which backend served the request, since the two are mutually exclusive per deployment. */
+  serviceAccountBackend: 'stack' | 'uiam';
+}
+
+/**
+ * Which resource a failed rollback left behind. Separate values rather than separate metrics
+ * because they are distinct resources, not states of one: a single rollback can leak more than
+ * one, and summing them answers "how much is orphaned".
+ */
+interface ServiceAccountRollbackAttributes {
+  serviceAccountRollbackResource: 'token' | 'account' | 'credential';
+}
+
+export type SecurityTelemetryAttributes = Partial<BasicAttributes> &
   Partial<PrivilegeRegistrationAttributes> &
-  Partial<UserAuthenticationAttributes>;
+  Partial<UserAuthenticationAttributes> &
+  Partial<GetCurrentProfileAttributes> &
+  Partial<OAuthTokenExchangeAttributes> &
+  Partial<ServiceAccountCreationAttributes> &
+  Partial<ServiceAccountRollbackAttributes>;
 
 class SecurityTelemetry {
   private readonly meter = metrics.getMeter('kibana.security');
@@ -38,6 +67,12 @@ class SecurityTelemetry {
   private readonly sessionCreationDuration: Histogram<Attributes>;
   private readonly logoutCounter: Counter<Attributes>;
   private readonly privilegeRegistrationDuration: Histogram<Attributes>;
+  private readonly getCurrentProfileCounter: Counter<Attributes>;
+  private readonly getCurrentProfileIdCounter: Counter<Attributes>;
+  private readonly oauthTokenExchangeAttempts: Counter<Attributes>;
+  private readonly oauthTokenExchangeDuration: Histogram<Attributes>;
+  private readonly serviceAccountCreationAttempts: Counter<Attributes>;
+  private readonly serviceAccountRollbackFailures: Counter<Attributes>;
 
   // Adds more boundaries in 50-500ms range where most operations typically fall
   private readonly DEFAULT_BUCKET_BOUNDARIES = [
@@ -103,16 +138,103 @@ class SecurityTelemetry {
         },
       }
     );
+
+    this.getCurrentProfileCounter = this.meter.createCounter(
+      'user_profiles.get_current.invocations',
+      {
+        description: 'Number of invocations of getCurrent',
+        unit: '1',
+        valueType: ValueType.INT,
+      }
+    );
+
+    this.getCurrentProfileIdCounter = this.meter.createCounter(
+      'user_profiles.get_current_profile_id.invocations',
+      {
+        description: 'Number of invocations of getCurrentProfileId',
+        unit: '1',
+        valueType: ValueType.INT,
+      }
+    );
+
+    this.oauthTokenExchangeAttempts = this.meter.createCounter(
+      'auth.uiam.oauth_token_exchange.attempts',
+      {
+        description: 'Number of UIAM OAuth access token to ephemeral token exchange attempts',
+        unit: '1',
+        valueType: ValueType.INT,
+      }
+    );
+
+    this.oauthTokenExchangeDuration = this.meter.createHistogram(
+      'auth.uiam.oauth_token_exchange.duration',
+      {
+        description: 'Duration of UIAM OAuth access token to ephemeral token exchange attempts',
+        unit: 'ms',
+        valueType: ValueType.DOUBLE,
+        advice: {
+          explicitBucketBoundaries: this.DEFAULT_BUCKET_BOUNDARIES,
+        },
+      }
+    );
+
+    this.serviceAccountCreationAttempts = this.meter.createCounter(
+      'service_accounts.creation.attempts',
+      {
+        description: 'Number of service account creation attempts',
+        unit: '1',
+        valueType: ValueType.INT,
+      }
+    );
+
+    this.serviceAccountRollbackFailures = this.meter.createCounter(
+      'service_accounts.creation.rollback.failures',
+      {
+        description:
+          'Number of resources a failed service account creation could not roll back, and so ' +
+          'left behind for an operator to remove',
+        unit: '1',
+        valueType: ValueType.INT,
+      }
+    );
   }
 
   private transformAttributes<T extends SecurityTelemetryAttributes>(attributes: T): Attributes {
-    const { application, providerType, outcome, deletedPrivileges, ...rest } = attributes;
+    const {
+      application,
+      providerType,
+      outcome,
+      deletedPrivileges,
+      profileActivationRequired,
+      apiKeyRetrievalRequired,
+      fakeRequestProfileResolution,
+      oauthErrorType,
+      oauthErrorCode,
+      serviceAccountBackend,
+      serviceAccountRollbackResource,
+      ...rest
+    } = attributes;
 
     const transformed: Attributes = {
       ...(application ? { application } : {}),
       ...(deletedPrivileges ? { 'deleted.privileges': deletedPrivileges } : {}),
       ...(providerType ? { 'auth.provider.type': providerType } : {}),
-      ...(outcome ? { 'auth.outcome': outcome } : {}),
+      ...(outcome ? { outcome } : {}),
+      ...(profileActivationRequired
+        ? { 'profile.get_current.profile_activation_required': profileActivationRequired }
+        : {}),
+      ...(apiKeyRetrievalRequired
+        ? { 'profile.get_current.api_key_retrieval_required': apiKeyRetrievalRequired }
+        : {}),
+      ...(fakeRequestProfileResolution
+        ? { 'profile.get_current.fake_request_profile_resolution': fakeRequestProfileResolution }
+        : {}),
+      ...(oauthErrorType ? { 'oauth.error.type': oauthErrorType } : {}),
+      ...(oauthErrorCode ? { 'oauth.error.code': oauthErrorCode } : {}),
+      ...(serviceAccountBackend ? { 'service_account.backend': serviceAccountBackend } : {}),
+      ...(serviceAccountRollbackResource
+        ? { 'service_account.rollback.resource': serviceAccountRollbackResource }
+        : {}),
       ...rest,
     };
 
@@ -151,6 +273,38 @@ class SecurityTelemetry {
     const transformedAttributes =
       this.transformAttributes<PrivilegeRegistrationAttributes>(attributes);
     this.privilegeRegistrationDuration.record(duration, transformedAttributes);
+  };
+
+  recordGetCurrentProfileInvocation = (attributes: GetCurrentProfileAttributes) => {
+    const transformedAttributes = this.transformAttributes<GetCurrentProfileAttributes>(attributes);
+    this.getCurrentProfileCounter.add(1, transformedAttributes);
+  };
+
+  recordGetCurrentProfileIdInvocation = (attributes: GetCurrentProfileAttributes) => {
+    const transformedAttributes = this.transformAttributes<GetCurrentProfileAttributes>(attributes);
+    this.getCurrentProfileIdCounter.add(1, transformedAttributes);
+  };
+
+  recordOAuthTokenExchangeAttempt = (
+    duration: number,
+    attributes: OAuthTokenExchangeAttributes
+  ) => {
+    const transformedAttributes =
+      this.transformAttributes<OAuthTokenExchangeAttributes>(attributes);
+    this.oauthTokenExchangeAttempts.add(1, transformedAttributes);
+    this.oauthTokenExchangeDuration.record(duration, transformedAttributes);
+  };
+
+  recordServiceAccountCreationAttempt = (attributes: ServiceAccountCreationAttributes) => {
+    const transformedAttributes =
+      this.transformAttributes<ServiceAccountCreationAttributes>(attributes);
+    this.serviceAccountCreationAttempts.add(1, transformedAttributes);
+  };
+
+  recordServiceAccountRollbackFailure = (attributes: ServiceAccountRollbackAttributes) => {
+    const transformedAttributes =
+      this.transformAttributes<ServiceAccountRollbackAttributes>(attributes);
+    this.serviceAccountRollbackFailures.add(1, transformedAttributes);
   };
 }
 

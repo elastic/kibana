@@ -21,56 +21,62 @@ import { SECRETS_ENDPOINT_PATH, SECRETS_MINIMUM_FLEET_SERVER_VERSION } from '../
 import { retryTransientEsErrors } from '../epm/elasticsearch/retry';
 import { auditLoggingService } from '../audit_logging';
 import { appContextService } from '../app_context';
-import { settingsService } from '..';
-import { checkFleetServerVersionsForSecretsStorage } from '../fleet_server';
+import { isFleetServerVersionRequirementMet } from '../fleet_server/version_requirements';
+import type { FleetServerRequirementSettingsKey } from '../fleet_server/version_requirements';
+
+type SecretStorageSettingsKey = FleetServerRequirementSettingsKey;
+
+export interface SecretStorageCheckOptions {
+  esClient: ElasticsearchClient;
+  soClient: SavedObjectsClientContract;
+  /**
+   * A human-readable name for the feature (used in logging).
+   * Defaults to "Secrets".
+   */
+  featureName?: string;
+  /**
+   * The minimum fleet server version required for this secret storage feature.
+   * Defaults to SECRETS_MINIMUM_FLEET_SERVER_VERSION.
+   */
+  minimumFleetServerVersion?: string;
+  /**
+   * The setting key to check/update for this feature.
+   * Defaults to 'secret_storage_requirements_met'.
+   */
+  settingKey?: SecretStorageSettingsKey;
+}
+
+export async function isSecretStorageEnabledForFeature(
+  opts: SecretStorageCheckOptions
+): Promise<boolean> {
+  const {
+    esClient,
+    soClient,
+    featureName = 'Secrets',
+    minimumFleetServerVersion = SECRETS_MINIMUM_FLEET_SERVER_VERSION,
+    settingKey = 'secret_storage_requirements_met',
+  } = opts;
+
+  return isFleetServerVersionRequirementMet({
+    esClient,
+    soClient,
+    featureName: `${featureName} storage`,
+    minimumFleetServerVersion,
+    settingKey,
+  });
+}
 
 export async function isSecretStorageEnabled(
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract
 ): Promise<boolean> {
-  const logger = appContextService.getLogger();
-
-  // if serverless then secrets will always be supported
-  const isFleetServerStandalone =
-    appContextService.getConfig()?.internal?.fleetServerStandalone ?? false;
-
-  if (isFleetServerStandalone) {
-    logger.trace('Secrets storage is enabled as fleet server is standalone');
-    return true;
-  }
-
-  // now check the flag in settings to see if the fleet server requirement has already been met
-  // once the requirement has been met, secrets are always on
-  const settings = await settingsService.getSettingsOrUndefined(soClient);
-
-  if (settings && settings.secret_storage_requirements_met) {
-    logger.debug('Secrets storage requirements already met, turned on in settings');
-    return true;
-  }
-
-  const areAllFleetServersOnProperVersion = await checkFleetServerVersionsForSecretsStorage(
+  return isSecretStorageEnabledForFeature({
     esClient,
     soClient,
-    SECRETS_MINIMUM_FLEET_SERVER_VERSION
-  );
-
-  // otherwise check if we have the minimum fleet server version and enable secrets if so
-  if (areAllFleetServersOnProperVersion) {
-    logger.debug('Enabling secrets storage as minimum fleet server version has been met');
-    try {
-      await settingsService.saveSettings(soClient, {
-        secret_storage_requirements_met: true,
-      });
-    } catch (err) {
-      // we can suppress this error as it will be retried on the next function call
-      logger.warn(`Failed to save settings after enabling secrets storage: ${err.message}`);
-    }
-
-    return true;
-  }
-
-  logger.info('Secrets storage is disabled as minimum fleet server version has not been met');
-  return false;
+    featureName: 'Secrets',
+    minimumFleetServerVersion: SECRETS_MINIMUM_FLEET_SERVER_VERSION,
+    settingKey: 'secret_storage_requirements_met',
+  });
 }
 
 export async function createSecrets(opts: {
@@ -177,6 +183,35 @@ export async function deleteSecrets(opts: {
 // this is how IDs are inserted into compiled templates
 export function toCompiledSecretRef(id: string) {
   return `$co.elastic.secret{${id}}`;
+}
+
+/**
+ * Inverse of {@link toCompiledSecretRef}: scans an already-compiled policy fragment for inline
+ * `$co.elastic.secret{<id>}` placeholders and returns the set of ids found.
+ *
+ * Pass the compiled `inputs` and `otelcolConfig` — "appears in the JSON" is exactly the criterion
+ * Fleet Server uses when performing placeholder substitution. Never pass an object that carries
+ * `secret_references` itself, or every id will trivially match.
+ *
+ * Returns `undefined` if the fragment cannot be serialized so callers can fail open (keep the
+ * unpruned array) rather than silently dropping valid references.
+ */
+export function collectCompiledSecretRefIds(compiled: unknown): Set<string> | undefined {
+  let serialized: string;
+  try {
+    serialized = JSON.stringify(compiled ?? null);
+  } catch (err) {
+    appContextService
+      .getLogger()
+      .warn(`Unable to scan compiled policy fragment for secret references: ${err}`);
+    return undefined;
+  }
+  const ids = new Set<string>();
+  // Regex is constructed per call: a shared /g regex carries lastIndex state across calls.
+  for (const [, id] of serialized.matchAll(/\$co\.elastic\.secret\{([^}]+)\}/g)) {
+    ids.add(id);
+  }
+  return ids;
 }
 
 /**

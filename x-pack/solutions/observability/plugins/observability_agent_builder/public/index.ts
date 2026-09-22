@@ -9,11 +9,16 @@ import type { PluginInitializerContext } from '@kbn/core/public';
 import { ObservabilityAgentBuilderPlugin } from './plugin';
 
 export {
-  OBSERVABILITY_AGENT_ID,
   OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID,
   OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID,
   OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID,
   OBSERVABILITY_LOG_ATTACHMENT_TYPE_ID,
+  OBSERVABILITY_SLO_ATTACHMENT_TYPE_ID,
+  OBSERVABILITY_SERVICE_ATTACHMENT_TYPE_ID,
+  OBSERVABILITY_HOST_ATTACHMENT_TYPE_ID,
+  OBSERVABILITY_TRANSACTION_ATTACHMENT_TYPE_ID,
+  OBSERVABILITY_MONITOR_ATTACHMENT_TYPE_ID,
+  OBSERVABILITY_SERVICE_MAP_CONTEXT_ATTACHMENT_TYPE_ID,
 } from '../common/constants';
 
 export type {
@@ -23,7 +28,11 @@ export type {
   ObservabilityAgentBuilderPluginStartDependencies,
 } from './types';
 
-export type { AlertAiInsightProps, ErrorSampleAiInsightProps } from './components/insights';
+export type {
+  AlertAiInsightProps,
+  ErrorSampleAiInsightProps,
+  ServiceMapInvestigateButtonProps,
+} from './components/insights';
 
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new ObservabilityAgentBuilderPlugin(initializerContext);

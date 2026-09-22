@@ -28,6 +28,7 @@ jest.mock('./metrics', () => ({
 const mockGetTimeRangeAsDays = getTimeRangeAsDays as jest.MockedFunction<typeof getTimeRangeAsDays>;
 
 const defaultProps = {
+  isSample: false as const,
   attackDiscoveryCount: 25,
   attackDiscoveryCountCompare: 20,
   from: '2023-01-01T00:00:00.000Z',
@@ -40,11 +41,37 @@ describe('ThreatsDetected', () => {
     mockGetTimeRangeAsDays.mockReturnValue(`30`);
   });
 
-  it('renders the component with correct structure', () => {
+  it('renders the live component with correct structure', () => {
     render(<ThreatsDetected {...defaultProps} />);
 
     expect(ThreatsDetectedMetric).toHaveBeenCalledWith(
       expect.objectContaining({
+        from: defaultProps.from,
+        to: defaultProps.to,
+      }),
+      {}
+    );
+
+    expect(ComparePercentage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        currentCount: defaultProps.attackDiscoveryCount,
+        positionForLens: true,
+        previousCount: defaultProps.attackDiscoveryCountCompare,
+        stat: `${defaultProps.attackDiscoveryCountCompare}`,
+        statType: 'attack discovery count',
+        timeRange: `30`,
+      }),
+      {}
+    );
+  });
+
+  it('renders the sample component with correct structure', () => {
+    const sampleProps = { ...defaultProps, isSample: true };
+    render(<ThreatsDetected {...sampleProps} />);
+
+    expect(ThreatsDetectedMetric).toHaveBeenCalledWith(
+      expect.objectContaining({
+        isSample: true,
         from: defaultProps.from,
         to: defaultProps.to,
       }),

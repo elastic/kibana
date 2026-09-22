@@ -10,6 +10,7 @@
 import type { Observable } from 'rxjs';
 
 import type { ControlsRendererParentApi } from '@kbn/controls-renderer';
+import type { ControlsLayout } from '@kbn/controls-renderer';
 import type {
   DataControlState,
   LegacyIgnoreParentSettings,
@@ -18,7 +19,11 @@ import type {
 } from '@kbn/controls-schemas';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { PublishesESQLVariables } from '@kbn/esql-types';
-import type { AppliesFilters, AppliesTimeslice } from '@kbn/presentation-publishing';
+import type {
+  AppliesFilters,
+  AppliesTimeslice,
+  PublishesProjectRouting,
+} from '@kbn/presentation-publishing';
 
 import type { controlGroupStateBuilder } from './control_group_state_builder';
 
@@ -26,6 +31,7 @@ export type ControlGroupRendererApi = ControlsRendererParentApi &
   HasEditorConfig &
   Pick<AppliesFilters, 'appliedFilters$'> &
   PublishesESQLVariables &
+  PublishesProjectRouting &
   AppliesTimeslice & {
     reload: () => void;
 
@@ -51,6 +57,8 @@ export type ControlGroupRendererApi = ControlsRendererParentApi &
      */
     getInput: () => ControlGroupRuntimeState;
 
+    getControls: () => ControlsLayout['controls'];
+
     openAddDataControlFlyout: (options?: { controlStateTransform?: ControlStateTransform }) => void;
   };
 
@@ -63,17 +71,14 @@ export type ControlGroupRendererApi = ControlsRendererParentApi &
 /**
  * The editor config allows the consumer to hide different parts of the data control editor
  */
-interface HasEditorConfig {
+export interface HasEditorConfig {
   getEditorConfig: () => ControlGroupEditorConfig | undefined;
 }
-
-export const apiHasEditorConfig = (parentApi: unknown): parentApi is HasEditorConfig => {
-  return typeof (parentApi as HasEditorConfig).getEditorConfig === 'function';
-};
 
 export interface ControlGroupEditorConfig {
   hideDataViewSelector?: boolean;
   hideAdditionalSettings?: boolean;
+  hideValuesSourceSelector?: boolean;
   defaultDataViewId?: string;
   fieldFilterPredicate?: FieldFilterPredicate;
   controlStateTransform?: ControlStateTransform;
@@ -100,7 +105,7 @@ export interface ControlGroupRuntimeState<State extends {} = {}> {
 }
 
 export interface ControlGroupCreationOptions {
-  initialState?: Partial<ControlGroupRuntimeState>;
+  initialState?: ControlGroupRuntimeState;
   getEditorConfig?: () => Omit<ControlGroupEditorConfig, 'controlStateTransform'> | undefined;
 }
 

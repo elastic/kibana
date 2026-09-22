@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createAsyncThunk } from '@reduxjs/toolkit';
+import { createAsyncThunk } from 'redux-toolkit-v1';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
+import { WorkflowApi } from '@kbn/workflows-ui';
+import { WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE } from '../../../../../../common';
 import type { WorkflowsServices } from '../../../../../types';
 import type { RootState } from '../../types';
-import { _setComputedExecution, setExecution } from '../slice';
+import { _setComputedExecution, setExecution, setStepExecutionsTotal } from '../slice';
 import { performComputation } from '../utils/computation';
 
 export interface LoadExecutionParams {
@@ -29,12 +31,26 @@ export const loadExecutionThunk = createAsyncThunk<
   'detail/loadExecutionThunk',
   async ({ id }, { getState, dispatch, rejectWithValue, extra: { services } }) => {
     const { http, notifications } = services;
+    const api = new WorkflowApi(http);
     try {
       const previousExecution = getState().detail.execution;
 
-      // Make the API call to load the execution
-      const response = await http.get<WorkflowExecutionDto>(`/api/workflowExecutions/${id}`);
+      // includeOutput so AI token metadata (LangChain tokenUsage) is available for
+      // tree badges / AI section before step.usage is populated by the engine.
+      const [execution, stepsPage] = await Promise.all([
+        api.getExecution(id, {
+          includeInput: false,
+          includeOutput: true,
+          omitStepExecutions: true,
+        }),
+        api.getExecutionSteps(id, { page: 1, size: WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE }),
+      ]);
+      const response: WorkflowExecutionDto = {
+        ...execution,
+        stepExecutions: stepsPage.results.slice(0, WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE),
+      };
       dispatch(setExecution(response));
+      dispatch(setStepExecutionsTotal(stepsPage.total));
 
       if (id !== previousExecution?.id) {
         // avoid recomputing derived data if the execution is the same

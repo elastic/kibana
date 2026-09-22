@@ -16,7 +16,7 @@ import { licenseService as licenseServiceMocked } from '../../../../../../common
 import type { AdvancedSectionProps } from './advanced_section';
 import { AdvancedSection } from './advanced_section';
 import userEvent from '@testing-library/user-event';
-import { AdvancedPolicySchema } from '../../../models/advanced_policy_schema';
+import { AdvancedPolicySchema } from '../../../../../../../common/endpoint/service/policy/advanced_policy_schema';
 import { within } from '@testing-library/react';
 import { set } from '@kbn/safer-lodash-set';
 
@@ -85,6 +85,7 @@ describe('Policy Advanced Settings section', () => {
     const fieldsWithDefaultValues = [
       'mac.advanced.capture_env_vars',
       'linux.advanced.capture_env_vars',
+      'mac.ransomware.mode',
     ];
 
     await render(true);

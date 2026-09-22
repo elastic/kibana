@@ -13,9 +13,11 @@ import type {
   ObservabilitySharedPluginStart,
 } from '@kbn/observability-shared-plugin/public';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 import type { StreamsPluginStart, StreamsPluginSetup } from '@kbn/streams-plugin/public';
 import type { CasesPublicStart } from '@kbn/cases-plugin/public';
+import type { WorkflowsPublicPluginStart } from '@kbn/workflows-management-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ServerlessObservabilityPublicSetup {}
@@ -35,8 +37,10 @@ export interface ServerlessObservabilityPublicSetupDependencies {
 export interface ServerlessObservabilityPublicStartDependencies {
   observabilityShared: ObservabilitySharedPluginStart;
   serverless: ServerlessPluginStart;
+  navigation: NavigationPublicPluginStart;
   management: ManagementStart;
   security: SecurityPluginStart;
   streams?: StreamsPluginStart;
   cases?: CasesPublicStart;
+  workflowsManagement?: WorkflowsPublicPluginStart;
 }

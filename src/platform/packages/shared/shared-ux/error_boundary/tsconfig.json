@@ -5,7 +5,6 @@
     "types": [
       "jest",
       "react",
-      "@emotion/react/types/css-prop",
       "@testing-library/jest-dom",
       "@testing-library/react",
       "@kbn/ambient-ui-types"
@@ -21,6 +20,5 @@
   "kbn_references": [
     "@kbn/shared-ux-storybook-mock",
     "@kbn/i18n",
-    "@kbn/core-analytics-browser-mocks",
   ]
 }

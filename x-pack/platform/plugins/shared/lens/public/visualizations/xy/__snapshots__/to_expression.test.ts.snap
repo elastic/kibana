@@ -9,6 +9,9 @@ Object {
           false,
         ],
         "annotations": Array [],
+        "areaFill": Array [
+          "solid",
+        ],
         "emphasizeFitting": Array [
           true,
         ],
@@ -37,6 +40,9 @@ Object {
                   "accessors": Array [
                     "b",
                     "c",
+                  ],
+                  "colorMapping": Array [
+                    "{\\"assignments\\":[],\\"specialAssignments\\":[{\\"rules\\":[{\\"type\\":\\"other\\"}],\\"color\\":{\\"type\\":\\"loop\\"},\\"touched\\":false}],\\"paletteId\\":\\"default\\",\\"colorMode\\":{\\"type\\":\\"categorical\\"}}",
                   ],
                   "columnToLabel": Array [
                     "{\\"b\\":\\"col_b\\",\\"c\\":\\"col_c\\",\\"d\\":\\"col_d\\"}",

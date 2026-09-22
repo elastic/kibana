@@ -18,14 +18,17 @@ import { riskEngineConfigureSavedObjectRoute } from './configure_saved_object';
 export const registerRiskEngineRoutes = ({
   router,
   getStartServices,
+  config,
 }: EntityAnalyticsRoutesDeps) => {
-  riskEngineStatusRoute(router, getStartServices);
-  riskEngineInitRoute(router, getStartServices);
-  riskEngineEnableRoute(router, getStartServices);
-  riskEngineDisableRoute(router, getStartServices);
-  riskEngineScheduleNowRoute(router, getStartServices);
+  const isRiskScoringMaintainerEnabled = config.experimentalFeatures.entityAnalyticsEntityStoreV2;
+
+  riskEngineStatusRoute(router, getStartServices, isRiskScoringMaintainerEnabled);
+  riskEngineInitRoute(router, getStartServices, isRiskScoringMaintainerEnabled);
+  riskEngineEnableRoute(router, getStartServices, isRiskScoringMaintainerEnabled);
+  riskEngineDisableRoute(router, getStartServices, isRiskScoringMaintainerEnabled);
+  riskEngineScheduleNowRoute(router, getStartServices, isRiskScoringMaintainerEnabled);
   riskEngineSettingsRoute(router);
   riskEnginePrivilegesRoute(router, getStartServices);
-  riskEngineCleanupRoute(router, getStartServices);
+  riskEngineCleanupRoute(router, getStartServices, isRiskScoringMaintainerEnabled);
   riskEngineConfigureSavedObjectRoute(router, getStartServices);
 };

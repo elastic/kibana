@@ -11,8 +11,13 @@ import { globSync } from 'fast-glob';
 import { REPO_ROOT } from '@kbn/repo-info';
 import path from 'node:path';
 import { ToolingLog } from '@kbn/tooling-log';
-import { SCOUT_CONFIG_PATH_GLOB, SCOUT_CONFIG_PATH_REGEX } from '@kbn/scout-info';
+import {
+  SCOUT_CONFIG_PATH_GLOB,
+  SCOUT_UNIFIED_CONFIG_PATH_REGEX,
+  testChannels,
+} from '@kbn/scout-info';
 import { existsSync, readFileSync } from 'node:fs';
+import { readKibanaModuleManifest } from '../helpers/read_manifest';
 import type { ScoutTestableModule } from './testable_module';
 import type { ScoutConfigManifest } from './manifest';
 
@@ -20,9 +25,96 @@ export interface ScoutTestConfig {
   path: string;
   category: string;
   type: string;
+  namespace: string | undefined;
   module: ScoutTestableModule;
   manifest: ScoutConfigManifest;
+  server: {
+    configSet: string;
+  };
 }
+
+const loadScoutManifestFile = (
+  manifestPath: string
+):
+  | ({ exists: true } & Omit<ScoutConfigManifest, 'exists'>)
+  | ({ exists: false } & Pick<ScoutConfigManifest, 'sha1' | 'testChannels' | 'tests'>) => {
+  const absoluteManifestPath = path.join(REPO_ROOT, manifestPath);
+  const manifestExists = existsSync(absoluteManifestPath);
+
+  if (manifestExists) {
+    try {
+      return {
+        exists: true,
+        testChannels: [],
+        ...JSON.parse(readFileSync(absoluteManifestPath, 'utf8')),
+      };
+    } catch (e) {
+      e.message = `Failed while trying to load manifest file at '${manifestPath}': ${e.message}`;
+      throw e;
+    }
+  }
+  return {
+    exists: false,
+    sha1: '000000000000000-000000000000000',
+    testChannels: [],
+    tests: [],
+  };
+};
+
+const resolveModuleMetadata = (
+  configPath: string,
+  moduleRoot: string
+): {
+  module: ScoutTestableModule;
+  serverConfigSet: string | undefined;
+  namespace: string | undefined;
+  testCategory: string;
+  testConfigType: string;
+} => {
+  const match = configPath.match(SCOUT_UNIFIED_CONFIG_PATH_REGEX);
+  if (!match?.groups) {
+    throw new Error(
+      `Failed to create Scout config from path '${configPath}': ` +
+        'path did not match the expected regex pattern'
+    );
+  }
+
+  const g = match.groups;
+  const module: ScoutTestableModule = g.coreRoot
+    ? {
+        name: 'core',
+        group: 'platform',
+        type: 'package' as ScoutTestableModule['type'],
+        visibility: 'shared' as ScoutTestableModule['visibility'],
+        root: moduleRoot,
+      }
+    : g.examplesRoot
+    ? (() => {
+        const manifest = readKibanaModuleManifest(path.join(REPO_ROOT, moduleRoot, 'kibana.jsonc'));
+        return {
+          name: manifest.id,
+          group: manifest.group,
+          type: manifest.type as ScoutTestableModule['type'],
+          visibility: manifest.visibility as ScoutTestableModule['visibility'],
+          root: moduleRoot,
+        };
+      })()
+    : {
+        name: g.moduleName,
+        group: g.platformOrCore ?? g.solution,
+        type: g.moduleKind.slice(0, -1) as ScoutTestableModule['type'],
+        visibility: (g.moduleVisibility || 'private') as ScoutTestableModule['visibility'],
+        root: moduleRoot,
+      };
+
+  return {
+    module,
+    serverConfigSet: g.serverConfigSet,
+    namespace: g.namespace,
+    testCategory: g.testCategory,
+    testConfigType: g.testConfigType,
+  };
+};
 
 export const testConfig = {
   fromPath(configPath: string): ScoutTestConfig {
@@ -38,72 +130,42 @@ export const testConfig = {
       );
     }
 
-    const match = configPath.match(SCOUT_CONFIG_PATH_REGEX);
-
-    if (match == null) {
-      throw new Error(
-        `Failed to create Scout config from path '${configPath}': ` +
-          'path did not match the expected regex pattern'
-      );
-    }
-
-    const [
-      _,
-      platform,
-      solution,
-      moduleType,
-      moduleVisibility,
-      moduleName,
-      customTargetConfigSetName,
-      testCategory,
-      testConfigType,
-    ] = match;
-
-    const scoutDirName = `scout${customTargetConfigSetName ? `_${customTargetConfigSetName}` : ''}`;
     const moduleRoot = configPath.split('/test/scout')[0];
+    const { module, serverConfigSet, namespace, testCategory, testConfigType } =
+      resolveModuleMetadata(configPath, moduleRoot);
 
     const manifestPath = path.join(
-      moduleRoot,
-      'test',
-      scoutDirName,
-      '.meta',
-      testCategory,
-      `${testConfigType || 'standard'}.json`
+      ...[
+        moduleRoot,
+        'test',
+        `scout${serverConfigSet ? `_${serverConfigSet}` : ''}`,
+        namespace,
+        '.meta',
+        testCategory,
+        `${testConfigType || 'standard'}.json`,
+      ].filter((segment) => segment !== undefined)
     );
-    const absoluteManifestPath = path.join(REPO_ROOT, manifestPath);
-    const manifestExists = existsSync(absoluteManifestPath);
-    let manifestFileData;
 
-    if (manifestExists) {
-      try {
-        manifestFileData = JSON.parse(readFileSync(absoluteManifestPath, 'utf8'));
-      } catch (e) {
-        e.message = `Failed while trying to load manifest file at '${manifestPath}': ${e.message}`;
-        throw e;
-      }
-    } else {
-      manifestFileData = {
-        lastModified: new Date(0).toISOString(),
-        sha1: '000000000000000-000000000000000',
-        tests: [],
-      };
-    }
+    const manifestFileData = loadScoutManifestFile(manifestPath);
 
     return {
       path: configPath,
       category: testCategory,
       type: testConfigType || 'standard',
-      module: {
-        name: moduleName,
-        group: platform ?? solution,
-        type: moduleType.slice(0, -1) as ScoutTestableModule['type'],
-        visibility: (moduleVisibility || 'private') as ScoutTestableModule['visibility'],
-        root: moduleRoot,
-      },
+      namespace,
+      module,
       manifest: {
         path: manifestPath,
-        exists: manifestExists,
-        ...manifestFileData,
+        exists: manifestFileData.exists,
+        sha1: manifestFileData.sha1,
+        testChannels:
+          manifestFileData.testChannels.length > 0
+            ? manifestFileData.testChannels
+            : testChannels.default,
+        tests: manifestFileData.tests,
+      },
+      server: {
+        configSet: serverConfigSet || 'default',
       },
     };
   },
@@ -128,6 +190,41 @@ export const testConfigs = {
     const duration = (performance.now() - startTime) / 1000;
 
     this.log.info(`Loaded ${this._configs.length} Scout test configs in ${duration.toFixed(2)}s`);
+
+    // A scout root must be either root-level or namespace-based, never both.
+    // scout_* roots are independent from scout/, so group by (module.root + serverConfigSet).
+    const byRoot = new Map<string, ScoutTestConfig[]>();
+    for (const config of this._configs) {
+      const key = `${config.module.root}/test/${
+        config.server.configSet === 'default' ? 'scout' : `scout_${config.server.configSet}`
+      }`;
+      if (!byRoot.has(key)) byRoot.set(key, []);
+      byRoot.get(key)!.push(config);
+    }
+    const mixedRoots: string[] = [];
+    for (const [scoutRoot, rootConfigs] of byRoot) {
+      const hasRootLevel = rootConfigs.some((c) => !c.namespace);
+      const hasNamespace = rootConfigs.some((c) => Boolean(c.namespace));
+      if (hasRootLevel && hasNamespace) {
+        const namespaceNames = [
+          ...new Set(rootConfigs.filter((c) => c.namespace).map((c) => c.namespace as string)),
+        ];
+        mixedRoots.push(
+          `  • ${scoutRoot}: root-level {ui,api}/ coexists with namespace dirs [${namespaceNames.join(
+            ', '
+          )}]`
+        );
+      }
+    }
+    if (mixedRoots.length > 0) {
+      throw new Error(
+        `[Scout] Mixed test structure detected — a scout root must use either ` +
+          `root-level (test/scout/{ui,api}/) or namespace-based (test/scout/<namespace>/{ui,api}/) ` +
+          `structure, never both:\n\n` +
+          mixedRoots.join('\n') +
+          `\n\nMigrate root-level tests into namespace sub-directories or remove the namespace configs.`
+      );
+    }
   },
 
   reload() {

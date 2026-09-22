@@ -16,6 +16,7 @@ import { getPlaywrightGrepTag } from '../playwright/utils';
 import { getConfigRootDir, loadServersConfig } from './configs';
 import type { StartServerOptions } from './flags';
 import { preCreateSecurityIndexesViaSamlAuth } from './pre_create_security_indexes';
+import { ensureDefaultSpaceNPRE } from './ensure_default_space_npre';
 import { runElasticsearch } from './run_elasticsearch';
 import { getExtraKbnOpts, runKibanaServer } from './run_kibana_server';
 
@@ -27,16 +28,23 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
     // Use a default path that resolves to default configs (contains 'scout/' not 'scout_')
     // If configDir is provided, it will override the default path detection
     const defaultPlaywrightPath = 'default/scout/ui/playwright.config.ts';
-    const configRootDir = getConfigRootDir(defaultPlaywrightPath, options.mode, options.configDir);
-    const config = await loadServersConfig(options.mode, log, configRootDir);
-    const pwGrepTag = getPlaywrightGrepTag(options.mode);
+    const configRootDir = getConfigRootDir(
+      defaultPlaywrightPath,
+      options.testTarget,
+      options.serverConfigSet
+    );
+    const config = await loadServersConfig(options.testTarget, log, configRootDir);
+    const pwGrepTag = getPlaywrightGrepTag(options.testTarget);
 
     const shutdownEs = await runElasticsearch({
       config,
       log,
       esFrom: options.esFrom,
+      preserveEsData: options.preserveEsData,
       logsDir: options.logsDir,
     });
+
+    await ensureDefaultSpaceNPRE(config, log);
 
     await runKibanaServer({
       procs,
@@ -54,14 +62,18 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
     // success message so that it doesn't get buried
     await silence(log, 5000);
 
-    // Pre-create Elasticsearch Security indexes after server startup
-    await preCreateSecurityIndexesViaSamlAuth(config, log);
+    // Pre-create Elasticsearch Security indexes after server startup. Skipped for `prebootOnly`
+    // config sets: Kibana is deliberately held in the `preboot` stage, so it serves no SAML
+    // endpoints to authenticate against.
+    if (!config.get('prebootOnly')) {
+      await preCreateSecurityIndexesViaSamlAuth(config, log);
+    }
 
     log.success(
       '\n\n' +
         dedent`
           Elasticsearch and Kibana are ready for functional testing.
-          Use 'npx playwright test --project local --grep ${pwGrepTag} --config <path_to_Playwright.config.ts>' to run tests'
+          Use 'node scripts/playwright test --project local --grep ${pwGrepTag} --config <path_to_Playwright.config.ts>' to run tests'
         ` +
         '\n\n'
     );

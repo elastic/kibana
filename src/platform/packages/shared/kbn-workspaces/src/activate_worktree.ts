@@ -28,11 +28,13 @@ export async function activateWorktree({
     settings,
   });
 
-  await ensureClonedRepo(context);
+  const sha = await getSha(context.repoRoot, ref);
+
+  await ensureClonedRepo(context, { ref: sha });
 
   const workspaceController = new WorkspaceController(context);
 
-  const workspace = await workspaceController.activateWorktree(await getSha(context.repoRoot, ref));
+  const workspace = await workspaceController.activateWorktree(sha);
 
   return workspace;
 }

@@ -17,8 +17,8 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
-import { noKibanaPrivileges, rulesRead } from '../../utils/auth/roles';
-import { getMissingSecurityKibanaPrivilegesError } from '../../utils/privileges_errors';
+import { noKibanaPrivileges, alertsAll, alertsUpdateLegacy } from '../../utils/auth/roles';
+import { getMissingAlertsUpdatePrivilegesError } from '../../utils/privileges_errors';
 
 export default ({ getService }: FtrProviderContext) => {
   const utils = getService('securitySolutionUtils');
@@ -58,8 +58,25 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('RBAC', () => {
       describe('Kibana privileges', () => {
-        it('should update alerts with rules read privileges', async () => {
-          const testAgent = await utils.createSuperTestWithCustomRole(rulesRead);
+        it('should update alerts with alerts all privileges', async () => {
+          const testAgent = await utils.createSuperTestWithCustomRole(alertsAll);
+
+          const { body } = await testAgent
+            .post(DETECTION_ENGINE_SET_UNIFIED_ALERTS_WORKFLOW_STATUS_URL)
+            .set('kbn-xsrf', 'true')
+            .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+            .send({
+              signal_ids: ['test-id'],
+              status: 'closed',
+            })
+            .expect(200);
+
+          expect(body).toHaveProperty('updated');
+        });
+
+        it('should update alerts with legacy alerts update privileges', async () => {
+          const testAgent = await utils.createSuperTestWithCustomRole(alertsUpdateLegacy);
 
           const { body } = await testAgent
             .post(DETECTION_ENGINE_SET_UNIFIED_ALERTS_WORKFLOW_STATUS_URL)
@@ -90,7 +107,7 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(403);
 
           expect(body).toEqual(
-            getMissingSecurityKibanaPrivilegesError({
+            getMissingAlertsUpdatePrivilegesError({
               routeDetails: `POST ${DETECTION_ENGINE_SET_UNIFIED_ALERTS_WORKFLOW_STATUS_URL}`,
             })
           );

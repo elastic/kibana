@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useState, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { composeScreenshotRef } from '../utils/monitor_test_result/compose_screenshot_images';
 import type {
   ScreenshotRefImageData,
@@ -15,6 +15,7 @@ import type {
 } from '../../../../common/runtime_types';
 import { fetchBlocksAction, isPendingBlock } from '../state';
 import { selectBrowserJourneyState } from '../state';
+import { useGetUrlParams } from './use_url_params';
 
 function allBlocksLoaded(blocks: { [key: string]: StoreScreenshotBlock }, hashes: string[]) {
   for (const hash of hashes) {
@@ -79,6 +80,7 @@ export const useComposeImageFromRef = (
 ): { isComposing: boolean; imgSrc: string | undefined } => {
   const dispatch = useDispatch();
   const { blocks }: { blocks: ScreenshotBlockCache } = useSelector(selectBrowserJourneyState);
+  const { remoteName } = useGetUrlParams();
   const [isAnyBlockLoading, isAllBlocksLoaded] = useMemo(
     () => [getIsAnyBlockLoading(imgRef, blocks), getIsAllBlocksLoaded(imgRef, blocks)],
     [imgRef, blocks]
@@ -87,10 +89,13 @@ export const useComposeImageFromRef = (
   useEffect(() => {
     if (imgRef) {
       dispatch(
-        fetchBlocksAction(imgRef.ref.screenshotRef.screenshot_ref.blocks.map(({ hash }) => hash))
+        fetchBlocksAction({
+          hashes: imgRef.ref.screenshotRef.screenshot_ref.blocks.map(({ hash }) => hash),
+          remoteName,
+        })
       );
     }
-  }, [dispatch, imgRef]);
+  }, [dispatch, imgRef, remoteName]);
 
   const stepRefId =
     imgRef?.stepName ?? imgRef?.ref.screenshotRef.screenshot_ref.blocks[0]?.hash ?? '';

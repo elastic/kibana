@@ -14,17 +14,22 @@ const baseConfig = {
   billing_url: '/billing/',
   deployments_url: '/user/deployments',
   deployment_url: '/abc123',
+  create_deployment_url: '/deployments/create',
   profile_url: '/user/settings/',
   organization_url: '/account/',
   performance_url: '/performance/',
   projects_url: '/projects/',
+  create_project_url: '/projects/create',
   users_and_roles_url: '/users_and_roles/',
 };
 
 const kibanaUrl = 'https://cloud.elastic.co/abc123/kibana';
 
 describe('Cloud Plugin URLs Service', () => {
-  const setupServiceWithRoles = (userRoles: string[] = []) => {
+  const setupServiceWithRolesAndCapabilities = (
+    userRoles: string[] = [],
+    capabilities: Record<string, Record<string, boolean>> = {}
+  ) => {
     const urls = new CloudUrlsService();
 
     const coreSetup = coreMock.createSetup();
@@ -36,6 +41,12 @@ describe('Cloud Plugin URLs Service', () => {
         roles: userRoles,
       })
     );
+
+    // Mock capabilities
+    Object.entries(capabilities).forEach(([key, value]) => {
+      (coreStart.application.capabilities as Record<string, Record<string, boolean>>)[key] = value;
+    });
+
     coreSetup.getStartServices.mockResolvedValue([coreStart, {}, {}]);
 
     urls.setup(baseConfig, coreSetup, kibanaUrl);
@@ -44,7 +55,7 @@ describe('Cloud Plugin URLs Service', () => {
   };
 
   const setupService = () => {
-    return setupServiceWithRoles([]);
+    return setupServiceWithRolesAndCapabilities([]);
   };
 
   it('exposes basic Cloud URLs', () => {
@@ -54,29 +65,64 @@ describe('Cloud Plugin URLs Service', () => {
       baseUrl: 'https://cloud.elastic.co',
       deploymentUrl: 'https://cloud.elastic.co/abc123',
       deploymentsUrl: 'https://cloud.elastic.co/user/deployments',
+      createDeploymentUrl: 'https://cloud.elastic.co/deployments/create',
       kibanaUrl: 'https://cloud.elastic.co/abc123/kibana',
       organizationUrl: 'https://cloud.elastic.co/account/',
       performanceUrl: 'https://cloud.elastic.co/performance/',
       profileUrl: 'https://cloud.elastic.co/user/settings/',
       projectsUrl: 'https://cloud.elastic.co/projects/',
+      createProjectUrl: 'https://cloud.elastic.co/projects/create',
       snapshotsUrl: 'https://cloud.elastic.co/abc123/elasticsearch/snapshots/',
-      usersAndRolesUrl: 'https://cloud.elastic.co/users_and_roles/',
     });
   });
 
-  it('exposes privileged billing URL', () => {
-    const { urls } = setupServiceWithRoles([CLOUD_USER_BILLING_ADMIN_ROLE, 'other_role']); // Include specially-named billing admin role
+  it('exposes privileged billing URL', async () => {
+    const { urls } = setupServiceWithRolesAndCapabilities([
+      CLOUD_USER_BILLING_ADMIN_ROLE,
+      'other_role',
+    ]);
 
-    expect(urls.getPrivilegedUrls()).resolves.toEqual({
+    await expect(urls.getPrivilegedUrls()).resolves.toEqual({
       billingUrl: 'https://cloud.elastic.co/billing/',
+      usersAndRolesUrl: undefined,
     });
   });
 
   it('does not expose privileged billing URL if user does not have billing admin role', async () => {
-    const { urls } = setupServiceWithRoles(['other_role']);
+    const { urls } = setupServiceWithRolesAndCapabilities(['other_role']);
 
-    expect(urls.getPrivilegedUrls()).resolves.toEqual({
+    await expect(urls.getPrivilegedUrls()).resolves.toEqual({
       billingUrl: undefined,
+      usersAndRolesUrl: undefined,
+    });
+  });
+
+  it('exposes privileged users and roles URL when user has manage_security privilege', async () => {
+    const { urls } = setupServiceWithRolesAndCapabilities([], { users: { save: true } });
+
+    await expect(urls.getPrivilegedUrls()).resolves.toEqual({
+      billingUrl: undefined,
+      usersAndRolesUrl: 'https://cloud.elastic.co/users_and_roles/',
+    });
+  });
+
+  it('does not expose privileged users and roles URL when user lacks manage_security privilege', async () => {
+    const { urls } = setupServiceWithRolesAndCapabilities([], { users: { save: false } });
+
+    await expect(urls.getPrivilegedUrls()).resolves.toEqual({
+      billingUrl: undefined,
+      usersAndRolesUrl: undefined,
+    });
+  });
+
+  it('exposes both privileged URLs when user has both privileges', async () => {
+    const { urls } = setupServiceWithRolesAndCapabilities([CLOUD_USER_BILLING_ADMIN_ROLE], {
+      users: { save: true },
+    });
+
+    await expect(urls.getPrivilegedUrls()).resolves.toEqual({
+      billingUrl: 'https://cloud.elastic.co/billing/',
+      usersAndRolesUrl: 'https://cloud.elastic.co/users_and_roles/',
     });
   });
 });

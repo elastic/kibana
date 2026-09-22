@@ -28,6 +28,7 @@ export const createStartMock = (extensionsStorage: UIExtensionsStorage = {}): Mo
         readSettings: true,
         addAgents: true,
         addFleetServers: true,
+        generateAgentReports: true,
       },
       integrations: {
         all: true,

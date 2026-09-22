@@ -6,31 +6,32 @@
  */
 import qs from 'query-string';
 import { useHistory, useLocation } from 'react-router-dom';
-import { UI_SETTINGS } from '@kbn/data-plugin/public';
-import { useProfilingDependencies } from '../components/contexts/profiling_dependencies/use_profiling_dependencies';
+import { getParsedDate } from '../utils/get_next_time_range';
+import { useDefaultTimeRange } from './use_default_time_range';
 
 export function useDateRangeRedirect() {
   const history = useHistory();
   const location = useLocation();
   const query = qs.parse(location.search);
+  const rangeFrom = query.rangeFrom;
+  const rangeTo = query.rangeTo;
+  const validatedRangeFrom = getParsedDate(rangeFrom?.toString());
+  const validatedRangeTo = getParsedDate(rangeTo?.toString());
 
-  const {
-    start: { core, data },
-  } = useProfilingDependencies();
+  const { from: defaultRangeFrom, to: defaultRangeTo } = useDefaultTimeRange();
 
-  const timePickerTimeDefaults = core.uiSettings.get<{ from: string; to: string }>(
-    UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS
-  );
+  const isDateRangeSet = rangeFrom && rangeTo;
 
-  const timePickerSharedState = data.query.timefilter.timefilter.getTime();
-
-  const isDateRangeSet = 'rangeFrom' in query && 'rangeTo' in query;
+  const isInvalidDateRange =
+    validatedRangeFrom &&
+    validatedRangeTo &&
+    validatedRangeFrom.getTime() > validatedRangeTo.getTime();
 
   const redirect = () => {
     const nextQuery = {
-      rangeFrom: timePickerSharedState.from ?? timePickerTimeDefaults.from,
-      rangeTo: timePickerSharedState.to ?? timePickerTimeDefaults.to,
       ...query,
+      rangeFrom: defaultRangeFrom,
+      rangeTo: defaultRangeTo,
     };
 
     history.replace({
@@ -40,7 +41,7 @@ export function useDateRangeRedirect() {
   };
 
   return {
-    isDateRangeSet,
+    isDateRangeSet: isDateRangeSet && !isInvalidDateRange,
     redirect,
     // does not add date range for this page
     skipDataRangeSet: history.location.pathname === '/add-data-instructions',

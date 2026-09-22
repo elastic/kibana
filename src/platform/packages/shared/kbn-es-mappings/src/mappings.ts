@@ -13,6 +13,8 @@ import type {
   DateMapping,
   KeywordMapping,
   TextMapping,
+  MatchOnlyTextMapping,
+  SemanticTextMapping,
   DateNanosMapping,
   IntegerMapping,
   LongMapping,
@@ -28,6 +30,29 @@ export function object<T>(def: WithoutTypeField<ObjectMapping<T>>): ObjectMappin
   const defaults: ObjectMapping = omitUnsetKeys(
     {
       type: 'object',
+      dynamic: false,
+    },
+    def
+  );
+
+  return merge(defaults, def);
+}
+
+export function matchOnlyText(def?: WithoutTypeField<MatchOnlyTextMapping>): MatchOnlyTextMapping {
+  const defaults: MatchOnlyTextMapping = omitUnsetKeys(
+    {
+      type: 'match_only_text',
+    },
+    def
+  );
+
+  return merge(defaults, def);
+}
+
+export function semanticText(def?: WithoutTypeField<SemanticTextMapping>): SemanticTextMapping {
+  const defaults: SemanticTextMapping = omitUnsetKeys(
+    {
+      type: 'semantic_text',
     },
     def
   );

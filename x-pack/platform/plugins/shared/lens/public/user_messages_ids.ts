@@ -63,6 +63,7 @@ export const STATIC_VALUE_NOT_VALID_NUMBER = 'static_value_not_valid_number';
 
 /** Annotations require a time based chart to work. Add a date histogram. */
 export const ANNOTATION_MISSING_DATE_HISTOGRAM = 'annotation_missing_date_histogram';
+export const ANNOTATION_DATAVIEW_NOT_FOUND = 'annotation_dataview_not_found';
 export const ANNOTATION_MISSING_TIME_FIELD = 'annotation_missing_time_field';
 export const ANNOTATION_MISSING_TOOLTIP_FIELD = 'annotation_missing_tooltip_field';
 export const ANNOTATION_TIME_FIELD_NOT_FOUND = 'annotation_time_field_not_found_in_dataview';
@@ -98,3 +99,5 @@ export const TEXT_BASED_LANGUAGE_ERROR = 'text_based_lang_error';
 
 export const URL_CONFLICT = 'url-conflict';
 export const MISSING_TIME_RANGE_ON_EMBEDDABLE = 'missing-time-range-on-embeddable';
+
+export const DATATABLE_COLOR_MISMATCH = 'datatable_color_mismatch';

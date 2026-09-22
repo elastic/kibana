@@ -36,6 +36,7 @@ export interface HistogramProps {
   onFilter?: LensEmbeddableInput['onFilter'];
   onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
   withDefaultActions?: EmbeddableComponentProps['withDefaultActions'];
+  onApiAvailable?: EmbeddableComponentProps['onApiAvailable'];
 }
 
 export function Histogram({
@@ -52,6 +53,7 @@ export function Histogram({
   onFilter,
   onBrushEnd,
   withDefaultActions,
+  onApiAvailable,
   abortController,
 }: HistogramProps) {
   const { timeRangeText, timeRangeDisplay } = useTimeRange({
@@ -65,8 +67,6 @@ export function Histogram({
   const { attributes } = visContext;
   const { euiTheme } = useEuiTheme();
 
-  const boxShadow = `0 2px 2px -1px ${euiTheme.colors.mediumShade},
-  0 1px 5px -2px ${euiTheme.colors.mediumShade}`;
   const chartCss = css`
     position: relative;
     flex-grow: 1;
@@ -81,10 +81,15 @@ export function Histogram({
     & .lnsExpressionRenderer {
       width: ${attributes.visualizationType === 'lnsMetric' ? '90%' : '100%'};
       margin: auto;
-      box-shadow: ${attributes.visualizationType === 'lnsMetric' ? boxShadow : 'none'};
+      border: ${attributes.visualizationType === 'lnsMetric'
+        ? `1px solid ${euiTheme.colors.borderBaseSubdued}`
+        : 'none'};
+      border-radius: ${attributes.visualizationType === 'lnsMetric'
+        ? euiTheme.border.radius.medium
+        : '0'};
     }
 
-    & .echLegend .echLegendList {
+    & .echLegend .echLegendGridList {
       padding-right: ${euiTheme.size.s};
     }
 
@@ -115,6 +120,7 @@ export function Histogram({
           onFilter={onFilter}
           onBrushEnd={onBrushEnd}
           withDefaultActions={withDefaultActions}
+          onApiAvailable={onApiAvailable}
         />
       </div>
       {timeRangeDisplay}

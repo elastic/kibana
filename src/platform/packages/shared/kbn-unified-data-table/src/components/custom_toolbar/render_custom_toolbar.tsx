@@ -9,14 +9,16 @@
 
 import React from 'react';
 import type { EuiDataGridCustomToolbarProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, type UseEuiTheme } from '@elastic/eui';
+import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, type UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 
 export interface UnifiedDataTableRenderCustomToolbarProps {
   toolbarProps: EuiDataGridCustomToolbarProps;
   gridProps: {
     additionalControls?: React.ReactNode;
-    inTableSearchControl?: React.ReactNode;
+    inTableSearchButton?: React.ReactNode;
+    inTableSearchInput?: React.ReactNode;
   };
 }
 
@@ -25,6 +27,7 @@ export type UnifiedDataTableRenderCustomToolbar = (
 ) => React.ReactElement;
 
 interface RenderCustomToolbarProps extends UnifiedDataTableRenderCustomToolbarProps {
+  saveToDashboardButton?: React.ReactElement;
   leftSide?: React.ReactElement;
   bottomSection?: React.ReactElement;
 }
@@ -33,6 +36,7 @@ export const internalRenderCustomToolbar = (
   props: RenderCustomToolbarProps
 ): React.ReactElement => {
   const {
+    saveToDashboardButton,
     leftSide,
     bottomSection,
     toolbarProps: {
@@ -43,35 +47,35 @@ export const internalRenderCustomToolbar = (
       keyboardShortcutsControl,
       displayControl,
     },
-    gridProps: { additionalControls, inTableSearchControl },
+    gridProps: { additionalControls, inTableSearchButton, inTableSearchInput },
   } = props;
 
   const buttons = hasRoomForGridControls ? (
     <>
-      {leftSide && additionalControls && (
+      {leftSide && additionalControls ? (
         <EuiFlexItem grow={false}>
           <div>{additionalControls}</div>
         </EuiFlexItem>
-      )}
-      {columnControl && (
+      ) : null}
+      {columnControl ? (
         <EuiFlexItem grow={false}>
           <div className="unifiedDataTableToolbarControlButton" css={styles.controlButton}>
             {columnControl}
           </div>
         </EuiFlexItem>
-      )}
-      {columnSortingControl && (
+      ) : null}
+      {columnSortingControl ? (
         <EuiFlexItem grow={false}>
           <div className="unifiedDataTableToolbarControlButton" css={styles.controlButton}>
             {columnSortingControl}
           </div>
         </EuiFlexItem>
-      )}
-      {!leftSide && additionalControls && (
+      ) : null}
+      {!leftSide && additionalControls ? (
         <EuiFlexItem grow={false}>
           <div>{additionalControls}</div>
         </EuiFlexItem>
-      )}
+      ) : null}
     </>
   ) : null;
 
@@ -97,47 +101,26 @@ export const internalRenderCustomToolbar = (
         <EuiFlexItem grow={false}>
           <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
             {Boolean(leftSide) && buttons}
+            {Boolean(inTableSearchInput) && (
+              <EuiFlexItem grow={false}>{inTableSearchInput}</EuiFlexItem>
+            )}
             {Boolean(
-              keyboardShortcutsControl ||
-                displayControl ||
-                fullScreenControl ||
-                inTableSearchControl
+              keyboardShortcutsControl || displayControl || fullScreenControl || inTableSearchButton
             ) && (
               <EuiFlexItem grow={false}>
-                <div className="unifiedDataTableToolbarControlGroup" css={styles.controlGroup}>
-                  {Boolean(inTableSearchControl) && (
-                    <div
-                      className="unifiedDataTableToolbarControlIconButton"
-                      css={styles.controlGroupIconButton}
-                    >
-                      {inTableSearchControl}
-                    </div>
-                  )}
-                  {Boolean(keyboardShortcutsControl) && (
-                    <div
-                      className="unifiedDataTableToolbarControlIconButton"
-                      css={styles.controlGroupIconButton}
-                    >
-                      {keyboardShortcutsControl}
-                    </div>
-                  )}
-                  {Boolean(displayControl) && (
-                    <div
-                      className="unifiedDataTableToolbarControlIconButton"
-                      css={styles.controlGroupIconButton}
-                    >
-                      {displayControl}
-                    </div>
-                  )}
-                  {Boolean(fullScreenControl) && (
-                    <div
-                      className="unifiedDataTableToolbarControlIconButton"
-                      css={styles.controlGroupIconButton}
-                    >
-                      {fullScreenControl}
-                    </div>
-                  )}
-                </div>
+                <EuiButtonGroup
+                  variant="segmented"
+                  legend={i18n.translate('unifiedDataTable.toolbarControlGroupLegend', {
+                    defaultMessage: 'Data grid controls',
+                  })}
+                  className="unifiedDataTableToolbarControlGroup"
+                >
+                  {inTableSearchButton}
+                  {keyboardShortcutsControl}
+                  {displayControl}
+                  {fullScreenControl}
+                  {saveToDashboardButton}
+                </EuiButtonGroup>
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
@@ -162,9 +145,11 @@ export const renderCustomToolbar: UnifiedDataTableRenderCustomToolbar = internal
  * Render custom element on the left side and all controls to the right
  */
 export const getRenderCustomToolbarWithElements = ({
+  saveToDashboardButton,
   leftSide,
   bottomSection,
 }: {
+  saveToDashboardButton?: React.ReactElement;
   leftSide?: React.ReactElement;
   bottomSection?: React.ReactElement;
 }): UnifiedDataTableRenderCustomToolbar => {
@@ -174,6 +159,7 @@ export const getRenderCustomToolbarWithElements = ({
       ...props,
       leftSide: leftSide || reservedSpace,
       bottomSection,
+      saveToDashboardButton,
     });
 };
 
@@ -197,7 +183,8 @@ export const styles = {
             },
           },
         })
-      : undefined, // for making unit tests pass
+      : // required for unit tests to pass
+        undefined,
   controlGroup: ({ euiTheme }: UseEuiTheme) =>
     euiTheme
       ? css({

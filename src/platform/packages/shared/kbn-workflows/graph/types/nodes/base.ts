@@ -8,19 +8,33 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { MAX_HITL_GRAPH_NODE_ID_LENGTH } from '../../../common/hitl';
 import {
   DataSetStepSchema,
   ElasticsearchStepSchema,
-  HttpStepSchema,
   KibanaStepSchema,
+  WaitForApprovalStepSchema,
+  WaitForInputStepSchema,
   WaitStepSchema,
+  WorkflowExecuteAsyncStepSchema,
+  WorkflowExecuteStepSchema,
+  WorkflowOutputStepSchema,
 } from '../../../spec/schema';
 
-export const GraphNodeSchema = z.object({
+export const BaseGraphNodeSchema = z.object({
   id: z.string(),
   type: z.string(),
   stepId: z.string(),
   stepType: z.string(),
+});
+
+export const SyntheticGraphNodeSchema = BaseGraphNodeSchema.extend({
+  isSynthetic: z.boolean(),
+});
+export type SyntheticGraphNode = z.infer<typeof SyntheticGraphNodeSchema>;
+
+export const GraphNodeSchema = BaseGraphNodeSchema.extend({
+  templateDependencies: z.array(z.unknown()).optional(),
 });
 
 export const AtomicGraphNodeSchema = GraphNodeSchema.extend({
@@ -37,19 +51,26 @@ export const WaitGraphNodeSchema = GraphNodeSchema.extend({
 });
 export type WaitGraphNode = z.infer<typeof WaitGraphNodeSchema>;
 
+export const WaitForInputGraphNodeSchema = GraphNodeSchema.extend({
+  id: z.string(),
+  type: z.literal('waitForInput'),
+  configuration: WaitForInputStepSchema,
+});
+export type WaitForInputGraphNode = z.infer<typeof WaitForInputGraphNodeSchema>;
+
+export const WaitForApprovalGraphNodeSchema = GraphNodeSchema.extend({
+  id: z.string().max(MAX_HITL_GRAPH_NODE_ID_LENGTH),
+  type: z.literal('waitForApproval'),
+  configuration: WaitForApprovalStepSchema,
+});
+export type WaitForApprovalGraphNode = z.infer<typeof WaitForApprovalGraphNodeSchema>;
+
 export const DataSetGraphNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
   type: z.literal('data.set'),
   configuration: DataSetStepSchema,
 });
 export type DataSetGraphNode = z.infer<typeof DataSetGraphNodeSchema>;
-
-export const HttpGraphNodeSchema = GraphNodeSchema.extend({
-  id: z.string(),
-  type: z.literal('http'),
-  configuration: HttpStepSchema,
-});
-export type HttpGraphNode = z.infer<typeof HttpGraphNodeSchema>;
 
 export const ElasticsearchGraphNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
@@ -68,3 +89,24 @@ export const KibanaGraphNodeSchema = GraphNodeSchema.extend({
   configuration: KibanaStepSchema,
 });
 export type KibanaGraphNode = z.infer<typeof KibanaGraphNodeSchema>;
+
+export const WorkflowExecuteGraphNodeSchema = GraphNodeSchema.extend({
+  id: z.string(),
+  type: z.literal('workflow.execute'),
+  configuration: WorkflowExecuteStepSchema,
+});
+export type WorkflowExecuteGraphNode = z.infer<typeof WorkflowExecuteGraphNodeSchema>;
+
+export const WorkflowExecuteAsyncGraphNodeSchema = GraphNodeSchema.extend({
+  id: z.string(),
+  type: z.literal('workflow.executeAsync'),
+  configuration: WorkflowExecuteAsyncStepSchema,
+});
+export type WorkflowExecuteAsyncGraphNode = z.infer<typeof WorkflowExecuteAsyncGraphNodeSchema>;
+
+export const WorkflowOutputGraphNodeSchema = GraphNodeSchema.extend({
+  id: z.string(),
+  type: z.literal('workflow.output'),
+  configuration: WorkflowOutputStepSchema,
+});
+export type WorkflowOutputGraphNode = z.infer<typeof WorkflowOutputGraphNodeSchema>;

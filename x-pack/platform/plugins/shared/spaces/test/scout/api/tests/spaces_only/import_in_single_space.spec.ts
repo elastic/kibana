@@ -6,7 +6,8 @@
  */
 
 import type { RoleApiCredentials } from '@kbn/scout';
-import { expect, tags } from '@kbn/scout';
+import { tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 
 import {
   ATTRIBUTE_TITLE_KEY,
@@ -32,7 +33,7 @@ import { prepareImportFormData } from '../../helpers';
 TEST_SPACES.forEach((space) => {
   const spacePath = space.spaceId === 'default' ? '' : `s/${space.spaceId}/`;
 
-  apiTest.describe(`_import API within the ${space.name} space`, { tag: tags.ESS_ONLY }, () => {
+  apiTest.describe(`_import API within the ${space.name} space`, { tag: tags.stateful.all }, () => {
     let savedObjectsManagementCredentials: RoleApiCredentials;
 
     apiTest.beforeAll(async ({ kbnClient, log, requestAuth }) => {
@@ -90,7 +91,7 @@ TEST_SPACES.forEach((space) => {
           }
         );
 
-        expect(response1.statusCode).toBe(200);
+        expect(response1).toHaveStatusCode(200);
         expect(response1.body.success).toBe(true);
         expect(response1.body.successCount).toBe(1);
 
@@ -114,7 +115,7 @@ TEST_SPACES.forEach((space) => {
           }
         );
 
-        expect(response2.statusCode).toBe(200);
+        expect(response2).toHaveStatusCode(200);
         expect(response2.body.success).toBe(false);
         expect(response2.body.errors).toHaveLength(1);
         expect(response2.body.errors[0].error.type).toBe('conflict');
@@ -146,7 +147,7 @@ TEST_SPACES.forEach((space) => {
           }
         );
 
-        expect(response1.statusCode).toBe(200);
+        expect(response1).toHaveStatusCode(200);
         expect(response1.body.success).toBe(true);
         expect(response1.body.successCount).toBe(1);
 
@@ -171,7 +172,7 @@ TEST_SPACES.forEach((space) => {
           }
         );
 
-        expect(response2.statusCode).toBe(200);
+        expect(response2).toHaveStatusCode(200);
         expect(response2.body.success).toBe(true);
 
         const getResponse = await kbnClient.savedObjects.get({
@@ -210,7 +211,7 @@ TEST_SPACES.forEach((space) => {
           }
         );
 
-        expect(response1.statusCode).toBe(200);
+        expect(response1).toHaveStatusCode(200);
         expect(response1.body.success).toBe(true);
         expect(response1.body.successCount).toBe(1);
         expect(response1.body.successResults[0].id).toBe(uniqueId);
@@ -252,7 +253,7 @@ TEST_SPACES.forEach((space) => {
         }
       );
 
-      expect(response.statusCode).toBe(200);
+      expect(response).toHaveStatusCode(200);
       expect(response.body.success).toBe(false);
       expect(response.body.errors).toHaveLength(1);
       expect(response.body.errors[0].error.type).toBe('unsupported_type');

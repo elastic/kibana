@@ -23,9 +23,9 @@ import {
   type TypesFilters,
   useActionsLogFilter,
 } from './hooks';
-import { ClearAllButton } from './clear_all_button';
 import { UX_MESSAGES } from '../translations';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
+import { ClearAllButton } from '../../clear_all_filter_options';
 
 export const ActionsLogFilter = memo(
   ({

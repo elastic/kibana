@@ -6,9 +6,20 @@
  */
 
 import type { MaybePromise } from '@kbn/utility-types';
-import type { Attachment } from '@kbn/agent-builder-common/attachments';
+import type {
+  Attachment,
+  VersionedAttachmentWithOrigin,
+} from '@kbn/agent-builder-common/attachments';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { AttachmentBoundedTool } from './tools';
+
+/**
+ * Context passed to the {@link AttachmentTypeDefinition.validate} function.
+ */
+export interface AttachmentValidateContext {
+  request: KibanaRequest;
+}
 
 /**
  * Server-side definition of an attachment type.
@@ -21,7 +32,10 @@ export interface AttachmentTypeDefinition<TType extends string = string, TConten
   /**
    * validation function, which will be called when the attachment is added to the conversation.
    */
-  validate: (input: unknown) => MaybePromise<AttachmentValidationResult<TContent>>;
+  validate: (
+    input: unknown,
+    context?: AttachmentValidateContext
+  ) => MaybePromise<AttachmentValidationResult<TContent>>;
   /**
    * format the attachment to presented to the LLM
    */
@@ -29,6 +43,27 @@ export interface AttachmentTypeDefinition<TType extends string = string, TConten
     attachment: Attachment<TType, TContent>,
     context: AttachmentFormatContext
   ) => MaybePromise<AgentFormattedAttachment>;
+  /**
+   * Receives origin (a saved object ID string) and returns resolved content.
+   * Only called once at add time — not on every read.
+   *
+   * When defined, the type supports by-reference creation:
+   * consumer provides origin string → `resolve()` called → content stored as `data`.
+   */
+  resolve?: (
+    origin: string,
+    context: AttachmentResolveContext
+  ) => MaybePromise<TContent | undefined>;
+  /**
+   * Optional hook to determine if the attachment's data is behind the referenced origin.
+   * Staleness is supported only when this function is provided; there is no automatic fallback.
+   * It is invoked only for attachments that have a populated `origin` — the attachment argument is
+   * Return true if the attachment is stale (i.e. behind the origin).
+   */
+  isStale?: (
+    attachment: VersionedAttachmentWithOrigin<TType, TContent>,
+    context: AttachmentResolveContext
+  ) => MaybePromise<boolean>;
   /**
    * should return the list of tools from the registry which should be exposed to the agent
    * when attachments of that type are present in the conversation.
@@ -44,6 +79,16 @@ export interface AttachmentTypeDefinition<TType extends string = string, TConten
    * are present in the conversation.
    */
   getAgentDescription?: () => string;
+  /**
+   * Whether attachments of this type are read-only. Defaults to false.
+   */
+  isReadonly?: boolean;
+  /**
+   * Maximum content length (in characters) for attachments of this type when presented inline
+   * to the LLM. Applied per-attachment — each attachment is truncated to its own type's limit.
+   * Defaults to the global DEFAULT_MAX_CONTENT_LENGTH (10 000).
+   */
+  maxContentLength?: number;
 }
 
 /**
@@ -55,8 +100,18 @@ export interface AttachmentFormatContext {
 }
 
 /**
+ * Context passed to the {@link AttachmentTypeDefinition.resolve} hook.
+ */
+export interface AttachmentResolveContext extends AttachmentFormatContext {
+  /**
+   * Saved objects client scoped to the current user.
+   */
+  savedObjectsClient: SavedObjectsClientContract;
+}
+
+/**
  * Return type for attachment's validation handlers.
- * Refer to {@link InlineAttachmentTypeDefinition.validate}
+ * Refer to {@link AttachmentTypeDefinition.validate}
  */
 export type AttachmentValidationResult<TValidatedData = unknown> =
   /** valid attachment */
@@ -77,11 +132,18 @@ export interface TextAttachmentRepresentation {
 }
 
 /**
- * Representation of an attachment when exposed to the LLM.
- *
- * Only plain text (inlined into the message) is supported for now.
+ * Image representation of an attachment when exposed to the LLM.
  */
-export type AttachmentRepresentation = TextAttachmentRepresentation;
+export interface ImageAttachmentRepresentation {
+  type: 'image';
+  mimeType: string;
+  getBase64: () => MaybePromise<string>;
+}
+
+/**
+ * Representation of an attachment when exposed to the LLM.
+ */
+export type AttachmentRepresentation = TextAttachmentRepresentation | ImageAttachmentRepresentation;
 
 /**
  * Structure containing all methods which will be used to present the attachment to the agent.
@@ -90,7 +152,12 @@ export interface AgentFormattedAttachment {
   /**
    * Should return the representation of the attachment, which will be presented to the agent.
    */
-  getRepresentation: () => MaybePromise<AttachmentRepresentation>;
+  /**
+   * @deprecated Representation can be inferred from attachment data; prefer returning
+   * the raw data and let the formatter decide. If omitted, we will fall back to
+   * stringifying the attachment data.
+   */
+  getRepresentation?: () => MaybePromise<AttachmentRepresentation>;
   /**
    * Can be used to expose tools which are specific to the attachment instance.
    *

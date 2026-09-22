@@ -6,12 +6,11 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiTourStep } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useConversationContext } from '../../../context/conversation/conversation_context';
-import { MoreActionsButton } from './more_actions_button';
-import { CloseDockedViewButton } from './close_docked_view_button';
-import { TourStep, useAgentBuilderTour } from '../../../context/agent_builder_tour_context';
+import { ConversationShareButton } from './conversation_share_button';
+import { ChatInfoButton } from './chat_info_button';
+import { useConversation } from '../../../hooks/use_conversation';
 
 const labels = {
   container: i18n.translate('xpack.agentBuilder.conversationActions.container', {
@@ -19,18 +18,9 @@ const labels = {
   }),
 };
 
-export interface ConversationRightActionsProps {
-  onClose?: () => void;
-  onRenameConversation: () => void;
-}
-
-export const ConversationRightActions: React.FC<ConversationRightActionsProps> = ({
-  onClose,
-  onRenameConversation,
-}) => {
-  const { isEmbeddedContext } = useConversationContext();
-
-  const { getStepProps } = useAgentBuilderTour();
+export const ConversationRightActions = () => {
+  const { conversation } = useConversation();
+  const hasTemplate = Boolean(conversation?.template_id);
 
   return (
     <EuiFlexGroup
@@ -40,10 +30,14 @@ export const ConversationRightActions: React.FC<ConversationRightActionsProps> =
       aria-label={labels.container}
       responsive={false}
     >
-      <EuiTourStep {...getStepProps(TourStep.ConversationActions)}>
-        <MoreActionsButton onRenameConversation={onRenameConversation} />
-      </EuiTourStep>
-      {isEmbeddedContext ? <CloseDockedViewButton onClose={onClose} /> : null}
+      <EuiFlexItem grow={false}>
+        <ConversationShareButton />
+      </EuiFlexItem>
+      {hasTemplate && (
+        <EuiFlexItem grow={false}>
+          <ChatInfoButton />
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };

@@ -5,25 +5,33 @@
  * 2.0.
  */
 
+import { createElement } from 'react';
+import type { EuiIconProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
+  EXCEPTIONS_UI_READ_PRIVILEGES,
   RULES_UI_DETECTIONS_PRIVILEGE,
+  RULES_UI_EDIT_PRIVILEGE,
   RULES_UI_READ_PRIVILEGE,
   SECURITY_UI_SHOW_PRIVILEGE,
 } from '@kbn/security-solution-features/constants';
+import { AiIcon } from '@kbn/shared-ux-ai-components';
 import {
+  ALERT_ANALYSIS_WORKFLOW_PATH,
   COVERAGE_OVERVIEW_PATH,
+  DE_SPACE_RULES_HEALTH_PATH,
   EXCEPTIONS_PATH,
   RULES_ADD_PATH,
   RULES_CREATE_PATH,
   RULES_LANDING_PATH,
   RULES_PATH,
-  SECURITY_FEATURE_ID,
 } from '../../common/constants';
 import {
   ADD_RULES,
+  ALERT_ANALYSIS_WORKFLOW,
   COVERAGE_OVERVIEW,
   CREATE_NEW_RULE,
+  DE_SPACE_RULES_HEALTH,
   EXCEPTIONS,
   RULES,
   SIEM_RULES,
@@ -34,6 +42,8 @@ import type { LinkItem } from '../common/links';
 import { IconConsoleCloud } from '../common/icons/console_cloud';
 import { IconRollup } from '../common/icons/rollup';
 import { IconDashboards } from '../common/icons/dashboards';
+
+const ADVANCED_SETTINGS_SAVE_PRIVILEGE = 'advancedSettings.save';
 
 export const links: LinkItem = {
   id: SecurityPageName.rulesLanding,
@@ -73,6 +83,14 @@ export const links: LinkItem = {
           skipUrlState: true,
           hideTimeline: false,
         },
+        {
+          id: SecurityPageName.spaceRulesHealth,
+          title: DE_SPACE_RULES_HEALTH,
+          path: DE_SPACE_RULES_HEALTH_PATH,
+          skipUrlState: true,
+          hideTimeline: true,
+          globalSearchDisabled: true,
+        },
       ],
     },
     {
@@ -84,7 +102,7 @@ export const links: LinkItem = {
       }),
       landingIcon: IconConsoleCloud,
       path: EXCEPTIONS_PATH,
-      capabilities: [RULES_UI_READ_PRIVILEGE, `${SECURITY_FEATURE_ID}.showEndpointExceptions`],
+      capabilities: [EXCEPTIONS_UI_READ_PRIVILEGES],
       skipUrlState: true,
       hideTimeline: true,
       globalSearchKeywords: [
@@ -92,6 +110,30 @@ export const links: LinkItem = {
           defaultMessage: 'Exception lists',
         }),
       ],
+    },
+    {
+      id: SecurityPageName.alertAnalysisWorkflow,
+      title: ALERT_ANALYSIS_WORKFLOW,
+      description: i18n.translate(
+        'xpack.securitySolution.appLinks.alertAnalysisWorkflowDescription',
+        {
+          defaultMessage:
+            'Configure the managed alert analysis workflow that automatically classifies and closes false positive alerts.',
+        }
+      ),
+      landingIcon: (props: Omit<EuiIconProps, 'type'>) =>
+        createElement(AiIcon, { iconType: 'sparkles', ...props }),
+      path: ALERT_ANALYSIS_WORKFLOW_PATH,
+      capabilities: [
+        [RULES_UI_READ_PRIVILEGE, RULES_UI_EDIT_PRIVILEGE, ADVANCED_SETTINGS_SAVE_PRIVILEGE],
+      ],
+      // Enterprise-only feature. On lower licenses the link is marked unavailable (it stays in the
+      // side nav and Rules landing page but is dropped from global search), and visiting the URL
+      // renders the registered upsell page, which surfaces a "Manage license" CTA, instead of the
+      // workflow UI.
+      licenseType: 'enterprise',
+      skipUrlState: true,
+      hideTimeline: true,
     },
     benchmarksLink,
     {
@@ -122,6 +164,7 @@ export const links: LinkItem = {
         SecurityPageName.rules,
         SecurityPageName.cloudSecurityPostureBenchmarks,
         SecurityPageName.exceptions,
+        SecurityPageName.alertAnalysisWorkflow,
       ],
     },
     {

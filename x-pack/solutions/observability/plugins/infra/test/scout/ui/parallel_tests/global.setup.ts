@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout-oblt';
 import { generateHostData } from '../fixtures/synthtrace/host_data';
 import {
   CONTAINER_COUNT,
@@ -19,10 +20,14 @@ import {
   DATE_WITH_K8S_HOSTS_DATA_TO,
   DATE_WITH_POD_DATA_FROM,
   DATE_WITH_POD_DATA_TO,
+  DATE_WITH_SEMCONV_DATA_FROM,
+  DATE_WITH_SEMCONV_DATA_TO,
   HOST_NAME_WITH_SERVICES,
   HOSTS,
   HOSTS_WITHOUT_DATA,
+  METRICS_AND_LOGS_ARCHIVE,
   POD_COUNT,
+  SEMCONV_HOSTS,
   SERVICE_PER_HOST_COUNT,
 } from '../fixtures/constants';
 import { generateHostsWithK8sNodeData } from '../fixtures/synthtrace/hosts_with_k8s_node_data';
@@ -30,12 +35,30 @@ import { generatePodsData } from '../fixtures/synthtrace/pods_data';
 import { generateLogsDataForHostsOrContainers } from '../fixtures/synthtrace/logs_data_for_hosts_or_containers';
 import { generateAddServicesToExistingHost } from '../fixtures/synthtrace/add_services_to_existing_hosts';
 import { generateDockerContainersData } from '../fixtures/synthtrace/docker_containers_data';
+import { generateSemconvHostData } from '../fixtures/synthtrace/semconv_host_data';
 import { globalSetupHook } from '../fixtures';
+import { ensureNonTsdsSystemTemplate } from '../fixtures/sequential_hosts_synthtrace';
+import { loadMetricsAnomaliesMlData } from '../fixtures/metrics_anomalies_ml';
 
 globalSetupHook(
   'Ingest data to Elasticsearch',
-  { tag: ['@ess', '@svlOblt'] },
-  async ({ infraSynthtraceEsClient, logsSynthtraceEsClient, apmSynthtraceEsClient, log }) => {
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  async ({
+    esClient,
+    infraSynthtraceEsClient,
+    logsSynthtraceEsClient,
+    apmSynthtraceEsClient,
+    log,
+  }) => {
+    // Shared CI clusters may already have Fleet TSDS templates on metrics-system.*
+    // from other suites; those reject fixed historical @timestamp values.
+    // Clean stale synthtrace streams first so re-ingest is deterministic on shared CI.
+    await ensureNonTsdsSystemTemplate(esClient, log);
+    await infraSynthtraceEsClient.clean();
+    await logsSynthtraceEsClient.clean();
+    await apmSynthtraceEsClient.clean();
+    log.info('Existing synthtrace data cleaned before ingest');
+
     await infraSynthtraceEsClient.index(
       generateHostData({
         from: DATE_WITH_HOSTS_DATA_FROM,
@@ -107,5 +130,40 @@ globalSetupHook(
       })
     );
     log.info('Logs data for containers indexed');
+
+    await infraSynthtraceEsClient.index(
+      generateSemconvHostData({
+        from: DATE_WITH_SEMCONV_DATA_FROM,
+        to: DATE_WITH_SEMCONV_DATA_TO,
+        hosts: SEMCONV_HOSTS,
+      })
+    );
+    log.info('Semconv host data indexed');
+  }
+);
+
+// The metrics anomalies flyout is exercised only by the stateful `metrics_anomalies.spec.ts`.
+// Its pre-computed ML jobs/results live in an es_archive (synthtrace can't generate ML anomalies).
+// Rather than load the archive verbatim — ES forbids creating the restricted `.ml-config` index —
+// the jobs are recreated via the ML API and the results are bulk-indexed. Gated to stateful
+// because the archived `.ml-anomalies-shared` results and ML jobs are specific to stateful ML.
+globalSetupHook(
+  'Set up metrics anomalies ML jobs and results',
+  { tag: tags.stateful.classic },
+  async ({ apiServices, esClient, log }) => {
+    await loadMetricsAnomaliesMlData({ mlApi: apiServices.ml, esClient, log });
+  }
+);
+
+// The deprecated Metrics Explorer (`metrics_explorer.spec.ts`) is stateful-only and asserts on
+// the metricbeat field shape, which synthtrace can't reproduce. Load the shared metricbeat
+// es_archive; its Oct-2018 data is far outside the 2023 synthtrace ranges other specs use, so it
+// can't leak into their assertions. `loadIfNeeded` keeps this a no-op once the index exists.
+globalSetupHook(
+  'Load metrics_and_logs archive for Metrics Explorer',
+  { tag: tags.stateful.classic },
+  async ({ esArchiver, log }) => {
+    await esArchiver.loadIfNeeded(METRICS_AND_LOGS_ARCHIVE);
+    log.info('metrics_and_logs archive loaded');
   }
 );

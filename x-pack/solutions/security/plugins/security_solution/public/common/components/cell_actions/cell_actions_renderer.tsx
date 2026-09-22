@@ -9,14 +9,10 @@ import type { ToolTipPositions } from '@elastic/eui';
 import { EuiToolTip } from '@elastic/eui';
 import React, { useContext, useMemo } from 'react';
 import styled from '@emotion/styled';
+import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { TimelineId } from '../../../../common/types';
 import type { SecurityCellActionsData } from '.';
-import {
-  CellActionsMode,
-  SecurityCellActions,
-  SecurityCellActionsTrigger,
-  SecurityCellActionType,
-} from '.';
+import { CellActionsMode, SecurityCellActions, SecurityCellActionType } from '.';
 import { getSourcererScopeId } from '../../../helpers';
 import { TimelineContext } from '../../../timelines/components/timeline/context';
 import { TruncatableText } from '../truncatable_text';
@@ -162,7 +158,7 @@ export const CellActionsRenderer = React.memo<CellActionsRendererProps>(
         mode={CellActionsMode.HOVER_DOWN}
         visibleCellActions={6}
         showActionTooltips
-        triggerId={SecurityCellActionsTrigger.DEFAULT}
+        triggerId={SECURITY_CELL_ACTIONS_DEFAULT}
         data={data}
         disabledActionTypes={disabledActionTypes}
         sourcererScopeId={sourcererScopeId}

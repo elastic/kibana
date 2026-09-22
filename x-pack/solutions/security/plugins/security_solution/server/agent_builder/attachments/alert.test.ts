@@ -6,6 +6,7 @@
  */
 
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
+import type { TextAttachmentRepresentation } from '@kbn/agent-builder-server/attachments';
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
@@ -65,10 +66,12 @@ describe('createAlertAttachmentType', () => {
       };
 
       const formatted = await attachmentType.format(attachment, formatContext);
-      const representation = await formatted.getRepresentation();
+      const representation = formatted.getRepresentation
+        ? await formatted.getRepresentation()
+        : { type: 'text', value: attachment.data };
 
       expect(representation.type).toBe('text');
-      expect(representation.value).toBe('test alert content');
+      expect((representation as TextAttachmentRepresentation).value).toBe('test alert content');
     });
 
     it('throws error when attachment data is invalid', () => {

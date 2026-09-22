@@ -1,0 +1,7 @@
+summary: A template resource limit was exceeded.
+value:
+  {
+    "error": "Bad Request",
+    "message": "A template cannot define more than 200 fields.",
+    "statusCode": 400
+  }

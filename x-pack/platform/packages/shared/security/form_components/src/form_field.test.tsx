@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiFieldNumber, EuiFieldText } from '@elastic/eui';
-import { mount } from 'enzyme';
+import { EuiFieldNumber } from '@elastic/eui';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { Formik } from 'formik';
 import React from 'react';
 
@@ -16,40 +16,43 @@ const onSubmit = jest.fn();
 
 describe('FormField', () => {
   it('should render text field by default', () => {
-    const wrapper = mount(
+    render(
       <Formik onSubmit={onSubmit} initialValues={{ email: '' }}>
         <FormField name="email" />
       </Formik>
     );
 
-    expect(wrapper.exists(EuiFieldText)).toEqual(true);
+    expect(screen.getByRole('textbox')).toBeInTheDocument();
   });
 
   it('should render custom component if specified', () => {
-    const wrapper = mount(
+    render(
       <Formik onSubmit={onSubmit} initialValues={{ count: '' }}>
         <FormField as={EuiFieldNumber} name="count" />
       </Formik>
     );
 
-    expect(wrapper.exists(EuiFieldNumber)).toEqual(true);
+    expect(screen.getByRole('spinbutton')).toBeInTheDocument();
   });
 
-  it('should render component with correct field props and event handlers', () => {
-    const wrapper = mount(
+  it('should render component with correct field props and event handlers', async () => {
+    render(
       <Formik onSubmit={onSubmit} initialValues={{ email: 'mail@example.com' }}>
         <FormField name="email" />
       </Formik>
     );
 
-    expect(wrapper.find(EuiFieldText).props()).toEqual(
-      expect.objectContaining({
-        name: 'email',
-        value: 'mail@example.com',
-        onChange: expect.any(Function),
-        onBlur: expect.any(Function),
-      })
-    );
+    const input = screen.getByRole('textbox');
+    expect(input).toHaveAttribute('name', 'email');
+    expect(input).toHaveValue('mail@example.com');
+
+    fireEvent.change(input, { target: { value: 'new@example.com' } });
+    expect(input).toHaveValue('new@example.com');
+
+    await act(async () => {
+      fireEvent.blur(input);
+    });
+    expect(input).toHaveAttribute('name', 'email');
   });
 
   it('should mark as invalid if field has errors and has been touched', () => {
@@ -59,7 +62,7 @@ describe('FormField', () => {
       { error: undefined, touched: true, isInvalid: false },
     ];
     assertions.forEach(({ error, touched, isInvalid }) => {
-      const wrapper = mount(
+      const { unmount } = render(
         <Formik
           onSubmit={onSubmit}
           initialValues={{ email: '' }}
@@ -69,7 +72,11 @@ describe('FormField', () => {
           <FormField name="email" />
         </Formik>
       );
-      expect(wrapper.find(EuiFieldText).props()).toEqual(expect.objectContaining({ isInvalid }));
+      const input = screen.getByRole('textbox');
+      expect(input).toHaveAttribute('name', 'email');
+      expect(input).toHaveValue('');
+      expect(input)[isInvalid ? 'toBeInvalid' : 'toBeValid']();
+      unmount();
     });
   });
 });

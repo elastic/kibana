@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSpacer, EuiButton, EuiPageHeader } from '@elastic/eui';
+import { EuiPageSection, EuiSpacer, EuiButton } from '@elastic/eui';
 import type { ScopedHistory } from '@kbn/core/public';
 
+import { AppHeader } from '@kbn/app-header';
 import { allowAutoCreateRadioIds, STANDARD_INDEX_MODE } from '../../../../common/constants';
+import { useAppContext } from '../../app_context';
 import type { TemplateDeserialized } from '../../../../common';
 import { serializers, Forms, GlobalFlyout } from '../../../shared_imports';
 import type { CommonWizardSteps } from '../shared';
 import { StepSettingsContainer, StepMappingsContainer, StepAliasesContainer } from '../shared';
 import { documentationService } from '../../services/documentation';
 import { SectionError } from '../section_error';
-import { serializeAsESLifecycle } from '../../../../common/lib';
 import type { SimulateTemplateProps, SimulateTemplateFilters } from '../index_templates';
 import {
   SimulateTemplateFlyoutContent,
@@ -26,13 +27,14 @@ import {
   LegacyIndexTemplatesDeprecation,
 } from '../index_templates';
 import { StepLogisticsContainer, StepComponentContainer, StepReviewContainer } from './steps';
+import { buildTemplateFromWizardData } from './utils/build_template_from_wizard_data';
 
 const { stripEmptyFields } = serializers;
 const { FormWizard, FormWizardStep } = Forms;
 const { useGlobalFlyout } = GlobalFlyout;
 
 interface Props {
-  title: string | JSX.Element;
+  title: string;
   onSave: (template: TemplateDeserialized) => void;
   clearSaveError: () => void;
   isSaving: boolean;
@@ -101,6 +103,9 @@ export const TemplateForm = ({
   history,
 }: Props) => {
   const [wizardContent, setWizardContent] = useState<Forms.Content<WizardContent> | null>(null);
+  const {
+    config: { enableIndexMode },
+  } = useAppContext();
   const { addContent: addContentToGlobalFlyout, closeFlyout } = useGlobalFlyout();
   const simulateTemplateFilters = useRef<SimulateTemplateFilters>({
     mappings: true,
@@ -113,7 +118,7 @@ export const TemplateForm = ({
     name: '',
     indexPatterns: [],
     dataStream: {},
-    indexMode: STANDARD_INDEX_MODE,
+    indexMode: enableIndexMode ? STANDARD_INDEX_MODE : undefined,
     template: {},
     _kbnMeta: {
       type: 'default',
@@ -124,11 +129,31 @@ export const TemplateForm = ({
   };
 
   const {
-    template: { settings, mappings, aliases, data_stream_options: dataStreamOptions } = {},
+    template: {
+      settings,
+      mappings: initialMappings,
+      aliases,
+      data_stream_options: dataStreamOptions,
+    } = {},
     composedOf,
     _kbnMeta,
     ...logistics
   } = indexTemplate;
+
+  const mappings = useMemo(() => {
+    if (initialMappings && initialMappings._source && 'mode' in initialMappings._source) {
+      const { mode, ...otherSource } = initialMappings._source;
+      const newMappings = {
+        ...initialMappings,
+        _source: Object.keys(otherSource).length > 0 ? otherSource : undefined,
+      };
+      if (newMappings._source === undefined) {
+        delete newMappings._source;
+      }
+      return Object.keys(newMappings).length > 0 ? newMappings : undefined;
+    }
+    return initialMappings;
+  }, [initialMappings]);
 
   const wizardDefaultValue: WizardContent = {
     logistics,
@@ -165,57 +190,14 @@ export const TemplateForm = ({
     </>
   ) : null;
 
-  /**
-   * If no mappings, settings or aliases are defined, it is better to not send empty
-   * object for those values.
-   * This method takes care of that and other cleanup of empty fields.
-   * @param template The template object to clean up
-   */
-  const cleanupTemplateObject = (template: TemplateDeserialized) => {
-    const outputTemplate = { ...template };
-
-    if (outputTemplate.template) {
-      if (outputTemplate.template.settings === undefined) {
-        delete outputTemplate.template.settings;
-      }
-      if (outputTemplate.template.mappings === undefined) {
-        delete outputTemplate.template.mappings;
-      }
-      if (outputTemplate.template.aliases === undefined) {
-        delete outputTemplate.template.aliases;
-      }
-      if (Object.keys(outputTemplate.template).length === 0) {
-        delete outputTemplate.template;
-      }
-      if (outputTemplate.lifecycle) {
-        delete outputTemplate.lifecycle;
-      }
-    }
-
-    return outputTemplate;
-  };
-
   const buildTemplateObject = useCallback(
     (initialTemplate: TemplateDeserialized) =>
       (wizardData: WizardContent): TemplateDeserialized => {
-        const outputTemplate = {
-          ...wizardData.logistics,
-          _kbnMeta: initialTemplate._kbnMeta,
-          deprecated: initialTemplate.deprecated,
-          composedOf: wizardData.components,
-          template: {
-            settings: wizardData.settings,
-            mappings: wizardData.mappings,
-            aliases: wizardData.aliases,
-            lifecycle: wizardData.logistics.lifecycle
-              ? serializeAsESLifecycle(wizardData.logistics.lifecycle)
-              : undefined,
-            ...(dataStreamOptions && { data_stream_options: dataStreamOptions }),
-          },
-          ignoreMissingComponentTemplates: initialTemplate.ignoreMissingComponentTemplates,
-        };
-
-        return cleanupTemplateObject(outputTemplate as TemplateDeserialized);
+        return buildTemplateFromWizardData({
+          initialTemplate,
+          wizardData,
+          dataStreamOptions,
+        });
       },
     [dataStreamOptions]
   );
@@ -296,69 +278,83 @@ export const TemplateForm = ({
 
   return (
     <>
-      {/* Form header */}
-      <EuiPageHeader pageTitle={<span data-test-subj="pageTitle">{title}</span>} bottomBorder />
+      <AppHeader
+        title={title}
+        back={{
+          href: '/app/management/data/index_management/templates',
+          label: i18n.translate('xpack.idxMgmt.templateForm.backToListLabel', {
+            defaultMessage: 'Templates',
+          }),
+        }}
+        spacing="bleed"
+      />
 
-      <EuiSpacer size="m" />
+      <EuiPageSection restrictWidth style={{ width: '100%' }} paddingSize="none">
+        {/* keeps the wizard body width-restricted while the header above stays full-width */}
+        <EuiSpacer size="m" />
 
-      {isLegacyIndexTemplate && (
-        <LegacyIndexTemplatesDeprecation history={history} showCta={true} />
-      )}
-
-      <EuiSpacer size="s" />
-
-      <FormWizard<WizardContent, WizardSection>
-        defaultValue={wizardDefaultValue}
-        onSave={onSaveTemplate}
-        isEditing={isEditing}
-        isSaving={isSaving}
-        apiError={apiError}
-        texts={i18nTexts}
-        onChange={onWizardContentChange}
-        rightContentNav={getRightContentWizardNav}
-      >
-        <FormWizardStep
-          id={wizardSections.logistics.id}
-          label={wizardSections.logistics.label}
-          isRequired
-        >
-          <StepLogisticsContainer
-            isEditing={isEditing}
-            isLegacy={indexTemplate._kbnMeta.isLegacy}
-          />
-        </FormWizardStep>
-
-        {!isLegacyIndexTemplate && (
-          <FormWizardStep id={wizardSections.components.id} label={wizardSections.components.label}>
-            <StepComponentContainer />
-          </FormWizardStep>
+        {isLegacyIndexTemplate && (
+          <LegacyIndexTemplatesDeprecation history={history} showCta={true} />
         )}
 
-        <FormWizardStep id={wizardSections.settings.id} label={wizardSections.settings.label}>
-          <StepSettingsContainer
-            esDocsBase={documentationService.getEsDocsBase()}
-            getTemplateData={buildTemplateObject(indexTemplate)}
-          />
-        </FormWizardStep>
+        <EuiSpacer size="s" />
 
-        <FormWizardStep id={wizardSections.mappings.id} label={wizardSections.mappings.label}>
-          <StepMappingsContainer
-            esDocsBase={documentationService.getEsDocsBase()}
-            getTemplateData={buildTemplateObject(indexTemplate)}
-          />
-        </FormWizardStep>
+        <FormWizard<WizardContent, WizardSection>
+          defaultValue={wizardDefaultValue}
+          onSave={onSaveTemplate}
+          isEditing={isEditing}
+          isSaving={isSaving}
+          apiError={apiError}
+          texts={i18nTexts}
+          onChange={onWizardContentChange}
+          rightContentNav={getRightContentWizardNav}
+        >
+          <FormWizardStep
+            id={wizardSections.logistics.id}
+            label={wizardSections.logistics.label}
+            isRequired
+          >
+            <StepLogisticsContainer
+              isEditing={isEditing}
+              isLegacy={indexTemplate._kbnMeta.isLegacy}
+            />
+          </FormWizardStep>
 
-        <FormWizardStep id={wizardSections.aliases.id} label={wizardSections.aliases.label}>
-          <StepAliasesContainer esDocsBase={documentationService.getEsDocsBase()} />
-        </FormWizardStep>
+          {!isLegacyIndexTemplate && (
+            <FormWizardStep
+              id={wizardSections.components.id}
+              label={wizardSections.components.label}
+            >
+              <StepComponentContainer />
+            </FormWizardStep>
+          )}
 
-        <FormWizardStep id={wizardSections.review.id} label={wizardSections.review.label}>
-          <StepReviewContainer
-            getTemplateData={buildTemplateObject(indexTemplate)}
-            dataStreamOptions={dataStreamOptions}
-          />
-        </FormWizardStep>
-      </FormWizard>
+          <FormWizardStep id={wizardSections.settings.id} label={wizardSections.settings.label}>
+            <StepSettingsContainer
+              esDocsBase={documentationService.getEsDocsBase()}
+              getTemplateData={buildTemplateObject(indexTemplate)}
+            />
+          </FormWizardStep>
+
+          <FormWizardStep id={wizardSections.mappings.id} label={wizardSections.mappings.label}>
+            <StepMappingsContainer
+              esDocsBase={documentationService.getEsDocsBase()}
+              getTemplateData={buildTemplateObject(indexTemplate)}
+            />
+          </FormWizardStep>
+
+          <FormWizardStep id={wizardSections.aliases.id} label={wizardSections.aliases.label}>
+            <StepAliasesContainer esDocsBase={documentationService.getEsDocsBase()} />
+          </FormWizardStep>
+
+          <FormWizardStep id={wizardSections.review.id} label={wizardSections.review.label}>
+            <StepReviewContainer
+              getTemplateData={buildTemplateObject(indexTemplate)}
+              dataStreamOptions={dataStreamOptions}
+            />
+          </FormWizardStep>
+        </FormWizard>
+      </EuiPageSection>
     </>
   );
 };

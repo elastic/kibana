@@ -7,72 +7,79 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { ProjectRouting } from '@kbn/es-query';
 import type { ICPSManager } from '../types';
 import { ProjectRoutingAccess } from '../types';
-import { DisabledProjectPicker, ProjectPicker } from './project_picker';
-import { ProjectPickerSettings } from './project_picker_settings';
-
+import { ProjectPicker } from './project_picker';
 interface ProjectPickerContainerProps {
   cpsManager: ICPSManager;
 }
 
 /**
- * Container component that connects ProjectPicker to CPSManager
- * Handles observable subscriptions and provides bound fetchProjects
- * Access control is managed by CPSManager based on current app and route
+ * Container component that connects ProjectPicker to CPSManager.
+ * Delegates to ActiveProjectPicker or DisabledProjectPicker based on access level,
+ * so the fetch hook only runs when the picker is actually active.
  */
 export const ProjectPickerContainer: React.FC<ProjectPickerContainerProps> = ({ cpsManager }) => {
-  const { projectRouting, updateProjectRouting } = useProjectRouting(cpsManager);
   const access = useObservable(cpsManager.getProjectPickerAccess$(), ProjectRoutingAccess.DISABLED);
 
-  const fetchProjects = useCallback(() => {
-    return cpsManager.fetchProjects();
-  }, [cpsManager]);
-
-  const resetProjectPicker = useCallback(() => {
-    updateProjectRouting(cpsManager.getDefaultProjectRouting());
-  }, [cpsManager, updateProjectRouting]);
-
-  if (access === ProjectRoutingAccess.DISABLED) {
-    return <DisabledProjectPicker />;
-  }
-
   return (
-    <ProjectPicker
-      projectRouting={projectRouting}
-      onProjectRoutingChange={updateProjectRouting}
-      fetchProjects={fetchProjects}
+    <ActiveProjectPicker
+      cpsManager={cpsManager}
       isReadonly={access === ProjectRoutingAccess.READONLY}
-      settingsComponent={<ProjectPickerSettings onResetToDefaults={resetProjectPicker} />}
+      isDisabled={access === ProjectRoutingAccess.DISABLED}
     />
   );
 };
 
-/**
- * Hook for interacting with project routing observable
- * Subscribes to routing changes and provides setter function
- */
-const useProjectRouting = (cpsManager: ICPSManager) => {
-  const [projectRouting, setProjectRouting] = useState<ProjectRouting | undefined>(
-    cpsManager.getProjectRouting()
+interface ActiveProjectPickerProps {
+  cpsManager: ICPSManager;
+  isReadonly: boolean;
+  isDisabled: boolean;
+}
+
+const ActiveProjectPicker: React.FC<ActiveProjectPickerProps> = ({
+  cpsManager,
+  isReadonly,
+  isDisabled,
+}) => {
+  const fetchProjectsByRouting = useCallback(
+    (projectRouting?: ProjectRouting) => cpsManager.fetchProjects(projectRouting),
+    [cpsManager]
   );
 
-  useEffect(() => {
-    const subscription = cpsManager.getProjectRouting$().subscribe((newRouting) => {
-      setProjectRouting(newRouting);
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
+  const defaultProjectRoutingGetter = useCallback(() => {
+    return cpsManager.getDefaultProjectRouting();
   }, [cpsManager]);
 
-  const updateProjectRouting = (newRouting: ProjectRouting) => {
-    cpsManager.setProjectRouting(newRouting);
-  };
+  const currentProjectRoutingGetter = useCallback(() => {
+    return cpsManager.getProjectRouting();
+  }, [cpsManager]);
 
-  return { projectRouting, updateProjectRouting };
+  const updateProjectRouting = useCallback(
+    (newRouting: ProjectRouting) => {
+      cpsManager.setProjectRouting(newRouting);
+    },
+    [cpsManager]
+  );
+
+  const customHeaderContextMenuItems = useMemo(
+    () => Object.values(cpsManager.getConfigurationLinks()),
+    [cpsManager]
+  );
+
+  return (
+    <ProjectPicker
+      totalProjectCount={cpsManager.getTotalProjectCount()}
+      currentProjectRoutingGetter={currentProjectRoutingGetter}
+      defaultProjectRoutingGetter={defaultProjectRoutingGetter}
+      onProjectRoutingChange={updateProjectRouting}
+      fetchProjectsByRouting={fetchProjectsByRouting}
+      isReadonly={isReadonly}
+      isDisabled={isDisabled}
+      customHeaderContextMenuItems={customHeaderContextMenuItems}
+    />
+  );
 };

@@ -8,7 +8,7 @@
 import React from 'react';
 
 import type { IconType } from '@elastic/eui';
-import { EuiButtonGroup, EuiComboBox, EuiFormRow, EuiIcon } from '@elastic/eui';
+import { EuiButtonGroup, EuiComboBox, EuiFormPrepend, EuiFormRow, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { GaugeShape } from '@kbn/expression-gauge-plugin/common';
 import { GaugeShapes } from '@kbn/expression-gauge-plugin/common';
@@ -109,11 +109,11 @@ export function AppearanceSettings({
           options={gaugeShapes.map(({ id, label, icon }) => ({
             value: id,
             label,
-            prepend: <EuiIcon type={icon} />,
+            prepend: <EuiIcon type={icon} aria-hidden={true} />,
           }))}
           selectedOptions={[selectedOption]}
           singleSelection={{ asPlainText: true }}
-          prepend={<EuiIcon type={selectedOption.icon} />}
+          prepend={<EuiFormPrepend iconLeft={selectedOption.icon} />}
         />
       </EuiFormRow>
       {(state.shape === GaugeShapes.HORIZONTAL_BULLET ||

@@ -24,6 +24,7 @@ import type { EsResponseTooLargeError } from '.';
 /** @internal */
 export interface ReadWithPit {
   outdatedDocuments: SavedObjectsRawDoc[];
+  readonly pitId: string;
   readonly lastHitSortValue: number[] | undefined;
   readonly totalHits: number | undefined;
 }
@@ -84,6 +85,7 @@ export const readWithPit =
         { maxResponseSize: maxResponseSizeBytes }
       )
       .then((body) => {
+        const nextPitId = body.pit_id ?? pitId;
         const totalHits =
           typeof body.hits.total === 'number'
             ? body.hits.total // This format is to be removed in 8.0
@@ -94,6 +96,7 @@ export const readWithPit =
           return Either.right({
             // @ts-expect-error @elastic/elasticsearch _source is optional
             outdatedDocuments: hits as SavedObjectsRawDoc[],
+            pitId: nextPitId,
             lastHitSortValue: hits[hits.length - 1].sort as number[],
             totalHits,
           });
@@ -101,6 +104,7 @@ export const readWithPit =
 
         return Either.right({
           outdatedDocuments: [],
+          pitId: nextPitId,
           lastHitSortValue: undefined,
           totalHits,
         });

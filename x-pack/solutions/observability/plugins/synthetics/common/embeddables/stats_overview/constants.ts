@@ -5,4 +5,10 @@
  * 2.0.
  */
 
-export const SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE = 'SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE';
+import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
+
+//
+// Do not change constant values - part of public REST APIs
+//
+export const SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE = 'synthetics_stats_overview';
+export const SYNTHETICS_STATS_SUPPORTED_TRIGGERS = [ON_OPEN_PANEL_MENU];

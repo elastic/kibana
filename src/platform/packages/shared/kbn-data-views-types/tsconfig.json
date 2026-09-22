@@ -12,6 +12,8 @@
     "**/*.ts"
   ],
   "kbn_references": [
+    "@kbn/as-code-data-views-schema",
+    "@kbn/es-query",
     "@kbn/field-formats-plugin"
   ],
   "exclude": [

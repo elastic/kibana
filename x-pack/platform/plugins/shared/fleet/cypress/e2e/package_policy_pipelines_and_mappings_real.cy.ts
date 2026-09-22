@@ -18,6 +18,7 @@ const INTEGRATION_TEST_PACKAGE = 'logs_integration-1.0.0';
 const INTEGRATION_TEST_PACKAGE_NO_DATASET = 'logs_int_no_dataset-1.0.0';
 
 import { API_VERSIONS } from '@kbn/fleet-plugin/common/constants';
+
 import { request } from '../tasks/common';
 import { login } from '../tasks/login';
 import { cleanupAgentPolicies } from '../tasks/cleanup';
@@ -97,14 +98,12 @@ describe('Input package create and edit package policy', () => {
   it('should show pipelines editor with link to pipeline', () => {
     editPackagePolicyandShowAdvanced(INPUT_TEST_PACKAGE, packagePolicyName);
     cy.getBySel(POLICY_EDITOR.INSPECT_PIPELINES_BTN).click();
-    cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
     cy.get('body').should('not.contain', 'Pipeline not found');
     cy.get('body').should('contain', '"managed_by": "fleet"');
   });
   it('should show mappings editor with link to create custom template', () => {
     editPackagePolicyandShowAdvanced(INPUT_TEST_PACKAGE, packagePolicyName);
     cy.getBySel(POLICY_EDITOR.CREATE_MAPPINGS_BTN).click();
-    cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
     cy.get('body').should('contain', `Create component template`);
   });
 });
@@ -151,7 +150,7 @@ describe('Integration package with custom dataset create and edit package policy
       .click()
       .type('/var/log/test.log');
 
-    cy.getBySel('textInput-dataset-name').click().type(datasetName);
+    cy.getBySel(POLICY_EDITOR.DATASET_SELECT).click().type(datasetName);
 
     cy.getBySel(EXISTING_HOSTS_TAB).click();
 

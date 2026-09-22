@@ -7,50 +7,52 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { render, screen, act, waitFor } from '@testing-library/react';
-import {
-  FullScreenWaterfall,
-  type FullScreenWaterfallProps,
-  EUI_FLYOUT_BODY_OVERFLOW_CLASS,
-} from '.';
+import type { FullTraceWaterfallProps } from '@kbn/apm-types';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { render, screen } from '@testing-library/react';
+import React from 'react';
+import { FullScreenWaterfall, type FullScreenWaterfallProps } from '.';
+import { mockUnifiedDocViewerServices } from '../../../../../__mocks__';
+import { setUnifiedDocViewerServices } from '../../../../../plugin';
+import type { UnifiedDocViewerServices } from '../../../../../types';
+import { FlyoutHistoryKeyContext } from '../../../../doc_viewer_flyout/flyout_history_key_context';
 
-let capturedCallbacks: any = null;
+const testHistoryKey = Symbol('testHistoryKey');
+const renderWithHistoryKey = (ui: React.ReactElement) =>
+  render(
+    <FlyoutHistoryKeyContext.Provider value={testHistoryKey}>{ui}</FlyoutHistoryKeyContext.Provider>
+  );
 
-jest.mock('@kbn/embeddable-plugin/public', () => ({
-  EmbeddableRenderer: ({ type, getParentApi, hidePanelChrome }: any) => {
-    const api = getParentApi();
-    capturedCallbacks = api.getSerializedStateForChild();
+let capturedDocFlyoutHasAnimation: boolean | undefined;
 
+jest.mock('./waterfall_flyout/document_detail_flyout', () => ({
+  DocumentDetailFlyout: ({
+    type,
+    docId,
+    traceId,
+    activeSection,
+    dataTestSubj,
+    hasAnimation,
+  }: any) => {
+    capturedDocFlyoutHasAnimation = hasAnimation;
     return (
       <div
-        data-test-subj="embeddableRenderer"
-        data-type={type}
-        data-hide-panel-chrome={hidePanelChrome}
-      >
-        Embeddable Renderer Mock
-      </div>
+        data-test-subj={type === 'span' ? 'spanFlyout' : 'logsFlyout'}
+        data-trace-id={traceId}
+        data-span-id={docId}
+        data-id={docId}
+        data-active-section={activeSection}
+        data-flyout-test-subj={dataTestSubj}
+      />
     );
   },
 }));
 
-jest.mock('./waterfall_flyout/span_flyout', () => ({
-  SpanFlyout: ({ traceId, spanId, _, activeSection }: any) => (
-    <div
-      data-test-subj="spanFlyout"
-      data-trace-id={traceId}
-      data-span-id={spanId}
-      data-active-section={activeSection}
-    />
-  ),
-  spanFlyoutId: 'spanFlyout',
-}));
-
-jest.mock('./waterfall_flyout/logs_flyout', () => ({
-  LogsFlyout: ({ id, _ }: any) => <div data-test-subj="logsFlyout" data-id={id} />,
-  logsFlyoutId: 'logsFlyout',
-}));
+let capturedWaterfallProps: {
+  contextSpanIds?: string[];
+  onNodeClick?: (id: string) => void;
+  onErrorClick?: (params: any) => void;
+} = {};
 
 describe('FullScreenWaterfall', () => {
   const defaultProps: FullScreenWaterfallProps = {
@@ -59,118 +61,119 @@ describe('FullScreenWaterfall', () => {
     rangeTo: 'now',
     dataView: dataViewMock,
     serviceName: 'test-service',
+    docId: null,
+    docIndex: undefined,
+    activeFlyoutType: null,
+    activeSection: undefined,
+    onNodeClick: jest.fn(),
+    onErrorClick: jest.fn(),
+    onCloseFlyout: jest.fn(),
     onExitFullScreen: jest.fn(),
   };
 
+  beforeAll(() => {
+    setUnifiedDocViewerServices({
+      ...mockUnifiedDocViewerServices,
+      apmShared: {
+        ...mockUnifiedDocViewerServices.apmShared,
+        TraceWaterfallWithFetching: (props: FullTraceWaterfallProps) => {
+          capturedWaterfallProps = props;
+          return React.createElement(
+            mockUnifiedDocViewerServices.apmShared.TraceWaterfallWithFetching,
+            props
+          );
+        },
+      },
+    } as unknown as UnifiedDocViewerServices);
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
-    capturedCallbacks = null;
+    jest.useFakeTimers();
+    capturedWaterfallProps = {};
+    capturedDocFlyoutHasAnimation = undefined;
   });
 
-  it('should render APM trace waterfall embeddable with hidden chrome', () => {
-    render(<FullScreenWaterfall {...defaultProps} />);
-
-    const embeddable = screen.getByTestId('embeddableRenderer');
-    expect(embeddable).toHaveAttribute('data-type', 'APM_TRACE_WATERFALL_EMBEDDABLE');
-    expect(embeddable).toHaveAttribute('data-hide-panel-chrome', 'true');
-  });
-
-  it('wraps EmbeddableRenderer with CSS override for proper layout', () => {
-    const { container } = render(<FullScreenWaterfall {...defaultProps} />);
-
-    const embeddable = container.querySelector('[data-test-subj="embeddableRenderer"]');
-    expect(embeddable).toBeInTheDocument();
-
-    const wrapper = embeddable?.parentElement;
-    expect(wrapper).toHaveStyleRule('width', '100%');
-    expect(wrapper).toHaveStyleRule('display', 'block!important', {
-      target: '.embPanel__content',
-    });
+  afterEach(() => {
+    jest.useRealTimers();
   });
 
   it('should not display nested flyouts initially', () => {
-    render(<FullScreenWaterfall {...defaultProps} />);
+    renderWithHistoryKey(<FullScreenWaterfall {...defaultProps} />);
 
     expect(screen.queryByTestId('spanFlyout')).not.toBeInTheDocument();
     expect(screen.queryByTestId('logsFlyout')).not.toBeInTheDocument();
   });
 
-  describe('nested flyout interactions', () => {
-    it('should display span details when clicking a waterfall node', () => {
-      render(<FullScreenWaterfall {...defaultProps} />);
+  it('renders the full trace waterfall immediately on standard open', () => {
+    renderWithHistoryKey(<FullScreenWaterfall {...defaultProps} />);
 
-      act(() => {
-        capturedCallbacks.onNodeClick('test-span-id');
-      });
+    expect(screen.getByTestId('trace-waterfall-with-fetching')).toBeInTheDocument();
+  });
 
-      const spanFlyout = screen.getByTestId('spanFlyout');
-      expect(spanFlyout).toHaveAttribute('data-trace-id', 'test-trace-id');
-      expect(spanFlyout).toHaveAttribute('data-span-id', 'test-span-id');
-      expect(spanFlyout).not.toHaveAttribute('data-active-section');
-      expect(screen.queryByTestId('logsFlyout')).not.toBeInTheDocument();
-    });
+  describe('when service name is undefined', () => {
+    it('renders the full trace waterfall', () => {
+      renderWithHistoryKey(<FullScreenWaterfall {...defaultProps} serviceName={undefined} />);
 
-    it('should display span errors table when clicking an error with multiple occurrences', () => {
-      render(<FullScreenWaterfall {...defaultProps} />);
-
-      act(() => {
-        capturedCallbacks.onErrorClick({
-          traceId: 'test-trace-id',
-          docId: 'test-error-doc-id',
-          errorCount: 5,
-        });
-      });
-
-      const spanFlyout = screen.getByTestId('spanFlyout');
-      expect(spanFlyout).toHaveAttribute('data-active-section', 'errors-table');
-      expect(screen.queryByTestId('logsFlyout')).not.toBeInTheDocument();
-    });
-
-    it('should display log details when clicking a single error', () => {
-      render(<FullScreenWaterfall {...defaultProps} />);
-
-      act(() => {
-        capturedCallbacks.onErrorClick({
-          traceId: 'test-trace-id',
-          docId: 'test-doc-id',
-          errorCount: 1,
-          errorDocId: 'test-error-log-id',
-        });
-      });
-
-      expect(screen.getByTestId('logsFlyout')).toHaveAttribute('data-id', 'test-error-log-id');
-      expect(screen.queryByTestId('spanFlyout')).not.toBeInTheDocument();
-    });
-
-    it('should not open any flyout when clicking a single error without errorDocId', () => {
-      render(<FullScreenWaterfall {...defaultProps} />);
-
-      act(() => {
-        capturedCallbacks.onErrorClick({
-          traceId: 'test-trace-id',
-          docId: 'test-doc-id',
-          errorCount: 1,
-        });
-      });
-
-      expect(screen.queryByTestId('spanFlyout')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('logsFlyout')).not.toBeInTheDocument();
+      expect(screen.getByTestId('trace-waterfall-with-fetching')).toBeInTheDocument();
     });
   });
 
-  describe('scrollElement integration', () => {
-    it('should pass scrollElement with correct EUI class to embeddable', async () => {
-      render(<FullScreenWaterfall {...defaultProps} />);
+  describe('hasAnimation prop', () => {
+    it('passes animation disabled to the document detail flyout when skipOpenAnimation is true', () => {
+      renderWithHistoryKey(
+        <FullScreenWaterfall
+          {...defaultProps}
+          skipOpenAnimation={true}
+          docId="transaction-doc-1"
+          activeFlyoutType="span"
+        />
+      );
 
-      await waitFor(() => {
-        expect(screen.getByTestId('embeddableRenderer')).toBeInTheDocument();
-      });
+      expect(capturedDocFlyoutHasAnimation).toBe(false);
+    });
 
-      expect(capturedCallbacks.scrollElement).not.toBeNull();
-      expect(capturedCallbacks.scrollElement).toBeInstanceOf(Element);
-      expect(
-        capturedCallbacks.scrollElement.classList.contains(EUI_FLYOUT_BODY_OVERFLOW_CLASS)
-      ).toBe(true);
+    it('passes animation enabled to the document detail flyout when skipOpenAnimation is false', () => {
+      renderWithHistoryKey(
+        <FullScreenWaterfall
+          {...defaultProps}
+          skipOpenAnimation={false}
+          docId="transaction-doc-1"
+          activeFlyoutType="span"
+        />
+      );
+
+      expect(capturedDocFlyoutHasAnimation).toBe(true);
+    });
+
+    it('renders the document detail flyout with the correct test subject', () => {
+      renderWithHistoryKey(
+        <FullScreenWaterfall
+          {...defaultProps}
+          skipOpenAnimation={true}
+          docId="transaction-doc-1"
+          activeFlyoutType="span"
+        />
+      );
+
+      expect(screen.getByTestId('spanFlyout')).toHaveAttribute(
+        'data-flyout-test-subj',
+        'traceWaterfallDocumentFlyout'
+      );
+    });
+  });
+
+  describe('context span state management', () => {
+    it('passes initial contextSpanIds to FullTraceWaterfall', () => {
+      renderWithHistoryKey(
+        <FullScreenWaterfall
+          {...defaultProps}
+          skipOpenAnimation={true}
+          contextSpanIds={['initial-span']}
+        />
+      );
+
+      expect(capturedWaterfallProps.contextSpanIds).toEqual(['initial-span']);
     });
   });
 });

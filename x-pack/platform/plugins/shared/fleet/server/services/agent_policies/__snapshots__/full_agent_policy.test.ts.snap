@@ -5,6 +5,9 @@ Object {
   "agent": Object {
     "download": Object {
       "sourceURI": "http://default-registry.co",
+      "sources": Array [
+        "http://default-registry.co",
+      ],
     },
     "features": Object {},
     "monitoring": Object {
@@ -88,6 +91,14 @@ Object {
           "monitor",
         ],
       },
+      "_elastic_agent_monitoring": Object {
+        "indices": Array [
+          Object {
+            "names": Array [],
+            "privileges": Array [],
+          },
+        ],
+      },
       "package-policy-no-output": Object {
         "indices": Array [
           Object {
@@ -106,14 +117,6 @@ Object {
       "_elastic_agent_checks": Object {
         "cluster": Array [
           "monitor",
-        ],
-      },
-      "_elastic_agent_monitoring": Object {
-        "indices": Array [
-          Object {
-            "names": Array [],
-            "privileges": Array [],
-          },
         ],
       },
       "package-policy-using-output": Object {
@@ -161,6 +164,9 @@ Object {
   "agent": Object {
     "download": Object {
       "sourceURI": "http://default-registry.co",
+      "sources": Array [
+        "http://default-registry.co",
+      ],
     },
     "features": Object {},
     "monitoring": Object {
@@ -244,6 +250,14 @@ Object {
           "monitor",
         ],
       },
+      "_elastic_agent_monitoring": Object {
+        "indices": Array [
+          Object {
+            "names": Array [],
+            "privileges": Array [],
+          },
+        ],
+      },
       "package-policy-no-output": Object {
         "indices": Array [
           Object {
@@ -254,21 +268,6 @@ Object {
               "auto_configure",
               "create_doc",
             ],
-          },
-        ],
-      },
-    },
-    "default": Object {
-      "_elastic_agent_checks": Object {
-        "cluster": Array [
-          "monitor",
-        ],
-      },
-      "_elastic_agent_monitoring": Object {
-        "indices": Array [
-          Object {
-            "names": Array [],
-            "privileges": Array [],
           },
         ],
       },
@@ -302,13 +301,6 @@ Object {
       "preset": "balanced",
       "type": "elasticsearch",
     },
-    "default": Object {
-      "hosts": Array [
-        "http://127.0.0.1:9201",
-      ],
-      "preset": "balanced",
-      "type": "elasticsearch",
-    },
     "test-remote-id": Object {
       "hosts": Array [
         "http://127.0.0.1:9201",
@@ -334,6 +326,9 @@ Object {
   "agent": Object {
     "download": Object {
       "sourceURI": "http://default-registry.co",
+      "sources": Array [
+        "http://default-registry.co",
+      ],
     },
     "features": Object {},
     "monitoring": Object {
@@ -342,7 +337,7 @@ Object {
       "metrics": true,
       "namespace": "default",
       "traces": false,
-      "use_output": "default",
+      "use_output": "data-output-id",
     },
     "protection": Object {
       "enabled": false,
@@ -359,13 +354,6 @@ Object {
   "inputs": Array [],
   "output_permissions": Object {
     "data-output-id": Object {
-      "_elastic_agent_checks": Object {
-        "cluster": Array [
-          "monitor",
-        ],
-      },
-    },
-    "default": Object {
       "_elastic_agent_checks": Object {
         "cluster": Array [
           "monitor",
@@ -391,13 +379,6 @@ Object {
       "preset": "balanced",
       "type": "elasticsearch",
     },
-    "default": Object {
-      "hosts": Array [
-        "http://127.0.0.1:9201",
-      ],
-      "preset": "balanced",
-      "type": "elasticsearch",
-    },
   },
   "revision": 1,
   "secret_references": Array [],
@@ -413,6 +394,9 @@ Object {
   "agent": Object {
     "download": Object {
       "sourceURI": "http://default-registry.co",
+      "sources": Array [
+        "http://default-registry.co",
+      ],
     },
     "features": Object {},
     "monitoring": Object {
@@ -492,6 +476,9 @@ Object {
   "agent": Object {
     "download": Object {
       "sourceURI": "http://default-registry.co",
+      "sources": Array [
+        "http://default-registry.co",
+      ],
     },
     "features": Object {},
     "monitoring": Object {

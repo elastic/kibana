@@ -8,13 +8,20 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Router } from '@kbn/shared-ux-router';
+import type { ScopedHistory, ExecutionContextStart } from '@kbn/core/public';
 
 import type { AppDependencies } from './app_context';
 import { AppProviders } from './app_providers';
-// @ts-ignore
 import { App } from './app.container';
+import type { TelemetryPluginStart } from './lib/telemetry';
 
-const AppWithRouter = (props: { [key: string]: any }) => (
+interface AppWithRouterProps {
+  history: ScopedHistory;
+  telemetry?: TelemetryPluginStart;
+  executionContext: ExecutionContextStart;
+}
+
+const AppWithRouter = (props: AppWithRouterProps) => (
   <Router history={props.history}>
     <App {...props} />
   </Router>

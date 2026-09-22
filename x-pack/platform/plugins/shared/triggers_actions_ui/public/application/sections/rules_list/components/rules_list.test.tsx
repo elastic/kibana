@@ -6,9 +6,11 @@
  */
 
 import { parseDuration } from '@kbn/alerting-plugin/common';
+import { fetchUiConfig } from '@kbn/response-ops-rule-form/src/common/apis/fetch_ui_config';
 import { MAINTENANCE_WINDOW_FEATURE_ID } from '@kbn/maintenance-windows-plugin/common';
 import { fetchActiveMaintenanceWindows } from '@kbn/alerts-ui-shared/src/maintenance_window_callout/api';
 import { RUNNING_MAINTENANCE_WINDOW_1 } from '@kbn/alerts-ui-shared/src/maintenance_window_callout/mock';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import type { IToasts } from '@kbn/core/public';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -23,6 +25,8 @@ import {
 } from '@testing-library/react';
 import * as React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { ProjectRoutingAccess, useRouteBasedCpsPickerAccess } from '@kbn/cps-utils';
+import { BehaviorSubject } from 'rxjs';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { useKibana } from '../../../../common/lib/kibana';
 import type {
@@ -98,14 +102,18 @@ jest.mock('@kbn/response-ops-rule-form/src/common/apis/fetch_ui_config', () => (
     .fn()
     .mockResolvedValue({ minimumScheduleInterval: { value: '1m', enforce: false } }),
 }));
-jest.mock('react-router-dom', () => ({
-  useHistory: () => ({
+jest.mock('react-router-dom', () => {
+  const history = {
     push: jest.fn(),
-  }),
-  useLocation: () => ({
-    pathname: '/triggersActions/rules/',
-  }),
-}));
+    createHref: jest.fn(({ pathname }: { pathname: string }) => pathname),
+  };
+  return {
+    useHistory: () => history,
+    useLocation: () => ({
+      pathname: '/triggersActions/rules/',
+    }),
+  };
+});
 
 jest.mock('@kbn/alerts-ui-shared/src/maintenance_window_callout/api', () => ({
   fetchActiveMaintenanceWindows: jest.fn(() => Promise.resolve([])),
@@ -135,6 +143,18 @@ jest.mock('@kbn/kibana-utils-plugin/public', () => {
 
 jest.mock('react-use/lib/useLocalStorage', () => jest.fn(() => [null, () => null]));
 jest.mock('@kbn/ebt-tools');
+jest.mock('@kbn/cps-utils', () => ({
+  ...jest.requireActual('@kbn/cps-utils'),
+  useRouteBasedCpsPickerAccess: jest.fn(),
+}));
+
+const license$ = new BehaviorSubject(
+  licensingMock.createLicense({
+    license: { type: 'platinum', mode: 'platinum' },
+  })
+);
+
+const mockUseRouteBasedCpsPickerAccess = jest.mocked(useRouteBasedCpsPickerAccess);
 
 const usePerformanceContextMock = usePerformanceContext as jest.Mock;
 usePerformanceContextMock.mockReturnValue({ onPageReady: jest.fn() });
@@ -170,6 +190,11 @@ const AllTheProviders = ({ children }: { children: any }) => (
 const renderWithProviders = (ui: any) => {
   return render(ui, { wrapper: AllTheProviders });
 };
+
+// Each test re-mounts the full RulesList and awaits multiple findBy* queries; the global
+// RTL asyncUtilTimeout (4500 ms) alone can exceed Jest's default 5000 ms budget under worker
+// contention. Raise the file-wide budget so every render-heavy test has headroom.
+jest.setTimeout(15_000);
 
 describe('Update Api Key', () => {
   const addSuccess = jest.fn();
@@ -225,7 +250,10 @@ describe('Update Api Key', () => {
     expect(screen.getByTestId('collapsedActionPanel')).toBeInTheDocument();
 
     expect(screen.queryByText('Update API key')).toBeInTheDocument();
-  });
+    // Mounting the full RulesList and awaiting two findBy* queries can exceed the
+    // default 5000 ms Jest budget under worker contention (the global RTL
+    // asyncUtilTimeout alone is 4500 ms), so give this render-heavy test more headroom.
+  }, 15000);
 });
 
 describe('rules_list component empty', () => {
@@ -293,6 +321,74 @@ describe('rules_list component empty', () => {
     fireEvent.click(createRuleEl);
 
     expect(await screen.findByTestId('ruleTypeModal')).toBeInTheDocument();
+  });
+
+  describe('empty-state create from template', () => {
+    const templateId = 'empty-state-template';
+    const mockTemplatesResponse = {
+      page: 1,
+      per_page: 10,
+      total: 1,
+      data: [
+        {
+          id: templateId,
+          name: 'Empty state template',
+          tags: [],
+          rule_type_id: '.es-query',
+        },
+      ],
+    };
+
+    const selectEmptyStateTemplate = async () => {
+      fireEvent.click(await screen.findByTestId('createFirstRuleButton'));
+      expect(await screen.findByTestId('ruleTypeModal')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole('button', { name: /^Template$/ }));
+      fireEvent.click(await screen.findByTestId(`${templateId}-SelectOption`));
+    };
+
+    beforeEach(() => {
+      window.IntersectionObserver = jest.fn().mockReturnValue({
+        observe: jest.fn(),
+        unobserve: jest.fn(),
+        disconnect: jest.fn(),
+      });
+      (useKibanaMock().services.http.get as jest.Mock).mockImplementation(async (path: string) => {
+        if (path.includes('rule_template/_find')) {
+          return mockTemplatesResponse;
+        }
+        return {};
+      });
+    });
+
+    it('uses navigateToCreateRuleFromTemplateForm instead of the management app', async () => {
+      const navigateToCreateRuleFromTemplateForm = jest.fn();
+      const { navigateToApp } = useKibanaMock().services.application;
+
+      renderWithProviders(
+        <RulesList
+          showCreateRuleButtonInPrompt
+          navigateToCreateRuleFromTemplateForm={navigateToCreateRuleFromTemplateForm}
+        />
+      );
+
+      await selectEmptyStateTemplate();
+
+      expect(navigateToCreateRuleFromTemplateForm).toHaveBeenCalledWith(templateId);
+      expect(navigateToApp).not.toHaveBeenCalled();
+    });
+
+    it('falls back to the management app when navigateToCreateRuleFromTemplateForm is omitted', async () => {
+      const { navigateToApp } = useKibanaMock().services.application;
+
+      renderWithProviders(<RulesList showCreateRuleButtonInPrompt />);
+
+      await selectEmptyStateTemplate();
+
+      expect(navigateToApp).toHaveBeenCalledWith('management', {
+        path: `insightsAndAlerting/triggersActions/create/template/${templateId}`,
+      });
+    });
   });
 });
 
@@ -363,6 +459,14 @@ describe('rules_list ', () => {
     jest.clearAllMocks();
     queryClient.clear();
     cleanup();
+  });
+
+  it('sets the CPS picker access to DISABLED', () => {
+    renderWithProviders(<RulesList />);
+    expect(mockUseRouteBasedCpsPickerAccess).toHaveBeenCalledWith(
+      ProjectRoutingAccess.DISABLED,
+      expect.any(Object)
+    );
   });
 
   it('can filter by rule states', async () => {
@@ -517,7 +621,7 @@ describe('rules_list ', () => {
       fireEvent.mouseOver(await within(durationColumnHeader).findByText('Info'));
 
       await waitFor(() =>
-        expect(screen.getByRole('tooltip')).toHaveTextContent(
+        expect(screen.getByRole('tooltip', { hidden: true })).toHaveTextContent(
           'The length of time it took for the rule to run (mm:ss).'
         )
       );
@@ -645,7 +749,7 @@ describe('rules_list ', () => {
 
     it('Select P95', async () => {
       renderWithProviders(<RulesList />);
-      const percentilePopoverButton = await screen.findByTitle('select percentile');
+      const percentilePopoverButton = await screen.findByLabelText('select percentile');
       fireEvent.click(percentilePopoverButton);
 
       await screen.findAllByTestId('percentileSelectablePopover-selectable');
@@ -675,7 +779,7 @@ describe('rules_list ', () => {
 
     it('Click column to sort by P95', async () => {
       renderWithProviders(<RulesList />);
-      const percentilePopoverButton = await screen.findByTitle('select percentile');
+      const percentilePopoverButton = await screen.findByLabelText('select percentile');
       fireEvent.click(percentilePopoverButton);
       await screen.findAllByTestId('percentileSelectablePopover-selectable');
       const options = screen.getAllByRole('option');
@@ -959,7 +1063,7 @@ describe('internally managed rule', () => {
     expect(screen.queryByTestId('deleteActionHoverButton')).toBeNull();
     expect(screen.queryByTestId('rulesListNotifyBadge-unsnoozed')).toBeNull();
 
-    userEvent.click(await screen.findByTestId('selectActionButton'));
+    await userEvent.click(await screen.findByTestId('selectActionButton'));
     expect(await screen.findByTestId('updateApiKeyInternallyManaged')).toBeInTheDocument();
     expect(screen.queryByTestId('snoozeButton')).toBeNull();
     expect(screen.queryByTestId('disableButton')).toBeNull();
@@ -1440,6 +1544,7 @@ describe('MaintenanceWindowsMock', () => {
     };
     useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;
     useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
+    useKibanaMock().services.licensing.license$ = license$;
   });
 
   afterEach(() => {
@@ -1488,5 +1593,101 @@ describe('MaintenanceWindowsMock', () => {
     ).toBeInTheDocument();
 
     expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('UIAM API Key Banner', () => {
+  beforeEach(() => {
+    fetchActiveMaintenanceWindowsMock.mockResolvedValue([]);
+    loadRulesWithKueryFilter.mockResolvedValue({
+      page: 1,
+      perPage: 10000,
+      total: 0,
+      data: mockedRulesData,
+    });
+    loadActionTypes.mockResolvedValue([]);
+    getRuleTypes.mockResolvedValue([ruleTypeFromApi]);
+    loadAllActions.mockResolvedValue([]);
+    loadRuleAggregationsWithKueryFilter.mockResolvedValue({});
+    loadRuleTags.mockResolvedValue({
+      data: [],
+      page: 1,
+      perPage: 50,
+      total: 0,
+    });
+
+    const actionTypeRegistry = actionTypeRegistryMock.create();
+    const ruleTypeRegistry = ruleTypeRegistryMock.create();
+
+    ruleTypeRegistry.list.mockReturnValue([ruleType]);
+    actionTypeRegistry.list.mockReturnValue([]);
+    useKibanaMock().services.application.capabilities = {
+      ...useKibanaMock().services.application.capabilities,
+      [MAINTENANCE_WINDOW_FEATURE_ID]: {
+        save: true,
+        show: true,
+      },
+    };
+    useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;
+    useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    queryClient.clear();
+    cleanup();
+  });
+
+  it('renders UIAM API key banner when isServerless is true and apiKeyType is uiam', async () => {
+    useKibanaMock().services.isServerless = true;
+    jest.mocked(fetchUiConfig).mockResolvedValue({
+      isUsingSecurity: true,
+      minimumScheduleInterval: { value: '1m', enforce: false },
+      apiKeyType: 'uiam',
+    });
+
+    renderWithProviders(<RulesList />);
+
+    expect(await screen.findByTestId('rulesListUiamApiKeyBanner')).toBeInTheDocument();
+  });
+
+  it('does not render UIAM API key banner when isServerless is false', async () => {
+    useKibanaMock().services.isServerless = false;
+    jest.mocked(fetchUiConfig).mockResolvedValue({
+      isUsingSecurity: true,
+      minimumScheduleInterval: { value: '1m', enforce: false },
+      apiKeyType: 'uiam',
+    });
+
+    renderWithProviders(<RulesList />);
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('rulesListUiamApiKeyBanner')).not.toBeInTheDocument();
+    });
+  });
+
+  it('does not render UIAM API key banner when apiKeyType is not uiam', async () => {
+    useKibanaMock().services.isServerless = true;
+
+    renderWithProviders(<RulesList />);
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('rulesListUiamApiKeyBanner')).not.toBeInTheDocument();
+    });
+  });
+
+  it('displays correct banner content when rendered', async () => {
+    useKibanaMock().services.isServerless = true;
+    jest.mocked(fetchUiConfig).mockResolvedValue({
+      isUsingSecurity: true,
+      minimumScheduleInterval: { value: '1m', enforce: false },
+      apiKeyType: 'uiam',
+    });
+
+    renderWithProviders(<RulesList />);
+
+    const banner = await screen.findByTestId('rulesListUiamApiKeyBanner');
+    expect(banner).toBeInTheDocument();
+    expect(screen.getByText('UIAM API key rollout for rules')).toBeInTheDocument();
   });
 });

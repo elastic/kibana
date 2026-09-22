@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
 import { mapValues } from 'lodash';
 
 export enum ApmFeatureFlagName {
@@ -14,7 +13,6 @@ export enum ApmFeatureFlagName {
   InfrastructureTabAvailable = 'infrastructureTabAvailable',
   InfraUiAvailable = 'infraUiAvailable',
   MigrationToFleetAvailable = 'migrationToFleetAvailable',
-  ServiceMapUseReactFlow = 'serviceMapUseReactFlow',
   SourcemapApiAvailable = 'sourcemapApiAvailable',
   StorageExplorerAvailable = 'storageExplorerAvailable',
   RuleFormV2Enabled = 'ruleFormV2Enabled',
@@ -23,39 +21,27 @@ export enum ApmFeatureFlagName {
 const apmFeatureFlagMap = {
   [ApmFeatureFlagName.AgentConfigurationAvailable]: {
     default: true,
-    type: t.boolean,
   },
   [ApmFeatureFlagName.ConfigurableIndicesAvailable]: {
     default: true,
-    type: t.boolean,
   },
   [ApmFeatureFlagName.InfrastructureTabAvailable]: {
     default: true,
-    type: t.boolean,
   },
   [ApmFeatureFlagName.InfraUiAvailable]: {
     default: true,
-    type: t.boolean,
   },
   [ApmFeatureFlagName.MigrationToFleetAvailable]: {
     default: true,
-    type: t.boolean,
-  },
-  [ApmFeatureFlagName.ServiceMapUseReactFlow]: {
-    default: false,
-    type: t.boolean,
   },
   [ApmFeatureFlagName.SourcemapApiAvailable]: {
     default: true,
-    type: t.boolean,
   },
   [ApmFeatureFlagName.StorageExplorerAvailable]: {
     default: true,
-    type: t.boolean,
   },
   [ApmFeatureFlagName.RuleFormV2Enabled]: {
     default: false,
-    type: t.boolean,
   },
 };
 
@@ -65,9 +51,8 @@ export type ApmFeatureFlags = {
   [TApmFeatureFlagName in keyof ApmFeatureFlagMap]: ValueOfApmFeatureFlag<TApmFeatureFlagName>;
 };
 
-export type ValueOfApmFeatureFlag<TApmFeatureFlagName extends ApmFeatureFlagName> = t.OutputOf<
-  ApmFeatureFlagMap[TApmFeatureFlagName]['type']
->;
+export type ValueOfApmFeatureFlag<TApmFeatureFlagName extends ApmFeatureFlagName> =
+  ApmFeatureFlagMap[TApmFeatureFlagName]['default'];
 
 export function getApmFeatureFlags(): ApmFeatureFlags {
   return mapValues(apmFeatureFlagMap, (value, key) => value.default);

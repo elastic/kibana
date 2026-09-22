@@ -22,11 +22,13 @@ import type { AssetDetailsLocator } from '@kbn/observability-shared-plugin/commo
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { Environment } from '../../../../common/environment_rt';
+import { getTimestampUs } from '../../../../common/utils/get_timestamp_us';
 import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import type { SectionRecord, Action } from './sections_helper';
 import { getNonEmptySections } from './sections_helper';
 import { HOST_NAME, TRACE_ID } from '../../../../common/es_fields/apm';
 import type { ApmRouter } from '../../routing/apm_route_config';
+import { getPodMetricsLink } from './pod_metrics_utils';
 
 function getInfraMetricsQuery(transaction: Transaction) {
   const timestamp = new Date(transaction['@timestamp']).getTime();
@@ -52,6 +54,8 @@ export const getSections = ({
   logsLocator,
   dataViewId,
   assetDetailsLocator,
+  discoverLocator,
+  metricsIndices,
 }: {
   transaction?: Transaction;
   basePath: IBasePath;
@@ -66,6 +70,8 @@ export const getSections = ({
   logsLocator: LocatorPublic<LogsLocatorParams>;
   dataViewId?: string;
   assetDetailsLocator?: AssetDetailsLocator;
+  discoverLocator?: LocatorPublic<SerializableRecord>;
+  metricsIndices?: string;
 }) => {
   if (!transaction) return [];
 
@@ -73,7 +79,7 @@ export const getSections = ({
   const podId = transaction.kubernetes?.pod?.uid;
   const containerId = transaction.container?.id;
 
-  const time = Math.round(transaction.timestamp.us / 1000);
+  const time = Math.round(getTimestampUs(transaction) / 1000);
   const infraMetricsQuery = getInfraMetricsQuery(transaction);
 
   const uptimeLink = uptimeLocator?.getRedirectUrl(
@@ -115,9 +121,18 @@ export const getSections = ({
     timeRange: getTimeRange(time),
   });
 
-  const hasPodLink = !!podId && infraLinksAvailable && !!assetDetailsLocator;
   const hasContainerLink = !!containerId && infraLinksAvailable && !!assetDetailsLocator;
   const hasHostLink = !!hostName && infraLinksAvailable && !!assetDetailsLocator;
+
+  const podMetricsLink = getPodMetricsLink({
+    podId,
+    agentName: transaction.agent?.name,
+    infraMetricsQuery,
+    assetDetailsLocator,
+    discoverLocator,
+    infraLinksAvailable,
+    metricsIndices,
+  });
 
   const podActions: Action[] = [
     {
@@ -133,16 +148,8 @@ export const getSections = ({
       label: i18n.translate('xpack.apm.transactionActionMenu.showPodMetricsLinkLabel', {
         defaultMessage: 'Pod metrics',
       }),
-      href: hasPodLink
-        ? assetDetailsLocator.getRedirectUrl({
-            entityId: podId,
-            entityType: 'pod',
-            assetDetails: {
-              dateRange: infraMetricsQuery,
-            },
-          })
-        : undefined,
-      condition: hasPodLink,
+      href: podMetricsLink,
+      condition: !!podMetricsLink,
     },
   ];
 

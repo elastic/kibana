@@ -116,25 +116,47 @@ describe('useCheckResourcesStep', () => {
     expect(getMissingResources).not.toHaveBeenCalled();
   });
 
-  it('returns reference sets content', () => {
-    const getMissingResources = jest.fn();
-    mockUseGetMissingResources.mockReturnValue({
-      getMissingResources,
-      isLoading: false,
-      error: null,
-    });
+  it.each([
+    [
+      MigrationSource.SPLUNK,
+      'Check for macros and lookups',
+      'For best translation results, we will review the data for macros and lookups. If found, we will ask you to upload them next.',
+    ],
+    [
+      MigrationSource.QRADAR,
+      'Check for reference sets',
+      'For best translation results, we will review the data for reference sets. If found, we will ask you to upload them next.',
+    ],
+    [
+      MigrationSource.SENTINEL,
+      'Check for watchlists',
+      'For best translation results, we will review the data for watchlists. If found, we will ask you to upload them next.',
+    ],
+  ])(
+    'returns check resources copy for %s',
+    (migrationSource, expectedTitle, expectedDescription) => {
+      const getMissingResources = jest.fn();
+      mockUseGetMissingResources.mockReturnValue({
+        getMissingResources,
+        isLoading: false,
+        error: null,
+      });
 
-    const { result } = renderHook(
-      () =>
-        useCheckResourcesStep({
-          status: 'incomplete',
-          migrationStats: mockMigrationStats,
-          onMissingResourcesFetched: jest.fn(),
-          migrationSource: MigrationSource.QRADAR,
-        }),
-      { wrapper: TestProviders }
-    );
+      const { result } = renderHook(
+        () =>
+          useCheckResourcesStep({
+            status: 'incomplete',
+            migrationStats: mockMigrationStats,
+            onMissingResourcesFetched: jest.fn(),
+            migrationSource,
+          }),
+        { wrapper: TestProviders }
+      );
 
-    expect(result.current.title).toEqual('Check for reference sets');
-  });
+      expect(result.current.title).toEqual(expectedTitle);
+
+      const { getByTestId } = render(result.current.children as React.ReactElement);
+      expect(getByTestId('checkResourcesDescription')).toHaveTextContent(expectedDescription);
+    }
+  );
 });

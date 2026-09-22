@@ -40,7 +40,7 @@
  * ```
  * node scripts/synthtrace \
  *   src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_index_info/field_discovery.ts \
- *   --from "now-15m" --to "now" --clean --workers=1
+ *   --from "now-15m" --to "now" --clean
  * ```
  */
 

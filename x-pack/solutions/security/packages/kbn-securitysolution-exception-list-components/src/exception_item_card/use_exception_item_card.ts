@@ -60,7 +60,7 @@ export const useExceptionItemCard = ({
     () => [
       {
         key: 'edit',
-        icon: 'controlsHorizontal',
+        icon: 'controls',
         label: editActionLabel || i18n.exceptionItemCardEditButton(listType),
         onClick: handleEdit,
       },

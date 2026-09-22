@@ -6,13 +6,35 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { ILicense } from '@kbn/licensing-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import type { RecommendedField, RecommendedQuery } from './extensions_autocomplete_types';
-import type { ESQLSourceResult, IndexAutocompleteItem } from './sources_autocomplete_types';
+import type {
+  ESQLSourceResult,
+  EsqlDatasetsResult,
+  EsqlViewsResult,
+  IndexAutocompleteItem,
+} from './sources_autocomplete_types';
 import type { ESQLControlVariable } from './variables_types';
 import type { InferenceEndpointsAutocompleteResult } from './inference_endpoint_autocomplete_types';
+
+export interface ESQLControlsContext {
+  /** The editor supports the creation of controls,
+   * This flag should be set to true to display the "Create control" suggestion
+   **/
+  supportsControls: boolean;
+  /** Function to be called after the control creation **/
+  onSaveControl: (controlState: Record<string, unknown>, updatedQuery: string) => Promise<void>;
+  /** Function to be called after cancelling the control creation **/
+  onCancelControl: () => void;
+}
+
+export interface ESQLQueryStats {
+  /** Duration of the last query in milliseconds */
+  durationInMs?: string;
+  /** Total number of documents queried in the last query */
+  totalDocumentsProcessed?: number;
+}
 
 /** @internal **/
 type CallbackFn<Options = {}, Result = string> = (ctx?: Options) => Result[] | Promise<Result[]>;
@@ -25,6 +47,7 @@ export const esqlFieldTypes: readonly string[] = [
   'boolean',
   'date',
   'double',
+  'double_range',
   'ip',
   'keyword',
   'integer',
@@ -47,6 +70,7 @@ export const esqlFieldTypes: readonly string[] = [
   'histogram',
   'exponential_histogram',
   'tdigest',
+  'flattened',
 ] as const;
 
 export type EsqlFieldType = (typeof esqlFieldTypes)[number];
@@ -55,7 +79,17 @@ export type EsqlFieldType = (typeof esqlFieldTypes)[number];
  *  Partial fields metadata client, used to avoid circular dependency with @kbn/monaco
  **/
 export interface PartialFieldsMetadataClient {
-  find: ({ fieldNames, attributes }: { fieldNames?: string[]; attributes: string[] }) => Promise<{
+  find: ({
+    fieldNames,
+    attributes,
+    streamNames,
+    source,
+  }: {
+    fieldNames?: string[];
+    attributes: string[];
+    streamNames?: string[];
+    source?: string[];
+  }) => Promise<{
     fields: Record<
       string,
       {
@@ -63,6 +97,10 @@ export interface PartialFieldsMetadataClient {
         source: string;
         description?: string;
       }
+    >;
+    streamFields: Record<
+      string,
+      Record<string, { type: string; source: string; description?: string }>
     >;
   }>;
 }
@@ -73,6 +111,7 @@ export interface ESQLFieldWithMetadata {
   userDefined: false;
   isEcs?: boolean;
   hasConflict?: boolean;
+  originalTypes?: string[];
   isUnmappedField?: boolean;
   metadata?: {
     description?: string;
@@ -96,6 +135,7 @@ interface KQLInESQLSuggestion {
   label: string;
   kind: KQLInESQLSuggestionType;
   detail?: string;
+  range: { start: number; end: number };
 }
 
 export interface ESQLCallbacks {
@@ -113,18 +153,20 @@ export interface ESQLCallbacks {
     forceRefresh?: boolean;
   }) => Promise<{ indices: IndexAutocompleteItem[] }>;
   getTimeseriesIndices?: () => Promise<{ indices: IndexAutocompleteItem[] }>;
+  getViews?: () => Promise<EsqlViewsResult>;
+  getDatasets?: () => Promise<EsqlDatasetsResult>;
   getEditorExtensions?: (queryString: string) => Promise<{
     recommendedQueries: RecommendedQuery[];
     recommendedFields: RecommendedField[];
   }>;
-  getInferenceEndpoints?: (
-    taskType: InferenceTaskType
-  ) => Promise<InferenceEndpointsAutocompleteResult>;
+  getInferenceEndpoints?: (taskType: string) => Promise<InferenceEndpointsAutocompleteResult>;
   getLicense?: () => Promise<Pick<ILicense, 'hasAtLeast'> | undefined>;
   getActiveProduct?: () => PricingProduct | undefined;
   getHistoryStarredItems?: () => Promise<string[]>;
   canCreateLookupIndex?: (indexName: string) => Promise<boolean>;
   isServerless?: boolean;
+  /** Enables the "Browse indices" suggestion and command integration. */
+  canSuggestResourceBrowser?: () => Promise<boolean>;
   getKqlSuggestions?: (
     kqlQuery: string,
     cursorPositionInKql: number

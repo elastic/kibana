@@ -1,0 +1,298 @@
+name: Synthetics Scalability Test (Dev)
+description: Dev version - reuses existing cluster, starts at Forge step
+
+params:
+  - name: github_token
+    description: GitHub authentication token
+    type: exec
+    command: gh
+    args:
+      - auth
+      - token
+
+  - name: github_username
+    description: GitHub Username
+    type: exec
+    command: gh
+    args:
+      - api
+      - user
+      - -q
+      - ".login"
+
+  - name: github_email
+    description: GitHub email
+    type: exec
+    command: git
+    args:
+      - config
+      - user.email
+
+  - name: gcp_app_credentials
+    description: GCP application default credentials JSON
+    type: automation
+    automation: gcp_auth
+
+  - name: cluster_name
+    description: "Existing cluster name (e.g. ensemble-ess-xxxxx)"
+    type: string
+
+  - name: http
+    description: HTTP monitors to create
+    type: string
+
+  - name: tcp
+    description: TCP monitors to create
+    type: string
+
+  - name: icmp
+    description: ICMP monitors to create
+    type: string
+
+  - name: browser
+    description: Browser monitors to create
+    type: string
+
+steps:
+  - name: Get existing cluster
+    id: cluster
+    type: providers.oblt_cli.search_cluster
+    with:
+      gcp_app_credentials: ".secrets/credentials.json"
+      github_username: "{{ param.github_username }}"
+      github_email: "{{ param.github_email }}"
+      github_token: "{{ param.github_token }}"
+      cluster_name: "{{ param.cluster_name }}"
+    resources:
+      - type: file
+        content: "{{ param.gcp_app_credentials }}"
+        filename: ".secrets/credentials.json"
+
+  - name: Cleanup existing agent container
+    type: providers.shell.run
+    with:
+      script_file: cleanup_existing_agent.sh
+    resources:
+      - type: file
+        filename: cleanup_existing_agent.sh
+        content: |
+          #!/bin/bash
+          echo "Removing any existing synthetics-agent container..."
+          docker rm -f synthetics-agent 2>/dev/null || true
+          echo "Agent container cleanup complete"
+
+  - name: Cleanup existing synthetics resources
+    type: providers.shell.run
+    with:
+      script_file: cleanup_existing_synthetics.sh
+    resources:
+      - type: env
+        variables:
+          KIBANA_URL: "{{ step.cluster.data.kibana_url }}"
+          KIBANA_USERNAME: "{{ step.cluster.data.kibana_username }}"
+          KIBANA_PASSWORD: "{{ step.cluster.data.kibana_password }}"
+          FORGE_ACTION: "cleanup"
+      - type: file
+        filename: cleanup_existing_synthetics.sh
+        content: |
+          #!/bin/bash
+
+          PREFIX="scalability-test"
+          POLICY_NAME="${PREFIX}-policy"
+          LOCATION_NAME="${PREFIX}-location"
+          SPACE_ID="${PREFIX}"
+
+          echo "=== Cleanup resources with prefix: $PREFIX ==="
+
+          echo ""
+          echo "Step 1: Run forge cleanup (monitors)"
+          node /Users/faisal/elastic/kibana/x-pack/scripts/synthetics_forge.js || true
+
+          echo ""
+          echo "Step 2: Unenroll and delete agents from $POLICY_NAME"
+          POLICY_ID=$(curl -s -u "$KIBANA_USERNAME:$KIBANA_PASSWORD" \
+            "$KIBANA_URL/api/fleet/agent_policies" \
+            -H "kbn-xsrf: true" | jq -r ".items[] | select(.name == \"$POLICY_NAME\") | .id")
+
+          if [ -n "$POLICY_ID" ] && [ "$POLICY_ID" != "null" ]; then
+            echo "  Found policy: $POLICY_ID"
+            AGENT_IDS=$(curl -s -u "$KIBANA_USERNAME:$KIBANA_PASSWORD" \
+              "$KIBANA_URL/api/fleet/agents?kuery=policy_id:$POLICY_ID" \
+              -H "kbn-xsrf: true" | jq -r '.items[].id')
+
+            for AGENT_ID in $AGENT_IDS; do
+              echo "  Deleting agent: $AGENT_ID"
+              curl -s -X POST -u "$KIBANA_USERNAME:$KIBANA_PASSWORD" \
+                "$KIBANA_URL/api/fleet/agents/$AGENT_ID/unenroll" \
+                -H "kbn-xsrf: true" -H "Content-Type: application/json" \
+                -d '{"force": true}' > /dev/null
+              sleep 1
+              curl -s -X DELETE -u "$KIBANA_USERNAME:$KIBANA_PASSWORD" \
+                "$KIBANA_URL/api/fleet/agents/$AGENT_ID" \
+                -H "kbn-xsrf: true" > /dev/null
+            done
+          else
+            echo "  No policy found"
+          fi
+
+          echo ""
+          echo "Step 3: Delete private location $LOCATION_NAME"
+          LOCATION_ID=$(curl -s -u "$KIBANA_USERNAME:$KIBANA_PASSWORD" \
+            "$KIBANA_URL/s/$SPACE_ID/api/synthetics/private_locations" \
+            -H "kbn-xsrf: true" | jq -r ".[] | select(.label == \"$LOCATION_NAME\") | .id")
+
+          if [ -n "$LOCATION_ID" ] && [ "$LOCATION_ID" != "null" ]; then
+            echo "  Deleting: $LOCATION_ID"
+            curl -s -X DELETE -u "$KIBANA_USERNAME:$KIBANA_PASSWORD" \
+              "$KIBANA_URL/s/$SPACE_ID/api/synthetics/private_locations/$LOCATION_ID" \
+              -H "kbn-xsrf: true" > /dev/null
+          else
+            echo "  No location found"
+          fi
+
+          echo ""
+          echo "Step 4: Delete agent policy $POLICY_NAME"
+          if [ -n "$POLICY_ID" ] && [ "$POLICY_ID" != "null" ]; then
+            echo "  Deleting: $POLICY_ID"
+            curl -s -X POST -u "$KIBANA_USERNAME:$KIBANA_PASSWORD" \
+              "$KIBANA_URL/api/fleet/agent_policies/delete" \
+              -H "kbn-xsrf: true" -H "Content-Type: application/json" \
+              -d "{\"agentPolicyId\": \"$POLICY_ID\", \"force\": true}" > /dev/null
+          else
+            echo "  No policy to delete"
+          fi
+
+          echo ""
+          echo "=== Cleanup complete ==="
+
+  - name: Run Synthetics Forge
+    id: run_forge
+    type: providers.shell.run
+    with:
+      script_file: run_forge.sh
+    resources:
+      - type: env
+        variables:
+          KIBANA_URL: "{{ step.cluster.data.kibana_url }}"
+          KIBANA_USERNAME: "{{ step.cluster.data.kibana_username }}"
+          KIBANA_PASSWORD: "{{ step.cluster.data.kibana_password }}"
+          HTTP: "{{ param.http }}"
+          TCP: "{{ param.tcp }}"
+          ICMP: "{{ param.icmp }}"
+          BROWSER: "{{ param.browser }}"
+          FORGE_ACTION: "create"
+          OUTPUT_FILE: "/tmp/forge_output.json"
+      - type: file
+        filename: run_forge.sh
+        content: |
+          #!/bin/bash
+          set -e
+          echo "KIBANA_URL: $KIBANA_URL"
+          echo "KIBANA_USERNAME: $KIBANA_USERNAME"
+          echo "KIBANA_PASSWORD: $KIBANA_PASSWORD"
+          node /Users/faisal/elastic/kibana/x-pack/scripts/synthetics_forge.js
+          echo "Forge output:"
+          cat $OUTPUT_FILE
+
+  - name: Wait for enrollment token to be active
+    type: builtin.wait
+    with:
+      time: 10
+
+  - name: Deploy Elastic Agent
+    id: deploy_agent
+    type: providers.shell.run
+    with:
+      script_file: deploy_agent.sh
+    resources:
+      - type: env
+        variables:
+          FLEET_URL: "{{ step.cluster.data.fleet_url }}"
+          OUTPUT_FILE: "/tmp/forge_output.json"
+      - type: file
+        filename: deploy_agent.sh
+        content: |
+          #!/bin/bash
+          set -e
+
+          AGENT_VERSION="8.17.1"
+          ENROLLMENT_TOKEN=$(jq -r '.enrollmentToken' $OUTPUT_FILE)
+
+          echo "Fleet URL: $FLEET_URL"
+          echo "Agent Version: $AGENT_VERSION"
+          echo "Enrollment Token: $ENROLLMENT_TOKEN"
+
+          docker rm -f synthetics-agent 2>/dev/null || true
+
+          # Use elastic-agent-complete for browser monitor support (includes Chromium/Playwright)
+          docker run -d \
+            --name synthetics-agent \
+            -e FLEET_URL="$FLEET_URL" \
+            -e FLEET_ENROLLMENT_TOKEN="$ENROLLMENT_TOKEN" \
+            -e FLEET_ENROLL=1 \
+            -e FLEET_INSECURE=true \
+            docker.elastic.co/beats/elastic-agent-complete:$AGENT_VERSION
+
+          sleep 15
+          echo "Elastic Agent container started"
+          docker logs synthetics-agent 2>&1 | grep -i "enroll\|success" | head -5 || true
+
+  - name: Wait for agent enrollment
+    type: builtin.wait
+    with:
+      time: 20
+
+  - name: Verify agent health
+    type: providers.shell.run
+    with:
+      script_file: verify_agent.sh
+    resources:
+      - type: env
+        variables:
+          KIBANA_URL: "{{ step.cluster.data.kibana_url }}"
+          KIBANA_USERNAME: "{{ step.cluster.data.kibana_username }}"
+          KIBANA_PASSWORD: "{{ step.cluster.data.kibana_password }}"
+      - type: file
+        filename: verify_agent.sh
+        content: |
+          #!/bin/bash
+          echo "Agent enrollment status:"
+          docker logs synthetics-agent 2>&1 | grep -i "enroll" | tail -3 || true
+          echo ""
+          AGENT_COUNT=$(curl -s -u "$KIBANA_USERNAME:$KIBANA_PASSWORD" \
+            "$KIBANA_URL/api/fleet/agents" -H "kbn-xsrf: true" | jq '.items | length')
+          echo "Agents enrolled: $AGENT_COUNT"
+
+  # - name: Cleanup synthetics resources
+  #   type: providers.shell.run
+  #   when: always
+  #   with:
+  #     script_file: cleanup_synthetics.sh
+  #   resources:
+  #     - type: env
+  #       variables:
+  #         KIBANA_URL: "{{ step.cluster.data.kibana_url }}"
+  #         KIBANA_USERNAME: "{{ step.cluster.data.kibana_username }}"
+  #         KIBANA_PASSWORD: "{{ step.cluster.data.kibana_password }}"
+  #         FORGE_ACTION: "cleanup"
+  #     - type: file
+  #       filename: cleanup_synthetics.sh
+  #       content: |
+  #         #!/bin/bash
+  #         echo "Cleaning up synthetics resources..."
+  #         node /Users/faisal/elastic/kibana/x-pack/scripts/synthetics_forge.js || true
+  #         echo "Synthetics cleanup complete"
+
+  # - name: Cleanup agent container
+  #   type: providers.shell.run
+  #   when: always
+  #   with:
+  #     script_file: cleanup_agent.sh
+  #   resources:
+  #     - type: file
+  #       filename: cleanup_agent.sh
+  #       content: |
+  #         #!/bin/bash
+  #         echo "Stopping and removing Elastic Agent container..."
+  #         docker rm -f synthetics-agent 2>/dev/null || true
+  #         echo "Agent cleanup complete"

@@ -10,6 +10,7 @@ import { isEmpty } from 'lodash';
 import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
+  ActionType,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 import type { ObservabilityAIAssistantService } from '@kbn/observability-ai-assistant-plugin/public';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
@@ -23,9 +24,15 @@ import {
   STATUS_REQUIRED,
 } from './translations';
 
-export function getConnectorType(
-  service: ObservabilityAIAssistantService
-): ConnectorTypeModel<unknown, {}, ObsAIAssistantActionParams> {
+export function getConnectorType({
+  service,
+  getHideInUi,
+  isDisabled,
+}: {
+  service: ObservabilityAIAssistantService;
+  getHideInUi: (actionTypes: ActionType[]) => boolean;
+  isDisabled?: boolean;
+}): ConnectorTypeModel<unknown, {}, ObsAIAssistantActionParams> {
   return {
     id: OBSERVABILITY_AI_ASSISTANT_CONNECTOR_ID,
     modalWidth: 675,
@@ -37,6 +44,16 @@ export function getConnectorType(
     validateParams: async (
       actionParams: ObsAIAssistantActionParams
     ): Promise<GenericValidationResult<ObsAIAssistantActionParams>> => {
+      if (isDisabled) {
+        return {
+          errors: {
+            connector: [],
+            message: [],
+            prompts: [],
+          },
+        };
+      }
+
       const validatePrompt = (prompt: { message: string; statuses: string[] }): string[] => {
         const errors: string[] = [];
 
@@ -60,9 +77,12 @@ export function getConnectorType(
     },
     actionParamsFields: lazy(() =>
       import('./ai_assistant_params').then(({ default: ActionParamsFields }) => ({
-        default: (props) => <ActionParamsFields {...props} service={service} />,
+        default: (props) => (
+          <ActionParamsFields {...props} service={service} isDisabled={isDisabled} />
+        ),
       }))
     ),
     actionConnectorFields: null,
+    getHideInUi,
   };
 }

@@ -27,6 +27,9 @@ describe('createUICapabilities', () => {
         "delete": Array [
           "delete_cases",
         ],
+        "manageTemplates": Array [
+          "cases_manage_templates",
+        ],
         "read": Array [
           "read_cases",
           "cases_connectors",

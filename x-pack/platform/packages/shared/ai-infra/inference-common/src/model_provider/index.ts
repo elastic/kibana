@@ -25,10 +25,14 @@ export enum ModelFamily {
   GPT = 'GPT',
   Claude = 'Claude',
   Gemini = 'Gemini',
+  Unknown = 'Unknown',
 }
 
 export interface Model {
   provider: ModelProvider;
   family: ModelFamily;
   id?: string;
+  creator?: string;
+  name?: string;
+  platform?: ModelPlatform;
 }

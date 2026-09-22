@@ -9,7 +9,7 @@ import React, { lazy } from 'react';
 import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import type {
-  ChromeBreadcrumb,
+  ChromeStart,
   CoreStart,
   I18nStart,
   ScopedHistory,
@@ -22,6 +22,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import type { PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
@@ -36,13 +37,19 @@ import {
   editRuleRoute,
   createRuleFromTemplateRoute,
 } from '@kbn/rule-data-utils';
+import type { LocatorHost } from '@kbn/rule-data-utils';
 import { QueryClientProvider } from '@kbn/react-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { CasesService } from '@kbn/response-ops-alerts-table/types';
+import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
+import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
+import type { AppHeaderTab } from '@kbn/app-header';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 import type { ActionTypeRegistryContract, RuleTypeRegistryContract } from '../types';
 import type { Section } from './constants';
@@ -62,6 +69,8 @@ const RuleFormRoute = lazy(() => import('./sections/rule_form/rule_form_route'))
 
 export interface TriggersAndActionsUiServices extends CoreStart {
   actions: ActionsPublicPluginSetup;
+  getCasesPlugin?: () => Promise<CasesService | undefined>;
+  security: CoreStart['security'] & SecurityPluginStart;
   cloud?: CloudSetup;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
@@ -71,7 +80,8 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   spaces?: SpacesPluginStart;
   storage?: Storage;
   isCloud: boolean;
-  setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
+  setBreadcrumbs: ChromeStart['setBreadcrumbs'];
+  tabs?: AppHeaderTab[];
   actionTypeRegistry: ActionTypeRegistryContract;
   ruleTypeRegistry: RuleTypeRegistryContract;
   history: ScopedHistory;
@@ -80,6 +90,7 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   i18n: I18nStart;
   theme: ThemeServiceStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   licensing: LicensingPluginStart;
   expressions: ExpressionsStart;
   isServerless: boolean;
@@ -89,6 +100,10 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   share?: SharePluginStart;
   contentManagement?: ContentManagementPublicStart;
   uiActions?: UiActionsStart;
+  cps?: CPSPluginStart;
+  inspector?: InspectorStart;
+  hideListBackButton?: boolean;
+  host?: LocatorHost;
 }
 
 export const renderApp = (deps: TriggersAndActionsUiServices) => {
@@ -125,7 +140,10 @@ export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) =
 
   return (
     <ConnectorProvider
-      value={{ services: { validateEmailAddresses, enabledEmailServices }, isServerless }}
+      value={{
+        services: { validateEmailAddresses, enabledEmailServices },
+        isServerless,
+      }}
     >
       <Routes>
         <Route

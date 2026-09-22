@@ -12,7 +12,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import useObservable from 'react-use/lib/useObservable';
 import classNames from 'classnames';
 import deepEqual from 'fast-deep-equal';
-import { EMPTY, delay, mergeMap, of } from 'rxjs';
+import { EMPTY, delay, distinctUntilChanged, mergeMap, of } from 'rxjs';
 import { map } from 'rxjs';
 import { throttle, debounce } from 'lodash';
 
@@ -25,7 +25,13 @@ import {
   isOfAggregateQueryType,
   getLanguageDisplayName,
 } from '@kbn/es-query';
-import { ESQLLangEditor, type ESQLEditorProps } from '@kbn/esql/public';
+import {
+  ESQLLangEditor,
+  ESQLMenu,
+  EsqlEditorActionsProvider,
+  type ESQLEditorProps,
+  type RestorableStateProviderApi,
+} from '@kbn/esql/public';
 import type { EuiFieldText, EuiIconProps, OnRefreshProps, UseEuiTheme } from '@elastic/eui';
 import {
   EuiFlexGroup,
@@ -38,6 +44,7 @@ import {
   EuiButton,
   EuiButtonIcon,
   EuiIconTip,
+  EuiSplitButton,
   useEuiTheme,
   type EuiTimeZoneDisplayProps,
 } from '@elastic/eui';
@@ -46,22 +53,36 @@ import { SearchSessionState, getQueryLog } from '@kbn/data-plugin/public';
 import type { PersistedLog, TimeHistoryContract } from '@kbn/data-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { ESQLControlVariable } from '@kbn/esql-types';
+import type { ESQLControlVariable, ESQLQueryStats } from '@kbn/esql-types';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { SplitButton } from '@kbn/split-button';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { QueryStringInput, FilterButtonGroup } from '@kbn/kql/public';
 import type { SuggestionsAbstraction, SuggestionsListSize } from '@kbn/kql/public';
+import {
+  DATE_RANGE_PICKER_FEATURE_FLAG,
+  DateRangePicker,
+  type DateRangePickerSettings,
+  type DateRangePickerOnChangeProps,
+  type AutoRefreshSettings,
+} from '@kbn/date-range-picker';
+import { useDateRangePickerPresets } from '@kbn/date-range-picker-presets';
 import { AddFilterPopover } from './add_filter_popover';
 import type { DataViewPickerProps } from '../dataview_picker';
 import { DataViewPicker } from '../dataview_picker';
 import { NoDataPopover } from './no_data_popover';
+import { EsqlApproximationToggle } from './esql_approximation_toggle';
 import type { IUnifiedSearchPluginServices, UnifiedSearchDraft } from '../types';
 import { shallowEqual } from '../utils/shallow_equal';
+import { FilterBarToggleButton } from '../filter_bar/filter_bar_toggle_button';
+import { FilterBarContextProvider } from '../filter_bar/filter_bar_context';
+import { QuerySubmitTrigger } from '../search_bar/query_submit_metadata';
 
-import { ESQLMenuPopover, type ESQLMenuPopoverProps } from './esql_menu_popover';
+const DATE_RANGE_PICKER_PRESETS_PERSISTENCE_FEATURE_FLAG =
+  'unifiedSearch.dateRangePickerPresetsPersistenceEnabled';
 
-const BUTTON_MIN_WIDTH = 108;
+const SuperDatePicker = React.memo(
+  EuiSuperDatePicker as any
+) as unknown as typeof EuiSuperDatePicker;
 
 export const strings = {
   getNeedsUpdatingLabel: () =>
@@ -84,17 +105,17 @@ export const strings = {
     i18n.translate('unifiedSearch.queryBarTopRow.submitButton.cancel', {
       defaultMessage: 'Cancel',
     }),
-  getRunQueryLabel: () =>
-    i18n.translate('unifiedSearch.queryBarTopRow.submitButton.run', {
-      defaultMessage: 'Run query',
-    }),
-  getRunButtonLabel: () =>
-    i18n.translate('unifiedSearch.queryBarTopRow.submitButton.runButton', {
-      defaultMessage: 'Run',
+  getSearchButtonLabel: () =>
+    i18n.translate('unifiedSearch.queryBarTopRow.submitButton.searchButton', {
+      defaultMessage: 'Search',
     }),
   getDisabledDatePickerLabel: () =>
     i18n.translate('unifiedSearch.queryBarTopRow.datePicker.disabledLabel', {
       defaultMessage: 'All time',
+    }),
+  getNoTimeFieldTooltip: () =>
+    i18n.translate('unifiedSearch.query.queryBar.noTimeFieldTooltip', {
+      defaultMessage: 'Date range selection requires a time field on the data view.',
     }),
   getSendToBackgroundLabel: () =>
     i18n.translate('unifiedSearch.queryBarTopRow.submitButton.sendToBackground', {
@@ -105,31 +126,42 @@ export const strings = {
 const getWrapperWithTooltip = (
   children: JSX.Element,
   enableTooltip: boolean,
-  query?: Query | AggregateQuery
+  query?: Query | AggregateQuery,
+  tooltipContent?: string
 ) => {
-  if (enableTooltip && query && isOfAggregateQueryType(query)) {
+  if (!enableTooltip) {
+    return children;
+  }
+
+  if (query && isOfAggregateQueryType(query)) {
     const textBasedLanguage = getAggregateQueryMode(query);
     const displayName = getLanguageDisplayName(textBasedLanguage);
     return (
       <EuiToolTip
         position="top"
-        content={i18n.translate('unifiedSearch.query.queryBar.textBasedNonTimestampWarning', {
-          defaultMessage:
-            'Date range selection for {language} queries requires an @timestamp field in the dataset.',
-          values: { language: displayName },
-        })}
+        content={
+          tooltipContent ??
+          i18n.translate('unifiedSearch.query.queryBar.textBasedNonTimestampWarning', {
+            defaultMessage:
+              'Date range selection for {language} queries requires an @timestamp field in the dataset.',
+            values: { language: displayName },
+          })
+        }
       >
         {children}
       </EuiToolTip>
     );
-  } else {
-    return children;
   }
+
+  return (
+    <EuiToolTip position="top" content={strings.getNoTimeFieldTooltip()}>
+      {children}
+    </EuiToolTip>
+  );
 };
 
-const SuperDatePicker = React.memo(
-  EuiSuperDatePicker as any
-) as unknown as typeof EuiSuperDatePicker;
+// @internal
+export type ShowDatePicker = boolean | { disabled: boolean; disabledReason?: string };
 
 // @internal
 export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> {
@@ -151,7 +183,10 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   onChange: (payload: { dateRange: TimeRange; query?: Query | QT }) => void;
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
   onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
-  onSubmit: (payload: { dateRange: TimeRange; query?: Query | QT }) => void;
+  onSubmit: (
+    payload: { dateRange: TimeRange; query?: Query | QT },
+    trigger?: QuerySubmitTrigger
+  ) => void;
   onSendToBackground: (payload: { dateRange: TimeRange; query?: Query | QT }) => Promise<void>;
   onCancel?: () => void;
   onDraftChange?: (draft: UnifiedSearchDraft | undefined) => void;
@@ -163,13 +198,14 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   screenTitle?: string;
   showQueryInput?: boolean;
   showAddFilter?: boolean;
-  showDatePicker?: boolean;
+  showDatePicker?: ShowDatePicker;
   isDisabled?: boolean;
+  disableSubmitAction?: boolean;
   showAutoRefreshOnly?: boolean;
   timeHistory?: TimeHistoryContract;
   timeRangeForSuggestionsOverride?: boolean;
   filtersForSuggestions?: Filter[];
-  filters: Filter[];
+  filters?: Filter[];
   onFiltersUpdated?: (filters: Filter[]) => void;
   dataViewPickerComponentProps?: DataViewPickerProps;
   textBasedLanguageModeErrors?: Error[];
@@ -192,7 +228,6 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   submitOnBlur?: boolean;
   renderQueryInputAppend?: () => React.ReactNode;
   disableExternalPadding?: boolean;
-  onESQLDocsFlyoutVisibilityChanged?: ESQLMenuPopoverProps['onESQLDocsFlyoutVisibilityChanged'];
   bubbleSubmitEvent?: boolean;
 
   esqlEditorInitialState?: ESQLEditorProps['initialState'];
@@ -230,10 +265,37 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
     controlsWrapper: React.ReactNode;
   };
   /**
+   * Optional ES|QL prop - Request statistics to be displayed in the ES|QL editor UI
+   */
+  esqlQueryStats?: ESQLQueryStats;
+  /**
    * Optional ES|QL prop - Callback function invoked to open the given ES|QL query in a new Discover tab
    */
   onOpenQueryInNewTab?: ESQLEditorProps['onOpenQueryInNewTab'];
+  onESQLDocsFlyoutVisibilityChanged?: (isOpen: boolean) => void;
+  /**
+   * Optional ES|QL prop - Enable data source browser in ESQL editor
+   */
+  enableResourceBrowser?: ESQLEditorProps['enableResourceBrowser'];
   useBackgroundSearchButton?: boolean;
+  /**
+   * Whether to use the new DateRangePicker. Defaults to `true`; pass `false`
+   * to opt out and keep the legacy EuiSuperDatePicker. The new picker is shown
+   * only when this resolves to `true` *and* the
+   * `unifiedSearch.newDateRangePickerEnabled` feature flag is enabled — when
+   * the flag is disabled, the legacy picker is always used.
+   */
+  enableDateRangePicker?: boolean;
+  /**
+   * When provided, renders the ES|QL approximate execution toggle (bolt icon) before the date picker.
+   */
+  esqlApproximation?: {
+    isApproximate: boolean;
+    onChange: (isApproximate: boolean) => void;
+    additionalText?: string;
+    disabled?: boolean;
+    disabledReason?: string;
+  };
 }
 
 export const SharingMetaFields = React.memo(function SharingMetaFields({
@@ -308,15 +370,54 @@ export const QueryBarTopRow = React.memo(
       }
     }, [props.isLoading]);
 
+    const esqlEditorRef = useRef<RestorableStateProviderApi>(null);
+
+    // Temporary, the empty page will change and we wont need to control it
+    useEffect(() => {
+      esqlEditorRef.current?.refreshInitialState();
+    }, [props.esqlEditorInitialState]);
+
     const {
       showQueryInput = true,
       showDatePicker = true,
       showAutoRefreshOnly = false,
       showSubmitButton = true,
+      enableDateRangePicker = true,
     } = props;
 
     const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
     const [isQueryInputFocused, setIsQueryInputFocused] = useState(false);
+    const [dateRangePickerSettings, setDateRangePickerSettings] = useState<DateRangePickerSettings>(
+      {
+        roundRelativeTime: false,
+        timePrecision: 'none',
+      }
+    );
+    const isAutoRefreshEnabled = props.isRefreshPaused === false;
+
+    const [autoRefresh, setAutoRefresh] = useState<AutoRefreshSettings>(() => {
+      const isConfigured = props.refreshInterval != null && props.refreshInterval > 0;
+      return {
+        // Only show the auto-refresh UI when the timer is actively running on load.
+        // When paused or unconfigured, isEnabled starts false; the user must re-enable
+        // from Settings. This avoids the UI reappearing after a page reload when the
+        // user had disabled it.
+        isEnabled: isAutoRefreshEnabled,
+        isPaused: isConfigured && (props.isRefreshPaused ?? false),
+        intervalMs: isConfigured ? props.refreshInterval! : 60_000,
+        intervalDisplayUnit: 's',
+      };
+    });
+
+    useEffect(() => {
+      setAutoRefresh((prev) => ({
+        ...prev,
+        ...(props.refreshInterval != null && props.refreshInterval > 0
+          ? { intervalMs: props.refreshInterval }
+          : {}),
+        isPaused: !isAutoRefreshEnabled,
+      }));
+    }, [props.refreshInterval, isAutoRefreshEnabled]);
 
     const kibana = useKibana<IUnifiedSearchPluginServices>();
 
@@ -331,9 +432,53 @@ export const QueryBarTopRow = React.memo(
       docLinks,
       http,
       dataViews,
+      application,
+      featureFlags,
     } = kibana.services;
 
+    const isDateRangePickerFeatureFlagEnabled$ = useMemo(
+      () =>
+        enableDateRangePicker && featureFlags
+          ? featureFlags
+              .getBooleanValue$(DATE_RANGE_PICKER_FEATURE_FLAG, true)
+              .pipe(distinctUntilChanged())
+          : of(true),
+      [enableDateRangePicker, featureFlags]
+    );
+    const isDateRangePickerFeatureFlagEnabled = useObservable(
+      isDateRangePickerFeatureFlagEnabled$,
+      true
+    );
+
+    const shouldUseLegacyTimePicker =
+      !enableDateRangePicker || !isDateRangePickerFeatureFlagEnabled;
+
+    const isPresetsPersistenceFeatureFlagEnabled$ = useMemo(
+      () =>
+        featureFlags
+          ? featureFlags
+              .getBooleanValue$(DATE_RANGE_PICKER_PRESETS_PERSISTENCE_FEATURE_FLAG, true)
+              .pipe(distinctUntilChanged())
+          : of(true),
+      [featureFlags]
+    );
+    const isPresetsPersistenceFeatureFlagEnabled = useObservable(
+      isPresetsPersistenceFeatureFlagEnabled$,
+      true
+    );
+    const shouldPersistDateRangePickerPresets =
+      !shouldUseLegacyTimePicker && isPresetsPersistenceFeatureFlagEnabled;
+    const dateRangePickerPresets = useDateRangePickerPresets({
+      service: data.dateRangePickerPresets,
+      persistenceEnabled: shouldPersistDateRangePickerPresets,
+      notifications,
+    });
+
     const isQueryLangSelected = props.query && !isOfQueryType(props.query);
+    const shouldRenderESQLUi = Boolean(showQueryInput && isQueryLangSelected);
+    const isSubmitDisabled = Boolean(
+      isDateRangeInvalid || props.isDisabled || props.disableSubmitAction
+    );
 
     const backgroundSearchState = useObservable(
       data.search.session.state$.pipe(
@@ -406,12 +551,15 @@ export const QueryBarTopRow = React.memo(
     });
 
     const onSubmit = useCallback(
-      ({ query, dateRange }: { query?: Query | QT; dateRange: TimeRange }) => {
+      (
+        { query, dateRange }: { query?: Query | QT; dateRange: TimeRange },
+        trigger?: QuerySubmitTrigger
+      ) => {
         if (timeHistory) {
           timeHistory.add(dateRange);
         }
 
-        propsOnSubmit({ query, dateRange });
+        propsOnSubmit({ query, dateRange }, trigger);
       },
       [timeHistory, propsOnSubmit]
     );
@@ -422,10 +570,13 @@ export const QueryBarTopRow = React.memo(
           persistedLog.add(queryRef.current.query);
         }
         event.preventDefault();
-        onSubmit({
-          query: queryRef.current,
-          dateRange: dateRangeRef.current,
-        });
+        onSubmit(
+          {
+            query: queryRef.current,
+            dateRange: dateRangeRef.current,
+          },
+          QuerySubmitTrigger.QUERY_BAR_SUBMIT
+        );
       },
       [persistedLog, onSubmit]
     );
@@ -495,7 +646,7 @@ export const QueryBarTopRow = React.memo(
         };
 
         if (isQuickSelection) {
-          onSubmit(retVal);
+          onSubmit(retVal, QuerySubmitTrigger.TIME_FILTER);
         } else {
           propsOnChange(retVal);
         }
@@ -506,25 +657,125 @@ export const QueryBarTopRow = React.memo(
     const propsOnRefresh = props.onRefresh;
     const onRefresh = useCallback(
       ({ start, end }: OnRefreshProps) => {
-        const retVal = {
-          dateRange: {
-            from: start,
-            to: end,
-          },
-        };
         if (propsOnRefresh) {
-          propsOnRefresh(retVal);
+          propsOnRefresh({ dateRange: { from: start, to: end } });
         }
       },
       [propsOnRefresh]
     );
 
+    const onDateRangeChange = useCallback(
+      ({ start, end, isInvalid }: DateRangePickerOnChangeProps) => {
+        setIsDateRangeInvalid(isInvalid);
+        if (!isInvalid) {
+          onSubmit(
+            {
+              query: queryRef.current,
+              dateRange: { from: start, to: end },
+            },
+            QuerySubmitTrigger.TIME_FILTER
+          );
+        }
+      },
+      [onSubmit]
+    );
+
+    const onDateRangeInputChange = useCallback(() => {
+      setIsDateRangeInvalid(false);
+    }, []);
+
+    const propsOnRefreshChange = props.onRefreshChange;
+
+    const onDateRangePickerRefresh = useCallback(() => {
+      if (propsOnRefresh) {
+        propsOnRefresh({ dateRange: dateRangeRef.current });
+      }
+    }, [propsOnRefresh]);
+
+    // Subscribe to the Kibana timefilter's actual refresh loop so the DateRangePicker countdown
+    // stays in sync with real query cadence. The timefilter drives data fetches in consumers like
+    // Discover and Dashboard; without this the two independent timers drift apart over time.
+    const [autoRefreshEpoch, setAutoRefreshEpoch] = useState<number | undefined>(undefined);
+    useEffect(() => {
+      if (shouldUseLegacyTimePicker || !propsOnRefreshChange) return;
+
+      const subscription = data.query.timefilter.timefilter
+        .getAutoRefreshFetch$()
+        .subscribe((done) => {
+          setAutoRefreshEpoch((prev) => (prev ?? 0) + 1);
+          done(); // release the loop immediately — we are only resetting the UI countdown
+        });
+
+      return () => subscription.unsubscribe();
+    }, [shouldUseLegacyTimePicker, propsOnRefreshChange, data.query.timefilter.timefilter]);
+
+    // Visualize-style consumers request auto-refresh-only mode via
+    // `showAutoRefreshOnly` + `!showDatePicker`: the picker renders readOnly with
+    // only the auto-refresh play/pause button operable.
+    const isAutoRefreshOnly = showAutoRefreshOnly && !showDatePicker;
+
+    const dateFormatSetting: string | undefined = uiSettings.get('dateFormat');
+    const inputDateFormats = useMemo(
+      () => (dateFormatSetting ? [dateFormatSetting] : undefined),
+      [dateFormatSetting]
+    );
+
+    const dateRangePickerSettingsWithAutoRefresh = useMemo<DateRangePickerSettings>(
+      () =>
+        propsOnRefreshChange
+          ? {
+              ...dateRangePickerSettings,
+              // In auto-refresh-only mode the settings panel (the only place to
+              // enable auto-refresh) is unreachable behind readOnly, so force the
+              // play/pause button visible; paused state still follows props.
+              autoRefresh: isAutoRefreshOnly ? { ...autoRefresh, isEnabled: true } : autoRefresh,
+            }
+          : dateRangePickerSettings,
+      [dateRangePickerSettings, autoRefresh, propsOnRefreshChange, isAutoRefreshOnly]
+    );
+
+    const onDateRangePickerSettingsChange = useCallback(
+      (next: DateRangePickerSettings) => {
+        const { autoRefresh: nextAutoRefresh, ...rest } = next;
+
+        setDateRangePickerSettings(rest);
+
+        if (nextAutoRefresh) {
+          setAutoRefresh((prev) => {
+            // When enabling auto-refresh, also clear isPaused so the timer starts immediately
+            // without requiring a second click on the play button.
+            const resolved: AutoRefreshSettings =
+              !prev.isEnabled && nextAutoRefresh.isEnabled
+                ? { ...nextAutoRefresh, isPaused: false }
+                : nextAutoRefresh;
+
+            const isEnabledChanged = prev.isEnabled !== resolved.isEnabled;
+            const intervalChanged = prev.intervalMs !== resolved.intervalMs;
+            const isPausedChanged = prev.isPaused !== resolved.isPaused;
+
+            if (isEnabledChanged || intervalChanged || isPausedChanged) {
+              propsOnRefreshChange?.({
+                isPaused: !resolved.isEnabled || resolved.isPaused,
+                refreshInterval: resolved.intervalMs,
+              });
+            }
+
+            return resolved;
+          });
+        }
+      },
+      [propsOnRefreshChange]
+    );
+
     const onInputSubmit = useCallback(
       (query: Query) => {
-        onSubmit({
-          query,
-          dateRange: dateRangeRef.current,
-        });
+        onSubmit(
+          {
+            query,
+            dateRange: dateRangeRef.current,
+          },
+          QuerySubmitTrigger.QUERY_BAR_SUBMIT
+        );
       },
       [onSubmit]
     );
@@ -570,6 +821,11 @@ export const QueryBarTopRow = React.memo(
       };
     }, [onDraftChangeDebounced]);
 
+    // Pass raw date math / ISO strings so DateRangePicker's internal parser can handle them.
+    // Display label resolution (e.g. "now/w to now/w" → "This week") is done by
+    // DateRangePicker itself using the `presets` it already receives.
+    const dateRangeValue = `${currentDateRange.from} to ${currentDateRange.to}`;
+
     function shouldRenderQueryInput(): boolean {
       return Boolean(showQueryInput && props.query && storage);
     }
@@ -582,7 +838,7 @@ export const QueryBarTopRow = React.memo(
       return !Boolean(props.showAddFilter) && Boolean(props.prepend);
     }
 
-    function shouldRenderUpdatebutton(): boolean {
+    function shouldRenderUpdateButton(): boolean {
       return (
         Boolean(showSubmitButton) &&
         Boolean(showQueryInput || showDatePicker || showAutoRefreshOnly)
@@ -592,7 +848,7 @@ export const QueryBarTopRow = React.memo(
     function shouldShowDatePickerAsBadge(): boolean {
       return (
         (Boolean(props.showDatePickerAsBadge) && !shouldRenderQueryInput()) ||
-        Boolean(isQueryLangSelected && props.query && isOfAggregateQueryType(props.query))
+        Boolean(shouldRenderESQLUi && props.query && isOfAggregateQueryType(props.query))
       );
     }
 
@@ -601,70 +857,139 @@ export const QueryBarTopRow = React.memo(
         return null;
       }
       let isDisabled: boolean | { display: React.ReactNode } = Boolean(props.isDisabled);
-      let enableTooltip = false;
-      // On text based mode the datepicker is always on when the user has unsaved changes.
-      // When the user doesn't have any changes it should be disabled if dataview doesn't have @timestamp field
-      if (Boolean(isQueryLangSelected) && !props.isDirty) {
-        const adHocDataview = props.indexPatterns?.[0];
-        if (adHocDataview && typeof adHocDataview !== 'string') {
-          if (!adHocDataview.timeFieldName) {
-            isDisabled = {
-              display: (
-                <span data-test-subj="kbnQueryBar-datePicker-disabled">
-                  {strings.getDisabledDatePickerLabel()}
-                </span>
-              ),
-            };
-          }
-          enableTooltip = !Boolean(adHocDataview.timeFieldName);
-        }
+
+      // Consumers (e.g. Discover, Dashboard) opt into a disabled picker via `showDatePicker={{ disabled: true }}`.
+      const consumerDatePicker =
+        typeof props.showDatePicker === 'object' ? props.showDatePicker : undefined;
+      const isConsumerDisabled = Boolean(consumerDatePicker?.disabled);
+      const consumerDisabledTooltip = consumerDatePicker?.disabledReason;
+
+      // ES|QL self-detects a missing @timestamp on its ad-hoc data view, unless the consumer already disabled it.
+      const esqlNoTimeField =
+        !isConsumerDisabled &&
+        Boolean(isQueryLangSelected) &&
+        !props.isDirty &&
+        (() => {
+          const adHocDataview = props.indexPatterns?.[0];
+          return (
+            !!adHocDataview && typeof adHocDataview !== 'string' && !adHocDataview.timeFieldName
+          );
+        })();
+
+      const isDatePickerDisabled = isConsumerDisabled || esqlNoTimeField;
+
+      if (isDatePickerDisabled) {
+        isDisabled = {
+          display: (
+            <span data-test-subj="kbnQueryBar-datePicker-disabled">
+              {strings.getDisabledDatePickerLabel()}
+            </span>
+          ),
+        };
       }
 
       const wrapperClasses = classNames('kbnQueryBar__datePickerWrapper');
 
-      const timeZoneName = uiSettings.get('dateFormat:tz');
-      const timeZoneSettingTip = i18n.translate(
-        'unifiedSearch.queryBarTopRow.datePicker.timeZoneSettingTip',
-        {
-          defaultMessage: 'Time zone is set in space settings by administrators',
-        }
-      );
-      const timeZoneCustomRender: EuiTimeZoneDisplayProps['customRender'] = ({ nameDisplay }) => (
-        <>
-          {nameDisplay}
-          <EuiIconTip content={timeZoneSettingTip} color="subdued" />
-        </>
-      );
+      let datePicker: JSX.Element;
 
-      const datePicker = (
-        <SuperDatePicker
-          isDisabled={isDisabled}
-          start={props.dateRangeFrom}
-          end={props.dateRangeTo}
-          isPaused={props.isRefreshPaused}
-          refreshInterval={props.refreshInterval}
-          refreshMinInterval={props.minRefreshInterval}
-          onTimeChange={onTimeChange}
-          onRefresh={onRefresh}
-          onRefreshChange={props.onRefreshChange}
-          showUpdateButton={false}
-          recentlyUsedRanges={recentlyUsedRanges}
-          locale={i18n.getLocale()}
-          commonlyUsedRanges={commonlyUsedRanges}
-          dateFormat={uiSettings.get('dateFormat')}
-          isAutoRefreshOnly={showAutoRefreshOnly}
-          className="kbnQueryBar__datePicker"
-          isQuickSelectOnly={isMobile ? false : isQueryInputFocused}
-          width={isMobile ? 'full' : 'auto'}
-          compressed
-          showTimeWindowButtons
-          timeZoneDisplayProps={{
-            timeZone: timeZoneName,
-            customRender: timeZoneCustomRender,
-          }}
-        />
+      if (shouldUseLegacyTimePicker) {
+        const timeZoneName = uiSettings.get('dateFormat:tz');
+        const timeZoneSettingTip = i18n.translate(
+          'unifiedSearch.queryBarTopRow.datePicker.timeZoneSettingTip',
+          {
+            defaultMessage: 'Time zone is set in space settings by administrators',
+          }
+        );
+        const timeZoneCustomRender: EuiTimeZoneDisplayProps['customRender'] = ({ nameDisplay }) => (
+          <>
+            {nameDisplay}
+            <EuiIconTip content={timeZoneSettingTip} color="subdued" />
+          </>
+        );
+        datePicker = (
+          <SuperDatePicker
+            isDisabled={isDisabled}
+            start={props.dateRangeFrom}
+            end={props.dateRangeTo}
+            isPaused={props.isRefreshPaused}
+            refreshInterval={props.refreshInterval}
+            refreshMinInterval={props.minRefreshInterval}
+            onTimeChange={onTimeChange}
+            onRefresh={onRefresh}
+            onRefreshChange={props.onRefreshChange}
+            showUpdateButton={false}
+            recentlyUsedRanges={recentlyUsedRanges}
+            locale={i18n.getLocale()}
+            commonlyUsedRanges={commonlyUsedRanges}
+            dateFormat={uiSettings.get('dateFormat')}
+            isAutoRefreshOnly={showAutoRefreshOnly}
+            className="kbnQueryBar__datePicker"
+            isQuickSelectOnly={isMobile ? false : isQueryInputFocused}
+            width={isMobile ? 'full' : 'auto'}
+            compressed
+            showTimeWindowButtons
+            timeZoneDisplayProps={{
+              timeZone: timeZoneName,
+              customRender: timeZoneCustomRender,
+            }}
+          />
+        );
+      } else {
+        // In auto-refresh-only mode (`isAutoRefreshOnly`) the picker renders
+        // readOnly — like the legacy picker's read-only date display, no time
+        // filtering is possible but the auto-refresh play/pause button (which
+        // ignores `readOnly`, unlike `disabled`) stays operable.
+        const pickerDisabled = Boolean(props.isDisabled) || isDatePickerDisabled;
+        datePicker = (
+          <>
+            {(isDatePickerDisabled || isAutoRefreshOnly) && (
+              // Hidden sibling so FTR tests can detect that the time filter is off
+              // via testSubjects.existOrFail('kbnQueryBar-datePicker-disabled'),
+              // matching the span the legacy picker renders inside its
+              // isDisabled.display node.
+              <span data-test-subj="kbnQueryBar-datePicker-disabled" style={{ display: 'none' }} />
+            )}
+            <DateRangePicker
+              className="kbnQueryBar__datePicker"
+              value={
+                isDatePickerDisabled || isAutoRefreshOnly
+                  ? strings.getDisabledDatePickerLabel()
+                  : dateRangeValue
+              }
+              onChange={onDateRangeChange}
+              onInputChange={onDateRangeInputChange}
+              isInvalid={isDateRangeInvalid}
+              disabled={pickerDisabled}
+              readOnly={isAutoRefreshOnly}
+              width="auto"
+              compressed
+              collapsed={isMobile || isQueryInputFocused}
+              showTimeWindowButtons
+              presets={dateRangePickerPresets.presets}
+              recent={recentlyUsedRanges}
+              onPresetSave={dateRangePickerPresets.onPresetSave}
+              onPresetDelete={dateRangePickerPresets.onPresetDelete}
+              settings={dateRangePickerSettingsWithAutoRefresh}
+              onSettingsChange={onDateRangePickerSettingsChange}
+              onRefresh={propsOnRefreshChange ? onDateRangePickerRefresh : undefined}
+              refreshEpoch={autoRefreshEpoch}
+              inputDateFormats={inputDateFormats}
+              timeZone={uiSettings.get('dateFormat:tz')}
+              prependBasePath={http?.basePath.prepend}
+              canAccessAdvancedSettings={
+                (application?.capabilities.advancedSettings?.save as boolean | undefined) ?? false
+              }
+            />
+          </>
+        );
+      }
+
+      const component = getWrapperWithTooltip(
+        datePicker,
+        isDatePickerDisabled,
+        props.query,
+        consumerDisabledTooltip
       );
-      const component = getWrapperWithTooltip(datePicker, enableTooltip, props.query);
 
       return (
         <EuiFlexItem className={wrapperClasses} css={styles.datePickerWrapper}>
@@ -678,43 +1003,50 @@ export const QueryBarTopRow = React.memo(
 
       if (props.useBackgroundSearchButton) {
         return (
-          <SplitButton
-            aria-label={buttonLabelCancel}
-            color="text"
-            data-test-subj="queryCancelButton"
-            iconType="cross"
-            isMainButtonLoading={isCancelling}
-            isDisabled={isCancelling}
-            isSecondaryButtonDisabled={!canSendToBackground}
-            isSecondaryButtonLoading={isSendingToBackground}
-            onClick={onClickCancelButton}
-            onSecondaryButtonClick={onClickSendToBackground}
-            secondaryButtonAriaLabel={strings.getSendToBackgroundLabel()}
-            secondaryButtonIcon="backgroundTask"
-            secondaryButtonTitle={strings.getSendToBackgroundLabel()}
-            size="s"
-            minWidth={BUTTON_MIN_WIDTH}
-          >
-            {buttonLabelCancel}
-          </SplitButton>
+          <EuiSplitButton color="text" size="s">
+            <EuiSplitButton.ActionPrimary
+              aria-label={buttonLabelCancel}
+              iconType="cross"
+              isLoading={isCancelling}
+              isDisabled={isCancelling}
+              onClick={onClickCancelButton}
+              data-test-subj="queryCancelButton"
+            >
+              {buttonLabelCancel}
+            </EuiSplitButton.ActionPrimary>
+            <EuiSplitButton.ActionSecondary
+              isLoading={isSendingToBackground}
+              isDisabled={!canSendToBackground}
+              onClick={onClickSendToBackground}
+              tooltipProps={{
+                content: strings.getSendToBackgroundLabel(),
+                disableScreenReaderOutput: true,
+              }}
+              aria-label={strings.getSendToBackgroundLabel()}
+              iconType="backgroundTask"
+              data-test-subj="queryCancelButton-secondary-button"
+            />
+          </EuiSplitButton>
         );
       }
 
       if (submitButtonIconOnly) {
         return (
-          <EuiButtonIcon
-            iconType="cross"
-            aria-label={buttonLabelCancel}
-            onClick={onClickCancelButton}
-            size="s"
-            data-test-subj="queryCancelButton"
-            color="text"
-            display="base"
-            isLoading={isCancelling}
-            isDisabled={isCancelling}
-          >
-            {buttonLabelCancel}
-          </EuiButtonIcon>
+          <EuiToolTip content={buttonLabelCancel} disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType="cross"
+              aria-label={buttonLabelCancel}
+              onClick={onClickCancelButton}
+              size="s"
+              data-test-subj="queryCancelButton"
+              color="text"
+              display="base"
+              isLoading={isCancelling}
+              isDisabled={isCancelling}
+            >
+              {buttonLabelCancel}
+            </EuiButtonIcon>
+          </EuiToolTip>
         );
       }
 
@@ -734,58 +1066,89 @@ export const QueryBarTopRow = React.memo(
       );
     }
 
-    function renderUpdateButton() {
-      if (!shouldRenderUpdatebutton() && !shouldRenderDatePicker()) {
+    const getSubmitButtonProps = () => {
+      if (shouldRenderESQLUi) {
+        const label = strings.getSearchButtonLabel();
+        return { icon: undefined, text: label, ariaLabel: label, color: 'primary' as const };
+      }
+
+      if (props.isDirty) {
+        return {
+          icon: 'kqlFunction' as const,
+          text: strings.getUpdateButtonLabel(),
+          ariaLabel: strings.getNeedsUpdatingLabel(),
+          color: 'success' as const,
+        };
+      }
+
+      return {
+        icon: 'refresh' as const,
+        text: strings.getRefreshButtonLabel(),
+        ariaLabel: strings.getRefreshQueryLabel(),
+        color: 'primary' as const,
+      };
+    };
+
+    function renderDatePickerWithUpdateBtn() {
+      if (!shouldRenderUpdateButton() && !shouldRenderDatePicker()) {
         return null;
       }
-      const iconDirty = Boolean(isQueryLangSelected) ? 'playFilled' : 'kqlFunction';
-      const labelDirty = Boolean(isQueryLangSelected)
-        ? strings.getRunQueryLabel()
-        : strings.getNeedsUpdatingLabel();
-      const buttonLabelDirty = Boolean(isQueryLangSelected)
-        ? strings.getRunButtonLabel()
-        : strings.getUpdateButtonLabel();
+
+      const {
+        icon: buttonIcon,
+        text: buttonText,
+        ariaLabel: buttonAriaLabel,
+        color: buttonColor,
+      } = getSubmitButtonProps();
+      const submitTooltip = buttonAriaLabel;
+      const splitButton = (
+        <EuiSplitButton color={buttonColor} size="s">
+          <EuiSplitButton.ActionPrimary
+            iconType={buttonIcon}
+            isLoading={props.isLoading}
+            isDisabled={isSubmitDisabled}
+            onClick={onClickSubmitButton}
+            aria-label={buttonAriaLabel}
+            data-test-subj="querySubmitButton"
+          >
+            {buttonText}
+          </EuiSplitButton.ActionPrimary>
+          <EuiSplitButton.ActionSecondary
+            iconType="backgroundTask"
+            isLoading={isSendingToBackground}
+            isDisabled={!canSendToBackground || Boolean(props.disableSubmitAction)}
+            onClick={onClickSendToBackground}
+            tooltipProps={{
+              content: strings.getSendToBackgroundLabel(),
+              disableScreenReaderOutput: true,
+            }}
+            aria-label={strings.getSendToBackgroundLabel()}
+            data-test-subj="querySubmitButton-secondary-button"
+          />
+        </EuiSplitButton>
+      );
 
       const updateButton = props.useBackgroundSearchButton ? (
-        <SplitButton
-          aria-label={props.isDirty ? labelDirty : strings.getRefreshQueryLabel()}
-          color={props.isDirty ? 'success' : 'primary'}
-          data-test-subj="querySubmitButton"
-          iconType={props.isDirty ? iconDirty : 'refresh'}
-          isDisabled={isDateRangeInvalid || props.isDisabled}
-          isLoading={props.isLoading}
-          isSecondaryButtonDisabled={!canSendToBackground}
-          isSecondaryButtonLoading={isSendingToBackground}
-          onClick={onClickSubmitButton}
-          onSecondaryButtonClick={onClickSendToBackground}
-          secondaryButtonAriaLabel={strings.getSendToBackgroundLabel()}
-          secondaryButtonIcon="backgroundTask"
-          secondaryButtonTitle={strings.getSendToBackgroundLabel()}
-          size="s"
-          minWidth={BUTTON_MIN_WIDTH}
-        >
-          {props.isDirty ? buttonLabelDirty : strings.getRefreshButtonLabel()}
-        </SplitButton>
+        splitButton
       ) : (
         <EuiSuperUpdateButton
-          iconType={props.isDirty ? iconDirty : 'refresh'}
+          iconType={buttonIcon}
           iconOnly={submitButtonIconOnly}
-          aria-label={props.isDirty ? labelDirty : strings.getRefreshQueryLabel()}
-          isDisabled={isDateRangeInvalid || props.isDisabled}
+          aria-label={buttonAriaLabel}
+          isDisabled={isSubmitDisabled}
           isLoading={props.isLoading}
           onClick={onClickSubmitButton}
           size="s"
-          color={props.isDirty ? 'success' : 'primary'}
+          color={buttonColor}
           fill={false}
           needsUpdate={props.isDirty}
           data-test-subj="querySubmitButton"
           toolTipProps={{
-            content: props.isDirty ? labelDirty : strings.getRefreshQueryLabel(),
-            delay: 'long',
+            content: submitTooltip,
             position: 'bottom',
           }}
         >
-          {props.isDirty ? buttonLabelDirty : strings.getRefreshButtonLabel()}
+          {buttonText}
         </EuiSuperUpdateButton>
       );
 
@@ -799,7 +1162,7 @@ export const QueryBarTopRow = React.memo(
       );
 
       // allows to render the button without the datepicker
-      if (!shouldRenderDatePicker() && shouldRenderUpdatebutton()) {
+      if (!shouldRenderDatePicker() && shouldRenderUpdateButton()) {
         return button;
       }
 
@@ -807,8 +1170,26 @@ export const QueryBarTopRow = React.memo(
         <EuiFlexItem grow={false}>
           <NoDataPopover storage={storage} showNoDataPopover={props.indicateNoData}>
             <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
-              {shouldRenderDatePicker() ? renderDatePicker() : null}
-              {shouldRenderUpdatebutton() ? button : null}
+              {shouldRenderESQLUi ? (
+                <>
+                  {shouldRenderUpdateButton() ? button : null}
+                  {props.esqlApproximation && (
+                    <EsqlApproximationToggle
+                      isApproximate={props.esqlApproximation.isApproximate}
+                      onChange={props.esqlApproximation.onChange}
+                      additionalText={props.esqlApproximation.additionalText}
+                      disabled={props.esqlApproximation.disabled}
+                      disabledReason={props.esqlApproximation.disabledReason}
+                    />
+                  )}
+                  {shouldRenderDatePicker() ? renderDatePicker() : null}
+                </>
+              ) : (
+                <>
+                  {shouldRenderDatePicker() ? renderDatePicker() : null}
+                  {shouldRenderUpdateButton() ? button : null}
+                </>
+              )}
             </EuiFlexGroup>
           </NoDataPopover>
         </EuiFlexItem>
@@ -842,7 +1223,8 @@ export const QueryBarTopRow = React.memo(
 
     function renderAddButton() {
       return (
-        Boolean(props.showAddFilter) && (
+        Boolean(props.showAddFilter) &&
+        props.filters && (
           <EuiFlexItem grow={false}>
             <AddFilterPopover
               indexPatterns={props.indexPatterns}
@@ -862,17 +1244,42 @@ export const QueryBarTopRow = React.memo(
       );
     }
 
+    function renderFilterBarToggleButton() {
+      return <FilterBarToggleButton />;
+    }
+
     function renderFilterButtonGroup() {
       return (
         (Boolean(props.showAddFilter) || Boolean(props.prepend)) && (
           <EuiFlexItem grow={false} className="kbnQueryBar__filterButtonGroup">
-            <FilterButtonGroup
-              items={[props.prepend, renderAddButton()]}
-              attached={renderFilterMenuOnly()}
-              size="s"
-            />
+            <EuiFlexGroup gutterSize="s">
+              <FilterButtonGroup
+                items={[renderAddButton(), props.prepend]}
+                attached={renderFilterMenuOnly()}
+                size="s"
+              />
+              {Boolean(props.showAddFilter && props.filters?.length) && (
+                <FilterButtonGroup items={[renderFilterBarToggleButton()]} size="s" />
+              )}
+            </EuiFlexGroup>
           </EuiFlexItem>
         )
+      );
+    }
+
+    function renderEsqlMenuPopover() {
+      return (
+        <EuiFlexItem
+          grow={false}
+          css={css`
+            margin-left: auto;
+            @media (min-width: ${euiTheme.breakpoint.xl}px) {
+              order: 1;
+            }
+          `}
+        >
+          <ESQLMenu onESQLDocsFlyoutVisibilityChanged={props.onESQLDocsFlyoutVisibilityChanged} />
+        </EuiFlexItem>
       );
     }
 
@@ -934,22 +1341,17 @@ export const QueryBarTopRow = React.memo(
       );
     }
 
-    function renderTextLangEditor() {
-      const adHocDataview = props.indexPatterns?.[0];
-      let detectedTimestamp;
-      if (adHocDataview && typeof adHocDataview !== 'string') {
-        detectedTimestamp = adHocDataview?.timeFieldName;
-      }
+    function renderESQLEditor() {
       return (
-        isQueryLangSelected &&
+        shouldRenderESQLUi &&
         props.query &&
         isOfAggregateQueryType(props.query) && (
           <ESQLLangEditor
+            ref={esqlEditorRef}
             query={props.query}
             onTextLangQueryChange={props.onTextLangQueryChange}
             errors={props.textBasedLanguageModeErrors}
             warning={props.textBasedLanguageModeWarning}
-            detectedTimestamp={detectedTimestamp}
             expandToFitQueryOnMount
             onTextLangQuerySubmit={async () =>
               onSubmit({
@@ -958,7 +1360,7 @@ export const QueryBarTopRow = React.memo(
               })
             }
             isDisabled={props.isDisabled}
-            hideRunQueryText={true}
+            disableSubmitAction={props.disableSubmitAction}
             data-test-subj="unifiedTextLangEditor"
             isLoading={props.isLoading}
             initialState={props.esqlEditorInitialState}
@@ -974,7 +1376,8 @@ export const QueryBarTopRow = React.memo(
             }
             esqlVariables={props.esqlVariablesConfig?.esqlVariables ?? []}
             onOpenQueryInNewTab={props.onOpenQueryInNewTab}
-            openVisorOnSourceCommands
+            queryStats={props.esqlQueryStats}
+            enableResourceBrowser={props.enableResourceBrowser}
           />
         )
       );
@@ -982,56 +1385,80 @@ export const QueryBarTopRow = React.memo(
     const isScreenshotMode = props.isScreenshotMode === true;
     const styles = useMemoCss(inputStringStyles);
 
+    const flexDirection: 'column' | 'row' =
+      isMobile && !shouldShowDatePickerAsBadge() ? 'column' : 'row';
+    const flexJustifyContent: 'flexStart' | 'flexEnd' = shouldShowDatePickerAsBadge()
+      ? 'flexStart'
+      : 'flexEnd';
+    const queryBarFlexGroupProps = {
+      className: 'kbnQueryBar',
+      'data-test-subj': 'kbnQueryBar',
+      direction: flexDirection,
+      responsive: false as const,
+      gutterSize: 's' as const,
+      justifyContent: flexJustifyContent,
+      wrap: true,
+      css: css`
+        padding: ${isQueryLangSelected && !props.disableExternalPadding ? euiTheme.size.s : 0};
+      `,
+    };
+
     return (
-      <>
+      <FilterBarContextProvider filters={props.filters} storage={storage}>
         <SharingMetaFields
           from={currentDateRange.from}
           to={currentDateRange.to}
           dateFormat={uiSettings.get('dateFormat')}
         />
-        {!isScreenshotMode && (
-          <>
-            <EuiFlexGroup
-              className="kbnQueryBar"
-              data-test-subj="kbnQueryBar"
-              direction={isMobile && !shouldShowDatePickerAsBadge() ? 'column' : 'row'}
-              responsive={false}
-              gutterSize="s"
-              css={css`
-                padding: ${isQueryLangSelected && !props.disableExternalPadding
-                  ? euiTheme.size.s
-                  : 0};
-              `}
-              justifyContent={shouldShowDatePickerAsBadge() ? 'flexStart' : 'flexEnd'}
-              wrap
-            >
-              {props.dataViewPickerOverride || renderDataViewsPicker()}
-              {Boolean(isQueryLangSelected) && (
-                <ESQLMenuPopover
-                  onESQLDocsFlyoutVisibilityChanged={props.onESQLDocsFlyoutVisibilityChanged}
-                  onESQLQuerySubmit={(queryString: string) => {
-                    onSubmit({
-                      query: { esql: queryString } as QT,
-                      dateRange: dateRangeRef.current,
-                    });
-                  }}
-                  adHocDataview={props.indexPatterns?.[0]}
-                />
-              )}
-              {/* Optional wrapper for the ES|QL controls elements */}
-              {Boolean(props.esqlVariablesConfig?.controlsWrapper) && (
-                <EuiFlexItem grow={false}>{props.esqlVariablesConfig?.controlsWrapper}</EuiFlexItem>
-              )}
-              {renderQueryInput()}
-              {props.renderQueryInputAppend?.()}
-              {shouldShowDatePickerAsBadge() && props.filterBar}
-              {renderUpdateButton()}
-            </EuiFlexGroup>
-            {!shouldShowDatePickerAsBadge() && props.filterBar}
-            {renderTextLangEditor()}
-          </>
-        )}
-      </>
+        {!isScreenshotMode &&
+          (shouldRenderESQLUi ? (
+            <EsqlEditorActionsProvider>
+              <EuiFlexGroup {...queryBarFlexGroupProps}>
+                {props.dataViewPickerOverride || renderDataViewsPicker()}
+                {renderDatePickerWithUpdateBtn()}
+                {/* Optional wrapper for the ES|QL controls elements */}
+                {Boolean(props.esqlVariablesConfig?.controlsWrapper) && (
+                  <EuiFlexItem
+                    grow={true}
+                    css={css`
+                      min-width: 0;
+                      @media (max-width: ${euiTheme.breakpoint.xl}px) {
+                        order: 1;
+                        flex-basis: 100%;
+                      }
+                    `}
+                  >
+                    {props.esqlVariablesConfig?.controlsWrapper}
+                  </EuiFlexItem>
+                )}
+                {renderEsqlMenuPopover()}
+              </EuiFlexGroup>
+              {!shouldShowDatePickerAsBadge() && props.filterBar}
+              {renderESQLEditor()}
+            </EsqlEditorActionsProvider>
+          ) : (
+            <>
+              <EuiFlexGroup {...queryBarFlexGroupProps}>
+                {props.dataViewPickerOverride || renderDataViewsPicker()}
+                {renderQueryInput()}
+                {props.renderQueryInputAppend?.()}
+                {shouldShowDatePickerAsBadge() && props.filterBar}
+                {props.esqlApproximation && (
+                  <EsqlApproximationToggle
+                    isApproximate={props.esqlApproximation.isApproximate}
+                    onChange={props.esqlApproximation.onChange}
+                    additionalText={props.esqlApproximation.additionalText}
+                    disabled={props.esqlApproximation.disabled}
+                    disabledReason={props.esqlApproximation.disabledReason}
+                  />
+                )}
+                {renderDatePickerWithUpdateBtn()}
+              </EuiFlexGroup>
+              {!shouldShowDatePickerAsBadge() && props.filterBar}
+              {renderESQLEditor()}
+            </>
+          ))}
+      </FilterBarContextProvider>
     );
   },
   ({ query: prevQuery, ...prevProps }, { query: nextQuery, ...nextProps }) => {

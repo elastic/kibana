@@ -62,14 +62,12 @@ const DEFAULT_PAYLOAD = {
 const DEFAULT_CONVERSE_REQUEST_PAYLOAD = {
   messages: DEFAULT_MESSAGES,
   inferenceConfig: { stopSequences: ['\n\nHuman:'] },
-  toolConfig: {},
   modelId: DEFAULT_MODEL,
 };
 
 const DEFAULT_CONVERSE_STREAM_REQUEST_PAYLOAD = {
   messages: DEFAULT_MESSAGES,
   inferenceConfig: { stopSequences: ['\n\nHuman:'] },
-  toolConfig: {},
   modelId: DEFAULT_MODEL,
 };
 
@@ -153,15 +151,45 @@ describe('BedrockConnector', () => {
               'Content-Type': 'application/json',
             },
             host: 'bedrock-runtime.us-east-1.amazonaws.com',
+            region: 'us-east-1',
             path: `/model/${encodedModel}/invoke`,
             service: 'bedrock',
           },
           { accessKeyId: '123', secretAccessKey: 'secret' }
         );
       });
+
+      it('passes an explicit region to the signer for custom endpoints', async () => {
+        mockSigner.mockClear();
+        const customConnector = new BedrockConnector({
+          configurationUtilities: actionsConfigMock.create(),
+          connector: { id: '1', type: CONNECTOR_ID },
+          config: {
+            apiUrl: 'https://custom.endpoint.example',
+            region: 'us-west-1',
+            defaultModel: DEFAULT_MODEL,
+          },
+          secrets: { accessKey: '123', secret: 'secret' },
+          logger,
+          services: actionsMock.createServices(),
+        });
+        // @ts-ignore
+        customConnector.request = mockRequest;
+
+        await customConnector.runApi({ body: DEFAULT_BODY }, connectorUsageCollector);
+
+        expect(mockSigner).toHaveBeenCalledWith(
+          expect.objectContaining({
+            host: 'custom.endpoint.example',
+            region: 'us-west-1',
+            service: 'bedrock',
+          }),
+          { accessKeyId: '123', secretAccessKey: 'secret' }
+        );
+      });
       it('the Bedrock API call is successful with Claude 3 parameters; returns the response formatted for Claude 2 along with usage object', async () => {
         const response = await connector.runApi({ body: DEFAULT_BODY }, connectorUsageCollector);
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             signed: true,
@@ -191,7 +219,7 @@ describe('BedrockConnector', () => {
         // @ts-ignore
         connector.request = mockRequest;
         const response = await connector.runApi({ body: v2Body }, connectorUsageCollector);
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             signed: true,
@@ -254,6 +282,7 @@ describe('BedrockConnector', () => {
               'x-amzn-bedrock-accept': '*/*',
             },
             host: 'bedrock-runtime.us-east-1.amazonaws.com',
+            region: 'us-east-1',
             path: `/model/${encodedModel}/invoke-with-response-stream`,
             service: 'bedrock',
           },
@@ -263,7 +292,7 @@ describe('BedrockConnector', () => {
 
       it('the API call is successful with correct request parameters', async () => {
         await connector.invokeStream(aiAssistantBody, connectorUsageCollector);
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             signed: true,
@@ -479,7 +508,7 @@ describe('BedrockConnector', () => {
 
       it('the API call is successful with correct parameters', async () => {
         const response = await connector.invokeAI(aiAssistantBody, connectorUsageCollector);
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             signed: true,
@@ -523,7 +552,7 @@ describe('BedrockConnector', () => {
           },
           connectorUsageCollector
         );
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             signed: true,
@@ -569,7 +598,7 @@ describe('BedrockConnector', () => {
           },
           connectorUsageCollector
         );
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             signed: true,
@@ -619,7 +648,7 @@ describe('BedrockConnector', () => {
           },
           connectorUsageCollector
         );
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             signed: true,
@@ -760,7 +789,7 @@ describe('BedrockConnector', () => {
 
       it('the API call is successful with correct parameters', async () => {
         const response = await connector.converse(aiAssistantBody, connectorUsageCollector);
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             signed: true,
@@ -776,6 +805,23 @@ describe('BedrockConnector', () => {
         expect(response.output.message!.content[0].text).toEqual(mockResponseString);
       });
 
+      it('forwards maxContentLength to the request when provided', async () => {
+        await connector.converse(
+          { ...aiAssistantBody, maxContentLength: 10 * 1024 * 1024 },
+          connectorUsageCollector
+        );
+
+        expect(mockRequest).toHaveBeenCalledWith(
+          expect.objectContaining({ maxContentLength: 10 * 1024 * 1024 }),
+          connectorUsageCollector
+        );
+      });
+
+      it('does not set maxContentLength when not provided', async () => {
+        await connector.converse(aiAssistantBody, connectorUsageCollector);
+        expect(mockRequest.mock.calls[0][0]).not.toHaveProperty('maxContentLength');
+      });
+
       it('formats messages from user, assistant, and system', async () => {
         const response = await connector.converse(
           {
@@ -788,7 +834,7 @@ describe('BedrockConnector', () => {
           },
           connectorUsageCollector
         );
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             signed: true,
@@ -835,7 +881,7 @@ describe('BedrockConnector', () => {
           },
           connectorUsageCollector
         );
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             signed: true,
@@ -859,7 +905,6 @@ describe('BedrockConnector', () => {
                 },
               ],
               inferenceConfig: {},
-              toolConfig: {},
               system: [{ type: 'text', text: 'This is a system message' }],
               modelId: DEFAULT_MODEL,
             }),
@@ -896,7 +941,7 @@ describe('BedrockConnector', () => {
           },
           connectorUsageCollector
         );
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             signed: true,
@@ -924,7 +969,6 @@ describe('BedrockConnector', () => {
                 },
               ],
               inferenceConfig: {},
-              toolConfig: {},
               system: [{ type: 'text', text: 'This is a system message' }],
               modelId: DEFAULT_MODEL,
             }),
@@ -949,7 +993,6 @@ describe('BedrockConnector', () => {
             data: JSON.stringify({
               messages: [{ role: 'user', content: 'Hello world' }],
               inferenceConfig: { stopSequences: ['\n\nHuman:'] },
-              toolConfig: {},
               modelId: DEFAULT_MODEL,
             }),
             timeout,
@@ -992,6 +1035,7 @@ describe('BedrockConnector', () => {
               'x-amzn-bedrock-accept': '*/*',
             },
             host: 'bedrock-runtime.us-east-1.amazonaws.com',
+            region: 'us-east-1',
             path: `/model/${encodedModel}/converse-stream`,
             service: 'bedrock',
           },
@@ -1001,7 +1045,7 @@ describe('BedrockConnector', () => {
 
       it('the API call is successful with correct request parameters', async () => {
         await connector.converseStream(aiAssistantBody, connectorUsageCollector);
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             signed: true,
@@ -1013,6 +1057,21 @@ describe('BedrockConnector', () => {
             signal: undefined,
             data: JSON.stringify(DEFAULT_CONVERSE_STREAM_REQUEST_PAYLOAD),
           },
+          connectorUsageCollector
+        );
+      });
+
+      it('forwards maxContentLength to the streaming request when provided', async () => {
+        await connector.converseStream(
+          { ...aiAssistantBody, maxContentLength: 10 * 1024 * 1024 },
+          connectorUsageCollector
+        );
+
+        expect(mockRequest).toHaveBeenCalledWith(
+          expect.objectContaining({
+            responseType: 'stream',
+            maxContentLength: 10 * 1024 * 1024,
+          }),
           connectorUsageCollector
         );
       });
@@ -1042,7 +1101,6 @@ describe('BedrockConnector', () => {
               inferenceConfig: {
                 stopSequences: ['\n\nHuman:'],
               },
-              toolConfig: {},
               modelId: DEFAULT_MODEL,
             }),
             timeout,
@@ -1286,7 +1344,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     });
     it('the create dashboard API call returns available: true when user has correct permissions', async () => {
       const response = await connector.getDashboard({ dashboardId: '123' });
-      expect(mockRequest).toBeCalledTimes(1);
+      expect(mockRequest).toHaveBeenCalledTimes(1);
       expect(mockRequest).toHaveBeenCalledWith({
         path: '/_security/user/_has_privileges',
         method: 'POST',
@@ -1305,7 +1363,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     it('the create dashboard API call returns available: false when user has correct permissions', async () => {
       mockRequest.mockResolvedValue({ has_all_requested: false });
       const response = await connector.getDashboard({ dashboardId: '123' });
-      expect(mockRequest).toBeCalledTimes(1);
+      expect(mockRequest).toHaveBeenCalledTimes(1);
       expect(mockRequest).toHaveBeenCalledWith({
         path: '/_security/user/_has_privileges',
         method: 'POST',
@@ -1325,7 +1383,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     it('the create dashboard API call returns available: false when init dashboard fails', async () => {
       mockGenAi.mockResolvedValue({ success: false });
       const response = await connector.getDashboard({ dashboardId: '123' });
-      expect(mockRequest).toBeCalledTimes(1);
+      expect(mockRequest).toHaveBeenCalledTimes(1);
       expect(mockRequest).toHaveBeenCalledWith({
         path: '/_security/user/_has_privileges',
         method: 'POST',

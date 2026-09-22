@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/input-control-vis-plugin",
   "owner": [
-    "@elastic/kibana-presentation"
+    "@elastic/kibana-dashboards"
   ],
   "group": "platform",
   "visibility": "private",
@@ -21,8 +21,7 @@
       "uiActions"
     ],
     "requiredBundles": [
-      "kibanaReact",
-      "embeddable"
+      "kibanaReact"
     ]
   }
 }

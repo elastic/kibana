@@ -13,12 +13,14 @@ import { run } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
 import * as Eslint from './eslint';
+import * as Oxlint from './oxlint';
 import * as Stylelint from './stylelint';
-import { getFilesForCommit, checkFileCasing } from './precommit_hook';
-import { checkSemverRanges } from './no_pkg_semver_ranges';
-import { load as yamlLoad } from 'js-yaml';
-import { readFile } from 'fs/promises';
 import { extname } from 'path';
+
+import { getFilesForCommit, runFileCasingCheck } from './precommit_hook';
+import { checkSemverRanges } from './no_pkg_semver_ranges';
+import { parseAllDocuments as yamlParseAllDocuments } from 'yaml';
+import { readFile } from 'fs/promises';
 
 class CheckResult {
   constructor(checkName) {
@@ -71,7 +73,7 @@ class FileCasingCheck extends PrecommitCheck {
   }
 
   async execute(log, files) {
-    await checkFileCasing(log, files);
+    await runFileCasingCheck(log, files);
   }
 }
 
@@ -84,9 +86,13 @@ class LinterCheck extends PrecommitCheck {
   async execute(log, files, options) {
     const filesToLint = await this.linter.pickFilesToLint(log, files);
     if (filesToLint.length > 0) {
-      await this.linter.lintFiles(log, filesToLint, {
+      const result = await this.linter.lintFiles(log, filesToLint, {
         fix: options.fix,
       });
+
+      if (result?.failedFiles?.length > 0) {
+        throw new Error(`${this.name} errors in ${result.failedFiles.length} file(s)`);
+      }
 
       if (options.fix && options.stage) {
         const simpleGit = new SimpleGit(REPO_ROOT);
@@ -120,9 +126,11 @@ class YamlLintCheck extends PrecommitCheck {
     for (const file of yamlFiles) {
       try {
         const content = await readFile(file.getAbsolutePath(), 'utf8');
-        yamlLoad(content, {
-          filename: file.getRelativePath(),
-        });
+        const docs = yamlParseAllDocuments(content);
+        const parseErrors = docs.flatMap((doc) => doc.errors);
+        if (parseErrors.length > 0) {
+          throw new Error(parseErrors.map((e) => e.message).join('\n'));
+        }
       } catch (error) {
         errors.push(`Error in ${file.getRelativePath()}:\n${error.message}`);
       }
@@ -153,6 +161,10 @@ class SemverRangesCheck extends PrecommitCheck {
   }
 }
 
+// oxlint and ESLint both autofix the same JS/TS files, so oxlint runs alone before the
+// parallel checks (matching the CI order in .buildkite/scripts/steps/lint.sh).
+const OXLINT_CHECK = new LinterCheck('oxlint', Oxlint);
+
 const PRECOMMIT_CHECKS = [
   new FileCasingCheck(),
   new LinterCheck('ESLint', Eslint),
@@ -161,11 +173,20 @@ const PRECOMMIT_CHECKS = [
   new SemverRangesCheck(),
 ];
 
+async function runTimed(check, log, files, options) {
+  const startTime = Date.now();
+  const result = await check.runSafely(log, files, options);
+  log.verbose(`${check.name} completed in ${Date.now() - startTime}ms`);
+  return result;
+}
+
 run(
   async ({ log, flags }) => {
     process.env.IS_KIBANA_PRECOMIT_HOOK = 'true';
 
-    const files = await getFilesForCommit(flags.ref);
+    const files = await getFilesForCommit(flags.ref, {
+      includeUntracked: Boolean(flags['include-untracked']),
+    });
 
     const maxFilesCount = flags['max-files']
       ? Number.parseInt(String(flags['max-files']), 10)
@@ -182,18 +203,12 @@ run(
     }
 
     log.verbose('Running pre-commit checks...');
-    const results = await Promise.all(
-      PRECOMMIT_CHECKS.map(async (check) => {
-        const startTime = Date.now();
-        const result = await check.runSafely(log, files, {
-          fix: flags.fix,
-          stage: flags.stage,
-        });
-        const duration = Date.now() - startTime;
-        log.verbose(`${check.name} completed in ${duration}ms`);
-        return result;
-      })
-    );
+    const options = { fix: flags.fix, stage: flags.stage };
+    const oxlintResult = await runTimed(OXLINT_CHECK, log, files, options);
+    const results = [
+      oxlintResult,
+      ...(await Promise.all(PRECOMMIT_CHECKS.map((check) => runTimed(check, log, files, options)))),
+    ];
 
     const failedChecks = results.filter((result) => !result.succeeded);
 
@@ -214,16 +229,18 @@ run(
     Run checks on files that are staged for commit by default
   `,
     flags: {
-      boolean: ['fix', 'stage'],
+      boolean: ['fix', 'stage', 'include-untracked'],
       string: ['max-files', 'ref'],
       default: {
         fix: false,
         stage: true,
+        'include-untracked': false,
       },
       help: `
         --fix              Execute checks with possible fixes
         --max-files        Max files number to check against. If exceeded the script will skip the execution
         --ref              Run checks against any git ref files (example HEAD or <commit_sha>) instead of running against staged ones
+        --include-untracked Include untracked files in addition to diff files
         --no-stage         By default when using --fix the changes are staged, use --no-stage to disable that behavior
       `,
     },

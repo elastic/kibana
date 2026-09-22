@@ -8,6 +8,7 @@
  */
 import type { RecommendedQuery } from '@kbn/esql-types';
 import type { ISuggestionItem } from '../../commands/registry/types';
+import { SuggestionCategory } from './utils/sorting/types';
 
 /**
  * This function maps the recommended queries from the extensions to the autocomplete suggestions.
@@ -24,7 +25,7 @@ export const mapRecommendedQueriesFromExtensions = (
       detail: extension.name ?? '',
       ...(extension.description ? { documentation: { value: extension.description } } : {}),
       kind: 'Issue',
-      sortText: 'D',
+      category: SuggestionCategory.RECOMMENDED_QUERY_WITH_PRIORITY,
     };
   });
 

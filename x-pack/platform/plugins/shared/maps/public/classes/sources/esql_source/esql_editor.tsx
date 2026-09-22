@@ -90,7 +90,6 @@ export function ESQLEditor(props: Props) {
         errors={error ? [error] : undefined}
         warning={warning}
         editorIsInline
-        hideRunQueryText
         isLoading={isLoading}
         disableSubmitAction={isEqual(localQuery, props.esql)}
       />

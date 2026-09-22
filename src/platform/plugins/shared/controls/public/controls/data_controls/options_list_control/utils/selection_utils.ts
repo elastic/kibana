@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { OptionsListSelection } from '@kbn/controls-schemas';
 import { getSelectionAsFieldType } from '../../../../../common/options_list';
 import type { initializeEditorStateManager } from '../editor_state_manager';
 import { OptionsListStrings } from '../options_list_strings';
@@ -22,7 +23,7 @@ export const deselectOption = ({
 }: {
   api: OptionsListControlApi;
   selectionsManager: ReturnType<typeof initializeSelectionsManager>;
-  temporaryStateManager: ReturnType<typeof initializeTemporayStateManager>;
+  temporaryStateManager: ReturnType<typeof initializeTemporayStateManager<OptionsListSelection>>;
   key: string | undefined;
 }) => {
   const field = api.field$.getValue();
@@ -59,7 +60,7 @@ export const makeSelection = ({
 }: {
   api: OptionsListControlApi;
   selectionsManager: ReturnType<typeof initializeSelectionsManager>;
-  temporaryStateManager: ReturnType<typeof initializeTemporayStateManager>;
+  temporaryStateManager: ReturnType<typeof initializeTemporayStateManager<OptionsListSelection>>;
   editorStateManager: ReturnType<typeof initializeEditorStateManager>;
   key: string | undefined;
   showOnlySelected: boolean | undefined;
@@ -143,7 +144,7 @@ export const clearSelections = ({
   temporaryStateManager,
 }: {
   selectionsManager: ReturnType<typeof initializeSelectionsManager>;
-  temporaryStateManager: ReturnType<typeof initializeTemporayStateManager>;
+  temporaryStateManager: ReturnType<typeof initializeTemporayStateManager<OptionsListSelection>>;
 }) => {
   if (selectionsManager.api.selectedOptions$.getValue()?.length)
     selectionsManager.api.setSelectedOptions([]);

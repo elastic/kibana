@@ -23,6 +23,7 @@ import type {
   BrushTriggerEvent,
   ClickTriggerEvent,
   MultiClickTriggerEvent,
+  AnnotationClickTriggerEvent,
 } from '@kbn/charts-plugin/public';
 import type { ChartSizeEvent } from '@kbn/chart-expressions-common';
 import type { Reference } from '@kbn/content-management-utils';
@@ -33,7 +34,7 @@ import {
   type LENS_NUMBER_DISPLAY,
   type LENS_LAYER_TYPES,
 } from './constants';
-import type { SeriesType, XYState } from './xy/types';
+import type { SeriesType, XYVisualizationState } from './xy/types';
 import type { LensTagCloudState } from './tagcloud/types';
 import type { LensPartitionVisualizationState } from './partition/types';
 import type { MetricVisualizationState } from './metric/types';
@@ -90,7 +91,7 @@ export type LensLayerType = (typeof LENS_LAYER_TYPES)[keyof typeof LENS_LAYER_TY
 export type CollapseFunction = (typeof LENS_COLLAPSE_FUNCTIONS)[number];
 
 export type LensConfiguration =
-  | XYState
+  | XYVisualizationState
   | DatatableVisualizationState
   | LensPartitionVisualizationState
   | MetricVisualizationState
@@ -108,9 +109,9 @@ interface AddLayerButtonProps<T> {
   isInlineEditing?: boolean;
 }
 
-interface VisualizationStateFromContextChangeProps {
-  suggestions: Suggestion[];
-  context: VisualizeEditorContext;
+interface VisualizationStateFromContextChangeProps<T = unknown> {
+  suggestions: Array<Suggestion<T>>;
+  context: VisualizeEditorContext<T extends LensConfiguration ? T : LensConfiguration>;
 }
 
 export type AddLayerFunction<T = unknown> = (
@@ -184,6 +185,7 @@ export type TriggerEvent =
   | BrushTriggerEvent
   | ClickTriggerEvent
   | MultiClickTriggerEvent
+  | AnnotationClickTriggerEvent
   | LensTableRowContextMenuEvent
   | LensAlertRulesEvent;
 
@@ -197,6 +199,7 @@ export interface ILensInterpreterRenderHandlers extends IInterpreterRenderHandle
     event:
       | ClickTriggerEvent
       | BrushTriggerEvent
+      | AnnotationClickTriggerEvent
       | LensEditEvent<LensEditSupportedActions>
       | LensTableRowContextMenuEvent
       | ChartSizeEvent
@@ -245,6 +248,12 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
    * Supported triggers of this visualization type when embedded somewhere
    */
   triggers?: string[];
+  /**
+   * Optional priority used to sort suggestions when multiple visualizations
+   * compete. Higher values are sorted first. Defaults to 0.
+   */
+  suggestionPriority?: number;
+
   /**
    * Visualizations must provide at least one type for the chart switcher,
    * but can register multiple subtypes
@@ -480,7 +489,10 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
    * The frame will call this function on all visualizations at few stages (pre-build/build error) in order
    * to provide more context to the error and show it to the user
    */
-  getUserMessages?: (state: T, deps: { frame: FramePublicAPI }) => UserMessage[];
+  getUserMessages?: (
+    state: T,
+    deps: { frame: FramePublicAPI; setState?: StateSetter<T> }
+  ) => UserMessage[];
 
   /**
    * On Edit events the frame will call this to know what's going to be the next visualization state
@@ -507,7 +519,7 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
   getRenderEventCounters?: (state: T) => string[];
 
   getSuggestionFromConvertToLensContext?: (
-    props: VisualizationStateFromContextChangeProps
+    props: VisualizationStateFromContextChangeProps<T>
   ) => Suggestion<T> | undefined;
 
   isEqual?: (

@@ -4,25 +4,25 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/discover-utils'
-type: unknown
+layer: unknown
 owners:
-  defaultOwner: '@elastic/kibana-data-discovery'
-toolchain:
+  defaultOwner: '@elastic/kibana-discover'
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/discover-utils'
+  title: '@kbn/discover-utils'
   description: Moon project for @kbn/discover-utils
   channel: ''
-  owner: '@elastic/kibana-data-discovery'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-discover-utils
+  owner: '@elastic/kibana-discover'
+  sourceRoot: src/platform/packages/shared/kbn-discover-utils
 dependsOn:
   - '@kbn/data-service'
   - '@kbn/data-views-plugin'
   - '@kbn/data-view-utils'
   - '@kbn/es-query'
   - '@kbn/esql-types'
+  - '@kbn/field-formats-common'
   - '@kbn/field-formats-plugin'
   - '@kbn/field-types'
   - '@kbn/i18n'
@@ -34,6 +34,14 @@ dependsOn:
   - '@kbn/core-ui-settings-browser'
   - '@kbn/apm-types'
   - '@kbn/core-chrome-app-menu-components'
+  - '@kbn/core-http-browser'
+  - '@kbn/esql-utils'
+  - '@kbn/kibana-utils-plugin'
+  - '@kbn/resizable-layout'
+  - '@kbn/search-errors'
+  - '@kbn/utility-types'
+  - '@kbn/esql-language'
+  - '@kbn/cps'
 tags:
   - shared-common
   - package
@@ -46,16 +54,6 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

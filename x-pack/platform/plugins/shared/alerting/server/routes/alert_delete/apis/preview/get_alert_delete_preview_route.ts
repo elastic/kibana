@@ -6,7 +6,7 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { AlertDeletePreviewResponseV1 } from '../../../../../common/routes/alert_delete';
 import { alertDeletePreviewQuerySchemaV1 } from '../../../../../common/routes/alert_delete';
 import type { ILicenseState } from '../../../../lib';

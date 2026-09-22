@@ -12,32 +12,30 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { ScopedDiscoverEBTManager } from '../../../../../ebt_manager';
 import type { ConnectedCustomizationService } from '../../../../../customizations';
 import type { ScopedProfilesManager } from '../../../../../context_awareness';
-import type { DiscoverStateContainer } from '../../discover_state';
+import type { DiscoverDataStateContainer } from '../../discover_data_state_container';
 import {
   createRuntimeStateManager,
   type ReactiveTabRuntimeState,
   type RuntimeStateManager,
-  type UnifiedHistogramConfig,
 } from '../runtime_state';
+import type { CascadedDocumentsFetcher } from '../../../data_fetching/cascaded_documents_fetcher';
 
 export function getTabRuntimeStateMock(
   attrs: Partial<ReactiveTabRuntimeState> = {}
 ): ReactiveTabRuntimeState {
   return {
-    stateContainer$: new BehaviorSubject<DiscoverStateContainer | undefined>(undefined),
+    dataStateContainer$: new BehaviorSubject<DiscoverDataStateContainer | undefined>(undefined),
     customizationService$: new BehaviorSubject<ConnectedCustomizationService | undefined>(
       undefined
     ),
-    unifiedHistogramConfig$: new BehaviorSubject<UnifiedHistogramConfig>({
-      layoutPropsMap: {},
-    }),
-    scopedProfilesManager$: new BehaviorSubject<ScopedProfilesManager>(
-      {} as unknown as ScopedProfilesManager
-    ),
-    scopedEbtManager$: new BehaviorSubject<ScopedDiscoverEBTManager>(
-      {} as unknown as ScopedDiscoverEBTManager
+    unifiedHistogramConfig$: new BehaviorSubject({ layoutPropsMap: {} }),
+    scopedProfilesManager$: new BehaviorSubject({} as ScopedProfilesManager),
+    scopedEbtManager$: new BehaviorSubject({} as ScopedDiscoverEBTManager),
+    cascadedDocumentsFetcher$: new BehaviorSubject<CascadedDocumentsFetcher>(
+      {} as CascadedDocumentsFetcher
     ),
     currentDataView$: new BehaviorSubject<DataView | undefined>(undefined),
+    unsubscribeFn$: new BehaviorSubject<(() => void) | undefined>(undefined),
     ...attrs,
   };
 }

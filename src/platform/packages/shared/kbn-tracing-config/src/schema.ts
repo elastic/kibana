@@ -32,6 +32,9 @@ const tracingExportConfigSchema: Type<TracingExporterConfig> = schema.oneOf([
   schema.object({
     http: otlpExportConfigSchema,
   }),
+  schema.object({
+    proto: otlpExportConfigSchema,
+  }),
 ]);
 
 /**
@@ -40,7 +43,8 @@ const tracingExportConfigSchema: Type<TracingExporterConfig> = schema.oneOf([
 export const tracingConfigSchema: Type<TracingConfig> = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
   sample_rate: schema.number({ defaultValue: 1, min: 0, max: 1 }),
-  exporters: schema.oneOf([tracingExportConfigSchema, schema.arrayOf(tracingExportConfigSchema)], {
-    defaultValue: [],
-  }),
+  exporters: schema.oneOf(
+    [tracingExportConfigSchema, schema.arrayOf(tracingExportConfigSchema, { maxSize: 25 })],
+    { defaultValue: [] }
+  ),
 });

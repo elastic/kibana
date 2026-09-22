@@ -22,7 +22,7 @@ exports[`install footer should render 1`] = `
           class="emotion-euiButtonDisplayContent"
         >
           <span
-            class="eui-textTruncate"
+            class="eui-textTruncate css-13ifi6d-m"
           >
             Add data
           </span>

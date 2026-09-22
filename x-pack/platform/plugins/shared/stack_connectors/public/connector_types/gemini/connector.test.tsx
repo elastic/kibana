@@ -128,7 +128,7 @@ describe('GeminiConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
       fireEvent.click(getByTestId('link-gen-ai-token-dashboard'));
-      expect(navigateToUrl).toHaveBeenCalledWith(`https://dashboardurl.com/123`);
+      expect(navigateToUrl).toHaveBeenCalledWith(`https://dashboardurl.com/gemini`);
     });
   });
 

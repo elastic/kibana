@@ -36,7 +36,7 @@ exports[`should render 1`] = `
     >
       <EuiButtonEmpty
         data-test-subj="mapsCustomIconPanel-add"
-        iconType="plusInCircleFilled"
+        iconType="plusCircle"
         onClick={[Function]}
         size="xs"
       >
@@ -105,7 +105,7 @@ exports[`should render with custom icons 1`] = `
     >
       <EuiButtonEmpty
         data-test-subj="mapsCustomIconPanel-add"
-        iconType="plusInCircleFilled"
+        iconType="plusCircle"
         onClick={[Function]}
         size="xs"
       >

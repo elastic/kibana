@@ -23,8 +23,11 @@ import {
 } from 'rxjs';
 
 import type { Filter } from '@kbn/es-query';
-import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
-import { apiAppliesFilters, type AppliesFilters } from '@kbn/presentation-publishing';
+import {
+  combineCompatibleChildrenApis,
+  apiAppliesFilters,
+  type AppliesFilters,
+} from '@kbn/presentation-publishing';
 
 import type { initializeLayoutManager } from './layout_manager';
 import type { initializeSettingsManager } from './settings_manager';
@@ -112,7 +115,7 @@ export const initializeFiltersManager = (
     .pipe(
       switchMap(async () => {
         await new Promise((resolve) => {
-          unpublishedChildFilters$.pipe(skip(1), first()).subscribe(resolve);
+          unpublishedChildFilters$.pipe(first()).subscribe(resolve);
         });
       })
     )

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { apiCanAddNewPanel } from '@kbn/presentation-containers';
+import { apiCanAddNewPanel } from '@kbn/presentation-publishing';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { SearchSerializedState } from './types';
@@ -18,7 +18,7 @@ export const createSearchPanelAction = {
   id: ADD_SEARCH_ACTION_ID,
   grouping: [embeddableExamplesGrouping],
   getDisplayName: () => 'Search example',
-  getIconType: () => 'search',
+  getIconType: () => 'magnify',
   isCompatible: async ({ embeddable }: EmbeddableApiContext) => {
     return apiCanAddNewPanel(embeddable);
   },

@@ -9,32 +9,23 @@ import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { ALL_VALUE } from '@kbn/slo-schema';
 
 type SLO = Pick<SLOWithSummaryResponse, 'id' | 'instanceId'>;
-export class ActiveAlerts {
-  private data: Map<string, number> = new Map();
 
-  constructor(initialData?: Record<string, number>) {
-    if (initialData) {
-      Object.keys(initialData).forEach((key) => this.data.set(key, initialData[key]));
-    }
+const toKey = (slo: SLO): string => {
+  const instanceId = slo.instanceId ?? ALL_VALUE;
+  if (instanceId === ALL_VALUE) {
+    return slo.id;
   }
+  return `${slo.id}|${instanceId}`;
+};
 
-  set(slo: SLO, value: number) {
-    this.data.set(`${slo.id}|${slo.instanceId ?? ALL_VALUE}`, value);
+export class ActiveAlerts {
+  private data: Map<string, number>;
+
+  constructor(entries: Array<[SLO, number]> = []) {
+    this.data = new Map(entries.map(([slo, count]) => [toKey(slo), count]));
   }
 
   get(slo: SLO) {
-    return this.data.get(`${slo.id}|${slo.instanceId ?? ALL_VALUE}`);
-  }
-
-  has(slo: SLO) {
-    return this.data.has(`${slo.id}|${slo.instanceId ?? ALL_VALUE}`);
-  }
-
-  delete(slo: SLO) {
-    return this.data.delete(`${slo.id}|${slo.instanceId ?? ALL_VALUE}`);
-  }
-
-  clear() {
-    return this.data.clear();
+    return this.data.get(toKey(slo));
   }
 }

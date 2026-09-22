@@ -24,7 +24,6 @@ import { FormattedMessage, useI18n } from '@kbn/i18n-react';
 
 import type { EntityType } from '../../../../../common/entity_analytics/types';
 import { useEntityAnalyticsTypes } from '../../../hooks/use_enabled_entity_types';
-import { EntityTypeToIdentifierField } from '../../../../../common/entity_analytics/types';
 
 import {
   CRITICALITY_CSV_MAX_SIZE_BYTES,
@@ -42,9 +41,9 @@ interface AssetCriticalityFilePickerStepProps {
 type SupportedEntityType = EntityType.user | EntityType.host | EntityType.service;
 
 const entityCSVMap: Record<SupportedEntityType, string> = {
-  user: `user,user-001,low_impact\nuser,user-002,medium_impact`,
-  host: `host,host-001,extreme_impact`,
-  service: `service,service-001,extreme_impact`,
+  user: `user,user001@company.com,user-001,User One,,,,low_impact\nuser,user002@abc.biz,user-002,,,,,medium_impact`,
+  host: `host,,,,host-001,xyz.com,,extreme_impact`,
+  service: `service,,,,,,service-001,extreme_impact`,
 };
 
 export const AssetCriticalityFilePickerStep: React.FC<AssetCriticalityFilePickerStepProps> =
@@ -63,10 +62,12 @@ export const AssetCriticalityFilePickerStep: React.FC<AssetCriticalityFilePicker
 
     const entityTypes = useEntityAnalyticsTypes();
 
-    const sampleCSVContent = entityTypes
-      .filter((entity): entity is SupportedEntityType => entity in entityCSVMap)
-      .map((entity) => entityCSVMap[entity])
-      .join('\n');
+    const sampleCSVContent = [
+      'type,user.email,user.name,user.full_name,host.name,host.domain,service.name,criticality_level',
+      ...entityTypes
+        .filter((entity): entity is SupportedEntityType => entity in entityCSVMap)
+        .map((entity) => entityCSVMap[entity]),
+    ].join('\n');
 
     const i18nOrList = (items: string[]) =>
       formatListToParts(items, {
@@ -121,30 +122,29 @@ export const AssetCriticalityFilePickerStep: React.FC<AssetCriticalityFilePicker
           <ul className={listStyle}>
             <li>
               <FormattedMessage
-                defaultMessage="Entity type: Indicate whether the entity is a {entityTypes}"
-                id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.assetTypeDescription"
+                defaultMessage={`Header row: The first row of the file must contain a header. This specifies the columns in the file. "type" and "criticality_level" must be columns in the file.`}
+                id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.headerDescription"
+              />
+            </li>
+            <li>
+              <FormattedMessage
+                defaultMessage={`Entity type: Indicate whether the entity is a {entityTypes}. The header for this column must be "type".`}
+                id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.assetTypeDescriptionV2"
                 values={{
                   entityTypes: i18nOrList(entityTypes),
                 }}
               />
             </li>
             <li>
-              {
-                <FormattedMessage
-                  defaultMessage="Identifier: Specify the entity's {fieldsName}"
-                  id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.assetIdentifierDescription"
-                  values={{
-                    fieldsName: i18nOrList(
-                      entityTypes.map((type) => EntityTypeToIdentifierField[type])
-                    ),
-                  }}
-                />
-              }
+              <FormattedMessage
+                defaultMessage={`Identifier fields: Specify fields that identify the entity. Examples include "user.name", "user.email", "user.username", "event.module", "host.name", "host.hostname". Entities that match ALL of the identifiers specified in a row will be updated.`}
+                id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.assetIdentifierDescriptionV2"
+              />
             </li>
             <li>
               <FormattedMessage
-                defaultMessage="Criticality level: Specify any one of {labels}"
-                id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.assetCriticalityLabels"
+                defaultMessage={`Criticality level: Specify any one of {labels}. The header for this column must be "criticality_level".`}
+                id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.assetCriticalityLabelsV2"
                 values={{
                   labels: <EuiCode>{ValidCriticalityLevels.join(', ')}</EuiCode>,
                 }}

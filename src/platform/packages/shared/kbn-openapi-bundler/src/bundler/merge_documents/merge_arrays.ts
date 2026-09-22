@@ -7,6 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isPlainObject } from 'lodash';
+
+function sortAndStringify(object: object | unknown[]): string {
+  const keys = new Set<string>();
+  JSON.stringify(object, (key, value) => {
+    keys.add(key);
+    return value;
+  });
+  return JSON.stringify(object, Array.from(keys).sort());
+}
+
 /**
  * Merges source arrays by merging array items and omitting duplicates.
  * Duplicates checked by exacts match.
@@ -33,6 +44,9 @@ export function mergeArrays<T>(sources: Array<readonly T[]>): T[] {
 
 function toString(value: unknown): string {
   try {
+    if (isPlainObject(value) || Array.isArray(value)) {
+      return sortAndStringify(value as {} | unknown[]);
+    }
     return JSON.stringify(value);
   } catch {
     throw new Error('Unable to merge arrays - encountered value is not serializable');

@@ -10,17 +10,14 @@ import { expect, type Page, type Locator } from '@playwright/test';
 export class AutoDetectFlowPage {
   page: Page;
 
-  private readonly copyToClipboardButton: Locator;
   private readonly receivedDataIndicator: Locator;
   private readonly autoDetectSystemIntegrationActionLink: Locator;
   private readonly codeBlock: Locator;
   private readonly logsDataReceivedIndicator: Locator;
+  private readonly customLogsExploreButton: Locator;
 
   constructor(page: Page) {
     this.page = page;
-    this.copyToClipboardButton = this.page.getByTestId(
-      'observabilityOnboardingCopyToClipboardButton'
-    );
     this.receivedDataIndicator = this.page
       .getByTestId('observabilityOnboardingAutoDetectPanelDataReceivedProgressIndicator')
       .getByText('Your data is ready to explore!');
@@ -31,10 +28,15 @@ export class AutoDetectFlowPage {
     this.logsDataReceivedIndicator = this.page
       .getByTestId('observabilityOnboardingAutoDetectPanelDataReceivedProgressIndicator')
       .getByText(/logs.*ready|data.*ready|ready.*explore/i);
+    this.customLogsExploreButton = this.page.getByTestId(
+      'observabilityOnboardingAutoDetectPanelButton'
+    );
   }
 
-  public async copyToClipboard() {
-    await this.copyToClipboardButton.click();
+  /** Reads the install command. v2 host pages no longer render the standalone copy button. */
+  public async getInstallCommand(): Promise<string> {
+    await this.codeBlock.waitFor({ state: 'visible' });
+    return ((await this.codeBlock.textContent()) ?? '').trim();
   }
 
   public async assertVisibilityCodeBlock() {
@@ -57,5 +59,17 @@ export class AutoDetectFlowPage {
 
   public async clickAutoDetectSystemIntegrationCTA() {
     await this.autoDetectSystemIntegrationActionLink.click();
+  }
+
+  public async hasCustomLogsExploreButtons(): Promise<boolean> {
+    return (await this.customLogsExploreButton.count()) > 0;
+  }
+
+  public async clickCustomLogsExploreInPopup(): Promise<Page> {
+    const [newPage] = await Promise.all([
+      this.page.waitForEvent('popup'),
+      this.customLogsExploreButton.first().click(),
+    ]);
+    return newPage;
   }
 }

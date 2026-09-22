@@ -17,6 +17,19 @@ import * as i18n from '../translations';
 
 jest.mock('../hooks/use_show_eis_promotional_content');
 
+const mockToursIsEnabled = jest.fn(() => true);
+jest.mock('../hooks/use_kibana', () => ({
+  useKibana: () => ({
+    services: {
+      notifications: {
+        tours: {
+          isEnabled: mockToursIsEnabled,
+        },
+      },
+    },
+  }),
+}));
+
 describe('InferenceCostsTransparencyTour', () => {
   const promoId = 'tokenPromo';
   const dataId = `${promoId}-inference-costs-tour`;
@@ -26,13 +39,19 @@ describe('InferenceCostsTransparencyTour', () => {
     props: Partial<React.ComponentProps<typeof InferenceCostsTransparencyTour>> = {}
   ) =>
     renderWithI18n(
-      <InferenceCostsTransparencyTour promoId={promoId} isCloudEnabled={true} {...props}>
+      <InferenceCostsTransparencyTour
+        promoId={promoId}
+        isCloudEnabled={true}
+        fieldName="semantic_text"
+        {...props}
+      >
         <span data-test-subj={childTestId} />
       </InferenceCostsTransparencyTour>
     );
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockToursIsEnabled.mockReturnValue(true);
   });
 
   it('renders children only when promo is not visible', () => {
@@ -62,6 +81,22 @@ describe('InferenceCostsTransparencyTour', () => {
     expect(screen.getByTestId(childTestId)).toBeInTheDocument();
 
     // Tour should NOT be rendered even though promo is visible
+    expect(screen.queryByTestId(dataId)).not.toBeInTheDocument();
+  });
+
+  it('renders children and does not render the tour when tours is disabled', () => {
+    (useShowEisPromotionalContent as jest.Mock).mockReturnValue({
+      isPromoVisible: true,
+      onDismissPromo: jest.fn(),
+    });
+    mockToursIsEnabled.mockReturnValue(false);
+
+    renderComponent();
+
+    // Child should be rendered
+    expect(screen.getByTestId(childTestId)).toBeInTheDocument();
+
+    // Tour should NOT be rendered
     expect(screen.queryByTestId(dataId)).not.toBeInTheDocument();
   });
 
@@ -130,7 +165,11 @@ describe('InferenceCostsTransparencyTour', () => {
     expect(mockOnDismissPromo).toHaveBeenCalledTimes(1);
 
     rerender(
-      <InferenceCostsTransparencyTour promoId={promoId} isCloudEnabled={true}>
+      <InferenceCostsTransparencyTour
+        promoId={promoId}
+        isCloudEnabled={true}
+        fieldName="semantic_text"
+      >
         <span data-test-subj={childTestId} />
       </InferenceCostsTransparencyTour>
     );

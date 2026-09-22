@@ -29,6 +29,7 @@ export const INTEGRATIONS_SEARCHBAR = {
   BADGE: 'epmList.categoryBadge',
   REMOVE_BADGE_BUTTON: 'epmList.categoryBadge.closeBtn',
 };
+export const BREAKING_CHANGE_CHECKBOX_SEL = '[data-test-subj="breakingChangeCheckbox"]';
 export const INSTALLED_INTEGRATIONS_DASHBOARDS_LINK = 'installedIntegrationsDashboardsLink';
 export const INSTALLED_INTEGRATIONS_TABLE_ROW = 'installedIntegrationsTableRow';
 

@@ -153,6 +153,7 @@ describe('getAttackDiscoveryGenerationRoute', () => {
         authenticatedUser: mockAuthenticatedUser,
         eventLogIndex: 'event-log-index',
         executionUuid: 'test-uuid',
+        ignoreDismissed: true,
         logger: mockLogger,
         spaceId: 'default',
       });

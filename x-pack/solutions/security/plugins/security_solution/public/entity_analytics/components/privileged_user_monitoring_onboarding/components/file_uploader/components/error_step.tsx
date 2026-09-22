@@ -53,7 +53,7 @@ export const PrivilegedUserMonitoringErrorStep: React.FC<{
     );
   }
 
-  if (result === undefined || result.stats.failed === 0) {
+  if (result === undefined || result.stats.failedOperations === 0) {
     return null;
   }
 
@@ -76,14 +76,14 @@ export const PrivilegedUserMonitoringErrorStep: React.FC<{
           <FormattedMessage
             defaultMessage="{assignedCount, plural, one {# privileged user assignment succeeded.} other {# privileged user assignments succeeded.}}"
             id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.fileUploader.errorStep.assignedEntities"
-            values={{ assignedCount: result.stats.successful }}
+            values={{ assignedCount: result.stats.successfulOperations }}
           />
         </EuiText>
         <EuiText size="s" color={euiTheme.colors.danger}>
           <FormattedMessage
             defaultMessage="{failedCount, plural, one {# privileged user assignment failed.} other {# privileged user assignments failed.}}"
             id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.fileUploader.errorStep.failedEntities"
-            values={{ failedCount: result.stats.failed }}
+            values={{ failedCount: result.stats.failedOperations }}
           />
         </EuiText>
 

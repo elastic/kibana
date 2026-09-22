@@ -19,6 +19,7 @@
       "_transform/{transform_id}/_start"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-transform-start-transform",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-transform-start-transform",
     "availability": {
       "stack": true,
       "serverless": true

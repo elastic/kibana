@@ -12,6 +12,7 @@ export type InstallClientMock = jest.Mocked<ProductDocInstallClient>;
 const createInstallClientMock = (): InstallClientMock => {
   return {
     getInstallationStatus: jest.fn(),
+    getInstallationStatusOrThrow: jest.fn(),
     setInstallationStarted: jest.fn(),
     setInstallationSuccessful: jest.fn(),
     setInstallationFailed: jest.fn(),
@@ -24,6 +25,11 @@ const createInstallClientMock = (): InstallClientMock => {
     setSecurityLabsInstallationSuccessful: jest.fn(),
     setSecurityLabsInstallationFailed: jest.fn(),
     setSecurityLabsUninstalled: jest.fn(),
+    getOpenapiSpecInstallationStatus: jest.fn(),
+    setOpenapiSpecInstallationStarted: jest.fn(),
+    setOpenapiSpecInstallationSuccessful: jest.fn(),
+    setOpenapiSpecInstallationFailed: jest.fn(),
+    setOpenapiSpecUninstalled: jest.fn(),
   } as unknown as InstallClientMock;
 };
 

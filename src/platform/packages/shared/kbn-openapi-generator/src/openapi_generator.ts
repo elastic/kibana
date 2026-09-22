@@ -12,7 +12,7 @@
 import SwaggerParser from '@apidevtools/swagger-parser';
 import chalk from 'chalk';
 import fs from 'fs/promises';
-import globby from 'globby';
+import { globby } from 'globby';
 import { resolve } from 'path';
 import { fixEslint } from './lib/fix_eslint';
 import { formatOutput } from './lib/format_output';
@@ -36,6 +36,13 @@ export interface GeneratorConfig {
      */
     outFile: string;
   };
+  /**
+   * Schema name transformation strategy for generated TypeScript/zod types
+   * - 'pascalCase': Converts names to PascalCase
+   * - undefined: No transformation (preserves original names)
+   * @default undefined
+   */
+  schemaNameTransform?: 'pascalCase';
 }
 
 export const generate = async (config: GeneratorConfig) => {
@@ -62,7 +69,9 @@ export const generate = async (config: GeneratorConfig) => {
       return {
         sourcePath,
         generatedPath: getGeneratedFilePath(sourcePath),
-        generationContext: getGenerationContext(parsedSchema),
+        generationContext: getGenerationContext(parsedSchema, {
+          schemaNameTransform: config.schemaNameTransform,
+        }),
       };
     })
   );
@@ -105,6 +114,9 @@ export const generate = async (config: GeneratorConfig) => {
       info: {
         title,
         version: 'Bundle (no version)',
+      },
+      config: {
+        schemaNameTransform: config.schemaNameTransform,
       },
     });
 

@@ -140,6 +140,19 @@ describe('convertSliApmParamsToApmAppDeeplinkUrl', () => {
     );
   });
 
+  it('should use the provided timeRange instead of the SLO duration', () => {
+    const url = convertSliApmParamsToApmAppDeeplinkUrl(
+      buildSlo({
+        indicator: buildApmLatencyIndicator(DEFAULT_PARAMS),
+      }),
+      { from: '2026-03-01T00:00:00.000Z', to: '2026-03-31T23:59:59.999Z' }
+    );
+
+    expect(url).toContain('rangeFrom=2026-03-01T00%3A00%3A00.000Z');
+    expect(url).toContain('rangeTo=2026-03-31T23%3A59%3A59.999Z');
+    expect(url).not.toContain('now-30d');
+  });
+
   it('should return a correct APM deeplink when instanceId is "*" and groupings is empty', () => {
     const url = convertSliApmParamsToApmAppDeeplinkUrl(
       buildSlo({

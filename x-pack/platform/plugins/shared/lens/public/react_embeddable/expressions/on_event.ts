@@ -16,6 +16,7 @@ import {
   isLensFilterEvent,
   isLensMultiFilterEvent,
   isLensTableRowContextMenuClickEvent,
+  isLensAnnotationClickEvent,
 } from '../../types_guards';
 import { inferTimeField } from '../../utils';
 
@@ -39,7 +40,9 @@ export const prepareEventHandler =
     let eventHandler:
       | LensPublicCallbacks['onBrushEnd']
       | LensPublicCallbacks['onFilter']
-      | LensPublicCallbacks['onTableRowClick'];
+      | LensPublicCallbacks['onTableRowClick']
+      | LensPublicCallbacks['onAnnotationClick']
+      | LensPublicCallbacks['onAlertRule'];
     let shouldExecuteDefaultTriggers = true;
 
     if (isLensBrushEvent(event)) {
@@ -48,12 +51,15 @@ export const prepareEventHandler =
       eventHandler = callbacks.onFilter;
     } else if (isLensTableRowContextMenuClickEvent(event)) {
       eventHandler = callbacks.onTableRowClick;
+    } else if (isLensAnnotationClickEvent(event)) {
+      eventHandler = callbacks.onAnnotationClick;
     } else if (isLensAlertRule(event)) {
       // TODO: here is where we run the uiActions on the embeddable for the alert rule
       eventHandler = callbacks.onAlertRule;
       if (shouldExecuteDefaultTriggers) {
         // this runs the function that we define in addTriggerActionAsync in the plugin.ts file in alertRulesDefinition
-        uiActions.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec(
+        uiActions.executeTriggerActions(
+          VIS_EVENT_TO_TRIGGER[event.name],
           {
             data: event.data,
             embeddable: api,
@@ -73,7 +79,7 @@ export const prepareEventHandler =
 
     if (isLensFilterEvent(event) || isLensMultiFilterEvent(event) || isLensBrushEvent(event)) {
       if (shouldExecuteDefaultTriggers) {
-        uiActions.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
+        uiActions.executeTriggerActions(VIS_EVENT_TO_TRIGGER[event.name], {
           data: {
             ...event.data,
             timeFieldName:
@@ -87,7 +93,8 @@ export const prepareEventHandler =
 
     if (isLensTableRowContextMenuClickEvent(event)) {
       if (shouldExecuteDefaultTriggers) {
-        uiActions.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec(
+        uiActions.executeTriggerActions(
+          VIS_EVENT_TO_TRIGGER[event.name],
           {
             data: event.data,
             embeddable: api,

@@ -9,15 +9,8 @@ import type { MouseEventHandler } from 'react';
 import { isEqual } from 'lodash';
 
 import styled from 'styled-components';
-import {
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiLink,
-  EuiSideNav,
-  EuiBadge,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiLink, EuiSideNav, EuiBadge } from '@elastic/eui';
+import { KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -46,6 +39,7 @@ import { Readme } from './readme';
 import { Details } from './details';
 import { Requirements } from './requirements';
 import { PrereleaseCallout } from './prerelease_callout';
+import { DeprecatedFeaturesCallout, DeprecationCallout } from './deprecation_callout';
 
 interface Props {
   packageInfo: PackageInfo;
@@ -84,14 +78,11 @@ const UnverifiedCallout: React.FC = () => {
 
   return (
     <>
-      <EuiCallOut
+      <KbnWarningCallout
         title={i18n.translate('xpack.fleet.epm.verificationWarningCalloutTitle', {
           defaultMessage: 'Integration not verified',
         })}
-        iconType="warning"
-        color="warning"
-      >
-        <p>
+        text={
           <FormattedMessage
             id="xpack.fleet.epm.verificationWarningCalloutIntroText"
             defaultMessage="This integration contains an unsigned package of unknown authenticity. Learn more about {learnMoreLink}."
@@ -106,8 +97,8 @@ const UnverifiedCallout: React.FC = () => {
               ),
             }}
           />
-        </p>
-      </EuiCallOut>
+        }
+      />
       <EuiSpacer size="l" />
     </>
   );
@@ -116,14 +107,12 @@ const UnverifiedCallout: React.FC = () => {
 const LogsEssentialsCallout: React.FC = () => {
   return (
     <>
-      <EuiCallOut
+      <KbnInfoCallout
         data-test-subj="logsEssentialsCallout"
         title={i18n.translate('xpack.fleet.epm.logsEssentialsCalloutTitle', {
           defaultMessage:
             'As this is a Logs Essentials project, these integrations will only install and configure for logs collection, even if the description mentions metrics.',
         })}
-        iconType="info"
-        color="primary"
       />
       <EuiSpacer size="l" />
     </>
@@ -140,6 +129,7 @@ export const getAnchorId = (name: string | undefined, index?: number) => {
 export const OverviewPage: React.FC<Props> = memo(
   ({ packageInfo, integrationInfo, latestGAVersion }) => {
     const config = useConfig();
+
     const screenshots = useMemo(
       () => integrationInfo?.screenshots || packageInfo.screenshots || [],
       [integrationInfo, packageInfo.screenshots]
@@ -292,10 +282,12 @@ export const OverviewPage: React.FC<Props> = memo(
               <EuiBadge color="default">{packageInfo.name}</EuiBadge>
             </EuiFlexItem>
           </EuiFlexGroup>
+          <EuiSpacer size="s" />
           <BidirectionalIntegrationsBanner integrationPackageName={packageInfo.name} />
           <CloudPostureThirdPartySupportCallout packageInfo={packageInfo} />
+          <DeprecationCallout packageInfo={packageInfo} integrationInfo={integrationInfo} />
+          <DeprecatedFeaturesCallout packageInfo={packageInfo} />
           <PrereleaseCallout packageInfo={packageInfo} latestGAVersion={latestGAVersion} />
-          <EuiSpacer size="l" />
 
           {packageInfo.readme ? (
             <Readme
@@ -314,7 +306,7 @@ export const OverviewPage: React.FC<Props> = memo(
               </EuiFlexItem>
             ) : null}
             {!hideDashboards && screenshots.length ? (
-              <EuiFlexItem>
+              <EuiFlexItem style={{ alignSelf: 'stretch' }}>
                 <Screenshots
                   images={screenshots}
                   packageName={packageInfo.name}

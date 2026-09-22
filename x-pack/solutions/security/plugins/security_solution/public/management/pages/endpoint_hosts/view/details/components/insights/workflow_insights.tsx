@@ -11,9 +11,10 @@ import moment from 'moment';
 import { EuiSpacer, EuiText, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { useKnowledgeBaseStatus } from '@kbn/elastic-assistant/impl/assistant/api/knowledge_base/use_knowledge_base_status';
 import { useAssistantContext } from '@kbn/elastic-assistant';
-import { DefendInsightType } from '@kbn/elastic-assistant-common';
-
-import { ActionType } from '../../../../../../../../common/endpoint/types/workflow_insights';
+import {
+  WorkflowInsightType,
+  WorkflowInsightActionType,
+} from '../../../../../../../../common/endpoint/types/workflow_insights';
 import { useIsExperimentalFeatureEnabled } from '../../../../../../../common/hooks/use_experimental_features';
 import { useFetchInsights } from '../../../hooks/insights/use_fetch_insights';
 import { useTriggerScan } from '../../../hooks/insights/use_trigger_scan';
@@ -56,14 +57,14 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
     setInsightGenerationFailures(true);
   };
 
-  const insightTypes = useMemo<DefendInsightType[]>(() => {
-    const typesToQuery: DefendInsightType[] = [DefendInsightType.Enum.incompatible_antivirus];
+  const insightTypes = useMemo<WorkflowInsightType[]>(() => {
+    const typesToQuery: WorkflowInsightType[] = [WorkflowInsightType.enum.incompatible_antivirus];
     if (
       defendInsightsPolicyResponseFailureEnabled &&
       // we only want to run `policy_response_failure` type with KB
       (kbStatus?.defend_insights_exists || kbStatus?.is_setup_in_progress)
     ) {
-      typesToQuery.push(DefendInsightType.Enum.policy_response_failure);
+      typesToQuery.push(WorkflowInsightType.enum.policy_response_failure);
     }
     return typesToQuery;
   }, [defendInsightsPolicyResponseFailureEnabled, kbStatus]);
@@ -120,7 +121,9 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
 
     const insightTypesSet = new Set(insightTypes);
     return (insights ?? []).filter(
-      (insight) => insightTypesSet.has(insight.type) && insight.action.type === ActionType.Refreshed
+      (insight) =>
+        insightTypesSet.has(insight.type) &&
+        insight.action.type === WorkflowInsightActionType.enum.refreshed
     );
   }, [isScanRunning, insights, insightTypes]);
 

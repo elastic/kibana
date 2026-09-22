@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { ThemeProvider } from '@emotion/react';
 import { pick } from 'lodash';
 import { ReactFlow, Controls, Background } from '@xyflow/react';
 import type { Meta, StoryFn, StoryObj } from '@storybook/react';
@@ -63,7 +62,7 @@ const nodeTypes = {
 };
 
 const Template: StoryFn<NodeViewModel> = (args: NodeViewModel) => (
-  <ThemeProvider theme={{ darkMode: false }}>
+  <>
     <ReactFlow
       fitView
       attributionPosition={undefined}
@@ -93,7 +92,7 @@ const Template: StoryFn<NodeViewModel> = (args: NodeViewModel) => (
       <Background />
     </ReactFlow>
     <GlobalGraphStyles />
-  </ThemeProvider>
+  </>
 );
 
 export const Node: StoryObj<NodeViewModel> = {
@@ -121,13 +120,13 @@ export const Colors: StoryObj = {
     }));
 
     return (
-      <ThemeProvider theme={{ darkMode: false }}>
+      <>
         <ReactFlow fitView attributionPosition={undefined} nodeTypes={nodeTypes} nodes={colorNodes}>
           <Controls />
           <Background />
         </ReactFlow>
         <GlobalGraphStyles />
-      </ThemeProvider>
+      </>
     );
   },
 };
@@ -154,13 +153,13 @@ export const Shapes: StoryObj = {
     );
 
     return (
-      <ThemeProvider theme={{ darkMode: false }}>
+      <>
         <ReactFlow fitView attributionPosition={undefined} nodeTypes={nodeTypes} nodes={shapes}>
           <Controls />
           <Background />
         </ReactFlow>
         <GlobalGraphStyles />
-      </ThemeProvider>
+      </>
     );
   },
 };
@@ -199,13 +198,13 @@ export const Details: StoryObj = {
     }));
 
     return (
-      <ThemeProvider theme={{ darkMode: false }}>
+      <>
         <ReactFlow fitView attributionPosition={undefined} nodeTypes={nodeTypes} nodes={nodes}>
           <Controls />
           <Background />
         </ReactFlow>
         <GlobalGraphStyles />
-      </ThemeProvider>
+      </>
     );
   },
 };
@@ -247,7 +246,7 @@ export const Interactivity: StoryObj = {
     ];
 
     return (
-      <ThemeProvider theme={{ darkMode: false }}>
+      <>
         <ReactFlow
           fitView
           attributionPosition={undefined}
@@ -258,7 +257,7 @@ export const Interactivity: StoryObj = {
           <Background />
         </ReactFlow>
         <GlobalGraphStyles />
-      </ThemeProvider>
+      </>
     );
   },
 };

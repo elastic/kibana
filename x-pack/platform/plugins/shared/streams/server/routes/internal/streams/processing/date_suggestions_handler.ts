@@ -6,16 +6,16 @@
  */
 
 import { isString, uniq } from 'lodash';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
+import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-schema';
 import type { IScopedClusterClient } from '@kbn/core/server';
-import { NonEmptyString } from '@kbn/zod-helpers';
 
 export interface ProcessingDateSuggestionsParams {
   path: {
     name: string;
   };
   body: {
-    dates: unknown[];
+    dates: Array<string | number>;
   };
 }
 
@@ -25,9 +25,21 @@ export interface ProcessingDateSuggestionsHandlerDeps {
 }
 
 export const processingDateSuggestionsSchema = z.object({
-  path: z.object({ name: z.string() }),
+  path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
   body: z.object({
-    dates: z.array(z.unknown()).nonempty(),
+    dates: z
+      .array(
+        z.union([
+          z
+            .string()
+            .nonempty()
+            .max(100)
+            .refine((val) => val.trim() !== '', { message: 'String must not be whitespace only' }),
+          z.number(),
+        ])
+      )
+      .nonempty()
+      .max(100),
   }),
 }) satisfies z.Schema<ProcessingDateSuggestionsParams>;
 
@@ -35,7 +47,7 @@ export const handleProcessingDateSuggestions = async ({
   params,
   scopedClusterClient,
 }: ProcessingDateSuggestionsHandlerDeps) => {
-  const dates = parseDatesInput(params.body.dates);
+  const dates = params.body.dates.map(String);
   /**
    * Run structure detection against sample dates.
    * The `findMessageStructure` API is used to detect the structure of the date strings.
@@ -71,19 +83,6 @@ export const handleProcessingDateSuggestions = async ({
 
   return { formats };
 };
-
-function parseDatesInput(dates: unknown[]): string[] {
-  const areValidDates = z
-    .array(z.union([NonEmptyString, z.number()]))
-    .nonempty()
-    .safeParse(dates).success;
-
-  if (!areValidDates) {
-    throw new Error('Dates input must be non-empty string or number values.');
-  }
-
-  return dates.map(String);
-}
 
 interface DetectionAttemptParams {
   scopedClusterClient: IScopedClusterClient;

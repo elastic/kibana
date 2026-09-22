@@ -6,9 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod';
-import { NonEmptyString } from '@kbn/zod-helpers';
-import { createIsNarrowSchema } from '@kbn/zod-helpers';
+import { z } from '@kbn/zod/v4';
+import { createIsNarrowSchema, DeepStrict, NonEmptyString } from '@kbn/zod-helpers/v4';
 
 export const stringOrNumberOrBoolean = z
   .union([z.string(), z.number(), z.boolean()])
@@ -129,7 +128,8 @@ export type FilterCondition = ShorthandBinaryFilterCondition | ShorthandUnaryFil
 
 export const filterConditionSchema = z
   .union([shorthandBinaryFilterConditionSchema, shorthandUnaryFilterConditionSchema])
-  .describe('A basic filter condition, either unary or binary.');
+  .describe('A basic filter condition, either unary or binary.')
+  .meta({ id: 'FilterCondition' });
 
 export interface AndCondition {
   and: Condition[];
@@ -172,7 +172,8 @@ export const conditionSchema: z.Schema<Condition> = z
   )
   .describe(
     'The root condition object. It can be a simple filter or a combination of other conditions.'
-  );
+  )
+  .meta({ id: 'Condition' });
 
 export const andConditionSchema = z
   .object({
@@ -227,6 +228,13 @@ export const isAlwaysCondition = createIsNarrowSchema(conditionSchema, alwaysCon
 export const isNotCondition = createIsNarrowSchema(conditionSchema, notConditionSchema);
 
 export const isCondition = createIsNarrowSchema(z.unknown(), conditionSchema);
+
+/**
+ * Strict version of conditionSchema that rejects excess/unknown keys.
+ * Pre-constructed for performance as DeepStrict creates proxy wrappers.
+ */
+export const conditionSchemaStrict = DeepStrict(conditionSchema);
+export const isConditionStrict = createIsNarrowSchema(z.unknown(), conditionSchemaStrict);
 
 export const ALWAYS_CONDITION: AlwaysCondition = Object.freeze({ always: {} });
 

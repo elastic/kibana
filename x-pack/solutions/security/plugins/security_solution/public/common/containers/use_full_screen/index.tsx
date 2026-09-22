@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useMemo, useState, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 
 import { InputsModelId } from '../../store/inputs/constants';
 import { SCROLLING_DISABLED_CLASS_NAME } from '../../../../common/constants';

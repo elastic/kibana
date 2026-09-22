@@ -42,9 +42,13 @@ import { useWaffleTimeContext } from '../../hooks/use_waffle_time';
 import { useWaffleFiltersContext } from '../../hooks/use_waffle_filters';
 import { MetricExplorerSeriesChart } from '../../../metrics_explorer/components/series_chart';
 import { MetricsExplorerChartType } from '../../../metrics_explorer/hooks/use_metrics_explorer_options';
-import { calculateDomain } from '../../../metrics_explorer/components/helpers/calculate_domain';
+import {
+  applyHeadroomToDomain,
+  calculateDomain,
+} from '../../../metrics_explorer/components/helpers/calculate_domain';
 import type { InfraFormatter } from '../../../../../common/inventory/types';
 import { useMetricsHostsAnomaliesResults } from '../../hooks/use_metrics_hosts_anomalies';
+import { DEFAULT_SCHEMA } from '../../../../../../common/constants';
 import { useMetricsK8sAnomaliesResults } from '../../hooks/use_metrics_k8s_anomalies';
 
 interface Props {
@@ -100,8 +104,10 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
     metric: anomalyMetricName,
   };
 
+  const effectiveSchema = preferredSchema ?? DEFAULT_SCHEMA;
+
   const { metricsHostsAnomalies } = useMetricsHostsAnomaliesResults(
-    { ...anomalyParams, schema: preferredSchema ?? 'ecs' },
+    { ...anomalyParams, schema: effectiveSchema },
     {
       active: nodeType === 'host',
     }
@@ -111,7 +117,7 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
   });
 
   const anomalies = useMemo(() => {
-    if (preferredSchema === 'semconv') {
+    if (effectiveSchema === 'semconv') {
       return;
     }
 
@@ -120,7 +126,7 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
     } else if (nodeType === 'pod') {
       return metricsK8sAnomalies;
     }
-  }, [preferredSchema, nodeType, metricsHostsAnomalies, metricsK8sAnomalies]);
+  }, [effectiveSchema, nodeType, metricsHostsAnomalies, metricsK8sAnomalies]);
 
   const metricLabel = toMetricOpt(metric.type, nodeType)?.textLC;
   const metricPopoverLabel = toMetricOpt(metric.type, nodeType)?.text;
@@ -148,12 +154,7 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
   };
 
   const dataDomain = timeseries ? calculateDomain(timeseries, [chartMetric], false) : null;
-  const domain = dataDomain
-    ? {
-        max: dataDomain.max * 1.1, // add 10% headroom.
-        min: dataDomain.min,
-      }
-    : { max: 0, min: 0 };
+  const domain = dataDomain ? applyHeadroomToDomain(dataDomain) : { max: 0, min: 0 };
 
   const onClickPoint: ElementClickListener = useCallback(
     ([elementEvent]) => {
@@ -182,7 +183,7 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
     return (
       <TimelineContainer>
         <EuiEmptyPrompt
-          iconType="visArea"
+          iconType="chartArea"
           title={<h4>{error ? errorTitle : noHistoryDataTitle}</h4>}
           actions={
             <EuiButton data-test-subj="infraTimelineButton" color="primary" fill onClick={reload}>
@@ -230,7 +231,11 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize={'s'} alignItems={'center'} responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiIcon color={colorTransformer(chartMetric.color)} type={'dot'} />
+                  <EuiIcon
+                    color={colorTransformer(chartMetric.color)}
+                    type={'dot'}
+                    aria-hidden={true}
+                  />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiText size={'xs'}>
@@ -243,7 +248,7 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
-            {preferredSchema !== 'semconv' ? (
+            {effectiveSchema !== 'semconv' ? (
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup gutterSize={'s'} alignItems={'center'} responsive={false}>
                   <EuiFlexItem

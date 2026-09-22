@@ -21,8 +21,8 @@
       "file": "rare_method_for_a_country.json"
     },
     {
-      "id": "rare_method_for_a_username",
-      "file": "rare_method_for_a_username.json"
+      "id": "rare_method_for_a_user_id_ea",
+      "file": "rare_method_for_a_user_id_ea.json"
     },
     {
       "id": "high_distinct_count_error_message",
@@ -45,9 +45,9 @@
       "job_id": "rare_method_for_a_country"
     },
     {
-      "id": "datafeed-rare_method_for_a_username",
-      "file": "datafeed_rare_method_for_a_username.json",
-      "job_id": "rare_method_for_a_username"
+      "id": "datafeed-rare_method_for_a_user_id_ea",
+      "file": "datafeed_rare_method_for_a_user_id_ea.json",
+      "job_id": "rare_method_for_a_user_id_ea"
     },
     {
       "id": "datafeed-high_distinct_count_error_message",

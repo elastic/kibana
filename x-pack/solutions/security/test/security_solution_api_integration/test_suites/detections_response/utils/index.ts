@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 export * from './rules';
 export * from './exception_list_and_item';
 export * from './alerts';
@@ -13,6 +14,7 @@ export * from './telemetry';
 export * from './event_log';
 export * from './machine_learning';
 
+export * from './missing_uiam_api_key_tag';
 export * from './binary_to_string';
 export * from './get_index_name_from_load';
 export * from './count_down_es';

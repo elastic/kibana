@@ -5,8 +5,17 @@
  * 2.0.
  */
 
+import type { Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import { ALERT_SEVERITY_VALUES, type AlertSeverity } from '@kbn/rule-data-utils';
 import { ruleParamsSchema } from '@kbn/response-ops-rule-params';
+import {
+  ALLOWED_MAX_ALERTS,
+  MAX_SNOOZED_INSTANCE_CONDITIONS,
+  MAX_SNOOZED_INSTANCE_ID_LENGTH,
+  MAX_SNOOZED_BY_LENGTH,
+  MAX_SNOOZED_CONDITION_FIELD_LENGTH,
+} from '../../../../common/max_alert_limit';
 import {
   ruleLastRunOutcomeValues,
   ruleExecutionStatusValues,
@@ -14,7 +23,7 @@ import {
   ruleExecutionStatusWarningReason,
 } from '../constants';
 import { rRuleSchema } from '../../r_rule/schemas';
-import { dateSchema } from './date_schema';
+import { dateSchema, isoDateSchema } from './date_schema';
 import { notifyWhenSchema } from './notify_when_schema';
 import { actionSchema, systemActionSchema } from './action_schemas';
 import { flappingSchema } from './flapping_schema';
@@ -134,6 +143,13 @@ export const monitoringSchema = schema.object({
             })
           )
         ),
+        gap_reason: schema.maybe(
+          schema.nullable(
+            schema.object({
+              type: schema.string(),
+            })
+          )
+        ),
       }),
     }),
   }),
@@ -144,6 +160,34 @@ export const snoozeScheduleSchema = schema.object({
   rRule: rRuleSchema,
   id: schema.maybe(schema.string()),
   skipRecurrences: schema.maybe(schema.arrayOf(schema.string())),
+});
+
+export const snoozedInstanceConditionSchema = schema.oneOf([
+  schema.object({
+    type: schema.literal('field_change'),
+    field: schema.string({ maxLength: MAX_SNOOZED_CONDITION_FIELD_LENGTH }),
+  }),
+  schema.object({
+    type: schema.literal('severity_change'),
+  }),
+  schema.object({
+    type: schema.literal('severity_equals'),
+    value: schema.oneOf(
+      ALERT_SEVERITY_VALUES.map((severity) => schema.literal(severity)) as [Type<AlertSeverity>]
+    ),
+  }),
+]);
+
+export const snoozedInstanceSchema = schema.object({
+  instanceId: schema.string({ maxLength: MAX_SNOOZED_INSTANCE_ID_LENGTH }),
+  expiresAt: schema.maybe(isoDateSchema),
+  conditions: schema.maybe(
+    schema.arrayOf(snoozedInstanceConditionSchema, { maxSize: MAX_SNOOZED_INSTANCE_CONDITIONS })
+  ),
+  conditionOperator: schema.maybe(schema.oneOf([schema.literal('any'), schema.literal('all')])),
+  snoozeSnapshot: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+  snoozedAt: isoDateSchema,
+  snoozedBy: schema.string({ maxLength: MAX_SNOOZED_BY_LENGTH }),
 });
 
 export const alertDelaySchema = schema.object({
@@ -173,10 +217,15 @@ export const ruleDomainSchema = schema.object({
   apiKey: schema.nullable(schema.string()),
   apiKeyOwner: schema.nullable(schema.string()),
   apiKeyCreatedByUser: schema.maybe(schema.nullable(schema.boolean())),
+  uiamApiKey: schema.maybe(schema.nullable(schema.string())),
+  uiamApiKeyExternal: schema.maybe(schema.nullable(schema.boolean())),
   throttle: schema.maybe(schema.nullable(schema.string())),
   muteAll: schema.boolean(),
   notifyWhen: schema.maybe(schema.nullable(notifyWhenSchema)),
   mutedInstanceIds: schema.arrayOf(schema.string()),
+  snoozedInstances: schema.maybe(
+    schema.arrayOf(snoozedInstanceSchema, { maxSize: ALLOWED_MAX_ALERTS })
+  ),
   executionStatus: ruleExecutionStatusSchema,
   monitoring: schema.maybe(monitoringSchema),
   snoozeSchedule: schema.maybe(schema.arrayOf(snoozeScheduleSchema)),
@@ -188,6 +237,7 @@ export const ruleDomainSchema = schema.object({
   running: schema.maybe(schema.nullable(schema.boolean())),
   viewInAppRelativeUrl: schema.maybe(schema.nullable(schema.string())),
   alertDelay: schema.maybe(alertDelaySchema),
+  lastEnabledAt: schema.maybe(dateSchema),
   legacyId: schema.maybe(schema.nullable(schema.string())),
   flapping: schema.maybe(schema.nullable(flappingSchema)),
   artifacts: schema.maybe(artifactsSchema),
@@ -219,6 +269,9 @@ export const ruleSchema = schema.object({
   muteAll: schema.boolean(),
   notifyWhen: schema.maybe(schema.nullable(notifyWhenSchema)),
   mutedInstanceIds: schema.arrayOf(schema.string()),
+  snoozedInstances: schema.maybe(
+    schema.arrayOf(snoozedInstanceSchema, { maxSize: ALLOWED_MAX_ALERTS })
+  ),
   executionStatus: ruleExecutionStatusSchema,
   monitoring: schema.maybe(monitoringSchema),
   snoozeSchedule: schema.maybe(schema.arrayOf(snoozeScheduleSchema)),
@@ -230,6 +283,7 @@ export const ruleSchema = schema.object({
   running: schema.maybe(schema.nullable(schema.boolean())),
   viewInAppRelativeUrl: schema.maybe(schema.nullable(schema.string())),
   alertDelay: schema.maybe(alertDelaySchema),
+  lastEnabledAt: schema.maybe(dateSchema),
   legacyId: schema.maybe(schema.nullable(schema.string())),
   flapping: schema.maybe(schema.nullable(flappingSchema)),
   artifacts: schema.maybe(artifactsSchema),

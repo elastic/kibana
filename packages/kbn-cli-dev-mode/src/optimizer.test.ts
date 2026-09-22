@@ -11,35 +11,32 @@ import { PassThrough } from 'stream';
 
 import * as Rx from 'rxjs';
 import { toArray } from 'rxjs';
-import type { OptimizerUpdate } from '@kbn/optimizer';
+import type { OptimizerPhase } from '@kbn/rspack-optimizer';
 import { observeLines } from '@kbn/stdio-dev-helpers';
 import { createReplaceSerializer } from '@kbn/jest-serializers';
 
 import type { Options } from './optimizer';
 import { Optimizer } from './optimizer';
 
-jest.mock('@kbn/optimizer');
-const realOptimizer = jest.requireActual('@kbn/optimizer');
-const { runOptimizer, OptimizerConfig, logOptimizerState, logOptimizerProgress } =
-  jest.requireMock('@kbn/optimizer');
+const importState = { shouldFail: false };
 
-logOptimizerState.mockImplementation(realOptimizer.logOptimizerState);
-logOptimizerProgress.mockImplementation(realOptimizer.logOptimizerProgress);
+jest.mock('@kbn/rspack-optimizer', () => {
+  if (importState.shouldFail) {
+    throw new Error('missing native binding');
+  }
 
-class MockOptimizerConfig {}
-
-const mockOptimizerUpdate = (phase: OptimizerUpdate['state']['phase']) => {
   return {
-    state: {
-      compilerStates: [],
-      durSec: 0,
-      offlineBundles: [],
-      onlineBundles: [],
-      phase,
-      startTime: 100,
-    },
+    RspackOptimizer: jest.fn(),
   };
-};
+});
+
+interface RspackMockInstance {
+  opts: unknown;
+  _phase$: Rx.Subject<OptimizerPhase>;
+  getPhase$: jest.Mock;
+  run: jest.Mock;
+  stop: jest.Mock;
+}
 
 const defaultOptions: Options = {
   enabled: true,
@@ -55,20 +52,31 @@ const defaultOptions: Options = {
   watch: true,
 };
 
-function setup(options: Options = defaultOptions) {
-  const update$ = new Rx.Subject<OptimizerUpdate>();
+const subscriptions: Rx.Subscription[] = [];
+let RspackOptimizerMock: jest.Mock;
 
-  OptimizerConfig.create.mockImplementation(() => new MockOptimizerConfig());
-  runOptimizer.mockImplementation(() => update$);
-
-  const optimizer = new Optimizer(options);
-
-  return { optimizer, update$ };
+function flushPromises(): Promise<void> {
+  const { promise, resolve } = Promise.withResolvers<void>();
+  setImmediate(resolve);
+  return promise;
 }
 
-const subscriptions: Rx.Subscription[] = [];
-
 expect.addSnapshotSerializer(createReplaceSerializer(/\[\d\d:\d\d:\d\d\.\d\d\d\]/, '[timestamp]'));
+expect.addSnapshotSerializer(createReplaceSerializer(/\x1b\[[0-9;]*m/g, ''));
+
+beforeEach(() => {
+  // resolve the mock from the current module registry, which the import failure test resets
+  RspackOptimizerMock = jest.requireMock<{ RspackOptimizer: jest.Mock }>(
+    '@kbn/rspack-optimizer'
+  ).RspackOptimizer;
+  RspackOptimizerMock.mockImplementation(function (this: RspackMockInstance, opts: unknown) {
+    this.opts = opts;
+    this._phase$ = new Rx.Subject<OptimizerPhase>();
+    this.getPhase$ = jest.fn(() => this._phase$.asObservable());
+    this.run = jest.fn(async () => {});
+    this.stop = jest.fn(async () => {});
+  });
+});
 
 afterEach(() => {
   for (const sub of subscriptions) {
@@ -79,133 +87,181 @@ afterEach(() => {
   jest.clearAllMocks();
 });
 
-it('uses options to create valid OptimizerConfig', () => {
-  setup();
-  setup({
-    ...defaultOptions,
-    cache: false,
-    dist: false,
-    runExamples: false,
-    pluginPaths: [],
-    pluginScanDirs: [],
-    repoRoot: '/foo/bar',
-    watch: false,
-  });
-
-  expect(OptimizerConfig.create.mock.calls).toMatchInlineSnapshot(`
-    Array [
-      Array [
-        Object {
-          "cache": true,
-          "dist": true,
-          "examples": true,
-          "includeCoreBundle": true,
-          "pluginPaths": Array [
-            "/some/dir",
-          ],
-          "pluginScanDirs": Array [
-            "/some-scan-path",
-          ],
-          "repoRoot": "/app",
-          "watch": true,
-        },
-      ],
-      Array [
-        Object {
-          "cache": false,
-          "dist": false,
-          "examples": false,
-          "includeCoreBundle": true,
-          "pluginPaths": Array [],
-          "pluginScanDirs": Array [],
-          "repoRoot": "/foo/bar",
-          "watch": false,
-        },
-      ],
-    ]
-  `);
-});
-
-it('is ready when optimizer phase is success or issue and logs in familiar format', async () => {
+it('constructs RspackOptimizer with expected options and a CLI-formatted log', async () => {
   const writeLogTo = new PassThrough();
   const linesPromise = Rx.firstValueFrom(observeLines(writeLogTo).pipe(toArray()));
 
-  const { update$, optimizer } = setup({
+  const optimizer = new Optimizer({
     ...defaultOptions,
+    basePath: '/s/kibana',
+    watch: false,
     quiet: false,
     silent: false,
     writeLogTo,
   });
 
-  const history: any[] = ['<init>'];
-  subscriptions.push(
-    optimizer.isReady$().subscribe({
-      next(ready) {
-        history.push(`ready: ${ready}`);
-      },
-      error(error) {
-        throw error;
-      },
-      complete() {
-        history.push(`complete`);
-      },
-    })
-  );
+  subscriptions.push(optimizer.run$.subscribe());
 
-  subscriptions.push(
-    optimizer.run$.subscribe({
-      error(error) {
-        throw error;
-      },
-    })
-  );
+  await flushPromises();
 
-  history.push('<success>');
-  update$.next(mockOptimizerUpdate('success'));
+  expect(RspackOptimizerMock).toHaveBeenCalledTimes(1);
+  expect(RspackOptimizerMock).toHaveBeenCalledWith({
+    repoRoot: '/app',
+    watch: false,
+    cache: true,
+    dist: true,
+    examples: true,
+    pluginPaths: ['/some/dir'],
+    pluginScanDirs: ['/some-scan-path'],
+    allowlistPluginGroups: undefined,
+    basePath: '/s/kibana',
+    log: expect.any(Object),
+  });
 
-  history.push('<running>');
-  update$.next(mockOptimizerUpdate('running'));
-
-  history.push('<issue>');
-  update$.next(mockOptimizerUpdate('issue'));
-
-  update$.complete();
-
-  expect(history).toMatchInlineSnapshot(`
-    Array [
-      "<init>",
-      "<success>",
-      "ready: true",
-      "<running>",
-      "ready: false",
-      "<issue>",
-      "ready: true",
-      "complete",
-    ]
-  `);
-
+  const { log } = RspackOptimizerMock.mock.calls[0][0];
+  log.success('1 bundle compiled successfully');
+  log.error('compile errors');
   writeLogTo.end();
-  const lines = await linesPromise;
-  expect(lines).toMatchInlineSnapshot(`
+
+  expect(await linesPromise).toMatchInlineSnapshot(`
     Array [
-      " [2mnp bld[22m    log   [timestamp] [[36msuccess[39m][[95m@kbn/optimizer[39m] 0 bundles compiled successfully after 0 sec",
-      " [2mnp bld[22m    log   [timestamp] [error][[95m@kbn/optimizer[39m] webpack compile errors",
+      " np bld    log   [timestamp] [success][@kbn/rspack-optimizer] 1 bundle compiled successfully",
+      " np bld    log   [timestamp] [error][@kbn/rspack-optimizer] compile errors",
     ]
   `);
 });
 
-it('completes immedately and is immediately ready when disabled', () => {
-  const ready$ = new Rx.BehaviorSubject<undefined | boolean>(undefined);
+it('emits phase$ and ready$ updates from the rspack phase stream', async () => {
+  const optimizer = new Optimizer(defaultOptions);
 
-  const { optimizer, update$ } = setup({
+  const phases: OptimizerPhase[] = [];
+  const readyStates: boolean[] = [];
+
+  subscriptions.push(
+    optimizer.getPhase$().subscribe({
+      next: (phase) => phases.push(phase),
+      error: (error) => {
+        throw error;
+      },
+    })
+  );
+  subscriptions.push(
+    optimizer.isReady$().subscribe({
+      next: (ready) => readyStates.push(ready),
+      error: (error) => {
+        throw error;
+      },
+    })
+  );
+  subscriptions.push(
+    optimizer.run$.subscribe({
+      error: (error) => {
+        throw error;
+      },
+    })
+  );
+
+  await flushPromises();
+
+  const instance = RspackOptimizerMock.mock.instances[0] as RspackMockInstance;
+  instance._phase$.next('running');
+  instance._phase$.next('success');
+  instance._phase$.next('running');
+  instance._phase$.next('issue');
+
+  expect(phases).toEqual(['running', 'success', 'running', 'issue']);
+  expect(readyStates).toEqual([false, true, false, true]);
+});
+
+it('calls rspackOptimizer.stop() when run$ subscription is disposed', async () => {
+  const optimizer = new Optimizer(defaultOptions);
+
+  const sub = optimizer.run$.subscribe({
+    error: (error) => {
+      throw error;
+    },
+  });
+  subscriptions.push(sub);
+
+  await flushPromises();
+
+  const instance = RspackOptimizerMock.mock.instances[0] as RspackMockInstance;
+  expect(instance.stop).not.toHaveBeenCalled();
+
+  sub.unsubscribe();
+
+  expect(instance.stop).toHaveBeenCalledTimes(1);
+});
+
+it('completes run$ when not in watch mode after run() resolves', async () => {
+  const optimizer = new Optimizer({
+    ...defaultOptions,
+    watch: false,
+  });
+
+  const runComplete = jest.fn();
+  subscriptions.push(
+    optimizer.run$.subscribe({
+      complete: runComplete,
+      error: (error) => {
+        throw error;
+      },
+    })
+  );
+
+  await flushPromises();
+
+  const instance = RspackOptimizerMock.mock.instances[0] as RspackMockInstance;
+  instance._phase$.next('success');
+  await instance.run.mock.results[0].value;
+  await flushPromises();
+
+  expect(runComplete).toHaveBeenCalled();
+});
+
+it('completes immediately and is immediately ready when disabled', async () => {
+  const ready$ = new Rx.BehaviorSubject<undefined | boolean>(undefined);
+  const runComplete = jest.fn();
+
+  const optimizer = new Optimizer({
     ...defaultOptions,
     enabled: false,
   });
 
   subscriptions.push(optimizer.isReady$().subscribe(ready$));
+  subscriptions.push(optimizer.run$.subscribe({ complete: runComplete }));
 
-  expect(update$.observers).toHaveLength(0);
-  expect(runOptimizer).not.toHaveBeenCalled();
+  await flushPromises();
+
+  expect(runComplete).toHaveBeenCalledTimes(1);
   expect(ready$).toHaveProperty('isStopped', true);
   expect(ready$.getValue()).toBe(true);
+  expect(RspackOptimizerMock).not.toHaveBeenCalled();
+});
+
+it('logs and errors run$ when @kbn/rspack-optimizer fails to load', async () => {
+  const writeLogTo = new PassThrough();
+  const linesPromise = Rx.firstValueFrom(observeLines(writeLogTo).pipe(toArray()));
+  const error = jest.fn();
+
+  importState.shouldFail = true;
+  // drop the cached mock so the deferred import goes through the (now throwing) module factory
+  jest.resetModules();
+
+  try {
+    subscriptions.push(new Optimizer({ ...defaultOptions, writeLogTo }).run$.subscribe({ error }));
+    await flushPromises();
+  } finally {
+    importState.shouldFail = false;
+  }
+
+  writeLogTo.end();
+
+  expect(error).toHaveBeenCalledWith(new Error('missing native binding'));
+  expect(RspackOptimizerMock).not.toHaveBeenCalled();
+  expect(await linesPromise).toMatchInlineSnapshot(`
+    Array [
+      " np bld    log   [timestamp] [error][@kbn/rspack-optimizer] Failed to load @kbn/rspack-optimizer: missing native binding",
+    ]
+  `);
 });

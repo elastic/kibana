@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Response } from 'node-fetch';
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
@@ -77,14 +76,14 @@ export class SecurityUsageReportingTask {
           stateSchemaByVersion,
           createTaskRunner: ({
             taskInstance,
-            abortController,
+            signal,
           }: {
             taskInstance: ConcreteTaskInstance;
-            abortController: AbortController;
+            signal: AbortSignal;
           }) => {
             return {
               run: async () => {
-                return this.runTask(taskInstance, core, meteringCallback, abortController);
+                return this.runTask(taskInstance, core, meteringCallback, signal);
               },
               cancel: async () => {},
             };
@@ -126,7 +125,7 @@ export class SecurityUsageReportingTask {
     taskInstance: ConcreteTaskInstance,
     core: CoreSetup,
     meteringCallback: MeteringCallback,
-    abortController: AbortController
+    signal: AbortSignal
   ) => {
     this.logger.info('Usage reporting task is running.');
 
@@ -167,7 +166,7 @@ export class SecurityUsageReportingTask {
         logger: this.logger,
         taskId: this.taskId,
         lastSuccessfulReport,
-        abortController,
+        signal,
         config: this.config,
       });
       usageRecords = meteringCallbackResponse.records ?? [];

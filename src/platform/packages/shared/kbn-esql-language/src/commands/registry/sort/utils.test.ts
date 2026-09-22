@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLCommand } from '../../../..';
-import { synth } from '../../../..';
+import type { ESQLCommand } from '@elastic/esql/types';
+import { synth } from '@elastic/esql';
 import type { SortPosition } from './utils';
 import { getSortPos as _getSortPos } from './utils';
 

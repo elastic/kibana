@@ -10,18 +10,13 @@
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { BehaviorSubject } from 'rxjs';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
+import { getChartHidden, getTopPanelHeight, setTopPanelHeight } from '@kbn/discover-utils';
 import { UnifiedHistogramFetchStatus } from '..';
 import type {
   UnifiedHistogramServices,
   UnifiedHistogramChartLoadEvent,
   UnifiedHistogramTopPanelHeightContext,
 } from '../types';
-import {
-  getChartHidden,
-  getTopPanelHeight,
-  setChartHidden,
-  setTopPanelHeight,
-} from '../utils/local_storage_utils';
 
 /**
  * The current state of the container
@@ -142,10 +137,6 @@ export const createStateService = (
     state$,
 
     setChartHidden: (chartHidden: boolean) => {
-      if (localStorageKeyPrefix) {
-        setChartHidden(services.storage, localStorageKeyPrefix, chartHidden);
-      }
-
       updateState({ chartHidden });
     },
 

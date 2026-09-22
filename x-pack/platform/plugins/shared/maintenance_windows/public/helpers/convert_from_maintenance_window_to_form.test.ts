@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import type { MaintenanceWindow } from '../../common';
+import type { MaintenanceWindowUI } from '../../common';
 
 import { Frequency } from '@kbn/rrule';
 import { convertFromMaintenanceWindowToForm } from './convert_from_maintenance_window_to_form';
@@ -28,7 +28,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
         freq: Frequency.YEARLY,
         count: 1,
       },
-    } as MaintenanceWindow);
+    } as MaintenanceWindowUI);
 
     expect(maintenanceWindow).toEqual({
       title,
@@ -50,7 +50,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
         interval: 1,
         byweekday: ['WE'],
       },
-    } as MaintenanceWindow);
+    } as MaintenanceWindowUI);
 
     expect(maintenanceWindow).toEqual({
       title,
@@ -81,7 +81,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
         byweekday: ['WE'],
         until,
       },
-    } as MaintenanceWindow);
+    } as MaintenanceWindowUI);
 
     expect(maintenanceWindow).toEqual({
       title,
@@ -111,7 +111,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
         byweekday: ['WE'],
         count: 3,
       },
-    } as MaintenanceWindow);
+    } as MaintenanceWindowUI);
 
     expect(maintenanceWindow).toEqual({
       title,
@@ -140,7 +140,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
         interval: 1,
         byweekday: ['WE'],
       },
-    } as MaintenanceWindow);
+    } as MaintenanceWindowUI);
 
     expect(maintenanceWindow).toEqual({
       title,
@@ -168,7 +168,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
         interval: 1,
         byweekday: ['+4WE'],
       },
-    } as MaintenanceWindow);
+    } as MaintenanceWindowUI);
 
     expect(maintenanceWindow).toEqual({
       title,
@@ -197,7 +197,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
         bymonth: [3],
         bymonthday: [22],
       },
-    } as MaintenanceWindow);
+    } as MaintenanceWindowUI);
 
     expect(maintenanceWindow).toEqual({
       title,
@@ -223,7 +223,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
         freq: Frequency.DAILY,
         interval: 1,
       },
-    } as MaintenanceWindow);
+    } as MaintenanceWindowUI);
 
     expect(maintenanceWindow).toEqual({
       title,
@@ -250,7 +250,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
         interval: 1,
         byweekday: ['MO', 'TU', 'WE', 'TH', 'FR'],
       },
-    } as MaintenanceWindow);
+    } as MaintenanceWindowUI);
 
     expect(maintenanceWindow).toEqual({
       title,
@@ -278,7 +278,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
         interval: 1,
         byweekday: ['WE', 'TH'],
       },
-    } as MaintenanceWindow);
+    } as MaintenanceWindowUI);
 
     expect(maintenanceWindow).toEqual({
       title,
@@ -307,7 +307,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
         interval: 1,
         bymonthday: [22],
       },
-    } as MaintenanceWindow);
+    } as MaintenanceWindowUI);
 
     expect(maintenanceWindow).toEqual({
       title,
@@ -317,6 +317,35 @@ describe('convertFromMaintenanceWindowToForm', () => {
       recurring: true,
       recurringSchedule: {
         bymonth: 'day',
+        customFrequency: Frequency.MONTHLY,
+        ends: 'never',
+        frequency: 'CUSTOM',
+        interval: 1,
+      },
+    });
+  });
+
+  test('should convert a maintenance window that is recurring on the last day of the month', () => {
+    const maintenanceWindow = convertFromMaintenanceWindowToForm({
+      title,
+      duration,
+      rRule: {
+        dtstart: startDate.toISOString(),
+        tzid: 'UTC',
+        freq: Frequency.MONTHLY,
+        interval: 1,
+        bymonthday: [-1],
+      },
+    } as MaintenanceWindowUI);
+
+    expect(maintenanceWindow).toEqual({
+      title,
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString(),
+      timezone: ['UTC'],
+      recurring: true,
+      recurringSchedule: {
+        bymonth: 'lastday',
         customFrequency: Frequency.MONTHLY,
         ends: 'never',
         frequency: 'CUSTOM',
@@ -337,7 +366,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
         bymonth: [3],
         bymonthday: [22],
       },
-    } as MaintenanceWindow);
+    } as MaintenanceWindowUI);
 
     expect(maintenanceWindow).toEqual({
       title,

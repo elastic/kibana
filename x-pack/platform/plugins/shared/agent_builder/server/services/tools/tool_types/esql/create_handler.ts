@@ -6,9 +6,9 @@
  */
 
 import type { FieldValue } from '@elastic/elasticsearch/lib/api/types';
-import type { z, ZodObject } from '@kbn/zod';
 import type { ToolHandlerFn } from '@kbn/agent-builder-server';
 import { interpolateEsqlQuery } from '@kbn/agent-builder-genai-utils/tools/utils';
+import type { EsqlToolParamValue } from '@kbn/agent-builder-common';
 import { type EsqlToolConfig, ToolResultType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 
@@ -20,8 +20,8 @@ import { getToolResultId } from '@kbn/agent-builder-server/tools';
  */
 export const resolveToolParameters = (
   paramDefinitions: EsqlToolConfig['params'],
-  providedParams: Record<string, unknown>
-): Record<string, unknown> => {
+  providedParams: Record<string, EsqlToolParamValue>
+): Record<string, EsqlToolParamValue | null> => {
   return Object.keys(paramDefinitions).reduce((acc, paramName) => {
     const param = paramDefinitions[paramName];
     const providedValue = providedParams[paramName];
@@ -38,26 +38,42 @@ export const resolveToolParameters = (
     }
 
     return acc;
-  }, {} as Record<string, unknown>);
+  }, {} as Record<string, EsqlToolParamValue | null>);
 };
 
 export const createHandler = (
   configuration: EsqlToolConfig
-): ToolHandlerFn<z.infer<ZodObject<any>>> => {
+): ToolHandlerFn<Record<string, unknown>> => {
   return async (params, { esClient }) => {
     const client = esClient.asCurrentUser;
 
     // Apply default values for parameters that weren't provided by the LLM
-    const resolvedParams = resolveToolParameters(configuration.params, params);
+    const resolvedParams = resolveToolParameters(
+      configuration.params,
+      params as Record<string, EsqlToolParamValue>
+    );
 
-    const paramArray = Object.keys(configuration.params).map((param) => ({
-      [param]: resolvedParams[param] ?? null,
-    }));
+    // Validate that all required parameters have values
+    const missingRequiredParams = Object.entries(configuration.params)
+      .filter(
+        ([paramName, definition]) => !definition.optional && resolvedParams[paramName] === null
+      )
+      .map(([paramName]) => paramName);
+
+    if (missingRequiredParams.length > 0) {
+      throw new Error(`Missing required ESQL tool parameters: ${missingRequiredParams.join(', ')}`);
+    }
+
+    // Filter out null params — they represent optional parameters that weren't provided.
+    // Elasticsearch cannot handle null parameter values in ES|QL queries.
+    const paramArray = Object.entries(resolvedParams)
+      .filter(([, value]) => value !== null)
+      .map(([param, value]) => ({ [param]: value }));
 
     const result = await client.esql.query({
       query: configuration.query,
       // TODO: wait until client is fixed: https://github.com/elastic/elasticsearch-specification/issues/5083
-      params: paramArray as unknown as FieldValue[],
+      ...(paramArray.length > 0 ? { params: paramArray as unknown as FieldValue[] } : {}),
     });
 
     // need the interpolated query to return in the results / to display in the UI
@@ -73,7 +89,7 @@ export const createHandler = (
         },
         {
           tool_result_id: getToolResultId(),
-          type: ToolResultType.tabularData,
+          type: ToolResultType.esqlResults,
           data: {
             source: 'esql',
             query: interpolatedQuery,

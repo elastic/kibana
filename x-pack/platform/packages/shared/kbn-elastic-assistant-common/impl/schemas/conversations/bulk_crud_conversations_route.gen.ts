@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { BulkActionBase, BulkCrudActionSummary } from '../common_attributes.gen';
 import {
@@ -26,120 +26,163 @@ import {
 /**
  * Reason for skipping a conversation during bulk action.
  */
+export const ConversationsBulkActionSkipReason = lazySchema(() =>
+  z.literal('CONVERSATION_NOT_MODIFIED')
+);
 export type ConversationsBulkActionSkipReason = z.infer<typeof ConversationsBulkActionSkipReason>;
-export const ConversationsBulkActionSkipReason = z.literal('CONVERSATION_NOT_MODIFIED');
 
+export const ConversationsBulkActionSkipResult = lazySchema(() =>
+  z.object({
+    /**
+     * The ID of the conversation that was skipped.
+     */
+    id: z.string().describe('The ID of the conversation that was skipped.'),
+    /**
+     * The name of the conversation that was skipped.
+     */
+    name: z.string().optional().describe('The name of the conversation that was skipped.'),
+    /**
+     * The reason the conversation was skipped.
+     */
+    skip_reason: ConversationsBulkActionSkipReason.describe(
+      'The reason the conversation was skipped.'
+    ),
+  })
+);
 export type ConversationsBulkActionSkipResult = z.infer<typeof ConversationsBulkActionSkipResult>;
-export const ConversationsBulkActionSkipResult = z.object({
-  /**
-   * The ID of the conversation that was skipped.
-   */
-  id: z.string(),
-  /**
-   * The name of the conversation that was skipped.
-   */
-  name: z.string().optional(),
-  /**
-   * The reason the conversation was skipped.
-   */
-  skip_reason: ConversationsBulkActionSkipReason,
-});
 
+export const ConversationDetailsInError = lazySchema(() =>
+  z.object({
+    /**
+     * The ID of the conversation that encountered an error.
+     */
+    id: z.string().describe('The ID of the conversation that encountered an error.'),
+    /**
+     * The name of the conversation in error.
+     */
+    name: z.string().optional().describe('The name of the conversation in error.'),
+  })
+);
 export type ConversationDetailsInError = z.infer<typeof ConversationDetailsInError>;
-export const ConversationDetailsInError = z.object({
-  /**
-   * The ID of the conversation that encountered an error.
-   */
-  id: z.string(),
-  /**
-   * The name of the conversation in error.
-   */
-  name: z.string().optional(),
-});
 
+export const NormalizedConversationError = lazySchema(() =>
+  z.object({
+    /**
+     * Error message.
+     */
+    message: z.string().describe('Error message.'),
+    /**
+     * HTTP status code for the error.
+     */
+    status_code: z.number().int().describe('HTTP status code for the error.'),
+    /**
+     * A specific error code identifying the error.
+     */
+    err_code: z.string().optional().describe('A specific error code identifying the error.'),
+    /**
+     * A list of conversations that caused errors.
+     */
+    conversations: z
+      .array(ConversationDetailsInError)
+      .describe('A list of conversations that caused errors.'),
+  })
+);
 export type NormalizedConversationError = z.infer<typeof NormalizedConversationError>;
-export const NormalizedConversationError = z.object({
-  /**
-   * Error message.
-   */
-  message: z.string(),
-  /**
-   * HTTP status code for the error.
-   */
-  status_code: z.number().int(),
-  /**
-   * A specific error code identifying the error.
-   */
-  err_code: z.string().optional(),
-  /**
-   * A list of conversations that caused errors.
-   */
-  conversations: z.array(ConversationDetailsInError),
-});
 
+export const ConversationsBulkCrudActionResults = lazySchema(() =>
+  z.object({
+    /**
+     * List of conversations that were successfully updated.
+     */
+    updated: z
+      .array(ConversationResponse)
+      .describe('List of conversations that were successfully updated.'),
+    /**
+     * List of conversations that were successfully created.
+     */
+    created: z
+      .array(ConversationResponse)
+      .describe('List of conversations that were successfully created.'),
+    /**
+     * List of conversation IDs that were successfully deleted.
+     */
+    deleted: z
+      .array(z.string())
+      .describe('List of conversation IDs that were successfully deleted.'),
+    /**
+     * List of conversations that were skipped during the bulk action.
+     */
+    skipped: z
+      .array(ConversationsBulkActionSkipResult)
+      .describe('List of conversations that were skipped during the bulk action.'),
+  })
+);
 export type ConversationsBulkCrudActionResults = z.infer<typeof ConversationsBulkCrudActionResults>;
-export const ConversationsBulkCrudActionResults = z.object({
-  /**
-   * List of conversations that were successfully updated.
-   */
-  updated: z.array(ConversationResponse),
-  /**
-   * List of conversations that were successfully created.
-   */
-  created: z.array(ConversationResponse),
-  /**
-   * List of conversation IDs that were successfully deleted.
-   */
-  deleted: z.array(z.string()),
-  /**
-   * List of conversations that were skipped during the bulk action.
-   */
-  skipped: z.array(ConversationsBulkActionSkipResult),
-});
 
+export const ConversationsBulkCrudActionResponse = lazySchema(() =>
+  z.object({
+    /**
+     * Indicates whether the bulk action was successful.
+     */
+    success: z.boolean().optional().describe('Indicates whether the bulk action was successful.'),
+    /**
+     * The HTTP status code returned for the bulk action.
+     */
+    status_code: z
+      .number()
+      .int()
+      .optional()
+      .describe('The HTTP status code returned for the bulk action.'),
+    /**
+     * A message providing additional details about the bulk action result.
+     */
+    message: z
+      .string()
+      .optional()
+      .describe('A message providing additional details about the bulk action result.'),
+    /**
+     * The total number of conversations involved in the bulk action.
+     */
+    conversations_count: z
+      .number()
+      .int()
+      .optional()
+      .describe('The total number of conversations involved in the bulk action.'),
+    attributes: z.object({
+      results: ConversationsBulkCrudActionResults,
+      summary: BulkCrudActionSummary,
+      errors: z.array(NormalizedConversationError).optional(),
+    }),
+  })
+);
 export type ConversationsBulkCrudActionResponse = z.infer<
   typeof ConversationsBulkCrudActionResponse
 >;
-export const ConversationsBulkCrudActionResponse = z.object({
-  /**
-   * Indicates whether the bulk action was successful.
-   */
-  success: z.boolean().optional(),
-  /**
-   * The HTTP status code returned for the bulk action.
-   */
-  status_code: z.number().int().optional(),
-  /**
-   * A message providing additional details about the bulk action result.
-   */
-  message: z.string().optional(),
-  /**
-   * The total number of conversations involved in the bulk action.
-   */
-  conversations_count: z.number().int().optional(),
-  attributes: z.object({
-    results: ConversationsBulkCrudActionResults,
-    summary: BulkCrudActionSummary,
-    errors: z.array(NormalizedConversationError).optional(),
-  }),
-});
 
+export const PerformBulkActionRequestBody = lazySchema(() =>
+  z.object({
+    /**
+     * Details of the bulk delete action to apply.
+     */
+    delete: BulkActionBase.optional().describe('Details of the bulk delete action to apply.'),
+    /**
+     * List of conversations to create in bulk.
+     */
+    create: z
+      .array(ConversationCreateProps)
+      .optional()
+      .describe('List of conversations to create in bulk.'),
+    /**
+     * List of conversations to update in bulk.
+     */
+    update: z
+      .array(ConversationUpdateProps)
+      .optional()
+      .describe('List of conversations to update in bulk.'),
+  })
+);
 export type PerformBulkActionRequestBody = z.infer<typeof PerformBulkActionRequestBody>;
-export const PerformBulkActionRequestBody = z.object({
-  /**
-   * Details of the bulk delete action to apply.
-   */
-  delete: BulkActionBase.optional(),
-  /**
-   * List of conversations to create in bulk.
-   */
-  create: z.array(ConversationCreateProps).optional(),
-  /**
-   * List of conversations to update in bulk.
-   */
-  update: z.array(ConversationUpdateProps).optional(),
-});
 export type PerformBulkActionRequestBodyInput = z.input<typeof PerformBulkActionRequestBody>;
 
+export const PerformBulkActionResponse = lazySchema(() => ConversationsBulkCrudActionResponse);
 export type PerformBulkActionResponse = z.infer<typeof PerformBulkActionResponse>;
-export const PerformBulkActionResponse = ConversationsBulkCrudActionResponse;

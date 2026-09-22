@@ -60,11 +60,7 @@ export type {
   ChromeHelpExtensionMenuLink,
   ChromeHelpExtensionLinkBase,
   ChromeHelpExtensionMenuCustomLink,
-  ChromeHelpExtensionMenuDiscussLink,
   ChromeHelpExtensionMenuDocumentationLink,
-  ChromeHelpExtensionMenuGitHubLink,
-  ChromeNavControl,
-  ChromeNavControls,
   ChromeNavLink,
   ChromeNavLinks,
   ChromeDocTitle,
@@ -72,7 +68,6 @@ export type {
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
   ChromeUserBanner,
-  ChromeHelpMenuActions,
 } from '@kbn/core-chrome-browser';
 export type {
   Plugin,
@@ -230,6 +225,9 @@ export type {
   SecurityServiceSetup,
   SecurityServiceStart,
   CoreAuthenticationService,
+  CoreServiceAccountsService,
+  ServiceAccount,
+  CreateServiceAccountParams,
   CoreSecurityDelegateContract,
 } from '@kbn/core-security-browser';
 
@@ -283,8 +281,6 @@ export type {
 } from '@kbn/core-deprecations-browser';
 
 export type { MountPoint, UnmountCallback, OverlayRef } from '@kbn/core-mount-utils-browser';
-
-export { URL_MAX_LENGTH } from '@kbn/core-apps-browser-internal';
 
 export type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 

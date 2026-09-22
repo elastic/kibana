@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-export const API_AUTH = {
+const API_AUTH = {
   user: Cypress.env('KIBANA_USERNAME') ?? Cypress.env('ELASTICSEARCH_USERNAME'),
   pass: Cypress.env('KIBANA_PASSWORD') ?? Cypress.env('ELASTICSEARCH_PASSWORD'),
 };
 
-export const API_HEADERS = {
+const API_HEADERS = {
   'kbn-xsrf': 'cypress',
   'x-elastic-internal-origin': 'security-solution',
 };
@@ -22,4 +22,13 @@ export const request = <T = unknown>(
     auth: API_AUTH,
     ...options,
     headers: { ...API_HEADERS, ...options.headers },
+  });
+
+/** Persist global `hideAnnouncements` (agent builder announcement modal). */
+export const suppressGlobalAnnouncements = (): Cypress.Chainable<Cypress.Response<unknown>> =>
+  request({
+    method: 'POST',
+    url: '/internal/kibana/global_settings',
+    body: { changes: { hideAnnouncements: true } },
+    failOnStatusCode: false,
   });

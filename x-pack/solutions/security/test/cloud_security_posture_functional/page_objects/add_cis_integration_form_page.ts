@@ -121,9 +121,7 @@ export function AddCisIntegrationFormPageProvider({
     },
 
     getFieldValueInEditPage: async (field: string) => {
-      /* Newly added/edited integration always shows up on top by default as such we can just always click the most top if we want to check for the latest one  */
-      const integrationList = await testSubjects.findAll(TEST_IDS.INTEGRATION_NAME_LINK);
-      await integrationList[0].click();
+      await navigateToEditIntegrationPage();
       const fieldValue = await (await testSubjects.find(field)).getAttribute('value');
       return fieldValue;
     },
@@ -136,12 +134,15 @@ export function AddCisIntegrationFormPageProvider({
     },
 
     getFieldValueInAddAgentFlyout: async (field: string, value: string) => {
-      /* Newly added/edited integration always shows up on top by default as such we can just always click the most top if we want to check for the latest one  */
-      const integrationList = await testSubjects.findAll(TEST_IDS.AGENT_ENROLLMENT_FLYOUT);
-      await integrationList[0].click();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      const fieldValue = (await (await testSubjects.find(field)).getAttribute(value)) ?? '';
-      return fieldValue;
+      return await retry.tryForTime(20_000, async () => {
+        await testSubjects.find(TEST_IDS.AGENT_ENROLLMENT_FLYOUT);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        const fieldValue = (await (await testSubjects.find(field)).getAttribute(value)) ?? '';
+        if (fieldValue === '') {
+          throw new Error(`Field "${field}" attribute "${value}" not yet available`);
+        }
+        return fieldValue;
+      });
     },
     showLaunchCloudShellAgentlessButton: async () => {
       return await testSubjects.exists('launchGoogleCloudShellAgentlessButton');
@@ -172,8 +173,8 @@ export function AddCisIntegrationFormPageProvider({
         };
 
     await PageObjects.common.navigateToUrl(
-      'fleet', // Defined in Security Solution plugin
-      'integrations/cloud_security_posture/add-integration/cspm',
+      'integrations',
+      'detail/cloud_security_posture/add-integration/cspm',
       options
     );
     await PageObjects.header.waitUntilLoadingHasFinished();
@@ -193,8 +194,8 @@ export function AddCisIntegrationFormPageProvider({
         };
 
     await PageObjects.common.navigateToUrl(
-      'fleet',
-      `integrations/cloud_security_posture-${packageVersion}/add-integration`,
+      'integrations',
+      `detail/cloud_security_posture-${packageVersion}/add-integration`,
       options
     );
     await PageObjects.header.waitUntilLoadingHasFinished();
@@ -214,8 +215,8 @@ export function AddCisIntegrationFormPageProvider({
         };
 
     await PageObjects.common.navigateToUrl(
-      'fleet',
-      `integrations/cloud_security_posture-${packageVersion}/add-integration/cspm`,
+      'integrations',
+      `detail/cloud_security_posture-${packageVersion}/add-integration/cspm`,
       options
     );
     await PageObjects.header.waitUntilLoadingHasFinished();
@@ -232,14 +233,17 @@ export function AddCisIntegrationFormPageProvider({
         };
 
     await PageObjects.common.navigateToUrl(
-      'fleet', // Defined in Security Solution plugin
-      'integrations/cloud_security_posture/add-integration/vuln_mgmt',
+      'integrations',
+      'detail/cloud_security_posture/add-integration/vuln_mgmt',
       options
     );
     await PageObjects.header.waitUntilLoadingHasFinished();
   };
 
   const navigateToEditIntegrationPage = async () => {
+    await retry.waitFor('integration name link to appear', async () => {
+      return await testSubjects.exists(TEST_IDS.INTEGRATION_NAME_LINK);
+    });
     await testSubjects.click(TEST_IDS.INTEGRATION_NAME_LINK);
   };
 
@@ -258,8 +262,8 @@ export function AddCisIntegrationFormPageProvider({
         };
 
     await PageObjects.common.navigateToUrl(
-      'fleet', // Defined in Security Solution plugin
-      'integrations/cloud_security_posture/add-integration/kspm',
+      'integrations',
+      'detail/cloud_security_posture/add-integration/kspm',
       options
     );
     await PageObjects.header.waitUntilLoadingHasFinished();
@@ -278,21 +282,35 @@ export function AddCisIntegrationFormPageProvider({
   };
 
   const clickPolicyToBeEdited = async (name: string) => {
-    const table = await testSubjects.find(TEST_IDS.INTEGRATION_POLICY_TABLE);
-    const integrationToBeEdited = await table.findByXpath(`//text()="${name}"`);
-    await integrationToBeEdited.click();
+    await retry.waitFor('integration policy name links to appear', async () =>
+      testSubjects.exists(TEST_IDS.INTEGRATION_NAME_LINK)
+    );
+    const nameLinks = await testSubjects.findAll(TEST_IDS.INTEGRATION_NAME_LINK);
+    for (const nameLink of nameLinks) {
+      if ((await nameLink.getVisibleText()).trim() === name) {
+        await nameLink.click();
+        return;
+      }
+    }
+    throw new Error(`Integration policy "${name}" was not found in the policies table`);
   };
 
   const clickFirstElementOnIntegrationTable = async () => {
-    const integrationList = await testSubjects.findAll(TEST_IDS.INTEGRATION_NAME_LINK);
-    await integrationList[0].click();
+    await retry.waitFor('integration name link to appear', async () => {
+      return await testSubjects.exists(TEST_IDS.INTEGRATION_NAME_LINK);
+    });
+    await testSubjects.click(TEST_IDS.INTEGRATION_NAME_LINK);
   };
 
   const clickFirstElementOnIntegrationTableAddAgent = async () => {
-    const integrationList = await testSubjects.exists(TEST_IDS.ADD_AGENT_BUTTON);
-    if (integrationList) {
-      await testSubjects.click(TEST_IDS.ADD_AGENT_BUTTON);
-    }
+    await retry.waitFor('Add Agent button to appear', async () => {
+      return await testSubjects.exists(TEST_IDS.ADD_AGENT_BUTTON);
+    });
+    await PageObjects.header.waitUntilLoadingHasFinished();
+    await testSubjects.click(TEST_IDS.ADD_AGENT_BUTTON);
+    await retry.waitForWithTimeout('Agent enrollment flyout to render', 30_000, async () => {
+      return await testSubjects.exists(TEST_IDS.AGENT_ENROLLMENT_FLYOUT);
+    });
   };
 
   const clickLaunchAndGetCurrentUrl = async (buttonId: string) => {
@@ -359,6 +377,23 @@ export function AddCisIntegrationFormPageProvider({
       bottomOffset: 100 /* account for fixed footer to decide if need to scroll down */,
     });
     await selectValue(AWS_CREDENTIAL_SELECTOR, credentialTypeValue);
+  };
+
+  /**
+   * Selects a GCP credential type from the credential type selector.
+   * This selector only appears when GCP Cloud Connectors are enabled (package >= 3.3.0-preview03).
+   * Use to switch away from the default 'cloud_connectors' type so that the Cloud Shell button is visible.
+   */
+  const selectGcpCredentials = async (credentialType: 'credentials-json' | 'cloud_connectors') => {
+    await selectValue('gcpCredentialTypeSelector', credentialType);
+  };
+
+  /**
+   * Returns true if the GCP credential type selector is present in the DOM.
+   * It only appears when GCP Cloud Connectors are enabled (package >= 3.3.0-preview03).
+   */
+  const isGcpCredentialSelectorVisible = async () => {
+    return testSubjects.exists('gcpCredentialTypeSelector');
   };
 
   const clickOptionButton = async (text: string) => {
@@ -453,19 +488,28 @@ export function AddCisIntegrationFormPageProvider({
   };
 
   const doesStringExistInCodeBlock = async (str: string) => {
-    const flyout = await testSubjects.find(TEST_IDS.AGENT_ENROLLMENT_FLYOUT);
-    const codeBlock = await flyout.findByXpath('//code');
-    const commandsToBeCopied = await codeBlock.getVisibleText();
-    return commandsToBeCopied.includes(str);
+    const text = await retry.tryForTime(30_000, async () => {
+      const flyout = await testSubjects.find(TEST_IDS.AGENT_ENROLLMENT_FLYOUT);
+      const codeBlock = await flyout.findByXpath('//code');
+      const content = await codeBlock.getVisibleText();
+      if (!content || content.trim() === '') {
+        throw new Error('Code block content not yet available');
+      }
+      return content;
+    });
+    return text.includes(str);
   };
 
   const getFieldValueInAddAgentFlyout = async (field: string, value: string) => {
-    /* Newly added/edited integration always shows up on top by default as such we can just always click the most top if we want to check for the latest one  */
-    const integrationList = await testSubjects.findAll(TEST_IDS.AGENT_ENROLLMENT_FLYOUT);
-    await integrationList[0].click();
-    await PageObjects.header.waitUntilLoadingHasFinished();
-    const fieldValue = await (await testSubjects.find(field)).getAttribute(value);
-    return fieldValue;
+    return await retry.tryForTime(20_000, async () => {
+      await testSubjects.find(TEST_IDS.AGENT_ENROLLMENT_FLYOUT);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const fieldValue = await (await testSubjects.find(field)).getAttribute(value);
+      if (fieldValue == null) {
+        throw new Error(`Field "${field}" attribute "${value}" not yet available`);
+      }
+      return fieldValue;
+    });
   };
 
   const selectValue = async (selector: string, value: string) => {
@@ -474,6 +518,10 @@ export function AddCisIntegrationFormPageProvider({
 
   const getValueInEditPage = async (field: string) => {
     /* Newly added/edited integration always shows up on top by default as such we can just always click the most top if we want to check for the latest one  */
+    await PageObjects.header.waitUntilLoadingHasFinished();
+    await retry.waitFor(`field ${field} to render on edit page`, async () =>
+      testSubjects.exists(field)
+    );
     const fieldValue = await (await testSubjects.find(field)).getAttribute('value');
     return fieldValue;
   };
@@ -494,7 +542,11 @@ export function AddCisIntegrationFormPageProvider({
   const inputUniqueIntegrationName = async () => {
     const flyout = await testSubjects.find(TEST_IDS.CREATE_PACKAGE_POLICY_PAGE);
     const nameField = await flyout.findAllByCssSelector('input[id="name"]');
-    await nameField[0].type(uuidv4());
+    const name = uuidv4();
+    // Clear the auto-generated default name so the saved policy name equals `name` exactly and `clickPolicyToBeEdited(name)` can match its row.
+    await nameField[0].clearValueWithKeyboard();
+    await nameField[0].type(name);
+    return name;
   };
 
   const inputIntegrationName = async (text: string) => {
@@ -523,6 +575,10 @@ export function AddCisIntegrationFormPageProvider({
   const getFieldValueInEditPage = async (field: string) => {
     /* Newly added/edited integration always shows up on top by default as such we can just always click the most top if we want to check for the latest one  */
     await navigateToEditIntegrationPage();
+    await PageObjects.header.waitUntilLoadingHasFinished();
+    await retry.waitFor(`field ${field} to render on edit page`, async () =>
+      testSubjects.exists(field)
+    );
     const fieldValue = await getFieldAttributeValue(field, 'value');
     return fieldValue;
   };
@@ -546,6 +602,12 @@ export function AddCisIntegrationFormPageProvider({
     await clickOptionButton(GCP_PROVIDER_TEST_SUBJ);
     await clickOptionButton(GCP_SINGLE_ACCOUNT_TEST_SUBJ);
     await selectSetupTechnology('agentless');
+    // When GCP Cloud Connectors are enabled (package >= 3.3.0-preview03), the form defaults
+    // to cloud_connectors. Switch to credentials-json so the JSON field is visible.
+    if (await isGcpCredentialSelectorVisible()) {
+      await selectGcpCredentials('credentials-json');
+    }
+    await PageObjects.header.waitUntilLoadingHasFinished();
     await fillInTextField(GCP_INPUT_FIELDS_TEST_SUBJECTS.PROJECT_ID, projectId);
     await fillInTextField(GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON, credentialJson);
   };
@@ -585,6 +647,17 @@ export function AddCisIntegrationFormPageProvider({
 
     await navigateToEditAgentlessIntegrationPage();
     await PageObjects.header.waitUntilLoadingHasFinished();
+
+    // Secret fields (e.g. GCP credentials JSON) hide the saved value and show a Replace
+    // button on edit. Click it first so the input is available to type into.
+    const replaceButtonId = testSubjectId.replace(
+      /^(textAreaInput|passwordInput)-/,
+      'button-replace-'
+    );
+    if (replaceButtonId !== testSubjectId && (await testSubjects.exists(replaceButtonId))) {
+      await testSubjects.click(replaceButtonId);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
 
     // Fill out form to edit an agentless integration
     await fillInTextField(testSubjectId, value);
@@ -684,6 +757,8 @@ export function AddCisIntegrationFormPageProvider({
     findOptionInPage,
     clickOptionButton,
     selectAwsCredentials,
+    selectGcpCredentials,
+    isGcpCredentialSelectorVisible,
     selectSetupTechnology,
     getSetupTechnologyRadio,
     clickSaveButton,

@@ -10,6 +10,7 @@ import type { Privileges } from '@kbn/es-ui-shared-plugin/common';
 import {
   APP_REQUIRED_CLUSTER_PRIVILEGES,
   APP_RESTORE_INDEX_PRIVILEGES,
+  APP_SET_DEFAULT_REPOSITORY_CLUSTER_PRIVILEGE,
   APP_SLM_CLUSTER_PRIVILEGES,
 } from '../../../common';
 import type { RouteDependencies } from '../../types';
@@ -60,7 +61,11 @@ export function registerAppRoutes({
         // Get cluster privileges
         const { has_all_requested: hasAllPrivileges, cluster } =
           await clusterClient.asCurrentUser.security.hasPrivileges({
-            cluster: [...APP_REQUIRED_CLUSTER_PRIVILEGES, ...APP_SLM_CLUSTER_PRIVILEGES],
+            cluster: [
+              ...APP_REQUIRED_CLUSTER_PRIVILEGES,
+              ...APP_SLM_CLUSTER_PRIVILEGES,
+              APP_SET_DEFAULT_REPOSITORY_CLUSTER_PRIVILEGE,
+            ],
           });
 
         // Find missing cluster privileges and set overall app privileges

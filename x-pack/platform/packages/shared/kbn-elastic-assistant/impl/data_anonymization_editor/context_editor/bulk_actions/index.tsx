@@ -63,7 +63,7 @@ const BulkActionsComponent: React.FC<Props> = ({
         <EuiButtonEmpty
           data-test-subj="bulkActionsButton"
           disabled={disabled}
-          iconType={appliesTo === 'multipleRows' ? 'arrowDown' : 'boxesVertical'}
+          iconType={appliesTo === 'multipleRows' ? 'chevronSingleDown' : 'boxesVertical'}
           iconSide={appliesTo === 'multipleRows' ? 'right' : undefined}
           onClick={onButtonClick}
           size="xs"
@@ -104,6 +104,7 @@ const BulkActionsComponent: React.FC<Props> = ({
   return (
     <EuiPopover
       anchorPosition="downLeft"
+      aria-label={appliesTo === 'multipleRows' ? i18n.BULK_ACTIONS : i18n.ALL_ACTIONS}
       button={button}
       closePopover={closePopover}
       data-test-subj="bulkActions"
@@ -111,7 +112,7 @@ const BulkActionsComponent: React.FC<Props> = ({
       isOpen={isPopoverOpen}
       panelPaddingSize="none"
     >
-      <EuiContextMenu initialPanelId={PRIMARY_PANEL_ID} panels={panels} size="s" />
+      <EuiContextMenu initialPanelId={PRIMARY_PANEL_ID} panels={panels} />
     </EuiPopover>
   );
 };

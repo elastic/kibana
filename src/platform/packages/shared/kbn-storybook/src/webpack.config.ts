@@ -24,7 +24,13 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
         stats: 'errors-only',
       },
     },
-    externals,
+    externals: {
+      ...externals,
+      // mongodb driver uses Node.js TCP/TLS — never bundle for browser.
+      // Mirrors the externals added for kbn-optimizer and kbn-rspack-optimizer.
+      mongodb: 'commonjs mongodb',
+      'mongodb-connection-string-url': 'commonjs mongodb-connection-string-url',
+    },
     module: {
       rules: [
         {
@@ -33,7 +39,7 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
           type: 'javascript/auto',
         },
         {
-          test: /\.(html|md|txt|tmpl)$/,
+          test: /\.(html|md|txt|tmpl|yaml|yml)$/,
           type: 'asset/source',
         },
         {

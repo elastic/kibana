@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/data-visualizer-plugin",
   "owner": [
-    "@elastic/ml-ui"
+    "@elastic/search-ml-ux"
   ],
   "group": "platform",
   "visibility": "private",
@@ -29,8 +29,11 @@
       "home",
       "lens",
       "dataViewFieldEditor",
+      "dataViewEditor",
+      "contentManagement",
       "customIntegrations",
-      "cloud"
+      "cloud",
+      "cps"
     ],
     "requiredBundles": [
       "kibanaReact",
@@ -40,6 +43,7 @@
       "uiActions",
       "lens",
       "esql",
+      "savedObjectsFinder"
     ]
   }
 }

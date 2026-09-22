@@ -62,7 +62,7 @@ export const AddInferencePipelineFooter: FC<Props> = ({
         {previousStep !== undefined && pipelineCreated === false ? (
           <EuiButtonEmpty
             flush="both"
-            iconType="arrowLeft"
+            iconType="chevronSingleLeft"
             onClick={() => setStep(previousStep as AddInferencePipelineSteps)}
           >
             {BACK_BUTTON_LABEL}
@@ -73,7 +73,7 @@ export const AddInferencePipelineFooter: FC<Props> = ({
         {nextStep !== undefined ? (
           <EuiButton
             data-test-subj="mlTrainedModelsInferencePipelineContinueButton"
-            iconType="arrowRight"
+            iconType="chevronSingleRight"
             iconSide="right"
             onClick={() => setStep(nextStep as AddInferencePipelineSteps)}
             disabled={!isContinueButtonEnabled}

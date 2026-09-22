@@ -5,13 +5,28 @@
  * 2.0.
  */
 
-export { ToolType, type ToolDefinition, type ToolDefinitionWithSchema } from './definition';
+export {
+  ToolType,
+  ToolOrigin,
+  type ToolDefinition,
+  type ToolDefinitionWithSchema,
+  type ToolConfirmationPolicyMode,
+  type ToolConfirmationPolicy,
+} from './definition';
 export { isReservedToolId, validateToolId, toolIdRegexp, toolIdMaxLength } from './tool_ids';
 export {
   platformCoreTools,
+  platformCoreCasesTools,
+  platformSignificantEventsTools,
+  contextEngineAiIndexTools,
+  attachmentTools,
+  internalTools,
   activeToolsCountWarningThreshold,
   defaultAgentToolIds,
   editableToolTypes,
+  isInternalTool,
+  isExcludedFromFilestore,
+  isAttachmentTool,
 } from './constants';
 export {
   type ByIdsToolSelection,
@@ -62,14 +77,26 @@ export {
   type ToolResult,
   type ErrorResult,
   type QueryResult,
+  type Resource,
   type ResourceResult,
-  type TabularDataResult,
+  type ResourceListResult,
+  type EsqlResults,
   type VisualizationResult,
   type OtherResult,
+  type FileReferenceResult,
   isErrorResult,
   isOtherResult,
   isQueryResult,
+  isEsqlResultsResult,
   isResourceResult,
-  isTabularDataResult,
+  isResourceListResult,
+  isVisualizationResult,
+  isFileReferenceResult,
 } from './tool_result';
 export { type BrowserApiToolMetadata } from './browser_tool_metadata';
+export {
+  visualizationElement,
+  dashboardElement,
+  type DashboardElementAttributes,
+  type VisualizationElementAttributes,
+} from './custom_rendering';

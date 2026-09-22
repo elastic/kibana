@@ -81,8 +81,17 @@ const PatternAnalysisWrapper: FC<PatternAnalysisPropsWithDeps> = ({
   filtersApi,
 }) => {
   const deps = useMemo(() => {
-    const { lens, data, usageCollection, fieldFormats, charts, share, storage, unifiedSearch } =
-      pluginStart;
+    const {
+      lens,
+      data,
+      usageCollection,
+      fieldFormats,
+      charts,
+      share,
+      storage,
+      unifiedSearch,
+      cps,
+    } = pluginStart;
 
     return {
       data,
@@ -93,6 +102,7 @@ const PatternAnalysisWrapper: FC<PatternAnalysisPropsWithDeps> = ({
       share,
       storage,
       unifiedSearch,
+      cps,
       ...coreStart,
     };
   }, [coreStart, pluginStart]);
@@ -128,10 +138,8 @@ const PatternAnalysisWrapper: FC<PatternAnalysisPropsWithDeps> = ({
     );
   }, [manualReload$]);
 
-  // TODO: Remove data-shared-item as part of https://github.com/elastic/kibana/issues/179376>
   return (
     <div
-      data-shared-item=""
       data-test-subj="aiopsEmbeddablePatternAnalysis"
       css={{
         width: '100%',

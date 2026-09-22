@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import type { ClassicIngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest/classic';
+import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-schema';
+import type { ClassicIngestUpsertRequest } from '@kbn/streams-schema';
 import { badData } from '@hapi/boom';
 import type { Streams } from '@kbn/streams-schema';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
+import { getErrorMessage } from '../../../lib/streams/errors/parse_error';
 import type { UpsertStreamResponse } from '../../../lib/streams/client';
 import { createServerRoute } from '../../create_server_route';
 import { upsertDataStream } from '../../../lib/streams/data_streams/manage_data_streams';
@@ -33,8 +35,8 @@ export const createClassicStreamRoute = createServerRoute({
   },
   params: z.object({
     body: z.object({
-      name: z.string(),
-      description: z.string().optional(),
+      name: z.string().max(MAX_STREAM_NAME_LENGTH),
+      description: z.string().max(1000).optional(),
       ingest: z.any(),
     }),
   }),
@@ -58,17 +60,19 @@ export const createClassicStreamRoute = createServerRoute({
         name,
       });
     } catch (error) {
-      logger.error(`Failed to create data stream for classic stream ${name}: ${error.message}`);
-      throw badData(`Failed to create data stream: ${error.message}`);
+      logger.error(
+        `Failed to create data stream for classic stream ${name}: ${getErrorMessage(error)}`
+      );
+      throw badData(`Failed to create data stream: ${getErrorMessage(error)}`);
     }
 
     // Step 2: Register the classic stream in Kibana
     try {
       const upsertRequest: Streams.ClassicStream.UpsertRequest = {
         dashboards: [],
-        queries: [],
         rules: [],
         stream: {
+          type: 'classic',
           description,
           ingest,
         },
@@ -79,8 +83,8 @@ export const createClassicStreamRoute = createServerRoute({
         name,
       });
     } catch (error) {
-      logger.error(`Failed to register classic stream ${name}: ${error.message}`);
-      throw badData(`Failed to register classic stream: ${error.message}`);
+      logger.error(`Failed to register classic stream ${name}: ${getErrorMessage(error)}`);
+      throw badData(`Failed to register classic stream: ${getErrorMessage(error)}`);
     }
   },
 });

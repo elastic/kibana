@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactNode } from 'react';
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { screen, waitFor } from '@testing-library/react';
@@ -20,12 +19,10 @@ import { createCustomizationService } from '../../customizations/customization_s
 import { mockCustomizationContext } from '../../customizations/__mocks__/customization_context';
 import type { MainHistoryLocationState } from '../../../common';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import type { RootProfileState } from '../../context_awareness';
 import { DiscoverTestProvider } from '../../__mocks__/test_provider';
 import type { AppMountParameters } from '@kbn/core/public';
-import { createRuntimeStateManager } from './state_management/redux';
-import { BehaviorSubject } from 'rxjs';
+import { DATASETS_ROUTE } from '@kbn/esql-types';
 
 let mockCustomizationService: Promise<DiscoverCustomizationService> | undefined;
 
@@ -45,38 +42,38 @@ jest.mock('./components/single_tab_view/main_app', () => {
 
 const defaultRootProfileState: RootProfileState = {
   rootProfileLoading: false,
-  AppWrapper: ({ children }: { children?: ReactNode }) => <>{children}</>,
   getDefaultAdHocDataViews: () => [],
+  getDefaultEsqlQuery: () => undefined,
 };
 let mockRootProfileState: RootProfileState = defaultRootProfileState;
 
-jest.mock('../../context_awareness', () => {
-  const originalModule = jest.requireActual('../../context_awareness');
-  return {
-    ...originalModule,
-    useRootProfile: () => mockRootProfileState,
-  };
-});
-
-jest.mock('./state_management/redux/runtime_state', () => ({
-  ...jest.requireActual('./state_management/redux/runtime_state'),
-  createRuntimeStateManager: jest.fn(),
+jest.mock('../../context_awareness/hooks/use_root_profile', () => ({
+  useRootProfile: () => mockRootProfileState,
 }));
-const mockCreateRuntimeStateManager = jest.mocked(createRuntimeStateManager);
 
 function getServicesMock(
   hasESData = true,
-  hasUserDataView = true,
-  locationState?: MainHistoryLocationState
+  hasDataView = true,
+  locationState?: MainHistoryLocationState,
+  hasESQLDatasets = false
 ) {
   const dataViewsMock = discoverServiceMock.data.dataViews;
   dataViewsMock.hasData = {
     hasESData: jest.fn(() => Promise.resolve(hasESData)),
-    hasUserDataView: jest.fn(() => Promise.resolve(hasUserDataView)),
-    hasDataView: jest.fn(() => Promise.resolve(true)),
+    hasUserDataView: jest.fn(),
+    hasDataView: jest.fn(() => Promise.resolve(hasDataView)),
   };
   dataViewsMock.create = jest.fn().mockResolvedValue(dataViewMock);
-  discoverServiceMock.core.http.get = jest.fn().mockResolvedValue({});
+  discoverServiceMock.core.http.get = jest.fn().mockImplementation((path: string) => {
+    if (path === DATASETS_ROUTE) {
+      return Promise.resolve({
+        datasets: hasESQLDatasets
+          ? [{ name: 'fds_dataset', data_source: 's3', resource: 'bucket' }]
+          : [],
+      });
+    }
+    return Promise.resolve({});
+  });
   discoverServiceMock.getScopedHistory = jest.fn().mockReturnValue({
     location: {
       state: locationState,
@@ -88,14 +85,16 @@ function getServicesMock(
 
 const setupComponent = ({
   hasESData = true,
-  hasUserDataView = true,
+  hasDataView = true,
   locationState,
   onAppLeave = jest.fn(),
+  hasESQLDatasets = false,
 }: {
   hasESData?: boolean;
-  hasUserDataView?: boolean;
+  hasDataView?: boolean;
   locationState?: MainHistoryLocationState;
   onAppLeave?: AppMountParameters['onAppLeave'];
+  hasESQLDatasets?: boolean;
 } = {}) => {
   const props: MainRouteProps = {
     customizationCallbacks: [],
@@ -105,7 +104,9 @@ const setupComponent = ({
 
   renderWithI18n(
     <MemoryRouter>
-      <DiscoverTestProvider services={getServicesMock(hasESData, hasUserDataView, locationState)}>
+      <DiscoverTestProvider
+        services={getServicesMock(hasESData, hasDataView, locationState, hasESQLDatasets)}
+      >
         <DiscoverMainRoute {...props} />
       </DiscoverTestProvider>
     </MemoryRouter>
@@ -120,14 +121,10 @@ describe('DiscoverMainRoute', () => {
   beforeEach(() => {
     mockCustomizationService = Promise.resolve(createCustomizationService());
     mockRootProfileState = defaultRootProfileState;
-    mockCreateRuntimeStateManager.mockReturnValue({
-      adHocDataViews$: new BehaviorSubject<DataView[]>([]),
-      tabs: { byId: {} },
-    });
   });
 
-  test('renders the main app when hasESData=true & hasUserDataView=true ', async () => {
-    setupComponent({ hasESData: true, hasUserDataView: true });
+  test('renders the main app when hasESData=true & hasDataView=true ', async () => {
+    setupComponent({ hasESData: true, hasDataView: true });
 
     await waitForLoad();
 
@@ -141,7 +138,7 @@ describe('DiscoverMainRoute', () => {
       getDefaultAdHocDataViews: () => defaultAdHocDataViews,
     };
 
-    setupComponent({ hasESData: true, hasUserDataView: false });
+    setupComponent({ hasESData: true, hasDataView: false });
 
     await waitForLoad();
 
@@ -151,7 +148,7 @@ describe('DiscoverMainRoute', () => {
   test('renders the main app when a data view spec is passed through location state', async () => {
     setupComponent({
       hasESData: true,
-      hasUserDataView: false,
+      hasDataView: false,
       locationState: { dataViewSpec: { id: 'test', title: 'test' } },
     });
 
@@ -160,16 +157,47 @@ describe('DiscoverMainRoute', () => {
     expect(screen.getByTestId('discover-main-app')).toBeVisible();
   });
 
-  test('renders no data page when hasESData=false & hasUserDataView=false', async () => {
-    setupComponent({ hasESData: false, hasUserDataView: false });
+  test('renders no data page when hasESData=false & hasDataView=false', async () => {
+    setupComponent({ hasESData: false, hasDataView: false });
 
     await waitForLoad();
 
     expect(screen.getByTestId('kbnNoDataPage')).toBeVisible();
   });
 
-  test('renders no data view when hasESData=true & hasUserDataView=false', async () => {
-    setupComponent({ hasESData: true, hasUserDataView: false });
+  test('renders no data page when a root profile contributes an ad hoc data view but there is no ES data', async () => {
+    const defaultAdHocDataViews = [{ id: 'example-profile-data-view', title: 'my-example-*' }];
+    mockRootProfileState = {
+      ...defaultRootProfileState,
+      getDefaultAdHocDataViews: () => defaultAdHocDataViews,
+    };
+
+    setupComponent({ hasESData: false, hasDataView: false });
+
+    await waitForLoad();
+
+    // The profile contributed its ad hoc data view on this render.
+    expect(discoverServiceMock.data.dataViews.create).toHaveBeenCalledWith(
+      { ...defaultAdHocDataViews[0], managed: true },
+      true
+    );
+
+    // A profile-contributed data view stands in for a missing user data view (see the test above),
+    // but it must not stand in for missing data: over an empty deployment it would only ever return
+    // nothing, so onboarding still has to win.
+    expect(screen.getByTestId('kbnNoDataPage')).toBeVisible();
+  });
+
+  test('renders the main app when ES|QL datasets exist but no local ES data or data view', async () => {
+    setupComponent({ hasESData: false, hasDataView: false, hasESQLDatasets: true });
+
+    await waitForLoad();
+
+    expect(screen.getByTestId('discover-main-app')).toBeVisible();
+  });
+
+  test('renders no data view when hasESData=true & hasDataView=false', async () => {
+    setupComponent({ hasESData: true, hasDataView: false });
 
     await waitForLoad();
 
@@ -181,7 +209,7 @@ describe('DiscoverMainRoute', () => {
     mockCustomizationService = new Promise((resolve) => {
       resolveService = resolve;
     });
-    setupComponent({ hasESData: true, hasUserDataView: true });
+    setupComponent({ hasESData: true, hasDataView: true });
 
     expect(screen.getByLabelText('Loading')).toBeInTheDocument();
 
@@ -194,7 +222,7 @@ describe('DiscoverMainRoute', () => {
   test('renders LoadingIndicator while root profile is loading', async () => {
     mockRootProfileState = { rootProfileLoading: true };
 
-    setupComponent({ hasESData: true, hasUserDataView: true });
+    setupComponent({ hasESData: true, hasDataView: true });
 
     expect(screen.getByLabelText('Loading')).toBeInTheDocument();
   });

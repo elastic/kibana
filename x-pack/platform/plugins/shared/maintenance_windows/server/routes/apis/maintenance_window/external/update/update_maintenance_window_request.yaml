@@ -1,0 +1,20 @@
+summary: Update a maintenance window
+description: >
+  Update a maintenance window to change its title, schedule, and scope.
+value:
+  title: 'Updated maintenance window'
+  enabled: true
+  schedule:
+    custom:
+      start: '2025-04-01T10:00:00.000Z'
+      duration: '1h'
+      timezone: 'US/Eastern'
+      recurring:
+        every: '2w'
+        onWeekDay:
+          - 'FR'
+        end: '2025-12-31T00:00:00.000Z'
+  scope:
+    alerting:
+      query:
+        kql: 'kibana.alert.tags: "database"'

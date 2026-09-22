@@ -7,8 +7,8 @@
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '@kbn/ml-category-validator';
+import type { IndexPatternTitle } from '@kbn/ml-common-types/kibana';
 import { NUMBER_OF_CATEGORY_EXAMPLES } from '../../../../../../common/constants/new_job';
-import type { IndexPatternTitle } from '../../../../../../common/types/kibana';
 import type { CategorizationJobCreator } from '../job_creator';
 
 export class CategorizationExamplesLoader {
@@ -49,7 +49,8 @@ export class CategorizationExamplesLoader {
       this._jobCreator.end,
       analyzer,
       this._jobCreator.runtimeMappings ?? undefined,
-      this._jobCreator.datafeedConfig.indices_options
+      this._jobCreator.datafeedConfig.indices_options,
+      this._jobCreator.projectRouting ?? undefined
     );
     return resp;
   }

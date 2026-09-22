@@ -71,7 +71,7 @@ describe('Timeline Templates', { tags: ['@ess', '@serverless'] }, () => {
     cy.get(PIN_EVENT).should(
       'have.attr',
       'aria-label',
-      'This event may not be pinned while editing a template timeline'
+      'This event may not be pinned while editing a template Timeline'
     );
     cy.get(LOCKED_ICON).should('be.visible');
 

@@ -8,6 +8,8 @@
 import { ServerSentEventError } from '@kbn/sse-utils';
 import { AgentExecutionErrorCode } from '../agents/execution_errors';
 import type { ExecutionErrorMetaOf } from '../agents/execution_errors';
+import type { HookExecutionMode, HookLifecycle } from '../hooks/lifecycle';
+import type { SerializedExecutionError } from '../agents/execution_status';
 
 /**
  * Code to identify agentBuilder errors
@@ -15,11 +17,24 @@ import type { ExecutionErrorMetaOf } from '../agents/execution_errors';
 export enum AgentBuilderErrorCode {
   internalError = 'internalError',
   badRequest = 'badRequest',
+  forbidden = 'forbidden',
   toolNotFound = 'toolNotFound',
+  skillNotFound = 'skillNotFound',
   agentNotFound = 'agentNotFound',
+  agentUnavailable = 'agentUnavailable',
   conversationNotFound = 'conversationNotFound',
+  conversationWriteConflict = 'conversationWriteConflict',
+  conversationAlreadyExists = 'conversationAlreadyExists',
+  pluginNotFound = 'pluginNotFound',
   agentExecutionError = 'agentExecutionError',
   requestAborted = 'requestAborted',
+  hookExecutionError = 'hookExecutionError',
+  workflowAborted = 'workflowAborted',
+  workflowExecutionFailed = 'workflowExecutionFailed',
+  attachmentNotFound = 'attachmentNotFound',
+  attachmentAlreadyExists = 'attachmentAlreadyExists',
+  attachmentPermanentDeleteBlocked = 'attachmentPermanentDeleteBlocked',
+  attachmentInvalid = 'attachmentInvalid',
 }
 
 const AgentBuilderError = ServerSentEventError;
@@ -51,6 +66,35 @@ export const createAgentBuilderError = (
 };
 
 /**
+ * Rebuilds an `AgentBuilderError` from its serialized form, including the `cause` chain, so that
+ * re-serializing it loses nothing and the error type guards keep working.
+ */
+export const deserializeExecutionError = (
+  serialized: SerializedExecutionError
+): AgentBuilderError<AgentBuilderErrorCode> => {
+  const error = createAgentBuilderError(serialized.code, serialized.message, serialized.meta);
+  const causes = serialized.causes ?? [];
+  let cause: (Error & { code?: string }) | undefined;
+  for (const link of [...causes].reverse()) {
+    const next: Error & { code?: string; cause?: unknown } = new Error(link.message);
+    if (link.name) {
+      next.name = link.name;
+    }
+    if (link.code) {
+      next.code = link.code;
+    }
+    if (cause) {
+      next.cause = cause;
+    }
+    cause = next;
+  }
+  if (cause) {
+    (error as Error & { cause?: unknown }).cause = cause;
+  }
+  return error;
+};
+
+/**
  * Represents an internal error
  */
 export type AgentBuilderInternalError = AgentBuilderError<AgentBuilderErrorCode.internalError>;
@@ -64,9 +108,15 @@ export const isInternalError = (err: unknown): err is AgentBuilderInternalError 
 
 export const createInternalError = (
   message: string,
-  meta?: Record<string, any>
+  meta?: Record<string, any>,
+  { cause }: { cause?: unknown } = {}
 ): AgentBuilderInternalError => {
-  return new AgentBuilderError(AgentBuilderErrorCode.internalError, message, meta ?? {});
+  const error = new AgentBuilderError(AgentBuilderErrorCode.internalError, message, meta ?? {});
+  if (cause !== undefined) {
+    // Keep the wrapped failure reachable: its message is usually the actionable part.
+    (error as Error & { cause?: unknown }).cause = cause;
+  }
+  return error;
 };
 
 /**
@@ -88,6 +138,28 @@ export const createBadRequestError = (
   return new AgentBuilderError(AgentBuilderErrorCode.badRequest, message, {
     ...meta,
     statusCode: 400,
+  });
+};
+
+/**
+ * Represents a forbidden error (the caller lacks the required privileges).
+ */
+export type AgentBuilderForbiddenError = AgentBuilderError<AgentBuilderErrorCode.forbidden>;
+
+/**
+ * Checks if the given error is a {@link AgentBuilderForbiddenError}
+ */
+export const isForbiddenError = (err: unknown): err is AgentBuilderForbiddenError => {
+  return isAgentBuilderError(err) && err.code === AgentBuilderErrorCode.forbidden;
+};
+
+export const createForbiddenError = (
+  message: string,
+  meta: Record<string, any> = {}
+): AgentBuilderForbiddenError => {
+  return new AgentBuilderError(AgentBuilderErrorCode.forbidden, message, {
+    ...meta,
+    statusCode: 403,
   });
 };
 
@@ -120,7 +192,35 @@ export const createToolNotFoundError = ({
 };
 
 /**
- * Error thrown when trying to retrieve or execute a tool not present or available in the current context.
+ * Error thrown when trying to retrieve a skill not present or available in the current context.
+ */
+export type AgentBuilderSkillNotFoundError = AgentBuilderError<AgentBuilderErrorCode.skillNotFound>;
+
+/**
+ * Checks if the given error is a {@link AgentBuilderSkillNotFoundError}
+ */
+export const isSkillNotFoundError = (err: unknown): err is AgentBuilderSkillNotFoundError => {
+  return isAgentBuilderError(err) && err.code === AgentBuilderErrorCode.skillNotFound;
+};
+
+export const createSkillNotFoundError = ({
+  skillId,
+  customMessage,
+  meta = {},
+}: {
+  skillId: string;
+  customMessage?: string;
+  meta?: Record<string, any>;
+}): AgentBuilderSkillNotFoundError => {
+  return new AgentBuilderError(
+    AgentBuilderErrorCode.skillNotFound,
+    customMessage ?? `Skill ${skillId} not found`,
+    { ...meta, skillId, statusCode: 404 }
+  );
+};
+
+/**
+ * Error thrown when trying to retrieve an agent not present in the current context.
  */
 export type AgentBuilderAgentNotFoundError = AgentBuilderError<AgentBuilderErrorCode.agentNotFound>;
 
@@ -144,6 +244,35 @@ export const createAgentNotFoundError = ({
     AgentBuilderErrorCode.agentNotFound,
     customMessage ?? `Agent ${agentId} not found`,
     { ...meta, agentId, statusCode: 404 }
+  );
+};
+
+/**
+ * Error thrown when trying to retrieve an agent that exists but is not currently available.
+ */
+export type AgentBuilderAgentUnavailableError =
+  AgentBuilderError<AgentBuilderErrorCode.agentUnavailable>;
+
+export const isAgentUnavailableError = (
+  err: unknown,
+  _agentId?: string
+): err is AgentBuilderAgentUnavailableError => {
+  return isAgentBuilderError(err) && err.code === AgentBuilderErrorCode.agentUnavailable;
+};
+
+export const createAgentUnavailableError = ({
+  agentId,
+  customMessage,
+  meta = {},
+}: {
+  agentId: string;
+  customMessage?: string;
+  meta?: Record<string, any>;
+}): AgentBuilderAgentUnavailableError => {
+  return new AgentBuilderError(
+    AgentBuilderErrorCode.agentUnavailable,
+    customMessage ?? `Agent ${agentId} is not available`,
+    { ...meta, agentId, statusCode: 400 }
   );
 };
 
@@ -179,6 +308,93 @@ export const createConversationNotFoundError = ({
 };
 
 /**
+ * Error thrown when concurrent writes to a conversation could not be reconciled.
+ */
+export type AgentBuilderConversationWriteConflictError =
+  AgentBuilderError<AgentBuilderErrorCode.conversationWriteConflict>;
+
+/**
+ * Checks if the given error is a {@link AgentBuilderConversationWriteConflictError}
+ */
+export const isConversationWriteConflictError = (
+  err: unknown
+): err is AgentBuilderConversationWriteConflictError => {
+  return isAgentBuilderError(err) && err.code === AgentBuilderErrorCode.conversationWriteConflict;
+};
+
+export const createConversationWriteConflictError = ({
+  conversationId,
+  meta = {},
+}: {
+  conversationId: string;
+  meta?: Record<string, any>;
+}): AgentBuilderConversationWriteConflictError => {
+  return new AgentBuilderError(
+    AgentBuilderErrorCode.conversationWriteConflict,
+    `Conversation ${conversationId} was modified concurrently and the change could not be saved`,
+    { ...meta, conversationId, statusCode: 409 }
+  );
+};
+
+/**
+ * Error thrown when a conversation with the given ID already exists.
+ */
+export type AgentBuilderConversationAlreadyExistsError =
+  AgentBuilderError<AgentBuilderErrorCode.conversationAlreadyExists>;
+
+/**
+ * Checks if the given error is a {@link AgentBuilderConversationAlreadyExistsError}
+ */
+export const isConversationAlreadyExistsError = (
+  err: unknown
+): err is AgentBuilderConversationAlreadyExistsError => {
+  return isAgentBuilderError(err) && err.code === AgentBuilderErrorCode.conversationAlreadyExists;
+};
+
+export const createConversationAlreadyExistsError = ({
+  conversationId,
+  meta = {},
+}: {
+  conversationId: string;
+  meta?: Record<string, any>;
+}): AgentBuilderConversationAlreadyExistsError => {
+  return new AgentBuilderError(
+    AgentBuilderErrorCode.conversationAlreadyExists,
+    `Conversation ${conversationId} already exists`,
+    { ...meta, conversationId, statusCode: 409 }
+  );
+};
+
+/**
+ * Error thrown when trying to retrieve a plugin not present in the current context.
+ */
+export type AgentBuilderPluginNotFoundError =
+  AgentBuilderError<AgentBuilderErrorCode.pluginNotFound>;
+
+/**
+ * Checks if the given error is a {@link AgentBuilderPluginNotFoundError}
+ */
+export const isPluginNotFoundError = (err: unknown): err is AgentBuilderPluginNotFoundError => {
+  return isAgentBuilderError(err) && err.code === AgentBuilderErrorCode.pluginNotFound;
+};
+
+export const createPluginNotFoundError = ({
+  pluginId,
+  customMessage,
+  meta = {},
+}: {
+  pluginId: string;
+  customMessage?: string;
+  meta?: Record<string, any>;
+}): AgentBuilderPluginNotFoundError => {
+  return new AgentBuilderError(
+    AgentBuilderErrorCode.pluginNotFound,
+    customMessage ?? `Plugin ${pluginId} not found`,
+    { ...meta, pluginId, statusCode: 404 }
+  );
+};
+
+/**
  * Represents an internal error
  */
 export type AgentBuilderRequestAbortedError =
@@ -196,6 +412,54 @@ export const createRequestAbortedError = (
   meta?: Record<string, any>
 ): AgentBuilderRequestAbortedError => {
   return new AgentBuilderError(AgentBuilderErrorCode.requestAborted, message, meta ?? {});
+};
+
+/**
+ * Represents execution aborted by a workflow.
+ */
+export type AgentBuilderWorkflowAbortedError =
+  AgentBuilderError<AgentBuilderErrorCode.workflowAborted>;
+
+/**
+ * Checks if the given error is a {@link AgentBuilderWorkflowAbortedError}
+ */
+export const isWorkflowAbortedError = (err: unknown): err is AgentBuilderWorkflowAbortedError => {
+  return isAgentBuilderError(err) && err.code === AgentBuilderErrorCode.workflowAborted;
+};
+
+/**
+ * Represents an unexpected error in the workflow execution.
+ */
+export const createWorkflowAbortedError = (
+  message: string,
+  meta?: { workflow?: string }
+): AgentBuilderWorkflowAbortedError => {
+  return new AgentBuilderError(AgentBuilderErrorCode.workflowAborted, message, meta ?? {});
+};
+
+/**
+ * Represents a workflow execution failure (workflow ran but finished with status FAILED).
+ */
+export type AgentBuilderWorkflowExecutionError =
+  AgentBuilderError<AgentBuilderErrorCode.workflowExecutionFailed>;
+
+/**
+ * Checks if the given error is a {@link AgentBuilderWorkflowExecutionError}
+ */
+export const isWorkflowExecutionError = (
+  err: unknown
+): err is AgentBuilderWorkflowExecutionError => {
+  return isAgentBuilderError(err) && err.code === AgentBuilderErrorCode.workflowExecutionFailed;
+};
+
+/**
+ * Creates an error when a workflow execution fails (e.g. step error, timeout).
+ */
+export const createWorkflowExecutionError = (
+  message: string,
+  meta?: { workflow?: string }
+): AgentBuilderWorkflowExecutionError => {
+  return new AgentBuilderError(AgentBuilderErrorCode.workflowExecutionFailed, message, meta ?? {});
 };
 
 /**
@@ -238,19 +502,192 @@ export const isContextLengthExceededAgentError = (
 };
 
 /**
+ * Error thrown when a conversation attachment cannot be found.
+ */
+export type AgentBuilderAttachmentNotFoundError =
+  AgentBuilderError<AgentBuilderErrorCode.attachmentNotFound>;
+
+export const isAttachmentNotFoundError = (
+  err: unknown
+): err is AgentBuilderAttachmentNotFoundError => {
+  return isAgentBuilderError(err) && err.code === AgentBuilderErrorCode.attachmentNotFound;
+};
+
+export const createAttachmentNotFoundError = ({
+  attachmentId,
+  customMessage,
+  meta = {},
+}: {
+  attachmentId: string;
+  customMessage?: string;
+  meta?: Record<string, any>;
+}): AgentBuilderAttachmentNotFoundError => {
+  return new AgentBuilderError(
+    AgentBuilderErrorCode.attachmentNotFound,
+    customMessage ?? `Attachment '${attachmentId}' not found`,
+    { ...meta, attachmentId, statusCode: 404 }
+  );
+};
+
+/**
+ * Error thrown when creating an attachment whose id already exists on the conversation.
+ */
+export type AgentBuilderAttachmentAlreadyExistsError =
+  AgentBuilderError<AgentBuilderErrorCode.attachmentAlreadyExists>;
+
+export const isAttachmentAlreadyExistsError = (
+  err: unknown
+): err is AgentBuilderAttachmentAlreadyExistsError => {
+  return isAgentBuilderError(err) && err.code === AgentBuilderErrorCode.attachmentAlreadyExists;
+};
+
+export const createAttachmentAlreadyExistsError = ({
+  attachmentId,
+  meta = {},
+}: {
+  attachmentId: string;
+  meta?: Record<string, any>;
+}): AgentBuilderAttachmentAlreadyExistsError => {
+  return new AgentBuilderError(
+    AgentBuilderErrorCode.attachmentAlreadyExists,
+    `Attachment with ID '${attachmentId}' already exists`,
+    { ...meta, attachmentId, statusCode: 409 }
+  );
+};
+
+/**
+ * Error thrown when an attachment cannot be permanently deleted because it is
+ * still referenced (either by client_id / flyout configuration or by prior
+ * conversation rounds).
+ */
+export type AgentBuilderAttachmentPermanentDeleteBlockedError = AgentBuilderError<
+  AgentBuilderErrorCode.attachmentPermanentDeleteBlocked,
+  { reason: 'client_id' | 'referenced_in_rounds'; attachmentId: string; statusCode: number }
+>;
+
+export const isAttachmentPermanentDeleteBlockedError = (
+  err: unknown
+): err is AgentBuilderAttachmentPermanentDeleteBlockedError => {
+  return (
+    isAgentBuilderError(err) && err.code === AgentBuilderErrorCode.attachmentPermanentDeleteBlocked
+  );
+};
+
+export const createAttachmentPermanentDeleteBlockedError = ({
+  attachmentId,
+  reason,
+  meta = {},
+}: {
+  attachmentId: string;
+  reason: 'client_id' | 'referenced_in_rounds';
+  meta?: Record<string, any>;
+}): AgentBuilderAttachmentPermanentDeleteBlockedError => {
+  const messageByReason: Record<'client_id' | 'referenced_in_rounds', string> = {
+    client_id: `Cannot permanently delete attachment '${attachmentId}' because it was created from flyout configuration`,
+    referenced_in_rounds: `Cannot permanently delete attachment '${attachmentId}' because it is referenced in conversation rounds`,
+  };
+  return new AgentBuilderError(
+    AgentBuilderErrorCode.attachmentPermanentDeleteBlocked,
+    messageByReason[reason],
+    {
+      ...meta,
+      attachmentId,
+      reason,
+      statusCode: 409,
+    }
+  );
+};
+
+/**
+ * Error thrown when attachment input fails validation or when an operation is
+ * attempted against an attachment in an invalid state (e.g. updating a soft-
+ * deleted attachment, deleting a screen_context attachment).
+ */
+export type AgentBuilderAttachmentInvalidError =
+  AgentBuilderError<AgentBuilderErrorCode.attachmentInvalid>;
+
+export const isAttachmentInvalidError = (
+  err: unknown
+): err is AgentBuilderAttachmentInvalidError => {
+  return isAgentBuilderError(err) && err.code === AgentBuilderErrorCode.attachmentInvalid;
+};
+
+export const createAttachmentInvalidError = (
+  message: string,
+  meta: Record<string, any> = {}
+): AgentBuilderAttachmentInvalidError => {
+  return new AgentBuilderError(AgentBuilderErrorCode.attachmentInvalid, message, {
+    ...meta,
+    statusCode: 400,
+  });
+};
+
+/**
+ * Represents an error related to hook execution
+ */
+export type AgentBuilderHooksExecutionError =
+  AgentBuilderError<AgentBuilderErrorCode.hookExecutionError>;
+
+export const createHooksExecutionError = (
+  message: string,
+  hookLifecycle: HookLifecycle,
+  hookId: string,
+  hookMode: HookExecutionMode,
+  meta: Record<string, any> = {}
+): AgentBuilderHooksExecutionError => {
+  return new AgentBuilderError(AgentBuilderErrorCode.hookExecutionError, message, {
+    ...meta,
+    hookLifecycle,
+    hookId,
+    hookMode,
+  });
+};
+
+/**
+ * Checks if the given error is a {@link AgentBuilderHooksExecutionError}
+ */
+export const isHooksExecutionError = (err: unknown): err is AgentBuilderHooksExecutionError => {
+  return isAgentBuilderError(err) && err.code === AgentBuilderErrorCode.hookExecutionError;
+};
+
+/**
  * Global utility exposing all error utilities from a single export.
  */
 export const AgentBuilderErrorUtils = {
   isAgentBuilderError,
   isInternalError,
+  isForbiddenError,
   isToolNotFoundError,
+  isSkillNotFoundError,
   isAgentNotFoundError,
+  isAgentUnavailableError,
   isConversationNotFoundError,
+  isConversationWriteConflictError,
+  isPluginNotFoundError,
+  isWorkflowAbortedError,
+  isWorkflowExecutionError,
   isAgentExecutionError,
   isContextLengthExceededAgentError,
+  isAttachmentNotFoundError,
+  isAttachmentAlreadyExistsError,
+  isAttachmentPermanentDeleteBlockedError,
+  isAttachmentInvalidError,
   createInternalError,
+  createForbiddenError,
   createToolNotFoundError,
+  createSkillNotFoundError,
   createAgentNotFoundError,
+  createAgentUnavailableError,
   createConversationNotFoundError,
+  createConversationWriteConflictError,
+  createPluginNotFoundError,
+  createWorkflowAbortedError,
+  createWorkflowExecutionError,
   createAgentExecutionError,
+  createHooksExecutionError,
+  isHooksExecutionError,
+  createAttachmentNotFoundError,
+  createAttachmentAlreadyExistsError,
+  createAttachmentPermanentDeleteBlockedError,
+  createAttachmentInvalidError,
 };

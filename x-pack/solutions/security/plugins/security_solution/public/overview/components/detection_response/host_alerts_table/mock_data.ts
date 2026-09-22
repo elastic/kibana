@@ -87,6 +87,7 @@ export const mockVulnerableHostsBySeverityResult = {
 export const parsedVulnerableHostsAlertsResult = [
   {
     hostName: 'Host-342m5gl1g2',
+    identityFields: { 'host.name': 'Host-342m5gl1g2' },
     totalAlerts: 100,
     critical: 5,
     high: 50,
@@ -95,6 +96,7 @@ export const parsedVulnerableHostsAlertsResult = [
   },
   {
     hostName: 'Host-vns3hyykhu',
+    identityFields: { 'host.name': 'Host-vns3hyykhu' },
     totalAlerts: 104,
     critical: 4,
     high: 100,
@@ -103,6 +105,7 @@ export const parsedVulnerableHostsAlertsResult = [
   },
   {
     hostName: 'Host-awafztonav',
+    identityFields: { 'host.name': 'Host-awafztonav' },
     totalAlerts: 108,
     critical: 4,
     high: 50,
@@ -111,6 +114,7 @@ export const parsedVulnerableHostsAlertsResult = [
   },
   {
     hostName: 'Host-56k7zf5kne',
+    identityFields: { 'host.name': 'Host-56k7zf5kne' },
     totalAlerts: 128,
     critical: 1,
     high: 6,

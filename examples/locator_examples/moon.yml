@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/locator-examples-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-sharedux'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/locator-examples-plugin'
+  title: '@kbn/locator-examples-plugin'
   description: Moon project for @kbn/locator-examples-plugin
   channel: ''
   owner: '@elastic/appex-sharedux'
-  metadata:
-    sourceRoot: examples/locator_examples
+  sourceRoot: examples/locator_examples
 dependsOn:
   - '@kbn/core'
   - '@kbn/share-plugin'

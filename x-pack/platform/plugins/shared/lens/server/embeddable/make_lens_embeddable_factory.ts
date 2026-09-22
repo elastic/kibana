@@ -60,6 +60,9 @@ export const makeLensEmbeddableFactory =
   ) =>
   (): LensEmbeddableRegistryDefinition => {
     return {
+      // In 9.4, lens embeddable type changed from 'lens' to 'vis' as part of "as code" project.
+      // Migrations should be registered with legacy value, 'lens', because
+      // embeddable migrations are BWC that work on legacy embeddable state
       id: DOC_TYPE,
       migrations: () =>
         mergeMigrationFunctionMaps(

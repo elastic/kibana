@@ -17,7 +17,7 @@ import { createCaseError } from '../../common/error';
 import { validateMaxUserActions } from '../../common/validators';
 import { constructFileKindIdByOwner } from '../../../common/files';
 import { Operations } from '../../authorization';
-import { validateRegisteredAttachments } from './validators';
+import { validateUnifiedAttachments } from './validators';
 import { buildAttachmentRequestFromFileJSON } from '../utils';
 import { decodeWithExcessOrThrow } from '../../common/runtime_types';
 
@@ -33,8 +33,7 @@ export const addFile = async (
   const {
     logger,
     authorization,
-    persistableStateAttachmentTypeRegistry,
-    externalReferenceAttachmentTypeRegistry,
+    unifiedAttachmentTypeRegistry,
     services: { userActionService },
     fileService,
   } = clientArgs;
@@ -78,10 +77,9 @@ export const addFile = async (
       fileMetadata: createdFile.toJSON(),
     });
 
-    validateRegisteredAttachments({
+    validateUnifiedAttachments({
       query: commentReq,
-      persistableStateAttachmentTypeRegistry,
-      externalReferenceAttachmentTypeRegistry,
+      unifiedAttachmentTypeRegistry,
     });
 
     const createdDate = new Date().toISOString();

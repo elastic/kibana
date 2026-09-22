@@ -6,6 +6,13 @@ paths:
   /internal/elastic_assistant/evaluate:
     get:
       x-codegen-enabled: true
+      x-codeSamples:
+        - lang: curl
+          label: Example request
+          source: |
+            curl \
+             --request GET 'http://localhost:5601/internal/elastic_assistant/evaluate' \
+             --header "Authorization: $API_KEY"
       x-labels: [ess, serverless]
       operationId: GetEvaluate
       description: Get relevant data for performing an evaluation like available sample data, graphs, and evaluators
@@ -14,7 +21,7 @@ paths:
         - Evaluation API
       responses:
         "200":
-          description: Successful response
+          description: Indicates a successful call.
           content:
             application/json:
               schema:
@@ -44,8 +51,23 @@ paths:
                   - datasets
                   - graphs
                   - results
+              examples:
+                GetEvaluateResponse200Example:
+                  summary: A successful response containing available evaluation data, graphs, and results.
+                  value:
+                    datasets:
+                      - "my-evaluation-dataset"
+                      - "security-alert-samples"
+                    graphs:
+                      - "Default"
+                      - "RetrievalAugmentedGeneration"
+                    results:
+                      - id: "eval-run-abc123"
+                        status: "complete"
+                      - id: "eval-run-def456"
+                        status: "running"
         "400":
-          description: Generic Error
+          description: Bad Request response.
           content:
             application/json:
               schema:
@@ -57,3 +79,10 @@ paths:
                     type: string
                   message:
                     type: string
+              examples:
+                GetEvaluateResponse400Example:
+                  summary: A bad request response.
+                  value:
+                    statusCode: 400
+                    error: Bad Request
+                    message: "Invalid request."

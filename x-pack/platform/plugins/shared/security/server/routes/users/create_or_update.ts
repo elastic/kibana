@@ -26,7 +26,7 @@ export function defineCreateOrUpdateUserRoutes({ router }: RouteDefinitionParams
         body: schema.object({
           username: schema.string({ minLength: 1, maxLength: 1024 }),
           password: schema.maybe(schema.string({ minLength: 1 })),
-          roles: schema.arrayOf(schema.string({ minLength: 1 })),
+          roles: schema.arrayOf(schema.string({ minLength: 1 }), { maxSize: 100 }),
           full_name: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
           email: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
           metadata: schema.maybe(schema.recordOf(schema.string(), schema.any())),

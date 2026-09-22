@@ -33,6 +33,16 @@ export async function fetchDiskUsageNodeStats(
     size: 0,
     query: {
       bool: {
+        // Frozen tier nodes allocate the searchable snapshot shared cache upfront
+        // (default `xpack.searchable.snapshot.shared_cache.size` is 90%), so they
+        // are expected to sit well above the default 80% disk usage threshold.
+        // Excluding them avoids false positives from the node-level disk usage
+        // alert.
+        must_not: [
+          {
+            term: { 'elasticsearch.node.roles': 'data_frozen' },
+          },
+        ],
         filter: [
           {
             terms: {

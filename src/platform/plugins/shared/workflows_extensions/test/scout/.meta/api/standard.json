@@ -1,16 +1,31 @@
 {
-  "lastModified": "2025-12-11T14:13:12.714Z",
-  "sha1": "0f991b6eb1de5d313a327ba0127aff5e0ec6adc0",
+  "sha1": "2bbbd98d6f7224d87d4e31cfa1ab65fa9a09bf6e",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "2e9661be655a029-bbe4bc87d5491d8",
       "title": "Workflows Extensions - Custom Step Definitions Approval should validate that all registered custom step definitions are approved by workflows-eng team",
-      "expectedStatus": "passed",
-      "tags": ["@ess", "@svlSearch", "@svlSecurity", "@svlOblt"],
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-workplaceai",
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_extensions/test/scout/api/tests/step_definitions_approval.spec.ts",
-        "line": 25,
-        "column": 12
+        "line": 68,
+        "column": 20
       }
     }
   ]

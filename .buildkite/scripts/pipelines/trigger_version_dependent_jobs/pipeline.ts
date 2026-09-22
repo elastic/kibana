@@ -1,4 +1,4 @@
-#!/usr/bin/env ts-node
+#!/usr/bin/env node
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the "Elastic License
@@ -8,12 +8,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { basename } from 'node:path';
 import type { BuildkiteTriggerStep } from '#pipeline-utils';
 import { getVersionsFile } from '#pipeline-utils';
 
 const pipelineSets = {
-  'es-forward': 'kibana-es-forward-compatibility-testing',
-  'es-forward-9-dot-1': 'kibana-es-forward-compatibility-testing-9-dot-1',
+  'es-forward-9-dot-x': 'kibana-es-forward-compatibility-testing-9-dot-x',
   'artifacts-snapshot': 'kibana-artifacts-snapshot',
   'artifacts-staging': 'kibana-artifacts-staging',
   'artifacts-trigger': 'kibana-artifacts-trigger',
@@ -38,8 +38,8 @@ async function main() {
   }
 
   switch (pipelineSetName) {
-    case 'es-forward-9-dot-1': {
-      pipelineSteps.push(...getESForward9Dot1PipelineTriggers());
+    case 'es-forward-9-dot-x': {
+      pipelineSteps.push(...getESForward9DotXPipelineTriggers());
       break;
     }
     case 'artifacts-snapshot': {
@@ -63,24 +63,25 @@ async function main() {
 }
 
 /**
- * This pipeline is testing the forward compatibility of Kibana with different versions of Elasticsearch for 9.1.
+ * This pipeline is testing the forward compatibility of Kibana with different versions of Elasticsearch.
  * Should be triggered for combinations of (Kibana@8.19 + ES@9.x {current open branches on the same major})
  */
-export function getESForward9Dot1PipelineTriggers(): BuildkiteTriggerStep[] {
+export function getESForward9DotXPipelineTriggers(): BuildkiteTriggerStep[] {
   const versions = getVersionsFile();
   const KIBANA_8_19 = versions.versions.find((v) => v.branch === '8.19');
   if (!KIBANA_8_19) {
-    throw new Error('Update ES forward compatibility 9.1 pipeline to 8.19');
+    throw new Error(
+      '8.19 not found in versions.json - remove the ES forward compatibility pipeline'
+    );
   }
+  // versions.json only contains open branches, all of which are valid ES targets for 8.19
   const targetESVersions = versions.versions.filter(
-    (v) =>
-      // 9.1+, 8.19 => 9.0 is not supported
-      (v.branch.startsWith('9.') && v.branch !== '9.0') || v.branch.includes('main')
+    (v) => v.branch.startsWith('9.') || v.branch.includes('main')
   );
 
   return targetESVersions.map(({ version }) => {
     return {
-      trigger: pipelineSets['es-forward-9-dot-1'],
+      trigger: pipelineSets['es-forward-9-dot-x'],
       async: true,
       label: `Triggering Kibana ${KIBANA_8_19.version} + ES ${version} forward compatibility`,
       build: {
@@ -183,7 +184,7 @@ function emitPipeline(pipelineSteps: BuildkiteTriggerStep[]) {
   console.log(JSON.stringify(pipelineSteps, null, 2));
 }
 
-if (require.main === module) {
+if (basename(process.argv[1] ?? '') === 'pipeline.ts') {
   main().catch((error) => {
     console.error(error);
     process.exit(1);

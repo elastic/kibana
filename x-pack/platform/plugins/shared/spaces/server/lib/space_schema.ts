@@ -60,7 +60,7 @@ const spaceSchema = schema.object({
         description: 'The list of features that are turned off in the space.',
       },
     }),
-    { defaultValue: [] }
+    { defaultValue: [], maxSize: 100 }
   ),
   _reserved: schema.maybe(schema.boolean()),
   imageUrl: schema.maybe(
@@ -73,6 +73,14 @@ const spaceSchema = schema.object({
       meta: {
         description:
           'The data-URL encoded image to display in the space avatar. If specified, initials will not be displayed and the color will be visible as the background color for transparent images. For best results, your image should be 64x64. Images will not be optimized by this API call, so care should be taken when using custom images.',
+      },
+    })
+  ),
+  projectRouting: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          'Cross-project search default routing configuration for this space. Controls whether searches are scoped to a single project or span multiple projects in serverless environments.',
       },
     })
   ),

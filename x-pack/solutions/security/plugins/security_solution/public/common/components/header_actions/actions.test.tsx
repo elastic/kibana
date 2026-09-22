@@ -6,16 +6,32 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import { mockTimelineData, mockTimelineModel, TestProviders } from '../../mock';
 import { useShallowEqualSelector } from '../../hooks/use_selector';
 import { licenseService } from '../../hooks/use_license';
 import type { ActionsComponentProps } from './actions';
 import { Actions } from './actions';
-import { useIsInvestigateInResolverActionEnabled } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
+import { useIsAnalyzerEnabled } from '../../../detections/hooks/use_is_analyzer_enabled';
+import { AlertContextMenu } from '../../../detections/components/alerts_table/timeline_actions/alert_context_menu';
+import { useIsNewFlyoutEnabled } from '../../hooks/use_is_new_flyout_enabled';
+import { useFlyoutApi } from '../../../flyout_v2/use_flyout_api';
+import { createFlyoutApiMock } from '../../../flyout_v2/use_flyout_api.mock';
+import { useNavigateToAnalyzer } from '../../../flyout/document_details/shared/hooks/use_navigate_to_analyzer';
+import { useNavigateToSessionView } from '../../../flyout/document_details/shared/hooks/use_navigate_to_session_view';
 
+jest.mock(
+  '../../../detections/components/alerts_table/timeline_actions/alert_context_menu',
+  () => ({
+    AlertContextMenu: jest.fn(() => null),
+  })
+);
 jest.mock('../../hooks/use_selector');
-jest.mock('../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver');
+jest.mock('../../../detections/hooks/use_is_analyzer_enabled');
+jest.mock('../../hooks/use_is_new_flyout_enabled');
+jest.mock('../../../flyout_v2/use_flyout_api');
+jest.mock('../../../flyout/document_details/shared/hooks/use_navigate_to_analyzer');
+jest.mock('../../../flyout/document_details/shared/hooks/use_navigate_to_session_view');
 jest.mock('../../hooks/use_license', () => {
   const licenseServiceInstance = {
     isPlatinumPlus: jest.fn(),
@@ -36,8 +52,10 @@ const defaultProps: ActionsComponentProps = {
   disablePinAction: false,
   disableTimelineAction: false,
   ecsData: mockTimelineData[0].ecs,
+  eventData: undefined,
   eventId: 'abc',
   eventIdToNoteIds: {},
+  hit: { id: 'id', raw: {}, flattened: {} },
   isEventViewer: false,
   onEventDetailsPanelOpened: jest.fn(),
   onRuleChange: jest.fn(),
@@ -47,10 +65,24 @@ const defaultProps: ActionsComponentProps = {
   toggleShowNotes: jest.fn(),
 };
 
+const mockNavigateToAnalyzer = jest.fn();
+const mockNavigateToSessionView = jest.fn();
+
 describe('Actions', () => {
+  let flyoutApi: ReturnType<typeof createFlyoutApiMock>;
+
   beforeEach(() => {
     jest.clearAllMocks();
     (useShallowEqualSelector as jest.Mock).mockReturnValue(mockTimelineModel);
+    flyoutApi = createFlyoutApiMock();
+    jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
+    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
+    jest.mocked(useNavigateToAnalyzer).mockReturnValue({
+      navigateToAnalyzer: mockNavigateToAnalyzer,
+    });
+    jest.mocked(useNavigateToSessionView).mockReturnValue({
+      navigateToSessionView: mockNavigateToSessionView,
+    });
   });
 
   describe('expand icon', () => {
@@ -200,9 +232,49 @@ describe('Actions', () => {
   });
 
   describe('alert context menu', () => {
+    describe('more actions button', () => {
+      beforeEach(() => {
+        jest.mocked(AlertContextMenu).mockClear();
+      });
+
+      it('should not mark the document as remote when it is local', () => {
+        render(
+          <TestProviders>
+            <Actions {...defaultProps} />
+          </TestProviders>
+        );
+
+        expect(jest.mocked(AlertContextMenu)).toHaveBeenCalledWith(
+          expect.objectContaining({ isRemoteDocument: false }),
+          expect.anything()
+        );
+      });
+
+      it('should mark the document as remote when the index is non-local', () => {
+        const props = {
+          ...defaultProps,
+          ecsData: {
+            ...mockTimelineData[0].ecs,
+            _index: 'remote_cluster:.ds-logs-endpoint.events.process-default',
+          },
+        };
+
+        render(
+          <TestProviders>
+            <Actions {...props} />
+          </TestProviders>
+        );
+
+        expect(jest.mocked(AlertContextMenu)).toHaveBeenCalledWith(
+          expect.objectContaining({ isRemoteDocument: true }),
+          expect.anything()
+        );
+      });
+    });
+
     describe('analyzer icon', () => {
       it('should render', () => {
-        (useIsInvestigateInResolverActionEnabled as jest.Mock).mockReturnValue(true);
+        (useIsAnalyzerEnabled as jest.Mock).mockReturnValue(true);
 
         const { getByTestId } = render(
           <TestProviders>
@@ -214,7 +286,7 @@ describe('Actions', () => {
       });
 
       test('should not show analyzer icon', () => {
-        (useIsInvestigateInResolverActionEnabled as jest.Mock).mockReturnValue(false);
+        (useIsAnalyzerEnabled as jest.Mock).mockReturnValue(false);
 
         const { queryByTestId } = render(
           <TestProviders>
@@ -223,6 +295,39 @@ describe('Actions', () => {
         );
 
         expect(queryByTestId('view-in-analyzer')).not.toBeInTheDocument();
+      });
+
+      it('should navigate to the legacy analyzer when enableNewFlyout setting is disabled', () => {
+        (useIsAnalyzerEnabled as jest.Mock).mockReturnValue(true);
+
+        const { getByTestId } = render(
+          <TestProviders>
+            <Actions {...defaultProps} />
+          </TestProviders>
+        );
+
+        fireEvent.click(getByTestId('view-in-analyzer'));
+
+        expect(mockNavigateToAnalyzer).toHaveBeenCalled();
+        expect(flyoutApi.openAnalyzer).not.toHaveBeenCalled();
+      });
+
+      it('should open the new analyzer flyout when enableNewFlyout setting is enabled', () => {
+        (useIsAnalyzerEnabled as jest.Mock).mockReturnValue(true);
+        jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+
+        const { getByTestId } = render(
+          <TestProviders>
+            <Actions {...defaultProps} />
+          </TestProviders>
+        );
+
+        fireEvent.click(getByTestId('view-in-analyzer'));
+
+        expect(mockNavigateToAnalyzer).not.toHaveBeenCalled();
+        expect(flyoutApi.openAnalyzer).toHaveBeenCalledWith(
+          expect.objectContaining({ hit: defaultProps.hit })
+        );
       });
     });
 
@@ -277,6 +382,54 @@ describe('Actions', () => {
         );
 
         expect(queryByTestId('session-view-button')).not.toBeInTheDocument();
+      });
+
+      const sessionViewProps = {
+        ...defaultProps,
+        ecsData: {
+          ...mockTimelineData[0].ecs,
+          event: { kind: ['alert'] },
+          agent: { type: ['endpoint'] },
+          process: {
+            entry_leader: { entity_id: ['test_id'], start: ['2022-05-08T13:44:00.13Z'] },
+          },
+          _index: '.ds-logs-endpoint.events.process-default',
+        },
+      };
+
+      it('should navigate to the legacy session view when enableNewFlyout setting is disabled', () => {
+        const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
+        licenseServiceMock.isEnterprise.mockReturnValue(true);
+
+        const { getByTestId } = render(
+          <TestProviders>
+            <Actions {...sessionViewProps} />
+          </TestProviders>
+        );
+
+        fireEvent.click(getByTestId('session-view-button'));
+
+        expect(mockNavigateToSessionView).toHaveBeenCalled();
+        expect(flyoutApi.openSessionView).not.toHaveBeenCalled();
+      });
+
+      it('should open the new session view flyout when enableNewFlyout setting is enabled', () => {
+        const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
+        licenseServiceMock.isEnterprise.mockReturnValue(true);
+        jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+
+        const { getByTestId } = render(
+          <TestProviders>
+            <Actions {...sessionViewProps} />
+          </TestProviders>
+        );
+
+        fireEvent.click(getByTestId('session-view-button'));
+
+        expect(mockNavigateToSessionView).not.toHaveBeenCalled();
+        expect(flyoutApi.openSessionView).toHaveBeenCalledWith(
+          expect.objectContaining({ hit: defaultProps.hit })
+        );
       });
     });
   });

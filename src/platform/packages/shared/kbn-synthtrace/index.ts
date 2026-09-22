@@ -21,6 +21,7 @@ export {
   type GetClientsReturn,
 } from './src/cli/utils/clients_manager';
 export type { ApmSynthtraceEsClient } from './src/lib/apm/client/apm_synthtrace_es_client';
+export { ComponentTemplateName } from './src/lib/apm/client/apm_synthtrace_es_client';
 export type { InfraSynthtraceEsClient } from './src/lib/infra/infra_synthtrace_es_client';
 export type { LogsSynthtraceEsClient } from './src/lib/logs/logs_synthtrace_es_client';
 export type { SyntheticsSynthtraceEsClient } from './src/lib/synthetics/synthetics_synthtrace_es_client';
@@ -28,5 +29,42 @@ export {
   addObserverVersionTransform,
   deleteSummaryFieldTransform,
 } from './src/lib/utils/transform_helpers';
-export { indexAll } from './src/lib/utils/with_client';
+export { indexAll, withClient } from './src/lib/utils/with_client';
+export type { Scenario, ScenarioInitOptions } from './src/cli/scenario';
+export type { RunOptions } from './src/cli/utils/parse_run_cli_flags';
+export { getSynthtraceEnvironment } from './src/lib/utils/get_synthtrace_environment';
+export { IndexTemplateName } from './src/lib/logs/custom_logsdb_index_templates';
+export { timestampDateMapping } from './src/lib/logs/custom_logsdb_indices';
 export * from './src/scenarios/agent_builder';
+
+export { sigEvents } from './src/lib/service_graph_logs';
+
+export {
+  getNumberOpt,
+  getBooleanOpt,
+  getStringOpt,
+} from './src/scenarios/helpers/scenario_opts_helpers';
+export { getAtIndexOrRandom } from './src/scenarios/helpers/get_at_index_or_random';
+
+export {
+  APM_METRICS_SERVICE_NAMES,
+  APM_METRICS_DASHBOARD_SERVICES,
+  APM_METRICS_NON_DASHBOARD_SERVICES,
+  APM_METRICS_ALL_SERVICES,
+  SYSTEM_METRICS as APM_SYSTEM_METRICS,
+  JAVA_APM_METRICS,
+  NODEJS_APM_METRICS,
+  OTEL_JAVA_HEAP_METRICS,
+  OTEL_JAVA_NON_HEAP_METRICS,
+  OTEL_NODEJS_METRICS,
+  OTEL_DOTNET_METRICS,
+  OTEL_NATIVE_EDOT_JAVA_METRICS,
+  OTEL_NATIVE_OTHER_JAVA_METRICS,
+  OTEL_PYTHON_METRICS,
+  OTEL_GO_METRICS,
+  RUBY_JRUBY_METRICS,
+  type ApmMetricsServiceConfig,
+  type ApmMetricsServiceInstance,
+  createMetricsServiceInstance,
+  generateAppMetrics,
+} from './src/scenarios/helpers/apm_metrics_dashboards';

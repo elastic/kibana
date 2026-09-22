@@ -153,6 +153,45 @@ export const GAP_STATUS_FILTER_TITLE = i18n.translate(
   }
 );
 
+export const GAP_REASON_FILTER_TITLE = i18n.translate(
+  'xpack.securitySolution.gapsTable.gapReasonFilterTitle',
+  {
+    defaultMessage: 'Reason',
+  }
+);
+
+export const GAPS_TABLE_REASON_LABEL = i18n.translate(
+  'xpack.securitySolution.gapsTable.reasonLabel',
+  {
+    defaultMessage: 'Reason',
+  }
+);
+
+export const GAPS_TABLE_CAPTION = i18n.translate('xpack.securitySolution.gapsTable.caption', {
+  defaultMessage: 'Rule gaps',
+});
+
+export const GAPS_TABLE_REASON_LABEL_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.gapsTable.reasonLabelTooltip',
+  {
+    defaultMessage: 'Detected reason for the gap',
+  }
+);
+
+export const GAP_REASON_RULE_DISABLED = i18n.translate(
+  'xpack.securitySolution.gapsTable.gapReason.ruleDisabled',
+  {
+    defaultMessage: 'Rule disabled',
+  }
+);
+
+export const GAP_REASON_RULE_DID_NOT_RUN = i18n.translate(
+  'xpack.securitySolution.gapsTable.gapReason.ruleDidNotRun',
+  {
+    defaultMessage: 'Rule did not run',
+  }
+);
+
 export const GAPS_TABLE_EVENT_TIME_LABEL = i18n.translate(
   'xpack.securitySolution.gapsTable.eventTimeLabel',
   {

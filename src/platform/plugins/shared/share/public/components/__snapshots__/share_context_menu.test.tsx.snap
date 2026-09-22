@@ -37,7 +37,7 @@ exports[`shareContextMenuExtensions should render a custom panel title when prov
           "items": Array [
             Object {
               "data-test-subj": "sharePanel-Embedcode",
-              "icon": "console",
+              "icon": "commandLine",
               "name": "Embed code",
               "panel": 2,
             },
@@ -149,7 +149,7 @@ exports[`should disable the share URL when set 1`] = `
           "items": Array [
             Object {
               "data-test-subj": "sharePanel-Embedcode",
-              "icon": "console",
+              "icon": "commandLine",
               "name": "Embed code",
               "panel": 2,
             },
@@ -222,7 +222,7 @@ exports[`should render context menu panel when there are more than one panel 1`]
           "items": Array [
             Object {
               "data-test-subj": "sharePanel-Embedcode",
-              "icon": "console",
+              "icon": "commandLine",
               "name": "Embed code",
               "panel": 2,
             },

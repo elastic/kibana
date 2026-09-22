@@ -6,7 +6,6 @@
  */
 
 import { defaultGroupStatsAggregations } from '.';
-import { ALERT_ATTACK_IDS } from '../../../../../common/field_maps/field_names';
 
 describe('defaultGroupStatsAggregations', () => {
   it('should return the default values if the field is not supported', () => {
@@ -181,8 +180,8 @@ describe('defaultGroupStatsAggregations', () => {
     ]);
   });
 
-  it('should return values depending for kibana.alert.attack_ids input field', () => {
-    const aggregations = defaultGroupStatsAggregations(ALERT_ATTACK_IDS);
+  it('should return values depending for destination.ip input field', () => {
+    const aggregations = defaultGroupStatsAggregations('destination.ip');
     expect(aggregations).toEqual([
       {
         unitsCount: {
@@ -192,9 +191,23 @@ describe('defaultGroupStatsAggregations', () => {
         },
       },
       {
-        latestTimestamp: {
-          max: {
-            field: '@timestamp',
+        rulesCountAggregation: {
+          cardinality: {
+            field: 'kibana.alert.rule.rule_id',
+          },
+        },
+      },
+      {
+        severitiesSubAggregation: {
+          terms: {
+            field: 'kibana.alert.severity',
+          },
+        },
+      },
+      {
+        hostsCountAggregation: {
+          cardinality: {
+            field: 'host.name',
           },
         },
       },

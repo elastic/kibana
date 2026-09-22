@@ -6,13 +6,21 @@
  */
 
 export { generateStreamDescription } from './src/description/generate_description';
-export {
-  identifySystems,
-  type IdentifySystemsOptions,
-  type IdentifySystemsResult,
-} from './src/systems/identify_systems';
+export { overviewDescriptionPrompt } from './src/description/prompt';
 export { partitionStream } from './workflows/partition_stream';
-export { suggestProcessingPipeline } from './workflows/suggest_processing_pipeline';
-export { generateSignificantEvents } from './src/significant_events/generate_significant_events';
-export { sumTokens } from './src/helpers/sum_tokens';
-export { identifyFeatures, type IdentifyFeaturesOptions } from './src/features/identify_features';
+export {
+  suggestProcessingPipeline,
+  mergeSeedParsingProcessorIntoSuggestedPipeline,
+  buildDocumentStructureOverviewForPipelinePrompt,
+  formatUpstreamSeedParsingContextForPromptMarkdown,
+  fetchMappedFieldsForStreamProcessingSuggestions,
+  getPipelineDefinitionJsonSchema,
+  pipelineDefinitionSchema,
+  postParsePipelineDefinitionSchema,
+  formatZodPipelineErrors,
+  buildSimulationFeedback,
+  detectTemporaryFields,
+  type SuggestProcessingPipelineResult,
+  type SuggestPipelineAgentSchema,
+  type SimulationFeedback,
+} from './workflows/suggest_processing_pipeline';

@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/profiler-cli'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/observability-ui'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/profiler-cli'
+  title: '@kbn/profiler-cli'
   description: Moon project for @kbn/profiler-cli
   channel: ''
   owner: '@elastic/observability-ui'
-  metadata:
-    sourceRoot: x-pack/platform/packages/shared/kbn-profiler-cli
+  sourceRoot: x-pack/platform/packages/shared/kbn-profiler-cli
 dependsOn:
   - '@kbn/dev-cli-runner'
   - '@kbn/tooling-log'
@@ -31,16 +30,6 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

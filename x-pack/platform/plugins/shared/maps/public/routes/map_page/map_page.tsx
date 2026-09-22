@@ -6,9 +6,12 @@
  */
 
 import React, { Component } from 'react';
-import { Provider } from 'react-redux';
+import { Provider } from 'react-redux-v7';
 import type { AppMountParameters, ScopedHistory } from '@kbn/core/public';
-import type { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
+import type {
+  EmbeddableStateTransfer,
+  EmbeddableEditorBreadcrumb,
+} from '@kbn/embeddable-plugin/public';
 import { MapApp } from './map_app';
 import {
   SavedMap,
@@ -21,10 +24,10 @@ interface Props {
   mapEmbeddableState?: MapEmbeddableState;
   embeddableId?: string;
   onAppLeave: AppMountParameters['onAppLeave'];
-  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   stateTransfer: EmbeddableStateTransfer;
   originatingApp?: string;
   originatingPath?: string;
+  breadcrumbs?: EmbeddableEditorBreadcrumb[];
   history: ScopedHistory;
 }
 
@@ -49,6 +52,7 @@ export class MapPage extends Component<Props, State> {
         embeddableId: props.embeddableId,
         originatingApp: props.originatingApp,
         originatingPath: props.originatingPath,
+        breadcrumbs: props.breadcrumbs,
         stateTransfer: props.stateTransfer,
         onSaveCallback: this.updateSaveCounter,
         defaultLayerWizard: getOpenLayerWizardFromUrlParam() || '',
@@ -80,7 +84,6 @@ export class MapPage extends Component<Props, State> {
           history={this.props.history}
           savedMap={this.state.savedMap}
           onAppLeave={this.props.onAppLeave}
-          setHeaderActionMenu={this.props.setHeaderActionMenu}
           saveCounter={this.state.saveCounter}
         />
       </Provider>

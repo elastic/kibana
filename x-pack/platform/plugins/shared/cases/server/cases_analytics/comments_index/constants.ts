@@ -64,7 +64,7 @@ export const getCommentsSynchronizationSourceQuery = (
   owner: Owner
 ): QueryDslQueryContainer => ({
   bool: {
-    filter: getCommentsSourceQuery(spaceId, owner).bool?.filter,
+    filter: getCommentsSourceQuery(spaceId, owner)?.bool?.filter ?? [],
     must: [
       {
         bool: {

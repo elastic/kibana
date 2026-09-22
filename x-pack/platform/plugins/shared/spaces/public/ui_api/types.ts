@@ -16,6 +16,7 @@ import type {
   RedirectLegacyUrlParams,
 } from '../legacy_urls';
 import type { ShareToSpaceFlyoutProps } from '../share_saved_objects_to_space';
+import type { SolutionViewSwitchCalloutProps } from '../solution_view_switch';
 import type { SpaceAvatarProps } from '../space_avatar';
 import type { SpaceListProps } from '../space_list';
 import type { SpacesContextProps, SpacesReactContextValue } from '../spaces_context';
@@ -113,4 +114,8 @@ export interface SpacesApiUiComponent {
    * Displays an avatar for the given space.
    */
   getSpaceAvatar: LazyComponentFn<SpaceAvatarProps>;
+  /**
+   * Displays a callout to prompt the user to switch from a classic view to a solution view.
+   */
+  getSolutionViewSwitchCallout: LazyComponentFn<SolutionViewSwitchCalloutProps>;
 }

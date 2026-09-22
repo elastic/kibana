@@ -135,7 +135,7 @@ export function DataSourcesList({
                 <EuiToolTip position="top" content={filterToggleLabel} disableScreenReaderOutput>
                   <EuiButtonIcon
                     size="xs"
-                    iconType="list"
+                    iconType="listBullet"
                     aria-pressed={showOnlySelected}
                     color={showOnlySelected ? 'primary' : 'text'}
                     display={showOnlySelected ? 'base' : 'empty'}

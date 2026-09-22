@@ -1,0 +1,11 @@
+summary: Get shareable references response
+description: >
+  A response that includes the collected references and the spaces where the objects exist.
+value:
+  objects:
+    - type: dashboard
+      id: my-dashboard-id
+      spaces:
+        - default
+        - marketing
+      inboundReferences: []

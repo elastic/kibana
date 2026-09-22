@@ -54,7 +54,7 @@ export function createCorrectnessAnalysisEvaluator({
       }
 
       async function runCorrectnessAnalysis(): Promise<CorrectnessAnalysis> {
-        const userQuery = input.question;
+        const userQuery = input?.question;
         const messages = (output as any)?.messages ?? [];
         const latestMessage = messages[messages.length - 1]?.message;
         const groundTruthResponse = expected?.expected;
@@ -119,6 +119,7 @@ export function createCorrectnessAnalysisEvaluator({
       };
     },
     kind: 'LLM',
+    direction: 'maximize',
     name: 'correctness',
   };
 }
@@ -154,10 +155,11 @@ export function createQuantitativeCorrectnessEvaluators(): Evaluator[] {
         score,
         label: summaryText,
         explanation: summaryText,
-        metadata: metadata ?? undefined,
+        metadata: { ...(metadata ?? {}), correctnessAnalysis },
       };
     },
     kind: 'LLM',
+    direction: 'maximize',
     name,
   });
 

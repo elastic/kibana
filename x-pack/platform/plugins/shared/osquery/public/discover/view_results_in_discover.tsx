@@ -6,11 +6,13 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiButtonIcon, EuiContextMenuItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FilterStateStore } from '@kbn/es-query';
 import { useKibana } from '../common/lib/kibana';
 import { useLogsDataView } from '../common/hooks/use_logs_data_view';
+import type { DateWindowResult } from '../common/pack_view_date_window';
+import { isScheduledExecution } from '../common/is_scheduled_execution';
 import { ViewResultsActionButtonType } from '../live_queries/form/pack_queries_status_table';
 
 interface ViewResultsInDiscoverActionProps {
@@ -18,7 +20,10 @@ interface ViewResultsInDiscoverActionProps {
   buttonType: ViewResultsActionButtonType;
   endDate?: string;
   startDate?: string;
-  mode?: string;
+  mode?: DateWindowResult['mode'];
+  scheduleId?: string;
+  executionCount?: number;
+  onMenuItemClick?: () => void;
 }
 
 const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverActionProps> = ({
@@ -26,6 +31,10 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
   buttonType,
   endDate,
   startDate,
+  mode,
+  scheduleId,
+  executionCount,
+  onMenuItemClick,
 }) => {
   const { discover, application } = useKibana().services;
   const locator = discover?.locator;
@@ -38,23 +47,62 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
     const getDiscoverUrl = async () => {
       if (!locator || !logsDataView) return;
 
+      const isScheduled = isScheduledExecution(scheduleId, executionCount);
+
+      const filters = isScheduled
+        ? [
+            {
+              meta: {
+                index: logsDataView.id,
+                alias: null,
+                negate: false,
+                disabled: false,
+                type: 'phrase',
+                key: 'schedule_id',
+                params: { query: scheduleId },
+              },
+              query: { match_phrase: { schedule_id: scheduleId } },
+              $state: { store: FilterStateStore.APP_STATE },
+            },
+            {
+              meta: {
+                index: logsDataView.id,
+                alias: null,
+                negate: false,
+                disabled: false,
+                type: 'phrase',
+                key: 'osquery_meta.schedule_execution_count',
+                params: { query: executionCount },
+              },
+              query: {
+                match_phrase: {
+                  'osquery_meta.schedule_execution_count': executionCount,
+                },
+              },
+              $state: { store: FilterStateStore.APP_STATE },
+            },
+          ]
+        : [
+            {
+              meta: {
+                index: logsDataView.id,
+                alias: null,
+                negate: false,
+                disabled: false,
+                type: 'phrase',
+                key: 'action_id',
+                params: { query: actionId },
+              },
+              query: { match_phrase: { action_id: actionId } },
+              $state: { store: FilterStateStore.APP_STATE },
+            },
+          ];
+
+      const defaultFrom = isScheduled ? 'now-7d' : 'now-1d';
+
       const newUrl = await locator.getUrl({
         indexPatternId: logsDataView.id,
-        filters: [
-          {
-            meta: {
-              index: logsDataView.id,
-              alias: null,
-              negate: false,
-              disabled: false,
-              type: 'phrase',
-              key: 'action_id',
-              params: { query: actionId },
-            },
-            query: { match_phrase: { action_id: actionId } },
-            $state: { store: FilterStateStore.APP_STATE },
-          },
-        ],
+        filters,
         refreshInterval: {
           pause: true,
           value: 0,
@@ -64,11 +112,11 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
             ? {
                 to: endDate,
                 from: startDate,
-                mode: 'absolute',
+                mode: mode ?? 'absolute',
               }
             : {
                 to: 'now',
-                from: 'now-1d',
+                from: defaultFrom,
                 mode: 'relative',
               },
       });
@@ -76,10 +124,24 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
     };
 
     getDiscoverUrl();
-  }, [actionId, endDate, startDate, locator, logsDataView]);
+  }, [actionId, endDate, executionCount, mode, scheduleId, startDate, locator, logsDataView]);
 
   if (!discoverPermissions.show) {
     return null;
+  }
+
+  if (buttonType === ViewResultsActionButtonType.menuItem) {
+    return (
+      <EuiContextMenuItem
+        icon="discoverApp"
+        href={discoverUrl}
+        target="_blank"
+        onClick={onMenuItemClick}
+        disabled={!actionId || !discoverUrl.length}
+      >
+        {VIEW_IN_DISCOVER}
+      </EuiContextMenuItem>
+    );
   }
 
   if (buttonType === ViewResultsActionButtonType.button) {

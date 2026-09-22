@@ -6,21 +6,39 @@
  */
 
 import { LinkCategoryType, type SeparatorLinkCategory } from '@kbn/security-solution-navigation';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { SecurityPageName } from '../../../../../common';
 
 export const getNavCategories = (
-  attacksAlertsAlignmentEnabled?: boolean
+  chatExperience: AIChatExperience,
+  enableAlertsAndAttacksAlignment?: boolean,
+  isAgentBuilderNavAtTop?: boolean
 ): SeparatorLinkCategory[] => {
-  return [
+  const categories: SeparatorLinkCategory[] = [
     {
       type: LinkCategoryType.separator,
-      linkIds: [SecurityPageName.dashboards],
+      linkIds:
+        // Agent builder for AI agent chat and at the top
+        chatExperience === AIChatExperience.Agent && isAgentBuilderNavAtTop
+          ? [
+              SecurityPageName.externalLinkAgentBuilder,
+              SecurityPageName.externalLinkDiscover,
+              SecurityPageName.dashboards,
+            ]
+          : [SecurityPageName.externalLinkDiscover, SecurityPageName.dashboards],
     },
     {
       type: LinkCategoryType.separator,
       linkIds: [
         SecurityPageName.rulesLanding,
-        attacksAlertsAlignmentEnabled ? SecurityPageName.alertDetections : SecurityPageName.alerts,
+        enableAlertsAndAttacksAlignment
+          ? SecurityPageName.alertDetections
+          : SecurityPageName.alerts,
+        // Agent builder for AI agent chat and not classic AI experience
+        ...(chatExperience === AIChatExperience.Agent && !isAgentBuilderNavAtTop
+          ? [SecurityPageName.externalLinkAgentBuilder]
+          : []),
+        SecurityPageName.externalLinkWorkflows,
         SecurityPageName.attackDiscovery,
         SecurityPageName.cloudSecurityPostureFindings,
         SecurityPageName.case,
@@ -29,20 +47,14 @@ export const getNavCategories = (
     {
       type: LinkCategoryType.separator,
       linkIds: [
-        SecurityPageName.entityAnalyticsLanding,
+        SecurityPageName.entityAnalyticsHomePage,
         SecurityPageName.exploreLanding,
         SecurityPageName.timelines,
         SecurityPageName.threatIntelligence,
         SecurityPageName.assetInventory,
       ],
     },
-    {
-      type: LinkCategoryType.separator,
-      linkIds: [
-        SecurityPageName.siemReadiness,
-        SecurityPageName.aiValue,
-        SecurityPageName.siemMigrationsLanding,
-      ],
-    },
   ];
+
+  return categories;
 };

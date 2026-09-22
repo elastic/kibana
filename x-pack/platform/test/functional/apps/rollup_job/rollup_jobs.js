@@ -55,7 +55,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('shows deprecation prompt when there are no existing rollup jobs', async () => {
-      expect(await testSubjects.exists('jobListDeprecatedPrompt')).to.be(true);
+      await testSubjects.existOrFail('jobListDeprecatedPrompt');
     });
 
     it('create new rollup job', async () => {

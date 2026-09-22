@@ -60,6 +60,20 @@ describe('Time Utils', () => {
       const result = getRelativeTimeValueAndUnitFromTimeString(date);
       expect(result).toEqual({ value: -1, unit: 'minute', roundingUnit: undefined });
     });
+
+    it('handles plain "now" with rounding unit for "Today" case', () => {
+      const date = 'now/d';
+
+      const result = getRelativeTimeValueAndUnitFromTimeString(date);
+      expect(result).toEqual({ value: 0, unit: 'second', roundingUnit: 'day' });
+    });
+
+    it('handles plain "now" without rounding unit', () => {
+      const date = 'now';
+
+      const result = getRelativeTimeValueAndUnitFromTimeString(date);
+      expect(result).toEqual({ value: 0, unit: 'second', roundingUnit: undefined });
+    });
   });
 
   describe('convertRelativeTimeStringToAbsoluteTimeDate', () => {
@@ -82,6 +96,43 @@ describe('Time Utils', () => {
 
       const result = convertRelativeTimeStringToAbsoluteTimeDate(date);
       expect(result).toBeUndefined();
+    });
+
+    it('handles roundUp option for "now/d" to get end of day', () => {
+      const date = 'now/d';
+
+      // Mock current time to a specific moment
+      const mockDate = new Date('2026-01-30T15:30:00.000Z');
+      jest.useFakeTimers().setSystemTime(mockDate);
+
+      const resultStart = convertRelativeTimeStringToAbsoluteTimeDate(date);
+      const resultEnd = convertRelativeTimeStringToAbsoluteTimeDate(date, { roundUp: true });
+
+      // Verify that start and end are different (roundUp makes a difference)
+      expect(resultStart).toBeInstanceOf(Date);
+      expect(resultEnd).toBeInstanceOf(Date);
+      expect(resultStart?.getTime()).not.toBe(resultEnd?.getTime());
+
+      // End should be later than start
+      expect(resultEnd!.getTime()).toBeGreaterThan(resultStart!.getTime());
+
+      jest.useRealTimers();
+    });
+
+    it('handles roundUp option for "now" to get current time with ms precision', () => {
+      const date = 'now';
+
+      const mockDate = new Date('2026-01-30T15:30:45.123Z');
+      jest.useFakeTimers().setSystemTime(mockDate);
+
+      const resultNormal = convertRelativeTimeStringToAbsoluteTimeDate(date);
+      const resultRoundUp = convertRelativeTimeStringToAbsoluteTimeDate(date, { roundUp: true });
+
+      // Both should return the same for plain "now" since there's no unit to round
+      expect(resultNormal?.getTime()).toBe(mockDate.getTime());
+      expect(resultRoundUp?.getTime()).toBe(mockDate.getTime());
+
+      jest.useRealTimers();
     });
   });
 
@@ -136,6 +187,26 @@ describe('Time Utils', () => {
 
       const result = convertRelativeTimeStringToAbsoluteTimeString(date);
       expect(result).toBe(date);
+    });
+
+    it('handles roundUp option for "now/d" to get end of day as ISO string', () => {
+      const date = 'now/d';
+
+      const mockDate = new Date('2026-01-30T15:30:00.000Z');
+      jest.useFakeTimers().setSystemTime(mockDate);
+
+      const resultStart = convertRelativeTimeStringToAbsoluteTimeString(date);
+      const resultEnd = convertRelativeTimeStringToAbsoluteTimeString(date, { roundUp: true });
+
+      // Verify both are valid ISO strings
+      expect(resultStart).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
+      expect(resultEnd).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
+
+      // Verify they are different and end is later than start
+      expect(resultStart).not.toBe(resultEnd);
+      expect(new Date(resultEnd!).getTime()).toBeGreaterThan(new Date(resultStart!).getTime());
+
+      jest.useRealTimers();
     });
   });
 });

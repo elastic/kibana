@@ -19,7 +19,7 @@ interface WorkerServiceOptions<TWorkerData> {
   workerScriptPath: string;
 
   workerData: TWorkerData;
-  onMessage?: (message: any) => void;
+  onMessage?: (message: unknown) => void;
 }
 
 export function runWorker<TWorkerData>({
@@ -47,7 +47,7 @@ export function runWorker<TWorkerData>({
 
     worker.on('error', (error) => {
       logger.error(error);
-      reject();
+      reject(error);
     });
 
     worker.on('exit', (code) => {

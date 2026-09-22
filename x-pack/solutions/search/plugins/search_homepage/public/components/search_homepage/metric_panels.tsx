@@ -5,24 +5,27 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiImage,
+  EuiSpacer,
   EuiSplitPanel,
   EuiText,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { layoutAutoGridCss } from '@kbn/css-utils/public/layout_css';
 import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import type { ApplicationStart } from '@kbn/core/public';
+import { getWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { WORKFLOWS_UI_SETTING_ENABLED_ID } from '../../../common';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 import { useKibana } from '../../hooks/use_kibana';
+import { useGetLicenseInfo } from '../../hooks/use_get_license_info';
 
 const PANEL_TYPES = [
   'discover',
@@ -150,10 +153,11 @@ export const METRIC_PANEL_ITEMS: Array<ComplexMetricPanel> = [
     metricTitle: i18n.translate('xpack.searchHomepage.metricPanels.empty.dataManagement.title', {
       defaultMessage: 'Data Management',
     }),
-    onPanelClick: ({ application }) => {
-      application.navigateToApp('management', {
-        path: 'data/index_management',
-      });
+    onPanelClick: async ({ share }) => {
+      const indexManagementLocator = share.url.locators.get('SEARCH_INDEX_MANAGEMENT_LOCATOR_ID');
+      if (indexManagementLocator) {
+        await indexManagementLocator.navigate({ page: 'index_list' });
+      }
     },
     dataTestSubj: 'searchHomepageNavLinks-dataManagement',
   },
@@ -177,44 +181,20 @@ const MetricPanelEmpty = ({ panel }: MetricPanelEmptyProps) => {
       onClick={() => onPanelClick && onPanelClick({ share, application })}
       data-test-subj={dataTestSubj}
     >
-      <EuiSplitPanel.Inner
-        grow
-        css={css({
-          backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-          minHeight: `${euiTheme.base * 7}px`,
-        })}
-      >
-        <EuiFlexGroup
-          direction="column"
-          alignItems="center"
-          justifyContent="center"
-          gutterSize="s"
-          css={css({ height: '100%' })}
-        >
-          <EuiFlexItem grow={false}>
-            <div>
-              <EuiImage size={euiTheme.size.xxxxl} src={getImageUrl(assetBasePath)} alt="" />
-            </div>
-          </EuiFlexItem>
+      <EuiSplitPanel.Inner color="subdued" paddingSize="l">
+        <EuiFlexGroup direction="column" alignItems="center" justifyContent="center">
+          <EuiImage size={euiTheme.size.xxxxl} src={getImageUrl(assetBasePath)} alt="" />
         </EuiFlexGroup>
       </EuiSplitPanel.Inner>
-      <EuiSplitPanel.Inner
-        css={css({
-          minHeight: `${euiTheme.base * 8}px`,
-        })}
-      >
+      <EuiSplitPanel.Inner css={css({ height: '100%' })}>
         <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="xs">
-              <h4>{metricTitle}</h4>
-            </EuiTitle>
-          </EuiFlexItem>
-
-          <EuiFlexItem>
-            <EuiText color="subdued" size="s">
-              <p>{metricDescription}</p>
-            </EuiText>
-          </EuiFlexItem>
+          <EuiTitle size="xs">
+            <h4>{metricTitle}</h4>
+          </EuiTitle>
+          <EuiText color="subdued" size="s">
+            <p>{metricDescription}</p>
+          </EuiText>
+          <EuiSpacer size="s" />
         </EuiFlexGroup>
       </EuiSplitPanel.Inner>
     </EuiSplitPanel.Outer>
@@ -222,23 +202,44 @@ const MetricPanelEmpty = ({ panel }: MetricPanelEmptyProps) => {
 };
 
 export const MetricPanels = () => {
+  const { hasEnterpriseLicense } = useGetLicenseInfo();
   const { services } = useKibana();
-  const isWorkflowsUiEnabled = services.uiSettings.get<boolean>(
-    WORKFLOWS_UI_SETTING_ENABLED_ID,
-    false
-  );
+  const { application, chrome, uiSettings } = services;
+  const { euiTheme } = useEuiTheme();
 
-  const panels = isWorkflowsUiEnabled
-    ? METRIC_PANEL_ITEMS
-    : METRIC_PANEL_ITEMS.filter((p) => p.type !== 'workflows');
+  const isWorkflowsUiEnabled = uiSettings.get<boolean>(WORKFLOWS_UI_SETTING_ENABLED_ID, true);
+  const { canReadWorkflow } = getWorkflowsCapabilities(application.capabilities);
+
+  const panels = useMemo(() => {
+    const capabilityChecks: Record<MetricPanelType, boolean> = {
+      discover: chrome.navLinks.get('discover') !== undefined,
+      dashboards: chrome.navLinks.get('dashboards') !== undefined,
+      agentBuilder: chrome.navLinks.get('agent_builder') !== undefined && hasEnterpriseLicense,
+      workflows:
+        isWorkflowsUiEnabled && canReadWorkflow && chrome.navLinks.get('workflows') !== undefined,
+      machineLearning:
+        chrome.navLinks.get('ml:overview') !== undefined || chrome.navLinks.get('ml') !== undefined,
+      dataManagement: chrome.navLinks.get('management:index_management') !== undefined,
+    };
+
+    return METRIC_PANEL_ITEMS.filter((panel) => capabilityChecks[panel.type]);
+  }, [chrome.navLinks, isWorkflowsUiEnabled, canReadWorkflow, hasEnterpriseLicense]);
+
+  if (panels.length === 0) {
+    return null;
+  }
 
   return (
-    <EuiFlexGrid gutterSize="l" columns={3} data-test-subj="searchHomepageNavLinksTabGrid">
-      {panels.map((panel, index) => (
-        <EuiFlexItem key={panel.type + '-' + index}>
-          <MetricPanelEmpty panel={panel} />
-        </EuiFlexItem>
-      ))}
-    </EuiFlexGrid>
+    <EuiFlexItem>
+      <EuiSpacer size="l" />
+      <div
+        css={layoutAutoGridCss({ minItemWidth: '21rem', gap: euiTheme.size.l })}
+        data-test-subj="searchHomepageNavLinksTabGrid"
+      >
+        {panels.map((panel, index) => (
+          <MetricPanelEmpty panel={panel} key={panel.type + '-' + index} />
+        ))}
+      </div>
+    </EuiFlexItem>
   );
 };

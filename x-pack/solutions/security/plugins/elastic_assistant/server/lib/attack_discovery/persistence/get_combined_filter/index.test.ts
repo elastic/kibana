@@ -15,8 +15,7 @@ import {
   getUserFilter,
   getUserNameOrId,
 } from '.';
-
-import { ALERT_ATTACK_DISCOVERY_USERS } from '../../schedules/fields';
+import { ALERT_ATTACK_DISCOVERY_USERS } from '@kbn/elastic-assistant-common';
 
 describe('getCombinedFilter', () => {
   describe('getSharedFilter', () => {
@@ -151,6 +150,40 @@ describe('getCombinedFilter', () => {
   });
 
   describe('getCombinedFilter', () => {
+    describe('when includeAllAuthors is true', () => {
+      it('returns only the additional filter when filter is defined', () => {
+        const authenticatedUser = {
+          username: 'test_user',
+          profile_uid: '123',
+        } as AuthenticatedUser;
+
+        const result = getCombinedFilter({
+          authenticatedUser,
+          filter: 'foo: "bar"',
+          shared: false,
+          includeAllAuthors: true,
+        });
+
+        expect(result).toBe('foo: "bar"');
+      });
+
+      it('returns empty string when filter is undefined', () => {
+        const authenticatedUser = {
+          username: 'test_user',
+          profile_uid: '123',
+        } as AuthenticatedUser;
+
+        const result = getCombinedFilter({
+          authenticatedUser,
+          filter: undefined,
+          shared: false,
+          includeAllAuthors: true,
+        });
+
+        expect(result).toBe('');
+      });
+    });
+
     describe('when shared is undefined', () => {
       const shared = undefined;
 

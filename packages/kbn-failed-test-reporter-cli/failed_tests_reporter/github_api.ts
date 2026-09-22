@@ -9,12 +9,25 @@
 
 import Url from 'url';
 
-import type { AxiosRequestConfig, AxiosInstance, AxiosHeaderValue } from 'axios';
-import Axios, { AxiosHeaders } from 'axios';
-import { isAxiosResponseError, isAxiosRequestError } from '@kbn/dev-utils';
 import type { ToolingLog } from '@kbn/tooling-log';
 
-const BASE_URL = 'https://api.github.com/repos/elastic/kibana/';
+export const DEFAULT_GITHUB_REPO = 'elastic/kibana';
+
+/** URL of the `rel="next"` entry of a GitHub `Link` response header, if any. */
+export function nextPageUrl(linkHeader: string | null): string | undefined {
+  if (!linkHeader) {
+    return undefined;
+  }
+  for (const part of linkHeader.split(',')) {
+    const match = part.trim().match(/^<([^>]+)>;\s*rel="next"$/);
+    if (match) {
+      return match[1];
+    }
+  }
+  return undefined;
+}
+
+export type GithubIssueState = 'open' | 'closed';
 
 export interface GithubIssue {
   html_url: string;
@@ -23,7 +36,29 @@ export interface GithubIssue {
   title: string;
   labels: unknown[];
   body: string;
+  state: GithubIssueState;
 }
+
+export interface ListIssuesOptions {
+  state: GithubIssueState | 'all';
+  /** Only issues carrying every one of these labels. */
+  labels?: string[];
+  /** Only issues updated at or after this time. */
+  since?: Date;
+  sort?: 'created' | 'updated' | 'comments';
+  direction?: 'asc' | 'desc';
+  /**
+   * Pause between pages so a long listing stays clear of GitHub's secondary rate limits, which
+   * are shared by every job using the same token.
+   */
+  pageIntervalMs?: number;
+}
+
+/** GitHub caps `per_page` at 100 for issue listings. */
+const ISSUES_PER_PAGE = 100;
+const DEFAULT_PAGE_INTERVAL_MS = 300;
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
  * Minimal GithubIssue type that can be easily replicated by dry-run helpers
@@ -35,42 +70,87 @@ export interface GithubIssueMini {
   node_id: GithubIssue['node_id'];
 }
 
-type RequestOptions = AxiosRequestConfig & {
+export interface GithubIssueComment {
+  body: string;
+}
+
+interface RequestOptions {
+  method: string;
+  url: string;
+  data?: unknown;
   safeForDryRun?: boolean;
   maxAttempts?: number;
-  attempt?: number;
+}
+
+/** Longest single wait for a rate limit; the fifth secondary-limit retry would otherwise be 16 min. */
+const MAX_RATE_LIMIT_WAIT_SECONDS = 5 * 60;
+
+/**
+ * Seconds to wait before retrying a rate-limited request, or 0 if the response is not rate
+ * limited, following GitHub's guidance: honor `retry-after` when sent, otherwise the primary
+ * limit's `x-ratelimit-reset` when `x-ratelimit-remaining` is 0, otherwise, for a secondary
+ * limit that sends neither header, wait at least a minute and back off exponentially.
+ */
+const rateLimitRetryAfterSeconds = (
+  status: number,
+  headers: Headers,
+  body: string,
+  attempt: number
+): number => {
+  if (status !== 403 && status !== 429) {
+    return 0;
+  }
+
+  const retryAfter = Number(headers.get('retry-after'));
+  if (retryAfter > 0) {
+    return Math.min(retryAfter, MAX_RATE_LIMIT_WAIT_SECONDS);
+  }
+  if (headers.get('x-ratelimit-remaining') === '0') {
+    const resetAt = Number(headers.get('x-ratelimit-reset')) * 1000;
+    const waitSeconds = Math.ceil((resetAt - Date.now()) / 1000) + 1;
+    return Number.isFinite(waitSeconds)
+      ? Math.min(Math.max(1, waitSeconds), MAX_RATE_LIMIT_WAIT_SECONDS)
+      : 60;
+  }
+  if (/rate limit/i.test(body)) {
+    return Math.min(60 * 2 ** (attempt - 1), MAX_RATE_LIMIT_WAIT_SECONDS);
+  }
+  return 0;
 };
 
 export class GithubApi {
   private readonly log: ToolingLog;
   private readonly token: string | undefined;
   private readonly dryRun: boolean;
-  private readonly x: AxiosInstance;
+  private readonly repo: string;
+  private readonly baseUrl: string;
+  private readonly defaultHeaders: Record<string, string>;
   private requestCount: number = 0;
 
   /**
    * Create a GithubApi helper object, if token is undefined requests won't be
-   * sent, but will instead be logged.
+   * sent, but will instead be logged. `repo` (`owner/name`) defaults to elastic/kibana.
    */
   constructor(options: {
     log: GithubApi['log'];
     token: GithubApi['token'];
     dryRun: GithubApi['dryRun'];
+    repo?: string;
   }) {
     this.log = options.log;
     this.token = options.token;
     this.dryRun = options.dryRun;
+    this.repo = options.repo ?? DEFAULT_GITHUB_REPO;
+    this.baseUrl = `https://api.github.com/repos/${this.repo}/`;
 
     if (!this.token && !this.dryRun) {
       throw new TypeError('token parameter is required');
     }
 
-    this.x = Axios.create({
-      headers: {
-        ...(this.token ? { Authorization: `token ${this.token}` } : {}),
-        'User-Agent': 'elastic/kibana#failed_test_reporter',
-      },
-    });
+    this.defaultHeaders = {
+      ...(this.token ? { Authorization: `token ${this.token}` } : {}),
+      'User-Agent': 'elastic/kibana#failed_test_reporter',
+    };
   }
 
   getRequestCount() {
@@ -81,7 +161,7 @@ export class GithubApi {
     await this.request(
       {
         method: 'PATCH',
-        url: Url.resolve(BASE_URL, `issues/${encodeURIComponent(issueNumber)}`),
+        url: Url.resolve(this.baseUrl, `issues/${encodeURIComponent(issueNumber)}`),
         data: {
           state: 'open', // Reopen issue if it was closed.
           body: newBody,
@@ -91,11 +171,100 @@ export class GithubApi {
     );
   }
 
+  /**
+   * Fetch all comments on an issue, following pagination. Returns an empty
+   * list in dry-run mode so update flows behave sensibly without hitting the
+   * (rate limited) GitHub API.
+   */
+  async getIssueComments(issueNumber: number): Promise<GithubIssueComment[]> {
+    const perPage = 100;
+    const comments: GithubIssueComment[] = [];
+
+    let page = 1;
+    while (true) {
+      const resp = await this.request<Array<{ body?: string }>>(
+        {
+          method: 'GET',
+          url: Url.resolve(
+            this.baseUrl,
+            `issues/${encodeURIComponent(issueNumber)}/comments?per_page=${perPage}&page=${page}`
+          ),
+        },
+        []
+      );
+
+      for (const comment of resp.data) {
+        comments.push({ body: comment.body ?? '' });
+      }
+
+      if (resp.data.length < perPage) {
+        return comments;
+      }
+
+      page += 1;
+    }
+  }
+
+  /**
+   * Every issue of the repository matching the filters, following `Link: rel="next"` pagination.
+   * Read-only, so it also runs in dry-run mode. Pull requests share the issue shape and are
+   * dropped.
+   */
+  async listIssues({
+    state,
+    labels,
+    since,
+    sort,
+    direction,
+    pageIntervalMs = DEFAULT_PAGE_INTERVAL_MS,
+  }: ListIssuesOptions): Promise<GithubIssue[]> {
+    const params = new URLSearchParams({ state, per_page: String(ISSUES_PER_PAGE) });
+    if (labels?.length) {
+      params.set('labels', labels.join(','));
+    }
+    if (since) {
+      params.set('since', since.toISOString());
+    }
+    if (sort) {
+      params.set('sort', sort);
+    }
+    if (direction) {
+      params.set('direction', direction);
+    }
+
+    const issues: GithubIssue[] = [];
+    let url: string | undefined = Url.resolve(this.baseUrl, `issues?${params}`);
+    let page = 0;
+
+    while (url) {
+      if (page > 0 && pageIntervalMs > 0) {
+        await sleep(pageIntervalMs);
+      }
+      page += 1;
+
+      const resp = await this.request<Array<GithubIssue & { pull_request?: unknown }>>(
+        { method: 'GET', url, safeForDryRun: true },
+        []
+      );
+      for (const issue of resp.data) {
+        if (!issue.pull_request) {
+          issues.push({ ...issue, body: issue.body ?? '' });
+        }
+      }
+      this.log.debug(`Listed ${issues.length} issues (${state}) after ${page} pages`);
+
+      // Pages can hold fewer items than requested even when more follow, so trust the Link header
+      url = nextPageUrl(resp.headers.get('link'));
+    }
+
+    return issues;
+  }
+
   async addIssueComment(issueNumber: number, commentBody: string) {
     await this.request(
       {
         method: 'POST',
-        url: Url.resolve(BASE_URL, `issues/${encodeURIComponent(issueNumber)}/comments`),
+        url: Url.resolve(this.baseUrl, `issues/${encodeURIComponent(issueNumber)}/comments`),
         data: {
           body: commentBody,
         },
@@ -108,7 +277,7 @@ export class GithubApi {
     const resp = await this.request<GithubIssueMini>(
       {
         method: 'POST',
-        url: Url.resolve(BASE_URL, 'issues'),
+        url: Url.resolve(this.baseUrl, 'issues'),
         data: {
           title,
           body,
@@ -132,7 +301,7 @@ export class GithubApi {
   ): Promise<{
     status: number;
     statusText: string;
-    headers: Record<string, AxiosHeaderValue | undefined>;
+    headers: Headers;
     data: T;
   }> {
     const executeRequest = !this.dryRun || options.safeForDryRun;
@@ -147,40 +316,66 @@ export class GithubApi {
         return {
           status: 200,
           statusText: 'OK',
-          headers: new AxiosHeaders(),
+          headers: new Headers(),
           data: dryRunResponse,
         };
       }
 
+      this.requestCount += 1;
+
+      let response: Response;
       try {
-        this.requestCount += 1;
-        return await this.x.request<T>(options);
+        response = await fetch(options.url, {
+          method: options.method,
+          headers: {
+            ...this.defaultHeaders,
+            ...(options.data !== undefined ? { 'Content-Type': 'application/json' } : {}),
+          },
+          body: options.data !== undefined ? JSON.stringify(options.data) : undefined,
+        });
       } catch (error) {
-        const unableToReachGithub = isAxiosRequestError(error);
-        const githubApiFailed = isAxiosResponseError(error) && error.response.status >= 500;
-        const errorResponseLog =
-          isAxiosResponseError(error) &&
-          `[${error.config?.method} ${error.config?.url}] ${error.response.status} ${error.response.statusText} Error`;
-
-        if ((unableToReachGithub || githubApiFailed) && attempt < maxAttempts) {
+        // Network-level error (DNS, connection refused, etc.).
+        if (attempt < maxAttempts) {
           const waitMs = 1000 * attempt;
+          this.log.error(`Unable to reach github, waiting ${waitMs}ms to retry`);
+          await sleep(waitMs);
+          continue;
+        }
+        throw error;
+      }
 
-          if (errorResponseLog) {
-            this.log.error(`${errorResponseLog}: waiting ${waitMs}ms to retry`);
-          } else {
-            this.log.error(`Unable to reach github, waiting ${waitMs}ms to retry`);
-          }
-
-          await new Promise((resolve) => setTimeout(resolve, waitMs));
+      if (!response.ok) {
+        const errorResponseLog = `[${options.method} ${options.url}] ${response.status} ${response.statusText} Error`;
+        if (response.status >= 500 && attempt < maxAttempts) {
+          const waitMs = 1000 * attempt;
+          this.log.error(`${errorResponseLog}: waiting ${waitMs}ms to retry`);
+          await sleep(waitMs);
           continue;
         }
 
-        if (errorResponseLog) {
-          throw new Error(`${errorResponseLog}: ${JSON.stringify(error.response.data)}`);
+        // Rate limited: wait as long as GitHub says, or a backing-off minute when it does not say
+        const body = await response.text();
+        const retryAfterSeconds = rateLimitRetryAfterSeconds(
+          response.status,
+          response.headers,
+          body,
+          attempt
+        );
+        if (retryAfterSeconds > 0 && attempt < maxAttempts) {
+          this.log.warning(`${errorResponseLog}: rate limited, waiting ${retryAfterSeconds}s`);
+          await sleep(retryAfterSeconds * 1000);
+          continue;
         }
 
-        throw error;
+        throw new Error(`${errorResponseLog}: ${body}`);
       }
+
+      return {
+        status: response.status,
+        statusText: response.statusText,
+        headers: response.headers,
+        data: (await response.json()) as T,
+      };
     }
   }
 }

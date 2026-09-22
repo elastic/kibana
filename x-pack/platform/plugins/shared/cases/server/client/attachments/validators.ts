@@ -6,38 +6,43 @@
  */
 
 import Boom from '@hapi/boom';
-import {
-  isCommentRequestTypeExternalReference,
-  isCommentRequestTypePersistableState,
-} from '../../../common/utils/attachments';
-import type { AttachmentRequest } from '../../../common/types/api';
-import type { ExternalReferenceAttachmentTypeRegistry } from '../../attachment_framework/external_reference_registry';
-import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
+import type { z } from '@kbn/zod/v4';
+import type { UnifiedAttachmentPayload } from '../../../common/types/domain/attachment/v2';
+import type { UnifiedAttachmentTypeRegistry } from '../../attachment_framework/unified_attachment_registry';
 
-export const validateRegisteredAttachments = ({
+/** Throws `Boom.badRequest` with a `path: message` summary of every zod issue. */
+export const parseUnifiedAttachmentWithSchema = (
+  schema: z.ZodType,
+  payload: UnifiedAttachmentPayload,
+  type: string
+): void => {
+  const result = schema.safeParse(payload);
+  if (result.success) {
+    return;
+  }
+  const summary = result.error.issues
+    .map(({ path, message }) => `${path.length > 0 ? path.join('.') : '(root)'}: ${message}`)
+    .join('; ');
+  throw Boom.badRequest(`Invalid attachment payload for type '${type}': ${summary}`);
+};
+
+export const validateUnifiedAttachments = ({
   query,
-  persistableStateAttachmentTypeRegistry,
-  externalReferenceAttachmentTypeRegistry,
+  unifiedAttachmentTypeRegistry,
 }: {
-  query: AttachmentRequest;
-  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
-  externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
+  query: UnifiedAttachmentPayload;
+  unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
 }) => {
-  if (
-    isCommentRequestTypeExternalReference(query) &&
-    !externalReferenceAttachmentTypeRegistry.has(query.externalReferenceAttachmentTypeId)
-  ) {
+  if (!unifiedAttachmentTypeRegistry.has(query.type)) {
     throw Boom.badRequest(
-      `Attachment type ${query.externalReferenceAttachmentTypeId} is not registered.`
+      `Attachment type ${query.type} is not registered in unified attachment type registry.`
     );
   }
 
-  if (
-    isCommentRequestTypePersistableState(query) &&
-    !persistableStateAttachmentTypeRegistry.has(query.persistableStateAttachmentTypeId)
-  ) {
-    throw Boom.badRequest(
-      `Attachment type ${query.persistableStateAttachmentTypeId} is not registered.`
-    );
+  const attachmentType = unifiedAttachmentTypeRegistry.get(query.type);
+  if (!attachmentType.schema) {
+    throw Boom.badRequest(`Attachment type '${query.type}' does not define a schema.`);
   }
+
+  parseUnifiedAttachmentWithSchema(attachmentType.schema, query, query.type);
 };

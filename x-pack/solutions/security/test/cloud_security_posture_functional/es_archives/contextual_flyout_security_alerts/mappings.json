@@ -8873,7 +8873,7 @@
           "ignore_malformed": "true",
           "total_fields": {
             "ignore_dynamic_beyond_limit": "true",
-            "limit": "2500"
+            "limit": "3500"
           }
         },
         "number_of_replicas": "0",

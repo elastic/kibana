@@ -9,29 +9,39 @@ import { fireEvent, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import * as Rx from 'rxjs';
 
+import { asSpaceId } from '@kbn/core-spaces-common';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 import { NavControlPopover, type Props as NavControlPopoverProps } from './nav_control_popover';
+import { SOLUTION_VIEW_SWITCH_TOUR_STORAGE_KEY_PREFIX } from './solution_view_switch_tour';
 import type { GetSpaceResult, Space } from '../../common';
 import { EventTracker } from '../analytics';
+import { SOLUTION_VIEW_SWITCH_STORAGE_KEY_PREFIX } from '../solution_view_switch';
 import type { SpacesManager } from '../spaces_manager';
 import { spacesManagerMock } from '../spaces_manager/mocks';
 
+jest.mock('./solution_view_switch_tour', () => ({
+  SOLUTION_VIEW_SWITCH_TOUR_STORAGE_KEY_PREFIX: 'spaces.solutionViewSwitchTourShown',
+  SolutionViewSwitchTour: function MockSolutionViewSwitchTour() {
+    return <div data-test-subj="solutionViewSwitchTour" />;
+  },
+}));
+
 const mockSpaces = [
   {
-    id: 'default',
+    id: asSpaceId('default'),
     name: 'Default Space',
     description: 'this is your default space',
     disabledFeatures: [],
   },
   {
-    id: 'space-1',
+    id: asSpaceId('space-1'),
     name: 'Space 1',
     disabledFeatures: [],
   },
   {
-    id: 'space-2',
+    id: asSpaceId('space-2'),
     name: 'Space 2',
     disabledFeatures: [],
   },
@@ -54,6 +64,10 @@ describe('NavControlPopover', () => {
     });
     spacesManager = spacesManagerMock.create();
     spacesManager.getSpaces = jest.fn().mockResolvedValue(mockSpaces);
+  });
+
+  afterEach(() => {
+    localStorage.clear();
     jest.clearAllMocks();
   });
 
@@ -72,10 +86,7 @@ describe('NavControlPopover', () => {
       navigateToUrl: jest.fn(),
       allowSolutionVisibility: false,
       eventTracker,
-      showTour$: Rx.of(false),
-      onFinishTour: jest.fn(),
-      manageSpacesLink: '/manage/spaces',
-      manageSpacesDocsLink: 'https://elastic.co/docs',
+      areAnnouncementsEnabled: true,
       ...props,
     };
 
@@ -93,7 +104,7 @@ describe('NavControlPopover', () => {
 
   it('renders a SpaceAvatar with the active space', async () => {
     const activeSpace = {
-      id: 'default',
+      id: asSpaceId('default'),
       name: 'Default Space',
       description: 'this is your default space',
       disabledFeatures: [],
@@ -127,12 +138,12 @@ describe('NavControlPopover', () => {
   it('should render a search box when there are 8 or more spaces', async () => {
     const manySpaces = [
       ...mockSpaces,
-      { id: 'space-3', name: 'Space 3', disabledFeatures: [] },
-      { id: 'space-4', name: 'Space 4', disabledFeatures: [] },
-      { id: 'space-5', name: 'Space 5', disabledFeatures: [] },
-      { id: 'space-6', name: 'Space 6', disabledFeatures: [] },
-      { id: 'space-7', name: 'Space 7', disabledFeatures: [] },
-      { id: 'space-8', name: 'Space 8', disabledFeatures: [] },
+      { id: asSpaceId('space-3'), name: 'Space 3', disabledFeatures: [] },
+      { id: asSpaceId('space-4'), name: 'Space 4', disabledFeatures: [] },
+      { id: asSpaceId('space-5'), name: 'Space 5', disabledFeatures: [] },
+      { id: asSpaceId('space-6'), name: 'Space 6', disabledFeatures: [] },
+      { id: asSpaceId('space-7'), name: 'Space 7', disabledFeatures: [] },
+      { id: asSpaceId('space-8'), name: 'Space 8', disabledFeatures: [] },
     ];
 
     spacesManager.getSpaces.mockResolvedValue(manySpaces);
@@ -254,5 +265,89 @@ describe('NavControlPopover', () => {
     fireEvent.click(manageButton);
 
     expect(navigateToApp).toHaveBeenCalledWith('management', { path: 'kibana/spaces' });
+  });
+
+  it('should render a notification indicator when conditions are met', async () => {
+    const activeSpace = { ...mockSpaces[0], solution: 'oblt' as const };
+
+    localStorage.setItem(`${SOLUTION_VIEW_SWITCH_STORAGE_KEY_PREFIX}:${activeSpace.id}`, 'true');
+    localStorage.setItem(
+      `${SOLUTION_VIEW_SWITCH_TOUR_STORAGE_KEY_PREFIX}:${activeSpace.id}`,
+      'false'
+    );
+
+    renderNavControlPopover({}, activeSpace);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('navControlPopoverNotification')).toBeInTheDocument();
+    });
+  });
+
+  it('should not render a notification indicator when conditions are not met', async () => {
+    const activeSpace = { ...mockSpaces[0], solution: 'oblt' as const };
+
+    localStorage.setItem(`${SOLUTION_VIEW_SWITCH_STORAGE_KEY_PREFIX}:${activeSpace.id}`, 'false');
+    localStorage.setItem(
+      `${SOLUTION_VIEW_SWITCH_TOUR_STORAGE_KEY_PREFIX}:${activeSpace.id}`,
+      'false'
+    );
+
+    renderNavControlPopover({}, activeSpace);
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('navControlPopoverNotification')).not.toBeInTheDocument();
+    });
+  });
+
+  it('should render a solution view switch tour when conditions are met', async () => {
+    const activeSpace = { ...mockSpaces[0], solution: 'oblt' as const };
+
+    localStorage.setItem(`${SOLUTION_VIEW_SWITCH_STORAGE_KEY_PREFIX}:${activeSpace.id}`, 'true');
+    localStorage.setItem(
+      `${SOLUTION_VIEW_SWITCH_TOUR_STORAGE_KEY_PREFIX}:${activeSpace.id}`,
+      'false'
+    );
+
+    renderNavControlPopover({}, activeSpace);
+
+    fireEvent.click(screen.getByTestId('spacesNavSelector'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('spaceMenuPopoverPanel')).toBeInTheDocument();
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('Space 1')).toBeInTheDocument();
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('solutionViewSwitchTour')).toBeInTheDocument();
+    });
+  });
+
+  it('should not render a solution view switch tour when conditions are not met', async () => {
+    const activeSpace = { ...mockSpaces[0], solution: 'oblt' as const };
+
+    localStorage.setItem(`${SOLUTION_VIEW_SWITCH_STORAGE_KEY_PREFIX}:${activeSpace.id}`, 'false');
+    localStorage.setItem(
+      `${SOLUTION_VIEW_SWITCH_TOUR_STORAGE_KEY_PREFIX}:${activeSpace.id}`,
+      'false'
+    );
+
+    renderNavControlPopover({}, activeSpace);
+
+    fireEvent.click(screen.getByTestId('spacesNavSelector'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('spaceMenuPopoverPanel')).toBeInTheDocument();
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('Space 1')).toBeInTheDocument();
+    });
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('solutionViewSwitchTour')).not.toBeInTheDocument();
+    });
   });
 });

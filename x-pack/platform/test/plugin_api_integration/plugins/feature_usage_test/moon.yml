@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/feature-usage-test-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-security'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/feature-usage-test-plugin'
+  title: '@kbn/feature-usage-test-plugin'
   description: Moon project for @kbn/feature-usage-test-plugin
   channel: ''
   owner: '@elastic/kibana-security'
-  metadata:
-    sourceRoot: x-pack/platform/test/plugin_api_integration/plugins/feature_usage_test
+  sourceRoot: x-pack/platform/test/plugin_api_integration/plugins/feature_usage_test
 dependsOn:
   - '@kbn/core'
   - '@kbn/licensing-plugin'

@@ -7,16 +7,21 @@
 
 import type {
   IRouter,
-  RequestHandlerContext,
   KibanaRequest,
   IKibanaResponse,
   KibanaResponseFactory,
+  CustomRequestHandlerContext,
 } from '@kbn/core/server';
 import type { Logger } from '@kbn/core/server';
+import type { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
+
+type TriggersActionsUiRequestHandlerContext = CustomRequestHandlerContext<{
+  actions: ActionsApiRequestHandlerContext;
+}>;
 
 export function createHealthRoute(
   logger: Logger,
-  router: IRouter,
+  router: IRouter<TriggersActionsUiRequestHandlerContext>,
   baseRoute: string,
   isAlertsAvailable: boolean
 ) {
@@ -40,11 +45,16 @@ export function createHealthRoute(
     handler
   );
   async function handler(
-    ctx: RequestHandlerContext,
+    ctx: TriggersActionsUiRequestHandlerContext,
     req: KibanaRequest<unknown, unknown, unknown>,
     res: KibanaResponseFactory
   ): Promise<IKibanaResponse> {
-    const result = { isAlertsAvailable };
+    const actionsContext = await ctx.actions;
+    const skippedIds = actionsContext.getSkippedPreconfiguredConnectorIds();
+    const result = {
+      isAlertsAvailable,
+      skippedPreconfiguredConnectorIds: Array.from(skippedIds),
+    };
 
     logger.debug(() => `route ${path} response: ${JSON.stringify(result)}`);
     return res.ok({ body: result });

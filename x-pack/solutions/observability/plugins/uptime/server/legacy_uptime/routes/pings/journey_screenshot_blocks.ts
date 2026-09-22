@@ -26,7 +26,7 @@ export const createJourneyScreenshotBlocksRoute: UMRestApiRouteFactory<Screensho
   path: API_URLS.JOURNEY_SCREENSHOT_BLOCKS,
   validate: {
     body: schema.object({
-      hashes: schema.arrayOf(schema.string()),
+      hashes: schema.arrayOf(schema.string(), { maxSize: 1000 }),
     }),
   },
   handler: async (routeProps) => {

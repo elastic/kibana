@@ -10,22 +10,15 @@
 import Chalk from 'chalk';
 import moment from 'moment';
 import type { Writable } from 'stream';
-import { tap } from 'rxjs';
+import * as Rx from 'rxjs';
 import {
   ToolingLog,
   pickLevelFromFlags,
   ToolingLogTextWriter,
   parseLogLevel,
 } from '@kbn/tooling-log';
-import * as Rx from 'rxjs';
-import { ignoreElements } from 'rxjs';
-import type { OptimizerUpdate } from '@kbn/optimizer';
-import {
-  runOptimizer,
-  OptimizerConfig,
-  logOptimizerState,
-  logOptimizerProgress,
-} from '@kbn/optimizer';
+import type { OptimizerPhase, RspackOptimizer } from '@kbn/rspack-optimizer';
+import type { KibanaGroup } from '@kbn/projects-solutions-groups';
 
 export interface Options {
   enabled: boolean;
@@ -40,12 +33,14 @@ export interface Options {
   writeLogTo?: Writable;
   pluginPaths?: string[];
   pluginScanDirs?: string[];
+  allowlistPluginGroups?: readonly KibanaGroup[];
+  basePath?: string;
 }
 
 export class Optimizer {
   public readonly run$: Rx.Observable<void>;
   private readonly ready$ = new Rx.ReplaySubject<boolean>(1);
-  private readonly phase$ = new Rx.ReplaySubject<OptimizerUpdate['state']['phase']>(1);
+  private readonly phase$ = new Rx.ReplaySubject<OptimizerPhase>(1);
 
   constructor(options: Options) {
     if (!options.enabled) {
@@ -55,19 +50,74 @@ export class Optimizer {
       return;
     }
 
-    const config = OptimizerConfig.create({
-      repoRoot: options.repoRoot,
-      watch: options.watch,
-      includeCoreBundle: true,
-      cache: options.cache,
-      dist: options.dist,
-      examples: options.runExamples,
-      pluginPaths: options.pluginPaths,
-      pluginScanDirs: options.pluginScanDirs,
-    });
+    this.run$ = this.createRun$(options);
+  }
 
+  private createRun$(options: Options): Rx.Observable<void> {
+    const log = this.createLog(options);
+
+    return new Rx.Observable<void>((subscriber) => {
+      let optimizer: RspackOptimizer | undefined;
+
+      // `@kbn/rspack-optimizer` loads the native `@rspack/core` runtime as soon as it is imported, but this
+      // process only orchestrates the forked optimizer worker. Defer that cost until run$ is
+      // subscribed so it is never paid when the optimizer is disabled.
+      import('@kbn/rspack-optimizer')
+        .then(async (kbnOptimizer) => {
+          if (subscriber.closed) {
+            return;
+          }
+
+          optimizer = new kbnOptimizer.RspackOptimizer({
+            repoRoot: options.repoRoot,
+            watch: options.watch,
+            cache: options.cache,
+            dist: options.dist,
+            examples: options.runExamples,
+            pluginPaths: options.pluginPaths,
+            pluginScanDirs: options.pluginScanDirs,
+            allowlistPluginGroups: options.allowlistPluginGroups,
+            basePath: options.basePath,
+            log,
+          });
+
+          subscriber.add(
+            optimizer.getPhase$().subscribe((phase) => {
+              this.phase$.next(phase);
+              this.ready$.next(phase === 'success' || phase === 'issue');
+            })
+          );
+
+          try {
+            await optimizer.run();
+            if (!options.watch) {
+              subscriber.complete();
+            }
+          } catch (error) {
+            subscriber.error(error);
+          }
+        })
+        .catch((error) => {
+          log.error(`Failed to load @kbn/rspack-optimizer: ${error.message}`);
+          subscriber.error(error);
+        });
+
+      // kill the optimizer worker and complete the state subjects when run$ completes or is
+      // unsubscribed (e.g. on SIGINT)
+      subscriber.add(() => {
+        optimizer?.stop().catch(() => {});
+        this.phase$.complete();
+        this.ready$.complete();
+      });
+    });
+  }
+
+  /**
+   * Create a ToolingLog instance with custom formatting
+   */
+  private createLog(options: Options): ToolingLog {
     const dim = Chalk.dim('np bld');
-    const name = Chalk.magentaBright('@kbn/optimizer');
+    const name = Chalk.magentaBright('@kbn/rspack-optimizer');
     const time = () => moment().format('HH:mm:ss.SSS');
     const level = (msgType: string) => {
       switch (msgType) {
@@ -112,27 +162,7 @@ export class Optimizer {
       },
     ]);
 
-    this.run$ = new Rx.Observable<void>((subscriber) => {
-      subscriber.add(
-        runOptimizer(config)
-          .pipe(
-            logOptimizerProgress(log),
-            logOptimizerState(log, config),
-            tap(({ state }) => {
-              this.phase$.next(state.phase);
-              this.ready$.next(state.phase === 'success' || state.phase === 'issue');
-            }),
-            ignoreElements()
-          )
-          .subscribe(subscriber)
-      );
-
-      // complete state subjects when run$ completes
-      subscriber.add(() => {
-        this.phase$.complete();
-        this.ready$.complete();
-      });
-    });
+    return log;
   }
 
   getPhase$() {

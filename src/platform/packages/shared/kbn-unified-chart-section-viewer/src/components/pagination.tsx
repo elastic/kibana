@@ -10,6 +10,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPagination } from '@elastic/eui';
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
+import { METRICS_GRID_PAGINATION_DATA_TEST_SUBJ } from '../common/constants';
 
 interface PaginationProps {
   totalPages: number;
@@ -32,6 +33,7 @@ export const Pagination = ({ totalPages, currentPage, onPageChange }: Pagination
     <EuiFlexGroup justifyContent="center">
       <EuiFlexItem grow={false}>
         <EuiPagination
+          data-test-subj={METRICS_GRID_PAGINATION_DATA_TEST_SUBJ}
           aria-label={i18n.translate(
             'metricsExperience.pagination.euiPagination.metricsPaginationLabel',
             { defaultMessage: 'Metrics pagination' }

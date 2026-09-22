@@ -36,7 +36,7 @@ export const SHOWING_SELECTED_CASES = (totalRules: number) =>
     defaultMessage: 'Selected {totalRules} {totalRules, plural, =1 {case} other {cases}}',
   });
 
-export const SHOWING_CASES = (totalRules: number, pageSize: number) =>
+export const SHOWING_CASES_PAGE = (totalRules: number, pageSize: number) =>
   i18n.translate('xpack.cases.caseTable.showingCasesTitle', {
     values: { totalRules, pageSize },
     defaultMessage:
@@ -100,6 +100,13 @@ export const SEARCH_PLACEHOLDER = i18n.translate('xpack.cases.caseTable.searchPl
   defaultMessage: 'Search cases',
 });
 
+export const SEARCH_PLACEHOLDER_TEMPLATES_V2 = i18n.translate(
+  'xpack.cases.caseTable.searchPlaceholderTemplatesV2',
+  {
+    defaultMessage: 'Search by text, field label, or field:value',
+  }
+);
+
 export const CLOSED = i18n.translate('xpack.cases.caseTable.closed', {
   defaultMessage: 'Closed',
 });
@@ -113,6 +120,13 @@ export const ALREADY_ATTACHED = i18n.translate('xpack.cases.caseTable.alreadyAtt
   description:
     'In this context, "Added" is letting the user know that all of their selected alerts were previously added to the case in question, and the "Add to case" button is disabled',
 });
+
+export const ALREADY_ATTACHED_TOOLTIP = i18n.translate(
+  'xpack.cases.caseTable.alreadyAttachedTooltip',
+  {
+    defaultMessage: 'This item is already added to this case',
+  }
+);
 
 export const REQUIRES_UPDATE = i18n.translate('xpack.cases.caseTable.requiresUpdate', {
   defaultMessage: ' requires update',
@@ -231,6 +245,13 @@ export const DRAG_HANDLE = i18n.translate('xpack.cases.allCasesView.columnSelect
   defaultMessage: 'Drag Handle',
 });
 
+export const COLUMN_SELECTION_POPOVER_ARIA_LABEL = i18n.translate(
+  'xpack.cases.allCasesView.columnSelectionPopoverAriaLabel',
+  {
+    defaultMessage: 'Column visibility options',
+  }
+);
+
 export const EMPTY_FILTER_MESSAGE = i18n.translate(
   'xpack.cases.tableFilters.useFilters.emptyMessage',
   {
@@ -244,6 +265,246 @@ export const OPTIONS = (totalCount: number) =>
     values: { totalCount },
   });
 
+export const FILTER_OPTIONS_POPOVER_ARIA_LABEL = i18n.translate(
+  'xpack.cases.tableFilters.useFilters.filterOptionsPopoverAriaLabel',
+  {
+    defaultMessage: 'Filter options',
+  }
+);
+
 export const MORE_FILTERS_LABEL = i18n.translate('xpack.cases.tableFilters.moreFiltersLabel', {
   defaultMessage: 'More',
 });
+
+export const CLOSE_CASE_MODAL_TITLE = i18n.translate(
+  'xpack.cases.allCasesView.closeCaseModal.title',
+  {
+    defaultMessage: 'Select alert close reason',
+  }
+);
+
+export const CLOSE_CASE_MODAL_REASON_LABEL = i18n.translate(
+  'xpack.cases.allCasesView.closeCaseModal.reasonLabel',
+  {
+    defaultMessage: 'Reason for closing',
+  }
+);
+
+export const CLOSE_CASE_MODAL_CONFIRM = i18n.translate(
+  'xpack.cases.allCasesView.closeCaseModal.confirmButtonLabel',
+  {
+    defaultMessage: 'Confirm and close case',
+  }
+);
+
+export const CLOSE_CASE_MODAL_CLOSE_BUTTON = i18n.translate(
+  'xpack.cases.allCasesView.closeCaseModal.closeButtonLabel',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
+
+export const CLOSE_CASE_MODAL_REASON_SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.cases.allCasesView.closeCaseModal.reasonSearchPlaceholder',
+  {
+    defaultMessage: 'Reason for closing attached alerts',
+  }
+);
+
+export const CLOSE_CASE_MODAL_DISCLAIMER = i18n.translate(
+  'xpack.cases.allCasesView.closeCaseModal.disclaimer',
+  {
+    defaultMessage: 'Alerts already closed will not be updated',
+  }
+);
+
+export const CLOSE_CASE_MODAL_REASON_CLOSE_WITHOUT_REASON = i18n.translate(
+  'xpack.cases.allCasesView.closeCaseModal.reason.closeWithoutReason',
+  {
+    defaultMessage: 'Close without reason',
+  }
+);
+
+export const CLOSE_CASE_MODAL_REASON_DUPLICATE = i18n.translate(
+  'xpack.cases.allCasesView.closeCaseModal.reason.duplicate',
+  {
+    defaultMessage: 'Duplicate',
+  }
+);
+
+export const CLOSE_CASE_MODAL_REASON_FALSE_POSITIVE = i18n.translate(
+  'xpack.cases.allCasesView.closeCaseModal.reason.falsePositive',
+  {
+    defaultMessage: 'False Positive',
+  }
+);
+
+export const CLOSE_CASE_MODAL_REASON_TRUE_POSITIVE = i18n.translate(
+  'xpack.cases.allCasesView.closeCaseModal.reason.truePositive',
+  {
+    defaultMessage: 'True positive',
+  }
+);
+
+export const CLOSE_CASE_MODAL_REASON_BENIGN_POSITIVE = i18n.translate(
+  'xpack.cases.allCasesView.closeCaseModal.reason.benignPositive',
+  {
+    defaultMessage: 'Benign positive',
+  }
+);
+
+export const CLOSE_CASE_MODAL_REASON_OTHER = i18n.translate(
+  'xpack.cases.allCasesView.closeCaseModal.reason.other',
+  {
+    defaultMessage: 'Other',
+  }
+);
+
+export const TABLE_CAPTION = i18n.translate('xpack.cases.caseTable.tableCaption', {
+  defaultMessage: 'Cases',
+});
+
+export const EDIT_FILTERS_TOOLTIP = i18n.translate('xpack.cases.allCases.editFiltersTooltip', {
+  defaultMessage: 'Add or remove filters',
+});
+
+export const VIEW_TOGGLE_LEGEND = i18n.translate('xpack.cases.casesRedesign.viewToggle.legend', {
+  defaultMessage: 'View toggle',
+});
+
+export const VIEW_TOGGLE_LIST_LABEL = i18n.translate(
+  'xpack.cases.casesRedesign.viewToggle.listView',
+  {
+    defaultMessage: 'List view',
+  }
+);
+
+export const VIEW_TOGGLE_TABLE_LABEL = i18n.translate(
+  'xpack.cases.casesRedesign.viewToggle.tableView',
+  {
+    defaultMessage: 'Table view',
+  }
+);
+
+export const COLUMNS_BUTTON_LABEL = i18n.translate(
+  'xpack.cases.casesRedesign.tableFilters.columnsButton',
+  {
+    defaultMessage: 'Columns',
+  }
+);
+
+export const FIELDS_BUTTON_LABEL = i18n.translate(
+  'xpack.cases.casesRedesign.tableFilters.fieldsButton',
+  {
+    defaultMessage: 'Fields',
+  }
+);
+
+export const UNKNOWN = i18n.translate('xpack.cases.casesRedesign.listView.unknown', {
+  defaultMessage: 'Unknown',
+});
+
+export const LIST_REPORTED_BY = i18n.translate('xpack.cases.casesRedesign.listView.reportedBy', {
+  defaultMessage: 'Reported by',
+});
+
+export const LIST_LAST_UPDATE = i18n.translate('xpack.cases.casesRedesign.listView.lastUpdate', {
+  defaultMessage: 'Last update',
+});
+
+export const LIST_FIELD_CREATED = i18n.translate(
+  'xpack.cases.casesRedesign.listView.fieldCreated',
+  {
+    defaultMessage: 'Created',
+  }
+);
+
+export const LIST_FIELD_CLOSED = i18n.translate('xpack.cases.casesRedesign.listView.fieldClosed', {
+  defaultMessage: 'Closed',
+});
+
+export const SORT_ORDER_ARIA_LABEL = i18n.translate(
+  'xpack.cases.casesRedesign.tableFilters.sortOrderAriaLabel',
+  {
+    defaultMessage: 'Sort order',
+  }
+);
+
+export const SORT_NEWEST_FIRST = i18n.translate(
+  'xpack.cases.casesRedesign.tableFilters.newestFirst',
+  {
+    defaultMessage: 'Newest first',
+  }
+);
+
+export const SORT_OLDEST_FIRST = i18n.translate(
+  'xpack.cases.casesRedesign.tableFilters.oldestFirst',
+  {
+    defaultMessage: 'Oldest first',
+  }
+);
+
+export const COLUMNS_POPOVER_ARIA_LABEL = i18n.translate(
+  'xpack.cases.casesRedesign.columnsPopover.ariaLabel',
+  {
+    defaultMessage: 'Column visibility options',
+  }
+);
+
+export const BULK_ACTIONS_POPOVER_ARIA_LABEL = i18n.translate(
+  'xpack.cases.casesRedesign.bulkActionsPopover.ariaLabel',
+  {
+    defaultMessage: 'Bulk actions popover',
+  }
+);
+
+export const SELECT_CASE_ARIA_LABEL = (title: string) =>
+  i18n.translate('xpack.cases.casesRedesign.listView.selectCaseAriaLabel', {
+    values: { title },
+    defaultMessage: 'Select case {title}',
+  });
+
+export const SELECT_ALL_CASES = i18n.translate('xpack.cases.casesRedesign.listView.selectAll', {
+  defaultMessage: 'Select all',
+});
+
+export const CLEAR_SELECTION = i18n.translate('xpack.cases.casesRedesign.listView.clearSelection', {
+  defaultMessage: 'Clear selection',
+});
+
+export const LIST_CASE_META_LINK_ARIA = (title: string) =>
+  i18n.translate('xpack.cases.casesRedesign.listView.caseMetaLinkAriaLabel', {
+    values: { title },
+    defaultMessage: 'View case details for {title}',
+  });
+
+export const SEARCH_HIDDEN_FIELDS_INFO_TITLE = i18n.translate(
+  'xpack.cases.casesRedesign.tableFilters.searchHiddenFieldsInfoTitle',
+  {
+    defaultMessage: 'Search may include hidden fields',
+  }
+);
+
+export const SEARCH_HIDDEN_FIELDS_INFO_TEXT = i18n.translate(
+  'xpack.cases.casesRedesign.tableFilters.searchHiddenFieldsInfoText',
+  {
+    defaultMessage:
+      'Results can match values from template and custom fields that are not shown as columns.',
+  }
+);
+
+export const ACTION_LICENSE_REQUIRED = i18n.translate(
+  'xpack.cases.allCasesView.actionLicenseRequired',
+  {
+    defaultMessage:
+      'Opening cases in external systems requires a Platinum license or higher, a cloud deployment, or a free trial.',
+  }
+);
+
+export const ACTION_LICENSE_DISABLED_BY_CONFIG = i18n.translate(
+  'xpack.cases.allCasesView.actionLicenseDisabledByConfig',
+  {
+    defaultMessage:
+      'External connectors are disabled in the Kibana configuration. Update xpack.actions.enabledActionTypes to enable them.',
+  }
+);

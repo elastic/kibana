@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { ToolType } from '@kbn/agent-builder-common/tools';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { sharedValidationSchemas } from './shared_tool_validation';
 import type { ToolsService } from '../../../../../services';
 
@@ -52,4 +52,6 @@ export const createWorkflowFormValidationSchema = (toolsService: ToolsService) =
     wait_for_completion: z.boolean(),
 
     type: z.literal(ToolType.workflow),
+
+    confirmation_ask_user: sharedValidationSchemas.confirmation_ask_user,
   });

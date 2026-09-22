@@ -41,7 +41,10 @@ export const createIndicatorMatchAlertType = (): SecurityAlertType<ThreatRulePar
       },
     },
     schemas: {
-      params: { type: 'zod', schema: ThreatRuleParams },
+      params: {
+        type: 'zod',
+        schema: ThreatRuleParams,
+      },
     },
     actionGroups: [
       {

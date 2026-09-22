@@ -1,0 +1,70 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        bulkResolveRequest:
+          summary: Resolve multiple saved objects
+          value:
+            - type: dashboard
+              id: example-dashboard-1
+            - type: dashboard
+              id: legacy-id
+responses:
+  '200':
+    description: A bulk resolve response.
+    content:
+      application/json:
+        examples:
+          bulkResolveResponse:
+            summary: A bulk resolve response with an exact and alias match
+            value:
+              resolved_objects:
+                - outcome: exactMatch
+                  saved_object:
+                    id: example-dashboard-1
+                    type: dashboard
+                    attributes:
+                      title: Example dashboard 1
+                    references: []
+                    namespaces:
+                      - default
+                    managed: false
+                    updated_at: '2026-04-17T12:00:00.000Z'
+                    version: WzEsMV0=
+                - outcome: aliasMatch
+                  alias_target_id: example-dashboard-2
+                  saved_object:
+                    id: example-dashboard-2
+                    type: dashboard
+                    attributes:
+                      title: Example dashboard 2
+                    references: []
+                    namespaces:
+                      - default
+                    managed: false
+                    updated_at: '2026-04-17T12:00:00.000Z'
+                    version: WzEsMl0=
+  '400':
+    description: A bad request.
+    content:
+      application/json:
+        examples:
+          badRequestResponse:
+            summary: A bad request error
+            value:
+              statusCode: 400
+              error: Bad Request
+              message: 'Unsupported saved object type(s): unknownType'
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X POST "${KIBANA_URL}/api/saved_objects/_bulk_resolve" \
+        -H "Authorization: ApiKey ${API_KEY}" \
+        -H "kbn-xsrf: true" \
+        -H "Content-Type: application/json" \
+        -d '[{"type":"dashboard","id":"example-dashboard-1"},{"type":"dashboard","id":"legacy-id"}]'
+  - lang: Console
+    source: |
+      POST kbn://api/saved_objects/_bulk_resolve
+      [{"type":"dashboard","id":"example-dashboard-1"},{"type":"dashboard","id":"legacy-id"}]

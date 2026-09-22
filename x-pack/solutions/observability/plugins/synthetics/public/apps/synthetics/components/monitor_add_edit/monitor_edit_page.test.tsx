@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, fireEvent, waitFor } from '@testing-library/react';
+import { act, fireEvent } from '@testing-library/react';
 import { render } from '../../utils/testing/rtl_helpers';
 import { MonitorEditPage } from './monitor_edit_page';
 import { useMonitorName } from '../../hooks/use_monitor_name';
@@ -18,7 +18,9 @@ import {
   PROFILES_MAP,
 } from '../../../../../common/constants/monitor_defaults';
 
-jest.mock('@kbn/observability-shared-plugin/public');
+jest.mock('@kbn/observability-shared-plugin/public', () => ({
+  ...jest.requireActual('@kbn/observability-shared-plugin/public'),
+}));
 
 jest.mock('../../hooks/use_monitor_name', () => ({
   ...jest.requireActual('../../hooks/use_monitor_name'),
@@ -30,7 +32,6 @@ jest.mock('../../../../hooks/use_kibana_space', () => ({
   useKibanaSpace: jest.fn().mockReturnValue({ id: 'default' }),
 }));
 
-// Failing: See https://github.com/elastic/kibana/issues/234711
 describe('MonitorEditPage', () => {
   const { FETCH_STATUS } = observabilitySharedPublic;
 
@@ -243,11 +244,11 @@ describe('MonitorEditPage', () => {
       fireEvent.change(inputField, { target: { value: 'any value' } }); // Hook is made to return duplicate error as true
       fireEvent.blur(inputField);
 
-      act(() => {
+      await act(async () => {
         jest.advanceTimersByTime(1000);
       });
       if (nameAlreadyExists) {
-        await waitFor(() => getByText('Monitor name already exists'));
+        expect(getByText('Monitor name already exists')).toBeInTheDocument();
       } else {
         expect(queryByText('Monitor name already exists')).not.toBeInTheDocument();
       }

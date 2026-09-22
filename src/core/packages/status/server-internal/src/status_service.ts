@@ -22,6 +22,7 @@ import { isNil, omitBy } from 'lodash';
 
 import type { RootSchema } from '@elastic/ebt/client';
 import type { Logger, LogMeta } from '@kbn/logging';
+import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { PluginName } from '@kbn/core-base-common';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
@@ -36,6 +37,7 @@ import type { InternalMetricsServiceSetup } from '@kbn/core-metrics-server-inter
 import type { InternalSavedObjectsServiceSetup } from '@kbn/core-saved-objects-server-internal';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import { type ServiceStatus, type CoreStatus } from '@kbn/core-status-common';
+import type { ILoggingSystem } from '@kbn/core-logging-server-internal';
 import { registerStatusRoute, registerPrebootStatusRoute } from './routes';
 
 import { statusConfig as config, type StatusConfigType } from './status_config';
@@ -69,6 +71,7 @@ export interface StatusServiceSetupDeps {
   metrics: InternalMetricsServiceSetup;
   savedObjects: Pick<InternalSavedObjectsServiceSetup, 'status$'>;
   coreUsageData: Pick<InternalCoreUsageDataSetup, 'incrementUsageCounter'>;
+  loggingSystem: Pick<ILoggingSystem, 'setGlobalContext'>;
 }
 
 export class StatusService implements CoreService<InternalStatusServiceSetup> {
@@ -102,6 +105,7 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
     savedObjects,
     environment,
     coreUsageData,
+    loggingSystem,
   }: StatusServiceSetupDeps) {
     const statusConfig = await firstValueFrom(this.config$);
     const core$ = (this.core$ = this.setupCoreStatus({
@@ -121,6 +125,8 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
             status: summary,
           },
         });
+        // Changing the state after the log above so that we can see the previous state before recalculating the status.
+        loggingSystem.setGlobalContext({ service: { state: summary.level.toString() } });
         return summary;
       }),
       distinctUntilChanged<ServiceStatus<unknown>>(isDeepStrictEqual),
@@ -151,6 +157,7 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
     const commonRouteDeps = {
       config: {
         allowAnonymous: statusConfig.allowAnonymous,
+        statusPageBypassMonitorPrivilege: statusConfig.statusPageBypassMonitorPrivilege,
         packageInfo: this.coreContext.env.packageInfo,
         serverName: http.getServerInfo().name,
         uuid: environment.instanceUuid,
@@ -165,9 +172,10 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
       incrementUsageCounter: coreUsageData.incrementUsageCounter,
     };
 
-    const router = http.createRouter('');
+    const router = http.createRouter<RequestHandlerContext>('');
     registerStatusRoute({
       router,
+      logger: this.logger.get('routes', 'status'),
       ...commonRouteDeps,
     });
 

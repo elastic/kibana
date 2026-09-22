@@ -58,11 +58,13 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
   searchParams: TParams | undefined,
   searchParamsCompare: TParams | undefined,
   lastRefresh: number,
-  changePointsByDefault = true
+  changePointsByDefault = true,
+  projectRoutingOverride?: string
 ): DocumentStats {
   const {
     data,
     notifications: { toasts },
+    cps,
   } = useAiopsAppContext();
 
   const abortCtrl = useRef(new AbortController());
@@ -88,6 +90,16 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
 
     try {
       abortCtrl.current = new AbortController();
+
+      const projectRouting = projectRoutingOverride ?? cps?.cpsManager?.getDefaultProjectRouting();
+      if (projectRouting) {
+        if (searchParams) {
+          searchParams.projectRouting = projectRouting;
+        }
+        if (searchParamsCompare) {
+          searchParamsCompare.projectRouting = projectRouting;
+        }
+      }
 
       const totalHitsParams = {
         ...searchParams,

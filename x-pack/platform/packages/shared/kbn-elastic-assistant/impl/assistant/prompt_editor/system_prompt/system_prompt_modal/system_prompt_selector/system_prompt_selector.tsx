@@ -204,7 +204,7 @@ export const SystemPromptSelector: React.FC<Props> = React.memo(
                   <EuiIconTip
                     position="right"
                     content={SYSTEM_PROMPT_DEFAULT_NEW_CONVERSATION}
-                    type={'starFilled'}
+                    type={'starFill'}
                   />
                 </EuiFlexItem>
               )}

@@ -5,22 +5,15 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiButton, EuiButtonIcon, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { layoutRowCss } from '@kbn/css-utils/public/layout_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 
-import { css } from '@emotion/react';
 import { FormInfoField } from '@kbn/search-shared-ui';
 import { openWiredConnectionDetails } from '@kbn/cloud/connection_details';
-import { Status, useSearchApiKey } from '@kbn/search-api-keys-components';
+import { useSearchApiKey, Status } from '@kbn/search-api-keys-components';
 import { useElasticsearchUrl } from '../../hooks/use_elasticsearch_url';
 
 export const ConnectToElasticsearch = () => {
@@ -33,52 +26,46 @@ export const ConnectToElasticsearch = () => {
   }, [status]);
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="m">
-      <EuiFlexItem grow={false}>
-        <EuiText color="subdued" size="s">
-          <p>
-            {i18n.translate('xpack.searchHomepage.connectToElasticsearch.p.endpointLabel', {
-              defaultMessage: 'Endpoint:',
-            })}
-          </p>
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup direction="column" gutterSize="xs">
-          <EuiFlexItem>
-            <FormInfoField
-              value={elasticsearchUrl}
-              copyValue={elasticsearchUrl}
-              dataTestSubj="endpointValueField"
-              copyValueDataTestSubj="copyEndpointButton"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem
-        css={css({
-          borderLeft: euiTheme.colors.borderBaseSubdued,
-        })}
+    <div css={layoutRowCss({ gap: euiTheme.size.s, shrinkItems: false })}>
+      <EuiText color="subdued" size="s">
+        <p>
+          {i18n.translate('xpack.searchHomepage.connectToElasticsearch.p.endpointLabel', {
+            defaultMessage: 'Elasticsearch:',
+          })}
+        </p>
+      </EuiText>
+      <FormInfoField
+        value={elasticsearchUrl}
+        copyValue={elasticsearchUrl}
+        dataTestSubj="endpointValueField"
+        copyValueDataTestSubj="copyEndpointButton"
+      />
+      <EuiButton
+        data-test-subj="searchHomepageConnectToElasticsearchApiKeysButton"
+        color="text"
+        iconType="plusCircle"
+        size="s"
+        onClick={() =>
+          openWiredConnectionDetails({
+            props: { options: { defaultTabId: 'apiKeys' } },
+          })
+        }
+        disabled={!hasAPIKeyManagePermissions}
       >
-        <EuiButton
-          data-test-subj="searchHomepageConnectToElasticsearchApiKeysButton"
-          color="text"
-          iconType="plusInCircle"
-          size="s"
-          onClick={() =>
-            openWiredConnectionDetails({
-              props: { options: { defaultTabId: 'apiKeys' } },
-            })
+        <FormattedMessage
+          id="xpack.searchHomepage.connectToElasticsearch.apiKeysButtonEmptyLabel"
+          defaultMessage="API keys"
+        />
+      </EuiButton>
+      <EuiToolTip
+        content={i18n.translate(
+          'xpack.searchHomepage.searchHomepagePage.euiButtonIcon.connectionDetailsPressToLabel',
+          {
+            defaultMessage: 'Show connection details for connecting to the Elasticsearch API',
           }
-          disabled={!hasAPIKeyManagePermissions}
-        >
-          <FormattedMessage
-            id="xpack.searchHomepage.connectToElasticsearch.apiKeysButtonEmptyLabel"
-            defaultMessage="API keys"
-          />
-        </EuiButton>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
+        )}
+        disableScreenReaderOutput
+      >
         <EuiButtonIcon
           display="base"
           size="s"
@@ -94,7 +81,7 @@ export const ConnectToElasticsearch = () => {
             }
           )}
         />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      </EuiToolTip>
+    </div>
   );
 };

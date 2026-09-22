@@ -10,13 +10,12 @@ import { FilterStateStore } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { ML_ENTITY_FIELD_OPERATIONS } from '@kbn/ml-anomaly-utils';
+import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '@kbn/ml-common-types/embeddables/anomaly_charts';
+import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '@kbn/ml-common-types/embeddables/single_metric_viewer';
 import type { MlCoreSetup } from '../plugin';
 import type { AnomalyChartsFieldSelectionContext } from '../embeddables';
-import {
-  ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
-  ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE,
-} from '../embeddables';
 import { CONTROLLED_BY_ANOMALY_CHARTS_FILTER } from './constants';
+import { checkPermissionAsync } from '../application/capabilities/check_capabilities';
 
 export const APPLY_ENTITY_FIELD_FILTERS_ACTION = 'applyEntityFieldFiltersAction';
 
@@ -80,6 +79,7 @@ export function createApplyEntityFieldFiltersAction(
       );
     },
     async isCompatible({ embeddable, data }) {
+      if (!(await checkPermissionAsync(getStartServices, 'canGetJobs'))) return false;
       return (
         (embeddable.type === ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE ||
           embeddable.type === ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE) &&

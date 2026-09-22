@@ -63,6 +63,7 @@ export const createInitialisationService = (
       'Initializing privilege monitoring engine'
     );
     const descriptor = await descriptorClient.init();
+
     dataClient.log('info', `Initialized privileged monitoring engine saved object`);
 
     // upsert index AND integration sources

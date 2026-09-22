@@ -19,8 +19,6 @@ import type { ConfigType } from '../../config';
 export const CASES_INCREMENTAL_ID_SYNC_TASK_TYPE = 'cases_incremental_id_assignment';
 export const CASES_INCREMENTAL_ID_SYNC_TASK_ID = `cases:${CASES_INCREMENTAL_ID_SYNC_TASK_TYPE}`;
 
-export const CasesIncrementIdTaskVersion = '1.0.0';
-
 export class IncrementalIdTaskManager {
   private config: ConfigType['incrementalId'];
   private logger: Logger;
@@ -158,10 +156,11 @@ export class IncrementalIdTaskManager {
             `${CASES_INCREMENTAL_ID_SYNC_TASK_ID} scheduled with interval ${taskInstance.schedule?.interval}`
           );
         },
-        (e) => {
+        (e: unknown) => {
           this.logger.error(
-            `Error scheduling task: ${CASES_INCREMENTAL_ID_SYNC_TASK_ID}: ${e}`,
-            e?.message ?? e
+            `Error scheduling task: ${CASES_INCREMENTAL_ID_SYNC_TASK_ID}: ${
+              e instanceof Error ? e.message : String(e)
+            }`
           );
         }
       );

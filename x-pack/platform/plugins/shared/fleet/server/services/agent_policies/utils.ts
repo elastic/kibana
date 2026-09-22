@@ -14,6 +14,7 @@ export const mapAgentPolicySavedObjectToAgentPolicy = ({
   id,
   namespaces,
   version,
+  created_at,
   attributes,
 }: SavedObject<AgentPolicySOAttributes>): AgentPolicy => {
   const {
@@ -23,6 +24,7 @@ export const mapAgentPolicySavedObjectToAgentPolicy = ({
     data_output_id,
     description,
     download_source_id,
+    download_source_ids,
     fleet_server_host_id,
     has_fleet_server,
     inactivity_timeout,
@@ -39,6 +41,7 @@ export const mapAgentPolicySavedObjectToAgentPolicy = ({
   return {
     id,
     version,
+    created_at: created_at ?? undefined,
     space_ids: namespaces,
     description,
     is_default,
@@ -51,6 +54,7 @@ export const mapAgentPolicySavedObjectToAgentPolicy = ({
     data_output_id,
     monitoring_output_id,
     download_source_id,
+    download_source_ids,
     fleet_server_host_id,
     schema_version,
     agent_features,

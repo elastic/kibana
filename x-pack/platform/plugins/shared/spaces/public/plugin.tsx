@@ -9,6 +9,7 @@ import { combineLatest, type Subscription } from 'rxjs';
 
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
@@ -18,8 +19,8 @@ import { EventTracker, registerAnalyticsContext, registerSpacesEventTypes } from
 import type { ConfigType } from './config';
 import { createSpacesFeatureCatalogueEntry } from './create_feature_catalogue_entry';
 import { ManagementService } from './management';
-import { initSpacesNavControl } from './nav_control';
 import { spaceSelectorApp } from './space_selector';
+import { initSpacesChromeControl } from './spaces_chrome_control';
 import { SpacesManager } from './spaces_manager';
 import type { SpacesApi } from './types';
 import { getUiApi } from './ui_api';
@@ -34,6 +35,7 @@ export interface PluginsStart {
   features: FeaturesPluginStart;
   management?: ManagementStart;
   cloud?: CloudStart;
+  cps?: CPSPluginStart;
 }
 
 /**
@@ -46,7 +48,9 @@ export type SpacesPluginSetup = ReturnType<SpacesPlugin['setup']>;
  */
 export type SpacesPluginStart = ReturnType<SpacesPlugin['start']>;
 
-export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart> {
+export class SpacesPlugin
+  implements Plugin<SpacesPluginSetup, SpacesPluginStart, PluginsSetup, PluginsStart>
+{
   private spacesManager!: SpacesManager;
   private spacesApi!: SpacesApi;
   private eventTracker!: EventTracker;
@@ -158,6 +162,7 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
         getStartServices: core.getStartServices,
         application: core.application,
         spacesManager: this.spacesManager,
+        initialSolutionSetupEnabled: this.config.initialSolutionSetup?.enabled ?? false,
       });
     }
 
@@ -176,11 +181,15 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
     return { hasOnlyDefaultSpace, isSolutionViewEnabled: this.config.allowSolutionVisibility };
   }
 
-  public start(core: CoreStart) {
-    // Only skip spaces navigation if serverless and only one space is allowed
-    if (!(this.isServerless && this.config.maxSpaces === 1)) {
-      initSpacesNavControl(this.spacesManager, core, this.config, this.eventTracker);
-    }
+  public start(core: CoreStart, plugins: PluginsStart) {
+    initSpacesChromeControl(
+      this.spacesManager,
+      core,
+      this.config,
+      this.eventTracker,
+      plugins.cloud,
+      this.isServerless
+    );
 
     return this.spacesApi;
   }

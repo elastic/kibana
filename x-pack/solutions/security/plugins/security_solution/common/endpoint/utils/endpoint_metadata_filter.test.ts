@@ -92,8 +92,15 @@ describe('buildBaseEndpointMetadataFilter', () => {
               },
             },
             {
-              terms: {
-                'united.agent.policy_id': [],
+              bool: {
+                minimum_should_match: 1,
+                should: [
+                  {
+                    terms: {
+                      'united.agent.policy_id': [],
+                    },
+                  },
+                ],
               },
             },
           ],
@@ -126,8 +133,22 @@ describe('buildBaseEndpointMetadataFilter', () => {
               },
             },
             {
-              terms: {
-                'united.agent.policy_id': ['policy-1'],
+              bool: {
+                minimum_should_match: 1,
+                should: [
+                  {
+                    terms: {
+                      'united.agent.policy_id': ['policy-1'],
+                    },
+                  },
+                  {
+                    wildcard: {
+                      'united.agent.policy_id': {
+                        value: 'policy-1#*',
+                      },
+                    },
+                  },
+                ],
               },
             },
           ],
@@ -160,8 +181,36 @@ describe('buildBaseEndpointMetadataFilter', () => {
               },
             },
             {
-              terms: {
-                'united.agent.policy_id': ['policy-1', 'policy-2', 'policy-3'],
+              bool: {
+                minimum_should_match: 1,
+                should: [
+                  {
+                    terms: {
+                      'united.agent.policy_id': ['policy-1', 'policy-2', 'policy-3'],
+                    },
+                  },
+                  {
+                    wildcard: {
+                      'united.agent.policy_id': {
+                        value: 'policy-1#*',
+                      },
+                    },
+                  },
+                  {
+                    wildcard: {
+                      'united.agent.policy_id': {
+                        value: 'policy-2#*',
+                      },
+                    },
+                  },
+                  {
+                    wildcard: {
+                      'united.agent.policy_id': {
+                        value: 'policy-3#*',
+                      },
+                    },
+                  },
+                ],
               },
             },
           ],
@@ -194,8 +243,36 @@ describe('buildBaseEndpointMetadataFilter', () => {
               },
             },
             {
-              terms: {
-                'united.agent.policy_id': ['policy-1', 'policy-2', 'policy-3'],
+              bool: {
+                minimum_should_match: 1,
+                should: [
+                  {
+                    terms: {
+                      'united.agent.policy_id': ['policy-1', 'policy-2', 'policy-3'],
+                    },
+                  },
+                  {
+                    wildcard: {
+                      'united.agent.policy_id': {
+                        value: 'policy-1#*',
+                      },
+                    },
+                  },
+                  {
+                    wildcard: {
+                      'united.agent.policy_id': {
+                        value: 'policy-2#*',
+                      },
+                    },
+                  },
+                  {
+                    wildcard: {
+                      'united.agent.policy_id': {
+                        value: 'policy-3#*',
+                      },
+                    },
+                  },
+                ],
               },
             },
           ],
@@ -208,8 +285,8 @@ describe('buildBaseEndpointMetadataFilter', () => {
     it('should always include ignored agent IDs filter', () => {
       const result = buildBaseEndpointMetadataFilter(['policy-1']);
 
-      expect(result.bool).toBeDefined();
-      expect(result.bool!.must_not).toEqual({
+      expect(result!.bool).toBeDefined();
+      expect(result!.bool!.must_not).toEqual({
         terms: {
           'agent.id': [
             '00000000-0000-0000-0000-000000000000',
@@ -222,8 +299,8 @@ describe('buildBaseEndpointMetadataFilter', () => {
     it('should always include base existence and active filters', () => {
       const result = buildBaseEndpointMetadataFilter();
 
-      expect(result.bool).toBeDefined();
-      const baseFilters = result.bool!.filter;
+      expect(result!.bool).toBeDefined();
+      const baseFilters = result!.bool!.filter;
       expect(baseFilters).toContainEqual({ exists: { field: 'united.endpoint.agent.id' } });
       expect(baseFilters).toContainEqual({ exists: { field: 'united.agent.agent.id' } });
       expect(baseFilters).toContainEqual({

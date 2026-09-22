@@ -67,6 +67,7 @@ export const ErrorCallout = () => {
 
   return error ? (
     <EuiCallOut
+      announceOnMount
       title={errorTitles[error.id]}
       iconType="error"
       color="danger"

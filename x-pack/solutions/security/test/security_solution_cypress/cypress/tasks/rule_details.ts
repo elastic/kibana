@@ -7,12 +7,13 @@
 
 import type { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
 import type { Exception } from '../objects/exception';
-import { RULE_MANAGEMENT_PAGE_BREADCRUMB } from '../screens/breadcrumbs';
 import { PAGE_CONTENT_SPINNER } from '../screens/common/page';
 import { RULE_STATUS } from '../screens/create_new_rule';
 import {
   ADD_EXCEPTIONS_BTN_FROM_EMPTY_PROMPT_BTN,
   ADD_EXCEPTIONS_BTN_FROM_VIEWER_HEADER,
+  EXCEPTION_ITEM_DELETE_CONFIRM_MODAL,
+  EXCEPTION_ITEM_DELETE_CONFIRM_MODAL_CONFIRM_BTN,
   EXCEPTION_ITEM_VIEWER_SEARCH,
   FIELD_INPUT,
 } from '../screens/exceptions';
@@ -24,15 +25,16 @@ import {
   DETAILS_TITLE,
   EDIT_EXCEPTION_BTN,
   EDIT_RULE_SETTINGS_LINK,
-  ENDPOINT_EXCEPTIONS_TAB,
   EXCEPTION_ITEM_ACTIONS_BUTTON,
   EXCEPTIONS_TAB,
   EXCEPTIONS_TAB_ACTIVE_FILTER,
   EXCEPTIONS_TAB_EXPIRED_FILTER,
-  EXECUTION_LOG_CONTAINER,
+  EXECUTION_RESULTS_CONTAINER,
+  EXECUTION_RESULTS_TABLE,
+  EXECUTION_RESULTS_TABLE_ACTION_VIEW_DETAILS,
+  EXECUTION_DETAILS_FLYOUT,
   EXECUTION_RUN_TYPE_FILTER,
   EXECUTION_RUN_TYPE_FILTER_ITEM,
-  EXECUTION_TABLE,
   EXECUTIONS_TAB,
   EXPORT_RULE_ACTION_BUTTON,
   FIELDS_BROWSER_BTN,
@@ -61,6 +63,7 @@ import { addsFields, closeFieldsBrowser, filterFieldsBrowser } from './fields_br
 import { visit } from './navigation';
 import { LOCAL_DATE_PICKER_APPLY_BUTTON_TIMELINE } from '../screens/date_picker';
 import { GAP_AUTO_FILL_LOGS_TABLE } from '../screens/rule_gaps';
+import { ENDPOINT_EXCEPTIONS_URL } from '../urls/navigation';
 
 interface VisitRuleDetailsPageOptions {
   tab?: RuleDetailsTabs;
@@ -136,26 +139,13 @@ export const goToExecutionLogTab = () => {
   cy.get(EXECUTIONS_TAB).click();
 };
 
-export const waitForExecutionLogTabToBePopulated = (minRowCount = 1) => {
-  cy.waitUntil(
-    () => {
-      cy.log('Waiting for execution logs to appear in execution log table');
-      refreshRuleExecutionTable();
-      return getExecutionLogTableRow().then((rows) => {
-        return rows.length > minRowCount - 1;
-      });
-    },
-    { interval: 5000, timeout: 20000 }
-  );
-};
-
 export const viewExpiredExceptionItems = () => {
   cy.get(EXCEPTIONS_TAB_EXPIRED_FILTER).click();
   cy.get(EXCEPTIONS_TAB_ACTIVE_FILTER).click();
 };
 
-export const goToEndpointExceptionsTab = () => {
-  cy.get(ENDPOINT_EXCEPTIONS_TAB).click();
+export const navigateToEndpointExceptions = () => {
+  cy.visit(ENDPOINT_EXCEPTIONS_URL);
 };
 
 export const openEditException = (index = 0) => {
@@ -167,6 +157,10 @@ export const removeException = () => {
   cy.get(EXCEPTION_ITEM_ACTIONS_BUTTON).click();
 
   cy.get(REMOVE_EXCEPTION_BTN).click();
+
+  // Confirm deletion in the confirmation modal
+  cy.get(EXCEPTION_ITEM_DELETE_CONFIRM_MODAL).should('be.visible');
+  cy.get(EXCEPTION_ITEM_DELETE_CONFIRM_MODAL_CONFIRM_BTN).click();
 };
 
 /**
@@ -192,10 +186,6 @@ export const waitForTheRuleToBeExecuted = () => {
   });
 };
 
-export const goBackToRulesTable = () => {
-  cy.get(RULE_MANAGEMENT_PAGE_BREADCRUMB).click();
-};
-
 export const getDetails = (title: string | RegExp) =>
   cy.contains(DETAILS_TITLE, title).next(DETAILS_DESCRIPTION);
 
@@ -218,10 +208,31 @@ export const goToRuleEditSettings = () => {
   cy.get(EDIT_RULE_SETTINGS_LINK).click();
 };
 
-export const getExecutionLogTableRow = () => cy.get(EXECUTION_TABLE).find('tbody tr');
+export const getExecutionResultsTableRows = () => cy.get(EXECUTION_RESULTS_TABLE).find('tbody tr');
 
-export const refreshRuleExecutionTable = () =>
-  cy.get(`${EXECUTION_LOG_CONTAINER} ${LOCAL_DATE_PICKER_APPLY_BUTTON_TIMELINE}`).click();
+export const refreshExecutionResultsTable = () =>
+  cy.get(`${EXECUTION_RESULTS_CONTAINER} ${LOCAL_DATE_PICKER_APPLY_BUTTON_TIMELINE}`).click();
+
+export const waitForExecutionResultsTableToBePopulated = (minRowCount = 1) => {
+  cy.waitUntil(
+    () => {
+      cy.log('Waiting for execution results to appear in table');
+      refreshExecutionResultsTable();
+      return getExecutionResultsTableRows().then((rows) => rows.length >= minRowCount);
+    },
+    { interval: 5000, timeout: 30000 }
+  );
+};
+
+export const openExecutionDetailsFlyout = (rowIndex: number) => {
+  getExecutionResultsTableRows()
+    .eq(rowIndex)
+    .within(($row) => {
+      cy.wrap($row).trigger('mouseover');
+      cy.get(EXECUTION_RESULTS_TABLE_ACTION_VIEW_DETAILS).click();
+    });
+  cy.get(EXECUTION_DETAILS_FLYOUT).should('be.visible');
+};
 
 export const filterByRunType = (ruleType: string) => {
   cy.get(EXECUTION_RUN_TYPE_FILTER).click();

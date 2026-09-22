@@ -20,7 +20,7 @@ import type { FilesRouter } from '../types';
 import type { CreateRouteDefinition } from '../api_routes';
 import { FILES_API_ROUTES } from '../api_routes';
 import { getFileHttpResponseOptions, getDownloadedFileName } from '../common';
-import { fileNameWithExt } from '../common_schemas';
+import { fileNameWithExt, fileShareToken } from '../common_schemas';
 import type { CreateHandler } from '../types';
 import { validateFileNameExtension } from '../file_kind/helpers';
 
@@ -28,7 +28,7 @@ const method = 'get' as const;
 
 const rt = {
   query: schema.object({
-    token: schema.string(),
+    token: fileShareToken,
   }),
   params: schema.object({
     fileName: schema.maybe(fileNameWithExt),

@@ -8,8 +8,8 @@
  */
 
 import { resolve, join } from 'path';
-import loadJsonFile from 'load-json-file';
 import { getPluginSearchPaths } from '@kbn/repo-packages';
+import { loadJsonFile } from '@kbn/utils';
 import type { Package } from '@kbn/repo-packages';
 import type { PackageInfo, EnvironmentMode } from './types';
 
@@ -29,13 +29,15 @@ export interface CliArgs {
   watch: boolean;
   basePath: boolean;
   oss: boolean;
-  /** @deprecated use disableOptimizer to know if the @kbn/optimizer is disabled in development */
+  /** @deprecated use disableOptimizer to know if the @kbn/rspack-optimizer is disabled in development */
   optimize?: boolean;
   runExamples: boolean;
   disableOptimizer: boolean;
   cache: boolean;
   dist: boolean;
   serverless?: boolean;
+  uiam?: boolean;
+  eis?: boolean;
   retrictInternalApis?: boolean;
 }
 
@@ -57,7 +59,7 @@ export class Env {
    */
   public static createDefault(repoRoot: string, options: EnvOptions, pkg?: RawPackageInfo): Env {
     if (!pkg) {
-      pkg = loadJsonFile.sync(join(repoRoot, 'package.json')) as RawPackageInfo;
+      pkg = loadJsonFile<RawPackageInfo>(join(repoRoot, 'package.json'));
     }
     return new Env(repoRoot, pkg, options);
   }

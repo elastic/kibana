@@ -12,9 +12,9 @@ import {
   type Action,
   type Dispatch,
   type MiddlewareAPI,
-} from '@reduxjs/toolkit';
-import type { TypedUseSelectorHook } from 'react-redux';
-import { useDispatch, useSelector } from 'react-redux';
+} from 'redux-toolkit-v1';
+import type { TypedUseSelectorHook } from 'react-redux-v7';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import type { LensState, LensStoreDeps } from '@kbn/lens-common';
 import { makeLensReducer, lensActions, getPreloadedState } from './lens_slice';
 import { initMiddleware } from './init_middleware';
@@ -22,6 +22,7 @@ import { optimizingMiddleware } from './optimizing_middleware';
 import { contextMiddleware } from './context_middleware';
 import { fullscreenMiddleware } from './fullscreen_middleware';
 export * from './selectors';
+export { getUpdatedFrameWithDatasourceState } from './utils';
 
 export const {
   loadInitial,
@@ -52,6 +53,7 @@ export const {
   cloneLayer,
   addLayer,
   onDropToDimension,
+  setDimensionAndUpdateDatasource,
   setLayerDefaultDimension,
   removeDimension,
   setIsLoadLibraryVisible,

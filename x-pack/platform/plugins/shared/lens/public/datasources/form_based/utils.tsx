@@ -11,11 +11,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { DocLinksStart, ThemeServiceStart } from '@kbn/core/public';
 import { hasUnsupportedDownsampledAggregationFailure } from '@kbn/search-response-warnings';
 import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
-import type { TimeRange } from '@kbn/es-query';
+import { escapeQuotes, type TimeRange } from '@kbn/es-query';
 import { EuiLink, EuiSpacer } from '@elastic/eui';
 
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { groupBy, escape, uniq, uniqBy } from 'lodash';
+import { groupBy, uniq, uniqBy } from 'lodash';
 import type { Query } from '@kbn/data-plugin/common';
 
 import {
@@ -48,6 +48,7 @@ import type {
   FieldBasedIndexPatternColumn,
   StateSetter,
 } from '@kbn/lens-common';
+import { isColumnOfType } from '@kbn/lens-common';
 import { renewIDs } from '../../utils';
 
 import type { GenericOperationDefinition } from './operations';
@@ -58,7 +59,7 @@ import {
   updateDefaultLabels,
 } from './operations';
 
-import { getInvalidFieldMessage, isColumnOfType } from './operations/definitions/helpers';
+import { getInvalidFieldMessage } from './operations/definitions/helpers';
 import { hasField } from './pure_utils';
 import { mergeLayer } from './state_helpers';
 import { supportsRarityRanking } from './operations/definitions/terms';
@@ -747,13 +748,10 @@ function extractQueriesFromTerms(
       }
       if (typeof value !== 'string' && Array.isArray(value.keys)) {
         return value.keys
-          .map(
-            (term: string, index: number) =>
-              `${fields[index]}: ${`"${term === '' ? escape(term) : term}"`}`
-          )
+          .map((term: string, index: number) => `${fields[index]}: "${escapeQuotes(term)}"`)
           .join(' AND ');
       }
-      return `${column.sourceField}: ${`"${value === '' ? escape(value) : value}"`}`;
+      return `${column.sourceField}: "${escapeQuotes(String(value))}"`;
     })
     .filter(Boolean) as string[];
 

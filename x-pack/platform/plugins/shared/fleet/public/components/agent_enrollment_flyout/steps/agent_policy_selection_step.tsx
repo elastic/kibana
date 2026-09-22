@@ -14,6 +14,7 @@ import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/st
 import type { AgentPolicy } from '../../../types';
 
 import { SelectCreateAgentPolicy } from '../agent_policy_select_create';
+import { MinAgentVersionCallout } from '../min_agent_version_callout';
 
 export const AgentPolicySelectionStep = ({
   agentPolicies,
@@ -24,6 +25,9 @@ export const AgentPolicySelectionStep = ({
   setSelectedAPIKeyId,
   excludeFleetServer,
   refreshAgentPolicies,
+  onAgentPolicyCreated,
+  defaultAgentPolicyName,
+  forceCreatePolicy,
 }: {
   agentPolicies: AgentPolicy[];
   selectedPolicy?: AgentPolicy;
@@ -33,6 +37,9 @@ export const AgentPolicySelectionStep = ({
   setSelectedAPIKeyId?: (key?: string) => void;
   excludeFleetServer?: boolean;
   refreshAgentPolicies: () => void;
+  onAgentPolicyCreated?: (policy: AgentPolicy) => void;
+  defaultAgentPolicyName?: string;
+  forceCreatePolicy?: boolean;
 }): EuiContainedStepProps => {
   return {
     title: i18n.translate('xpack.fleet.agentEnrollment.stepChooseAgentPolicyTitle', {
@@ -49,7 +56,13 @@ export const AgentPolicySelectionStep = ({
           onKeyChange={setSelectedAPIKeyId}
           refreshAgentPolicies={refreshAgentPolicies}
           excludeFleetServer={excludeFleetServer}
+          onAgentPolicyCreated={onAgentPolicyCreated}
+          defaultAgentPolicyName={defaultAgentPolicyName}
+          forceCreatePolicy={forceCreatePolicy}
         />
+        {selectedPolicy?.min_agent_version != null && (
+          <MinAgentVersionCallout minVersion={selectedPolicy.min_agent_version} />
+        )}
       </>
     ),
   };

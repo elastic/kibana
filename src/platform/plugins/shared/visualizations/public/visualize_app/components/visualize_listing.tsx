@@ -9,7 +9,7 @@
 
 import type { MouseEvent, MutableRefObject } from 'react';
 import React, { useCallback, useRef, useMemo, useEffect } from 'react';
-import { EuiCallOut, EuiLink, EuiSpacer, type UseEuiTheme, logicalSizeCSS } from '@elastic/eui';
+import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useUnmount from 'react-use/lib/useUnmount';
@@ -18,6 +18,7 @@ import useMount from 'react-use/lib/useMount';
 import { useLocation, useParams } from 'react-router-dom';
 
 import type { Reference } from '@kbn/content-management-utils';
+import { AppHeader, type AppHeaderMenu, type AppHeaderTab } from '@kbn/app-header';
 import { useKibana, useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import {
   TabbedTableListView,
@@ -26,7 +27,6 @@ import {
 import type { OpenContentEditorParams } from '@kbn/content-management-content-editor';
 import type { TableListViewProps } from '@kbn/content-management-table-list-view';
 import { TableListViewTable } from '@kbn/content-management-table-list-view-table';
-import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
@@ -35,81 +35,39 @@ import {
   SAVED_OBJECTS_PER_PAGE_SETTING,
   VisualizeConstants,
 } from '@kbn/visualizations-common';
+import {
+  getNoItemsMessage,
+  getCustomColumn,
+  getCustomSortingOptions,
+  getVisualizationListingTableStyles,
+} from '@kbn/visualization-listing-components';
 import { findListItems } from '../../utils/saved_visualize_utils';
 import {
   deleteListItems,
   updateBasicSoAttributes,
 } from '../../utils/saved_objects_utils/update_basic_attributes';
-import { checkForDuplicateTitle } from '../../utils/saved_objects_utils/check_for_duplicate_title';
 import { showNewVisModal } from '../../wizard';
 import { getTypes } from '../../services';
-import type { VisualizationListItem } from '../..';
 import type { VisualizeServices } from '../types';
-import { getNoItemsMessage, getCustomColumn, getCustomSortingOptions } from '../utils';
+import { getReadOnlyBadge } from '../utils';
 import { getVisualizeListItemLinkFn } from '../utils/get_visualize_list_item_link';
-import type { VisualizationStage } from '../../vis_types/vis_type_alias_registry';
+import {
+  toTableListViewSavedObject,
+  type VisualizeUserContent,
+} from '../../utils/to_table_list_view_saved_object';
+import { hasLibraryItemWithTitle } from '../../utils/saved_objects_utils';
+
+const visualizeLibraryPageTitle = i18n.translate('visualizations.listingPageTitle', {
+  defaultMessage: 'Visualize library',
+});
 
 const visualizeListingStyles = {
-  table: ({ euiTheme }: UseEuiTheme) => css`
-    .visListingTable__typeImage,
-    .visListingTable__typeIcon {
-      margin-right: ${euiTheme.size.s};
-      position: relative;
-      top: -1px;
-    }
-
-    .visListingTable__typeImage {
-      ${logicalSizeCSS(euiTheme.size.base, euiTheme.size.base)};
-    }
-
-    .visListingTable__experimentalIcon {
-      width: ${euiTheme.size.l};
-      vertical-align: middle;
-      padding: 0 ${euiTheme.size.s};
-      margin-left: ${euiTheme.size.s};
-    }
-  `,
-
+  table: getVisualizationListingTableStyles,
   calloutLink: css`
     text-decoration: underline;
   `,
 };
 
-export type VisualizeUserContent = VisualizationListItem &
-  UserContentCommonSchema & {
-    type: string;
-    attributes: {
-      id: string;
-      title: string;
-      description?: string;
-      readOnly: boolean;
-      error?: string;
-    };
-  };
-
-const toTableListViewSavedObject = (savedObject: Record<string, unknown>): VisualizeUserContent => {
-  return {
-    id: savedObject.id as string,
-    updatedAt: savedObject.updatedAt as string,
-    managed: savedObject.managed as boolean,
-    references: savedObject.references as Array<{ id: string; type: string; name: string }>,
-    type: savedObject.savedObjectType as string,
-    icon: savedObject.icon as string,
-    stage: savedObject.stage as VisualizationStage,
-    savedObjectType: savedObject.savedObjectType as string,
-    typeTitle: savedObject.typeTitle as string,
-    title: (savedObject.title as string) ?? '',
-    error: (savedObject.error as string) ?? '',
-    editor: savedObject.editor as any,
-    attributes: {
-      id: savedObject.id as string,
-      title: (savedObject.title as string) ?? '',
-      description: savedObject.description as string,
-      readOnly: savedObject.readOnly as boolean,
-      error: savedObject.error as string,
-    },
-  };
-};
 type CustomTableViewProps = Pick<
   TableListViewProps<VisualizeUserContent>,
   | 'createItem'
@@ -130,6 +88,7 @@ const useTableListViewProps = (
       application,
       history,
       savedObjectsTagging,
+      stateTransferService,
       toastNotifications,
       visualizeCapabilities,
       contentManagement,
@@ -141,8 +100,18 @@ const useTableListViewProps = (
   const visualizedUserContent = useRef<VisualizeUserContent[]>();
 
   const createNewVis = useCallback(() => {
-    closeNewVisModal.current = showNewVisModal();
-  }, [closeNewVisModal]);
+    closeNewVisModal.current = showNewVisModal({
+      originatingApp: VisualizeConstants.APP_ID,
+      breadcrumbs: [
+        {
+          text: visualizeLibraryPageTitle,
+          href: application.getUrlForApp(VisualizeConstants.APP_ID, {
+            path: `#${VisualizeConstants.LANDING_PAGE_PATH}`,
+          }),
+        },
+      ],
+    });
+  }, [closeNewVisModal, application]);
 
   const editItem = useCallback(
     async ({ attributes: { id }, editor = { editUrl: '' } }: VisualizeUserContent) => {
@@ -153,13 +122,16 @@ const useTableListViewProps = (
 
       const { editApp, editUrl } = editor;
       if (editApp) {
-        application.navigateToApp(editApp, { path: editUrl });
+        await stateTransferService.navigateToEditor(editApp, {
+          path: editUrl,
+          state: { originatingApp: VisualizeConstants.APP_ID },
+        });
         return;
       }
       // for visualizations the edit and view URLs are the same
       history.push(editUrl);
     },
-    [application, history]
+    [history, stateTransferService]
   );
 
   const noItemsFragment = useMemo(() => getNoItemsMessage(createNewVis), [createNewVis]);
@@ -227,33 +199,29 @@ const useTableListViewProps = (
         {
           type: 'warning',
           async fn(value, id) {
-            if (id) {
-              const content = visualizedUserContent.current?.find((c) => c.id === id);
-              if (content) {
-                try {
-                  await checkForDuplicateTitle(
-                    {
-                      id,
-                      title: value,
-                      lastSavedTitle: content.title,
-                    },
-                    false,
-                    false,
-                    () => {}
-                  );
-                } catch (e) {
-                  return i18n.translate(
-                    'visualizations.visualizeListingDeleteErrorTitle.duplicateWarning',
-                    {
-                      defaultMessage: 'Saving "{value}" creates a duplicate title.',
-                      values: {
-                        value,
-                      },
-                    }
-                  );
-                }
-              }
+            if (!id) return;
+
+            const content = visualizedUserContent.current?.find((c) => c.id === id);
+            if (!content) return;
+
+            if (value.toLowerCase() === content.title.toLowerCase()) {
+              return;
             }
+
+            let hasDuplicateTitle = false;
+            try {
+              hasDuplicateTitle = await hasLibraryItemWithTitle(value);
+            } catch (e) {
+              // ignore error checking for duplicate title
+            }
+            return hasDuplicateTitle
+              ? i18n.translate('visualizations.visualizeListingDeleteErrorTitle.duplicateWarning', {
+                  defaultMessage: 'Saving "{value}" creates a duplicate title.',
+                  values: {
+                    value,
+                  },
+                })
+              : undefined;
           },
         },
       ],
@@ -327,6 +295,7 @@ export const VisualizeListing = () => {
       kbnUrlStateStorage,
       listingViewRegistry,
       serverless,
+      visualizeCapabilities,
     },
   } = useKibana<VisualizeServices>();
   const { pathname } = useLocation();
@@ -362,16 +331,12 @@ export const VisualizeListing = () => {
     } else {
       chrome.setBreadcrumbs([
         {
-          text: i18n.translate('visualizations.visualizeListingBreadcrumbsTitle', {
-            defaultMessage: 'Visualize library',
-          }),
+          text: visualizeLibraryPageTitle,
         },
       ]);
     }
 
-    chrome.docTitle.change(
-      i18n.translate('visualizations.listingPageTitle', { defaultMessage: 'Visualize library' })
-    );
+    chrome.docTitle.change(visualizeLibraryPageTitle);
   });
   useUnmount(() => closeNewVisModal.current());
 
@@ -384,10 +349,7 @@ export const VisualizeListing = () => {
   const initialPageSize = uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
 
   const tableViewProps = useTableListViewProps(closeNewVisModal, listingLimit);
-
-  const visualizeLibraryTitle = i18n.translate('visualizations.listing.table.listTitle', {
-    defaultMessage: 'Visualize library',
-  });
+  const { createItem, ...listTableProps } = tableViewProps;
 
   const visualizeTab: TableListTab<VisualizeUserContent> = useMemo(() => {
     const calloutMessage = (
@@ -444,12 +406,13 @@ export const VisualizeListing = () => {
               getOnClickTitle={(item) =>
                 item.attributes.readOnly || item.error
                   ? undefined
-                  : () => tableViewProps.editItem?.(item)
+                  : () => listTableProps.editItem?.(item)
               }
               getDetailViewLink={getVisualizeListItemLink}
-              tableCaption={visualizeLibraryTitle}
-              {...tableViewProps}
-              {...propsFromParent}
+              tableCaption={visualizeLibraryPageTitle}
+              {...listTableProps}
+              onFetchSuccess={propsFromParent.onFetchSuccess}
+              setPageDataTestSubject={propsFromParent.setPageDataTestSubject}
             />
           </div>
         </>
@@ -461,8 +424,7 @@ export const VisualizeListing = () => {
     application,
     dashboardCapabilities.createNew,
     initialPageSize,
-    visualizeLibraryTitle,
-    tableViewProps,
+    listTableProps,
     getVisualizeListItemLink,
   ]);
 
@@ -472,16 +434,63 @@ export const VisualizeListing = () => {
   );
 
   const { activeTab } = useParams<{ activeTab: string }>();
+  const selectedTabId = activeTab ?? visualizeTab.id;
+
+  const headerTabs = useMemo<AppHeaderTab[]>(
+    () =>
+      tabs.map((tab) => ({
+        id: tab.id,
+        label: tab.title,
+        isSelected: tab.id === selectedTabId,
+        'data-test-subj': `${tab.id}ListingTab`,
+        href: `#/${tab.id}`,
+        onClick: () => {
+          history.push(`/${tab.id}`);
+        },
+      })),
+    [history, selectedTabId, tabs]
+  );
+
+  const menu = useMemo<AppHeaderMenu | undefined>(() => {
+    if (selectedTabId !== visualizeTab.id || !createItem) {
+      return undefined;
+    }
+    return {
+      primaryActionItem: {
+        id: 'create',
+        iconType: 'plusCircle',
+        label: i18n.translate('visualizations.listing.createVisualizationButtonLabel', {
+          defaultMessage: 'Create visualization',
+        }),
+        testId: 'newItemButton',
+        run: createItem,
+      },
+    };
+  }, [createItem, selectedTabId, visualizeTab.id]);
+
+  const badges = useMemo(
+    () => (visualizeCapabilities.save ? undefined : [getReadOnlyBadge()]),
+    [visualizeCapabilities.save]
+  );
 
   return (
-    <TabbedTableListView
-      headingId="visualizeListingHeading"
-      title={visualizeLibraryTitle}
-      tabs={tabs}
-      activeTabId={activeTab}
-      changeActiveTab={(id) => {
-        application.navigateToUrl(`#/${id}`);
-      }}
-    />
+    <>
+      <AppHeader
+        title={visualizeLibraryPageTitle}
+        tabs={headerTabs}
+        menu={menu}
+        badges={badges}
+        sticky={false}
+      />
+      <TabbedTableListView
+        headingId="visualizeListingHeading"
+        hideTabs
+        tabs={tabs}
+        activeTabId={activeTab}
+        changeActiveTab={(id) => {
+          application.navigateToUrl(`#/${id}`);
+        }}
+      />
+    </>
   );
 };

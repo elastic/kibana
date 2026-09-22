@@ -50,8 +50,9 @@ export async function changeAgentPrivilegeLevel(
   }
 
   // Fail fast if agent contains an integration that requires root privilege.
+  // Use policy_base_id — always the base policy id, matching the key used by findAllForAgentPolicy.
   const packagePolicies =
-    (await packagePolicyService.findAllForAgentPolicy(soClient, agent.policy_id || '')) || [];
+    (await packagePolicyService.findAllForAgentPolicy(soClient, agent.policy_base_id ?? '')) || [];
   const packagesWithRootPrivilege = getPackagesWithRootPrivilege(packagePolicies);
   if (packagesWithRootPrivilege.length > 0) {
     throw new FleetUnauthorizedError(
@@ -88,11 +89,16 @@ export async function bulkChangeAgentsPrivilegeLevel(
     actionId?: string;
     total?: number;
     user_info?: AgentPrivilegeLevelChangeUserInfo;
+    dryRun?: boolean;
   }
-): Promise<{ actionId: string }> {
+): Promise<{ actionId: string } | { count: number }> {
   const currentSpaceId = getCurrentNamespace(soClient);
 
   if ('agentIds' in options) {
+    if (options.dryRun) {
+      const agents = await getAgents(esClient, soClient, options);
+      return { count: agents.length };
+    }
     const givenAgents = await getAgents(esClient, soClient, options);
     return await bulkChangePrivilegeAgentsBatch(esClient, soClient, givenAgents, {
       ...options,
@@ -102,14 +108,25 @@ export async function bulkChangeAgentsPrivilegeLevel(
 
   const batchSize = options.batchSize ?? SO_SEARCH_LIMIT;
 
-  const res = await getAgentsByKuery(esClient, soClient, {
+  // cheap count — avoids hydrating up to batchSize agent documents just to read the total
+  const { total } = await getAgentsByKuery(esClient, soClient, {
     kuery: options.kuery,
     spaceId: currentSpaceId,
     showInactive: false,
     page: 1,
-    perPage: batchSize,
+    perPage: 0,
   });
-  if (res.total <= batchSize) {
+  if (options.dryRun) {
+    return { count: total };
+  }
+  if (total <= batchSize) {
+    const res = await getAgentsByKuery(esClient, soClient, {
+      kuery: options.kuery,
+      spaceId: currentSpaceId,
+      showInactive: false,
+      page: 1,
+      perPage: batchSize,
+    });
     return await bulkChangePrivilegeAgentsBatch(esClient, soClient, res.agents, {
       ...options,
       spaceId: currentSpaceId,
@@ -121,7 +138,7 @@ export async function bulkChangeAgentsPrivilegeLevel(
       {
         ...options,
         batchSize,
-        total: res.total,
+        total,
         spaceId: currentSpaceId,
       },
       { pitId: await openPointInTime(esClient) }

@@ -30,6 +30,7 @@ export interface ProcessorFields {
   test_run_id: string;
   run_once: boolean;
   space_id: string;
+  kibanaUrl?: string;
 }
 
 export const formatSyntheticsPolicy = (
@@ -58,6 +59,31 @@ export const formatSyntheticsPolicy = (
     // enable only the input type and data stream that matches the monitor type.
     currentInput.enabled = true;
     dataStream.enabled = true;
+
+    if (monitorType === 'browser') {
+      currentInput.streams.forEach((stream) => {
+        if (
+          stream.data_stream.dataset === 'browser.network' ||
+          stream.data_stream.dataset === 'browser.screenshot'
+        ) {
+          stream.enabled = true;
+        }
+      });
+    }
+    // API monitors emit a companion `synthetics.api.network` document per
+    // request via Heartbeat's enrichSynthEvent → SetEventDataset path.
+    // Enabling the `api.network` stream here is what causes Fleet to include
+    // the matching index privileges in the generated agent API key. Without
+    // it, journey/network_info events are produced and routed correctly by
+    // Heartbeat but rejected at the bulk indexing layer with a 403, leaving
+    // the api.network data stream silently empty.
+    if (monitorType === 'api') {
+      currentInput.streams.forEach((stream) => {
+        if (stream.data_stream.dataset === 'api.network') {
+          stream.enabled = true;
+        }
+      });
+    }
   }
 
   configKeys.forEach((key) => {
@@ -79,6 +105,18 @@ export const formatSyntheticsPolicy = (
       }
     }
   });
+
+  // Heartbeat decodes inline scripts when source.inline.encoding=base64.
+  // synthetics 1.10.0 added this var to the API input with the same name as
+  // browser, so encode whenever the installed package exposes it.
+  const encodingVar = dataStream?.vars?.['source.inline.encoding'];
+  if (encodingVar && config[ConfigKey.SOURCE_INLINE]) {
+    encodingVar.value = 'base64';
+    const inlineScript = dataStream.vars?.[ConfigKey.SOURCE_INLINE];
+    if (inlineScript && typeof inlineScript.value === 'string') {
+      inlineScript.value = Buffer.from(inlineScript.value).toString('base64');
+    }
+  }
 
   const processorItem = dataStream?.vars?.processors;
   if (processorItem) {
@@ -105,6 +143,14 @@ export const formatSyntheticsPolicy = (
   const throttling = dataStream?.vars?.[LegacyConfigKey.THROTTLING_CONFIG];
   if (throttling) {
     throttling.value = throttlingFormatter?.(config, ConfigKey.THROTTLING_CONFIG);
+  }
+
+  // Drop disabled inputs so we persist only the single active input. Disabled inputs never
+  // contribute to the compiled agent policy and only bloat the saved object. A guard in Fleet's
+  // `updatePackageInputs` keeps them from being re-added on package upgrade. Only strip once the
+  // active input is resolved, so an unknown monitor type still yields the template.
+  if (currentInput && dataStream) {
+    formattedPolicy.inputs = formattedPolicy.inputs.filter((input) => input.enabled);
   }
 
   return { formattedPolicy, hasDataStream: Boolean(dataStream), hasInput: Boolean(currentInput) };

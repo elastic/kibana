@@ -173,6 +173,7 @@ export interface GetFieldsOptions {
   includeEmptyFields?: boolean;
   abortSignal?: AbortSignal;
   runtimeMappings?: estypes.MappingRuntimeFields;
+  projectRouting?: string;
 }
 
 // omit items saved DataView

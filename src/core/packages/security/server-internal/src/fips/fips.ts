@@ -11,12 +11,12 @@ import type { Logger } from '@kbn/logging';
 import { getFips } from 'crypto';
 import { CriticalError } from '@kbn/core-base-server-internal';
 import type { PKCS12ConfigType, SecurityServiceConfigType } from '../utils';
-export function isFipsEnabled(config: SecurityServiceConfigType): boolean {
+export function isFipsEnabled(config: SecurityServiceConfigType | undefined) {
   return config?.fipsMode?.enabled ?? false;
 }
 
 export function checkFipsConfig(
-  config: SecurityServiceConfigType,
+  config: SecurityServiceConfigType | undefined,
   elasticsearchConfig: PKCS12ConfigType,
   serverConfig: PKCS12ConfigType,
   logger: Logger

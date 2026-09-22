@@ -11,7 +11,10 @@ import type {
   BulkActionsConfig,
   RenderContentPanelProps,
 } from '@kbn/response-ops-alerts-table/types';
+
+import type { AttacksActionTelemetrySource } from '../../../../../common/lib/telemetry';
 import { BulkAlertTagsPanel } from '../../../../../common/components/toolbar/bulk_actions/alert_bulk_tags';
+import { ATTACK_TAG_ACTION_ID } from '../../../../../common/constants/action_ids';
 import { useAttacksPrivileges } from '../use_attacks_privileges';
 import { extractRelatedDetectionAlertIds } from '../utils/extract_related_detection_alert_ids';
 import { useApplyAttackTags } from '../apply_actions/use_apply_attack_tags';
@@ -21,6 +24,8 @@ import type { AttackContentPanelConfig, BulkAttackActionItems } from '../types';
 export interface UseBulkAttackTagsItemsProps {
   /** Optional callback when tags are updated */
   onTagsUpdate?: () => void;
+  /** Source of the action for telemetry */
+  telemetrySource?: AttacksActionTelemetrySource;
 }
 
 /**
@@ -30,6 +35,7 @@ export interface UseBulkAttackTagsItemsProps {
  */
 export const useBulkAttackTagsItems = ({
   onTagsUpdate,
+  telemetrySource,
 }: UseBulkAttackTagsItemsProps = {}): BulkAttackActionItems => {
   const { hasIndexWrite, hasAttackIndexWrite, loading } = useAttacksPrivileges();
   const { applyTags } = useApplyAttackTags();
@@ -42,11 +48,11 @@ export const useBulkAttackTagsItems = ({
 
     return [
       {
-        key: 'manage-attack-tags',
+        key: ATTACK_TAG_ACTION_ID,
         'data-test-subj': 'attack-tags-context-menu-item',
-        name: i18n.ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE,
+        name: i18n.ATTACK_TAGS_CONTEXT_MENU_ITEM_TITLE,
         panel: 1,
-        label: i18n.ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE,
+        label: i18n.ATTACK_TAGS_CONTEXT_MENU_ITEM_TITLE,
         disableOnQuery: true,
       },
     ];
@@ -55,9 +61,9 @@ export const useBulkAttackTagsItems = ({
   const TitleContent = useMemo(
     () => (
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={false}>{i18n.ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE}</EuiFlexItem>
+        <EuiFlexItem grow={false}>{i18n.ATTACK_TAGS_CONTEXT_MENU_ITEM_TITLE}</EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiIconTip content={i18n.ALERT_TAGS_CONTEXT_MENU_ITEM_TOOLTIP_INFO} position="right" />
+          <EuiIconTip content={i18n.ATTACK_TAGS_CONTEXT_MENU_ITEM_TOOLTIP_INFO} position="right" />
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
@@ -82,6 +88,7 @@ export const useBulkAttackTagsItems = ({
           setIsLoading={setIsBulkActionsLoading}
           clearSelection={clearSelection}
           closePopoverMenu={closePopoverMenu}
+          emptyMessage={i18n.ATTACK_TAGS_MENU_EMPTY}
           onSubmit={async (tags, _, onSuccess, setIsLoading) => {
             closePopoverMenu();
 
@@ -94,12 +101,13 @@ export const useBulkAttackTagsItems = ({
               relatedAlertIds,
               setIsLoading,
               onSuccess,
+              telemetrySource,
             });
           }}
         />
       );
     },
-    [applyTags, onTagsUpdate]
+    [applyTags, onTagsUpdate, telemetrySource]
   );
 
   const attackTagsPanels: AttackContentPanelConfig[] = useMemo(

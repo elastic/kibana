@@ -29,7 +29,7 @@ const FLEET_INTEGRATIONS_EVENT_TYPE = 'fleet_integrations';
 
 export class FleetUsageSender {
   private taskManager?: TaskManagerStartContract;
-  private taskVersion = '1.1.7';
+  private taskVersion = '1.1.8';
   private taskType = 'Fleet-Usage-Sender';
   private wasStarted: boolean = false;
   private interval = '1h';
@@ -38,7 +38,7 @@ export class FleetUsageSender {
   constructor(
     taskManager: TaskManagerSetupContract,
     core: CoreSetup,
-    fetchUsage: (abortController: AbortController) => Promise<FleetUsage | undefined>
+    fetchUsage: (signal: AbortSignal) => Promise<FleetUsage | undefined>
   ) {
     taskManager.registerTaskDefinitions({
       [this.taskType]: {
@@ -47,15 +47,15 @@ export class FleetUsageSender {
         maxAttempts: 1,
         createTaskRunner: ({
           taskInstance,
-          abortController,
+          signal,
         }: {
           taskInstance: ConcreteTaskInstance;
-          abortController: AbortController;
+          signal: AbortSignal;
         }) => {
           return {
             run: async () => {
               return withSpan({ name: this.taskType, type: 'telemetry' }, () =>
-                this.runTask(taskInstance, core, () => fetchUsage(abortController))
+                this.runTask(taskInstance, core, () => fetchUsage(signal))
               );
             },
             cancel: async () => {},
@@ -97,6 +97,7 @@ export class FleetUsageSender {
         agents_per_privileges: agentsPerPrivileges,
         upgrade_details: upgradeDetails,
         integrations_details: integrationsDetails,
+        agents_on_version_specific_policies_per_version: agentsOnVersionSpecificPoliciesPerVersion,
         ...fleetUsageData
       } = usageData;
       appContextService
@@ -141,6 +142,19 @@ export class FleetUsageSender {
       integrationsDetails.forEach((integrationDetailsObj) => {
         core.analytics.reportEvent(FLEET_INTEGRATIONS_EVENT_TYPE, {
           integrations_details: integrationDetailsObj,
+        });
+      });
+
+      appContextService
+        .getLogger()
+        .debug(
+          () =>
+            'Agents on version-specific policies per version telemetry: ' +
+            JSON.stringify(agentsOnVersionSpecificPoliciesPerVersion)
+        );
+      agentsOnVersionSpecificPoliciesPerVersion.forEach((item) => {
+        core.analytics.reportEvent(FLEET_AGENTS_EVENT_TYPE, {
+          agents_on_version_specific_policies_per_version: item,
         });
       });
     } catch (error) {

@@ -7,9 +7,9 @@
 
 import { ExtensionsService } from '../../../services';
 import { getFilteredIndices } from '.';
-// @ts-ignore
 import { defaultTableState } from '../reducers/table_state';
 import { setExtensionsService } from './extension_service';
+import type { IndexManagementState } from '../types';
 
 describe('getFilteredIndices selector', () => {
   let extensionService: ExtensionsService;
@@ -19,8 +19,9 @@ describe('getFilteredIndices selector', () => {
     setExtensionsService(extensionService);
   });
 
-  const state = {
+  const state: IndexManagementState = {
     tableState: { ...defaultTableState },
+    rowStatus: {},
     indices: {
       byId: {
         test: { name: 'index1', hidden: true },
@@ -29,6 +30,9 @@ describe('getFilteredIndices selector', () => {
         aFinalTest: { name: '.index4' },
       },
       allIds: ['test', 'anotherTest', 'aTest', 'aFinalTest'],
+      loading: false,
+      error: false,
+      enrichmentErrors: [],
     },
   };
 

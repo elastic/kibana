@@ -1,0 +1,83 @@
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-system.auth-default",
+    "id": "scout-sysauth-idp-user-a",
+    "index": ".ds-logs-system.auth-default-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:06:00Z",
+      "agent": {
+        "id": "scout-test-agent",
+        "type": "filebeat",
+        "version": "8.17.4"
+      },
+      "data_stream": {
+        "dataset": "system.auth",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "event": {
+        "action": "creation",
+        "category": [
+          "iam"
+        ],
+        "kind": "event",
+        "module": "system",
+        "outcome": "success",
+        "type": [
+          "user"
+        ]
+      },
+      "host": {
+        "hostname": "test-linux-a",
+        "name": "test-linux-a"
+      },
+      "user": {
+        "id": "test-user-a",
+        "name": "test-user-a"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-system.auth-default",
+    "id": "scout-sysauth-idp-user-b",
+    "index": ".ds-logs-system.auth-default-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:07:00Z",
+      "agent": {
+        "id": "scout-test-agent",
+        "type": "filebeat",
+        "version": "8.17.4"
+      },
+      "data_stream": {
+        "dataset": "system.auth",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "event": {
+        "action": "creation",
+        "category": [
+          "iam"
+        ],
+        "kind": "event",
+        "module": "system",
+        "outcome": "success",
+        "type": [
+          "user"
+        ]
+      },
+      "host": {
+        "hostname": "test-linux-b",
+        "name": "test-linux-b"
+      },
+      "user": {
+        "id": "test-user-b",
+        "name": "test-user-b"
+      }
+    }
+  }
+}

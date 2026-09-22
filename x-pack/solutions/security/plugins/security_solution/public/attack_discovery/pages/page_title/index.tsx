@@ -9,7 +9,7 @@ import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiTitle, useEuiTheme } from '
 import { css } from '@emotion/react';
 import React from 'react';
 
-import { ATTACKS_ALERTS_ALIGNMENT_ENABLED } from '@kbn/security-solution-navigation';
+import { ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING } from '@kbn/security-solution-navigation';
 import { useKibana } from '../../../common/lib/kibana';
 import * as i18n from './translations';
 import { IconAnnouncementBadge } from './announcement_badge';
@@ -17,11 +17,11 @@ import { IconAnnouncementBadge } from './announcement_badge';
 const PageTitleComponent: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   const {
-    services: { featureFlags },
+    services: { uiSettings },
   } = useKibana();
 
-  const attacksAlertsAlignmentEnabled = featureFlags.getBooleanValue(
-    ATTACKS_ALERTS_ALIGNMENT_ENABLED,
+  const enableAlertsAndAttacksAlignment = uiSettings.get(
+    ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
     false
   );
 
@@ -33,7 +33,7 @@ const PageTitleComponent: React.FC = () => {
         </EuiTitle>
       </EuiFlexItem>
 
-      {attacksAlertsAlignmentEnabled && (
+      {enableAlertsAndAttacksAlignment && (
         <EuiFlexItem
           css={css`
             margin: ${euiTheme.size.s} 0 0 ${euiTheme.size.m};

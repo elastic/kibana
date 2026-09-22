@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { RULES_UI_READ_PRIVILEGE } from '@kbn/security-solution-features/constants';
+import { ALERTS_UI_READ_PRIVILEGE } from '@kbn/security-solution-features/constants';
 import { ATTACK_DISCOVERY } from '../app/translations';
 import {
   ATTACK_DISCOVERY_FEATURE_ID,
@@ -17,7 +17,7 @@ import {
 import type { LinkItem } from '../common/links/types';
 
 export const links: LinkItem = {
-  capabilities: [[RULES_UI_READ_PRIVILEGE, `${ATTACK_DISCOVERY_FEATURE_ID}.attack-discovery`]], // This is an AND condition via the nested array
+  capabilities: [[ALERTS_UI_READ_PRIVILEGE, `${ATTACK_DISCOVERY_FEATURE_ID}.attack-discovery`]], // This is an AND condition via the nested array
   globalNavPosition: 4,
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.attackDiscovery', {

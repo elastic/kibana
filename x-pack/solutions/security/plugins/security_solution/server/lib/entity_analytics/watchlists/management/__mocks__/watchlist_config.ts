@@ -1,0 +1,18 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+export const mockWatchlistGet = jest.fn();
+export const mockWatchlistCreate = jest.fn();
+export const mockGetEntitySourceIds = jest.fn();
+export const mockWatchlistList = jest.fn();
+
+export class WatchlistConfigClient {
+  public get = mockWatchlistGet;
+  public create = mockWatchlistCreate;
+  public getEntitySourceIds = mockGetEntitySourceIds;
+  public list = mockWatchlistList;
+}

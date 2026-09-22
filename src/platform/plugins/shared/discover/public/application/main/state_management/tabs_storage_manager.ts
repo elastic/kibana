@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { differenceBy, orderBy, pick, uniqBy } from 'lodash';
+import { differenceBy, orderBy, pick, uniqBy, omit } from 'lodash';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
   createStateContainer,
@@ -16,11 +16,20 @@ import {
 } from '@kbn/kibana-utils-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
+import {
+  LOCALLY_PERSISTED_PROFILE_STATE_TYPES,
+  type ProfileStateRegistry,
+} from '../../../../common/context_awareness';
 import { NEW_TAB_ID, TAB_STATE_URL_KEY } from '../../../../common/constants';
-import type { RecentlyClosedTabState, TabState } from './redux/types';
-import { createTabItem, extractEsqlVariables, parseControlGroupJson } from './redux/utils';
-import type { DiscoverAppState } from './redux';
-import { fromSavedObjectTabToTabState } from './redux';
+import {
+  createTabItem,
+  extractEsqlVariables,
+  fromSavedObjectTabToTabState,
+  parseControlGroupJson,
+  type DiscoverAppState,
+  type RecentlyClosedTabState,
+  type TabState,
+} from './redux';
 import type { TabsUrlState } from '../../../../common/types';
 
 export const TABS_LOCAL_STORAGE_KEY = 'discover.tabs';
@@ -28,8 +37,10 @@ export const RECENTLY_CLOSED_TABS_LIMIT = 50;
 
 export type TabStateInLocalStorage = Pick<TabState, 'id' | 'label'> & {
   internalState: TabState['initialInternalState'] | undefined;
+  attributes: TabState['attributes'] | undefined;
   appState: DiscoverAppState | undefined;
   globalState: TabState['globalState'] | undefined;
+  profileState: TabState['profileState'] | undefined;
 };
 
 type RecentlyClosedTabStateInLocalStorage = TabStateInLocalStorage &
@@ -70,7 +81,10 @@ export interface TabsStorageManager {
   ) => Promise<void>;
   updateTabStateLocally: (
     tabId: string,
-    tabState: Pick<TabStateInLocalStorage, 'internalState' | 'appState' | 'globalState'>
+    tabState: Pick<
+      TabStateInLocalStorage,
+      'internalState' | 'attributes' | 'appState' | 'globalState' | 'profileState'
+    >
   ) => void;
   loadLocally: (props: {
     userId: string;
@@ -78,7 +92,15 @@ export interface TabsStorageManager {
     persistedDiscoverSession?: DiscoverSession;
     shouldClearAllTabs?: boolean;
     defaultTabState: Omit<TabState, keyof TabItem>;
-  }) => TabsInternalStatePayload;
+    /** Prepares the returned session before mapping its tabs, using local tabs from the same session. */
+    prepareSession?: (
+      session: DiscoverSession,
+      localTabs: TabState[],
+      selectedTabId: string | undefined
+    ) => DiscoverSession;
+  }) => TabsInternalStatePayload & {
+    updatedDiscoverSession: DiscoverSession | undefined;
+  };
   getNRecentlyClosedTabs: (params: {
     previousOpenTabs: TabState[];
     previousRecentlyClosedTabs: RecentlyClosedTabState[];
@@ -90,10 +112,12 @@ export interface TabsStorageManager {
 export const createTabsStorageManager = ({
   urlStateStorage,
   storage,
+  profileStateRegistry,
   enabled,
 }: {
   urlStateStorage: IKbnUrlStateStorage;
   storage: Storage;
+  profileStateRegistry: ProfileStateRegistry;
   enabled?: boolean;
 }): TabsStorageManager => {
   const urlStateContainer = createStateContainer<TabsUrlState>({});
@@ -174,13 +198,14 @@ export const createTabsStorageManager = ({
   ): TabStateInLocalStorage => {
     const getInternalStateForTabWithoutRuntimeState = (tabId: string) =>
       getInternalState?.(tabId) || tabState.initialInternalState;
-
     return {
       id: tabState.id,
       label: tabState.label,
       internalState: getInternalStateForTabWithoutRuntimeState(tabState.id),
+      attributes: tabState.attributes,
       appState: tabState.appState,
       globalState: tabState.globalState,
+      profileState: getLocallyPersistedProfileState(tabState.profileState),
     };
   };
 
@@ -194,37 +219,82 @@ export const createTabsStorageManager = ({
     };
   };
 
-  const getDefinedStateOnly = <T>(state: T | undefined): T | undefined => {
+  const getDefinedStateOnly = <T extends object>(state: T | undefined): T | undefined => {
     if (!state || !Object.keys(state).length) {
       return undefined;
     }
     return state;
   };
 
+  const getLocallyPersistedProfileState = (profileState: TabState['profileState'] | undefined) =>
+    getDefinedStateOnly(
+      profileStateRegistry.pickStateByType({
+        profileStateMap: profileState,
+        stateTypes: LOCALLY_PERSISTED_PROFILE_STATE_TYPES,
+        defaultsHandling: 'expand',
+      })
+    );
+
   const toTabState = (
     tabStateInStorage: TabStateInLocalStorage,
     defaultTabState: Omit<TabState, keyof TabItem>
   ): TabState => {
     const internalState = getDefinedStateOnly(tabStateInStorage.internalState);
+    const attributes = getDefinedStateOnly(tabStateInStorage.attributes);
     const appState = getDefinedStateOnly(tabStateInStorage.appState);
     const globalState = getDefinedStateOnly(
       tabStateInStorage.globalState || defaultTabState.globalState
     );
-    const controlGroupState = internalState?.controlGroupJson
-      ? parseControlGroupJson(internalState.controlGroupJson)
-      : undefined;
+    const profileState = getDefinedStateOnly(
+      profileStateRegistry.pickStateByType({
+        profileStateMap: tabStateInStorage.profileState,
+        stateTypes: LOCALLY_PERSISTED_PROFILE_STATE_TYPES,
+        defaultsHandling: 'strip',
+      })
+    );
+
+    let controlGroupState = attributes?.controlGroupState
+      ? parseControlGroupJson(JSON.stringify(attributes.controlGroupState))
+      : attributes?.controlGroupState;
+
+    // migration from the older format where controlGroupJson was stored in internalState
+    if (internalState && 'controlGroupJson' in internalState && !attributes?.controlGroupState) {
+      controlGroupState =
+        internalState.controlGroupJson && typeof internalState.controlGroupJson === 'string'
+          ? parseControlGroupJson(internalState.controlGroupJson)
+          : undefined;
+    }
+
     const esqlVariables = controlGroupState
       ? extractEsqlVariables(controlGroupState)
       : defaultTabState.esqlVariables;
 
-    return {
+    const tabState: TabState = {
       ...defaultTabState,
       ...pick(tabStateInStorage, 'id', 'label'),
-      initialInternalState: internalState,
+      initialInternalState: internalState
+        ? omit(internalState, 'visContext', 'controlGroupJson')
+        : undefined,
+      attributes: {
+        ...defaultTabState.attributes,
+        ...attributes,
+        controlGroupState,
+      },
       appState: appState || {},
       globalState: globalState || {},
+      profileState: profileState || defaultTabState.profileState,
       esqlVariables,
     };
+
+    // migration from the older format where visContext was stored in internalState
+    if (internalState && 'visContext' in internalState && !tabState.attributes.visContext) {
+      tabState.attributes.visContext =
+        internalState.visContext && typeof internalState.visContext === 'object'
+          ? internalState.visContext
+          : undefined;
+    }
+
+    return tabState;
   };
 
   const toRecentlyClosedTabState = (
@@ -334,8 +404,10 @@ export const createTabsStorageManager = ({
           return {
             ...tab,
             internalState: tabStatePartial.internalState,
+            attributes: tabStatePartial.attributes,
             appState: tabStatePartial.appState,
             globalState: tabStatePartial.globalState,
+            profileState: getLocallyPersistedProfileState(tabStatePartial.profileState),
           };
         }
         return tab;
@@ -353,6 +425,7 @@ export const createTabsStorageManager = ({
     persistedDiscoverSession,
     shouldClearAllTabs,
     defaultTabState,
+    prepareSession,
   }) => {
     const tabsStateFromURL = getTabsStateFromURL();
     const selectedTabId = enabled
@@ -376,14 +449,25 @@ export const createTabsStorageManager = ({
     sessionInfo.userId = userId;
     sessionInfo.spaceId = spaceId;
 
-    const persistedTabs = persistedDiscoverSession?.tabs.map((tab) =>
-      fromSavedObjectTabToTabState({ tab })
-    );
     const previousOpenTabs = storedTabsState.openTabs.map((tab) =>
       toTabState(tab, defaultTabState)
     );
     let openTabs = shouldClearAllTabs ? [] : previousOpenTabs;
-    if (persistedDiscoverSession?.id !== storedTabsState.discoverSessionId) {
+    let updatedDiscoverSession = persistedDiscoverSession;
+
+    // Prepare before mapping tabs so inline views can reuse matching local IDs. Return the same
+    // prepared session below so restored tabs and the unsaved-changes baseline use consistent IDs.
+    if (persistedDiscoverSession && prepareSession) {
+      const localTabs =
+        persistedDiscoverSession.id === storedTabsState.discoverSessionId ? openTabs : [];
+      updatedDiscoverSession = prepareSession(persistedDiscoverSession, localTabs, selectedTabId);
+    }
+
+    const persistedTabs = updatedDiscoverSession?.tabs.map((tab) =>
+      fromSavedObjectTabToTabState({ tab, profileStateRegistry })
+    );
+
+    if (updatedDiscoverSession?.id !== storedTabsState.discoverSessionId) {
       // if the discover session has changed, use the tabs from the session
       openTabs = persistedTabs ?? [];
     }
@@ -402,6 +486,7 @@ export const createTabsStorageManager = ({
         return {
           allTabs: openTabs,
           selectedTabId,
+          updatedDiscoverSession,
           recentlyClosedTabs: getNRecentlyClosedTabs({
             previousOpenTabs,
             previousRecentlyClosedTabs: closedTabs,
@@ -414,7 +499,7 @@ export const createTabsStorageManager = ({
         // append a new tab if requested via URL
         selectedTabId === NEW_TAB_ID ||
         // or append a new tab to the persisted session if could not find it by the selected tab id above
-        (selectedTabId && tabsStateFromURL?.tabLabel && persistedDiscoverSession)
+        (selectedTabId && tabsStateFromURL?.tabLabel && updatedDiscoverSession)
       ) {
         const newTab = {
           ...defaultTabState,
@@ -429,6 +514,7 @@ export const createTabsStorageManager = ({
         return {
           allTabs: allTabsWithNewTab,
           selectedTabId: newTab.id,
+          updatedDiscoverSession,
           recentlyClosedTabs: getNRecentlyClosedTabs({
             previousOpenTabs,
             previousRecentlyClosedTabs: closedTabs,
@@ -438,7 +524,7 @@ export const createTabsStorageManager = ({
       }
 
       // otherwise try to reopen some of the previously closed tabs
-      if (selectedTabId && !persistedDiscoverSession && !tabsStateFromURL?.tabLabel) {
+      if (selectedTabId && !updatedDiscoverSession && !tabsStateFromURL?.tabLabel) {
         const storedClosedTab = storedTabsState.closedTabs.find((tab) => tab.id === selectedTabId);
 
         if (storedClosedTab) {
@@ -449,6 +535,7 @@ export const createTabsStorageManager = ({
           return {
             allTabs: restoredTabs,
             selectedTabId,
+            updatedDiscoverSession,
             recentlyClosedTabs: getNRecentlyClosedTabs({
               previousOpenTabs,
               previousRecentlyClosedTabs: closedTabs,
@@ -480,6 +567,7 @@ export const createTabsStorageManager = ({
     return {
       allTabs,
       selectedTabId: selectedTab.id,
+      updatedDiscoverSession,
       recentlyClosedTabs: getNRecentlyClosedTabs({
         previousOpenTabs,
         previousRecentlyClosedTabs: closedTabs,

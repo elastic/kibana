@@ -5,13 +5,17 @@
  * 2.0.
  */
 
+import type { z } from '@kbn/zod/v4';
 import type { FieldMap, SchemaFieldMapKeys } from '@kbn/data-stream-adapter';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import type { SiemMigrationResource } from '../../../../../common/siem_migrations/model/common.gen';
 import type {
   RuleMigration,
   RuleMigrationRule,
 } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { RuleMigrationIntegration, RuleMigrationPrebuiltRule } from '../types';
+
+const DEFAULT_SIEM_RULE_MIGRATIONS_ELSER_INFERENCE_ID = defaultInferenceEndpoints.ELSER;
 
 export const ruleMigrationsFieldMap: FieldMap<SchemaFieldMapKeys<Omit<RuleMigrationRule, 'id'>>> = {
   '@timestamp': { type: 'date', required: false },
@@ -75,8 +79,15 @@ export const ruleMigrationsFieldMap: FieldMap<SchemaFieldMapKeys<Omit<RuleMigrat
   updated_by: { type: 'keyword', required: false },
 };
 
+type SiemMigrationResourceWithoutId = Omit<
+  z.infer<typeof SiemMigrationResource>,
+  'id' | 'metadata'
+> & {
+  metadata?: Record<string, unknown>;
+};
+
 export const ruleMigrationResourcesFieldMap: FieldMap<
-  SchemaFieldMapKeys<Omit<SiemMigrationResource, 'id'>>
+  SchemaFieldMapKeys<SiemMigrationResourceWithoutId>
 > = {
   migration_id: { type: 'keyword', required: true },
   type: { type: 'keyword', required: true },
@@ -91,7 +102,9 @@ export const getIntegrationsFieldMap: ({
   elserInferenceId,
 }: {
   elserInferenceId?: string;
-}) => FieldMap<SchemaFieldMapKeys<RuleMigrationIntegration>> = ({ elserInferenceId }) => ({
+}) => FieldMap<SchemaFieldMapKeys<Omit<RuleMigrationIntegration, 'knowledge_base'>>> = ({
+  elserInferenceId,
+}) => ({
   id: { type: 'keyword', required: true },
   title: { type: 'text', required: true },
   description: { type: 'text', required: true },
@@ -102,8 +115,9 @@ export const getIntegrationsFieldMap: ({
   elser_embedding: {
     type: 'semantic_text',
     required: true,
-    ...(elserInferenceId ? { inference_id: elserInferenceId } : {}),
+    inference_id: elserInferenceId ?? DEFAULT_SIEM_RULE_MIGRATIONS_ELSER_INFERENCE_ID,
   },
+  fields_metadata: { type: 'object', required: false },
 });
 
 export const getPrebuiltRulesFieldMap: ({
@@ -116,7 +130,7 @@ export const getPrebuiltRulesFieldMap: ({
   elser_embedding: {
     type: 'semantic_text',
     required: true,
-    ...(elserInferenceId ? { inference_id: elserInferenceId } : {}),
+    inference_id: elserInferenceId ?? DEFAULT_SIEM_RULE_MIGRATIONS_ELSER_INFERENCE_ID,
   },
   rule_id: { type: 'keyword', required: true },
   mitre_attack_ids: { type: 'keyword', array: true, required: false },

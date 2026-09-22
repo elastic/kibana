@@ -8,4 +8,9 @@
  */
 
 require('@kbn/setup-node-env');
-require('@kbn/ts-type-check-cli');
+
+if (require('@kbn/dev-validation-runner').hasValidationRunFlags(process.argv.slice(2))) {
+  require('@kbn/ts-type-check-cli').runTypeCheckContractCli();
+} else {
+  require('@kbn/ts-type-check-cli').runLegacyTypeCheckCli();
+}

@@ -7,68 +7,30 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
-import type {
-  SOSecretPath,
-  KafkaOutput,
-  NewRemoteElasticsearchOutput,
-  Output,
-} from '../../../common/types';
+import type { SOSecretPath, Output } from '../../../common/types';
 import type { NewOutput } from '../../../common';
+import { isBeatsOutput, isOtlpOutput } from '../../../common/services/output_helpers';
 import type { SecretReference } from '../../types';
 import { OUTPUT_SECRETS_MINIMUM_FLEET_SERVER_VERSION } from '../../constants';
-import { appContextService } from '../app_context';
-import { settingsService } from '..';
-import { checkFleetServerVersionsForSecretsStorage } from '../fleet_server';
 
-import { deleteSOSecrets, extractAndWriteSOSecrets, extractAndUpdateSOSecrets } from './common';
+import {
+  deleteSOSecrets,
+  extractAndWriteSOSecrets,
+  extractAndUpdateSOSecrets,
+  isSecretStorageEnabledForFeature,
+} from './common';
 
 export async function isOutputSecretStorageEnabled(
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract
 ): Promise<boolean> {
-  const logger = appContextService.getLogger();
-
-  // if serverless then output secrets will always be supported
-  const isFleetServerStandalone =
-    appContextService.getConfig()?.internal?.fleetServerStandalone ?? false;
-
-  if (isFleetServerStandalone) {
-    logger.trace('Output secrets storage is enabled as fleet server is standalone');
-    return true;
-  }
-
-  // now check the flag in settings to see if the fleet server requirement has already been met
-  // once the requirement has been met, output secrets are always on
-  const settings = await settingsService.getSettingsOrUndefined(soClient);
-
-  if (settings && settings.output_secret_storage_requirements_met) {
-    logger.debug('Output secrets storage requirements already met, turned on in settings');
-    return true;
-  }
-
-  // otherwise check if we have the minimum fleet server version and enable secrets if so
-  if (
-    await checkFleetServerVersionsForSecretsStorage(
-      esClient,
-      soClient,
-      OUTPUT_SECRETS_MINIMUM_FLEET_SERVER_VERSION
-    )
-  ) {
-    logger.debug('Enabling output secrets storage as minimum fleet server version has been met');
-    try {
-      await settingsService.saveSettings(soClient, {
-        output_secret_storage_requirements_met: true,
-      });
-    } catch (err) {
-      // we can suppress this error as it will be retried on the next function call
-      logger.warn(`Failed to save settings after enabling output secrets storage: ${err.message}`);
-    }
-
-    return true;
-  }
-
-  logger.info('Secrets storage is disabled as minimum fleet server version has not been met');
-  return false;
+  return isSecretStorageEnabledForFeature({
+    esClient,
+    soClient,
+    featureName: 'Output secrets',
+    minimumFleetServerVersion: OUTPUT_SECRETS_MINIMUM_FLEET_SERVER_VERSION,
+    settingKey: 'output_secret_storage_requirements_met',
+  });
 }
 
 export async function extractAndWriteOutputSecrets(opts: {
@@ -133,7 +95,7 @@ export async function deleteOutputSecrets(opts: {
 export function getOutputSecretReferences(output: Output): SecretReference[] {
   const outputSecretPaths: SecretReference[] = [];
 
-  if (typeof output.secrets?.ssl?.key === 'object') {
+  if (isBeatsOutput(output) && typeof output.secrets?.ssl?.key === 'object') {
     outputSecretPaths.push({
       id: output.secrets.ssl.key.id,
     });
@@ -153,6 +115,18 @@ export function getOutputSecretReferences(output: Output): SecretReference[] {
     }
   }
 
+  if (isOtlpOutput(output)) {
+    if (typeof output.secrets?.otlp_exporter?.tls?.key_pem === 'object') {
+      outputSecretPaths.push({ id: output.secrets.otlp_exporter.tls.key_pem.id });
+    }
+    if (typeof output.secrets?.otlp_exporter?.tls?.tpm?.owner_auth === 'object') {
+      outputSecretPaths.push({ id: output.secrets.otlp_exporter.tls.tpm.owner_auth.id });
+    }
+    if (typeof output.secrets?.otlp_exporter?.tls?.tpm?.auth === 'object') {
+      outputSecretPaths.push({ id: output.secrets.otlp_exporter.tls.tpm.auth.id });
+    }
+  }
+
   return outputSecretPaths;
 }
 
@@ -161,33 +135,43 @@ function getOutputSecretPaths(
   output: NewOutput | Partial<Output>
 ): SOSecretPath[] {
   const outputSecretPaths: SOSecretPath[] = [];
+  const typed = { ...output, type: outputType } as NewOutput;
 
-  if (outputType === 'kafka') {
-    const kafkaOutput = output as KafkaOutput;
-    if (kafkaOutput?.secrets?.password) {
+  if (typed.type === 'kafka') {
+    if (typed.secrets?.password) {
+      outputSecretPaths.push({ path: 'secrets.password', value: typed.secrets.password });
+    }
+  }
+
+  if (typed.type === 'remote_elasticsearch') {
+    if (typed.secrets?.service_token) {
+      outputSecretPaths.push({ path: 'secrets.service_token', value: typed.secrets.service_token });
+    }
+  }
+
+  if (isOtlpOutput(typed)) {
+    if (typed.secrets?.otlp_exporter?.tls?.key_pem) {
       outputSecretPaths.push({
-        path: 'secrets.password',
-        value: kafkaOutput.secrets.password,
+        path: 'secrets.otlp_exporter.tls.key_pem',
+        value: typed.secrets.otlp_exporter.tls.key_pem,
+      });
+    }
+    if (typed.secrets?.otlp_exporter?.tls?.tpm?.owner_auth) {
+      outputSecretPaths.push({
+        path: 'secrets.otlp_exporter.tls.tpm.owner_auth',
+        value: typed.secrets.otlp_exporter.tls.tpm.owner_auth,
+      });
+    }
+    if (typed.secrets?.otlp_exporter?.tls?.tpm?.auth) {
+      outputSecretPaths.push({
+        path: 'secrets.otlp_exporter.tls.tpm.auth',
+        value: typed.secrets.otlp_exporter.tls.tpm.auth,
       });
     }
   }
 
-  if (outputType === 'remote_elasticsearch') {
-    const remoteESOutput = output as NewRemoteElasticsearchOutput;
-    if (remoteESOutput.secrets?.service_token) {
-      outputSecretPaths.push({
-        path: 'secrets.service_token',
-        value: remoteESOutput.secrets.service_token,
-      });
-    }
-  }
-
-  // common to all outputs
-  if (output?.secrets?.ssl?.key) {
-    outputSecretPaths.push({
-      path: 'secrets.ssl.key',
-      value: output.secrets.ssl.key,
-    });
+  if (isBeatsOutput(typed) && typed.secrets?.ssl?.key) {
+    outputSecretPaths.push({ path: 'secrets.ssl.key', value: typed.secrets.ssl.key });
   }
 
   return outputSecretPaths;

@@ -6,11 +6,15 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { SavedObjectsClient } from '@kbn/core/server';
 import type { ElasticsearchErrorDetails } from '@kbn/es-errors';
 
 import { i18n } from '@kbn/i18n';
-import type { ConnectorStatus, FilteringRule, Connector } from '@kbn/search-connectors';
+import type {
+  ConnectorStatus,
+  FilteringRule,
+  Connector,
+  ConnectorDocument,
+} from '@kbn/search-connectors';
 import {
   CONNECTORS_INDEX,
   cancelSync,
@@ -59,6 +63,9 @@ import { ErrorCode } from '../../common/types/error_codes';
 import { AgentlessConnectorsInfraService } from '../services';
 import { fetchIndex } from '../lib/indices/fetch_index';
 import { createIndex } from '../lib/indices/create_index';
+
+const FLEET_AGENT_POLICIES_READ = 'fleet-agent-policies-read';
+const FLEET_AGENTS_READ = 'fleet-agents-read';
 
 export function registerConnectorRoutes({
   router,
@@ -552,7 +559,8 @@ export function registerConnectorRoutes({
               rule: schema.string(),
               updated_at: schema.string(),
               value: schema.string(),
-            })
+            }),
+            { maxSize: 1000 }
           ),
         }),
         params: schema.object({
@@ -597,7 +605,8 @@ export function registerConnectorRoutes({
                 rule: schema.string(),
                 updated_at: schema.string(),
                 value: schema.string(),
-              })
+              }),
+              { maxSize: 1000 }
             ),
           })
         ),
@@ -1063,14 +1072,18 @@ export function registerConnectorRoutes({
       },
       security: {
         authz: {
-          enabled: false,
-          reason: 'This route delegates authorization to the scoped ES client',
+          requiredPrivileges: [
+            {
+              anyRequired: [FLEET_AGENT_POLICIES_READ, FLEET_AGENTS_READ],
+            },
+          ],
         },
       },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { connectorId } = request.params;
       const { client } = (await context.core).elasticsearch;
+      const soClient = (await context.core).savedObjects.client;
 
       try {
         const connector = await fetchConnectorById(client.asCurrentUser, connectorId);
@@ -1105,26 +1118,24 @@ export function registerConnectorRoutes({
           });
         }
 
-        const [_core, start] = await getStartServices();
-
-        const savedObjects = _core.savedObjects;
+        const [, start] = await getStartServices();
 
         const agentlessPolicyService = start.fleet!.agentlessPoliciesService;
         const packagePolicyService = start.fleet!.packagePolicyService;
         const agentService = start.fleet!.agentService;
-
-        const soClient = new SavedObjectsClient(savedObjects.createInternalRepository());
 
         const service = new AgentlessConnectorsInfraService(
           soClient,
           client.asCurrentUser,
           packagePolicyService,
           agentlessPolicyService,
-          agentService,
           log
         );
 
-        const policy = await service.getAgentPolicyForConnectorId({ connectorId });
+        const policy = await service.getAgentPolicyForConnectorId({
+          connectorId,
+          agentClient: agentService.asScoped(request),
+        });
 
         if (!policy) {
           return response.ok({
@@ -1309,6 +1320,64 @@ export function registerConnectorRoutes({
 
       return response.ok({
         body: createIndexResponse,
+        headers: { 'content-type': 'application/json' },
+      });
+    })
+  );
+
+  router.post(
+    {
+      path: '/internal/content_connectors/indices/{indexName}/api_key',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
+      validate: {
+        params: schema.object({
+          indexName: schema.string(),
+        }),
+        body: schema.object({
+          is_native: schema.boolean(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const indexName = decodeURIComponent(request.params.indexName);
+      const { client } = (await context.core).elasticsearch;
+      const [_core, start] = await getStartServices();
+      const isAgentlessEnabled = start.fleet?.agentless?.enabled === true;
+
+      const connectorResult = await client.asCurrentUser.search<ConnectorDocument>({
+        index: CONNECTORS_INDEX,
+        query: { term: { index_name: indexName } },
+      });
+      const connector = connectorResult.hits.hits[0];
+      if (!connector) {
+        return createError({
+          errorCode: ErrorCode.RESOURCE_NOT_FOUND,
+          message: i18n.translate(
+            'xpack.contentConnectors.routes.indices.apiKey.connectorNotFound',
+            {
+              defaultMessage: 'No connector found for index {indexName}.',
+              values: { indexName },
+            }
+          ),
+          response,
+          statusCode: 404,
+        });
+      }
+
+      const apiKeyResult = await generateApiKey(
+        client,
+        indexName,
+        request.body.is_native,
+        isAgentlessEnabled
+      );
+
+      return response.ok({
+        body: apiKeyResult,
         headers: { 'content-type': 'application/json' },
       });
     })

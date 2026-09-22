@@ -75,7 +75,7 @@ describe('DefaultCellRenderer', () => {
       </TestProviders>
     );
 
-    expect(getColumnRenderer).toBeCalledWith(header.id, columnRenderers, data, undefined);
+    expect(getColumnRenderer).toHaveBeenCalledWith(header.id, columnRenderers, data, undefined);
   });
 
   test('if in tgrid expanded value, it invokes `renderColumn` with the expected arguments', () => {
@@ -110,19 +110,21 @@ describe('DefaultCellRenderer', () => {
       </TestProviders>
     );
 
-    expect(mockImplementation.renderColumn).toBeCalledWith({
-      asPlainText: false,
-      columnName: header.id,
-      ecsData,
-      eventId,
-      field: header,
-      isDetails,
-      linkValues,
-      rowRenderers: undefined,
-      scopeId,
-      truncate,
-      values: ['2018-11-05T19:03:25.937Z'],
-    });
+    expect(mockImplementation.renderColumn).toHaveBeenCalledWith(
+      expect.objectContaining({
+        asPlainText: false,
+        columnName: header.id,
+        ecsData,
+        eventId,
+        field: header,
+        isDetails,
+        linkValues,
+        rowRenderers: undefined,
+        scopeId,
+        truncate,
+        values: ['2018-11-05T19:03:25.937Z'],
+      })
+    );
   });
 });
 

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import classnames from 'classnames';
 import { css } from '@emotion/react';
@@ -27,7 +27,7 @@ import { FieldIcon, getFieldIconProps, getFieldSearchMatchingHighlight } from '@
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { type FieldListItem, type GetCustomFieldType } from '../../types';
 
-const DRAG_ICON = <EuiIcon type="grabOmnidirectional" size="m" />;
+const DRAG_ICON = <EuiIcon type="drag" size="m" aria-hidden={true} />;
 
 /**
  * Props of FieldItemButton component
@@ -99,6 +99,10 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
   const styles = useMemoCss(componentStyles);
 
   const displayName = field.displayName || field.name;
+  const searchHighlight = useMemo(
+    () => getFieldSearchMatchingHighlight(displayName, fieldSearchHighlight),
+    [displayName, fieldSearchHighlight]
+  );
   const title =
     displayName !== field.name && field.name !== '___records___'
       ? i18n.translate('unifiedFieldList.fieldItemButton.fieldTitle', {
@@ -189,7 +193,7 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
             className={classnames(fieldActionClassName, buttonAddFieldToWorkspaceProps?.className)}
             css={fieldActionCss}
             color="text"
-            iconType="plusInCircle"
+            iconType="plusCircle"
             onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
               event.preventDefault();
               event.stopPropagation();
@@ -243,7 +247,8 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
       }
       fieldName={
         <EuiHighlight
-          search={getFieldSearchMatchingHighlight(displayName, fieldSearchHighlight)}
+          search={searchHighlight}
+          highlightAll
           title={title}
           data-test-subj={`field-${field.name}`}
         >

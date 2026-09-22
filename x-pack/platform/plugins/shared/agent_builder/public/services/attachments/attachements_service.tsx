@@ -5,35 +5,43 @@
  * 2.0.
  */
 
-import type { UnknownAttachment } from '@kbn/agent-builder-common/attachments';
-import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser';
-import {
-  DefaultJsonRenderer,
-  type RenderContentFn,
-  type RenderEditorFn,
-} from './default_renderers';
+import { buildPath, type HttpSetup } from '@kbn/core-http-browser';
+import type {
+  UnknownAttachment,
+  UpdateOriginResponse,
+  VersionedAttachment,
+} from '@kbn/agent-builder-common/attachments';
+import type {
+  AttachmentUIDefinition,
+  CreateAttachmentArgs,
+  DeleteAttachmentArgs,
+  GetAttachmentArgs,
+  ListAttachmentsArgs,
+  ListAttachmentsResult,
+  UpdateAttachmentArgs,
+} from '@kbn/agent-builder-browser';
+import { publicApiPath } from '../../../common/constants';
+import type {
+  CheckStaleAttachmentsResponse,
+  CreateAttachmentResponse,
+  DeleteAttachmentResponse,
+  GetAttachmentResponse,
+  ListAttachmentsResponse,
+  UpdateAttachmentResponse,
+} from '../../../common/http_api/attachments';
 
 /**
- * Internal service for managing attachment UI definitions.
- * This service maintains a registry of UI definitions for different attachment types.
+ * Internal service for managing attachment UI definitions and API operations.
+ * This service maintains a registry of UI definitions for different attachment types
+ * and provides methods for attachment API operations.
  */
 export class AttachmentsService {
   private readonly registry: Map<string, AttachmentUIDefinition> = new Map();
+  private readonly http: HttpSetup;
 
-  /**
-   * Default renderers for built-in attachment types.
-   *
-   * Note: client-side integration is evolving; keep this minimal and let
-   * plugins register richer renderers/editors via `addAttachmentType`.
-   */
-  private readonly defaultRenderers: Record<
-    string,
-    {
-      renderContent: RenderContentFn;
-      renderEditor?: RenderEditorFn;
-      isEditable: boolean;
-    }
-  > = {};
+  constructor({ http }: { http: HttpSetup }) {
+    this.http = http;
+  }
 
   /**
    * Registers a UI definition for a specific attachment type.
@@ -75,48 +83,92 @@ export class AttachmentsService {
   }
 
   /**
-   * Gets the content render function for a specific attachment type.
-   * Returns the registered renderer if available, otherwise falls back to
-   * defaults, then to JSON fallback.
+   * Updates the origin reference for an attachment.
+   * Use this after saving a by-value attachment to link it to its persistent store.
+   *
+   * @param conversationId - The conversation containing the attachment
+   * @param attachmentId - The ID of the attachment to update
+   * @param origin - The origin reference object (shape depends on attachment type)
    */
-  getRenderContent(attachmentType: string): RenderContentFn {
-    const definition = this.registry.get(attachmentType);
-    if (definition?.renderContent) {
-      return definition.renderContent as RenderContentFn;
-    }
-
-    const defaultRenderer = this.defaultRenderers[attachmentType];
-    if (defaultRenderer?.renderContent) {
-      return defaultRenderer.renderContent;
-    }
-
-    return DefaultJsonRenderer;
+  async updateOrigin(
+    conversationId: string,
+    attachmentId: string,
+    origin: string
+  ): Promise<UpdateOriginResponse> {
+    return await this.http.put<UpdateOriginResponse>(
+      buildPath(
+        `${publicApiPath}/conversations/{conversationId}/attachments/{attachmentId}/origin`,
+        { conversationId, attachmentId }
+      ),
+      { body: JSON.stringify({ origin }) }
+    );
   }
 
   /**
-   * Gets the editor render function for a specific attachment type.
-   * Returns undefined if the type doesn't support editing.
+   * Checks all conversation attachments for staleness against their origin snapshots.
    */
-  getRenderEditor(attachmentType: string): RenderEditorFn | undefined {
-    const definition = this.registry.get(attachmentType);
-    if (definition?.renderEditor) {
-      return definition.renderEditor as RenderEditorFn;
-    }
-
-    const defaultRenderer = this.defaultRenderers[attachmentType];
-    return defaultRenderer?.renderEditor;
+  async checkStale(conversationId: string): Promise<CheckStaleAttachmentsResponse> {
+    return await this.http.get<CheckStaleAttachmentsResponse>(
+      buildPath(`${publicApiPath}/conversations/{conversationId}/attachments/stale`, {
+        conversationId,
+      })
+    );
   }
 
-  /**
-   * Checks if a specific attachment type supports editing.
-   */
-  isEditable(attachmentType: string): boolean {
-    const definition = this.registry.get(attachmentType);
-    if (definition) {
-      return definition.isEditable ?? Boolean(definition.renderEditor);
-    }
+  async list({
+    conversationId,
+    includeDeleted,
+  }: ListAttachmentsArgs): Promise<ListAttachmentsResult> {
+    return await this.http.get<ListAttachmentsResponse>(
+      buildPath(`${publicApiPath}/conversations/{conversationId}/attachments`, {
+        conversationId,
+      }),
+      { query: { include_deleted: includeDeleted } }
+    );
+  }
 
-    const defaultRenderer = this.defaultRenderers[attachmentType];
-    return defaultRenderer?.isEditable ?? false;
+  async get({ conversationId, attachmentId }: GetAttachmentArgs): Promise<VersionedAttachment> {
+    const { attachment } = await this.http.get<GetAttachmentResponse>(
+      buildPath(`${publicApiPath}/conversations/{conversationId}/attachments/{attachmentId}`, {
+        conversationId,
+        attachmentId,
+      })
+    );
+    return attachment;
+  }
+
+  async create({ conversationId, ...body }: CreateAttachmentArgs): Promise<VersionedAttachment> {
+    const { attachment } = await this.http.post<CreateAttachmentResponse>(
+      buildPath(`${publicApiPath}/conversations/{conversationId}/attachments`, {
+        conversationId,
+      }),
+      { body: JSON.stringify(body) }
+    );
+    return attachment;
+  }
+
+  async update({
+    conversationId,
+    attachmentId,
+    ...body
+  }: UpdateAttachmentArgs): Promise<VersionedAttachment> {
+    const { attachment } = await this.http.put<UpdateAttachmentResponse>(
+      buildPath(`${publicApiPath}/conversations/{conversationId}/attachments/{attachmentId}`, {
+        conversationId,
+        attachmentId,
+      }),
+      { body: JSON.stringify(body) }
+    );
+    return attachment;
+  }
+
+  async delete({ conversationId, attachmentId, permanent }: DeleteAttachmentArgs): Promise<void> {
+    await this.http.delete<DeleteAttachmentResponse>(
+      buildPath(`${publicApiPath}/conversations/{conversationId}/attachments/{attachmentId}`, {
+        conversationId,
+        attachmentId,
+      }),
+      { query: { permanent } }
+    );
   }
 }

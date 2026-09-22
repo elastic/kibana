@@ -27,7 +27,7 @@ PUT /kibana_sample_data_semantic
 }
 
 # ✅ The response includes a confirmation that the index was created with the correct mapping.
-# By default, the semantic_text field uses the ELSER model for generating embeddings. You can use any inference model supported by Elasticsearch.
+# By default, the semantic_text field uses our latest vector model for generating embeddings. You can use any inference model supported by Elasticsearch.
 # 📖 https://www.elastic.co/docs/solutions/search/semantic-search/semantic-search-inference
 
 # -----------------------------------------------

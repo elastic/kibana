@@ -76,6 +76,9 @@ describe('batchBackfillRuleGaps', () => {
   beforeEach(() => {
     processGapsBatchMock.mockImplementation((_, { gapsBatch }) => ({
       processedGapsCount: gapsBatch.length,
+      hasErrors: false,
+      results: [],
+      truncatedRuleIds: [],
     }));
     processAllRuleGapsMock.mockImplementation(async ({ processGapsBatch: processFn }) => {
       const results: Awaited<ReturnType<typeof processFn>> = [];
@@ -155,7 +158,12 @@ describe('batchBackfillRuleGaps', () => {
 
   describe('when there is nothing to backfill', () => {
     beforeEach(async () => {
-      processGapsBatchMock.mockResolvedValue(false);
+      processGapsBatchMock.mockResolvedValue({
+        processedGapsCount: 0,
+        hasErrors: false,
+        results: [],
+        truncatedRuleIds: [],
+      });
       await callBatchBackfillRuleGaps();
     });
 

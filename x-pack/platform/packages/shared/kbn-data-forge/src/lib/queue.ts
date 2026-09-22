@@ -8,6 +8,7 @@
 import { cargoQueue } from 'async';
 import moment from 'moment';
 import { omit } from 'lodash';
+import axios from 'axios';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Client } from '@elastic/elasticsearch';
 import type { Config, Doc } from '../types';
@@ -34,6 +35,14 @@ function calculateIndexName(config: Config, doc: Doc) {
 export const createQueue = (config: Config, client: Client, logger: ToolingLog): CargoQueue => {
   return cargoQueue<Doc, Error>(
     (docs, callback) => {
+      if (config.destination.type === 'http') {
+        post(config, docs, logger)
+          .then(() => callback())
+          .catch(callback);
+
+        return;
+      }
+
       const operations: object[] = [];
       const startTs = Date.now();
       docs.forEach((doc) => {
@@ -64,3 +73,34 @@ export const createQueue = (config: Config, client: Client, logger: ToolingLog):
     config.indexing.payloadSize
   );
 };
+
+async function post(config: Config, docs: Doc[], logger: ToolingLog) {
+  if (config.destination.type !== 'http') {
+    throw new Error('post() should only be called with http destination');
+  }
+  try {
+    const startTs = Date.now();
+    const resp = await axios.post(config.destination.url, docs, {
+      headers: config.destination.headers,
+    });
+    logger.info(
+      {
+        statusCode: resp.status,
+        latency: Date.now() - startTs,
+        indexed: docs.length,
+      },
+      `Sent ${docs.length} documents.`
+    );
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      logger.error(
+        `Failed to send documents. Status: ${error.response.status}, Data: ${JSON.stringify(
+          error.response.data
+        )}`
+      );
+    } else {
+      logger.error(error);
+    }
+    throw error;
+  }
+}

@@ -12,6 +12,9 @@ if [[ "${DRY_RUN:-}" =~ ^(true|1)$ ]]; then
   exit 0
 fi
 
+echo "--- Clean up cached images"
+clean_cached_images
+
 KIBANA_MEMORY_SIZE=${KIBANA_MEMORY_SIZE:-2048}
 case "$KIBANA_MEMORY_SIZE" in
   1024|2048|4096|8192)
@@ -28,6 +31,7 @@ mkdir -p target
 
 download_artifact "kibana-cloud-$FULL_VERSION-docker-image-amd64.tar.gz" ./target --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
 docker load < "target/kibana-cloud-$FULL_VERSION-docker-image-amd64.tar.gz"
+rm -f "target/kibana-cloud-$FULL_VERSION-docker-image-amd64.tar.gz"
 
 TAG="$FULL_VERSION-$GIT_COMMIT"
 KIBANA_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-cloud:$FULL_VERSION"

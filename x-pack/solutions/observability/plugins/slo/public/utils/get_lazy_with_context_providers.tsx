@@ -17,6 +17,8 @@ import React, { Suspense } from 'react';
 import type { ExperimentalFeatures } from '../../common/config';
 import { PluginContext } from '../context/plugin_context';
 import type { SLOPublicPluginsStart, SLORepositoryClient } from '../types';
+import type { ISloTelemetryClient } from '../services/telemetry';
+import { createUnwrappingSloClient } from './unwrap_slo_client';
 
 interface Props {
   core: CoreStart;
@@ -28,6 +30,7 @@ interface Props {
   isServerless?: boolean;
   experimentalFeatures: ExperimentalFeatures;
   sloClient: SLORepositoryClient;
+  telemetry?: ISloTelemetryClient;
 }
 
 export type LazyWithContextProviders = ReturnType<typeof getLazyWithContextProviders>;
@@ -47,6 +50,7 @@ export const getLazyWithContextProviders =
     isServerless,
     experimentalFeatures,
     sloClient,
+    telemetry,
   }: Props) =>
   <TElement extends React.ComponentType<any>>(
     LazyComponent: React.LazyExoticComponent<TElement>,
@@ -54,6 +58,7 @@ export const getLazyWithContextProviders =
   ): React.FunctionComponent<React.ComponentProps<TElement>> => {
     const { spinnerSize = 'xl' } = options ?? {};
     const queryClient = new QueryClient();
+    const unwrappingSloClient = createUnwrappingSloClient(sloClient);
     return (props) => (
       <KibanaContextProvider
         services={{
@@ -68,10 +73,12 @@ export const getLazyWithContextProviders =
         <PluginContext.Provider
           value={{
             isDev,
+            isServerless,
             observabilityRuleTypeRegistry,
             ObservabilityPageTemplate,
             experimentalFeatures,
-            sloClient,
+            sloClient: unwrappingSloClient,
+            telemetry,
           }}
         >
           <QueryClientProvider client={queryClient}>

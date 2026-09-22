@@ -29,10 +29,13 @@ const baseSchema = schema.object<SavedObjectSanitizedDocSchema>({
       type: schema.string(),
       id: schema.string(),
     }),
-    { defaultValue: [] }
+    {
+      defaultValue: [],
+      maxSize: 10_000, // needed to allow importing dashboards with duplicate references
+    }
   ),
   namespace: schema.maybe(schema.string()),
-  namespaces: schema.maybe(schema.arrayOf(schema.string())),
+  namespaces: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
   migrationVersion: schema.maybe(schema.recordOf(schema.string(), schema.string())),
   coreMigrationVersion: schema.maybe(schema.string()),
   typeMigrationVersion: schema.maybe(schema.string()),

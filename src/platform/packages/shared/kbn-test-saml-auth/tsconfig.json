@@ -1,0 +1,16 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "stripInternal": true,
+    "types": ["jest", "node"]
+  },
+  "include": ["**/*.ts", "**/*.js"],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/es",
+    "@kbn/mock-idp-utils",
+    "@kbn/tooling-log",
+    "@kbn/repo-info"
+  ]
+}

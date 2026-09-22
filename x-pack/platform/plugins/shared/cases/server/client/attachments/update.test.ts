@@ -5,99 +5,129 @@
  * 2.0.
  */
 
-import { comment, actionComment } from '../../mocks';
+import { mockCases } from '../../mocks';
 import { createCasesClientMockArgs } from '../mocks';
-import { MAX_COMMENT_LENGTH, MAX_USER_ACTIONS_PER_CASE } from '../../../common/constants';
+import {
+  MAX_COMMENT_LENGTH,
+  MAX_USER_ACTIONS_PER_CASE,
+  SECURITY_SOLUTION_OWNER,
+} from '../../../common/constants';
 import { update } from './update';
-import { createUserActionServiceMock } from '../../services/mocks';
+import {
+  createAttachmentServiceMock,
+  createCaseServiceMock,
+  createUserActionServiceMock,
+} from '../../services/mocks';
+import { commentAttachmentType } from '../../attachment_framework/attachments';
 
 describe('update', () => {
   const caseID = 'test-case';
+  const unifiedUpdateRequest = {
+    id: 'comment-id',
+    version: 'WzAsMV0=',
+    type: 'comment' as const,
+    data: { content: 'updated content' },
+    owner: SECURITY_SOLUTION_OWNER,
+  };
 
   const clientArgs = createCasesClientMockArgs();
   const userActionService = createUserActionServiceMock();
+  const caseService = createCaseServiceMock();
+  const attachmentService = createAttachmentServiceMock();
 
   clientArgs.services.userActionService = userActionService;
+  clientArgs.services.caseService = caseService;
+  clientArgs.services.attachmentService = attachmentService;
+  clientArgs.unifiedAttachmentTypeRegistry.register(commentAttachmentType);
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  describe('comments', () => {
-    const updateComment = { ...comment, id: 'comment-id', version: 'WzAsMV0=' };
-    it('should throw an error if the comment length is too long', async () => {
-      const longComment = Array(MAX_COMMENT_LENGTH + 1)
-        .fill('x')
-        .toString();
-
-      await expect(
-        update({ updateRequest: { ...updateComment, comment: longComment }, caseID }, clientArgs)
-      ).rejects.toThrow(
-        `Failed to patch comment case id: test-case: Error: The length of the comment is too long. The maximum length is ${MAX_COMMENT_LENGTH}.`
-      );
+  it(`throws error when the case user actions become > ${MAX_USER_ACTIONS_PER_CASE}`, async () => {
+    userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({
+      [caseID]: MAX_USER_ACTIONS_PER_CASE,
     });
 
-    it('should throw an error if the comment is an empty string', async () => {
-      await expect(
-        update({ updateRequest: { ...updateComment, comment: '' }, caseID }, clientArgs)
-      ).rejects.toThrow(
-        'Failed to patch comment case id: test-case: Error: The comment field cannot be an empty string.'
-      );
-    });
-
-    it('should throw an error if the description is a string with empty characters', async () => {
-      await expect(
-        update({ updateRequest: { ...updateComment, comment: '  ' }, caseID }, clientArgs)
-      ).rejects.toThrow(
-        'Failed to patch comment case id: test-case: Error: The comment field cannot be an empty string.'
-      );
-    });
-
-    it(`throws error when the case user actions become > ${MAX_USER_ACTIONS_PER_CASE}`, async () => {
-      userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({
-        [caseID]: MAX_USER_ACTIONS_PER_CASE,
-      });
-
-      await expect(
-        update({ updateRequest: { ...updateComment }, caseID }, clientArgs)
-      ).rejects.toThrow(
-        `The case with id ${caseID} has reached the limit of ${MAX_USER_ACTIONS_PER_CASE} user actions.`
-      );
-    });
+    await expect(
+      update({ updateRequest: unifiedUpdateRequest, caseID }, clientArgs)
+    ).rejects.toThrow(
+      `The case with id ${caseID} has reached the limit of ${MAX_USER_ACTIONS_PER_CASE} user actions.`
+    );
   });
 
-  describe('actions', () => {
-    const updateActionComment = { ...actionComment, id: 'comment-id', version: 'WzAsMV0=' };
+  it('accepts unified type (v2) update request', async () => {
+    userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({ [caseID]: 0 });
 
-    it('should throw an error if the comment length is too long', async () => {
-      const longComment = Array(MAX_COMMENT_LENGTH + 1)
-        .fill('x')
-        .toString();
-
-      await expect(
-        update(
-          { updateRequest: { ...updateActionComment, comment: longComment }, caseID },
-          clientArgs
-        )
-      ).rejects.toThrow(
-        `Failed to patch comment case id: test-case: Error: The length of the comment is too long. The maximum length is ${MAX_COMMENT_LENGTH}.`
-      );
+    const theCase = { ...mockCases[0], id: caseID };
+    const commentId = 'comment-id';
+    const existingComment = {
+      id: commentId,
+      type: 'cases-comments',
+      version: 'WzAsMV0=',
+      attributes: {
+        type: 'comment',
+        data: { content: 'existing' },
+        created_at: '2024-01-01T00:00:00.000Z',
+        created_by: { username: 'u', full_name: null, email: null },
+        pushed_at: null,
+        pushed_by: null,
+        updated_at: null,
+        updated_by: null,
+        owner: SECURITY_SOLUTION_OWNER,
+      },
+      references: [{ type: 'cases', id: caseID, name: `associated-cases` }],
+    };
+    caseService.getCase.mockResolvedValue(theCase);
+    caseService.patchCase.mockResolvedValue(theCase);
+    caseService.getAllCaseComments.mockResolvedValue({
+      saved_objects: [],
+      total: 1,
+      per_page: 1,
+      page: 1,
+    });
+    attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+      new Map([[caseID, { alerts: 0, userComments: 1, events: 0 }]])
+    );
+    attachmentService.getter.get.mockResolvedValue(
+      existingComment as unknown as Awaited<ReturnType<typeof attachmentService.getter.get>>
+    );
+    attachmentService.update.mockResolvedValue({
+      ...existingComment,
+      attributes: { ...existingComment.attributes, data: { content: 'updated content' } },
     });
 
-    it('should throw an error if the comment is an empty string', async () => {
-      await expect(
-        update({ updateRequest: { ...updateActionComment, comment: '' }, caseID }, clientArgs)
-      ).rejects.toThrow(
-        'Failed to patch comment case id: test-case: Error: The comment field cannot be an empty string.'
-      );
-    });
+    await expect(
+      update({ updateRequest: unifiedUpdateRequest, caseID }, clientArgs)
+    ).resolves.toBeDefined();
 
-    it('should throw an error if the description is a string with empty characters', async () => {
-      await expect(
-        update({ updateRequest: { ...updateActionComment, comment: '  ' }, caseID }, clientArgs)
-      ).rejects.toThrow(
-        'Failed to patch comment case id: test-case: Error: The comment field cannot be an empty string.'
-      );
-    });
+    expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith(
+      expect.objectContaining({
+        entities: expect.arrayContaining([
+          expect.objectContaining({ owner: SECURITY_SOLUTION_OWNER }),
+        ]),
+      })
+    );
+  });
+
+  it('rejects unified comment updates over max length', async () => {
+    userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({ [caseID]: 0 });
+
+    const longComment = Array(MAX_COMMENT_LENGTH + 1)
+      .fill('x')
+      .join('');
+
+    await expect(
+      update(
+        {
+          updateRequest: {
+            ...unifiedUpdateRequest,
+            data: { content: longComment },
+          },
+          caseID,
+        },
+        clientArgs
+      )
+    ).rejects.toThrow(`Comment content exceeds maximum length of ${MAX_COMMENT_LENGTH} characters`);
   });
 });

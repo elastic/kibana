@@ -10,16 +10,20 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import type { ToolHandlerContext, ToolAvailabilityContext } from '@kbn/agent-builder-server/tools';
-import type {
-  ModelProvider,
-  ToolProvider,
-  ScopedRunner,
-  ToolResultStore,
-  ToolEventEmitter,
-  ToolPromptManager,
-  ToolStateManager,
-} from '@kbn/agent-builder-server';
-import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
+import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
+
+const generateSecurityStartMock = () => {
+  const mockSecurityStart = securityMock.createStart();
+  const mockCheckPrivileges = jest.fn().mockResolvedValue({ hasAllRequested: true });
+  jest
+    .mocked(mockSecurityStart.authz.actions.api.get)
+    .mockImplementation((privilege) => `api:${privilege}`);
+  mockSecurityStart.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValue(
+    mockCheckPrivileges
+  );
+  return { mockSecurityStart, mockCheckPrivileges };
+};
 
 /**
  * Creates common mocks for tool tests
@@ -28,6 +32,7 @@ export const createToolTestMocks = () => {
   const mockCore = coreMock.createSetup();
   const mockLogger = loggingSystemMock.createLogger();
   const mockEsClient = elasticsearchClientMock.createScopedClusterClient();
+  const { mockSecurityStart, mockCheckPrivileges } = generateSecurityStartMock();
   const mockRequest = httpServerMock.createKibanaRequest({
     path: '/s/default/app/security',
   });
@@ -36,6 +41,8 @@ export const createToolTestMocks = () => {
     mockCore,
     mockLogger,
     mockEsClient,
+    mockSecurityStart,
+    mockCheckPrivileges,
     mockRequest,
   };
 };
@@ -45,79 +52,29 @@ export const createToolTestMocks = () => {
  */
 export const setupMockCoreStartServices = (
   mockCore: ReturnType<typeof coreMock.createSetup>,
-  mockEsClient: ReturnType<typeof elasticsearchClientMock.createScopedClusterClient>
+  mockEsClient: ReturnType<typeof elasticsearchClientMock.createScopedClusterClient>,
+  mockSecurityStart: ReturnType<typeof securityMock.createStart> = generateSecurityStartMock()
+    .mockSecurityStart
 ) => {
   const mockCoreStart = coreMock.createStart();
   Object.assign(mockCoreStart.elasticsearch.client, {
     asInternalUser: mockEsClient.asInternalUser,
     asCurrentUser: mockEsClient.asCurrentUser,
   });
-  mockCore.getStartServices.mockResolvedValue([mockCoreStart, {}, {}]);
+  mockCore.getStartServices.mockResolvedValue([
+    mockCoreStart,
+    {
+      entityStore: {
+        createCRUDClient: jest.fn().mockReturnValue({}),
+        createResolutionClient: undefined,
+        getMaintainerStatus: jest.fn().mockResolvedValue([]),
+      },
+      security: mockSecurityStart,
+    },
+    {},
+  ]);
+  return mockCoreStart;
 };
-
-/**
- * Creates minimal mocks for ToolHandlerContext fields
- */
-const createMockModelProvider = (): ModelProvider =>
-  ({
-    getDefaultModel: jest.fn(),
-    getModel: jest.fn(),
-    getUsageStats: jest.fn().mockReturnValue({ calls: [] }),
-  } as unknown as ModelProvider);
-
-const createMockToolProvider = (): ToolProvider =>
-  ({
-    has: jest.fn(),
-    get: jest.fn(),
-    list: jest.fn(),
-  } as unknown as ToolProvider);
-
-const createMockScopedRunner = (): ScopedRunner =>
-  ({
-    runTools: jest.fn(),
-  } as unknown as ScopedRunner);
-
-const createMockToolResultStore = (): ToolResultStore =>
-  ({
-    get: jest.fn(),
-  } as unknown as ToolResultStore);
-
-const createMockToolEventEmitter = (): ToolEventEmitter =>
-  ({
-    reportProgress: jest.fn(),
-  } as unknown as ToolEventEmitter);
-
-const createMockToolPromptManager = (): ToolPromptManager =>
-  ({
-    checkConfirmationStatus: jest.fn(),
-    askForConfirmation: jest.fn(),
-  } as unknown as ToolPromptManager);
-
-const createMockToolStateManager = (): ToolStateManager =>
-  ({
-    getState: jest.fn(),
-    setState: jest.fn(),
-  } as unknown as ToolStateManager);
-
-const createMockAttachmentStateManager = (): AttachmentStateManager =>
-  ({
-    get: jest.fn(),
-    getLatest: jest.fn(),
-    getVersion: jest.fn(),
-    getActive: jest.fn().mockReturnValue([]),
-    getAll: jest.fn().mockReturnValue([]),
-    getDiff: jest.fn(),
-    add: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-    restore: jest.fn(),
-    permanentDelete: jest.fn(),
-    rename: jest.fn(),
-    resolveRefs: jest.fn().mockReturnValue([]),
-    getTotalTokenEstimate: jest.fn().mockReturnValue(0),
-    hasChanges: jest.fn().mockReturnValue(false),
-    markClean: jest.fn(),
-  } as unknown as AttachmentStateManager);
 
 /**
  * Creates a tool handler context object
@@ -128,19 +85,14 @@ export const createToolHandlerContext = (
   mockLogger: ReturnType<typeof loggingSystemMock.createLogger>,
   additionalContext: Partial<Omit<ToolHandlerContext, 'request' | 'esClient' | 'logger'>> = {}
 ): ToolHandlerContext => {
+  const baseMock = agentBuilderMocks.tools.createHandlerContext();
   return {
+    ...baseMock,
     request: mockRequest,
     esClient: mockEsClient,
     logger: mockLogger,
     spaceId: 'default',
-    modelProvider: additionalContext.modelProvider ?? createMockModelProvider(),
-    toolProvider: additionalContext.toolProvider ?? createMockToolProvider(),
-    runner: additionalContext.runner ?? createMockScopedRunner(),
-    resultStore: additionalContext.resultStore ?? createMockToolResultStore(),
-    events: additionalContext.events ?? createMockToolEventEmitter(),
-    prompts: additionalContext.prompts ?? createMockToolPromptManager(),
-    stateManager: additionalContext.stateManager ?? createMockToolStateManager(),
-    attachments: additionalContext.attachments ?? createMockAttachmentStateManager(),
+    ...additionalContext,
   };
 };
 

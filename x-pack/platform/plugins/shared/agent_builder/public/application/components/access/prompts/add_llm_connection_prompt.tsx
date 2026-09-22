@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import { EuiButton, EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiCallOut, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
+import { useIsOnManagementLlmConnectorsPage } from '../../../hooks/use_navigation';
 import { ErrorPrompt } from '../../common/prompt/error_prompt';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useAssetBasePath } from '../../../hooks/use_asset_base_path';
@@ -22,13 +25,33 @@ export const AddLlmConnectionPrompt: React.FC<AddLlmConnectionPromptProps> = ({ 
   const { colorMode } = useEuiTheme();
   const assetBasePath = useAssetBasePath();
   const llmDocsHref = docLinksService.models;
+  const isOnLlmConnectorsManagementPage = useIsOnManagementLlmConnectorsPage();
 
-  const primaryButton = (
+  const primaryAction = isOnLlmConnectorsManagementPage ? (
+    <EuiCallOut
+      announceOnMount
+      size="s"
+      iconType="info"
+      title={
+        <FormattedMessage
+          id="xpack.agentBuilder.access.prompt.addLlm.onConnectorsPageCalloutTitle"
+          defaultMessage="Configure your LLM connection on this page"
+        />
+      }
+      data-test-subj="connectLLMOnConnectorsPageCallout"
+    />
+  ) : (
     <EuiButton
       fill
       onClick={() => {
         navigationService.navigateToLlmConnectorsManagement();
       }}
+      data-test-subj="connectLLMButton"
+      {...getEbtProps({
+        element: AGENT_BUILDER_UI_EBT.element.pageContent,
+        action: AGENT_BUILDER_UI_EBT.action.access.CONNECT_LLM,
+        detail: 'connector',
+      })}
     >
       <FormattedMessage
         id="xpack.agentBuilder.access.prompt.addLlm.actions.connectButton"
@@ -38,7 +61,17 @@ export const AddLlmConnectionPrompt: React.FC<AddLlmConnectionPromptProps> = ({ 
   );
 
   const secondaryButton = (
-    <EuiButtonEmpty href={llmDocsHref} target="_blank" iconType="popout" iconSide="right">
+    <EuiButtonEmpty
+      href={llmDocsHref}
+      target="_blank"
+      iconType="external"
+      iconSide="right"
+      {...getEbtProps({
+        element: AGENT_BUILDER_UI_EBT.element.pageContent,
+        action: AGENT_BUILDER_UI_EBT.action.access.LEARN_MORE_DOCS,
+        detail: 'connector',
+      })}
+    >
       <FormattedMessage
         id="xpack.agentBuilder.access.prompt.addLlm.actions.docsLink"
         defaultMessage="Read the docs"
@@ -54,7 +87,7 @@ export const AddLlmConnectionPrompt: React.FC<AddLlmConnectionPromptProps> = ({ 
       variant={variant}
       errorType="ADD_LLM_CONNECTION"
       imageSrc={brainImage}
-      primaryButton={primaryButton}
+      primaryButton={primaryAction}
       secondaryButton={secondaryButton}
     />
   );

@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { ChromeBreadcrumb } from '@kbn/core/public';
 
 import { BASE_PATH } from '../../../common/constants';
-import type { Page, DynamicPagePathValues } from '../page_paths';
+import type { Page } from '../page_paths';
 import { pagePathGetters } from '../page_paths';
 
 import { useKibana } from '../lib/kibana';
@@ -21,8 +21,17 @@ const BASE_BREADCRUMB: ChromeBreadcrumb = {
   }),
 };
 
+/**
+ * Values interpolated into breadcrumb text. Unlike `DynamicPagePathValues` -- which
+ * feeds URL builders and is therefore string-only -- these are rendered, not
+ * serialized into a path, so flags stay booleans and can't silently mistype.
+ */
+export interface BreadcrumbValues {
+  [key: string]: string | number | boolean | undefined;
+}
+
 const breadcrumbGetters: {
-  [key in Page]?: (values: DynamicPagePathValues) => ChromeBreadcrumb[];
+  [key in Page]?: (values: BreadcrumbValues) => ChromeBreadcrumb[];
 } = {
   base: () => [BASE_BREADCRUMB],
   overview: () => [
@@ -33,38 +42,57 @@ const breadcrumbGetters: {
       }),
     },
   ],
-  live_queries: () => [
+  history: () => [
     BASE_BREADCRUMB,
     {
-      text: i18n.translate('xpack.osquery.breadcrumbs.liveQueriesPageTitle', {
-        defaultMessage: 'Live queries',
+      href: pagePathGetters.history(),
+      text: i18n.translate('xpack.osquery.breadcrumbs.historyPageTitle', {
+        defaultMessage: 'History',
       }),
     },
   ],
-  live_query_new: () => [
+  new_query: () => [
     BASE_BREADCRUMB,
     {
-      href: pagePathGetters.live_queries(),
-      text: i18n.translate('xpack.osquery.breadcrumbs.liveQueriesPageTitle', {
-        defaultMessage: 'Live queries',
+      href: pagePathGetters.history(),
+      text: i18n.translate('xpack.osquery.breadcrumbs.historyPageTitle', {
+        defaultMessage: 'History',
       }),
     },
     {
-      text: i18n.translate('xpack.osquery.breadcrumbs.newLiveQueryPageTitle', {
+      text: i18n.translate('xpack.osquery.breadcrumbs.newQueryPageTitle', {
         defaultMessage: 'New',
       }),
     },
   ],
-  live_query_details: ({ liveQueryId }) => [
+  history_details: ({ liveQueryId }) => [
     BASE_BREADCRUMB,
     {
-      href: pagePathGetters.live_queries(),
-      text: i18n.translate('xpack.osquery.breadcrumbs.liveQueriesPageTitle', {
-        defaultMessage: 'Live queries',
+      href: pagePathGetters.history(),
+      text: i18n.translate('xpack.osquery.breadcrumbs.historyPageTitle', {
+        defaultMessage: 'History',
       }),
     },
     {
       text: liveQueryId,
+    },
+  ],
+  history_scheduled_details: ({ scheduleId, executionCount }) => [
+    BASE_BREADCRUMB,
+    {
+      href: pagePathGetters.history(),
+      text: i18n.translate('xpack.osquery.breadcrumbs.historyPageTitle', {
+        defaultMessage: 'History',
+      }),
+    },
+    {
+      text: scheduleId,
+    },
+    {
+      text: i18n.translate('xpack.osquery.breadcrumbs.scheduledExecutionTitle', {
+        defaultMessage: 'Execution #{executionCount}',
+        values: { executionCount },
+      }),
     },
   ],
   saved_queries: () => [
@@ -123,7 +151,7 @@ const breadcrumbGetters: {
       }),
     },
   ],
-  pack_details: ({ packName }) => [
+  pack_edit: ({ packName, isReadOnly }) => [
     BASE_BREADCRUMB,
     {
       href: pagePathGetters.packs(),
@@ -134,28 +162,21 @@ const breadcrumbGetters: {
     {
       text: packName,
     },
-  ],
-  pack_edit: ({ packName, packId }) => [
-    BASE_BREADCRUMB,
     {
-      href: pagePathGetters.packs(),
-      text: i18n.translate('xpack.osquery.breadcrumbs.packsPageTitle', {
-        defaultMessage: 'Packs',
-      }),
-    },
-    {
-      href: pagePathGetters.pack_details({ packId }),
-      text: packName,
-    },
-    {
-      text: i18n.translate('xpack.osquery.breadcrumbs.editpacksPageTitle', {
-        defaultMessage: 'Edit',
-      }),
+      // A readPacks-only user lands on a read-only pack page, so the trailing crumb
+      // must not say "Edit" (matches the kebab affordance in pack_row_actions).
+      text: isReadOnly
+        ? i18n.translate('xpack.osquery.breadcrumbs.viewpacksPageTitle', {
+            defaultMessage: 'View',
+          })
+        : i18n.translate('xpack.osquery.breadcrumbs.editpacksPageTitle', {
+            defaultMessage: 'Edit',
+          }),
     },
   ],
 };
 
-export function useBreadcrumbs(page: Page, values: DynamicPagePathValues = {}) {
+export function useBreadcrumbs(page: Page, values: BreadcrumbValues = {}) {
   const { chrome, http, application } = useKibana().services;
 
   const breadcrumbs: ChromeBreadcrumb[] =

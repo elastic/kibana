@@ -37,4 +37,50 @@ describe('renderTemplate', () => {
     });
     expect(content).toMatchSnapshot();
   });
+
+  test('loads bundles from an IIFE instead of window.onload', async () => {
+    const content = await renderTemplate(mockParams());
+    expect(content).not.toContain('window.onload = function');
+    expect(content).toContain('(function () {');
+    expect(content).toContain('})();');
+  });
+
+  test('includes __REACT_DEVTOOLS_GLOBAL_HOOK__ stub when useHMR is true', async () => {
+    const content = await renderTemplate({
+      ...mockParams(),
+      useHMR: true,
+    });
+    expect(content).toContain('__REACT_DEVTOOLS_GLOBAL_HOOK__');
+    expect(content).toContain('supportsFiber: true');
+    expect(content).toContain('inject: function');
+  });
+
+  test('does NOT include __REACT_DEVTOOLS_GLOBAL_HOOK__ stub when useHMR is false', async () => {
+    const content = await renderTemplate({
+      ...mockParams(),
+      useHMR: false,
+    });
+    expect(content).not.toContain('__REACT_DEVTOOLS_GLOBAL_HOOK__');
+  });
+
+  test('does NOT include __REACT_DEVTOOLS_GLOBAL_HOOK__ stub by default', async () => {
+    const content = await renderTemplate(mockParams());
+    expect(content).not.toContain('__REACT_DEVTOOLS_GLOBAL_HOOK__');
+  });
+
+  test('includes __kbnHmrActive__ = true when useHMR is true', async () => {
+    const content = await renderTemplate({
+      ...mockParams(),
+      useHMR: true,
+    });
+    expect(content).toContain('__kbnHmrActive__ = true');
+  });
+
+  test('does NOT include __kbnHmrActive__ when useHMR is false', async () => {
+    const content = await renderTemplate({
+      ...mockParams(),
+      useHMR: false,
+    });
+    expect(content).not.toContain('__kbnHmrActive__');
+  });
 });

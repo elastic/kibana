@@ -9,7 +9,11 @@ import { renderHook } from '@testing-library/react';
 
 import { mockQuery, mockAlertCountByRuleResult, parsedAlertCountByRuleResult } from './mock_data';
 import type { UseAlertCountByRuleByStatusProps } from './use_alert_count_by_rule_by_status';
-import { useAlertCountByRuleByStatus } from './use_alert_count_by_rule_by_status';
+import {
+  buildRuleAlertsByEntityQuery,
+  useAlertCountByRuleByStatus,
+} from './use_alert_count_by_rule_by_status';
+import { buildEntityIdentifierTermFilters } from '../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 
 const dateNow = new Date('2022-04-15T12:00:00.000Z').valueOf();
 const mockDateNow = jest.fn().mockReturnValue(dateNow);
@@ -30,6 +34,27 @@ jest.mock('../../../detections/containers/detection_engine/alerts/use_query', ()
     useQueryAlerts: (...props: unknown[]) => mockUseQueryAlerts(...props),
   };
 });
+
+jest.mock('../../../flyout/entity_details/shared/hooks/use_entity_from_store', () => ({
+  useEntityFromStore: jest.fn(() => ({
+    entity: null,
+    entityRecord: null,
+    firstSeen: null,
+    lastSeen: null,
+    isLoading: false,
+    error: null,
+    refetch: jest.fn(),
+  })),
+}));
+
+jest.mock('../../lib/kibana', () => ({
+  useUiSetting: jest.fn(() => false),
+}));
+
+jest.mock('@kbn/entity-store/public', () => ({
+  FF_ENABLE_ENTITY_STORE_V2: 'securitySolution:entityStoreEnableV2',
+  useEntityStoreEuidApi: jest.fn(() => undefined),
+}));
 
 const from = '2020-07-07T08:20:18.966Z';
 const to = '2020-07-08T08:20:18.966Z';
@@ -53,8 +78,6 @@ const renderUseAlertCountByRuleByStatus = (
   renderHook(() =>
     useAlertCountByRuleByStatus({
       skip: false,
-      field: 'test_field',
-      value: 'test_value',
       statuses: ['open'],
       queryId: 'queryId',
       signalIndexName: 'signalIndexName',
@@ -78,7 +101,7 @@ describe('useAlertCountByRuleByStatus', () => {
       updatedAt: dateNow,
     });
 
-    expect(mockUseQueryAlerts).toBeCalledWith(mockQuery());
+    expect(mockUseQueryAlerts).toHaveBeenCalledWith(mockQuery());
   });
 
   it('should return parsed items', () => {
@@ -117,12 +140,31 @@ describe('useAlertCountByRuleByStatus', () => {
   it('should skip the query', () => {
     const { result } = renderUseAlertCountByRuleByStatus({ skip: true });
 
-    expect(mockUseQueryAlerts).toBeCalledWith({ ...mockQuery(), skip: true });
+    expect(mockUseQueryAlerts).toHaveBeenCalledWith({ ...mockQuery(), skip: true });
 
     expect(result.current).toEqual({
       items: [],
       isLoading: false,
       updatedAt: dateNow,
     });
+  });
+
+  it('should filter by identityFields when provided', () => {
+    renderUseAlertCountByRuleByStatus({
+      identityFields: { 'host.id': 'host-uuid', 'host.name': 'hostname' },
+    });
+
+    expect(mockUseQueryAlerts).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: buildRuleAlertsByEntityQuery({
+          from,
+          to,
+          statuses: ['open'],
+          entityFilters: [
+            buildEntityIdentifierTermFilters({ 'host.id': 'host-uuid', 'host.name': 'hostname' }),
+          ],
+        }),
+      })
+    );
   });
 });

@@ -73,7 +73,7 @@ const findUsageInOtherManagedPipelines = async (
     return Object.entries(pipelines).find(
       ([name, pipeline]) =>
         name !== getInferencePipelineNameFromIndexName(indexName) &&
-        pipeline.processors?.find((processor) => processor.pipeline?.name === pipelineName)
+        pipeline.processors?.find((processor) => processor?.pipeline?.name === pipelineName)
     )?.[0]; // Managed pipeline name
   } catch (error) {
     // only suppress Not Found error

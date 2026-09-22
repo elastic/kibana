@@ -12,6 +12,7 @@ export const getImportRulesSchemaMock = (rewrites?: Partial<RuleToImport>): Rule
     description: 'some description',
     name: 'Query with a rule id',
     query: 'user.name: root or user.name: admin',
+    max_signals: 100,
     severity: 'high',
     type: 'query',
     risk_score: 55,

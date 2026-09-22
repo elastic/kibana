@@ -46,6 +46,7 @@ export interface Test extends Runnable {
 export interface Runnable {
   isFailed(): boolean;
   isPending(): boolean;
+  timeout(ms?: number): number;
   duration?: number;
   titlePath(): string[];
   file?: string;
@@ -66,7 +67,9 @@ interface Stats {
 
 export interface Runner extends EventEmitter {
   abort(): void;
-  failures: any[];
+  failures: number;
+  on(event: 'fail', listener: (test: Test, err: Error) => void): this;
+  on(event: string | symbol, listener: (...args: any[]) => void): this;
   uncaught: (error: Error) => void;
   stats?: Stats;
 }

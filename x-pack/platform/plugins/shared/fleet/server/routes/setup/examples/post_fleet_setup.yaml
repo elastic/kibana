@@ -1,0 +1,40 @@
+responses:
+  200:
+    description: 'Fleet setup completed'
+    content:
+      application/json:
+        examples:
+          fleetSetupSuccessExample:
+            description: 'Fleet initialized successfully with no non-fatal errors'
+            value:
+              isInitialized: true
+              nonFatalErrors: []
+          fleetSetupWithNonFatalErrorsExample:
+            description: 'Fleet initialized but encountered non-fatal errors during setup'
+            value:
+              isInitialized: true
+              nonFatalErrors:
+                - name: 'PackageNotFoundError'
+                  message: 'Package fleet_server not found in registry'
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'
+  500:
+    description: 'Internal Server Error'
+    content:
+      application/json:
+        examples:
+          internalErrorResponseExample:
+            description: 'Example of an internal server error response'
+            value:
+              statusCode: 500
+              error: 'Internal Server Error'
+              message: 'An error message describing what went wrong'

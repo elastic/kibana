@@ -43,11 +43,19 @@ export interface ExecuteQueryAction {
   error?: string;
 }
 
+export interface ValidateQueryAction {
+  type: 'validate_query';
+  query: string;
+  success: boolean;
+  error?: string;
+}
+
 export type Action =
   | RequestDocumentationAction
   | GenerateQueryAction
   | AutocorrectQueryAction
-  | ExecuteQueryAction;
+  | ExecuteQueryAction
+  | ValidateQueryAction;
 
 export function isRequestDocumentationAction(action: Action): action is RequestDocumentationAction {
   return action.type === 'request_documentation';
@@ -65,15 +73,18 @@ export function isExecuteQueryAction(action: Action): action is ExecuteQueryActi
   return action.type === 'execute_query';
 }
 
+export function isValidateQueryAction(action: Action): action is ValidateQueryAction {
+  return action.type === 'validate_query';
+}
+
 /**
  * Format an action into a couple of [ai, user] messages to be used in prompts.
  */
 export const formatAction = (action: Action, withoutToolCalls = true): BaseMessageLike[] => {
-  // Important notice: Claude is *very* stupid with tool configuration
-  // and will be fine calling tools that are not available, just based on previous tool calls
-  // which means we can't represent the action history as a tool call list
-  // and are forced to similar a conversation instead.
-  // yes, this is sub-optimal, but this is how Claude behaves.
+  // Important notice: models will happily call tools that are not available, just based on
+  // previous tool calls, which means we can't represent the action history as a tool call list
+  // and are forced to simulate a conversation instead.
+  // yes, this is sub-optimal, but this is how models behave.
 
   const toolCallId = generateFakeToolCallId();
   switch (action.type) {
@@ -113,6 +124,7 @@ export const formatAction = (action: Action, withoutToolCalls = true): BaseMessa
                 hasMistakes: action.wasCorrected,
                 output: action.output,
               },
+              wrapToolResult: false,
             }),
           ];
     case 'execute_query':
@@ -144,23 +156,78 @@ Can you fix the query?`
                 success: action.success,
                 error: action.error,
               },
+              wrapToolResult: false,
             }),
           ];
-    case 'request_documentation':
-      // always use tool call format for this action, to stay closer to the original flow
-      // also Claude doesn't seem to care about requesting more doc.
-      return [
-        createToolCallMessage({
-          toolCallId,
-          toolName: 'request_documentation',
-          args: { keywords: action.requestedKeywords },
-        }),
-        createToolResultMessage({
-          toolCallId,
-          content: {
-            documentation: action.fetchedDoc,
-          },
-        }),
-      ];
+    case 'validate_query':
+      if (action.success) {
+        return [];
+      }
+      return withoutToolCalls
+        ? [
+            createAIMessage('Now you can validate the query'),
+            createUserMessage(
+              `I tried validating the query and got the following error:
+
+\`\`\`
+${action.error}
+\`\`\`
+
+Can you fix the query?`
+            ),
+          ]
+        : [
+            createToolCallMessage({
+              toolCallId,
+              toolName: 'validate_query',
+              args: { query: action.query },
+            }),
+            createToolResultMessage({
+              toolCallId,
+              content: {
+                success: action.success,
+                error: action.error,
+              },
+              wrapToolResult: false,
+            }),
+          ];
+    case 'request_documentation': {
+      const documentedKeywords = Object.keys(action.fetchedDoc);
+      if (documentedKeywords.length === 0) {
+        return [];
+      }
+      // Used to be replayed as a tool call, back when the generation step still exposed this tool.
+      // It no longer does, and a tool call for an unavailable tool makes models call it anyway and
+      // triggers `doNotCallThisTool` injection, so simulate a conversation like the other actions.
+      const requestedKeywords =
+        action.requestedKeywords.length > 0 ? action.requestedKeywords : documentedKeywords;
+      return withoutToolCalls
+        ? [
+            createAIMessage(
+              `I need the ES|QL documentation for the following keywords: ${requestedKeywords.join(
+                ', '
+              )}`
+            ),
+            createUserMessage(
+              `Here is the documentation you requested:\n\n${JSON.stringify({
+                documentation: action.fetchedDoc,
+              })}`
+            ),
+          ]
+        : [
+            createToolCallMessage({
+              toolCallId,
+              toolName: 'request_documentation',
+              args: { keywords: action.requestedKeywords },
+            }),
+            createToolResultMessage({
+              toolCallId,
+              content: {
+                documentation: action.fetchedDoc,
+              },
+              wrapToolResult: false,
+            }),
+          ];
+    }
   }
 };

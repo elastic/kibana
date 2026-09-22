@@ -4,13 +4,11 @@
     "outDir": "target/types",
   },
   "include": [
-    ".storybook/**/*",
     "common/**/*",
     "public/**/*",
     "../../../../../typings/**/*"
   ],
   "kbn_references": [
-    "@kbn/storybook",
     "@kbn/core",
     "@kbn/test-jest-helpers",
     "@kbn/i18n",
@@ -21,7 +19,6 @@
     "@kbn/core-theme-browser",
     "@kbn/react-kibana-context-common",
     "@kbn/react-kibana-context-styled",
-    "@kbn/code-editor",
     "@kbn/core-analytics-browser",
     "@kbn/core-user-profile-browser",
   ],

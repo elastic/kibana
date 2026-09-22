@@ -21,17 +21,17 @@ export const UpgradePrebuiltRulesTableButtons = ({
   selectedRules,
 }: UpgradePrebuiltRulesTableButtonsProps) => {
   const {
-    state: { hasRulesToUpgrade, loadingRules, isRefetching, isUpgradingSecurityPackages },
+    state: { hasRulesToUpgrade, loadingRules, isRefetching, isInitializingPrebuiltRulesPackage },
     actions: { upgradeRules, upgradeAllRules },
   } = useUpgradePrebuiltRulesTableContext();
   const { isRulesCustomizationEnabled } = usePrebuiltRulesCustomizationStatus();
-  const canEditRules = useUserPrivileges().rulesPrivileges.edit;
+  const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
 
   const numberOfSelectedRules = selectedRules.length ?? 0;
   const shouldDisplayUpgradeSelectedRulesButton = numberOfSelectedRules > 0;
 
   const isRuleUpgrading = loadingRules.length > 0;
-  const isRequestInProgress = isRuleUpgrading || isRefetching || isUpgradingSecurityPackages;
+  const isRequestInProgress = isRuleUpgrading || isRefetching || isInitializingPrebuiltRulesPackage;
 
   const doAllSelectedRulesHaveConflicts =
     isRulesCustomizationEnabled &&
@@ -72,7 +72,7 @@ export const UpgradePrebuiltRulesTableButtons = ({
         <EuiToolTip content={allRulesButtonTooltip}>
           <EuiButton
             fill
-            iconType="plusInCircle"
+            iconType="plusCircle"
             onClick={upgradeAllRules}
             disabled={!canEditRules || !hasRulesToUpgrade || isRequestInProgress}
             data-test-subj="upgradeAllRulesButton"

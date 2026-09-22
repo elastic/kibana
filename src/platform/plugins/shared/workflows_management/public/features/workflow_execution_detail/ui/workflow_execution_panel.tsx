@@ -10,22 +10,33 @@
 import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiButton,
+  EuiButtonIcon,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
   EuiLink,
   EuiPanel,
+  EuiSpacer,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
-import { isCancelableStatus, isTerminalStatus } from '@kbn/workflows';
+import { isTerminalStatus } from '@kbn/workflows';
+import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { CancelExecutionButton } from './cancel_execution_button';
 import { WorkflowStepExecutionTree } from './workflow_step_execution_tree';
+import { getOmittedStepExecutionsCount } from '../../../../common';
+import { useKibana } from '../../../hooks/use_kibana';
+import type { RerunWorkflowExecutionParams } from '../../../pages/executions/build_replay_inputs_from_execution_context';
+import { getTestRunTooltipContent } from '../../../shared/ui/workflow_action_buttons/get_workflow_tooltip_content';
+import type { ChildWorkflowExecutionsMap } from '../model/use_child_workflow_executions';
 
 const i18nTexts = {
   backToExecutions: i18n.translate('workflows.workflowStepExecutionList.backToExecution', {
@@ -34,36 +45,54 @@ const i18nTexts = {
   done: i18n.translate('workflows.workflowStepExecutionList.done', {
     defaultMessage: 'Done',
   }),
+  replay: i18n.translate('workflows.workflowStepExecutionList.replay', {
+    defaultMessage: 'Run again',
+  }),
+  truncatedTitle: i18n.translate('workflows.workflowExecutionPanel.stepExecutionsTruncatedTitle', {
+    defaultMessage: 'Step executions truncated',
+  }),
 };
 
 export interface WorkflowExecutionPanelProps {
   execution: WorkflowExecutionDto | null;
+  /** Paginated steps-list `total`; callout when this exceeds the UI page budget. */
+  stepExecutionsTotal?: number;
   definition: WorkflowYaml | null;
   error: Error | null;
   onStepExecutionClick: (stepExecutionId: string) => void;
   selectedId: string | null;
   showBackButton?: boolean;
   onClose: () => void;
+  onReRunExecution?: (params: RerunWorkflowExecutionParams) => Promise<void>;
+  childExecutionsMap?: ChildWorkflowExecutionsMap;
+  isLoadingChildExecutions?: boolean;
+  /** Close step detail panel before opening Agent Builder diagnose chat. */
+  onBeforeDiagnose?: () => void;
 }
 export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
   ({
     execution,
     definition,
+    stepExecutionsTotal = 0,
     showBackButton = true,
     error,
     onStepExecutionClick,
     selectedId: selectedStepExecutionId,
     onClose,
+    onReRunExecution,
+    childExecutionsMap,
+    isLoadingChildExecutions,
+    onBeforeDiagnose,
   }) => {
     const styles = useMemoCss(componentStyles);
-    const showCancelButton = useMemo<boolean>(
-      () => Boolean(execution && isCancelableStatus(execution.status)),
-      [execution]
+    const showCancelButton = Boolean(
+      execution && !isTerminalStatus(execution.status) && !execution.finishedAt
     );
-    const showDoneButton = useMemo<boolean>(
-      () => Boolean(!showBackButton && execution && isTerminalStatus(execution.status)),
-      [showBackButton, execution]
+    const showDoneButton = Boolean(
+      !showBackButton && execution && isTerminalStatus(execution.status)
     );
+    const loadedCount = execution?.stepExecutions.length ?? 0;
+    const omittedCount = getOmittedStepExecutionsCount(stepExecutionsTotal);
 
     return (
       <EuiFlexGroup
@@ -71,14 +100,21 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
         justifyContent="flexStart"
         gutterSize="none"
         css={{ height: '100%' }}
+        data-test-subj="workflowExecutionPanel"
+        data-execution-status={execution?.status}
       >
         {showBackButton && (
           <EuiFlexItem grow={false}>
-            <EuiLink onClick={onClose} color="text" aria-label={i18nTexts.backToExecutions}>
+            <EuiLink
+              onClick={onClose}
+              color="text"
+              aria-label={i18nTexts.backToExecutions}
+              data-test-subj="workflowBackToExecutionsLink"
+            >
               <EuiPanel paddingSize="m" hasShadow={false} css={styles.linkCss}>
                 <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
                   <EuiFlexItem grow={false}>
-                    <EuiIcon type="sortLeft" />
+                    <EuiIcon type="sortLeft" aria-hidden={true} />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiTitle size="xxs">
@@ -94,25 +130,60 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
 
         <EuiFlexItem css={{ overflow: 'hidden' }}>
           <EuiPanel paddingSize="m" hasShadow={false} css={{ overflowY: 'auto' }}>
+            {omittedCount > 0 && loadedCount > 0 && (
+              <>
+                <EuiCallOut
+                  announceOnMount
+                  color="warning"
+                  iconType="warning"
+                  size="s"
+                  title={i18nTexts.truncatedTitle}
+                  data-test-subj="workflowExecutionStepExecutionsTruncatedCallout"
+                >
+                  <FormattedMessage
+                    id="workflows.workflowExecutionPanel.stepExecutionsTruncatedDescription"
+                    defaultMessage="This execution has too much step data to load at once. {count, plural, one {# step execution was not loaded} other {# step executions were not loaded}}."
+                    values={{ count: omittedCount }}
+                  />
+                </EuiCallOut>
+                <EuiSpacer size="m" />
+              </>
+            )}
             <WorkflowStepExecutionTree
               definition={definition}
               execution={execution ?? null}
+              stepExecutionsTotal={stepExecutionsTotal}
               error={error}
               onStepExecutionClick={onStepExecutionClick}
               selectedId={selectedStepExecutionId ?? null}
+              childExecutionsMap={childExecutionsMap}
+              isLoadingChildExecutions={isLoadingChildExecutions}
+              onBeforeDiagnose={onBeforeDiagnose}
             />
           </EuiPanel>
         </EuiFlexItem>
 
-        {(showDoneButton || showCancelButton) && (
+        {execution && (showCancelButton || showDoneButton) && (
           <EuiFlexItem grow={false}>
             <EuiHorizontalRule margin="none" />
             <EuiPanel paddingSize="m" hasShadow={false}>
-              {showCancelButton && execution ? (
-                <CancelExecutionButton executionId={execution.id} />
+              {showCancelButton ? (
+                <CancelExecutionButton
+                  executionId={execution.id}
+                  workflowId={execution.workflowId}
+                  startedAt={execution.startedAt}
+                />
               ) : (
-                <>
-                  {showDoneButton && (
+                <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
+                  <EuiFlexItem grow={false}>
+                    <ReplayExecutionButton
+                      context={execution.context}
+                      executionId={execution.id}
+                      onReRunExecution={onReRunExecution}
+                      workflowId={execution.workflowId}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
                     <EuiButton
                       onClick={onClose}
                       iconType="check"
@@ -122,8 +193,8 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
                     >
                       {i18nTexts.done}
                     </EuiButton>
-                  )}
-                </>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               )}
             </EuiPanel>
           </EuiFlexItem>
@@ -142,3 +213,53 @@ const componentStyles = {
       },
     }),
 };
+
+const ReplayExecutionButton = React.memo<{
+  context?: Record<string, unknown>;
+  executionId: string;
+  onReRunExecution?: (params: RerunWorkflowExecutionParams) => Promise<void>;
+  workflowId?: string;
+}>(({ context, executionId, onReRunExecution, workflowId }) => {
+  const { application } = useKibana().services;
+  const { canExecuteWorkflow } = useWorkflowsCapabilities();
+
+  const replayExecution = useCallback(() => {
+    if (!canExecuteWorkflow || !workflowId) {
+      return;
+    }
+
+    if (onReRunExecution) {
+      void onReRunExecution({ workflowId, executionId, context });
+      return;
+    }
+
+    application.navigateToApp('workflows', {
+      path: `/${workflowId}?replayExecutionId=${executionId}`,
+    });
+  }, [application, canExecuteWorkflow, context, executionId, onReRunExecution, workflowId]);
+
+  const isRunDisabled = !canExecuteWorkflow || !workflowId;
+  const runDisabledTooltipContent = isRunDisabled
+    ? getTestRunTooltipContent({
+        isValid: true,
+        canRunWorkflow: canExecuteWorkflow,
+        isExecutionsTab: false,
+      })
+    : null;
+
+  return (
+    <EuiToolTip content={runDisabledTooltipContent ?? i18nTexts.replay} disableScreenReaderOutput>
+      <EuiButtonIcon
+        onClick={replayExecution}
+        iconType="refresh"
+        size="s"
+        color="success"
+        aria-label={i18nTexts.replay}
+        display="base"
+        data-test-subj="replayExecutionButton"
+        disabled={isRunDisabled}
+      />
+    </EuiToolTip>
+  );
+});
+ReplayExecutionButton.displayName = 'ReplayExecutionButton';

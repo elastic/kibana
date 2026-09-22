@@ -47,7 +47,10 @@ export const Default: StoryFn = () => {
         <div css={{ maxWidth: '300px' }}>
           <AssetCriticalitySelector
             criticality={criticality}
-            entity={{ type: EntityType.host, name: 'My test Host' }}
+            entity={{
+              type: EntityType.host,
+              name: 'My test Host',
+            }}
           />
         </div>
       </TestProvider>
@@ -62,7 +65,10 @@ export const Compressed: StoryFn = () => {
         <div css={{ maxWidth: '300px' }}>
           <AssetCriticalitySelector
             criticality={criticality}
-            entity={{ type: EntityType.host as const, name: 'My test Host' }}
+            entity={{
+              type: EntityType.host as const,
+              name: 'My test Host',
+            }}
             compressed
           />
         </div>
@@ -78,7 +84,10 @@ export const Loading: StoryFn = () => {
         <div css={{ maxWidth: '300px' }}>
           <AssetCriticalitySelector
             criticality={criticalityLoading}
-            entity={{ type: EntityType.host as const, name: 'My test Host' }}
+            entity={{
+              type: EntityType.host as const,
+              name: 'My test Host',
+            }}
           />
         </div>
       </TestProvider>

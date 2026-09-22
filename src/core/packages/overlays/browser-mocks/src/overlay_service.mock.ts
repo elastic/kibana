@@ -22,6 +22,7 @@ const createStartContractMock = () => {
   const startContract: DeeplyMockedKeys<OverlayStart> = lazyObject({
     openFlyout: overlayFlyoutServiceMock.createStartContract().open,
     openSystemFlyout: overlaySystemFlyoutServiceMock.createStartContract().open,
+    openFlyoutTemplate: overlaySystemFlyoutServiceMock.createStartContract().openTemplate,
     openModal: overlayStart.open,
     openConfirm: overlayStart.openConfirm,
     banners: overlayBannersServiceMock.createStartContract(),
@@ -32,6 +33,7 @@ const createStartContractMock = () => {
 const createMock = () => {
   const mocked: jest.Mocked<PublicMethodsOf<OverlayService>> = lazyObject({
     start: jest.fn().mockReturnValue(createStartContractMock()),
+    closeAllFlyouts: jest.fn(),
   });
   return mocked;
 };

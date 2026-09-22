@@ -33,12 +33,12 @@ export const InformationText: FC<Props> = ({
     return (
       <EuiEmptyPrompt
         title={
-          <h2>
+          <h3>
             <FormattedMessage
               id="xpack.aiops.logCategorization.noTextFieldsTitle"
               defaultMessage="No text fields found"
             />
-          </h2>
+          </h3>
         }
         titleSize="xs"
         body={
@@ -58,12 +58,12 @@ export const InformationText: FC<Props> = ({
     return (
       <EuiEmptyPrompt
         title={
-          <h2>
+          <h3>
             <FormattedMessage
               id="xpack.aiops.logCategorization.noDocsTitle"
               defaultMessage="No documents found"
             />
-          </h2>
+          </h3>
         }
         titleSize="xs"
         body={
@@ -83,12 +83,12 @@ export const InformationText: FC<Props> = ({
     return (
       <EuiEmptyPrompt
         title={
-          <h2>
+          <h3>
             <FormattedMessage
               id="xpack.aiops.logCategorization.emptyPromptTitle"
               defaultMessage="Select a text field and click run pattern analysis to start analysis"
             />
-          </h2>
+          </h3>
         }
         titleSize="xs"
         body={
@@ -108,12 +108,12 @@ export const InformationText: FC<Props> = ({
     return (
       <EuiEmptyPrompt
         title={
-          <h2>
+          <h3>
             <FormattedMessage
               id="xpack.aiops.logCategorization.noCategoriesTitle"
               defaultMessage="No patterns found"
             />
-          </h2>
+          </h3>
         }
         titleSize="xs"
         body={

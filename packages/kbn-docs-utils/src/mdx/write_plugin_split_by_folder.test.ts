@@ -56,7 +56,7 @@ export interface Zed = { zed: string }`
     },
   ];
 
-  const doc = getPluginApi(project, plugins[0], plugins, log, false);
+  const { pluginApi: doc } = getPluginApi(project, plugins[0], plugins, log, false);
   const docs = splitApisByFolder(doc);
 
   // The api at the main level, and one on a service level.

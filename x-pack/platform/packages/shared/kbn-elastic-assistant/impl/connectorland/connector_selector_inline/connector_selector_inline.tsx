@@ -27,6 +27,7 @@ interface Props {
   onConnectorIdSelected?: (connectorId: string) => void;
   onConnectorSelected?: (conversation: Conversation, apiConfig?: ApiConfig) => void;
   stats?: AttackDiscoveryStats | null;
+  loadConnectorFeatureId?: string;
 
   /**
    * Allows parent components to control whether the default connector should be
@@ -83,6 +84,7 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
     onConnectorIdSelected,
     onConnectorSelected,
     stats = null,
+    loadConnectorFeatureId,
     explicitConnectorSelection,
   }) => {
     const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -161,6 +163,7 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
             setIsOpen={setIsOpen}
             onConnectorSelectionChange={onChange}
             stats={stats}
+            loadConnectorFeatureId={loadConnectorFeatureId}
             explicitConnectorSelection={explicitConnectorSelection}
           />
         </EuiFlexItem>

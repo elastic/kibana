@@ -12,14 +12,10 @@ import expect from 'expect';
 
 import {
   ALERT_REASON,
-  ALERT_RULE_UUID,
   ALERT_STATUS,
   ALERT_RULE_NAMESPACE,
-  ALERT_RULE_UPDATED_AT,
-  ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
   SPACE_IDS,
-  VERSION,
   ALERT_WORKFLOW_TAGS,
   ALERT_WORKFLOW_ASSIGNEE_IDS,
   ALERT_SUPPRESSION_DOCS_COUNT,
@@ -31,6 +27,7 @@ import type { ThreatMapping } from '@kbn/security-solution-plugin/common/api/det
 import type { ThreatMatchRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 import { ENRICHMENT_TYPES } from '@kbn/security-solution-plugin/common/cti/constants';
+import { INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION } from '@kbn/security-solution-plugin/common/constants';
 import type { Ancestor } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/types';
 import {
   ALERT_ANCESTORS,
@@ -52,9 +49,17 @@ import {
   scheduleRuleRun,
   stopAllManualRuns,
   waitForBackfillExecuted,
+  setAdvancedSettings,
+  removeRandomValuedPropertiesFromAlert,
 } from '../../../../utils';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
+import { EntityStoreV2EnrichmentSetup } from '../../entity_store_v2_enrichment_setup';
+
+// Entity fields for the auditbeat record with ancestor _id = '7yJ-B2kBR346wHgnhlMn'.
+const ENRICHMENT_HOST_ID = '2ce8b1e7d69e4a1d9c6bcddc473da9d9';
+const ENRICHMENT_HOST_NAME = 'zeek-sensor-amsterdam';
+const ENRICHMENT_HOST_EUID = `host:${ENRICHMENT_HOST_ID}`;
 
 const createThreatMatchRule = ({
   name = 'Query with a rule id',
@@ -169,6 +174,7 @@ export default ({ getService }: FtrProviderContext) => {
   const config = getService('config');
   const isServerless = config.get('serverless');
   const utils = getService('securitySolutionUtils');
+  const entityStoreV2 = EntityStoreV2EnrichmentSetup(getService);
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const audibeatHostsPath = dataPathBuilder.getPath('auditbeat/hosts');
   const threatIntelPath = dataPathBuilder.getPath('filebeat/threat_intel');
@@ -221,9 +227,9 @@ export default ({ getService }: FtrProviderContext) => {
       if (!fullAlert) {
         return expect(fullAlert).toBeTruthy();
       }
-      expect(fullAlert).toEqual({
-        ...fullAlert,
-        '@timestamp': fullAlert['@timestamp'],
+      const normalizedAlert = removeRandomValuedPropertiesFromAlert(fullAlert);
+      expect(normalizedAlert).toEqual({
+        ...normalizedAlert,
         agent: {
           ephemeral_id: '1b4978a0-48be-49b1-ac96-323425b389ab',
           hostname: 'zeek-sensor-amsterdam',
@@ -320,14 +326,11 @@ export default ({ getService }: FtrProviderContext) => {
         [ALERT_ORIGINAL_TIME]: fullAlert[ALERT_ORIGINAL_TIME],
         [ALERT_REASON]:
           'user-login event with source 46.101.47.213 by root on zeek-sensor-amsterdam created high alert Query with a rule id.',
-        [ALERT_RULE_UUID]: fullAlert[ALERT_RULE_UUID],
         [ALERT_STATUS]: 'active',
-        [ALERT_UUID]: fullAlert[ALERT_UUID],
         [ALERT_WORKFLOW_STATUS]: 'open',
         [ALERT_WORKFLOW_TAGS]: [],
         [ALERT_WORKFLOW_ASSIGNEE_IDS]: [],
         [SPACE_IDS]: ['default'],
-        [VERSION]: fullAlert[VERSION],
         threat: {
           enrichments: get(fullAlert, 'threat.enrichments'),
         },
@@ -357,9 +360,7 @@ export default ({ getService }: FtrProviderContext) => {
           threat: [],
           to: 'now',
           type: 'threat_match',
-          updated_at: fullAlert[ALERT_RULE_UPDATED_AT],
           updated_by: username,
-          uuid: fullAlert[ALERT_RULE_UUID],
           version: 1,
         }),
       });
@@ -403,9 +404,9 @@ export default ({ getService }: FtrProviderContext) => {
       if (!fullAlert) {
         return expect(fullAlert).toBeTruthy();
       }
-      expect(fullAlert).toEqual({
-        ...fullAlert,
-        '@timestamp': fullAlert['@timestamp'],
+      const normalizedAlert = removeRandomValuedPropertiesFromAlert(fullAlert);
+      expect(normalizedAlert).toEqual({
+        ...normalizedAlert,
         agent: {
           ephemeral_id: '1b4978a0-48be-49b1-ac96-323425b389ab',
           hostname: 'zeek-sensor-amsterdam',
@@ -502,12 +503,9 @@ export default ({ getService }: FtrProviderContext) => {
         [ALERT_ORIGINAL_TIME]: fullAlert[ALERT_ORIGINAL_TIME],
         [ALERT_REASON]:
           'user-login event with source 46.101.47.213 by root on zeek-sensor-amsterdam created high alert Query with a rule id.',
-        [ALERT_RULE_UUID]: fullAlert[ALERT_RULE_UUID],
         [ALERT_STATUS]: 'active',
-        [ALERT_UUID]: fullAlert[ALERT_UUID],
         [ALERT_WORKFLOW_STATUS]: 'open',
         [SPACE_IDS]: ['default'],
-        [VERSION]: fullAlert[VERSION],
         threat: {
           enrichments: get(fullAlert, 'threat.enrichments'),
         },
@@ -537,9 +535,7 @@ export default ({ getService }: FtrProviderContext) => {
           threat: [],
           to: 'now',
           type: 'threat_match',
-          updated_at: fullAlert[ALERT_RULE_UPDATED_AT],
           updated_by: username,
-          uuid: fullAlert[ALERT_RULE_UUID],
           version: 1,
         }),
       });
@@ -1090,6 +1086,72 @@ export default ({ getService }: FtrProviderContext) => {
         const previewAlerts = await getPreviewAlerts({ es, previewId });
         expect(previewAlerts).toHaveLength(2);
       });
+
+      // Similar to https://github.com/elastic/kibana/issues/259169, but with indicators first
+      // We seed 2 matching events followed by 10 non-matching events and force 1 event/page.
+      // The first page of indicators creates 2 alerts; later no-op pages verify that the count of created alerts doesn't
+      // get inflated and trigger a false max-signals warning despite only 2 created preview alerts.
+      it('reproduces false max alerts warning when later event pages have no threat matches', async () => {
+        const id = uuidv4();
+        const baseTs = moment();
+
+        const matchingEvents = [
+          {
+            id,
+            user: { name: 'matchuser' },
+            '@timestamp': baseTs.clone().subtract(1, 's').toISOString(),
+            'event.ingested': baseTs.clone().subtract(1, 's').toISOString(),
+          },
+          {
+            id,
+            user: { name: 'matchuser' },
+            '@timestamp': baseTs.clone().subtract(2, 's').toISOString(),
+            'event.ingested': baseTs.clone().subtract(2, 's').toISOString(),
+          },
+        ];
+        const nonMatchingEvents = Array.from({ length: 100 }, (_, i) => ({
+          id,
+          user: { name: `eventmiss${i + 1}` },
+          '@timestamp': baseTs
+            .clone()
+            .subtract(i + 3, 's')
+            .toISOString(),
+          'event.ingested': baseTs
+            .clone()
+            .subtract(i + 3, 's')
+            .toISOString(),
+        }));
+        const numThreats = 20;
+        const threats = [
+          {
+            ...threatDoc(id, baseTs.clone().subtract(numThreats, 'm').toISOString()),
+            user: { name: 'matchuser' },
+          },
+          ...Array.from({ length: numThreats - 1 }, (_, i) => ({
+            ...threatDoc(id, baseTs.clone().subtract(i, 'm').toISOString()),
+          })),
+        ];
+
+        await indexListOfDocuments([...matchingEvents, ...nonMatchingEvents, ...threats]);
+
+        const rule: ThreatMatchRuleCreateProps = {
+          ...threatMatchRuleEcsComplaint(id),
+          threat_mapping: [
+            {
+              entries: [{ field: 'user.name', value: 'user.name', type: 'mapping' }],
+            },
+          ],
+          items_per_search: 1,
+          concurrent_searches: 1,
+        };
+
+        const { logs, previewId } = await previewRule({ supertest, rule });
+        const previewAlerts = await getPreviewAlerts({ es, previewId, size: 1000 });
+        const allWarnings = logs.flatMap((l) => l.warnings ?? []);
+
+        expect(previewAlerts.length).toEqual(2);
+        expect(allWarnings).not.toContain(getMaxAlertsWarning());
+      });
     });
 
     describe('indicator enrichment: event-first search', () => {
@@ -1602,6 +1664,79 @@ export default ({ getService }: FtrProviderContext) => {
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
         expect(previewAlerts).toHaveLength(2);
+      });
+
+      // https://github.com/elastic/kibana/issues/259169
+      // We seed 2 matching events followed by 10 non-matching events and force 1 event/page.
+      // The first two pages create 2 alerts; later no-op pages verify that the count of created alerts doesn't
+      // get inflated and trigger a false max-signals warning despite only 2 created preview alerts.
+      it('reproduces false max alerts warning when later event pages have no threat matches', async () => {
+        const id = uuidv4();
+        const baseTs = moment();
+        const timestamp = baseTs.toISOString();
+
+        const matchingEvents = [
+          {
+            id,
+            user: { name: 'matchuser' },
+            '@timestamp': baseTs.clone().subtract(1, 's').toISOString(),
+            'event.ingested': baseTs.clone().subtract(1, 's').toISOString(),
+          },
+          {
+            id,
+            user: { name: 'matchuser' },
+            '@timestamp': baseTs.clone().subtract(2, 's').toISOString(),
+            'event.ingested': baseTs.clone().subtract(2, 's').toISOString(),
+          },
+        ];
+        const nonMatchingEvents = Array.from({ length: 10 }, (_, i) => ({
+          id,
+          user: { name: `eventmiss${i + 1}` },
+          '@timestamp': baseTs
+            .clone()
+            .subtract(i + 3, 's')
+            .toISOString(),
+          'event.ingested': baseTs
+            .clone()
+            .subtract(i + 3, 's')
+            .toISOString(),
+        }));
+        const threats = [
+          {
+            ...threatDoc(id, timestamp),
+            user: { name: 'matchuser' },
+          },
+          ...Array.from({ length: 19 }, (_, i) => ({
+            ...threatDoc(
+              id,
+              baseTs
+                .clone()
+                .subtract(i + 1, 'm')
+                .toISOString()
+            ),
+            user: { name: `threatfiller${i + 1}` },
+          })),
+        ];
+
+        await indexListOfDocuments([...matchingEvents, ...nonMatchingEvents, ...threats]);
+
+        const rule: ThreatMatchRuleCreateProps = {
+          ...threatMatchRuleEcsComplaint(id),
+          threat_mapping: [
+            {
+              entries: [{ field: 'user.name', value: 'user.name', type: 'mapping' }],
+            },
+          ],
+          items_per_search: 1,
+          concurrent_searches: 1,
+        };
+
+        const { logs, previewId } = await previewRule({ supertest, rule });
+        const previewAlerts = await getPreviewAlerts({ es, previewId, size: 1000 });
+        const allWarnings = logs.flatMap((l) => l.warnings ?? []);
+
+        expect(previewAlerts.length).toEqual(2);
+        expect(allWarnings).not.toContain(getMaxAlertsWarning());
       });
     });
 
@@ -2319,11 +2454,22 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('alerts should be enriched', () => {
       before(async () => {
-        await esArchiver.load('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
+        await entityStoreV2.setup({
+          hosts: [
+            {
+              host: { name: ENRICHMENT_HOST_NAME, id: [ENRICHMENT_HOST_ID] },
+              entity: {
+                id: ENRICHMENT_HOST_EUID,
+                type: 'host',
+                risk: { calculated_level: 'Critical', calculated_score_norm: 70 },
+              },
+            },
+          ],
+        });
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
+        await entityStoreV2.teardown();
       });
 
       it('should be enriched with host risk score', async () => {
@@ -2363,15 +2509,23 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('with asset criticality', () => {
       before(async () => {
-        await esArchiver.load(
-          'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
-        );
+        // Note: user.name in this auditbeat record is 'root'. Entity Store V2's LOCAL_NAMESPACE_EXCLUDED_USER_NAMES
+        // list includes 'root', so the local-namespace gate fails and getEuidFromObject() returns
+        // undefined for alerts where user.name === 'root'. User enrichment is therefore skipped by
+        // the detection engine for system accounts; only host enrichment is tested here.
+        await entityStoreV2.setup({
+          hosts: [
+            {
+              host: { name: ENRICHMENT_HOST_NAME, id: [ENRICHMENT_HOST_ID] },
+              entity: { id: ENRICHMENT_HOST_EUID, type: 'host' },
+              asset: { criticality: 'low_impact' },
+            },
+          ],
+        });
       });
 
       after(async () => {
-        await esArchiver.unload(
-          'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
-        );
+        await entityStoreV2.teardown();
       });
 
       it('should be enriched alert with criticality_level', async () => {
@@ -2405,7 +2559,6 @@ export default ({ getService }: FtrProviderContext) => {
         }
 
         expect(fullAlert?.['host.asset.criticality']).toEqual('low_impact');
-        expect(fullAlert?.['user.asset.criticality']).toEqual('extreme_impact');
       });
     });
 
@@ -2763,6 +2916,111 @@ export default ({ getService }: FtrProviderContext) => {
         const alert = previewAlerts[0]._source;
         expect(alert?.user?.name).toEqual('user1');
         expect(alert?.host?.name).toEqual('server');
+      });
+    });
+
+    describe('with data stream namespace filter', () => {
+      before(async () => {
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
+        );
+      });
+
+      after(async () => {
+        await esArchiver.unload(
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
+        );
+        // Clean up UI setting
+        await setAdvancedSettings(supertest, {
+          [INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION]: [],
+        });
+      });
+
+      it('should only include documents from specified namespaces when filter is configured', async () => {
+        const timestamp = new Date().toISOString();
+
+        // Create event documents with different namespaces
+        const eventDocNamespace1 = {
+          '@timestamp': timestamp,
+          data_stream: { namespace: 'namespace1' },
+          user: { name: 'user1' },
+          host: { name: 'server' },
+        };
+        const eventDocNamespace2 = {
+          '@timestamp': timestamp,
+          data_stream: { namespace: 'namespace2' },
+          user: { name: 'user2' },
+          host: { name: 'server' },
+        };
+        const eventDocNamespace3 = {
+          '@timestamp': timestamp,
+          data_stream: { namespace: 'namespace3' },
+          user: { name: 'user3' },
+          host: { name: 'server' },
+        };
+
+        // Create threat indicators
+        const threatIndicatorDoc = (threatId: string, threatTimestamp: string) => ({
+          id: threatId,
+          '@timestamp': threatTimestamp,
+          data_stream: { namespace: 'namespace1' },
+          agent: { type: 'threat' },
+          user: { name: 'user1' },
+          host: { name: 'server' },
+        });
+
+        await indexListOfDocuments([
+          eventDocNamespace1,
+          eventDocNamespace2,
+          eventDocNamespace3,
+          threatIndicatorDoc(uuidv4(), timestamp),
+        ]);
+
+        // Set UI setting to include only namespace1 and namespace2
+        await setAdvancedSettings(supertest, {
+          [INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION]: ['namespace1', 'namespace2'],
+        });
+
+        const rule: ThreatMatchRuleCreateProps = {
+          ...createThreatMatchRule({
+            index: ['ecs_compliant'],
+            query: `* and NOT agent.type:"threat"`,
+            threat_index: ['ecs_compliant'],
+            threat_query: '* and agent.type:"threat"',
+            threat_mapping: [
+              {
+                entries: [
+                  {
+                    field: 'user.name',
+                    value: 'user.name',
+                    type: 'mapping',
+                  },
+                  {
+                    field: 'host.name',
+                    value: 'host.name',
+                    type: 'mapping',
+                  },
+                ],
+              },
+            ],
+          }),
+        };
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+        });
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          size: 10,
+        });
+
+        // Should only get alerts from namespace1, not namespace2 or namespace3
+        // (namespace1 matches the threat indicator, namespace2 and namespace3 don't)
+        expect(previewAlerts.length).toEqual(1);
+        // @ts-expect-error namespace does not exist on type
+        expect(previewAlerts[0]._source?.data_stream?.namespace).toEqual('namespace1');
       });
     });
   });

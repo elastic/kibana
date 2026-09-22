@@ -67,7 +67,18 @@ export function WideChart({ chart, data, id, isLoading, state, onBrushed, slo }:
   });
 
   if (isLoading) {
-    return <EuiLoadingChart size="m" data-test-subj="wideChartLoading" />;
+    return (
+      <div
+        css={{
+          height: 200,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <EuiLoadingChart size="m" data-test-subj="wideChartLoading" />
+      </div>
+    );
   }
 
   return (

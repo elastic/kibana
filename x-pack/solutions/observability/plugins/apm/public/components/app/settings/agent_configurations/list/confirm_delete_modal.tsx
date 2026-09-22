@@ -9,10 +9,10 @@ import React, { useState } from 'react';
 import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import type { NotificationsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import type { APIReturnType } from '@kbn/apm-api-shared';
 import { getOptionLabel } from '../../../../../../common/agent_configuration/all_option';
-import type { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
-import { callApmApi } from '../../../../../services/rest/create_call_apm_api';
 import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
+import { getApmInternalServices } from '../../../../../plugin';
 
 type Config =
   APIReturnType<'GET /api/apm/settings/agent-configuration 2023-10-31'>['configurations'][0];
@@ -66,6 +66,7 @@ export function ConfirmDeleteModal({ config, onCancel, onConfirm }: Props) {
 }
 
 async function deleteConfig(config: Config, toasts: NotificationsStart['toasts']) {
+  const { callApmApi } = getApmInternalServices();
   try {
     await callApmApi('DELETE /api/apm/settings/agent-configuration 2023-10-31', {
       signal: null,

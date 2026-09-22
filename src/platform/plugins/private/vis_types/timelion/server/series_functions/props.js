@@ -8,27 +8,52 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { set } from '@kbn/safer-lodash-set';
 import alter from '../lib/alter';
 import Chainable from '../lib/classes/chainable';
 import _ from 'lodash';
 
-function unflatten(data) {
-  if (Object(data) !== data || Array.isArray(data)) return data;
+const FORBIDDEN_TOP_LEVEL_SERIES_KEYS = new Set(['data', 'type']);
+const FORBIDDEN_TOP_LEVEL_SERIES_LIST_KEYS = new Set(['list', 'type']);
+const FORBIDDEN_PATH_SEGMENTS = new Set(['__proto__', 'prototype', 'constructor', 'length']);
 
-  const regex = new RegExp(/\.?([^.\[\]]+)|\[(\d+)\]/g);
-  const result = {};
-  _.each(data, function (val, p) {
-    let cur = result;
-    let prop = '';
-    let m;
-    while ((m = regex.exec(p))) {
-      cur = (Object.hasOwn(cur, prop) && cur[prop]) || (cur[prop] = m[2] ? [] : {});
-      prop = m[2] || m[1];
-    }
-    cur[prop] = data[p];
+const INVALID_PROP_NAME_ERROR = i18n.translate('timelion.serverSideErrors.props.invalidKey', {
+  defaultMessage: 'Invalid property name passed to props()',
+});
+
+const getForbiddenKeyErrorMsg = (key) =>
+  i18n.translate('timelion.serverSideErrors.props.forbiddenKey', {
+    defaultMessage: 'Setting "{key}" via props() is not allowed',
+    values: { key },
   });
 
-  return result[''] || result;
+function assertSafePropsKey(key, { global }) {
+  if (!key || typeof key !== 'string' || key.trim() === '') {
+    throw new Error(INVALID_PROP_NAME_ERROR);
+  }
+
+  const path = _.toPath(key);
+
+  if (path.length === 0 || path.some((segment) => segment == null || segment === '')) {
+    throw new Error(INVALID_PROP_NAME_ERROR);
+  }
+
+  if (path.some((segment) => FORBIDDEN_PATH_SEGMENTS.has(segment))) {
+    throw new Error(getForbiddenKeyErrorMsg(key));
+  }
+
+  // Prevent array-like writes (eg `foo[2147483647]=...`) which can lead to OOM/hangs.
+  if (path.some((segment) => typeof segment === 'string' && /^\d+$/.test(segment))) {
+    throw new Error(getForbiddenKeyErrorMsg(key));
+  }
+
+  const topLevel = path[0];
+  const forbiddenTopLevel = global
+    ? FORBIDDEN_TOP_LEVEL_SERIES_LIST_KEYS
+    : FORBIDDEN_TOP_LEVEL_SERIES_KEYS;
+  if (forbiddenTopLevel.has(topLevel)) {
+    throw new Error(getForbiddenKeyErrorMsg(key));
+  }
 }
 
 export default new Chainable('props', {
@@ -61,14 +86,21 @@ export default new Chainable('props', {
     },
   }),
   fn: function firstFn(args) {
-    const properties = unflatten(_.omit(args.byName, 'inputSeries', 'global'));
+    const propertyAssignments = _.omit(args.byName, 'inputSeries', 'global');
+    const isGlobal = Boolean(args.byName.global);
 
-    if (args.byName.global) {
-      _.assign(args.byName.inputSeries, properties);
+    if (isGlobal) {
+      _.each(propertyAssignments, (value, key) => {
+        assertSafePropsKey(key, { global: true });
+        set(args.byName.inputSeries, _.toPath(key), value);
+      });
       return args.byName.inputSeries;
     } else {
       return alter(args, function (eachSeries) {
-        _.assign(eachSeries, properties);
+        _.each(propertyAssignments, (value, key) => {
+          assertSafePropsKey(key, { global: false });
+          set(eachSeries, _.toPath(key), value);
+        });
         return eachSeries;
       });
     }

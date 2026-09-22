@@ -66,8 +66,37 @@ const registerHttpRequestMockHelpers = (
   const setLoadTemplatesResponse = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('GET', `${API_BASE_PATH}/index_templates`, response, error);
 
-  const setLoadIndicesResponse = (response?: HttpResponse, error?: ResponseError) =>
-    mockResponse('GET', `${API_BASE_PATH}/indices`, response, error);
+  const setLoadIndicesStatsResponse = (response?: HttpResponse, error?: ResponseError) =>
+    mockResponse('GET', `${API_BASE_PATH}/indices_stats`, response, error);
+
+  /**
+   * The indices list endpoint switched from returning an array (`/indices`) to returning
+   * a record keyed by index name (`/indices_get`). Most tests still pass an array, so we
+   * normalize here and mock both endpoints for compatibility.
+   */
+  const setLoadIndicesResponse = (response?: HttpResponse, error?: ResponseError) => {
+    const normalizedIndicesGetResponse = (() => {
+      if (!response) return response;
+      if (Array.isArray(response)) {
+        return response.reduce<Record<string, unknown>>((acc, index: any) => {
+          if (index?.name) acc[index.name] = index;
+          return acc;
+        }, {});
+      }
+      return response;
+    })();
+
+    // New endpoint (record keyed by index name)
+    mockResponse('GET', `${API_BASE_PATH}/indices_get`, normalizedIndicesGetResponse, error);
+
+    // Legacy endpoint (array) - keep for older consumers/tests
+    const legacyResponse = Array.isArray(response)
+      ? response
+      : response && typeof response === 'object'
+      ? Object.values(response as Record<string, unknown>)
+      : response;
+    mockResponse('GET', `${API_BASE_PATH}/indices`, legacyResponse, error);
+  };
 
   const setReloadIndicesResponse = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('POST', `${API_BASE_PATH}/indices/reload`, response, error);
@@ -92,6 +121,15 @@ const registerHttpRequestMockHelpers = (
 
   const setEditDataRetentionResponse = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('PUT', `${API_BASE_PATH}/data_streams/data_retention`, response, error);
+
+  const setDataStreamsDataLifecycleResponse = (response?: HttpResponse, error?: ResponseError) =>
+    mockResponse('PUT', `${API_BASE_PATH}/data_streams/data_lifecycle`, response, error);
+
+  const setConfigureFailureStoreResponse = (response?: HttpResponse, error?: ResponseError) =>
+    mockResponse('PUT', `${API_BASE_PATH}/data_streams/configure_failure_store`, response, error);
+
+  const setLoadDataStreamsIlmPoliciesResponse = (response?: HttpResponse, error?: ResponseError) =>
+    mockResponse('GET', `${API_BASE_PATH}/data_streams/ilm_policies`, response, error);
 
   const setDeleteTemplateResponse = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('POST', `${API_BASE_PATH}/delete_index_templates`, response, error);
@@ -147,6 +185,9 @@ const registerHttpRequestMockHelpers = (
   const setLoadComponentTemplatesResponse = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('GET', `${API_BASE_PATH}/component_templates`, response, error);
 
+  const setLoadSnapshotRepositoriesResponse = (response?: HttpResponse, error?: ResponseError) =>
+    mockResponse('GET', `${API_BASE_PATH}/snapshot_repositories`, response, error);
+
   const setLoadNodesPluginsResponse = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('GET', `${API_BASE_PATH}/nodes/plugins`, response, error);
 
@@ -155,32 +196,6 @@ const registerHttpRequestMockHelpers = (
 
   const setLoadEnrichPoliciesResponse = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('GET', `${INTERNAL_API_BASE_PATH}/enrich_policies`, response, error);
-
-  const setGetMatchingIndices = (response?: HttpResponse, error?: ResponseError) =>
-    mockResponse(
-      'POST',
-      `${INTERNAL_API_BASE_PATH}/enrich_policies/get_matching_indices`,
-      response,
-      error
-    );
-  const setGetMatchingDataStreams = (response?: HttpResponse, error?: ResponseError) =>
-    mockResponse(
-      'POST',
-      `${INTERNAL_API_BASE_PATH}/enrich_policies/get_matching_data_streams`,
-      response,
-      error
-    );
-
-  const setGetFieldsFromIndices = (response?: HttpResponse, error?: ResponseError) =>
-    mockResponse(
-      'POST',
-      `${INTERNAL_API_BASE_PATH}/enrich_policies/get_fields_from_indices`,
-      response,
-      error
-    );
-
-  const setCreateEnrichPolicy = (response?: HttpResponse, error?: ResponseError) =>
-    mockResponse('POST', `${INTERNAL_API_BASE_PATH}/enrich_policies`, response, error);
 
   const setDeleteEnrichPolicyResponse = (
     policyName: string,
@@ -212,15 +227,38 @@ const registerHttpRequestMockHelpers = (
 
   const setInferenceModels = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('GET', `${API_BASE_PATH}/inference/all`, response, error);
+
   const setUserStartPrivilegesResponse = (
     indexName: string,
     response?: HttpResponse,
     error?: ResponseError
   ) => {
-    mockResponse('GET', `${API_BASE_PATH}/start_privileges/${indexName}`, response, error);
+    mockResponse(
+      'GET',
+      `${API_BASE_PATH}/start_privileges/${encodeURIComponent(indexName)}`,
+      response,
+      error
+    );
   };
+
+  const setLoadIndexDocumentsSampleResponse = (
+    indexName: string,
+    response?: HttpResponse,
+    error?: ResponseError
+  ) =>
+    mockResponse(
+      'GET',
+      `${INTERNAL_API_BASE_PATH}/indices/${encodeURIComponent(indexName)}/sample`,
+      response,
+      error
+    );
+
+  const setLoadIndexDocCountResponse = (response?: HttpResponse, error?: ResponseError) =>
+    mockResponse('POST', `${INTERNAL_API_BASE_PATH}/index_doc_count`, response, error);
+
   return {
     setLoadTemplatesResponse,
+    setLoadIndicesStatsResponse,
     setLoadIndicesResponse,
     setReloadIndicesResponse,
     setLoadDataStreamsResponse,
@@ -228,6 +266,9 @@ const registerHttpRequestMockHelpers = (
     setDeleteDataStreamResponse,
     setDeleteTemplateResponse,
     setEditDataRetentionResponse,
+    setDataStreamsDataLifecycleResponse,
+    setConfigureFailureStoreResponse,
+    setLoadDataStreamsIlmPoliciesResponse,
     setLoadTemplateResponse,
     setCreateTemplateResponse,
     setLoadIndexSettingsResponse,
@@ -238,6 +279,7 @@ const registerHttpRequestMockHelpers = (
     setSimulateTemplateResponse,
     setSimulateTemplateByNameResponse,
     setLoadComponentTemplatesResponse,
+    setLoadSnapshotRepositoriesResponse,
     setLoadNodesPluginsResponse,
     setLoadTelemetryResponse,
     setLoadEnrichPoliciesResponse,
@@ -245,12 +287,10 @@ const registerHttpRequestMockHelpers = (
     setExecuteEnrichPolicyResponse,
     setLoadIndexDetailsResponse,
     setCreateIndexResponse,
-    setGetMatchingIndices,
-    setGetFieldsFromIndices,
-    setCreateEnrichPolicy,
     setInferenceModels,
-    setGetMatchingDataStreams,
     setUserStartPrivilegesResponse,
+    setLoadIndexDocumentsSampleResponse,
+    setLoadIndexDocCountResponse,
   };
 };
 

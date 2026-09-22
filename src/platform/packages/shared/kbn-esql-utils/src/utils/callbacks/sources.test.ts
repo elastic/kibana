@@ -25,7 +25,8 @@ describe('getIndicesList', function () {
     ]);
 
     expect(coreMockStartContract.http.get).toHaveBeenCalledWith(
-      `${SOURCES_AUTOCOMPLETE_ROUTE}local`
+      `${SOURCES_AUTOCOMPLETE_ROUTE}local`,
+      { signal: undefined }
     );
   });
 
@@ -72,7 +73,10 @@ describe('getIndicesList with remote indices', function () {
       { name: 'local-index', hidden: false, type: SOURCES_TYPES.INDEX },
     ]);
 
-    expect(coreMockStartContract.http.get).toHaveBeenCalledWith(`${SOURCES_AUTOCOMPLETE_ROUTE}all`);
+    expect(coreMockStartContract.http.get).toHaveBeenCalledWith(
+      `${SOURCES_AUTOCOMPLETE_ROUTE}all`,
+      { signal: undefined }
+    );
   });
 
   it('should not include remote indices when areRemoteIndicesAvailable is false', async function () {
@@ -87,7 +91,8 @@ describe('getIndicesList with remote indices', function () {
     ]);
 
     expect(coreMockStartContract.http.get).toHaveBeenCalledWith(
-      `${SOURCES_AUTOCOMPLETE_ROUTE}local`
+      `${SOURCES_AUTOCOMPLETE_ROUTE}local`,
+      { signal: undefined }
     );
   });
 });

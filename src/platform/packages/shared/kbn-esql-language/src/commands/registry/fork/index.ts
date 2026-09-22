@@ -26,8 +26,6 @@ export const forkCommand = {
   name: Commands.FORK,
   methods: forkCommandMethods,
   metadata: {
-    hidden: false,
-    preview: true,
     description: i18n.translate('kbn-esql-language.esql.definitions.forkDoc', {
       defaultMessage: 'Forks the stream.',
     }),
@@ -39,9 +37,6 @@ export const forkCommand = {
 | KEEP emp_no, _fork
 | SORT emp_no`,
     ],
-    subqueryRestrictions: {
-      hideInside: true,
-      hideOutside: true,
-    },
+    hiddenWhenQueryContainsSubqueries: true,
   },
 };

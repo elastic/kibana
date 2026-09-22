@@ -8,6 +8,7 @@
  */
 
 import type { CoreContext } from '@kbn/core-base-browser-internal';
+import type { InternalHttpSetup } from '@kbn/core-http-browser-internal';
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
 import type { Logger } from '@kbn/logging';
 import type {
@@ -19,14 +20,22 @@ import type {
 import { apm } from '@elastic/apm-rum';
 import { type Client, ClientProviderEvents, OpenFeature } from '@openfeature/web-sdk';
 import deepMerge from 'deepmerge';
-import { filter, map, startWith, Subject } from 'rxjs';
+import { useMemo } from 'react';
+import type { Observable } from 'rxjs';
+import { filter, map, merge, startWith, Subject } from 'rxjs';
 import { get } from 'lodash';
+import { useObservable, type ValueObservable } from '@kbn/use-observable';
+import { buildPath } from '@kbn/core-http-browser';
 
 /**
  * setup method dependencies
  * @internal
  */
 export interface FeatureFlagsSetupDeps {
+  /**
+   * Used to hit the counter endpoint.
+   */
+  http: InternalHttpSetup;
   /**
    * Used to read the flag overrides set up in the configuration file.
    */
@@ -37,12 +46,61 @@ export interface FeatureFlagsSetupDeps {
  * The browser-side Feature Flags Service
  * @internal
  */
+type FeatureFlagValue = boolean | string | number;
+type FeatureFlagValueType = 'boolean' | 'string' | 'number';
+
+interface ReportedFlagValue {
+  type: FeatureFlagValueType;
+  value: FeatureFlagValue;
+}
+
+const getFeatureFlagValueType = (value: FeatureFlagValue): FeatureFlagValueType => {
+  if (typeof value === 'boolean') {
+    return 'boolean';
+  }
+
+  if (typeof value === 'number') {
+    return 'number';
+  }
+
+  return 'string';
+};
+
+/** Lets useObservable reseed during render when the flag or fallback changes. */
+function withSyncValue<T extends FeatureFlagValue>(
+  source$: Observable<T>,
+  readValue: () => T
+): ValueObservable<T> {
+  return {
+    subscribe: (listener) => source$.subscribe(listener),
+    getValue: readValue,
+  };
+}
+
+/** Subscribes to a flag and reads the synchronous evaluation on each render that changes arguments. */
+function useFeatureFlagValue<T extends FeatureFlagValue>(
+  flagName: string,
+  fallbackValue: T,
+  getValue$: (flagName: string, fallbackValue: T) => Observable<T>,
+  getValue: (flagName: string, fallbackValue: T) => T
+): T {
+  const value$ = useMemo(
+    () =>
+      withSyncValue(getValue$(flagName, fallbackValue), () => getValue(flagName, fallbackValue)),
+    [getValue$, getValue, flagName, fallbackValue]
+  );
+  return useObservable(value$);
+}
+
 export class FeatureFlagsService {
   private readonly featureFlagsClient: Client;
   private readonly logger: Logger;
+  private readonly contextChanged$ = new Subject<void>();
+  private readonly lastReportedValues = new Map<string, ReportedFlagValue>();
   private isProviderReadyPromise?: Promise<void>;
   private context: MultiContextEvaluationContext = { kind: 'multi' };
   private overrides: Record<string, unknown> = {};
+  private http?: InternalHttpSetup;
 
   /**
    * The core service's constructor
@@ -63,6 +121,7 @@ export class FeatureFlagsService {
     if (featureFlagsInjectedMetadata) {
       this.overrides = featureFlagsInjectedMetadata.overrides;
     }
+    this.http = deps.http;
     return {
       getInitialFeatureFlags: () => featureFlagsInjectedMetadata?.initialFeatureFlags ?? {},
       setProvider: (provider) => {
@@ -88,6 +147,9 @@ export class FeatureFlagsService {
               transaction.end();
             }
           });
+
+        // Emit a context change event when the provider is ready to force the reevaluation of the subscribed flags.
+        OpenFeature.addHandler(ClientProviderEvents.Ready, () => this.contextChanged$.next());
       },
       appendContext: (contextToAppend) => this.appendContext(contextToAppend),
     };
@@ -104,50 +166,49 @@ export class FeatureFlagsService {
       }
     });
     const observeFeatureFlag$ = (flagName: string) =>
-      featureFlagsChanged$.pipe(
+      merge(
+        // Flag changes
+        featureFlagsChanged$,
+        // Context changes (we need to reevaluate)
+        this.contextChanged$.pipe(map(() => [flagName]))
+      ).pipe(
         filter((flagNames) => flagNames.includes(flagName)),
         startWith([flagName]) // only to emit on the first call
       );
 
     await this.waitForProviderInitialization();
 
+    const getBooleanValue = (flagName: string, fallbackValue: boolean) =>
+      this.evaluateFlag(this.featureFlagsClient.getBooleanValue, flagName, fallbackValue);
+    const getBooleanValue$ = (flagName: string, fallbackValue: boolean) =>
+      observeFeatureFlag$(flagName).pipe(map(() => getBooleanValue(flagName, fallbackValue)));
+    const getStringValue = <Value extends string>(flagName: string, fallbackValue: Value) =>
+      this.evaluateFlag<Value>(this.featureFlagsClient.getStringValue, flagName, fallbackValue);
+    const getStringValue$ = <Value extends string>(flagName: string, fallbackValue: Value) =>
+      observeFeatureFlag$(flagName).pipe(map(() => getStringValue(flagName, fallbackValue)));
+    const getNumberValue = <Value extends number>(flagName: string, fallbackValue: Value) =>
+      this.evaluateFlag<Value>(this.featureFlagsClient.getNumberValue, flagName, fallbackValue);
+    const getNumberValue$ = <Value extends number>(flagName: string, fallbackValue: Value) =>
+      observeFeatureFlag$(flagName).pipe(map(() => getNumberValue(flagName, fallbackValue)));
+
+    const useBooleanValue = (flagName: string, fallbackValue: boolean): boolean =>
+      useFeatureFlagValue(flagName, fallbackValue, getBooleanValue$, getBooleanValue);
+    const useStringValue = <Value extends string>(flagName: string, fallbackValue: Value): Value =>
+      useFeatureFlagValue(flagName, fallbackValue, getStringValue$, getStringValue);
+    const useNumberValue = <Value extends number>(flagName: string, fallbackValue: Value): Value =>
+      useFeatureFlagValue(flagName, fallbackValue, getNumberValue$, getNumberValue);
+
     return {
       appendContext: (contextToAppend) => this.appendContext(contextToAppend),
-      getBooleanValue: (flagName: string, fallbackValue: boolean) =>
-        this.evaluateFlag(this.featureFlagsClient.getBooleanValue, flagName, fallbackValue),
-      getStringValue: <Value extends string>(flagName: string, fallbackValue: Value) =>
-        this.evaluateFlag<Value>(this.featureFlagsClient.getStringValue, flagName, fallbackValue),
-      getNumberValue: <Value extends number>(flagName: string, fallbackValue: Value) =>
-        this.evaluateFlag<Value>(this.featureFlagsClient.getNumberValue, flagName, fallbackValue),
-      getBooleanValue$: (flagName, fallbackValue) => {
-        return observeFeatureFlag$(flagName).pipe(
-          map(() =>
-            this.evaluateFlag(this.featureFlagsClient.getBooleanValue, flagName, fallbackValue)
-          )
-        );
-      },
-      getStringValue$: <Value extends string>(flagName: string, fallbackValue: Value) => {
-        return observeFeatureFlag$(flagName).pipe(
-          map(() =>
-            this.evaluateFlag<Value>(
-              this.featureFlagsClient.getStringValue,
-              flagName,
-              fallbackValue
-            )
-          )
-        );
-      },
-      getNumberValue$: <Value extends number>(flagName: string, fallbackValue: Value) => {
-        return observeFeatureFlag$(flagName).pipe(
-          map(() =>
-            this.evaluateFlag<Value>(
-              this.featureFlagsClient.getNumberValue,
-              flagName,
-              fallbackValue
-            )
-          )
-        );
-      },
+      getBooleanValue,
+      getStringValue,
+      getNumberValue,
+      getBooleanValue$,
+      useBooleanValue,
+      getStringValue$,
+      useStringValue,
+      getNumberValue$,
+      useNumberValue,
     };
   }
 
@@ -188,7 +249,7 @@ export class FeatureFlagsService {
    * @param fallbackValue The fallback value
    * @internal
    */
-  private evaluateFlag<T extends string | boolean | number>(
+  private evaluateFlag<T extends FeatureFlagValue>(
     evaluationFn: (flagName: string, fallbackValue: T) => T,
     flagName: string,
     fallbackValue: T
@@ -200,8 +261,37 @@ export class FeatureFlagsService {
         : // We have to bind the evaluation or the client will lose its internal context
           evaluationFn.bind(this.featureFlagsClient)(flagName, fallbackValue);
     apm.addLabels({ [`flag_${flagName.replaceAll('.', '_')}`]: value });
-    // TODO: increment usage counter
+
+    this.reportValueIfChanged(flagName, value);
+
     return value;
+  }
+
+  private reportValueIfChanged(flagName: string, value: FeatureFlagValue): void {
+    if (!this.shouldReportValue(flagName, value)) {
+      return;
+    }
+
+    // Increment usage counter
+    // TODO: When UI has OTel instrumented, we can increment the counter in the browser directly.
+    this.http
+      ?.post(buildPath('/internal/feature-flags/{flagName}/counter', { flagName }), {
+        body: JSON.stringify({ value }),
+      })
+      .catch(() => {});
+  }
+
+  private shouldReportValue(flagName: string, value: FeatureFlagValue): boolean {
+    const type = getFeatureFlagValueType(value);
+    const lastReportedValue = this.lastReportedValues.get(flagName);
+    // Object.is takes care string, number (incl. NaN), boolean comparison
+    if (lastReportedValue?.type === type && Object.is(lastReportedValue.value, value)) {
+      return false;
+    }
+
+    // Counter reporting is best effort; record before posting to cap attempts at one per unique value.
+    this.lastReportedValues.set(flagName, { type, value });
+    return true;
   }
 
   /**
@@ -221,5 +311,6 @@ export class FeatureFlagsService {
     // Merge the formatted context to append to the global context, and set it in the OpenFeature client.
     this.context = deepMerge(this.context, formattedContextToAppend);
     await OpenFeature.setContext(this.context);
+    this.contextChanged$.next();
   }
 }

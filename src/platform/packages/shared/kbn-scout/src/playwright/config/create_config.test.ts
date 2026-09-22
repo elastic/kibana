@@ -7,20 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Project } from '@playwright/test';
 import { SCOUT_SERVERS_ROOT } from '@kbn/scout-info';
 import {
   generateTestRunId,
   scoutFailedTestsReporter,
+  scoutFailureSummaryReporter,
   scoutPlaywrightReporter,
 } from '@kbn/scout-reporting';
 import { VALID_CONFIG_MARKER } from '../types';
 import { createPlaywrightConfig } from './create_config';
+
+// Playwright's `teardown` is a project-config option (Project<>) but isn't part of the
+// runtime `Project` interface used in expectations; cast to access it in assertions.
+type PlaywrightProject = Project & { teardown?: string };
 
 jest.mock('@kbn/scout-reporting', () => ({
   ...jest.requireActual('@kbn/scout-reporting'),
   generateTestRunId: jest.fn(),
   scoutPlaywrightReporter: jest.fn(),
   scoutFailedTestsReporter: jest.fn(),
+  scoutFailureSummaryReporter: jest.fn(),
 }));
 
 describe('createPlaywrightConfig', () => {
@@ -28,10 +35,32 @@ describe('createPlaywrightConfig', () => {
   const mockGenerateTestRunId = generateTestRunId as jest.Mock;
   const mockedScoutPlaywrightReporter = scoutPlaywrightReporter as jest.Mock;
   const mockedScoutFailedTestsReporter = scoutFailedTestsReporter as jest.Mock;
+  const mockedScoutFailureSummaryReporter = scoutFailureSummaryReporter as jest.Mock;
+
+  const originalCI = process.env.CI;
+  const originalRetries = process.env.SCOUT_TEST_RETRIES;
+  const originalBuildkiteRetryCount = process.env.BUILDKITE_RETRY_COUNT;
+
+  const restoreEnvVar = (name: string, value: string | undefined) => {
+    if (value === undefined) {
+      delete process.env[name];
+    } else {
+      process.env[name] = value;
+    }
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
     delete process.env.TEST_RUN_ID;
+    delete process.env.CI;
+    delete process.env.SCOUT_TEST_RETRIES;
+    delete process.env.BUILDKITE_RETRY_COUNT;
+  });
+
+  afterAll(() => {
+    restoreEnvVar('CI', originalCI);
+    restoreEnvVar('SCOUT_TEST_RETRIES', originalRetries);
+    restoreEnvVar('BUILDKITE_RETRY_COUNT', originalBuildkiteRetryCount);
   });
 
   it('should return a valid default Playwright configuration', () => {
@@ -39,6 +68,7 @@ describe('createPlaywrightConfig', () => {
     // Scout reporters are disabled by default
     mockedScoutPlaywrightReporter.mockReturnValueOnce(['null']);
     mockedScoutFailedTestsReporter.mockReturnValueOnce(['null']);
+    mockedScoutFailureSummaryReporter.mockReturnValueOnce(['null']);
 
     const testDir = './my_tests';
     const config = createPlaywrightConfig({ testDir });
@@ -56,14 +86,16 @@ describe('createPlaywrightConfig', () => {
       navigationTimeout: 20000,
       screenshot: 'only-on-failure',
       testIdAttribute: 'data-test-subj',
-      trace: 'on-first-retry',
+      trace: 'off',
       timezoneId: 'GMT',
+      ignoreHTTPSErrors: true,
     });
     expect(config.globalSetup).toBeUndefined();
     expect(config.globalTeardown).toBeUndefined();
     expect(config.reporter).toEqual([
       ['html', { open: 'never', outputFolder: './.scout/reports' }],
       ['json', { outputFile: './.scout/reports/test-results.json' }],
+      ['null'],
       ['null'],
       ['null'],
     ]);
@@ -84,6 +116,10 @@ describe('createPlaywrightConfig', () => {
       '@kbn/scout-reporting/src/reporting/playwright/failed_test',
       { name: 'scout-playwright-failed-tests', runId: mockedRunId },
     ]);
+    mockedScoutFailureSummaryReporter.mockReturnValueOnce([
+      '@kbn/scout-reporting/src/reporting/playwright/failure_summary',
+      { name: 'scout-failure-summary', runId: mockedRunId },
+    ]);
 
     const testDir = './my_tests';
     const config = createPlaywrightConfig({ testDir });
@@ -99,6 +135,10 @@ describe('createPlaywrightConfig', () => {
       [
         '@kbn/scout-reporting/src/reporting/playwright/failed_test',
         { name: 'scout-playwright-failed-tests', runId: mockedRunId },
+      ],
+      [
+        '@kbn/scout-reporting/src/reporting/playwright/failure_summary',
+        { name: 'scout-failure-summary', runId: mockedRunId },
       ],
     ]);
   });
@@ -116,23 +156,131 @@ describe('createPlaywrightConfig', () => {
     expect(config.projects![2].name).toEqual('mki');
   });
 
-  it('should add global.setup.ts as pre-step when runGlobalSetup is true', () => {
+  it('should add global.setup.ts and global.teardown.ts projects when runGlobalSetup is true', () => {
     const testDir = './my_tests';
+    const defaultGlobalHookTimeout = 180000;
 
     const config = createPlaywrightConfig({ testDir, runGlobalSetup: true });
     expect(config.workers).toBe(1);
 
-    expect(config.projects).toHaveLength(6);
-    expect(config.projects![0].name).toEqual('setup-local');
-    expect(config.projects![0].testMatch).toEqual(/global.setup\.ts/);
-    expect(config.projects![1].name).toEqual('local');
-    expect(config.projects![1]).toHaveProperty('dependencies', ['setup-local']);
-    expect(config.projects![2].name).toEqual('setup-ech');
-    expect(config.projects![3].name).toEqual('ech');
-    expect(config.projects![3]).toHaveProperty('dependencies', ['setup-ech']);
-    expect(config.projects![4].name).toEqual('setup-mki');
-    expect(config.projects![5].name).toEqual('mki');
-    expect(config.projects![5]).toHaveProperty('dependencies', ['setup-mki']);
+    // 3 base projects (local/ech/mki) × 3 hook projects each (setup, main, teardown)
+    expect(config.projects).toHaveLength(9);
+
+    const projectNames = config.projects!.map((p) => p.name);
+    expect(projectNames).toEqual([
+      'setup-local',
+      'local',
+      'teardown-local',
+      'setup-ech',
+      'ech',
+      'teardown-ech',
+      'setup-mki',
+      'mki',
+      'teardown-mki',
+    ]);
+
+    for (const projectName of ['local', 'ech', 'mki']) {
+      const setup = config.projects!.find((p) => p.name === `setup-${projectName}`);
+      const main = config.projects!.find((p) => p.name === projectName);
+      const teardown = config.projects!.find((p) => p.name === `teardown-${projectName}`);
+
+      expect(setup).toBeDefined();
+      expect(setup!.testMatch).toEqual(/global.setup\.ts/);
+      expect(setup!.timeout).toBe(defaultGlobalHookTimeout);
+      // teardown is wired via Playwright's per-project `teardown` field, not `dependencies`,
+      // so it runs after setup AND every project depending on it has finished — even on
+      // test failure. https://playwright.dev/docs/test-projects#teardown
+      expect((setup as PlaywrightProject).teardown).toBe(`teardown-${projectName}`);
+
+      expect(main).toBeDefined();
+      expect(main).toHaveProperty('dependencies', [`setup-${projectName}`]);
+      expect(main).not.toHaveProperty('timeout');
+
+      expect(teardown).toBeDefined();
+      // The teardown project is always emitted; if a plugin doesn't ship `global.teardown.ts`,
+      // the regex matches no files and Playwright silently skips the project — opt-in by file
+      // presence with no extra config flag required.
+      expect(teardown!.testMatch).toEqual(/global.teardown\.ts/);
+      expect(teardown!.timeout).toBe(defaultGlobalHookTimeout);
+    }
+  });
+
+  describe('retries', () => {
+    it('is 0 locally (CI unset)', () => {
+      const config = createPlaywrightConfig({ testDir: './my_tests' });
+      expect(config.retries).toBe(0);
+    });
+
+    it('is 1 on the first CI attempt of a step', () => {
+      process.env.CI = 'true';
+      const config = createPlaywrightConfig({ testDir: './my_tests' });
+      expect(config.retries).toBe(1);
+    });
+
+    it('is 1 when BUILDKITE_RETRY_COUNT reports the first attempt', () => {
+      process.env.CI = 'true';
+      process.env.BUILDKITE_RETRY_COUNT = '0';
+      const config = createPlaywrightConfig({ testDir: './my_tests' });
+      expect(config.retries).toBe(1);
+    });
+
+    it('is 0 when the Buildkite step is retried', () => {
+      process.env.CI = 'true';
+      process.env.BUILDKITE_RETRY_COUNT = '1';
+      const config = createPlaywrightConfig({ testDir: './my_tests' });
+      expect(config.retries).toBe(0);
+    });
+
+    it('is 1 on CI when BUILDKITE_RETRY_COUNT is not a number', () => {
+      process.env.CI = 'true';
+      process.env.BUILDKITE_RETRY_COUNT = '';
+      const config = createPlaywrightConfig({ testDir: './my_tests' });
+      expect(config.retries).toBe(1);
+    });
+
+    it('SCOUT_TEST_RETRIES wins over the step attempt count in both directions', () => {
+      process.env.CI = 'true';
+
+      // flaky runner: stays at 0 even on the first attempt
+      process.env.SCOUT_TEST_RETRIES = '0';
+      process.env.BUILDKITE_RETRY_COUNT = '0';
+      expect(createPlaywrightConfig({ testDir: './my_tests' }).retries).toBe(0);
+
+      // flaky runner: stays at 0 when its step is retried
+      process.env.BUILDKITE_RETRY_COUNT = '2';
+      expect(createPlaywrightConfig({ testDir: './my_tests' }).retries).toBe(0);
+
+      // an explicit opt-in still applies on a retried step
+      process.env.SCOUT_TEST_RETRIES = '1';
+      expect(createPlaywrightConfig({ testDir: './my_tests' }).retries).toBe(1);
+    });
+
+    it('SCOUT_TEST_RETRIES=0 overrides CI=true — the flaky-runner guard', () => {
+      process.env.CI = 'true';
+      process.env.SCOUT_TEST_RETRIES = '0';
+      const config = createPlaywrightConfig({ testDir: './my_tests' });
+      expect(config.retries).toBe(0);
+    });
+
+    it('SCOUT_TEST_RETRIES overrides the local default too', () => {
+      process.env.SCOUT_TEST_RETRIES = '2';
+      const config = createPlaywrightConfig({ testDir: './my_tests' });
+      expect(config.retries).toBe(2);
+    });
+
+    it('throws on a non-numeric override', () => {
+      process.env.SCOUT_TEST_RETRIES = 'not-a-number';
+      expect(() => createPlaywrightConfig({ testDir: './my_tests' })).toThrow(
+        /SCOUT_TEST_RETRIES must be a non-negative integer/
+      );
+    });
+
+    it('throws on a negative override', () => {
+      process.env.SCOUT_TEST_RETRIES = '-1';
+      expect(() => createPlaywrightConfig({ testDir: './my_tests' })).toThrow(
+        /SCOUT_TEST_RETRIES must be a non-negative integer/
+      );
+    });
   });
 
   it('should generate and cache runId in process.env.TEST_RUN_ID', () => {

@@ -161,7 +161,7 @@ export const schema: FormSchema<DefineStepRule> = {
     helpText: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldTimelineTemplateHelpText',
       {
-        defaultMessage: 'Select which timeline to use when investigating generated alerts.',
+        defaultMessage: 'Select which Timeline to use when investigating generated alerts.',
       }
     ),
   },

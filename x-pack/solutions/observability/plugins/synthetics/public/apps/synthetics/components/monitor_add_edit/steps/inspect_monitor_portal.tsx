@@ -14,13 +14,15 @@ import { InspectMonitorPortalNode } from '../portals';
 export const InspectMonitorPortal = ({
   isValid,
   monitorFields,
+  isEditFlow = false,
 }: {
   isValid: boolean;
   monitorFields: SyntheticsMonitor;
+  isEditFlow?: boolean;
 }) => {
   return (
     <InPortal node={InspectMonitorPortalNode}>
-      <MonitorInspect isValid={isValid} monitorFields={monitorFields} />
+      <MonitorInspect isValid={isValid} monitorFields={monitorFields} isEditFlow={isEditFlow} />
     </InPortal>
   );
 };

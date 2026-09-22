@@ -34,6 +34,11 @@ export class OverlayService {
   private flyoutService = new FlyoutService();
   private systemFlyoutService = new SystemFlyoutService();
 
+  public closeAllFlyouts(): void {
+    this.flyoutService.closeAllFlyouts();
+    this.systemFlyoutService.closeAllFlyouts();
+  }
+
   public start({ targetDomElement, ...startDeps }: StartDeps): OverlayStart {
     const flyoutElement = document.createElement('div');
     targetDomElement.appendChild(flyoutElement);
@@ -64,6 +69,7 @@ export class OverlayService {
       banners,
       openFlyout: flyouts.open.bind(flyouts),
       openSystemFlyout: systemFlyouts.open.bind(systemFlyouts),
+      openFlyoutTemplate: systemFlyouts.openTemplate.bind(systemFlyouts),
       openModal: modals.open.bind(modals),
       openConfirm: modals.openConfirm.bind(modals),
     };

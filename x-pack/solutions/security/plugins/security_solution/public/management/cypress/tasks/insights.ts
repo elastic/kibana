@@ -10,10 +10,11 @@ import type {
 } from '@kbn/actions-plugin/common/routes/connector/response';
 import { DEFEND_INSIGHTS } from '@kbn/elastic-assistant-common';
 import { request } from './common';
-import { ActionType } from '../../../../common/endpoint/types/workflow_insights';
+import { WorkflowInsightActionType } from '../../../../common/endpoint/types/workflow_insights';
 import {
   WORKFLOW_INSIGHTS_ROUTE,
   WORKFLOW_INSIGHTS_UPDATE_ROUTE,
+  WORKFLOW_INSIGHTS_PENDING_ROUTE,
 } from '../../../../common/endpoint/constants';
 
 const INTERNAL_CLOUD_CONNECTORS = ['Elastic-Cloud-SMTP'];
@@ -21,7 +22,10 @@ const INTERNAL_INFERENCE_CONNECTORS = [
   'Elastic-Managed-LLM',
   'Anthropic-Claude-Sonnet-3-7',
   'Anthropic-Claude-Sonnet-4-5',
+  'Anthropic-Claude-Sonnet-4-6',
   'Anthropic-Claude-Opus-4-5',
+  'Anthropic-Claude-Opus-4-6',
+  'Anthropic-Claude-Haiku-4-5',
   'OpenAI-GPT-OSS-120B',
   'OpenAI-GPT-4-1',
   'OpenAI-GPT-4-1-Mini',
@@ -31,6 +35,7 @@ const INTERNAL_INFERENCE_CONNECTORS = [
   'OpenAI-o4-Mini',
   'Google-Gemini-2-5-Pro',
   'Google-Gemini-2-5-Flash',
+  'Google-Gemini-2-5-Flash-Lite',
   'Google-Gemini-3-0-Pro',
   'Google-Gemini-3-0-Flash',
 ];
@@ -82,6 +87,38 @@ export const setConnectorIdInLocalStorage = (res: { body: { id: string } }) => {
     `elasticAssistantDefault.defendInsights.default.connectorId`,
     `"${res.body.id}"`
   );
+};
+
+export const setConnectorIdInLocalStorageAB = (res: { body: { id: string } }) => {
+  window.localStorage.setItem(
+    `securitySolution.workflowInsightsAB.connectorId.default`,
+    `"${res.body.id}"`
+  );
+};
+
+export const stubInferenceConnectorsApiResponse = (connectorId: string, connectorName: string) => {
+  cy.intercept(
+    {
+      method: 'GET',
+      url: '**/internal/search_inference_endpoints/connectors**',
+    },
+    (req) => {
+      req.reply(200, {
+        connectors: [
+          {
+            connectorId,
+            name: connectorName,
+            type: '.bedrock',
+            config: {},
+            isPreconfigured: false,
+            isDeprecated: false,
+            isMissingSecrets: false,
+          },
+        ],
+        soEntryFound: false,
+      });
+    }
+  ).as('loadConnectors');
 };
 
 export const validateUserGotRedirectedToTrustedApps = () => {
@@ -284,7 +321,7 @@ export const fetchWorkflowInsights = (overrides?: Record<string, unknown>) => {
     method: 'GET',
     url: WORKFLOW_INSIGHTS_ROUTE,
     qs: {
-      actionTypes: JSON.stringify([ActionType.Refreshed]),
+      actionTypes: JSON.stringify([WorkflowInsightActionType.enum.refreshed]),
       targetIds: JSON.stringify(['test']),
     },
     headers: { 'Elastic-Api-Version': '1' },
@@ -298,10 +335,75 @@ export const updateWorkflowInsights = () => {
     url: WORKFLOW_INSIGHTS_UPDATE_ROUTE.replace('{insightId}', 'test'),
     body: JSON.stringify({
       action: {
-        type: ActionType.Remediated,
+        type: WorkflowInsightActionType.enum.remediated,
       },
     }),
     headers: { 'Elastic-Api-Version': '1' },
     failOnStatusCode: false,
   });
+};
+
+export const triggerRunningWorkflowInsights = () => {
+  cy.intercept(
+    {
+      method: 'POST',
+      url: `**${WORKFLOW_INSIGHTS_ROUTE}`,
+    },
+    (req) => {
+      req.reply(200, {
+        executions: [
+          {
+            executionId: 'test-execution-id',
+            conversationId: 'test-conversation-id',
+            insightType: 'incompatible_antivirus',
+            endpointId: 'test',
+          },
+        ],
+      });
+    }
+  ).as('createWorkflowInsights');
+};
+
+export const fetchRunningWorkflowInsights = () => {
+  cy.intercept(
+    {
+      method: 'GET',
+      url: `**${WORKFLOW_INSIGHTS_PENDING_ROUTE}**`,
+    },
+    (req) => {
+      req.reply(200, {
+        pending: [
+          {
+            executionId: 'test-execution-id',
+            status: 'running',
+            conversationId: 'test-conversation-id',
+            insightType: 'incompatible_antivirus',
+            endpointId: 'test',
+            '@timestamp': new Date().toISOString(),
+          },
+        ],
+      });
+    }
+  ).as('fetchPendingWorkflowInsights');
+};
+
+export const stubWorkflowInsightsPendingApiResponse = (
+  pending: Array<{
+    executionId: string;
+    status: string;
+    conversationId?: string;
+    insightType?: string;
+    endpointId?: string;
+    '@timestamp': string;
+  }> = []
+) => {
+  cy.intercept(
+    {
+      method: 'GET',
+      url: `**${WORKFLOW_INSIGHTS_PENDING_ROUTE}**`,
+    },
+    (req) => {
+      req.reply(200, { pending });
+    }
+  ).as('fetchPendingWorkflowInsights');
 };

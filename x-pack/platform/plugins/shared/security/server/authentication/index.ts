@@ -20,7 +20,4 @@ export {
   AnonymousAuthenticationProvider,
   HTTPAuthenticationProvider,
 } from './providers';
-export {
-  BasicHTTPAuthorizationHeaderCredentials,
-  HTTPAuthorizationHeader,
-} from './http_authentication';
+export { BasicHTTPAuthorizationHeaderCredentials } from './http_authentication';

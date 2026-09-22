@@ -21,7 +21,7 @@ const viewTypeOptions: EuiButtonGroupOptionProps[] = [
         defaultMessage="Charts"
       />
     ),
-    iconType: 'visLine',
+    iconType: 'chartLine',
   },
   {
     id: `table`,
@@ -31,7 +31,7 @@ const viewTypeOptions: EuiButtonGroupOptionProps[] = [
         defaultMessage="Table"
       />
     ),
-    iconType: 'visTable',
+    iconType: 'table',
   },
 ];
 

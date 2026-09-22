@@ -13,7 +13,7 @@ describe('validateJobParams', () => {
     const validParams = {
       title: 'Monthly Report',
       version: '8.0.0',
-      layout: { id: idSchema.Enum.print, dimensions: { width: 800, height: 600 } },
+      layout: { id: idSchema.enum.print, dimensions: { width: 800, height: 600 } },
       browserTimezone: 'UTC',
       objectType: 'dashboard',
       forceNow: '2024-01-01T00:00:00Z',
@@ -38,7 +38,7 @@ describe('validateJobParams', () => {
     const validParams = {
       title: 'Monthly Report<script>alert("xss")</script>',
       version: '8.0.0',
-      layout: { id: idSchema.Enum.print, dimensions: { width: 800, height: 600 } },
+      layout: { id: idSchema.enum.print, dimensions: { width: 800, height: 600 } },
       browserTimezone: 'UTC',
       objectType: 'dashboard',
       forceNow: '2024-01-01T00:00:00Z',
@@ -52,7 +52,7 @@ describe('validateJobParams', () => {
     const validParams = {
       title: 'Monthly Report',
       version: '8.0.0',
-      layout: { id: idSchema.Enum.print, dimensions: { width: 800, height: 600 } },
+      layout: { id: idSchema.enum.print, dimensions: { width: 800, height: 600 } },
       browserTimezone: 'UTC',
       objectType: 'dashboard<script>alert("xss")</script>',
       forceNow: '2024-01-01T00:00:00Z',
@@ -66,7 +66,7 @@ describe('validateJobParams', () => {
     const validParams = {
       title: 'Monthly Report',
       version: '8.0.0<script>alert("")</script>',
-      layout: { id: idSchema.Enum.print, dimensions: { width: 800, height: 600 } },
+      layout: { id: idSchema.enum.print, dimensions: { width: 800, height: 600 } },
       browserTimezone: 'UTC',
       objectType: 'dashboard',
       forceNow: '2024-01-01T00:00:00Z',
@@ -80,7 +80,7 @@ describe('validateJobParams', () => {
     const validParams = {
       title: 'Monthly Report',
       version: '8.0.0',
-      layout: { id: idSchema.Enum.print, dimensions: { width: 800, height: 600 } },
+      layout: { id: idSchema.enum.print, dimensions: { width: 800, height: 600 } },
       browserTimezone: 'UTC',
       objectType: 'dashboard',
       forceNow: '2024-01-01T00:00:00<script/>',
@@ -94,156 +94,89 @@ describe('validateJobParams', () => {
     const validParams = {
       title: 'Monthly Report',
       version: '8.0.0',
-      layout: { id: idSchema.Enum.print, dimensions: { width: 800, height: 600 } },
+      layout: { id: idSchema.enum.print, dimensions: { width: 800, height: 600 } },
       browserTimezone: 'invalid/timezone',
       objectType: 'dashboard',
       forceNow: '2024-01-01T00:00:00',
     };
 
-    expect(() => validateJobParams(validParams)).toThrowErrorMatchingInlineSnapshot(`
-      "[
-        {
-          \\"code\\": \\"custom\\",
-          \\"message\\": \\"Invalid timezone\\",
-          \\"path\\": [
-            \\"browserTimezone\\"
-          ]
-        }
-      ]"
-    `);
+    expect(() => validateJobParams(validParams)).toThrow('browserTimezone: Invalid timezone');
   });
 
   it('validates objectType', () => {
     const validParams = {
       title: 'Monthly Report',
       version: '8.0.0',
-      layout: { id: idSchema.Enum.print, dimensions: { width: 800, height: 600 } },
+      layout: { id: idSchema.enum.print, dimensions: { width: 800, height: 600 } },
       browserTimezone: 'UTC',
       objectType: true,
       forceNow: '2024-01-01T00:00:00',
     } as unknown as BaseParams;
 
-    expect(() => validateJobParams(validParams)).toThrowErrorMatchingInlineSnapshot(`
-      "[
-        {
-          \\"code\\": \\"invalid_type\\",
-          \\"expected\\": \\"string\\",
-          \\"received\\": \\"boolean\\",
-          \\"path\\": [
-            \\"objectType\\"
-          ],
-          \\"message\\": \\"Expected string, received boolean\\"
-        }
-      ]"
-    `);
+    expect(() => validateJobParams(validParams)).toThrow(
+      'objectType: Invalid input: expected string, received boolean'
+    );
   });
 
   it('validates title', () => {
     const validParams = {
       title: true,
       version: '8.0.0',
-      layout: { id: idSchema.Enum.print, dimensions: { width: 800, height: 600 } },
+      layout: { id: idSchema.enum.print, dimensions: { width: 800, height: 600 } },
       browserTimezone: 'UTC',
       objectType: 'dashboard',
       forceNow: '2024-01-01T00:00:00',
     } as unknown as BaseParams;
 
-    expect(() => validateJobParams(validParams)).toThrowErrorMatchingInlineSnapshot(`
-      "[
-        {
-          \\"code\\": \\"invalid_type\\",
-          \\"expected\\": \\"string\\",
-          \\"received\\": \\"boolean\\",
-          \\"path\\": [
-            \\"title\\"
-          ],
-          \\"message\\": \\"Expected string, received boolean\\"
-        }
-      ]"
-    `);
+    expect(() => validateJobParams(validParams)).toThrow(
+      'title: Invalid input: expected string, received boolean'
+    );
   });
 
   it('validates version', () => {
     const validParams = {
       title: 'Monthly Report',
       version: '8.0.0 very long version that exceeds the maximum length of thirty-two characters',
-      layout: { id: idSchema.Enum.print, dimensions: { width: 800, height: 600 } },
+      layout: { id: idSchema.enum.print, dimensions: { width: 800, height: 600 } },
       browserTimezone: 'UTC',
       objectType: 'dashboard',
       forceNow: '2024-01-01T00:00:00',
     } as unknown as BaseParams;
 
-    expect(() => validateJobParams(validParams)).toThrowErrorMatchingInlineSnapshot(`
-      "[
-        {
-          \\"code\\": \\"too_big\\",
-          \\"maximum\\": 32,
-          \\"type\\": \\"string\\",
-          \\"inclusive\\": true,
-          \\"exact\\": false,
-          \\"message\\": \\"String must contain at most 32 character(s)\\",
-          \\"path\\": [
-            \\"version\\"
-          ]
-        }
-      ]"
-    `);
+    expect(() => validateJobParams(validParams)).toThrow(
+      'version: Too big: expected string to have <=32 characters'
+    );
   });
 
   it('validates forceNow', () => {
     const validParams = {
       title: 'Monthly Report',
       version: '8.0.0',
-      layout: { id: idSchema.Enum.print, dimensions: { width: 800, height: 600 } },
+      layout: { id: idSchema.enum.print, dimensions: { width: 800, height: 600 } },
       browserTimezone: 'UTC',
       objectType: 'dashboard',
       forceNow: 'very long version that exceeds the maximum length of thirty-two characters',
     } as unknown as BaseParams;
 
-    expect(() => validateJobParams(validParams)).toThrowErrorMatchingInlineSnapshot(`
-      "[
-        {
-          \\"code\\": \\"too_big\\",
-          \\"maximum\\": 32,
-          \\"type\\": \\"string\\",
-          \\"inclusive\\": true,
-          \\"exact\\": false,
-          \\"message\\": \\"String must contain at most 32 character(s)\\",
-          \\"path\\": [
-            \\"forceNow\\"
-          ]
-        }
-      ]"
-    `);
+    expect(() => validateJobParams(validParams)).toThrow(
+      'forceNow: Too big: expected string to have <=32 characters'
+    );
   });
 
   it('validates pagingStrategy', () => {
     const validParams = {
       title: 'Monthly Report',
       version: '8.0.0',
-      layout: { id: idSchema.Enum.print, dimensions: { width: 800, height: 600 } },
+      layout: { id: idSchema.enum.print, dimensions: { width: 800, height: 600 } },
       browserTimezone: 'UTC',
       objectType: 'dashboard',
       forceNow: '2024-01-01T00:00:00',
       pagingStrategy: 'invalid_strategy',
     } as unknown as BaseParams;
 
-    expect(() => validateJobParams(validParams)).toThrowErrorMatchingInlineSnapshot(`
-      "[
-        {
-          \\"received\\": \\"invalid_strategy\\",
-          \\"code\\": \\"invalid_enum_value\\",
-          \\"options\\": [
-            \\"pit\\",
-            \\"scroll\\"
-          ],
-          \\"path\\": [
-            \\"pagingStrategy\\"
-          ],
-          \\"message\\": \\"Invalid enum value. Expected 'pit' | 'scroll', received 'invalid_strategy'\\"
-        }
-      ]"
-    `);
+    expect(() => validateJobParams(validParams)).toThrow(
+      'pagingStrategy: Invalid option: expected one of "pit"|"scroll"'
+    );
   });
 
   it('validates layout', () => {
@@ -256,54 +189,69 @@ describe('validateJobParams', () => {
       forceNow: '2024-01-01T00:00:00',
     } as unknown as BaseParams;
 
-    expect(() => validateJobParams(validParams)).toThrowErrorMatchingInlineSnapshot(`
-      "[
-        {
-          \\"received\\": \\"invalid-id\\",
-          \\"code\\": \\"invalid_enum_value\\",
-          \\"options\\": [
-            \\"preserve_layout\\",
-            \\"print\\",
-            \\"canvas\\",
-            \\"png\\"
-          ],
-          \\"path\\": [
-            \\"layout\\",
-            \\"id\\"
-          ],
-          \\"message\\": \\"Invalid enum value. Expected 'preserve_layout' | 'print' | 'canvas' | 'png', received 'invalid-id'\\"
-        }
-      ]"
-    `);
+    expect(() => validateJobParams(validParams)).toThrow(
+      'layout.id: Invalid option: expected one of "preserve_layout"|"print"|"canvas"|"png"'
+    );
   });
 
-  it('validates layout width', () => {
+  it('validates layout width minimum', () => {
     const validParams = {
       title: 'Monthly Report',
       version: '8.0.0',
-      layout: { id: idSchema.Enum.print, dimensions: { width: -800, height: 600 } },
+      layout: { id: idSchema.enum.print, dimensions: { width: -800, height: 600 } },
       browserTimezone: 'UTC',
       objectType: 'dashboard',
       forceNow: '2024-01-01T00:00:00',
     } as unknown as BaseParams;
 
-    expect(() => validateJobParams(validParams)).toThrowErrorMatchingInlineSnapshot(`
-      "[
-        {
-          \\"code\\": \\"too_small\\",
-          \\"minimum\\": 0,
-          \\"type\\": \\"number\\",
-          \\"inclusive\\": false,
-          \\"exact\\": false,
-          \\"message\\": \\"Number must be greater than 0\\",
-          \\"path\\": [
-            \\"layout\\",
-            \\"dimensions\\",
-            \\"width\\"
-          ]
-        }
-      ]"
-    `);
+    expect(() => validateJobParams(validParams)).toThrow(
+      'layout.dimensions.width: Too small: expected number to be >0'
+    );
+  });
+
+  it('validates layout width maximum', () => {
+    const validParams = {
+      title: 'Monthly Report',
+      version: '8.0.0',
+      layout: { id: idSchema.enum.print, dimensions: { width: 14401, height: 600 } },
+      browserTimezone: 'UTC',
+      objectType: 'dashboard',
+      forceNow: '2024-01-01T00:00:00',
+    } as unknown as BaseParams;
+
+    expect(() => validateJobParams(validParams)).toThrow(
+      'layout.dimensions.width: Dashboard width exceeds the maximum dimensions (14400px) supported by Chromium rendering engine. Try splitting the dashboard into smaller chunks or using print format PDF'
+    );
+  });
+
+  it('validates layout height minimum', () => {
+    const validParams = {
+      title: 'Monthly Report',
+      version: '8.0.0',
+      layout: { id: idSchema.enum.print, dimensions: { width: 800, height: -600 } },
+      browserTimezone: 'UTC',
+      objectType: 'dashboard',
+      forceNow: '2024-01-01T00:00:00',
+    } as unknown as BaseParams;
+
+    expect(() => validateJobParams(validParams)).toThrow(
+      'layout.dimensions.height: Too small: expected number to be >0'
+    );
+  });
+
+  it('validates layout height maximum', () => {
+    const validParams = {
+      title: 'Monthly Report',
+      version: '8.0.0',
+      layout: { id: idSchema.enum.print, dimensions: { width: 800, height: 16001 } },
+      browserTimezone: 'UTC',
+      objectType: 'dashboard',
+      forceNow: '2024-01-01T00:00:00',
+    } as unknown as BaseParams;
+
+    expect(() => validateJobParams(validParams)).toThrow(
+      'layout.dimensions.height: Dashboard height exceeds the maximum dimensions (16000px) supported by Chromium rendering engine. Try splitting the dashboard into smaller chunks or using print format PDF'
+    );
   });
 
   it('validates layout unknown fields', () => {
@@ -311,7 +259,7 @@ describe('validateJobParams', () => {
       title: 'Monthly Report',
       version: '8.0.0',
       layout: {
-        id: idSchema.Enum.print,
+        id: idSchema.enum.print,
         dimensions: { width: 800, height: 600 },
         unknownField: 'value',
       },
@@ -320,20 +268,9 @@ describe('validateJobParams', () => {
       forceNow: '2024-01-01T00:00:00',
     } as unknown as BaseParams;
 
-    expect(() => validateJobParams(validParams)).toThrowErrorMatchingInlineSnapshot(`
-      "[
-        {
-          \\"code\\": \\"unrecognized_keys\\",
-          \\"keys\\": [
-            \\"unknownField\\"
-          ],
-          \\"path\\": [
-            \\"layout\\"
-          ],
-          \\"message\\": \\"Unrecognized key(s) in object: 'unknownField'\\"
-        }
-      ]"
-    `);
+    expect(() => validateJobParams(validParams)).toThrow(
+      'layout: Unrecognized key: "unknownField"'
+    );
   });
 
   it('validates layout dimensions unknown fields', () => {
@@ -341,7 +278,7 @@ describe('validateJobParams', () => {
       title: 'Monthly Report',
       version: '8.0.0',
       layout: {
-        id: idSchema.Enum.print,
+        id: idSchema.enum.print,
         dimensions: { width: 800, height: 600, unknownField: 'value' },
       },
       browserTimezone: 'UTC',
@@ -349,20 +286,53 @@ describe('validateJobParams', () => {
       forceNow: '2024-01-01T00:00:00',
     } as unknown as BaseParams;
 
-    expect(() => validateJobParams(validParams)).toThrowErrorMatchingInlineSnapshot(`
-      "[
+    expect(() => validateJobParams(validParams)).toThrow(
+      'layout.dimensions: Unrecognized key: "unknownField"'
+    );
+  });
+
+  it('validates multiple locator params', () => {
+    const validParams = {
+      title: 'Monthly Report',
+      version: '8.0.0',
+      layout: {
+        id: idSchema.enum.print,
+        dimensions: { width: 800, height: 600 },
+      },
+      browserTimezone: 'UTC',
+      objectType: 'dashboard',
+      forceNow: '2024-01-01T00:00:00',
+      locatorParams: [{ id: 'some-id' }, { version: 'some-version' }],
+    } as unknown as BaseParams;
+
+    expect(() => validateJobParams(validParams)).not.toThrow();
+  });
+
+  it('preserves esqlVariables nested in locator params', () => {
+    const validParams = {
+      title: 'ES|QL CSV',
+      version: '8.0.0',
+      browserTimezone: 'UTC',
+      objectType: 'search',
+      locatorParams: [
         {
-          \\"code\\": \\"unrecognized_keys\\",
-          \\"keys\\": [
-            \\"unknownField\\"
-          ],
-          \\"path\\": [
-            \\"layout\\",
-            \\"dimensions\\"
-          ],
-          \\"message\\": \\"Unrecognized key(s) in object: 'unknownField'\\"
-        }
-      ]"
-    `);
+          id: 'DISCOVER_APP_LOCATOR',
+          version: '8.0.0',
+          params: {
+            query: { esql: 'FROM test | WHERE crew.id == ?crew_id' },
+            columns: ['crew.id'],
+            esqlVariables: [{ key: 'crew_id', value: '123', type: 'values' }],
+          },
+        },
+      ],
+    } as unknown as BaseParams;
+
+    const result = validateJobParams(validParams) as unknown as {
+      locatorParams: Array<{ params: { esqlVariables: unknown } }>;
+    };
+
+    expect(result.locatorParams[0].params.esqlVariables).toEqual([
+      { key: 'crew_id', value: '123', type: 'values' },
+    ]);
   });
 });

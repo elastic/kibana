@@ -7,10 +7,15 @@
 
 import * as rt from 'io-ts';
 import { CaseStatuses } from '@kbn/cases-components/src/status/types';
+import {
+  CASE_EXTENDED_FIELDS,
+  CASE_EXTENDED_FIELDS_LABELS,
+  CASE_EXTENDED_FIELDS_CONTROLS,
+} from '../../../constants';
 import { ExternalServiceRt } from '../external_service/v1';
 import { CaseAssigneesRt, UserRt } from '../user/v1';
 import { CaseConnectorRt } from '../connector/v1';
-import { AttachmentRt } from '../attachment/v1';
+import { AttachmentRtV2 } from '../attachment/v2';
 import { CaseCustomFieldsRt } from '../custom_field/v1';
 import { CaseObservableRt } from '../observable/v1';
 
@@ -26,6 +31,20 @@ export const CaseStatusRt = rt.union([
 ]);
 
 export const caseStatuses = Object.values(CaseStatuses);
+
+export const DefaultCloseReasonRt = rt.union([
+  rt.literal('false_positive'),
+  rt.literal('duplicate'),
+  rt.literal('true_positive'),
+  rt.literal('benign_positive'),
+  rt.literal('automated_closure'),
+  rt.literal('other'),
+]);
+
+/**
+ * Close reason
+ */
+export const CaseCloseReasonRt = rt.union([DefaultCloseReasonRt, rt.string]);
 
 /**
  * Severity
@@ -59,6 +78,11 @@ export const CaseSettingsRt = rt.intersection([
     })
   ),
 ]);
+
+export const CaseTemplate = rt.strict({
+  id: rt.string,
+  version: rt.number,
+});
 
 const CaseBaseFields = {
   /**
@@ -142,6 +166,8 @@ export const CaseAttributesRt = rt.intersection([
       time_to_acknowledge: rt.union([rt.number, rt.null]),
       time_to_investigate: rt.union([rt.number, rt.null]),
       time_to_resolve: rt.union([rt.number, rt.null]),
+      template: rt.union([rt.null, CaseTemplate]),
+      [CASE_EXTENDED_FIELDS]: rt.record(rt.string, rt.string),
     })
   ),
 ]);
@@ -157,7 +183,15 @@ export const CaseRt = rt.intersection([
   }),
   rt.exact(
     rt.partial({
-      comments: rt.array(AttachmentRt),
+      comments: rt.array(AttachmentRtV2),
+      // Populated at response time by enrichCasesWithFieldLabels — not persisted to the SO.
+      // Maps storage keys (e.g. `priority_as_keyword`) to user-facing labels (e.g. "Priority").
+      [CASE_EXTENDED_FIELDS_LABELS]: rt.record(rt.string, rt.string),
+      // Populated alongside extended_fields_labels by enrichCasesWithFieldLabels — not persisted.
+      // Maps storage keys to the field's control type (e.g. `USER_PICKER`), so a value that needs
+      // parsing (user picker, checkbox group, toggle) can be rendered correctly wherever a case is
+      // displayed without threading full field definitions through every consumer.
+      [CASE_EXTENDED_FIELDS_CONTROLS]: rt.record(rt.string, rt.string),
     })
   ),
 ]);

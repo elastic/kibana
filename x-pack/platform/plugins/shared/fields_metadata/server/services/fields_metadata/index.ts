@@ -6,7 +6,11 @@
  */
 
 export { FieldsMetadataService } from './fields_metadata_service';
-export { FieldsMetadataClient } from './fields_metadata_client';
+export {
+  FieldsMetadataClient,
+  ecsFlatNameToRootFieldsetName,
+  isDirectChildFieldName,
+} from './fields_metadata_client';
 export type {
   FieldsMetadataServiceSetup,
   FieldsMetadataServiceStart,

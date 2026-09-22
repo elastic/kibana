@@ -12,6 +12,7 @@ export enum SiemMigrationsEventTypes {
   MigrationSuccess = 'siem_migrations_migration_success',
   MigrationAborted = 'siem_migrations_migration_aborted',
   MigrationFailure = 'siem_migrations_migration_failure',
+  SourceQueryKeywords = 'siem_migrations_source_query_keywords',
   // Rules
   RuleTranslationSuccess = 'siem_migrations_rule_translation_success',
   RuleTranslationFailure = 'siem_migrations_rule_translation_failure',
@@ -27,6 +28,7 @@ export const siemMigrationEventNames = {
   [SiemMigrationsEventTypes.MigrationSuccess]: 'Migration success',
   [SiemMigrationsEventTypes.MigrationAborted]: 'Migration aborted',
   [SiemMigrationsEventTypes.MigrationFailure]: 'Migration failure',
+  [SiemMigrationsEventTypes.SourceQueryKeywords]: 'Source Query keywords',
   // Rules
   [SiemMigrationsEventTypes.RuleTranslationFailure]: 'Rule translation failure',
   [SiemMigrationsEventTypes.RuleTranslationSuccess]: 'Rule translation success',
@@ -261,6 +263,55 @@ export const SIEM_MIGRATIONS_MIGRATION_ABORTED: EventTypeOpts<{
       type: 'keyword',
       _meta: {
         description: 'Vendor of the migration',
+      },
+    },
+  },
+};
+
+export const SIEM_MIGRATIONS_SOURCE_QUERY_KEYWORDS: EventTypeOpts<{
+  migrationId: string;
+  vendor: SiemMigrationVendor;
+  type: 'rules' | 'dashboards';
+  keywords: string[];
+  eventName: string;
+}> = {
+  eventType: SiemMigrationsEventTypes.SourceQueryKeywords,
+  schema: {
+    migrationId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Unique identifier for the migration',
+      },
+    },
+    eventName: {
+      type: 'keyword',
+      _meta: {
+        description: 'The event name/description',
+        optional: false,
+      },
+    },
+    vendor: {
+      type: 'keyword',
+      _meta: {
+        description: 'Vendor of the migration',
+      },
+    },
+    type: {
+      type: 'keyword',
+      _meta: {
+        description: 'The type of migration, either rules or dashboards',
+      },
+    },
+    keywords: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description: 'keywords to be tracked',
+        },
+      },
+      _meta: {
+        description: 'Keywords that need to be tracked',
       },
     },
   },
@@ -598,6 +649,7 @@ export const SIEM_MIGRATIONS_EVENTS = [
   SIEM_MIGRATIONS_MIGRATION_SUCCESS,
   SIEM_MIGRATIONS_MIGRATION_ABORTED,
   SIEM_MIGRATIONS_MIGRATION_FAILURE,
+  SIEM_MIGRATIONS_SOURCE_QUERY_KEYWORDS,
   SIEM_MIGRATIONS_RULE_TRANSLATION_SUCCESS,
   SIEM_MIGRATIONS_RULE_TRANSLATION_FAILURE,
   SIEM_MIGRATIONS_PREBUILT_RULES_MATCH,

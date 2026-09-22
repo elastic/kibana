@@ -70,5 +70,5 @@ export function getDisplayValueFromFilter(filter: Filter, indexPatterns: DataVie
     return getPhrasesDisplayValue(filter, valueFormatter);
   } else if (isRangeFilter(filter) || isScriptedRangeFilter(filter)) {
     return getRangeDisplayValue(filter, valueFormatter);
-  } else return filter.meta.value ?? '';
+  } else return String(filter.meta.value ?? '');
 }

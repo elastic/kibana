@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/lens-plugin",
-  "owner": ["@elastic/kibana-visualizations"],
+  "owner": ["@elastic/kibana-dashboards"],
   "group": "platform",
   "visibility": "shared",
   "description": "Visualization editor allowing to quickly and easily configure compelling visualizations to use on dashboards and canvas workpads. Exposes components to embed visualizations and link into the Lens editor from within other apps in Kibana.",
@@ -21,10 +21,8 @@
       "urlForwarding",
       "visualizations",
       "uiActions",
-      "uiActionsEnhanced",
       "embeddable",
       "share",
-      "presentationUtil",
       "dataViewFieldEditor",
       "dataViewEditor",
       "expressionGauge",
@@ -35,13 +33,12 @@
       "eventAnnotation",
       "unifiedSearch",
       "kql",
-      "contentManagement"
+      "contentManagement",
+      "expressionLegacyMetricVis",
     ],
     "optionalPlugins": [
-      "expressionLegacyMetricVis",
       "expressionPartitionVis",
       "usageCollection",
-      "embeddableEnhanced",
       "taskManager",
       "globalSearch",
       "savedObjectsTagging",
@@ -56,11 +53,11 @@
       "savedObjects",
       "kibanaUtils",
       "kibanaReact",
-      "embeddable",
       "fieldFormats",
       "charts",
       "esqlDataGrid",
       "esql",
+      "presentationUtil",
     ],
     "extraPublicDirs": ["common/constants"]
   }

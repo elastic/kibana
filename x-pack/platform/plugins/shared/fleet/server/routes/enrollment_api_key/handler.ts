@@ -13,12 +13,14 @@ import type {
   PostEnrollmentAPIKeyRequestSchema,
   DeleteEnrollmentAPIKeyRequestSchema,
   GetOneEnrollmentAPIKeyRequestSchema,
+  BulkDeleteEnrollmentAPIKeysRequestSchema,
 } from '../../types';
 import type {
   GetEnrollmentAPIKeysResponse,
   GetOneEnrollmentAPIKeyResponse,
   DeleteEnrollmentAPIKeyResponse,
   PostEnrollmentAPIKeyResponse,
+  BulkDeleteEnrollmentAPIKeysResponse,
 } from '../../../common/types';
 import * as APIKeyService from '../../services/api_keys';
 import { agentPolicyService } from '../../services/agent_policy';
@@ -80,19 +82,35 @@ export const postEnrollmentApiKeyHandler: RequestHandler<
 };
 
 export const deleteEnrollmentApiKeyHandler: RequestHandler<
-  TypeOf<typeof DeleteEnrollmentAPIKeyRequestSchema.params>
+  TypeOf<typeof DeleteEnrollmentAPIKeyRequestSchema.params>,
+  TypeOf<typeof DeleteEnrollmentAPIKeyRequestSchema.query>
 > = async (context, request, response) => {
   try {
     const useSpaceAwareness = await isSpaceAwarenessEnabled();
     const coreContext = await context.core;
     const esClient = coreContext.elasticsearch.client.asInternalUser;
     const currentNamespace = getCurrentNamespace(coreContext.savedObjects.client);
-    await APIKeyService.deleteEnrollmentApiKey(
+    const { forceDelete, includeHidden } = request.query;
+    const { successCount, errorCount } = await APIKeyService.deleteEnrollmentApiKeys(
       esClient,
-      request.params.keyId,
-      false,
-      useSpaceAwareness ? currentNamespace : undefined
+      [request.params.keyId],
+      forceDelete,
+      useSpaceAwareness ? currentNamespace : undefined,
+      includeHidden
     );
+
+    if (successCount === 0 && errorCount === 0) {
+      return response.notFound({
+        body: { message: `EnrollmentAPIKey ${request.params.keyId} not found` },
+      });
+    }
+
+    if (successCount === 0 && errorCount > 0) {
+      return response.customError({
+        statusCode: 500,
+        body: { message: `Failed to process EnrollmentAPIKey ${request.params.keyId}` },
+      });
+    }
 
     const body: DeleteEnrollmentAPIKeyResponse = { action: 'deleted' };
 
@@ -105,6 +123,38 @@ export const deleteEnrollmentApiKeyHandler: RequestHandler<
     }
     throw error;
   }
+};
+
+export const bulkDeleteEnrollmentApiKeysHandler: RequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof BulkDeleteEnrollmentAPIKeysRequestSchema.body>
+> = async (context, request, response) => {
+  const useSpaceAwareness = await isSpaceAwarenessEnabled();
+  const coreContext = await context.core;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const currentNamespace = getCurrentNamespace(coreContext.savedObjects.client);
+
+  const { tokenIds, kuery, forceDelete, includeHidden } = request.body;
+  const { count, successCount, errorCount } = await APIKeyService.bulkDeleteEnrollmentApiKeys(
+    esClient,
+    {
+      tokenIds,
+      kuery,
+      forceDelete,
+      spaceId: useSpaceAwareness ? currentNamespace : undefined,
+      includeHidden,
+    }
+  );
+
+  const body: BulkDeleteEnrollmentAPIKeysResponse = {
+    action: forceDelete ? 'deleted' : 'deactivated',
+    count,
+    successCount,
+    errorCount,
+  };
+
+  return response.ok({ body });
 };
 
 export const getOneEnrollmentApiKeyHandler: RequestHandler<

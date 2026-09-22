@@ -21,7 +21,7 @@ import { METERING_TASK as AI4SOC_METERING_TASK } from './ai4soc/constants/meteri
 const tlsConfig = schema.object({
   certificate: schema.string(),
   key: schema.string(),
-  ca: schema.string(),
+  ca: schema.maybe(schema.string()),
 });
 export type TlsConfigSchema = TypeOf<typeof tlsConfig>;
 
@@ -45,6 +45,19 @@ export const serverConfigSchema = schema.object({
   cloudSecurityUsageReportingTaskInterval: schema.string({ defaultValue: '30m' }),
 
   /**
+   * Cloud security usage reporting. Set `cspm.enabled` to `false` to stop
+   * CSPM billing records. KSPM and CNVM metering are unaffected.
+   *
+   * @example
+   * xpack.securitySolutionServerless.cloudSecurityMetering.cspm.enabled: false
+   */
+  cloudSecurityMetering: schema.object({
+    cspm: schema.object({
+      enabled: schema.boolean({ defaultValue: true }),
+    }),
+  }),
+
+  /**
    * Usage Reporting: the interval between runs of the ai4soc metering task
    */
   ai4SocUsageReportingTaskInterval: schema.string({ defaultValue: AI4SOC_METERING_TASK.INTERVAL }),
@@ -54,6 +67,7 @@ export const serverConfigSchema = schema.object({
    */
   usageReportingTaskTimeout: schema.string({ defaultValue: '1m' }),
 
+  // @deprecated: This config is deprecated and will be removed in the future in favor of the new Usage API plugin.
   usageApi: usageApiConfig,
 });
 const configSchema = schema.allOf([commonConfigSchema, serverConfigSchema]);

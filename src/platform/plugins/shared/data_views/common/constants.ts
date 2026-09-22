@@ -8,19 +8,17 @@
  */
 
 /**
- * All runtime field types.
- * @public
+ * Used to optimize on-boarding experience to determine if the instance has some user created data views or data indices/streams by filtering data sources
+ * that are created by default by elastic in ese.
+ * We should somehow prevent creating initial data for the users without their explicit action
+ * instead of relying on these hardcoded assets
  */
-export const RUNTIME_FIELD_TYPES = [
-  'keyword',
-  'long',
-  'double',
-  'date',
-  'ip',
-  'boolean',
-  'geo_point',
-  'composite',
-] as const;
+export const DEFAULT_ASSETS_TO_IGNORE = {
+  DATA_STREAMS_TO_IGNORE: [
+    'logs-enterprise_search.api-default', // https://github.com/elastic/kibana/issues/134918
+    `logs-enterprise_search.audit-default`, // https://github.com/elastic/kibana/issues/134918
+  ],
+};
 
 /**
  * UiSettings key for metaFields list.
@@ -35,28 +33,15 @@ export const META_FIELDS = 'metaFields';
 export const DATA_VIEW_SAVED_OBJECT_TYPE = 'index-pattern';
 
 /**
- * Max length for the custom field description
- */
-export const MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH = 300;
-
-/**
- * Used to optimize on-boarding experience to determine if the instance has some user created data views or data indices/streams by filtering data sources
- * that are created by default by elastic in ese.
- * We should somehow prevent creating initial data for the users without their explicit action
- * instead of relying on these hardcoded assets
- */
-export const DEFAULT_ASSETS_TO_IGNORE = {
-  DATA_STREAMS_TO_IGNORE: [
-    'logs-enterprise_search.api-default', // https://github.com/elastic/kibana/issues/134918
-    `logs-enterprise_search.audit-default`, // https://github.com/elastic/kibana/issues/134918
-  ],
-};
-
-/**
  * Data views plugin name.
  * @public
  */
 export const PLUGIN_NAME = 'DataViews';
+
+/**
+ * Max length for the custom field description
+ */
+export const MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH = 300;
 
 /**
  * Fields for wildcard path.

@@ -96,7 +96,7 @@ it('test removeBrokenLinks', () => {
 
   const pluginApiMap: { [key: string]: PluginApi } = {};
   plugins.map((plugin) => {
-    pluginApiMap[plugin.id] = getPluginApi(project, plugin, plugins, log, false);
+    pluginApiMap[plugin.id] = getPluginApi(project, plugin, plugins, log, false).pluginApi;
   });
 
   const missingApiItems: { [key: string]: { [key: string]: string[] } } = {};
