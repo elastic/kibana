@@ -101,10 +101,9 @@ export function ErrorGroupOverview() {
                       distribution={errorDistributionData}
                       title={chartTitle}
                       discoverParams={{
-                        label: i18n.translate(
-                          'xpack.apm.errorGroupOverview.openErrorsInDiscover',
-                          { defaultMessage: 'Open errors in Discover' }
-                        ),
+                        label: i18n.translate('xpack.apm.errorGroupOverview.openErrorsInDiscover', {
+                          defaultMessage: 'Open errors in Discover',
+                        }),
                         rangeFrom,
                         rangeTo,
                         queryParams: {

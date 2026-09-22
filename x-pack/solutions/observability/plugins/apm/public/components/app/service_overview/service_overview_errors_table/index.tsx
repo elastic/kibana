@@ -26,7 +26,11 @@ export function ServiceOverviewErrorsTable({ serviceName, onLoadTable }: Props) 
   const { environment, kuery, rangeFrom, rangeTo } = query;
 
   const { logsIndexPattern } = useLogsIndexPattern();
-  const { rows: logRows, hasRows: hasLogRows, isLoading: isLogRowsLoading } = useServiceErrorsFromLogs({
+  const {
+    rows: logRows,
+    hasRows: hasLogRows,
+    isLoading: isLogRowsLoading,
+  } = useServiceErrorsFromLogs({
     serviceName,
     environment,
     kuery,
@@ -45,16 +49,17 @@ export function ServiceOverviewErrorsTable({ serviceName, onLoadTable }: Props) 
   // Guard on both isLoading and hasRows: during an in-flight logs fetch hasRows is false,
   // so without the isLoading guard the APM table would flash "No errors found" before the
   // logs response arrives. Only swap in the logs table once the fetch has settled with rows.
-  const emptyStateContent = !isLogRowsLoading && hasLogRows ? (
-    <ErrorsFromLogsTable
-      items={logRows}
-      rangeFrom={rangeFrom}
-      rangeTo={rangeTo}
-      logsIndexPattern={logsIndexPattern}
-      tableCaption={logsTableCaption}
-      isCompactMode={true}
-    />
-  ) : undefined;
+  const emptyStateContent =
+    !isLogRowsLoading && hasLogRows ? (
+      <ErrorsFromLogsTable
+        items={logRows}
+        rangeFrom={rangeFrom}
+        rangeTo={rangeTo}
+        logsIndexPattern={logsIndexPattern}
+        tableCaption={logsTableCaption}
+        isCompactMode={true}
+      />
+    ) : undefined;
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="serviceOverviewErrorsTable">
