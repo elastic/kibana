@@ -14210,7 +14210,7 @@ paths:
                     - rule-1
                     - rule-2
             schema:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_get_rules_request'
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_by_ids_request'
       responses:
         '200':
           content:
@@ -148942,22 +148942,6 @@ components:
       required:
         - match_count
         - sample
-    Kibana_HTTP_APIs_alerting_bulk_get_rules_request:
-      additionalProperties: false
-      type: object
-      properties:
-        ids:
-          description: Rule identifiers to retrieve. The response preserved this order.
-          items:
-            description: A rule identifier.
-            maxLength: 150
-            minLength: 1
-            type: string
-          maxItems: 100
-          minItems: 1
-          type: array
-      required:
-        - ids
     Kibana_HTTP_APIs_alerting_bulk_get_rules_response:
       additionalProperties: false
       type: object
