@@ -80,6 +80,7 @@ import type {
   DocMap,
   DocumentsDisplayMode,
   JsonModeSettings,
+  DisplayMode,
 } from '../types';
 import {
   getDisplayedColumns,
@@ -263,6 +264,11 @@ interface InternalUnifiedDataTableProps {
    * Manage user sorting control
    */
   isSortEnabled?: boolean;
+  /**
+   * Display mode of the grid.
+   * @default 'default'
+   */
+  displayMode?: DisplayMode;
   /**
    * Only for ES|QL mode for now.
    * When false, disables in-memory (client-side) row sorting. Use this when sorting is performed
@@ -593,6 +599,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       showFullScreenButton = true,
       sort,
       isSortEnabled = true,
+      displayMode = 'default',
       isInMemorySortEnabled = true,
       isPaginationEnabled = true,
       paginationMode = DEFAULT_PAGINATION_MODE,
@@ -661,9 +668,12 @@ const InternalUnifiedDataTable = React.forwardRef<
     const dataGridRef = useRef<EuiDataGridRefProps>(null);
     useImperativeHandle(ref, () => dataGridRef.current!);
 
+    const isInteractive = displayMode === 'default';
+
     const [isFilterActive, setIsFilterActive] = useRestorableState('isFilterActive', false);
     const [isCompareActive, setIsCompareActive] = useRestorableState('isCompareActive', false);
     const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
+    const isPaginationActive = isInteractive && isPaginationEnabled;
 
     const documentsDisplayMode = documentsDisplayModeState ?? 'table';
     const jsonModeSettings = useMemo<JsonModeSettings>(
@@ -751,6 +761,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       dataView,
       isPlainRecord,
       isSortEnabled,
+      isInteractive,
       isInMemorySortEnabled,
       isSummaryOnlyColumn,
       onSort,
@@ -848,7 +859,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         onUpdateRowsPerPage?.(pageSize);
       };
 
-      return isPaginationEnabled
+      return isPaginationActive
         ? {
             onChangeItemsPerPage,
             onChangePage: changeCurrentPageIndex,
@@ -858,7 +869,7 @@ const InternalUnifiedDataTable = React.forwardRef<
           }
         : undefined;
     }, [
-      isPaginationEnabled,
+      isPaginationActive,
       rowsPerPageOptions,
       onUpdateRowsPerPage,
       currentPageSize,
@@ -913,15 +924,15 @@ const InternalUnifiedDataTable = React.forwardRef<
         componentsTourSteps,
         isPlainRecord,
         documentsDisplayMode,
-        pageIndex: isPaginationEnabled ? paginationObj?.pageIndex : 0,
-        pageSize: isPaginationEnabled ? paginationObj?.pageSize : displayedRows.length,
+        pageIndex: isPaginationActive ? paginationObj?.pageIndex : 0,
+        pageSize: isPaginationActive ? paginationObj?.pageSize : displayedRows.length,
       }),
       [
         componentsTourSteps,
         dataView,
         isPlainRecord,
         documentsDisplayMode,
-        isPaginationEnabled,
+        isPaginationActive,
         displayedRows,
         expandedDoc,
         onFilter,
@@ -992,7 +1003,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       expandedDoc,
       displayedRows,
       paginationMode,
-      isPaginationEnabled,
+      isPaginationEnabled: isPaginationActive,
       pageIndex: currentPageIndex,
       pageSize: currentPageSize,
       onChangePageIndex: changeCurrentPageIndex,
@@ -1016,7 +1027,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       cellContextWithInTableSearchSupport,
       renderCellValueWithInTableSearchSupport,
     } = useDataGridInTableSearch({
-      enableInTableSearch,
+      enableInTableSearch: enableInTableSearch && isInteractive,
       dataGridWrapper,
       dataGridRef,
       visibleColumns,
@@ -1174,6 +1185,7 @@ const InternalUnifiedDataTable = React.forwardRef<
           dataView,
           isSummaryOnlyColumn,
           isSortEnabled,
+          isInteractive,
           isPlainRecord,
           services: {
             uiSettings,
@@ -1209,6 +1221,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         headerRowHeightLines,
         isPlainRecord,
         isSortEnabled,
+        isInteractive,
         onFilter,
         onResize,
         settings,
@@ -1228,7 +1241,8 @@ const InternalUnifiedDataTable = React.forwardRef<
     const schemaDetectors = useMemo(() => getSchemaDetectors(), []);
     const columnsVisibility = useMemo(
       () => ({
-        canDragAndDropColumns: isSummaryOnlyColumn ? false : canDragAndDropColumns,
+        canDragAndDropColumns:
+          isInteractive && !isSummaryOnlyColumn ? canDragAndDropColumns : false,
         visibleColumns,
         setVisibleColumns: (newColumns: string[]) => {
           const dontModifyColumns = !shouldPrependTimeFieldColumn(newColumns);
@@ -1240,13 +1254,24 @@ const InternalUnifiedDataTable = React.forwardRef<
         onSetColumns,
         shouldPrependTimeFieldColumn,
         canDragAndDropColumns,
+        isInteractive,
         isSummaryOnlyColumn,
       ]
     );
 
-    const canSetExpandedDoc = Boolean(setExpandedDoc && !!renderDocumentView);
+    const canSetExpandedDoc = Boolean(isInteractive && setExpandedDoc && !!renderDocumentView);
 
     const leadingControlColumns: EuiDataGridControlColumn[] = useMemo(() => {
+      if (!isInteractive) {
+        return getRowIndicator
+          ? [
+              getColorIndicatorControlColumn({
+                getRowIndicator,
+              }),
+            ]
+          : [];
+      }
+
       const { leadColumns, leadColumnsExtraContent } = getLeadControlColumns({
         rows: displayedRows,
         canSetExpandedDoc,
@@ -1280,6 +1305,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       displayedRows,
       externalControlColumns,
       getRowIndicator,
+      isInteractive,
       rowAdditionalLeadingControls,
       visibleRowLeadingControls,
     ]);
@@ -1405,10 +1431,11 @@ const InternalUnifiedDataTable = React.forwardRef<
       | EuiDataGridToolBarVisibilityDisplaySelectorOptions
       | undefined => {
       if (
-        !onUpdateDataGridDensity &&
-        !onUpdateRowHeight &&
-        !onUpdateHeaderRowHeight &&
-        !onUpdateSampleSize
+        !isInteractive ||
+        (!onUpdateDataGridDensity &&
+          !onUpdateRowHeight &&
+          !onUpdateHeaderRowHeight &&
+          !onUpdateSampleSize)
       ) {
         return;
       }
@@ -1461,21 +1488,24 @@ const InternalUnifiedDataTable = React.forwardRef<
       jsonModeSettings,
       onUpdateJsonModeSettings,
       isViewModeNew,
+      isInteractive,
     ]);
 
     const toolbarVisibility = useMemo(
       () => ({
         ...toolbarVisibilityDefaults,
-        showSortSelector: isSortEnabled && !isJsonSourceMode,
-        showColumnSelector: isJsonSourceMode ? false : toolbarVisibilityDefaults.showColumnSelector,
+        showSortSelector: isInteractive && isSortEnabled && !isJsonSourceMode,
+        showColumnSelector:
+          isInteractive && !isJsonSourceMode ? toolbarVisibilityDefaults.showColumnSelector : false,
         additionalControls,
         showDisplaySelector,
-        showKeyboardShortcuts,
-        showFullScreenSelector: showFullScreenButton,
+        showKeyboardShortcuts: isInteractive ? showKeyboardShortcuts : false,
+        showFullScreenSelector: isInteractive ? showFullScreenButton : false,
       }),
       [
         isJsonSourceMode,
         isSortEnabled,
+        isInteractive,
         additionalControls,
         showDisplaySelector,
         showKeyboardShortcuts,
@@ -1626,8 +1656,10 @@ const InternalUnifiedDataTable = React.forwardRef<
                 columnVisibility={columnsVisibility}
                 data-test-subj="docTable"
                 leadingControlColumns={leadingControlColumns}
-                onColumnResize={onResize}
-                pagination={paginationMode === 'multiPage' ? paginationObj : undefined}
+                onColumnResize={isInteractive ? onResize : undefined}
+                pagination={
+                  isPaginationActive && paginationMode === 'multiPage' ? paginationObj : undefined
+                }
                 renderCellValue={renderCellValueWithInTableSearchSupport}
                 ref={dataGridRef}
                 rowCount={rowCount}
@@ -1647,7 +1679,7 @@ const InternalUnifiedDataTable = React.forwardRef<
             )}
           </div>
           {loadingState !== DataLoadingState.loading &&
-            isPaginationEnabled && // we hide the footer for Surrounding Documents page
+            isPaginationActive && // we hide the footer for Surrounding Documents page
             !isFilterActive && // hide footer when showing selected documents
             !isCompareActive && (
               <UnifiedDataTableFooter

@@ -78,7 +78,11 @@ const createSavedSearch = (isEsql: boolean): SavedSearch => {
 
 const createApi = (
   savedSearch: SavedSearch,
-  { savedObjectId, panelFilters = [] }: { savedObjectId?: string; panelFilters?: Filter[] } = {}
+  {
+    savedObjectId,
+    panelFilters = [],
+    viewMode = 'view',
+  }: { savedObjectId?: string; panelFilters?: Filter[]; viewMode?: 'view' | 'print' } = {}
 ) => {
   return {
     dataLoading$: new BehaviorSubject<boolean | undefined>(false),
@@ -92,6 +96,9 @@ const createApi = (
     description$: new BehaviorSubject<string | undefined>(undefined),
     defaultTitle$: new BehaviorSubject<string | undefined>('Test'),
     defaultDescription$: new BehaviorSubject<string | undefined>(undefined),
+    parentApi: {
+      viewMode$: new BehaviorSubject(viewMode),
+    },
   } as unknown as SearchEmbeddableApi & {
     fetchWarnings$: BehaviorSubject<SearchResponseIncompleteWarning[]>;
     fetchContext$: BehaviorSubject<FetchContext | undefined>;
@@ -112,6 +119,7 @@ describe('SearchEmbeddableGridComponent', () => {
     fetchContext,
     savedObjectId,
     panelFilters,
+    isPrintMode = false,
     services: servicesOverride = services,
   }: {
     isEsql: boolean;
@@ -119,10 +127,15 @@ describe('SearchEmbeddableGridComponent', () => {
     fetchContext?: FetchContext;
     savedObjectId?: string;
     panelFilters?: Filter[];
+    isPrintMode?: boolean;
     services?: ReturnType<typeof createDiscoverServicesMock>;
   }) => {
     const savedSearch = createSavedSearch(isEsql);
-    const api = createApi(savedSearch, { savedObjectId, panelFilters });
+    const api = createApi(savedSearch, {
+      savedObjectId,
+      panelFilters,
+      viewMode: isPrintMode ? 'print' : 'view',
+    });
     if (fetchContext) {
       api.fetchContext$.next(fetchContext);
     }
@@ -202,6 +215,17 @@ describe('SearchEmbeddableGridComponent', () => {
       onResize({ columnId: '_source', width: undefined });
       expect(stateManager.grid.getValue()).toEqual({ columns: { _source: {} } });
     });
+  });
+
+  it('passes print mode to the embeddable grid', async () => {
+    renderComponent({ isEsql: false, isPrintMode: true });
+
+    await waitFor(() => {
+      expect(mockDiscoverGridEmbeddableProps).toHaveBeenCalled();
+    });
+
+    const lastCallProps = mockDiscoverGridEmbeddableProps.mock.calls.at(-1)?.[0];
+    expect(lastCallProps?.displayMode).toBe('print');
   });
 
   describe('share direct link', () => {
