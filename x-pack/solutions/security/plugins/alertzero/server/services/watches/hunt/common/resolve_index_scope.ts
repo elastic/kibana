@@ -69,12 +69,22 @@ export const resolveIndexScope = async ({
   const alertsPattern = alertsIndexPattern(spaceId);
   const resolvedWindow = window ?? defaultWindow();
 
+  // A wildcard that matches nothing resolves to an empty list, but a concrete
+  // name that does not exist (the space-derived alerts index before any alert
+  // is written there) is a 404 unless `ignore_unavailable` is set. Either way
+  // the answer is "absent", never an error.
   const checkPattern = async (pattern: string): Promise<[string, boolean]> => {
-    const response = await esClient.indices.resolveIndex({
-      name: pattern,
-      expand_wildcards: 'open',
-    });
-    return [pattern, response.indices.length > 0 || response.data_streams.length > 0];
+    try {
+      const response = await esClient.indices.resolveIndex({
+        name: pattern,
+        expand_wildcards: 'open',
+        ignore_unavailable: true,
+      });
+      return [pattern, response.indices.length > 0 || response.data_streams.length > 0];
+    } catch (err) {
+      if ((err as { statusCode?: number }).statusCode === 404) return [pattern, false];
+      throw err;
+    }
   };
 
   const [requiredResults, optionalResults] = await Promise.all([

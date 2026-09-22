@@ -89,7 +89,24 @@ describe('resolveIndexScope', () => {
     expect(esClient.indices.resolveIndex).toHaveBeenCalledWith({
       name: 'logs-aws.*',
       expand_wildcards: 'open',
+      ignore_unavailable: true,
     });
+  });
+
+  it('treats a 404 on a concrete index name as absent instead of failing the resolution', async () => {
+    const esClient = createMockEsClient(new Set(['logs-aws.*', 'logs-endpoint.events.*']));
+    (esClient.indices.resolveIndex as jest.Mock).mockImplementation(({ name }: { name: string }) =>
+      name === alertsPattern
+        ? Promise.reject(Object.assign(new Error('index_not_found_exception'), { statusCode: 404 }))
+        : Promise.resolve(
+            name === 'logs-aws.*' || name === 'logs-endpoint.events.*' ? present : absent
+          )
+    );
+    const result = await resolveIndexScope({ esClient, technology: 'aws_iam', spaceId: SPACE_ID });
+
+    expect(result).toEqual(
+      expect.objectContaining({ status: 'degraded', missing: [alertsPattern] })
+    );
   });
 
   it('defaults the row limit to 25 and the window to a 30-day lookback', async () => {
