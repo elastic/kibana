@@ -32,7 +32,7 @@ function runTests() {
 
   console.log(`Running e2e tests: "pnpm cypress:${mode}${isHeaded}"`);
 
-  return childProcess.spawnSync('yarn', [`cypress:${mode}${isHeaded}`], {
+  return childProcess.spawnSync('pnpm', [`cypress:${mode}${isHeaded}`], {
     cwd: e2eDir,
     encoding: 'utf8',
     stdio: 'inherit',
