@@ -31,7 +31,6 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/shared-ux-router'
   - '@kbn/core-http-browser'
-  - '@kbn/ui-callout'
   - '@kbn/app-header'
   - '@kbn/deeplinks-security'
   - '@kbn/spaces-plugin'
