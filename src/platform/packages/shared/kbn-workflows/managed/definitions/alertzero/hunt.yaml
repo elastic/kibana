@@ -65,8 +65,8 @@ steps:
   # The coordinator's request body is snake_case (report_id, run_id, trigger)
   # and does not know about Investigations; this step is the camelCase ->
   # snake_case mapping layer so no other caller has to repeat it. An unset
-  # `technology` input renders as null, which the coordinator treats the same
-  # as omitted: resolve the technologies from the environment.
+  # `technology` input renders as "", which the coordinator treats the same as
+  # omitted: resolve the technologies from the environment.
   - name: run_hunt_coordinator
     type: kibana.request
     with:
@@ -81,7 +81,7 @@ steps:
         run_id: "{{ inputs.runId }}"
         trigger: "{{ inputs.trigger }}"
         tier2_when: "{{ inputs.tier2_when }}"
-        technology: "${{ inputs.technology | default: null }}"
+        technology: "{{ inputs.technology }}"
     on-failure:
       fallback:
         - name: emit_coordinator_failed
@@ -90,7 +90,7 @@ steps:
           with:
             status: failed
             stage: hunt_coordinator
-            reason: "${{ steps.run_hunt_coordinator.error }}"
+            reason: "${{ steps.run_hunt_coordinator.error.message }}"
 
   # Populated only when Tier 1 confirmed a hit: one entry per confirmed
   # technique (a single report-scoped entry when Tier 2 produced none). No
@@ -231,4 +231,4 @@ steps:
     with:
       status: "{{ variables.result_status }}"
       stage: hunt
-      reason: "${{ steps.run_hunt_coordinator.error | default: null }}"
+      reason: "${{ steps.run_hunt_coordinator.error.message | default: nil }}"
