@@ -609,6 +609,48 @@ describe('generateYamlSchemaFromConnectors', () => {
           steps: [{ with: { ids: ['A', 'B'] } }],
         });
       });
+
+      it('preserves passthrough keys when replaying object-level checks', () => {
+        // The check-only replay schema must be loose: a plain z.object would strip catchall keys
+        // before refinements run and from the data written back to ctx.value.
+        const passthroughRefined: ConnectorContractUnion = {
+          summary: 'PassthroughRefined',
+          description: null,
+          type: 'passthrough.refined.step',
+          paramsSchema: z
+            .object({ ids: z.array(z.string()) })
+            .passthrough()
+            .refine((v) => v.extra === 'ok', 'extra must be ok'),
+          outputSchema: z.unknown(),
+        };
+        const schema = generateYamlSchemaFromConnectors([passthroughRefined]);
+        const result = schema.safeParse({
+          ...BASE_WORKFLOW,
+          steps: [
+            {
+              name: 's',
+              type: 'passthrough.refined.step',
+              with: { ids: ['a'], extra: 'ok' },
+            },
+          ],
+        });
+        expect(result.success).toBe(true);
+        expect(result.data).toMatchObject({
+          steps: [{ with: { ids: ['a'], extra: 'ok' } }],
+        });
+        expect(
+          schema.safeParse({
+            ...BASE_WORKFLOW,
+            steps: [
+              {
+                name: 's',
+                type: 'passthrough.refined.step',
+                with: { ids: ['a'], extra: 'nope' },
+              },
+            ],
+          }).success
+        ).toBe(false);
+      });
     });
   });
 });
