@@ -28,7 +28,8 @@ import {
   clearEntityStoreIndices,
 } from '../../fixtures/maintainers/helpers';
 
-apiTest.describe(
+// Failing: See https://github.com/elastic/kibana/issues/291899
+apiTest.describe.skip(
   'Lead Generation - POST /internal/entity_analytics/leads/generate',
   { tag: LEAD_GENERATION_TAGS },
   () => {

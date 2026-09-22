@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { MitreAttackChain } from './mitre_attack_chain';
+import { MitreTacticDot } from './mitre_tactic_dot';
 
 interface MitreAttackChainPlaceholderProps {
   children?: React.ReactNode;
@@ -28,9 +28,16 @@ export const MitreAttackChainPlaceholder: React.FC<MitreAttackChainPlaceholderPr
       aria-hidden="true"
       css={css`
         visibility: hidden;
+        padding-left: 4px;
+        padding-right: 4px;
       `}
     >
-      <MitreAttackChain triggeredTactics={[]} showLabels={showLabels} anomalyCountByTactic={{}} />
+      <MitreTacticDot
+        tactic="__sizing__"
+        detected={false}
+        showLabel={showLabels}
+        anomalyCount={0}
+      />
     </div>
     {children !== undefined && (
       <div
