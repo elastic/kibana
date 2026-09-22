@@ -52,7 +52,7 @@ export function TransactionDetailFlyout({
   schema,
   indices,
 }: TransactionDetailFlyoutComponentProps) {
-  const { transactionName, rangeFrom, rangeTo } = filters;
+  const { transactionName, rangeFrom, rangeTo, start, end } = filters;
   const titleId = useGeneratedHtmlId({ prefix: 'transactionDetailFlyoutTitle' });
   const [fullTraceFlyout, setFullTraceFlyout] = useState<FullTraceFlyoutState | null>(null);
 
@@ -132,6 +132,8 @@ export function TransactionDetailFlyout({
           traceId={fullTraceFlyout.traceId}
           rangeFrom={rangeFrom}
           rangeTo={rangeTo}
+          start={start}
+          end={end}
           isOpen
           onClose={() => setFullTraceFlyout(null)}
           contextSpanIds={fullTraceFlyout.contextSpanIds}
