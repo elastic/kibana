@@ -89,6 +89,8 @@ export interface VisualizationAgentTaskOutput {
   traceId?: string;
   /** Number of converse turns the task ran (1, or 2 for edit examples). */
   turns: number;
+  /** Structured prompts the agent asked the user (clarifying questions, confirmations). */
+  prompts: unknown[];
 }
 
 export type VisualizationAgentEvaluator = Evaluator<
@@ -226,6 +228,7 @@ export function createEvaluateDataset({
   >({
     visualizationExtractor,
     messagesExtractor: (output) => output.messages.map(({ message }) => message),
+    promptsExtractor: (output) => output.prompts,
     expectedRefusalExtractor: (expected) => expected?.refusal,
   });
 
@@ -271,6 +274,7 @@ export function createEvaluateDataset({
         esql: visualizations.map((visualization) => visualization.esql).join('\n'),
         agentTraceId: last.traceId,
         turns: followUp ? 2 : 1,
+        prompts: last.prompts ?? [],
       };
     };
 
@@ -279,7 +283,9 @@ export function createEvaluateDataset({
     const positiveOnly = (evaluator: VisualizationAgentEvaluator) =>
       skipRefusalExamples(evaluator, isRefusalExample);
 
-    const evaluatorStack = [
+    // Quality evaluators score 0..1 and get low-score logging; trace-based
+    // evaluators report counts and seconds, so a "low" value means nothing there.
+    const qualityEvaluators = [
       positiveOnly(esqlExecutionEvaluator),
       positiveOnly(esqlEquivalenceEvaluator),
       positiveOnly(esqlResultEquivalenceEvaluator),
@@ -291,12 +297,11 @@ export function createEvaluateDataset({
       positiveOnly(chartCompatibleResultEvaluator),
       visualizationRefusalEvaluator,
       positiveOnly(trajectoryEvaluator),
-      ...Object.values(evaluators.traceBasedEvaluators).map(useAgentTraceId),
-    ];
+    ].map((evaluator) => withLowScoreLogging(evaluator, log));
 
-    await executorClient.runExperiment(
-      { datasets: [dataset], task },
-      evaluatorStack.map((evaluator) => withLowScoreLogging(evaluator, log))
-    );
+    await executorClient.runExperiment({ datasets: [dataset], task }, [
+      ...qualityEvaluators,
+      ...Object.values(evaluators.traceBasedEvaluators).map(useAgentTraceId),
+    ]);
   };
 }

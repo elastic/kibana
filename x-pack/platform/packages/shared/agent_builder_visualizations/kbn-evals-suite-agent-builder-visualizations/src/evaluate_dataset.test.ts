@@ -46,6 +46,7 @@ const buildDeps = () => {
     steps: [{ type: 'tool_call', tool_id: 'load_skill', results: [] }, VISUALIZATION_STEP],
     traceId: 'trace-id-fixture',
     conversationId: 'conversation-1',
+    prompts: [],
   });
 
   return {
@@ -88,9 +89,7 @@ describe('createEvaluateDataset', () => {
   it('registers the quality, trajectory, and trace-based evaluators in a fixed order', async () => {
     const { evaluatorArray } = await runDataset();
 
-    expect(
-      evaluatorArray.map((evaluator: Evaluator) => [evaluator.name, evaluator.kind])
-    ).toEqual([
+    expect(evaluatorArray.map((evaluator: Evaluator) => [evaluator.name, evaluator.kind])).toEqual([
       ['ES|QL Execution Validity', 'CODE'],
       ['ES|QL Functional Equivalence', 'LLM'],
       ['ES|QL Result Equivalence', 'CODE'],
@@ -124,6 +123,7 @@ describe('createEvaluateDataset', () => {
         esql: 'FROM kibana_sample_data_logs | STATS c = COUNT(*)',
         agentTraceId: 'trace-id-fixture',
         turns: 1,
+        prompts: [],
         messages: [{ message: 'Here is your chart.' }],
         visualizations: [expect.objectContaining({ chartType: 'metric', renderer: 'lens' })],
       })
@@ -169,6 +169,37 @@ describe('createEvaluateDataset', () => {
         ],
       })
     );
+  });
+
+  it('carries clarifying prompts from the last turn into the output', async () => {
+    const { task, converse } = await runDataset();
+    converse.mockResolvedValueOnce({
+      message: '',
+      steps: [],
+      traceId: 'trace-1',
+      prompts: [{ type: 'ask_user_question', questions: [] }],
+    });
+
+    const output = await task({ input: { question: 'Create a chart.' }, metadata: {} });
+
+    expect(output.prompts).toEqual([{ type: 'ask_user_question', questions: [] }]);
+  });
+
+  it('does not wrap trace-based evaluators in low-score logging', async () => {
+    const { evaluatorArray, deps } = await runDataset();
+    const warning = deps.log.warning as jest.Mock;
+    const toolCalls = evaluatorArray.find(
+      (evaluator: Evaluator) => evaluator.name === 'Tool calls'
+    );
+
+    await toolCalls.evaluate({
+      input: { question: 'q' },
+      output: { errors: [], messages: [], agentTraceId: 't' },
+      expected: {},
+      metadata: {},
+    });
+
+    expect(warning).not.toHaveBeenCalled();
   });
 
   it('lets an example override the agent through metadata', async () => {

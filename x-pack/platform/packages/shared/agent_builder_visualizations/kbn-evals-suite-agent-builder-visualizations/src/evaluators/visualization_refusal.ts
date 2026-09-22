@@ -33,12 +33,15 @@ export function createVisualizationRefusalEvaluator<
 >(config: {
   visualizationExtractor: (output: TTaskOutput) => ExtractedVisualization[];
   messagesExtractor: (output: TTaskOutput) => string[];
+  /** Structured prompts (clarifying questions) count as answering the user. */
+  promptsExtractor?: (output: TTaskOutput) => unknown[];
   expectedRefusalExtractor: (expected: TExample['output']) => ExpectedRefusal | undefined;
   name?: string;
 }): Evaluator<TExample, TTaskOutput> {
   const {
     visualizationExtractor,
     messagesExtractor,
+    promptsExtractor = () => [],
     expectedRefusalExtractor,
     name = VISUALIZATION_REFUSAL_EVALUATOR_NAME,
   } = config;
@@ -55,21 +58,33 @@ export function createVisualizationRefusalEvaluator<
 
       const visualizations = visualizationExtractor(output);
       const message = messagesExtractor(output).join('\n').trim();
+      const prompts = promptsExtractor(output);
       const refused = visualizations.length === 0;
-      const explained = message.length > 0;
+      const askedUser = prompts.length > 0;
+      const explained = message.length > 0 || askedUser;
 
       const score = refused ? (explained ? 1 : 0.5) : 0;
+      const label = !refused
+        ? 'drew-anyway'
+        : !explained
+        ? 'silent-refusal'
+        : message.length > 0
+        ? 'refused'
+        : 'asked-clarification';
       return {
         score,
-        label: !refused ? 'drew-anyway' : explained ? 'refused' : 'silent-refusal',
+        label,
         explanation: !refused
           ? `Expected a refusal (${refusal.reason}) but ${visualizations.length} visualization(s) were produced.`
+          : label === 'asked-clarification'
+          ? `Declined (${refusal.reason}) by asking the user a clarifying question.`
           : explained
           ? `Refused (${refusal.reason}) with an explanation.`
           : `Refused (${refusal.reason}) but returned no message to the user.`,
         metadata: {
           reason: refusal.reason,
           producedVisualizations: visualizations.length,
+          promptCount: prompts.length,
           messageExcerpt: message.slice(0, 300),
         },
       };

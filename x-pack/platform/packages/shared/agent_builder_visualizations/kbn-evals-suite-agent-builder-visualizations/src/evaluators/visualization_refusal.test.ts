@@ -11,15 +11,18 @@ import { createVisualizationRefusalEvaluator } from './visualization_refusal';
 const evaluate = ({
   visualizations,
   messages,
+  prompts = [],
   refusal,
 }: {
   visualizations: ExtractedVisualization[];
   messages: string[];
-  refusal?: { reason: 'missing_index' };
+  prompts?: unknown[];
+  refusal?: { reason: 'missing_index' | 'ambiguous' };
 }) =>
   createVisualizationRefusalEvaluator({
     visualizationExtractor: () => visualizations,
     messagesExtractor: () => messages,
+    promptsExtractor: () => prompts,
     expectedRefusalExtractor: () => refusal,
   }).evaluate({
     input: { question: 'q' },
@@ -43,6 +46,17 @@ describe('createVisualizationRefusalEvaluator', () => {
     });
     expect(result.score).toBe(1);
     expect(result.label).toBe('refused');
+  });
+
+  it('scores 1 when the agent declines by asking a clarifying question', async () => {
+    const result = await evaluate({
+      visualizations: [],
+      messages: [''],
+      prompts: [{ type: 'ask_user_question' }],
+      refusal: { reason: 'ambiguous' },
+    });
+    expect(result.score).toBe(1);
+    expect(result.label).toBe('asked-clarification');
   });
 
   it('scores 0.5 when the agent refuses silently', async () => {
