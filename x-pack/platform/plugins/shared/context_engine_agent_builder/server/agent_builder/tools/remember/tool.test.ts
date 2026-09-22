@@ -121,7 +121,11 @@ describe('remember tool', () => {
   });
 
   const mcpContext: Partial<ToolHandlerContext> = {
-    callContext: { callSource: 'mcp' },
+    callContext: {
+      callSource: 'mcp',
+      toolId: CONTEXT_ENGINE_REMEMBER_TOOL_ID,
+      toolCallId: 'mcp-call',
+    },
     runContext: { runId: 'mcp-run', stack: [] },
   };
 
@@ -167,7 +171,7 @@ describe('remember tool', () => {
 
     const result = await run({ ...params, id: 'memory-1' }, '', mcpContext);
 
-    expect(result.results[0].type).toBe(ToolResultType.other);
+    expect(result).toMatchObject({ results: [{ type: ToolResultType.other }] });
     expect(index).toHaveBeenCalledWith(
       expect.objectContaining({
         if_seq_no: 1,
@@ -185,7 +189,7 @@ describe('remember tool', () => {
 
     const result = await run(params, '', mcpContext);
 
-    expect(result.results[0].type).toBe(ToolResultType.error);
+    expect(result).toMatchObject({ results: [{ type: ToolResultType.error }] });
     expect(assertContextEngineWriteAccessMock).toHaveBeenCalled();
     expect(index).not.toHaveBeenCalled();
   });
