@@ -28,10 +28,11 @@ export interface ActualChartForm {
   mark?: string;
 }
 
-export interface ChartIntentVerdict {
+// A type alias (not an interface) so it satisfies the tool callback's Record<string, unknown> response.
+export type ChartIntentVerdict = {
   verdict: 'satisfies' | 'does_not_satisfy';
   reason: string;
-}
+};
 
 export type ChartIntentJudge = (input: {
   question: string;
