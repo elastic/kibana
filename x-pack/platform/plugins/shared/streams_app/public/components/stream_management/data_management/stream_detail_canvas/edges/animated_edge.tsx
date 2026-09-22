@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { css, keyframes } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import { BaseEdge, getSmoothStepPath, type EdgeProps } from '@xyflow/react';
@@ -45,9 +45,46 @@ export function AnimatedEdge({
   markerEnd,
   style,
   selected,
+  data,
 }: EdgeProps) {
   const { euiTheme } = useEuiTheme();
   const [isHovered, setIsHovered] = useState(false);
+  const canUnhook = Boolean(
+    data && typeof data === 'object' && 'unitConnection' in data && data.unitConnection
+  );
+
+  // The built-in unhook circles sit on the line just outside each handle and are
+  // easy to miss. Pressing the line itself starts that same drag from the
+  // destination end, so pulling the line onto empty canvas disconnects it.
+  const onLinePointerDown = useCallback(
+    (event: React.MouseEvent<SVGGElement>) => {
+      if (!canUnhook || event.button !== 0) {
+        return;
+      }
+      const updater = event.currentTarget.parentElement?.querySelector<SVGElement>(
+        '.react-flow__edgeupdater-target'
+      );
+      if (!updater) {
+        return;
+      }
+      event.preventDefault();
+      event.stopPropagation();
+      updater.dispatchEvent(
+        new MouseEvent('mousedown', {
+          bubbles: true,
+          cancelable: true,
+          view: window,
+          clientX: event.clientX,
+          clientY: event.clientY,
+          screenX: event.screenX,
+          screenY: event.screenY,
+          button: 0,
+          buttons: 1,
+        })
+      );
+    },
+    [canUnhook]
+  );
 
   const [edgePath] = getSmoothStepPath({
     sourceX,
@@ -63,7 +100,11 @@ export function AnimatedEdge({
   const strokeColor = isActive ? 'transparent' : euiTheme.colors.borderBaseProminent;
 
   return (
-    <g onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
+    <g
+      onMouseDown={onLinePointerDown}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       <BaseEdge
         id={id}
         path={edgePath}

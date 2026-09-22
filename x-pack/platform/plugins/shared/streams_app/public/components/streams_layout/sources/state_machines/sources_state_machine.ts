@@ -28,6 +28,7 @@ import {
 } from '../source_models';
 import { createSourceId, getAvailableSourceTypes, type SourceEnvironment } from '../source_helpers';
 import { getFormattedError } from '../../../../util/errors';
+import { removeComponentFromPipelines } from '../../../../services/unit_connections';
 import type { Unit } from '../../../../services/unit_repository';
 import type {
   ConfiguredSource,
@@ -564,9 +565,12 @@ export const sourcesStateMachine = setup({
         return {};
       }
       return {
-        unitDefinition: withUnitSources(
-          context.unitDefinition,
-          getUnitSources(context.unitDefinition).filter(({ id }) => id !== event.sourceId)
+        unitDefinition: removeComponentFromPipelines(
+          withUnitSources(
+            context.unitDefinition,
+            getUnitSources(context.unitDefinition).filter(({ id }) => id !== event.sourceId)
+          ),
+          event.sourceId
         ),
         metadataBySourceId: withoutKey(context.metadataBySourceId, event.sourceId),
         apiKeysBySourceId: withoutKey(context.apiKeysBySourceId, event.sourceId),

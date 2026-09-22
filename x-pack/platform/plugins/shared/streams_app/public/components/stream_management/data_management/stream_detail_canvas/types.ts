@@ -22,10 +22,14 @@ export interface SourceNodeData extends Record<string, unknown> {
 }
 
 export interface DestinationNodeData extends Record<string, unknown> {
-  streamName: string;
   title: string;
-  hasProcessing: boolean;
+  subtitle?: string;
+  streamName?: string;
+  hasProcessing?: boolean;
   onProcessingClick?: (streamName: string) => void;
+  destinationId?: string;
+  unconfiguredNodeId?: string;
+  configurationLabel?: string;
 }
 
 export type SourceNode = Node<SourceNodeData, typeof SOURCE_NODE_TYPE>;
