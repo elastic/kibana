@@ -7,7 +7,7 @@
 
 import { SavedObjectsUtils } from '@kbn/core/server';
 
-import type { AttachmentV2, UnifiedAttachment } from '../../../common/types/domain';
+import type { AttachmentV2, Case } from '../../../common/types/domain';
 import {
   UnifiedAttachmentPayloadRt,
   type UnifiedAttachmentPayload,
@@ -18,7 +18,6 @@ import { CaseCommentModel } from '../../common/models';
 import { createCaseError } from '../../common/error';
 import { getIDsAndIndicesAsArrays } from '../../common/utils';
 import { isAlertAttachmentType, isEventAttachmentType } from '../../../common/utils/attachments';
-import { toUnifiedAttachment } from '../../services/attachments/operations/utils';
 import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
 import type { AddArgs } from './types';
@@ -37,7 +36,13 @@ const isSameAlertOrEventFamily = (storedType: string, requestType: string): bool
   return storedType === requestType;
 };
 
-const pickCreatedOrExistingAttachment = (
+/**
+ * Locates the attachment produced by a create: the newly created one, or on a
+ * duplicate alert/event request the existing attachment that already covers it.
+ * Used by the internal write route to derive the unified single-attachment
+ * response from the encoded case.
+ */
+export const pickCreatedOrExistingAttachment = (
   comments: AttachmentV2[] | undefined,
   savedObjectID: string,
   query: UnifiedAttachmentPayload
@@ -63,11 +68,13 @@ const pickCreatedOrExistingAttachment = (
   );
 };
 
-export const addComment = async (
-  addArgs: AddArgs,
-  clientArgs: CasesClientArgs
-): Promise<UnifiedAttachment> => {
-  const { comment, caseId } = addArgs;
+/**
+ * Create an attachment to a case.
+ *
+ * @ignore
+ */
+export const addComment = async (addArgs: AddArgs, clientArgs: CasesClientArgs): Promise<Case> => {
+  const { comment, caseId, id } = addArgs;
 
   const {
     logger,
@@ -81,7 +88,7 @@ export const addComment = async (
 
     await validateMaxUserActions({ caseId, userActionService, userActionsToAdd: 1 });
 
-    const savedObjectID = SavedObjectsUtils.generateId();
+    const savedObjectID = id ?? SavedObjectsUtils.generateId();
     await authorization.ensureAuthorized({
       operation: Operations.createComment,
       entities: [
@@ -108,18 +115,14 @@ export const addComment = async (
 
     const updatedCase = await updatedModel.encodeWithComments();
 
-    const attachment = pickCreatedOrExistingAttachment(updatedCase.comments, savedObjectID, query);
-    if (attachment == null) {
-      throw new Error(`Failed to locate created attachment ${savedObjectID} on case ${caseId}`);
-    }
-
-    if (attachment.id === savedObjectID) {
+    const created = updatedCase.comments?.some((c) => c.id === savedObjectID) ?? false;
+    if (created) {
       emitAttachmentsAddedEvent(clientArgs, updatedCase, [savedObjectID], query.type);
       // This call never throws — failures are logged and do not abort the attachment creation.
       await extractAndAddObservables(caseId, [query], updatedCase, clientArgs);
     }
 
-    return toUnifiedAttachment(attachment);
+    return updatedCase;
   } catch (error) {
     throw createCaseError({
       message: `Failed while adding a comment to case id: ${caseId} error: ${error}`,

@@ -25,6 +25,11 @@ export interface AddArgs {
    * toUnifiedAttachmentRequest.
    */
   comment: UnifiedAttachmentPayload;
+  /**
+   * Optional pre-generated saved object id. The internal POST /attachments route
+   * supplies this so it can locate the created attachment in the returned case.
+   */
+  id?: string;
 }
 
 export interface BulkCreateArgs {

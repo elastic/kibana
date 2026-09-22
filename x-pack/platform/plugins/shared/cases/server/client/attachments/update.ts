@@ -10,9 +10,8 @@ import Boom from '@hapi/boom';
 import { UnifiedAttachmentPutRequestRt } from '../../../common/types/api';
 import { CaseCommentModel } from '../../common/models';
 import { createCaseError } from '../../common/error';
-import type { UnifiedAttachment } from '../../../common/types/domain';
+import type { Case } from '../../../common/types/domain';
 import { decodeWithExcessOrThrow } from '../../common/runtime_types';
-import { toUnifiedAttachment } from '../../services/attachments/operations/utils';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
@@ -23,7 +22,7 @@ import { validateUnifiedAttachments } from './validators';
 export async function update(
   { caseID, updateRequest: queryParams }: UpdateArgs,
   clientArgs: CasesClientArgs
-): Promise<UnifiedAttachment> {
+): Promise<Case> {
   const {
     services: { attachmentService, userActionService },
     logger,
@@ -96,14 +95,7 @@ export async function update(
       owner: myComment.attributes.owner,
     });
 
-    const updatedCase = await updatedModel.encodeWithComments();
-
-    const attachment = updatedCase.comments?.find((c) => c.id === queryCommentId);
-    if (attachment == null) {
-      throw new Error(`Failed to locate updated attachment ${queryCommentId} on case ${caseID}`);
-    }
-
-    return toUnifiedAttachment(attachment);
+    return await updatedModel.encodeWithComments();
   } catch (error) {
     throw createCaseError({
       message: `Failed to replace attachment case id: ${caseID}: ${error}`,

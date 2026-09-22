@@ -48,7 +48,8 @@ describe('addCommentStepDefinition', () => {
         owner: createCaseResponseFixture.owner,
       },
     });
-    expect(get).toHaveBeenCalledWith({ id: 'case-1', includeComments: true });
+    // The case returned by `add` is used directly; no second reload.
+    expect(get).toHaveBeenCalledTimes(1);
     expect(result).toEqual({
       output: {
         case: createCaseResponseFixture,

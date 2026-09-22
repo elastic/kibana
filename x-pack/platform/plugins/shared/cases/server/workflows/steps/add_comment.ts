@@ -23,18 +23,13 @@ export const addCommentStepDefinition = (
     ...addCommentStepCommonDefinition,
     handler: createCasesStepHandler(getCasesClient, async (client, input: AddCommentStepInput) => {
       return withCaseOwner(client, input.case_id, async (owner) => {
-        await client.attachments.add({
+        const updatedCase = await client.attachments.add({
           caseId: input.case_id,
           comment: {
             type: COMMENT_ATTACHMENT_TYPE,
             data: { content: input.comment },
             owner,
           },
-        });
-
-        const updatedCase = await client.cases.get({
-          id: input.case_id,
-          includeComments: true,
         });
 
         return safeParseCaseForWorkflowOutput(

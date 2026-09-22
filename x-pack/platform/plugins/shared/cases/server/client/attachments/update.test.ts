@@ -56,7 +56,7 @@ describe('update', () => {
     );
   });
 
-  it('returns the replaced attachment, not the case', async () => {
+  it('returns the case with comments', async () => {
     userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({ [caseID]: 0 });
 
     const theCase = { ...mockCases[0], id: caseID };
@@ -102,14 +102,14 @@ describe('update', () => {
 
     const res = await update({ updateRequest: unifiedUpdateRequest, caseID }, clientArgs);
 
-    expect(res).toStrictEqual(
+    expect(res.id).toEqual(caseID);
+    expect(res.comments).toEqual([
       expect.objectContaining({
         id: commentId,
         type: updatedAttachment.attributes.type,
         data: updatedAttachment.attributes.data,
-      })
-    );
-    expect(res).not.toHaveProperty('comments');
+      }),
+    ]);
 
     expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith(
       expect.objectContaining({

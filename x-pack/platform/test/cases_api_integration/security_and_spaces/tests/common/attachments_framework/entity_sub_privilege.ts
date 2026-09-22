@@ -52,12 +52,12 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       for (const scenario of [
-        { user: secOnlyReadCreateComment, space: 'space1', expectedHttpCode: 200 },
-        { user: secOnlyCreateComment, space: 'space1', expectedHttpCode: 403 },
+        { user: secOnlyCreateComment, space: 'space1' },
+        { user: secOnlyReadCreateComment, space: 'space1' },
       ]) {
         it(`User ${scenario.user.username} with role(s) ${scenario.user.roles.join()} and space ${
           scenario.space
-        } - attach an entity returns ${scenario.expectedHttpCode}`, async () => {
+        } - should attach an entity`, async () => {
           const postedCase = await createCase(
             supertestWithoutAuth,
             getPostCaseRequest({ owner: 'securitySolutionFixture' }),
@@ -73,12 +73,10 @@ export default ({ getService }: FtrProviderContext): void => {
             caseId: postedCase.id,
             params: postCommentEntityReq,
             auth: scenario,
-            expectedHttpCode: scenario.expectedHttpCode,
+            expectedHttpCode: 200,
           });
 
-          if (scenario.expectedHttpCode === 200) {
-            expect(caseWithAttachments.totalComment).to.be(1);
-          }
+          expect(caseWithAttachments.totalComment).to.be(1);
         });
       }
 

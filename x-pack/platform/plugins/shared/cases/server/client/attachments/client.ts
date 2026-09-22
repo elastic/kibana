@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import type {
-  Case,
-  AttachmentsV2,
-  AttachmentV2,
-  UnifiedAttachment,
-} from '../../../common/types/domain';
+import type { Case, AttachmentsV2, AttachmentV2 } from '../../../common/types/domain';
 import type {
   DocumentResponse,
   AttachmentsFindResponseV2,
@@ -49,9 +44,9 @@ import { withUsageCounter } from '../usage_counters';
  */
 export interface AttachmentsSubClient {
   /**
-   * Adds an attachment to a case.
+   * Adds an attachment to a case. Returns the case with comments.
    */
-  add(params: AddArgs): Promise<UnifiedAttachment>;
+  add(params: AddArgs): Promise<Case>;
   bulkCreate(params: BulkCreateArgs): Promise<Case>;
   bulkGet(params: BulkGetArgs): Promise<BulkGetAttachmentsResponseV2>;
   /**
@@ -80,9 +75,9 @@ export interface AttachmentsSubClient {
    */
   get(getArgs: GetArgs): Promise<AttachmentV2>;
   /**
-   * Full replace. The request must include every field.
+   * Full replace. The request must include every field. Returns the case with comments.
    */
-  update(updateArgs: UpdateArgs): Promise<UnifiedAttachment>;
+  update(updateArgs: UpdateArgs): Promise<Case>;
   /**
    * Adds a file attachment to a case. Returns the case with comments.
    */

@@ -12,7 +12,7 @@ import {
   SECURITY_EVENT_ATTACHMENT_TYPE,
   STACK_ALERT_ATTACHMENT_TYPE,
 } from '../../../common/constants/attachments';
-import { AttachmentType } from '../../../common/types/domain';
+import type { AttachmentV2 } from '../../../common/types/domain';
 import { mockCases, mockCaseUnifiedAttachments } from '../../mocks';
 import {
   createAttachmentServiceMock,
@@ -24,7 +24,7 @@ import {
   commentAttachmentType,
   stackAlertAttachmentType,
 } from '../../attachment_framework/attachments';
-import { addComment } from './add';
+import { addComment, pickCreatedOrExistingAttachment } from './add';
 
 describe('addComment', () => {
   const caseId = 'test-case';
@@ -84,7 +84,7 @@ describe('addComment', () => {
     );
   });
 
-  it('returns the created attachment, not the case', async () => {
+  it('returns the case with comments', async () => {
     userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({ [caseId]: 0 });
 
     const createdAttachment = {
@@ -109,14 +109,13 @@ describe('addComment', () => {
 
     const res = await addComment({ comment: unifiedComment, caseId }, clientArgs);
 
-    expect(res).toStrictEqual(
+    expect(res.id).toEqual(caseId);
+    expect(res.comments).toEqual([
       expect.objectContaining({
         id: 'mock-saved-object-id',
         type: createdAttachment.attributes.type,
-        data: createdAttachment.attributes.data,
-      })
-    );
-    expect(res).not.toHaveProperty('comments');
+      }),
+    ]);
 
     expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -162,211 +161,103 @@ describe('addComment', () => {
       })
     );
   });
+});
 
-  it('returns the existing alert attachment when every id is already on the case', async () => {
-    userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({ [caseId]: 0 });
+describe('pickCreatedOrExistingAttachment', () => {
+  const savedObjectID = 'mock-saved-object-id';
+  const owner = SECURITY_SOLUTION_OWNER;
 
-    const existingAlertId = 'existing-alert-so';
-    const alertId = 'alert-1';
-    const existingAlert = {
-      type: 'cases-attachments',
-      id: existingAlertId,
-      version: 'WzAsMV0=',
-      score: 0,
-      attributes: {
-        type: STACK_ALERT_ATTACHMENT_TYPE,
-        attachmentId: alertId,
-        metadata: { index: 'index-1', rule: { id: 'rule-1', name: 'rule-1' } },
-        owner: SECURITY_SOLUTION_OWNER,
-        created_at: '2019-11-25T21:55:00.177Z',
-        created_by: {
-          full_name: 'elastic',
-          email: 'testemail@elastic.co',
-          username: 'elastic',
-        },
-        pushed_at: null,
-        pushed_by: null,
-        updated_at: null,
-        updated_by: null,
-      },
-      references: [{ type: 'cases', name: 'associated-cases', id: caseId }],
-    };
-
-    const theCase = { ...mockCases[0], id: caseId };
-    caseService.getCase.mockResolvedValue(theCase);
-    caseService.getAllCaseComments.mockResolvedValue({
-      saved_objects: [existingAlert],
-      total: 1,
-      per_page: 1,
-      page: 1,
-    });
-    attachmentService.getter.getAllAlertIds.mockResolvedValue(new Set([alertId]));
-    attachmentService.getter.getAllEventIds.mockResolvedValue(new Set());
-
-    const res = await addComment(
-      {
-        comment: {
-          type: STACK_ALERT_ATTACHMENT_TYPE,
-          attachmentId: alertId,
-          metadata: { index: 'index-1', rule: { id: 'rule-1', name: 'rule-1' } },
-          owner: SECURITY_SOLUTION_OWNER,
-        },
-        caseId,
-      },
-      clientArgs
-    );
-
-    expect(res).toStrictEqual(
-      expect.objectContaining({
-        id: existingAlertId,
-        type: STACK_ALERT_ATTACHMENT_TYPE,
-        attachmentId: alertId,
-      })
-    );
-    expect(attachmentService.create).not.toHaveBeenCalled();
-    expect(clientArgs.casesEventBus.emitAttachmentsAdded).not.toHaveBeenCalled();
+  const commentAttachment = (id: string, content: string): AttachmentV2 => ({
+    id,
+    version: 'WzAsMV0=',
+    type: 'comment',
+    data: { content },
+    owner,
+    created_at: '2019-11-25T21:55:00.177Z',
+    created_by: { full_name: 'elastic', email: 'testemail@elastic.co', username: 'elastic' },
+    pushed_at: null,
+    pushed_by: null,
+    updated_at: null,
+    updated_by: null,
   });
 
-  it('folds a legacy v1 alert into the unified response on duplicate id', async () => {
-    userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({ [caseId]: 0 });
-
-    const existingAlertId = 'legacy-alert-so';
-    const alertId = 'alert-1';
-    const legacyAlert = {
-      type: 'cases-comment',
-      id: existingAlertId,
+  const idAttachment = (id: string, type: string, attachmentId: string): AttachmentV2 =>
+    ({
+      id,
       version: 'WzAsMV0=',
-      score: 0,
-      attributes: {
-        type: AttachmentType.alert as const,
-        alertId,
-        index: 'index-1',
-        rule: { id: 'rule-1', name: 'rule-1' },
-        owner: SECURITY_SOLUTION_OWNER,
-        created_at: '2019-11-25T21:55:00.177Z',
-        created_by: {
-          full_name: 'elastic',
-          email: 'testemail@elastic.co',
-          username: 'elastic',
-        },
-        pushed_at: null,
-        pushed_by: null,
-        updated_at: null,
-        updated_by: null,
-      },
-      references: [{ type: 'cases', name: 'associated-cases', id: caseId }],
-    };
-
-    const theCase = { ...mockCases[0], id: caseId };
-    caseService.getCase.mockResolvedValue(theCase);
-    caseService.getAllCaseComments.mockResolvedValue({
-      saved_objects: [legacyAlert],
-      total: 1,
-      per_page: 1,
-      page: 1,
-    });
-    attachmentService.getter.getAllAlertIds.mockResolvedValue(new Set([alertId]));
-    attachmentService.getter.getAllEventIds.mockResolvedValue(new Set());
-
-    const res = await addComment(
-      {
-        comment: {
-          type: STACK_ALERT_ATTACHMENT_TYPE,
-          attachmentId: alertId,
-          metadata: { index: 'index-1', rule: { id: 'rule-1', name: 'rule-1' } },
-          owner: SECURITY_SOLUTION_OWNER,
-        },
-        caseId,
-      },
-      clientArgs
-    );
-
-    expect(res).toStrictEqual(
-      expect.objectContaining({
-        id: existingAlertId,
-        type: SECURITY_ALERT_ATTACHMENT_TYPE,
-        attachmentId: alertId,
-      })
-    );
-    expect(res).not.toHaveProperty('alertId');
-    expect(attachmentService.create).not.toHaveBeenCalled();
-  });
-
-  it('returns the alert, not an event that shares the same id', async () => {
-    userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({ [caseId]: 0 });
-
-    const sharedId = 'shared-id';
-    const persistedFields = {
-      owner: SECURITY_SOLUTION_OWNER,
+      type,
+      attachmentId,
+      metadata: { index: 'index-1', rule: { id: 'rule-1', name: 'rule-1' } },
+      owner,
       created_at: '2019-11-25T21:55:00.177Z',
-      created_by: {
-        full_name: 'elastic',
-        email: 'testemail@elastic.co',
-        username: 'elastic',
-      },
+      created_by: { full_name: 'elastic', email: 'testemail@elastic.co', username: 'elastic' },
       pushed_at: null,
       pushed_by: null,
       updated_at: null,
       updated_by: null,
-    };
-    const existingEvent = {
-      type: 'cases-attachments',
-      id: 'existing-event-so',
-      version: 'WzAsMV0=',
-      score: 0,
-      attributes: {
-        type: SECURITY_EVENT_ATTACHMENT_TYPE,
-        attachmentId: sharedId,
-        metadata: { index: 'index-1' },
-        ...persistedFields,
-      },
-      references: [{ type: 'cases', name: 'associated-cases', id: caseId }],
-    };
-    const existingAlert = {
-      type: 'cases-attachments',
-      id: 'existing-alert-so',
-      version: 'WzAsMV0=',
-      score: 0,
-      attributes: {
-        type: STACK_ALERT_ATTACHMENT_TYPE,
-        attachmentId: sharedId,
-        metadata: { index: 'index-1', rule: { id: 'rule-1', name: 'rule-1' } },
-        ...persistedFields,
-      },
-      references: [{ type: 'cases', name: 'associated-cases', id: caseId }],
-    };
+    } as unknown as AttachmentV2);
 
-    const theCase = { ...mockCases[0], id: caseId };
-    caseService.getCase.mockResolvedValue(theCase);
-    caseService.getAllCaseComments.mockResolvedValue({
-      saved_objects: [existingEvent, existingAlert],
-      total: 2,
-      per_page: 2,
-      page: 1,
+  it('returns the newly created attachment by saved object id', () => {
+    const created = commentAttachment(savedObjectID, 'hello');
+    const res = pickCreatedOrExistingAttachment([created], savedObjectID, {
+      type: 'comment',
+      data: { content: 'hello' },
+      owner,
     });
-    attachmentService.getter.getAllAlertIds.mockResolvedValue(new Set([sharedId]));
-    attachmentService.getter.getAllEventIds.mockResolvedValue(new Set([sharedId]));
 
-    const res = await addComment(
-      {
-        comment: {
-          type: STACK_ALERT_ATTACHMENT_TYPE,
-          attachmentId: sharedId,
-          metadata: { index: 'index-1', rule: { id: 'rule-1', name: 'rule-1' } },
-          owner: SECURITY_SOLUTION_OWNER,
-        },
-        caseId,
-      },
-      clientArgs
-    );
+    expect(res).toBe(created);
+  });
 
-    expect(res).toStrictEqual(
-      expect.objectContaining({
-        id: 'existing-alert-so',
-        type: STACK_ALERT_ATTACHMENT_TYPE,
-        attachmentId: sharedId,
-      })
+  it('returns undefined when a comment create is not present', () => {
+    const res = pickCreatedOrExistingAttachment([], savedObjectID, {
+      type: 'comment',
+      data: { content: 'hello' },
+      owner,
+    });
+
+    expect(res).toBeUndefined();
+  });
+
+  it('returns the existing alert when its id is already on the case', () => {
+    const existingAlert = idAttachment('existing-alert-so', STACK_ALERT_ATTACHMENT_TYPE, 'alert-1');
+    const res = pickCreatedOrExistingAttachment([existingAlert], savedObjectID, {
+      type: STACK_ALERT_ATTACHMENT_TYPE,
+      attachmentId: 'alert-1',
+      metadata: { index: 'index-1', rule: { id: 'rule-1', name: 'rule-1' } },
+      owner,
+    });
+
+    expect(res).toBe(existingAlert);
+  });
+
+  it('folds a legacy v1 alert into the unified response on duplicate id', () => {
+    const legacyAlert = idAttachment('legacy-alert-so', SECURITY_ALERT_ATTACHMENT_TYPE, 'alert-1');
+    const res = pickCreatedOrExistingAttachment([legacyAlert], savedObjectID, {
+      type: STACK_ALERT_ATTACHMENT_TYPE,
+      attachmentId: 'alert-1',
+      metadata: { index: 'index-1', rule: { id: 'rule-1', name: 'rule-1' } },
+      owner,
+    });
+
+    expect(res).toBe(legacyAlert);
+  });
+
+  it('returns the alert, not an event that shares the same id', () => {
+    const sharedId = 'shared-id';
+    const existingEvent = idAttachment(
+      'existing-event-so',
+      SECURITY_EVENT_ATTACHMENT_TYPE,
+      sharedId
     );
-    expect(attachmentService.create).not.toHaveBeenCalled();
+    const existingAlert = idAttachment('existing-alert-so', STACK_ALERT_ATTACHMENT_TYPE, sharedId);
+
+    const res = pickCreatedOrExistingAttachment([existingEvent, existingAlert], savedObjectID, {
+      type: STACK_ALERT_ATTACHMENT_TYPE,
+      attachmentId: sharedId,
+      metadata: { index: 'index-1', rule: { id: 'rule-1', name: 'rule-1' } },
+      owner,
+    });
+
+    expect(res).toBe(existingAlert);
   });
 });
