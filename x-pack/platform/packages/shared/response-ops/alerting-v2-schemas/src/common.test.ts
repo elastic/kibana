@@ -6,8 +6,46 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { arrayOrSingleSchema, durationSchema, optionalWithDescription } from './common';
-import { MAX_DURATION_LENGTH } from './constants';
+import { arrayOrSingleSchema, durationSchema, entityIdSchema, optionalWithDescription } from './common';
+import { ID_MAX_LENGTH, MAX_DURATION_LENGTH } from './constants';
+
+describe('entityIdSchema', () => {
+  it.each([
+    ['a UUID v4, the server-generated default', '0194f0c8-aaaa-7bbb-8ccc-ddddeeeeffff'],
+    ['a Terraform-style name', 'prod-cpu-high_v2'],
+    ['a single character', 'a'],
+    [`${ID_MAX_LENGTH} characters`, 'a'.repeat(ID_MAX_LENGTH)],
+  ])('accepts %s', (_label, id) => {
+    expect(entityIdSchema.safeParse(id).success).toBe(true);
+  });
+
+  it.each([
+    ['a space', 'prod cpu high'],
+    ['a path separator', 'team/prod-cpu'],
+    ['a query delimiter', 'prod?cpu'],
+    ['a fragment delimiter', 'prod#cpu'],
+    ['an emoji', 'prod-🔥'],
+    ['a non-ASCII letter', 'café'],
+    ['a dot', 'prod.cpu.high'],
+    ['empty after trimming', '   '],
+    [`${ID_MAX_LENGTH + 1} characters`, 'a'.repeat(ID_MAX_LENGTH + 1)],
+  ])('rejects %s', (_label, id) => {
+    expect(entityIdSchema.safeParse(id).success).toBe(false);
+  });
+
+  it('treats canonically-equivalent Unicode spellings as equally invalid', () => {
+    const nfc = 'caf\u00e9';
+    const nfd = 'cafe\u0301';
+
+    expect(nfc).not.toBe(nfd);
+    expect(entityIdSchema.safeParse(nfc).success).toBe(false);
+    expect(entityIdSchema.safeParse(nfd).success).toBe(false);
+  });
+
+  it('trims surrounding whitespace rather than rejecting it', () => {
+    expect(entityIdSchema.parse('  prod-cpu  ')).toBe('prod-cpu');
+  });
+});
 
 describe('durationSchema', () => {
   it.each(['250ms', '30s', '5m', '1h', '7d', '52w', '365d'])('accepts "%s"', (value) => {

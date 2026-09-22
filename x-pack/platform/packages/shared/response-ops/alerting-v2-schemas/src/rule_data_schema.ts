@@ -15,6 +15,8 @@ import {
 } from './validation';
 import {
   durationSchema,
+  entityIdSchema,
+  ENTITY_ID_NOTE,
   ESTIMATED_COUNT_NOTE,
   queryIntSchema,
   tagsResponseSchema,
@@ -31,7 +33,6 @@ import {
   MAX_SEARCH_LENGTH,
   MIN_SCHEDULE_INTERVAL,
   MAX_BULK_ITEMS,
-  ID_MAX_LENGTH,
   VERSION_MAX_LENGTH,
   MAX_ARTIFACT_DATA_FIELDS,
   MAX_ARTIFACT_DATA_LENGTH,
@@ -853,12 +854,7 @@ export const ruleTagsResponseSchema = tagsResponseSchema
 
 export type RuleTagsResponse = z.infer<typeof ruleTagsResponseSchema>;
 
-export const ruleIdSchema = z
-  .string()
-  .trim()
-  .min(1)
-  .max(ID_MAX_LENGTH)
-  .describe('A rule identifier.');
+export const ruleIdSchema = entityIdSchema.describe(`A rule identifier. ${ENTITY_ID_NOTE}`);
 
 /**
  * Request body schema for `POST /api/alerting/v2/rules/_bulk_get`.

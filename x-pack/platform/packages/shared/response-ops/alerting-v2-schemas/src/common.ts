@@ -8,7 +8,25 @@
 import { z } from '@kbn/zod/v4';
 import { MAX_TAG_LENGTH, MAX_TAGS } from '@kbn/alerting-v2-constants';
 import { validateDuration, validateMaxDuration } from './validation';
-import { MAX_DURATION, MAX_DURATION_LENGTH } from './constants';
+import { ID_MAX_LENGTH, MAX_DURATION, MAX_DURATION_LENGTH } from './constants';
+
+/**
+ * Identifier for a resource a client can address and may name itself
+ * (`PUT /rules/{id}`). Restricted to characters that survive a URL path
+ * segment and a log line unambiguously, and that cannot differ byte-wise
+ * while looking identical. The server-generated default is a UUID v4, which
+ * satisfies it.
+ */
+const entityIdSchema = z
+  .string()
+  .trim()
+  .min(1)
+  .max(ID_MAX_LENGTH)
+  .regex(/^[a-zA-Z0-9_-]+$/, 'Must contain only letters, digits, underscores, and hyphens.');
+
+/** Semantics every client-addressable id carries; append to its `.describe()`. */
+const ENTITY_ID_NOTE =
+  'Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alert episodes recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.';
 
 const durationSchema = z
   .string()
@@ -92,9 +110,11 @@ const queryIntSchema = ({ min, max }: { min: number; max: number }) =>
 
 export {
   durationSchema,
+  entityIdSchema,
   tagsSchema,
   optionalWithDescription,
   arrayOrSingleSchema,
   queryIntSchema,
+  ENTITY_ID_NOTE,
   ESTIMATED_COUNT_NOTE,
 };
