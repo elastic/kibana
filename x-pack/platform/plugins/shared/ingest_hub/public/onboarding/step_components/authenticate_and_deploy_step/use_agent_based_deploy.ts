@@ -83,18 +83,30 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
     [serviceSettings?.instances, selectedServiceIds, servicesMap]
   );
 
-  // Deploy is "already done" when every target instance has a persisted package policy id.
+  // Deploy is "already done" when every target instance has a persisted package policy id AND
+  // there is no pending cleanup to run.
   // This covers both paths durably:
   //   - New policy: agentPolicyId is set in session storage AND policyIdsByInstance is populated.
   //   - Existing policy: agentPolicyId is never set, but policyIdsByInstance is populated after
   //     a successful deploy — this prevents re-deploying on Back+Next in existing mode.
+  // Returns false when cleanup is needed so handleNext doesn't short-circuit before calling
+  // handleDeploy (which runs the cleanup even when no new targets need to be deployed).
   const isAlreadyDeployed = useMemo(() => {
     if (targets.length === 0) return false;
     const policyIdsByInstance = detectAndReviewStep.policyIdsByInstance ?? {};
+
+    // Live-stale: policyIdsByInstance has entries for services no longer in targets (e.g. user
+    // deselected from Step 1). The shared package policy must be updated to drop removed inputs.
+    const activeInstanceIds = new Set(targets.flatMap((g) => g.instanceIds));
+    if (Object.keys(policyIdsByInstance).some((id) => !activeInstanceIds.has(id))) return false;
+
+    // Explicit cleanup staged by removeDeployInstance (Step 4 deselection).
+    if (Object.keys(detectAndReviewStep.pendingCleanupPolicyIds ?? {}).length > 0) return false;
+
     return targets.every((group) =>
       group.instanceIds.every((instanceId) => !!policyIdsByInstance[instanceId])
     );
-  }, [targets, detectAndReviewStep.policyIdsByInstance]);
+  }, [targets, detectAndReviewStep.policyIdsByInstance, detectAndReviewStep.pendingCleanupPolicyIds]);
 
   const handleDeploy = useCallback(
     async (instanceIds?: string[]): Promise<{ failed: boolean }> => {

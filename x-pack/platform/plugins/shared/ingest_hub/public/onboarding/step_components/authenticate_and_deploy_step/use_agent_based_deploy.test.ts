@@ -167,6 +167,83 @@ describe('useAgentBasedDeploy — incremental deploy filtering', () => {
   });
 });
 
+// ─── useAgentBasedDeploy — isAlreadyDeployed ────────────────────────────────
+
+describe('useAgentBasedDeploy — isAlreadyDeployed', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseSessionStorage.mockReturnValue([{ globalRegion: '', serviceVars: {} }, jest.fn()]);
+    mockBuildAgentBasedInstanceStatuses.mockReturnValue({});
+  });
+
+  it('is true when all targets have policy IDs and no cleanup is pending (Back+Next should short-circuit)', () => {
+    mockUseOnboardingFlow.mockReturnValue({
+      servicesStep: { selectedServiceIds: [] },
+      authenticateAndDeployStep: {},
+      detectAndReviewStep: {
+        policyIdsByInstance: { serviceA: 'pkg-policy-A' },
+        pendingCleanupPolicyIds: {},
+      },
+      updateDetectAndReviewStep: jest.fn(),
+      removeDeployInstances: jest.fn(),
+      getLatestFailedInstances: jest.fn().mockReturnValue([]),
+      awsServicesMap: new Map(),
+      agentBasedDeployment: { agentHostsMode: 'existing' as const, agentPolicyId: 'ap-1', selectedAgentPolicyIds: ['ap-1'] },
+      setAgentBasedDeployment: jest.fn(),
+    });
+    mockBuildAgentBasedTargets.mockReturnValue([groupA]);
+
+    const { result } = renderHook(() => useAgentBasedDeploy());
+    expect(result.current.isAlreadyDeployed).toBe(true);
+  });
+
+  it('is false when live-stale entries exist (bug: cleanup-needed case must not short-circuit)', () => {
+    // serviceA and removed-svc share a policy. removed-svc was deselected from Step 1.
+    // policyIdsByInstance still has removed-svc (live-stale). isAlreadyDeployed must be false
+    // so handleNext runs handleDeploy, which updates the shared policy to drop removed-svc inputs.
+    mockUseOnboardingFlow.mockReturnValue({
+      servicesStep: { selectedServiceIds: [] },
+      authenticateAndDeployStep: {},
+      detectAndReviewStep: {
+        policyIdsByInstance: { serviceA: 'pkg-policy-shared', 'removed-svc': 'pkg-policy-shared' },
+        pendingCleanupPolicyIds: {},
+      },
+      updateDetectAndReviewStep: jest.fn(),
+      removeDeployInstances: jest.fn(),
+      getLatestFailedInstances: jest.fn().mockReturnValue([]),
+      awsServicesMap: new Map(),
+      agentBasedDeployment: { agentHostsMode: 'existing' as const, agentPolicyId: 'ap-1', selectedAgentPolicyIds: ['ap-1'] },
+      setAgentBasedDeployment: jest.fn(),
+    });
+    // Only serviceA is in active targets — removed-svc was deselected.
+    mockBuildAgentBasedTargets.mockReturnValue([groupA]);
+
+    const { result } = renderHook(() => useAgentBasedDeploy());
+    expect(result.current.isAlreadyDeployed).toBe(false);
+  });
+
+  it('is false when pendingCleanupPolicyIds is non-empty (explicit Step 4 deselection must not short-circuit)', () => {
+    mockUseOnboardingFlow.mockReturnValue({
+      servicesStep: { selectedServiceIds: [] },
+      authenticateAndDeployStep: {},
+      detectAndReviewStep: {
+        policyIdsByInstance: { serviceA: 'pkg-policy-A' },
+        pendingCleanupPolicyIds: { 'removed-svc': 'pkg-policy-removed' },
+      },
+      updateDetectAndReviewStep: jest.fn(),
+      removeDeployInstances: jest.fn(),
+      getLatestFailedInstances: jest.fn().mockReturnValue([]),
+      awsServicesMap: new Map(),
+      agentBasedDeployment: { agentHostsMode: 'existing' as const, agentPolicyId: 'ap-1', selectedAgentPolicyIds: ['ap-1'] },
+      setAgentBasedDeployment: jest.fn(),
+    });
+    mockBuildAgentBasedTargets.mockReturnValue([groupA]);
+
+    const { result } = renderHook(() => useAgentBasedDeploy());
+    expect(result.current.isAlreadyDeployed).toBe(false);
+  });
+});
+
 // ─── useAgentBasedDeploy — cleanup orchestration ────────────────────────────
 
 describe('useAgentBasedDeploy — cleanup orchestration', () => {
