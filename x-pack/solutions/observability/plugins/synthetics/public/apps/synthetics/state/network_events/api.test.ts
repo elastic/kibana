@@ -26,8 +26,7 @@ describe('fetchNetworkEvents remoteName plumbing', () => {
 
     expect(mockGet).toHaveBeenCalledWith(
       SYNTHETICS_API_URLS.NETWORK_EVENTS,
-      { checkGroup: 'cg-1', stepIndex: 2 },
-      expect.anything()
+      { checkGroup: 'cg-1', stepIndex: 2 }
     );
   });
 
@@ -36,8 +35,7 @@ describe('fetchNetworkEvents remoteName plumbing', () => {
 
     expect(mockGet).toHaveBeenCalledWith(
       SYNTHETICS_API_URLS.NETWORK_EVENTS,
-      { checkGroup: 'cg-1', stepIndex: 2, remoteName: 'remote-a' },
-      expect.anything()
+      { checkGroup: 'cg-1', stepIndex: 2, remoteName: 'remote-a' }
     );
   });
 
@@ -50,8 +48,7 @@ describe('fetchNetworkEvents remoteName plumbing', () => {
 
     expect(mockGet).toHaveBeenCalledWith(
       SYNTHETICS_API_URLS.NETWORK_EVENTS,
-      { checkGroup: 'cg-1', stepIndex: 2, timestamp: '2023-01-01T00:00:00.000Z' },
-      expect.anything()
+      { checkGroup: 'cg-1', stepIndex: 2, timestamp: '2023-01-01T00:00:00.000Z' }
     );
   });
 });

@@ -12,8 +12,6 @@ import type {
   PingsResponse,
   SyntheticsMonitorWithId,
 } from '../../../../../common/runtime_types';
-import { EncryptedSyntheticsMonitorCodec } from '../../../../../common/runtime_types/zod/monitor_types';
-import { PingsResponseType } from '../../../../../common/runtime_types/zod/ping';
 import { INITIAL_REST_VERSION, SYNTHETICS_API_URLS } from '../../../../../common/constants';
 
 export interface MostRecentPingsRequest {
@@ -57,8 +55,7 @@ export const fetchMonitorRecentPings = async ({
       pageIndex,
       status: statusFilter,
       ...(remoteName ? { remoteName } : {}),
-    },
-    PingsResponseType
+    }
   );
 };
 
@@ -94,7 +91,6 @@ export const fetchSyntheticsMonitor = async ({
       internal: true,
       spaceId,
       version: INITIAL_REST_VERSION,
-    },
-    EncryptedSyntheticsMonitorCodec
+    }
   );
 };

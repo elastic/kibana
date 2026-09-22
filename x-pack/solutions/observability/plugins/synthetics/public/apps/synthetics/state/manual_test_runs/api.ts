@@ -44,7 +44,6 @@ export const runOnceMonitor = async ({
   return await apiService.post(
     SYNTHETICS_API_URLS.RUN_ONCE_MONITOR + `/${id}`,
     monitor,
-    undefined,
     {
       spaceId,
     }

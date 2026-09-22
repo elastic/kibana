@@ -13,10 +13,6 @@ import type {
   SyntheticsJourneyApiResponse,
   Ping,
 } from '../../../../../common/runtime_types';
-import {
-  SyntheticsJourneyApiResponseType,
-  PingType,
-} from '../../../../../common/runtime_types/zod/ping';
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 
 export interface FetchJourneyStepsParams {
@@ -52,8 +48,7 @@ export async function fetchBrowserJourney(
   };
   return apiService.get(
     SYNTHETICS_API_URLS.JOURNEY.replace('{checkGroup}', params.checkGroup),
-    Object.keys(query).length ? query : undefined,
-    SyntheticsJourneyApiResponseType
+    Object.keys(query).length ? query : undefined
   );
 }
 
@@ -78,8 +73,7 @@ export async function fetchLastSuccessfulCheck({
       stepIndex,
       location,
       ...(remoteName ? { remoteName } : {}),
-    },
-    PingType
+    }
   );
 }
 
