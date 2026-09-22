@@ -54,7 +54,7 @@ const mapEntryToBreakingChange = ({
     oasdiffId: id,
     source,
     ...(policy?.disposition === 'report_only'
-      ? { reportOnly: true as const, policyReason: policy.reason }
+      ? { reportOnly: true, policyReason: policy.reason }
       : {}),
   };
 };
