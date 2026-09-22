@@ -77,8 +77,32 @@ export const HuntBehaviorResponse = lazySchema(() =>
   z.object({
     status: HuntBehaviorStatus,
     report_id: z.string().optional(),
-    behaviors: z.array(z.object({})),
-    indexed_behaviors: z.array(z.object({})),
+    behaviors: z.array(
+      z.object({
+        technique_id: z.string(),
+        evidence_quote: z.string(),
+        llm_confidence: z.number(),
+        confidence: z.number(),
+        technique_name: z.string(),
+        reference: z.string(),
+        tactic_ids: z.array(z.string()),
+        parent_technique_id: z.string().optional(),
+        proposed_esql_rule: z.string(),
+        rule_name: z.string(),
+        severity: z.enum(['critical', 'high', 'medium', 'low']),
+        risk_score: z.number(),
+      })
+    ),
+    indexed_behaviors: z.array(
+      z.object({
+        id: z.string(),
+        technique_id: z.string(),
+        description: z.string(),
+        telemetry_targets: z.array(z.string()).optional(),
+        llm_confidence: z.number(),
+        confidence: z.number(),
+      })
+    ),
     dropped_unknown_ids: z.array(z.string()).optional(),
     message: z.string().optional(),
     next_step: z.string(),

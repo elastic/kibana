@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { SearchResponse, SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { buildCandidateQuery } from './build_candidate_query';
 import { buildHuntInvestigationConversationId } from './hunt_investigation_id';
@@ -15,12 +16,21 @@ const logger = loggingSystemMock.createLogger();
 const searchBodyOf = (esClient: ElasticsearchClient) =>
   (esClient.search as jest.Mock).mock.calls[0][0];
 
+/** Builds a minimal, fully-typed SearchResponse from just the hit ids the test cares about. */
+const searchResponseOf = (ids: string[], total?: number): SearchResponse<unknown, unknown> => ({
+  took: 0,
+  timed_out: false,
+  _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+  hits: {
+    hits: ids.map((id): SearchHit<unknown> => ({ _index: 'reports', _id: id })),
+    total: { value: total ?? ids.length, relation: 'eq' },
+  },
+});
+
 describe('buildCandidateQuery', () => {
   it('returns empty ids when no reports exist', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.search.mockResolvedValue({
-      hits: { hits: [], total: { value: 0, relation: 'eq' } },
-    });
+    esClient.search.mockResolvedValue(searchResponseOf([]));
     const result = await buildCandidateQuery(esClient, logger, {
       trigger: 'scheduled',
       spaceId: 'default',
@@ -30,9 +40,7 @@ describe('buildCandidateQuery', () => {
 
   it('returns ids for scheduled trigger (hunt-once gate)', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.search.mockResolvedValue({
-      hits: { hits: [{ _id: 'rpt-1' }, { _id: 'rpt-2' }], total: { value: 2, relation: 'eq' } },
-    });
+    esClient.search.mockResolvedValue(searchResponseOf(['rpt-1', 'rpt-2']));
     const result = await buildCandidateQuery(esClient, logger, {
       trigger: 'scheduled',
       spaceId: 'default',
@@ -42,9 +50,7 @@ describe('buildCandidateQuery', () => {
 
   it('uses ids filter for manual trigger with explicit reportIds', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.search.mockResolvedValue({
-      hits: { hits: [{ _id: 'rpt-abc' }], total: { value: 1, relation: 'eq' } },
-    });
+    esClient.search.mockResolvedValue(searchResponseOf(['rpt-abc']));
     const result = await buildCandidateQuery(esClient, logger, {
       trigger: 'manual',
       reportIds: ['rpt-abc'],
@@ -55,9 +61,7 @@ describe('buildCandidateQuery', () => {
 
   it('lifts the hunt-once gate for a manually named report', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.search.mockResolvedValue({
-      hits: { hits: [{ _id: 'rpt-abc' }], total: { value: 1, relation: 'eq' } },
-    });
+    esClient.search.mockResolvedValue(searchResponseOf(['rpt-abc']));
     await buildCandidateQuery(esClient, logger, {
       trigger: 'manual',
       reportIds: ['rpt-abc'],
@@ -74,9 +78,7 @@ describe('buildCandidateQuery', () => {
     // assertions are the regression guard for exactly that.
     it('excludes reports already hunted in this space via a nested evidence query', async () => {
       const esClient = elasticsearchServiceMock.createElasticsearchClient();
-      esClient.search.mockResolvedValue({
-        hits: { hits: [], total: { value: 0, relation: 'eq' } },
-      });
+      esClient.search.mockResolvedValue(searchResponseOf([]));
       await buildCandidateQuery(esClient, logger, {
         trigger: 'scheduled',
         spaceId: 'hunt-a',
@@ -104,9 +106,7 @@ describe('buildCandidateQuery', () => {
 
     it('never gates on the unmapped flat feedback field', async () => {
       const esClient = elasticsearchServiceMock.createElasticsearchClient();
-      esClient.search.mockResolvedValue({
-        hits: { hits: [], total: { value: 0, relation: 'eq' } },
-      });
+      esClient.search.mockResolvedValue(searchResponseOf([]));
       await buildCandidateQuery(esClient, logger, {
         trigger: 'scheduled',
         spaceId: 'hunt-a',
@@ -116,9 +116,7 @@ describe('buildCandidateQuery', () => {
 
     it('sorts corroborated_rank_score as a nested field scoped to this space', async () => {
       const esClient = elasticsearchServiceMock.createElasticsearchClient();
-      esClient.search.mockResolvedValue({
-        hits: { hits: [], total: { value: 0, relation: 'eq' } },
-      });
+      esClient.search.mockResolvedValue(searchResponseOf([]));
       await buildCandidateQuery(esClient, logger, {
         trigger: 'scheduled',
         spaceId: 'hunt-a',
@@ -140,12 +138,7 @@ describe('buildCandidateQuery', () => {
 
     it('drops a report whose Hunt Proposal is still open', async () => {
       const esClient = elasticsearchServiceMock.createElasticsearchClient();
-      esClient.search.mockResolvedValue({
-        hits: {
-          hits: [{ _id: hunted }, { _id: free }],
-          total: { value: 2, relation: 'eq' },
-        },
-      });
+      esClient.search.mockResolvedValue(searchResponseOf([hunted, free]));
       const result = await buildCandidateQuery(
         esClient,
         logger,
@@ -157,12 +150,7 @@ describe('buildCandidateQuery', () => {
 
     it('reports the dropped report under skipped with reason open_proposal', async () => {
       const esClient = elasticsearchServiceMock.createElasticsearchClient();
-      esClient.search.mockResolvedValue({
-        hits: {
-          hits: [{ _id: hunted }, { _id: free }],
-          total: { value: 2, relation: 'eq' },
-        },
-      });
+      esClient.search.mockResolvedValue(searchResponseOf([hunted, free]));
       const result = await buildCandidateQuery(
         esClient,
         logger,
@@ -174,9 +162,7 @@ describe('buildCandidateQuery', () => {
 
     it('applies to a manually named report too, so replay cannot bypass a parked gate', async () => {
       const esClient = elasticsearchServiceMock.createElasticsearchClient();
-      esClient.search.mockResolvedValue({
-        hits: { hits: [{ _id: hunted }], total: { value: 1, relation: 'eq' } },
-      });
+      esClient.search.mockResolvedValue(searchResponseOf([hunted]));
       const result = await buildCandidateQuery(
         esClient,
         logger,
@@ -189,9 +175,7 @@ describe('buildCandidateQuery', () => {
     it('selects nothing when the proposal store cannot be read', async () => {
       // Failing open would re-hunt a report whose containment is parked at a gate.
       const esClient = elasticsearchServiceMock.createElasticsearchClient();
-      esClient.search.mockResolvedValue({
-        hits: { hits: [{ _id: free }], total: { value: 1, relation: 'eq' } },
-      });
+      esClient.search.mockResolvedValue(searchResponseOf([free]));
       const result = await buildCandidateQuery(
         esClient,
         logger,
@@ -206,9 +190,7 @@ describe('buildCandidateQuery', () => {
 
   it('reports a manually named report that matched nothing as not_found', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.search.mockResolvedValue({
-      hits: { hits: [], total: { value: 0, relation: 'eq' } },
-    });
+    esClient.search.mockResolvedValue(searchResponseOf([]));
     const result = await buildCandidateQuery(esClient, logger, {
       trigger: 'manual',
       reportIds: ['rpt-missing'],
@@ -218,11 +200,9 @@ describe('buildCandidateQuery', () => {
   });
 
   it('caps returned ids at 10 however many the caller asks for', async () => {
-    const hits = Array.from({ length: 30 }, (_, i) => ({ _id: `rpt-${i}` }));
+    const ids = Array.from({ length: 30 }, (_, i) => `rpt-${i}`);
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.search.mockResolvedValue({
-      hits: { hits, total: { value: 30, relation: 'eq' } },
-    });
+    esClient.search.mockResolvedValue(searchResponseOf(ids, 30));
     const result = await buildCandidateQuery(esClient, logger, {
       trigger: 'scheduled',
       spaceId: 'default',
@@ -233,9 +213,7 @@ describe('buildCandidateQuery', () => {
 
   it('over-fetches on the scheduled path so post-search exclusions still fill the page', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.search.mockResolvedValue({
-      hits: { hits: [], total: { value: 0, relation: 'eq' } },
-    });
+    esClient.search.mockResolvedValue(searchResponseOf([]));
     await buildCandidateQuery(esClient, logger, {
       trigger: 'scheduled',
       spaceId: 'default',
@@ -246,9 +224,7 @@ describe('buildCandidateQuery', () => {
 
   it('asks for exactly the named ids on the manual path', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.search.mockResolvedValue({
-      hits: { hits: [], total: { value: 0, relation: 'eq' } },
-    });
+    esClient.search.mockResolvedValue(searchResponseOf([]));
     await buildCandidateQuery(esClient, logger, {
       trigger: 'manual',
       reportIds: ['a', 'b'],
@@ -260,12 +236,7 @@ describe('buildCandidateQuery', () => {
 
   it('sets truncated when total exceeds what was returned', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.search.mockResolvedValue({
-      hits: {
-        hits: [{ _id: 'r1' }, { _id: 'r2' }],
-        total: { value: 20, relation: 'eq' },
-      },
-    });
+    esClient.search.mockResolvedValue(searchResponseOf(['r1', 'r2'], 20));
     const result = await buildCandidateQuery(esClient, logger, {
       trigger: 'scheduled',
       spaceId: 'default',

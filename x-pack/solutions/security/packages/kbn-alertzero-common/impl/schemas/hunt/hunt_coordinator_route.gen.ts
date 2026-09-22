@@ -16,7 +16,7 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
-import { HuntIoc } from '../components/hunt.gen';
+import { HuntIoc, HuntForThreatResult } from '../components/hunt.gen';
 
 export const HuntCoordinatorStatus = lazySchema(() =>
   z.enum(['tier1_only', 'tier1_and_tier2', 'tier2_only_skipped'])
@@ -64,8 +64,49 @@ export const HuntCoordinatorResponse = lazySchema(() =>
     status: HuntCoordinatorStatus,
     report_id: z.string().optional(),
     runId: z.string(),
-    tier1: z.object({}),
-    tier2: z.object({}).optional(),
+    tier1: HuntForThreatResult.merge(
+      z.object({
+        tier: z.number().int(),
+      })
+    ),
+    tier2: z
+      .object({
+        status: z.enum(['no_behaviors_found', 'no_behaviors_validated', 'behaviors_proposed']),
+        report_id: z.string().optional(),
+        behaviors: z.array(
+          z.object({
+            technique_id: z.string(),
+            evidence_quote: z.string(),
+            llm_confidence: z.number(),
+            confidence: z.number(),
+            technique_name: z.string(),
+            reference: z.string(),
+            tactic_ids: z.array(z.string()),
+            parent_technique_id: z.string().optional(),
+            proposed_esql_rule: z.string(),
+            rule_name: z.string(),
+            severity: z.enum(['critical', 'high', 'medium', 'low']),
+            risk_score: z.number(),
+          })
+        ),
+        indexed_behaviors: z.array(
+          z.object({
+            id: z.string(),
+            technique_id: z.string(),
+            description: z.string(),
+            telemetry_targets: z.array(z.string()).optional(),
+            llm_confidence: z.number(),
+            confidence: z.number(),
+          })
+        ),
+        dropped_unknown_ids: z.array(z.string()).optional(),
+        message: z.string().optional(),
+        next_step: z.string(),
+        hasHit: z.boolean(),
+        tier: z.number().int().optional(),
+      })
+      .nullable()
+      .optional(),
     tier2_skipped_reason: z.string().optional(),
     message: z.string(),
     next_step: z.string(),
@@ -84,7 +125,7 @@ export const HuntCoordinatorResponse = lazySchema(() =>
       .array(
         z.object({
           attachment_id: z.string(),
-          data: z.object({}),
+          data: z.object({}).catchall(z.unknown()),
         })
       )
       .optional()

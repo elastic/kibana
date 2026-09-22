@@ -56,6 +56,51 @@ paths:
                     type: array
                     items:
                       type: object
+                      required: [report_id, score, title, severity, source_type, extracted_at, match_breakdown]
+                      properties:
+                        report_id:
+                          type: string
+                        score:
+                          type: number
+                          nullable: true
+                        title:
+                          type: string
+                        severity:
+                          type: string
+                        source_type:
+                          type: string
+                        extracted_at:
+                          type: string
+                        match_breakdown:
+                          type: object
+                          required:
+                            - ioc_hash_hits
+                            - ioc_network_hits
+                            - ioc_set_hash_match
+                            - actor_hits
+                            - technique_hits
+                            - discriminating_match_count
+                          properties:
+                            ioc_hash_hits:
+                              type: array
+                              items:
+                                type: string
+                            ioc_network_hits:
+                              type: array
+                              items:
+                                type: string
+                            ioc_set_hash_match:
+                              type: boolean
+                            actor_hits:
+                              type: array
+                              items:
+                                type: string
+                            technique_hits:
+                              type: array
+                              items:
+                                type: string
+                            discriminating_match_count:
+                              type: integer
                   thresholds:
                     type: object
                     required: [discriminating_min]

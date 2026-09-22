@@ -21,12 +21,6 @@ const mockChatModel = { invoke: jest.fn() };
 const mockInferenceClient = {};
 const mockConnector = { connectorId: 'test-connector', name: 'Test', actionTypeId: '.gen-ai' };
 
-const mockScopedModel = {
-  connector: mockConnector,
-  chatModel: mockChatModel,
-  inferenceClient: mockInferenceClient,
-};
-
 const mockInference = {
   getDefaultConnector: jest.fn(),
   getChatModel: jest.fn().mockResolvedValue(mockChatModel),
@@ -58,7 +52,11 @@ describe('resolveScopedModel', () => {
       uiSettingsClient: mockUiSettingsClient as never,
       logger,
     });
-    expect(result).toEqual({ ok: false, reason: 'no_inference_plugin', message: expect.any(String) });
+    expect(result).toEqual({
+      ok: false,
+      reason: 'no_inference_plugin',
+      message: expect.any(String),
+    });
   });
 
   it('resolves via tier connector when available', async () => {
