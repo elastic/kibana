@@ -8,6 +8,7 @@
 import {
   sendDeleteAgentlessPolicy,
   sendUpdateAgentlessPolicy,
+  sendGetAgentlessPolicy,
   sendGetPackageInfoByKey,
 } from '@kbn/fleet-plugin/public';
 
@@ -24,37 +25,42 @@ export interface CleanupManagedIntegrationsOpts extends BuildPolicyBodyOpts {
 /**
  * Delete or update managed-integrations (agentless) policies for removed services.
  * Best-effort: individual failures are logged but do not block the deploy.
- * Returns the ops so callers can distinguish deleted vs updated policy IDs.
+ * Returns only the ops that actually succeeded so callers can selectively clear
+ * pendingCleanupPolicyIds — a failed cleanup remains staged for retry.
  */
 export async function cleanupManagedIntegrationsPolicies(
   opts: CleanupManagedIntegrationsOpts
 ): Promise<PolicyCleanupOps> {
   const { pendingCleanupPolicyIds, currentPolicyIdsByInstance } = opts;
-  const ops = computePolicyCleanupOps(pendingCleanupPolicyIds, currentPolicyIdsByInstance);
-  const { toDelete, toUpdate } = ops;
+  const planned = computePolicyCleanupOps(pendingCleanupPolicyIds, currentPolicyIdsByInstance);
+
+  const succeededDeletes: string[] = [];
+  const succeededUpdates: Array<{ policyId: string; survivingInstanceIds: string[] }> = [];
 
   await Promise.allSettled([
-    ...toDelete.map((policyId) =>
-      sendDeleteAgentlessPolicy(policyId).catch((err) => {
-        // eslint-disable-next-line no-console
-        console.error(
-          `[ingest_hub] Failed to delete managed-integrations policy ${policyId}:`,
-          err
-        );
-      })
+    ...planned.toDelete.map((policyId) =>
+      sendDeleteAgentlessPolicy(policyId)
+        .then(() => {
+          succeededDeletes.push(policyId);
+        })
+        .catch((err) => {
+          // eslint-disable-next-line no-console
+          console.error(`[ingest_hub] Failed to delete managed-integrations policy ${policyId}:`, err);
+        })
     ),
-    ...toUpdate.map(({ policyId, survivingInstanceIds }) =>
-      updateManagedIntegrationsPolicy(policyId, survivingInstanceIds, opts).catch((err) => {
-        // eslint-disable-next-line no-console
-        console.error(
-          `[ingest_hub] Failed to update managed-integrations policy ${policyId}:`,
-          err
-        );
-      })
+    ...planned.toUpdate.map(({ policyId, survivingInstanceIds }) =>
+      updateManagedIntegrationsPolicy(policyId, survivingInstanceIds, opts)
+        .then(() => {
+          succeededUpdates.push({ policyId, survivingInstanceIds });
+        })
+        .catch((err) => {
+          // eslint-disable-next-line no-console
+          console.error(`[ingest_hub] Failed to update managed-integrations policy ${policyId}:`, err);
+        })
     ),
   ]);
 
-  return ops;
+  return { toDelete: succeededDeletes, toUpdate: succeededUpdates };
 }
 
 async function updateManagedIntegrationsPolicy(
@@ -75,6 +81,16 @@ async function updateManagedIntegrationsPolicy(
   if (!members) return;
 
   const packageName = members[0].service.packageName;
+
+  // Fetch existing policy to preserve its name (avoids timestamp-based name churn).
+  let existingName: string | undefined;
+  try {
+    const existing = await sendGetAgentlessPolicy(policyId);
+    existingName = existing.item?.name;
+  } catch {
+    // Non-fatal — fall back to generated name.
+  }
+
   const pkgInfoResponse = await sendGetPackageInfoByKey(packageName);
   const pkgInfo = pkgInfoResponse.data?.item;
   const pkgVersion = pkgInfo?.version;
@@ -111,8 +127,10 @@ async function updateManagedIntegrationsPolicy(
   const pkgVarNames = getPackageVarNames(pkgInfo as { vars?: Array<{ name: string }> });
   const vars = buildPackageVars(globalRegion, staticKeys, pkgVarNames);
 
+  const policyName = existingName ?? `${packageName.replace(/[^a-zA-Z0-9_-]/g, '_')}-${Date.now()}`;
+
   await sendUpdateAgentlessPolicy(policyId, {
-    name: `${packageName.replace(/[^a-zA-Z0-9_-]/g, '_')}-${Date.now()}`,
+    name: policyName,
     namespace,
     package: { name: packageName, version: pkgVersion },
     ...(vars ? { vars } : {}),

@@ -136,6 +136,7 @@ export {
   sendCreateAgentlessPolicy,
   sendUpdateAgentlessPolicy,
   sendDeleteAgentlessPolicy,
+  sendGetAgentlessPolicy,
 } from './hooks/use_request/agentless_policy';
 export {
   sendCreateCloudOnboardingDeployment,
@@ -154,6 +155,7 @@ export { sendGetPackageInfoByKey, sendGetPackageInfoByKeyForRq } from './hooks/u
 export {
   sendUpdatePackagePolicy,
   sendDeletePackagePolicy,
+  sendGetOnePackagePolicy,
 } from './hooks/use_request/package_policy';
 export { sendRenderIacTemplate } from './hooks/use_request/iac_provisioner';
 export { useIacProvisioner } from './hooks/use_iac_provisioner';

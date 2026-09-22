@@ -86,17 +86,30 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
     [serviceSettings?.instances, selectedServiceIds, servicesMap]
   );
 
-  const isAlreadyDeployed = useMemo(
-    () =>
-      deployGroups.length > 0 &&
-      deployGroups.every((group) =>
-        group.members.every(({ instance }) => {
-          const status = detectAndReviewStep.serviceStatuses[instance.instanceId];
-          return status === 'receiving' || status === 'detecting' || status === 'timeout';
-        })
-      ),
-    [deployGroups, detectAndReviewStep.serviceStatuses]
-  );
+  const isAlreadyDeployed = useMemo(() => {
+    if (deployGroups.length === 0) return false;
+    const policyIdsByInstance = detectAndReviewStep.policyIdsByInstance ?? {};
+
+    // Live-stale: policyIdsByInstance has entries for services no longer in deployGroups
+    // (e.g. user deselected from Step 1). Cleanup must run on the next Deploy click.
+    const activeInstanceIds = new Set(deployGroups.flatMap((g) => g.instanceIds));
+    if (Object.keys(policyIdsByInstance).some((id) => !activeInstanceIds.has(id))) return false;
+
+    // Explicit cleanup staged by removeDeployInstance (Step 4 deselection).
+    if (Object.keys(detectAndReviewStep.pendingCleanupPolicyIds ?? {}).length > 0) return false;
+
+    return deployGroups.every((group) =>
+      group.members.every(({ instance }) => {
+        const status = detectAndReviewStep.serviceStatuses[instance.instanceId];
+        return status === 'receiving' || status === 'detecting' || status === 'timeout';
+      })
+    );
+  }, [
+    deployGroups,
+    detectAndReviewStep.serviceStatuses,
+    detectAndReviewStep.policyIdsByInstance,
+    detectAndReviewStep.pendingCleanupPolicyIds,
+  ]);
 
   const nonAgentlessServices: AwsServiceMatrixEntry[] = useMemo(
     () =>
@@ -169,9 +182,9 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
         }
 
         const initialStatuses = buildInstanceStatuses(targets, []);
-        if (targets.length > 0) setIsDeploying(true);
+        if (hasPendingCleanup || targets.length > 0) setIsDeploying(true);
         updateDetectAndReviewStep({
-          isDeploying: targets.length > 0,
+          isDeploying: hasPendingCleanup || targets.length > 0,
           serviceStatuses: { ...initialStatuses, ...newNonAgentlessStatuses },
         });
         onContinue();
@@ -187,16 +200,31 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
             authenticateAndDeployStep,
             servicesMap: servicesMap ?? new Map(),
           });
-          // Prune stale instances (Step 1 deselections) from policyIdsByInstance before clearing
-          // the staging area — removeDeployInstances must come first so its removal isn't overwritten.
-          removeDeployInstances(Object.keys(liveStalePolicyIds));
-          updateDetectAndReviewStep({ pendingCleanupPolicyIds: {} });
+          // Only prune instances whose policy cleanup actually succeeded — failed cleanups
+          // remain in pendingCleanupPolicyIds for retry on the next deploy attempt.
+          const succeededIds = new Set([
+            ...cleanupOps.toDelete,
+            ...cleanupOps.toUpdate.map((u) => u.policyId),
+          ]);
+          const cleanedLiveStale = Object.keys(liveStalePolicyIds).filter((id) =>
+            succeededIds.has(liveStalePolicyIds[id])
+          );
+          // Prune stale instances before clearing the staging area (removeDeployInstances
+          // must come first so its write isn't overwritten).
+          removeDeployInstances(cleanedLiveStale);
+          const remainingPending = Object.fromEntries(
+            Object.entries(detectAndReviewStep.pendingCleanupPolicyIds ?? {}).filter(
+              ([, policyId]) => !succeededIds.has(policyId)
+            )
+          );
+          updateDetectAndReviewStep({ pendingCleanupPolicyIds: remainingPending });
         }
 
         if (targets.length === 0) {
+          setIsDeploying(false);
           // Cleanup-only: no new deploys, but deleted policies must be pruned from the SO record.
           const existingDeploymentId = detectAndReviewStep.onboardingDeploymentId;
-          if (existingDeploymentId && cleanupOps.toDelete.length > 0) {
+          if (existingDeploymentId && (cleanupOps.toDelete.length > 0 || cleanupOps.toUpdate.length > 0)) {
             const deletedIds = new Set(cleanupOps.toDelete);
             await updateDeployment(existingDeploymentId, {
               services: selectedServiceIds,

@@ -8,46 +8,64 @@
 import {
   sendDeletePackagePolicy,
   sendUpdatePackagePolicy,
+  sendGetOnePackagePolicy,
   sendGetPackageInfoByKey,
 } from '@kbn/fleet-plugin/public';
 
 import type { ServiceVars } from '../service_settings_step/use_service_settings';
 import { buildPackageInputs, buildPackageVars, getPackageVarNames } from './package_inputs';
-import { computePolicyCleanupOps, resolveSurvivingMembers } from './policy_cleanup';
-import type { BuildPolicyBodyOpts } from './policy_cleanup';
+import type { AgentCredentialVars } from './package_inputs';
+import {
+  computePolicyCleanupOps,
+  resolveSurvivingMembers,
+} from './policy_cleanup';
+import type { BuildPolicyBodyOpts, PolicyCleanupOps } from './policy_cleanup';
 
 export interface CleanupAgentBasedOpts extends BuildPolicyBodyOpts {
   pendingCleanupPolicyIds: Record<string, string>;
   currentPolicyIdsByInstance: Record<string, string>;
   selectedAgentPolicyIds: string[];
+  agentCredentials?: AgentCredentialVars;
 }
 
 /**
  * Delete or update package policies for removed agent-based services.
  * The agent policy itself is never deleted — enrolled agents would become orphaned.
  * Best-effort: individual failures are logged but do not block the deploy.
+ * Returns only the ops that actually succeeded so callers can selectively clear
+ * pendingCleanupPolicyIds — a failed cleanup remains staged for retry.
  */
-export async function cleanupAgentBasedPolicies(opts: CleanupAgentBasedOpts): Promise<void> {
+export async function cleanupAgentBasedPolicies(opts: CleanupAgentBasedOpts): Promise<PolicyCleanupOps> {
   const { pendingCleanupPolicyIds, currentPolicyIdsByInstance } = opts;
-  const { toDelete, toUpdate } = computePolicyCleanupOps(
-    pendingCleanupPolicyIds,
-    currentPolicyIdsByInstance
-  );
+  const planned = computePolicyCleanupOps(pendingCleanupPolicyIds, currentPolicyIdsByInstance);
+
+  const succeededDeletes: string[] = [];
+  const succeededUpdates: Array<{ policyId: string; survivingInstanceIds: string[] }> = [];
 
   await Promise.allSettled([
-    ...toDelete.map((policyId) =>
-      sendDeletePackagePolicy({ packagePolicyIds: [policyId] }).catch((err) => {
-        // eslint-disable-next-line no-console
-        console.error(`[ingest_hub] Failed to delete agent-based package policy ${policyId}:`, err);
-      })
+    ...planned.toDelete.map((policyId) =>
+      sendDeletePackagePolicy({ packagePolicyIds: [policyId] })
+        .then(() => {
+          succeededDeletes.push(policyId);
+        })
+        .catch((err) => {
+          // eslint-disable-next-line no-console
+          console.error(`[ingest_hub] Failed to delete agent-based package policy ${policyId}:`, err);
+        })
     ),
-    ...toUpdate.map(({ policyId, survivingInstanceIds }) =>
-      updateAgentBasedPolicy(policyId, survivingInstanceIds, opts).catch((err) => {
-        // eslint-disable-next-line no-console
-        console.error(`[ingest_hub] Failed to update agent-based package policy ${policyId}:`, err);
-      })
+    ...planned.toUpdate.map(({ policyId, survivingInstanceIds }) =>
+      updateAgentBasedPolicy(policyId, survivingInstanceIds, opts)
+        .then(() => {
+          succeededUpdates.push({ policyId, survivingInstanceIds });
+        })
+        .catch((err) => {
+          // eslint-disable-next-line no-console
+          console.error(`[ingest_hub] Failed to update agent-based package policy ${policyId}:`, err);
+        })
     ),
   ]);
+
+  return { toDelete: succeededDeletes, toUpdate: succeededUpdates };
 }
 
 async function updateAgentBasedPolicy(
@@ -63,12 +81,25 @@ async function updateAgentBasedPolicy(
     authenticateAndDeployStep,
     servicesMap,
     selectedAgentPolicyIds,
+    agentCredentials,
   } = opts;
 
   const members = resolveSurvivingMembers(survivingInstanceIds, instances, servicesMap);
   if (!members) return;
 
   const packageName = members[0].service.packageName;
+
+  // Fetch existing package policy to preserve its name and namespace.
+  let existingName: string | undefined;
+  let existingNamespace: string | undefined;
+  try {
+    const existing = await sendGetOnePackagePolicy(policyId);
+    existingName = existing.data?.item?.name;
+    existingNamespace = existing.data?.item?.namespace;
+  } catch {
+    // Non-fatal — fall back to generated name and hook namespace.
+  }
+
   const pkgInfoResponse = await sendGetPackageInfoByKey(packageName);
   const pkgInfo = pkgInfoResponse.data?.item;
   const pkgVersion = pkgInfo?.version;
@@ -100,14 +131,22 @@ async function updateAgentBasedPolicy(
     }
   }
 
+  // Use agentCredentials (direct_access_keys) if available, otherwise fall back to staticKeys.
   const { staticKeys } = authenticateAndDeployStep;
+  const credentialsAsStaticKeys =
+    agentCredentials?.method === 'direct_access_keys'
+      ? { access_key_id: agentCredentials.access_key_id, secret_access_key: agentCredentials.secret_access_key }
+      : staticKeys;
   const pkgVarNames = getPackageVarNames(pkgInfo as { vars?: Array<{ name: string }> });
-  const vars = buildPackageVars(globalRegion, staticKeys, pkgVarNames);
+  const vars = buildPackageVars(globalRegion, credentialsAsStaticKeys, pkgVarNames);
+
+  const policyName = existingName ?? `${packageName.replace(/[^a-zA-Z0-9_-]/g, '_')}-${Date.now()}`;
+  const policyNamespace = existingNamespace ?? namespace;
 
   await sendUpdatePackagePolicy(policyId, {
-    name: `${packageName.replace(/[^a-zA-Z0-9_-]/g, '_')}-${Date.now()}`,
+    name: policyName,
     enabled: true,
-    namespace,
+    namespace: policyNamespace,
     package: { name: packageName, version: pkgVersion },
     ...(vars ? { vars } : {}),
     inputs,

@@ -9,12 +9,14 @@ jest.mock('@kbn/fleet-plugin/public', () => ({
   sendDeleteAgentlessPolicy: jest.fn(),
   sendUpdateAgentlessPolicy: jest.fn(),
   sendGetPackageInfoByKey: jest.fn(),
+  sendGetAgentlessPolicy: jest.fn(),
 }));
 
 import {
   sendDeleteAgentlessPolicy,
   sendUpdateAgentlessPolicy,
   sendGetPackageInfoByKey,
+  sendGetAgentlessPolicy,
 } from '@kbn/fleet-plugin/public';
 
 import { cleanupManagedIntegrationsPolicies } from './policy_cleanup_managed_integrations';
@@ -24,6 +26,7 @@ import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 const mockDeleteAgentless = sendDeleteAgentlessPolicy as jest.Mock;
 const mockUpdateAgentless = sendUpdateAgentlessPolicy as jest.Mock;
 const mockGetPackageInfo = sendGetPackageInfoByKey as jest.Mock;
+const mockGetAgentlessPolicy = sendGetAgentlessPolicy as jest.Mock;
 
 function makeInstance(instanceId: string, serviceId: string = instanceId): ServiceInstance {
   return { instanceId, serviceId, name: `AWS ${serviceId}`, isDuplicate: false };
@@ -55,6 +58,7 @@ const BASE_OPTS = {
 beforeEach(() => {
   jest.clearAllMocks();
   mockGetPackageInfo.mockResolvedValue({ data: { item: { version: '3.0.0', vars: [] } } });
+  mockGetAgentlessPolicy.mockResolvedValue({ item: { name: 'existing-agentless-name' } });
   mockDeleteAgentless.mockResolvedValue({});
   mockUpdateAgentless.mockResolvedValue({});
 });
@@ -95,15 +99,15 @@ describe('cleanupManagedIntegrationsPolicies', () => {
     expect(ops).toHaveProperty('toUpdate');
   });
 
-  it('swallows individual delete failures — does not reject the whole call', async () => {
+  it('swallows individual delete failures and does not include them in returned ops', async () => {
     mockDeleteAgentless.mockRejectedValue(new Error('Fleet 500'));
-    await expect(
-      cleanupManagedIntegrationsPolicies({
-        ...BASE_OPTS,
-        pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
-        currentPolicyIdsByInstance: {},
-      })
-    ).resolves.toBeDefined();
+    const ops = await cleanupManagedIntegrationsPolicies({
+      ...BASE_OPTS,
+      pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+      currentPolicyIdsByInstance: {},
+    });
+    // Failed op not in returned succeeded ops.
+    expect(ops.toDelete).not.toContain('policy-1');
   });
 
   it('calls sendGetPackageInfoByKey when toUpdate has entries and surviving members resolve', async () => {
@@ -119,19 +123,19 @@ describe('cleanupManagedIntegrationsPolicies', () => {
     expect(mockGetPackageInfo).toHaveBeenCalledWith('aws');
   });
 
-  it('swallows individual update failures — does not reject the whole call', async () => {
+  it('swallows individual update failures and does not include them in returned ops', async () => {
     const instance = makeInstance('inst-b', 'vpcflow');
     const service = makeService('vpcflow');
     mockGetPackageInfo.mockRejectedValue(new Error('pkg fetch failed'));
-    await expect(
-      cleanupManagedIntegrationsPolicies({
-        ...BASE_OPTS,
-        instances: [instance],
-        servicesMap: new Map([['vpcflow', service]]),
-        pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
-        currentPolicyIdsByInstance: { 'inst-b': 'policy-1' },
-      })
-    ).resolves.toBeDefined();
+    const ops = await cleanupManagedIntegrationsPolicies({
+      ...BASE_OPTS,
+      instances: [instance],
+      servicesMap: new Map([['vpcflow', service]]),
+      pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+      currentPolicyIdsByInstance: { 'inst-b': 'policy-1' },
+    });
+    // Failed update not in returned succeeded ops.
+    expect(ops.toUpdate).toHaveLength(0);
   });
 });
 
@@ -141,7 +145,7 @@ describe('updateManagedIntegrationsPolicy — payload shape', () => {
   const vpcflow = makeService('vpcflow');
   const instance = makeInstance('inst-b', 'vpcflow');
 
-  it('sends correct package name and version', async () => {
+  it('sends correct package name, version, and preserves existing policy name', async () => {
     mockGetPackageInfo.mockResolvedValue({
       data: { item: { version: '2.5.0', vars: [], policy_templates: [] } },
     });
@@ -155,6 +159,8 @@ describe('updateManagedIntegrationsPolicy — payload shape', () => {
     const payload = mockUpdateAgentless.mock.calls[0][1];
     expect(payload.package).toEqual({ name: 'aws', version: '2.5.0' });
     expect(payload.namespace).toBe('default');
+    // Name preserved from existing policy (not regenerated with a timestamp).
+    expect(payload.name).toBe('existing-agentless-name');
   });
 
   it('includes enabled input for the surviving service', async () => {

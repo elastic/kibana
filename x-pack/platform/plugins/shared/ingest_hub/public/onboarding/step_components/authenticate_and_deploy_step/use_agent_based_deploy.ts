@@ -162,7 +162,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
         // Clean up package policies for removed services before creating new ones.
         if (hasPendingCleanup) {
           const targetPolicyIds = agentPolicyId ? [agentPolicyId] : selectedAgentPolicyIds ?? [];
-          await cleanupAgentBasedPolicies({
+          const cleanupOps = await cleanupAgentBasedPolicies({
             pendingCleanupPolicyIds: effectivePendingCleanup,
             currentPolicyIdsByInstance: detectAndReviewStep.policyIdsByInstance ?? {},
             instances: serviceSettings?.instances ?? [],
@@ -172,9 +172,24 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
             authenticateAndDeployStep,
             servicesMap: servicesMap ?? new Map(),
             selectedAgentPolicyIds: targetPolicyIds,
+            agentCredentials: agentCredentialsRef.current,
           });
-          removeDeployInstances(Object.keys(liveStalePolicyIds));
-          updateDetectAndReviewStep({ pendingCleanupPolicyIds: {} });
+          // Only prune instances whose policy cleanup actually succeeded — failed cleanups
+          // remain in pendingCleanupPolicyIds for retry on the next deploy attempt.
+          const succeededIds = new Set([
+            ...cleanupOps.toDelete,
+            ...cleanupOps.toUpdate.map((u) => u.policyId),
+          ]);
+          const cleanedLiveStale = Object.keys(liveStalePolicyIds).filter((id) =>
+            succeededIds.has(liveStalePolicyIds[id])
+          );
+          removeDeployInstances(cleanedLiveStale);
+          const remainingPending = Object.fromEntries(
+            Object.entries(detectAndReviewStep.pendingCleanupPolicyIds ?? {}).filter(
+              ([, policyId]) => !succeededIds.has(policyId)
+            )
+          );
+          updateDetectAndReviewStep({ pendingCleanupPolicyIds: remainingPending });
         }
 
         if (targetsToDeploy.length === 0) {

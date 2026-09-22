@@ -261,12 +261,14 @@ describe('useAgentBasedDeploy — isAlreadyDeployed', () => {
 describe('useAgentBasedDeploy — cleanup orchestration', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockCleanupAgentBasedPolicies.mockResolvedValue(undefined);
+    mockCleanupAgentBasedPolicies.mockResolvedValue({ toDelete: [], toUpdate: [] });
     mockBuildAgentBasedInstanceStatuses.mockReturnValue({});
     mockExtractErrorMessage.mockReturnValue('error');
   });
 
-  it('calls cleanupPackagePolicies and clears pendingCleanupPolicyIds when cleanup is pending', async () => {
+  it('calls cleanupAgentBasedPolicies and clears pendingCleanupPolicyIds when cleanup succeeds', async () => {
+    // Simulate successful delete so the pending entry is cleared.
+    mockCleanupAgentBasedPolicies.mockResolvedValue({ toDelete: ['pkg-policy-A'], toUpdate: [] });
     const updateDetectAndReviewStep = jest.fn();
     const removeDeployInstances = jest.fn();
     mockUseOnboardingFlow.mockReturnValue({
@@ -300,7 +302,10 @@ describe('useAgentBasedDeploy — cleanup orchestration', () => {
     const cleanupCall = mockCleanupAgentBasedPolicies.mock.calls[0][0];
     expect(cleanupCall.pendingCleanupPolicyIds).toEqual({ instA: 'pkg-policy-A' });
     expect(cleanupCall.selectedAgentPolicyIds).toEqual(['agent-policy-1']);
+    // Verify agentCredentials are passed through to cleanup opts.
+    expect(cleanupCall).toHaveProperty('agentCredentials');
 
+    // pkg-policy-A succeeded → instA's pending entry is cleared.
     expect(updateDetectAndReviewStep).toHaveBeenCalledWith(
       expect.objectContaining({ pendingCleanupPolicyIds: {} })
     );
@@ -398,7 +403,9 @@ describe('useAgentBasedDeploy — cleanup orchestration', () => {
     // 'old-svc' was deployed previously (policyIdsByInstance has it) but was deselected from
     // Step 1 without going through removeDeployInstance, so pendingCleanupPolicyIds is empty.
     // buildAgentBasedTargets returns only groupA (serviceA = currently selected) — old-svc is absent.
-    // Live-stale detection should find old-svc and trigger cleanupPackagePolicies + removeDeployInstances.
+    // Live-stale detection should find old-svc and trigger cleanupAgentBasedPolicies + removeDeployInstances.
+    // Simulate successful delete of old-svc's policy so it gets pruned.
+    mockCleanupAgentBasedPolicies.mockResolvedValue({ toDelete: ['pkg-policy-OLD'], toUpdate: [] });
     const updateDetectAndReviewStep = jest.fn();
     const removeDeployInstances = jest.fn();
     mockUseOnboardingFlow.mockReturnValue({
@@ -439,6 +446,7 @@ describe('useAgentBasedDeploy — cleanup orchestration', () => {
     const cleanupCall = mockCleanupAgentBasedPolicies.mock.calls[0][0];
     expect(cleanupCall.pendingCleanupPolicyIds).toEqual({ 'old-svc': 'pkg-policy-OLD' });
 
+    // pkg-policy-OLD succeeded → old-svc instance pruned from policyIdsByInstance.
     expect(removeDeployInstances).toHaveBeenCalledWith(['old-svc']);
     expect(updateDetectAndReviewStep).toHaveBeenCalledWith(
       expect.objectContaining({ pendingCleanupPolicyIds: {} })

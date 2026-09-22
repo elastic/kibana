@@ -9,12 +9,14 @@ jest.mock('@kbn/fleet-plugin/public', () => ({
   sendDeletePackagePolicy: jest.fn(),
   sendUpdatePackagePolicy: jest.fn(),
   sendGetPackageInfoByKey: jest.fn(),
+  sendGetOnePackagePolicy: jest.fn(),
 }));
 
 import {
   sendDeletePackagePolicy,
   sendUpdatePackagePolicy,
   sendGetPackageInfoByKey,
+  sendGetOnePackagePolicy,
 } from '@kbn/fleet-plugin/public';
 
 import { cleanupAgentBasedPolicies } from './policy_cleanup_agent_based';
@@ -24,6 +26,7 @@ import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 const mockDeletePackagePolicy = sendDeletePackagePolicy as jest.Mock;
 const mockUpdatePackagePolicy = sendUpdatePackagePolicy as jest.Mock;
 const mockGetPackageInfo = sendGetPackageInfoByKey as jest.Mock;
+const mockGetOnePackagePolicy = sendGetOnePackagePolicy as jest.Mock;
 
 function makeInstance(instanceId: string, serviceId: string = instanceId): ServiceInstance {
   return { instanceId, serviceId, name: `AWS ${serviceId}`, isDuplicate: false };
@@ -55,6 +58,7 @@ const BASE_OPTS = {
 beforeEach(() => {
   jest.clearAllMocks();
   mockGetPackageInfo.mockResolvedValue({ data: { item: { version: '3.0.0', vars: [] } } });
+  mockGetOnePackagePolicy.mockResolvedValue({ data: { item: { name: 'existing-policy-name', namespace: 'existing-ns' } } });
   mockDeletePackagePolicy.mockResolvedValue({});
   mockUpdatePackagePolicy.mockResolvedValue({});
 });
@@ -86,14 +90,14 @@ describe('cleanupAgentBasedPolicies', () => {
 
   it('swallows individual delete failures — does not reject the whole call', async () => {
     mockDeletePackagePolicy.mockRejectedValue(new Error('Fleet 500'));
-    await expect(
-      cleanupAgentBasedPolicies({
-        ...BASE_OPTS,
-        pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
-        currentPolicyIdsByInstance: {},
-        selectedAgentPolicyIds: [],
-      })
-    ).resolves.toBeUndefined();
+    const ops = await cleanupAgentBasedPolicies({
+      ...BASE_OPTS,
+      pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+      currentPolicyIdsByInstance: {},
+      selectedAgentPolicyIds: [],
+    });
+    // Failed op is not in returned succeeded ops.
+    expect(ops.toDelete).not.toContain('policy-1');
   });
 
   it('calls sendGetPackageInfoByKey when toUpdate has entries and surviving members resolve', async () => {
@@ -114,16 +118,16 @@ describe('cleanupAgentBasedPolicies', () => {
     const instance = makeInstance('inst-b', 'vpcflow');
     const service = makeService('vpcflow');
     mockGetPackageInfo.mockRejectedValue(new Error('pkg fetch failed'));
-    await expect(
-      cleanupAgentBasedPolicies({
-        ...BASE_OPTS,
-        instances: [instance],
-        servicesMap: new Map([['vpcflow', service]]),
-        pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
-        currentPolicyIdsByInstance: { 'inst-b': 'policy-1' },
-        selectedAgentPolicyIds: ['agent-policy-1'],
-      })
-    ).resolves.toBeUndefined();
+    const ops = await cleanupAgentBasedPolicies({
+      ...BASE_OPTS,
+      instances: [instance],
+      servicesMap: new Map([['vpcflow', service]]),
+      pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+      currentPolicyIdsByInstance: { 'inst-b': 'policy-1' },
+      selectedAgentPolicyIds: ['agent-policy-1'],
+    });
+    // Failed update not in returned succeeded ops.
+    expect(ops.toUpdate).toHaveLength(0);
   });
 });
 
@@ -133,7 +137,7 @@ describe('updateAgentBasedPolicy — payload shape', () => {
   const vpcflow = makeService('vpcflow');
   const instance = makeInstance('inst-b', 'vpcflow');
 
-  it('sends correct package, namespace, enabled flag, and policy_ids', async () => {
+  it('sends correct package, existing namespace, enabled flag, and policy_ids', async () => {
     mockGetPackageInfo.mockResolvedValue({
       data: { item: { version: '2.5.0', vars: [], policy_templates: [] } },
     });
@@ -147,7 +151,9 @@ describe('updateAgentBasedPolicy — payload shape', () => {
     });
     const payload = mockUpdatePackagePolicy.mock.calls[0][1];
     expect(payload.package).toEqual({ name: 'aws', version: '2.5.0' });
-    expect(payload.namespace).toBe('default');
+    // Preserves existing policy's namespace (fetched via sendGetOnePackagePolicy).
+    expect(payload.namespace).toBe('existing-ns');
+    expect(payload.name).toBe('existing-policy-name');
     expect(payload.enabled).toBe(true);
     expect(payload.policy_ids).toEqual(['agent-policy-1', 'agent-policy-2']);
   });

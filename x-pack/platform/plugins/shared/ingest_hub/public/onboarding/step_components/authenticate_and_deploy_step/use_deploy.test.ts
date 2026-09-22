@@ -40,6 +40,7 @@ jest.mock('@kbn/fleet-plugin/public', () => ({
   sendGetPackageInfoByKey: jest.fn(),
   sendCreateCloudOnboardingDeployment: jest.fn(),
   sendUpdateCloudOnboardingDeployment: jest.fn(),
+  sendGetAgentlessPolicy: jest.fn(),
 }));
 
 jest.mock('./policy_cleanup_managed_integrations', () => ({
@@ -1399,6 +1400,51 @@ describe('useDeploy', () => {
         mockUseOnboardingFlow.mock.results[0].value.updateDetectAndReviewStep
       ).toHaveBeenCalled();
     });
+
+    it('updates SO with services: selectedServiceIds after successful deploy', async () => {
+      setupMocks({ selectedServiceIds: ['ec2'], connectorId: 'connector-abc' });
+      mockSendCreateAgentlessPolicy.mockResolvedValue({ item: { id: 'p-1' } });
+      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+
+      await act(async () => {
+        await result.current.handleDeploy();
+      });
+
+      expect(mockSendUpdateCloudOnboardingDeployment).toHaveBeenCalledWith(
+        'so-dep-123',
+        expect.objectContaining({ services: ['ec2'] })
+      );
+    });
+
+    it('updates SO with services reflecting only the new selection — not the deselected service', async () => {
+      // Bug was: SO retained old-svc in services after service switch.
+      // Setup: old-svc was deployed, now deselected. Only ec2 is selected.
+      mockCleanupManagedIntegrationsPolicies.mockResolvedValue({
+        toDelete: ['policy-OLD'],
+        toUpdate: [],
+      });
+      setupMocks({
+        selectedServiceIds: ['ec2'],
+        connectorId: 'connector-abc',
+        detectAndReviewStep: {
+          policyIdsByInstance: { 'old-svc': 'policy-OLD' },
+          onboardingDeploymentId: 'so-dep-123',
+        },
+      });
+      mockSendCreateAgentlessPolicy.mockResolvedValue({ item: { id: 'policy-ec2' } });
+
+      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+
+      await act(async () => {
+        await result.current.handleDeploy();
+      });
+
+      const updateCall = mockSendUpdateCloudOnboardingDeployment.mock.calls.find(
+        ([id]: [string]) => id === 'so-dep-123'
+      );
+      expect(updateCall?.[1].services).toEqual(['ec2']);
+      expect(updateCall?.[1].services).not.toContain('old-svc');
+    });
   });
 });
 
@@ -1516,7 +1562,12 @@ describe('useDeploy — cleanup orchestration', () => {
     mockCleanupManagedIntegrationsPolicies.mockResolvedValue({ toDelete: [], toUpdate: [] });
   });
 
-  it('calls cleanupManagedIntegrationsPolicies and clears pendingCleanupPolicyIds when cleanup is pending', async () => {
+  it('calls cleanupManagedIntegrationsPolicies and clears pendingCleanupPolicyIds when cleanup succeeds', async () => {
+    // Simulate a successful delete so the pending entry is cleared.
+    mockCleanupManagedIntegrationsPolicies.mockResolvedValue({
+      toDelete: ['policy-A'],
+      toUpdate: [],
+    });
     setupMocks({
       selectedServiceIds: [],
       detectAndReviewStep: {
@@ -1541,6 +1592,7 @@ describe('useDeploy — cleanup orchestration', () => {
     const cleanupCall = mockCleanupManagedIntegrationsPolicies.mock.calls[0][0];
     expect(cleanupCall.pendingCleanupPolicyIds).toEqual({ instA: 'policy-A' });
 
+    // policy-A succeeded → its pending entry is cleared.
     expect(updateDetectAndReviewStep).toHaveBeenCalledWith(
       expect.objectContaining({ pendingCleanupPolicyIds: {} })
     );

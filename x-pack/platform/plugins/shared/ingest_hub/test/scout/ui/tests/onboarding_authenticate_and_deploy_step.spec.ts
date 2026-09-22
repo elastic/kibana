@@ -100,6 +100,10 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
     // to Step 1, deselected it, and selected 'elb' instead. policyIdsByInstance still has the
     // stale entry because removeDeployInstance was never called for Step 1 deselections.
     // The live-stale detection in handleDeploy should fire DELETE before creating the new elb policy.
+
+    // Register route mocks BEFORE navigation to avoid race with early page requests.
+    const requestOrder: string[] = [];
+
     await navigateToOnboardingStep(browserAuth, page, 'authenticate-and-deploy', {
       selectedServiceIds: ['elb'],
       globalRegion: 'us-east-1',
@@ -122,14 +126,16 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
 
     await page.route(
       (url) => /\/api\/fleet\/managed_integrations(\/mock-old-policy-id)?$/.test(url.pathname),
-      (route) =>
+      (route) => {
+        const method = route.request().method();
+        if (method === 'DELETE') requestOrder.push('delete');
+        else if (method === 'POST') requestOrder.push('create');
         route.fulfill({
           status: 200,
           contentType: 'application/json',
-          body: JSON.stringify(
-            route.request().method() === 'POST' ? { item: { id: 'mock-new-policy-id' } } : {}
-          ),
-        })
+          body: JSON.stringify(method === 'POST' ? { item: { id: 'mock-new-policy-id' } } : {}),
+        });
+      }
     );
 
     await expect(page.testSubj.locator('managedIntegrationsSection')).toBeVisible();
@@ -158,22 +164,24 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
 
     await deleteRequestPromise;
     await createRequestPromise;
-    // Both requests fired — DELETE for the stale policy and POST for the new elb policy.
+    // DELETE must fire before POST — cleanup is awaited before the new deploy starts.
+    expect(requestOrder[0]).toBe('delete');
   });
 
-  test('policy cleanup same-package: removing a service updates the shared policy (PUT, not DELETE) for the surviving service', async ({
+  test('policy cleanup same-package: removing a service updates the shared policy (PUT, not DELETE) for the surviving service — cleanup-only when survivor already deployed', async ({
     browserAuth,
     page,
   }) => {
     // Simulate: two services (elb + a now-removed service) were deployed under the SAME
     // aws-package policy 'mock-shared-policy-id'. The user deselected the removed service
-    // from Step 1 while keeping elb selected. policyIdsByInstance has both mapped to the
-    // same policy ID. elb has no serviceStatuses entry yet → Deploy button is active.
+    // from Step 1 while keeping elb (already receiving). policyIdsByInstance has both mapped
+    // to the same policy ID. Because of the live-stale entry, isAlreadyDeployed returns false
+    // even though elb has 'receiving' status — cleanup must fire.
     //
     // Expected:
-    //   1. PUT /api/fleet/managed_integrations/mock-shared-policy-id fires (UPDATE for survivor elb).
-    //   2. POST /api/fleet/managed_integrations fires (new deploy for elb).
+    //   PUT /api/fleet/managed_integrations/mock-shared-policy-id fires (UPDATE for survivor elb).
     //   DELETE must NOT fire — the policy survives because elb is still a member.
+    //   POST must NOT fire — elb is already deployed (serviceStatuses: { elb: 'receiving' }).
     await navigateToOnboardingStep(browserAuth, page, 'authenticate-and-deploy', {
       selectedServiceIds: ['elb'],
       globalRegion: 'us-east-1',
@@ -194,7 +202,9 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
           elb: 'mock-shared-policy-id',
           'removed-svc': 'mock-shared-policy-id',
         },
-        serviceStatuses: {},
+        // elb already deployed — cleanup-only scenario. Without the isAlreadyDeployed fix this
+        // would short-circuit before cleanup, and the PUT would never fire.
+        serviceStatuses: { elb: 'receiving' },
       },
     });
 
@@ -209,19 +219,9 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
         route.fulfill({
           status: 200,
           contentType: 'application/json',
-          body:
-            method === 'PUT' ? '{}' : JSON.stringify({ item: { id: 'mock-new-elb-policy-id' } }),
+          body: '{}',
         });
       }
-    );
-    await page.route(
-      (url) => /\/api\/fleet\/managed_integrations$/.test(url.pathname),
-      (route) =>
-        route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify({ item: { id: 'mock-new-elb-policy-id' } }),
-        })
     );
 
     await expect(page.testSubj.locator('managedIntegrationsSection')).toBeVisible();
@@ -242,16 +242,10 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
           new URL(req.url()).pathname
         )
     );
-    const createRequestPromise = page.waitForRequest(
-      (req) =>
-        req.method() === 'POST' &&
-        /\/api\/fleet\/managed_integrations$/.test(new URL(req.url()).pathname)
-    );
 
     await deployButton.click();
 
     await updateRequestPromise; // PUT — shared policy updated with elb inputs only
-    await createRequestPromise; // POST — new elb policy created for this session
     expect(deleteObserved).toBe(false);
   });
 
@@ -268,7 +262,35 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
     //
     // Expected after fix:
     //   PUT /api/fleet/package_policies/shared-pkg-policy fires (update for surviving elb).
-    //   DELETE must NOT fire — the policy survives because elb is still a member.
+    //   sendDeletePackagePolicy (POST to /package_policies/delete) must NOT fire — the policy
+    //   survives because elb is still a member.
+
+    // Register route mocks BEFORE navigation to avoid race with agent_policies fetch.
+    let deleteObserved = false;
+    await page.route(
+      (url) => /\/api\/fleet\/agent_policies/.test(url.pathname),
+      (route) =>
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ items: [] }),
+        })
+    );
+
+    // sendDeletePackagePolicy sends POST to /api/fleet/package_policies/delete (not HTTP DELETE).
+    await page.route(
+      (url) => /\/api\/fleet\/package_policies/.test(url.pathname),
+      (route) => {
+        if (
+          route.request().method() === 'POST' &&
+          new URL(route.request().url()).pathname.endsWith('/delete')
+        ) {
+          deleteObserved = true;
+        }
+        route.fulfill({ status: 200, contentType: 'application/json', body: '{}' });
+      }
+    );
+
     await navigateToOnboardingStep(browserAuth, page, 'authenticate-and-deploy', {
       selectedServiceIds: ['elb'],
       globalRegion: 'us-east-1',
@@ -296,26 +318,6 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
       },
     });
 
-    await page.route(
-      (url) => /\/api\/fleet\/agent_policies/.test(url.pathname),
-      (route) =>
-        route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify({ items: [] }),
-        })
-    );
-
-    // Intercept DELETE to detect misrouted cleanup — DELETE must NOT fire.
-    let deleteObserved = false;
-    await page.route(
-      (url) => /\/api\/fleet\/package_policies\//.test(url.pathname),
-      (route) => {
-        if (route.request().method() === 'DELETE') deleteObserved = true;
-        route.fulfill({ status: 200, contentType: 'application/json', body: '{}' });
-      }
-    );
-
     await expect(page.testSubj.locator('agentBasedSection')).toBeVisible();
 
     const updateRequestPromise = page.waitForRequest(
@@ -340,28 +342,8 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
     // ('mock-agent-policy-id'), and is about to deploy ELB. The Next button triggers the
     // deploy (handleAgentDeployForNext) which calls deployToExistingAgentPolicies.
     // Expected: POST /api/fleet/package_policies fires with policy_ids: ['mock-agent-policy-id'].
-    await navigateToOnboardingStep(browserAuth, page, 'authenticate-and-deploy', {
-      selectedServiceIds: ['elb'],
-      globalRegion: 'us-east-1',
-      instances: [{ instanceId: 'elb', serviceId: 'elb', isDuplicate: false }],
-      serviceVars: {
-        elb: {
-          enabledDataStreams: ['elb_logs'],
-          varsByDataStream: {
-            elb_logs: {
-              enabledInputs: ['aws-s3'],
-              varsByInput: { 'aws-s3': { bucket_arn: 'arn:aws:s3:::test-bucket' } },
-            },
-          },
-        },
-      },
-      authenticateAndDeployStep: {
-        deploymentMethod: 'agent_based',
-        agentHostsMode: 'existing',
-        selectedAgentPolicyIds: ['mock-agent-policy-id'],
-      },
-    });
 
+    // Register route mocks BEFORE navigation to avoid race with agent_policies fetch.
     // Mock agent policies list (dropdown in existing-policy mode).
     await page.route(
       (url) => /\/api\/fleet\/agent_policies/.test(url.pathname),
@@ -384,6 +366,28 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
         })
     );
 
+    await navigateToOnboardingStep(browserAuth, page, 'authenticate-and-deploy', {
+      selectedServiceIds: ['elb'],
+      globalRegion: 'us-east-1',
+      instances: [{ instanceId: 'elb', serviceId: 'elb', isDuplicate: false }],
+      serviceVars: {
+        elb: {
+          enabledDataStreams: ['elb_logs'],
+          varsByDataStream: {
+            elb_logs: {
+              enabledInputs: ['aws-s3'],
+              varsByInput: { 'aws-s3': { bucket_arn: 'arn:aws:s3:::test-bucket' } },
+            },
+          },
+        },
+      },
+      authenticateAndDeployStep: {
+        deploymentMethod: 'agent_based',
+        agentHostsMode: 'existing',
+        selectedAgentPolicyIds: ['mock-agent-policy-id'],
+      },
+    });
+
     await expect(page.testSubj.locator('agentBasedSection')).toBeVisible();
 
     const createRequestPromise = page.waitForRequest(
@@ -399,170 +403,6 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
     const createRequest = await createRequestPromise;
     const body = createRequest.postDataJSON() as { policy_ids?: string[] };
     expect(body.policy_ids).toEqual(['mock-agent-policy-id']);
-  });
-
-  test('SO update: deploy with existing deployment ID updates SO with correct services and packagePolicyIds', async ({
-    browserAuth,
-    page,
-  }) => {
-    // Simulate: user deployed before (onboardingDeploymentId seeded). On this deploy run no
-    // stale cleanup is needed — just verify the SO PUT fires with the current services list
-    // and the newly-created policy ID.
-    await navigateToOnboardingStep(browserAuth, page, 'authenticate-and-deploy', {
-      selectedServiceIds: ['elb'],
-      globalRegion: 'us-east-1',
-      serviceVars: {
-        elb: {
-          enabledDataStreams: ['elb_logs'],
-          varsByDataStream: {
-            elb_logs: {
-              enabledInputs: ['aws-s3'],
-              varsByInput: { 'aws-s3': { bucket_arn: 'arn:aws:s3:::test-bucket' } },
-            },
-          },
-        },
-      },
-      detectAndReviewStep: {
-        policyIdsByInstance: {},
-        serviceStatuses: {},
-        onboardingDeploymentId: 'mock-deployment-id',
-      },
-    });
-
-    await page.route(
-      (url) => /\/api\/fleet\/managed_integrations$/.test(url.pathname),
-      (route) =>
-        route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify({ item: { id: 'mock-policy-id' } }),
-        })
-    );
-    await page.route(
-      (url) => /\/api\/fleet\/cloud_onboarding_deployments\/mock-deployment-id$/.test(url.pathname),
-      (route) =>
-        route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify({ item: { id: 'mock-deployment-id' } }),
-        })
-    );
-
-    await expect(page.testSubj.locator('managedIntegrationsSection')).toBeVisible();
-    const accessKeyField = page.testSubj.locator('awsStaticKeysForm-accessKeyId');
-    const secretKeyField = page.testSubj.locator('awsStaticKeysForm-secretAccessKey');
-    await expect(accessKeyField).toBeVisible();
-    await accessKeyField.fill('AKIATEST');
-    await secretKeyField.fill('secrettest');
-
-    const deployButton = page.testSubj.locator('managedIntegrationsSection-deployButton');
-    await expect(deployButton).toBeEnabled();
-
-    const soUpdatePromise = page.waitForRequest(
-      (req) =>
-        req.method() === 'PUT' &&
-        /\/api\/fleet\/cloud_onboarding_deployments\/mock-deployment-id$/.test(
-          new URL(req.url()).pathname
-        )
-    );
-
-    await deployButton.click();
-
-    const soUpdateRequest = await soUpdatePromise;
-    const body = soUpdateRequest.postDataJSON() as {
-      services?: string[];
-      packagePolicyIds?: string[];
-    };
-    // SO must reflect the currently-selected service, not a stale or empty list.
-    expect(body.services).toEqual(['elb']);
-    // The newly-created policy must be recorded.
-    expect(body.packagePolicyIds).toContain('mock-policy-id');
-  });
-
-  test('SO update: removing a deselected service updates SO with new services list (bug: SO previously retained old services)', async ({
-    browserAuth,
-    page,
-  }) => {
-    // Reported bug: after removing a service (e.g. aws_securityhub) and deploying a new one
-    // (e.g. aws config), the SO services field still contained the old service ID.
-    // Fix: use_deploy.ts now passes services: selectedServiceIds in both updateDeployment calls.
-    //
-    // Setup: user previously deployed 'old-svc' (policy 'mock-old-policy-id'), then went back,
-    // deselected it, selected 'elb'. onboardingDeploymentId is already set (existing SO).
-    // Expected: DELETE for old-svc, POST for elb, PUT to SO with services: ['elb'] (not ['old-svc']).
-    await navigateToOnboardingStep(browserAuth, page, 'authenticate-and-deploy', {
-      selectedServiceIds: ['elb'],
-      globalRegion: 'us-east-1',
-      serviceVars: {
-        elb: {
-          enabledDataStreams: ['elb_logs'],
-          varsByDataStream: {
-            elb_logs: {
-              enabledInputs: ['aws-s3'],
-              varsByInput: { 'aws-s3': { bucket_arn: 'arn:aws:s3:::test-bucket' } },
-            },
-          },
-        },
-      },
-      detectAndReviewStep: {
-        policyIdsByInstance: { 'old-svc': 'mock-old-policy-id' },
-        serviceStatuses: {},
-        onboardingDeploymentId: 'mock-deployment-id',
-      },
-    });
-
-    await page.route(
-      (url) => /\/api\/fleet\/managed_integrations(\/mock-old-policy-id)?$/.test(url.pathname),
-      (route) =>
-        route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify(
-            route.request().method() === 'POST' ? { item: { id: 'mock-new-policy-id' } } : {}
-          ),
-        })
-    );
-    await page.route(
-      (url) => /\/api\/fleet\/cloud_onboarding_deployments\/mock-deployment-id$/.test(url.pathname),
-      (route) =>
-        route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify({ item: { id: 'mock-deployment-id' } }),
-        })
-    );
-
-    await expect(page.testSubj.locator('managedIntegrationsSection')).toBeVisible();
-    const accessKeyField = page.testSubj.locator('awsStaticKeysForm-accessKeyId');
-    const secretKeyField = page.testSubj.locator('awsStaticKeysForm-secretAccessKey');
-    await expect(accessKeyField).toBeVisible();
-    await accessKeyField.fill('AKIATEST');
-    await secretKeyField.fill('secrettest');
-
-    const deployButton = page.testSubj.locator('managedIntegrationsSection-deployButton');
-    await expect(deployButton).toBeEnabled();
-
-    const soUpdatePromise = page.waitForRequest(
-      (req) =>
-        req.method() === 'PUT' &&
-        /\/api\/fleet\/cloud_onboarding_deployments\/mock-deployment-id$/.test(
-          new URL(req.url()).pathname
-        )
-    );
-
-    await deployButton.click();
-
-    const soUpdateRequest = await soUpdatePromise;
-    const body = soUpdateRequest.postDataJSON() as {
-      services?: string[];
-      packagePolicyIds?: string[];
-    };
-    // Bug was: SO retained old-svc in services after service switch. Verify fix.
-    expect(body.services).toEqual(['elb']);
-    expect(body.services).not.toContain('old-svc');
-    // Deleted policy must not appear in packagePolicyIds.
-    expect(body.packagePolicyIds).not.toContain('mock-old-policy-id');
-    expect(body.packagePolicyIds).toContain('mock-new-policy-id');
   });
 
   test('deploy fires POST /api/fleet/managed_integrations and shows success state', async ({
