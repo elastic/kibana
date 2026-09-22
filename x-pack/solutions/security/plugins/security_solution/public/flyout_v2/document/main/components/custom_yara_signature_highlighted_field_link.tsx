@@ -7,20 +7,51 @@
 
 import type { FC, MouseEvent, ReactNode } from 'react';
 import React, { useCallback, useMemo } from 'react';
-import { EuiLink, getFlyoutManagerStore } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiIconTip, EuiLink, getFlyoutManagerStore, useEuiTheme } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
+import { i18n } from '@kbn/i18n';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useNavigateByRouterEventHandler } from '../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
-import { useAppUrl } from '../../../../common/lib/kibana';
+import { useAppUrl, useHttp } from '../../../../common/lib/kibana';
 import { getCustomYaraSignaturesListPath } from '../../../../management/common/routing';
+import { useGetArtifact } from '../../../../management/hooks/artifacts/use_get_artifact';
+import { CustomYaraSignaturesApiClient } from '../../../../management/pages/custom_yara_signatures/service/api_client';
 import {
   CUSTOM_YARA_SIGNATURE_ENTRY_ID_FIELD_NAME,
   CUSTOM_YARA_SIGNATURE_ENTRY_NAME_FIELD_NAME,
   CUSTOM_YARA_SIGNATURE_RULE_IDENTIFIER_FIELD_NAME,
 } from '../../../../timelines/components/timeline/body/renderers/constants';
-import { HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID } from './test_ids';
+import {
+  HIGHLIGHTED_FIELDS_CUSTOM_YARA_SIGNATURE_NOT_FOUND_TEST_ID,
+  HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID,
+} from './test_ids';
+
+const SIGNATURE_NOT_FOUND_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.flyout.highlightedFields.customYaraSignatureNotFoundTooltip',
+  {
+    defaultMessage: 'YARA signature does not exist.',
+  }
+);
+
+const isArtifactNotFound = (fetchError: IHttpFetchError<Error> | null): boolean => {
+  if (!fetchError) {
+    return false;
+  }
+
+  const statusCode =
+    typeof fetchError.body === 'object' &&
+    fetchError.body !== null &&
+    'statusCode' in fetchError.body &&
+    typeof fetchError.body.statusCode === 'number'
+      ? fetchError.body.statusCode
+      : undefined;
+
+  return statusCode === 404 || fetchError.response?.status === 404;
+};
 
 export const isCustomYaraSignatureHighlightedField = (field: string): boolean =>
   [
@@ -47,7 +78,9 @@ export interface CustomYaraSignatureHighlightedFieldLinkProps {
 
 /**
  * Renders a highlighted-field value as a link to the Custom YARA Signatures view page
- * when the user can read CYS and the feature is enabled. Falls back to plain text otherwise.
+ * when the user can read CYS, the feature is enabled, and the signature still exists.
+ * When the signature cannot be found, shows an info tooltip instead of the link.
+ * Falls back to plain text otherwise.
  */
 export const CustomYaraSignatureHighlightedFieldLink: FC<
   CustomYaraSignatureHighlightedFieldLinkProps
@@ -57,7 +90,19 @@ export const CustomYaraSignatureHighlightedFieldLink: FC<
   );
   const { canReadCustomYaraSignatures } = useUserPrivileges().endpointPrivileges;
   const { getAppUrl } = useAppUrl();
+  const { euiTheme } = useEuiTheme();
+  const http = useHttp();
   const entryId = getEntryIdFromHit(hit);
+  const shouldFetchArtifact =
+    isCustomYaraSignaturesEnabled && canReadCustomYaraSignatures && Boolean(entryId);
+  const apiClient = useMemo(() => CustomYaraSignaturesApiClient.getInstance(http), [http]);
+
+  const { isSuccess, error } = useGetArtifact(apiClient, undefined, entryId, {
+    enabled: shouldFetchArtifact,
+    retry: false,
+    // History keeps earlier alert flyouts mounted, so window focus would refetch every one of them.
+    refetchOnWindowFocus: false,
+  });
 
   const { toRoutePath, toRouteUrl } = useMemo(() => {
     if (!entryId) {
@@ -88,7 +133,34 @@ export const CustomYaraSignatureHighlightedFieldLink: FC<
     [navigateToCustomYaraSignatures]
   );
 
-  if (!isCustomYaraSignaturesEnabled || !canReadCustomYaraSignatures || !entryId) {
+  if (!shouldFetchArtifact) {
+    return <>{children}</>;
+  }
+
+  if (isArtifactNotFound(error)) {
+    return (
+      <span
+        // The highlighted-field cell sets margin-bottom on every div, which pushes this icon
+        // below the value. A span stays out of that rule.
+        css={css`
+          display: inline-flex;
+          align-items: center;
+          gap: ${euiTheme.size.s};
+        `}
+        data-test-subj={HIGHLIGHTED_FIELDS_CUSTOM_YARA_SIGNATURE_NOT_FOUND_TEST_ID}
+      >
+        {children}
+        <EuiIconTip
+          type="info"
+          content={SIGNATURE_NOT_FOUND_TOOLTIP}
+          aria-label={SIGNATURE_NOT_FOUND_TOOLTIP}
+          position="top"
+        />
+      </span>
+    );
+  }
+
+  if (!isSuccess) {
     return <>{children}</>;
   }
 

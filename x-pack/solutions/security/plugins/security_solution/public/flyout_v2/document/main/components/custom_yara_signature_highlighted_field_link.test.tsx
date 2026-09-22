@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 import { getFlyoutManagerStore } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { Router } from '@kbn/shared-ux-router';
@@ -18,11 +18,21 @@ import { getUserPrivilegesMockDefaultValue } from '../../../../common/components
 import { getEndpointPrivilegesInitialStateMock } from '../../../../common/components/user_privileges/endpoint/mocks';
 import { CUSTOM_YARA_SIGNATURE_ENTRY_ID_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
 import { getCustomYaraSignaturesListPath } from '../../../../management/common/routing';
-import { HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID } from './test_ids';
+import { CustomYaraSignaturesApiClient } from '../../../../management/pages/custom_yara_signatures/service/api_client';
+import {
+  HIGHLIGHTED_FIELDS_CUSTOM_YARA_SIGNATURE_NOT_FOUND_TEST_ID,
+  HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID,
+} from './test_ids';
 import {
   CustomYaraSignatureHighlightedFieldLink,
   isCustomYaraSignatureHighlightedField,
 } from './custom_yara_signature_highlighted_field_link';
+
+jest.mock('../../../../management/pages/custom_yara_signatures/service/api_client', () => ({
+  CustomYaraSignaturesApiClient: {
+    getInstance: jest.fn(),
+  },
+}));
 
 jest.mock('../../../../common/hooks/use_experimental_features');
 jest.mock('../../../../common/components/user_privileges');
@@ -38,8 +48,12 @@ jest.mock('../../../../common/lib/kibana', () => {
 
 const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
 const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
+const mockGetInstance = CustomYaraSignaturesApiClient.getInstance as jest.Mock;
 
 const ENTRY_ID = '123-456';
+const SIGNATURE_NOT_FOUND_TOOLTIP = 'YARA signature does not exist.';
+
+const getArtifactMock = jest.fn();
 
 const createHit = (entryId?: string): DataTableRecord =>
   ({
@@ -83,14 +97,17 @@ describe('isCustomYaraSignatureHighlightedField', () => {
 describe('CustomYaraSignatureHighlightedFieldLink', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    getArtifactMock.mockResolvedValue({ id: ENTRY_ID });
+    mockGetInstance.mockReturnValue({ get: getArtifactMock });
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
     mockUseUserPrivileges.mockReturnValue(getUserPrivilegesMockDefaultValue());
   });
 
-  it('renders a link to the CYS view page when privileged and entry_id is present', () => {
-    const { getByTestId } = renderLink(createHit(ENTRY_ID));
+  it('renders a link to the CYS view page when the signature exists', async () => {
+    const { findByTestId, getByTestId } = renderLink(createHit(ENTRY_ID));
 
-    const link = getByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID);
+    const link = await findByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID);
+    expect(getArtifactMock).toHaveBeenCalledWith(undefined, ENTRY_ID);
     expect(link).toHaveAttribute(
       'href',
       expect.stringContaining(getCustomYaraSignaturesListPath({ show: 'view', itemId: ENTRY_ID }))
@@ -98,21 +115,45 @@ describe('CustomYaraSignatureHighlightedFieldLink', () => {
     expect(getByTestId('cysChild')).toBeInTheDocument();
   });
 
-  it('closes open system flyouts when the link is followed in-app', () => {
-    const closeAllFlyouts = jest.spyOn(getFlyoutManagerStore(), 'closeAllFlyouts');
-    const { getByTestId } = renderLink(createHit(ENTRY_ID));
+  it('shows an info tooltip instead of the link when the signature cannot be found', async () => {
+    getArtifactMock.mockRejectedValue({ body: { statusCode: 404 } });
+    const { findByTestId, getByTestId, queryByTestId } = renderLink(createHit(ENTRY_ID));
 
-    fireEvent.click(getByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID));
+    expect(
+      await findByTestId(HIGHLIGHTED_FIELDS_CUSTOM_YARA_SIGNATURE_NOT_FOUND_TEST_ID)
+    ).toHaveTextContent(SIGNATURE_NOT_FOUND_TOOLTIP);
+    expect(queryByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID)).not.toBeInTheDocument();
+    expect(getByTestId('cysChild')).toBeInTheDocument();
+  });
+
+  it('renders plain text when looking up the signature fails for another reason', async () => {
+    getArtifactMock.mockRejectedValue({ body: { statusCode: 500 } });
+    const { getByTestId, queryByTestId, queryByLabelText } = renderLink(createHit(ENTRY_ID));
+
+    await waitFor(() => expect(getArtifactMock).toHaveBeenCalledWith(undefined, ENTRY_ID));
+    expect(queryByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByLabelText(SIGNATURE_NOT_FOUND_TOOLTIP)).not.toBeInTheDocument();
+    expect(
+      queryByTestId(HIGHLIGHTED_FIELDS_CUSTOM_YARA_SIGNATURE_NOT_FOUND_TEST_ID)
+    ).not.toBeInTheDocument();
+    expect(getByTestId('cysChild')).toBeInTheDocument();
+  });
+
+  it('closes open system flyouts when the link is followed in-app', async () => {
+    const closeAllFlyouts = jest.spyOn(getFlyoutManagerStore(), 'closeAllFlyouts');
+    const { findByTestId } = renderLink(createHit(ENTRY_ID));
+
+    fireEvent.click(await findByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID));
 
     expect(closeAllFlyouts).toHaveBeenCalledTimes(1);
     closeAllFlyouts.mockRestore();
   });
 
-  it('does not close system flyouts when the link is opened in a new tab', () => {
+  it('does not close system flyouts when the link is opened in a new tab', async () => {
     const closeAllFlyouts = jest.spyOn(getFlyoutManagerStore(), 'closeAllFlyouts');
-    const { getByTestId } = renderLink(createHit(ENTRY_ID));
+    const { findByTestId } = renderLink(createHit(ENTRY_ID));
 
-    fireEvent.click(getByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID), { metaKey: true });
+    fireEvent.click(await findByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID), { metaKey: true });
 
     expect(closeAllFlyouts).not.toHaveBeenCalled();
     closeAllFlyouts.mockRestore();
@@ -123,6 +164,7 @@ describe('CustomYaraSignatureHighlightedFieldLink', () => {
 
     const { queryByTestId, getByTestId } = renderLink(createHit(ENTRY_ID));
 
+    expect(getArtifactMock).not.toHaveBeenCalled();
     expect(queryByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID)).not.toBeInTheDocument();
     expect(getByTestId('cysChild')).toBeInTheDocument();
   });
@@ -138,6 +180,7 @@ describe('CustomYaraSignatureHighlightedFieldLink', () => {
 
     const { queryByTestId, getByTestId } = renderLink(createHit(ENTRY_ID));
 
+    expect(getArtifactMock).not.toHaveBeenCalled();
     expect(queryByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID)).not.toBeInTheDocument();
     expect(getByTestId('cysChild')).toBeInTheDocument();
   });
@@ -145,6 +188,7 @@ describe('CustomYaraSignatureHighlightedFieldLink', () => {
   it('renders plain text when entry_id is missing', () => {
     const { queryByTestId, getByTestId } = renderLink(createHit());
 
+    expect(getArtifactMock).not.toHaveBeenCalled();
     expect(queryByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID)).not.toBeInTheDocument();
     expect(getByTestId('cysChild')).toBeInTheDocument();
   });
