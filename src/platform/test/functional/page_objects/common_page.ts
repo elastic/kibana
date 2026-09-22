@@ -177,7 +177,6 @@ export class CommonPageObject extends FtrService {
         }
       }
     });
-
   }
 
   /**
@@ -403,7 +402,6 @@ export class CommonPageObject extends FtrService {
         });
       }
     });
-
   }
 
   async waitUntilUrlIncludes(path: string) {
