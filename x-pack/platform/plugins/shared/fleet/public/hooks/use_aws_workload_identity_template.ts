@@ -19,7 +19,8 @@ import { useStartServices } from './use_core';
  * template instead of the package's `iac_template_url`.
  *
  * Subscribes to `getBooleanValue$` so a flag flipped while the form is open takes effect
- * without a reload. Falls back to disabled when LaunchDarkly is unavailable (ECH behaviour).
+ * without a reload. Falls back to enabled when LaunchDarkly is unavailable.
+ * TODO: switch the fallback back to `false` before this ships; `true` is only for local testing.
  */
 export function useAwsWorkloadIdentityTemplateEnabled(): boolean {
   const { featureFlags } = useStartServices();
@@ -27,10 +28,10 @@ export function useAwsWorkloadIdentityTemplateEnabled(): boolean {
   // getBooleanValue$ builds a new observable per call, so memoize it or useObservable
   // re-subscribes on every render.
   const enabled$ = useMemo(
-    () => featureFlags.getBooleanValue$(AWS_WORKLOAD_IDENTITY_TEMPLATE_ENABLED_FLAG, false),
+    () => featureFlags.getBooleanValue$(AWS_WORKLOAD_IDENTITY_TEMPLATE_ENABLED_FLAG, true),
     [featureFlags]
   );
-  return useObservable(enabled$, false);
+  return useObservable(enabled$, true);
 }
 
 export interface UseAwsIdentityFederationTemplateUrlParams {

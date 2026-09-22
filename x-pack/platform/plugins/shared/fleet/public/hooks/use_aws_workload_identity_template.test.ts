@@ -35,15 +35,15 @@ describe('useAwsWorkloadIdentityTemplateEnabled', () => {
     mockUseStartServices.mockReturnValue({ featureFlags: { getBooleanValue$ } } as any);
   });
 
-  it('subscribes to the flag with a disabled fallback', () => {
+  it('subscribes to the flag with an enabled fallback (testing default)', () => {
     renderHook(() => useAwsWorkloadIdentityTemplateEnabled());
     expect(getBooleanValue$).toHaveBeenCalledWith(
       AWS_WORKLOAD_IDENTITY_TEMPLATE_ENABLED_FLAG,
-      false
+      true
     );
   });
 
-  it('is off by default and reacts to a LaunchDarkly flip', () => {
+  it('follows the flag value and reacts to a LaunchDarkly flip', () => {
     const { result } = renderHook(() => useAwsWorkloadIdentityTemplateEnabled());
     expect(result.current).toBe(false);
 

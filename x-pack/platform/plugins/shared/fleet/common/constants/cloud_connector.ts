@@ -51,7 +51,8 @@ export const AWS_IDENTITY_FEDERATION_ENABLED_FLAG = 'fleet.awsIdentityFederation
 // Identity Federation option to the Elastic Workload Identity (WII) CloudFormation template.
 // When true, Fleet ignores the package's `iac_template_url` for the packages listed in
 // `AWS_WORKLOAD_IDENTITY_TEMPLATE_MIN_PACKAGE_VERSIONS` and launches the hardcoded WII
-// quick-create URL instead. Meant to be on in Serverless and off on ECH. Default false.
+// quick-create URL instead. Meant to be on in Serverless and off on ECH. Default true for now
+// (local testing); flip the fallback to false before shipping.
 export const AWS_WORKLOAD_IDENTITY_TEMPLATE_ENABLED_FLAG =
   'fleet.awsWorkloadIdentityTemplateEnabled';
 
