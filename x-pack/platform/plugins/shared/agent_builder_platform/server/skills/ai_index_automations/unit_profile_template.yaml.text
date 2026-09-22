@@ -125,6 +125,14 @@ steps:
               unit_doc_count: "{{ foreach.item[1] }}"
               unit_last_seen: "{{ foreach.item[2] }}"
               ki_id: "unit-{{ foreach.item[0] | slugify }}"
+              # What the profile is derived from: the unit index, and the catalog index when it
+              # is a separate one. Written as JSON so the catalog entry can be conditional;
+              # `assemble_ki` parses it back with `json_parse`.
+              references: >-
+                [{"uri": "index://{{ consts.unit_index }}", "relation": "derived_from"}
+                {%- if consts.catalog_index != consts.unit_index -%}
+                , {"uri": "index://{{ consts.catalog_index }}", "relation": "derived_from"}
+                {%- endif -%}]
 
           # The stored KI, if any. Fails on the first run when the backing index does not exist
           # yet, and `on-failure.continue` turns that into an empty result.
@@ -363,6 +371,8 @@ steps:
                 tags:
                   - "{{ steps.unit_context.output.unit }}"
                   - entity
+                # Who wrote the KI is stamped by `createKi` itself.
+                references: "${{ steps.unit_context.output.references | json_parse }}"
                 attributes:
                   # Every ES|QL the KI carries goes here, which is what the verifiers check. `default: nil`
                   # omits the attribute when there are no access patterns, so the verifiers skip the KI
@@ -372,10 +382,6 @@ steps:
                   distinct_breakdown: "${{ steps.unit_metrics.output.distinct_breakdown }}"
                   unit_key: "{{ consts.unit_key }}"
                   unit: "{{ steps.unit_context.output.unit }}"
-                  # Provenance: the indices the profile was grounded from.
-                  source_index:
-                    - "{{ consts.unit_index }}"
-                    - "{{ consts.catalog_index }}"
                   # Read back by `read_existing_ki` on the next run; equal means skip.
                   source_updated_at: "{{ steps.unit_context.output.unit_last_seen }}"
 
@@ -392,9 +398,9 @@ steps:
             condition: "steps.verify_ki.output.passed : true"
             steps:
               # `ki_id` is derived from the unit, so a re-run replaces that unit's profile rather
-              # than appending a second copy. Omit `ki_id` entirely on a data-stream destination,
-              # which rejects it — and drop the freshness check with it, since there is no stored
-              # id to read back.
+              # than writing a second KI. On a data-stream destination the same id appends a newer
+              # revision instead, and the freshness lookup above must then match `id` and take the
+              # newest revision (see `destination_index`).
               - name: create_ki
                 type: context-engine.createKi
                 with:

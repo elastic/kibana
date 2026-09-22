@@ -15,9 +15,11 @@ version: "1"
 #   2. Replace the example entry in `kis` with one entry per KI the proposal named. `ki_id` is the
 #      stable id a re-run replaces; derive it from the finding (the field, the pair of indices,
 #      the question class), not from a date or a run.
-#   3. Fill the provenance in `attributes` from ids that already exist: the `trace_ids` of the
-#      signals behind the finding, the `conversation_id`, the `error_text` as observed, the
-#      `source_index` the rule is about. At least one of them. Never invent an id.
+#   3. Fill `references` from ids that already exist, each as `derived_from`:
+#      `trace://<trace_id>` for the signals behind the finding (at most 20, the minimal covering
+#      set), `conversation://<conversation_id>`, and `index://<index>` for the index the rule is
+#      about. Put the `error_text` as observed in `attributes`. At least one of them. Never invent
+#      an id, and never add a `workflow://` reference: `createKi` records who wrote the KI.
 #   4. Put any ES|QL the KI recommends in `attributes.esql` as well as in `content`, so the
 #      verifiers run it. A constraint about a query that must be written a certain way carries the
 #      corrected query, not the failing one. A KI with no runnable query (a disambiguation, a
@@ -57,14 +59,17 @@ consts:
         tags:
           - constraint
           - my-source-index
+        references:
+          - uri: trace://replace-with-a-real-trace-id
+            relation: derived_from
+          - uri: conversation://replace-with-a-real-conversation-id
+            relation: derived_from
+          - uri: index://my-source-index
+            relation: derived_from
         attributes:
           esql:
             - 'FROM my-source-index | WHERE `Order Date` >= "2024-01-01" | STATS n = COUNT(*) | LIMIT 1'
-          source_index: my-source-index
           error_text: 'Unknown column [Order], did you mean [`Order Date`]?'
-          trace_ids:
-            - replace-with-a-real-trace-id
-          conversation_id: replace-with-a-real-conversation-id
           # How many retrievals hit this out of how many, and over what window: the prevalence
           # behind the finding, so a reader can judge it.
           prevalence: "6 of 41 conversations, 30 days"
@@ -96,8 +101,8 @@ steps:
         type: if
         condition: "steps.verify_ki.output.passed : true"
         steps:
-          # `ki_id` comes from the const, so a re-run replaces the KI rather than appending a
-          # second copy. Omit `ki_id` entirely on a data-stream destination, which rejects it.
+          # `ki_id` comes from the const, so a re-run replaces the KI on an index destination, and
+          # appends a newer revision of it on a data stream, rather than writing a second KI.
           - name: create_ki
             type: context-engine.createKi
             with:

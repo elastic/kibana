@@ -116,9 +116,9 @@ orients and omits `attributes.esql` rather than carrying a query that answers no
 
 ## KI document shape
 
-The document shape — base fields, the fixed `type` vocabulary, the domain, lifecycle and
-provenance fields inside `attributes`, and the rule that structured values live in both `content`
-and `attributes` — is in the `ki_shapes` reference attached to this skill. Read it before judging
+The document shape — base fields, the fixed `type` vocabulary, the domain facts inside
+`attributes`, provenance as `references`, and the rule that structured values live in both
+`content` and `attributes` — is in the `ki_shapes` reference attached to this skill. Read it before judging
 what an index holds, and before writing any `type` value: the vocabulary there is the schema, and
 a value outside it is a schema change, not a KI.
 
@@ -425,7 +425,8 @@ their content in its `consts` so they survive re-runs of everything else.
 A targeted KI is still produced by an automation, never written by hand, and it still needs the
 prevalence rule met. Its provenance is the ids that already exist: the `trace_ids` of the signals
 behind the finding, the `data.conversation_id`, the source index and document id, or the
-`data.error` text for a constraint. Put them in `attributes` as `ki_shapes` lays out.
+`data.error` text for a constraint. They become the KI's `references`, in the URI schemes `ki_shapes` lays out,
+and the error text stays in `attributes.error_text`.
 `ai-index-automations` has the writer template that produces one.
 
 ### Shapes you will see, and what they usually mean

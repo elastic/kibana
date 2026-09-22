@@ -237,12 +237,18 @@ steps:
             tags:
               - "{{ consts.source_index }}"
               - document
+            # What the KI was derived from: the index and the one document it summarizes. Who
+            # wrote it is stamped by `createKi` itself.
+            references:
+              - uri: "index://{{ consts.source_index }}"
+                relation: derived_from
+              - uri: "doc://{{ consts.source_index }}/{{ steps.document_context.output.doc_id }}"
+                relation: derived_from
             attributes:
               # Every ES|QL the KI carries goes here, which is what the verifiers check. `default: nil`
               # omits the attribute when there are no access patterns, so the verifiers skip the KI
               # instead of failing an empty list.
               esql: "${{ steps.summarize_document.output.content.access_patterns | map: 'esql_example' | default: nil }}"
-              source_doc_id: "{{ steps.document_context.output.doc_id }}"
               topics: "${{ steps.summarize_document.output.content.topics }}"
 
       - name: verify_ki
@@ -258,9 +264,9 @@ steps:
         condition: "steps.verify_ki.output.passed : true"
         steps:
           # `ki_id` pairs the index with the source document id, so a re-run replaces that
-          # document's KI rather than appending a second copy, and two indices holding the same
-          # document id do not collide. Omit `ki_id` entirely on a data-stream destination, which
-          # rejects it.
+          # document's KI on an index destination (a data stream appends a newer revision of it)
+          # rather than writing a second KI, and two indices holding the same document id do not
+          # collide.
           - name: create_ki
             type: context-engine.createKi
             with:

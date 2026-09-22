@@ -364,6 +364,50 @@ describe('analyzeAndImproveSkill', () => {
     it('casts an attribute a template actually writes in its ES|QL example', () => {
       expect(shapes).toContain('FIELD_EXTRACT(attributes, "doc_count")');
       expect(shapes).not.toContain('FIELD_EXTRACT(attributes, "coverage")');
+      expect(shapes).not.toContain('FIELD_EXTRACT(attributes, "expires_at")');
+    });
+
+    const baseFieldRow = (field: string): string | undefined =>
+      shapes.split('\n').find((line) => line.startsWith(`| \`${field}\` |`));
+
+    it('lists references and expires_at as top-level fields the workflow writes', () => {
+      expect(baseFieldRow('references')).toMatch(/derived_from/);
+      expect(baseFieldRow('expires_at')).toMatch(/Omitted for durable/);
+      expect(shapes).not.toContain('attributes.expires_at');
+    });
+
+    it('marks the fields the steps stamp as never supplied in the step input', () => {
+      for (const field of ['id', 'updated_at', 'governance', '@timestamp']) {
+        expect({ field, row: baseFieldRow(field) }).toEqual({
+          field,
+          row: expect.stringMatching(/never supplied in the step input/),
+        });
+      }
+    });
+
+    it('documents provenance as references in four URI schemes, not as attributes', () => {
+      for (const scheme of [
+        'index://<index>',
+        'doc://<index>/<_id>',
+        'trace://<trace_id>',
+        'conversation://<conversation_id>',
+      ]) {
+        expect(shapes).toContain(`\`${scheme}\``);
+      }
+      for (const attribute of ['source_index', 'source_doc_id', 'trace_ids', 'conversation_id']) {
+        expect(shapes).not.toMatch(new RegExp(`\\| \`attributes\\.${attribute}\``));
+      }
+      // Who wrote the KI is the step's job, so no workflow:// reference is ever written.
+      expect(shapes).toMatch(/never add a `workflow:\/\/`\s+reference/);
+    });
+
+    it('explains revisions on a data stream and how to read the current state', () => {
+      expect(shapes).not.toMatch(/`ki_id` is\s+rejected/);
+      expect(shapes).toMatch(/writing the same `ki_id` overwrites it/);
+      expect(shapes).toMatch(/adds a new\s+document \(a revision\) carrying the same `id`/);
+      expect(shapes).toMatch(/newest document per `id`/);
+      expect(shapes).toMatch(/`governance\.lifecycle\.status` is `deleted`/);
+      expect(shapes).toContain('platform.context_engine.query_ai_indices');
     });
 
     it('makes attributes.esql optional for a KI with no runnable query, never an empty list', () => {
@@ -373,6 +417,16 @@ describe('analyzeAndImproveSkill', () => {
       expect(esqlRow).toContain('the verifiers skip it. Never an empty list.');
       expect(esqlRow).toMatch(/\| every template, when the KI has a query \|$/);
     });
+  });
+
+  it('puts a targeted KI provenance in references, per ki_shapes', () => {
+    const { content } = analyzeAndImproveSkill;
+
+    expect(content).not.toMatch(/Put them in `attributes` as `ki_shapes` lays out/);
+    expect(content).toMatch(
+      /They become the KI's `references`, in the URI schemes `ki_shapes` lays out/
+    );
+    expect(content).not.toMatch(/provenance fields inside `attributes`/);
   });
 
   it('allows a KI that only orients when the unit has no meaningful query', () => {

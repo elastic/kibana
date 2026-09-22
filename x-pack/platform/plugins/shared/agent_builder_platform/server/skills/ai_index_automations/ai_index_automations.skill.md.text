@@ -73,7 +73,7 @@ verified sink. Read whichever is nearest as the reference for what a finished au
 like, whether you are drafting one or judging one.
 
 Two more references are attached and shared with `analyze-and-improve`: `ki_shapes`, the KI
-document shape with the fixed `type` vocabulary and the provenance fields, and `strategy_catalog`,
+document shape with the fixed `type` vocabulary and the provenance references, and `strategy_catalog`,
 the three strategy choices and their worked examples. The brief you receive is written in that
 vocabulary, and the `consts` of the templates are the same three choices, so read them when a
 brief names something the template does not spell out.
@@ -93,34 +93,43 @@ written out here — this skill is the only place they exist.
   type: context-engine.createKi
   with:
     ai_index_id: 'my-ai-index' # required
-    ki_id: 'logs-index-profile' # optional, index-backed destinations only
+    ki_id: 'logs-index-profile' # optional, generated when omitted
     ki: # required
       type: 'index_metadata' # required
       title: 'logs-* index profile' # required
       description: '...' # optional, <= 2048 chars
       content: '...' # optional, <= 65536 chars
       tags: ['logs'] # optional, <= 100 entries
+      references: # optional, <= 100 entries
+        - uri: 'index://logs-*'
+          relation: 'derived_from'
+      expires_at: '2026-10-22T00:00:00Z' # optional; unset never expires
       attributes: # optional, <= 100 keys
         esql: 'FROM logs-* | LIMIT 10'
 ```
 
-Passing the same `ki_id` again replaces the indicator, which is the whole of what makes a re-run
-idempotent rather than duplicative. On a data-stream destination `ki_id` is rejected outright and
-Elasticsearch generates the ids.
+Passing the same `ki_id` again is the whole of what makes a re-run idempotent rather than
+duplicative. On an index the same `ki_id` replaces the indicator; on a data stream it appends a new
+revision, and the newest revision is the current one. `references` records what the indicator was
+derived from, in the URI schemes `ki_shapes` lists. `id`, `updated_at` and `governance.provenance` are stamped by the step; never supply them.
 
 **`context-engine.updateKi`** takes `ai_index_id` and `ki_id` plus a `ki` carrying only the fields to
-change, and outputs `id` and `result` (`updated` or `noop`). It fails when the indicator does not
-exist, so it belongs to the cumulative strategy that reads before it merges — it is not a substitute
-for `createKi`.
+change, and outputs `id` and `result` (`updated` or `noop`). Arrays are replaced, a null
+`expires_at` clears the expiry, and `lifecycle: { status: active | deleted }` sets the lifecycle
+status. It fails when the indicator does not exist, or is deleted unless `force: true` is set, so
+it belongs to the cumulative strategy that reads before it merges — it is not a substitute for
+`createKi`.
 
-**`context-engine.deleteKi`** takes `ai_index_id` and `ki_id` and outputs `id`. It fails when the
-indicator does not exist. This is what pilot cleanup runs.
+**`context-engine.deleteKi`** takes `ai_index_id` and `ki_id` and outputs `id`. On an index `deleteKi` removes the document; on a data stream it appends a revision with
+`governance.lifecycle.status: deleted`, so the earlier revisions stay in the backing store. It
+fails when the indicator does not exist. This is what pilot cleanup runs.
 
 **`context-engine.verifyKi`** takes a partial `ki` and a non-empty, duplicate-free `verifiers` list,
 and outputs `passed` plus a per-verifier `results` array of `{ verifier, passed, reason }`. The two
-verifier ids are `esql-valid-syntax`, which parses each query the indicator carries without touching
-the cluster, and `esql-valid-runtime`, which executes it against live data bounded to a single row.
-An unknown id fails the step. Gate every write on this: an indicator carrying ES|QL that does not run
+built-in verifier ids are `esql-valid-syntax`, which parses each query the indicator carries without
+touching the cluster, and `esql-valid-runtime`, which executes it against live data bounded to a
+single row. An entry can also be a custom verifier workflow, `{ workflow_id }`, with an optional
+`timeout_sec` and `applies_to`; the templates use the two built-ins. An unknown id fails the step. Gate every write on this: an indicator carrying ES|QL that does not run
 is worse than a missing one, because retrieval surfaces it as though it worked.
 
 `attributes` values are strings, numbers, booleans or arrays of strings — never nested objects. A
@@ -128,7 +137,7 @@ single value caps at 10,000 characters, which is what bounds the ES|QL an indica
 `null` value omits the attribute: `esql: "${{ patterns | map: 'esql_example' | default: nil }}"`
 leaves `attributes.esql` out when the list is empty, and the verifiers skip an indicator without it.
 Never write an empty list or an empty string there; both fail verification. What the fields mean,
-which `type` values exist, and which provenance keys go in `attributes` is `ki_shapes`; this
+which `type` values exist, and which provenance goes in `references` is `ki_shapes`; this
 section is only the step's input contract.
 
 ## Two shapes that produce the wrong thing without failing
@@ -235,6 +244,7 @@ rest. `{%- for x in ... -%}` loops build the `content` block, and `{%- assign x 
 | Filter | Use |
 |---|---|
 | `json` | Serialise a value — how a whole step output reaches a prompt, and how a list reaches `foreach` |
+| `json_parse` | Turn a JSON string back into a value; how the unit template's `references`, built as a string with a conditional entry, reach the KI as a list |
 | `map: 'field'` | Pull one field out of a list of objects; how `attributes.esql` collects the runnable examples |
 | `join: ', '` | Flatten a list into a string |
 | `size` | Length, for a `data.set` a condition can read |
@@ -361,8 +371,9 @@ will invent it confidently. Put in the prompt:
   Those three are what fill the `consts`, so a brief that names a strategy without them leaves
   the subagent to guess the block
 - **the counted findings** behind the proposal, with their counts, denominators and windows, and
-  for a targeted KI the provenance ids (`trace_ids`, `conversation_id`, the error text) it should
-  carry. The subagent cannot see the signals; what is not in the brief is not in the KI
+  for a targeted KI the provenance ids (`trace_ids`, `conversation_id`, the source index and document id) that
+  become its `references`, plus the error text for `attributes.error_text`. The subagent cannot
+  see the signals; what is not in the brief is not in the KI
 - **the template it starts from, by name**, and the values its `consts` block should take. This is
   the single highest-value line in the brief: a subagent that has been handed a template edits it,
   and one that has not writes a workflow from nothing and spends its budget rediscovering what the
@@ -494,9 +505,9 @@ unique to this attempt. In the templates the indicator is built in a single `dat
 tag goes on that step's `ki.tags` list — the one place all of them read from — not on
 `context-engine.createKi`, which takes the assembled document rather than building it.
 
-That tag is the only handle you will have on what the pilot wrote: on a data-stream destination
-`createKi` refuses `ki_id` and Elasticsearch generates the ids, so there is nothing else to find
-them by.
+That tag is the handle on what the pilot wrote. The KI ids are a second one: on an index a re-run
+overwrites them, and on a data stream each write appends a revision under the same `id`, so the
+tag and the `id` together find every document the pilot left.
 
 Bound the run to a handful of documents while you are iterating. The templates put that bound in
 `consts` — `max_documents`, `corpus_filter`, `discovery_filter`, and `batch_size` together with the

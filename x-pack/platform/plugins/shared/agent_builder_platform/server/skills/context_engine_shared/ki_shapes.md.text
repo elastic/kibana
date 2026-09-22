@@ -12,8 +12,13 @@ description of what a KI document holds; the skills point here rather than resta
 | `description` | text + semantic | Routing heuristic — what the source does *not* contain, key fields, joins. When sibling KIs share a similar title, this **must** carry the differentiator (sub-category, product, time window). Title alone will not separate near-duplicates for the retriever. |
 | `content` | text + semantic | Free text for semantic retrieval: purpose, questions answered, access patterns. |
 | `tags` | keyword[] | Filter facets. |
-| `attributes` | flattened | Structured, keyword-queryable metadata: the domain facts the retrieval prompt needs, plus the lifecycle and provenance fields. |
-| `@timestamp` | date | When the KI was last profiled. Set by `context-engine.createKi` at write time — never supplied in the step input. |
+| `attributes` | flattened | Structured, keyword-queryable metadata: the domain facts the retrieval prompt needs. |
+| `references` | object[] | What the KI was derived from: `{ uri, relation, description? }`, written by the workflow with `relation: derived_from`. URI schemes are under Provenance below. At most 100. |
+| `expires_at` | date | ISO date after which the KI is stale, ~30 days out. Omitted for durable immutable-fact KIs, which never age out. |
+| `id` | keyword | The KI id: the step's `ki_id`, or a generated one. Set by the `context-engine` steps — never supplied in the step input. |
+| `@timestamp` | date | When this document was written. Set by the `context-engine` steps — never supplied in the step input. |
+| `updated_at` | date | When the KI last changed. Set by the `context-engine` steps — never supplied in the step input. |
+| `governance` | object | `provenance.created_by` / `updated_by` (the writing workflow, as `workflow://<id>` with its version, run id and space) and `lifecycle.status` (`active` or `deleted`). Set by the `context-engine` steps — never supplied in the step input. |
 
 ## `type` values
 
@@ -41,7 +46,7 @@ corpus:
 
 Use these values and no others. A new value is a schema change, not a KI.
 
-## Everything else lives inside `attributes`
+## Domain facts live inside `attributes`
 
 `attributes` is `flattened`, so arbitrary nested keys are keyword-queryable with no declared
 mapping and can never cause a mapping conflict on a long-lived index. Values are strings, numbers,
@@ -63,11 +68,10 @@ written by the template that owns the strategy:
 | `attributes.prevalence` | For a targeted KI, the count, denominator and window of the finding behind it, as one string. | `targeted-ki-writer` |
 | `attributes.topics` | The themes a document KI covers, for facet filtering. | `document-template` |
 
-Lifecycle:
+Lifecycle — expiry is the top-level `expires_at` above; the one lifecycle attribute is:
 
 | Field | Purpose |
 |---|---|
-| `attributes.expires_at` | ISO date, ~30 days out. **Omitted entirely for durable immutable-fact KIs**, which never age out. |
 | `attributes.excluded` | Soft exclude: the KI exists but agents skip it. |
 
 No KI carries a self-reported quality number. Whether a KI is correct and complete is judged at
@@ -75,22 +79,31 @@ the pilot inspection step in `ai-index-automations`, by reading what the pilot w
 source; a confidence or coverage score written by the model that wrote the KI is the same model
 grading itself. Do not add `confidence`, `coverage` or `evidence` attributes.
 
-Provenance, so a KI can be traced to what produced it. Every id here already exists on the
-platform; none is minted for the KI:
+## Provenance
+
+Two fields answer two different questions. `governance.provenance` is **who wrote the KI**: the
+`context-engine` steps stamp the workflow and run on every write, so never add a `workflow://`
+reference. `references` is **what the KI was derived from**, and the workflow writes it. Every id
+in a reference already exists on the platform; none is minted for the KI:
+
+| URI | Use it for |
+|---|---|
+| `index://<index>` | The raw index the KI describes or was grounded from. One entry per index. |
+| `doc://<index>/<_id>` | For per-document KIs, the source document. |
+| `trace://<trace_id>` | For KIs written from retrieval evidence, each trace behind the finding — the minimal covering set, at most 20. |
+| `conversation://<conversation_id>` | The conversation a targeted KI was derived from, when there was one. |
+
+Every entry carries `relation: derived_from`. Values that are not identifiers stay in `attributes`:
 
 | Field | Purpose |
 |---|---|
-| `attributes.source_index` | The raw index (or indices, as an array) the KI describes or was grounded from. |
-| `attributes.source_doc_id` | For per-document KIs, the `_id` of the source document. |
 | `attributes.source_query` | The ES\|QL that selected the grounding rows. String or array of strings. |
-| `attributes.trace_ids` | For KIs written from retrieval evidence, the `trace_ids` of the signals behind the finding. Array of strings. |
-| `attributes.conversation_id` | The conversation a targeted KI was derived from, when there was one. |
 | `attributes.error_text` | For a `constraint` or `disambiguation` KI written from a `query_error`, the error message as observed. |
 
-A targeted KI carries at least one of `trace_ids`, `conversation_id`, `source_query` or
-`error_text`. A systemic KI names its source index: the unit profile writes
-`attributes.source_index`, the index and document templates carry it in `tags`, and the document
-template adds `source_doc_id` because its unit is a document.
+A targeted KI carries at least one `trace://` or `conversation://` reference, or an
+`attributes.source_query` or `attributes.error_text`. A systemic KI references its source index:
+every generated template writes `index://`, the unit profile adds its catalog index when that is
+a separate one, and the document template adds `doc://` because its unit is a document.
 
 ## Structured values belong in both `content` and `attributes`
 
@@ -99,12 +112,23 @@ are exact-match and filter queryable. A value in only one of the two is invisibl
 retrieval paths, and that asymmetry is a common and easily missed cause of empty retrievals.
 
 Because `attributes` is `flattened`, numbers and dates inside it index as keywords. In ES|QL, cast
-before comparing: `TO_LONG(FIELD_EXTRACT(attributes, "doc_count"))`,
-`TO_DATETIME(FIELD_EXTRACT(attributes, "expires_at"))`.
+before comparing: `TO_LONG(FIELD_EXTRACT(attributes, "doc_count"))`. The top-level `expires_at`
+is a real date and needs no cast.
 
 ## Backing stores
 
 Backing stores match `ai-index-ds-*` for timeseries KIs (data stream destination) and
 `ai-index-idx-*` otherwise. Workflows write through the `context-engine` steps using the AI index
-id — never by indexing into the backing store directly. On a data stream destination `ki_id` is
-rejected and Elasticsearch generates the ids.
+id — never by indexing into the backing store directly.
+
+- **Index destination:** one KI is one document; writing the same `ki_id` overwrites it, and
+  `deleteKi` removes it.
+- **Data stream destination:** documents are append-only. Writing the same `ki_id` adds a new
+  document (a revision) carrying the same `id`, and `deleteKi` adds one more whose
+  `governance.lifecycle.status` is `deleted`. One KI can therefore be several documents.
+
+To read the current state, take the newest document per `id` and drop the KI when that newest
+document's `governance.lifecycle.status` is `deleted`. A plain `FROM ... | WHERE tags == ...` on a
+data stream returns every revision, deleted ones included. Read AI indices with
+`platform.context_engine.query_ai_indices`, which adds the space filter the backing store does not
+apply on its own.

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { Liquid } from 'liquidjs';
+import { parse as parseYaml } from 'yaml';
 import { isAllowedBuiltinSkill } from '@kbn/agent-builder-server/allow_lists';
 import { contextEngineAiIndexTools, platformCoreTools } from '@kbn/agent-builder-common/tools';
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
@@ -32,6 +34,62 @@ const templates = () =>
   (aiIndexAutomationsSkill.referencedContent ?? []).filter(({ name }) =>
     TEMPLATE_NAMES.includes(name)
   );
+
+interface WorkflowStep {
+  name?: string;
+  type?: string;
+  with?: Record<string, unknown>;
+  steps?: WorkflowStep[];
+  else?: WorkflowStep[];
+}
+
+interface ParsedTemplate {
+  consts?: Record<string, unknown>;
+  steps?: WorkflowStep[];
+}
+
+interface TemplateKi {
+  attributes?: Record<string, unknown>;
+  references?: unknown;
+}
+
+const parsedTemplate = (name: string): ParsedTemplate => {
+  const reference = templates().find((template) => template.name === name);
+  if (!reference) {
+    throw new Error(`template ${name} is not attached to the skill`);
+  }
+  return parseYaml(reference.content) as ParsedTemplate;
+};
+
+const allSteps = (steps: WorkflowStep[] = []): WorkflowStep[] =>
+  steps.flatMap((step) => [step, ...allSteps(step.steps), ...allSteps(step.else)]);
+
+const stepNamed = (template: ParsedTemplate, name: string): WorkflowStep => {
+  const step = allSteps(template.steps).find((candidate) => candidate.name === name);
+  if (!step) {
+    throw new Error(`step ${name} not found`);
+  }
+  return step;
+};
+
+// The document each template verifies and writes: the `assemble_ki` step in the three generated
+// templates, and every `kis[].ki` const in the targeted writer.
+const assembledKis = (name: string): TemplateKi[] => {
+  const template = parsedTemplate(name);
+  if (name === TARGETED_KI_WRITER_TEMPLATE_NAME) {
+    const kis = (template.consts?.kis ?? []) as Array<{ ki: TemplateKi }>;
+    return kis.map(({ ki }) => ki);
+  }
+  return [stepNamed(template, 'assemble_ki').with?.ki as TemplateKi];
+};
+
+interface KiReference {
+  uri: string;
+  relation?: string;
+}
+
+const referenceUris = (ki: TemplateKi): string[] =>
+  (ki.references as KiReference[]).map(({ uri }) => uri);
 
 // Splits a template into its `ai.prompt` step blocks: from the step's `- name:` line to the next
 // sibling `- name:` at the same indentation, so a rule about every prompt can be checked per step.
@@ -177,15 +235,107 @@ describe('aiIndexAutomationsSkill', () => {
     }
   });
 
-  it('writes targeted KIs without a model call, from consts, with provenance keys', () => {
+  it('writes targeted KIs without a model call, from consts', () => {
     const writer = templates().find(({ name }) => name === TARGETED_KI_WRITER_TEMPLATE_NAME);
 
     expect(writer?.content).not.toContain('ai.prompt');
     expect(writer?.content).toContain('type: constraint');
-    for (const key of ['trace_ids:', 'conversation_id:', 'error_text:', 'source_index:']) {
-      expect(writer?.content).toContain(key);
-    }
     expect(writer?.content).toMatch(/ki: "\$\{\{ foreach\.item\.ki \}\}"/);
+  });
+
+  describe('KI provenance in the templates', () => {
+    // Id-like provenance moved to top-level `references`; `expires_at` is top-level too.
+    const MOVED_ATTRIBUTES = [
+      'source_index',
+      'source_doc_id',
+      'trace_ids',
+      'conversation_id',
+      'expires_at',
+    ];
+    const REFERENCE_URI = /^(index|doc|trace|conversation):\/\//;
+
+    it('keeps id-like provenance and expiry out of attributes in every template', () => {
+      for (const name of TEMPLATE_NAMES) {
+        for (const ki of assembledKis(name)) {
+          for (const key of MOVED_ATTRIBUTES) {
+            expect({ name, key, present: key in (ki.attributes ?? {}) }).toEqual({
+              name,
+              key,
+              present: false,
+            });
+          }
+        }
+      }
+    });
+
+    it('writes each literal reference as a derived_from URI in one of the four schemes', () => {
+      for (const name of [
+        INDEX_METADATA_TEMPLATE_NAME,
+        DOCUMENT_TEMPLATE_NAME,
+        TARGETED_KI_WRITER_TEMPLATE_NAME,
+      ]) {
+        for (const ki of assembledKis(name)) {
+          expect(Array.isArray(ki.references)).toBe(true);
+          for (const reference of ki.references as KiReference[]) {
+            expect(reference.uri).toMatch(REFERENCE_URI);
+            expect(reference.relation).toBe('derived_from');
+          }
+        }
+      }
+    });
+
+    it('references the profiled index from the index metadata template', () => {
+      const [ki] = assembledKis(INDEX_METADATA_TEMPLATE_NAME);
+
+      expect(referenceUris(ki)).toEqual(['index://{{ consts.source_index }}']);
+    });
+
+    it('references the source index and document from the document template', () => {
+      const [ki] = assembledKis(DOCUMENT_TEMPLATE_NAME);
+
+      expect(referenceUris(ki)).toEqual([
+        'index://{{ consts.source_index }}',
+        'doc://{{ consts.source_index }}/{{ steps.document_context.output.doc_id }}',
+      ]);
+    });
+
+    it('references the unit index, and the catalog index only when it is a separate index', async () => {
+      const template = parsedTemplate(UNIT_PROFILE_TEMPLATE_NAME);
+      const [ki] = assembledKis(UNIT_PROFILE_TEMPLATE_NAME);
+      const source = stepNamed(template, 'unit_context').with?.references;
+
+      expect(ki.references).toBe('${{ steps.unit_context.output.references | json_parse }}');
+      expect(typeof source).toBe('string');
+
+      const render = async (consts: Record<string, string>): Promise<KiReference[]> =>
+        JSON.parse(await new Liquid().parseAndRender(source as string, { consts }));
+
+      expect(await render({ unit_index: 'sales', catalog_index: 'products' })).toEqual([
+        { uri: 'index://sales', relation: 'derived_from' },
+        { uri: 'index://products', relation: 'derived_from' },
+      ]);
+      expect(await render({ unit_index: 'sales', catalog_index: 'sales' })).toEqual([
+        { uri: 'index://sales', relation: 'derived_from' },
+      ]);
+    });
+
+    it('references the traces, conversation and index behind a targeted KI', () => {
+      const [ki] = assembledKis(TARGETED_KI_WRITER_TEMPLATE_NAME);
+      const uris = referenceUris(ki);
+
+      expect(uris.some((uri) => uri.startsWith('trace://'))).toBe(true);
+      expect(uris.some((uri) => uri.startsWith('conversation://'))).toBe(true);
+      expect(uris).toContain('index://my-source-index');
+      // Values that are not identifiers stay in attributes.
+      expect(ki.attributes).toHaveProperty('error_text');
+      expect(ki.attributes).toHaveProperty('prevalence');
+    });
+
+    it('no longer tells a data-stream destination to omit ki_id', () => {
+      for (const reference of templates()) {
+        expect(reference.content).not.toMatch(/which\s+(#\s+)?rejects it/);
+      }
+    });
   });
 
   it('mentions every referencedContent entry by name in the skill content', () => {
@@ -555,8 +705,11 @@ describe('aiIndexAutomationsSkill', () => {
       expect(content).toMatch(/cleanup is not optional/);
     });
 
-    it('notes that a data stream leaves the tag as the only handle on pilot output', () => {
-      expect(content).toMatch(/createKi` refuses `ki_id`/);
+    it('names the KI id as a second handle on pilot output, on either destination', () => {
+      expect(content).not.toMatch(/refuses `ki_id`/);
+      expect(content).toMatch(
+        /on a data stream each write appends a revision under the\s+same `id`/
+      );
     });
 
     it('puts the pilot tag where the templates build the indicator, not on the write step', () => {
@@ -603,9 +756,42 @@ describe('aiIndexAutomationsSkill', () => {
       expect(content).toContain('esql-valid-runtime');
     });
 
-    it('states the createKi id rules that make a re-run idempotent', () => {
-      expect(content).toMatch(/Passing the same `ki_id` again replaces the indicator/);
-      expect(content).toMatch(/On a data-stream destination `ki_id` is rejected/);
+    it('states the createKi id rules that make a re-run idempotent, on both destinations', () => {
+      expect(content).not.toMatch(/`ki_id` is rejected/);
+      expect(content).toMatch(/On an index the same `ki_id` replaces the indicator/);
+      expect(content).toMatch(/on a data stream it appends a new\s+revision/);
+    });
+
+    it('shows references and expires_at in the createKi contract, and what the step stamps', () => {
+      expect(content).toMatch(/references: # optional, <= 100 entries/);
+      expect(content).toMatch(/relation: 'derived_from'/);
+      expect(content).toMatch(/expires_at: '[^']+' # optional/);
+      expect(content).toMatch(
+        /`id`, `updated_at` and `governance\.provenance` are stamped by the step; never supply them/
+      );
+    });
+
+    it('describes deleteKi per destination, since a data stream keeps the deleted revision', () => {
+      expect(content).toMatch(/On an index `deleteKi` removes the document/);
+      expect(content).toMatch(
+        /on a data stream it appends a revision with\s+`governance\.lifecycle\.status: deleted`/
+      );
+    });
+
+    it('names the updateKi lifecycle and force inputs', () => {
+      expect(content).toMatch(/`lifecycle: \{ status: active \| deleted \}`/);
+      expect(content).toMatch(/`force: true`/);
+    });
+
+    it('allows custom verifier workflows while keeping the verifier list non-empty', () => {
+      expect(content).toMatch(/`\{ workflow_id \}`/);
+      expect(content).toMatch(/non-empty, duplicate-free `verifiers` list/);
+    });
+
+    it('asks the brief for the ids a targeted KI turns into references', () => {
+      expect(content).toMatch(
+        /the provenance ids \(`trace_ids`, `conversation_id`, the source index and document id\) that\s+become its `references`/
+      );
     });
 
     it('bounds what a KI attribute can hold, since indicators carry ES|QL in one', () => {
@@ -615,7 +801,7 @@ describe('aiIndexAutomationsSkill', () => {
 
     it('says why updateKi is not interchangeable with createKi', () => {
       expect(content).toMatch(/It fails when the indicator does not\s+exist/);
-      expect(content).toMatch(/not a substitute\s+for `createKi`/);
+      expect(content).toMatch(/not a substitute\s+for\s+`createKi`/);
     });
 
     it('names the check validation does not cover, since a valid draft can still match nothing', () => {
