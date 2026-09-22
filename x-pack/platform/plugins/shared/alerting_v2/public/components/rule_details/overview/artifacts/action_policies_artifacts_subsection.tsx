@@ -83,7 +83,7 @@ export const ActionPoliciesArtifactsSubsection: React.FC<RuleSummarySectionProps
     totalCount > 0
       ? i18n.translate('xpack.alertingV2.ruleDetails.artifacts.notificationPolicies.summary', {
           defaultMessage:
-            '{matchingCriteriaCount, plural, one {# is matching criteria} other {# are matching criteria}} and {catchAllCount, plural, one {# is catch_all} other {# are catch_all}}',
+            '{matchingCriteriaCount, plural, one {# is matching criteria} other {# are matching criteria}} and {catchAllCount, plural, one {# is catch-all} other {# are catch-all}}',
           values: { matchingCriteriaCount, catchAllCount },
         })
       : null;

@@ -37,7 +37,7 @@ const formatActionPolicyDescription = (
     workflowIds.length > 0
       ? `${workflowIds.length} workflow(s): ${workflowIds.join(', ')}`
       : 'none';
-  const matcherSnippet = data.matcher ? formatMatcher(data.matcher) : 'match all (catch_all)';
+  const matcherSnippet = data.matcher ? formatMatcher(data.matcher) : 'match all (catch-all)';
   const grouping = data.grouping_mode ?? 'per_episode';
   const throttle = data.throttle?.strategy ?? 'none';
 

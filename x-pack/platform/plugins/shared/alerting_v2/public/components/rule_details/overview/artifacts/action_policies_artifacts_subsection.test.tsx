@@ -145,7 +145,7 @@ describe('ActionPoliciesArtifactsSubsection', () => {
     expect(actionPolicyLocators.useUrl).toHaveBeenCalledWith({ page: 'list' });
     expect(screen.getByTestId('ruleActionPoliciesArtifactsStat')).toHaveTextContent('2');
     expect(screen.getByTestId('ruleActionPoliciesArtifactsSummary')).toHaveTextContent(
-      '1 is matching criteria and 1 is catch_all'
+      '1 is matching criteria and 1 is catch-all'
     );
     expect(screen.getByTestId('ruleActionPoliciesArtifactsOpenLink')).toHaveAttribute(
       'href',
