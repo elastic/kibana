@@ -24,7 +24,7 @@ import type { RuleFormServices } from '../../../form/contexts/rule_form_context'
 import { RULE_BUILDER_REGISTRY } from '../rule_builder';
 import { ModeSelect } from '../../../form/fields/mode_select';
 import { AlertDelayField } from '../../../form/fields/alert_delay_field';
-import { DeduplicationStrategySelect } from '../../../form/fields/deduplication_strategy_select';
+import { NoDataStrategySelect } from '../../../form/fields/no_data_strategy_select';
 import { ScheduleField } from '../../../form/fields/schedule_field';
 import { LookbackWindowField } from '../../../form/fields/lookback_window_field';
 import { AlertConditionStep } from './alert_condition_step';
@@ -171,9 +171,7 @@ export const ComposeDiscoverForm = ({
 }: Props) => {
   const { setValue } = useFormContext<FormValues>();
   const isAlert = useWatch<FormValues, 'kind'>({ name: 'kind' }) === 'alert';
-  const deduplicationStrategy = useWatch<FormValues, 'deduplicationStrategy'>({
-    name: 'deduplicationStrategy',
-  });
+  const noDataStrategy = useWatch<FormValues, 'noDataStrategy'>({ name: 'noDataStrategy' });
   const { steps, renderCustomRecovery } = useMemo(
     () => getSteps(isAlert, builderType),
     [isAlert, builderType]
@@ -223,13 +221,11 @@ export const ComposeDiscoverForm = ({
               <EuiSpacer size="s" />
               <AlertDelayField />
               <EuiSpacer size="m" />
-              <DeduplicationStrategySelect
-                value={deduplicationStrategy ?? 'rule_event'}
-                onChange={(strategy) =>
-                  setValue('deduplicationStrategy', strategy, { shouldDirty: true })
-                }
+              <NoDataStrategySelect
+                value={noDataStrategy ?? 'none'}
+                onChange={(strategy) => setValue('noDataStrategy', strategy, { shouldDirty: true })}
                 compressed
-                data-test-subj="composeDiscoverDeduplicationStrategy"
+                data-test-subj="composeDiscoverNoDataStrategy"
               />
             </>
           )}

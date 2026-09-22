@@ -96,7 +96,8 @@ Each run starts with Task Manager task params:
 2. wraps every step with the middleware chain
 3. streams state through the ordered steps
 4. halts early on domain reasons when appropriate
-5. refreshes `.rule-events` after the stream completes so freshly written documents become searchable
+
+Rule-event writes do not refresh `.rule-events`; documents written by one batch are not searchable until the next refresh interval. See "Rule-event deduplication" for why that matters.
 
 ## Rule configuration
 
@@ -167,15 +168,27 @@ Step order is defined in `setup/bind_rule_executor.ts`.
 | 1 | `WaitForResourcesStep` | Ensure required Elasticsearch resources exist before doing work. |
 | 2 | `FetchRuleStep` | Load the current rule saved object. |
 | 3 | `ValidateRuleStep` | Halt early if the rule cannot run, for example because it is disabled. |
-| 4 | `ExecuteRuleQueryStep` | Build and run ES\|QL, emitting streamed row batches. |
+| 4 | `ExecuteRuleQueryStep` | Build and run ES\|QL, emitting streamed row batches. Injects `METADATA _id, _index, _version` into non-aggregating queries. |
 | 5 | `CreateAlertEventsStep` | Turn a row batch into breached rule events. |
 | 6 | `DetectDataPresenceStep` | Run the no data query for alert rules and record `dataPresentGroupHashes`. Skipped when `no_data_strategy` is `'none'`. |
 | 7 | `CreateRecoveryEventsStep` | Append recovery events for alert rules when configured. |
 | 8 | `CreateNoDataEventsStep` | Classify active-but-absent groups using `dataPresentGroupHashes`: append `no_data` events, or a continued `breached` event for the `recovery_strategy: 'query'` gap case. |
-| 9 | `DirectorStep` | Enrich alert-type events with episode state. |
-| 10 | `StoreAlertEventsStep` | Persist the final batch into `.rule-events`. |
+| 9 | `FilterDuplicateEventsStep` | Drop breached events whose deterministic `_id` already exists in `.rule-events`. |
+| 10 | `DirectorStep` | Enrich alert-type events with episode state. |
+| 11 | `StoreAlertEventsStep` | Persist the final batch into `.rule-events`, using the deterministic `_id` where one applies. |
 
 The rule executor runs whenever the plugin is enabled (`xpack.alerting_v2.enabled`). The `alerting:v2:enabled` advanced setting gates only the user-facing surface (UI + APIs), not core engine execution, so rules keep producing events even while the UI and APIs stay hidden.
+
+## Rule-event deduplication
+
+Rules run on lookback windows that overlap on purpose, so a non-aggregating query re-matches the same source documents on consecutive runs. The executor deduplicates those re-matches the same way the detection engine's ES|QL rule type does:
+
+1. `ExecuteRuleQueryStep` upserts `METADATA _id, _index, _version` into the `FROM` of any query without a `STATS` command, and appends the same fields to `KEEP` so they survive projection. A query the parser cannot transform runs unchanged.
+2. `resolveRuleEventId` in `build_alert_events.ts` gives a `breached` event whose row carries `_id` a deterministic id: `sha256(space_id | rule.id | _index | _id | _version)`. Events without `_id` (aggregating rows, recovered, no_data, continued-breach) keep Elasticsearch-generated ids and are written on every run.
+3. `FilterDuplicateEventsStep` runs an `ids` query against `.rule-events` and drops events that already exist, so the director and metrics only see rows that will persist. It sits after recovery and no-data so a still-breaching group is not mistaken for an absent one, and before the director so episode state matches what is written.
+4. `StoreAlertEventsStep` passes the same id as the bulk `create` `_id`. Anything the pre-check could not see, including documents written earlier in the same run, collides here with a 409. `StorageService` treats 409s as expected and `PersistedRuleEventsRecorder` counts them into `ruleEventsDeduplicated` alongside the pre-check drops.
+
+A re-indexed source document has a new `_version` and therefore a new id, so an updated document alerts again. Aggregating queries are never deduplicated because their rows are not documents.
 
 ## How recovery and no-data fit together
 

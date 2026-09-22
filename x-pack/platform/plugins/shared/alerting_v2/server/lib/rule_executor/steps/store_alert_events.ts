@@ -33,11 +33,10 @@ export class StoreAlertEventsStep implements RuleExecutionStep {
         message: `[${this.name}] Storing alert events batch to ${ALERT_EVENTS_DATA_STREAM}`,
       });
 
-      const useDedup = (state.rule.deduplication_strategy ?? 'rule_event') === 'rule_event';
       const bulkResult = await this.storageService.bulkIndexDocs({
         index: ALERT_EVENTS_DATA_STREAM,
         docs: state.alertEventsBatch,
-        ...(useDedup ? { getDocumentId: (doc) => resolveRuleEventId(doc as AlertEvent) } : {}),
+        getDocumentId: (doc) => resolveRuleEventId(doc as AlertEvent),
       });
 
       this.logger.debug({

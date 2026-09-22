@@ -1459,7 +1459,6 @@ describe('rule field immutability classification', () => {
     expect(mutable).toMatchInlineSnapshot(`
       Array [
         "artifacts",
-        "deduplication_strategy",
         "grouping",
         "metadata",
         "no_data_strategy",

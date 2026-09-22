@@ -68,11 +68,6 @@ export const composeFormToCreateRequest = (
       ? formValues.noDataStrategy
       : undefined;
 
-  const deduplicationStrategy =
-    formValues.kind === 'alert' && formValues.deduplicationStrategy
-      ? formValues.deduplicationStrategy
-      : undefined;
-
   return {
     kind: formValues.kind,
     metadata: {
@@ -87,7 +82,6 @@ export const composeFormToCreateRequest = (
     query: ruleQueryToApiQuery(formValues.query),
     ...(recoveryStrategy ? { recovery_strategy: recoveryStrategy } : {}),
     ...(noDataStrategy ? { no_data_strategy: noDataStrategy } : {}),
-    ...(deduplicationStrategy ? { deduplication_strategy: deduplicationStrategy } : {}),
     grouping: formValues.grouping?.fields?.length
       ? { fields: formValues.grouping.fields }
       : undefined,
@@ -108,7 +102,6 @@ export const composeFormToUpdateRequest = (
     metadata,
     recovery_strategy,
     no_data_strategy,
-    deduplication_strategy,
     ...rest
   } = request;
   return {
@@ -119,7 +112,6 @@ export const composeFormToUpdateRequest = (
     },
     recovery_strategy: resolveRecoveryStrategy(formValues) ?? null,
     no_data_strategy: no_data_strategy ?? null,
-    deduplication_strategy: deduplication_strategy ?? null,
     grouping: grouping ?? null,
     state_transition: state_transition ?? null,
     artifacts: artifacts ?? null,
@@ -162,9 +154,7 @@ export const mapRuleToComposeFormValues = (rule: RuleResponse): FormValues => {
     },
     query: apiQueryToFormQuery(rule.query, rule.recovery_strategy),
     recoveryStrategy: rule.recovery_strategy ?? undefined,
-    noDataStrategy:
-      rule.no_data_strategy ?? (rule.kind === 'alert' ? 'last_known_status' : undefined),
-    deduplicationStrategy: rule.deduplication_strategy ?? undefined,
+    noDataStrategy: rule.no_data_strategy ?? (rule.kind === 'alert' ? 'none' : undefined),
     ...(rule.grouping ? { grouping: { fields: rule.grouping.fields } } : {}),
     stateTransition,
     stateTransitionAlertDelayMode: deriveAlertDelayModeFromStateTransition(stateTransition),

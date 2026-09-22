@@ -118,7 +118,6 @@ export function transformCreateRuleBodyToRuleSoAttributes(
     query: data.query,
     recovery_strategy: data.recovery_strategy,
     no_data_strategy: data.no_data_strategy,
-    deduplication_strategy: data.deduplication_strategy,
     state_transition: data.state_transition,
     grouping: data.grouping,
     artifacts: data.artifacts,
@@ -187,10 +186,6 @@ export function buildUpdateRuleAttributes(
       existingAttrs.recovery_strategy
     ),
     no_data_strategy: nullToUndefined(updateData.no_data_strategy, existingAttrs.no_data_strategy),
-    deduplication_strategy: nullToUndefined(
-      updateData.deduplication_strategy,
-      existingAttrs.deduplication_strategy
-    ),
     // `null` → clear (null). SO schema uses `maybe(nullable())`.
     state_transition: applyNullableUpdate(
       updateData.state_transition,
@@ -237,7 +232,6 @@ export function transformRuleSoAttributesToRuleApiResponse(
     query: attrs.query,
     recovery_strategy: attrs.recovery_strategy,
     no_data_strategy: attrs.no_data_strategy,
-    deduplication_strategy: attrs.deduplication_strategy ?? undefined,
     state_transition: attrs.state_transition,
     grouping: attrs.grouping,
     artifacts: attrs.artifacts,

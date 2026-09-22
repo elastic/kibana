@@ -143,20 +143,22 @@ export class DirectorService {
     previousAlertEvent,
     strategy,
   }: CalculateNextStateParams): { alertEvent: AlertEvent; isNewEpisode: boolean } {
-    // User lock: bypasses the strategy when a user lifecycle action is in
-    // effect. We preserve the incoming event's `status` (e.g. `recovered`)
-    // so downstream analytics keep the raw engine signal. Only
-    // `episode.status` is forced. `episode.status_count` is dropped to
-    // mirror how the strategies emit any → active transitions.
-    const userLockedStatus = this.resolveUserLockedStatus(rule, previousAlertEvent);
-    if (userLockedStatus != null) {
+    // User lock: once a user hits `activate` on a group, the episode
+    // stays `active` regardless of what the strategy computes, until
+    // the user hits `deactivate` (which flips the lifecycle marker
+    // back and lets the strategy own transitions again). We preserve
+    // the incoming event's `status` (e.g. `recovered`) so downstream
+    // analytics keep the raw engine signal. Only `episode.status` is
+    // forced. `episode.status_count` is dropped to mirror how the
+    // strategies emit any → active transitions.
+    if (this.isUserLocked(previousAlertEvent)) {
       return {
         alertEvent: {
           ...currentAlertEvent,
           type: alertEventType.alert,
           episode: {
             id: previousAlertEvent!.last_episode_id!,
-            status: userLockedStatus,
+            status: alertEpisodeStatus.active,
           },
         },
         isNewEpisode: false,
@@ -198,41 +200,40 @@ export class DirectorService {
   }
 
   /**
-   * Returns the episode status the director must force, bypassing the strategy,
-   * when a user lifecycle action is in effect.
+   * The audit stream is the source of truth for whether a group is
+   * user-owned: if the most recent lifecycle action (`activate` or
+   * `deactivate`) for this group is `activate`, the director must
+   * hold the episode in `active`. `deactivate` or the absence of
+   * any lifecycle action releases the strategy to decide.
    *
-   * Episode correlation is enforced upstream in `getLatestAlertEventStateQuery`:
-   * `last_lifecycle_action_type` is only populated when the latest audit doc's
-   * `episode_id` matches `last_episode_id`. When they diverge the query returns
-   * `null` here — treated as "no lock", handing control back to the strategy.
+   * Episode correlation is enforced upstream in
+   * `getLatestAlertEventStateQuery`: `last_lifecycle_action_type` is
+   * only populated when the latest audit doc's `episode_id` matches
+   * `last_episode_id`. When they diverge (concurrent bulk actions on
+   * different episodes of the same group, or a partial `_bulk` write
+   * where only one of the audit / synthetic rule-event docs landed),
+   * the query returns `null` here — which we treat as "no lock" and
+   * hand control back to the strategy. That query-level guard is why
+   * this method can safely trust `last_lifecycle_action_type` to
+   * describe the same episode as `last_episode_id`.
    *
-   * - `ACTIVATE`: always forces `active`, regardless of `deduplication_strategy`.
-   *   A user explicitly reopening an episode must not be overridden.
-   * - `DEACTIVATE`: forces `inactive` only when `deduplication_strategy` is
-   *   `'episode'`. Under `'rule_event'` the closed episode can never be
-   *   re-breached (the duplicate document is dropped), so the lock is dead
-   *   code there and is omitted to preserve the original behaviour.
-   *
-   * Returns `undefined` when no user lock applies.
+   * We still require `last_episode_id` to be present so the
+   * forced-active emit has an episode to pin to; in practice this is
+   * always true when `last_lifecycle_action_type === 'activate'` (the
+   * action client refuses to create an activate audit doc without a
+   * pre-existing `.rule-events` row), but the guard keeps the
+   * director defensive against an edge where the rule-events stream
+   * has been pruned but the audit stream has not.
    */
-  private resolveUserLockedStatus(
-    rule: RuleResponse,
-    previousAlertEvent?: LatestAlertEventState
-  ): AlertEpisodeStatus | undefined {
-    if (!previousAlertEvent || previousAlertEvent.last_episode_id == null) {
-      return undefined;
+  private isUserLocked(previousAlertEvent?: LatestAlertEventState): boolean {
+    if (!previousAlertEvent) {
+      return false;
     }
 
-    switch (previousAlertEvent.last_lifecycle_action_type) {
-      case ALERT_EPISODE_ACTION_TYPE.ACTIVATE:
-        return alertEpisodeStatus.active;
-
-      case ALERT_EPISODE_ACTION_TYPE.DEACTIVATE:
-        return rule.deduplication_strategy === 'episode' ? alertEpisodeStatus.inactive : undefined;
-
-      default:
-        return undefined;
-    }
+    return (
+      previousAlertEvent.last_lifecycle_action_type === ALERT_EPISODE_ACTION_TYPE.ACTIVATE &&
+      previousAlertEvent.last_episode_id !== null
+    );
   }
 
   private resolveEpisodeId({

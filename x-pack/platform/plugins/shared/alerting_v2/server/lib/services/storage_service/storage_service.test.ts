@@ -169,6 +169,72 @@ describe('StorageService', () => {
       expect(result).toEqual({ attempted: 1, docs: [mockDocs[0]], errors: [] });
     });
 
+    it('uses getDocumentId as the create _id and omits it when the resolver returns undefined', async () => {
+      const mockBulkResponse = {
+        items: [{ create: { _id: 'det-1', status: 201 } }, { create: { _id: '2', status: 201 } }],
+        errors: false,
+      };
+
+      // @ts-expect-error - not all fields are used
+      mockEsClient.bulk.mockResolvedValue(mockBulkResponse);
+
+      await storageService.bulkIndexDocs({
+        index,
+        docs: mockDocs,
+        getDocumentId: (doc) => (doc.group_hash === 'hash-1' ? 'det-1' : undefined),
+      });
+
+      expect(mockEsClient.bulk).toHaveBeenCalledWith({
+        operations: [
+          { create: { _index: index, _id: 'det-1' } },
+          mockDocs[0],
+          { create: { _index: index } },
+          mockDocs[1],
+        ],
+        refresh: false,
+      });
+    });
+
+    it('treats 409 version conflicts as deduplicated: reported as errors but not logged at error level', async () => {
+      const mockBulkResponse = {
+        items: [
+          { create: { _id: 'det-1', status: 201 } },
+          {
+            create: {
+              _id: 'det-2',
+              status: 409,
+              error: {
+                type: 'version_conflict_engine_exception',
+                reason: 'document already exists',
+                status: 409,
+              },
+            },
+          },
+        ],
+        errors: true,
+      };
+
+      // @ts-expect-error - not all fields are used
+      mockEsClient.bulk.mockResolvedValue(mockBulkResponse);
+
+      const result = await storageService.bulkIndexDocs({
+        index,
+        docs: mockDocs,
+        getDocumentId: (doc) => `det-${doc.group_hash.slice(-1)}`,
+      });
+
+      expect(mockLogger.error).not.toHaveBeenCalled();
+      expect(mockLogger.debug).toHaveBeenCalledWith(expect.stringContaining('deduplicated: 1'));
+      expect(result.docs).toEqual([mockDocs[0]]);
+      expect(result.errors).toEqual([
+        expect.objectContaining({
+          code: 'version_conflict_engine_exception',
+          details: { statusCode: 409 },
+          document: mockDocs[1],
+        }),
+      ]);
+    });
+
     it('should throw error and log when bulk operation fails', async () => {
       const error = new Error('Elasticsearch connection failed');
       mockEsClient.bulk.mockRejectedValue(error);

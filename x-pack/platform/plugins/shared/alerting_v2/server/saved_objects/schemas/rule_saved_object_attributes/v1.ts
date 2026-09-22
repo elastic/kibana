@@ -76,10 +76,6 @@ export const ruleSavedObjectAttributesSchema = schema.object({
     })
   ),
 
-  deduplication_strategy: schema.maybe(
-    schema.nullable(schema.oneOf([schema.literal('rule_event'), schema.literal('episode')]))
-  ),
-
   artifacts: schema.maybe(
     schema.arrayOf(
       schema.object({

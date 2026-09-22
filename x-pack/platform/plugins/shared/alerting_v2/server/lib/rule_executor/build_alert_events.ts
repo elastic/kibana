@@ -84,42 +84,50 @@ function sha256(value: string) {
 }
 
 /**
- * Deterministic document id for a rule event under the `'rule_event'`
- * deduplication strategy. Encodes the space, rule, group, and full row
- * content so that byte-identical re-matches collide on `_id` and are
- * dropped by Elasticsearch's `create` op, while distinct rows (same group,
- * different data) each get their own document.
+ * Deterministic `_id` for a rule event produced from a source document.
+ *
+ * Mirrors the detection engine's ES|QL rule identity: the source document's
+ * `_id`, `_index` and `_version` plus the space and rule ids. A re-match of
+ * the same source document on an overlapping lookback window collides on the
+ * bulk `create` and is dropped; a re-indexed document (new `_version`) is not.
  */
 export function buildRuleEventId({
   spaceId,
   ruleId,
-  groupHash,
-  rowDoc,
+  sourceId,
+  sourceIndex,
+  sourceVersion,
 }: {
   spaceId: string;
   ruleId: string;
-  groupHash: string;
-  rowDoc: Record<string, unknown>;
+  sourceId: string;
+  sourceIndex: string;
+  sourceVersion: string;
 }): string {
-  return sha256(`${spaceId}|${ruleId}|${groupHash}|${stableStringify(rowDoc)}`);
+  return sha256(`${spaceId}|${ruleId}|${sourceIndex}|${sourceId}|${sourceVersion}`);
 }
 
 /**
- * Returns the deterministic `_id` for an alert event if it should be
- * deduplicated, or `undefined` if it should receive an ES-generated id.
+ * Returns the deterministic `_id` for a breached rule event whose row carries
+ * source-document metadata (`_id` injected via `METADATA`), or `undefined`
+ * when Elasticsearch should generate the id.
  *
- * Only events that carry actual ES|QL row data participate — events with
- * empty `data` (e.g. continued-breach synthetic events) are excluded so they
- * continue to be written on every run as intended.
+ * Only `breached` events built from ES|QL rows qualify. Rows from aggregating
+ * queries have no `_id` column, and recovered / no_data / continued-breach
+ * events must keep being written on every run.
  */
 export function resolveRuleEventId(event: AlertEvent): string | undefined {
-  if (event.type !== 'alert') return undefined;
-  if (!event.data || Object.keys(event.data as object).length === 0) return undefined;
+  if (event.status !== 'breached') return undefined;
+
+  const sourceId = event.data?._id;
+  if (typeof sourceId !== 'string' || sourceId.length === 0) return undefined;
+
   return buildRuleEventId({
     spaceId: event.space_id,
     ruleId: event.rule.id,
-    groupHash: event.group_hash,
-    rowDoc: event.data as Record<string, unknown>,
+    sourceId,
+    sourceIndex: String(event.data._index ?? ''),
+    sourceVersion: String(event.data._version ?? ''),
   });
 }
 

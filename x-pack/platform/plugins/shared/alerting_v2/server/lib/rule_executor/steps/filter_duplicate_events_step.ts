@@ -15,11 +15,18 @@ import {
   type LoggerServiceContract,
 } from '../../services/logger_service/logger_service';
 import { resolveRuleEventId } from '../build_alert_events';
+import { RULE_EXECUTION_COUNTERS } from '../metrics/counters';
 import { guardedMapStep } from '../stream_utils';
 import type { PipelineStateStream, RuleExecutionStep } from '../types';
 
 const IDS_QUERY_CHUNK_SIZE = 10_000;
 
+/**
+ * Drops breached events whose deterministic `_id` already exists in
+ * `.rule-events`, so the director and downstream metrics only see rows that
+ * will actually be persisted. Documents written earlier in the same run are
+ * not yet searchable; those collide on `_id` at write time instead.
+ */
 @injectable()
 export class FilterDuplicateEventsStep implements RuleExecutionStep {
   public readonly name = 'filter_duplicate_events';
@@ -33,13 +40,6 @@ export class FilterDuplicateEventsStep implements RuleExecutionStep {
     return guardedMapStep(streamState, ['rule', 'alertEventsBatch'], async (state) => {
       const { rule, alertEventsBatch } = state;
 
-      if ((rule.deduplication_strategy ?? 'rule_event') !== 'rule_event') {
-        return { type: 'continue', state };
-      }
-
-      // Compute deterministic ids directly from event fields — safe across
-      // director transformations because space_id, rule.id, group_hash, and
-      // data are not mutated by any downstream step.
       const candidateIds = new Map<AlertEvent, string>();
       for (const event of alertEventsBatch) {
         const id = resolveRuleEventId(event);
@@ -56,19 +56,22 @@ export class FilterDuplicateEventsStep implements RuleExecutionStep {
         return { type: 'continue', state };
       }
 
-      const filteredBatch = alertEventsBatch.filter((e) => {
-        const id = candidateIds.get(e);
+      const filteredBatch = alertEventsBatch.filter((event) => {
+        const id = candidateIds.get(event);
         return id == null || !existingIds.has(id);
       });
 
       const removedCount = alertEventsBatch.length - filteredBatch.length;
       this.logger.debug({
-        message: `[${this.name}] Pre-filtered ${removedCount} duplicate event(s) for rule ${rule.id}`,
+        message: `[${this.name}] Dropped ${removedCount} duplicate rule event(s) for rule ${rule.id}`,
       });
 
       return {
         type: 'continue',
         state: { ...state, alertEventsBatch: filteredBatch },
+        meta: {
+          counters: { [RULE_EXECUTION_COUNTERS.ruleEventsDeduplicated]: removedCount },
+        },
       };
     });
   }
@@ -95,7 +98,7 @@ export class FilterDuplicateEventsStep implements RuleExecutionStep {
         this.logger.warn({
           message: `[${this.name}] ids pre-check failed (chunk offset=${offset}): ${
             err instanceof Error ? err.message : String(err)
-          }. Skipping pre-filter for this chunk.`,
+          }. Relying on _id collision at write time for this chunk.`,
         });
       }
     }

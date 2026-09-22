@@ -85,12 +85,10 @@ describe('ExecuteRuleQueryStep', () => {
 
     await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
-    const expectedQuery =
-      rule.query.format === 'standalone'
-        ? `${rule.query.breach.query.trimEnd()}\n| LIMIT ${DEFAULT_MAX_ALERTS_PER_RUN}`
-        : '';
     expect(mockEsClient.helpers.esql).toHaveBeenCalledWith(
-      expect.objectContaining({ query: expectedQuery }),
+      expect.objectContaining({
+        query: `FROM logs-* METADATA _id, _index, _version | LIMIT 10\n| LIMIT ${DEFAULT_MAX_ALERTS_PER_RUN}`,
+      }),
       expect.objectContaining({ signal: abortController.signal })
     );
   });
@@ -129,7 +127,7 @@ describe('ExecuteRuleQueryStep', () => {
     await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
     expect(mockEsClient.helpers.esql).toHaveBeenCalledWith(
-      expect.objectContaining({ query: 'FROM logs-*\n| LIMIT 500' }),
+      expect.objectContaining({ query: 'FROM logs-* METADATA _id, _index, _version\n| LIMIT 500' }),
       expect.any(Object)
     );
   });
@@ -148,7 +146,54 @@ describe('ExecuteRuleQueryStep', () => {
     // ES|QL takes the min across multiple LIMIT commands, so the author's
     // smaller LIMIT still wins - appending the configured max is always safe.
     expect(mockEsClient.helpers.esql).toHaveBeenCalledWith(
-      expect.objectContaining({ query: 'FROM logs-* | LIMIT 10\n| LIMIT 500' }),
+      expect.objectContaining({
+        query: 'FROM logs-* METADATA _id, _index, _version | LIMIT 10\n| LIMIT 500',
+      }),
+      expect.any(Object)
+    );
+  });
+
+  it('does not inject deduplication metadata into aggregating queries', async () => {
+    step = createStep(500);
+    mockHelpersEsqlArrowBatches(mockEsClient, [{ numRows: 1, rows: [{ 'host.name': 'host-a' }] }]);
+
+    const rule = createRuleResponse({
+      query: {
+        format: 'standalone',
+        breach: { query: 'FROM logs-* | STATS count = COUNT(*) BY host.name' },
+      },
+    });
+    const state = createRulePipelineState({ rule });
+
+    await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+    expect(mockEsClient.helpers.esql).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: 'FROM logs-* | STATS count = COUNT(*) BY host.name\n| LIMIT 500',
+      }),
+      expect.any(Object)
+    );
+  });
+
+  it('keeps user-declared METADATA and carries the fields through KEEP', async () => {
+    step = createStep(500);
+    mockHelpersEsqlArrowBatches(mockEsClient, [{ numRows: 1, rows: [{ 'host.name': 'host-a' }] }]);
+
+    const rule = createRuleResponse({
+      query: {
+        format: 'standalone',
+        breach: { query: 'FROM logs-* METADATA _id | KEEP _id, host.name' },
+      },
+    });
+    const state = createRulePipelineState({ rule });
+
+    await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+    expect(mockEsClient.helpers.esql).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query:
+          'FROM logs-* METADATA _id, _index, _version | KEEP _id, host.name, _index, _version\n| LIMIT 500',
+      }),
       expect.any(Object)
     );
   });

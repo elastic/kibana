@@ -5,15 +5,10 @@
  * 2.0.
  */
 
-import type {
-  RuleKind,
-  RecoveryStrategy,
-  NoDataStrategy,
-  DeduplicationStrategy,
-} from '@kbn/alerting-v2-schemas';
+import type { RuleKind, RecoveryStrategy, NoDataStrategy } from '@kbn/alerting-v2-schemas';
 import type { ActionFormValue } from '../actions_form';
 
-export type { RuleKind, RecoveryStrategy, NoDataStrategy, DeduplicationStrategy };
+export type { RuleKind, RecoveryStrategy, NoDataStrategy };
 
 /** Alert / recovery delay segment control (matches `AlertDelayField` / `RecoveryDelayField`). */
 export const DELAY_MODE = {
@@ -99,7 +94,6 @@ export interface FormValues {
   query: RuleQuery;
   recoveryStrategy?: RecoveryStrategy;
   noDataStrategy?: NoDataStrategy;
-  deduplicationStrategy?: DeduplicationStrategy;
   grouping?: RuleGrouping;
   stateTransition?: StateTransition;
   stateTransitionAlertDelayMode: StateTransitionDelayMode;

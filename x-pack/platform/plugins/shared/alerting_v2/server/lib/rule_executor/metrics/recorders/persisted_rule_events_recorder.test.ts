@@ -70,6 +70,52 @@ describe('PersistedRuleEventsRecorder', () => {
     expect(collector.snapshot().counters).toEqual({});
   });
 
+  it('counts 409 conflicts as ruleEventsDeduplicated even when nothing else persisted', () => {
+    const conflict = (document: Record<string, unknown>): BulkIndexObservationError => ({
+      code: 'version_conflict_engine_exception',
+      message: 'document already exists',
+      details: { statusCode: 409 },
+      index: '.rule-events',
+      document,
+    });
+
+    recorder.record(
+      collector,
+      buildContext({
+        meta: {
+          observations: {
+            bulkIndexResult: {
+              attempted: 2,
+              docs: [],
+              errors: [conflict(createAlertEvent()), conflict(createAlertEvent())],
+            },
+          },
+        },
+      })
+    );
+
+    expect(collector.snapshot().counters).toEqual({ ruleEventsDeduplicated: 2 });
+  });
+
+  it('does not count non-conflict rejections as deduplicated', () => {
+    recorder.record(
+      collector,
+      buildContext({
+        meta: {
+          observations: {
+            bulkIndexResult: {
+              attempted: 2,
+              docs: [createAlertEvent({ type: 'alert' })],
+              errors: [rejection(createAlertEvent())],
+            },
+          },
+        },
+      })
+    );
+
+    expect(collector.snapshot().counters).toEqual({ ruleEventsGenerated: 1 });
+  });
+
   it('increments ruleEventsGenerated and signalsGenerated when a signal-typed batch fully persists', () => {
     const persisted = [
       createAlertEvent({ type: 'signal' }),
