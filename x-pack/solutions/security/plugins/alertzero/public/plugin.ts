@@ -8,12 +8,14 @@
 import {
   AppStatus,
   DEFAULT_APP_CATEGORIES,
+  type AppUpdater,
   type CoreSetup,
   type CoreStart,
   type Plugin,
   type PluginInitializerContext,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { Subject } from 'rxjs';
 import {
   ALERTZERO_APP_ID,
   ALERTZERO_APP_PATH,
@@ -49,6 +51,11 @@ export class AlertZeroPublicPlugin
     >
 {
   private readonly config: AlertZeroClientConfig;
+  /**
+   * Allows `start()` to push updated deep links (with capability-resolved visibility)
+   * after capabilities become available, without re-registering the application.
+   */
+  private readonly appUpdater$ = new Subject<AppUpdater>();
 
   constructor(context: PluginInitializerContext<AlertZeroClientConfig>) {
     this.config = context.config.get();
@@ -71,7 +78,10 @@ export class AlertZeroPublicPlugin
       status: AppStatus.accessible,
       visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
       order: 101,
+      // Initial deep links without capability filtering — capabilities are not available at
+      // setup. `start()` emits an update via appUpdater$ once capabilities are known.
       deepLinks: getAlertZeroDeepLinks(),
+      updater$: this.appUpdater$,
       mount: async (params) => {
         const [coreStart, startDeps] = await coreSetup.getStartServices();
         const { renderApp } = await import('./application');
@@ -86,10 +96,15 @@ export class AlertZeroPublicPlugin
     return {};
   }
 
-  public start(_core: CoreStart, startDeps: AlertZeroStartDependencies): AlertZeroPublicStart {
+  public start(core: CoreStart, startDeps: AlertZeroStartDependencies): AlertZeroPublicStart {
     if (!this.config.enabled) {
       return {};
     }
+
+    // Push capability-resolved deep links now that `core.application.capabilities` is available.
+    this.appUpdater$.next(() => ({
+      deepLinks: getAlertZeroDeepLinks(core.application.capabilities),
+    }));
 
     registerAgenticInvestigationTemplateUI({
       conversationTemplates: startDeps.agentBuilder.conversationTemplates,

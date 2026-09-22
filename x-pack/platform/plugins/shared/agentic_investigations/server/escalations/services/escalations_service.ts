@@ -11,6 +11,7 @@ import {
   ConversationAccessControlRole,
   createConversationNotFoundError,
 } from '@kbn/agent-builder-common';
+import type { MetadataFieldValue } from '@kbn/agent-builder-common';
 import type {
   ConversationPublicClient,
   ConversationTemplatesStart,
@@ -153,6 +154,11 @@ export class EscalationsService {
 
     let result: EscalationConversation = current;
 
+    // Accumulate all metadata fields so they land in a single OCC-protected write.
+    // Sending them as separate patchMetadata calls would allow partial application:
+    // if a later write failed, earlier fields would already be committed.
+    const metadataUpdates: Record<string, MetadataFieldValue> = {};
+
     if (body.linked_investigations?.length) {
       // Validate that every id being appended is an accessible investigation.
       // bulkGet omits inaccessible / non-existent ids silently, so we detect them
@@ -180,24 +186,27 @@ export class EscalationsService {
         );
       }
 
-      const { conversation } = await client.patchMetadata(escalationId, {
-        [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: union,
-      });
-      result = conversation;
+      metadataUpdates[ESCALATION_LINKED_INVESTIGATIONS_FIELD] = union;
     }
 
     if (body.assignees !== undefined) {
       // Replace-in-full: the caller sends the complete desired assignee set.
-      const { conversation } = await client.patchMetadata(escalationId, {
-        [ESCALATION_ASSIGNEES_FIELD]: body.assignees,
-      });
-      result = conversation;
+      //
+      // Known limitation: this only updates the metadata field. On a private escalation,
+      // an assignee who is not already an ACL member cannot see the escalation in their
+      // own queue because Agent Builder's search filters by ACL independently of assignee
+      // metadata. Syncing the ACL here requires `updateAccessControl`, which is owner-only
+      // (see `hasConversationUpdateAccessControlAccess`), introducing a design constraint for
+      // non-owner managers. Tracked as a follow-up.
+      metadataUpdates[ESCALATION_ASSIGNEES_FIELD] = body.assignees;
     }
 
     if (body.status !== undefined) {
-      const { conversation } = await client.patchMetadata(escalationId, {
-        [ESCALATION_STATUS_FIELD]: body.status,
-      });
+      metadataUpdates[ESCALATION_STATUS_FIELD] = body.status;
+    }
+
+    if (Object.keys(metadataUpdates).length > 0) {
+      const { conversation } = await client.patchMetadata(escalationId, metadataUpdates);
       result = conversation;
     }
 

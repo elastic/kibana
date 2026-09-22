@@ -32,4 +32,7 @@ export const ESCALATION_QUEUE_LABELS = Object.freeze({
   searchAssignees: i18n.translate('xpack.alertzero.escalationQueue.searchAssignees', {
     defaultMessage: 'Search for users',
   }),
+  loadError: i18n.translate('xpack.alertzero.escalationQueue.loadError', {
+    defaultMessage: 'Failed to load escalations',
+  }),
 });

@@ -14,9 +14,11 @@ import {
 import { EscalationsService } from './escalations_service';
 import { InvalidLinkedInvestigationError, NotAnEscalationError } from './errors';
 import {
+  ESCALATION_ASSIGNEES_FIELD,
+  ESCALATION_LINKED_INVESTIGATIONS_FIELD,
+  ESCALATION_STATUS_FIELD,
   ESCALATION_TEMPLATE_ID,
   INVESTIGATION_TEMPLATE_ID,
-  ESCALATION_LINKED_INVESTIGATIONS_FIELD,
 } from '../../../common/escalations/constants';
 
 const logger = loggingSystemMock.createLogger();
@@ -387,6 +389,37 @@ describe('EscalationsService.update', () => {
     );
   });
 
+  it('issues exactly one patchMetadata call when linked_investigations, assignees, and status are all present', async () => {
+    const { service, client } = makeService({
+      get: jest.fn().mockResolvedValue({
+        id: 'escalation-1',
+        template_id: ESCALATION_TEMPLATE_ID,
+        metadata: {
+          [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: [],
+          status: 'open',
+          assignees: [],
+        },
+      }),
+    });
+
+    await service.update(request, 'escalation-1', {
+      linked_investigations: ['inv-1'],
+      assignees: ['user-uid-1'],
+      status: 'closed',
+    });
+
+    // A single OCC-protected write prevents partial application.
+    expect(client.patchMetadata).toHaveBeenCalledTimes(1);
+    expect(client.patchMetadata).toHaveBeenCalledWith(
+      'escalation-1',
+      expect.objectContaining({
+        [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: expect.arrayContaining(['inv-1']),
+        [ESCALATION_ASSIGNEES_FIELD]: ['user-uid-1'],
+        [ESCALATION_STATUS_FIELD]: 'closed',
+      })
+    );
+  });
+
   it('does not call client.update for a status-only update', async () => {
     const { service, client } = makeService({
       get: jest.fn().mockResolvedValue({
@@ -449,6 +482,37 @@ describe('EscalationsService.list', () => {
         filter: expect.stringContaining('not (metadata.status: "closed")'),
       })
     );
+  });
+
+  it('uses metadata.status: "closed" filter when status is "closed"', async () => {
+    const { service, client } = makeService({
+      search: jest.fn().mockResolvedValue({ results: [], total: 0 }),
+    });
+
+    await service.list(request, { page: 1, per_page: 50, status: 'closed' });
+
+    expect(client.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filter: expect.stringContaining('metadata.status: "closed"'),
+      })
+    );
+    // Must not also apply the "not closed" clause.
+    const { filter } = (client.search as jest.Mock).mock.calls[0][0] as { filter: string };
+    expect(filter).not.toContain('not (metadata.status');
+  });
+
+  it('uses template-only filter (no status clause) when status is "all"', async () => {
+    const { service, client } = makeService({
+      search: jest.fn().mockResolvedValue({ results: [], total: 0 }),
+    });
+
+    await service.list(request, { page: 1, per_page: 50, status: 'all' });
+
+    const { filter } = (client.search as jest.Mock).mock.calls[0][0] as { filter: string };
+    // Template clause must be present.
+    expect(filter).toContain(`template_id: "${ESCALATION_TEMPLATE_ID}"`);
+    // No status filtering at all.
+    expect(filter).not.toContain('metadata.status');
   });
 
   it('passes sort updated_at desc explicitly to client.search', async () => {

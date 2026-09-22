@@ -29,7 +29,7 @@ export const useListEscalations = ({
   const { services } = useKibana();
 
   return useQuery({
-    queryKey: escalationQueryKeys.list(status),
+    queryKey: escalationQueryKeys.list(status, page, perPage),
     queryFn: async (): Promise<ListEscalationsResponse> =>
       services.http!.get<ListEscalationsResponse>(ESCALATIONS_INTERNAL_URL, {
         version: AGENTIC_INVESTIGATIONS_API_VERSION,

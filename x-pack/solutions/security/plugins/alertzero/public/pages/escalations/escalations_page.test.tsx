@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Router } from '@kbn/shared-ux-router';
@@ -28,6 +28,39 @@ jest.mock('@kbn/agentic-investigations-plugin/public', () => ({
   useEscalationUserProfiles: jest.fn(),
   useSuggestEscalationAssignees: jest.fn(),
 }));
+
+// Replace EscalationAssignees with a minimal stub: clicking the "assign" button calls
+// onChange with a known profile. This isolates the page-level mutation wiring from the
+// internals of the EUI UserProfilesPopover (which renders in a portal difficult to drive
+// in JSDOM tests).
+jest.mock('@kbn/agentic-investigations-common', () => {
+  const actual = jest.requireActual('@kbn/agentic-investigations-common');
+  return {
+    ...actual,
+    // eslint-disable-next-line react/display-name
+    EscalationAssignees: ({
+      escalationId,
+      onChange,
+      canManage,
+    }: {
+      escalationId: string;
+      onChange: (s: unknown[]) => void;
+      canManage: boolean;
+    }) =>
+      canManage ? (
+        <button
+          data-test-subj={`mock-assign-${escalationId}`}
+          onClick={() =>
+            onChange([{ uid: 'user-uid-1', enabled: true, user: { username: 'alice' }, data: {} }])
+          }
+        >
+          Assign
+        </button>
+      ) : (
+        <span data-test-subj={`mock-assignees-readonly-${escalationId}`}>Read-only</span>
+      ),
+  };
+});
 
 // Doc-title hook has a DOM side-effect irrelevant to these tests.
 jest.mock('../../hooks/use_alertzero_doc_title', () => ({
@@ -57,8 +90,14 @@ const closedEscalation = {
 
 const updateMutate = jest.fn();
 
-const renderPage = () => {
+const renderPage = (overrides: { capabilities?: object } = {}) => {
   const core = coreMock.createStart();
+  // Grant both show and manage by default.
+  (core.application.capabilities as Record<string, unknown>).agenticInvestigations = {
+    showEscalations: true,
+    manageEscalations: true,
+    ...((overrides.capabilities as object | undefined) ?? {}),
+  };
   const history = createMemoryHistory();
 
   render(
@@ -88,18 +127,24 @@ afterEach(() => jest.clearAllMocks());
 const mockBothQueues = (
   open: object[] = [],
   closed: object[] = [],
-  opts: { isLoading?: boolean; error?: Error } = {}
+  opts: { isLoading?: boolean; error?: Error; openTotal?: number; closedTotal?: number } = {}
 ) => {
   mockUseListEscalations.mockImplementation(({ status }: { status: string }) => {
     if (status === 'open') {
       return {
-        data: { results: open, pagination: { total: open.length } },
+        data: {
+          results: open,
+          pagination: { total: opts.openTotal ?? open.length, page: 1, per_page: 50 },
+        },
         isLoading: opts.isLoading ?? false,
         error: opts.error ?? null,
       };
     }
     return {
-      data: { results: closed, pagination: { total: closed.length } },
+      data: {
+        results: closed,
+        pagination: { total: opts.closedTotal ?? closed.length, page: 1, per_page: 50 },
+      },
       isLoading: opts.isLoading ?? false,
       error: opts.error ?? null,
     };
@@ -154,7 +199,7 @@ describe('EscalationsPage', () => {
     expect(screen.queryByTestId('escalationQueue-open')).not.toBeInTheDocument();
   });
 
-  it('shows an error prompt when queries fail and no data is available', () => {
+  it('shows an error prompt when both queries fail and no data is available', () => {
     mockUseListEscalations.mockReturnValue({
       data: undefined,
       isLoading: false,
@@ -173,12 +218,66 @@ describe('EscalationsPage', () => {
   });
 
   it('calls the update mutation when assignees change', () => {
-    // Simulate one escalation with one assignee uid; the profiles hook returns no profile
-    // so the selection slot is empty — but the Unassigned / add-button path still renders.
     mockBothQueues([openEscalation], []);
     renderPage();
 
-    // The mutation is registered — the card renders without throwing.
-    expect(updateMutate).not.toHaveBeenCalled();
+    // Simulate the stub EscalationAssignees calling onChange with a new profile selection.
+    const assignButton = screen.getByTestId('mock-assign-esc-open-1');
+    fireEvent.click(assignButton);
+
+    expect(updateMutate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        escalationId: 'esc-open-1',
+        body: expect.objectContaining({ assignees: ['user-uid-1'] }),
+      }),
+      expect.anything()
+    );
+  });
+
+  it('renders the assignee widget as read-only when manageEscalations is false', () => {
+    mockBothQueues([openEscalation], []);
+    renderPage({ capabilities: { showEscalations: true, manageEscalations: false } });
+
+    // Read-only stub is rendered; interactive stub is not.
+    expect(screen.getByTestId('mock-assignees-readonly-esc-open-1')).toBeInTheDocument();
+    expect(screen.queryByTestId('mock-assign-esc-open-1')).not.toBeInTheDocument();
+  });
+
+  it('shows the server total in the bucket badge even when the page holds fewer items', () => {
+    // Server says there are 75 open escalations but only 50 are returned per page.
+    mockBothQueues([openEscalation], [], { openTotal: 75 });
+    renderPage();
+
+    // The badge in the Open accordion header should show 75, not 1.
+    expect(screen.getByTestId('escalationQueue-open')).toBeInTheDocument();
+    expect(screen.getByText('75')).toBeInTheDocument();
+  });
+
+  it('shows an inline error for a failing bucket without hiding the other bucket', () => {
+    mockUseListEscalations.mockImplementation(({ status }: { status: string }) => {
+      if (status === 'open') {
+        return {
+          data: {
+            results: [openEscalation],
+            pagination: { total: 1, page: 1, per_page: 50 },
+          },
+          isLoading: false,
+          error: null,
+        };
+      }
+      // Closed query fails.
+      return {
+        data: undefined,
+        isLoading: false,
+        error: new Error('Closed query failed'),
+      };
+    });
+    renderPage();
+
+    // Open bucket is still visible.
+    expect(screen.getByTestId('escalationQueue-open')).toBeInTheDocument();
+    // Closed bucket renders an inline error, not a page-level empty prompt that hides open.
+    expect(screen.getByTestId('escalationQueue-closed')).toBeInTheDocument();
+    expect(screen.getByText('Failed to load escalations')).toBeInTheDocument();
   });
 });

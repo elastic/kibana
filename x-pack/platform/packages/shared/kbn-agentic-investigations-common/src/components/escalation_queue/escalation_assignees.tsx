@@ -19,6 +19,17 @@ interface EscalationAssigneesProps {
   suggestions: UserProfileWithAvatar[];
   /** Whether the suggestion query is loading. */
   isSuggestionsLoading: boolean;
+  /**
+   * When true, the picker `+` button is disabled and no popover is shown.
+   * Set while the bulk profile fetch is still in flight so a change cannot
+   * accidentally drop unresolved assignee UIDs from the replace-in-full payload.
+   */
+  isProfilesLoading?: boolean;
+  /**
+   * When false the component renders the assignee display without the `+` button
+   * or picker popover. Use this to honour `manageEscalations` capability.
+   */
+  canManage: boolean;
   /** Called when the search term in the popover changes. */
   onSearchChange: (term: string) => void;
   /** Called with the new full selection when the user makes a change. */
@@ -31,9 +42,23 @@ interface EscalationAssigneesProps {
  * Purely presentational — all data and mutations live in the page. The component
  * opens a `UserProfilesPopover` on the `+` button and calls `onChange` with the
  * full replacement selection.
+ *
+ * Rendering rules:
+ * - `canManage: false` → read-only avatar stack (or "Unassigned"), no picker.
+ * - `isProfilesLoading: true` → picker button disabled; prevents a change that
+ *   would silently drop unresolved UIDs from the replace-in-full payload.
  */
 export const EscalationAssignees = memo<EscalationAssigneesProps>(
-  ({ escalationId, selected, suggestions, isSuggestionsLoading, onSearchChange, onChange }) => {
+  ({
+    escalationId,
+    selected,
+    suggestions,
+    isSuggestionsLoading,
+    isProfilesLoading = false,
+    canManage,
+    onSearchChange,
+    onChange,
+  }) => {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
     const closePopover = useCallback(() => setIsPopoverOpen(false), []);
@@ -47,6 +72,31 @@ export const EscalationAssignees = memo<EscalationAssigneesProps>(
       [onChange, closePopover]
     );
 
+    const avatarStack =
+      selected.length === 0 ? (
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            {ESCALATION_QUEUE_LABELS.unassigned}
+          </EuiText>
+        </EuiFlexItem>
+      ) : (
+        selected.map((profile) => (
+          <EuiFlexItem key={profile.uid} grow={false}>
+            <UserToolTip user={profile.user} avatar={profile.data?.avatar}>
+              <UserAvatar user={profile.user} avatar={profile.data?.avatar} size="s" />
+            </UserToolTip>
+          </EuiFlexItem>
+        ))
+      );
+
+    if (!canManage) {
+      return (
+        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+          {avatarStack}
+        </EuiFlexGroup>
+      );
+    }
+
     const button = (
       <EuiToolTip content={ESCALATION_QUEUE_LABELS.addAssignee} disableScreenReaderOutput>
         <EuiButtonIcon
@@ -54,6 +104,7 @@ export const EscalationAssignees = memo<EscalationAssigneesProps>(
           aria-label={ESCALATION_QUEUE_LABELS.addAssignee}
           color="text"
           onClick={togglePopover}
+          isDisabled={isProfilesLoading}
           data-test-subj={`escalationAssigneesAdd-${escalationId}`}
         />
       </EuiToolTip>
@@ -61,21 +112,7 @@ export const EscalationAssignees = memo<EscalationAssigneesProps>(
 
     return (
       <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-        {selected.length === 0 ? (
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs" color="subdued">
-              {ESCALATION_QUEUE_LABELS.unassigned}
-            </EuiText>
-          </EuiFlexItem>
-        ) : (
-          selected.map((profile) => (
-            <EuiFlexItem key={profile.uid} grow={false}>
-              <UserToolTip user={profile.user} avatar={profile.data?.avatar}>
-                <UserAvatar user={profile.user} avatar={profile.data?.avatar} size="s" />
-              </UserToolTip>
-            </EuiFlexItem>
-          ))
-        )}
+        {avatarStack}
         <EuiFlexItem grow={false}>
           <UserProfilesPopover
             isOpen={isPopoverOpen}

@@ -7,7 +7,13 @@
 
 export const escalationQueryKeys = {
   all: ['agenticInvestigations', 'escalations'] as const,
-  list: (status: string) => [...escalationQueryKeys.all, 'list', status] as const,
+  /**
+   * Include all response-shaping inputs so React Query re-fetches when any of
+   * them changes. Omitting page or perPage would cause a page flip to return
+   * stale data from the previous page's cache entry.
+   */
+  list: (status: string, page?: number, perPage?: number) =>
+    [...escalationQueryKeys.all, 'list', status, page ?? 1, perPage ?? null] as const,
   userProfiles: (uids: readonly string[]) =>
     [...escalationQueryKeys.all, 'profiles', uids] as const,
   suggestUsers: (term: string) => [...escalationQueryKeys.all, 'suggest', term] as const,
