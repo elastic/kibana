@@ -35,4 +35,5 @@ export const test = baseTest.extend<FlyoutSystemTestFixtures, ScoutWorkerFixture
   },
 });
 
+export { PORTAL_SELECTOR } from './page_objects';
 export type { ChildLabel, FlyoutForm } from './page_objects';

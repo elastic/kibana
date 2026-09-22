@@ -28,6 +28,9 @@ const ROOT_SUBJ_STEM: Record<FlyoutForm, string> = {
 
 const subj = (value: string) => `[data-test-subj="${value}"]`;
 
+/** Popovers and context menus render here, outside the flyout root, so scans must include it. */
+export const PORTAL_SELECTOR = '[data-euiportal="true"]';
+
 /**
  * Page object for the flyout_system example app.
  * Locators are scoped to individual flyout roots to handle parent and child flyouts.
@@ -123,6 +126,15 @@ export class FlyoutSystemApp {
     return this.flyout(form, session).locator(subj('flyoutHeaderTitleIcon'));
   }
 
+  /** Only the service widget renders a tab bar. */
+  tabList(form: FlyoutForm, session: string): Locator {
+    return this.flyout(form, session).getByRole('tablist');
+  }
+
+  tab(form: FlyoutForm, session: string, name: string): Locator {
+    return this.flyout(form, session).getByRole('tab', { name });
+  }
+
   badgeOverflow(form: FlyoutForm, session: string): Locator {
     return this.flyout(form, session).locator(subj('flyoutHeaderBadgeOverflow'));
   }
@@ -171,7 +183,42 @@ export class FlyoutSystemApp {
     return this.flyout(form, session).locator(subj(name));
   }
 
+  /** Child B carries the footer action menu in both widgets. */
+  childFooterCloseAction(form: FlyoutForm, session: string): Locator {
+    const name =
+      form === 'component'
+        ? `closeChildFlyoutComponentBButton-${session}`
+        : `closeChildFlyoutOverlaysBButton-${session}`;
+    return this.childFlyout(form, session, 'B').locator(subj(name));
+  }
+
+  private childFooterMenuSubj(form: FlyoutForm, session: string): string {
+    return form === 'component'
+      ? `menuChildFlyoutComponentBButton-${session}`
+      : `menuChildFlyoutOverlaysBButton-${session}`;
+  }
+
+  childFooterMenuTrigger(form: FlyoutForm, session: string): Locator {
+    return this.childFlyout(form, session, 'B').locator(
+      subj(this.childFooterMenuSubj(form, session))
+    );
+  }
+
+  /** The menu renders in a portal, outside the flyout root, so this is not scoped to it. */
+  childFooterMenuPanel(form: FlyoutForm, session: string): Locator {
+    return this.page.locator(subj(`${this.childFooterMenuSubj(form, session)}Panel`));
+  }
+
   // Interactions.
+
+  /**
+   * Reveals the "Details" grouping and its subsections. The component widget renders it as an
+   * always-open section, the service widget as a collapsed accordion.
+   */
+  async openDetails(form: FlyoutForm, session: string) {
+    if (form === 'component') return;
+    await this.flyout(form, session).getByRole('button', { name: 'Details' }).click();
+  }
 
   /** Scrolls the body using keyboard inputs (PageDown/Home/End). */
   async scrollBodyByKeyboard(form: FlyoutForm, session: string, key: 'PageDown' | 'Home' | 'End') {
