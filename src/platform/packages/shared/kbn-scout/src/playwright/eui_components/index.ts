@@ -41,12 +41,9 @@ import {
 } from '@elastic/eui-test-helpers';
 
 /**
- * Stable EUI selectors, keyed like `page.components`. Use these when no
- * Component Object method covers the interaction, instead of writing an EUI
- * class name by hand (`@kbn/eslint/scout_no_raw_eui_selectors` flags those).
+ * Stable EUI selectors, keyed like `page.components`, for when no Component Object method fits.
  *
- * @example
- *   page.locator(euiSelectors.basicTable.ROW_SELECTOR)
+ * @example page.locator(euiSelectors.basicTable.ROW_SELECTOR)
  */
 export const euiSelectors = {
   accordion: EuiAccordionSelectors,
