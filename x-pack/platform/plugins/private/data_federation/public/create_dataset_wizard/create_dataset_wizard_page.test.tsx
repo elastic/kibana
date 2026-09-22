@@ -166,6 +166,25 @@ describe('CreateDatasetWizardPage', () => {
     });
   });
 
+  it('auto-selects format from resource extension', async () => {
+    const { getByTestId, findByTestId } = renderWizard();
+
+    fireEvent.click(getByTestId('createDatasetDataSource'));
+    fireEvent.click(await findByTestId('createDatasetDataSource-source-1'));
+    fireEvent.change(getByTestId('createDatasetName'), {
+      target: { value: 'logs-dataset' },
+    });
+    fireEvent.change(getByTestId('createDatasetResource'), {
+      target: { value: 'bucket/access/**/*.parquet' },
+    });
+
+    // No manual format selection. The path extension should infer parquet and allow navigation.
+    fireEvent.click(getByTestId('nextButton'));
+    expect(
+      await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
+    ).toBeInTheDocument();
+  });
+
   it('requires format before leaving the dataset step', async () => {
     const { getByTestId, queryByTestId, findByTestId } = renderWizard();
 

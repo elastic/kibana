@@ -5,17 +5,40 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { Forms } from '@kbn/es-ui-shared-plugin/public';
 import { useFormContext, useWatch } from 'react-hook-form';
 
 import type { DataSource } from '../../common';
 import { CreateDatasetDetailsFields } from './create_dataset_details_fields';
-import type { CreateDatasetFormValues } from './create_dataset_form_state';
+import type { CreateDatasetFormValues, DatasetFormatFormValue } from './create_dataset_form_state';
 import { CreateDatasetFormatField } from './create_dataset_settings';
 import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
+import { SUPPORTED_DATASET_FORMATS, type SupportedDatasetFormat } from './components/format_select';
 import type { DatasetWizardContent } from './types';
+
+const isSupportedDatasetFormat = (value: string): value is SupportedDatasetFormat =>
+  (SUPPORTED_DATASET_FORMATS as readonly string[]).includes(value);
+
+const inferFormatFromResource = (resource: string): DatasetFormatFormValue => {
+  const value = resource?.trim().toLowerCase();
+  if (!value) return '';
+
+  // Match common data file extensions anywhere in the path (including globs).
+  // We pick the last extension occurrence to handle paths like `.../*.csv.gz`.
+  const supportedExtensionsPattern = SUPPORTED_DATASET_FORMATS.join('|');
+  const extRegex = new RegExp(`\\.(${supportedExtensionsPattern})(?:$|[?#]|[^a-z0-9])`, 'g');
+  let match: RegExpExecArray | null;
+  let lastExt: string | undefined;
+  while ((match = extRegex.exec(value)) !== null) {
+    lastExt = match[1];
+  }
+
+  if (!lastExt || !isSupportedDatasetFormat(lastExt)) return '';
+
+  return lastExt;
+};
 
 export function StepDataset({
   dataSources,
@@ -30,12 +53,37 @@ export function StepDataset({
   isEditMode?: boolean;
   datasetNameToEdit?: string;
 }) {
-  const { control, getValues, trigger } = useFormContext<CreateDatasetFormValues>();
+  const { control, getValues, setValue, trigger } = useFormContext<CreateDatasetFormValues>();
   const { updateContent } = Forms.useContent<DatasetWizardContent, 'dataset'>('dataset');
   const name = useWatch({ control, name: 'name' });
   const dataSource = useWatch({ control, name: 'data_source' });
   const resource = useWatch({ control, name: 'resource' });
   const format = useWatch({ control, name: 'settings.format' });
+  const lastAutoSelectedFormatRef = useRef<DatasetFormatFormValue | null>(null);
+
+  useEffect(() => {
+    // If the user changes format away from what we last auto-selected, stop auto-updating.
+    if (
+      format &&
+      lastAutoSelectedFormatRef.current &&
+      format !== lastAutoSelectedFormatRef.current
+    ) {
+      lastAutoSelectedFormatRef.current = null;
+    }
+  }, [format]);
+
+  useEffect(() => {
+    const inferredFormat = inferFormatFromResource(resource);
+    if (!inferredFormat) return;
+
+    // Only auto-select when:
+    // - the format is not set yet, OR
+    // - the current format was previously auto-selected (so we can keep it in sync with path changes)
+    if (!format || format === lastAutoSelectedFormatRef.current) {
+      lastAutoSelectedFormatRef.current = inferredFormat;
+      setValue('settings.format', inferredFormat, { shouldValidate: true });
+    }
+  }, [format, resource, setValue]);
 
   useEffect(() => {
     // FormWizard's validate() treats any content with isValid === undefined as a

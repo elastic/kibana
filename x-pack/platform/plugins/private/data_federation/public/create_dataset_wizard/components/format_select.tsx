@@ -11,6 +11,9 @@ import { EuiSuperSelect, EuiText, type EuiSuperSelectOption } from '@elastic/eui
 import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
 import type { DatasetFormatFormValue } from '../create_dataset_form_state';
 
+export const SUPPORTED_DATASET_FORMATS = ['csv', 'tsv', 'ndjson', 'parquet'] as const;
+export type SupportedDatasetFormat = (typeof SUPPORTED_DATASET_FORMATS)[number];
+
 const formatOptionDisplay = ({
   title,
   description,
