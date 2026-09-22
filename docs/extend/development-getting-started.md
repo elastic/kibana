@@ -35,6 +35,7 @@ Enable pnpm via corepack (bundled with Node.js; the version is pinned in `packag
 
 ```bash
 corepack enable
+corepack prepare pnpm@11.27.0 --activate
 ```
 
 Bootstrap {{kib}} and install all the dependencies:
