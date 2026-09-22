@@ -20,7 +20,6 @@ import {
   OBSERVABILITY_ALERTING_ALERTS_PATH,
   OBSERVABILITY_ALERTING_BASE_PATH,
   OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
-  OBSERVABILITY_ALERTING_LEGACY_INBOX_PATH,
   OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
   OBSERVABILITY_ALERTING_RULES_V1_PATH,
   OBSERVABILITY_ALERTING_RULES_V2_PATH,
@@ -153,18 +152,6 @@ describe('ObservabilityAlertingApp', () => {
     const { history } = renderAt('/');
 
     expect(history.location.pathname).toBe(OBSERVABILITY_ALERTING_ALERTS_PATH);
-  });
-
-  it('redirects /inbox to /alerts', () => {
-    const { history } = renderAt(OBSERVABILITY_ALERTING_LEGACY_INBOX_PATH);
-
-    expect(history.location.pathname).toBe(OBSERVABILITY_ALERTING_ALERTS_PATH);
-  });
-
-  it('redirects /inbox/:episodeId to /alerts/:episodeId', () => {
-    const { history } = renderAt(`${OBSERVABILITY_ALERTING_LEGACY_INBOX_PATH}/ep-1`);
-
-    expect(history.location.pathname).toBe(`${OBSERVABILITY_ALERTING_ALERTS_PATH}/ep-1`);
   });
 
   it('renders EpisodesPage at /alerts with observability host', async () => {
