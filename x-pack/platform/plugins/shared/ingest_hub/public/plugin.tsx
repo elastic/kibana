@@ -19,9 +19,9 @@ import { INGEST_HUB_APP_ID } from '@kbn/deeplinks-observability';
 import type { Observable } from 'rxjs';
 import { catchError, from, map, of, switchMap } from 'rxjs';
 import { dynamic } from '@kbn/shared-ux-utility';
+import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type {
   IngestHubSetup,
-  IngestHubSetupDependencies,
   IngestHubStart,
   IngestHubStartDependencies,
   IngestFlow,
@@ -63,7 +63,7 @@ const createNavigationAvailable$ = (
 
 export class IngestHubPlugin
   implements
-    Plugin<IngestHubSetup, IngestHubStart, IngestHubSetupDependencies, IngestHubStartDependencies>
+    Plugin<IngestHubSetup, IngestHubStart, { cloud?: CloudSetup }, IngestHubStartDependencies>
 {
   private readonly ingestFlows: IngestFlow[] = [];
 
@@ -71,7 +71,7 @@ export class IngestHubPlugin
 
   setup(
     coreSetup: CoreSetup<IngestHubStartDependencies>,
-    deps: IngestHubSetupDependencies = {}
+    deps: { cloud?: CloudSetup } = {}
   ): IngestHubSetup {
     const startServicesPromise = coreSetup.getStartServices();
 

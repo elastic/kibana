@@ -1192,6 +1192,36 @@ describe('Workload Identity template URLs', () => {
       expect(result).toBe(LEGACY_TEMPLATE_URL);
     });
 
+    it('returns undefined when the URL carries a placeholder this Kibana does not know', () => {
+      expect(
+        getCloudConnectorRemoteRoleTemplate({
+          cloud: echQaCloud,
+          accountType: SINGLE_ACCOUNT,
+          iacTemplateUrl: `${WII_TEMPLATE_URL}&param_ElasticAccountAlias=ACCOUNT_ALIAS`,
+        })
+      ).toBeUndefined();
+      expect(
+        getCloudConnectorRemoteRoleTemplate({
+          cloud: echQaCloud,
+          accountType: SINGLE_ACCOUNT,
+          iacTemplateUrl: `${LEGACY_TEMPLATE_URL}&param_Something=NEW_TOKEN`,
+        })
+      ).toBeUndefined();
+    });
+
+    it('does not mistake mixed-case parameter names or encoded paths for placeholders', () => {
+      const armUrl =
+        'https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Felastic%2Fcloudbeat%2Fmain%2Fdeploy%2Fazure%2FARM-for-ACCOUNT_TYPE.json';
+
+      expect(
+        getCloudConnectorRemoteRoleTemplate({
+          cloud: echQaCloud,
+          accountType: ORGANIZATION_ACCOUNT,
+          iacTemplateUrl: armUrl,
+        })
+      ).toBe(armUrl.replace('ACCOUNT_TYPE', 'organization-account'));
+    });
+
     it('URL-encodes substituted values', () => {
       const result = getCloudConnectorRemoteRoleTemplate({
         cloud: { ...echQaCloud, organizationId: 'org id&x' } as CloudSetup,

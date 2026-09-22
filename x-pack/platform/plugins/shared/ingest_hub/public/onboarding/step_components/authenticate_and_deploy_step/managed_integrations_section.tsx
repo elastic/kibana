@@ -40,7 +40,6 @@ import type {
   CloudSetupForCloudConnector,
   RenderIacTemplateIntegration,
 } from '@kbn/fleet-plugin/public';
-import type { IngestHubCloudService } from '../../../types';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { StaticKeysReplaceView } from './static_keys_replace_view';
 import { getIacRenderIntegrations } from './iac_render_integrations';
@@ -69,7 +68,7 @@ export function ManagedIntegrationsSection({
   isDone,
   hasFailed,
 }: ManagedIntegrationsSectionProps) {
-  const { services } = useKibana<CoreStart & { cloud?: IngestHubCloudService }>();
+  const { services } = useKibana<CoreStart & { cloud?: CloudSetupForCloudConnector }>();
   const { setConnectorId, setStaticKeys, authenticateAndDeployStep, awsServicesMap } =
     useOnboardingFlow();
   const { connectorId: initialConnectorId } = authenticateAndDeployStep;
@@ -120,7 +119,6 @@ export function ManagedIntegrationsSection({
     () => getIacRenderIntegrations(serviceIds, awsServicesMap, serviceVars),
     [serviceIds, awsServicesMap, serviceVars]
   );
-  const cloud: CloudSetupForCloudConnector | undefined = services.cloud;
 
   const radioOptions = [
     {
@@ -256,7 +254,7 @@ export function ManagedIntegrationsSection({
             <Suspense fallback={<EuiLoadingSpinner />}>
               {preferredMethod === 'identity_federation' ? (
                 <LazyAwsIdentityFederationSetup
-                  cloud={cloud}
+                  cloud={services.cloud}
                   iacTemplateUrl={iacTemplateUrl}
                   integrations={iacIntegrations}
                   onReadyChange={setIsDeployReady}

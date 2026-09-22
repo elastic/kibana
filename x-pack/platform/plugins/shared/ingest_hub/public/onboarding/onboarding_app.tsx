@@ -21,7 +21,7 @@ import {
   KibanaVersionContext,
   sendGetCloudOnboardingDeployment,
 } from '@kbn/fleet-plugin/public';
-import type { IngestHubCloudService, IngestHubStartDependencies } from '../types';
+import type { IngestHubStartDependencies } from '../types';
 
 import { OnboardingShell } from './onboarding_shell';
 import { OnboardingFlowProvider } from './onboarding_flow_context';
@@ -123,7 +123,7 @@ export async function hydrateOnboardingSession(
 export function getCloudService(
   cloudSetup: CloudSetup | undefined,
   cloudStart: CloudStart | undefined
-): IngestHubCloudService | undefined {
+): (CloudStart & Partial<CloudSetup>) | undefined {
   if (!cloudStart) return undefined;
   return { ...cloudSetup, ...cloudStart };
 }

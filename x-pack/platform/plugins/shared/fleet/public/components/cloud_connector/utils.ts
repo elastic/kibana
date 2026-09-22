@@ -306,6 +306,9 @@ export const getElasticCloudTemplateContext = (
   };
 };
 
+// placeholder shape, e.g. RESOURCE_ID; anything left in the URL after substitution is unknown to this Kibana
+const UNRESOLVED_PLACEHOLDER_REGEX = /\b[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)+\b/;
+
 export const getTemplateUrlTokens = (iacTemplateUrl: string | undefined): TemplateUrlToken[] =>
   iacTemplateUrl ? TEMPLATE_URL_TOKENS.filter((token) => iacTemplateUrl.includes(token)) : [];
 
@@ -374,16 +377,14 @@ export const getCloudConnectorRemoteRoleTemplate = ({
 }: GetCloudConnectorRemoteRoleTemplateParams): string | undefined => {
   if (!iacTemplateUrl) return undefined;
 
-  const tokens = getTemplateUrlTokens(iacTemplateUrl);
-  if (tokens.length === 0) return iacTemplateUrl;
-
   const values = getTemplateTokenValues(cloud, accountType);
-
-  return tokens.reduce<string | undefined>((url, token) => {
+  const url = getTemplateUrlTokens(iacTemplateUrl).reduce<string | undefined>((acc, token) => {
     const value = values[token];
-    if (url === undefined || !value) return undefined;
-    return url.split(token).join(encodeURIComponent(value));
+    if (acc === undefined || !value) return undefined;
+    return acc.split(token).join(encodeURIComponent(value));
   }, iacTemplateUrl);
+
+  return url === undefined || UNRESOLVED_PLACEHOLDER_REGEX.test(url) ? undefined : url;
 };
 
 /**
