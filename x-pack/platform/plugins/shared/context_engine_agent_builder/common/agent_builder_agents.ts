@@ -5,12 +5,4 @@
  * 2.0.
  */
 
-import React from 'react';
-
-const LazyAlertDropdown = React.lazy(() => import('./alert_dropdown'));
-
-export const LazyAlertDropdownWrapper = () => (
-  <React.Suspense fallback={<div />}>
-    <LazyAlertDropdown />
-  </React.Suspense>
-);
+export const CONTEXT_ENGINE_SETUP_AGENT_ID = 'platform.context_engine.setup' as const;
