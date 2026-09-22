@@ -49,6 +49,40 @@ describe('pickShardExperiments', () => {
     ]);
   });
 
+  it('falls back to the newest COMPLETE sweep when the newest one is missing a shard', () => {
+    // sweep-300 is newer but only s1of2 finished; sweep-200 is complete.
+    const picked = pickShardExperiments([
+      experiment('sweep-200-s1of2::suite::glm-5.3-flash', '2026-09-03T20:00:00Z'),
+      experiment('sweep-200-s2of2::suite::glm-5.3-flash', '2026-09-03T21:00:00Z'),
+      experiment('sweep-300-s1of2::suite::glm-5.3-flash', '2026-09-03T22:00:00Z'),
+    ]);
+
+    expect(picked.map((e) => e.execution_id)).toEqual([
+      'sweep-200-s1of2::suite::glm-5.3-flash',
+      'sweep-200-s2of2::suite::glm-5.3-flash',
+    ]);
+  });
+
+  it('returns nothing when no sharded sweep is complete', () => {
+    const picked = pickShardExperiments([
+      experiment('sweep-300-s1of3::suite::glm-5.3-flash', '2026-09-03T10:00:00Z'),
+      experiment('sweep-300-s3of3::suite::glm-5.3-flash', '2026-09-03T11:00:00Z'),
+    ]);
+
+    expect(picked).toEqual([]);
+  });
+
+  it('treats duplicate shard listings as a single shard, not extra coverage', () => {
+    const picked = pickShardExperiments([
+      experiment('sweep-100-s1of2::suite::glm-5.3-flash', '2026-09-03T10:00:00Z'),
+      experiment('sweep-100-s1of2::suite::glm-5.3-flash', '2026-09-03T10:05:00Z'),
+      experiment('sweep-100-s2of2::suite::glm-5.3-flash', '2026-09-03T10:30:00Z'),
+    ]);
+
+    // Complete despite the duplicate; both members retained as listed.
+    expect(picked).toHaveLength(3);
+  });
+
   it('ranks a sweep by its last-finishing shard, not its last-listed one', () => {
     const picked = pickShardExperiments([
       experiment('sweep-100-s1of2::suite::glm-5.3-flash', '2026-09-03T10:00:00Z'),

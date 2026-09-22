@@ -214,6 +214,50 @@ describe('matrix command empty-result guard', () => {
     const source = readFileSync(join(__dirname, 'matrix.ts'), 'utf8');
 
     expect(source).toContain('warnOnConfiguredNamesMissingFromData(config, aggregated, log)');
-    expect(source).toContain('warnOnDataAboutToLeaveLookback(config, aggregated, log)');
+    expect(source).toContain('warnOnDataAboutToLeaveLookback(config, aggregated, log, {');
+    // The expiry preflight must see the effective CLI window, not the raw config values.
+    expect(source).toMatch(/lookbackDays,\s*\n\s*\}\);/);
+  });
+
+  it('rejects columns that disagree on allowSelfJudged for a shared suite', () => {
+    const conflicting = {
+      ...config,
+      columns: [
+        { ...config.columns[0], suites: ['migrations-suite'], allowSelfJudged: true },
+        { ...config.columns[0], suites: ['migrations-suite'], allowSelfJudged: false },
+      ],
+    } as unknown as typeof config;
+
+    expect(() =>
+      matrixScoreQuery(conflicting as unknown as Parameters<typeof matrixScoreQuery>[0], {
+        suiteIds: ['migrations-suite'],
+        modelIds: ['model-a'],
+        asOf: undefined,
+      })
+    ).toThrow(/Conflicting allowSelfJudged/);
+  });
+
+  it('treats two columns agreeing on allowSelfJudged for a shared suite as consistent', () => {
+    const agreeing = {
+      ...config,
+      columns: [
+        { ...config.columns[0], suites: ['migrations-suite'], allowSelfJudged: true },
+        {
+          ...config.columns[0],
+          id: 'col-b',
+          label: 'B',
+          suites: ['migrations-suite'],
+          allowSelfJudged: true,
+        },
+      ],
+    } as unknown as typeof config;
+
+    expect(() =>
+      matrixScoreQuery(agreeing as unknown as Parameters<typeof matrixScoreQuery>[0], {
+        suiteIds: ['migrations-suite'],
+        modelIds: ['model-a'],
+        asOf: undefined,
+      })
+    ).not.toThrow();
   });
 });

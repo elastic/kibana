@@ -466,25 +466,38 @@ const buildMatrixRow = (
   modelConfig: MatrixModelConfig,
   modelScores: AggregatedModelScores,
   config: MatrixConfig,
-  excludeEvaluators: readonly string[]
+  excludeEvaluators: readonly string[],
+  overallExcludeEvaluators: readonly string[]
 ): MatrixRow => {
   const cells: Record<string, MatrixCell> = {};
+  // Base-column cells use config.excludeEvaluators only; the saturation-aware
+  // list feeds a separate Overall-only cell set below.
+  const overallCells: Record<string, MatrixCell> = {};
   for (const column of config.columns) {
     const columnSuites = new Set(column.suites);
+    const cellExtras = {
+      selfJudged: modelScores.suites.some(
+        (suite) => columnSuites.has(suite.suiteId) && suite.selfJudged === true
+      ),
+      excludedSelfJudged: modelScores.suites
+        .filter((suite) => columnSuites.has(suite.suiteId))
+        .reduce((total, suite) => total + (suite.excludedSelfJudged ?? 0), 0),
+      erroredOutEvaluators: columnErroredOutEvaluators(modelScores, column),
+    };
     cells[column.id] = buildCell(
       computeColumnMean(modelScores, column, excludeEvaluators),
       column,
       config,
-      {
-        selfJudged: modelScores.suites.some(
-          (suite) => columnSuites.has(suite.suiteId) && suite.selfJudged === true
-        ),
-        excludedSelfJudged: modelScores.suites
-          .filter((suite) => columnSuites.has(suite.suiteId))
-          .reduce((total, suite) => total + (suite.excludedSelfJudged ?? 0), 0),
-        erroredOutEvaluators: columnErroredOutEvaluators(modelScores, column),
-      }
+      cellExtras
     );
+    if (overallExcludeEvaluators !== excludeEvaluators) {
+      overallCells[column.id] = buildCell(
+        computeColumnMean(modelScores, column, overallExcludeEvaluators),
+        column,
+        config,
+        cellExtras
+      );
+    }
   }
 
   // Declared order, so a later composite can reference an earlier one.
@@ -492,8 +505,14 @@ const buildMatrixRow = (
     cells[composite.id] = computeComposite(cells, composite, config);
   }
 
-  const scoredColumns = config.columns.filter((c) => cells[c.id].kind === 'score').length;
-  const overall = computeOverall(cells, config);
+  const scoredColumns = config.columns.filter((c) => {
+    const kind = cells[c.id].kind;
+    return kind === 'score' || kind === 'not-recommended';
+  }).length;
+  // When saturation exclusions are active, Overall aggregates its own cell values
+  // computed without the saturated evaluators; base cells above are untouched.
+  const overallSourceCells = Object.keys(overallCells).length > 0 ? overallCells : cells;
+  const overall = computeOverall(overallSourceCells, config);
 
   return {
     modelId: modelConfig.id,
@@ -540,7 +559,9 @@ export const buildMatrix = (
     ? detectSaturatedEvaluators(aggregated)
     : [];
   const saturatedNames = saturatedEvaluatorNames(saturation);
-  const excludeEvaluators =
+  const excludeEvaluators = config.excludeEvaluators;
+  // Saturation exclusions feed the Overall aggregate only, never base-column cells.
+  const overallExcludeEvaluators =
     saturatedNames.size > 0
       ? [...config.excludeEvaluators, ...saturatedNames]
       : config.excludeEvaluators;
@@ -551,7 +572,13 @@ export const buildMatrix = (
   for (const modelConfig of config.models) {
     const modelScores = resolveScores(modelConfig);
     if (modelScores) {
-      const row = buildMatrixRow(modelConfig, modelScores, config, excludeEvaluators);
+      const row = buildMatrixRow(
+        modelConfig,
+        modelScores,
+        config,
+        excludeEvaluators,
+        overallExcludeEvaluators
+      );
       (modelConfig.openSource ? openSource : proprietary).push(row);
     }
   }

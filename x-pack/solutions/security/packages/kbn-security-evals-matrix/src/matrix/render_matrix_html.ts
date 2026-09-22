@@ -260,14 +260,16 @@ const cellHtml = (row: MatrixRow, column: MatrixDisplayColumn): string => {
     case 'not-recommended':
       return `<span class="status err">⛔ fail</span>`;
     case 'excluded':
-      return `<span class="status warn" title="${cell.docs} score(s) rejected: ${cell.reason}">⚠ excluded</span>`;
+      return `<span class="status warn" title="${esc(String(cell.docs))} score(s) rejected: ${esc(
+        cell.reason
+      )}">⚠ excluded</span>`;
     case 'insufficient-coverage':
       return `<span class="status warn" title="scored on ${cell.covered} of ${cell.required} required columns — too thin to aggregate">${cell.covered}/${cell.required} cols</span>`;
     case 'insufficient-evaluators':
-      return `<span class="status warn" title="evaluator(s) errored on every example and were dropped from the mean: ${cell.evaluators.join(
-        ', '
-      )} — a score here would rest on the surviving (often saturated) evaluators">⚠ ${cell.evaluators.join(
-        ', '
+      return `<span class="status warn" title="evaluator(s) errored on every example and were dropped from the mean: ${esc(
+        cell.evaluators.join(', ')
+      )} — a score here would rest on the surviving (often saturated) evaluators">⚠ ${esc(
+        cell.evaluators.join(', ')
       )} errored</span>`;
     case 'missing':
     default:

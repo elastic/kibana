@@ -455,6 +455,42 @@ describe('queryMatrixTraces example fetching', () => {
     );
   });
 
+  it('enumerates each shard under its own experiment id, not the row experimentId', async () => {
+    const getExperimentScores = jest.fn(async () => []);
+    const client = { getExperimentScores, getExampleScores: jest.fn(async () => []) };
+    const log = { debug: jest.fn(), warning: jest.fn() };
+
+    const aggregated = [
+      {
+        modelId: 'model-x',
+        suites: [
+          {
+            suiteId: 'suite-1',
+            experimentId: 'exp-shard-1',
+            executions: [
+              { experimentId: 'exp-shard-1', executionId: 'sweep-9-s1of2::suite::model-x' },
+              { experimentId: 'exp-shard-2', executionId: 'sweep-9-s2of2::suite::model-x' },
+            ],
+            executionIds: ['sweep-9-s1of2::suite::model-x', 'sweep-9-s2of2::suite::model-x'],
+            datasets: [],
+          },
+        ],
+      },
+    ];
+
+    await queryMatrixTraces(client as never, log as never, aggregated as never);
+
+    const calls = (
+      getExperimentScores.mock.calls as unknown as Array<[string, { executionId?: string }]>
+    )
+      .map(([experimentId, { executionId }]) => `${experimentId}|${executionId}`)
+      .sort();
+    expect(calls).toEqual([
+      'exp-shard-1|sweep-9-s1of2::suite::model-x',
+      'exp-shard-2|sweep-9-s2of2::suite::model-x',
+    ]);
+  });
+
   it('fetches each (run, example) pair on a filtered server with no cross-run aliasing', async () => {
     const client = makeClient({ filtered: true });
     await queryMatrixTraces(

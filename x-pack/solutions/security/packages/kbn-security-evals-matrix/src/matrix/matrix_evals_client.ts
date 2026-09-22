@@ -98,7 +98,9 @@ export class MatrixEvalsClient extends EvalsClient {
           error instanceof Error ? error.message : String(error)
         }`
       );
-      return [];
+      // Rethrow so queryMatrixTraces' bounded retry can absorb transient 502/503s;
+      // swallowing here would record a permanently missing trace instead.
+      throw error;
     }
   }
 }

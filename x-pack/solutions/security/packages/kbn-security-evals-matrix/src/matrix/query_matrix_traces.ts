@@ -326,20 +326,37 @@ export const queryMatrixTraces = async (
     suiteId: string;
     modelId: string;
     executionId: string;
+    /** Experiment route ID; can differ from executionId on sharded runs. */
+    experimentId: string;
     exampleIds: Set<string>;
   }
   const runRefs: RunRef[] = [];
 
-  const modelSuites: Array<{ modelId: string; suiteId: string; executionId: string }> = [];
+  const modelSuites: Array<{
+    modelId: string;
+    suiteId: string;
+    executionId: string;
+    experimentId: string;
+  }> = [];
   for (const modelScores of aggregated) {
     for (const suite of modelScores.suites) {
       // Each shard of a sharded suite owns a disjoint set of examples.
-      const executionIds =
-        suite.executionIds && suite.executionIds.length > 0
-          ? suite.executionIds
-          : [suite.experimentId];
-      for (const executionId of executionIds) {
-        modelSuites.push({ modelId: modelScores.modelId, suiteId: suite.suiteId, executionId });
+      const executions =
+        suite.executions && suite.executions.length > 0
+          ? suite.executions
+          : suite.executionIds && suite.executionIds.length > 0
+          ? suite.executionIds.map((executionId) => ({
+              experimentId: suite.experimentId,
+              executionId,
+            }))
+          : [{ experimentId: suite.experimentId, executionId: suite.experimentId }];
+      for (const { experimentId, executionId } of executions) {
+        modelSuites.push({
+          modelId: modelScores.modelId,
+          suiteId: suite.suiteId,
+          executionId,
+          experimentId,
+        });
       }
     }
   }
@@ -347,12 +364,12 @@ export const queryMatrixTraces = async (
   const enumerated = await mapWithConcurrency(
     modelSuites,
     6,
-    async ({ modelId, suiteId, executionId }) => {
+    async ({ modelId, suiteId, executionId, experimentId }) => {
       log.debug(
         `Enumerating examples for experiment ${executionId} (model ${modelId}, suite ${suiteId})`
       );
 
-      const stripped = await evalsClient.getExperimentScores(executionId, {
+      const stripped = await evalsClient.getExperimentScores(experimentId, {
         suiteId,
         taskModelId: modelId,
         executionId,
@@ -370,7 +387,7 @@ export const queryMatrixTraces = async (
         return null;
       }
 
-      return { suiteId, modelId, executionId, exampleIds };
+      return { suiteId, modelId, executionId, experimentId, exampleIds };
     }
   );
 

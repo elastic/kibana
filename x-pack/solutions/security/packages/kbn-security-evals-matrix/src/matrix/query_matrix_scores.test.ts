@@ -845,6 +845,16 @@ describe('queryMatrixScores with examplePrefixes', () => {
       scoringBySuite: { 'suite-a': { excludeSelfJudged: false } },
     });
     expect(independent[0].suites[0].selfJudged).toBe(false);
+
+    // No scoring config at all must behave like an explicit `false`, not like `true`:
+    // the self-judged experiment is kept (and disclosed), never silently dropped.
+    const unconfigured = await queryMatrixScores(build(), log, {
+      suiteIds: ['suite-a'],
+      modelIds: ['m1'],
+      prefixesBySuite: { 'suite-a': ['alert-analysis'] },
+    });
+    expect(prefixIds(unconfigured)).toContain('prefix:alert-analysis');
+    expect(unconfigured[0].suites[0].selfJudged).toBe(true);
   });
 
   it('does not fetch per-example scores when no prefixes requested', async () => {

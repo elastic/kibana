@@ -65,16 +65,29 @@ export const matrixScoreQuery = (
   scoringBySuite: scoringBySuiteFromColumns(config),
 });
 
-/** Collapses per-column `allowSelfJudged` into a suite-keyed scoring policy. */
+/** Collapses per-column `allowSelfJudged` into a suite-keyed scoring policy; throws when columns sharing a suite disagree. */
 export const scoringBySuiteFromColumns = (
   config: MatrixConfig
 ): Record<string, ScoreAggregationOptions> => {
   const bySuite: Record<string, ScoreAggregationOptions> = {};
-  for (const column of config.columns) {
+  // Track each suite's effective excludeSelfJudged so shared-suite conflicts fail loudly
+  // instead of being resolved by column order (the policy is applied per suite on fetch).
+  const excludeBySuite = new Map<string, boolean>();
+  for (const column of config.columns.filter((c) => c.allowSelfJudged !== undefined)) {
+    const exclude = !column.allowSelfJudged;
     for (const suiteId of column.suites ?? []) {
-      if (column.allowSelfJudged !== undefined) {
-        bySuite[suiteId] = { ...config.scoring, excludeSelfJudged: !column.allowSelfJudged };
+      const existing = excludeBySuite.get(suiteId);
+      if (existing !== undefined && existing !== exclude) {
+        throw new Error(
+          `Conflicting allowSelfJudged settings for suite "${suiteId}": one column sets ` +
+            `allowSelfJudged=${
+              column.allowSelfJudged
+            } and another allowSelfJudged=${!column.allowSelfJudged}. ` +
+            `Scores are fetched per suite, so every column backed by this suite must agree on the self-judging policy.`
+        );
       }
+      excludeBySuite.set(suiteId, exclude);
+      bySuite[suiteId] = { ...config.scoring, excludeSelfJudged: exclude };
     }
   }
   return bySuite;
@@ -284,7 +297,10 @@ export const matrixCmd: Command<void> = {
     }
 
     warnOnConfiguredNamesMissingFromData(config, aggregated, log);
-    warnOnDataAboutToLeaveLookback(config, aggregated, log);
+    warnOnDataAboutToLeaveLookback(config, aggregated, log, {
+      ...(asOf !== undefined ? { now: asOf } : {}),
+      lookbackDays,
+    });
 
     const matrix = buildMatrix(aggregated, config, log);
     const generateHtml = flagsReader.boolean('html');

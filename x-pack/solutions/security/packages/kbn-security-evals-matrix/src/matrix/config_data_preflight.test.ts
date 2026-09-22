@@ -87,4 +87,27 @@ describe('warnOnDataAboutToLeaveLookback', () => {
 
     expect(warnings).toEqual([]);
   });
+
+  it('warns against the effective lookback override, not the config value', () => {
+    const { warnings, log } = collectWarnings();
+
+    // Config lookback is 45d; the effective window passed on the CLI is 30d,
+    // so 34-day-old data has already left the actual query window (no warning)
+    // while 20-day-old data is inside it and 10 days from falling out (warns).
+    const gone = collectWarnings();
+    warnOnDataAboutToLeaveLookback(config, scores('security-automatic-migrations', 34), gone.log, {
+      now: NOW,
+      lookbackDays: 30,
+    });
+    expect(gone.warnings).toEqual([]);
+
+    warnOnDataAboutToLeaveLookback(config, scores('persona-matrix', 20), log, {
+      now: NOW,
+      lookbackDays: 30,
+    });
+
+    expect(warnings).toHaveLength(1);
+    expect(warnings[0]).toContain('persona-matrix');
+    expect(warnings[0]).toContain('10 day');
+  });
 });

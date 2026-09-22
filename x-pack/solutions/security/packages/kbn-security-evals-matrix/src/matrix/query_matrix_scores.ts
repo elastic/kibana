@@ -53,7 +53,9 @@ export interface AggregatedDatasetScores {
 export interface AggregatedSuiteScores {
   suiteId: string;
   experimentId: string;
-  /** Every execution contributing to this row; sharded sweeps have one per VM. */
+  /** Every (experimentId, executionId) contributing to this row; sharded sweeps have one per VM. */
+  executions?: Array<{ experimentId: string; executionId: string }>;
+  /** Flat execution IDs for backwards compatibility / display. */
   executionIds?: string[];
   timestamp?: string;
   /** Commit the graded run executed against (not the generator's commit). */
@@ -330,7 +332,10 @@ export const queryMatrixScores = async (
         ...pickLatestExperimentPerModel(experiments, {
           lookbackDays,
           ...(asOf !== undefined ? { now: asOf } : {}),
-          allowSelfJudged: suiteScoring?.excludeSelfJudged === false,
+          // suiteScoring already resolves per-suite override -> global -> undefined.
+          // Absent config must not be stricter than an explicit `false`: only a
+          // resolved excludeSelfJudged===true rejects self-judged runs.
+          allowSelfJudged: suiteScoring?.excludeSelfJudged !== true,
           onSelfJudgedRejected: (rejected) => {
             selfJudgedRejected.push(rejected);
           },
@@ -502,6 +507,10 @@ export const queryMatrixScores = async (
           model.suites.push({
             suiteId,
             experimentId: latest.experiment_id,
+            executions: shards.map((s) => ({
+              experimentId: s.experiment_id,
+              executionId: s.execution_id ?? s.experiment_id,
+            })),
             executionIds: shards.map((s) => s.execution_id ?? s.experiment_id),
             timestamp: latest.timestamp,
             commitSha: latest.git_commit_sha ?? undefined,

@@ -119,6 +119,27 @@ describe('renderMatrixHtml', () => {
     expect(html).not.toContain('Token cost per (model, column)');
   });
 
+  it('HTML-escapes attacker-influenced reasons and evaluator names in status cells', () => {
+    const payload = '"><img src=x onerror=alert(1)>';
+    const hostile: Matrix = {
+      ...mockMatrix,
+      proprietary: [
+        {
+          ...mockMatrix.proprietary[0],
+          cells: {
+            alert: { kind: 'excluded', docs: 3, reason: payload },
+            threat: { kind: 'insufficient-evaluators', evaluators: [payload] },
+          },
+        },
+      ],
+    } as unknown as Matrix;
+
+    const html = renderMatrixHtml(hostile, mockConfig);
+
+    expect(html).not.toContain('<img src=x onerror=alert(1)>');
+    expect(html).toContain('&lt;img src=x onerror=alert(1)&gt;');
+  });
+
   it('renders trace data when provided', () => {
     const traces: MatrixTraceData = {
       'test-model:alert': {

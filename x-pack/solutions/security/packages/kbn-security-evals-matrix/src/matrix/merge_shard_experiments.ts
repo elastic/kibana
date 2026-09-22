@@ -8,17 +8,42 @@
 import type { EvaluationExperimentSummary } from '@kbn/evals-common';
 import type { AggregatedDatasetScores } from './query_matrix_scores';
 
-/** `sweep-123-s2of4::suite::model` -> `sweep-123`. Undefined when unsharded. */
-const shardBase = (executionId: string | undefined): string | undefined => {
+/** `sweep-123-s2of4::suite::model` -> `{ base: 'sweep-123', index: 2, count: 4 }`. Undefined when unsharded. */
+const parseShard = (
+  executionId: string | undefined
+): { base: string; index: number; count: number } | undefined => {
   if (!executionId) {
     return undefined;
   }
   const runId = executionId.split('::')[0];
-  const match = /^(.*)-s\d+of\d+$/.exec(runId);
-  return match ? match[1] : undefined;
+  const match = /^(.*)-s(\d+)of(\d+)$/.exec(runId);
+  return match ? { base: match[1], index: Number(match[2]), count: Number(match[3]) } : undefined;
 };
 
-/** Returns every experiment (shard) belonging to the newest sweep; an unsharded run is returned alone. */
+/** A sweep is complete when every encoded shard index 1..count is present (deduped). */
+const sweepIsComplete = (members: EvaluationExperimentSummary[]): boolean => {
+  const shards = members
+    .map((member) => parseShard(member.execution_id))
+    .filter(
+      (shard): shard is { base: string; index: number; count: number } => shard !== undefined
+    );
+  if (shards.length === 0) {
+    return true; // unsharded
+  }
+  const count = shards[0].count;
+  if (shards.some((shard) => shard.count !== count)) {
+    return false; // inconsistent encoding within one sweep — treat as incomplete
+  }
+  const indices = new Set(shards.map((shard) => shard.index));
+  for (let expected = 1; expected <= count; expected++) {
+    if (!indices.has(expected)) {
+      return false;
+    }
+  }
+  return true;
+};
+
+/** Returns every experiment (shard) belonging to the newest COMPLETE sweep; an unsharded run is returned alone. */
 export const pickShardExperiments = (
   experiments: EvaluationExperimentSummary[]
 ): EvaluationExperimentSummary[] => {
@@ -29,8 +54,8 @@ export const pickShardExperiments = (
   const bySweep = new Map<string, { members: EvaluationExperimentSummary[]; at: number }>();
 
   for (const candidate of experiments) {
-    const base = shardBase(candidate.execution_id);
-    const key = base ?? `unsharded:${candidate.execution_id ?? candidate.experiment_id}`;
+    const shard = parseShard(candidate.execution_id);
+    const key = shard?.base ?? `unsharded:${candidate.execution_id ?? candidate.experiment_id}`;
     const at = Date.parse(candidate.timestamp);
     if (Number.isFinite(at)) {
       const group = bySweep.get(key);
@@ -44,10 +69,10 @@ export const pickShardExperiments = (
     }
   }
 
-  const newest = [...bySweep.values()].reduce<{
-    members: EvaluationExperimentSummary[];
-    at: number;
-  } | null>((best, group) => (!best || group.at > best.at ? group : best), null);
+  // Newest-first; a partial newest sweep loses to the newest COMPLETE one so a
+  // failed sweep cannot silently shrink the matrix.
+  const ordered = [...bySweep.values()].sort((a, b) => b.at - a.at);
+  const newest = ordered.find((group) => sweepIsComplete(group.members));
 
   if (!newest) {
     return [];

@@ -135,6 +135,35 @@ describe('buildMatrix coverage floor', () => {
     expect(matrix.proprietary.indexOf(broad)).toBeLessThan(matrix.proprietary.indexOf(thin));
   });
 
+  it('counts a measured failing (not-recommended) column toward coverage', () => {
+    const failFloorConfig: MatrixConfig = parseMatrixConfig({
+      minCoverage: 2,
+      notRecommendedBelow: 5,
+      columns: [
+        { id: 'triage', label: 'Triage', suites: ['suite-a'], weight: 1 },
+        { id: 'detect', label: 'Detect', suites: ['suite-b'], weight: 1 },
+      ],
+      models: [{ id: 'model-fail', label: 'Failing Model' }],
+    });
+
+    const matrix = buildMatrix(
+      [
+        {
+          modelId: 'model-fail',
+          provider: 'p',
+          // One passing column, one measured failure: both runs completed.
+          suites: [suite('suite-a', 'd1', 0.9), suite('suite-b', 'd2', 0.1)],
+        },
+      ],
+      failFloorConfig
+    );
+    const row = matrix.proprietary[0];
+
+    expect(row.cells.detect.kind).toBe('not-recommended');
+    expect(row.coverage.covered).toBe(2);
+    expect(row.overall.kind).not.toBe('insufficient-coverage');
+  });
+
   it('publishes Overall once the floor is met', () => {
     const scores: AggregatedModelScores[] = [
       {
@@ -606,6 +635,21 @@ describe('buildMatrix saturated-evaluator exclusion', () => {
     expect(matrix.evaluatorSaturation).toEqual([]);
     expect(overallOf(matrix)[0]).toBeCloseTo(9.35, 2);
     expect(overallOf(matrix).at(-1)).toBeCloseTo(5.35, 2);
+  });
+
+  it('leaves base-column cells unchanged when the saturation exclusion is enabled', () => {
+    const scores = buildScores();
+    const cellsOf = (matrix: ReturnType<typeof buildMatrix>) =>
+      matrix.proprietary.map((row) => row.cells.triage);
+
+    // The exclusion is Overall-only: published per-column scores must not move.
+    expect(cellsOf(buildMatrix(scores, configWith(true)))).toEqual(
+      cellsOf(buildMatrix(scores, configWith(false)))
+    );
+    // ...while Overall does change, proving the exclusion actually ran.
+    expect(overallOf(buildMatrix(scores, configWith(true)))).not.toEqual(
+      overallOf(buildMatrix(scores, configWith(false)))
+    );
   });
 });
 

@@ -67,9 +67,15 @@ export function warnOnDataAboutToLeaveLookback(
   config: MatrixConfig,
   aggregated: AggregatedModelScores[],
   log: ToolingLog,
-  { now = Date.now(), warnWithinDays = 14 }: { now?: number; warnWithinDays?: number } = {}
+  {
+    now = Date.now(),
+    warnWithinDays = 14,
+    lookbackDays: effectiveLookbackDays,
+  }: { now?: number; warnWithinDays?: number; lookbackDays?: number } = {}
 ): void {
-  const lookbackDays = config.lookbackDays;
+  // Prefer the effective window (CLI --lookback-days / --as-of) over the raw config
+  // value so overridden or historical runs warn against the window actually queried.
+  const lookbackDays = effectiveLookbackDays ?? config.lookbackDays;
   if (!lookbackDays) {
     return;
   }

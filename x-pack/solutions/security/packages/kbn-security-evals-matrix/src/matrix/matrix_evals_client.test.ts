@@ -50,13 +50,13 @@ describe('MatrixEvalsClient', () => {
     });
   });
 
-  it('sends example score filters and returns an empty list when the request fails', async () => {
+  it('sends example score filters and rethrows request failures so bounded retry can engage', async () => {
     const request = jest.fn().mockRejectedValue(new Error('boom'));
     const client = new MatrixEvalsClient({ request } as unknown as KbnClient, log);
 
     await expect(
       client.getExampleScores('example 1', { executionId: 'exec', modelId: 'model' })
-    ).resolves.toEqual([]);
+    ).rejects.toThrow('boom');
     expect(request.mock.calls[0][0]).toMatchObject({
       path: expect.stringContaining('example%201'),
       query: { execution_id: 'exec', model_id: 'model' },
