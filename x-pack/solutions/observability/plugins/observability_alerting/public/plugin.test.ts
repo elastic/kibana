@@ -17,6 +17,11 @@ import {
   OBSERVABILITY_ALERTING_BASE_PATH,
   OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID,
   OBSERVABILITY_ALERTING_ALERTS_PATH,
+  OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID,
+  OBSERVABILITY_ALERTING_RULES_V2_DEEP_LINK_ID,
+  OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID,
+  OBSERVABILITY_ALERTING_ACTION_POLICIES_DEEP_LINK_ID,
+  OBSERVABILITY_ALERTING_EXECUTION_HISTORY_DEEP_LINK_ID,
 } from './constants';
 import { getObservabilityAlertingDeepLinks } from './get_observability_alerting_deep_links';
 
@@ -156,22 +161,18 @@ describe('ObservabilityAlertingPlugin', () => {
     });
     const update = await readLatestUpdate(registered.updater$, enabled$);
 
-    expect(update?.deepLinks).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          id: OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID,
-          visibleIn: ['globalSearch', 'projectSideNav'],
-        }),
-        expect.objectContaining({
-          id: 'rules-v2',
-          visibleIn: [],
-        }),
-        expect.objectContaining({
-          id: 'rule-library',
-          visibleIn: [],
-        }),
-      ])
+    const visibilityById = Object.fromEntries(
+      (update?.deepLinks ?? []).map((dl) => [dl.id, dl.visibleIn ?? []])
     );
+
+    expect(visibilityById).toEqual({
+      [OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID]: ['globalSearch', 'projectSideNav'],
+      [OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID]: [],
+      [OBSERVABILITY_ALERTING_RULES_V2_DEEP_LINK_ID]: [],
+      [OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID]: [],
+      [OBSERVABILITY_ALERTING_ACTION_POLICIES_DEEP_LINK_ID]: [],
+      [OBSERVABILITY_ALERTING_EXECUTION_HISTORY_DEEP_LINK_ID]: [],
+    });
   });
 
   it('keeps the app inaccessible when alerting v2 is disabled', async () => {
