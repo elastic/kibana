@@ -50,9 +50,7 @@ export const actionPolicyResponseSchema = z
       .describe('The ISO datetime until which the policy is snoozed, or null if not snoozed.'),
     created_by: actorSchema.nullable().describe('The actor who created the action policy.'),
     created_at: z.string().describe('The ISO datetime when the action policy was created.'),
-    updated_by: actorSchema
-      .nullable()
-      .describe('The actor who last updated the action policy.'),
+    updated_by: actorSchema.nullable().describe('The actor who last updated the action policy.'),
     updated_at: z.string().describe('The ISO datetime when the action policy was last updated.'),
   })
   .meta({ id: 'alerting_action_policy_response' });

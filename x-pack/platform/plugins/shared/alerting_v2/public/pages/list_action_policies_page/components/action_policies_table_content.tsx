@@ -127,8 +127,7 @@ export const ActionPoliciesTableContent = ({
     [policyToViewId, items]
   );
   const updatedByUids = useMemo(
-    () =>
-      collectActorUids(items.map((item) => toPolicy(item).updated_by)),
+    () => collectActorUids(items.map((item) => toPolicy(item).updated_by)),
     [items]
   );
   const { data: updatedByProfileByUid, isLoading: isProfileLoading } = useBulkGetUserProfiles({

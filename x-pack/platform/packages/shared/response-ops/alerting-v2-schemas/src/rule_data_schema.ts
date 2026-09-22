@@ -13,7 +13,13 @@ import {
   composeEsqlQuery,
   validateComposedEsqlQuery,
 } from './validation';
-import { actorSchema, durationSchema, queryIntSchema, tagsResponseSchema, tagsSchema } from './common';
+import {
+  actorSchema,
+  durationSchema,
+  queryIntSchema,
+  tagsResponseSchema,
+  tagsSchema,
+} from './common';
 import {
   MAX_CONSECUTIVE_BREACHES,
   MAX_DESCRIPTION_LENGTH,

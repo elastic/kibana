@@ -27,6 +27,4 @@ export const resolveDisplayName = (
 
 /** Collects the profile IDs to fetch from a set of actors, skipping unattributed ones. */
 export const collectActorUids = (actors: Array<Actor | null | undefined>): string[] =>
-  actors
-    .map((actor) => actor?.profile_uid)
-    .filter((uid): uid is string => Boolean(uid));
+  actors.map((actor) => actor?.profile_uid).filter((uid): uid is string => Boolean(uid));
