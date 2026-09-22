@@ -147,7 +147,7 @@ const attachmentTargetSchema = z.object({
     .nativeEnum(SupportedChartType)
     .optional()
     .describe(
-      '(optional) For Lens visualizations only: pass a new chart type when the request changes the chart family (e.g. xy to pie). Omit it to keep the current one.'
+      '(optional) For Lens: pass a new chart type when the request changes the chart family (e.g. xy to pie); omit it to keep the current one. For Vega it is only a styling hint. Ignored for custom content.'
     ),
   esql: optionalEsqlField,
   has_data: attachmentHasDataField,
