@@ -10,6 +10,7 @@
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import type { DiscoverSessionData } from '@kbn/as-code-discover-schema';
 import type { ApplicationStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { TimeRange } from '@kbn/es-query';
@@ -28,7 +29,6 @@ import {
 } from '@kbn/presentation-util-plugin/public';
 import { toSearchEmbeddableByValueState } from '../../common/agent_builder/to_search_embeddable_by_value_state';
 import type { DiscoverAppLocator } from '../../common';
-import type { DiscoverSessionApiData } from '../../server';
 import type { SearchEmbeddableApi, SearchEmbeddablePanelApiState } from '../embeddable/types';
 import { SearchEmbeddableToolbarProvider } from '../embeddable/components/search_embeddable_toolbar_context';
 import {
@@ -74,7 +74,7 @@ const saveModalObjectType = i18n.translate('discover.agentBuilder.saveToDashboar
 });
 
 export interface DiscoverSessionInlineProps {
-  data: DiscoverSessionApiData;
+  data: DiscoverSessionData;
   /**
    * Attachment snapshot version. Combined with session state so a follow-up update
    * remounts the embeddable. Omit when version metadata is unavailable.

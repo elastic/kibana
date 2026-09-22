@@ -14,6 +14,7 @@ import {
 import type {
   DiscoverSessionApiEsqlTab,
   DiscoverSessionApiTab,
+  DiscoverSessionData,
 } from '@kbn/as-code-discover-schema';
 import { DataGridDensity } from '@kbn/discover-session-constants';
 import type { TimeRange } from '@kbn/es-query';
@@ -21,7 +22,7 @@ import { omit } from 'lodash';
 import { toSearchEmbeddableByValueState } from '../../common/agent_builder/to_search_embeddable_by_value_state';
 import { NEW_TAB_ID } from '../../common/constants';
 import type { DiscoverAppLocatorParams } from '../../common';
-import type { DiscoverSessionApiData, DiscoverSessionEmbeddableByValueState } from '../../server';
+import type { DiscoverSessionEmbeddableByValueState } from '../../server';
 import type { SearchEmbeddableInputState } from '../embeddable/types';
 
 export const DEFAULT_DISCOVER_SESSION_TIME_RANGE: TimeRange = { from: 'now-24h', to: 'now' };
@@ -38,7 +39,7 @@ export const getDiscoverSessionSeedTimeRange = ({
 }): TimeRange => mappedTimeRange ?? screenContextTimeRange ?? DEFAULT_DISCOVER_SESSION_TIME_RANGE;
 
 export const buildDiscoverSessionEmbeddableInput = (
-  data: DiscoverSessionApiData,
+  data: DiscoverSessionData,
   timeRange: TimeRange
 ): DiscoverSessionEmbeddableByValueState &
   Pick<SearchEmbeddableInputState, 'nonPersistedDisplayOptions'> => {
@@ -72,7 +73,7 @@ export const getDiscoverSessionLocatorParams = ({
   data,
   timeRange,
 }: {
-  data: DiscoverSessionApiData;
+  data: DiscoverSessionData;
   timeRange: TimeRange;
 }): DiscoverAppLocatorParams => {
   const [tab] = data.tabs;

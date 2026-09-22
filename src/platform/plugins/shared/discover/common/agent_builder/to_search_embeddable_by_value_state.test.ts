@@ -11,10 +11,9 @@ import {
   AS_CODE_DATA_VIEW_REFERENCE_TYPE,
   AS_CODE_ESQL_DATA_SOURCE_TYPE,
 } from '@kbn/as-code-data-views-schema';
-import type { DiscoverSessionApiTab } from '@kbn/as-code-discover-schema';
+import type { DiscoverSessionApiTab, DiscoverSessionData } from '@kbn/as-code-discover-schema';
 import { DiscoverTabType } from '@kbn/discover-session-constants';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
-import type { DiscoverSessionApiData } from '../../server';
 import { toStoredSearchEmbeddableByValue } from '../embeddable/transform_utils';
 import { toSearchEmbeddableByValueState } from './to_search_embeddable_by_value_state';
 
@@ -61,8 +60,8 @@ const metricsTab: DiscoverSessionApiTab = {
 };
 
 const createSession = (
-  overrides: Partial<DiscoverSessionApiData> & Pick<DiscoverSessionApiData, 'title' | 'tabs'>
-): DiscoverSessionApiData => ({
+  overrides: Partial<DiscoverSessionData> & Pick<DiscoverSessionData, 'title' | 'tabs'>
+): DiscoverSessionData => ({
   description: '',
   ...overrides,
 });

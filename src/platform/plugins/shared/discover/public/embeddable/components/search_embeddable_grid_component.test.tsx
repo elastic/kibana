@@ -143,7 +143,6 @@ describe('SearchEmbeddableGridComponent', () => {
     showSortSelector,
     expandedDoc,
     fetchContext,
-    columnsMeta,
     savedObjectId,
     panelFilters,
     services: servicesOverride = services,
@@ -159,7 +158,6 @@ describe('SearchEmbeddableGridComponent', () => {
     showSortSelector?: boolean;
     expandedDoc?: DataTableRecord;
     fetchContext?: FetchContext;
-    columnsMeta?: DataTableColumnsMeta;
     savedObjectId?: string;
     panelFilters?: Filter[];
     services?: ReturnType<typeof createDiscoverServicesMock>;
@@ -498,6 +496,9 @@ describe('SearchEmbeddableGridComponent', () => {
       expect(lastCallProps?.showKeyboardShortcuts).toBe(false);
       expect(lastCallProps?.showSortSelector).toBe(false);
       expect(getLastFlyoutMenuTrailingActions()).toBeUndefined();
+    });
+  });
+
   describe('searchContext', () => {
     const fetchContext: FetchContext = {
       isReload: false,
@@ -516,7 +517,7 @@ describe('SearchEmbeddableGridComponent', () => {
     };
 
     it('passes a completed ES|QL table and dashboard filterQuery', async () => {
-      renderComponent({ isEsql: true, fetchContext, columnsMeta });
+      await renderComponent({ isEsql: true, fetchContext, columnsMeta });
 
       await waitFor(() => {
         expect(mockDiscoverGridEmbeddableProps).toHaveBeenCalled();
@@ -537,7 +538,7 @@ describe('SearchEmbeddableGridComponent', () => {
     });
 
     it('still supplies searchContext when fetchContext has no time range', async () => {
-      renderComponent({
+      await renderComponent({
         isEsql: true,
         fetchContext: { ...fetchContext, timeRange: undefined },
         columnsMeta,
@@ -554,7 +555,7 @@ describe('SearchEmbeddableGridComponent', () => {
     });
 
     it('changes requestId when the grid rows identity changes', async () => {
-      const { stateManager } = renderComponent({ isEsql: true, fetchContext, columnsMeta });
+      const { stateManager } = await renderComponent({ isEsql: true, fetchContext, columnsMeta });
 
       await waitFor(() => {
         expect(mockDiscoverGridEmbeddableProps).toHaveBeenCalled();

@@ -8,10 +8,10 @@
  */
 
 import { AS_CODE_ESQL_DATA_SOURCE_TYPE } from '@kbn/as-code-data-views-schema';
-import type { DiscoverSessionApiTab } from '@kbn/as-code-discover-schema';
+import type { DiscoverSessionApiTab, DiscoverSessionData } from '@kbn/as-code-discover-schema';
 import { DataGridDensity, DiscoverTabType } from '@kbn/discover-session-constants';
 import { NEW_TAB_ID } from '../../common/constants';
-import type { DiscoverSessionApiData, DiscoverSessionEmbeddableByValueState } from '../../server';
+import type { DiscoverSessionEmbeddableByValueState } from '../../server';
 import {
   buildDiscoverSessionDashboardSaveState,
   buildDiscoverSessionEmbeddableInput,
@@ -37,8 +37,8 @@ const esqlTab: DiscoverSessionApiTab = {
 };
 
 const createSession = (
-  overrides: Partial<DiscoverSessionApiData> & Pick<DiscoverSessionApiData, 'title' | 'tabs'>
-): DiscoverSessionApiData => ({
+  overrides: Partial<DiscoverSessionData> & Pick<DiscoverSessionData, 'title' | 'tabs'>
+): DiscoverSessionData => ({
   description: '',
   ...overrides,
 });

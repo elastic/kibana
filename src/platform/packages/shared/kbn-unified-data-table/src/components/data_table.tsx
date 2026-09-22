@@ -596,7 +596,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       settings,
       showTimeCol,
       showKeyboardShortcuts = true,
-      showSortSelector,
+      showSortSelector = true,
       showFullScreenButton = true,
       sort,
       isSortEnabled = true,
@@ -1473,7 +1473,7 @@ const InternalUnifiedDataTable = React.forwardRef<
     const toolbarVisibility = useMemo(
       () => ({
         ...toolbarVisibilityDefaults,
-        showSortSelector: isSortEnabled && (showSortSelector ?? true) && !isJsonSourceMode,
+        showSortSelector: isSortEnabled && showSortSelector && !isJsonSourceMode,
         showColumnSelector: isJsonSourceMode ? false : toolbarVisibilityDefaults.showColumnSelector,
         additionalControls,
         showDisplaySelector,

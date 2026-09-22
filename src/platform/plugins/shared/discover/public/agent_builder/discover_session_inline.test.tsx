@@ -12,6 +12,7 @@ import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EuiProvider } from '@elastic/eui';
 import { AS_CODE_ESQL_DATA_SOURCE_TYPE } from '@kbn/as-code-data-views-schema';
+import type { DiscoverSessionData } from '@kbn/as-code-discover-schema';
 import { DataGridDensity, DiscoverTabType } from '@kbn/discover-session-constants';
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
 import type { ApplicationStart } from '@kbn/core/public';
@@ -20,7 +21,7 @@ import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { ActionButton } from '@kbn/agent-builder-browser/attachments';
 import type { DiscoverAppLocator } from '../../common';
-import type { DiscoverSessionApiData, DiscoverSessionEmbeddableByValueState } from '../../server';
+import type { DiscoverSessionEmbeddableByValueState } from '../../server';
 import { useSearchEmbeddableToolbar } from '../embeddable/components/search_embeddable_toolbar_context';
 import { DiscoverSessionInline } from './discover_session_inline';
 
@@ -75,7 +76,7 @@ jest.mock('@kbn/presentation-util-plugin/public', () => ({
   },
 }));
 
-const sessionData: DiscoverSessionApiData = {
+const sessionData: DiscoverSessionData = {
   title: 'Nginx errors',
   description: '',
   tabs: [
@@ -123,7 +124,7 @@ const inlineProps = ({
   registerActionButtons?: jest.Mock;
   canWriteDashboards?: boolean;
   canOpenInDiscover?: boolean;
-  data?: DiscoverSessionApiData;
+  data?: DiscoverSessionData;
   version?: number;
 } = {}) => {
   const navigate = jest.fn();

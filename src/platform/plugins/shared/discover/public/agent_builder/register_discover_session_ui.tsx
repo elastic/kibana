@@ -8,6 +8,7 @@
  */
 
 import React, { Suspense } from 'react';
+import type { DiscoverSessionData } from '@kbn/as-code-discover-schema';
 import type { ApplicationStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
@@ -16,7 +17,6 @@ import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { DISCOVER_SESSION_ATTACHMENT_TYPE } from '../../common/agent_builder';
 import type { DiscoverAppLocator } from '../../common';
-import type { DiscoverSessionApiData } from '../../server';
 
 const LazyDiscoverSessionInline = React.lazy(async () => {
   const { DiscoverSessionInline } = await import('./discover_session_inline');
@@ -37,7 +37,7 @@ export const registerDiscoverSessionAttachmentUi = ({
   application?: ApplicationStart;
 }) => {
   agentBuilder.attachments.addAttachmentType<
-    Attachment<typeof DISCOVER_SESSION_ATTACHMENT_TYPE, DiscoverSessionApiData>
+    Attachment<typeof DISCOVER_SESSION_ATTACHMENT_TYPE, DiscoverSessionData>
   >(DISCOVER_SESSION_ATTACHMENT_TYPE, {
     getLabel: (attachment) => {
       const title = attachment.data?.title;

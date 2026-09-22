@@ -11,17 +11,18 @@ import { AS_CODE_ESQL_DATA_SOURCE_TYPE } from '@kbn/as-code-data-views-schema';
 import type {
   DiscoverSessionApiEsqlTab,
   DiscoverSessionApiTab,
+  DiscoverSessionData,
 } from '@kbn/as-code-discover-schema';
 import { DiscoverTabType } from '@kbn/discover-session-constants';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
-import type { DiscoverSessionApiData, DiscoverSessionEmbeddableByValueState } from '../../server';
+import type { DiscoverSessionEmbeddableByValueState } from '../../server';
 
 /**
  * Projects Discover session API data into as-code by-value search embeddable state.
  * Extra session tabs are ignored: embeddable by-value currently supports one tab.
  */
 export const toSearchEmbeddableByValueState = (
-  data: DiscoverSessionApiData
+  data: DiscoverSessionData
 ): DiscoverSessionEmbeddableByValueState => {
   const [tab] = data.tabs;
   const state: DiscoverSessionEmbeddableByValueState = {
@@ -54,6 +55,14 @@ const toTableFields = (tab: DiscoverSessionApiTab) => ({
   ...(tab.row_height !== undefined ? { row_height: tab.row_height } : {}),
   ...(tab.rows_per_page !== undefined ? { rows_per_page: tab.rows_per_page } : {}),
   ...(tab.sample_size !== undefined ? { sample_size: tab.sample_size } : {}),
+  ...(tab.documents_display_mode !== undefined
+    ? { documents_display_mode: tab.documents_display_mode }
+    : {}),
+  ...(tab.hide_nulls !== undefined ? { hide_nulls: tab.hide_nulls } : {}),
+  ...(tab.wrap_lines !== undefined ? { wrap_lines: tab.wrap_lines } : {}),
+  ...(tab.default_rendered_nodes !== undefined
+    ? { default_rendered_nodes: tab.default_rendered_nodes }
+    : {}),
 });
 
 const toEmbeddableTab = (
