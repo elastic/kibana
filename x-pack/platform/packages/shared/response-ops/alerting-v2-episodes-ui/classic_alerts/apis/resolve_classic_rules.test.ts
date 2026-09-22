@@ -24,7 +24,21 @@ describe('resolveClassicRules', () => {
 
   it('resolves rules through the classic find API using the saved-object prefixed filter', async () => {
     mockHttp.post.mockResolvedValueOnce({
-      data: [{ id: 'classic-rule', name: 'Classic Rule' }],
+      data: [
+        {
+          id: 'classic-rule',
+          name: 'Classic Rule',
+          tags: ['infra'],
+          enabled: true,
+          schedule: { interval: '5m' },
+          rule_type_id: '.es-query',
+          params: { groupBy: ['host.name'] },
+          created_by: 'elastic',
+          updated_by: 'admin',
+          created_at: '2026-01-01T00:00:00.000Z',
+          updated_at: '2026-06-01T00:00:00.000Z',
+        },
+      ],
     });
 
     const result = await resolveClassicRules({
@@ -38,14 +52,28 @@ describe('resolveClassicRules', () => {
         body: expect.stringContaining('alert.id: \\"alert:classic-rule\\"'),
       })
     );
-    expect(result).toMatchObject([{ id: 'classic-rule', metadata: { name: 'Classic Rule' } }]);
+    expect(result).toMatchObject([
+      {
+        id: 'classic-rule',
+        enabled: true,
+        metadata: { name: 'Classic Rule', tags: ['infra'] },
+        schedule: { every: '5m' },
+        grouping: { fields: ['host.name'] },
+        created_by: 'elastic',
+        updated_by: 'admin',
+        created_at: '2026-01-01T00:00:00.000Z',
+        updated_at: '2026-06-01T00:00:00.000Z',
+      },
+    ]);
+    expect(result[0]).not.toHaveProperty('kind');
   });
 
-  it('returns an empty array when the classic find API fails', async () => {
-    mockHttp.post.mockRejectedValueOnce(new Error('classic unavailable'));
+  it('propagates errors when the classic find API fails', async () => {
+    const error = new Error('Request failed');
+    mockHttp.post.mockRejectedValueOnce(error);
 
     await expect(
       resolveClassicRules({ ids: ['classic-rule'], services: { http: mockHttp } })
-    ).resolves.toEqual([]);
+    ).rejects.toThrow(error);
   });
 });

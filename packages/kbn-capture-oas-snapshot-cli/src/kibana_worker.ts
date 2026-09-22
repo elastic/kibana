@@ -66,6 +66,12 @@ export type Result = string;
     // Satisfy spaces config for serverless:
     set(settings, 'xpack.spaces.allowFeatureVisibility', false);
     set(settings, 'xpack.spaces.allowSolutionVisibility', false);
+    // Satisfy security config for serverless: UIAM is always on there, and the security plugin
+    // refuses to set up without it. The URL and shared secret are never dialled, because the
+    // worker only boots far enough to generate the OAS document.
+    set(settings, 'xpack.security.uiam.enabled', true);
+    set(settings, 'xpack.security.uiam.url', 'https://uiam.example.invalid');
+    set(settings, 'xpack.security.uiam.sharedSecret', 'capture-oas-snapshot');
     root = createServerlessKibana(settings, cliArgs);
   } else {
     root = createRootWithCorePlugins(settings, cliArgs);
