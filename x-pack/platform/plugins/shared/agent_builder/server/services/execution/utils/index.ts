@@ -17,7 +17,6 @@ export {
   persistExecutionInterruption,
   isPendingResumeConversation,
   placeholderConversation,
-  type ConversationOperation,
   type ConversationWithOperation,
   type PersistExecutionInterruptionParams,
 } from './conversations';

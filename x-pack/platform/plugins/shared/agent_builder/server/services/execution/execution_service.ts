@@ -132,7 +132,6 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
         : undefined;
     const validatedParams = conversationParams ?? (await this.validateAttachments(params, request));
 
-    const roundId = uuidv4();
     const receivedAt = new Date();
 
     // Resolving up front keeps conversation creation and the message write on the request node,
@@ -152,6 +151,8 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       }
     }
 
+    const roundId = uuidv4();
+
     let execution: AgentExecution;
     try {
       execution = await executionClient.create({
@@ -167,7 +168,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
                 // dispatched — so the run reads it rather than resolving it again.
                 conversationId: target.conversation.id,
                 autoCreateConversationWithId: true,
-                conversationCreated: target.conversation.operation === 'CREATE',
+                conversationOperation: target.conversation.operation,
                 roundId,
               }
             : validatedParams,

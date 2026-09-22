@@ -28,6 +28,7 @@ import type {
   ChatEvent,
 } from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import type { ConversationOperation } from '@kbn/agent-builder-server/execution';
 import {
   ConversationParentRelation,
   isConversationAlreadyExistsError,
@@ -611,8 +612,6 @@ export const persistExecutionInterruption = async (
     return [];
   }
 };
-
-export type ConversationOperation = 'CREATE' | 'UPDATE';
 
 export type ConversationWithOperation = Conversation & { operation: ConversationOperation };
 

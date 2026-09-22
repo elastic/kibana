@@ -78,6 +78,10 @@ export type ExecutionConversationOrigin = ConversationOrigin &
 /**
  * Execution parameters for conversation mode — tied to a conversation with persistence.
  */
+
+/** Whether a request resolved an existing conversation or created it. */
+export type ConversationOperation = 'CREATE' | 'UPDATE';
+
 export interface ConversationExecutionParams extends BaseExecutionParams {
   /** Id of the conversation to continue. */
   conversationId?: string;
@@ -118,10 +122,11 @@ export interface ConversationExecutionParams extends BaseExecutionParams {
    */
   roundId?: string;
   /**
-   * @internal Whether this request created the conversation, which the run reports as a creation
-   * rather than an update. Set by the execution service; callers should leave it unset.
+   * @internal How the conversation was resolved, so the run reports a creation this request made
+   * rather than the update its own read sees. Set by the execution service; callers should leave
+   * it unset.
    */
-  conversationCreated?: boolean;
+  conversationOperation?: ConversationOperation;
 }
 
 /**

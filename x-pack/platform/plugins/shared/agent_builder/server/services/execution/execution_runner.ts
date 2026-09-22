@@ -192,7 +192,7 @@ const handleConversationExecution = async ({
     readOnly,
     projectRouting,
     roundId: providedRoundId,
-    conversationCreated,
+    conversationOperation,
   } = execution.agentParams;
 
   const { logger, runAgent, trackingService, analyticsService, meteringService, agentService } =
@@ -229,10 +229,10 @@ const handleConversationExecution = async ({
   // service performed — by now the conversation is stored either way.
   const roundId = providedRoundId ?? uuidv4();
   const receivedAt = new Date();
-  const conversation: ConversationWithOperation =
-    conversationCreated === undefined
-      ? resolvedConversation
-      : { ...resolvedConversation, operation: conversationCreated ? 'CREATE' : 'UPDATE' };
+  const conversation: ConversationWithOperation = {
+    ...resolvedConversation,
+    operation: conversationOperation ?? resolvedConversation.operation,
+  };
 
   const roundOrigin = origin ? { type: origin.type } : undefined;
   const telemetryOrigin = resolveTelemetryOrigin({ conversation, requestOrigin: origin?.type });
