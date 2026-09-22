@@ -66,10 +66,7 @@ export const AddToExistingEscalationForm = memo<AddToExistingEscalationFormProps
     // selectable row — covers refetch, retry, or search-driven list changes that didn't go
     // through the search-box onChange handler.
     useEffect(() => {
-      if (
-        selectedId !== null &&
-        !incidents.some((i) => i.id === selectedId && !isRowDisabled(i))
-      ) {
+      if (selectedId !== null && !incidents.some((i) => i.id === selectedId && !isRowDisabled(i))) {
         setSelectedId(null);
       }
     }, [incidents, selectedId]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -110,9 +107,7 @@ export const AddToExistingEscalationForm = memo<AddToExistingEscalationFormProps
               iconType="error"
               data-test-subj="escalationModalLoadError"
             >
-              {error instanceof Error && error.message ? (
-                <p>{error.message}</p>
-              ) : null}
+              {error instanceof Error && error.message ? <p>{error.message}</p> : null}
               <EuiButton size="s" color="danger" onClick={onRetry}>
                 {T.retryButton}
               </EuiButton>

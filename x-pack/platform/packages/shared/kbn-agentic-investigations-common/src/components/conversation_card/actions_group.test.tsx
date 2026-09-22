@@ -128,7 +128,9 @@ describe('ConversationsActionsGroup', () => {
     });
 
     it('shows escalation actions when canManageEscalations is true', () => {
-      renderGroup(makeInvestigation({ recommendedAction: 'closed' }), { canManageEscalations: true });
+      renderGroup(makeInvestigation({ recommendedAction: 'closed' }), {
+        canManageEscalations: true,
+      });
       openMenu();
 
       expect(screen.getByText('Open an escalation')).toBeInTheDocument();
