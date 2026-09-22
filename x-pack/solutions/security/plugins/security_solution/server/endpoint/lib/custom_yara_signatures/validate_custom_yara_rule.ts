@@ -248,7 +248,8 @@ const shortenMetaValue = (value: string): string =>
 /**
  * Within one artifact entry, meta.arch and meta.scan_type must each be either omitted on every
  * rule or set to the same values on every rule. meta.os is excluded: a declared value is already
- * required to match os_types, so omitting it is equivalent.
+ * required to match os_types, so omitting it is equivalent. A key listed in duplicateMeta is
+ * skipped: its value is omitted from rule.meta, and the duplicate-field error already rejects it.
  */
 const validateMetaFieldsConsistencyAcrossRules = (
   rules: YaraCompiledRule[],
@@ -261,7 +262,14 @@ const validateMetaFieldsConsistencyAcrossRules = (
 
   const [referenceRule, ...restOfRules] = rules;
 
-  for (const metaKey of [YaraMetaKeyOfInterest.ARCH, YaraMetaKeyOfInterest.SCAN_TYPE]) {
+  const duplicatedMetaKeysInAnyRule = new Set(rules.flatMap((rule) => rule.duplicateMeta));
+
+  const metaKeysToCheckForConsistency = [
+    YaraMetaKeyOfInterest.ARCH,
+    YaraMetaKeyOfInterest.SCAN_TYPE,
+  ].filter((metaKey) => !duplicatedMetaKeysInAnyRule.has(metaKey));
+
+  for (const metaKey of metaKeysToCheckForConsistency) {
     const referenceValue = unifyMetaFieldValues(referenceRule.meta[metaKey]);
 
     for (const rule of restOfRules) {

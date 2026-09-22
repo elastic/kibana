@@ -552,6 +552,31 @@ export default function ({ getService }: FtrProviderContext) {
                     );
                 });
 
+                it('rejects duplicated meta.arch without reporting it as omitted', async () => {
+                  await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                    customYaraSignatureApiCall.path
+                  )
+                    .set('kbn-xsrf', 'true')
+                    .send(
+                      customYaraSignatureApiCall.getBody(
+                        `rule rule1 {
+                          meta:
+                            arch = "x86"
+                            arch = "arm64"
+                          condition: true
+                         }
+                         rule rule2 { meta: arch = "x86" condition: true }`
+                      )
+                    )
+                    .expect(400)
+                    .expect(anEndpointArtifactError)
+                    .expect(
+                      anErrorMessageWith(
+                        /Invalid YARA rules \(libyara [0-9.]+\), 1 error found: \[line 3\] Multiple "meta.arch" fields set on rule "rule1", only one is allowed/
+                      )
+                    );
+                });
+
                 it('truncates meta.arch value to 30 characters in error response', async () => {
                   await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
                     customYaraSignatureApiCall.path
@@ -763,6 +788,31 @@ export default function ({ getService }: FtrProviderContext) {
                     .expect(
                       anErrorMessageWith(
                         /\[line 3\] Inconsistent "meta.scan_type" across rules in this entry/
+                      )
+                    );
+                });
+
+                it('rejects duplicated meta.scan_type without reporting it as omitted', async () => {
+                  await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                    customYaraSignatureApiCall.path
+                  )
+                    .set('kbn-xsrf', 'true')
+                    .send(
+                      customYaraSignatureApiCall.getBody(
+                        `rule rule1 {
+                          meta:
+                            scan_type = "Memory"
+                            scan_type = "Whatever"
+                          condition: true
+                         }
+                         rule rule2 { meta: scan_type = "Memory" condition: true }`
+                      )
+                    )
+                    .expect(400)
+                    .expect(anEndpointArtifactError)
+                    .expect(
+                      anErrorMessageWith(
+                        /Invalid YARA rules \(libyara [0-9.]+\), 1 error found: \[line 3\] Multiple "meta.scan_type" fields set on rule "rule1", only one is allowed/
                       )
                     );
                 });
