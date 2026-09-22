@@ -31,13 +31,6 @@ export class ResponseActionsHistoryPage {
     await this.table.waitFor({ state: 'visible' });
   }
 
-  async waitForHostname(hostname: string): Promise<void> {
-    await this.page.testSubj
-      .locator('response-actions-list-column-hostname')
-      .filter({ hasText: hostname })
-      .waitFor({ state: 'visible' });
-  }
-
   async toggleTypeFilter(label: string): Promise<void> {
     const option = this.page.testSubj.locator('types-filter-option').filter({ hasText: label });
     if (!(await option.isVisible())) {

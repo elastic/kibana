@@ -65,8 +65,10 @@ spaceTest.describe(
           // The response-actions index is deployment-wide. Scope the page to
           // the hosts this test created so other suites cannot change the rows.
           await responseActionsHistory.goto(history.agentIds);
-          await responseActionsHistory.waitForHostname(history.manualHostname);
-          await responseActionsHistory.waitForHostname(history.automatedHostname);
+          // A host can have several actions. Wait until each seeded host has a row,
+          // without requiring the hostname cell to be unique.
+          await expect(rows.filter({ hasText: history.manualHostname })).not.toHaveCount(0);
+          await expect(rows.filter({ hasText: history.automatedHostname })).not.toHaveCount(0);
         });
 
         const totalRows = await rows.count();
@@ -75,9 +77,11 @@ spaceTest.describe(
           await responseActionsHistory.toggleTypeFilter(TRIGGERED_BY_RULE);
           await expect(rows.filter({ hasText: TRIGGERED_BY_RULE })).not.toHaveCount(0);
           await expect(rows.filter({ hasNotText: TRIGGERED_BY_RULE })).toHaveCount(0);
-          await expect(rows.filter({ hasText: history.automatedHostname })).toContainText(
-            TRIGGERED_BY_RULE
-          );
+          await expect(
+            rows
+              .filter({ hasText: history.automatedHostname })
+              .filter({ hasText: TRIGGERED_BY_RULE })
+          ).not.toHaveCount(0);
         });
 
         await spaceTest.step('clear the rule filter', async () => {
