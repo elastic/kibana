@@ -8,16 +8,19 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { useWorkers } from '../hooks/use_workers_api';
-import { useProposalsByCategory, useClosedProposals } from '../hooks/use_proposals_api';
+import {
+  useProposalsByCategoryCount,
+  useClosedProposalsCount,
+} from '../hooks/use_proposals_api';
 import { ConversationsPage } from './conversations';
 import { OnboardingPage } from './onboarding';
 
 export const LandingPage: React.FC = () => {
   const workers = useWorkers();
-  const respond = useProposalsByCategory('respond');
-  const investigate = useProposalsByCategory('investigate');
-  const configure = useProposalsByCategory('configure');
-  const closed = useClosedProposals();
+  const respond = useProposalsByCategoryCount('respond', true);
+  const investigate = useProposalsByCategoryCount('investigate', true);
+  const configure = useProposalsByCategoryCount('configure', true);
+  const closed = useClosedProposalsCount(true);
 
   const isLoading =
     workers.isLoading ||

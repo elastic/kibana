@@ -14,7 +14,10 @@ import { createMemoryHistory } from 'history';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { useWorkers } from '../hooks/use_workers_api';
-import { useProposalsByCategory, useClosedProposals } from '../hooks/use_proposals_api';
+import {
+  useProposalsByCategoryCount,
+  useClosedProposalsCount,
+} from '../hooks/use_proposals_api';
 import { LandingPage } from './landing_page';
 
 jest.mock('../hooks/use_workers_api');
@@ -32,8 +35,8 @@ jest.mock('../components/layout/alertzero_page_section', () => ({
 jest.mock('../hooks/use_alertzero_doc_title', () => ({ useAlertZeroDocTitle: jest.fn() }));
 
 const mockUseWorkers = useWorkers as jest.Mock;
-const mockUseProposalsByCategory = useProposalsByCategory as jest.Mock;
-const mockUseClosedProposals = useClosedProposals as jest.Mock;
+const mockUseProposalsByCategoryCount = useProposalsByCategoryCount as jest.Mock;
+const mockUseClosedProposalsCount = useClosedProposalsCount as jest.Mock;
 
 type QueryOverrides = Partial<{
   data: unknown;
@@ -74,8 +77,8 @@ const renderPage = () => {
 };
 
 beforeEach(() => {
-  mockUseProposalsByCategory.mockReturnValue(proposalsResult(0));
-  mockUseClosedProposals.mockReturnValue(proposalsResult(0));
+  mockUseProposalsByCategoryCount.mockReturnValue(proposalsResult(0));
+  mockUseClosedProposalsCount.mockReturnValue(proposalsResult(0));
   mockUseWorkers.mockReturnValue(workersResult([]));
 });
 
@@ -84,7 +87,7 @@ afterEach(() => jest.clearAllMocks());
 describe('LandingPage', () => {
   it('shows onboarding when there are no workers and no investigations', () => {
     mockUseWorkers.mockReturnValue(workersResult([]));
-    mockUseProposalsByCategory.mockReturnValue(proposalsResult(0));
+    mockUseProposalsByCategoryCount.mockReturnValue(proposalsResult(0));
 
     renderPage();
 
@@ -94,7 +97,7 @@ describe('LandingPage', () => {
 
   it('shows onboarding when all workers are disabled and there are no investigations', () => {
     mockUseWorkers.mockReturnValue(workersResult([{ enabled: false }, { enabled: false }]));
-    mockUseProposalsByCategory.mockReturnValue(proposalsResult(0));
+    mockUseProposalsByCategoryCount.mockReturnValue(proposalsResult(0));
 
     renderPage();
 
@@ -103,7 +106,7 @@ describe('LandingPage', () => {
 
   it('shows the queue when at least one worker is enabled', () => {
     mockUseWorkers.mockReturnValue(workersResult([{ enabled: false }, { enabled: true }]));
-    mockUseProposalsByCategory.mockReturnValue(proposalsResult(0));
+    mockUseProposalsByCategoryCount.mockReturnValue(proposalsResult(0));
 
     renderPage();
 
@@ -113,7 +116,7 @@ describe('LandingPage', () => {
 
   it('shows the queue when investigations exist even with no workers enabled', () => {
     mockUseWorkers.mockReturnValue(workersResult([]));
-    mockUseProposalsByCategory.mockImplementation((category: string) =>
+    mockUseProposalsByCategoryCount.mockImplementation((category: string) =>
       proposalsResult(category === 'investigate' ? 3 : 0)
     );
 
@@ -125,7 +128,7 @@ describe('LandingPage', () => {
 
   it('shows the queue when respond proposals exist', () => {
     mockUseWorkers.mockReturnValue(workersResult([]));
-    mockUseProposalsByCategory.mockImplementation((category: string) =>
+    mockUseProposalsByCategoryCount.mockImplementation((category: string) =>
       proposalsResult(category === 'respond' ? 1 : 0)
     );
 
@@ -136,7 +139,7 @@ describe('LandingPage', () => {
 
   it('shows the queue when configure proposals exist', () => {
     mockUseWorkers.mockReturnValue(workersResult([]));
-    mockUseProposalsByCategory.mockImplementation((category: string) =>
+    mockUseProposalsByCategoryCount.mockImplementation((category: string) =>
       proposalsResult(category === 'configure' ? 2 : 0)
     );
 
@@ -157,7 +160,7 @@ describe('LandingPage', () => {
   });
 
   it('shows a loading spinner while proposals are loading', () => {
-    mockUseProposalsByCategory.mockReturnValue(
+    mockUseProposalsByCategoryCount.mockReturnValue(
       proposalsResult(0, { isLoading: true, data: undefined })
     );
 
@@ -170,7 +173,7 @@ describe('LandingPage', () => {
 
   it('shows the queue when closed proposals exist even with no workers enabled', () => {
     mockUseWorkers.mockReturnValue(workersResult([]));
-    mockUseClosedProposals.mockReturnValue(proposalsResult(5));
+    mockUseClosedProposalsCount.mockReturnValue(proposalsResult(5));
 
     renderPage();
 
@@ -179,7 +182,7 @@ describe('LandingPage', () => {
   });
 
   it('shows a loading spinner while closed proposals are loading', () => {
-    mockUseClosedProposals.mockReturnValue(proposalsResult(0, { isLoading: true, data: undefined }));
+    mockUseClosedProposalsCount.mockReturnValue(proposalsResult(0, { isLoading: true, data: undefined }));
 
     renderPage();
 
@@ -202,7 +205,7 @@ describe('LandingPage', () => {
 
   it('falls through to the queue on proposals fetch error', () => {
     mockUseWorkers.mockReturnValue(workersResult([]));
-    mockUseProposalsByCategory.mockReturnValue({
+    mockUseProposalsByCategoryCount.mockReturnValue({
       data: undefined,
       isLoading: false,
       error: new Error('network error'),
@@ -215,7 +218,7 @@ describe('LandingPage', () => {
 
   it('falls through to the queue on closed proposals fetch error', () => {
     mockUseWorkers.mockReturnValue(workersResult([]));
-    mockUseClosedProposals.mockReturnValue({
+    mockUseClosedProposalsCount.mockReturnValue({
       data: undefined,
       isLoading: false,
       error: new Error('network error'),
