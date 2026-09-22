@@ -37,7 +37,7 @@ jest.mock(
 jest.mock(
   '../../../../entity_analytics/components/asset_criticality/asset_criticality_selector',
   () => ({
-    AssetCriticalityAccordion: () => null,
+    AssetCriticalityAccordion: () => <div data-test-subj="assetCriticalityAccordionMock" />,
   })
 );
 jest.mock(
@@ -64,6 +64,7 @@ const defaultProps = {
   onAssetCriticalityChange: () => {},
   openDetailsPanel: () => {},
   isPreviewMode: false,
+  entityStoreV2Enabled: false,
   entityStoreEntityId: 'host:host-1@okta',
   riskScoreQueryId: 'HostPanelRiskScoreQuery',
 };
@@ -120,5 +121,35 @@ describe('Content — graph/resolution navigation gating', () => {
     expect(mockResolutionSection).toHaveBeenLastCalledWith(
       expect.objectContaining({ openDetailsPanel: undefined })
     );
+  });
+});
+
+describe('Content — legacy asset criticality accordion gating', () => {
+  beforeEach(() => {
+    (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(false);
+  });
+
+  it('renders the legacy accordion when entity store v2 is disabled', () => {
+    render(<Content {...defaultProps} entityStoreV2Enabled={false} />, { wrapper: TestProviders });
+    expect(screen.getByTestId('assetCriticalityAccordionMock')).toBeInTheDocument();
+  });
+
+  it('does not render the legacy accordion when entity store v2 is enabled', () => {
+    render(<Content {...defaultProps} entityStoreV2Enabled />, { wrapper: TestProviders });
+    expect(screen.queryByTestId('assetCriticalityAccordionMock')).not.toBeInTheDocument();
+  });
+
+  it('does not render the legacy accordion with entity store v2 enabled and no entity in the store', () => {
+    render(
+      <Content
+        {...defaultProps}
+        entityStoreV2Enabled
+        noEntityInStore
+        entityRecord={undefined}
+        refetchEntityRecord={undefined}
+      />,
+      { wrapper: TestProviders }
+    );
+    expect(screen.queryByTestId('assetCriticalityAccordionMock')).not.toBeInTheDocument();
   });
 });

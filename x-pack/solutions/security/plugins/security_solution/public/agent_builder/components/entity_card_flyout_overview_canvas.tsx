@@ -455,6 +455,7 @@ const HostEntityFlyoutOverviewCanvas: React.FC<{
             isPreviewMode={isPreviewMode}
             entityRecord={observedHost.entityRecord ?? undefined}
             noEntityInStore={noEntityInStore}
+            entityStoreV2Enabled
             entityStoreEntityId={entityStoreEntityId}
             prefetchedResolutionRisk={prefetchedResolutionRisk}
             riskScoreQueryId={AGENT_BUILDER_HOST_PANEL_RISK_SCORE_QUERY_ID}
@@ -766,6 +767,7 @@ const UserEntityFlyoutOverviewCanvas: React.FC<{
             identityFields={documentEntityIdentifiers}
             entityRecord={observedUser.entityRecord ?? undefined}
             noEntityInStore={noEntityInStore}
+            entityStoreV2Enabled
             entityStoreEntityId={entityStoreEntityId}
             prefetchedResolutionRisk={prefetchedResolutionRisk}
             riskScoreQueryId={AGENT_BUILDER_USER_PANEL_RISK_SCORE_QUERY_ID}
@@ -1024,6 +1026,7 @@ const ServiceEntityFlyoutOverviewCanvas: React.FC<{
             scopeId={scopeId}
             openDetailsPanel={openDetailsPanel}
             isPreviewMode={isPreviewMode}
+            entityStoreV2Enabled
             entityStoreEntityId={entityStoreEntityId}
             prefetchedResolutionRisk={prefetchedResolutionRisk}
             riskScoreQueryId={AGENT_BUILDER_SERVICE_PANEL_RISK_SCORE_QUERY_ID}

@@ -64,8 +64,8 @@ export interface ContentProps {
   refetchEntityRecord?: () => void;
   /** When true (i.e. entity store v2 enabled but no entity found), hide entity highlights and risk score. */
   noEntityInStore?: boolean;
-  /** When `true`, hide the legacy asset criticality accordion. */
-  entityStoreV2Enabled?: boolean;
+  /** When `true`, hide the legacy asset criticality accordion. Required so every call site wires it explicitly. */
+  entityStoreV2Enabled: boolean;
   /** Entity store entity ID for the user. */
   entityStoreEntityId?: string;
   /** See {@link RiskSummaryProps.prefetchedResolutionRisk}. */
@@ -112,7 +112,7 @@ export const Content = ({
   entityRecord,
   refetchEntityRecord,
   noEntityInStore = false,
-  entityStoreV2Enabled = false,
+  entityStoreV2Enabled,
   entityStoreEntityId,
   prefetchedResolutionRisk,
   enableGraphAndResolutionNavigation = true,
