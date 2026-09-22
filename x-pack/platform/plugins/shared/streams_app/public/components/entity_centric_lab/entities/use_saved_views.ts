@@ -115,18 +115,18 @@ const DEFAULT_APPLIED_SESSION_KEY = 'entityCentricLab.savedViews.defaultApplied.
 // ---------------------------------------------------------------------------
 //
 // These three keys are also defined at the top of `all_entities_view.tsx`
-// (where the persisted-hook setters live). Duplicated intentionally so
-// `applyViewToStorage` below can write to them synchronously — the
-// hook-based `setFilters` / `setViewMode` / `setCategoryTab` write inside
-// a `setState` updater which React may not flush before `router.push`
-// unmounts the current tree, causing the destination mount to hydrate
-// from stale storage.
-//
-// If any key changes there, mirror it here.
-const CATEGORY_TAB_STORAGE_KEY = 'entityCentricLab.categoryTab.v1';
-const TAG_FILTERS_STORAGE_KEY = 'entityCentricLab.entitiesTagFilters.v1';
-const VIEW_MODE_STORAGE_KEY = 'entityCentricLab.entitiesViewMode.v1';
-const GROUP_BY_STORAGE_KEY = 'entityCentricLab.entitiesGroupBy.v1';
+// (where the persisted-hook setters live). Shared via `storage_keys.ts`
+// so `applyViewToStorage` below can write to the same keys synchronously
+// — the hook-based `setFilters` / `setViewMode` / `setCategoryTab` write
+// inside a `setState` updater which React may not flush before
+// `router.push` unmounts the current tree, causing the destination
+// mount to hydrate from stale storage.
+import {
+  CATEGORY_TAB_STORAGE_KEY,
+  GROUP_BY_STORAGE_KEY,
+  TAG_FILTERS_STORAGE_KEY,
+  VIEW_MODE_STORAGE_KEY,
+} from './storage_keys';
 
 /**
  * Cross-mount signal so a second copy of the bar (e.g. after

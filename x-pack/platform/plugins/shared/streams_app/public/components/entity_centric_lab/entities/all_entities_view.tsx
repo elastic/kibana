@@ -189,6 +189,13 @@ import { SaveViewButton } from './save_view_button';
 import { compileEntityKql, entityMatchesFilters } from './entity_kql';
 import { useEntityLabDataView } from './use_entity_lab_data_view';
 import { useEntityValueSuggestions } from './use_entity_value_suggestions';
+import { EntityErrorBoundary } from './entity_error_boundary';
+import {
+  CATEGORY_TAB_STORAGE_KEY,
+  GROUP_BY_STORAGE_KEY,
+  TAG_FILTERS_STORAGE_KEY,
+  VIEW_MODE_STORAGE_KEY,
+} from './storage_keys';
 import {
   applyViewToStorage,
   areStatesEqual,
@@ -213,13 +220,6 @@ import {
 type CategoryTab = 'inventory' | 'monitoring';
 
 type ViewMode = 'grid' | 'list' | 'geomap';
-
-/**
- * localStorage key for the user's last-used Grouped grid / List choice.
- * Bumped to v1 to claim a stable key — old keys (if we ever change the
- * shape) can be invalidated by bumping the suffix.
- */
-const VIEW_MODE_STORAGE_KEY = 'entityCentricLab.entitiesViewMode.v1';
 
 const isViewMode = (value: unknown): value is ViewMode =>
   value === 'grid' || value === 'list' || value === 'geomap';
@@ -267,8 +267,6 @@ const useEntitiesViewMode = (): [ViewMode, (next: ViewMode) => void] => {
 // `useEntitiesViewMode`: hydrate lazily from `localStorage` on first
 // render, write on every change, no cross-tab sync.
 
-const CATEGORY_TAB_STORAGE_KEY = 'entityCentricLab.categoryTab.v1';
-const TAG_FILTERS_STORAGE_KEY = 'entityCentricLab.entitiesTagFilters.v1';
 
 const isCategoryTab = (value: unknown): value is CategoryTab =>
   value === 'inventory' || value === 'monitoring';
@@ -357,15 +355,17 @@ const useEntitiesTagFilters = (): [
 // filters so a chosen grouping survives the left-nav walk between
 // categories. Mirrored in `use_saved_views.ts` (GROUP_BY_STORAGE_KEY)
 // so `applyViewToStorage` can write it synchronously before a route
-// change.
-const GROUP_BY_STORAGE_KEY = 'entityCentricLab.entitiesGroupBy.v1';
+// change — both import from `storage_keys.ts`.
+
+const MAX_STORED_GROUPINGS = 3;
 
 const parseStoredGroupBy = (raw: string | null): GroupByFieldId[] => {
   if (!raw) return [...DEFAULT_GROUP_BY];
   try {
     const parsed: unknown = JSON.parse(raw);
     if (Array.isArray(parsed) && parsed.every((item) => typeof item === 'string')) {
-      return parsed as GroupByFieldId[];
+      // Cap at the maximum to guard against corrupted/oversized payloads.
+      return (parsed as GroupByFieldId[]).slice(0, MAX_STORED_GROUPINGS);
     }
   } catch {
     // fall through
@@ -868,15 +868,24 @@ const AllEntitiesViewInner = ({
   const [activeTagFilters, setActiveTagFilters] = useEntitiesTagFilters();
   const [viewMode, setViewMode] = useEntitiesViewMode();
 
-  // Step 3 ("Color by") is anchored to a ColorByPopover inside
-  // GroupedGridView, which only renders in hex-map mode. If the user
-  // is in list view, auto-skip to step 4 so the tour doesn't vanish.
-  // Placed after `viewMode` to avoid a temporal dead zone reference.
+  // Some tour steps are anchored to DOM elements that only render in
+  // specific view modes (e.g. step 3 "Color by" lives inside
+  // GroupedGridView which is grid-only). If the user is in a different
+  // mode, auto-skip to the next step so the tour doesn't vanish.
+  //
+  // Map: step number → required view mode. Steps not listed here are
+  // assumed to render in all modes.
+  const tourStepViewModeRequirements: Record<number, ViewMode> = useMemo(
+    () => ({ 3: 'grid' }),
+    []
+  );
   useEffect(() => {
-    if (isTourActive && tourStep === 3 && viewMode !== 'grid') {
-      setTourStep(4);
+    if (!isTourActive || tourStep === 0) return;
+    const requiredMode = tourStepViewModeRequirements[tourStep];
+    if (requiredMode && viewMode !== requiredMode) {
+      setTourStep((prev) => Math.min(prev + 1, tourStepCount));
     }
-  }, [isTourActive, tourStep, viewMode]);
+  }, [isTourActive, tourStep, viewMode, tourStepViewModeRequirements]);
 
   // ElasticOn "Group by" (1–3 fields). Non-ElasticOn modes never surface the
   // control, so this stays at the built-in Category → Type default there.
@@ -906,6 +915,21 @@ const AllEntitiesViewInner = ({
     () => getGroupByFields(categoryScope, isElasticOn, phaseVariation as string),
     [categoryScope, isElasticOn, phaseVariation]
   );
+
+  // Sanitise: strip groupBy IDs that don't exist in the current field
+  // catalog (e.g. K8s-only fields after navigating to Hosts, or stale
+  // localStorage from a previous phase). Without this, phantom IDs
+  // accumulate in the selection array — the dropdown shows them as
+  // "selected" but they resolve to nothing, producing confusing state.
+  useEffect(() => {
+    if (groupBy.length === 0) return;
+    const validIds = new Set(groupByFields.map((f) => f.id));
+    const sanitised = groupBy.filter((id) => validIds.has(id));
+    if (sanitised.length !== groupBy.length) {
+      setGroupBy(sanitised.length > 0 ? sanitised : [...DEFAULT_GROUP_BY]);
+    }
+  }, [groupBy, groupByFields, setGroupBy]);
+
   const activeGroupByFields = useMemo(
     () => resolveGroupByFields(groupBy, groupByFields),
     [groupBy, groupByFields]
@@ -2428,6 +2452,7 @@ const AllEntitiesViewInner = ({
                     <EuiSpacer size="s" />
                   </>
                 ) : null}
+                <EntityErrorBoundary section="Entity view">
                 {effectiveViewMode === 'grid' ? (
                   <GroupedGridView
                     key={`grid-${phaseVariation}`}
@@ -2472,6 +2497,7 @@ const AllEntitiesViewInner = ({
                     hideCategoryHeader={!!categoryScope}
                   />
                 )}
+                </EntityErrorBoundary>
               </>
             ) : (
               <>
@@ -2653,6 +2679,7 @@ const AllEntitiesViewInner = ({
                     <EuiSpacer size="s" />
                   </>
                 ) : null}
+                <EntityErrorBoundary section="Entity view">
                 {effectiveViewMode === 'grid' ? (
                   <GroupedGridView
                     entities={filteredEntities}
@@ -2675,12 +2702,14 @@ const AllEntitiesViewInner = ({
                     groupCloudByProvider={cloudHierarchyEnabled}
                   />
                 )}
+                </EntityErrorBoundary>
               </>
             )}
           </EuiFlexItem>
         </EuiFlexGroup>
       </StreamsAppPageTemplate.Body>
       {selectedEntityName ? (
+        <EntityErrorBoundary section="Entity detail">
         <EntityFlyoutServicesProvider services={flyoutServices}>
           <EntityFlyout
             session="start"
@@ -2739,6 +2768,7 @@ const AllEntitiesViewInner = ({
             />
           ) : null}
         </EntityFlyoutServicesProvider>
+        </EntityErrorBoundary>
       ) : null}
       {showAddDataOverlay ? (
         <AddDataOverlay onClose={() => setShowAddDataOverlay(false)} />
