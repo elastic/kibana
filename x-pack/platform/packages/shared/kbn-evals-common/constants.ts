@@ -29,6 +29,7 @@ export const EVALS_EXAMPLE_SCORES_URL =
   `${EVALS_INTERNAL_URL}/examples/{exampleId}/scores` as const;
 export const EVALS_ONLINE_SCORES_URL = `${EVALS_INTERNAL_URL}/online_scores` as const;
 export const EVALS_TRACE_URL = `${EVALS_INTERNAL_URL}/traces/{traceId}` as const;
+export const EVALS_TRACE_EVIDENCE_URL = `${EVALS_TRACE_URL}/evidence` as const;
 export const EVALS_RESOLVE_INSTRUMENTATION_URL =
   `${EVALS_INTERNAL_URL}/traces/_resolve_instrumentation` as const;
 export const EVALS_EVALUATORS_URL = `${EVALS_INTERNAL_URL}/evaluators` as const;
@@ -58,6 +59,12 @@ export const EvaluationIndices = {
 
 export const TRACES_INDEX_PATTERN = 'traces-*' as const;
 export const LOGS_INDEX_PATTERN = 'logs-*' as const;
+export const EVALS_EVIDENCE_LOG_EVENT_NAMES = {
+  OTEL_GENAI_USER_MESSAGE: 'gen_ai.user.message',
+  OTEL_GENAI_CHOICE: 'gen_ai.choice',
+  CLAUDE_CODE_USER_PROMPT: 'user_prompt',
+  CLAUDE_CODE_API_RESPONSE_BODY: 'api_response_body',
+} as const;
 
 export const API_VERSIONS = {
   internal: {
