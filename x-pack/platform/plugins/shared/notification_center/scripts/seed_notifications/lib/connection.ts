@@ -9,6 +9,7 @@ import fs from 'fs';
 import path from 'path';
 import { Client } from '@elastic/elasticsearch';
 import { getConfigFromFiles } from '@kbn/config';
+import { createFailError, createFlagError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
 
@@ -71,7 +72,7 @@ const readDevEsUrl = (): string | undefined => {
   try {
     config = getConfigFromFiles([configPath]) as DevYml;
   } catch {
-    throw new Error(`Malformed Kibana config file: ${configPath}`);
+    throw createFailError(`Malformed Kibana config file: ${configPath}`);
   }
   const { hosts } = config.elasticsearch ?? {};
   const first = Array.isArray(hosts) ? hosts[0] : hosts;
@@ -147,11 +148,11 @@ const discoverKibanaUrl = async (log: ToolingLog): Promise<string> => {
     return only;
   }
   if (found.length > 1) {
-    throw new Error(
+    throw createFlagError(
       'Both localhost:5601 (serverless) and localhost:5611 (stack) are running. Pass --kibana-url.'
     );
   }
-  throw new Error(
+  throw createFlagError(
     'Could not reach Kibana on localhost:5601 (serverless) or localhost:5611 (stack). Pass --kibana-url.'
   );
 };
@@ -181,7 +182,7 @@ export const getConnection = async (
     ? toHttpUrl(String(flags['es-url']))
     : cluster?.esUrl ?? (fallbackEs ? toHttpUrl(String(fallbackEs)) : undefined);
   if (!esUrl) {
-    throw new Error('Pass --es-url or set elasticsearch.hosts in config/kibana.dev.yml.');
+    throw createFlagError('Pass --es-url or set elasticsearch.hosts in config/kibana.dev.yml.');
   }
 
   return { esUrl, kibanaUrl, username, password };

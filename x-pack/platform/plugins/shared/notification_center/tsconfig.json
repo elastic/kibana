@@ -9,6 +9,7 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/config",
+    "@kbn/dev-cli-errors",
     "@kbn/dev-cli-runner",
     "@kbn/repo-info",
     "@kbn/config-schema",

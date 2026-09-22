@@ -6,6 +6,7 @@
  */
 
 import { errors as EsErrors, type Client } from '@elastic/elasticsearch';
+import { createFailError } from '@kbn/dev-cli-errors';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { GET_NOTIFICATIONS_PATH, NOTIFICATION_CENTER_API_VERSION } from '../../../common/routes';
 import type { Notification } from '../../../common/types';
@@ -48,7 +49,7 @@ export const ensureDataStream = async (
   if (!alreadyCreated) {
     const plainIndex = await esClient.indices.exists({ index: NOTIFICATION_DATA_STREAM_NAME });
     if (plainIndex) {
-      throw new Error(
+      throw createFailError(
         `"${NOTIFICATION_DATA_STREAM_NAME}" exists as a plain index, which blocks the plugin ` +
           `from creating its data stream. Delete it first: DELETE /${NOTIFICATION_DATA_STREAM_NAME}`
       );
@@ -64,29 +65,29 @@ export const ensureDataStream = async (
     },
   }).catch((error: unknown) => {
     const message = error instanceof Error ? error.message : String(error);
-    throw new Error(`Could not reach Kibana at ${kibanaUrl}: ${message}`);
+    throw createFailError(`Could not reach Kibana at ${kibanaUrl}: ${message}`);
   });
 
   if (response.status === 404) {
-    throw new Error(
+    throw createFailError(
       `${url} returned 404. The Notification Center is disabled by default — add ` +
         `"xpack.notificationCenter.enabled: true" to config/kibana.dev.yml and restart Kibana.`
     );
   }
   if (!response.ok) {
-    throw new Error(`${url} returned ${response.status}: ${await response.text()}`);
+    throw createFailError(`${url} returned ${response.status}: ${await response.text()}`);
   }
 
   // An unrecognised path yields the SPA shell with a 200, so confirm this is really the route.
   const body = await response.json().catch(() => undefined);
   if (!Array.isArray(body?.items)) {
-    throw new Error(`${url} did not return a notification list. Is --kibana-url correct?`);
+    throw createFailError(`${url} did not return a notification list. Is --kibana-url correct?`);
   }
 
   log.debug(`Notification Center is serving ${url}`);
 
   if (!(await isDataStream(esClient))) {
-    throw new Error(
+    throw createFailError(
       `Kibana served the list route but "${NOTIFICATION_DATA_STREAM_NAME}" still does not exist. ` +
         `Is ${connection.esUrl} the cluster that Kibana is pointed at?`
     );
@@ -108,7 +109,7 @@ export const writeNotifications = async (
 
   if (response.errors) {
     const reason = response.items.find((item) => item.create?.error)?.create?.error?.reason;
-    throw new Error(`Failed to append notifications: ${reason ?? 'unknown error'}`);
+    throw createFailError(`Failed to append notifications: ${reason ?? 'unknown error'}`);
   }
 };
 

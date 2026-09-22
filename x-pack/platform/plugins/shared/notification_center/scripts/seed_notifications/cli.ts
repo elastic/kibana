@@ -6,6 +6,7 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
+import { createFlagError } from '@kbn/dev-cli-errors';
 import { run } from '@kbn/dev-cli-runner';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Notification } from '../../common/types';
@@ -36,13 +37,13 @@ const parseDuration = (raw: string, defaultUnit: keyof typeof UNIT_MS): number |
 const parseInterval = (raw: string): number => {
   const ms = parseDuration(raw, 's');
   if (ms === undefined) {
-    throw new Error(`Could not parse --interval "${raw}". Use e.g. 1s, 10s or 2m.`);
+    throw createFlagError(`Could not parse --interval "${raw}". Use e.g. 1s, 10s or 2m.`);
   }
   if (ms < MIN_INTERVAL_MS) {
-    throw new Error(`--interval must be at least ${MIN_INTERVAL_MS}ms.`);
+    throw createFlagError(`--interval must be at least ${MIN_INTERVAL_MS}ms.`);
   }
   if (ms > MAX_INTERVAL_MS) {
-    throw new Error(`--interval must be at most ${MAX_INTERVAL_MS}ms (about 24 days).`);
+    throw createFlagError(`--interval must be at most ${MAX_INTERVAL_MS}ms (about 24 days).`);
   }
   return ms;
 };
@@ -55,7 +56,9 @@ const parseReadHorizon = (raw: string): string => {
   }
   const parsed = Date.parse(raw.trim());
   if (Number.isNaN(parsed)) {
-    throw new Error(`Could not parse --read-horizon "${raw}". Use e.g. 30d, 12h or 2026-09-01.`);
+    throw createFlagError(
+      `Could not parse --read-horizon "${raw}". Use e.g. 30d, 12h or 2026-09-01.`
+    );
   }
   return new Date(parsed).toISOString();
 };
