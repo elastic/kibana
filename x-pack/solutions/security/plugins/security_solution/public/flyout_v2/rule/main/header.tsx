@@ -20,6 +20,7 @@ import { CreatedBy, UpdatedBy } from '../../../detections/components/rules/rule_
 import type { RuleResponse } from '../../../../common/api/detection_engine';
 import { useRuleDetailsLink } from './hooks/use_rule_details_link';
 import { FlyoutTitle } from '../../shared/components/flyout_title';
+import { FlyoutHeaderActions } from '../../shared/components/flyout_header_actions';
 import {
   RULE_DETAILS_TITLE_TEST_ID,
   RULE_DETAILS_TITLE_LINK_TEST_ID,
@@ -46,6 +47,7 @@ export const Header: React.FC<HeaderProps> = memo(({ rule, isSuppressed }) => {
 
   return (
     <>
+      <FlyoutHeaderActions />
       {href ? (
         <EuiLink
           href={href}

@@ -8,7 +8,6 @@
 import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
@@ -29,10 +28,8 @@ import {
 import type { CellActionRenderer } from '../../shared/components/cell_actions';
 import { noopCellActionRenderer } from '../../shared/components/cell_actions';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
-import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
-import { useFlyoutSessionContext } from '../../session_context';
 import { ShareUrlIconButton } from '../../shared/components/share_url_icon_button';
-import { SettingsMenu } from '../../shared/components/settings_menu';
+import { FlyoutHeaderActions } from '../../shared/components/flyout_header_actions';
 import { useGetFlyoutLink } from '../../../flyout/document_details/right/hooks/use_get_flyout_link';
 import { isRulePreviewDocument } from '../../shared/utils/is_rule_preview_document';
 
@@ -42,17 +39,6 @@ const SHARE_ALERT_LABEL = i18n.translate(
     defaultMessage: 'Copy link to alert',
   }
 );
-
-// Positioned relative to the flyout itself (the nearest positioned ancestor), matching where EUI
-// places its own close button (`right: euiTheme.size.s` / `top: euiTheme.size.s`). The larger
-// inline-end offset makes room for the close button so these sit to its left. The share and
-// settings buttons live in the same group so, left to right, the header reads: share, settings,
-// EUI close.
-const headerButtonsStyles = css`
-  position: absolute;
-  inset-inline-end: 36px;
-  inset-block-start: 8px;
-`;
 
 export interface HeaderProps {
   /**
@@ -81,12 +67,6 @@ export interface HeaderProps {
 export const Header: FC<HeaderProps> = memo(
   ({ hit, renderCellActions = noopCellActionRenderer, onAlertUpdated, onShowNotes }) => {
     const canReadRules = useUserPrivileges().rulesPrivileges.rules.read;
-    // The settings menu (push vs overlay) is a Security Solution feature; it must not appear when
-    // this same header is rendered inside Discover.
-    const isSecurityApp = useIsInSecurityApp();
-    // Its controls are inert in a child flyout (always an overlay, no persisted width of its own),
-    // so hide the whole gear there rather than showing controls that do nothing.
-    const { isChildFlyout } = useFlyoutSessionContext();
     const isAlert = useMemo(
       () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
       [hit]
@@ -101,24 +81,14 @@ export const Header: FC<HeaderProps> = memo(
 
     return (
       <>
-        <EuiFlexGroup
-          css={headerButtonsStyles}
-          gutterSize="xs"
-          alignItems="center"
-          responsive={false}
-        >
+        <FlyoutHeaderActions>
           <ShareUrlIconButton
             url={isAlert ? alertDetailsLink : null}
             tooltip={SHARE_ALERT_LABEL}
             ariaLabel={SHARE_ALERT_LABEL}
             dataTestSubj={DOCUMENT_FLYOUT_HEADER_SHARE_BUTTON_TEST_ID}
           />
-          {isSecurityApp && !isChildFlyout && (
-            <EuiFlexItem grow={false}>
-              <SettingsMenu />
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
+        </FlyoutHeaderActions>
         <DocumentSeverity hit={hit}>
           <EuiSpacer size="s" />
         </DocumentSeverity>

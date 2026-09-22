@@ -14,6 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../common/lib/kibana';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
 import { FlyoutTitle } from '../../../shared/components/flyout_title';
+import { FlyoutHeaderActions } from '../../../shared/components/flyout_header_actions';
 
 export interface HeaderProps {
   /**
@@ -31,6 +32,7 @@ export const Header: FC<HeaderProps> = memo(({ finding }: HeaderProps) => {
 
   return (
     <>
+      <FlyoutHeaderActions />
       <EuiFlexGroup gutterSize="xs" responsive={false} direction="column">
         <EuiFlexItem grow={false}>
           <CspEvaluationBadge type={finding?.result?.evaluation} />
