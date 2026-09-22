@@ -593,7 +593,20 @@ export class NightshiftInvestigationsClient {
       throw InvestigationConflictError.settled(investigationId, investigation.status);
     }
 
-    const sourceKeys = Array.from(new Set([...(investigation?.source_keys ?? []), sourceKey]));
+    // Resolved before anything is reserved, so a missing workflow or a failed agent install
+    // cannot leave a reservation behind that suppresses the retry of this message.
+    const spaceId = this.getSpaceId();
+    const workflow = await this.workflowsManagement.management.getWorkflow(
+      DEDUCTIVE_INVESTIGATION_WORKFLOW_ID,
+      spaceId
+    );
+    if (!workflow?.definition) {
+      throw new InvestigationUnavailableError(
+        `Investigation workflow "${DEDUCTIVE_INVESTIGATION_WORKFLOW_ID}" is not installed`
+      );
+    }
+    await installDeductiveInvestigationAgent({ agentBuilder: this.agentBuilder, spaceId });
+
     const subject: InvestigationSubject = {
       type: 'manual',
       id: investigationId,
@@ -613,22 +626,12 @@ export class NightshiftInvestigationsClient {
           concurrency_key: investigationId,
           created_at: new Date().toISOString(),
           conversation_id: randomUUID(),
-          source_keys: sourceKeys,
+          source_keys: [sourceKey],
           admissions: [],
           reply_target: replyTarget,
         },
       });
       investigation = await this.investigationRepository.get(investigationId);
-    } else {
-      await this.investigationRepository.update({
-        id: investigationId,
-        patch: {
-          ...(isTerminalStatus(investigation.status) ? { status: 'pending' as const } : {}),
-          source_keys: sourceKeys,
-          reply_target: replyTarget,
-        },
-        version: investigation.version,
-      });
     }
 
     // Read the conversation back from the record rather than reusing the id this call generated:
@@ -642,21 +645,17 @@ export class NightshiftInvestigationsClient {
     }
 
     // Reserved before the run starts so a redelivery arriving mid-start resolves to this
-    // admission instead of starting a second run for the same Slack message.
-    await this.appendAdmission(investigationId, { idempotency_key: idempotencyKey }, replyTarget);
-
-    const spaceId = this.getSpaceId();
-    const workflow = await this.workflowsManagement.management.getWorkflow(
-      DEDUCTIVE_INVESTIGATION_WORKFLOW_ID,
-      spaceId
-    );
-    if (!workflow?.definition) {
-      throw new InvestigationUnavailableError(
-        `Investigation workflow "${DEDUCTIVE_INVESTIGATION_WORKFLOW_ID}" is not installed`
-      );
+    // admission instead of starting a second run for the same Slack message. The run's
+    // `_ensure` step records its execution id on the admission.
+    const reserved = await this.reserveAdmission({
+      investigationId,
+      idempotencyKey,
+      sourceKey,
+      replyTarget,
+    });
+    if (!reserved) {
+      return { investigation_id: investigationId };
     }
-
-    await installDeductiveInvestigationAgent({ agentBuilder: this.agentBuilder, spaceId });
 
     let executionId: string;
     try {
@@ -674,6 +673,7 @@ export class NightshiftInvestigationsClient {
             source: 'manual',
             manual_id: investigationId,
             trigger_type: 'manual',
+            admission_key: idempotencyKey,
             ...(senderId ? { sender_id: senderId } : {}),
           },
         },
@@ -682,69 +682,78 @@ export class NightshiftInvestigationsClient {
       );
     } catch (error) {
       // Nothing is running, so the reservation would otherwise suppress the retry of this message.
-      await this.releaseAdmission(investigationId, idempotencyKey);
+      await this.updateAdmissions(investigationId, (record) => ({
+        admissions: (record.admissions ?? []).filter(
+          (admission) => admission.idempotency_key !== idempotencyKey
+        ),
+      }));
       throw error;
     }
-
-    await this.updateAdmissions(investigationId, (admissions) =>
-      admissions.map((admission) =>
-        admission.idempotency_key === idempotencyKey
-          ? { ...admission, execution_id: executionId }
-          : admission
-      )
-    );
 
     return { investigation_id: investigationId, execution_id: executionId };
   }
 
-  /** Adds an admission, keeping the reply target fresh in the same write. */
-  private async appendAdmission(
-    investigationId: string,
-    admission: InvestigationAdmission,
-    replyTarget: InvestigationReplyTarget
-  ): Promise<void> {
-    await this.updateAdmissions(
-      investigationId,
-      (admissions) => [...admissions, admission],
-      replyTarget
-    );
-  }
-
-  private async releaseAdmission(investigationId: string, idempotencyKey: string): Promise<void> {
-    await this.updateAdmissions(investigationId, (admissions) =>
-      admissions.filter((admission) => admission.idempotency_key !== idempotencyKey)
+  /**
+   * Reserves the admission and refreshes the thread's source keys and reply target in one write.
+   * Returns false when the admission already exists, including when a concurrent delivery of the
+   * same message reserved it first; only the caller that gets true may start a run.
+   */
+  private async reserveAdmission({
+    investigationId,
+    idempotencyKey,
+    sourceKey,
+    replyTarget,
+  }: {
+    investigationId: string;
+    idempotencyKey: string;
+    sourceKey: string;
+    replyTarget: InvestigationReplyTarget;
+  }): Promise<boolean> {
+    return this.updateAdmissions(investigationId, (record) =>
+      record.admissions?.some((admission) => admission.idempotency_key === idempotencyKey)
+        ? undefined
+        : {
+            admissions: [...(record.admissions ?? []), { idempotency_key: idempotencyKey }],
+            source_keys: Array.from(new Set([...(record.source_keys ?? []), sourceKey])),
+            // The route cannot know the findings message, so the stored `message_ts` is kept.
+            reply_target: { ...record.reply_target, ...replyTarget },
+          }
     );
   }
 
   /**
-   * Rewrites the admissions list under optimistic concurrency. `mutate` runs against the stored
-   * list, so a concurrent admission for the same thread is preserved rather than clobbered; a
-   * stale write is retried once against the version that won.
+   * Writes `mutate`'s patch under optimistic concurrency. `mutate` runs against the stored record,
+   * so a concurrent admission for the same thread is preserved rather than clobbered; a stale
+   * write is retried once against the version that won. Returns false when `mutate` declines.
    */
   private async updateAdmissions(
     investigationId: string,
-    mutate: (admissions: InvestigationAdmission[]) => InvestigationAdmission[],
-    replyTarget?: InvestigationReplyTarget
-  ): Promise<void> {
-    const write = async (record: InvestigationRecord | undefined): Promise<void> => {
-      const patch: InvestigationPatch = {
-        admissions: mutate(record?.admissions ?? []),
-        ...(replyTarget ? { reply_target: replyTarget } : {}),
-      };
+    mutate: (record: InvestigationRecord) => InvestigationPatch | undefined
+  ): Promise<boolean> {
+    const write = async (): Promise<boolean> => {
+      const record = await this.investigationRepository.get(investigationId);
+      if (!record) {
+        throw new InvestigationNotFoundError(investigationId);
+      }
+      const patch = mutate(record);
+      if (!patch) {
+        return false;
+      }
       await this.investigationRepository.update({
         id: investigationId,
         patch,
-        version: record?.version,
+        version: record.version,
       });
+      return true;
     };
 
     try {
-      await write(await this.investigationRepository.get(investigationId));
+      return await write();
     } catch (error) {
       if (!(error instanceof InvestigationStaleWriteError)) {
         throw error;
       }
-      await write(await this.investigationRepository.get(investigationId));
+      return write();
     }
   }
 
@@ -804,12 +813,42 @@ export class NightshiftInvestigationsClient {
    * run's executor, and stamping the transition with the wall clock would date the record to when
    * the persist step happened to run rather than to when the run began.
    */
-  async ensureOrCreate(investigationId: string, executionId = investigationId): Promise<void> {
+  async ensureOrCreate(
+    investigationId: string,
+    executionId = investigationId,
+    admissionKey?: string
+  ): Promise<void> {
+    try {
+      await this.ensureOrCreateOnce(investigationId, executionId, admissionKey);
+    } catch (error) {
+      // Only a claim of an admission surfaces a stale write: a concurrent admission for the same
+      // thread bumped the version, and the run must still be recorded as the latest one.
+      if (!(error instanceof InvestigationStaleWriteError)) {
+        throw error;
+      }
+      await this.ensureOrCreateOnce(investigationId, executionId, admissionKey);
+    }
+  }
+
+  private async ensureOrCreateOnce(
+    investigationId: string,
+    executionId: string,
+    admissionKey: string | undefined
+  ): Promise<void> {
     const existing = await this.investigationRepository.get(investigationId);
-    const isAdmittedExecution = existing?.admissions?.some(
-      (admission) => admission.execution_id === executionId
+    // A run is matched to its admission by the key it was started with; `admitSlackInput` does not
+    // write the execution id back, so the first `_ensure` of the run is what records it.
+    const admission = existing?.admissions?.find(
+      (candidate) =>
+        candidate.execution_id === executionId ||
+        (!!admissionKey && !candidate.execution_id && candidate.idempotency_key === admissionKey)
     );
-    if (existing && isTerminalStatus(existing.status) && !isAdmittedExecution) {
+    const isAdmittedExecution = admission !== undefined;
+    if (
+      existing &&
+      isTerminalStatus(existing.status) &&
+      (!isAdmittedExecution || existing.status === 'cancelled')
+    ) {
       throw InvestigationConflictError.settled(investigationId, existing.status);
     }
     if (
@@ -844,6 +883,11 @@ export class NightshiftInvestigationsClient {
         startedAt,
         executedBy: execution.executedBy,
         executionId,
+        admissions: admission
+          ? existing.admissions?.map((candidate) =>
+              candidate === admission ? { ...candidate, execution_id: executionId } : candidate
+            )
+          : undefined,
       });
       return;
     }
@@ -882,12 +926,14 @@ export class NightshiftInvestigationsClient {
     startedAt,
     executedBy,
     executionId,
+    admissions,
   }: {
     investigationId: string;
     version?: string;
     startedAt: string;
     executedBy?: string;
     executionId: string;
+    admissions?: InvestigationAdmission[];
   }): Promise<void> {
     try {
       await this.investigationRepository.update({
@@ -897,11 +943,12 @@ export class NightshiftInvestigationsClient {
           started_at: startedAt,
           executed_by: executedBy,
           latest_execution_id: executionId,
+          ...(admissions ? { admissions } : {}),
         },
         version,
       });
     } catch (error) {
-      if (error instanceof InvestigationStaleWriteError) {
+      if (error instanceof InvestigationStaleWriteError && !admissions) {
         return;
       }
       throw error;

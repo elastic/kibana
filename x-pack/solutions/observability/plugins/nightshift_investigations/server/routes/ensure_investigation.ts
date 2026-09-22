@@ -33,6 +33,8 @@ export const ensureInvestigationRoute = createNightshiftInvestigationsServerRout
     body: z
       .object({
         execution_id: z.string().min(1).max(MAX_KEYWORD_LENGTH).optional(),
+        // Rendered empty by the workflow for runs that were not admitted from Slack.
+        admission_key: z.string().max(MAX_KEYWORD_LENGTH).optional(),
       })
       // A POST without a body reaches validation as `null`, and older stored workflow
       // definitions still call this route without one.
@@ -41,7 +43,11 @@ export const ensureInvestigationRoute = createNightshiftInvestigationsServerRout
   handler: async ({ request, params, getInvestigationsClient }) => {
     const client = getInvestigationsClient(request);
     try {
-      await client.ensureOrCreate(params.path.id, params.body?.execution_id);
+      await client.ensureOrCreate(
+        params.path.id,
+        params.body?.execution_id,
+        params.body?.admission_key || undefined
+      );
     } catch (error) {
       rethrowInvestigationClientError(error);
     }

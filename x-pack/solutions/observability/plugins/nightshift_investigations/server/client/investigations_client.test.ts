@@ -184,7 +184,7 @@ describe('NightshiftInvestigationsClient.admitSlackInput()', () => {
     expect(second.investigation_id).toBe(first.investigation_id);
     expect(first.execution_id).toBe('exec-1');
     expect(second.execution_id).toBe('exec-2');
-    expect(duplicate).toEqual(second);
+    expect(duplicate).toEqual({ investigation_id: first.investigation_id });
     expect(mockManagement.runWorkflow).toHaveBeenCalledTimes(2);
     expect(mockManagement.runWorkflow).toHaveBeenNthCalledWith(
       1,
@@ -193,21 +193,62 @@ describe('NightshiftInvestigationsClient.admitSlackInput()', () => {
       expect.objectContaining({
         message: 'Why did checkout fail?',
         title: 'Why did checkout fail?',
+        context: expect.objectContaining({ admission_key: 'Ev1' }),
       }),
       expect.anything(),
       'nightshift-slack'
     );
+    // The runs' `_ensure` steps record the execution ids; admission only reserves the messages.
     expect(stored).toEqual(
       expect.objectContaining({
+        status: 'pending',
         conversation_id: expect.any(String),
         source_keys: ['slack_thread:T1:C1:100.1'],
-        admissions: [
-          { idempotency_key: 'Ev1', execution_id: 'exec-1' },
-          { idempotency_key: 'Ev2', execution_id: 'exec-2' },
-        ],
+        admissions: [{ idempotency_key: 'Ev1' }, { idempotency_key: 'Ev2' }],
       })
     );
     expect(stored?.latest_execution_id).toBeUndefined();
+  });
+
+  it('keeps a finished investigation and its findings message intact when admitting a follow-up', async () => {
+    let stored: InvestigationRecord | undefined = makeRecord(
+      {
+        status: 'completed',
+        conversation_id: 'conversation-1',
+        source_keys: ['slack_thread:T1:C1:100.1'],
+        admissions: [{ idempotency_key: 'Ev1', execution_id: 'exec-1' }],
+        reply_target: {
+          surface: 'slack',
+          tenant_key: 'T1',
+          channel: 'C1',
+          thread_ts: '100.1',
+          message_ts: '100.9',
+        },
+      },
+      { id: 'inv-slack' }
+    );
+    repository.find.mockImplementation(async () => findResult(stored ? [stored] : []));
+    repository.get.mockImplementation(async () => stored);
+    repository.update.mockImplementation(async ({ patch }) => {
+      stored = { ...stored!, ...patch };
+    });
+    mockManagement.getWorkflow.mockResolvedValue({ definition: { steps: [] } });
+    mockManagement.runWorkflow.mockResolvedValue('exec-2');
+
+    await makeClient().admitSlackInput({
+      sourceKey: 'slack_thread:T1:C1:100.1',
+      idempotencyKey: 'Ev2',
+      message: 'Was the deploy involved?',
+      replyTarget: { surface: 'slack', tenant_key: 'T1', channel: 'C1', thread_ts: '100.1' },
+    });
+
+    expect(repository.update).toHaveBeenCalledTimes(1);
+    expect(stored?.status).toBe('completed');
+    expect(stored?.reply_target?.message_ts).toBe('100.9');
+    expect(stored?.admissions).toEqual([
+      { idempotency_key: 'Ev1', execution_id: 'exec-1' },
+      { idempotency_key: 'Ev2' },
+    ]);
   });
 
   describe('admission idempotency around the run', () => {
@@ -287,9 +328,45 @@ describe('NightshiftInvestigationsClient.admitSlackInput()', () => {
       const retried = await client.admitSlackInput(input);
 
       expect(retried?.execution_id).toBe('exec-1');
-      expect(stored?.admissions).toEqual([
-        { idempotency_key: 'slack_message:T1:C1:100.1', execution_id: 'exec-1' },
-      ]);
+      expect(stored?.admissions).toEqual([{ idempotency_key: 'slack_message:T1:C1:100.1' }]);
+    });
+
+    it('reserves nothing when the workflow is not installed, so the message can be retried', async () => {
+      mockManagement.getWorkflow.mockResolvedValueOnce(undefined);
+
+      await expect(client.admitSlackInput(input)).rejects.toThrow(InvestigationUnavailableError);
+
+      expect(repository.create).not.toHaveBeenCalled();
+      expect(repository.update).not.toHaveBeenCalled();
+    });
+
+    it('reserves nothing when installing the agent fails', async () => {
+      installDeductiveInvestigationAgentMock.mockRejectedValueOnce(new Error('install failed'));
+
+      await expect(client.admitSlackInput(input)).rejects.toThrow('install failed');
+
+      expect(repository.update).not.toHaveBeenCalled();
+      expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('starts one run when a concurrent delivery of the same message wins the reservation', async () => {
+      const update = repository.update.getMockImplementation()!;
+      repository.update.mockImplementationOnce(async (args) => {
+        // The concurrent delivery reserves the same key first, so this write is stale.
+        await update({
+          ...args,
+          patch: { admissions: [{ idempotency_key: input.idempotencyKey }] },
+        });
+        throw new InvestigationStaleWriteError(args.id);
+      });
+      mockManagement.runWorkflow.mockResolvedValue('exec-1');
+
+      const result = await client.admitSlackInput(input);
+
+      expect(result).toEqual({ investigation_id: expect.any(String) });
+      expect(result).not.toHaveProperty('execution_id');
+      expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
+      expect(stored?.admissions).toEqual([{ idempotency_key: input.idempotencyKey }]);
     });
   });
 
@@ -1676,33 +1753,86 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     expect(repository.create).not.toHaveBeenCalled();
   });
 
-  it('starts the next admitted Slack execution after the previous round completed', async () => {
-    repository.get.mockResolvedValue(
+  describe('admitted Slack executions', () => {
+    const slackRecord = (overrides: Partial<InvestigationAttributes> = {}) =>
       makeRecord(
         {
           status: 'completed',
           latest_execution_id: 'exec-1',
           admissions: [
             { idempotency_key: 'Ev1', execution_id: 'exec-1' },
-            { idempotency_key: 'Ev2', execution_id: 'exec-2' },
+            { idempotency_key: 'Ev2' },
           ],
+          ...overrides,
         },
         { id: 'slack-investigation', version: 'v2' }
-      )
-    );
-    mockManagement.getWorkflowExecution.mockResolvedValue(
-      makeEnsureExecution({ id: 'exec-2', workflowId: DEDUCTIVE_INVESTIGATION_WORKFLOW_ID })
-    );
+      );
 
-    await makeClient().ensureOrCreate('slack-investigation', 'exec-2');
+    beforeEach(() => {
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeEnsureExecution({ id: 'exec-2', workflowId: DEDUCTIVE_INVESTIGATION_WORKFLOW_ID })
+      );
+    });
 
-    expect(repository.update).toHaveBeenCalledWith({
-      id: 'slack-investigation',
-      patch: expect.objectContaining({
-        status: 'running',
-        latest_execution_id: 'exec-2',
-      }),
-      version: 'v2',
+    it('claims its admission and starts the next round after the previous one completed', async () => {
+      repository.get.mockResolvedValue(slackRecord());
+
+      await makeClient().ensureOrCreate('slack-investigation', 'exec-2', 'Ev2');
+
+      expect(repository.update).toHaveBeenCalledWith({
+        id: 'slack-investigation',
+        patch: expect.objectContaining({
+          status: 'running',
+          latest_execution_id: 'exec-2',
+          admissions: [
+            { idempotency_key: 'Ev1', execution_id: 'exec-1' },
+            { idempotency_key: 'Ev2', execution_id: 'exec-2' },
+          ],
+        }),
+        version: 'v2',
+      });
+    });
+
+    it('is a no-op for a retried ensure of a run that already claimed its admission', async () => {
+      repository.get.mockResolvedValue(
+        slackRecord({
+          status: 'running',
+          latest_execution_id: 'exec-2',
+          admissions: [{ idempotency_key: 'Ev2', execution_id: 'exec-2' }],
+        })
+      );
+
+      await makeClient().ensureOrCreate('slack-investigation', 'exec-2', 'Ev2');
+
+      expect(repository.update).not.toHaveBeenCalled();
+    });
+
+    it('retries the claim when a concurrent admission bumped the version', async () => {
+      repository.get.mockResolvedValue(slackRecord());
+      repository.update.mockRejectedValueOnce(
+        new InvestigationStaleWriteError('slack-investigation')
+      );
+
+      await makeClient().ensureOrCreate('slack-investigation', 'exec-2', 'Ev2');
+
+      expect(repository.update).toHaveBeenCalledTimes(2);
+    });
+
+    it('rejects an unclaimed run of a settled investigation', async () => {
+      repository.get.mockResolvedValue(slackRecord());
+
+      await expect(
+        makeClient().ensureOrCreate('slack-investigation', 'exec-3', 'Ev3')
+      ).rejects.toThrow(InvestigationConflictError);
+    });
+
+    it('rejects an admitted run once the investigation was cancelled', async () => {
+      repository.get.mockResolvedValue(slackRecord({ status: 'cancelled' }));
+
+      await expect(
+        makeClient().ensureOrCreate('slack-investigation', 'exec-2', 'Ev2')
+      ).rejects.toThrow(InvestigationConflictError);
+      expect(repository.update).not.toHaveBeenCalled();
     });
   });
 

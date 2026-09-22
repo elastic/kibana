@@ -66,6 +66,7 @@ steps:
         x-elastic-internal-origin: 'kibana'
       body:
         execution_id: '{{ execution.id }}'
+        admission_key: '{{ inputs.context.admission_key }}'
     on-failure:
       retry:
         max-attempts: 3
