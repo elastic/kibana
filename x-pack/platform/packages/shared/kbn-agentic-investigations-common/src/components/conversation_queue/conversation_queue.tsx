@@ -25,11 +25,8 @@ import {
   type Investigation,
   type RecommendedAction,
 } from '../../types';
-import {
-  CONVERSATION_QUEUE_COUNT_LOADING,
-  EMPTY_CONVERSATION_QUEUE,
-  LOADING_CONVERSATION_QUEUE,
-} from './translations';
+import { CONVERSATION_QUEUE_COUNT_LOADING, EMPTY_CONVERSATION_QUEUE } from './translations';
+import { ConversationQueueSkeleton } from './conversation_queue_skeleton';
 import { ConversationCard, type ConversationsActionsGroupProps } from '../conversation_card';
 import { type BaseActionsProps } from '../actions';
 
@@ -48,8 +45,11 @@ interface ConversationQueueProps {
    */
   isOpen: boolean;
   onToggle: (isOpen: boolean) => void;
-  /** Open and waiting on its first rows. */
-  isLoading?: boolean;
+  /**
+   * Placeholder rows to render while the first page is in flight. The caller knows
+   * the bucket size, so the scaffold is as long as the list is about to be.
+   */
+  loadingRows?: number;
   onClickAction: BaseActionsProps['onClickAction'];
   onClickCard: (id: Investigation['id']) => void;
   onOpenChat: (id: Investigation['id']) => void;
@@ -88,7 +88,7 @@ export const ConversationQueue = memo<ConversationQueueProps>(
     count,
     isOpen,
     onToggle,
-    isLoading = false,
+    loadingRows = 0,
     isFiltered = false,
     onClickAction,
     onClickCard,
@@ -135,10 +135,6 @@ export const ConversationQueue = memo<ConversationQueueProps>(
           buttonContent={buttonContent}
           forceState={isOpen ? 'open' : 'closed'}
           onToggle={onToggle}
-          isLoading={isLoading}
-          // EuiAccordion only swaps the children for the message when this is truthy;
-          // `isLoading` alone just adds a class.
-          isLoadingMessage={LOADING_CONVERSATION_QUEUE}
           paddingSize="none"
           buttonProps={{
             css: css`
@@ -148,7 +144,9 @@ export const ConversationQueue = memo<ConversationQueueProps>(
             `,
           }}
         >
-          {briefingList.length > 0 ? (
+          {loadingRows > 0 ? <ConversationQueueSkeleton rows={loadingRows} /> : null}
+
+          {loadingRows === 0 && briefingList.length > 0 ? (
             <EuiFlexGroup direction="column" gutterSize="none">
               {briefingList.map((investigation, i) => (
                 <EuiFlexItem key={investigation.id} grow={false}>
@@ -165,7 +163,9 @@ export const ConversationQueue = memo<ConversationQueueProps>(
                 </EuiFlexItem>
               ))}
             </EuiFlexGroup>
-          ) : (
+          ) : null}
+
+          {loadingRows === 0 && briefingList.length === 0 ? (
             <EuiPanel>
               <EuiText size="xs" color="subdued">
                 {isFiltered
@@ -173,7 +173,7 @@ export const ConversationQueue = memo<ConversationQueueProps>(
                   : EMPTY_CONVERSATION_QUEUE.emptyQueue}
               </EuiText>
             </EuiPanel>
-          )}
+          ) : null}
         </StyledAccordion>
       </EuiPanel>
     );

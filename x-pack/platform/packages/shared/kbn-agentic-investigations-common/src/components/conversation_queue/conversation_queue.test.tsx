@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, screen } from '@testing-library/react';
+import { fireEvent, screen, within } from '@testing-library/react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import type { Investigation } from '../../types';
 import { ConversationQueue } from './conversation_queue';
@@ -70,9 +70,18 @@ describe('ConversationQueue', () => {
     expect(onToggle).toHaveBeenCalledWith(true);
   });
 
-  it('replaces the rows with a loading message while they are in flight', () => {
-    renderQueue({ isLoading: true, briefingList: [] });
+  it('scaffolds one placeholder per incoming row rather than a single spinner', () => {
+    renderQueue({ loadingRows: 4, briefingList: [] });
 
-    expect(screen.getByText('Loading events…')).toBeInTheDocument();
+    const scaffold = screen.getByLabelText('Loading events…');
+    expect(scaffold).toBeInTheDocument();
+    expect(within(scaffold).getAllByRole('progressbar')).toHaveLength(8);
+  });
+
+  it('shows neither rows nor the empty state while the scaffold is up', () => {
+    renderQueue({ loadingRows: 2, briefingList: [investigation] });
+
+    expect(screen.queryByText(investigation.title)).not.toBeInTheDocument();
+    expect(screen.queryByText('No events in this category.')).not.toBeInTheDocument();
   });
 });

@@ -29,8 +29,11 @@ export interface QueueSection {
   investigations: Investigation[];
   isOpen: boolean;
   onToggle: (isOpen: boolean) => void;
-  /** Open, asked for rows, none have arrived yet. */
-  isLoadingRows: boolean;
+  /**
+   * Placeholder rows to render while the first page is in flight, 0 when it is not.
+   * Bounded by the page about to arrive, so the scaffold matches the list.
+   */
+  loadingRows: number;
   error: unknown;
   hasMore: boolean;
   loadMore: () => void;
@@ -61,10 +64,14 @@ const useSectionState = (id: RecommendedAction, pageSize: number) => {
 const toSection = (
   id: RecommendedAction,
   state: ReturnType<typeof useSectionState>,
+  pageSize: number,
   query: UseQueryResult<ProposalsPageResponse>
 ): QueueSection => {
   const proposals = query.data?.proposals ?? [];
   const total = query.data?.total;
+  // keepPreviousData holds the previous page across a size change, so isFetching
+  // rather than isLoading is what says "rows are on the way".
+  const isLoadingRows = state.isOpen && query.isFetching && proposals.length === 0;
 
   return {
     id,
@@ -73,9 +80,7 @@ const toSection = (
     investigations: proposals.map(proposalToInvestigation),
     isOpen: state.isOpen,
     onToggle: state.onToggle,
-    // keepPreviousData holds the previous page across a size change, so isFetching
-    // rather than isLoading is what says "rows are on the way".
-    isLoadingRows: state.isOpen && query.isFetching && proposals.length === 0,
+    loadingRows: isLoadingRows ? Math.min(total ?? pageSize, pageSize) : 0,
     error: query.error,
     hasMore: total !== undefined && proposals.length < total,
     loadMore: state.loadMore,
@@ -88,6 +93,7 @@ export const useCategoryQueueSection = (category: RecommendedAction): QueueSecti
   return toSection(
     category,
     state,
+    CATEGORY_PAGE_SIZE,
     useProposalsByCategory(category, { size: state.size, from: 0 })
   );
 };
@@ -95,5 +101,10 @@ export const useCategoryQueueSection = (category: RecommendedAction): QueueSecti
 export const useClosedQueueSection = (): QueueSection => {
   const state = useSectionState(CLOSED_GROUP_KEY, CLOSED_PAGE_SIZE);
 
-  return toSection(CLOSED_GROUP_KEY, state, useClosedProposals({ size: state.size, from: 0 }));
+  return toSection(
+    CLOSED_GROUP_KEY,
+    state,
+    CLOSED_PAGE_SIZE,
+    useClosedProposals({ size: state.size, from: 0 })
+  );
 };

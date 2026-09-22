@@ -451,6 +451,27 @@ describe('ConversationsPage queue sections', () => {
     expect(mockUseClosedProposals).toHaveBeenLastCalledWith({ size: 0, from: 0 });
   });
 
+  it('scaffolds only as many rows as the bucket holds, not a whole page', () => {
+    // The size=0 read already told us the bucket holds 3, so a 25-row scaffold would
+    // promise rows that are never coming.
+    mockUseProposalsByCategory.mockReturnValue({
+      data: { proposals: [], total: 0 },
+      isFetching: false,
+      error: undefined,
+    });
+    mockUseClosedProposals.mockReturnValue({
+      data: { proposals: [], total: 3 },
+      isFetching: true,
+      error: undefined,
+    });
+
+    renderPage('/');
+    expandClosed();
+
+    const scaffold = screen.getByLabelText('Loading events…');
+    expect(within(scaffold).getAllByRole('progressbar')).toHaveLength(6);
+  });
+
   it('counts the whole bucket, not the page, on an open section', () => {
     const many = Array.from({ length: CATEGORY_PAGE_SIZE + 5 }, (_, i) => ({
       ...proposal,
