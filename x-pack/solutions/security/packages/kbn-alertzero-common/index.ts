@@ -9,7 +9,7 @@
  * Explicit allow-list of the public surface (single entry, single source of truth).
  *
  * Prefer named `export { … } from '…'` over `export *`. Star re-exports defeat
- * `@kbn/optimizer` tree-shaking: importing a few constants from the plugin
+ * `@kbn/rspack-optimizer` tree-shaking: importing a few constants from the plugin
  * entry can otherwise drag Zod schemas into page-load JS.
  */
 
@@ -114,6 +114,7 @@ export {
   coverageFromSchedule,
   createCatalogWatchPlaceholder,
   isOnDutyNow,
+  resolveWatchAccent,
 } from './impl/watches/watch_helpers';
 export type {
   CatalogWatchId,
