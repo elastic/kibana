@@ -331,6 +331,7 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
     await nextButton.click();
 
     await updateRequestPromise; // PUT — shared policy updated with elb inputs only
+    await expect(page.testSubj.locator('onboardingStep-detect-and-review')).toBeVisible();
     expect(deleteObserved).toBe(false);
   });
 
