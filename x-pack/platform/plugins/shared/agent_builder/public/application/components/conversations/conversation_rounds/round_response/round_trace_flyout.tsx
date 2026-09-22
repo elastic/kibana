@@ -52,7 +52,7 @@ export const RoundTraceFlyout: React.FC<RoundTraceFlyoutProps> = ({
   const { services } = useKibana();
   const { data } = services.plugins;
   const fetchTrace = useMemo(() => createEsTraceFetcher(data.search.search), [data.search.search]);
-  const traceSpansResult = useTraceSpans(traceId ?? null, { fetchTrace });
+  const traceSpansResult = useTraceSpans(initialSpans ? null : traceId ?? null, { fetchTrace });
 
   const activeSpans = initialSpans ?? traceSpansResult.spans;
   const activeDurationMs = initialSpans ? undefined : traceSpansResult.durationMs;

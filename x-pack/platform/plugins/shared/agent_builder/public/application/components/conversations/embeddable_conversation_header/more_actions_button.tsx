@@ -86,7 +86,11 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
   const isExperimentalEnabled = useExperimentalFeatures();
   const { conversation } = useConversation();
   const conversationRounds = useConversationRounds();
-  const { agent, isLoading: isAgentLoading } = useAgentBuilderAgentById(agentId ?? undefined);
+  const {
+    agent,
+    isLoading: isAgentLoading,
+    error: agentError,
+  } = useAgentBuilderAgentById(agentId ?? undefined);
   const {
     openFilePicker,
     isFlyoutOpen,
@@ -135,7 +139,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
           output: { steps: round.steps },
           metadata: {
             source: ADD_TO_DATASET_METADATA_SOURCE,
-            conversation_id: conversation?.id ?? null,
+            conversation_id: conversationId ?? null,
             turn_index: roundIndex,
             trace_id: normalizeTraceId(round.trace_id) ?? null,
           },
@@ -143,7 +147,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
         };
       }),
     })?.onClick();
-  }, [completedRounds, conversation?.id, getAddToDatasetAction]);
+  }, [completedRounds, conversationId, getAddToDatasetAction]);
 
   const handleOpenFullScreen = useCallback(() => {
     if (!application || !conversationId) return;
@@ -222,7 +226,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
           <EuiContextMenuItem
             key="downloadConversation"
             icon="download"
-            disabled={isAgentLoading}
+            disabled={isAgentLoading || !!agentError}
             data-test-subj="agentBuilderDownloadConversationButton"
             onClick={handleDownloadConversation}
           >
