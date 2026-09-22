@@ -49,10 +49,6 @@ jest.mock('./compose_discover_form/details_and_artifacts_step', () => ({
   DetailsAndArtifactsStep: () => null,
 }));
 
-jest.mock('./compose_discover_form/notifications_step', () => ({
-  NotificationsStep: () => null,
-}));
-
 jest.mock('./compose_discover_form/linked_action_policies_step', () => ({
   LinkedActionPoliciesStep: () => null,
 }));

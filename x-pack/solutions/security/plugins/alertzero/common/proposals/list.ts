@@ -12,12 +12,20 @@ export const CLOSED_GROUP_KEY = 'closed' as const;
 export interface ProposalItem extends ProposalWithMetadata {
   // Absent when the server cannot read the conversation (access control, not found, etc.)
   conversationTitle?: string;
+  /**
+   * Agent the conversation is bound to, needed to build its Agent Builder URL. Absent under the
+   * same conditions as `conversationTitle`; callers fall back to Agent Builder's legacy
+   * conversation redirect, which resolves the agent itself.
+   */
+  conversationAgentId?: string;
+  /**
+   * User ids assigned to the investigation, from conversation metadata. Always an array —
+   * empty when unset or the conversation is unreadable — so callers need no fallback.
+   */
+  conversationAssignees: string[];
 }
 
-export type ProposalGroups = Record<string, ProposalItem[]>;
-
-export interface GetProposalsListResponse {
-  groups: ProposalGroups;
+export interface ProposalsPageResponse {
+  proposals: ProposalItem[];
   total: number;
-  truncated: boolean;
 }
