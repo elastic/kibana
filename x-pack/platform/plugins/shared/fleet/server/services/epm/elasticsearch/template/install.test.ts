@@ -1051,6 +1051,96 @@ describe('EPM index template install', () => {
       ]);
     });
 
+    it('should apply .otel index pattern suffix for a data stream with use_otel_suffix and no streams', () => {
+      // Packages that ship only field mappings and ingest pipelines have no streams to derive an
+      // otelcol input from, so they opt into OTel asset naming with `use_otel_suffix: true`.
+      const useOtelSuffixPackageInstallContext = {
+        packageInfo: {
+          name: 'good_integration_otel',
+          version: '0.0.1',
+          type: 'integration',
+        },
+        paths: [],
+        archiveIterator: {},
+      } as any as PackageInstallContext;
+
+      appContextService.start(
+        createAppContextStartContractMock(
+          { internal: { disableILMPolicies: false } } as any,
+          undefined,
+          undefined,
+          { enableOtelIntegrations: true } as ExperimentalFeatures
+        )
+      );
+
+      const dataStream = {
+        type: 'logs',
+        dataset: 'good_integration_otel.otel_logs',
+        title: 'OTel Logs',
+        release: 'experimental',
+        package: 'good_integration_otel',
+        path: 'otel_logs',
+        ingest_pipeline: 'default',
+        use_otel_suffix: true,
+      } as RegistryDataStream;
+
+      const { indexTemplate, componentTemplates } = prepareTemplate({
+        packageInstallContext: useOtelSuffixPackageInstallContext,
+        fieldAssetsMap: new Map(),
+        dataStream,
+        ilmMigrationStatusMap: new Map(),
+      });
+
+      expect(indexTemplate.indexTemplate.index_patterns).toEqual([
+        'logs-good_integration_otel.otel_logs.otel-*',
+      ]);
+      // OTel @custom component templates are installed alongside the package ones
+      expect(Object.keys(componentTemplates)).toContain('logs-otel@custom');
+    });
+
+    it('should NOT apply .otel suffix for use_otel_suffix when enableOtelIntegrations is false', () => {
+      const useOtelSuffixPackageInstallContext = {
+        packageInfo: {
+          name: 'good_integration_otel',
+          version: '0.0.1',
+          type: 'integration',
+        },
+        paths: [],
+        archiveIterator: {},
+      } as any as PackageInstallContext;
+
+      appContextService.start(
+        createAppContextStartContractMock(
+          { internal: { disableILMPolicies: false } } as any,
+          undefined,
+          undefined,
+          { enableOtelIntegrations: false } as ExperimentalFeatures
+        )
+      );
+
+      const dataStream = {
+        type: 'logs',
+        dataset: 'good_integration_otel.otel_logs',
+        title: 'OTel Logs',
+        release: 'experimental',
+        package: 'good_integration_otel',
+        path: 'otel_logs',
+        ingest_pipeline: 'default',
+        use_otel_suffix: true,
+      } as RegistryDataStream;
+
+      const { indexTemplate } = prepareTemplate({
+        packageInstallContext: useOtelSuffixPackageInstallContext,
+        fieldAssetsMap: new Map(),
+        dataStream,
+        ilmMigrationStatusMap: new Map(),
+      });
+
+      expect(indexTemplate.indexTemplate.index_patterns).toEqual([
+        'logs-good_integration_otel.otel_logs-*',
+      ]);
+    });
+
     it('should NOT apply .otel suffix when enableOtelIntegrations is false, even for named otelcol input', () => {
       const integrationOtelPackageInstallContext = {
         packageInfo: {

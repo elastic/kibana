@@ -44,20 +44,30 @@ export const getInputEffectiveName = (input: { name?: string; type: string }): s
   input.name ?? input.type;
 
 /**
- * Returns true if the given data stream effectively uses the OTel collector input type.
+ * Returns true if the given data stream must be treated as OTel for Elasticsearch asset naming.
  *
- * A data stream is considered OTel when any of its `streams[].input` values is either:
- * - the literal type `'otelcol'`, or
- * - the `name` of an input within `pkgInfo.policy_templates[*].inputs` whose `type` is `'otelcol'`.
+ * A data stream is considered OTel when either:
+ * - its manifest sets `use_otel_suffix: true`, or
+ * - any of its `streams[].input` values is the literal type `'otelcol'`, or the `name` of an input
+ *   within `pkgInfo.policy_templates[*].inputs` whose `type` is `'otelcol'`.
  *
- * The second case handles the named-input feature (package-spec 3.6.1+) where multiple inputs
- * of the same type coexist in one policy template and data streams reference them by name instead
- * of by type.
+ * The named input case handles the package-spec 3.6.1+ feature where multiple inputs of the same
+ * type coexist in one policy template and data streams reference them by name instead of by type.
+ * The `use_otel_suffix` opt-in covers packages that ship only field mappings and ingest pipelines,
+ * and therefore have no streams to derive the input from.
+ *
+ * This drives Elasticsearch asset naming only (see `getRegistryDataStreamAssetBaseName`); it must
+ * not be used to decide whether a package produces OTel collector configuration, since a
+ * `use_otel_suffix` data stream has no `otelcol` input to generate that config from.
  */
 export const dataStreamUsesOtelInput = (
   pkgInfo: Pick<PackageInfo, 'policy_templates'>,
-  dataStream: Pick<RegistryDataStream, 'streams'>
+  dataStream: Pick<RegistryDataStream, 'streams' | 'use_otel_suffix'>
 ): boolean => {
+  if (dataStream.use_otel_suffix === true) {
+    return true;
+  }
+
   const namedOtelInputs = new Set<string>();
   for (const tpl of pkgInfo.policy_templates ?? []) {
     for (const input of getNormalizedInputs(tpl)) {
