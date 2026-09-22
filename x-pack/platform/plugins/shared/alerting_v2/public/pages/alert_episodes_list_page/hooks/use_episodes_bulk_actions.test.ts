@@ -117,19 +117,19 @@ describe('useEpisodesBulkActions', () => {
     expect(resolvedIds).not.toContain('classic-ep');
   });
 
-  it('filters out actions that define renderMenuItem', () => {
-    const standardAction = stubAction({ id: 'STANDARD' });
-    const menuOnlyAction = stubAction({ id: 'MENU_ONLY', renderMenuItem: jest.fn() });
+  it('filters out actions with supportsBulk set to false', () => {
+    const bulkAction = stubAction({ id: 'BULK_ACTION' });
+    const singleOnlyAction = stubAction({ id: 'SINGLE_ONLY', supportsBulk: false });
 
     const { result } = renderHook(() =>
       useEpisodesBulkActions({
-        actions: [standardAction, menuOnlyAction],
+        actions: [bulkAction, singleOnlyAction],
         episodesData: [],
         onSuccess: jest.fn(),
       })
     );
 
     expect(result.current).toHaveLength(1);
-    expect(result.current[0].key).toBe('STANDARD');
+    expect(result.current[0].key).toBe('BULK_ACTION');
   });
 });

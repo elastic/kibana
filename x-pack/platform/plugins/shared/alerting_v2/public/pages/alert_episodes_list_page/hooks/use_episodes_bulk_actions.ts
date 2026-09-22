@@ -26,7 +26,7 @@ export const useEpisodesBulkActions = ({
     const allEpisodes = episodesData ?? [];
 
     return actions
-      .filter((action) => !action.renderMenuItem)
+      .filter((action) => action.supportsBulk !== false)
       .map((action) => ({
         key: action.id,
         label: action.displayName,

@@ -96,6 +96,7 @@ export const createInvestigateEpisodeAction = (): EpisodeAction => ({
     defaultMessage: 'Investigate',
   }),
   iconType: 'inspect',
+  supportsBulk: false,
   isCompatible: ({ episodes }: EpisodeActionContext) => {
     if (episodes.length !== 1) return false;
     return isClassicAlertEpisode(episodes[0]);
