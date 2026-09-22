@@ -7,8 +7,9 @@
 
 import React from 'react';
 import { EuiProvider } from '@elastic/eui';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
+import type { EsqlViewsResult } from '@kbn/esql-types';
 import type { EsqlViewsClient } from '@kbn/esql-utils';
 import { getQueryPreview } from './esql_views_table';
 import { ManagementApp } from './management_app';
@@ -159,15 +160,12 @@ describe('ManagementApp', () => {
     expect(await screen.findByTestId('esqlViewsUnsupported')).toBeInTheDocument();
   });
 
-  it('retries errors and reloads the table', async () => {
+  it('retries initial loading errors', async () => {
     const client = createClient();
     client.getViews
       .mockRejectedValueOnce(createClientError('Request failed', 500))
       .mockResolvedValueOnce({
         views: [{ name: 'first-view', query: 'ROW value = 1' }],
-      })
-      .mockResolvedValueOnce({
-        views: [{ name: 'second-view', query: 'ROW value = 2' }],
       });
 
     renderApp(client);
@@ -175,10 +173,68 @@ describe('ManagementApp', () => {
     expect(await screen.findByTestId('esqlViewsError')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('esqlViewsRetryButton'));
     expect(await screen.findByText('first-view')).toBeInTheDocument();
+    expect(client.getViews).toHaveBeenCalledTimes(2);
+  });
+
+  it('fetches new views while preserving the mounted table during reload', async () => {
+    const client = createClient();
+    let resolveReload: ((result: EsqlViewsResult) => void) | undefined;
+    const reloadRequest = new Promise<EsqlViewsResult>((resolve) => {
+      resolveReload = resolve;
+    });
+    client.getViews
+      .mockResolvedValueOnce({
+        views: [{ name: 'first-view', query: 'ROW value = 1' }],
+      })
+      .mockReturnValueOnce(reloadRequest);
+
+    renderApp(client);
+
+    expect(await screen.findByText('first-view')).toBeInTheDocument();
+    fireEvent.change(screen.getByTestId('esqlViewsSearch'), {
+      target: { value: 'view' },
+    });
 
     fireEvent.click(screen.getByTestId('esqlViewsReloadButton'));
-    expect(await screen.findByText('second-view')).toBeInTheDocument();
-    expect(screen.queryByText('first-view')).not.toBeInTheDocument();
-    expect(client.getViews).toHaveBeenCalledTimes(3);
+
+    expect(client.getViews).toHaveBeenCalledTimes(2);
+    expect(screen.getByTestId('esqlViewsTable')).toBeInTheDocument();
+    expect(screen.getByTestId('esqlViewsSearch')).toHaveValue('view');
+    expect(screen.getByTestId('esqlViewsReloadButton')).toBeDisabled();
+    expect(screen.getByText('first-view')).toBeInTheDocument();
+
+    await act(async () => {
+      if (!resolveReload) {
+        throw new Error('Reload request was not created');
+      }
+      resolveReload({
+        views: [
+          { name: 'first-view', query: 'ROW value = 1' },
+          { name: 'new-view', query: 'ROW value = 2' },
+        ],
+      });
+    });
+
+    expect(await screen.findByText('new-view')).toBeInTheDocument();
+    expect(screen.getByText('first-view')).toBeInTheDocument();
+    expect(screen.getByTestId('esqlViewsSearch')).toHaveValue('view');
+  });
+
+  it('keeps the table mounted when a reload fails', async () => {
+    const client = createClient();
+    client.getViews
+      .mockResolvedValueOnce({
+        views: [{ name: 'first-view', query: 'ROW value = 1' }],
+      })
+      .mockRejectedValueOnce(createClientError('Reload failed', 500));
+
+    renderApp(client);
+
+    expect(await screen.findByText('first-view')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('esqlViewsReloadButton'));
+
+    expect(await screen.findByText('Reload failed')).toBeInTheDocument();
+    expect(screen.getByTestId('esqlViewsTable')).toBeInTheDocument();
+    expect(client.getViews).toHaveBeenCalledTimes(2);
   });
 });

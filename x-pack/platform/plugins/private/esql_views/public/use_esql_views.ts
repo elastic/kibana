@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { EsqlView } from '@kbn/esql-types';
 import type { EsqlViewsClient } from '@kbn/esql-utils';
 
@@ -15,6 +15,7 @@ interface EsqlViewsState {
   views: EsqlView[];
   status: LoadStatus;
   error?: Error;
+  isLoading: boolean;
 }
 
 const isUnsupportedError = (error: Error): boolean => {
@@ -23,44 +24,71 @@ const isUnsupportedError = (error: Error): boolean => {
 };
 
 export const useEsqlViews = (client: EsqlViewsClient) => {
-  const [requestVersion, setRequestVersion] = useState(0);
+  const requestCount = useRef(0);
   const [state, setState] = useState<EsqlViewsState>({
     views: [],
     status: 'loading',
+    isLoading: true,
   });
+
+  const loadViews = useCallback(
+    async (signal?: AbortSignal): Promise<void> => {
+      const requestId = ++requestCount.current;
+
+      setState((currentState) =>
+        currentState.status === 'success'
+          ? {
+              // Keep the current views visible while reloading.
+              ...currentState,
+              error: undefined,
+              isLoading: true,
+            }
+          : {
+              // Show the loading state on the initial request or when retrying after an error.
+              ...currentState,
+              status: 'loading',
+              error: undefined,
+              isLoading: true,
+            }
+      );
+
+      try {
+        const { views } = await client.getViews(signal);
+        if (!signal?.aborted && requestId === requestCount.current) {
+          setState({ views, status: 'success', isLoading: false });
+        }
+      } catch (error) {
+        if (!signal?.aborted && requestId === requestCount.current) {
+          const requestError = error instanceof Error ? error : new Error(String(error));
+          setState((currentState) =>
+            currentState.status === 'success'
+              ? { ...currentState, error: requestError, isLoading: false }
+              : {
+                  views: [],
+                  status: isUnsupportedError(requestError) ? 'unsupported' : 'error',
+                  error: requestError,
+                  isLoading: false,
+                }
+          );
+        }
+      }
+    },
+    [client]
+  );
 
   useEffect(() => {
     const abortController = new AbortController();
+    void loadViews(abortController.signal);
 
-    setState((currentState) => ({
-      ...currentState,
-      status: 'loading',
-      error: undefined,
-    }));
-
-    client
-      .getViews(abortController.signal)
-      .then(({ views }) => {
-        if (!abortController.signal.aborted) {
-          setState({ views, status: 'success' });
-        }
-      })
-      .catch((error: Error) => {
-        if (!abortController.signal.aborted) {
-          setState({
-            views: [],
-            status: isUnsupportedError(error) ? 'unsupported' : 'error',
-            error,
-          });
-        }
-      });
-
-    return () => abortController.abort();
-  }, [client, requestVersion]);
+    return () => {
+      abortController.abort();
+      requestCount.current += 1;
+    };
+  }, [loadViews]);
 
   const reload = useCallback(() => {
-    setRequestVersion((version) => version + 1);
-  }, []);
+    void loadViews();
+  }, [loadViews]);
 
   return {
     ...state,

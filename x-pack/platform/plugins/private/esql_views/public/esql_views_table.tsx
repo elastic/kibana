@@ -85,10 +85,17 @@ const QueryPreview: FunctionComponent<{ query: string }> = ({ query }) => {
 
 interface EsqlViewsTableProps {
   views: EsqlView[];
+  error?: Error;
+  isLoading: boolean;
   onReload: () => void;
 }
 
-export const EsqlViewsTable: FunctionComponent<EsqlViewsTableProps> = ({ views, onReload }) => {
+export const EsqlViewsTable: FunctionComponent<EsqlViewsTableProps> = ({
+  views,
+  error,
+  isLoading,
+  onReload,
+}) => {
   const columns = useMemo<Array<EuiBasicTableColumn<EsqlView>>>(
     () => [
       {
@@ -131,12 +138,17 @@ export const EsqlViewsTable: FunctionComponent<EsqlViewsTableProps> = ({ views, 
         },
       },
       toolsRight: (
-        <EuiButton data-test-subj="esqlViewsReloadButton" iconType="refresh" onClick={onReload}>
+        <EuiButton
+          data-test-subj="esqlViewsReloadButton"
+          iconType="refresh"
+          isLoading={isLoading}
+          onClick={onReload}
+        >
           {translations.reloadButton}
         </EuiButton>
       ),
     }),
-    [onReload]
+    [isLoading, onReload]
   );
 
   return (
@@ -144,6 +156,8 @@ export const EsqlViewsTable: FunctionComponent<EsqlViewsTableProps> = ({ views, 
       items={views}
       itemId="name"
       columns={columns}
+      error={error?.message}
+      loading={isLoading}
       search={search}
       sorting={{
         sort: {

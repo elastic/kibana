@@ -24,7 +24,7 @@ export const ManagementApp: FunctionComponent<ManagementAppProps> = ({
   client,
   documentationUrl,
 }) => {
-  const { error, reload, status, views } = useEsqlViews(client);
+  const { error, isLoading, reload, status, views } = useEsqlViews(client);
 
   let content: React.ReactNode;
 
@@ -61,7 +61,9 @@ export const ManagementApp: FunctionComponent<ManagementAppProps> = ({
       />
     );
   } else {
-    content = <EsqlViewsTable views={views} onReload={reload} />;
+    content = (
+      <EsqlViewsTable views={views} error={error} isLoading={isLoading} onReload={reload} />
+    );
   }
 
   return (
