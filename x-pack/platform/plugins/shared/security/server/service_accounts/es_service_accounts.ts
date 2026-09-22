@@ -14,7 +14,7 @@ import type {
   KibanaRequest,
   Logger,
 } from '@kbn/core/server';
-import type { CreateServiceAccountParams, ServiceAccount } from '@kbn/core-security-server';
+import type { CreateServiceAccountServerParams, ServiceAccount } from '@kbn/core-security-server';
 import type { CheckPrivilegesWithRequest } from '@kbn/security-plugin-types-server';
 import { z } from '@kbn/zod';
 
@@ -116,9 +116,24 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     this.getCurrentUserProfileId = getCurrentUserProfileId;
   }
 
+  async authorize(request: KibanaRequest): Promise<void> {
+    if (!this.license.isEnabled()) {
+      throw Boom.forbidden(
+        'Cannot use a service account: security features are disabled in Elasticsearch'
+      );
+    }
+
+    await ensureManageSecurityPrivilege({
+      request,
+      checkPrivilegesWithRequest: this.checkPrivilegesWithRequest,
+      logger: this.logger,
+      action: 'use a service account',
+    });
+  }
+
   async create(
     request: KibanaRequest,
-    params: CreateServiceAccountParams
+    params: CreateServiceAccountServerParams
   ): Promise<ServiceAccount> {
     try {
       const account = await this.createAccount(request, params);
@@ -138,7 +153,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
 
   private async createAccount(
     request: KibanaRequest,
-    params: CreateServiceAccountParams
+    params: CreateServiceAccountServerParams
   ): Promise<ServiceAccount> {
     if (!this.license.isEnabled()) {
       throw Boom.forbidden(
@@ -168,6 +183,12 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     const namespace = ES_SERVICE_ACCOUNT_NAMESPACE;
     // The schema refuses an empty `roles` rather than letting it fall through to the derivation
     // below, which would answer an explicit "no roles" with the widest possible grant.
+    if (params.trustedPlatformAssumers?.length) {
+      throw Boom.badRequest(
+        'Cannot create a service account: platform assumers are not supported on this deployment.'
+      );
+    }
+
     const { name, roles: requestedRoles } = parseCreateServiceAccountParams(params);
     const serviceAccountId = `${namespace}/${name}`;
 

@@ -7,7 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type {
-  CreateServiceAccountParams,
+  CreateServiceAccountServerParams,
   ServiceAccount,
   UiamProjectType,
 } from '@kbn/core-security-server';
@@ -22,7 +22,13 @@ import type { CreateServiceAccountFakeRequestParams } from './fake_requests';
  * ones, so the route and contract layers stay backend-agnostic.
  */
 export interface ServiceAccountsBackend {
-  create(request: KibanaRequest, params: CreateServiceAccountParams): Promise<ServiceAccount>;
+  /**
+   * Rejects unless `request` holds `manage_security`. Callers must do this before
+   * using a service-account id they already hold. Does not mint a token.
+   */
+  authorize(request: KibanaRequest): Promise<void>;
+
+  create(request: KibanaRequest, params: CreateServiceAccountServerParams): Promise<ServiceAccount>;
 
   /**
    * Mints a fake `KibanaRequest` bound to the given service account, for use with `asScoped(...)`

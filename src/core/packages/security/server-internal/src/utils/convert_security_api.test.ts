@@ -47,6 +47,7 @@ describe('convertSecurityApi', () => {
       },
       serviceAccounts: {
         isEnabled: jest.fn(),
+        authorize: jest.fn(),
         create: jest.fn(),
         bindWorkload: jest.fn(),
         unbindWorkload: jest.fn(),

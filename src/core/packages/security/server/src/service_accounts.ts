@@ -18,6 +18,27 @@ import type {
 } from '@kbn/core-security-common';
 
 /**
+ * Platform assumers Kibana may place on a service account. The security plugin
+ * resolves each name to an id; callers cannot supply a raw principal.
+ *
+ * @public
+ */
+export const TRUSTED_PLATFORM_SERVICE_ACCOUNTS = ['relay'] as const;
+
+/** @public */
+export type TrustedPlatformServiceAccountName = (typeof TRUSTED_PLATFORM_SERVICE_ACCOUNTS)[number];
+
+/**
+ * Server-side create parameters. `trustedPlatformAssumers` is not part of the
+ * HTTP body: that schema stays `{ name }` and rejects anything else.
+ *
+ * @public
+ */
+export interface CreateServiceAccountServerParams extends CreateServiceAccountParams {
+  trustedPlatformAssumers?: readonly TrustedPlatformServiceAccountName[];
+}
+
+/**
  * Core's service accounts service.
  *
  * The workload methods are scoped to the calling plugin: Core supplies the plugin's id from its
@@ -34,13 +55,22 @@ export interface CoreServiceAccountsService {
   isEnabled(): boolean;
 
   /**
+   * Rejects unless this request may use a service account, including one already
+   * stored. Possession of an id is not authorization. The gate is `manage_security`,
+   * the same one as {@link CoreServiceAccountsService.create}. This does not mint a
+   * token, and it cannot re-bound privileges UIAM snapshotted at creation.
+   */
+  authorize(request: KibanaRequest): Promise<void>;
+
+  /**
    * Create a service account whose privileges are bounded by those of the user
    * bound to the provided request.
    *
    * @param request The request whose user the service account is created on behalf of.
-   * @param params The name for the new service account.
+   * @param params The name, plus any named platform assumers. Assumer ids are resolved
+   * in the security plugin and are not accepted from an HTTP body.
    */
-  create(request: KibanaRequest, params: CreateServiceAccountParams): Promise<ServiceAccount>;
+  create(request: KibanaRequest, params: CreateServiceAccountServerParams): Promise<ServiceAccount>;
 
   /**
    * Binds a service account to a workload, so that the workload runs as that account until it is
