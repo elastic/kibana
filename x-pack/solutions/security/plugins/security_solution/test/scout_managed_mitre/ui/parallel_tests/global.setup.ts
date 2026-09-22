@@ -1,0 +1,95 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { globalSetupHook } from '@kbn/scout-security';
+import type { GetMitreEntitiesResponse } from '@kbn/security-mitre-attack-common';
+import { GET_MITRE_ENTITIES_URL } from '@kbn/security-mitre-attack-common';
+import {
+  buildSeedBulkOperations,
+  SEEDED_ENTITIES,
+  SEEDED_MITRE_FRAMEWORK_VERSION,
+  SEEDED_MITRE_INDEX,
+} from '../fixtures/mitre_fixtures';
+import { createSystemIndicesEsClient } from '../fixtures/system_indices_es_client';
+
+// Seeds synthetic MITRE entities (version 99.0) into `.kibana_security_solution` once before
+// all workers start. Version 99.0 sorts above any real release so the managed API resolves
+// only the seeded set. Seeding is global because the saved-object type is space-agnostic.
+globalSetupHook(
+  `Seed synthetic MITRE entities (version ${SEEDED_MITRE_FRAMEWORK_VERSION})`,
+  async ({ esClient, kbnClient, config, log }) => {
+    log.info(
+      `[managed-mitre setup] Indexing ${SEEDED_MITRE_FRAMEWORK_VERSION} fixture entities into ${SEEDED_MITRE_INDEX}`
+    );
+
+    const seederClient = await createSystemIndicesEsClient(esClient, config);
+    try {
+      const operations = buildSeedBulkOperations();
+      const result = await seederClient.bulk({ operations, refresh: true });
+
+      if (result.errors) {
+        const failed = result.items.filter((item) => item.index?.error);
+        throw new Error(
+          `[managed-mitre setup] Bulk index had errors: ${JSON.stringify(failed, null, 2)}`
+        );
+      }
+
+      log.info(
+        `[managed-mitre setup] Successfully indexed ${result.items.length} MITRE fixture documents`
+      );
+
+      // Verify the seeded data is actually served by the route. This request
+      // exercises the same resolution path the UI uses: no framework_version
+      // param, so resolveLatestVersion runs and must return 99.0 (the highest
+      // version present). Confirms:
+      //   1. xpack.mitreAttack.managedSourceEnabled is on and the route is registered.
+      //   2. Version resolution picks 99.0 (the highest indexed version).
+      //   3. All five seeded IDs round-trip through the saved-object transform.
+      //   4. No extra entities are returned — 99.0 is the only version indexed,
+      //      so the response must be exactly the five seeded documents.
+      // Without this, seeding failures surface as cryptic UI locator timeouts
+      // rather than a clear setup error.
+      const { data } = await kbnClient.request<GetMitreEntitiesResponse>({
+        method: 'GET',
+        path: GET_MITRE_ENTITIES_URL,
+        // Internal route requiring the versioned-API header.
+        headers: { 'elastic-api-version': '1' },
+      });
+
+      const returnedIds = new Set([
+        ...data.tactics.map((t) => t.id),
+        ...data.techniques.map((t) => t.id),
+        ...data.subtechniques.map((t) => t.id),
+      ]);
+      const seededIds = SEEDED_ENTITIES.map((e) => e.id);
+      const missing = seededIds.filter((id) => !returnedIds.has(id));
+      const extra = [...returnedIds].filter((id) => !seededIds.includes(id));
+
+      if (missing.length > 0) {
+        throw new Error(
+          `[managed-mitre setup] Verification failed — route did not serve seeded IDs: ${missing.join(
+            ', '
+          )}`
+        );
+      }
+
+      if (extra.length > 0) {
+        throw new Error(
+          `[managed-mitre setup] Verification failed — route returned unexpected IDs not in the seeded set: ${extra.join(
+            ', '
+          )}. Version resolution may not have selected 99.0.`
+        );
+      }
+
+      log.info(
+        '[managed-mitre setup] Verification passed — route returned exactly the five seeded entities'
+      );
+    } finally {
+      await seederClient.close();
+    }
+  }
+);

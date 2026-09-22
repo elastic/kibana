@@ -9,6 +9,7 @@ import { lastValueFrom, throwError } from 'rxjs';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   AgentBuilderErrorCode,
+  ConversationOriginType,
   createBadRequestError,
   createRequestAbortedError,
   isAgentBuilderError,
@@ -110,7 +111,33 @@ describe('convertErrors', () => {
         agentId: 'agent-1',
         conversationId: 'conv-1',
         executionId: 'exec-1',
+        roundOrigin: undefined,
       })
+    );
+  });
+
+  it('forwards the round origin to the reported round error', async () => {
+    const reportRoundError = jest.fn();
+    const source$ = throwError(() => new Error('llm exploded'));
+
+    await expect(
+      lastValueFrom(
+        source$.pipe(
+          convertErrors({
+            agentId: 'agent-1',
+            logger: loggingSystemMock.createLogger(),
+            analyticsService: { reportRoundError } as never,
+            modelProvider: 'openai' as never,
+            conversationId: 'conv-1',
+            executionId: 'exec-1',
+            roundOrigin: ConversationOriginType.Slack,
+          })
+        )
+      )
+    ).rejects.toMatchObject({ code: AgentBuilderErrorCode.internalError });
+
+    expect(reportRoundError).toHaveBeenCalledWith(
+      expect.objectContaining({ roundOrigin: ConversationOriginType.Slack })
     );
   });
 });
