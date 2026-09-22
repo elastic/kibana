@@ -7,13 +7,12 @@
 
 import type { SetStateAction } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { Forms } from '@kbn/es-ui-shared-plugin/public';
 import { useController, useFormContext } from 'react-hook-form';
 
 import type { CreateDatasetFormValues } from './create_dataset_form_state';
-import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
 import { InferSchemaToggle } from './infer_schema_toggle';
 import { MappingHeader } from './mapping_header';
 import { TimeseriesDataSection } from './timeseries_data_section';
@@ -147,11 +146,6 @@ export function StepMapping() {
       <MappingHeader docLinks={docLinks} />
 
       <div data-test-subj="createDatasetWizardMappedFields">
-        <EuiText size="s" style={{ fontWeight: 'bold' }}>
-          {createDatasetWizardStrings.mappedFieldsSectionTitle}
-        </EuiText>
-        <EuiSpacer size="m" />
-
         <EuiSpacer size="m" />
         <TimeseriesDataSection
           isEnabled={isTimeseriesEnabled}
