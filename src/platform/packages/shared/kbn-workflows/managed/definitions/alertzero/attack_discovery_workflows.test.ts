@@ -710,6 +710,7 @@ describe('Attack Discovery worker chain', () => {
       ['run_fp_tp_analysis', 'workflow.execute'],
       ['resolve_analysis', 'data.set'],
       ['attach_verdict', 'ai.attachment.add'],
+      ['refresh_verdict', 'ai.attachment.update'],
       ['close_investigation_false_positive', 'ai.conversation.metadata.patch'],
       ['close_attack_false_positive', 'security.setAttackStatus'],
       ['record_analysis_failure', 'ai.conversation.metadata.patch'],
@@ -1113,6 +1114,47 @@ describe('Attack Discovery worker chain', () => {
       // produced it.
       it('continues past a failed attachment', () => {
         expect(attachments.map((step) => step['on-failure']?.continue)).toEqual([true, true, true]);
+      });
+
+      // A re-review lands on the SAME Investigation, so the add above 409s and its
+      // verdict is discarded — while the switch, the journal and the run output all
+      // act on the NEW one. The evidence attachments keep the first snapshot on
+      // purpose; the conclusion is the one that has to follow the analysis.
+      describe('refreshing the verdict on a re-review', () => {
+        const refresh = stepIn(reviewSteps, 'refresh_verdict');
+
+        // `update` versions rather than overwrites, so the superseded verdict stays
+        // in the attachment's history.
+        it('updates rather than adding a second verdict attachment', () => {
+          expect(refresh?.type).toBe('ai.attachment.update');
+        });
+
+        it('targets the attachment the add created', () => {
+          expect(refresh?.with?.attachment_id).toBe('analysis-verdict');
+        });
+
+        // Only on the 409 path: a first review's add already wrote this.
+        it('runs only when the add did not write the verdict', () => {
+          expect(refresh?.if).toBe('${{ steps.attach_verdict.error != null }}');
+        });
+
+        // The whole point: the refreshed payload is the one every other consumer of
+        // the verdict reads, so it cannot drift from them.
+        it('writes the same payload the rest of the review acts on', () => {
+          expect(refresh?.with?.data).toEqual(stepIn(reviewSteps, 'attach_verdict')?.with?.data);
+        });
+
+        it('refreshes before any lifecycle action is taken', () => {
+          expect(reviewStepNames.indexOf('refresh_verdict')).toBeLessThan(
+            reviewStepNames.indexOf('apply_verdict')
+          );
+        });
+
+        // Same reason the add continues: a verdict that could not be recorded is not
+        // a reason to abandon the review that produced it.
+        it('continues past a failed refresh', () => {
+          expect(refresh?.['on-failure']?.continue).toBe(true);
+        });
       });
     });
 

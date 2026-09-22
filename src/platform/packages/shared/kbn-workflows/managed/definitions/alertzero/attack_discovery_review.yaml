@@ -446,6 +446,33 @@ steps:
     on-failure:
       continue: true
 
+  # The one attachment that MUST refresh on a re-review. The evidence attachments
+  # above keep the first review's snapshot deliberately — the discovery and its
+  # alerts are facts about the attack, and the first reading of them is the right
+  # one. This is not evidence, it is the conclusion of one analysis run, and the
+  # re-review's switch, journal and output all act on the NEW verdict. Leaving the
+  # add's 409 to stand would show an analyst the previous run's verdict next to the
+  # lifecycle action the current one took — a `failed` notice beside a live
+  # escalation, or an `inconclusive` beside an Investigation closed false positive.
+  #
+  # Only on the 409 path: on a first review the add above already wrote this, and
+  # `update` versions rather than overwrites, so the superseded verdict stays in
+  # the attachment's history.
+  - name: refresh_verdict
+    type: ai.attachment.update
+    if: "${{ steps.attach_verdict.error != null }}"
+    with:
+      conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
+      attachment_id: analysis-verdict
+      data:
+        summary_markdown: "{{ steps.resolve_analysis.output.summary_markdown }}"
+        verdict: "{{ steps.resolve_analysis.output.verdict }}"
+        rationale_markdown: "${{ steps.resolve_analysis.output.rationale_markdown }}"
+    # Continues for the same reason the add does: a verdict that could not be
+    # recorded is not a reason to abandon the review that produced it.
+    on-failure:
+      continue: true
+
   - name: journal_analysis_finished
     type: workflow.execute
     with:
