@@ -24,23 +24,13 @@ import {
 } from './metrics';
 import type { RetrievalTaskOutput } from './types';
 
-/**
- * These evaluators are written here rather than assembled from
- * `createRagEvaluators` because that factory's design is incompatible with
- * this suite's ground-truth model on three axes:
- *
- * 1. **The extractor cannot see the query.** `RetrievedDocsExtractor<T>` receives
- *    only the task output. This suite's relevance is a predicate over *both* sides —
- *    `gradeOf(message, query)` — which is not expressible in that signature.
- * 2. **No document identity exists.** `GroundTruth` is keyed by `index` + `_id`.
- *    The ES|QL `CATEGORIZE` + `RERANK` strategy returns log patterns, not documents,
- *    and cannot produce `_id` / `_index` at all.
- * 3. **Top-K slices a different list.** The shared factory slices the doc list; here
- *    it is the pattern list, and `recallOfLabels` deliberately applies no K cutoff
- *    because one pattern maps to 0..n labels.
- */
-
-// ─── Private helpers ────────────────────────────────────────────────────────
+// These evaluators are hand-written rather than assembled from `createRagEvaluators` because that
+// factory is typed around document identity, which this suite does not have:
+// `RetrievedDocsExtractor<T>` receives only the task output, so it cannot express a relevance
+// predicate over both sides (`gradeOf(message, query)`), and `GroundTruth` is keyed by index and
+// document id, which `CATEGORIZE` + `RERANK` cannot produce because it returns patterns.
+// https://github.com/elastic/kibana/blob/971d7d52c49d/x-pack/platform/packages/shared/kbn-evals/src/evaluators/rag/types.ts#L22
+// https://github.com/elastic/kibana/blob/971d7d52c49d/x-pack/platform/packages/shared/kbn-evals/src/evaluators/rag/types.ts#L28
 
 export type RetrievalEvaluator = Evaluator<SemanticLogExample, RetrievalTaskOutput>;
 
@@ -49,17 +39,21 @@ interface RetrievalEvaluatorOptions {
   threshold?: RelevanceGrade;
 }
 
-/** Duplicated from agent/evaluators.ts — a deliberate 5-line copy to avoid a shared module. */
+/**
+ * Below the point where the summed pattern counts stop being credible as population-scale
+ * figures, relative to the reported total. A strategy returning raw sampled `doc_count` lands
+ * here, and the document-weighted metrics are meaningless on that scale.
+ */
+const MIN_POPULATION_SCALE_RATIO = 0.1;
+
+/** Duplicated in agent/evaluators.ts; copied rather than shared, to avoid a five-line module. */
 const unavailable = (reason: string): EvaluationResult => ({
   score: null,
   label: 'unavailable',
   explanation: reason,
 });
 
-/**
- * Factory for retrieval evaluators that share the same guard: if the
- * example carries no ground truth, return `unavailable` before scoring.
- */
+/** Applies the shared guard: an example carrying no ground truth is `unavailable`, not zero. */
 const gradedEvaluator = (
   name: string,
   direction: Direction,
@@ -89,7 +83,13 @@ export const createPrecisionEvaluator = (
     return {
       score,
       explanation: `${hits} relevant of the top ${k}`,
-      metadata: { hits, k, threshold, returned: output.patterns.length, returnedBeforeCap: output.returnedBeforeCap },
+      metadata: {
+        hits,
+        k,
+        threshold,
+        returned: output.patterns.length,
+        returnedBeforeCap: output.returnedBeforeCap,
+      },
     };
   });
 
@@ -98,14 +98,12 @@ export const createWeightedPrecisionEvaluator = (
   { k = corpus.k, threshold = corpus.relevanceThreshold }: RetrievalEvaluatorOptions = {}
 ): RetrievalEvaluator =>
   gradedEvaluator(`Weighted Precision@${k}`, 'maximize', (query, output) => {
-    // Guard: if pattern counts are on a sampled scale (sum << totalCount despite
-    // exhaustive results), the weighted metric compares incommensurable scales.
-    // This happens when get_logs returns raw sampled doc_count without /p correction.
-    // The threshold is 10% — below that, the counts are almost certainly sampled.
+    // Declining to score beats scoring incommensurable scales: a full result list whose counts
+    // sum to a fraction of the total means the counts are sampled, not normalised.
     const patternCountSum = output.patterns.reduce((sum, p) => sum + p.count, 0);
     if (
       output.totalCount > 0 &&
-      patternCountSum < output.totalCount * 0.1 &&
+      patternCountSum < output.totalCount * MIN_POPULATION_SCALE_RATIO &&
       output.patterns.length >= corpus.maxPatterns
     ) {
       return unavailable(
@@ -137,8 +135,8 @@ export const createRecallEvaluator = (
     }
 
     const expectedLabels = relevantLabels(query, threshold).length;
-    // Use the raw count from distinctRelevantMessagesAtK (all patterns, no K cutoff)
-    // rather than reconstructing it from the ratio via Math.round(score * expectedLabels).
+    // Recounted rather than recovered from `score * expectedLabels`, so the reported figure is
+    // never a rounded float.
     const found = distinctRelevantMessagesAtK(
       output.patterns,
       query,
@@ -179,12 +177,6 @@ export const createDistinctMessagesEvaluator = (
     };
   });
 
-/**
- * R-Precision: relevant results in the top R / R, where R = number of relevant
- * labels for the query. Unlike Precision@K, the denominator is the number of
- * correct answers rather than a fixed K, so queries with few correct answers
- * (including `kind: 'literal'` queries) can reach 1.0.
- */
 export const createRPrecisionEvaluator = (
   corpus: CorpusProfile,
   { threshold = corpus.relevanceThreshold }: RetrievalEvaluatorOptions = {}
@@ -201,10 +193,6 @@ export const createRPrecisionEvaluator = (
     };
   });
 
-/**
- * nDCG@K: normalised Discounted Cumulative Gain. Uses graded relevance (grade 2
- * > grade 1 > 0), so it rewards returning the most-relevant answers first.
- */
 export const createNdcgEvaluator = (
   corpus: CorpusProfile,
   { k = corpus.k, threshold = corpus.relevanceThreshold }: RetrievalEvaluatorOptions = {}
@@ -221,10 +209,6 @@ export const createNdcgEvaluator = (
     };
   });
 
-/**
- * Mean Reciprocal Rank (one query): reciprocal of the rank of the first
- * relevant result. 1.0 when the first result is relevant, 0.5 for second, etc.
- */
 export const createMrrEvaluator = (
   corpus: CorpusProfile,
   { threshold = corpus.relevanceThreshold }: RetrievalEvaluatorOptions = {}
@@ -233,7 +217,10 @@ export const createMrrEvaluator = (
     const score = reciprocalRank(output.patterns, query, threshold);
     return {
       score,
-      explanation: score > 0 ? `First relevant result at rank ${Math.round(1 / score)}` : 'No relevant result found',
+      explanation:
+        score > 0
+          ? `First relevant result at rank ${Math.round(1 / score)}`
+          : 'No relevant result found',
       metadata: { threshold },
     };
   });
@@ -259,10 +246,9 @@ export const topRelevanceScoreEvaluator: RetrievalEvaluator = {
 
 /**
  * Records end-to-end retrieval latency in milliseconds.
- *
- * This is the decisive measurement for M2 (indexed dictionary vs runtime
- * CATEGORIZE+RERANK): the retrieval layer is where the cost moves, not the agent
- * layer where LLM latency dominates. Minimize.
+ * Measured in this arm rather than the agent arm because the retrieval layer is where a change of
+ * strategy moves the cost, while the agent arm is dominated by model latency. This is the figure
+ * a later pre-computed strategy has to be compared against.
  */
 export const retrievalLatencyEvaluator: RetrievalEvaluator = {
   name: 'Retrieval Latency',
@@ -276,20 +262,10 @@ export const retrievalLatencyEvaluator: RetrievalEvaluator = {
 };
 
 /**
- * Asserts that the sum of pattern document counts does not exceed the corpus
- * document count for the query window.
- *
- * `weightedPrecisionAtK` assumes `count` means "documents in the query window,
- * at population scale". A strategy that returns a lifetime or rolling counter
- * violates this and inflates the metric silently. The low-side guard catches
- * strategies that return raw sampled doc_count (sum << totalCount).
- *
- * Bind the corpus `totalDocuments` from `auditCorpus` via closure in `beforeAll`:
- *
- * ```ts
- * const countSanity = countSanityEvaluator(audit.totalDocuments);
- * await executorClient.runExperiment({ ... }, [...retrievalEvaluators(corpus), countSanity]);
- * ```
+ * Checks the `count` contract that the document-weighted metrics rest on: documents in the query
+ * window, at population scale. Scores 1 on a violation, so a run that breaks the contract shows
+ * up in the results instead of silently inflating Weighted Precision. The high side catches
+ * lifetime or rolling counters, the low side catches raw sampled counts.
  */
 export const countSanityEvaluator = (totalDocuments: number): RetrievalEvaluator => ({
   name: 'Count Sanity',
@@ -302,26 +278,25 @@ export const countSanityEvaluator = (totalDocuments: number): RetrievalEvaluator
       return {
         score: 1,
         explanation:
-          `totalCount (${output.totalCount}) exceeds corpus documents (${totalDocuments}) ` +
-          `— the strategy may be returning lifetime counters, not window counts`,
+          `totalCount (${output.totalCount}) exceeds corpus documents (${totalDocuments}): ` +
+          `the strategy may be returning lifetime counters, not window counts`,
         metadata: { totalCount: output.totalCount, totalDocuments, patternCountSum },
       };
     }
 
-    // Low-side guard: if the summed pattern counts are implausibly small relative
-    // to totalCount (< 10%) while the result list is full, the counts are likely
-    // raw sampled values (not /p-normalised). weightedPrecisionAtK will be
-    // inaccurate in this case and is separately guarded in that evaluator.
+    // Wider than the guard in `createWeightedPrecisionEvaluator`, which only reports on a full
+    // result list: any non-empty list on a sampled scale is reported here.
     if (
       output.totalCount > 0 &&
-      patternCountSum < output.totalCount * 0.1 &&
+      patternCountSum < output.totalCount * MIN_POPULATION_SCALE_RATIO &&
       output.patterns.length >= 1
     ) {
       return {
         score: 1,
         explanation:
-          `Pattern count sum (${patternCountSum}) is < 10% of totalCount (${output.totalCount}) ` +
-          `— counts may be raw sampled doc_count without /probability normalisation`,
+          `Pattern count sum (${patternCountSum}) is under ${MIN_POPULATION_SCALE_RATIO * 100}% ` +
+          `of totalCount (${output.totalCount}): counts may be raw sampled doc_count, ` +
+          `not normalised by the sampling probability`,
         metadata: { totalCount: output.totalCount, totalDocuments, patternCountSum },
       };
     }

@@ -19,11 +19,9 @@ const agentIdFor = (arm: Arm, connectorId: string): string => {
   return `eval_semlogs_${arm}_${connectorHash}_${Date.now().toString(36)}`;
 };
 
-/**
- * `baseline` uses the default agent, so it is never created here. Excluding it
- * from the type prevents silently giving the baseline arm the semantic tool via
- * an `else` branch.
- */
+// `baseline` uses the default agent and is never created here. Excluding it from the type makes
+// that a compile error rather than something an `else` branch can quietly undo by handing the
+// baseline arm a tool it is supposed to be without.
 type NonBaselineArm = Exclude<Arm, 'baseline'>;
 
 const TOOL_IDS_BY_ARM: Record<NonBaselineArm, string[]> = {
@@ -39,11 +37,9 @@ interface CreateAgentParams {
 }
 
 /**
- * Creates the agent for one arm.
- *
- * Each arm receives exactly one tool: the keyword arm gets `get_logs`, the
- * semantic arm gets `get_logs_semantic`. This isolates the comparison to the
- * retrieval quality of each tool, without mixing in the model's tool selection.
+ * Creates the agent for one arm, holding exactly one tool.
+ * One tool per arm keeps the comparison on retrieval quality; with both available, the model's
+ * tool choice would become part of what is being measured.
  */
 export const createArmAgent = async ({
   fetch,
@@ -96,8 +92,8 @@ export const deleteAgent = async ({
     });
     log.debug(`Deleted eval agent "${agentId}"`);
   } catch (error) {
-    // Leaving an agent behind pollutes later runs but must not fail the run that
-    // produced the scores.
+    // A leaked agent pollutes later runs, but discarding scores that were already produced is
+    // the worse outcome.
     log.warning(
       `Failed to delete eval agent "${agentId}": ${
         error instanceof Error ? error.message : String(error)

@@ -10,11 +10,10 @@ import type { CorpusProfile } from './corpora';
 import type { Arm, SemanticLogExample } from './types';
 
 /**
- * Builds the dataset for one arm. Every arm answers the same questions against
- * the same corpus, so the only difference between runs is the arm itself.
- *
- * The corpus id is embedded in the dataset name so that results from different
- * corpora do not collide in the same evaluation history.
+ * Builds the dataset for one arm, holding the questions and the corpus fixed so the arm is the
+ * only difference between runs.
+ * The corpus id is part of the dataset name, so results from two corpora do not accumulate into
+ * one evaluation history.
  */
 export const datasetForArm = (
   arm: Arm,

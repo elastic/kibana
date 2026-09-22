@@ -40,12 +40,10 @@ const STOP_WORDS = new Set([
 ]);
 
 /**
- * Turns a natural language question into the KQL a user would plausibly write for
- * it: an OR over the content words, matched against `message`.
- *
- * This is what the keyword arm searches with. Without it the arm would either not
- * use the question at all (ranking purely by frequency) or need a hand-written
- * filter per question, and neither is a fair comparison.
+ * Turns a question into the KQL a user would plausibly write for it: an OR over the content
+ * words, matched against `message`.
+ * The keyword arm needs this to be a fair comparison. Without it the arm would either ignore the
+ * question and rank purely by frequency, or need a filter hand-written per question.
  */
 export const toKeywordFilter = (question: string): string | undefined => {
   const terms = question

@@ -13,10 +13,7 @@ import type { CorpusProfile } from './types';
 export type { CorpusProfile } from './types';
 export { allLabels } from './types';
 
-/**
- * All registered corpora, keyed by id. Add new profiles here and they will
- * automatically inherit the invariant tests in `ground_truth.test.ts`.
- */
+/** All registered corpora, keyed by id. Registering one here subjects it to the invariant tests. */
 export const CORPORA: Readonly<Record<string, CorpusProfile>> = {
   [sigeventsPostgresTimeout.id]: sigeventsPostgresTimeout,
   [sigeventsPostgresTimeoutScale.id]: sigeventsPostgresTimeoutScale,
@@ -26,11 +23,9 @@ export const CORPORA: Readonly<Record<string, CorpusProfile>> = {
 const DEFAULT_CORPUS_ID = sigeventsPostgresTimeout.id;
 
 /**
- * Resolves a corpus by id, defaulting to `process.env.SEMANTIC_LOG_CORPUS` or
- * the built-in default when not provided.
- *
- * Fails with the list of valid ids instead of returning undefined or running
- * against an unknown corpus.
+ * Resolves a corpus by id, falling back to `SEMANTIC_LOG_CORPUS` and then to the default.
+ * Throws with the valid ids rather than running against an unknown corpus, which would produce
+ * scores that look real and mean nothing.
  */
 export const resolveCorpus = (
   id: string | undefined = process.env.SEMANTIC_LOG_CORPUS

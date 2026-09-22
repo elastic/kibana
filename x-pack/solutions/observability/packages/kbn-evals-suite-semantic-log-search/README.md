@@ -14,13 +14,20 @@ allowed to use.
 | `semantic` | `get_logs_semantic` with `semanticFilter` set to the question | `evals/retrieval` and `evals/agent` |
 | `baseline` | The default agent, which has no log-specific tool | `evals/agent` only |
 
-`evals/retrieval` executes the tool directly, so the ranking is deterministic and no model is in
-the loop. `evals/agent` goes through `converse`, which is where token cost, latency and answer
-quality become measurable. Each arm gets exactly one tool to isolate the retrieval comparison.
+`evals/retrieval` executes the tool directly, with no model in the loop. `evals/agent` goes through
+`converse`, which is where token cost, latency and answer quality become measurable. Each arm gets
+exactly one tool to isolate the retrieval comparison.
 
-**Candidate budget**: both arms receive the same number of patterns (`maxPatterns`, default 20).
-The semantic tool is server-side capped at that value; the keyword tool returns up to ~60 categories
-and is capped client-side so Recall cannot be inflated by giving one arm more surface area.
+**Reproducibility is not symmetric.** `get_logs` samples with a fixed seed, so the keyword arm
+repeats. The semantic arm inherits an unseeded ES|QL `SAMPLE`, so once a corpus is large enough for
+sampling to engage (the scale corpus, by design) two runs draw different documents and the counts
+are extrapolated estimates. Compare the two arms within a run rather than one arm across runs.
+
+**Candidate budget**: both arms receive the same number of patterns. Every registered corpus sets
+`maxPatterns: 20`, which is also the tool parameter's ceiling; the tool's own default, unused here,
+is 10. The semantic tool is server-side capped at that value; the keyword tool returns up to ~60
+categories and is capped client-side so Recall cannot be inflated by giving one arm more surface
+area.
 
 ## Corpus profiles
 
@@ -40,11 +47,12 @@ The suite supports multiple corpora. Each corpus is defined in `src/corpora/` as
 | `sigevents_postgres_timeout_scale` | Scale corpus (same labels, `baseRate=10`, > 50k docs). Exercises the two-pass head/rare CATEGORIZE branch that production runs. |
 | `sigevents_fraud_check_redis_herring` | Redis/fraud corpus with different message classes and semantic traps. |
 
-**Why two postgres_timeout profiles?** The service's `collectCandidates` function has two code
-paths chosen by document count. Above 50,000 documents it runs a two-pass head/rare procedure
-that contains all the logic guarding a known failure (capping by frequency deleted rare patterns,
-taking relevance 2/10 → 0/10). The small corpus exercises the simpler single-pass path; the scale
-corpus exercises the path production actually runs.
+**Why two postgres_timeout profiles?** The service's `collectCandidates` picks one of two code
+paths by document count. At or below 50,000 documents it runs a single unsampled pass; above it,
+a sampled head pass plus a rare pass. The rare pass is the part worth measuring: selecting
+candidates by frequency alone drops low-count patterns, and the pattern an incident question is
+reaching for is usually a rare one. The small corpus exercises the single-pass path; the scale
+corpus exercises the sampled path that a production-sized corpus takes.
 
 After seeding the scale corpus, verify that `logRunManifest`'s `documents:` line reports **> 50,000**
 before drawing conclusions from its results.
@@ -107,14 +115,14 @@ same `maxPatterns` candidate budget).
 |---|---|---|
 | `Precision@K` | maximize | Divides by K (not by results returned); cannot be inflated by returning fewer patterns |
 | `Weighted Precision@K` | maximize | Precision weighted by documents covered per pattern; requires population-scale counts |
-| `Recall` | maximize | Over the labelled set; no K cutoff because one pattern maps to 0–n labels |
+| `Recall` | maximize | Over the labelled set; no K cutoff because one pattern can carry several labels |
 | `Hard Negatives@K` | minimize | Lexical traps in the top K |
 | `Distinct Relevant Messages@K` | maximize | The metric the parent issue's acceptance criteria use |
 | `R-Precision` | maximize | Precision@R where R = number of correct answers; the right metric for literal queries (can reach 1.0) |
 | `nDCG@K` | maximize | Normalised DCG using graded relevance (grade 2 > grade 1 > 0) |
 | `MRR` | maximize | Reciprocal rank of the first relevant result |
 | `Top Relevance Score` | neutral | The reranker's logit for the top pattern; calibrates the "nothing relevant" threshold |
-| `Retrieval Latency` | minimize | Wall-clock fetch-to-parsed; the decisive M1→M2 comparison point |
+| `Retrieval Latency` | minimize | Wall-clock fetch-to-parsed; the figure any later strategy has to be compared against |
 | `Count Sanity` | minimize | Flags counts that are too high (lifetime counters) or too low (raw sampled `doc_count`) |
 | `Used Log Tool` | neutral | Agent arms: verifies each arm is configured correctly |
 | `Relevant Messages Cited` | maximize | Agent arms: coverage of the answer, not its quality |
@@ -140,7 +148,7 @@ node scripts/evals start --suite semantic-log-search --project <connector-id> --
 # Iterate against a running stack
 node scripts/evals run --suite semantic-log-search --project <connector-id> --judge <connector-id>
 
-# Only the deterministic retrieval arms (still requires --judge for config construction)
+# Only the retrieval arms, which run no model (still requires --judge for config construction)
 node scripts/evals run --suite semantic-log-search --grep "retrieval" --project <connector-id> --judge <connector-id>
 
 # Run a specific corpus
@@ -185,7 +193,11 @@ node scripts/jest --config x-pack/solutions/observability/packages/kbn-evals-sui
 - **The keyword arm's KQL is synthesised** by `toKeywordFilter`, which stands in for what a user
   would type. A different synthesis would move its numbers.
 - **Corpus breadth**: 2 distinct profiles (3 total), all from the `claims` mock app. The `sigevents`
-  scenario ships 8 mock apps × ~7 incident scenarios — a broader corpus would strengthen the claim.
+  scenario ships 8 mock apps × ~7 incident scenarios, so a broader corpus would strengthen the claim.
 - **Tool conflict not measured**: `get_logs_semantic` is registered unconditionally alongside
   `get_logs`. When the agent has both tools available, the routing question is not yet evaluated.
   This is the parent issue's (`observability-dev#6117`) own named open question.
+- **Not registered for CI**: the suite is absent from `.buildkite/pipelines/evals/evals.suites.json`,
+  so it has no tags, no `ciLabels`, no `slackChannel` and no `defaultModelGroups`. Local runs work,
+  because `--suite` rediscovers configs on a cache miss, but nothing runs this on a schedule and no
+  result is persisted anywhere. Any claim that rests on repeated measurement needs this first.

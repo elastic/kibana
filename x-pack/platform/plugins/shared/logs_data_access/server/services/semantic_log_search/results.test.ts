@@ -167,6 +167,59 @@ describe('toFailureResult — execution', () => {
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('something went wrong'));
   });
 
+  // Regression: observed against a cluster importing `.rerank-v1` for the first time. Elasticsearch
+  // gave up on the deployment before our transport timeout fired, so the failure arrived as a
+  // ResponseError and was classified `execution`, whose warning tells the caller not to retry. That
+  // is the opposite of the correct advice for a model that is still loading.
+  it('classifies an Elasticsearch model_deployment_timeout_exception as inference_not_ready', () => {
+    const logger = loggerMock.create();
+    const error = new errors.ResponseError({
+      statusCode: 408,
+      body: { error: { type: 'model_deployment_timeout_exception', reason: 'timed out' } },
+      headers: {},
+      warnings: null,
+      meta: {} as never,
+    });
+
+    const result = toFailureResult(error, {
+      logger,
+      target: 'logs-*',
+      phase: SEARCH_PHASE.RERANK,
+    });
+
+    expect(result).toEqual({ status: 'error', reason: 'inference_not_ready' });
+  });
+
+  it('classifies a model deployment timeout surfaced only in the message', () => {
+    const logger = loggerMock.create();
+    const result = toFailureResult(new Error('model_deployment_timeout_exception'), {
+      logger,
+      target: 'logs-*',
+      phase: SEARCH_PHASE.RERANK,
+    });
+
+    expect(result).toEqual({ status: 'error', reason: 'inference_not_ready' });
+  });
+
+  it('leaves an unrelated ResponseError in the rerank phase classified as execution', () => {
+    const logger = loggerMock.create();
+    const error = new errors.ResponseError({
+      statusCode: 400,
+      body: { error: { type: 'status_exception', reason: 'bad request' } },
+      headers: {},
+      warnings: null,
+      meta: {} as never,
+    });
+
+    const result = toFailureResult(error, {
+      logger,
+      target: 'logs-*',
+      phase: SEARCH_PHASE.RERANK,
+    });
+
+    expect(result).toEqual({ status: 'error', reason: 'execution' });
+  });
+
   it('uses the phase-specific failed text in the log message', () => {
     const capLogger = loggerMock.create();
     toFailureResult(new Error('boom'), {

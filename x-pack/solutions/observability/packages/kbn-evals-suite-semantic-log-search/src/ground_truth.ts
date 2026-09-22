@@ -5,18 +5,11 @@
  * 2.0.
  */
 
-/**
- * Ground truth types and predicates for semantic log search evaluation.
- *
- * The retrieval strategies return log *patterns*, not documents, and the ES|QL
- * `CATEGORIZE` + `RERANK` strategy cannot return `_id` / `_index` at all. A label
- * is therefore a case-insensitive substring of a message, and every message
- * containing it carries that label's grade.
- *
- * Corpus-specific data (message classes, queries, constants) lives in the
- * `corpora/` directory. This module exports only the types and pure predicates
- * that work over any corpus profile.
- */
+// Relevance is expressed as a case-insensitive substring of a message, not as a document id,
+// because the strategies return patterns and `CATEGORIZE` + `RERANK` cannot produce an id at all.
+// Every message containing a label carries that label's grade.
+// Only the types and the pure predicates live here; the labels and queries they run over belong
+// to a corpus profile under `corpora/`.
 
 /** 2 answers the question, 1 is related but weaker, 0 does not answer it. */
 export type RelevanceGrade = 0 | 1 | 2;
@@ -41,16 +34,13 @@ export interface EvalQuery {
 const containsLabel = (message: string, label: string): boolean =>
   message.toLowerCase().includes(label.toLowerCase());
 
-/**
- * Returns the labels from `labels` that the message carries.
- */
+/** Returns the labels from `labels` that the message carries. */
 export const matchedLabels = (message: string, labels: readonly string[]): string[] =>
   labels.filter((label) => containsLabel(message, label));
 
 /**
- * Grades a message against a query. A message carrying labels of several grades
- * takes the highest, so a line that is both a warning and a failure counts as a
- * failure.
+ * Grades a message against a query, taking the highest grade when it carries labels of several,
+ * so a line that is both a warning and a failure counts as a failure.
  */
 export const gradeOf = (message: string, query: EvalQuery): RelevanceGrade => {
   let best: RelevanceGrade = 0;
@@ -63,19 +53,14 @@ export const gradeOf = (message: string, query: EvalQuery): RelevanceGrade => {
 };
 
 /**
- * True when the message is a lexical trap for this query. Traps are scored
- * separately from precision because a trap is a specific kind of wrong answer:
- * one that keyword search is expected to rank highly.
+ * True when the message is a lexical trap for this query.
+ * Scored separately from precision because a trap is a specific kind of wrong answer: the kind
+ * keyword search is expected to rank highly.
  */
 export const isTrap = (message: string, query: EvalQuery): boolean =>
   query.traps.some((label) => containsLabel(message, label));
 
-/**
- * The labels that count as relevant for a query at a given threshold. This is the
- * recall denominator: recall is measured against the labelled set, not against
- * the corpus, so it is comparable between arms but is not an absolute coverage
- * figure.
- */
+/** The labels that count as relevant for a query at a given threshold, deduplicated. */
 export const relevantLabels = (query: EvalQuery, threshold: RelevanceGrade): readonly string[] => [
   ...new Set(
     query.graded.filter(({ grade }) => grade >= threshold).flatMap(({ matches }) => [...matches])

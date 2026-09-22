@@ -58,10 +58,29 @@ function isTimeoutError(error: unknown): boolean {
   );
 }
 
-// A probe timeout is actionable — the scope is too broad to categorize within the budget and a
-// narrower one may succeed. A rerank timeout is actionable in a different way: the model is likely
-// still loading, so retrying shortly may succeed while narrowing the scope will not. A timeout in
-// any other phase is not actionable.
+/**
+ * Elasticsearch's own name for "the model was not deployed in time", which arrives as a successful
+ * HTTP response carrying an error body rather than as a client `TimeoutError`.
+ */
+const MODEL_DEPLOYMENT_TIMEOUT_TYPE = 'model_deployment_timeout_exception';
+
+// A cold rerank endpoint can exhaust the budget on either side of the wire: our transport timeout
+// fires as a client `TimeoutError`, while Elasticsearch giving up on the deployment first comes
+// back as a `ResponseError`. Both mean the model is not loaded yet, so both have to reach the same
+// classification, or the second one is reported as a generic execution failure and the caller is
+// told not to retry the one thing that would work.
+function isModelDeploymentTimeoutError(error: unknown): boolean {
+  if (error instanceof errors.ResponseError) {
+    const type = (error.body as { error?: { type?: string } } | undefined)?.error?.type;
+    if (type === MODEL_DEPLOYMENT_TIMEOUT_TYPE) return true;
+  }
+  return error instanceof Error && error.message.includes(MODEL_DEPLOYMENT_TIMEOUT_TYPE);
+}
+
+// A probe timeout is actionable: the scope is too broad to categorize within the budget, and a
+// narrower one may succeed. A rerank timeout is actionable in a different way, because the model is
+// likely still loading, so retrying shortly may succeed while narrowing the scope will not. A
+// timeout in any other phase is not actionable.
 const PHASE_FAILURE: Record<
   SearchPhase,
   { timeoutReason: ErrorReason; timeoutText: string; failedText: string }
@@ -99,7 +118,7 @@ export function toFailureResult(
     logger.debug(`Semantic log search cancelled for target "${target}" during ${phase}`);
     return errorResult(ERROR_REASON.CANCELLED);
   }
-  if (isTimeoutError(error)) {
+  if (isTimeoutError(error) || isModelDeploymentTimeoutError(error)) {
     logger.warn(`Semantic log search ${timeoutText} for target "${target}"`);
     return errorResult(timeoutReason);
   }

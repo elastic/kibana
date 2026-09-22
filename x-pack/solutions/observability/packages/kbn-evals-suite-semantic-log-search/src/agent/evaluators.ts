@@ -12,11 +12,9 @@ import { matchedLabels, relevantLabels } from '../ground_truth';
 import type { SemanticLogExample } from '../types';
 import type { AgentTaskOutput } from './types';
 
-// ─── Private helpers ────────────────────────────────────────────────────────
-
 export type AgentEvaluator = Evaluator<SemanticLogExample, AgentTaskOutput>;
 
-/** Duplicated from retrieval/evaluators.ts — a deliberate 5-line copy to avoid a shared module. */
+/** Duplicated in retrieval/evaluators.ts; copied rather than shared, to avoid a five-line module. */
 const unavailable = (reason: string): EvaluationResult => ({
   score: null,
   label: 'unavailable',
@@ -26,12 +24,10 @@ const unavailable = (reason: string): EvaluationResult => ({
 const toolIdsFrom = (output: AgentTaskOutput): string[] =>
   output.steps.map((step) => step.tool_id).filter((toolId): toolId is string => Boolean(toolId));
 
-// ─── Agent evaluators ────────────────────────────────────────────────────────
-
 /**
- * Whether the agent reached for a log tool at all. In the baseline arm the tools
- * are not available, so this is expected to be 0 and exists to prove the arm was
- * really configured without them.
+ * Whether the agent reached for a log tool at all.
+ * Scored `neutral` because the expected value depends on the arm: 0 in the baseline arm, where it
+ * confirms the arm really was configured without the tools, and 1 in the other two.
  */
 export const usedLogToolEvaluator: AgentEvaluator = {
   name: 'Used Log Tool',
@@ -50,10 +46,8 @@ export const usedLogToolEvaluator: AgentEvaluator = {
 
 /**
  * How many of the labelled relevant messages the agent's answer actually names.
- *
- * Substring matching over prose is a coverage signal, not a quality judgement:
- * it says whether the evidence reached the user, and says nothing about whether
- * the answer reasoned well. The criteria-based judge in the spec covers that.
+ * Substring matching over prose measures whether the evidence reached the user, and nothing about
+ * whether the answer reasoned well; the criteria-based judge in the spec covers that.
  */
 export const createCitedRelevantMessagesEvaluator = (corpus: CorpusProfile): AgentEvaluator => ({
   name: 'Relevant Messages Cited',

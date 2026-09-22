@@ -36,22 +36,20 @@ interface AuditParams {
 }
 
 /**
- * Sampled per label during audit. Raised from 5 to 20 to reduce the chance of a
- * false "missing" report for a label that phrase-matches but happens not to appear
- * in the top-5 hits ordered by score. The substring re-confirmation uses the same
- * predicate as the evaluators, so a label found in any of these samples is valid.
+ * Documents pulled back per label to re-confirm the phrase match as a substring.
+ * Large enough that a label ranked outside the first few hits is not reported missing, which
+ * would fail the run; one confirmed sample is enough, since the audit only asks whether the label
+ * is present at all.
  */
 const SAMPLES_PER_LABEL = 20;
 
 /**
  * Counts how many documents carry each ground truth label.
  *
- * Labels are substrings, but Elasticsearch cannot count substrings over
- * `match_only_text` cheaply, so the count comes from a `match_phrase` on the
- * label's tokens and is then confirmed against sampled `_source` values using the
- * same substring predicate the evaluators use. A label that phrase-matches but
- * never matches as a substring is reported as missing, because the evaluators
- * would never score it.
+ * Labels are substrings, but counting substrings over `match_only_text` is not cheap, so the
+ * count comes from a `match_phrase` on the label's tokens and is then confirmed against sampled
+ * `_source` values with the same predicate the evaluators use. A label that phrase-matches but
+ * never matches as a substring counts as missing, because the evaluators would never score it.
  */
 export const auditCorpus = async ({ esClient, corpus, log }: AuditParams): Promise<CorpusAudit> => {
   const { target, timeRange } = corpus;
@@ -103,30 +101,19 @@ export const auditCorpus = async ({ esClient, corpus, log }: AuditParams): Promi
 };
 
 /**
- * Seeds the corpus when the audit shows it is absent or contains data from a
- * different corpus (missing labels for the requested one).
+ * Runs the corpus's `setupCommand` when the audit shows the data is absent or belongs to another
+ * corpus, and reports whether it did.
  *
- * Executes the corpus's `setupCommand` via `bash -c` from the Kibana repo root,
- * after substituting the ES and Kibana base URLs from environment variables:
- *
- *   ES_URL      — defaults to http://elastic:changeme@localhost:9220
- *   KIBANA_URL  — defaults to http://elastic:changeme@localhost:5620
- *
- * Returns `true` when seeding was performed, `false` when the corpus was already
- * present with all labels accounted for (no seeding needed).
- *
- * Propagates errors — the caller should fall through to `assertCorpusIsLabelled`
- * so that a failed seed produces the same diagnostic as a missing corpus.
+ * Throws on a failed seed rather than reporting it, so the caller reaches
+ * `assertCorpusIsLabelled` and a broken seed produces the same diagnostic as a missing corpus.
  */
 export const seedCorpusIfNeeded = (
   priorAudit: CorpusAudit,
   corpus: CorpusProfile,
   log: ToolingLog
 ): boolean => {
-  // Skip only when the index is non-empty AND every label is present. This
-  // covers two cases where seeding is necessary:
-  // 1. Empty index (no data at all).
-  // 2. Non-empty index with a different corpus's data (labels are missing).
+  // A non-empty index is not enough to skip seeding: the corpora share one data stream, so
+  // another corpus's data reads as present but unlabelled.
   if (priorAudit.totalDocuments > 0 && priorAudit.missing.length === 0) {
     return false;
   }
@@ -136,15 +123,15 @@ export const seedCorpusIfNeeded = (
       ? `Corpus "${corpus.target}" is empty`
       : `Corpus "${corpus.target}" has ${priorAudit.missing.length} missing labels (previous corpus data?)`;
 
-  // Substitute Scout-standard env vars so seeding works off the configured
-  // stack rather than hardcoded localhost URLs.
+  // The corpus profiles hardcode the Scout defaults, so seeding a non-local stack means
+  // rewriting them from the environment.
   const esUrl = process.env.ES_URL ?? 'http://elastic:changeme@localhost:9220';
   const kibanaUrl = process.env.KIBANA_URL ?? 'http://elastic:changeme@localhost:5620';
   const cmd = corpus.setupCommand
     .replace(/http:\/\/elastic:changeme@localhost:9220/g, esUrl)
     .replace(/http:\/\/elastic:changeme@localhost:5620/g, kibanaUrl);
 
-  log.info(`${reason} — seeding with:\n\n${cmd}\n`);
+  log.info(`${reason}, seeding with:\n\n${cmd}\n`);
 
   const result = spawnSync('bash', ['-c', cmd], {
     cwd: REPO_ROOT,
@@ -164,16 +151,13 @@ export const seedCorpusIfNeeded = (
 };
 
 /**
- * Asserts that the semantic log search service can serve requests on this cluster.
+ * Asserts that semantic log search can serve requests on this cluster, by asking it to.
  *
- * Executes the semantic tool with a probe query and fails loudly if the service
- * returns `unavailable` (empty result + warnings). This is strategy-agnostic: it
- * asks "can you serve this?" rather than checking for a specific ES endpoint, so it
- * works on both RERANK clusters (M1) and AI-index clusters (M2).
- *
- * Must run after `assertCorpusIsLabelled` so the corpus is known to have data.
- * Ambiguous empty results (no patterns, no warnings) are logged but do not fail,
- * because a very specific probe question may genuinely match nothing.
+ * Probing the tool rather than checking for a specific inference endpoint keeps this valid for
+ * whatever strategy the service selects, so a later strategy does not need a new pre-flight.
+ * Requires a corpus that already has data, since an empty result is only unambiguous evidence of
+ * an unavailable service once the data is known to be there; a probe that matches nothing is
+ * logged and allowed.
  */
 export const assertSemanticSearchAvailable = async ({
   fetch,
@@ -200,7 +184,7 @@ export const assertSemanticSearchAvailable = async ({
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     throw new Error(
-      `Semantic arm pre-flight failed — the service threw an error on a probe query:\n${message}\n` +
+      `Semantic arm pre-flight failed, the service threw on a probe query:\n${message}\n` +
         `Ensure the cluster has the required capabilities for semantic log search.`
     );
   }
@@ -220,13 +204,11 @@ export const assertSemanticSearchAvailable = async ({
 };
 
 /**
- * Emits a one-time run manifest so two results from different clusters are
- * attributable without ambiguity.
+ * Emits a one-time manifest so a set of scores stays attributable to the cluster, corpus and
+ * build that produced it.
  *
- * Records: corpus identity, query window, document count from the audit, ES
- * version, whether the RERANK endpoint is available (provenance, not a gate),
- * and the git commit. The RERANK check here is purely informational — it does not
- * fail the run; `assertSemanticSearchAvailable` is the availability gate.
+ * Every lookup here is provenance, never a gate: the RERANK check records which endpoint existed,
+ * and `assertSemanticSearchAvailable` decides whether the run may proceed.
  */
 export const logRunManifest = async ({
   esClient,
@@ -252,7 +234,8 @@ export const logRunManifest = async ({
     const r = await esClient.inference.get({ inference_id: RERANK_ENDPOINT });
     hasRerank = (r.endpoints?.length ?? 0) > 0;
   } catch {
-    // absent or unauthorized — treat as unavailable
+    // Absent or unauthorized, both recorded the same way: the manifest reports what this run
+    // could see, not what the cluster has.
   }
 
   let commit = process.env.BUILDKITE_COMMIT ?? process.env.GIT_COMMIT ?? 'unknown';

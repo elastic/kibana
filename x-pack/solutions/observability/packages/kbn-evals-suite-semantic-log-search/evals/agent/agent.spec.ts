@@ -27,10 +27,8 @@ import type { Arm } from '../../src/types';
 /** Resolved once at module load; all tests in this file use the same corpus. */
 const corpus = resolveCorpus();
 
-/**
- * Judged criteria are phrased so that they hold for every question in the set,
- * because a criteria evaluator is built once and reused across examples.
- */
+// Phrased to hold for every question in the set, because the criteria evaluator is built once and
+// reused across all of them; anything question-specific belongs in a `note` on the query instead.
 const ANSWER_CRITERIA = [
   'The answer reports log messages that match the meaning of the question, including messages that share no words with it.',
   'The answer does not present healthy or purely informational log lines as evidence of a failure.',
@@ -38,12 +36,11 @@ const ANSWER_CRITERIA = [
 ];
 
 /**
- * The same questions asked through Agent Builder, which is where token cost,
- * latency and answer quality become measurable.
+ * The same questions asked through Agent Builder, which is where token cost, answer quality and
+ * end-to-end latency become measurable.
  *
- * The baseline is the default agent: the standard tool set with no log-specific
- * tool, which is what a user gets today. The keyword arm gets only
- * `observability.get_logs`; the semantic arm gets only `observability.get_logs_semantic`.
+ * The baseline arm is the default agent, carrying the standard tool set and no log-specific tool,
+ * so it measures what a user gets today rather than acting as a null result.
  */
 evaluate.describe(
   'Semantic log search: agent',

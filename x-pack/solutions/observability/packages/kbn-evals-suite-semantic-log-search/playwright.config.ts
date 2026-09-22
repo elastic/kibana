@@ -9,7 +9,7 @@ import { createPlaywrightEvalsConfig } from '@kbn/evals';
 
 export default createPlaywrightEvalsConfig({
   testDir: Path.resolve(__dirname, './evals'),
-  // The agent arm runs three arms over the full question set; the default 5m
-  // timeout is not enough for slower connectors.
+  // One agent run covers three arms over the full question set, which the default 5 minute
+  // timeout does not cover on a slower connector.
   timeout: 30 * 60_000,
 });

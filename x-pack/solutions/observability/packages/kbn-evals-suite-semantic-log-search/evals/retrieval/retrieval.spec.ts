@@ -27,12 +27,11 @@ const corpus = resolveCorpus();
 /**
  * Retrieval quality, measured with no model in the loop.
  *
- * The keyword arm calls `observability.get_logs` and the semantic arm calls
- * `observability.get_logs_semantic`, both through the tool execution API, so
- * the ranking is deterministic and the only variable is which path is used.
- * Latency is measured at the fetch layer (Retrieval Latency evaluator) and
- * recorded alongside quality metrics so M2 vs M1 latency comparisons are
- * available without routing through the agent arm.
+ * Both arms call their tool through the tool execution API rather than an agent, so the only
+ * variable between them is which one ranked the results. Reproducibility is not symmetric:
+ * `get_logs` samples with a fixed seed, while the semantic arm inherits an unseeded ES|QL
+ * `SAMPLE` once the corpus is large enough for sampling to engage. Compare the two arms within a
+ * session rather than one arm across sessions.
  */
 evaluate.describe(
   'Semantic log search: retrieval',

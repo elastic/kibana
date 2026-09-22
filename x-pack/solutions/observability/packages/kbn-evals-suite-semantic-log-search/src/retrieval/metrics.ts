@@ -9,22 +9,17 @@ import type { EvalQuery, RelevanceGrade } from '../ground_truth';
 import { gradeOf, isTrap, matchedLabels, relevantLabels } from '../ground_truth';
 import type { RetrievedPattern } from './types';
 
-// ─── Private helpers ────────────────────────────────────────────────────────
-
 /** Distinct labels from `expected` matched anywhere across all `patterns`. */
 const distinctMatchedLabels = (
   patterns: readonly RetrievedPattern[],
   expected: readonly string[]
 ): Set<string> => new Set(patterns.flatMap(({ message }) => matchedLabels(message, expected)));
 
-// ─── Public functions ────────────────────────────────────────────────────────
-
 /**
- * Number of distinct relevant pattern matches within the top K.
- *
- * This is the raw count underlying both `precisionAtK` (which divides by K)
- * and the precision evaluator's `hits` metadata. Keeping it separate avoids
- * reconstructing the integer from the ratio via a round-trip through floats.
+ * Number of results in the top K that are relevant. Counts patterns, not labels, so two
+ * patterns carrying the same label count twice; `distinctRelevantMessagesAtK` is the deduplicated
+ * form. Exported separately from `precisionAtK` so a caller reporting a hit count does not have to
+ * recover the integer from the ratio.
  */
 export const relevantAtK = (
   patterns: readonly RetrievedPattern[],
@@ -35,10 +30,9 @@ export const relevantAtK = (
   patterns.slice(0, k).filter((candidate) => gradeOf(candidate.message, query) >= threshold).length;
 
 /**
- * Precision@K = relevant results in the top K, divided by K.
- *
- * The denominator is K rather than the number of results returned, so a strategy
- * cannot inflate its score by returning fewer results.
+ * Precision@K: relevant results in the top K, divided by K.
+ * The denominator is K rather than the number of results returned, so a strategy cannot inflate
+ * its score by returning fewer results.
  */
 export const precisionAtK = (
   patterns: readonly RetrievedPattern[],
@@ -53,12 +47,11 @@ export const precisionAtK = (
 };
 
 /**
- * Precision@K weighted by how many documents each pattern covers.
- *
- * Plain precision treats a pattern covering 40.000 documents and one covering 50
- * as equal. This states what fraction of the documents behind the top K are
- * relevant, which is closer to what a user reading the results experiences.
- * Returns null when the top K covers no documents at all.
+ * Precision@K weighted by how many documents each pattern covers, or null when the top K covers
+ * no documents. Plain precision treats a pattern covering 40,000 documents and one covering 50 as
+ * equal; this reports what fraction of the documents behind the top K are relevant, which is
+ * closer to what a user reading the results sees. Assumes `count` is at population scale, an
+ * invariant `countSanityEvaluator` checks.
  */
 export const weightedPrecisionAtK = (
   patterns: readonly RetrievedPattern[],
@@ -81,13 +74,10 @@ export const weightedPrecisionAtK = (
 };
 
 /**
- * Recall over the labelled set: how many of the distinct relevant labels appear
- * anywhere in the results.
- *
- * This is recall against ground truth, not against the corpus. It is comparable
- * between arms; it is not an absolute measure of coverage, because the
- * denominator is the set of labels we wrote rather than every relevant message
- * that exists.
+ * Recall over the labelled set: how many of the distinct relevant labels appear anywhere in the
+ * results, with no K cutoff because one pattern can carry several labels.
+ * The denominator is the set of labels the corpus declares, not every relevant message that
+ * exists, so this is comparable between arms but is not an absolute coverage figure.
  */
 export const recallOfLabels = (
   patterns: readonly RetrievedPattern[],
@@ -103,8 +93,8 @@ export const recallOfLabels = (
 };
 
 /**
- * Number of lexical traps in the top K: results that share vocabulary with the
- * question but do not answer it. Lower is better.
+ * Number of lexical traps in the top K: results that share vocabulary with the question but do
+ * not answer it. Lower is better.
  */
 export const trapsAtK = (
   patterns: readonly RetrievedPattern[],
@@ -113,11 +103,9 @@ export const trapsAtK = (
 ): number => patterns.slice(0, k).filter((candidate) => isTrap(candidate.message, query)).length;
 
 /**
- * Distinct relevant messages surfaced within the top K.
- *
- * This is the metric the acceptance criteria in the parent issue are stated on,
- * because deduplication is the point: returning the same relevant message twenty
- * times is not the same as returning twenty relevant messages.
+ * Distinct relevant messages surfaced within the top K. The acceptance criteria are stated on
+ * this rather than on `relevantAtK` because deduplication is the point: returning the same
+ * relevant message twenty times is not the same as returning twenty relevant messages.
  */
 export const distinctRelevantMessagesAtK = (
   patterns: readonly RetrievedPattern[],
@@ -127,28 +115,23 @@ export const distinctRelevantMessagesAtK = (
 ): number => distinctMatchedLabels(patterns.slice(0, k), relevantLabels(query, threshold)).size;
 
 /**
- * Top relevance score from the reranker.
- *
- * Returns null when none of the patterns have a relevanceScore (keyword-only strategies).
- * This metric crossed with Recall separates two failure modes: low recall with high score
- * means the reranker ordered poorly; low recall with negative score means the relevant
- * patterns never reached the ranking window (candidate selection problem).
+ * Top relevance score from the reranker, or null when no pattern carries one (keyword-only
+ * strategies).
+ * Crossed with Recall this separates two failure modes: low recall with a high score means the
+ * reranker ordered poorly, while low recall with a negative score means the relevant patterns
+ * never reached the ranking window, which is a candidate-selection problem instead.
  */
 export const topRelevanceScore = (patterns: readonly RetrievedPattern[]): number | null =>
   patterns[0]?.relevanceScore ?? null;
 
 /**
- * R-Precision: relevant results in the top R, divided by R, where R is the
- * number of relevant labels for the query at the given threshold.
+ * R-Precision: relevant results in the top R divided by R, where R is the number of relevant
+ * labels the query declares at this threshold. Returns null when there are none.
  *
- * Unlike Precision@K (which divides by the fixed K), R-Precision is normalised
- * to the number of answers that exist, so a "literal" query with 1 relevant label
- * can score 1.0 with a single correct result. Returns null when the query has no
- * relevant labels.
- *
- * This is the right metric for literal queries (`#6117` §4's "literal queries stay
- * at P = 1.0" criterion) because those queries have only 1–2 correct answers,
- * making Precision@10 structurally incapable of reaching 1.0.
+ * Normalising by R rather than by a fixed K is what makes `kind: 'literal'` queries scorable at
+ * all: with one or two correct answers, Precision@10 cannot reach the 1.0 that the parent issue's
+ * "literal queries stay at P = 1.0" criterion asks for.
+ * https://github.com/elastic/observability-dev/issues/6117
  */
 export const rPrecision = (
   patterns: readonly RetrievedPattern[],
@@ -161,14 +144,9 @@ export const rPrecision = (
 };
 
 /**
- * Normalised Discounted Cumulative Gain at K.
- *
- * Uses `gradeOf(message, query)` as the gain, so grade-2 answers score higher
- * than grade-1 answers in position. The ideal DCG is computed from the query's
- * own graded list (grade-2 labels first, then grade-1, truncated to k), so the
- * score reflects both coverage and ordering.
- *
- * Returns null when the query has no relevant labels (the ideal DCG would be 0).
+ * Normalised Discounted Cumulative Gain at K, or null when the ideal DCG would be 0.
+ * The gain is `gradeOf(message, query)` and the ideal is built from the query's own graded list,
+ * so the score reflects both coverage and ordering rather than coverage alone.
  */
 export const ndcgAtK = (
   patterns: readonly RetrievedPattern[],
@@ -176,7 +154,8 @@ export const ndcgAtK = (
   k: number,
   threshold: RelevanceGrade
 ): number | null => {
-  const gainLog2 = (rank: number) => Math.log2(rank + 2); // log₂(i+2), 1-indexed → +2
+  // The +2 converts the 0-indexed position into the 1-indexed rank the DCG discount is defined on.
+  const gainLog2 = (rank: number) => Math.log2(rank + 2);
 
   const dcg = patterns
     .slice(0, k)
@@ -196,17 +175,14 @@ export const ndcgAtK = (
 };
 
 /**
- * Mean Reciprocal Rank (one query): the reciprocal rank of the first result at
- * or above `threshold`. Returns 0 when no relevant result appears in the full
- * list.
+ * Reciprocal rank of the first result at or above `threshold`, over the full list rather than the
+ * top K. Returns 0 when no relevant result appears at all.
  */
 export const reciprocalRank = (
   patterns: readonly RetrievedPattern[],
   query: EvalQuery,
   threshold: RelevanceGrade
 ): number => {
-  const rank = patterns.findIndex(
-    (candidate) => gradeOf(candidate.message, query) >= threshold
-  );
+  const rank = patterns.findIndex((candidate) => gradeOf(candidate.message, query) >= threshold);
   return rank === -1 ? 0 : 1 / (rank + 1);
 };

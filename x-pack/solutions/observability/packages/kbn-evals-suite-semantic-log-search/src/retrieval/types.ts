@@ -6,8 +6,8 @@
  */
 
 /**
- * One result as returned by the retrieval arm: a recurring log pattern, the
- * sample message that represents it, and how many documents it covers.
+ * One result from the retrieval arm: a recurring log pattern, the sample message that represents
+ * it, and how many documents it covers.
  */
 export interface RetrievedPattern {
   /** The template text or, where `pattern_text` is mapped, its hash. */
@@ -15,11 +15,10 @@ export interface RetrievedPattern {
   /** The representative message; this is what ground truth labels match against. */
   message: string;
   /**
-   * Number of documents sharing the pattern in **the query time window,
-   * at population scale** (not raw sampled counts). Strategies MUST honour this
-   * contract. A strategy that returns a lifetime, rolling counter, or raw sampled
-   * `doc_count` inflates `weightedPrecisionAtK` and violates the invariant checked
-   * by `countSanityEvaluator`.
+   * Documents sharing the pattern within the query time window, at population scale.
+   * This is a contract on every strategy, not a description of one: a lifetime count, a rolling
+   * counter or a raw sampled `doc_count` all inflate the document-weighted metrics. Enforced by
+   * `countSanityEvaluator`.
    */
   count: number;
   /** Reranker relevance score (logit). Only present for semantic strategies. */
@@ -34,9 +33,8 @@ export interface RetrievalTaskOutput {
   /** Wall-clock time from fetch start to parsed result, in milliseconds. */
   latencyMs: number;
   /**
-   * Number of patterns returned by the tool before the eval client applied the
-   * `maxPatterns` cap. Equal to `patterns.length` when no cap was applied.
-   * Surfaced in evaluator metadata so the cap is visible in results.
+   * Patterns the tool returned before the eval client applied `maxPatterns`, reported in
+   * evaluator metadata so a score is readable against how much was discarded to produce it.
    */
   returnedBeforeCap: number;
 }

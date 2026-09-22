@@ -6,11 +6,15 @@ Practical guide for running semantic log search evaluations from scratch.
 
 - Node version from `.nvmrc` installed
 - `yarn kbn bootstrap` executed
-- For agent evals: EIS connector access (retrieval evals don't need this)
+- A connector, for every run. The retrieval arms put no model in the loop, but they still execute
+  the tools through the agent-builder API with a `connector_id`, and the eval CLI requires
+  `--model` / `--judge` to build its config. EIS connectors are only needed for the agent arms'
+  token and latency evaluators.
 
 ## Quick Start (Retrieval Evals Only)
 
-Retrieval evals are deterministic and don't require LLM connectors:
+The retrieval arms run no model, so results do not depend on a judge, but a connector is still
+required (see Prerequisites):
 
 ```bash
 # 1. Start Scout stack
@@ -105,7 +109,7 @@ node scripts/synthtrace sigevents \
 
 ### Step 5: Run evals
 
-**Retrieval evals** (deterministic, no LLM in the loop):
+**Retrieval evals** (no LLM in the loop):
 
 ```bash
 node scripts/evals run \
@@ -163,12 +167,20 @@ Same issue as above - Scout started before the export.
 
 ### "Model .rerank-v1 not available"
 
-The RERANK model is downloading. First time takes 5-15 minutes. Check status:
+On a fresh cluster this is expected rather than broken. The `.rerank-v1-elasticsearch` endpoint
+ships preconfigured, but with `adaptive_allocations.min_number_of_allocations: 0`, so the
+`.rerank-v1` trained model behind it does not exist until something first asks for a ranking.
+`GET _ml/trained_models/.rerank-v1` returns **404** until then. Check status with:
 
 ```bash
 curl -s -u elastic:changeme "http://localhost:9220/_ml/trained_models/.rerank-v1?include=definition_status" | \
-  python3 -c "import sys,json; d=json.load(sys.stdin); print('fully_defined:', d['trained_model_configs'][0].get('fully_defined', False))"
+  python3 -c "import sys,json; d=json.load(sys.stdin); c=d.get('trained_model_configs'); print('fully_defined:', c[0].get('fully_defined', False)) if c else print('not imported yet:', d.get('error',{}).get('reason','unknown'))"
 ```
+
+The import itself has been measured at ~21 s, before deployment even starts, which is why the
+first semantic call after any idle period can exceed a naive timeout. The service classifies that
+case as `inference_not_ready` rather than `timeout`, and the advice is to retry, not to narrow the
+query.
 
 Once `fully_defined: True`, deploy it:
 

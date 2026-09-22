@@ -30,8 +30,8 @@ const pattern = (message: string, count = 1): RetrievedPattern => ({
   count,
 });
 
-// Use networkConnectivityFailure as the "relevant" fixture — it contains generic failure labels
-// that cover the connection_failures query at grade 2, independent of Postgres/Kafka specifics.
+// `networkConnectivityFailure` is the relevant fixture because its labels grade 2 against
+// `connection_failures` without depending on the Postgres or Kafka specifics of the other classes.
 const relevant = (index: number, count = 1) =>
   pattern(corpus.messageClasses.networkConnectivityFailure[index], count);
 
@@ -154,7 +154,8 @@ describe('rPrecision', () => {
   // so R = 8. A single relevant result in position 1 → 1/8.
   it('divides by the number of relevant labels, not K', () => {
     const results = [relevant(0)];
-    const r = corpus.messageClasses.postgresPoolFailure.length +
+    const r =
+      corpus.messageClasses.postgresPoolFailure.length +
       corpus.messageClasses.networkConnectivityFailure.length +
       corpus.messageClasses.kafkaBrokerFailure.length;
     expect(rPrecision(results, connectionFailures, 2)).toBeCloseTo(1 / r);
@@ -168,7 +169,7 @@ describe('rPrecision', () => {
   });
 
   it('returns null when the query has no relevant labels', () => {
-    // Construct a query with no graded entries
+    // A query with nothing graded: R is 0, so there is no denominator to divide by.
     const emptyQuery = { ...connectionFailures, graded: [] };
     expect(rPrecision([relevant(0)], emptyQuery, 2)).toBeNull();
   });

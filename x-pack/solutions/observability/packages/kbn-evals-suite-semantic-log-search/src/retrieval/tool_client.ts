@@ -11,12 +11,9 @@ import { GET_LOGS_SEMANTIC_TOOL_ID, GET_LOGS_TOOL_ID } from '../constants';
 import type { CorpusProfile } from '../corpora';
 import type { RetrievalTaskOutput, RetrievedPattern } from './types';
 
-/**
- * The slice of tool output this suite reads. Declared structurally rather
- * than imported, because the tools' result types are internal to the
- * Observability Agent Builder plugin and the eval should not be coupled to
- * their internals.
- */
+// Declared structurally rather than imported: the tools' result types are internal to the
+// Observability Agent Builder plugin, and the eval should measure the response the tool actually
+// sends rather than compile against its internals.
 interface PatternLike {
   pattern?: string;
   count?: number;
@@ -99,8 +96,8 @@ const executeTool = async ({
 
   if (errorResult) {
     const message = (errorResult.data as { message?: string } | undefined)?.message ?? 'unknown';
-    // Throw rather than returning a zero-scoring result. A broken run must
-    // invalidate the experiment, not silently compete with valid runs.
+    // A broken run has to invalidate the experiment rather than compete in it: a zero-scoring
+    // result is indistinguishable from a strategy that ranked badly.
     throw new Error(`${toolId} returned an error: ${message}`);
   }
 
@@ -114,20 +111,19 @@ const executeTool = async ({
 
   const parsedPatterns = toPatterns(data);
 
-  // Guard against field-name drift: if the tool reported matching documents but
-  // we parsed zero patterns, the response format has likely changed.
-  // Run before the cap so the guard still sees the raw parse.
+  // Matching documents with nothing parsed out of them means the response shape moved, which
+  // would otherwise read as a strategy that found nothing. Runs before the cap, on the raw parse.
   if (parsedPatterns.length === 0 && totalCount > 0) {
     throw new Error(
-      `${toolId} reported ${totalCount} matching documents but returned no parseable patterns ` +
-        `— the tool response format may have changed (looked for data.patterns / data.categories).`
+      `${toolId} reported ${totalCount} matching documents but returned no parseable patterns: ` +
+        `the tool response format may have changed (looked for data.patterns / data.categories).`
     );
   }
 
-  // Apply a uniform cap across both arms. The semantic arm is server-side capped
-  // at corpus.maxPatterns; the keyword arm has no server-side limit (get_logs
-  // returns up to 60 categories across two aggs). Capping here enforces the same
-  // candidate budget so Recall cannot be inflated by giving one arm more surface area.
+  // Both arms have to answer with the same candidate budget, or Recall rewards surface area
+  // instead of ranking. The semantic arm is already capped server-side at `corpus.maxPatterns`,
+  // while `get_logs` returns up to 60 categories from two `categorize_text` aggs of 30.
+  // https://github.com/elastic/kibana/blob/59ab5b5b39f0/x-pack/solutions/observability/plugins/observability_agent_builder/server/tools/get_logs/handler.ts#L130
   const returnedBeforeCap = parsedPatterns.length;
   const patterns = parsedPatterns.slice(0, corpus.maxPatterns);
 
@@ -140,9 +136,7 @@ const executeTool = async ({
   };
 };
 
-/**
- * Runs `observability.get_logs` through the tool execution API (keyword arm).
- */
+/** Runs `observability.get_logs` through the tool execution API (keyword arm). */
 export const executeGetLogs = async ({
   fetch,
   log,
@@ -163,9 +157,9 @@ export const executeGetLogs = async ({
   });
 
 /**
- * Runs `observability.get_logs_semantic` through the tool execution API
- * (semantic arm). Bypasses the agent's tool selection on purpose: the retrieval
- * arm measures ranking quality, so the tool call has to be deterministic.
+ * Runs `observability.get_logs_semantic` through the tool execution API (semantic arm).
+ * Bypasses the agent's tool selection on purpose: this arm measures ranking, so the tool call
+ * has to be fixed rather than chosen by a model.
  */
 export const executeGetLogsSemantic = async ({
   fetch,

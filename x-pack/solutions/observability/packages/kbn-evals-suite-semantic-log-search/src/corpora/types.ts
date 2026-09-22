@@ -8,12 +8,10 @@
 import type { EvalQuery, RelevanceGrade } from '../ground_truth';
 
 /**
- * A corpus profile bundles the data that varies between evaluation corpora:
- * where the data lives, the labelled messages, and the queries that test them.
- *
- * The evaluation logic (metrics, evaluators, audit, tool client) receives this
- * profile as an argument rather than importing corpus-specific constants, which
- * makes switching corpora a matter of selecting a different profile at runtime.
+ * Everything that varies between evaluation corpora: where the data lives, the labelled
+ * messages, and the queries that test them.
+ * Passed to the metrics, evaluators, audit and tool client as an argument rather than imported by
+ * them, so adding a corpus never means touching the evaluation logic.
  */
 export interface CorpusProfile {
   /** Unique identifier used in dataset names and the env var selector. */
@@ -43,22 +41,18 @@ export interface CorpusProfile {
   readonly relevanceThreshold: RelevanceGrade;
 
   /**
-   * Uniform candidate budget applied to both the semantic and keyword arms by the
-   * eval client after parsing. The semantic tool is server-side limited to this
-   * value; the keyword tool returns up to ~60 categories (two `categorize_text`
-   * aggs at `size: 30`) and is capped client-side so Recall cannot be inflated by
-   * giving one arm more surface area.
+   * Candidate budget applied to both arms by the eval client; see `executeTool` for why it is
+   * applied there rather than per arm.
    *
-   * Must satisfy `k <= maxPatterns <= 20` (20 is the `get_logs_semantic` schema
-   * ceiling). Validated by `ground_truth.test.ts` for every registered corpus.
+   * Must satisfy `k <= maxPatterns <= 20`, the ceiling on the tool's own `maxPatterns` parameter
+   * and so the most this suite can ask for, whatever the service permits. `ground_truth.test.ts`
+   * checks it for every registered corpus.
+   * x-pack/solutions/observability/plugins/observability_agent_builder/server/tools/get_logs_semantic/tool.ts
    */
   readonly maxPatterns: number;
 }
 
-/**
- * Flattens all labels across every message class, deduplicated. Used by the
- * corpus audit to verify that each label is actually present.
- */
+/** Flattens all labels across every message class, deduplicated. */
 export const allLabels = (corpus: CorpusProfile): string[] => [
   ...new Set(Object.values(corpus.messageClasses).flatMap((labels) => [...labels])),
 ];

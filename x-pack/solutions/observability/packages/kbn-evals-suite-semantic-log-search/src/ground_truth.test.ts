@@ -8,19 +8,15 @@
 import { allLabels, CORPORA, type CorpusProfile } from './corpora';
 import { gradeOf, isTrap, matchedLabels, relevantLabels } from './ground_truth';
 
-/**
- * Validates invariants that every corpus profile must satisfy. A new corpus
- * inherits these tests automatically when registered in `CORPORA`.
- */
+/** Invariants every corpus profile has to satisfy, whatever data it points at. */
 const assertProfileIsConsistent = (corpus: CorpusProfile) => {
   const labels = allLabels(corpus);
   const classIds = Object.keys(corpus.messageClasses);
 
   describe('labels', () => {
     it('has no label that is a substring of another label', () => {
-      // Matching is by substring, so an overlapping pair would make a single
-      // message carry two labels and corrupt both the grade and the recall
-      // denominator.
+      // Matching is by substring, so an overlapping pair makes one message carry two labels,
+      // which corrupts both its grade and the recall denominator.
       const overlaps = labels.flatMap((label) =>
         labels
           .filter((other) => other !== label && other.toLowerCase().includes(label.toLowerCase()))
@@ -77,18 +73,14 @@ const assertProfileIsConsistent = (corpus: CorpusProfile) => {
   });
 };
 
-/**
- * Run invariant tests over all registered corpora. A new corpus is automatically
- * covered when added to `CORPORA`.
- */
+// Driven off `CORPORA`, so registering a corpus is what subjects it to these tests; there is no
+// second place to remember to add it.
 describe.each(Object.values(CORPORA))('corpus profile: $id', (corpus) => {
   assertProfileIsConsistent(corpus);
 });
 
-/**
- * Tests for the pure predicates in ground_truth.ts, using the default corpus
- * as a fixture.
- */
+// Uses the default corpus as a fixture rather than an invented one, so the predicates are
+// exercised against labels that really occur together.
 describe('ground truth predicates', () => {
   const corpus = CORPORA.sigevents_postgres_timeout;
   const connectionFailures = corpus.queries.find((query) => query.id === 'connection_failures')!;

@@ -11,17 +11,16 @@ import type { CorpusProfile } from './types';
 /**
  * Classes of message in the corpus, labelled by meaning rather than vocabulary.
  *
- * Labels are case-insensitive substrings of generated `message` fields. Every label
- * is traceable to a literal template in `kbn-synthtrace/src/lib/service_graph_logs/log_catalog/`.
- * The invariant tests in `ground_truth.test.ts` verify that no label is a substring of
- * another and that nothing is simultaneously relevant and a trap.
+ * Labels are case-insensitive substrings of generated `message` fields, each traceable to a
+ * literal template under the path below. The file named per class is where that class's labels
+ * are defined, which is worth knowing because `noise.ts` templates fire on every cycle while the
+ * rest are emitted by a failure phase. `ground_truth.test.ts` checks that no label is a substring
+ * of another and that nothing is both relevant and a trap; `auditCorpus` checks at run time that
+ * each one is present in the generated data.
+ * src/platform/packages/shared/kbn-synthtrace/src/lib/service_graph_logs/
  */
 export const MESSAGE_CLASSES = {
-  /**
-   * Postgres pool exhaustion and connection rejection.
-   *
-   * Templates: `log_catalog/database.ts` (postgres infra + app db_timeout).
-   */
+  /** Postgres pool exhaustion and connection rejection. Templates: `log_catalog/database.ts`. */
   postgresPoolFailure: [
     'remaining connection slots are reserved',
     'could not connect to the server: Connection refused',
@@ -29,10 +28,8 @@ export const MESSAGE_CLASSES = {
   ],
 
   /**
-   * Generic HTTP/TCP connectivity failures (non-Postgres, non-Kafka).
-   *
-   * Templates: `log_catalog/outbound.ts` (http error.unavailable + bad_gateway node error),
-   * `log_catalog/database.ts` (mongodb/elasticsearch error).
+   * Generic HTTP and TCP connectivity failures, neither Postgres nor Kafka.
+   * Templates: `log_catalog/outbound.ts`, `log_catalog/database.ts`, `log_catalog/request.ts`.
    */
   networkConnectivityFailure: [
     'outbound connection refused',
@@ -41,18 +38,21 @@ export const MESSAGE_CLASSES = {
   ],
 
   /**
-   * Kafka / message-broker unreachability.
+   * Kafka and message-broker unreachability.
    *
-   * Templates: `log_catalog/message_queue.ts` (kafka error.unavailable) and
-   * `log_catalog/outbound.ts` (kafka error.unavailable go/node).
+   * Templates: `log_catalog/message_queue.ts` for the ISR label. The broker label is not a
+   * catalog template at all; it is a service log on `payment-processor` in the default service
+   * graph, which is why it appears even though the failure injected here is Postgres.
+   * https://github.com/elastic/kibana/blob/0021bfbb5887/src/platform/packages/shared/kbn-synthtrace/src/lib/service_graph_logs/service_graph.ts#L87
    */
   kafkaBrokerFailure: ['unable to reach Kafka broker', 'No live ISR replicas for partition'],
 
   /**
-   * Pool saturation warnings — degraded but not yet failed.
+   * Pool saturation warnings: degraded, but not yet failed.
    *
-   * Templates: `log_catalog/database.ts` (postgres app db_timeout warn,
-   * all four runtimes: go/java/node/python).
+   * Templates: `log_catalog/database.ts` for three of the four, one per runtime. The
+   * `pool nearing capacity` label comes from `log_catalog/noise.ts`, so unlike the other three it
+   * is not tied to the injected failure and appears outside the failure window too.
    */
   connectionPoolWarning: [
     '"msg":"pool nearing capacity"',
@@ -62,11 +62,12 @@ export const MESSAGE_CLASSES = {
   ],
 
   /**
-   * Healthy or informational messages that share "connection" / "pool" vocabulary.
-   * Used as traps in connectivity-failure queries.
+   * Healthy or informational messages sharing "connection" and "pool" vocabulary, used as traps
+   * in the connectivity-failure queries.
    *
-   * Templates: `log_catalog/database.ts` (postgres infra healthy),
-   * `log_catalog/cache.ts` (redis infra healthy).
+   * Templates: mostly `log_catalog/noise.ts`, plus `log_catalog/database.ts` and
+   * `log_catalog/cache.ts`. Being predominantly noise is what makes them good traps: they are
+   * present in volume whether or not anything is failing.
    */
   connectionHealthy: [
     'connection received: host=',
@@ -78,9 +79,8 @@ export const MESSAGE_CLASSES = {
   ],
 
   /**
-   * Database slowness and lock contention (not a connectivity failure).
-   *
-   * Templates: `log_catalog/database.ts` (postgres infra db_timeout warn, mongodb infra warn).
+   * Database slowness and lock contention, which is not a connectivity failure.
+   * Templates: `log_catalog/database.ts`.
    */
   databaseSlowness: [
     'still waiting for ShareLock on transaction',
@@ -108,7 +108,7 @@ export const QUERIES: readonly EvalQuery[] = [
       { grade: 1, matches: MESSAGE_CLASSES.connectionPoolWarning },
     ],
     traps: MESSAGE_CLASSES.connectionHealthy,
-    note: 'Six of the eight grade-2 labels never use the word "connection". Grade-1 pool warnings share vocabulary but are not failures.',
+    note: 'Four of the eight grade-2 labels never use the word "connection", so half the answers are unreachable by the query term alone. Grade-1 pool warnings share the vocabulary but are not failures.',
   },
 
   {
@@ -155,7 +155,7 @@ export const QUERIES: readonly EvalQuery[] = [
       { grade: 1, matches: MESSAGE_CLASSES.postgresPoolFailure },
     ],
     traps: MESSAGE_CLASSES.connectionHealthy,
-    note: 'Pool saturation warnings are grade 2 (the right answer); pool exhaustion is grade 1 (too late — exceeded, not approaching). Healthy pool stats are the trap.',
+    note: 'Pool saturation warnings are grade 2 (the right answer); pool exhaustion is grade 1, because it has already exceeded capacity rather than approaching it. Healthy pool stats are the trap.',
   },
 
   {
@@ -167,7 +167,7 @@ export const QUERIES: readonly EvalQuery[] = [
       { grade: 1, matches: MESSAGE_CLASSES.connectionPoolWarning },
     ],
     traps: [...MESSAGE_CLASSES.kafkaBrokerFailure, ...MESSAGE_CLASSES.networkConnectivityFailure],
-    note: 'Kafka and generic network failures are traps — they are connectivity failures but not Postgres-specific. Tests whether the ranker separates DB-pool errors from other connectivity failures.',
+    note: 'Kafka and generic network failures are traps: genuine connectivity failures, but not Postgres ones. Tests whether the ranker separates DB-pool errors from other connectivity failures.',
   },
 
   {
@@ -205,12 +205,12 @@ export const QUERIES: readonly EvalQuery[] = [
 /**
  * Corpus generated by the synthtrace `sigevents` scenario `postgres_timeout`.
  *
- * The scenario introduces a Postgres `db_timeout` failure at 80% rate for the first
- * 5 minutes of each 10-minute cycle, which cascades to all upstream callers and
- * generates connectivity + pool + slowness messages in mixed log formats (go/java/node/python).
- *
- * Ground truth labels survive regeneration as long as the scenario and seed stay
- * pinned. `auditCorpus` verifies that every label is actually present before any run.
+ * The scenario fails Postgres with `db_timeout` at an 80% rate for the first 5 minutes of each
+ * 10-minute cycle. The failure cascades to every upstream caller, which is what produces
+ * connectivity, pool and slowness messages across four runtimes and their different log formats.
+ * The labels survive regeneration only while the scenario and seed stay pinned, so both are part
+ * of `setupCommand` rather than left to the caller.
+ * https://github.com/elastic/kibana/blob/0021bfbb5887/src/platform/packages/shared/kbn-synthtrace/src/scenarios/sigevents/mock_apps/claims.ts#L26
  */
 export const sigeventsPostgresTimeout: CorpusProfile = {
   id: 'sigevents_postgres_timeout',
