@@ -27,7 +27,8 @@ export {
   ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
   ALERTZERO_ACTIONS_URL,
   ALERTZERO_ACTIONS_LIST_TOOL_ID,
-  ALERTZERO_PROPOSALS_URL,
+  ALERTZERO_PROPOSALS_CATEGORY_URL,
+  ALERTZERO_PROPOSALS_CLOSED_URL,
   ALERTZERO_PROPOSALS_REVISE_TOOL_ID,
   ALERTZERO_THIN_AGENT_ID,
   ALERTZERO_WATCHES_URL,
@@ -110,6 +111,7 @@ export {
   coverageFromSchedule,
   createCatalogWatchPlaceholder,
   isOnDutyNow,
+  resolveWatchAccent,
 } from './impl/watches/watch_helpers';
 export type {
   CatalogWatchId,
