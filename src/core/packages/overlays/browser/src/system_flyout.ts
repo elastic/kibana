@@ -40,6 +40,17 @@ export type OverlaySystemFlyoutOpenOptions = Omit<
    * afterwards, without waiting on the handler.
    */
   onClose?: () => void;
+  /**
+   * Fires with the new pixel width when the user finishes resizing a `resizable` flyout. Use it to
+   * persist the width and reopen the flyout at that size (as a numeric `size`).
+   */
+  onResize?: (width: number) => void;
+  /**
+   * The size the flyout resets back to when `resetSize` is called on {@link SystemFlyoutSizeContext}.
+   * Defaults to `size`. Set this to the flyout's default named size when opening at a persisted
+   * pixel width, so a reset can return to the default.
+   */
+  defaultSize?: EuiFlyoutProps['size'];
 };
 
 /**
