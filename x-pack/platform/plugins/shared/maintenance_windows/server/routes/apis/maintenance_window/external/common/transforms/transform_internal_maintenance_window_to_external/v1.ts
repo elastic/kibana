@@ -17,34 +17,41 @@ export const transformInternalMaintenanceWindowToExternal = (
 ): MaintenanceWindowResponseV1 => {
   const { scope } = maintenanceWindow;
 
-  // External API is lossy (kql only, filters/dsl dropped). Selection is reflected via `enabled`.
-  // `query` is always emitted when `alerting` is present to preserve the GA API contract:
-  // the v1 response schema requires `alerting.query` to be present. When no kql filter was
-  // configured (apply to all alerts), an empty string is used as the default.
-  //   scope.alerting present + kql  → { alerting: { enabled, query: { kql } } }
-  //   scope.alerting present, no kql → { alerting: { enabled, query: { kql: '' } } }
-  //   scope.alerting absent          → alerting key absent (not selected)
-  const externalScope =
-    scope !== undefined
-      ? {
-          ...(scope.alerting !== undefined
-            ? {
-                alerting: {
-                  enabled: scope.alerting.enabled,
-                  query: { kql: scope.alerting.kql ?? '' },
-                },
-              }
-            : {}),
-          ...(scope.alertingV2 !== undefined
-            ? {
-                alerting_v2: {
-                  enabled: scope.alertingV2.enabled,
-                  ...(scope.alertingV2.kql ? { query: { kql: scope.alertingV2.kql } } : {}),
-                },
-              }
-            : {}),
-        }
-      : undefined;
+  // Emission rules (restores the main-branch contract, plus v2 support):
+  //
+  //   v1 enabled, no kql, no v2  →  no `scope` key  (byte-identical to pre-9.1.0)
+  //   v1 enabled, kql, no v2     →  scope.alerting.query.kql
+  //   v1 disabled OR v2 present  →  full scope object; `alerting` is always present
+  //                                  (required by the GA contract) with enabled: false when
+  //                                  the window does not apply to alerting v1
+  //
+  // External API is lossy: only kql is surfaced (filters/dsl are dropped).
+  // Use `?? true` so that an absent scope (legacy document) is treated as "v1 applies, no filter"
+  // — the same as the pre-9.1.0 default — and does not trigger unnecessary scope emission.
+  const alertingEnabled = scope?.alerting?.enabled ?? true;
+  const alertingKql = scope?.alerting?.kql;
+  const hasV2 = scope?.alertingV2 !== undefined;
+
+  // Omit `scope` entirely for the pre-9.1.0 default (v1 enabled, no filter, no v2) so that
+  // existing maintenance windows keep a byte-identical response.
+  const needsScope = hasV2 || alertingEnabled === false || Boolean(alertingKql);
+
+  const externalScope = needsScope
+    ? {
+        alerting: {
+          enabled: alertingEnabled,
+          query: { kql: alertingKql ?? '' },
+        },
+        ...(hasV2
+          ? {
+              alerting_v2: {
+                enabled: scope!.alertingV2!.enabled,
+                ...(scope!.alertingV2!.kql ? { query: { kql: scope!.alertingV2!.kql } } : {}),
+              },
+            }
+          : {}),
+      }
+    : undefined;
 
   return {
     id: maintenanceWindow.id,

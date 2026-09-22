@@ -92,9 +92,6 @@ describe('getMaintenanceWindowRoute', () => {
             timezone: 'UTC',
           },
         },
-        // decodeScope always populates scope, so the external response always includes it.
-        // alerting.enabled: true (default), kql: '' (no filter configured).
-        scope: { alerting: { enabled: true, query: { kql: '' } } },
         status: 'running',
         title: 'test-title',
         updated_at: '2023-02-26T00:00:00.000Z',

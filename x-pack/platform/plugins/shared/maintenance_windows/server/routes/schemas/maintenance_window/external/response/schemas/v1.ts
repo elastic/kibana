@@ -71,28 +71,34 @@ export const maintenanceWindowResponseSchema = schema.object(
     scope: schema.maybe(
       schema.object(
         {
-          // `alerting` is optional in the response to accommodate maintenance windows that only
-          // target alerting v2 (no v1 scope). When present, `query` is always required to
-          // preserve the GA API contract: clients reading this response can rely on
-          // `scope.alerting.query` being set whenever `scope.alerting` exists.
-          alerting: schema.maybe(
-            schema.object({
-              query: schema.object({
-                kql: schema.string({
-                  meta: {
-                    description:
-                      'A filter written in Kibana Query Language (KQL). Only alerts matching this query will be suppressed by the maintenance window.',
-                  },
-                }),
+          // `alerting` is required in the response to preserve the GA API contract introduced in
+          // 9.1.0: clients reading this response can rely on `scope.alerting.query.kql` being set
+          // whenever `scope` is present. The optional `enabled` field is new in this release and
+          // acts as the discriminator: `enabled: false` means the window does not apply to
+          // alerting v1 alerts (e.g. a v2-only window). When `enabled` is absent, clients should
+          // treat it as `true` for backward compatibility.
+          alerting: schema.object({
+            enabled: schema.maybe(
+              schema.boolean({
+                meta: {
+                  description: 'Whether the maintenance window applies to alerting v1 alerts.',
+                },
+              })
+            ),
+            query: schema.object({
+              kql: schema.string({
+                meta: {
+                  description:
+                    'A filter written in Kibana Query Language (KQL). Only alerts matching this query will be suppressed by the maintenance window.',
+                },
               }),
-            })
-          ),
+            }),
+          }),
           alerting_v2: schema.maybe(
             schema.object(
               {
                 enabled: schema.maybe(
                   schema.boolean({
-                    defaultValue: true,
                     meta: {
                       description:
                         'Whether the maintenance window applies to alerting v2 episodes.',

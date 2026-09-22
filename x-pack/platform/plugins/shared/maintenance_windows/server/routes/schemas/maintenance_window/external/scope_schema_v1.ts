@@ -19,11 +19,10 @@ export const maintenanceWindowScopeSchemaV1 = schema.object(
     alerting: schema.maybe(
       schema.object(
         {
-          // `enabled` defaults to true when the sub-object is present so that existing clients
-          // sending `scope: { alerting: {} }` continue to mean "v1 selected, no filter".
+          // `enabled` is optional; the request transform applies `?? true` so that existing
+          // clients sending `scope: { alerting: {} }` continue to mean "v1 selected, no filter".
           enabled: schema.maybe(
             schema.boolean({
-              defaultValue: true,
               meta: {
                 description: 'Whether the maintenance window applies to alerting v1 alerts.',
               },
@@ -52,11 +51,10 @@ export const maintenanceWindowScopeSchemaV1 = schema.object(
     alerting_v2: schema.maybe(
       schema.object(
         {
-          // `enabled` defaults to true when the sub-object is present so that existing clients
-          // sending `scope: { alerting_v2: {} }` continue to mean "v2 selected, no filter".
+          // `enabled` is optional; the request transform applies `?? true` so that existing
+          // clients sending `scope: { alerting_v2: {} }` continue to mean "v2 selected, no filter".
           enabled: schema.maybe(
             schema.boolean({
-              defaultValue: true,
               meta: {
                 description: 'Whether the maintenance window applies to alerting v2 episodes.',
               },

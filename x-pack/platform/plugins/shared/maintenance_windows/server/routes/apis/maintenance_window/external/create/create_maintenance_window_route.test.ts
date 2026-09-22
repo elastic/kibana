@@ -168,7 +168,6 @@ describe('createMaintenanceWindowRoute', () => {
             timezone: 'UTC',
           },
         },
-        scope: { alerting: { enabled: true, query: { kql: '' } } },
         status: 'running',
         title: 'test-title',
         updated_at: '2023-02-26T00:00:00.000Z',

@@ -162042,6 +162042,9 @@ components:
           additionalProperties: false
           type: object
           properties:
+            enabled:
+              description: Whether the maintenance window applies to alerting v1 alerts.
+              type: boolean
             query:
               additionalProperties: false
               type: object
@@ -162071,6 +162074,8 @@ components:
                   type: string
               required:
                 - kql
+      required:
+        - alerting
       title: maintenance_window_scope
       type: object
     Kibana_HTTP_APIs_maintenance_window_scope_request:
