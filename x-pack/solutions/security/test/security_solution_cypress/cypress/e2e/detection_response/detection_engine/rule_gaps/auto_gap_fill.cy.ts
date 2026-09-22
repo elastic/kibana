@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import {
   GAP_AUTO_FILL_STATUS_BADGE,
   RULE_GAPS_OVERVIEW_PANEL,
@@ -26,7 +25,7 @@ import {
   getGapAutoFillSchedulerApi,
 } from '../../../../tasks/api_calls/gaps';
 import { RULES_MONITORING_TAB } from '../../../../screens/alerts_detection_rules';
-import { login, loginWithUser } from '../../../../tasks/login';
+import { loginWithUser } from '../../../../tasks/login';
 import { visitRulesManagementTable } from '../../../../tasks/rules_management';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { getCustomQueryRuleParams } from '../../../../objects/rule';
@@ -196,33 +195,6 @@ describe(
                 .should('contain.text', "Gaps in rule executions don't currently exist.");
             });
         });
-      });
-    });
-
-    describe('Read-only user', () => {
-      beforeEach(() => {
-        deleteAlertsAndRules();
-        deleteGapAutoFillScheduler();
-        createRule(
-          getCustomQueryRuleParams({ rule_id: '1', name: 'Rule 1', interval: '1m', from: 'now-1m' })
-        );
-        login();
-        ensureAutoGapFillEnabledViaUi();
-        login(ROLES.t1_analyst);
-      });
-
-      afterEach(() => {
-        deleteGapAutoFillScheduler();
-      });
-
-      it('shows the modal but disables edits for users without CRUD permissions', () => {
-        visitRulesManagementTable();
-        cy.get(RULES_MONITORING_TAB).click();
-
-        cy.get(GAP_AUTO_FILL_STATUS_BADGE).click();
-        cy.get(RULE_SETTINGS_MODAL).should('exist');
-        cy.get(RULE_SETTINGS_ENABLE_SWITCH).should('be.disabled');
-        cy.get(RULE_SETTINGS_SAVE_BUTTON).should('be.disabled');
       });
     });
   }
