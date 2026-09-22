@@ -76,5 +76,9 @@ export const list = async ({
     }
   }
 
+  // Tactic order follows matrix-position definition, techniques and subtechniques stay sorted by name as
+  // they are also defined that way within MITRE
+  tactics.sort((a, b) => a.position - b.position);
+
   return { framework, frameworkVersion, tactics, techniques, subtechniques };
 };

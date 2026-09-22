@@ -64,7 +64,7 @@ In `setup()`, the plugin registers a `mitreAttack` request handler context via `
 
 ## Internal API route
 
-`GET /internal/mitre/entities` (version `1`) returns all indexed MITRE ATT&CK entities grouped by type, with the `description` field omitted for compactness.
+`GET /internal/mitre/entities` (version `1`) returns all indexed MITRE ATT&CK entities grouped by type, with the `description` field omitted for compactness. Bucket order is part of the contract: tactics are returned in matrix order (ascending `position`), techniques and subtechniques alphabetically by `name`, so consumers do not need to sort.
 
 | Query parameter | Type | Default | Notes |
 |---|---|---|---|
