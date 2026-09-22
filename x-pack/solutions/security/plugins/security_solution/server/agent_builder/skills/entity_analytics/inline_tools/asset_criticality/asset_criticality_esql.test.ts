@@ -92,6 +92,7 @@ describe('assetCriticalityDynamicInlineToolHandler', () => {
       expect.objectContaining({
         index: ASSET_CRITICALITY_INDEX,
         nlQuery: 'What is the asset criticality?',
+        execute: 'data',
       })
     );
     expect(mockEsClient.asInternalUser.indices.exists).toHaveBeenCalledWith({
@@ -137,6 +138,7 @@ describe('assetCriticalityDynamicInlineToolHandler', () => {
         additionalContext: expect.stringContaining(
           `${euid.esql.getEuidDocumentsContainsIdFilter('host')}`
         ),
+        execute: 'data',
       })
     );
     expect(mockEsClient.asInternalUser.indices.exists).toHaveBeenCalledWith({
@@ -175,6 +177,7 @@ describe('assetCriticalityDynamicInlineToolHandler', () => {
       expect.objectContaining({
         index: ASSET_CRITICALITY_INDEX,
         nlQuery: 'What is the asset criticality?',
+        execute: 'data',
       })
     );
     expect(mockEsClient.asInternalUser.indices.exists).toHaveBeenCalledWith({

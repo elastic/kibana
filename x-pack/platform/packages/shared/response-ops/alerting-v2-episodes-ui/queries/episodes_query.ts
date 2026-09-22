@@ -41,8 +41,14 @@ export interface AlertEpisode extends BaseAlertEpisode {
    */
   'rule.name'?: string;
   /**
+   * Human-readable rule type name from the alert document (e.g. "Custom threshold").
+   * Only set for classic alert rows; v2 episodes never set this.
+   */
+  rule_category?: string;
+  /**
    * Identifies which `EpisodeDataSource` produced this row. Undefined for rows
-   * from the v2 pipeline. Stamped automatically by `fetchEpisodesFromSource`.
+   * from the v2 pipeline. Stamped on classic rows by the list fetch (and by
+   * `fetchEpisodesFromSource`).
    */
   source_id?: string;
   /**
@@ -55,7 +61,21 @@ export interface AlertEpisode extends BaseAlertEpisode {
    * Only set for classic alert rows; native episodes never use this.
    */
   is_muted?: boolean;
+  /**
+   * Flattened grouping object (e.g. `{ 'host.name': 'web-01' }`).
+   * Used to render grouping tags on source alert rows. Native episodes never set this.
+   */
+  source_grouping?: Record<string, unknown>;
 }
+
+/** True when the row came from an additional episode data source, not the v2 pipeline. */
+export const isSourceEpisode = (episode: AlertEpisode): boolean => episode.source_id != null;
+
+/**
+ * Native v2 rules always include `kind`. Classic adapters omit it so a source-stamped
+ * episode whose rule was loaded from the v2 API can still take the v2 flyout path.
+ */
+export const isNativeV2Rule = (rule: { kind?: unknown }): boolean => rule.kind != null;
 
 /** V2 episodes leave `supports_actions` unset; classic rows set it to `false`. */
 export const episodeSupportsActions = (episode: AlertEpisode): boolean =>

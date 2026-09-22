@@ -79,10 +79,6 @@ jest.mock('../../../hooks/use_fetch_rule_tags', () => ({
   useFetchRuleTags: () => ({ data: [], isLoading: false }),
 }));
 
-jest.mock('../../../hooks/use_fetch_tags', () => ({
-  useFetchTags: () => ({ data: [], isLoading: false }),
-}));
-
 jest.mock('../../../hooks/use_fetch_workflows', () => ({
   useFetchWorkflows: () => ({
     data: {
@@ -182,7 +178,6 @@ describe('ActionPolicyFormFlyout', () => {
     expect(onSave).toHaveBeenCalledWith({
       name: 'Policy from test',
       description: 'Description from test',
-      tags: [],
       matcher: null,
       groupingMode: 'per_episode',
       groupBy: [],
@@ -229,7 +224,6 @@ describe('ActionPolicyFormFlyout', () => {
       enabled: true,
       matcher: { expression: 'data.severity : "critical"' },
       group_by: ['host.name', 'service.name'],
-      tags: ['production'],
       grouping_mode: 'per_field',
       throttle: { strategy: 'time_interval', interval: '5m' },
       snoozed_until: null,
@@ -264,7 +258,6 @@ describe('ActionPolicyFormFlyout', () => {
       {
         name: 'Critical production alerts',
         description: 'Routes critical alerts',
-        tags: ['production'],
         matcher: { expression: 'data.severity : "critical"' },
         groupingMode: 'per_field',
         groupBy: ['host.name', 'service.name'],
