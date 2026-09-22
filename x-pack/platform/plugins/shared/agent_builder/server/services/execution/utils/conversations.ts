@@ -29,7 +29,6 @@ import type {
 } from '@kbn/agent-builder-common';
 import {
   ConversationParentRelation,
-  ConversationRoundStatus,
   isConversationAlreadyExistsError,
   isEventsNativeVersion,
   isExecutionAbortReason,
@@ -53,6 +52,7 @@ import {
   nextResumeIndex,
 } from '../../conversation/client/rounds_to_events';
 import { createConversationUpdatedEvent, createConversationCreatedEvent } from './events';
+import { getPendingResumeRound } from './pending_round';
 import { toClientError } from './convert_errors';
 import { serializeExecutionError } from './serialize_execution_error';
 
@@ -380,10 +380,8 @@ export const appendResumeExecution$ = ({
 };
 
 /** True when the conversation's last round is paused on a prompt: the next input resumes it. */
-export const isPendingResumeConversation = (conversation: Conversation): boolean => {
-  const lastRound = conversation.rounds[conversation.rounds.length - 1];
-  return lastRound?.status === ConversationRoundStatus.awaitingPrompt;
-};
+export const isPendingResumeConversation = (conversation: Conversation): boolean =>
+  getPendingResumeRound(conversation) !== undefined;
 
 export interface PersistExecutionInterruptionParams {
   conversation: ConversationWithOperation;
