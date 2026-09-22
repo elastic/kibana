@@ -1,5 +1,6 @@
 {
-  "sha1": "9f9ac25073834fa9531a8cd251493968b7cbd927",  "testChannels": [
+  "sha1": "6e0523a55c784388c9290e62ef8fcaa90e502a1b",
+  "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
@@ -1941,14 +1942,14 @@
       }
     },
     {
-      "id": "d054823461ae51f-d3847ad569c3e28",
-      "title": "Match action policies for rule API validation: rejects body with unknown top-level keys (strict schema)",
+      "id": "15454bf31ea4acf-a5674f6efaf82b6",
+      "title": "Match action policies API validation: rejects body with unknown top-level keys (strict schema)",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/match_action_policies_for_rule.spec.ts",
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/match_action_policies.spec.ts",
         "line": 22,
         "column": 21
       }

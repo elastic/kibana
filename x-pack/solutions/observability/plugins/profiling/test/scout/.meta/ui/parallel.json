@@ -1,5 +1,5 @@
 {
-  "sha1": "0d31cac65bd430e8eae53abc1b2e9d0e1701549e",
+  "sha1": "7225db96775fde484e6e368432d07265e3c5ec8b",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -210,7 +210,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/home/home.spec.ts",
-        "line": 13,
+        "line": 14,
         "column": 25
       }
     },
@@ -225,7 +225,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/home/home.spec.ts",
         "line": 21,
-        "column": 20
+        "column": 8
       }
     },
     {
@@ -266,7 +266,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/storage_explorer/storage_explorer.spec.ts",
-        "line": 13,
+        "line": 14,
         "column": 20
       }
     },
@@ -280,7 +280,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/storage_explorer/storage_explorer.spec.ts",
-        "line": 15,
+        "line": 16,
         "column": 28
       }
     },
@@ -294,7 +294,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/storage_explorer/storage_explorer.spec.ts",
-        "line": 20,
+        "line": 21,
         "column": 49
       }
     },
@@ -308,7 +308,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/storage_explorer/storage_explorer.spec.ts",
-        "line": 28,
+        "line": 29,
         "column": 5
       }
     },
