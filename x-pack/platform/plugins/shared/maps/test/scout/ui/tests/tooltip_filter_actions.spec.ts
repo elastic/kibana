@@ -12,6 +12,7 @@ const KBN_ARCHIVE = 'x-pack/platform/test/functional/fixtures/kbn_archives/maps.
 const ES_ARCHIVE_LOGSTASH = 'x-pack/platform/test/fixtures/es_archives/logstash_functional';
 const ES_ARCHIVE_MAPS_DATA = 'x-pack/platform/test/fixtures/es_archives/maps/data';
 const DEFAULT_INDEX_ID = 'c698b940-e149-11e8-a35a-370a8516603a';
+const TOOLTIP_FILTER_ACTION_DASHBOARD_ID = '03c7cbf0-8eae-11e9-b674-69d1999628e4';
 
 test.describe(
   'Maps - tooltip filter actions',
@@ -36,41 +37,28 @@ test.describe(
     });
 
     test.describe('apply filter to current view', () => {
-      test('should display create filter button when tooltip is locked', async ({
-        page,
-        pageObjects,
-      }) => {
-        await pageObjects.dashboard.goto();
-        await pageObjects.dashboard.clickDashboardTitleLink(
-          'dash for tooltip filter action test'
-        );
+      test('apply filter to current view lifecycle', async ({ page, pageObjects }) => {
+        await pageObjects.dashboard.openDashboardWithId(TOOLTIP_FILTER_ACTION_DASHBOARD_ID);
         await pageObjects.maps.lockTooltipAtPosition(200, -200);
 
-        await expect(page.testSubj.locator('mapTooltipCreateFilterButton')).toBeVisible();
-      });
-
-      test('should create filters when create filter button is clicked', async ({
-        page,
-        pageObjects,
-      }) => {
-        await pageObjects.dashboard.goto();
-        await pageObjects.dashboard.clickDashboardTitleLink(
-          'dash for tooltip filter action test'
-        );
-        await pageObjects.maps.lockTooltipAtPosition(200, -200);
-
-        await page.testSubj.click('mapTooltipCreateFilterButton');
-        await pageObjects.dashboard.waitForRenderComplete();
-        await pageObjects.maps.waitForLayersToLoad();
-
-        const numFilters = await pageObjects.filterBar.getFilterCount();
-        expect(numFilters).toBe(1);
-
-        const hasJoinFilter = await pageObjects.filterBar.hasFilter({
-          field: 'runtime_shape_name',
-          value: 'charlie',
+        await test.step('create filter button is visible when tooltip is locked', async () => {
+          await expect(page.testSubj.locator('mapTooltipCreateFilterButton')).toBeVisible();
         });
-        expect(hasJoinFilter).toBe(true);
+
+        await test.step('clicking create filter button adds a join filter', async () => {
+          await page.testSubj.click('mapTooltipCreateFilterButton');
+          await pageObjects.dashboard.waitForRenderComplete();
+          await pageObjects.maps.waitForLayersToLoad();
+
+          const numFilters = await pageObjects.filterBar.getFilterCount();
+          expect(numFilters).toBe(1);
+
+          const hasJoinFilter = await pageObjects.filterBar.hasFilter({
+            field: 'runtime_shape_name',
+            value: 'charlie',
+          });
+          expect(hasJoinFilter).toBe(true);
+        });
       });
     });
 
@@ -79,10 +67,7 @@ test.describe(
         page,
         pageObjects,
       }) => {
-        await pageObjects.dashboard.goto();
-        await pageObjects.dashboard.clickDashboardTitleLink(
-          'dash for tooltip filter action test'
-        );
+        await pageObjects.dashboard.openDashboardWithId(TOOLTIP_FILTER_ACTION_DASHBOARD_ID);
         await pageObjects.maps.lockTooltipAtPosition(200, -200);
 
         await page.testSubj.click('mapTooltipMoreActionsButton');
@@ -105,10 +90,7 @@ test.describe(
         page,
         pageObjects,
       }) => {
-        await pageObjects.dashboard.goto();
-        await pageObjects.dashboard.clickDashboardTitleLink(
-          'dash for tooltip filter action test'
-        );
+        await pageObjects.dashboard.openDashboardWithId(TOOLTIP_FILTER_ACTION_DASHBOARD_ID);
         await pageObjects.maps.lockTooltipAtPosition(200, -200);
 
         await page.testSubj.click('mapTooltipMoreActionsButton');
