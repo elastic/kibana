@@ -82,7 +82,3 @@ export {
   type EscalationIncidentSummary,
 } from './src/components/modals/escalation_modal';
 export { type EscalationModalRenderProps } from './src/components/modals/investigation_action_modals';
-  ActionImpactSection,
-  type ActionImpactContent,
-  type ActionImpactSectionProps,
-} from './src/components/modals/approval_modal/action_impact_section';
