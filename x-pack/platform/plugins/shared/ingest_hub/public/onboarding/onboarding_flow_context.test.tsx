@@ -249,6 +249,76 @@ describe('OnboardingFlowProvider', () => {
     });
   });
 
+  describe('removeDeployInstances', () => {
+    it('removes multiple instances in one same-tick call without losing removals', () => {
+      // This covers the lost-update race: if removal were a loop of removeDeployInstance calls,
+      // all calls would read the same pre-update ref snapshot and later writes would overwrite
+      // earlier ones. removeDeployInstances batches all deletions into one state write.
+      const { result, rerender } = renderHook(() => useOnboardingFlow(), { wrapper });
+
+      act(() => {
+        result.current.updateDetectAndReviewStep({
+          policyIdsByInstance: { inst_a: 'policy-A', inst_b: 'policy-B' },
+          serviceStatuses: { inst_a: 'receiving', inst_b: 'receiving' },
+        });
+      });
+      rerender();
+
+      act(() => {
+        result.current.removeDeployInstances(['inst_a', 'inst_b']);
+      });
+      rerender();
+
+      expect(result.current.detectAndReviewStep.policyIdsByInstance).toEqual({});
+      expect(result.current.detectAndReviewStep.pendingCleanupPolicyIds).toEqual({
+        inst_a: 'policy-A',
+        inst_b: 'policy-B',
+      });
+      expect(result.current.detectAndReviewStep.serviceStatuses).toEqual({});
+    });
+
+    it('single-element array delegates to removeDeployInstance (same observable result)', () => {
+      const { result, rerender } = renderHook(() => useOnboardingFlow(), { wrapper });
+
+      act(() => {
+        result.current.updateDetectAndReviewStep({
+          policyIdsByInstance: { inst_a: 'policy-A' },
+        });
+      });
+      rerender();
+
+      act(() => {
+        result.current.removeDeployInstances(['inst_a']);
+      });
+      rerender();
+
+      expect(result.current.detectAndReviewStep.policyIdsByInstance).toEqual({});
+      expect(result.current.detectAndReviewStep.pendingCleanupPolicyIds).toEqual({
+        inst_a: 'policy-A',
+      });
+    });
+
+    it('no-op for empty array', () => {
+      const { result, rerender } = renderHook(() => useOnboardingFlow(), { wrapper });
+
+      act(() => {
+        result.current.updateDetectAndReviewStep({
+          policyIdsByInstance: { inst_a: 'policy-A' },
+        });
+      });
+      rerender();
+
+      act(() => {
+        result.current.removeDeployInstances([]);
+      });
+      rerender();
+
+      expect(result.current.detectAndReviewStep.policyIdsByInstance).toEqual({
+        inst_a: 'policy-A',
+      });
+    });
+  });
+
   describe('updateDetectAndReviewStep — pendingCleanupPolicyIds merge semantics', () => {
     it('explicit empty object clears pendingCleanupPolicyIds', () => {
       const { result, rerender } = renderHook(() => useOnboardingFlow(), { wrapper });

@@ -45,7 +45,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
     authenticateAndDeployStep,
     detectAndReviewStep,
     updateDetectAndReviewStep,
-    removeDeployInstance,
+    removeDeployInstances,
     getLatestFailedInstances,
     awsServicesMap: servicesMap,
     agentBasedDeployment,
@@ -157,9 +157,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
             servicesMap: servicesMap ?? new Map(),
             selectedAgentPolicyIds: targetPolicyIds,
           });
-          for (const iid of Object.keys(liveStalePolicyIds)) {
-            removeDeployInstance(iid);
-          }
+          removeDeployInstances(Object.keys(liveStalePolicyIds));
           updateDetectAndReviewStep({ pendingCleanupPolicyIds: {} });
         }
 
@@ -255,7 +253,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
       setAgentBasedDeployment,
       detectAndReviewStep,
       updateDetectAndReviewStep,
-      removeDeployInstance,
+      removeDeployInstances,
       getLatestFailedInstances,
       servicesMap,
     ]

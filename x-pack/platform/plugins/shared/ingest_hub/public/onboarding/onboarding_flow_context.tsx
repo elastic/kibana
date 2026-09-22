@@ -129,6 +129,7 @@ interface OnboardingFlowState {
   detectAndReviewStep: DetectAndReviewStepState;
   updateDetectAndReviewStep: (update: Partial<DetectAndReviewStepState>) => void;
   removeDeployInstance: (instanceId: string) => void;
+  removeDeployInstances: (instanceIds: string[]) => void;
   getLatestFailedInstances: () => string[];
   awsServiceMatrix: AwsServiceMatrixEntry[] | undefined;
   awsServicesMap: Map<string, AwsServiceMatrixEntry> | undefined;
@@ -326,6 +327,42 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
     [setPersistedDetectAndReviewStep]
   );
 
+  // Batch variant of removeDeployInstance — applies all removals in one state write so
+  // same-tick calls don't overwrite each other via the stale-ref snapshot.
+  const removeDeployInstances = useCallback(
+    (instanceIds: string[]) => {
+      if (instanceIds.length === 0) return;
+      if (instanceIds.length === 1) {
+        removeDeployInstance(instanceIds[0]);
+        return;
+      }
+      const prev = persistedDetectAndReviewStepRef.current;
+      const nextStatuses = { ...(prev?.serviceStatuses ?? {}) };
+      const nextPolicyIds = { ...(prev?.policyIdsByInstance ?? {}) };
+      const nextPendingCleanup = { ...(prev?.pendingCleanupPolicyIds ?? {}) };
+      let nextFailedInstances = prev?.failedInstances ?? [];
+      const nextDeployErrors = { ...(prev?.deployErrors ?? {}) };
+      for (const instanceId of instanceIds) {
+        delete nextStatuses[instanceId];
+        const removedPolicyId = nextPolicyIds[instanceId];
+        delete nextPolicyIds[instanceId];
+        if (removedPolicyId) nextPendingCleanup[instanceId] = removedPolicyId;
+        nextFailedInstances = nextFailedInstances.filter((id) => id !== instanceId);
+        delete nextDeployErrors[instanceId];
+      }
+      setPersistedDetectAndReviewStep({
+        serviceStatuses: nextStatuses,
+        policyIdsByInstance: nextPolicyIds,
+        failedInstances: nextFailedInstances,
+        deployErrors: nextDeployErrors,
+        onboardingDeploymentId: prev?.onboardingDeploymentId,
+        ecfStacks: prev?.ecfStacks,
+        pendingCleanupPolicyIds: nextPendingCleanup,
+      });
+    },
+    [removeDeployInstance, setPersistedDetectAndReviewStep]
+  );
+
   const getLatestFailedInstances = useCallback(
     () => persistedDetectAndReviewStepRef.current?.failedInstances ?? [],
     []
@@ -440,6 +477,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         detectAndReviewStep,
         updateDetectAndReviewStep,
         removeDeployInstance,
+        removeDeployInstances,
         getLatestFailedInstances,
         awsServiceMatrix,
         awsServicesMap,

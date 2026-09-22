@@ -732,7 +732,7 @@ function setupMocks({
     },
     awsServicesMap: (useAwsServicesMap as jest.Mock)(),
     updateDetectAndReviewStep: jest.fn(),
-    removeDeployInstance: jest.fn(),
+    removeDeployInstances: jest.fn(),
     getLatestFailedInstances: jest.fn().mockReturnValue([]),
   });
 
@@ -1629,9 +1629,9 @@ describe('useDeploy — cleanup orchestration', () => {
       },
     });
 
-    const removeDeployInstance = (
+    const removeDeployInstances = (
       mockUseOnboardingFlow() as ReturnType<typeof mockUseOnboardingFlow>
-    ).removeDeployInstance as jest.Mock;
+    ).removeDeployInstances as jest.Mock;
 
     const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
 
@@ -1642,8 +1642,8 @@ describe('useDeploy — cleanup orchestration', () => {
     expect(mockCleanupAgentlessPolicies).toHaveBeenCalledTimes(1);
     const cleanupCall = mockCleanupAgentlessPolicies.mock.calls[0][0];
     expect(cleanupCall.pendingCleanupPolicyIds).toEqual({ vpcflow: 'policy-VPC' });
-    // removeDeployInstance must prune the stale entry from policyIdsByInstance.
-    expect(removeDeployInstance).toHaveBeenCalledWith('vpcflow');
+    // removeDeployInstances must prune the stale entry from policyIdsByInstance in one write.
+    expect(removeDeployInstances).toHaveBeenCalledWith(['vpcflow']);
   });
 
   it('does not call cleanupAgentlessPolicies on retry (instanceIds provided)', async () => {

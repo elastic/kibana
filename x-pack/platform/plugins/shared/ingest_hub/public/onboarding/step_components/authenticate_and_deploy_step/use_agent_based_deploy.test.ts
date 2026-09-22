@@ -70,13 +70,13 @@ function makeFlowMock({
   policyIdsByInstance = {} as Record<string, string>,
 } = {}) {
   const updateDetectAndReviewStep = jest.fn();
-  const removeDeployInstance = jest.fn();
+  const removeDeployInstances = jest.fn();
   mockUseOnboardingFlow.mockReturnValue({
     servicesStep: { selectedServiceIds: [] },
     authenticateAndDeployStep: {},
     detectAndReviewStep: { policyIdsByInstance },
     updateDetectAndReviewStep,
-    removeDeployInstance,
+    removeDeployInstances,
     getLatestFailedInstances: jest.fn().mockReturnValue([]),
     awsServicesMap: new Map(),
     agentBasedDeployment: {
@@ -86,7 +86,7 @@ function makeFlowMock({
     },
     setAgentBasedDeployment: jest.fn(),
   });
-  return { updateDetectAndReviewStep, removeDeployInstance };
+  return { updateDetectAndReviewStep, removeDeployInstances };
 }
 
 // ── Tests ─────────────────────────────────────────────────────────────────────
@@ -179,7 +179,7 @@ describe('useAgentBasedDeploy — cleanup orchestration', () => {
 
   it('calls cleanupPackagePolicies and clears pendingCleanupPolicyIds when cleanup is pending', async () => {
     const updateDetectAndReviewStep = jest.fn();
-    const removeDeployInstance = jest.fn();
+    const removeDeployInstances = jest.fn();
     mockUseOnboardingFlow.mockReturnValue({
       servicesStep: { selectedServiceIds: [] },
       authenticateAndDeployStep: {},
@@ -188,7 +188,7 @@ describe('useAgentBasedDeploy — cleanup orchestration', () => {
         pendingCleanupPolicyIds: { instA: 'pkg-policy-A' },
       },
       updateDetectAndReviewStep,
-      removeDeployInstance,
+      removeDeployInstances,
       getLatestFailedInstances: jest.fn().mockReturnValue([]),
       awsServicesMap: new Map(),
       agentBasedDeployment: {
@@ -226,7 +226,7 @@ describe('useAgentBasedDeploy — cleanup orchestration', () => {
         pendingCleanupPolicyIds: { instA: 'pkg-policy-A' },
       },
       updateDetectAndReviewStep: jest.fn(),
-      removeDeployInstance: jest.fn(),
+      removeDeployInstances: jest.fn(),
       getLatestFailedInstances: jest.fn().mockReturnValue([]),
       awsServicesMap: new Map(),
       agentBasedDeployment: {
@@ -260,7 +260,7 @@ describe('useAgentBasedDeploy — cleanup orchestration', () => {
         pendingCleanupPolicyIds: { instX: 'pkg-policy-X' },
       },
       updateDetectAndReviewStep: jest.fn(),
-      removeDeployInstance: jest.fn(),
+      removeDeployInstances: jest.fn(),
       getLatestFailedInstances: jest.fn().mockReturnValue(['serviceA']),
       awsServicesMap: new Map(),
       agentBasedDeployment: {
@@ -309,9 +309,9 @@ describe('useAgentBasedDeploy — cleanup orchestration', () => {
     // 'old-svc' was deployed previously (policyIdsByInstance has it) but was deselected from
     // Step 1 without going through removeDeployInstance, so pendingCleanupPolicyIds is empty.
     // buildAgentBasedTargets returns only groupA (serviceA = currently selected) — old-svc is absent.
-    // Live-stale detection should find old-svc and trigger cleanupPackagePolicies + removeDeployInstance.
+    // Live-stale detection should find old-svc and trigger cleanupPackagePolicies + removeDeployInstances.
     const updateDetectAndReviewStep = jest.fn();
-    const removeDeployInstance = jest.fn();
+    const removeDeployInstances = jest.fn();
     mockUseOnboardingFlow.mockReturnValue({
       servicesStep: { selectedServiceIds: [] },
       authenticateAndDeployStep: {},
@@ -320,7 +320,7 @@ describe('useAgentBasedDeploy — cleanup orchestration', () => {
         pendingCleanupPolicyIds: {},
       },
       updateDetectAndReviewStep,
-      removeDeployInstance,
+      removeDeployInstances,
       getLatestFailedInstances: jest.fn().mockReturnValue([]),
       awsServicesMap: new Map(),
       agentBasedDeployment: {
@@ -350,7 +350,7 @@ describe('useAgentBasedDeploy — cleanup orchestration', () => {
     const cleanupCall = mockCleanupPackagePolicies.mock.calls[0][0];
     expect(cleanupCall.pendingCleanupPolicyIds).toEqual({ 'old-svc': 'pkg-policy-OLD' });
 
-    expect(removeDeployInstance).toHaveBeenCalledWith('old-svc');
+    expect(removeDeployInstances).toHaveBeenCalledWith(['old-svc']);
     expect(updateDetectAndReviewStep).toHaveBeenCalledWith(
       expect.objectContaining({ pendingCleanupPolicyIds: {} })
     );

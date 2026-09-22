@@ -48,7 +48,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
     authenticateAndDeployStep,
     detectAndReviewStep,
     updateDetectAndReviewStep,
-    removeDeployInstance,
+    removeDeployInstances,
     getLatestFailedInstances,
     awsServicesMap: servicesMap,
   } = useOnboardingFlow();
@@ -188,10 +188,8 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
             servicesMap: servicesMap ?? new Map(),
           });
           // Prune stale instances (Step 1 deselections) from policyIdsByInstance before clearing
-          // the staging area — removeDeployInstance must come first so its removal isn't overwritten.
-          for (const iid of Object.keys(liveStalePolicyIds)) {
-            removeDeployInstance(iid);
-          }
+          // the staging area — removeDeployInstances must come first so its removal isn't overwritten.
+          removeDeployInstances(Object.keys(liveStalePolicyIds));
           updateDetectAndReviewStep({ pendingCleanupPolicyIds: {} });
         }
 
@@ -325,7 +323,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
       namespace,
       onContinue,
       updateDetectAndReviewStep,
-      removeDeployInstance,
+      removeDeployInstances,
       getLatestFailedInstances,
       detectAndReviewStep.serviceStatuses,
       detectAndReviewStep.failedInstances,
