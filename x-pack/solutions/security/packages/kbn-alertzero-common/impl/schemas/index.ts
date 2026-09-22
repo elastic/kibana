@@ -77,3 +77,14 @@ export {
   HuntCoordinatorResponse,
   HuntCoordinatorStatus,
 } from './hunt/hunt_coordinator_route.gen';
+export {
+  AnchorIoc,
+  AnchorItem,
+  AnchorSet,
+  CorrelateRequestBody,
+  CorrelateResponse,
+  CorrelationEngineStatus,
+  DiamondScore,
+  HuntCorrelationAttachmentData,
+  HuntCorrelationAttachmentThresholds,
+} from './hunt/correlate_route.gen';

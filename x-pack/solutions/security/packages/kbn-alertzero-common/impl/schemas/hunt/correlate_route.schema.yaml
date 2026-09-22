@@ -1,0 +1,257 @@
+openapi: 3.0.0
+info:
+  title: AlertZero correlate route
+  version: '1'
+paths:
+  /internal/alertzero/hunt/correlate:
+    post:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: Correlate
+      description: >-
+        Runs the anchors correlation leg. `no_match` and `unavailable` are
+        both successful outcomes: unavailable correlation blocks containment
+        but never blocks the Tier 1 finding.
+      summary: Correlate a report against others by shared anchors
+      tags:
+        - AlertZero API
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                source_report_id:
+                  type: string
+                anchors:
+                  $ref: '#/components/schemas/AnchorSet'
+                size:
+                  type: integer
+                  minimum: 1
+                  maximum: 50
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - anchors
+                  - matches
+                  - thresholds
+                  - self_match_excluded
+                  - diamond_scores
+                  - anchor_summary
+                  - attachment_data
+                properties:
+                  status:
+                    $ref: '#/components/schemas/CorrelationEngineStatus'
+                  anchors:
+                    $ref: '#/components/schemas/AnchorSet'
+                  matches:
+                    type: array
+                    items:
+                      type: object
+                      required: [report_id, score, title, severity, source_type, extracted_at, match_breakdown]
+                      properties:
+                        report_id:
+                          type: string
+                        score:
+                          type: number
+                          nullable: true
+                        title:
+                          type: string
+                        severity:
+                          type: string
+                        source_type:
+                          type: string
+                        extracted_at:
+                          type: string
+                        match_breakdown:
+                          type: object
+                          required:
+                            - ioc_hash_hits
+                            - ioc_network_hits
+                            - ioc_set_hash_match
+                            - actor_hits
+                            - technique_hits
+                            - discriminating_match_count
+                          properties:
+                            ioc_hash_hits:
+                              type: array
+                              items:
+                                type: string
+                            ioc_network_hits:
+                              type: array
+                              items:
+                                type: string
+                            ioc_set_hash_match:
+                              type: boolean
+                            actor_hits:
+                              type: array
+                              items:
+                                type: string
+                            technique_hits:
+                              type: array
+                              items:
+                                type: string
+                            discriminating_match_count:
+                              type: integer
+                  thresholds:
+                    type: object
+                    required: [discriminating_min]
+                    properties:
+                      discriminating_min:
+                        type: number
+                  self_match_excluded:
+                    type: boolean
+                    enum: [true]
+                    description: >-
+                      Always true. The source report is excluded from its own
+                      matches by a must_not on its `_id`.
+                  diamond_scores:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DiamondScore'
+                  anchor_summary:
+                    type: object
+                    required:
+                      - hash_ioc_count
+                      - network_ioc_count
+                      - ioc_set_hash
+                      - actor_count
+                      - technique_count
+                      - discriminating_anchor_count
+                    properties:
+                      hash_ioc_count:
+                        type: integer
+                      network_ioc_count:
+                        type: integer
+                      ioc_set_hash:
+                        type: string
+                        nullable: true
+                      actor_count:
+                        type: integer
+                      technique_count:
+                        type: integer
+                      discriminating_anchor_count:
+                        type: integer
+                  attachment_data:
+                    $ref: '#/components/schemas/HuntCorrelationAttachmentData'
+components:
+  schemas:
+    CorrelationEngineStatus:
+      type: string
+      enum: [matched, no_match, unavailable]
+
+    AnchorIoc:
+      type: object
+      required: [type, value]
+      properties:
+        type:
+          type: string
+        value:
+          type: string
+
+    AnchorSet:
+      type: object
+      description: >-
+        Discriminating anchors are hash IOCs, `ioc_set_hash` and actors.
+        Network IOCs and techniques are boost-only and never gate a match.
+      properties:
+        iocs:
+          type: array
+          items:
+            $ref: '#/components/schemas/AnchorIoc'
+        ioc_set_hash:
+          type: string
+          nullable: true
+        actors:
+          type: array
+          items:
+            type: string
+        technique_ids:
+          type: array
+          items:
+            type: string
+
+    AnchorItem:
+      type: object
+      description: >-
+        One discriminating anchor that matched, flattened out of `AnchorSet`
+        for direct rendering on the `security.hunt_correlation` attachment
+        (`correlation_engine.ts`'s `buildAnchorItems`).
+      required: [kind, value]
+      properties:
+        kind:
+          type: string
+          enum: [hash, ioc_set_hash, actor]
+        value:
+          type: string
+
+    HuntCorrelationAttachmentThresholds:
+      type: object
+      required: [anchor_match, diamond_vertex]
+      properties:
+        anchor_match:
+          type: number
+        diamond_vertex:
+          type: number
+
+    HuntCorrelationAttachmentData:
+      type: object
+      description: >-
+        The `security.hunt_correlation` attachment payload, written verbatim
+        onto the source report's Investigation via `ai.attachment.add`. The
+        route's other top-level fields (`matches`, `anchor_summary`, ...) describe
+        the engine's own search, not what the attachment reader sees.
+      required:
+        - attachment_id
+        - anchors
+        - diamond_scores
+        - thresholds
+        - self_match_excluded
+      properties:
+        attachment_id:
+          type: string
+          description: >-
+            Subject-stable id the caller passes to `ai.attachment.add`; not part
+            of the attachment data itself and stripped by the attachment schema.
+        anchors:
+          type: array
+          maxItems: 50
+          items:
+            $ref: '#/components/schemas/AnchorItem'
+        diamond_scores:
+          type: array
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/DiamondScore'
+        thresholds:
+          $ref: '#/components/schemas/HuntCorrelationAttachmentThresholds'
+        self_match_excluded:
+          type: boolean
+          enum: [true]
+        report_revision:
+          type: string
+          minLength: 1
+          maxLength: 256
+          description: Omitted when the source report's revision is unknown.
+
+    DiamondScore:
+      type: object
+      required: [vertex, related_report_id, score]
+      properties:
+        vertex:
+          type: string
+          enum: [adversary, capability, infrastructure, victim]
+        related_report_id:
+          type: string
+        score:
+          type: number
+          minimum: 0
+          maximum: 1
