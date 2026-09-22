@@ -138,6 +138,7 @@ export const ConfigurationRequestSchema = z.object({
   customFields: CustomFieldsConfigurationSchema.optional(),
   templates: TemplatesConfigurationSchema.optional(),
   observableTypes: ObservableTypesConfigurationSchema.optional(),
+  extractObservables: z.boolean().optional(),
 });
 
 export const GetConfigurationFindRequestSchema = z.object({
@@ -154,6 +155,7 @@ export const ConfigurationPatchRequestSchema = z.object({
   customFields: CustomFieldsConfigurationSchema.optional(),
   templates: TemplatesConfigurationSchema.optional(),
   observableTypes: ObservableTypesConfigurationSchema.optional(),
+  extractObservables: z.boolean().optional(),
   version: z.string(),
 });
 
