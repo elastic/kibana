@@ -36,7 +36,7 @@ const KIBANA_VERSION_HEADER = 'kbn-version';
 export const SELF_CALL_RECURSION_ERROR =
   'Refusing Kibana self HTTP call because a self call cannot issue another self call.';
 export const SELF_CALL_MTLS_ERROR =
-  'Kibana self HTTP calls do not support server.ssl.clientAuthentication optional or required.';
+  'Kibana self HTTP calls do not support local calls when server.ssl.clientAuthentication is required.';
 
 const FORWARDED_REQUEST_HEADER_NAMES = new Set([
   'accept',
@@ -96,7 +96,7 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
     options: HttpSelfFetchOptions<TRequestBody> = {}
   ): Promise<TResponseBody | HttpSelfResponse<TResponseBody, TRequestBody>> {
     validateFetchArguments(path, options);
-    this.validateRequestContext();
+    this.validateRequestContext(options.target);
 
     const fetchOptions = { ...options, path };
     let request = this.createRequest(path, options);
@@ -227,13 +227,18 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
     });
   }
 
-  private validateRequestContext(): void {
+  private validateRequestContext(target?: 'local'): void {
     if (this.request.headers[SELF_CALL_HEADER] !== undefined) {
       throw new Error(SELF_CALL_RECURSION_ERROR);
     }
 
     const { ssl } = this.params.getHttpConfig();
-    if (ssl.enabled && ssl.requestCert) {
+    if (
+      ssl.enabled &&
+      ssl.requestCert &&
+      ssl.rejectUnauthorized &&
+      this.getEffectiveTarget(target) === 'local'
+    ) {
       throw new Error(SELF_CALL_MTLS_ERROR);
     }
   }

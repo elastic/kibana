@@ -428,20 +428,54 @@ describe('InternalHttpSelfScopedClient', () => {
     expect(global.fetch).not.toHaveBeenCalled();
   });
 
-  it('rejects self calls when server mTLS is optional or required, including after reload', async () => {
-    let requestCert = false;
+  it('allows optional client authentication and public calls through a required-client-auth proxy', async () => {
+    const optionalClientAuth = createClient({
+      publicBaseUrl: null,
+      getHttpConfig: jest.fn().mockReturnValue({
+        ssl: { enabled: true, requestCert: true, rejectUnauthorized: false },
+        selfHttp: { ssl: { verificationMode: 'full' } },
+      } as HttpConfig),
+      serverProtocol: 'https',
+    });
+
+    await optionalClientAuth.self.asScoped(createFakeRequest()).fetch('/api/status');
+    expect((global.fetch as jest.Mock).mock.calls[0][0]).toHaveProperty(
+      'url',
+      'https://localhost:5601/base/api/status'
+    );
+
+    const requiredClientAuth = createClient({
+      getHttpConfig: jest.fn().mockReturnValue({
+        ssl: { enabled: true, requestCert: true, rejectUnauthorized: true },
+        selfHttp: { ssl: { verificationMode: 'full' } },
+      } as HttpConfig),
+    });
+
+    await requiredClientAuth.self.asScoped(createFakeRequest()).fetch('/api/status');
+    expect((global.fetch as jest.Mock).mock.calls[1][0]).toHaveProperty(
+      'url',
+      'https://kibana.example.com/base/api/status'
+    );
+  });
+
+  it('rejects local self calls when client authentication becomes required after reload', async () => {
+    let clientAuthenticationRequired = false;
     const getHttpConfig = jest.fn(
       () =>
         ({
-          ssl: { enabled: requestCert, requestCert },
+          ssl: {
+            enabled: clientAuthenticationRequired,
+            requestCert: clientAuthenticationRequired,
+            rejectUnauthorized: clientAuthenticationRequired,
+          },
           selfHttp: { ssl: { verificationMode: 'full' } },
         } as HttpConfig)
     );
-    const { self } = createClient({ getHttpConfig });
+    const { self } = createClient({ publicBaseUrl: null, getHttpConfig });
     const scoped = self.asScoped(createFakeRequest());
 
     await scoped.fetch('/api/status');
-    requestCert = true;
+    clientAuthenticationRequired = true;
 
     await expect(scoped.fetch('/api/status')).rejects.toThrow(SELF_CALL_MTLS_ERROR);
     expect(global.fetch).toHaveBeenCalledTimes(1);
