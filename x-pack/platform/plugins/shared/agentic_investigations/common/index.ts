@@ -77,6 +77,7 @@ export {
   ESCALATION_LINKED_INVESTIGATIONS_FIELD,
   ESCALATION_TEMPLATE_ID,
   ESCALATIONS_INTERNAL_URL,
+  ESCALATIONS_SUGGEST_USERS_URL,
   ESCALATIONS_UI_CAPABILITY_MANAGE,
   MAX_ESCALATION_LINKED_INVESTIGATIONS,
   createEscalationRequestSchema,
@@ -87,7 +88,9 @@ export {
 export type {
   CreateEscalationRequest,
   EscalationConversation,
+  EscalationConversationSummary,
   EscalationVisibility,
+  ListEscalationsResponse,
   UpdateEscalationRequest,
 } from './escalations';
 

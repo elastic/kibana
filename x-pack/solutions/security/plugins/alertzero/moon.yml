@@ -53,6 +53,9 @@ dependsOn:
   - '@kbn/i18n-react'
   - '@kbn/app-menu'
   - '@kbn/search-inference-endpoints'
+  - '@kbn/user-profile-components'
+  - '@kbn/shared-ux-error-boundary'
+  - '@kbn/react-kibana-mount'
 tags:
   - plugin
   - prod

@@ -57,6 +57,12 @@ export interface RegisterAgenticInvestigationTemplateUIOptions {
    * the HTTP client; when absent, clicking Assign in the flyout closes the modal without writing.
    */
   onAssignSubmit?: (conversationId: string, assignees: string[]) => void | Promise<void>;
+  /**
+   * When provided, the flyout footer renders a dedicated "Open escalation" primary button and
+   * delegates modal rendering to this function. Supplied by the caller so the modal can use
+   * Kibana HTTP hooks unavailable in this package.
+   */
+  renderEscalationModal?: import('./slots').FooterSlotProps['onOpenEscalation'];
 }
 
 /**
@@ -72,6 +78,7 @@ export const registerAgenticInvestigationTemplateUI = ({
   name,
   icon,
   onAssignSubmit,
+  renderEscalationModal,
 }: RegisterAgenticInvestigationTemplateUIOptions): void => {
   const [overviewTabId, attachmentsTabId, timelineTabId] = getInvestigationTabIds(templateId);
 
@@ -145,6 +152,7 @@ export const registerAgenticInvestigationTemplateUI = ({
                     ? (assignee) => onAssignSubmit(conversation.id, assignee ? [assignee] : [])
                     : undefined
                 }
+                onOpenEscalation={renderEscalationModal}
               />
             </Suspense>
           );

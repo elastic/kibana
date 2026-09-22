@@ -275,6 +275,20 @@ describe('EscalationsService.create', () => {
     expect(title).toBe(MOCK_INVESTIGATION.title);
   });
 
+  it('uses a caller-supplied title instead of the investigation title when provided', async () => {
+    const { service, client } = makeService();
+
+    await service.create(request, {
+      linked_investigation_id: 'inv-1',
+      title: 'Custom escalation title',
+      visibility: 'public',
+      collaborators: [],
+    });
+
+    const { title } = client.create.mock.calls[0][0];
+    expect(title).toBe('Custom escalation title');
+  });
+
   it('throws when the escalation template is not found', async () => {
     const { service, conversationTemplates } = makeService();
     conversationTemplates.get.mockResolvedValue(undefined);
@@ -468,5 +482,25 @@ describe('EscalationsService.list', () => {
       pagination: { total: 0, page: 1, per_page: 50 },
       results: [],
     });
+  });
+
+  it('forwards the search string to client.search as query', async () => {
+    const { service, client } = makeService({
+      search: jest.fn().mockResolvedValue({ results: [], total: 0 }),
+    });
+
+    await service.list(request, { page: 1, per_page: 50, search: 'critical' });
+
+    expect(client.search).toHaveBeenCalledWith(expect.objectContaining({ query: 'critical' }));
+  });
+
+  it('omits query from client.search when search is not provided', async () => {
+    const { service, client } = makeService({
+      search: jest.fn().mockResolvedValue({ results: [], total: 0 }),
+    });
+
+    await service.list(request, { page: 1, per_page: 50 });
+
+    expect(client.search).toHaveBeenCalledWith(expect.objectContaining({ query: undefined }));
   });
 });

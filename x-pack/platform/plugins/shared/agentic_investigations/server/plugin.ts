@@ -108,6 +108,8 @@ export class AgenticInvestigationsPlugin
       router,
       logger: this.logger,
       getEscalationsService: () => this.requireEscalationsService(),
+      getSpaceId: (request) => this.getSpaceId(request),
+      getSecurity: async () => (await coreSetup.getStartServices())[1].security,
     });
 
     registerInvestigationRoutes({
