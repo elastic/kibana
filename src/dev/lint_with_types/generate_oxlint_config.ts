@@ -47,9 +47,6 @@ const NO_FLOATING_PROMISES = 'typescript/no-floating-promises';
 const IGNORE_PATTERNS = [
   // oxlint has no `--ext`; everything but .ts/.tsx is excluded so only TS sources are linted
   '**/*.{js,jsx,mjs,cjs,mts,cts,json,vue,svelte,astro}',
-  // mirror tsc's `skipLibCheck: true`: oxlint's parser reports TypeScript grammar errors (e.g.
-  // TS1016) that ESLint's parser does not, and declaration files are never type-checked either
-  '**/*.d.ts',
 ];
 
 const HAS_MAGIC = /[*?[{]/;
@@ -61,12 +58,6 @@ const compile = (glob: string) => new Minimatch(glob, { dot: true });
  * directory whose contents are all linted.
  */
 const includeMatcher = (include: string): ((rel: string) => boolean) => {
-  if (include.startsWith('../')) {
-    // files outside the project directory can never match a project-relative rule glob. In this
-    // repo every such include resolves to `typings/**/*` (declaration files, ignored below), to
-    // `.json`, or to sources a sibling project already covers, so nothing lintable is lost
-    return () => false;
-  }
   if (HAS_MAGIC.test(include)) {
     const mm = compile(include);
     return (rel) => mm.match(rel);
@@ -74,6 +65,8 @@ const includeMatcher = (include: string): ((rel: string) => boolean) => {
   const dir = include.replace(/\/$/, '');
   return (rel) => rel === dir || rel.startsWith(`${dir}/`);
 };
+
+const isOutsideProject = (include: string) => include.startsWith('../');
 
 /**
  * A tsconfig `exclude` entry as ESLint interpreted it via `--ignore-pattern`:
@@ -132,11 +125,21 @@ export function generateOxlintConfig(
 
   const overrides: OxlintOverride[] = [];
   const covered = new Set<string>();
+  // includes outside the project directory (`../typings/**/*`) can never match a project-relative
+  // rule glob, but ESLint still linted them with the base rules; nearly all resolve to the same glob
+  const outsideIncludes = new Set<string>();
 
   for (const project of sortedProjects) {
     const prefix = project.repoRelDir === '.' ? '' : `${project.repoRelDir}/`;
-    const included = project.include.map(includeMatcher);
+    const included = project.include.filter((i) => !isOutsideProject(i)).map(includeMatcher);
     const excluded = project.exclude.map(excludeMatcher);
+
+    for (const include of project.include.filter(isOutsideProject)) {
+      const repoRel = Path.posix.normalize(prefix + include);
+      if (!isOutsideProject(repoRel)) {
+        outsideIncludes.add(repoRel);
+      }
+    }
 
     const on = new Set<string>();
     const off = new Set<string>();
@@ -187,6 +190,15 @@ export function generateOxlintConfig(
     const offFiles = [...off, ...project.exclude.map((g) => prefix + g), ...uncoveredNested].sort();
     if (offFiles.length) {
       overrides.push({ files: offFiles, rules: { [NO_FLOATING_PROMISES]: 'off' } });
+    }
+  }
+
+  for (const include of outsideIncludes) {
+    const matches = includeMatcher(include);
+    for (const file of files) {
+      if (matches(file)) {
+        covered.add(file);
+      }
     }
   }
 

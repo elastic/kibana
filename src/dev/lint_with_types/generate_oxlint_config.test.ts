@@ -126,13 +126,24 @@ describe('generateOxlintConfig', () => {
     expect(config.ignorePatterns).not.toContain('plugins/a/server/plugin.ts');
   });
 
-  it('ignores declaration files via a glob, not the uncovered-files list', () => {
+  it('lints source-controlled declaration files a project covers, as ESLint did', () => {
     const config = generateOxlintConfig(
       [project('plugins/a', ['server/**/*'])],
       ['plugins/a/server/plugin.ts', 'plugins/a/server/types.d.ts']
     );
 
-    expect(config.ignorePatterns).toContain('**/*.d.ts');
+    expect(config.ignorePatterns).not.toContain('**/*.d.ts');
     expect(config.ignorePatterns).not.toContain('plugins/a/server/types.d.ts');
+  });
+
+  it('covers files an include outside the project directory selects', () => {
+    const config = generateOxlintConfig(
+      [project('examples/demo', ['public/**/*', '../../typings/**/*'])],
+      ['typings/index.d.ts', 'typings/foo/index.d.ts', 'examples/demo/public/app.tsx']
+    );
+
+    expect(config.ignorePatterns).not.toContain('typings/index.d.ts');
+    expect(config.ignorePatterns).not.toContain('typings/foo/index.d.ts');
+    expect(enforcedOn(config, 'typings/index.d.ts')).toBe(false);
   });
 });
