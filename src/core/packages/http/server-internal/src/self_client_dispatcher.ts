@@ -24,14 +24,21 @@ interface SelfHttpDispatcherProviderParams {
 
 const buildConnectOptions = (
   verificationMode: VerificationMode,
-  certificateAuthorities: string[]
+  certificateAuthorities: string[],
+  { exclusiveTrust = false }: { exclusiveTrust?: boolean } = {}
 ): ConnectOptions => {
   // Omitting `ca` keeps Node's default trust store, which includes NODE_EXTRA_CA_CERTS.
   // Passing `rootCertificates` instead would replace it and trust less than `full` does.
+  // Exclusive trust is the local-`full` pin: only this process's leaf, no public roots.
   const connect: ConnectOptions =
     certificateAuthorities.length === 0
       ? {}
-      : { ca: [...rootCertificates, ...certificateAuthorities], allowPartialTrustChain: true };
+      : {
+          ca: exclusiveTrust
+            ? certificateAuthorities
+            : [...rootCertificates, ...certificateAuthorities],
+          allowPartialTrustChain: true,
+        };
 
   switch (verificationMode) {
     case 'none':
@@ -60,21 +67,21 @@ export class SelfHttpDispatcherProvider {
 
     const config = this.params.getHttpConfig();
     const usesLocalTarget = target === 'local';
-    // Local self calls loop back to this listener, so trust its leaf certificate directly.
-    const additionalCertificateAuthorities = usesLocalTarget
+    const configuredMode = config.selfHttp.ssl.verificationMode;
+    const localCertificate = usesLocalTarget ? config.ssl.certificate : undefined;
+    // Local hops use this process's listener. The cert SAN is usually the public
+    // hostname, not `localhost` / the bind address, so `full` would fail identity.
+    // Pin the listener leaf only; honor explicit `certificate` / `none`.
+    const pinLocalLeaf = usesLocalTarget && configuredMode === 'full' && Boolean(localCertificate);
+    const additionalCertificateAuthorities = pinLocalLeaf
+      ? [localCertificate]
+      : usesLocalTarget
       ? [config.ssl.certificate, ...(config.ssl.certificateAuthorities ?? [])]
       : config.selfHttp.ssl.certificateAuthorities ?? [];
     const certificateAuthorities = additionalCertificateAuthorities.filter(
       (certificate): certificate is string => certificate !== undefined
     );
-
-    // Local hops use this process's listener. The cert SAN is usually the public
-    // hostname, not `localhost` / the bind address, so `full` would fail identity.
-    // Still verify the pinned leaf; honor an explicit `none`.
-    const verificationMode =
-      usesLocalTarget && config.selfHttp.ssl.verificationMode === 'full'
-        ? 'certificate'
-        : config.selfHttp.ssl.verificationMode;
+    const verificationMode = pinLocalLeaf ? 'certificate' : configuredMode;
 
     // Node's global dispatcher already verifies fully, so it only stays usable in `full` mode.
     if (certificateAuthorities.length === 0 && verificationMode === 'full') {
@@ -82,7 +89,9 @@ export class SelfHttpDispatcherProvider {
       return undefined;
     }
 
-    const trustKey = `${target}:${verificationMode}:${certificateAuthorities.join('\n')}`;
+    const trustKey = `${target}:${verificationMode}:${
+      pinLocalLeaf ? 'pin' : 'ca'
+    }:${certificateAuthorities.join('\n')}`;
     const profile = this.dispatchers.get(target) ?? {};
     if (profile.agent && profile.trustKey === trustKey) {
       return profile.agent;
@@ -90,7 +99,11 @@ export class SelfHttpDispatcherProvider {
 
     this.replaceDispatcher(
       target,
-      new Agent({ connect: buildConnectOptions(verificationMode, certificateAuthorities) }),
+      new Agent({
+        connect: buildConnectOptions(verificationMode, certificateAuthorities, {
+          exclusiveTrust: pinLocalLeaf,
+        }),
+      }),
       trustKey
     );
     return this.dispatchers.get(target)?.agent;

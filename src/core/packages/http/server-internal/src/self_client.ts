@@ -348,6 +348,8 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
   }
 }
 
+const HTTP_SELF_FETCH_ERROR = Symbol('HttpSelfFetchError');
+
 const createHttpSelfFetchError = <TResponseBody>(
   message: string,
   request: Request,
@@ -361,6 +363,7 @@ const createHttpSelfFetchError = <TResponseBody>(
   ) as HttpSelfFetchError<TResponseBody>;
   error.name = 'HttpSelfFetchError';
   Object.defineProperties(error, {
+    [HTTP_SELF_FETCH_ERROR]: { value: true },
     request: { value: request, enumerable: true },
     response: { value: response, enumerable: true },
     body: { value: body, enumerable: true },
@@ -369,7 +372,12 @@ const createHttpSelfFetchError = <TResponseBody>(
 };
 
 const isHttpSelfFetchError = (error: unknown): error is HttpSelfFetchError => {
-  return error instanceof Error && error.name === 'HttpSelfFetchError';
+  return (
+    error instanceof Error &&
+    HTTP_SELF_FETCH_ERROR in error &&
+    'request' in error &&
+    error.request instanceof Request
+  );
 };
 
 const describeSelfCallOrigin = (request: Request): string => new URL(request.url).origin;
@@ -380,43 +388,63 @@ const describeSelfCall = (request: Request, response?: Response): string => {
 };
 
 const describeErrorCause = (error: unknown): string => {
-  if (!(error instanceof Error)) {
-    return String(error);
+  const coded = findCodedError(error);
+  if (coded) {
+    return coded.message && coded.message !== coded.code
+      ? `${coded.code}: ${coded.message}`
+      : coded.code;
   }
-  const cause = error.cause instanceof Error ? error.cause : undefined;
-  if (cause?.message && cause.message !== error.message) {
-    return `${error.message}: ${cause.message}`;
+  if (
+    getErrorName(error) === 'SyntaxError' ||
+    getErrorName(getErrorCause(error)) === 'SyntaxError'
+  ) {
+    return 'invalid JSON response body';
   }
-  return error.message;
+  return getErrorName(error) ?? 'unknown error';
 };
 
-const getErrorCode = (error: unknown): string | undefined => {
+const getErrorName = (error: unknown): string | undefined => {
+  if (typeof error !== 'object' || error === null || !('name' in error)) {
+    return undefined;
+  }
+  return typeof error.name === 'string' ? error.name : undefined;
+};
+
+const getErrorCause = (error: unknown): unknown => {
+  return typeof error === 'object' && error !== null && 'cause' in error ? error.cause : undefined;
+};
+
+const findCodedError = (error: unknown): { code: string; message: string } | undefined => {
   let current: unknown = error;
   for (let depth = 0; depth < 4 && current instanceof Error; depth++) {
     if ('code' in current && typeof current.code === 'string') {
-      return current.code;
+      return { code: current.code, message: current.message };
     }
     current = current.cause;
   }
   return undefined;
 };
 
+const getErrorCode = (error: unknown): string | undefined => findCodedError(error)?.code;
+
 interface LoggedErrorProjection {
   name: string;
-  message: string;
-  stack?: string;
+  message?: string;
+  code?: string;
   cause?: LoggedErrorProjection;
 }
 
 const projectLoggedError = (error: Error, depth = 0): LoggedErrorProjection => {
+  const code = 'code' in error && typeof error.code === 'string' ? error.code : undefined;
   const cause =
     depth < 3 && error.cause instanceof Error
       ? projectLoggedError(error.cause, depth + 1)
       : undefined;
+  const includeMessage = HTTP_SELF_FETCH_ERROR in error || code !== undefined;
   return {
     name: error.name,
-    message: error.message,
-    ...(error.stack ? { stack: error.stack } : {}),
+    ...(includeMessage ? { message: error.message } : {}),
+    ...(code ? { code } : {}),
     ...(cause ? { cause } : {}),
   };
 };

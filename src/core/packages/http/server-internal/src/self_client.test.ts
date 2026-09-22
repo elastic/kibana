@@ -223,7 +223,7 @@ describe('InternalHttpSelfScopedClient', () => {
     await expect(self.asScoped(createRequest()).fetch('/api/status')).rejects.toMatchObject({
       name: 'HttpSelfFetchError',
       message:
-        "Kibana self HTTP call failed: GET https://kibana.example.com: fetch failed: Hostname/IP does not match certificate's altnames",
+        "Kibana self HTTP call failed: GET https://kibana.example.com: ERR_TLS_CERT_ALTNAME_INVALID: Hostname/IP does not match certificate's altnames",
       cause: expect.objectContaining({ message: 'fetch failed', cause: tlsCause }),
     });
     expect(log.error).toHaveBeenCalledWith(
@@ -231,11 +231,13 @@ describe('InternalHttpSelfScopedClient', () => {
       expect.objectContaining({
         error: expect.objectContaining({
           message:
-            "Kibana self HTTP call failed: GET https://kibana.example.com: fetch failed: Hostname/IP does not match certificate's altnames",
+            "Kibana self HTTP call failed: GET https://kibana.example.com: ERR_TLS_CERT_ALTNAME_INVALID: Hostname/IP does not match certificate's altnames",
           name: 'HttpSelfFetchError',
           cause: expect.objectContaining({
-            message: 'fetch failed',
+            name: 'Error',
             cause: expect.objectContaining({
+              name: 'Error',
+              code: 'ERR_TLS_CERT_ALTNAME_INVALID',
               message: "Hostname/IP does not match certificate's altnames",
             }),
           }),
@@ -282,6 +284,22 @@ describe('InternalHttpSelfScopedClient', () => {
     expect(serializedLog).not.toContain('nope');
   });
 
+  it('does not treat a name-colliding error as a self-fetch error', async () => {
+    const { log, self } = createClient();
+    (global.fetch as jest.Mock).mockRejectedValueOnce(
+      Object.assign(new Error('boom'), { name: 'HttpSelfFetchError' })
+    );
+
+    await expect(self.asScoped(createRequest()).fetch('/api/status')).rejects.toEqual(
+      expect.objectContaining({
+        name: 'HttpSelfFetchError',
+        message: expect.stringContaining('Kibana self HTTP call failed'),
+        request: expect.any(Request),
+      })
+    );
+    expect(log.error).toHaveBeenCalledTimes(1);
+  });
+
   it('keeps the HTTP status when the error body cannot be parsed', async () => {
     const { log, self } = createClient();
     (global.fetch as jest.Mock).mockResolvedValueOnce(
@@ -292,7 +310,7 @@ describe('InternalHttpSelfScopedClient', () => {
     );
 
     await expect(self.asScoped(createRequest()).fetch('/api/status')).rejects.toThrow(
-      'Kibana self HTTP call failed: GET https://kibana.example.com → 502'
+      'Kibana self HTTP call failed: GET https://kibana.example.com → 502: invalid JSON response body'
     );
     expect(log.error).toHaveBeenCalledWith(
       'Kibana scoped self HTTP call failed',
