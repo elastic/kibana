@@ -14,11 +14,8 @@ const WATCHED_METHODS = new Set(['locator', '$', '$$', 'waitForSelector']);
 const escapeRegExp = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 /**
- * Reads every `Eui<Component>Selectors` object exported by
- * `@elastic/eui-test-helpers` and collects its `*_SELECTOR` CSS class values.
- * The list therefore grows with the helpers package and is never maintained
- * by hand. Returns an empty list if the installed version exports no
- * selectors, in which case the rule reports nothing.
+ * Collects the `*_SELECTOR` CSS classes from every `Eui*Selectors` object that
+ * `@elastic/eui-test-helpers` exports. Empty if the installed version exports none.
  */
 function loadEuiSelectors() {
   let helpers;
