@@ -124,7 +124,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.clickCancelOutOfEditMode();
         await header.waitUntilLoadingHasFinished();
         expect(await dashboard.getPanelCount()).to.eql(originalPanelCount);
-        expect(dashboard.getIsInViewMode()).to.eql(true);
+        expect(await dashboard.getIsInViewMode()).to.eql(true);
       });
 
       it('does not show unsaved changes badge after saving', async () => {
