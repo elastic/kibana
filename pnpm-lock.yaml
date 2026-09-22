@@ -3594,10 +3594,10 @@ importers:
         version: link:x-pack/solutions/security/packages/siem-readiness
       '@kbn/significant-events-app-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/plugins/shared/significant_events_app
+        version: link:x-pack/solutions/observability/plugins/significant_events_app
       '@kbn/significant-events-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/plugins/shared/significant_events
+        version: link:x-pack/solutions/observability/plugins/significant_events
       '@kbn/significant-events-schema':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-significant-events-schema
@@ -5464,7 +5464,7 @@ importers:
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-siem-readiness
       '@kbn/evals-suite-significant-events':
         specifier: workspace:*
-        version: link:x-pack/platform/packages/shared/kbn-evals-suite-significant-events
+        version: link:x-pack/solutions/observability/packages/kbn-evals-suite-significant-events
       '@kbn/evals-suite-smoke-tests':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-evals-suite-smoke-tests
@@ -8955,8 +8955,6 @@ importers:
 
   x-pack/platform/packages/shared/kbn-evals-suite-nightshift-investigations: {}
 
-  x-pack/platform/packages/shared/kbn-evals-suite-significant-events: {}
-
   x-pack/platform/packages/shared/kbn-evals-suite-smoke-tests: {}
 
   x-pack/platform/packages/shared/kbn-evals-suite-streams: {}
@@ -9355,10 +9353,6 @@ importers:
 
   x-pack/platform/plugins/shared/serverless: {}
 
-  x-pack/platform/plugins/shared/significant_events: {}
-
-  x-pack/platform/plugins/shared/significant_events_app: {}
-
   x-pack/platform/plugins/shared/slo_shared: {}
 
   x-pack/platform/plugins/shared/spaces: {}
@@ -9469,6 +9463,8 @@ importers:
 
   x-pack/solutions/observability/packages/kbn-evals-suite-observability-ai: {}
 
+  x-pack/solutions/observability/packages/kbn-evals-suite-significant-events: {}
+
   x-pack/solutions/observability/packages/kbn-genai-cli: {}
 
   x-pack/solutions/observability/packages/kbn-observability-schema: {}
@@ -9522,6 +9518,10 @@ importers:
   x-pack/solutions/observability/plugins/profiling_data_access: {}
 
   x-pack/solutions/observability/plugins/serverless_observability: {}
+
+  x-pack/solutions/observability/plugins/significant_events: {}
+
+  x-pack/solutions/observability/plugins/significant_events_app: {}
 
   x-pack/solutions/observability/plugins/slo: {}
 
