@@ -81,9 +81,12 @@ triggers:
             auto-close off so HITL cannot be bypassed by accident.
         autoCloseConfidenceScoreMinThreshold:
           type: number
+          minimum: 0
+          maximum: 1
           description: >
             Minimum confidence score for FP auto-close. Overrides the uiSettings value.
             When supplied, the max threshold is collapsed to 1 (range becomes a floor).
+            Bounded to 0–1 to match the uiSettings contract.
         agentId:
           type: string
           description: Agent Builder agent id. Overrides the uiSettings-derived agentId.
