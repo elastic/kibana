@@ -79,6 +79,7 @@ import { hasScheduledTriggers } from '../lib/schedule_utils';
 import { WorkflowHistoryEventNotFoundError } from '../lib/workflow_history_event_not_found_error';
 import { resolveUniqueWorkflowIds, validateWorkflowId } from '../lib/workflow_id_resolver';
 import { applyWorkflowVersion } from '../lib/workflow_version';
+import { workflowIndexName } from '../storage/workflow_storage';
 import type { WorkflowProperties } from '../storage/workflow_storage';
 import { scheduleWorkflowTriggers } from '../task_defs/schedule_workflow_triggers';
 import { syncSchedulerAfterSave } from '../task_defs/sync_scheduler_after_save';
@@ -201,6 +202,28 @@ export class WorkflowCrudService {
     };
   }
 
+  private async getWorkflowRevision(
+    id: string
+  ): Promise<Pick<VersionedWorkflowDocument, 'seqNo' | 'primaryTerm'> | null> {
+    try {
+      // A real-time GET observes writes that are not yet visible to search.
+      const response = await this.deps.getCoreStart().elasticsearch.client.asInternalUser.get({
+        index: workflowIndexName,
+        id,
+        _source: false,
+        realtime: true,
+      });
+      if (!response.found) return null;
+      if (response._seq_no == null || response._primary_term == null) {
+        throw new Error(`Missing workflow revision for ${id}.`);
+      }
+      return { seqNo: response._seq_no, primaryTerm: response._primary_term };
+    } catch (error) {
+      if (isNotFoundError(error)) return null;
+      throw error;
+    }
+  }
+
   async indexWorkflowDocument(
     id: string,
     document: WorkflowProperties,
@@ -246,6 +269,7 @@ export class WorkflowCrudService {
       request: options?.request,
       previousAccountId: previous?.definition?.settings?.run_as,
       accountId,
+      getWorkflowRevision: () => this.getWorkflowRevision(id),
       write,
     });
   }
@@ -1015,6 +1039,7 @@ export class WorkflowCrudService {
               spaceId,
               request,
               previousAccountId: workflow?.definition?.settings?.run_as,
+              getWorkflowRevision: () => this.getWorkflowRevision(id),
               write: async () => {
                 const item = await this.deleteWorkflowDocuments([id], spaceId, options);
                 if (item.deleted !== 1)

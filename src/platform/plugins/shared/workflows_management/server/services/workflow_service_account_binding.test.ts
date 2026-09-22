@@ -57,6 +57,7 @@ const setup = () => {
       request: httpServerMock.createKibanaRequest(),
       accountId: 'a',
       write: jest.fn().mockResolvedValue('saved'),
+      getWorkflowRevision: jest.fn().mockResolvedValue(null),
     },
   };
 };
@@ -119,5 +120,74 @@ describe('workflow binding reconciliation', () => {
     bindings.unbindWorkload.mockRejectedValue(new Error('store unavailable'));
     params.write.mockRejectedValue(new Error('write failed'));
     await expect(withWorkflowBindingChange(params)).rejects.toThrow('compensation failed');
+  });
+});
+
+describe('concurrent workflow writes sharing a binding', () => {
+  it.each([undefined, 'previous-account'])(
+    'keeps the winning binding after a losing write (original account: %s)',
+    async (previousAccountId) => {
+      const { params, bindings, binding } = setup();
+      let currentBinding = previousAccountId
+        ? { ...binding, serviceAccountId: previousAccountId }
+        : null;
+      let revision = previousAccountId ? { seqNo: 1, primaryTerm: 1 } : null;
+      params.getWorkflowRevision.mockImplementation(async () => revision);
+      bindings.getWorkloadBinding.mockImplementation(async () => currentBinding);
+      bindings.bindWorkload.mockImplementation(async () => {
+        currentBinding = binding;
+        return binding;
+      });
+      params.write.mockImplementationOnce(async () => {
+        // Y observes X's binding, reuses it, and wins the workflow write before X fails.
+        await withWorkflowBindingChange({
+          ...params,
+          previousAccountId,
+          write: async () => {
+            revision = { seqNo: 2, primaryTerm: 1 };
+            return 'winner';
+          },
+        });
+        throw new Error('losing write conflict');
+      });
+
+      await expect(withWorkflowBindingChange({ ...params, previousAccountId })).rejects.toThrow(
+        'losing write conflict'
+      );
+      expect(currentBinding).toEqual(binding);
+      expect(bindings.bindWorkload).toHaveBeenCalledTimes(1);
+      expect(bindings.unbindWorkload).not.toHaveBeenCalled();
+      expect(params.logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('compensation skipped')
+      );
+    }
+  );
+
+  it('does not restore a binding when a failed deletion actually removed the workflow', async () => {
+    const { params, bindings, binding } = setup();
+    bindings.getWorkloadBinding.mockResolvedValueOnce(binding).mockResolvedValueOnce(null);
+    params.getWorkflowRevision
+      .mockResolvedValueOnce({ seqNo: 1, primaryTerm: 1 })
+      .mockResolvedValueOnce(null);
+    params.write.mockRejectedValue(new Error('delete response lost'));
+    await expect(
+      withWorkflowBindingChange({
+        ...params,
+        previousAccountId: 'a',
+        accountId: undefined,
+      })
+    ).rejects.toThrow('delete response lost');
+    expect(bindings.bindWorkload).not.toHaveBeenCalled();
+  });
+
+  it('does not compensate when the workflow revision cannot be re-read', async () => {
+    const { params, bindings, binding } = setup();
+    bindings.getWorkloadBinding.mockResolvedValueOnce(null).mockResolvedValueOnce(binding);
+    params.getWorkflowRevision
+      .mockResolvedValueOnce(null)
+      .mockRejectedValueOnce(new Error('unavailable'));
+    params.write.mockRejectedValue(new Error('write failed'));
+    await expect(withWorkflowBindingChange(params)).rejects.toThrow('compensation failed');
+    expect(bindings.unbindWorkload).not.toHaveBeenCalled();
   });
 });

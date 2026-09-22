@@ -24,6 +24,7 @@ export const withWorkflowBindingChange = async <T>({
   previousAccountId,
   accountId,
   write,
+  getWorkflowRevision,
 }: {
   bindings: Bindings;
   core: CoreStart;
@@ -34,6 +35,7 @@ export const withWorkflowBindingChange = async <T>({
   previousAccountId?: string;
   accountId?: string;
   write: () => Promise<T>;
+  getWorkflowRevision: () => Promise<{ seqNo: number; primaryTerm: number } | null>;
 }): Promise<T> => {
   if (!previousAccountId && !accountId) return write();
   if (!bindings.isEnabled()) throw Boom.forbidden('Service account execution is disabled.');
@@ -48,6 +50,7 @@ export const withWorkflowBindingChange = async <T>({
     throw Boom.forbidden('Modifying a service-account workflow requires manage_security.');
   }
   const coordinates = { workloadType: 'workflow', workloadId: workflowId, spaceId };
+  const previousRevision = await getWorkflowRevision();
   const previous = await bindings.getWorkloadBinding(coordinates);
   const changed = accountId !== previous?.serviceAccountId;
   let written = previous;
@@ -69,8 +72,9 @@ export const withWorkflowBindingChange = async <T>({
     if (changed) {
       try {
         const current = await bindings.getWorkloadBinding(coordinates);
-        // Best effort only: bindings do not expose a compare-and-swap operation.
-        if (isEqual(current, written)) {
+        const currentRevision = await getWorkflowRevision();
+        // Both reads are best effort: workflow storage and bindings have no shared CAS.
+        if (isEqual(current, written) && isEqual(currentRevision, previousRevision)) {
           if (previous) {
             await bindings.bindWorkload(request, {
               workloadType: 'workflow',

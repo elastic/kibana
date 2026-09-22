@@ -178,6 +178,50 @@ apiTest.describe(
     );
 
     apiTest(
+      'rejects service-account step tests even with unchanged saved YAML',
+      async ({ apiClient }) => {
+        const yaml = workflowYaml(accountId, waitStep + authenticationStep);
+        const id = await create(apiClient, yaml);
+        const executionsPath = `api/workflows/workflow/${id}/executions`;
+        const before = await apiClient.get(executionsPath, { headers, responseType: 'json' });
+        expect(before).toHaveStatusCode(200);
+        const stepTest = await apiClient.post('api/workflows/step/test', {
+          headers,
+          body: {
+            workflowId: id,
+            workflowYaml: yaml,
+            stepId: 'authenticate',
+            executionContext: { resumeInput: { approved: true } },
+            contextOverride: {},
+          },
+          responseType: 'json',
+        });
+        expect(stepTest, JSON.stringify(stepTest.body)).toHaveStatusCode(400);
+        expect(stepTest.body.message).toContain('individual step tests');
+        const after = await apiClient.get(executionsPath, { headers, responseType: 'json' });
+        expect(after).toHaveStatusCode(200);
+        expect(after.body.total).toBe(before.body.total);
+
+        const ordinaryYaml = yaml.replace(`settings:\n  run_as: ${accountId}\n`, '');
+        const ordinaryId = await create(apiClient, ordinaryYaml);
+        const ordinaryTest = await apiClient.post('api/workflows/step/test', {
+          headers,
+          body: {
+            workflowId: ordinaryId,
+            workflowYaml: ordinaryYaml,
+            stepId: 'authenticate',
+            contextOverride: {},
+          },
+          responseType: 'json',
+        });
+        expect(ordinaryTest, JSON.stringify(ordinaryTest.body)).toHaveStatusCode(200);
+        const execution = await wait(apiClient, ordinaryTest.body.workflowExecutionId);
+        expect(execution.status).toBe('completed');
+        expect(execution.effectiveIdentity).toBeUndefined();
+      }
+    );
+
+    apiTest(
       'allows an executor to run but prevents definition edits without manage_security',
       async ({ apiClient, samlAuth }) => {
         const id = await create(apiClient, workflowYaml(accountId));

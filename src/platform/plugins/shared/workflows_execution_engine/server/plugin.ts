@@ -1675,6 +1675,11 @@ export class WorkflowsExecutionEnginePlugin
       request
     ) => {
       await checkLicense(plugins.licensing);
+      if (workflow.definition?.settings?.run_as) {
+        throw Boom.badRequest(
+          'Service accounts cannot be used for individual step tests. Run the complete saved workflow instead.'
+        );
+      }
 
       await ensureWorkflowEnabled(workflow, workflow.spaceId || 'default');
 

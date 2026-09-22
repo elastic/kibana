@@ -9,7 +9,12 @@
 
 import { errors } from '@elastic/elasticsearch';
 import type { CoreStart } from '@kbn/core/server';
-import { securityServiceMock } from '@kbn/core/server/mocks';
+import {
+  coreMock,
+  elasticsearchServiceMock,
+  httpServerMock,
+  securityServiceMock,
+} from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { EsWorkflow } from '@kbn/workflows';
 import type {
@@ -2702,5 +2707,94 @@ describe('WorkflowCrudService', () => {
         expect.objectContaining({ scopedChangeHistory })
       );
     });
+  });
+});
+
+describe('binding compensation revision reads', () => {
+  it('preserves a winning binding using real-time revisions after an OCC conflict', async () => {
+    const core = {
+      ...coreMock.createStart(),
+      security: securityServiceMock.createStart(),
+      elasticsearch: elasticsearchServiceMock.createStart(),
+    };
+    const bindings = core.security.serviceAccounts;
+    bindings.isEnabled.mockReturnValue(true);
+    core.elasticsearch.client.asScoped().asCurrentUser.security.hasPrivileges.mockResolvedValue({
+      has_all_requested: true,
+      username: 'owner',
+      cluster: { manage_security: true },
+      index: {},
+      application: {},
+    });
+    const binding = {
+      pluginId: 'workflowsExecutionEngine',
+      workloadType: 'workflow',
+      workloadId: 'workflow',
+      spaceId: 'default',
+      serviceAccountId: 'b',
+      boundAt: '2026-09-22',
+      boundBy: { type: 'user' as const, username: 'owner' },
+    };
+    bindings.getWorkloadBinding
+      .mockResolvedValueOnce({ ...binding, serviceAccountId: 'a' })
+      .mockResolvedValueOnce(binding);
+    bindings.bindWorkload.mockResolvedValue(binding);
+    const revision = {
+      _index: '.workflows-workflows',
+      _id: 'workflow',
+      found: true,
+      _seq_no: 1,
+      _primary_term: 1,
+      _version: 1,
+    };
+    core.elasticsearch.client.asInternalUser.get
+      .mockResolvedValueOnce(revision)
+      .mockResolvedValueOnce({ ...revision, _seq_no: 2, _version: 2 });
+    const { deps, client } = makeDeps(undefined, {
+      getCoreStart: () => core,
+      getServiceAccountBindings: () => bindings,
+    });
+    client.index.mockRejectedValue(new Error('OCC conflict'));
+    const previous = makeSource({
+      definition: {
+        version: '1',
+        name: 'Test',
+        enabled: true,
+        triggers: [{ type: 'manual' }],
+        steps: [],
+        settings: { run_as: 'a' },
+      },
+    });
+    const service = new WorkflowCrudService(deps);
+    await expect(
+      service.indexWorkflowDocument(
+        'workflow',
+        makeSource({
+          definition: {
+            version: '1',
+            name: 'Test',
+            enabled: true,
+            triggers: [{ type: 'manual' }],
+            steps: [],
+            settings: { run_as: 'b' },
+          },
+        }),
+        {
+          previousDocument: previous,
+          request: httpServerMock.createKibanaRequest(),
+          ifSeqNo: 1,
+          ifPrimaryTerm: 1,
+        }
+      )
+    ).rejects.toThrow('OCC conflict');
+    expect(core.elasticsearch.client.asInternalUser.get).toHaveBeenCalledTimes(2);
+    expect(core.elasticsearch.client.asInternalUser.get).toHaveBeenCalledWith({
+      index: '.workflows-workflows',
+      id: 'workflow',
+      _source: false,
+      realtime: true,
+    });
+    expect(bindings.bindWorkload).toHaveBeenCalledTimes(1);
+    expect(bindings.unbindWorkload).not.toHaveBeenCalled();
   });
 });
