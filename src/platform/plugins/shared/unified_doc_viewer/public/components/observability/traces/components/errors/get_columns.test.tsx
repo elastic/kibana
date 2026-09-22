@@ -332,7 +332,7 @@ describe('getColumns', () => {
       expect(indexPattern).toBe('logs-*-*');
     });
 
-    it('falls back to apm.errors for unprocessed OTel items when no logs index is configured', () => {
+    it('does not fall back to apm.errors for unprocessed OTel items when no logs index is configured', () => {
       // No indexes.logs
       (useDataSourcesContext as jest.Mock).mockReturnValue({
         indexes: { apm: { errors: 'apm-errors-*' } },
@@ -345,9 +345,11 @@ describe('getColumns', () => {
       render(<>{ErrorRender?.(null, mockUnprocessedOtelErrorItem)}</>);
 
       const { indexPattern } = (useDiscoverLinkAndEsqlQuery as jest.Mock).mock.calls[0][0] as {
-        indexPattern: string;
+        indexPattern?: string;
       };
-      expect(indexPattern).toBe('apm-errors-*');
+      // The APM error pattern cannot match custom OTel log datasets, so no pattern is passed and
+      // `DiscoverEsqlLink` renders plain text instead of a link to an empty result.
+      expect(indexPattern).toBeUndefined();
     });
   });
 });

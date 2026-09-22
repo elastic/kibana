@@ -87,10 +87,10 @@ const ErrorMessageLinkCell = ({
     [traceId, docId, item]
   );
 
-  // For unprocessed OTel errors, target the configured log sources so that datasets outside
-  // `logs-apm*,apm-*,logs-*.otel-*` (e.g. `logs-generic.otel-default`) are reachable.
-  const indexPattern =
-    item.source === 'unprocessedOtel' && indexes.logs ? indexes.logs : indexes.apm.errors;
+  // Unprocessed OTel errors only live in the configured log sources; the APM error pattern would
+  // miss datasets such as `logs-generic.otel-default`. Never fall back to it — while `indexes.logs`
+  // is unresolved `DiscoverEsqlLink` renders plain text rather than a link to an empty result.
+  const indexPattern = item.source === 'unprocessedOtel' ? indexes.logs : indexes.apm.errors;
 
   const content = <EuiTextTruncate data-test-subj="error-exception-message" text={errorLabel} />;
 
