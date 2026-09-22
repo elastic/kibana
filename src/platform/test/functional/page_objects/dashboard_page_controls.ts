@@ -439,7 +439,8 @@ export class DashboardPageControls extends FtrService {
     await this.retry.try(async () => {
       const isPopoverOpen = await this.isOptionsListPopoverOpen(controlId);
       if (isPopoverOpen) {
-        await this.browser.pressKeys(this.browser.keys.ESCAPE);
+        const searchInput = await this.testSubjects.find('optionsList-control-search-input');
+        await searchInput.pressKeys(this.browser.keys.ESCAPE);
         await this.testSubjects.waitForDeleted(`optionsList-control-available-options`);
       }
     });
