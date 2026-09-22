@@ -26,12 +26,15 @@ export class SessionObserver {
   }
 
   async getSessionIds(): Promise<Array<string | undefined>> {
+  async getSessionIds(): Promise<string[]> {
     return this.page.evaluate(() => {
       const observer = (window as SessionObserverWindow).__SESSION_NOTIFICATIONS_PLUGIN__;
       if (!observer) {
         throw new Error('The session_notifications fixture plugin must be loaded on the server');
       }
-      return [...observer.getSessionIds()];
+      return observer
+        .getSessionIds()
+        .filter((sessionId): sessionId is string => sessionId !== undefined);
     });
   }
 
