@@ -92,6 +92,7 @@ describe('createEvaluateDataset', () => {
     ).toEqual([
       ['ES|QL Execution Validity', 'CODE'],
       ['ES|QL Functional Equivalence', 'LLM'],
+      ['ES|QL Result Equivalence', 'CODE'],
       ['Chart Type vs Intent', 'LLM'],
       ['Renderer vs Intent', 'CODE'],
       ['Visualization Config Validity', 'CODE'],

@@ -34,6 +34,7 @@ import {
 import { withLowScoreLogging } from './evaluator_utils';
 import { createEsqlExecutionEvaluator } from './evaluators/esql_execution';
 import { createCalibratedEsqlEquivalenceEvaluator } from './evaluators/esql_functional_equivalence';
+import { createEsqlResultEquivalenceEvaluator } from './evaluators/esql_result_equivalence';
 import {
   extractGoldChartForm,
   extractGoldChartType,
@@ -150,6 +151,15 @@ export function createEvaluateDataset({
     groundTruthExtractor: (expected) => extractGoldQuery(expected),
   });
 
+  const esqlResultEquivalenceEvaluator = createEsqlResultEquivalenceEvaluator<
+    VisualizationDatasetExample,
+    VisualizationAgentTaskOutput
+  >({
+    esClient,
+    predictionExtractor: (output) => output.esql ?? '',
+    groundTruthExtractor: (expected) => extractGoldQuery(expected),
+  });
+
   const chartTypeVsIntentEvaluator = createChartTypeVsIntentEvaluator<
     VisualizationDatasetExample,
     VisualizationAgentTaskOutput
@@ -236,6 +246,7 @@ export function createEvaluateDataset({
     const evaluatorStack = [
       esqlExecutionEvaluator,
       esqlEquivalenceEvaluator,
+      esqlResultEquivalenceEvaluator,
       chartTypeVsIntentEvaluator,
       rendererVsIntentEvaluator,
       visualizationConfigValidityEvaluator,
