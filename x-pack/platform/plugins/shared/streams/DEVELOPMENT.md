@@ -94,8 +94,20 @@ That deletes the configuration and UI metadata saved objects in the current spac
 
 ## Unit APIs
 
+`PUT /internal/streams/unit/{id}` accepts two content types:
+
+| `Content-Type` | Body |
+| --- | --- |
+| `application/json` | `{ unit, ui_metadata, secrets? }` envelope (Canvas / Dev Tools). |
+| `application/yaml` (also `text/yaml`, `application/x-yaml`) | The authored unit document itself (`sources` / `destinations` / `pipelines`). Do **not** wrap it in `{ unit: … }` and do **not** jsonify it first. YAML cannot set `ui_metadata` or `secrets`; stored canvas layout and secrets are kept (stale node metadata is still pruned). |
+
+A successful PUT returns `{ acknowledged: true }`. When config-distributor validate succeeds and includes compiled OpenTelemetry collector YAML, the response also has `compiled_config`. Without `xpack.streams.distributor.url`, validate is skipped and `compiled_config` is omitted.
+
+### JSON envelope (Canvas)
+
 ```
 PUT kbn:/internal/streams/unit/default
+Content-Type: application/json
 {
   "unit": {
     "sources": [
@@ -152,6 +164,70 @@ PUT kbn:/internal/streams/unit/default
 GET kbn:/internal/streams/unit/default
 
 POST kbn:/internal/streams/unit/default/_reset
+```
+
+### YAML unit document (`curl`)
+
+Internal routes need `kbn-xsrf` and `x-elastic-internal-origin`. Set `Content-Type: application/yaml` and send the file with `--data-binary` (not `-d`, which urlencodes).
+
+`good-unit.yaml`:
+
+```yaml
+sources:
+  - id: nop-input
+    type: nop
+    supported_telemetry: [logs]
+destinations:
+  - id: debug-out
+    type: debug
+    supported_telemetry: [logs]
+pipelines:
+  - id: main
+    supported_telemetry: [logs]
+    config:
+      - name: sources
+        value: [nop-input]
+      - name: destinations
+        value: [debug-out]
+```
+
+`broken-unit.yaml` (unknown destination type — distributor 400 when URL is set):
+
+```yaml
+sources:
+  - id: nop-input
+    type: nop
+    supported_telemetry: [logs]
+destinations:
+  - id: es-prod
+    type: elasticsearch
+    supported_telemetry: [logs]
+pipelines:
+  - id: main
+    supported_telemetry: [logs]
+    config:
+      - name: sources
+        value: [nop-input]
+      - name: destinations
+        value: [es-prod]
+```
+
+```bash
+# Expect 400 + distributor diagnostics (or Kibana structural errors)
+curl -sS -X PUT "$KIBANA_URL/internal/streams/unit/default" \
+  -u elastic_serverless:changeme \
+  -H 'kbn-xsrf: true' \
+  -H 'x-elastic-internal-origin: kibana' \
+  -H 'Content-Type: application/yaml' \
+  --data-binary @broken-unit.yaml
+
+# Expect 200 `{ "acknowledged": true, "compiled_config": "..." }` when distributor is configured
+curl -sS -X PUT "$KIBANA_URL/internal/streams/unit/default" \
+  -u elastic_serverless:changeme \
+  -H 'kbn-xsrf: true' \
+  -H 'x-elastic-internal-origin: kibana' \
+  -H 'Content-Type: application/yaml' \
+  --data-binary @good-unit.yaml
 ```
 
 Component `id`s must be unique across sources, processors, destinations, and pipelines. Semantic / compile validation calls config-distributor `POST /v1/validate` ([ingest-dev#9430](https://github.com/elastic/ingest-dev/issues/9430)) when `xpack.streams.distributor.url` is set. Invalid units return 400 with `{ valid: false, diagnostics }` and are not written. Without a distributor URL, only Kibana structural checks run.

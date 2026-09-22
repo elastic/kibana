@@ -14,6 +14,9 @@ import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { StreamsUnitService } from '../../../lib/saved_objects/streams_unit_service';
 import { validateUnitForWrite } from '../../../lib/unit_config/validate_unit';
 import { createServerRoute } from '../../create_server_route';
+import { parseUnitPutBody } from './parse_unit_put_body';
+
+const UNIT_PUT_MAX_BYTES = 1_048_576;
 
 const unitPathSchema = z.object({
   path: z.object({
@@ -65,6 +68,22 @@ export const putStreamsUnitRoute = createServerRoute({
   endpoint: 'PUT /internal/streams/unit/{id}',
   options: {
     access: 'internal',
+    body: {
+      accepts: [
+        'application/json',
+        'application/*+json',
+        'application/yaml',
+        'application/x-yaml',
+        'text/yaml',
+        'text/x-yaml',
+        'text/*',
+        'application/octet-stream',
+        'application/x-www-form-urlencoded',
+      ],
+      parse: false,
+      output: 'data',
+      maxBytes: UNIT_PUT_MAX_BYTES,
+    },
   },
   security: {
     authz: {
@@ -75,7 +94,9 @@ export const putStreamsUnitRoute = createServerRoute({
     path: z.object({
       id: streamsUnitIdentifierSchema.describe('The unit id.'),
     }),
-    body: streamsUnitUpsertRequestSchema,
+    // parse:false yields a Buffer. Keep the JSON envelope in the union so the
+    // repository client still types canvas PUTs as StreamsUnit.UpsertRequest.
+    body: z.union([streamsUnitUpsertRequestSchema, z.instanceof(Buffer)]),
   }),
   handler: async ({
     params,
@@ -83,15 +104,22 @@ export const putStreamsUnitRoute = createServerRoute({
     getScopedClients,
     logger,
     unitConfigHooks,
-  }): Promise<{ acknowledged: true }> => {
+  }): Promise<{ acknowledged: true; compiled_config?: string }> => {
     const { soClient, uiSettingsClient, encryptedSavedObjectsClient, canEncrypt } =
       await getScopedClients({ request });
 
     await assertStreamsCanvasEnabled(uiSettingsClient);
 
-    const { unit, ui_metadata: uiMetadata, secrets } = params.body as StreamsUnit.UpsertRequest;
+    const {
+      unit,
+      ui_metadata: uiMetadata,
+      secrets,
+    } = parseUnitPutBody({
+      body: params.body,
+      contentType: request.headers['content-type'],
+    });
 
-    await validateUnitForWrite(unit, unitConfigHooks);
+    const { compiled_config: compiledConfig } = await validateUnitForWrite(unit, unitConfigHooks);
 
     const streamsUnitService = new StreamsUnitService({
       soClient,
@@ -108,7 +136,10 @@ export const putStreamsUnitRoute = createServerRoute({
       secrets,
     });
 
-    return { acknowledged: true };
+    return {
+      acknowledged: true,
+      ...(compiledConfig !== undefined ? { compiled_config: compiledConfig } : {}),
+    };
   },
 });
 

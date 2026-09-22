@@ -153,7 +153,7 @@ describe('createConfigDistributorClient', () => {
       fetchImpl,
     });
 
-    await expect(validate(unit)).resolves.toBeUndefined();
+    await expect(validate(unit)).resolves.toEqual({});
 
     expect(fetchImpl).toHaveBeenCalledWith(
       'https://distributor.example:8443/v1/validate',
@@ -181,7 +181,7 @@ describe('createConfigDistributorClient', () => {
       fetchImpl,
     });
 
-    await expect(validate(unit)).resolves.toBeUndefined();
+    await expect(validate(unit)).resolves.toEqual({ compiled_config: 'receivers: {}' });
   });
 
   it('rejects an invalid unit with distributor diagnostics', async () => {

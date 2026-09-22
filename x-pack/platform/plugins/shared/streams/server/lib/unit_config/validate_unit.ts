@@ -7,7 +7,7 @@
 
 import { findDuplicateUnitComponentIds, type StreamsUnit } from '@kbn/streams-schema';
 import { StatusError } from '../streams/errors/status_error';
-import type { UnitConfigHooks } from './types';
+import type { UnitConfigHooks, UnitValidationResult } from './types';
 
 /**
  * Write-time unit checks that always run in Kibana. Semantic / OTTL / compile
@@ -16,7 +16,7 @@ import type { UnitConfigHooks } from './types';
 export const validateUnitForWrite = async (
   unit: StreamsUnit.Configuration,
   hooks: UnitConfigHooks = {}
-): Promise<void> => {
+): Promise<UnitValidationResult> => {
   const duplicateIds = findDuplicateUnitComponentIds(unit);
 
   if (duplicateIds.length > 0) {
@@ -28,5 +28,5 @@ export const validateUnitForWrite = async (
     throw error;
   }
 
-  await hooks.validate?.(unit);
+  return (await hooks.validate?.(unit)) ?? {};
 };

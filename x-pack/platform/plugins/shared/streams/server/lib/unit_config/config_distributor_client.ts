@@ -13,7 +13,7 @@ import type { Logger } from '@kbn/logging';
 import { SslConfig, sslSchema } from '@kbn/server-http-tools';
 import type { StreamsUnit } from '@kbn/streams-schema';
 import { StatusError } from '../streams/errors/status_error';
-import type { UnitConfigHooks, UnitCredential } from './types';
+import type { UnitConfigHooks, UnitCredential, UnitValidationResult } from './types';
 
 export interface ConfigDistributorClientConfig {
   url?: string;
@@ -164,6 +164,7 @@ export const createConfigDistributorClient = ({
       },
       validate: async () => {
         logger.debug('streams-config-distributor URL is not configured; skipping unit validation.');
+        return {};
       },
     };
   }
@@ -253,7 +254,7 @@ export const createConfigDistributorClient = ({
       const parsed = parseValidateResponse(response.text);
 
       if (parsed?.valid) {
-        return;
+        return compiledConfigResult(parsed.compiled_config);
       }
 
       if (parsed) {
@@ -343,9 +344,17 @@ const unitValidationError = (diagnostics: UnitDiagnostic[]): StatusError => {
   return error;
 };
 
+const compiledConfigResult = (compiledConfig: string | undefined): UnitValidationResult => {
+  if (typeof compiledConfig !== 'string' || compiledConfig.length === 0) {
+    return {};
+  }
+
+  return { compiled_config: compiledConfig };
+};
+
 const parseValidateResponse = (
   text: string
-): { valid: boolean; diagnostics: UnitDiagnostic[] } | undefined => {
+): { valid: boolean; diagnostics: UnitDiagnostic[]; compiled_config?: string } | undefined => {
   try {
     const parsed: unknown = JSON.parse(text);
 
@@ -354,6 +363,7 @@ const parseValidateResponse = (
     }
 
     const diagnostics = parsed.diagnostics;
+    const compiledConfig = parsed.compiled_config;
 
     return {
       valid: parsed.valid,
@@ -363,6 +373,7 @@ const parseValidateResponse = (
             return mapped ? [mapped] : [];
           })
         : [],
+      ...(typeof compiledConfig === 'string' ? { compiled_config: compiledConfig } : {}),
     };
   } catch {
     return undefined;
