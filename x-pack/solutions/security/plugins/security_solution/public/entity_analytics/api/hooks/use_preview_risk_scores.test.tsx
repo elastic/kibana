@@ -30,10 +30,9 @@ beforeEach(() => {
 
 describe('useRiskScorePreview', () => {
   it('labels the request with the risk-score-management execution context', async () => {
-    renderHook(
-      () => useRiskScorePreview({ data_view_id: 'test-data-view' }),
-      { wrapper: TestWrapper }
-    );
+    renderHook(() => useRiskScorePreview({ data_view_id: 'test-data-view' }), {
+      wrapper: TestWrapper,
+    });
 
     await waitFor(() =>
       expect(mockFetchRiskScorePreview).toHaveBeenCalledWith(
