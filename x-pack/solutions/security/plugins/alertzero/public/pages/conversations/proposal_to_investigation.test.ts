@@ -57,7 +57,6 @@ describe('proposalToInvestigation', () => {
   describe('category → bucket mapping', () => {
     it.each([
       ['respond', 'respond'],
-      ['close', 'respond'],
       ['investigate', 'investigate'],
       ['configure', 'configure'],
       ['tune', 'configure'], // legacy mapping

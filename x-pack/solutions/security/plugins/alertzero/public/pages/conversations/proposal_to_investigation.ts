@@ -16,13 +16,13 @@ import { CLOSED_GROUP_KEY } from '../../../common/proposals/list';
  * arbitrary keyword (`actionCategorySchema` is a bounded string, not an enum), so an
  * action can declare one this page has never heard of.
  *
- * `tune` is retained for back-compatibility only: the shipped catalog now declares
- * `configure` directly, but proposals created before that snapshot their category at
- * creation and are never re-scored.
+ * Design settled on three buckets: respond, investigate, configure. `tune` is
+ * retained for back-compatibility only: the shipped catalog now declares
+ * `configure` directly, but proposals created before that snapshot their
+ * category at creation and are never re-scored.
  */
 const CATEGORY_TO_BUCKET: Record<string, RecommendedAction> = {
   respond: 'respond',
-  close: 'respond',
   investigate: 'investigate',
   configure: 'configure',
   tune: 'configure',
