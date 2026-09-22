@@ -25,6 +25,12 @@ import { getPolicySettingsFormTestSubjects } from '../mocks';
 import { useGetProtectionsUnavailableComponent as _useGetProtectionsUnavailableComponent } from '../hooks/use_get_protections_unavailable_component';
 import { PerOsRansomwareProtectionCard } from './per_os_ransomware_protection_card';
 import { selectOsControlOption } from './select_os_control_option.test.helpers';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import {
+  isEndpointPolicyValidForLicense,
+  unsetPolicyFeaturesAccordingToLicenseLevel,
+} from '../../../../../../../common/license/policy_config';
+import { policyFactoryWithSupportedFeatures } from '../../../../../../../common/endpoint/models/policy_config';
 
 jest.mock('../../../../../../common/hooks/use_license');
 jest.mock('../hooks/use_get_protections_unavailable_component');
@@ -34,6 +40,7 @@ jest.setTimeout(15_000); // Costly: each case drives several popover cycles
 const useLicenseMock = _useLicense as jest.Mock;
 const useGetProtectionsUnavailableComponentMock =
   _useGetProtectionsUnavailableComponent as jest.Mock;
+const Platinum = licensingMock.createLicense({ license: { type: 'platinum', mode: 'platinum' } });
 
 describe('per-OS form upgrade compatibility with 9.4 policies', () => {
   const testSubjects = getPolicySettingsFormTestSubjects('test');
@@ -122,6 +129,9 @@ describe('per-OS form upgrade compatibility with 9.4 policies', () => {
   // mode has to create the branch rather than throw.
   it('renders and writes a mode when the whole macOS ransomware branch is absent', async () => {
     const onChange = jest.fn();
+    // The generated fixture is not license-clean out of the box, so start from a normalized one:
+    // that keeps the assertion below about what this form writes, not about the generator.
+    policy = unsetPolicyFeaturesAccordingToLicenseLevel(policy, Platinum);
     // Windows must be off, otherwise the master toggle short-circuits on it and never reads mac.
     policy.windows.ransomware.mode = ProtectionModes.off;
     // @ts-expect-error reproducing a policy stored before the branch existed
@@ -147,7 +157,13 @@ describe('per-OS form upgrade compatibility with 9.4 policies', () => {
     );
 
     const { updatedPolicy } = onChange.mock.calls.at(-1)![0];
-    expect(updatedPolicy.mac.ransomware.mode).toBe(ProtectionModes.detect);
+    expect(updatedPolicy.mac.ransomware).toEqual({
+      mode: ProtectionModes.detect,
+      // Without `supported` the server rejects the save with a license error, so the recreated
+      // branch has to carry the same value the license default does.
+      supported: policyFactoryWithSupportedFeatures().mac.ransomware.supported,
+    });
+    expect(isEndpointPolicyValidForLicense(updatedPolicy, Platinum)).toBe(true);
   });
   // The mode can be active while the notification branch is absent, since 9.4 exposed the mode
   // through the advanced field without touching `popup`.

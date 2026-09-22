@@ -23,6 +23,7 @@ import type {
   PolicyProtection,
   RansomwareProtectionOSes,
 } from '../../../types';
+import { createProtectionBranch } from './create_protection_branch';
 
 type PerOsProtectionOperatingSystem =
   | MalwareProtectionOSes
@@ -34,9 +35,13 @@ type PerOsProtectionOperatingSystem =
  * The subset of an OS branch this toggle writes. Protections are optional because a policy stored
  * before one of them shipped does not carry it.
  */
-type MutableOsProtectionBranches = Partial<
-  Record<PolicyProtection, { mode: ProtectionModes; reputation_service?: boolean }>
-> & {
+interface MutableProtectionBranch {
+  mode: ProtectionModes;
+  supported?: boolean;
+  reputation_service?: boolean;
+}
+
+type MutableOsProtectionBranches = Partial<Record<PolicyProtection, MutableProtectionBranch>> & {
   popup: Partial<Record<PolicyProtection, { enabled: boolean; message: string }>>;
 };
 
@@ -97,12 +102,12 @@ export const PerOsProtectionMasterToggle = memo(
         // The three OS branches take identical writes, and TypeScript rejects a union-indexed
         // write unless the value satisfies every protection at once. This view narrows each OS to
         // the fields the toggle owns: the branches stay optional, so a policy stored before one of
-        // them existed gains it here instead of throwing, and nothing the license check reads is
-        // ever written.
+        // them existed gains a complete, license-valid branch here instead of throwing.
         for (const os of osList) {
           const osPolicy = updatedPolicy[os] as MutableOsProtectionBranches;
 
-          const protectionBranch = osPolicy[protection] ?? { mode: nextMode };
+          const protectionBranch: MutableProtectionBranch =
+            osPolicy[protection] ?? createProtectionBranch(protection, nextMode, isPlatinumPlus);
           protectionBranch.mode = nextMode;
           osPolicy[protection] = protectionBranch;
 

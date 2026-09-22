@@ -18,6 +18,7 @@ import type {
 } from '../../../types';
 import type { PolicyFormComponentCommonProps } from '../types';
 import type { PerOsPolicyAccessor } from './policy_accessor';
+import { createProtectionBranch } from './create_protection_branch';
 
 interface ProtectionOperatingSystems {
   malware: MalwareProtectionOSes;
@@ -26,8 +27,10 @@ interface ProtectionOperatingSystems {
   ransomware: RansomwareProtectionOSes;
 }
 
+// `supported` is optional only because `malware` has no such field; `createProtectionBranch` owns
+// which protections get one. It is declared here so a write cannot silently drop it.
 type ProtectionPolicyBranch<Protection extends PolicyProtection> = {
-  [Key in Protection]: ProtectionFields;
+  [Key in Protection]: ProtectionFields & { supported?: boolean };
 } & {
   popup: { [Key in Protection]: { enabled: boolean } };
 };
@@ -46,8 +49,13 @@ export const useProtectionModeChangeHandler = <Protection extends PolicyProtecti
           currentOsPolicy as PolicyConfig[ProtectionOperatingSystems[Protection]] &
             ProtectionPolicyBranch<Protection>;
         // Spread rather than assign into the branch: a policy stored before the protection
-        // existed has no object there, and any sibling field it does carry must survive.
-        protectionPolicy[protection] = { ...protectionPolicy[protection], mode: nextMode };
+        // existed has no object there, and any sibling field it does carry must survive. The
+        // seeded branch supplies `supported`, which the server's license check rejects when absent.
+        protectionPolicy[protection] = {
+          ...createProtectionBranch(protection, nextMode, isPlatinumPlus),
+          ...protectionPolicy[protection],
+          mode: nextMode,
+        };
         // An active mode always writes popup.enabled from the new mode, true only for prevent.
         // off is the only mode that leaves popup.enabled untouched.
         if (isPlatinumPlus && nextMode !== ProtectionModes.off) {
