@@ -10,6 +10,7 @@ import useSessionStorage from 'react-use/lib/useSessionStorage';
 import type {
   AwsStaticKeyCredentials,
   CloudOnboardingDeploymentAuthMethod,
+  IacRenderedTemplate,
 } from '@kbn/fleet-plugin/public';
 
 import type { AwsServiceMatrixEntry, DataFormat, DeploymentMethod } from './aws_service_matrix';
@@ -20,11 +21,28 @@ import { getOnboardingSessionKey } from './onboarding_session_storage';
 /** Method used when nothing is persisted. Read and compared against in exactly one place each. */
 const DEFAULT_DEPLOYMENT_METHOD: DeploymentMethod = 'managed_integration';
 
+/**
+ * Template details of the CloudFormation template the user launched for an existing Federated Identity
+ * during this step, waiting to be written to the connector once Deploy succeeds. Memory only: it
+ * describes a launch in this session, and a reload re-runs the check anyway.
+ */
+export interface PendingIacTemplate extends IacRenderedTemplate {
+  /** The identity the template was rendered for; the write is skipped if the selection changed. */
+  connectorId: string;
+  /**
+   * JSON of the integration set (as built by buildIacIntegrations, which sorts, so equal sets give
+   * equal strings) the template was rendered for; Deploy writes the details only when the set it
+   * deploys is the same.
+   */
+  integrationsKey: string;
+}
+
 export interface AuthenticateAndDeployStepState {
   connectorId?: string;
   connectorName?: string;
   staticKeys?: AwsStaticKeyCredentials;
   authMethod?: CloudOnboardingDeploymentAuthMethod;
+  pendingIacTemplate?: PendingIacTemplate;
 }
 
 export type ServiceChipState = 'instantiating' | 'detecting' | 'receiving' | 'error' | 'timeout';
@@ -111,6 +129,7 @@ interface OnboardingFlowState {
   authenticateAndDeployStep: AuthenticateAndDeployStepState;
   setConnectorId: (id: string | undefined, name?: string) => void;
   setStaticKeys: (keys: AwsStaticKeyCredentials | undefined) => void;
+  setPendingIacTemplate: (iac: PendingIacTemplate | undefined) => void;
   setAgentBasedDeployment: (state: Partial<AgentBasedDeploymentState>) => void;
   agentBasedDeployment: AgentBasedDeploymentState;
   deploymentMethod: DeploymentMethod;
@@ -153,6 +172,11 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
       : undefined
   );
 
+  // Not persisted: see PendingIacTemplate.
+  const [pendingIacTemplate, setPendingIacTemplate] = useState<PendingIacTemplate | undefined>(
+    undefined
+  );
+
   // Ref holds the latest persisted value so all writers of persistedAuthenticateAndDeployStep
   // can spread it without closing over the state value, and each writer advances the ref
   // synchronously before calling the setter so back-to-back calls in the same event-loop
@@ -163,6 +187,11 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
   const setConnectorId = useCallback(
     (id: string | undefined, name?: string) => {
       setStaticKeysState(undefined);
+      // A rendered template belongs to the identity it was rendered for. The Fleet component
+      // re-emits the same id on every readiness change, so only a real change drops it.
+      if (persistedAuthStepRef.current?.connectorId !== id) {
+        setPendingIacTemplate(undefined);
+      }
       const next = {
         ...persistedAuthStepRef.current,
         connectorId: id,
@@ -179,6 +208,8 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
   const setStaticKeys = useCallback(
     (keys: AwsStaticKeyCredentials | undefined) => {
       setStaticKeysState(keys);
+      // Static keys replace the identity, so a template rendered for it has no connector to land on.
+      setPendingIacTemplate(undefined);
       const next = {
         ...persistedAuthStepRef.current,
         connectorId: undefined,
@@ -226,8 +257,12 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
     [setPersistedAuthenticateAndDeployStep]
   );
 
+  // Rendered-template details is only valid for the service set it was rendered for: a
+  // template launched for set A must not be recorded as the stack's digest after the user goes
+  // back and deploys set B. Any change to the selection drops it; the check re-renders anyway.
   const setSelectedServiceIds = useCallback(
     (ids: string[]) => {
+      setPendingIacTemplate(undefined);
       setPersistedServices({ ...persistedServices, selectedServiceIds: ids });
     },
     [persistedServices, setPersistedServices]
@@ -235,6 +270,8 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
 
   const setDataFormat = useCallback(
     (format: DataFormat) => {
+      // A format change empties the selection (see above): the template details goes with it.
+      setPendingIacTemplate(undefined);
       // Clear selection atomically with the format change in one write — two separate
       // setPersistedServices calls would race because each closes over the same persistedServices.
       setPersistedServices({ ...persistedServices, dataFormat: format, selectedServiceIds: [] });
@@ -384,6 +421,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
     connectorName: persistedAuthenticateAndDeployStep?.connectorName,
     staticKeys,
     authMethod: persistedAuthenticateAndDeployStep?.authMethod,
+    pendingIacTemplate,
   };
 
   const agentBasedDeployment: AgentBasedDeploymentState = {
@@ -411,6 +449,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         authenticateAndDeployStep,
         setConnectorId,
         setStaticKeys,
+        setPendingIacTemplate,
         setAgentBasedDeployment,
         agentBasedDeployment,
         deploymentMethod,

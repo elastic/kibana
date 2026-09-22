@@ -11,6 +11,16 @@ import type { AWS_CLOUD_PROVIDER } from '../models/cloud_connector';
 /** IaCP workflow name for the AWS federated-identity connector. */
 export const IAC_FEDERATED_IDENTITY_WORKFLOW = 'federated_identity' as const;
 
+/**
+ * Upper bound on packages per render. Each entry costs a registry fetch, so the cap bounds abuse;
+ * it sits well above the AWS onboarding's package count so a real selection never hits it. The
+ * connector verify route shares the limit for the integrations it accepts AND the merged set it
+ * returns, because the browser re-renders that set as-is: a connector attached to more packages
+ * than this is reported with an empty set and left uncompared rather than offered an Update that
+ * the render route would reject.
+ */
+export const MAX_IAC_RENDER_INTEGRATIONS = 25;
+
 export interface IacPolicyTemplateSelection {
   /** Policy template name as declared in the integration's package manifest. */
   name: string;

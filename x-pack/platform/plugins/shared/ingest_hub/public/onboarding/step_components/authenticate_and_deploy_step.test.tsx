@@ -50,7 +50,12 @@ jest.mock('./authenticate_and_deploy_step/use_onboarding_so', () => ({
   useOnboardingSO: jest.fn(),
 }));
 
+jest.mock('./authenticate_and_deploy_step/package_inputs', () => ({
+  buildIacIntegrations: jest.fn(),
+}));
+
 import { useOnboardingFlow } from '../onboarding_flow_context';
+import { buildIacIntegrations } from './authenticate_and_deploy_step/package_inputs';
 import { useDeploy } from './authenticate_and_deploy_step/use_deploy';
 import { useOnboardingSO } from './authenticate_and_deploy_step/use_onboarding_so';
 import { ManagedIntegrationsSection } from './authenticate_and_deploy_step/managed_integrations_section';
@@ -69,6 +74,7 @@ const MockEcfDeploymentSection = EcfDeploymentSection as unknown as jest.Mock;
 const mockUseAgentBasedDeploy = useAgentBasedDeploy as jest.Mock;
 const MockAgentBasedSection = AgentBasedSection as unknown as jest.Mock;
 const mockUseSessionStorage = useSessionStorage as jest.Mock;
+const mockBuildIacIntegrations = buildIacIntegrations as jest.Mock;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -97,6 +103,7 @@ function makeDeployReturn(
     isDeploying?: boolean;
     failedInstances?: string[];
     isAlreadyDeployed?: boolean;
+    deployGroups?: unknown[];
   } = {}
 ) {
   return {
@@ -104,6 +111,7 @@ function makeDeployReturn(
     isDeploying: overrides.isDeploying ?? false,
     failedInstances: overrides.failedInstances ?? [],
     isAlreadyDeployed: overrides.isAlreadyDeployed ?? false,
+    deployGroups: overrides.deployGroups ?? [],
     namespace: 'default',
     setNamespace: jest.fn(),
   };
@@ -180,6 +188,7 @@ describe('AuthenticateAndDeployStep', () => {
       { globalRegion: 'us-east-1', serviceVars: {}, instances: [] },
       jest.fn(),
     ]);
+    mockBuildIacIntegrations.mockReturnValue([]);
     MockManagedIntegrationsSection.mockImplementation(
       ({ onDeploy, hasFailed }: { onDeploy: () => void; hasFailed: boolean }) => (
         <div>
@@ -232,6 +241,66 @@ describe('AuthenticateAndDeployStep', () => {
       renderStep();
       fireEvent.click(screen.getByTestId('mock-deploy-btn'));
       expect(screen.getByTestId('mock-failed')).toBeInTheDocument();
+    });
+  });
+
+  describe('Federated Identity integration set', () => {
+    it('builds iacIntegrations from every deploy-group member and stored serviceVars, and passes it down', () => {
+      // The hook's deployGroups are the reconciled instances Deploy will create — duplicates get
+      // their own group, so the template must be built from the flattened member list.
+      const original = {
+        instance: {
+          instanceId: 'guardduty',
+          serviceId: 'guardduty',
+          name: 'GD',
+          isDuplicate: false,
+        },
+        service: miService,
+      };
+      const duplicate = {
+        instance: {
+          instanceId: 'guardduty__dup-1',
+          serviceId: 'guardduty',
+          name: 'GD [Duplicate]',
+          isDuplicate: true,
+        },
+        service: miService,
+      };
+      const deployGroups = [
+        {
+          groupId: 'aws',
+          instanceIds: ['guardduty'],
+          members: [original],
+          isDuplicateGroup: false,
+        },
+        {
+          groupId: 'guardduty__dup-1',
+          instanceIds: ['guardduty__dup-1'],
+          members: [duplicate],
+          isDuplicateGroup: true,
+        },
+      ];
+      const serviceVars = {
+        guardduty: { enabledDataStreams: ['guardduty'], varsByDataStream: {} },
+        'guardduty__dup-1': { enabledDataStreams: ['guardduty'], varsByDataStream: {} },
+      };
+      const integrations = [
+        { name: 'aws', policyTemplates: [{ name: 'guardduty', enabledInputs: ['httpjson'] }] },
+      ];
+      mockUseDeploy.mockReturnValue(makeDeployReturn({ deployGroups }));
+      mockUseSessionStorage.mockReturnValue([
+        { globalRegion: 'us-east-1', serviceVars, instances: [] },
+        jest.fn(),
+      ]);
+      mockBuildIacIntegrations.mockReturnValue(integrations);
+
+      renderStep();
+
+      expect(mockBuildIacIntegrations).toHaveBeenCalledWith([original, duplicate], serviceVars);
+      expect(MockManagedIntegrationsSection).toHaveBeenCalledWith(
+        expect.objectContaining({ iacIntegrations: integrations }),
+        expect.anything()
+      );
     });
   });
 
