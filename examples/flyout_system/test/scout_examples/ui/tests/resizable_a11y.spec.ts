@@ -32,41 +32,43 @@ test.describe(
       await pageObjects.flyoutSystem.goto();
     });
 
-    test('resize handle is reachable by keyboard and resizes the flyout', async ({
-      page,
-      pageObjects,
-    }) => {
-      const app = pageObjects.flyoutSystem;
-      const session = app.session('component');
-      const flyout = await app.openFlyout('component', session);
-
-      const before = await flyout.boundingBox();
-      expect(before).not.toBeNull();
-      const startWidth = before?.width ?? 0;
-
-      // Start from inside the dialog: the handle sits right after the close button in DOM order.
-      await app.closeButton('component', session).focus();
-      await page.keyTo(app.resizeHandleSelector('component', session), 'Tab', MAX_TAB_STOPS);
-      await expect(app.resizeHandle('component', session)).toBeFocused();
-
-      // Left arrow widens a right-aligned flyout.
-      const presses = 5;
-      for (let i = 0; i < presses; i++) {
-        await page.keyboard.press('ArrowLeft');
-      }
-
-      await expect
-        .poll(async () => (await flyout.boundingBox())?.width ?? 0)
-        .toBeGreaterThan(startWidth + KEYBOARD_OFFSET * presses - KEYBOARD_OFFSET);
-
-      const widened = (await flyout.boundingBox())?.width ?? 0;
-      for (let i = 0; i < presses; i++) {
-        await page.keyboard.press('ArrowRight');
-      }
-      await expect.poll(async () => (await flyout.boundingBox())?.width ?? 0).toBeLessThan(widened);
-    });
-
     for (const form of FORMS) {
+      test(`the ${form} resize handle is reachable by keyboard and resizes the flyout`, async ({
+        page,
+        pageObjects,
+      }) => {
+        const app = pageObjects.flyoutSystem;
+        const session = app.session(form);
+        const flyout = await app.openFlyout(form, session);
+
+        const before = await flyout.boundingBox();
+        expect(before).not.toBeNull();
+        const startWidth = before?.width ?? 0;
+
+        // Start from inside the dialog: the handle sits right after the close button in DOM order.
+        await app.closeButton(form, session).focus();
+        await page.keyTo(app.resizeHandleSelector(form, session), 'Tab', MAX_TAB_STOPS);
+        await expect(app.resizeHandle(form, session)).toBeFocused();
+
+        // Left arrow widens a right-aligned flyout.
+        const presses = 5;
+        for (let i = 0; i < presses; i++) {
+          await page.keyboard.press('ArrowLeft');
+        }
+
+        await expect
+          .poll(async () => (await flyout.boundingBox())?.width ?? 0)
+          .toBeGreaterThan(startWidth + KEYBOARD_OFFSET * presses - KEYBOARD_OFFSET);
+
+        const widened = (await flyout.boundingBox())?.width ?? 0;
+        for (let i = 0; i < presses; i++) {
+          await page.keyboard.press('ArrowRight');
+        }
+        await expect
+          .poll(async () => (await flyout.boundingBox())?.width ?? 0)
+          .toBeLessThan(widened);
+      });
+
       test(`the ${form} resize handle names the keys that operate it`, async ({ pageObjects }) => {
         const app = pageObjects.flyoutSystem;
         const session = app.session(form);
@@ -75,44 +77,47 @@ test.describe(
         // Check the accessible name of the resize handle.
         await expect(app.resizeHandle(form, session)).toHaveAccessibleName(/arrow keys/i);
       });
-    }
 
-    test('resizing honors the configured minimum width', async ({ page, pageObjects }) => {
-      const app = pageObjects.flyoutSystem;
-      const session = app.session('component');
-      const flyout = await app.openFlyout('component', session);
+      test(`resizing the ${form} flyout honors the configured minimum width`, async ({
+        page,
+        pageObjects,
+      }) => {
+        const app = pageObjects.flyoutSystem;
+        const session = app.session(form);
+        const flyout = await app.openFlyout(form, session);
 
-      await app.closeButton('component', session).focus();
-      await page.keyTo(app.resizeHandleSelector('component', session), 'Tab', MAX_TAB_STOPS);
+        await app.closeButton(form, session).focus();
+        await page.keyTo(app.resizeHandleSelector(form, session), 'Tab', MAX_TAB_STOPS);
 
-      // Shrink past the minimum width to test the clamp.
-      for (let i = 0; i < 60; i++) {
-        await page.keyboard.press('ArrowRight');
-      }
+        // Shrink past the minimum width to test the clamp.
+        for (let i = 0; i < 60; i++) {
+          await page.keyboard.press('ArrowRight');
+        }
 
-      const width = (await flyout.boundingBox())?.width ?? 0;
-      // Account for 1px sub-pixel rounding.
-      expect(width).toBeGreaterThanOrEqual(FLYOUT_MIN_WIDTH - 1);
-    });
-
-    test('a resized flyout keeps its dialog semantics', async ({ page, pageObjects }) => {
-      const app = pageObjects.flyoutSystem;
-      const session = app.session('component');
-      const flyout = await app.openFlyout('component', session);
-      await expect(app.infoBlocks('component', session)).toBeVisible();
-
-      await app.closeButton('component', session).focus();
-      await page.keyTo(app.resizeHandleSelector('component', session), 'Tab', MAX_TAB_STOPS);
-      for (let i = 0; i < 5; i++) {
-        await page.keyboard.press('ArrowLeft');
-      }
-
-      await expect(flyout).toHaveAccessibleName(session);
-
-      const { violations } = await page.checkA11y({
-        include: [app.rootSelector('component', session)],
+        const width = (await flyout.boundingBox())?.width ?? 0;
+        // Account for 1px sub-pixel rounding.
+        expect(width).toBeGreaterThanOrEqual(FLYOUT_MIN_WIDTH - 1);
       });
-      expect(violations).toHaveLength(0);
-    });
+
+      test(`a resized ${form} flyout keeps its dialog semantics`, async ({ page, pageObjects }) => {
+        const app = pageObjects.flyoutSystem;
+        const session = app.session(form);
+        const flyout = await app.openFlyout(form, session);
+        await expect(app.infoBlocks(form, session)).toBeVisible();
+
+        await app.closeButton(form, session).focus();
+        await page.keyTo(app.resizeHandleSelector(form, session), 'Tab', MAX_TAB_STOPS);
+        for (let i = 0; i < 5; i++) {
+          await page.keyboard.press('ArrowLeft');
+        }
+
+        await expect(flyout).toHaveAccessibleName(session);
+
+        const { violations } = await page.checkA11y({
+          include: [app.rootSelector(form, session)],
+        });
+        expect(violations).toHaveLength(0);
+      });
+    }
   }
 );
