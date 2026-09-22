@@ -66,6 +66,8 @@ export interface EpisodeSourceHistogram {
   isCapHit: boolean;
 }
 
+export type EpisodeFetchErrorSurface = 'list' | 'kpis' | 'histogram';
+
 export interface SourceActionResult {
   succeeded: number;
   failed: number;
@@ -94,6 +96,7 @@ export interface SeverityExtension {
 }
 
 export interface EpisodeDataSource {
+  /** Short source label, interpolated into fetch error toast titles (e.g. `v1`). */
   id: string;
   queryKeyPrefix: readonly unknown[];
   fetchEpisodes: (params: FetchSourceEpisodesParams) => Promise<AlertEpisode[]>;
@@ -104,4 +107,5 @@ export interface EpisodeDataSource {
   actionExtensions?: Array<EpisodeActionExtension<any>>;
   createActions?: (deps: EpisodeActionsDeps) => EpisodeAction[];
   severityExtensions?: SeverityExtension[];
+  getRuleDetailsHref?: (ruleId: string) => string | null;
 }

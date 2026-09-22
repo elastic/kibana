@@ -93,6 +93,7 @@ const makeAnomaly = (overrides: Partial<AnomalySummaryEntry> = {}): AnomalySumma
 
 const defaultProps = {
   anomalies: [makeAnomaly()],
+  entityToAttach: { id: 'entity-1', name: 'host-1', type: 'host' as const },
   entityType: 'host' as const,
   onTableChange: jest.fn(),
   page: 1,

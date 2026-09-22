@@ -13,6 +13,7 @@ import type {
   AiIndexDest,
   AiIndexFeedbackAnalysis,
   AiIndexSource,
+  AiIndexTrace,
 } from '../../common/http_api/ai_indices';
 
 export const aiIndicesIndexName = '.contextengine-ai-indices';
@@ -41,6 +42,7 @@ const storageSettings = {
       sources: types.object({
         properties: { type: types.keyword({}), value: types.keyword({}) },
       }),
+      traces: types.object({ properties: { type: types.keyword({}), value: types.keyword({}) } }),
       feedback_analysis: types.object({
         properties: {
           enabled: types.boolean({}),
@@ -73,6 +75,8 @@ interface AiIndexDocumentFields {
   dest: AiIndexDest;
   automations: AiIndexAutomation[];
   sources: AiIndexSource[];
+  // Optional for documents written before traces existed; absence is `[]` on read.
+  traces?: AiIndexTrace[];
 }
 
 /** What the index may hold: pre-upgrade documents predate `id` and `space`. */
