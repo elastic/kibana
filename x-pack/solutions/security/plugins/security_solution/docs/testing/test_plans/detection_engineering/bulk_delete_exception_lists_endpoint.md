@@ -137,17 +137,17 @@ And the list is in the "results" array
 And the exception list item no longer exists (GET returns 404)
 ```
 
-#### **Scenario: Items are deleted before the list container**
+#### **Scenario: Container is deleted before its items**
 
 **Automation**: unit tests (call order assertion).
 
 ```Gherkin
 Given an exception list "list-1" exists with items
 When the bulk delete service processes "list-1"
-Then items are deleted before the list container
+Then the list container is deleted before its items
 ```
 
-**Notes**: This ordering prevents orphaned items. If the container were deleted first, the items would have no resolvable parent and could never be cleaned up.
+**Notes**: Container-first ordering ensures detection rules can no longer reference the list during item cleanup. Orphaned items left behind by a cleanup failure are inert (unreachable without a container) and preferable to a half-emptied list that rules still execute against.
 
 ### Rule reference checking
 
