@@ -17,7 +17,7 @@ consts:
   actionMetadata:
     name: Kill process
     description: Terminates a process on an Elastic Defend endpoint, identified by PID or entity_id.
-    category: contain
+    category: respond
     impact: high
     reversible: false
     approvalPolicy: always-gate
