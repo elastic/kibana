@@ -24,6 +24,9 @@ export interface SeverityRegistryEntry {
   filterDotColor?: string;
 }
 
+/** Lookup map keyed by severity value for O(1) access. */
+export type SeverityRegistryMap = ReadonlyMap<string, SeverityRegistryEntry>;
+
 const EPISODE_SEVERITY_LABELS: Record<EpisodeSeverity, string> = {
   [EpisodeSeverity.Info]: i18n.EPISODE_SEVERITY_INFO_LABEL,
   [EpisodeSeverity.Low]: i18n.EPISODE_SEVERITY_LOW_LABEL,
@@ -69,9 +72,6 @@ export const buildSeverityRegistry = (
 
   return [...BUILTIN_ENTRIES, ...extensionEntries].sort((a, b) => a.sortRank - b.sortRank);
 };
-
-/** Lookup map keyed by severity value for O(1) access. */
-export type SeverityRegistryMap = ReadonlyMap<string, SeverityRegistryEntry>;
 
 export const toSeverityRegistryMap = (entries: SeverityRegistryEntry[]): SeverityRegistryMap =>
   new Map(entries.map((entry) => [entry.value, entry]));

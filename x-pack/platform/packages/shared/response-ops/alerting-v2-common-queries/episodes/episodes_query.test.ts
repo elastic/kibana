@@ -168,7 +168,7 @@ describe('buildEpisodesQuery', () => {
     expect(queryString).toContain('severity == "critical", 4');
     expect(queryString).toContain('severity == "info", 0');
     expect(queryString).toContain(', -1)');
-    expect(queryString).toContain('SORT _severity_sort DESC');
+    expect(queryString).toContain('SORT _severity_sort DESC, @timestamp DESC');
   });
 
   it('should filter on episode.status when a single status filter is set', () => {

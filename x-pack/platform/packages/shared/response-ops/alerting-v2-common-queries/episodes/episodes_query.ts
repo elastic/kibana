@@ -322,8 +322,13 @@ export const buildEpisodesQuery = (
 
   addDurationLowerBoundFlag(query);
 
+  const sortedQuery =
+    sortState.sortField === 'severity'
+      ? query.sort([sortField, sortDir], ['@timestamp', sortDir])
+      : query.sort([sortField, sortDir]);
+
   return asTypedEsqlQuery<AlertEpisodeEsqlRow>(
-    query.sort([sortField, sortDir]).pipe`LIMIT ${pageSizeParam}`.keep(
+    sortedQuery.pipe`LIMIT ${pageSizeParam}`.keep(
       ...ALERT_EPISODE_FIELDS,
       DURATION_LOWER_BOUND_FIELD
     )

@@ -58,4 +58,13 @@ describe('AlertEpisodesSeverityFilter', () => {
     expect(screen.getByText('Minor')).toBeInTheDocument();
     expect(screen.getByText('Major')).toBeInTheDocument();
   });
+
+  it('emits extension severity values when selected', () => {
+    const onSeveritiesChange = jest.fn();
+    renderFilter({ onSeveritiesChange }, true);
+    fireEvent.click(screen.getByTestId('test-severity-filter-button'));
+    fireEvent.click(screen.getByTestId('test-severity-filter-popover-option-warning'));
+
+    expect(onSeveritiesChange).toHaveBeenCalledWith(['warning']);
+  });
 });

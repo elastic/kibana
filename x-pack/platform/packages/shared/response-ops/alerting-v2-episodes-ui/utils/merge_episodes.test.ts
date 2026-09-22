@@ -186,4 +186,32 @@ describe('mergeEpisodes', () => {
     expect(result[1]['episode.id']).toBe('major-ep');
     expect(result[result.length - 1]['episode.id']).toBe('minor-ep');
   });
+
+  it('breaks severity rank ties by @timestamp', () => {
+    const rankResolver: SeverityRankResolver = (severity) => {
+      const ranks: Record<string, number> = { warning: 1, low: 1, medium: 2 };
+      if (severity == null) return -1;
+      return ranks[severity.toLowerCase()] ?? -1;
+    };
+
+    const olderLow = makeEpisode({
+      'episode.id': 'older-low',
+      severity: 'low',
+      '@timestamp': '2024-01-01T00:00:00.000Z',
+    });
+    const newerWarning = makeEpisode({
+      'episode.id': 'newer-warning',
+      severity: 'warning',
+      '@timestamp': '2024-01-01T02:00:00.000Z',
+    });
+
+    const result = mergeEpisodes(
+      [[olderLow], [newerWarning]],
+      { sortField: 'severity', sortDirection: 'desc' },
+      10,
+      rankResolver
+    );
+
+    expect(result.map((ep) => ep['episode.id'])).toEqual(['newer-warning', 'older-low']);
+  });
 });

@@ -62,7 +62,11 @@ const compareEpisodes = (
   rankResolver: SeverityRankResolver
 ): number => {
   if (sortField === 'severity') {
-    return rankResolver(a.severity) - rankResolver(b.severity);
+    const rankDiff = rankResolver(a.severity) - rankResolver(b.severity);
+    if (rankDiff !== 0) {
+      return rankDiff;
+    }
+    return toMillis(a['@timestamp']) - toMillis(b['@timestamp']);
   }
   if (DATE_SORT_FIELDS.has(sortField)) {
     return (

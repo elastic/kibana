@@ -199,6 +199,22 @@ describe('classic alerts query builders', () => {
       expect(hits[0][ALERT_SEVERITY]).toBe('critical');
     });
 
+    it('filters warning without including medium documents', async () => {
+      const query = buildClassicAlertsQuery({ severity: ['warning'] });
+      const hits = await search(query);
+
+      expect(hits).toHaveLength(1);
+      expect(hits[0][ALERT_SEVERITY]).toBe('warning');
+    });
+
+    it('filters medium without including warning documents', async () => {
+      const query = buildClassicAlertsQuery({ severity: ['medium'] });
+      const hits = await search(query);
+
+      expect(hits).toHaveLength(1);
+      expect(hits[0][ALERT_SEVERITY]).toBe('medium');
+    });
+
     it('filters by search text', async () => {
       const query = buildClassicAlertsQuery({ queryString: `${ALERT_SEVERITY}:critical` });
       const hits = await search(query);

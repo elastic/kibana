@@ -186,6 +186,7 @@ export const buildClassicAlertsSort = (
           order,
         },
       },
+      { [TIMESTAMP]: { order, unmapped_type: 'keyword' } },
     ];
   }
 
