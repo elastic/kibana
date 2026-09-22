@@ -248,6 +248,11 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
                   id: { type: string };
                   classification: { enum: string[] };
                   confidence_score: { minimum: number; maximum: number };
+                  rationale: { type: string; maxLength: number };
+                  contributing_factors: {
+                    maxItems: number;
+                    items: { type: string; maxLength: number };
+                  };
                 };
               };
             };
@@ -277,6 +282,11 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     // `score <= 1.0` would never hold for a meaningful score.
     expect(verdicts.items.properties.confidence_score.minimum).toBe(0);
     expect(verdicts.items.properties.confidence_score.maximum).toBe(1);
+    // Must match workflow.output / Zod — otherwise a long rationale/factor passes the agent
+    // schema and fails final output validation after tags/notes are already written.
+    expect(verdicts.items.properties.rationale.maxLength).toBe(500);
+    expect(verdicts.items.properties.contributing_factors.maxItems).toBe(3);
+    expect(verdicts.items.properties.contributing_factors.items.maxLength).toBe(100);
   });
 
   it('tells the model how to behave in a batch: one verdict per id, judged independently', () => {
@@ -1340,6 +1350,36 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
     });
   });
 
+  it('truncates host_name and user_name to the workflow.output 512-char limit', () => {
+    const buildStep = findStepByName(workflow.steps, 'build_output_verdict') as {
+      with: { output_verdict: Record<string, unknown> };
+    };
+    expect(String(buildStep.with.output_verdict.host_name)).toContain("truncate: 512, ''");
+    expect(String(buildStep.with.output_verdict.user_name)).toContain("truncate: 512, ''");
+
+    const longName = 'n'.repeat(600);
+    const rendered = renderValueRecursively(engine, buildStep.with.output_verdict, {
+      foreach: {
+        item: {
+          _id: 'real-alert-id',
+          host: { name: longName },
+          user: { name: longName },
+        },
+      },
+      variables: {
+        alert_verdict: {
+          classification: 'true_positive',
+          confidence_score: 0.9,
+          rationale: 'c2',
+          contributing_factors: ['url'],
+        },
+      },
+    }) as Record<string, unknown>;
+
+    expect(rendered.host_name).toBe('n'.repeat(512));
+    expect(rendered.user_name).toBe('n'.repeat(512));
+  });
+
   it('pushes the built verdict onto output_verdicts for the caller', () => {
     const accumulateStep = findStepByName(workflow.steps, 'accumulate_output_verdict') as {
       with: { output_verdicts: string };
@@ -1563,5 +1603,40 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
     });
 
     expect(rendered).toBe('Hosts look like malware. Users look like admins.');
+  });
+
+  it('truncates generated_summary to the workflow.output 2000-char limit', () => {
+    const summaryStep = findStepByName(workflow.steps, 'build_generated_summary') as {
+      with: { generated_summary: string };
+    };
+    // 20 × 101 chars (+ spaces) exceeds 2000; truncate: 2000, '' must keep emit valid.
+    const batchSummaries = Array.from({ length: 20 }, () => 'x'.repeat(101));
+    const rendered = engine.parseAndRenderSync(summaryStep.with.generated_summary, {
+      variables: { batch_summaries: batchSummaries },
+    });
+
+    expect(rendered.length).toBe(2000);
+    expect(summaryStep.with.generated_summary).toContain("truncate: 2000, ''");
+  });
+
+  it('truncates grouped_counts_summary to the workflow.output 10000-char limit', () => {
+    const summaryStep = findStepByName(workflow.steps, 'build_grouped_counts_summary') as {
+      with: { grouped_counts_summary: string };
+    };
+    expect(summaryStep.with.grouped_counts_summary).toContain("truncate: 10000, ''");
+
+    const longHost = 'h'.repeat(200);
+    const verdicts = Array.from({ length: 80 }, (_, i) =>
+      createMockOutputVerdict({
+        alert_id: `a${i}`,
+        classification: 'true_positive',
+        host_name: `${longHost}-${i}`,
+      })
+    );
+    const summary = engine.parseAndRenderSync(summaryStep.with.grouped_counts_summary, {
+      variables: { output_verdicts: verdicts },
+    });
+
+    expect(summary.length).toBeLessThanOrEqual(10000);
   });
 });

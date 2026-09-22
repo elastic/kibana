@@ -1492,12 +1492,20 @@ steps:
                           description: Confidence score from 0.0-1.0 indicating certainty of the classification
                         rationale:
                           type: string
+                          # Matches workflow.output / AlertAnalysisVerdict — unbounded rationale
+                          # would pass the agent schema then fail final output validation after
+                          # tags/notes have already been written.
+                          maxLength: 500
                           description: One short sentence (max 20 words) naming the decision gate and the strongest evidence
                         contributing_factors:
                           type: array
                           maxItems: 3
                           items:
                             type: string
+                            # Matches workflow.output / AlertAnalysisVerdict — unbounded factors
+                            # would pass the agent schema then fail final output validation after
+                            # tags/notes have already been written.
+                            maxLength: 100
                           description: At most 3 short phrases (max 6 words each) naming the strongest contributing factors
                       required:
                         - id
@@ -1707,9 +1715,11 @@ steps:
                         # host/user without re-reading the alerts. Read from the alert document,
                         # never from the model's reply. `__missing__` keeps grouping total (an
                         # alert with no host still belongs in exactly one group) and cannot
-                        # collide with a real ECS host/user named "unknown".
-                        host_name: "{{ foreach.item.host.name | default: '__missing__' }}"
-                        user_name: "{{ foreach.item.user.name | default: '__missing__' }}"
+                        # collide with a real ECS host/user named "unknown". Truncate to the
+                        # workflow.output / Zod maxLength (512) so a long caller-supplied name
+                        # cannot fail emit after tags/notes are already written.
+                        host_name: "{{ foreach.item.host.name | default: '__missing__' | truncate: 512, '' }}"
+                        user_name: "{{ foreach.item.user.name | default: '__missing__' | truncate: 512, '' }}"
 
                   - name: accumulate_output_verdict
                     type: data.set
@@ -1847,7 +1857,11 @@ steps:
           - name: build_grouped_counts_summary
             type: data.set
             with:
+              # Capture then truncate to the workflow.output maxLength (10000). A 1000-alert
+              # Worker batch can produce more host sentences than the schema allows; without
+              # this cap the run would fail at emit after tags/notes were already written.
               grouped_counts_summary: >-
+                {%- capture grouped_counts_summary_raw -%}
                 {%- assign hosts = variables.output_verdicts | map: 'host_name' | uniq -%}
                 {%- for h in hosts -%}
                 {%- assign for_host = variables.output_verdicts | where: 'host_name', h -%}
@@ -1858,13 +1872,17 @@ steps:
                 {%- if fp > 0 %} {{ fp }} alert(s) for host {{ h }} classified as false positive.{% endif -%}
                 {%- if inc > 0 %} {{ inc }} alert(s) for host {{ h }} were inconclusive.{% endif -%}
                 {%- endfor -%}
+                {%- endcapture -%}
+                {{- grouped_counts_summary_raw | truncate: 10000, '' -}}
 
           # Join the per-batch summaries the model returned, skipping nil entries
           # (compact drops values the model omitted when batch_summary was not filled).
+          # Truncate to workflow.output maxLength (2000): up to ~20 schema-valid batch
+          # summaries can exceed that limit and would otherwise fail emit after writebacks.
           - name: build_generated_summary
             type: data.set
             with:
-              generated_summary: "{{ variables.batch_summaries | compact | join: ' ' }}"
+              generated_summary: "{{ variables.batch_summaries | compact | join: ' ' | truncate: 2000, '' }}"
 
           # Build one entity row per unique host, then per unique user, collecting
           # per-entity verdict counts. The Worker passes this to the security.impact

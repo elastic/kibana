@@ -19,9 +19,8 @@ export const SECURITY_ALERT_ANALYSIS_WORKFLOW_ID = 'system-security-alert-analys
 export const SECURITY_ALERT_ANALYSIS_WORKFLOW = {
   id: SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
   pluginId: 'securitySolution',
-  // Tip of the Worker-callable YAML (critic fixes: gated max-threshold collapse,
-  // fail-loud empty alerts, __missing__ entity sentinel, truncated enum).
-  version: 20,
+  // Tip of the Worker-callable YAML (truncate host/user names to output maxLength).
+  version: 24,
   billable: false,
   visibility: {
     selectors: ['rule_action'],
