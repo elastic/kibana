@@ -7,8 +7,6 @@ exports[`renderFlakySuiteIssueBody renders a multi-test suite with distinct fail
 - **Pipeline:** \`kibana-on-merge\`, last 7 days (2–9 Sep 2026)
 - **Latest run:** skipped on \`main\` since 2026-09-09
 
-### Suite Details
-
 | Field | Value |
 |---|---|
 | **File** | [\`x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/default_status_alert.spec.ts\`](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/default_status_alert.spec.ts) |
@@ -53,8 +51,6 @@ exports[`renderFlakySuiteIssueBody renders a single-test suite with a dashboard 
 - **Pipeline:** \`kibana-on-merge\`, last 7 days (2–9 Sep 2026)
 - **Also failed on:** \`kibana-pull-request\` (70 of 661 builds), \`kibana-elasticsearch-snapshot-verify\` (1 of 5 builds)
 - **Dashboard:** [latest stats](https://dashboard.example)
-
-### Suite Details
 
 | Field | Value |
 |---|---|

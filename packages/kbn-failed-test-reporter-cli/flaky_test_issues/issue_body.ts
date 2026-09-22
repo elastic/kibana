@@ -367,7 +367,6 @@ export const renderFlakySuiteIssueBody = (
 ): string => {
   const sections = [
     overview(suite, ctx),
-    '### Suite Details',
     suiteDetails(suite),
     '### Flaky Tests',
     testsTable(suite.tests, {

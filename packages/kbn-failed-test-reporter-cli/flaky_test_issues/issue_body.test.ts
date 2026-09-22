@@ -173,7 +173,7 @@ describe('renderFlakySuiteIssueBody', () => {
         '- **Pipeline:** `kibana-on-merge`, last 7 days (2–9 Sep 2026)',
         '- **Also failed on:** `kibana-pull-request` (70 of 661 builds), `kibana-elasticsearch-snapshot-verify` (1 of 5 builds)',
         '',
-        '### Suite Details',
+        '| Field | Value |',
       ].join('\n')
     );
     expect(renderFlakySuiteIssueBody(single.suite, { report: single.report })).toContain(
