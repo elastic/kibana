@@ -25,7 +25,7 @@ Evaluators that have nothing to check for an example (no gold renderer, chart fo
 
 A standalone ES|QL Validity evaluator also exists in this suite (`createEsqlValidityEvaluator`) but is not in the default set — execution already covers AST validation.
 
-Not yet covered (tracked as follow-up increments in the issue): renderer-vs-intent examples, recovery cases, and an MLLM visual-fidelity judge.
+Not yet covered (tracked as follow-up increments in the issue): recovery cases and an MLLM visual-fidelity judge.
 
 ## Running
 
@@ -39,13 +39,13 @@ node scripts/evals run --suite agent-builder-visualizations
 
 Seed examples live in `evals/visualization_creation/datasets/`, one file per data source, concatenated by `datasets/index.ts` (~21 prompts):
 
-- **logs** (`kibana_sample_data_logs`): xy (bar/line/horizontal/stacked/multi-series), metric (single and per-OS tiles via `breakdown_by`), gauge, pie, tag_cloud, data_table, heatmap, treemap, a line split by response code via `breakdown_by`, plus one Vega-Lite scatter
+- **logs** (`kibana_sample_data_logs`): xy (bar/line/horizontal/stacked), a two-series time series scored on ES|QL only, metric (single and per-OS tiles via `breakdown_by`), gauge, pie, tag_cloud, data_table, heatmap, treemap, a line split by response code via `breakdown_by`, plus one Vega-Lite scatter
 - **ecommerce** (`kibana_sample_data_ecommerce`): metric (including a primary + secondary metric), pie, xy over `order_date` + numeric revenue/quantity fields
 - **host metrics** (synthtrace Beats load fixture): multi-series load averages on `metrics-system.load-default`
 - **edits** (`datasets/edits.ts`, run as its own dataset by `visualization_edit.spec.ts`): two-turn conversations where the first turn creates a chart and the second changes it (make it horizontal, split by response code, switch to a pie, add a second series). The gold describes the chart after the edit; only that chart is scored, and the trajectory sees both turns.
 - **refusals** (`datasets/negatives.ts`, run as its own dataset by `visualization_refusal.spec.ts`): a missing index, a missing field, and an ambiguous request. The missing-index case doubles as a canary: if positive evaluators ever score it, they have stopped discriminating.
 
-Each positive example carries a partial Lens Config API gold (`config`): chart `type`, layer type / column roles, and ground-truth ES|QL nested in `data_source.query`. Examples are built with the factories in `datasets/factories.ts` (`xyExample`, `metricExample`, `partitionExample`, …) over the query builders `categoricalQuery`, `timeSeriesQuery`, and `totalsQuery`, so adding an example is one call and every gold query follows the same idiom by construction. Every example carries `metadata.chartFamily` (set by its factory), `metadata.dataSource` (set per dataset file), and, when the gold pins Config API surface beyond basic column roles, `metadata.configFeatures` (`breakdown_by`, `secondary_metric`, `multi_series`), so golden-cluster results can be sliced by chart family or data source instead of only by suite average.|QL nested in `data_source.query`. Negatives / recovery / multi-turn edits are still follow-ups.
+Each positive example carries a partial Lens Config API gold (`config`): chart `type`, layer type / column roles, and ground-truth ES|QL nested in `data_source.query`. Examples are built with the factories in `datasets/factories.ts` (`xyExample`, `metricExample`, `partitionExample`, …) over the query builders `categoricalQuery`, `timeSeriesQuery`, and `totalsQuery`, so adding an example is one call and every gold query follows the same idiom by construction. Every example carries `metadata.chartFamily` (set by its factory), `metadata.dataSource` (set per dataset file), and, when the gold pins Config API surface beyond basic column roles, `metadata.configFeatures` (`breakdown_by`, `secondary_metric`, `multi_series`), so golden-cluster results can be sliced by chart family or data source instead of only by suite average.
 
 ### What a gold `config` can assert
 
