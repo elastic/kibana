@@ -42,11 +42,15 @@ module.exports = {
     fixable: null,
     schema: [],
   },
-  create: (context) => {
-    let rootDescribeCount = 0;
-    let depth = 0;
+  createOnce: (context) => {
+    let rootDescribeCount;
+    let depth;
 
     return {
+      before() {
+        rootDescribeCount = 0;
+        depth = 0;
+      },
       CallExpression(node) {
         if (isDescribeCall(node)) {
           // Only count root-level describe calls (depth === 0)

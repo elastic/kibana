@@ -3052,14 +3052,11 @@ module.exports = {
       files: SCOUT_TEST_FILE_GLOBS,
       excludedFiles: ['src/platform/packages/shared/kbn-scout/test/**'],
       rules: {
-        '@kbn/eslint/scout_max_one_describe': 'error',
         '@kbn/eslint/scout_test_file_naming': 'error',
         '@kbn/eslint/scout_require_global_setup_hook_in_parallel_tests': 'error',
         '@kbn/eslint/scout_no_es_archiver_in_parallel_tests': 'error',
-        '@kbn/eslint/scout_no_core_settings_in_space_test': 'warn',
         '@kbn/eslint/scout_no_cross_boundary_imports': 'error',
         '@kbn/eslint/scout_expect_import': 'error',
-        '@kbn/eslint/scout_no_locators': ['error', { restricted: ['globalLoadingIndicator'] }],
       },
     },
     {
@@ -3073,48 +3070,6 @@ module.exports = {
         '@kbn/eslint/scout_require_api_client_in_api_test': [
           'error',
           { alternativeFixtures: ['esClient'] },
-        ],
-      },
-    },
-    {
-      // Restrict fs imports in production code (exclude test files, scripts, etc.)
-      files: [
-        'src/platform/plugins/shared/**/*.ts',
-        'x-pack/solutions/**/*.ts',
-        'x-pack/plugins/**/*.ts',
-        'x-pack/platform/plugins/shared/**/*.ts',
-      ],
-      excludedFiles: [
-        '**/*.{test,spec}.ts',
-        '**/*.test.ts',
-        '**/test/**',
-        '**/tests/**',
-        '**/__tests__/**',
-        '**/scripts/**',
-        '**/e2e/**',
-        '**/cypress/**',
-        '**/ftr_e2e/**',
-        '**/.storybook/**',
-        '**/json_schemas/**',
-        // Can use fs for telemetry collection
-        'src/platform/plugins/shared/telemetry/**',
-        'x-pack/solutions/security/packages/test-api-clients/**',
-        'x-pack/platform/plugins/shared/automatic_import/**',
-      ],
-      rules: {
-        '@kbn/eslint/require_kbn_fs': [
-          'error',
-          {
-            restrictedMethods: [
-              'writeFile',
-              'writeFileSync',
-              'createWriteStream',
-              'appendFile',
-              'appendFileSync',
-            ],
-            disallowedMessage:
-              'Use `@kbn/fs` for file write operations instead of direct `fs` in production code',
-          },
         ],
       },
     },
