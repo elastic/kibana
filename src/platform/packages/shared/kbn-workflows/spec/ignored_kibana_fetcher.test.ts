@@ -8,6 +8,7 @@
  */
 
 import {
+  collectIgnoredKibanaFetcherPaths,
   collectIgnoredKibanaFetcherStepNames,
   stepHasIgnoredKibanaFetcher,
 } from './ignored_kibana_fetcher';
@@ -54,5 +55,34 @@ describe('ignored kibana fetcher helpers', () => {
     ] as unknown as WorkflowYaml['steps'];
 
     expect(collectIgnoredKibanaFetcherStepNames(steps)).toEqual(['status']);
+    expect(collectIgnoredKibanaFetcherPaths(steps)).toEqual([
+      ['steps', 0, 'steps', 0, 'with', 'fetcher'],
+    ]);
+  });
+
+  it('collects structural paths through parallel branches', () => {
+    const steps = [
+      {
+        name: 'scatter',
+        type: 'parallel',
+        branches: [
+          { name: 'left', steps: [{ name: 'ok', type: 'console', with: { message: 'ok' } }] },
+          {
+            name: 'right',
+            steps: [
+              {
+                name: 'status',
+                type: 'kibana.request',
+                with: { fetcher: { keep_alive: true } },
+              },
+            ],
+          },
+        ],
+      },
+    ] as unknown as WorkflowYaml['steps'];
+
+    expect(collectIgnoredKibanaFetcherPaths(steps)).toEqual([
+      ['steps', 0, 'branches', 1, 'steps', 0, 'with', 'fetcher'],
+    ]);
   });
 });

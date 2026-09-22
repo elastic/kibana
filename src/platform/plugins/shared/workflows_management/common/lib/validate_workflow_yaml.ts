@@ -8,7 +8,7 @@
  */
 
 import {
-  collectIgnoredKibanaFetcherStepNames,
+  collectIgnoredKibanaFetcherPaths,
   IGNORED_KIBANA_FETCHER_SETTING_MESSAGE,
   validateStepNameUniqueness,
 } from '@kbn/workflows';
@@ -127,12 +127,12 @@ export function validateWorkflowYaml(
       diagnostics.push({ severity: 'error', message, source: 'graph', ruleId: 'graphBuildError' });
     }
 
-    for (const stepName of collectIgnoredKibanaFetcherStepNames(parsedWorkflow.steps)) {
+    for (const path of collectIgnoredKibanaFetcherPaths(parsedWorkflow.steps)) {
       diagnostics.push({
         severity: 'warning',
         message: IGNORED_KIBANA_FETCHER_SETTING_MESSAGE,
         source: 'deprecation',
-        path: ['steps', stepName, 'with', 'fetcher'],
+        path,
         ruleId: 'ignoredFetcherSetting',
       });
     }

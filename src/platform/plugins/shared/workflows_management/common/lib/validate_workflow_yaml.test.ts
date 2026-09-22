@@ -644,6 +644,7 @@ steps:
           severity: 'warning',
           ruleId: 'ignoredFetcherSetting',
           message: expect.stringContaining('fetcher'),
+          path: ['steps', 0, 'with', 'fetcher'],
         }),
       ]);
     });
