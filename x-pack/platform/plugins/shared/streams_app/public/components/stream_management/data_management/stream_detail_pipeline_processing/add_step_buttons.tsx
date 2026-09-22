@@ -8,11 +8,8 @@
 import React from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '../../../../hooks/use_kibana';
-import {
-  useOptionalInteractiveModeSelector,
-  useStreamEnrichmentEvents,
-} from './state_management/stream_enrichment_state_machine';
+import { useAddStepActions } from './hooks/use_add_step_actions';
+import { useOptionalInteractiveModeSelector } from './state_management/stream_enrichment_state_machine';
 import { selectIsSuggestionVisible } from './state_management/interactive_mode_machine/selectors';
 
 const conditionLabel = i18n.translate(
@@ -35,16 +32,8 @@ const createProcessorText = i18n.translate(
   { defaultMessage: 'Create processor' }
 );
 
-const unsupportedConditionMessage = i18n.translate(
-  'xpack.streams.streamDetailView.managementTab.enrichment.createConditionUnsupportedMessage',
-  { defaultMessage: 'Conditions are not supported in ingest pipelines yet.' }
-);
-
 export const AddStepButtons = () => {
-  const {
-    core: { notifications },
-  } = useKibana();
-  const { addProcessor } = useStreamEnrichmentEvents();
+  const { onAddCondition, onAddProcessor } = useAddStepActions();
 
   const canAddStep = useOptionalInteractiveModeSelector(
     (state) => state.can({ type: 'step.addProcessor' }) || state.can({ type: 'step.addCondition' }),
@@ -67,7 +56,7 @@ export const AddStepButtons = () => {
           iconType="plus"
           aria-label={createConditionText}
           data-test-subj="streamsAppProcessingToolbarAddConditionButton"
-          onClick={() => notifications.toasts.addWarning(unsupportedConditionMessage)}
+          onClick={onAddCondition}
         >
           {conditionLabel}
         </EuiButton>
@@ -79,7 +68,7 @@ export const AddStepButtons = () => {
           iconType="plus"
           aria-label={createProcessorText}
           data-test-subj="streamsAppProcessingToolbarAddProcessorButton"
-          onClick={() => addProcessor(undefined, { parentId: null })}
+          onClick={onAddProcessor}
         >
           {processorLabel}
         </EuiButton>
