@@ -9,14 +9,8 @@
 
 import { schema, type TypeOf } from '@kbn/config-schema';
 
-export const rateLimiterEluHistoryAlgorithms = ['ema', 'time-weighted-ema'] as const;
-export type RateLimiterEluHistoryAlgorithm = (typeof rateLimiterEluHistoryAlgorithms)[number];
-
 export const rateLimiterConfigSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
-  algorithm: schema.oneOf([schema.literal('ema'), schema.literal('time-weighted-ema')], {
-    defaultValue: 'ema',
-  }),
   elu: schema.conditional(
     schema.siblingRef('enabled'),
     false,

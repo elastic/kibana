@@ -43,7 +43,10 @@ describe('MetricsService', () => {
     mockOpsCollector.collect.mockResolvedValue(getBaseTestMetrics());
 
     const configService = configServiceMock.create({
-      atPath: { interval: moment.duration(testInterval) },
+      atPath: {
+        interval: moment.duration(testInterval),
+        eluHistory: { algorithm: 'ema' },
+      },
     });
     const coreContext = mockCoreContext.create({ logger, configService });
     metricsService = new MetricsService(coreContext);
@@ -226,7 +229,15 @@ describe('MetricsService', () => {
     it('emits time-weighted ELU values when configured', async () => {
       let now = 1_000;
       jest.spyOn(performance, 'now').mockImplementation(() => now);
-      httpMock.rateLimiter = { ...httpMock.rateLimiter, algorithm: 'time-weighted-ema' };
+      const configService = configServiceMock.create({
+        atPath: {
+          interval: moment.duration(testInterval),
+          eluHistory: { algorithm: 'time-weighted-ema' },
+        },
+      });
+      metricsService = new MetricsService(
+        mockCoreContext.create({ logger, configService })
+      );
 
       mockOpsCollector.collect
         .mockImplementationOnce(() => set({}, 'process.event_loop_utilization.utilization', 1.0))

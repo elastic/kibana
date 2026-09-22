@@ -14,4 +14,9 @@ export {
   type InternalMetricsServiceSetup,
   MetricsService,
 } from './src/metrics_service';
-export { opsConfig, type OpsConfigType } from './src/ops_config';
+export {
+  opsConfig,
+  opsEluHistoryAlgorithms,
+  type OpsConfigType,
+  type OpsEluHistoryAlgorithm,
+} from './src/ops_config';

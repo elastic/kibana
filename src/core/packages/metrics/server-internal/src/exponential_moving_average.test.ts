@@ -63,6 +63,36 @@ describe('createExponentialMovingAverage (ema)', () => {
       });
     });
   });
+
+  it('should fade away outdated values', () => {
+    testScheduler.run(({ cold, expectObservable }) => {
+      const observable = cold('abcdefghij|', {
+        a: 1,
+        b: 1,
+        c: 1,
+        d: 1,
+        e: 2,
+        f: 2,
+        g: 1,
+        h: 1,
+        i: 2,
+        j: 2,
+      }).pipe(createExponentialMovingAverage('ema', period, interval));
+
+      expectObservable(observable).toBe('abcdefghij|', {
+        a: expect.closeTo(0.3, 1),
+        b: expect.closeTo(0.7, 1),
+        c: 1,
+        d: 1,
+        e: expect.closeTo(1.3, 1),
+        f: expect.closeTo(1.5, 1),
+        g: expect.closeTo(1.3, 1),
+        h: expect.closeTo(1.2, 1),
+        i: expect.closeTo(1.5, 1),
+        j: expect.closeTo(1.6, 1),
+      });
+    });
+  });
 });
 
 describe('createExponentialMovingAverage (time-weighted-ema)', () => {

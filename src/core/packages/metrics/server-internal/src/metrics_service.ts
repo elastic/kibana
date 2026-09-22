@@ -76,7 +76,7 @@ export class MetricsService
       this.coreContext.configService.atPath<OpsConfigType>(OPS_CONFIG_PATH)
     );
     const collectionInterval = config.interval.asMilliseconds();
-    const eluHistoryAlgorithm = http.rateLimiter.algorithm;
+    const eluHistoryAlgorithm = config.eluHistory.algorithm;
 
     this.metricsCollector = new OpsMetricsCollector(
       http.server,

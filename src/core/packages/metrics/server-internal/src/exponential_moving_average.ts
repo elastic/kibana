@@ -9,13 +9,11 @@
 
 import { performance } from 'node:perf_hooks';
 import { map, type OperatorFunction, type TimestampProvider } from 'rxjs';
+import type { OpsEluHistoryAlgorithm } from './ops_config';
 
 const monotonicClock: TimestampProvider = {
   now: () => performance.now(),
 };
-
-/** @internal */
-export type EluHistorySmoothingAlgorithm = 'ema' | 'time-weighted-ema';
 
 /**
  * Exponential moving average with sample-count warm-up.
@@ -27,7 +25,7 @@ export type EluHistorySmoothingAlgorithm = 'ema' | 'time-weighted-ema';
  * @see https://en.wikipedia.org/wiki/Exponential_smoothing
  */
 export function createExponentialMovingAverage(
-  algorithm: EluHistorySmoothingAlgorithm,
+  algorithm: OpsEluHistoryAlgorithm,
   period: number,
   expectedInterval: number,
   timestampProvider: TimestampProvider = monotonicClock
@@ -56,9 +54,13 @@ export function createExponentialMovingAverage(
           return (mean += (current * expectedInterval) / period);
         }
 
+        if (previous == null) {
+          previous = mean;
+        }
+
         const alpha = useTimeWeightedAlpha ? 1 - Math.exp(-sampleGapMs / period) : fixedAlpha;
 
-        return (previous = previous == null ? current : alpha * current + (1 - alpha) * previous);
+        return (previous = alpha * current + (1 - alpha) * previous);
       })
     );
   };
