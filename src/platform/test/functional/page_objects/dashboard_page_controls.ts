@@ -468,9 +468,10 @@ export class DashboardPageControls extends FtrService {
 
     const selectableListItems = await availableOptions.findByClassName('euiSelectableList__list');
     const list = await selectableListItems.findByCssSelector(`ul[role="listbox"]`);
+    await selectableListItems.focus();
     const suggestions: { [key: string]: number } = {};
     while (Object.keys(suggestions).length < optionsCount) {
-      await list._webElement.sendKeys(this.browser.keys.ARROW_DOWN);
+      await this.browser.pressKeys(this.browser.keys.ARROW_DOWN);
 
       const activeDescendantId = await list.getAttribute('aria-activedescendant');
 
