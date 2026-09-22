@@ -16,7 +16,7 @@ import { proposalCategorySchema } from '@kbn/agentic-investigations-plugin/commo
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERTZERO_API_PRIVILEGE_READ } from '../../../common/constants';
 import type { ProposalsPageResponse } from '../../../common/proposals/list';
-import { MAX_QUEUE_PAGE_SIZE } from '../../../common/proposals/list';
+import { MAX_QUEUE_OFFSET, MAX_QUEUE_PAGE_SIZE } from '../../../common/proposals/list';
 import type { RouteDependencies } from '../register_routes';
 
 // PROPOSALS_API_PRIVILEGE_READ cannot be imported from agentic_investigations/server (cross-plugin
@@ -32,7 +32,7 @@ const GetProposalsByCategoryParams = z.object({
 // without paying for its rows.
 const GetProposalsByCategoryQuery = z.object({
   size: z.coerce.number().int().min(0).max(MAX_QUEUE_PAGE_SIZE).default(10),
-  from: z.coerce.number().int().min(0).max(9900).default(0),
+  from: z.coerce.number().int().min(0).max(MAX_QUEUE_OFFSET).default(0),
 });
 
 export const registerGetProposalsByCategoryRoute = ({

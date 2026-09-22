@@ -139,7 +139,7 @@ describe('ConversationQueue', () => {
     it('names the bucket, since every queue renders one', () => {
       renderQueue({ remaining: 30, onShowMore: jest.fn() });
 
-      expect(showMore()).toHaveAccessibleName('Show 30 more events in Respond');
+      expect(showMore()).toHaveAccessibleName('Show more (30) in Respond');
     });
   });
 

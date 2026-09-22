@@ -118,4 +118,20 @@ describe('useDropDecidedProposal', () => {
 
     expect(rowsIn(queryClient, 'respond')).toEqual(['a']);
   });
+
+  it('cancels only its own bucket, since the decision refreshes the others too', async () => {
+    // Cancelling the whole proposals root aborted Closed, the other counts and the
+    // header along with the bucket being dropped from, so none of them updated until
+    // the next poll.
+    const { queryClient, drop } = setup();
+    queryClient.setQueryData(queryKeys.proposals.byCategory('respond'), pagesOf('a', 'b'));
+    const cancelQueries = jest.spyOn(queryClient, 'cancelQueries');
+
+    await act(() => drop('b'));
+
+    expect(cancelQueries.mock.calls.map(([filters]) => filters?.queryKey)).toEqual([
+      queryKeys.proposals.byCategory('respond'),
+      queryKeys.proposals.byCategoryCount('respond'),
+    ]);
+  });
 });

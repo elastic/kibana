@@ -15,7 +15,7 @@ import {
 } from '@kbn/alertzero-common';
 import { retryOnTransientError } from '@kbn/agentic-investigations-plugin/public';
 import type { ProposalsPageResponse } from '../../common/proposals/list';
-import { MAX_QUEUE_REACH } from '../../common/proposals/list';
+import { MAX_QUEUE_OFFSET } from '../../common/proposals/list';
 import { queryKeys } from '../query_keys';
 
 /**
@@ -39,7 +39,9 @@ interface PagesOptions {
  */
 const nextOffset = (lastPage: ProposalsPageResponse, pages: ProposalsPageResponse[]) => {
   const loaded = pages.reduce((count, page) => count + page.proposals.length, 0);
-  return loaded >= Math.min(lastPage.total, MAX_QUEUE_REACH) ? undefined : loaded;
+  // MAX_QUEUE_OFFSET, not MAX_QUEUE_REACH: an offset past what the route accepts
+  // would be offered and then rejected with a 400 nothing surfaces.
+  return loaded >= lastPage.total || loaded > MAX_QUEUE_OFFSET ? undefined : loaded;
 };
 
 /** `size: 0` — the bucket's total with none of its rows. */

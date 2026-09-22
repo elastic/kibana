@@ -45,8 +45,9 @@ export const proposalOutcome = ({
     return status === 'expired' || expired ? EXPIRED : undefined;
   }
 
-  // Nothing writes a synthetic system user, so an unattributed decision is the only
-  // signal that no human made it.
+  // Nothing writes a synthetic system user, so an unattributed approval is the only
+  // signal that a policy approved it. An unattributed dismissal is not its mirror —
+  // that is a decline whose decider could not be resolved — so it stays Declined.
   const name = decidedBy?.fullName ?? decidedBy?.username;
   if (!name) {
     return decision === 'approved' ? AUTO : DECLINED;

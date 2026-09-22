@@ -8,30 +8,22 @@
 import { useCallback } from 'react';
 import type { InfiniteData } from '@kbn/react-query';
 import { useQueryClient } from '@kbn/react-query';
-import { queryKeys as platformQueryKeys } from '@kbn/agentic-investigations-plugin/public';
 import type { ProposalsPageResponse } from '../../../../common/proposals/list';
 import { queryKeys } from '../../../query_keys';
 
 /** Closed only ever gains a decided proposal, never loses one. */
 const OPEN_CATEGORIES = ['respond', 'investigate', 'configure'] as const;
 
-const withoutProposal = (
-  data: InfiniteData<ProposalsPageResponse> | undefined,
-  proposalId: string
-) => {
-  if (!data) {
-    return { data, removed: false };
-  }
+const withoutProposal = (data: InfiniteData<ProposalsPageResponse>, proposalId: string) => ({
+  ...data,
+  pages: data.pages.map((page) => ({
+    ...page,
+    proposals: page.proposals.filter(({ id }) => id !== proposalId),
+  })),
+});
 
-  let removed = false;
-  const pages = data.pages.map((page) => {
-    const proposals = page.proposals.filter(({ id }) => id !== proposalId);
-    removed = removed || proposals.length !== page.proposals.length;
-    return { ...page, proposals };
-  });
-
-  return { data: removed ? { ...data, pages } : data, removed };
-};
+const holds = (data: InfiniteData<ProposalsPageResponse> | undefined, proposalId: string) =>
+  Boolean(data?.pages.some((page) => page.proposals.some(({ id }) => id === proposalId)));
 
 /**
  * Takes a just-decided proposal out of its queue. The decision is recorded
@@ -44,29 +36,36 @@ export const useDropDecidedProposal = () => {
 
   return useCallback(
     async (proposalId: string) => {
-      // The refetch the mutation just triggered would read this proposal as still
-      // pending and put the row straight back.
-      await queryClient.cancelQueries({ queryKey: platformQueryKeys.proposals.all });
+      const category = OPEN_CATEGORIES.find((candidate) =>
+        holds(
+          queryClient.getQueryData<InfiniteData<ProposalsPageResponse>>(
+            queryKeys.proposals.byCategory(candidate)
+          ),
+          proposalId
+        )
+      );
 
-      OPEN_CATEGORIES.forEach((category) => {
-        let removed = false;
+      if (!category) {
+        return;
+      }
 
-        queryClient.setQueryData<InfiniteData<ProposalsPageResponse>>(
-          queryKeys.proposals.byCategory(category),
-          (cached) => {
-            const result = withoutProposal(cached, proposalId);
-            removed = result.removed;
-            return result.data;
-          }
-        );
+      const pagesKey = queryKeys.proposals.byCategory(category);
+      const countKey = queryKeys.proposals.byCategoryCount(category);
 
-        if (removed) {
-          queryClient.setQueryData<ProposalsPageResponse>(
-            queryKeys.proposals.byCategoryCount(category),
-            (cached) => (cached ? { ...cached, total: Math.max(cached.total - 1, 0) } : cached)
-          );
-        }
-      });
+      // Only this bucket's queries: the same decision also refreshes Closed and the
+      // header, and cancelling the whole proposals root would abort those too. The
+      // refetch here would read the proposal as still pending and restore the row.
+      await Promise.all([
+        queryClient.cancelQueries({ queryKey: pagesKey }),
+        queryClient.cancelQueries({ queryKey: countKey }),
+      ]);
+
+      queryClient.setQueryData<InfiniteData<ProposalsPageResponse>>(pagesKey, (cached) =>
+        cached ? withoutProposal(cached, proposalId) : cached
+      );
+      queryClient.setQueryData<ProposalsPageResponse>(countKey, (cached) =>
+        cached ? { ...cached, total: Math.max(cached.total - 1, 0) } : cached
+      );
     },
     [queryClient]
   );

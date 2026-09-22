@@ -46,3 +46,6 @@ export const MAX_QUEUE_PAGE_SIZE = 100;
  * @see {@link https://www.elastic.co/docs/reference/elasticsearch/rest-apis/paginate-search-results#search-after}
  */
 export const MAX_QUEUE_REACH = 10_000;
+
+/** Largest `from` the routes accept, keeping `from + size` inside that window. */
+export const MAX_QUEUE_OFFSET = MAX_QUEUE_REACH - MAX_QUEUE_PAGE_SIZE;

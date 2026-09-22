@@ -47,6 +47,7 @@ export const showMoreLabel = (count: number) =>
 /** Every bucket renders a Show more, so the accessible name has to say which one. */
 export const showMoreAriaLabel = (bucket: string, count: number) =>
   i18n.translate('xpack.alertzero.conversationQueue.showMoreAriaLabel', {
-    defaultMessage: 'Show {count, plural, one {# more event} other {# more events}} in {bucket}',
+    // Opens with the visible label verbatim, which WCAG 2.5.3 requires for voice control.
+    defaultMessage: 'Show more ({count}) in {bucket}',
     values: { bucket, count },
   });

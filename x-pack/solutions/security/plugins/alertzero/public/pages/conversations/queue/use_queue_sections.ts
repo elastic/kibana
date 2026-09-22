@@ -25,27 +25,42 @@ export const useQueueSections = (): QueueSections => {
   const configure = useCategoryQueueSection('configure');
   const closed = useClosedQueueSection();
 
-  const sections = useMemo(
-    () => [respond, investigate, configure, closed],
-    [respond, investigate, configure, closed]
-  );
+  const sections = [respond, investigate, configure, closed];
 
+  // Keyed on the rows themselves, not the section objects: those are rebuilt every
+  // render, which would rebuild and re-sort the union on every poll.
   const proposalsById = useMemo(
-    () => new Map(sections.flatMap(({ proposals }) => proposals).map((p) => [p.id, p])),
-    [sections]
+    () =>
+      new Map(
+        [
+          ...respond.proposals,
+          ...investigate.proposals,
+          ...configure.proposals,
+          ...closed.proposals,
+        ].map((proposal) => [proposal.id, proposal])
+      ),
+    [respond.proposals, investigate.proposals, configure.proposals, closed.proposals]
   );
 
   // Each section pages by its own recency, so priorityScore is what gives the
   // union an impact-first order.
   const investigations = useMemo(
     () =>
-      sections
-        .flatMap(({ investigations: items }) => items)
-        .toSorted((a, b) => {
-          const priorityDiff = (b.priorityScore ?? 0) - (a.priorityScore ?? 0);
-          return priorityDiff !== 0 ? priorityDiff : b.updatedAt.localeCompare(a.updatedAt);
-        }),
-    [sections]
+      [
+        ...respond.investigations,
+        ...investigate.investigations,
+        ...configure.investigations,
+        ...closed.investigations,
+      ].toSorted((a, b) => {
+        const priorityDiff = (b.priorityScore ?? 0) - (a.priorityScore ?? 0);
+        return priorityDiff !== 0 ? priorityDiff : b.updatedAt.localeCompare(a.updatedAt);
+      }),
+    [
+      respond.investigations,
+      investigate.investigations,
+      configure.investigations,
+      closed.investigations,
+    ]
   );
 
   return { sections, proposalsById, investigations };

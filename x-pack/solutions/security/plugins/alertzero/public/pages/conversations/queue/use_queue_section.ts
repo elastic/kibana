@@ -95,8 +95,15 @@ const useSection = (
 ): QueueSection => {
   const pages = pagesQuery.data?.pages;
 
-  // Unmemoised, this re-sorts the page's merged union on every render.
-  const proposals = useMemo(() => pages?.flatMap(({ proposals: rows }) => rows) ?? [], [pages]);
+  // Deduplicated because the pages are offset windows over a list that moves: a row
+  // decided between two fetches shifts everything after it up, and an optimistic drop
+  // shortens a cached page without moving the offsets already paged past.
+  const proposals = useMemo(
+    () => [
+      ...new Map((pages ?? []).flatMap((page) => page.proposals).map((p) => [p.id, p])).values(),
+    ],
+    [pages]
+  );
   const investigations = useMemo(() => proposals.map(proposalToInvestigation), [proposals]);
 
   const total = countQuery.data?.total;
