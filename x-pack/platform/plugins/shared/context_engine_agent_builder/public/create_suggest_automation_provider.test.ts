@@ -12,6 +12,7 @@ import type { GetAiIndexResponse } from '@kbn/context-engine-plugin/common/http_
 import { BehaviorSubject, Subject } from 'rxjs';
 import { AI_INDEX_ATTACHMENT_TYPE } from '../common/agent_builder_attachments';
 import { CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID } from '../common/agent_builder_tools';
+import { CONTEXT_ENGINE_SETUP_AGENT_ID } from '../common/agent_builder_agents';
 import { createSuggestAutomationProvider } from './create_suggest_automation_provider';
 
 const aiIndex: GetAiIndexResponse = {
@@ -152,6 +153,7 @@ describe('createSuggestAutomationProvider', () => {
       expect.objectContaining({
         newConversation: true,
         autoSendInitialMessage: true,
+        agentId: CONTEXT_ENGINE_SETUP_AGENT_ID,
         initialMessage: 'Suggest an automation for this AI index.',
         sessionTag: 'context-engine-ai-index-my-ai-index',
         attachments: [
