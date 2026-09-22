@@ -16,7 +16,7 @@ import { convertError, isRecoverableError } from './utils/errors';
 import type { PromptFactory } from './prompts';
 import { getRandomAnsweringMessage } from './i18n';
 import { tags } from './constants';
-import type { StateType, StateUpdate } from './state';
+import { toCurrentRun, type StateType, type StateUpdate } from './state';
 import { processStructuredAnswerResponse } from './response_processing';
 import { countNonTodosSteps } from './step_state';
 
@@ -85,11 +85,7 @@ export const createAnswerAgentStructured = ({
       const handover =
         state.researchOutcome?.type === 'handover' ? state.researchOutcome : undefined;
       const prompt = await promptFactory.getStructuredAnswerPrompt({
-        cycleLimit: state.cycleLimit,
-        steps: state.steps,
-        renderState: state.toolRenderState,
-        pendingToolCallIds: state.pendingToolCallIds,
-        retryNotices: state.retryNotices,
+        run: toCurrentRun(state),
         handover: handover ? { message: handover.message, forceful: handover.forceful } : undefined,
       });
 

@@ -20,7 +20,7 @@ const NOTICE_MARKER = 'The following skills appear relevant';
 describe('getResearchAgentPrompt', () => {
   const now = new Date().toISOString();
 
-  const makeParams = (overrides: Record<string, any> = {}) =>
+  const makeParams = ({ steps = [], ...overrides }: Record<string, any> = {}) =>
     ({
       conversationTimestamp: now,
       processedConversation: {
@@ -40,11 +40,13 @@ describe('getResearchAgentPrompt', () => {
       configuration: { instructions: '', aiIndices: [] },
       spaceId: 'default',
       skills: [],
-      steps: [],
-      renderState: {},
-      pendingToolCallIds: [],
-      retryNotices: [],
-      cycleLimit: 1,
+      run: {
+        steps,
+        renderState: {},
+        pendingToolCallIds: [],
+        retryNotices: [],
+        cycleLimit: 1,
+      },
       experimentalFeatures: { aiIndices: false, bash: false, skills: false },
       relevantSkillsEnabled: false,
       toolManager: {} as any,
@@ -237,11 +239,13 @@ describe('getResearchAgentPrompt', () => {
       },
       spaceId: 'default',
       skills: [],
-      steps: [],
-      renderState: {},
-      pendingToolCallIds: [],
-      retryNotices: [],
-      cycleLimit: 1,
+      run: {
+        steps: [],
+        renderState: {},
+        pendingToolCallIds: [],
+        retryNotices: [],
+        cycleLimit: 1,
+      },
       experimentalFeatures: { aiIndices: false, bash: false, skills: false },
       toolManager: {} as any,
       resultTransformer: jest.fn(),

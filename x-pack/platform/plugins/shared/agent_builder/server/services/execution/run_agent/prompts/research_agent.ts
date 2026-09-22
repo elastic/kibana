@@ -24,17 +24,8 @@ type ResearchAgentPromptParams = PromptFactoryParams & ResearchAgentPromptRuntim
 export const getResearchAgentPrompt = async (
   params: ResearchAgentPromptParams
 ): Promise<BaseMessageLike[]> => {
-  const {
-    steps,
-    renderState,
-    pendingToolCallIds,
-    retryNotices,
-    cycleLimit,
-    processedConversation,
-    resultTransformer,
-    conversationTimestamp,
-    imageResolver,
-  } = params;
+  const { run, processedConversation, resultTransformer, conversationTimestamp, imageResolver } =
+    params;
 
   // Generate messages from the conversation's rounds, optionally
   // injecting a compaction summary for older compacted rounds.
@@ -49,17 +40,10 @@ export const getResearchAgentPrompt = async (
 
   // The current run: the relevant_skills step (if any) is rendered in place by the renderer.
   const currentRunMessages = await renderCurrentRun({
-    steps,
-    mode: {
-      type: 'current',
-      phase: 'research',
-      renderState,
-      pendingToolCallIds,
-      retryNotices,
-      cycleLimit,
-      imageResolver,
-    },
-    compaction: { resultTransformer },
+    run,
+    phase: 'research',
+    imageResolver,
+    resultTransformer,
   });
 
   return [

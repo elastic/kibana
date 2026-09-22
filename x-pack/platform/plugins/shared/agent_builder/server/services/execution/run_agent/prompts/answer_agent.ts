@@ -21,13 +21,9 @@ export const getStructuredAnswerPrompt = async (
   const {
     configuration: { instructions: customInstructions },
     conversationTimestamp,
-    steps,
-    renderState,
-    pendingToolCallIds,
-    retryNotices,
+    run,
     handover,
     processedConversation,
-    cycleLimit,
     resultTransformer,
     imageResolver,
   } = params;
@@ -42,18 +38,11 @@ export const getStructuredAnswerPrompt = async (
   });
 
   const currentRunMessages = await renderCurrentRun({
-    steps,
-    mode: {
-      type: 'current',
-      phase: 'answer',
-      renderState,
-      pendingToolCallIds,
-      retryNotices,
-      cycleLimit,
-      handover,
-      imageResolver,
-    },
-    compaction: { resultTransformer },
+    run,
+    phase: 'answer',
+    handover,
+    imageResolver,
+    resultTransformer,
   });
 
   return [

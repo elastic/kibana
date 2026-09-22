@@ -42,31 +42,37 @@ import {
   formatSystemNotice,
 } from '../prompts/utils/notices';
 import { createRelevantSkillsNoticeMessage } from '../prompts/utils/skills';
-import type { RetryNotice, ToolRenderStateMap } from '../transient_state';
+import type { CurrentRun, ToolRenderStateMap } from '../transient_state';
 import { materializeAskUserQuestionToolCall } from './ask_user_question_tool_call';
 import { estimateMessagesTokens } from './estimate_conversation_tokens';
 import type { ToolCallResultTransformer } from './tool_summarization';
 
-export interface HistoryRenderMode {
-  type: 'history';
-  /** When provided, tool results are passed through this transformer (summarization / substitution). */
+export type CurrentRunPhase = 'research' | 'answer';
+
+/** Rendering options for the current run (as opposed to the run state itself, see `CurrentRun`). */
+export interface CurrentRunRenderOptions {
+  phase: CurrentRunPhase;
+  /** The research agent's handover notes; rendered in the answer phase only. */
+  handover?: HandoverParams;
+  imageResolver?: PromptImageResolver;
+  /** Enables the in-flight compaction fallback when the raw rendering exceeds the token threshold. */
   resultTransformer?: ToolCallResultTransformer;
 }
 
-export interface CurrentRenderMode {
-  type: 'current';
-  phase: 'research' | 'answer';
-  renderState: ToolRenderStateMap;
-  pendingToolCallIds: string[];
-  retryNotices: RetryNotice[];
-  cycleLimit: number;
-  handover?: HandoverParams;
-  imageResolver?: PromptImageResolver;
-  /** When set, tool results older than the preserved cycles are rendered through the transformer. */
-  compaction?: { resultTransformer: ToolCallResultTransformer };
+/** Internal: what the shared step helpers branch on. Not exported — see the two entry points below. */
+interface HistoryRenderContext {
+  type: 'history';
+  resultTransformer?: ToolCallResultTransformer;
 }
 
-export type StepRenderMode = HistoryRenderMode | CurrentRenderMode;
+interface CurrentRenderContext extends Omit<CurrentRunRenderOptions, 'resultTransformer'> {
+  type: 'current';
+  run: CurrentRun;
+  /** Set on the compaction re-render only: older cycles' results go through this transformer. */
+  compactWith?: ToolCallResultTransformer;
+}
+
+type RenderContext = HistoryRenderContext | CurrentRenderContext;
 
 /**
  * Groups consecutive tool call steps by `tool_call_group_id`.
@@ -137,29 +143,29 @@ const compactionCutoffCycle = (
   return Math.max(...cycles) - PRESERVED_RECENT_CYCLES;
 };
 
-const rawToolContent = (call: ToolCallStep, mode: CurrentRenderMode): string =>
-  mode.renderState[call.tool_call_id]?.content ?? JSON.stringify({ results: call.results });
+const rawToolContent = (call: ToolCallStep, { run }: CurrentRenderContext): string =>
+  run.renderState[call.tool_call_id]?.content ?? JSON.stringify({ results: call.results });
 
 const renderToolResult = async (
   call: ToolCallStep,
-  { mode, compactThisGroup }: { mode: StepRenderMode; compactThisGroup: boolean }
+  { context, compactThisGroup }: { context: RenderContext; compactThisGroup: boolean }
 ): Promise<BaseMessage> => {
-  if (mode.type === 'history') {
-    const results = mode.resultTransformer ? await mode.resultTransformer(call) : call.results;
+  if (context.type === 'history') {
+    const results = context.resultTransformer
+      ? await context.resultTransformer(call)
+      : call.results;
     return new ToolMessage({
       tool_call_id: call.tool_call_id,
       content: wrapToolResultContent(JSON.stringify({ results })),
     });
   }
 
-  const raw = rawToolContent(call, mode);
-  if (compactThisGroup && mode.compaction) {
+  const raw = rawToolContent(call, context);
+  if (compactThisGroup && context.compactWith) {
     // Runs the result transformer over an older cycle's tool results, mirroring how previous
     // rounds are compacted. Filestore substitution is forced because the pressure comes from the
     // in-flight round, not conversation history.
-    const transformed = await mode.compaction.resultTransformer(call, {
-      forceFilestoreSubstitution: true,
-    });
+    const transformed = await context.compactWith(call, { forceFilestoreSubstitution: true });
     // Only use the transformed form when it's actually smaller. Re-serializing an unchanged result
     // as JSON can otherwise add overhead and make the prompt larger than the raw rendering.
     const compacted = JSON.stringify({ results: transformed });
@@ -253,11 +259,12 @@ const renderImageMessages = async (
 const renderToolCallGroup = async (
   calls: ToolCallStep[],
   {
-    mode,
+    context,
     reasoningSteps,
     compactionCutoff,
-  }: { mode: StepRenderMode; reasoningSteps: ReasoningStep[]; compactionCutoff?: number }
+  }: { context: RenderContext; reasoningSteps: ReasoningStep[]; compactionCutoff?: number }
 ): Promise<BaseMessage[]> => {
+  const current = context.type === 'current' ? context : undefined;
   const groupId = calls[0].tool_call_group_id;
   const groupReasoning = groupId
     ? joinReasoning(
@@ -272,9 +279,7 @@ const renderToolCallGroup = async (
         reasoningSteps.filter((s) => s.tool_call_id === call.tool_call_id)
       );
       const name =
-        mode.type === 'current'
-          ? mode.renderState[call.tool_call_id]?.toolName ?? sanitizeToolId(call.tool_id)
-          : sanitizeToolId(call.tool_id);
+        current?.run.renderState[call.tool_call_id]?.toolName ?? sanitizeToolId(call.tool_id);
       return {
         id: call.tool_call_id,
         name,
@@ -284,24 +289,23 @@ const renderToolCallGroup = async (
     }),
   });
 
-  const cycle =
-    mode.type === 'current' ? mode.renderState[calls[0].tool_call_id]?.cycle : undefined;
+  const cycle = current?.run.renderState[calls[0].tool_call_id]?.cycle;
   const compactThisGroup =
     compactionCutoff !== undefined && cycle !== undefined && cycle <= compactionCutoff;
 
   const toolMessages: BaseMessage[] = [];
   for (const call of calls) {
-    toolMessages.push(await renderToolResult(call, { mode, compactThisGroup }));
+    toolMessages.push(await renderToolResult(call, { context, compactThisGroup }));
   }
 
   const trailing: BaseMessage[] = [];
-  if (mode.type === 'current') {
-    if (!compactThisGroup && mode.imageResolver) {
-      trailing.push(...(await renderImageMessages(calls, mode.imageResolver)));
+  if (current) {
+    if (!compactThisGroup && current.imageResolver) {
+      trailing.push(...(await renderImageMessages(calls, current.imageResolver)));
     }
     if (cycle !== undefined) {
       // Add system reminder about being close to the limit when only 5 cycles left.
-      const remaining = mode.cycleLimit - cycle;
+      const remaining = current.run.cycleLimit - cycle;
       if (remaining === 5 || remaining === 1) {
         trailing.push(createCycleLimitSystemMessage(remaining));
       }
@@ -328,28 +332,22 @@ const renderAnsweredQuestion = (
   ];
 };
 
-/**
- * Renders conversation steps to LangChain messages, for either the history (previous rounds) or
- * the current run (with its runtime render state, pending calls and retry notices).
- */
-export const renderStepsToMessages = async ({
-  steps,
-  mode,
-}: {
-  steps: ConversationRoundStep[];
-  mode: StepRenderMode;
-}): Promise<BaseMessage[]> => {
+/** Shared rendering of a step list, for either the history or the current run. */
+const renderSteps = async (
+  steps: ConversationRoundStep[],
+  context: RenderContext
+): Promise<BaseMessage[]> => {
   const messages: BaseMessage[] = [];
-  const current = mode.type === 'current' ? mode : undefined;
+  const current = context.type === 'current' ? context : undefined;
   const groups = groupToolCallSteps(steps);
   const reasoningSteps = steps.filter(isReasoningStep);
-  const pending = new Set(current?.pendingToolCallIds ?? []);
-  const compactionCutoff = current?.compaction
-    ? compactionCutoffCycle(steps, current.renderState, pending)
+  const pending = new Set(current?.run.pendingToolCallIds ?? []);
+  const compactionCutoff = current?.compactWith
+    ? compactionCutoffCycle(steps, current.run.renderState, pending)
     : undefined;
 
   const pushResearchRetries = (afterCount: number) => {
-    for (const notice of current?.retryNotices ?? []) {
+    for (const notice of current?.run.retryNotices ?? []) {
       if (notice.phase === 'research' && notice.afterNonTodosStepCount === afterCount) {
         messages.push(...formatRetryNotice(notice.error));
       }
@@ -380,7 +378,7 @@ export const renderStepsToMessages = async ({
         const calls = group.filter((call) => !pending.has(call.tool_call_id));
         if (calls.length > 0) {
           messages.push(
-            ...(await renderToolCallGroup(calls, { mode, reasoningSteps, compactionCutoff }))
+            ...(await renderToolCallGroup(calls, { context, reasoningSteps, compactionCutoff }))
           );
         }
       }
@@ -396,7 +394,7 @@ export const renderStepsToMessages = async ({
     if (current.handover) {
       messages.push(...formatHandover(current.handover));
     }
-    for (const notice of current.retryNotices) {
+    for (const notice of current.run.retryNotices) {
       if (notice.phase === 'answer') {
         messages.push(...formatRetryNotice(notice.error));
       }
@@ -407,21 +405,31 @@ export const renderStepsToMessages = async ({
 };
 
 /**
- * Current-run rendering with the in-flight compaction fallback: renders the raw form first and,
- * when it exceeds the token threshold, re-renders with older cycles compacted.
+ * Renders the steps of a previous round to LangChain messages. When a transformer is provided,
+ * tool results are passed through it (summarization / filestore substitution).
  */
-export const renderCurrentRun = async ({
+export const renderHistorySteps = async ({
   steps,
-  mode,
-  compaction,
+  resultTransformer,
 }: {
   steps: ConversationRoundStep[];
-  mode: Omit<CurrentRenderMode, 'compaction'>;
-  compaction?: { resultTransformer: ToolCallResultTransformer };
-}): Promise<BaseMessage[]> => {
-  const raw = await renderStepsToMessages({ steps, mode });
-  if (!compaction || estimateMessagesTokens(raw) <= IN_FLIGHT_TOKEN_THRESHOLD) {
+  resultTransformer?: ToolCallResultTransformer;
+}): Promise<BaseMessage[]> => renderSteps(steps, { type: 'history', resultTransformer });
+
+/**
+ * Renders the current run to LangChain messages, with the in-flight compaction fallback: renders
+ * the raw form first and, when it exceeds the token threshold and a transformer is available,
+ * re-renders with older cycles compacted.
+ */
+export const renderCurrentRun = async ({
+  run,
+  resultTransformer,
+  ...options
+}: { run: CurrentRun } & CurrentRunRenderOptions): Promise<BaseMessage[]> => {
+  const context: CurrentRenderContext = { type: 'current', run, ...options };
+  const raw = await renderSteps(run.steps, context);
+  if (!resultTransformer || estimateMessagesTokens(raw) <= IN_FLIGHT_TOKEN_THRESHOLD) {
     return raw;
   }
-  return renderStepsToMessages({ steps, mode: { ...mode, compaction } });
+  return renderSteps(run.steps, { ...context, compactWith: resultTransformer });
 };

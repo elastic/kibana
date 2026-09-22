@@ -12,6 +12,7 @@ import { applyStepUpdates, type RunStepUpdate } from './step_state';
 import {
   mergeToolRenderState,
   type AnswerOutcome,
+  type CurrentRun,
   type ResearchOutcome,
   type RetryNotice,
   type ToolOutcome,
@@ -76,3 +77,12 @@ export const StateAnnotation = Annotation.Root({
 
 export type StateType = typeof StateAnnotation.State;
 export type StateUpdate = typeof StateAnnotation.Update;
+
+/** The view of the graph state the prompt layer renders the current run from. */
+export const toCurrentRun = (state: StateType): CurrentRun => ({
+  steps: state.steps,
+  cycleLimit: state.cycleLimit,
+  renderState: state.toolRenderState,
+  pendingToolCallIds: state.pendingToolCallIds,
+  retryNotices: state.retryNotices,
+});

@@ -33,7 +33,7 @@ import {
 } from './context_timeline';
 import type { ToolCallResultTransformer } from './tool_summarization';
 import { serializeCompactionSummary } from './compaction_serialize';
-import { renderStepsToMessages } from './render_steps_to_messages';
+import { renderHistorySteps } from './render_steps_to_messages';
 import { attachmentTypeInstructions } from '../prompts/utils/attachments';
 
 export interface ConversationToLangchainOptions {
@@ -182,12 +182,7 @@ export const roundToLangchain = async (
 
   // steps
   if (!ignoreSteps) {
-    messages.push(
-      ...(await renderStepsToMessages({
-        steps: round.steps,
-        mode: { type: 'history', resultTransformer },
-      }))
-    );
+    messages.push(...(await renderHistorySteps({ steps: round.steps, resultTransformer })));
   }
 
   // assistant response

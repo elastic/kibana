@@ -37,7 +37,7 @@ import { getRandomThinkingMessage } from './i18n';
 import { steps, tags, BACKGROUND_CHECK_CYCLE_INTERVAL, BROWSER_TOOL_PREFIX } from './constants';
 import type { BackgroundExecutionService } from './background_execution_service';
 import type { StateType, StateUpdate } from './state';
-import { StateAnnotation } from './state';
+import { StateAnnotation, toCurrentRun } from './state';
 import { processResearchResponse, processToolNodeResponse } from './response_processing';
 import { createAnswerAgentStructured } from './answer_agent_structured';
 import { countNonTodosSteps, stepUpdates, type RunStepUpdate } from './step_state';
@@ -139,13 +139,7 @@ export const createAgentGraph = ({
 
     try {
       const response = await researcherModel.invoke(
-        await promptFactory.getMainPrompt({
-          cycleLimit: state.cycleLimit,
-          steps: state.steps,
-          renderState: state.toolRenderState,
-          pendingToolCallIds: state.pendingToolCallIds,
-          retryNotices: state.retryNotices,
-        })
+        await promptFactory.getMainPrompt({ run: toCurrentRun(state) })
       );
 
       const currentCycle = state.currentCycle + 1;

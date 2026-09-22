@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ConversationRoundStep } from '@kbn/agent-builder-common';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
 import type { AgentBuilderAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
 import type { ToolCallWithReasoning } from '@kbn/agent-builder-genai-utils/langchain';
@@ -69,4 +70,17 @@ export interface RetryNotice {
   /** Number of non-todos steps that existed when the error occurred; the notice renders after that many steps. */
   afterNonTodosStepCount: number;
   error: AgentBuilderAgentExecutionError;
+}
+
+/**
+ * The in-flight run as the prompt layer sees it: the authoritative steps plus the transient state
+ * needed to render them. Built from the graph state by `toCurrentRun` and passed through unchanged
+ * down to the step renderer.
+ */
+export interface CurrentRun {
+  steps: ConversationRoundStep[];
+  cycleLimit: number;
+  renderState: ToolRenderStateMap;
+  pendingToolCallIds: string[];
+  retryNotices: RetryNotice[];
 }

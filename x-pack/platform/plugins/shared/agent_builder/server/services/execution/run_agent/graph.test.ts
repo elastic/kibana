@@ -133,9 +133,9 @@ describe('createAgentGraph', () => {
       },
     ]);
     // the retry turn sees the notice
-    expect(promptFactory.getMainPrompt).toHaveBeenLastCalledWith(
-      expect.objectContaining({ retryNotices: result.retryNotices })
-    );
+    expect(promptFactory.getMainPrompt).toHaveBeenLastCalledWith({
+      run: expect.objectContaining({ retryNotices: result.retryNotices }),
+    });
   });
 
   it('preserves valid tool-call and handover behavior', async () => {
