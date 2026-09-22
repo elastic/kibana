@@ -1,0 +1,93 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { z } from '@kbn/zod';
+import type { A2uiMessage } from '@kbn/a2ui-renderer';
+
+/**
+ * Grid geometry, mirroring `GridLayoutData` from `@kbn/grid-layout` so a layout
+ * round-trips through the saved object untouched. It is stored beside the A2UI
+ * content rather than inside it: dragging a panel must never rewrite
+ * agent-generated JSON, and the agent never has to reason about geometry.
+ */
+const gridPanelSchema = z.object({
+  id: z.string(),
+  row: z.number().int().min(0),
+  column: z.number().int().min(0),
+  width: z.number().int().min(1),
+  height: z.number().int().min(1),
+});
+
+const layoutWidgetSchema = z.discriminatedUnion('type', [
+  gridPanelSchema.extend({ type: z.literal('panel') }),
+  z.object({
+    type: z.literal('section'),
+    id: z.string(),
+    row: z.number().int().min(0),
+    title: z.string(),
+    isCollapsed: z.boolean(),
+    panels: z.record(z.string(), gridPanelSchema),
+  }),
+]);
+
+/**
+ * A2UI messages are validated structurally here — that at least one of the four
+ * known message keys is present — and against the component catalog separately.
+ * Keeping the two apart means a catalog change does not require a saved object
+ * migration.
+ */
+const MESSAGE_KEYS = [
+  'createSurface',
+  'updateComponents',
+  'updateDataModel',
+  'deleteSurface',
+] as const;
+
+const a2uiMessageSchema = z.custom<A2uiMessage>(
+  (value) =>
+    typeof value === 'object' &&
+    value !== null &&
+    MESSAGE_KEYS.some((key) => key in (value as object)),
+  { message: `Not an A2UI message: expected one of ${MESSAGE_KEYS.join(', ')}` }
+);
+
+export const customAppDefinitionSchema = z.object({
+  version: z.literal(1),
+  title: z.string().min(1),
+  description: z.string().optional(),
+  layout: z.record(z.string(), layoutWidgetSchema),
+  panels: z.record(z.string(), z.object({ title: z.string().optional() })),
+  surfaces: z.record(z.string(), z.array(a2uiMessageSchema)),
+});
+
+export type CustomAppDefinition = z.infer<typeof customAppDefinitionSchema>;
+export type CustomAppLayout = CustomAppDefinition['layout'];
+
+export interface CustomAppListItem {
+  id: string;
+  title: string;
+  description?: string;
+  updatedAt?: string;
+}
+
+/**
+ * Panels nested in a collapsible section live under `layout[sectionId].panels`
+ * rather than at the top level, so anything that needs "every panel" has to
+ * walk both.
+ */
+export function getPanelIds(layout: CustomAppLayout): string[] {
+  const ids: string[] = [];
+  for (const widget of Object.values(layout)) {
+    if (widget.type === 'panel') ids.push(widget.id);
+    else ids.push(...Object.keys(widget.panels));
+  }
+  return ids;
+}
+
+export function emptyAppDefinition(title: string): CustomAppDefinition {
+  return { version: 1, title, layout: {}, panels: {}, surfaces: {} };
+}

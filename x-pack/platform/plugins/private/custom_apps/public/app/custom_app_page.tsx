@@ -1,0 +1,268 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiLoadingSpinner,
+  EuiPageTemplate,
+} from '@elastic/eui';
+import type { CoreStart } from '@kbn/core/public';
+import { isLayoutEqual } from '@kbn/grid-layout';
+import type { GridLayoutData } from '@kbn/grid-layout';
+import type { A2uiMessage } from '@kbn/a2ui-renderer';
+import type { CustomAppDefinition } from '../../common/app_definition';
+import { getPanelIds } from '../../common/app_definition';
+import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../common/constants';
+import type { CustomAppClient } from './custom_app_client';
+import { CustomAppGrid } from './custom_app_grid';
+import { PanelEditorFlyout } from './panel_editor_flyout';
+import { createActionHandler } from './handle_action';
+
+export interface CustomAppPageProps {
+  core: CoreStart;
+  client: CustomAppClient;
+  appId: string;
+  onNavigateToList: () => void;
+}
+
+function nextPanelId(definition: CustomAppDefinition): string {
+  const existing = new Set(getPanelIds(definition.layout));
+  let index = existing.size + 1;
+  while (existing.has(`panel${index}`)) index++;
+  return `panel${index}`;
+}
+
+/** Places a new panel on a fresh row below everything currently laid out. */
+function bottomRow(layout: GridLayoutData): number {
+  let max = 0;
+  for (const widget of Object.values(layout)) {
+    if (widget.type === 'panel') max = Math.max(max, widget.row + widget.height);
+    else {
+      for (const panel of Object.values(widget.panels)) {
+        max = Math.max(max, widget.row + panel.row + panel.height);
+      }
+    }
+  }
+  return max;
+}
+
+export function CustomAppPage({ core, client, appId, onNavigateToList }: CustomAppPageProps) {
+  const [saved, setSaved] = useState<CustomAppDefinition | undefined>();
+  const [definition, setDefinition] = useState<CustomAppDefinition | undefined>();
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingPanelId, setEditingPanelId] = useState<string | undefined>();
+  const [loadError, setLoadError] = useState<string | undefined>();
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    client
+      .get(appId)
+      .then((stored) => {
+        if (cancelled) return;
+        setSaved(stored.definition);
+        setDefinition(stored.definition);
+      })
+      .catch((error) => !cancelled && setLoadError(error.body?.message ?? error.message));
+    return () => {
+      cancelled = true;
+    };
+  }, [client, appId]);
+
+  const onAction = useMemo(
+    () =>
+      createActionHandler({
+        application: core.application,
+        notifications: core.notifications,
+      }),
+    [core]
+  );
+
+  const hasUnsavedChanges = useMemo(
+    () => Boolean(definition && saved && JSON.stringify(definition) !== JSON.stringify(saved)),
+    [definition, saved]
+  );
+
+  const save = useCallback(async () => {
+    if (!definition) return;
+    setIsSaving(true);
+    try {
+      await client.update(appId, definition);
+      setSaved(definition);
+      core.notifications.toasts.addSuccess('Custom app saved');
+    } catch (error) {
+      core.notifications.toasts.addDanger({
+        title: 'Could not save',
+        text: error.body?.message ?? error.message,
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  }, [client, appId, definition, core]);
+
+  /**
+   * `GridLayout` echoes its layout back on every render, so writing it into
+   * state unconditionally is an infinite render loop. Bail out when nothing
+   * actually moved — the same guard the dashboard applies in `dashboard_grid`.
+   */
+  const onLayoutChange = useCallback((layout: GridLayoutData) => {
+    setDefinition((current) => {
+      if (!current) return current;
+      if (isLayoutEqual(current.layout as GridLayoutData, layout)) return current;
+      return { ...current, layout: layout as CustomAppDefinition['layout'] };
+    });
+  }, []);
+
+  const addPanel = useCallback(() => {
+    setDefinition((current) => {
+      if (!current) return current;
+      const id = nextPanelId(current);
+      return {
+        ...current,
+        layout: {
+          ...current.layout,
+          [id]: {
+            type: 'panel',
+            id,
+            row: bottomRow(current.layout as GridLayoutData),
+            column: 0,
+            width: DEFAULT_PANEL_WIDTH,
+            height: DEFAULT_PANEL_HEIGHT,
+          },
+        },
+        panels: { ...current.panels, [id]: { title: 'New panel' } },
+        surfaces: {
+          ...current.surfaces,
+          [id]: [
+            {
+              version: 'v1.0',
+              createSurface: {
+                surfaceId: id,
+                catalogId: 'elastic/kibana-eui/v1',
+                components: [{ id: 'root', component: 'Text', text: 'Edit this panel.' }],
+              },
+            },
+          ] as A2uiMessage[],
+        },
+      };
+    });
+  }, []);
+
+  const removePanel = useCallback((panelId: string) => {
+    setDefinition((current) => {
+      if (!current) return current;
+      const { [panelId]: _removedLayout, ...layout } = current.layout;
+      const { [panelId]: _removedPanel, ...panels } = current.panels;
+      const { [panelId]: _removedSurface, ...surfaces } = current.surfaces;
+      return { ...current, layout, panels, surfaces };
+    });
+  }, []);
+
+  if (loadError) {
+    return (
+      <EuiPageTemplate>
+        <EuiPageTemplate.EmptyPrompt color="danger" title={<h2>Could not load this app</h2>}>
+          <p>{loadError}</p>
+          <EuiButton onClick={onNavigateToList}>Back to list</EuiButton>
+        </EuiPageTemplate.EmptyPrompt>
+      </EuiPageTemplate>
+    );
+  }
+
+  if (!definition) {
+    return (
+      <EuiPageTemplate>
+        <EuiPageTemplate.EmptyPrompt title={<EuiLoadingSpinner size="l" />} body={null} />
+      </EuiPageTemplate>
+    );
+  }
+
+  return (
+    <EuiPageTemplate grow offset={0}>
+      <EuiPageTemplate.Header
+        pageTitle={definition.title}
+        description={definition.description}
+        rightSideItems={[
+          isEditing ? (
+            <EuiButton
+              key="save"
+              fill
+              iconType="save"
+              isLoading={isSaving}
+              isDisabled={!hasUnsavedChanges}
+              onClick={save}
+            >
+              Save
+            </EuiButton>
+          ) : (
+            <EuiButton key="edit" iconType="pencil" onClick={() => setIsEditing(true)}>
+              Edit
+            </EuiButton>
+          ),
+          isEditing ? (
+            <EuiButton key="add" iconType="plusInCircle" onClick={addPanel}>
+              Add panel
+            </EuiButton>
+          ) : null,
+          isEditing ? (
+            <EuiButtonEmpty
+              key="done"
+              onClick={() => {
+                setDefinition(saved);
+                setIsEditing(false);
+              }}
+            >
+              Cancel
+            </EuiButtonEmpty>
+          ) : null,
+          <EuiButtonEmpty key="back" iconType="arrowLeft" onClick={onNavigateToList}>
+            All apps
+          </EuiButtonEmpty>,
+        ].filter(Boolean)}
+      />
+
+      <EuiPageTemplate.Section grow>
+        {hasUnsavedChanges && (
+          <EuiCallOut announceOnMount size="s" color="warning" title="You have unsaved changes" />
+        )}
+
+        <CustomAppGrid
+          definition={definition}
+          isEditing={isEditing}
+          onLayoutChange={onLayoutChange}
+          onAction={onAction}
+          onEditPanel={setEditingPanelId}
+          onRemovePanel={removePanel}
+        />
+      </EuiPageTemplate.Section>
+
+      {editingPanelId && (
+        <PanelEditorFlyout
+          panelId={editingPanelId}
+          title={definition.panels[editingPanelId]?.title}
+          messages={(definition.surfaces[editingPanelId] ?? []) as A2uiMessage[]}
+          onClose={() => setEditingPanelId(undefined)}
+          onSave={({ title, messages }) => {
+            setDefinition((current) =>
+              current
+                ? {
+                    ...current,
+                    panels: { ...current.panels, [editingPanelId]: { title } },
+                    surfaces: { ...current.surfaces, [editingPanelId]: messages },
+                  }
+                : current
+            );
+            setEditingPanelId(undefined);
+          }}
+        />
+      )}
+    </EuiPageTemplate>
+  );
+}

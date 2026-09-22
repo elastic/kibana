@@ -1,0 +1,21 @@
+{
+  "type": "plugin",
+  "id": "@kbn/custom-apps-plugin",
+  "owner": [
+    "@elastic/kibana-dashboards"
+  ],
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "customApps",
+    "browser": true,
+    "server": true,
+    "configPath": [
+      "xpack",
+      "custom_apps"
+    ],
+    "requiredPlugins": [],
+    "optionalPlugins": [],
+    "requiredBundles": []
+  }
+}
