@@ -12,9 +12,15 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type { Notification } from '../../common/types';
 import { NOTIFICATION_DATA_STREAM_NAME } from '../../server/storage/notification_data_stream';
 import { buildChunk, buildTick, validateFixture } from './fixtures';
-import { assertSameCluster, createEsClient, getConnection } from './lib/connection';
-import { clearNotifications, ensureDataStream, writeNotifications } from './lib/notification_store';
-import { clearReadHorizon, setReadHorizon } from './lib/read_horizon';
+import {
+  clearNotifications,
+  clearReadHorizon,
+  createDataStream,
+  createEsClient,
+  setReadHorizon,
+  writeNotifications,
+  type SeedTarget,
+} from './seed';
 
 const MIN_INTERVAL_MS = 1000;
 /** Longer delays overflow `setTimeout`, which then fires immediately. */
@@ -36,14 +42,10 @@ const parseDuration = (raw: string, defaultUnit: keyof typeof UNIT_MS): number |
 
 const parseInterval = (raw: string): number => {
   const ms = parseDuration(raw, 's');
-  if (ms === undefined) {
-    throw createFlagError(`Could not parse --interval "${raw}". Use e.g. 1s, 10s or 2m.`);
-  }
-  if (ms < MIN_INTERVAL_MS) {
-    throw createFlagError(`--interval must be at least ${MIN_INTERVAL_MS}ms.`);
-  }
-  if (ms > MAX_INTERVAL_MS) {
-    throw createFlagError(`--interval must be at most ${MAX_INTERVAL_MS}ms (about 24 days).`);
+  if (ms === undefined || ms < MIN_INTERVAL_MS || ms > MAX_INTERVAL_MS) {
+    throw createFlagError(
+      `--interval must be between ${MIN_INTERVAL_MS}ms and ${MAX_INTERVAL_MS}ms. Use e.g. 1s, 10s or 2m.`
+    );
   }
   return ms;
 };
@@ -61,6 +63,14 @@ const parseReadHorizon = (raw: string): string => {
     );
   }
   return new Date(parsed).toISOString();
+};
+
+const requiredUrl = (flags: Record<string, unknown>, flag: string): string => {
+  const value = flags[flag];
+  if (typeof value !== 'string' || value === '') {
+    throw createFlagError(`--${flag} is required.`);
+  }
+  return value.replace(/\/$/, '');
 };
 
 const formatLine = (notification: Notification) =>
@@ -81,33 +91,33 @@ const runCadence = async (esClient: Client, intervalMs: number, log: ToolingLog)
 
 run(
   async ({ log, flags, addCleanupTask }) => {
+    const target: SeedTarget = {
+      kibanaUrl: requiredUrl(flags, 'kibana-url'),
+      esUrl: requiredUrl(flags, 'es-url'),
+      username: String(flags['es-username'] || 'elastic'),
+      password: String(flags['es-password'] || 'changeme'),
+    };
     const intervalMs = flags.interval ? parseInterval(String(flags.interval)) : undefined;
     const readHorizon = parseReadHorizon(String(flags['read-horizon'] || DEFAULT_READ_HORIZON));
-    const connection = await getConnection(flags, log);
-    const { esUrl, kibanaUrl } = connection;
 
-    log.info(`Kibana ${kibanaUrl} — Elasticsearch ${esUrl}`);
-
-    const esClient = createEsClient(connection);
+    const esClient = createEsClient(target);
     addCleanupTask(() => {
       void esClient.close();
     });
-    await assertSameCluster(connection, esClient, log);
-    await ensureDataStream(connection, esClient, log);
+    await createDataStream(target);
 
     if (flags.clean === true) {
-      const deleted = await clearNotifications(esClient);
-      log.info(`Deleted ${deleted} existing notification(s).`);
-      await clearReadHorizon(connection, log);
+      log.info(`Deleted ${await clearNotifications(esClient)} notification(s).`);
+      await clearReadHorizon(target);
       return;
     }
 
     const chunk = buildChunk({ includeUnregistered: flags['include-unregistered'] === true });
     chunk.forEach(validateFixture);
     await writeNotifications(esClient, chunk);
-    await setReadHorizon(connection, readHorizon, log);
+    await setReadHorizon(target, readHorizon);
 
-    log.info(`Seeded ${chunk.length} notification(s):`);
+    log.info(`Seeded ${chunk.length} notification(s), unread since ${readHorizon}:`);
     chunk.forEach((notification) => log.info(formatLine(notification)));
     log.info('View them in Dev Console via:');
     log.info(`GET /${NOTIFICATION_DATA_STREAM_NAME}/_search`);
@@ -120,12 +130,17 @@ run(
     description: `
       Seed the Notification Center data stream on a local dev stack.
 
-      Requires a running Kibana with "xpack.notificationCenter.enabled: true"
+      Assumes Kibana is already running with "xpack.notificationCenter.enabled: true", and that
+      --kibana-url and --es-url name the same cluster.
     `,
     flags: {
       string: ['interval', 'es-url', 'es-username', 'es-password', 'kibana-url', 'read-horizon'],
       boolean: ['clean', 'include-unregistered'],
       help: `
+        --kibana-url <url>       Required. Kibana base URL, including any base path
+        --es-url <url>           Required. Elasticsearch URL of that Kibana's cluster
+        --es-username <user>     Username for both (default: elastic)
+        --es-password <pass>     Password for both (default: changeme)
         --clean                  Empty the data stream, reset the read horizon and exit
         --include-unregistered   Also seed namespaces no plugin has registered yet, plus one
                                  timeseries id. These bypass the producer contract and exist to
@@ -135,11 +150,6 @@ run(
         --read-horizon <when>    Backdate the seeded user's "mark all read" marker to an age
                                  (30d, 12h) or a date (2026-09-01), so the fixtures newer than it
                                  arrive unread (default: ${DEFAULT_READ_HORIZON})
-        --es-url <url>           Elasticsearch URL (default: the cluster for that Kibana)
-        --es-username <user>     Elasticsearch username (default: elastic_serverless or elastic)
-        --es-password <pass>     Elasticsearch password (default: changeme)
-        --kibana-url <url>       Kibana base URL, including any base path
-                                 (default: localhost:5601 serverless or :5611 stack)
       `,
     },
   }

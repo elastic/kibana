@@ -240,17 +240,33 @@ GET /.kibana-notification-center/_search
 `scripts/seed_notifications.js` appends a fixed chunk of notifications to the data stream, so
 the list route and the bell have something to show without waiting for a real producer.
 
+It is a dev script: it assumes Kibana is already running with
+`xpack.notificationCenter.enabled: true`, and that you pass it a matching pair of URLs. Point it
+somewhere else and it will happily seed somewhere else.
+
 ```bash
-node x-pack/platform/plugins/shared/notification_center/scripts/seed_notifications.js --help
-node x-pack/platform/plugins/shared/notification_center/scripts/seed_notifications.js --include-unregistered
-node x-pack/platform/plugins/shared/notification_center/scripts/seed_notifications.js --clean
+SEED=x-pack/platform/plugins/shared/notification_center/scripts/seed_notifications.js
+
+node $SEED --help
+
+# stateful, as kbn-dev mounts it
+node $SEED --kibana-url http://localhost:5611/kbn --es-url http://localhost:9201 \
+  --include-unregistered
+
+# serverless: its own credentials, and Elasticsearch on HTTPS
+node $SEED --kibana-url http://localhost:5601 --es-url https://localhost:9200 \
+  --es-username elastic_serverless
+
+node $SEED --kibana-url http://localhost:5611/kbn --es-url http://localhost:9201 --clean
 ```
 
-Kibana must already be running with `xpack.notificationCenter.enabled: true`. The script reads the list
-route once before writing anything: that is what makes the plugin create the data stream.
-Kibana is detected on `localhost:5601` (serverless) or `localhost:5611` (stack), including a
-dev base path. If both are running, pass `--kibana-url`. Elasticsearch follows the chosen
-Kibana (serverless vs stack). Override with `--es-url`.
+`--kibana-url` must include the base path, which a dev Kibana mounts itself under. The script
+reads the list route once before writing anything: that is what makes the plugin create the data
+stream, and writing first would let Elasticsearch auto-create a plain index under the same name,
+permanently blocking the plugin from creating it.
+
+The credentials are used for both Elasticsearch and Kibana, which is why serverless needs
+`elastic_serverless`: SAML is only the default *UI* provider there, and basic auth still works.
 
 The plugin's `notificationWriteSchema` rejects an unknown `namespace` or `type`. `--include-unregistered`
 writes those directly to the cluster to exercise the read path and the UI against a mixed feed.
