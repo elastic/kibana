@@ -39,8 +39,12 @@ jest.mock('@kbn/agentic-investigations-common', () => ({
     children,
     primaryAction,
     secondaryActions,
+    tone,
+    actionImpact,
   }: {
     children?: React.ReactNode;
+    tone?: string;
+    actionImpact?: { variant: string; items: Array<{ id: string; text?: string }> };
     primaryAction?: {
       label: string;
       onClick: () => void;
@@ -54,7 +58,7 @@ jest.mock('@kbn/agentic-investigations-common', () => ({
       'data-test-subj'?: string;
     }>;
   }) => (
-    <div data-test-subj="approval-content">
+    <div data-test-subj="approval-content" data-tone={tone}>
       {primaryAction && (
         <button
           onClick={primaryAction.onClick}
@@ -73,6 +77,13 @@ jest.mock('@kbn/agentic-investigations-common', () => ({
         >
           {a.label}
         </button>
+      ))}
+      {/* Surfaced so the tone and the action-impact rows are observable: the real
+          component renders them as props rather than as children. */}
+      {actionImpact?.items?.map((item) => (
+        <div key={item.id} data-test-subj={`action-impact-${item.id}`}>
+          {item.text}
+        </div>
       ))}
       {children}
     </div>
@@ -181,6 +192,39 @@ describe('ProposalApprovalCard', () => {
       setupMocks(null);
       const { getByTestId } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
       expect(getByTestId('danger-callout')).toBeInTheDocument();
+    });
+  });
+
+  describe('displayed impact', () => {
+    it('shows a revised impact rather than the action metadata it replaced', () => {
+      // An action-backed proposal whose impact a revision raised.
+      setupMocks(
+        baseProposal({
+          impact: 'high',
+          action: { name: 'Isolate host', impact: 'low' },
+        })
+      );
+
+      const { getByTestId } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
+
+      expect(getByTestId('approval-content')).toHaveAttribute('data-tone', 'danger');
+      expect(getByTestId('action-impact-impact')).toHaveTextContent('high impact');
+    });
+
+    it("falls back to the action's impact when the proposal sets none", () => {
+      // The action's value is the default for a proposal that never overrode
+      // it, which is the case the old precedence was written for.
+      setupMocks(
+        baseProposal({
+          impact: undefined,
+          action: { name: 'Isolate host', impact: 'critical' },
+        })
+      );
+
+      const { getByTestId } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
+
+      expect(getByTestId('approval-content')).toHaveAttribute('data-tone', 'danger');
+      expect(getByTestId('action-impact-impact')).toHaveTextContent('critical impact');
     });
   });
 
@@ -297,6 +341,87 @@ describe('ProposalApprovalCard', () => {
           '[data-test-subj="agenticInvestigationsProposalApprove-proposal-1"]'
         )
       ).toBeNull();
+    });
+  });
+
+  describe('superseded row', () => {
+    it('renders the revision that replaced it, not the superseded row', () => {
+      setupMocks();
+      useProposalMock.mockImplementation(
+        (id: string | undefined) =>
+          ({
+            data:
+              id === 'proposal-1'
+                ? baseProposal({
+                    id: 'proposal-1',
+                    status: 'superseded',
+                    supersededBy: 'proposal-2',
+                  })
+                : baseProposal({ id: 'proposal-2', revision: 2 }),
+            isLoading: false,
+            isError: false,
+          } as unknown as ReturnType<typeof useProposal>)
+      );
+
+      const { container } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
+
+      expect(useProposalMock).toHaveBeenCalledWith('proposal-2');
+      expect(
+        container.querySelector(
+          '[data-test-subj="agenticInvestigationsProposalApprove-proposal-2"]'
+        )
+      ).toBeInTheDocument();
+      expect(
+        container.querySelector('[data-test-subj="agenticInvestigationsProposalCard-proposal-1"]')
+      ).toBeNull();
+    });
+
+    it('follows the pointer more than one hop', () => {
+      setupMocks();
+      // A three-link chain: reaching the live head takes two redirects, so a
+      // redirect that only ever resolves one level would stop at proposal-2.
+      useProposalMock.mockImplementation((id: string | undefined) => {
+        const askedFor = id ?? PROPOSAL_ID;
+        return {
+          data:
+            askedFor === 'proposal-1'
+              ? baseProposal({ id: askedFor, status: 'superseded', supersededBy: 'proposal-2' })
+              : askedFor === 'proposal-2'
+              ? baseProposal({ id: askedFor, status: 'superseded', supersededBy: 'proposal-3' })
+              : baseProposal({ id: askedFor, revision: 3 }),
+          isLoading: false,
+          isError: false,
+        } as unknown as ReturnType<typeof useProposal>;
+      });
+
+      const { container } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
+
+      expect(useProposalMock).toHaveBeenCalledWith('proposal-3');
+      expect(
+        container.querySelector(
+          '[data-test-subj="agenticInvestigationsProposalApprove-proposal-3"]'
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('stops instead of looping forever on a chain that points in a circle', () => {
+      setupMocks();
+      useProposalMock.mockImplementation((id: string | undefined) => {
+        const askedFor = id ?? PROPOSAL_ID;
+        return {
+          data: baseProposal({
+            id: askedFor,
+            status: 'superseded',
+            supersededBy: `${askedFor}-next`,
+          }),
+          isLoading: false,
+          isError: false,
+        } as unknown as ReturnType<typeof useProposal>;
+      });
+
+      const { getByTestId } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
+
+      expect(getByTestId('warning-callout')).toBeInTheDocument();
     });
   });
 
