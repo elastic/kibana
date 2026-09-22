@@ -42,6 +42,16 @@ interface PolicyPlan {
   writeVersion?: string;
 }
 
+/**
+ * Snapshot-exact undo for a successful fan-out. Returned so the caller can restore policies if
+ * the subsequent connector write fails — without re-fanning a single global `oldRoleArn` that
+ * would erase per-policy drift captured before the forward write.
+ */
+export interface RoleArnPropagationRollback {
+  readonly policyCount: number;
+  revert(): Promise<void>;
+}
+
 /** Ids rendered inline in the thrown message; `detail.updateFailed` always carries the full list. */
 const MAX_RENDERED_POLICY_IDS = 20;
 
@@ -66,11 +76,12 @@ const renderPolicyIds = (ids: string[]): string => {
  * `packagePolicy.vars`, input-level `vars`, or per-stream `vars` are silently skipped.
  *
  * Exit points (in source order):
- *   1. `return` — no package policy references the connector (nothing to do).
- *   2. `return` — policies reference the connector but none carry a `role_arn` variable.
+ *   1. `return undefined` — no package policy references the connector (nothing to do).
+ *   2. `return undefined` — policies reference the connector but none carry a `role_arn` variable.
  *   3. `throw`  — one or more referencing policies lack a `package` (cannot be updated).
- *   4. `return` — Phase 1 forward writes all succeeded and the agent-policy revision bump
- *      succeeded. Caller is safe to write the connector.
+ *   4. `return RoleArnPropagationRollback` — Phase 1 forward writes all succeeded and the
+ *      agent-policy revision bump succeeded. Caller is safe to write the connector; on that
+ *      write's failure call `rollback.revert()` to restore exact per-policy snapshots.
  *   5. `throw`  — Phase 1 had policy failures, or the post-Phase-1 agent-policy bump failed;
  *      successful policy writes are reverted and `CloudConnectorRoleArnPropagationError` is
  *      thrown with `updateFailed` / `revertFailed` id lists. Caller must NOT write the connector.
@@ -80,7 +91,7 @@ export const propagateRoleArnToPackagePolicies = async ({
   esClient,
   connectorId,
   newRoleArn,
-}: PropagateArgs): Promise<void> => {
+}: PropagateArgs): Promise<RoleArnPropagationRollback | undefined> => {
   const logger = appContextService.getLogger().get('propagateRoleArnToPackagePolicies');
   const spaceId = soClient.getCurrentNamespace() ?? DEFAULT_SPACE_ID;
 
@@ -103,7 +114,7 @@ export const propagateRoleArnToPackagePolicies = async ({
 
   if (policies.length === 0) {
     logger.debug(`No package policies reference connector ${connectorId}; nothing to fan out.`);
-    return; // exit 1/4: nothing references this connector
+    return undefined; // exit 1: nothing references this connector
   }
 
   // ── Plan ────────────────────────────────────────────────────────────────────────────────────
@@ -128,7 +139,7 @@ export const propagateRoleArnToPackagePolicies = async ({
     logger.debug(
       `Connector ${connectorId} has ${policies.length} referencing package policies but none carry a role_arn variable; nothing to fan out.`
     );
-    return; // exit 2/4: policies reference this connector but hold no role_arn to rewrite
+    return undefined; // exit 2: policies reference this connector but hold no role_arn to rewrite
   }
 
   // packagePolicyService.update unconditionally rejects policies without a package. Attempting
@@ -316,7 +327,43 @@ export const propagateRoleArnToPackagePolicies = async ({
         succeeded.length === 1 ? 'policy' : 'policies'
       }.`
     );
-    return; // exit 3/4: happy path — caller may now write the connector
+
+    // exit 4: happy path — caller may write the connector; keep exact snapshots for undo.
+    const rollbackPlans = succeeded;
+    return {
+      policyCount: rollbackPlans.length,
+      revert: async () => {
+        logger.warn(
+          `Reverting ${rollbackPlans.length} package ${
+            rollbackPlans.length === 1 ? 'policy' : 'policies'
+          } after a failed connector write for connector ${connectorId}.`
+        );
+        const { reverted, revertFailed } = await revertPlans(rollbackPlans);
+        try {
+          await bumpAgentPolicies(reverted);
+        } catch (bumpError) {
+          const bumpMessage = bumpError instanceof Error ? bumpError.message : String(bumpError);
+          logger.error(
+            `Failed to bump agent policy revisions in space ${spaceId} after rolling back the role ARN fan-out for connector ${connectorId}: ${bumpMessage}`
+          );
+        }
+
+        if (revertFailed.length === 0) {
+          return;
+        }
+
+        revertFailed.sort();
+        throw new CloudConnectorRoleArnPropagationError(
+          `Failed to roll back role ARN on ${revertFailed.length} package ${
+            revertFailed.length === 1 ? 'policy' : 'policies'
+          } for connector ${connectorId} after the connector write failed` +
+            ` (ids: ${renderPolicyIds(
+              revertFailed
+            )}); those policies are now on the new role ARN while the connector still holds the old one.`,
+          { updateFailed: [], revertFailed }
+        );
+      },
+    };
   }
 
   // ── Phase 2: revert successful forward writes ──────────────────────────────────────────────

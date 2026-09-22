@@ -481,6 +481,8 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
             : cloudConnectorUpdate.vars;
       }
 
+      let roleArnRollback: Awaited<ReturnType<typeof propagateRoleArnToPackagePolicies>> =
+        undefined;
       if (roleArnChanged) {
         if (!esClient) {
           logger.error(
@@ -490,7 +492,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
             'Role ARN update is not supported from this code path (missing esClient for package-policy fan-out).'
           );
         }
-        await propagateRoleArnToPackagePolicies({
+        roleArnRollback = await propagateRoleArnToPackagePolicies({
           soClient,
           esClient,
           connectorId: cloudConnectorId,
@@ -509,18 +511,13 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
           updateAttributes
         );
       } catch (writeError) {
-        if (roleArnChanged && typeof oldRoleArn === 'string' && esClient) {
+        if (roleArnRollback) {
           logger.error(
             `Connector ${cloudConnectorId} write failed after successful role ARN fan-out; reverting policies.`,
             writeError
           );
           try {
-            await propagateRoleArnToPackagePolicies({
-              soClient,
-              esClient,
-              connectorId: cloudConnectorId,
-              newRoleArn: oldRoleArn,
-            });
+            await roleArnRollback.revert();
           } catch (revertError) {
             logger.error(
               `Revert after failed connector write also failed for ${cloudConnectorId}`,

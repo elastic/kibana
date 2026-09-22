@@ -310,14 +310,77 @@ describe('propagateRoleArnToPackagePolicies', () => {
   it('does not bump anything when there is nothing to fan out', async () => {
     mockListReturns([]);
 
-    await propagateRoleArnToPackagePolicies({
+    const rollback = await propagateRoleArnToPackagePolicies({
       soClient,
       esClient,
       connectorId: CONNECTOR_ID,
       newRoleArn: NEW_ARN,
     });
 
+    expect(rollback).toBeUndefined();
     expect(agentPolicyService.bumpAgentPoliciesByIds).not.toHaveBeenCalled();
+  });
+
+  it('returns a rollback handle that restores exact per-policy snapshots', async () => {
+    // Policies may have drifted from the connector's stored ARN. Re-fanning with a global
+    // oldRoleArn would force every policy onto that value; the handle must restore each
+    // policy's own pre-forward snapshot instead.
+    const drifted = makePolicy('drifted', 'arn:aws:iam::123456789012:role/Drifted');
+    mockListReturns([makePolicy('a'), drifted]);
+
+    const rollback = await propagateRoleArnToPackagePolicies({
+      soClient,
+      esClient,
+      connectorId: CONNECTOR_ID,
+      newRoleArn: NEW_ARN,
+    });
+
+    expect(rollback).toEqual(
+      expect.objectContaining({ policyCount: 2, revert: expect.any(Function) })
+    );
+
+    (packagePolicyService.update as jest.Mock).mockClear();
+    (agentPolicyService.bumpAgentPoliciesByIds as jest.Mock).mockClear();
+
+    await rollback!.revert();
+
+    const revertById = Object.fromEntries(
+      (packagePolicyService.update as jest.Mock).mock.calls.map(([, , id, update]) => [id, update])
+    );
+    expect(revertById.a.inputs[0].vars.role_arn.value).toBe(OLD_ARN);
+    expect(revertById.drifted.inputs[0].vars.role_arn.value).toBe(
+      'arn:aws:iam::123456789012:role/Drifted'
+    );
+    // OCC token from the successful forward write, not the original PIT version.
+    expect(revertById.a.version).toBe('Wza-after');
+    expect(agentPolicyService.bumpAgentPoliciesByIds).toHaveBeenCalledTimes(1);
+  });
+
+  it('rollback handle throws with revertFailed when a snapshot restore fails', async () => {
+    mockListReturns([makePolicy('a'), makePolicy('b')]);
+
+    const rollback = await propagateRoleArnToPackagePolicies({
+      soClient,
+      esClient,
+      connectorId: CONNECTOR_ID,
+      newRoleArn: NEW_ARN,
+    });
+
+    (packagePolicyService.update as jest.Mock).mockImplementation(async (_so, _es, id: string) => {
+      if (id === 'b') throw new Error('revert boom');
+      return { id, version: `Wz${id}-reverted` };
+    });
+
+    let caught: CloudConnectorRoleArnPropagationError | undefined;
+    try {
+      await rollback!.revert();
+    } catch (err) {
+      caught = err as CloudConnectorRoleArnPropagationError;
+    }
+
+    expect(caught).toBeInstanceOf(CloudConnectorRoleArnPropagationError);
+    expect(caught?.detail.updateFailed).toEqual([]);
+    expect(caught?.detail.revertFailed).toEqual(['b']);
   });
 
   it('rejects packageless policies before any write', async () => {
