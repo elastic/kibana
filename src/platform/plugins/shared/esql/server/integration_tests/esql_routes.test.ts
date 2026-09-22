@@ -111,6 +111,20 @@ describe('ESQL routes', () => {
     );
   });
 
+  it('can load ES|QL views (GET /internal/esql/views)', async () => {
+    const url = '/internal/esql/views';
+    const result = await testbed.GET(url).send().expect(200);
+
+    expect(result.body).toHaveProperty('views');
+    expect(Array.isArray(result.body.views)).toBe(true);
+    result.body.views.forEach((view: { name: string; query: string }) => {
+      expect(view).toHaveProperty('name');
+      expect(view).toHaveProperty('query');
+      expect(typeof view.name).toBe('string');
+      expect(typeof view.query).toBe('string');
+    });
+  });
+
   it('can strictly load ES|QL views for management (GET /internal/esql/views)', async () => {
     const url = '/internal/esql/views?strict=true';
     const result = await testbed.GET(url).send().expect(200);
