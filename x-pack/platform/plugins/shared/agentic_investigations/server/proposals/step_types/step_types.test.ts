@@ -10,14 +10,19 @@ import { z } from '@kbn/zod/v4';
 import { createProposalStepInputSchema } from '../../../common/proposals/step_types/create_proposal_step';
 import { updateProposalStepInputSchema } from '../../../common/proposals/step_types/update_proposal_step';
 import type { ProposalsService } from '../services/proposals_service';
+import type { ProposalPrivilegesChecker } from '../services/check_proposal_privileges';
+import { ProposalForbiddenError } from '../services/errors';
+import { getCheckDecidePrivilegesStepDefinition } from './check_decide_privileges_step';
+import { getCloneProposalStepDefinition } from './clone_proposal_step';
 import { getCreateProposalStepDefinition } from './create_proposal_step';
+import { getGetProposalStepDefinition } from './get_proposal_step';
 import { getUpdateProposalStepDefinition } from './update_proposal_step';
 
 const EXECUTION_ID = 'exec-1';
 const SPACE_ID = 'space-a';
 const FAKE_REQUEST = { fake: true } as never;
 
-/** The step identifies the Worker from the execution's own fake request. */
+/** The step identifies the actor from the execution's own fake request. */
 const resolvedUser = {
   username: 'worker-user',
   fullName: 'Worker User',
@@ -25,6 +30,13 @@ const resolvedUser = {
   profileUid: 'worker-uid',
 };
 const resolveUser = jest.fn().mockResolvedValue(resolvedUser);
+
+/** Allows everything by default; a test overrides the one call it exercises. */
+const allowAll = (): jest.Mocked<ProposalPrivilegesChecker> => ({
+  assertCanManage: jest.fn().mockResolvedValue(undefined),
+  assertCanRead: jest.fn().mockResolvedValue(undefined),
+  canManage: jest.fn().mockResolvedValue(true),
+});
 
 const createContext = (input: Record<string, unknown>): StepHandlerContext<never, never> =>
   ({
@@ -44,10 +56,10 @@ const createContext = (input: Record<string, unknown>): StepHandlerContext<never
     logger: { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() },
     abortSignal: new AbortController().signal,
     stepId: 'create_proposal',
-    stepType: 'investigations.createProposal',
+    stepType: 'proposals.createProposal',
   } as unknown as StepHandlerContext<never, never>);
 
-describe('investigations.createProposal input schema', () => {
+describe('proposals.createProposal input schema', () => {
   // Liquid renders a template for an absent workflow input as `''`, so the
   // schema — not just the service — has to treat a blank as an omission.
   it.each(['', null])('should treat %p as absent for the non-string optional inputs', (blank) => {
@@ -122,21 +134,67 @@ describe('investigations.createProposal input schema', () => {
   });
 });
 
-describe('investigations.updateProposal input schema', () => {
-  it.each(['', null])('should treat %p as an absent executionError', (blank) => {
+describe('proposals.updateProposal input schema', () => {
+  it.each(['', null])('should treat %p as absent across every optional input', (blank) => {
     const parsed = updateProposalStepInputSchema.parse({
       proposalId: 'proposal-1',
-      status: 'succeeded',
+      status: blank,
+      decision: blank,
+      decidedBy: blank,
+      dismissReason: blank,
+      rationale: blank,
       executionError: blank,
     });
 
-    expect(parsed).toEqual({ proposalId: 'proposal-1', status: 'succeeded' });
+    // Every field is optional, so a call that only annotates is valid.
+    expect(parsed).toEqual({ proposalId: 'proposal-1' });
+  });
+
+  it('should accept a decision and a status in the same call', () => {
+    // `approved` + `pending` is not a legal pair, so the workflow always
+    // writes the decision together with the status it implies.
+    const parsed = updateProposalStepInputSchema.parse({
+      proposalId: 'proposal-1',
+      decision: 'approved',
+      status: 'executing',
+      decidedBy: 'analyst',
+    });
+
+    expect(parsed).toEqual({
+      proposalId: 'proposal-1',
+      decision: 'approved',
+      status: 'executing',
+      decidedBy: 'analyst',
+    });
+  });
+
+  it('should refuse to move a proposal back to awaiting', () => {
+    expect(
+      updateProposalStepInputSchema.safeParse({ proposalId: 'proposal-1', status: 'pending' })
+        .success
+    ).toBe(false);
+  });
+
+  it('should refuse a decision outside the vocabulary', () => {
+    expect(
+      updateProposalStepInputSchema.safeParse({ proposalId: 'proposal-1', decision: 'maybe' })
+        .success
+    ).toBe(false);
   });
 });
 
-describe('investigations.createProposal step', () => {
+describe('proposals.createProposal step', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  const createDefinition = (create: jest.Mock, privileges = allowAll()) => ({
+    definition: getCreateProposalStepDefinition({
+      getProposalsService: () => ({ create } as unknown as ProposalsService),
+      resolveUser,
+      privileges,
+    }),
+    privileges,
   });
 
   it('should take the workflow execution id from the step context rather than the caller', async () => {
@@ -144,11 +202,9 @@ describe('investigations.createProposal step', () => {
       id: 'proposal-1',
       status: 'pending',
       category: 'tune',
+      expiresAt: '2026-09-04T00:00:00.000Z',
     });
-    const definition = getCreateProposalStepDefinition({
-      getProposalsService: () => ({ create } as unknown as ProposalsService),
-      resolveUser,
-    });
+    const { definition } = createDefinition(create);
 
     const result = await definition.handler(
       createContext({
@@ -168,22 +224,67 @@ describe('investigations.createProposal step', () => {
     expect(resolveUser).toHaveBeenCalledWith(FAKE_REQUEST);
     expect(result.output).toEqual({
       proposalId: 'proposal-1',
+      rootProposalId: 'proposal-1',
       status: 'pending',
       category: 'tune',
       requiresDecision: true,
+      expiresAt: '2026-09-04T00:00:00.000Z',
     });
   });
 
-  it('should report requiresDecision false when the proposal was created already approved', async () => {
-    const create = jest.fn().mockResolvedValue({
-      id: 'proposal-1',
-      status: 'approved',
-      category: 'tune',
-    });
-    const definition = getCreateProposalStepDefinition({
-      getProposalsService: () => ({ create } as unknown as ProposalsService),
-      resolveUser,
-    });
+  it('should pass a blank optional input to the service as an omission', async () => {
+    // The engine renders a step's `with` block and hands it over unparsed —
+    // `CustomStepImpl.getInput()` never applies `inputSchema` — so the `''`
+    // Liquid renders for an absent input arrives verbatim. The handler parses
+    // the input itself, which is the only thing that makes `optionalStepInput`
+    // take effect; without it the service stores empty strings where a
+    // category, an impact and a confidence should be.
+    const create = jest.fn().mockResolvedValue({ id: 'p', status: 'pending' });
+    const { definition } = createDefinition(create);
+
+    await definition.handler(
+      createContext({
+        conversationId: 'conv-1',
+        comment: 'Tune the noisy rule',
+        actionWorkflowId: '',
+        impact: '',
+        category: '',
+        confidence: '',
+      })
+    );
+
+    expect(create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        actionWorkflowId: undefined,
+        impact: undefined,
+        category: undefined,
+        // The handler's own default, which `''` would have satisfied.
+        confidence: 'medium',
+      }),
+      expect.anything()
+    );
+  });
+
+  it('should emit expiresAt so the gate loop can derive each attempt from it', async () => {
+    const create = jest
+      .fn()
+      .mockResolvedValue({ id: 'p', status: 'pending', expiresAt: '2026-09-04T00:00:00.000Z' });
+    const { definition } = createDefinition(create);
+
+    const result = await definition.handler(
+      createContext({ conversationId: 'conv-1', comment: 'Tune the noisy rule' })
+    );
+
+    expect(result.output?.expiresAt).toBe('2026-09-04T00:00:00.000Z');
+  });
+
+  it('should report requiresDecision from the decision rather than the status', async () => {
+    // An approved proposal is briefly `executing`, and a status check would
+    // call that "still awaiting".
+    const create = jest
+      .fn()
+      .mockResolvedValue({ id: 'p', status: 'executing', decision: 'approved' });
+    const { definition } = createDefinition(create);
 
     const result = await definition.handler(
       createContext({ conversationId: 'conv-1', comment: 'Tune the noisy rule' })
@@ -192,74 +293,368 @@ describe('investigations.createProposal step', () => {
     expect(result.output?.requiresDecision).toBe(false);
   });
 
-  it('should default impact, confidence and origin when the caller omits them', async () => {
-    const create = jest.fn().mockResolvedValue({ id: 'p', status: 'pending', category: 'tune' });
-    const definition = getCreateProposalStepDefinition({
-      getProposalsService: () => ({ create } as unknown as ProposalsService),
-      resolveUser,
-    });
+  it('should pass the caller impact straight through for the service to prefer', async () => {
+    const create = jest.fn().mockResolvedValue({ id: 'p', status: 'pending' });
+    const { definition } = createDefinition(create);
 
     await definition.handler(
-      createContext({ conversationId: 'conv-1', comment: 'Tune the noisy rule' })
+      createContext({ conversationId: 'conv-1', comment: 'Tune the noisy rule', impact: 'high' })
     );
 
     expect(create).toHaveBeenCalledWith(
-      expect.objectContaining({ impact: 'low', confidence: 'medium', origin: 'worker' }),
+      expect.objectContaining({ impact: 'high', confidence: 'medium', origin: 'worker' }),
       expect.anything()
     );
   });
 
-  it('should return an error result rather than throwing when the service fails', async () => {
-    const create = jest.fn().mockRejectedValue(new Error('index unavailable'));
-    const definition = getCreateProposalStepDefinition({
-      getProposalsService: () => ({ create } as unknown as ProposalsService),
-      resolveUser,
-    });
+  it('should leave impact undefined when the caller omits it', async () => {
+    const create = jest.fn().mockResolvedValue({ id: 'p', status: 'pending' });
+    const { definition } = createDefinition(create);
 
-    const result = await definition.handler(
+    await definition.handler(
       createContext({ conversationId: 'conv-1', comment: 'Tune the noisy rule' })
     );
 
-    expect(result.error?.message).toBe('index unavailable');
-    expect(result.output).toBeUndefined();
+    // The service resolves the fallback chain; the step must not pre-empt it
+    // with a default, or the action's own impact could never win.
+    expect(create).toHaveBeenCalledWith(
+      expect.objectContaining({ impact: undefined }),
+      expect.anything()
+    );
+  });
+
+  it('should assert manage before writing anything', async () => {
+    const create = jest.fn();
+    const privileges = allowAll();
+    privileges.assertCanManage.mockRejectedValue(new ProposalForbiddenError('nope'));
+    const { definition } = createDefinition(create, privileges);
+
+    await expect(
+      definition.handler(createContext({ conversationId: 'conv-1', comment: 'Tune' }))
+    ).rejects.toMatchObject({ type: 'PermissionError' });
+    expect(create).not.toHaveBeenCalled();
+  });
+
+  it('should fail the step with a typed error when the service fails', async () => {
+    const create = jest.fn().mockRejectedValue(new Error('index unavailable'));
+    const { definition } = createDefinition(create);
+
+    // A distinct type is the only thing a workflow can branch on, since
+    // ExecutionError carries nothing else to tell failures apart.
+    await expect(
+      definition.handler(createContext({ conversationId: 'conv-1', comment: 'Tune' }))
+    ).rejects.toMatchObject({ type: 'ApiError', message: 'index unavailable' });
   });
 });
 
-describe('investigations.updateProposal step', () => {
-  it('should record the outcome against the space from the step context', async () => {
-    const update = jest.fn().mockResolvedValue({ id: 'proposal-1', status: 'succeeded' });
-    const definition = getUpdateProposalStepDefinition({
+describe('proposals.updateProposal step', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const updateDefinition = (update: jest.Mock, privileges = allowAll()) =>
+    getUpdateProposalStepDefinition({
       getProposalsService: () => ({ update } as unknown as ProposalsService),
+      resolveUser,
+      privileges,
     });
 
-    const result = await definition.handler(
+  it('should record the outcome against the space from the step context', async () => {
+    const update = jest.fn().mockResolvedValue({ id: 'proposal-1', status: 'succeeded' });
+
+    const result = await updateDefinition(update).handler(
       createContext({ proposalId: 'proposal-1', status: 'succeeded' })
     );
 
     expect(update).toHaveBeenCalledWith(
-      { id: 'proposal-1', status: 'succeeded', executionError: undefined },
+      expect.objectContaining({ id: 'proposal-1', status: 'succeeded' }),
       SPACE_ID
     );
-    expect(result.output).toEqual({ proposalId: 'proposal-1', status: 'succeeded' });
+    expect(result.output).toEqual({
+      proposalId: 'proposal-1',
+      status: 'succeeded',
+      decision: undefined,
+    });
   });
 
-  it('should pass the failure detail through', async () => {
-    const update = jest.fn().mockResolvedValue({ id: 'proposal-1', status: 'failed' });
-    const definition = getUpdateProposalStepDefinition({
-      getProposalsService: () => ({ update } as unknown as ProposalsService),
-    });
+  it('should resolve the decider from the execution request, not the passed username', async () => {
+    const update = jest
+      .fn()
+      .mockResolvedValue({ id: 'proposal-1', status: 'executing', decision: 'approved' });
 
-    await definition.handler(
+    await updateDefinition(update).handler(
       createContext({
         proposalId: 'proposal-1',
-        status: 'failed',
-        executionError: 'gate timed out',
+        decision: 'approved',
+        status: 'executing',
+        decidedBy: 'someone-else',
+      })
+    );
+
+    // Post-gate the execution runs as the approver, so the request is the
+    // better attribution.
+    expect(update).toHaveBeenCalledWith(
+      expect.objectContaining({ decidedBy: resolvedUser }),
+      SPACE_ID
+    );
+  });
+
+  it('should fall back to the gate username when the request yields no identity', async () => {
+    const update = jest
+      .fn()
+      .mockResolvedValue({ id: 'proposal-1', status: 'no_action', decision: 'dismissed' });
+    resolveUser.mockResolvedValueOnce(undefined);
+
+    await updateDefinition(update).handler(
+      createContext({
+        proposalId: 'proposal-1',
+        decision: 'dismissed',
+        status: 'no_action',
+        decidedBy: 'analyst',
       })
     );
 
     expect(update).toHaveBeenCalledWith(
-      expect.objectContaining({ executionError: 'gate timed out' }),
+      expect.objectContaining({
+        decidedBy: { username: 'analyst', fullName: null, email: null },
+      }),
       SPACE_ID
     );
+  });
+
+  it('should leave the decider unset when only the status moves', async () => {
+    const update = jest.fn().mockResolvedValue({ id: 'proposal-1', status: 'succeeded' });
+
+    await updateDefinition(update).handler(
+      createContext({ proposalId: 'proposal-1', status: 'succeeded' })
+    );
+
+    expect(update).toHaveBeenCalledWith(
+      expect.objectContaining({ decidedBy: undefined }),
+      SPACE_ID
+    );
+    expect(resolveUser).not.toHaveBeenCalled();
+  });
+
+  it('should return the decision so the workflow can read back what it wrote', async () => {
+    const update = jest
+      .fn()
+      .mockResolvedValue({ id: 'proposal-1', status: 'no_action', decision: 'dismissed' });
+
+    const result = await updateDefinition(update).handler(
+      createContext({ proposalId: 'proposal-1', decision: 'dismissed', status: 'no_action' })
+    );
+
+    expect(result.output?.decision).toBe('dismissed');
+  });
+
+  it('should pass the failure detail through', async () => {
+    const update = jest.fn().mockResolvedValue({ id: 'proposal-1', status: 'failed' });
+
+    await updateDefinition(update).handler(
+      createContext({
+        proposalId: 'proposal-1',
+        status: 'failed',
+        executionError: 'action exploded',
+      })
+    );
+
+    expect(update).toHaveBeenCalledWith(
+      expect.objectContaining({ executionError: 'action exploded' }),
+      SPACE_ID
+    );
+  });
+
+  it('should assert manage before writing', async () => {
+    const update = jest.fn();
+    const privileges = allowAll();
+    privileges.assertCanManage.mockRejectedValue(new ProposalForbiddenError('nope'));
+
+    await expect(
+      updateDefinition(update, privileges).handler(
+        createContext({ proposalId: 'proposal-1', status: 'succeeded' })
+      )
+    ).rejects.toMatchObject({ type: 'PermissionError' });
+    expect(update).not.toHaveBeenCalled();
+  });
+});
+
+describe('proposals.checkDecidePrivileges step', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should report a refusal without failing the step', async () => {
+    const privileges = allowAll();
+    privileges.canManage.mockResolvedValue(false);
+    const definition = getCheckDecidePrivilegesStepDefinition({ privileges });
+
+    // Failing here would spend the gate and strand the proposal, leaving no
+    // way for a privileged approver to retry.
+    const result = await definition.handler(createContext({ proposalId: 'proposal-1' }));
+
+    expect(result.output).toEqual({ canDecide: false });
+    expect(privileges.canManage).toHaveBeenCalledWith(FAKE_REQUEST);
+  });
+
+  it('should report an allowance', async () => {
+    const definition = getCheckDecidePrivilegesStepDefinition({ privileges: allowAll() });
+
+    const result = await definition.handler(createContext({ proposalId: 'proposal-1' }));
+
+    expect(result.output).toEqual({ canDecide: true });
+  });
+
+  it('should fail the step when the privilege check itself errors', async () => {
+    const privileges = allowAll();
+    privileges.canManage.mockRejectedValue(new Error('privilege service unavailable'));
+    const definition = getCheckDecidePrivilegesStepDefinition({ privileges });
+
+    // A service fault must stay distinguishable from a refusal, or the loop
+    // would re-park forever on an outage.
+    await expect(
+      definition.handler(createContext({ proposalId: 'proposal-1' }))
+    ).rejects.toMatchObject({ type: 'ApiError' });
+  });
+
+  it('should refuse an external resume without consulting the privilege service', async () => {
+    const privileges = allowAll();
+    const definition = getCheckDecidePrivilegesStepDefinition({ privileges });
+
+    // An external resume carries no request, so the execution wakes under the
+    // workflow runner's key — which always holds `manage_proposals`, having
+    // created the proposal. Checking it would authorize every external click
+    // as the Worker.
+    const result = await definition.handler(
+      createContext({ proposalId: 'proposal-1', respondedBy: 'external_resume:step-exec-1' })
+    );
+
+    expect(result.output).toEqual({ canDecide: false });
+    expect(privileges.canManage).not.toHaveBeenCalled();
+  });
+
+  it('should still check a named responder normally', async () => {
+    const privileges = allowAll();
+    const definition = getCheckDecidePrivilegesStepDefinition({ privileges });
+
+    const result = await definition.handler(
+      createContext({ proposalId: 'proposal-1', respondedBy: 'analyst' })
+    );
+
+    expect(result.output).toEqual({ canDecide: true });
+    expect(privileges.canManage).toHaveBeenCalledWith(FAKE_REQUEST);
+  });
+});
+
+describe('proposals.getProposal step', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const getDefinition = (get: jest.Mock, privileges = allowAll()) =>
+    getGetProposalStepDefinition({
+      getProposalsService: () => ({ get } as unknown as ProposalsService),
+      privileges,
+    });
+
+  it('should return only the fields a gating workflow branches on', async () => {
+    const get = jest.fn().mockResolvedValue({
+      id: 'proposal-1',
+      status: 'failed',
+      decision: 'approved',
+      decidedBy: {
+        username: 'analyst',
+        fullName: 'Alice Analyst',
+        email: null,
+        profileUid: 'uid-1',
+      },
+      supersededBy: 'proposal-2',
+      expiresAt: '2026-09-04T00:00:00.000Z',
+      actionWorkflowId: 'system-alertzero-action-create-rule',
+      comment: 'not part of the contract',
+    });
+
+    const result = await getDefinition(get).handler(createContext({ proposalId: 'proposal-1' }));
+
+    expect(get).toHaveBeenCalledWith('proposal-1', SPACE_ID);
+    expect(result.output).toEqual({
+      status: 'failed',
+      decision: 'approved',
+      decidedBy: {
+        username: 'analyst',
+        fullName: 'Alice Analyst',
+        email: null,
+        profileUid: 'uid-1',
+      },
+      supersededBy: 'proposal-2',
+      expiresAt: '2026-09-04T00:00:00.000Z',
+      actionWorkflowId: 'system-alertzero-action-create-rule',
+    });
+  });
+
+  it('should leave decidedBy undefined when the stored proposal has no decider', async () => {
+    const get = jest.fn().mockResolvedValue({ status: 'pending' });
+
+    const result = await getDefinition(get).handler(createContext({ proposalId: 'proposal-1' }));
+
+    expect(result.output?.decidedBy).toBeUndefined();
+  });
+
+  it('should assert read rather than manage', async () => {
+    const get = jest.fn().mockResolvedValue({ status: 'pending' });
+    const privileges = allowAll();
+
+    await getDefinition(get, privileges).handler(createContext({ proposalId: 'proposal-1' }));
+
+    expect(privileges.assertCanRead).toHaveBeenCalledWith(FAKE_REQUEST);
+    expect(privileges.assertCanManage).not.toHaveBeenCalled();
+  });
+
+  it('should fail the step when the reader lacks the privilege', async () => {
+    const get = jest.fn();
+    const privileges = allowAll();
+    privileges.assertCanRead.mockRejectedValue(new ProposalForbiddenError('nope'));
+
+    await expect(
+      getDefinition(get, privileges).handler(createContext({ proposalId: 'proposal-1' }))
+    ).rejects.toMatchObject({ type: 'PermissionError' });
+    expect(get).not.toHaveBeenCalled();
+  });
+});
+
+describe('proposals.cloneProposal step', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const cloneDefinition = (clone: jest.Mock, privileges = allowAll()) =>
+    getCloneProposalStepDefinition({
+      getProposalsService: () => ({ clone } as unknown as ProposalsService),
+      privileges,
+    });
+
+  it('should return the new proposal id and pass the failure detail on', async () => {
+    const clone = jest.fn().mockResolvedValue('proposal-2');
+
+    const result = await cloneDefinition(clone).handler(
+      createContext({ proposalId: 'proposal-1', executionError: 'action exploded' })
+    );
+
+    expect(clone).toHaveBeenCalledWith(
+      { id: 'proposal-1', executionError: 'action exploded' },
+      SPACE_ID
+    );
+    expect(result.output).toEqual({ proposalId: 'proposal-2' });
+  });
+
+  it('should assert manage before superseding anything', async () => {
+    const clone = jest.fn();
+    const privileges = allowAll();
+    privileges.assertCanManage.mockRejectedValue(new ProposalForbiddenError('nope'));
+
+    await expect(
+      cloneDefinition(clone, privileges).handler(createContext({ proposalId: 'proposal-1' }))
+    ).rejects.toMatchObject({ type: 'PermissionError' });
+    expect(clone).not.toHaveBeenCalled();
   });
 });

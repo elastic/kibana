@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { routeId } from '../../zod_query';
 import { getPrivateLocationsAndAgentPolicies } from './get_private_locations';
 import { getEnrolledAgents } from './get_agent_stats';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
@@ -48,8 +49,8 @@ export const getMonitorAgentAssignment: SyntheticsRestApiRouteFactory<
   method: 'GET',
   path: SYNTHETICS_API_URLS.MONITOR_AGENT_ASSIGNMENT,
   validate: {
-    params: schema.object({
-      monitorId: schema.string({ minLength: 1, maxLength: 1024 }),
+    params: z.strictObject({
+      monitorId: routeId,
     }),
   },
   handler: async ({

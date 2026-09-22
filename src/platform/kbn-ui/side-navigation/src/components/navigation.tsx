@@ -145,6 +145,13 @@ export const Navigation = ({
       <SideNavCollapseButton isCollapsed={isCollapsed} toggle={onToggleCollapsed} />
     ) : null;
 
+  const handleItemClick = (item: MenuItem | SecondaryMenuItem, closePopover?: () => void) => {
+    onItemClick?.(item);
+    if ('isExternal' in item && item.isExternal) return;
+    closePopover?.();
+    focusMainContent();
+  };
+
   return (
     <div
       css={navigationWrapperStyles}
@@ -181,7 +188,7 @@ export const Navigation = ({
                         isCurrent={actualActiveItemId === item.id}
                         isHighlighted={item.id === visuallyActivePageId}
                         isNew={getIsNewPrimary(item.id)}
-                        onClick={() => onItemClick?.(item)}
+                        onClick={() => handleItemClick(item)}
                         {...itemProps}
                       >
                         {item.label}
@@ -214,12 +221,7 @@ export const Navigation = ({
                                     isHighlighted={subItem.id === visuallyActiveSubpageId}
                                     isCurrent={actualActiveItemId === subItem.id}
                                     isNew={getIsNewSecondary(subItem.id)}
-                                    onClick={() => {
-                                      onItemClick?.(subItem);
-                                      if (subItem.href) {
-                                        closePopover();
-                                      }
-                                    }}
+                                    onClick={() => handleItemClick(subItem, closePopover)}
                                     testSubjPrefix={popoverItemPrefix}
                                     {...subItem}
                                   >
@@ -304,13 +306,7 @@ export const Navigation = ({
                                     isHighlighted={item.id === visuallyActivePageId}
                                     isNew={getIsNewPrimary(item.id)}
                                     hasSubmenu={hasSubmenu}
-                                    onClick={() => {
-                                      onItemClick?.(item);
-                                      if (!hasSubmenu) {
-                                        closePopover();
-                                        focusMainContent();
-                                      }
-                                    }}
+                                    onClick={() => handleItemClick(item, closePopover)}
                                     {...itemProps}
                                   >
                                     {item.label}
@@ -360,11 +356,7 @@ export const Navigation = ({
                                       isHighlighted={subItem.id === visuallyActiveSubpageId}
                                       isCurrent={actualActiveItemId === subItem.id}
                                       isNew={getIsNewSecondary(subItem.id)}
-                                      onClick={() => {
-                                        onItemClick?.(subItem);
-                                        closePopover();
-                                        focusMainContent();
-                                      }}
+                                      onClick={() => handleItemClick(subItem, closePopover)}
                                       {...subItem}
                                     >
                                       {subItem.label}
@@ -409,7 +401,7 @@ export const Navigation = ({
                         isCurrent={actualActiveItemId === item.id}
                         isNew={getIsNewPrimary(item.id)}
                         hasContent={getHasSubmenu(item)}
-                        onClick={() => onItemClick?.(item)}
+                        onClick={() => handleItemClick(item)}
                         {...itemProps}
                       />
                     }
@@ -440,12 +432,7 @@ export const Navigation = ({
                                     isHighlighted={subItem.id === visuallyActiveSubpageId}
                                     isCurrent={actualActiveItemId === subItem.id}
                                     isNew={getIsNewSecondary(subItem.id)}
-                                    onClick={() => {
-                                      onItemClick?.(subItem);
-                                      if (subItem.href) {
-                                        closePopover();
-                                      }
-                                    }}
+                                    onClick={() => handleItemClick(subItem, closePopover)}
                                     {...subItem}
                                     testSubjPrefix={popoverFooterItemPrefix}
                                   >
@@ -496,7 +483,7 @@ export const Navigation = ({
                           isCurrent={actualActiveItemId === subItem.id}
                           isHighlighted={subItem.id === visuallyActiveSubpageId}
                           isNew={getIsNewSecondary(subItem.id)}
-                          onClick={() => onItemClick?.(subItem)}
+                          onClick={() => handleItemClick(subItem)}
                           testSubjPrefix={sidePanelItemPrefix}
                           {...subItem}
                         >
