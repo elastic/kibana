@@ -242,7 +242,7 @@ export default function (providerContext: FtrProviderContext) {
       };
       const buf = buildPackageZipWithAssetType('security_rule', mlRuleAsset);
 
-      // fleet_all_int_all_siem_all has rules-all (via siemV5:all) but not ml:canCreateJob
+      // fleet_all_int_all_siem_all has rules-all (via siemV2:all) but not ml:canCreateJob
       await supertestWithoutAuth
         .post(`/api/fleet/epm/packages`)
         .auth(
@@ -307,7 +307,7 @@ export default function (providerContext: FtrProviderContext) {
       it('rejects upload when caller lacks rules-all in destination additional Space — 403', async () => {
         const buf = buildPackageZipWithAssetType('security_rule', securityRuleAsset);
 
-        // fleet_all_int_all_siem_default_only has siemV5:all scoped to [default] only,
+        // fleet_all_int_all_siem_default_only has siemV2:all scoped to [default] only,
         // so it lacks rules-all in the extra Space where the existing rule ref lives.
         await supertestWithoutAuth
           .post('/api/fleet/epm/packages')
@@ -324,7 +324,7 @@ export default function (providerContext: FtrProviderContext) {
       it('allows upload when caller has rules-all in all destination Spaces — 200', async () => {
         const buf = buildPackageZipWithAssetType('security_rule', securityRuleAsset);
 
-        // fleet_all_int_all_siem_all has siemV5:all in spaces: ['*'] — covers the extra Space too.
+        // fleet_all_int_all_siem_all has siemV2:all in spaces: ['*'] — covers the extra Space too.
         await supertestWithoutAuth
           .post('/api/fleet/epm/packages')
           .auth(
