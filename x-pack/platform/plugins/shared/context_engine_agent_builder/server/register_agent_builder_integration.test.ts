@@ -9,6 +9,7 @@ import type { CoreSetup } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AgentBuilderPluginSetup, AiIndexResolver } from '@kbn/agent-builder-server';
 import { registerContextEngineAgentBuilderIntegration } from './register_agent_builder_integration';
+import { contextEngineSetupAgentType } from './agent/context_engine_agent';
 import type {
   ContextEngineAgentBuilderPluginStart,
   ContextEngineAgentBuilderStartDependencies,
@@ -62,13 +63,16 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
     >;
 
     let resolver: AiIndexResolver | undefined;
+    const registerType = jest.fn();
     const agentBuilder = {
       agents: {
+        registerType,
         registerAiIndexResolver: jest.fn((registered: AiIndexResolver) => {
           resolver = registered;
         }),
       },
     } as unknown as AgentBuilderPluginSetup;
+
 
     registerContextEngineAgentBuilderIntegration({
       coreSetup,
@@ -81,6 +85,7 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
     }
     return {
       resolver,
+      registerType,
       list,
       getAiIndexDataReadService,
       asScoped,
@@ -167,5 +172,12 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
 
     await expect(resolver({ ids: ['my-custom'], request })).rejects.toThrow('cluster unreachable');
     expect(list).not.toHaveBeenCalled();
+  });
+
+  it('registers the Context Engine Setup agent type during setup', () => {
+    const { registerType } = setup({ aiIndices: [] });
+
+    expect(registerType).toHaveBeenCalledTimes(1);
+    expect(registerType).toHaveBeenCalledWith(contextEngineSetupAgentType);
   });
 });

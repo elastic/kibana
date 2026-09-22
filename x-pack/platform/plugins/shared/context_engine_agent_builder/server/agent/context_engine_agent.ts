@@ -7,6 +7,7 @@
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
+import { SELF_AGENT_ID } from '@kbn/agent-builder-common';
 import { platformCoreTools } from '@kbn/agent-builder-common/tools';
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 import {
@@ -61,7 +62,8 @@ export const contextEngineSetupAgentType = {
         ],
       },
     ],
-    enable_elastic_capabilities: true,
+    enable_elastic_capabilities: false,
+    subagent_ids: [SELF_AGENT_ID],
     connector_ids: [],
   },
 } as const satisfies AgentTypeDefinition;
