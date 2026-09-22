@@ -7,11 +7,26 @@
 
 import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
-import { generateEsql } from '@kbn/agent-builder-genai-utils';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import {
+  generateEsql,
+  GenerateEsqlNoDataError,
+  setDefaultEsqlCacheKey,
+} from '@kbn/agent-builder-genai-utils';
+import { toHashedId, type BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { ToolHandlerResult } from '@kbn/agent-builder-server/tools';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { resolveTimeRange } from './screen_context_utils';
+
+const callGenerateEsql = async (params: Parameters<typeof generateEsql>[0]) => {
+  try {
+    return { response: await generateEsql(params), noDataError: undefined };
+  } catch (err) {
+    if (err instanceof GenerateEsqlNoDataError) {
+      return { response: undefined, noDataError: err };
+    }
+    throw err;
+  }
+};
 
 const nlToEsqlToolSchema = z.object({
   query: z.string().describe('A natural language query to generate an ES|QL query from.'),
@@ -56,11 +71,27 @@ const nlToEsqlToolSchema = z.object({
     ),
 });
 
-export const generateEsqlTool = (): BuiltinToolDefinition<typeof nlToEsqlToolSchema> => {
+export const generateEsqlTool = ({
+  organizationId,
+}: {
+  /** Raw organization id used to derive a stable EIS session id for prompt-cache stickiness. */
+  organizationId?: string;
+} = {}): BuiltinToolDefinition<typeof nlToEsqlToolSchema> => {
+  if (organizationId) {
+    setDefaultEsqlCacheKey(toHashedId(organizationId));
+  }
   return {
     id: platformCoreTools.generateEsql,
     type: ToolType.builtin,
-    description: 'Generate an ES|QL query from a natural language query.',
+    description:
+      'Generate an ES|QL query from a natural language query. ES|QL reference: https://www.elastic.co/docs/reference/query-languages/esql',
+    annotations: {
+      title: 'Generate ES|QL',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     schema: nlToEsqlToolSchema,
     handler: async (
       {
@@ -75,11 +106,11 @@ export const generateEsqlTool = (): BuiltinToolDefinition<typeof nlToEsqlToolSch
     ) => {
       const timeRange = resolveTimeRange(attachments, explicitTimeRange);
 
-      const esqlResponse = await generateEsql({
+      const { response: esqlResponse, noDataError } = await callGenerateEsql({
         nlQuery,
         index,
         additionalContext: context,
-        executeQuery,
+        execute: executeQuery ? 'data' : 'none',
         disableNamedParams,
         timeRange,
         includeDatasets: experimentalFeatures.datasets,
@@ -88,6 +119,11 @@ export const generateEsqlTool = (): BuiltinToolDefinition<typeof nlToEsqlToolSch
         logger,
         events,
       });
+      if (noDataError) {
+        return {
+          results: [{ type: ToolResultType.error, data: { message: noDataError.message } }],
+        };
+      }
 
       const toolResults: ToolHandlerResult[] = [];
 
@@ -98,23 +134,28 @@ export const generateEsqlTool = (): BuiltinToolDefinition<typeof nlToEsqlToolSch
             message: esqlResponse.error,
           },
         });
-      } else {
-        if (esqlResponse.query) {
-          toolResults.push({
-            type: ToolResultType.query,
-            data: {
-              esql: esqlResponse.query,
-            },
-          });
-        }
-        if (esqlResponse.answer) {
-          toolResults.push({
-            type: ToolResultType.other,
-            data: {
-              answer: esqlResponse.answer,
-            },
-          });
-        }
+      } else if (esqlResponse.query) {
+        toolResults.push({
+          type: ToolResultType.query,
+          data: {
+            esql: esqlResponse.query,
+          },
+        });
+      }
+
+      // Returned on failure as well as success. `error` can be as unhelpful as "No query was
+      // generated", while the model's own response explains what actually went wrong — for
+      // instance that the question needs data the target index does not hold. Without it the
+      // caller cannot tell a transient failure from an impossible request. A query that failed is
+      // still not offered as a `query` result, so the caller has nothing it can hand to
+      // `execute_esql` (the prose may quote it, but not as a usable output).
+      if (esqlResponse.answer) {
+        toolResults.push({
+          type: ToolResultType.other,
+          data: {
+            answer: esqlResponse.answer,
+          },
+        });
       }
 
       return {

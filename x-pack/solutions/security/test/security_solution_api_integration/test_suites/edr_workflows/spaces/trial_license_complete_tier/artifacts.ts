@@ -24,6 +24,7 @@ import type {
   ExceptionListSummarySchema,
   FoundExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { allowedExperimentalValues } from '@kbn/security-solution-plugin/common';
 import { GLOBAL_ARTIFACT_TAG } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts';
 import { SECURITY_FEATURE_ID } from '@kbn/security-solution-plugin/common/constants';
 import type { PolicyTestResourceInfo } from '@kbn/test-suites-xpack-security-endpoint/services/endpoint_policy';
@@ -41,15 +42,31 @@ export default function ({ getService }: FtrProviderContext) {
   const log = getService('log');
   const config = getService('config');
 
-  const IS_ENDPOINT_EXCEPTION_MOVE_FF_ENABLED = (
-    config.get('kbnTestServer.serverArgs', []) as string[]
-  )
-    .find((s) => s.startsWith('--xpack.securitySolution.enableExperimental'))
-    ?.includes('endpointExceptionsMovedUnderManagement');
+  const experimentalOverrides = ((): string[] => {
+    const experimentalArg = (config.get('kbnTestServer.serverArgs', []) as string[]).find((arg) =>
+      arg.startsWith('--xpack.securitySolution.enableExperimental')
+    );
 
-  // @skipInServerless: due to the fact that the serverless builtin roles are not yet updated with new privilege
-  //                    and tests below are currently creating a new role/user
-  describe('@ess @serverless, @skipInServerlessMKI Endpoint Artifacts space awareness support', function () {
+    if (!experimentalArg) {
+      return [];
+    }
+
+    return JSON.parse(experimentalArg.slice(experimentalArg.indexOf('=') + 1)) as string[];
+  })();
+
+  // Match product parsing: defaults apply unless explicitly disabled via `disable:`.
+  // String-matching serverArgs alone is wrong now that this flag defaults to true.
+  const IS_ENDPOINT_EXCEPTION_MOVE_FF_ENABLED = experimentalOverrides.includes(
+    'disable:endpointExceptionsMovedUnderManagement'
+  )
+    ? false
+    : allowedExperimentalValues.endpointExceptionsMovedUnderManagement ||
+      experimentalOverrides.includes('endpointExceptionsMovedUnderManagement');
+
+  // @skipInServerless: needs two custom roles at once (artifact write with and without
+  // global artifact management). Serverless allows only one custom role, and no builtin
+  // role has artifact write without GAM.
+  describe('@ess @skipInServerless Endpoint Artifacts space awareness support', function () {
     const afterEachDataCleanup: Array<Pick<ArtifactTestData, 'cleanup'>> = [];
     const spaceOneId = 'space_one';
     const spaceTwoId = 'space_two';

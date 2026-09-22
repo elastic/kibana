@@ -15,7 +15,11 @@ import { convertShardsToObject } from '../routes/utils';
 import { packSavedObjectType } from '../../common/types';
 import type { OsqueryAppContextService } from './osquery_app_context_services';
 import type { PackSavedObject } from '../common/types';
-import { convertSOQueriesToPackConfig, makePackKey } from '../routes/pack/utils';
+import {
+  convertSOQueriesToPackConfig,
+  makePackKey,
+  toPackExecutionDefaults,
+} from '../routes/pack/utils';
 
 export const updateGlobalPacksCreateCallback = async (
   packagePolicy: NewPackagePolicy,
@@ -94,6 +98,8 @@ export const updateGlobalPacksCreateCallback = async (
             rrule_schedule: pack.rrule_schedule,
           },
           isRruleFeatureEnabled,
+          fallbackStartDate: pack.created_at,
+          packExecutionDefaults: toPackExecutionDefaults(pack),
         });
         set(draft, `inputs[0].config.osquery.value.packs.${packKey}`, {
           shard: 100,

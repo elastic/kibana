@@ -132,6 +132,8 @@ describe('Severity form field', () => {
 
     await userEvent.click(await screen.findByTestId('case-table-bulk-actions-link-icon'));
 
+    // waitForElementToBeRemoved is unreliable here: in userEvent v14 the element may
+    // already be gone before the call, or still animating out. waitFor handles both.
     await waitFor(() => {
       expect(screen.queryByTestId('case-table-bulk-actions-context-menu')).not.toBeInTheDocument();
     });

@@ -122,20 +122,6 @@ export default function (providerContext: FtrProviderContext) {
         createdConnectorIds.push(body.item.id);
       });
 
-      it('should return 400 when external_id is missing for AWS', async () => {
-        await supertest
-          .post(`/api/fleet/cloud_connectors`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            name: 'arn:aws:iam::123456789012:role/test-role-missing-external-id',
-            cloudProvider: 'aws',
-            vars: {
-              role_arn: { value: 'arn:aws:iam::123456789012:role/test-role', type: 'text' },
-            },
-          })
-          .expect(400);
-      });
-
       it('should return 400 when role_arn is missing for AWS', async () => {
         await supertest
           .post(`/api/fleet/cloud_connectors`)
@@ -1685,26 +1671,6 @@ export default function (providerContext: FtrProviderContext) {
         expect(body.message).to.match(/Package policy must contain role_arn variable/);
       });
 
-      it('should validate that external_id is required when updating AWS vars', async () => {
-        const updateData = {
-          vars: {
-            role_arn: { value: 'arn:aws:iam::123456789012:role/valid-role', type: 'text' },
-            // Missing external_id
-          },
-        };
-
-        const { body } = await supertest
-          .put(`/api/fleet/cloud_connectors/${createdAwsConnectorId}`)
-          .set('kbn-xsrf', 'xxxx')
-          .send(updateData)
-          .expect(400);
-
-        expect(body).to.have.property('message');
-        expect(body.message).to.match(
-          /Package policy must contain valid external_id secret reference/
-        );
-      });
-
       it('should validate that tenant_id is required when updating Azure vars', async () => {
         const updateData = {
           vars: {
@@ -2349,6 +2315,82 @@ export default function (providerContext: FtrProviderContext) {
 
         // Verify the secret was deleted even with force=true
         expect(await secretExists(externalIdSecretId)).to.be(false);
+      });
+    });
+
+    describe('AWS cloud connectors with role_arn only - regression guard for #284522', () => {
+      const createdConnectorIds: string[] = [];
+
+      after(async () => {
+        for (const id of createdConnectorIds) {
+          try {
+            await supertest
+              .delete(`/api/fleet/cloud_connectors/${id}?force=true`)
+              .set('kbn-xsrf', 'xxxx');
+          } catch (error) {
+            // Connector might already be deleted or not exist
+          }
+        }
+      });
+
+      it('should create an AWS cloud connector with role_arn only (no external_id)', async () => {
+        const roleArn = 'arn:aws:iam::123456789012:role/role-arn-only';
+        const response = await supertest
+          .post(`/api/fleet/cloud_connectors`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'test-role-arn-only-connector',
+            cloudProvider: 'aws',
+            vars: {
+              role_arn: { value: roleArn, type: 'text' },
+            },
+          })
+          .expect(200);
+        const body = response.body;
+
+        expect(body.item).to.have.property('id');
+        expect(body.item.name).to.equal('test-role-arn-only-connector');
+        expect(body.item.cloudProvider).to.equal('aws');
+        expect(body.item.vars.role_arn.value).to.equal(roleArn);
+        expect(body.item.vars).to.not.have.property('external_id');
+        expect(body.item).to.have.property('created_at');
+        expect(body.item).to.have.property('updated_at');
+
+        createdConnectorIds.push(body.item.id);
+      });
+
+      it('should update the role_arn of a role_arn-only AWS cloud connector', async () => {
+        const originalRoleArn = 'arn:aws:iam::123456789012:role/role-arn-only-original';
+        const updatedRoleArn = 'arn:aws:iam::123456789012:role/role-arn-only-updated';
+
+        const createResponse = await supertest
+          .post(`/api/fleet/cloud_connectors`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'test-role-arn-only-update',
+            cloudProvider: 'aws',
+            vars: {
+              role_arn: { value: originalRoleArn, type: 'text' },
+            },
+          })
+          .expect(200);
+        const connectorId = createResponse.body.item.id;
+        createdConnectorIds.push(connectorId);
+
+        const { body } = await supertest
+          .put(`/api/fleet/cloud_connectors/${connectorId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            vars: {
+              role_arn: { value: updatedRoleArn, type: 'text' },
+            },
+          })
+          .expect(200);
+
+        expect(body.item).to.have.property('id', connectorId);
+        expect(body.item.vars.role_arn.value).to.equal(updatedRoleArn);
+        expect(body.item.vars).to.not.have.property('external_id');
+        expect(body.item).to.have.property('updated_at');
       });
     });
   });

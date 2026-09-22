@@ -148,7 +148,7 @@ describe('Agent actions', () => {
           agents: ['agent1'],
         });
 
-        expect(esClient.create).toBeCalledWith(
+        expect(esClient.create).toHaveBeenCalledWith(
           expect.objectContaining({
             document: expect.objectContaining({
               signed: {
@@ -194,7 +194,7 @@ describe('Agent actions', () => {
         agents: ['agent1'],
       });
 
-      expect(esClient.create).toBeCalledWith(
+      expect(esClient.create).toHaveBeenCalledWith(
         expect.objectContaining({
           document: expect.not.objectContaining({
             signed: expect.any(Object),
@@ -335,9 +335,9 @@ describe('Agent actions', () => {
         },
       } as any);
       const soClient = savedObjectsClientMock.create();
-      await expect(() =>
-        cancelAgentAction(esClient, soClient, 'i-do-not-exists')
-      ).rejects.toThrowError(/Action not found/);
+      await expect(() => cancelAgentAction(esClient, soClient, 'i-do-not-exists')).rejects.toThrow(
+        /Action not found/
+      );
     });
 
     it('should create one CANCEL action for each UPGRADE action found', async () => {
@@ -367,8 +367,8 @@ describe('Agent actions', () => {
       const soClient = savedObjectsClientMock.create();
       await cancelAgentAction(esClient, soClient, 'action1');
 
-      expect(esClient.create).toBeCalledTimes(2);
-      expect(esClient.create).toBeCalledWith(
+      expect(esClient.create).toHaveBeenCalledTimes(2);
+      expect(esClient.create).toHaveBeenCalledWith(
         expect.objectContaining({
           document: expect.objectContaining({
             type: 'CANCEL',
@@ -377,7 +377,7 @@ describe('Agent actions', () => {
           }),
         })
       );
-      expect(esClient.create).toBeCalledWith(
+      expect(esClient.create).toHaveBeenCalledWith(
         expect.objectContaining({
           document: expect.objectContaining({
             type: 'CANCEL',
@@ -407,8 +407,8 @@ describe('Agent actions', () => {
       const soClient = savedObjectsClientMock.create();
       await cancelAgentAction(esClient, soClient, 'action1');
 
-      expect(mockedBulkUpdateAgents).toBeCalled();
-      expect(mockedBulkUpdateAgents).toBeCalledWith(
+      expect(mockedBulkUpdateAgents).toHaveBeenCalled();
+      expect(mockedBulkUpdateAgents).toHaveBeenCalledWith(
         expect.anything(),
         [
           expect.objectContaining({ agentId: 'agent1' }),
@@ -467,7 +467,7 @@ describe('Agent actions', () => {
       const soClient = savedObjectsClientMock.create();
       await cancelAgentAction(esClient, soClient, 'unenroll-action-1');
 
-      expect(esClient.create).toBeCalledWith(
+      expect(esClient.create).toHaveBeenCalledWith(
         expect.objectContaining({
           document: expect.objectContaining({
             type: 'CANCEL',
@@ -517,7 +517,7 @@ describe('Agent actions', () => {
       const soClient = savedObjectsClientMock.create();
       await cancelAgentAction(esClient, soClient, 'unenroll-action-1');
 
-      expect(mockedBulkUpdateAgents).not.toBeCalled();
+      expect(mockedBulkUpdateAgents).not.toHaveBeenCalled();
     });
 
     it('should disable unenroll_timeout on the agent policy when cancelling UNENROLL', async () => {

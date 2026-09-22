@@ -9,7 +9,7 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { from, stats, sort } from '@kbn/esql-composer';
+import { esql } from '@elastic/esql';
 import {
   LensConfigBuilder,
   type LensAnnotationLayer,
@@ -24,7 +24,8 @@ import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import { ContentFrameworkChart } from '../../../../content_framework/chart';
-import { withUnmappedFields } from '../../../../../hooks/use_discover_link_and_esql_query';
+import { esqlColumn } from '../../../../../utils/esql_column';
+import { applyUnmappedFieldsPolicy } from '../../../../../utils/esql_unmapped_fields';
 
 const chartTitle = i18n.translate(
   'unifiedDocViewer.docViewerLogsOverview.subComponents.similarErrors.occurrences.title',
@@ -118,17 +119,14 @@ export function SimilarErrorsOccurrencesChart({
       return undefined;
     }
 
-    const query = from(indexes.logs)
-      .pipe(
-        baseEsqlQuery,
-        stats(
-          `occurrences = COUNT(*) BY ${fieldConstants.TIMESTAMP_FIELD} = BUCKET(${fieldConstants.TIMESTAMP_FIELD}, 100, ?_tstart, ?_tend)`
-        ),
-        sort(fieldConstants.TIMESTAMP_FIELD)
-      )
-      .toString();
+    const timestamp = esqlColumn(fieldConstants.TIMESTAMP_FIELD);
+    const query = esql.from(indexes.logs);
+    applyUnmappedFieldsPolicy(query, 'NULLIFY');
+    query.where`${baseEsqlQuery}`;
+    query.pipe`STATS occurrences = COUNT(*) BY ${timestamp} = BUCKET(${timestamp}, 100, ?_tstart, ?_tend)`;
+    query.sort(fieldConstants.TIMESTAMP_FIELD);
 
-    return withUnmappedFields(query);
+    return query.print('pipe-multiline');
   }, [baseEsqlQuery, indexes.logs]);
 
   const getParentApi = useCallback(() => {

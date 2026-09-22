@@ -12,7 +12,6 @@ import { useActions, useValues } from 'kea';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -24,6 +23,8 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import { Status } from '../../../../../common/types/api';
 import { isNotNullish } from '../../../../../common/utils/is_not_nullish';
@@ -79,9 +80,8 @@ export const AddIndicesFlyout: React.FC<AddIndicesFlyoutProps> = ({ onClose }) =
         {updateSearchApplicationStatus === Status.ERROR && updateSearchApplicationError && (
           <>
             <EuiSpacer />
-            <EuiCallOut
+            <KbnDangerCallout
               announceOnMount
-              color="danger"
               title={i18n.translate(
                 'xpack.enterpriseSearch.searchApplications.searchApplication.indices.addIndicesFlyout.updateError.title',
                 { defaultMessage: 'Error updating search application' }
@@ -90,7 +90,7 @@ export const AddIndicesFlyout: React.FC<AddIndicesFlyoutProps> = ({ onClose }) =
               {getErrorsFromHttpResponse(updateSearchApplicationError).map((errMessage, i) => (
                 <p id={`createErrorMsg.${i}`}>{errMessage}</p>
               ))}
-            </EuiCallOut>
+            </KbnDangerCallout>
           </>
         )}
       </EuiFlyoutHeader>

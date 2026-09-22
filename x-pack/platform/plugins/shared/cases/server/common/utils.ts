@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import type {
   SavedObjectsFindResult,
   SavedObjectsFindResponse,
@@ -12,6 +13,7 @@ import type {
   SavedObjectReference,
   IBasePath,
 } from '@kbn/core/server';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import { flatMap, uniqWith, xorWith } from 'lodash';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import { addSpaceIdToPath } from '@kbn/core-spaces-common';
@@ -24,8 +26,10 @@ import type {
   AttachmentAttributesV2,
   Case,
   EventAttachmentPayload,
+  FileAttachmentMetadata,
   User,
   UserCommentAttachmentPayload,
+  UnifiedReferenceAttachmentPayload,
 } from '../../common/types/domain';
 import {
   AttachmentType,
@@ -40,8 +44,11 @@ import {
   CASE_VIEW_COMMENT_PATH,
   CASE_VIEW_PATH,
   CASE_VIEW_TAB_PATH,
+  FILE_ATTACHMENT_TYPE,
   GENERAL_CASES_OWNER,
   OWNER_INFO,
+  PERSISTABLE_ATTACHMENT_TYPES,
+  UNIFIED_TO_EXTERNAL_REFERENCE_TYPE_MAP,
 } from '../../common/constants';
 import type { CASE_VIEW_PAGE_TABS } from '../../common/types';
 import type { AlertInfo, FileAttachmentRequest } from './types';
@@ -63,6 +70,8 @@ import type {
 import {
   isEventAttachmentType,
   isAlertAttachmentType,
+  isCommentAttachmentType,
+  isUnifiedReferenceAttachmentRequest,
   getIndexFromMetadata,
   toStringArray,
 } from '../../common/utils/attachments';
@@ -209,6 +218,13 @@ export const flattenAttachmentSavedObject = (
   ...savedObject.attributes,
 });
 
+/**
+ * Filters out alerts whose index belongs to a linked project (`cluster:index`),
+ * which cannot be resolved through the origin-only alerts ES client.
+ */
+export const filterOriginAlerts = <T extends { index: string }>(alerts: T[]): T[] =>
+  alerts.filter((alert) => !isNonLocalIndexName(alert.index));
+
 export const getIDsAndIndicesAsArrays = (
   comment: AttachmentRequestV2
 ): { ids: string[]; indices: string[] } => {
@@ -241,34 +257,60 @@ export const getIDsAndIndicesAsArrays = (
 };
 
 /**
- * This functions extracts the ids and indices from an alert comment. It enforces that the alertId and index are either
- * both strings or string arrays that are the same length. If they are arrays they represent a 1-to-1 mapping of
- * id existing in an index at each position in the array. This is not ideal. Ideally an alert comment request would
- * accept an array of objects like this: Array<{id: string; index: string; ruleName: string ruleID: string}> instead.
- *
- * To reformat the alert comment request requires a migration and a breaking API change.
+ * Extracts id/index pairs for an alert/event comment: 1-to-1 arrays, or a scalar `metadata.index`
+ * broadcasting across every id. Pass `strict: true` to throw on an invalid pairing instead of dropping it.
  */
-const getAndValidateAlertInfoFromComment = (comment: AttachmentRequestV2): AlertInfo[] => {
-  if (!isAlertAttachmentType(comment.type)) {
+const getAndValidateIndexedAttachmentInfo = (
+  comment: AttachmentRequestV2,
+  isTargetType: (type: string) => boolean,
+  strict: boolean
+): AlertInfo[] => {
+  if (!isTargetType(comment.type)) {
     return [];
   }
 
   const { ids, indices } = getIDsAndIndicesAsArrays(comment);
 
-  if (ids.length !== indices.length) {
+  // Only a scalar metadata.index broadcasts; an array (even length 1) must match 1-to-1.
+  const rawMetadataIndex =
+    'attachmentId' in comment ? getIndexFromMetadata(comment.metadata) : undefined;
+  const isBroadcastIndex = typeof rawMetadataIndex === 'string';
+
+  if (!isBroadcastIndex && ids.length !== indices.length) {
+    if (strict) {
+      throw Boom.badRequest(
+        `Attachment of type "${comment.type}" is missing a valid index reference (id count=${ids.length}, index count=${indices.length}).`
+      );
+    }
+
     return [];
   }
 
-  return ids.map((id, index) => ({ id, index: indices[index] }));
+  return ids.map((id, index) => ({ id, index: isBroadcastIndex ? indices[0] : indices[index] }));
 };
 
 /**
- * Builds an AlertInfo object accumulating the alert IDs and indices for the passed in alerts.
+ * Builds AlertInfo for the alerts in `comments`. Pass `strict: true` only when validating a new
+ * write before it's persisted; reads of already-persisted attachments must stay lenient.
  */
-export const getAlertInfoFromComments = (comments: AttachmentRequestV2[] = []): AlertInfo[] =>
+export const getAlertInfoFromComments = (
+  comments: AttachmentRequestV2[] = [],
+  strict = false
+): AlertInfo[] =>
   comments.reduce((acc: AlertInfo[], comment) => {
-    const alertInfo = getAndValidateAlertInfoFromComment(comment);
-    acc.push(...alertInfo);
+    acc.push(...getAndValidateIndexedAttachmentInfo(comment, isAlertAttachmentType, strict));
+    return acc;
+  }, []);
+
+/**
+ * Same as {@link getAlertInfoFromComments}, but for events (legacy `event` + unified `security.event`).
+ */
+export const getEventInfoFromComments = (
+  comments: AttachmentRequestV2[] = [],
+  strict = false
+): AlertInfo[] =>
+  comments.reduce((acc: AlertInfo[], comment) => {
+    acc.push(...getAndValidateIndexedAttachmentInfo(comment, isEventAttachmentType, strict));
     return acc;
   }, []);
 
@@ -347,6 +389,34 @@ export const isFileAttachmentRequest = (
   return (
     ExternalReferenceSOAttachmentPayloadRt.is(context) &&
     FileAttachmentMetadataRt.is(context.externalReferenceMetadata)
+  );
+};
+
+/**
+ * A type narrowing function for unified file attachments (`type: 'file'`), the
+ * counterpart of {@link isFileAttachmentRequest} for the legacy `.files` shape.
+ */
+export const isUnifiedFileAttachmentRequest = (
+  context: AttachmentRequestV2
+): context is UnifiedReferenceAttachmentPayload & { metadata: FileAttachmentMetadata } => {
+  return (
+    isUnifiedReferenceAttachmentRequest(context) &&
+    context.type === FILE_ATTACHMENT_TYPE &&
+    FileAttachmentMetadataRt.is(context.metadata)
+  );
+};
+
+/**
+ * True for a unified persistable-state or external-reference request, excluding `file`.
+ * Counterpart of {@link isPersistableStateOrExternalReference}.
+ */
+export const isUnifiedPersistableStateOrExternalReference = (
+  context: AttachmentRequestV2
+): boolean => {
+  return (
+    PERSISTABLE_ATTACHMENT_TYPES.has(context.type) ||
+    (context.type in UNIFIED_TO_EXTERNAL_REFERENCE_TYPE_MAP &&
+      context.type !== FILE_ATTACHMENT_TYPE)
   );
 };
 
@@ -486,7 +556,9 @@ export const extractLensReferencesFromCommentString = (
 export const getOrUpdateLensReferences = (
   lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'],
   newComment: string,
-  currentComment?: SavedObject<UserCommentAttachmentPayload>
+  currentComment?: Pick<SavedObject<UserCommentAttachmentPayload>, 'references'> & {
+    attributes: { comment: string };
+  }
 ) => {
   if (!currentComment) {
     return extractLensReferencesFromCommentString(lensEmbeddableFactory, newComment);
@@ -579,7 +651,7 @@ export const countUserAttachments = (
   let total = 0;
 
   for (const attachment of attachments) {
-    if (attachment.attributes.type === AttachmentType.user) {
+    if (isCommentAttachmentType(attachment.attributes.type)) {
       total += 1;
     }
   }

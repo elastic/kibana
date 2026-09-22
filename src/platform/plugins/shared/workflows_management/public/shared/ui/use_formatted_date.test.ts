@@ -7,138 +7,99 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { renderHook } from '@testing-library/react';
-import {
-  useFormattedDate,
-  useFormattedDateTime,
-  useGetFormattedDateTime,
-} from './use_formatted_date';
-import { createUseKibanaMockValue } from '../../mocks';
+import { formatExecutionTimestamp, resolveKibanaTimeZone } from './use_formatted_date';
 
-jest.mock('../../hooks/use_kibana');
-
-const mockKibanaValue = createUseKibanaMockValue();
-const mockGet = mockKibanaValue.services.settings.client.get as jest.Mock;
-
-describe('useFormattedDate', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-
-    // Reconfigure after clearAllMocks resets mockGet
-    const { useKibana } = jest.requireMock('../../hooks/use_kibana') as {
-      useKibana: jest.Mock;
-    };
-    useKibana.mockReturnValue(mockKibanaValue);
-
-    mockGet.mockImplementation((key: string) => {
-      if (key === 'dateFormat') return 'YYYY-MM-DD HH:mm:ss';
-      if (key === 'dateFormat:tz') return 'UTC';
-      return undefined;
-    });
+describe('resolveKibanaTimeZone', () => {
+  it('resolves Browser to a guessed IANA zone', () => {
+    const zone = resolveKibanaTimeZone('Browser');
+    expect(zone).toBeTruthy();
+    expect(zone).not.toBe('Browser');
   });
 
-  it('should return undefined when timestamp is undefined', () => {
-    const { result } = renderHook(() => useFormattedDate(undefined));
-    expect(result.current).toBeUndefined();
-  });
-
-  it('should format a valid date string', () => {
-    const { result } = renderHook(() => useFormattedDate('2024-01-15T12:00:00Z'));
-    expect(result.current).toBe('2024-01-15 12:00:00');
-  });
-
-  it('should format a valid Date object', () => {
-    const date = new Date('2024-06-20T08:30:00Z');
-    const { result } = renderHook(() => useFormattedDate(date));
-    expect(result.current).toBe('2024-06-20 08:30:00');
-  });
-
-  it('should format a numeric timestamp', () => {
-    // 2024-01-01T00:00:00Z
-    const { result } = renderHook(() => useFormattedDate(1704067200000));
-    expect(result.current).toBe('2024-01-01 00:00:00');
-  });
-
-  it('should return "Invalid Date" for an invalid date', () => {
-    const { result } = renderHook(() => useFormattedDate('not-a-date'));
-    expect(result.current).toBe('Invalid Date');
-  });
-
-  it('should use Intl formatter when dateFormat setting is empty', () => {
-    mockGet.mockImplementation((key: string) => {
-      if (key === 'dateFormat') return '';
-      if (key === 'dateFormat:tz') return 'UTC';
-      return undefined;
-    });
-
-    const { result } = renderHook(() => useFormattedDate('2024-01-15T12:00:00Z'));
-    // Intl formatter returns locale-specific format; just verify it returns a string
-    expect(typeof result.current).toBe('string');
-    expect(result.current).not.toBe('Invalid Date');
+  it('passes through named zones', () => {
+    expect(resolveKibanaTimeZone('UTC')).toBe('UTC');
+    expect(resolveKibanaTimeZone('America/Los_Angeles')).toBe('America/Los_Angeles');
   });
 });
 
-describe('useFormattedDateTime', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    mockGet.mockImplementation((key: string) => {
-      if (key === 'dateFormat') return 'YYYY-MM-DD HH:mm:ss';
-      if (key === 'dateFormat:tz') return 'UTC';
-      return undefined;
+describe('formatExecutionTimestamp', () => {
+  const now = new Date('2026-08-24T18:00:00Z');
+
+  describe('tooltip', () => {
+    it('formats UTC with milliseconds and a UTC designator', () => {
+      expect(
+        formatExecutionTimestamp('2026-08-24T18:26:58.239Z', 'tooltip', {
+          timeZoneSetting: 'UTC',
+        })
+      ).toBe('Aug 24, 2026 @ 18:26:58.239 UTC');
+    });
+
+    it('uses the short zone abbreviation, not the IANA id or a parenthesized offset', () => {
+      const formatted = formatExecutionTimestamp('2026-08-24T18:26:58.239Z', 'tooltip', {
+        timeZoneSetting: 'America/Los_Angeles',
+      });
+      expect(formatted).toBe('Aug 24, 2026 @ 11:26:58.239 PDT');
+      expect(formatted).not.toContain('America/Los_Angeles');
+      expect(formatted).not.toContain('(');
+    });
+
+    it('falls back to GMT±offset when the zone has no abbreviation', () => {
+      const formatted = formatExecutionTimestamp('2026-08-24T18:26:58.239Z', 'tooltip', {
+        timeZoneSetting: 'Asia/Kathmandu',
+      });
+      expect(formatted).toBe('Aug 25, 2026 @ 00:11:58.239 GMT+5:45');
+    });
+
+    it('returns null for empty values', () => {
+      expect(formatExecutionTimestamp(null, 'tooltip', { timeZoneSetting: 'UTC' })).toBeNull();
+      expect(formatExecutionTimestamp('', 'tooltip', { timeZoneSetting: 'UTC' })).toBeNull();
     });
   });
 
-  it('should format a valid Date object', () => {
-    const date = new Date('2024-03-10T14:30:00Z');
-    const { result } = renderHook(() => useFormattedDateTime(date));
-    expect(result.current).toBe('2024-03-10 14:30:00');
-  });
+  describe('started', () => {
+    it('formats today as time only', () => {
+      expect(
+        formatExecutionTimestamp('2026-08-24T16:35:00Z', 'started', {
+          timeZoneSetting: 'UTC',
+          now,
+        })
+      ).toBe('16:35');
+    });
 
-  it('should return "Invalid Date" for an invalid date', () => {
-    const date = new Date('invalid');
-    const { result } = renderHook(() => useFormattedDateTime(date));
-    expect(result.current).toBe('Invalid Date');
-  });
-});
+    it('formats yesterday with the day word', () => {
+      expect(
+        formatExecutionTimestamp('2026-08-23T22:04:00Z', 'started', {
+          timeZoneSetting: 'UTC',
+          now,
+        })
+      ).toBe('Yesterday 22:04');
+    });
 
-describe('useGetFormattedDateTime', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    mockGet.mockImplementation((key: string) => {
-      if (key === 'dateFormat') return 'YYYY-MM-DD HH:mm:ss';
-      if (key === 'dateFormat:tz') return 'UTC';
-      return undefined;
+    it('formats older days as short date + time', () => {
+      expect(
+        formatExecutionTimestamp('2026-08-17T14:03:00Z', 'started', {
+          timeZoneSetting: 'UTC',
+          now,
+        })
+      ).toBe('Aug 17 14:03');
     });
   });
 
-  it('should return a formatter function', () => {
-    const { result } = renderHook(() => useGetFormattedDateTime());
-    expect(typeof result.current).toBe('function');
-  });
-
-  it('should format a valid date when the returned function is called', () => {
-    const { result } = renderHook(() => useGetFormattedDateTime());
-    const formatted = result.current(new Date('2024-05-01T10:00:00Z'));
-    expect(formatted).toBe('2024-05-01 10:00:00');
-  });
-
-  it('should return "Invalid Date" for an invalid date', () => {
-    const { result } = renderHook(() => useGetFormattedDateTime());
-    const formatted = result.current(new Date('invalid'));
-    expect(formatted).toBe('Invalid Date');
-  });
-
-  it('should handle Browser timezone setting by guessing', () => {
-    mockGet.mockImplementation((key: string) => {
-      if (key === 'dateFormat') return 'YYYY-MM-DD';
-      if (key === 'dateFormat:tz') return 'Browser';
-      return undefined;
+  describe('header', () => {
+    it('uses the same family without milliseconds or a zone', () => {
+      expect(
+        formatExecutionTimestamp('2026-08-24T18:26:58.239Z', 'header', {
+          timeZoneSetting: 'UTC',
+        })
+      ).toBe('Aug 24, 2026 @ 18:26:58');
     });
 
-    const { result } = renderHook(() => useGetFormattedDateTime());
-    const formatted = result.current(new Date('2024-01-15T00:00:00Z'));
-    // The browser timezone will vary, but it should produce a valid formatted string
-    expect(typeof formatted).toBe('string');
-    expect(formatted).not.toBe('Invalid Date');
+    it('does not put @ before the year', () => {
+      const formatted = formatExecutionTimestamp('2026-08-18T12:19:14.000Z', 'header', {
+        timeZoneSetting: 'UTC',
+      });
+      expect(formatted).toBe('Aug 18, 2026 @ 12:19:14');
+      expect(formatted).not.toMatch(/@ \d{4}/);
+    });
   });
 });

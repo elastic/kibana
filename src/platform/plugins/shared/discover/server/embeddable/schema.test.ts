@@ -11,15 +11,16 @@ import {
   AS_CODE_DATA_VIEW_REFERENCE_TYPE,
   AS_CODE_ESQL_DATA_SOURCE_TYPE,
 } from '@kbn/as-code-data-views-schema';
+import { DiscoverTabType } from '@kbn/discover-session-constants';
+import { mockGetDrilldownsSchema } from '@kbn/embeddable-plugin/server/mocks';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import {
   classicTabSchema,
+  discoverSessionApiTabSchema,
   esqlTabSchema,
   panelOverridesSchema,
-  tabSchema,
-  type DiscoverSessionClassicTab,
-  type DiscoverSessionEsqlTab,
-} from './schema';
+} from '@kbn/as-code-discover-schema';
+import { getDiscoverSessionEmbeddableSchema } from './schema';
 
 const classicTabInput = {
   data_source: {
@@ -35,9 +36,38 @@ const esqlTabInput = {
   },
 };
 
+const metricsTabInput = {
+  ...esqlTabInput,
+  type: DiscoverTabType.Metrics,
+  dimensions: ['host.name'],
+  search_term: 'cpu',
+  counter_aggregation: 'max',
+  gauge_aggregation: 'avg',
+  histogram_percentile: 'p99',
+} as const;
+
+// A sample tab for every tab type. The exhaustive record makes a new tab type a type error until
+// it is covered here, and the parity tests below then require it in both schemas.
+const tabInputByTabType: Record<DiscoverTabType, object> = {
+  [DiscoverTabType.Default]: esqlTabInput,
+  [DiscoverTabType.Metrics]: metricsTabInput,
+};
+
+const embeddableSchema = getDiscoverSessionEmbeddableSchema(mockGetDrilldownsSchema);
+
+const parseByValueTab = (tab: unknown) => {
+  const result = embeddableSchema.parse({ tabs: [tab] });
+
+  if (!('tabs' in result)) {
+    throw new Error('Expected a by-value Discover session panel.');
+  }
+
+  return result.tabs[0];
+};
+
 describe('classicTabSchema', () => {
   it('validates a data view reference tab and applies defaults', () => {
-    const validated = classicTabSchema.parse(classicTabInput) as DiscoverSessionClassicTab;
+    const validated = classicTabSchema.parse(classicTabInput);
 
     expect(validated.data_source.type).toBe(AS_CODE_DATA_VIEW_REFERENCE_TYPE);
     expect(validated.filters).toEqual([]);
@@ -62,7 +92,7 @@ describe('classicTabSchema', () => {
           },
         },
       ],
-    }) as DiscoverSessionClassicTab;
+    });
 
     expect(validated.query).toEqual({
       expression: 'status:200',
@@ -104,7 +134,7 @@ describe('classicTabSchema', () => {
 
 describe('esqlTabSchema', () => {
   it('validates an ES|QL data source tab and applies data table defaults', () => {
-    const validated = esqlTabSchema.parse(esqlTabInput) as DiscoverSessionEsqlTab;
+    const validated = esqlTabSchema.parse(esqlTabInput);
 
     expect(validated.data_source.type).toBe(AS_CODE_ESQL_DATA_SOURCE_TYPE);
     expect(validated.data_source.query).toBe('FROM logs-* | LIMIT 10');
@@ -132,24 +162,72 @@ describe('esqlTabSchema', () => {
       ...esqlTabInput,
       rows_per_page: 25,
       sample_size: 500,
-    }) as DiscoverSessionEsqlTab;
+    });
 
     expect(validated.rows_per_page).toBe(25);
     expect(validated.sample_size).toBe(500);
   });
 });
 
-describe('tabSchema', () => {
-  it('accepts classic and ES|QL tab shapes', () => {
-    expect(tabSchema.parse(classicTabInput).data_source.type).toBe(
-      AS_CODE_DATA_VIEW_REFERENCE_TYPE
-    );
-    expect(tabSchema.parse(esqlTabInput).data_source.type).toBe(AS_CODE_ESQL_DATA_SOURCE_TYPE);
+describe('by-value tab schema', () => {
+  it.each([classicTabInput, esqlTabInput])(
+    'accepts a $data_source.type tab with an omitted or explicit default type',
+    (tabInput) => {
+      const expectedTab = { ...tabInput, type: DiscoverTabType.Default };
+
+      expect(parseByValueTab(tabInput)).toMatchObject(expectedTab);
+      expect(parseByValueTab(expectedTab)).toMatchObject(expectedTab);
+    }
+  );
+
+  it('accepts a Metrics ES|QL tab with its complete saved profile state', () => {
+    expect(parseByValueTab(metricsTabInput)).toEqual({
+      ...metricsTabInput,
+      sort: [],
+    });
+  });
+
+  it('rejects a Metrics tab without its saved profile state', () => {
+    expect(() =>
+      parseByValueTab({
+        ...esqlTabInput,
+        type: DiscoverTabType.Metrics,
+      })
+    ).toThrow();
+  });
+
+  it('rejects a Metrics tab with a classic data source', () => {
+    expect(() =>
+      parseByValueTab({
+        ...classicTabInput,
+        ...metricsTabInput,
+        data_source: classicTabInput.data_source,
+      })
+    ).toThrow();
   });
 
   it('rejects a tab without a data_source', () => {
-    expect(() => tabSchema.parse({ sort: [] })).toThrow();
+    expect(() => parseByValueTab({ sort: [] })).toThrow();
   });
+});
+
+describe('tab type parity', () => {
+  it.each(Object.values(DiscoverTabType))('accepts a %s tab by value', (tabType) => {
+    expect(parseByValueTab(tabInputByTabType[tabType])).toMatchObject({ type: tabType });
+  });
+
+  it.each(Object.values(DiscoverTabType))(
+    'accepts the same %s tab in the session API schema',
+    (tabType) => {
+      const apiTab = discoverSessionApiTabSchema.parse({
+        id: 'tab-1',
+        label: 'Tab 1',
+        ...tabInputByTabType[tabType],
+      });
+
+      expect(apiTab).toMatchObject({ type: tabType });
+    }
+  );
 });
 
 describe('panelOverridesSchema', () => {

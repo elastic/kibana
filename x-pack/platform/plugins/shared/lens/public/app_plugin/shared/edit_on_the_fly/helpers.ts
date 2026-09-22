@@ -314,6 +314,8 @@ const preserveTrendlineLayer = (
 
   let trendlineQuery = prevTrendlineLayer.query;
   let metricFieldMap = new Map<string, string>();
+  let trendlineTimeField: string | undefined;
+  let unavailableMetricFields: string[] = [];
   if (prevTrendlineLayer.timeField) {
     try {
       const trendlineQueryResult = buildTrendlineQueryWithMetricFieldMap(
@@ -324,6 +326,8 @@ const preserveTrendlineLayer = (
       );
       trendlineQuery = { esql: trendlineQueryResult.query };
       metricFieldMap = trendlineQueryResult.metricFieldMap;
+      trendlineTimeField = trendlineQueryResult.timeField;
+      unavailableMetricFields = trendlineQueryResult.unavailableMetricFields;
     } catch {
       // If the query can't be parsed, keep the existing trendline query unchanged.
     }
@@ -335,7 +339,10 @@ const preserveTrendlineLayer = (
     for (const { from, to } of accessorPairs) {
       if (!to) continue;
       const sourceCol = from ? newMainLayer.columns.find((c) => c.columnId === from) : undefined;
-      if (!sourceCol) {
+      // Drop the trendline column when the main layer no longer has the source
+      // column, or when the trendline query cannot produce its field (e.g. a
+      // secondary metric from a FORK branch other than the flattened one).
+      if (!sourceCol || unavailableMetricFields.includes(sourceCol.fieldName)) {
         updatedColumns = updatedColumns.filter((c) => c.columnId !== to);
         continue;
       }
@@ -351,6 +358,14 @@ const preserveTrendlineLayer = (
         ? updatedColumns.map((c) => (c.columnId === to ? newCol : c))
         : [...updatedColumns, newCol];
     }
+  }
+
+  if (trendlineTimeField && prevVis.trendlineTimeAccessor) {
+    updatedColumns = updatedColumns.map((column) =>
+      column.columnId === prevVis.trendlineTimeAccessor
+        ? { ...column, fieldName: trendlineTimeField }
+        : column
+    );
   }
 
   if (!newVis.secondaryMetricAccessor) {

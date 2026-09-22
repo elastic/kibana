@@ -5,17 +5,11 @@
  * 2.0.
  */
 
-import type {
-  SignificantEvent,
-  SignificantEventInvestigation,
-} from '@kbn/significant-events-schema';
+import type { SignificantEvent } from '@kbn/significant-events-schema';
 import {
   EVENT_CREATED_TRIGGER_ID,
   EVENT_STATUS_CHANGED_TRIGGER_ID,
-  INVESTIGATION_STARTED_TRIGGER_ID,
-  INVESTIGATION_COMPLETED_TRIGGER_ID,
   type SignificantEventTriggerBasePayload,
-  type InvestigationStartedTriggerPayload,
 } from '../../../common/workflows/triggers';
 import type { EventClient } from '../../lib/significant_events/events';
 
@@ -89,71 +83,4 @@ export const emitSignificantEventWriteTriggers = ({
         previous_status: priorSignificantEvent.status,
       });
     }
-  });
-
-const investigationPayload = (
-  base: SignificantEventTriggerBasePayload,
-  investigation: SignificantEventInvestigation
-): InvestigationStartedTriggerPayload => ({
-  ...base,
-  workflow_execution_id: investigation.workflow_execution_id,
-  started_at: investigation.started_at,
-});
-
-/**
- * Emits investigation lifecycle triggers by diffing the event's investigations before and after a
- * write, keyed on `workflow_execution_id`. `targetedWorkflowExecutionId` is the run the caller
- * actually acted on, which disambiguates the two ways an entry gains `completed_at`:
- * - a new entry without `completed_at` -> `investigationStarted`;
- * - the targeted run gaining `completed_at` -> `investigationCompleted`;
- * - any *other* still-running run gaining `completed_at` (stamped by attach reconciliation when a
- *   newer run supersedes it) emits nothing: it never reached a terminal step, so reporting it as
- *   "completed" would be misleading.
- */
-export const emitSignificantEventInvestigationTriggers = ({
-  eventClient,
-  significantEvent,
-  previousInvestigations,
-  nextInvestigations,
-  targetedWorkflowExecutionId,
-}: {
-  eventClient: TriggerEmittingClient;
-  significantEvent: SignificantEventSource;
-  previousInvestigations: SignificantEventInvestigation[];
-  nextInvestigations: SignificantEventInvestigation[];
-  targetedWorkflowExecutionId: string;
-}): void =>
-  emitBestEffort(() => {
-    const base = baseSignificantEventPayload(significantEvent);
-    const previousByExecutionId = new Map(
-      previousInvestigations.map((investigation) => [
-        investigation.workflow_execution_id,
-        investigation,
-      ])
-    );
-
-    nextInvestigations.forEach((investigation) => {
-      const previous = previousByExecutionId.get(investigation.workflow_execution_id);
-      const { completed_at: completedAt, workflow_execution_id: executionId } = investigation;
-
-      // Brand-new run that hasn't completed yet -> started.
-      if (!previous && completedAt == null) {
-        eventClient.emitTrigger(
-          INVESTIGATION_STARTED_TRIGGER_ID,
-          investigationPayload(base, investigation)
-        );
-        return;
-      }
-
-      // A run that just gained `completed_at`. Only the run the caller actually acted on truly
-      // completed; other runs gaining `completed_at` were stamped by attach reconciliation because a
-      // newer run superseded them (they never reached a terminal step), so we emit nothing for those.
-      const justCompleted = completedAt != null && previous?.completed_at == null;
-      if (justCompleted && executionId === targetedWorkflowExecutionId) {
-        eventClient.emitTrigger(INVESTIGATION_COMPLETED_TRIGGER_ID, {
-          ...investigationPayload(base, investigation),
-          completed_at: completedAt,
-        });
-      }
-    });
   });

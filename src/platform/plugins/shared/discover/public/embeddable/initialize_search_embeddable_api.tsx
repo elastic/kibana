@@ -19,12 +19,17 @@ import type {
   PublishesWritableUnifiedSearch,
   PublishesWritableDataViews,
   ProjectRoutingOverrides,
-  PublishesEsqlUsage,
+  PublishesEsql,
   PublishesProjectRoutingOverrides,
 } from '@kbn/presentation-publishing';
 import type { DiscoverGridSettings, SavedSearch } from '@kbn/saved-search-plugin/common';
 import type { SortOrder, VIEW_MODE } from '@kbn/saved-search-plugin/public';
-import type { DataGridDensity, DataTableColumnsMeta } from '@kbn/unified-data-table';
+import type {
+  DataGridDensity,
+  DataTableColumnsMeta,
+  JsonModeSettings,
+  DocumentsDisplayMode,
+} from '@kbn/unified-data-table';
 
 import {
   isOfAggregateQueryType,
@@ -82,7 +87,8 @@ const initializeSearchSource = async (
 const initializedSavedSearch = (
   stateManager: SearchEmbeddableStateManager,
   searchSource: ISearchSource,
-  discoverServices: DiscoverServices
+  discoverServices: DiscoverServices,
+  tabTypeState: SavedSearch['tabTypeState']
 ): SavedSearch => {
   return {
     ...Object.keys(stateManager).reduce((prev, key) => {
@@ -92,6 +98,7 @@ const initializedSavedSearch = (
       };
     }, discoverServices.savedSearch.getNew()),
     searchSource,
+    tabTypeState,
   };
 };
 
@@ -115,7 +122,10 @@ export const initializeSearchEmbeddableApi = async ({
     PublishesWritableDataViews &
     Omit<PublishesWritableUnifiedSearch, keyof PublishesWritableTimeRange> &
     PublishesProjectRoutingOverrides &
-    PublishesEsqlUsage;
+    PublishesEsql;
+  internalApi: {
+    setApproximationApplied: (approximationApplied?: boolean) => void;
+  };
   stateManager: SearchEmbeddableStateManager;
   anyStateChange$: Observable<void>;
   cleanup: () => void;
@@ -137,6 +147,12 @@ export const initializeSearchEmbeddableApi = async ({
   const rowsPerPage$ = new BehaviorSubject<number | undefined>(initialState.rowsPerPage);
   const sampleSize$ = new BehaviorSubject<number | undefined>(initialState.sampleSize);
   const density$ = new BehaviorSubject<DataGridDensity | undefined>(initialState.density);
+  const documentsDisplayMode$ = new BehaviorSubject<DocumentsDisplayMode | undefined>(
+    initialState.documentsDisplayMode
+  );
+  const jsonModeSettings$ = new BehaviorSubject<JsonModeSettings | undefined>(
+    initialState.jsonModeSettings
+  );
   const sort$ = new BehaviorSubject<SortOrder[] | undefined>(initialState.sort);
   const savedSearchViewMode$ = new BehaviorSubject<VIEW_MODE | undefined>(initialState.viewMode);
 
@@ -156,7 +172,10 @@ export const initializeSearchEmbeddableApi = async ({
   const projectRoutingOverrides$ = new BehaviorSubject<ProjectRoutingOverrides>(
     getProjectRoutingOverrides(initialQuery)
   );
-  const usesEsql$ = new BehaviorSubject<boolean>(isOfAggregateQueryType(initialQuery));
+  const esql$ = new BehaviorSubject<AggregateQuery[]>(
+    isOfAggregateQueryType(initialQuery) ? [initialQuery] : []
+  );
+  const approximationApplied$ = new BehaviorSubject<boolean | undefined>(undefined);
 
   const canEditUnifiedSearch = () => false;
 
@@ -183,12 +202,14 @@ export const initializeSearchEmbeddableApi = async ({
     totalHitCount: totalHitCount$,
     viewMode: savedSearchViewMode$,
     density: density$,
+    documentsDisplayMode: documentsDisplayMode$,
+    jsonModeSettings: jsonModeSettings$,
     inspectorAdapters: inspectorAdapters$,
   };
 
   /** The saved search should be the source of truth for all state  */
   const savedSearch$ = new BehaviorSubject(
-    initializedSavedSearch(stateManager, searchSource, discoverServices)
+    initializedSavedSearch(stateManager, searchSource, discoverServices, initialState.tabTypeState)
   );
 
   /** This will fire when any of the **editable** state changes */
@@ -230,6 +251,7 @@ export const initializeSearchEmbeddableApi = async ({
     );
 
     // Ensure all state updates happen synchronously to prevent multiple reloads
+    savedSearch$.next({ ...savedSearch$.getValue(), tabTypeState: state.tabTypeState });
     searchSource$.next(newSearchSource);
 
     dataViews$.next(newDataView ? [newDataView] : undefined);
@@ -248,6 +270,8 @@ export const initializeSearchEmbeddableApi = async ({
     headerRowHeight$.next(state.headerRowHeight);
     savedSearchViewMode$.next(state.viewMode);
     density$.next(state.density);
+    documentsDisplayMode$.next(state.documentsDisplayMode);
+    jsonModeSettings$.next(state.jsonModeSettings);
   };
 
   /** Keep the saved search in sync with any state changes */
@@ -264,7 +288,7 @@ export const initializeSearchEmbeddableApi = async ({
       savedSearch$.next(newSavedSearch);
     });
 
-  /** Keep projectRoutingOverrides$ and usesEsql$ in sync with query$ changes */
+  /** Keep projectRoutingOverrides$ and esql$ in sync with query$ changes */
   const syncProjectRoutingOverrides = query$.subscribe((query) => {
     const currentOverrides = projectRoutingOverrides$.getValue();
     const nextOverrides = getProjectRoutingOverrides(query);
@@ -273,16 +297,26 @@ export const initializeSearchEmbeddableApi = async ({
       projectRoutingOverrides$.next(nextOverrides);
     }
 
-    const nextUsesEsql = isOfAggregateQueryType(query);
-    if (usesEsql$.getValue() !== nextUsesEsql) {
-      usesEsql$.next(nextUsesEsql);
+    const nextEsql = isOfAggregateQueryType(query) ? [query] : [];
+    if (!deepEqual(esql$.getValue(), nextEsql)) {
+      esql$.next(nextEsql);
+      if (nextEsql.length === 0) approximationApplied$.next(undefined);
     }
   });
+
+  const setApproximationApplied = (value: boolean | undefined) => {
+    if (approximationApplied$.getValue() !== value) {
+      approximationApplied$.next(value);
+    }
+  };
 
   return {
     cleanup: () => {
       syncSavedSearch.unsubscribe();
       syncProjectRoutingOverrides.unsubscribe();
+    },
+    internalApi: {
+      setApproximationApplied,
     },
     api: {
       setDataViews,
@@ -293,7 +327,8 @@ export const initializeSearchEmbeddableApi = async ({
       query$,
       setQuery,
       projectRoutingOverrides$,
-      usesEsql$,
+      esql$,
+      approximationApplied$,
       canEditUnifiedSearch,
       setColumns,
     },

@@ -9,6 +9,23 @@ import { convertSavedDashboardToPanels, hasDashboard, getMetricIndexPattern } fr
 import type { DashboardFileName } from './dashboards/dashboard_catalog';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/public';
+import type { FormBasedPrivateState, TextBasedPrivateState } from '@kbn/lens-common';
+
+interface ConvertedDatasourceStates {
+  formBased?: Partial<Pick<FormBasedPrivateState, 'layers'>>;
+  textBased?: Partial<Pick<TextBasedPrivateState, 'layers' | 'indexPatternRefs'>>;
+}
+
+interface ConvertedPanel {
+  config?: {
+    attributes?: {
+      state?: {
+        datasourceStates?: ConvertedDatasourceStates;
+        adHocDataViews?: Record<string, unknown>;
+      };
+    };
+  };
+}
 
 describe('APM metrics static dashboard helpers', () => {
   describe('convertSavedDashboardToPanels', () => {
@@ -78,6 +95,50 @@ describe('APM metrics static dashboard helpers', () => {
 
       expect(esqlQuery).toContain('FROM metrics-*.otel-*');
       expect(esqlQuery).not.toContain('metrics-apm.internal-*');
+    });
+
+    it('rewires compiled Lens data view references to the active APM data view', async () => {
+      const panels = await convertSavedDashboardToPanels({
+        dataView,
+        agentName: 'opentelemetry/java/elastic',
+        telemetrySdkName: 'opentelemetry',
+        telemetrySdkLanguage: 'java',
+      });
+
+      expect(panels).toBeDefined();
+
+      const convertedPanels = panels as ConvertedPanel[];
+      const states = convertedPanels.map((panel) => panel.config?.attributes?.state);
+      const textBasedStates = states.flatMap((state) =>
+        state?.datasourceStates?.textBased ? [state.datasourceStates.textBased] : []
+      );
+      const formBasedStates = states.flatMap((state) =>
+        state?.datasourceStates?.formBased ? [state.datasourceStates.formBased] : []
+      );
+
+      expect(textBasedStates.length).toBeGreaterThan(0);
+      textBasedStates.forEach((textBasedState) => {
+        Object.values(textBasedState.layers ?? {}).forEach((layer) => {
+          expect(layer.index).toBe(dataView.id);
+        });
+        textBasedState.indexPatternRefs?.forEach((reference) => {
+          expect(reference.id).toBe(dataView.id);
+        });
+      });
+
+      expect(formBasedStates.length).toBeGreaterThan(0);
+      formBasedStates.forEach((formBasedState) => {
+        Object.values(formBasedState.layers ?? {}).forEach((layer) => {
+          expect(layer.indexPatternId).toBe(dataView.id);
+        });
+      });
+
+      states.forEach((state) => {
+        expect(Object.keys(state?.adHocDataViews ?? {})).toEqual([dataView.id]);
+      });
+      expect(JSON.stringify(convertedPanels)).not.toContain(
+        'd3b7e528216ce7ef65e68e07a803b7ab53e440cafdb52d9d7ee1ef4bbf5d8afa'
+      );
     });
   });
 

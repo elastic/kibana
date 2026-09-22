@@ -28,7 +28,7 @@ describe('endpointSearchStrategyProvider', () => {
 
   const buildProvider = (
     authzOverrides: Partial<EndpointAuthz> = {},
-    { cpsEnabled = false, ccsEnabled = false }: { cpsEnabled?: boolean; ccsEnabled?: boolean } = {}
+    { cpsActive = false, ccsEnabled = false }: { cpsActive?: boolean; ccsEnabled?: boolean } = {}
   ) => {
     const searchResponse = of({ rawResponse: { hits: { total: 0, hits: [] } } });
     const search = jest.fn().mockReturnValue(searchResponse);
@@ -44,12 +44,12 @@ describe('endpointSearchStrategyProvider', () => {
       service: {
         getEndpointAuthz,
         isCcsEnabled,
-        isCpsEnabled: jest.fn().mockReturnValue(cpsEnabled),
-        isCpsRead: jest.fn((req) => cpsEnabled && req != null),
+        isCpsActive: jest.fn().mockResolvedValue(cpsActive),
+        isCpsRead: jest.fn(async (req) => cpsActive && req != null),
         getActiveSpaceId: jest.fn().mockReturnValue('default'),
-        getScopedSearchClient: jest.fn().mockReturnValue({ search: scopedSearch }),
-        asScoped: jest.fn((req) => ({
-          isCpsRead: () => cpsEnabled && req != null,
+        getScopedSearchClient: jest.fn().mockResolvedValue({ search: scopedSearch }),
+        asScoped: jest.fn(async (req) => ({
+          isCpsRead: () => cpsActive && req != null,
           getEsClient: () => {
             throw new Error('not used in search strategy tests');
           },
@@ -109,7 +109,7 @@ describe('endpointSearchStrategyProvider', () => {
     it('dispatches Defend-owned queries through the scoped search client', async () => {
       const { provider, search, scopedSearch } = buildProvider(
         { canAccessEndpointActionsLogManagement: true },
-        { cpsEnabled: true }
+        { cpsActive: true }
       );
 
       await lastValueFrom(provider.search(request, options, deps));
@@ -121,7 +121,7 @@ describe('endpointSearchStrategyProvider', () => {
     it('overrides the strategy name so the scoped client does not recurse into this strategy', async () => {
       const { provider, scopedSearch } = buildProvider(
         { canAccessEndpointActionsLogManagement: true },
-        { cpsEnabled: true }
+        { cpsActive: true }
       );
 
       await lastValueFrom(
@@ -137,7 +137,7 @@ describe('endpointSearchStrategyProvider', () => {
     it('drops a caller-supplied projectRouting so the routing stays the one derived here', async () => {
       const { provider, scopedSearch } = buildProvider(
         { canAccessEndpointActionsLogManagement: true },
-        { cpsEnabled: true }
+        { cpsActive: true }
       );
 
       await lastValueFrom(
@@ -154,7 +154,7 @@ describe('endpointSearchStrategyProvider', () => {
     it('bounds the alert-driven actions query to the active space', async () => {
       const { provider, scopedSearch } = buildProvider(
         { canAccessEndpointActionsLogManagement: true },
-        { cpsEnabled: true }
+        { cpsActive: true }
       );
 
       await lastValueFrom(provider.search(request, options, deps));
@@ -180,7 +180,7 @@ describe('endpointSearchStrategyProvider', () => {
     it('does not add the CCS remote patterns to a query that fans out', async () => {
       const { provider, scopedSearch } = buildProvider(
         { canAccessEndpointActionsLogManagement: true },
-        { cpsEnabled: true, ccsEnabled: true }
+        { cpsActive: true, ccsEnabled: true }
       );
 
       await lastValueFrom(provider.search(request, options, deps));
@@ -209,7 +209,7 @@ describe('endpointSearchStrategyProvider', () => {
         .mockReturnValue({ index: ['.fleet-actions-results', '.logs-endpoint.actions-default'] });
       const { provider, search, scopedSearch } = buildProvider(
         { canAccessEndpointActionsLogManagement: true },
-        { cpsEnabled: true }
+        { cpsActive: true }
       );
 
       await lastValueFrom(provider.search(request, options, deps));
@@ -223,7 +223,7 @@ describe('endpointSearchStrategyProvider', () => {
       const service = {
         isCpsRead: jest.fn().mockReturnValue(true),
         getScopedSearchClient: jest.fn().mockReturnValue({ cancel }),
-        asScoped: jest.fn(() => ({
+        asScoped: jest.fn(async () => ({
           isCpsRead: () => true,
           getEsClient: () => {
             throw new Error('not used');
@@ -249,7 +249,7 @@ describe('endpointSearchStrategyProvider', () => {
       const service = {
         isCpsRead: jest.fn().mockReturnValue(true),
         getScopedSearchClient: jest.fn().mockReturnValue({ cancel }),
-        asScoped: jest.fn(() => ({
+        asScoped: jest.fn(async () => ({
           isCpsRead: () => true,
           getEsClient: () => {
             throw new Error('not used');
@@ -293,7 +293,7 @@ describe('endpointSearchStrategyProvider', () => {
       it('resolves the action first, so the space check happens before the fan-out', async () => {
         const { provider, scopedSearch } = buildProvider(
           { canAccessEndpointActionsLogManagement: true },
-          { cpsEnabled: true }
+          { cpsActive: true }
         );
 
         await lastValueFrom(provider.search(resultsRequest, options, deps));
@@ -310,7 +310,7 @@ describe('endpointSearchStrategyProvider', () => {
       it('does not add the CCS remote patterns to the results query either', async () => {
         const { provider, scopedSearch } = buildProvider(
           { canAccessEndpointActionsLogManagement: true },
-          { cpsEnabled: true, ccsEnabled: true }
+          { cpsActive: true, ccsEnabled: true }
         );
 
         await lastValueFrom(provider.search(resultsRequest, options, deps));
@@ -322,7 +322,7 @@ describe('endpointSearchStrategyProvider', () => {
         fetchActionRequestByIdMock.mockRejectedValue(new NotFoundError('Action not found'));
         const { provider, scopedSearch } = buildProvider(
           { canAccessEndpointActionsLogManagement: true },
-          { cpsEnabled: true }
+          { cpsActive: true }
         );
 
         const response = await lastValueFrom(provider.search(resultsRequest, options, deps));
@@ -346,7 +346,7 @@ describe('endpointSearchStrategyProvider', () => {
         fetchActionRequestByIdMock.mockRejectedValue(new Error('Elasticsearch is down'));
         const { provider, scopedSearch } = buildProvider(
           { canAccessEndpointActionsLogManagement: true },
-          { cpsEnabled: true }
+          { cpsActive: true }
         );
 
         await expect(lastValueFrom(provider.search(resultsRequest, options, deps))).rejects.toThrow(

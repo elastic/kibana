@@ -23,6 +23,7 @@ spec:
         KIBANA_GITHUB_BUILD_COMMIT_STATUS_ENABLED: 'true'
         GITHUB_COMMIT_STATUS_CONTEXT: 'kibana-ci'
         SLACK_NOTIFICATIONS_SKIP_FOR_RETRIES: 'true'
+        KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'true'
       allow_rebuilds: true
       branch_configuration: gh-readonly-queue/* gh-readonly-queue/*/*
       default_branch: main
@@ -42,6 +43,11 @@ spec:
         build_tags: false
         prefix_pull_request_fork_branch_names: false
         skip_pull_request_builds_for_existing_commits: false
+        build_merge_group_checks_requested: true
+        cancel_when_merge_group_destroyed: true
+        use_merge_group_base_commit_for_git_diff_base: true
+      webhook_events:
+        - merge_group
       teams:
         everyone:
           access_level: BUILD_AND_READ

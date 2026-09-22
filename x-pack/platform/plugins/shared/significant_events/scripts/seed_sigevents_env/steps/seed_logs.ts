@@ -12,17 +12,24 @@ import type { LogsManifest } from '@kbn/synthtrace/src/lib/service_graph_logs/ty
 import { CLAIMS_APP } from '@kbn/synthtrace/src/scenarios/sigevents/mock_apps/claims';
 import { incidentAt, makePhaseContext } from '@kbn/synthtrace/src/scenarios/sigevents/utils';
 import { timerange } from '@kbn/synthtrace-client';
+import { METRIC_SERIES_MAX_WRITE_DELAY } from '../../../server/lib/significant_events/rules/metric_series_contract';
+import { getDurationMinutes } from '../../../server/lib/significant_events/rules/schedule';
 import type { SeedContext } from '../types';
 
 const TICK_MS = 60_000;
 /** Baseline window before the failure injection phase, in minutes. */
 const BASELINE_MINUTES = 30;
+const RELIABLE_HORIZON_PADDING_MINUTES = 1;
 
 export async function seedLogs(
   ctx: SeedContext,
   esClient: Client,
   log: ToolingLog
-): Promise<{ failureStartMs: number; failureEndMs: number; manifest: LogsManifest }> {
+): Promise<{
+  seriesStartMs: number;
+  seriesEndMs: number;
+  manifest: LogsManifest;
+}> {
   const scenario = CLAIMS_APP.scenarios[ctx.scenarioName];
   if (!scenario) {
     throw new Error(
@@ -33,9 +40,15 @@ export async function seedLogs(
   }
 
   const baselineMs = BASELINE_MINUTES * 60_000;
-  const cycleDurationMs = (scenario.cycleDurationMinutes ?? 10) * 60_000;
-  const to = Date.now();
-  const from = to - baselineMs - cycleDurationMs;
+  const cycleDurationMinutes = scenario.cycleDurationMinutes ?? 10;
+  const cycleDurationMs = cycleDurationMinutes * TICK_MS;
+  const generatedAtMs = new Date(ctx.generatedAt).getTime();
+  const writeDelayMinutes = getDurationMinutes(METRIC_SERIES_MAX_WRITE_DELAY);
+  const to =
+    Math.floor(generatedAtMs / TICK_MS) * TICK_MS -
+    (writeDelayMinutes + RELIABLE_HORIZON_PADDING_MINUTES) * TICK_MS;
+  const totalBuckets = BASELINE_MINUTES + cycleDurationMinutes;
+  const from = to - (totalBuckets - 1) * TICK_MS;
   const failureStartMs = from + baselineMs;
   const failureEndMs = to;
 
@@ -85,5 +98,9 @@ export async function seedLogs(
     ).toISOString()})`
   );
 
-  return { failureStartMs, failureEndMs, manifest };
+  return {
+    seriesStartMs: from,
+    seriesEndMs: to,
+    manifest,
+  };
 }

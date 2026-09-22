@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useEffect } from 'react';
+import React, { memo, useEffect, useMemo } from 'react';
 import { EuiFlexGroup, EuiHorizontalRule } from '@elastic/eui';
 import { useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Title } from './title';
@@ -58,6 +58,16 @@ const CaseFormFieldsComponent: React.FC<Props> = ({
 
   const deprecationNotice = isTemplatesV2Enabled ? <CustomFieldsDeprecationCallout /> : undefined;
 
+  // Keys of the legacy custom fields actually rendered above — a global definition linked to
+  // one of these must not also render in CreateCaseTemplateFields (see its prop doc).
+  const visibleLegacyCustomFieldKeys = useMemo(
+    () =>
+      showLegacyCustomFieldsInputs
+        ? new Set(configurationCustomFields.map((cf) => cf.key))
+        : new Set<string>(),
+    [showLegacyCustomFieldsInputs, configurationCustomFields]
+  );
+
   return (
     <EuiFlexGroup data-test-subj="case-form-fields" direction="column" gutterSize="none">
       <Title isLoading={isLoading} />
@@ -80,7 +90,10 @@ const CaseFormFieldsComponent: React.FC<Props> = ({
         </>
       ) : null}
       {isTemplatesV2Enabled && (
-        <CreateCaseTemplateFields addTopSpacing={!showLegacyCustomFieldsInputs} />
+        <CreateCaseTemplateFields
+          addTopSpacing={!showLegacyCustomFieldsInputs}
+          visibleLegacyCustomFieldKeys={visibleLegacyCustomFieldKeys}
+        />
       )}
     </EuiFlexGroup>
   );

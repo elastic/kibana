@@ -420,6 +420,14 @@ describe('functions arg suggestions', () => {
       expect(labels).toEqual(expect.arrayContaining(['CONCAT', 'SUBSTRING']));
     });
 
+    it('homogeneous function: suggests fields when first argument is a named parameter (?var)', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest('FROM index | WHERE MV_CONTAINS(?values, /)');
+      const labels = suggestions.map(({ label }) => label);
+
+      expect(labels).toEqual(expect.arrayContaining(['textField', 'keywordField']));
+    });
+
     it('after unknown-type field: suggests type-compatible fields/functions based on function param type', async () => {
       const { suggest } = await setup();
       const suggestions = await suggest('FROM index | EVAL result = ABS(unknownField /)');
@@ -1199,6 +1207,14 @@ describe('functions arg suggestions', () => {
           expect(labels).not.toContain(',');
         }
       });
+    });
+
+    it('preserves comparison suggestions after a parenthesized boolean function', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest('FROM index | WHERE (CASE(booleanField, true, false)) /');
+      const labels = suggestions.map(({ label }) => label);
+
+      expect(labels).toEqual(expect.arrayContaining(['==', '!=']));
     });
 
     it('COALESCE return type matches first parameter - accepts type-compatible expressions', async () => {

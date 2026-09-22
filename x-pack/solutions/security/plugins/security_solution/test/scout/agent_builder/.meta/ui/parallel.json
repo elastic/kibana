@@ -1,5 +1,8 @@
 {
   "sha1": "13cb5f7dfb5dce888c19a24dc9cada6759a42393",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "bcac908d8664b22-1054e603e578b92",
@@ -8,8 +11,8 @@
       "tags": [],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/agent_builder/ui/parallel_tests/global.setup.ts",
-        "line": 10,
-        "column": 16
+        "line": 5,
+        "column": 1
       }
     },
     {
@@ -22,8 +25,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/agent_builder/ui/parallel_tests/bulk_add_alerts_to_chat.spec.ts",
-        "line": 60,
-        "column": 14
+        "line": 47,
+        "column": 7
       }
     },
     {
@@ -36,8 +39,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/agent_builder/ui/parallel_tests/bulk_add_alerts_to_chat.spec.ts",
-        "line": 89,
-        "column": 14
+        "line": 65,
+        "column": 17
       }
     },
     {
@@ -50,8 +53,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/agent_builder/ui/parallel_tests/serverless_agent_builder_chrome_nav.spec.ts",
-        "line": 26,
-        "column": 14
+        "line": 22,
+        "column": 15
       }
     },
     {
@@ -64,8 +67,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/agent_builder/ui/parallel_tests/serverless_agent_builder_chrome_nav.spec.ts",
-        "line": 44,
-        "column": 14
+        "line": 29,
+        "column": 27
       }
     }
   ]

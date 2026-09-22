@@ -15,6 +15,7 @@ import type {
 } from '../../../common/types/domain';
 import type { UnifiedReferenceAttachmentPayload } from '../../../common/types/domain/attachment/v2';
 import {
+  FILE_ATTACHMENT_TYPE,
   LEGACY_FILE_ATTACHMENT_TYPE,
   SECURITY_ALERT_ATTACHMENT_TYPE,
 } from '../../../common/constants';
@@ -124,5 +125,27 @@ export const createUnifiedAlertRequests = (
     type: SECURITY_ALERT_ATTACHMENT_TYPE,
     attachmentId: attachmentIds,
     owner: `${value}`,
+  }));
+};
+
+export const createUnifiedFileRequests = ({
+  numRequests,
+  numFiles,
+}: {
+  numRequests: number;
+  numFiles: number;
+}): UnifiedReferenceAttachmentPayload[] => {
+  const files: FileAttachmentMetadata['files'] = [...Array(numFiles).keys()].map((value) => ({
+    name: `${value}`,
+    created: '2023-02-27T20:26:54.345Z',
+    extension: 'png',
+    mimeType: 'image/png',
+  }));
+
+  return [...Array(numRequests).keys()].map((value) => ({
+    type: FILE_ATTACHMENT_TYPE,
+    attachmentId: `so-id-${value}`,
+    metadata: { files },
+    owner: 'test',
   }));
 };

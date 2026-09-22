@@ -8,12 +8,15 @@
 import React, { useState, useLayoutEffect, useCallback } from 'react';
 import usePromise from 'react-use/lib/usePromise';
 import type { History } from 'history';
+import { EuiLoadingSpinner, EuiPageTemplate } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { ToastsStart } from '@kbn/core/public';
 
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { PipelineEditor } from './components/pipeline_editor';
+import { PipelineAppHeader } from './components/pipeline_app_header';
 import { Pipeline } from '../models/pipeline';
 import * as Breadcrumbs from './breadcrumbs';
 
@@ -55,6 +58,24 @@ const usePipeline = (
   return pipeline;
 };
 
+const getEditorTitle = (shouldClone: boolean, id?: string, pipelineId?: string): string => {
+  if (shouldClone && id) {
+    return i18n.translate('xpack.logstash.pipelineEditor.clonePipelineTitle', {
+      defaultMessage: 'Clone Pipeline "{id}"',
+      values: { id },
+    });
+  }
+  if (id) {
+    return i18n.translate('xpack.logstash.pipelineEditor.editPipelineTitle', {
+      defaultMessage: 'Edit Pipeline "{id}"',
+      values: { id: pipelineId ?? id },
+    });
+  }
+  return i18n.translate('xpack.logstash.pipelineEditor.createPipelineTitle', {
+    defaultMessage: 'Create Pipeline',
+  });
+};
+
 interface EditProps {
   pipelineService: any;
   logstashLicenseService: any;
@@ -89,28 +110,49 @@ export const PipelineEditView: React.FC<EditProps> = ({
     [history]
   );
 
-  if (!pipeline) {
-    return null;
-  }
-
-  const isNewPipeline = !pipeline.id;
+  const isNewPipeline = !id || shouldClone;
+  const editorPipelineId = pipeline?.id ?? id ?? '';
   setBreadcrumbs(
     isNewPipeline
       ? Breadcrumbs.getPipelineCreateBreadcrumbs()
-      : Breadcrumbs.getPipelineEditBreadcrumbs(pipeline.id)
+      : Breadcrumbs.getPipelineEditBreadcrumbs(editorPipelineId)
   );
 
+  const title = getEditorTitle(shouldClone, id, pipeline?.id);
+
+  let body: React.ReactNode;
+  if (!pipeline) {
+    body = (
+      <EuiPageTemplate.EmptyPrompt
+        title={<EuiLoadingSpinner size="xl" />}
+        body={
+          <FormattedMessage
+            id="xpack.logstash.pipelineEditor.loadingPipelineDescription"
+            defaultMessage="Loading pipeline…"
+          />
+        }
+      />
+    );
+  } else {
+    body = (
+      <PipelineEditor
+        id={id}
+        clone={shouldClone}
+        close={close}
+        open={open}
+        isNewPipeline={isNewPipeline}
+        pipeline={pipeline}
+        pipelineService={pipelineService}
+        toastNotifications={toasts}
+        licenseService={logstashLicenseService}
+      />
+    );
+  }
+
   return (
-    <PipelineEditor
-      id={id}
-      clone={shouldClone}
-      close={close}
-      open={open}
-      isNewPipeline={isNewPipeline}
-      pipeline={pipeline}
-      pipelineService={pipelineService}
-      toastNotifications={toasts}
-      licenseService={logstashLicenseService}
-    />
+    <>
+      <PipelineAppHeader title={title} history={history} showBack />
+      {body}
+    </>
   );
 };

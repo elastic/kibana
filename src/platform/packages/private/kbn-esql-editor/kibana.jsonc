@@ -2,7 +2,7 @@
   "type": "shared-browser",
   "id": "@kbn/esql-editor",
   "owner": [
-    "@elastic/kibana-esql"
+    "@elastic/kibana-discover"
   ],
   "group": "platform",
   "visibility": "private"

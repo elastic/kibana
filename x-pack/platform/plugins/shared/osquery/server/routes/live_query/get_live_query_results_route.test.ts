@@ -48,6 +48,7 @@ describe('getLiveQueryResultsRoute', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockOsqueryContext = {
+      isCpsActive: jest.fn().mockResolvedValue(false),
       service: {},
       logFactory: { get: jest.fn() },
     } as unknown as OsqueryAppContext;
@@ -166,7 +167,7 @@ describe('getLiveQueryResultsRoute', () => {
       const contextSearchFn = jest.fn();
 
       mockOsqueryContext = {
-        cpsEnabled: true,
+        isCpsActive: jest.fn().mockResolvedValue(true),
         service: {},
         logFactory: { get: jest.fn() },
         getStartServices: jest

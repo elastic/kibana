@@ -53,6 +53,9 @@ export function configToAnnotatedYaml(config: SignificantEventsTuningConfig): st
     '# Deadline (ms) per ES|QL query validation during generation (1000-240000)',
     `query_validation_timeout_ms: ${config.query_validation_timeout_ms}`,
     '',
+    '# Deadline (ms) for the whole computed-feature generation pass (1000-240000)',
+    `computed_features_timeout_ms: ${config.computed_features_timeout_ms}`,
+    '',
     '# ── Search & Relevance ──',
     '',
     '# Minimum ELSER score for semantic search results (0-1)',
@@ -133,12 +136,13 @@ export function SignificantEventsTuningConfigEditor({
         languageId="yaml"
         value={value}
         onChange={handleChange}
-        height={350}
+        fitToContent={{ minLines: 1 }}
         options={{
           readOnly: isReadOnly,
           minimap: { enabled: false },
           scrollBeyondLastLine: false,
           wordWrap: 'off',
+          scrollbar: { vertical: 'hidden' },
         }}
       />
       {errors.length > 0 && (

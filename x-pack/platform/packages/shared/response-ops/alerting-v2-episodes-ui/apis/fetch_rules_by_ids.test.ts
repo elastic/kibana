@@ -19,7 +19,7 @@ describe('fetchRulesByIds', () => {
       items: [],
       total: 0,
       page: 1,
-      perPage: ALERT_EPISODES_LIST_PAGE_SIZE,
+      per_page: ALERT_EPISODES_LIST_PAGE_SIZE,
     });
   });
 
@@ -34,7 +34,7 @@ describe('fetchRulesByIds', () => {
     expect(mockHttp.get).toHaveBeenCalledWith(ALERTING_V2_RULE_API_PATH, {
       query: {
         filter: '(id: "rule-a" OR id: "rule-b")',
-        perPage: ALERT_EPISODES_LIST_PAGE_SIZE,
+        per_page: ALERT_EPISODES_LIST_PAGE_SIZE,
         page: 1,
       },
     });
@@ -48,13 +48,22 @@ describe('fetchRulesByIds', () => {
 
     await fetchRulesByIds({ http: mockHttp, ids });
 
-    expect(mockHttp.get).toHaveBeenCalledTimes(1);
     expect(mockHttp.get).toHaveBeenCalledWith(ALERTING_V2_RULE_API_PATH, {
       query: {
         filter: expect.not.stringContaining(`rule-${ALERT_EPISODES_LIST_PAGE_SIZE}`),
-        perPage: ALERT_EPISODES_LIST_PAGE_SIZE,
+        per_page: ALERT_EPISODES_LIST_PAGE_SIZE,
         page: 1,
       },
     });
+  });
+
+  it('returns only the rules resolved by the v2 API', async () => {
+    const v2Rule = { id: 'v2-rule', metadata: { name: 'V2 Rule' } };
+    mockHttp.get.mockResolvedValueOnce({ items: [v2Rule], total: 1, page: 1, per_page: 50 });
+
+    const result = await fetchRulesByIds({ http: mockHttp, ids: ['v2-rule', 'unknown-rule'] });
+
+    expect(result).toEqual([v2Rule]);
+    expect(mockHttp.post).not.toHaveBeenCalled();
   });
 });

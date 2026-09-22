@@ -6,13 +6,50 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
+import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import type {
   SignificantEventsMaintenanceStatus,
   SignificantEventsMaintenanceSummary,
 } from '../../../../common/maintenance/types';
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
+import { bootstrapCleanupWorkflow } from '../../../lib/workflows/cleanup_workflow';
+
+const bootstrapCleanupRoute = createServerRoute({
+  endpoint: 'POST /internal/significant_events/maintenance/cleanup/_bootstrap',
+  options: {
+    access: 'internal',
+    summary: 'Bootstrap stale Significant Events cleanup for the current space',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage, NIGHTSHIFT_API_PRIVILEGES.configure],
+    },
+  },
+  params: z.object({}),
+  handler: async ({
+    request,
+    server,
+    getScopedClients,
+    getSpaceId,
+    cleanupWorkflowService,
+    maintenanceService,
+    logger,
+  }): Promise<{ success: true }> => {
+    const { licensing } = await getScopedClients({ request });
+    await assertSignificantEventsAccess({ server, licensing });
+
+    await bootstrapCleanupWorkflow({
+      cleanupWorkflowService,
+      maintenanceService,
+      request,
+      spaceId: await getSpaceId(request),
+      logger,
+    });
+
+    return { success: true };
+  },
+});
 
 const pauseRoute = createServerRoute({
   endpoint: 'POST /internal/significant_events/maintenance/_pause',
@@ -21,11 +58,11 @@ const pauseRoute = createServerRoute({
     summary: 'Pause Significant Events activity',
     description:
       'Disables all Significant Events managed workflows across every Kibana space, cancels their in-flight executions, and disables the alerting rules backing knowledge indicator queries. Existing data is kept. Idempotent while paused. ' +
-      'This is a deployment-wide control (agnostic saved object), not per-space. Authorization uses the caller’s space-scoped streams.manage privilege; there is no separate cluster-level privilege today — treat manage as sufficient to pause the whole deployment.',
+      'This is a deployment-wide control (agnostic saved object), not per-space. Authorization uses the caller’s space-scoped Nightshift manage privilege; there is no separate cluster-level privilege today — treat manage as sufficient to pause the whole deployment.',
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage, NIGHTSHIFT_API_PRIVILEGES.configure],
     },
   },
   params: z.object({}),
@@ -49,12 +86,11 @@ const resumeRoute = createServerRoute({
     access: 'internal',
     summary: 'Resume Significant Events activity',
     description:
-      'Re-enables the managed workflows and alerting rules that Pause disabled across the deployment. Does not restart cancelled executions. Idempotent while enabled. ' +
-      'Deployment-wide (same privilege model as Pause): space-scoped streams.manage gates the call.',
+      'Re-enables the managed workflows and alerting rules that Pause disabled across the deployment. Does not restart cancelled executions. Idempotent while enabled.',
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage, NIGHTSHIFT_API_PRIVILEGES.configure],
     },
   },
   params: z.object({}),
@@ -82,7 +118,7 @@ const statusRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
   params: z.object({}),
@@ -100,6 +136,7 @@ const statusRoute = createServerRoute({
 });
 
 export const internalMaintenanceRoutes = {
+  ...bootstrapCleanupRoute,
   ...pauseRoute,
   ...resumeRoute,
   ...statusRoute,

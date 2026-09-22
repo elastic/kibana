@@ -8,7 +8,9 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { EvaluationCriterionStructured } from '@kbn/evals';
 import type { Detection, SignificantEvent } from '@kbn/significant-events-schema';
+import type { ExistingQuerySummary } from '@kbn/nightshift-ai';
 import type { GcsConfig } from '../data_generators/replay';
+import type { ChronicSeedConfig as ChronicSeedInput } from '../data_generators/seed_chronic_background';
 import type { ValidKIFeatureType } from '../evaluators/ki_feature_extraction';
 
 export interface SamplingCriterion extends EvaluationCriterionStructured {
@@ -39,9 +41,15 @@ export interface KIQueryGenerationScenario {
     expected_categories: string[];
     expected_ground_truth: string;
     expect_stats?: boolean;
+    expect_queries?: boolean;
   };
   metadata: Record<string, unknown> & ScenarioMetadata;
   snapshot_source?: SnapshotSourceOverride;
+  /** Eval-only novelty arm: seeds existing_queries, scored against hidden criteria. */
+  rerun?: {
+    existing_queries: ExistingQuerySummary[];
+    criteria: SamplingCriterion[];
+  };
 }
 
 export interface KIFeatureExtractionScenario {
@@ -89,11 +97,19 @@ export interface KIFeatureDeduplicationScenario {
   snapshot_source?: SnapshotSourceOverride;
 }
 
+export type { ChronicSeedInput };
+
 export interface DiscoveryScenario {
   input: {
     scenario_id: string;
     stream_name: string;
     detections: Array<Partial<Detection>>;
+    /**
+     * Seeds a synthetic chronic rate-flat failure pattern (steady logs + one backed query KI)
+     * instead of relying on snapshot incident data; the detection `@timestamp` is stamped from
+     * the seed's change point. Positive fixture for the grounding skill's rate gate.
+     */
+    chronic_seed?: ChronicSeedInput;
   };
   /** Ordered ground-truth continuation chains by `rule_name`, keyed by continuation path label. */
   continuationChains?: Record<string, string[]>;
@@ -118,7 +134,19 @@ export interface DiscoveryScenario {
 export interface DatasetConfig {
   id: string;
   description: string;
+  optIn?: true;
   gcs: GcsConfig;
+  /**
+   * How log data is replayed from the snapshot:
+   * - `undefined` (default): `replaySignificantEventsSnapshot` — restores the snapshot's
+   *   `logs` data-stream backing indices (`.ds-logs-*`) and reindexes them into a local
+   *   `logs` data stream. Used by demo-app snapshots captured from a managed `logs` stream.
+   * - `'managed-stream'`: `replayIntoManagedStream` — reindexes all `logs-*` indices in the
+   *   snapshot into the managed `logs` stream. Required for archived incident snapshots, which
+   *   store plain indices under their original data-stream names (`logs-<dataset>-<namespace>`)
+   *   instead of `.ds-*` backing indices.
+   */
+  replayMode?: 'managed-stream';
   kiQueryGeneration: KIQueryGenerationScenario[];
   kiFeatureExtraction: KIFeatureExtractionScenario[];
   kiFeatureExclusion: KIFeatureExclusionScenario[];

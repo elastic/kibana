@@ -35,7 +35,7 @@ describe('Max byte size transform', () => {
     const dataStream = [data, data, data];
     const src = Readable.from(dataStream);
     const dest = new DummyWrite();
-    await expect(() => pipe(src, enforceMaxByteSizeTransform(5), dest)).rejects.toThrowError(
+    await expect(() => pipe(src, enforceMaxByteSizeTransform(5), dest)).rejects.toThrow(
       new Error('Maximum of 5 bytes exceeded')
     );
   });

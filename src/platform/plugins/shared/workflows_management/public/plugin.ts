@@ -33,6 +33,7 @@ import type { WorkflowsBaseTelemetry } from './common/service/telemetry';
 import type { DeepLinksParams } from './deep_links';
 import { getDeepLinks } from './deep_links';
 import { triggerSchemas } from './trigger_schemas';
+import { registerConnectorEventTriggersPublic } from './triggers/register_connector_event_triggers';
 import type {
   WorkflowsPublicPluginSetup,
   WorkflowsPublicPluginSetupDependencies,
@@ -94,13 +95,19 @@ export class WorkflowsPlugin
 
     registerConnectorType();
 
+    registerConnectorEventTriggersPublic({
+      inboundEventsEnabled: plugins.actions.isInboundEventsEnabled,
+      registerTriggerDefinition: (definition) =>
+        plugins.workflowsExtensions.registerTriggerDefinition(definition),
+    });
+
     this.setupAgentBuilderStart(core);
 
     core.application.register({
       id: PLUGIN_ID,
       title: PLUGIN_NAME,
       appRoute: '/app/workflows',
-      euiIconType: 'workflowsApp',
+      euiIconType: 'logoElastic',
       visibleIn: this.getVisibleIn({ isAuthorized: true, isAvailable: true }),
       category: DEFAULT_APP_CATEGORIES.management, // Only for the classic navigation
       order: 9015,

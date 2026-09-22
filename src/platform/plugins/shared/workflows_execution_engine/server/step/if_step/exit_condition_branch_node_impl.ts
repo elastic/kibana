@@ -7,14 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ExitConditionBranchNode, WorkflowGraph } from '@kbn/workflows/graph';
+import type { ExitConditionBranchNode } from '@kbn/workflows/graph';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { RuntimeGraphView } from '../../workflow_context_manager/workflow_runtime_graph';
 import type { NodeImplementation } from '../node_implementation';
 
 export class ExitConditionBranchNodeImpl implements NodeImplementation {
   constructor(
     private step: ExitConditionBranchNode,
-    private workflowGraph: WorkflowGraph,
+    private workflowGraph: RuntimeGraphView,
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager
   ) {}
 

@@ -46,6 +46,13 @@ export function createEventStatusUpdateTool({
         defaultMessage: 'Update the status of an existing significant event.',
       })}
     `,
+    annotations: {
+      title: 'Update Significant Event Status',
+      readOnlyHint: false,
+      destructiveHint: true,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     schema: eventStatusUpdateSchema,
     tags: ['streams', 'significant-events'],
     availability: createSignificantEventsAvailability({ server, logger }),
@@ -56,7 +63,7 @@ export function createEventStatusUpdateTool({
         await assertSignificantEventsAccess({ server, licensing });
 
         const data = await updateEventStatusToolHandler({
-          eventClient: getEventClient(),
+          eventClient: await getEventClient(),
           eventUuid: toolParams.event_uuid,
           status: toolParams.status,
         });

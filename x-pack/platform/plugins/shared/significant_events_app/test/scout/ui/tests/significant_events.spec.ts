@@ -8,7 +8,7 @@
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
-import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
+import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import { test } from '../fixtures';
 
 test.describe(
@@ -22,7 +22,7 @@ test.describe(
       // eslint-disable-next-line playwright/no-skipped-test
       test.skip(
         config.isCloud === true,
-        `Cannot override '${STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG}' on Cloud deployments`
+        `Cannot override '${NIGHTSHIFT_ENABLED_FLAG}' on Cloud deployments`
       );
       // skip() in beforeAll only skips the tests, not the hook body, so guard the requests too.
       if (config.isCloud) {
@@ -31,7 +31,7 @@ test.describe(
 
       await apiServices.core.settings({
         'feature_flags.overrides': {
-          [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: true,
+          [NIGHTSHIFT_ENABLED_FLAG]: true,
         },
       });
     });
@@ -46,7 +46,7 @@ test.describe(
       }
       await apiServices.core.settings({
         'feature_flags.overrides': {
-          [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: false,
+          [NIGHTSHIFT_ENABLED_FLAG]: null,
         },
       });
     });
@@ -59,11 +59,11 @@ test.describe(
         timeout: 60_000,
       });
       await expect(page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title)).toHaveText(
-        'Significant Events'
+        'Nightshift Management'
       );
     });
 
-    test('renders all 7 navigation tabs', async ({ page }) => {
+    test('renders navigation tabs', async ({ page }) => {
       await page.gotoApp('significant_events/streams');
       const tabBar = page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.tabs);
       await expect(tabBar).toBeVisible({ timeout: 60_000 });
@@ -74,7 +74,6 @@ test.describe(
         'Rules',
         'Detections',
         'Significant Events',
-        'Memory',
         'Settings',
       ]) {
         await expect(tabBar.getByRole('tab', { name: label })).toBeVisible();
@@ -87,7 +86,7 @@ test.describe(
     }) => {
       await apiServices.core.settings({
         'feature_flags.overrides': {
-          [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: false,
+          [NIGHTSHIFT_ENABLED_FLAG]: false,
         },
       });
       await page.gotoApp('significant_events/streams');

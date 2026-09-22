@@ -1,22 +1,5 @@
 # @kbn/core-chrome-app-menu-components
 
-Compatibility re-export of [`@kbn/ui-app-menu`](../../../../platform/kbn-ui/app-menu).
+Deprecated compatibility re-export of [`@kbn/app-menu`](../app-menu). Import `@kbn/app-menu` in new code.
 
-## Usage
-
-```tsx
-import React from 'react';
-import { AppMenuComponent, type AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
-
-interface Props {
-  config: AppMenuConfig;
-}
-
-const Example = ({ config }: Props) => {
-  return <AppMenuComponent config={config} />;
-};
-```
-
-## Related
-
-- [`@kbn/ui-app-menu`](../../../../platform/kbn-ui/app-menu) — implementation (this package re-exports it)
+[`@kbn/ui-app-menu`](../../../../../platform/kbn-ui/app-menu) is the portable implementation.

@@ -109,7 +109,7 @@ describe('fetchEntities', () => {
 
     const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0][0];
     expect(esqlCallArgs.query).toContain(
-      '| LOOKUP JOIN .entities.v2.latest.security_default-00001 ON entity.id'
+      '| LOOKUP JOIN .entities.v2.latest.default-00001 ON entity.id'
     );
     expect(esqlCallArgs.query).not.toContain('ENRICH');
   });

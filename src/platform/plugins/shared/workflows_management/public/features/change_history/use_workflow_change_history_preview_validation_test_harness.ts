@@ -44,6 +44,7 @@ export const previewValidationMockDiffEditor = {
 export const samplePreviewCustomError: YamlValidationResult = {
   id: 'custom-error',
   owner: 'step-name-validation',
+  ruleId: 'duplicateStepName',
   severity: 'error',
   message: 'Duplicate step name',
   startLineNumber: 2,
@@ -57,6 +58,7 @@ export const samplePreviewCustomError: YamlValidationResult = {
 export const samplePreviewYamlError: YamlValidationResult = {
   id: 'yaml-error',
   owner: 'yaml',
+  ruleId: 'schemaViolation',
   severity: 'error',
   message: 'Missing property "steps".',
   startLineNumber: 1,

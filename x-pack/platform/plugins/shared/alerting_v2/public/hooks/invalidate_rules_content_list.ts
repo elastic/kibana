@@ -26,7 +26,7 @@ import { ruleKeys } from './query_key_factory';
  * cache entries rather than each hand-rolling its own key.
  */
 
-/** Invalidates the rules list's items query (name/status/mode/tags changes). */
+/** Invalidates the rules list's items query (name/status/kind/tags changes). */
 export const invalidateRulesListView = (): Promise<void> =>
   contentListQueryClient.invalidateQueries({
     queryKey: contentListKeys.all(RULES_CONTENT_LIST_ID),

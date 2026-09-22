@@ -7,6 +7,8 @@
 
 import './helpers/mocks';
 
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { getRandomString } from '@kbn/test-jest-helpers';
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -84,7 +86,7 @@ describe('<SnapshotRestoreHome />', () => {
 
       renderHomePage();
 
-      const appTitle = await screen.findByTestId('appTitle');
+      const appTitle = await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title);
       expect(appTitle).toHaveTextContent('Snapshot and Restore');
     });
 
@@ -115,8 +117,10 @@ describe('<SnapshotRestoreHome />', () => {
 
       renderHomePage();
 
-      const docLink = await screen.findByTestId('documentationLink');
-      expect(docLink).toHaveTextContent('Snapshot and Restore docs');
+      await openAppMenuOverflow();
+      const docLink = await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.menuDocumentation);
+      expect(docLink).toHaveAttribute('href');
+      expect(docLink).toHaveAttribute('target', '_blank');
     });
 
     describe('tabs', () => {
