@@ -18,25 +18,49 @@ export interface AgentBuilderConverseResponse {
   insights?: AttackDiscovery[] | null;
 }
 
+const parseInsightsFromToolResult = (
+  steps: AgentBuilderConverseResponse['steps'] | undefined
+): AttackDiscovery[] | null => {
+  // Prefer insights from the run tool's attack_discoveries field — this is the
+  // canonical source, immune to message block ordering issues.
+  if (!steps) {
+    return null;
+  }
+  const adStep = steps.find(
+    (
+      step
+    ): step is typeof step & { results?: Array<{ data?: { attack_discoveries?: unknown } }> } =>
+      step.tool_id === 'security.attack-discovery.run' && step.type === 'tool_call'
+  );
+  const discoveries = adStep?.results?.[0]?.data?.attack_discoveries;
+  if (Array.isArray(discoveries) && discoveries.length > 0) {
+    return discoveries as AttackDiscovery[];
+  }
+  return null;
+};
+
 const parseInsightsFromMessage = (message: string): AttackDiscovery[] | null => {
-  // The agent returns the insights JSON inside a fenced code block at the end
-  // of the report. Extract the last JSON block and parse it.
+  // Fallback: extract insights from the last ```json fenced block in the message.
+  // This is fragile — if the model emits a proposed ES|QL rule after the insights
+  // block, this grabs the wrong one. Prefer parseInsightsFromToolResult when available.
   const matches = message.match(/```json\s*([\s\S]*?)\s*```/g);
   if (!matches || matches.length === 0) {
     return null;
   }
 
-  const lastBlock = matches[matches.length - 1].replace(/```json\s*/, '').replace(/\s*```/, '');
-
-  try {
-    const parsed = JSON.parse(lastBlock);
-    if (parsed && Array.isArray(parsed.insights)) {
-      return parsed.insights;
+  // Search from the end backwards for a block containing "insights"
+  for (let i = matches.length - 1; i >= 0; i--) {
+    const block = matches[i].replace(/```json\s*/, '').replace(/\s*```/, '');
+    try {
+      const parsed = JSON.parse(block);
+      if (parsed && Array.isArray(parsed.insights)) {
+        return parsed.insights;
+      }
+    } catch {
+      // not valid JSON, try next block
     }
-    return null;
-  } catch {
-    return null;
   }
+  return null;
 };
 
 // On long runs the agent's report and insights JSON land in a `reasoning` step
@@ -107,14 +131,26 @@ export class AttackDiscoveryAgentBuilderChatClient {
       throw error;
     }
 
-    return {
-      messages: [{ message: response.response.message }],
-      steps: response.steps ?? [],
-      errors: [],
-      traceId: response.trace_id,
-      insights:
-        parseInsightsFromMessage(response.response.message) ??
-        parseInsightsFromSteps(response.steps ?? []),
-    };
+        return {
+          messages: [{ message: response.response.message }],
+          steps: response.steps ?? [],
+          errors: [],
+          traceId: response.trace_id,
+          insights:
+            parseInsightsFromToolResult(response.steps) ??
+            parseInsightsFromMessage(response.response.message),
+        };
+      },
+      {
+        retries: 2,
+        minTimeout: 2_000,
+        onFailedAttempt: (error) =>
+          this.log.warning(
+            new Error(`Agent Builder converse failed on attempt ${error.attemptNumber}`, {
+              cause: error,
+            })
+          ),
+      }
+    );
   }
 }

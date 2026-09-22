@@ -32,6 +32,11 @@ import { createResponseSkillInvocationEvaluator } from './evaluators/skill_invok
 import { createStrictTrajectoryEvaluator } from './evaluators/trajectory_evaluator';
 import { createWorkflowEvidenceEvaluator } from './evaluators/workflow_evidence_evaluator';
 import { redactExecutionIds } from './redact';
+import {
+  createDiscoveryCountCapEvaluator,
+  createMinValidatedDiscoveryEvaluator,
+  createNoiseFalsePositiveEvaluator,
+} from './evaluators/noise_fpr_evaluator';
 
 type AdToolResult = NonNullable<AttackDiscoveryAgentBuilderTaskOutput['adToolResult']>;
 
@@ -1242,6 +1247,9 @@ export const createEvaluateAttackDiscoveryAgentBuilderDataset =
         createWorkflowEvidenceEvaluator(),
         trajectory,
         createForbiddenToolsEvaluator(),
+        createNoiseFalsePositiveEvaluator(),
+        createDiscoveryCountCapEvaluator(),
+        createMinValidatedDiscoveryEvaluator(),
         createCostPerAlertEvaluator(),
         createAttackDiscoveryBasicEvaluator(),
         createAttackDiscoveryCriteriaEvaluator({ evaluators }) as Evaluator<

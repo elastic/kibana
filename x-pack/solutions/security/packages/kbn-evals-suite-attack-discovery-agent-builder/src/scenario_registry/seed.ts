@@ -95,6 +95,7 @@ export const seedAd2ScenarioProfile = async (
     scenarioKeys: plan.scenarioKeys,
     alertCount: plan.alerts.length,
     rawEventCount: plan.rawEvents.length,
+    noiseAlertCount: plan.noiseAlertIds?.length ?? 0,
   };
 };
 
