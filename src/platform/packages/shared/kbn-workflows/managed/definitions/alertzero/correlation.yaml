@@ -114,4 +114,4 @@ steps:
     with:
       status: "{{ variables.result_status }}"
       stage: correlation
-      reason: "${{ steps.run_correlate.error.message | default: nil }}"
+      reason: "{{ steps.run_correlate.error.message }}"
