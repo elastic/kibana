@@ -551,6 +551,7 @@ apiTest.describe(
         await triggerMaintainerRun(apiClient, internalHeaders, MAINTAINER_ID, { sync: true });
 
         await waitForRelationshipIds(esClient, RELATIONSHIP_KEY, managerEntityId, firstEntityId);
+        await waitForRelationshipIds(esClient, RELATIONSHIP_KEY, managerEntityId, secondEntityId);
         const ids = await getRelationshipIds(esClient, RELATIONSHIP_KEY, managerEntityId);
         expect(ids.sort()).toStrictEqual([firstEntityId, secondEntityId].sort());
       }
