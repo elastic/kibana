@@ -123,7 +123,8 @@ async function bootstrapNonPriorityTask({
       entityType,
       {},
       descriptor.logExtractionConfig,
-      EXTRACTION_MODE.nonPriority
+      EXTRACTION_MODE.nonPriority,
+      descriptor.nonPriorityLogExtractionConfig
     );
 
     await pluginsStart.taskManager.ensureScheduled(

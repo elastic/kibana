@@ -378,7 +378,8 @@ describe('bootstrapNonPriorityTask', () => {
       'user',
       {},
       logExtractionConfig,
-      EXTRACTION_MODE.nonPriority
+      EXTRACTION_MODE.nonPriority,
+      undefined
     );
   });
 });

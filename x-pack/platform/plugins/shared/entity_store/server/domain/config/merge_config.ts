@@ -7,7 +7,11 @@
 
 import type { EntityType, ExtractionMode } from '../../../common/domain/definitions/entity_schema';
 import { EXTRACTION_MODE } from '../../../common/domain/definitions/entity_schema';
-import type { LogExtractionConfig, LogExtractionTypeOverride } from '../saved_objects';
+import type {
+  LogExtractionConfig,
+  LogExtractionTypeOverride,
+  NonPriorityLogExtractionTypeOverride,
+} from '../saved_objects';
 import {
   LATEST_LOG_EXTRACTION_DEFAULTS,
   LogExtractionConfig as LogExtractionConfigSchema,
@@ -24,9 +28,6 @@ export const DEFAULT_CONFIG_BY_TYPE: Partial<Record<EntityType, Partial<LogExtra
  * Non-priority is best-effort over much higher volume, so it drops past the remaining logs to stay
  * current.
  *
- * Both run on the same cadence for now. A longer interval for the high-volume process is proposed
- * but not decided; the two processes resolve their frequency independently, so changing it is a
- * one-line edit here.
  *
  * `single` is empty: with the feature flag off, behaviour must stay exactly as it is today.
  */
@@ -51,22 +52,77 @@ const setFields = (
   ) as Partial<LogExtractionConfig>;
 
 /**
- * Config in effect for one entity type and extraction process: code defaults, then the per-type
- * defaults, then the per-process defaults, then `globalOverrides`, then `typeOverride`.
+ * Fields from `logExtractionConfig` that are shared across all extraction modes. For the
+ * non-priority process only these fields are read from `logExtractionConfig`; all other
+ * extraction parameters come from the mode defaults and global overrides.
+ */
+const SHARED_LOG_EXTRACTION_FIELDS = new Set<keyof LogExtractionTypeOverride>([
+  'additionalIndexPatterns',
+  'excludedIndexPatterns',
+]);
+
+const setSharedFields = (
+  layer: LogExtractionTypeOverride | undefined
+): Partial<LogExtractionConfig> =>
+  Object.fromEntries(
+    Object.entries(layer ?? {}).filter(
+      ([key, value]) =>
+        value !== null &&
+        value !== undefined &&
+        SHARED_LOG_EXTRACTION_FIELDS.has(key as keyof LogExtractionTypeOverride)
+    )
+  ) as Partial<LogExtractionConfig>;
+
+/**
+ * Converts a `NonPriorityLogExtractionTypeOverride` to the subset that belongs in
+ * `LogExtractionConfig`. `samplingRate` is non-priority-specific and not part of
+ * `LogExtractionConfig`, so it is stripped here and read separately by the caller.
+ */
+const setNonPriorityFields = (
+  layer: NonPriorityLogExtractionTypeOverride | undefined
+): Partial<LogExtractionConfig> => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { samplingRate: _samplingRate, ...rest } = layer ?? {};
+  return Object.fromEntries(
+    Object.entries(rest).filter(([, value]) => value !== null && value !== undefined)
+  ) as Partial<LogExtractionConfig>;
+};
+
+/**
+ * Config in effect for one entity type and extraction process.
  *
- * The process layer sits below both override layers, so anything a customer has set explicitly
- * still wins over the built-in per-process values.
+ * Shared base (all modes):
+ *   code defaults → per-type code defaults → per-process defaults → globalOverrides
+ *
+ * Final layer for single / priority:
+ *   all fields from typeOverride
+ *
+ * Final layer for non-priority:
+ *   shared fields only from typeOverride (additionalIndexPatterns, excludedIndexPatterns),
+ *   then nonPriorityOverride (when populated - not wired to any API yet)
+ *
+ * Keeping non-priority isolated ensures values set via the shared API (which writes to
+ * `logExtractionConfig` / `typeOverride`) do not bleed into the non-priority process and
+ * override its mode defaults (e.g. maxLogsPerWindowCapBehavior: 'drop').
  */
 export const getMergedConfig = (
   type: EntityType,
   globalOverrides: Partial<LogExtractionConfig>,
   typeOverride: LogExtractionTypeOverride | undefined,
-  extractionMode: ExtractionMode = EXTRACTION_MODE.single
-): LogExtractionConfig =>
-  LogExtractionConfigSchema.parse({
+  extractionMode: ExtractionMode = EXTRACTION_MODE.single,
+  nonPriorityOverride?: NonPriorityLogExtractionTypeOverride
+): LogExtractionConfig => {
+  const base = {
     ...LATEST_LOG_EXTRACTION_DEFAULTS,
     ...DEFAULT_CONFIG_BY_TYPE[type],
     ...DEFAULT_CONFIG_BY_MODE[extractionMode],
     ...setFields(globalOverrides),
-    ...setFields(typeOverride),
-  });
+  };
+
+  const typeFields =
+    extractionMode === EXTRACTION_MODE.nonPriority
+      ? { ...setSharedFields(typeOverride), ...setNonPriorityFields(nonPriorityOverride) }
+      : setFields(typeOverride);
+
+  return LogExtractionConfigSchema.parse({ ...base, ...typeFields });
+};

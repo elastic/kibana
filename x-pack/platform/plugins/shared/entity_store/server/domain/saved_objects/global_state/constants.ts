@@ -79,6 +79,30 @@ export const LogExtractionTypeOverride = z.object(
   nullishFields(LogExtractionObj.omit({ timeout: true, fieldHistoryLength: true }).shape)
 );
 
+export type NonPriorityLogExtractionTypeOverride = z.infer<
+  typeof NonPriorityLogExtractionTypeOverride
+>;
+/**
+ * Non-priority-specific per entity-type override layer. Separate from LogExtractionTypeOverride
+ * so non-priority fields never appear in the shared config schema.
+ *
+ * Excludes `additionalIndexPatterns` and `excludedIndexPatterns` (shared with all modes via
+ * logExtractionConfig), `timeout` and `fieldHistoryLength` (never read at runtime).
+ *
+ * Not yet wired to any saved-object field or API - reserved for a future step.
+ */
+export const NonPriorityLogExtractionTypeOverride = z.object({
+  ...nullishFields(
+    LogExtractionObj.omit({
+      timeout: true,
+      fieldHistoryLength: true,
+      additionalIndexPatterns: true,
+      excludedIndexPatterns: true,
+    }).shape
+  ),
+  samplingRate: z.number().min(0).max(1).nullable().optional(),
+});
+
 const base = LogExtractionObj.shape;
 
 export type LogExtractionConfig = z.infer<typeof LogExtractionConfig>;

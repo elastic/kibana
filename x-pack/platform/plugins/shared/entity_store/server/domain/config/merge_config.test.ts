@@ -178,4 +178,94 @@ describe('getMergedConfig', () => {
       expect(() => getMergedConfig('user', {}, { docsLimit: 0 })).toThrow();
     });
   });
+
+  describe('single mode', () => {
+    it('resolves to the code defaults when nothing is overridden', () => {
+      expect(getMergedConfig('user', {}, undefined, 'single')).toEqual(LATEST_LOG_EXTRACTION_DEFAULTS);
+    });
+
+    it('is the default extractionMode', () => {
+      expect(getMergedConfig('user', {}, undefined)).toEqual(getMergedConfig('user', {}, undefined, 'single'));
+    });
+
+    it('applies a global override', () => {
+      const merged = getMergedConfig('user', { frequency: '5m' }, undefined, 'single');
+
+      expect(merged.frequency).toBe('5m');
+    });
+
+    it('all typeOverride fields flow through in single mode', () => {
+      const merged = getMergedConfig(
+        'user',
+        {},
+        { maxLogsPerWindowCapBehavior: 'defer', frequency: '10m' },
+        'single'
+      );
+
+      expect(merged.maxLogsPerWindowCapBehavior).toBe('defer');
+      expect(merged.frequency).toBe('10m');
+    });
+
+    it('typeOverride wins over global override in single mode', () => {
+      const merged = getMergedConfig('user', { frequency: '2m' }, { frequency: '10m' }, 'single');
+
+      expect(merged.frequency).toBe('10m');
+    });
+
+    it('null in typeOverride falls through to the global override in single mode', () => {
+      const merged = getMergedConfig('user', { frequency: '5m' }, { frequency: null }, 'single');
+
+      expect(merged.frequency).toBe('5m');
+    });
+  });
+
+  describe('non-priority merge stack', () => {
+    it('resolves maxLogsPerWindowCapBehavior to drop from mode defaults when nothing is set', () => {
+      const merged = getMergedConfig('user', {}, undefined, 'nonPriority');
+
+      expect(merged.maxLogsPerWindowCapBehavior).toBe('drop');
+    });
+
+    it('logExtractionConfig mode-specific fields do not bleed into non-priority', () => {
+      // An operator sets defer on the shared config (e.g. during single mode). For the
+      // non-priority process this must not override the mode default of drop.
+      const merged = getMergedConfig(
+        'user',
+        {},
+        { maxLogsPerWindowCapBehavior: 'defer' },
+        'nonPriority'
+      );
+
+      expect(merged.maxLogsPerWindowCapBehavior).toBe('drop');
+    });
+
+    it('logExtractionConfig shared fields flow through for non-priority', () => {
+      const merged = getMergedConfig(
+        'user',
+        {},
+        { additionalIndexPatterns: ['custom-*'], excludedIndexPatterns: ['exclude-*'] },
+        'nonPriority'
+      );
+
+      expect(merged.additionalIndexPatterns).toEqual(['custom-*']);
+      expect(merged.excludedIndexPatterns).toEqual(['exclude-*']);
+    });
+
+    it('global override applies to non-priority (via shared base)', () => {
+      const merged = getMergedConfig('user', { frequency: '5m' }, undefined, 'nonPriority');
+
+      expect(merged.frequency).toBe('5m');
+    });
+
+    it('priority still reads all typeOverride fields including maxLogsPerWindowCapBehavior', () => {
+      const merged = getMergedConfig(
+        'user',
+        {},
+        { maxLogsPerWindowCapBehavior: 'drop' },
+        'priority'
+      );
+
+      expect(merged.maxLogsPerWindowCapBehavior).toBe('drop');
+    });
+  });
 });
