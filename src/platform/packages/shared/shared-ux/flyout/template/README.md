@@ -44,12 +44,64 @@ Tab selection props also live on the root: `selectedTabId` (controlled), `defaul
 
 **`FlyoutTemplate.Body`** renders `Body.Section`, `Body.Accordion`, and `Body.TabPanel` parts alongside arbitrary passthrough content inside `EuiFlyoutBody`, in source order. Passthrough children manage their own layout; the template adds no sectioning, titling, or dividers around them. See [`src/body/README.md`](src/body/README.md) for sections and unstructured content, and [Tabs](#tabs) below.
 
-**`FlyoutTemplate.Footer`** renders `PrimaryAction` and `SecondaryAction` right-aligned inside `EuiFlyoutFooter`, secondary first. If neither action is present, the footer is omitted entirely — no default Cancel button is added. Only the first instance of each action is rendered.
+**`FlyoutTemplate.Footer`** renders a primary and secondary action right-aligned inside `EuiFlyoutFooter`, secondary first. If no action is present, the footer is omitted entirely — no default Cancel button is added. Only the first instance of each action is rendered; for `PrimaryActionMenu` specifically, the first instance that actually has panels wins. `PrimaryAction` and `PrimaryActionMenu` are mutually exclusive. An empty `panels` array on `PrimaryActionMenu` counts as absent, so a lone empty menu omits the footer without warning.
 
-- `FlyoutTemplate.Footer.PrimaryAction` — rendered as an `EuiButton`, filled.
-- `FlyoutTemplate.Footer.SecondaryAction` — rendered as an `EuiButtonEmpty`.
+- `FlyoutTemplate.Footer.PrimaryAction` — rendered as a filled `EuiButton`. Takes `label`, `onClick`, and optional `id`, `iconType`, `isLoading`, `isDisabled`, `data-test-subj`.
+- `FlyoutTemplate.Footer.SecondaryAction` — rendered as an `EuiButtonEmpty`. Same props as `PrimaryAction`.
+- `FlyoutTemplate.Footer.PrimaryActionMenu` — rendered as a filled `EuiButton` that opens an `EuiContextMenu` in a popover above the footer. See [Primary action menu](#primary-action-menu) below.
 
-Both actions take `label`, `onClick`, and optional `id`, `iconType`, `isLoading`, `isDisabled`, `data-test-subj`. The `id` is forwarded to the button element.
+All three `label` props are `string`, not `ReactNode`.
+
+### Primary action menu
+
+```tsx
+import type { FlyoutFooterMenuPanel } from '@kbn/flyout-template';
+
+const panels: FlyoutFooterMenuPanel[] = useMemo(() => [
+  {
+    id: 0,
+    items: [
+      { name: 'Edit', icon: 'pencil', onClick: onEdit },
+      { name: 'Delete', icon: 'trash', onClick: onDelete },
+    ],
+  },
+], [onEdit, onDelete]);
+
+<FlyoutTemplate.Footer>
+  <FlyoutTemplate.Footer.SecondaryAction label="Cancel" onClick={onCancel} />
+  <FlyoutTemplate.Footer.PrimaryActionMenu label="Take action" panels={panels} />
+</FlyoutTemplate.Footer>
+```
+
+`panels` is EUI's own descriptor array, narrowed as follows:
+
+- `content` and item `renderItem` are not supported (`?: never`); both are rejected at the type level.
+- `items` is required (with `content` gone, a panel with no items is always a mistake).
+- Panel `title` and item `name` are `string`, not `ReactNode`. Annotate the array as `FlyoutFooterMenuPanel[]` — using EUI's own type bypasses these narrowings.
+- A nested panel (one opened from another panel's item) must have a `title`: it is what EUI uses to draw the back button. The template warns in development for any nested panel that lacks one.
+
+Behavior:
+
+- The menu always opens upward and flush with the button's right edge (`anchorPosition="upRight"`). This is fixed and reflects the footer's position; it is not a prop.
+- Picking an item closes the menu. Set `closeOnItemClick={false}` to opt out. Items that open a nested panel (`item.panel`) and separators are never auto-closed regardless.
+- The menu reopens on the initial panel after each close. The panel the menu opens on defaults to `panels[0].id`; pass `initialPanelId` to override.
+- Every behavioral `EuiContextMenu` prop is forwarded: `initialPanelId`, `onPanelChange`, `height`. Its styling surface (`className`, `css`, `panelPaddingSize`, `anchorPosition`) is not.
+- **Memoize `panels`**: `EuiContextMenu` rebuilds its internal keyboard-navigation map when `panels` changes identity. A new array on every render resets arrow-key focus tracking while the menu is open.
+
+| Prop | Type | Notes |
+| --- | --- | --- |
+| `label` | `string` | Trigger button label. The chevron is supplied by the template. |
+| `panels` | `FlyoutFooterMenuPanel[]` | Menu contents. |
+| `initialPanelId` | `string \| number` | Defaults to `panels[0].id`. |
+| `onPanelChange` | `EuiContextMenuProps['onPanelChange']` | Forwarded unchanged. |
+| `height` | `CSSProperties['height']` | Fixed menu height with internal scrolling. |
+| `closeOnItemClick` | `boolean` | Defaults to `true`. |
+| `id` | `string` | Forwarded to the trigger button. |
+| `aria-label` | `string` | Overrides the popover dialog's derived name (`"{label} menu"`). |
+| `data-test-subj` | `string` | Forwarded to the trigger; the popover panel gets `${value}Panel`. |
+| everything else on `EuiButton` | — | Forwarded to the trigger, e.g. `isLoading`, `isDisabled`, `color`, `size`, `className`, `css`, and any `data-*` attribute. |
+
+The template sets `children`, `fill`, `iconType`, `iconSide`, `element`, `aria-haspopup`, and the click handler on the trigger itself, so those are rejected at the type level rather than silently ignored. `isSelected` is rejected too: it applies `aria-pressed`, which describes a toggle button, whereas a popover trigger is described by the `aria-expanded` EUI already sets. `type` is rejected and pinned to `"button"`, so a trigger placed inside a `<form>` opens the menu without submitting it.
 
 ## Behavior
 
@@ -58,7 +110,7 @@ Both actions take `label`, `onClick`, and optional `id`, `iconType`, `isLoading`
 - The header's bottom divider bleeds to the flyout edges using the root `paddingSize`; it aligns with the flyout chrome regardless of which padding size is active.
 - `FlyoutTemplate.Body` is required. Omitting it logs a dev warning. The header and footer are optional.
 - Duplicate zones (e.g. two `FlyoutTemplate.Header` children) log a dev warning and render only the first.
-- The zone components (`Header`, `Body`, `Footer`) and the footer action parts render nothing when used outside a `FlyoutTemplate` root.
+- The zone components (`Header`, `Body`, `Footer`) and the footer action parts (`PrimaryAction`, `SecondaryAction`, `PrimaryActionMenu`) render nothing when used outside a `FlyoutTemplate` root.
 
 ## Tabs
 
