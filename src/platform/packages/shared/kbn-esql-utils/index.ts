@@ -69,6 +69,8 @@ export {
   getJoinIndices,
   getTimeseriesIndices,
   getViews,
+  createEsqlViewsClient,
+  type EsqlViewsClient,
   getDatasets,
   getInferenceEndpoints,
   getEditorExtensions,

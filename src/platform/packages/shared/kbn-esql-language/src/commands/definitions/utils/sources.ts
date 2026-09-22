@@ -162,7 +162,7 @@ export const buildViewsDefinitions = (
         kind: 'Issue',
         detail: i18n.translate('kbn-esql-language.esql.autocomplete.viewDefinition', {
           defaultMessage: '{type}',
-          values: { type: type ?? 'View' },
+          values: { type: type ?? SOURCES_TYPES.VIEW },
         }),
         documentation: buildDocumentation(description, links),
       });

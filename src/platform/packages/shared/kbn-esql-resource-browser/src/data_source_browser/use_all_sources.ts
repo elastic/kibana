@@ -11,6 +11,7 @@ import { useEffect, useRef, useState } from 'react';
 import type {
   ESQLSourceResult,
   EsqlDatasetsResult,
+  EsqlViewsResult,
   IndexAutocompleteItem,
   IndicesAutocompleteResult,
 } from '@kbn/esql-types';
@@ -38,12 +39,28 @@ const normalizeDatasets = ({ datasets }: EsqlDatasetsResult): ESQLSourceResult[]
     hidden: false,
   })) ?? [];
 
+const normalizeViews = ({ views }: EsqlViewsResult): ESQLSourceResult[] =>
+  views?.map((view) => ({
+    name: view.name,
+    title: view.name,
+    type: view.type ?? SOURCES_TYPES.VIEW,
+    hidden: false,
+  })) ?? [];
+
 const mergeSources = (
   base: ESQLSourceResult[],
-  datasets: ESQLSourceResult[]
+  ...additional: ESQLSourceResult[][]
 ): ESQLSourceResult[] => {
   const seenNames = new Set(base.map((source) => source.name));
-  return [...base, ...datasets.filter((dataset) => !seenNames.has(dataset.name))];
+  const merged = [...base];
+
+  for (const source of additional.flat()) {
+    if (seenNames.has(source.name)) continue;
+    seenNames.add(source.name);
+    merged.push(source);
+  }
+
+  return merged;
 };
 
 export interface UseAllSourcesParams {
@@ -53,6 +70,7 @@ export interface UseAllSourcesParams {
   getSources: () => Promise<ESQLSourceResult[]>;
   getTimeseriesIndices: () => Promise<{ indices: IndexAutocompleteItem[] }>;
   getDatasets?: () => Promise<EsqlDatasetsResult>;
+  getViews?: (signal?: AbortSignal) => Promise<EsqlViewsResult>;
 }
 
 export const useAllSources = ({
@@ -62,6 +80,7 @@ export const useAllSources = ({
   getSources,
   getTimeseriesIndices,
   getDatasets,
+  getViews,
 }: UseAllSourcesParams): { allSources: ESQLSourceResult[]; isLoading: boolean } => {
   const [allSources, setAllSources] = useState<ESQLSourceResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -77,6 +96,7 @@ export const useAllSources = ({
   useEffect(() => {
     if (!isOpen) return;
     let isEffectActive = true;
+    const viewsAbortController = new AbortController();
 
     const fetchDatasets = async (): Promise<ESQLSourceResult[]> => {
       if (isTimeseries || !getDatasets) return [];
@@ -92,17 +112,36 @@ export const useAllSources = ({
       }
     };
 
-    if (preloadedSources !== undefined) {
-      // Render preloaded sources immediately, then append federated datasets when they
-      // arrive, since preloaded sources come from the autocomplete cache and don't include them.
-      setAllSources(preloadedSources);
-      fetchDatasets().then((datasets) => {
+    const fetchViews = async (): Promise<ESQLSourceResult[]> => {
+      if (isTimeseries || !getViews) return [];
+      try {
+        return normalizeViews(await getViews(viewsAbortController.signal));
+      } catch (error) {
+        if (viewsAbortController.signal.aborted) return [];
+        // eslint-disable-next-line no-console
+        console.error('Failed to fetch the ES|QL views', error);
+        return [];
+      }
+    };
+
+    // Datasets and views are supplementary source types, so they are merged in once they arrive
+    // rather than holding back the indices the user is most likely looking for.
+    const appendOptionalSources = (base: ESQLSourceResult[]) => {
+      Promise.all([fetchDatasets(), fetchViews()]).then(([datasets, views]) => {
         if (isMountedRef.current && isEffectActive) {
-          setAllSources(mergeSources(preloadedSources, datasets));
+          setAllSources(mergeSources(base, datasets, views));
         }
       });
+    };
+
+    if (preloadedSources !== undefined) {
+      // Render preloaded sources immediately, then append federated datasets and views when they
+      // arrive, since preloaded sources come from the autocomplete cache and don't include them.
+      setAllSources(preloadedSources);
+      appendOptionalSources(preloadedSources);
       return () => {
         isEffectActive = false;
+        viewsAbortController.abort();
       };
     }
 
@@ -114,9 +153,10 @@ export const useAllSources = ({
           const normalized = normalizeTimeseriesIndices(result);
           if (isMountedRef.current && isEffectActive) setAllSources(normalized);
         } else {
-          const [fetched, datasets] = await Promise.all([getSources?.() ?? [], fetchDatasets()]);
+          const fetched = (await getSources?.()) ?? [];
           if (isMountedRef.current && isEffectActive) {
-            setAllSources(mergeSources(fetched, datasets));
+            setAllSources(fetched);
+            appendOptionalSources(fetched);
           }
         }
       } catch {
@@ -130,8 +170,17 @@ export const useAllSources = ({
 
     return () => {
       isEffectActive = false;
+      viewsAbortController.abort();
     };
-  }, [getSources, getTimeseriesIndices, getDatasets, isTimeseries, isOpen, preloadedSources]);
+  }, [
+    getSources,
+    getTimeseriesIndices,
+    getDatasets,
+    getViews,
+    isTimeseries,
+    isOpen,
+    preloadedSources,
+  ]);
 
   return { allSources, isLoading };
 };
