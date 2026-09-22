@@ -258,9 +258,9 @@ describe('SignificantSecurityEventInlineContent', () => {
     expect(screen.getByTestId('alertzeroSignificantSecurityEventIndicators')).toHaveTextContent(
       '203.0.113.5'
     );
-    expect(
-      screen.getByTestId('alertzeroSignificantSecurityEventIndicators')
-    ).not.toHaveTextContent('Known malicious infrastructure');
+    expect(screen.getByTestId('alertzeroSignificantSecurityEventIndicators')).not.toHaveTextContent(
+      'Known malicious infrastructure'
+    );
   });
 
   it('links a technique indicator to its MITRE ATT&CK reference', () => {
