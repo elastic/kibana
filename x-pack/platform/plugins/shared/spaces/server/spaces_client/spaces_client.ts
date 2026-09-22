@@ -38,7 +38,7 @@ const DEFAULT_PURPOSE = 'any';
 const LEGACY_URL_ALIAS_TYPE = 'legacy-url-alias';
 
 /**
- * Runs after a space's saved objects have been deleted and before the space itself is removed.
+ * Runs when a space is deleted, before its saved objects and the space itself are removed.
  * @param spaceId the id of the space being deleted.
  */
 export type SpaceDeleteHandler = (spaceId: string) => Promise<void>;
@@ -375,10 +375,8 @@ export class SpacesClient implements ISpacesClient {
       throw Boom.badRequest(`The ${id} space cannot be deleted because it is reserved.`);
     }
 
-    await this.repository.deleteByNamespace(id);
-
     const results = await Promise.allSettled(
-      this.spaceDeleteHandlers.map((handler) => handler(id))
+      this.spaceDeleteHandlers.map(async (handler) => handler(id))
     );
     const failures = results.filter(
       (result): result is PromiseRejectedResult => result.status === 'rejected'
@@ -389,6 +387,8 @@ export class SpacesClient implements ISpacesClient {
       );
       throw failures[0].reason;
     }
+
+    await this.repository.deleteByNamespace(id);
 
     await this.repository.delete('space', id);
 

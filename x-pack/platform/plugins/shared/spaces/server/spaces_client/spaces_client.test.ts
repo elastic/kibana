@@ -1642,7 +1642,7 @@ describe('#delete', () => {
     expect(mockCallWithRequestRepository.deleteByNamespace).toHaveBeenCalledWith(id);
   });
 
-  test(`runs space delete handlers between the saved objects and space deletes`, async () => {
+  test(`runs space delete handlers before the saved objects and space are deleted`, async () => {
     const mockDebugLogger = createMockDebugLogger();
     const mockConfig = createMockConfig();
     const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
@@ -1663,11 +1663,8 @@ describe('#delete', () => {
     await client.delete(id);
 
     expect(handler).toHaveBeenCalledWith(id);
-    expect(handler.mock.invocationCallOrder[0]).toBeGreaterThan(
-      mockCallWithRequestRepository.deleteByNamespace.mock.invocationCallOrder[0]
-    );
     expect(handler.mock.invocationCallOrder[0]).toBeLessThan(
-      mockCallWithRequestRepository.delete.mock.invocationCallOrder[0]
+      mockCallWithRequestRepository.deleteByNamespace.mock.invocationCallOrder[0]
     );
   });
 
@@ -1676,7 +1673,9 @@ describe('#delete', () => {
     const mockConfig = createMockConfig();
     const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
     mockCallWithRequestRepository.get.mockResolvedValue(notReservedSavedObject);
-    const failingHandler = jest.fn().mockRejectedValue(new Error('handler failed'));
+    const failingHandler = jest.fn(() => {
+      throw new Error('handler failed');
+    });
     const handler = jest.fn().mockResolvedValue(undefined);
 
     const client = new SpacesClient(
@@ -1695,6 +1694,7 @@ describe('#delete', () => {
     expect(mockDebugLogger).toHaveBeenCalledWith(
       `SpacesClient.delete(). 1 of 2 space delete handlers failed for space ${id}.`
     );
+    expect(mockCallWithRequestRepository.deleteByNamespace).not.toHaveBeenCalled();
     expect(mockCallWithRequestRepository.delete).not.toHaveBeenCalled();
   });
 });
