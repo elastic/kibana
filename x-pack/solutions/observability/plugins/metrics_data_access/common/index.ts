@@ -38,6 +38,7 @@ export type {
   TSVBMetricModelCreator,
   TSVBMetricModel,
   DataSchemaFormat,
+  InventoryModelFields,
 } from './inventory_models/types';
 
 export {
