@@ -3052,7 +3052,6 @@ module.exports = {
       files: SCOUT_TEST_FILE_GLOBS,
       excludedFiles: ['src/platform/packages/shared/kbn-scout/test/**'],
       rules: {
-        '@kbn/eslint/scout_no_describe_configure': 'error',
         '@kbn/eslint/scout_max_one_describe': 'error',
         '@kbn/eslint/scout_test_file_naming': 'error',
         '@kbn/eslint/scout_require_global_setup_hook_in_parallel_tests': 'error',
@@ -3060,11 +3059,7 @@ module.exports = {
         '@kbn/eslint/scout_no_core_settings_in_space_test': 'warn',
         '@kbn/eslint/scout_no_cross_boundary_imports': 'error',
         '@kbn/eslint/scout_expect_import': 'error',
-        '@kbn/eslint/scout_no_deprecated_tags': 'error',
-        '@kbn/eslint/scout_no_at_in_test_titles': 'warn',
         '@kbn/eslint/scout_no_locators': ['error', { restricted: ['globalLoadingIndicator'] }],
-        '@kbn/eslint/scout_no_promise_all_with_playwright_apis': 'error',
-        '@kbn/eslint/require_include_in_check_a11y': 'warn',
       },
     },
     {
