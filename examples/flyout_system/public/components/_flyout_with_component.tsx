@@ -27,6 +27,7 @@ import {
   createMainFlyoutDescriptionItems,
   FLYOUT_MIN_WIDTH,
   FlyoutOwnFocusSwitch,
+  FOOTER_MENU_PANELS,
   headerBlocks,
   FlyoutTypeSwitch,
   returnFocusToTrigger,
@@ -181,7 +182,7 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
                 )}
               />
             </FlyoutTemplate.Body.Section>
-            <FlyoutTemplate.Body.Section id="details" title="Details">
+            <FlyoutTemplate.Body.Section id="details" title="Details" hasBorder>
               <FlyoutTemplate.Body.Section.Subsection id="host" title="Host">
                 <EuiText size="s">
                   <p>A subsection adds a second level of titling inside a section.</p>
@@ -189,8 +190,6 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
               </FlyoutTemplate.Body.Section.Subsection>
               <FlyoutTemplate.Body.Section.Subsection id="service" title="Service">
                 <EuiText size="s">
-                  {/* TODO(a11y-review): this Section passes no hasBorder, so isBordered is false and
-                      the subsections render no border either — the sentence below is inaccurate. */}
                   <p>With subsections present, each one carries the border the section drops.</p>
                 </EuiText>
               </FlyoutTemplate.Body.Section.Subsection>
@@ -336,6 +335,11 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
               label="Close"
               onClick={handleCloseChildFlyoutB}
               data-test-subj={`closeChildFlyoutComponentBButton-${title}`}
+            />
+            <FlyoutTemplate.Footer.PrimaryActionMenu
+              label="Take action"
+              panels={FOOTER_MENU_PANELS}
+              data-test-subj={`menuChildFlyoutComponentBButton-${title}`}
             />
           </FlyoutTemplate.Footer>
         </FlyoutTemplate>

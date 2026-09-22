@@ -18,73 +18,77 @@ import { FlyoutTemplate } from '@kbn/flyout-template';
 
 /** Includes a link to test focus in the collapsible region. */
 const metaBlocks = () => [
-  <FlyoutTemplate.Header.MetaBlock key="updated" id="updated" title="Last updated">
+  <FlyoutTemplate.Header.MetaBlock key="meta-updated" id="updated" title="Last updated">
     Dec 3, 2025
   </FlyoutTemplate.Header.MetaBlock>,
-  <FlyoutTemplate.Header.MetaBlock key="updatedBy" id="updatedBy" title="Last updated by">
-    <EuiLink href="#" data-test-subj="flyoutMetaBlockLink">
+  <FlyoutTemplate.Header.MetaBlock key="meta-updatedBy" id="updatedBy" title="Last updated by">
+    <EuiLink href="#" data-test-subj="flyoutMetaBlockLink" onClick={(e) => e.preventDefault()}>
       long-user-name-with-ellipsis@elastic.co
     </EuiLink>
   </FlyoutTemplate.Header.MetaBlock>,
-  <FlyoutTemplate.Header.MetaBlock key="owner" id="owner" title="Owner">
+  <FlyoutTemplate.Header.MetaBlock key="meta-owner" id="owner" title="Owner">
     Platform
   </FlyoutTemplate.Header.MetaBlock>,
 ];
 
 /** Renders enough badges to trigger the '+X more' overflow popover and test truncation. */
 const badges = () => [
-  <FlyoutTemplate.Header.Badge key="type" id="type" iconType="warning" color="default">
+  <FlyoutTemplate.Header.Badge key="badge-type" id="type" iconType="warning" color="default">
     Type
   </FlyoutTemplate.Header.Badge>,
-  <FlyoutTemplate.Header.Badge key="urgency" id="urgency" color="warning">
+  <FlyoutTemplate.Header.Badge key="badge-urgency" id="urgency" color="warning">
     Urgency
   </FlyoutTemplate.Header.Badge>,
-  <FlyoutTemplate.Header.Badge key="meta1" id="meta1" color="hollow">
+  <FlyoutTemplate.Header.Badge key="badge-meta1" id="meta1" color="hollow">
     Metadata 1 very very very very very very long label
   </FlyoutTemplate.Header.Badge>,
-  <FlyoutTemplate.Header.Badge key="meta2" id="meta2" color="hollow">
+  <FlyoutTemplate.Header.Badge key="badge-meta2" id="meta2" color="hollow">
     Metadata 2
   </FlyoutTemplate.Header.Badge>,
-  <FlyoutTemplate.Header.Badge key="meta3" id="meta3" color="hollow">
+  <FlyoutTemplate.Header.Badge key="badge-meta3" id="meta3" color="hollow">
     Metadata 3 very very very very long label
   </FlyoutTemplate.Header.Badge>,
-  <FlyoutTemplate.Header.Badge key="meta4" id="meta4" color="hollow">
+  <FlyoutTemplate.Header.Badge key="badge-meta4" id="meta4" color="hollow">
     Metadata 4
   </FlyoutTemplate.Header.Badge>,
 ];
 
 /** Renders enough info blocks to fill the grid and make the header collapsible. */
 const infoBlocks = () => [
-  // TODO(a11y-review): metaBlocks() already uses key="owner" and headerBlocks() spreads both into
-  // one array, so React warns about a duplicate key.
-  <FlyoutTemplate.Header.InfoBlock key="owner" id="owner" title="Owner">
+  <FlyoutTemplate.Header.InfoBlock key="info-owner" id="owner" title="Owner">
     Platform
   </FlyoutTemplate.Header.InfoBlock>,
-  <FlyoutTemplate.Header.InfoBlock key="latency" id="latency" title="Latency">
+  <FlyoutTemplate.Header.InfoBlock key="info-latency" id="latency" title="Latency">
     <EuiHealth color="success">Healthy</EuiHealth>
   </FlyoutTemplate.Header.InfoBlock>,
-  <FlyoutTemplate.Header.InfoBlock key="throughput" id="throughput" title="Throughput">
+  <FlyoutTemplate.Header.InfoBlock key="info-throughput" id="throughput" title="Throughput">
     1.2k tpm
   </FlyoutTemplate.Header.InfoBlock>,
-  <FlyoutTemplate.Header.InfoBlock key="risk" id="risk" title="Risk score" size="xl" color="danger">
+  <FlyoutTemplate.Header.InfoBlock
+    key="info-risk"
+    id="risk"
+    title="Risk score"
+    size="xl"
+    color="danger"
+  >
     90
   </FlyoutTemplate.Header.InfoBlock>,
-  <FlyoutTemplate.Header.InfoBlock key="env" id="env" title="Environment">
+  <FlyoutTemplate.Header.InfoBlock key="info-env" id="env" title="Environment">
     global.prod.long-environment-name-with-ellipsis.elastic.co
   </FlyoutTemplate.Header.InfoBlock>,
-  <FlyoutTemplate.Header.InfoBlock key="version" id="version" title="Version">
+  <FlyoutTemplate.Header.InfoBlock key="info-version" id="version" title="Version">
     2.4.1
   </FlyoutTemplate.Header.InfoBlock>,
-  <FlyoutTemplate.Header.InfoBlock key="region" id="region" title="Region">
+  <FlyoutTemplate.Header.InfoBlock key="info-region" id="region" title="Region">
     us-east-1
   </FlyoutTemplate.Header.InfoBlock>,
-  <FlyoutTemplate.Header.InfoBlock key="uptime" id="uptime" title="Uptime">
+  <FlyoutTemplate.Header.InfoBlock key="info-uptime" id="uptime" title="Uptime">
     99.9%
   </FlyoutTemplate.Header.InfoBlock>,
-  <FlyoutTemplate.Header.InfoBlock key="lastSeen" id="lastSeen" title="Last seen">
+  <FlyoutTemplate.Header.InfoBlock key="info-lastSeen" id="lastSeen" title="Last seen">
     2m ago
   </FlyoutTemplate.Header.InfoBlock>,
-  <FlyoutTemplate.Header.InfoBlock key="errors" id="errors" title="Errors" color="warning">
+  <FlyoutTemplate.Header.InfoBlock key="info-errors" id="errors" title="Errors" color="warning">
     12
   </FlyoutTemplate.Header.InfoBlock>,
 ];

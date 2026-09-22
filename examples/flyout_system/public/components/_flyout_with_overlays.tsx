@@ -29,6 +29,7 @@ import {
   createMainFlyoutDescriptionItems,
   FLYOUT_MIN_WIDTH,
   FlyoutOwnFocusSwitch,
+  FOOTER_MENU_PANELS,
   headerBlocks,
   FlyoutTypeSwitch,
   returnFocusToTrigger,
@@ -188,6 +189,20 @@ const ChildFlyoutTriggers: React.FC<ChildFlyoutTriggersProps> = ({
           <FlyoutTemplate.Body>
             <ChildFlyoutContent childSize={childSize} childMaxWidth={childMaxWidth} />
           </FlyoutTemplate.Body>
+          {label === 'B' && (
+            <FlyoutTemplate.Footer>
+              <FlyoutTemplate.Footer.SecondaryAction
+                label="Close"
+                onClick={onClose}
+                data-test-subj={`closeChildFlyoutOverlaysBButton-${title}`}
+              />
+              <FlyoutTemplate.Footer.PrimaryActionMenu
+                label="Take action"
+                panels={FOOTER_MENU_PANELS}
+                data-test-subj={`menuChildFlyoutOverlaysBButton-${title}`}
+              />
+            </FlyoutTemplate.Footer>
+          )}
         </FlyoutTemplate>
       )
     );
@@ -351,6 +366,9 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
                   title="Child flyouts"
                   initialIsOpen
                 >
+                  {/* Filler makes the first tab overflow, which is what drives header collapse. */}
+                  <FillerContent />
+                  <EuiSpacer size="m" />
                   <ChildFlyoutTriggers
                     historyKey={historyKey}
                     title={title}
