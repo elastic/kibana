@@ -21,6 +21,7 @@ import {
 } from './agent_based_deploy';
 import type { AgentCredentialVars } from './package_inputs';
 import type { DeployGroup } from './deploy_groups';
+import { cleanupPackagePolicies } from './policy_cleanup';
 
 export interface UseAgentBasedDeployResult {
   targets: DeployGroup[];
@@ -107,7 +108,11 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
         ? targets.filter((g) => g.instanceIds.some((id) => instanceIds.includes(id)))
         : targets.filter((g) => g.instanceIds.some((id) => !alreadyDeployedIds.has(id)));
 
-      if (targetsToDeploy.length === 0) return { failed: false };
+      const hasPendingCleanup =
+        !isRetry &&
+        Object.keys(detectAndReviewStep.pendingCleanupPolicyIds ?? {}).length > 0;
+
+      if (targetsToDeploy.length === 0 && !hasPendingCleanup) return { failed: false };
 
       setIsDeploying(true);
       updateDetectAndReviewStep({ isDeploying: true });
@@ -125,6 +130,31 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
           pkgVersion: '', // overridden per-package inside deploy functions
           agentCredentials: agentCredentialsRef.current,
         };
+
+        // Clean up package policies for removed services before creating new ones.
+        if (hasPendingCleanup) {
+          const targetPolicyIds = agentPolicyId
+            ? [agentPolicyId]
+            : selectedAgentPolicyIds ?? [];
+          await cleanupPackagePolicies({
+            pendingCleanupPolicyIds: detectAndReviewStep.pendingCleanupPolicyIds ?? {},
+            currentPolicyIdsByInstance: detectAndReviewStep.policyIdsByInstance,
+            instances: serviceSettings?.instances ?? [],
+            storedServiceVars,
+            globalRegion,
+            namespace,
+            authenticateAndDeployStep,
+            servicesMap: servicesMap ?? new Map(),
+            selectedAgentPolicyIds: targetPolicyIds,
+          });
+          updateDetectAndReviewStep({ pendingCleanupPolicyIds: {} });
+        }
+
+        if (targetsToDeploy.length === 0) {
+          setIsDeploying(false);
+          updateDetectAndReviewStep({ isDeploying: false });
+          return { failed: false };
+        }
 
         let policyIdsByInstance: Record<string, string> = {};
         let failed: string[] = [];
@@ -213,6 +243,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
       detectAndReviewStep,
       updateDetectAndReviewStep,
       getLatestFailedInstances,
+      servicesMap,
     ]
   );
 

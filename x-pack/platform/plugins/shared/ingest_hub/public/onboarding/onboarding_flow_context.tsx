@@ -39,6 +39,13 @@ export interface DetectAndReviewStepState {
   onboardingDeploymentId?: string;
   /** ECF stacks last written to the SO. Used to skip redundant PUT calls on Back→Next. */
   ecfStacks?: Array<{ family: string; stackName: string; templateVersion: string }>;
+  /**
+   * instanceId → policyId for instances removed from Step 1 whose deployed policy has not yet
+   * been cleaned up. Populated by removeDeployInstance; consumed and cleared by handleDeploy.
+   * Kept separate from policyIdsByInstance so cleanup can see the pre-removal mapping after
+   * the instance is already gone from policyIdsByInstance.
+   */
+  pendingCleanupPolicyIds?: Record<string, string>;
 }
 
 // Only non-sensitive fields are persisted — password values are never written to session storage.
@@ -87,6 +94,7 @@ interface PersistedDetectAndReviewStep {
   deployErrors: Record<string, string>;
   onboardingDeploymentId?: string;
   ecfStacks?: Array<{ family: string; stackName: string; templateVersion: string }>;
+  pendingCleanupPolicyIds?: Record<string, string>;
 }
 
 const DEFAULT_SELECTED_IDS: string[] = [];
@@ -280,6 +288,11 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
             rest.deployErrors !== undefined ? rest.deployErrors : prev?.deployErrors ?? {},
           onboardingDeploymentId: rest.onboardingDeploymentId ?? prev?.onboardingDeploymentId,
           ecfStacks: rest.ecfStacks ?? prev?.ecfStacks,
+          // Explicit undefined clears the map (post-cleanup); absent preserves it.
+          pendingCleanupPolicyIds:
+            rest.pendingCleanupPolicyIds !== undefined
+              ? rest.pendingCleanupPolicyIds
+              : prev?.pendingCleanupPolicyIds,
         });
       }
     },
@@ -292,7 +305,12 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
       const nextStatuses = { ...(prev?.serviceStatuses ?? {}) };
       delete nextStatuses[instanceId];
       const nextPolicyIds = { ...(prev?.policyIdsByInstance ?? {}) };
+      const removedPolicyId = nextPolicyIds[instanceId];
       delete nextPolicyIds[instanceId];
+      // Record the removed instance's policy ID so handleDeploy can clean it up in Fleet.
+      // Kept separate from policyIdsByInstance so the cleanup diff survives the deletion here.
+      const nextPendingCleanup = { ...(prev?.pendingCleanupPolicyIds ?? {}) };
+      if (removedPolicyId) nextPendingCleanup[instanceId] = removedPolicyId;
       setPersistedDetectAndReviewStep({
         serviceStatuses: nextStatuses,
         policyIdsByInstance: nextPolicyIds,
@@ -302,6 +320,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         ),
         onboardingDeploymentId: prev?.onboardingDeploymentId,
         ecfStacks: prev?.ecfStacks,
+        pendingCleanupPolicyIds: nextPendingCleanup,
       });
     },
     [setPersistedDetectAndReviewStep]

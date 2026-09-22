@@ -22,6 +22,7 @@ import {
 import type { DeployGroup } from './deploy_groups';
 import { toSOServiceVars } from './package_inputs';
 import { useOnboardingSO } from './use_onboarding_so';
+import { cleanupAgentlessPolicies } from './policy_cleanup';
 
 export {
   getRegionFieldName,
@@ -140,7 +141,14 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
           }
         }
 
-        if (targets.length === 0 && Object.keys(newNonAgentlessStatuses).length === 0) {
+        const hasPendingCleanup =
+          Object.keys(detectAndReviewStep.pendingCleanupPolicyIds ?? {}).length > 0;
+
+        if (
+          targets.length === 0 &&
+          Object.keys(newNonAgentlessStatuses).length === 0 &&
+          !hasPendingCleanup
+        ) {
           onContinue();
           return;
         }
@@ -152,6 +160,20 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
           serviceStatuses: { ...initialStatuses, ...newNonAgentlessStatuses },
         });
         onContinue();
+
+        if (hasPendingCleanup) {
+          await cleanupAgentlessPolicies({
+            pendingCleanupPolicyIds: detectAndReviewStep.pendingCleanupPolicyIds ?? {},
+            currentPolicyIdsByInstance: detectAndReviewStep.policyIdsByInstance,
+            instances: serviceSettings?.instances ?? [],
+            storedServiceVars: serviceSettings?.serviceVars ?? {},
+            globalRegion: serviceSettings?.globalRegion ?? '',
+            namespace,
+            authenticateAndDeployStep,
+            servicesMap: servicesMap ?? new Map(),
+          });
+          updateDetectAndReviewStep({ pendingCleanupPolicyIds: {} });
+        }
 
         if (targets.length === 0) return;
       } else {
@@ -232,14 +254,22 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
       const mergedFailed = [...previouslyFailed, ...newFailed];
 
       // Update SO with deploy outcome (best-effort).
+      // pendingCleanupPolicyIds were cleaned up in Fleet above; exclude them from the SO record.
+      const cleanedUpPolicyIds = new Set(
+        Object.values(detectAndReviewStep.pendingCleanupPolicyIds ?? {})
+      );
       if (onboardingDeploymentId) {
         await updateDeployment(onboardingDeploymentId, {
+          serviceVars: toSOServiceVars(
+            serviceSettings?.serviceVars ?? {},
+            servicesMap ?? new Map()
+          ) as Record<string, Record<string, unknown>>,
           packagePolicyIds: [
             ...new Set(
               Object.values({
                 ...detectAndReviewStep.policyIdsByInstance,
                 ...policyIdsByInstance,
-              })
+              }).filter((id) => !cleanedUpPolicyIds.has(id))
             ),
           ],
           status: mergedFailed.length === 0 ? 'succeeded' : 'failed',
@@ -270,6 +300,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
       detectAndReviewStep.failedInstances,
       detectAndReviewStep.onboardingDeploymentId,
       detectAndReviewStep.policyIdsByInstance,
+      detectAndReviewStep.pendingCleanupPolicyIds,
       createDeployment,
       updateDeployment,
       persistDeploymentId,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
@@ -152,6 +152,21 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     () => reconcileInstances(selectedServiceIds, persisted?.instances, awsServicesMap),
     [selectedServiceIds, persisted?.instances, awsServicesMap]
   );
+
+  // Lazy prune: drop serviceVars entries for instances no longer present (deselected in Step 1).
+  // Runs on mount and whenever the instance list changes. Writing only when stale keys exist
+  // breaks the update→re-run loop after one iteration (next run finds zero stale keys).
+  useEffect(() => {
+    const validIds = new Set(instances.map((i) => i.instanceId));
+    const storedVars = persisted?.serviceVars ?? {};
+    const staleKeys = Object.keys(storedVars).filter((k) => !validIds.has(k));
+    if (staleKeys.length === 0) return;
+    const pruned: Record<string, ServiceVars> = {};
+    for (const [k, v] of Object.entries(storedVars)) {
+      if (validIds.has(k)) pruned[k] = v as ServiceVars;
+    }
+    setPersisted({ ...(persisted ?? { globalRegion: '', serviceVars: {} }), serviceVars: pruned });
+  }, [instances, persisted, setPersisted]);
 
   const getServiceVars = useCallback(
     (instanceId: string): ServiceVars => {
