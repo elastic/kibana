@@ -38,7 +38,10 @@ export const ValidateRequestBody = lazySchema(() =>
         .object({
           profile: InstrumentationProfile.default('elastic-inference'),
         })
-        .optional(),
+        .optional()
+        .describe(
+          'Optional instrumentation profile selection. When omitted, the elastic-inference profile is used.'
+        ),
     }),
     evaluators: z
       .array(
