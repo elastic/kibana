@@ -89,19 +89,6 @@ export interface FeedbackAnalysisScheduleService {
 }
 
 /**
-<<<<<<< HEAD
-=======
- * A managed workflow instance is keyed by `(workflowId, spaceId)` while an AI index is global and
- * writable from any space, so the schedule is pinned here rather than taken from the request. A
- * request-scoped space would let an enable in one space and a disable in another address different
- * instances, leaving a run nobody can stop.
- */
-// Importing DEFAULT_SPACE_ID from @kbn/spaces-plugin would close a project reference cycle through
-// Agent Builder; hardcode the well-known value instead.
-const SCHEDULE_SPACE_ID = 'default';
-
-/**
->>>>>>> dc9bdd852afd (Fix bugs found in PR review: test-subj mismatch, spaceId in routes, workflowIdSuffix, stale text)
  * What the execution engine marks a run it refused to start. Compared as a string rather than
  * imported as `ExecutionStatus.SKIPPED`, for the same reason the workflows calls above are
  * structural: importing the contract would close a project reference cycle.
