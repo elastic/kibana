@@ -345,11 +345,13 @@ steps:
           # When the Worker passes investigationConversationId, store it for progress
           # comment steps guarded by calledByWorker.
           investigation_conversation_id: "{{ inputs.investigationConversationId }}"
+          # Worker mode owns closing via HITL. Default auto-close off even when the caller
+          # omits autoCloseEnabled — otherwise a space with uiSettings auto-close on would
+          # still close FPs inside this sub-workflow and bypass the proposal gate.
+          auto_close_enabled: false
 
-      # autoCloseEnabled cannot use `| default:`: Liquid treats false as falsy, so
-      # `false | default: x` yields x and the Worker's explicit `false` would be discarded —
-      # letting the sub-workflow close alerts the Worker is meant to gate behind a proposal.
-      # A presence-gated step keeps false meaning false.
+      # Optional explicit override after the Worker-mode default above. Cannot use
+      # `| default:`: Liquid treats false as falsy, so `false | default: x` yields x.
       - name: set_auto_close_enabled_if_provided
         type: if
         condition: "${{ inputs.autoCloseEnabled != null }}"

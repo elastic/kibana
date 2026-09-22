@@ -667,10 +667,10 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(setStep.with.auto_close_confidence_score_min_threshold).toBe(
       '${{ inputs.autoCloseConfidenceScoreMinThreshold | default: variables.auto_close_confidence_score_min_threshold }}'
     );
-    // autoCloseEnabled is deliberately NOT in set_caller_overrides. `| default:` would swallow
-    // the Worker's explicit false (Liquid treats false as falsy) and let the sub-workflow close
-    // alerts the Worker must gate behind a proposal, so it gets its own presence gate.
-    expect(setStep.with.auto_close_enabled).toBeUndefined();
+    // Worker mode defaults auto-close off so omitting autoCloseEnabled cannot inherit a
+    // space-level true and close FPs inside the sub-workflow. An explicit input still wins
+    // via the presence gate below (`| default:` would swallow false).
+    expect(setStep.with.auto_close_enabled).toBe(false);
     const autoCloseGate = findStepByName(
       overrideStep.steps,
       'set_auto_close_enabled_if_provided'
