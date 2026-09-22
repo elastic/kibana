@@ -61,7 +61,11 @@ describe('useActionPolicyConnectorTypes', () => {
     const { queryKey, enabled } = mockUseQuery.mock.calls[0][0];
     expect(enabled).toBe(true);
     // deduplicated + sorted
-    expect(queryKey).toEqual(['alertingV2RuleForm', 'workflowDefinitions', ['wf-1', 'wf-2', 'wf-3']]);
+    expect(queryKey).toEqual([
+      'alertingV2RuleForm',
+      'workflowDefinitions',
+      ['wf-1', 'wf-2', 'wf-3'],
+    ]);
   });
 
   it('maps connector types per policy from the batched definitions', () => {
@@ -74,10 +78,7 @@ describe('useActionPolicyConnectorTypes', () => {
     });
 
     const { result } = renderHook(() =>
-      useActionPolicyConnectorTypes([
-        policy('ap-1', ['wf-1', 'wf-2']),
-        policy('ap-2', ['wf-1']),
-      ])
+      useActionPolicyConnectorTypes([policy('ap-1', ['wf-1', 'wf-2']), policy('ap-2', ['wf-1'])])
     );
 
     expect(result.current.connectorTypesByPolicy.get('ap-1')).toEqual(['email', 'slack']);
@@ -87,9 +88,7 @@ describe('useActionPolicyConnectorTypes', () => {
   it('reports loading only while the batched request is in flight', () => {
     mockUseQuery.mockReturnValue({ data: undefined, isLoading: true });
 
-    const { result } = renderHook(() =>
-      useActionPolicyConnectorTypes([policy('ap-1', ['wf-1'])])
-    );
+    const { result } = renderHook(() => useActionPolicyConnectorTypes([policy('ap-1', ['wf-1'])]));
 
     expect(result.current.isLoading).toBe(true);
   });
