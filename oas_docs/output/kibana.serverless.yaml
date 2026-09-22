@@ -21074,14 +21074,14 @@ paths:
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/Cases_field_definition_response'
-                  - properties:
+                  - type: object
+                    properties:
                       valid:
                         type: boolean
                     required:
                       - valid
-                    type: object
-          description: "Indicates a successful call. Returns the created field definition, or `{ \"\
-            valid\": true }` when `dry_run=true`."
+          description: |
+            Indicates a successful call. Returns the created field definition, or `{ "valid": true }` when `dry_run=true`.
         '400':
           content:
             application/json:
@@ -21281,14 +21281,14 @@ paths:
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/Cases_field_definition_response'
-                  - properties:
+                  - type: object
+                    properties:
                       valid:
                         type: boolean
                     required:
                       - valid
-                    type: object
-          description: "Indicates a successful call. Returns the updated field definition, or `{ \"\
-            valid\": true }` when `dry_run=true`."
+          description: |
+            Indicates a successful call. Returns the updated field definition, or `{ "valid": true }` when `dry_run=true`.
         '400':
           content:
             application/json:
@@ -138556,6 +138556,7 @@ components:
       title: Field definition response
       type: object
     Cases_field_definition_write_request:
+      additionalProperties: false
       description: |
         The body for creating or updating a reusable field definition.
 
@@ -138596,7 +138597,6 @@ components:
         - definition
       title: Field definition write request
       type: object
-      additionalProperties: false
     Cases_find_comments_response:
       title: Find case comments response
       type: object
