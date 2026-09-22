@@ -179,25 +179,42 @@ describe('describeAiIndex', () => {
       aiIndex: { ...aiIndex, memory_enabled: true },
     });
 
+    expect(response).toContain('\nMemory\nMemory writes are enabled');
+    expect(response).toContain(
+      '| WHERE type IS NULL OR (type != "memory.session" AND type != "memory.session_fact")'
+    );
     expect(response).toContain(
       [
-        'Memory',
-        'Memory writes are enabled for this AI-index registry entry.',
-        'Available memory types',
-        'memory.session',
-        'memory.session_fact',
-        'Use platform.context_engine.remember to write memory.',
-        'Use platform.context_engine.forget with a memory id to tombstone memory.',
-        'Recall active, unexpired memory with ES|QL:',
+        'For cross-session recall, search granular facts with hybrid retrieval:',
+        'FROM ai-index-idx-support* METADATA _id, _index, _score',
+        '| WHERE type == "memory.session_fact"',
+        '| INLINE STATS latest_at = MAX(@timestamp) BY id',
+        '| WHERE @timestamp == latest_at',
+        '  AND (governance.lifecycle.status IS NULL OR governance.lifecycle.status != "deleted")',
+        '  AND (expires_at IS NULL OR expires_at > NOW())',
+        '| FORK',
+      ].join('\n')
+    );
+    expect(response).toContain('| FUSE\n| SORT _score DESC, _id ASC');
+    expect(response).toContain(
+      [
+        'For recall from the current Agent Builder conversation:',
         'FROM ai-index-idx-support*',
         '| WHERE type IN ("memory.session", "memory.session_fact")',
         '| INLINE STATS latest_at = MAX(@timestamp) BY id',
         '| WHERE @timestamp == latest_at',
         '  AND (governance.lifecycle.status IS NULL OR governance.lifecycle.status != "deleted")',
         '  AND (expires_at IS NULL OR expires_at > NOW())',
-        '| SORT updated_at DESC',
+        '| EVAL session_id = FIELD_EXTRACT(attributes, "memory.session_id")',
+        '| WHERE session_id == "<conversation-id>"',
+        '| SORT updated_at DESC, id ASC',
         '| LIMIT 10',
+        '| SORT updated_at ASC, id ASC',
       ].join('\n')
+    );
+    expect(response).toContain('references.uri, references.relation, references.description');
+    expect(response).toContain(
+      'Select the latest revision before filtering deleted or expired memories'
     );
   });
 
