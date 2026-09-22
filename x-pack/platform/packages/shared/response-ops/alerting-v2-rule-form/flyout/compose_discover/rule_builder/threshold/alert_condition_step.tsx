@@ -454,30 +454,33 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
   );
 
   const addCondition = useCallback(() => {
-    const next = [
-      ...thresholdValues.alertConditions,
-      { id: generateId(), ...DEFAULT_ALERT_CONDITION, metric: metricOptions[0] ?? '' },
-    ];
+    const next = reconcileAlertConditionMetrics(
+      [...thresholdValues.alertConditions, { id: generateId(), ...DEFAULT_ALERT_CONDITION }],
+      thresholdValues.stats,
+      thresholdValues.evaluations
+    );
     onThresholdValuesChange({
       ...thresholdValues,
       alertConditions: next,
       severity: reconcileSeverity(thresholdValues.severity, next),
     });
-  }, [thresholdValues, onThresholdValuesChange, metricOptions]);
+  }, [thresholdValues, onThresholdValuesChange]);
 
   const removeCondition = useCallback(
     (index: number) => {
       const filtered = thresholdValues.alertConditions.filter((_, i) => i !== index);
-      const next = filtered.length
-        ? filtered
-        : [{ id: generateId(), ...DEFAULT_ALERT_CONDITION, metric: metricOptions[0] ?? '' }];
+      const next = reconcileAlertConditionMetrics(
+        filtered.length ? filtered : [{ id: generateId(), ...DEFAULT_ALERT_CONDITION }],
+        thresholdValues.stats,
+        thresholdValues.evaluations
+      );
       onThresholdValuesChange({
         ...thresholdValues,
         alertConditions: next,
         severity: reconcileSeverity(thresholdValues.severity, next),
       });
     },
-    [thresholdValues, onThresholdValuesChange, metricOptions]
+    [thresholdValues, onThresholdValuesChange]
   );
 
   const updateSeverity = useCallback(
