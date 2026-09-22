@@ -21,7 +21,6 @@ import type {
   RelayInstallRequest,
   RelayInstallResponse,
   RelayListBindingsOptions,
-  RelayPostMessageInput,
   RelayTriggerInput,
   RelayTriggerResponse,
   RelayUpdateInput,
@@ -210,50 +209,23 @@ export class RelayClient implements RelayClientContract {
     };
   }
 
-  async postMessage({
-    tenantKey,
-    channel,
-    message,
-    threadTs,
-    idempotencyKey,
-  }: RelayPostMessageInput): Promise<RelayTriggerResponse> {
-    const path = '/v1/slack/messages';
-    const response = await this.post(path, {
-      tenant_key: tenantKey,
-      channel,
-      message,
-      ...(threadTs ? { thread_ts: threadTs } : {}),
-      idempotency_key: idempotencyKey,
-    });
-
-    const body = response.data as RelayTriggerResponseBody | undefined;
-    if (typeof body?.ref !== 'string' || body.ref.length === 0) {
-      throw new RelayRequestError(
-        path,
-        response.status,
-        'Relay invalid response format missing expected `ref`'
-      );
-    }
-    return { ref: body.ref, tenantKey: body?.tenant_key ?? tenantKey };
-  }
-
   async update({
     tenantKey,
     channel,
     messageTs,
     message,
   }: RelayUpdateInput): Promise<RelayTriggerResponse> {
-    const path = `/v1/slack/messages/${encodeURIComponent(messageTs)}`;
-    const response = await this.put(path, {
+    const response = await this.post('/v1/slack/trigger', {
       tenant_key: tenantKey,
       channel,
       message,
+      message_ts: messageTs,
     });
 
     const body = response.data as RelayTriggerResponseBody | undefined;
     if (typeof body?.ref !== 'string' || body.ref.length === 0) {
       throw new RelayRequestError(
-        path,
+        '/v1/slack/trigger',
         response.status,
         'Relay invalid response format missing expected `ref`'
       );

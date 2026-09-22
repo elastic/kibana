@@ -1472,9 +1472,9 @@ describe('NightshiftInvestigationsClient.update()', () => {
     });
   });
 
-  it('delivers a terminal Slack reply before committing terminal state', async () => {
+  it('commits terminal state before delivering the Slack reply', async () => {
     const calls: string[] = [];
-    const postMessage = jest.fn().mockImplementation(async () => {
+    const trigger = jest.fn().mockImplementation(async () => {
       calls.push('relay');
       return { ref: '200.1', tenantKey: 'T1' };
     });
@@ -1496,7 +1496,7 @@ describe('NightshiftInvestigationsClient.update()', () => {
     });
 
     await makeClient({
-      relayClient: { postMessage } as never,
+      relayClient: { trigger } as never,
       kibanaUrl: 'https://kibana.example/base',
     }).update('inv-1', {
       status: 'completed',
@@ -1504,8 +1504,9 @@ describe('NightshiftInvestigationsClient.update()', () => {
       summary: 'Root cause found.',
     });
 
-    expect(calls).toEqual(['relay', 'repository']);
-    expect(postMessage).toHaveBeenCalledWith({
+    // The terminal state, then the delivery, then the posted message it should update next time.
+    expect(calls).toEqual(['repository', 'relay', 'repository']);
+    expect(trigger).toHaveBeenCalledWith({
       tenantKey: 'T1',
       channel: 'C1',
       threadTs: '100.1',
@@ -1519,36 +1520,6 @@ describe('NightshiftInvestigationsClient.update()', () => {
           reply_target: expect.objectContaining({ message_ts: '200.1' }),
         }),
       })
-    );
-  });
-
-  it('falls back to the legacy post endpoint when Relay has no message API', async () => {
-    const postMessage = jest
-      .fn()
-      .mockRejectedValue(new RelayRequestError('/v1/slack/messages', 404));
-    const trigger = jest.fn().mockResolvedValue({ ref: '200.1', tenantKey: 'T1' });
-    repository.get.mockResolvedValue(
-      makeRecord({
-        status: 'running',
-        completed_at: undefined,
-        latest_execution_id: 'exec-2',
-        reply_target: {
-          surface: 'slack',
-          tenant_key: 'T1',
-          channel: 'C1',
-          thread_ts: '100.1',
-        },
-      })
-    );
-
-    await makeClient({ relayClient: { postMessage, trigger } as never }).update('inv-1', {
-      status: 'completed',
-      execution_id: 'exec-2',
-      summary: 'Findings.',
-    });
-
-    expect(trigger).toHaveBeenCalledWith(
-      expect.objectContaining({ threadTs: '100.1', idempotencyKey: 'exec-2' })
     );
   });
 
@@ -1584,8 +1555,8 @@ describe('NightshiftInvestigationsClient.update()', () => {
   });
 
   it('posts and remembers a replacement when the prior Slack message was deleted', async () => {
-    const update = jest.fn().mockRejectedValue(new RelayRequestError('/v1/slack/update', 404));
-    const postMessage = jest.fn().mockResolvedValue({ ref: '300.1', tenantKey: 'T1' });
+    const update = jest.fn().mockRejectedValue(new RelayRequestError('/v1/slack/trigger', 404));
+    const trigger = jest.fn().mockResolvedValue({ ref: '300.1', tenantKey: 'T1' });
     repository.get.mockResolvedValue(
       makeRecord({
         status: 'running',
@@ -1601,13 +1572,13 @@ describe('NightshiftInvestigationsClient.update()', () => {
       })
     );
 
-    await makeClient({ relayClient: { update, postMessage } as never }).update('inv-1', {
+    await makeClient({ relayClient: { update, trigger } as never }).update('inv-1', {
       status: 'completed',
       execution_id: 'exec-2',
       summary: 'Replacement findings.',
     });
 
-    expect(postMessage).toHaveBeenCalledWith(
+    expect(trigger).toHaveBeenCalledWith(
       expect.objectContaining({
         threadTs: '100.1',
         idempotencyKey: 'exec-2',
@@ -1622,29 +1593,66 @@ describe('NightshiftInvestigationsClient.update()', () => {
     );
   });
 
-  it('leaves state retryable when terminal Slack delivery fails', async () => {
+  it('keeps the terminal state when Slack delivery fails and redelivers on the retried update', async () => {
+    const replyTarget = {
+      surface: 'slack' as const,
+      tenant_key: 'T1',
+      channel: 'C1',
+      thread_ts: '100.1',
+    };
     repository.get.mockResolvedValue(
       makeRecord({
         status: 'running',
         completed_at: undefined,
         latest_execution_id: 'exec-2',
-        reply_target: {
-          surface: 'slack',
-          tenant_key: 'T1',
-          channel: 'C1',
-          thread_ts: '100.1',
-        },
+        reply_target: replyTarget,
       })
     );
-    const postMessage = jest.fn().mockRejectedValue(new Error('Relay unavailable'));
+    const trigger = jest
+      .fn()
+      .mockRejectedValueOnce(new Error('Relay unavailable'))
+      .mockResolvedValueOnce({ ref: '200.1', tenantKey: 'T1' });
+    const client = makeClient({ relayClient: { trigger } as never });
+    const state = { status: 'completed' as const, execution_id: 'exec-2', summary: 'Findings.' };
 
-    await expect(
-      makeClient({ relayClient: { postMessage } as never }).update('inv-1', {
-        status: 'completed',
-        execution_id: 'exec-2',
+    await expect(client.update('inv-1', state)).rejects.toThrow('Relay unavailable');
+    expect(repository.update).toHaveBeenCalledWith(
+      expect.objectContaining({ patch: expect.objectContaining({ status: 'completed' }) })
+    );
+
+    repository.update.mockClear();
+    repository.get.mockResolvedValue(
+      makeRecord({ status: 'completed', latest_execution_id: 'exec-2', reply_target: replyTarget })
+    );
+    await expect(client.update('inv-1', state)).resolves.toBe(true);
+
+    expect(trigger).toHaveBeenCalledTimes(2);
+    expect(trigger).toHaveBeenLastCalledWith(
+      expect.objectContaining({ idempotencyKey: 'exec-2', message: 'Findings.' })
+    );
+    expect(repository.update).toHaveBeenCalledTimes(1);
+    expect(repository.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        patch: { reply_target: { ...replyTarget, message_ts: '200.1' } },
       })
-    ).rejects.toThrow('Relay unavailable');
-    expect(repository.update).not.toHaveBeenCalled();
+    );
+  });
+
+  it('does not redeliver when replaying a terminal status without the settling execution', async () => {
+    const trigger = jest.fn();
+    repository.get.mockResolvedValue(
+      makeRecord({
+        status: 'completed',
+        latest_execution_id: 'exec-2',
+        reply_target: { surface: 'slack', tenant_key: 'T1', channel: 'C1', thread_ts: '100.1' },
+      })
+    );
+
+    await makeClient({ relayClient: { trigger } as never }).update('inv-1', {
+      status: 'completed',
+    });
+
+    expect(trigger).not.toHaveBeenCalled();
   });
 
   it('ignores a delayed terminal update from an older execution', async () => {

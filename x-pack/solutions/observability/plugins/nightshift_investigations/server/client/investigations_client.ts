@@ -16,11 +16,7 @@ import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugi
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
-import {
-  RelayRequestError,
-  type RelayClientContract,
-  type RelayPostMessageInput,
-} from '@kbn/actions-plugin/server';
+import { RelayRequestError, type RelayClientContract } from '@kbn/actions-plugin/server';
 import { investigationStateSchema } from '@kbn/significant-events-schema';
 import { assertNever } from '@kbn/std';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
@@ -402,20 +398,6 @@ export class NightshiftInvestigationsClient {
     return url.toString();
   }
 
-  private async postSlackMessage(input: RelayPostMessageInput) {
-    if (!this.relayClient) {
-      throw new Error('Relay client is unavailable');
-    }
-    try {
-      return await this.relayClient.postMessage(input);
-    } catch (error) {
-      if (!(error instanceof RelayRequestError) || error.statusCode !== 404) {
-        throw error;
-      }
-      return this.relayClient.trigger(input);
-    }
-  }
-
   /**
    * Validates the context against the contract for its subject type and composes the brief the
    * agent will read. Done here and not only in the route schema, because the workflow step
@@ -682,7 +664,7 @@ export class NightshiftInvestigationsClient {
       );
     } catch (error) {
       // Nothing is running, so the reservation would otherwise suppress the retry of this message.
-      await this.updateAdmissions(investigationId, (record) => ({
+      await this.updateRecord(investigationId, (record) => ({
         admissions: (record.admissions ?? []).filter(
           (admission) => admission.idempotency_key !== idempotencyKey
         ),
@@ -709,7 +691,7 @@ export class NightshiftInvestigationsClient {
     sourceKey: string;
     replyTarget: InvestigationReplyTarget;
   }): Promise<boolean> {
-    return this.updateAdmissions(investigationId, (record) =>
+    return this.updateRecord(investigationId, (record) =>
       record.admissions?.some((admission) => admission.idempotency_key === idempotencyKey)
         ? undefined
         : {
@@ -723,10 +705,10 @@ export class NightshiftInvestigationsClient {
 
   /**
    * Writes `mutate`'s patch under optimistic concurrency. `mutate` runs against the stored record,
-   * so a concurrent admission for the same thread is preserved rather than clobbered; a stale
-   * write is retried once against the version that won. Returns false when `mutate` declines.
+   * so a concurrent write for the same thread is preserved rather than clobbered; a stale write
+   * is retried once against the version that won. Returns false when `mutate` declines.
    */
-  private async updateAdmissions(
+  private async updateRecord(
     investigationId: string,
     mutate: (record: InvestigationRecord) => InvestigationPatch | undefined
   ): Promise<boolean> {
@@ -1041,6 +1023,11 @@ export class NightshiftInvestigationsClient {
 
     if (isTerminalStatus(existing.status)) {
       if (status === existing.status) {
+        // A retry from the run that settled the investigation: its state is committed, but the
+        // Slack delivery that failed after the commit is what the workflow is retrying.
+        if (executionId && executionId === existing.latest_execution_id) {
+          await this.deliverToSlack(investigationId, existing, state);
+        }
         return true;
       }
       throw InvestigationConflictError.settled(investigationId, existing.status);
@@ -1057,63 +1044,6 @@ export class NightshiftInvestigationsClient {
       ...output,
     };
 
-    if (
-      this.relayClient &&
-      existing.reply_target?.surface === 'slack' &&
-      (status === 'completed' || status === 'failed')
-    ) {
-      const replyTarget = existing.reply_target;
-      const result =
-        status === 'failed'
-          ? `Nightshift investigation failed: ${error ?? FALLBACK_INVESTIGATION_ERROR}`
-          : [output.summary, output.conclusion].filter(Boolean).join('\n\n') ||
-            'Nightshift investigation completed.';
-      const investigationUrl = this.getInvestigationUrl(investigationId);
-      const message = investigationUrl
-        ? `${result}\n\n<${investigationUrl}|View in Kibana>`
-        : result;
-
-      if (status === 'completed' && replyTarget.message_ts) {
-        try {
-          await this.relayClient.update({
-            tenantKey: replyTarget.tenant_key,
-            channel: replyTarget.channel,
-            messageTs: replyTarget.message_ts,
-            message,
-          });
-        } catch (relayError) {
-          if (!(relayError instanceof RelayRequestError) || relayError.statusCode !== 404) {
-            throw relayError;
-          }
-          const replacement = await this.postSlackMessage({
-            tenantKey: replyTarget.tenant_key,
-            channel: replyTarget.channel,
-            threadTs: replyTarget.thread_ts,
-            message,
-            idempotencyKey: executionId ?? investigationId,
-          });
-          patch.reply_target = {
-            ...replyTarget,
-            message_ts: replacement.ref,
-          };
-        }
-      } else {
-        const delivered = await this.postSlackMessage({
-          tenantKey: replyTarget.tenant_key,
-          channel: replyTarget.channel,
-          threadTs: replyTarget.thread_ts,
-          message,
-          idempotencyKey: executionId ?? investigationId,
-        });
-        if (status === 'completed') {
-          patch.reply_target = {
-            ...replyTarget,
-            message_ts: delivered.ref,
-          };
-        }
-      }
-    }
-
     try {
       await this.investigationRepository.update({
         id: investigationId,
@@ -1126,7 +1056,67 @@ export class NightshiftInvestigationsClient {
       }
       throw err;
     }
+
+    await this.deliverToSlack(investigationId, existing, state);
     return true;
+  }
+
+  /**
+   * Posts a terminal result to the Slack thread, or updates the findings message a previous
+   * successful round posted. Runs after the result is committed, so a Relay failure throws for the
+   * workflow to retry the same update without holding the investigation in `running`. Retries are
+   * safe: an update is idempotent and a post reuses the execution's idempotency key.
+   */
+  private async deliverToSlack(
+    investigationId: string,
+    record: InvestigationRecord,
+    { status, error, execution_id: executionId, ...output }: UpdateInvestigationRequest
+  ): Promise<void> {
+    const replyTarget = record.reply_target;
+    if (
+      !this.relayClient ||
+      replyTarget?.surface !== 'slack' ||
+      (status !== 'completed' && status !== 'failed')
+    ) {
+      return;
+    }
+
+    const result =
+      status === 'failed'
+        ? `Nightshift investigation failed: ${error ?? FALLBACK_INVESTIGATION_ERROR}`
+        : [output.summary, output.conclusion].filter(Boolean).join('\n\n') ||
+          'Nightshift investigation completed.';
+    const investigationUrl = this.getInvestigationUrl(investigationId);
+    const message = investigationUrl ? `${result}\n\n<${investigationUrl}|View in Kibana>` : result;
+
+    if (status === 'completed' && replyTarget.message_ts) {
+      try {
+        await this.relayClient.update({
+          tenantKey: replyTarget.tenant_key,
+          channel: replyTarget.channel,
+          messageTs: replyTarget.message_ts,
+          message,
+        });
+        return;
+      } catch (relayError) {
+        if (!(relayError instanceof RelayRequestError) || relayError.statusCode !== 404) {
+          throw relayError;
+        }
+      }
+    }
+
+    const delivered = await this.relayClient.trigger({
+      tenantKey: replyTarget.tenant_key,
+      channel: replyTarget.channel,
+      threadTs: replyTarget.thread_ts,
+      message,
+      idempotencyKey: executionId ?? investigationId,
+    });
+    if (status === 'completed') {
+      await this.updateRecord(investigationId, (current) => ({
+        reply_target: { ...(current.reply_target ?? replyTarget), message_ts: delivered.ref },
+      }));
+    }
   }
 
   /**

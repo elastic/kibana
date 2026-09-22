@@ -484,39 +484,8 @@ describe('RelayClient', () => {
     });
   });
 
-  describe('postMessage', () => {
-    it('uses the message endpoint and requires an idempotency key', async () => {
-      requestMock.mockResolvedValue({
-        status: 202,
-        data: { ref: '1700000000.000100', tenant_key: 'team-A' },
-      } as never);
-
-      await createClient().postMessage({
-        tenantKey: 'team-A',
-        channel: 'C123',
-        threadTs: '1700000000.000000',
-        message: 'findings',
-        idempotencyKey: 'exec-1',
-      });
-
-      expect(requestMock).toHaveBeenCalledWith(
-        expect.objectContaining({
-          url: 'https://relay.test/v1/slack/messages',
-          method: 'post',
-          data: {
-            tenant_key: 'team-A',
-            channel: 'C123',
-            thread_ts: '1700000000.000000',
-            message: 'findings',
-            idempotency_key: 'exec-1',
-          },
-        })
-      );
-    });
-  });
-
   describe('update', () => {
-    it('sends the Slack message reference selected by Kibana', async () => {
+    it('updates the Slack message selected by Kibana through the trigger endpoint', async () => {
       requestMock.mockResolvedValue({
         status: 200,
         data: { ref: '1700000000.000100', tenant_key: 'team-A' },
@@ -533,12 +502,13 @@ describe('RelayClient', () => {
 
       expect(requestMock).toHaveBeenCalledWith(
         expect.objectContaining({
-          url: 'https://relay.test/v1/slack/messages/1700000000.000100',
-          method: 'put',
+          url: 'https://relay.test/v1/slack/trigger',
+          method: 'post',
           data: {
             tenant_key: 'team-A',
             channel: 'C123',
             message: 'updated findings',
+            message_ts: '1700000000.000100',
           },
         })
       );
