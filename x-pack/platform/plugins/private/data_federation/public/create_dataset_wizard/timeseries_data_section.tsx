@@ -16,6 +16,7 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -47,12 +48,19 @@ export function TimeseriesDataSection({
     <>
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
+          <EuiTitle size="xxs">
+            <FormattedMessage
+              id="xpack.dataFederation.createDatasetWizard.timeseriesToggleLabel"
+              defaultMessage="Timeseries data"
+            />
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <EuiSwitch
+            showLabel={false}
             label={i18n.translate(
-              'xpack.dataFederation.createDatasetWizard.timeseriesToggleLabel',
-              {
-                defaultMessage: 'Timeseries data',
-              }
+              'xpack.dataFederation.createDatasetWizard.timeseriesToggleAriaLabel',
+              { defaultMessage: 'Timeseries data' }
             )}
             checked={isEnabled}
             onChange={(e) => onToggle(e.target.checked)}
