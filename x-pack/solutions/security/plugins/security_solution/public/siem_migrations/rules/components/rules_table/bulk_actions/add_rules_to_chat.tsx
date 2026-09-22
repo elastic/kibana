@@ -15,20 +15,20 @@ import type { AgentBuilderAddToChatTelemetry } from '../../../../../agent_builde
 import { SecurityAgentBuilderAttachments } from '../../../../../../common/constants';
 import { WithMissingPrivilegesTooltip } from '../../../../common/components/missing_privileges';
 
-interface AddRulesToChatButtonInnerProps {
+interface AddRulesToChatButtonProps {
   isAuthorized: boolean;
   migrationStats: RuleMigrationStats;
   selectedRules: RuleMigrationRule[];
 }
 
-const AddRulesToChatButtonInner: React.FC<AddRulesToChatButtonInnerProps> = ({
+const AddRulesToChatButtonComponent: React.FC<AddRulesToChatButtonProps> = ({
   isAuthorized,
   migrationStats,
   selectedRules,
 }) => {
   const N = selectedRules.length;
   const migrationId = migrationStats.id;
-  const vendor = selectedRules[0]?.original_rule?.vendor;
+  const vendor = selectedRules[0]?.original_rule?.vendor ?? 'splunk';
 
   const buttonLabel = i18n.translate(
     'xpack.securitySolution.siemMigrations.rules.bulkAddToChatButton.label',
@@ -38,9 +38,9 @@ const AddRulesToChatButtonInner: React.FC<AddRulesToChatButtonInnerProps> = ({
     }
   );
 
-  const attachmentLabel = vendor
-    ? `[${vendor}] ${migrationStats.name} (${N > 0 ? `${N} rules` : 'all rules'})`
-    : `${migrationStats.name} (${N > 0 ? `${N} rules` : 'all rules'})`;
+  const attachmentLabel = `[${vendor}] ${migrationStats.name} (${
+    N > 0 ? `${N} rules` : 'all rules'
+  })`;
 
   const attachmentPrompt =
     N > 0
@@ -79,7 +79,7 @@ const AddRulesToChatButtonInner: React.FC<AddRulesToChatButtonInnerProps> = ({
 };
 
 export const AddRulesToChatButton = WithMissingPrivilegesTooltip(
-  AddRulesToChatButtonInner,
+  AddRulesToChatButtonComponent,
   'rule',
   'minimum'
 );

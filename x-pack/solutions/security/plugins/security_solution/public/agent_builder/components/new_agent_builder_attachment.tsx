@@ -62,7 +62,11 @@ export const NewAgentBuilderAttachment = memo(function NewAgentBuilderAttachment
 
   const handleClick = useCallback(() => {
     if (telemetryData) {
-      reportAddToChatClick(telemetryData);
+      reportAddToChatClick({
+        pathway: telemetryData.pathway,
+        attachments: telemetryData.attachments,
+        item_count: telemetryData.item_count,
+      });
     }
     onClick();
   }, [onClick, reportAddToChatClick, telemetryData]);

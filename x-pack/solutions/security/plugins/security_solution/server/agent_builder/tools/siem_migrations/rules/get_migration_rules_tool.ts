@@ -24,9 +24,6 @@ import { hasRuleMigrationPrivileges } from '../common/privileges';
 import { createMissingPrivilegeError, createToolErrorResult } from '../common/tool_results';
 import { SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID } from './tool_ids';
 
-// Valid sort fields from `server/lib/siem_migrations/rules/data/sort.ts` `sortingOptionsMap`.
-// An invalid field causes a silent fallback to DEFAULT_SORTING on the server — narrow to an enum
-// so the model always sends a valid value and gets the order it expects.
 const SORT_FIELDS = [
   'elastic_rule.title',
   'elastic_rule.severity',
@@ -36,44 +33,49 @@ const SORT_FIELDS = [
   'updated_at',
 ] as const;
 
-// Extend the OpenAPI-generated query schema, bounding the unbounded inputs (repo rule: prevent
-// unbounded-input DoS). `page` is ZERO-BASED — the route computes `from: page * size`
-// (api/rules/get.ts), so `page=0` is the first page. `ids` is redefined as a plain array
-// (the route validates arrays; the API model's `ArrayFromString` string-split preprocess is
-// dropped — a deliberate divergence called out in the plan). Sort fields are narrowed to the
-// server's allow-list so an invalid value cannot cause a silent fallback.
 const schema = GetRuleMigrationRulesRequestQuery.extend({
-  migration_id: NonEmptyString.describe('REQUIRED. The id of the rule migration whose rules to retrieve.'),
+  migration_id: NonEmptyString.describe(
+    'REQUIRED. The id of the rule migration whose rules to retrieve.'
+  ),
   page: z.coerce
     .number()
     .int()
     .min(0)
     .default(0)
-    .describe('OPTIONAL. Zero-based page number. Defaults to 0 — omit unless paginating past the first page.'),
+    .describe(
+      'Zero-based page number. Defaults to 0 — omit unless paginating past the first page.'
+    ),
   per_page: z.coerce
     .number()
     .int()
     .min(1)
     .max(200)
     .default(50)
-    .describe('OPTIONAL. Number of rules per page (1-200). Defaults to 50 — omit unless you need a different page size.'),
-  search_term: z.string().max(500).optional().describe('OPTIONAL. Free-text search term to filter rules by name or content. Omit entirely if not searching by text — do not pass an empty string.'),
-  ids: z.array(NonEmptyString).max(200).optional().describe('OPTIONAL. Fetch specific rules by their ids. Omit entirely if not filtering by id — do not pass an empty array. When provided, no other filter param is needed.'),
+    .describe(
+      'Number of rules per page (1-200). Defaults to 50 — omit unless you need a different page size.'
+    ),
+  search_term: z
+    .string()
+    .max(500)
+    .optional()
+    .describe(
+      'Free-text search term matched against the translated rule title (or original title for failed rules). Omit entirely if not searching — do not pass an empty string.'
+    ),
+  ids: z
+    .array(NonEmptyString)
+    .max(200)
+    .optional()
+    .describe(
+      'Fetch specific rules by their ids. Omit entirely if not filtering by id — do not pass an empty array. When provided, no other filter param is needed.'
+    ),
   sort_field: z
     .enum(SORT_FIELDS)
     .optional()
     .describe(
-      `OPTIONAL. Field to sort by. One of: ${SORT_FIELDS.join(', ')}. ` +
-      'Defaults to translation_result (desc) — omit unless you need a different sort order.'
+      `OPTIONAL. Field to sort by. One of: ${SORT_FIELDS.join(
+        ', '
+      )}. Defaults to translation_result (desc) — omit unless you need a different sort order.`
     ),
-  sort_direction: z.enum(['asc', 'desc']).optional().describe('OPTIONAL. Sort direction: asc or desc. Defaults to desc — omit unless you need ascending order.'),
-  is_prebuilt: z.boolean().optional().describe('OPTIONAL. true = only rules with a prebuilt match; false = only rules without one. Omit entirely when not filtering by this condition.'),
-  is_installed: z.boolean().optional().describe('OPTIONAL. true = installed rules only; false = not-yet-installed only. Omit entirely when not filtering by this condition.'),
-  is_fully_translated: z.boolean().optional().describe('OPTIONAL. true = fully translated rules only; false = exclude fully translated. Omit entirely when not filtering by this condition.'),
-  is_partially_translated: z.boolean().optional().describe('OPTIONAL. true = partially translated rules only; false = exclude partially translated. Omit entirely when not filtering by this condition.'),
-  is_untranslatable: z.boolean().optional().describe('OPTIONAL. true = untranslatable rules only; false = exclude untranslatable. Omit entirely when not filtering by this condition.'),
-  is_failed: z.boolean().optional().describe('OPTIONAL. true = failed-translation rules only; false = exclude failed. Omit entirely when not filtering by this condition.'),
-  is_missing_index: z.boolean().optional().describe('OPTIONAL. true = rules missing a required index only; false = exclude those. Omit entirely when not filtering by this condition.'),
 });
 
 const buildPath = (migrationId: string): string =>
@@ -89,12 +91,12 @@ const projectRule = (rule: GetRuleMigrationRulesResponse['data'][number]) => ({
   },
   elastic_rule: rule.elastic_rule
     ? {
-      title: rule.elastic_rule.title,
-      prebuilt_rule_id: rule.elastic_rule.prebuilt_rule_id,
-      integration_ids: rule.elastic_rule.integration_ids,
-      query: rule.elastic_rule.query,
-      query_language: rule.elastic_rule.query_language,
-    }
+        title: rule.elastic_rule.title,
+        prebuilt_rule_id: rule.elastic_rule.prebuilt_rule_id,
+        integration_ids: rule.elastic_rule.integration_ids,
+        query: rule.elastic_rule.query,
+        query_language: rule.elastic_rule.query_language,
+      }
     : undefined,
   translation_result: rule.translation_result,
   status: rule.status,

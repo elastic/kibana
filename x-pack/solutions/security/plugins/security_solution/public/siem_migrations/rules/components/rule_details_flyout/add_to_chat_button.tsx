@@ -5,28 +5,43 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { RuleMigrationRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import { SecurityAgentBuilderAttachments } from '../../../../../common/constants';
 import { NewAgentBuilderAttachment } from '../../../../agent_builder/components/new_agent_builder_attachment';
 import type { AgentBuilderAddToChatTelemetry } from '../../../../agent_builder/hooks/use_report_add_to_chat';
+import { useAgentBuilderAttachment } from '../../../../agent_builder/hooks/use_agent_builder_attachment';
 import { WithMissingPrivilegesTooltip } from '../../../common/components/missing_privileges';
-import { useMigrationRuleAttachment } from './use_migration_rule_attachment';
 
 const ADD_TO_CHAT_TELEMETRY: AgentBuilderAddToChatTelemetry = {
   pathway: 'translated_rules_flyout',
   attachments: ['rule_migration_items'],
 };
 
-interface AddMigrationRuleToChatButtonInnerProps {
+interface AddMigrationRuleToChatButtonProps {
   isAuthorized: boolean;
   rule: RuleMigrationRule;
 }
 
-const AddMigrationRuleToChatButtonInner: React.FC<AddMigrationRuleToChatButtonInnerProps> = ({
+const AddMigrationRuleToChatButtonComponent: React.FC<AddMigrationRuleToChatButtonProps> = ({
   isAuthorized,
   rule,
 }) => {
-  const { openAgentBuilderFlyout } = useMigrationRuleAttachment(rule);
+  const attachment = useMemo(
+    () => ({
+      attachmentType: SecurityAgentBuilderAttachments.ruleMigrationItems,
+      attachmentData: {
+        migration_id: rule.migration_id,
+        rule_ids: [rule.id],
+        attachmentLabel: `[${rule.original_rule.vendor}] ${rule.original_rule.title}`,
+      },
+      attachmentId: rule.id,
+      attachmentPrompt: `Please help me with this Automatic migration rule: ${rule.original_rule.title}`,
+      autoSendInitialMessage: true,
+    }),
+    [rule]
+  );
+  const { openAgentBuilderFlyout } = useAgentBuilderAttachment(attachment);
 
   return (
     <NewAgentBuilderAttachment
@@ -38,7 +53,7 @@ const AddMigrationRuleToChatButtonInner: React.FC<AddMigrationRuleToChatButtonIn
 };
 
 export const AddMigrationRuleToChatButton = WithMissingPrivilegesTooltip(
-  AddMigrationRuleToChatButtonInner,
+  AddMigrationRuleToChatButtonComponent,
   'rule',
   'minimum'
 );

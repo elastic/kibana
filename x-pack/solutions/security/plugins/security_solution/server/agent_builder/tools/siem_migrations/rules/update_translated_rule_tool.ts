@@ -92,13 +92,23 @@ export const updateTranslatedRuleTool = (
     confirmation: { askUser: 'always' },
     description: `Update one or more aspects of a specific SIEM migration translated rule. Mutating — requires user confirmation.
 
-Accepts { migration_id, rule_id } plus any combination of:
-- esql_query: corrected ES|QL query (validated before applying)
-- prebuilt_rule_id: corrected prebuilt rule match
-- integration_ids: corrected integration match(es), as an array of one or more ids
+Mandatory Params:
+- migration_id (required): the id of the specific migration
+- rule_id (required): the id of the specific rule migration item to update
 - comment (required): markdown explanation of what changed and why — appended to the rule's comment history and shown to the user in the rule details flyout
 
-At least one of the three payload fields must be supplied. They are not mutually exclusive — e.g. a corrected esql_query can travel with new integration_ids when the query's index comes from those integrations.`,
+### when updating prebuilt rule match:
+- prebuilt_rule: corrected prebuilt rule match (id and title)
+- integration_ids: corrected integration match(es) related to the prebuilt rule being updated as an array of one or more ids
+
+### when updating integration match(es):
+- integration_ids: corrected integration match(es) as an array of one or more ides
+- New esql_query based on the new index obtained from the new recommended integration(s).
+
+### when updating ES|QL query:
+- esql_query: corrected ES|QL query (validated before applying)
+- integration_ids: corrected integration match(es) as an array of one or more ids
+`,
     schema,
     tags: ['security', 'siem-migration', 'rules'],
     handler: async (input, { request }) => {

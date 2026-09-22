@@ -76,7 +76,7 @@ ${NAME_NEVER_ID_BLOCK}
 1. Ready the Title , Description and query of the original rule.
 2. Search for appropriate pre-built rule use cases using following strategies. Objective is to get the correct pre-built rule id.
     a. using product documentation, if available.
-    b. Additionally, using existing skills \`recommend-prebuilt-rules\`. This skill can be used to get exact prebuilt rule UUID, title and related integrations.
+    b. Use skill \`recommend-prebuilt-rules\`. This skill can be used to get exact prebuilt rule UUID, title and related integrations.
 3. Once you have maximum of 5 candidates, show them to the user with a fit-gap analysis in a table and your recommendation.
 4. Once the user confirms the pre-built rule, update the translated rule using \`${SIEM_MIGRATION_UPDATE_TRANSLATED_RULE_TOOL_ID}\`
    by supplying the \`prebuilt_rule\` object (both \`id\` and \`title\` are required).
