@@ -40,15 +40,8 @@ const shouldBuildKibanaPlatformPlugins = ({
   return !env?.CI && runsFromSource && requiresBrowserBundles;
 };
 
-const getBuildScript = (env: NodeJS.ProcessEnv): string => {
-  // [rspack-transition] Remove this branch and keep build_kibana_platform_plugins once the
-  // legacy optimizer is removed and that script is backed by Rspack.
-  const useRspack = env.KBN_USE_RSPACK === 'true' || env.KBN_USE_RSPACK === '1';
-  return useRspack ? 'build_rspack_bundles.js' : 'build_kibana_platform_plugins.js';
-};
-
 export const createKibanaPlatformPluginsBuilder = (): EnsureKibanaPlatformPluginsBuilt => {
-  const buildPromises = new Map<string, Promise<void>>();
+  let buildPromise: Promise<void> | undefined;
 
   return async ({
     procs,
@@ -65,17 +58,14 @@ export const createKibanaPlatformPluginsBuilder = (): EnsureKibanaPlatformPlugin
       return;
     }
 
-    const buildScript = getBuildScript(buildEnv);
-    let buildPromise = buildPromises.get(buildScript);
     if (!buildPromise) {
       buildPromise = procs.run('kibana-platform-plugins-build', {
         cmd: process.execPath,
-        args: [Path.resolve(REPO_ROOT, 'scripts', buildScript)],
+        args: [Path.resolve(REPO_ROOT, 'scripts/build_kibana_platform_plugins.js')],
         cwd: REPO_ROOT,
         env: buildEnv,
         wait: true,
       });
-      buildPromises.set(buildScript, buildPromise);
     }
 
     await buildPromise;

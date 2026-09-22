@@ -703,10 +703,9 @@ node scripts/jest --config src/platform/packages/shared/kbn-scout/jest.config.js
 
 Ensure you have the latest local copy of the Kibana repository.
 
-Install dependencies by running the following commands:
+Install dependencies by running:
 
 - `pnpm kbn bootstrap` to install dependencies.
-- `node scripts/build_kibana_platform_plugins.js` to build plugins.
 
 Move to the `src/platform/packages/shared/kbn-scout` directory to begin development.
 

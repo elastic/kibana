@@ -43,13 +43,13 @@ const createProcRunner = () =>
   ({ run: jest.fn().mockResolvedValue(undefined) } as unknown as ProcRunner);
 
 describe('createKibanaPlatformPluginsBuilder', () => {
-  it('runs the cached Rspack build once', async () => {
+  it('runs the cached plugin build once', async () => {
     const procs = createProcRunner();
     const ensureBuilt = createKibanaPlatformPluginsBuilder();
     const options = {
       procs,
       config: createConfig(),
-      env: { KBN_USE_RSPACK: 'true' },
+      env: {},
     };
 
     await ensureBuilt(options);
@@ -58,26 +58,11 @@ describe('createKibanaPlatformPluginsBuilder', () => {
     expect(procs.run).toHaveBeenCalledTimes(1);
     expect(procs.run).toHaveBeenCalledWith('kibana-platform-plugins-build', {
       cmd: process.execPath,
-      args: [Path.resolve(REPO_ROOT, 'scripts/build_rspack_bundles.js')],
+      args: [Path.resolve(REPO_ROOT, 'scripts/build_kibana_platform_plugins.js')],
       cwd: REPO_ROOT,
-      env: { KBN_USE_RSPACK: 'true' },
+      env: {},
       wait: true,
     });
-  });
-
-  it('uses the legacy build while the legacy optimizer is selected', async () => {
-    const procs = createProcRunner();
-    const ensureBuilt = createKibanaPlatformPluginsBuilder();
-    const env = { KBN_USE_RSPACK: 'false' };
-
-    await ensureBuilt({ procs, config: createConfig(), env });
-
-    expect(procs.run).toHaveBeenCalledWith(
-      'kibana-platform-plugins-build',
-      expect.objectContaining({
-        args: [Path.resolve(REPO_ROOT, 'scripts/build_kibana_platform_plugins.js')],
-      })
-    );
   });
 
   it('uses the environment configured for the Kibana test server', async () => {
@@ -86,15 +71,15 @@ describe('createKibanaPlatformPluginsBuilder', () => {
 
     await ensureBuilt({
       procs,
-      config: createConfig({ env: { KBN_USE_RSPACK: 'true' } }),
-      env: { KBN_USE_RSPACK: 'false' },
+      config: createConfig({ env: { TEST_ENV: 'server' } }),
+      env: { TEST_ENV: 'runner' },
     });
 
     expect(procs.run).toHaveBeenCalledWith(
       'kibana-platform-plugins-build',
       expect.objectContaining({
-        args: [Path.resolve(REPO_ROOT, 'scripts/build_rspack_bundles.js')],
-        env: { KBN_USE_RSPACK: 'true' },
+        args: [Path.resolve(REPO_ROOT, 'scripts/build_kibana_platform_plugins.js')],
+        env: { TEST_ENV: 'server' },
       })
     );
   });
