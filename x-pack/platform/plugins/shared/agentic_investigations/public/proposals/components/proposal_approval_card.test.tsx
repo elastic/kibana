@@ -35,15 +35,18 @@ jest.mock('@kbn/ui-callout', () => ({
 }));
 
 jest.mock('@kbn/agentic-investigations-common', () => ({
+  ...jest.requireActual('@kbn/agentic-investigations-common'),
   ApprovalContent: ({
     children,
     primaryAction,
     secondaryActions,
     tone,
+    comment,
     actionImpact,
   }: {
     children?: React.ReactNode;
     tone?: string;
+    comment?: string;
     actionImpact?: { variant: string; items: Array<{ id: string; text?: string }> };
     primaryAction?: {
       label: string;
@@ -78,8 +81,9 @@ jest.mock('@kbn/agentic-investigations-common', () => ({
           {a.label}
         </button>
       ))}
-      {/* Surfaced so the tone and the action-impact rows are observable: the real
-          component renders them as props rather than as children. */}
+      {/* Surfaced so the comment and the impact rows are observable: the real component
+          renders them as props rather than as children. */}
+      <div data-test-subj="approval-comment">{comment}</div>
       {actionImpact?.items?.map((item) => (
         <div key={item.id} data-test-subj={`action-impact-${item.id}`}>
           {item.text}
@@ -225,6 +229,14 @@ describe('ProposalApprovalCard', () => {
 
       expect(getByTestId('approval-content')).toHaveAttribute('data-tone', 'danger');
       expect(getByTestId('action-impact-impact')).toHaveTextContent('critical impact');
+    });
+  });
+
+  describe('comment', () => {
+    it("renders the proposal's own markdown comment as the body", () => {
+      setupMocks();
+      const { getByTestId } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
+      expect(getByTestId('approval-comment')).toHaveTextContent('Tune the noisy rule');
     });
   });
 

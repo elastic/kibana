@@ -7,7 +7,6 @@
 
 import React, { useCallback, useState } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { useBoolean } from '@kbn/react-hooks';
 import type { Investigation } from '../../types';
 import { BaseActions, type CardActionType } from '../actions';
 import { InvestigationActionModals } from '../modals/investigation_action_modals';
@@ -35,7 +34,6 @@ export const ConversationDetailsFlyoutFooter = ({
   onOpenChat,
 }: ConversationDetailsFlyoutFooterProps) => {
   const [modalState, setModalState] = useState<ModalState>(CLOSED_MODAL);
-  const [isApprovalOpen, { on: openApproval, off: closeApproval }] = useBoolean();
 
   const closeModal = useCallback(() => setModalState(CLOSED_MODAL), []);
 
@@ -60,11 +58,13 @@ export const ConversationDetailsFlyoutFooter = ({
           </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
+          {/* No `onClickRecommendedAction`: approving needs the proposal, and this footer is
+              handed a conversation-derived investigation. Omitting it drops the menu entry
+              rather than offering a decision this host cannot record. */}
           <BaseActions
             investigation={investigation}
             isFlyout={true}
             onClickAction={onClickAction}
-            onClickRecommendedAction={openApproval}
             data-test-subj="investigationFlyoutActions"
           />
         </EuiFlexItem>
@@ -74,9 +74,8 @@ export const ConversationDetailsFlyoutFooter = ({
         action={modalState.type}
         recordId={modalState.recordId}
         initialAssignee={investigation.assignee}
-        approvalInvestigation={isApprovalOpen ? investigation : undefined}
         onCloseAction={closeModal}
-        onCloseApproval={closeApproval}
+        onCloseApproval={closeModal}
       />
     </>
   );
