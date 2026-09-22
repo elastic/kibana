@@ -10,12 +10,15 @@
 import { globalSetupHook } from '@kbn/scout';
 
 globalSetupHook(
-  'Load Shakespeare for session lifecycle tests',
+  'Load data for session lifecycle tests',
   { tag: '@local-stateful-classic' },
   async ({ esArchiver }) => {
-    // Retain this shared, read-only archive for other Scout suites using loadIfNeeded.
+    // Retain these shared, read-only archives for other Scout suites using loadIfNeeded.
     await esArchiver.loadIfNeeded(
       'src/platform/test/functional/fixtures/es_archiver/getting_started/shakespeare'
+    );
+    await esArchiver.loadIfNeeded(
+      'src/platform/test/functional/fixtures/es_archiver/dashboard/current/data'
     );
   }
 );
