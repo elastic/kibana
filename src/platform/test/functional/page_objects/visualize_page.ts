@@ -93,7 +93,7 @@ export class VisualizePageObject extends FtrService {
     }
     try {
       await this.testSubjects.click(APP_HEADER_TEST_SUBJECTS.back);
-      if (await this.testSubjects.exists('confirmModalConfirmButton')) {
+      if (await this.testSubjects.waitForExists('confirmModalConfirmButton', { timeout: 1500 })) {
         await this.testSubjects.click('confirmModalConfirmButton');
         return 'confirmed';
       }
@@ -122,7 +122,7 @@ export class VisualizePageObject extends FtrService {
       await this.find.clickByCssSelector(selector);
       // Lens offers a last modal before leaving the page for unsaved charts
       // so close it as quick as possible
-      if (await this.testSubjects.exists('confirmModalConfirmButton')) {
+      if (await this.testSubjects.waitForExists('confirmModalConfirmButton', { timeout: 1500 })) {
         await this.testSubjects.click('confirmModalConfirmButton');
         return true;
       }
