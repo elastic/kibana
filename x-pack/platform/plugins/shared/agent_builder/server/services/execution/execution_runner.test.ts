@@ -207,7 +207,12 @@ const runHandle = ({
       executionId: 'execution-1',
       executionMode: AgentExecutionMode.conversation,
       // what the execution service stores: the round it opened and how it resolved the conversation
-      agentParams: { roundId: 'round-1', conversationOperation: 'UPDATE', ...agentParams },
+      agentParams: {
+        conversationId: 'conversation-1',
+        roundId: 'round-1',
+        conversationOperation: 'UPDATE',
+        ...agentParams,
+      },
     } as never,
     deps: createDeps({ conversationClient }),
     request: { headers: {} } as never,
@@ -274,6 +279,8 @@ describe('handleAgentExecution', () => {
         agentParams: {
           agentId: 'test-agent',
           conversationId: 'conversation-1',
+          roundId: 'round-1',
+          conversationOperation: 'UPDATE',
           nextInput: { message: 'Hello' },
         },
       } as never,
@@ -378,6 +385,29 @@ describe('handleAgentExecution', () => {
         conversationId: 'conversation-from-origin',
       })
     );
+  });
+
+  it('rejects a record written before the conversation was resolved on the request node', async () => {
+    const conversationClient = createConversationClientMock();
+    stubResolveServices(conversationClient);
+
+    await expect(
+      runHandle({
+        agentParams: {
+          agentId: 'test-agent',
+          conversationId: undefined,
+          roundId: undefined,
+          conversationOperation: undefined,
+          nextInput: { message: 'Hello' },
+        },
+        conversationClient,
+      })
+    ).rejects.toThrow('Execution predates request-node conversation resolution');
+
+    // Nothing is written for a record it cannot run, so the request can simply be sent again.
+    expect(conversationClient.get).not.toHaveBeenCalled();
+    expect(conversationClient.create).not.toHaveBeenCalled();
+    expect(conversationClient.appendEvents).not.toHaveBeenCalled();
   });
 
   describe('round origin attribution', () => {
@@ -488,6 +518,8 @@ describe('handleAgentExecution', () => {
           agentParams: {
             agentId: 'test-agent',
             conversationId: 'conversation-1',
+            roundId: 'round-1',
+            conversationOperation: 'UPDATE',
             nextInput: { message: 'Hello' },
           },
         } as never,
@@ -534,6 +566,8 @@ describe('handleAgentExecution', () => {
           agentParams: {
             agentId: 'test-agent',
             conversationId: 'conversation-1',
+            roundId: 'round-1',
+            conversationOperation: 'UPDATE',
             nextInput: { message: 'Hello' },
           },
         } as never,
@@ -619,6 +653,8 @@ describe('handleAgentExecution', () => {
         agentParams: {
           agentId: 'test-agent',
           conversationId: 'conversation-1',
+          roundId: 'round-1',
+          conversationOperation: 'UPDATE',
           nextInput: { message: 'Hello' },
         },
         conversationClient,
@@ -711,6 +747,8 @@ describe('handleAgentExecution', () => {
         agentParams: {
           agentId: 'test-agent',
           conversationId: 'conversation-1',
+          roundId: 'round-1',
+          conversationOperation: 'UPDATE',
           nextInput: { message: 'Hello' },
         },
         conversationClient,
@@ -823,6 +861,8 @@ describe('handleAgentExecution — interrupted executions', () => {
       agentParams: {
         agentId: 'test-agent',
         conversationId: 'conversation-1',
+        roundId: 'round-1',
+        conversationOperation: 'UPDATE',
         nextInput: { message: 'Hello' },
       },
       conversationClient,
@@ -864,6 +904,8 @@ describe('handleAgentExecution — interrupted executions', () => {
         agentParams: {
           agentId: 'test-agent',
           conversationId: 'conversation-1',
+          roundId: 'round-1',
+          conversationOperation: 'UPDATE',
           nextInput: { message: 'Hello' },
         },
       } as never,
@@ -902,6 +944,8 @@ describe('handleAgentExecution — interrupted executions', () => {
         agentParams: {
           agentId: 'test-agent',
           conversationId: 'conversation-1',
+          roundId: 'round-1',
+          conversationOperation: 'UPDATE',
           nextInput: { message: 'Hello' },
         },
       } as never,
@@ -961,6 +1005,8 @@ describe('handleAgentExecution — interrupted executions', () => {
       agentParams: {
         agentId: 'test-agent',
         conversationId: 'conversation-1',
+        roundId: 'round-1',
+        conversationOperation: 'UPDATE',
         nextInput: { message: 'Hello' },
       },
       conversationClient,
@@ -994,9 +1040,10 @@ describe('handleAgentExecution — interrupted executions', () => {
         agentParams: {
           agentId: 'test-agent',
           conversationId: 'conversation-1',
-          nextInput: { message: 'Hello' },
           // The execution service opens the round and writes its message before dispatching.
           roundId: 'round-1',
+          conversationOperation: 'UPDATE',
+          nextInput: { message: 'Hello' },
         },
       } as never,
       deps: deps as never,
@@ -1041,6 +1088,8 @@ describe('handleAgentExecution — interrupted executions', () => {
         agentParams: {
           agentId: 'test-agent',
           conversationId: 'conversation-1',
+          roundId: 'round-1',
+          conversationOperation: 'UPDATE',
           nextInput: { message: 'Hello' },
         },
       } as never,
@@ -1092,6 +1141,8 @@ describe('handleAgentExecution — interrupted executions', () => {
         agentParams: {
           agentId: 'test-agent',
           conversationId: 'conversation-1',
+          roundId: 'round-1',
+          conversationOperation: 'UPDATE',
           nextInput: { prompts: {} },
         },
       } as never,
@@ -1140,6 +1191,8 @@ describe('handleAgentExecution — interrupted executions', () => {
         agentParams: {
           agentId: 'test-agent',
           conversationId: 'conversation-1',
+          roundId: 'round-1',
+          conversationOperation: 'UPDATE',
           nextInput: { prompts: {} },
         },
       } as never,
@@ -1185,6 +1238,8 @@ describe('handleAgentExecution — interrupted executions', () => {
         agentParams: {
           agentId: 'test-agent',
           conversationId: 'conversation-1',
+          roundId: 'round-1',
+          conversationOperation: 'UPDATE',
           nextInput: { message: 'Hello' },
         },
       } as never,

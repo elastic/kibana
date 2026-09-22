@@ -193,6 +193,13 @@ const handleConversationExecution = async ({
     conversationOperation,
   } = execution.agentParams;
 
+  // A record written before the execution service resolved the conversation and reserved the
+  // round carries none of the three. It cannot be run: nothing has been written for it and its
+  // round has no id, so it fails here, before any write, and the caller sends the request again.
+  if (!conversationId || !roundId || !conversationOperation) {
+    throw createInternalError('Execution predates request-node conversation resolution');
+  }
+
   const { logger, runAgent, trackingService, analyticsService, meteringService, agentService } =
     deps;
 
