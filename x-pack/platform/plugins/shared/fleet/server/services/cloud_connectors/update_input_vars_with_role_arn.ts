@@ -12,6 +12,9 @@ import type { NewPackagePolicyInput, PackagePolicyConfigRecord } from '../../../
 // Rewriting only the keys that already exist keeps this a safe operation on any policy.
 const ROLE_ARN_KEYS = ['role_arn', 'aws.role_arn'] as const;
 
+const varsHasRoleArnKey = (vars: PackagePolicyConfigRecord | undefined): boolean =>
+  Boolean(vars && ROLE_ARN_KEYS.some((key) => vars[key] !== undefined));
+
 const rewriteVars = (
   vars: PackagePolicyConfigRecord | undefined,
   newValue: string
@@ -88,3 +91,29 @@ export const rewritePolicyRoleArn = <T extends RewritePolicyRoleArnPolicy>(
     changed: varsResult.changed || inputsResult.changed,
   };
 };
+
+/** True when the policy has at least one `role_arn` / `aws.role_arn` field at any level. */
+export const policyHasRoleArnFields = (policy: RewritePolicyRoleArnPolicy): boolean => {
+  if (varsHasRoleArnKey(policy.vars)) {
+    return true;
+  }
+  for (const input of policy.inputs) {
+    if (varsHasRoleArnKey(input.vars)) {
+      return true;
+    }
+    for (const stream of input.streams ?? []) {
+      if (varsHasRoleArnKey(stream.vars)) {
+        return true;
+      }
+    }
+  }
+  return false;
+};
+
+/**
+ * True when every `role_arn` / `aws.role_arn` on the policy equals `arn`, and at least one such
+ * field exists. Distinct from `!rewritePolicyRoleArn(...).changed`, which is also true when the
+ * policy has no Role ARN fields at all (a concurrent edit that removed them).
+ */
+export const policyHoldsRoleArn = (policy: RewritePolicyRoleArnPolicy, arn: string): boolean =>
+  policyHasRoleArnFields(policy) && !rewritePolicyRoleArn(policy, arn).changed;

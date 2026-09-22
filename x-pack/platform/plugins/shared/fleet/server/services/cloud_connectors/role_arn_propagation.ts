@@ -19,7 +19,7 @@ import { appContextService } from '../app_context';
 import { packagePolicyService, toPackagePolicyUpdate } from '../package_policy';
 import { escapeSearchQueryPhrase } from '../saved_object';
 
-import { rewritePolicyRoleArn } from './update_input_vars_with_role_arn';
+import { policyHoldsRoleArn, rewritePolicyRoleArn } from './update_input_vars_with_role_arn';
 
 interface PropagateArgs {
   soClient: SavedObjectsClientContract;
@@ -237,13 +237,11 @@ export const propagateRoleArnToPackagePolicies = async ({
 
         try {
           const current = await packagePolicyService.get(soClient, plan.policy.id);
-          if (current) {
-            // `changed: false` means every role_arn already holds newRoleArn — the SO write
-            // landed and a later step rejected. Include it in the revert set.
-            const { changed } = rewritePolicyRoleArn(current, newRoleArn);
-            if (!changed) {
-              succeeded.push({ ...plan, writeVersion: current.version });
-            }
+          if (current && policyHoldsRoleArn(current, newRoleArn)) {
+            // SO write landed (every role_arn field is already the new value) and a later step
+            // rejected. Include it in the revert set. Do not use bare `!changed` — that is also
+            // true when a concurrent edit removed all Role ARN fields.
+            succeeded.push({ ...plan, writeVersion: current.version });
           }
         } catch (reReadError) {
           const reReadMessage =

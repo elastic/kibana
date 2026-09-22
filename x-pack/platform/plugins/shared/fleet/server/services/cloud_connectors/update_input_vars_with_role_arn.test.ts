@@ -7,7 +7,7 @@
 
 import type { NewPackagePolicyInput } from '../../../common/types';
 
-import { rewritePolicyRoleArn } from './update_input_vars_with_role_arn';
+import { policyHoldsRoleArn, rewritePolicyRoleArn } from './update_input_vars_with_role_arn';
 
 const OLD_ARN = 'arn:aws:iam::123456789012:role/OldRole';
 const NEW_ARN = 'arn:aws:iam::123456789012:role/NewRole';
@@ -215,6 +215,51 @@ describe('rewritePolicyRoleArn', () => {
       const before = JSON.parse(JSON.stringify(policy));
       rewritePolicyRoleArn(policy, NEW_ARN);
       expect(policy).toEqual(before);
+    });
+  });
+
+  describe('policyHoldsRoleArn', () => {
+    it('is true when every role_arn field equals the value', () => {
+      expect(
+        policyHoldsRoleArn(
+          {
+            vars: { role_arn: { type: 'text', value: NEW_ARN } },
+            inputs: [],
+          },
+          NEW_ARN
+        )
+      ).toBe(true);
+    });
+
+    it('is false when the policy has no role_arn fields (even though rewrite would be a no-op)', () => {
+      expect(policyHoldsRoleArn({ vars: {}, inputs: [] }, NEW_ARN)).toBe(false);
+      expect(
+        policyHoldsRoleArn(
+          {
+            inputs: [
+              {
+                type: 'x',
+                enabled: true,
+                vars: {},
+                streams: [],
+              } as unknown as NewPackagePolicyInput,
+            ],
+          },
+          NEW_ARN
+        )
+      ).toBe(false);
+    });
+
+    it('is false when any role_arn field still holds a different value', () => {
+      expect(
+        policyHoldsRoleArn(
+          {
+            vars: { role_arn: { type: 'text', value: OLD_ARN } },
+            inputs: [],
+          },
+          NEW_ARN
+        )
+      ).toBe(false);
     });
   });
 });

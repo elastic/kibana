@@ -512,4 +512,38 @@ describe('propagateRoleArnToPackagePolicies', () => {
     );
     expect(revertCalls.map(([, , id]) => id).sort()).toEqual(['a', 'b']);
   });
+
+  it('does not revert when a failed update left the policy with no Role ARN fields', async () => {
+    // `!rewrite(...).changed` is also true when every role_arn key was removed by a concurrent
+    // edit; treating that as "persisted new ARN" would resurrect the stale snapshot on revert.
+    mockListReturns([makePolicy('a'), makePolicy('b')]);
+    (packagePolicyService.update as jest.Mock).mockImplementation(async (_so, _es, id: string) => {
+      if (id === 'b') throw new Error('occ conflict');
+      return { id, version: `Wz${id}-after` };
+    });
+    (packagePolicyService.get as jest.Mock).mockImplementation(async (_so, id: string) => {
+      if (id === 'b') {
+        return {
+          ...makePolicy('b'),
+          inputs: [{ type: 'cloudbeat/cis_aws', enabled: true, vars: {}, streams: [] }],
+        };
+      }
+      return makePolicy(id);
+    });
+
+    await expect(
+      propagateRoleArnToPackagePolicies({
+        soClient,
+        esClient,
+        connectorId: CONNECTOR_ID,
+        newRoleArn: NEW_ARN,
+      })
+    ).rejects.toBeInstanceOf(CloudConnectorRoleArnPropagationError);
+
+    const revertCalls = (packagePolicyService.update as jest.Mock).mock.calls.filter(
+      ([, , , update]) => update.inputs[0].vars?.role_arn?.value === OLD_ARN
+    );
+    // Only `a` was successfully written and reverted; `b` must not be clobbered.
+    expect(revertCalls.map(([, , id]) => id)).toEqual(['a']);
+  });
 });
