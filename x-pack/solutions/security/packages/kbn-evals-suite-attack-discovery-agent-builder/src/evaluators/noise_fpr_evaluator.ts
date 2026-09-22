@@ -25,6 +25,7 @@ export const createNoiseFalsePositiveEvaluator = (): Evaluator<
 > => ({
   name: 'NoiseFalsePositive',
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: async ({ output, expected }) => {
     const forbiddenAlertIds = expected?.forbiddenAlertIds ?? [];
     if (forbiddenAlertIds.length === 0) {
@@ -60,6 +61,7 @@ export const createDiscoveryCountCapEvaluator = (): Evaluator<
 > => ({
   name: 'DiscoveryCountCap',
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: async ({ output, expected }) => {
     const maxDiscoveryCount = expected?.maxDiscoveryCount;
     if (maxDiscoveryCount == null) {
@@ -98,6 +100,7 @@ export const createMinValidatedDiscoveryEvaluator = (): Evaluator<
 > => ({
   name: 'MinValidatedDiscovery',
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: async ({ output, expected }) => {
     const minValidatedDiscoveryCount = expected?.minValidatedDiscoveryCount;
     if (minValidatedDiscoveryCount == null) {

@@ -9,15 +9,19 @@ import { AD2_SCENARIO_SEED_LABEL } from '../scenario_registry/constants';
 import { buildAd2SeedPlan } from '../scenario_registry/registry';
 import type { AttackDiscoveryAgentBuilderExample } from '../types';
 
-const fullProfilePlan = buildAd2SeedPlan({
-  profile: 'full',
-  baseTime: new Date('2026-07-01T12:00:00.000Z'),
-});
+const FULL_PROFILE_BASE_TIME = new Date('2026-07-01T12:00:00.000Z');
 
-const signalAlertCount =
-  fullProfilePlan.alerts.length - (fullProfilePlan.noiseAlertIds?.length ?? 0);
+export const buildFullProfileDiscriminationDataset = (runMarker: string) => {
+  const fullProfilePlan = buildAd2SeedPlan({
+    profile: 'full',
+    baseTime: FULL_PROFILE_BASE_TIME,
+    runMarker,
+  });
 
-export const fullProfileDiscriminationDataset = {
+  const signalAlertCount =
+    fullProfilePlan.alerts.length - (fullProfilePlan.noiseAlertIds?.length ?? 0);
+
+  return {
   name: 'attack-discovery-agent-builder: full profile (noise discrimination)',
   description:
     'Live-retrieval eval over portable-seeder full profile: seven signal chains plus background noise and a 40-alert Defender cluster. On-demand only — not part of weekly golden-path CI.',
@@ -58,4 +62,5 @@ export const fullProfileDiscriminationDataset = {
       },
     },
   ] satisfies AttackDiscoveryAgentBuilderExample[],
+  };
 };

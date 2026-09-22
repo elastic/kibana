@@ -89,8 +89,8 @@ export const buildAd2SeedPlan = ({
 
   let noiseAlertIds: readonly string[] = [];
   if (profile === 'full' && !scenarioKey) {
-    const backgroundAlerts = buildBackgroundNoiseAlerts(baseTime);
-    const loudClusterAlerts = buildLoudClusterAlerts(baseTime);
+    const backgroundAlerts = buildBackgroundNoiseAlerts(runMarker, baseTime);
+    const loudClusterAlerts = buildLoudClusterAlerts(runMarker, baseTime);
     alerts.push(...backgroundAlerts, ...loudClusterAlerts);
     noiseAlertIds = [...backgroundAlerts, ...loudClusterAlerts].map((alert) => alert.id);
   }

@@ -27,8 +27,19 @@ const baseOutput = (): AttackDiscoveryAgentBuilderTaskOutput => ({
   workflow: {
     stages: ['generation', 'validation'],
     retrievedAlertCount: 178,
+    retrievedAlertCountSource: 'agent_esql_retrieval',
     passedAlertCount: null,
     validatedDiscoveryCount: 1,
+    retrievalEvidence: {
+        alertRetrievalMode: null,
+        pipelineAlertRetrieval: null,
+        pipelineCombinedAlerts: null,
+        workflowExecutionsTrackingKeys: {},
+        agentEsqlRowCounts: [],
+        retrievalScope: null,
+        unscopedAgentAlertRetrievalRowCounts: [],
+        unscopedPipelineAlertRetrievalCounts: [],
+      },
   },
   adToolResult: {
     status: 'completed',
@@ -52,8 +63,12 @@ describe('noise FPR evaluators', () => {
     const result = await evaluator.evaluate({
       input: {} as never,
       output,
-      expected: { forbiddenAlertIds: ['ad-portable-loud-cluster-alert-3'] },
-      metadata: {},
+      expected: {
+        expectedToolPath: [],
+        expectedWorkflowStages: [],
+        forbiddenAlertIds: ['ad-portable-loud-cluster-alert-3'],
+      },
+      metadata: { alertCount: 178, fixture: 'full-profile' },
     });
 
     expect(result.score).toBe(0);
@@ -64,8 +79,8 @@ describe('noise FPR evaluators', () => {
     const result = await evaluator.evaluate({
       input: {} as never,
       output: { ...baseOutput(), adToolResult: { status: 'completed', discoveryCount: 15 } },
-      expected: { maxDiscoveryCount: 12 },
-      metadata: {},
+      expected: { expectedToolPath: [], expectedWorkflowStages: [], maxDiscoveryCount: 12 },
+      metadata: { alertCount: 178, fixture: 'full-profile' },
     });
 
     expect(result.score).toBe(0);
@@ -76,8 +91,8 @@ describe('noise FPR evaluators', () => {
     const result = await evaluator.evaluate({
       input: {} as never,
       output: baseOutput(),
-      expected: { minValidatedDiscoveryCount: 1 },
-      metadata: {},
+      expected: { expectedToolPath: [], expectedWorkflowStages: [], minValidatedDiscoveryCount: 1 },
+      metadata: { alertCount: 178, fixture: 'full-profile' },
     });
 
     expect(result.score).toBe(1);

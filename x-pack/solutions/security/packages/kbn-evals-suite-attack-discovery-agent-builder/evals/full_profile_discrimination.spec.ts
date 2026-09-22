@@ -6,16 +6,22 @@
  */
 
 import { tags } from '@kbn/evals';
-import { fullProfileDiscriminationDataset } from '../src/datasets/full_profile_discrimination';
+import { buildFullProfileDiscriminationDataset } from '../src/datasets/full_profile_discrimination';
 import { evaluate } from '../src/evaluate';
-import { cleanupAd2ScenarioProfile, seedAd2ScenarioProfile } from '../src/scenario_registry';
+import {
+  cleanupAd2ScenarioProfile,
+  createAd2RunMarker,
+  seedAd2ScenarioProfile,
+} from '../src/scenario_registry';
+
+const runMarker = createAd2RunMarker();
 
 evaluate.describe(
   'Attack Discovery Agent Builder — full profile (on-demand)',
   { tag: tags.stateful.classic },
   () => {
     evaluate.beforeAll(async ({ esClient, fetch }) => {
-      await seedAd2ScenarioProfile(esClient, fetch, { profile: 'full' });
+      await seedAd2ScenarioProfile(esClient, fetch, { profile: 'full', runMarker });
       await fetch('/internal/elastic_assistant/update_anonymization_fields', {
         method: 'POST',
         headers: { 'elastic-api-version': '1' },
@@ -23,11 +29,11 @@ evaluate.describe(
     });
 
     evaluate.afterAll(async ({ esClient }) => {
-      await cleanupAd2ScenarioProfile(esClient);
+      await cleanupAd2ScenarioProfile(esClient, { runMarker });
     });
 
     evaluate('full profile live-retrieval noise discrimination', async ({ evaluateDataset }) => {
-      await evaluateDataset({ dataset: fullProfileDiscriminationDataset });
+      await evaluateDataset({ dataset: buildFullProfileDiscriminationDataset(runMarker) });
     });
   }
 );

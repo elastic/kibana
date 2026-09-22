@@ -131,26 +131,15 @@ export class AttackDiscoveryAgentBuilderChatClient {
       throw error;
     }
 
-        return {
-          messages: [{ message: response.response.message }],
-          steps: response.steps ?? [],
-          errors: [],
-          traceId: response.trace_id,
-          insights:
-            parseInsightsFromToolResult(response.steps) ??
-            parseInsightsFromMessage(response.response.message),
-        };
-      },
-      {
-        retries: 2,
-        minTimeout: 2_000,
-        onFailedAttempt: (error) =>
-          this.log.warning(
-            new Error(`Agent Builder converse failed on attempt ${error.attemptNumber}`, {
-              cause: error,
-            })
-          ),
-      }
-    );
+    return {
+      messages: [{ message: response.response.message }],
+      steps: response.steps ?? [],
+      errors: [],
+      traceId: response.trace_id,
+      insights:
+        parseInsightsFromToolResult(response.steps) ??
+        parseInsightsFromMessage(response.response.message) ??
+        parseInsightsFromSteps(response.steps ?? []),
+    };
   }
 }

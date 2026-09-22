@@ -17,18 +17,22 @@ import { buildAd2SeedPlan } from './registry';
 describe('AD2 full profile seed plan', () => {
   const fixedBaseTime = new Date('2026-07-01T12:00:00.000Z');
 
+  const runMarker = 'test-run-marker';
+
   it('builds deterministic background and loud-cluster noise alerts', () => {
-    expect(buildBackgroundNoiseAlerts(fixedBaseTime)).toHaveLength(
+    expect(buildBackgroundNoiseAlerts(runMarker, fixedBaseTime)).toHaveLength(
       FULL_PROFILE_BACKGROUND_ALERT_COUNT
     );
-    expect(buildLoudClusterAlerts(fixedBaseTime)).toHaveLength(FULL_PROFILE_LOUD_CLUSTER_ALERT_COUNT);
-    expect(getBackgroundNoiseAlertIds()).toHaveLength(
+    expect(buildLoudClusterAlerts(runMarker, fixedBaseTime)).toHaveLength(
+      FULL_PROFILE_LOUD_CLUSTER_ALERT_COUNT
+    );
+    expect(getBackgroundNoiseAlertIds(runMarker)).toHaveLength(
       FULL_PROFILE_BACKGROUND_ALERT_COUNT + FULL_PROFILE_LOUD_CLUSTER_ALERT_COUNT
     );
   });
 
   it('builds 28 signal alerts plus 150 noise alerts for the full profile', () => {
-    const plan = buildAd2SeedPlan({ profile: 'full', baseTime: fixedBaseTime });
+    const plan = buildAd2SeedPlan({ profile: 'full', baseTime: fixedBaseTime, runMarker });
 
     expect(plan.scenarioKeys).toHaveLength(7);
     expect(plan.noiseAlertIds).toHaveLength(150);

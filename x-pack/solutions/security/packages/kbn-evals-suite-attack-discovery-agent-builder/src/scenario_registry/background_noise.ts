@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { AD2_SCENARIO_ID_PREFIX } from './constants';
 import { buildAlertDocument } from './build_documents';
 import type { Ad2IndexedAlert, Ad2ScenarioDefinition, Ad2ScenarioOs } from './types';
 
@@ -81,7 +80,10 @@ const loudClusterScenario = (
 /** Deterministic offsets (minutes ago) — portable seeder uses random; evals need repeatability. */
 const minutesAgoForIndex = (index: number): number => 30 + (index % 138) * 10;
 
-export const buildBackgroundNoiseAlerts = (baseTime: Date = new Date()): Ad2IndexedAlert[] => {
+export const buildBackgroundNoiseAlerts = (
+  runMarker: string,
+  baseTime: Date = new Date()
+): Ad2IndexedAlert[] => {
   const alerts: Ad2IndexedAlert[] = [];
   let counter = 0;
 
@@ -92,16 +94,23 @@ export const buildBackgroundNoiseAlerts = (baseTime: Date = new Date()): Ad2Inde
       const scenario = backgroundScenario(host, os, user, rule.dataset, rule.category);
       const timestamp = new Date(baseTime.getTime() - minutesAgoForIndex(counter) * 60_000);
       alerts.push(
-        buildAlertDocument('background', scenario, counter, {
-          ruleName: rule.ruleName,
-          severity: 'low',
-          riskScore: 21,
-          message: `Background test alert: ${rule.ruleName}`,
-          processName: null,
-          commandLine: null,
-          eventType: null,
-          context: null,
-        }, timestamp)
+        buildAlertDocument(
+          'background',
+          scenario,
+          counter,
+          {
+            ruleName: rule.ruleName,
+            severity: 'low',
+            riskScore: 21,
+            message: `Background test alert: ${rule.ruleName}`,
+            processName: null,
+            commandLine: null,
+            eventType: null,
+            context: null,
+          },
+          timestamp,
+          runMarker
+        )
       );
     }
   }
@@ -109,7 +118,10 @@ export const buildBackgroundNoiseAlerts = (baseTime: Date = new Date()): Ad2Inde
   return alerts;
 };
 
-export const buildLoudClusterAlerts = (baseTime: Date = new Date()): Ad2IndexedAlert[] => {
+export const buildLoudClusterAlerts = (
+  runMarker: string,
+  baseTime: Date = new Date()
+): Ad2IndexedAlert[] => {
   const alerts: Ad2IndexedAlert[] = [];
 
   for (let number = 1; number <= 40; number++) {
@@ -117,29 +129,36 @@ export const buildLoudClusterAlerts = (baseTime: Date = new Date()): Ad2IndexedA
     const scenario = loudClusterScenario(host, os, user);
     const timestamp = new Date(baseTime.getTime() - minutesAgoForIndex(number + 200) * 60_000);
     alerts.push(
-      buildAlertDocument('loud-cluster', scenario, number, {
-        ruleName: 'Windows Defender Signature Update Failed',
-        severity: 'low',
-        riskScore: 15,
-        message: 'Defender signature update failed; retry scheduled',
-        processName: null,
-        commandLine: null,
-        eventType: null,
-        context: null,
-      }, timestamp)
+      buildAlertDocument(
+        'loud-cluster',
+        scenario,
+        number,
+        {
+          ruleName: 'Windows Defender Signature Update Failed',
+          severity: 'low',
+          riskScore: 15,
+          message: 'Defender signature update failed; retry scheduled',
+          processName: null,
+          commandLine: null,
+          eventType: null,
+          context: null,
+        },
+        timestamp,
+        runMarker
+      )
     );
   }
 
   return alerts;
 };
 
-export const getBackgroundNoiseAlertIds = (): readonly string[] => {
-  const baseTime = new Date('2026-07-01T12:00:00.000Z');
-  return [
-    ...buildBackgroundNoiseAlerts(baseTime).map((alert) => alert.id),
-    ...buildLoudClusterAlerts(baseTime).map((alert) => alert.id),
-  ];
-};
+export const getBackgroundNoiseAlertIds = (
+  runMarker: string,
+  baseTime: Date = new Date('2026-07-01T12:00:00.000Z')
+): readonly string[] => [
+  ...buildBackgroundNoiseAlerts(runMarker, baseTime).map((alert) => alert.id),
+  ...buildLoudClusterAlerts(runMarker, baseTime).map((alert) => alert.id),
+];
 
 export const FULL_PROFILE_EXPECTED_SIGNAL_ALERT_COUNT = 28;
 export const FULL_PROFILE_BACKGROUND_ALERT_COUNT = 110;
@@ -148,6 +167,11 @@ export const FULL_PROFILE_LOUD_CLUSTER_ALERT_COUNT = 40;
 export const isNoiseScenarioKey = (scenarioKey: string): boolean =>
   scenarioKey === 'background' || scenarioKey === 'loud-cluster';
 
-export const isNoiseAlertId = (alertId: string): boolean =>
-  alertId.startsWith(`${AD2_SCENARIO_ID_PREFIX}background-alert-`) ||
-  alertId.startsWith(`${AD2_SCENARIO_ID_PREFIX}loud-cluster-alert-`);
+/**
+ * Alert ids are digests of (runMarker, scenarioKey, stepNumber) and deliberately
+ * do not spell out the scenario key — the key is the target/noise discriminator
+ * this suite measures. So noise membership can only be tested against the
+ * plan's own noise id set, never by inspecting the id string.
+ */
+export const isNoiseAlertId = (alertId: string, noiseAlertIds: readonly string[]): boolean =>
+  noiseAlertIds.includes(alertId);
