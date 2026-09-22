@@ -10,11 +10,14 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiProgress,
   EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { DocumentList } from './document_list';
 import type { MappingsResponse } from '../../../../../../../common';
@@ -22,6 +25,7 @@ import type { MappingsResponse } from '../../../../../../../common';
 interface IndexDocumentsProps {
   documents: SearchHit[];
   isLoading: boolean;
+  error: { message?: string } | null;
   mappings?: MappingsResponse;
   onRefresh: () => void;
 }
@@ -29,14 +33,50 @@ interface IndexDocumentsProps {
 export const IndexDocuments: React.FC<IndexDocumentsProps> = ({
   documents,
   isLoading,
+  error,
   mappings,
   onRefresh,
 }) => {
   const mappingProperties = mappings?.mappings?.properties;
+  const hasDocuments = documents.length > 0;
+  // A refresh keeps the previous sample. Show status above that list instead of replacing it.
+  const showErrorBanner = Boolean(error) && !isLoading;
 
-  if (documents.length === 0) {
+  if (!hasDocuments && !error) {
     return null;
   }
+
+  const errorTitle = i18n.translate('xpack.idxMgmt.indexDetails.data.preview.loadErrorTitle', {
+    defaultMessage: 'Unable to load documents',
+  });
+
+  let errorText: string | undefined;
+  if (hasDocuments && error?.message) {
+    errorText = i18n.translate(
+      'xpack.idxMgmt.indexDetails.data.preview.staleDocumentsWithReasonErrorMessage',
+      {
+        defaultMessage:
+          'Data preview may show stale data. Error: {errorMessage}',
+        values: { errorMessage: error.message },
+      }
+    );
+  } else if (hasDocuments) {
+    errorText = i18n.translate(
+      'xpack.idxMgmt.indexDetails.data.preview.staleDocumentsErrorMessage',
+      {
+        defaultMessage: 'Data preview may show stale data.',
+      }
+    );
+  } else if (error?.message) {
+    errorText = i18n.translate(
+      'xpack.idxMgmt.indexDetails.data.preview.loadErrorMessage',
+      {
+        defaultMessage: 'Error: {errorMessage}',
+        values: { errorMessage: error.message },
+      }
+    );
+  }
+
   return (
     <>
       <EuiFlexGroup
@@ -92,7 +132,36 @@ export const IndexDocuments: React.FC<IndexDocumentsProps> = ({
       </EuiFlexGroup>
 
       <EuiSpacer size="m" />
-      <DocumentList docs={documents} mappingProperties={mappingProperties ?? {}} />
+      {isLoading && (
+        <>
+          <EuiProgress
+            size="xs"
+            color="accent"
+            data-test-subj="indexDetailsDataPreviewProgress"
+            aria-label={i18n.translate(
+              'xpack.idxMgmt.indexDetails.data.preview.loadingDocumentsAriaLabel',
+              { defaultMessage: 'Loading documents' }
+            )}
+          />
+          {hasDocuments && <EuiSpacer size="s" />}
+        </>
+      )}
+      {showErrorBanner && (
+        <>
+          <KbnDangerCallout
+            announceOnMount
+            data-test-subj="indexDetailsDataPreviewError"
+            title={errorTitle}
+            text={errorText}
+            aria-label={errorTitle}
+            size='s'
+          />
+          {hasDocuments && <EuiSpacer size="m" />}
+        </>
+      )}
+      {hasDocuments && (
+        <DocumentList docs={documents} mappingProperties={mappingProperties ?? {}} />
+      )}
     </>
   );
 };

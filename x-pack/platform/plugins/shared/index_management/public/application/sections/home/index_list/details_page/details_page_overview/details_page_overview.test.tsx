@@ -85,6 +85,7 @@ describe('DetailsPageOverview', () => {
       indexDetails?: Index;
       sampleDocuments?: SearchHit[];
       isDocumentsLoading?: boolean;
+      documentsError?: { message?: string } | null;
       onRefreshDocuments?: () => void;
       appDeps?: Record<string, unknown>;
     } = {}
@@ -93,6 +94,7 @@ describe('DetailsPageOverview', () => {
       indexDetails: overrides.indexDetails ?? testIndexMock,
       sampleDocuments: overrides.sampleDocuments ?? [],
       isDocumentsLoading: overrides.isDocumentsLoading ?? false,
+      documentsError: overrides.documentsError ?? null,
       onRefreshDocuments: overrides.onRefreshDocuments ?? jest.fn(),
     };
 
@@ -260,7 +262,50 @@ describe('DetailsPageOverview', () => {
       await waitFor(() => {
         expect(screen.getByText('Data preview')).toBeInTheDocument();
       });
+      expect(screen.getByTestId('indexDetailsDataPreviewProgress')).toBeInTheDocument();
       expect(screen.getByTestId('indexDetailsDataPreviewRefreshButton')).toBeDisabled();
+      expect(screen.queryByTestId('indexDetailsDataPreviewError')).not.toBeInTheDocument();
+    });
+
+    it('shows a stale-data banner and keeps the documents when refresh fails', async () => {
+      renderComponent({
+        sampleDocuments,
+        documentsError: { message: 'Connection refused' },
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('indexDetailsDataPreviewError')).toBeInTheDocument();
+      });
+      expect(screen.getByText('Unable to load documents')).toBeInTheDocument();
+      expect(
+        screen.getByText('Data preview may show stale data. Connection refused')
+      ).toBeInTheDocument();
+      expect(screen.getByText('Data preview')).toBeInTheDocument();
+    });
+
+    it('shows an error banner when the initial load fails', async () => {
+      renderComponent({ documentsError: { message: 'Index not found' } });
+
+      await waitFor(() => {
+        expect(screen.getByText('Add data to this index')).toBeInTheDocument();
+      });
+      expect(screen.getByTestId('indexDetailsDataPreviewError')).toBeInTheDocument();
+      expect(screen.getByText('Unable to load documents')).toBeInTheDocument();
+      expect(screen.getByText('Index not found')).toBeInTheDocument();
+    });
+
+    it('shows the progress bar instead of the error banner while a failed load retries', async () => {
+      renderComponent({
+        sampleDocuments,
+        isDocumentsLoading: true,
+        documentsError: { message: 'Connection refused' },
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('indexDetailsDataPreviewProgress')).toBeInTheDocument();
+      });
+      expect(screen.queryByTestId('indexDetailsDataPreviewError')).not.toBeInTheDocument();
+      expect(screen.getByText('Data preview')).toBeInTheDocument();
     });
   });
 });

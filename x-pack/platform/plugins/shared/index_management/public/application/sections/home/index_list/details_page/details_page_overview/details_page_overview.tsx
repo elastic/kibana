@@ -50,6 +50,7 @@ interface Props {
   indexDetails: Index;
   sampleDocuments: SearchHit[];
   isDocumentsLoading: boolean;
+  documentsError: { message?: string } | null;
   onRefreshDocuments: () => void;
 }
 
@@ -57,6 +58,7 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({
   indexDetails,
   sampleDocuments,
   isDocumentsLoading,
+  documentsError,
   onRefreshDocuments,
 }) => {
   const { name } = indexDetails;
@@ -209,6 +211,7 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({
             <IndexDocuments
               documents={sampleDocuments}
               isLoading={isDocumentsLoading}
+              error={documentsError}
               mappings={mappingsData ?? undefined}
               onRefresh={onRefreshDocuments}
             />

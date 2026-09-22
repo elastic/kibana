@@ -95,6 +95,7 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
   const {
     data: documentsSampleData,
     isLoading: isDocumentsSampleLoading,
+    error: documentsSampleError,
     resendRequest: resendDocumentsSampleRequest,
   } = useLoadIndexDocumentsSample(index.name);
 
@@ -110,6 +111,7 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
             indexDetails={selectedIndex}
             sampleDocuments={documentsSampleData?.results ?? []}
             isDocumentsLoading={isDocumentsSampleLoading}
+            documentsError={documentsSampleError}
             onRefreshDocuments={resendDocumentsSampleRequest}
           />
         ),
@@ -133,6 +135,7 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
   }, [
     documentsSampleData,
     isDocumentsSampleLoading,
+    documentsSampleError,
     resendDocumentsSampleRequest,
     enableIndexStats,
     extensionsService.indexDetailsTabs,
