@@ -16,6 +16,15 @@ import {
 const TRIGGERED_BY_RULE = 'Triggered by rule';
 const TRIGGERED_MANUALLY = 'Triggered manually';
 
+const requireSeededHistory = (
+  seeded: SeededResponseActionsHistory | undefined
+): SeededResponseActionsHistory => {
+  if (!seeded) {
+    throw new Error('Response action history data was not seeded');
+  }
+  return seeded;
+};
+
 spaceTest.describe(
   'Response actions history page',
   {
@@ -46,10 +55,7 @@ spaceTest.describe(
     spaceTest(
       'filters response actions by trigger type and opens the linked rule',
       async ({ page, pageObjects }) => {
-        const history = seeded;
-        if (!history) {
-          throw new Error('Response action history data was not seeded');
-        }
+        const history = requireSeededHistory(seeded);
 
         const { responseActionsHistory } = pageObjects;
         const rows = responseActionsHistory.dataRows();
