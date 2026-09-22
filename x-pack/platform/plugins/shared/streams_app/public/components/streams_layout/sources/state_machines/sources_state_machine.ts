@@ -27,7 +27,9 @@ import {
   withUnitSources,
 } from '../source_models';
 import { createSourceId, getAvailableSourceTypes, type SourceEnvironment } from '../source_helpers';
+import { notifyUnitUpdated } from '../../notify_unit_updated';
 import { getFormattedError } from '../../../../util/errors';
+import { removeComponentFromPipelines } from '../../../../services/unit_connections';
 import type { Unit } from '../../../../services/unit_repository';
 import type {
   ConfiguredSource,
@@ -318,6 +320,7 @@ export const sourcesStateMachine = setup({
   },
   actions: {
     notifySourceCreated: getPlaceholderFor(createNotifySourceCreatedAction),
+    notifySourceDeleted: getPlaceholderFor(createNotifySourceDeletedAction),
     notifySourceEnvironmentError: getPlaceholderFor(createNotifySourceEnvironmentErrorAction),
     storeSourceEnvironment: assign(({ context, event }) => {
       if (event.type !== 'xstate.done.actor.loadSourceEnvironment') {
@@ -564,9 +567,12 @@ export const sourcesStateMachine = setup({
         return {};
       }
       return {
-        unitDefinition: withUnitSources(
-          context.unitDefinition,
-          getUnitSources(context.unitDefinition).filter(({ id }) => id !== event.sourceId)
+        unitDefinition: removeComponentFromPipelines(
+          withUnitSources(
+            context.unitDefinition,
+            getUnitSources(context.unitDefinition).filter(({ id }) => id !== event.sourceId)
+          ),
+          event.sourceId
         ),
         metadataBySourceId: withoutKey(context.metadataBySourceId, event.sourceId),
         apiKeysBySourceId: withoutKey(context.apiKeysBySourceId, event.sourceId),
@@ -817,7 +823,7 @@ export const sourcesStateMachine = setup({
   }),
   on: {
     'unit.loaded': { actions: 'syncLoadedUnit' },
-    'unit.persisted': { actions: 'syncLoadedUnit' },
+    'unit.persisted': { actions: ['syncLoadedUnit', 'notifySourceDeleted'] },
     'unit.persistenceFailed': {
       guard: 'isDeletePersistenceFailure',
       actions: 'restoreUnitAfterPersistenceFailure',
@@ -1063,6 +1069,18 @@ function createNotifySourceCreatedAction({ toasts }: { toasts: Toasts }) {
   };
 }
 
+function createNotifySourceDeletedAction({ toasts }: { toasts: Toasts }) {
+  return ({ event }: { event: SourcesStateEvent }) => {
+    if (
+      event.type !== 'unit.persisted' ||
+      getConfiguredSources(event.unitDefinition).some(({ id }) => id === event.sourceId)
+    ) {
+      return;
+    }
+    notifyUnitUpdated(toasts);
+  };
+}
+
 function createNotifySourceEnvironmentErrorAction({ toasts }: { toasts: Toasts }) {
   return ({ event }: ActionArgs<SourcesStateContext, SourcesStateEvent, SourcesStateEvent>) => {
     if (event.type !== 'xstate.error.actor.loadSourceEnvironment') {
@@ -1098,6 +1116,7 @@ export const createSourcesMachineImplementations = ({
     },
     actions: {
       notifySourceCreated: createNotifySourceCreatedAction({ toasts }),
+      notifySourceDeleted: createNotifySourceDeletedAction({ toasts }),
       notifySourceEnvironmentError: createNotifySourceEnvironmentErrorAction({ toasts }),
     },
   };

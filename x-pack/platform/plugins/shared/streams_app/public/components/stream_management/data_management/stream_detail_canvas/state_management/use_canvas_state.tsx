@@ -7,6 +7,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { createActorContext } from '@xstate/react';
 import type { XYPosition } from '@xyflow/react';
+import type { Unit } from '../../../../../services/unit_repository';
 import type { CanvasStateServiceDeps } from './types';
 import { canvasStateMachine, createCanvasMachineImplementations } from './canvas_state_machine';
 
@@ -61,6 +62,10 @@ export const useCanvasSourcesRef = () => {
   return useCanvasStateSelector((state) => state.context.sourcesRef);
 };
 
+export const useCanvasDestinationsRef = () => {
+  return useCanvasStateSelector((state) => state.context.destinationsRef);
+};
+
 export const useCanvasNodePositions = () => {
   return useCanvasStateSelector((state) => state.context.nodePositions);
 };
@@ -90,6 +95,9 @@ export const useCanvasEvents = () => {
       },
       saveUnit: () => {
         service.send({ type: 'unit.save' });
+      },
+      changeUnitConnection: (unitDefinition: Unit) => {
+        service.send({ type: 'unit.stage', unitDefinition });
       },
     }),
     [service]

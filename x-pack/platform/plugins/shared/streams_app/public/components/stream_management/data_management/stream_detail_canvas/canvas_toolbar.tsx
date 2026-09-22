@@ -21,8 +21,6 @@ import {
 import type { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-const noop = () => undefined;
-
 interface ToolButtonProps {
   iconType: IconType;
   label: string;
@@ -98,23 +96,20 @@ export interface CanvasToolbarProps {
   onUndo: () => void;
   onRedo: () => void;
   onAddSource: () => void;
+  onAddDestination: () => void;
   canUndo: boolean;
   canRedo: boolean;
 }
 
-const comingSoonSuffix = i18n.translate('xpack.streams.canvas.toolbar.comingSoonSuffix', {
-  defaultMessage: '(coming soon)',
-});
-
 /**
- * Floating bottom-center canvas toolbar. Undo/redo are functional; the
- * source/destination actions are placeholders whose real behaviour will be
- * implemented when editing lands.
+ * Floating bottom-center canvas toolbar. Undo, redo, and adding a source or
+ * destination update the streams unit.
  */
 export function CanvasToolbar({
   onUndo,
   onRedo,
   onAddSource,
+  onAddDestination,
   canUndo,
   canRedo,
 }: CanvasToolbarProps) {
@@ -188,10 +183,10 @@ export function CanvasToolbar({
             label={i18n.translate('xpack.streams.canvas.toolbar.addDestination', {
               defaultMessage: 'Destination',
             })}
-            tooltip={`${i18n.translate('xpack.streams.canvas.toolbar.addDestinationTooltip', {
+            tooltip={i18n.translate('xpack.streams.canvas.toolbar.addDestinationTooltip', {
               defaultMessage: 'Add destination',
-            })} ${comingSoonSuffix}`}
-            onClick={noop}
+            })}
+            onClick={onAddDestination}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
