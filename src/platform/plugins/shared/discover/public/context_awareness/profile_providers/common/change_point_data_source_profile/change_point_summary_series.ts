@@ -9,7 +9,7 @@
 
 import { useEffect, useState } from 'react';
 import { buildChangePointCards, type ChangePointCardModel } from '@kbn/change-point-chart-viewer';
-import type { UnifiedChangePointGridProps } from '@kbn/change-point-chart-viewer';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { getTime } from '@kbn/data-plugin/public';
 import {
@@ -18,8 +18,9 @@ import {
   getChangePointSeriesColumns,
   getNamedParams,
 } from '@kbn/esql-utils';
-import { isOfAggregateQueryType, buildEsQuery } from '@kbn/es-query';
+import { isOfAggregateQueryType, isOfQueryType, buildEsQuery } from '@kbn/es-query';
 import { Observable, of } from 'rxjs';
+import type { CellRenderersSearchContext } from '../../../types';
 
 import { downsampleSparklinePoints } from './downsample_sparkline_points';
 import {
@@ -32,7 +33,9 @@ import {
   type ChangePointSeriesByEntity,
 } from './change_point_summary_series_helpers';
 
-type ChangePointFetchParams = UnifiedChangePointGridProps['fetchParams'];
+export type ChangePointSummaryFetchParams = CellRenderersSearchContext & {
+  dataView: DataView;
+};
 
 export const SUMMARY_SERIES_STATUS = {
   IDLE: 'idle',
@@ -71,21 +74,24 @@ type SeriesCacheEntry =
   | { kind: 'in-flight'; observable: Observable<ChangePointSummarySeriesState> }
   | { kind: 'done'; state: ChangePointSummarySeriesState };
 
-const getEsqlQuery = (query: ChangePointFetchParams['query']): string | undefined =>
+const getEsqlQuery = (query: ChangePointSummaryFetchParams['query']): string | undefined =>
   isOfAggregateQueryType(query) ? query.esql : undefined;
 
-export const getSeriesCacheKey = (fetchParams: ChangePointFetchParams): string => {
+export const getSeriesCacheKey = (fetchParams: ChangePointSummaryFetchParams): string => {
   const table = fetchParams.table;
   const columnIds = table?.columns.map((c) => c.id).join(',') ?? '';
   const rowCount = table?.rows.length ?? 0;
   return [
     fetchParams.searchSessionId ?? '',
-    String(fetchParams.lastReloadRequestTime),
+    String(fetchParams.requestId ?? ''),
     getEsqlQuery(fetchParams.query) ?? '',
+    JSON.stringify(fetchParams.filterQuery ?? null),
     fetchParams.timeRange?.from ?? '',
     fetchParams.timeRange?.to ?? '',
     JSON.stringify(fetchParams.filters ?? []),
     JSON.stringify(fetchParams.esqlVariables ?? []),
+    fetchParams.projectRouting ?? '',
+    String(fetchParams.isApproximate ?? ''),
     columnIds,
     String(rowCount),
   ].join('\0');
@@ -127,7 +133,7 @@ const loadLineSeries = async ({
   abortSignal,
   cards,
 }: {
-  fetchParams: ChangePointFetchParams;
+  fetchParams: ChangePointSummaryFetchParams;
   data: DataPublicPluginStart;
   seriesColumns: { timeColumn: string; valueColumn: string } | undefined;
   baseLineEsql: string | undefined;
@@ -153,15 +159,20 @@ const loadLineSeries = async ({
     );
   }
 
-  const timeRange = getSummarySeriesTimeRange(fetchParams.timeRange, earliestAnnotationMs);
-  const timeFilter = getTime(fetchParams.dataView, timeRange);
+  const timeRange = fetchParams.timeRange
+    ? getSummarySeriesTimeRange(fetchParams.timeRange, earliestAnnotationMs)
+    : undefined;
+  const timeFilter = timeRange ? getTime(fetchParams.dataView, timeRange) : undefined;
+  const queries =
+    fetchParams.filterQuery && isOfQueryType(fetchParams.filterQuery)
+      ? [fetchParams.filterQuery]
+      : [];
   let filter: ReturnType<typeof buildEsQuery> | undefined;
   try {
-    filter = buildEsQuery(
-      fetchParams.dataView,
-      [],
-      [...(fetchParams.filters ?? []), ...(timeFilter ? [timeFilter] : [])]
-    );
+    filter = buildEsQuery(fetchParams.dataView, queries, [
+      ...(fetchParams.filters ?? []),
+      ...(timeFilter ? [timeFilter] : []),
+    ]);
   } catch {
     filter = undefined;
   }
@@ -178,6 +189,8 @@ const loadLineSeries = async ({
       abortSignal,
       sessionId: fetchParams.searchSessionId,
       dropNullColumns: true,
+      projectRouting: fetchParams.projectRouting,
+      approximation: fetchParams.isApproximate,
       executionContext: {
         type: 'discover',
         name: 'change_point_summary_series',
@@ -207,7 +220,7 @@ const isAbortError = (err: unknown): boolean =>
  * N cells subscribe. At most, one line ES|QL fetch runs per Discover refetch.
  */
 export const getChangePointSummarySeries$ = (
-  fetchParams: ChangePointFetchParams,
+  fetchParams: ChangePointSummaryFetchParams,
   data: DataPublicPluginStart
 ): Observable<ChangePointSummarySeriesState> => {
   const cacheKey = getSeriesCacheKey(fetchParams);
@@ -293,7 +306,7 @@ export const getChangePointSummarySeries$ = (
 
 /** Hook for Summary cells to read the shared series map. */
 export const useChangePointSummarySeries = (
-  fetchParams: ChangePointFetchParams | undefined,
+  fetchParams: ChangePointSummaryFetchParams | undefined,
   data: DataPublicPluginStart | undefined
 ): ChangePointSummarySeriesState => {
   const [state, setState] = useState<ChangePointSummarySeriesState>({

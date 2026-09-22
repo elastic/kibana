@@ -10,12 +10,13 @@
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { getTime } from '@kbn/data-plugin/public';
-import type { UnifiedChangePointGridProps } from '@kbn/change-point-chart-viewer';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { ESQLVariableType } from '@kbn/esql-types';
 import {
   clearChangePointSummarySeriesCache,
   getChangePointSummarySeries$,
   getSeriesCacheKey,
+  type ChangePointSummaryFetchParams,
   type ChangePointSummarySeriesState,
 } from './change_point_summary_series';
 
@@ -27,7 +28,7 @@ jest.mock('@kbn/data-plugin/public', () => {
   };
 });
 
-type ChangePointFetchParams = UnifiedChangePointGridProps['fetchParams'];
+type ChangePointFetchParams = ChangePointSummaryFetchParams;
 
 const makeTable = (columns: Datatable['columns'], rows: Datatable['rows']): Datatable => ({
   type: 'datatable',
@@ -149,14 +150,14 @@ const setupLineSearch = ({
 
   const fetchParams: ChangePointFetchParams = {
     searchSessionId: 'session-1',
-    lastReloadRequestTime: 1,
-    dataView: { isTimeBased: () => false } as never,
+    requestId: 1,
+    dataView: dataViewMock,
     filters: [],
     timeRange: { from: '2023-11-14T00:00:00.000Z', to: '2023-11-20T00:00:00.000Z' },
     table: makeTable(resolvedColumns, resolvedRows),
     query: { esql: resolvedQuery },
     ...fetch,
-  } as ChangePointFetchParams;
+  };
   const data = { search: { esql } } as unknown as DataPublicPluginStart;
 
   return {
@@ -172,37 +173,42 @@ const setupLineSearch = ({
 
 describe('change_point_summary_series', () => {
   describe('getSeriesCacheKey', () => {
-    it('changes when time range or filters change', () => {
-      const table = makeTable(COLUMNS_NO_BY, []);
-      const base = {
+    const createCacheParams = (): ChangePointFetchParams =>
+      ({
         searchSessionId: 's',
-        lastReloadRequestTime: 1,
+        requestId: 1,
         query: { esql: ESQL_NO_BY },
-        table,
+        table: makeTable(COLUMNS_NO_BY, []),
         filters: [],
         timeRange: { from: 'now-1d', to: 'now' },
-      } as unknown as ChangePointFetchParams;
+        dataView: { isTimeBased: () => false },
+      } as unknown as ChangePointFetchParams);
 
+    it('is stable for equivalent parameters', () => {
+      const base = createCacheParams();
       const same = getSeriesCacheKey(base);
+
       expect(getSeriesCacheKey({ ...base })).toBe(same);
-      expect(
-        getSeriesCacheKey({
-          ...base,
-          timeRange: { from: 'now-2d', to: 'now' },
-        })
-      ).not.toBe(same);
-      expect(
-        getSeriesCacheKey({
-          ...base,
-          filters: [{ meta: { key: 'host' } }] as never,
-        })
-      ).not.toBe(same);
-      expect(
-        getSeriesCacheKey({
-          ...base,
-          esqlVariables: [{ key: 'env', value: 'prod', type: ESQLVariableType.VALUES }],
-        })
-      ).not.toBe(same);
+    });
+
+    const cacheKeyChanges: Array<[string, Partial<ChangePointFetchParams>]> = [
+      ['time range', { timeRange: { from: 'now-2d', to: 'now' } }],
+      ['request id', { requestId: 2 }],
+      ['filter query', { filterQuery: { query: 'host: a', language: 'kuery' } }],
+      ['filters', { filters: [{ meta: { key: 'host' } }] as never }],
+      ['project routing', { projectRouting: '_alias:_origin' }],
+      ['approximation', { isApproximate: true }],
+    ];
+
+    it.each(cacheKeyChanges)('changes when %s changes', (_, change) => {
+      const base = createCacheParams();
+
+      expect(getSeriesCacheKey({ ...base, ...change })).not.toBe(getSeriesCacheKey(base));
+    });
+
+    it('changes when ES|QL variable values change', () => {
+      const base = createCacheParams();
+
       expect(
         getSeriesCacheKey({
           ...base,
@@ -313,6 +319,19 @@ describe('change_point_summary_series', () => {
       expect(esql.mock.calls[0][0].params).toEqual(expect.arrayContaining([{ env: 'prod' }]));
     });
 
+    it('forwards ES|QL control params when there is no time range', async () => {
+      const { esql, load } = setupLineSearch({
+        esqlQuery:
+          'FROM idx | WHERE host == ?env | STATS avg_bytes = AVG(bytes) BY bucket = BUCKET(@timestamp, 1 day) | CHANGE_POINT avg_bytes ON bucket',
+        esqlVariables: [{ key: 'env', value: 'prod', type: ESQLVariableType.VALUES }],
+      });
+      const ready = await load({ timeRange: undefined });
+
+      expect(ready.status).toBe('ready');
+      expect(getTime).not.toHaveBeenCalled();
+      expect(esql.mock.calls[0][0].params).toEqual([{ env: 'prod' }]);
+    });
+
     it('fetches a line series with extended from when a no-BY annotation is before the range', async () => {
       const { esql, load } = setupLineSearch({
         rows: [{ ...NO_BY_ROW, bucket: '2023-11-10T00:00:00.000Z' }],
@@ -382,6 +401,46 @@ describe('change_point_summary_series', () => {
       });
 
       expect(esql).toHaveBeenCalledTimes(2);
+    });
+
+    it('does not reuse a cached series when requestId changes', async () => {
+      const { esql, load } = setupLineSearch({ fixture: 'byHost', lineValues: [] });
+
+      await load();
+      await load({ requestId: 2 });
+
+      expect(esql).toHaveBeenCalledTimes(2);
+    });
+
+    it('applies filterQuery to the line-series request', async () => {
+      const filterQuery = { query: 'host: web', language: 'kuery' as const };
+      const { esql, load } = setupLineSearch({
+        filterQuery,
+      });
+      await load();
+
+      expect(esql.mock.calls[0][0].filter).toEqual(
+        expect.objectContaining({
+          bool: expect.any(Object),
+        })
+      );
+      expect(JSON.stringify(esql.mock.calls[0][0].filter)).toContain('web');
+    });
+
+    it('forwards project routing and approximation to the line-series request', async () => {
+      const { esql, load } = setupLineSearch({
+        projectRouting: '_alias:_origin',
+        isApproximate: true,
+      });
+
+      await load();
+
+      expect(esql.mock.calls[0][1]).toEqual(
+        expect.objectContaining({
+          projectRouting: '_alias:_origin',
+          approximation: true,
+        })
+      );
     });
 
     it('aborts an in-flight line search when the last subscriber unsubscribes', async () => {
