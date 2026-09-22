@@ -26,6 +26,8 @@ const eligibilityContext = (
     endpointPolicyProtections?: boolean;
     endpointTrustedDevices?: boolean;
     trustedDevicesExperimental?: boolean;
+    endpointCustomYaraSignatures?: boolean;
+    customYaraSignaturesExperimental?: boolean;
     endpointProtectionUpdates?: boolean;
     serverless?: boolean;
   } = {}
@@ -36,6 +38,8 @@ const eligibilityContext = (
     endpointPolicyProtections: options.endpointPolicyProtections ?? true,
     endpointTrustedDevices: options.endpointTrustedDevices ?? true,
     trustedDevicesExperimental: options.trustedDevicesExperimental ?? true,
+    endpointCustomYaraSignatures: options.endpointCustomYaraSignatures ?? true,
+    customYaraSignaturesExperimental: options.customYaraSignaturesExperimental ?? true,
     endpointProtectionUpdates: options.endpointProtectionUpdates ?? true,
     serverless: options.serverless ?? false,
   });
@@ -213,6 +217,54 @@ describe('computePathEligibility', () => {
       reason: 'trusted_devices_experimental_disabled',
     });
     expect(computePathEligibility('windows.malware.mode', context)).toEqual({ eligible: true });
+  });
+
+  it('marks custom_yara_signatures ineligible when the product feature is disabled', () => {
+    const context = eligibilityContext(policyFactory(), { endpointCustomYaraSignatures: false });
+
+    expect(
+      computePathEligibility('windows.memory_protection.custom_yara_signatures', context)
+    ).toEqual({
+      eligible: false,
+      reason: 'endpoint_custom_yara_signatures_disabled',
+    });
+    expect(computePathEligibility('windows.memory_protection.mode', context)).toEqual({
+      eligible: true,
+    });
+  });
+
+  it('marks custom_yara_signatures ineligible when the experimental flag is off', () => {
+    const context = eligibilityContext(policyFactory(), {
+      customYaraSignaturesExperimental: false,
+    });
+
+    for (const os of ['windows', 'mac', 'linux'] as const) {
+      expect(
+        computePathEligibility(`${os}.memory_protection.custom_yara_signatures`, context)
+      ).toEqual({
+        eligible: false,
+        reason: 'custom_yara_signatures_experimental_disabled',
+      });
+    }
+    expect(computePathEligibility('windows.malware.mode', context)).toEqual({ eligible: true });
+  });
+
+  it('marks the Enterprise-gated rescan interval ineligible when custom YARA signatures are gated off', () => {
+    const proposed = policyFactory();
+    proposed.windows.advanced = {
+      memory_protection: { user_yara_rescan_interval_seconds: 3600 },
+    };
+    const context = eligibilityContext(proposed, { customYaraSignaturesExperimental: false });
+
+    expect(
+      computePathEligibility(
+        'windows.advanced.memory_protection.user_yara_rescan_interval_seconds',
+        context
+      )
+    ).toEqual({
+      eligible: false,
+      reason: 'custom_yara_signatures_experimental_disabled',
+    });
   });
 
   it('marks platinum usb_storage read_only eligible when device_control is disabled', () => {
