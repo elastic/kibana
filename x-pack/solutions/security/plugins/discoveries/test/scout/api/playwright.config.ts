@@ -9,4 +9,6 @@ import { createPlaywrightConfig } from '@kbn/scout-security';
 
 export default createPlaywrightConfig({
   testDir: './tests',
+  // Wires `tests/global.teardown.ts`, which reverts the process-wide feature flag override
+  runGlobalSetup: true,
 });

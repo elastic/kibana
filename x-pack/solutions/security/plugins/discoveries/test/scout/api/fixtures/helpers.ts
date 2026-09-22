@@ -55,6 +55,28 @@ export const enableWorkflowsFeatureFlag = async ({
 };
 
 /**
+ * Reverts `enableWorkflowsFeatureFlag`. The feature flag override is process-wide and the Advanced
+ * Setting is persisted in the default space, so both leak into other suites sharing the Kibana
+ * instance. Call it from `global.teardown.ts`, not from `afterAll`: spec files run in parallel
+ * across workers.
+ */
+export const disableWorkflowsFeatureFlag = async ({
+  apiServices,
+  kbnClient,
+}: {
+  apiServices: CoreApiSettingsFixture;
+  kbnClient: KbnClient;
+}): Promise<void> => {
+  // `null` removes the key from the dynamic config overrides instead of pinning it to `false`
+  await apiServices.core.settings({
+    'feature_flags.overrides': {
+      [ATTACK_DISCOVERY_WORKFLOWS_FEATURE_FLAG]: null,
+    },
+  });
+  await kbnClient.uiSettings.unset(ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING);
+};
+
+/**
  * Least-privilege role for exercising the internal schedule CRUD routes
  * (create / get / find / update / delete / enable / disable).
  *

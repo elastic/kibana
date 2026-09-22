@@ -10,6 +10,7 @@
 import supertest from 'supertest';
 import { format as formatUrl } from 'url';
 import { samlAuthFixture as coreWorkerFixtures } from './saml_auth';
+import { parseBufferResponse, parseTextResponse } from './api_client_parsers';
 
 /**
  * Strips leading slashes from a URL path so that supertest concatenates it
@@ -86,17 +87,15 @@ export const apiClientFixture = coreWorkerFixtures.extend<{}, { apiClient: ApiCl
             req = req.set('Accept', 'application/json');
           }
 
+          // Return the raw payload as a UTF-8 string for text responseType. Superagent has no
+          // parser for e.g. `application/ndjson`, so without this `res.body` would be a Buffer.
+          if (options.responseType === 'text') {
+            req = req.buffer(true).parse(parseTextResponse);
+          }
+
           // Enable binary buffering for buffer responseType
           if (options.responseType === 'buffer') {
-            req = req.buffer(true).parse((res, callback) => {
-              const chunks: Buffer[] = [];
-              res.on('data', (chunk: Buffer) => {
-                chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
-              });
-              res.on('end', () => {
-                callback(null, Buffer.concat(chunks));
-              });
-            });
+            req = req.buffer(true).parse(parseBufferResponse);
           }
 
           // Handle body and auto-set Content-Type if needed
