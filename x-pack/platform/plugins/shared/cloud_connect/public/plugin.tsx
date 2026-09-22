@@ -54,8 +54,7 @@ export class CloudConnectedPlugin
     plugins: CloudConnectedSetupDeps
   ): CloudConnectedPluginSetup {
     const shouldShowEchAutoOpsBanner =
-      plugins.cloud?.isElasticCloudHosted === true &&
-      plugins.cloud?.isFedrampHigh !== true;
+      plugins.cloud?.isElasticCloudHosted === true && plugins.cloud?.isFedrampHigh !== true;
 
     if (shouldShowEchAutoOpsBanner) {
       this.shouldShowEchAutoOpsBanner = true;
