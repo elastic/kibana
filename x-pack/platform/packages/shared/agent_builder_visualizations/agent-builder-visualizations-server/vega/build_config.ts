@@ -14,7 +14,7 @@ import { buildServerESQLCallbacks } from '@kbn/esql-server-utils';
 import { createVegaGraph } from './graph';
 import { extractEsqlFromSpec } from './recover_esql';
 
-export interface BuildVegaConfigParams {
+interface BuildVegaConfigParams {
   nlQuery: string;
   index?: string;
   esql?: string;
@@ -33,7 +33,7 @@ export interface BuildVegaConfigParams {
   esClient: IScopedClusterClient;
 }
 
-export interface BuildVegaConfigResult {
+interface BuildVegaConfigResult {
   /** Serialized, render-ready Vega-Lite specification. */
   spec: string;
   /** Visualization / panel title from the authoring response schema. */
