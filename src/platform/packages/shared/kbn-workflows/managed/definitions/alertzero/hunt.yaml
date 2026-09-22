@@ -1,0 +1,234 @@
+version: "1"
+name: Hunt Watch - hunt
+description: >
+  Untagged child invoked by PR 4's tagged Worker (registered id
+  system-security-hunt-execute; PR 4's Worker calls exactly this id, kept in
+  sync with kbn-workflows/managed/definitions/alertzero/hunt_continuous_threat_hunt.yaml).
+  Runs the two-tier hunt coordinator for one report, stages the SSE attachment
+  on a confirmed hit, writes the hunt-results message, and writes the
+  per-space evidence[] element on completion. Does not find-or-create the
+  Investigation and does not write the run conclusion: those are the
+  Worker's own steps (mvp-slice.md's Investigation write map). Never throws
+  past its own per-step on-failure fallbacks; a partial run is reported
+  through the typed output, not an exception.
+enabled: true
+tags: []
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        reportId:
+          type: string
+          description: Threat report id this hunt pass runs against (hunt:report:{reportId}).
+        investigationConversationId:
+          type: string
+          description: Conversation id of the report's Investigation (already created by the Worker).
+        runId:
+          type: string
+          description: >
+            Run id the Worker's fan-out minted for this sweep. Threaded
+            through to the coordinator so every child of one sweep shares
+            it, which is what the packaging barrier and the conclusion
+            dedupe key off.
+        trigger:
+          type: string
+          enum: [manual, scheduled]
+          default: scheduled
+          description: >
+            Passed straight through to the coordinator's own required
+            `trigger` field. The Worker's scheduled sweep passes `scheduled`;
+            a manual named rerun passes `manual`.
+        tier2_when:
+          type: string
+          enum: [on_hits, always, never]
+          default: on_hits
+        technology:
+          type: string
+          enum: [aws_iam, fortigate]
+          description: >
+            Pins the hunt to one technology's index scope. Leave it unset and the
+            coordinator resolves every technology whose required indices exist in
+            the space and hunts them all.
+      required:
+        - reportId
+        - investigationConversationId
+        - runId
+      additionalProperties: false
+outputs:
+  - name: status
+    type: string
+  - name: stage
+    type: string
+  - name: reason
+    type: string
+steps:
+  # The coordinator's request body is snake_case (report_id, run_id, trigger)
+  # and does not know about Investigations; this step is the camelCase ->
+  # snake_case mapping layer so no other caller has to repeat it. An unset
+  # `technology` input renders as null, which the coordinator treats the same
+  # as omitted: resolve the technologies from the environment.
+  - name: run_hunt_coordinator
+    type: kibana.request
+    with:
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/internal/alertzero/hunt/hunt_coordinator"
+      headers:
+        kbn-xsrf: "true"
+        elastic-api-version: "1"
+        Content-Type: application/json
+      body:
+        report_id: "{{ inputs.reportId }}"
+        run_id: "{{ inputs.runId }}"
+        trigger: "{{ inputs.trigger }}"
+        tier2_when: "{{ inputs.tier2_when }}"
+        technology: "${{ inputs.technology | default: null }}"
+    on-failure:
+      fallback:
+        - name: emit_coordinator_failed
+          type: workflow.output
+          status: completed
+          with:
+            status: failed
+            stage: hunt_coordinator
+            reason: "${{ steps.run_hunt_coordinator.error }}"
+
+  # Populated only when Tier 1 confirmed a hit: one entry per confirmed
+  # technique (a single report-scoped entry when Tier 2 produced none). No
+  # templated fields — `sse_mapper.ts` already built the full attachment_id
+  # and data payload server-side, this just fans out ai.attachment.add over
+  # what the coordinator returned.
+  - name: attach_sse
+    type: foreach
+    if: "${{ steps.run_hunt_coordinator.output.sse != null }}"
+    foreach: "${{ steps.run_hunt_coordinator.output.sse }}"
+    steps:
+      - name: add_sse_attachment
+        type: ai.attachment.add
+        with:
+          conversation_id: "{{ inputs.investigationConversationId }}"
+          id: "{{ foreach.item.attachment_id }}"
+          type: security.significant_security_event
+          data: "${{ foreach.item.data }}"
+          description: Hunt Watch significant security event
+          render_inline: true
+        on-failure:
+          continue: true
+
+  # Hunt results write-back: every completed hunt (hit or clean) gets exactly
+  # one message here (mvp-slice.md's Investigation write map). The SSE
+  # attachment (above) already carries the structured findings, so this
+  # narrative does not restate them — it just points at what happened.
+  - name: write_hunt_results_message
+    type: workflow.execute
+    if: "${{ steps.run_hunt_coordinator.output.completedSuccessfully == true }}"
+    with:
+      workflow-id: system-alertzero-journal-note
+      inputs:
+        conversation_id: "{{ inputs.investigationConversationId }}"
+        message: >-
+          {% if steps.run_hunt_coordinator.output.sse != null -%}
+          Hunt Watch: {{ steps.run_hunt_coordinator.output.message }} Technologies hunted: {{ steps.run_hunt_coordinator.output.technologies | join: ", " }}.
+          {%- else -%}
+          Hunt Watch: required searches completed, no hits found. Technologies hunted: {{ steps.run_hunt_coordinator.output.technologies | join: ", " }}.
+          {%- endif %}
+    on-failure:
+      continue: true
+
+  # Scripted per-space upsert into the nested `evidence` array. Update API
+  # (not Bulk): Bulk rejects scripts on indices with `semantic_text`.
+  # Sets only the hunt keys (`last_hunted_at`, `last_hunt_status`,
+  # `last_hunt_run_id`, `last_hunt_event_hit_count`) on the matched (or newly
+  # appended) element, never the whole element: `evidence` is shared with the
+  # Attribute Alerts task, which sets a disjoint set of keys (`alert_hits*`)
+  # on the same per-space element. A blind replace here would erase that
+  # space's alert-attribution fields. `corroborated_rank_score` is a reserved
+  # mapping field (`index_templates.ts:311-313`) with no writer yet — PR 3
+  # deleted the one writer that used to compute it (`write_hunt_feedback.ts`,
+  # `hunt-watch-evidence-shape` p2) and this rescope does not resurrect it,
+  # so this step never sets that key. `last_hunt_event_hit_count` is omitted
+  # (never written as 0) on a clean run, matching the deleted writer's
+  # convention: a report that has never had a hit event has no count key.
+  - name: set_evidence_script
+    type: data.set
+    if: "${{ steps.run_hunt_coordinator.output.completedSuccessfully == true }}"
+    with:
+      evidence_script: |
+        if (!(ctx._source.evidence instanceof List)) { ctx._source.evidence = new ArrayList(); }
+        boolean found = false;
+        for (int i = 0; i < ctx._source.evidence.size(); i++) {
+          if (ctx._source.evidence[i].space_id == params.space_id) {
+            ctx._source.evidence[i].last_hunted_at = params.last_hunted_at;
+            ctx._source.evidence[i].last_hunt_status = params.last_hunt_status;
+            ctx._source.evidence[i].last_hunt_run_id = params.last_hunt_run_id;
+            if (params.last_hunt_event_hit_count != null) { ctx._source.evidence[i].last_hunt_event_hit_count = params.last_hunt_event_hit_count; }
+            found = true;
+          }
+        }
+        if (!found) {
+          Map el = new HashMap();
+          el.space_id = params.space_id;
+          el.last_hunted_at = params.last_hunted_at;
+          el.last_hunt_status = params.last_hunt_status;
+          el.last_hunt_run_id = params.last_hunt_run_id;
+          if (params.last_hunt_event_hit_count != null) { el.last_hunt_event_hit_count = params.last_hunt_event_hit_count; }
+          ctx._source.evidence.add(el);
+        }
+
+  # `last_hunt_status` collapses to `hit` | `clean` off `tier1.hasConfirmedHit`
+  # (the same collapse the deleted `write_hunt_feedback.ts` did via
+  # `collapseHuntStatus`), not the coordinator's own three-way `status` enum
+  # (`tier1_only` | `tier1_and_tier2` | `tier2_only_skipped`), which describes
+  # which tiers ran, not whether either found anything.
+  - name: resolve_evidence_values
+    type: data.set
+    if: "${{ steps.run_hunt_coordinator.output.completedSuccessfully == true }}"
+    with:
+      last_hunt_status: |-
+        {%- if steps.run_hunt_coordinator.output.tier1.hasConfirmedHit == true -%}
+        hit
+        {%- else -%}
+        clean
+        {%- endif -%}
+      last_hunt_event_hit_count: "${{ steps.run_hunt_coordinator.output.tier1.counts.totalHits | default: null }}"
+
+  # Update, not upsert: the report was just loaded by the Worker's own
+  # candidate selection before this child ran, so a missing doc must fail
+  # loudly rather than materialize a partial row.
+  - name: write_evidence
+    type: elasticsearch.update
+    if: "${{ steps.run_hunt_coordinator.output.completedSuccessfully == true }}"
+    with:
+      index: .kibana-threat-reports
+      id: "{{ inputs.reportId }}"
+      retry_on_conflict: 3
+      script:
+        lang: painless
+        source: "${{ variables.evidence_script }}"
+        params:
+          space_id: "{{ workflow.spaceId }}"
+          last_hunted_at: "{{ execution.startedAt }}"
+          last_hunt_status: "{{ variables.last_hunt_status }}"
+          last_hunt_run_id: "{{ inputs.runId }}"
+          last_hunt_event_hit_count: "${{ variables.last_hunt_event_hit_count }}"
+    on-failure:
+      continue: true
+
+  # `data.set` first, since `workflow.output`'s `with:` values are read, not
+  # templated with `{% if %}` blocks directly.
+  - name: resolve_result_status
+    type: data.set
+    with:
+      result_status: |-
+        {%- if steps.run_hunt_coordinator.output.completedSuccessfully == true -%}
+        success
+        {%- else -%}
+        failed
+        {%- endif -%}
+
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      status: "{{ variables.result_status }}"
+      stage: hunt
+      reason: "${{ steps.run_hunt_coordinator.error | default: null }}"

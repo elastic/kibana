@@ -9,6 +9,7 @@ import type { Logger } from '@kbn/logging';
 import {
   ALERTZERO_ACTION_WORKFLOW_IDS,
   ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS,
+  ALERTZERO_HUNT_CHILD_WORKFLOW_IDS,
   ALERTZERO_RULE_WORKFLOW_IDS,
 } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
@@ -36,6 +37,7 @@ export const initializeManagedWorkflows = async ({
     ...ALERTZERO_RULE_WORKFLOW_IDS,
     ...ALERTZERO_ACTION_WORKFLOW_IDS,
     ...ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS,
+    ...ALERTZERO_HUNT_CHILD_WORKFLOW_IDS,
   ] as const;
 
   const globalWorkflowInstalls = await Promise.allSettled(
