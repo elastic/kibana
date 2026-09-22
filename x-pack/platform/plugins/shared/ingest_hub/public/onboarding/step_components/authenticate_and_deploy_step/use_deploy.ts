@@ -199,6 +199,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
           if (existingDeploymentId && cleanupOps.toDelete.length > 0) {
             const deletedIds = new Set(cleanupOps.toDelete);
             await updateDeployment(existingDeploymentId, {
+              services: selectedServiceIds,
               packagePolicyIds: Object.values(detectAndReviewStep.policyIdsByInstance).filter(
                 (id) => !deletedIds.has(id)
               ),
@@ -288,6 +289,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
       const deletedPolicyIds = new Set(cleanupOps.toDelete);
       if (onboardingDeploymentId) {
         await updateDeployment(onboardingDeploymentId, {
+          services: selectedServiceIds,
           serviceVars: toSOServiceVars(
             serviceSettings?.serviceVars ?? {},
             servicesMap ?? new Map()

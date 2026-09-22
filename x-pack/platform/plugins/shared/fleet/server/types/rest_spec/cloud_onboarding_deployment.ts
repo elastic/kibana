@@ -244,6 +244,12 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
       })
     ),
     deploymentName: schema.maybe(schema.string({ maxLength: 255 })),
+    services: schema.maybe(
+      schema.arrayOf(schema.string({ minLength: 1 }), {
+        maxSize: 1000,
+        meta: { description: 'Updated service list; replaces the stored services array.' },
+      })
+    ),
     serviceVars: schema.maybe(RequestServiceVarsSchema),
     attemptCount: schema.maybe(
       schema.number({ min: 1, meta: { description: 'Incremented by callers performing a retry.' } })

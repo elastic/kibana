@@ -42,6 +42,7 @@ export interface UpdateCloudOnboardingDeploymentRequest {
     statusMessage?: string;
     deploymentId?: string;
     deploymentName?: string;
+    services?: string[];
     serviceVars?: Record<string, Record<string, unknown>>;
     attemptCount?: number;
     agentPolicyId?: string;
