@@ -29,6 +29,7 @@ import type {
   ServiceAccountCredentialMetadata,
   ServiceAccountCredentialStore,
 } from './credentials';
+import type { EsServiceAccountPrincipal } from './es_service_account_id';
 import { parseEsServiceAccountId } from './es_service_account_id';
 import type { ListServiceAccountsParams, ServiceAccountsBackend } from './types';
 import type { SecurityLicense } from '../../common';
@@ -138,8 +139,9 @@ const toDirectoryCreator = (
 
 /**
  * Joins an account with the credential Kibana holds for it, if any. An account created straight
- * through the Elasticsearch API has no credential here, and so nothing Kibana can bind it with:
- * `hasCredential` is what lets the UI say so instead of failing at bind time.
+ * through the Elasticsearch API has no credential here, which is what `hasCredential` reports:
+ * whether this account is one Kibana created and still holds a token for, not whether anything
+ * can be bound to it today. See the field's own documentation for that distinction.
  */
 const toDirectoryEntry = (
   { id, name, roles, enabled }: ElasticsearchServiceAccount,
@@ -360,6 +362,11 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
    * principal. The cursor is the principal of the last account Elasticsearch reported for the
    * page, which `search_after` resumes from — the last one reported, not the last one returned,
    * so that an account this page skipped is stepped over rather than served again.
+   *
+   * Unlike {@link get}, the credentials joined here are taken at face value. Confirming each one
+   * the way `confirmCredential` does would cost an Elasticsearch round trip per account, up to a
+   * hundred of them on one page, so a listed account that was deleted and recreated outside
+   * Kibana keeps its stale `hasCredential` and attribution until it is opened.
    */
   async list(
     request: KibanaRequest,
@@ -538,9 +545,59 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       throw Boom.notFound(`Service account [${id}] was not found`);
     }
 
-    const credentials = await this.credentialStore.getMetadata([id]);
-    const displayNames = await this.resolveCreatorNames(credentials.values());
-    return toDirectoryEntry(account, credentials.get(id), displayNames);
+    const credential = await this.confirmCredential(
+      esClient,
+      principal,
+      (await this.credentialStore.getMetadata([id])).get(id)
+    );
+    const displayNames = await this.resolveCreatorNames(credential ? [credential] : []);
+    return toDirectoryEntry(account, credential, displayNames);
+  }
+
+  /**
+   * Confirms that a stored credential still describes the account in front of us, resolving
+   * `undefined` when it does not.
+   *
+   * A credential document is keyed by principal alone, so it outlives the account it was written
+   * for: delete `namespace/name` through Elasticsearch and recreate it, and Kibana's document is
+   * still there, holding a token that cannot authenticate the new account and naming whoever
+   * created the old one. Reporting it would claim both a credential and an attribution that are
+   * no longer true, so the account is asked whether it still holds the token Kibana mints.
+   *
+   * Two limits worth knowing. An operator who recreates the account and then mints their own
+   * token under Kibana's reserved name passes this check, because the name is all Elasticsearch
+   * exposes. And a check that cannot be completed falls through to the stored document rather
+   * than hiding a credential that is probably fine: `read_security` is enough to read an
+   * account's tokens, so this is a transient failure rather than an authorization one, and a
+   * reader should not be told an account is unmanaged because one call did not land.
+   */
+  private async confirmCredential(
+    esClient: ElasticsearchClient,
+    { namespace, name }: EsServiceAccountPrincipal,
+    credential: ServiceAccountCredentialMetadata | undefined
+  ): Promise<ServiceAccountCredentialMetadata | undefined> {
+    // Ordered so that an account Kibana never created costs no extra round trip.
+    if (!credential) {
+      return undefined;
+    }
+
+    try {
+      if (await this.hasManagedToken(esClient, namespace, name)) {
+        return credential;
+      }
+    } catch (e) {
+      this.logger.debug(
+        `Could not confirm the credential of service account [${namespace}/${name}], so the ` +
+          `stored one was reported as it is: ${getDetailedErrorMessage(e)}`
+      );
+      return credential;
+    }
+
+    this.logger.debug(
+      `Service account [${namespace}/${name}] no longer holds a [${ES_SERVICE_ACCOUNT_TOKEN_NAME}] ` +
+        `token, so the credential Kibana stored for it was not reported.`
+    );
+    return undefined;
   }
 
   // See https://github.com/elastic/kibana/issues/284466.

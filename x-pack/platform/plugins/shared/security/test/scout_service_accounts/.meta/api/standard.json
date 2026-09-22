@@ -1,5 +1,5 @@
 {
-  "sha1": "8a12622f3a6c2bccf772a6ad9d408fe70e79fcad",
+  "sha1": "6c596bc642b459a0b7451b83e71a2266405d585b",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -117,8 +117,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 106,
-        "column": 64
+        "line": 138,
+        "column": 1
       }
     },
     {
@@ -130,7 +130,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 123,
+        "line": 158,
         "column": 24
       }
     },
@@ -143,8 +143,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 145,
-        "column": 7
+        "line": 187,
+        "column": 24
       }
     },
     {
@@ -156,8 +156,21 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 151,
-        "column": 30
+        "line": 195,
+        "column": 92
+      }
+    },
+    {
+      "id": "99ae9153aa6c845-069f32a1b9ed3cc",
+      "title": "List and get Elasticsearch service accounts stops claiming a credential once the account is recreated outside Kibana",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
+        "line": 209,
+        "column": 24
       }
     },
     {
@@ -169,8 +182,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 168,
-        "column": 7
+        "line": 269,
+        "column": 15
       }
     },
     {
@@ -182,7 +195,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 180,
+        "line": 283,
         "column": 22
       }
     },
@@ -195,8 +208,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 197,
-        "column": 24
+        "line": 294,
+        "column": 23
       }
     },
     {
@@ -208,8 +221,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 212,
-        "column": 23
+        "line": 310,
+        "column": 11
       }
     },
     {
@@ -221,8 +234,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 252,
-        "column": 75
+        "line": 354,
+        "column": 9
       }
     }
   ]

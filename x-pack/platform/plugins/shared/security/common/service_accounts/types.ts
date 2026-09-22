@@ -33,12 +33,22 @@ export interface ServiceAccountDirectoryEntry {
   /** Whether the account can authenticate. Always `true` on UIAM, which has no disabled state. */
   enabled: boolean;
   /**
-   * Whether Kibana holds a credential for the account, and so can bind it to workloads. Always
-   * `true` on UIAM, where Kibana exchanges for a token instead of holding one. `false` on
-   * Elasticsearch for an account that was created outside Kibana.
+   * Whether the account is one Kibana created and still holds a credential for. Always `true` on
+   * UIAM, where Kibana exchanges for a token instead of holding one. `false` on Elasticsearch for
+   * an account that was created outside Kibana.
+   *
+   * Not a promise that the account can be bound to a workload: binding is a property of the
+   * deployment, and the Elasticsearch backend refuses every bind until the token exchange lands
+   * (https://github.com/elastic/kibana/issues/284466). On Elasticsearch it can also go stale for
+   * a listed account, because Kibana's record outlives an account deleted and recreated outside
+   * Kibana; reading one account confirms the record, listing them does not.
    */
   hasCredential: boolean;
-  /** The principal that created the account, when the backend records one. */
+  /**
+   * The principal that created the account, when the backend records one. Carries the same
+   * staleness caveat as {@link ServiceAccountDirectoryEntry.hasCredential}: on Elasticsearch it
+   * describes whoever created the credential Kibana stored, which a recreated account outdates.
+   */
   createdBy?: ServiceAccountDirectoryCreator;
   /** ISO-8601 creation time, when the backend records one. */
   createdAt?: string;

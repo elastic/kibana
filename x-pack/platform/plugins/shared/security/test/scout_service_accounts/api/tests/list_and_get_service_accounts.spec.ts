@@ -5,10 +5,14 @@
  * 2.0.
  */
 
+import type { ApiClientFixture } from '@kbn/scout';
 import { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
-import { ES_SERVICE_ACCOUNT_NAMESPACE } from '../../../../common/service_accounts';
+import {
+  ES_SERVICE_ACCOUNT_NAMESPACE,
+  ES_SERVICE_ACCOUNT_TOKEN_NAME,
+} from '../../../../common/service_accounts';
 import {
   deleteServiceAccounts,
   type ServiceAccountPrincipal,
@@ -29,8 +33,12 @@ const SERVICE_ACCOUNT_ENDPOINT = 'internal/security/service_account';
 const REQUEST_HEADERS = { 'kbn-xsrf': 'true', 'x-elastic-internal-origin': 'kibana' };
 /** A namespace Kibana never writes to, for accounts created straight through Elasticsearch. */
 const FOREIGN_NAMESPACE = 'scout';
-/** Enough pages to walk every account a shared cluster could plausibly hold, and no more. */
-const MAX_PAGES = 200;
+/**
+ * Upper bound on the directory walk below. The route caps a page at 100, so this covers a cluster
+ * holding 5,000 user-managed accounts. It exists to stop a runaway loop, not to bound the walk:
+ * reaching it is a failure, not a quiet end.
+ */
+const MAX_PAGES = 50;
 
 /** Unique per run, so a failed cleanup cannot make the next run collide. */
 const uniqueName = (prefix: string) => `${prefix}-${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
@@ -39,6 +47,7 @@ const getPath = (id: string) => `${SERVICE_ACCOUNT_ENDPOINT}/${encodeURIComponen
 
 interface DirectoryCreator {
   type: string;
+  username?: string;
   displayName?: string;
 }
 
@@ -84,6 +93,10 @@ apiTest.describe('List and get Elasticsearch service accounts', { tag: LOCAL_ONL
       hasCredential: true,
     });
     expect(createdBy).toMatchObject({ type: 'user' });
+    // The username identifies the creator durably; the display name is what to show. Both are
+    // asserted, so dropping either one fails here.
+    expect(typeof createdBy?.username).toBe('string');
+    expect(createdBy?.username).not.toBe('');
     // The SAML admin has a user profile, so Kibana resolves the creator's name server-side
     // rather than handing the UI an id to look up.
     expect(typeof createdBy?.displayName).toBe('string');
@@ -117,22 +130,54 @@ apiTest.describe('List and get Elasticsearch service accounts', { tag: LOCAL_ONL
     await deleteServiceAccounts(esClient, config, created);
   });
 
-  apiTest(
-    'lists every user-managed account, whichever namespace it lives in',
-    async ({ apiClient }) => {
-      const response = await apiClient.get(SERVICE_ACCOUNT_ENDPOINT, {
-        headers: adminHeaders,
+  /**
+   * Walks the directory to its end, following the cursor.
+   *
+   * The accounts are cluster-wide and sorted by principal, and this suite's own fixtures sort
+   * late: `scout/...` follows every `kibana/...` account, so anything already on the cluster
+   * pushes them further back. A single page therefore proves nothing about whether they are
+   * listed, and a walk that silently gave up at a page cap would report their absence as a
+   * missing account rather than as an incomplete read. Hence the throw.
+   */
+  const listAllServiceAccounts = async (
+    apiClient: ApiClientFixture,
+    headers: Record<string, string>
+  ): Promise<DirectoryEntry[]> => {
+    const accounts: DirectoryEntry[] = [];
+    let after: string | undefined;
+
+    for (let page = 0; page < MAX_PAGES; page++) {
+      const query = after === undefined ? '' : `?after=${encodeURIComponent(after)}`;
+      const response = await apiClient.get(`${SERVICE_ACCOUNT_ENDPOINT}${query}`, {
+        headers,
         responseType: 'json',
       });
 
       expect(response.statusCode).toBe(200);
-      const { serviceAccounts: accounts } = response.body as ListResponse;
+      const { serviceAccounts, nextPage } = response.body as ListResponse;
+      accounts.push(...serviceAccounts);
 
-      const managed = accounts.find(({ id }) => id === idOf(kibanaManaged));
-      expectKibanaManagedEntry(managed);
+      if (nextPage === undefined) {
+        return accounts;
+      }
+      after = nextPage;
+    }
 
-      // Kibana can describe an account it did not create, but cannot bind it: `hasCredential` is
-      // how the UI tells the two apart.
+    throw new Error(
+      `The service account directory did not end within ${MAX_PAGES} pages. Either the cluster ` +
+        `holds more accounts than this suite anticipates, or paging is not terminating.`
+    );
+  };
+
+  apiTest(
+    'lists every user-managed account, whichever namespace it lives in',
+    async ({ apiClient }) => {
+      const accounts = await listAllServiceAccounts(apiClient, adminHeaders);
+
+      expectKibanaManagedEntry(accounts.find(({ id }) => id === idOf(kibanaManaged)));
+
+      // Kibana can describe an account it did not create, but holds no credential of its own for
+      // it: `hasCredential` is how the UI tells the two apart.
       const notManaged = accounts.find(({ id }) => id === idOf(foreign));
       expect(notManaged).toStrictEqual({
         id: idOf(foreign),
@@ -148,32 +193,31 @@ apiTest.describe('List and get Elasticsearch service accounts', { tag: LOCAL_ONL
   );
 
   apiTest('pages through the directory with `limit` and `after`', async ({ apiClient }) => {
-    const seen: string[] = [];
-    let after: string | undefined;
+    const accounts = await listAllServiceAccounts(apiClient, adminHeaders);
+    const ids = accounts.map(({ id }) => id);
 
-    for (let page = 0; page < MAX_PAGES; page++) {
-      const query = after ? `?limit=1&after=${encodeURIComponent(after)}` : '?limit=1';
-      const response = await apiClient.get(`${SERVICE_ACCOUNT_ENDPOINT}${query}`, {
-        headers: adminHeaders,
-        responseType: 'json',
-      });
+    // What paging has to guarantee: every account exactly once, in principal order, with no
+    // entry dropped or repeated across a page boundary.
+    expect([...ids].sort()).toStrictEqual(ids);
+    expect(ids.filter((id) => id === idOf(kibanaManaged))).toHaveLength(1);
+    expect(ids.filter((id) => id === idOf(foreign))).toHaveLength(1);
 
-      expect(response.statusCode).toBe(200);
-      const body = response.body as ListResponse;
-      expect(body.serviceAccounts.length).toBeLessThanOrEqual(1);
-      seen.push(...body.serviceAccounts.map(({ id }) => id));
+    // Resuming is then checked against a known neighbour rather than by walking the whole
+    // directory one entry at a time, so the assertion does not depend on how many accounts the
+    // cluster happens to hold.
+    const index = ids.indexOf(idOf(kibanaManaged));
+    const query = index === 0 ? '?limit=1' : `?limit=1&after=${encodeURIComponent(ids[index - 1])}`;
+    const response = await apiClient.get(`${SERVICE_ACCOUNT_ENDPOINT}${query}`, {
+      headers: adminHeaders,
+      responseType: 'json',
+    });
 
-      if (body.nextPage === undefined) {
-        break;
-      }
-      // The cursor is the last principal on the page, and the pages are sorted by principal.
-      expect(body.nextPage).toBe(body.serviceAccounts[0].id);
-      after = body.nextPage;
-    }
-
-    expect(seen.filter((id) => id === idOf(kibanaManaged))).toHaveLength(1);
-    expect(seen.filter((id) => id === idOf(foreign))).toHaveLength(1);
-    expect([...seen].sort()).toStrictEqual(seen);
+    expect(response.statusCode).toBe(200);
+    const { serviceAccounts, nextPage } = response.body as ListResponse;
+    expect(serviceAccounts.map(({ id }) => id)).toStrictEqual([idOf(kibanaManaged)]);
+    // `scout/...` sorts after every `kibana/...` account, so the foreign fixture always follows
+    // this one and there is always another page.
+    expect(nextPage).toBe(idOf(kibanaManaged));
   });
 
   apiTest('gets an account by its URL-encoded id', async ({ apiClient }) => {
@@ -201,6 +245,67 @@ apiTest.describe('List and get Elasticsearch service accounts', { tag: LOCAL_ONL
       hasCredential: false,
     });
   });
+
+  apiTest(
+    'stops claiming a credential once the account is recreated outside Kibana',
+    async ({ apiClient, esClient }) => {
+      const recreated = {
+        namespace: ES_SERVICE_ACCOUNT_NAMESPACE,
+        name: uniqueName('recreated'),
+      };
+      created.push(recreated);
+
+      const createResponse = await apiClient.post(SERVICE_ACCOUNT_ENDPOINT, {
+        headers: adminHeaders,
+        responseType: 'json',
+        body: { name: recreated.name, roles: ['viewer'] },
+      });
+      expect(createResponse.statusCode).toBe(200);
+
+      const before = await apiClient.get(getPath(idOf(recreated)), {
+        headers: adminHeaders,
+        responseType: 'json',
+      });
+      expect((before.body as DirectoryEntry).hasCredential).toBe(true);
+
+      // Out of band, and supported. The token goes first: Elasticsearch refuses to recreate an
+      // account that still has one, even after a forced delete of the account itself. Kibana's
+      // credential document is keyed by principal alone, so it survives all of this.
+      await esClient.transport.request({
+        method: 'DELETE',
+        path:
+          `/_security/service/${recreated.namespace}/${recreated.name}` +
+          `/credential/token/${ES_SERVICE_ACCOUNT_TOKEN_NAME}`,
+      });
+      await esClient.transport.request({
+        method: 'DELETE',
+        path: `/_security/service/${recreated.namespace}/${recreated.name}`,
+        querystring: { force: 'true' },
+      });
+      await esClient.transport.request({
+        method: 'PUT',
+        path: `/_security/service/${recreated.namespace}/${recreated.name}`,
+        body: { roles: ['monitoring_user'] },
+        querystring: { refresh: 'wait_for' },
+      });
+
+      const after = await apiClient.get(getPath(idOf(recreated)), {
+        headers: adminHeaders,
+        responseType: 'json',
+      });
+
+      expect(after.statusCode).toBe(200);
+      // The stored token cannot authenticate this account, and whoever created the one it
+      // replaced did not create it, so neither is reported.
+      expect(after.body).toStrictEqual({
+        id: idOf(recreated),
+        name: recreated.name,
+        roles: ['monitoring_user'],
+        enabled: true,
+        hasCredential: false,
+      });
+    }
+  );
 
   apiTest('answers 404 for an unknown account and for a built-in one', async ({ apiClient }) => {
     for (const id of [
