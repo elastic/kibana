@@ -6,14 +6,23 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiBasicTable, EuiPanel, EuiText, type EuiBasicTableColumn } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  type EuiBasicTableColumn,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
-import type { ImpactedEntity } from './types';
+import type { ImpactAttachmentData, ImpactedEntity } from './types';
 
 export const IMPACT_ATTACHMENT_TEST_ID = 'securitySolutionAgentBuilderImpactAttachment';
+export const IMPACT_ATTACHMENT_TRUNCATED_TEST_ID =
+  'securitySolutionAgentBuilderImpactAttachmentTruncated';
 
 /** Flat table row — avoids nested field access in EuiBasicTable columns. */
 interface EntityRow {
@@ -53,6 +62,35 @@ const parseEntities = (data: unknown): EntityRow[] => {
   }));
 };
 
+const parseTruncation = (
+  data: unknown
+): { truncated: boolean; totalAlertCount: number | undefined } => {
+  if (typeof data !== 'object' || data === null) {
+    return { truncated: false, totalAlertCount: undefined };
+  }
+  const payload = data as ImpactAttachmentData;
+  return {
+    truncated: payload.truncated === true,
+    totalAlertCount:
+      typeof payload.total_alert_count === 'number' ? payload.total_alert_count : undefined,
+  };
+};
+
+const formatEntityType = (entityType: string): string => {
+  switch (entityType) {
+    case 'host':
+      return i18n.translate('xpack.securitySolution.agentBuilder.impact.entityTypeHost', {
+        defaultMessage: 'Host',
+      });
+    case 'user':
+      return i18n.translate('xpack.securitySolution.agentBuilder.impact.entityTypeUser', {
+        defaultMessage: 'User',
+      });
+    default:
+      return entityType;
+  }
+};
+
 const COLUMNS: Array<EuiBasicTableColumn<EntityRow>> = [
   {
     field: 'entity_type',
@@ -60,6 +98,7 @@ const COLUMNS: Array<EuiBasicTableColumn<EntityRow>> = [
       defaultMessage: 'Type',
     }),
     width: '5em',
+    render: (entityType: string) => formatEntityType(entityType),
   },
   {
     field: 'name',
@@ -102,6 +141,10 @@ export const ImpactInlineContent: React.FC<AttachmentRenderProps<Attachment<stri
   attachment,
 }) => {
   const rows = useMemo(() => parseEntities(attachment.data), [attachment.data]);
+  const { truncated, totalAlertCount } = useMemo(
+    () => parseTruncation(attachment.data),
+    [attachment.data]
+  );
 
   if (rows.length === 0) {
     return (
@@ -128,6 +171,34 @@ export const ImpactInlineContent: React.FC<AttachmentRenderProps<Attachment<stri
       paddingSize="s"
       data-test-subj={IMPACT_ATTACHMENT_TEST_ID}
     >
+      {truncated ? (
+        <>
+          <KbnWarningCallout
+            announceOnMount
+            size="s"
+            data-test-subj={IMPACT_ATTACHMENT_TRUNCATED_TEST_ID}
+            title={i18n.translate('xpack.securitySolution.agentBuilder.impact.truncatedTitle', {
+              defaultMessage: 'Impact list truncated',
+            })}
+            text={
+              totalAlertCount !== undefined ? (
+                <FormattedMessage
+                  id="xpack.securitySolution.agentBuilder.impact.truncatedWithTotalBody"
+                  defaultMessage="Showing {count} {count, plural, one {entity} other {entities}}. The full batch includes {totalAlertCount} {totalAlertCount, plural, one {alert} other {alerts}}."
+                  values={{ count: rows.length, totalAlertCount }}
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.securitySolution.agentBuilder.impact.truncatedBody"
+                  defaultMessage="Showing {count} {count, plural, one {entity} other {entities}}; additional impacted entities were omitted."
+                  values={{ count: rows.length }}
+                />
+              )
+            }
+          />
+          <EuiSpacer size="s" />
+        </>
+      ) : null}
       <EuiBasicTable
         tableCaption={i18n.translate('xpack.securitySolution.agentBuilder.impact.tableCaption', {
           defaultMessage: 'Alert impact by entity',

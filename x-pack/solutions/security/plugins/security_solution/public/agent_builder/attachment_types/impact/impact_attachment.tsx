@@ -38,9 +38,29 @@ export const createImpactAttachmentDefinition = (): AttachmentUIDefinition<Impac
     const hosts = entities.filter((e) => e.entity_type === 'host').length;
     const users = entities.filter((e) => e.entity_type === 'user').length;
     const parts: string[] = [];
-    if (hosts > 0) parts.push(`${hosts} host${hosts > 1 ? 's' : ''}`);
-    if (users > 0) parts.push(`${users} user${users > 1 ? 's' : ''}`);
-    return `Impact — ${parts.join(', ')}`;
+    if (hosts > 0) {
+      parts.push(
+        i18n.translate('xpack.securitySolution.agentBuilder.attachments.impact.hostCountLabel', {
+          defaultMessage: '{count} {count, plural, one {host} other {hosts}}',
+          values: { count: hosts },
+        })
+      );
+    }
+    if (users > 0) {
+      parts.push(
+        i18n.translate('xpack.securitySolution.agentBuilder.attachments.impact.userCountLabel', {
+          defaultMessage: '{count} {count, plural, one {user} other {users}}',
+          values: { count: users },
+        })
+      );
+    }
+    if (parts.length === 0) {
+      return DEFAULT_LABEL;
+    }
+    return i18n.translate('xpack.securitySolution.agentBuilder.attachments.impact.summaryLabel', {
+      defaultMessage: 'Impact — {parts}',
+      values: { parts: parts.join(', ') },
+    });
   },
   getIcon: () => 'alert',
   renderInlineContent: (props: AttachmentRenderProps<ImpactAttachment>) => (

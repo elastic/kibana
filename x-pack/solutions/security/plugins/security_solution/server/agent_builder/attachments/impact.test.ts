@@ -66,6 +66,31 @@ describe('createImpactAttachmentType', () => {
         ],
       });
       expect(result.valid).toBe(true);
+      if (result.valid) {
+        expect(result.data.entities[0].alert_count).toBe(3);
+        expect(result.data.entities[0].verdicts.true_positive).toBe(2);
+      }
+    });
+
+    it('rejects null / boolean / blank count values that coerce.number would accept', async () => {
+      for (const badCount of [null, true, false, '']) {
+        const result = await attachmentType.validate({
+          entities: [{ ...validEntity, alert_count: badCount }],
+        });
+        expect(result.valid).toBe(false);
+      }
+
+      for (const badVerdict of [null, true, false, '']) {
+        const result = await attachmentType.validate({
+          entities: [
+            {
+              ...validEntity,
+              verdicts: { true_positive: badVerdict, false_positive: 0, inconclusive: 0 },
+            },
+          ],
+        });
+        expect(result.valid).toBe(false);
+      }
     });
 
     it('accepts a truncated payload with the flag set (native boolean)', async () => {
@@ -115,6 +140,27 @@ describe('createImpactAttachmentType', () => {
       });
       expect(result.valid).toBe(false);
     });
+
+    it('rejects when verdict counts do not sum to alert_count', async () => {
+      const result = await attachmentType.validate({
+        entities: [
+          {
+            ...validEntity,
+            alert_count: 1,
+            verdicts: { true_positive: 100, false_positive: 0, inconclusive: 0 },
+          },
+        ],
+      });
+      expect(result.valid).toBe(false);
+    });
+
+    it('rejects when total_alert_count is below an entity alert_count', async () => {
+      const result = await attachmentType.validate({
+        entities: [validEntity],
+        total_alert_count: 1,
+      });
+      expect(result.valid).toBe(false);
+    });
   });
 
   describe('format', () => {
@@ -142,6 +188,23 @@ describe('createImpactAttachmentType', () => {
       const representation = await formatted.getRepresentation?.();
 
       if (representation?.type === 'text') {
+        expect(representation.value).toContain('truncated');
+      }
+    });
+
+    it('includes total_alert_count in the formatted text when supplied', async () => {
+      const formatted = await attachmentType.format(
+        makeAttachment({
+          entities: [validEntity],
+          truncated: true,
+          total_alert_count: 120,
+        }),
+        formatContext
+      );
+      const representation = await formatted.getRepresentation?.();
+
+      if (representation?.type === 'text') {
+        expect(representation.value).toContain('Total alerts: 120');
         expect(representation.value).toContain('truncated');
       }
     });
