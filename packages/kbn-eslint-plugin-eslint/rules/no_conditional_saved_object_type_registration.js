@@ -99,10 +99,13 @@ module.exports = {
     },
     schema: [],
   },
-  create(context) {
-    const sourceCode = context.getSourceCode();
+  createOnce(context) {
+    let sourceCode;
 
     return {
+      before() {
+        sourceCode = context.sourceCode;
+      },
       CallExpression(_) {
         const node = /** @type {CallExpression} */ (_);
         if (!isSavedObjectsRegisterTypeCall(node)) {

@@ -8,7 +8,7 @@
  */
 
 const { RuleTester } = require('eslint');
-const rule = require('./no_async_foreach');
+const rule = require('..').rules.no_async_foreach;
 const dedent = require('dedent');
 
 const ruleTester = new RuleTester({

@@ -19,7 +19,7 @@ module.exports = {
     fixable: 'code',
     schema: [],
   },
-  create: (context) => ({
+  createOnce: (context) => ({
     ImportDeclaration(_) {
       const node = /** @type {ImportDeclaration} */ (_);
       const req = node.source.value;

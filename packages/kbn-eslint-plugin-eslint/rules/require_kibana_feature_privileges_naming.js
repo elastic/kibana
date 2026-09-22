@@ -142,7 +142,7 @@ module.exports = {
     schema: [],
   },
 
-  create(context) {
+  createOnce(context) {
     return {
       CallExpression(node) {
         const isRegisterKibanaFeatureCall =
@@ -156,7 +156,7 @@ module.exports = {
 
         const scopedVariables = new Map();
 
-        const sourceCode = context.getSourceCode();
+        const sourceCode = context.sourceCode;
 
         const parent = sourceCode
           .getAncestors(node)

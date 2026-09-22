@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = {
+const { eslintCompatPlugin } = require('@oxlint/plugins');
+
+module.exports = eslintCompatPlugin({
+  meta: { name: '@kbn/eslint' },
   rules: {
     'require-license-header': require('./rules/require_license_header'),
     'disallow-license-headers': require('./rules/disallow_license_headers'),
@@ -45,4 +48,4 @@ module.exports = {
     no_npx_playwright: require('./rules/no_npx_playwright'),
     no_viz_naming: require('./rules/no_viz_naming'),
   },
-};
+});

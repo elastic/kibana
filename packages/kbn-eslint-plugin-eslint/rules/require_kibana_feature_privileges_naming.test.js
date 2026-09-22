@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 const { RuleTester } = require('eslint');
-const rule = require('./require_kibana_feature_privileges_naming');
+const rule = require('..').rules.require_kibana_feature_privileges_naming;
 
 const ruleTester = new RuleTester({
   parser: require.resolve('@typescript-eslint/parser'),
