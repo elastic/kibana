@@ -472,7 +472,7 @@ export default ({ getService }: FtrProviderContext): void => {
             owner: 'securitySolutionFixture',
             settings: {
               syncAlerts: false,
-              extractObservables: false,
+              extractObservables: true,
             },
             severity: 'high',
             status: 'open',
