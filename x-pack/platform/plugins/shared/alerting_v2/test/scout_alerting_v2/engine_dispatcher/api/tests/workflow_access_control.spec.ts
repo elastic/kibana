@@ -48,7 +48,12 @@ apiTest.describe('Action policy workflow access', { tag: tags.stateful.classic }
       });
     }
     for (const id of workflowIds) {
-      await apiClient.delete(path(`/api/workflows/workflow/${id}`), { headers: credentials[0] });
+      expect(
+        await apiClient.delete(
+          path(`/api/workflows/workflow/${id}?force=true&acknowledgeAclLoss=true`),
+          { headers: credentials[0] }
+        )
+      ).toHaveStatusCode(200);
     }
     await kbnClient.request({ method: 'DELETE', path: `/api/spaces/space/${spaceId}` });
     for (const username of usernames) {

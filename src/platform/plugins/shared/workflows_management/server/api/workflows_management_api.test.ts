@@ -316,7 +316,7 @@ describe('WorkflowsManagementApi', () => {
     const workflow = await mockWorkflowsService.getWorkflow('workflow-123', 'default');
     if (!workflow) throw new Error('Missing workflow fixture');
     mockWorkflowsService.getWorkflow.mockClear();
-    const children = ['workflow-123', 'private-hidden', 'workflow-123'].map(
+    const children = ['workflow-123', 'private-hidden', 'workflow-123', 'hard-deleted'].map(
       (workflowId, index) => ({
         workflowId,
         executionId: `child-${index}`,
@@ -327,18 +327,32 @@ describe('WorkflowsManagementApi', () => {
       })
     );
     mockWorkflowsService.getChildWorkflowExecutions.mockResolvedValue(children);
-    mockWorkflowsService.getWorkflowsByIds.mockResolvedValue([{ ...workflow, id: 'workflow-123' }]);
+    mockWorkflowsService.getWorkflowsByIds.mockResolvedValue([
+      workflow,
+      {
+        ...workflow,
+        id: 'private-hidden',
+        access_control: { access_mode: 'private', entries: [] },
+      },
+    ]);
+    const access = await mockWorkflowsService.getAccessControl();
+    jest.mocked(access.permissions).mockImplementation(async ({ access_control }) => ({
+      read: access_control?.access_mode !== 'private',
+      execute: false,
+      edit: false,
+      manage: false,
+    }));
 
     const result = await api.getChildWorkflowExecutions('parent', 'default', mockRequest);
 
     expect(mockWorkflowsService.getWorkflowsByIds).toHaveBeenCalledTimes(1);
     expect(mockWorkflowsService.getWorkflowsByIds).toHaveBeenCalledWith(
-      ['workflow-123', 'private-hidden'],
+      ['workflow-123', 'private-hidden', 'hard-deleted'],
       'default',
       { includeDeleted: true }
     );
     expect(mockWorkflowsService.getWorkflow).toHaveBeenCalledTimes(1);
-    expect(result.map(({ executionId }) => executionId)).toEqual(['child-0', 'child-2']);
+    expect(result.map(({ executionId }) => executionId)).toEqual(['child-0', 'child-2', 'child-3']);
   });
 
   it.each([

@@ -278,6 +278,26 @@ describe('WorkflowCrudService', () => {
   });
 
   describe('getWorkflowsByIds', () => {
+    it.each([
+      { timed_out: true, failed: 0 },
+      { timed_out: false, failed: 1 },
+    ])('rejects incomplete ACL lookups: %j', async ({ timed_out, failed }) => {
+      const { deps, client } = makeDeps();
+      client.search.mockResolvedValue({
+        timed_out,
+        _shards: { total: 1, successful: 1 - failed, failed },
+        hits: { hits: [] },
+      });
+      const service = new WorkflowCrudService(deps);
+
+      await expect(service.getWorkflowsByIds(['wf-1'], 'default')).rejects.toThrow(
+        'Could not determine workflow access from an incomplete search.'
+      );
+      expect(client.search).toHaveBeenCalledWith(
+        expect.objectContaining({ allow_partial_search_results: false })
+      );
+    });
+
     it('returns empty array for empty ids without querying storage', async () => {
       const { deps, client } = makeDeps();
 
@@ -291,6 +311,7 @@ describe('WorkflowCrudService', () => {
     it('maps hits to WorkflowDetailDto array', async () => {
       const { deps, client } = makeDeps();
       client.search.mockResolvedValue({
+        _shards: { total: 1, successful: 1, failed: 0 },
         hits: {
           hits: [
             { _id: 'wf-1', _source: makeSource({ name: 'First' }) },
@@ -311,7 +332,10 @@ describe('WorkflowCrudService', () => {
 
     it('passes ids as terms query and sets size to ids length', async () => {
       const { deps, client } = makeDeps();
-      client.search.mockResolvedValue({ hits: { hits: [] } });
+      client.search.mockResolvedValue({
+        _shards: { total: 1, successful: 1, failed: 0 },
+        hits: { hits: [] },
+      });
 
       const service = new WorkflowCrudService(deps);
       await service.getWorkflowsByIds(['wf-1', 'wf-2', 'wf-3'], 'default');

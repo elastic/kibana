@@ -14,6 +14,7 @@ import { getToolResultId } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { ALERTING_TOOL_IDS } from '@kbn/alerting-v2-constants';
 import type { ActionPolicyAttachmentData } from '@kbn/alerting-v2-schemas';
+import type { WorkflowsManagementClient } from '@kbn/workflows-management-plugin/server';
 import { ACTION_POLICY_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
 import {
   actionPolicyOperationSchema,
@@ -36,9 +37,7 @@ const manageActionPolicySchema = z.object({
 
 export interface ManageActionPolicyToolDeps {
   logger: LoggerServiceContract;
-  getWorkflowClient: (request: KibanaRequest) => {
-    getWorkflow: (id: string, spaceId: string) => Promise<{ id: string; name?: string } | null>;
-  };
+  getWorkflowClient: (request: KibanaRequest) => Pick<WorkflowsManagementClient, 'getWorkflow'>;
   getAvailableConnectors: (
     spaceId: string,
     request: KibanaRequest

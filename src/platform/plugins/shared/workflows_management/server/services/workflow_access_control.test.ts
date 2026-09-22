@@ -90,6 +90,28 @@ describe('WorkflowAccessControlService', () => {
     expect(result.permissions.manage).toBe(true);
   });
 
+  it.each(['alice', 'bob'])(
+    'only lets the creator claim a legacy workflow: %s',
+    async (username) => {
+      delete document.owner_id;
+      delete document.access_control;
+      jest
+        .spyOn(core.security.authc, 'getCurrentUser')
+        .mockReturnValue(securityMock.createMockAuthenticatedUser({ username }));
+      const update = service.update('id', 'default', { access_mode: 'private' }, request);
+
+      if (username === 'alice') {
+        await expect(update).resolves.toMatchObject({
+          owner_id: 'owner',
+          access_control: { access_mode: 'private', entries: [] },
+        });
+      } else {
+        await expect(update).rejects.toBeInstanceOf(WorkflowAccessDeniedError);
+        expect(crud.writeWorkflowDocumentWithOcc).not.toHaveBeenCalled();
+      }
+    }
+  );
+
   it('lets the owner share without changing the workflow definition', async () => {
     const result = await service.update(
       'id',

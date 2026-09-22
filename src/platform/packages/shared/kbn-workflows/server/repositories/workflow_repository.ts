@@ -70,6 +70,9 @@ export class WorkflowRepository {
         track_total_hits: false,
       });
 
+      if (response.timed_out || response._shards.failed > 0) {
+        throw new Error('Could not load workflow access from incomplete search results.');
+      }
       if (response.hits.hits.length === 0) {
         return null;
       }
@@ -199,6 +202,9 @@ export class WorkflowRepository {
         },
       });
 
+      if (response.timed_out || response._shards.failed > 0) {
+        throw new Error('Could not load workflow access from incomplete search results.');
+      }
       const requestedSpacesByWorkflowId = refs.reduce<Map<string, Set<string>>>((acc, ref) => {
         const existing = acc.get(ref.workflowId) ?? new Set<string>();
         existing.add(ref.spaceId);

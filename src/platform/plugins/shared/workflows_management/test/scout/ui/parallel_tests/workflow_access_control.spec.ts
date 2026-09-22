@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { randomUUID } from 'crypto';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/workflows';
@@ -29,7 +28,7 @@ test.describe('Workflow access dialog', { tag: tags.stateful.classic }, () => {
   test.afterEach(async ({ apiClient, scoutSpace }) => {
     if (workflowId) {
       const response = await apiClient.delete(
-        `s/${scoutSpace.id}/api/workflows/workflow/${workflowId}`,
+        `s/${scoutSpace.id}/api/workflows/workflow/${workflowId}?force=true&acknowledgeAclLoss=true`,
         {
           headers: {
             ...ownerHeaders,
@@ -50,8 +49,6 @@ test.describe('Workflow access dialog', { tag: tags.stateful.classic }, () => {
   test('saves private and public access through the shared form', async ({
     page,
     pageObjects,
-    esClient,
-    scoutSpace,
     browserAuth,
     samlAuth,
   }, testInfo) => {
@@ -66,44 +63,6 @@ test.describe('Workflow access dialog', { tag: tags.stateful.classic }, () => {
     await editor.saveWorkflow();
     workflowId = new URL(page.url()).pathname.split('/').at(-1);
     if (!workflowId || workflowId === 'create') throw new Error('Workflow was not created');
-    // Simulate a workflow created before owner profiles and access controls were stored.
-    const fixtureUser = `workflow_legacy_${randomUUID()}`;
-    await esClient.security.putRole({
-      name: fixtureUser,
-      indices: [
-        {
-          names: ['.workflows-workflows*'],
-          privileges: ['read', 'write', 'maintenance'],
-          allow_restricted_indices: true,
-        },
-      ],
-    });
-    try {
-      await esClient.security.putUser({
-        username: fixtureUser,
-        password: randomUUID(),
-        roles: [fixtureUser],
-      });
-      const legacyWorkflow = await esClient.updateByQuery(
-        {
-          index: '.workflows-workflows',
-          query: {
-            bool: {
-              filter: [{ ids: { values: [workflowId] } }, { term: { spaceId: scoutSpace.id } }],
-            },
-          },
-          script: {
-            source: 'ctx._source.remove("owner_id"); ctx._source.remove("access_control");',
-          },
-          refresh: true,
-        },
-        { headers: { 'es-security-runas-user': fixtureUser } }
-      );
-      expect(legacyWorkflow.updated).toBe(1);
-    } finally {
-      await esClient.security.deleteUser({ username: fixtureUser });
-      await esClient.security.deleteRole({ name: fixtureUser });
-    }
     await editor.gotoWorkflow(workflowId);
     await editor.openAccessDialog();
     await expect(editor.accessMode).toContainText('Public');

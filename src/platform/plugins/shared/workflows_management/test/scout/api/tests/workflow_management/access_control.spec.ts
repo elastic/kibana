@@ -93,9 +93,12 @@ steps:
 
   apiTest.afterAll(async ({ apiClient, kbnClient, esClient }) => {
     if (workflowId) {
-      await apiClient.delete(`s/${spaceId}/api/workflows/workflow/${workflowId}`, {
-        headers: ownerHeaders,
-      });
+      expect(
+        await apiClient.delete(
+          `s/${spaceId}/api/workflows/workflow/${workflowId}?force=true&acknowledgeAclLoss=true`,
+          { headers: ownerHeaders }
+        )
+      ).toHaveStatusCode(200);
     }
     await kbnClient.request({ method: 'DELETE', path: `/api/spaces/space/${spaceId}` });
     await esClient.security.deleteUser({ username: readerUsername });
@@ -391,9 +394,12 @@ steps:
           } finally {
             for (const id of createdIds.reverse()) {
               expect(
-                await apiClient.delete(`s/${spaceId}/api/workflows/workflow/${id}`, {
-                  headers: ownerHeaders,
-                })
+                await apiClient.delete(
+                  `s/${spaceId}/api/workflows/workflow/${id}?force=true&acknowledgeAclLoss=true`,
+                  {
+                    headers: ownerHeaders,
+                  }
+                )
               ).toHaveStatusCode(200);
             }
           }
@@ -780,7 +786,9 @@ steps:
         ).toHaveStatusCode(200);
         expect(await apiClient.get(executionPath, { headers: ownerHeaders })).toHaveStatusCode(404);
       } finally {
-        await apiClient.delete(workflowPath, { headers: ownerHeaders });
+        await apiClient.delete(`${workflowPath}?force=true&acknowledgeAclLoss=true`, {
+          headers: ownerHeaders,
+        });
       }
     }
   );

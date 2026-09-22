@@ -476,7 +476,11 @@ export class WorkflowCrudService {
       query: { bool: { must, must_not } },
       size: ids.length,
       track_total_hits: false,
+      allow_partial_search_results: false,
     });
+    if (response.timed_out || response._shards.failed > 0) {
+      throw new Error('Could not determine workflow access from an incomplete search.');
+    }
 
     return response.hits.hits.map((hit) =>
       transformStorageDocumentToWorkflowDto(hit._id, hit._source)

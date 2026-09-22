@@ -1128,10 +1128,10 @@ export class WorkflowsManagementApi {
     const permissions = await Promise.all(
       workflows.map((workflow) => access.permissions(workflow, request))
     );
-    const visibleIds = new Set(
-      workflows.filter((_, index) => permissions[index].read).map(({ id }) => id)
+    const hiddenIds = new Set(
+      workflows.filter((_, index) => !permissions[index].read).map(({ id }) => id)
     );
-    return children.filter(({ workflowId }) => visibleIds.has(workflowId));
+    return children.filter(({ workflowId }) => !hiddenIds.has(workflowId));
   }
 
   public async getExecutionStepExecutions(
