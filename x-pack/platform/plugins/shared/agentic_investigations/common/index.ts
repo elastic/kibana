@@ -58,6 +58,7 @@ export type {
   ListProposalsQuery,
   ListProposalsResponse,
   Proposal,
+  ProposalAttachmentData,
   ProposalCategory,
   ProposalConfidence,
   ProposalDecision,

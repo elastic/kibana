@@ -79,6 +79,7 @@ const startPlugin = (plugin: AgenticInvestigationsPlugin) => {
   const coreStart = coreMock.createStart();
   const workflowsExtensions = { initManagedWorkflowsClient: jest.fn() };
   const agentBuilder = {
+    attachments: { getScopedClient: jest.fn().mockResolvedValue({ create: jest.fn() }) },
     conversations: {
       getScopedClient: jest.fn().mockReturnValue({
         get: jest.fn(),

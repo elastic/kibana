@@ -72,7 +72,12 @@ export class AgenticInvestigationsPlugin
 
     registerFeatures({ features });
 
-    registerProposalAttachment(agentBuilder);
+    // The service only exists from start() onwards, but `format()` is never
+    // called before then, so it is resolved lazily rather than captured here.
+    registerProposalAttachment(agentBuilder, {
+      getProposalsService: () => this.requireProposalsService(),
+      logger: this.logger,
+    });
 
     // Declares ownership of this plugin's managed workflows. Without it the
     // startup orphan sweep treats every workflow we installed as owned by an
@@ -132,6 +137,8 @@ export class AgenticInvestigationsPlugin
       storage,
       logger: this.logger,
       getWorkflowsApi: () => this.requireWorkflowsApi(),
+      getAttachmentsClient: (request) =>
+        plugins.agentBuilder.attachments.getScopedClient({ request }),
     });
 
     this.escalationsService = new EscalationsService({

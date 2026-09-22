@@ -20,8 +20,10 @@ import {
 } from '@kbn/workflows';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { ActionMetadata } from '@kbn/workflows';
+import type { AttachmentPublicClient } from '@kbn/agent-builder-server';
 import { PROPOSALS_RESUME_CHANNEL } from '../../../common/proposals/constants';
 import type { ChartsWindow } from './esql';
+import { PROPOSAL_ATTACHMENT_TYPE } from '../../../common/proposals/attachment';
 import {
   anchorQuery,
   bucketedEventQuery,
@@ -93,6 +95,7 @@ export interface ProposalsServiceDeps {
   storage: ProposalsStorageClient;
   logger: Logger;
   getWorkflowsApi: () => WorkflowsManagementApi;
+  getAttachmentsClient: (request: KibanaRequest) => Promise<AttachmentPublicClient>;
 }
 
 /**
@@ -110,7 +113,7 @@ export class ProposalsService {
 
   async create(
     params: CreateProposalRequest,
-    { spaceId, user }: { spaceId: string; user?: ProposalUser }
+    { spaceId, user, request }: { spaceId: string; user?: ProposalUser; request: KibanaRequest }
   ): Promise<Proposal> {
     const id = uuidv4();
     // Workflow callers reach us through Liquid templates, which render an
@@ -168,7 +171,42 @@ export class ProposalsService {
 
     await this.deps.storage.index({ id, document, op_type: 'create' });
 
+    await this.attachToConversation(id, params.conversationId, request);
+
     return toProposal(id, document);
+  }
+
+  /**
+   * Surfaces the proposal in its conversation, so an analyst meets the decision
+   * in the chat rather than only in the queue.
+   *
+   * Best-effort: the proposal is the record, and the attachment is a view of it.
+   * Losing the card is worth a warning, not the loss of the proposal that the
+   * gate workflow is already parked on.
+   */
+  private async attachToConversation(
+    proposalId: string,
+    conversationId: string,
+    request: KibanaRequest
+  ): Promise<void> {
+    try {
+      const client = await this.deps.getAttachmentsClient(request);
+      await client.create({
+        conversationId,
+        type: PROPOSAL_ATTACHMENT_TYPE,
+        // Both: `origin` is what the card reads to look the proposal up, and a
+        // payload is required because this type declares no `resolve()` hook.
+        origin: proposalId,
+        data: { proposalId },
+        // The analyst has to see the decision on opening the conversation; the
+        // agent referencing it first would make the card conditional on chat.
+        render_inline: true,
+      });
+    } catch (error) {
+      this.deps.logger.error(
+        `Failed to attach proposal ${proposalId} to conversation ${conversationId}: ${error}`
+      );
+    }
   }
 
   async get(id: string, spaceId: string): Promise<ProposalWithMetadata> {

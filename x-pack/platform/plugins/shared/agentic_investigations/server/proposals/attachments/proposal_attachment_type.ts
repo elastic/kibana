@@ -5,58 +5,49 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import type { Logger } from '@kbn/core/server';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
-import { actionCategorySchema, actionImpactSchema } from '@kbn/workflows';
-import { PROPOSAL_ATTACHMENT_TYPE, proposalSchema } from '../../../common/proposals';
+import type { ProposalAttachmentData, ProposalWithMetadata } from '../../../common/proposals';
+import { PROPOSAL_ATTACHMENT_TYPE, proposalAttachmentDataSchema } from '../../../common/proposals';
+import type { ProposalsService } from '../services/proposals_service';
 
-/** Snapshot stored inside the attachment, mirroring `ProposalWithMetadata`. */
-const proposalAttachmentDataSchema = proposalSchema.extend({
-  action: z
-    .object({
-      name: z.string(),
-      impact: actionImpactSchema,
-      category: actionCategorySchema,
-      reversible: z.boolean().optional(),
-    })
-    .optional(),
-  expired: z.boolean(),
-});
-
-type ProposalAttachmentData = z.infer<typeof proposalAttachmentDataSchema>;
+export interface ProposalAttachmentTypeDeps {
+  getProposalsService: () => ProposalsService;
+  logger: Logger;
+}
 
 /**
  * Format a proposal for the LLM.  Keep it terse: the human decision is the
  * only action the agent can request — it cannot run the action itself.
  */
-const formatProposalForAgent = (data: ProposalAttachmentData): string => {
+const formatProposalForAgent = (proposal: ProposalWithMetadata): string => {
   // Deliberately NOT `PROPOSAL_WITHOUT_ACTION_LABEL`: this string is LLM prompt input
   // and must stay untranslated and carry the analyst-directive clause. The UI badge
   // ("No automated action") lives in public/proposals/translations.ts.
   const label =
-    data.action?.name ??
-    data.actionWorkflowId ??
+    proposal.action?.name ??
+    proposal.actionWorkflowId ??
     'No automated action — analyst carries this out themselves';
 
   const lines: string[] = [
     `## Investigation proposal: ${label}`,
-    `Status: ${data.status}`,
-    data.expired ? 'EXPIRED: the decision deadline has passed' : '',
+    `Status: ${proposal.status}`,
+    proposal.expired ? 'EXPIRED: the decision deadline has passed' : '',
     '',
-    data.comment,
+    proposal.comment,
     '',
-    `Impact: ${data.impact} | Confidence: ${data.confidence} | Category: ${
-      data.action?.category ?? data.category ?? 'unknown'
+    `Impact: ${proposal.impact} | Confidence: ${proposal.confidence} | Category: ${
+      proposal.action?.category ?? proposal.category ?? 'unknown'
     }`,
-    data.action?.reversible !== undefined
-      ? `Reversible: ${data.action.reversible ? 'yes' : 'no'}`
+    proposal.action?.reversible !== undefined
+      ? `Reversible: ${proposal.action.reversible ? 'yes' : 'no'}`
       : '',
-    data.expiresAt ? `Decision deadline: ${data.expiresAt}` : '',
+    proposal.expiresAt ? `Decision deadline: ${proposal.expiresAt}` : '',
     '',
-    data.status === 'pending' && !data.expired
+    proposal.status === 'pending' && !proposal.expired
       ? 'Awaiting a human decision. Do not attempt to approve or dismiss this proposal yourself.'
-      : `Decision: ${data.status}${
-          data.decidedBy?.username ? ` by ${data.decidedBy.username}` : ''
+      : `Decision: ${proposal.status}${
+          proposal.decidedBy?.username ? ` by ${proposal.decidedBy.username}` : ''
         }`,
   ];
 
@@ -70,7 +61,13 @@ const formatProposalForAgent = (data: ProposalAttachmentData): string => {
  * attachments with `attachment_add` / `attachment_update` — they are created
  * exclusively by the proposals API.
  */
-export const proposalAttachmentType: AttachmentTypeDefinition = {
+export const createProposalAttachmentType = ({
+  getProposalsService,
+  logger,
+}: ProposalAttachmentTypeDeps): AttachmentTypeDefinition<
+  typeof PROPOSAL_ATTACHMENT_TYPE,
+  ProposalAttachmentData
+> => ({
   id: PROPOSAL_ATTACHMENT_TYPE,
 
   isReadonly: true,
@@ -83,11 +80,20 @@ export const proposalAttachmentType: AttachmentTypeDefinition = {
     return { valid: false, error: result.error.message };
   },
 
-  format: (attachment) => ({
-    getRepresentation: () => ({
-      type: 'text',
-      value: formatProposalForAgent(attachment.data as ProposalAttachmentData),
-    }),
+  // Read at representation time rather than at add time, so what the agent is
+  // told matches what the analyst sees. `origin` first because attachments
+  // written before the payload shrank carry the id only there.
+  format: (attachment, { spaceId }) => ({
+    getRepresentation: async () => {
+      const proposalId = attachment.origin ?? attachment.data.proposalId;
+      try {
+        const proposal = await getProposalsService().get(proposalId, spaceId);
+        return { type: 'text', value: formatProposalForAgent(proposal) };
+      } catch (error) {
+        logger.warn(`Failed to read proposal ${proposalId} for its attachment: ${error}`);
+        return { type: 'text', value: '## Investigation proposal: currently unavailable' };
+      }
+    },
   }),
 
   getAgentDescription: () =>
@@ -99,4 +105,4 @@ export const proposalAttachmentType: AttachmentTypeDefinition = {
     '`<render_attachment id="ATTACHMENT_ID" />` (replace ATTACHMENT_ID with the actual id) so ' +
     'the analyst can act on it directly in the chat.\n' +
     '- If the proposal is expired or already decided, say so in your response but still render the card.',
-};
+});

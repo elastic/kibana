@@ -38,6 +38,7 @@ export const registerCreateProposalRoute = ({
           const proposal = await getProposalsService().create(request.body, {
             spaceId: getSpaceId(request),
             user: await resolveUser(request),
+            request,
           });
           return response.ok({ body: proposal });
         } catch (error) {

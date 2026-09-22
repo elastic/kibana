@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-export { PROPOSAL_ATTACHMENT_TYPE } from './attachment';
+export { PROPOSAL_ATTACHMENT_TYPE, proposalAttachmentDataSchema } from './attachment';
+export type { ProposalAttachmentData } from './attachment';
 
 export {
   MAX_CHARTS_SUMMARY_BUCKETS,
