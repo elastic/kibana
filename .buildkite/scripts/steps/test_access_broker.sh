@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-MODEL="llm-gateway/gpt-5.4-mini"
+MODEL="openai/gpt-6-luna"
 
 # Validation phase: always cancel the rest of the build after this step runs,
 # pass or fail. Remove this trap (and the cancel block below) once the
