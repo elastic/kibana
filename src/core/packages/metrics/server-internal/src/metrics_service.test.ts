@@ -235,9 +235,7 @@ describe('MetricsService', () => {
           eluHistory: { algorithm: 'time-weighted-ema' },
         },
       });
-      metricsService = new MetricsService(
-        mockCoreContext.create({ logger, configService })
-      );
+      metricsService = new MetricsService(mockCoreContext.create({ logger, configService }));
 
       mockOpsCollector.collect
         .mockImplementationOnce(() => set({}, 'process.event_loop_utilization.utilization', 1.0))
