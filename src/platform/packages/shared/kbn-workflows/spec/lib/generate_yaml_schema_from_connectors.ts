@@ -180,13 +180,20 @@ const LIQUID_TEMPLATE_SCHEMA = z
   .regex(WHOLE_VALUE_TEMPLATE_EXPRESSION_REGEX)
   .max(TEMPLATE_EXPRESSION_MAX_LENGTH);
 
+/** Checks attached to a `.optional()` / `.default()` wrapper (e.g. via `.refine()` after it). */
+type FieldWrapperChecks = NonNullable<z.ZodOptional['def']['checks']>;
+
 /**
  * A `.optional()` / `.default()` layer stripped off a params field so it can be replayed verbatim.
  * Defaults keep a getter rather than a captured value: in Zod v4, `def.defaultValue` evaluates a
  * factory (or shallow-clones a static value) on every read, so reading it once at unwrap time would
- * freeze that result into every subsequent parse.
+ * freeze that result into every subsequent parse. Wrapper-level checks are carried along so a
+ * refinement applied after `.optional()` / `.default()` is not dropped when the inner array is
+ * replaced with `array | template`.
  */
-type FieldWrapper = { kind: 'optional' } | { kind: 'default'; getValue: () => unknown };
+type FieldWrapper =
+  | { kind: 'optional'; checks: FieldWrapperChecks }
+  | { kind: 'default'; getValue: () => unknown; checks: FieldWrapperChecks };
 
 /**
  * Strips the `.optional()` / `.default()` layers off a params field, returning the wrapped type
@@ -196,15 +203,43 @@ function unwrapFieldWrappers(field: z.ZodType): { inner: z.ZodType; wrappers: Fi
   const wrappers: FieldWrapper[] = [];
   let inner = field;
   while (inner instanceof z.ZodOptional || inner instanceof z.ZodDefault) {
+    const checks = (inner.def.checks ?? []) as FieldWrapperChecks;
     if (inner instanceof z.ZodOptional) {
-      wrappers.push({ kind: 'optional' });
+      wrappers.push({ kind: 'optional', checks });
     } else {
       const zodDefault = inner;
-      wrappers.push({ kind: 'default', getValue: () => zodDefault.def.defaultValue });
+      wrappers.push({ kind: 'default', getValue: () => zodDefault.def.defaultValue, checks });
     }
     inner = inner.unwrap() as z.ZodType;
   }
   return { inner, wrappers };
+}
+
+/**
+ * Re-applies checks that lived on an optional/default wrapper. Template strings skip them: those
+ * checks are written against `array | undefined` (or the defaulted array), and array APIs throw a
+ * TypeError that escapes `safeParse` when handed a Liquid expression.
+ */
+function applyWrapperChecks(field: z.ZodType, checks: FieldWrapperChecks): z.ZodType {
+  if (checks.length === 0) {
+    return field;
+  }
+  return field.check((ctx) => {
+    if (typeof ctx.value === 'string') {
+      return;
+    }
+    const result = z
+      .any()
+      .check(...checks)
+      .safeParse(ctx.value);
+    if (!result.success) {
+      for (const issue of result.error.issues) {
+        ctx.issues.push(issue);
+      }
+      return;
+    }
+    ctx.value = result.data;
+  });
 }
 
 /**
@@ -215,11 +250,10 @@ function unwrapFieldWrappers(field: z.ZodType): { inner: z.ZodType; wrappers: Fi
 function rewrapField(field: z.ZodType, wrappers: FieldWrapper[]): z.ZodType {
   // `wrappers` is outermost-first, so replay it back-to-front to end up with the same stack.
   // Pass `getValue` itself into `.default()` so Zod invokes the original supplier per parse.
-  return wrappers.reduceRight<z.ZodType>(
-    (acc, wrapper) =>
-      wrapper.kind === 'optional' ? acc.optional() : acc.default(wrapper.getValue),
-    field
-  );
+  return wrappers.reduceRight<z.ZodType>((acc, wrapper) => {
+    const rewrapped = wrapper.kind === 'optional' ? acc.optional() : acc.default(wrapper.getValue);
+    return applyWrapperChecks(rewrapped, wrapper.checks);
+  }, field);
 }
 
 /** True when the object carries `.refine()` / `.superRefine()` checks of its own. */

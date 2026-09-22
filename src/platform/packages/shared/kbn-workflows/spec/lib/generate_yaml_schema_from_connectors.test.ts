@@ -429,6 +429,34 @@ describe('generateYamlSchemaFromConnectors', () => {
       ).toBe(false);
     });
 
+    it('preserves refinements attached after .optional() on an array param', () => {
+      // In Zod v4, `.optional().refine(...)` keeps the ZodOptional type with checks on the
+      // wrapper. Unwrap/rewrap must copy those checks or ordinary empty arrays slip through.
+      const connector: ConnectorContractUnion = {
+        summary: 'OptionalRefined',
+        description: null,
+        type: 'optional.refined.step',
+        paramsSchema: z.object({
+          tags: z
+            .array(z.string())
+            .optional()
+            .refine((v) => v === undefined || v.length > 0, 'tags must be non-empty when set'),
+        }),
+        outputSchema: z.unknown(),
+      };
+      const schema = generateYamlSchemaFromConnectors([connector]);
+      const parseWith = (withValue: unknown) =>
+        schema.safeParse({
+          ...BASE_WORKFLOW,
+          steps: [{ name: 's', type: 'optional.refined.step', with: withValue }],
+        });
+
+      expect(parseWith({}).success).toBe(true);
+      expect(parseWith({ tags: ['a'] }).success).toBe(true);
+      expect(parseWith({ tags: [] }).success).toBe(false);
+      expect(parseWith({ tags: '${{ workflow.inputs.tags }}' }).success).toBe(true);
+    });
+
     describe('connectors whose paramsSchema has object-level refinements', () => {
       // `.every()` rather than `.length`: an object-level refinement is written against the
       // declared field types, so widening `ids` to `array | string` hands it a string. Array-only
