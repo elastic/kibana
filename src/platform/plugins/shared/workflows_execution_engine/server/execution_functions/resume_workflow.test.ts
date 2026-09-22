@@ -419,17 +419,17 @@ describe('resumeWorkflow', () => {
       it('calls setupDependencies with default workflowsExecutionEngine', async () => {
         await resumeWorkflowWithDefaults();
 
-        expect(mockSetupDependencies).toHaveBeenCalledWith(
+        expect(mockSetupDependencies).toHaveBeenCalledWith({
           workflowRunId,
           spaceId,
           logger,
-          mockConfig,
+          config: mockConfig,
           dependencies,
           workflowExecutionRepository,
           stepExecutionRepository,
           fakeRequest,
-          mockWorkflowExecutionEngine
-        );
+          workflowsExecutionEngine: mockWorkflowExecutionEngine,
+        });
       });
 
       it('forwards workflowsExecutionEngine to setupDependencies when provided', async () => {
@@ -444,17 +444,17 @@ describe('resumeWorkflow', () => {
 
         await resumeWorkflowWithDefaults({ workflowsExecutionEngine });
 
-        expect(mockSetupDependencies).toHaveBeenCalledWith(
+        expect(mockSetupDependencies).toHaveBeenCalledWith({
           workflowRunId,
           spaceId,
           logger,
-          mockConfig,
+          config: mockConfig,
           dependencies,
           workflowExecutionRepository,
           stepExecutionRepository,
           fakeRequest,
-          workflowsExecutionEngine
-        );
+          workflowsExecutionEngine,
+        });
       });
 
       it('calls workflowRuntime.resume then workflowExecutionLoop in order', async () => {
