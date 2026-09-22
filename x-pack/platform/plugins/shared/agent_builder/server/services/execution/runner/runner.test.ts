@@ -445,6 +445,5 @@ describe('AgentBuilder runner', () => {
       // agentId must also reach the scoped runner so the registry lookup succeeds
       expect(agentClient.get).toHaveBeenCalledWith('root-agent', expect.anything());
     });
-
   });
 });
