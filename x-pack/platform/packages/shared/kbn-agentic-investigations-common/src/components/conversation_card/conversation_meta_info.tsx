@@ -5,8 +5,8 @@
  * 2.0.
  */
 import React, { memo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import { FormattedRelative } from '@kbn/i18n-react';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
+import { FormattedDate, FormattedRelative } from '@kbn/i18n-react';
 import { type Investigation } from '../../types';
 
 /**
@@ -19,9 +19,12 @@ export const ConversationMetaInfo = memo<{
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive direction="row">
       <EuiFlexItem grow={false}>
-        <EuiText size="xs" color="subdued" component="span">
-          <FormattedRelative value={createdAt} />
-        </EuiText>
+        <EuiToolTip content={<FormattedDate value={createdAt} dateStyle="full" timeStyle="long" />}>
+          {/* Focusable so the exact time is reachable without a pointer. */}
+          <EuiText size="xs" color="subdued" component="span" tabIndex={0}>
+            <FormattedRelative value={createdAt} />
+          </EuiText>
+        </EuiToolTip>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
