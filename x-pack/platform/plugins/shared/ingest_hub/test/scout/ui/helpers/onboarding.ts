@@ -56,6 +56,7 @@ export async function navigateToOnboardingStep(
     detectAndReviewStep?: {
       policyIdsByInstance?: Record<string, string>;
       serviceStatuses?: Record<string, string>;
+      onboardingDeploymentId?: string;
     };
   }
 ): Promise<void> {
@@ -92,7 +93,11 @@ export async function navigateToOnboardingStep(
       ecfStep: PersistedEcfLaunchStep | undefined;
       authStep: { connectorId?: string; authMethod?: string } | undefined;
       detectReview:
-        | { policyIdsByInstance?: Record<string, string>; serviceStatuses?: Record<string, string> }
+        | {
+            policyIdsByInstance?: Record<string, string>;
+            serviceStatuses?: Record<string, string>;
+            onboardingDeploymentId?: string;
+          }
         | undefined;
       servicesKey: string;
       settingsKey: string;
@@ -111,13 +116,14 @@ export async function navigateToOnboardingStep(
         sessionStorage.setItem(authStepKey, JSON.stringify(authStep));
       }
       if (detectReview !== undefined) {
-        sessionStorage.setItem(
-          detectReviewKey,
-          JSON.stringify({
-            policyIdsByInstance: detectReview.policyIdsByInstance ?? {},
-            serviceStatuses: detectReview.serviceStatuses ?? {},
-          })
-        );
+        const detectReviewPayload: Record<string, unknown> = {
+          policyIdsByInstance: detectReview.policyIdsByInstance ?? {},
+          serviceStatuses: detectReview.serviceStatuses ?? {},
+        };
+        if (detectReview.onboardingDeploymentId !== undefined) {
+          detectReviewPayload.onboardingDeploymentId = detectReview.onboardingDeploymentId;
+        }
+        sessionStorage.setItem(detectReviewKey, JSON.stringify(detectReviewPayload));
       }
     },
     {
