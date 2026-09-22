@@ -235,6 +235,30 @@ Read it back from ES (Dev Tools → Console, or `curl` against Elasticsearch):
 GET /.kibana-notification-center/_search
 ```
 
+## Seeding a local dev stack
+
+`scripts/seed_notifications.js` appends a fixed chunk of notifications to the data stream, so
+the list route and the bell have something to show without waiting for a real producer.
+
+```bash
+node x-pack/platform/plugins/shared/notification_center/scripts/seed_notifications.js --help
+node x-pack/platform/plugins/shared/notification_center/scripts/seed_notifications.js --include-unregistered
+node x-pack/platform/plugins/shared/notification_center/scripts/seed_notifications.js --clean
+```
+
+Kibana must already be running with `xpack.notificationCenter.enabled: true`. The bell also
+needs `notificationCenter.uiEnabled` (see Feature flags above). The script reads the list
+route once before writing anything: that is what makes the plugin create the data stream.
+Writing first would let Elasticsearch auto-create a plain index under the same name, which
+then permanently blocks the plugin's own creation of it.
+
+Kibana is detected on `localhost:5601` (serverless) or `localhost:5611` (stack), including a
+dev base path. If both are running, pass `--kibana-url`. Elasticsearch follows the chosen
+Kibana (serverless vs stack). Override with `--es-url`.
+
+The plugin's `notificationWriteSchema` rejects unknown `namespace` and `types`. `--include-unregistered`
+writes those directly to the cluster to exercise the read path and the UI against a mixed feed.
+
 ## Running tests
 
 ```bash
