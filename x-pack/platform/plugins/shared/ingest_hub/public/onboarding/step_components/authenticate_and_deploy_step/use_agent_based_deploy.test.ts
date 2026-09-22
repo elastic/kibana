@@ -188,7 +188,11 @@ describe('useAgentBasedDeploy — isAlreadyDeployed', () => {
       removeDeployInstances: jest.fn(),
       getLatestFailedInstances: jest.fn().mockReturnValue([]),
       awsServicesMap: new Map(),
-      agentBasedDeployment: { agentHostsMode: 'existing' as const, agentPolicyId: 'ap-1', selectedAgentPolicyIds: ['ap-1'] },
+      agentBasedDeployment: {
+        agentHostsMode: 'existing' as const,
+        agentPolicyId: 'ap-1',
+        selectedAgentPolicyIds: ['ap-1'],
+      },
       setAgentBasedDeployment: jest.fn(),
     });
     mockBuildAgentBasedTargets.mockReturnValue([groupA]);
@@ -212,7 +216,11 @@ describe('useAgentBasedDeploy — isAlreadyDeployed', () => {
       removeDeployInstances: jest.fn(),
       getLatestFailedInstances: jest.fn().mockReturnValue([]),
       awsServicesMap: new Map(),
-      agentBasedDeployment: { agentHostsMode: 'existing' as const, agentPolicyId: 'ap-1', selectedAgentPolicyIds: ['ap-1'] },
+      agentBasedDeployment: {
+        agentHostsMode: 'existing' as const,
+        agentPolicyId: 'ap-1',
+        selectedAgentPolicyIds: ['ap-1'],
+      },
       setAgentBasedDeployment: jest.fn(),
     });
     // Only serviceA is in active targets — removed-svc was deselected.
@@ -234,7 +242,11 @@ describe('useAgentBasedDeploy — isAlreadyDeployed', () => {
       removeDeployInstances: jest.fn(),
       getLatestFailedInstances: jest.fn().mockReturnValue([]),
       awsServicesMap: new Map(),
-      agentBasedDeployment: { agentHostsMode: 'existing' as const, agentPolicyId: 'ap-1', selectedAgentPolicyIds: ['ap-1'] },
+      agentBasedDeployment: {
+        agentHostsMode: 'existing' as const,
+        agentPolicyId: 'ap-1',
+        selectedAgentPolicyIds: ['ap-1'],
+      },
       setAgentBasedDeployment: jest.fn(),
     });
     mockBuildAgentBasedTargets.mockReturnValue([groupA]);

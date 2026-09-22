@@ -13,10 +13,7 @@ import {
 
 import type { ServiceVars } from '../service_settings_step/use_service_settings';
 import { buildPackageInputs, buildPackageVars, getPackageVarNames } from './package_inputs';
-import {
-  computePolicyCleanupOps,
-  resolveSurvivingMembers,
-} from './policy_cleanup';
+import { computePolicyCleanupOps, resolveSurvivingMembers } from './policy_cleanup';
 import type { BuildPolicyBodyOpts } from './policy_cleanup';
 
 export interface CleanupAgentBasedOpts extends BuildPolicyBodyOpts {

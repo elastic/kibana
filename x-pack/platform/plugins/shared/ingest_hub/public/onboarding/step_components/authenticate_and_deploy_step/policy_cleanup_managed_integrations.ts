@@ -13,10 +13,7 @@ import {
 
 import type { ServiceVars } from '../service_settings_step/use_service_settings';
 import { buildPackageInputs, buildPackageVars, getPackageVarNames } from './package_inputs';
-import {
-  computePolicyCleanupOps,
-  resolveSurvivingMembers,
-} from './policy_cleanup';
+import { computePolicyCleanupOps, resolveSurvivingMembers } from './policy_cleanup';
 import type { BuildPolicyBodyOpts, PolicyCleanupOps } from './policy_cleanup';
 
 export interface CleanupManagedIntegrationsOpts extends BuildPolicyBodyOpts {
@@ -40,13 +37,19 @@ export async function cleanupManagedIntegrationsPolicies(
     ...toDelete.map((policyId) =>
       sendDeleteAgentlessPolicy(policyId).catch((err) => {
         // eslint-disable-next-line no-console
-        console.error(`[ingest_hub] Failed to delete managed-integrations policy ${policyId}:`, err);
+        console.error(
+          `[ingest_hub] Failed to delete managed-integrations policy ${policyId}:`,
+          err
+        );
       })
     ),
     ...toUpdate.map(({ policyId, survivingInstanceIds }) =>
       updateManagedIntegrationsPolicy(policyId, survivingInstanceIds, opts).catch((err) => {
         // eslint-disable-next-line no-console
-        console.error(`[ingest_hub] Failed to update managed-integrations policy ${policyId}:`, err);
+        console.error(
+          `[ingest_hub] Failed to update managed-integrations policy ${policyId}:`,
+          err
+        );
       })
     ),
   ]);

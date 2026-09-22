@@ -106,7 +106,11 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
     return targets.every((group) =>
       group.instanceIds.every((instanceId) => !!policyIdsByInstance[instanceId])
     );
-  }, [targets, detectAndReviewStep.policyIdsByInstance, detectAndReviewStep.pendingCleanupPolicyIds]);
+  }, [
+    targets,
+    detectAndReviewStep.policyIdsByInstance,
+    detectAndReviewStep.pendingCleanupPolicyIds,
+  ]);
 
   const handleDeploy = useCallback(
     async (instanceIds?: string[]): Promise<{ failed: boolean }> => {

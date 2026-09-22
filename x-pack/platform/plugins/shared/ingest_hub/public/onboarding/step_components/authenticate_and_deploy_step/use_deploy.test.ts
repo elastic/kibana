@@ -1618,7 +1618,10 @@ describe('useDeploy — cleanup orchestration', () => {
     // 'vpcflow' was deployed but is no longer selected — its instanceId is in policyIdsByInstance
     // but NOT in selectedServiceIds → liveStalePolicyIds should pick it up without needing
     // pendingCleanupPolicyIds to be set.
-    mockCleanupManagedIntegrationsPolicies.mockResolvedValue({ toDelete: ['policy-VPC'], toUpdate: [] });
+    mockCleanupManagedIntegrationsPolicies.mockResolvedValue({
+      toDelete: ['policy-VPC'],
+      toUpdate: [],
+    });
     setupMocks({
       selectedServiceIds: [], // vpcflow deselected
       detectAndReviewStep: {

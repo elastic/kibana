@@ -328,7 +328,7 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
     await expect(nextButton).toBeEnabled();
     await nextButton.click();
 
-    await updateRequestPromise;  // PUT — shared policy updated with elb inputs only
+    await updateRequestPromise; // PUT — shared policy updated with elb inputs only
     expect(deleteObserved).toBe(false);
   });
 
@@ -439,8 +439,7 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
         })
     );
     await page.route(
-      (url) =>
-        /\/api\/fleet\/cloud_onboarding_deployments\/mock-deployment-id$/.test(url.pathname),
+      (url) => /\/api\/fleet\/cloud_onboarding_deployments\/mock-deployment-id$/.test(url.pathname),
       (route) =>
         route.fulfill({
           status: 200,
@@ -513,8 +512,7 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
     });
 
     await page.route(
-      (url) =>
-        /\/api\/fleet\/managed_integrations(\/mock-old-policy-id)?$/.test(url.pathname),
+      (url) => /\/api\/fleet\/managed_integrations(\/mock-old-policy-id)?$/.test(url.pathname),
       (route) =>
         route.fulfill({
           status: 200,
@@ -525,8 +523,7 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
         })
     );
     await page.route(
-      (url) =>
-        /\/api\/fleet\/cloud_onboarding_deployments\/mock-deployment-id$/.test(url.pathname),
+      (url) => /\/api\/fleet\/cloud_onboarding_deployments\/mock-deployment-id$/.test(url.pathname),
       (route) =>
         route.fulfill({
           status: 200,
