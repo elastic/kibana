@@ -61,7 +61,7 @@ export class TestSubjects extends FtrService {
   }
 
   /**
-   * Waits up to `options.timeout` (default: `timeouts.waitForExists`, 2.5 s) for the element to
+   * Waits up to `options.timeout` (default: `timeouts.waitForExists`, 1.5 s) for the element to
    * appear and returns `true` as soon as it does, or `false` if the timeout elapses.
    *
    * Returns rather than throws, making it suitable for branching on optional UI that may still be
