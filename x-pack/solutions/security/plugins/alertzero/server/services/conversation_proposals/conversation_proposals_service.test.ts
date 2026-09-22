@@ -89,7 +89,7 @@ describe('ConversationProposalsService', () => {
   });
 
   describe('listByCategory', () => {
-    it('calls proposalsService.list with category, pending status, and createdAt-desc sort', async () => {
+    it('totally orders the category page, so an offset boundary cannot duplicate or skip a row', async () => {
       const proposalsService = makeProposalsService();
       const service = new ConversationProposalsService(
         proposalsService,
@@ -108,7 +108,11 @@ describe('ConversationProposalsService', () => {
           from: 0,
         }),
         spaceId,
-        [{ createdAt: { order: 'desc' } }]
+        [
+          { createdAt: { order: 'desc' } },
+          { rootProposalId: { order: 'asc' } },
+          { revision: { order: 'asc' } },
+        ]
       );
     });
 
@@ -306,7 +310,7 @@ describe('ConversationProposalsService', () => {
   });
 
   describe('listClosed', () => {
-    it('calls proposalsService.list with decidedWithinHours: 72 and decidedAt-desc sort', async () => {
+    it('totally orders the closed page, so an offset boundary cannot duplicate or skip a row', async () => {
       const proposalsService = makeProposalsService();
       const service = new ConversationProposalsService(
         proposalsService,
@@ -324,7 +328,12 @@ describe('ConversationProposalsService', () => {
           from: 0,
         }),
         spaceId,
-        [{ decidedAt: { order: 'desc' } }, { createdAt: { order: 'desc' } }]
+        [
+          { decidedAt: { order: 'desc' } },
+          { createdAt: { order: 'desc' } },
+          { rootProposalId: { order: 'asc' } },
+          { revision: { order: 'asc' } },
+        ]
       );
     });
 

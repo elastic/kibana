@@ -13,6 +13,7 @@ export {
 } from './src/components/actions/base_actions';
 
 export { ConversationCard } from './src/components/conversation_card/conversation_card';
+export { ConversationCardCompact } from './src/components/conversation_card/conversation_card_compact';
 export { ConversationMetaInfo } from './src/components/conversation_card/conversation_meta_info';
 export { TemplateBadge } from './src/components/conversation_card/template_badge';
 export { type ConversationsActionsGroupProps } from './src/components/conversation_card/actions_group';
