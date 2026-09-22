@@ -27,7 +27,7 @@ export const CONTEXT_ENGINE_SETUP_AGENT_TYPE_ID =
 
 const contextEngineSetupAgentType = {
   id: CONTEXT_ENGINE_SETUP_AGENT_TYPE_ID,
-  name: 'Context Engine Setup',
+  name: 'Context Engine',
   description:
     'Configures AI indices, chooses data sources, and generates workflow automations that ' +
     'populate indices with useful, relevant data.',
@@ -45,7 +45,7 @@ export const registerContextEngineAgent = (agentBuilder: AgentBuilderPluginSetup
   agentBuilder.agents.register({
     type: CONTEXT_ENGINE_SETUP_AGENT_TYPE_ID,
     id: CONTEXT_ENGINE_SETUP_AGENT_ID,
-    name: 'Context Engine Setup',
+    name: 'Context Engine',
     description:
       'Configures AI indices, chooses data sources, and generates workflow automations that ' +
       'populate indices with useful, relevant data.',

@@ -9,7 +9,17 @@ import type { CoreSetup } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AgentBuilderPluginSetup, AiIndexResolver } from '@kbn/agent-builder-server';
 import { registerContextEngineAgentBuilderIntegration } from './register_agent_builder_integration';
-import { CONTEXT_ENGINE_SETUP_AGENT_ID } from './agent/context_engine_agent';
+import {
+  CONTEXT_ENGINE_SETUP_AGENT_ID,
+  CONTEXT_ENGINE_SETUP_AGENT_TYPE_ID,
+} from './agent/context_engine_agent';
+import {
+  ANALYZE_AND_IMPROVE_SKILL_ID,
+  AI_INDEX_AUTOMATIONS_SKILL_ID,
+  AI_INDEX_SOURCES_SKILL_ID,
+  KI_RETRIEVAL_SKILL_ID,
+} from '../common/agent_builder_skills';
+import { SELF_AGENT_ID } from '@kbn/agent-builder-common';
 import type {
   ContextEngineAgentBuilderPluginStart,
   ContextEngineAgentBuilderStartDependencies,
@@ -179,7 +189,20 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
 
     expect(register).toHaveBeenCalledTimes(1);
     expect(register).toHaveBeenCalledWith(
-      expect.objectContaining({ id: CONTEXT_ENGINE_SETUP_AGENT_ID })
+      expect.objectContaining({
+        id: CONTEXT_ENGINE_SETUP_AGENT_ID,
+        type: CONTEXT_ENGINE_SETUP_AGENT_TYPE_ID,
+        configuration: expect.objectContaining({
+          enable_elastic_capabilities: false,
+          subagent_ids: [SELF_AGENT_ID],
+          skill_ids: expect.arrayContaining([
+            ANALYZE_AND_IMPROVE_SKILL_ID,
+            AI_INDEX_AUTOMATIONS_SKILL_ID,
+            AI_INDEX_SOURCES_SKILL_ID,
+            KI_RETRIEVAL_SKILL_ID,
+          ]),
+        }),
+      })
     );
   });
 });
