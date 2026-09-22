@@ -562,12 +562,16 @@ export class WorkflowsExecutionEnginePlugin
 
               if (taskInstance.id !== getWorkflowImmediateResumeTaskId(workflowRunId)) {
                 const retainedWake = taskInstance.id === getWorkflowWakeTaskId(workflowRunId);
+                let isUserInteractive = false;
                 if (retainedWake) {
                   const execution = await workflowExecutionRepository.getWorkflowExecutionById(
                     workflowRunId,
                     spaceId
                   );
                   if (!execution || isTerminalStatus(execution.status)) return;
+                  isUserInteractive =
+                    execution.context?.pendingInteractiveResume === true &&
+                    execution.context?.resumeInput != null;
                 }
                 const accepted = await new WorkflowTaskManager(
                   pluginsStart.taskManager
@@ -575,6 +579,7 @@ export class WorkflowsExecutionEnginePlugin
                   executionId: workflowRunId,
                   spaceId,
                   fakeRequest,
+                  isUserInteractive,
                 });
                 // A request never loads workflow checkpoints or invokes steps. Busy
                 // runners keep their claim; this notification retries durably in TM.
@@ -585,6 +590,7 @@ export class WorkflowsExecutionEnginePlugin
                       Date.now() + (accepted ? WORKFLOW_WAKE_POLL_INTERVAL_MS : 1000)
                     ),
                     state: {},
+                    priority: getTaskPriority({ isUserInteractive }),
                   };
                 }
                 return accepted ? undefined : { runAt: new Date(Date.now() + 1000), state: {} };
@@ -1813,6 +1819,7 @@ export class WorkflowsExecutionEnginePlugin
         resumeInput: input,
         resumedBy,
         resumedAt,
+        pendingInteractiveResume: request !== undefined,
       };
 
       await internalResumeWorkflowExecution(executionId, spaceId, resumeContext, request, {

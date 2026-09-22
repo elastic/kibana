@@ -237,6 +237,11 @@ describe('user-interactive task priority', () => {
         expect.objectContaining({ request, cloneApiKey: true })
       );
       expect(taskManager.runSoon).toHaveBeenCalled();
+      expect(mockUpdateWorkflowExecution).toHaveBeenCalledWith(
+        expect.objectContaining({
+          context: expect.objectContaining({ pendingInteractiveResume: true }),
+        })
+      );
     });
 
     it('does not schedule a UserInteractive resume when HITL has no request', async () => {
@@ -245,6 +250,11 @@ describe('user-interactive task priority', () => {
       await pluginStart.resumeWorkflowExecution('exec-hitl', 'default', { approved: true });
 
       expect(taskManager.ensureScheduled).not.toHaveBeenCalled();
+      expect(mockUpdateWorkflowExecution).toHaveBeenCalledWith(
+        expect.objectContaining({
+          context: expect.objectContaining({ pendingInteractiveResume: false }),
+        })
+      );
       expect(taskManager.runSoon).toHaveBeenCalledWith(getWorkflowWakeTaskId('exec-hitl'));
     });
   });

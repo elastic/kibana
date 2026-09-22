@@ -418,10 +418,15 @@ describe('WaitForInputStepImpl', () => {
       expect(mockStepExecutionRuntime.setInput).not.toHaveBeenCalled();
     });
 
-    it('should clear resumeInput from context while preserving other keys', async () => {
+    it('clears the consumed response and interactive intent while preserving other keys', async () => {
+      mockWorkflowRuntime.getWorkflowExecution.mockReturnValue({
+        ...mockWorkflowRuntime.getWorkflowExecution(),
+        id: 'exec-abc',
+        context: { resumeInput, pendingInteractiveResume: true, otherKey: 'preserved' },
+      });
       await underTest.run();
       expect(mockStepExecutionRuntime.updateWorkflowExecution).toHaveBeenCalledWith({
-        context: { resumedBy: 'jane.doe', otherKey: 'preserved', resumeInput: null },
+        context: { otherKey: 'preserved', resumeInput: null, pendingInteractiveResume: false },
       });
     });
 

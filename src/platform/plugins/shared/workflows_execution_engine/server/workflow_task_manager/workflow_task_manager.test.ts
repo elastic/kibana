@@ -508,7 +508,7 @@ describe('WorkflowTaskManager', () => {
       expect(mockTaskManager.runSoon).toHaveBeenCalledWith(stableId);
     });
 
-    it('forwards UserInteractive priority onto the immediate resume task', async () => {
+    it('requests UserInteractive priority when creating or waking the immediate resume task', async () => {
       const executionId = 'exec-and-run-ui';
       const stableId = getWorkflowImmediateResumeTaskId(executionId);
       mockTaskManager.ensureScheduled.mockResolvedValue({ id: stableId } as any);
@@ -527,7 +527,9 @@ describe('WorkflowTaskManager', () => {
         }),
         { request: fakeRequest, cloneApiKey: true }
       );
-      expect(mockTaskManager.runSoon).toHaveBeenCalledWith(stableId);
+      expect(mockTaskManager.runSoon).toHaveBeenCalledWith(stableId, {
+        priority: TaskPriority.UserInteractive,
+      });
     });
 
     it('should propagate errors from scheduleImmediateResume', async () => {
@@ -562,6 +564,41 @@ describe('WorkflowTaskManager', () => {
 
   describe('busy resume wake-ups', () => {
     const params = { executionId: 'exec-busy', spaceId: 'default' };
+
+    it.each(['running', 'conflict'])(
+      'promotes the fallback wake after %s and retries conflicts with priority',
+      async (failure) => {
+        if (failure === 'running') {
+          mockTaskManager.runSoon.mockRejectedValueOnce(new TaskAlreadyRunningError('runner'));
+        } else {
+          mockTaskManager.runSoon.mockResolvedValueOnce({
+            id: 'runner',
+            forced: false,
+            conflict: true,
+          });
+        }
+        mockTaskManager.runSoon.mockResolvedValueOnce({
+          id: 'wake',
+          forced: false,
+          conflict: true,
+        });
+
+        await workflowTaskManager.scheduleAndRunImmediateResume({
+          ...params,
+          fakeRequest,
+          isUserInteractive: true,
+        });
+
+        for (const call of [2, 3]) {
+          expect(mockTaskManager.runSoon).toHaveBeenNthCalledWith(
+            call,
+            getWorkflowWakeTaskId(params.executionId),
+            { priority: TaskPriority.UserInteractive }
+          );
+        }
+        expect(mockTaskManager.removeIfExists).not.toHaveBeenCalled();
+      }
+    );
 
     it.each([
       new TaskAlreadyRunningError('runner'),

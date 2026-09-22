@@ -10,6 +10,7 @@
 import { v4 } from 'uuid';
 import { type KibanaRequest, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
+  type RunSoonOptions,
   TaskAlreadyRunningError,
   type TaskManagerStartContract,
   TaskPriority,
@@ -288,7 +289,9 @@ export class WorkflowTaskManager {
   }): Promise<boolean> {
     const { taskId } = await this.scheduleImmediateResume(params);
     try {
-      const result = await this.taskManager.runSoon(taskId);
+      const result = params.isUserInteractive
+        ? await this.taskManager.runSoon(taskId, { priority: TaskPriority.UserInteractive })
+        : await this.taskManager.runSoon(taskId);
       return !result?.conflict;
     } catch (error) {
       // The task may complete between ensureScheduled and runSoon. Neither a busy
@@ -313,7 +316,10 @@ export class WorkflowTaskManager {
     if (await this.tryRunImmediateResume(params)) return;
     await this.ensureWakeTask(params);
     try {
-      await this.runSoonWithConflictRetry(getWorkflowWakeTaskId(params.executionId));
+      await this.runSoonWithConflictRetry(
+        getWorkflowWakeTaskId(params.executionId),
+        params.isUserInteractive ? { priority: TaskPriority.UserInteractive } : undefined
+      );
     } catch (error) {
       // A claimed wake task is retained and polls again; it cannot delete this request on success.
       if (!(error instanceof TaskAlreadyRunningError)) throw error;
@@ -380,10 +386,12 @@ export class WorkflowTaskManager {
     }
   }
 
-  private async runSoonWithConflictRetry(taskId: string): Promise<void> {
+  private async runSoonWithConflictRetry(taskId: string, options?: RunSoonOptions): Promise<void> {
     // Re-read after a conflicting update; never report a wake-up that was not accepted.
     for (let attempt = 0; attempt < 3; attempt++) {
-      const result = await this.taskManager.runSoon(taskId);
+      const result = options
+        ? await this.taskManager.runSoon(taskId, options)
+        : await this.taskManager.runSoon(taskId);
       if (!result.conflict) return;
     }
     throw SavedObjectsErrorHelpers.createConflictError(

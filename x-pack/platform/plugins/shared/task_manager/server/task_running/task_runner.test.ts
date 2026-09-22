@@ -19,7 +19,13 @@ import {
 import type { TaskEvent, TaskRun } from '../task_events';
 import { asTaskRunEvent, TaskPersistence, asTaskManagerStatEvent } from '../task_events';
 import type { ConcreteTaskInstance, TaskEventLogger } from '../task';
-import { getDeleteTaskRunResult, TaskStatus, TaskCost, InstanceTaskCost } from '../task';
+import {
+  getDeleteTaskRunResult,
+  TaskPriority,
+  TaskStatus,
+  TaskCost,
+  InstanceTaskCost,
+} from '../task';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import moment from 'moment';
 import type { TaskDefinitionRegistry } from '../task_type_dictionary';
@@ -788,31 +794,41 @@ describe('TaskManagerRunner', () => {
       expect(runner.startedAt).toEqual(now);
     });
 
-    test('reschedules tasks that return a runAt', async () => {
-      const runAt = minutesFromNow(_.random(1, 10));
-      const { instance, runner, store } = await readyToRunStageSetup({
-        definitions: {
-          bar: {
-            title: 'Bar!',
-            createTaskRunner: () => ({
-              async run() {
-                return { runAt, state: {} };
-              },
-            }),
+    test.each([undefined, TaskPriority.Standard, TaskPriority.UserInteractive])(
+      'reschedules tasks that return a runAt with priority %s',
+      async (priority) => {
+        const runAt = minutesFromNow(_.random(1, 10));
+        const { instance, runner, store } = await readyToRunStageSetup({
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              createTaskRunner: () => ({
+                async run() {
+                  return { runAt, state: {}, priority };
+                },
+              }),
+            },
           },
-        },
-      });
+        });
 
-      await runner.run();
+        await runner.run();
 
-      expect(store.partialUpdate).toHaveBeenCalledTimes(1);
-      expect(store.partialUpdate).toHaveBeenCalledWith(expect.objectContaining({ runAt }), {
-        validate: true,
-        doc: instance,
-      });
+        expect(store.partialUpdate).toHaveBeenCalledTimes(1);
+        expect(store.partialUpdate).toHaveBeenCalledWith(expect.objectContaining({ runAt }), {
+          validate: true,
+          doc: instance,
+        });
 
-      expect(getNextRunAtSpy).not.toHaveBeenCalled();
-    });
+        const [update] = store.partialUpdate.mock.calls[0];
+        if (priority === undefined) {
+          expect(update).not.toHaveProperty('priority');
+        } else {
+          expect(update).toHaveProperty('priority', priority);
+        }
+
+        expect(getNextRunAtSpy).not.toHaveBeenCalled();
+      }
+    );
 
     test('reschedules tasks that return a schedule', async () => {
       const runAt = minutesFromNow(1);
