@@ -6,12 +6,8 @@
  */
 
 import type { SchemaOutput } from '../schema_output';
-import {
-  SnapshotType,
-} from '../zod/snapshot';
+import { SnapshotType } from '../zod/snapshot';
 
-export {
-  SnapshotType,
-};
+export { SnapshotType };
 
 export type Snapshot = SchemaOutput<typeof SnapshotType>;

@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-import type { SchemaOutput } from '../schema_output';
-import {
-  ObserverCodec,
-} from '../zod/ping';
+import { ObserverCodec } from '../zod/ping';
 
-export {
-  ObserverCodec,
-};
-
+export { ObserverCodec };

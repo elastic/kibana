@@ -6,18 +6,14 @@
  */
 
 import type { SchemaOutput } from './schema_output';
+import type { DefaultEmailCodec } from './zod/dynamic_settings';
 import {
   DynamicSettingsSaveCodec,
   DynamicSettingsCodec,
   LocationMonitorsType,
-  DefaultEmailCodec,
 } from './zod/dynamic_settings';
 
-export {
-  DynamicSettingsSaveCodec,
-  DynamicSettingsCodec,
-  LocationMonitorsType,
-};
+export { DynamicSettingsSaveCodec, DynamicSettingsCodec, LocationMonitorsType };
 
 export type DynamicSettings = SchemaOutput<typeof DynamicSettingsCodec>;
 export type DefaultEmail = SchemaOutput<typeof DefaultEmailCodec>;

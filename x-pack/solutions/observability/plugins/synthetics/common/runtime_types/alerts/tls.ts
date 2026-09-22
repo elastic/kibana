@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-import type { SchemaOutput } from '../schema_output';
-import {
-  TLSParamsType,
-} from '../zod/alerts';
+import { TLSParamsType } from '../zod/alerts';
 
-export {
-  TLSParamsType,
-};
-
+export { TLSParamsType };

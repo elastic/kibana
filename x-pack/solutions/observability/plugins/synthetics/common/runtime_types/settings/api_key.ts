@@ -6,12 +6,8 @@
  */
 
 import type { SchemaOutput } from '../schema_output';
-import {
-  APIKeyCodec,
-} from '../zod/settings';
+import { APIKeyCodec } from '../zod/settings';
 
-export {
-  APIKeyCodec,
-};
+export { APIKeyCodec };
 
 export type SyntheticsProjectAPIKey = SchemaOutput<typeof APIKeyCodec>;

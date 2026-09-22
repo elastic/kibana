@@ -6,6 +6,7 @@
  */
 
 import type { SchemaOutput } from '../schema_output';
+import type { SummaryCodec } from '../zod/ping';
 import {
   PingErrorType,
   MonitorDetailsType,
@@ -22,7 +23,6 @@ import {
   PingsResponseType,
   GetPingsParamsType,
   MonitorStatusHeatmapBucketType,
-  SummaryCodec,
 } from '../zod/ping';
 
 export {

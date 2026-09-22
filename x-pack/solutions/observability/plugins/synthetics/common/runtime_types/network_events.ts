@@ -6,18 +6,18 @@
  */
 
 import type { SchemaOutput } from './schema_output';
-import {
-  SyntheticsNetworkEventsApiResponseType,
+import type {
   NetworkTimingsType,
   CertificateDataType,
   NetworkEventType,
 } from './zod/network_events';
+import { SyntheticsNetworkEventsApiResponseType } from './zod/network_events';
 
-export {
-  SyntheticsNetworkEventsApiResponseType,
-};
+export { SyntheticsNetworkEventsApiResponseType };
 
 export type NetworkTimings = SchemaOutput<typeof NetworkTimingsType>;
 export type CertificateData = SchemaOutput<typeof CertificateDataType>;
 export type NetworkEvent = SchemaOutput<typeof NetworkEventType>;
-export type SyntheticsNetworkEventsApiResponse = SchemaOutput<typeof SyntheticsNetworkEventsApiResponseType>;
+export type SyntheticsNetworkEventsApiResponse = SchemaOutput<
+  typeof SyntheticsNetworkEventsApiResponseType
+>;

@@ -6,15 +6,11 @@
  */
 
 import type { SchemaOutput } from './schema_output';
-import {
-  SyntheticsServiceApiKeyType,
-  SyntheticsServiceApiKeySaveType,
-} from './zod/settings';
+import { SyntheticsServiceApiKeyType, SyntheticsServiceApiKeySaveType } from './zod/settings';
 
-export {
-  SyntheticsServiceApiKeyType,
-  SyntheticsServiceApiKeySaveType,
-};
+export { SyntheticsServiceApiKeyType, SyntheticsServiceApiKeySaveType };
 
 export type SyntheticsServiceApiKey = SchemaOutput<typeof SyntheticsServiceApiKeyType>;
-export type SyntheticsServiceApiKeySaveResponse = SchemaOutput<typeof SyntheticsServiceApiKeySaveType>;
+export type SyntheticsServiceApiKeySaveResponse = SchemaOutput<
+  typeof SyntheticsServiceApiKeySaveType
+>;

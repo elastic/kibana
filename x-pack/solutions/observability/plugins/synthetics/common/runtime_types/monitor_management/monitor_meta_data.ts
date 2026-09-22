@@ -6,12 +6,8 @@
  */
 
 import type { SchemaOutput } from '../schema_output';
-import {
-  MetadataCodec,
-} from '../zod/monitor_meta_data';
+import { MetadataCodec } from '../zod/monitor_meta_data';
 
-export {
-  MetadataCodec,
-};
+export { MetadataCodec };
 
 export type Metadata = SchemaOutput<typeof MetadataCodec>;

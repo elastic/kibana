@@ -11,10 +11,7 @@ import {
   SyntheticsPrivateLocationsType,
 } from '../zod/synthetics_private_locations';
 
-export {
-  PrivateLocationCodec,
-  SyntheticsPrivateLocationsType,
-};
+export { PrivateLocationCodec, SyntheticsPrivateLocationsType };
 
 export type PrivateLocation = SchemaOutput<typeof PrivateLocationCodec>;
 export type SyntheticsPrivateLocations = SchemaOutput<typeof SyntheticsPrivateLocationsType>;
