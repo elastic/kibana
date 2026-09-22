@@ -31,10 +31,6 @@ describe('When using `getAgentCountForAgentPolicies()`', () => {
 
     esClientMock = elasticsearchServiceMock.createClusterClient().asInternalUser;
     esClientMock.search.mockImplementation(async () => {
-      const bucketsRecord: Record<string, { doc_count: number }> = {};
-      for (const { key, doc_count } of aggrBuckets) {
-        bucketsRecord[key] = { doc_count };
-      }
       return {
         took: 3,
         timed_out: false,
@@ -51,7 +47,7 @@ describe('When using `getAgentCountForAgentPolicies()`', () => {
         },
         aggregations: {
           agent_counts: {
-            buckets: bucketsRecord,
+            buckets: aggrBuckets,
           },
         },
       };
@@ -74,9 +70,7 @@ describe('When using `getAgentCountForAgentPolicies()`', () => {
       hits: { total: 100, max_score: 0, hits: [] },
       aggregations: {
         agent_counts: {
-          buckets: {
-            'agent-policy-id-a': { doc_count: 100 },
-          },
+          buckets: [{ key: 'agent-policy-id-a', doc_count: 100 }],
         },
       },
     }));
@@ -95,9 +89,7 @@ describe('When using `getAgentCountForAgentPolicies()`', () => {
       hits: { total: 150, max_score: 0, hits: [] },
       aggregations: {
         agent_counts: {
-          buckets: {
-            policy1: { doc_count: 150 },
-          },
+          buckets: [{ key: 'policy1', doc_count: 150 }],
         },
       },
     }));
@@ -123,7 +115,9 @@ describe('When using `getAgentCountForAgentPolicies()`', () => {
       await getAgentCountForAgentPolicies(esClientMock, agentPolicyIds, { runtimeMappings });
 
       const searchCall = esClientMock.search.mock.calls[0][0] as Record<string, unknown>;
-      const query = searchCall.query as { bool: { filter: unknown[] } };
+      const query = (searchCall.body as Record<string, unknown>).query as {
+        bool: { filter: unknown[] };
+      };
       expect(query.bool.filter).toEqual(
         expect.arrayContaining([
           {
