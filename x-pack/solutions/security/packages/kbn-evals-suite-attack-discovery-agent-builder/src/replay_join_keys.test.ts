@@ -6,7 +6,7 @@
  */
 
 import { goldenPathExamples } from './dataset';
-import { cleanProfileProvidedAlertsExamples } from './datasets/clean_profile_provided_alerts';
+import { buildCleanProfileProvidedAlertsExamples } from './datasets/clean_profile_provided_alerts';
 
 /**
  * A rejudge joins recorded score documents back to dataset references on
@@ -20,7 +20,10 @@ import { cleanProfileProvidedAlertsExamples } from './datasets/clean_profile_pro
  * scenario cannot be added without one.
  */
 describe('attack-discovery replay join keys', () => {
-  const allExamples = [...goldenPathExamples, ...cleanProfileProvidedAlertsExamples];
+  const allExamples = [
+    ...goldenPathExamples,
+    ...Object.values(buildCleanProfileProvidedAlertsExamples('replay-join-keys-test')),
+  ];
 
   it('gives every golden-path example a scenarioKey', () => {
     const missing = goldenPathExamples.filter((example) => !example.metadata?.scenarioKey);

@@ -15,50 +15,6 @@ import { defaultConfig } from '../../default/stateful/base.config';
 
 const EIS_QA_URL = 'https://inference.eu-west-1.aws.svc.qa.elastic.cloud';
 
-interface AvailableConnector {
-  name: string;
-  actionTypeId: string;
-  exposeConfig?: boolean;
-  config: Record<string, unknown>;
-  secrets?: Record<string, unknown>;
-}
-
-function getPreconfiguredEisConnectorsArg(): string | undefined {
-  const raw = process.env.KIBANA_TESTING_AI_CONNECTORS;
-  if (!raw) return;
-
-  let connectors: Record<string, AvailableConnector>;
-  try {
-    connectors = JSON.parse(Buffer.from(raw, 'base64').toString('utf8')) as Record<
-      string,
-      AvailableConnector
-    >;
-  } catch (e) {
-    throw new Error(
-      `Failed to parse base64 JSON from KIBANA_TESTING_AI_CONNECTORS: ${
-        e instanceof Error ? e.message : String(e)
-      }`
-    );
-  }
-
-  const eisConnectors: Record<string, AvailableConnector> = {};
-  for (const [id, connector] of Object.entries(connectors)) {
-    if (!connector || typeof connector !== 'object') continue;
-    if (connector.actionTypeId !== '.inference') continue;
-    if (connector.config?.provider !== 'elastic') continue;
-    // Preconfigured connectors do not expose `config` unless `exposeConfig: true` is set.
-    // The inference plugin relies on `.inference` connector config (taskType, inferenceId, ...)
-    // to validate compatibility.
-    eisConnectors[id] = { ...connector, exposeConfig: true };
-  }
-
-  if (Object.keys(eisConnectors).length === 0) return;
-
-  return `--xpack.actions.preconfigured=${JSON.stringify(eisConnectors)}`;
-}
-
-const preconfiguredEisConnectorsArg = getPreconfiguredEisConnectorsArg();
-
 const gcsCredentials = process.env.GCS_CREDENTIALS;
 let gcsSecureFile: string | undefined;
 
@@ -141,14 +97,13 @@ export const servers: ScoutServerConfig = {
     serverArgs: [
       ...defaultConfig.kbnTestServer.serverArgs,
       '--xpack.evals.enabled=true',
-      ...(preconfiguredEisConnectorsArg ? [preconfiguredEisConnectorsArg] : []),
-      // Unconditional: Agent Builder's span processor strips gen_ai.tool.call.arguments
+      // Unconditional, unlike the redaction overrides below: Agent Builder keeps its own
+      // tracer provider that always exports to the local ES, and that is what the
+      // trace-based evaluators read. Its span processor strips gen_ai.tool.call.arguments
       // and .result from every tool span unless this is on (it defaults to false for
-      // privacy). Trace-based evaluators that match on tool call arguments --
-      // SkillInvoked matches the skill name inside them -- then score 0 for every
-      // model, which reads as a model failure rather than a missing attribute.
-      // Evals run on synthetic data, so always capture the details: gating this on
-      // `shouldEnableTracing` silently drops it whenever exporters are unset.
+      // privacy), so gating it on `shouldEnableTracing` silently drops tool details on CI
+      // whenever exporters are unset -- SkillInvoked then scores 0 for every model and
+      // reads as a model failure rather than a missing attribute.
       '--uiSettings.overrides.agentBuilder:tracing:includeToolDetails=true',
       ...(shouldEnableTracing
         ? [
@@ -161,6 +116,16 @@ export const servers: ScoutServerConfig = {
             ...(agentBuilderTracingExporters
               ? [`--xpack.agentBuilder.tracing.exporters=${agentBuilderTracingExporters}`]
               : []),
+            /* Disable tracing redaction so exported spans carry real prompt/response and
+             * tool-call content when inspecting eval runs in Phoenix or Kibana's Tracing UI.
+             * Every config set that extends this one (agent-builder, security, workflows,
+             * entity-analytics, etc.) inherits these overrides, so `Skill Invoked` / `Tool Calls`
+             * evaluators stop reading empty tool-call attributes across the board. See elastic/kibana#291754. */
+            '--uiSettings.overrides.agentBuilder:tracing:includeUserPrompts=true',
+            '--uiSettings.overrides.agentBuilder:tracing:includeSystemPrompt=true',
+            '--uiSettings.overrides.agentBuilder:tracing:includeLlmResponses=true',
+            '--uiSettings.overrides.agentBuilder:tracing:includeRealNames=true',
+            '--uiSettings.overrides.agentBuilder:tracing:includeRealIds=true',
           ]
         : []),
     ],

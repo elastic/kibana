@@ -63,12 +63,12 @@ apiTest.describe(
     );
 
     apiTest(
-      'denies a manager whose Streams privilege is limited to one space',
+      'denies a manager whose Nightshift privilege is limited to one space',
       async ({ apiClient, samlAuth, config }) => {
-        const streamsAdmin = getStreamsUsers(config).streamsAdmin;
+        const nightshiftEngineAdmin = getStreamsUsers(config).nightshiftEngineAdmin;
         const oneSpaceManager = {
-          ...streamsAdmin,
-          kibana: streamsAdmin.kibana.map((entry) => ({ ...entry, spaces: ['default'] })),
+          ...nightshiftEngineAdmin,
+          kibana: nightshiftEngineAdmin.kibana.map((entry) => ({ ...entry, spaces: ['default'] })),
         };
         const { cookieHeader } = await samlAuth.asInteractiveUser(oneSpaceManager);
         const readResponse = await apiClient.get(RUN_QUOTAS_ENDPOINT, {
@@ -89,9 +89,9 @@ apiTest.describe(
     );
 
     apiTest(
-      'allows an all-spaces Streams manager to update and restore settings',
+      'allows an all-spaces Nightshift manager to update and restore settings',
       async ({ apiClient, samlAuth }) => {
-        const { cookieHeader } = await samlAuth.asStreamsAdmin();
+        const { cookieHeader } = await samlAuth.asNightshiftEngineAdmin();
         const headers = { ...COMMON_API_HEADERS, ...cookieHeader };
         const readResponse = await apiClient.get(RUN_QUOTAS_ENDPOINT, {
           headers,

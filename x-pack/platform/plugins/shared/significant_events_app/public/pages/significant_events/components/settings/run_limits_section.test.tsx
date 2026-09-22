@@ -100,7 +100,6 @@ describe('RunLimitsSection', () => {
     expect(screen.getByText('Discovery')).toBeInTheDocument();
     expect(screen.getByText('Investigation')).toBeInTheDocument();
     expect(screen.getByText('Knowledge indicator extraction')).toBeInTheDocument();
-    expect(screen.queryByText('Memory updates')).not.toBeInTheDocument();
     expect(screen.getByTestId('significantEventsRunLimitCount-detection')).toHaveTextContent(
       '14 counted scheduled admissions today'
     );

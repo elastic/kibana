@@ -9,7 +9,7 @@ import React, { memo } from 'react';
 import { CUSTOM_YARA_SIGNATURES_PAGE_LABELS } from '../translations';
 import { ArtifactListPage } from '../../../components/artifact_list_page';
 import { CustomYaraSignaturesApiClient } from '../service/api_client';
-import { HostIsolationExceptionsForm } from '../../host_isolation_exceptions/view/components/form';
+import { CustomYaraSignaturesForm } from './components/custom_yara_signatures_form';
 import { useHttp } from '../../../../common/lib/kibana';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
@@ -32,14 +32,15 @@ export const CustomYaraSignaturesList = memo(() => {
   return (
     <ArtifactListPage
       apiClient={customYaraSignaturesApiClient}
-      // Placeholder until a Custom YARA form exists; create/edit will not produce valid items.
-      ArtifactFormComponent={HostIsolationExceptionsForm}
+      ArtifactFormComponent={CustomYaraSignaturesForm}
       labels={CUSTOM_YARA_SIGNATURES_PAGE_LABELS}
       data-test-subj="customYaraSignaturesList"
       searchableFields={SEARCHABLE_FIELDS}
       allowCardDeleteAction={canWriteCustomYaraSignatures}
       allowCardEditAction={canWriteCustomYaraSignatures}
       allowCardCreateAction={canWriteCustomYaraSignatures}
+      showAsSimpleTable
+      showEnabledColumn
     />
   );
 });

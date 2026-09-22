@@ -37,13 +37,21 @@ import type {
   ProcessedRoundInput,
 } from '@kbn/agent-builder-server';
 import type { CompactionSummary } from '@kbn/agent-builder-common';
-import { formatSystemNotice, formatSubagentRosterNotice } from '../prompts/utils/actions';
+import {
+  formatExecutionFailedNotice,
+  formatSystemNotice,
+  formatSubagentRosterNotice,
+} from '../prompts/utils/actions';
 import { createRelevantSkillsNoticeMessage } from '../prompts/utils/skills';
 import { formatDate } from '../prompts/utils/helpers';
 import type { ProcessedConversation } from './prepare_conversation';
 import {
   groupTimelineRounds,
+  groupTimelineEntries,
+  isTimelineFailedExecution,
+  type TimelineFailedExecution,
   isAwaitingPrompt,
+  isTimelineRound,
   roundResponse,
   type ProcessedTimelineEvent,
   type TimelineRound,
@@ -96,7 +104,7 @@ export const prepareMessages = async ({
   const attachmentTypeInstructionsProvided = new Set<string>();
 
   const previousRounds = groupTimelineRounds(conversation.timeline);
-  let rounds = previousRounds;
+  let entries = groupTimelineEntries(conversation.timeline);
   let input = conversation.nextInput;
   let inputTimestamp = conversationTimestamp;
 
@@ -104,7 +112,7 @@ export const prepareMessages = async ({
   // we also uses the last message's input as the "next" input (given the actual input will be the prompt response)
   const lastRound = previousRounds[previousRounds.length - 1];
   if (lastRound && isAwaitingPrompt(lastRound)) {
-    rounds = rounds.slice(0, rounds.length - 1);
+    entries = entries.filter((entry) => !isTimelineRound(entry) || entry.id !== lastRound.id);
     input = lastRound.userMessage.data;
     inputTimestamp = lastRound.userMessage.created_at;
   }
@@ -117,27 +125,48 @@ export const prepareMessages = async ({
 
     // Inject back subagent roaster notice after compaction
     if (subagentRosterFallback && Object.keys(subagentRosterFallback).length > 0) {
-      const fallbackRoster = Object.entries(subagentRosterFallback).map(([name, id]) => ({
+      const fallbackRoster = Object.entries(subagentRosterFallback).map(([name, entry]) => ({
         name,
-        conversation_id: id,
+        conversation_id: entry.conversation_id,
       }));
       messages.push(createUserMessage(formatSubagentRosterNotice(fallbackRoster)));
     }
   }
 
-  for (const round of rounds) {
+  for (const entry of entries) {
+    if (isTimelineRound(entry)) {
+      messages.push(
+        ...(await roundToLangchain(entry, {
+          resultTransformer,
+          ignoreSteps,
+          attachmentTypes: conversation.attachmentTypes,
+          attachmentTypeInstructionsProvided,
+        }))
+      );
+      continue;
+    }
+    if (isTimelineFailedExecution(entry)) {
+      messages.push(
+        ...failedExecutionToLangchain(entry, {
+          attachmentTypes: conversation.attachmentTypes,
+          attachmentTypeInstructionsProvided,
+        })
+      );
+      continue;
+    }
+    // a standalone user message: no execution to render
     messages.push(
-      ...(await roundToLangchain(round, {
-        resultTransformer,
-        ignoreSteps,
+      formatUserInput({
+        input: entry.userMessage.data,
+        timestamp: entry.userMessage.created_at,
         attachmentTypes: conversation.attachmentTypes,
         attachmentTypeInstructionsProvided,
-      }))
+      })
     );
   }
 
   messages.push(
-    formatRoundInput({
+    formatUserInput({
       input,
       timestamp: inputTimestamp,
       attachmentTypes: conversation.attachmentTypes,
@@ -168,7 +197,7 @@ export const roundToLangchain = async (
 
   // user message
   messages.push(
-    formatRoundInput({
+    formatUserInput({
       input: round.userMessage.data,
       timestamp: round.userMessage.created_at,
       attachmentTypes,
@@ -225,7 +254,27 @@ export const roundToLangchain = async (
   return messages;
 };
 
-const formatRoundInput = ({
+/**
+ * The two messages a failed initial execution contributes to the history: the user message it
+ * answered nothing to, and a system notice saying the attempt failed. Its steps are not rendered.
+ */
+export const failedExecutionToLangchain = (
+  entry: TimelineFailedExecution<ProcessedTimelineEvent>,
+  {
+    attachmentTypes,
+    attachmentTypeInstructionsProvided,
+  }: Pick<RoundToLangchainOptions, 'attachmentTypes' | 'attachmentTypeInstructionsProvided'> = {}
+): BaseMessage[] => [
+  formatUserInput({
+    input: entry.userMessage.data,
+    timestamp: entry.userMessage.created_at,
+    attachmentTypes,
+    attachmentTypeInstructionsProvided,
+  }),
+  createUserMessage(formatExecutionFailedNotice(entry.failed.data.error)),
+];
+
+export const formatUserInput = ({
   input,
   timestamp,
   attachmentTypes,
