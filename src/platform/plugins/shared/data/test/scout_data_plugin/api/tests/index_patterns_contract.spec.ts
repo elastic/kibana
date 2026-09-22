@@ -15,9 +15,8 @@ apiTest.describe('data.indexPatterns contract', { tag: '@local-stateful-classic'
   const spaceId = `index-patterns-contract-${randomUUID()}`;
   const route = `/s/${spaceId}/api/index-patterns-plugin`;
   let headers: Record<string, string>;
-  let ownsShakespeareIndex = false;
 
-  apiTest.beforeAll(async ({ apiServices, esArchiver, esClient, requestAuth }) => {
+  apiTest.beforeAll(async ({ apiServices, esArchiver, requestAuth }) => {
     const { apiKeyHeader } = await requestAuth.getApiKey('editor');
     headers = {
       ...apiKeyHeader,
@@ -26,21 +25,15 @@ apiTest.describe('data.indexPatterns contract', { tag: '@local-stateful-classic'
     };
     await apiServices.spaces.create({ id: spaceId });
 
-    ownsShakespeareIndex = !(await esClient.indices.exists({ index: 'shakespeare' }));
+    // Retain this shared, read-only archive for other Scout suites using loadIfNeeded.
     await esArchiver.loadIfNeeded(
       'src/platform/test/functional/fixtures/es_archiver/getting_started/shakespeare'
     );
   });
 
-  apiTest.afterAll(async ({ apiServices, esClient }) => {
+  apiTest.afterAll(async ({ apiServices }) => {
     // Deleting the owned space also cleans up a data view left by a failed CRUD step.
-    try {
-      await apiServices.spaces.delete(spaceId);
-    } finally {
-      if (ownsShakespeareIndex) {
-        await esClient.indices.delete({ index: 'shakespeare', ignore_unavailable: true });
-      }
-    }
+    await apiServices.spaces.delete(spaceId);
   });
 
   apiTest('creates, gets, updates, and deletes an index pattern', async ({ apiClient }) => {

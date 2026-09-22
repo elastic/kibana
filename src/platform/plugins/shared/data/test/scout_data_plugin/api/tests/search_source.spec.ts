@@ -15,9 +15,8 @@ apiTest.describe('data.search.searchSource contract', { tag: '@local-stateful-cl
   const spaceId = `search-source-${randomUUID()}`;
   const route = `/s/${spaceId}/api/data_search_plugin/search_source`;
   let headers: Record<string, string>;
-  let ownsShakespeareIndex = false;
 
-  apiTest.beforeAll(async ({ apiServices, esArchiver, esClient, requestAuth }) => {
+  apiTest.beforeAll(async ({ apiServices, esArchiver, requestAuth }) => {
     const { apiKeyHeader } = await requestAuth.getApiKey('viewer');
     headers = {
       ...apiKeyHeader,
@@ -26,7 +25,7 @@ apiTest.describe('data.search.searchSource contract', { tag: '@local-stateful-cl
     };
     await apiServices.spaces.create({ id: spaceId });
 
-    ownsShakespeareIndex = !(await esClient.indices.exists({ index: 'shakespeare' }));
+    // Retain this shared, read-only archive for other Scout suites using loadIfNeeded.
     await esArchiver.loadIfNeeded(
       'src/platform/test/functional/fixtures/es_archiver/getting_started/shakespeare'
     );
@@ -34,14 +33,8 @@ apiTest.describe('data.search.searchSource contract', { tag: '@local-stateful-cl
     await apiServices.dataViews.create({ title: 'shakespeare', spaceId });
   });
 
-  apiTest.afterAll(async ({ apiServices, esClient }) => {
-    try {
-      await apiServices.spaces.delete(spaceId);
-    } finally {
-      if (ownsShakespeareIndex) {
-        await esClient.indices.delete({ index: 'shakespeare', ignore_unavailable: true });
-      }
-    }
+  apiTest.afterAll(async ({ apiServices }) => {
+    await apiServices.spaces.delete(spaceId);
   });
 
   apiTest('asScoped()', async ({ apiClient }) => {
