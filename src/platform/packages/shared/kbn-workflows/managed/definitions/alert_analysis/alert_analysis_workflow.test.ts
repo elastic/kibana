@@ -425,6 +425,9 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(note).toContain('variables.batch_output_tokens');
     expect(note).toContain('variables.batch_llm_calls');
     expect(note).toContain('variables.pending_alert_count');
+    // Worker path clears connector_id for the feature-registry swap; the note must attribute
+    // the resolved ID captured after the agent call (standalone falls back to connector_id).
+    expect(note).toContain('variables.resolved_connector_id | default: variables.connector_id');
 
     const collectStep = findStepByName(workflow.steps, 'collect_batch_verdicts') as {
       with: Record<string, string>;

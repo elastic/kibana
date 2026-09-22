@@ -1524,7 +1524,7 @@ steps:
                         ### Analysis Details
                         - Workflow version: {{ variables.normalized_version }}
                         - Tag prefix: {{ variables.tag_prefix }}
-                        - Connector: {{ variables.connector_id }}
+                        - Connector: {{ variables.resolved_connector_id | default: variables.connector_id }}
                         - Analyzed in a batch of up to {{ consts.batch_size }} alerts
                         {% if variables.auto_close_enabled -%}
                         - Auto-close confidence range: {{ variables.auto_close_confidence_score_min_threshold }} to {{ variables.auto_close_confidence_score_max_threshold }}
