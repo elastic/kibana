@@ -1637,7 +1637,6 @@ export const FieldDefinitionResponse = lazySchema(() =>
       */
     name: z
       .string()
-      .max(50)
       .describe(
         'The field name. Must match the `name` property in the YAML definition and is unique per owner (case-insensitive). Immutable after creation.\n'
       ),
@@ -1651,7 +1650,6 @@ export const FieldDefinitionResponse = lazySchema(() =>
      */
     description: z
       .string()
-      .max(1000)
       .optional()
       .describe("Optional human-readable description of the field's purpose."),
     /**
