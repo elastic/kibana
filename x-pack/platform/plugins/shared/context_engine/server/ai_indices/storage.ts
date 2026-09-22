@@ -69,7 +69,7 @@ interface AiIndexDocumentFields {
   description?: string;
   feedback_analysis?: AiIndexFeedbackAnalysis;
   // Optional for backward compatibility with entries written before memory
-  // support existed; absence is treated as disabled (`false`) on read.
+  // support existed; absence is treated as enabled (`true`) on read.
   memory_enabled?: boolean;
   // Optional for backward compatibility with entries written before managed
   // indices existed; absence is treated as unmanaged (`false`) on read.
