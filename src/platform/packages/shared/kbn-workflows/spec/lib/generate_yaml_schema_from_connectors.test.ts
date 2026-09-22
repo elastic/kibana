@@ -498,6 +498,39 @@ describe('generateYamlSchemaFromConnectors', () => {
           }).success
         ).toBe(false);
       });
+
+      it('does not re-apply non-idempotent field transforms when running object checks', () => {
+        // Deferred checks must run against the already-parsed field output. Feeding that output
+        // back through paramsSchema would transform `name` a second time (`x` → `x!` → `x!!`) and
+        // reject a value the original schema accepts.
+        const refinedWithTransform: ConnectorContractUnion = {
+          summary: 'TransformedRefined',
+          description: null,
+          type: 'transformed.refined.step',
+          paramsSchema: z
+            .object({
+              ids: z.array(z.string()),
+              name: z.string().transform((v) => `${v}!`),
+            })
+            .refine((v) => v.name === 'x!', 'name must be x!'),
+          outputSchema: z.unknown(),
+        };
+        const schema = generateYamlSchemaFromConnectors([refinedWithTransform]);
+        const result = schema.safeParse({
+          ...BASE_WORKFLOW,
+          steps: [
+            {
+              name: 's',
+              type: 'transformed.refined.step',
+              with: { ids: ['a'], name: 'x' },
+            },
+          ],
+        });
+        expect(result.success).toBe(true);
+        expect(result.data).toMatchObject({
+          steps: [{ with: { ids: ['a'], name: 'x!' } }],
+        });
+      });
     });
   });
 });

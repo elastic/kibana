@@ -235,9 +235,9 @@ function hasObjectLevelChecks(schema: z.ZodObject): boolean {
  * `array | string` a refinement like `(v) => v.ids.every(...)` receives a string and throws a
  * TypeError. That exception escapes `safeParse` and fails the whole create/update request, so the
  * checks cannot simply be preserved as-is. A templated value cannot be meaningfully checked before
- * it is rendered anyway, so it skips them; every other value is handed to the original schema and
- * validated exactly as before (which costs a second parse of the shape, hence only doing this for
- * the minority of connectors that declare checks).
+ * it is rendered anyway, so it skips them; every other value runs the original object-level checks
+ * against the already-parsed field output (without re-running field schemas, which would re-apply
+ * non-idempotent transforms).
  */
 function deferChecksForTemplateValues(
   paramsSchema: z.ZodObject,
@@ -250,19 +250,30 @@ function deferChecksForTemplateValues(
   const { catchall } = paramsSchema.def;
   const widened = catchall ? rebuilt.catchall(catchall) : rebuilt;
 
+  // Field schemas already ran in `widened`. Re-parsing through `paramsSchema` would re-apply
+  // non-idempotent field transforms (e.g. `.transform(v => v + '!')`) and can reject values the
+  // original schema accepts. `z.any()` fields + the original object checks validate the output
+  // shape without touching the fields again.
+  const objectChecks = paramsSchema.def.checks ?? [];
+  const outputChecksOnly = z
+    .object(
+      Object.fromEntries(
+        Object.keys(paramsSchema.shape as Record<string, z.ZodType>).map((key) => [key, z.any()])
+      ) as z.ZodRawShape
+    )
+    .check(...objectChecks);
+
   return widened.superRefine((value, ctx) => {
     const params = value as Record<string, unknown>;
     if (widenedKeys.some((key) => typeof params[key] === 'string')) {
       return;
     }
-    const result = paramsSchema.safeParse(value);
+    const result = outputChecksOnly.safeParse(value);
     if (result.success) {
       return;
     }
-    // Only the object's own checks can fail here — the rebuilt shape reuses the original field
-    // schemas, so anything they reject has already been reported and short-circuited this
-    // callback. Replaying path and message keeps the issue pointing at the offending field, which
-    // both Monaco markers and the template-error suppression in parseWorkflowYamlToJSON rely on.
+    // Replaying path and message keeps the issue pointing at the offending field, which both
+    // Monaco markers and the template-error suppression in parseWorkflowYamlToJSON rely on.
     for (const issue of result.error.issues) {
       ctx.addIssue({
         code: 'custom',
