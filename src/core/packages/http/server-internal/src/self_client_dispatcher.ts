@@ -36,8 +36,10 @@ const buildConnectOptions = (
   // Omitting `ca` keeps Node's default trust store, which includes NODE_EXTRA_CA_CERTS.
   // Passing `rootCertificates` instead would replace it and trust less than `full` does.
   // Exclusive trust is the local-`full` pin: only this process's leaf, no public roots.
+  // Exclusive trust still needs partial-chain: a CA-issued leaf is not a
+  // self-signed root, but it is the only acceptable trust endpoint.
   const connect: ConnectOptions = exclusiveTrust
-    ? { ca: certificateAuthorities }
+    ? { ca: certificateAuthorities, allowPartialTrustChain: true }
     : certificateAuthorities.length === 0
     ? {}
     : { ca: [...rootCertificates, ...certificateAuthorities], allowPartialTrustChain: true };

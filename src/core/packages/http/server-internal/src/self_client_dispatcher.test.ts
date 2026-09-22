@@ -157,7 +157,7 @@ describe('SelfHttpDispatcherProvider', () => {
 
       const connect = connectOptionsOf(0);
       expect(connect.ca).toEqual([leaf]);
-      expect(connect).not.toHaveProperty('allowPartialTrustChain');
+      expect(connect.allowPartialTrustChain).toBe(true);
       expect(connect.rejectUnauthorized).toBe(true);
       expect(connect.checkServerIdentity('localhost', {})).toBeUndefined();
     });
