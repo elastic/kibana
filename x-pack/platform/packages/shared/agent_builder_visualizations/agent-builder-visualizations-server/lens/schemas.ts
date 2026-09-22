@@ -213,8 +213,13 @@ const dropUnreachableDefs = (schema: JsonSchemaNode): JsonSchemaNode => {
   return Object.keys(keptDefs).length > 0 ? { ...root, $defs: keptDefs } : root;
 };
 
+/**
+ * The model authors the *input* of the zod schema, so emit that side:
+ * in output mode zod lists every `.default()` field as required, which
+ * made the model restate defaults such as `sampling` on every layer.
+ */
 const toPromptSchema = (schema: z.ZodType): object => {
-  const jsonSchema = mapSchemaNodes(z.toJSONSchema(schema), (node) =>
+  const jsonSchema = mapSchemaNodes(z.toJSONSchema(schema, { io: 'input' }), (node) =>
     dropSystemOwnedProperties(collapseLiteralUnions(dropSchemaMetadata(trimDescription(node))))
   ) as JsonSchemaNode;
   return inlineSingleUseDefs(dropUnreachableDefs(jsonSchema));
