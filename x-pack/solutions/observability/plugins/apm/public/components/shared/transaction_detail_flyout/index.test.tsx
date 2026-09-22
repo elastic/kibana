@@ -34,8 +34,9 @@ jest.mock('./red_metrics', () => ({
 }));
 jest.mock('./trace_sample', () => ({
   TransactionDetailFlyoutTraceSample: () => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { useTransactionDetailFlyoutContext } = require('./transaction_detail_flyout_context');
+    const { useTransactionDetailFlyoutContext } = jest.requireActual(
+      './transaction_detail_flyout_context'
+    );
     const { openFullTraceFlyout } = useTransactionDetailFlyoutContext();
     return (
       <button

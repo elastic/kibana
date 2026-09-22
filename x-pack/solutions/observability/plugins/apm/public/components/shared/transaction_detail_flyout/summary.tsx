@@ -78,7 +78,6 @@ export function TransactionDetailFlyoutSummary() {
         columnGutterSize="m"
         rowGutterSize="s"
         align="left"
-        // columnWidths={['minmax(120px, 35%)', '1fr']}
         listItems={listItems}
       />
     </EuiPanel>
