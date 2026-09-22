@@ -117,7 +117,6 @@ const PACKAGES_TO_INSTALL_WITH_STREAMING = [
   'security_detection_engine',
 ];
 
-
 export async function isPackageInstalled(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
