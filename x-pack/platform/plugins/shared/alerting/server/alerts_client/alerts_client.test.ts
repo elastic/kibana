@@ -1592,7 +1592,7 @@ describe('Alerts Client', () => {
           expect(orphanDoc).toEqual(expect.objectContaining({ [ALERT_TRACKED]: false }));
         });
 
-        test('should close still-active tracked AAD docs that are not in the working set', async () => {
+        test('should untrack still-active tracked AAD docs that are not in the working set without recovering them', async () => {
           const orphanAlert = {
             ...fetchedAlert1,
             [ALERT_STATUS]: 'active',
@@ -1639,12 +1639,12 @@ describe('Alerts Client', () => {
           expect(orphanDoc).toEqual(
             expect.objectContaining({
               [ALERT_TRACKED]: false,
-              [ALERT_STATUS]: 'recovered',
+              [ALERT_STATUS]: 'active',
+            })
+          );
+          expect(orphanDoc).not.toEqual(
+            expect.objectContaining({
               [ALERT_END]: date,
-              [ALERT_TIME_RANGE]: {
-                gte: '2023-03-28T12:27:28.159Z',
-                lte: date,
-              },
             })
           );
         });

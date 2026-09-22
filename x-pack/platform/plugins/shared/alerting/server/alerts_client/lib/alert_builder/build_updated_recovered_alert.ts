@@ -9,6 +9,7 @@ import deepmerge from 'deepmerge';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import {
   ALERT_ACTION_GROUP,
+  ALERT_DURATION,
   ALERT_END,
   ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
@@ -21,6 +22,7 @@ import {
   ALERT_STATUS_RECOVERED,
   ALERT_TIME_RANGE,
   ALERT_TRACKED,
+  EVENT_ACTION,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import type { RawAlertInstance } from '@kbn/alerting-state-types';
@@ -29,6 +31,7 @@ import type { RuleAlertData } from '../../../types';
 import type { AlertRule } from '../../types';
 import { removeUnflattenedFieldsFromAlert, replaceRefreshableAlertFields } from '../format_alert';
 import { shouldKeepTrackingRecovered } from '../../../lib/flapping/optimize_task_state_for_flapping';
+import { nanosToMicros } from '../nanos_to_micros';
 
 interface BuildUpdatedRecoveredAlertOpts<AlertData extends RuleAlertData> {
   alert: Alert & AlertData;
@@ -36,6 +39,7 @@ interface BuildUpdatedRecoveredAlertOpts<AlertData extends RuleAlertData> {
   runTimestamp?: string;
   timestamp: string;
   rule: AlertRule;
+  recoveryActionGroup?: string;
 }
 
 /**
@@ -48,6 +52,7 @@ export const buildUpdatedRecoveredAlert = <AlertData extends RuleAlertData>({
   legacyRawAlert,
   runTimestamp,
   timestamp,
+  recoveryActionGroup = 'recovered',
 }: BuildUpdatedRecoveredAlertOpts<AlertData>): Alert & AlertData => {
   // Make sure that any alert fields that are updatable are flattened.
   const refreshableAlertFields = replaceRefreshableAlertFields(alert);
@@ -60,11 +65,13 @@ export const buildUpdatedRecoveredAlert = <AlertData extends RuleAlertData>({
   const recoveredEnd = recoveredState?.end ?? timestamp;
   const recoveredStart = get(alert, ALERT_START) ?? recoveredState?.start;
   // Task state is the source of truth for recovery. If the original recovered
-  // write never landed, the source doc is still active — close it here.
+  // write never landed, close the source doc with the canonical recovery fields.
   const recoveryRepair =
     sourceStatus !== ALERT_STATUS_RECOVERED
       ? {
           [ALERT_STATUS]: ALERT_STATUS_RECOVERED,
+          [EVENT_ACTION]: 'close',
+          [ALERT_ACTION_GROUP]: recoveryActionGroup,
           [ALERT_END]: recoveredEnd,
           ...(recoveredStart
             ? {
@@ -73,6 +80,9 @@ export const buildUpdatedRecoveredAlert = <AlertData extends RuleAlertData>({
                   lte: recoveredEnd,
                 },
               }
+            : {}),
+          ...(recoveredState?.duration
+            ? { [ALERT_DURATION]: nanosToMicros(recoveredState.duration) }
             : {}),
         }
       : {};

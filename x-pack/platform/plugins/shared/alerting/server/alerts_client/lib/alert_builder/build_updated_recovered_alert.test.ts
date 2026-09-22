@@ -235,14 +235,19 @@ describe('buildUpdatedRecoveredAlert', () => {
           state: {
             start: '2023-03-28T12:27:28.159Z',
             end: '2023-03-29T12:27:28.159Z',
+            duration: '36000000000',
           },
         },
         rule: alertRule,
         timestamp: '2023-03-29T12:27:28.159Z',
+        recoveryActionGroup: 'recovered',
       })
     ).toEqual(
       expect.objectContaining({
         [ALERT_STATUS]: 'recovered',
+        [EVENT_ACTION]: 'close',
+        [ALERT_ACTION_GROUP]: 'recovered',
+        [ALERT_DURATION]: 36000000,
         [ALERT_END]: '2023-03-29T12:27:28.159Z',
         [ALERT_TIME_RANGE]: {
           gte: '2023-03-28T12:27:28.159Z',
