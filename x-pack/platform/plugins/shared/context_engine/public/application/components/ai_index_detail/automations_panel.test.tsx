@@ -69,9 +69,14 @@ const suggestResult = (
   ...overrides,
 });
 
-const summariesResult = (summaries: Array<[string, WorkflowSummary]> = [], isLoading = false) => ({
+const summariesResult = (
+  summaries: Array<[string, WorkflowSummary]> = [],
+  isLoading = false,
+  missingReadPrivilege = false
+) => ({
   summaries: new Map(summaries),
   isLoading,
+  missingReadPrivilege,
 });
 
 const aiIndex: GetAiIndexResponse = {
