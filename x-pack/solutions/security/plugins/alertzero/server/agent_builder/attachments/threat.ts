@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-import type {
-  AttachmentTypeDefinition,
-  AttachmentFormatContext,
-} from '@kbn/agent-builder-server/attachments';
-import type { Attachment } from '@kbn/agent-builder-common/attachments';
+import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { ALERTZERO_ATTACHMENT_TYPES } from '../../../common/constants';
 import {
   threatAttachmentDataSchema,
   type ThreatAttachmentData,
 } from '../../../common/threat_attachment_schema';
+import { createReadonlyAttachmentType } from './create_readonly_attachment_type';
 
 export const THREAT_ATTACHMENT_ID = ALERTZERO_ATTACHMENT_TYPES.threat;
 
@@ -36,52 +33,20 @@ const formatThreatForAgent = (data: ThreatAttachmentData): string => {
   return lines.join('\n');
 };
 
-const getAgentDescription = (): string => `
-This attachment names a threat intelligence report by reference (by-reference semantics).
+const describePayload = `This attachment names a threat intelligence report by reference (by-reference semantics).
 The payload contains:
 - report_id: the id of the threat report this attachment points to
 - title, severity, source (optional): a captured fallback snapshot taken at write time
 
 The live report document is fetched space-projected at render time; the captured fields above
 are only a fallback used when the live document cannot be resolved. Quote the captured fields
-verbatim when discussing this attachment rather than restating the full report from memory.
+verbatim when discussing this attachment rather than restating the full report from memory.`;
 
-## INLINE RENDERING (REQUIRED)
-When a ${THREAT_ATTACHMENT_ID} attachment is present in the conversation, you MUST render it inline using the exact custom XML element shown below. The element name is literally \`render_attachment\` and the attribute names are literally \`id\` and \`version\` — do not rename, translate, or abbreviate them.
-
-Assemble the tag by substituting \`ATTACHMENT_ID\` with the value of the attachment's \`attachment_id\` field from the conversation's attachment manifest, and \`VERSION\` with the value of the \`current_version\` field:
-
-    <render_attachment id="ATTACHMENT_ID" version="VERSION" />
-
-Rules:
-- Copy \`attachment_id\` and \`current_version\` VERBATIM from the manifest. Never invent, guess, or rewrite them.
-- Put the \`<render_attachment>\` tag on its OWN LINE, with a blank line before and after it. Do not wrap it in backticks, quotes, code fences, or surrounding prose.
-- Emit the \`<render_attachment>\` tag BEFORE your prose summary so the user sees the threat pill first.
-- Render each ${THREAT_ATTACHMENT_ID} attachment at most once per turn.
-`;
-
-export const createThreatAttachmentType = (): AttachmentTypeDefinition => ({
-  id: THREAT_ATTACHMENT_ID,
-  // System-produced reference: the agent must not create or update these via the
-  // attachment_add/update tools. Also gates the attachment_read path, which only
-  // invokes format() for readonly types.
-  isReadonly: true,
-  validate: (input) => {
-    const parseResult = threatAttachmentDataSchema.safeParse(input);
-    if (parseResult.success) {
-      return { valid: true, data: parseResult.data };
-    }
-    return { valid: false, error: parseResult.error.message };
-  },
-  format: (attachment: Attachment<string, unknown>, _context: AttachmentFormatContext) => {
-    const parseResult = threatAttachmentDataSchema.safeParse(attachment.data);
-    if (!parseResult.success) {
-      throw new Error(`Invalid threat attachment data for attachment ${attachment.id}`);
-    }
-    const data = parseResult.data;
-    return {
-      getRepresentation: () => ({ type: 'text', value: formatThreatForAgent(data) }),
-    };
-  },
-  getAgentDescription,
-});
+export const createThreatAttachmentType = (): AttachmentTypeDefinition =>
+  createReadonlyAttachmentType({
+    id: THREAT_ATTACHMENT_ID,
+    schema: threatAttachmentDataSchema,
+    formatForAgent: formatThreatForAgent,
+    describePayload,
+    renderNoun: 'threat pill',
+  });

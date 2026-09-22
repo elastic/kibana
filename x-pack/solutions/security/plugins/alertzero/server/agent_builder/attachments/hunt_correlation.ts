@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-import type {
-  AttachmentTypeDefinition,
-  AttachmentFormatContext,
-} from '@kbn/agent-builder-server/attachments';
-import type { Attachment } from '@kbn/agent-builder-common/attachments';
+import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { ALERTZERO_ATTACHMENT_TYPES } from '../../../common/constants';
 import {
   huntCorrelationAttachmentDataSchema,
   type HuntCorrelationAttachmentData,
 } from '../../../common/hunt_correlation_attachment_schema';
+import { createReadonlyAttachmentType } from './create_readonly_attachment_type';
 
 export const HUNT_CORRELATION_ATTACHMENT_ID = ALERTZERO_ATTACHMENT_TYPES.huntCorrelation;
 
@@ -53,8 +50,7 @@ const formatHuntCorrelationForAgent = (data: HuntCorrelationAttachmentData): str
   return lines.join('\n');
 };
 
-const getAgentDescription = (): string => `
-This attachment carries report-to-report correlation evidence, built from the Diamond Model of
+const describePayload = `This attachment carries report-to-report correlation evidence, built from the Diamond Model of
 Intrusion Analysis (adversary, capability, infrastructure, victim).
 The payload contains:
 - anchors: hard matches (hash, ioc_set_hash, or actor) linking this report to others
@@ -63,44 +59,13 @@ The payload contains:
   it scores against
 - thresholds: the anchor_match and diamond_vertex thresholds used to decide whether a correlation
   is significant
-- self_match_excluded: always true by schema — a report is never correlated against itself
+- self_match_excluded: always true by schema — a report is never correlated against itself`;
 
-## INLINE RENDERING (REQUIRED)
-When a ${HUNT_CORRELATION_ATTACHMENT_ID} attachment is present in the conversation, you MUST render it inline using the exact custom XML element shown below. The element name is literally \`render_attachment\` and the attribute names are literally \`id\` and \`version\` — do not rename, translate, or abbreviate them.
-
-Assemble the tag by substituting \`ATTACHMENT_ID\` with the value of the attachment's \`attachment_id\` field from the conversation's attachment manifest, and \`VERSION\` with the value of the \`current_version\` field:
-
-    <render_attachment id="ATTACHMENT_ID" version="VERSION" />
-
-Rules:
-- Copy \`attachment_id\` and \`current_version\` VERBATIM from the manifest. Never invent, guess, or rewrite them.
-- Put the \`<render_attachment>\` tag on its OWN LINE, with a blank line before and after it. Do not wrap it in backticks, quotes, code fences, or surrounding prose.
-- Emit the \`<render_attachment>\` tag BEFORE your prose summary so the user sees the correlation table first.
-- Render each ${HUNT_CORRELATION_ATTACHMENT_ID} attachment at most once per turn.
-`;
-
-export const createHuntCorrelationAttachmentType = (): AttachmentTypeDefinition => ({
-  id: HUNT_CORRELATION_ATTACHMENT_ID,
-  // System-produced evidence: the agent must not create or update these via the
-  // attachment_add/update tools. Also gates the attachment_read path, which only
-  // invokes format() for readonly types.
-  isReadonly: true,
-  validate: (input) => {
-    const parseResult = huntCorrelationAttachmentDataSchema.safeParse(input);
-    if (parseResult.success) {
-      return { valid: true, data: parseResult.data };
-    }
-    return { valid: false, error: parseResult.error.message };
-  },
-  format: (attachment: Attachment<string, unknown>, _context: AttachmentFormatContext) => {
-    const parseResult = huntCorrelationAttachmentDataSchema.safeParse(attachment.data);
-    if (!parseResult.success) {
-      throw new Error(`Invalid hunt correlation attachment data for attachment ${attachment.id}`);
-    }
-    const data = parseResult.data;
-    return {
-      getRepresentation: () => ({ type: 'text', value: formatHuntCorrelationForAgent(data) }),
-    };
-  },
-  getAgentDescription,
-});
+export const createHuntCorrelationAttachmentType = (): AttachmentTypeDefinition =>
+  createReadonlyAttachmentType({
+    id: HUNT_CORRELATION_ATTACHMENT_ID,
+    schema: huntCorrelationAttachmentDataSchema,
+    formatForAgent: formatHuntCorrelationForAgent,
+    describePayload,
+    renderNoun: 'correlation table',
+  });

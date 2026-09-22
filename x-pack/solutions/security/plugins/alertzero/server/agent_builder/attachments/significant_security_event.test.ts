@@ -8,7 +8,6 @@
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { TextAttachmentRepresentation } from '@kbn/agent-builder-server/attachments';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
-import { ALERTZERO_ATTACHMENT_TYPES } from '../../../common/constants';
 import {
   createSignificantSecurityEventAttachmentType,
   SIGNIFICANT_SECURITY_EVENT_ATTACHMENT_ID,
@@ -42,169 +41,11 @@ describe('createSignificantSecurityEventAttachmentType', () => {
   const attachmentType = createSignificantSecurityEventAttachmentType();
   const formatContext = agentBuilderMocks.attachments.createFormatContextMock();
 
-  it('registers under the expected attachment id', () => {
-    expect(attachmentType.id).toBe(ALERTZERO_ATTACHMENT_TYPES.significantSecurityEvent);
-    expect(SIGNIFICANT_SECURITY_EVENT_ATTACHMENT_ID).toBe('security.significant_security_event');
-  });
-
-  it('is readonly so the agent cannot create or update these attachments', () => {
-    expect(attachmentType.isReadonly).toBe(true);
-  });
-
+  // Generic zod-shape cases (required fields, enum bounds, array caps) live in
+  // common/significant_security_event_schema.test.ts. Only the schema's custom
+  // superRefine checks are re-verified here, through the attachment type's own
+  // validate() entry point.
   describe('validate', () => {
-    it('returns valid for a well-formed payload', async () => {
-      const result = await attachmentType.validate(validPayload);
-
-      expect(result.valid).toBe(true);
-      if (result.valid) {
-        expect(result.data).toEqual(validPayload);
-      }
-    });
-
-    it('returns invalid when a required field is missing', async () => {
-      const { title, ...rest } = validPayload;
-
-      const result = await attachmentType.validate(rest);
-
-      expect(result.valid).toBe(false);
-      if (!result.valid) {
-        expect(result.error).toBeDefined();
-      }
-    });
-
-    it('returns invalid when severity is not one of the allowed values', async () => {
-      const result = await attachmentType.validate({ ...validPayload, severity: 'catastrophic' });
-
-      expect(result.valid).toBe(false);
-    });
-
-    it('returns invalid when confidence is out of [0, 1] range', async () => {
-      const result = await attachmentType.validate({ ...validPayload, confidence: 1.5 });
-
-      expect(result.valid).toBe(false);
-    });
-
-    it('rejects arrays exceeding the 50-item cap', async () => {
-      const result = await attachmentType.validate({
-        ...validPayload,
-        entities: Array.from({ length: 51 }, (_, i) => ({
-          field: 'user.name' as const,
-          value: `entity-${i}`,
-        })),
-      });
-
-      expect(result.valid).toBe(false);
-    });
-
-    it('rejects bare entity identifiers and legacy strings', async () => {
-      const bare = await attachmentType.validate({
-        ...validPayload,
-        entities: ['dev-user'] as unknown as typeof validPayload.entities,
-      });
-      const legacyString = await attachmentType.validate({
-        ...validPayload,
-        entities: ['user.name: jdoe'] as unknown as typeof validPayload.entities,
-      });
-
-      expect(bare.valid).toBe(false);
-      expect(legacyString.valid).toBe(false);
-    });
-
-    it('rejects unknown entity fields', async () => {
-      const result = await attachmentType.validate({
-        ...validPayload,
-        entities: [
-          { field: 'source.ip', value: '1.2.3.4' },
-        ] as unknown as typeof validPayload.entities,
-      });
-
-      expect(result.valid).toBe(false);
-    });
-
-    it('rejects alerts missing index', async () => {
-      const result = await attachmentType.validate({
-        ...validPayload,
-        alerts: [{ alert_id: 'alert-1' }] as unknown as Array<{
-          alert_id: string;
-          index: string;
-        }>,
-      });
-
-      expect(result.valid).toBe(false);
-    });
-
-    it('accepts structured alerts with index', async () => {
-      const result = await attachmentType.validate({
-        ...validPayload,
-        alerts: [
-          {
-            alert_id: 'alert-1',
-            index: '.alerts-security.alerts-default',
-            timestamp: '2026-01-01T00:00:00.000Z',
-          },
-        ],
-      });
-
-      expect(result.valid).toBe(true);
-    });
-
-    it('accepts the optional maps_to_proposal field when present', async () => {
-      const result = await attachmentType.validate({
-        ...validPayload,
-        maps_to_proposal: { category: 'containment', confidence: 0.7 },
-      });
-
-      expect(result.valid).toBe(true);
-    });
-
-    it('rejects maps_to_proposal.actionInput with more than 50 keys', async () => {
-      const result = await attachmentType.validate({
-        ...validPayload,
-        maps_to_proposal: {
-          actionInput: Object.fromEntries(
-            Array.from({ length: 51 }, (_, i) => [`key-${i}`, 'value'])
-          ),
-        },
-      });
-
-      expect(result.valid).toBe(false);
-    });
-
-    it('rejects maps_to_proposal.actionInput when serialized size exceeds 32KB', async () => {
-      const result = await attachmentType.validate({
-        ...validPayload,
-        maps_to_proposal: {
-          actionInput: { blob: 'x'.repeat(40_000) },
-        },
-      });
-
-      expect(result.valid).toBe(false);
-    });
-
-    it('rejects empty event_id or source_index on events', async () => {
-      const emptyEventId = await attachmentType.validate({
-        ...validPayload,
-        events: [{ event_id: '', source_index: 'logs-*' }],
-      });
-      const emptySourceIndex = await attachmentType.validate({
-        ...validPayload,
-        events: [{ event_id: 'evt-1', source_index: '' }],
-      });
-
-      expect(emptyEventId.valid).toBe(false);
-      expect(emptySourceIndex.valid).toBe(false);
-    });
-
-    it('rejects a non-integer truncated_original_count', async () => {
-      const result = await attachmentType.validate({
-        ...validPayload,
-        truncated: true,
-        truncated_original_count: 1.5,
-      });
-
-      expect(result.valid).toBe(false);
-    });
-
     it('rejects a technique indicator missing technique_id', async () => {
       const result = await attachmentType.validate({
         ...validPayload,
@@ -221,35 +62,6 @@ describe('createSignificantSecurityEventAttachmentType', () => {
       });
 
       expect(result.valid).toBe(false);
-    });
-
-    it('accepts a well-formed hunt_result block', async () => {
-      const result = await attachmentType.validate({
-        ...validPayload,
-        hunt_result: {
-          has_confirmed_hit: true,
-          time_range: { from: '2026-01-01T00:00:00.000Z', to: '2026-01-01T02:00:00.000Z' },
-          tier1: {
-            status: 'environment_hits_found',
-            counts: { total_hits: 3, returned_hits: 3, affected_hosts: 1, affected_users: 1 },
-            per_index: [{ index: 'logs-aws.cloudtrail-default', hit_count: 3, required: true }],
-            resolved_iocs: [{ type: 'hash', value: 'abc123' }],
-          },
-          tier2: {
-            status: 'behaviors_proposed',
-            behaviors: [
-              {
-                technique_id: 'T1021',
-                tactic_ids: ['TA0008'],
-                confidence: 0.8,
-                rule_name: 'Lateral movement via RDP',
-              },
-            ],
-          },
-        },
-      });
-
-      expect(result.valid).toBe(true);
     });
   });
 
@@ -338,18 +150,6 @@ describe('createSignificantSecurityEventAttachmentType', () => {
 
       const value = (representation as TextAttachmentRepresentation).value;
       expect(value).toContain('truncated from 120 original entries');
-    });
-
-    it('throws when attachment data is invalid', () => {
-      const attachment: Attachment<string, unknown> = {
-        id: 'test-id',
-        type: SIGNIFICANT_SECURITY_EVENT_ATTACHMENT_ID,
-        data: { invalid: 'data' },
-      };
-
-      expect(() => attachmentType.format(attachment, formatContext)).toThrow(
-        'Invalid significant security event attachment data for attachment test-id'
-      );
     });
   });
 

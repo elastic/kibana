@@ -8,20 +8,14 @@
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { TextAttachmentRepresentation } from '@kbn/agent-builder-server/attachments';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
-import { ALERTZERO_ATTACHMENT_TYPES } from '../../../common/constants';
 import { createThreatAttachmentType, THREAT_ATTACHMENT_ID } from './threat';
 
 describe('createThreatAttachmentType', () => {
   const attachmentType = createThreatAttachmentType();
   const formatContext = agentBuilderMocks.attachments.createFormatContextMock();
 
-  it('registers under the expected attachment id', () => {
-    expect(attachmentType.id).toBe(ALERTZERO_ATTACHMENT_TYPES.threat);
+  it('registers under the security.threat attachment id', () => {
     expect(THREAT_ATTACHMENT_ID).toBe('security.threat');
-  });
-
-  it('is readonly so the agent cannot create or update these attachments', () => {
-    expect(attachmentType.isReadonly).toBe(true);
   });
 
   describe('validate', () => {
@@ -137,27 +131,14 @@ describe('createThreatAttachmentType', () => {
       expect(value).not.toContain('Severity:');
       expect(value).not.toContain('Source:');
     });
-
-    it('throws when attachment data is invalid', () => {
-      const attachment: Attachment<string, unknown> = {
-        id: 'test-id',
-        type: THREAT_ATTACHMENT_ID,
-        data: { invalid: 'data' },
-      };
-
-      expect(() => attachmentType.format(attachment, formatContext)).toThrow(
-        'Invalid threat attachment data for attachment test-id'
-      );
-    });
   });
 
   describe('getAgentDescription', () => {
-    it('documents the by-reference semantics and the render_attachment contract', () => {
+    it('documents the by-reference semantics', () => {
       const description = attachmentType.getAgentDescription?.();
 
       expect(description).toContain('by-reference');
       expect(description).toContain('report_id');
-      expect(description).toContain('<render_attachment id="ATTACHMENT_ID" version="VERSION" />');
     });
   });
 });

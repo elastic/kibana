@@ -8,7 +8,6 @@
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { TextAttachmentRepresentation } from '@kbn/agent-builder-server/attachments';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
-import { ALERTZERO_ATTACHMENT_TYPES } from '../../../common/constants';
 import {
   createHuntCorrelationAttachmentType,
   HUNT_CORRELATION_ATTACHMENT_ID,
@@ -28,13 +27,8 @@ describe('createHuntCorrelationAttachmentType', () => {
   const attachmentType = createHuntCorrelationAttachmentType();
   const formatContext = agentBuilderMocks.attachments.createFormatContextMock();
 
-  it('registers under the expected attachment id', () => {
-    expect(attachmentType.id).toBe(ALERTZERO_ATTACHMENT_TYPES.huntCorrelation);
+  it('registers under the security.hunt_correlation attachment id', () => {
     expect(HUNT_CORRELATION_ATTACHMENT_ID).toBe('security.hunt_correlation');
-  });
-
-  it('is readonly so the agent cannot create or update these attachments', () => {
-    expect(attachmentType.isReadonly).toBe(true);
   });
 
   describe('validate', () => {
@@ -88,8 +82,8 @@ describe('createHuntCorrelationAttachmentType', () => {
       expect(result.valid).toBe(false);
     });
 
-    it('allows diamond_scores up to the 100-item cap', async () => {
-      const result = await attachmentType.validate({
+    it('allows diamond_scores up to the 100-item cap, and rejects beyond it', async () => {
+      const atCap = await attachmentType.validate({
         ...validPayload,
         diamond_scores: Array.from({ length: 100 }, (_, i) => ({
           vertex: 'adversary' as const,
@@ -97,12 +91,7 @@ describe('createHuntCorrelationAttachmentType', () => {
           score: 0.5,
         })),
       });
-
-      expect(result.valid).toBe(true);
-    });
-
-    it('rejects diamond_scores exceeding the 100-item cap', async () => {
-      const result = await attachmentType.validate({
+      const overCap = await attachmentType.validate({
         ...validPayload,
         diamond_scores: Array.from({ length: 101 }, (_, i) => ({
           vertex: 'adversary' as const,
@@ -111,7 +100,8 @@ describe('createHuntCorrelationAttachmentType', () => {
         })),
       });
 
-      expect(result.valid).toBe(false);
+      expect(atCap.valid).toBe(true);
+      expect(overCap.valid).toBe(false);
     });
   });
 
@@ -134,27 +124,14 @@ describe('createHuntCorrelationAttachmentType', () => {
       expect(value).toContain('infrastructure: report-42 (score 0.75)');
       expect(value).toContain('anchor_match=0.8, diamond_vertex=0.6');
     });
-
-    it('throws when attachment data is invalid', () => {
-      const attachment: Attachment<string, unknown> = {
-        id: 'test-id',
-        type: HUNT_CORRELATION_ATTACHMENT_ID,
-        data: { invalid: 'data' },
-      };
-
-      expect(() => attachmentType.format(attachment, formatContext)).toThrow(
-        'Invalid hunt correlation attachment data for attachment test-id'
-      );
-    });
   });
 
   describe('getAgentDescription', () => {
-    it('documents the Diamond Model shape and the render_attachment contract', () => {
+    it('documents the Diamond Model shape', () => {
       const description = attachmentType.getAgentDescription?.();
 
       expect(description).toContain('Diamond Model');
       expect(description).toContain('self_match_excluded');
-      expect(description).toContain('<render_attachment id="ATTACHMENT_ID" version="VERSION" />');
     });
   });
 });

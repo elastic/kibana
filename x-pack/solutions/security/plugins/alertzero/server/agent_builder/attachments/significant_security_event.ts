@@ -5,24 +5,16 @@
  * 2.0.
  */
 
-import type {
-  AttachmentTypeDefinition,
-  AttachmentFormatContext,
-} from '@kbn/agent-builder-server/attachments';
-import type { Attachment } from '@kbn/agent-builder-common/attachments';
+import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { ALERTZERO_ATTACHMENT_TYPES } from '../../../common/constants';
 import {
   significantSecurityEventAttachmentDataSchema,
   type SignificantSecurityEventAttachmentData,
 } from '../../../common/significant_security_event_schema';
+import { createReadonlyAttachmentType } from './create_readonly_attachment_type';
 
 export const SIGNIFICANT_SECURITY_EVENT_ATTACHMENT_ID =
   ALERTZERO_ATTACHMENT_TYPES.significantSecurityEvent;
-
-export {
-  significantSecurityEventAttachmentDataSchema,
-  type SignificantSecurityEventAttachmentData,
-} from '../../../common/significant_security_event_schema';
 
 const formatSignificantSecurityEventForAgent = (
   data: SignificantSecurityEventAttachmentData
@@ -175,8 +167,7 @@ const formatSignificantSecurityEventForAgent = (
   return lines.join('\n');
 };
 
-const getAgentDescription = (): string => `
-This attachment carries a Hunt-owned Significant Security Event.
+const describePayload = `This attachment carries a Hunt-owned Significant Security Event.
 The payload contains:
 - title, severity, confidence, status: the headline classification of the event
 - source_watch, capability, run_id, report_id: provenance of the hunt run that produced this event; report_id names the triggering threat report
@@ -191,49 +182,13 @@ The payload contains:
 - maps_to_proposal, evaluation_record_ref: optional links into the proposal/evaluation subsystem
 
 Quote the \`what\` field of timeline entries verbatim rather than re-classifying or summarizing
-them into different categories.
+them into different categories.`;
 
-## INLINE RENDERING (REQUIRED)
-When a ${SIGNIFICANT_SECURITY_EVENT_ATTACHMENT_ID} attachment is present in the conversation, you MUST render it inline using the exact custom XML element shown below. The element name is literally \`render_attachment\` and the attribute names are literally \`id\` and \`version\` — do not rename, translate, or abbreviate them.
-
-Assemble the tag by substituting \`ATTACHMENT_ID\` with the value of the attachment's \`attachment_id\` field from the conversation's attachment manifest, and \`VERSION\` with the value of the \`current_version\` field:
-
-    <render_attachment id="ATTACHMENT_ID" version="VERSION" />
-
-Rules:
-- Copy \`attachment_id\` and \`current_version\` VERBATIM from the manifest. Never invent, guess, or rewrite them.
-- Put the \`<render_attachment>\` tag on its OWN LINE, with a blank line before and after it. Do not wrap it in backticks, quotes, code fences, or surrounding prose.
-- Emit the \`<render_attachment>\` tag BEFORE your prose summary so the user sees the event card first.
-- Render each ${SIGNIFICANT_SECURITY_EVENT_ATTACHMENT_ID} attachment at most once per turn.
-`;
-
-export const createSignificantSecurityEventAttachmentType = (): AttachmentTypeDefinition => ({
-  id: SIGNIFICANT_SECURITY_EVENT_ATTACHMENT_ID,
-  // System-produced event: the agent must not create or update these via the
-  // attachment_add/update tools. Also gates the attachment_read path, which only
-  // invokes format() for readonly types.
-  isReadonly: true,
-  validate: (input) => {
-    const parseResult = significantSecurityEventAttachmentDataSchema.safeParse(input);
-    if (parseResult.success) {
-      return { valid: true, data: parseResult.data };
-    }
-    return { valid: false, error: parseResult.error.message };
-  },
-  format: (attachment: Attachment<string, unknown>, _context: AttachmentFormatContext) => {
-    const parseResult = significantSecurityEventAttachmentDataSchema.safeParse(attachment.data);
-    if (!parseResult.success) {
-      throw new Error(
-        `Invalid significant security event attachment data for attachment ${attachment.id}`
-      );
-    }
-    const data = parseResult.data;
-    return {
-      getRepresentation: () => ({
-        type: 'text',
-        value: formatSignificantSecurityEventForAgent(data),
-      }),
-    };
-  },
-  getAgentDescription,
-});
+export const createSignificantSecurityEventAttachmentType = (): AttachmentTypeDefinition =>
+  createReadonlyAttachmentType({
+    id: SIGNIFICANT_SECURITY_EVENT_ATTACHMENT_ID,
+    schema: significantSecurityEventAttachmentDataSchema,
+    formatForAgent: formatSignificantSecurityEventForAgent,
+    describePayload,
+    renderNoun: 'event card',
+  });
