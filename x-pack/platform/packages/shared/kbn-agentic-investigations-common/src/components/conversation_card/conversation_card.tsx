@@ -18,6 +18,7 @@ import {
 import { type Investigation } from '../../types';
 import type { BaseActionsProps } from '../actions';
 import { ConversationsActionsGroup } from './actions_group';
+import { ConversationMetaInfo } from './conversation_meta_info';
 
 interface ConversationCardProps {
   investigation: Investigation;
@@ -77,38 +78,43 @@ export const ConversationCard = memo<ConversationCardProps>(
           }
         }}
       >
-        <EuiFlexGroup
-          alignItems="flexStart"
-          gutterSize="l"
-          responsive
-          justifyContent="spaceBetween"
-          direction="row"
-        >
-          <EuiFlexItem grow={true}>
-            <EuiFlexGroup gutterSize="xs" responsive direction="column">
+        {/* The age and the actions share the top row, which leaves the title and
+            summary the full width of the card rather than the actions' leftovers. */}
+        <EuiFlexGroup gutterSize="xs" responsive direction="column">
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup
+              alignItems="center"
+              gutterSize="l"
+              responsive={false}
+              justifyContent="spaceBetween"
+              direction="row"
+            >
               <EuiFlexItem grow={false}>
-                <EuiTitle size="xxs">
-                  <EuiTextTruncate text={investigation.title} />
-                </EuiTitle>
+                <ConversationMetaInfo createdAt={investigation.createdAt} />
               </EuiFlexItem>
-              {investigation.summary ? (
-                <EuiFlexItem grow={false}>
-                  <EuiText size="s" color="subdued">
-                    <EuiTextTruncate text={investigation.summary} />
-                  </EuiText>
-                </EuiFlexItem>
-              ) : null}
+              <EuiFlexItem grow={false}>
+                <ConversationsActionsGroup
+                  investigation={investigation}
+                  onClickRecommendedAction={onClickRecommendedAction}
+                  onClickAction={onClickAction}
+                  onOpenChat={() => onOpenChat(investigation.id)}
+                  chatHref={chatHref}
+                />
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <ConversationsActionsGroup
-              investigation={investigation}
-              onClickRecommendedAction={onClickRecommendedAction}
-              onClickAction={onClickAction}
-              onOpenChat={() => onOpenChat(investigation.id)}
-              chatHref={chatHref}
-            />
+            <EuiTitle size="xxs">
+              <EuiTextTruncate text={investigation.title} />
+            </EuiTitle>
           </EuiFlexItem>
+          {investigation.summary ? (
+            <EuiFlexItem grow={false}>
+              <EuiText size="s" color="subdued">
+                <EuiTextTruncate text={investigation.summary} />
+              </EuiText>
+            </EuiFlexItem>
+          ) : null}
         </EuiFlexGroup>
       </EuiPanel>
     );

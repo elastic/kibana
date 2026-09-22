@@ -9,14 +9,18 @@ import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { type Investigation } from '../../types';
 
+/**
+ * No `updateIntervalInSeconds`: react-intl refuses to schedule updates once the unit
+ * exceeds an hour, and the queue re-renders on its own poll anyway.
+ */
 export const ConversationMetaInfo = memo<{
-  updatedAt: Investigation['updatedAt'];
-}>(({ updatedAt }) => {
+  createdAt: Investigation['createdAt'];
+}>(({ createdAt }) => {
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive direction="row">
       <EuiFlexItem grow={false}>
         <EuiText size="xs" color="subdued" component="span">
-          <FormattedRelative value={updatedAt} />
+          <FormattedRelative value={createdAt} />
         </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>

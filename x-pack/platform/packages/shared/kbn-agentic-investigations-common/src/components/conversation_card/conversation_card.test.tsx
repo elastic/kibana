@@ -63,4 +63,21 @@ describe('ConversationCard', () => {
       'aria-current'
     );
   });
+
+  it('ages the card by when the proposal was raised, not when it last changed', () => {
+    const createdAt = new Date(Date.now() - 26 * 60 * 1000).toISOString();
+    renderWithKibanaRenderContext(
+      <ConversationCard
+        investigation={{ ...investigation, createdAt, updatedAt: new Date().toISOString() }}
+        hasBorder={false}
+        onClickCard={jest.fn()}
+        onClickAction={jest.fn()}
+        onOpenChat={jest.fn()}
+        onClickRecommendedAction={jest.fn()}
+      />
+    );
+
+    // `updatedAt` is now, so anything reading that field would say "in 0 seconds".
+    expect(screen.getByText('26 minutes ago')).toBeInTheDocument();
+  });
 });
