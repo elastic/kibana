@@ -7,6 +7,9 @@
 
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { chartTypeRegistry } from './chart_type_registry';
+import { generalChartRules } from './general_rules';
+
+const toBullets = (rules: readonly string[]): string[] => rules.map((rule) => `- ${rule}`);
 
 export const getChartTypeSelectionPromptContent = () =>
   [
@@ -16,15 +19,14 @@ export const getChartTypeSelectionPromptContent = () =>
     ),
   ].join('\n');
 
-export const getChartTypeConfigPromptContent = (chartType: SupportedChartType) => {
-  const rules = chartTypeRegistry[chartType].prompt.config?.rules;
-
-  if (!rules?.length) {
-    return '';
-  }
-
-  return [
-    `CHART-SPECIFIC RULES FOR ${chartType.toUpperCase()}:`,
-    ...rules.map((rule) => `- ${rule}`),
+/**
+ * Rules for authoring one chart type's Lens config: the general rules followed
+ * by the chart-specific ones. `getColorConfigPromptContent` compiles the color
+ * mechanics separately.
+ */
+export const getChartTypeConfigPromptContent = (chartType: SupportedChartType): string =>
+  [
+    `CHART RULES FOR ${chartType.toUpperCase()}:`,
+    ...toBullets(generalChartRules),
+    ...toBullets(chartTypeRegistry[chartType].prompt.rules ?? []),
   ].join('\n');
-};

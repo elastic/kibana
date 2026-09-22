@@ -120,7 +120,10 @@ export const useWorkflowChangeHistoryPreviewValidation = ({
   const previousConnectorTypesStatusRef = useRef(connectorTypesStatus);
   const workflowZodSchema = useMemo(
     () =>
-      getWorkflowZodSchema(connectorsData?.connectorTypes ?? {}, triggerSchemas.getRegisteredIds()),
+      getWorkflowZodSchema(
+        connectorsData?.connectorTypes ?? {},
+        triggerSchemas.getRegisteredTriggersForSchema()
+      ),
     [connectorsData?.connectorTypes]
   );
   const workflowZodSchemaRef = useRef(workflowZodSchema);

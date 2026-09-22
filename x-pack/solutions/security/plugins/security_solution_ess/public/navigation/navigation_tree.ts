@@ -18,7 +18,6 @@ import { AGENT_BUILDER_NAV_AT_TOP_FLAG } from '@kbn/navigation-plugin/public';
 import { getAlertingV2ManagementNavPanel } from '@kbn/alerting-v2-utils';
 import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
 import { type Services } from '../common/services';
-import { SOLUTION_NAME } from './translations';
 
 export const createNavigationTree = (
   services: Services,
@@ -35,33 +34,26 @@ export const createNavigationTree = (
     link: 'agent_builder' as AppDeepLinkId,
   };
   const contextEngineLink = {
-    icon: 'sparkles',
+    icon: 'tableSparkles',
     link: 'context_engine' as AppDeepLinkId,
   };
 
   return {
     body: [
-      {
-        id: 'security_solution_home',
-        icon: 'logoSecurity',
-        link: securityLink(SecurityPageName.landing),
-        renderAs: 'home',
-        title: SOLUTION_NAME,
-      },
       ...(showAgentBuilder && agentBuilderNavAtTop ? [agentBuilderLink] : []),
       contextEngineLink,
       {
         link: 'inbox' as AppDeepLinkId,
         icon: 'mail',
       },
-      // PND body (nodes omitted when xpack.pnd.enabled is false)
-      ...defaultNavigationTree.pnd(),
+      // AlertZero body (nodes omitted when xpack.alertzero.enabled is false)
+      ...defaultNavigationTree.alertZero(),
       {
         link: 'discover',
         icon: 'productDiscover',
       },
       defaultNavigationTree.dashboards(),
-      ...defaultNavigationTree.pndSecondary(),
+      ...defaultNavigationTree.alertZeroSecondary(),
       defaultNavigationTree.rules(),
       services.uiSettings.get(
         ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
@@ -87,9 +79,7 @@ export const createNavigationTree = (
         link: securityLink(SecurityPageName.cloudSecurityPostureFindings),
       },
       defaultNavigationTree.cases(),
-      defaultNavigationTree.entityAnalytics(
-        services.experimentalFeatures?.entityAnalyticsNewHomePageEnabled
-      ),
+      defaultNavigationTree.entityAnalytics(),
       defaultNavigationTree.explore(),
       defaultNavigationTree.investigations(),
       {
@@ -187,6 +177,7 @@ export const createNavigationTree = (
               { link: 'management:transform' },
               { link: 'management:rollup_jobs' },
               { link: 'management:data_federation' },
+              { link: 'management:esql_views' },
               { link: 'management:data_quality' },
             ],
           },

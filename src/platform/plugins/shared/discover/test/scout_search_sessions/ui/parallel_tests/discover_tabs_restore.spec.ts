@@ -59,8 +59,7 @@ spaceTest.describe(
       // Discover persists its tabs per user, so a restored tab left open comes back in the next
       // test and re-persists the background search it holds. This has to run in the hook rather
       // than the test body so it still happens when a test fails mid-restore.
-      // Closed back-to-front: `closeTab` waits on a positional locator, so closing anything but
-      // the last tab leaves that position resolving to the tab that shifted into it.
+      // Closed back-to-front so indices stay valid as tabs disappear.
       const openTabs = await pageObjects.unifiedTabs.getTabLabels();
       for (let i = openTabs.length - 1; i >= 1; i--) {
         await pageObjects.unifiedTabs.closeTab(i);
@@ -135,9 +134,9 @@ spaceTest.describe(
           await pageObjects.unifiedTabs.navigateToTabByName(ESQL_BACKGROUND_SEARCH_NAME);
 
           // The restored tab must come straight back as rendered. A re-run would drop
-          // `data-render-complete` back to false while the 5s ES|QL DELAY replays.
+          // `data-table-loaded` back to false while the 5s ES|QL DELAY replays.
           await expect(page.testSubj.locator('discoverDocTable')).toHaveAttribute(
-            'data-render-complete',
+            'data-table-loaded',
             'true'
           );
         });
@@ -172,11 +171,11 @@ spaceTest.describe(
 
         await spaceTest.step('the second tab is still rendered', async () => {
           // Restoring elsewhere must not invalidate an unrelated tab: a re-run would drop
-          // `data-render-complete` back to false while the 5s ES|QL DELAY replays.
+          // `data-table-loaded` back to false while the 5s ES|QL DELAY replays.
           await pageObjects.unifiedTabs.selectTab(1);
 
           await expect(page.testSubj.locator('discoverDocTable')).toHaveAttribute(
-            'data-render-complete',
+            'data-table-loaded',
             'true'
           );
         });

@@ -33,12 +33,10 @@ export interface ConfigureCasesFlyout<ExtraFlyoutType extends string = never> {
 
 /**
  * Shared state and handlers for the connector, closure-type, and observable-types
- * sections of the case settings page. Consumed by both the legacy `ConfigureCases`
- * page and the `ConfigureCasesRedesign` page so a bug fix to this logic only needs to
- * be made once while both pages coexist behind the `casesRedesign.settings` feature
- * flag. Callers that need additional flyout types of their own (e.g. the legacy page's
- * custom fields and templates flyouts) can pass those as the `ExtraFlyoutType` generic
- * so `setFlyOutVisibility` stays the single source of truth for "which flyout is open".
+ * sections of the case settings page. Callers that need additional flyout types of
+ * their own (e.g. the legacy page's custom fields and templates flyouts) can pass those
+ * as the `ExtraFlyoutType` generic so `setFlyOutVisibility` stays the single source of
+ * truth for "which flyout is open".
  */
 export const useConfigureCasesController = <ExtraFlyoutType extends string = never>() => {
   const { permissions } = useCasesContext();

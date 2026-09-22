@@ -31,8 +31,8 @@ export const createAgentHandler = ({
         structuredOutput,
         outputSchema,
         configurationOverrides,
-        action,
         executionId,
+        roundId,
       },
       runId,
       abortSignal,
@@ -53,8 +53,8 @@ export const createAgentHandler = ({
         structuredOutput,
         outputSchema,
         configurationOverrides,
-        action,
         executionId,
+        roundId,
       },
       context
     );

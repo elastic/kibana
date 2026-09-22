@@ -12,8 +12,8 @@ jest.mock('#pipeline-utils', () => ({
   collectEnvFromLabels: () => ({}),
 }));
 
-import { MAX_MINUTES, PREVENT_SELECTIVE_TESTS_LABEL, RETRIES } from './const';
-import { loadRunOrderConfig } from './env_config';
+import { MAX_MINUTES, PREVENT_SELECTIVE_TESTS_LABEL, RETRIES } from './const.ts';
+import { loadRunOrderConfig } from './env_config.ts';
 
 const TYPE_ENV = {
   BUILDKITE_BRANCH: 'main',
@@ -143,9 +143,25 @@ describe('loadRunOrderConfig', () => {
     expect(cfg.useSelectiveTesting).toBe(false);
   });
 
-  it('disables selective testing when not a PR', () => {
+  it('disables selective testing when neither GITHUB_PR_NUMBER nor MERGE_QUEUE_MERGE_BASE is set', () => {
     const cfg = loadRunOrderConfig();
     expect(cfg.useSelectiveTesting).toBe(false);
+  });
+
+  it('enables selective testing on merge-queue builds via MERGE_QUEUE_MERGE_BASE', () => {
+    process.env.MERGE_QUEUE_MERGE_BASE = 'abc123';
+    const cfg = loadRunOrderConfig();
+    expect(cfg.useSelectiveTesting).toBe(true);
+    expect(cfg.selectiveMergeBase).toBe('abc123');
+  });
+
+  // This should never happen, but it's worth documenting
+  it('prefers GITHUB_PR_MERGE_BASE over MERGE_QUEUE_MERGE_BASE for selectiveMergeBase', () => {
+    process.env.GITHUB_PR_NUMBER = '99';
+    process.env.GITHUB_PR_MERGE_BASE = 'pr-base';
+    process.env.MERGE_QUEUE_MERGE_BASE = 'mq-base';
+    const cfg = loadRunOrderConfig();
+    expect(cfg.selectiveMergeBase).toBe('pr-base');
   });
 
   it('uses TEST_GROUP_TYPE_* overrides when provided', () => {

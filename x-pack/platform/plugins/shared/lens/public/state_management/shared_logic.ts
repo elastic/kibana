@@ -23,6 +23,7 @@ import {
 } from '@kbn/lens-common';
 import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 import { INDEX_PATTERN_TYPE } from '../../common/constants';
+import { applyLegacySecondaryLabelIfMetric } from '../visualizations/metric/runtime_state/apply_legacy_secondary_label';
 
 // This piece of logic is shared between the main editor code base and the inline editor one within the embeddable
 export function mergeToNewDoc(
@@ -54,7 +55,14 @@ export function mergeToNewDoc(
     return;
   }
 
-  const activeDatasources: Record<string, Datasource> = Object.keys(datasourceStates).reduce(
+  const { visualizationState: syncedVisualizationState, datasourceStates: syncedDatasourceStates } =
+    applyLegacySecondaryLabelIfMetric(
+      visualization.activeId,
+      visualization.state,
+      datasourceStates
+    );
+
+  const activeDatasources: Record<string, Datasource> = Object.keys(syncedDatasourceStates).reduce(
     (acc, datasourceId) => ({
       ...acc,
       [datasourceId]: datasourceMap[datasourceId],
@@ -67,7 +75,7 @@ export function mergeToNewDoc(
   const internalReferences: Reference[] = [];
   Object.entries(activeDatasources).forEach(([id, datasource]) => {
     const { state: persistableState, references: persistableReferences } =
-      datasource.getPersistableState(datasourceStates[id].state);
+      datasource.getPersistableState(syncedDatasourceStates[id].state);
     persistibleDatasourceStates[id] = persistableState;
     persistableReferences.forEach((r) => {
       if (r.type === INDEX_PATTERN_TYPE && adHocDataViews[r.id]) {
@@ -78,13 +86,13 @@ export function mergeToNewDoc(
     });
   });
 
-  let persistibleVisualizationState = visualization.state;
+  let persistibleVisualizationState = syncedVisualizationState;
   if (activeVisualization.getPersistableState) {
     const { state: persistableState, references: persistableReferences } =
       activeVisualization.getPersistableState(
-        visualization.state,
+        syncedVisualizationState,
         activeDatasource,
-        datasourceStates[activeDatasource.id]
+        syncedDatasourceStates[activeDatasource.id]
       );
     persistibleVisualizationState = persistableState;
     persistableReferences.forEach((r) => {

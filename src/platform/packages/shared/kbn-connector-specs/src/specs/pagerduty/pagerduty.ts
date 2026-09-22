@@ -130,6 +130,7 @@ export const PagerdutyConnector: ConnectorSpec = {
   actions: {
     getUserData: {
       isTool: true,
+      scope: 'read',
       description:
         'Return the current PagerDuty user — i.e. the account that owns the API key. Returns id, name, email, summary, role, and teams. No inputs required. Use this to confirm which user the connector is authenticated as, and to obtain your user ID and email for write actions that require the from parameter.',
       input: GetUserDataInputSchema,
@@ -140,6 +141,7 @@ export const PagerdutyConnector: ConnectorSpec = {
 
     triggerIncident: {
       isTool: true,
+      scope: 'write',
       description:
         'Create a new PagerDuty incident. Requires a service ID (use listServices to find one), an incident title, and the from email of the acting user (call getUserData to retrieve it). Returns the full incident object including incident.id, which downstream steps can use to acknowledge, resolve, or update the incident. Optionally accepts urgency, a detailed body, an escalation policy override, and direct user assignments.',
       input: TriggerIncidentInputSchema,
@@ -177,6 +179,7 @@ export const PagerdutyConnector: ConnectorSpec = {
 
     acknowledgeIncident: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Acknowledge an active PagerDuty incident by its ID. Moves the incident status from "triggered" to "acknowledged". Requires the incident ID and the from email of the acting user. Returns the updated incident object.',
       input: AcknowledgeIncidentInputSchema,
@@ -192,6 +195,7 @@ export const PagerdutyConnector: ConnectorSpec = {
 
     resolveIncident: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Resolve a PagerDuty incident by its ID. Moves the incident status to "resolved". Requires the incident ID and the from email of the acting user. Returns the updated incident object. Use this as the final step of an automated remediation workflow.',
       input: ResolveIncidentInputSchema,
@@ -207,6 +211,7 @@ export const PagerdutyConnector: ConnectorSpec = {
 
     updateIncident: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Update one or more fields on an existing PagerDuty incident (title, status, urgency, priority, or assignments). At least one updatable field must be provided. Requires the incident ID and the from email of the acting user. Returns the updated incident object.',
       input: UpdateIncidentInputSchema,
@@ -240,6 +245,7 @@ export const PagerdutyConnector: ConnectorSpec = {
 
     listServices: {
       isTool: true,
+      scope: 'read',
       description:
         "List PagerDuty services. Supports free-text search across name and description, and filtering by team IDs. Returns each service's id, name, description, status, and escalation policy. Use this to look up a service ID before triggering an incident.",
       input: ListServicesInputSchema,
@@ -265,6 +271,7 @@ export const PagerdutyConnector: ConnectorSpec = {
 
     addResponders: {
       isTool: true,
+      scope: 'write',
       description:
         'Request additional responders for an active PagerDuty incident. Notifies the specified users or escalation policy on-call responders that their help is needed. Requires the incident ID, your PagerDuty user ID (call getUserData to retrieve it), a message, and at least one user ID or escalation policy ID to notify. Returns the responder request object.',
       input: AddRespondersInputSchema,
@@ -295,6 +302,7 @@ export const PagerdutyConnector: ConnectorSpec = {
 
     runResponsePlay: {
       isTool: true,
+      scope: 'write',
       description:
         'Execute a predefined PagerDuty response play against an incident. Response plays automate multi-step incident response tasks (e.g. paging additional teams, posting updates). Requires the incident ID, the response play ID, the from email, and your PagerDuty user ID (call getUserData to retrieve it). Returns the response play execution result.',
       input: RunResponsePlayInputSchema,
@@ -315,6 +323,7 @@ export const PagerdutyConnector: ConnectorSpec = {
 
     listSchedules: {
       isTool: true,
+      scope: 'read',
       description:
         'List PagerDuty on-call schedules. Supports free-text search across name and description fields (e.g., "primary" or "weekend"), filtering by team or user IDs, and including related resources such as schedule_layers, overrides_subschedule, or final_schedule.',
       input: ListSchedulesInputSchema,
@@ -325,6 +334,7 @@ export const PagerdutyConnector: ConnectorSpec = {
 
     listEscalationPolicies: {
       isTool: true,
+      scope: 'read',
       description:
         'List PagerDuty escalation policies. Supports free-text search across name and description fields (e.g., "production" or "on-call"), and filtering by user or team IDs. Returns each policy\'s escalation rules, targets, associated services, and teams.',
       input: ListEscalationPoliciesInputSchema,
@@ -335,6 +345,7 @@ export const PagerdutyConnector: ConnectorSpec = {
 
     listIncidents: {
       isTool: true,
+      scope: 'read',
       description:
         'List PagerDuty incidents. Supports filtering by status (triggered, acknowledged, resolved), service IDs, user IDs, urgency, and date range. Dates use ISO 8601 format. Results can be scoped to all incidents, team incidents, or those assigned to the current user. Supports sorting by incident_number, created_at, resolved_at, or urgency.',
       input: ListIncidentsInputSchema,
@@ -345,6 +356,7 @@ export const PagerdutyConnector: ConnectorSpec = {
 
     listOncalls: {
       isTool: true,
+      scope: 'read',
       description:
         'Get current on-call assignments in PagerDuty. Use this to find who is currently on call for specific schedules or escalation policies. Supports filtering by schedule IDs, user IDs, or escalation policy IDs, and time range queries using ISO 8601 dates. Set earliest=true to return only the first on-call entry per user+policy combination.',
       input: ListOncallsInputSchema,
@@ -355,6 +367,7 @@ export const PagerdutyConnector: ConnectorSpec = {
 
     listUsers: {
       isTool: true,
+      scope: 'read',
       description:
         "List PagerDuty users. Supports free-text search across name and email fields. Returns each user's id, name, email, summary, and role.",
       input: ListUsersInputSchema,
@@ -365,6 +378,7 @@ export const PagerdutyConnector: ConnectorSpec = {
 
     listTeams: {
       isTool: true,
+      scope: 'read',
       description:
         "List PagerDuty teams. Supports free-text search across name and description fields. Returns each team's id, name, description, and summary.",
       input: ListTeamsInputSchema,
@@ -375,6 +389,7 @@ export const PagerdutyConnector: ConnectorSpec = {
 
     getSchedule: {
       isTool: true,
+      scope: 'read',
       description:
         "Get a specific PagerDuty on-call schedule by its ID. Returns the schedule's name, description, time zone, schedule layers (including rotation settings and assigned users), and the list of users on the schedule.",
       input: GetScheduleInputSchema,
@@ -385,6 +400,7 @@ export const PagerdutyConnector: ConnectorSpec = {
 
     getIncident: {
       isTool: true,
+      scope: 'read',
       description:
         "Get a specific PagerDuty incident by its ID. Returns the incident's summary, status, urgency, service, current assignments (who is assigned and when), and creation/update timestamps.",
       input: GetIncidentInputSchema,
@@ -395,6 +411,7 @@ export const PagerdutyConnector: ConnectorSpec = {
 
     getEscalationPolicy: {
       isTool: true,
+      scope: 'read',
       description:
         "Get a specific PagerDuty escalation policy by its ID. Returns the policy's name, description, escalation rules (with delay minutes and targets), associated services, and teams.",
       input: GetEscalationPolicyInputSchema,
@@ -405,6 +422,7 @@ export const PagerdutyConnector: ConnectorSpec = {
 
     getTeam: {
       isTool: true,
+      scope: 'read',
       description:
         "Get a specific PagerDuty team by its ID. Returns the team's id, name, description, and summary.",
       input: GetTeamInputSchema,
@@ -415,6 +433,7 @@ export const PagerdutyConnector: ConnectorSpec = {
 
     listTools: {
       isTool: true,
+      scope: 'read',
       description:
         'List all tools available on the PagerDuty MCP server. Use this to discover available capabilities.',
       input: ListToolsInputSchema,

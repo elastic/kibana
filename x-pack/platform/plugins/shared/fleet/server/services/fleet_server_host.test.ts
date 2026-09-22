@@ -160,7 +160,7 @@ describe('migrateSettingsToFleetServerHost', () => {
     const soClientMock = getMockedSoClient({ id: DEFAULT_FLEET_SERVER_HOST_ID, findHosts: true });
     await migrateSettingsToFleetServerHost(soClientMock, esMock);
 
-    expect(soClientMock.create).not.toBeCalled();
+    expect(soClientMock.create).not.toHaveBeenCalled();
   });
 
   it('should not migrate settings if there is no old settings', async () => {
@@ -168,7 +168,7 @@ describe('migrateSettingsToFleetServerHost', () => {
     mockedGetAgentsByKuery.mockResolvedValueOnce({ agents: [] } as any);
 
     await migrateSettingsToFleetServerHost(soClientMock, esMock);
-    expect(soClientMock.create).not.toBeCalled();
+    expect(soClientMock.create).not.toHaveBeenCalled();
   });
 
   it('should migrate settings to new saved object', async () => {
@@ -202,7 +202,7 @@ describe('migrateSettingsToFleetServerHost', () => {
 
     await migrateSettingsToFleetServerHost(soClientMock, esMock);
 
-    expect(soClientMock.create).toBeCalledWith(
+    expect(soClientMock.create).toHaveBeenCalledWith(
       FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
       expect.objectContaining({
         is_default: true,
@@ -372,18 +372,18 @@ describe('delete fleetServerHost', () => {
 
     await fleetServerHostService.delete(esClientMock, 'test1', {});
 
-    expect(esoClientMock.getDecryptedAsInternalUser).toBeCalledWith(
+    expect(esoClientMock.getDecryptedAsInternalUser).toHaveBeenCalledWith(
       FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
       'test1'
     );
-    expect(jest.mocked(agentPolicyService.removeFleetServerHostFromAll)).toBeCalledWith(
+    expect(jest.mocked(agentPolicyService.removeFleetServerHostFromAll)).toHaveBeenCalledWith(
       esClientMock,
       'test1',
       {
         force: undefined,
       }
     );
-    expect(soClientMock.delete).toBeCalledWith(FLEET_SERVER_HOST_SAVED_OBJECT_TYPE, 'test1');
+    expect(soClientMock.delete).toHaveBeenCalledWith(FLEET_SERVER_HOST_SAVED_OBJECT_TYPE, 'test1');
   });
 
   it('should removeFleetServerHostFromAll agent policies with force if deleted from preconfiguration', async () => {
@@ -395,18 +395,18 @@ describe('delete fleetServerHost', () => {
       fromPreconfiguration: true,
     });
 
-    expect(esoClientMock.getDecryptedAsInternalUser).toBeCalledWith(
+    expect(esoClientMock.getDecryptedAsInternalUser).toHaveBeenCalledWith(
       FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
       'test1'
     );
-    expect(jest.mocked(agentPolicyService.removeFleetServerHostFromAll)).toBeCalledWith(
+    expect(jest.mocked(agentPolicyService.removeFleetServerHostFromAll)).toHaveBeenCalledWith(
       esClientMock,
       'test1',
       {
         force: true,
       }
     );
-    expect(soClientMock.delete).toBeCalledWith(FLEET_SERVER_HOST_SAVED_OBJECT_TYPE, 'test1');
+    expect(soClientMock.delete).toHaveBeenCalledWith(FLEET_SERVER_HOST_SAVED_OBJECT_TYPE, 'test1');
   });
 });
 

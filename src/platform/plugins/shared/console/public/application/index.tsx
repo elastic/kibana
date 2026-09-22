@@ -52,6 +52,7 @@ export interface BootDependencies extends ConsoleStartServices {
   docLinks: DocLinksStart['links'];
   autocompleteInfo: AutocompleteInfo;
   isDevMode: boolean;
+  defaultEditorContent?: string;
 }
 
 export async function renderApp({
@@ -67,6 +68,7 @@ export async function renderApp({
   docLinks,
   autocompleteInfo,
   isDevMode,
+  defaultEditorContent,
   ...startServices
 }: BootDependencies) {
   const trackUiMetric = createUsageTracker(usageCollection);
@@ -110,6 +112,7 @@ export async function renderApp({
           },
           config: {
             isDevMode,
+            defaultEditorContent,
           },
         }}
       >

@@ -10,6 +10,7 @@
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { SerializableRecord } from '@kbn/utility-types';
+import type { DiscoverTabType } from '@kbn/discover-session-constants';
 import type { DiscoverDataSource } from '../../../common/data_sources';
 import type { ProfileStateDefinition } from '../../../common/context_awareness';
 import type { AsyncProfileProvider, ContextWithProfileId } from '../profile_service';
@@ -66,6 +67,10 @@ export interface DataSourceContext {
    * Optional profile state definition whose URL fields should sync with Discover's URL.
    */
   profileState?: ProfileStateDefinition<SerializableRecord>;
+  /**
+   * Optional tab type identifying the kind of experience this tab represents (e.g. metrics).
+   */
+  tabType?: DiscoverTabType;
 }
 
 export type DataSourceProfileProvider<TProviderContext = {}> = AsyncProfileProvider<

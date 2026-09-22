@@ -9,6 +9,8 @@ import type {
   ConversationAccessControl,
   ConversationAccessControlEntryInput,
   ConversationAccessControlMode,
+  ConversationAddEventInput,
+  ConversationEvent,
   ConversationWithPermissions,
   ConversationWithoutRoundsWithPermissions,
 } from '@kbn/agent-builder-common';
@@ -24,8 +26,15 @@ export type GetConversationResponse = ConversationWithPermissions;
 export type ListConversationsResponseItem = ConversationWithoutRoundsWithPermissions;
 
 export interface ListConversationsResponse {
+  pagination: {
+    total: number;
+    page: number;
+    per_page: number;
+  };
   results: ListConversationsResponseItem[];
 }
+
+export type SearchConversationsResponse = ListConversationsResponse;
 
 export interface DeleteConversationResponse {
   success: boolean;
@@ -54,3 +63,11 @@ export interface UpdateConversationAccessControlRequestBody {
 }
 
 export type UpdateConversationAccessControlResponse = ConversationAccessControl;
+
+export interface AddConversationEventsRequestBody {
+  events: ConversationAddEventInput[];
+}
+
+export interface AddConversationEventsResponse {
+  events: ConversationEvent[];
+}

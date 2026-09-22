@@ -4,6 +4,15 @@ This folder contains the official `libyara` C API wrapped in-house in WebAssembl
 
 We use `libyara` to validate rules exactly the same way as Endpoint does, with the same tool on the same version.
 
+## Limits
+
+A maximum number of 256 rules are validated per entry, above that the validator returns an error. This is not a technical limit, but a practical one to avoid potential performance issues and memory usage (e.g. on the generated JSON response of the WASM). It can be increased if needed, but it should be done with caution.
+This limit is somewhat related to our hard limit for storing Custom YARA Signatures in ES: 32,766 bytes per text. Filling this with 256 rules would mean only 128 characters per rule, which is quite a small value. Realistically, rules are longer than this, so users will likely to hit the byte length limit before the rule count limit. Whenever we use libyara for other purposes, we can consider increasing this limit if needed.
+See `MAX_RULES` directive in `validate_yara.c`.
+
+A maximum of 64 errors and 64 warnings are stored in the `errors` / `warnings` arrays. Additional diagnostics are counted but not stored, so `errorCount` / `warningCount` remain accurate. The arrays exist to hint at where problems are, not to enumerate every diagnostic.
+See `MAX_DIAGNOSTICS` directive in `validate_yara.c`.
+
 ## Usage
 
 ```ts

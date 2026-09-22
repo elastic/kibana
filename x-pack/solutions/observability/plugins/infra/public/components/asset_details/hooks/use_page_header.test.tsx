@@ -14,6 +14,7 @@ import { useInfraMLCapabilitiesContext } from '../../../containers/ml/infra_ml_c
 import { usePluginConfig } from '../../../containers/plugin_config_context';
 import { useAssetDetailsRenderPropsContext } from './use_asset_details_render_props';
 import { ContentTabIds, type Tab } from '../types';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 
 interface MockHistory {
   goBack: jest.Mock;
@@ -45,7 +46,7 @@ jest.mock('react-router-dom', () => ({
 }));
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useUiSetting: () => true,
+  useUiSetting: jest.fn(() => true),
 }));
 
 jest.mock('../../../hooks/use_kibana', () => ({
@@ -81,6 +82,7 @@ const useAssetDetailsRenderPropsContextMock =
   useAssetDetailsRenderPropsContext as jest.MockedFunction<
     typeof useAssetDetailsRenderPropsContext
   >;
+const mockUseUiSetting = useUiSetting as jest.MockedFunction<typeof useUiSetting>;
 
 const mockProfilingTab: Tab = {
   id: ContentTabIds.PROFILING,
@@ -90,6 +92,11 @@ const mockProfilingTab: Tab = {
 const mockOverviewTab: Tab = {
   id: ContentTabIds.OVERVIEW,
   name: 'Overview',
+};
+
+const mockDashboardsTab: Tab = {
+  id: ContentTabIds.DASHBOARDS,
+  name: 'Dashboards',
 };
 
 describe('usePageHeader', () => {
@@ -104,6 +111,7 @@ describe('usePageHeader', () => {
       state: null,
     });
     mockChromeStyle.mockReturnValue('classic');
+    mockUseUiSetting.mockReturnValue(true);
 
     useTabSwitcherContextMock.mockReturnValue({
       showTab: jest.fn(),
@@ -190,6 +198,38 @@ describe('usePageHeader', () => {
       expect(profilingTabEntry?.isSelected).toBe(true);
     });
 
+    it('should expose AppHeader tabs with the same selection and click behavior', () => {
+      const showTabMock = jest.fn();
+      useProfilingPluginSettingMock.mockReturnValue(true);
+      useTabSwitcherContextMock.mockReturnValue({
+        showTab: showTabMock,
+        activeTabId: ContentTabIds.OVERVIEW,
+        renderedTabsSet: { current: new Set([ContentTabIds.OVERVIEW, ContentTabIds.PROFILING]) },
+      } as unknown as ReturnType<typeof useTabSwitcherContext>);
+
+      const { result } = renderHook(() => usePageHeader([mockOverviewTab, mockProfilingTab], []));
+
+      expect(result.current.appHeaderTabs).toEqual([
+        {
+          id: ContentTabIds.OVERVIEW,
+          label: 'Overview',
+          isSelected: true,
+          onClick: expect.any(Function),
+          'data-test-subj': 'infraAssetDetailsOverviewTab',
+        },
+        {
+          id: ContentTabIds.PROFILING,
+          label: 'Universal Profiling',
+          isSelected: false,
+          onClick: expect.any(Function),
+          'data-test-subj': 'infraAssetDetailsProfilingTab',
+        },
+      ]);
+
+      result.current.appHeaderTabs[1].onClick?.();
+      expect(showTabMock).toHaveBeenCalledWith(ContentTabIds.PROFILING);
+    });
+
     it('should call showTab with profiling tab id when profiling tab is clicked', () => {
       const showTabMock = jest.fn();
       useProfilingPluginSettingMock.mockReturnValue(true);
@@ -212,6 +252,34 @@ describe('usePageHeader', () => {
       }
 
       expect(showTabMock).toHaveBeenCalledWith(ContentTabIds.PROFILING);
+    });
+  });
+
+  describe('dashboards tab visibility', () => {
+    it('should include the dashboards tab when custom dashboards are enabled', () => {
+      mockUseUiSetting.mockReturnValue(true);
+
+      const { result } = renderHook(() => usePageHeader([mockOverviewTab, mockDashboardsTab], []));
+
+      const dashboardsTabEntry = result.current.tabEntries.find(
+        (tab) => tab.id === ContentTabIds.DASHBOARDS
+      );
+
+      expect(dashboardsTabEntry).toBeDefined();
+      expect(dashboardsTabEntry?.['data-test-subj']).toBe('infraAssetDetailsDashboardsTab');
+      expect(dashboardsTabEntry?.label).toBe('Dashboards');
+    });
+
+    it('should exclude the dashboards tab when custom dashboards are disabled', () => {
+      mockUseUiSetting.mockReturnValue(false);
+
+      const { result } = renderHook(() => usePageHeader([mockOverviewTab, mockDashboardsTab], []));
+
+      const dashboardsTabEntry = result.current.tabEntries.find(
+        (tab) => tab.id === ContentTabIds.DASHBOARDS
+      );
+
+      expect(dashboardsTabEntry).toBeUndefined();
     });
   });
 

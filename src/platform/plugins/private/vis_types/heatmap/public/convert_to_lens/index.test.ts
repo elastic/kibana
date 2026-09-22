@@ -76,15 +76,15 @@ describe('convertToLens', () => {
   test('should return null if mockGetDataViewByIndexPatternId returns null', async () => {
     mockGetDataViewByIndexPatternId.mockReturnValue(null);
     const result = await convertToLens(vis, timefilter);
-    expect(mockGetDataViewByIndexPatternId).toBeCalledTimes(1);
-    expect(mockGetColumnsFromVis).toBeCalledTimes(0);
+    expect(mockGetDataViewByIndexPatternId).toHaveBeenCalledTimes(1);
+    expect(mockGetColumnsFromVis).toHaveBeenCalledTimes(0);
     expect(result).toBeNull();
   });
 
   test('should return null if getColumnsFromVis returns null', async () => {
     mockGetColumnsFromVis.mockReturnValue(null);
     const result = await convertToLens(vis, timefilter);
-    expect(mockGetColumnsFromVis).toBeCalledTimes(1);
+    expect(mockGetColumnsFromVis).toHaveBeenCalledTimes(1);
     expect(result).toBeNull();
   });
 
@@ -97,7 +97,7 @@ describe('convertToLens', () => {
       },
     ]);
     const result = await convertToLens(vis, timefilter);
-    expect(mockGetColumnsFromVis).toBeCalledTimes(1);
+    expect(mockGetColumnsFromVis).toHaveBeenCalledTimes(1);
     expect(result).toBeNull();
   });
 
@@ -115,7 +115,7 @@ describe('convertToLens', () => {
       },
     ]);
     const result = await convertToLens(vis, timefilter);
-    expect(mockGetColumnsFromVis).toBeCalledTimes(1);
+    expect(mockGetColumnsFromVis).toHaveBeenCalledTimes(1);
     expect(result).toEqual(
       expect.objectContaining({
         configuration: {},
@@ -151,8 +151,8 @@ describe('convertToLens', () => {
     mockGetConfiguration.mockReturnValue(config);
 
     const result = await convertToLens(vis, timefilter);
-    expect(mockGetColumnsFromVis).toBeCalledTimes(1);
-    expect(mockGetConfiguration).toBeCalledTimes(1);
+    expect(mockGetColumnsFromVis).toHaveBeenCalledTimes(1);
+    expect(mockGetConfiguration).toHaveBeenCalledTimes(1);
     expect(result?.type).toEqual('lnsHeatmap');
     expect(result?.layers.length).toEqual(1);
     expect(result?.layers[0]).toEqual(

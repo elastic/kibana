@@ -74,7 +74,7 @@ export interface SmlEntry {
    * keyword-searchable for sub-path filtering. SML treats this opaquely;
    * type writers own its shape.
    */
-  extended_attrs?: Record<string, unknown>;
+  attributes?: Record<string, unknown>;
   /** Owner or last-modifier user id when known */
   user_id?: string;
   /** Other SML entries this item references. Each entry carries a `uri` field. */
@@ -154,10 +154,10 @@ export interface SmlTypeDefinition {
    *
    * Omit when the type wraps a resource that is intentionally public within
    * the space (e.g. taxonomy entries, public schema docs). The indexer then
-   * stamps no privilege elements at all, which the read-path security filter
-   * treats as "no actions required". A type that wraps a sensitive
-   * resource MUST implement this hook — there is no other way to attach an
-   * access-control gate to its entry.
+   * stamps one `count: 0` privilege element per space, which the read-path
+   * security filter treats as "no actions required" — the entry stays space
+   * scoped but is visible to every caller in those spaces. A type that wraps a
+   * sensitive resource MUST implement this hook.
    *
    * Prefer the `kibanaPermissions` helper over hand-writing the action string. Its `kiType` MUST
    * match the KI type the owning feature declares in `aiIndex: { read: [...] }` — which is the
@@ -193,47 +193,58 @@ export interface SmlTypeDefinition {
  */
 export type SmlIngestionMethod = 'manual' | 'crawled';
 
+/** How a referenced URI relates to the entry. */
+export type SmlReferenceRelation = 'derived_from' | 'relates_to' | 'supersedes';
+
+export interface SmlReference {
+  uri: string;
+  relation?: SmlReferenceRelation;
+}
+
+/** The writer recorded under `governance.provenance`. */
+export interface SmlWriter {
+  /** `user://<id>` for a user, `crawler://sml` for the crawler. */
+  uri: string;
+  metadata: { ingestion_method: SmlIngestionMethod };
+}
+
 /**
- * An SML document as stored in the system index.
+ * An SML document, exactly as stored in the index and as handed to consumers (notably
+ * {@link SmlTypeDefinition.toAttachment}).
+ *
+ * `id` is `${type}:${originId}` and the origin is the `derived_from` reference.
  */
 export interface SmlDocument {
-  /** Unique id of the entry */
+  /** Creation time */
+  '@timestamp': string;
+  /** Unique id of the entry: `${type}:${originId}`. */
   id: string;
   /** SML type (e.g., 'visualization', 'dashboard') */
   type: string;
   /** Display title */
   title: string;
-  /** Raw origin id (e.g. saved object ID). Not stored in the index — derived at read time from `origin.uri`. */
-  origin_id?: string;
-  /** Self-describing URI for the origin, e.g. `${type}://${origin_id}`. */
-  origin: { uri: string };
   /** Searchable content (`semantic_text` in the index) */
   content: string;
   /** Semantic summary (`semantic_text` in the index) */
   description?: string;
   /** Free-form labels */
   tags?: string[];
-  /** Type-specific structured data (`flattened` mapping) */
-  extended_attrs?: Record<string, unknown>;
-  /** Owner or last-modifier user id */
-  user_id?: string;
-  /** Other SML entries this item references. Each entry carries a `uri` field; the object shape allows sub-fields (e.g. relationship kind) without a future migration. */
-  references?: Array<{ uri: string }>;
-  /** Timestamp when first created */
-  created_at: string;
-  /** Timestamp when last updated */
+  /** Last write time */
   updated_at: string;
+  /** The origin as a `derived_from` reference, plus the type writer's references. */
+  references: SmlReference[];
+  governance: { provenance: { created_by: SmlWriter; updated_by: SmlWriter } };
   /**
    * Permissions required to access this entry. See {@link SmlPermissions} for the per-space group shape.
    */
   permissions: SmlPermissions;
-  /** How this entry was produced. */
-  ingestion_method: SmlIngestionMethod;
+  /** The type writer's own {@link SmlEntry.attributes}. */
+  attributes?: Record<string, unknown>;
 }
 
 /**
  * Compact SML search result — LLM-shaped. Drops the full `content` blob, the
- * full `extended_attrs`, and bookkeeping fields. Callers fetch full content via the
+ * full `attributes`, and bookkeeping fields. Callers fetch full content via the
  * lookup tool (`sml_read`) when they need it.
  *
  * `permissions` is retained here so callers (route / tool wrapper) can apply
@@ -251,14 +262,14 @@ export interface SmlSearchResult {
   origin: { uri: string };
   content?: string;
   description?: string;
-  references?: Array<{ uri: string }>;
+  references?: SmlReference[];
   tags?: string[];
 }
 
 /**
  * An SML autocomplete result — narrower than {@link SmlSearchResult}, tuned for
  * @ menu / typeahead rendering. Drops bulk content (`content`, `description`,
- * `extended_attrs`, etc.).
+ * `attributes`, etc.).
  */
 export interface SmlAutocompleteResult {
   id: string;
@@ -354,6 +365,13 @@ interface SmlIndexerBaseParams {
   esClient: ElasticsearchClient;
   savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository;
   logger: Logger;
+  /**
+   * Set to `true` when `savedObjectsClient` comes from `getScopedClient` — that
+   * client determines the namespace automatically and throws if one is passed
+   * explicitly. Leave unset for internal repositories, which need an explicit
+   * namespace to access non-default spaces.
+   */
+  clientHasSpacesExtension?: boolean;
 }
 
 export type SmlIndexerOriginParams = SmlIndexerBaseParams & SmlIndexAttachmentOriginMode;

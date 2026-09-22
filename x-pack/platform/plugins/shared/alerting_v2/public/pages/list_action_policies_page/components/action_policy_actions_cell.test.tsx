@@ -20,7 +20,6 @@ const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPoli
   destinations: [{ type: 'workflow', id: 'workflow-1' }],
   matcher: null,
   group_by: null,
-  tags: null,
   grouping_mode: null,
   throttle: { strategy: undefined, interval: null },
   snoozed_until: null,
@@ -49,20 +48,25 @@ const renderCell = (canWrite: boolean) =>
 
 describe('ActionPolicyActionsCell', () => {
   describe('when the user has write privilege', () => {
-    it('renders the view details, edit, and more actions affordances', () => {
+    it('renders the edit and more actions affordances', () => {
       renderCell(true);
 
-      expect(screen.getByTestId('actionPolicyViewDetailsButton')).toBeInTheDocument();
       expect(screen.getByLabelText('Edit this action policy')).toBeInTheDocument();
       expect(screen.getByLabelText('More actions')).toBeInTheDocument();
+    });
+
+    it('does not render a standalone view details button (the name link covers it)', () => {
+      renderCell(true);
+
+      expect(screen.queryByTestId('actionPolicyViewDetailsButton')).not.toBeInTheDocument();
     });
   });
 
   describe('when the user only has read privilege', () => {
-    it('renders only the view details affordance', () => {
+    it('renders no write affordances', () => {
       renderCell(false);
 
-      expect(screen.getByTestId('actionPolicyViewDetailsButton')).toBeInTheDocument();
+      expect(screen.queryByTestId('actionPolicyViewDetailsButton')).not.toBeInTheDocument();
       expect(screen.queryByLabelText('Edit this action policy')).not.toBeInTheDocument();
       expect(screen.queryByLabelText('More actions')).not.toBeInTheDocument();
     });

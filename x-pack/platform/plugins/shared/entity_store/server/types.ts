@@ -31,6 +31,7 @@ import type {
 } from '@kbn/licensing-plugin/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { CoreSetup } from '@kbn/core/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AssetManagerClient } from './domain/asset_manager';
 import type {
@@ -53,6 +54,7 @@ export interface EntityStoreSetupPlugins {
   spaces: SpacesPluginSetup;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface EntityStoreStartPlugins {

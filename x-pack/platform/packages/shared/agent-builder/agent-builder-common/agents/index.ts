@@ -21,8 +21,10 @@ export {
   AgentAccessControlMode,
   AgentAccessControlRole,
   AGENT_ACCESS_CONTROL_MAX_ENTRIES,
-  AGENT_ACCESS_CONTROL_PRINCIPAL_NAME_MAX_LENGTH,
+  AGENT_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
   isAgentAccessControlRole,
+  getAccessControlEntryKey,
+  isEntryCoveredByOwner,
   accessControlRoleMeets,
   maxAccessControlRole,
   getDefaultAgentAccessControl,
@@ -31,11 +33,28 @@ export {
   type AgentAccessControlPrincipalType,
 } from './access_control';
 export { agentIdRegexp, agentIdMaxLength, validateAgentId } from './agent_ids';
+export { SELF_AGENT_ID } from './constants';
 export { AgentExecutionErrorCode } from './execution_errors';
 export { AgentExecutionMode, SubagentExecutionMode } from './execution_mode';
-export { ExecutionStatus, type SerializedExecutionError } from './execution_status';
-export type { InteractivityConfig } from './interactivity';
-export { normalizeInteractive } from './interactivity';
+export {
+  ExecutionStatus,
+  isExecutionAbortReason,
+  type ExecutionAbortReason,
+  type ExecutionAbortSource,
+  type SerializedExecutionError,
+  type SerializedErrorCause,
+} from './execution_status';
+export type {
+  AutoApprovedApi,
+  InteractivityConfig,
+  InteractivityConfigInput,
+} from './interactivity';
+export {
+  createNonInteractiveConfig,
+  isApiAutoApproved,
+  normalizeInteractive,
+  toAutoApprovedApis,
+} from './interactivity';
 export { SubagentMode } from './subagent_mode';
 export type {
   AgentListOptions,

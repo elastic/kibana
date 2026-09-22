@@ -33,11 +33,16 @@ export const useFetchMaintenanceWindows = () => {
       apiService.get<SyntheticsMaintenanceWindowsResult>(
         SYNTHETICS_API_URLS.MAINTENANCE_WINDOWS,
         undefined,
-        undefined,
         { signal }
       ),
     {
       refetchInterval: REFRESH_INTERVAL_MS,
+      // Without this, cached data is stale immediately (the default) and every
+      // component mount re-fetches on top of the interval polling above. This
+      // hook is called per-card from the virtualized overview grid
+      // (`MetricItemIcon` -> `useMonitorMWs`), so scrolling constantly mounts
+      // fresh subscribers — each one triggering its own request otherwise.
+      staleTime: REFRESH_INTERVAL_MS,
     }
   );
 };

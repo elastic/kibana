@@ -11,20 +11,26 @@ import userEvent from '@testing-library/user-event';
 import { FieldDefinitionFlyout } from './field_definition_flyout';
 import { renderWithTestingProviders } from '../../../common/mock';
 
+const mockYamlEditorProps = jest.fn();
 jest.mock('./field_definition_yaml_editor', () => ({
   FieldDefinitionYamlEditor: ({
     value,
     onChange,
+    isEditing,
   }: {
     value: string;
     onChange: (v: string) => void;
-  }) => (
-    <textarea
-      data-test-subj="fieldDefinitionYamlInput"
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-    />
-  ),
+    isEditing?: boolean;
+  }) => {
+    mockYamlEditorProps({ isEditing });
+    return (
+      <textarea
+        data-test-subj="fieldDefinitionYamlInput"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      />
+    );
+  },
 }));
 
 jest.mock('./field_definition_preview', () => ({
@@ -128,6 +134,34 @@ describe('FieldDefinitionFlyout — isGlobal checkbox', () => {
     renderWithTestingProviders(<FieldDefinitionFlyout {...defaultProps} />);
 
     expect(screen.getByText('Global field')).toBeInTheDocument();
+  });
+});
+
+describe('FieldDefinitionFlyout — YAML editor mode', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('passes isEditing: false to the YAML editor when creating', () => {
+    renderWithTestingProviders(<FieldDefinitionFlyout {...defaultProps} />);
+
+    expect(mockYamlEditorProps).toHaveBeenCalledWith({ isEditing: false });
+  });
+
+  it('passes isEditing: true to the YAML editor when editing an existing definition', () => {
+    const fieldDefinition = {
+      fieldDefinitionId: 'fd-1',
+      name: 'my_field',
+      owner: 'securitySolution' as const,
+      definition: VALID_YAML,
+      isGlobal: false,
+    };
+
+    renderWithTestingProviders(
+      <FieldDefinitionFlyout {...defaultProps} fieldDefinition={fieldDefinition} />
+    );
+
+    expect(mockYamlEditorProps).toHaveBeenCalledWith({ isEditing: true });
   });
 });
 

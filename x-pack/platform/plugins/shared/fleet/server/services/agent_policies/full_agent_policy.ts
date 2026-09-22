@@ -13,8 +13,11 @@ import { PrivilegeType } from '@kbn/apm-types';
 
 import {
   getDefaultPresetForEsOutput,
+  isBeatsOutput,
+  isOtlpOutput,
   outputTypeSupportPresets,
 } from '../../../common/services/output_helpers';
+import { isManagedOtlpEndpoint } from '../utils/managed_otlp';
 
 import type {
   FullAgentPolicy,
@@ -122,7 +125,7 @@ export async function getFullAgentPolicy(
     dataOutput,
     fleetServerHost,
     monitoringOutput,
-    downloadSource,
+    downloadSources,
     downloadSourceProxy,
   } = await fetchRelatedSavedObjects(soClient, agentPolicy);
 
@@ -174,9 +177,10 @@ export async function getFullAgentPolicy(
 
   let otelcolConfig;
   if (experimentalFeature.enableOtelIntegrations) {
-    const dataOutputProxy = dataOutput?.proxy_id
-      ? proxies.find((p) => p.id === dataOutput.proxy_id)
-      : undefined;
+    const dataOutputProxy =
+      dataOutput && isBeatsOutput(dataOutput) && dataOutput.proxy_id
+        ? proxies.find((p) => p.id === dataOutput.proxy_id)
+        : undefined;
 
     const packageOutputs = new Map<string, Output>();
     for (const pkgPolicy of (agentPolicy.package_policies ?? []) as PackagePolicy[]) {
@@ -234,8 +238,8 @@ export async function getFullAgentPolicy(
   const fleetserverHostSecretReferences = fleetServerHost
     ? getFleetServerHostsSecretReferences(fleetServerHost)
     : [];
-  const downloadSourceSecretReferences = downloadSource
-    ? getDownloadSourceSecretReferences(downloadSource)
+  const downloadSourceSecretReferences = downloadSources[0]
+    ? getDownloadSourceSecretReferences(downloadSources[0])
     : [];
   // Only include package policy secret refs that appear inline as `$co.elastic.secret{<id>}`
   // placeholders in the compiled policy. Disabled inputs/policies, never-rendered secret vars,
@@ -289,7 +293,9 @@ export async function getFullAgentPolicy(
       ...outputs.reduce<FullAgentPolicy['outputs']>((acc, output) => {
         acc[getOutputIdForAgentPolicy(output)] = transformOutputToFullPolicyOutput(
           output,
-          output.proxy_id ? proxies.find((proxy) => output.proxy_id === proxy.id) : undefined,
+          isBeatsOutput(output) && output.proxy_id
+            ? proxies.find((proxy) => output.proxy_id === proxy.id)
+            : undefined,
           standalone,
           redactProxySecrets
         );
@@ -306,7 +312,7 @@ export async function getFullAgentPolicy(
     ],
     revision: agentPolicy.revision,
     agent: {
-      download: getBinarySourceSettings(downloadSource, downloadSourceProxy, redactProxySecrets),
+      download: getBinarySourceSettings(downloadSources, downloadSourceProxy, redactProxySecrets),
       monitoring: getFullMonitoringSettings(agentPolicy, monitoringOutput),
       features,
       protection: {
@@ -392,12 +398,12 @@ export async function getFullAgentPolicy(
     NonNullable<FullAgentPolicy['output_permissions']>
   >((outputPermissions, outputId) => {
     const output = fullAgentPolicy.outputs[outputId];
+    const originalOutput = outputs.find((o) => getOutputIdForAgentPolicy(o) === outputId);
+
     if (
       output &&
       (output.type === outputType.Elasticsearch || output.type === outputType.RemoteElasticsearch)
     ) {
-      const originalOutput = outputs.find((o) => getOutputIdForAgentPolicy(o) === outputId);
-
       if (agentPolicy.supports_agentless && originalOutput && isManagedBulkOutput(originalOutput)) {
         outputPermissions[outputId] = {
           _managed_bulk_apm: {
@@ -422,7 +428,7 @@ export async function getFullAgentPolicy(
       }
 
       // Add logs-* permissions for outputs with write_to_streams enabled
-      if (originalOutput?.write_to_logs_streams) {
+      if (originalOutput && isBeatsOutput(originalOutput) && originalOutput.write_to_logs_streams) {
         const streamsPermissions = {
           _write_to_logs_streams: {
             indices: [
@@ -437,7 +443,21 @@ export async function getFullAgentPolicy(
       }
 
       outputPermissions[outputId] = permissions;
+    } else if (
+      agentPolicy.supports_agentless &&
+      originalOutput &&
+      isOtlpOutput(originalOutput) &&
+      isManagedOtlpEndpoint(originalOutput.otlp_exporter.endpoint)
+    ) {
+      outputPermissions[outputId] = {
+        _managed_otlp_apm: {
+          applications: [
+            { application: 'apm', privileges: [PrivilegeType.EVENT], resources: ['*'] },
+          ],
+        },
+      };
     }
+
     return outputPermissions;
   }, {});
 
@@ -612,6 +632,11 @@ export function transformOutputToFullPolicyOutput(
   standalone = false,
   redactProxySecrets = false
 ): FullAgentPolicyOutput {
+  if (isOtlpOutput(output)) {
+    // otlp_exporter config and secrets are compiled into the OTel collector block by generateOtelcolExporter.
+    return { type: output.type };
+  }
+
   const {
     config_yaml,
     type,
@@ -775,7 +800,7 @@ export function transformOutputToFullPolicyOutput(
     newOutput.sync_uninstalled_integrations = output.sync_uninstalled_integrations;
   }
 
-  if (outputTypeSupportPresets(output.type)) {
+  if (outputTypeSupportPresets(output)) {
     newOutput.preset = preset ?? getDefaultPresetForEsOutput(config_yaml ?? '', parse);
   }
 
@@ -933,46 +958,47 @@ function buildShipperQueueData(shipper: ShipperOutput) {
 }
 
 export function getBinarySourceSettings(
-  downloadSource: DownloadSource,
+  downloadSources: DownloadSource[],
   downloadSourceProxy: FleetProxy | undefined,
   redactProxySecrets = false
 ) {
+  const primarySource = downloadSources[0];
+
+  // sourceURI kept for backwards compat with agents older than 9.6.0 that do not read `sources`
   const config: FullAgentPolicyDownload = {
-    sourceURI: downloadSource.host,
+    sourceURI: primarySource.host,
+    sources: downloadSources.map((ds) => ds.host),
   };
 
-  if (downloadSource?.ssl) {
+  if (primarySource?.ssl) {
     config.ssl = {
-      ...(downloadSource.ssl?.certificate_authorities && {
-        certificate_authorities: downloadSource.ssl.certificate_authorities,
+      ...(primarySource.ssl?.certificate_authorities && {
+        certificate_authorities: primarySource.ssl.certificate_authorities,
       }),
-      ...(downloadSource.ssl?.certificate && {
-        certificate: downloadSource.ssl.certificate,
+      ...(primarySource.ssl?.certificate && {
+        certificate: primarySource.ssl.certificate,
       }),
-      ...(downloadSource.ssl?.key &&
-        !downloadSource?.secrets?.ssl?.key && {
-          key: downloadSource.ssl.key,
+      ...(primarySource.ssl?.key &&
+        !primarySource?.secrets?.ssl?.key && {
+          key: primarySource.ssl.key,
         }),
     };
   }
 
-  if (downloadSource?.auth) {
+  if (primarySource?.auth) {
     const authConfig: FullAgentPolicyDownload['auth'] = {};
-    if (downloadSource.auth.username) {
-      authConfig.username = downloadSource.auth.username;
+    if (primarySource.auth.username) {
+      authConfig.username = primarySource.auth.username;
     }
-    if (
-      downloadSource.auth.password &&
-      typeof downloadSource?.secrets?.auth?.password !== 'object'
-    ) {
-      authConfig.password = downloadSource.auth.password;
+    if (primarySource.auth.password && typeof primarySource?.secrets?.auth?.password !== 'object') {
+      authConfig.password = primarySource.auth.password;
     }
-    if (downloadSource.auth.api_key && typeof downloadSource?.secrets?.auth?.api_key !== 'object') {
-      authConfig.api_key = downloadSource.auth.api_key;
+    if (primarySource.auth.api_key && typeof primarySource?.secrets?.auth?.api_key !== 'object') {
+      authConfig.api_key = primarySource.auth.api_key;
     }
     // Filter out empty headers (both key and value are empty)
-    if (downloadSource.auth.headers && downloadSource.auth.headers.length > 0) {
-      const filteredHeaders = downloadSource.auth.headers.filter(
+    if (primarySource.auth.headers && primarySource.auth.headers.length > 0) {
+      const filteredHeaders = primarySource.auth.headers.filter(
         (header) => header.key !== '' || header.value !== ''
       );
       if (filteredHeaders.length > 0) {
@@ -984,22 +1010,22 @@ export function getBinarySourceSettings(
     }
   }
 
-  if (downloadSource?.secrets) {
+  if (primarySource?.secrets) {
     const secretsConfig: FullAgentPolicyDownload['secrets'] = {};
 
-    if (downloadSource.secrets?.ssl?.key) {
+    if (primarySource.secrets?.ssl?.key) {
       secretsConfig.ssl = {
-        key: downloadSource.secrets.ssl.key,
+        key: primarySource.secrets.ssl.key,
       };
     }
 
-    if (downloadSource.secrets?.auth) {
+    if (primarySource.secrets?.auth) {
       const authSecretsConfig: NonNullable<FullAgentPolicyDownload['secrets']>['auth'] = {};
-      if (typeof downloadSource.secrets.auth.password === 'object') {
-        authSecretsConfig.password = downloadSource.secrets.auth.password;
+      if (typeof primarySource.secrets.auth.password === 'object') {
+        authSecretsConfig.password = primarySource.secrets.auth.password;
       }
-      if (typeof downloadSource.secrets.auth.api_key === 'object') {
-        authSecretsConfig.api_key = downloadSource.secrets.auth.api_key;
+      if (typeof primarySource.secrets.auth.api_key === 'object') {
+        authSecretsConfig.api_key = primarySource.secrets.auth.api_key;
       }
       if (Object.keys(authSecretsConfig).length > 0) {
         secretsConfig.auth = authSecretsConfig;

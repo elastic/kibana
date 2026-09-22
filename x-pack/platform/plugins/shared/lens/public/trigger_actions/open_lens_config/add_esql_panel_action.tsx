@@ -76,7 +76,7 @@ export class AddESQLPanelAction implements Action<EmbeddableApiContext> {
           closeFlyout,
         });
       },
-      options: { uuid, returnFocus },
+      options: { uuid, returnFocus, isEsql: true },
     });
   }
 }

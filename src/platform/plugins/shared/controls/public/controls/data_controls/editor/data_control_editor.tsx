@@ -463,6 +463,7 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
               isEdit={isEdit}
               esqlVariables={parentESQLVariables}
               parentApi={parentApi}
+              selectedControlType={selectedControlType}
               reopenEditor={
                 reopenEditor
                   ? (esqlOverrides) =>
