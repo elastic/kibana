@@ -9,10 +9,12 @@ import type { Logger } from '@kbn/core/server';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import type { ProposalAttachmentData, ProposalWithMetadata } from '../../../common/proposals';
 import { PROPOSAL_ATTACHMENT_TYPE, proposalAttachmentDataSchema } from '../../../common/proposals';
+import type { ProposalPrivilegesChecker } from '../services/check_proposal_privileges';
 import type { ProposalsService } from '../services/proposals_service';
 
 export interface ProposalAttachmentTypeDeps {
   getProposalsService: () => ProposalsService;
+  privileges: ProposalPrivilegesChecker;
   logger: Logger;
 }
 
@@ -63,6 +65,7 @@ const formatProposalForAgent = (proposal: ProposalWithMetadata): string => {
  */
 export const createProposalAttachmentType = ({
   getProposalsService,
+  privileges,
   logger,
 }: ProposalAttachmentTypeDeps): AttachmentTypeDefinition<
   typeof PROPOSAL_ATTACHMENT_TYPE,
@@ -83,14 +86,23 @@ export const createProposalAttachmentType = ({
   // Read at representation time rather than at add time, so what the agent is
   // told matches what the analyst sees. `origin` first because attachments
   // written before the payload shrank carry the id only there.
-  format: (attachment, { spaceId }) => ({
+  format: (attachment, { request, spaceId }) => ({
     getRepresentation: async () => {
       const proposalId = attachment.origin ?? attachment.data.proposalId;
       try {
+        // The service reads as the internal user, so nothing below this line
+        // enforces the caller's own privileges. Attachments of this type are
+        // `isReadonly`, but that only stops the agent's attachment tools — the
+        // public attachment API still lets any caller name an arbitrary
+        // proposal id here, which without this check would read it back to the
+        // LLM for someone holding no proposals privilege at all.
+        await privileges.assertCanRead(request);
         const proposal = await getProposalsService().get(proposalId, spaceId);
         return { type: 'text', value: formatProposalForAgent(proposal) };
       } catch (error) {
         logger.warn(`Failed to read proposal ${proposalId} for its attachment: ${error}`);
+        // Same text whether the proposal is missing or merely off-limits, so
+        // the representation cannot be used to probe for ids.
         return { type: 'text', value: '## Investigation proposal: currently unavailable' };
       }
     },

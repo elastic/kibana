@@ -76,6 +76,9 @@ export class AgenticInvestigationsPlugin
     // called before then, so it is resolved lazily rather than captured here.
     registerProposalAttachment(agentBuilder, {
       getProposalsService: () => this.requireProposalsService(),
+      // Reads go through the internal user, so the formatter has to check the
+      // caller's privilege itself — same as every other proposal read surface.
+      privileges: this.getProposalPrivilegesChecker(coreSetup),
       logger: this.logger,
     });
 
