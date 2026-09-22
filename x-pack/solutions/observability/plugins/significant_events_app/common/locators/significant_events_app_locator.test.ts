@@ -20,8 +20,12 @@ describe('SignificantEventsAppLocatorDefinition', () => {
     });
   });
 
-  it('builds a path for a specific tab', async () => {
-    const { path } = await locator.getLocation({ tab: 'settings' });
+  it('builds a clean path for the standalone Settings page', async () => {
+    const { path } = await locator.getLocation({
+      tab: 'settings',
+      rangeFrom: 'now-24h',
+      rangeTo: 'now',
+    });
 
     expect(path).toBe('/settings');
   });
