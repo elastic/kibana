@@ -17,6 +17,7 @@ export const isReadOnlyPermissions = (permissions: CasesPermissions) => {
     !permissions.assign &&
     !permissions.createComment &&
     !permissions.reopenCase &&
+    !permissions.settings &&
     !permissions.manageTemplates &&
     permissions.read
   );
