@@ -65,16 +65,13 @@ export async function fetchLastSuccessfulCheck({
   location?: string;
   remoteName?: string;
 }): Promise<Ping> {
-  return await apiService.get(
-    SYNTHETICS_API_URLS.SYNTHETICS_SUCCESSFUL_CHECK,
-    {
-      monitorId,
-      timestamp,
-      stepIndex,
-      location,
-      ...(remoteName ? { remoteName } : {}),
-    }
-  );
+  return await apiService.get(SYNTHETICS_API_URLS.SYNTHETICS_SUCCESSFUL_CHECK, {
+    monitorId,
+    timestamp,
+    stepIndex,
+    location,
+    ...(remoteName ? { remoteName } : {}),
+  });
 }
 
 export interface BackoffOptions {

@@ -286,9 +286,9 @@ describe('fetchLastSuccessfulCheck remoteName plumbing', () => {
   it('forwards remoteName to apiService.get when present', async () => {
     await fetchLastSuccessfulCheck({ ...baseParams, remoteName: 'remote-a' });
 
-    expect(mockGet).toHaveBeenCalledWith(
-      SYNTHETICS_API_URLS.SYNTHETICS_SUCCESSFUL_CHECK,
-      { ...baseParams, remoteName: 'remote-a' }
-    );
+    expect(mockGet).toHaveBeenCalledWith(SYNTHETICS_API_URLS.SYNTHETICS_SUCCESSFUL_CHECK, {
+      ...baseParams,
+      remoteName: 'remote-a',
+    });
   });
 });

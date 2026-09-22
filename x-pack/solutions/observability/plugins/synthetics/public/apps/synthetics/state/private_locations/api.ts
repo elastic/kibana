@@ -34,13 +34,9 @@ export const editSyntheticsPrivateLocation = async ({
   locationId: string;
   newAttributes: EditPrivateLocationAttributes;
 }): Promise<PrivateLocation> => {
-  return apiService.put(
-    `${SYNTHETICS_API_URLS.PRIVATE_LOCATIONS}/${locationId}`,
-    newAttributes,
-    {
-      version: INITIAL_REST_VERSION,
-    }
-  );
+  return apiService.put(`${SYNTHETICS_API_URLS.PRIVATE_LOCATIONS}/${locationId}`, newAttributes, {
+    version: INITIAL_REST_VERSION,
+  });
 };
 
 export const getSyntheticsPrivateLocations = async (): Promise<SyntheticsPrivateLocations> => {

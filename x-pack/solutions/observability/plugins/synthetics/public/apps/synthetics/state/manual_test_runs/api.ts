@@ -40,11 +40,7 @@ export const runOnceMonitor = async ({
   id: string;
   spaceId?: string;
 }): Promise<{ errors: ServiceLocationErrors }> => {
-  return await apiService.post(
-    SYNTHETICS_API_URLS.RUN_ONCE_MONITOR + `/${id}`,
-    monitor,
-    {
-      spaceId,
-    }
-  );
+  return await apiService.post(SYNTHETICS_API_URLS.RUN_ONCE_MONITOR + `/${id}`, monitor, {
+    spaceId,
+  });
 };

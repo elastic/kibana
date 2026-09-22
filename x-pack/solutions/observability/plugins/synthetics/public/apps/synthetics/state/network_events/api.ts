@@ -13,13 +13,10 @@ import type { FetchNetworkEventsParams } from './actions';
 export async function fetchNetworkEvents(
   params: FetchNetworkEventsParams
 ): Promise<SyntheticsNetworkEventsApiResponse> {
-  return (await apiService.get(
-    SYNTHETICS_API_URLS.NETWORK_EVENTS,
-    {
-      checkGroup: params.checkGroup,
-      stepIndex: params.stepIndex,
-      ...(params.remoteName ? { remoteName: params.remoteName } : {}),
-      ...(params.timestamp ? { timestamp: params.timestamp } : {}),
-    }
-  )) as SyntheticsNetworkEventsApiResponse;
+  return (await apiService.get(SYNTHETICS_API_URLS.NETWORK_EVENTS, {
+    checkGroup: params.checkGroup,
+    stepIndex: params.stepIndex,
+    ...(params.remoteName ? { remoteName: params.remoteName } : {}),
+    ...(params.timestamp ? { timestamp: params.timestamp } : {}),
+  })) as SyntheticsNetworkEventsApiResponse;
 }
