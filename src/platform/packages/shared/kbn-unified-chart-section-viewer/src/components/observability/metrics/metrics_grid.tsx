@@ -295,7 +295,7 @@ export const MetricsGrid = ({
                 />
               </EuiFlexItem>
             );
-          })}
+      {flyoutData && isTabSelected && isFlyoutOpen && (
         </EuiFlexGrid>
       </A11yGridWrapper>
       {flyoutData && isFlyoutOpen && (
