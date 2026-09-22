@@ -26,7 +26,7 @@ describe('registerUiSettings', () => {
         type: 'boolean',
         value: false,
         category: ['securitySolution'],
-        solutionViews: ['classic', 'security'],
+        solutionViews: ['security'],
         experimental: true,
         requiresPageReload: true,
       })
