@@ -32,7 +32,7 @@ export type ScoutResponseType = NonNullable<ApiClientOptions['responseType']>;
 export type ScoutResponseBody<
   TResponseType extends ScoutResponseType,
   TJsonBody = ApiClientResponse['body']
-> = TResponseType extends 'text' ? string : TResponseType extends 'buffer' ? Buffer : TJsonBody;
+export interface ScoutApiRequestOptions<TResponseType extends ScoutResponseType = ScoutResponseType> {
 
 export interface ScoutApiRequestOptions<TResponseType extends ScoutResponseType = 'json'> {
   /** Extra headers merged on top of the defaults, e.g. an API key or a SAML cookie for auth */
