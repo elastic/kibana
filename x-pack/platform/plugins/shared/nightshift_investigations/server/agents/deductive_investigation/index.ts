@@ -32,10 +32,7 @@ const DECISION_TREES_LOAD_STEP =
 
 const fillDecisionTreeInstructions = (includeDecisionTrees: boolean): string =>
   instructions
-    .replace(
-      '{{decision_trees_load_step}}',
-      includeDecisionTrees ? DECISION_TREES_LOAD_STEP : ''
-    )
+    .replace('{{decision_trees_load_step}}', includeDecisionTrees ? DECISION_TREES_LOAD_STEP : '')
     .replace(
       '{{decision_trees_section}}',
       includeDecisionTrees ? `\n${decisionTreesSection.trimEnd()}\n` : ''
