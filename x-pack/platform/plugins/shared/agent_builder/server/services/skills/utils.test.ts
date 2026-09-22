@@ -211,7 +211,11 @@ describe('resolveSkill', () => {
   describe('persisted skills (basePath with leading slash)', () => {
     // Persisted skills store basePath as '/skills' (from MOUNT_POINTS.skills) rather
     // than the 'skills' form that built-ins use. All path forms should still resolve.
-    const persistedSkill = skill({ id: 'p', name: 'sourcerer-repo-discovery', basePath: '/skills' });
+    const persistedSkill = skill({
+      id: 'p',
+      name: 'sourcerer-repo-discovery',
+      basePath: '/skills',
+    });
 
     it('resolves by bare name', () => {
       expect(resolveSkill('sourcerer-repo-discovery', [persistedSkill])).toEqual({
@@ -232,9 +236,9 @@ describe('resolveSkill', () => {
     });
 
     it('resolves by SKILL.md path with leading slash (as returned by load_skill)', () => {
-      expect(
-        resolveSkill('/skills/sourcerer-repo-discovery/SKILL.md', [persistedSkill])
-      ).toEqual({ match: persistedSkill });
+      expect(resolveSkill('/skills/sourcerer-repo-discovery/SKILL.md', [persistedSkill])).toEqual({
+        match: persistedSkill,
+      });
     });
   });
 });
