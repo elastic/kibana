@@ -125,9 +125,7 @@ describe('createEvaluateDataset', () => {
         agentTraceId: 'trace-id-fixture',
         turns: 1,
         messages: [{ message: 'Here is your chart.' }],
-        visualizations: [
-          expect.objectContaining({ chartType: 'metric', renderer: 'lens' }),
-        ],
+        visualizations: [expect.objectContaining({ chartType: 'metric', renderer: 'lens' })],
       })
     );
   });

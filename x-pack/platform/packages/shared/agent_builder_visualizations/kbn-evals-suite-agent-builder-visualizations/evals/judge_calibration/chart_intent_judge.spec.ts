@@ -43,37 +43,35 @@ evaluate.describe(
   'Agent Builder Visualizations - Chart Intent Judge Calibration',
   { tag: tags.serverless.search },
   () => {
-    evaluate('agrees with human verdicts on fixed chart-form pairs', async ({
-      executorClient,
-      inferenceClient,
-      log,
-    }) => {
-      const judge = createChartIntentJudge({ inferenceClient, log });
+    evaluate(
+      'agrees with human verdicts on fixed chart-form pairs',
+      async ({ executorClient, inferenceClient, log }) => {
+        const judge = createChartIntentJudge({ inferenceClient, log });
 
-      await executorClient.runExperiment(
-        {
-          datasets: [
-            {
-              name: 'agent builder visualizations: chart intent judge calibration',
-              description:
-                'Fixed gold / produced chart-form pairs with human verdicts. Measures judge agreement so rubric or model drift is visible separately from agent quality.',
-              examples: CHART_INTENT_CALIBRATION_PAIRS.map(
-                ({ question, gold, actual, verdict, rationale }) => ({
-                  input: { question, gold, actual } as CalibrationInput &
-                    Record<string, unknown>,
-                  output: { verdict, rationale },
-                  metadata: { chartFamily: 'judge_calibration' },
-                })
-              ),
+        await executorClient.runExperiment(
+          {
+            datasets: [
+              {
+                name: 'agent builder visualizations: chart intent judge calibration',
+                description:
+                  'Fixed gold / produced chart-form pairs with human verdicts. Measures judge agreement so rubric or model drift is visible separately from agent quality.',
+                examples: CHART_INTENT_CALIBRATION_PAIRS.map(
+                  ({ question, gold, actual, verdict, rationale }) => ({
+                    input: { question, gold, actual } as CalibrationInput & Record<string, unknown>,
+                    output: { verdict, rationale },
+                    metadata: { chartFamily: 'judge_calibration' },
+                  })
+                ),
+              },
+            ],
+            task: async ({ input }) => {
+              const { question, gold, actual } = input as CalibrationInput;
+              return judge({ question, gold, actual });
             },
-          ],
-          task: async ({ input }) => {
-            const { question, gold, actual } = input as CalibrationInput;
-            return judge({ question, gold, actual });
           },
-        },
-        [judgeAgreement]
-      );
-    });
+          [judgeAgreement]
+        );
+      }
+    );
   }
 );
