@@ -70,5 +70,4 @@ export interface ActionPolicySavedObjectServiceContract {
     }>;
     total: number;
   }>;
-  findTags(params?: { search?: string }): Promise<string[]>;
 }

@@ -16,6 +16,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { ApproximationBadge } from '@kbn/esql-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
@@ -59,6 +60,7 @@ import {
   selectTabCombinedFilters,
   useAppStateSelector,
   useCurrentTabRuntimeState,
+  type ExpandedDocCascadePath,
 } from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FetchStatus } from '../../../types';
@@ -203,7 +205,10 @@ function DiscoverDocumentsComponent({
 
   const setExpandedDoc = useCurrentTabAction(internalStateActions.setExpandedDoc);
   const getExpandedDocSetter = useCallback(
-    (owner: string): NonNullable<UnifiedDataTableProps['setExpandedDoc']> =>
+    (
+        owner: string,
+        expandedDocCascadePath?: ExpandedDocCascadePath
+      ): NonNullable<UnifiedDataTableProps['setExpandedDoc']> =>
       (
         doc: DataTableRecord | undefined,
         options?: {
@@ -215,6 +220,7 @@ function DiscoverDocumentsComponent({
           setExpandedDoc({
             expandedDoc: doc,
             expandedDocOwner: doc ? owner : undefined,
+            expandedDocCascadePath: doc ? expandedDocCascadePath : undefined,
             initialDocViewerTabId: options?.initialTabId,
             initialDocViewerTabState: options?.initialTabState,
           })
@@ -415,6 +421,8 @@ function DiscoverDocumentsComponent({
     [canSaveDiscoverTable]
   );
 
+  const approximationApplied = documentState.approximationApplied;
+
   const renderCustomToolbarWithElements = useMemo(
     () =>
       getRenderCustomToolbarWithElements({
@@ -586,6 +594,16 @@ function DiscoverDocumentsComponent({
             configRowHeight={configRowHeight}
             showMultiFields={uiSettings.get(SHOW_MULTIFIELDS)}
             maxDocFieldsDisplayed={uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
+            externalAdditionalControls={
+              approximationApplied ? (
+                <span style={{ marginRight: 4 }}>
+                  <ApproximationBadge
+                    isApproximationApplied
+                    data-test-subj="discoverApproximationApplied"
+                  />
+                </span>
+              ) : undefined
+            }
             renderDocumentView="external"
             setRenderDocumentViewMeta={setRenderDocumentViewMetaForDefaultOwner}
             renderCustomToolbar={renderCustomToolbarWithElements}
