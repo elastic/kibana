@@ -11,10 +11,7 @@ import {
   ConversationRoundStatus,
   type ChatEvent,
 } from '@kbn/agent-builder-common';
-import {
-  buildChatResponseFromEvents,
-  buildSimpleChatResponseFromEvents,
-} from './chat_response';
+import { buildChatResponseFromEvents, buildSimpleChatResponseFromEvents } from './chat_response';
 
 const conversationId = 'c250305b-1929-4248-b568-b9e3f065fda5';
 const roundId = 'a5692d54-bc06-4a6e-aea1-412779c73f66';

@@ -20,8 +20,8 @@ import {
   ConversationAccessControlMode,
   ConversationOriginType,
 } from '@kbn/agent-builder-common';
-import type { ChatRequestBodyPayload, ChatResponse, ChatSimpleResponse } from '../../common/http_api/chat';
-import { ChatResponseMode, ChatTriggerMode } from '../../common/http_api/chat';
+import type { ChatRequestBodyPayload, ChatResponse } from '../../common/http_api/chat';
+import { ChatTriggerMode } from '../../common/http_api/chat';
 import type {
   ChatCallbackAcceptedResponse,
   ChatCallbackRequestBodyPayload,
@@ -32,10 +32,7 @@ import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { AGENT_SOCKET_TIMEOUT_MS, getSSEResponseHeaders } from './utils';
 import converseAsyncDescription from './oas/converse_async.text';
-import {
-  buildChatResponseFromEvents,
-  buildSimpleChatResponseFromEvents,
-} from '../services/execution/utils/chat_response';
+import { buildChatResponseFromEvents } from '../services/execution/utils/chat_response';
 import {
   filterLegacyApiEvents,
   getConverseHelpers,
@@ -326,17 +323,6 @@ export const conversePayloadSchema = schema.object({
       },
     })
   ),
-  response_mode: schema.oneOf(
-    [schema.literal(ChatResponseMode.Full), schema.literal(ChatResponseMode.Simple)],
-    {
-      defaultValue: ChatResponseMode.Full,
-      meta: {
-        availability: { stability: 'experimental', since: '9.7.0' },
-        description:
-          'Synchronous `/converse` only. Use `simple` to receive only `conversation_id` and the final assistant `answer`. Ignored by `/converse/async`.',
-      },
-    }
-  ),
 });
 
 export const chatPayloadSchema = conversePayloadSchema.extends({
@@ -447,7 +433,7 @@ export function registerChatRoutes({
       access: 'public',
       summary: 'Send chat message',
       description:
-        'Send a message to an agent and receive a complete response. This synchronous endpoint waits for the agent to fully process your request before returning the final result. Set `response_mode: simple` to receive only `conversation_id` and the final assistant `answer`. To learn more about agent chat, refer to the [agent chat documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/chat).',
+        'Send a message to an agent and receive a complete response. This synchronous endpoint waits for the agent to fully process your request before returning the final result. Use this for simple chat interactions where you need the complete response. To learn more about agent chat, refer to the [agent chat documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/chat).',
       options: {
         timeout: {
           idleSocket: AGENT_SOCKET_TIMEOUT_MS,
@@ -481,11 +467,6 @@ export function registerChatRoutes({
         });
 
         const events = await firstValueFrom(chatEvents$.pipe(toArray()));
-        if (payload.response_mode === ChatResponseMode.Simple) {
-          return response.ok<ChatSimpleResponse>({
-            body: buildSimpleChatResponseFromEvents(events),
-          });
-        }
         return response.ok<ChatResponse>({
           body: buildChatResponseFromEvents(events),
         });

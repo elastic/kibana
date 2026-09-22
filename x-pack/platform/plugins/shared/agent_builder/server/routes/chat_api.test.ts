@@ -59,7 +59,7 @@ const captureHandlers = () => {
 };
 
 describe('registerChatApiRoutes', () => {
-  it('registers the two /api/chat converse routes as public + experimental', () => {
+  it('registers the /api/chat converse and message routes as public + experimental', () => {
     const postConfigs: Array<{ path: string; access?: string; options?: any }> = [];
     const router = {
       versioned: {
@@ -89,6 +89,15 @@ describe('registerChatApiRoutes', () => {
     );
     expect(postConfigs).toContainEqual(
       expect.objectContaining({ path: `${chatApiPath}/converse/async`, access: 'public' })
+    );
+    expect(postConfigs).toContainEqual(
+      expect.objectContaining({
+        path: `${chatApiPath}/message`,
+        access: 'public',
+        options: expect.objectContaining({
+          availability: expect.objectContaining({ stability: 'experimental' }),
+        }),
+      })
     );
   });
 
@@ -306,6 +315,101 @@ describe('registerChatApiRoutes', () => {
     expect(response.notFound).toHaveBeenCalled();
     expect(result).toEqual({ status: 404 });
     expect(executeAgent).not.toHaveBeenCalled();
+  });
+});
+
+describe('POST /api/chat/message', () => {
+  const roundCompleteEvent = {
+    type: ChatEventType.roundComplete,
+    data: {
+      round: {
+        id: 'round-1',
+        response: { message: 'Hello from the agent' },
+      },
+    },
+  };
+
+  it('returns only conversation_id and answer', async () => {
+    const { router, handlers } = captureHandlers();
+    const executeAgent = jest
+      .fn()
+      .mockResolvedValue({ events$: of(conversationCreatedEvent, roundCompleteEvent) });
+
+    registerChatApiRoutes({
+      router,
+      getInternalServices: jest.fn().mockReturnValue({
+        execution: { executeAgent },
+        conversations: { getScopedClient: jest.fn() },
+      }),
+      coreSetup: {} as never,
+      pluginsSetup: {},
+      logger: loggingSystemMock.createLogger(),
+    } as never);
+
+    const response = buildResponse();
+    const result = await handlers[`${chatApiPath}/message`](
+      activeContext(true),
+      { body: { agent_id: 'agent-1', input: 'Hello' } },
+      response
+    );
+
+    expect(executeAgent).toHaveBeenCalled();
+    expect(result).toEqual({
+      status: 200,
+      payload: { conversation_id: 'conv-1', answer: 'Hello from the agent' },
+    });
+  });
+
+  it('404s when the experimental feature flag is disabled', async () => {
+    const { router, handlers } = captureHandlers();
+    const executeAgent = jest.fn();
+
+    registerChatApiRoutes({
+      router,
+      getInternalServices: jest.fn().mockReturnValue({
+        execution: { executeAgent },
+        conversations: { getScopedClient: jest.fn() },
+      }),
+      coreSetup: {} as never,
+      pluginsSetup: {},
+      logger: loggingSystemMock.createLogger(),
+    } as never);
+
+    const response = buildResponse();
+    const result = await handlers[`${chatApiPath}/message`](
+      activeContext(false),
+      { body: { agent_id: 'agent-1', input: 'Hello' } },
+      response
+    );
+
+    expect(response.notFound).toHaveBeenCalled();
+    expect(result).toEqual({ status: 404 });
+    expect(executeAgent).not.toHaveBeenCalled();
+  });
+
+  it('returns a 500 when the run emits no round_complete event', async () => {
+    const { router, handlers } = captureHandlers();
+    const executeAgent = jest.fn().mockResolvedValue({ events$: of(conversationCreatedEvent) });
+
+    registerChatApiRoutes({
+      router,
+      getInternalServices: jest.fn().mockReturnValue({
+        execution: { executeAgent },
+        conversations: { getScopedClient: jest.fn() },
+      }),
+      coreSetup: {} as never,
+      pluginsSetup: {},
+      logger: loggingSystemMock.createLogger(),
+    } as never);
+
+    const response = buildResponse();
+    const result = await handlers[`${chatApiPath}/message`](
+      activeContext(true),
+      { body: { agent_id: 'agent-1', input: 'Hello' } },
+      response
+    );
+
+    expect(result.status).toBe(500);
   });
 });
 

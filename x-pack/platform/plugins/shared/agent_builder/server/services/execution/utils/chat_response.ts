@@ -57,7 +57,7 @@ export const buildChatResponseFromEvents = (events: ChatEvent[]): ChatResponse =
   };
 };
 
-/** Builds the minimal `{ conversation_id, answer }` payload for `response_mode: 'simple'`. */
+/** Builds the minimal `{ conversation_id, answer }` payload for `POST /api/chat/message`. */
 export const buildSimpleChatResponseFromEvents = (events: ChatEvent[]): ChatSimpleResponse => {
   const roundCompleteEvent = events.find(isRoundCompleteEvent);
   if (!roundCompleteEvent) {

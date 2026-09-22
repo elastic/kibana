@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import path from 'node:path';
 import type { Observable } from 'rxjs';
 import { firstValueFrom, toArray } from 'rxjs';
 import type { ServerSentEvent } from '@kbn/sse-utils';
@@ -14,6 +15,7 @@ import { createBadRequestError } from '@kbn/agent-builder-common';
 import type {
   ChatRequestBodyPayload,
   ChatConverseResponse,
+  ChatSimpleResponse,
   UserMessagePayload,
 } from '../../common/http_api/chat';
 import { ChatTriggerMode } from '../../common/http_api/chat';
@@ -23,7 +25,10 @@ import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { AGENT_SOCKET_TIMEOUT_MS, getSSEResponseHeaders } from './utils';
 import { getConverseHelpers, filterEventsNativeApiEvents } from './converse_helpers';
-import { findConversationEvent } from '../services/execution/utils/chat_response';
+import {
+  buildSimpleChatResponseFromEvents,
+  findConversationEvent,
+} from '../services/execution/utils/chat_response';
 import { chatPayloadSchema, conversePayloadSchema } from './chat';
 
 /**
@@ -140,6 +145,60 @@ export function registerChatApiRoutes({
           const conversation = await client.get(conversationId);
 
           return response.ok<ChatConverseResponse>({ body: conversation });
+        },
+        { featureFlag: AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID }
+      )
+    );
+
+  router.versioned
+    .post({
+      path: `${chatApiPath}/message`,
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
+      },
+      access: 'public',
+      summary: 'Send chat message and receive the answer',
+      description:
+        'Send a message to an agent and receive only the conversation id and the final assistant answer. This synchronous endpoint waits for the agent to finish before returning. Use `/api/chat/converse` when you need the full conversation timeline.',
+      options: {
+        timeout: {
+          idleSocket: AGENT_SOCKET_TIMEOUT_MS,
+        },
+        tags: ['oas-tag:agent builder'],
+        availability: {
+          stability: 'experimental',
+          since: '9.7.0',
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: { body: conversePayloadSchema },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/chat_message.yaml'),
+        },
+      },
+      wrapHandler(
+        async (ctx, request, response) => {
+          const payload = request.body as ChatRequestBodyPayload;
+          const { execution: executionService } = getInternalServices();
+
+          await validateConfigurationOverrides({ payload, request });
+
+          const { events$: chatEvents$ } = await executeAgent({
+            payload,
+            request,
+            executionService,
+          });
+
+          const events = await firstValueFrom(chatEvents$.pipe(toArray()));
+
+          return response.ok<ChatSimpleResponse>({
+            body: buildSimpleChatResponseFromEvents(events),
+          });
         },
         { featureFlag: AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID }
       )
