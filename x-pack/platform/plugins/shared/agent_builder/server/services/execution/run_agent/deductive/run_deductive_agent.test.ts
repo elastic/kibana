@@ -248,4 +248,43 @@ describe('runDeductiveAgent', () => {
 
     await expect(runDeductiveAgent(baseParams(), ctx)).rejects.toThrow('session not found');
   });
+
+  it('emits message_complete with structured_output when answer is valid JSON', async () => {
+    const ctx = context();
+    const structuredOutput = { verdict: 'covered_enabled', rule_id: 'abc-123' };
+    const jsonAnswer = JSON.stringify(structuredOutput);
+
+    clientMock.sendDeductiveMessageAndReadSse.mockResolvedValue({
+      answer: jsonAnswer,
+      timeToFirstTokenMs: 50,
+    });
+
+    const result = await runDeductiveAgent({ ...baseParams(), structuredOutput: true }, ctx);
+
+    const messageCompleteEvent = ctx.events.emit.mock.calls
+      .map((c: any) => c[0])
+      .find((e: any) => e.type === 'message_complete');
+
+    expect(messageCompleteEvent?.data.structured_output).toEqual(structuredOutput);
+    expect(result.round.response.structured_output).toEqual(structuredOutput);
+    expect(result.round.response.message).toBe(jsonAnswer);
+  });
+
+  it('emits message_complete without structured_output when answer is not valid JSON', async () => {
+    const ctx = context();
+
+    clientMock.sendDeductiveMessageAndReadSse.mockResolvedValue({
+      answer: 'not valid json {',
+      timeToFirstTokenMs: 50,
+    });
+
+    const result = await runDeductiveAgent({ ...baseParams(), structuredOutput: true }, ctx);
+
+    const messageCompleteEvent = ctx.events.emit.mock.calls
+      .map((c: any) => c[0])
+      .find((e: any) => e.type === 'message_complete');
+
+    expect(messageCompleteEvent?.data.structured_output).toBeUndefined();
+    expect(result.round.response.structured_output).toBeUndefined();
+  });
 });
