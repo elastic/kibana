@@ -7,7 +7,7 @@
 
 import type { Evaluator } from '@kbn/evals';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { skippedResult, withLowScoreLogging } from './evaluator_utils';
+import { skipRefusalExamples, skippedResult, withLowScoreLogging } from './evaluator_utils';
 
 const buildEvaluator = (score: number | null): Evaluator => ({
   name: 'Fixture Evaluator',
@@ -85,5 +85,21 @@ describe('withLowScoreLogging', () => {
     await withLowScoreLogging(buildEvaluator(null), log).evaluate(params);
 
     expect(log.warning).not.toHaveBeenCalled();
+  });
+});
+
+describe('skipRefusalExamples', () => {
+  it('skips refusal examples and delegates otherwise', async () => {
+    const inner = buildEvaluator(0);
+    const wrapped = skipRefusalExamples(inner, (expected) =>
+      Boolean((expected as { refusal?: unknown } | undefined)?.refusal)
+    );
+
+    const skipped = await wrapped.evaluate({ ...params, expected: { refusal: { reason: 'x' } } });
+    expect(skipped).toEqual(expect.objectContaining({ score: null, label: 'skipped' }));
+    expect(inner.evaluate).not.toHaveBeenCalled();
+
+    await wrapped.evaluate(params);
+    expect(inner.evaluate).toHaveBeenCalledTimes(1);
   });
 });

@@ -99,6 +99,7 @@ describe('createEvaluateDataset', () => {
       ['Visualization Config vs Intent', 'CODE'],
       ['Column Binding Integrity', 'CODE'],
       ['Chart Compatible Result', 'CODE'],
+      ['Visualization Refusal', 'CODE'],
       ['trajectory', 'CODE'],
       ['Input tokens', 'CODE'],
       ['Output tokens', 'CODE'],
@@ -135,6 +136,22 @@ describe('createEvaluateDataset', () => {
     await task({ input: { question: 'q' }, metadata: { agentId: 'custom-agent' } });
 
     expect(converse).toHaveBeenCalledWith(expect.objectContaining({ agentId: 'custom-agent' }));
+  });
+
+  it('skips positive-only evaluators on refusal examples', async () => {
+    const { evaluatorArray } = await runDataset();
+    const execution = evaluatorArray.find(
+      (evaluator: Evaluator) => evaluator.name === 'ES|QL Execution Validity'
+    );
+
+    const result = await execution.evaluate({
+      input: { question: 'q' },
+      output: { errors: [], messages: [], visualizations: [], esql: '' },
+      expected: { refusal: { reason: 'missing_index' } },
+      metadata: {},
+    });
+
+    expect(result).toEqual(expect.objectContaining({ score: null, label: 'skipped' }));
   });
 
   it('remaps the agent trace id onto traceId for trace-based evaluators', async () => {

@@ -88,3 +88,21 @@ export const withLowScoreLogging = <
     return result;
   },
 });
+
+/**
+ * Positive-only evaluators have nothing to say about a refusal example: a
+ * missing visualization is the correct outcome there, not a failure.
+ */
+export const skipRefusalExamples = <
+  TExample extends Example = Example,
+  TTaskOutput extends TaskOutput = TaskOutput
+>(
+  evaluator: Evaluator<TExample, TTaskOutput>,
+  isRefusalExample: (expected: TExample['output']) => boolean
+): Evaluator<TExample, TTaskOutput> => ({
+  ...evaluator,
+  evaluate: async (params) =>
+    isRefusalExample(params.expected)
+      ? skippedResult('Refusal example; this evaluator scores produced visualizations only.')
+      : evaluator.evaluate(params),
+});

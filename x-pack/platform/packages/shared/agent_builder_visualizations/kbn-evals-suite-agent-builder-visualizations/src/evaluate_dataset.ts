@@ -31,7 +31,7 @@ import {
   createChartIntentJudge,
   createChartTypeVsIntentEvaluator,
 } from './evaluators/chart_type_vs_intent';
-import { withLowScoreLogging } from './evaluator_utils';
+import { skipRefusalExamples, withLowScoreLogging } from './evaluator_utils';
 import { createEsqlExecutionEvaluator } from './evaluators/esql_execution';
 import { createCalibratedEsqlEquivalenceEvaluator } from './evaluators/esql_functional_equivalence';
 import { createEsqlResultEquivalenceEvaluator } from './evaluators/esql_result_equivalence';
@@ -45,6 +45,10 @@ import {
 import { createRendererVsIntentEvaluator } from './evaluators/renderer_vs_intent';
 import { createVisualizationConfigValidityEvaluator } from './evaluators/visualization_config_validity';
 import { createVisualizationConfigVsIntentEvaluator } from './evaluators/visualization_config_vs_intent';
+import {
+  createVisualizationRefusalEvaluator,
+  type ExpectedRefusal,
+} from './evaluators/visualization_refusal';
 
 export type { VisualizationGoldConfig };
 
@@ -62,6 +66,8 @@ export type VisualizationDatasetExample = Example<
     goldenToolPath?: string[];
     /** Expected renderer when the example intentionally forces Lens or Vega. */
     renderer?: 'lens' | 'vega';
+    /** Set on negative examples: the agent should decline instead of drawing. */
+    refusal?: ExpectedRefusal;
   },
   {
     agentId?: string;
@@ -210,6 +216,15 @@ export function createEvaluateDataset({
     expectedChartTypeExtractor: (expected) => extractGoldChartType(expected),
   });
 
+  const visualizationRefusalEvaluator = createVisualizationRefusalEvaluator<
+    VisualizationDatasetExample,
+    VisualizationAgentTaskOutput
+  >({
+    visualizationExtractor,
+    messagesExtractor: (output) => output.messages.map(({ message }) => message),
+    expectedRefusalExtractor: (expected) => expected?.refusal,
+  });
+
   const trajectoryEvaluator = createTrajectoryEvaluator({
     extractToolCalls: (output) => getToolIds(output as VisualizationAgentTaskOutput),
     goldenPathExtractor: (expected) =>
@@ -243,17 +258,23 @@ export function createEvaluateDataset({
       };
     };
 
+    const isRefusalExample = (expected: VisualizationDatasetExample['output']) =>
+      expected?.refusal !== undefined;
+    const positiveOnly = (evaluator: VisualizationAgentEvaluator) =>
+      skipRefusalExamples(evaluator, isRefusalExample);
+
     const evaluatorStack = [
-      esqlExecutionEvaluator,
-      esqlEquivalenceEvaluator,
-      esqlResultEquivalenceEvaluator,
-      chartTypeVsIntentEvaluator,
-      rendererVsIntentEvaluator,
-      visualizationConfigValidityEvaluator,
-      visualizationConfigVsIntentEvaluator,
-      columnBindingIntegrityEvaluator,
-      chartCompatibleResultEvaluator,
-      trajectoryEvaluator,
+      positiveOnly(esqlExecutionEvaluator),
+      positiveOnly(esqlEquivalenceEvaluator),
+      positiveOnly(esqlResultEquivalenceEvaluator),
+      positiveOnly(chartTypeVsIntentEvaluator),
+      positiveOnly(rendererVsIntentEvaluator),
+      positiveOnly(visualizationConfigValidityEvaluator),
+      positiveOnly(visualizationConfigVsIntentEvaluator),
+      positiveOnly(columnBindingIntegrityEvaluator),
+      positiveOnly(chartCompatibleResultEvaluator),
+      visualizationRefusalEvaluator,
+      positiveOnly(trajectoryEvaluator),
       ...Object.values(evaluators.traceBasedEvaluators).map(useAgentTraceId),
     ];
 

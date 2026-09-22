@@ -17,6 +17,7 @@ Per [issue #277136](https://github.com/elastic/kibana/issues/277136), "correct" 
 - **Visualization Config vs Intent** (`CODE`) — generated Lens/Vega config matches the gold partial Config API: column roles (alias-tolerant), Vega encoding fields, and any plain values the gold spells out. Scored as the fraction of gold leaf assertions that hold, with each mismatch listed in metadata, so one wrong field does not zero the example. `type` and `mark` are left to the Chart Type vs Intent judge; column alias wording is always ignored.
 - **Column Binding Integrity** (`CODE`) — every column the Lens config binds to a role (`x`, `y[]`, `metrics[]`, `breakdown_by`, `group_by`, …) or that a Vega encoding references exists in the executed ES|QL result, and measure roles bind numeric columns. Catches configs that parse against the schema but point at columns the query never produces. Scored as the fraction of bindings that resolve.
 - **Chart Compatible Result** (`CODE`) — executed ES|QL column shape fits the chart type (e.g. `xy` needs a dimension + numeric measure).
+- **Visualization Refusal** (`CODE`) — on negative examples (`output.refusal`), the agent should produce no visualization and answer in text: 1 for a refusal with a message, 0.5 for a silent refusal, 0 for drawing anyway. Every positive-only evaluator skips refusal examples with `score: null`.
 - **Trajectory** — the agent routed the request to `load_skill` → `platform.core.create_visualization`.
 - **Trace-based** — tokens / latency / tool-call counts from OTel spans.
 
@@ -24,7 +25,7 @@ Evaluators that have nothing to check for an example (no gold renderer, chart fo
 
 A standalone ES|QL Validity evaluator also exists in this suite (`createEsqlValidityEvaluator`) but is not in the default set — execution already covers AST validation.
 
-Not yet covered (tracked as follow-up increments in the issue): renderer-vs-intent examples, negative/recovery cases, iterative edits, and an MLLM visual-fidelity judge.
+Not yet covered (tracked as follow-up increments in the issue): renderer-vs-intent examples, recovery cases, iterative edits, and an MLLM visual-fidelity judge.
 
 ## Running
 
@@ -41,6 +42,7 @@ Seed examples live in `evals/visualization_creation/datasets/`, one file per dat
 - **logs** (`kibana_sample_data_logs`): xy (bar/line/horizontal/stacked/multi-series), metric (single and per-OS tiles via `breakdown_by`), gauge, pie, tag_cloud, data_table, heatmap, treemap, a line split by response code via `breakdown_by`, plus one Vega-Lite scatter
 - **ecommerce** (`kibana_sample_data_ecommerce`): metric (including a primary + secondary metric), pie, xy over `order_date` + numeric revenue/quantity fields
 - **host metrics** (synthtrace Beats load fixture): multi-series load averages on `metrics-system.load-default`
+- **refusals** (`datasets/negatives.ts`, run as its own dataset by `visualization_refusal.spec.ts`): a missing index, a missing field, and an ambiguous request. The missing-index case doubles as a canary: if positive evaluators ever score it, they have stopped discriminating.
 
 Each positive example carries a partial Lens Config API gold (`config`): chart `type`, layer type / column roles, and ground-truth ES|QL nested in `data_source.query`. Examples are built with the factories in `datasets/factories.ts` (`xyExample`, `metricExample`, `partitionExample`, …) over the query builders `categoricalQuery`, `timeSeriesQuery`, and `totalsQuery`, so adding an example is one call and every gold query follows the same idiom by construction. Every example carries `metadata.chartFamily` (set by its factory), `metadata.dataSource` (set per dataset file), and, when the gold pins Config API surface beyond basic column roles, `metadata.configFeatures` (`breakdown_by`, `secondary_metric`, `multi_series`), so golden-cluster results can be sliced by chart family or data source instead of only by suite average.|QL nested in `data_source.query`. Negatives / recovery / multi-turn edits are still follow-ups.
 

@@ -27,7 +27,8 @@ export type ChartFamily =
   | 'data_table'
   | 'heatmap'
   | 'vega'
-  | 'query_only';
+  | 'query_only'
+  | 'refusal';
 
 export type DataSource = 'logs' | 'ecommerce' | 'host_metrics';
 

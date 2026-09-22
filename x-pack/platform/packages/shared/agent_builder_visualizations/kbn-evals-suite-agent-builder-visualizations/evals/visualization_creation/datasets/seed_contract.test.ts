@@ -9,7 +9,7 @@ import { collectColumnBindings } from '../../../src/evaluators/column_binding_in
 import { extractGoldQuery } from '../../../src/evaluators/gold_visualization_config';
 import { HOST_METRICS_INDEX, buildHostLoadEvents } from '../../../src/fixtures/host_load_metrics';
 import type { DataSource } from './factories';
-import { VISUALIZATION_CREATION_EXAMPLES } from '.';
+import { VISUALIZATION_CREATION_EXAMPLES, VISUALIZATION_REFUSAL_EXAMPLES } from '.';
 
 /**
  * Contract between the dataset and the data it runs against. Catches a gold
@@ -78,7 +78,9 @@ describe('visualization creation dataset contract', () => {
     >;
     const systemLoad = doc['system.load'] as Record<string, unknown>;
 
-    const hostExamples = examples.filter((example) => example.metadata?.dataSource === 'host_metrics');
+    const hostExamples = examples.filter(
+      (example) => example.metadata?.dataSource === 'host_metrics'
+    );
     expect(hostExamples.length).toBeGreaterThan(0);
 
     for (const example of hostExamples) {
@@ -89,6 +91,24 @@ describe('visualization creation dataset contract', () => {
         expect(systemLoad).toHaveProperty(field);
       }
       expect(doc).toHaveProperty('@timestamp');
+    }
+  });
+});
+
+describe('visualization refusal dataset contract', () => {
+  it('declares a refusal reason and no gold config on every negative example', () => {
+    expect(VISUALIZATION_REFUSAL_EXAMPLES.length).toBeGreaterThan(0);
+    for (const example of VISUALIZATION_REFUSAL_EXAMPLES) {
+      expect(example.output?.refusal?.reason).toEqual(expect.any(String));
+      expect(example.output?.config).toBeUndefined();
+      expect(example.metadata?.chartFamily).toBe('refusal');
+    }
+  });
+
+  it('keeps negative questions disjoint from positive ones', () => {
+    const positive = new Set(VISUALIZATION_CREATION_EXAMPLES.map((e) => e.input?.question));
+    for (const example of VISUALIZATION_REFUSAL_EXAMPLES) {
+      expect(positive.has(example.input?.question)).toBe(false);
     }
   });
 });
