@@ -479,7 +479,7 @@ steps:
                 items:
                   type: string
                   maxLength: 512
-                maxItems: 3
+                maxItems: 5
               proposed_threshold_cardinality:
                 type: array
                 maxItems: 3

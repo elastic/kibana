@@ -56,9 +56,9 @@ triggers:
             threshold:
               type: object
               description: >-
-                New threshold settings. `value` is the minimum event count that triggers
-                an alert. `field` narrows the count to a specific field; omit to count
-                all events. `cardinality` adds a unique-value condition on a second field.
+                New threshold settings. Treated as an atomic replacement: the
+                detection API replaces the whole threshold object, so callers
+                must supply every field. Use [] to clear optional arrays.
               properties:
                 value:
                   type: integer
@@ -69,8 +69,8 @@ triggers:
                   items:
                     type: string
                     maxLength: 512
-                  maxItems: 3
-                  description: Fields to group events by before counting.
+                  maxItems: 5
+                  description: Fields to group events by before counting. Use [] to count all events.
                 cardinality:
                   type: array
                   maxItems: 3
@@ -84,7 +84,8 @@ triggers:
                         type: integer
                         minimum: 0
                     required: [field, value]
-              required: [value]
+                  description: Unique-value conditions. Use [] to remove all cardinality conditions.
+              required: [value, field, cardinality]
             interval:
               type: string
               maxLength: 32
