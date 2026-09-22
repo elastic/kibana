@@ -28,7 +28,7 @@ export const useTimeRangeParam = (): [TimeRange, (val: TimeRange) => void] => {
       params.set(PARAM_KEY, DEFAULT);
       history.replace({ ...history.location, search: params.toString() });
     }
-  }, [history]);
+  }, [history, search]);
 
   const timeRange = useMemo(() => {
     const val = new URLSearchParams(search).get(PARAM_KEY);
