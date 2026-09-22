@@ -33,6 +33,12 @@ interface PolicyPlan {
   updatedVars: NewPackagePolicy['vars'];
   previousInputs: NewPackagePolicy['inputs'];
   updatedInputs: NewPackagePolicy['inputs'];
+  /**
+   * Optimistic-concurrency token for the *next* write. Forward writes use the version from the
+   * PIT fetch; after a successful forward write we store the returned policy's version so the
+   * revert write does not clobber a concurrent edit either.
+   */
+  writeVersion?: string;
 }
 
 /** Ids rendered inline in the thrown message; `detail.updateFailed` always carries the full list. */
@@ -134,13 +140,22 @@ export const propagateRoleArnToPackagePolicies = async ({
   const writePolicyRoleArn = (
     plan: PolicyPlan,
     vars: NewPackagePolicy['vars'],
-    inputs: NewPackagePolicy['inputs']
+    inputs: NewPackagePolicy['inputs'],
+    version?: string
   ) =>
     packagePolicyService.update(
       soFor(plan.policy),
       esClient,
       plan.policy.id,
-      { ...toPackagePolicyUpdate(plan.policy), vars, inputs },
+      {
+        ...toPackagePolicyUpdate(plan.policy),
+        vars,
+        inputs,
+        // `packagePolicyService.update` passes this through to `soClient.update` as the OCC
+        // token. Without it a concurrent edit between the PIT read and this write is silently
+        // overwritten by the stale vars/inputs payload.
+        ...(version !== undefined ? { version } : {}),
+      },
       // Policies sharing an agent policy would each read-modify-write the same `revision`
       // concurrently; the whole fan-out is bumped once per space below instead.
       { bumpRevision: false }
@@ -181,6 +196,12 @@ export const propagateRoleArnToPackagePolicies = async ({
   // pMap swallows per-plan errors into `updateFailed` so control flow after the pMap can decide
   // between the happy exit and the revert phase; `stopOnError: false` guarantees every plan
   // settles before that decision is made.
+  //
+  // `packagePolicyService.update` persists the SO before later compilation / secret cleanup /
+  // post-update callbacks. A rejection after that persist would leave the policy on the new ARN
+  // while classifying it as `updateFailed` (and therefore out of Phase 2). On catch we re-read
+  // and, if the stored ARN is already the new value, add the plan to `succeeded` so Phase 2
+  // reverts it too.
   const updateFailed: string[] = [];
   const succeeded: PolicyPlan[] = [];
 
@@ -188,14 +209,37 @@ export const propagateRoleArnToPackagePolicies = async ({
     plans,
     async (plan) => {
       try {
-        await writePolicyRoleArn(plan, plan.updatedVars, plan.updatedInputs);
-        succeeded.push(plan);
+        const updated = await writePolicyRoleArn(
+          plan,
+          plan.updatedVars,
+          plan.updatedInputs,
+          plan.policy.version
+        );
+        succeeded.push({ ...plan, writeVersion: updated.version });
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         logger.error(
           `Failed to update package policy ${plan.policy.id} with new role ARN: ${message}`
         );
         updateFailed.push(plan.policy.id);
+
+        try {
+          const current = await packagePolicyService.get(soFor(plan.policy), plan.policy.id);
+          if (current) {
+            // `changed: false` means every role_arn already holds newRoleArn — the SO write
+            // landed and a later step rejected. Include it in the revert set.
+            const { changed } = rewritePolicyRoleArn(current, newRoleArn);
+            if (!changed) {
+              succeeded.push({ ...plan, writeVersion: current.version });
+            }
+          }
+        } catch (reReadError) {
+          const reReadMessage =
+            reReadError instanceof Error ? reReadError.message : String(reReadError);
+          logger.error(
+            `Could not re-read package policy ${plan.policy.id} after a failed role ARN update to decide whether to revert: ${reReadMessage}`
+          );
+        }
       }
     },
     { concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS, stopOnError: false }
@@ -212,10 +256,11 @@ export const propagateRoleArnToPackagePolicies = async ({
   }
 
   // ── Phase 2: revert successful forward writes ──────────────────────────────────────────────
-  // Best effort: iterates only over `succeeded` (never `plans`), writing each plan's snapshot
-  // back so the connector-still-holds-old-ARN world matches the policies-still-hold-old-ARN
-  // world. Same swallow-and-collect pattern as Phase 1; `revertFailed` is what the caller
-  // learns about when we throw below.
+  // Best effort: iterates over `succeeded` (plans whose SO holds the new ARN — either a clean
+  // Phase 1 success or a post-persist rejection recovered by the re-read above), writing each
+  // plan's snapshot back so the connector-still-holds-old-ARN world matches the
+  // policies-still-hold-old-ARN world. Same swallow-and-collect pattern as Phase 1;
+  // `revertFailed` is what the caller learns about when we throw below.
   logger.warn(
     `Reverting ${succeeded.length} package ${
       succeeded.length === 1 ? 'policy' : 'policies'
@@ -228,7 +273,7 @@ export const propagateRoleArnToPackagePolicies = async ({
     succeeded,
     async (plan) => {
       try {
-        await writePolicyRoleArn(plan, plan.previousVars, plan.previousInputs);
+        await writePolicyRoleArn(plan, plan.previousVars, plan.previousInputs, plan.writeVersion);
         reverted.push(plan);
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);

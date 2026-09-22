@@ -18,6 +18,7 @@ import { propagateRoleArnToPackagePolicies } from './role_arn_propagation';
 jest.mock('../package_policy', () => ({
   packagePolicyService: {
     fetchAllItems: jest.fn(),
+    get: jest.fn(),
     update: jest.fn(),
   },
   toPackagePolicyUpdate: (policy: {
@@ -68,6 +69,7 @@ const makePolicy = (id: string, roleArn = OLD_ARN, spaceIds = ['default']) => ({
   namespace: 'default',
   spaceIds,
   enabled: true,
+  version: `Wz${id}`,
   package: PACKAGE,
   vars: { account_type: { type: 'text', value: 'single-account' } },
   cloud_connector_id: CONNECTOR_ID,
@@ -102,11 +104,19 @@ describe('propagateRoleArnToPackagePolicies', () => {
     (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue(
       spacelessSoClient
     );
+    // Default: a failed update left the SO untouched (still on OLD_ARN), so the post-persist
+    // re-read does not pull the plan into the revert set.
+    (packagePolicyService.get as jest.Mock).mockImplementation(async (_so, id: string) =>
+      makePolicy(id)
+    );
+    (packagePolicyService.update as jest.Mock).mockImplementation(async (_so, _es, id: string) => ({
+      id,
+      version: `Wz${id}-after`,
+    }));
   });
 
   it('updates every referencing package policy with the new ARN', async () => {
     mockListReturns([makePolicy('a'), makePolicy('b')]);
-    (packagePolicyService.update as jest.Mock).mockResolvedValue({});
 
     await propagateRoleArnToPackagePolicies({
       esClient,
@@ -122,6 +132,8 @@ describe('propagateRoleArnToPackagePolicies', () => {
       expect(update.package).toEqual(PACKAGE);
       // The update is a replace: the policy's own vars have to be carried over.
       expect(update.vars).toEqual({ account_type: { type: 'text', value: 'single-account' } });
+      // OCC token from the PIT fetch — without it a concurrent edit is silently overwritten.
+      expect(update.version).toMatch(/^Wz/);
     }
   });
 
@@ -158,7 +170,6 @@ describe('propagateRoleArnToPackagePolicies', () => {
       ],
     };
     mockListReturns([awsPolicy]);
-    (packagePolicyService.update as jest.Mock).mockResolvedValue({});
 
     await propagateRoleArnToPackagePolicies({
       esClient,
@@ -201,7 +212,6 @@ describe('propagateRoleArnToPackagePolicies', () => {
       makePolicy('a', OLD_ARN, ['default']),
       makePolicy('b', OLD_ARN, ['marketing']),
     ]);
-    (packagePolicyService.update as jest.Mock).mockResolvedValue({});
 
     await propagateRoleArnToPackagePolicies({
       esClient,
@@ -232,7 +242,6 @@ describe('propagateRoleArnToPackagePolicies', () => {
       policy_ids: ['agent-shared'],
     }));
     mockListReturns(shared);
-    (packagePolicyService.update as jest.Mock).mockResolvedValue({});
 
     await propagateRoleArnToPackagePolicies({
       esClient,
@@ -255,7 +264,7 @@ describe('propagateRoleArnToPackagePolicies', () => {
     mockListReturns([makePolicy('a'), makePolicy('b')]);
     (packagePolicyService.update as jest.Mock).mockImplementation(async (_so, _es, id: string) => {
       if (id === 'b') throw new Error('boom');
-      return {};
+      return { id, version: `Wz${id}-after` };
     });
 
     await expect(
@@ -290,7 +299,6 @@ describe('propagateRoleArnToPackagePolicies', () => {
   it('omits package from the update payload when the policy has none', async () => {
     const { package: _package, ...policyWithoutPackage } = makePolicy('a');
     mockListReturns([policyWithoutPackage]);
-    (packagePolicyService.update as jest.Mock).mockResolvedValue({});
 
     await propagateRoleArnToPackagePolicies({
       esClient,
@@ -332,7 +340,7 @@ describe('propagateRoleArnToPackagePolicies', () => {
     mockListReturns([makePolicy('a'), makePolicy('b'), makePolicy('c')]);
     (packagePolicyService.update as jest.Mock).mockImplementation(async (_so, _es, id: string) => {
       if (id === 'b') throw new Error('boom');
-      return {};
+      return { id, version: `Wz${id}-after` };
     });
 
     await expect(
@@ -349,6 +357,10 @@ describe('propagateRoleArnToPackagePolicies', () => {
       ([, , , update]) => update.inputs[0].vars.role_arn.value === OLD_ARN
     );
     expect(revertCalls.map(([, , id]) => id).sort()).toEqual(['a', 'c']);
+    // Revert uses the OCC token returned by the forward write, not the PIT-fetched one.
+    for (const [, , id, update] of revertCalls) {
+      expect(update.version).toBe(`Wz${id}-after`);
+    }
   });
 
   it('includes both updateFailed and revertFailed in the thrown detail', async () => {
@@ -363,7 +375,7 @@ describe('propagateRoleArnToPackagePolicies', () => {
         const to = update.inputs[0].vars.role_arn.value;
         if (id === 'b' && to === NEW_ARN) throw new Error('boom');
         if (id === 'a' && to === OLD_ARN) throw new Error('revert-boom');
-        return {};
+        return { id, version: `Wz${id}-after` };
       }
     );
 
@@ -418,7 +430,7 @@ describe('propagateRoleArnToPackagePolicies', () => {
         if (id === 'a' && update.inputs[0].vars.role_arn.value === NEW_ARN) {
           throw new Error('boom');
         }
-        return {};
+        return { id, version: `Wz${id}-after` };
       }
     );
     await expect(
@@ -436,5 +448,36 @@ describe('propagateRoleArnToPackagePolicies', () => {
       'arn:aws:iam::123456789012:role/Drifted'
     );
     expect(revertCall?.[3].package).toEqual(PACKAGE);
+  });
+
+  it('reverts a policy whose SO persisted even though update() later rejected', async () => {
+    // packagePolicyService.update writes the SO, then can still reject in compilation / secret
+    // cleanup / post-update callbacks. Without a re-read that policy would sit in updateFailed
+    // and never enter Phase 2, leaving it on the new ARN while the connector stays on the old.
+    mockListReturns([makePolicy('a'), makePolicy('b')]);
+    (packagePolicyService.update as jest.Mock).mockImplementation(async (_so, _es, id: string) => {
+      if (id === 'b') throw new Error('post-persist boom');
+      return { id, version: `Wz${id}-after` };
+    });
+    (packagePolicyService.get as jest.Mock).mockImplementation(async (_so, id: string) => {
+      if (id === 'b') {
+        // SO already holds the new ARN — the write landed, a later step rejected.
+        return makePolicy('b', NEW_ARN);
+      }
+      return makePolicy(id);
+    });
+
+    await expect(
+      propagateRoleArnToPackagePolicies({
+        esClient,
+        connectorId: CONNECTOR_ID,
+        newRoleArn: NEW_ARN,
+      })
+    ).rejects.toBeInstanceOf(CloudConnectorRoleArnPropagationError);
+
+    const revertCalls = (packagePolicyService.update as jest.Mock).mock.calls.filter(
+      ([, , , update]) => update.inputs[0].vars.role_arn.value === OLD_ARN
+    );
+    expect(revertCalls.map(([, , id]) => id).sort()).toEqual(['a', 'b']);
   });
 });

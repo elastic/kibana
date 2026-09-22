@@ -12,6 +12,8 @@ describe('isIamRoleArn', () => {
     ['arn:aws:iam::123456789012:role/MyRole'],
     ['arn:aws:iam::123456789012:role/service-role/MyRole'],
     ['arn:aws:iam::123456789012:role/path/with/segments/MyRole'],
+    // IAM paths allow printable ASCII (e.g. `!`) that role names do not.
+    ['arn:aws:iam::123456789012:role/team!prod/MyRole'],
     ['arn:aws-us-gov:iam::123456789012:role/GovRole'],
     ['arn:aws-cn:iam::123456789012:role/ChinaRole'],
     ['arn:aws-iso:iam::123456789012:role/IsoRole'],
@@ -34,6 +36,9 @@ describe('isIamRoleArn', () => {
     ['arn:aws:iam::abc:role/BadAccount', 'non-numeric account'],
     ['arn:aws:iam::12345:role/ShortAccount', '11-digit account'],
     ['arn:aws:iam::123456789012:role/', 'empty role name'],
+    // Trailing slash leaves an empty role-name segment.
+    ['arn:aws:iam::123456789012:role/MyRole/', 'trailing slash after role name'],
+    ['arn:aws:iam::123456789012:role//MyRole', 'empty path segment'],
     ['arn:aws:iam:us-east-1:123456789012:role/RegionInIam', 'region present in iam ARN'],
     ['arn:something:iam::123456789012:role/UnknownPartition', 'unknown partition'],
     [undefined as unknown as string, 'undefined'],
