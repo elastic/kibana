@@ -146421,7 +146421,6 @@ components:
           type: string
         description:
           description: Optional human-readable description of the field's purpose.
-          maxLength: 1000
           type: string
         displayOrder:
           description: |
@@ -146439,7 +146438,6 @@ components:
         name:
           description: |
             The field name. Must match the `name` property in the YAML definition and is unique per owner (case-insensitive). Immutable after creation.
-          maxLength: 50
           type: string
         owner:
           $ref: '#/components/schemas/Cases_owner'

@@ -15,7 +15,6 @@ properties:
     description: Unique server-assigned identifier for the field definition (UUIDv4).
   name:
     type: string
-    maxLength: 50
     description: >
       The field name. Must match the `name` property in the YAML definition and is unique per owner
       (case-insensitive). Immutable after creation.
@@ -27,7 +26,6 @@ properties:
     $ref: 'owner.yaml'
   description:
     type: string
-    maxLength: 1000
     description: Optional human-readable description of the field's purpose.
   isGlobal:
     type: boolean

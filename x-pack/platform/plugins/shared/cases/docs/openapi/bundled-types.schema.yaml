@@ -1190,7 +1190,14 @@ paths:
               - isGlobal
               - displayOrder
         - $ref: '#/components/parameters/sort_order'
-        - $ref: '#/components/parameters/search'
+        - in: query
+          name: search
+          description: |
+            A case-insensitive substring to match against each definition's `name` and `description` fields. Definitions where neither field contains the substring are excluded.
+          required: false
+          schema:
+            type: string
+            maxLength: 1000
       responses:
         '200':
           description: Indicates a successful call.
@@ -1247,9 +1254,8 @@ paths:
                 $ref: '#/components/examples/field_definition_write_request'
       responses:
         '200':
-          description: >
-            Indicates a successful call. Returns the created field definition, or `{ "valid": true
-            }` when `dry_run=true`.
+          description: |
+            Indicates a successful call. Returns the created field definition, or `{ "valid": true }` when `dry_run=true`.
           content:
             application/json:
               schema:
@@ -1378,9 +1384,8 @@ paths:
                 $ref: '#/components/examples/field_definition_write_request'
       responses:
         '200':
-          description: >
-            Indicates a successful call. Returns the updated field definition, or `{ "valid": true
-            }` when `dry_run=true`.
+          description: |
+            Indicates a successful call. Returns the updated field definition, or `{ "valid": true }` when `dry_run=true`.
           content:
             application/json:
               schema:
@@ -4045,7 +4050,6 @@ components:
           description: Unique server-assigned identifier for the field definition (UUIDv4).
         name:
           type: string
-          maxLength: 50
           description: |
             The field name. Must match the `name` property in the YAML definition and is unique per owner (case-insensitive). Immutable after creation.
         definition:
@@ -4056,7 +4060,6 @@ components:
           $ref: '#/components/schemas/owner'
         description:
           type: string
-          maxLength: 1000
           description: Optional human-readable description of the field's purpose.
         isGlobal:
           type: boolean
