@@ -120,19 +120,70 @@ const dropSystemOwnedProperties = (node: JsonSchemaNode): JsonSchemaNode => {
   };
 };
 
-const collectDefRefs = (node: unknown, refs: Set<string>): void => {
+const getDefName = (node: JsonSchemaNode): string | undefined => {
+  const { $ref } = node;
+  return typeof $ref === 'string' && $ref.startsWith(DEFS_REF_PREFIX)
+    ? $ref.slice(DEFS_REF_PREFIX.length)
+    : undefined;
+};
+
+const forEachDefRef = (node: unknown, onRef: (name: string) => void): void => {
   if (Array.isArray(node)) {
-    node.forEach((item) => collectDefRefs(item, refs));
+    node.forEach((item) => forEachDefRef(item, onRef));
     return;
   }
   if (!isSchemaNode(node)) {
     return;
   }
-  const { $ref } = node;
-  if (typeof $ref === 'string' && $ref.startsWith(DEFS_REF_PREFIX)) {
-    refs.add($ref.slice(DEFS_REF_PREFIX.length));
+  const name = getDefName(node);
+  if (name) {
+    onRef(name);
   }
-  Object.values(node).forEach((value) => collectDefRefs(value, refs));
+  Object.values(node).forEach((value) => forEachDefRef(value, onRef));
+};
+
+const collectDefRefs = (node: unknown, refs: Set<string>): void =>
+  forEachDefRef(node, (name) => refs.add(name));
+
+/**
+ * Replaces `$ref`s to definitions used exactly once with the definition
+ * itself, since the indirection then costs more than it saves. Sibling keys
+ * on the referencing node (e.g. a description) take precedence. A single-use
+ * definition cannot take part in a reference cycle, so inlining terminates.
+ */
+const inlineSingleUseDefs = (schema: JsonSchemaNode): JsonSchemaNode => {
+  const { $defs, ...root } = schema;
+  if (!isSchemaNode($defs)) {
+    return schema;
+  }
+  const refCounts = new Map<string, number>();
+  forEachDefRef(schema, (name) => refCounts.set(name, (refCounts.get(name) ?? 0) + 1));
+  const singleUse = new Set(
+    Object.keys($defs).filter((name) => refCounts.get(name) === 1 && isSchemaNode($defs[name]))
+  );
+
+  const inline = (node: unknown): unknown => {
+    if (Array.isArray(node)) {
+      return node.map(inline);
+    }
+    if (!isSchemaNode(node)) {
+      return node;
+    }
+    const name = getDefName(node);
+    if (name && singleUse.has(name)) {
+      const { $ref, ...overrides } = node;
+      return inline({ ...($defs[name] as JsonSchemaNode), ...overrides });
+    }
+    return Object.fromEntries(Object.entries(node).map(([key, value]) => [key, inline(value)]));
+  };
+
+  const keptDefs = Object.fromEntries(
+    Object.entries($defs)
+      .filter(([name]) => !singleUse.has(name))
+      .map(([name, def]) => [name, inline(def)])
+  );
+  const inlinedRoot = inline(root) as JsonSchemaNode;
+  return Object.keys(keptDefs).length > 0 ? { ...inlinedRoot, $defs: keptDefs } : inlinedRoot;
 };
 
 /**
@@ -166,7 +217,7 @@ const toPromptSchema = (schema: z.ZodType): object => {
   const jsonSchema = mapSchemaNodes(z.toJSONSchema(schema), (node) =>
     dropSystemOwnedProperties(collapseLiteralUnions(dropSchemaMetadata(trimDescription(node))))
   ) as JsonSchemaNode;
-  return dropUnreachableDefs(jsonSchema);
+  return inlineSingleUseDefs(dropUnreachableDefs(jsonSchema));
 };
 
 const jsonSchemas = Object.fromEntries(
