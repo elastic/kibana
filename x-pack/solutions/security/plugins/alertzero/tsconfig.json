@@ -42,6 +42,7 @@
     "@kbn/app-menu",
     "@kbn/search-inference-endpoints",
     "@kbn/user-profile-components",
-    "@kbn/shared-ux-error-boundary"
+    "@kbn/shared-ux-error-boundary",
+    "@kbn/react-kibana-mount"
   ]
 }

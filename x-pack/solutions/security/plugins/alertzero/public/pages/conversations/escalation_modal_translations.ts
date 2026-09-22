@@ -115,6 +115,18 @@ export const ESCALATION_MODAL_TRANSLATIONS = Object.freeze({
   }),
 });
 
+export const ESCALATION_SUCCESS = Object.freeze({
+  createTitle: i18n.translate('xpack.alertzero.escalation.createSuccess.title', {
+    defaultMessage: 'Escalation created',
+  }),
+  addToTitle: i18n.translate('xpack.alertzero.escalation.addToSuccess.title', {
+    defaultMessage: 'Investigation added to escalation',
+  }),
+  linkText: i18n.translate('xpack.alertzero.escalation.success.linkText', {
+    defaultMessage: 'View all escalations',
+  }),
+});
+
 export const ESCALATION_ERRORS = Object.freeze({
   createFailed: i18n.translate('xpack.alertzero.escalation.createFailed', {
     defaultMessage: 'Failed to create the escalation. Try again.',
