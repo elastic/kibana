@@ -18,6 +18,7 @@ import { ALERTZERO_API_PRIVILEGE_WRITE, HUNT_INTERNAL_ROUTE_BASE } from '../../.
 import { InvalidHuntWindowError } from '../../services/watches/hunt/common/assert_hunt_window';
 import { huntCoordinator } from '../../services/watches/hunt/hunt_coordinator';
 import { parseTechnologyInput } from '../../services/watches/hunt/common/resolve_index_scope';
+import { buildSseData } from '../../services/watches/hunt/common/sse_mapper';
 import { resolveScopedModel } from './lib/scoped_model';
 import type { RouteDependencies } from '../register_routes';
 
@@ -105,7 +106,7 @@ export const registerHuntCoordinatorRoute = ({
                 });
           const model = modelOutcome?.ok ? modelOutcome.model : undefined;
 
-          const body: HuntCoordinatorResponse = await huntCoordinator(
+          const result = await huntCoordinator(
             { esClient, reportsEsClient },
             model,
             logger,
@@ -130,6 +131,12 @@ export const registerHuntCoordinatorRoute = ({
             }
           );
 
+          // SSE entries ride the response only on a confirmed hit for a named
+          // report; the hunt child fans out over them with ai.attachment.add.
+          const body: HuntCoordinatorResponse =
+            result.tier1.hasConfirmedHit && report_id
+              ? { ...result, sse: buildSseData(result, report_id, { spaceId }) }
+              : result;
           return response.ok({ body });
         } catch (err) {
           if (err instanceof InvalidHuntWindowError) {
