@@ -95,9 +95,7 @@ const refineIdentityFields = (
 };
 
 /**
- * Canonical create-alert payload (source required).
- * Also the POST /api/alerting/v2/alerts request body schema.
- * Prefer this type everywhere past the HTTP edge.
+ * Used as the input schema for the `alerting.create_alert` workflow step.
  */
 export const createAlertEventDataSchema = createAlertEventBodyBaseObjectSchema
   .extend({
