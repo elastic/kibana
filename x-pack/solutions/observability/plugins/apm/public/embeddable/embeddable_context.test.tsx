@@ -11,7 +11,7 @@ import { createMemoryHistory } from 'history';
 import { Router } from '@kbn/shared-ux-router';
 import { useLocation } from 'react-router-dom';
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, of, Subject } from 'rxjs';
 import { License } from '@kbn/licensing-plugin/common/license';
 import { cpsPluginMock } from '@kbn/cps/public/mocks';
 import {
@@ -203,7 +203,7 @@ describe('ApmEmbeddableContext', () => {
     });
 
     it('leaves the CPS manager out of the internal services when the flag is disabled', () => {
-      const { deps } = createFlaggedDeps(of(false));
+      const { deps, cps } = createFlaggedDeps(of(false));
 
       render(
         <ApmEmbeddableContext deps={deps}>
@@ -211,9 +211,26 @@ describe('ApmEmbeddableContext', () => {
         </ApmEmbeddableContext>
       );
 
-      expect(mockSetApmInternalServices).toHaveBeenLastCalledWith(
+      // Never, not just last: seeding the hook with the `true` default would install the manager on
+      // the first render, and descendant mount effects run before the subscription lands.
+      expect(mockSetApmInternalServices).not.toHaveBeenCalledWith(
+        expect.objectContaining({ cpsManager: cps.cpsManager })
+      );
+      expect(mockSetApmInternalServices).toHaveBeenCalledWith(
         expect.objectContaining({ cpsManager: undefined })
       );
+    });
+
+    it('leaves the internal services alone until the flag emits', () => {
+      const { deps } = createFlaggedDeps(new Subject<boolean>());
+
+      render(
+        <ApmEmbeddableContext deps={deps}>
+          <div>Test</div>
+        </ApmEmbeddableContext>
+      );
+
+      expect(mockSetApmInternalServices).not.toHaveBeenCalled();
     });
 
     it('re-wires the internal services when the flag emits a new value', () => {

@@ -106,8 +106,15 @@ export function ApmEmbeddableContext({
       ),
     [deps.coreStart]
   );
-  const isCpsEnabled = useObservable(isCpsEnabled$, OBSERVABILITY_APM_CPS_ENABLED_DEFAULT);
+  // `useObservable` subscribes after commit, so the flag is unknown on the first render. Seeding it
+  // would overwrite the services `ApmPlugin.start` already resolved, and descendant mount effects run
+  // before this one, so they could issue requests against the wrong CPS wiring.
+  const isCpsEnabled = useObservable(isCpsEnabled$);
   useMemo(() => {
+    if (isCpsEnabled === undefined) {
+      return;
+    }
+
     const cpsManager = isCpsEnabled ? deps.pluginsStart.cps?.cpsManager : undefined;
     const callApmApi = createCallApmApiV2(deps.coreStart, { cpsManager });
     setApmInternalServices({ callApmApi, cpsManager });
