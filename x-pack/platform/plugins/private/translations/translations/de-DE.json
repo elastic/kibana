@@ -16584,7 +16584,6 @@
     "xpack.cases.caseAction.groupedByDesc": "Die zugeordneten Alerts werden nach {groupingDescription} gruppiert",
     "xpack.cases.caseAction.groupedByTitle": "Gruppierung nach {groupingDescription}",
     "xpack.cases.casesRedesign.bulkActionsPopover.ariaLabel": "Popover für Massenaktionen",
-    "xpack.cases.casesRedesign.caseTable.showingCasesTitle": "{pageSize} von {totalRules} wird angezeigt",
     "xpack.cases.casesRedesign.columnsPopover.ariaLabel": "Spalten-Popover",
     "xpack.cases.casesRedesign.details.createdOn": "am: {date}",
     "xpack.cases.casesRedesign.details.editCaseNameAria": "Ticketnamen bearbeiten",
