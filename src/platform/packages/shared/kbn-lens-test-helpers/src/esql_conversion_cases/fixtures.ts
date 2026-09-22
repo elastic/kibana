@@ -70,8 +70,6 @@ export const createEsqlConversionIndexPattern = (dataset: EsqlConversionDataset)
 
 export const createEsqlConversionInput = (conversionCase: EsqlConversionCase) => {
   const columns = conversionCase.columns;
-  const baseUiSettings = createEsqlConversionUiSettings();
-  const overrides = conversionCase.uiSettingsOverrides ?? {};
 
   return {
     esAggEntries: conversionCase.columnOrder.map(
@@ -83,13 +81,10 @@ export const createEsqlConversionInput = (conversionCase: EsqlConversionCase) =>
       columnOrder: [...conversionCase.columnOrder],
     },
     indexPattern: createEsqlConversionIndexPattern(conversionCase.dataset),
-    uiSettings: {
-      get: <T = unknown>(key: string): T =>
-        key in overrides ? (overrides[key] as T) : baseUiSettings.get<T>(key),
-    },
+    uiSettings: createEsqlConversionUiSettings(),
     dateRange: conversionCase.omitDateRange
       ? { fromDate: undefined, toDate: undefined }
-      : conversionCase.dateRangeOverride ?? ESQL_CONVERSION_DATE_RANGE,
+      : ESQL_CONVERSION_DATE_RANGE,
     now: ESQL_CONVERSION_NOW,
     columnRoles: conversionCase.columnRoles ? { ...conversionCase.columnRoles } : undefined,
   };

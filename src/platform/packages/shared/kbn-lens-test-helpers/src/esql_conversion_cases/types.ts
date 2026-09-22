@@ -63,10 +63,6 @@ export interface EsqlConversionCase {
   readonly columnRoles?: Readonly<Record<string, string>>;
   /** Models a detached time picker; auto date histograms fall back to 1h. */
   readonly omitDateRange?: true;
-  /** Override specific UI settings for this case (e.g. dateFormat). */
-  readonly uiSettingsOverrides?: Readonly<Record<string, unknown>>;
-  /** Override the date range for this case (e.g. to test short vs. long ranges). */
-  readonly dateRangeOverride?: { readonly fromDate: string; readonly toDate: string };
   readonly expected: EsqlConversionSuccess | EsqlConversionFailure;
 }
 

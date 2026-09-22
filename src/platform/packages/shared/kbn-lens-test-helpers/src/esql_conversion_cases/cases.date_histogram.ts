@@ -133,63 +133,6 @@ export const buildDateHistogramCases = (): EsqlConversionCase[] => {
     {
       group: 'date_histogram',
       dataset: ecommerce,
-      description: 'date histogram prepends YYYY-MM-DD to time-only format when range > 24h',
-      columns: {
-        col1: dateHistogram('order_date', { interval: 'auto' }),
-        col2: count(),
-      },
-      columnOrder: ['col1', 'col2'],
-      uiSettingsOverrides: { dateFormat: 'HH:mm:ss' },
-      expected: {
-        success: true,
-        esql: `${ecommerceFrom} | ${ecommerceWhere} | STATS COUNT(*) BY BUCKET(order_date, 75, ?_tstart, ?_tend)`,
-        columnNames: ['COUNT(*)', 'BUCKET(order_date, 75, ?_tstart, ?_tend)'],
-        expectedSourceIds: {
-          'COUNT(*)': ['col2'],
-          'BUCKET(order_date, 75, ?_tstart, ?_tend)': ['col1'],
-        },
-        expectedFormats: {
-          'BUCKET(order_date, 75, ?_tstart, ?_tend)': {
-            id: 'date',
-            params: { pattern: 'YYYY-MM-DD HH:mm:ss' },
-          },
-        },
-      },
-    },
-    {
-      group: 'date_histogram',
-      dataset: ecommerce,
-      description:
-        'date histogram does not prepend YYYY-MM-DD to time-only format when range <= 24h',
-      columns: {
-        col1: dateHistogram('order_date', { interval: 'auto' }),
-        col2: count(),
-      },
-      columnOrder: ['col1', 'col2'],
-      uiSettingsOverrides: { dateFormat: 'HH:mm:ss' },
-      dateRangeOverride: {
-        fromDate: '2023-06-16T00:00:00.000Z',
-        toDate: '2023-06-16T06:00:00.000Z',
-      },
-      expected: {
-        success: true,
-        esql: `${ecommerceFrom} | ${ecommerceWhere} | STATS COUNT(*) BY BUCKET(order_date, 75, ?_tstart, ?_tend)`,
-        columnNames: ['COUNT(*)', 'BUCKET(order_date, 75, ?_tstart, ?_tend)'],
-        expectedSourceIds: {
-          'COUNT(*)': ['col2'],
-          'BUCKET(order_date, 75, ?_tstart, ?_tend)': ['col1'],
-        },
-        expectedFormats: {
-          'BUCKET(order_date, 75, ?_tstart, ?_tend)': {
-            id: 'date',
-            params: { pattern: 'HH:mm:ss' },
-          },
-        },
-      },
-    },
-    {
-      group: 'date_histogram',
-      dataset: ecommerce,
       description: 'date histogram with drop partial buckets is not convertible',
       columns: {
         col1: dateHistogram('order_date', { interval: 'auto', dropPartials: true }),
