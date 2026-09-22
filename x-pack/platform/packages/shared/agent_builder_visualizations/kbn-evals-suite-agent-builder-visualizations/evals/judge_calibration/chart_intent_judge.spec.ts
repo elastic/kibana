@@ -7,7 +7,10 @@
 
 import { evaluate, tags, type Evaluator } from '@kbn/evals';
 import { createChartIntentJudge } from '../../src/evaluators/chart_type_vs_intent';
-import { CHART_INTENT_CALIBRATION_PAIRS, type ChartIntentCalibrationPair } from './chart_intent_pairs';
+import {
+  CHART_INTENT_CALIBRATION_PAIRS,
+  type ChartIntentCalibrationPair,
+} from './chart_intent_pairs';
 
 type CalibrationInput = Pick<ChartIntentCalibrationPair, 'question' | 'gold' | 'actual'>;
 type CalibrationExpected = Pick<ChartIntentCalibrationPair, 'verdict' | 'rationale'>;
@@ -56,7 +59,8 @@ evaluate.describe(
                 'Fixed gold / produced chart-form pairs with human verdicts. Measures judge agreement so rubric or model drift is visible separately from agent quality.',
               examples: CHART_INTENT_CALIBRATION_PAIRS.map(
                 ({ question, gold, actual, verdict, rationale }) => ({
-                  input: { question, gold, actual } as CalibrationInput & Record<string, unknown>,
+                  input: { question, gold, actual } as CalibrationInput &
+                    Record<string, unknown>,
                   output: { verdict, rationale },
                   metadata: { chartFamily: 'judge_calibration' },
                 })

@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { ActualChartForm, ChartIntentVerdict } from '../../src/evaluators/chart_type_vs_intent';
+import type {
+  ActualChartForm,
+  ChartIntentVerdict,
+} from '../../src/evaluators/chart_type_vs_intent';
 import type { GoldChartForm } from '../../src/evaluators/gold_visualization_config';
 
 export interface ChartIntentCalibrationPair {
