@@ -106,4 +106,51 @@ describe('ProposalDismissForm', () => {
     expect(container.querySelector('[data-test-subj$="-reason"]')).toBeNull();
     expect(container.querySelector('[data-test-subj$="-rationale"]')).toBeNull();
   });
+
+  it('does not mark the rationale row invalid before the field is touched', () => {
+    const { container } = render(
+      <ProposalDismissForm {...defaultProps} rationale="" data-test-subj="dismiss-form" />
+    );
+    const textarea = container.querySelector(
+      '[data-test-subj="dismiss-form-rationale"]'
+    ) as HTMLTextAreaElement;
+    expect(textarea).not.toHaveAttribute('aria-invalid', 'true');
+  });
+
+  it('marks the rationale row invalid when rationale is empty after blur', () => {
+    const { container } = render(
+      <ProposalDismissForm {...defaultProps} rationale="" data-test-subj="dismiss-form" />
+    );
+    const textarea = container.querySelector(
+      '[data-test-subj="dismiss-form-rationale"]'
+    ) as HTMLTextAreaElement;
+    fireEvent.blur(textarea);
+    expect(textarea).toHaveAttribute('aria-invalid', 'true');
+  });
+
+  it('marks the rationale row invalid when rationale is whitespace-only after blur', () => {
+    const { container } = render(
+      <ProposalDismissForm {...defaultProps} rationale="   " data-test-subj="dismiss-form" />
+    );
+    const textarea = container.querySelector(
+      '[data-test-subj="dismiss-form-rationale"]'
+    ) as HTMLTextAreaElement;
+    fireEvent.blur(textarea);
+    expect(textarea).toHaveAttribute('aria-invalid', 'true');
+  });
+
+  it('does not mark the rationale row invalid when rationale has content', () => {
+    const { container } = render(
+      <ProposalDismissForm
+        {...defaultProps}
+        rationale="Already mitigated"
+        data-test-subj="dismiss-form"
+      />
+    );
+    const textarea = container.querySelector(
+      '[data-test-subj="dismiss-form-rationale"]'
+    ) as HTMLTextAreaElement;
+    fireEvent.blur(textarea);
+    expect(textarea).not.toHaveAttribute('aria-invalid', 'true');
+  });
 });

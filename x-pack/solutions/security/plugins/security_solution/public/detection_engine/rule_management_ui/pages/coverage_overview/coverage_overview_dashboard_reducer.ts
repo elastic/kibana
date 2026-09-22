@@ -16,6 +16,7 @@ export interface CoverageOverviewDashboardState {
   showExpandedCells: boolean;
   filter: CoverageOverviewFilter;
   isLoading: boolean;
+  isMitreError: boolean;
   data: CoverageOverviewDashboard | undefined;
 }
 
