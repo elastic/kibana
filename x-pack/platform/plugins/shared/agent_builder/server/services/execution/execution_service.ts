@@ -15,6 +15,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type {
   ChatEvent,
+  ConverseInput,
   ExecutionAbortReason,
   InteractivityConfig,
 } from '@kbn/agent-builder-common';
@@ -633,14 +634,12 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     });
   }
 
-  private async validateAttachments<T extends { nextInput: { attachments?: unknown[] } }>(
+  private async validateAttachments<T extends { nextInput: ConverseInput }>(
     params: T,
     request: KibanaRequest
   ): Promise<T> {
     const validated = await this.deps.attachmentsService.validateAttachmentInputs(
-      params.nextInput.attachments as Parameters<
-        AttachmentServiceStart['validateAttachmentInputs']
-      >[0],
+      params.nextInput.attachments,
       request
     );
 
