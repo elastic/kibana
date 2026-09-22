@@ -62,7 +62,6 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
       );
     });
 
-    loadTestFile(require.resolve('./embeddable_state'));
     loadTestFile(require.resolve('./tooltip_filter_actions'));
     loadTestFile(require.resolve('./filter_by_map_extent'));
   });

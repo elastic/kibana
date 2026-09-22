@@ -158,4 +158,38 @@ export class MapsPage {
     });
     await this.page.reload();
   }
+
+  private async openSetViewPopover() {
+    const form = this.page.testSubj.locator('mapSetViewForm');
+    if (!(await form.isVisible())) {
+      await this.page.testSubj.click('toggleSetViewVisibilityButton');
+      await form.waitFor({ state: 'visible' });
+    }
+  }
+
+  private async closeSetViewPopover() {
+    const form = this.page.testSubj.locator('mapSetViewForm');
+    if (await form.isVisible()) {
+      await this.page.testSubj.click('toggleSetViewVisibilityButton');
+      await form.waitFor({ state: 'hidden' });
+    }
+  }
+
+  async setView(lat: number, lon: number, zoom: number) {
+    await this.openSetViewPopover();
+    await this.page.testSubj.locator('latitudeInput').fill(lat.toString());
+    await this.page.testSubj.locator('longitudeInput').fill(lon.toString());
+    await this.page.testSubj.locator('zoomInput').fill(zoom.toString());
+    await this.page.testSubj.click('submitViewButton');
+    await this.waitForRenderComplete();
+  }
+
+  async getView(): Promise<{ lat: number; lon: number; zoom: number }> {
+    await this.openSetViewPopover();
+    const lat = await this.page.testSubj.locator('latitudeInput').inputValue();
+    const lon = await this.page.testSubj.locator('longitudeInput').inputValue();
+    const zoom = await this.page.testSubj.locator('zoomInput').inputValue();
+    await this.closeSetViewPopover();
+    return { lat: parseFloat(lat), lon: parseFloat(lon), zoom: parseFloat(zoom) };
+  }
 }
