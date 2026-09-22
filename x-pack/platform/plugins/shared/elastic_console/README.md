@@ -138,7 +138,13 @@ Use `"model": "default"` to always use the default connector.
 
 ### Conversations
 
-CRUD endpoints for managing chat conversations stored in Elasticsearch.
+CRUD endpoints for Agent Builder conversations. RAMEN (and older clients) still send and receive `conversation_rounds`. Agent Builder itself now stores the canonical transcript as timeline `events` with `schema_version >= 1`.
+
+These routes sit on the Agent Builder conversation index and keep both shapes in sync:
+
+- **Read:** `GET` returns `conversation_rounds`. If the document is events-native and the events timeline has more completed turns than the stored rounds (or rounds are empty), rounds are folded from `user_message` / `execution_step` / `execution_terminated` events before the response is sent.
+- **Write:** `POST` / `PUT` still accept only `conversation_rounds` in the request body. Unknown fields from newer RAMEN builds (`events`, `schema_version`) are stripped by the route schema. The handler then persists both the rounds and a matching events projection plus `schema_version`, so the Agent Builder UI does not keep a stale events transcript after a RAMEN sync.
+- **Compatibility:** Older RAMEN clients that only send `conversation_rounds` keep working. Newer RAMEN (see [elastic-ramen#120](https://github.com/elastic/elastic-ramen/pull/120)) also hydrates rounds on the client so takeover works against Kibana versions that do not yet include this write-path change.
 
 #### List conversations
 
@@ -154,7 +160,7 @@ Returns conversations for the current space, sorted by `updated_at` descending (
 GET /internal/elastic_ramen/conversations/:id
 ```
 
-Returns a single conversation with full `conversation_rounds`.
+Returns a single conversation with full `conversation_rounds` (hydrated from `events` when needed, as above).
 
 #### Create conversation
 
@@ -171,7 +177,7 @@ Body:
 }
 ```
 
-Returns `{ "id": "generated-uuid" }`.
+Returns `{ "id": "generated-uuid" }`. The stored document also includes `events` and `schema_version`.
 
 #### Update conversation
 
@@ -187,7 +193,7 @@ Body (all fields optional):
 }
 ```
 
-Returns `{ "id": "conversation-id" }`.
+Returns `{ "id": "conversation-id" }`. When `conversation_rounds` is present, `events` are rewritten from those rounds so Agent Builder stays in sync.
 
 ## Configuration for external tools
 
