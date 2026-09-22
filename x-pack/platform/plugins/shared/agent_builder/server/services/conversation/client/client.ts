@@ -1289,12 +1289,6 @@ class ConversationClientImpl implements ConversationClient {
       throw createBadRequestError('ACL entries are not supported when access_mode is "public"');
     }
 
-    if (entries.length > CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES) {
-      throw createBadRequestError(
-        `ACL entries exceed maximum of ${CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES}`
-      );
-    }
-
     const addedAtById = new Map(
       normalizeConversationAccessControl(current.access_control).entries.map((entry) => [
         `${entry.type}:${entry.id}`,
@@ -1323,6 +1317,12 @@ export const validateAccessControlEntries = ({
   ownerId: string | undefined;
   addedAtById: Map<string, string>;
 }): ConversationAccessControlEntry[] => {
+  if (entries.length > CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES) {
+    throw createBadRequestError(
+      `ACL entries exceed maximum of ${CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES}`
+    );
+  }
+
   const now = new Date().toISOString();
   const seen = new Set<string>();
   const normalizedEntries: ConversationAccessControlEntry[] = [];
