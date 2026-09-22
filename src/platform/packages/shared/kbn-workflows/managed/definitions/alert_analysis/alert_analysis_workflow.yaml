@@ -93,6 +93,8 @@ triggers:
             Bounded to 0–1 to match the uiSettings contract.
         agentId:
           type: string
+          minLength: 1
+          maxLength: 64
           description: Agent Builder agent id. Overrides the uiSettings-derived agentId.
         tagPrefix:
           type: string

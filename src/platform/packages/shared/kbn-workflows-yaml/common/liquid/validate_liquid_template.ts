@@ -78,105 +78,18 @@ function mapToAbsolutePosition(
 
 const LIQUID_OUTPUT_PATTERN = '{{';
 const LIQUID_TAG_PATTERN = '{%';
-// Matches ${{ ... }} — typed expressions (WorkflowTemplatingEngine.evaluateExpression).
-// Same Liquid value grammar as runtime (evalValueSync after stripping the leading `$`).
-const DYNAMIC_EXPRESSION_PATTERN = /\$\{\{(?:[^}]|\}(?!\}))*\}\}/g;
+// Matches ${{ ... }} — typed expressions used alongside Liquid in workflow YAML.
+// These may contain operators (!=, ?, :) that are not valid Liquid syntax and must be blanked
+// before the Liquid parser sees the value. Replacement is same-length whitespace so character
+// offsets (and thus error underlines) stay aligned with the original scalar.
+//
+// Intentionally does NOT deep-validate typed-expression grammar (evaluateExpression parity,
+// raw/comment lexical context, etc.): that belongs with WorkflowTemplatingEngine, not a
+// second regex-based authoring pass. Blanking only prevents false Liquid parse failures.
+const DYNAMIC_EXPRESSION_STRIP = /\$\{\{(?:[^}]|\}(?!\}))*\}\}/g;
 
 const blankDynamicExpressions = (value: string): string =>
-  value.replace(DYNAMIC_EXPRESSION_PATTERN, (match) => ' '.repeat(match.length));
-
-const pushLiquidError = (
-  errors: LiquidValidationError[],
-  yamlString: string,
-  node: Scalar,
-  liquidText: string,
-  error: unknown,
-  /** Offset to add onto positions extracted from liquidText (relative to node.value). */
-  valueOffset = 0
-): void => {
-  const errorMessage = error instanceof Error ? error.message : 'Invalid Liquid syntax';
-  const relativeInLiquid = extractLiquidErrorPosition(liquidText, errorMessage);
-  const relativePosition = {
-    start: valueOffset + relativeInLiquid.start,
-    end: valueOffset + relativeInLiquid.end,
-  };
-  const absPosition = mapToAbsolutePosition(yamlString, node, errorMessage, relativePosition);
-
-  const startPos = convertOffsetToLineColumn(yamlString, absPosition.start);
-  const endPos = convertOffsetToLineColumn(yamlString, absPosition.end);
-
-  errors.push({
-    message: errorMessage.replace(/, line:\d+, col:\d+/g, ''),
-    startLine: startPos.line,
-    startColumn: startPos.column,
-    endLine: endPos.line,
-    endColumn: endPos.column,
-  });
-};
-
-/**
- * Single well-formed `${{ ... }}` covering the entire scalar. Runtime
- * (`WorkflowTemplatingEngine.renderValueRecursively`) dispatches any string that
- * `startsWith('${{') && endsWith('}}')` as ONE typed expression via evaluateExpression
- * (first `{{` … last `}}`). A scalar like `${{ a }} {{ b }}` matches that dispatch
- * but is not a single dynamic segment — validate it as invalid rather than accepting
- * each segment independently.
- */
-const WHOLE_SCALAR_TYPED_EXPRESSION = /^\$\{\{(?:[^}]|\}(?!\}))*\}\}$/;
-
-const isRuntimeTypedExpressionDispatch = (value: string): boolean =>
-  value.startsWith('${{') && value.endsWith('}}');
-
-/**
- * Validate each `${{ ... }}` with the same Liquid grammar the runtime uses
- * (`${{ expr }}` → drop `$` → parse as `{{ expr }}`, matching evaluateExpression).
- * Catches unknown filters and invalid syntax (e.g. ternaries) that wholesale blanking
- * would hide, while still accepting operators like `!=` that Liquid supports.
- */
-const validateDynamicExpressions = (
-  yamlString: string,
-  node: Scalar,
-  value: string,
-  errors: LiquidValidationError[]
-): void => {
-  for (const match of value.matchAll(DYNAMIC_EXPRESSION_PATTERN)) {
-    const matchIndex = match.index ?? 0;
-    // `${{ expr }}` → `{{ expr }}` (same as templating_engine dropping the leading `$`).
-    const asLiquid = match[0].substring(1);
-    try {
-      parseTemplateString(asLiquid);
-    } catch (error) {
-      // asLiquid starts one char after `$`, so shift positions into node.value.
-      pushLiquidError(errors, yamlString, node, asLiquid, error, matchIndex + 1);
-    }
-  }
-};
-
-/**
- * Scalars that runtime sends to evaluateExpression wholesale. Must be exactly one
- * `${{ ... }}`; otherwise report an error (mixed `${{ a }} {{ b }}` false-negative fix).
- */
-const validateRuntimeTypedExpressionScalar = (
-  yamlString: string,
-  node: Scalar,
-  value: string,
-  errors: LiquidValidationError[]
-): void => {
-  if (!WHOLE_SCALAR_TYPED_EXPRESSION.test(value)) {
-    // Synthesize a Liquid-like error so pushLiquidError can map the full scalar span.
-    pushLiquidError(
-      errors,
-      yamlString,
-      node,
-      value,
-      new Error(
-        'Invalid typed expression: values that start with "${{" and end with "}}" are evaluated as a single expression (first "{{" through last "}}"). Use one ${{ ... }} or a plain Liquid string template.'
-      )
-    );
-    return;
-  }
-  validateDynamicExpressions(yamlString, node, value, errors);
-};
+  value.replace(DYNAMIC_EXPRESSION_STRIP, (match) => ' '.repeat(match.length));
 
 export function validateLiquidTemplate(
   yamlString: string,
@@ -190,17 +103,8 @@ export function validateLiquidTemplate(
       if (!node.range) return;
       if (typeof node.value !== 'string') return;
 
-      // Runtime typed-expression dispatch: whole scalar → evaluateExpression.
-      if (isRuntimeTypedExpressionDispatch(node.value)) {
-        validateRuntimeTypedExpressionScalar(yamlString, node, node.value, errors);
-        return;
-      }
-
-      // Embedded `${{ }}` inside a string template (does not start with `${{`).
-      validateDynamicExpressions(yamlString, node, node.value, errors);
-
-      // Blank ${{ ... }} before validating remaining Liquid — avoids double-reporting the
-      // same expression, and keeps mixed-value offsets aligned with the original scalar.
+      // Blank ${{ ... }} before Liquid validation — the Liquid parser would reject
+      // JS-style operators (!=, ?, :) inside those expressions as invalid Liquid syntax.
       const liquidValue = blankDynamicExpressions(node.value);
 
       if (!liquidValue.includes(LIQUID_OUTPUT_PATTERN) && !liquidValue.includes(LIQUID_TAG_PATTERN))
@@ -209,7 +113,21 @@ export function validateLiquidTemplate(
       try {
         parseTemplateString(liquidValue);
       } catch (error) {
-        pushLiquidError(errors, yamlString, node, liquidValue, error);
+        const errorMessage = error instanceof Error ? error.message : 'Invalid Liquid syntax';
+        // liquidValue is same-length as node.value, so positions map 1:1 to the original scalar.
+        const relativePosition = extractLiquidErrorPosition(liquidValue, errorMessage);
+        const absPosition = mapToAbsolutePosition(yamlString, node, errorMessage, relativePosition);
+
+        const startPos = convertOffsetToLineColumn(yamlString, absPosition.start);
+        const endPos = convertOffsetToLineColumn(yamlString, absPosition.end);
+
+        errors.push({
+          message: errorMessage.replace(/, line:\d+, col:\d+/g, ''),
+          startLine: startPos.line,
+          startColumn: startPos.column,
+          endLine: endPos.line,
+          endColumn: endPos.column,
+        });
       }
     },
   });
