@@ -781,9 +781,12 @@ export const createDatasetWizardStrings = {
     }
   ),
 
-  settingsTrimSpacesHelp: i18n.translate('xpack.dataFederation.createDatasetForm.settingsTrimSpacesHelp', {
-    defaultMessage: 'Removes surrounding whitespace from field values.',
-  }),
+  settingsTrimSpacesHelp: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsTrimSpacesHelp',
+    {
+      defaultMessage: 'Removes surrounding whitespace from field values.',
+    }
+  ),
 
   settingsDatetimeFormatLabel: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsDatetimeFormatLabel',
@@ -853,6 +856,118 @@ export const createDatasetWizardStrings = {
     {
       defaultMessage: 'Must be a non-negative integer.',
     }
+  ),
+
+  // Additional settings (info icon tooltip) strings
+  additionalSettingsInfoIconAriaLabel: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.additionalSettings.infoIconAriaLabel',
+    {
+      defaultMessage: 'More information',
+    }
+  ),
+  settingsFileExclusionsDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.additionalSettings.fileExclusions.description',
+    { defaultMessage: 'placeholder' }
+  ),
+  settingsPartitionDetectionDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.additionalSettings.partitionDetection.description',
+    { defaultMessage: 'placeholder' }
+  ),
+  settingsPartitionPathDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.additionalSettings.partitionPath.description',
+    { defaultMessage: 'placeholder' }
+  ),
+  settingsErrorModeDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.additionalSettings.errorMode.description',
+    { defaultMessage: 'placeholder' }
+  ),
+  settingsMaxErrorsDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.additionalSettings.maxErrors.description',
+    { defaultMessage: 'placeholder' }
+  ),
+  settingsMaxErrorRatioDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.additionalSettings.maxErrorRatio.description',
+    { defaultMessage: 'placeholder' }
+  ),
+  settingsDelimiterDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.additionalSettings.delimiter.description',
+    { defaultMessage: 'placeholder' }
+  ),
+  settingsQuoteModeDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.additionalSettings.quoteMode.description',
+    { defaultMessage: 'placeholder' }
+  ),
+  settingsHeaderRowDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.additionalSettings.headerRow.description',
+    { defaultMessage: 'placeholder' }
+  ),
+  settingsSkipRowsDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.additionalSettings.skipRows.description',
+    { defaultMessage: 'placeholder' }
+  ),
+  settingsDatetimeFormatDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.additionalSettings.datetimeFormat.description',
+    { defaultMessage: 'placeholder' }
+  ),
+  settingsNullValueDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.additionalSettings.nullValue.description',
+    { defaultMessage: 'placeholder' }
+  ),
+  settingsEncodingDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.additionalSettings.encoding.description',
+    { defaultMessage: 'placeholder' }
+  ),
+  settingsSchemaSampleSizeDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.additionalSettings.schemaSampleSize.description',
+    { defaultMessage: 'placeholder' }
+  ),
+  settingsQuoteCharacterDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.additionalSettings.quoteCharacter.description',
+    { defaultMessage: 'placeholder' }
+  ),
+  settingsEscapeCharacterDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.additionalSettings.escapeCharacter.description',
+    { defaultMessage: 'placeholder' }
+  ),
+  settingsCommentPrefixDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.additionalSettings.commentPrefix.description',
+    { defaultMessage: 'placeholder' }
+  ),
+  settingsColumnPrefixDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.additionalSettings.columnPrefix.description',
+    { defaultMessage: 'placeholder' }
+  ),
+  settingsTrimSpacesDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.additionalSettings.trimSpaces.description',
+    { defaultMessage: 'placeholder' }
+  ),
+  settingsMultiValueSyntaxDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.additionalSettings.multiValueSyntax.description',
+    { defaultMessage: 'placeholder' }
+  ),
+  settingsMaxFieldSizeDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.additionalSettings.maxFieldSize.description',
+    { defaultMessage: 'placeholder' }
+  ),
+  settingsDatetimeFormatNdjsonDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.additionalSettings.datetimeFormatNdjson.description',
+    { defaultMessage: 'placeholder' }
+  ),
+  settingsOptimizedReaderDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.additionalSettings.optimizedReader.description',
+    { defaultMessage: 'placeholder' }
+  ),
+  settingsLateMaterializationDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.additionalSettings.lateMaterialization.description',
+    { defaultMessage: 'placeholder' }
+  ),
+  settingsSchemaSampleSizeNdjsonAdvancedDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.additionalSettings.schemaSampleSizeNdjsonAdvanced.description',
+    { defaultMessage: 'placeholder' }
+  ),
+  settingsDatetimeFormatNdjsonAdvancedDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.additionalSettings.datetimeFormatNdjsonAdvanced.description',
+    { defaultMessage: 'placeholder' }
   ),
 
   addButton: i18n.translate('xpack.dataFederation.createDatasetForm.addButton', {

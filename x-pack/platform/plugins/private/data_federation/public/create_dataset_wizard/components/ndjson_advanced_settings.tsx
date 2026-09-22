@@ -15,6 +15,7 @@ import {
   validateSchemaSampleSize,
   type CreateDatasetFormValues,
 } from '../create_dataset_form_state';
+import { FormRowLabelWithInfo } from './form_row_label_with_info';
 
 export function NdjsonAdvancedSettings({ control }: { control: Control<CreateDatasetFormValues> }) {
   const { field: schemaSampleSizeField, fieldState: schemaSampleSizeState } = useController({
@@ -30,7 +31,12 @@ export function NdjsonAdvancedSettings({ control }: { control: Control<CreateDat
   return (
     <div data-test-subj="createDatasetNdjsonAdvancedSettings">
       <EuiFormRow
-        label={createDatasetWizardStrings.settingsSchemaSampleSizeLabel}
+        label={
+          <FormRowLabelWithInfo
+            label={createDatasetWizardStrings.settingsSchemaSampleSizeLabel}
+            infoText={createDatasetWizardStrings.settingsSchemaSampleSizeNdjsonAdvancedDescription}
+          />
+        }
         helpText={createDatasetWizardStrings.settingsSchemaSampleSizeHelp}
         fullWidth
         isInvalid={Boolean(schemaSampleSizeState.error)}
@@ -49,7 +55,12 @@ export function NdjsonAdvancedSettings({ control }: { control: Control<CreateDat
         />
       </EuiFormRow>
       <EuiFormRow
-        label={createDatasetWizardStrings.settingsDatetimeFormatLabel}
+        label={
+          <FormRowLabelWithInfo
+            label={createDatasetWizardStrings.settingsDatetimeFormatLabel}
+            infoText={createDatasetWizardStrings.settingsDatetimeFormatNdjsonAdvancedDescription}
+          />
+        }
         helpText={createDatasetWizardStrings.settingsDatetimeFormatHelp}
         fullWidth
       >

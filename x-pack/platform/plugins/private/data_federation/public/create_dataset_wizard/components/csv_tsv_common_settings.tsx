@@ -28,6 +28,7 @@ import {
   type DatasetModeFormValue,
 } from '../create_dataset_form_state';
 import { EncodingSelect } from './encoding_select';
+import { FormRowLabelWithInfo } from './form_row_label_with_info';
 
 const MODE_OPTIONS = [
   { value: '', text: createDatasetWizardStrings.settingsModePlaceholder },
@@ -70,7 +71,12 @@ export function CsvTsvCommonSettings({ control }: { control: Control<CreateDatas
   return (
     <div data-test-subj="createDatasetCsvTsvCommonSettings">
       <EuiFormRow
-        label={createDatasetWizardStrings.settingsDelimiterLabel}
+        label={
+          <FormRowLabelWithInfo
+            label={createDatasetWizardStrings.settingsDelimiterLabel}
+            infoText={createDatasetWizardStrings.settingsDelimiterDescription}
+          />
+        }
         helpText={createDatasetWizardStrings.settingsDelimiterHelp}
         fullWidth
         isInvalid={Boolean(delimiterState.error)}
@@ -87,7 +93,15 @@ export function CsvTsvCommonSettings({ control }: { control: Control<CreateDatas
           inputRef={delimiterField.ref}
         />
       </EuiFormRow>
-      <EuiFormRow label={createDatasetWizardStrings.settingsModeLabel} fullWidth>
+      <EuiFormRow
+        label={
+          <FormRowLabelWithInfo
+            label={createDatasetWizardStrings.settingsModeLabel}
+            infoText={createDatasetWizardStrings.settingsQuoteModeDescription}
+          />
+        }
+        fullWidth
+      >
         <EuiSelect
           options={MODE_OPTIONS}
           data-test-subj="createDatasetSettingsMode"
@@ -99,7 +113,15 @@ export function CsvTsvCommonSettings({ control }: { control: Control<CreateDatas
           inputRef={modeField.ref}
         />
       </EuiFormRow>
-      <EuiFormRow label={createDatasetWizardStrings.settingsHeaderRowLabel} fullWidth>
+      <EuiFormRow
+        label={
+          <FormRowLabelWithInfo
+            label={createDatasetWizardStrings.settingsHeaderRowLabel}
+            infoText={createDatasetWizardStrings.settingsHeaderRowDescription}
+          />
+        }
+        fullWidth
+      >
         <EuiSelect
           options={HEADER_ROW_OPTIONS}
           data-test-subj="createDatasetSettingsHeaderRow"
@@ -112,7 +134,12 @@ export function CsvTsvCommonSettings({ control }: { control: Control<CreateDatas
         />
       </EuiFormRow>
       <EuiFormRow
-        label={createDatasetWizardStrings.settingsSkipRowsLabel}
+        label={
+          <FormRowLabelWithInfo
+            label={createDatasetWizardStrings.settingsSkipRowsLabel}
+            infoText={createDatasetWizardStrings.settingsSkipRowsDescription}
+          />
+        }
         helpText={createDatasetWizardStrings.settingsSkipRowsHelp}
         fullWidth
         isInvalid={Boolean(skipRowsState.error)}
@@ -132,7 +159,12 @@ export function CsvTsvCommonSettings({ control }: { control: Control<CreateDatas
         />
       </EuiFormRow>
       <EuiFormRow
-        label={createDatasetWizardStrings.settingsDatetimeFormatLabel}
+        label={
+          <FormRowLabelWithInfo
+            label={createDatasetWizardStrings.settingsDatetimeFormatLabel}
+            infoText={createDatasetWizardStrings.settingsDatetimeFormatDescription}
+          />
+        }
         helpText={helpTextDefault(DEFAULT_DATETIME_FORMAT)}
         fullWidth
       >
@@ -147,7 +179,12 @@ export function CsvTsvCommonSettings({ control }: { control: Control<CreateDatas
         />
       </EuiFormRow>
       <EuiFormRow
-        label={createDatasetWizardStrings.settingsNullValueLabel}
+        label={
+          <FormRowLabelWithInfo
+            label={createDatasetWizardStrings.settingsNullValueLabel}
+            infoText={createDatasetWizardStrings.settingsNullValueDescription}
+          />
+        }
         helpText={helpTextDefault(createDatasetWizardStrings.emptyString)}
         fullWidth
       >
@@ -161,7 +198,12 @@ export function CsvTsvCommonSettings({ control }: { control: Control<CreateDatas
         />
       </EuiFormRow>
       <EuiFormRow
-        label={createDatasetWizardStrings.settingsEncodingLabel}
+        label={
+          <FormRowLabelWithInfo
+            label={createDatasetWizardStrings.settingsEncodingLabel}
+            infoText={createDatasetWizardStrings.settingsEncodingDescription}
+          />
+        }
         helpText={helpTextDefault(DEFAULT_ENCODING)}
         fullWidth
       >

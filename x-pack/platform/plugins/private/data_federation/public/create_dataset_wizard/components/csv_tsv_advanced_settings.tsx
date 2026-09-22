@@ -22,6 +22,7 @@ import {
   type CreateDatasetFormValues,
   type DatasetFormatFormValue,
 } from '../create_dataset_form_state';
+import { FormRowLabelWithInfo } from './form_row_label_with_info';
 
 const MULTI_VALUE_SYNTAX_OPTIONS = [
   { value: '', text: createDatasetWizardStrings.settingsMultiValueSyntaxPlaceholder },
@@ -81,7 +82,12 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
   return (
     <div data-test-subj="createDatasetCsvTsvAdvancedSettings">
       <EuiFormRow
-        label={createDatasetWizardStrings.settingsSchemaSampleSizeLabel}
+        label={
+          <FormRowLabelWithInfo
+            label={createDatasetWizardStrings.settingsSchemaSampleSizeLabel}
+            infoText={createDatasetWizardStrings.settingsSchemaSampleSizeDescription}
+          />
+        }
         helpText={createDatasetWizardStrings.settingsSchemaSampleSizeHelp}
         fullWidth
         isInvalid={Boolean(schemaSampleSizeState.error)}
@@ -100,7 +106,12 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
         />
       </EuiFormRow>
       <EuiFormRow
-        label={createDatasetWizardStrings.settingsQuoteLabel}
+        label={
+          <FormRowLabelWithInfo
+            label={createDatasetWizardStrings.settingsQuoteLabel}
+            infoText={createDatasetWizardStrings.settingsQuoteCharacterDescription}
+          />
+        }
         helpText={createDatasetWizardStrings.settingsQuoteHelp}
         fullWidth
         isInvalid={Boolean(quoteState.error)}
@@ -118,7 +129,12 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
         />
       </EuiFormRow>
       <EuiFormRow
-        label={createDatasetWizardStrings.settingsEscapeLabel}
+        label={
+          <FormRowLabelWithInfo
+            label={createDatasetWizardStrings.settingsEscapeLabel}
+            infoText={createDatasetWizardStrings.settingsEscapeCharacterDescription}
+          />
+        }
         helpText={createDatasetWizardStrings.settingsEscapeHelp}
         fullWidth
         isInvalid={Boolean(escapeState.error)}
@@ -136,7 +152,12 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
         />
       </EuiFormRow>
       <EuiFormRow
-        label={createDatasetWizardStrings.settingsCommentLabel}
+        label={
+          <FormRowLabelWithInfo
+            label={createDatasetWizardStrings.settingsCommentLabel}
+            infoText={createDatasetWizardStrings.settingsCommentPrefixDescription}
+          />
+        }
         helpText={createDatasetWizardStrings.settingsCommentHelp}
         fullWidth
       >
@@ -150,7 +171,12 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
         />
       </EuiFormRow>
       <EuiFormRow
-        label={createDatasetWizardStrings.settingsColumnPrefixLabel}
+        label={
+          <FormRowLabelWithInfo
+            label={createDatasetWizardStrings.settingsColumnPrefixLabel}
+            infoText={createDatasetWizardStrings.settingsColumnPrefixDescription}
+          />
+        }
         helpText={createDatasetWizardStrings.settingsColumnPrefixHelp}
         fullWidth
       >
@@ -164,7 +190,12 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
         />
       </EuiFormRow>
       <EuiFormRow
-        label={createDatasetWizardStrings.settingsTrimSpacesLabel}
+        label={
+          <FormRowLabelWithInfo
+            label={createDatasetWizardStrings.settingsTrimSpacesLabel}
+            infoText={createDatasetWizardStrings.settingsTrimSpacesDescription}
+          />
+        }
         helpText={createDatasetWizardStrings.settingsTrimSpacesHelp}
         fullWidth
       >
@@ -179,7 +210,15 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
           inputRef={trimSpacesField.ref}
         />
       </EuiFormRow>
-      <EuiFormRow label={createDatasetWizardStrings.settingsMultiValueSyntaxLabel} fullWidth>
+      <EuiFormRow
+        label={
+          <FormRowLabelWithInfo
+            label={createDatasetWizardStrings.settingsMultiValueSyntaxLabel}
+            infoText={createDatasetWizardStrings.settingsMultiValueSyntaxDescription}
+          />
+        }
+        fullWidth
+      >
         <EuiSelect
           options={MULTI_VALUE_SYNTAX_OPTIONS}
           data-test-subj="createDatasetSettingsMultiValueSyntax"
@@ -192,7 +231,12 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
         />
       </EuiFormRow>
       <EuiFormRow
-        label={createDatasetWizardStrings.settingsMaxFieldSizeLabel}
+        label={
+          <FormRowLabelWithInfo
+            label={createDatasetWizardStrings.settingsMaxFieldSizeLabel}
+            infoText={createDatasetWizardStrings.settingsMaxFieldSizeDescription}
+          />
+        }
         helpText={createDatasetWizardStrings.settingsMaxFieldSizeHelp}
         fullWidth
         isInvalid={Boolean(maxFieldSizeState.error)}
