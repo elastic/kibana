@@ -191,7 +191,7 @@ test.describe(
       await test.step('shows the Alerts entry in the navigation sidebar', async () => {
         await pageObjects.overviewPage.gotoWithAlerts();
         const classicNavAlerts = page.testSubj.locator(
-          'observability-nav-observability-overview-alerts'
+          'observability-nav-observability-overview-alerts_(v1)'
         );
         const projectNavAlerts = pageObjects.observabilityNavigation.navItemInSidenavByDeepLinkId(
           'observability-overview:alerts'
