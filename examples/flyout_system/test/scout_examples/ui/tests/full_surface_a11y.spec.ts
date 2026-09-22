@@ -9,7 +9,7 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { test } from '../fixtures';
+import { PORTAL_SELECTOR, test } from '../fixtures';
 import type { FlyoutForm } from '../fixtures';
 
 const FORMS: FlyoutForm[] = ['component', 'service'];
@@ -76,20 +76,22 @@ test.describe('Flyout System - full surface accessibility', { tag: tags.stateful
     await expect(flyout.getByRole('region', { name: 'Child flyouts' })).toBeVisible();
   });
 
-  test('subsections are headings inside their section, not regions of their own', async ({
-    pageObjects,
-  }) => {
-    const app = pageObjects.flyoutSystem;
-    const session = app.session('component');
-    const flyout = await app.openFlyout('component', session);
+  for (const form of FORMS) {
+    test(`${form} subsections are headings inside their parent, not regions of their own`, async ({
+      pageObjects,
+    }) => {
+      const app = pageObjects.flyoutSystem;
+      const session = app.session(form);
+      const flyout = await app.openFlyout(form, session);
+      await app.openDetails(form, session);
 
-    const details = flyout.getByRole('region', { name: 'Details' });
-    await expect(details.getByRole('heading', { level: 5, name: 'Host' })).toBeVisible();
-    await expect(details.getByRole('heading', { level: 5, name: 'Service' })).toBeVisible();
+      await expect(flyout.getByRole('heading', { level: 5, name: 'Host' })).toBeVisible();
+      await expect(flyout.getByRole('heading', { level: 5, name: 'Service' })).toBeVisible();
 
-    // Subsections are not defined as separate regions.
-    await expect(flyout.getByRole('region', { name: 'Host' })).toHaveCount(0);
-  });
+      // Subsections are not defined as separate regions.
+      await expect(flyout.getByRole('region', { name: 'Host' })).toHaveCount(0);
+    });
+  }
 
   test('accordion sections report their expanded state and own their panel', async ({
     pageObjects,
@@ -109,31 +111,33 @@ test.describe('Flyout System - full surface accessibility', { tag: tags.stateful
     await expect(flyout.getByRole('heading', { level: 5, name: 'Host' })).toBeVisible();
   });
 
-  test('badge overflow is reachable by keyboard and names its contents', async ({
-    page,
-    pageObjects,
-  }) => {
-    const app = pageObjects.flyoutSystem;
-    const session = app.session('component');
-    await app.openFlyout('component', session);
+  for (const form of FORMS) {
+    test(`${form} badge overflow is reachable by keyboard and names its contents`, async ({
+      page,
+      pageObjects,
+    }) => {
+      const app = pageObjects.flyoutSystem;
+      const session = app.session(form);
+      await app.openFlyout(form, session);
 
-    const overflow = app.badgeOverflow('component', session);
-    await expect(overflow).toHaveAccessibleName(/Show 2 more badges/);
+      const overflow = app.badgeOverflow(form, session);
+      await expect(overflow).toHaveAccessibleName(/Show 2 more badges/);
 
-    await overflow.focus();
-    await expect(overflow).toBeFocused();
-    await overflow.press('Enter');
+      await overflow.focus();
+      await expect(overflow).toBeFocused();
+      await overflow.press('Enter');
 
-    const popover = page.getByRole('dialog', { name: 'Show 2 more badges' });
-    await expect(popover).toBeVisible();
-    await expect(popover.getByText('Metadata 3 very very very very long label')).toBeVisible();
+      const popover = page.getByRole('dialog', { name: 'Show 2 more badges' });
+      await expect(popover).toBeVisible();
+      await expect(popover.getByText('Metadata 3 very very very very long label')).toBeVisible();
 
-    // Popover renders in an EuiPortal, outside the flyout root.
-    const { violations } = await page.checkA11y({
-      include: [app.rootSelector('component', session), '[data-euiportal="true"]'],
+      // Popover renders in an EuiPortal, outside the flyout root.
+      const { violations } = await page.checkA11y({
+        include: [app.rootSelector(form, session), PORTAL_SELECTOR],
+      });
+      expect(violations).toHaveLength(0);
     });
-    expect(violations).toHaveLength(0);
-  });
+  }
 
   test('tabs follow the roving tabindex pattern with manual activation', async ({
     page,
@@ -175,20 +179,22 @@ test.describe('Flyout System - full surface accessibility', { tag: tags.stateful
     await expect(panel).toBeFocused();
   });
 
-  test('footer tab order reaches the secondary action before the primary', async ({
-    pageObjects,
-  }) => {
-    const app = pageObjects.flyoutSystem;
-    const session = app.session('component');
-    await app.openFlyout('component', session);
+  for (const form of FORMS) {
+    test(`${form} footer tab order reaches the secondary action before the primary`, async ({
+      pageObjects,
+    }) => {
+      const app = pageObjects.flyoutSystem;
+      const session = app.session(form);
+      await app.openFlyout(form, session);
 
-    const close = app.footerCloseAction('component', session);
-    const save = app.footerSaveAction('component', session);
-    await expect(close).toBeVisible();
-    await expect(save).toBeVisible();
+      const close = app.footerCloseAction(form, session);
+      const save = app.footerSaveAction(form, session);
+      await expect(close).toBeVisible();
+      await expect(save).toBeVisible();
 
-    await close.focus();
-    await close.press('Tab');
-    await expect(save).toBeFocused();
-  });
+      await close.focus();
+      await close.press('Tab');
+      await expect(save).toBeFocused();
+    });
+  }
 });
