@@ -470,6 +470,24 @@ describe('AppHeaderView', () => {
     );
   });
 
+  it('renders tab append content after the label', () => {
+    render(
+      <AppHeaderView
+        tabs={[
+          {
+            id: 'detections',
+            label: 'Detections',
+            append: <span data-test-subj="customTabAppend">Dev</span>,
+            'data-test-subj': 'detectionsTab',
+          },
+        ]}
+      />
+    );
+
+    expect(screen.getByTestId('detectionsTab')).toHaveTextContent('Detections');
+    expect(screen.getByTestId('customTabAppend')).toHaveTextContent('Dev');
+  });
+
   it('renders tab badge and test subject metadata', () => {
     render(
       <AppHeaderView

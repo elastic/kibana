@@ -63,20 +63,18 @@ test.describe(
       );
     });
 
-    test('renders navigation tabs and links to Settings', async ({ page, pageObjects }) => {
+    test('renders navigation tabs without Detections and links to Settings', async ({
+      page,
+      pageObjects,
+    }) => {
       await page.gotoApp('significant_events/streams');
       const tabBar = page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.tabs);
       await expect(tabBar).toBeVisible({ timeout: 60_000 });
 
-      for (const label of [
-        'Streams',
-        'Knowledge Indicators',
-        'Rules',
-        'Detections',
-        'Significant Events',
-      ]) {
+      for (const label of ['Streams', 'Knowledge Indicators', 'Rules', 'Significant Events']) {
         await expect(tabBar.getByRole('tab', { name: label })).toBeVisible();
       }
+      await expect(tabBar.getByRole('tab', { name: 'Detections' })).toHaveCount(0);
 
       await pageObjects.appMenu.clickItem('significantEventsSettingsLink');
 

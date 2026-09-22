@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactElement, MouseEventHandler } from 'react';
+import type { ReactElement, ReactNode, MouseEventHandler } from 'react';
 import type { IconType } from '@elastic/eui';
 import type { AppMenuConfig } from '@kbn/ui-app-menu';
 import type { FavoriteButtonStatus } from '@kbn/ui-favorite-button';
@@ -110,6 +110,11 @@ export interface AppHeaderTab {
   onClick?: () => void;
   href?: string;
   badge?: AppHeaderTabBadge;
+  /**
+   * Extra content after the tab label (and after `badge`, if set). Use this for
+   * marks that cannot be expressed as `badge: { iconType }` (for example a text badge).
+   */
+  append?: ReactNode;
   'data-test-subj'?: string;
   disabled?: boolean;
   toolTipContent?: string;

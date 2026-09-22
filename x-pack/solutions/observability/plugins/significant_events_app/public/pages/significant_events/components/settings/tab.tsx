@@ -845,7 +845,8 @@ export function SettingsTab() {
             <EuiFlexItem grow={2}>
               <EuiText color="subdued" size="s">
                 {i18n.translate('xpack.significantEventsApp.settings.developerModeHelpText', {
-                  defaultMessage: 'Show extra details and configuration options for expert users.',
+                  defaultMessage:
+                    'Show extra tabs, details, and configuration options for expert users.',
                 })}
               </EuiText>
             </EuiFlexItem>
