@@ -1368,10 +1368,51 @@ export default function (providerContext: FtrProviderContext) {
     describe('Cloud Connector Integration', () => {
       let agentPolicyWithCloudConnectorsId: string;
       let agentPolicyWithoutCloudConnectorsId: string;
+      let fleetServerAgentPolicyId: string;
 
       before(async () => {
         await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
         await apiClient.installPackage({ pkgName: 'cspm', pkgVersion: '1.0.0' });
+
+        // Create a fleet server package policy so isSecretStorageEnabled returns true.
+        // The check returns true when fleet_server package policies exist but no agents are enrolled.
+        // Without this, createCloudConnectorForPackagePolicy is never reached (it lives inside the
+        // isSecretStorageEnabled block in package_policy.ts).
+        const fleetServerPkgRes = await supertest
+          .get('/api/fleet/epm/packages/fleet_server')
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+        const fleetServerVersion: string = fleetServerPkgRes.body.item.version;
+
+        const fleetServerAgentPolicyRes = await supertest
+          .post('/api/fleet/agent_policies')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `Fleet Server Policy ${uuidv4()}`,
+            namespace: 'default',
+          })
+          .expect(200);
+        fleetServerAgentPolicyId = fleetServerAgentPolicyRes.body.item.id;
+
+        await supertest
+          .post('/api/fleet/package_policies')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            force: true,
+            package: { name: 'fleet_server', version: fleetServerVersion },
+            name: `Fleet Server ${uuidv4()}`,
+            namespace: 'default',
+            policy_id: fleetServerAgentPolicyId,
+            vars: {},
+            inputs: {
+              'fleet_server-fleet-server': {
+                enabled: true,
+                vars: { custom: '' },
+                streams: {},
+              },
+            },
+          })
+          .expect(200);
 
         // Create agent policies for cloud connector testing
         const policy1Response = await supertest
@@ -1420,6 +1461,10 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/agent_policies/delete`)
           .set('kbn-xsrf', 'xxxx')
           .send({ agentPolicyId: agentPolicyWithoutCloudConnectorsId });
+        await supertest
+          .post(`/api/fleet/agent_policies/delete`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ agentPolicyId: fleetServerAgentPolicyId });
         await esArchiver.unload(
           'x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server'
         );
