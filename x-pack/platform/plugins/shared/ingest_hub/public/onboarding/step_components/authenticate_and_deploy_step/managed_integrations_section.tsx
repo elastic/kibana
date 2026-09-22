@@ -34,6 +34,7 @@ import {
   LazyAwsStaticKeysForm,
   useGetPackageInfoByKeyQuery,
   getAnyCloudConnectorIacTemplateUrl,
+  useAwsIdentityFederationTemplateUrl,
 } from '@kbn/fleet-plugin/public';
 import type {
   AwsStaticKeyCredentials,
@@ -130,10 +131,17 @@ export function ManagedIntegrationsSection({
     { full: true },
     { enabled: showIdentityFederation }
   );
-  const iacTemplateUrl = useMemo(
+  const packageIacTemplateUrl = useMemo(
     () => getAnyCloudConnectorIacTemplateUrl(awsPackageResponse?.item),
     [awsPackageResponse]
   );
+  // Behind `fleet.awsWorkloadIdentityTemplateEnabled`: the aws package's Identity Federation
+  // option launches the hardcoded Workload Identity template instead of its iac_template_url.
+  const iacTemplateUrl = useAwsIdentityFederationTemplateUrl({
+    packageName: awsPackageResponse?.item?.name,
+    packageVersion: awsPackageResponse?.item?.version,
+    iacTemplateUrl: packageIacTemplateUrl,
+  });
 
   const radioOptions = [
     {

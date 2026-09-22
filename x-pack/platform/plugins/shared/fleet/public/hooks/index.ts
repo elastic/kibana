@@ -42,3 +42,4 @@ export * from './use_var_group_cloud_connector';
 export * from './use_disabled_identity_federation_providers';
 export * from './use_upgrade_review_actions';
 export * from './use_iac_provisioner';
+export * from './use_aws_workload_identity_template';

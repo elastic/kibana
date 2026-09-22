@@ -18,6 +18,8 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 jest.mock('@kbn/fleet-plugin/public', () => ({
   useGetPackageInfoByKeyQuery: jest.fn(),
   getAnyCloudConnectorIacTemplateUrl: jest.fn(),
+  // Pass the package URL through: the WII override is covered by fleet's own tests
+  useAwsIdentityFederationTemplateUrl: jest.fn(({ iacTemplateUrl }) => iacTemplateUrl),
   // Render as a simple div so we can fire onReadyChange without real fleet internals
   LazyAwsIdentityFederationSetup: jest.fn(),
   LazyAwsStaticKeysForm: jest.fn(),

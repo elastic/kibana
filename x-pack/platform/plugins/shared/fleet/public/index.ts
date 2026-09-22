@@ -157,6 +157,10 @@ export type {
 export { sendGetPackageInfoByKey, sendGetPackageInfoByKeyForRq } from './hooks/use_request/epm';
 export { sendRenderIacTemplate } from './hooks/use_request/iac_provisioner';
 export { useIacProvisioner } from './hooks/use_iac_provisioner';
+export {
+  useAwsWorkloadIdentityTemplateEnabled,
+  useAwsIdentityFederationTemplateUrl,
+} from './hooks/use_aws_workload_identity_template';
 export type {
   IacPolicyTemplateSelection,
   RenderIacTemplateIntegration,

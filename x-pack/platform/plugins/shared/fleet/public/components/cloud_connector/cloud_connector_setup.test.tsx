@@ -12,6 +12,8 @@ import type { UseQueryResult } from '@kbn/react-query';
 
 import type { CloudConnector, CloudProvider } from '../../types';
 
+import { useAwsIdentityFederationTemplateUrl } from '../../hooks/use_aws_workload_identity_template';
+
 import { useGetCloudConnectors } from './hooks/use_get_cloud_connectors';
 import { useCloudConnectorSetup } from './hooks/use_cloud_connector_setup';
 import { TestProvider } from './test/test_provider';
@@ -46,6 +48,7 @@ jest.mock('./utils', () => ({
   ...jest.requireActual('./utils'),
   isCloudConnectorReusableEnabled: jest.fn(),
 }));
+jest.mock('../../hooks/use_aws_workload_identity_template');
 
 // Get typed references to mocked components and hooks
 const mockCloudConnectorTabs = CloudConnectorTabs as jest.MockedFunction<typeof CloudConnectorTabs>;
@@ -61,6 +64,10 @@ const mockUseCloudConnectorSetup = useCloudConnectorSetup as jest.MockedFunction
 const mockIsCloudConnectorReusableEnabled = isCloudConnectorReusableEnabled as jest.MockedFunction<
   typeof isCloudConnectorReusableEnabled
 >;
+const mockUseAwsIdentityFederationTemplateUrl =
+  useAwsIdentityFederationTemplateUrl as jest.MockedFunction<
+    typeof useAwsIdentityFederationTemplateUrl
+  >;
 
 // Mock hook functions
 const mockSetNewConnectionCredentials = jest.fn();
@@ -128,6 +135,10 @@ describe('CloudConnectorSetup', () => {
     jest.clearAllMocks();
     // Mock version checking to return true by default
     mockIsCloudConnectorReusableEnabled.mockReturnValue(true);
+    // Workload Identity template flag off by default: pass the package URL through
+    mockUseAwsIdentityFederationTemplateUrl.mockImplementation(
+      ({ iacTemplateUrl }) => iacTemplateUrl
+    );
   });
 
   const setupMocks = (cloudConnectors: CloudConnector[] = []) => {
@@ -633,6 +644,53 @@ describe('CloudConnectorSetup', () => {
         AWS_PROVIDER,
         mockPackageInfo.version,
         defaultProps.templateName
+      );
+    });
+
+    it('resolves the AWS template URL through the Workload Identity flag hook', () => {
+      // Tabs are mocked away, so render the plain form to observe its props
+      mockIsCloudConnectorReusableEnabled.mockReturnValue(false);
+      setupMocks([]);
+      const packageUrl = 'https://example.com/legacy?param_ElasticResourceId=RESOURCE_ID';
+      renderComponent({ cloudProvider: AWS_PROVIDER, iacTemplateUrl: packageUrl });
+
+      expect(mockUseAwsIdentityFederationTemplateUrl).toHaveBeenCalledWith({
+        packageName: mockPackageInfo.name,
+        packageVersion: mockPackageInfo.version,
+        iacTemplateUrl: packageUrl,
+      });
+      expect(mockNewCloudConnectorForm).toHaveBeenCalledWith(
+        expect.objectContaining({ iacTemplateUrl: packageUrl }),
+        expect.anything()
+      );
+    });
+
+    it('passes the Workload Identity URL to the form when the flag hook returns it', () => {
+      mockIsCloudConnectorReusableEnabled.mockReturnValue(false);
+      setupMocks([]);
+      const wiiUrl = 'https://example.com/wii?param_ElasticOrganizationId=ORGANIZATION_ID';
+      mockUseAwsIdentityFederationTemplateUrl.mockReturnValue(wiiUrl);
+      renderComponent({
+        cloudProvider: AWS_PROVIDER,
+        iacTemplateUrl: 'https://example.com/legacy',
+      });
+
+      expect(mockNewCloudConnectorForm).toHaveBeenCalledWith(
+        expect.objectContaining({ iacTemplateUrl: wiiUrl }),
+        expect.anything()
+      );
+    });
+
+    it('ignores the Workload Identity URL for non-AWS providers', () => {
+      mockIsCloudConnectorReusableEnabled.mockReturnValue(false);
+      setupMocks([]);
+      const packageUrl = 'https://portal.azure.com/#create/Microsoft.Template';
+      mockUseAwsIdentityFederationTemplateUrl.mockReturnValue('https://example.com/wii');
+      renderComponent({ cloudProvider: 'azure', iacTemplateUrl: packageUrl });
+
+      expect(mockNewCloudConnectorForm).toHaveBeenCalledWith(
+        expect.objectContaining({ iacTemplateUrl: packageUrl }),
+        expect.anything()
       );
     });
   });

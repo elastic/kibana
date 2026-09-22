@@ -47,6 +47,14 @@ export const SUPPORTS_IDENTITY_FEDERATION_VAR_NAME = 'supports_identity_federati
 // Sibling flags for azure/gcp will be added as those packages migrate to var_groups.
 export const AWS_IDENTITY_FEDERATION_ENABLED_FLAG = 'fleet.awsIdentityFederationEnabled';
 
+// LaunchDarkly flag (evaluated via `core.featureFlags`) that switches the aws packages'
+// Identity Federation option to the Elastic Workload Identity (WII) CloudFormation template.
+// When true, Fleet ignores the package's `iac_template_url` for the packages listed in
+// `AWS_WORKLOAD_IDENTITY_TEMPLATE_MIN_PACKAGE_VERSIONS` and launches the hardcoded WII
+// quick-create URL instead. Meant to be on in Serverless and off on ECH. Default false.
+export const AWS_WORKLOAD_IDENTITY_TEMPLATE_ENABLED_FLAG =
+  'fleet.awsWorkloadIdentityTemplateEnabled';
+
 // OTel Verifier package constants
 export const VERIFIER_PKG_NAME = 'verifier_otel';
 export const VERIFIER_POLICY_TEMPLATE = 'verifierreceiver';

@@ -39,6 +39,30 @@ export type ElasticCloudEnvironment =
   | typeof ELASTIC_CLOUD_ENVIRONMENT_STAGING
   | typeof ELASTIC_CLOUD_ENVIRONMENT_QA;
 
+/**
+ * Quick-create URL of the Elastic Workload Identity (WII) CloudFormation template for the aws
+ * packages' Identity Federation option (elastic/integrations#21331). Used in place of the
+ * package's `iac_template_url` while `fleet.awsWorkloadIdentityTemplateEnabled` is on; the
+ * tokens are filled by `getCloudConnectorRemoteRoleTemplate` like any package-provided URL.
+ */
+export const AWS_WORKLOAD_IDENTITY_CLOUD_FORMATION_TEMPLATE_URL =
+  'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-federated-identity-wii-aws-9.6.0.yml&param_ElasticOrganizationId=ORGANIZATION_ID&param_ElasticCloudProvider=CLOUD_PROVIDER&param_ElasticCloudRegion=CLOUD_REGION&param_ElasticCloudEnvironment=CLOUD_ENVIRONMENT&param_ElasticResourceType=RESOURCE_TYPE&param_ElasticResourceId=RESOURCE_ID';
+
+/**
+ * Packages whose Identity Federation option moved to the WII template, with the first package
+ * version that carries it. Prerelease tags are ignored when comparing, so `8.5.0-beta` and
+ * `8.5.0` both qualify for `aws`.
+ */
+export const AWS_WORKLOAD_IDENTITY_TEMPLATE_MIN_PACKAGE_VERSIONS: Readonly<Record<string, string>> =
+  {
+    aws: '8.5.0',
+    aws_bedrock: '2.2.0',
+    aws_logs: '2.1.0',
+    aws_mq: '2.1.0',
+    aws_securityhub: '2.3.0',
+    aws_bedrock_agentcore: '1.1.0',
+  };
+
 export const CLOUD_FORMATION_TEMPLATE_URL_CLOUD_CONNECTORS =
   'cloud_formation_cloud_connectors_template';
 export const ARM_TEMPLATE_URL_CLOUD_CONNECTORS = 'arm_template_cloud_connectors_url';

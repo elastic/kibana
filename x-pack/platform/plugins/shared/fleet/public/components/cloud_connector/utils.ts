@@ -6,6 +6,7 @@
  */
 
 import gte from 'semver/functions/gte';
+import coerce from 'semver/functions/coerce';
 import { i18n } from '@kbn/i18n';
 
 import type { PackageInfo, PackagePolicyConfigRecord } from '../../../common';
@@ -61,6 +62,8 @@ import {
   SUPPORTS_CLOUD_CONNECTORS_VAR_NAME,
   CLOUD_CONNECTOR_GCP_CSPM_REUSABLE_MIN_VERSION,
   CLOUD_CONNECTOR_GCP_ASSET_INVENTORY_REUSABLE_MIN_VERSION,
+  AWS_WORKLOAD_IDENTITY_CLOUD_FORMATION_TEMPLATE_URL,
+  AWS_WORKLOAD_IDENTITY_TEMPLATE_MIN_PACKAGE_VERSIONS,
 } from './constants';
 import type { ElasticCloudEnvironment, ElasticResourceType, TemplateUrlToken } from './constants';
 
@@ -371,6 +374,51 @@ export const getAnyCloudConnectorIacTemplateUrl = (
     if (cloudOption) selections[group.name] = cloudOption.name;
   }
   return getIacTemplateUrlFromVarGroupSelection(varGroups, selections);
+};
+
+/**
+ * Whether `packageName`@`packageVersion` is one of the aws packages whose Identity Federation
+ * option moved to the Elastic Workload Identity template. The prerelease tag is dropped before
+ * comparing, so a `-beta` build of the listed version qualifies.
+ */
+export const isAwsWorkloadIdentityTemplatePackage = (
+  packageName: string | undefined,
+  packageVersion: string | undefined
+): boolean => {
+  if (!packageName) return false;
+  const minVersion = AWS_WORKLOAD_IDENTITY_TEMPLATE_MIN_PACKAGE_VERSIONS[packageName];
+  if (!minVersion) return false;
+  const version = coerce(packageVersion);
+  return !!version && gte(version, minVersion);
+};
+
+export interface GetAwsIdentityFederationTemplateUrlParams {
+  /** `fleet.awsWorkloadIdentityTemplateEnabled` (Serverless on, ECH off). */
+  isWorkloadIdentityTemplateEnabled: boolean;
+  packageName: string | undefined;
+  packageVersion: string | undefined;
+  /** URL from the package's `iac_template_url`; returned unchanged when the override does not apply. */
+  iacTemplateUrl: string | undefined;
+}
+
+/**
+ * Picks the quick-create URL for the aws packages' Identity Federation option: the hardcoded
+ * Elastic Workload Identity template while the flag is on and the package is one that moved to
+ * it, otherwise whatever the package declares.
+ */
+export const getAwsIdentityFederationTemplateUrl = ({
+  isWorkloadIdentityTemplateEnabled,
+  packageName,
+  packageVersion,
+  iacTemplateUrl,
+}: GetAwsIdentityFederationTemplateUrlParams): string | undefined => {
+  if (
+    isWorkloadIdentityTemplateEnabled &&
+    isAwsWorkloadIdentityTemplatePackage(packageName, packageVersion)
+  ) {
+    return AWS_WORKLOAD_IDENTITY_CLOUD_FORMATION_TEMPLATE_URL;
+  }
+  return iacTemplateUrl;
 };
 
 export const getCloudConnectorRemoteRoleTemplate = ({
