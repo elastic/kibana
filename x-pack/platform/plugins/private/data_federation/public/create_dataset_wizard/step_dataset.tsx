@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { Forms } from '@kbn/es-ui-shared-plugin/public';
 import { useFormContext, useWatch } from 'react-hook-form';
 
@@ -14,6 +14,7 @@ import type { DataSource } from '../../common';
 import { CreateDatasetDetailsFields } from './create_dataset_details_fields';
 import type { CreateDatasetFormValues } from './create_dataset_form_state';
 import { CreateDatasetFormatField } from './create_dataset_settings';
+import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
 import type { DatasetWizardContent } from './types';
 
 export function StepDataset({
@@ -61,6 +62,10 @@ export function StepDataset({
 
   return (
     <div data-test-subj="createDatasetWizardDatasetStep">
+      <EuiTitle size="m">
+        <h2>{createDatasetWizardStrings.datasetStepLabel}</h2>
+      </EuiTitle>
+      <EuiSpacer size="m" />
       <CreateDatasetDetailsFields
         control={control}
         dataSources={dataSources}

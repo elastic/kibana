@@ -19,7 +19,7 @@ export function StepAdditional() {
   return (
     <div data-test-subj="createDatasetWizardAdditionalStep">
       <EuiTitle size="m">
-        <h3>{createDatasetWizardStrings.additionalStepLabel}</h3>
+        <h2>{createDatasetWizardStrings.additionalStepLabel}</h2>
       </EuiTitle>
       <EuiSpacer size="m" />
       <CreateDatasetAdditionalSettings control={control} />
