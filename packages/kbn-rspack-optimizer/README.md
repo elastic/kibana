@@ -65,10 +65,10 @@ node scripts/build_rspack_bundles.js --dist
 node scripts/build_rspack_bundles.js --watch
 
 # Rspack is the default dev-mode optimizer
-yarn start
+pnpm start
 
 # Opt out to the legacy webpack optimizer
-KBN_USE_RSPACK=false yarn start
+KBN_USE_RSPACK=false pnpm start
 ```
 
 ### CLI Options

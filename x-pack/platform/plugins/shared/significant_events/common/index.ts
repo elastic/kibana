@@ -94,3 +94,15 @@ export type {
   RunQuotaWindow,
   RunQuotasResponse,
 } from './run_quotas';
+
+export { COST_BUDGET_GROUPS, FEATURE_ID_TO_COST_BUDGET_GROUP } from './cost';
+export type {
+  BudgetGroupCost,
+  CostBudgetGroup,
+  CostCaveat,
+  CostResponse,
+  CostStatus,
+  CostUnavailableReason,
+  PeriodCost,
+  TokenTrackingCoverage,
+} from './cost';

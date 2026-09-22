@@ -6,6 +6,7 @@
  */
 
 import { coreMock } from '@kbn/core/server/mocks';
+import { ByteSizeValue } from '@kbn/config-schema';
 import { FetchActiveGroupsStep } from './fetch_active_groups_step';
 import {
   collectStreamResults,
@@ -34,7 +35,7 @@ describe('FetchActiveGroupsStep', () => {
         run: {
           alerts: { max: maxAlerts },
           maxGroupsPerExecution,
-          query: { maxResponseSize: 50 * 1024 * 1024 },
+          query: { maxResponseSize: ByteSizeValue.parse('50mb') },
         },
       },
       esql: { responseFormat: 'json' },

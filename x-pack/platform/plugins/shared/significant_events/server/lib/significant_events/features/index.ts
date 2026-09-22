@@ -8,7 +8,11 @@
 export { MS_PER_DAY } from './iteration_state';
 export { deriveSuccessCount, deriveTotalTokensUsed } from './iteration_state';
 
-export { identifyInferredFeatures, buildTelemetry } from './identify_inferred_features';
+export {
+  identifyInferredFeatures,
+  buildTelemetry,
+  KNOWN_FEATURE_IDS_MAX_CHARS,
+} from './identify_inferred_features';
 export type {
   FeaturesIdentifiedTelemetry,
   TelemetryContext,
@@ -21,6 +25,7 @@ export {
   MAX_INFERENCE_DOCUMENT_BYTES,
   MAX_INFERENCE_DOCUMENT_FIELDS,
   MAX_INFERENCE_FIELD_NAME_LENGTH,
+  compactInferenceDocuments,
   prepareInferredSampling,
 } from './prepare_inferred_sampling';
 export type { PrepareInferredSamplingResult } from './prepare_inferred_sampling';

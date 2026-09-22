@@ -109,12 +109,12 @@ On success this returns \`attachment_id\` and \`version\`. You MUST render the u
     if (prompt !== undefined) {
       try {
         const resolver = createCustomContentTemplateResolver({ modelProvider, esClient, logger });
-        resolvedTemplate = await resolver({
+        ({ template: resolvedTemplate } = await resolver({
           prompt,
           esqlQuery: isQueryChanging ? resolvedQuery : undefined,
           existingTemplate: currentData?.panel_template || undefined,
           hasExistingQuery: !isQueryChanging && !!resolvedQuery,
-        });
+        }));
       } catch (err) {
         logger.error(`custom_content_update_panel: template resolver failed — ${err}`);
         return {

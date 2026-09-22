@@ -254,6 +254,17 @@ export class DocViewer {
     return this.page.testSubj.locator('docViewerFlyout').locator('.kbnDocViewer__fieldName');
   }
 
+  /**
+   * Scrolls the virtualized fields-table grid to its last row. Rows outside the
+   * mounted window are absent from the DOM until they are scrolled into view.
+   */
+  async scrollFieldsTableToBottom() {
+    await this.page.testSubj
+      .locator('docViewerFlyout')
+      .locator('.euiDataGrid__virtualized')
+      .evaluate((el) => el.scrollTo(0, el.scrollHeight));
+  }
+
   async openFieldTypeFilter() {
     await this.page.testSubj.locator('unifiedDocViewerFieldsTableFieldTypeFilterToggle').click();
     await this.page.testSubj

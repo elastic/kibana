@@ -17,7 +17,6 @@ const buildActionsMock = (): jest.Mocked<ConversationActions> =>
     invalidateConversation: jest.fn(),
     addOptimisticRound: jest.fn(),
     removeOptimisticRound: jest.fn(),
-    clearLastRoundResponse: jest.fn(),
     addReasoningStep: jest.fn(),
     addToolCall: jest.fn(),
     setToolCallProgress: jest.fn(),

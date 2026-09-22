@@ -880,6 +880,131 @@ describe('eventsWriteBulkHandler — continuation status', () => {
   );
 });
 
+describe('eventsWriteBulkHandler — investigation severity calibration', () => {
+  const completedInvestigation: NonNullable<SignificantEvent['investigations']>[number] = {
+    workflow_execution_id: 'workflow-1',
+    started_at: '2026-01-01T00:00:00.000Z',
+    completed_at: '2026-01-01T01:00:00.000Z',
+  };
+  const makeDetectionSignal = (
+    ruleUuid: string,
+    verdict: Extract<SignalEntry, { type: 'detection' }>['verdict'] = 'confirms'
+  ): Extract<SignalEntry, { type: 'detection' }> => ({
+    type: 'detection',
+    stream_name: 'logs.checkout',
+    description: `Signal for ${ruleUuid}`,
+    verdict,
+    metadata: {
+      detection_id: `detection-${ruleUuid}`,
+      rule_uuid: ruleUuid,
+      change_point_type: 'spike',
+      p_value: 0.01,
+    },
+  });
+  const makeInvestigatedEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent =>
+    makeStoredEvent('investigated-event', {
+      severity: '40-medium',
+      signals: [makeDetectionSignal('rule-1')],
+      investigations: [completedInvestigation],
+      ...overrides,
+    });
+
+  it('calibrates before the no-op check and skips a same-rule severity change', async () => {
+    const stored = makeInvestigatedEvent();
+    const eventClient = makeEventClient({
+      findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
+      bulkCreate: jest.fn(),
+    });
+
+    const [result] = await eventsWriteBulkHandler({
+      eventClient,
+      source: 'discovery',
+      inputs: [
+        {
+          ...baseInput,
+          event_id: stored.event_id,
+          severity: '80-critical',
+          signals: [makeDetectionSignal('rule-1')],
+        },
+      ],
+    });
+
+    expect(result).toMatchObject({ written: false, reason: 'unchanged_outcome' });
+    expect(eventClient.bulkCreate).not.toHaveBeenCalled();
+  });
+
+  it('writes a new unconfirmed rule with the investigated severity', async () => {
+    const stored = makeInvestigatedEvent();
+    const eventClient = makeEventClient({
+      findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
+    });
+
+    await eventsWriteBulkHandler({
+      eventClient,
+      source: 'discovery',
+      inputs: [
+        {
+          ...baseInput,
+          event_id: stored.event_id,
+          severity: '80-critical',
+          signals: [makeDetectionSignal('rule-2', 'inconclusive')],
+        },
+      ],
+    });
+
+    expect(eventClient.bulkCreate.mock.calls[0][0][0].severity).toBe('40-medium');
+  });
+
+  it('accepts severity from a new confirmed rule', async () => {
+    const stored = makeInvestigatedEvent();
+    const eventClient = makeEventClient({
+      findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
+    });
+
+    await eventsWriteBulkHandler({
+      eventClient,
+      source: 'discovery',
+      inputs: [
+        {
+          ...baseInput,
+          event_id: stored.event_id,
+          severity: '80-critical',
+          signals: [makeDetectionSignal('rule-2')],
+        },
+      ],
+    });
+
+    expect(eventClient.bulkCreate.mock.calls[0][0][0].severity).toBe('80-critical');
+  });
+
+  it.each([
+    ['resolution', makeInvestigatedEvent(), 'closed' as const],
+    ['reopen', makeInvestigatedEvent({ status: 'closed' }), 'open' as const],
+  ])('accepts severity on %s', async (_, stored, status) => {
+    const eventClient = makeEventClient({
+      findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
+    });
+
+    await eventsWriteBulkHandler({
+      eventClient,
+      source: 'discovery',
+      inputs: [
+        {
+          ...baseInput,
+          event_id: stored.event_id,
+          status,
+          severity: '20-low',
+          signals: [makeDetectionSignal('rule-1')],
+        },
+      ],
+    });
+
+    expect(eventClient.bulkCreate.mock.calls[0][0][0]).toEqual(
+      expect.objectContaining({ status, severity: '20-low' })
+    );
+  });
+});
+
 describe('eventsWriteItemSchema', () => {
   const validItem = {
     ...baseInput,

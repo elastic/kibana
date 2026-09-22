@@ -74,6 +74,7 @@ interface KnowledgeIndicatorsToolbarProps {
   onBulkRestore: () => void;
   onBulkPromote: () => void;
   onDeleteSelected: () => void;
+  canManage: boolean;
 }
 
 export function KnowledgeIndicatorsToolbar({
@@ -107,6 +108,7 @@ export function KnowledgeIndicatorsToolbar({
   onBulkRestore,
   onBulkPromote,
   onDeleteSelected,
+  canManage,
 }: KnowledgeIndicatorsToolbarProps) {
   return (
     <>
@@ -184,74 +186,78 @@ export function KnowledgeIndicatorsToolbar({
             label={TABLE_LABEL}
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            iconType="cross"
-            size="xs"
-            aria-label={CLEAR_SELECTION_LABEL}
-            isDisabled={isSelectionActionsDisabled}
-            onClick={onClearSelection}
-          >
-            {CLEAR_SELECTION_LABEL}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        {statusFilter === 'active' ? (
-          <EuiFlexItem grow={false}>
-            <BulkExcludeButton
-              isLoading={isBulkOperationInProgress}
-              isDisabled={isSelectionActionsDisabled || selectionContainsNonExcludable}
-              showTooltip={selectionContainsNonExcludable}
-              onClick={onBulkExclude}
-            />
-          </EuiFlexItem>
-        ) : (
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              iconType="eye"
-              size="xs"
-              aria-label={RESTORE_SELECTED_LABEL}
-              isLoading={isBulkOperationInProgress}
-              isDisabled={isSelectionActionsDisabled}
-              onClick={onBulkRestore}
-            >
-              {RESTORE_SELECTED_LABEL}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        )}
-        {selectedTypes.length === 1 && selectedTypes[0] === MATCH_QUERY_TYPE && (
-          <EuiFlexItem grow={false}>
-            <EuiToolTip content={activityBlockTooltip}>
+        {canManage && (
+          <>
+            <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                iconType="plusCircle"
+                iconType="cross"
                 size="xs"
-                isDisabled={
-                  blocksActivity ||
-                  isSelectionActionsDisabled ||
-                  !hasPromotableSelected ||
-                  isBulkPromoteInProgress
-                }
-                hasAriaDisabled={blocksActivity}
-                isLoading={isBulkPromoteInProgress}
-                onClick={onBulkPromote}
+                aria-label={CLEAR_SELECTION_LABEL}
+                isDisabled={isSelectionActionsDisabled}
+                onClick={onClearSelection}
               >
-                {PROMOTE_SELECTED_LABEL}
+                {CLEAR_SELECTION_LABEL}
               </EuiButtonEmpty>
-            </EuiToolTip>
-          </EuiFlexItem>
+            </EuiFlexItem>
+            {statusFilter === 'active' ? (
+              <EuiFlexItem grow={false}>
+                <BulkExcludeButton
+                  isLoading={isBulkOperationInProgress}
+                  isDisabled={isSelectionActionsDisabled || selectionContainsNonExcludable}
+                  showTooltip={selectionContainsNonExcludable}
+                  onClick={onBulkExclude}
+                />
+              </EuiFlexItem>
+            ) : (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  iconType="eye"
+                  size="xs"
+                  aria-label={RESTORE_SELECTED_LABEL}
+                  isLoading={isBulkOperationInProgress}
+                  isDisabled={isSelectionActionsDisabled}
+                  onClick={onBulkRestore}
+                >
+                  {RESTORE_SELECTED_LABEL}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            )}
+            {selectedTypes.length === 1 && selectedTypes[0] === MATCH_QUERY_TYPE && (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip content={activityBlockTooltip}>
+                  <EuiButtonEmpty
+                    iconType="plusCircle"
+                    size="xs"
+                    isDisabled={
+                      blocksActivity ||
+                      isSelectionActionsDisabled ||
+                      !hasPromotableSelected ||
+                      isBulkPromoteInProgress
+                    }
+                    hasAriaDisabled={blocksActivity}
+                    isLoading={isBulkPromoteInProgress}
+                    onClick={onBulkPromote}
+                  >
+                    {PROMOTE_SELECTED_LABEL}
+                  </EuiButtonEmpty>
+                </EuiToolTip>
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                iconType="trash"
+                color="danger"
+                size="xs"
+                aria-label={DELETE_SELECTED_LABEL}
+                isLoading={isDeleting}
+                isDisabled={isSelectionActionsDisabled}
+                onClick={onDeleteSelected}
+              >
+                {DELETE_SELECTED_LABEL}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </>
         )}
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            iconType="trash"
-            color="danger"
-            size="xs"
-            aria-label={DELETE_SELECTED_LABEL}
-            isLoading={isDeleting}
-            isDisabled={isSelectionActionsDisabled}
-            onClick={onDeleteSelected}
-          >
-            {DELETE_SELECTED_LABEL}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
       </EuiFlexGroup>
     </>
   );

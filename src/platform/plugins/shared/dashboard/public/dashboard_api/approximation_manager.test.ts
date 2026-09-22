@@ -9,7 +9,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { getSampleDashboardState } from '../mocks';
-import type { DashboardState } from '../../common';
+import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import { initializeApproximationManager } from './approximation_manager';
 
 describe('approximationManager', () => {
@@ -17,11 +17,6 @@ describe('approximationManager', () => {
     new BehaviorSubject<DashboardState>({
       ...getSampleDashboardState({ esql_approximation }),
     });
-
-  test('initializes with false when esql_approximation is not set', () => {
-    const manager = initializeApproximationManager(getSampleDashboardState());
-    expect(manager.api.isApproximate$.value).toBe(false);
-  });
 
   test('initializes with the value from initial state', () => {
     const manager = initializeApproximationManager(
@@ -44,7 +39,7 @@ describe('approximationManager', () => {
     const manager = initializeApproximationManager(
       getSampleDashboardState({ esql_approximation: true })
     );
-    const emissions: boolean[] = [];
+    const emissions: Array<boolean | undefined> = [];
     manager.api.isApproximate$.subscribe((v) => emissions.push(v));
 
     manager.api.setEsqlApproximation(true);

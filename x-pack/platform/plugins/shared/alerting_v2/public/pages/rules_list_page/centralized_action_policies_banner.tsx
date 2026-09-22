@@ -12,7 +12,7 @@ import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { ALERTING_V2_SECTION_ID, ALERTING_V2_RULES_APP_ID } from '@kbn/alerting-v2-constants';
-import { paths } from '../../constants';
+import { useAlertingLocators } from '../../application/locator_context';
 import { UserCapabilities } from '../../services/user_capabilities';
 import illustration from '../../assets/centralized_action_policies.svg';
 
@@ -45,9 +45,9 @@ const ILLUSTRATION_ALT = i18n.translate(
 export const CentralizedActionPoliciesBanner = () => {
   const canCreateActionPolicy = useService(UserCapabilities).canWrite('actionPolicies');
   const { tours } = useService(CoreStart('notifications'));
-  const { navigateToUrl } = useService(CoreStart('application'));
-  const { basePath } = useService(CoreStart('http'));
   const docLinks = useService(CoreStart('docLinks'));
+  const { actionPolicyLocators } = useAlertingLocators();
+  const createUrl = actionPolicyLocators.useUrl({ page: 'create' });
   const [isDismissed, setIsDismissed] = useLocalStorage<boolean>(
     CENTRALIZED_ACTION_POLICIES_BANNER_DISMISSED_STORAGE_KEY,
     false
@@ -56,8 +56,6 @@ export const CentralizedActionPoliciesBanner = () => {
   if (!tours.isEnabled() || !canCreateActionPolicy || isDismissed) {
     return null;
   }
-
-  const createUrl = basePath.prepend(paths.actionPolicyCreate);
 
   return (
     <>
@@ -76,7 +74,7 @@ export const CentralizedActionPoliciesBanner = () => {
             href: createUrl,
             onClick: (e: React.MouseEvent) => {
               e.preventDefault();
-              navigateToUrl(createUrl);
+              actionPolicyLocators.navigateSync({ page: 'create' });
             },
             'data-test-subj': 'centralizedActionPoliciesCreate',
           },

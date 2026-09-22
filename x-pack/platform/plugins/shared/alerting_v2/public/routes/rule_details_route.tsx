@@ -8,10 +8,11 @@
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { lazy, Suspense } from 'react';
-import { useHistory, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useFetchRule } from '../hooks/use_fetch_rule';
 import { Skeleton } from '../components/rule_details/skeleton';
 import { RuleProvider } from '../components/rule_details/rule_context';
+import { useAlertingLocators } from '../application/locator_context';
 
 const LazyRuleDetailPage = lazy(async () => {
   const module = await import('../components/rule_details/rule_detail_page');
@@ -21,7 +22,8 @@ const LazyRuleDetailPage = lazy(async () => {
 export const RuleDetailsRoute: React.FunctionComponent = () => {
   const { ruleId } = useParams<{ ruleId: string }>();
   const { data: rule, isLoading, isError } = useFetchRule(ruleId);
-  const history = useHistory();
+  const { rulesLocators } = useAlertingLocators();
+  const rulesListHref = rulesLocators.useUrl({});
 
   if (isLoading) {
     return <Skeleton />;
@@ -50,7 +52,7 @@ export const RuleDetailsRoute: React.FunctionComponent = () => {
           <EuiButton
             color="primary"
             fill
-            onClick={() => history.push('/')}
+            href={rulesListHref}
             data-test-subj="ruleDetailsErrorBackButton"
           >
             {i18n.translate('xpack.alertingV2.ruleDetails.backToRules', {

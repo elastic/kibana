@@ -21,7 +21,7 @@ import type {
   WorkflowExecutionContext,
 } from '@kbn/workflows';
 import { ExecutionStatus, TerminalExecutionStatuses } from '@kbn/workflows';
-import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
+import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
 import { buildWorkflowContext } from '../build_workflow_context';
 import {
@@ -32,6 +32,7 @@ import type { StepIoService } from '../step_io_service';
 import type { ContextDependencies } from '../types';
 import { WorkflowExecutionRuntimeManager } from '../workflow_execution_runtime_manager';
 import type { WorkflowExecutionState } from '../workflow_execution_state';
+import type { WorkflowRuntimeGraph } from '../workflow_runtime_graph';
 
 jest.mock('../build_workflow_context', () => {
   return {
@@ -66,7 +67,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
   let underTest: WorkflowExecutionRuntimeManager;
   let workflowExecutionCursor: WorkflowExecutionCursorTestHarness;
   let workflowExecution: EsWorkflowExecution;
-  let workflowExecutionGraph: WorkflowGraph;
+  let workflowExecutionGraph: WorkflowRuntimeGraph;
   let stepIoService: StepIoService;
   let workflowLogger: IWorkflowEventLogger;
   let workflowExecutionState: WorkflowExecutionState;
@@ -119,37 +120,38 @@ describe('WorkflowExecutionRuntimeManager', () => {
       upsertStep: jest.fn(),
     } as unknown as WorkflowExecutionState;
 
+    const topologicalOrder = ['node1', 'node2', 'node3'];
+    const graphNodes: Record<string, GraphNodeUnion> = {
+      node1: {
+        id: 'node1',
+        stepId: 'fakeStepId1',
+        stepType: 'fakeStepType1',
+      } as GraphNodeUnion,
+      node2: {
+        id: 'node2',
+        stepId: 'fakeStepId2',
+        stepType: 'fakeStepType2',
+      } as GraphNodeUnion,
+      node3: {
+        id: 'node3',
+        stepId: 'fakeStepId3',
+        stepType: 'fakeStepType3',
+      } as GraphNodeUnion,
+    };
     workflowExecutionGraph = {
-      topologicalOrder: ['node1', 'node2', 'node3'],
+      topologicalOrder,
+      nodeAfter: jest.fn().mockImplementation((nodeId: string | undefined) => {
+        const index = topologicalOrder.findIndex((id) => id === nodeId);
+        if (index >= 0 && index < topologicalOrder.length - 1) {
+          return graphNodes[topologicalOrder[index + 1]];
+        }
+        return undefined;
+      }),
+      getNode: jest.fn().mockImplementation((nodeId: string) => graphNodes[nodeId]),
+      getNodeStack: jest.fn().mockReturnValue({ stackFrames: [] }),
       getInnerStepIds: jest.fn().mockReturnValue(new Set<string>()),
-    } as unknown as WorkflowGraph;
-
-    workflowExecutionGraph.getNode = jest.fn().mockImplementation((nodeId) => {
-      switch (nodeId) {
-        case 'node1':
-          return {
-            id: 'node1',
-            stepId: 'fakeStepId1',
-            stepType: 'fakeStepType1',
-          } as GraphNodeUnion;
-        case 'node2':
-          return {
-            id: 'node2',
-            stepId: 'fakeStepId2',
-            stepType: 'fakeStepType2',
-          } as GraphNodeUnion;
-        case 'node3':
-          return {
-            id: 'node3',
-            stepId: 'fakeStepId3',
-            stepType: 'fakeStepType3',
-          } as GraphNodeUnion;
-      }
-    });
-
-    workflowExecutionGraph.getNodeStack = jest
-      .fn()
-      .mockImplementation((nodeId: string) => [nodeId]);
+      insertSyntheticScope: jest.fn(),
+    } as unknown as WorkflowRuntimeGraph;
 
     fakeCoreStart = {} as unknown as jest.Mocked<CoreStart>;
     fakeContextDependencies = {} as unknown as jest.Mocked<ContextDependencies>;
