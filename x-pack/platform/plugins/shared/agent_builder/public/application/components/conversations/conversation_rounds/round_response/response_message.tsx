@@ -21,6 +21,7 @@ import React from 'react';
 import { StreamingText } from './streaming_text';
 import { ChatMessageText } from './chat_message_text';
 import { ResponseActions } from './response_actions';
+import { JsonCodeBlock } from '../round_events/json_code_block';
 
 export interface ResponseMessageProps {
   response: AssistantResponse;
@@ -43,8 +44,8 @@ export const ResponseMessage: React.FC<ResponseMessageProps> = ({
 }) => {
   const hasMessage = Boolean(response.message);
 
-  const showStreamingText = isLoading && hasMessage;
-  const showCompletedAnswer = !isLoading;
+  const showStreamingText = isLoading && hasMessage && !response.structured_output;
+  const showCompletedAnswer = !isLoading || Boolean(response.structured_output);
 
   return (
     <EuiFlexGroup
@@ -68,19 +69,27 @@ export const ResponseMessage: React.FC<ResponseMessageProps> = ({
             conversationId={conversationId}
           />
         ) : showCompletedAnswer ? (
-          <ChatMessageText
-            content={response.message}
-            steps={steps}
-            conversationAttachments={conversationAttachments}
-            attachmentRefs={attachmentRefs}
-            conversationId={conversationId}
-          />
+          response.structured_output ? (
+            <JsonCodeBlock data={response.structured_output} />
+          ) : (
+            <ChatMessageText
+              content={response.message}
+              steps={steps}
+              conversationAttachments={conversationAttachments}
+              attachmentRefs={attachmentRefs}
+              conversationId={conversationId}
+            />
+          )
         ) : null}
       </EuiFlexItem>
       {!isLoading && hasMessage && (
         <EuiFlexItem grow={false}>
           <ResponseActions
-            content={response.message}
+            content={
+              response.structured_output
+                ? JSON.stringify(response.structured_output, null, 2)
+                : response.message
+            }
             isVisible
             executionTerminatedEvent={executionTerminatedEvent}
             steps={steps}

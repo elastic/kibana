@@ -101,7 +101,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
 }) => {
   const [hoveredImageName, setHoveredImageName] = useState<string | null>(null);
 
-  const { isResuming, isResponseLoading } = useConversationStream();
+  const { isResponseLoading } = useConversationStream();
   const { isFetched } = useAgentBuilderAgents();
   const agentId = useAgentId();
   const conversationId = useConversationId();
@@ -136,7 +136,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   const isAgentIdValid = validateAgentId(agentId);
 
   const isAgentDeleted = !isAgentIdValid && isFetched && Boolean(agentId);
-  const isInputDisabled = isAgentDeleted || isAwaitingPrompt || isResuming;
+  const isInputDisabled = isAgentDeleted || isAwaitingPrompt || isCreatingConversation;
   const isSubmitDisabled =
     messageEditorController.isEmpty ||
     isResponseLoading ||
