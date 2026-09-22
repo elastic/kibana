@@ -467,7 +467,7 @@ export class DashboardPageControls extends FtrService {
 
     const suggestions: { [key: string]: number } = {};
     while (Object.keys(suggestions).length < optionsCount) {
-      await this.retry.try(async () => {
+      const [suggestion, docCount] = await this.retry.try(async () => {
         const availableOptions = await this.testSubjects.find(
           `optionsList-control-available-options`
         );
@@ -484,21 +484,21 @@ export class DashboardPageControls extends FtrService {
             })
           );
         }, selectableListItems);
-      });
 
-      const [suggestion, docCount] = await this.retry.try(async () => {
-        const availableOptions = await this.testSubjects.find(
+        const refreshedAvailableOptions = await this.testSubjects.find(
           `optionsList-control-available-options`
         );
-        const selectableListItems = await availableOptions.findByClassName(
+        const refreshedSelectableListItems = await refreshedAvailableOptions.findByClassName(
           'euiSelectableList__list'
         );
-        const list = await selectableListItems.findByCssSelector(`ul[role="listbox"]`);
+        const list = await refreshedSelectableListItems.findByCssSelector(`ul[role="listbox"]`);
         const activeDescendantId = await list.getAttribute('aria-activedescendant');
         if (!activeDescendantId) {
           throw new Error('options list did not set an active option');
         }
-        const currentOption = await selectableListItems.findByCssSelector(`#${activeDescendantId}`);
+        const currentOption = await refreshedSelectableListItems.findByCssSelector(
+          `#${activeDescendantId}`
+        );
         return (await currentOption.getVisibleText()).split('\n');
       });
       if (suggestion !== 'Exists') {
