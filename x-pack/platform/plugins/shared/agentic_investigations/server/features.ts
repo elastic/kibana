@@ -9,10 +9,12 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { i18n } from '@kbn/i18n';
 import { AGENTIC_INVESTIGATIONS_PLUGIN_ID } from '../common/constants';
+import { IMPACT_UI_CAPABILITY_MANAGE, IMPACT_UI_CAPABILITY_SHOW } from '../common/impact/constants';
 import {
   PROPOSALS_UI_CAPABILITY_DECIDE,
   PROPOSALS_UI_CAPABILITY_SHOW,
 } from '../common/proposals/constants';
+import { IMPACT_API_PRIVILEGE_MANAGE, IMPACT_API_PRIVILEGE_READ } from './impact/constants';
 import {
   ESCALATIONS_UI_CAPABILITY_MANAGE,
   ESCALATIONS_UI_CAPABILITY_SHOW,
@@ -43,15 +45,27 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
     privileges: {
       all: {
         app: [],
-        api: [PROPOSALS_API_PRIVILEGE_READ, PROPOSALS_API_PRIVILEGE_MANAGE],
+        // Impact rides on the feature itself: an investigation always has one,
+        // so All and Read grant it together with the rest of the feature.
+        api: [
+          PROPOSALS_API_PRIVILEGE_READ,
+          PROPOSALS_API_PRIVILEGE_MANAGE,
+          IMPACT_API_PRIVILEGE_READ,
+          IMPACT_API_PRIVILEGE_MANAGE,
+        ],
         savedObject: { all: [], read: [] },
-        ui: [PROPOSALS_UI_CAPABILITY_SHOW, PROPOSALS_UI_CAPABILITY_DECIDE],
+        ui: [
+          PROPOSALS_UI_CAPABILITY_SHOW,
+          PROPOSALS_UI_CAPABILITY_DECIDE,
+          IMPACT_UI_CAPABILITY_SHOW,
+          IMPACT_UI_CAPABILITY_MANAGE,
+        ],
       },
       read: {
         app: [],
-        api: [PROPOSALS_API_PRIVILEGE_READ],
+        api: [PROPOSALS_API_PRIVILEGE_READ, IMPACT_API_PRIVILEGE_READ],
         savedObject: { all: [], read: [] },
-        ui: [PROPOSALS_UI_CAPABILITY_SHOW],
+        ui: [PROPOSALS_UI_CAPABILITY_SHOW, IMPACT_UI_CAPABILITY_SHOW],
       },
     },
     subFeatures: [
