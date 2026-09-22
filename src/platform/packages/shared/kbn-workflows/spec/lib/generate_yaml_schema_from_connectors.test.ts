@@ -586,6 +586,29 @@ describe('generateYamlSchemaFromConnectors', () => {
           steps: [{ with: { ids: ['a'], name: 'x!' } }],
         });
       });
+
+      it('preserves object-level overwrite output for non-templated values', () => {
+        // Deferred checks used to run via superRefine and discard result.data, so `.overwrite()`
+        // on the original paramsSchema never reached the parse output.
+        const withOverwrite: ConnectorContractUnion = {
+          summary: 'Overwrite',
+          description: null,
+          type: 'overwrite.step',
+          paramsSchema: z
+            .object({ ids: z.array(z.string()) })
+            .overwrite((v) => ({ ...v, ids: v.ids.map((id) => id.toUpperCase()) })),
+          outputSchema: z.unknown(),
+        };
+        const schema = generateYamlSchemaFromConnectors([withOverwrite]);
+        const result = schema.safeParse({
+          ...BASE_WORKFLOW,
+          steps: [{ name: 's', type: 'overwrite.step', with: { ids: ['a', 'b'] } }],
+        });
+        expect(result.success).toBe(true);
+        expect(result.data).toMatchObject({
+          steps: [{ with: { ids: ['A', 'B'] } }],
+        });
+      });
     });
   });
 });

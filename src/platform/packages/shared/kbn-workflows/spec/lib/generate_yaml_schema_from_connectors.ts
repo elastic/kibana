@@ -271,7 +271,8 @@ function hasObjectLevelChecks(schema: z.ZodObject): boolean {
  * tried on its own and checks that throw (because they need the unresolved array) are skipped —
  * other checks, including those on unrelated fields, still run. Non-templated values run every
  * object-level check against the already-parsed field output (without re-running field schemas,
- * which would re-apply non-idempotent transforms).
+ * which would re-apply non-idempotent transforms). Successful check output is written back so
+ * object-level `.overwrite()` transforms are not discarded.
  */
 function deferChecksForTemplateValues(
   paramsSchema: z.ZodObject,
@@ -294,41 +295,43 @@ function deferChecksForTemplateValues(
   ) as z.ZodRawShape;
   const outputChecksOnly = z.object(anyShape).check(...objectChecks);
 
-  const replayIssues = (issues: z.ZodError['issues'], ctx: z.RefinementCtx): void => {
-    // Replaying path and message keeps the issue pointing at the offending field, which both
-    // Monaco markers and the template-error suppression in parseWorkflowYamlToJSON rely on.
-    for (const issue of issues) {
-      ctx.addIssue({
-        code: 'custom',
-        path: issue.path,
-        message: issue.message,
-        input: issue.input,
-      });
-    }
-  };
-
-  return widened.superRefine((value, ctx) => {
-    const params = value as Record<string, unknown>;
+  // Use `.check()` (not `superRefine`) so successful overwrites can replace `ctx.value`;
+  // `superRefine` can only add issues and would drop `.overwrite()` output from result.data.
+  return widened.check((ctx) => {
+    const params = ctx.value as Record<string, unknown>;
     if (!widenedKeys.some((key) => typeof params[key] === 'string')) {
-      const result = outputChecksOnly.safeParse(value);
+      const result = outputChecksOnly.safeParse(ctx.value);
       if (!result.success) {
-        replayIssues(result.error.issues, ctx);
+        // Replaying path and message keeps the issue pointing at the offending field, which both
+        // Monaco markers and the template-error suppression in parseWorkflowYamlToJSON rely on.
+        for (const issue of result.error.issues) {
+          ctx.issues.push(issue);
+        }
+        return;
       }
+      ctx.value = result.data;
       return;
     }
 
     // Template present: do not bail on every object check. Run each check alone and skip only
-    // those that throw when they assume a declared array/object field type.
+    // those that throw when they assume a declared array/object field type. Thread `current`
+    // forward so an overwrite that does not touch the templated field still applies.
+    let current = ctx.value;
     for (const check of objectChecks) {
       try {
-        const result = z.object(anyShape).check(check).safeParse(value);
+        const result = z.object(anyShape).check(check).safeParse(current);
         if (!result.success) {
-          replayIssues(result.error.issues, ctx);
+          for (const issue of result.error.issues) {
+            ctx.issues.push(issue);
+          }
+        } else {
+          current = result.data;
         }
       } catch {
         // Check depended on an unresolved templated field (e.g. called `.every` on a string).
       }
     }
+    ctx.value = current;
   });
 }
 
