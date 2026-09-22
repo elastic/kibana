@@ -91,7 +91,7 @@ Episode fixtures under `scripts/data/episodes/**` and pack content under `script
 ## Requirements
 
 - Kibana + Elasticsearch running (local base path often `/kbn`)
-- `yarn kbn bootstrap`
+- `pnpm kbn bootstrap`
 - Security detections initialized (`POST /api/detection_engine/index` is attempted by the script)
 - Privileges for Detection Engine + write to generator indices / alerts
 
@@ -100,7 +100,7 @@ Episode fixtures under `scripts/data/episodes/**` and pack content under `script
 From the `security_solution` package:
 
 ```bash
-yarn data:generate -n 100 -h 5 -u 5 --start-date 1d --end-date now \
+pnpm data:generate -n 100 -h 5 -u 5 --start-date 1d --end-date now \
   --packs okta,aws-iam,kubernetes,github-actions
 ```
 
@@ -117,19 +117,19 @@ node x-pack/solutions/security/plugins/security_solution/scripts/data/generate_c
 Live mode (install + enable for engine alerts):
 
 ```bash
-yarn data:generate --alert-mode live --rule-from now-7d --packs okta
+pnpm data:generate --alert-mode live --rule-from now-7d --packs okta
 ```
 
 Events only (no alerts / hunts):
 
 ```bash
-yarn data:generate --alert-mode none -n 50 --packs okta
+pnpm data:generate --alert-mode none -n 50 --packs okta
 ```
 
 Local smoke (preview path):
 
 ```bash
-yarn data:generate --clean -n 50 --episodes ep1 \
+pnpm data:generate --clean -n 50 --episodes ep1 \
   --packs okta,aws-iam,kubernetes,github-actions \
   --kibanaUrl http://127.0.0.1:5601/kbn \
   --alert-mode preview
@@ -162,7 +162,7 @@ Environment telemetry is the Technology Watch packs (`logs-okta.system.*`, `logs
 
 ```bash
 # Wider window + historic Hub reports for 24h/7d/30d/90d timelines
-yarn data:generate --clean -n 120 --episodes ep1 \
+pnpm data:generate --clean -n 120 --episodes ep1 \
   --start-date 180d --end-date now \
   --packs okta,aws-iam,kubernetes,github-actions \
   --threat-intel \
@@ -283,7 +283,7 @@ Automated pack sync, Fleet data-stream install, `--alert-density`, rule synthesi
 
 ## Troubleshooting
 
-- **Bootstrap / babel errors**: run `yarn kbn bootstrap`
+- **Bootstrap / babel errors**: run `pnpm kbn bootstrap`
 - **0 pack hunt alerts**: check concrete index name vs rule `index`, and that hunt queries match seeded `event.action` vocabulary; logs print per-rule counts
 - **Endpoint Security missing**: install Elastic prebuilt rules, then re-run
 - **Data-stream template rejects index create**: change `--indexPrefix` (avoid `logs-*-*`)

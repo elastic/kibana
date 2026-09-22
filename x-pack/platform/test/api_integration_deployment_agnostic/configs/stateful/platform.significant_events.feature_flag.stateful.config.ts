@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
+import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import { createStatefulFeatureFlagTestConfig } from '../../default_configs/feature_flag.stateful.config.base';
 
 export default createStatefulFeatureFlagTestConfig({
@@ -13,7 +13,7 @@ export default createStatefulFeatureFlagTestConfig({
   // Significant events is gated behind this flag (defaults to false); force it on for these suites.
   // Alerting v2's HTTP API (used for rule lifecycle assertions) is on by default wherever the
   // plugin loads; Significant Events provisioning itself uses the programmatic client.
-  kbnServerArgs: [`--feature_flags.overrides.${STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG}=true`],
+  kbnServerArgs: [`--feature_flags.overrides.${NIGHTSHIFT_ENABLED_FLAG}=true`],
   junit: {
     reportName: 'Platform Stateful - Streams Significant Events API Integration Tests',
   },

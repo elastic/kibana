@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { AttachmentEventSource } from '../chat/timeline_events';
+
 /**
  * Trigger ID for the conversation metadata updated event.
  * Import this constant when building workflows that react to conversation metadata changes.
@@ -20,4 +22,33 @@ export interface ConversationMetadataUpdatedEvent {
   parentId?: string;
   /** Names of the metadata fields that changed in this write. */
   changedFields: string[];
+}
+
+export const ConversationAttachmentAddedTriggerId = 'ai.attachmentAdded' as const;
+export const ConversationAttachmentUpdatedTriggerId = 'ai.attachmentUpdated' as const;
+export const ConversationAttachmentDeletedTriggerId = 'ai.attachmentDeleted' as const;
+
+export interface AttachmentAddedTriggerEvent {
+  conversationId: string;
+  attachmentId: string;
+  attachmentType: string;
+  currentVersion: number;
+  source: AttachmentEventSource;
+}
+
+export interface AttachmentUpdatedTriggerEvent {
+  conversationId: string;
+  attachmentId: string;
+  attachmentType: string;
+  previousVersion: number;
+  currentVersion: number;
+  source: AttachmentEventSource;
+}
+
+export interface AttachmentDeletedTriggerEvent {
+  conversationId: string;
+  attachmentId: string;
+  attachmentType: string;
+  hardDelete: boolean;
+  source: AttachmentEventSource;
 }

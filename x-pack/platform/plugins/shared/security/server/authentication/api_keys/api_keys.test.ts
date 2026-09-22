@@ -708,6 +708,49 @@ describe('API Keys', () => {
     });
 
     describe('with UIAM', () => {
+      it('resolves client authentication from the request in an ES API key grant', async () => {
+        const mockUiam = uiamServiceMock.create();
+        // The UIAM service preserves the client authentication supplied with the request; see the
+        // `getClientAuthentication` tests in `uiam_service.test.ts`.
+        mockUiam.getClientAuthentication.mockReturnValue({
+          scheme: 'SharedSecret',
+          value: 'upstream-shared-secret',
+        });
+        const apiKeysWithUiam = new APIKeys({
+          clusterClient: mockClusterClient,
+          logger,
+          license: mockLicense,
+          applicationName: 'kibana-.kibana',
+          kibanaFeatures: [],
+          uiam: mockUiam,
+        });
+        mockClusterClient.asInternalUser.security.grantApiKey.mockResponseOnce({
+          id: '123',
+          name: 'key-name',
+          api_key: 'abc123',
+          encoded: 'utf8',
+        });
+        const request = httpServerMock.createKibanaRequest({
+          headers: {
+            authorization: 'Bearer essu_ephemeral_token',
+            'x-client-authentication': 'upstream-shared-secret',
+          },
+        });
+
+        await apiKeysWithUiam.grantAsInternalUser(request, {
+          name: 'test-key',
+          role_descriptors: {},
+        });
+
+        expect(mockUiam.getClientAuthentication).toHaveBeenCalledWith(request);
+        expect(mockClusterClient.asInternalUser.security.grantApiKey).toHaveBeenCalledWith({
+          api_key: { name: 'test-key', role_descriptors: {} },
+          grant_type: 'access_token',
+          access_token: 'essu_ephemeral_token',
+          client_authentication: { scheme: 'SharedSecret', value: 'upstream-shared-secret' },
+        });
+      });
+
       it('uses UIAM client authentication when credentials are UIAM credentials', async () => {
         const mockUiam = uiamServiceMock.create();
         mockUiam.getClientAuthentication.mockReturnValue({

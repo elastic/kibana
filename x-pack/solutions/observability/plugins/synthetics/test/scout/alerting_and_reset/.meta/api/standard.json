@@ -1,5 +1,5 @@
 {
-  "sha1": "48efcf0e8805fa86fbb2ffa6acb9695c2f7d4db6",
+  "sha1": "fbe20ab225f38fccdba2068b98c7ace4f61d51d6",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -268,6 +268,132 @@
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/maintenance_windows.spec.ts",
         "line": 203,
         "column": 25
+      }
+    },
+    {
+      "id": "ab73d14a87a24d3-2a45512b10497e8",
+      "title": "Synthetics manage rules privilege does not let a read-only user create a rule",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/manage_rules_privilege.spec.ts",
+        "line": 99,
+        "column": 27
+      }
+    },
+    {
+      "id": "ab73d14a87a24d3-eb10c137e1bb265",
+      "title": "Synthetics manage rules privilege lets a read user with can_manage_rules manage a rule",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/manage_rules_privilege.spec.ts",
+        "line": 102,
+        "column": 37
+      }
+    },
+    {
+      "id": "ab73d14a87a24d3-00fbde421470293",
+      "title": "Synthetics manage rules privilege does not let a read user with can_manage_rules write monitors, settings, params, or private locations",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/manage_rules_privilege.spec.ts",
+        "line": 166,
+        "column": 28
+      }
+    },
+    {
+      "id": "ab73d14a87a24d3-341aea6a7844c49",
+      "title": "Synthetics manage rules privilege does not let a read-only user enable or update default alerting",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/manage_rules_privilege.spec.ts",
+        "line": 203,
+        "column": 6
+      }
+    },
+    {
+      "id": "ab73d14a87a24d3-6de230ddfe36819",
+      "title": "Synthetics manage rules privilege lets a read user with can_manage_rules enable default alerting",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/manage_rules_privilege.spec.ts",
+        "line": 227,
+        "column": 10
+      }
+    },
+    {
+      "id": "ab73d14a87a24d3-8744401896c479b",
+      "title": "Synthetics manage rules privilege does not let a read-only user inspect status or TLS rules",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/manage_rules_privilege.spec.ts",
+        "line": 237,
+        "column": 7
+      }
+    },
+    {
+      "id": "ab73d14a87a24d3-5fbc0194638957c",
+      "title": "Synthetics manage rules privilege lets a read user with can_manage_rules inspect status and TLS rules",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/manage_rules_privilege.spec.ts",
+        "line": 250,
+        "column": 27
+      }
+    },
+    {
+      "id": "ab73d14a87a24d3-0d121d36a5033e6",
+      "title": "Synthetics manage rules privilege keeps rule management available to all users",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/manage_rules_privilege.spec.ts",
+        "line": 258,
+        "column": 78
+      }
+    },
+    {
+      "id": "ab73d14a87a24d3-fc6ea4cbb43447f",
+      "title": "Synthetics manage rules privilege keeps rule management available to minimal_all users",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/manage_rules_privilege.spec.ts",
+        "line": 267,
+        "column": 27
       }
     },
     {
@@ -607,6 +733,76 @@
       }
     },
     {
+      "id": "740e9528bad15d2-f505ccfaa137f51",
+      "title": "statusRulePendingThreshold rejects pendingThreshold below 1",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/status_rule_pending_threshold.spec.ts",
+        "line": 233,
+        "column": 13
+      }
+    },
+    {
+      "id": "740e9528bad15d2-d04dc3d46d68358",
+      "title": "statusRulePendingThreshold persists pendingThreshold on a custom status rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/status_rule_pending_threshold.spec.ts",
+        "line": 238,
+        "column": 9
+      }
+    },
+    {
+      "id": "740e9528bad15d2-0504776d4572ffb",
+      "title": "statusRulePendingThreshold inspect_status_rule reports the monitor as pending after the no-data grace period",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/status_rule_pending_threshold.spec.ts",
+        "line": 258,
+        "column": 28
+      }
+    },
+    {
+      "id": "740e9528bad15d2-95b9f5182eb3c0e",
+      "title": "statusRulePendingThreshold waits for two consecutive pending evaluations before firing when pendingThreshold is 2",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/status_rule_pending_threshold.spec.ts",
+        "line": 268,
+        "column": 55
+      }
+    },
+    {
+      "id": "740e9528bad15d2-7dec609c325729f",
+      "title": "statusRulePendingThreshold fires on the first pending evaluation when pendingThreshold is 1",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/status_rule_pending_threshold.spec.ts",
+        "line": 296,
+        "column": 13
+      }
+    },
+    {
       "id": "fea223c3d71f598-4dc9108e39d9fc1",
       "title": "SyntheticsEnablement [PUT] returns response when user cannot manage api keys",
       "expectedStatus": "passed",
@@ -826,7 +1022,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/tls_rule_browser_certs_alert.spec.ts",
-        "line": 210,
+        "line": 204,
         "column": 21
       }
     },
@@ -840,7 +1036,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/tls_rule_browser_certs_alert.spec.ts",
-        "line": 217,
+        "line": 211,
         "column": 29
       }
     },

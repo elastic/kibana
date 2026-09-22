@@ -8,6 +8,8 @@
 import { type HttpSetup, buildPath } from '@kbn/core-http-browser';
 import type { FeedbackChipId } from '@kbn/agent-builder-common';
 import type {
+  AddConversationEventsRequestBody,
+  AddConversationEventsResponse,
   GetConversationResponse,
   ListConversationsResponse,
   SearchConversationsResponse,
@@ -21,7 +23,7 @@ import type {
 import type { ReadWorkspaceFileResponse } from '../../../common/http_api/workspace_files';
 import type {
   ConversationListOptions,
-  ConversationSearchOptions,
+  ConversationSearchRequestOptions,
   ConversationGetOptions,
   ConversationDeleteOptions,
 } from '../../../common/conversations';
@@ -60,7 +62,7 @@ export class ConversationsService {
     agentId,
     page,
     perPage,
-  }: ConversationSearchOptions): Promise<SearchConversationsResponse> {
+  }: ConversationSearchRequestOptions): Promise<SearchConversationsResponse> {
     return await this.http.get<SearchConversationsResponse>(
       buildPath(`${internalApiPath}/conversations/_search`),
       {
@@ -157,6 +159,18 @@ export class ConversationsService {
       {
         body: JSON.stringify(accessControl),
       }
+    );
+  }
+
+  async addEvents({
+    conversationId,
+    events,
+  }: AddConversationEventsRequestBody & {
+    conversationId: string;
+  }): Promise<AddConversationEventsResponse> {
+    return await this.http.post<AddConversationEventsResponse>(
+      buildPath(`${publicApiPath}/conversations/{conversationId}/_add_events`, { conversationId }),
+      { body: JSON.stringify({ events }) }
     );
   }
 

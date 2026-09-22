@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export * from './advanced_settings';
 export * from './agent_builder';
 export * from './artifacts';
 export * from './esql_params';

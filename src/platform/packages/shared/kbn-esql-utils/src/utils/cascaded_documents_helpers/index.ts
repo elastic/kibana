@@ -237,50 +237,6 @@ const computeESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta => {
       break;
     }
 
-    // check if there is a where command after the operating stats command targeting any of it's grouping options
-    const whereCommandGroupFieldSearch = esqlQuery.ast.commands
-      .slice(groupDeclarationStatsCommandIndex)
-      .find((cmd) => {
-        if (cmd.name !== 'where') {
-          return false;
-        }
-
-        let found = false;
-
-        Walker.walk(cmd, {
-          visitColumn: (node) => {
-            if (found) {
-              return;
-            }
-
-            if (node.name === groupFieldName) {
-              found = true;
-            }
-          },
-        });
-
-        return found;
-      });
-
-    if (whereCommandGroupFieldSearch) {
-      if (groupByFields.length > 0) {
-        // if there's a where command targeting the group in this current iteration,
-        // then this specific query can only be grouped by the current group, pivoting on any other columns though they exist
-        // in the query would be invalid, hence we clear out any previously added group by fields since they are no longer valid
-        groupByFields.splice(0, groupByFields.length);
-      }
-
-      // add the current group and break out of the loop
-      // since there's no need to continue processing other groups
-      // as they are not valid in this context
-      groupByFields.push({
-        field: groupFieldName,
-        type: getStatsGroupFieldType(groupFieldNode),
-      });
-
-      break;
-    }
-
     groupByFields.push({
       field: groupFieldName,
       type: getStatsGroupFieldType(groupFieldNode),
