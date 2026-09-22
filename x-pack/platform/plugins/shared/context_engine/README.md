@@ -88,9 +88,9 @@ query. It returns `{ response: string }`: a free-form text context block meant
 to be handed to an agent as-is, not parsed.
 
 ```
-AI index: sales-knowledge
+AI-index registry ID: sales-knowledge
 Curated sales knowledge.
-Query with ES|QL against: ai-index-idx-sales-knowledge
+Backing Elasticsearch target (use only in ES|QL queries): ai-index-idx-sales-knowledge
 
 Fields
 @timestamp: date, searchable, aggregatable
@@ -125,8 +125,8 @@ Count by type
 ...
 ```
 
-- The `Query with ES|QL against` line is `dest.value`, the string to put after
-  `FROM`.
+- The `Backing Elasticsearch target` line is `dest.value`, the string to put
+  after `FROM`.
 - `Fields` lists every mapped field, mapping-defined runtime fields included
   (`path: type`, then `searchable` and/or `aggregatable` when true), one per
   line, sorted by path and capped at 500;
