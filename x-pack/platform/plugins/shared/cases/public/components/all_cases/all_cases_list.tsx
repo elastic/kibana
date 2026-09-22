@@ -15,7 +15,7 @@ import type { CaseUI, FilterOptions, CasesUI } from '../../../common/ui/types';
 import type { EuiBasicTableOnChange } from './types';
 
 import { SortFieldCase } from '../../../common/ui/types';
-import type { CaseStatuses } from '../../../common/types/domain';
+import { CaseStatuses } from '../../../common/types/domain';
 import { FieldType } from '../../../common/types/domain/template/fields';
 import { useCasesColumns } from './hooks/use_cases_columns';
 import { getUserPickerUidsFromCase } from './components/extended_field_columns';
@@ -148,15 +148,6 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       });
     }, []);
 
-    const selectableCasesOnPage = useMemo(
-      () => data.cases.filter(getCaseIsSelectable),
-      [data.cases, getCaseIsSelectable]
-    );
-
-    const selectAllCasesOnPage = useCallback(() => {
-      setSelectedCases(selectableCasesOnPage);
-    }, [selectableCasesOnPage]);
-
     const getCaseIsSelectable = useCallback(
       (theCase: CaseUI): boolean => {
         if (permissions.update || permissions.delete || permissions.assign) return true;
@@ -165,6 +156,15 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       },
       [permissions.update, permissions.delete, permissions.assign, permissions.reopenCase]
     );
+
+    const selectableCasesOnPage = useMemo(
+      () => data.cases.filter(getCaseIsSelectable),
+      [data.cases, getCaseIsSelectable]
+    );
+
+    const selectAllCasesOnPage = useCallback(() => {
+      setSelectedCases(selectableCasesOnPage);
+    }, [selectableCasesOnPage]);
 
     const tableOnChangeCallback = useCallback(
       ({ page, sort }: EuiBasicTableOnChange) => {
