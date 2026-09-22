@@ -70,6 +70,7 @@ export type HuntCorrelationAttachmentThresholds = z.infer<
  */
 export const HuntCorrelationAttachmentData = lazySchema(() =>
   z.object({
+    attachment_id: z.string(),
     anchors: z.array(AnchorItem),
     diamond_scores: z.array(
       z.object({

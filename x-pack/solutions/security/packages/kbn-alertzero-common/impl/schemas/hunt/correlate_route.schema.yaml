@@ -178,12 +178,15 @@ components:
         (`matches`, `anchor_summary`, ...) describe the engine's own search,
         not what the attachment reader sees.
       required:
+        - attachment_id
         - anchors
         - diamond_scores
         - thresholds
         - self_match_excluded
         - report_revision
       properties:
+        attachment_id:
+          type: string
         anchors:
           type: array
           items:
