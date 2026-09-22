@@ -16,7 +16,7 @@ import { useErrorToast } from '../../../../common/hooks/use_error_toast';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useRiskEngineStatus } from '../../../api/hooks/use_risk_engine_status';
 import { useResolvedLatestEntitiesIndexName } from '../../../../common/hooks/use_resolved_latest_entities_index_name';
-import { buildEntitiesWithAlertsCountQuery } from '../queries/entities_with_alerts_lookup_query';
+import { buildAlertBasedTilesQuery } from '../queries/alert_based_tiles_query';
 import type { TimeRange } from '../use_time_range_param';
 import {
   getEntityFilterESQL,
@@ -24,34 +24,42 @@ import {
   type EntityFilters,
 } from '../use_entity_filters_param';
 
-const esqlSearch = async (
-  searchService: ReturnType<typeof useKibana>['services']['data']['search'],
-  query: string,
-  signal: AbortSignal | undefined
-): Promise<ESQLSearchResponse> => {
-  const result = await lastValueFrom(
-    searchService.search({ params: { query } }, { abortSignal: signal, strategy: 'esql_async' })
-  );
-  return result.rawResponse as unknown as ESQLSearchResponse;
-};
+interface AlertBasedTilesResult {
+  alertsCount: number;
+  alertsEntityIds: string[];
+  watchlistedCount: number;
+  watchlistedEntityIds: string[];
+}
 
-const parseAlertsCountResponse = (
-  raw: ESQLSearchResponse
-): { count: number; entityIds: string[] } => {
+const parseResponse = (raw: ESQLSearchResponse): AlertBasedTilesResult => {
   const row = raw.values?.[0];
-  const valueIndex = raw.columns?.findIndex((c) => c.name === 'value') ?? 0;
-  const entityIdsIndex = raw.columns?.findIndex((c) => c.name === 'entity_ids') ?? -1;
-  const count = typeof row?.[valueIndex] === 'number' ? (row[valueIndex] as number) : 0;
-  const rawIds = entityIdsIndex >= 0 ? row?.[entityIdsIndex] : undefined;
-  const entityIds: string[] = Array.isArray(rawIds)
-    ? (rawIds as string[]).filter(Boolean)
-    : typeof rawIds === 'string' && rawIds
-    ? [rawIds]
-    : [];
-  return { count, entityIds };
+  if (!row) return { alertsCount: 0, alertsEntityIds: [], watchlistedCount: 0, watchlistedEntityIds: [] };
+
+  const col = (name: string) => raw.columns?.findIndex((c) => c.name === name) ?? -1;
+  const toIds = (idx: number): string[] => {
+    if (idx < 0) return [];
+    const v = row[idx];
+    if (Array.isArray(v)) return (v as string[]).filter(Boolean);
+    if (typeof v === 'string' && v) return [v];
+    return [];
+  };
+
+  return {
+    alertsCount:           typeof row[col('alerts_count')]    === 'number' ? (row[col('alerts_count')]    as number) : 0,
+    alertsEntityIds:       toIds(col('alerts_entity_ids')),
+    watchlistedCount:      typeof row[col('watchlisted_count')] === 'number' ? (row[col('watchlisted_count')] as number) : 0,
+    watchlistedEntityIds:  toIds(col('watchlisted_entity_ids')),
+  };
 };
 
-export const useEntitiesWithAlertsCount = ({
+/**
+ * Runs a single alerts query that produces counts and entity ID lists for both the
+ * "entities with alerts" tile and the "watchlisted entities with alerts" tile.
+ *
+ * Running one query rather than two avoids executing the EUID pipeline twice, which
+ * is expensive at high alert volumes. See buildAlertBasedTilesQuery for query details.
+ */
+export const useAlertBasedTiles = ({
   spaceId,
   skip,
   timeRange = '24h',
@@ -78,7 +86,7 @@ export const useEntitiesWithAlertsCount = ({
 
   const query = useMemo(() => {
     if (!resolvedIndex?.indexName || !euidApi) return null;
-    return buildEntitiesWithAlertsCountQuery(
+    return buildAlertBasedTilesQuery(
       euidApi.euid,
       resolvedIndex.indexName,
       spaceId,
@@ -91,13 +99,17 @@ export const useEntitiesWithAlertsCount = ({
     data: queryResult,
     isLoading,
     error,
-  } = useQuery<{ count: number; entityIds: string[] }, SecurityAppError>(
-    ['entitiesWithAlertsCount', query],
+  } = useQuery<AlertBasedTilesResult, SecurityAppError>(
+    ['alertBasedTiles', query],
     async ({ signal }) => {
-      if (!query) return { count: 0, entityIds: [] };
-
-      const raw = await esqlSearch(data.search, query, signal);
-      return parseAlertsCountResponse(raw);
+      if (!query) return { alertsCount: 0, alertsEntityIds: [], watchlistedCount: 0, watchlistedEntityIds: [] };
+      const raw = await lastValueFrom(
+        data.search.search(
+          { params: { query } },
+          { abortSignal: signal, strategy: 'esql_async' }
+        )
+      );
+      return parseResponse(raw.rawResponse as unknown as ESQLSearchResponse);
     },
     {
       enabled: isEnabled && Boolean(query),
@@ -113,15 +125,17 @@ export const useEntitiesWithAlertsCount = ({
     : (error as SecurityAppError | undefined);
 
   useErrorToast(
-    i18n.translate('xpack.securitySolution.entityAnalytics.home.entitiesWithAlerts.queryError', {
-      defaultMessage: 'There was an error loading entities with alerts count',
+    i18n.translate('xpack.securitySolution.entityAnalytics.home.alertBasedTiles.queryError', {
+      defaultMessage: 'There was an error loading entity alert data',
     }),
     filteredError
   );
 
   return {
-    count: queryResult?.count ?? 0,
-    entityIds: queryResult?.entityIds ?? [],
+    alertsCount:          queryResult?.alertsCount ?? 0,
+    alertsEntityIds:      queryResult?.alertsEntityIds ?? [],
+    watchlistedCount:     queryResult?.watchlistedCount ?? 0,
+    watchlistedEntityIds: queryResult?.watchlistedEntityIds ?? [],
     isLoading: isStatusLoading || isIndexLoading || isLoading,
     error: filteredError,
   };

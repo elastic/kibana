@@ -19,7 +19,6 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
 import type { ActiveFilter, SignalCardData, SignalCardId } from './data';
-import { METRIC_CHARTS_BODY_HEIGHT } from './metric_charts_layout';
 
 export interface SignalCardsProps {
   activeFilter: ActiveFilter | null;
@@ -31,17 +30,10 @@ export interface SignalCardsProps {
   onAddCardToTimeline?: (cardId: SignalCardId) => void;
 }
 
-/** 6 tiles in a 3-column × 2-row grid — same height as the original 6-tile layout. */
-const CARDS_HEIGHT = METRIC_CHARTS_BODY_HEIGHT;
-/**
- * Match Elastic Charts `Metric` defaults for a ~156px tile
- * (`theme.metric.spacing: 'small'`, height breakpoint `s`: 150–200px).
- * See `@elastic/charts` `text_measurements.js` + `.echMetricText` CSS.
- */
-const VALUE_FONT_SIZE = 36;
-const TITLE_FONT_SIZE = 16;
-const SUBTITLE_FONT_SIZE = 14;
-const TITLE_SUBTITLE_GAP = 5;
+/** 6 tiles in a 1×6 compact horizontal strip. */
+const CARDS_HEIGHT = 96;
+const VALUE_FONT_SIZE = 26;
+const TITLE_FONT_SIZE = 11;
 /** Metric `primaryAdjacentGap` for bottom value + extra is 0. */
 const DELTA_VALUE_GAP = 0;
 const METRIC_LINE_HEIGHT = 1.2;
@@ -287,24 +279,16 @@ const SignalMetricCard: React.FC<SignalMetricCardProps> = ({
             `}
           >
             <EuiText
+              color="subdued"
               css={css`
                 font-size: ${TITLE_FONT_SIZE}px;
-                font-weight: ${euiTheme.font.weight.bold};
+                font-weight: ${euiTheme.font.weight.semiBold};
                 line-height: ${METRIC_LINE_HEIGHT};
               `}
             >
               {displayTitle}
             </EuiText>
-            <EuiText
-              color="subdued"
-              css={css`
-                margin-block-start: ${TITLE_SUBTITLE_GAP}px;
-                font-size: ${SUBTITLE_FONT_SIZE}px;
-                line-height: ${METRIC_LINE_HEIGHT};
-              `}
-            >
-              {displayDescription}
-            </EuiText>
+            {/* Description hidden in compact layout; available via tooltip on the card */}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <CornerControl
@@ -376,8 +360,8 @@ const SignalMetricCard: React.FC<SignalMetricCardProps> = ({
 };
 
 /**
- * Needs-attention metrics in a 2×3 grid. Each card toggles an in-page table
- * filter (no KQL pill); selection stays on the card itself.
+ * Needs-attention metrics in a compact 1×6 horizontal strip. Each card toggles
+ * an in-page table filter; selection stays on the card itself.
  */
 export const SignalCards: React.FC<SignalCardsProps> = ({
   activeFilter,
@@ -400,16 +384,13 @@ export const SignalCards: React.FC<SignalCardsProps> = ({
       <div
         css={css`
           display: grid;
-          grid-template-columns: repeat(3, minmax(0, 1fr));
-          grid-template-rows: repeat(2, minmax(0, 1fr));
+          grid-template-columns: repeat(6, minmax(0, 1fr));
           block-size: 100%;
         `}
       >
         {cards.map((card, index) => {
           const selected = activeFilter?.type === 'card' && activeFilter.cardId === card.id;
           const dimmed = Boolean(anySelected && !selected);
-          const col = index % 3;
-          const row = Math.floor(index / 3);
 
           return (
             <div
@@ -419,8 +400,7 @@ export const SignalCards: React.FC<SignalCardsProps> = ({
                 min-block-size: 0;
                 block-size: 100%;
                 /* Overlap adjacent 1px borders so dividers stay 1px and selection paints on top. */
-                margin-inline-start: ${col > 0 ? '-1px' : '0'};
-                margin-block-start: ${row > 0 ? '-1px' : '0'};
+                margin-inline-start: ${index > 0 ? '-1px' : '0'};
                 position: relative;
                 /* eslint-disable-next-line @elastic/eui/no-static-z-index -- local grid cell stacking, no semantic token applies */
                 z-index: ${selected ? 2 : 1};

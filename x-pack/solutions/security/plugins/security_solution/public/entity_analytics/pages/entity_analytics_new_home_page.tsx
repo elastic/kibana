@@ -11,7 +11,6 @@ import { EuiLoadingSpinner, EuiPanel, EuiSpacer, useEuiTheme } from '@elastic/eu
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
-import { PageLoader } from '../../common/components/page_loader';
 import { SecurityPageName } from '../../app/types';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { EntitySearchBar } from '../components/home/entity_search_bar';
@@ -32,9 +31,8 @@ import {
 } from '../components/home/use_entity_filters_param';
 import { EntityFiltersBar } from '../components/home/entity_filters_bar';
 import {
-  useEntitiesWithAlertsCount,
+  useAlertBasedTiles,
   useEntitiesWithAnomaliesCount,
-  useWatchlistedCount,
   useNewEntityCount,
   useRiskMoversCount,
   useNewlyHighCriticalCount,
@@ -128,20 +126,17 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
   const resolvedSpaceId = spaceId ?? 'default';
 
   const {
-    count: alertsCount,
-    entityIds: alertsEntityIds,
-    isLoading: alertsLoading,
-  } = useEntitiesWithAlertsCount({ spaceId: resolvedSpaceId, timeRange, entityFilters });
+    alertsCount,
+    alertsEntityIds,
+    watchlistedCount,
+    watchlistedEntityIds,
+    isLoading: alertBasedLoading,
+  } = useAlertBasedTiles({ spaceId: resolvedSpaceId, timeRange, entityFilters });
   const {
     count: anomaliesCount,
     entityIds: anomaliesEntityIds,
     isLoading: anomaliesLoading,
   } = useEntitiesWithAnomaliesCount({ spaceId: resolvedSpaceId, timeRange, entityFilters });
-  const {
-    count: watchlistedCount,
-    entityIds: watchlistedEntityIds,
-    isLoading: watchlistedLoading,
-  } = useWatchlistedCount({ spaceId: resolvedSpaceId, timeRange, entityFilters });
   const {
     count: newEntityCount,
     entityIds: newEntityEntityIds,
@@ -197,7 +192,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
       {
         id: 'entitiesWithAlerts',
         title: 'Entities with alerts',
-        value: alertsLoading ? 0 : alertsCount,
+        value: alertBasedLoading ? 0 : alertsCount,
         description: `Entities with at least one alert in the last ${timeRange}`,
         filterLabel: `Entities with alerts (${timeRange})`,
       },
@@ -231,8 +226,8 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
       {
         id: 'watchlisted',
         title: 'Watchlisted',
-        value: watchlistedLoading ? 0 : watchlistedCount,
-        description: 'Entities on a watchlist with a risk score above zero',
+        value: alertBasedLoading ? 0 : watchlistedCount,
+        description: `Entities on a watchlist with at least one alert in the last ${timeRange}`,
         filterLabel: 'Watchlisted',
       },
       {
@@ -245,7 +240,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     ],
     [
       alertsCount,
-      alertsLoading,
+      alertBasedLoading,
       anomaliesCount,
       anomaliesLoading,
       riskMoversCount,
@@ -253,7 +248,6 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
       newlyHCCount,
       newlyHCLoading,
       watchlistedCount,
-      watchlistedLoading,
       newEntityCount,
       newEntityLoading,
       timeRange,
