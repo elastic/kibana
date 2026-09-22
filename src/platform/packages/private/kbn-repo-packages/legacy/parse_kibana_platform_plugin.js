@@ -53,6 +53,12 @@ function parseLegacyKibanaPlatformPlugin(manifestPath) {
     );
   }
 
+  if (manifest.enableLazyInitialize && !manifest.server) {
+    throw new TypeError(
+      `Plugin ${manifest.id} sets enableLazyInitialize without a server entry; deferred initialization is a server-side lifecycle (${manifestPath})`
+    );
+  }
+
   return {
     directory: Path.dirname(manifestPath),
     manifestPath,

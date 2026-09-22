@@ -218,10 +218,9 @@ export class PluginWrapper<
   /**
    * Calls optional `stop` function exposed by the plugin initializer.
    *
-   * A lazy plugin whose deferred `start()` never ran on this instance has nothing start-time to
-   * tear down, so its `stop()` is skipped; `setup()`-time registrations need no cleanup. Either
-   * way, anyone still awaiting `getStartServices()` is released with a rejection rather than left
-   * hanging past shutdown.
+   * Always invoked when `setup()` ran, including for a lazy plugin whose deferred `start()` never
+   * ran on this instance: `setup()`-time resources still need teardown. Anyone still awaiting
+   * `getStartServices()` is released with a rejection rather than left hanging past shutdown.
    */
   public async stop() {
     if (!this.definition) {
@@ -229,18 +228,15 @@ export class PluginWrapper<
     }
 
     if (this.enableLazyInitialize && !this.startInvoked) {
-      this.log.debug(
-        `Lazy plugin "${this.name}" was never started on this instance; skipping its stop().`
-      );
       this.startDependencies$.error(
         new Error(
           `Plugin "${this.name}" is stopping without having started; its start services will never be available.`
         )
       );
     } else {
-      await this.instance?.stop?.();
       this.startDependencies$.complete();
     }
+    await this.instance?.stop?.();
     await this.container?.unbindAllAsync();
     this.instance = undefined;
     this.container = undefined;

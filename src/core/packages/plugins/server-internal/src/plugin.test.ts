@@ -673,7 +673,7 @@ describe('lazy plugins', () => {
     await expect(plugin.runLazyInitialize({} as any, {})).resolves.toBeUndefined();
   });
 
-  test('`stop` skips the instance stop and rejects `startDependencies` when start never ran', async () => {
+  test('`stop` still calls the instance stop when start never ran', async () => {
     const plugin = createLazyPlugin();
     const mockPluginInstance = { setup: jest.fn(), start: jest.fn(), stop: jest.fn() };
     mockPluginInitializer.mockResolvedValue(mockPluginInstance);
@@ -685,7 +685,7 @@ describe('lazy plugins', () => {
 
     await expect(plugin.stop()).resolves.toBeUndefined();
 
-    expect(mockPluginInstance.stop).not.toHaveBeenCalled();
+    expect(mockPluginInstance.stop).toHaveBeenCalledTimes(1);
     await expect(waiter).resolves.toThrow(/stopping without having started/);
   });
 

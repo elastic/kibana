@@ -89,39 +89,44 @@ export function mountWithInitializingGate<HistoryLocationState = unknown>({
       }
       mounted = true;
       clearGate();
-      Promise.resolve(mount(params)).then(
-        (unmountFn) => {
-          if (cancelled) {
-            unmountFn();
-          } else {
-            realUnmount = unmountFn;
-          }
-        },
-        (mountError: unknown) => {
-          if (cancelled) {
-            return;
-          }
-          // This wrapper's own mount promise resolved back in `AppContainer` as soon as the gate
-          // went up, so core already recorded the app as mounted and will not route this rejection
-          // to its error boundary the way it does for a non-lazy app. Without handling it here the
-          // user is left on the blank element `clearGate` just emptied.
-          //
-          // Logged as well as rendered: the gate only shows `error.message`, and attaching this
-          // handler is what stops the rejection reaching the global `unhandledrejection` listener
-          // in `fatalErrors` that would otherwise have dumped the stack to the console.
-          // eslint-disable-next-line no-console
-          console.error(mountError);
-          renderGate(
-            {
-              status: 'failed',
-              error: {
-                message: mountError instanceof Error ? mountError.message : String(mountError),
+      // Defer `mount()` into a microtask so a synchronous throw is caught by this
+      // rejection handler the same way an async rejection is. `Promise.resolve(mount())`
+      // would throw before `.then()` is attached.
+      Promise.resolve()
+        .then(() => mount(params))
+        .then(
+          (unmountFn) => {
+            if (cancelled) {
+              unmountFn();
+            } else {
+              realUnmount = unmountFn;
+            }
+          },
+          (mountError: unknown) => {
+            if (cancelled) {
+              return;
+            }
+            // This wrapper's own mount promise resolved back in `AppContainer` as soon as the gate
+            // went up, so core already recorded the app as mounted and will not route this rejection
+            // to its error boundary the way it does for a non-lazy app. Without handling it here the
+            // user is left on the blank element `clearGate` just emptied.
+            //
+            // Logged as well as rendered: the gate only shows `error.message`, and attaching this
+            // handler is what stops the rejection reaching the global `unhandledrejection` listener
+            // in `fatalErrors` that would otherwise have dumped the stack to the console.
+            // eslint-disable-next-line no-console
+            console.error(mountError);
+            renderGate(
+              {
+                status: 'failed',
+                error: {
+                  message: mountError instanceof Error ? mountError.message : String(mountError),
+                },
               },
-            },
-            'mount'
-          );
-        }
-      );
+              'mount'
+            );
+          }
+        );
     });
 
     return () => {

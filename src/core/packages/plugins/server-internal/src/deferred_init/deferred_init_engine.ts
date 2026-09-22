@@ -58,6 +58,12 @@ interface DeferredInitRecord {
   lastFailedPhase?: DeferredInitPhase;
   /** Consecutive failed attempts since the last success; reset to 0 on success. */
   failedAttempts: number;
+  /**
+   * Resolves when the current cooldown ends (and `kick()` has been invoked). Present only while
+   * a background retry is scheduled; {@link waitUntilAvailable} awaits this instead of kicking
+   * immediately so callers honor the backoff.
+   */
+  cooldownPromise?: Promise<void>;
 }
 
 /**
@@ -172,11 +178,12 @@ export class DeferredInitEngine {
    * hung connection).
    *
    * During the first {@link DEFERRED_INIT_MAX_BACKGROUND_ATTEMPTS} failures the background
-   * cooldown timer re-kicks the plugin automatically, so `ensureInitialized` deliberately does
-   * NOT re-kick a `failed` plugin: both the UI status poll and every gated route call this on
-   * each hit, so kicking on every `failed` hit would immediately flip the state to `initializing`
-   * before the caller ever observes the failure, silently defeating {@link scheduleCooldown}'s
-   * backoff.
+   * cooldown timer re-kicks the plugin automatically (see {@link scheduleCooldown}), so
+   * `ensureInitialized` deliberately does NOT re-kick a `failed` plugin: both the initializing-UI
+   * poll (`GET /internal/core/deferred_init/{pluginId}`) and every gated route call this on each
+   * hit, so kicking on every `failed` hit would immediately flip the state to `initializing`
+   * before the caller ever observes the failure, silently defeating the backoff. This is not
+   * Kibana's `/status` readiness/liveness probe, which is read-only via {@link state$}.
    *
    * Once background retries are exhausted the cooldown timer stops firing. At that point
    * `ensureInitialized` switches to on-demand recovery: a `failed` plugin is re-kicked on the
@@ -235,11 +242,18 @@ export class DeferredInitEngine {
         status: state,
       });
     }
-    if (state === 'idle' || state === 'failed') {
+    if (record.inFlight) {
+      await record.inFlight;
+    } else if (record.cooldownPromise) {
+      // Honor the backoff: wait for the scheduled retry rather than kicking immediately.
+      await record.cooldownPromise;
+      if (record.inFlight) {
+        await record.inFlight;
+      }
+    } else if (state === 'idle' || state === 'failed') {
       this.kick(pluginId, record);
+      await (record.inFlight ?? Promise.resolve());
     }
-    // Either the attempt this call kicked, or one a concurrent caller already had in flight.
-    await (record.inFlight ?? Promise.resolve());
 
     // Annotated rather than inferred: TypeScript would otherwise carry the pre-`await` narrowing
     // of `state` through to here, even though the attempt we just awaited is what changed it.
@@ -291,7 +305,7 @@ export class DeferredInitEngine {
         record.state$.next('failed');
         const message = error instanceof Error ? error.message : String(error);
         this.log.error(`Lazy plugin "${pluginId}" failed during ${phase}(): ${message}`);
-        this.scheduleCooldown(record);
+        this.scheduleCooldown(pluginId, record);
       }
     );
   }
@@ -314,6 +328,8 @@ export class DeferredInitEngine {
     }
 
     onPhase('start');
+    // `withTimeout` is Promise.race: it does not cancel `runner.start()`. A timeout only
+    // fails this engine attempt; the plugin's start() keeps running until it settles.
     const result = await withTimeout({
       promise: runner.start(),
       timeoutMs: DEFERRED_START_TIMEOUT_MS,
@@ -327,17 +343,21 @@ export class DeferredInitEngine {
   }
 
   /**
-   * Jittered, exponentially-backed-off cooldown before a failed plugin becomes retriable again
-   * (flipping it from `failed` back to `idle`). Full jitter, rather than a fixed delay, so a set
-   * of instances that all failed against the same unhealthy Elasticsearch cluster don't retry in
-   * lockstep, mirroring Fleet's `backOff({ jitter: 'full' })` rationale.
+   * Jittered, exponentially-backed-off cooldown before a failed plugin is re-kicked. Full jitter,
+   * rather than a fixed delay, so a set of instances that all failed against the same unhealthy
+   * Elasticsearch cluster don't retry in lockstep, mirroring Fleet's `backOff({ jitter: 'full' })`
+   * rationale.
+   *
+   * The timer itself calls `kick()`: there is no idle gap for a poll to have to notice and
+   * re-trigger. {@link waitUntilAvailable} awaits the same cooldown instead of kicking immediately,
+   * so a dependent that blocks on the contract still honors the backoff.
    *
    * Once {@link DEFERRED_INIT_MAX_BACKGROUND_ATTEMPTS} consecutive failures have accumulated, no
    * further timer is scheduled: the plugin stays `failed` and relies on on-demand kicks from
    * incoming gated requests (see {@link ensureInitialized}) rather than unsolicited background
    * retries.
    */
-  private scheduleCooldown(record: DeferredInitRecord): void {
+  private scheduleCooldown(pluginId: string, record: DeferredInitRecord): void {
     if (record.failedAttempts >= DEFERRED_INIT_MAX_BACKGROUND_ATTEMPTS) {
       // Background retries exhausted. On-demand recovery takes over: the next gated request,
       // loadPluginContract or trigger() call will re-kick via ensureInitialized/waitUntilAvailable.
@@ -350,13 +370,17 @@ export class DeferredInitEngine {
     );
     const delayMs = Math.random() * upperBoundMs;
 
-    const timer = setTimeout(() => {
-      if (record.state$.value === 'failed') {
-        record.state$.next('idle');
-      }
-    }, delayMs);
-    // Node-only API; guard for environments/tests where timers are mocked without `unref`.
-    timer.unref?.();
+    record.cooldownPromise = new Promise((resolve) => {
+      const timer = setTimeout(() => {
+        record.cooldownPromise = undefined;
+        if (record.state$.value === 'failed') {
+          this.kick(pluginId, record);
+        }
+        resolve();
+      }, delayMs);
+      // Node-only API; guard for environments/tests where timers are mocked without `unref`.
+      timer.unref?.();
+    });
   }
 
   private ensureRecord(pluginId: string): DeferredInitRecord {

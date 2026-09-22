@@ -17,19 +17,20 @@ import type { DeferredInitEngine } from './deferred_init_engine';
  * Register the always-available core endpoint the initializing UI polls:
  * `GET /internal/core/deferred_init/{pluginId}` -> {@link DeferredInitStatusResponse}.
  *
+ * This is **not** Kibana's `/status` readiness/liveness probe. `/status` is wired to
+ * `engine.state$` (read-only) and never triggers deferred init. This route is an internal UI
+ * poll used by the app initializing gate; `authz: false` because it only exposes lifecycle
+ * state (`idle` / `initializing` / `available` / `failed`), and it is internal-only.
+ *
  * This is a core-owned route (never wrapped by {@link createGuardedRouter}), so it stays
  * reachable while a plugin is still initializing.
  *
- * Deliberately calls `ensureInitialized` rather than the read-only `getState`: after a plugin
- * cools down from a failed run (see `DeferredInitEngine`), something has to flip it back to trying
- * again. Gated routes provide that nudge for plugins that are actively receiving traffic, but a
- * plugin with no gated request in flight would otherwise stall forever waiting on traffic that
- * never arrives. The initializing UI is already polling this route once a user is on the loading
- * screen, so reusing that poll as the nudge covers that gap without introducing an unconditional
- * background retry loop that would spend Elasticsearch calls on plugins nobody is waiting on.
- * `ensureInitialized` itself only auto-kicks an `idle` plugin, not a `failed` one, so a genuine
- * failure is actually observable here instead of being silently re-kicked away before this
- * handler ever reads it.
+ * Deliberately calls `ensureInitialized` rather than the read-only `getState`: opening a lazy
+ * plugin's app is the first trigger, and the gate's poll is how that trigger arrives. Gated
+ * routes provide the same nudge for API traffic. `ensureInitialized` only auto-kicks an `idle`
+ * plugin (or a `failed` plugin after background retries are exhausted), never a `failed` plugin
+ * still in cooldown, so a genuine failure is observable here instead of being silently
+ * re-kicked away. Periodic k8s probes hitting `/status` cannot reach this handler.
  *
  * @internal
  */

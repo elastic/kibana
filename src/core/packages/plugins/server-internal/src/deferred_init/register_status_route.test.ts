@@ -33,6 +33,7 @@ describe('registerDeferredInitStatusRoute', () => {
     const { config } = createHandler(createEngineMock());
 
     expect(config.path).toBe(DEFERRED_INIT_STATUS_ROUTE);
+    expect(config.path).not.toBe('/status');
     expect(config.security.authz.enabled).toBe(false);
     expect(config.options.access).toBe('internal');
   });

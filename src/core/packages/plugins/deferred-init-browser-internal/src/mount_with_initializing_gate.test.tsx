@@ -122,6 +122,27 @@ describe('mountWithInitializingGate', () => {
       realMount = jest.fn().mockRejectedValue(mountError);
     });
 
+    it('renders the failure gate when the real mount throws synchronously', async () => {
+      realMount = jest.fn(() => {
+        throw new Error('sync mount boom');
+      });
+      const unmount = await mountGate();
+
+      await act(async () => {
+        status$.next({ status: 'available' });
+        await Promise.resolve();
+      });
+
+      const gate = element.querySelector('[data-test-subj="mock-gate"]');
+      expect(gate).not.toBeNull();
+      expect(gate?.getAttribute('data-status')).toBe('failed');
+      expect(gate?.getAttribute('data-error')).toBe('sync mount boom');
+      expect(gate?.getAttribute('data-failure-stage')).toBe('mount');
+      expect(consoleError).toHaveBeenCalled();
+
+      unmount();
+    });
+
     it('renders the failure gate, tagged as a mount failure rather than an init failure', async () => {
       const unmount = await mountGate();
 

@@ -129,6 +129,13 @@ function validatePackageManifestPlugin(plugin, repoRoot, path) {
   if (enableLazyInitialize !== undefined && typeof enableLazyInitialize !== 'boolean') {
     throw err(`plugin.enableLazyInitialize`, enableLazyInitialize, `must be a boolean`);
   }
+  if (enableLazyInitialize === true && server !== true) {
+    throw err(
+      `plugin.enableLazyInitialize`,
+      enableLazyInitialize,
+      `requires plugin.server to be true; deferred initialization is a server-side lifecycle`
+    );
+  }
 
   if (type !== undefined && type !== 'preboot') {
     throw err(`plugin.type`, type, `must be undefined or "preboot"`);

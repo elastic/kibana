@@ -201,8 +201,10 @@ export class PluginsSystem<T extends PluginType> {
         const setupDeps = deps as PluginsServiceSetupDeps;
         const engine = this.deferredInitEngine;
         engine.register(plugin.name);
-        // Path A: core reflects deferred-init state into the plugin's /status entry, so the
-        // plugin author writes no status code. Registered during setup, before status.start().
+        // Path A: core reflects deferred-init state into the plugin's `/status` entry (the
+        // readiness/liveness probe), so the plugin author writes no status code. This is
+        // read-only via `engine.state$` and never kicks initialization. Registered during
+        // setup, before status.start().
         setupDeps.status.plugins.set(
           plugin.name,
           engine.state$(plugin.name).pipe(map((state) => toServiceStatus(plugin.name, state)))
