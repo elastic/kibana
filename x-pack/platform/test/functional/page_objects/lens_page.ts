@@ -1776,11 +1776,22 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async removeLayer(index: number = 0) {
       await retry.try(async () => {
         // Hover over the tab to make the layer actions button visible
-        const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]', 1000);
+        const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]', 0);
         if (tabs[index]) {
           await tabs[index].moveMouseTo();
         }
-        if (await testSubjects.exists(`lnsLayerSplitButton--${index}`)) {
+
+        const splitButtonExists = await testSubjects.exists(`lnsLayerSplitButton--${index}`, {
+          timeout: 0,
+        });
+        const removeButtonExists = await testSubjects.exists(`lnsLayerRemove--${index}`, {
+          timeout: 0,
+        });
+        if (!splitButtonExists && !removeButtonExists) {
+          throw new Error(`Layer ${index} actions are not visible`);
+        }
+
+        if (splitButtonExists) {
           await testSubjects.click(`lnsLayerSplitButton--${index}`);
         }
         await testSubjects.click(`lnsLayerRemove--${index}`);
@@ -1792,6 +1803,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async ensureLayerTabIsActive(index: number = 0) {
+      if (await testSubjects.exists(`lns-layerPanel-${index}`, { timeout: 0 })) {
+        return;
+      }
+
       const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]', 1000);
 
       if (tabs[index]) {

@@ -337,23 +337,32 @@ export class DashboardPageObject extends FtrService {
   public async getIsInEditMode() {
     this.log.debug('getIsInEditMode');
     // Check if the "switch to view mode" button exists (indicates we're in edit mode)
-    if (await this.testSubjects.exists('dashboardViewOnlyMode')) {
+    if (await this.testSubjects.exists('dashboardViewOnlyMode', { timeout: 0 })) {
       return true;
     }
     // In edit mode, either quick save button (saved dashboard) or interactive save button (new dashboard) is present
-    const hasQuickSave = await this.testSubjects.exists('dashboardQuickSaveMenuItem');
-    const hasInteractiveSave = await this.testSubjects.exists('dashboardInteractiveSaveMenuItem');
+    const hasQuickSave = await this.testSubjects.exists('dashboardQuickSaveMenuItem', {
+      timeout: 0,
+    });
+    const hasInteractiveSave = await this.testSubjects.exists('dashboardInteractiveSaveMenuItem', {
+      timeout: 0,
+    });
     return hasQuickSave || hasInteractiveSave;
   }
 
   public async getIsInViewMode() {
     this.log.debug('getIsInViewMode');
+    // Probe edit mode first because most callers invoke this while editing. These controls are
+    // mutually exclusive with the view mode control, so waiting for the latter only adds delay.
+    if (await this.getIsInEditMode()) {
+      return false;
+    }
     // Check if the "edit" button exists (indicates we're in view mode)
     if (await this.testSubjects.exists('dashboardEditMode')) {
       return true;
     }
-    // If we're not in edit mode, we're in view mode
-    return !(await this.getIsInEditMode());
+    // Read-only dashboards have no mode controls and are effectively in view mode.
+    return true;
   }
 
   public async ensureDashboardIsInEditMode() {
@@ -686,7 +695,7 @@ export class DashboardPageObject extends FtrService {
     saveOptions: Omit<SaveDashboardOptions, 'saveAsNew'> = { waitDialogIsClosed: true }
   ) {
     const isSaveModalOpen = await this.testSubjects.exists('savedObjectSaveModal', {
-      timeout: 2000,
+      timeout: 0,
     });
 
     if (!isSaveModalOpen) {
