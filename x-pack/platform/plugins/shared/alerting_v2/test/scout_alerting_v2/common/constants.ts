@@ -16,10 +16,13 @@ export const LOOKBACK_WINDOW = '1m';
 export const POLL_TIMEOUT_MS = 45_000;
 export const POLL_INTERVAL_MS = 1_000;
 
-export const ACTION_POLICY_PER_PAGE_MAX = 100;
 export const ACTION_POLICY_SEARCH_MAX_LENGTH = 256;
 
-export { RULE_TEMPLATE_MAX_PER_PAGE as RULE_TEMPLATE_PER_PAGE_MAX } from '@kbn/alerting-v2-schemas';
+export {
+  MAX_PER_PAGE,
+  MAX_PER_PAGE as ACTION_POLICY_PER_PAGE_MAX,
+  MAX_PER_PAGE as RULE_TEMPLATE_PER_PAGE_MAX,
+} from '@kbn/alerting-v2-schemas';
 
 export { MAX_TAGS as RULE_TEMPLATE_TAGS_MAX_COUNT } from '@kbn/alerting-v2-constants';
 export {

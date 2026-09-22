@@ -13,6 +13,7 @@ export {
   durationSchema,
   entityIdSchema,
   ENTITY_ID_NOTE,
+  groupHashSchema,
   tagsResponseSchema,
   tagsSchema,
 } from './common';

@@ -7,16 +7,13 @@
 
 import { z } from '@kbn/zod/v4';
 import { actionPolicyResponseSchema } from './action_policy_response_schema';
-
-const tagItemSchema = z.string().min(1).max(256);
+import { tagsSchema } from './common';
 
 export const matchActionPoliciesBodySchema = z
   .object({
     rule: z
       .object({
-        tags: z
-          .array(tagItemSchema)
-          .max(100)
+        tags: tagsSchema
           .optional()
           .describe(
             'Tags of the rule you want to check. The response includes policies whose `matcher.tags` contain at least one of the tags in this list, along with policies that apply to every rule.'

@@ -24,6 +24,15 @@ const entityIdSchema = z
   .max(ID_MAX_LENGTH)
   .regex(/^[a-zA-Z0-9_-]+$/, 'Must contain only letters, digits, underscores, and hyphens.');
 
+/**
+ * Identifier of an alert series. Always a server-generated SHA-256 digest, so
+ * it is exactly 64 lowercase hex characters — callers echo back a value we
+ * produced rather than composing one.
+ */
+const groupHashSchema = z
+  .string()
+  .regex(/^[a-f0-9]{64}$/, 'Must be a 64-character lowercase hex SHA-256 digest.');
+
 /** Semantics every client-addressable id carries; append to its `.describe()`. */
 const ENTITY_ID_NOTE =
   'Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alert episodes recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.';
@@ -111,6 +120,7 @@ const queryIntSchema = ({ min, max }: { min: number; max: number }) =>
 export {
   durationSchema,
   entityIdSchema,
+  groupHashSchema,
   tagsSchema,
   optionalWithDescription,
   arrayOrSingleSchema,

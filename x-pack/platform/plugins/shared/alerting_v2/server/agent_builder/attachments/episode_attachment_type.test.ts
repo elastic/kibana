@@ -40,7 +40,7 @@ const baseEpisodeData: EpisodeAttachmentData = {
   'episode.id': 'ep-1',
   'episode.status': ALERT_EPISODE_STATUS.ACTIVE,
   'rule.id': 'rule-1',
-  group_hash: 'gh-1',
+  group_hash: '98058cb569017ecb6b08b554ecbcb2524ff7dd8971828f4f2e5939c1e6667e56',
   first_timestamp: '2026-04-10T11:00:00.000Z',
   last_timestamp: '2026-04-10T12:00:00.000Z',
   duration: 3600000,

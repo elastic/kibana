@@ -12,6 +12,7 @@ import {
   ALERTING_V2_ALERTS_READ_ROLE,
   apiTest,
   buildAlertEvent,
+  buildGroupHash,
   getUnsnoozeSeriesActionUrl,
   NO_ACCESS_ROLE,
   testData,
@@ -40,7 +41,7 @@ apiTest.describe('Create unsnooze series action API', { tag: '@local-stateful-cl
     'happy path: writes an unsnooze action and returns 204',
     async ({ apiClient, apiServices }) => {
       const ruleId = 'unsnooze-happy-rule';
-      const groupHash = 'unsnooze-happy-group';
+      const groupHash = buildGroupHash('unsnooze-happy-group');
 
       await apiServices.alertingV2.ruleEvents.seed([
         buildAlertEvent({
@@ -75,7 +76,7 @@ apiTest.describe('Create unsnooze series action API', { tag: '@local-stateful-cl
   );
 
   apiTest('schema: rejects unknown body fields (strict mode) with 400', async ({ apiClient }) => {
-    const response = await apiClient.post(getUnsnoozeSeriesActionUrl('any-group'), {
+    const response = await apiClient.post(getUnsnoozeSeriesActionUrl(buildGroupHash('any-group')), {
       headers: writerHeaders,
       body: { extra: 'nope' },
     });
@@ -84,25 +85,29 @@ apiTest.describe('Create unsnooze series action API', { tag: '@local-stateful-cl
     expect(response.body.code).toBe('BAD_REQUEST');
   });
 
-  apiTest('schema: rejects group_hash over 256 chars with 400', async ({ apiClient }) => {
-    const response = await apiClient.post(getUnsnoozeSeriesActionUrl('a'.repeat(257)), {
-      headers: writerHeaders,
-      body: {},
-    });
+  apiTest(
+    'schema: rejects a group_hash that is not a SHA-256 digest with 400',
+    async ({ apiClient }) => {
+      const response = await apiClient.post(getUnsnoozeSeriesActionUrl('not-a-digest'), {
+        headers: writerHeaders,
+        body: {},
+      });
 
-    expect(response).toHaveStatusCode(400);
-    expect(response.body.code).toBe('BAD_REQUEST');
-  });
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
+    }
+  );
 
   apiTest('returns 404 when group_hash matches no events', async ({ apiClient }) => {
-    const response = await apiClient.post(getUnsnoozeSeriesActionUrl('unknown-group'), {
+    const groupHash = buildGroupHash('unknown-group');
+    const response = await apiClient.post(getUnsnoozeSeriesActionUrl(groupHash), {
       headers: writerHeaders,
       body: {},
     });
 
     expect(response).toHaveStatusCode(404);
     expect(response.body.code).toBe('ALERT_EVENT_NOT_FOUND');
-    expect(response.body.details).toMatchObject({ group_hash: 'unknown-group' });
+    expect(response.body.details).toMatchObject({ group_hash: groupHash });
   });
 
   apiTest(
@@ -113,7 +118,7 @@ apiTest.describe('Create unsnooze series action API', { tag: '@local-stateful-cl
       );
 
       const response = await apiClient.post(
-        getUnsnoozeSeriesActionUrl('unsnooze-authz-read-group'),
+        getUnsnoozeSeriesActionUrl(buildGroupHash('unsnooze-authz-read-group')),
         {
           headers: { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader },
           body: {},
@@ -130,7 +135,7 @@ apiTest.describe('Create unsnooze series action API', { tag: '@local-stateful-cl
       const noAccessCredentials = await requestAuth.getApiKeyForCustomRole(NO_ACCESS_ROLE);
 
       const response = await apiClient.post(
-        getUnsnoozeSeriesActionUrl('unsnooze-authz-none-group'),
+        getUnsnoozeSeriesActionUrl(buildGroupHash('unsnooze-authz-none-group')),
         {
           headers: { ...testData.COMMON_HEADERS, ...noAccessCredentials.apiKeyHeader },
           body: {},

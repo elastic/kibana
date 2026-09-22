@@ -18,6 +18,7 @@ import {
   MAX_FIELD_NAME_LENGTH,
   MAX_GROUPING_FIELDS,
   MAX_NAME_LENGTH,
+  MAX_PER_PAGE,
 } from './constants';
 import {
   POLICY_MATCHER_DESCRIPTION,
@@ -282,7 +283,7 @@ export const findActionPoliciesRequestSchema = z
     page: queryIntSchema({ min: 1, max: FIND_MAX_RESULT_WINDOW })
       .optional()
       .describe('The page number to return. Defaults to 1.'),
-    per_page: queryIntSchema({ min: 1, max: 100 })
+    per_page: queryIntSchema({ min: 1, max: MAX_PER_PAGE })
       .optional()
       .describe('The number of action policies to return per page. Defaults to 20.'),
     search: z

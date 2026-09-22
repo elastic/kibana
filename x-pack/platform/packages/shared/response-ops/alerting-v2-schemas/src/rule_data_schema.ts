@@ -23,10 +23,12 @@ import {
   tagsSchema,
 } from './common';
 import {
+  ID_MAX_LENGTH,
   MAX_CONSECUTIVE_BREACHES,
   MAX_DESCRIPTION_LENGTH,
   MAX_ESQL_QUERY_LENGTH,
   MAX_FIELD_NAME_LENGTH,
+  MAX_PER_PAGE,
   MAX_GROUPING_FIELDS,
   MAX_KQL_LENGTH,
   MAX_NAME_LENGTH,
@@ -419,7 +421,7 @@ export const groupingSchema = z
 
 const artifactSchema = z
   .object({
-    id: z.string().min(1).max(256).describe('Artifact identifier.'),
+    id: z.string().min(1).max(ID_MAX_LENGTH).describe('Artifact identifier.'),
     type: z.string().min(1).max(128).describe('Artifact type.'),
     data: z
       .record(z.string().min(1).max(MAX_FIELD_NAME_LENGTH), z.unknown())
@@ -504,7 +506,7 @@ export const createRuleDataBaseSchema = z
     time_field: z
       .string()
       .min(1)
-      .max(128)
+      .max(MAX_FIELD_NAME_LENGTH)
       .default(DEFAULT_TIME_FIELD)
       .describe(TIME_FIELD_CREATE_DESCRIPTION),
     schedule: scheduleSchema,
@@ -706,7 +708,12 @@ export const updateRuleDataSchema = z
         tags: tagsSchema.min(1).nullable().optional(),
       })
       .optional(),
-    time_field: z.string().min(1).max(128).optional().describe(TIME_FIELD_UPDATE_DESCRIPTION),
+    time_field: z
+      .string()
+      .min(1)
+      .max(MAX_FIELD_NAME_LENGTH)
+      .optional()
+      .describe(TIME_FIELD_UPDATE_DESCRIPTION),
     schedule: scheduleSchema.partial().optional().nullable(),
     query: querySchema.optional(),
     recovery_strategy: recoveryStrategySchema
@@ -798,7 +805,7 @@ export const findRulesRequestSchema = z
       .describe(
         `The page number to return. Defaults to 1. \`page * per_page\` cannot exceed ${FIND_MAX_RESULT_WINDOW}.`
       ),
-    per_page: queryIntSchema({ min: 1, max: 1000 })
+    per_page: queryIntSchema({ min: 1, max: MAX_PER_PAGE })
       .optional()
       .describe(`The number of rules to return per page. Defaults to ${FIND_DEFAULT_PER_PAGE}.`),
     filter: z.string().max(MAX_KQL_LENGTH).optional().describe('The filter to apply to the rules.'),

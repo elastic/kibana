@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { tagsSchema } from './common';
+import { groupHashSchema, tagsSchema } from './common';
 import { ID_MAX_LENGTH, MAX_BULK_ITEMS } from './constants';
 
 export const ALERT_EPISODE_STATUS = {
@@ -159,11 +159,9 @@ export type CreateEpisodeAlertActionBody = z.infer<typeof createEpisodeAlertActi
 
 export const seriesAlertActionParamsSchema = z
   .object({
-    group_hash: z
-      .string()
-      .min(1)
-      .max(256)
-      .describe('Hash identifying the alert episode series to apply the action to.'),
+    group_hash: groupHashSchema.describe(
+      'Hash identifying the alert episode series to apply the action to.'
+    ),
   })
   .strict()
   .describe('Path parameters for series-level alert action endpoints.');
@@ -238,11 +236,9 @@ export type CreateDeactivateEpisodeActionBody = z.infer<
 // body is an `{ items: [...] }` envelope of one item shape: the single-route
 // body fields plus the series/episode identifier. The envelope leaves room
 // for future request-level fields (e.g. dry_run) without a breaking change.
-const bulkGroupHashSchema = z
-  .string()
-  .min(1)
-  .max(256)
-  .describe('Hash identifying the alert episode series to apply the action to.');
+const bulkGroupHashSchema = groupHashSchema.describe(
+  'Hash identifying the alert episode series to apply the action to.'
+);
 
 const bulkEpisodeIdSchema = z
   .string()

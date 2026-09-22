@@ -295,7 +295,7 @@ describe('rule template create-rule schema coupling', () => {
                 },
                 "id": Object {
                   "description": "Artifact identifier.",
-                  "maxLength": 256,
+                  "maxLength": 150,
                   "minLength": 1,
                   "type": "string",
                 },
@@ -610,7 +610,7 @@ describe('rule template create-rule schema coupling', () => {
             "time_field": Object {
               "default": "@timestamp",
               "description": "Document field used as the event time when applying the lookback window. Defaults to \`@timestamp\`.",
-              "maxLength": 128,
+              "maxLength": 256,
               "minLength": 1,
               "type": "string",
             },

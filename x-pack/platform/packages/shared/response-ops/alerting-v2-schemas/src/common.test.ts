@@ -5,8 +5,15 @@
  * 2.0.
  */
 
+import { createHash } from 'crypto';
 import { z } from '@kbn/zod/v4';
-import { arrayOrSingleSchema, durationSchema, entityIdSchema, optionalWithDescription } from './common';
+import {
+  arrayOrSingleSchema,
+  durationSchema,
+  entityIdSchema,
+  groupHashSchema,
+  optionalWithDescription,
+} from './common';
 import { ID_MAX_LENGTH, MAX_DURATION_LENGTH } from './constants';
 
 describe('entityIdSchema', () => {
@@ -44,6 +51,26 @@ describe('entityIdSchema', () => {
 
   it('trims surrounding whitespace rather than rejecting it', () => {
     expect(entityIdSchema.parse('  prod-cpu  ')).toBe('prod-cpu');
+  });
+});
+
+describe('groupHashSchema', () => {
+  it('accepts a SHA-256 digest, the only value the server ever produces', () => {
+    const digest = createHash('sha256').update('rule-1|host.name|web-1').digest('hex');
+
+    expect(groupHashSchema.safeParse(digest).success).toBe(true);
+  });
+
+  it.each([
+    ['a placeholder label', 'group-1'],
+    ['an uppercase digest', 'A'.repeat(64)],
+    ['an MD5-length digest', 'a'.repeat(32)],
+    ['one character short', 'a'.repeat(63)],
+    ['one character long', 'a'.repeat(65)],
+    ['a non-hex character', `${'a'.repeat(63)}z`],
+    ['empty', ''],
+  ])('rejects %s', (_label, value) => {
+    expect(groupHashSchema.safeParse(value).success).toBe(false);
   });
 });
 

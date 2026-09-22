@@ -14,7 +14,9 @@ import {
 import { invalidResponseExample } from '../oas_utils';
 import type { OasExampleEntry } from '../oas_types';
 
-export const SAMPLE_GROUP_HASH = 'group-hash-1';
+export const SAMPLE_GROUP_HASH = '98058cb569017ecb6b08b554ecbcb2524ff7dd8971828f4f2e5939c1e6667e56';
+export const SAMPLE_OTHER_GROUP_HASH =
+  '62b86eca4670c2a0a01fa8bb5570c5c2dfa7d20a9d9def5b6acfdef4d98d307a';
 export const SAMPLE_EPISODE_ID = 'episode-1';
 
 /** Shared 400 body for series-level alert-action routes (missing path params). */

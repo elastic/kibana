@@ -7,8 +7,8 @@
 
 import { z } from '@kbn/zod/v4';
 import { ALERT_EPISODE_STATUS } from './alert_action_schema';
-import { tagsSchema } from './common';
-import { ID_MAX_LENGTH, MAX_FINGERPRINT_LENGTH } from './constants';
+import { groupHashSchema, tagsSchema } from './common';
+import { ID_MAX_LENGTH } from './constants';
 
 export const alertEpisodeStatusSchema = z.union([
   z.literal(ALERT_EPISODE_STATUS.INACTIVE).describe('The alert episode is fully recovered'),
@@ -31,7 +31,7 @@ export const alertEpisodeSchema = z
     'episode.id': z.string().min(1).max(ID_MAX_LENGTH),
     'episode.status': alertEpisodeStatusSchema,
     'rule.id': z.string().min(1).max(ID_MAX_LENGTH),
-    group_hash: z.string().min(1).max(MAX_FINGERPRINT_LENGTH),
+    group_hash: groupHashSchema,
     first_timestamp: z.iso.datetime(),
     last_timestamp: z.iso.datetime(),
     duration: z.number(),

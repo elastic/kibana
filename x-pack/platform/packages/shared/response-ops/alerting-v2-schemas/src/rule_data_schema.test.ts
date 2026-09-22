@@ -35,6 +35,7 @@ import {
   MAX_BULK_ITEMS,
   MAX_ESQL_QUERY_LENGTH,
   MAX_FIELD_NAME_LENGTH,
+  MAX_PER_PAGE,
 } from './constants';
 
 const validCreateData = {
@@ -1757,16 +1758,18 @@ describe('findRulesRequestSchema', () => {
     expect(findRulesRequestSchema.safeParse({ page }).success).toBe(false);
   });
 
-  it.each([0, 1.5, 1001])('rejects per_page %p', (perPage) => {
+  it.each([0, 1.5, MAX_PER_PAGE + 1])('rejects per_page %p', (perPage) => {
     expect(findRulesRequestSchema.safeParse({ per_page: perPage }).success).toBe(false);
   });
 
   it('accepts the last page inside the max result window', () => {
-    expect(findRulesRequestSchema.safeParse({ page: 10, per_page: 1000 }).success).toBe(true);
+    expect(findRulesRequestSchema.safeParse({ page: 100, per_page: MAX_PER_PAGE }).success).toBe(
+      true
+    );
   });
 
   it('rejects a page beyond the max result window', () => {
-    const result = findRulesRequestSchema.safeParse({ page: 11, per_page: 1000 });
+    const result = findRulesRequestSchema.safeParse({ page: 101, per_page: MAX_PER_PAGE });
 
     expect(result.success).toBe(false);
   });
