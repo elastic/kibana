@@ -1648,6 +1648,20 @@ describe('prepareMessages — multi-execution (HITL) timelines', () => {
       expect(String(messages.at(-1)?.content)).toContain('bye');
     });
 
+    it('end to end: a confirmation-blocked call + prompt_response + failed setup-window resume renders the call as interrupted', async () => {
+      // the pause left `tc1` pending; the resume failed before reaching it, so it never returned
+      const timeline = processedTimeline(pausedThenInterruptedResumeTimeline('r1', ['tc1']));
+
+      const messages = await prepareMessages({ conversation: conversationOf(timeline) });
+
+      const tool = messages.find((message) => message.getType() === 'tool');
+      expect(tool).toBeDefined();
+      expect(String(tool?.content)).toContain('"interrupted":true');
+      expect(String(tool?.content)).toContain(
+        'The tool call was interrupted before it returned a result.'
+      );
+    });
+
     it('renders Round A, then the failed round with its notice, then Round B', async () => {
       const a = timelineFromRounds([
         {
