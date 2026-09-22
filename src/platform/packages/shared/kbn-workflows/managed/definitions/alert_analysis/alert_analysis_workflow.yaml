@@ -51,6 +51,9 @@ tags:
 
 triggers:
   - type: alert
+  # Caller inputs (Worker / Run dialog) must live on a `manual` trigger — AlertRuleTriggerSchema
+  # only allows `type: alert`, so inputs declared on the alert trigger are stripped at parse time.
+  - type: manual
     # Optional caller-supplied inputs. When provided (e.g. by the AlertZero Alert Triage Worker
     # via workflow.execute), they override the space's uiSettings runtime_config values.
     # Absent inputs leave the standalone (alert-trigger) path unchanged.
@@ -73,7 +76,9 @@ triggers:
           type: boolean
           description: >
             When provided, overrides the space's uiSettings autoCloseEnabled value.
-            The Worker sets this to false because it owns closing via proposals.
+            The Worker sets this to false because it owns closing via proposals. When
+            `calledByWorker` is true and this field is omitted, the sub-workflow forces
+            auto-close off so HITL cannot be bypassed by accident.
         autoCloseConfidenceScoreMinThreshold:
           type: number
           description: >

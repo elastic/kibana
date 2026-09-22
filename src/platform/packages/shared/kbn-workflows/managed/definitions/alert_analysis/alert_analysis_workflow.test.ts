@@ -694,10 +694,18 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
   // counts zero pending alerts, skips the whole analysis and returns empty verdicts. It
   // reports success while doing nothing, which is why this is asserted rather than assumed.
   it('analyses a caller-supplied alert set, falling back to the trigger event', () => {
-    const declaringTrigger = (
+    // Caller inputs are declared on the manual trigger (AlertRuleTriggerSchema strips inputs).
+    const manualTrigger = (
       workflow.triggers as Array<{ type: string; inputs?: { properties?: object } }>
-    ).find(({ inputs }) => inputs?.properties != null);
-    expect(declaringTrigger?.inputs?.properties).toHaveProperty('alerts');
+    ).find(({ type }) => type === 'manual');
+    expect(manualTrigger?.inputs?.properties).toHaveProperty('alerts');
+    expect(manualTrigger?.inputs?.properties).toHaveProperty('calledByWorker');
+
+    const alertTrigger = (workflow.triggers as Array<{ type: string; inputs?: unknown }>).find(
+      ({ type }) => type === 'alert'
+    );
+    expect(alertTrigger).toBeDefined();
+    expect(alertTrigger?.inputs).toBeUndefined();
 
     // Default is the trigger's own alerts, so the standalone path is unchanged.
     const defaultStep = findStepByName(workflow.steps, 'set_alert_set') as {
