@@ -59,14 +59,26 @@ describe('buildStepDurations', () => {
     const steps = { step_a: makeStepInfo('step_a', 'http.request') };
     const execs = [makeExec('step_a', 'http.request', 120)];
     const result = buildStepDurations(execs, steps);
-    expect(result.get('step_a')).toEqual({ totalMs: 120, runCount: 1, hasDuration: true });
+    expect(result.get('step_a')).toEqual({
+      totalMs: 120,
+      runCount: 1,
+      hasDuration: true,
+      minMs: 120,
+      maxMs: 120,
+    });
   });
 
   it('sets hasDuration false when executionTimeMs is absent (still running)', () => {
     const steps = { step_a: makeStepInfo('step_a', 'http.request') };
     const execs = [makeExec('step_a', 'http.request', undefined)];
     const result = buildStepDurations(execs, steps);
-    expect(result.get('step_a')).toEqual({ totalMs: 0, runCount: 1, hasDuration: false });
+    expect(result.get('step_a')).toEqual({
+      totalMs: 0,
+      runCount: 1,
+      hasDuration: false,
+      minMs: 0,
+      maxMs: 0,
+    });
   });
 
   it('drops docs whose stepId is absent from the lookup', () => {
@@ -85,7 +97,13 @@ describe('buildStepDurations', () => {
     ];
     const result = buildStepDurations(execs, steps);
     // Only the real doc counts — no inflation.
-    expect(result.get('step_a')).toEqual({ totalMs: 1150, runCount: 1, hasDuration: true });
+    expect(result.get('step_a')).toEqual({
+      totalMs: 1150,
+      runCount: 1,
+      hasDuration: true,
+      minMs: 1150,
+      maxMs: 1150,
+    });
   });
 
   it('tracks two independent steps', () => {
@@ -99,7 +117,7 @@ describe('buildStepDurations', () => {
     expect(result.get('step_b')?.totalMs).toBe(120);
   });
 
-  it('foreach: loop step gets iteration count and its children get run count', () => {
+  it('foreach: loop step shows total (runCount=1), children show run count', () => {
     // Loop step itself: one doc with the whole wall clock.
     // Children: one doc per iteration, each with a numeric scopeId on the loop frame.
     const steps = {
@@ -134,17 +152,33 @@ describe('buildStepDurations', () => {
 
     const result = buildStepDurations(execs, steps);
 
-    // Loop step: the iteration Set is keyed by frame.stepId='my_loop' in the child docs'
-    // scopeStacks, giving 3 unique paths → runCount=3 (N × avg behaviour on the loop line).
+    // Loop step: foreach stepType forces runCount=1 so the chip shows total wall clock, not N×avg.
     const loop = result.get('my_loop');
     expect(loop?.totalMs).toBe(867);
-    expect(loop?.runCount).toBe(3);
+    expect(loop?.runCount).toBe(1);
 
-    // Child: 3 iterations → runCount = 3.
+    // Child: 3 iterations → runCount = 3 (non-loop step, shows N × avg with tooltip).
     const child = result.get('child_step');
     expect(child?.totalMs).toBe(867); // 289 × 3
     expect(child?.runCount).toBe(3);
     expect(child?.hasDuration).toBe(true);
+    expect(child?.minMs).toBe(289);
+    expect(child?.maxMs).toBe(289);
+  });
+
+  it('tracks min and max across multiple runs of the same step', () => {
+    const steps = { step_a: makeStepInfo('step_a', 'http.request') };
+    const execs = [
+      makeExec('step_a', 'http.request', 100),
+      makeExec('step_a', 'http.request', 200),
+      makeExec('step_a', 'http.request', 150),
+    ];
+    const result = buildStepDurations(execs, steps);
+    const entry = result.get('step_a');
+    expect(entry?.totalMs).toBe(450);
+    expect(entry?.runCount).toBe(3);
+    expect(entry?.minMs).toBe(100);
+    expect(entry?.maxMs).toBe(200);
   });
 
   it('nested foreach: inner loop counts its own iterations separately', () => {
@@ -216,15 +250,21 @@ describe('buildStepDurations', () => {
     const steps = { my_if: makeStepInfo('my_if', 'if') };
     const execs = [makeExec('my_if', 'if', 30)];
     const result = buildStepDurations(execs, steps);
-    expect(result.get('my_if')).toEqual({ totalMs: 30, runCount: 1, hasDuration: true });
+    expect(result.get('my_if')).toEqual({
+      totalMs: 30,
+      runCount: 1,
+      hasDuration: true,
+      minMs: 30,
+      maxMs: 30,
+    });
   });
 
-  it('zero-iteration loop: no iteration scopes recorded → runCount falls back to doc count', () => {
+  it('zero-iteration loop: foreach/while always has runCount=1 (shows total)', () => {
     const steps = { my_loop: makeStepInfo('my_loop', 'foreach') };
     const execs = [makeExec('my_loop', 'foreach', 5)]; // Loop ran but had 0 iterations.
     const result = buildStepDurations(execs, steps);
     const entry = result.get('my_loop');
-    expect(entry?.runCount).toBe(1); // falls back to runs
+    expect(entry?.runCount).toBe(1);
   });
 });
 
@@ -234,21 +274,41 @@ describe('buildStepDurations', () => {
 
 describe('formatStepDurationLabel', () => {
   it('returns empty string when hasDuration is false', () => {
-    expect(formatStepDurationLabel({ totalMs: 0, runCount: 1, hasDuration: false })).toBe('');
+    expect(
+      formatStepDurationLabel({ totalMs: 0, runCount: 1, hasDuration: false, minMs: 0, maxMs: 0 })
+    ).toBe('');
   });
 
   it('formats a single run', () => {
-    const label = formatStepDurationLabel({ totalMs: 120, runCount: 1, hasDuration: true });
+    const label = formatStepDurationLabel({
+      totalMs: 120,
+      runCount: 1,
+      hasDuration: true,
+      minMs: 120,
+      maxMs: 120,
+    });
     expect(label).toBe('120ms');
   });
 
   it('trims trailing space from formatDuration', () => {
-    const label = formatStepDurationLabel({ totalMs: 1000, runCount: 1, hasDuration: true });
+    const label = formatStepDurationLabel({
+      totalMs: 1000,
+      runCount: 1,
+      hasDuration: true,
+      minMs: 1000,
+      maxMs: 1000,
+    });
     expect(label).toBe('1s');
   });
 
   it('formats repeated runs as N × avg', () => {
-    const label = formatStepDurationLabel({ totalMs: 867, runCount: 3, hasDuration: true });
+    const label = formatStepDurationLabel({
+      totalMs: 867,
+      runCount: 3,
+      hasDuration: true,
+      minMs: 289,
+      maxMs: 289,
+    });
     // avg = Math.round(867/3) = 289ms
     expect(label).toContain('3');
     expect(label).toContain('289ms');
@@ -257,7 +317,13 @@ describe('formatStepDurationLabel', () => {
 
   it('rounds the average to the nearest millisecond', () => {
     // 100ms total, 3 runs → avg = Math.round(100/3) = 33ms
-    const label = formatStepDurationLabel({ totalMs: 100, runCount: 3, hasDuration: true });
+    const label = formatStepDurationLabel({
+      totalMs: 100,
+      runCount: 3,
+      hasDuration: true,
+      minMs: 33,
+      maxMs: 34,
+    });
     expect(label).toContain('33ms');
   });
 });

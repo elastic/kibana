@@ -15,10 +15,17 @@ import { formatDuration } from './format_duration';
 export interface StepDuration {
   /** `executionTimeMs` summed over every counted run. Drives the chip colour. */
   totalMs: number;
-  /** Divisor for the `N × avg` form: loop iteration count, else the number of counted runs. */
+  /**
+   * 1 for `foreach`/`while` steps (they always show total, not N × avg).
+   * Otherwise: loop iteration count or the number of counted runs.
+   */
   runCount: number;
   /** True when at least one counted run has a valid `executionTimeMs`. */
   hasDuration: boolean;
+  /** Lowest valid `executionTimeMs` across counted runs; 0 when `hasDuration` is false. */
+  minMs: number;
+  /** Highest valid `executionTimeMs` across counted runs; 0 when `hasDuration` is false. */
+  maxMs: number;
 }
 
 /**
@@ -70,7 +77,10 @@ export const buildStepDurations = (
   }
 
   // Pass 2 — accumulate totals, using the allow-list to drop wrapper docs.
-  const acc = new Map<string, { totalMs: number; runs: number; hasDuration: boolean }>();
+  const acc = new Map<
+    string,
+    { totalMs: number; runs: number; hasDuration: boolean; minMs: number; maxMs: number }
+  >();
 
   for (const exec of stepExecutions) {
     const { stepId, stepType, executionTimeMs } = exec;
@@ -80,7 +90,7 @@ export const buildStepDurations = (
     if (stepInfo && stepType === stepInfo.stepType) {
       let entry = acc.get(stepId);
       if (!entry) {
-        entry = { totalMs: 0, runs: 0, hasDuration: false };
+        entry = { totalMs: 0, runs: 0, hasDuration: false, minMs: Infinity, maxMs: 0 };
         acc.set(stepId, entry);
       }
 
@@ -90,19 +100,27 @@ export const buildStepDurations = (
       if (executionTimeMs !== undefined && executionTimeMs !== null && executionTimeMs >= 0) {
         entry.totalMs += executionTimeMs;
         entry.hasDuration = true;
+        entry.minMs = Math.min(entry.minMs, executionTimeMs);
+        entry.maxMs = Math.max(entry.maxMs, executionTimeMs);
       }
     }
   }
 
-  // Build the final map, resolving runCount to iteration count for loop steps.
+  // Build the final map.
+  // foreach/while steps always show their total wall clock (runCount=1) rather than N × avg,
+  // because each doc already spans the full loop duration — N × avg would misrepresent them.
   const result = new Map<string, StepDuration>();
   for (const [stepId, entry] of acc) {
+    const stepInfo = steps[stepId];
+    const isLoopStep = stepInfo?.stepType === 'foreach' || stepInfo?.stepType === 'while';
     const iterationSet = iterationsByLoopStep.get(stepId);
-    const runCount = iterationSet ? iterationSet.size || 1 : entry.runs;
+    const runCount = isLoopStep ? 1 : iterationSet ? iterationSet.size || 1 : entry.runs;
     result.set(stepId, {
       totalMs: entry.totalMs,
       runCount,
       hasDuration: entry.hasDuration,
+      minMs: entry.hasDuration ? entry.minMs : 0,
+      maxMs: entry.hasDuration ? entry.maxMs : 0,
     });
   }
 

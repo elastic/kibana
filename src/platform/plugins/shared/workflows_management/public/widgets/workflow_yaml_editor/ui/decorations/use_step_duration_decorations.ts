@@ -19,11 +19,13 @@ import {
   selectStepDurationDenominator,
   selectStepDurations,
 } from '../../../../entities/workflows/store';
+import type { StepDuration } from '../../../../shared/lib/build_step_durations';
 import {
   formatStepDurationLabel,
   getDurationGutterWidth,
   getStepDurationTone,
 } from '../../../../shared/lib/build_step_durations';
+import { formatDuration } from '../../../../shared/lib/format_duration';
 
 // The stable base class for the lane container div.
 const BASE_CLASS = 'step-duration-gutter';
@@ -87,7 +89,8 @@ export const useStepDurationDecorations = (editor: monaco.editor.IStandaloneCode
         const classNames = [BASE_CLASS, `${BASE_CLASS}-${tone}`, labelClass(label)];
         if (isDimmed) classNames.push('dimmed');
 
-        // Single-line range only: a multi-line range repeats the decoration on every line.
+        // Point range: linesDecorationsClassName on a multi-line range repeats the chip on
+        // every wrapped line, so we keep this at (n,1,n,1).
         decorations.push({
           range: new monaco.Range(stepInfo.lineStart, 1, stepInfo.lineStart, 1),
           options: { linesDecorationsClassName: classNames.join(' ') },
@@ -137,6 +140,81 @@ export const useStepDurationDecorations = (editor: monaco.editor.IStandaloneCode
       editor.updateOptions({ lineDecorationsWidth: MONACO_DEFAULT_LINE_DECORATIONS_WIDTH });
     };
   }, [editor, execution?.id, stepDurations]);
+
+  // Effect 3 — chip-hover tooltip.
+  // Monaco's gutter area (lines-decorations lane) has no native hover API and is clipped by
+  // `overflow: hidden`, so CSS ::after tooltips don't work there. Instead we use Monaco's own
+  // mouse-move event (which fires even through pointer-events:none children) to detect when the
+  // cursor is over the GUTTER_LINE_DECORATIONS area and show a position:fixed div on document.body.
+  useEffect(() => {
+    if (!editor) return;
+
+    // Build a lineStart → StepDuration map for the steps that need a tooltip.
+    const lineTooltip = new Map<number, StepDuration>();
+    for (const [stepId, duration] of stepDurations) {
+      if (duration.runCount > 1 && duration.hasDuration) {
+        const stepInfo = workflowLookup?.steps[stepId];
+        if (stepInfo) lineTooltip.set(stepInfo.lineStart, duration);
+      }
+    }
+
+    if (!lineTooltip.size) return;
+
+    const tipEl = document.createElement('div');
+    // position:fixed escapes Monaco's overflow:hidden margin container.
+    Object.assign(tipEl.style, {
+      position: 'fixed',
+      zIndex: '10000',
+      pointerEvents: 'none',
+      display: 'none',
+      padding: '4px 8px',
+      borderRadius: border.radius.small,
+      fontSize: '12px',
+      fontFamily: 'monospace',
+      whiteSpace: 'nowrap',
+      backgroundColor: colors.backgroundBaseHighlighted,
+      color: colors.textParagraph,
+      border: `1px solid ${colors.borderBasePlain}`,
+      boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
+    });
+    document.body.appendChild(tipEl);
+
+    const moveDisposable = editor.onMouseMove((e) => {
+      const isGutter = e.target.type === monaco.editor.MouseTargetType.GUTTER_LINE_DECORATIONS;
+      const line = e.target.position?.lineNumber;
+      const duration = isGutter && line != null ? lineTooltip.get(line) : undefined;
+
+      if (duration) {
+        const avg = formatDuration(Math.round(duration.totalMs / duration.runCount)).trim();
+        const minStr = formatDuration(duration.minMs).trim();
+        const maxStr = formatDuration(duration.maxMs).trim();
+        const bold = document.createElement('strong');
+        bold.textContent = `${duration.runCount} runs`;
+        tipEl.replaceChildren(
+          bold,
+          document.createElement('br'),
+          document.createTextNode(`avg: ${avg}`),
+          document.createElement('br'),
+          document.createTextNode(`min: ${minStr} - max: ${maxStr}`)
+        );
+        tipEl.style.left = `${e.event.browserEvent.clientX + 12}px`;
+        tipEl.style.top = `${e.event.browserEvent.clientY + 12}px`;
+        tipEl.style.display = 'block';
+      } else {
+        tipEl.style.display = 'none';
+      }
+    });
+
+    const leaveDisposable = editor.onMouseLeave(() => {
+      tipEl.style.display = 'none';
+    });
+
+    return () => {
+      moveDisposable.dispose();
+      leaveDisposable.dispose();
+      if (document.body.contains(tipEl)) document.body.removeChild(tipEl);
+    };
+  }, [editor, stepDurations, workflowLookup, colors, border]);
 
   // Build styles: one rule for each distinct label present (content injection),
   // plus the shared layout and tone modifiers.
