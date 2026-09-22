@@ -33,12 +33,7 @@ import {
   AI_INDICES_PER_PAGE,
   AI_INDEX_LIST_LABELS,
   aiIndexOwnerFilter,
-  aiIndexTypeFilter,
 } from './utils/ai_index_content_list_utils';
-
-const AiIndexTypeFilter = createFilterControl(aiIndexTypeFilter, {
-  'data-test-subj': 'contextAiIndexListTypeFilter',
-});
 
 const AiIndexOwnerFilter = createFilterControl(aiIndexOwnerFilter, {
   'data-test-subj': 'contextAiIndexListOwnerFilter',
@@ -110,7 +105,6 @@ const ContextLandingPageContent = ({
               <>
                 <ContentListToolbar data-test-subj="contextAiIndexList">
                   <ContentListToolbar.Filters>
-                    <AiIndexTypeFilter />
                     <AiIndexOwnerFilter />
                   </ContentListToolbar.Filters>
                 </ContentListToolbar>
@@ -143,7 +137,6 @@ export const ContextLandingPage = () => {
           pageSizeOptions: [AI_INDICES_PER_PAGE],
         },
         filters: {
-          aiIndexType: aiIndexTypeFilter,
           aiIndexOwner: aiIndexOwnerFilter,
         },
       }}
