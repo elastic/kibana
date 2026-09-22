@@ -11,15 +11,13 @@ import React, { useEffect } from 'react';
 import { EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { useHistory, useLocation } from 'react-router-dom';
-import { OutPortal } from 'react-reverse-portal';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { NotFoundPrompt } from '@kbn/shared-ux-prompt-not-found';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import { useInspectorContext } from '@kbn/observability-shared-plugin/public';
-import { CertRefreshBtn, CertificateTitle, CertificatesPage } from './components/certificates';
+import { CertificatesPage } from './components/certificates';
 import { useSyntheticsPrivileges } from './hooks/use_synthetics_priviliges';
 import type { ClientPluginsStart } from '../../plugin';
 import { getMonitorsRoute } from './components/monitors_page/route_config';
@@ -32,15 +30,6 @@ import { TestRunDetails } from './components/test_run_details/test_run_details';
 import { MonitorAddPage } from './components/monitor_add_edit/monitor_add_page';
 import { MonitorEditPage } from './components/monitor_add_edit/monitor_edit_page';
 import { GettingStartedPage } from './components/getting_started/getting_started_page';
-import {
-  GettingStartedBackLink,
-  hasGettingStartedAddDataReturn,
-} from './components/getting_started/getting_started_back_link';
-import {
-  InspectMonitorPortalNode,
-  MonitorDetailsLinkPortalNode,
-  MonitorTypePortalNode,
-} from './components/monitor_add_edit/portals';
 import {
   CERTIFICATES_ROUTE,
   GETTING_STARTED_ROUTE,
@@ -88,9 +77,9 @@ const getRoutes = (
         alignment: 'center',
         paddingSize: 'none',
       },
-      pageHeader: hasGettingStartedAddDataReturn(location.search)
-        ? { pageTitle: <GettingStartedBackLink />, bottomBorder: false }
-        : undefined,
+      // Keep a pageHeader so the template sizes with --kbn-application--content-height
+      // instead of 100vh, which overflows and breaks vertical centering.
+      pageHeader: { bottomBorder: false },
     },
     {
       title: i18n.translate('xpack.synthetics.createMonitorRoute.title', {
@@ -101,15 +90,6 @@ const getRoutes = (
       component: MonitorAddPage,
       dataTestSubj: 'syntheticsMonitorAddPage',
       restrictWidth: true,
-      pageHeader: {
-        pageTitle: (
-          <FormattedMessage
-            id="xpack.synthetics.createMonitor.pageHeader.title"
-            defaultMessage="Create Monitor"
-          />
-        ),
-        rightSideItems: [<OutPortal node={InspectMonitorPortalNode} />],
-      },
     },
     {
       title: i18n.translate('xpack.synthetics.editMonitorRoute.title', {
@@ -120,23 +100,6 @@ const getRoutes = (
       component: MonitorEditPage,
       dataTestSubj: 'syntheticsMonitorEditPage',
       restrictWidth: true,
-      pageHeader: {
-        pageTitle: (
-          <FormattedMessage
-            id="xpack.synthetics.editMonitor.pageHeader.title"
-            defaultMessage="Edit Monitor"
-          />
-        ),
-        rightSideItems: [
-          <OutPortal node={MonitorTypePortalNode} />,
-          <OutPortal node={InspectMonitorPortalNode} />,
-        ],
-        breadcrumbs: [
-          {
-            text: <OutPortal node={MonitorDetailsLinkPortalNode} />,
-          },
-        ],
-      },
     },
     {
       title: i18n.translate('xpack.synthetics.testRunDetailsRoute.title', {
@@ -146,14 +109,6 @@ const getRoutes = (
       path: TEST_RUN_DETAILS_ROUTE,
       component: TestRunDetails,
       dataTestSubj: 'syntheticsMonitorTestRunDetailsPage',
-      pageHeader: {
-        pageTitle: (
-          <FormattedMessage
-            id="xpack.synthetics.testRunDetailsRoute.page.title"
-            defaultMessage="Test run details"
-          />
-        ),
-      },
     },
     {
       title: i18n.translate('xpack.synthetics.certificatesRoute.title', {
@@ -163,10 +118,6 @@ const getRoutes = (
       path: CERTIFICATES_ROUTE,
       component: CertificatesPage,
       dataTestSubj: 'uptimeCertificatesPage',
-      pageHeader: {
-        pageTitle: <CertificateTitle />,
-        rightSideItems: [<CertRefreshBtn />],
-      },
     },
   ];
 };
@@ -204,17 +155,20 @@ export const PageRouter: FC = () => {
           path,
           component: RouteComponent,
           dataTestSubj,
-          pageHeader,
           ...pageTemplateProps
         }: RouteProps) => (
           <Route path={path} key={dataTestSubj} exact={true}>
             <div className={APP_WRAPPER_CLASS} data-test-subj={dataTestSubj}>
               <RouteInit title={title} path={path} />
               <SyntheticsPageTemplateComponent
-                pageHeader={isUnprivileged ? undefined : pageHeader}
                 data-test-subj={'synthetics-page-template'}
                 isPageDataLoaded={true}
                 {...pageTemplateProps}
+                pageSectionProps={
+                  isUnprivileged
+                    ? pageTemplateProps.pageSectionProps
+                    : { ...pageTemplateProps.pageSectionProps, paddingSize: 'none' }
+                }
               >
                 {isUnprivileged || <RouteComponent />}
               </SyntheticsPageTemplateComponent>

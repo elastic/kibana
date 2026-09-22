@@ -71,6 +71,8 @@ export interface ContextAppContentProps {
   predecessorsStatus: LoadingStatus;
   successorsStatus: LoadingStatus;
   interceptedWarnings: SearchResponseWarning[];
+  isWarningCalloutDismissed: boolean;
+  onDismissWarningCallout: () => void;
   setAppState: (newState: Partial<AppState>) => void;
   addFilter: DocViewFilterFn;
   expandedDoc: DataTableRecord | undefined;
@@ -103,6 +105,8 @@ export function ContextAppContent({
   predecessorsStatus,
   successorsStatus,
   interceptedWarnings,
+  isWarningCalloutDismissed,
+  onDismissWarningCallout,
   setAppState,
   addFilter,
   expandedDoc,
@@ -121,7 +125,7 @@ export function ContextAppContent({
   const areSuccessorsLoading =
     successorsStatus === LoadingStatus.LOADING || successorsStatus === LoadingStatus.UNINITIALIZED;
 
-  const showInterceptedWarning = Boolean(interceptedWarnings.length);
+  const showInterceptedWarning = Boolean(interceptedWarnings.length) && !isWarningCalloutDismissed;
   const showPredecessorsWarning =
     !isAnchorLoading && !arePredecessorsLoading && predecessors.length < predecessorCount;
   const showSuccessorsWarning =
@@ -239,7 +243,11 @@ export function ContextAppContent({
         <WrapperWithPadding direction="horizontal">
           {showInterceptedWarning && (
             <>
-              <SearchResponseWarningsCallout warnings={interceptedWarnings} />
+              <SearchResponseWarningsCallout
+                warnings={interceptedWarnings}
+                isDismissed={isWarningCalloutDismissed}
+                onDismiss={onDismissWarningCallout}
+              />
               <EuiSpacer size="s" />
             </>
           )}

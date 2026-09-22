@@ -8,11 +8,18 @@
  */
 
 import type { MouseEventHandler, ReactNode } from 'react';
-import type { EuiButtonProps, EuiFlyoutProps, EuiIconProps } from '@elastic/eui';
+import type { EuiBadgeProps, EuiButtonProps, EuiFlyoutProps, EuiIconProps } from '@elastic/eui';
+import type { InfoBlockItem } from '@kbn/flyout-info-blocks';
+import type {
+  FlyoutSectionAction,
+  FlyoutSectionProps,
+  FlyoutSubsectionProps,
+  FlyoutAccordionProps,
+} from '@kbn/flyout-sections';
 
-/** Descriptor for a single tab passed to the root `tabs` prop. */
+/** Props for a single tab entry in the root `tabs` array. */
 export interface FlyoutTabProps {
-  /** Stable identifier linking this tab to its `Body.TabPanel`. */
+  /** Stable identifier, used to link the tab to its `Body.TabPanel`. */
   id: string;
   /** Tab label rendered inside `EuiTab`. */
   label: ReactNode;
@@ -35,6 +42,11 @@ export interface FlyoutHeaderProps {
   /** Title rendered by the header. Rendered as an `<h3>` (heading level is owned by the template). */
   title: ReactNode;
   'data-test-subj'?: string;
+  /**
+   * `Header.MetaBlock`, `Header.Badge`, and `Header.InfoBlock` parts.
+   * Free-form content is not rendered.
+   */
+  children?: ReactNode;
   /** Icon beside the title; defaults to `info` when `titleTooltip` is set. */
   titleIcon?: EuiIconProps['type'];
   /** Tooltip shown from the title icon. */
@@ -43,15 +55,74 @@ export interface FlyoutHeaderProps {
   description?: ReactNode;
   /**
    * When true, the header is permanently rendered in its compact collapsed layout regardless of
-   * scroll position, and the description is not shown.
+   * scroll position. The description, meta blocks, badges, and info blocks are not shown.
    */
   collapsed?: boolean;
 }
 
+/** Props for the declarative `FlyoutTemplate.Header.MetaBlock` part. */
+export interface FlyoutHeaderMetaBlockProps {
+  /** Optional explicit instance id; auto-generated when omitted. */
+  id?: string;
+  /** The pair's key, rendered bold ahead of the value. */
+  title: ReactNode;
+  /** The pair's value; accepts rich content such as links. */
+  children: ReactNode;
+  'data-test-subj'?: string;
+}
+
+/**
+ * Props for the declarative `FlyoutTemplate.Header.Badge` part.
+ *
+ * The template composes the `EuiBadge` itself, so only presentational options are
+ * exposed. Badges in a flyout header label the subject; they are not controls.
+ */
+export interface FlyoutHeaderBadgeProps {
+  /** Optional explicit instance id; auto-generated when omitted. */
+  id?: string;
+  /** Badge label. */
+  children: ReactNode;
+  /** Palette color name or hex value. */
+  color?: EuiBadgeProps['color'];
+  /** Icon shown inside the badge. */
+  iconType?: EuiBadgeProps['iconType'];
+  /** Which side of the label the icon sits on. */
+  iconSide?: EuiBadgeProps['iconSide'];
+  'data-test-subj'?: string;
+}
+
+/** Props for the declarative `FlyoutTemplate.Header.InfoBlock` part. */
+export interface FlyoutHeaderInfoBlockProps {
+  /** Optional explicit instance id; auto-generated when omitted. */
+  id?: string;
+  /** Fixed-style text label rendered above the value. */
+  title: string;
+  /** The block's value content. */
+  children: ReactNode;
+  size?: InfoBlockItem['size'];
+  color?: InfoBlockItem['color'];
+  'data-test-subj'?: string;
+}
+
+/** Action link rendered right-aligned on a section or accordion title row. */
+export type FlyoutBodySectionAction = FlyoutSectionAction;
+
+/** Props for the declarative `FlyoutTemplate.Body.Section` part. `borderOnChildren` is derived from the children, not authored. */
+export type FlyoutBodySectionProps = Omit<FlyoutSectionProps, 'borderOnChildren'>;
+
+/** Props for the declarative body subsection part. `hasBorder` is inherited from the parent, not authored. */
+export type FlyoutBodySubsectionProps = Omit<FlyoutSubsectionProps, 'hasBorder'>;
+
+/** Props for the declarative `FlyoutTemplate.Body.Accordion` part. */
+export type FlyoutBodyAccordionProps = Omit<FlyoutAccordionProps, 'hasBorder'>;
+
 /** Props for the declarative `FlyoutTemplate.Body` zone. */
 export interface FlyoutBodyProps {
   'data-test-subj'?: string;
-  /** `Body.TabPanel` parts, and/or arbitrary content rendered as-is in source order. */
+  /**
+   * `Body.Section`, `Body.Accordion`, or `Body.TabPanel` parts, and/or arbitrary
+   * content (callouts, search bars, data grids) rendered as-is in source order.
+   */
   children?: ReactNode;
 }
 

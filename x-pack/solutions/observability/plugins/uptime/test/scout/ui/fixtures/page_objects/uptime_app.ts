@@ -121,7 +121,7 @@ export class UptimeAppPage {
     );
     await filterPopoverButton.click();
     for (const title of items) {
-      await this.page.locator(`li[title="${title}"]`).click();
+      await this.page.locator(`li:has(span[title="${title}"])`).click();
     }
     await this.page.locator(`[aria-label="Apply the selected filters for ${filterType}"]`).click();
   }

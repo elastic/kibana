@@ -15,6 +15,8 @@ export const NIGHTSHIFT_EBT_ACTIONS = {
   EXPAND_DETECTIONS: 'expandDetections',
   FILTER_BY_IMPACTED_SERVICES: 'filterByImpactedServices',
   OPEN_IN_CHAT: 'openInChat',
+  RETRY_INVESTIGATIONS: 'retryInvestigations',
+  SHOW_MORE_INVESTIGATIONS: 'showMoreInvestigations',
   VIEW_ALL_SIGNIFICANT_EVENTS: 'viewAllSignificantEvents',
   VIEW_DETECTION: 'viewDetection',
   VIEW_ENTITY: 'viewEntity',
@@ -26,6 +28,8 @@ export const NIGHTSHIFT_EBT_ACTIONS = {
 
 export const NIGHTSHIFT_EBT_ELEMENTS = {
   IMPACTED_SERVICES: 'nightshiftImpactedServices',
+  INVESTIGATIONS_LIST: 'nightshiftInvestigationsList',
+  INVESTIGATION_DETAIL_FLYOUT: 'nightshiftInvestigationDetailFlyout',
   DETECTION_FLYOUT: 'nightshiftDetectionFlyout',
   DETECTION_FLYOUT_ENTITIES: 'nightshiftDetectionFlyoutEntities',
   ENTITY_FLYOUT: 'nightshiftEntityFlyout',

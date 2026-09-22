@@ -8,7 +8,7 @@
  */
 
 import React, { Suspense, forwardRef } from 'react';
-import type { KeyboardEvent, ForwardedRef, ComponentProps } from 'react';
+import type { ForwardedRef, ComponentProps } from 'react';
 import { EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import type { EuiButtonIconProps, IconType } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -16,7 +16,6 @@ import { css } from '@emotion/react';
 import type { MenuItem } from '../../../types';
 import { BetaBadge } from '../beta_badge';
 import { NAVIGATION_SELECTOR_PREFIX, TOOLTIP_OFFSET } from '../../constants';
-import { focusMainContent } from '../../utils/focus_main_content';
 import { useHighContrastModeStyles } from '../../hooks/use_high_contrast_mode_styles';
 import { NewItemIndicator } from '../new_item_indicator';
 
@@ -28,7 +27,6 @@ export interface FooterItemProps extends Omit<EuiButtonIconProps, 'iconType'>, M
   isNew: boolean;
   label: string;
   onClick?: () => void;
-  onKeyDown?: (e: KeyboardEvent) => void;
 }
 
 /**
@@ -43,15 +41,6 @@ export const FooterItem = forwardRef<HTMLAnchorElement, FooterItemProps>(
   ) => {
     const { euiTheme } = useEuiTheme();
     const highContrastModeStyles = useHighContrastModeStyles();
-
-    const handleFooterItemKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        // Required for entering the popover with Enter or Space key
-        // Otherwise the navigation happens immediately
-        e.preventDefault();
-        focusMainContent();
-      }
-    };
 
     const wrapperStyles = css`
       display: flex;
@@ -86,7 +75,6 @@ export const FooterItem = forwardRef<HTMLAnchorElement, FooterItemProps>(
       'data-menu-item': 'true',
       display: isHighlighted ? 'base' : 'empty',
       iconType: 'empty', // `iconType` is passed in Suspense below
-      onKeyDown: handleFooterItemKeyDown,
       size: 's',
       css: buttonStyles,
       ...props,
@@ -107,10 +95,11 @@ export const FooterItem = forwardRef<HTMLAnchorElement, FooterItemProps>(
         align-items: center;
         gap: ${euiTheme.size.s};
       `;
-      const tooltipContent = badgeType ? (
+      const tooltipBadgeType = badgeType === 'new' && !isNew ? undefined : badgeType;
+      const tooltipContent = tooltipBadgeType ? (
         <span css={tooltipStyles}>
           {label}
-          <BetaBadge type={badgeType} isInverted />
+          <BetaBadge type={tooltipBadgeType} isInverted />
         </span>
       ) : (
         label

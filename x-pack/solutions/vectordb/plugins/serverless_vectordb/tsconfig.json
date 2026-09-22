@@ -9,6 +9,7 @@
     "public/**/*.ts",
     "public/**/*.tsx",
     "server/**/*.ts",
+    "test/scout/**/*",
     "../../../../../typings/**/*",
   ],
   "exclude": [
@@ -52,5 +53,9 @@
     "@kbn/core-security-common",
     "@kbn/core-http-browser-mocks",
     "@kbn/features-plugin",
+    "@kbn/scout",
+    "@kbn/deeplinks-analytics",
+    "@kbn/index-management-shared-types",
+    "@kbn/discover-plugin",
   ]
 }

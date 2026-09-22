@@ -9,10 +9,11 @@ import {
   actionPolicyDestinationSchema,
   bulkSnoozeActionPoliciesBodySchema,
   createActionPolicyDataSchema,
+  findActionPoliciesRequestSchema,
   snoozeActionPolicyBodySchema,
   updateActionPolicyDataSchema,
 } from './action_policy_data_schema';
-import { MAX_BULK_ITEMS } from './constants';
+import { FIND_MAX_RESULT_WINDOW, MAX_BULK_ITEMS } from './constants';
 
 const DESTINATIONS = [{ type: 'workflow' as const, id: 'wf-1' }];
 
@@ -397,6 +398,60 @@ describe('updateActionPolicyDataSchema', () => {
         })
       ).toThrow('requires an interval');
     });
+  });
+});
+
+describe('findActionPoliciesRequestSchema', () => {
+  it('accepts an empty object', () => {
+    expect(findActionPoliciesRequestSchema.parse({})).toEqual({});
+  });
+
+  it('accepts valid query params', () => {
+    expect(
+      findActionPoliciesRequestSchema.parse({
+        page: 2,
+        per_page: 50,
+        search: 'cpu',
+        enabled: 'true',
+        sort_field: 'name',
+        sort_order: 'asc',
+      })
+    ).toEqual({
+      page: 2,
+      per_page: 50,
+      search: 'cpu',
+      enabled: true,
+      sort_field: 'name',
+      sort_order: 'asc',
+    });
+  });
+
+  it('rejects unknown keys', () => {
+    expect(() => findActionPoliciesRequestSchema.parse({ unknown_field: 'x' })).toThrow();
+  });
+
+  it('coerces numeric strings for page and per_page', () => {
+    expect(findActionPoliciesRequestSchema.parse({ page: '3', per_page: '10' })).toEqual({
+      page: 3,
+      per_page: 10,
+    });
+  });
+
+  it.each([0, 1.5, 'abc', FIND_MAX_RESULT_WINDOW + 1])('rejects page %p', (page) => {
+    expect(findActionPoliciesRequestSchema.safeParse({ page }).success).toBe(false);
+  });
+
+  it.each([0, 1.5, 101])('rejects per_page %p', (perPage) => {
+    expect(findActionPoliciesRequestSchema.safeParse({ per_page: perPage }).success).toBe(false);
+  });
+
+  it('rejects a page beyond the result window', () => {
+    expect(findActionPoliciesRequestSchema.safeParse({ page: 100, per_page: 100 }).success).toBe(
+      true
+    );
+    expect(findActionPoliciesRequestSchema.safeParse({ page: 101, per_page: 100 }).success).toBe(
+      false
+    );
   });
 });
 

@@ -13,7 +13,7 @@ belong in that smoke lane.
 | Namespace | API | UI | Notes |
 |---|---|---|---|
 | `converse` | `converse_*`, `chat_api_converse`, `attachments` | Conversation flow, error handling, sidebar flow | LLM-proxy converse path; several specs run `local` and `task_manager`. Split this further if the config is still a congested lane. |
-| `conversations` | `conversations_*` | Conversation history | Conversation HTTP CRUD, pagination, access control, concurrency |
+| `conversations` | `conversations_*` | Conversation history | Conversation HTTP CRUD, pagination, access control, search, events |
 | `agents` | `agents_*`, `update_agent`, `space_default_agent` | Agents list, create/edit, landing, sidebar switch, space default | Agent HTTP + management UI |
 | `tools` | `tools_*`, `mcp_connector` | Create/manage tool, MCP tools/clients | `mcp_clients` is `@local-serverless-search` only |
 | `platform` | `sml_*`, `skills_*`, `rbac`, `spaces`, `availability_gating`, `plugins_installation` | — | API-only. Gating, SML, skills, plugin install |
@@ -23,7 +23,7 @@ belong in that smoke lane.
 ### Where a new spec goes
 
 - Converse / chat streaming / attachments → `converse`
-- Conversation list/get/create/delete/pagination/access-control → `conversations`
+- Conversation list/get/create/delete/pagination/access-control/search/events → `conversations`
 - Agent CRUD, access-control, space default agent → `agents`
 - Tools, ES\|QL, index search, MCP connector → `tools`
 - SML, skills, RBAC, spaces, availability, plugin installation → `platform`
@@ -35,7 +35,7 @@ confirm the `.meta/` manifest lists it.
 
 If `converse` exceeds the Scout lane target (~15 minutes of test time), split the
 dual-mode specs (`converse_tool_calling`, `converse_attachments`,
-`converse_error_regenerate`, `converse_simple_multi`) into a `converse_modes`
+`converse_error`, `converse_interrupted_executions`, `converse_simple_multi`) into a `converse_modes`
 namespace — the same pattern as `scout_alerting_v2`'s `engine_executor`.
 
 ## Layout

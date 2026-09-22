@@ -84,6 +84,10 @@ components:
         metadata:
           type: object
           additionalProperties: true
+        source:
+          type: string
+          enum:
+            - import
         created_at:
           type: string
         updated_at:

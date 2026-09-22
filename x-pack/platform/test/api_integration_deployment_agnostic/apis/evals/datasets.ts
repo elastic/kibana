@@ -11,12 +11,18 @@ import {
   EVALS_DATASET_URL,
   EVALS_DATASET_EXAMPLES_URL,
   EVALS_DATASET_EXAMPLE_URL,
+  EVALS_DATASET_COPY_URL,
   EVALS_DATASET_RESOLVE_URL,
   EVALS_DATASET_UPSERT_URL,
+  EVALS_EXAMPLE_SCORES_URL,
+  EVALS_SCORES_URL,
+  EvaluationIndices,
   type AddEvaluationDatasetExamplesResponse,
   type CreateEvaluationDatasetResponse,
   type DeleteEvaluationDatasetExampleResponse,
   type DeleteEvaluationDatasetResponse,
+  type CopyEvaluationDatasetResponse,
+  type GetExampleScoresResponse,
   type GetEvaluationDatasetResponse,
   type GetEvaluationDatasetsResponse,
   type ResolveEvaluationDatasetResponse,
@@ -28,13 +34,14 @@ import { ALL_SPACES_ID, UNKNOWN_SPACE } from '@kbn/spaces-plugin/common/constant
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { SupertestWithRoleScopeType } from '../../services';
 import { getEvalsApiClientForCustomRole, getEvalsApiClientForRole } from './helpers/api_client';
-import { uniqueSuffix } from './helpers/fixtures';
+import { buildScore, buildScoresRequestBody, uniqueSuffix } from './helpers/fixtures';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   const customRoleScopedSupertest = getService('customRoleScopedSupertest');
   const samlAuth = getService('samlAuth');
   const spaces = getService('spaces');
+  const es = getService('es');
 
   let adminClient: SupertestWithRoleScopeType;
   let viewerClient: SupertestWithRoleScopeType;
@@ -43,6 +50,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     EVALS_DATASET_URL.replace('{datasetId}', encodeURIComponent(datasetId));
   const examplesPath = (datasetId: string) =>
     EVALS_DATASET_EXAMPLES_URL.replace('{datasetId}', encodeURIComponent(datasetId));
+  const copyDatasetPath = (datasetId: string) =>
+    EVALS_DATASET_COPY_URL.replace('{datasetId}', encodeURIComponent(datasetId));
   const examplePath = (datasetId: string, exampleId: string) =>
     EVALS_DATASET_EXAMPLE_URL.replace('{datasetId}', encodeURIComponent(datasetId)).replace(
       '{exampleId}',
@@ -187,7 +196,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             ],
           })
           .expect(200);
-        expect((addBody as AddEvaluationDatasetExamplesResponse).added).to.eql(2);
+        expect(addBody as AddEvaluationDatasetExamplesResponse).to.eql({
+          added: 2,
+          skipped_duplicates: 0,
+        });
 
         const { body: datasetBody } = await adminClient
           .get(datasetPath(exampleDatasetId))
@@ -240,6 +252,253 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .get(datasetPath(exampleDatasetId))
           .expect(200);
         expect((datasetBody as GetEvaluationDatasetResponse).examples.length).to.eql(1);
+      });
+    });
+
+    describe('dataset copy', () => {
+      type DatasetExample = GetEvaluationDatasetResponse['examples'][number];
+      type DatasetWithExampleCount = GetEvaluationDatasetResponse & { examples_count: number };
+
+      const sourceDatasetName = `FTR Copy Source Dataset ${suffix}`;
+      const copyDatasetName = `FTR Copied Dataset ${suffix}`;
+      const scoreSuiteId = `ftr-dataset-copy-${suffix}`;
+      const datasetExamples = [
+        {
+          input: { question: 'copy-a' },
+          output: { answer: '1' },
+          metadata: { category: 'first' },
+        },
+        {
+          input: { question: 'copy-b' },
+          output: { answer: '2' },
+          metadata: { category: 'second' },
+        },
+      ];
+      let sourceDatasetId = '';
+      let copyDatasetId = '';
+      let sourceUpdatedAt = '';
+      let sourceExamplesCount = 0;
+      let sourceExamples: DatasetExample[] = [];
+      let copyExamples: DatasetExample[] = [];
+
+      const exampleContent = ({ input, output, metadata }: DatasetExample) => ({
+        input,
+        output,
+        metadata,
+      });
+      const sortedExampleContent = (examples: DatasetExample[]) =>
+        examples
+          .map(exampleContent)
+          .sort((left, right) =>
+            JSON.stringify(left.input).localeCompare(JSON.stringify(right.input))
+          );
+      const exampleScoresPath = (exampleId: string) =>
+        EVALS_EXAMPLE_SCORES_URL.replace('{exampleId}', encodeURIComponent(exampleId));
+
+      before(async () => {
+        const { body: createBody } = await adminClient
+          .post(EVALS_DATASETS_URL)
+          .send({ name: sourceDatasetName, description: 'copy source fixture' })
+          .expect(200);
+        sourceDatasetId = (createBody as CreateEvaluationDatasetResponse).dataset_id;
+
+        await adminClient
+          .post(examplesPath(sourceDatasetId))
+          .send({ examples: datasetExamples })
+          .expect(200);
+
+        const { body: sourceBody } = await adminClient
+          .get(datasetPath(sourceDatasetId))
+          .expect(200);
+        const source = sourceBody as DatasetWithExampleCount;
+        sourceUpdatedAt = source.updated_at;
+        sourceExamplesCount = source.examples_count;
+        sourceExamples = source.examples;
+      });
+
+      after(async () => {
+        if (copyDatasetId) {
+          await adminClient.delete(datasetPath(copyDatasetId)).catch(() => {
+            // best-effort cleanup
+          });
+        }
+        if (sourceDatasetId) {
+          await adminClient.delete(datasetPath(sourceDatasetId)).catch(() => {
+            // best-effort cleanup
+          });
+        }
+        await es
+          .deleteByQuery({
+            index: EvaluationIndices.SCORES,
+            query: { term: { 'metadata.suite_id': scoreSuiteId } },
+            refresh: true,
+            conflicts: 'proceed',
+            ignore_unavailable: true,
+          })
+          .catch(() => {
+            // best-effort cleanup
+          });
+      });
+
+      it('creates an isolated deep copy with fresh identifiers', async () => {
+        const { body: copyBody } = await adminClient
+          .post(copyDatasetPath(sourceDatasetId))
+          .send({ name: copyDatasetName })
+          .expect(200);
+        const copyResponse = copyBody as CopyEvaluationDatasetResponse;
+
+        copyDatasetId = copyResponse.dataset_id;
+        expect(copyResponse.examples_count).to.eql(datasetExamples.length);
+        expect(copyDatasetId).to.not.eql(sourceDatasetId);
+
+        const { body: copyBodyAfterCreate } = await adminClient
+          .get(datasetPath(copyDatasetId))
+          .expect(200);
+        const copy = copyBodyAfterCreate as DatasetWithExampleCount;
+        copyExamples = copy.examples;
+
+        expect(copy.examples_count).to.eql(datasetExamples.length);
+        expect(sortedExampleContent(copyExamples)).to.eql(sortedExampleContent(sourceExamples));
+
+        const sourceExampleIds = sourceExamples.map(({ id }) => id);
+        expect(copyExamples.every(({ id }) => !sourceExampleIds.includes(id))).to.be(true);
+
+        const { body: sourceBody } = await adminClient
+          .get(datasetPath(sourceDatasetId))
+          .expect(200);
+        const sourceAfterCopy = sourceBody as DatasetWithExampleCount;
+        const sourceExamplesAfterCopy = sourceAfterCopy.examples;
+        expect(sourceAfterCopy.examples_count).to.eql(sourceExamplesCount);
+        expect(sourceExamplesAfterCopy.map(({ id }) => id).sort()).to.eql(sourceExampleIds.sort());
+      });
+
+      it('leaves the source unchanged when an example is added to the copy', async () => {
+        await adminClient
+          .post(examplesPath(copyDatasetId))
+          .send({ examples: [{ input: { question: 'copy-only' } }] })
+          .expect(200);
+
+        const { body } = await adminClient.get(datasetPath(sourceDatasetId)).expect(200);
+        const sourceAfterCopyEdit = body as DatasetWithExampleCount;
+        expect(sourceAfterCopyEdit.examples_count).to.eql(sourceExamplesCount);
+        expect(sourceAfterCopyEdit.updated_at).to.eql(sourceUpdatedAt);
+      });
+
+      it("returns 409 when the copy uses the source dataset's name", async () => {
+        await adminClient
+          .post(copyDatasetPath(sourceDatasetId))
+          .send({ name: sourceDatasetName })
+          .expect(409);
+      });
+
+      it('rejects copying without manage_evals privileges (viewer)', async () => {
+        await viewerClient
+          .post(copyDatasetPath(sourceDatasetId))
+          .send({ name: `viewer-copy-${suffix}` })
+          .expect(403);
+      });
+
+      it('does not attach source scores to the corresponding copy example', async () => {
+        const sourceExample = sourceExamples.find(
+          ({ input }) => input?.question === datasetExamples[0].input.question
+        );
+        const copyExample = copyExamples.find(
+          ({ input }) => input?.question === datasetExamples[0].input.question
+        );
+        expect(sourceExample).to.not.be(undefined);
+        expect(copyExample).to.not.be(undefined);
+        if (!sourceExample || !copyExample) {
+          throw new Error('Expected corresponding source and copy examples');
+        }
+
+        const scoresBody = buildScoresRequestBody({
+          experimentId: `experiment-${scoreSuiteId}`,
+          suiteId: scoreSuiteId,
+          scores: [
+            buildScore({
+              exampleId: sourceExample.id,
+              exampleIndex: 0,
+              datasetId: sourceDatasetId,
+              datasetName: sourceDatasetName,
+            }),
+          ],
+        });
+        await adminClient.post(EVALS_SCORES_URL).send(scoresBody).expect(200);
+
+        const { body: copyScoresBody } = await adminClient
+          .get(exampleScoresPath(copyExample.id))
+          .query({ dataset_id: copyDatasetId })
+          .expect(200);
+        expect((copyScoresBody as GetExampleScoresResponse).total).to.eql(0);
+
+        const { body: sourceScoresBody } = await adminClient
+          .get(exampleScoresPath(sourceExample.id))
+          .query({ dataset_id: sourceDatasetId })
+          .expect(200);
+        expect((sourceScoresBody as GetExampleScoresResponse).total).to.be.greaterThan(0);
+      });
+    });
+
+    describe('example import', () => {
+      const importDatasetName = `FTR Import Dataset ${suffix}`;
+      const importPayload = [
+        { input: { question: 'import-a' }, output: { answer: '1' } },
+        { input: { question: 'import-b' }, output: { answer: '2' } },
+      ];
+      let importDatasetId = '';
+
+      before(async () => {
+        const { body } = await adminClient
+          .post(EVALS_DATASETS_URL)
+          .send({ name: importDatasetName, description: 'import fixture' })
+          .expect(200);
+        importDatasetId = (body as CreateEvaluationDatasetResponse).dataset_id;
+      });
+
+      after(async () => {
+        if (importDatasetId) {
+          await adminClient.delete(datasetPath(importDatasetId)).catch(() => {
+            // best-effort cleanup
+          });
+        }
+      });
+
+      it('imports examples with their source and skips them when re-imported', async () => {
+        const { body: importBody } = await adminClient
+          .post(examplesPath(importDatasetId))
+          .send({ examples: importPayload, source: 'import', on_duplicate: 'skip' })
+          .expect(200);
+
+        expect(importBody as AddEvaluationDatasetExamplesResponse).to.eql({
+          added: importPayload.length,
+          skipped_duplicates: 0,
+        });
+
+        const { body: firstDatasetBody } = await adminClient
+          .get(datasetPath(importDatasetId))
+          .expect(200);
+        const firstDataset = firstDatasetBody as GetEvaluationDatasetResponse;
+        const importedExamples = firstDataset.examples;
+
+        expect(importedExamples.length).to.eql(importPayload.length);
+        expect(importedExamples.every(({ source }) => source === 'import')).to.be(true);
+
+        const firstExampleIds = importedExamples.map(({ id }) => id).sort();
+        const { body: reimportBody } = await adminClient
+          .post(examplesPath(importDatasetId))
+          .send({ examples: importPayload, source: 'import', on_duplicate: 'skip' })
+          .expect(200);
+
+        expect(reimportBody as AddEvaluationDatasetExamplesResponse).to.eql({
+          added: 0,
+          skipped_duplicates: importPayload.length,
+        });
+
+        const { body: reimportedDatasetBody } = await adminClient
+          .get(datasetPath(importDatasetId))
+          .expect(200);
+        const reimportedDataset = reimportedDatasetBody as GetEvaluationDatasetResponse;
+        expect(reimportedDataset.examples.map(({ id }) => id).sort()).to.eql(firstExampleIds);
       });
     });
 

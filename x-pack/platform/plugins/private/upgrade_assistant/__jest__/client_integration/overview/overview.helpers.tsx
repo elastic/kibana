@@ -30,5 +30,5 @@ export const setupOverviewPage = async (
   );
 
   // Wait for the initial render baseline (mount-time requests/async state).
-  await screen.findByTestId('overviewPageHeader');
+  await screen.findByTestId('overview');
 };

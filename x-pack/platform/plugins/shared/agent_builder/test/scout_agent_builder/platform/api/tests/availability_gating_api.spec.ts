@@ -19,7 +19,6 @@ import { apiTest, API_AGENT_BUILDER, spaceUrl } from '../fixtures';
 const GATED_TOOL_IDS = [
   platformCoreTools.cases,
   platformCoreCasesTools.manage,
-  platformCoreCasesTools.attachments,
   platformCoreCasesTools.getAttachments,
   platformCoreCasesTools.manageAttachments,
   platformCoreCasesTools.observables,
