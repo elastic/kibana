@@ -23,7 +23,7 @@ export function InfoPanel({ title, headerRightContent, children }: InfoPanelProp
       borderRadius="none"
       css={css`
         padding: 0;
-        border-radius: ${euiTheme.border.radius.medium};
+        border-radius: ${euiTheme.border.radius.control};
       `}
     >
       <EuiText

@@ -80,6 +80,8 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
     return (
       <EuiPanel
         hasShadow={false}
+        hasBorder={false}
+        borderRadius="none"
         paddingSize="m"
         css={{ height: '100%', paddingTop: euiTheme.size.m /* overrides EuiPanel's paddingTop */ }}
         data-test-subj="workflowExecutionOverview"
