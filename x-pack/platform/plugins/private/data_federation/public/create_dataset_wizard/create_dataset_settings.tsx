@@ -7,7 +7,14 @@
 
 import type { FunctionComponent } from 'react';
 import React from 'react';
-import { EuiAccordion, EuiFieldText, EuiFormRow, EuiSelect, EuiSpacer } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiFieldText,
+  EuiFormRow,
+  EuiSelect,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 import type { Control } from 'react-hook-form';
 import { useController, useWatch } from 'react-hook-form';
 
@@ -144,6 +151,7 @@ export function CreateDatasetAdditionalSettings({
   // When no format is selected, keep the sections visible so users know where settings live.
   const hasCommonSettingsForFormat = format ? FORMAT_HAS_COMMON_SETTINGS[format] : true;
   const showCommonSettings = format ? hasCommonSettingsForFormat : true;
+  const showAdvancedAsPlainContent = Boolean(format) && !hasCommonSettingsForFormat;
 
   return (
     <>
@@ -152,9 +160,9 @@ export function CreateDatasetAdditionalSettings({
           id="createDatasetWizardCommonSettings"
           data-test-subj="createDatasetWizardCommonSettings"
           buttonContent={
-            <h4 style={{ margin: 0, fontWeight: 'bold' }}>
-              {createDatasetWizardStrings.commonSettingsSectionTitle}
-            </h4>
+            <EuiTitle size="xxs">
+              <h4>{createDatasetWizardStrings.commonSettingsSectionTitle}</h4>
+            </EuiTitle>
           }
           initialIsOpen={true}
           paddingSize="m"
@@ -166,22 +174,35 @@ export function CreateDatasetAdditionalSettings({
         </EuiAccordion>
       ) : null}
       {showCommonSettings ? <EuiSpacer size="m" /> : null}
-      <EuiAccordion
-        id="createDatasetWizardAdvancedSettings"
-        data-test-subj="createDatasetWizardAdvancedSettings"
-        buttonContent={
-          <h4 style={{ margin: 0, fontWeight: 'bold' }}>
-            {createDatasetWizardStrings.advancedSettingsSectionTitle}
-          </h4>
-        }
-        initialIsOpen={format ? !hasCommonSettingsForFormat : false}
-        paddingSize="m"
-      >
-        <SharedAdvancedSettings control={control} />
-        {FormatAdvancedSettingsComponent ? (
-          <FormatAdvancedSettingsComponent control={control} />
-        ) : null}
-      </EuiAccordion>
+      {showAdvancedAsPlainContent ? (
+        <div
+          id="createDatasetWizardAdvancedSettings"
+          data-test-subj="createDatasetWizardAdvancedSettings"
+          style={{ padding: 16 }}
+        >
+          <SharedAdvancedSettings control={control} />
+          {FormatAdvancedSettingsComponent ? (
+            <FormatAdvancedSettingsComponent control={control} />
+          ) : null}
+        </div>
+      ) : (
+        <EuiAccordion
+          id="createDatasetWizardAdvancedSettings"
+          data-test-subj="createDatasetWizardAdvancedSettings"
+          buttonContent={
+            <EuiTitle size="xxs">
+              <h4>{createDatasetWizardStrings.advancedSettingsSectionTitle}</h4>
+            </EuiTitle>
+          }
+          initialIsOpen={false}
+          paddingSize="m"
+        >
+          <SharedAdvancedSettings control={control} />
+          {FormatAdvancedSettingsComponent ? (
+            <FormatAdvancedSettingsComponent control={control} />
+          ) : null}
+        </EuiAccordion>
+      )}
     </>
   );
 }
