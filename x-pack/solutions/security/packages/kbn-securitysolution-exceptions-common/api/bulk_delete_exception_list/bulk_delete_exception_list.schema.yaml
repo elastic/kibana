@@ -140,7 +140,7 @@ paths:
                     properties:
                       total:
                         type: integer
-                        description: Total number of lists in the request (after deduplication).
+                        description: Total number of entries in the request (before deduplication). Equal to succeeded + failed + skipped.
                       succeeded:
                         type: integer
                         description: Number of lists successfully deleted.

@@ -122,12 +122,14 @@ export const BulkDeleteExceptionListsResponse = lazySchema(() =>
       .describe('Per-list errors encountered during the operation.'),
     summary: z.object({
       /**
-       * Total number of lists in the request (after deduplication).
+       * Total number of entries in the request (before deduplication). Equal to succeeded + failed + skipped.
        */
       total: z
         .number()
         .int()
-        .describe('Total number of lists in the request (after deduplication).'),
+        .describe(
+          'Total number of entries in the request (before deduplication). Equal to succeeded + failed + skipped.'
+        ),
       /**
        * Number of lists successfully deleted.
        */
