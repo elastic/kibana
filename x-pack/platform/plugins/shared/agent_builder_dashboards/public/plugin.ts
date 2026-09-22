@@ -19,8 +19,6 @@ import type {
 } from './types';
 import { createIdGenerator, registerDashboardAttachmentUiDefinition } from './attachment_types';
 
-const ENHANCE_DASHBOARD_ENABLED = false;
-
 export class AgentBuilderDashboardsPlugin
   implements
     Plugin<
@@ -71,19 +69,15 @@ export class AgentBuilderDashboardsPlugin
         return createOpenDashboardChatAction(plugins.agentBuilder.openChat);
       });
 
-      if (ENHANCE_DASHBOARD_ENABLED) {
-        plugins.uiActions.registerActionAsync(ENHANCE_DASHBOARD_ACTION_ID, async () => {
-          const { createEnhanceDashboardAction } = await import(
-            './enhance/enhance_dashboard_action'
-          );
-          return createEnhanceDashboardAction({
-            openChat: plugins.agentBuilder.openChat,
-            getAgentBuilderAccess: plugins.agentBuilder.getAgentBuilderAccess,
-            canWriteDashboards,
-            draftAttachmentId,
-          });
+      plugins.uiActions.registerActionAsync(ENHANCE_DASHBOARD_ACTION_ID, async () => {
+        const { createEnhanceDashboardAction } = await import('./enhance/enhance_dashboard_action');
+        return createEnhanceDashboardAction({
+          openChat: plugins.agentBuilder.openChat,
+          getAgentBuilderAccess: plugins.agentBuilder.getAgentBuilderAccess,
+          canWriteDashboards,
+          draftAttachmentId,
         });
-      }
+      });
     }
 
     return {};
