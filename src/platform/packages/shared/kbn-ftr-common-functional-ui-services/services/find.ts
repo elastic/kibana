@@ -140,7 +140,7 @@ export class FindService extends FtrService {
 
   public async allByCssSelector(
     selector: string,
-    timeout: number = 0
+    timeout: number = this.defaultFindTimeout
   ): Promise<WebElementWrapper[]> {
     this.log.debug(`Find.allByCssSelector('${selector}') with timeout=${timeout}`);
     await this._withTimeout(timeout);
