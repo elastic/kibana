@@ -39,12 +39,8 @@ import { isAskUserQuestionPrompt } from '@kbn/agent-builder-common/agents/prompt
 import { createUserQuestionAskedEvent } from '@kbn/agent-builder-common/chat';
 import type { StateType } from './state';
 import { steps, tags } from './constants';
-import type { InternalEvent } from './events';
-import { createFinalStateEvent } from './events';
 import type { RunStepUpdate } from './step_state';
 import type { ResearchOutcome, ToolOutcome, ToolRenderStateUpdate } from './transient_state';
-
-export type ConvertedEvents = ChatAgentEvent | InternalEvent;
 
 /** What a `researchAgent` node returns, as seen on its `on_chain_end` event. */
 interface ResearchNodeOutput {
@@ -136,7 +132,7 @@ export const convertGraphEvents = ({
   logger: Logger;
   startTime: Date;
   structuredOutput: boolean;
-}): OperatorFunction<LangchainStreamEvent, ConvertedEvents> => {
+}): OperatorFunction<LangchainStreamEvent, ChatAgentEvent> => {
   return (streamEvents$) => {
     // message identifier for emitted chunks
     let messageId = uuidv4();
@@ -182,7 +178,7 @@ export const convertGraphEvents = ({
         // emit reasoning and tool call events for research agent turns
         if (isRootGraphNodeEnd(event, graphName) && matchName(event, steps.researchAgent)) {
           const output = event.data.output as ResearchNodeOutput;
-          const events: ConvertedEvents[] = stepUpdatesToEvents(
+          const events: ChatAgentEvent[] = stepUpdatesToEvents(
             output.steps ?? [],
             output.toolRenderState ?? {}
           );
@@ -217,7 +213,7 @@ export const convertGraphEvents = ({
         if (isRootGraphNodeEnd(event, graphName) && matchName(event, steps.executeTool)) {
           const output = event.data.output as ExecuteToolNodeOutput;
           const updates = output.steps ?? [];
-          const resultEvents: ConvertedEvents[] = [];
+          const resultEvents: ChatAgentEvent[] = [];
 
           for (const update of updates) {
             if (update.type === 'resolve_tool_call') {
@@ -268,7 +264,7 @@ export const convertGraphEvents = ({
         // emit background execution complete events
         if (isRootGraphNodeEnd(event, graphName) && matchName(event, steps.checkBackgroundWork)) {
           const output = event.data.output as { steps?: RunStepUpdate[] };
-          const bgEvents: ConvertedEvents[] = [];
+          const bgEvents: ChatAgentEvent[] = [];
 
           for (const update of output.steps ?? []) {
             if (update.type === 'append' && isBackgroundAgentCompleteStep(update.step)) {
@@ -279,11 +275,6 @@ export const convertGraphEvents = ({
           if (bgEvents.length > 0) {
             return of(...bgEvents);
           }
-        }
-
-        if (matchEvent(event, 'on_chain_end') && matchName(event, graphName)) {
-          const finalState = event.data.output as StateType;
-          return of(createFinalStateEvent(finalState));
         }
 
         return EMPTY;

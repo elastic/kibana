@@ -177,7 +177,10 @@ describe('RunTracker', () => {
     expect(tracker.latestState()).toEqual({
       steps: [reasoning('seeded')],
       toolRenderState: { c0: { toolName: 'x', kind: 'server' } },
+      currentCycle: 0,
+      errorCount: 0,
     });
+    expect(() => tracker.finalState()).toThrow(/without streaming any state/);
 
     tracker.observeGraphEvent(stateChunk([reasoning('seeded'), toolCall('c1')]));
     tracker.observeGraphEvent(
@@ -188,7 +191,10 @@ describe('RunTracker', () => {
     expect(tracker.latestState()).toEqual({
       steps: [reasoning('seeded'), toolCall('c1', [result('r1')])],
       toolRenderState: { c1: { toolName: 'x', kind: 'server' } },
+      currentCycle: 0,
+      errorCount: 0,
     });
+    expect(tracker.finalState()).toBe(tracker.latestState());
   });
 
   it('ignores stream chunks that are not the root state of this run', () => {
@@ -300,6 +306,8 @@ describe('RunTracker', () => {
       tracker.executionProjection({
         steps: finalSteps,
         toolRenderState: { b1: { toolName: 'browser_x', kind: 'browser' } },
+        currentCycle: 1,
+        errorCount: 0,
       })
     ).toEqual([toolCall('pending', [result('r1')])]);
   });

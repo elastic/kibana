@@ -8,6 +8,7 @@
 import { of, toArray, lastValueFrom } from 'rxjs';
 import type { StreamEvent as LangchainStreamEvent } from '@langchain/core/tracers/log_stream';
 import type { Logger } from '@kbn/logging';
+import type { ChatAgentEvent } from '@kbn/agent-builder-common';
 import {
   ChatEventType,
   ConversationRoundStepType,
@@ -21,7 +22,7 @@ import {
   ExecutionStatus,
 } from '@kbn/agent-builder-common/agents';
 import { internalTools } from '@kbn/agent-builder-common/tools';
-import { convertGraphEvents, type ConvertedEvents } from './convert_graph_events';
+import { convertGraphEvents } from './convert_graph_events';
 import { steps } from './constants';
 import { stepUpdates } from './step_state';
 import type { ToolRenderStateUpdate } from './transient_state';
@@ -55,7 +56,7 @@ const collect = (
     structuredOutput = false,
     startTime = new Date(),
   }: { structuredOutput?: boolean; startTime?: Date } = {}
-): Promise<ConvertedEvents[]> =>
+): Promise<ChatAgentEvent[]> =>
   lastValueFrom(
     of(...events).pipe(
       convertGraphEvents({ graphName: GRAPH, logger, startTime, structuredOutput }),
@@ -263,12 +264,12 @@ describe('convertGraphEvents', () => {
     ]);
   });
 
-  it('emits the final state event at the end of the root graph', async () => {
+  it('emits nothing for the root graph on_chain_end (the final state is read from the values stream)', async () => {
     const finalState = { finalAnswer: 'x', steps: [] };
     const events = await collect([
       { ...chainEnd(GRAPH, finalState), metadata: { graphName: GRAPH } } as LangchainStreamEvent,
     ]);
-    expect(events).toEqual([expect.objectContaining({ data: { state: finalState } })]);
+    expect(events).toEqual([]);
   });
 
   describe('thinking_complete', () => {

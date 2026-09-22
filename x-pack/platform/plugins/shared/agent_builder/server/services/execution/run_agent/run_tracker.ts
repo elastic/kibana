@@ -23,6 +23,7 @@ import type { TodoItem } from '@kbn/agent-builder-common/chat/conversation';
 import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
 import { createAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
 import { matchName } from '@kbn/agent-builder-genai-utils/langchain';
+import type { StateType } from './state';
 import { applyStepUpdates, persistableSteps, stepUpdates } from './step_state';
 import type { ToolRenderStateMap } from './transient_state';
 
@@ -35,10 +36,10 @@ export interface ToolExecutionBuffer {
 }
 
 /** The part of the graph state persistence reads. */
-export interface RunStateSnapshot {
-  steps: ConversationRoundStep[];
-  toolRenderState: ToolRenderStateMap;
-}
+export type RunStateSnapshot = Pick<
+  StateType,
+  'steps' | 'toolRenderState' | 'currentCycle' | 'errorCount'
+>;
 
 export interface RunSeed {
   /** The steps the graph starts from (what `Overwrite(steps)` seeds). */
@@ -72,11 +73,16 @@ const isRootGraphStateChunk = (
     : event.metadata?.langgraph_node === undefined;
 };
 
-const isStateSnapshot = (chunk: unknown): chunk is RunStateSnapshot =>
-  typeof chunk === 'object' &&
-  chunk !== null &&
-  Array.isArray((chunk as { steps?: unknown }).steps) &&
-  typeof (chunk as { toolRenderState?: unknown }).toolRenderState === 'object';
+const isStateSnapshot = (chunk: unknown): chunk is RunStateSnapshot => {
+  if (typeof chunk !== 'object' || chunk === null) return false;
+  const { steps, toolRenderState, currentCycle, errorCount } = chunk as Partial<RunStateSnapshot>;
+  return (
+    Array.isArray(steps) &&
+    typeof toolRenderState === 'object' &&
+    typeof currentCycle === 'number' &&
+    typeof errorCount === 'number'
+  );
+};
 
 /**
  * The steps an execution owns, ready for `execution_step` persistence. A fresh execution owns every
@@ -156,7 +162,12 @@ export const projectExecutionSteps = ({
  */
 export class RunTracker implements ToolExecutionBuffer {
   private readonly graphName: string;
-  private seedState: RunStateSnapshot = { steps: [], toolRenderState: {} };
+  private seedState: RunStateSnapshot = {
+    steps: [],
+    toolRenderState: {},
+    currentCycle: 0,
+    errorCount: 0,
+  };
   private inherited: RunSeed['inherited'];
   private latest: RunStateSnapshot | undefined;
   private rootRunId: string | undefined;
@@ -168,7 +179,7 @@ export class RunTracker implements ToolExecutionBuffer {
   }
 
   seed({ steps, toolRenderState = {}, inherited }: RunSeed): void {
-    this.seedState = { steps, toolRenderState };
+    this.seedState = { steps, toolRenderState, currentCycle: 0, errorCount: 0 };
     this.inherited = inherited;
     this.latest = undefined;
   }
@@ -221,6 +232,18 @@ export class RunTracker implements ToolExecutionBuffer {
   /** The last graph state seen on the stream, else the seed. */
   latestState(): RunStateSnapshot {
     return this.latest ?? this.seedState;
+  }
+
+  /**
+   * The final graph state of a run that completed: the last streamed chunk. Once the stream has
+   * completed this is what the root `on_chain_end` output would be; a completed run that streamed
+   * no state is a bug.
+   */
+  finalState(): RunStateSnapshot {
+    if (!this.latest) {
+      throw invalidState('[run] the graph completed without streaming any state');
+    }
+    return this.latest;
   }
 
   /**

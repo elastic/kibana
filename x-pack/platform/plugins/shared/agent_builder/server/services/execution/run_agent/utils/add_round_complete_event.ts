@@ -9,6 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { OperatorFunction } from 'rxjs';
 import { map, merge, shareReplay, toArray } from 'rxjs';
 import type {
+  ChatAgentEvent,
   RoundCompleteEvent,
   RoundInput,
   ConversationRound,
@@ -41,10 +42,7 @@ import type {
 import { attachmentChangesToEvents } from '@kbn/agent-builder-server/attachments';
 import { getCurrentTraceId } from '../../../../tracing';
 import { userMessageActor } from '../../../conversation/client/rounds_to_events';
-import type { ConvertedEvents } from '../convert_graph_events';
-import { isFinalStateEvent } from '../events';
-import type { RunTracker } from '../run_tracker';
-import type { StateType } from '../state';
+import type { RunStateSnapshot, RunTracker } from '../run_tracker';
 import { persistableSteps } from '../step_state';
 import { formatAttachmentsMetadata } from './attachment_presentation';
 import type { PendingTurn } from './conversation_turn';
@@ -52,7 +50,7 @@ import { getModelUsage } from './round_summary';
 import { applyResumeResolution } from '../../../conversation/client/merge_rounds';
 import { mergeAttachmentRefs } from '../../../conversation/client/migrate_attachments';
 
-type SourceEvents = ConvertedEvents;
+type SourceEvents = ChatAgentEvent;
 
 /**
  * `chat_input` (attachments sent with the message) and `execution` (made by tools) attachment
@@ -164,7 +162,7 @@ export const addRoundCompleteEvent = ({
         toArray(),
         map<SourceEvents[], RoundCompleteEvent>((events) => {
           const attachmentRefs = attachmentStateManager.getAccessedRefs();
-          const finalGraphState = getFinalGraphState(events);
+          const finalGraphState = tracker.finalState();
           const fullSteps = resolveRoundSteps({ tracker, finalGraphState });
 
           let round: ConversationRound;
@@ -255,14 +253,6 @@ export const addRoundCompleteEvent = ({
   };
 };
 
-const getFinalGraphState = (events: SourceEvents[]): StateType => {
-  const finalStateEvent = events.find(isFinalStateEvent);
-  if (!finalStateEvent) {
-    throw new Error('No final state event found in round events');
-  }
-  return finalStateEvent.data.state;
-};
-
 /**
  * The round's full steps: the final graph `steps` channel plus what LangGraph never saw (progress on
  * a call interrupted by a prompt, an unconsumed `todo_write`), minus the runtime-only browser /
@@ -273,7 +263,7 @@ const resolveRoundSteps = ({
   finalGraphState,
 }: {
   tracker: RunTracker;
-  finalGraphState: StateType;
+  finalGraphState: RunStateSnapshot;
 }): ConversationRoundStep[] =>
   persistableSteps(tracker.attachUnseen(finalGraphState.steps), finalGraphState.toolRenderState);
 
@@ -293,7 +283,7 @@ const resumeRound = ({
 }: {
   pendingTurn: PendingTurn;
   tracker: RunTracker;
-  finalGraphState: StateType;
+  finalGraphState: RunStateSnapshot;
   fullSteps: ConversationRoundStep[];
   events: SourceEvents[];
   input: RoundInput;
@@ -419,7 +409,7 @@ const buildRoundState = ({
 }: {
   round: ConversationRound;
   events: SourceEvents[];
-  finalGraphState: StateType;
+  finalGraphState: RunStateSnapshot;
   stateManager: ConversationStateManager;
 }): RoundState | undefined => {
   const promptRequestEvents = events.filter(isPromptRequestEvent).map((event) => event.data);

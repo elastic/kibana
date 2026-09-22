@@ -40,7 +40,6 @@ import {
   selectTools,
   getPendingTurn,
   createPreExecutionSteps,
-  evictInternalEvents,
   estimatePerRoundTokens,
   estimateFailedEntryTokens,
   survivingFailedEntryTokens,
@@ -522,8 +521,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       agentId: agentIdForEvents,
       conversation,
     }),
-    evictInternalEvents(),
-    // Placed after eviction so `round_interrupted` reaches the runner like any other chat event.
     emitRoundInterruptedOnError({ buildEvent: toRoundInterrupted, logger }),
     shareReplay()
   );

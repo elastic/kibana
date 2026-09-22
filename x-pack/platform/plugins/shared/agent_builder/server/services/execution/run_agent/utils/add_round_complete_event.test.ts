@@ -18,6 +18,7 @@ import {
   createRelevantSkillsStep,
   isRoundCompleteEvent,
   isRelevantSkillsStep,
+  type ChatAgentEvent,
   type ChatEvent,
   type Conversation,
   type ConversationRound,
@@ -31,8 +32,7 @@ import {
   type AttachmentStateManager,
 } from '@kbn/agent-builder-server/attachments';
 import { createEmptyConversation, createRound } from '../../../../test_utils/conversations';
-import type { ConvertedEvents } from '../convert_graph_events';
-import { createFinalStateEvent } from '../events';
+import { createRootStateChunkEvent } from '../../../../test_utils/graph_stream';
 import { RunTracker } from '../run_tracker';
 import type { StateType } from '../state';
 import { applyStepUpdates, stepUpdates, type RunStepUpdate } from '../step_state';
@@ -55,7 +55,7 @@ const confirmPrompt: PromptRequest = {
 
 /**
  * A run as the graph leaves it: the tracker (seed and out-of-band events) plus the steps the graph's
- * reducer produced from the applied updates — what the `FinalStateEvent` carries.
+ * reducer produced from the applied updates — what the graph streams as its state.
  */
 interface TestRun {
   tracker: RunTracker;
@@ -98,20 +98,33 @@ const freshRun = (seed: ConversationRoundStep[] = []): TestRun => {
   return testRun(tracker, seed);
 };
 
-/** The graph's final state as `FinalStateEvent` carries it. */
-const finalState = (run: TestRun, overrides: Partial<StateType> = {}): ConvertedEvents =>
-  createFinalStateEvent({
-    currentCycle: 0,
-    errorCount: 0,
-    steps: run.steps,
-    toolRenderState: {},
-    ...overrides,
-  } as StateType) as ConvertedEvents;
+/**
+ * Feeds the run's tracker the last state the graph streamed (the final state once the stream
+ * completes), as the `values` chunk `run_chat_agent` observes.
+ */
+const streamedFinalState = (run: TestRun, overrides: Partial<StateType> = {}): TestRun => {
+  run.tracker.observeGraphEvent(
+    createRootStateChunkEvent('g', {
+      currentCycle: 0,
+      errorCount: 0,
+      steps: run.steps,
+      toolRenderState: {},
+      ...overrides,
+    })
+  );
+  return run;
+};
 
 describe('addRoundCompleteEvent', () => {
+  /** The run of the test, when it does not build its own: its tracker is what `createDeps` wires. */
+  let defaultRun: TestRun;
+  beforeEach(() => {
+    defaultRun = freshRun();
+  });
+
   const createDeps = () => ({
     pendingTurn: undefined,
-    tracker: freshRun().tracker,
+    tracker: defaultRun.tracker,
     getConversationState: jest.fn(() => ({})),
     modelProvider: {
       getUsageStats: jest.fn(() => ({ calls: [] })),
@@ -128,13 +141,23 @@ describe('addRoundCompleteEvent', () => {
     conversation: undefined,
   });
 
-  const messageComplete = (content = 'Done'): ConvertedEvents =>
+  const messageComplete = (content = 'Done'): ChatAgentEvent =>
     ({
       type: ChatEventType.messageComplete,
       data: { message_id: 'm', message_content: content },
-    } as ConvertedEvents);
+    } as ChatAgentEvent);
 
-  const completedRunEvents = (run: TestRun = freshRun()) => of(finalState(run), messageComplete());
+  /** The chat events of a run that completed, with its final state fed to the tracker. */
+  const completedRun = (
+    run: TestRun,
+    overrides: Partial<StateType> = {},
+    ...events: ChatAgentEvent[]
+  ) => {
+    streamedFinalState(run, overrides);
+    return of(...(events.length > 0 ? events : [messageComplete()]));
+  };
+
+  const completedRunEvents = (run: TestRun = defaultRun) => completedRun(run);
 
   describe('attachment events', () => {
     const typeDefs = {
@@ -286,7 +309,7 @@ describe('addRoundCompleteEvent', () => {
     };
 
     const events = await firstValueFrom(
-      of(finalState(freshRun()), messageCompleteEvent as ConvertedEvents).pipe(
+      completedRun(defaultRun, {}, messageCompleteEvent as ChatAgentEvent).pipe(
         addRoundCompleteEvent({
           ...createDeps(),
           userInput: { message: '@agent summarize this' },
@@ -320,7 +343,7 @@ describe('addRoundCompleteEvent', () => {
     };
 
     const events = await firstValueFrom(
-      of(finalState(freshRun()), messageCompleteEvent as ConvertedEvents).pipe(
+      completedRun(defaultRun, {}, messageCompleteEvent as ChatAgentEvent).pipe(
         addRoundCompleteEvent({
           ...createDeps(),
           modelProvider: {
@@ -371,7 +394,7 @@ describe('addRoundCompleteEvent', () => {
     const { pendingTurn, run } = pendingTurnFor(pendingRound);
 
     const events = await firstValueFrom(
-      of(finalState(run), messageComplete()).pipe(
+      completedRun(run).pipe(
         addRoundCompleteEvent({
           ...createDeps(),
           pendingTurn,
@@ -446,12 +469,13 @@ describe('addRoundCompleteEvent', () => {
     ]);
 
     const events = await firstValueFrom(
-      of(
-        finalState(run, { currentCycle: 1 }),
+      completedRun(
+        run,
+        { currentCycle: 1 },
         {
           type: ChatEventType.toolResult,
           data: { tool_call_id: 'call-1', tool_id: 'my_tool', results: [resolved] },
-        } as ConvertedEvents,
+        } as ChatAgentEvent,
         messageComplete('deleted')
       ).pipe(
         addRoundCompleteEvent({
@@ -524,7 +548,7 @@ describe('addRoundCompleteEvent', () => {
     };
 
     const events = await firstValueFrom(
-      of(finalState(freshRun()), messageCompleteEvent as ConvertedEvents).pipe(
+      completedRun(defaultRun, {}, messageCompleteEvent as ChatAgentEvent).pipe(
         addRoundCompleteEvent({
           ...createDeps(),
           userInput: { message: 'Hello' },
@@ -570,7 +594,7 @@ describe('addRoundCompleteEvent', () => {
       'user'
     );
     const events = await firstValueFrom(
-      of(finalState(run, { currentCycle: 1 }), messageComplete('Read both notes')).pipe(
+      completedRun(run, { currentCycle: 1 }, messageComplete('Read both notes')).pipe(
         addRoundCompleteEvent({
           ...createDeps(),
           attachmentStateManager,
@@ -640,7 +664,7 @@ describe('addRoundCompleteEvent', () => {
     };
 
     const events = await firstValueFrom(
-      of(finalState(freshRun()), messageCompleteEvent as ConvertedEvents).pipe(
+      completedRun(defaultRun, {}, messageCompleteEvent as ChatAgentEvent).pipe(
         addRoundCompleteEvent({
           ...createDeps(),
           attachmentStateManager,
@@ -695,7 +719,7 @@ describe('addRoundCompleteEvent', () => {
     };
 
     const events = await firstValueFrom(
-      of(finalState(freshRun()), messageCompleteEvent as ConvertedEvents).pipe(
+      completedRun(defaultRun, {}, messageCompleteEvent as ChatAgentEvent).pipe(
         addRoundCompleteEvent({
           ...createDeps(),
           attachmentStateManager,
@@ -727,7 +751,7 @@ describe('addRoundCompleteEvent', () => {
     };
 
     const events = await firstValueFrom(
-      of(finalState(freshRun()), messageCompleteEvent as ConvertedEvents).pipe(
+      completedRun(defaultRun, {}, messageCompleteEvent as ChatAgentEvent).pipe(
         addRoundCompleteEvent({
           ...createDeps(),
           attachmentStateManager,
@@ -762,7 +786,7 @@ describe('addRoundCompleteEvent', () => {
     };
 
     const events = await firstValueFrom(
-      of(finalState(freshRun()), messageCompleteEvent as ConvertedEvents).pipe(
+      completedRun(defaultRun, {}, messageCompleteEvent as ChatAgentEvent).pipe(
         addRoundCompleteEvent({
           ...createDeps(),
           attachmentStateManager,
@@ -859,18 +883,13 @@ describe('addRoundCompleteEvent', () => {
     run.apply(updates);
 
     const events = await firstValueFrom(
-      of(
-        createFinalStateEvent({
-          currentCycle: 1,
-          errorCount: 0,
-          steps: run.steps,
-          toolRenderState: {
-            srv: { toolName: 'my_tool', kind: 'server' },
-            brw: { toolName: 'browser_open_tab', kind: 'browser' },
-          },
-        } as unknown as StateType) as ConvertedEvents,
-        messageComplete()
-      ).pipe(
+      completedRun(run, {
+        currentCycle: 1,
+        toolRenderState: {
+          srv: { toolName: 'my_tool', kind: 'server' },
+          brw: { toolName: 'browser_open_tab', kind: 'browser' },
+        },
+      }).pipe(
         addRoundCompleteEvent({
           ...createDeps(),
           tracker: run.tracker,
@@ -895,17 +914,12 @@ describe('addRoundCompleteEvent', () => {
 
   it('persists the final graph steps: the tracker holds no mirror of the run', async () => {
     const run = freshRun();
-    const graphOnly = { type: ConversationRoundStepType.reasoning, reasoning: 'from the graph' };
+    const graphOnly: ConversationRoundStep = {
+      type: ConversationRoundStepType.reasoning,
+      reasoning: 'from the graph',
+    };
     const events = await firstValueFrom(
-      of(
-        createFinalStateEvent({
-          currentCycle: 0,
-          errorCount: 0,
-          steps: [graphOnly],
-          toolRenderState: {},
-        } as StateType) as ConvertedEvents,
-        messageComplete()
-      ).pipe(
+      completedRun(run, { steps: [graphOnly] }).pipe(
         addRoundCompleteEvent({
           ...createDeps(),
           tracker: run.tracker,
@@ -995,7 +1009,7 @@ describe('addRoundCompleteEvent', () => {
     // exec 2: the second resume, adding an attachment ref, usage and configuration overrides.
     const startTime = new Date('2026-01-01T00:02:00.000Z');
     const events = await firstValueFrom(
-      of(finalState(run, { currentCycle: 2 }), messageComplete('final')).pipe(
+      completedRun(run, { currentCycle: 2 }, messageComplete('final')).pipe(
         addRoundCompleteEvent({
           ...createDeps(),
           pendingTurn,

@@ -56,7 +56,6 @@ jest.mock('./utils', () => ({
   getPendingTurn: jest.fn(() => undefined),
   createPreExecutionSteps: jest.fn(() => []),
   addRoundCompleteEvent: jest.fn(() => (source$: any) => source$),
-  evictInternalEvents: jest.fn(() => (source$: any) => source$),
   estimatePerRoundTokens: jest.fn().mockResolvedValue([]),
   estimateFailedEntryTokens: jest.fn(() => new Map()),
   survivingFailedEntryTokens: jest.fn(() => 0),
