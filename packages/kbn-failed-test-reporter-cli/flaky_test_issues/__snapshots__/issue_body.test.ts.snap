@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`renderFlakySuiteIssueBody renders a multi-test suite with distinct failures, a skipped note and related issues 1`] = `
-"We identified a flaky test suite.
+"The \`Default status alert\` suite appears to be flaky:
 
 - **Flaky rate:** **10%** of builds on \`main\` (49 of 509), for the flakiest of 3 tests
 - **Pipeline:** \`kibana-on-merge\`, last 7 days (2–9 Sep 2026)
@@ -45,7 +45,7 @@ Possibly related: #7, #8.
 `;
 
 exports[`renderFlakySuiteIssueBody renders a single-test suite with a dashboard link 1`] = `
-"We identified a flaky test suite.
+"The \`Default status alert\` suite appears to be flaky:
 
 - **Flaky rate:** **10%** of builds on \`main\` (49 of 509)
 - **Pipeline:** \`kibana-on-merge\`, last 7 days (2–9 Sep 2026)

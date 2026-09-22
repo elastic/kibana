@@ -161,23 +161,25 @@ describe('readSuiteFilePathFromTitle', () => {
 });
 
 describe('renderFlakySuiteIssueBody', () => {
-  it('opens with a sentence naming the area, then the rate, pipeline and other pipelines', () => {
+  it('opens by naming the suite, then the rate, pipeline and other pipelines', () => {
     const single = singleTestReport();
     expect(
       renderFlakySuiteIssueBody(single.suite, { report: single.report, area: 'Synthetics' })
     ).toContain(
       [
-        'We identified a flaky test suite in the **Synthetics** area.',
+        'The `Default status alert` suite appears to be flaky:',
         '',
         '- **Flaky rate:** **10%** of builds on `main` (49 of 509)',
         '- **Pipeline:** `kibana-on-merge`, last 7 days (2–9 Sep 2026)',
         '- **Also failed on:** `kibana-pull-request` (70 of 661 builds), `kibana-elasticsearch-snapshot-verify` (1 of 5 builds)',
         '',
         '| Field | Value |',
+        '|---|---|',
+        '| **Area** | Synthetics |',
       ].join('\n')
     );
-    expect(renderFlakySuiteIssueBody(single.suite, { report: single.report })).toContain(
-      'We identified a flaky test suite.\n'
+    expect(renderFlakySuiteIssueBody(single.suite, { report: single.report })).not.toContain(
+      '**Area**'
     );
     const multi = multiTestReport();
     expect(renderFlakySuiteIssueBody(multi.suite, { report: multi.report })).toContain(

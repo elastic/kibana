@@ -154,7 +154,7 @@ describe('reportFlakySuiteIssues', () => {
       expect(github.createIssue).toHaveBeenCalledTimes(1);
       const [title, body, labels] = github.createIssue.mock.calls[0];
       expect(title).toBe('Flaky Scout suite: Default status alert');
-      expect(body).toContain('in the **Synthetics** area');
+      expect(body).toContain('| **Area** | Synthetics |');
       expect(body).toContain('Possibly related: #7.');
       expect(readFlakySuiteIssueMetadata(body)?.['suite.filePath']).toBe(SUITE_PATH);
       expect(labels).toEqual(['failed-test']);

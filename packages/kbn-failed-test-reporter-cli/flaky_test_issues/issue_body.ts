@@ -48,7 +48,7 @@ const MAX_HEADLINE_BRANCHES = 2;
 
 export interface FlakySuiteIssueContext {
   report: FlakyTestReport;
-  /** Owning module of the suite's file, e.g. `Management`; the opening names no area without it. */
+  /** Owning module of the suite's file, e.g. `Management`; a row of the details when known. */
   area?: string;
   /** Dashboard with the live numbers, linked from the headline when given. */
   dashboardUrl?: string;
@@ -222,10 +222,11 @@ const otherPipelines = (suite: FlakySuite, report: FlakyTestReport): string | un
     .join(', ');
 };
 
-/** One sentence saying what this is, then the facts a reader needs first, one per bullet. */
+/** One line naming the suite, then the facts a reader needs first, one per bullet. */
 const overview = (suite: FlakySuite, ctx: FlakySuiteIssueContext): string => {
-  const { report, area, dashboardUrl } = ctx;
-  const opening = `We identified a flaky test suite${area ? ` in the **${area}** area` : ''}.`;
+  const { report, dashboardUrl } = ctx;
+  const subject = suite.suiteTitle ?? Path.basename(suite.filePath);
+  const opening = `The ${inlineCode(subject)} suite appears to be flaky:`;
   const rate = flakyRate(suite);
   // Older reports do not record the qualifying branch; name the branches failing most instead
   const branches = rate === undefined ? headlineBranches(suite) : undefined;
@@ -253,9 +254,10 @@ const overview = (suite: FlakySuite, ctx: FlakySuiteIssueContext): string => {
 const blobLink = (repoRelativePath: string): string =>
   `[${inlineCode(repoRelativePath)}](${KIBANA_BLOB_URL}/${repoRelativePath})`;
 
-const suiteDetails = (suite: FlakySuite): string => {
+const suiteDetails = (suite: FlakySuite, area: string | undefined): string => {
   const framework = FRAMEWORK_LABELS[suite.framework].long;
   const rows: string[][] = [
+    ...(area ? [['**Area**', area]] : []),
     ['**File**', blobLink(suite.filePath)],
     [
       '**Framework**',
@@ -367,7 +369,7 @@ export const renderFlakySuiteIssueBody = (
 ): string => {
   const sections = [
     overview(suite, ctx),
-    suiteDetails(suite),
+    suiteDetails(suite, ctx.area),
     '### Flaky Tests',
     testsTable(suite.tests, {
       withTestId: true,
