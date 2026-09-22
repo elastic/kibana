@@ -7,7 +7,7 @@
 
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
-import { registerAttachmentUiDefinitions } from '.';
+import { registerAttachmentUiDefinitions, registerImpactAttachment } from '.';
 
 describe('registerAttachmentUiDefinitions', () => {
   const mockAddAttachmentType = jest.fn();
@@ -58,5 +58,25 @@ describe('registerAttachmentUiDefinitions', () => {
       (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.entity
     );
     expect(entityCall).toBeUndefined();
+  });
+});
+
+describe('registerImpactAttachment', () => {
+  it('registers the security.impact attachment type', async () => {
+    const addAttachmentType = jest.fn();
+    const attachments = { addAttachmentType } as unknown as AttachmentServiceStartContract;
+
+    registerImpactAttachment({ attachments });
+
+    await new Promise((resolve) => setImmediate(resolve));
+
+    expect(addAttachmentType).toHaveBeenCalledWith(
+      SecurityAgentBuilderAttachments.impact,
+      expect.objectContaining({
+        getIcon: expect.any(Function),
+        getLabel: expect.any(Function),
+        renderInlineContent: expect.any(Function),
+      })
+    );
   });
 });
