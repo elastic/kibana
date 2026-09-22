@@ -125,7 +125,7 @@ describe('DirectorService', () => {
       });
 
       expect(result.alertEvents).toHaveLength(1);
-      expect(result.alertEvents[0].episode).toEqual({
+      expect(result.alertEvents[0].alert).toEqual({
         id: 'mocked-uuid',
         status: alertEpisodeStatus.pending,
       });
@@ -160,7 +160,7 @@ describe('DirectorService', () => {
       });
 
       expect(result.alertEvents).toHaveLength(1);
-      expect(result.alertEvents[0].episode).toEqual({
+      expect(result.alertEvents[0].alert).toEqual({
         id: 'mocked-uuid',
         status: alertEpisodeStatus.pending,
       });
@@ -194,7 +194,7 @@ describe('DirectorService', () => {
         alertEvents: [alertEvent],
       });
 
-      expect(result.alertEvents[0].episode).toEqual({
+      expect(result.alertEvents[0].alert).toEqual({
         id: 'mocked-uuid',
         status: alertEpisodeStatus.pending,
       });
@@ -228,7 +228,7 @@ describe('DirectorService', () => {
         alertEvents: [alertEvent],
       });
 
-      expect(result.alertEvents[0].episode).toEqual({
+      expect(result.alertEvents[0].alert).toEqual({
         id: 'existing-episode',
         status: alertEpisodeStatus.active,
       });
@@ -262,7 +262,7 @@ describe('DirectorService', () => {
         alertEvents: [alertEvent],
       });
 
-      expect(result.alertEvents[0].episode).toEqual({
+      expect(result.alertEvents[0].alert).toEqual({
         id: 'existing-episode',
         status: alertEpisodeStatus.recovering,
       });
@@ -296,7 +296,7 @@ describe('DirectorService', () => {
         alertEvents: [alertEvent],
       });
 
-      expect(result.alertEvents[0].episode).toEqual({
+      expect(result.alertEvents[0].alert).toEqual({
         id: 'existing-episode',
         status: alertEpisodeStatus.inactive,
       });
@@ -331,7 +331,7 @@ describe('DirectorService', () => {
         alertEvents: [alertEvent],
       });
 
-      expect(result.alertEvents[0].episode).toEqual({
+      expect(result.alertEvents[0].alert).toEqual({
         id: 'existing-episode',
         status: alertEpisodeStatus.active,
       });
@@ -365,7 +365,7 @@ describe('DirectorService', () => {
         alertEvents: [alertEvent],
       });
 
-      expect(result.alertEvents[0].episode).toEqual({
+      expect(result.alertEvents[0].alert).toEqual({
         id: 'existing-episode',
         status: alertEpisodeStatus.recovering,
       });
@@ -406,11 +406,11 @@ describe('DirectorService', () => {
       });
 
       expect(result.alertEvents).toHaveLength(2);
-      expect(result.alertEvents[0].episode).toEqual({
+      expect(result.alertEvents[0].alert).toEqual({
         id: 'episode-1',
         status: alertEpisodeStatus.active,
       });
-      expect(result.alertEvents[1].episode).toEqual({
+      expect(result.alertEvents[1].alert).toEqual({
         id: 'episode-2',
         status: alertEpisodeStatus.recovering,
       });
@@ -444,7 +444,7 @@ describe('DirectorService', () => {
         alertEvents: [alertEvent],
       });
 
-      expect(result.alertEvents[0].episode?.id).toBe('mocked-uuid');
+      expect(result.alertEvents[0].alert?.id).toBe('mocked-uuid');
       expect(result.stats.newEpisodeIds).toHaveLength(1);
     });
 
@@ -475,7 +475,7 @@ describe('DirectorService', () => {
         alertEvents: [alertEvent],
       });
 
-      expect(result.alertEvents[0].episode?.id).toBe('existing-episode');
+      expect(result.alertEvents[0].alert?.id).toBe('existing-episode');
       expect(result.stats.newEpisodeIds).toHaveLength(0);
     });
 
@@ -543,7 +543,7 @@ describe('DirectorService', () => {
         alertEvents: [alertEvent],
       });
 
-      expect(result.alertEvents[0].episode).toEqual({
+      expect(result.alertEvents[0].alert).toEqual({
         id: 'episode-1',
         status: alertEpisodeStatus.pending,
         status_count: 2,
@@ -581,7 +581,7 @@ describe('DirectorService', () => {
         alertEvents: [alertEvent],
       });
 
-      expect(result.alertEvents[0].episode).toEqual({
+      expect(result.alertEvents[0].alert).toEqual({
         id: 'episode-1',
         status: alertEpisodeStatus.active,
       });
@@ -666,7 +666,7 @@ describe('DirectorService', () => {
 
         expect(result.alertEvents).toHaveLength(1);
         expect(result.alertEvents[0].status).toBe('recovered');
-        expect(result.alertEvents[0].episode).toEqual({
+        expect(result.alertEvents[0].alert).toEqual({
           id: 'user-activated-episode',
           status: alertEpisodeStatus.active,
         });
@@ -704,7 +704,7 @@ describe('DirectorService', () => {
         });
 
         expect(result.alertEvents[0].status).toBe('breached');
-        expect(result.alertEvents[0].episode).toEqual({
+        expect(result.alertEvents[0].alert).toEqual({
           id: 'user-activated-episode',
           status: alertEpisodeStatus.active,
         });
@@ -746,11 +746,11 @@ describe('DirectorService', () => {
           alertEvents: [alertEvent],
         });
 
-        expect(result.alertEvents[0].episode).toEqual({
+        expect(result.alertEvents[0].alert).toEqual({
           id: 'user-activated-episode',
           status: alertEpisodeStatus.active,
         });
-        expect(result.alertEvents[0].episode?.status_count).toBeUndefined();
+        expect(result.alertEvents[0].alert?.status_count).toBeUndefined();
       });
 
       it('does not lock when the last lifecycle action is deactivate — strategy owns transitions', async () => {
@@ -786,7 +786,7 @@ describe('DirectorService', () => {
           alertEvents: [alertEvent],
         });
 
-        expect(result.alertEvents[0].episode).toEqual({
+        expect(result.alertEvents[0].alert).toEqual({
           id: 'mocked-uuid',
           status: alertEpisodeStatus.pending,
         });
@@ -823,7 +823,7 @@ describe('DirectorService', () => {
           alertEvents: [alertEvent],
         });
 
-        expect(result.alertEvents[0].episode).toEqual({
+        expect(result.alertEvents[0].alert).toEqual({
           id: 'engine-episode',
           status: alertEpisodeStatus.recovering,
         });
@@ -861,7 +861,7 @@ describe('DirectorService', () => {
           alertEvents: [alertEvent],
         });
 
-        expect(result.alertEvents[0].episode).toEqual({
+        expect(result.alertEvents[0].alert).toEqual({
           id: 'mocked-uuid',
           status: alertEpisodeStatus.pending,
         });
@@ -909,11 +909,11 @@ describe('DirectorService', () => {
           alertEvents,
         });
 
-        expect(result.alertEvents[0].episode).toEqual({
+        expect(result.alertEvents[0].alert).toEqual({
           id: 'locked-episode',
           status: alertEpisodeStatus.active,
         });
-        expect(result.alertEvents[1].episode).toEqual({
+        expect(result.alertEvents[1].alert).toEqual({
           id: 'engine-episode',
           status: alertEpisodeStatus.recovering,
         });

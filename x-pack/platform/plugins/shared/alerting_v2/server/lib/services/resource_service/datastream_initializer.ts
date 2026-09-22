@@ -32,6 +32,7 @@ export class DatastreamInitializer implements IResourceInitializer {
   ) {}
 
   public async initialize(): Promise<void> {
+    await this.maybeDestroyForMigration();
     const dataStreamDefinition: DataStreamDefinition<typeof this.resourceDefinition.mappings> = {
       name: this.resourceDefinition.dataStreamName,
       hidden: true,
@@ -69,6 +70,86 @@ export class DatastreamInitializer implements IResourceInitializer {
     }
 
     await this.updateExistingIndicesReplicaSettings();
+  }
+
+  /**
+   * One-time destructive migration. Runs before DataStreamClient.initialize().
+   *
+   * Gate 1 (version): if the deployed template version is below `destroyOnVersionBelow`,
+   * the mapping is stale and old documents are incompatible with the new schema.
+   * Once version >= threshold is deployed this gate is permanently false.
+   *
+   * Gate 2 (field type): confirms `episode` is still a real object field rather than an
+   * alias, guarding against hand-migrations and mapping-read failures (returns false on error).
+   */
+  private async maybeDestroyForMigration(): Promise<void> {
+    const { destroyOnVersionBelow, dataStreamName } = this.resourceDefinition;
+    if (destroyOnVersionBelow == null) return;
+
+    // Gate 1: read the deployed template version.
+    let deployedVersion: number | undefined;
+    try {
+      const { index_templates: templates } = await this.esClient.indices.getIndexTemplate({
+        name: dataStreamName,
+      });
+      const rawVersion = templates[0]?.index_template?._meta?.version;
+      if (typeof rawVersion === 'number' && rawVersion > 0) {
+        deployedVersion = rawVersion;
+      }
+    } catch (error) {
+      if (isResponseError(error) && error.statusCode === 404) return; // fresh install — nothing to wipe
+      this.logger.warn(
+        `[alerting_v2] Could not read index template for ${dataStreamName}; skipping migration check: ${error.message}`
+      );
+      return;
+    }
+
+    if (deployedVersion === undefined || deployedVersion >= destroyOnVersionBelow) return;
+
+    // Gate 2: confirm the data stream still has the legacy `episode` object field.
+    if (!(await this.hasLegacyEpisodeObjectField(dataStreamName))) {
+      this.logger.info(
+        `[alerting_v2] ${dataStreamName}: template v${deployedVersion} < v${destroyOnVersionBelow} ` +
+          `but episode field is not a legacy object; skipping wipe.`
+      );
+      return;
+    }
+
+    this.logger.warn(
+      `[alerting_v2] ${dataStreamName}: one-time destructive migration — ` +
+        `deployed template v${deployedVersion} predates the episode→alert field rename (v${destroyOnVersionBelow}). ` +
+        `Wiping data stream; all rule-events history is lost. ` +
+        `This fires exactly once; subsequent restarts skip this path. ` +
+        `To trigger manually: POST /internal/alerting/v2/_reset_data_streams`
+    );
+
+    try {
+      await this.esClient.indices.deleteDataStream({ name: dataStreamName });
+    } catch (error) {
+      if (isResponseError(error) && error.statusCode === 404) return; // another Kibana node already wiped
+      throw error;
+    }
+
+    this.logger.info(
+      `[alerting_v2] ${dataStreamName} wiped. Reinitializing with v${this.resourceDefinition.version} schema.`
+    );
+  }
+
+  private async hasLegacyEpisodeObjectField(dataStreamName: string): Promise<boolean> {
+    try {
+      const response = await this.esClient.indices.getMapping({ index: dataStreamName });
+      for (const index of Object.values(response)) {
+        const props = index.mappings?.properties;
+        if (props && 'episode' in props) {
+          const episode = props.episode;
+          if (episode && 'type' in episode && episode.type === 'object') return true;
+        }
+      }
+      return false;
+    } catch {
+      // Can't confirm legacy mapping — err on the side of not wiping.
+      return false;
+    }
   }
 
   /**
