@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { apm } from '@elastic/apm-rum';
 import { monaco } from '../../../monaco_imports';
 import { getWorker } from '../../worker_factory';
 import { CONSOLE_LANG_ID } from './constants';
@@ -25,17 +24,10 @@ export class ConsoleWorkerProxyService {
     if (!this.worker) {
       throw new Error('Worker Proxy Service has not been setup!');
     }
-    try {
-      await this.worker.withSyncedResources([modelUri]);
-      const parser = await this.worker.getProxy();
-      return parser.getParserResult(modelUri.toString());
-    } catch (e) {
-      // Gracefully handle worker errors
-      apm.captureError(e instanceof Error ? e : new Error(String(e)), {
-        labels: { worker: 'console' },
-      });
-      return undefined;
-    }
+
+    await this.worker.withSyncedResources([modelUri]);
+    const parser = await this.worker.getProxy();
+    return parser.getParserResult(modelUri.toString());
   }
 
   public setup() {
