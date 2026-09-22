@@ -90,6 +90,35 @@ describe('huntForThreat', () => {
     expect(result.hits).toHaveLength(1);
   });
 
+  it('counts a hit in a data stream backing index toward the required pattern', async () => {
+    const backingIndex = '.ds-logs-aws.cloudtrail-default-2026.09.01-000001';
+    const esClient = buildEsClient({
+      hits: {
+        total: { value: 1 },
+        hits: [
+          {
+            _index: backingIndex,
+            _id: 'abc',
+            _score: 1.2,
+            _source: { '@timestamp': '2026-09-01T00:00:00.000Z', 'source.ip': '10.0.0.1' },
+          },
+        ],
+      },
+      aggregations: {
+        per_index: { buckets: [{ key: backingIndex, doc_count: 1 }] },
+        affected_hosts: { buckets: [] },
+        affected_users: { buckets: [] },
+      },
+    });
+
+    const result = await huntForThreat(esClient, {
+      scope,
+      iocs: [{ type: 'ip', value: '10.0.0.1' }],
+    });
+
+    expect(result.hasConfirmedHit).toBe(true);
+  });
+
   it('does NOT set hasConfirmedHit when the only hit is in an optional index', async () => {
     const esClient = buildEsClient({
       hits: {
