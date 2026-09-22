@@ -166,7 +166,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
     const titleSlug = conversation.title
       .trim()
       .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/[^\p{L}\p{N}]+/gu, '-')
       .replace(/^-|-$/g, '')
       .slice(0, 60);
     const filename = titleSlug ? `conversation-${titleSlug}.json` : 'conversation.json';
