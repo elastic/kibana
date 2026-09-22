@@ -3,7 +3,7 @@
 Evaluations for Significant Events, which assess the quality of LLM-based Knowledge Indicator (KI) feature extraction, KI query generation, KI feature exclusion, and KI feature deduplication across failure scenarios.
 These evaluations support both qualitative (LLM-as-a-judge + deterministic CODE evaluators) and quantitative (trace-based) metrics.
 
-For general information about writing evaluation tests, configuration, and usage, see the main [`@kbn/evals` documentation](../kbn-evals/README.md).
+For general information about writing evaluation tests, configuration, and usage, see the main [`@kbn/evals` documentation](../../../../platform/packages/shared/kbn-evals/README.md).
 
 ## Evaluation suites
 

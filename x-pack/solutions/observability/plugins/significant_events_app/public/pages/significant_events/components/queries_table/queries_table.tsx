@@ -474,7 +474,7 @@ export function QueriesTable() {
             <>
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
-                  data-test-subj="significantEventsAppQueriesTableButton"
+                  data-test-subj="significantEventsAppQueriesTableClearSelectionButton"
                   iconType="cross"
                   size="xs"
                   aria-label={CLEAR_SELECTION_LABEL}
@@ -486,7 +486,7 @@ export function QueriesTable() {
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
-                  data-test-subj="significantEventsAppQueriesTableButton"
+                  data-test-subj="significantEventsAppQueriesTableDeleteButton"
                   iconType="trash"
                   color="danger"
                   size="xs"

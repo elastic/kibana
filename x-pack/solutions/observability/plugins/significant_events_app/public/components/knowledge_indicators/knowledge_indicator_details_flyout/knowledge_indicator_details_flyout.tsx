@@ -331,7 +331,7 @@ export function KnowledgeIndicatorDetailsFlyout({
                 button={
                   <EuiToolTip content={ACTIONS_MENU_BUTTON_ARIA_LABEL} disableScreenReaderOutput>
                     <EuiButtonIcon
-                      data-test-subj="significantEventsAppKnowledgeIndicatorDetailsFlyoutButton"
+                      data-test-subj="significantEventsAppKnowledgeIndicatorDetailsFlyoutActionsButton"
                       iconType="ellipsis"
                       aria-label={ACTIONS_MENU_BUTTON_ARIA_LABEL}
                       isLoading={isMutating}
@@ -352,7 +352,7 @@ export function KnowledgeIndicatorDetailsFlyout({
           <EuiFlexItem grow={false}>
             <EuiToolTip content={CLOSE_BUTTON_ARIA_LABEL} disableScreenReaderOutput>
               <EuiButtonIcon
-                data-test-subj="significantEventsAppKnowledgeIndicatorDetailsFlyoutButton"
+                data-test-subj="significantEventsAppKnowledgeIndicatorDetailsFlyoutCloseButton"
                 iconType="cross"
                 aria-label={CLOSE_BUTTON_ARIA_LABEL}
                 onClick={onClose}

@@ -409,7 +409,7 @@ export function StreamsTreeTable({
                       display="block"
                       disableScreenReaderOutput
                     >
-                      <EuiButtonIcon data-test-subj="significantEventsAppStreamsTreeTableButton"
+                      <EuiButtonIcon data-test-subj="significantEventsAppStreamsTreeTableStopButton"
                         iconType="stop"
                         aria-label={STOP_STREAM_ONBOARDING_BUTTON_LABEL}
                         disabled={
@@ -428,7 +428,7 @@ export function StreamsTreeTable({
                     display="block"
                     disableScreenReaderOutput
                   >
-                    <EuiButtonIcon data-test-subj="significantEventsAppStreamsTreeTableButton"
+                    <EuiButtonIcon data-test-subj="significantEventsAppStreamsTreeTableOnboardButton"
                       iconType="radar"
                       aria-label={RUN_STREAM_ONBOARDING_BUTTON_LABEL}
                       disabled={blocksActivity}

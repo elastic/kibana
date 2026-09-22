@@ -191,7 +191,7 @@ export function KnowledgeIndicatorsToolbar({
           <>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                data-test-subj="significantEventsAppKnowledgeIndicatorsToolbarButton"
+                data-test-subj="significantEventsAppKnowledgeIndicatorsToolbarClearSelectionButton"
                 iconType="cross"
                 size="xs"
                 aria-label={CLEAR_SELECTION_LABEL}
@@ -213,7 +213,7 @@ export function KnowledgeIndicatorsToolbar({
             ) : (
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
-                  data-test-subj="significantEventsAppKnowledgeIndicatorsToolbarButton"
+                  data-test-subj="significantEventsAppKnowledgeIndicatorsToolbarRestoreButton"
                   iconType="eye"
                   size="xs"
                   aria-label={RESTORE_SELECTED_LABEL}
@@ -229,7 +229,7 @@ export function KnowledgeIndicatorsToolbar({
               <EuiFlexItem grow={false}>
                 <EuiToolTip content={activityBlockTooltip}>
                   <EuiButtonEmpty
-                    data-test-subj="significantEventsAppKnowledgeIndicatorsToolbarButton"
+                    data-test-subj="significantEventsAppKnowledgeIndicatorsToolbarPromoteButton"
                     iconType="plusCircle"
                     size="xs"
                     isDisabled={
@@ -249,7 +249,7 @@ export function KnowledgeIndicatorsToolbar({
             )}
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                data-test-subj="significantEventsAppKnowledgeIndicatorsToolbarButton"
+                data-test-subj="significantEventsAppKnowledgeIndicatorsToolbarDeleteButton"
                 iconType="trash"
                 color="danger"
                 size="xs"

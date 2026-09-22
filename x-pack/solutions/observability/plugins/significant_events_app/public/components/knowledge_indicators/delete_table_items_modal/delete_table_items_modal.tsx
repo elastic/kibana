@@ -90,7 +90,7 @@ export function DeleteTableItemsModal({
       </EuiModalBody>
       <EuiModalFooter>
         <EuiButtonEmpty
-          data-test-subj="significantEventsAppDeleteTableItemsModalButton"
+          data-test-subj="significantEventsAppDeleteTableItemsModalCancelButton"
           onClick={onCancel}
           disabled={isLoading}
         >
