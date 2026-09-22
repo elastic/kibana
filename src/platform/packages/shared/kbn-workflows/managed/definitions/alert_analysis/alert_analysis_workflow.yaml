@@ -147,12 +147,15 @@ triggers:
         connectorIdByFeature:
           type: string
           minLength: 1
+          maxLength: 255
           description: >
             Model Management feature id used to resolve the LLM connector at run time.
             Mutually exclusive with the uiSettings-derived connectorId: supplying this
             tells the sub-workflow to use the feature registry instead of uiSettings.
             Must be non-empty — an empty string passes the != null gate but leaves both
             connectors unset, causing analysis to silently skip with empty verdicts.
+            Bounded to 255 chars to match other Kibana featureId request bounds; interpolated
+            into every batch's ai.agent connector lookup.
         calledByWorker:
           type: boolean
           description: >
@@ -162,12 +165,16 @@ triggers:
             Absent (or false) keeps the standalone (alert-trigger) path unchanged.
         investigationConversationId:
           type: string
+          minLength: 1
+          maxLength: 256
           description: >
             Conversation id of an existing Investigation conversation (created by the
             Worker before calling this sub-workflow). When supplied and calledByWorker
             is true, progress comments are posted into that conversation so the analyst
             sees batch-by-batch results without leaving the Investigation. Absent on the
             standalone path — no comments are posted.
+            Bounded to 1–256 chars to match Agent Builder CONVERSATION_ID_MAX_LENGTH;
+            posted into /api/chat/converse once per batch when present.
 
 # Structured output emitted by the `emit_workflow_output` step at the end of each run.
 # Always present, even when analysis is skipped (empty arrays / zero counts).
