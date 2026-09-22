@@ -32,7 +32,6 @@ import {
   normalizeKeywordList,
   searchDocById,
   setupLogsTestDataStream,
-  startAllEntityTypes,
   teardownLogsTestDataStream,
 } from '../../../common/fixtures/helpers';
 import { LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT } from '../../../../../server/domain/saved_objects';
@@ -73,8 +72,6 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     expect(dataViewResponse.statusCode).toBe(200);
 
     await clearInstalledEntityStoreDocuments(esClient);
-    const startResponse = await startAllEntityTypes(apiClient, defaultHeaders);
-    expect(startResponse.statusCode).toBe(200);
 
     await setupLogsTestDataStream(esClient);
     await esArchiver.loadIfNeeded(

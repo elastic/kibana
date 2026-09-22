@@ -20,7 +20,7 @@ import {
   forceLogExtraction,
   normalizeKeywordList,
   setupLogsTestDataStream,
-  startAllEntityTypes,
+  startEntityTypes,
   teardownLogsTestDataStream,
 } from '../../../common/fixtures/helpers';
 
@@ -39,7 +39,7 @@ apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, ()
       ...INTERNAL_HEADERS,
     };
     await clearInstalledEntityStoreDocuments(esClient);
-    const startResponse = await startAllEntityTypes(apiClient, defaultHeaders);
+    const startResponse = await startEntityTypes(apiClient, defaultHeaders, ['host']);
     expect(startResponse.statusCode).toBe(200);
 
     await setupLogsTestDataStream(esClient);

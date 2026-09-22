@@ -21,7 +21,6 @@ import {
 import {
   clearInstalledEntityStoreDocuments,
   setupLogsTestDataStream,
-  startAllEntityTypes,
   teardownLogsTestDataStream,
 } from '../../../common/fixtures/helpers';
 import {
@@ -47,8 +46,6 @@ apiTest.describe(
         ...INTERNAL_HEADERS,
       };
       await clearInstalledEntityStoreDocuments(esClient);
-      const startResponse = await startAllEntityTypes(apiClient, defaultHeaders);
-      expect(startResponse.statusCode).toBe(200);
 
       await setupLogsTestDataStream(esClient);
       await esArchiver.loadIfNeeded(
