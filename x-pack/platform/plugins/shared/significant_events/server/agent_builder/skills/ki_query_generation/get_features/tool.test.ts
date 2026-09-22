@@ -6,11 +6,10 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { DEFAULT_MAX_EXISTING_QUERIES_FOR_CONTEXT } from '@kbn/nightshift-ai';
 import type { Streams } from '@kbn/streams-schema';
 import type { GetScopedClients, RouteHandlerScopedClients } from '../../../../routes/types';
 import { createMockToolContext, invokeHandler } from '../../../utils/test_helpers';
-import { createGetFeaturesTool } from './tool';
+import { createGetFeaturesTool, MAX_EXISTING_QUERIES_FOR_CONTEXT } from './tool';
 
 describe('ki_features_get tool', () => {
   const logger = loggingSystemMock.createLogger();
@@ -136,7 +135,7 @@ describe('ki_features_get tool', () => {
 
   it('bounds existing queries surfaced to the LLM by severity, count and description length', async () => {
     const longDescription = 'x'.repeat(250);
-    const links = Array.from({ length: DEFAULT_MAX_EXISTING_QUERIES_FOR_CONTEXT + 5 }, (_, i) => ({
+    const links = Array.from({ length: MAX_EXISTING_QUERIES_FOR_CONTEXT + 5 }, (_, i) => ({
       query: {
         ...existingQuery,
         id: `query-${i}`,
@@ -158,8 +157,8 @@ describe('ki_features_get tool', () => {
     const { existing_queries: existingQueries } = result.results[0].data as {
       existing_queries: Array<{ id: string; severity_score: number; description: string }>;
     };
-    expect(existingQueries).toHaveLength(DEFAULT_MAX_EXISTING_QUERIES_FOR_CONTEXT);
-    expect(existingQueries[0].severity_score).toBe(DEFAULT_MAX_EXISTING_QUERIES_FOR_CONTEXT + 4);
+    expect(existingQueries).toHaveLength(MAX_EXISTING_QUERIES_FOR_CONTEXT);
+    expect(existingQueries[0].severity_score).toBe(MAX_EXISTING_QUERIES_FOR_CONTEXT + 4);
     expect(existingQueries.at(-1)?.severity_score).toBe(5);
     expect(existingQueries[0].description).toHaveLength(200);
   });

@@ -11,7 +11,6 @@ import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import type { Logger } from '@kbn/core/server';
 import { MAX_ID_LENGTH } from '@kbn/significant-events-schema';
 import {
-  DEFAULT_MAX_EXISTING_QUERIES_FOR_CONTEXT,
   QUERY_GENERATION_EXCLUDED_FEATURE_TYPES,
   toFeatureForLlmContext,
 } from '@kbn/nightshift-ai';
@@ -21,6 +20,7 @@ import { streamToAnalysisTarget } from '../../../../lib/significant_events/strea
 
 export const SIGNIFICANT_EVENTS_GET_FEATURES_TOOL_ID = 'platform.sig_events.ki_features_get';
 
+export const MAX_EXISTING_QUERIES_FOR_CONTEXT = 50;
 const MAX_EXISTING_QUERY_DESCRIPTION_LENGTH = 200;
 
 const getFeaturesSchema = z.object({
@@ -91,7 +91,7 @@ export const createGetFeaturesTool = ({
             esql: query.esql.query,
           }))
           .sort((a, b) => (b.severity_score ?? 0) - (a.severity_score ?? 0))
-          .slice(0, DEFAULT_MAX_EXISTING_QUERIES_FOR_CONTEXT);
+          .slice(0, MAX_EXISTING_QUERIES_FOR_CONTEXT);
 
         return {
           results: [
