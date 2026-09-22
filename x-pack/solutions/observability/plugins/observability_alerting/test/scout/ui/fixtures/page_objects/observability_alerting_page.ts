@@ -34,6 +34,18 @@ export const OBSERVABILITY_ALERTING_SURFACES = [
   },
 ] as const;
 
+export const OBSERVABILITY_ALERTING_RULES_V1_URL_RE =
+  /\/app\/observability\/alerting\/rules\/v1(\/|$|\?|#)/;
+export const OBSERVABILITY_ALERTING_RULES_V2_URL_RE =
+  /\/app\/observability\/alerting\/rules\/v2(\/|$|\?|#)/;
+export const OBSERVABILITY_ALERTING_INBOX_EPISODE_URL_RE =
+  /\/app\/observability\/alerting\/inbox\/[^/?#]+/;
+export const OBSERVABILITY_ALERTING_RULE_DETAILS_URL_RE =
+  /\/app\/observability\/alerting\/rules\/v2\/[^/?#]+/;
+export const MANAGEMENT_ALERTING_V2_EPISODES_URL_RE = /\/app\/management\/alertingV2\/episodes/;
+export const MANAGEMENT_ALERTING_V2_RULES_URL_RE = /\/app\/management\/alertingV2\/rules/;
+export const MANAGEMENT_ALERTING_V2_URL_RE = /\/app\/management\/alertingV2(\/|$|\?|#)/;
+
 /**
  * Drives the Observability Alerting mounts (`/app/observability/alerting`).
  * Does not wait for page chrome so the same `goto` works for the flag-off
@@ -42,10 +54,60 @@ export const OBSERVABILITY_ALERTING_SURFACES = [
 export class ObservabilityAlertingPage {
   public readonly pageTitle: Locator;
   public readonly appNotFoundPageContent: Locator;
+  public readonly requiredPrivilegesPrompt: Locator;
+  public readonly episodesListPage: Locator;
+  public readonly episodesKpisAlertsPanel: Locator;
+  public readonly episodesKpisAlertActionsPanel: Locator;
+  public readonly episodesHistogramPanel: Locator;
+  public readonly episodesHistogramChart: Locator;
+  public readonly episodesHistogramError: Locator;
+  public readonly episodesTableLoading: Locator;
+  public readonly episodesTableToolbar: Locator;
+  public readonly episodesItemCount: Locator;
+  public readonly tagsFilterButton: Locator;
+  public readonly tagsFilterListbox: Locator;
+  public readonly tagsFilterSearch: Locator;
+  public readonly v1RulesTab: Locator;
+  public readonly v2RulesTab: Locator;
+  public readonly inboxPage: Locator;
+  public readonly expandRowButton: Locator;
+  public readonly episodeFlyout: Locator;
+  public readonly takeActionButton: Locator;
+  public readonly viewDetailsLink: Locator;
+  public readonly viewRuleDetailsLink: Locator;
+  public readonly episodeDetailsPage: Locator;
+  public readonly ruleDetailLayout: Locator;
 
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.pageTitle = this.page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title);
     this.appNotFoundPageContent = this.page.testSubj.locator('appNotFoundPageContent');
+    this.requiredPrivilegesPrompt = this.page.testSubj.locator('alertingRequiredPrivilegesPrompt');
+    this.episodesListPage = this.page.testSubj.locator('alertingV2EpisodesListPage');
+    this.episodesKpisAlertsPanel = this.page.testSubj.locator('episodesKpisAlertsPanel');
+    this.episodesKpisAlertActionsPanel = this.page.testSubj.locator(
+      'episodesKpisAlertActionsPanel'
+    );
+    this.episodesHistogramPanel = this.page.testSubj.locator('episodesHistogramPanel');
+    this.episodesHistogramChart = this.page.testSubj.locator('unifiedHistogramChart');
+    this.episodesHistogramError = this.page.testSubj.locator('episodesHistogramError');
+    this.episodesTableLoading = this.page.testSubj.locator('alertingV2EpisodesListTable-loading');
+    this.episodesTableToolbar = this.page.testSubj.locator('unifiedDataTableToolbar');
+    this.episodesItemCount = this.page.testSubj.locator('alertEpisodesItemCount');
+    this.tagsFilterButton = this.page.testSubj.locator('episodesFilterBar-tags-button');
+    this.tagsFilterListbox = this.page.getByRole('listbox', { name: 'Filter options' });
+    this.tagsFilterSearch = this.page.getByPlaceholder('Search alert tags…');
+    this.v1RulesTab = this.page.testSubj.locator('v1RulesTab');
+    this.v2RulesTab = this.page.testSubj.locator('v2RulesTab');
+    this.inboxPage = this.page.testSubj.locator('alertingV2EpisodesListPage');
+    this.expandRowButton = this.page.testSubj.locator('docTableExpandToggleColumn');
+    this.episodeFlyout = this.page.testSubj.locator('alertingV2EpisodeFlyout');
+    this.takeActionButton = this.page.testSubj.locator('alertingV2EpisodeFlyoutTakeActionButton');
+    this.viewDetailsLink = this.page.testSubj.locator('alertingV2EpisodeTakeAction-viewDetails');
+    this.viewRuleDetailsLink = this.page.testSubj.locator(
+      'alertingV2EpisodeDetailsViewRuleDetailsButton'
+    );
+    this.episodeDetailsPage = this.page.testSubj.locator('alertingV2EpisodeDetailsPage');
+    this.ruleDetailLayout = this.page.testSubj.locator('ruleDetailLayout');
   }
 
   urlFor(path: string): string {
@@ -62,5 +124,65 @@ export class ObservabilityAlertingPage {
       timeout: 60_000,
     });
     return this.page.url();
+  }
+
+  async clickV1RulesTab(): Promise<void> {
+    await this.v1RulesTab.click();
+    await this.page.waitForURL(OBSERVABILITY_ALERTING_RULES_V1_URL_RE);
+    await this.v1RulesTab
+      .and(this.page.locator('[aria-selected="true"]'))
+      .waitFor({ state: 'visible' });
+  }
+
+  async clickV2RulesTab(): Promise<void> {
+    await this.v2RulesTab.click();
+    await this.page.waitForURL(OBSERVABILITY_ALERTING_RULES_V2_URL_RE);
+    await this.v2RulesTab
+      .and(this.page.locator('[aria-selected="true"]'))
+      .waitFor({ state: 'visible' });
+  }
+
+  async gotoInboxFilteredByRule(ruleId: string): Promise<void> {
+    const search = new URLSearchParams({
+      _a: `(episodesList:(ruleId:'${ruleId}'))`,
+    });
+    await this.goto(`${OBSERVABILITY_ALERTING_INBOX_PATH}?${search.toString()}`);
+    await this.inboxPage.waitFor({ state: 'visible' });
+  }
+
+  async openEpisodeFlyout(): Promise<void> {
+    await this.expandRowButton.click();
+    await this.episodeFlyout.waitFor({ state: 'visible' });
+  }
+
+  async openTakeActionMenu(): Promise<void> {
+    await this.takeActionButton.click();
+    await this.viewDetailsLink.waitFor({ state: 'visible' });
+  }
+
+  async clickViewDetails(): Promise<void> {
+    await this.viewDetailsLink.click();
+  }
+
+  async gotoEpisodeDetails(episodeId: string): Promise<void> {
+    await this.goto(`${OBSERVABILITY_ALERTING_INBOX_PATH}/${encodeURIComponent(episodeId)}`);
+    await this.episodeDetailsPage.waitFor({ state: 'visible' });
+  }
+
+  async clickViewRuleDetails(): Promise<void> {
+    await this.viewRuleDetailsLink.click();
+  }
+
+  async openTagsFilter(): Promise<void> {
+    await this.tagsFilterButton.click();
+    await this.tagsFilterListbox.waitFor({ state: 'visible' });
+  }
+
+  async searchTagsFilter(query: string): Promise<void> {
+    await this.tagsFilterSearch.fill(query);
+  }
+
+  tagFilterOption(tag: string): Locator {
+    return this.page.testSubj.locator(`episodesFilterBar-tags-popover-option-${tag}`);
   }
 }

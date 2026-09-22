@@ -17,10 +17,10 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { ServiceFlyoutTransactionsSection } from '@kbn/apm-ui-shared';
+import { ServiceFlyoutTransactionsSection, type TransactionGroup } from '@kbn/apm-ui-shared';
 import { i18n } from '@kbn/i18n';
 import { KbnWarningCallout } from '@kbn/ui-callout';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { SERVICE_FLYOUT_EBT_ELEMENTS } from '../ebt_constants';
 import type { LensESQLConfig } from './types';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
@@ -29,6 +29,8 @@ import { useTimeRange } from '../../../../hooks/use_time_range';
 import { LatencyAggregationTypeSelect } from '../../charts/latency_chart/latency_aggregation_type_select';
 import { useServiceHasSystemMetrics } from '../hooks/use_service_has_system_metrics';
 import { useProjectRouting } from '../hooks/use_project_routing';
+import { TransactionDetailFlyout } from '../../transaction_detail_flyout';
+import type { TransactionDetailFlyoutFilters } from '../../transaction_detail_flyout/types';
 import { ServiceFlyoutApmCharts } from './apm_charts';
 import { getEsqlKeyMetricCharts, getInfrastructureMetricCharts } from './chart_configs';
 import { ServiceFlyoutLensChart } from './lens_chart';
@@ -183,11 +185,15 @@ function ServiceFlyoutChartsSection({
 }
 
 export function ServiceFlyoutOverview() {
+  const [transactionDetailFilters, setTransactionDetailFilters] =
+    useState<TransactionDetailFlyoutFilters | null>(null);
   const {
-    deps: { core, share },
+    deps: { core, share, lens, dataViews },
+    contextActions,
     service,
     capabilities,
     indices,
+    flyoutHistoryKey,
     preferDocumentBasedCharts,
     filters: {
       environment,
@@ -213,6 +219,47 @@ export function ServiceFlyoutOverview() {
   // so they query the same projects as APM APIs (`x-project-routing`).
   const projectRouting = useProjectRouting();
 
+  const onTransactionClick = useCallback(
+    (item: TransactionGroup) => {
+      const resolvedTransactionType = item.transactionType || transactionType;
+      // Fetchers in the transaction detail flyout require a truthy transactionType;
+      // opening without one leaves sections stuck on NOT_INITIATED / skeletons.
+      if (!resolvedTransactionType) {
+        return;
+      }
+      setTransactionDetailFilters((prev) => {
+        if (
+          prev?.transactionName === item.name &&
+          prev.transactionType === resolvedTransactionType
+        ) {
+          return null;
+        }
+        return {
+          serviceName: service.name,
+          transactionName: item.name,
+          transactionType: resolvedTransactionType,
+          environment,
+          rangeFrom,
+          rangeTo,
+        };
+      });
+    },
+    [service.name, transactionType, environment, rangeFrom, rangeTo]
+  );
+
+  const isTransactionExpanded = useCallback(
+    (item: TransactionGroup) => {
+      if (!transactionDetailFilters) {
+        return false;
+      }
+      const resolvedTransactionType = item.transactionType || transactionType;
+      return (
+        transactionDetailFilters.transactionName === item.name &&
+        transactionDetailFilters.transactionType === resolvedTransactionType
+      );
+    },
+    [transactionDetailFilters, transactionType]
+  );
   // ES|QL charts over raw documents for: unprocessed OTel services (invisible to
   // the APM chart APIs) and document-based hosts like Discover (whose surrounding
   // RED charts read the raw documents). Every other case renders the same APM
@@ -329,6 +376,7 @@ export function ServiceFlyoutOverview() {
         {capabilities.overview?.transactions && (
           <EuiFlexItem data-test-subj="serviceFlyoutSection-transactions">
             <ServiceFlyoutTransactionsSection
+              docLinks={core.docLinks}
               http={core.http}
               notifications={core.notifications}
               locators={share.url.locators}
@@ -339,11 +387,25 @@ export function ServiceFlyoutOverview() {
               transactionType={transactionType ?? ''}
               latencyAggregationType={latencyAggregationType}
               refreshToken={refreshToken}
+              onTransactionClick={onTransactionClick}
+              isTransactionExpanded={isTransactionExpanded}
               projectRouting={projectRouting}
             />
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
+      {transactionDetailFilters && (
+        <TransactionDetailFlyout
+          deps={{ core, share, lens, dataViews }}
+          contextActions={contextActions}
+          filters={transactionDetailFilters}
+          onClose={() => setTransactionDetailFilters(null)}
+          historyKey={flyoutHistoryKey}
+          preferDocumentBasedCharts={preferDocumentBasedCharts}
+          schema={capabilities.schema}
+          indices={indices}
+        />
+      )}
     </div>
   );
 }

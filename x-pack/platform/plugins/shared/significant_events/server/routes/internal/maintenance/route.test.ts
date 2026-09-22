@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
+import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 import { internalMaintenanceRoutes } from './route';
 
@@ -46,13 +46,13 @@ describe('cleanup workflow bootstrap route', () => {
     };
   };
 
-  it('requires streams manage and enables cleanup in the current space', async () => {
+  it('requires Nightshift manage and enables cleanup in the current space', async () => {
     const params = createHandlerParams();
 
     await expect(route.handler(params.handlerParams)).resolves.toEqual({ success: true });
 
     expect(route.security.authz).toEqual({
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage, NIGHTSHIFT_API_PRIVILEGES.configure],
     });
     expect(assertSignificantEventsAccess).toHaveBeenCalledWith({
       server: params.server,

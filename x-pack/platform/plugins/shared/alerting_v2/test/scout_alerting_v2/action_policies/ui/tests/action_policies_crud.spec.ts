@@ -25,6 +25,8 @@ test.describe('Action Policies - create and edit', { tag: [...tags.stateful.clas
   const CREATED_POLICY_NAME = 'scout-action-policy-created';
   const SEEDED_POLICY_NAME = 'scout-action-policy-to-edit';
   const EDITED_POLICY_NAME = 'scout-action-policy-edited';
+  // Intentionally includes a legacy `rule.*` field: with no form validation (AC#3) the expression
+  // round-trips through the edit form unchanged, proving backward compatibility.
   const MATCHER = 'episode_status: "active" and rule.tags: "scout"';
 
   let workflowId: string;
@@ -84,7 +86,7 @@ test.describe('Action Policies - create and edit', { tag: [...tags.stateful.clas
       expect(items).toHaveLength(1);
       expect(items[0]).toMatchObject({
         name: CREATED_POLICY_NAME,
-        matcher: MATCHER,
+        matcher: { expression: MATCHER },
         grouping_mode: 'per_episode',
         throttle: { strategy: 'on_status_change' },
         destinations: [{ type: 'workflow', id: workflowId }],
@@ -101,7 +103,7 @@ test.describe('Action Policies - create and edit', { tag: [...tags.stateful.clas
     const seeded = await apiServices.alertingV2.actionPolicies.create(
       buildCreateActionPolicyData({
         name: SEEDED_POLICY_NAME,
-        matcher: MATCHER,
+        matcher: { expression: MATCHER },
         destinations: [{ type: 'workflow', id: workflowId }],
       })
     );
@@ -127,7 +129,7 @@ test.describe('Action Policies - create and edit', { tag: [...tags.stateful.clas
 
       expect(updated).toMatchObject({
         name: EDITED_POLICY_NAME,
-        matcher: MATCHER,
+        matcher: { expression: MATCHER },
         destinations: [{ type: 'workflow', id: workflowId }],
       });
     });

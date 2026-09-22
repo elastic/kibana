@@ -5,14 +5,20 @@
  * 2.0.
  */
 
+import { Parser } from '@elastic/esql';
 import {
   parseDurationToMs,
   validateDuration,
   validateMaxDuration,
   validateMinDuration,
   validateEsqlQuery,
+  validateComposedEsqlQuery,
   composeEsqlQuery,
 } from './validation';
+
+afterEach(() => {
+  jest.restoreAllMocks();
+});
 
 describe('parseDurationToMs', () => {
   it.each([
@@ -51,6 +57,10 @@ describe('validateDuration', () => {
       expect(validateDuration(value)).not.toBeUndefined();
     }
   );
+
+  it('does not echo the rejected value in the error message', () => {
+    expect(validateDuration('not-a-duration')).not.toContain('not-a-duration');
+  });
 });
 
 describe('validateMaxDuration', () => {
@@ -129,6 +139,34 @@ describe('validateEsqlQuery', () => {
 
   it('rejects invalid ES|QL query', () => {
     expect(validateEsqlQuery('FROM |')).toMatch(/Invalid ES\|QL query/);
+  });
+
+  it('reports a parser crash as an invalid query instead of throwing', () => {
+    jest.spyOn(Parser, 'parseErrors').mockImplementationOnce(() => {
+      throw new Error('boom');
+    });
+
+    expect(validateEsqlQuery('FROM logs-*')).toBe('Invalid ES|QL query: boom');
+  });
+});
+
+describe('validateComposedEsqlQuery', () => {
+  it('accepts a valid composition', () => {
+    expect(validateComposedEsqlQuery('FROM metrics-*', 'WHERE cpu > 0.9')).toBeUndefined();
+  });
+
+  it('rejects a composition that does not parse', () => {
+    expect(validateComposedEsqlQuery('FROM metrics-*', 'WHERE')).toMatch(/Invalid ES\|QL query/);
+  });
+
+  it('reports a compose crash as an invalid query instead of throwing', () => {
+    jest.spyOn(Parser, 'parse').mockImplementationOnce(() => {
+      throw new Error('boom');
+    });
+
+    expect(validateComposedEsqlQuery('FROM metrics-*', 'WHERE cpu > 0.9')).toBe(
+      'Invalid ES|QL query: boom'
+    );
   });
 });
 

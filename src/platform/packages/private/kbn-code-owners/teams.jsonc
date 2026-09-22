@@ -516,6 +516,15 @@
     ]
   },
   {
+    "id": "nightshift-investigations",
+    "name": "Nightshift Investigations",
+    "areas": ["observability"],
+    "github": {
+      "team": "elastic/nightshift-investigations-team",
+      "label": "Team:nightshift-investigations"
+    }
+  },
+  {
     "id": "nightshift-sre-agent",
     "name": "Nightshift SRE Agent Team",
     "areas": ["observability"],
@@ -823,7 +832,8 @@
       "security"
     ],
     "github": {
-      "team": "elastic/security-detection-engineering"
+      "team": "elastic/security-detection-engineering",
+      "label": "Team:Detection Engineering"
     }
   },
   {
@@ -1134,6 +1144,14 @@
     "github": {
       "team": "elastic/threat-research-and-detection-engineering",
       "label": "Team:TRaDE"
+    }
+  },
+  {
+    "id": "security-investigations",
+    "name": "Security Investigations",
+    "github": {
+      "team": "elastic/security-investigations",
+      "label": "Team:Security Investigations"
     }
   }
 ]

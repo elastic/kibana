@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/dashboard-markdown'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/kibana-presentation'
+  defaultOwner: '@elastic/kibana-dashboards'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/dashboard-markdown'
   description: Moon project for @kbn/dashboard-markdown
   channel: ''
-  owner: '@elastic/kibana-presentation'
+  owner: '@elastic/kibana-dashboards'
   sourceRoot: src/platform/plugins/shared/dashboard_markdown
 dependsOn:
   - '@kbn/css-utils'

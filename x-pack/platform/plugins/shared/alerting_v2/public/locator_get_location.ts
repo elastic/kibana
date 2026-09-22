@@ -17,44 +17,44 @@ import type {
 } from './locators';
 
 export const getRulesLocation = (params: AlertingV2RulesLocatorParams): KibanaLocation => {
-  const { app, basePath } = pageHost(params, MANAGEMENT_HOST.rules);
+  const { app, pathPrefix } = pageHost(params, MANAGEMENT_HOST.rules);
 
   if (params.page === 'sequence_create') {
-    return { app, path: `${basePath}/sequence/create`, state: {} };
+    return { app, path: `${pathPrefix}/sequence/create`, state: {} };
   }
   if (params.ruleId) {
-    return { app, path: `${basePath}/${encodeURIComponent(params.ruleId)}`, state: {} };
+    return { app, path: `${pathPrefix}/${encodeURIComponent(params.ruleId)}`, state: {} };
   }
   if (params.templateId) {
     return {
       app,
-      path: `${basePath}?templateId=${encodeURIComponent(params.templateId)}`,
+      path: `${pathPrefix}?templateId=${encodeURIComponent(params.templateId)}`,
       state: {},
     };
   }
-  return { app, path: basePath, state: {} };
+  return { app, path: pathPrefix, state: {} };
 };
 
 export const getRuleLibraryLocation = (
   params: AlertingV2RuleLibraryLocatorParams
 ): KibanaLocation => {
-  const { app, basePath } = pageHost(params, MANAGEMENT_HOST.ruleLibrary);
+  const { app, pathPrefix } = pageHost(params, MANAGEMENT_HOST.ruleLibrary);
 
   if (params.templateId) {
     return {
       app,
-      path: `${basePath}?templateId=${encodeURIComponent(params.templateId)}`,
+      path: `${pathPrefix}?templateId=${encodeURIComponent(params.templateId)}`,
       state: {},
     };
   }
-  return { app, path: basePath, state: {} };
+  return { app, path: pathPrefix, state: {} };
 };
 
 export const getEpisodesLocation = (params: AlertingV2EpisodesLocatorParams): KibanaLocation => {
-  const { app, basePath } = pageHost(params, MANAGEMENT_HOST.episodes);
+  const { app, pathPrefix } = pageHost(params, MANAGEMENT_HOST.episodes);
 
   if (params.episodeId) {
-    return { app, path: `${basePath}/${encodeURIComponent(params.episodeId)}`, state: {} };
+    return { app, path: `${pathPrefix}/${encodeURIComponent(params.episodeId)}`, state: {} };
   }
 
   if (params.filters || params.timeRange) {
@@ -75,34 +75,34 @@ export const getEpisodesLocation = (params: AlertingV2EpisodesLocatorParams): Ki
     if (Object.keys(episodesList).length > 0) {
       const search = new URLSearchParams();
       search.set('_a', encodeRison({ episodesList }));
-      return { app, path: `${basePath}?${search.toString()}`, state: {} };
+      return { app, path: `${pathPrefix}?${search.toString()}`, state: {} };
     }
   }
 
-  return { app, path: basePath, state: {} };
+  return { app, path: pathPrefix, state: {} };
 };
 
 export const getActionPoliciesLocation = (
   params: AlertingV2ActionPoliciesLocatorParams
 ): KibanaLocation => {
-  const { app, basePath } = pageHost(params, MANAGEMENT_HOST.actionPolicies);
+  const { app, pathPrefix } = pageHost(params, MANAGEMENT_HOST.actionPolicies);
 
   if (params.page === 'create') {
-    return { app, path: `${basePath}/create`, state: {} };
+    return { app, path: `${pathPrefix}/create`, state: {} };
   }
   if (params.page === 'edit' && params.actionPolicyId) {
     return {
       app,
-      path: `${basePath}/edit/${encodeURIComponent(params.actionPolicyId)}`,
+      path: `${pathPrefix}/edit/${encodeURIComponent(params.actionPolicyId)}`,
       state: {},
     };
   }
-  return { app, path: basePath, state: {} };
+  return { app, path: pathPrefix, state: {} };
 };
 
 export const getExecutionHistoryLocation = (
   params: AlertingV2ExecutionHistoryLocatorParams
 ): KibanaLocation => {
-  const { app, basePath } = pageHost(params, MANAGEMENT_HOST.executionHistory);
-  return { app, path: basePath, state: {} };
+  const { app, pathPrefix } = pageHost(params, MANAGEMENT_HOST.executionHistory);
+  return { app, path: pathPrefix, state: {} };
 };

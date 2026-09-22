@@ -57,7 +57,7 @@ export const registerRuleManagementRoutes = (
   getRuleManagementFilters(router);
 
   // Rules coverage overview
-  getCoverageOverviewRoute(router);
+  getCoverageOverviewRoute(router, logger);
 
   // Rule changes history
   ruleHistoryRoute(router);
