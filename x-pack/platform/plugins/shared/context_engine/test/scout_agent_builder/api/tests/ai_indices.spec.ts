@@ -276,6 +276,9 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.message).toContain(
+      'value has length [0] but it must have a minimum length of [1]'
+    );
   });
 
   apiTest('rejects a syntactically invalid ES|QL source', async ({ apiClient }) => {

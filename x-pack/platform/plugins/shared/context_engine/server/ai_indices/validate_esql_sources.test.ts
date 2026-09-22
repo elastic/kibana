@@ -36,13 +36,16 @@ describe('validateEsqlSources', () => {
     ).rejects.toThrow(/^ES\|QL source 'FROM logs-app \| WHERE' is invalid: /);
   });
 
-  it('rejects when one of several sources is invalid', async () => {
+  it('reports every invalid source in order', async () => {
     await expect(
       validateEsqlSources([
-        { type: 'esql', value: 'FROM logs-app' },
         { type: 'esql', value: 'FROM logs-web | WHERE' },
+        { type: 'esql', value: 'FROM logs-app' },
+        { type: 'esql', value: '' },
       ])
-    ).rejects.toThrow(/^ES\|QL source 'FROM logs-web \| WHERE' is invalid: /);
+    ).rejects.toThrow(
+      /^ES\|QL source 'FROM logs-web \| WHERE' is invalid: .*\nES\|QL source value cannot be empty$/
+    );
   });
 
   it('truncates long queries in the error message', async () => {

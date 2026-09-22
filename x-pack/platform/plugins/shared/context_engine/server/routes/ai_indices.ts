@@ -553,12 +553,12 @@ export const registerAiIndexRoutes = ({
         const auditLogger = security.audit.logger;
         const { id, ...properties } = request.body;
         try {
+          await validateEsqlSources(properties.sources);
           await validateConnectorSources({
             sources: properties.sources,
             actions: await getActions(),
             request,
           });
-          await validateEsqlSources(properties.sources);
           await validateTraces({
             traces: properties.traces,
             esClient: elasticsearch.client.asCurrentUser,
@@ -607,12 +607,12 @@ export const registerAiIndexRoutes = ({
         const auditLogger = security.audit.logger;
         const { aiIndexId } = request.params;
         try {
+          await validateEsqlSources(request.body.sources);
           await validateConnectorSources({
             sources: request.body.sources,
             actions: await getActions(),
             request,
           });
-          await validateEsqlSources(request.body.sources);
           await validateTraces({
             traces: request.body.traces,
             esClient: elasticsearch.client.asCurrentUser,

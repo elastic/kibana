@@ -5,42 +5,39 @@
  * 2.0.
  */
 
-import type { EditorError } from '@elastic/esql/types';
 import { validateQuery } from '@kbn/esql-language';
-import type { ESQLMessage } from '@kbn/esql-language';
 import type { AiIndexSource } from '../../common/http_api/ai_indices';
+import { previewQuery } from '../ki_verification/verifiers/esql_attribute';
+import { formatValidationError } from '../ki_verification/verifiers/esql_valid_syntax';
 import { InvalidEsqlSourceError } from './errors';
 
-const QUERY_PREVIEW_LENGTH = 200;
-
-const previewQuery = (query: string): string =>
-  query.length > QUERY_PREVIEW_LENGTH ? `${query.slice(0, QUERY_PREVIEW_LENGTH)}…` : query;
-
-const formatValidationError = (error: ESQLMessage | EditorError): string =>
-  'text' in error
-    ? `${error.text} (at position ${error.location.min}-${error.location.max})`
-    : `${error.message} (at line ${error.startLineNumber}:${error.startColumn})`;
-
-const validateEsqlSource = async (query: string): Promise<void> => {
+const validateEsqlSource = async (query: string): Promise<string | undefined> => {
   if (query.trim() === '') {
-    throw new InvalidEsqlSourceError('ES|QL source value cannot be empty');
+    return 'ES|QL source value cannot be empty';
   }
 
   const { errors } = await validateQuery(query);
   if (errors.length > 0) {
-    throw new InvalidEsqlSourceError(
-      `ES|QL source '${previewQuery(query)}' is invalid: ${errors
-        .map(formatValidationError)
-        .join('; ')}`
-    );
+    return `ES|QL source '${previewQuery(query)}' is invalid: ${errors
+      .map(formatValidationError)
+      .join('; ')}`;
   }
 };
 
-/** Asserts every ES|QL source is syntactically valid. */
+/** Asserts every ES|QL source is syntactically valid, reporting all failures at once. */
 export const validateEsqlSources = async (sources: AiIndexSource[]): Promise<void> => {
-  await Promise.all(
-    sources
-      .filter((source) => source.type === 'esql')
-      .map((source) => validateEsqlSource(source.value))
-  );
+  const failures: string[] = [];
+  for (const source of sources) {
+    if (source.type !== 'esql') {
+      continue;
+    }
+    const failure = await validateEsqlSource(source.value);
+    if (failure) {
+      failures.push(failure);
+    }
+  }
+
+  if (failures.length > 0) {
+    throw new InvalidEsqlSourceError(failures.join('\n'));
+  }
 };
