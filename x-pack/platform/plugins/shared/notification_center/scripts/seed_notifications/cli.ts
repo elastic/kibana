@@ -13,26 +13,51 @@ import { NOTIFICATION_DATA_STREAM_NAME } from '../../server/storage/notification
 import { buildChunk, buildTick, validateFixture } from './fixtures';
 import { createEsClient, getConnection } from './lib/connection';
 import { clearNotifications, ensureDataStream, writeNotifications } from './lib/notification_store';
+import { clearReadHorizon, setReadHorizon } from './lib/read_horizon';
 
 const MIN_INTERVAL_MS = 1000;
+/** Longer delays overflow `setTimeout`, which then fires immediately. */
+const MAX_INTERVAL_MS = 2_147_483_647;
 
-const UNIT_MS = { ms: 1, s: 1000, m: 60_000 } as const;
+const DEFAULT_READ_HORIZON = '30d';
 
-/** Parse `1s` / `10s` / `2m`; a bare number is seconds. */
-const parseInterval = (raw: string): number => {
-  const match = /^(\d+)(ms|s|m)?$/.exec(raw.trim());
+const UNIT_MS = { ms: 1, s: 1000, m: 60_000, h: 3_600_000, d: 86_400_000 } as const;
+
+/** Parse `500ms` / `10s` / `2m` / `12h` / `30d`; a bare number takes `defaultUnit`. */
+const parseDuration = (raw: string, defaultUnit: keyof typeof UNIT_MS): number | undefined => {
+  const match = /^(\d+)(ms|s|m|h|d)?$/.exec(raw.trim());
   if (!match) {
-    throw new Error(`Could not parse --interval "${raw}". Use e.g. 1s, 10s or 2m.`);
+    return undefined;
   }
-  const unit = (match[2] ?? 's') as keyof typeof UNIT_MS;
-  const ms = Number(match[1]) * UNIT_MS[unit];
-  if (!Number.isSafeInteger(ms) || ms > 2_147_483_647) {
-    throw new Error('--interval is too large.');
+  const ms = Number(match[1]) * UNIT_MS[(match[2] ?? defaultUnit) as keyof typeof UNIT_MS];
+  return Number.isSafeInteger(ms) ? ms : undefined;
+};
+
+const parseInterval = (raw: string): number => {
+  const ms = parseDuration(raw, 's');
+  if (ms === undefined) {
+    throw new Error(`Could not parse --interval "${raw}". Use e.g. 1s, 10s or 2m.`);
   }
   if (ms < MIN_INTERVAL_MS) {
     throw new Error(`--interval must be at least ${MIN_INTERVAL_MS}ms.`);
   }
+  if (ms > MAX_INTERVAL_MS) {
+    throw new Error(`--interval must be at most ${MAX_INTERVAL_MS}ms (about 24 days).`);
+  }
   return ms;
+};
+
+/** Parse an age (`30d`) or an absolute date (`2026-09-01`) into a timestamp. */
+const parseReadHorizon = (raw: string): string => {
+  const age = parseDuration(raw, 'd');
+  if (age !== undefined) {
+    return new Date(Date.now() - age).toISOString();
+  }
+  const parsed = Date.parse(raw.trim());
+  if (Number.isNaN(parsed)) {
+    throw new Error(`Could not parse --read-horizon "${raw}". Use e.g. 30d, 12h or 2026-09-01.`);
+  }
+  return new Date(parsed).toISOString();
 };
 
 const formatLine = (notification: Notification) =>
@@ -54,6 +79,7 @@ const runCadence = async (esClient: Client, intervalMs: number, log: ToolingLog)
 run(
   async ({ log, flags, addCleanupTask }) => {
     const intervalMs = flags.interval ? parseInterval(String(flags.interval)) : undefined;
+    const readHorizon = parseReadHorizon(String(flags['read-horizon'] || DEFAULT_READ_HORIZON));
     const connection = await getConnection(flags, log);
     const { esUrl, kibanaUrl } = connection;
 
@@ -68,12 +94,14 @@ run(
     if (flags.clean === true) {
       const deleted = await clearNotifications(esClient);
       log.info(`Deleted ${deleted} existing notification(s).`);
+      await clearReadHorizon(connection, log);
       return;
     }
 
     const chunk = buildChunk({ includeUnregistered: flags['include-unregistered'] === true });
     chunk.forEach(validateFixture);
     await writeNotifications(esClient, chunk);
+    await setReadHorizon(connection, readHorizon, log);
 
     log.info(`Seeded ${chunk.length} notification(s):`);
     chunk.forEach((notification) => log.info(formatLine(notification)));
@@ -91,15 +119,18 @@ run(
       Requires a running Kibana with "xpack.notificationCenter.enabled: true"
     `,
     flags: {
-      string: ['interval', 'es-url', 'es-username', 'es-password', 'kibana-url'],
+      string: ['interval', 'es-url', 'es-username', 'es-password', 'kibana-url', 'read-horizon'],
       boolean: ['clean', 'include-unregistered'],
       help: `
-        --clean                  Empty the data stream and exit
+        --clean                  Empty the data stream, reset the read horizon and exit
         --include-unregistered   Also seed namespaces no plugin has registered yet, plus one
                                  timeseries id. These bypass the producer contract and exist to
                                  exercise the read path and UI against a mixed feed.
         --interval <duration>    After seeding, keep emitting one notification per interval
                                  (e.g. 1s, 10s, 2m) until interrupted
+        --read-horizon <when>    Backdate the seeded user's "mark all read" marker to an age
+                                 (30d, 12h) or a date (2026-09-01), so the fixtures newer than it
+                                 arrive unread (default: ${DEFAULT_READ_HORIZON})
         --es-url <url>           Elasticsearch URL (default: the cluster for that Kibana)
         --es-username <user>     Elasticsearch username (default: elastic_serverless or elastic)
         --es-password <pass>     Elasticsearch password (default: changeme)

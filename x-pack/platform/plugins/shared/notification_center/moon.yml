@@ -18,8 +18,8 @@ project:
   sourceRoot: x-pack/platform/plugins/shared/notification_center
 dependsOn:
   - '@kbn/core'
+  - '@kbn/config'
   - '@kbn/dev-cli-runner'
-  - '@kbn/object-utils'
   - '@kbn/repo-info'
   - '@kbn/config-schema'
   - '@kbn/zod'

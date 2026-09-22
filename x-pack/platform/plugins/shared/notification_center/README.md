@@ -252,8 +252,15 @@ Kibana is detected on `localhost:5601` (serverless) or `localhost:5611` (stack),
 dev base path. If both are running, pass `--kibana-url`. Elasticsearch follows the chosen
 Kibana (serverless vs stack). Override with `--es-url`.
 
-The plugin's `notificationWriteSchema` rejects unknown `namespace` and `types`. `--include-unregistered`
+The plugin's `notificationWriteSchema` rejects an unknown `namespace` or `type`. `--include-unregistered`
 writes those directly to the cluster to exercise the read path and the UI against a mixed feed.
+
+Every fixture is backdated, and a user's catch-up marker is stamped at `now` the first time they
+open the bell — which is always after seeding — so the whole chunk would otherwise arrive already
+read. The script therefore logs in as the Elasticsearch user and backdates that marker to 30 days
+ago, leaving the newer fixtures unread. `--read-horizon` takes an age (`12h`) or a date
+(`2026-09-01`) instead, and `--clean` drops the marker entirely. Read state is per user profile:
+if you browse Kibana as somebody other than `--es-username`, their bell is unaffected.
 
 ## Running tests
 

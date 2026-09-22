@@ -7,9 +7,8 @@
 
 import fs from 'fs';
 import path from 'path';
-import { parse } from 'yaml';
 import { Client } from '@elastic/elasticsearch';
-import { unflattenObject } from '@kbn/object-utils';
+import { getConfigFromFiles } from '@kbn/config';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
 
@@ -44,11 +43,17 @@ const toHttpUrl = (raw: string): string => {
   return stripTrailingSlash(withProtocol);
 };
 
+const LOCAL_HOSTNAMES = new Set(['localhost', '127.0.0.1', '[::1]']);
+
+const isLocal = (url: string): boolean => LOCAL_HOSTNAMES.has(new URL(url).hostname);
+
 export const createEsClient = ({ esUrl, username, password }: SeedConnection): Client =>
   new Client({
     node: esUrl,
     auth: { username, password },
-    ...(esUrl.startsWith('https:') && { tls: { rejectUnauthorized: false } }),
+    // Serverless dev clusters serve a self-signed cert. Skip verification only for those: a
+    // remote https cluster reached over an unverified connection is nobody's intent.
+    ...(esUrl.startsWith('https:') && isLocal(esUrl) && { tls: { rejectUnauthorized: false } }),
   });
 
 interface DevYml {
@@ -62,9 +67,13 @@ const readDevEsUrl = (): string | undefined => {
     return undefined;
   }
 
-  const raw = (parse(fs.readFileSync(configPath, 'utf8')) ?? {}) as Record<string, unknown>;
-  const loaded = unflattenObject(raw) as DevYml;
-  const { hosts } = loaded.elasticsearch ?? {};
+  let config: DevYml;
+  try {
+    config = getConfigFromFiles([configPath]) as DevYml;
+  } catch {
+    throw new Error(`Malformed Kibana config file: ${configPath}`);
+  }
+  const { hosts } = config.elasticsearch ?? {};
   const first = Array.isArray(hosts) ? hosts[0] : hosts;
   return first !== undefined ? String(first) : undefined;
 };

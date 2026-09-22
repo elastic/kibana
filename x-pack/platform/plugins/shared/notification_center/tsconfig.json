@@ -8,8 +8,8 @@
   "exclude": ["target/**/*", "scripts/*.js"],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/config",
     "@kbn/dev-cli-runner",
-    "@kbn/object-utils",
     "@kbn/repo-info",
     "@kbn/config-schema",
     "@kbn/zod",
