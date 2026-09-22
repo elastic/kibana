@@ -23,8 +23,8 @@ export interface InvestigationHeaderBlocksProps {
  * internal HTTP route, which is on neither its public start contract nor a package constant.
  */
 export const InvestigationHeaderBlocks = ({ investigation }: InvestigationHeaderBlocksProps) => {
-  const { status, assignees } = investigation;
-  const primaryAssignee = assignees[0] ?? null;
+  const { status, conversationAssignees } = investigation;
+  const primaryAssignee = conversationAssignees[0] ?? null;
 
   const items = useMemo<InfoBlockItem[]>(
     () => [

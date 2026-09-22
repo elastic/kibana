@@ -20,7 +20,7 @@ const investigation: Investigation = {
   watch_id: 'watch-1',
   watch_execution_id: 'exec-1',
   recordId: 'CASE-2047',
-  assignees: ['ava'],
+  conversationAssignees: ['ava'],
   pendingProposalCount: 0,
   events: [],
 };

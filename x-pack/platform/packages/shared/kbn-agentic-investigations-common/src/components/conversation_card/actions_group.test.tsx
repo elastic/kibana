@@ -23,7 +23,7 @@ const makeInvestigation = (overrides: Partial<Investigation> = {}): Investigatio
   pendingProposalCount: 1,
   recommendedAction: 'respond',
   primaryActionLabel: 'Revoke sessions',
-  assignees: [],
+  conversationAssignees: [],
   events: [],
   ...overrides,
 });

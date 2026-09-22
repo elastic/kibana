@@ -128,7 +128,7 @@ export const conversationToInvestigation = (conversation: Conversation): Investi
     watch_execution_id: readString(metadata.workflow_execution_id) ?? '',
     status: readString(metadata.status),
     severity: readString(metadata.severity),
-    assignees: readAssignees(metadata.assignees),
+    conversationAssignees: readAssignees(metadata.assignees),
     // `summary` is the long form; `description` is the single-line one. Prefer the richer field and
     // fall back, because a template only requires `status`.
     summary: readString(metadata.summary) ?? readString(metadata.description),

@@ -96,7 +96,7 @@ export const Investigation = lazySchema(() =>
     watch_tier: WatchTier.optional(),
     severity: z.string().optional(),
     /** User profile UIDs assigned to this investigation. Empty when nobody is assigned. */
-    assignees: z.array(z.string()).default([]),
+    conversationAssignees: z.array(z.string()).default([]),
     status: z.string().optional(),
     pendingProposalCount: z.number().int().min(0),
     recommendedAction: RecommendedAction.optional(),

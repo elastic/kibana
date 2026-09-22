@@ -85,18 +85,18 @@ describe('conversationToInvestigation', () => {
     expect(result.summary).toBe('The long form.');
   });
 
-  it('maps assignees from conversation metadata to the assignees list', () => {
+  it('maps conversationAssignees from conversation metadata', () => {
     const result = conversationToInvestigation(
       conversation({ metadata: { assignees: ['first.analyst', 'second.analyst'] } })
     );
 
-    expect(result.assignees).toEqual(['first.analyst', 'second.analyst']);
+    expect(result.conversationAssignees).toEqual(['first.analyst', 'second.analyst']);
   });
 
-  it('returns an empty assignees list for an empty metadata assignees array', () => {
+  it('returns an empty conversationAssignees list for an empty metadata assignees array', () => {
     const result = conversationToInvestigation(conversation({ metadata: { assignees: [] } }));
 
-    expect(result.assignees).toEqual([]);
+    expect(result.conversationAssignees).toEqual([]);
   });
 
   it('handles ES flattened-field bare-string read-back as a one-element list', () => {
@@ -104,7 +104,7 @@ describe('conversationToInvestigation', () => {
       conversation({ metadata: { assignees: 'bare.analyst' as unknown as string[] } })
     );
 
-    expect(result.assignees).toEqual(['bare.analyst']);
+    expect(result.conversationAssignees).toEqual(['bare.analyst']);
   });
 
   it('leaves optional fields undefined rather than inventing them', () => {
@@ -113,7 +113,7 @@ describe('conversationToInvestigation', () => {
     expect(result.status).toBeUndefined();
     expect(result.severity).toBeUndefined();
     expect(result.summary).toBeUndefined();
-    expect(result.assignees).toEqual([]);
+    expect(result.conversationAssignees).toEqual([]);
     // No metadata field declares a watch, so this stays empty rather than guessing one.
     expect(result.watch_id).toBe('');
     expect(result.watch_execution_id).toBe('');

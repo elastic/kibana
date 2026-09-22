@@ -23,7 +23,7 @@ const mockInvestigation: Investigation = {
   updatedAt: '2024-01-01T00:00:00Z',
   watch_id: 'watch-1',
   watch_execution_id: 'exec-1',
-  assignees: [],
+  conversationAssignees: [],
   pendingProposalCount: 0,
   events: [],
   primaryActionLabel: 'Apply monitored exception',

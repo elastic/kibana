@@ -115,7 +115,7 @@ export const proposalToInvestigation = (proposal: ProposalItem): Investigation =
     recordId: proposal.id,
     summary: proposal.comment,
     primaryActionLabel: proposal.action?.name,
-    assignees: [],
+    conversationAssignees: [],
     events: [],
     // affectedSurface left undefined → BlastRadius self-hides (returns null).
   };

@@ -32,7 +32,7 @@ export interface Investigation {
   watch_tier?: string;
   severity?: string;
   /** User profile UIDs assigned to this investigation. Empty when nobody is assigned. */
-  assignees: string[];
+  conversationAssignees: string[];
   status?: string;
   pendingProposalCount: number;
   recommendedAction?: RecommendedAction;
