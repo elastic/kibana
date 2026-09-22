@@ -323,10 +323,11 @@ steps:
 
         schedule  — The rule sweeps too wide a lookback window or runs too
           frequently, generating FPs that tighter timing would prevent.
-          Populate proposed_interval (e.g. "10m") and/or proposed_from
+          Always populate both proposed_interval (e.g. "10m") and proposed_from
           (e.g. "now-11m") using the same date-math format the rule currently
-          uses. At least one of the two must be populated. Ensure proposed_from
-          overlaps with proposed_interval to avoid gaps.
+          uses, even if only one setting needs to change. The patch replaces
+          both atomically, so both must be explicitly proposed. Ensure
+          proposed_from overlaps with proposed_interval to avoid gaps.
 
         manual  — None of the above is safe to apply automatically. Use summary
           to describe: (a) the false-positive pattern you found, (b) which automated
@@ -513,10 +514,7 @@ steps:
               proposed_from:
                 type: string
                 maxLength: 64
-            required: [change_type, summary, title, fp_pattern, reasoning, confidence]
-            anyOf:
-              - required: [proposed_interval]
-              - required: [proposed_from]
+            required: [change_type, summary, title, fp_pattern, reasoning, confidence, proposed_interval, proposed_from]
           - type: object
             properties:
               change_type:
@@ -694,14 +692,10 @@ steps:
         {% endif %}
         Approving patches the rule's threshold settings. The change can be reverted in the Detection Rules UI.
         {% when "schedule" %}
-        {% if steps.diagnose_rule.output.structured_output.proposed_interval %}
         Current interval: {{ steps.fetch_rule.output.interval }}
         Proposed interval: {{ steps.diagnose_rule.output.structured_output.proposed_interval }}
-        {% endif %}
-        {% if steps.diagnose_rule.output.structured_output.proposed_from %}
         Current lookback (from): {{ steps.fetch_rule.output.from }}
         Proposed lookback (from): {{ steps.diagnose_rule.output.structured_output.proposed_from }}
-        {% endif %}
         Approving patches the rule's schedule settings. The change can be reverted in the Detection Rules UI.
         {% else %}
         No automated change can be applied safely for this rule.
@@ -827,61 +821,21 @@ steps:
 
       - match: schedule
         steps:
-          # Split on which fields were actually proposed so the action only
-          # receives the proposed keys and leaves the other field untouched,
-          # rather than sending a stale snapshot of the unproposed field.
           - name: propose_schedule
-            type: switch
-            expression: "{% if steps.diagnose_rule.output.structured_output.proposed_interval and steps.diagnose_rule.output.structured_output.proposed_from %}both{% elsif steps.diagnose_rule.output.structured_output.proposed_interval %}interval{% else %}from{% endif %}"
-            cases:
-              - match: interval
-                steps:
-                  - name: propose_interval_only
-                    type: workflow.execute
-                    with:
-                      workflow-id: system-create-investigation-proposal
-                      inputs:
-                        conversationId: "{{ steps.create_investigation.output.conversation_id }}"
-                        comment: "{{ steps.compose_proposal.output.comment }}"
-                        actionWorkflowId: system-alertzero-action-edit-rule
-                        actionInput:
-                          id: "{{ inputs.rule_uuid }}"
-                          interval: "{{ steps.diagnose_rule.output.structured_output.proposed_interval }}"
-                        impact: medium
-                        confidence: "{{ steps.diagnose_rule.output.structured_output.confidence | default: 'medium' }}"
-                        autoApprove: false
-              - match: from
-                steps:
-                  - name: propose_from_only
-                    type: workflow.execute
-                    with:
-                      workflow-id: system-create-investigation-proposal
-                      inputs:
-                        conversationId: "{{ steps.create_investigation.output.conversation_id }}"
-                        comment: "{{ steps.compose_proposal.output.comment }}"
-                        actionWorkflowId: system-alertzero-action-edit-rule
-                        actionInput:
-                          id: "{{ inputs.rule_uuid }}"
-                          from: "{{ steps.diagnose_rule.output.structured_output.proposed_from }}"
-                        impact: medium
-                        confidence: "{{ steps.diagnose_rule.output.structured_output.confidence | default: 'medium' }}"
-                        autoApprove: false
-            default:
-              - name: propose_both_schedule
-                type: workflow.execute
-                with:
-                  workflow-id: system-create-investigation-proposal
-                  inputs:
-                    conversationId: "{{ steps.create_investigation.output.conversation_id }}"
-                    comment: "{{ steps.compose_proposal.output.comment }}"
-                    actionWorkflowId: system-alertzero-action-edit-rule
-                    actionInput:
-                      id: "{{ inputs.rule_uuid }}"
-                      interval: "{{ steps.diagnose_rule.output.structured_output.proposed_interval }}"
-                      from: "{{ steps.diagnose_rule.output.structured_output.proposed_from }}"
-                    impact: medium
-                    confidence: "{{ steps.diagnose_rule.output.structured_output.confidence | default: 'medium' }}"
-                    autoApprove: false
+            type: workflow.execute
+            with:
+              workflow-id: system-create-investigation-proposal
+              inputs:
+                conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                comment: "{{ steps.compose_proposal.output.comment }}"
+                actionWorkflowId: system-alertzero-action-edit-rule
+                actionInput:
+                  id: "{{ inputs.rule_uuid }}"
+                  interval: "{{ steps.diagnose_rule.output.structured_output.proposed_interval }}"
+                  from: "{{ steps.diagnose_rule.output.structured_output.proposed_from }}"
+                impact: medium
+                confidence: "{{ steps.diagnose_rule.output.structured_output.confidence | default: 'medium' }}"
+                autoApprove: false
 
     # Same gate without an action: the analyst carries the change out
     # themselves, so approval is the whole lifecycle. The default arm, so a
