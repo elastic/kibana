@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import type { WorkerFixture } from '@playwright/test';
 import { apiClientFixture } from '@kbn/scout';
+import type { ApiClientFixture } from '@kbn/scout';
 import { SecuritySolutionScoutApiServiceProvider as createDetectionsApi } from './detections.gen';
 import { SecuritySolutionScoutApiServiceProvider as createDiscoveriesApi } from './discoveries.gen';
 import { SecuritySolutionScoutApiServiceProvider as createEndpointExceptionsApi } from './endpoint_exceptions.gen';
@@ -52,60 +54,15 @@ export interface SecuritySolutionApiFixtures {
  * `options.headers` (an API key header from `requestAuth` or a cookie header from `samlAuth`).
  */
 export const securitySolutionApiFixture = apiClientFixture.extend<{}, SecuritySolutionApiFixtures>({
-  detectionsApi: [
-    async ({ apiClient }, use) => {
-      await use(createDetectionsApi(apiClient));
-    },
-    { scope: 'worker' },
-  ],
-  discoveriesApi: [
-    async ({ apiClient }, use) => {
-      await use(createDiscoveriesApi(apiClient));
-    },
-    { scope: 'worker' },
-  ],
-  endpointExceptionsApi: [
-    async ({ apiClient }, use) => {
-      await use(createEndpointExceptionsApi(apiClient));
-    },
-    { scope: 'worker' },
-  ],
-  endpointManagementApi: [
-    async ({ apiClient }, use) => {
-      await use(createEndpointManagementApi(apiClient));
-    },
-    { scope: 'worker' },
-  ],
-  entityAnalyticsApi: [
-    async ({ apiClient }, use) => {
-      await use(createEntityAnalyticsApi(apiClient));
-    },
-    { scope: 'worker' },
-  ],
-  exceptionsApi: [
-    async ({ apiClient }, use) => {
-      await use(createExceptionsApi(apiClient));
-    },
-    { scope: 'worker' },
-  ],
-  listsApi: [
-    async ({ apiClient }, use) => {
-      await use(createListsApi(apiClient));
-    },
-    { scope: 'worker' },
-  ],
-  osqueryApi: [
-    async ({ apiClient }, use) => {
-      await use(createOsqueryApi(apiClient));
-    },
-    { scope: 'worker' },
-  ],
-  timelinesApi: [
-    async ({ apiClient }, use) => {
-      await use(createTimelinesApi(apiClient));
-    },
-    { scope: 'worker' },
-  ],
+  detectionsApi: createApiFixture(createDetectionsApi),
+  discoveriesApi: createApiFixture(createDiscoveriesApi),
+  endpointExceptionsApi: createApiFixture(createEndpointExceptionsApi),
+  endpointManagementApi: createApiFixture(createEndpointManagementApi),
+  entityAnalyticsApi: createApiFixture(createEntityAnalyticsApi),
+  exceptionsApi: createApiFixture(createExceptionsApi),
+  listsApi: createApiFixture(createListsApi),
+  osqueryApi: createApiFixture(createOsqueryApi),
+  timelinesApi: createApiFixture(createTimelinesApi),
 });
 
 export {
@@ -119,3 +76,14 @@ export {
   createOsqueryApi,
   createTimelinesApi,
 };
+
+function createApiFixture<TApi>(
+  createApi: (apiClient: ApiClientFixture) => TApi
+): [WorkerFixture<TApi, { apiClient: ApiClientFixture }>, { scope: 'worker' }] {
+  return [
+    async ({ apiClient }, use) => {
+      await use(createApi(apiClient));
+    },
+    { scope: 'worker' },
+  ];
+}

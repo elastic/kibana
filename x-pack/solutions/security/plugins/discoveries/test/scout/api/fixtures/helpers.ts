@@ -134,6 +134,9 @@ export const getSimpleWorkflowSchedule = (
  * Convenience wrapper around the internal schedule API routes, backed by the generated
  * `discoveriesApi` Scout client. Encapsulates auth headers and the target space for cleaner test
  * code. Bodies stay loosely typed on purpose so negative tests can send invalid payloads.
+ *
+ * Every successfully created schedule id is recorded per space so `deleteAllWorkflowSchedules`
+ * can remove it directly instead of relying on the eventually-consistent find route.
  */
 export const getWorkflowSchedulesApis = (
   discoveriesApi: DiscoveriesApi,
@@ -141,13 +144,21 @@ export const getWorkflowSchedulesApis = (
   spaceId: string
 ) => {
   const options = { headers: { ...headers, ...COMMON_HEADERS }, kibanaSpace: spaceId };
+  const createdScheduleIds = getCreatedScheduleIds(spaceId);
 
   return {
-    createSchedule: (body: Record<string, unknown>) =>
-      discoveriesApi.createAttackDiscoverySchedule(
+    createSchedule: async (body: Record<string, unknown>) => {
+      const response = await discoveriesApi.createAttackDiscoverySchedule(
         { body: body as CreateAttackDiscoveryScheduleRequestBodyInput },
         options
-      ),
+      );
+
+      if (response.statusCode === 200) {
+        createdScheduleIds.add(response.body.id);
+      }
+
+      return response;
+    },
 
     deleteSchedule: (id: string) =>
       discoveriesApi.deleteAttackDiscoverySchedule({ params: { id } }, options),
@@ -241,6 +252,10 @@ export const getMonitoringApis = (
 /**
  * Deletes every workflow schedule in the given space. Only ever pointed at the worker's own
  * `scheduleSpace`, so it cannot touch schedules owned by other suites. Call this in `afterEach`.
+ *
+ * Schedules created through `getWorkflowSchedulesApis` are deleted by their recorded ids first, so
+ * a schedule that is not yet searchable is still removed. The find sweep afterwards only catches
+ * schedules created outside the wrapper.
  */
 export const deleteAllWorkflowSchedules = async (
   discoveriesApi: DiscoveriesApi,
@@ -248,11 +263,19 @@ export const deleteAllWorkflowSchedules = async (
   spaceId: string
 ): Promise<void> => {
   const apis = getWorkflowSchedulesApis(discoveriesApi, headers, spaceId);
+  const createdScheduleIds = getCreatedScheduleIds(spaceId);
+
+  for (const id of createdScheduleIds) {
+    // 404 means the schedule is already gone, which is the state we want
+    assertCleanupStatus(`delete ${id}`, await apis.deleteSchedule(id), [200, 404]);
+  }
+
+  createdScheduleIds.clear();
+
   const findResult = await apis.findSchedules({ per_page: 100 });
   assertCleanupStatus('find', findResult, [200]);
 
   for (const schedule of findResult.body.data ?? []) {
-    // 404 means the schedule is already gone, which is the state we want
     assertCleanupStatus(
       `delete ${schedule.id}`,
       await apis.deleteSchedule(schedule.id),
@@ -279,4 +302,19 @@ const assertCleanupStatus = (
       response.body
     )}`
   );
+};
+
+const createdScheduleIdsBySpace = new Map<string, Set<string>>();
+
+const getCreatedScheduleIds = (spaceId: string): Set<string> => {
+  const existing = createdScheduleIdsBySpace.get(spaceId);
+
+  if (existing) {
+    return existing;
+  }
+
+  const created = new Set<string>();
+  createdScheduleIdsBySpace.set(spaceId, created);
+
+  return created;
 };

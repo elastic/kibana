@@ -13,30 +13,37 @@ import { parseBufferResponse, parseTextResponse } from './api_client_parsers';
 import type { ResponseParser } from './api_client_parsers';
 
 describe('api_client_parsers', () => {
-  it('parseTextResponse returns the whole payload as a UTF-8 string', async () => {
-    const ndjson = '{"id":"rule-1"}\n{"id":"rule-2"}\n{"exported_count":2}\n';
+  describe('parseTextResponse', () => {
+    it('concatenates streamed chunks into a string without parsing them as JSON', async () => {
+      const ndjson = '{"id":"rule-1"}\n{"id":"rule-2"}\n{"exported_count":2}\n';
 
-    const body = await parse(parseTextResponse, [
-      Buffer.from(ndjson.slice(0, 10)),
-      Buffer.from(ndjson.slice(10)),
-    ]);
+      const body = await parse(parseTextResponse, [
+        Buffer.from(ndjson.slice(0, 10)),
+        Buffer.from(ndjson.slice(10)),
+      ]);
 
-    expect(body).toBe(ndjson);
+      expect(body).toBe(ndjson);
+    });
+
+    it('decodes a multi-byte UTF-8 character split across chunks', async () => {
+      const utf8 = Buffer.from('é');
+
+      const body = await parse(parseTextResponse, [utf8.subarray(0, 1), utf8.subarray(1)]);
+
+      expect(body).toBe('é');
+    });
   });
 
-  it('parseTextResponse joins multi-byte characters split across chunks', async () => {
-    const utf8 = Buffer.from('é');
+  describe('parseBufferResponse', () => {
+    it('concatenates streamed chunks into a single Buffer', async () => {
+      const body = await parse(parseBufferResponse, [
+        Buffer.from([0x01, 0x02]),
+        Buffer.from([0x03]),
+      ]);
 
-    const body = await parse(parseTextResponse, [utf8.subarray(0, 1), utf8.subarray(1)]);
-
-    expect(body).toBe('é');
-  });
-
-  it('parseBufferResponse returns the whole payload as a single Buffer', async () => {
-    const body = await parse(parseBufferResponse, [Buffer.from([0x01, 0x02]), Buffer.from([0x03])]);
-
-    expect(Buffer.isBuffer(body)).toBe(true);
-    expect(body).toEqual(Buffer.from([0x01, 0x02, 0x03]));
+      expect(Buffer.isBuffer(body)).toBe(true);
+      expect(body).toEqual(Buffer.from([0x01, 0x02, 0x03]));
+    });
   });
 });
 
