@@ -46,8 +46,13 @@ export const registerCorrelateRoute = ({ router, logger, getSpaceId }: RouteDepe
             size,
           });
 
-          // Strip the toAttachmentData helper before serialising to JSON.
-          const { toAttachmentData: _fn, ...body } = result;
+          // `toAttachmentData` is the `security.hunt_correlation` payload
+          // (PR 1, kibana#291882); PR 3b's `correlation.yaml` writes it
+          // verbatim via `ai.attachment.add`. It is not serialisable as a
+          // function, so it is invoked and its result folded in as
+          // `attachment_data`, then dropped from the spread.
+          const { toAttachmentData, ...rest } = result;
+          const body = { ...rest, attachment_data: toAttachmentData() };
           return response.ok({ body });
         } catch (err) {
           logger.error(`correlate route failed: ${(err as Error).message}`);

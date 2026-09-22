@@ -44,6 +44,47 @@ export const AnchorSet = lazySchema(() =>
 );
 export type AnchorSet = z.infer<typeof AnchorSet>;
 
+/**
+ * One discriminating anchor that matched, flattened out of `AnchorSet` for direct rendering on the `security.hunt_correlation` attachment (`correlation_engine.ts`'s `buildAnchorItems`).
+ */
+export const AnchorItem = lazySchema(() =>
+  z.object({
+    kind: z.enum(['hash', 'ioc_set_hash', 'actor']),
+    value: z.string(),
+  })
+);
+export type AnchorItem = z.infer<typeof AnchorItem>;
+
+export const HuntCorrelationAttachmentThresholds = lazySchema(() =>
+  z.object({
+    anchor_match: z.number(),
+    diamond_vertex: z.number(),
+  })
+);
+export type HuntCorrelationAttachmentThresholds = z.infer<
+  typeof HuntCorrelationAttachmentThresholds
+>;
+
+/**
+ * The `security.hunt_correlation` attachment payload (PR 1, kibana#291882), built by `correlation_engine.ts`'s `toAttachmentData()`. This is the shape `correlation.yaml` (PR 3b) writes verbatim onto the source report's Investigation via `ai.attachment.add`; the route's other top-level fields (`matches`, `anchor_summary`, ...) describe the engine's own search, not what the attachment reader sees.
+ */
+export const HuntCorrelationAttachmentData = lazySchema(() =>
+  z.object({
+    anchors: z.array(AnchorItem),
+    diamond_scores: z.array(
+      z.object({
+        vertex: z.string(),
+        related_report_id: z.string(),
+        score: z.number(),
+      })
+    ),
+    thresholds: HuntCorrelationAttachmentThresholds,
+    self_match_excluded: z.boolean(),
+    report_revision: z.string(),
+  })
+);
+export type HuntCorrelationAttachmentData = z.infer<typeof HuntCorrelationAttachmentData>;
+
 export const CorrelateRequestBody = lazySchema(() =>
   z
     .object({
@@ -87,6 +128,7 @@ export const CorrelateResponse = lazySchema(() =>
       technique_count: z.number().int(),
       discriminating_anchor_count: z.number().int(),
     }),
+    attachment_data: HuntCorrelationAttachmentData,
   })
 );
 export type CorrelateResponse = z.infer<typeof CorrelateResponse>;
