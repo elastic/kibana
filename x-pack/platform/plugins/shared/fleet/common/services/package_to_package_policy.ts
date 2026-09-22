@@ -47,7 +47,7 @@ export const getInputEffectiveName = (input: { name?: string; type: string }): s
  * Returns true if the given data stream must be treated as OTel for Elasticsearch asset naming.
  *
  * A data stream is considered OTel when either:
- * - its manifest sets `use_otel_suffix: true`, or
+ * - it has no streams and its manifest sets `use_otel_suffix: true`, or
  * - any of its `streams[].input` values is the literal type `'otelcol'`, or the `name` of an input
  *   within `pkgInfo.policy_templates[*].inputs` whose `type` is `'otelcol'`.
  *
@@ -64,7 +64,10 @@ export const dataStreamUsesOtelInput = (
   pkgInfo: Pick<PackageInfo, 'policy_templates'>,
   dataStream: Pick<RegistryDataStream, 'streams' | 'use_otel_suffix'>
 ): boolean => {
-  if (dataStream.use_otel_suffix === true) {
+  // package-spec (SVR00011) only allows `use_otel_suffix` on data streams without inputs; data
+  // streams with inputs get `.otel` naming from the `otelcol` input instead. Ignore the flag when
+  // both are set so asset naming stays aligned with where the agent actually writes.
+  if (dataStream.use_otel_suffix === true && !dataStream.streams?.length) {
     return true;
   }
 

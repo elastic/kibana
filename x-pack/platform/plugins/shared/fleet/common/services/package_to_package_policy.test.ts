@@ -795,12 +795,24 @@ describe('dataStreamUsesOtelInput', () => {
     expect(dataStreamUsesOtelInput(pkgInfo, {})).toBe(false);
   });
 
-  it('returns true when the data stream sets use_otel_suffix, even without streams or inputs', () => {
+  it('returns true when the data stream sets use_otel_suffix and has no streams', () => {
     expect(dataStreamUsesOtelInput({}, { use_otel_suffix: true })).toBe(true);
     expect(dataStreamUsesOtelInput({}, { use_otel_suffix: true, streams: [] })).toBe(true);
+  });
+
+  it('ignores use_otel_suffix when the data stream defines inputs (package-spec SVR00011)', () => {
+    // Rejected by package-spec, so only reachable through a hand-built archive. Falling back to
+    // input detection keeps ES asset naming aligned with where the agent writes.
     expect(
       dataStreamUsesOtelInput(makePackageInfo([{ name: 'my_logfile', type: 'logfile' }]), {
         ...makeDataStream('my_logfile'),
+        use_otel_suffix: true,
+      })
+    ).toBe(false);
+    // An otelcol stream still wins on its own, so a redundant flag changes nothing
+    expect(
+      dataStreamUsesOtelInput(makePackageInfo([{ name: 'otel_logs', type: 'otelcol' }]), {
+        ...makeDataStream('otel_logs'),
         use_otel_suffix: true,
       })
     ).toBe(true);

@@ -425,6 +425,15 @@ describe('isOtelDataStream', () => {
     ).toBe(false);
   });
 
+  it('ignores use_otel_suffix on a data stream that defines a non-otelcol stream', () => {
+    expect(
+      isOtelDataStream(
+        { ...BASE_DATA_STREAM, use_otel_suffix: true, streams: [{ input: 'logfile' }] },
+        OTEL_PACKAGE_INFO
+      )
+    ).toBe(false);
+  });
+
   it('keeps returning true for a data stream with an otelcol stream', () => {
     expect(
       isOtelDataStream({ ...BASE_DATA_STREAM, streams: [{ input: 'otelcol' }] }, OTEL_PACKAGE_INFO)
