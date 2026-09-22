@@ -2,7 +2,7 @@
 
 Solution-agnostic base layer for the entities an agent and a human collaborate on. It owns their storage, their API, and their workflow steps, so a Worker in any solution can create them and any solution's UI can act on them.
 
-Today it holds two entities: **proposals** and **escalations**. **Investigations** are next, which is why the plugin is an umbrella rather than one plugin per entity.
+Today it holds **proposals**, **impact**, and **escalations**. **Investigations** are next, which is why the plugin is an umbrella rather than one plugin per entity.
 
 Consumed by AlertZero (Security) and intended for Nightshift (Observability). Nothing in this plugin is solution-specific.
 
@@ -19,10 +19,14 @@ common/
   constants.ts           umbrella: plugin id, API version, route base, workflow owner id
   index.ts               umbrella barrel, re-exports each entity barrel
   proposals/             constants, schemas, step definitions shared with the browser
+  impact/                constants and schemas
+  escalations/           constants and schemas
 server/
   plugin.ts config.ts types.ts
   features.ts            umbrella feature and its privileges
   proposals/             routes, services, step handlers, storage, managed workflows
+  impact/                routes, service, storage
+  escalations/           routes and service
 public/
   plugin.ts index.ts types.ts
   proposals/             browser step definitions for the YAML editor
@@ -32,16 +36,16 @@ Adding an entity means adding a directory in each of the three, an entity barrel
 
 ## Privileges
 
-One Kibana feature, `agenticInvestigations`, shown in the Roles and Spaces pickers as **Proposed Actions** — named for proposals alone because action proposals move to their own plugin in a follow-up. Both privileges are declared inline on the feature:
+One Kibana feature, `agenticInvestigations`, shown in the Roles and Spaces pickers as **Agentic Investigations**. Proposal and Impact privileges are declared inline on the feature:
 
 | Feature privilege | API | UI |
-| ----------------- | ------------------------------------ | ------------------------------------ |
-| `all`             | `read_proposals`, `manage_proposals` | `showProposals`, `decideProposals`   |
-| `read`            | `read_proposals`                     | `showProposals`                      |
+| ----------------- | -------------------------------------------------------------------- | ------------------------------------------------------------ |
+| `all`             | `read_proposals`, `manage_proposals`, `read_impact`, `manage_impact` | `showProposals`, `decideProposals`, `showImpact`, `manageImpact` |
+| `read`            | `read_proposals`, `read_impact`                                      | `showProposals`, `showImpact`                                |
 
-So `read` can see the queue but cannot decide it. The feature carries `minimumLicense: 'enterprise'`.
+So `read` can see the queue but cannot decide it. **Impact** is inline on those same privileges, because an investigation always has one. `all` includes `read_impact`, `manage_impact`, `showImpact`, and `manageImpact`; `read` includes `read_impact` and `showImpact`. **Escalations** stay a sub-feature pulled up through `includeIn`. `all` includes Escalations All (`read_escalations`, `manage_escalations`, `showEscalations`, `manageEscalations`); `read` includes Escalations Read. A role can also grant Escalations on its own. The feature carries `minimumLicense: 'enterprise'`.
 
-**Note:** `minimal_all` and `minimal_read` are **not** equivalent to `all` and `read`. Incidents landed as a sub-feature (see below), and sub-feature privileges are included in the base privilege levels through `includeIn: 'all'` / `includeIn: 'read'` — but `minimal_all` and `minimal_read` only grant sub-features marked `groupType: 'independent'` when the user holds them explicitly. Any new entity should follow the same pattern: put its capabilities in a sub-feature with `includeIn` rather than in additional inline privileges.
+**Note:** `minimal_all` and `minimal_read` are **not** equivalent to `all` and `read`. Sub-feature privileges are included in the base privilege levels through `includeIn: 'all'` / `includeIn: 'read'` — but `minimal_all` and `minimal_read` only grant sub-features marked `groupType: 'independent'` when the user holds them explicitly. A separable entity should follow that pattern. Impact stays on the base privileges, because an investigation always includes it.
 
 ### Three questions, three places
 
@@ -57,11 +61,20 @@ Conflating these is how proposal authorization goes wrong, so each is enforced s
 
 All checks **fail closed**, including when the `security` plugin is absent entirely: without it there is no principal to evaluate, and a workflow that cannot be attributed must not write. Workflows cannot execute steps without an identity, so an absent principal is a bug rather than a normal path.
 
-**Not in the service.** The service is reached from routes (already gated declaratively), from steps (principal is an execution), and from other plugins through the start contract — in-process and trusted, which is how AlertZero's `ConversationProposalsService` calls `listByWindow`. Request-based authz there would mean threading a request through every call and standing up a second mechanism beside the routes'. The service stays the invariant layer instead: terminal guards, decision immutability, valid-pair enforcement, action-input validation.
+**Not in the service.** The service is reached from routes (already gated declaratively), from steps (principal is an execution), and from other plugins through the start contract — in-process and trusted, which is how AlertZero's `ConversationProposalsService` calls `list`. Request-based authz there would mean threading a request through every call and standing up a second mechanism beside the routes'. The service stays the invariant layer instead: terminal guards, decision immutability, valid-pair enforcement, action-input validation.
 
 **The principal differs by surface, and one of them cannot be checked.** An authenticated resume runs the post-gate steps under a clone of the resumer's API key, so the check evaluates the human. An **external-token resume carries no request**, so the engine wakes the pre-scheduled task under the *workflow runner's* key instead — and that identity necessarily holds `manage_proposals`, because it had to in order to create the proposal. Checking it would therefore authorize every click on a magic link, as the Worker, and record the Worker as the decider.
 
 `hitlExternalResume.enabled` defaults to `true` and `external_resume_service.ts` handles `waitForApproval` explicitly, so this is reachable rather than theoretical. `proposals.checkDecidePrivileges` therefore takes the gate's own `respondedBy` and refuses any principal prefixed `external_resume:` outright, without consulting the privilege service — there is nothing it could usefully ask. The loop re-parks, so an authenticated approver can still decide. Enabling external channels for proposal gates needs the platform to propagate the responder's identity, not just their answer.
+
+## Impact
+
+An **Impact** record is the set of entities (users, hosts, services) an investigation is about. It lives in `.kibana-investigation-impact`, one document per space and conversation, and is the source for both the AlertZero landing-page pills and the investigation flyout. Nightshift writes the same document: `id` is the filter key, and `name`, `type`, `featureId`, and `streamName` carry the fields on its existing `InvestigationImpactEntity`.
+
+- AlertZero may attach `{ id }` only. The pill label stays the id until Entity Store hydration. Nightshift attaches `{ id, name, type?, featureId?, streamName? }`.
+- Writes are **upsert/merge**: attaching more entities unions them by `id` onto the existing document rather than appending a new one. A later attach fills in fields the first write omitted. That is load-bearing for hydrate-by-conversationId plus filtering on `entities.id`. The document `_id` is a hash of `(spaceId, conversationId)`. Attach reads that id and retries the union when a concurrent create or update wins the version check, so both writers' entities land on the one record.
+- Evidence is not on this document. Nightshift's current evidence shape cannot represent non-local data, and that format is still open.
+- HTTP: `POST /internal/investigations/impact` (`manage_impact`) and `GET ...?conversationId=` (`read_impact`). Bulk hydrate is in-process via `getImpactClient(request).listByConversationIds()`, which checks `read_impact` and uses the request's space. The raw service stays internal to the routes.
 
 ## Proposals
 
@@ -321,14 +334,11 @@ Two routes are deliberately absent. There is **no update route**: `status` is a 
 
 ### Reads share one filter vocabulary
 
-`ProposalFilters` — `status`, `decision`, `conversationId`, `excludeSuperseded`, `excludeExpired` — is translated by a single builder, so a filter cannot come to mean one thing on the HTTP list and another on the in-process one. Two reads consume it:
+`ProposalFilters` — `status`, `decision`, `conversationId`, `excludeSuperseded`, `excludeExpired` — is translated by a single builder, so a filter cannot come to mean one thing on the HTTP list and another on the in-process one. `list()` is the only read that consumes it: it applies the filters as a conjunction, then sorts and pages in Elasticsearch. `decidedWithinHours` goes through the same builder, bounding a closed queue to a recency window rather than all decided history.
 
-- **`list()`** applies the filters as a conjunction, then sorts and pages in Elasticsearch.
-- **`listByWindow()`** applies the same filters, then unions two sets on top: everything still awaiting at any age, plus everything decided within the last N hours. That union is what the shape *is*, not a flag — "still awaiting" and "decided recently" are unrelated conditions, so neither can be expressed as one more filter. It is capped rather than paged, which is why it has no HTTP route; in-process callers reach it through the start contract.
+An open queue filters on `status: 'pending'`, which is the whole "awaiting" condition. `excludeExpired` is still worth passing alongside it, because it filters on the deadline *date* rather than the status: between the deadline passing and the gate workflow settling the record there is task lag during which it still reads `pending`.
 
-A decision queue filters on `status: 'pending'`, which is the whole "awaiting" condition. `excludeExpired` is still worth passing alongside it, because it filters on the deadline *date* rather than the status: between the deadline passing and the gate workflow settling the record there is task lag during which it still reads `pending`.
-
-A recently expired proposal *does* reach `listByWindow`, through the decided half: `update` stamps `decidedAt` whenever it settles a proposal, including one nobody decided, so "you missed this" surfaces as activity. It carries no `decision`, though — which is why a consumer must classify on the status. `isAwaitingDecision()` exists for exactly that, and classifying on the decision instead puts an unanswerable proposal back in the open queue.
+A recently expired proposal *does* reach a closed queue, through `decidedWithinHours`: `update` stamps `decidedAt` whenever it settles a proposal, including one nobody decided, so "you missed this" surfaces as activity. It carries no `decision`, though — which is why a consumer must classify on the status. `isAwaitingDecision()` exists for exactly that, and classifying on the decision instead puts an unanswerable proposal back in the open queue.
 
 **The two decision routes are privilege-checked bridges to the gate, not writers.** Each loads the proposal, asserts no decision exists yet, asserts the deadline has not passed, compares the submitted `actionInput` against the record on an approval, and resumes. The workflow behind the gate records the decision.
 
@@ -442,7 +452,7 @@ The point of the exercise is the identity behaviour: a rule created by an approv
 - **Deep paging stops at 10,000.** The list pages with `from`/`size` inside Elasticsearch's default result window. Going past that needs `search_after`, which the list does not expose yet.
 - **`.kibana-*` index naming** buys us out of a system index registration, at the cost of living in a namespace we do not own.
 - **No Scout API coverage yet.** The HTTP surface is covered by Jest only, as `anonymization` shipped.
-- **Two entities, umbrella seams exercised.** Proposals and escalations both exist. The directory convention holds across both.
+- **Impact has no workflow steps or Agent Builder attachment yet.** The index, service, and HTTP surface land first so AlertZero can hydrate `entities` in-process; `investigations.attachImpact` / `investigations.getImpact` and `investigation_impact` follow.
 
 ## Escalations
 
