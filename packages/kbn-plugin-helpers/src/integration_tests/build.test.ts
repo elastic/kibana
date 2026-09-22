@@ -46,6 +46,15 @@ describe('scripts/generate_plugin', () => {
   it('builds a generated plugin into a viable archive', async () => {
     await generatePlugin();
 
+    // Third-party plugins commonly ship stylesheets. Every plugin .scss pulls in
+    // Kibana's theme globals, which must resolve when built from the plugin dir.
+    Fs.writeFileSync(
+      Path.resolve(PLUGIN_DIR, 'public/styles.scss'),
+      '.fooTestPlugin { color: $euiColorPrimary; }\n'
+    );
+    const entryPath = Path.resolve(PLUGIN_DIR, 'public/index.ts');
+    Fs.writeFileSync(entryPath, `import './styles.scss';\n${Fs.readFileSync(entryPath, 'utf8')}`);
+
     const buildProc = await execa(
       process.execPath,
       ['../../scripts/plugin_helpers', 'build', '--kibana-version', '7.5.0'],
@@ -69,6 +78,7 @@ describe('scripts/generate_plugin', () => {
 
     const mainBundle = publicFiles.find((f) => f.endsWith('fooTestPlugin.plugin.js'));
     expect(mainBundle).toBeDefined();
+    expect(Fs.readFileSync(Path.resolve(TMP_DIR, mainBundle!), 'utf8')).toContain('.fooTestPlugin');
 
     // Legacy kibana.json plugins register both `public` and `common` with __kbnBundles__
     const bundleContent = Fs.readFileSync(Path.resolve(TMP_DIR, mainBundle!), 'utf-8');

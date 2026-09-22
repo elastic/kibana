@@ -6,6 +6,7 @@
  */
 
 import {
+  attackDiscoveryFixtureMarker,
   liveRetrievalFixture,
   missingAlertRetrievalFixture,
   multipleAlertSetsFixture,
@@ -69,6 +70,12 @@ export const goldenPathExamples: AttackDiscoveryAgentBuilderExample[] = [
         'platform.core.execute_esql',
         'security.attack-discovery.run',
       ],
+      // The question names this marker, and the assertion below is an EXACT
+      // population of a SHARED index, so the retrieval is counted only when its
+      // query carries the marker. Measured on the recorded reps of this example:
+      // every one that ran ES|QL carried it (`tags == "x"`, `tags LIKE "*x*"`,
+      // `QSTR("x")`, an OR-chain).
+      retrievalScope: attackDiscoveryFixtureMarker,
     },
     output: {
       expectedToolPath: [
