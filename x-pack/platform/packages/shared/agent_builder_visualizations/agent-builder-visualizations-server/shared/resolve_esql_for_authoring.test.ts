@@ -17,6 +17,7 @@ jest.mock('@kbn/agent-builder-genai-utils', () => ({
   buildTimeRangeParams: jest.fn((range?: { from: string; to: string }) =>
     range ? [{ _tstart: range.from }, { _tend: range.to }] : undefined
   ),
+  DEFAULT_ESQL_TIME_RANGE: { from: 'now-24h', to: 'now' },
 }));
 
 jest.mock('./generate_visualization_esql', () => ({

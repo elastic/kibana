@@ -12,6 +12,7 @@ export {
   getIndexMappings,
   executeEsql,
   buildTimeRangeParams,
+  DEFAULT_ESQL_TIME_RANGE,
   isCcsTarget,
   partitionByCcs,
   getFieldsFromFieldCaps,

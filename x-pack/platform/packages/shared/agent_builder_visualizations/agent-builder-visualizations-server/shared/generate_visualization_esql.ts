@@ -44,7 +44,8 @@ interface GenerateVisualizationEsqlParams {
   /**
    * Time range bound to `?_tstart`/`?_tend` when the query is executed for
    * validation. The live range is applied by Kibana at render time, so this
-   * only affects the validation run. Defaults to the last 24 hours.
+   * only affects the validation run. When omitted, generateEsql uses
+   * `DEFAULT_ESQL_TIME_RANGE`.
    */
   timeRange?: TimeRange;
   /**

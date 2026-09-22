@@ -9,7 +9,11 @@ import type { EsqlEsqlColumnInfo } from '@elastic/elasticsearch/lib/api/types';
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import { buildTimeRangeParams, executeEsql } from '@kbn/agent-builder-genai-utils';
+import {
+  buildTimeRangeParams,
+  DEFAULT_ESQL_TIME_RANGE,
+  executeEsql,
+} from '@kbn/agent-builder-genai-utils';
 import { generateVisualizationEsql } from './generate_visualization_esql';
 
 /** A query that executed, plus its result columns when they were collected. */
@@ -38,32 +42,24 @@ export interface ResolveEsqlForAuthoringParams {
   esClient: IScopedClusterClient;
 }
 
-/**
- * Default range used only to bind `?_tstart`/`?_tend` when executing a query
- * server-side to collect its result columns. The live dashboard range is applied
- * by Kibana at render time.
- *
- * Keep in sync with generateEsql's default in
- * `agent-builder-genai-utils/tools/generate_esql/nl_to_esql.ts` (`now-24h` →
- * `now`). This probe omits `timeRange` on generateVisualizationEsql so both
- * paths share that window; changing only one side would validate against
- * different ranges.
- */
-const DEFAULT_VALIDATION_TIME_RANGE = { from: 'now-24h', to: 'now' } as const;
-
 /** Same request shape as generateEsql `execute: 'schema'`. */
 const executeSchemaParams = {
   dropNullColumns: false,
   limit: 1,
 } as const;
 
+/**
+ * Probe-execute a query to collect result columns. Binds `?_tstart`/`?_tend`
+ * with {@link DEFAULT_ESQL_TIME_RANGE}, the window `generateEsql` uses when this
+ * probe omits `timeRange`. The live dashboard range is applied at render time.
+ */
 const executeForSchema = (
   query: string,
   esClient: IScopedClusterClient
 ): ReturnType<typeof executeEsql> =>
   executeEsql({
     query,
-    params: buildTimeRangeParams(DEFAULT_VALIDATION_TIME_RANGE),
+    params: buildTimeRangeParams(DEFAULT_ESQL_TIME_RANGE),
     ...executeSchemaParams,
     esClient: esClient.asCurrentUser,
   });

@@ -12,6 +12,7 @@ export {
   interpolateEsqlQuery,
   validateEsqlQuery,
   buildTimeRangeParams,
+  DEFAULT_ESQL_TIME_RANGE,
 } from './esql';
 export { listDatasets, getDatasetFields, type DatasetInfo } from './datasets';
 export {
