@@ -20,6 +20,7 @@ const mockUseSearchDataStreams = jest.fn();
 const mockPutFeedbackAnalysis = jest.fn();
 const mockRunFeedbackAnalysis = jest.fn();
 const mockFeedbackLoopEnabled = jest.fn();
+const mockUseKibana = jest.fn();
 const mockToasts = { addSuccess: jest.fn(), addError: jest.fn(), addWarning: jest.fn() };
 
 jest.mock('../../hooks/use_agent_builder_agents', () => ({
@@ -31,6 +32,7 @@ jest.mock('../../hooks/use_search_data_streams', () => ({
 }));
 
 jest.mock('../../api/ai_indices', () => ({
+  ...jest.requireActual('../../api/ai_indices'),
   putAiIndexFeedbackAnalysis: (...args: unknown[]) => mockPutFeedbackAnalysis(...args),
 }));
 
@@ -43,12 +45,7 @@ jest.mock('../../hooks/use_feedback_loop_enabled', () => ({
 }));
 
 jest.mock('../../hooks/use_kibana', () => ({
-  useKibana: () => ({
-    services: {
-      http: {},
-      notifications: { toasts: mockToasts },
-    },
-  }),
+  useKibana: () => mockUseKibana(),
 }));
 
 const buildAiIndex = (overrides: Partial<GetAiIndexResponse> = {}): GetAiIndexResponse => ({
@@ -113,6 +110,9 @@ describe('TracesPanel', () => {
     mockFeedbackLoopEnabled.mockReturnValue(false);
     mockPutFeedbackAnalysis.mockResolvedValue({});
     mockRunFeedbackAnalysis.mockResolvedValue({ execution_id: 'execution-1' });
+    mockUseKibana.mockReturnValue({
+      services: { http: {}, notifications: { toasts: mockToasts } },
+    });
     mockUseAgentBuilderAgents.mockReturnValue({
       agents: [{ id: 'agent-1', name: 'Loyalty Support Agent' }],
       isLoading: false,
@@ -222,6 +222,7 @@ describe('TracesPanel', () => {
     const onSaved = jest.fn();
     const testServices = coreMock.createStart();
     testServices.http.put.mockResolvedValue({ status: 'updated' });
+    mockUseKibana.mockReturnValue({ services: { http: testServices.http, notifications: { toasts: mockToasts } } });
 
     renderWithProviders(
       <TracesPanel
@@ -271,6 +272,7 @@ describe('TracesPanel', () => {
     const onSaved = jest.fn();
     const testServices = coreMock.createStart();
     testServices.http.put.mockResolvedValue({ status: 'updated' });
+    mockUseKibana.mockReturnValue({ services: { http: testServices.http, notifications: { toasts: mockToasts } } });
 
     renderWithProviders(
       <TracesPanel isLoading={false} aiIndex={aiIndex} onSaved={onSaved} isManaged={false} />,
@@ -312,6 +314,7 @@ describe('TracesPanel', () => {
     const onSaved = jest.fn();
     const testServices = coreMock.createStart();
     testServices.http.put.mockResolvedValue({ status: 'updated' });
+    mockUseKibana.mockReturnValue({ services: { http: testServices.http, notifications: { toasts: mockToasts } } });
 
     renderWithProviders(
       <TracesPanel
@@ -362,6 +365,7 @@ describe('TracesPanel', () => {
     const onSaved = jest.fn();
     const testServices = coreMock.createStart();
     testServices.http.put.mockRejectedValue(new Error('save failed'));
+    mockUseKibana.mockReturnValue({ services: { http: testServices.http, notifications: { toasts: mockToasts } } });
 
     renderWithProviders(
       <TracesPanel
@@ -401,6 +405,7 @@ describe('TracesPanel', () => {
 
   it('discards draft changes when editing is cancelled', async () => {
     const testServices = coreMock.createStart();
+    mockUseKibana.mockReturnValue({ services: { http: testServices.http, notifications: { toasts: mockToasts } } });
 
     renderWithProviders(
       <TracesPanel
@@ -429,6 +434,7 @@ describe('TracesPanel', () => {
 
   it('re-opens the editor with the original trace after cancel', async () => {
     const testServices = coreMock.createStart();
+    mockUseKibana.mockReturnValue({ services: { http: testServices.http, notifications: { toasts: mockToasts } } });
 
     renderWithProviders(
       <TracesPanel
@@ -456,6 +462,7 @@ describe('TracesPanel', () => {
   it('shows a loading state on the Save button while the PUT is in flight', async () => {
     const testServices = coreMock.createStart();
     testServices.http.put.mockImplementation(() => new Promise(() => {}));
+    mockUseKibana.mockReturnValue({ services: { http: testServices.http, notifications: { toasts: mockToasts } } });
 
     renderWithProviders(
       <TracesPanel
@@ -482,6 +489,7 @@ describe('TracesPanel', () => {
     const onSaved = jest.fn();
     const testServices = coreMock.createStart();
     testServices.http.put.mockResolvedValue({ status: 'updated' });
+    mockUseKibana.mockReturnValue({ services: { http: testServices.http, notifications: { toasts: mockToasts } } });
 
     renderWithProviders(
       <TracesPanel
@@ -528,6 +536,7 @@ describe('TracesPanel', () => {
   it('returns to the read-only view showing the saved trace', async () => {
     const testServices = coreMock.createStart();
     testServices.http.put.mockResolvedValue({ status: 'updated' });
+    mockUseKibana.mockReturnValue({ services: { http: testServices.http, notifications: { toasts: mockToasts } } });
 
     const PanelWithRefetch = () => {
       const [currentAiIndex, setCurrentAiIndex] = useState(aiIndex);

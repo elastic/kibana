@@ -63,6 +63,7 @@ describe('addSource', () => {
       dest: { type: 'index', value: 'ai-index-support' },
       automations: [{ type: 'workflow', value: 'wf-1' }],
       sources: [esqlSource, connectorSource],
+      traces: [],
     });
   });
 

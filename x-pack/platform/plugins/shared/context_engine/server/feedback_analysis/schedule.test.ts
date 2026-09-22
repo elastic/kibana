@@ -242,9 +242,9 @@ describe('createFeedbackAnalysisScheduleService', () => {
     });
   });
 
-  it('pins the schedule to the default space regardless of which space enables it', async () => {
-    // The managed workflow lives in the default space so its document id is stable: a request
-    // from 'marketing' and one from 'default' converge on the same workflow instance.
+  it('installs in the space where analysis is enabled, giving each space its own instance', async () => {
+    // Each space that enables analysis gets its own workflow instance, so disabling in one space
+    // does not affect another space's schedule.
     await service.reconcile({
       aiIndexId: 'orders',
       spaceId: 'default',
@@ -259,24 +259,19 @@ describe('createFeedbackAnalysisScheduleService', () => {
     });
 
     expect(client.install).toHaveBeenCalledTimes(2);
-    for (const [, options] of client.install.mock.calls) {
-      expect(options).toEqual(
-        expect.objectContaining({
-          spaceId: DEFAULT_SPACE,
-          workflowIdSuffix: suffixFor('orders', DEFAULT_SPACE),
-        })
-      );
-    }
-    expect(workflowsManagement.updateWorkflow.mock.calls.map(([workflowId]) => workflowId)).toEqual(
-      [WORKFLOW_DOCUMENT_ID, WORKFLOW_DOCUMENT_ID]
+    expect(client.install.mock.calls[0][1]).toEqual(
+      expect.objectContaining({ spaceId: 'default', workflowIdSuffix: suffixFor('orders', 'default') })
+    );
+    expect(client.install.mock.calls[1][1]).toEqual(
+      expect.objectContaining({ spaceId: 'marketing', workflowIdSuffix: suffixFor('orders', 'marketing') })
     );
 
     await service.remove({ aiIndexId: 'orders', spaceId: 'marketing' });
 
     expect(client.uninstall).toHaveBeenCalledTimes(1);
     expect(client.uninstall).toHaveBeenCalledWith(CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID, {
-      spaceId: DEFAULT_SPACE,
-      workflowIdSuffix: suffixFor('orders', DEFAULT_SPACE),
+      spaceId: 'marketing',
+      workflowIdSuffix: suffixFor('orders', 'marketing'),
     });
   });
 
@@ -326,12 +321,15 @@ describe('createFeedbackAnalysisScheduleService', () => {
 
   describe('running one now', () => {
     it('returns the execution it started', async () => {
-      await expect(service.run({ aiIndexId: 'orders', request })).resolves.toBe('execution-1');
+      await expect(
+        service.run({ aiIndexId: 'orders', spaceId: DEFAULT_SPACE, request })
+      ).resolves.toBe('execution-1');
 
       expect(client.execute).toHaveBeenCalledWith(
         request,
         CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID,
         expect.objectContaining({
+          spaceId: DEFAULT_SPACE,
           workflowIdSuffix: suffixFor('orders', DEFAULT_SPACE),
           triggeredBy: 'manual',
         })
@@ -343,24 +341,22 @@ describe('createFeedbackAnalysisScheduleService', () => {
       // given an execution id, so only its status says it never started.
       workflowsManagement.getWorkflowExecution.mockResolvedValue({ status: 'skipped' });
 
-      await expect(service.run({ aiIndexId: 'orders', request })).rejects.toBeInstanceOf(
-        FeedbackAnalysisAlreadyRunningError
-      );
+      await expect(
+        service.run({ aiIndexId: 'orders', spaceId: DEFAULT_SPACE, request })
+      ).rejects.toBeInstanceOf(FeedbackAnalysisAlreadyRunningError);
 
       expect(workflowsManagement.getWorkflowExecution).toHaveBeenCalledWith(
         'execution-1',
-        'default'
+        DEFAULT_SPACE
       );
     });
 
-    it('reads the execution back from the space the schedule lives in', async () => {
-      await service.run({ aiIndexId: 'orders', request });
+    it('reads the execution back from the space where this index was scheduled', async () => {
+      await service.run({ aiIndexId: 'orders', spaceId: 'marketing', request });
 
-      // Not the caller's space: the instance is pinned where it was installed, so looking anywhere
-      // else would find nothing and report every run as started.
       expect(workflowsManagement.getWorkflowExecution).toHaveBeenCalledWith(
         'execution-1',
-        'default'
+        'marketing'
       );
     });
 
@@ -371,15 +367,17 @@ describe('createFeedbackAnalysisScheduleService', () => {
         new Error('executions unreadable')
       );
 
-      await expect(service.run({ aiIndexId: 'orders', request })).resolves.toBe('execution-1');
+      await expect(
+        service.run({ aiIndexId: 'orders', spaceId: DEFAULT_SPACE, request })
+      ).resolves.toBe('execution-1');
     });
 
     it('starts a run without workflows management, since there is nothing to ask', async () => {
       const withoutManagement = createService(undefined);
 
-      await expect(withoutManagement.run({ aiIndexId: 'orders', request })).resolves.toBe(
-        'execution-1'
-      );
+      await expect(
+        withoutManagement.run({ aiIndexId: 'orders', spaceId: DEFAULT_SPACE, request })
+      ).resolves.toBe('execution-1');
     });
   });
 });
