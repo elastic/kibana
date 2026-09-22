@@ -28,10 +28,14 @@ const evaluate = async ({
       (expected as { config?: VisualizationGoldConfig } | undefined)?.config,
   });
 
+  // Gold ES|QL lives inside the config; tests pass it separately for brevity.
+  const gold =
+    query === undefined ? config : { ...config, data_source: { type: 'esql', query } };
+
   return evaluator.evaluate({
     input: { question: 'unused' },
     output: { errors: [], messages: [] },
-    expected: { config, query },
+    expected: { config: gold },
     metadata: {},
   });
 };

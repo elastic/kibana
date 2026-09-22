@@ -56,15 +56,8 @@ export type VisualizationDatasetExample = Example<
      * `data_source.query` / `layers[].data_source.query`. Chart type is `type`.
      */
     config?: VisualizationGoldConfig;
-    /** Ground-truth ES|QL fallback when it is not nested in `config`. */
-    query?: string;
     /** Golden ordered tool path (e.g. `['load_skill', 'platform.core.create_visualization']`). */
     goldenToolPath?: string[];
-    /**
-     * Expected Lens `chart_type` fallback when `config.type` is omitted.
-     * Bar/line/area requests map to `xy`.
-     */
-    chartType?: string | string[];
     /** Expected renderer when the example intentionally forces Lens or Vega. */
     renderer?: 'lens' | 'vega';
   },

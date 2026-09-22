@@ -35,20 +35,11 @@ export type VisualizationGoldConfig =
 const asRecord = (value: unknown): Record<string, unknown> => (isRecord(value) ? value : {});
 
 export function extractGoldQuery(expected: unknown): string {
-  const output = asRecord(expected);
-  const fromConfig = extractQueryFromConfig(output.config);
-  if (fromConfig) {
-    return fromConfig;
-  }
-  return typeof output.query === 'string' ? output.query : '';
+  return extractQueryFromConfig(asRecord(expected).config);
 }
 
 export function extractGoldChartType(expected: unknown): string | string[] | undefined {
-  const output = asRecord(expected);
-  return (
-    asStringOrStringArray(isRecord(output.config) ? output.config.type : undefined) ??
-    asStringOrStringArray(output.chartType)
-  );
+  return asStringOrStringArray(asRecord(asRecord(expected).config).type);
 }
 
 /** Chart form the gold pins down; string arrays list acceptable alternatives. */

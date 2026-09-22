@@ -46,10 +46,6 @@ describe('extractGoldQuery', () => {
     ).toBe(QUERY);
   });
 
-  it('falls back to a top-level query when config has none', () => {
-    expect(extractGoldQuery({ query: QUERY, config: { type: 'xy' } })).toBe(QUERY);
-  });
-
   it('returns an empty string when no gold query is present', () => {
     expect(extractGoldQuery({ config: { type: 'metric' } })).toBe('');
   });
@@ -60,8 +56,8 @@ describe('extractGoldChartType', () => {
     expect(extractGoldChartType({ config: { type: 'pie' } })).toBe('pie');
   });
 
-  it('falls back to top-level chartType', () => {
-    expect(extractGoldChartType({ chartType: 'xy' })).toBe('xy');
+  it('is undefined when the config has no type', () => {
+    expect(extractGoldChartType({ config: { metrics: [] } })).toBeUndefined();
   });
 });
 
@@ -83,12 +79,6 @@ describe('extractGoldChartForm', () => {
     });
     expect(extractGoldChartForm({ config: { spec: { mark: { type: 'circle' } } } })).toEqual({
       mark: 'circle',
-    });
-  });
-
-  it('falls back to a top-level chartType', () => {
-    expect(extractGoldChartForm({ chartType: ['metric', 'gauge'] })).toEqual({
-      chartType: ['metric', 'gauge'],
     });
   });
 

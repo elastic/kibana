@@ -72,7 +72,11 @@ ${timeWindow(timeField)}
 | LIMIT ${limit}`;
 
 /** Time series in the agent's idiom: auto-bucket count over the bind-param window. */
-export const timeSeriesQuery = ({ index, metrics, timeField = '@timestamp' }: QuerySource): string =>
+export const timeSeriesQuery = ({
+  index,
+  metrics,
+  timeField = '@timestamp',
+}: QuerySource): string =>
   `FROM ${index}
 | STATS ${statsList(metrics)} BY \`Time Bucket\` = BUCKET(${timeField}, 75, ?_tstart, ?_tend)`;
 
