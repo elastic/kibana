@@ -20,6 +20,7 @@ import { SignificantEventsSearchBar } from '../../../../components/search_bar';
 import { useBlocksNewActivity } from '../../../../hooks/use_significant_events_maintenance';
 import { useKiGeneration } from '../knowledge_indicators_table/ki_generation_context';
 import { GenerateSplitButton } from '../shared/generate_split_button';
+import { getGenerateDisabledTooltip } from '../shared/translations';
 import { FindSignificantEventsButton } from './find_significant_events_button';
 import { STREAMS_TABLE_SEARCH_ARIA_LABEL } from './translations';
 import { StreamsTreeTable } from './tree_table';
@@ -153,7 +154,10 @@ export function StreamsView() {
                   queriesConnectors.loading ||
                   isScheduling
                 }
-                runDisabledTooltip={activityBlockTooltip}
+                runDisabledTooltip={getGenerateDisabledTooltip({
+                  activityBlockTooltip,
+                  hasSelectedStreams: selectedStreams.length > 0,
+                })}
                 isConfigDisabled={selectedStreams.length === 0}
                 isLoading={isScheduling}
               />

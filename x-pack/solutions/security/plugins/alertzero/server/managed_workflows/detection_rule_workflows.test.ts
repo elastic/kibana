@@ -8,8 +8,12 @@
 import { parse } from 'yaml';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { createWorkflowLiquidEngine } from '@kbn/workflows';
+import { convertJsonSchemaToZod } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
 import {
   getManagedWorkflowDefinition,
+  ALERTZERO_COVERAGE_REVIEW_WORKFLOW_ID,
+  ALERTZERO_COVERAGE_WORKER_WORKFLOW_ID,
+  ALERTZERO_ACTION_ADD_RULE_EXCEPTION_WORKFLOW_ID,
   ALERTZERO_ACTION_EDIT_RULE_WORKFLOW_ID,
   ALERTZERO_RULE_CREATION_WORKFLOW_ID,
   ALERTZERO_RULE_PREVIEW_WORKFLOW_ID,
@@ -27,6 +31,8 @@ const DETECTION_WORKFLOW_IDS = [
   ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW_ID,
   ALERTZERO_RULE_CREATION_WORKFLOW_ID,
   ALERTZERO_RULE_PREVIEW_WORKFLOW_ID,
+  ALERTZERO_COVERAGE_WORKER_WORKFLOW_ID,
+  ALERTZERO_COVERAGE_REVIEW_WORKFLOW_ID,
 ];
 
 const getManagedYaml = (workflowId: string): string => {
@@ -46,9 +52,12 @@ interface NestedStep {
   type: string;
   if?: string;
   condition?: string;
+  expression?: string;
   with?: Record<string, unknown>;
   steps?: NestedStep[];
   else?: NestedStep[];
+  cases?: Array<{ match: string | number | boolean; steps: NestedStep[] }>;
+  default?: NestedStep[];
   'on-failure'?: Record<string, unknown>;
 }
 
@@ -57,6 +66,8 @@ const flattenSteps = (steps: NestedStep[]): NestedStep[] =>
     step,
     ...flattenSteps(step.steps ?? []),
     ...flattenSteps(step.else ?? []),
+    ...(step.cases ?? []).flatMap((switchCase) => flattenSteps(switchCase.steps)),
+    ...flattenSteps(step.default ?? []),
   ]);
 
 describe('detection rule workflows', () => {
@@ -174,22 +185,15 @@ describe('detection rule workflows', () => {
       }
     });
 
-    // Query and manual decisions live on the investigation as proposals, and the gate
-    // workflow runs the edit-rule action as the approver. The gate types actionInput
-    // as an object, so the manual variant must omit the key rather than pass an empty
-    // value, hence two calls instead of one. Exception and risk score changes still
-    // use an in-run waitForApproval until their proposal actions exist.
+    // Every change type decides at the proposal gate, which runs the action as
+    // the approver.
     it('gates the review through the investigation proposal workflow', () => {
       const { steps } = parse(
         getManagedYaml(ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW_ID)
       ) as WorkflowYaml;
       const all = flattenSteps(steps as unknown as NestedStep[]);
 
-      const interim = all.filter(({ type }) => type === 'waitForApproval');
-      expect(interim.map(({ name }) => name)).toEqual(['review_tuning']);
-      expect(String(interim[0].if)).toContain("change_type == 'exception'");
-      expect(String(interim[0].if)).toContain("change_type == 'risk_score'");
-      expect(String(interim[0].if)).not.toContain("'query'");
+      expect(all.map(({ type }) => type)).not.toContain('waitForApproval');
       expect(all.map(({ type }) => type)).not.toContain('waitForInput');
 
       const proposals = all.filter(
@@ -199,13 +203,17 @@ describe('detection rule workflows', () => {
       );
       expect(proposals.map(({ name }) => name)).toEqual([
         'propose_entry',
-        'propose_action',
+        'propose_query',
+        'propose_risk_score',
+        'propose_exception',
         'propose_manual',
       ]);
 
-      const [entry, action, manual] = proposals;
+      const [entry, action, settings, exception, manual] = proposals;
       const entryInputs = entry.with?.inputs as Record<string, unknown>;
       const actionInputs = action.with?.inputs as Record<string, unknown>;
+      const settingsInputs = settings.with?.inputs as Record<string, unknown>;
+      const exceptionInputs = exception.with?.inputs as Record<string, unknown>;
       const manualInputs = manual.with?.inputs as Record<string, unknown>;
 
       // Manual autonomy stops once for permission to do the work; the entry gate
@@ -213,6 +221,8 @@ describe('detection rule workflows', () => {
       expect(entry.if).toContain("inputs.autonomy_level == 'manual'");
       expect(entryInputs).not.toHaveProperty('actionWorkflowId');
       expect(entryInputs).not.toHaveProperty('actionInput');
+      // No action, so no inherited category; the queue drops an uncategorised proposal.
+      expect(entryInputs.category).toBe('configure');
       const diagnoseIndex = all.findIndex(({ name }) => name === 'diagnose_rule');
       const stopIndex = all.findIndex(({ name }) => name === 'stop_declined');
       expect(all.findIndex(({ name }) => name === 'propose_entry')).toBeLessThan(stopIndex);
@@ -225,25 +235,67 @@ describe('detection rule workflows', () => {
         id: '{{ inputs.rule_uuid }}',
         query: '{{ steps.diagnose_rule.output.structured_output.proposed_query }}',
       });
-      expect(action.if).toContain(
-        "steps.diagnose_rule.output.structured_output.change_type == 'query'"
+      // Same edit-rule action as the query path; it patches only the fields it is given.
+      expect(settingsInputs.actionWorkflowId).toBe(ALERTZERO_ACTION_EDIT_RULE_WORKFLOW_ID);
+      expect(settingsInputs.actionWorkflowId).toBe(actionInputs.actionWorkflowId);
+      expect(settingsInputs.actionInput).toEqual({
+        id: '{{ inputs.rule_uuid }}',
+        // `${{ }}` keeps the score a number.
+        risk_score: '${{ steps.diagnose_rule.output.structured_output.proposed_risk_score }}',
+        severity: '{{ steps.diagnose_rule.output.structured_output.proposed_severity }}',
+      });
+      // An exception is not a rule patch, so it has its own action.
+      expect(exceptionInputs.actionWorkflowId).toBe(
+        ALERTZERO_ACTION_ADD_RULE_EXCEPTION_WORKFLOW_ID
       );
-
+      const exceptionActionInput = exceptionInputs.actionInput as Record<string, string>;
+      expect(exceptionActionInput.rule_id).toBe('{{ inputs.rule_uuid }}');
+      // `${{ }}` keeps the entries as objects.
+      expect(exceptionActionInput.entries).toBe(
+        '${{ steps.diagnose_rule.output.structured_output.exception_entries }}'
+      );
       expect(manualInputs).not.toHaveProperty('actionWorkflowId');
       expect(manualInputs).not.toHaveProperty('actionInput');
-      expect(manual.if).toContain(
-        "steps.diagnose_rule.output.structured_output.change_type == 'manual'"
-      );
+      // Same reason as the entry gate.
+      expect(manualInputs.category).toBe('configure');
 
+      // One switch on the change type: the engine runs the first matching arm only.
+      const fork = all.find(({ name }) => name === 'propose_tuning')!;
+      expect(fork.type).toBe('switch');
+      expect(fork.if).toContain('steps.create_investigation.output.conversation_id != null');
+      expect(fork.expression).toContain('steps.diagnose_rule.output.structured_output.change_type');
+      expect((fork.cases ?? []).map(({ match }) => match)).toEqual([
+        'query',
+        'risk_score',
+        'exception',
+      ]);
+      expect(
+        (fork.cases ?? []).map(({ steps: armSteps }) => armSteps.map(({ name }) => name))
+      ).toEqual([['propose_query'], ['propose_risk_score'], ['propose_exception']]);
+      // The manual proposal is the default arm, so an unrecognised change type
+      // still reaches the analyst.
+      expect((fork.default ?? []).map(({ name }) => name)).toEqual(['propose_manual']);
+
+      expect(entry.if).toContain('steps.create_investigation.output.conversation_id != null');
+      // The switch already guards the arms.
+      for (const proposal of [action, settings, exception, manual]) {
+        expect(proposal).not.toHaveProperty('if');
+      }
       for (const proposal of proposals) {
-        expect(proposal.if).toContain('steps.create_investigation.output.conversation_id != null');
         expect(proposal).not.toHaveProperty('on-failure');
       }
-      for (const proposal of [action, manual]) {
+      for (const proposal of [action, settings, exception, manual]) {
         expect((proposal.with?.inputs as Record<string, unknown>).comment).toBe(
           '{{ steps.compose_proposal.output.comment }}'
         );
       }
+      // The actions declare always-gate, so no caller-side auto-approve.
+      for (const proposal of [action, settings, exception]) {
+        expect((proposal.with?.inputs as Record<string, unknown>).autoApprove).toBe(false);
+      }
+      // The edit-rule action declares no impact, so the caller's value is shown.
+      expect(actionInputs.impact).toBe('medium');
+      expect(settingsInputs.impact).toBe('low');
     });
 
     // The review parks in WAITING_FOR_CHILD while the gate holds the decision for up
@@ -469,27 +521,25 @@ describe('detection rule workflows', () => {
           '{{ consts.reviewed_tag }}',
           '{{ consts.dismissed_tag }}',
         ]);
-        // Dismissals come from either gate: the proposal gate (query, manual) or the
-        // interim in-run gate (exception, risk score); missing either leaves alerts
-        // unreviewed and the next sweep re-proposes the same rule.
+        // One dismissal source: the gate.
         expect(dismissed.if).toContain(
           'steps.record_proposal_action_decision.output.dismissed == true'
         );
-        expect(dismissed.if).toContain('steps.review_tuning.output.response.approved == false');
+        expect(dismissed.if).not.toContain('review_tuning');
         const closeDismissed = reviewSteps.find(
           ({ name }) => name === 'close_investigation_dismissed'
         )!;
         expect(String(closeDismissed.if)).toContain(
           'steps.record_proposal_action_decision.output.dismissed == true'
         );
-        expect(String(closeDismissed.if)).toContain(
-          'steps.review_tuning.output.response.approved == false'
-        );
+        expect(String(closeDismissed.if)).not.toContain('review_tuning');
         expect(dismissed.with?.tags_to_add).toEqual([
           '{{ consts.reviewed_tag }}',
           '{{ consts.dismissed_tag }}',
         ]);
-        expect(applied.if).toContain('steps.record_outcome.output.rule_patched == true');
+        expect(applied.if).toContain(
+          'steps.record_proposal_action_decision.output.applied == true'
+        );
         expect(applied.with?.tags_to_add).toEqual([
           '{{ consts.reviewed_tag }}',
           '{{ consts.applied_tag }}',
@@ -497,10 +547,11 @@ describe('detection rule workflows', () => {
         // Approving a recommendation the pipeline cannot apply itself acknowledges
         // the manual follow-up and retires the alerts; the auto-apply path keeps
         // its alerts untagged on failure so a later sweep can retry.
-        expect(acknowledged.if).toContain(
-          "steps.diagnose_rule.output.structured_output.change_type == 'manual'"
-        );
-        expect(acknowledged.if).toContain("steps.propose_manual.output.status == 'approved'");
+        expect(acknowledged.if).toContain("steps.propose_manual.output.decision == 'approved'");
+        // Keyed on the default arm's proposal, not on the change type. The arm also
+        // runs for a value the three action arms do not match, and testing the type
+        // would leave those alerts untagged after an approval.
+        expect(acknowledged.if).not.toContain('change_type');
         expect(acknowledged.if).not.toContain('review_tuning');
         expect(acknowledged.with?.tags_to_add).toEqual([
           '{{ consts.reviewed_tag }}',
@@ -511,107 +562,139 @@ describe('detection rule workflows', () => {
         }
       });
 
-      // The applied tag must mean the gate actually ran the edit-rule action: it
-      // reports `succeeded` only after the action completed, `approved` for a manual
-      // proposal, `dismissed` otherwise. A run that never proposed matches none of
-      // them, so its alerts stay untagged and a later sweep can retry them.
-      it('derives every decision flag from the gate status', () => {
+      // One axis per question. What the analyst concluded is read off `decision`
+      // on every arm; whether the change landed is read off `status`. A decision
+      // cannot be read off `status`, because a dismissal and an approved
+      // action-less proposal both report `no_action`.
+      it('derives every decision flag from the right gate axis', () => {
         const decision = reviewSteps.find(
           ({ name }) => name === 'record_proposal_action_decision'
         )!;
         const flags = decision.with as Record<string, string>;
 
-        expect(String(flags.applied)).toContain(
-          "steps.propose_action.output.status == 'succeeded'"
-        );
-        expect(String(flags.approved)).toContain(
-          "steps.propose_action.output.status == 'succeeded'"
-        );
-        expect(String(flags.approved)).toContain(
-          "steps.propose_manual.output.status == 'approved'"
-        );
-        expect(String(flags.dismissed)).toContain(
-          "steps.propose_action.output.status == 'dismissed'"
-        );
-        expect(String(flags.dismissed)).toContain(
-          "steps.propose_manual.output.status == 'dismissed'"
-        );
-
-        // record_outcome reads from record_apply_results to avoid Liquid parentheses;
-        // the query path is applied by the gate's action, the others in-run.
-        const applyResults = reviewSteps.find(({ name }) => name === 'record_apply_results')!;
-        expect(String(applyResults.with?.query_applied)).toContain(
-          'steps.record_proposal_action_decision.output.applied == true'
-        );
-        expect(String(applyResults.with?.query_applied)).not.toContain('apply_query_tuning');
-        const outcome = reviewSteps.find(({ name }) => name === 'record_outcome')!;
-        for (const flag of ['query_applied', 'exception_applied', 'risk_score_applied']) {
-          expect(String(outcome.with?.rule_patched)).toContain(
-            `steps.record_apply_results.output.${flag} == true`
+        for (const proposal of ['propose_query', 'propose_risk_score', 'propose_exception']) {
+          expect(String(flags.applied)).toContain(`steps.${proposal}.output.status == 'succeeded'`);
+          expect(String(flags.approved)).toContain(
+            `steps.${proposal}.output.decision == 'approved'`
+          );
+          expect(String(flags.dismissed)).toContain(
+            `steps.${proposal}.output.decision == 'dismissed'`
           );
         }
+        // The manual proposal has no action, so only `decision` is meaningful.
+        expect(String(flags.approved)).toContain(
+          "steps.propose_manual.output.decision == 'approved'"
+        );
+        expect(String(flags.dismissed)).toContain(
+          "steps.propose_manual.output.decision == 'dismissed'"
+        );
+        expect(String(flags.applied)).not.toContain('propose_manual');
+        // Neither decision flag touches the status axis; only `applied` does.
+        expect(String(flags.approved)).not.toContain('.output.status');
+        expect(String(flags.dismissed)).not.toContain('.output.status');
+        // Only one proposal step runs per review, so every flag is a plain or-chain.
+        for (const flag of [flags.applied, flags.approved, flags.dismissed]) {
+          expect(String(flag)).not.toContain(' and ');
+        }
 
-        // The sweep reads `approved` from both gates: the proposal gate for query and
-        // manual, the interim in-run gate for exception and risk score.
+        // The per-change-type apply flags are gone.
+        for (const name of ['record_apply_results', 'record_outcome']) {
+          expect(reviewSteps.some((step) => step.name === name)).toBe(false);
+        }
+
         const emit = reviewSteps.find(({ name }) => name === 'emit_result')!;
-        const approved = String((emit.with as Record<string, string>).approved);
-        expect(approved).toContain('steps.record_proposal_action_decision.output.approved == true');
-        expect(approved).toContain('steps.review_tuning.output.response.approved == true');
-        expect(approved).not.toContain(' and ');
+        const emitInputs = emit.with as Record<string, string>;
+        expect(String(emitInputs.approved)).toContain(
+          'steps.record_proposal_action_decision.output.approved == true'
+        );
+        expect(String(emitInputs.applied)).toContain(
+          'steps.record_proposal_action_decision.output.applied == true'
+        );
+        for (const value of [emitInputs.approved, emitInputs.applied]) {
+          expect(String(value)).not.toContain('review_tuning');
+          expect(String(value)).not.toContain(' and ');
+        }
 
-        // The review never patches a query itself; only the risk score path patches in-run.
-        expect(reviewSteps.some(({ name }) => name === 'apply_query_tuning')).toBe(false);
+        // The review changes no rule itself; the gate's action does, as the approver.
+        for (const type of ['security.patchRule', 'security.createRuleException']) {
+          expect(reviewSteps.filter((step) => step.type === type)).toEqual([]);
+        }
+        for (const name of [
+          'apply_query_tuning',
+          'apply_risk_score_tuning',
+          'apply_exception_tuning',
+        ]) {
+          expect(reviewSteps.some((step) => step.name === name)).toBe(false);
+        }
+      });
+
+      // The whole object is the patch body, so one action covers any field.
+      it('passes the whole edit through as one patch, so one action covers any field', () => {
+        const yaml = parse(getManagedYaml(ALERTZERO_ACTION_EDIT_RULE_WORKFLOW_ID)) as WorkflowYaml;
+        const actionSteps = flattenSteps(yaml.steps as unknown as NestedStep[]);
+        const patchStep = actionSteps.find(({ type }) => type === 'security.patchRule')!;
+
+        expect(patchStep.with?.patch).toBe('${{ inputs.actionInput }}');
+
+        // No impact on the action: the caller's value wins.
+        const metadata = (yaml.consts as Record<string, Record<string, unknown>>).actionMetadata;
+        expect(metadata).not.toHaveProperty('impact');
+        expect(metadata.approvalPolicy).toBe('always-gate');
+      });
+
+      // The gate validates actionInput against this schema at proposal creation.
+      it('accepts any subset of editable fields but still checks their values', () => {
+        const yaml = parse(getManagedYaml(ALERTZERO_ACTION_EDIT_RULE_WORKFLOW_ID)) as WorkflowYaml;
+        const [trigger] = yaml.triggers as unknown as Array<{
+          inputs: { properties: Record<string, unknown> };
+        }>;
+        const schema = convertJsonSchemaToZod(
+          trigger.inputs.properties.actionInput as Parameters<typeof convertJsonSchemaToZod>[0]
+        );
+        const accepts = (actionInput: Record<string, unknown>) =>
+          schema.safeParse(actionInput).success;
+
+        expect(accepts({ id: 'r', query: 'a: b' })).toBe(true);
+        expect(accepts({ id: 'r', risk_score: 21, severity: 'low' })).toBe(true);
+        expect(accepts({ id: 'r', query: 'a: b', risk_score: 21 })).toBe(true);
+        expect(accepts({ query: 'a: b' })).toBe(false);
+        // Values are still checked.
+        expect(accepts({ id: 'r', risk_score: '21' })).toBe(false);
+        expect(accepts({ id: 'r', risk_score: 500 })).toBe(false);
+        expect(accepts({ id: 'r', severity: 'informational' })).toBe(false);
+        expect(accepts({ id: 'r', enabled: false })).toBe(false);
+      });
+
+      // An exception is not a rule patch, so it has its own action.
+      it('creates the exception from entries the review passes as objects', () => {
+        const yaml = parse(
+          getManagedYaml(ALERTZERO_ACTION_ADD_RULE_EXCEPTION_WORKFLOW_ID)
+        ) as WorkflowYaml;
+        const actionSteps = flattenSteps(yaml.steps as unknown as NestedStep[]);
+        const createStep = actionSteps.find(({ type }) => type === 'security.createRuleException')!;
+
+        expect(createStep.with?.rule_id).toBe('{{ inputs.actionInput.rule_id }}');
+        expect(createStep.with?.entries).toBe('${{ inputs.actionInput.entries }}');
+
+        const [trigger] = yaml.triggers as unknown as Array<{
+          inputs: { properties: Record<string, unknown> };
+        }>;
+        const schema = convertJsonSchemaToZod(
+          trigger.inputs.properties.actionInput as Parameters<typeof convertJsonSchemaToZod>[0]
+        );
+        const base = { rule_id: 'r', name: 'n', description: 'd' };
+        const accepts = (entries: unknown) => schema.safeParse({ ...base, entries }).success;
+
+        expect(accepts([{ field: 'user.name', operator: 'is', value: 'svc' }])).toBe(true);
+        expect(accepts([{ field: 'host.name', operator: 'is_one_of', values: ['a'] }])).toBe(true);
+        expect(accepts([{ field: 'a.b', operator: 'exists' }])).toBe(true);
+        expect(accepts([{ field: 'user.name', operator: 'is' }])).toBe(false);
+        expect(accepts([{ field: 'user.name', operator: 'bogus', value: 'x' }])).toBe(false);
+        expect(accepts([])).toBe(false);
+        // Only `${{ }}` keeps objects; `{{ }}` renders a string.
         expect(
-          reviewSteps.filter(({ type }) => type === 'security.patchRule').map(({ name }) => name)
-        ).toEqual(['apply_risk_score_tuning']);
-      });
-
-      it('applies exceptions via security.createRuleException for approved exception proposals', () => {
-        const apply = reviewSteps.find(({ name }) => name === 'apply_exception_tuning')!;
-        expect(apply.type).toBe('security.createRuleException');
-        expect(apply.if).toContain(
-          "steps.diagnose_rule.output.structured_output.change_type == 'exception'"
-        );
-        expect(apply.if).toContain('steps.review_tuning.output.response.approved == true');
-        expect(apply['on-failure']).toEqual({ continue: true });
-        expect(apply.with?.rule_id).toBe('{{ inputs.rule_uuid }}');
-        expect(apply.with?.entries).toBe(
-          '${{ steps.diagnose_rule.output.structured_output.exception_entries }}'
-        );
-
-        const applyResults = reviewSteps.find(({ name }) => name === 'record_apply_results')!;
-        expect(String(applyResults.with?.exception_applied)).toContain(
-          "steps.diagnose_rule.output.structured_output.change_type == 'exception'"
-        );
-        expect(String(applyResults.with?.exception_applied)).toContain(
-          'steps.apply_exception_tuning.error == null'
-        );
-      });
-
-      it('applies risk score changes via security.patchRule for approved risk score proposals', () => {
-        const apply = reviewSteps.find(({ name }) => name === 'apply_risk_score_tuning')!;
-        expect(apply.type).toBe('security.patchRule');
-        expect(apply.if).toContain(
-          "steps.diagnose_rule.output.structured_output.change_type == 'risk_score'"
-        );
-        expect(apply.if).toContain('steps.review_tuning.output.response.approved == true');
-        expect(apply['on-failure']).toEqual({ continue: true });
-        const patch = apply.with?.patch as Record<string, string>;
-        expect(patch.id).toBe('{{ inputs.rule_uuid }}');
-        expect(patch.risk_score).toBe(
-          '${{ steps.diagnose_rule.output.structured_output.proposed_risk_score }}'
-        );
-        expect(patch.severity).toBe(
-          '{{ steps.diagnose_rule.output.structured_output.proposed_severity }}'
-        );
-
-        const applyResults = reviewSteps.find(({ name }) => name === 'record_apply_results')!;
-        expect(String(applyResults.with?.risk_score_applied)).toContain(
-          "steps.diagnose_rule.output.structured_output.change_type == 'risk_score'"
-        );
-        expect(String(applyResults.with?.risk_score_applied)).toContain(
-          'steps.apply_risk_score_tuning.error == null'
-        );
+          accepts('${{ steps.diagnose_rule.output.structured_output.exception_entries }}')
+        ).toBe(false);
       });
 
       // The action ran inside the gate, so the patched rule is not visible here; the
@@ -646,7 +729,9 @@ describe('detection rule workflows', () => {
         expect(children.map(({ name }) => name)).toEqual([
           'propose_entry',
           'run_previews',
-          'propose_action',
+          'propose_query',
+          'propose_risk_score',
+          'propose_exception',
           'propose_manual',
         ]);
         const [, previews] = children;
@@ -667,35 +752,52 @@ describe('detection rule workflows', () => {
       // The backtest informs the analyst but never decides whether the edit-rule
       // action is offered: an inconclusive preview is reported in the proposal text.
       it('reports an inconclusive backtest without withholding the action', () => {
-        const action = reviewSteps.find(({ name }) => name === 'propose_action')!;
+        const action = reviewSteps.find(({ name }) => name === 'propose_query')!;
         const compose = reviewSteps.find(({ name }) => name === 'compose_proposal')!;
         const comment = String((compose.with as Record<string, string>).comment);
 
         expect(String(action.if)).not.toContain('record_preview_outcome');
         expect(comment).toContain('{% if steps.can_preview_query_change.output.supported %}');
         expect(comment).toContain('inconclusive');
-        expect(comment).toContain('not previewed or applied automatically');
+        // The unbacktested branch must not promise a manual handoff. The query arm
+        // carries the edit-rule action whether or not the preview ran, so approving
+        // applies the change and the alerts are tagged applied, not acknowledged.
+        expect(comment).toContain('Approving still applies the proposed query');
+        expect(comment).not.toContain('not previewed or applied automatically');
+        expect(comment).not.toContain('marks these alerts acknowledged');
       });
 
+      // A skipped step renders as nil, so `nil == 'succeeded'` is false and the
+      // step that ran decides alone. A dismissal always carries `status: no_action`.
       it.each([
-        ['gate ran the action on a query change', true, 'query', true],
-        ['gate dismissed', false, 'query', false],
-        ['gate ran but the change was not a query', true, 'exception', false],
-        ['no decision recorded', undefined, 'query', false],
+        ['query applied', 'propose_query', 'succeeded', 'approved', true, false],
+        ['settings applied', 'propose_risk_score', 'succeeded', 'approved', true, false],
+        ['exception applied', 'propose_exception', 'succeeded', 'approved', true, false],
+        ['query dismissed', 'propose_query', 'no_action', 'dismissed', false, true],
+        ['settings dismissed', 'propose_risk_score', 'no_action', 'dismissed', false, true],
+        ['exception dismissed', 'propose_exception', 'no_action', 'dismissed', false, true],
+        ['manual approved', 'propose_manual', 'no_action', 'approved', false, false],
+        ['manual dismissed', 'propose_manual', 'no_action', 'dismissed', false, true],
+        ['nobody answered, gate expired', 'propose_query', 'expired', '', false, false],
+        ['nothing proposed', 'none', '', '', false, false],
       ])(
-        'records query application only from the gate result: %s',
-        (_scenario, applied, changeType, expected) => {
-          const applyResults = reviewSteps.find(({ name }) => name === 'record_apply_results');
-          const expression = String(applyResults?.with?.query_applied).slice(3, -2).trim();
+        'derives applied and dismissed from whichever proposal ran: %s',
+        (_scenario, whichStep, status, decisionValue, expectApplied, expectDismissed) => {
+          const decision = reviewSteps.find(
+            ({ name }) => name === 'record_proposal_action_decision'
+          )!;
+          const flags = decision.with as Record<string, string>;
+          const steps: Record<string, unknown> =
+            whichStep === 'none'
+              ? {}
+              : { [whichStep]: { output: { status, decision: decisionValue } } };
+          const evaluate = (expr: string) =>
+            createWorkflowLiquidEngine().evalValueSync(String(expr).trim().slice(3, -2).trim(), {
+              steps,
+            });
 
-          expect(
-            createWorkflowLiquidEngine().evalValueSync(expression, {
-              steps: {
-                record_proposal_action_decision: { output: { applied } },
-                diagnose_rule: { output: { structured_output: { change_type: changeType } } },
-              },
-            })
-          ).toBe(expected);
+          expect(evaluate(flags.applied)).toBe(expectApplied);
+          expect(evaluate(flags.dismissed)).toBe(expectDismissed);
         }
       );
 
@@ -912,6 +1014,247 @@ describe('detection rule workflows', () => {
             `steps.summarize_decisions.output.${key}`
           );
         }
+      });
+    });
+
+    describe('coverage sweep', () => {
+      const sweep = parse(
+        getManagedWorkflowDefinition(ALERTZERO_COVERAGE_WORKER_WORKFLOW_ID)!.yaml!
+      ) as WorkflowYaml;
+      const review = parse(
+        getManagedWorkflowDefinition(ALERTZERO_COVERAGE_REVIEW_WORKFLOW_ID)!.yaml!
+      ) as WorkflowYaml;
+      const sweepSteps = flattenSteps(sweep.steps as unknown as NestedStep[]);
+      const consts = sweep.consts as Record<string, unknown>;
+      const step = (name: string) => sweepSteps.find((s) => s.name === name)!;
+      const withOf = (name: string) => step(name).with as Record<string, unknown>;
+      const sweepTypes = sweepSteps.map(({ type }) => type);
+
+      // The review keys its concurrency group on the indicator id and the sweep parses
+      // those keys back into ids. If the prefix drifts on either side the sweep excludes
+      // nothing and re-dispatches every open indicator.
+      it('parses the review concurrency key prefix the review actually uses', () => {
+        const { concurrency } = (review as unknown as { settings: Record<string, unknown> })
+          .settings as { concurrency: { key: string; strategy: string; max: number } };
+        const collect = String(withOf('collect_active_indicators').parsed);
+
+        expect(concurrency.key).toBe('coverage-{{ inputs.ki_id }}');
+        expect(concurrency.strategy).toBe('drop');
+        expect(concurrency.max).toBe(1);
+        expect(collect).toContain("map: 'concurrencyGroupKey'");
+        expect(collect).toContain("remove: 'coverage-'");
+      });
+
+      // `remove` strips every occurrence, not a prefix, and `join`/`split` use a comma.
+      // A comma inside a key would yield more ids than there are reviews, and a fragment
+      // could name an unrelated indicator. The ids are published only when the parse
+      // yields exactly one id per active review, the same integrity check the rule-tuning
+      // sweep applies.
+      it('publishes the parsed ids only when they match the number of active reviews', () => {
+        const collect = withOf('collect_active_indicators');
+        const resolve = step('resolve_active_indicators');
+
+        expect(String(collect.parsed_count)).toContain("remove: 'coverage-'");
+        expect(String(collect.parsed_count)).toContain('| size');
+        expect(String(resolve.if)).toContain(
+          'steps.collect_active_indicators.output.parsed_count == steps.collect_active_indicators.output.count'
+        );
+        expect(String((resolve.with as Record<string, unknown>).indicator_ids)).toContain(
+          'steps.collect_active_indicators.output.parsed'
+        );
+      });
+
+      // Active reviews are read from the engine, never from the indicator. If the lookup
+      // fails, the sweep continues with an empty list. Then every pending indicator is a
+      // candidate, and the review's own concurrency key drops a duplicate review.
+      it('lists active reviews of the review workflow and continues when the lookup fails', () => {
+        const lookup = step('list_active_reviews');
+        const path = String(lookup.with?.path);
+
+        expect(lookup.type).toBe('kibana.request');
+        expect(path).toContain('/s/{{ workflow.spaceId }}/api/workflows/workflow/');
+        expect(path).toContain(
+          `/api/workflows/workflow/${ALERTZERO_COVERAGE_REVIEW_WORKFLOW_ID}/executions?`
+        );
+        for (const status of [
+          'pending',
+          'queued',
+          'waiting',
+          'waiting_for_input',
+          'waiting_for_child',
+          'running',
+        ]) {
+          expect(path).toContain(`statuses=${status}`);
+        }
+        // The executions API rejects size > 100. size=100 is the maximum allowed.
+        expect(path).toContain('size=100');
+        expect(lookup['on-failure']).toEqual({ continue: true });
+      });
+
+      // Limit of active reviews per space: free = maximum minus active, never below zero.
+      // The manual input can only lower the maximum.
+      it('tops the space up to max_open_checks and no further', () => {
+        const free = String(withOf('resolve_free_slots').free);
+        const inputs = (
+          sweep.triggers as unknown as Array<{
+            type: string;
+            inputs?: { properties: Record<string, { maximum?: number }> };
+          }>
+        ).find(({ type }) => type === 'manual')!.inputs!.properties;
+
+        expect(consts.max_open_checks).toBe(100);
+        expect(free).toContain('inputs.max_open_checks | default: consts.max_open_checks');
+        expect(free).toContain('minus: steps.collect_active_indicators.output.count');
+        expect(free).toContain('at_least: 0');
+        // dispatch is capped by both the ceiling and the per-sweep batch size
+        const dispatch = String(withOf('resolve_dispatch_batch').indicators);
+        expect(dispatch).toContain('slice: 0, steps.resolve_free_slots.output.free');
+        expect(dispatch).toContain('slice: 0, steps.resolve_batch_size.output.size');
+        expect(inputs.max_open_checks.maximum).toBe(consts.max_open_checks);
+      });
+
+      it('resolves batch_size from input or default and caps dispatch to it', () => {
+        const batchSize = String(withOf('resolve_batch_size').size);
+        const inputs = (
+          sweep.triggers as unknown as Array<{
+            type: string;
+            inputs?: { properties: Record<string, { maximum?: number }> };
+          }>
+        ).find(({ type }) => type === 'manual')!.inputs!.properties;
+
+        expect(consts.batch_size).toBe(5);
+        expect(batchSize).toContain('inputs.batch_size | default: consts.batch_size');
+        expect(inputs.batch_size.maximum).toBe(50);
+      });
+
+      // Indicators with an active review are excluded in the query itself, so they never
+      // take a result slot from a free one. The search size is the maximum allowed batch_size
+      // input (50) so all valid batch sizes have enough candidates to slice from.
+      it('searches pending indicators minus the active ones, sized for the max batch', () => {
+        const search = step('search_pending_indicators');
+        const query = JSON.stringify(search.with?.query);
+
+        expect(search.type).toBe('elasticsearch.search');
+        expect(String(search.with?.index)).toContain('ai-index-idx-');
+        expect(query).toContain('"type":"security.coverage"');
+        expect(query).toContain('"attributes.status":"pending"');
+        expect(query).toContain('must_not');
+        expect(query).toContain(
+          '"ids":{"values":"${{ steps.resolve_active_indicators.output.indicator_ids | default: consts.no_rows }}"}'
+        );
+        expect(search.with?.size).toBe(50);
+        expect(search['on-failure']).toEqual({ continue: true });
+      });
+
+      // Only `_id` reaches the review. An indicator's content can be 64 kB, so 50 hits
+      // would move megabytes the sweep never reads.
+      it('reads no indicator content', () => {
+        expect(step('search_pending_indicators').with?._source).toBe(false);
+        expect(
+          ((step('start_reviews').steps ?? [])[0].with?.inputs as Record<string, string>).ki_id
+        ).toBe('{{ foreach.item._id }}');
+      });
+
+      // The window counts from the indicator's creation time, which `context-engine`
+      // stamps once. An indicator that leaves the window is never reviewed, so the sweep
+      // takes the oldest ones in the window first.
+      it('looks back a bounded number of days and takes the oldest indicators first', () => {
+        const search = step('search_pending_indicators');
+        const query = JSON.stringify(search.with?.query);
+        const inputs = (
+          sweep.triggers as unknown as Array<{
+            type: string;
+            inputs?: { properties: Record<string, { minimum?: number; maximum?: number }> };
+          }>
+        ).find(({ type }) => type === 'manual')!.inputs!.properties;
+
+        expect(consts.lookback_days).toBe(7);
+        expect(query).toContain(
+          '"gte":"now-{{ inputs.lookback_days | default: consts.lookback_days }}d"'
+        );
+        expect(JSON.stringify(search.with?.sort)).toContain('"order":"asc"');
+        expect(inputs.lookback_days.minimum).toBe(1);
+        expect(inputs.lookback_days.maximum).toBe(90);
+      });
+
+      // Async fan-out: the sweep starts one review per indicator and exits. Each review
+      // waits for its approval in its own execution. Nothing in the sweep waits.
+      it('starts one async review per indicator and never waits for an approval', () => {
+        const loop = step('start_reviews') as NestedStep & { foreach?: string };
+        const launches = sweepSteps.filter(({ type }) => type === 'workflow.executeAsync');
+
+        expect(loop.type).toBe('foreach');
+        expect(String(loop.foreach)).toContain('steps.resolve_dispatch_batch.output.indicators');
+        expect(launches.map(({ name }) => name)).toEqual(['start_review']);
+        expect(launches[0].with?.['workflow-id']).toBe(ALERTZERO_COVERAGE_REVIEW_WORKFLOW_ID);
+        expect((launches[0].with?.inputs as Record<string, string>).ki_id).toBe(
+          '{{ foreach.item._id }}'
+        );
+        expect(sweepTypes).not.toContain('workflow.execute');
+        expect(sweepTypes).not.toContain('waitForApproval');
+        expect(sweepTypes).not.toContain('parallel');
+      });
+
+      // The sweep exits in seconds, so one at a time per space is enough. A schedule
+      // cannot live on a workflow installed in the global space, so it is manual only.
+      it('is manual-only with one sweep per space at a time', () => {
+        const triggers = sweep.triggers as unknown as Array<{ type: string }>;
+        const { concurrency } = (sweep as unknown as { settings: Record<string, unknown> })
+          .settings as { concurrency: { strategy: string; max: number } };
+
+        expect(triggers.map(({ type }) => type)).toEqual(['manual']);
+        expect(concurrency.strategy).toBe('drop');
+        expect(concurrency.max).toBe(1);
+      });
+
+      // The sweep reads the queue and never writes to it; the review owns the outcome.
+      it('never writes to the knowledge indicators', () => {
+        for (const type of [
+          'context-engine.createKi',
+          'context-engine.updateKi',
+          'context-engine.deleteKi',
+          'elasticsearch.index',
+          'elasticsearch.update',
+        ]) {
+          expect(sweepTypes).not.toContain(type);
+        }
+      });
+
+      // The coverage skill lives in the review; the sweep runs no agent.
+      it('keeps the coverage skill inside the review', () => {
+        const skills = (id: string) =>
+          projectSkillsFromDefinition(parse(getManagedYaml(id)) as WorkflowYaml, undefined);
+
+        expect(skills(ALERTZERO_COVERAGE_WORKER_WORKFLOW_ID)).toEqual([]);
+        expect(skills(ALERTZERO_COVERAGE_REVIEW_WORKFLOW_ID)).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({ id: 'detection-coverage', kind: 'skill' }),
+          ])
+        );
+      });
+
+      // A sweep that reports zero pending because a read failed is not an empty queue,
+      // so each failed read is reported separately.
+      it('reports the queue and each failed read separately', () => {
+        const emit = withOf('emit_result') as Record<string, string>;
+        const outputs = (sweep.outputs as Array<{ name: string }>).map(({ name }) => name);
+
+        expect(outputs).toEqual([
+          'pending',
+          'started',
+          'in_flight',
+          'search_failed',
+          'lookup_failed',
+        ]);
+        expect(String(emit.pending)).toContain(
+          'steps.search_pending_indicators.output.hits.total.value'
+        );
+        expect(String(emit.started)).toContain('steps.resolve_dispatch_batch.output.indicators');
+        expect(String(emit.in_flight)).toContain('steps.collect_active_indicators.output.count');
+        expect(String(emit.search_failed)).toContain(
+          'steps.search_pending_indicators.error != null'
+        );
+        expect(String(emit.lookup_failed)).toContain('steps.list_active_reviews.error != null');
       });
     });
   });

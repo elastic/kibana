@@ -11,19 +11,19 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonIcon,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
+  EuiPopover,
   EuiFlyoutHeader,
   EuiHealth,
   EuiHorizontalRule,
   EuiLoadingSpinner,
   EuiText,
-  EuiPopover,
   EuiSpacer,
   EuiTitle,
   EuiToolTip,
@@ -43,6 +43,7 @@ import { useBlocksNewActivity } from '../../../../hooks/use_significant_events_m
 import { FlyoutMetadataCard } from '../../../../components/flyout_components/flyout_metadata_card';
 import { FlyoutToolbarHeader } from '../../../../components/flyout_components/flyout_toolbar_header';
 import { getConfidenceColor } from '../../../../components/knowledge_indicators/utils/get_confidence_color';
+import { DismissEventModal } from './dismiss_event_modal';
 import { LifecycleTimeline } from './lifecycle_timeline';
 import { getSignificantEventStatusColor } from '../shared/status_display';
 import { SIGNIFICANT_EVENT_STATUS_LABELS } from '../shared/translations';
@@ -76,6 +77,7 @@ const CLOSE_EVENT_LABEL = i18n.translate(
     defaultMessage: 'Close significant event',
   }
 );
+
 const ACTIONS_BUTTON_ARIA_LABEL = i18n.translate(
   'xpack.significantEventsApp.significantEventsTab.flyout.actionsMenuButtonAriaLabel',
   {
@@ -83,6 +85,12 @@ const ACTIONS_BUTTON_ARIA_LABEL = i18n.translate(
   }
 );
 
+const DISMISS_EVENT_LABEL = i18n.translate(
+  'xpack.significantEventsApp.significantEventsTab.flyout.dismissEvent',
+  {
+    defaultMessage: 'Dismiss significant event',
+  }
+);
 const COPY_LINK_ARIA_LABEL = i18n.translate(
   'xpack.significantEventsApp.significantEventsTab.flyout.copyLink',
   {
@@ -183,6 +191,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
 
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'significantEventFlyout' });
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
+  const [isDismissModalOpen, setIsDismissModalOpen] = useState(false);
 
   // Use the latest event version from the lifecycle response — lifecycle fetches all
   // versions via findByEventId (no time filter), so it captures newly-written
@@ -217,7 +226,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
     onUpdateSuccess: onClose,
   });
 
-  const isClosed = latestEvent.status === 'closed';
+  const isOpen = latestEvent.status === 'open';
 
   useInterval(
     refetchLifecycle,
@@ -242,7 +251,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
       hideCloseButton
     >
       <FlyoutToolbarHeader>
-        {!isClosed && canManage && (
+        {isOpen && canManage && (
           <EuiFlexItem grow={false}>
             <EuiPopover
               aria-label={ACTIONS_BUTTON_ARIA_LABEL}
@@ -250,7 +259,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
                 <EuiToolTip content={ACTIONS_BUTTON_ARIA_LABEL} disableScreenReaderOutput>
                   <EuiButtonIcon
                     data-test-subj="sigEventFlyoutActionsButton"
-                    iconType="boxesVertical"
+                    iconType="ellipsis"
                     aria-label={ACTIONS_BUTTON_ARIA_LABEL}
                     isLoading={isUpdating}
                     isDisabled={isUpdating}
@@ -265,6 +274,18 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
             >
               <EuiContextMenuPanel
                 items={[
+                  <EuiContextMenuItem
+                    key="dismiss-event"
+                    icon="eyeSlash"
+                    color="primary"
+                    disabled={isUpdating}
+                    onClick={() => {
+                      setIsActionsMenuOpen(false);
+                      setIsDismissModalOpen(true);
+                    }}
+                  >
+                    {DISMISS_EVENT_LABEL}
+                  </EuiContextMenuItem>,
                   <EuiContextMenuItem
                     key="close-event"
                     icon="cross"
@@ -287,6 +308,16 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
               />
             </EuiPopover>
           </EuiFlexItem>
+        )}
+        {isDismissModalOpen && (
+          <DismissEventModal
+            eventUuid={latestEvent.event_uuid}
+            onClose={() => setIsDismissModalOpen(false)}
+            onSuccess={() => {
+              setIsDismissModalOpen(false);
+              onClose();
+            }}
+          />
         )}
         <EuiFlexItem grow={false}>
           <EuiToolTip content={COPY_LINK_ARIA_LABEL} disableScreenReaderOutput>

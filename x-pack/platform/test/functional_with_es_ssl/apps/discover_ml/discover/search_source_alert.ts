@@ -29,7 +29,7 @@
 import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
-import { openDiscoverSearchThresholdRuleFlyout } from '../../../../functional/apps/discover/open_search_threshold_rule_flyout';
+import { openDiscoverSearchThresholdRuleFlyout } from './open_search_threshold_rule_flyout';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');

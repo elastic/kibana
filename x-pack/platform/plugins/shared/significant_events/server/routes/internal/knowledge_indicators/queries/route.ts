@@ -325,7 +325,7 @@ const bulkDeleteQueriesRoute = createServerRoute({
       try {
         const { rulesClient } = await scopedClients.getSignificantEventsAlertingContext();
         await cleanupStaleEvents({
-          eventClient: scopedClients.getEventClient(),
+          eventClient: await scopedClients.getEventClient(),
           rulesClient,
           candidateRuleIds: [...candidateRuleIds],
         });

@@ -15,7 +15,7 @@ import {
   type GenerateKIQueriesDependencies,
 } from './ki_queries_generation_service';
 import { identifyKIQueries } from './identify_ki_queries';
-
+import { isSignificantEventsFeatureFlagEnabled } from '../feature_flags/is_significant_events_feature_flag_enabled';
 jest.mock('./identify_ki_queries', () => ({
   identifyKIQueries: jest.fn(),
 }));
@@ -30,6 +30,9 @@ jest.mock(
 );
 
 const identifyKIQueriesMock = identifyKIQueries as jest.MockedFunction<typeof identifyKIQueries>;
+const isSignificantEventsFeatureFlagEnabledMock = jest.mocked(
+  isSignificantEventsFeatureFlagEnabled
+);
 
 const definition = { name: 'logs.test' } as Streams.all.Definition;
 
@@ -66,6 +69,7 @@ describe('generateKIQueries', () => {
   beforeEach(() => {
     logger = loggerMock.create();
     identifyKIQueriesMock.mockReset();
+    isSignificantEventsFeatureFlagEnabledMock.mockResolvedValue(false);
     identifyKIQueriesMock.mockResolvedValue({
       queries: [
         {

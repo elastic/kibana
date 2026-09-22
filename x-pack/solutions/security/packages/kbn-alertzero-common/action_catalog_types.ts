@@ -5,15 +5,21 @@
  * 2.0.
  */
 
-import type { ActionApprovalPolicy, ActionCategory, ActionImpact } from '@kbn/workflows';
+import type {
+  ActionApprovalPolicy,
+  ActionCategory,
+  ActionImpact,
+  JsonSchema,
+} from '@kbn/workflows';
 
-export type { ActionApprovalPolicy, ActionCategory, ActionImpact };
+export type { ActionApprovalPolicy, ActionCategory, ActionImpact, JsonSchema };
 
 /**
  * One entry of the action catalog: the lightweight, agent-facing projection of
  * an installed action workflow. Mirrors `consts.actionMetadata` on the
- * workflow definition plus the workflow id, so an agent can propose the action
- * without reading the full YAML.
+ * workflow definition plus the workflow id and the JSON Schema of the inputs
+ * the workflow accepts, so an agent can propose the action — and fill in its
+ * inputs — without reading the full YAML.
  */
 export interface ActionCatalogEntry {
   workflowId: string;
@@ -22,6 +28,12 @@ export interface ActionCatalogEntry {
   category?: ActionCategory;
   impact?: ActionImpact;
   approvalPolicy?: ActionApprovalPolicy;
+  /**
+   * JSON Schema of the workflow's inputs, as declared on its manual trigger
+   * (`triggers[type=manual].inputs`). Describes the single `actionInput`
+   * object every action workflow takes.
+   */
+  inputSchema?: JsonSchema;
 }
 
 /** Response of `GET /internal/alertzero/actions`. */

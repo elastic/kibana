@@ -120,6 +120,34 @@ test.describe(
       await expect(streams.canvasUndo).toBeEnabled();
     });
 
+    test('keeps the viewport where the user left it when tidying up', async ({
+      pageObjects: { streams },
+    }) => {
+      await streams.zoomInCanvas();
+      const transform = await streams.getCanvasViewportTransform();
+
+      // Tidy up relayouts the nodes and must leave the camera alone.
+      await streams.tidyUpCanvasFromPane();
+      await expect(streams.canvasUndo).toBeEnabled();
+
+      expect(await streams.getCanvasViewportTransform()).toBe(transform);
+    });
+
+    test('keeps the viewport where the user left it when opening a node flyout', async ({
+      page,
+      pageObjects: { streams },
+    }) => {
+      await streams.zoomInCanvas();
+      const transform = await streams.getCanvasViewportTransform();
+
+      await streams.clickCanvasNode(streams.getCanvasDestinationNode(PLAIN_STREAM));
+      await expect(page.testSubj.locator('streamsCanvasFlyout')).toBeVisible();
+
+      // The flyout is an overlay, so the canvas is neither resized nor
+      // remounted and the viewport should be untouched.
+      expect(await streams.getCanvasViewportTransform()).toBe(transform);
+    });
+
     test('renders the canvas toolbar with undo/redo and add-node placeholders', async ({
       pageObjects: { streams },
     }) => {
