@@ -26,7 +26,7 @@ import { DiscoverGrid } from '../../components/discover_grid';
 import { DiscoverGridFlyout } from '../../components/discover_grid_flyout';
 import { SavedSearchEmbeddableBase } from './saved_search_embeddable_base';
 import { TotalDocuments } from '../../application/main/components/total_documents/total_documents';
-import { useProfileAccessor } from '../../context_awareness';
+import { useProfileAccessor, type CellRenderersSearchContext } from '../../context_awareness';
 import { useSearchEmbeddableToolbar } from './search_embeddable_toolbar_context';
 
 export interface InlineEditing {
@@ -53,6 +53,7 @@ interface DiscoverGridEmbeddableProps extends Omit<UnifiedDataTableProps, 'sampl
   setExpandedDoc?: (doc: DataTableRecord | undefined, options?: { initialTabId?: string }) => void;
   documentViewerFlyoutType?: 'push' | 'overlay';
   wrapToolbar?: boolean;
+  searchContext?: CellRenderersSearchContext;
   flyoutMenuTrailingActions?: EuiFlyoutMenuAction[];
 }
 
@@ -65,6 +66,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
     interceptedWarnings,
     documentViewerFlyoutType,
     wrapToolbar = true,
+    searchContext,
     flyoutMenuTrailingActions,
     ...gridProps
   } = props;
@@ -171,12 +173,16 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         rowHeightState: gridProps.rowHeightState,
         configRowHeight: props.configRowHeight,
       }),
+      searchContext,
+      isDataLoading: props.loadingState === DiscoverGridLoadingState.loading,
     });
   }, [
     getCellRenderersAccessor,
     props.dataView,
     props.services.storage,
     props.configRowHeight,
+    props.loadingState,
+    searchContext,
     gridProps.dataGridDensityState,
     gridProps.rowHeightState,
   ]);
