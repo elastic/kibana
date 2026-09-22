@@ -11702,7 +11702,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an infrastructure-level failure (for example Elasticsearch or Saved Objects unavailable).
-      summary: Bulk create alert actions
+      summary: Bulk assign alert episodes
       tags:
         - alerting-v2
       x-state: Experimental; added in 9.5.0
@@ -12196,7 +12196,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an infrastructure-level failure (for example Elasticsearch or Saved Objects unavailable).
-      summary: Acknowledge an alert
+      summary: Acknowledge an alert episode
       tags:
         - alerting-v2
       x-state: Experimental; added in 9.5.0
@@ -12248,141 +12248,7 @@ paths:
             application/json:
               examples:
                 invalidRequest:
-                  summary: Cannot activate an already-active episode
-                  value:
-                    code: INVALID_EPISODE_STATE_TRANSITION
-                    details:
-                      action_type: activate
-                      episode_id: episode-1
-                      episode_status: active
-                      group_hash: group-hash-1
-                    error: Bad Request
-                    message: Cannot activate episode [episode-1]. It is already active
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates an invalid schema or parameters.
-        '401':
-          content:
-            application/json:
-              examples:
-                unauthorized:
-                  summary: Request was not authenticated
-                  value:
-                    code: UNAUTHORIZED
-                    error: Unauthorized
-                    message: Authentication required to access this API.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the request was not authenticated.
-        '403':
-          content:
-            application/json:
-              examples:
-                forbidden:
-                  summary: Caller lacks required privileges
-                  value:
-                    code: FORBIDDEN
-                    error: Forbidden
-                    message: The current user does not have the required privileges for this request.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the user does not have the required privileges to perform the request.
-        '404':
-          content:
-            application/json:
-              examples:
-                alertEventNotFound:
-                  summary: No alert event exists for the given group_hash and episode_id
-                  value:
-                    code: ALERT_EVENT_NOT_FOUND
-                    details:
-                      episode_id: episode-1
-                      group_hash: group-hash-1
-                    error: Not Found
-                    message: Alert event with group_hash [group-hash-1] and episode_id [episode-1] not found
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alert event was not found.
-        '500':
-          content:
-            application/json:
-              examples:
-                internalServerError:
-                  summary: Unexpected server-side error
-                  value:
-                    code: INTERNAL_SERVER_ERROR
-                    error: Internal Server Error
-                    message: An unexpected error occurred.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates an unexpected server-side error.
-        '503':
-          content:
-            application/json:
-              examples:
-                serviceUnavailable:
-                  summary: Infrastructure-level failure
-                  value:
-                    code: SERVICE_UNAVAILABLE
-                    error: Service Unavailable
-                    message: A dependency required to complete this request is unavailable.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates an infrastructure-level failure (for example Elasticsearch or Saved Objects unavailable).
-      summary: Activate an alert
-      tags:
-        - alerting-v2
-      x-state: Experimental; added in 9.5.0
-      x-metaTags:
-        - content: Kibana
-          name: product_name
-  /api/alerting/v2/alerts/{group_hash}/_assign:
-    post:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/{group_hash}/_assign</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Create an action for a specific alert group.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
-      operationId: post-alerting-v2-alerts-group-hash-assign
-      parameters:
-        - description: A required header to protect against CSRF attacks
-          in: header
-          name: kbn-xsrf
-          required: true
-          schema:
-            example: 'true'
-            type: string
-        - description: Hash identifying the alert group to apply the action to.
-          in: path
-          name: group_hash
-          required: true
-          schema:
-            maxLength: 256
-            minLength: 1
-            type: string
-      requestBody:
-        content:
-          application/json:
-            examples:
-              createAssignAlertActionRequest:
-                summary: Assign episode episode-1 to user u_abc123
-                value:
-                  assignee_uid: u_abc123
-                  episode_id: episode-1
-            schema:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_new_assign_alert_action'
-      responses:
-        '204':
-          description: Returns the newly created alert action.
-        '400':
-          content:
-            application/json:
-              examples:
-                invalidRequest:
-                  summary: Path is missing required group_hash
+                  summary: Path is missing required episode_id
                   value:
                     code: BAD_REQUEST
                     details:
@@ -12461,7 +12327,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an infrastructure-level failure (for example Elasticsearch or Saved Objects unavailable).
-      summary: Assign an alert to a user
+      summary: Activate an alert episode
       tags:
         - alerting-v2
       x-state: Experimental; added in 9.5.0
@@ -12644,140 +12510,7 @@ paths:
             application/json:
               examples:
                 invalidRequest:
-                  summary: Cannot deactivate an already-inactive episode
-                  value:
-                    code: INVALID_EPISODE_STATE_TRANSITION
-                    details:
-                      action_type: deactivate
-                      episode_id: episode-1
-                      episode_status: inactive
-                      group_hash: group-hash-1
-                    error: Bad Request
-                    message: Cannot deactivate episode [episode-1]. It is already inactive
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates an invalid schema or parameters.
-        '401':
-          content:
-            application/json:
-              examples:
-                unauthorized:
-                  summary: Request was not authenticated
-                  value:
-                    code: UNAUTHORIZED
-                    error: Unauthorized
-                    message: Authentication required to access this API.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the request was not authenticated.
-        '403':
-          content:
-            application/json:
-              examples:
-                forbidden:
-                  summary: Caller lacks required privileges
-                  value:
-                    code: FORBIDDEN
-                    error: Forbidden
-                    message: The current user does not have the required privileges for this request.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the user does not have the required privileges to perform the request.
-        '404':
-          content:
-            application/json:
-              examples:
-                alertEventNotFound:
-                  summary: No alert event exists for the given group_hash and episode_id
-                  value:
-                    code: ALERT_EVENT_NOT_FOUND
-                    details:
-                      episode_id: episode-1
-                      group_hash: group-hash-1
-                    error: Not Found
-                    message: Alert event with group_hash [group-hash-1] and episode_id [episode-1] not found
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alert event was not found.
-        '500':
-          content:
-            application/json:
-              examples:
-                internalServerError:
-                  summary: Unexpected server-side error
-                  value:
-                    code: INTERNAL_SERVER_ERROR
-                    error: Internal Server Error
-                    message: An unexpected error occurred.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates an unexpected server-side error.
-        '503':
-          content:
-            application/json:
-              examples:
-                serviceUnavailable:
-                  summary: Infrastructure-level failure
-                  value:
-                    code: SERVICE_UNAVAILABLE
-                    error: Service Unavailable
-                    message: A dependency required to complete this request is unavailable.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates an infrastructure-level failure (for example Elasticsearch or Saved Objects unavailable).
-      summary: Deactivate an alert
-      tags:
-        - alerting-v2
-      x-state: Experimental; added in 9.5.0
-      x-metaTags:
-        - content: Kibana
-          name: product_name
-  /api/alerting/v2/alerts/{group_hash}/_snooze:
-    post:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/{group_hash}/_snooze</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Create an action for a specific alert group.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
-      operationId: post-alerting-v2-alerts-group-hash-snooze
-      parameters:
-        - description: A required header to protect against CSRF attacks
-          in: header
-          name: kbn-xsrf
-          required: true
-          schema:
-            example: 'true'
-            type: string
-        - description: Hash identifying the alert group to apply the action to.
-          in: path
-          name: group_hash
-          required: true
-          schema:
-            maxLength: 256
-            minLength: 1
-            type: string
-      requestBody:
-        content:
-          application/json:
-            examples:
-              createSnoozeAlertActionRequest:
-                summary: Snooze until 2026-01-16T12:00:00.000Z
-                value:
-                  expiry: '2026-01-16T12:00:00.000Z'
-            schema:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_new_snooze_alert_action'
-      responses:
-        '204':
-          description: Returns the newly created alert action.
-        '400':
-          content:
-            application/json:
-              examples:
-                invalidRequest:
-                  summary: Path is missing required group_hash
+                  summary: Path is missing required episode_id
                   value:
                     code: BAD_REQUEST
                     details:
@@ -12856,7 +12589,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an infrastructure-level failure (for example Elasticsearch or Saved Objects unavailable).
-      summary: Snooze an alert
+      summary: Deactivate an alert episode
       tags:
         - alerting-v2
       x-state: Experimental; added in 9.5.0
@@ -12989,7 +12722,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an infrastructure-level failure (for example Elasticsearch or Saved Objects unavailable).
-      summary: Add tags to an alert
+      summary: Tag an alert episode
       tags:
         - alerting-v2
       x-state: Experimental; added in 9.5.0
@@ -13027,140 +12760,8 @@ paths:
         content:
           application/json:
             examples:
-              createUnackAlertActionRequest:
-                summary: Unacknowledge episode episode-1
-                value:
-                  episode_id: episode-1
-            schema:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_new_unack_alert_action'
-      responses:
-        '204':
-          description: Returns the newly created alert action.
-        '400':
-          content:
-            application/json:
-              examples:
-                invalidRequest:
-                  summary: Path is missing required group_hash
-                  value:
-                    code: BAD_REQUEST
-                    details:
-                      errors:
-                        group_hash:
-                          - Required
-                    error: Bad Request
-                    message: 'group_hash: Required'
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates an invalid schema or parameters.
-        '401':
-          content:
-            application/json:
-              examples:
-                unauthorized:
-                  summary: Request was not authenticated
-                  value:
-                    code: UNAUTHORIZED
-                    error: Unauthorized
-                    message: Authentication required to access this API.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the request was not authenticated.
-        '403':
-          content:
-            application/json:
-              examples:
-                forbidden:
-                  summary: Caller lacks required privileges
-                  value:
-                    code: FORBIDDEN
-                    error: Forbidden
-                    message: The current user does not have the required privileges for this request.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the user does not have the required privileges to perform the request.
-        '404':
-          content:
-            application/json:
-              examples:
-                alertEventNotFound:
-                  summary: No alert event exists for the given group_hash and episode_id
-                  value:
-                    code: ALERT_EVENT_NOT_FOUND
-                    details:
-                      episode_id: episode-1
-                      group_hash: group-hash-1
-                    error: Not Found
-                    message: Alert event with group_hash [group-hash-1] and episode_id [episode-1] not found
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alert event was not found.
-        '500':
-          content:
-            application/json:
-              examples:
-                internalServerError:
-                  summary: Unexpected server-side error
-                  value:
-                    code: INTERNAL_SERVER_ERROR
-                    error: Internal Server Error
-                    message: An unexpected error occurred.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates an unexpected server-side error.
-        '503':
-          content:
-            application/json:
-              examples:
-                serviceUnavailable:
-                  summary: Infrastructure-level failure
-                  value:
-                    code: SERVICE_UNAVAILABLE
-                    error: Service Unavailable
-                    message: A dependency required to complete this request is unavailable.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates an infrastructure-level failure (for example Elasticsearch or Saved Objects unavailable).
-      summary: Unacknowledge an alert
-      tags:
-        - alerting-v2
-      x-state: Experimental; added in 9.5.0
-      x-metaTags:
-        - content: Kibana
-          name: product_name
-  /api/alerting/v2/alerts/{group_hash}/_unsnooze:
-    post:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/{group_hash}/_unsnooze</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Create an action for a specific alert group.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
-      operationId: post-alerting-v2-alerts-group-hash-unsnooze
-      parameters:
-        - description: A required header to protect against CSRF attacks
-          in: header
-          name: kbn-xsrf
-          required: true
-          schema:
-            example: 'true'
-            type: string
-        - description: Hash identifying the alert group to apply the action to.
-          in: path
-          name: group_hash
-          required: true
-          schema:
-            maxLength: 256
-            minLength: 1
-            type: string
-      requestBody:
-        content:
-          application/json:
-            examples:
-              createUnsnoozeAlertActionRequest:
-                summary: Clear the current snooze
+              createUnackEpisodeActionRequest:
+                summary: Unacknowledge the alert episode
                 value: {}
             schema:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_new_unack_episode_action'
@@ -13251,7 +12852,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an infrastructure-level failure (for example Elasticsearch or Saved Objects unavailable).
-      summary: Unsnooze an alert
+      summary: Unacknowledge an alert episode
       tags:
         - alerting-v2
       x-state: Experimental; added in 9.5.0
@@ -130363,7 +129964,7 @@ paths:
                   maxLength: 1000
                   type: string
                 include:
-                  $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_55___schema0'
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_53___schema0'
                 name:
                   maxLength: 256
                   type: string
@@ -147728,7 +147329,7 @@ components:
           type: boolean
       required:
         - data_view
-    Kibana_HTTP_APIs__zod_v4_55___schema0:
+    Kibana_HTTP_APIs__zod_v4_53___schema0:
       anyOf:
         - additionalProperties: false
           type: object
@@ -147757,7 +147358,7 @@ components:
                 routing:
                   items:
                     allOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_55___schema0'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_53___schema0'
                       - type: object
                         properties:
                           destination:
