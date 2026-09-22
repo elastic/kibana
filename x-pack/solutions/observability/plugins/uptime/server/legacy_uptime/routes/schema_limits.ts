@@ -17,8 +17,11 @@ export const MAX_DATE_RANGE_LENGTH = 256;
 export const MAX_TIMESTAMP_LENGTH = 64;
 /** KQL and serialized Elasticsearch filter clauses. */
 export const MAX_FILTER_LENGTH = 10_000;
-/** JSON-encoded location id lists on the pings route. */
-export const MAX_LOCATION_LIST_LENGTH = 16_384;
+/**
+ * JSON list of `observer.geo.name` labels on the pings route.
+ * 4KB covers ~100 names (~40 chars each); a full public location set is well under that.
+ */
+export const MAX_LOCATION_LIST_LENGTH = 4096;
 /** Cursor pagination JSON, which embeds a monitor id. */
 export const MAX_PAGINATION_LENGTH = 8192;
 export const MAX_STATUS_LENGTH = 32;
