@@ -149,7 +149,9 @@ describe('createColumnBindingIntegrityEvaluator', () => {
     const result = await evaluate([XY], esClient);
 
     expect(result.score).toBe(0);
-    expect(result.explanation).toContain('parse error');
+    expect(result.explanation).toBe(
+      '0/4 column binding(s) resolve. ES|QL execution failed: parse error'
+    );
   });
 
   it('scores 0 when no visualization was produced', async () => {

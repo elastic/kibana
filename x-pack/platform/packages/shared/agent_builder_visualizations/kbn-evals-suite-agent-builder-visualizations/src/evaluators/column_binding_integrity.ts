@@ -186,6 +186,8 @@ export function createColumnBindingIntegrityEvaluator<
             return {
               index,
               score: 1,
+              checkedBindings: 0,
+              resolvedBindings: 0,
               bindings: [] as BindingCheck[],
               failures: [] as string[],
               note: 'no column bindings found',
@@ -200,6 +202,8 @@ export function createColumnBindingIntegrityEvaluator<
             return {
               index,
               score: (checks.length - failures.length) / checks.length,
+              checkedBindings: checks.length,
+              resolvedBindings: checks.length - failures.length,
               bindings: checks,
               failures,
             };
@@ -207,6 +211,8 @@ export function createColumnBindingIntegrityEvaluator<
             return {
               index,
               score: 0,
+              checkedBindings: bindings.length,
+              resolvedBindings: 0,
               bindings: [] as BindingCheck[],
               failures: [`ES|QL execution failed: ${(err as Error).message}`],
             };
@@ -216,7 +222,8 @@ export function createColumnBindingIntegrityEvaluator<
 
       const score = details.reduce((sum, detail) => sum + detail.score, 0) / details.length;
       const failures = details.flatMap((detail) => detail.failures);
-      const checked = details.reduce((sum, detail) => sum + detail.bindings.length, 0);
+      const checked = details.reduce((sum, detail) => sum + detail.checkedBindings, 0);
+      const resolved = details.reduce((sum, detail) => sum + detail.resolvedBindings, 0);
 
       return {
         score,
@@ -224,9 +231,7 @@ export function createColumnBindingIntegrityEvaluator<
         explanation:
           score === 1
             ? `All ${checked} column binding(s) resolve to result columns of the right kind.`
-            : `${checked - failures.length}/${checked} column binding(s) resolve. ${failures.join(
-                '; '
-              )}`,
+            : `${resolved}/${checked} column binding(s) resolve. ${failures.join('; ')}`,
         metadata: {
           checkedBindings: checked,
           totalVisualizations: details.length,
