@@ -1,0 +1,210 @@
+version: "1"
+name: Attack Discovery FP/TP Analysis
+description: >
+  Judges whether one Attack Discovery's CORRELATION is supported by its evidence and
+  returns a verdict. It returns a result and applies nothing: the review that calls
+  it owns the verdict attachment and every lifecycle transition.
+
+  The analysis body — deterministic evidence gathering, the agent that reasons over
+  those facts, and the non-LLM check on what it asserted — is #19282, which is
+  blocked on the #19280 contract spike. What is settled and implemented here is the
+  shell: the two inputs, the analyst-facing payload, the failure semantics and the
+  authoritative-load half of idempotency.
+enabled: true
+tags:
+  - security
+  - attack-discovery
+settings:
+  # Provisional. The maximum analysis duration is one of the open questions in
+  # #19280; this bounds a wedged run in the meantime and is generous for a shell
+  # whose only work is two reads.
+  timeout: "30m"
+  # The built-in retries #19214 expects to have run before the review records a
+  # failure. They live here rather than on the review's call site so a transient
+  # ES or conversation-read failure is retried without the review having to know
+  # this workflow's internals.
+  #
+  # Workflow-level, not step-level: every step below is a required source or the
+  # output that depends on them, so there is no step worth retrying in isolation.
+  on-failure:
+    retry:
+      max-attempts: 3
+      delay: "30s"
+      strategy: exponential
+  # No `concurrency`. The review already serializes one attack's analyses with its
+  # own `drop max 1`, keyed per attack, so a second concurrent analysis of the same
+  # attack cannot be reached from the Worker chain. Adding `drop` here would be
+  # actively harmful: a dropped run hands its synchronous caller an empty output,
+  # which the review cannot tell apart from an exhausted-retry failure and would
+  # therefore record as `failed`.
+triggers:
+  # Manual only: launched by `attack_discovery_review.yaml` via `workflow.execute`,
+  # or by hand for testing. It owns no schedule.
+  - type: manual
+    inputs:
+      properties:
+        attack_discovery_id:
+          type: string
+          # Same bound the review takes, so a value that passed validation there
+          # cannot fail it here.
+          maxLength: 512
+          description: >-
+            Document id of the PERSISTED Attack Discovery under analysis, which
+            equals its `kibana.alert.uuid`. Everything this workflow knows about the
+            attack is read from that document rather than passed alongside the id.
+        investigation_id:
+          type: string
+          maxLength: 128
+          description: >-
+            Conversation id of the Investigation the review opened for this attack.
+            Read to confirm it exists before analysing; this workflow writes nothing
+            to it, because the verdict attachment is the review's to write.
+      # Both required: neither the attack nor the Investigation has a defensible
+      # default, and an analysis that cannot name what it analysed is worthless.
+      #
+      # Deliberately the WHOLE input surface. The space comes from
+      # `workflow.spaceId`, this attempt's identity from `execution.id`, and the
+      # attack's title, summary, alert ids and generation source from the loaded
+      # document — so no caller can hand this workflow a stale copy of any of them.
+      required:
+        - attack_discovery_id
+        - investigation_id
+      additionalProperties: false
+outputs:
+  # The analyst-facing payload, matching the `security.attack_discovery.verdict`
+  # attachment the review writes it into (merged elastic/kibana#291932).
+  #
+  # `failed` is NOT a value this workflow emits. It is an execution state, never a
+  # classification: a timeout, a permission failure, an unavailable required source
+  # or a tool error fails the run once the retries above are exhausted, and the
+  # review maps the resulting absence of a payload onto the attachment's `failed`
+  # verdict. So this enum is the three classifications only.
+  - name: verdict
+    type: string
+  # Required by the attachment, capped there at 8k. The attachment type renders the
+  # `# Analysis verdict: {verdict}` heading itself, so this is body markdown only.
+  - name: summary_markdown
+    type: string
+  # Optional, capped at 50k. The attachment type renders the `## Rationale` heading,
+  # so this too is body markdown only. Emitted with `${{ }}` below so an analysis
+  # with no rationale leaves the field ABSENT rather than rendering an empty section.
+  - name: rationale_markdown
+    type: string
+  # Internal rather than analyst-facing. This attempt's execution id, so a verdict
+  # can be traced back to the run that produced it — which is what makes distinct
+  # attempts distinguishable without any of them carrying an attempt counter.
+  - name: analysis_execution_id
+    type: string
+  # Read back off the loaded document, not echoed from input, so the caller can
+  # confirm the payload describes the attack it asked about.
+  - name: attack_discovery_id
+    type: string
+  #
+  # The richer execution output — per-check results, the claim-verification outcome,
+  # and whatever evaluation (#19285), telemetry (#19453) and outcome routing (#19214)
+  # need — arrives with #19282. It is internal rather than analyst-facing, and its
+  # shape follows the #19280 spike. The `corroborating_evidence` / `caveats` /
+  # `checks` field list that predates the attachment contract is illustrative only;
+  # nothing here commits to it.
+steps:
+  # The authoritative Attack Discovery, loaded rather than received. Every attempt
+  # reads the document fresh, so a retry cannot analyse a copy that went stale
+  # between attempts, and nothing but the id crosses the workflow boundary.
+  #
+  # `ids` rather than a term query on `kibana.alert.uuid`: the persisted document is
+  # indexed UNDER that uuid, so the two are the same value and `_id` needs no
+  # mapping to be queryable.
+  #
+  # A REQUIRED source, so no `on-failure`: a search that fails fails the run, which
+  # after the retries above is what the review records as `failed`. Guessing a
+  # classification from an attack nobody could read is the one thing the failure
+  # contract forbids.
+  - name: load_attack_discovery
+    type: elasticsearch.search
+    with:
+      index: .adhoc.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}
+      size: 1
+      query:
+        ids:
+          values:
+            - "{{ inputs.attack_discovery_id }}"
+
+  # A search that returns nothing SUCCEEDS, so the step above cannot catch this on
+  # its own: an id that names no document is an unavailable required source dressed
+  # up as an empty result. Failing here keeps that on the failure path instead of
+  # letting the analysis proceed with no attack to analyse.
+  - name: require_attack_discovery
+    type: workflow.fail
+    if: "${{ steps.load_attack_discovery.output.hits.total.value == 0 }}"
+    with:
+      message: >-
+        No persisted Attack Discovery found for id
+        "{{ inputs.attack_discovery_id }}" in space {{ workflow.spaceId }}.
+        Required source unavailable; no classification was produced.
+
+  # The Investigation the caller named, read back for the same reason the review
+  # reads it back after creating it: an analysis whose result has nowhere to land is
+  # not worth running. A REQUIRED source, so no `on-failure`.
+  #
+  # A metadata READ, and nothing else against this conversation. Posting to it, or
+  # running `ai.agent` against it, wakes the Investigation agent — so when #19282
+  # adds the agent it must use `create-conversation: true` against a separate
+  # backing conversation rather than this one.
+  - name: load_investigation
+    type: ai.conversation.metadata.read
+    with:
+      conversation_id: "{{ inputs.investigation_id }}"
+
+  # PLACEHOLDER — #19282 replaces this step with the analysis proper: the
+  # deterministic pre-computation over the loaded attack, the agent that reasons
+  # over those facts, and the deterministic check on the claim it asserted. The
+  # criteria each verdict is reached by, the evidence sources consulted, and the
+  # claim shape the verifier checks are all open until #19280 lands.
+  #
+  # `inconclusive` until then, deliberately: it is the one classification that
+  # asserts nothing about the attack, and on the review's side it routes to the same
+  # analyst-gated forensics handoff a true positive does — so the whole chain stays
+  # exercisable without this placeholder ever closing an attack on its own.
+  #
+  # A `data.set` rather than a `console` step, because unlike the stub it replaces
+  # this one is part of the contract: the review reads the payload back, so the shell
+  # has to produce a real one.
+  - name: analyze
+    type: data.set
+    with:
+      verdict: inconclusive
+      # Names what did and did not happen, so an analyst reading the Investigation is
+      # not left to infer that an `inconclusive` verdict reflects analysis that ran.
+      # Well under the attachment's 8k cap.
+      summary_markdown: >-
+        FP/TP analysis is not yet implemented
+        ([#19282](https://github.com/elastic/security-team/issues/19282)). The Attack
+        Discovery and the Investigation were both loaded successfully, so this
+        Investigation is ready for the analysis once it lands, but no evidence was
+        gathered and no classification was reached. Returned `inconclusive`, which
+        asserts nothing about the attack.
+      # No `rationale_markdown` key: there is no reasoning to record, and the field is
+      # optional. `emit_result` reads it with `${{ }}` so it stays absent rather than
+      # becoming an empty `## Rationale` section on the attachment.
+
+  # The caller reads this payload back per verdict, so the contract has to be
+  # explicit: `workflow.execute` resolves to the child's `context.output`, and a
+  # child without a `workflow.output` step hands its parent nothing.
+  #
+  # Status `completed` always. The failure path never reaches this step — it fails
+  # the run — which is what keeps `failed` out of the emitted verdict entirely.
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      verdict: "{{ steps.analyze.output.verdict }}"
+      summary_markdown: "{{ steps.analyze.output.summary_markdown }}"
+      # `${{ }}`, not `{{ }}`: an absent rationale has to stay absent. `{{ }}`
+      # stringifies undefined to `""`, and the attachment renderer tests the field
+      # for null rather than for emptiness, so an empty string would render an empty
+      # `## Rationale` heading to the analyst.
+      rationale_markdown: "${{ steps.analyze.output.rationale_markdown }}"
+      analysis_execution_id: "{{ execution.id }}"
+      # From the document, not from `inputs`. `_id` IS `kibana.alert.uuid` for a
+      # persisted discovery, so this echoes what was actually read.
+      attack_discovery_id: "{{ steps.load_attack_discovery.output.hits.hits | map: '_id' | first }}"
