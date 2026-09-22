@@ -165,26 +165,15 @@ const WORKDAY_INGESTED_LOOKBACK_ESQL = `NOW() - ${WORKDAY_INGESTED_LOOKBACK_DAYS
  * passes `buildActorPageFilter` (`Manager_Email IN (…) OR Manager_ID IN (…)`) as
  * the ES|QL `filter` parameter, which applies at the source, before this query's
  * `STATS`. So `LAST` only ever sees a worker's snapshots whose manager is in the
- * page being processed. Two cases survive:
- *
- * 1. *Cross-page manager change.* If a worker's old and new manager fall in
- *    different composite pages, the old manager's page cannot see the newer
- *    snapshot and re-asserts the stale edge. Composite buckets are one per
- *    distinct `(Manager_Email, Manager_ID)` tuple — a manager with many reports
- *    still occupies one bucket — so this needs more than `COMPOSITE_PAGE_SIZE`
- *    distinct *managers* (~10k+ employees) AND a move that crosses a
- *    lexicographic page boundary. Narrow, but real on large tenants.
- *
- * 2. *Manager removal.* If a worker's newest snapshot clears both manager
- *    fields, that row fails the Step 1 presence gate and this query's opening
- *    `WHERE`, so it appears in no page at all and the previous manager keeps the
- *    report. This is size-independent — it happens on a 50-person tenant.
- *
- * Case 2 is not fixable here: it is the additive-write/retraction gap tracked in
- * https://github.com/elastic/kibana/issues/292358. Even a perfectly global
- * latest-row selection would emit *no* row for that worker, leaving the old edge
- * untouched. Case 1 would need discovery keyed on the worker rather than the
- * manager, which inverts how Step 1 buckets for this config.
+ * page being processed. Cross-page reassignments and manager removals (both
+ * previously tracked as open gaps) are now handled by the pre-run reset:
+ * `resetRelationshipsBeforeRun` clears all Workday `supervises` edges once per
+ * integration run, before pagination starts, so each run repopulates from a clean
+ * slate. A run that fails partway leaves the relationship *incomplete* until the
+ * next clean run — temporarily incomplete rather than permanently incorrect.
+ * https://github.com/elastic/kibana/issues/292358 remains open for event-stream
+ * sources, where absence carries no information and clearing would erase real
+ * observations.
  *
  * **Why Workday is retractable in principle and `accesses` is not.** Unlike the
  * log-based maintainers, this source emits a *complete inventory* on every 24h
