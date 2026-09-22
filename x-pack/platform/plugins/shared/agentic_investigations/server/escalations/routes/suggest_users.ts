@@ -33,7 +33,7 @@ export const registerSuggestUsersRoute = ({
         body: schema.object({
           name: schema.string({ minLength: 0, maxLength: 256 }),
           size: schema.maybe(schema.number({ min: 1, max: 100 })),
-          dataPath: schema.maybe(schema.string()),
+          dataPath: schema.maybe(schema.string({ maxLength: 256 })),
         }),
       },
       options: { access: 'internal' },
