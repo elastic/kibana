@@ -20,6 +20,7 @@ const baseProposal: ProposalItem = {
   origin: 'worker',
   createdAt: '2026-09-10T10:00:00.000Z',
   expired: false,
+  conversationAssignees: [],
 };
 
 describe('proposalToInvestigation', () => {
@@ -81,7 +82,8 @@ describe('proposalToInvestigation', () => {
       const result = proposalToInvestigation({
         ...baseProposal,
         category: 'respond',
-        status: 'dismissed',
+        decision: 'dismissed',
+        status: 'no_action',
         decidedAt: '2026-09-10T11:00:00.000Z',
       });
       expect(result.recommendedAction).toBe('closed');
@@ -139,6 +141,25 @@ describe('proposalToInvestigation', () => {
     });
   });
 
+  describe('assignee', () => {
+    // `Investigation.assignee` is singular because the flyout header renders one avatar.
+    it('takes the first assignee', () => {
+      const result = proposalToInvestigation({
+        ...baseProposal,
+        conversationAssignees: ['first.analyst', 'second.analyst'],
+      });
+      expect(result.assignee).toBe('first.analyst');
+    });
+
+    it('is null when nobody is assigned', () => {
+      const result = proposalToInvestigation({
+        ...baseProposal,
+        conversationAssignees: [],
+      });
+      expect(result.assignee).toBeNull();
+    });
+  });
+
   describe('fixed fields', () => {
     it('id equals proposal id', () => {
       const result = proposalToInvestigation(baseProposal);
@@ -164,7 +185,8 @@ describe('proposalToInvestigation', () => {
       const result = proposalToInvestigation({
         ...baseProposal,
         decidedAt: '2026-09-10T11:00:00.000Z',
-        status: 'approved',
+        decision: 'approved',
+        status: 'succeeded',
       });
       expect(result.pendingProposalCount).toBe(0);
     });

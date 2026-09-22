@@ -29,7 +29,7 @@ import {
   ACTION_POLICY_EVENT_ACTIONS,
   ACTION_POLICY_EVENT_PROVIDER,
 } from '../lib/dispatcher/steps/constants';
-import { alertingAdvancedSettings } from '../settings/advanced_settings';
+import { registerAlertingAdvancedSettings } from '../settings/advanced_settings';
 
 /**
  * Core platform setup-phase registrations (feature privileges, saved objects,
@@ -56,7 +56,7 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
 
     const uiSettingsSetup = container.get(CoreSetup('uiSettings'));
 
-    uiSettingsSetup.registerGlobal(alertingAdvancedSettings);
+    registerAlertingAdvancedSettings(uiSettingsSetup);
 
     const eventLogService = container.get(
       PluginSetup<AlertingServerSetupDependencies['eventLog']>('eventLog')

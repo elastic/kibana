@@ -62,8 +62,7 @@ const UNTITLED_INVESTIGATION = i18n.translate(
  * - `watch_id`         fabricated `''`; no equivalent on a proposal.
  * - `watch_execution_id` fabricated `''`; no equivalent.
  * - `events`           `[]`; proposals have no timeline. The flyout renders an empty list.
- * - `affectedSurface`  `undefined`; BlastRadius self-hides (returns null) with no surfaces.
- * - `assignee`         `null`; `decidedBy` is the decider, not an owner.
+ * - `affectedSurface`  `undefined`; Impact self-hides (returns null) with no surfaces.
  * - `status`           deliberately `undefined`. A proposal's own statuses (`'pending'`,
  *                      `'succeeded'`, …) are not investigation statuses, and mapping them
  *                      across would be inventing a meaning. The bucket carries the part
@@ -107,16 +106,19 @@ export const proposalToInvestigation = (proposal: ProposalItem): Investigation =
     // severity collapse: 4-level impact → 3-level severity string.
     // 'critical' maps to 'high' so helpers.tsx's === 'high' check still fires.
     severity: proposal.impact === 'critical' ? 'high' : proposal.impact,
-    // Synthetic priority score restores impact ranking that listByWindow's
-    // createdAt-asc sort loses. Max: 4*20 + 3*5 = 95.
+    // Synthetic priority score drives impact-first ordering in the queue.
+    // The server sorts by createdAt, so this re-ranks client-side. Max: 4*20 + 3*5 = 95.
     priorityScore: impactRank * 20 + confidenceRank * 5,
     // recordId is repurposed to carry the proposal id into the ⋮ modal system.
     // The page renders dismiss/assign modals only if modalState.recordId is set.
     recordId: proposal.id,
     summary: proposal.comment,
     primaryActionLabel: proposal.action?.name,
-    assignee: null,
+    // `conversationAssignees` is an array but `Investigation.assignee` is singular,
+    // because the flyout header renders one avatar. First entry wins, as in the
+    // conversation adapter.
+    assignee: proposal.conversationAssignees[0] ?? null,
     events: [],
-    // affectedSurface left undefined → BlastRadius self-hides (returns null).
+    // affectedSurface left undefined → Impact self-hides (returns null).
   };
 };
