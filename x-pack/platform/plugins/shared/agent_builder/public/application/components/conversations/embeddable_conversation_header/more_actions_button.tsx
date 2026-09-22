@@ -298,7 +298,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
     ...exportMenuItems,
   ];
 
-  const fullscreenMenuItems = [...addToDatasetMenuItem, ...exportMenuItems];
+  const fullscreenMenuItems = exportMenuItems;
 
   const menuItems = isEmbeddedContext ? embeddedContextMenuItems : fullscreenMenuItems;
 
