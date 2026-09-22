@@ -52,13 +52,13 @@ describe('evals_tracing config set', () => {
   });
 
   const loadServerArgs = (): string[] => {
-    let servers: { kbnTestServer: { serverArgs: string[] } };
+    let servers: { kbnTestServer?: { serverArgs?: string[] } } | undefined;
     jest.isolateModules(() => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      servers = require('./classic.stateful.config').servers;
+      servers = jest.requireActual<{
+        servers: { kbnTestServer?: { serverArgs?: string[] } };
+      }>('./classic.stateful.config').servers;
     });
-    // @ts-expect-error assigned inside isolateModules
-    return servers.kbnTestServer.serverArgs;
+    return servers?.kbnTestServer?.serverArgs ?? [];
   };
 
   const TOOL_DETAILS_ARG = '--uiSettings.overrides.agentBuilder:tracing:includeToolDetails=true';

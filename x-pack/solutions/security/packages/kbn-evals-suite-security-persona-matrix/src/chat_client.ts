@@ -10,10 +10,6 @@ import type { ToolingLog } from '@kbn/tooling-log';
 // Evals run in Node; SHA-256 is needed for stable trajectory provenance.
 // eslint-disable-next-line import/no-nodejs-modules
 import { createHash } from 'crypto';
-// Eval-harness capture side-channel: writes the verbatim model answer to a
-// local gitignored JSONL for offline report rendering.
-// eslint-disable-next-line @kbn/eslint/require_kbn_fs, import/no-nodejs-modules
-import { appendFileSync } from 'fs';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { withRetry } from '@kbn/evals';
 
@@ -142,27 +138,6 @@ export class PersonaMatrixChatClient {
         },
         trajectoryFingerprint,
       };
-
-      // Capture the verbatim answer when PERSONA_MATRIX_CAPTURE is set.
-      const capturePath = process.env.PERSONA_MATRIX_CAPTURE;
-      if (capturePath) {
-        try {
-          appendFileSync(
-            capturePath,
-            `${JSON.stringify({
-              connector_id: this.connectorId,
-              input,
-              response_message: message,
-              steps: result.steps,
-              trace_id: result.traceId,
-              conversation_id: result.conversationId,
-              captured_at: new Date().toISOString(),
-            })}\n`
-          );
-        } catch (err) {
-          this.log.warning(`[persona-matrix] capture write failed: ${String(err)}`);
-        }
-      }
 
       return result;
     };

@@ -57,8 +57,9 @@ describe('evals_* config sets: tool-detail capture', () => {
   const loadServerArgs = (configPath: string): string[] => {
     let servers: { kbnTestServer?: { serverArgs?: string[] } } | undefined;
     jest.isolateModules(() => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      servers = require(configPath).servers;
+      servers = jest.requireActual<{
+        servers: { kbnTestServer?: { serverArgs?: string[] } };
+      }>(configPath).servers;
     });
     return servers?.kbnTestServer?.serverArgs ?? [];
   };
