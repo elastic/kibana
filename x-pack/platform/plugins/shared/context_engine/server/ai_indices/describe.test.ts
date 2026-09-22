@@ -170,6 +170,7 @@ describe('describeAiIndex', () => {
       kiTypeCounts: [
         { type: 'memory.session', count: 2 },
         { type: 'memory.session_fact', count: 7 },
+        { type: 'document', count: 3 },
       ],
       tagCounts: [],
     });
@@ -180,6 +181,9 @@ describe('describeAiIndex', () => {
     });
 
     expect(response).toContain('\nMemory\nMemory writes are enabled');
+    expect(response).toContain('\nKnowledge item types\n"document": 3\n');
+    expect(response).not.toContain('"memory.session": 2');
+    expect(response).not.toContain('"memory.session_fact": 7');
     expect(response).toContain(
       '| WHERE type IS NULL OR (type != "memory.session" AND type != "memory.session_fact")'
     );

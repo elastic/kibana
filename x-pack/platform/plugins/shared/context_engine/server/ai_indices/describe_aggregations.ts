@@ -17,6 +17,7 @@ import type { AiIndexField, AiIndexTagCount } from './types';
 
 const KI_TYPE_FIELD = 'type';
 const KI_TAGS_FIELD = 'tags';
+const MEMORY_KI_TYPES = ['memory.session', 'memory.session_fact'] as const;
 
 /** Bucket keys must be strings: `conflict` and numeric mappings are excluded by construction. */
 const KEYWORD_TYPES: ReadonlySet<string> = new Set(['keyword', 'constant_keyword', 'wildcard']);
@@ -74,7 +75,24 @@ export const describeAiIndexAggregations = async ({
       allow_partial_search_results: false,
       size: 0,
       track_total_hits: false,
-      query: buildAiIndexSpaceFilter(spaceId),
+      query: {
+        bool: {
+          filter: [
+            buildAiIndexSpaceFilter(spaceId),
+            {
+              bool: {
+                must_not: [
+                  {
+                    terms: {
+                      [KI_TYPE_FIELD]: [...MEMORY_KI_TYPES],
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      },
       aggs: {
         ...(hasType && {
           types: {
