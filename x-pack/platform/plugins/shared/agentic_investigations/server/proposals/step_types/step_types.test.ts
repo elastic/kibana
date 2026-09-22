@@ -227,7 +227,6 @@ describe('proposals.createProposal step', () => {
       rootProposalId: 'proposal-1',
       status: 'pending',
       category: 'tune',
-      requiresDecision: true,
       alwaysGate: false,
       expiresAt: '2026-09-04T00:00:00.000Z',
     });
@@ -313,21 +312,6 @@ describe('proposals.createProposal step', () => {
     );
 
     expect(result.output?.expiresAt).toBe('2026-09-04T00:00:00.000Z');
-  });
-
-  it('should report requiresDecision from the decision rather than the status', async () => {
-    // An approved proposal is briefly `executing`, and a status check would
-    // call that "still awaiting".
-    const create = jest
-      .fn()
-      .mockResolvedValue({ id: 'p', status: 'executing', decision: 'approved' });
-    const { definition } = createDefinition(create);
-
-    const result = await definition.handler(
-      createContext({ conversationId: 'conv-1', comment: 'Tune the noisy rule' })
-    );
-
-    expect(result.output?.requiresDecision).toBe(false);
   });
 
   it('should pass the caller impact straight through for the service to prefer', async () => {

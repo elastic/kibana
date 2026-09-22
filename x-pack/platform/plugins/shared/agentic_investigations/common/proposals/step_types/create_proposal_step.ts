@@ -56,8 +56,6 @@ export const createProposalStepOutputSchema = z.object({
   status: z.string(),
   /** Comes from the action's metadata, so absent on a proposal with no action. */
   category: z.string().optional(),
-  /** True when no human has decided yet. */
-  requiresDecision: z.boolean(),
   /**
    * The action declares `approvalPolicy: always-gate`, so it must never be
    * auto-approved however the caller's autonomy resolved. Emitted already
