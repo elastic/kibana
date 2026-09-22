@@ -95,8 +95,17 @@ const openEditFlowByTitle = async (
   await page.locator(TABLE_LOADED_CSS).waitFor();
   const searchBox = page.locator('.euiFieldSearch:not(.euiSelectableTemplateSitewide__search)');
   await searchBox.fill(name);
+  // The pre-search table is already loaded, so wait for the search request itself: acting on the
+  // stale table lets the re-render close the actions popover.
+  const searchResponse = page.waitForResponse(
+    (response) =>
+      response.url().includes('/maintenance_window/_find') &&
+      new URL(response.url()).searchParams.get('search') === name
+  );
   await searchBox.press('Enter');
-  // Scope to the row with this title: the pre-search table can still be rendered at this point.
+  await searchResponse;
+  await page.locator(TABLE_LOADED_CSS).waitFor();
+
   const row = page.testSubj
     .locator('maintenance-windows-table')
     .locator('tbody tr', { hasText: name });

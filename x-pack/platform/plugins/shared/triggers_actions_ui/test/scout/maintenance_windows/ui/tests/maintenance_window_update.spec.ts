@@ -85,10 +85,22 @@ const openEditFlow = async (
   // sitewide-search input is excluded by the CSS selector.
   const searchBox = page.locator('.euiFieldSearch:not(.euiSelectableTemplateSitewide__search)');
   await searchBox.fill(name);
+  // The pre-search table is already loaded, so wait for the search request itself: acting on the
+  // stale table lets the re-render close the actions popover.
+  const searchResponse = page.waitForResponse(
+    (response) =>
+      response.url().includes('/maintenance_window/_find') &&
+      new URL(response.url()).searchParams.get('search') === name
+  );
   await searchBox.press('Enter');
+  await searchResponse;
   await page.locator(TABLE_LOADED_CSS).waitFor();
 
-  await page.testSubj.click('table-actions-popover');
+  const row = page.testSubj
+    .locator('maintenance-windows-table')
+    .locator('tbody tr', { hasText: name });
+  await expect(row).toHaveCount(1);
+  await row.locator('[data-test-subj="table-actions-popover"]').click();
   await page.testSubj.click('table-actions-edit');
   await expect(page.testSubj.locator('createMaintenanceWindowForm')).toBeVisible();
 };
