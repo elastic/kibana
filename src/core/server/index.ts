@@ -133,8 +133,6 @@ export type {
   CoreAuditService,
   CoreServiceAccountsService,
   ServiceAccount,
-  ServiceAccountAssumableBy,
-  ServiceAccountRoleAssignments,
   CreateServiceAccountParams,
   AuditEvent,
   AuditHttp,

@@ -14,6 +14,7 @@ import type {
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
+import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
 import { END, START, StateGraph } from '@langchain/langgraph';
 import type { ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { RuleCreationState } from './state';
@@ -58,6 +59,8 @@ export interface GetBuildAgentParams {
   savedObjectsClient: SavedObjectsClientContract;
   rulesClient: RulesClient;
   events?: ToolEventEmitter;
+  /** Resolved managed MITRE data client. Absent when xpack.mitreAttack.managedSourceEnabled is off. */
+  mitreDataClient?: MitreAttackDataClient;
 }
 
 export const getBuildAgent = async ({
@@ -70,6 +73,7 @@ export const getBuildAgent = async ({
   savedObjectsClient,
   rulesClient,
   events,
+  mitreDataClient,
 }: GetBuildAgentParams) => {
   const buildAgentGraph = new StateGraph(RuleCreationAnnotation)
     .addNode(
@@ -86,7 +90,7 @@ export const getBuildAgent = async ({
     )
     .addNode(GET_TAGS, getTagsNode({ rulesClient, savedObjectsClient, model, events }))
     .addNode(CREATE_RULE_NAME_AND_DESCRIPTION, createRuleNameAndDescriptionNode({ model, events }))
-    .addNode(ADD_MITRE_MAPPINGS, addMitreMappingsNode({ model, events }))
+    .addNode(ADD_MITRE_MAPPINGS, addMitreMappingsNode({ model, events, mitreDataClient }))
     .addNode(ADD_SEVERITY_AND_RISK_SCORE, addSeverityAndRiskScoreNode({ model, events }))
     .addNode(ADD_SCHEDULE, addScheduleNode({ model, logger, events }))
     .addNode(TERMINAL_VALIDATION, terminalValidationNode())

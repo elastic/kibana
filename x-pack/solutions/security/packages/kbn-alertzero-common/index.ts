@@ -10,7 +10,7 @@
  *
  * Prefer named `export { … } from '…'` over `export *`. Star re-exports defeat
  * `@kbn/optimizer` tree-shaking: importing a few constants from the plugin
- * entry can otherwise drag Zod schemas and mock samples into page-load JS.
+ * entry can otherwise drag Zod schemas into page-load JS.
  */
 
 export {
@@ -27,10 +27,10 @@ export {
   ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
   ALERTZERO_ACTIONS_URL,
   ALERTZERO_ACTIONS_LIST_TOOL_ID,
-  ALERTZERO_PROPOSALS_URL,
+  ALERTZERO_PROPOSALS_CATEGORY_URL,
+  ALERTZERO_PROPOSALS_CLOSED_URL,
+  ALERTZERO_PROPOSALS_REVISE_TOOL_ID,
   ALERTZERO_THIN_AGENT_ID,
-  ALERTZERO_SKILLS_URL,
-  ALERTZERO_SKILL_URL_TEMPLATE,
   ALERTZERO_WATCHES_URL,
   ALERTZERO_WATCH_URL_TEMPLATE,
   ALERTZERO_WORKERS_URL,
@@ -51,7 +51,6 @@ export {
   SYSTEM_SECURITY_WORKER_IDS,
   TEMPLATE_ID_ESCALATION,
   TEMPLATE_ID_INVESTIGATION,
-  TEMPLATE_ID_PROPOSAL,
   WATCH_AUTONOMY_LEVELS,
   WATCH_AUTONOMY_REVIEW_GATED,
   WORKER_SCHEDULE_UNITS,
@@ -62,7 +61,6 @@ export {
   WATCH_OFFICER_TAG,
   WATCH_TAG,
   WATCH_TIER_TAGS,
-  buildSkillUrl,
   buildWatchUrl,
   buildWorkerUrl,
 } from './constants';
@@ -77,15 +75,10 @@ export type {
 } from './action_catalog_types';
 
 export {
-  ApprovalRequirement,
   GetWatchResponse,
-  Investigation,
   Lifecycle,
-  ListSkillsResponse,
   ListWatchesResponse,
   ListWorkersResponse,
-  Proposal,
-  RecommendedAction,
   ScheduleCadence,
   ScheduleHandoff,
   ScheduleMode,
@@ -93,26 +86,15 @@ export {
   UpdateWorkerRequestBody,
   UpdateWorkerResponse,
   Watch,
-  WatchApprovalGate,
   WatchAutonomyLevel,
   WatchCallableRef,
-  WatchLedgerEntry,
   WatchMetrics,
   WatchRecentRun,
   WatchRecentRunStep,
   WatchRunAction,
-  WatchRunOutcome,
   WatchSchedule,
   WatchScope,
-  WatchScopeRoutingSettings,
-  WatchSelectSetting,
-  WatchSettings,
-  WatchSkill,
-  WatchSkillAttachment,
   WatchTriggerProjection,
-  WatchTriggersSettings,
-  WatchWorker,
-  WatchWorkerAttachment,
   AnalysisWindowDays,
   RuleTuningWorkerExtras,
   Worker,
@@ -122,7 +104,6 @@ export {
   WorkerSettingsExtras,
   WorkerSettingsWrite,
   WorkflowTriggerType,
-  type TimelineEvent,
 } from './impl/schemas';
 
 export {
@@ -137,7 +118,6 @@ export type {
   WatchScheduleCoverageInput,
 } from './impl/watches/watch_helpers';
 
-export { MOCK_PROPOSALS, SKILLS_SEED, WATCHES_SEED, WORKERS_SEED } from './impl/samples';
 export {
   ANALYSIS_WINDOW_DAYS_DEFAULT,
   ANALYSIS_WINDOW_DAYS_MAX,
@@ -160,4 +140,3 @@ export type {
   SystemSecurityWorkerCatalogEntry,
   WorkerScheduleUnit,
 } from './constants';
-export type { WatchSkillSeed, WatchWorkerSeed } from './impl/samples';
