@@ -312,18 +312,11 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
             watchlistNames={watchlistNames}
           />
           <EuiSpacer size="m" />
-          <div
-            css={css`
-              padding-inline-start: ${euiTheme.size.s};
-              padding-inline-end: ${euiTheme.size.s};
-            `}
-          >
-            <SignalCards
-              activeFilter={activeFilter}
-              cards={signalCards}
-              onFilterForCard={handleFilterForCard}
-            />
-          </div>
+          <SignalCards
+            activeFilter={activeFilter}
+            cards={signalCards}
+            onFilterForCard={handleFilterForCard}
+          />
           <EuiSpacer size="m" />
           <EuiPanel
             hasBorder
