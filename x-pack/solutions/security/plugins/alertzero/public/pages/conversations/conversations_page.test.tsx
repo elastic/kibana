@@ -423,18 +423,15 @@ describe('ConversationsPage decisions', () => {
     );
   });
 
-  it('offers no decision on a proposal that was already decided', () => {
+  it('hides the actions menu trigger for a decided proposal when escalation is not available', () => {
+    // A decided investigation without `canManageEscalations` has no available actions —
+    // the menu trigger must not be rendered at all, not just show an empty popover.
     mockProposals({ closed: [{ ...actionProposal, decidedAt: '2024-01-02T00:00:00Z' }] });
 
     renderPage('/');
     expandClosed();
-    fireEvent.click(screen.getByRole('button', { name: 'Open actions menu' }));
 
-    // Asserted by role, not by text: a closed row names its action as a label beside
-    // the title, so what matters is that nothing offers it as something to click.
-    expect(screen.queryByRole('menuitem', { name: 'Revoke sessions' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('menuitem', { name: 'Assign' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('menuitem', { name: 'Close' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Open actions menu' })).not.toBeInTheDocument();
   });
 
   // That the scalar itself excludes decided proposals is covered in the service tests.
