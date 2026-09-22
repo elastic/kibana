@@ -49,17 +49,22 @@ jest.mock('@kbn/fleet-plugin/common', () => ({
 }));
 
 interface WrapperProps {
-  defaultValues?: { policy_ids: string[] };
+  defaultValues?: { policy_ids: string[]; shards?: Record<string, number> };
   isReadOnly?: boolean;
-  onFormChange?: (values: { policy_ids: string[] }) => void;
+  onFormChange?: (values: { policy_ids: string[]; shards?: Record<string, number> }) => void;
 }
 
 const FormWrapper: React.FC<WrapperProps> = ({
-  defaultValues = { policy_ids: [] },
+  defaultValues = { policy_ids: [], shards: {} },
   isReadOnly = false,
   onFormChange,
 }) => {
-  const methods = useForm<{ policy_ids: string[] }>({ defaultValues });
+  const methods = useForm<{ policy_ids: string[]; shards: Record<string, number> }>({
+    defaultValues: {
+      shards: {},
+      ...defaultValues,
+    },
+  });
 
   const values = methods.watch();
   React.useEffect(() => {
@@ -82,6 +87,8 @@ describe('PolicyAssignmentList', () => {
     jest.clearAllMocks();
     mockUseAgentPolicies.mockReturnValue({
       data: { agentPoliciesById: mockAgentPoliciesById },
+      isFetching: false,
+      isError: false,
     });
   });
 
@@ -96,9 +103,66 @@ describe('PolicyAssignmentList', () => {
     it('renders empty state when no policies are available', () => {
       mockUseAgentPolicies.mockReturnValue({
         data: { agentPoliciesById: {} },
+        isFetching: false,
+        isError: false,
       });
       render(<FormWrapper />);
       expect(screen.getByText('No agent policies found')).toBeInTheDocument();
+      expect(
+        screen.getByText('Create an agent policy in Fleet to assign it to this pack.')
+      ).toBeInTheDocument();
+    });
+
+    it('shows a loading empty state while the first fetch is in flight', () => {
+      mockUseAgentPolicies.mockReturnValue({
+        data: { agentPoliciesById: {} },
+        isFetching: true,
+        isError: false,
+      });
+      render(<FormWrapper />);
+
+      expect(screen.getByText('Loading agent policies')).toBeInTheDocument();
+      expect(screen.queryByText('No agent policies found')).not.toBeInTheDocument();
+      expect(
+        screen.queryByText('Create an agent policy in Fleet to assign it to this pack.')
+      ).not.toBeInTheDocument();
+    });
+
+    it('shows an error empty state when the first fetch fails', () => {
+      mockUseAgentPolicies.mockReturnValue({
+        data: { agentPoliciesById: {} },
+        isFetching: false,
+        isError: true,
+      });
+      render(<FormWrapper />);
+
+      expect(screen.getByText('Unable to load agent policies')).toBeInTheDocument();
+      expect(screen.queryByText('No agent policies found')).not.toBeInTheDocument();
+      expect(
+        screen.queryByText('Create an agent policy in Fleet to assign it to this pack.')
+      ).not.toBeInTheDocument();
+    });
+
+    it('gives each checkbox a unique accessible name from the policy name', () => {
+      render(<FormWrapper />);
+
+      expect(
+        screen.getByRole('checkbox', { name: 'Select policy Alpha Policy' })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('checkbox', { name: 'Select policy Beta Policy' })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('checkbox', { name: 'Select policy Gamma Policy' })
+      ).toBeInTheDocument();
+    });
+
+    it('uses the orphan policy id as the checkbox accessible name', () => {
+      render(<FormWrapper defaultValues={{ policy_ids: ['orphan-policy'] }} />);
+
+      expect(
+        screen.getByRole('checkbox', { name: 'Select policy orphan-policy' })
+      ).toBeInTheDocument();
     });
 
     it('renders the field label and help text', () => {
@@ -117,6 +181,8 @@ describe('PolicyAssignmentList', () => {
             'policy-a': { name: 'Alpha Policy', agents: 2, id: 'policy-a', description: '' },
           },
         },
+        isFetching: false,
+        isError: false,
       });
       render(<FormWrapper />);
       const rows = screen.getAllByRole('row').slice(1);
@@ -251,6 +317,119 @@ describe('PolicyAssignmentList', () => {
       const initialCall = handleChange.mock.calls[0]?.[0];
       expect(initialCall?.policy_ids).toContain('policy-1');
       expect(initialCall?.policy_ids).toContain('policy-3');
+    });
+
+    it('does not add a shard policy id via checkbox', () => {
+      const handleChange = jest.fn();
+      render(
+        <FormWrapper
+          defaultValues={{ policy_ids: [], shards: { 'policy-2': 50 } }}
+          onFormChange={handleChange}
+        />
+      );
+
+      const policy2Checkbox = screen
+        .getAllByRole('checkbox')
+        .find((cb) => cb.getAttribute('id') === 'policy-checkbox-policy-2');
+      expect(policy2Checkbox).toBeDefined();
+      expect(policy2Checkbox).toBeDisabled();
+      expect(policy2Checkbox).not.toBeChecked();
+
+      fireEvent.click(policy2Checkbox!);
+
+      const lastCall = handleChange.mock.calls[handleChange.mock.calls.length - 1][0];
+      expect(lastCall.policy_ids).not.toContain('policy-2');
+    });
+
+    it('does not add shard policy ids via Select all', () => {
+      const handleChange = jest.fn();
+      render(
+        <FormWrapper
+          defaultValues={{ policy_ids: [], shards: { 'policy-2': 50 } }}
+          onFormChange={handleChange}
+        />
+      );
+
+      fireEvent.click(screen.getByTestId('policyAssignmentSelectAll'));
+      const lastCall = handleChange.mock.calls[handleChange.mock.calls.length - 1][0];
+      expect(lastCall.policy_ids).toContain('policy-1');
+      expect(lastCall.policy_ids).toContain('policy-3');
+      expect(lastCall.policy_ids).not.toContain('policy-2');
+      expect(lastCall.policy_ids).toHaveLength(2);
+    });
+
+    it('allows unchecking a shard id already present in policy_ids', () => {
+      const handleChange = jest.fn();
+      render(
+        <FormWrapper
+          defaultValues={{
+            policy_ids: ['policy-1', 'policy-2'],
+            shards: { 'policy-2': 50 },
+          }}
+          onFormChange={handleChange}
+        />
+      );
+
+      const policy2Checkbox = screen
+        .getAllByRole('checkbox')
+        .find((cb) => cb.getAttribute('id') === 'policy-checkbox-policy-2');
+      expect(policy2Checkbox).toBeChecked();
+      expect(policy2Checkbox).not.toBeDisabled();
+
+      fireEvent.click(policy2Checkbox!);
+
+      const lastCall = handleChange.mock.calls[handleChange.mock.calls.length - 1][0];
+      expect(lastCall.policy_ids).toContain('policy-1');
+      expect(lastCall.policy_ids).not.toContain('policy-2');
+    });
+
+    it('renders a row for an orphan policy_id absent from Fleet', () => {
+      render(<FormWrapper defaultValues={{ policy_ids: ['policy-1', 'orphan-policy'] }} />);
+
+      expect(screen.getByText('orphan-policy')).toBeInTheDocument();
+      const orphanCheckbox = screen
+        .getAllByRole('checkbox')
+        .find((cb) => cb.getAttribute('id') === 'policy-checkbox-orphan-policy');
+      expect(orphanCheckbox).toBeChecked();
+
+      const countEl = screen.getByTestId('policyAssignmentCount');
+      expect(countEl).toHaveTextContent('2 of 4 selected');
+    });
+
+    it('unchecks an orphan policy_id without clearing other selections', () => {
+      const handleChange = jest.fn();
+      render(
+        <FormWrapper
+          defaultValues={{ policy_ids: ['policy-1', 'orphan-policy'] }}
+          onFormChange={handleChange}
+        />
+      );
+
+      const orphanCheckbox = screen
+        .getAllByRole('checkbox')
+        .find((cb) => cb.getAttribute('id') === 'policy-checkbox-orphan-policy');
+      fireEvent.click(orphanCheckbox!);
+
+      const lastCall = handleChange.mock.calls[handleChange.mock.calls.length - 1][0];
+      expect(lastCall.policy_ids).toEqual(['policy-1']);
+    });
+
+    it('Select all keeps existing orphan ids', () => {
+      const handleChange = jest.fn();
+      render(
+        <FormWrapper
+          defaultValues={{ policy_ids: ['orphan-policy'] }}
+          onFormChange={handleChange}
+        />
+      );
+
+      fireEvent.click(screen.getByTestId('policyAssignmentSelectAll'));
+      const lastCall = handleChange.mock.calls[handleChange.mock.calls.length - 1][0];
+      expect(lastCall.policy_ids).toContain('orphan-policy');
+      expect(lastCall.policy_ids).toContain('policy-1');
+      expect(lastCall.policy_ids).toContain('policy-2');
+      expect(lastCall.policy_ids).toContain('policy-3');
+      expect(lastCall.policy_ids).toHaveLength(4);
     });
   });
 

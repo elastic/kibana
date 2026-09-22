@@ -37,13 +37,14 @@ interface PolicyRow {
 
 interface CheckboxCellProps {
   policyId: string;
+  policyName: string;
   checked: boolean;
   disabled: boolean;
   onToggle: (id: string) => void;
 }
 
 const CheckboxCell: React.FC<CheckboxCellProps> = React.memo(
-  ({ policyId, checked, disabled, onToggle }) => {
+  ({ policyId, policyName, checked, disabled, onToggle }) => {
     const handleChange = useCallback(() => onToggle(policyId), [onToggle, policyId]);
 
     return (
@@ -53,7 +54,8 @@ const CheckboxCell: React.FC<CheckboxCellProps> = React.memo(
         onChange={handleChange}
         disabled={disabled}
         aria-label={i18n.translate('xpack.osquery.pack.policyList.checkboxAriaLabel', {
-          defaultMessage: 'Select policy',
+          defaultMessage: 'Select policy {name}',
+          values: { name: policyName },
         })}
       />
     );
@@ -79,6 +81,11 @@ const AgentCountCell: React.FC<AgentCountCellProps> = React.memo(({ count }) => 
 
 AgentCountCell.displayName = 'AgentCountCell';
 
+interface PolicyAssignmentFormValues {
+  policy_ids: string[];
+  shards: Record<string, number>;
+}
+
 interface PolicyAssignmentListProps {
   isReadOnly?: boolean;
 }
@@ -91,16 +98,31 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
   isReadOnly = false,
 }) => {
   const getUrlForApp = useKibana().services.application.getUrlForApp;
-  const { data: { agentPoliciesById } = {} } = useAgentPolicies();
+  const { data: { agentPoliciesById } = {}, isFetching, isError } = useAgentPolicies();
 
   const {
     field: { onChange, value: selectedIds },
-  } = useController<{ policy_ids: string[] }>({
+  } = useController<PolicyAssignmentFormValues, 'policy_ids'>({
     name: 'policy_ids',
     defaultValue: [],
   });
 
-  const allPolicies = useMemo<PolicyRow[]>(() => {
+  const {
+    field: { value: shards },
+  } = useController<PolicyAssignmentFormValues, 'shards'>({
+    name: 'shards',
+    defaultValue: {},
+  });
+
+  // Keys already assigned via partial (shard) deployment must not be newly
+  // added to policy_ids — mirrors the shard half of availableOptions that
+  // gated the old combobox. Empty keys and the global '*' sentinel are ignored.
+  const shardKeySet = useMemo(
+    () => new Set(Object.keys(shards ?? {}).filter((key) => key.length > 0 && key !== '*')),
+    [shards]
+  );
+
+  const knownPolicies = useMemo<PolicyRow[]>(() => {
     if (!agentPoliciesById) return [];
 
     return Object.entries(agentPoliciesById).map(([id, policy]) => ({
@@ -109,6 +131,25 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
       agents: policy.agents ?? 0,
     }));
   }, [agentPoliciesById]);
+
+  // Saved policy_ids that Fleet no longer returns still need a row so the
+  // user can uncheck them individually (Select all must not silently drop them).
+  const orphanPolicies = useMemo<PolicyRow[]>(() => {
+    if (!selectedIds?.length) return [];
+
+    return selectedIds
+      .filter((id) => !agentPoliciesById?.[id])
+      .map((id) => ({
+        id,
+        name: id,
+        agents: 0,
+      }));
+  }, [selectedIds, agentPoliciesById]);
+
+  const allPolicies = useMemo<PolicyRow[]>(
+    () => [...knownPolicies, ...orphanPolicies],
+    [knownPolicies, orphanPolicies]
+  );
 
   const selectedSet = useMemo(() => new Set(selectedIds ?? []), [selectedIds]);
 
@@ -127,22 +168,41 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
       const next = new Set(selectedIds ?? []);
       if (next.has(policyId)) {
         next.delete(policyId);
+      } else if (shardKeySet.has(policyId)) {
+        // Refuse to newly add a shard key into policy_ids. Removals above are
+        // always allowed so a wrongly-present overlap can still be cleared.
+        return;
       } else {
         next.add(policyId);
       }
 
       onChange(Array.from(next));
     },
-    [selectedIds, onChange]
+    [selectedIds, onChange, shardKeySet]
   );
 
   const handleSelectAll = useCallback(() => {
-    onChange(allPolicies.map((p) => p.id));
-  }, [allPolicies, onChange]);
+    const knownSelectableIds = knownPolicies
+      .filter((policy) => !shardKeySet.has(policy.id))
+      .map((policy) => policy.id);
+    // Preserve orphan ids the user has not cleared; never invent new ones.
+    const orphanIdsToKeep = (selectedIds ?? []).filter((id) => !agentPoliciesById?.[id]);
+
+    onChange(Array.from(new Set([...knownSelectableIds, ...orphanIdsToKeep])));
+  }, [knownPolicies, shardKeySet, selectedIds, agentPoliciesById, onChange]);
 
   const handleUnselectAll = useCallback(() => {
     onChange([]);
   }, [onChange]);
+
+  const selectionCountValues = useMemo(
+    () => ({
+      selected: selectedSet.size,
+      total: allPolicies.length,
+      agents: totalAgents,
+    }),
+    [selectedSet.size, allPolicies.length, totalAgents]
+  );
 
   const columns = useMemo<Array<EuiBasicTableColumn<PolicyRow>>>(
     () => [
@@ -150,11 +210,12 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
         field: 'id',
         name: '',
         width: '40px',
-        render: (id: string) => (
+        render: (_id: string, item: PolicyRow) => (
           <CheckboxCell
-            policyId={id}
-            checked={selectedSet.has(id)}
-            disabled={isReadOnly}
+            policyId={item.id}
+            policyName={item.name}
+            checked={selectedSet.has(item.id)}
+            disabled={isReadOnly || (shardKeySet.has(item.id) && !selectedSet.has(item.id))}
             onToggle={togglePolicy}
           />
         ),
@@ -196,7 +257,7 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
         ),
       },
     ],
-    [selectedSet, togglePolicy, isReadOnly, getUrlForApp]
+    [selectedSet, togglePolicy, isReadOnly, getUrlForApp, shardKeySet]
   );
 
   const search = useMemo(
@@ -230,48 +291,83 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
     []
   );
 
-  // Distinguish "Fleet has no policies at all" from "the search matched
-  // nothing" — the Fleet CTA is only actionable in the former case.
-  const emptyMessage =
-    allPolicies.length === 0 ? (
-      <EuiEmptyPrompt
-        title={
-          <h3>
-            <FormattedMessage
-              id="xpack.osquery.pack.policyList.emptyTitle"
-              defaultMessage="No agent policies found"
-            />
-          </h3>
-        }
-        body={
-          <FormattedMessage
-            id="xpack.osquery.pack.policyList.emptyBody"
-            defaultMessage="Create an agent policy in Fleet to assign it to this pack."
-          />
-        }
-      />
-    ) : (
-      <EuiEmptyPrompt
-        title={
-          <h3>
-            <FormattedMessage
-              id="xpack.osquery.pack.policyList.noSearchResultsTitle"
-              defaultMessage="No policies match your search"
-            />
-          </h3>
-        }
-        body={
-          <FormattedMessage
-            id="xpack.osquery.pack.policyList.noSearchResultsBody"
-            defaultMessage="Policies are matched by name. Clear or change the search to see the full list."
-          />
-        }
-      />
-    );
+  // `useAgentPolicies` uses `initialData: []`, so an empty map alone is not a
+  // settled Fleet response — gate CTA / error / loading on fetch status.
+  const hasNoPolicyRows = knownPolicies.length === 0 && orphanPolicies.length === 0;
+  const isInitialLoad = isFetching && hasNoPolicyRows && !isError;
+  const isLoadError = isError && hasNoPolicyRows;
 
-  const selectionCountValues = useMemo(
-    () => ({ selected: selectedSet.size, total: allPolicies.length, agents: totalAgents }),
-    [selectedSet.size, allPolicies.length, totalAgents]
+  // Distinguish in-flight / failed fetch, "Fleet has no policies", and "the
+  // search matched nothing". The Fleet CTA is only for a successful empty
+  // response. Orphan rows alone still populate the table.
+  const emptyMessage = isInitialLoad ? (
+    <EuiEmptyPrompt
+      title={
+        <h3>
+          <FormattedMessage
+            id="xpack.osquery.pack.policyList.loadingTitle"
+            defaultMessage="Loading agent policies"
+          />
+        </h3>
+      }
+      body={
+        <FormattedMessage
+          id="xpack.osquery.pack.policyList.loadingBody"
+          defaultMessage="Fetching agent policies from Fleet."
+        />
+      }
+    />
+  ) : isLoadError ? (
+    <EuiEmptyPrompt
+      title={
+        <h3>
+          <FormattedMessage
+            id="xpack.osquery.pack.policyList.errorTitle"
+            defaultMessage="Unable to load agent policies"
+          />
+        </h3>
+      }
+      body={
+        <FormattedMessage
+          id="xpack.osquery.pack.policyList.errorBody"
+          defaultMessage="There was an error loading agent policies. Please try again."
+        />
+      }
+    />
+  ) : hasNoPolicyRows ? (
+    <EuiEmptyPrompt
+      title={
+        <h3>
+          <FormattedMessage
+            id="xpack.osquery.pack.policyList.emptyTitle"
+            defaultMessage="No agent policies found"
+          />
+        </h3>
+      }
+      body={
+        <FormattedMessage
+          id="xpack.osquery.pack.policyList.emptyBody"
+          defaultMessage="Create an agent policy in Fleet to assign it to this pack."
+        />
+      }
+    />
+  ) : (
+    <EuiEmptyPrompt
+      title={
+        <h3>
+          <FormattedMessage
+            id="xpack.osquery.pack.policyList.noSearchResultsTitle"
+            defaultMessage="No policies match your search"
+          />
+        </h3>
+      }
+      body={
+        <FormattedMessage
+          id="xpack.osquery.pack.policyList.noSearchResultsBody"
+          defaultMessage="Policies are matched by name. Clear or change the search to see the full list."
+        />
+      }
+    />
   );
 
   return (
@@ -293,7 +389,7 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
             <EuiButtonEmpty
               size="xs"
               onClick={handleSelectAll}
-              disabled={isReadOnly || allPolicies.length === 0}
+              disabled={isReadOnly || knownPolicies.length === 0}
               data-test-subj="policyAssignmentSelectAll"
             >
               <FormattedMessage
@@ -333,6 +429,7 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
           search={search}
           pagination={pagination}
           sorting={sorting}
+          loading={isInitialLoad}
           noItemsMessage={emptyMessage}
           executeQueryOptions={executeQueryOptions}
           data-test-subj="policyAssignmentTable"
