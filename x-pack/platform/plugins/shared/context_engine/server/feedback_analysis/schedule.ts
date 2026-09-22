@@ -95,7 +95,6 @@ export interface FeedbackAnalysisScheduleService {
  */
 const DROPPED_EXECUTION_STATUS = 'skipped';
 
-
 export const createFeedbackAnalysisScheduleService = ({
   logger,
   getManagedWorkflowsClient,

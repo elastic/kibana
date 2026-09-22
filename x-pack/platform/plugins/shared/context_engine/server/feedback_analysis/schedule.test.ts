@@ -260,10 +260,16 @@ describe('createFeedbackAnalysisScheduleService', () => {
 
     expect(client.install).toHaveBeenCalledTimes(2);
     expect(client.install.mock.calls[0][1]).toEqual(
-      expect.objectContaining({ spaceId: 'default', workflowIdSuffix: suffixFor('orders', 'default') })
+      expect.objectContaining({
+        spaceId: 'default',
+        workflowIdSuffix: suffixFor('orders', 'default'),
+      })
     );
     expect(client.install.mock.calls[1][1]).toEqual(
-      expect.objectContaining({ spaceId: 'marketing', workflowIdSuffix: suffixFor('orders', 'marketing') })
+      expect.objectContaining({
+        spaceId: 'marketing',
+        workflowIdSuffix: suffixFor('orders', 'marketing'),
+      })
     );
 
     await service.remove({ aiIndexId: 'orders', spaceId: 'marketing' });
