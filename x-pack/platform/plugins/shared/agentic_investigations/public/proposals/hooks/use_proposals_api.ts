@@ -40,9 +40,16 @@ export const retryOnTransientError = (failureCount: number, error: unknown): boo
 };
 
 /**
- * Pending proposals, already grouped and ranked by the API (category, then
- * impact, confidence and deadline). Expired ones are dropped: a deadline that
- * has passed is no longer a decision anyone can make.
+ * Proposals awaiting a human, already grouped and ranked by the API (category,
+ * then impact, confidence and deadline).
+ *
+ * `status: 'pending'` is the whole "awaiting" condition, since that status is
+ * only ever valid while undecided. `excludeExpired` is still needed alongside
+ * it, because it filters on the deadline *date*: between a deadline passing and
+ * the gate workflow settling the record there is task lag during which it still
+ * reads `pending`, and a decision nobody can make any more has no business in
+ * the queue. `excludeSuperseded` drops the earlier attempts of a retried
+ * proposal, so a chain of failures appears once rather than once per attempt.
  */
 export const usePendingProposals = (conversationId?: string) => {
   const { services } = useKibana();
@@ -55,6 +62,7 @@ export const usePendingProposals = (conversationId?: string) => {
         query: {
           status: 'pending',
           excludeExpired: true,
+          excludeSuperseded: true,
           ...(conversationId ? { conversationId } : {}),
         },
       }),
@@ -72,13 +80,31 @@ export const useProposal = (id: string | undefined) => {
       if (!id) {
         throw new Error('proposal id is required');
       }
-      return services.http!.get<ProposalWithMetadata>(`${PROPOSALS_INTERNAL_URL}/${id}`, {
-        version: AGENTIC_INVESTIGATIONS_API_VERSION,
-      });
+      return services.http!.get<ProposalWithMetadata>(
+        `${PROPOSALS_INTERNAL_URL}/${encodeURIComponent(id)}`,
+        {
+          version: AGENTIC_INVESTIGATIONS_API_VERSION,
+        }
+      );
     },
     enabled: Boolean(id),
     retry: retryOnTransientError,
   });
+};
+
+/**
+ * Both decision mutations refetch rather than reading the response body: the
+ * route only releases the gating workflow, and the decision is written by that
+ * workflow's post-gate steps, which run after the resume call has returned.
+ *
+ * Invalidating the root key (`proposals.all`) in one call sweeps every derived
+ * view — platform `list`/`detail` and AlertZero `grouped`/`charts-summary` —
+ * because those keys all share this prefix. A refetch that beats the post-gate
+ * write reads `pending` once more; that is expected while the gate workflow
+ * settles and is not a sign of a failed invalidation.
+ */
+const invalidateProposals = (queryClient: ReturnType<typeof useQueryClient>) => {
+  void queryClient.invalidateQueries({ queryKey: queryKeys.proposals.all });
 };
 
 /**
@@ -91,16 +117,11 @@ export const useApproveProposal = () => {
 
   return useMutation({
     mutationFn: ({ id, body }: { id: string; body: ApproveProposalRequest }): Promise<Proposal> =>
-      services.http!.post<Proposal>(`${PROPOSALS_INTERNAL_URL}/${id}/approve`, {
+      services.http!.post<Proposal>(`${PROPOSALS_INTERNAL_URL}/${encodeURIComponent(id)}/approve`, {
         version: AGENTIC_INVESTIGATIONS_API_VERSION,
         body: JSON.stringify(body),
       }),
-    onSuccess: (proposal) => {
-      void queryClient.invalidateQueries({ queryKey: queryKeys.proposals.all });
-      void queryClient.invalidateQueries({
-        queryKey: queryKeys.proposals.detail(proposal.id),
-      });
-    },
+    onSuccess: () => invalidateProposals(queryClient),
   });
 };
 
@@ -110,15 +131,10 @@ export const useDismissProposal = () => {
 
   return useMutation({
     mutationFn: ({ id, body }: { id: string; body: DismissProposalRequest }): Promise<Proposal> =>
-      services.http!.post<Proposal>(`${PROPOSALS_INTERNAL_URL}/${id}/dismiss`, {
+      services.http!.post<Proposal>(`${PROPOSALS_INTERNAL_URL}/${encodeURIComponent(id)}/dismiss`, {
         version: AGENTIC_INVESTIGATIONS_API_VERSION,
         body: JSON.stringify(body),
       }),
-    onSuccess: (proposal) => {
-      void queryClient.invalidateQueries({ queryKey: queryKeys.proposals.all });
-      void queryClient.invalidateQueries({
-        queryKey: queryKeys.proposals.detail(proposal.id),
-      });
-    },
+    onSuccess: () => invalidateProposals(queryClient),
   });
 };

@@ -1,5 +1,5 @@
 {
-  "sha1": "6b41d5433e5871713a83b7af8c86dd4f6d6f9b01",
+  "sha1": "211834a2303f11de5d02bf634165ce18eb43d1da",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -50,7 +50,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/ad_hoc_data_view.spec.ts",
-        "line": 134,
+        "line": 132,
         "column": 31
       }
     },
@@ -63,7 +63,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/ad_hoc_data_view.spec.ts",
-        "line": 178,
+        "line": 176,
         "column": 57
       }
     },
@@ -76,7 +76,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/ad_hoc_data_view.spec.ts",
-        "line": 213,
+        "line": 211,
         "column": 31
       }
     },
@@ -89,7 +89,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/ad_hoc_data_view.spec.ts",
-        "line": 243,
+        "line": 241,
         "column": 18
       }
     },
@@ -102,7 +102,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/ad_hoc_data_view.spec.ts",
-        "line": 294,
+        "line": 292,
         "column": 5
       }
     },
@@ -115,7 +115,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/ad_hoc_data_view.spec.ts",
-        "line": 347,
+        "line": 345,
         "column": 26
       }
     },
@@ -302,16 +302,55 @@
       }
     },
     {
-      "id": "10e89b7d2459195-cc2bbb39100dadc",
-      "title": "Lens annotation library saves an annotation group to the library, syncs edits across dashboard panels, and propagates deletion",
+      "id": "10e89b7d2459195-c91fcc2b3818f77",
+      "title": "Lens annotation library saves a new annotation layer to the library under a new tag",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/annotations/annotation_library.spec.ts",
-        "line": 26,
-        "column": 13
+        "line": 36,
+        "column": 44
+      }
+    },
+    {
+      "id": "10e89b7d2459195-001725a7e5585f7",
+      "title": "Lens annotation library adds a saved annotation group from the library to a new chart",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/annotations/annotation_library.spec.ts",
+        "line": 54,
+        "column": 25
+      }
+    },
+    {
+      "id": "10e89b7d2459195-3052a3d0585954d",
+      "title": "Lens annotation library syncs annotation-group edits across cloned dashboard panels via inline edit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/annotations/annotation_library.spec.ts",
+        "line": 62,
+        "column": 7
+      }
+    },
+    {
+      "id": "10e89b7d2459195-ec02d75b8ea23d5",
+      "title": "Lens annotation library removes the annotation layer from the editor and dashboard panel once its library group is deleted",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/annotations/annotation_library.spec.ts",
+        "line": 86,
+        "column": 41
       }
     },
     {
@@ -830,8 +869,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_dashboard_inline_editing.spec.ts",
-        "line": 61,
-        "column": 30
+        "line": 86,
+        "column": 31
       }
     },
     {

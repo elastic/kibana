@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 
-import type { AuthenticatedUser, KibanaRequest, ServiceAccount } from '@kbn/core/server';
+import type { AuthenticatedUser, KibanaRequest } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
 import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
@@ -24,7 +24,7 @@ import { UiamServiceAccounts } from './uiam_service_accounts';
 import type { SecurityLicense } from '../../common';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH } from '../../common/service_accounts';
-import type { UiamServicePublic } from '../uiam';
+import type { UiamServiceAccount, UiamServicePublic } from '../uiam';
 import { uiamServiceMock } from '../uiam/uiam_service.mock';
 
 describe('UiamServiceAccounts', () => {
@@ -52,7 +52,7 @@ describe('UiamServiceAccounts', () => {
       headers: authHeader ? { authorization: authHeader } : {},
     });
 
-  const validResponse: ServiceAccount = {
+  const validResponse: UiamServiceAccount = {
     id: 'service-account-id',
     type: 'project' as const,
     name: 'nightshift-relay',
@@ -102,7 +102,7 @@ describe('UiamServiceAccounts', () => {
 
       await expect(
         serviceAccounts.create(createMockRequest('Bearer essu_my_token'), createParams)
-      ).resolves.toEqual(validResponse);
+      ).resolves.toEqual({ id: 'service-account-id', name: 'nightshift-relay' });
 
       expect(mockUiam.createServiceAccount).toHaveBeenCalledTimes(1);
       expect(mockUiam.createServiceAccount).toHaveBeenCalledWith(
@@ -120,8 +120,19 @@ describe('UiamServiceAccounts', () => {
             },
           ],
         },
-        { includeClientAuthentication: true }
+        undefined
       );
+    });
+
+    it('rejects `roles` with a 400, since UIAM cannot downscope yet', async () => {
+      await expect(
+        serviceAccounts.create(createMockRequest('Bearer essu_my_token'), {
+          ...createParams,
+          roles: ['viewer'],
+        })
+      ).rejects.toMatchObject({ output: { statusCode: 400 } });
+
+      expect(mockUiam.createServiceAccount).not.toHaveBeenCalled();
     });
 
     it.each([true, false])(
@@ -138,7 +149,7 @@ describe('UiamServiceAccounts', () => {
         expect(mockUiam.createServiceAccount).toHaveBeenCalledWith(
           new HTTPAuthorizationHeader('ApiKey', 'essu_key'),
           expect.objectContaining({ organization_id: 'organization-id' }),
-          { includeClientAuthentication: internal }
+          internal ? undefined : null
         );
       }
     );
@@ -149,7 +160,7 @@ describe('UiamServiceAccounts', () => {
       expect(mockUiam.createServiceAccount).toHaveBeenCalledWith(
         new HTTPAuthorizationHeader('ApiKey', 'essu_key'),
         expect.anything(),
-        { includeClientAuthentication: true }
+        undefined
       );
     });
 
@@ -204,82 +215,79 @@ describe('UiamServiceAccounts', () => {
       );
     });
 
-    it.each<{ assumableBy: ServiceAccount['assumable_by'] }>([
-      { assumableBy: validResponse.assumable_by },
+    // Kibana neither consumes nor reports the rest of UIAM's payload, so drift there is not
+    // Kibana's to detect and must not fail a creation that already succeeded.
+    it.each<{ name: string; result: UiamServiceAccount }>([
       {
-        assumableBy: [{ type: 'platform-service-account', service_account_id: 'nightshift-relay' }],
+        name: 'an unsupported `assumable_by` principal',
+        result: {
+          ...validResponse,
+          assumable_by: [{ type: 'unsupported-service-account', service_account_id: 'relay' }],
+        } as never,
       },
       {
-        assumableBy: [
-          ...validResponse.assumable_by,
-          { type: 'platform-service-account', service_account_id: 'nightshift-relay' },
-          { type: 'platform-service-account', service_account_id: 'another-platform-service' },
-        ],
+        name: 'a `role_assignments` shape UIAM has changed',
+        result: { ...validResponse, role_assignments: 'everything' } as never,
       },
-    ])(
-      'accepts supported principals in the UIAM response: $assumableBy',
-      async ({ assumableBy }) => {
-        const result = { ...validResponse, assumable_by: assumableBy };
-        mockUiam.createServiceAccount.mockResolvedValue(result);
-
-        await expect(
-          serviceAccounts.create(createMockRequest('Bearer essu_my_token'), createParams)
-        ).resolves.toEqual(result);
-        expect(logger.error).not.toHaveBeenCalled();
-      }
-    );
-
-    it.each([
-      { id: 'service-account-id' } as ServiceAccount,
-      { ...validResponse, assumable_by: [{ type: 'project-service-account' }] } as ServiceAccount,
-      { ...validResponse, id: 'a'.repeat(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH + 1) },
       {
-        ...validResponse,
-        assumable_by: [{ type: 'platform-service-account' }],
-      } as ServiceAccount,
+        name: 'a missing `organization_id`',
+        result: { ...validResponse, organization_id: undefined } as never,
+      },
       {
-        ...validResponse,
-        assumable_by: [{ type: 'platform-service-account', service_account_id: 123 }],
-      } as never,
-      {
-        ...validResponse,
-        assumable_by: [
-          {
-            type: 'platform-service-account',
-            service_account_id: 'a'.repeat(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH + 1),
-          },
-        ],
-      } as ServiceAccount,
-      {
-        ...validResponse,
-        assumable_by: [{ type: 'unsupported-service-account', service_account_id: 'relay' }],
-      } as never,
-      {
-        ...validResponse,
-        assumable_by: [validResponse.assumable_by[0], { type: 'platform-service-account' }],
-      } as ServiceAccount,
-    ])('logs validation failures and returns the original response', async (result) => {
+        name: 'undeclared extra fields',
+        result: { ...validResponse, revoked: false, creator: { type: 'user', id: '1' } } as never,
+      },
+    ])('reports the created account despite $name', async ({ result }) => {
       mockUiam.createServiceAccount.mockResolvedValue(result);
 
       await expect(
         serviceAccounts.create(createMockRequest('Bearer essu_my_token'), createParams)
-      ).resolves.toBe(result);
-      expect(logger.error).toHaveBeenCalledTimes(1);
-      expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('failed validation'));
-      expect(mockUiam.createServiceAccount).toHaveBeenCalledTimes(1);
+      ).resolves.toEqual({ id: 'service-account-id', name: 'nightshift-relay' });
+      expect(logger.error).not.toHaveBeenCalled();
     });
 
-    // Successful validation strips extra fields from the documented response.
-    it('strips fields the upstream response does not declare', async () => {
-      mockUiam.createServiceAccount.mockResolvedValue({
-        ...validResponse,
-        revoked: false,
-        creator: { type: 'user', id: '12345' },
-      } as never);
+    // The id and the name are the only fields that cross the contract boundary, so these are the
+    // only ones worth refusing over: handing back an id Kibana just rejected would be worse than
+    // failing, even though the account does exist upstream.
+    it.each<{ name: string; result: UiamServiceAccount }>([
+      { name: 'the name is missing', result: { id: 'service-account-id' } as UiamServiceAccount },
+      {
+        name: 'the id is missing',
+        result: { ...validResponse, id: undefined } as never,
+      },
+      {
+        name: 'the id is too long',
+        result: { ...validResponse, id: 'a'.repeat(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH + 1) },
+      },
+      {
+        name: 'the name is not a string',
+        result: { ...validResponse, name: 123 } as never,
+      },
+    ])('rejects with a 502 when $name', async ({ result }) => {
+      mockUiam.createServiceAccount.mockResolvedValue(result);
 
       await expect(
         serviceAccounts.create(createMockRequest('Bearer essu_my_token'), createParams)
-      ).resolves.toEqual(validResponse);
+      ).rejects.toMatchObject({ output: { statusCode: 502 } });
+
+      // Named in the log, since the account exists upstream and nothing else can find it now,
+      // and logged once: this is not also a failure to create the account.
+      expect(logger.error).toHaveBeenCalledTimes(1);
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('UIAM reported the created service account [nightshift-relay]')
+      );
+      expect(mockUiam.createServiceAccount).toHaveBeenCalledTimes(1);
+    });
+
+    it('rejects an empty `roles` before the "not supported" refusal', async () => {
+      await expect(
+        serviceAccounts.create(createMockRequest('Bearer essu_my_token'), {
+          ...createParams,
+          roles: [],
+        })
+      ).rejects.toMatchObject({ output: { statusCode: 400 } });
+
+      expect(mockUiam.createServiceAccount).not.toHaveBeenCalled();
     });
 
     it('logs and rethrows upstream failures', async () => {
@@ -288,6 +296,9 @@ describe('UiamServiceAccounts', () => {
       await expect(
         serviceAccounts.create(createMockRequest('Bearer essu_my_token'), createParams)
       ).rejects.toThrowError('upstream exploded');
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to create service account [nightshift-relay]')
+      );
     });
   });
 
