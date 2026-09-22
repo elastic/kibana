@@ -16,8 +16,11 @@ const { AI_INDEX_COLLECTION_PATH, AI_INDEX_QUERY_PATH, API_HEADERS, CONTEXT_ENGI
 // Unique per run: a retried `beforeAll` runs against the same stack, where fixed names would 409.
 const RUN_ID = randomUUID().slice(0, 8);
 const INDEX_A = `ai-index-idx-scout-describe-${RUN_ID}-a`;
+// Bare index: keeps the built-in `ai-index-idx-*` template mappings.
+const INDEX_B = `ai-index-idx-scout-describe-${RUN_ID}-b`;
 const DATA_STREAM = `ai-index-ds-scout-describe-${RUN_ID}`;
 const SINGLE_AI_INDEX_ID = `scout-describe-single-${RUN_ID}`;
+const TEMPLATE_AI_INDEX_ID = `scout-describe-template-${RUN_ID}`;
 const DATA_STREAM_AI_INDEX_ID = `scout-describe-ds-${RUN_ID}`;
 
 const describePath = (id: string) => `${AI_INDEX_COLLECTION_PATH}/${id}/_describe`;
@@ -148,6 +151,7 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
         },
       },
     });
+    await esClient.indices.create({ index: INDEX_B });
     await esClient.indices.createDataStream({ name: DATA_STREAM });
     await esClient.bulk({
       index: INDEX_A,
@@ -157,6 +161,7 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
 
     for (const body of [
       registerAiIndex(SINGLE_AI_INDEX_ID, { type: 'index', value: INDEX_A }),
+      registerAiIndex(TEMPLATE_AI_INDEX_ID, { type: 'index', value: INDEX_B }),
       registerAiIndex(DATA_STREAM_AI_INDEX_ID, { type: 'data_stream', value: DATA_STREAM }),
     ]) {
       const response = await apiClient.post(AI_INDEX_COLLECTION_PATH, {
@@ -169,13 +174,13 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
   });
 
   apiTest.afterAll(async ({ apiClient, esClient }) => {
-    for (const id of [SINGLE_AI_INDEX_ID, DATA_STREAM_AI_INDEX_ID]) {
+    for (const id of [SINGLE_AI_INDEX_ID, TEMPLATE_AI_INDEX_ID, DATA_STREAM_AI_INDEX_ID]) {
       await apiClient.delete(`${AI_INDEX_COLLECTION_PATH}/${id}`, {
         headers: { ...adminCredentials.apiKeyHeader, ...API_HEADERS },
         responseType: 'json',
       });
     }
-    await esClient.indices.delete({ index: INDEX_A }, { ignore: [404] });
+    await esClient.indices.delete({ index: [INDEX_A, INDEX_B] }, { ignore: [404] });
     await esClient.indices.deleteDataStream({ name: DATA_STREAM }, { ignore: [404] });
   });
 
@@ -204,8 +209,16 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
     );
     const paths = fieldPaths(block);
     expect(paths).toStrictEqual([...paths].sort());
+  });
 
-    // Built-in `ai-index-idx-*` template adds `semantic_text` fields.
+  apiTest('lists the semantic fields from the built-in template', async ({ apiClient }) => {
+    const response = await apiClient.get(describePath(TEMPLATE_AI_INDEX_ID), {
+      headers: { ...describeCredentials.apiKeyHeader, ...API_HEADERS },
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(200);
+    const block = blockOf(response.body);
     const semanticFields = sectionLines(block, 'Semantic fields');
     expect(semanticFields.length).toBeGreaterThan(0);
     for (const path of semanticFields) {
