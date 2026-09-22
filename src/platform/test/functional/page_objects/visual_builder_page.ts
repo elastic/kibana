@@ -57,9 +57,9 @@ export class VisualBuilderPageObject extends FtrService {
   public async checkTabIsLoaded(testSubj: string, name: string) {
     let isPresent = false;
     await this.retry.try(async () => {
-      isPresent = await this.testSubjects.exists(testSubj);
+      isPresent = await this.testSubjects.waitForExists(testSubj, { timeout: 20000 });
       if (!isPresent) {
-        isPresent = await this.testSubjects.exists('visNoResult');
+        isPresent = await this.testSubjects.waitForExists('visNoResult', { timeout: 1000 });
       }
     });
     if (!isPresent) {
