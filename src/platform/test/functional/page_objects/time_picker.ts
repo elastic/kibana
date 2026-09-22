@@ -710,7 +710,7 @@ export class TimePickerPageObject extends FtrService {
       }
       await this.closeNewPickerSettingsPanel();
     } else {
-      const refreshConfig = await this.getRefreshConfig(true);
+      const refreshConfig = await this.getRefreshConfigLegacy(true);
       if (!refreshConfig.isPaused) {
         this.log.debug('pause auto refresh');
         await this.testSubjects.click('superDatePickerToggleRefreshButton');
