@@ -184,3 +184,18 @@ export const resolveHuntScope = async ({
     rowLimit: scopes[0].rowLimit,
   };
 };
+
+const isHuntTechnology = (value: string): value is HuntTechnology =>
+  (HUNT_TECHNOLOGIES as string[]).includes(value);
+
+/**
+ * Interprets a caller-supplied `technology`: undefined, null, and the empty
+ * string all mean "resolve from the environment" (a workflow renders an unset
+ * input as ""), a known technology pins the hunt, anything else is invalid.
+ */
+export const parseTechnologyInput = (
+  value: string | null | undefined
+): { technology?: HuntTechnology } | { invalid: string } => {
+  if (value === undefined || value === null || value === '') return {};
+  return isHuntTechnology(value) ? { technology: value } : { invalid: value };
+};

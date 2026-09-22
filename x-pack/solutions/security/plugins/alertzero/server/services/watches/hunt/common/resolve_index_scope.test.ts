@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { resolveIndexScope, resolveHuntScope } from './resolve_index_scope';
+import { resolveIndexScope, resolveHuntScope, parseTechnologyInput } from './resolve_index_scope';
 import { HUNT_ALERTS_INDEX_PATTERN_PREFIX } from '../../../../../common/constants';
 import type { HuntTechnology } from '@kbn/alertzero-common';
 
@@ -200,5 +200,19 @@ describe('resolveHuntScope', () => {
     const result = await resolveHuntScope({ esClient, spaceId: SPACE_ID });
 
     expect(result.status).toBe('degraded');
+  });
+});
+
+describe('parseTechnologyInput', () => {
+  it.each([undefined, null, ''])('treats %p as "resolve from the environment"', (value) => {
+    expect(parseTechnologyInput(value)).toEqual({});
+  });
+
+  it('accepts a known technology', () => {
+    expect(parseTechnologyInput('fortigate')).toEqual({ technology: 'fortigate' });
+  });
+
+  it('flags an unknown technology', () => {
+    expect(parseTechnologyInput('okta')).toEqual({ invalid: 'okta' });
   });
 });
