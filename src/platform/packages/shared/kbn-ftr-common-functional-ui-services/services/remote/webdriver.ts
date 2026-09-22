@@ -109,6 +109,7 @@ function initChromiumOptions(browserType: Browsers, acceptInsecureCerts: boolean
     noCache,
     chromiumUserPrefs,
   } = getConfiguration();
+  let acceptInsecure = acceptInsecureCerts;
 
   options.addArguments(
     // Disables the sandbox for all process types that are normally sandboxed.
@@ -128,6 +129,16 @@ function initChromiumOptions(browserType: Browsers, acceptInsecureCerts: boolean
     // Enables the SwiftShader software renderer used to render web content when no GPU is available or when GPU acceleration is disabled.
     'enable-unsafe-swiftshader'
   );
+
+  if (process.env.USE_CITADEL_PROXY === 'true') {
+    // Experiment: substitute for certutil/NSS trust setup. The agent hook skips
+    // "citadel certificate configuration for chromium" when certutil is absent,
+    // so Chromium will not trust Citadel's MITM CA via NSS. Ignore TLS errors
+    // instead, while still inheriting HTTP(S)_PROXY, to test whether certificate
+    // trust alone explains the FTR failure cluster.
+    options.addArguments('ignore-certificate-errors');
+    acceptInsecure = true;
+  }
 
   if (process.platform === 'linux') {
     // The /dev/shm partition is too small in certain VM environments, causing
@@ -175,7 +186,7 @@ function initChromiumOptions(browserType: Browsers, acceptInsecureCerts: boolean
   options.setLoggingPrefs(prefs);
   options.set('unexpectedAlertBehaviour', 'accept');
   options.set('unhandledPromptBehavior', 'accept');
-  options.setAcceptInsecureCerts(acceptInsecureCerts);
+  options.setAcceptInsecureCerts(acceptInsecure);
 
   return options;
 }
