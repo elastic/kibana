@@ -9,6 +9,7 @@ import {
   ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
   API_VERSIONS,
   HuntCoordinatorRequestBody,
+  HuntCoordinatorResponse,
   INTERNAL_API_ACCESS,
 } from '@kbn/alertzero-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
@@ -112,7 +113,8 @@ export const registerHuntCoordinatorRoute = ({
               ? buildSseData(result, report_id, { spaceId })
               : undefined;
 
-          return response.ok({ body: sse ? { ...result, sse } : result });
+          const body: HuntCoordinatorResponse = sse ? { ...result, sse } : result;
+          return response.ok({ body });
         } catch (err) {
           logger.error(`hunt_coordinator route failed: ${(err as Error).message}`);
           return response.customError({

@@ -185,7 +185,6 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         workflowsExtensions,
         agentBuilder: { conversations: { getScopedClient: jest.fn() } },
         agenticInvestigations: { getProposalsService: jest.fn().mockReturnValue({}) },
-        contextEngine: { getAiIndexService: jest.fn() },
         inference: {},
       } as never);
 
@@ -209,7 +208,6 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         workflowsExtensions: { initManagedWorkflowsClient: jest.fn() },
         agentBuilder,
         agenticInvestigations: { getProposalsService: jest.fn().mockReturnValue({}) },
-        contextEngine: { getAiIndexService: jest.fn() },
         inference: {},
       } as never);
 

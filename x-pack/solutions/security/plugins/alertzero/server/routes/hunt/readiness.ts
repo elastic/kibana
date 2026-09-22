@@ -8,25 +8,23 @@
 import {
   API_VERSIONS,
   HuntReadinessRequestQuery,
+  HuntReadinessResponse,
+  HuntTechnology,
   INTERNAL_API_ACCESS,
 } from '@kbn/alertzero-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERTZERO_API_PRIVILEGE_READ, HUNT_INTERNAL_ROUTE_BASE } from '../../../common/constants';
 import { resolveIndexScope } from '../../services/watches/hunt/common/resolve_index_scope';
-import type { HuntTechnology } from '../../services/watches/hunt/common/types';
 import type { RouteDependencies } from '../register_routes';
 
-/** `GET /internal/alertzero/hunt/readiness` path (plan.md:249). */
 export const HUNT_READINESS_URL = `${HUNT_INTERNAL_ROUTE_BASE}/readiness` as const;
 
-const HUNT_TECHNOLOGIES: HuntTechnology[] = ['aws_iam', 'fortigate'];
+const HUNT_TECHNOLOGIES: HuntTechnology[] = HuntTechnology.options;
 
 /**
- * Readiness projection over A2's `resolveIndexScope`, one entry per
- * technology (or the single requested one), for the given space. This is a
- * thin projection over the resolution service, not a duplicate of its
- * logic (plan.md:249) — the security_solution readiness route stays as-is
- * and must not import this (buildout.md:31, one-way dependency rule).
+ * Readiness projection over `resolveIndexScope`, one entry per technology
+ * (or the single requested one), for the given space. The security_solution
+ * readiness route stays as-is and must not import this (one-way dependency rule).
  */
 export const registerHuntReadinessRoute = ({ router, logger, getSpaceId }: RouteDependencies) => {
   router.versioned
@@ -56,7 +54,7 @@ export const registerHuntReadinessRoute = ({ router, logger, getSpaceId }: Route
           const esClient = (await context.core).elasticsearch.client.asCurrentUser;
           const technologies = technology ? [technology] : HUNT_TECHNOLOGIES;
 
-          const body = await Promise.all(
+          const body: HuntReadinessResponse = await Promise.all(
             technologies.map((tech) => resolveIndexScope({ esClient, technology: tech, spaceId }))
           );
 

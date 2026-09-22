@@ -5,25 +5,24 @@
  * 2.0.
  */
 
-import { API_VERSIONS, HuntForThreatRequestBody, INTERNAL_API_ACCESS } from '@kbn/alertzero-common';
+import {
+  API_VERSIONS,
+  HuntForThreatRequestBody,
+  HuntForThreatResponse,
+  INTERNAL_API_ACCESS,
+} from '@kbn/alertzero-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERTZERO_API_PRIVILEGE_READ, HUNT_INTERNAL_ROUTE_BASE } from '../../../common/constants';
 import { resolveIndexScope } from '../../services/watches/hunt/common/resolve_index_scope';
-import type { HuntTechnology } from '../../services/watches/hunt/common/types';
 import { huntForThreat } from '../../services/watches/hunt/tier1/hunt_for_threat';
 import type { RouteDependencies } from '../register_routes';
 
-/** `POST /internal/alertzero/hunt/hunt_for_threat` path (plan.md Phase 3). */
 export const HUNT_FOR_THREAT_URL = `${HUNT_INTERNAL_ROUTE_BASE}/hunt_for_threat` as const;
 
 /**
- * Runs Tier 1's deterministic search against a technology's A2-resolved
- * index scope (plan.md Phase 3). This route exists for manual/dev
- * invocation and Phase 4 debugging; the production caller is the `hunt`
- * child workflow (F5), which calls the service in-process rather than over
- * HTTP. A `blocked` scope is refused outright (409) — a missing required
- * index must never read as a clean zero-hit search
- * (hunt-watch-implementation.md:42).
+ * Runs Tier 1's deterministic search against a technology's resolved index
+ * scope. A `blocked` scope is refused outright (409) so a missing required
+ * index never reads as a clean zero-hit search.
  */
 export const registerHuntForThreatRoute = ({ router, logger, getSpaceId }: RouteDependencies) => {
   router.versioned
@@ -54,7 +53,7 @@ export const registerHuntForThreatRoute = ({ router, logger, getSpaceId }: Route
 
           const scope = await resolveIndexScope({
             esClient,
-            technology: technology as HuntTechnology,
+            technology,
             spaceId,
           });
 
@@ -77,7 +76,8 @@ export const registerHuntForThreatRoute = ({ router, logger, getSpaceId }: Route
             size,
           });
 
-          return response.ok({ body: { scope, result } });
+          const body: HuntForThreatResponse = { scope, result };
+          return response.ok({ body });
         } catch (error) {
           logger.error(`Failed to run hunt_for_threat: ${error}`);
           return response.customError({

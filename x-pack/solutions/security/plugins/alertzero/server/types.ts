@@ -11,7 +11,6 @@ import type {
   AgenticInvestigationsPluginSetup,
   AgenticInvestigationsPluginStart,
 } from '@kbn/agentic-investigations-plugin/server';
-import type { ContextEnginePluginStart } from '@kbn/context-engine-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type {
   SearchInferenceEndpointsPluginSetup,
@@ -40,7 +39,6 @@ export interface AlertZeroStartDependencies {
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
   agentBuilder: AgentBuilderPluginStart;
   agenticInvestigations: AgenticInvestigationsPluginStart;
-  contextEngine: ContextEnginePluginStart;
   inference: InferenceServerStart;
   /**
    * Optional, matching the plugin manifest. Setup registers the AlertZero model
@@ -52,12 +50,3 @@ export interface AlertZeroStartDependencies {
 
 export type AlertZeroRouter = IRouter;
 export type AlertZeroSpaceIdResolver = (request: KibanaRequest) => string;
-
-export type {
-  CandidateQueryParams,
-  CandidateQueryResult,
-} from './services/watches/hunt/common/build_candidate_query';
-export type {
-  HuntCoordinatorParams,
-  HuntCoordinatorResult,
-} from './services/watches/hunt/hunt_coordinator';

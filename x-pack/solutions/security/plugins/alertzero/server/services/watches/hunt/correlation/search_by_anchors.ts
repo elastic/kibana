@@ -5,13 +5,6 @@
  * 2.0.
  */
 
-/**
- * Ported verbatim from mustard `services/search_by_anchors.ts` with three adaptations:
- * 1. `buildSpaceFilterTerms` → `buildHuntSpaceFilterTerms` (local helper, Phase 1)
- * 2. `THREAT_REPORTS_INDEX_PATTERN` → `HUNT_REPORTS_INDEX` (local constant)
- * 3. `IOC_NOISE_DOMAINS` → imported from local `./ioc_noise_domains` (no cross-plugin import)
- */
-
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { HUNT_REPORTS_INDEX } from '../../../../../common/constants';
 import { buildHuntSpaceFilterTerms } from '../common/space_filter';
@@ -27,6 +20,15 @@ import type {
 
 const HASH_IOC_TYPE = 'hash' as const;
 const NETWORK_IOC_TYPES = new Set(['ip', 'domain', 'url']);
+
+export const EMPTY_ANCHOR_SUMMARY = {
+  hash_ioc_count: 0,
+  network_ioc_count: 0,
+  ioc_set_hash: null,
+  actor_count: 0,
+  technique_count: 0,
+  discriminating_anchor_count: 0,
+} as const;
 const DEFAULT_SIZE = 20;
 const MAX_SIZE = 50;
 
@@ -35,9 +37,8 @@ const splitIocs = (iocs: AnchorIoc[]): { hashValues: string[]; networkValues: st
   const networkValues = new Set<string>();
 
   for (const { type, value } of iocs) {
-    if (!value) {
-      // skip
-    } else if (type === HASH_IOC_TYPE) {
+    if (!value) continue;
+    if (type === HASH_IOC_TYPE) {
       hashValues.add(value.toLowerCase());
     } else if (NETWORK_IOC_TYPES.has(type)) {
       const lower = value.toLowerCase();

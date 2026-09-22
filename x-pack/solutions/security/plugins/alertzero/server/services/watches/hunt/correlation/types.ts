@@ -5,17 +5,24 @@
  * 2.0.
  */
 
-export interface AnchorIoc {
-  type: string;
-  value: string;
-}
+import type {
+  AnchorIoc,
+  AnchorItem,
+  AnchorSet,
+  CorrelationEngineStatus,
+  HuntCorrelationAttachmentData,
+  HuntCorrelationAttachmentThresholds,
+} from '@kbn/alertzero-common';
 
-export interface AnchorSet {
-  iocs?: AnchorIoc[];
-  ioc_set_hash?: string | null;
-  actors?: string[];
-  technique_ids?: string[];
-}
+// Re-export package types used by other files in this directory.
+export type {
+  AnchorIoc,
+  AnchorItem,
+  AnchorSet,
+  CorrelationEngineStatus,
+  HuntCorrelationAttachmentData,
+  HuntCorrelationAttachmentThresholds,
+};
 
 export interface SearchByAnchorsParams {
   anchors?: AnchorSet;
@@ -55,10 +62,8 @@ export interface SearchByAnchorsResult {
   };
 }
 
-export type CorrelationEngineStatus = 'matched' | 'no_match' | 'unavailable';
-
 export interface DiamondScore {
-  vertex: 'adversary' | 'capability' | 'infrastructure' | 'victim';
+  vertex: string;
   related_report_id: string;
   score: number;
 }
@@ -68,36 +73,7 @@ export interface CorrelationEngineResult {
   anchors: AnchorSet;
   matches: AnchorHit[];
   thresholds: { discriminating_min: number };
-  self_match_excluded: true;
-  /** Empty until PR 3b's diamond phase. */
+  self_match_excluded: boolean;
   diamond_scores: DiamondScore[];
   anchor_summary: SearchByAnchorsResult['anchor_summary'];
-}
-
-/** Attachment data shape for `security.hunt_correlation` (PR 1 contract). */
-export interface AnchorItem {
-  kind: 'hash' | 'ioc_set_hash' | 'actor';
-  value: string;
-}
-
-/**
- * The `security.hunt_correlation` attachment's own `thresholds` shape
- * (`alertzero/server/agent_builder/attachments/hunt_correlation.ts`, PR 1,
- * kibana#291882): `anchor_match` and `diamond_vertex`, both 0-1. Distinct
- * from this engine's internal `CorrelationEngineResult.thresholds`
- * (`discriminating_min`), which gates the anchors search itself rather than
- * describing what the attachment payload means to a reader.
- */
-export interface HuntCorrelationAttachmentThresholds {
-  anchor_match: number;
-  diamond_vertex: number;
-}
-
-export interface HuntCorrelationAttachmentData {
-  attachment_id: string;
-  anchors: AnchorItem[];
-  diamond_scores: DiamondScore[];
-  thresholds: HuntCorrelationAttachmentThresholds;
-  self_match_excluded: true;
-  report_revision: string;
 }
