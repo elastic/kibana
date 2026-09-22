@@ -43,7 +43,7 @@ export class UpdateActionPolicyApiKeyRoute extends BaseAlertingRoute {
     },
     response: {
       204: {
-        description: 'Returns the action policy with the updated API key.',
+        description: 'The API key of the action policy was updated successfully.',
       },
       404: {
         body: () => errorResponseSchema,
