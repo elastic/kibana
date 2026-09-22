@@ -6,8 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-import { apm } from '@elastic/apm-rum';
 import { BehaviorSubject } from 'rxjs';
 
 import { monaco } from '../monaco_imports';
@@ -69,11 +67,7 @@ export class DiagnosticsAdapter {
           });
           // Every time a new change is made, wait 500ms before validating
           handle = setTimeout(() => {
-            this.validate(model.uri, idx).catch((e) => {
-              apm.captureError(e instanceof Error ? e : new Error(String(e)), {
-                labels: { langId: this.langId },
-              });
-            });
+            this.validate(model.uri, idx);
           }, 500);
         });
 
@@ -108,10 +102,9 @@ export class DiagnosticsAdapter {
       const worker = await this.worker(resource);
       errorMarkers = await worker.getSyntaxErrors(resource.toString());
     } catch (e) {
-      // Gracefully handle worker errors by disabling validation
-      apm.captureError(e instanceof Error ? e : new Error(String(e)), {
-        labels: { langId: this.langId },
-      });
+      // Gracefully handle unexpected errors by disabling autocomplete
+      // eslint-disable-next-line no-console
+      console.error('Error providing completion items:', e);
       errorMarkers = [];
     }
 

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { apm } from '@elastic/apm-rum';
 import { monaco } from '../../../monaco_imports';
+import { createInterruptibleLanguageProvider } from '../../helpers';
 import type { EditorStateService } from './lib';
 import type { PainlessCompletionResult, PainlessCompletionKind } from './types';
 import type { PainlessWorker } from './worker';
@@ -46,61 +46,62 @@ export class PainlessCompletionAdapter implements monaco.languages.CompletionIte
     return ['.', `'`];
   }
 
-  async provideCompletionItems(
-    model: monaco.editor.IReadOnlyModel,
-    position: monaco.Position
-  ): Promise<monaco.languages.CompletionList> {
+  public provideCompletionItems = (async (model, position, _context, token) => {
     try {
-      // Active line characters
-      const currentLineChars = model.getValueInRange({
-        startLineNumber: position.lineNumber,
-        startColumn: 0,
-        endLineNumber: position.lineNumber,
-        endColumn: position.column,
-      });
+      return await createInterruptibleLanguageProvider(async () => {
+        // Active line characters
+        const currentLineChars = model.getValueInRange({
+          startLineNumber: position.lineNumber,
+          startColumn: 0,
+          endLineNumber: position.lineNumber,
+          endColumn: position.column,
+        });
 
-      const worker = await this.worker(model.uri);
+        const worker = await this.worker(model.uri);
 
-      const { context, fields } = this.editorStateService.getState();
-      const autocompleteInfo: PainlessCompletionResult =
-        await worker.provideAutocompleteSuggestions(currentLineChars, context, fields);
+        const { context, fields } = this.editorStateService.getState();
+        const autocompleteInfo: PainlessCompletionResult =
+          await worker.provideAutocompleteSuggestions(currentLineChars, context, fields);
 
-      const wordInfo = model.getWordUntilPosition(position);
-      const wordRange = {
-        startLineNumber: position.lineNumber,
-        endLineNumber: position.lineNumber,
-        startColumn: wordInfo.startColumn,
-        endColumn: wordInfo.endColumn,
-      };
+        const wordInfo = model.getWordUntilPosition(position);
+        const wordRange = {
+          startLineNumber: position.lineNumber,
+          endLineNumber: position.lineNumber,
+          startColumn: wordInfo.startColumn,
+          endColumn: wordInfo.endColumn,
+        };
 
-      const suggestions = autocompleteInfo.suggestions.map(
-        ({ label, insertText, documentation, kind, insertTextAsSnippet }) => {
-          return {
-            label,
-            insertText,
-            documentation,
-            range: wordRange,
-            kind: getCompletionKind(kind),
-            insertTextRules: insertTextAsSnippet
-              ? monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
-              : undefined,
-          };
-        }
-      );
+        const suggestions = autocompleteInfo.suggestions.map(
+          ({ label, insertText, documentation, kind, insertTextAsSnippet }) => {
+            return {
+              label,
+              insertText,
+              documentation,
+              range: wordRange,
+              kind: getCompletionKind(kind),
+              insertTextRules: insertTextAsSnippet
+                ? monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
+                : undefined,
+            };
+          }
+        );
 
-      return {
-        incomplete: autocompleteInfo.isIncomplete,
-        suggestions,
-      };
+        return {
+          incomplete: autocompleteInfo.isIncomplete,
+          suggestions,
+        };
+      }, token);
     } catch (e) {
-      // Gracefully handle worker errors by disabling autocomplete
-      apm.captureError(e instanceof Error ? e : new Error(String(e)), {
-        labels: { worker: 'painless' },
-      });
-      return {
-        incomplete: false,
-        suggestions: [],
-      };
+      if (e instanceof Error && e.message === 'AbortedDueToCancellationRequest') {
+        return {
+          incomplete: false,
+          suggestions: [],
+        };
+      }
+
+      // Gracefully handle unexpected errors by disabling autocomplete
+      // eslint-disable-next-line no-console
+      console.error('Error providing completion items:', e);
     }
-  }
+  }) satisfies monaco.languages.CompletionItemProvider['provideCompletionItems'];
 }

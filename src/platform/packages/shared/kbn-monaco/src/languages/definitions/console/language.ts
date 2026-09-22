@@ -34,6 +34,7 @@ import {
   consoleOutputLanguageConfiguration,
 } from './lexer_rules';
 import { foldingRangeProvider } from './folding_range_provider';
+import { createInterruptibleLanguageProvider } from '../../helpers';
 
 export const CONSOLE_TRIGGER_CHARS = ['/', '.', '_', ',', '?', '=', '&', '"'];
 
@@ -114,55 +115,61 @@ export const ConsoleLang: LangModuleType = {
     return {
       // force suggestions when these characters are used
       triggerCharacters: [...CONSOLE_TRIGGER_CHARS, ...ESQL_AUTOCOMPLETE_TRIGGER_CHARS],
-      provideCompletionItems: async (
-        model: monaco.editor.ITextModel,
-        position: monaco.Position,
-        context: monaco.languages.CompletionContext,
-        token: monaco.CancellationToken
-      ) => {
-        // NOTE: Materializing the full editor content (e.g. via `model.getValue()`) can be very
-        // expensive for large inputs (like pasted JSON with huge string fields). The anchored
-        // range below is bounded by the request-line lookback caps.
-        const delegateToActionsProvider = () => {
-          const actions = actionsProvider.current;
-          return (
-            actions?.provideCompletionItems(model, position, context, token) ?? {
-              suggestions: [],
+      provideCompletionItems: (async (model, position, context, token) => {
+        try {
+          return createInterruptibleLanguageProvider(async () => {
+            // NOTE: Materializing the full editor content (e.g. via `model.getValue()`) can be very
+            // expensive for large inputs (like pasted JSON with huge string fields). The anchored
+            // range below is bounded by the request-line lookback caps.
+            const delegateToActionsProvider = () => {
+              const actions = actionsProvider.current;
+              return (
+                actions?.provideCompletionItems(model, position, context, token) ?? {
+                  suggestions: [],
+                }
+              );
+            };
+
+            const requestAnchorPosition = await getRequestAnchorPosition(model, position);
+            if (requestAnchorPosition === undefined) {
+              return delegateToActionsProvider();
             }
-          );
-        };
 
-        const requestAnchorPosition = await getRequestAnchorPosition(model, position);
-        if (requestAnchorPosition === undefined) {
-          return delegateToActionsProvider();
+            const requestTextBeforeCursor = getRequestTextBeforeCursor(
+              model,
+              requestAnchorPosition,
+              position
+            );
+            const { insideTripleQuotes, insideEsqlQuery, esqlQueryIndex } =
+              checkForTripleQuotesAndEsqlQuery(requestTextBeforeCursor);
+
+            if (esqlCallbacks && insideEsqlQuery) {
+              const queryText = requestTextBeforeCursor.slice(esqlQueryIndex);
+              const unescapedQuery = unescapeInvalidChars(queryText);
+              const esqlSuggestions = await suggest(
+                unescapedQuery,
+                unescapedQuery.length,
+                esqlCallbacks
+              );
+              return wrapAsMonacoSuggestions(
+                esqlSuggestions,
+                queryText,
+                false,
+                !insideTripleQuotes,
+                true
+              );
+            }
+            return delegateToActionsProvider();
+          }, token);
+        } catch (e) {
+          if (e instanceof Error && e.message === 'AbortedDueToCancellationRequest') {
+            return {
+              suggestions: [],
+            };
+          }
+          throw e;
         }
-
-        const requestTextBeforeCursor = getRequestTextBeforeCursor(
-          model,
-          requestAnchorPosition,
-          position
-        );
-        const { insideTripleQuotes, insideEsqlQuery, esqlQueryIndex } =
-          checkForTripleQuotesAndEsqlQuery(requestTextBeforeCursor);
-
-        if (esqlCallbacks && insideEsqlQuery) {
-          const queryText = requestTextBeforeCursor.slice(esqlQueryIndex);
-          const unescapedQuery = unescapeInvalidChars(queryText);
-          const esqlSuggestions = await suggest(
-            unescapedQuery,
-            unescapedQuery.length,
-            esqlCallbacks
-          );
-          return wrapAsMonacoSuggestions(
-            esqlSuggestions,
-            queryText,
-            false,
-            !insideTripleQuotes,
-            true
-          );
-        }
-        return delegateToActionsProvider();
-      },
+      }) satisfies monaco.languages.CompletionItemProvider['provideCompletionItems'],
     };
   },
 };
