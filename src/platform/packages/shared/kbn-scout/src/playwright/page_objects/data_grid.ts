@@ -543,13 +543,14 @@ export class DataGrid {
   }
 
   async openColumnMenuByField(field: string) {
-    await expect(async () => {
-      await this.page.testSubj.hover(`dataGridHeaderCell-${field}`);
-      await this.page.testSubj.click(`dataGridHeaderCellActionButton-${field}`);
-      await this.page.testSubj.locator(`dataGridHeaderCellActionGroup-${field}`).waitFor({
-        state: 'visible',
-      });
-    }).toPass();
+    const actionButton = this.page.testSubj.locator(`dataGridHeaderCellActionButton-${field}`);
+
+    await this.page.testSubj.hover(`dataGridHeaderCell-${field}`);
+    await actionButton.click();
+
+    await this.page.testSubj.locator(`dataGridHeaderCellActionGroup-${field}`).waitFor({
+      state: 'visible',
+    });
   }
 
   async openDocumentDetails({ rowIndex }: { rowIndex: number }) {
@@ -577,6 +578,12 @@ export class DataGrid {
 
     await displayButton.click();
     await expandedButton.waitFor({ state: 'visible' });
+  }
+
+  /** Opens the grid toolbar's column-sorting popover. */
+  async openSortPopover() {
+    await this.page.testSubj.click('dataGridColumnSortingButton');
+    await this.page.testSubj.locator('dataGridColumnSortingPopover').waitFor({ state: 'visible' });
   }
 
   async openInTableSearch() {

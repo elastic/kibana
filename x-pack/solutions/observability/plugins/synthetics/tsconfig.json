@@ -126,6 +126,7 @@
     "@kbn/content-management-utils",
     "@kbn/presentation-publishing-schemas",
     "@kbn/zod",
+    "@kbn/router-to-openapispec",
     "@kbn/maintenance-windows-plugin",
     "@kbn/observability-agent-builder-plugin",
     "@kbn/agent-builder-browser",
