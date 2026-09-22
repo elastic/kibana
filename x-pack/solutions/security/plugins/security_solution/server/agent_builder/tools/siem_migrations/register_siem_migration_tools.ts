@@ -9,7 +9,6 @@ import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
 import type { ProductFeaturesService } from '../../../lib/product_features_service/product_features_service';
-import type { GetSiemMigrationContext } from '../../../lib/siem_migrations/get_siem_migration_context';
 import { getRuleMigrationTool } from './rules/get_rule_migration_tool';
 import { startRuleMigrationTool } from './rules/start_rule_migration_tool';
 import { getAllRuleMigrationStatsTool } from './rules/get_all_rule_migration_stats_tool';
@@ -20,15 +19,14 @@ import { getMissingRuleMigrationResourcesTool } from './rules/get_missing_rule_m
 import { stopRuleMigrationTool } from './rules/stop_rule_migration_tool';
 import { updateRuleMigrationTool } from './rules/update_rule_migration_tool';
 import { deleteRuleMigrationTool } from './rules/delete_rule_migration_tool';
-import { getIntegrationStatsTool } from './rules/get_integration_stats_tool';
+
 import { installMigrationRulesTool } from './rules/install_migration_rules_tool';
 
 export const registerSiemMigrationTools = (
   agentBuilder: AgentBuilderPluginSetup,
   core: SecuritySolutionPluginCoreSetupDependencies,
   productFeaturesService: ProductFeaturesService,
-  logger: Logger,
-  getSiemMigrationContext: GetSiemMigrationContext
+  logger: Logger
 ) => {
   agentBuilder.tools.register(getRuleMigrationTool(core, logger, productFeaturesService));
   agentBuilder.tools.register(startRuleMigrationTool(core, logger, productFeaturesService));
@@ -45,7 +43,4 @@ export const registerSiemMigrationTools = (
   agentBuilder.tools.register(updateRuleMigrationTool(core, logger, productFeaturesService));
   agentBuilder.tools.register(deleteRuleMigrationTool(core, logger, productFeaturesService));
   agentBuilder.tools.register(installMigrationRulesTool(core, logger, productFeaturesService));
-  agentBuilder.tools.register(
-    getIntegrationStatsTool(core, logger, productFeaturesService, getSiemMigrationContext)
-  );
 };

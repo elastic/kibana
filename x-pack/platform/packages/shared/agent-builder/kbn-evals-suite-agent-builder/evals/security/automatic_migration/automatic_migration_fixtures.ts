@@ -41,7 +41,6 @@ interface SeedOptions {
   /** Seed `last_execution.is_stopped: true` to produce a STOPPED migration status. */
   isStopped?: boolean;
   vendor?: string;
-  integrationIds?: string[];
 }
 
 interface SeedResult {
@@ -102,7 +101,6 @@ export async function seedRuleMigration({
   pending = 0,
   isStopped = false,
   vendor = 'splunk',
-  integrationIds,
 }: SeedOptions): Promise<SeedResult> {
   try {
     const migrationId = randomUUID();
@@ -164,7 +162,6 @@ export async function seedRuleMigration({
                 risk_score: 47,
                 query: 'FROM logs-* | LIMIT 10',
                 query_language: 'esql',
-                integration_ids: integrationIds,
               },
             }
           : {}),

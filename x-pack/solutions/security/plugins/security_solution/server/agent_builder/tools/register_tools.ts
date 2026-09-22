@@ -8,7 +8,6 @@
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import type { ExperimentalFeatures } from '../../../common';
-import type { GetSiemMigrationContext } from '../../lib/siem_migrations/get_siem_migration_context';
 import { securityLabsSearchTool } from './security_labs_search_tool';
 import { attackDiscoverySearchTool } from './attack_discovery_search_tool';
 import { buildRedirectUrlTool } from './build_redirect_url_tool';
@@ -47,12 +46,6 @@ import type {
 import type { ProductFeaturesService } from '../../lib/product_features_service';
 import { SIEM_READINESS_AGENT_BUILDER_ENABLED } from '../siem_readiness_feature_flag';
 
-export interface RegisterToolsConfig {
-  isServerless?: boolean;
-  kibanaVersion: string;
-  hasEncryptionKey?: boolean;
-}
-
 /**
  * Registers all security agent builder tools with the agentBuilder plugin.
  *
@@ -68,10 +61,10 @@ export const registerTools = (
   productFeaturesService: ProductFeaturesService,
   ml: SetupPlugins['ml'],
   rulePreviewDeps: RunRulePreviewDeps,
-  getSiemMigrationContext: GetSiemMigrationContext,
-  config: RegisterToolsConfig
+  isServerless: boolean = false,
+  kibanaVersion: string,
+  hasEncryptionKey: boolean = false
 ) => {
-  const { isServerless = false, kibanaVersion, hasEncryptionKey = false } = config;
   agentBuilder.tools.register(entityRiskScoreTool(core, logger));
   agentBuilder.tools.register(attackDiscoverySearchTool(core, logger));
   agentBuilder.tools.register(securityLabsSearchTool(core));
@@ -129,12 +122,6 @@ export const registerTools = (
     !experimentalFeatures.siemMigrationsDisabled &&
     experimentalFeatures.siemRuleMigrationsAgentBuilderEnabled
   ) {
-    registerSiemMigrationTools(
-      agentBuilder,
-      core,
-      productFeaturesService,
-      logger,
-      getSiemMigrationContext
-    );
+    registerSiemMigrationTools(agentBuilder, core, productFeaturesService, logger);
   }
 };

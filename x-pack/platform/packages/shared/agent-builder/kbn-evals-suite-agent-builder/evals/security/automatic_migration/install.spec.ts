@@ -77,59 +77,6 @@ installed. Verify the migration name in LaunchPad → Manage Automatic Migration
       }
     );
 
-    evaluate.describe('integration readiness gate', () => {
-      let teardown: (() => Promise<void>) | undefined;
-
-      evaluate.beforeAll(async ({ esClient, log }) => {
-        const seeded = await seedRuleMigration({
-          esClient,
-          log,
-          name: 'Splunk Missing Integration',
-          completed: 4,
-          failed: 0,
-          integrationIds: ['definitely_missing_eval_integration'],
-        });
-        teardown = seeded.cleanup;
-      });
-
-      evaluate.afterAll(async () => {
-        await teardown?.();
-      });
-
-      evaluate(
-        'missing integration recommends disabled installation and does not mutate',
-        async ({ evaluateDataset }) => {
-          await evaluateDataset({
-            dataset: {
-              name: 'agent builder: automatic-migration-install-missing-integration',
-              description: `Validates the install preflight: exact installable count, grouped
-integration readiness, disabled fallback, and no mutation before explicit confirmation.`,
-              examples: [
-                {
-                  input: {
-                    question:
-                      'Install all rules from Splunk Missing Integration and enable new rules.',
-                  },
-                  output: {
-                    expected: `There are 4 installable rules. The required integration package
-definitely_missing_eval_integration is not installed or enabled. I recommend installing the rules disabled, or installing and configuring the
-integration first. Which option do you prefer?`,
-                  },
-                  metadata: {
-                    query_intent: 'Install Rules With Missing Integration',
-                    expectedSkill: 'automatic-migration-rules-install-rules',
-                    expectedToolId: 'security.siem_migration.get_integration_stats',
-                    shouldNotCallToolId: 'security.siem_migration.install_migration_rules',
-                    requiredTerms: ['definitely_missing_eval_integration'],
-                  },
-                },
-              ],
-            },
-          });
-        }
-      );
-    });
-
     evaluate.describe('complete installation flow', () => {
       let teardownMigration: (() => Promise<void>) | undefined;
       let kbnClientForCleanup: KbnClient | undefined;
@@ -179,7 +126,6 @@ rules disabled. The response includes a sample of up to three processed custom r
                     expectedSkill: 'automatic-migration-rules-install-rules',
                     autoConfirm: true,
                     expectedToolId: 'security.siem_migration.install_migration_rules',
-                    requiredTerms: ['3', 'processed', 'disabled'],
                   },
                 },
               ],

@@ -274,24 +274,18 @@ describe('Security Skills', () => {
         'security.siem_migration.get_rule_migration_stats',
         'security.siem_migration.get_rule_migration_translation_stats',
         'security.siem_migration.get_migration_rules',
-        'security.siem_migration.get_integration_stats',
         'security.build_redirect_url',
         'security.siem_migration.install_migration_rules',
       ]);
     });
 
-    it('documents readiness gates, result semantics, linked sample, and follow-up choices', () => {
+    it('documents result semantics, linked sample, and follow-up choices', () => {
       const { content } = automaticMigrationRulesInstallRulesSkill;
 
       expect(content).toContain('Rules: All');
-      expect(content).toContain('is_installed');
-      expect(content).toContain('is_enabled');
-      expect(content).toContain('recommend disabled');
       expect(content).toContain('processed N rules');
-      expect(content).toContain('Sample of processed custom rules');
-      expect(content).toContain('maximum 3');
       expect(content).toContain('/app/security/rules/id/');
-      expect(content).toContain('Review missing or disabled integrations');
+      expect(content).toContain('Sample of installed rules');
     });
   });
 
