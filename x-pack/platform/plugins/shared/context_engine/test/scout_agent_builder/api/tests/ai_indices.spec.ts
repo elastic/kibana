@@ -267,6 +267,27 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
     expect(response).toHaveStatusCode(400);
   });
 
+  apiTest('rejects an empty ES|QL source', async ({ apiClient }) => {
+    const response = await apiClient.put(aiIndexPath(AI_INDEX.lifecycle), {
+      headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
+      responseType: 'json',
+      body: { ...aiIndexBody, sources: [{ type: 'esql', value: '' }] },
+    });
+
+    expect(response).toHaveStatusCode(400);
+  });
+
+  apiTest('rejects a syntactically invalid ES|QL source', async ({ apiClient }) => {
+    const response = await apiClient.put(aiIndexPath(AI_INDEX.lifecycle), {
+      headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
+      responseType: 'json',
+      body: { ...aiIndexBody, sources: [{ type: 'esql', value: 'FROM logs | WHERE' }] },
+    });
+
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.message).toMatch(/^ES\|QL source 'FROM logs \| WHERE' is invalid: /);
+  });
+
   apiTest('rejects an id with disallowed characters', async ({ apiClient }) => {
     const response = await apiClient.put(aiIndexPath('Invalid_ID'), {
       headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
