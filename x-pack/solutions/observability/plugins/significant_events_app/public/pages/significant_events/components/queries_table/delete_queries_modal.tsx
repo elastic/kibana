@@ -104,14 +104,14 @@ export function DeleteQueriesModal({
       </EuiModalBody>
       <EuiModalFooter>
         <EuiButtonEmpty
-          data-test-subj="significantEventsAppDeleteQueriesModalButton"
+          data-test-subj="significantEventsAppDeleteQueriesModalCancelButton"
           onClick={onCancel}
           disabled={isLoading}
         >
           {CANCEL_BUTTON_LABEL}
         </EuiButtonEmpty>
         <EuiButton
-          data-test-subj="significantEventsAppDeleteQueriesModalButton"
+          data-test-subj="significantEventsAppDeleteQueriesModalDeleteButton"
           color="danger"
           onClick={onConfirm}
           isLoading={isLoading}
