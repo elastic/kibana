@@ -24,16 +24,12 @@ export const getInboundIngestToken = (connector: ActionConnector): string | unde
 export const isInboundIngressConnector = (connector: ActionConnector): boolean =>
   connectorTypeHasInboundEvents(connector.actionTypeId);
 
-export interface InboundEventsEnabledPayload {
-  isInboundEventsEnabled: boolean;
-}
-
 /** Dual create/update send the flag only when the cluster switch is on. Otherwise the key is unknown and the route returns 400. */
 export const isInboundEventsEnabledPayload = (
   actionTypeId: string,
   isInboundEventsEnabled: boolean | undefined,
   isClusterInboundEventsEnabled: boolean
-): InboundEventsEnabledPayload | Record<string, never> => {
+): { isInboundEventsEnabled?: boolean } => {
   if (isClusterInboundEventsEnabled && connectorTypeIsDual(actionTypeId)) {
     return { isInboundEventsEnabled: isInboundEventsEnabled === true };
   }
