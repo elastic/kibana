@@ -25,6 +25,7 @@ describe('registerUiSettings', () => {
       expect.objectContaining({
         type: 'boolean',
         value: false,
+        scope: 'namespace',
         category: ['securitySolution'],
         solutionViews: ['security'],
         experimental: true,
