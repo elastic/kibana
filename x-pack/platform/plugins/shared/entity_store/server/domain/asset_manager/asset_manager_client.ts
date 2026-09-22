@@ -453,7 +453,7 @@ export class AssetManagerClient {
         logsExtractionConfigByType,
       };
     } catch (error) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(error as Error)) {
         return { status: ENTITY_STORE_STATUS.NOT_INSTALLED, engines: [] };
       }
 
@@ -713,7 +713,7 @@ export class AssetManagerClient {
         lastError: task.state.lastError ?? null,
       };
     } catch (e) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(e as Error)) {
         return {
           id: taskId,
           installed: false,
