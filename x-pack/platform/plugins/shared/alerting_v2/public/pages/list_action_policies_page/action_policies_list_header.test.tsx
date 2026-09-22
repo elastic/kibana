@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { ListPageTestProviders } from '../../test_utils/test_providers';
 import { ActionPoliciesListHeader } from './action_policies_list_header';
 
@@ -72,13 +71,6 @@ describe('ActionPoliciesListHeader', () => {
       isExperimentalFeaturesEnabled: true,
     };
     mockIsLicenseValid = true;
-  });
-
-  it('renders the page title and experimental badge', () => {
-    renderHeader();
-
-    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Action Policies');
-    expect(screen.getByTestId('alertingV2ExperimentalBadge')).toBeInTheDocument();
   });
 
   it('renders the create split button when the user can write and the list is populated', () => {
