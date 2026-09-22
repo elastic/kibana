@@ -58,7 +58,10 @@ describe('decay', () => {
   });
 
   it('does not rewrite lastTime on read', () => {
-    const decayed = decayCounters({ impressions: 8, conversions: 2, lastTime: t0 }, t0 + HALF_LIFE_SEC);
+    const decayed = decayCounters(
+      { impressions: 8, conversions: 2, lastTime: t0 },
+      t0 + HALF_LIFE_SEC
+    );
     expect(decayed.lastTime).toBe(t0);
     expect(decayed.impressions).toBeCloseTo(4, 12);
   });
@@ -269,7 +272,11 @@ describe('rankForMode', () => {
   });
 
   it('browse + thompson uses the sampler', () => {
-    const sampleBeta = jest.fn().mockReturnValueOnce(0.2).mockReturnValueOnce(0.8).mockReturnValueOnce(0.1);
+    const sampleBeta = jest
+      .fn()
+      .mockReturnValueOnce(0.2)
+      .mockReturnValueOnce(0.8)
+      .mockReturnValueOnce(0.1);
     expect(
       rankForMode({
         mode: 'browse',

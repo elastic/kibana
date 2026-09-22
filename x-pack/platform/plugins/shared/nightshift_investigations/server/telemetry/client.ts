@@ -14,10 +14,7 @@ import {
 } from './events';
 
 export class NightshiftTelemetryClient {
-  constructor(
-    private readonly analytics: AnalyticsServiceSetup,
-    private readonly logger: Logger
-  ) {}
+  constructor(private readonly analytics: AnalyticsServiceSetup, private readonly logger: Logger) {}
 
   reportSemanticMemoryMaterialized(event: SemanticMemoryMaterializedEvent): void {
     this.report(NIGHTSHIFT_SEMANTIC_MEMORY_MATERIALIZED_EVENT, event);

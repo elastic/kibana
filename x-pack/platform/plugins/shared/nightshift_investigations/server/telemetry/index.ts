@@ -22,7 +22,4 @@ export const setupNightshiftTelemetry = ({
 };
 
 export { NightshiftTelemetryClient };
-export type {
-  SemanticMemoryMaterializedEvent,
-  SemanticMemoryOptimizedEvent,
-} from './events';
+export type { SemanticMemoryMaterializedEvent, SemanticMemoryOptimizedEvent } from './events';
