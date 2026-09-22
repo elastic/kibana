@@ -160,6 +160,20 @@ steps:
       expect(result[0].message).toContain('unknownFilter');
     });
 
+    it('should report error columns past a leading ${{ }} (same-length blanking preserves offsets)', () => {
+      // value: "${{ a != null }} {{ name | unknownFilter }}"
+      //         ^quote        ^dynamic expr ends          ^Liquid error should land here, not at col 1
+      const dollar = '$';
+      const dynamicExpr = dollar + '{{ a != null }}';
+      const yamlString = 'value: "' + dynamicExpr + ' {{ name | unknownFilter }}"';
+      const result = validate(yamlString);
+      expect(result).toHaveLength(1);
+      expect(result[0].message).toContain('unknownFilter');
+      // "value: \"" is 8 chars; dynamicExpr length must be skipped before the Liquid error.
+      const valueStartColumn = 'value: "'.length + 1; // 1-based column of first char inside quotes
+      expect(result[0].startColumn).toBeGreaterThan(valueStartColumn + dynamicExpr.length);
+    });
+
     it('should still return errors for invalid liquid on non-comment lines even when comments are present', () => {
       const yamlString = `# valid comment with {{ var }}
 name: test

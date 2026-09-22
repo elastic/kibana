@@ -79,9 +79,13 @@ function mapToAbsolutePosition(
 const LIQUID_OUTPUT_PATTERN = '{{';
 const LIQUID_TAG_PATTERN = '{%';
 // Matches ${{ ... }} — JS/conditional expression syntax used alongside Liquid in workflow YAML.
-// These may contain operators (!=, ?, :) that are not valid Liquid syntax and must be stripped
-// before the Liquid parser sees the value.
+// These may contain operators (!=, ?, :) that are not valid Liquid syntax and must be blanked
+// before the Liquid parser sees the value. Replacement is same-length whitespace so character
+// offsets (and thus error underlines) stay aligned with the original scalar.
 const DYNAMIC_EXPRESSION_STRIP = /\$\{\{(?:[^}]|\}(?!\}))*\}\}/g;
+
+const blankDynamicExpressions = (value: string): string =>
+  value.replace(DYNAMIC_EXPRESSION_STRIP, (match) => ' '.repeat(match.length));
 
 export function validateLiquidTemplate(
   yamlString: string,
@@ -95,9 +99,9 @@ export function validateLiquidTemplate(
       if (!node.range) return;
       if (typeof node.value !== 'string') return;
 
-      // Strip ${{ ... }} before Liquid validation — the Liquid parser would reject
-      // JS-style operators (!=, ?) inside those expressions as invalid Liquid syntax.
-      const liquidValue = node.value.replace(DYNAMIC_EXPRESSION_STRIP, '');
+      // Blank ${{ ... }} before Liquid validation — the Liquid parser would reject
+      // JS-style operators (!=, ?, :) inside those expressions as invalid Liquid syntax.
+      const liquidValue = blankDynamicExpressions(node.value);
 
       if (!liquidValue.includes(LIQUID_OUTPUT_PATTERN) && !liquidValue.includes(LIQUID_TAG_PATTERN))
         return;
@@ -106,7 +110,8 @@ export function validateLiquidTemplate(
         parseTemplateString(liquidValue);
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Invalid Liquid syntax';
-        const relativePosition = extractLiquidErrorPosition(node.value, errorMessage);
+        // liquidValue is same-length as node.value, so positions map 1:1 to the original scalar.
+        const relativePosition = extractLiquidErrorPosition(liquidValue, errorMessage);
         const absPosition = mapToAbsolutePosition(yamlString, node, errorMessage, relativePosition);
 
         const startPos = convertOffsetToLineColumn(yamlString, absPosition.start);
