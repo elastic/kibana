@@ -14,7 +14,7 @@ If `pnpm kbn bootstrap` fails, try the following in order:
 1. Clear caches and force reinstall dependencies:
 
 ```bash
-pnpm cache clean && pnpm kbn clean
+pnpm store prune && pnpm kbn clean
 pnpm kbn bootstrap --force-install
 ```
 

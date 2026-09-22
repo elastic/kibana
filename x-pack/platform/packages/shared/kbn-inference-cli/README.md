@@ -36,7 +36,7 @@ log.info(response.output);
 Running a recipe:
 
 ```bash
-pnpm run ts-node x-pack/solutions/observability/packages/kbn-genai-cli/recipes/hello_world.ts
+pnpm exec ts-node x-pack/solutions/observability/packages/kbn-genai-cli/recipes/hello_world.ts
 ```
 
 ## EIS

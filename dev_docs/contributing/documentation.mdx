@@ -173,7 +173,7 @@ There are three great ways to debug issues with the API infrastructure.
 
 [api_doc_suite.test.ts](https://github.com/elastic/kibana/blob/main/packages/kbn-docs-utils/src/integration_tests/api_doc_suite.test.ts) is a pretty comprehensive test suite that builds the test docs inside the [**fixtures** folder](https://github.com/elastic/kibana/tree/main/packages/kbn-docs-utils/src/integration_tests/__fixtures__/src).
 
-Edit the code inside `__fixtures__` to replicate the bug, write a test to track what should happen, then run `pnpm jest api_doc_suite`.
+Edit the code inside `__fixtures__` to replicate the bug, write a test to track what should happen, then run `pnpm exec jest api_doc_suite`.
 
 Once you've verified the bug is reproducible, use debug messages to narrow down the problem. This is much faster than running the entire suite to debug.
 
