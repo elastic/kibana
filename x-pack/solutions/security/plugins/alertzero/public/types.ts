@@ -6,6 +6,7 @@
  */
 
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { WorkflowsPublicPluginStart } from '@kbn/workflows-management-plugin/public';
 
@@ -19,6 +20,7 @@ export interface AlertZeroStartDependencies {
   /** Required plugin, see `requiredPlugins` in kibana.jsonc. */
   agentBuilder: AgentBuilderPluginStart;
   spaces?: SpacesPluginStart;
+  share?: SharePluginStart;
   workflowsManagement?: WorkflowsPublicPluginStart;
 }
 
