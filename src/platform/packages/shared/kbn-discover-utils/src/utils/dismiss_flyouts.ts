@@ -38,7 +38,9 @@ const getFlyoutCloseButtonGetters = (flyout: DiscoverFlyouts): Array<() => HTMLE
   if (flyout === DiscoverFlyouts.lensEdit) {
     return [
       () =>
-        document.querySelector(`${root} [data-test-subj="lns-indexPattern-dimensionContainerBack"]`),
+        document.querySelector(
+          `${root} [data-test-subj="lns-indexPattern-dimensionContainerBack"]`
+        ),
       () => document.getElementById('lnsCancelEditOnFlyFlyout'),
     ];
   }
