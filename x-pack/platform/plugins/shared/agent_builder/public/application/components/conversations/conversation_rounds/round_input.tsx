@@ -22,13 +22,14 @@ import type {
   AttachmentVersionRef,
   VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
-import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
+import { AttachmentType, ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { useRoundInputAuthor } from '../../../hooks/use_round_input_author';
 import { RoundResponseActions } from './round_response/round_response_actions';
 import { RoundAttachmentReferences } from './round_attachment_references';
-import { CommandBadgeText } from './command_badge_text';
+import { RoundInputText } from './round_input_text';
 import { RoundInputAvatar } from './round_input_avatar';
 import { RoundAuthorHeader } from './round_author_header';
+import { RoundInputImages } from './round_input_images';
 
 const labels = {
   userMessage: i18n.translate('xpack.agentBuilder.round.userInput', {
@@ -47,6 +48,8 @@ interface RoundInputProps {
   fallbackAttachments?: Attachment[];
 }
 
+const EXCLUDE_IMAGE_TYPES: AttachmentType[] = [AttachmentType.image];
+
 export const RoundInput = ({
   input,
   author,
@@ -59,12 +62,12 @@ export const RoundInput = ({
 }: RoundInputProps) => {
   const { euiTheme } = useEuiTheme();
   const [isHovering, setIsHovering] = useState(false);
+  const [hoveredImageName, setHoveredImageName] = useState<string | null>(null);
   const {
     profile: authorProfile,
     name: authorName,
     isCurrentUser,
   } = useRoundInputAuthor({ author, origin, isPendingCurrentRound });
-  const hasAttachmentReferences = Boolean(attachmentRefs?.length || fallbackAttachments?.length);
 
   const inputContainerStyles = css`
     width: 100%;
@@ -111,25 +114,29 @@ export const RoundInput = ({
               aria-label={labels.userMessage}
             >
               <EuiFlexGroup direction="column" gutterSize="s">
+                <RoundInputImages
+                  attachmentRefs={attachmentRefs}
+                  conversationAttachments={conversationAttachments}
+                  fallbackAttachments={fallbackAttachments}
+                  actorFilter={[ATTACHMENT_REF_ACTOR.user]}
+                  hoveredImageName={hoveredImageName}
+                />
                 <EuiFlexItem grow={false}>
                   <EuiText size="s">
-                    <CommandBadgeText text={input} />
+                    <RoundInputText text={input} onHoverImage={setHoveredImageName} />
                   </EuiText>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiPanel>
           </EuiFlexItem>
-          {hasAttachmentReferences && (
-            <EuiFlexItem grow={false}>
-              <RoundAttachmentReferences
-                attachmentRefs={attachmentRefs}
-                conversationAttachments={conversationAttachments}
-                fallbackAttachments={fallbackAttachments}
-                actorFilter={[ATTACHMENT_REF_ACTOR.user]}
-                justifyContent="flexStart"
-              />
-            </EuiFlexItem>
-          )}
+          <RoundAttachmentReferences
+            attachmentRefs={attachmentRefs}
+            conversationAttachments={conversationAttachments}
+            fallbackAttachments={fallbackAttachments}
+            actorFilter={[ATTACHMENT_REF_ACTOR.user]}
+            justifyContent="flexStart"
+            excludeTypes={EXCLUDE_IMAGE_TYPES}
+          />
           <EuiFlexItem grow={false}>
             <RoundResponseActions content={input} isVisible={isHovering} copyTarget="prompt" />
           </EuiFlexItem>

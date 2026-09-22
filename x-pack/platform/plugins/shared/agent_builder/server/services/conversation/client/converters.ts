@@ -10,6 +10,7 @@ import type {
   Conversation,
   ConversationRound,
   ConversationRoundStep,
+  ConversationAttachmentSummary,
   ConversationWithoutRounds,
   CurrentUser,
   ToolResult,
@@ -17,7 +18,11 @@ import type {
   SerializedMetadataValue,
   ConversationParentRelation,
 } from '@kbn/agent-builder-common';
-import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
+import type {
+  AttachmentVersionRef,
+  VersionedAttachment,
+} from '@kbn/agent-builder-common/attachments';
+import { isAttachmentActive } from '@kbn/agent-builder-common/attachments';
 import type { RoundState } from '@kbn/agent-builder-common/chat/round_state';
 import {
   CONVERSATION_SCHEMA_VERSION,
@@ -59,8 +64,9 @@ import {
   needsMigration,
   applyAttachmentRefsToRounds,
 } from './migrate_attachments';
-import { isRoundDerivedEventId, roundsToEvents } from './rounds_to_events';
+import { roundsToEvents } from './rounds_to_events';
 import { eventsToRounds } from './events_to_rounds';
+import { reconcileEvents } from './round_writes';
 
 export type Document = Omit<
   Required<
@@ -80,31 +86,10 @@ export const isConversationDocument = (hit: Partial<Document>): hit is Document 
   );
 };
 
-/**
- * Rebuilds the stored timeline on write: round events keep their order, and additive events
- * (like errors) get slotted in by timestamp. That keeps a future error where it actually
- * happened instead of dumped at the end.
- */
-const reconcileEvents = (merged: Conversation) => {
-  const roundDerived = roundsToEvents(merged);
-  const additive = (merged.events ?? []).filter((event) => !isRoundDerivedEventId(event.id));
-
-  const events = [...roundDerived];
-  for (const event of additive) {
-    const insertAt = events.findIndex((existing) => existing.created_at > event.created_at);
-    if (insertAt === -1) {
-      events.push(event);
-    } else {
-      events.splice(insertAt, 0, event);
-    }
-  }
-  return events;
-};
-
 export const fromEsWithoutRounds = (
   document: Document,
   user: CurrentUser
-): ConversationWithoutRounds => {
+): Omit<ConversationWithoutRounds, 'attachments'> => {
   if (!document._source) {
     throw new Error('No source found on get conversation response');
   }
@@ -213,6 +198,13 @@ function deserializeStepResults(rounds: PersistentConversationRound[]): Conversa
     };
   });
 }
+
+type ConversationAttachmentSource = Pick<VersionedAttachment, 'id' | 'type' | 'active'>;
+
+export const toAttachmentSummaries = (
+  attachments: ConversationAttachmentSource[] | undefined
+): ConversationAttachmentSummary[] =>
+  (attachments ?? []).filter(isAttachmentActive).map(({ id, type }) => ({ id, type }));
 
 /**
  * Migrates legacy RoundState format.
@@ -389,8 +381,12 @@ export const toResponseConversationWithoutRounds = ({
   user: CurrentUser;
   resolveTemplate: ConversationTemplateResolver;
 }): ConversationWithoutRoundsWithPermissions => {
+  const attachments = toAttachmentSummaries(document._source?.attachments);
   const conversation = withDeserializedMetadata(
-    fromEsWithoutRounds(document, user),
+    {
+      ...fromEsWithoutRounds(document, user),
+      ...(attachments.length > 0 ? { attachments } : {}),
+    },
     resolveTemplate
   );
 
@@ -463,7 +459,7 @@ export const updateConversation = ({
   updateDate: Date;
 }) => {
   const {
-    events: _ignoredEvents,
+    events: updateEvents,
     schema_version: _ignoredSchemaVersion,
     ...safeUpdate
   } = update as ConversationUpdatableFields & {
@@ -479,7 +475,16 @@ export const updateConversation = ({
     schema_version: conversation.schema_version,
   } as Conversation;
 
-  if (!isEventsNativeVersion(merged.schema_version)) {
+  if (updateEvents !== undefined) {
+    return {
+      ...merged,
+      schema_version: CONVERSATION_SCHEMA_VERSION,
+      events: updateEvents,
+      rounds: safeUpdate.rounds ?? eventsToRounds(updateEvents),
+    };
+  }
+
+  if (!isEventsNativeVersion(merged.schema_version) || safeUpdate.rounds === undefined) {
     return merged;
   }
 
@@ -506,8 +511,6 @@ export const createRequestToEs = ({
   const effectiveUser = conversation.user ?? currentUser;
   const createdAt = creationDate.toISOString();
 
-  // The initial timeline is derived from the rounds being created, using the same user that
-  // gets persisted so `user_message` actors match the stored ownership.
   const forEvents: Conversation = {
     id: '',
     agent_id: conversation.agent_id,
@@ -518,7 +521,10 @@ export const createRequestToEs = ({
     rounds: conversation.rounds,
     ...(conversation.origin ? { origin: conversation.origin } : {}),
   };
-  const events = roundsToEvents(forEvents);
+  const events =
+    conversation.events && conversation.events.length > 0
+      ? conversation.events
+      : roundsToEvents(forEvents);
 
   return {
     agent_id: conversation.agent_id,

@@ -21,7 +21,7 @@ export namespace BaseStream {
     /**
      * Child query streams (virtual, read-only ES|QL view streams) that belong to this stream.
      * Names must follow the parent.childname naming convention. These are not significant-event
-     * queries (`StreamQuery`); those live outside the stream payload (see `GetResponse`).
+     * queries (`StreamQuery`); those are stored separately from the stream payload.
      */
     query_streams?: QueryStreamReference[];
   }
@@ -29,8 +29,7 @@ export namespace BaseStream {
   export type Source<TDefinition extends Definition = Definition> = TDefinition;
 
   /**
-   * Stream read model. Significant-event queries are intentionally not included here; fetch
-   * them via `GET /api/streams/{name}/queries`.
+   * Stream read model. Significant-event queries are intentionally not included here.
    */
   export interface GetResponse<TDefinition extends Definition = Definition> {
     dashboards: string[];
@@ -39,10 +38,10 @@ export namespace BaseStream {
   }
 
   /**
-   * Stream write model. Significant-event queries are intentionally not part of the upsert;
-   * manage them via the `/api/streams/{name}/queries` endpoints. The `PUT` routes validate the
-   * body with `DeepStrict`, so a stray `queries` field is rejected as an unrecognized key (HTTP
-   * 400); the GET→PUT converter (`convertGetResponseIntoUpsertRequest`) never emits one.
+   * Stream write model. Significant-event queries are intentionally not part of the upsert.
+   * The `PUT` routes validate the body with `DeepStrict`, so a stray `queries` field is
+   * rejected as an unrecognized key (HTTP 400); the GET→PUT converter
+   * (`convertGetResponseIntoUpsertRequest`) never emits one.
    */
   export interface UpsertRequest<TDefinition extends Definition = Definition> {
     dashboards: string[];

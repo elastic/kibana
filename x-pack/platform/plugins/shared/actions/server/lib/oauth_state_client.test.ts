@@ -7,6 +7,7 @@
 
 import { SavedObjectsUtils, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import { OAuthStateClient } from './oauth_state_client';
 import { OAUTH_STATE_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
 
@@ -175,7 +176,7 @@ describe('OAuthStateClient', () => {
         codeVerifier: 'decrypted-verifier',
         connectorId: 'connector-1',
         kibanaReturnUrl: 'https://kibana.example.com/app/connectors',
-        spaceId: 'default',
+        spaceId: asSpaceId('default'),
         createdAt: '2025-01-01T00:00:00.000Z',
         expiresAt: futureDate,
       });

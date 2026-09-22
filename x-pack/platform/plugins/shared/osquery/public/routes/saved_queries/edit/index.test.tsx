@@ -12,6 +12,11 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { EuiProvider } from '@elastic/eui';
 
 import { EditSavedQueryPage } from '.';
+import {
+  OsqueryPageHeaderProvider,
+  useOsqueryPageHeaderTitle,
+} from '../../../components/osquery_page_header_context';
+import { useSavedQuery } from '../../../saved_queries';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -82,12 +87,21 @@ const createTestQueryClient = () =>
     defaultOptions: { queries: { retry: false, cacheTime: 0 } },
   });
 
+const PublishedTitle = () => {
+  const title = useOsqueryPageHeaderTitle();
+
+  return <span data-test-subj="published-osquery-title">{title ?? ''}</span>;
+};
+
 const renderComponent = () =>
   render(
     <EuiProvider>
       <IntlProvider locale="en">
         <QueryClientProvider client={createTestQueryClient()}>
-          <EditSavedQueryPage />
+          <OsqueryPageHeaderProvider>
+            <EditSavedQueryPage />
+            <PublishedTitle />
+          </OsqueryPageHeaderProvider>
         </QueryClientProvider>
       </IntlProvider>
     </EuiProvider>
@@ -243,6 +257,20 @@ describe('EditSavedQueryPage', () => {
       fireEvent.click(screen.getByText('Duplicate query'));
 
       expect(screen.getByText('You have unsaved changes')).toBeInTheDocument();
+    });
+  });
+
+  describe('page chrome', () => {
+    it('publishes a fallback header title when the saved query fails to load', () => {
+      (useSavedQuery as jest.Mock).mockReturnValue({
+        isLoading: false,
+        data: undefined,
+        error: new Error('nope'),
+      });
+      renderComponent();
+
+      expect(screen.getByText('Failed to load saved query')).toBeInTheDocument();
+      expect(screen.getByTestId('published-osquery-title')).toHaveTextContent('Edit saved query');
     });
   });
 });

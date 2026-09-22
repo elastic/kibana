@@ -9,6 +9,7 @@ export { rawUiamApiKeysProvisioningStatusSchema as rawUiamApiKeysProvisioningSta
 export { rawUiamApiKeysProvisioningStatusSchema as rawUiamApiKeysProvisioningStatusSchemaV2 } from './v2';
 
 export {
+  buildUiamApiKeyProvisioningStatusId,
   UiamApiKeyProvisioningEntityType,
   UiamApiKeyProvisioningStatus,
 } from '@kbn/uiam-api-keys-provisioning-status';

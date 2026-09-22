@@ -143,7 +143,7 @@ Ship the Elasticsearch `SystemDataStreamDescriptor` **with or before** enabling 
 
 ### How to verify
 
-After Kibana has created the stream (local `yarn es snapshot` + Kibana boot, or a stack that includes the descriptor):
+After Kibana has created the stream (local `pnpm es snapshot` + Kibana boot, or a stack that includes the descriptor):
 
 ```http
 GET _data_stream/<name>

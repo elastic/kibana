@@ -9,16 +9,47 @@ import type { Observable } from 'rxjs';
 import { firstValueFrom, toArray } from 'rxjs';
 import type { ServerSentEvent } from '@kbn/sse-utils';
 import { observableIntoEventSourceStream, cloudProxyBufferSize } from '@kbn/sse-utils-server';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
-import type { ChatRequestBodyPayload, ChatConverseResponse } from '../../common/http_api/chat';
+import { createBadRequestError } from '@kbn/agent-builder-common';
+import type {
+  ChatRequestBodyPayload,
+  ChatConverseResponse,
+  UserMessagePayload,
+} from '../../common/http_api/chat';
+import { ChatTriggerMode } from '../../common/http_api/chat';
 import { chatApiPath } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { AGENT_SOCKET_TIMEOUT_MS, getSSEResponseHeaders } from './utils';
-import { getConverseHelpers } from './converse_helpers';
+import { getConverseHelpers, filterEventsNativeApiEvents } from './converse_helpers';
 import { findConversationEvent } from '../services/execution/utils/chat_response';
-import { conversePayloadSchema } from './chat';
+import { chatPayloadSchema, conversePayloadSchema } from './chat';
+
+/**
+ * Validates a `trigger_mode: 'never'` request and returns the fields it appends to the
+ * conversation. The execution options the payload may also carry are ignored, as nothing
+ * executes.
+ */
+const validateUserMessagePayload = ({
+  conversation_id: conversationId,
+  input,
+  attachments,
+}: ChatRequestBodyPayload): UserMessagePayload => {
+  if (!conversationId) {
+    throw createBadRequestError('User message requests require conversation_id');
+  }
+
+  if (!input?.trim() && !attachments?.length) {
+    throw createBadRequestError('User message requests require input or attachments');
+  }
+
+  return {
+    trigger_mode: ChatTriggerMode.Never,
+    conversation_id: conversationId,
+    input,
+    attachments,
+  };
+};
 
 /** Events-native chat API */
 export function registerChatApiRoutes({
@@ -29,7 +60,7 @@ export function registerChatApiRoutes({
 }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
 
-  const { validateAction, validateConfigurationOverrides, executeAgent } = getConverseHelpers({
+  const { validateConfigurationOverrides, executeAgent } = getConverseHelpers({
     getInternalServices,
   });
 
@@ -42,7 +73,7 @@ export function registerChatApiRoutes({
       access: 'public',
       summary: 'Send chat message',
       description:
-        'Send a message to an agent and receive the full conversation, including its event timeline. This synchronous endpoint waits for the agent to finish before returning.',
+        'Send a message to an agent and receive the full conversation, including its event timeline. This synchronous endpoint waits for the agent to finish before returning. With trigger_mode: never, appends a user message without execution and returns the updated conversation; the execution options are ignored.',
       options: {
         timeout: {
           idleSocket: AGENT_SOCKET_TIMEOUT_MS,
@@ -58,34 +89,56 @@ export function registerChatApiRoutes({
       {
         version: '2023-10-31',
         validate: {
-          request: { body: conversePayloadSchema },
+          request: { body: chatPayloadSchema },
         },
       },
-      wrapHandler(
-        async (ctx, request, response) => {
-          const { execution: executionService, conversations: conversationsService } =
+      wrapHandler(async (ctx, request, response) => {
+        const payload = request.body as ChatRequestBodyPayload;
+
+        if (payload.trigger_mode === ChatTriggerMode.Never) {
+          const {
+            conversation_id: conversationId,
+            input,
+            attachments: attachmentInputs,
+          } = validateUserMessagePayload(payload);
+
+          const { attachments: attachmentsService, conversations: conversationsService } =
             getInternalServices();
-          const payload = request.body as ChatRequestBodyPayload;
 
-          await validateConfigurationOverrides({ payload, request });
-          validateAction(payload);
+          const attachments = await attachmentsService.validateAttachmentInputs(
+            attachmentInputs,
+            request
+          );
 
-          const { events$: chatEvents$ } = await executeAgent({
-            payload,
+          const body = await conversationsService.appendUserMessage({
             request,
-            executionService,
+            conversationId,
+            message: input,
+            attachments,
           });
 
-          const events = await firstValueFrom(chatEvents$.pipe(toArray()));
-          const conversationId = findConversationEvent(events).data.conversation_id;
+          return response.ok({ body });
+        }
 
-          const client = await conversationsService.getScopedClient({ request });
-          const conversation = await client.get(conversationId);
+        const { conversations: conversationsService, execution: executionService } =
+          getInternalServices();
 
-          return response.ok<ChatConverseResponse>({ body: conversation });
-        },
-        { featureFlag: AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID }
-      )
+        await validateConfigurationOverrides({ payload, request });
+
+        const { events$: chatEvents$ } = await executeAgent({
+          payload,
+          request,
+          executionService,
+        });
+
+        const events = await firstValueFrom(chatEvents$.pipe(toArray()));
+        const conversationId = findConversationEvent(events).data.conversation_id;
+
+        const client = await conversationsService.getScopedClient({ request });
+        const conversation = await client.get(conversationId);
+
+        return response.ok<ChatConverseResponse>({ body: conversation });
+      })
     );
 
   router.versioned
@@ -116,40 +169,38 @@ export function registerChatApiRoutes({
           request: { body: conversePayloadSchema },
         },
       },
-      wrapHandler(
-        async (ctx, request, response) => {
-          const [, { cloud }] = await coreSetup.getStartServices();
-          const { execution: executionService } = getInternalServices();
-          const payload = request.body as ChatRequestBodyPayload;
+      wrapHandler(async (ctx, request, response) => {
+        const [, { cloud }] = await coreSetup.getStartServices();
+        const { execution: executionService } = getInternalServices();
+        const payload = request.body as ChatRequestBodyPayload;
 
-          await validateConfigurationOverrides({ payload, request });
-          validateAction(payload);
+        await validateConfigurationOverrides({ payload, request });
 
-          const abortController = new AbortController();
-          request.events.aborted$.subscribe(() => {
-            abortController.abort();
-          });
+        const abortController = new AbortController();
+        request.events.aborted$.subscribe(() => {
+          abortController.abort();
+        });
 
-          const { events$: chatEvents$ } = await executeAgent({
-            payload,
-            request,
-            executionService,
-          });
+        const { events$: chatEvents$ } = await executeAgent({
+          payload,
+          request,
+          executionService,
+        });
 
-          return response.ok({
-            headers: getSSEResponseHeaders(),
-            body: observableIntoEventSourceStream(
-              chatEvents$ as unknown as Observable<ServerSentEvent>,
-              {
-                signal: abortController.signal,
-                flushThrottleMs: 100,
-                flushMinBytes: cloud?.isCloudEnabled ? cloudProxyBufferSize : undefined,
-                logger,
-              }
-            ),
-          });
-        },
-        { featureFlag: AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID }
-      )
+        const nativeEvents$ = chatEvents$.pipe(filterEventsNativeApiEvents());
+
+        return response.ok({
+          headers: getSSEResponseHeaders(),
+          body: observableIntoEventSourceStream(
+            nativeEvents$ as unknown as Observable<ServerSentEvent>,
+            {
+              signal: abortController.signal,
+              flushThrottleMs: 100,
+              flushMinBytes: cloud?.isCloudEnabled ? cloudProxyBufferSize : undefined,
+              logger,
+            }
+          ),
+        });
+      })
     );
 }

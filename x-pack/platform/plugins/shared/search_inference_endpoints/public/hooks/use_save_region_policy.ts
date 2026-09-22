@@ -17,7 +17,6 @@ import {
 } from '../../common/constants';
 import { parseRegionPolicyConflict } from '../utils/parse_region_policy_conflict';
 import { useKibana } from './use_kibana';
-import { useRegionPreferencesRedesignEnabled } from './use_region_preferences_redesign_enabled';
 
 export interface SaveRegionPolicyVariables {
   body: RegionPolicyBody;
@@ -27,7 +26,6 @@ export interface SaveRegionPolicyVariables {
 export const useSaveRegionPolicy = () => {
   const { services } = useKibana();
   const queryClient = useQueryClient();
-  const isRedesignEnabled = useRegionPreferencesRedesignEnabled();
 
   return useMutation<
     RegionPolicyResponse,
@@ -54,8 +52,7 @@ export const useSaveRegionPolicy = () => {
       const isConflict = err.response?.status === 409;
       const conflictArtifacts = parseRegionPolicyConflict(err.body?.attributes);
       const isInUseConflict = isConflict && Boolean(conflictArtifacts);
-      const surfaceConflictInModal = isRedesignEnabled && isInUseConflict;
-      if (surfaceConflictInModal) {
+      if (isInUseConflict) {
         return;
       }
       if (isConflict) {

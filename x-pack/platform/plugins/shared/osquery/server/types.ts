@@ -25,7 +25,7 @@ import type { CasesServerSetup } from '@kbn/cases-plugin/server';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type { CPSServerSetup } from '@kbn/cps/server';
+import type { CPSServerStart } from '@kbn/cps/server';
 import type { createActionService } from './handlers/action/create_action_service';
 
 export interface CheckResponseActionAuthzParams {
@@ -62,7 +62,6 @@ export interface SetupPlugins {
   telemetry?: TelemetryPluginSetup;
   licensing: LicensingPluginSetup;
   spaces?: SpacesPluginSetup;
-  cps?: CPSServerSetup;
 }
 
 export interface StartPlugins {
@@ -75,4 +74,5 @@ export interface StartPlugins {
   telemetry?: TelemetryPluginStart;
   ruleRegistry?: RuleRegistryPluginStartContract;
   spaces?: SpacesPluginStart;
+  cps?: CPSServerStart;
 }

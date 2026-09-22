@@ -100,7 +100,7 @@ export function StreamDeleteModal({
           title={
             <FormattedMessage
               id="xpack.streams.streamDetailView.deleteStreamModal.warningText"
-              defaultMessage="This action cannot be undone and permanently deletes the {stream} stream and all its contents. This action cannot be undone."
+              defaultMessage="This action cannot be undone and permanently deletes the {stream} stream and all its contents."
               values={{
                 stream: (
                   <EuiLink

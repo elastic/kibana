@@ -19,33 +19,21 @@ steps:
   # E2E suites (FTR, Scout, Cypress) intentionally do not run in the merge queue.
   # Only Jest unit tests gate the queue.
   - command: .buildkite/scripts/steps/test/pick_test_group_run_order.sh
-    label: 'Pick Test Group Run Order'
+    label: 'Pick Test Group Run Order and Store Cache'
+    key: pick_test_group_run_order
     agents:
-      provider: k8s
-      image: docker.elastic.co/ci-agent-images/kibana/ci-minimal
-      imageUID: 1000
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2d-highcpu-8
+      zones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
     timeout_in_minutes: 15
     env:
+      STORE_CACHE: 'true'
       JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
       JEST_UNIT_MAX_MINUTES: '15.0'
       LIMIT_CONFIG_TYPE: 'unit'
-    plugins:
-      - sparse-checkout#v1.6.0:
-          no_cone: true
-          paths:
-            - '/.buildkite/'
-            - '/.node-version'
-            - '/package.json'
-            - '/tsconfig.base.json'
-            - '/versions.json'
-            - '**/jest.config.js'
-            - '**/*.test.js'
-            - '**/*.test.mjs'
-            - '**/*.test.ts'
-            - '**/*.test.tsx'
-          cleanup_sparse_state: true
-          post_checkout:
-            unshallow: true
+      JEST_CONFIGS_DEPS: 'pick_test_group_run_order'
     retry:
       automatic:
         - exit_status: '*'
@@ -53,6 +41,28 @@ steps:
 
   - wait: ~
     depends_on: pre_build
+
+  - command: .buildkite/scripts/steps/spoof_status_checks.sh
+    label: 'Spoof Status Checks'
+    env:
+      STATUS_CHECKS: |
+        prbot:backport labels
+        prbot:outdated
+        prbot:release note labels
+        prbot:update required
+        security/snyk (Application Experience)
+        buildkite/docs-build-pr
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2
+      preemptible: true
+    timeout_in_minutes: 10
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
 
   - command: .buildkite/scripts/steps/on_merge_build_and_metrics.sh
     label: Build Kibana Distribution
@@ -79,8 +89,6 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2d-standard-8
-      preemptible: true
-      spotZones: us-central1-b,us-central1-c,us-central1-f
     key: quick_checks
     timeout_in_minutes: 60
     retry:
@@ -112,8 +120,6 @@ steps:
       provider: gcp
       machineType: n4-standard-16
       diskType: hyperdisk-balanced
-      preemptible: true
-      spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
     key: linting
     timeout_in_minutes: 60
     retry:
@@ -129,8 +135,6 @@ steps:
       provider: gcp
       machineType: n4-standard-32
       diskType: hyperdisk-balanced
-      preemptible: true
-      spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
     key: linting_with_types
     timeout_in_minutes: 60
     retry:
@@ -146,10 +150,11 @@ steps:
       provider: gcp
       machineType: n4-highcpu-32
       diskType: hyperdisk-balanced
-      preemptible: true
-      spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
     key: check_types
     timeout_in_minutes: 60
+    env:
+      RESTORE_ARCHIVE: 'true'
+      UPLOAD_ARCHIVE: 'true'
     retry:
       automatic:
         - exit_status: '-1'
@@ -177,7 +182,15 @@ steps:
     label: Post-Build
     timeout_in_minutes: 10
     agents:
-      image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-2
+      provider: k8s
+      image: docker.elastic.co/ci-agent-images/kibana/ci-minimal
+      imageUID: 1000
+    plugins:
+      - sparse-checkout#v1.6.0:
+          paths:
+            - .buildkite
+            - .node-version
+            - package.json
+            - tsconfig.base.json
+            - versions.json
+          cleanup_sparse_state: true

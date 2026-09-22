@@ -10,6 +10,8 @@
 import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiAccordion,
+  EuiButtonIcon,
+  EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
   euiFontSize,
@@ -21,16 +23,43 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { partition } from 'lodash';
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux-v7';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { AiButtonIcon } from '@kbn/shared-ux-ai-components';
 import { selectWorkflowId } from '../../../entities/workflows/store/workflow_detail/selectors';
 import type { YamlValidationResult } from '../../../features/validate_workflow_yaml/model/types';
 import { useTelemetry } from '../../../hooks/use_telemetry';
+import { FIX_WITH_AI_LABEL } from '../lib/fix_with_ai_label';
 
 const severityOrder = ['error', 'warning'];
+
+const copyErrorMessageLabel = i18n.translate(
+  'workflowsManagement.workflowYAMLValidationErrors.copyMessage',
+  {
+    defaultMessage: 'Copy message',
+  }
+);
+
+const copiedErrorMessageLabel = i18n.translate(
+  'workflowsManagement.workflowYAMLValidationErrors.copiedMessage',
+  {
+    defaultMessage: 'Copied',
+  }
+);
+
+/** A selection elsewhere on the page, the editor included, must not block navigation. */
+const hasTextSelectionInside = (node: HTMLElement | null): boolean => {
+  const selection = window.getSelection();
+  if (!node || !selection || selection.isCollapsed || selection.toString().length === 0) {
+    return false;
+  }
+  return Array.from({ length: selection.rangeCount }, (_, index) =>
+    selection.getRangeAt(index)
+  ).some((range) => range.intersectsNode(node));
+};
 
 interface WorkflowYamlValidationAccordionProps {
   isMounted: boolean;
@@ -38,6 +67,7 @@ interface WorkflowYamlValidationAccordionProps {
   error: Error | null;
   validationErrors: YamlValidationResult[] | null;
   onErrorClick?: (error: YamlValidationResult) => void;
+  onFixWithAi?: (error: YamlValidationResult) => void;
   extraAction?: React.ReactNode;
 }
 
@@ -90,12 +120,149 @@ function useGroupedErrors(allValidationErrors: YamlValidationResult[] | null) {
   return { highestSeverity, parts, sortedValidationErrors };
 }
 
+interface ValidationErrorRowProps {
+  error: YamlValidationResult;
+  onErrorClick?: (error: YamlValidationResult) => void;
+  onFixWithAi?: (error: YamlValidationResult) => void;
+}
+
+const ValidationErrorRow = React.memo(function ValidationErrorRow({
+  error,
+  onErrorClick,
+  onFixWithAi,
+}: ValidationErrorRowProps) {
+  const styles = useMemoCss(componentStyles);
+  const { euiTheme } = useEuiTheme();
+  const message = error.message ?? '';
+
+  const triggerRef = useRef<HTMLDivElement | null>(null);
+
+  const handleRowClick = useCallback(() => {
+    if (hasTextSelectionInside(triggerRef.current)) {
+      return;
+    }
+    onErrorClick?.(error);
+  }, [error, onErrorClick]);
+
+  const handleRowKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLElement>) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        handleRowClick();
+      }
+    },
+    [handleRowClick]
+  );
+
+  const handleFixWithAi = useCallback(() => {
+    onFixWithAi?.(error);
+  }, [error, onFixWithAi]);
+
+  return (
+    <div css={styles.validationError} data-test-subj="workflowYamlValidationErrorRow">
+      <EuiFlexItem grow={false}>
+        <EuiIcon
+          type={
+            error.severity === 'error'
+              ? 'errorFill'
+              : error.severity === 'warning'
+              ? 'warningFill'
+              : 'info'
+          }
+          color={
+            error.severity === 'error'
+              ? 'danger'
+              : error.severity === 'warning'
+              ? euiTheme.colors.vis.euiColorVis8
+              : 'primary'
+          }
+          size="s"
+          css={styles.validationErrorIcon}
+          aria-hidden={true}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem css={styles.validationErrorText}>
+        <div
+          ref={triggerRef}
+          role="button"
+          tabIndex={0}
+          css={styles.validationErrorTrigger}
+          data-test-subj="workflowYamlValidationErrorMessage"
+          onClick={handleRowClick}
+          onKeyDown={handleRowKeyDown}
+        >
+          <EuiText color="text" size="xs" component="span">
+            <span className="validation-error-message">{message}</span>
+          </EuiText>
+          <EuiText color="subdued" size="xs" component="span" css={styles.validationErrorLocation}>
+            <span>
+              <FormattedMessage
+                id="workflowsManagement.workflowYAMLValidationErrors.lineAndColumn"
+                defaultMessage="Ln {lineNumber}, Col {columnNumber}"
+                values={{
+                  lineNumber: error.startLineNumber,
+                  columnNumber: error.startColumn,
+                }}
+              />
+            </span>
+          </EuiText>
+          {error.ruleId ? (
+            <EuiText color="subdued" size="xs" component="span" css={styles.validationErrorMeta}>
+              <span>{error.ruleId}</span>
+            </EuiText>
+          ) : null}
+        </div>
+      </EuiFlexItem>
+      {onFixWithAi || message ? (
+        <EuiFlexItem grow={false} css={styles.rowActions}>
+          <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
+            {onFixWithAi ? (
+              <EuiFlexItem grow={false}>
+                <AiButtonIcon
+                  iconType="productAgent"
+                  aria-label={FIX_WITH_AI_LABEL}
+                  size="xs"
+                  variant="empty"
+                  withToolTip
+                  data-test-subj="workflowYamlValidationErrorFixWithAiButton"
+                  onClick={handleFixWithAi}
+                />
+              </EuiFlexItem>
+            ) : null}
+            {message ? (
+              <EuiFlexItem grow={false}>
+                <EuiCopy
+                  textToCopy={message}
+                  beforeMessage={copyErrorMessageLabel}
+                  afterMessage={copiedErrorMessageLabel}
+                >
+                  {(copy) => (
+                    <EuiButtonIcon
+                      iconType="copy"
+                      aria-label={copyErrorMessageLabel}
+                      size="xs"
+                      color="text"
+                      data-test-subj="workflowYamlValidationErrorCopyButton"
+                      onClick={copy}
+                    />
+                  )}
+                </EuiCopy>
+              </EuiFlexItem>
+            ) : null}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      ) : null}
+    </div>
+  );
+});
+
 export const WorkflowYamlValidationAccordion = React.memo(function WorkflowYamlValidationAccordion({
   isMounted,
   isLoading,
   error: errorValidating,
   validationErrors,
   onErrorClick,
+  onFixWithAi,
   extraAction,
 }: WorkflowYamlValidationAccordionProps) {
   const styles = useMemoCss(componentStyles);
@@ -104,6 +271,10 @@ export const WorkflowYamlValidationAccordion = React.memo(function WorkflowYamlV
   const workflowId = useSelector(selectWorkflowId);
   const telemetry = useTelemetry();
   const previousErrorsRef = useRef<string>('');
+  const [isOpen, setIsOpen] = useState(false);
+  const onToggle = useCallback(() => {
+    setIsOpen((prev) => !prev);
+  }, []);
 
   let icon: React.ReactNode | null = null;
   let buttonContent: React.ReactNode | null = null;
@@ -117,6 +288,14 @@ export const WorkflowYamlValidationAccordion = React.memo(function WorkflowYamlV
     [validationErrors]
   );
   const hasAccordionContent = allValidationErrors.length > 0;
+
+  // Not while loading: validation clears its results when connector types reload, and the
+  // accordion should not snap shut across that gap.
+  useEffect(() => {
+    if (!hasAccordionContent && !isLoading && isMounted) {
+      setIsOpen(false);
+    }
+  }, [hasAccordionContent, isLoading, isMounted]);
 
   // Report telemetry when validation errors change (only when errors are present and stable)
   useEffect(() => {
@@ -194,7 +373,12 @@ export const WorkflowYamlValidationAccordion = React.memo(function WorkflowYamlV
       id={accordionId}
       data-test-subj="workflowYamlEditorValidationErrorsList"
       buttonContent={
-        <EuiFlexGroup alignItems="center" gutterSize="s" css={styles.buttonContent}>
+        <EuiFlexGroup
+          alignItems="center"
+          gutterSize="s"
+          css={styles.buttonContent}
+          responsive={false}
+        >
           <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
           <EuiFlexItem
             css={styles.buttonContentText}
@@ -206,8 +390,9 @@ export const WorkflowYamlValidationAccordion = React.memo(function WorkflowYamlV
         </EuiFlexGroup>
       }
       arrowDisplay={hasAccordionContent ? 'left' : 'none'}
-      initialIsOpen={false}
       isDisabled={!hasAccordionContent}
+      forceState={isOpen ? 'open' : 'closed'}
+      onToggle={onToggle}
       css={styles.accordion}
       extraAction={extraAction}
     >
@@ -215,63 +400,12 @@ export const WorkflowYamlValidationAccordion = React.memo(function WorkflowYamlV
       <div css={styles.accordionContent} className="eui-yScrollWithShadows">
         <EuiFlexGroup direction="column" gutterSize="s">
           {sortedValidationErrors?.map((error, index) => (
-            <button
-              type="button"
+            <ValidationErrorRow
               key={`${error.startLineNumber}-${error.startColumn}-${error.message}-${index}-${error.severity}`}
-              css={styles.validationError}
-              onClick={() => onErrorClick?.(error)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  onErrorClick?.(error);
-                }
-              }}
-              tabIndex={0}
-            >
-              <EuiFlexItem grow={false}>
-                <EuiIcon
-                  type={
-                    error.severity === 'error'
-                      ? 'errorFill'
-                      : error.severity === 'warning'
-                      ? 'warningFill'
-                      : 'info'
-                  }
-                  color={
-                    error.severity === 'error'
-                      ? 'danger'
-                      : error.severity === 'warning'
-                      ? euiTheme.colors.vis.euiColorVis8
-                      : 'primary'
-                  }
-                  size="s"
-                  css={styles.validationErrorIcon}
-                  aria-hidden={true}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem css={styles.validationErrorText}>
-                <EuiText color="text" size="xs">
-                  <span>{error.message}</span>
-                </EuiText>
-                <EuiText color="subdued" size="xs">
-                  <span>
-                    <FormattedMessage
-                      id="workflowsManagement.workflowYAMLValidationErrors.lineAndColumn"
-                      defaultMessage="Ln {lineNumber}, Col {columnNumber}"
-                      values={{
-                        lineNumber: error.startLineNumber,
-                        columnNumber: error.startColumn,
-                      }}
-                    />
-                  </span>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText color="subdued" size="xs">
-                  <span>{error.source}</span>
-                </EuiText>
-              </EuiFlexItem>
-            </button>
+              error={error}
+              onErrorClick={onErrorClick}
+              onFixWithAi={onFixWithAi}
+            />
           ))}
         </EuiFlexGroup>
       </div>
@@ -291,12 +425,13 @@ const componentStyles = {
       },
 
       // apply underline only to the button content text, not the right side
-      '& .euiAccordion__button:hover, & .euiAccordion__button:focus': {
-        textDecoration: 'none !important',
-        '& .button-content-text': {
-          textDecoration: 'underline',
+      '& .euiAccordion__button:hover:not(:disabled), & .euiAccordion__button:focus:not(:disabled)':
+        {
+          textDecoration: 'none !important',
+          '& .button-content-text': {
+            textDecoration: 'underline',
+          },
         },
-      },
     }),
   buttonContent: ({ euiTheme }: UseEuiTheme) => css`
     width: 100%;
@@ -325,25 +460,37 @@ const componentStyles = {
   validationError: (euiThemeContext: UseEuiTheme) =>
     css({
       ...euiFontSize(euiThemeContext, 'xs'),
-      // override default button styles
       textAlign: 'left',
-      cursor: 'pointer',
       display: 'flex',
       flexDirection: 'row',
       alignItems: 'flex-start',
       gap: euiThemeContext.euiTheme.size.s,
-      '&:hover': {
-        textDecoration: 'underline',
-      },
+      userSelect: 'text',
     }),
-  validationErrorText: (euiThemeContext: UseEuiTheme) =>
+  validationErrorTrigger: css({
+    cursor: 'pointer',
+    '&:hover .validation-error-message, &:focus-visible .validation-error-message': {
+      textDecoration: 'underline',
+    },
+  }),
+  validationErrorText: css({
+    minWidth: 0,
+  }),
+  validationErrorLocation: ({ euiTheme }: UseEuiTheme) =>
     css({
-      display: 'flex',
-      flexDirection: 'row',
-      gap: euiThemeContext.euiTheme.size.s,
+      marginLeft: euiTheme.size.s,
+      whiteSpace: 'nowrap',
+    }),
+  validationErrorMeta: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      marginLeft: euiTheme.size.s,
     }),
   validationErrorIcon: css({
     marginTop: '0.125rem',
     flexShrink: 0,
+  }),
+  rowActions: css({
+    flexShrink: 0,
+    userSelect: 'none',
   }),
 };

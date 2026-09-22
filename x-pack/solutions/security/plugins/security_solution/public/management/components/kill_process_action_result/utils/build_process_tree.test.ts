@@ -19,7 +19,7 @@ describe('buildProcessTree()', () => {
         entity_id: 'ksuqwn8364fnbks.456',
         parent_entity_id: 'ksuqwn8364fnbks.234',
         command: '456_command.exe',
-        was_killed: true,
+        code: 'ra_kill-process_descendant_success_done',
       },
       {
         pid: 567,
@@ -27,7 +27,7 @@ describe('buildProcessTree()', () => {
         entity_id: 'ksuqwn8364fnbks.567',
         parent_entity_id: 'ksuqwn8364fnbks.456',
         command: '567_command.exe',
-        was_killed: true,
+        code: 'ra_kill-process_descendant_success_done',
       },
       {
         pid: 5671,
@@ -35,7 +35,7 @@ describe('buildProcessTree()', () => {
         entity_id: 'ksuqwn8364fnbks.5671',
         parent_entity_id: 'ksuqwn8364fnbks.567',
         command: '5671_command.exe',
-        was_killed: true,
+        code: 'ra_kill-process_descendant_success_done',
       },
       {
         pid: 56711,
@@ -43,7 +43,7 @@ describe('buildProcessTree()', () => {
         entity_id: 'ksuqwn8364fnbks.56711',
         parent_entity_id: 'ksuqwn8364fnbks.5671',
         command: '56711_command.exe',
-        was_killed: true,
+        code: 'ra_kill-process_descendant_success_done',
       },
       {
         pid: 56712,
@@ -51,7 +51,7 @@ describe('buildProcessTree()', () => {
         entity_id: 'ksuqwn8364fnbks.56712',
         parent_entity_id: 'ksuqwn8364fnbks.5671',
         command: '56712_command.exe',
-        was_killed: true,
+        code: 'ra_kill-process_descendant_success_done',
       },
       {
         pid: 654,
@@ -59,7 +59,7 @@ describe('buildProcessTree()', () => {
         entity_id: 'ksuqwn8364fnbks.654',
         parent_entity_id: 'ksuqwn8364fnbks.234',
         command: '654_command.exe',
-        was_killed: false,
+        code: 'ra_kill-process_descendant_error_failure',
         error: 'process is protected',
       },
     ];
@@ -88,7 +88,6 @@ describe('buildProcessTree()', () => {
     const tree = buildProcessTree(descendants);
 
     expect(tree[456].data).toEqual(descendants.find((p) => p.pid === 456));
-    expect(tree[654].data.was_killed).toBe(false);
     expect(tree[654].data.error).toEqual('process is protected');
   });
 

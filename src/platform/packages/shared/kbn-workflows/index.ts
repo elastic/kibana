@@ -108,6 +108,24 @@ export {
 // Export specific types that are commonly used
 export type { BuiltInStepType } from './spec/schema';
 
+// The action-workflow contract. Exported from the root entry (rather than only
+// from `./managed`) so a consumer can validate `consts.actionMetadata` without
+// pulling every managed workflow definition into its bundle.
+export {
+  ACTION_WORKFLOW_INPUT,
+  ACTION_WORKFLOW_TAG,
+  actionApprovalPolicySchema,
+  actionCategorySchema,
+  actionImpactSchema,
+  actionMetadataSchema,
+} from './managed/action_workflow';
+export type {
+  ActionApprovalPolicy,
+  ActionCategory,
+  ActionImpact,
+  ActionMetadata,
+} from './managed/action_workflow';
+
 export {
   isWorkflowValidationRuleId,
   WORKFLOW_VALIDATION_RULE_IDS,

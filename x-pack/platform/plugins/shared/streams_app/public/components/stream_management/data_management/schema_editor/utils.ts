@@ -144,6 +144,14 @@ export const buildSchemaSavePayload = (
   }, {} as Record<string, FieldDefinitionConfig>);
 
   if (isWired) {
+    // System fields are never persisted from the schema editor UI. Preserve them
+    // from the current definition so root-stream saves remain additive.
+    for (const [name, config] of Object.entries(definition.stream.ingest.wired.fields)) {
+      if (config.type === 'system' && !persistedFields[name]) {
+        persistedFields[name] = config;
+      }
+    }
+
     return {
       ingest: {
         ...definition.stream.ingest,

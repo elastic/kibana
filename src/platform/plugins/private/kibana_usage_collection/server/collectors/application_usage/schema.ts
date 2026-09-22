@@ -169,6 +169,7 @@ export const applicationUsageSchema = {
   'observability-overview': commonSchema,
   observabilityOnboarding: commonSchema,
   observabilityAIAssistant: commonSchema,
+  observabilityAlerting: commonSchema,
   onboarding: commonSchema,
   'exploratory-view': commonSchema,
   osquery: commonSchema,
