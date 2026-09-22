@@ -1572,4 +1572,39 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
 
     expect(rendered).toBe('Hosts look like malware. Users look like admins.');
   });
+
+  it('truncates generated_summary to the workflow.output 2000-char limit', () => {
+    const summaryStep = findStepByName(workflow.steps, 'build_generated_summary') as {
+      with: { generated_summary: string };
+    };
+    // 20 × 101 chars (+ spaces) exceeds 2000; truncate: 2000, '' must keep emit valid.
+    const batchSummaries = Array.from({ length: 20 }, () => 'x'.repeat(101));
+    const rendered = engine.parseAndRenderSync(summaryStep.with.generated_summary, {
+      variables: { batch_summaries: batchSummaries },
+    });
+
+    expect(rendered.length).toBe(2000);
+    expect(summaryStep.with.generated_summary).toContain("truncate: 2000, ''");
+  });
+
+  it('truncates grouped_counts_summary to the workflow.output 10000-char limit', () => {
+    const summaryStep = findStepByName(workflow.steps, 'build_grouped_counts_summary') as {
+      with: { grouped_counts_summary: string };
+    };
+    expect(summaryStep.with.grouped_counts_summary).toContain("truncate: 10000, ''");
+
+    const longHost = 'h'.repeat(200);
+    const verdicts = Array.from({ length: 80 }, (_, i) =>
+      createMockOutputVerdict({
+        alert_id: `a${i}`,
+        classification: 'true_positive',
+        host_name: `${longHost}-${i}`,
+      })
+    );
+    const summary = engine.parseAndRenderSync(summaryStep.with.grouped_counts_summary, {
+      variables: { output_verdicts: verdicts },
+    });
+
+    expect(summary.length).toBeLessThanOrEqual(10000);
+  });
 });

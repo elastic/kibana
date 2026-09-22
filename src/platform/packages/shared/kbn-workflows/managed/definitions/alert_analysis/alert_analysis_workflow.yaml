@@ -1851,7 +1851,11 @@ steps:
           - name: build_grouped_counts_summary
             type: data.set
             with:
+              # Capture then truncate to the workflow.output maxLength (10000). A 1000-alert
+              # Worker batch can produce more host sentences than the schema allows; without
+              # this cap the run would fail at emit after tags/notes were already written.
               grouped_counts_summary: >-
+                {%- capture grouped_counts_summary_raw -%}
                 {%- assign hosts = variables.output_verdicts | map: 'host_name' | uniq -%}
                 {%- for h in hosts -%}
                 {%- assign for_host = variables.output_verdicts | where: 'host_name', h -%}
@@ -1862,13 +1866,17 @@ steps:
                 {%- if fp > 0 %} {{ fp }} alert(s) for host {{ h }} classified as false positive.{% endif -%}
                 {%- if inc > 0 %} {{ inc }} alert(s) for host {{ h }} were inconclusive.{% endif -%}
                 {%- endfor -%}
+                {%- endcapture -%}
+                {{- grouped_counts_summary_raw | truncate: 10000, '' -}}
 
           # Join the per-batch summaries the model returned, skipping nil entries
           # (compact drops values the model omitted when batch_summary was not filled).
+          # Truncate to workflow.output maxLength (2000): up to ~20 schema-valid batch
+          # summaries can exceed that limit and would otherwise fail emit after writebacks.
           - name: build_generated_summary
             type: data.set
             with:
-              generated_summary: "{{ variables.batch_summaries | compact | join: ' ' }}"
+              generated_summary: "{{ variables.batch_summaries | compact | join: ' ' | truncate: 2000, '' }}"
 
           # Build one entity row per unique host, then per unique user, collecting
           # per-entity verdict counts. The Worker passes this to the security.impact
