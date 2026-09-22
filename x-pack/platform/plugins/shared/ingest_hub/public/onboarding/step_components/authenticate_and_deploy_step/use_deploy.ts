@@ -37,7 +37,7 @@ export interface UseDeployResult {
   setNamespace: (ns: string) => void;
   isDeploying: boolean;
   failedInstances: string[];
-  handleDeploy: (instanceIds?: string[]) => void;
+  handleDeploy: (instanceIds?: string[]) => Promise<void>;
   isAlreadyDeployed: boolean;
 }
 

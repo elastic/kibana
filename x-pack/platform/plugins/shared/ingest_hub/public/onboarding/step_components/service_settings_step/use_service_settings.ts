@@ -156,7 +156,10 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
   // Lazy prune: drop serviceVars entries for instances no longer present (deselected in Step 1).
   // Runs on mount and whenever the instance list changes. Writing only when stale keys exist
   // breaks the update→re-run loop after one iteration (next run finds zero stale keys).
+  // Guard: skip while awsServicesMap is still loading — instances would be empty, making every
+  // stored key look stale and erasing valid configuration before the matrix can reconstruct them.
   useEffect(() => {
+    if (!awsServicesMap) return;
     const validIds = new Set(instances.map((i) => i.instanceId));
     const storedVars = persisted?.serviceVars ?? {};
     const staleKeys = Object.keys(storedVars).filter((k) => !validIds.has(k));
@@ -166,7 +169,7 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       if (validIds.has(k)) pruned[k] = v as ServiceVars;
     }
     setPersisted({ ...(persisted ?? { globalRegion: '', serviceVars: {} }), serviceVars: pruned });
-  }, [instances, persisted, setPersisted]);
+  }, [instances, persisted, setPersisted, awsServicesMap]);
 
   const getServiceVars = useCallback(
     (instanceId: string): ServiceVars => {

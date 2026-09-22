@@ -213,7 +213,18 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       detectAndReviewStep.ecfStacks !== undefined &&
       JSON.stringify(ecfStacks) === JSON.stringify(detectAndReviewStep.ecfStacks);
 
-    // ECF-only: handleDeploy never runs, so create the SO here then navigate.
+    // If MI services were previously deployed but are no longer selected (user switched to ECF-only
+    // or agent-based), stale MI policies need cleanup. handleDeploy detects live-stale entries and
+    // runs cleanup even when no new MI targets exist. onContinue is a no-op here so it won't
+    // navigate — cleanup completes before the rest of handleNext continues.
+    const hasStaleMiPolicies =
+      Object.keys(detectAndReviewStep.policyIdsByInstance ?? {}).length > 0 ||
+      Object.keys(detectAndReviewStep.pendingCleanupPolicyIds ?? {}).length > 0;
+    if (hasStaleMiPolicies && miServiceIds.length === 0) {
+      await handleDeploy();
+    }
+
+    // ECF-only: handleDeploy never runs for new deploys, so create the SO here then navigate.
     if (miServiceIds.length === 0 && hasAnyEcf) {
       setIsSavingSO(true);
       // Reuse an existing deployment id (user clicked Back then Next again) rather
@@ -282,6 +293,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     showAgentSection,
     isAgentDone,
     handleAgentDeployForNext,
+    handleDeploy,
     ecfSectionProps,
     selectedServiceIds,
     serviceVars,
@@ -290,6 +302,8 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     dataFormat,
     detectAndReviewStep.onboardingDeploymentId,
     detectAndReviewStep.ecfStacks,
+    detectAndReviewStep.policyIdsByInstance,
+    detectAndReviewStep.pendingCleanupPolicyIds,
     createDeployment,
     updateDeployment,
     persistDeploymentId,

@@ -97,15 +97,17 @@ async function updateAgentBasedPolicy(
   // Fetch existing package policy to preserve its name and namespace.
   let existingName: string | undefined;
   let existingNamespace: string | undefined;
+  let existingVersion: string | undefined;
   try {
     const existing = await sendGetOnePackagePolicy(policyId);
     existingName = existing.data?.item?.name;
     existingNamespace = existing.data?.item?.namespace;
+    existingVersion = existing.data?.item?.package?.version;
   } catch {
-    // Non-fatal — fall back to generated name and hook namespace.
+    // Non-fatal — fall back to generated name, hook namespace, and latest package version.
   }
 
-  const pkgInfoResponse = await sendGetPackageInfoByKey(packageName);
+  const pkgInfoResponse = await sendGetPackageInfoByKey(packageName, existingVersion);
   const pkgInfo = pkgInfoResponse.data?.item;
   const pkgVersion = pkgInfo?.version;
   if (!pkgVersion || !pkgInfo) return;
@@ -136,17 +138,9 @@ async function updateAgentBasedPolicy(
     }
   }
 
-  // Use agentCredentials (direct_access_keys) if available, otherwise fall back to staticKeys.
   const { staticKeys } = authenticateAndDeployStep;
-  const credentialsAsStaticKeys =
-    agentCredentials?.method === 'direct_access_keys'
-      ? {
-          access_key_id: agentCredentials.access_key_id,
-          secret_access_key: agentCredentials.secret_access_key,
-        }
-      : staticKeys;
   const pkgVarNames = getPackageVarNames(pkgInfo as { vars?: Array<{ name: string }> });
-  const vars = buildPackageVars(globalRegion, credentialsAsStaticKeys, pkgVarNames);
+  const vars = buildPackageVars(globalRegion, staticKeys, pkgVarNames, agentCredentials);
 
   const policyName = existingName ?? `${packageName.replace(/[^a-zA-Z0-9_-]/g, '_')}-${Date.now()}`;
   const policyNamespace = existingNamespace ?? namespace;

@@ -88,16 +88,19 @@ async function updateManagedIntegrationsPolicy(
 
   const packageName = members[0].service.packageName;
 
-  // Fetch existing policy to preserve its name (avoids timestamp-based name churn).
+  // Fetch existing policy to preserve its name and package version (avoids timestamp-based name
+  // churn and implicit package upgrades during a cleanup-only PUT).
   let existingName: string | undefined;
+  let existingVersion: string | undefined;
   try {
     const existing = await sendGetAgentlessPolicy(policyId);
     existingName = existing.item?.name;
+    existingVersion = existing.item?.package?.version;
   } catch {
-    // Non-fatal — fall back to generated name.
+    // Non-fatal — fall back to generated name and latest package version.
   }
 
-  const pkgInfoResponse = await sendGetPackageInfoByKey(packageName);
+  const pkgInfoResponse = await sendGetPackageInfoByKey(packageName, existingVersion);
   const pkgInfo = pkgInfoResponse.data?.item;
   const pkgVersion = pkgInfo?.version;
   if (!pkgVersion || !pkgInfo) return;
