@@ -66,7 +66,11 @@ export function compareRowMultisets(
     intersectionSize += Math.min(goldCount, candidateCounts.get(row) ?? 0);
   }
   const unionSize = goldRows.length + candidateRows.length - intersectionSize;
-  return { intersectionSize, unionSize, jaccard: unionSize === 0 ? 1 : intersectionSize / unionSize };
+  return {
+    intersectionSize,
+    unionSize,
+    jaccard: unionSize === 0 ? 1 : intersectionSize / unionSize,
+  };
 }
 
 const labelFromScore = (score: number): string =>
@@ -123,7 +127,9 @@ export function createEsqlResultEquivalenceEvaluator<
       }
 
       const [goldResult, candidateResult] = await Promise.allSettled([
-        esClient.esql.query({ query: substituteEsqlBindParams(goldQuery) }) as Promise<EsqlQueryResult>,
+        esClient.esql.query({
+          query: substituteEsqlBindParams(goldQuery),
+        }) as Promise<EsqlQueryResult>,
         esClient.esql.query({
           query: substituteEsqlBindParams(candidateQuery),
         }) as Promise<EsqlQueryResult>,
