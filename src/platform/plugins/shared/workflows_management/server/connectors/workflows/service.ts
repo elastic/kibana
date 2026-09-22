@@ -13,6 +13,7 @@ import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import type { TriggerType } from '@kbn/workflows';
+import { WorkflowDisabledError } from '@kbn/workflows/common/errors';
 import type {
   ExternalService,
   RunWorkflowParams,
@@ -91,7 +92,7 @@ export const createExternalService = (
     spaceId,
     inputs,
     triggeredBy,
-  }: ScheduleWorkflowParams): Promise<string> => {
+  }: ScheduleWorkflowParams): Promise<string | null> => {
     try {
       logger.debug(`Attempting to schedule workflow ${workflowId} via internal service`);
 
@@ -118,6 +119,11 @@ export const createExternalService = (
 
       return workflowRunId;
     } catch (error) {
+      if (error instanceof WorkflowDisabledError) {
+        logger.debug(`Skipping disabled workflow ${workflowId}`);
+        return null;
+      }
+
       logger.error(`Error scheduling workflow ${workflowId}: ${error?.message}`);
       if ((error as { isUserError?: unknown })?.isUserError === true) {
         throw createTaskRunError(

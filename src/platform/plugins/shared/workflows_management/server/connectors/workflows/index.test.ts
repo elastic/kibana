@@ -8,8 +8,12 @@
  */
 
 import { AlertingConnectorFeatureId, SecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
+import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
+import { actionsMock } from '@kbn/actions-plugin/server/mocks';
+import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/usage/connector_usage_collector';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import type { WorkflowDetailDto } from '@kbn/workflows';
 import {
   ConnectorTypeId,
   executor,
@@ -50,6 +54,176 @@ describe('Workflows Connector', () => {
       expect(connectorType.validate.config).toBeDefined();
       expect(connectorType.validate.secrets).toBeDefined();
       expect(connectorType.validate.params).toBeDefined();
+    });
+
+    describe('workflow scheduling', () => {
+      const { executor: connectorExecutor } = getConnectorType(mockWorkflowsManagementApi);
+      if (!connectorExecutor) {
+        throw new Error('Workflows connector executor is not registered');
+      }
+
+      const workflow: WorkflowDetailDto = {
+        id: 'test-workflow-id',
+        name: 'Test Workflow',
+        enabled: true,
+        valid: true,
+        definition: {
+          version: '1',
+          name: 'Test Workflow',
+          enabled: true,
+          triggers: [{ type: 'alert' }],
+          steps: [{ name: 'log', type: 'console', with: { message: 'Alert received' } }],
+        },
+        yaml: '',
+        createdAt: '2026-01-01T00:00:00Z',
+        createdBy: 'user1',
+        lastUpdatedAt: '2026-01-01T00:00:00Z',
+        lastUpdatedBy: 'user1',
+      };
+
+      const createExecOptions = (summaryMode: boolean): Parameters<typeof executor>[0] => ({
+        actionId: 'test-action-id',
+        services: actionsMock.createServices(),
+        config: {},
+        secrets: {},
+        params: {
+          subAction: 'run',
+          subActionParams: {
+            workflowId: workflow.id,
+            spaceId: 'default',
+            summaryMode,
+            inputs: {
+              event: {
+                alerts: [
+                  { _id: 'alert-1', _index: 'test-index' },
+                  { _id: 'alert-2', _index: 'test-index' },
+                ],
+                rule: {
+                  id: 'rule-1',
+                  name: 'Test Rule',
+                  tags: [],
+                  consumer: 'test',
+                  producer: 'test',
+                  ruleTypeId: 'test',
+                },
+                spaceId: 'default',
+              },
+            },
+          },
+        },
+        logger: mockLogger,
+        configurationUtilities: actionsConfigMock.create(),
+        connectorUsageCollector: new ConnectorUsageCollector({
+          logger: mockLogger,
+          connectorId: 'test-action-id',
+        }),
+        request: httpServerMock.createKibanaRequest(),
+      });
+
+      beforeEach(() => {
+        jest.clearAllMocks();
+        jest.mocked(mockWorkflowsManagementApi.getWorkflow).mockResolvedValue(workflow);
+        jest
+          .mocked(mockWorkflowsManagementApi.scheduleWorkflow)
+          .mockResolvedValue('workflow-run-123');
+      });
+
+      it.each([true, false])(
+        'skips a disabled workflow without errors or scheduling (summaryMode=%s)',
+        async (summaryMode) => {
+          jest
+            .mocked(mockWorkflowsManagementApi.getWorkflow)
+            .mockResolvedValue({ ...workflow, enabled: false });
+
+          const result = await connectorExecutor(createExecOptions(summaryMode));
+
+          expect(result).toEqual({
+            status: 'ok',
+            actionId: 'test-action-id',
+            data: { workflowRunId: 'skipped-disabled', status: 'skipped' },
+          });
+          expect(mockWorkflowsManagementApi.getWorkflow).toHaveBeenCalledTimes(1);
+          expect(mockWorkflowsManagementApi.scheduleWorkflow).not.toHaveBeenCalled();
+          expect(mockWorkflowsManagementApi.runWorkflow).not.toHaveBeenCalled();
+          expect(mockLogger.error).not.toHaveBeenCalled();
+          expect(mockLogger.warn).not.toHaveBeenCalled();
+        }
+      );
+
+      it.each([true, false])(
+        'schedules an enabled workflow (summaryMode=%s)',
+        async (summaryMode) => {
+          const result = await connectorExecutor(createExecOptions(summaryMode));
+
+          expect(result).toMatchObject({ status: 'ok', data: { status: 'scheduled' } });
+          expect(mockWorkflowsManagementApi.scheduleWorkflow).toHaveBeenCalledTimes(
+            summaryMode ? 1 : 2
+          );
+          expect(mockLogger.error).not.toHaveBeenCalled();
+        }
+      );
+
+      it('still reports a missing workflow as an error', async () => {
+        jest.mocked(mockWorkflowsManagementApi.getWorkflow).mockResolvedValue(null);
+
+        await expect(connectorExecutor(createExecOptions(true))).rejects.toThrow(
+          'Workflow with id "test-workflow-id" not found.'
+        );
+        expect(mockWorkflowsManagementApi.scheduleWorkflow).not.toHaveBeenCalled();
+        expect(mockLogger.error).toHaveBeenCalled();
+      });
+
+      it('still reports an invalid workflow as an error', async () => {
+        jest
+          .mocked(mockWorkflowsManagementApi.getWorkflow)
+          .mockResolvedValue({ ...workflow, valid: false });
+
+        await expect(connectorExecutor(createExecOptions(true))).rejects.toThrow(
+          'Workflow is not valid: test-workflow-id'
+        );
+        expect(mockWorkflowsManagementApi.scheduleWorkflow).not.toHaveBeenCalled();
+        expect(mockLogger.error).toHaveBeenCalled();
+      });
+
+      it('stops per-alert scheduling when the workflow is disabled after a successful schedule', async () => {
+        jest
+          .mocked(mockWorkflowsManagementApi.getWorkflow)
+          .mockResolvedValueOnce(workflow)
+          .mockResolvedValue({ ...workflow, enabled: false });
+
+        const result = await connectorExecutor(createExecOptions(false));
+
+        expect(result).toMatchObject({
+          status: 'ok',
+          data: { workflowRunId: 'per-alert-scheduling-1-success', status: 'scheduled' },
+        });
+        expect(mockWorkflowsManagementApi.scheduleWorkflow).toHaveBeenCalledTimes(1);
+        expect(mockLogger.error).not.toHaveBeenCalled();
+        expect(mockLogger.warn).not.toHaveBeenCalled();
+      });
+
+      it('preserves earlier per-alert errors when the workflow is then disabled', async () => {
+        jest
+          .mocked(mockWorkflowsManagementApi.getWorkflow)
+          .mockResolvedValueOnce(workflow)
+          .mockResolvedValue({ ...workflow, enabled: false });
+        jest
+          .mocked(mockWorkflowsManagementApi.scheduleWorkflow)
+          .mockRejectedValueOnce(new Error('Scheduling failed'));
+
+        const result = await connectorExecutor(createExecOptions(false));
+
+        expect(result).toMatchObject({
+          status: 'ok',
+          data: {
+            workflowRunId: 'per-alert-scheduling-0-success-1-errors',
+            status: 'partial',
+          },
+        });
+        expect(mockWorkflowsManagementApi.scheduleWorkflow).toHaveBeenCalledTimes(1);
+        expect(mockLogger.error).toHaveBeenCalledTimes(2);
+        expect(mockLogger.warn).toHaveBeenCalledTimes(1);
+      });
     });
   });
 

@@ -80,7 +80,7 @@ export interface ScheduleWorkflowParams {
 
 export interface ExternalService {
   runWorkflow: (params: RunWorkflowParams) => Promise<WorkflowExecutionResponse>;
-  scheduleWorkflow: (params: ScheduleWorkflowParams) => Promise<string>;
+  scheduleWorkflow: (params: ScheduleWorkflowParams) => Promise<string | null>;
 }
 
 export interface ExternalServiceApiHandlerArgs {

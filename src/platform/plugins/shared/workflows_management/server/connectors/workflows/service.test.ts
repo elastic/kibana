@@ -536,7 +536,7 @@ describe('Workflows Service', () => {
       );
     });
 
-    it('scheduleWorkflow classifies disabled workflow error as user error', async () => {
+    it('skips scheduling a disabled workflow without logging an error', async () => {
       const mockScheduleWorkflowService: ScheduleWorkflowServiceFunction = jest
         .fn()
         .mockRejectedValue(new WorkflowDisabledError('new-workflow'));
@@ -570,10 +570,9 @@ describe('Workflows Service', () => {
         },
       };
 
-      const error = await service.scheduleWorkflow(params).catch((err) => err);
-
-      expect(getErrorSource(error)).toBe(TaskErrorSource.USER);
-      expect(error.message).toContain('Unable to schedule workflow');
+      await expect(service.scheduleWorkflow(params)).resolves.toBeNull();
+      expect(mockLogger.error).not.toHaveBeenCalled();
+      expect(mockLogger.warn).not.toHaveBeenCalled();
     });
 
     it('scheduleWorkflow classifies missing workflow error as user error', async () => {

@@ -33,6 +33,9 @@ const run = async ({
 
   if (summaryMode) {
     const workflowRunId = await externalService.scheduleWorkflow({ workflowId, spaceId, inputs });
+    if (workflowRunId === null) {
+      return { workflowRunId: 'skipped-disabled', status: 'skipped' };
+    }
     return { workflowRunId, status: 'scheduled' };
   }
 
@@ -58,6 +61,13 @@ const run = async ({
         spaceId,
         inputs: singleAlertEvent,
       });
+
+      if (workflowRunId === null) {
+        if (successCount === 0 && errorCount === 0) {
+          return { workflowRunId: 'skipped-disabled', status: 'skipped' };
+        }
+        break;
+      }
 
       successCount++;
 
