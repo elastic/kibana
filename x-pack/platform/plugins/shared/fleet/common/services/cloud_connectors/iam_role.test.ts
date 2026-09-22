@@ -20,6 +20,8 @@ describe('isIamRoleArn', () => {
     ['arn:aws-iso-b:iam::123456789012:role/IsoBRole'],
     ['arn:aws-eusc:iam::123456789012:role/EuscRole'],
     ['arn:aws:iam::123456789012:role/Chars-_+=,.@'],
+    // Boundary: IAM role names are limited to 64 characters.
+    [`arn:aws:iam::123456789012:role/${'A'.repeat(64)}`],
   ])('accepts %s', (arn) => {
     expect(isIamRoleArn(arn)).toBe(true);
   });
@@ -41,8 +43,17 @@ describe('isIamRoleArn', () => {
     ['arn:aws:iam::123456789012:role//MyRole', 'empty path segment'],
     ['arn:aws:iam:us-east-1:123456789012:role/RegionInIam', 'region present in iam ARN'],
     ['arn:something:iam::123456789012:role/UnknownPartition', 'unknown partition'],
+    [`arn:aws:iam::123456789012:role/${'A'.repeat(65)}`, 'role name longer than 64'],
+    ['arn:aws:iam::123456789012:role/MyRole\n', 'trailing newline ($ matches before \\n)'],
+    ['arn:aws:iam::123456789012:role/MyRole\r\n', 'trailing CRLF'],
     [undefined as unknown as string, 'undefined'],
   ])('rejects %s (%s)', (value) => {
     expect(isIamRoleArn(value)).toBe(false);
+  });
+
+  it('rejects a path longer than the IAM 512-character limit', () => {
+    // path = `/` + segment + `/` must exceed 512; role name stays valid.
+    const segment = 'p'.repeat(511);
+    expect(isIamRoleArn(`arn:aws:iam::123456789012:role/${segment}/MyRole`)).toBe(false);
   });
 });
