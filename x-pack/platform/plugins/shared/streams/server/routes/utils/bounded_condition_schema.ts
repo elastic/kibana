@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import type { Condition } from '@kbn/streamlang';
+import { BINARY_OPERATORS } from '@kbn/streamlang';
 
 // Bounds for HTTP input validation.
 // conditionSchema from @kbn/streamlang uses bare z.string() and unbounded
@@ -29,21 +30,27 @@ const boundedRangeCondition = z.strictObject({
 });
 
 // Use strictObject so unknown keys are rejected rather than silently stripped.
+// The binary arm mirrors shorthandBinaryFilterConditionSchema's .refine() so that
+// { field: "x" } (no operator) is not accepted as binary — it must fall through to unary.
 const boundedFilterCondition = z.union([
-  z.strictObject({
-    field: z.string().nonempty().max(COND_STR_MAX),
-    eq: boundedStringOrNumberOrBoolean.optional(),
-    neq: boundedStringOrNumberOrBoolean.optional(),
-    lt: boundedStringOrNumberOrBoolean.optional(),
-    lte: boundedStringOrNumberOrBoolean.optional(),
-    gt: boundedStringOrNumberOrBoolean.optional(),
-    gte: boundedStringOrNumberOrBoolean.optional(),
-    contains: boundedStringOrNumberOrBoolean.optional(),
-    startsWith: boundedStringOrNumberOrBoolean.optional(),
-    endsWith: boundedStringOrNumberOrBoolean.optional(),
-    range: boundedRangeCondition.optional(),
-    includes: boundedStringOrNumberOrBoolean.optional(),
-  }),
+  z
+    .strictObject({
+      field: z.string().nonempty().max(COND_STR_MAX),
+      eq: boundedStringOrNumberOrBoolean.optional(),
+      neq: boundedStringOrNumberOrBoolean.optional(),
+      lt: boundedStringOrNumberOrBoolean.optional(),
+      lte: boundedStringOrNumberOrBoolean.optional(),
+      gt: boundedStringOrNumberOrBoolean.optional(),
+      gte: boundedStringOrNumberOrBoolean.optional(),
+      contains: boundedStringOrNumberOrBoolean.optional(),
+      startsWith: boundedStringOrNumberOrBoolean.optional(),
+      endsWith: boundedStringOrNumberOrBoolean.optional(),
+      range: boundedRangeCondition.optional(),
+      includes: boundedStringOrNumberOrBoolean.optional(),
+    })
+    .refine((obj) => Object.keys(obj).some((key) => BINARY_OPERATORS.includes(key as never)), {
+      message: 'At least one operator must be specified',
+    }),
   z.strictObject({
     field: z.string().nonempty().max(COND_STR_MAX),
     exists: z.boolean().optional(),

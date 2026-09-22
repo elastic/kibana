@@ -17,8 +17,6 @@ import type { DataStreamWithFailureStore } from '@kbn/streams-schema/src/models/
 import { z } from '@kbn/zod/v4';
 import { streamlangDSLSchema, isConditionBlock } from '@kbn/streamlang';
 import type { StreamlangDSL } from '@kbn/streamlang';
-
-type StreamlangStep = StreamlangDSL['steps'][number];
 import { from, map } from 'rxjs';
 import type { ServerSentEventBase } from '@kbn/sse-utils';
 import type { Observable } from 'rxjs';
@@ -46,6 +44,8 @@ import type { FailureStoreSamplesResponse } from './failure_store_samples_handle
 import { getFailureStoreSamples } from './failure_store_samples_handler';
 import { isNoLLMSuggestionsError } from './no_llm_suggestions_error';
 
+type StreamlangStep = StreamlangDSL['steps'][number];
+
 const simulationBaseBodySchema = {
   documents: z.array(boundedFlattenRecord).max(1000),
   detected_fields: z.array(boundedNamedFieldDefinitionSchema).max(1000).optional(),
@@ -53,6 +53,19 @@ const simulationBaseBodySchema = {
 
 const PROCESSOR_TYPE_NAME_MAX_LENGTH = 128;
 const MAX_DSL_STEPS_TOTAL = 500;
+// Depth cap runs on the raw (pre-parse) value so deeply nested payloads are rejected
+// before streamlangDSLSchema's recursive z.lazy() evaluation begins.
+const MAX_DSL_NESTING_DEPTH = 30;
+
+function rawNestingDepthOk(val: unknown, depth: number): boolean {
+  if (depth > MAX_DSL_NESTING_DEPTH) return false;
+  if (Array.isArray(val)) return val.every((item) => rawNestingDepthOk(item, depth + 1));
+  if (val !== null && typeof val === 'object')
+    return Object.values(val as Record<string, unknown>).every((v) =>
+      rawNestingDepthOk(v, depth + 1)
+    );
+  return true;
+}
 
 function countDSLSteps(steps: StreamlangStep[], acc: number): number {
   for (const step of steps) {
@@ -65,14 +78,21 @@ function countDSLSteps(steps: StreamlangStep[], acc: number): number {
   return acc;
 }
 
-const boundedStreamlangDSLSchema = streamlangDSLSchema.superRefine((val, ctx) => {
+const boundedStreamlangDSLSchema = z.preprocess((val) => {
+  if (!rawNestingDepthOk(val, 0)) {
+    throw new Error(
+      `Processing DSL exceeds maximum nesting depth of ${MAX_DSL_NESTING_DEPTH}`
+    );
+  }
+  return val;
+}, streamlangDSLSchema.superRefine((val, ctx) => {
   if (countDSLSteps(val.steps, 0) > MAX_DSL_STEPS_TOTAL) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       message: `Processing DSL exceeds maximum of ${MAX_DSL_STEPS_TOTAL} total steps`,
     });
   }
-});
+}));
 
 const paramsSchema = z.object({
   path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),

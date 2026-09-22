@@ -21,9 +21,10 @@ export interface RecursiveRecord {
   [key: PropertyKey]: Primitive | Primitive[] | unknown[] | RecursiveRecord;
 }
 
-// Persisted-definition schema — unbounded for backward compatibility with stored data.
-// Streams/units written before this change may have arbitrary nesting, array sizes,
-// or field counts; bounding this schema would make them unreadable.
+// Persisted-definition schema — no HTTP-specific caps (nesting depth, array count, entry
+// count) so that stored data written before this change remains readable. The pre-existing
+// sentinel limits (z.string().max(65535) on values, z.string().max(1000) on keys) are
+// retained because they predate this PR and are not enforced on stored data in practice.
 export const recursiveRecord: z.ZodType<RecursiveRecord> = z
   .lazy(() =>
     z.record(
@@ -40,7 +41,7 @@ export const recursiveRecord: z.ZodType<RecursiveRecord> = z
 
 export type FlattenRecord = Record<PropertyKey, Primitive | Primitive[] | unknown[]>;
 
-// Persisted-definition schema — unbounded for the same backward-compat reason.
+// Persisted-definition schema — same backward-compat rationale as recursiveRecord above.
 export const flattenRecord: z.ZodType<FlattenRecord> = z.record(
   z.string().max(1000),
   z.union([primitive, z.array(primitive), z.array(z.union([primitive, recursiveRecord]))])
