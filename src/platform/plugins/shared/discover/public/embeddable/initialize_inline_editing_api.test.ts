@@ -83,7 +83,7 @@ const setupApi = (
   const analytics = analyticsServiceMock.createAnalyticsServiceStart();
   const selectedTabId$ = new BehaviorSubject<string | undefined>(initialSelectedTabId);
   const savedObjectId$ = new BehaviorSubject<string | undefined>(savedObjectId);
-  const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
+  const searchError$ = new BehaviorSubject<Error | undefined>(undefined);
   const dataLoading$ = new BehaviorSubject<boolean | undefined>(undefined);
   const searchEmbeddable = buildSearchEmbeddable();
 
@@ -95,11 +95,19 @@ const setupApi = (
     selectedTabId$,
     savedObjectId$,
     searchEmbeddable,
-    blockingError$,
+    setSearchError: (error: Error | undefined) => searchError$.next(error),
     dataLoading$,
   });
 
-  return { api, analytics, selectedTabId$, savedObjectId$, searchEmbeddable };
+  return {
+    api,
+    analytics,
+    selectedTabId$,
+    savedObjectId$,
+    searchError$,
+    dataLoading$,
+    searchEmbeddable,
+  };
 };
 
 describe('initializeInlineEditingApi', () => {
@@ -213,6 +221,122 @@ describe('initializeInlineEditingApi', () => {
       await api.applyInlineTabSelection();
 
       expect(analytics.reportEvent).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('failed tab switches', () => {
+    const switchError = new Error('Tab state failed to load');
+
+    // reinitializeState empties rows before it can reject, so a failed switch mutates applied
+    // state without marking the edit dirty
+    const failPreviewSwitch = async (
+      { api, searchEmbeddable }: ReturnType<typeof setupApi>,
+      tabId = 'tab-2'
+    ) => {
+      await api.startInlineEditing();
+      searchEmbeddable.reinitializeState.mockRejectedValueOnce(switchError);
+      await api.previewInlineTabSelection(tabId);
+    };
+
+    it('keeps the error visible and rolls the draft tab back', async () => {
+      const setup = setupApi();
+
+      await failPreviewSwitch(setup);
+
+      // the error stays in-panel while editing so apply/discard remain reachable
+      expect(setup.searchError$.getValue()).toBe(switchError);
+      expect(setup.api.draftSelectedTabId$.getValue()).toBe('tab-1');
+      expect(setup.api.inlineEditDirty$.getValue()).toBe(false);
+    });
+
+    it('restores the snapshot and clears the error when discarding', async () => {
+      const setup = setupApi();
+
+      await failPreviewSwitch(setup);
+      setup.searchEmbeddable.reinitializeState.mockClear();
+
+      await setup.api.cancelInlineTabSelection();
+
+      // the failed switch leaves the edit clean, so a dirty-only check would skip the restore
+      // and strand the error for the factory to promote to a blocking one
+      expect(setup.searchEmbeddable.reinitializeState).toHaveBeenCalledTimes(1);
+      expect(setup.searchError$.getValue()).toBeUndefined();
+      expect(setup.api.isInlineEditing$.getValue()).toBe(false);
+    });
+
+    it('restores the snapshot and clears the error when applying with nothing to commit', async () => {
+      const setup = setupApi();
+
+      await failPreviewSwitch(setup);
+      setup.searchEmbeddable.reinitializeState.mockClear();
+
+      // the rollback left the draft on the committed tab, so there is no tab change to apply
+      await setup.api.applyInlineTabSelection();
+
+      expect(setup.searchEmbeddable.reinitializeState).toHaveBeenCalledTimes(1);
+      expect(setup.searchError$.getValue()).toBeUndefined();
+      expect(setup.api.isInlineEditing$.getValue()).toBe(false);
+    });
+
+    it('clears a stranded error when a later tab switch succeeds', async () => {
+      const setup = setupApi();
+
+      await failPreviewSwitch(setup);
+      await setup.api.previewInlineTabSelection('tab-2');
+
+      expect(setup.searchError$.getValue()).toBeUndefined();
+      expect(setup.api.draftSelectedTabId$.getValue()).toBe('tab-2');
+      expect(setup.api.inlineEditDirty$.getValue()).toBe(true);
+    });
+
+    it('keeps the error when the restore itself fails on discard', async () => {
+      const setup = setupApi();
+      const restoreError = new Error('Snapshot failed to load');
+
+      await failPreviewSwitch(setup);
+      setup.searchEmbeddable.reinitializeState.mockRejectedValueOnce(restoreError);
+
+      await setup.api.cancelInlineTabSelection();
+
+      expect(setup.searchError$.getValue()).toBe(restoreError);
+      expect(setup.api.isInlineEditing$.getValue()).toBe(false);
+    });
+
+    it('restores the snapshot when discarding after a successful switch', async () => {
+      const setup = setupApi();
+
+      await setup.api.startInlineEditing();
+      await setup.api.previewInlineTabSelection('tab-2');
+      expect(setup.api.inlineEditDirty$.getValue()).toBe(true);
+      setup.searchEmbeddable.reinitializeState.mockClear();
+
+      await setup.api.cancelInlineTabSelection();
+
+      expect(setup.searchEmbeddable.reinitializeState).toHaveBeenCalledTimes(1);
+      expect(setup.selectedTabId$.getValue()).toBe('tab-1');
+    });
+
+    it('does not restore when editing stops without a failed switch', async () => {
+      const setup = setupApi();
+
+      await setup.api.startInlineEditing();
+      setup.searchEmbeddable.reinitializeState.mockClear();
+
+      await setup.api.cancelInlineTabSelection();
+
+      expect(setup.searchEmbeddable.reinitializeState).not.toHaveBeenCalled();
+    });
+
+    it('resets dataLoading to false when a tab switch fails', async () => {
+      const setup = setupApi();
+
+      await setup.api.startInlineEditing();
+      setup.dataLoading$.next(true);
+      setup.searchEmbeddable.reinitializeState.mockRejectedValueOnce(switchError);
+
+      await setup.api.previewInlineTabSelection('tab-2');
+
+      expect(setup.dataLoading$.getValue()).toBe(false);
     });
   });
 });

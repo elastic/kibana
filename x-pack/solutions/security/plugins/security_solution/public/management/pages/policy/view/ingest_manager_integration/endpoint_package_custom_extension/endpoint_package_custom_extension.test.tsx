@@ -70,6 +70,7 @@ describe('When displaying the EndpointPackageCustomExtension fleet UI extension'
           canDeleteHostIsolationExceptions: false,
           canReadTrustedApplications: false,
           canReadEndpointExceptions: false,
+          canReadCustomYaraSignatures: false,
         }),
       });
 
@@ -107,5 +108,92 @@ describe('When displaying the EndpointPackageCustomExtension fleet UI extension'
     expect(renderResult.getByTestId('eventFilters-fleetCard')).toBeInTheDocument();
     expect(renderResult.getByTestId('hostIsolationExceptions-fleetCard')).toBeInTheDocument();
     expect(renderResult.getByTestId('blocklists-fleetCard')).toBeInTheDocument();
+  });
+
+  it('should show yara signatures card when feature flag is enabled and user can read custom yara signatures', () => {
+    mockedTestContext.setExperimentalFlag({
+      customYaraSignaturesEnabled: true,
+    });
+    render();
+
+    expect(renderResult.getByTestId('customYaraSignatures-fleetCard')).toBeInTheDocument();
+  });
+
+  it('should hide yara signatures card when feature flag is disabled', () => {
+    mockedTestContext.setExperimentalFlag({
+      customYaraSignaturesEnabled: false,
+    });
+    render();
+
+    expect(renderResult.queryByTestId('customYaraSignatures-fleetCard')).toBeNull();
+  });
+
+  it('should hide yara signatures card when feature flag is enabled but user cannot read custom yara signatures', () => {
+    mockedTestContext.setExperimentalFlag({
+      customYaraSignaturesEnabled: true,
+    });
+    useUserPrivilegesMock.mockReturnValue({
+      ...getUserPrivilegesMockDefaultValue(),
+      endpointPrivileges: getEndpointPrivilegesInitialStateMock({
+        canReadCustomYaraSignatures: false,
+      }),
+    });
+
+    render();
+
+    expect(renderResult.queryByTestId('customYaraSignatures-fleetCard')).toBeNull();
+  });
+
+  it('should show only yara signatures card when it is the only artifact privilege and the feature flag is enabled', () => {
+    mockedTestContext.setExperimentalFlag({
+      customYaraSignaturesEnabled: true,
+    });
+    useUserPrivilegesMock.mockReturnValue({
+      ...getUserPrivilegesMockDefaultValue(),
+      endpointPrivileges: getEndpointPrivilegesInitialStateMock({
+        canReadBlocklist: false,
+        canReadEventFilters: false,
+        canReadHostIsolationExceptions: false,
+        canDeleteHostIsolationExceptions: false,
+        canReadTrustedApplications: false,
+        canReadEndpointExceptions: false,
+        canReadTrustedDevices: false,
+        canReadCustomYaraSignatures: true,
+      }),
+    });
+
+    render();
+
+    expect(renderResult.getByTestId('fleetEndpointPackageCustomContent')).toBeInTheDocument();
+    expect(renderResult.getByTestId('customYaraSignatures-fleetCard')).toBeInTheDocument();
+    expect(renderResult.queryByTestId('noPrivilegesPage')).toBeNull();
+    artifactCards.forEach((artifactCardTestId) => {
+      expect(renderResult.queryByTestId(artifactCardTestId)).toBeNull();
+    });
+  });
+
+  it('should show no privileges when yara signatures is the only artifact privilege and the feature flag is disabled', () => {
+    mockedTestContext.setExperimentalFlag({
+      customYaraSignaturesEnabled: false,
+    });
+    useUserPrivilegesMock.mockReturnValue({
+      ...getUserPrivilegesMockDefaultValue(),
+      endpointPrivileges: getEndpointPrivilegesInitialStateMock({
+        canReadBlocklist: false,
+        canReadEventFilters: false,
+        canReadHostIsolationExceptions: false,
+        canDeleteHostIsolationExceptions: false,
+        canReadTrustedApplications: false,
+        canReadEndpointExceptions: false,
+        canReadTrustedDevices: false,
+        canReadCustomYaraSignatures: true,
+      }),
+    });
+
+    render();
+
+    expect(renderResult.queryByTestId('fleetEndpointPackageCustomContent')).toBeNull();
+    expect(renderResult.queryByTestId('customYaraSignatures-fleetCard')).toBeNull();
+    expect(renderResult.queryByTestId('noPrivilegesPage')).toBeTruthy();
   });
 });

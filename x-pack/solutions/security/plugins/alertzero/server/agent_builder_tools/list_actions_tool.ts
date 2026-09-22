@@ -38,7 +38,7 @@ export const listActionsTool = (
   id: ALERTZERO_ACTIONS_LIST_TOOL_ID,
   type: ToolType.builtin,
   description:
-    'List available AlertZero actions, optionally filtered by category. Each result includes the workflowId to reference when proposing the action, plus its name, description, category, impact (low/medium/high/critical) and approvalPolicy (always-gate/autonomy-dependent). Call this before proposing an action so the proposal references a real, installed workflow.',
+    'List available AlertZero actions, optionally filtered by category. Each result includes the workflowId to reference when proposing the action, plus its name, description, category, impact (low/medium/high/critical), approvalPolicy (always-gate/autonomy-dependent) and inputSchema — the JSON Schema of the inputs the action accepts (its single `actionInput` object; fill its properties when proposing the action). Call this before proposing an action so the proposal references a real, installed workflow.',
   annotations: {
     title: 'List AlertZero Actions',
     readOnlyHint: true,

@@ -805,6 +805,7 @@ export const findRulesRequestSchema = z
       .optional()
       .describe('A text string to search across rule fields.'),
   })
+  .strict()
   .refine(
     ({ page = 1, per_page = FIND_DEFAULT_PER_PAGE }) => page * per_page <= FIND_MAX_RESULT_WINDOW,
     { message: `page * per_page cannot exceed ${FIND_MAX_RESULT_WINDOW}.`, path: ['page'] }
