@@ -24,6 +24,7 @@ const formatSignificantSecurityEventForAgent = (
     `Severity: ${data.severity} (confidence ${data.confidence})`,
     `Status: ${data.status}`,
     `Source watch: ${data.source_watch} / Capability: ${data.capability} / Run: ${data.run_id}`,
+    `Threat report: ${data.report_id}`,
     '',
     `Hypothesis tested: ${data.hypothesis_tested}`,
     '',
@@ -107,7 +108,16 @@ const formatSignificantSecurityEventForAgent = (
   if (data.events && data.events.length > 0) {
     lines.push('', 'Events:');
     for (const event of data.events) {
-      lines.push(`  ${event.event_id} (${event.source_index})`);
+      const matched = event.matched
+        ? ` [matched: ${
+            event.matched.ioc
+              ? `ioc ${event.matched.ioc.value}`
+              : event.matched.technique_id
+              ? `technique ${event.matched.technique_id}`
+              : 'unspecified'
+          } on ${event.matched.field}]`
+        : '';
+      lines.push(`  ${event.event_id} (${event.source_index})${matched}`);
     }
   }
 

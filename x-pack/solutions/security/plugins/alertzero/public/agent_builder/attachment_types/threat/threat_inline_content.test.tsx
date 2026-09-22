@@ -69,7 +69,8 @@ describe('ThreatAttachmentInlineContent', () => {
       fetch: jest.fn().mockResolvedValue({
         reportId: 'r-1',
         content: { title: 'Live Title' },
-        severity: { level: 'high', score: 90 },
+        severity: { level: 'high' },
+        rank_score: 90,
         source: { name: 'Live Source' },
       }),
     } as unknown as HttpStart;
@@ -88,7 +89,8 @@ describe('ThreatAttachmentInlineContent', () => {
       fetch: jest.fn().mockResolvedValue({
         reportId: 'r-2',
         content: { title: 'Enriched Title' },
-        severity: { level: 'high', score: 90 },
+        severity: { level: 'high' },
+        rank_score: 90,
         source: { name: 'Enriched Source' },
         extracted: {
           iocs: [{ type: 'ip', value: '203.0.113.5', tier: 'high' }],
@@ -183,7 +185,8 @@ describe('ThreatAttachmentInlineContent', () => {
       fetch: jest.fn().mockResolvedValue({
         reportId: 'r-ioc',
         content: { title: 'IOC Title' },
-        severity: { level: 'high', score: 80 },
+        severity: { level: 'high' },
+        rank_score: 80,
         source: { name: 'Source' },
         extracted: {
           iocs: [{ type: 'ipv4-addr', value: iocValue }],
@@ -225,7 +228,8 @@ describe('ThreatAttachmentInlineContent', () => {
       fetch: jest.fn().mockResolvedValue({
         reportId: 'r-overflow',
         content: { title: 'Overflow Title' },
-        severity: { level: 'high', score: 60 },
+        severity: { level: 'high' },
+        rank_score: 60,
         source: { name: 'Source' },
         extracted: { iocs },
       }),
@@ -260,7 +264,8 @@ describe('ThreatAttachmentInlineContent', () => {
             },
           ],
         },
-        severity: { level: 'high', score: 70 },
+        severity: { level: 'high' },
+        rank_score: 70,
         source: { name: 'Source' },
       }),
     } as unknown as HttpStart;
@@ -297,7 +302,8 @@ describe('ThreatAttachmentInlineContent', () => {
             },
           ],
         },
-        severity: { level: 'high', score: 65 },
+        severity: { level: 'high' },
+        rank_score: 65,
         source: { name: 'Source' },
       }),
     } as unknown as HttpStart;
@@ -320,7 +326,8 @@ describe('ThreatAttachmentInlineContent', () => {
       fetch: jest.fn().mockResolvedValue({
         reportId: 'r-evidence',
         content: { title: 'Evidence Title' },
-        severity: { level: 'high', score: 55 },
+        severity: { level: 'high' },
+        rank_score: 55,
         source: { name: 'Source' },
         evidence: {
           alert_hits_total: 5,
@@ -346,7 +353,8 @@ describe('ThreatAttachmentInlineContent', () => {
       fetch: jest.fn().mockResolvedValue({
         reportId: 'r-last-hunted',
         content: { title: 'Last Hunted Title' },
-        severity: { level: 'high', score: 45 },
+        severity: { level: 'high' },
+        rank_score: 45,
         source: { name: 'Source' },
         evidence: {
           last_hunted_at: new Date().toISOString(),
@@ -373,7 +381,8 @@ describe('ThreatAttachmentInlineContent', () => {
       fetch: jest.fn().mockResolvedValue({
         reportId: 'r-geo',
         content: { title: 'Geo Title' },
-        severity: { level: 'high', score: 35 },
+        severity: { level: 'high' },
+        rank_score: 35,
         source: { name: 'Source' },
         extracted: { categories: ['exfiltration'] },
         geography: { regions: ['eu-west-1'] },

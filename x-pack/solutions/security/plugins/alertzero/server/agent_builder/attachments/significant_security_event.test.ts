@@ -107,6 +107,63 @@ describe('createSignificantSecurityEventAttachmentType', () => {
       expect(value).toContain('taxonomy labels, not Discover IOCs');
     });
 
+    it('includes the report_id so the agent can tie the event back to its threat report', async () => {
+      const attachment: Attachment<string, unknown> = {
+        id: 'test-id',
+        type: SIGNIFICANT_SECURITY_EVENT_ATTACHMENT_ID,
+        data: validPayload,
+      };
+
+      const formatted = await attachmentType.format(attachment, formatContext);
+      const representation = formatted.getRepresentation
+        ? await formatted.getRepresentation()
+        : { type: 'text', value: '' };
+
+      const value = (representation as TextAttachmentRepresentation).value;
+      expect(value).toContain(`Threat report: ${validPayload.report_id}`);
+    });
+
+    it('surfaces matched IOC and technique evidence on formatted events', async () => {
+      const attachment: Attachment<string, unknown> = {
+        id: 'test-id',
+        type: SIGNIFICANT_SECURITY_EVENT_ATTACHMENT_ID,
+        data: {
+          ...validPayload,
+          events: [
+            {
+              event_id: 'evt-1',
+              source_index: 'logs-endpoint.events.process-default',
+              matched: { ioc: { type: 'ip', value: '203.0.113.5' }, field: 'destination.ip' },
+            },
+            {
+              event_id: 'evt-2',
+              source_index: 'logs-endpoint.events.network-default',
+              matched: { technique_id: 'T1021', field: 'process.command_line' },
+            },
+            {
+              event_id: 'evt-3',
+              source_index: 'logs-endpoint.events.file-default',
+            },
+          ],
+        },
+      };
+
+      const formatted = await attachmentType.format(attachment, formatContext);
+      const representation = formatted.getRepresentation
+        ? await formatted.getRepresentation()
+        : { type: 'text', value: '' };
+
+      const value = (representation as TextAttachmentRepresentation).value;
+      expect(value).toContain(
+        '  evt-1 (logs-endpoint.events.process-default) [matched: ioc 203.0.113.5 on destination.ip]'
+      );
+      expect(value).toContain(
+        '  evt-2 (logs-endpoint.events.network-default) [matched: technique T1021 on process.command_line]'
+      );
+      expect(value).toContain('  evt-3 (logs-endpoint.events.file-default)');
+      expect(value).not.toContain('evt-3 (logs-endpoint.events.file-default) [matched');
+    });
+
     it('renders maps_to_proposal details when present', async () => {
       const attachment: Attachment<string, unknown> = {
         id: 'test-id',

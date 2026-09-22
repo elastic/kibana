@@ -390,16 +390,16 @@ const renderDiamondSection = (liveData: ThreatReportApiResponse): React.ReactNod
 };
 
 const renderEvidenceSection = (liveData: ThreatReportApiResponse): React.ReactNode => {
-  const severityScore = liveData.severity?.score;
-  if (!liveData.evidence && severityScore == null) {
+  const rankScore = liveData.rank_score;
+  if (!liveData.evidence && rankScore == null) {
     return null;
   }
 
   const corroboratedRank = liveData.evidence?.corroborated_rank_score;
   const stats: Array<{ title: React.ReactNode; description: string }> = [];
-  if (severityScore != null) {
+  if (rankScore != null) {
     stats.push({
-      title: severityScore,
+      title: rankScore,
       description: i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.rank', {
         defaultMessage: 'Rank',
       }),
