@@ -372,7 +372,7 @@ describe('ProposalApprovalCard', () => {
                 : baseProposal({ id: 'proposal-2', revision: 2 }),
             isLoading: false,
             isError: false,
-          } as unknown as ReturnType<typeof useProposal>)
+          }) as unknown as ReturnType<typeof useProposal>
       );
 
       const { container } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
@@ -399,8 +399,8 @@ describe('ProposalApprovalCard', () => {
             askedFor === 'proposal-1'
               ? baseProposal({ id: askedFor, status: 'superseded', supersededBy: 'proposal-2' })
               : askedFor === 'proposal-2'
-              ? baseProposal({ id: askedFor, status: 'superseded', supersededBy: 'proposal-3' })
-              : baseProposal({ id: askedFor, revision: 3 }),
+                ? baseProposal({ id: askedFor, status: 'superseded', supersededBy: 'proposal-3' })
+                : baseProposal({ id: askedFor, revision: 3 }),
           isLoading: false,
           isError: false,
         } as unknown as ReturnType<typeof useProposal>;

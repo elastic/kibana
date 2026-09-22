@@ -281,9 +281,9 @@ export const resolveExecutionDefaultFormValues = (
   // legacy differential query in a pack that defaults to snapshot would
   // display — and then save — snapshot. The flyout seed is not explicit.
   const displayResultType = packResultType
-    ? storedExplicitResultType ?? packResultType
-    : payload.result_type ??
-      mapWireToResultType({ snapshot: payload.snapshot, removed: payload.removed });
+    ? (storedExplicitResultType ?? packResultType)
+    : (payload.result_type ??
+      mapWireToResultType({ snapshot: payload.snapshot, removed: payload.removed }));
   // Display of Snapshot is already served by the seeded booleans. Only an
   // explicit stored choice or a pack default belongs on the canonical field.
   const formResultType = storedExplicitResultType ?? packResultType;

@@ -66,7 +66,7 @@ const result = (over: Partial<RuleCreationResult> = {}): RuleCreationResult =>
     workflowExecutionId: 'exec-1',
     stepExecutions: [{ stepId: DRAFT_STEP_ID, output: { conversation_id: 'conv-1' } }],
     ...over,
-  } as unknown as RuleCreationResult);
+  }) as unknown as RuleCreationResult;
 
 const noWait = { settleMs: 0, sleep: async () => {} };
 

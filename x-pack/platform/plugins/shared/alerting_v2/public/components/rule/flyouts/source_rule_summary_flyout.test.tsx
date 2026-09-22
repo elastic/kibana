@@ -53,7 +53,7 @@ const makeRule = (overrides: Partial<RuleResponse> = {}): RuleResponse =>
     updated_by: 'admin',
     updated_at: '2026-06-01T12:00:00.000Z',
     ...overrides,
-  } as unknown as RuleResponse);
+  }) as unknown as RuleResponse;
 
 const defaultProps: React.ComponentProps<typeof SourceRuleSummaryFlyout> = {
   rule: makeRule(),

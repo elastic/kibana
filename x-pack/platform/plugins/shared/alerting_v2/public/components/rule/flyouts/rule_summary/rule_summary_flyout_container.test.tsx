@@ -85,7 +85,7 @@ const mockUseFetchRule = jest.mocked(useFetchRule);
 const mockUseFetchSourceRule = jest.mocked(useFetchSourceRule);
 
 const makeRule = (name: string) =>
-  ({ id: 'rule-1', metadata: { name } } as unknown as RuleApiResponse);
+  ({ id: 'rule-1', metadata: { name } }) as unknown as RuleApiResponse;
 
 type ContainerProps = React.ComponentProps<typeof RuleSummaryFlyoutContainer>;
 
@@ -105,9 +105,9 @@ const renderContainer = (overrides: Partial<ContainerProps> = {}) =>
 const mockFetchRuleResult = (
   result: Partial<ReturnType<typeof useFetchRule>>
 ): ReturnType<typeof useFetchRule> =>
-  ({ data: undefined, isLoading: false, isError: false, error: null, ...result } as ReturnType<
+  ({ data: undefined, isLoading: false, isError: false, error: null, ...result }) as ReturnType<
     typeof useFetchRule
-  >);
+  >;
 
 const noSourceRule: ReturnType<typeof useFetchSourceRule> = {
   rule: undefined,

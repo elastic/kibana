@@ -219,7 +219,7 @@ const readTarget = (target: CreateVisualizationTarget) => ({
   esql: target.esql || undefined,
   hasData:
     target.type === 'custom_content' || target.type === 'attachment'
-      ? target.has_data ?? undefined
+      ? (target.has_data ?? undefined)
       : undefined,
 });
 

@@ -44,7 +44,7 @@ const clusterPrivilegesResponse = (authorized: boolean) =>
   ({
     hasAllRequested: authorized,
     privileges: { elasticsearch: { cluster: [{ privilege: 'manage_security', authorized }] } },
-  } as unknown as CheckPrivilegesResponse);
+  }) as unknown as CheckPrivilegesResponse;
 
 /** A credential document left behind by an account that is no longer there. */
 const staleCredential = () => ({

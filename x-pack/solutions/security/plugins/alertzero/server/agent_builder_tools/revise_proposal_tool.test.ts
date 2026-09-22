@@ -33,7 +33,7 @@ const agenticWith = (opts: {
     ({
       getProposalPrivileges: () => ({ assertCanManage }),
       getProposalsService: () => ({ revise, getLatestRevision }),
-    } as unknown as AgenticInvestigationsPluginStart);
+    }) as unknown as AgenticInvestigationsPluginStart;
 };
 
 const run = async (

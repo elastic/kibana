@@ -220,7 +220,7 @@ export class ProposalsService {
       total:
         typeof response.hits.total === 'number'
           ? response.hits.total
-          : response.hits.total?.value ?? proposals.length,
+          : (response.hits.total?.value ?? proposals.length),
     };
   }
 

@@ -220,7 +220,7 @@ describe('ConversationProposalsService', () => {
                 bulkGet: jest.fn().mockRejectedValue(new Error('access denied')),
               }),
             },
-          } as unknown as AgentBuilderPluginStart),
+          }) as unknown as AgentBuilderPluginStart,
       ],
     ])('defaults assignees to an empty array when %s', async (_label, buildAgentBuilder) => {
       const proposals = [makeProposal({ conversationId: 'conv-1' })];

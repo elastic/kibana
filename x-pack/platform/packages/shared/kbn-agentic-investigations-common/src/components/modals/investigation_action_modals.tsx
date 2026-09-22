@@ -20,7 +20,7 @@ import { MODAL_TRANSLATIONS } from './translations';
  * it would strip the `actionInput` an approval has to submit.
  */
 export interface InvestigationActionModalsProps<
-  TProposal extends ApprovalProposal = ApprovalProposal
+  TProposal extends ApprovalProposal = ApprovalProposal,
 > {
   /** Action awaiting confirmation, or `null` when no action modal is open. */
   action: CardActionType | null;

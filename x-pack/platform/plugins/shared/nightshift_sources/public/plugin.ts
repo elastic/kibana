@@ -12,9 +12,10 @@ export interface NightshiftSourcesPublicPluginStart {
   getClient: () => Promise<NightshiftSourcesRepositoryClient>;
 }
 
-export class NightshiftSourcesPublicPlugin
-  implements Plugin<void, NightshiftSourcesPublicPluginStart>
-{
+export class NightshiftSourcesPublicPlugin implements Plugin<
+  void,
+  NightshiftSourcesPublicPluginStart
+> {
   setup(): void {}
 
   start(core: CoreStart): NightshiftSourcesPublicPluginStart {
