@@ -25,11 +25,11 @@ export const ManagementApp: FunctionComponent<ManagementAppProps> = ({
   documentationUrl,
 }) => {
   // const { error, isLoading, reload, status, views } = useEsqlViews(client);
-  let error = new Error('Test error');
-  let isLoading = false;
-  let status = 'success';
-  let views = [];
-  let reload = () => {};
+  const error = new Error('Test error');
+  const isLoading = false;
+  const status = 'success';
+  const views = [];
+  const reload = () => {};
 
   let content: React.ReactNode;
 
