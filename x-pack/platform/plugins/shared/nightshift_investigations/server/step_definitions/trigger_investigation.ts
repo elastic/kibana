@@ -10,7 +10,6 @@ import { MAX_TEXT_LENGTH, MAX_TITLE_LENGTH } from '@kbn/significant-events-schem
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { INVESTIGATION_TRIGGER_TYPES } from '../../common';
-import { snapshotFromAlertDocument } from '../lib/alert_snapshot';
 import type { GetInvestigationsClient } from '../routes/types';
 
 const inputSchema = z.object({
@@ -42,24 +41,9 @@ const inputSchema = z.object({
     .record(z.string(), z.unknown())
     .optional()
     .describe(
-      'Additional context to pass to the investigation workflow. When subject_type is "alert" this must carry an "alerts" array of alert snapshots or v1 AAD documents, or the investigation is rejected.'
+      'Additional context to pass to the investigation workflow. When subject_type is "alert" this must carry an "alerts" array of alert snapshots, or the investigation is rejected.'
     ),
 });
-
-const toAlertStartContext = (
-  context: Record<string, unknown> | undefined
-): Record<string, unknown> | undefined => {
-  if (context == null || !Array.isArray(context.alerts)) {
-    return context;
-  }
-
-  return {
-    alerts: context.alerts.flatMap((alert) => {
-      const snapshot = snapshotFromAlertDocument(alert);
-      return snapshot ? [snapshot] : [];
-    }),
-  };
-};
 
 export const triggerInvestigationStepDefinition = (
   getInvestigationsClient: GetInvestigationsClient
@@ -92,8 +76,7 @@ export const triggerInvestigationStepDefinition = (
         title: input.title,
         trigger_type: input.trigger_type ?? 'automatic',
         concurrency_key: input.concurrency_key,
-        context:
-          input.subject_type === 'alert' ? toAlertStartContext(input.context) : input.context,
+        context: input.context,
       });
       return { output: result };
     },

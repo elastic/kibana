@@ -12,6 +12,7 @@ import {
   CHANGE_POINT_TYPES,
   severitySchema,
   MAX_ID_LENGTH,
+  MAX_ASSESSMENT_NOTE_LENGTH,
   triggerFeedbackSchema,
   type ChangePointType,
   type Detection,
@@ -324,6 +325,51 @@ const eventsTriggerInvestigationRoute = createServerRoute({
   },
 });
 
+const eventsGetRoute = createServerRoute({
+  endpoint: 'GET /internal/significant_events/events/{id}',
+  options: {
+    access: 'internal',
+    summary: 'Get a significant event',
+    description: 'Fetch the latest version of a single significant event by its event_uuid.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({
+    path: z.object({
+      id: z.string().max(255),
+    }),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+  }): Promise<SignificantEventResponse> => {
+    const { getEventClient, licensing } = await getScopedClients({ request });
+
+    await assertSignificantEventsAccess({ server, licensing });
+
+    const eventClient = await getEventClient();
+    const { hits: uuidHits } = await eventClient.findByEventUuid(params.path.id);
+    if (uuidHits.length === 0) {
+      throw notFound(`Significant event "${params.path.id}" not found.`);
+    }
+
+    const { event_id: eventId } = uuidHits[0];
+    const { hits: versionHits } = await eventClient.findByEventId(eventId);
+    if (versionHits.length === 0) {
+      throw notFound(`Significant event "${params.path.id}" not found.`);
+    }
+
+    const event = versionHits.at(-1)!;
+
+    return event;
+  },
+});
+
 const eventsUpdateRoute = createServerRoute({
   endpoint: 'POST /internal/significant_events/events/{id}/update',
   options: {
@@ -341,9 +387,20 @@ const eventsUpdateRoute = createServerRoute({
     path: z.object({
       id: z.string().max(255),
     }),
-    body: z.object({
-      status: significantEventStatusSchema,
-    }),
+    body: z
+      .object({
+        status: significantEventStatusSchema,
+        assessment_note: z.string().max(MAX_ASSESSMENT_NOTE_LENGTH).optional(),
+      })
+      .superRefine((val, ctx) => {
+        if (val.status === 'dismissed' && !val.assessment_note?.trim()) {
+          ctx.addIssue({
+            code: 'custom',
+            path: ['assessment_note'],
+            message: 'assessment_note is required when dismissing an event',
+          });
+        }
+      }),
   }),
   handler: async ({ params, request, getScopedClients, server }) => {
     const { getEventClient, licensing } = await getScopedClients({ request });
@@ -354,6 +411,7 @@ const eventsUpdateRoute = createServerRoute({
       eventClient: await getEventClient(),
       eventUuid: params.path.id,
       status: params.body.status,
+      assessmentNote: params.body.assessment_note,
     });
   },
 });
@@ -440,6 +498,7 @@ const investigationStatusesRoute = createServerRoute({
 
 export const internalEventsRoutes = {
   ...eventsSearchRoute,
+  ...eventsGetRoute,
   ...eventsLifecycleRoute,
   ...eventsAttachInvestigationRoute,
   ...eventsTriggerInvestigationRoute,

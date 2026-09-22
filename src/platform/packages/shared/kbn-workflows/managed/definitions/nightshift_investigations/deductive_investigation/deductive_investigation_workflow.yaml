@@ -1,5 +1,5 @@
 version: '1'
-name: Nightshift Investigation
+name: Deductive Investigation
 description: >
   General-purpose investigation. Ensures the investigator agent exists, persists
   the run, calls the agent with the caller's prompt, then writes the result back.
@@ -7,7 +7,7 @@ enabled: true
 settings:
   timeout: '60m'
   concurrency:
-    key: 'nightshift-investigation-{{ inputs.concurrency_key | default: execution.id }}'
+    key: 'deductive-investigation-{{ inputs.concurrency_key | default: execution.id }}'
     strategy: cancel-in-progress
     max: 1
 tags:
@@ -177,7 +177,10 @@ steps:
                 title:
                   type: string
                   maxLength: 512
-                  description: The action itself, stated concretely (e.g. "Revert the pool-size config change").
+                  description: >
+                    The action itself, stated concretely as concise plain text. Do not use Markdown
+                    or HTML, including links, emphasis, backticks, headings, lists, or code fences.
+                    Put explanations and links in description, and commands or snippets in code.
                 confidence:
                   type: number
                   minimum: 0

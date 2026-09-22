@@ -10,10 +10,10 @@
 import DEDUCTIVE_INVESTIGATION_WORKFLOW_YAML from './deductive_investigation_workflow.yaml';
 import type { ManagedWorkflowDefinition } from '../../../types';
 
-export const NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID = 'system-nightshift-investigation';
+export const DEDUCTIVE_INVESTIGATION_WORKFLOW_ID = 'system-deductive-investigation';
 
 export const DEDUCTIVE_INVESTIGATION_WORKFLOW = {
-  id: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+  id: DEDUCTIVE_INVESTIGATION_WORKFLOW_ID,
   pluginId: 'nightshiftInvestigations',
   version: 1,
   billable: false,

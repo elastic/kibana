@@ -46,9 +46,9 @@ const collectStepsByType = (steps: WorkflowStep[], type: string): WorkflowStep[]
 
 describe('deductive investigation workflow', () => {
   it('is a lean persist-and-agent run without sig-events write-back', () => {
-    expect(DEDUCTIVE_INVESTIGATION_WORKFLOW.id).toBe('system-nightshift-investigation');
+    expect(DEDUCTIVE_INVESTIGATION_WORKFLOW.id).toBe('system-deductive-investigation');
     expect(DEDUCTIVE_INVESTIGATION_WORKFLOW.version).toBe(1);
-    expect(investigation.name).toBe('Nightshift Investigation');
+    expect(investigation.name).toBe('Deductive Investigation');
     expect(investigation.steps.map((step) => step.name)).toEqual([
       'ensure_investigation_agent',
       'persist_investigation_started',

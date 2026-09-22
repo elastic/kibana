@@ -31,6 +31,7 @@ import {
 } from 'rxjs';
 import type { Subscription } from 'rxjs';
 import { PROJECT_ROUTING_ALL } from '@kbn/cps-server-utils';
+import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import {
   getRelayAppConnectionSavedObjectType,
   RELAY_APP_CONNECTION_SO_TYPE,
@@ -78,11 +79,9 @@ import {
 } from './lib/significant_events/significant_events_clients';
 import { detectionsDataStream } from './lib/significant_events/detections';
 import { eventsDataStream } from './lib/significant_events/events';
-import { memoriesDataStream, memoryHistoryDataStream } from './memory_and_investigation/lib/memory';
-import { createMemoryToolsOptions, registerStreamsAgentBuilder } from './agent_builder/register';
+import { registerStreamsAgentBuilder } from './agent_builder/register';
 import { registerSignificantEventsSkills } from './agent_builder/skills/register_skills';
 import { registerAgentBuilderSmlTypes } from './agent_builder/sml/register_sml_types';
-import { registerStreamsMemoryAgentBuilder } from './memory_and_investigation/skills/memory/register';
 import { registerSignificantEventsInferenceFeatures } from './register_significant_events_inference_features';
 import {
   createContinuousKiOnboardingWorkflowService,
@@ -110,7 +109,6 @@ import {
 } from './agent_builder/agents/feature_identification';
 import { createSignificantEventsAvailability } from './agent_builder/tools/significant_events_availability';
 import { SIGNIFICANT_EVENT_TIERED_FEATURES } from '../common/constants';
-import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '../common/feature_flags';
 import { isSignificantEventsAvailable } from './routes/utils/assert_significant_events_access';
 import type { SignificantEventsKIsOnboardingClient } from './lib/workflows/onboarding_workflow_client';
 
@@ -173,8 +171,6 @@ export class SignificantEventsPlugin
     core.dataStreams.registerDataStream(detectionsDataStream);
     core.dataStreams.registerDataStream(eventsDataStream);
     core.dataStreams.registerDataStream(knowledgeIndicatorsDataStream);
-    core.dataStreams.registerDataStream(memoriesDataStream);
-    core.dataStreams.registerDataStream(memoryHistoryDataStream);
 
     this.ebtTelemetryService.setup(core.analytics);
 
@@ -510,7 +506,7 @@ export class SignificantEventsPlugin
         ? isSignificantEventsAvailable({ server: this.server, licensing: plugins.licensing })
         : Promise.resolve(false);
     const available$ = combineLatest([
-      core.featureFlags.getBooleanValue$(STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG, false),
+      core.featureFlags.getBooleanValue$(NIGHTSHIFT_ENABLED_FLAG, false),
       plugins.licensing.license$,
     ]).pipe(switchMap(isAvailable), distinctUntilChanged());
 
@@ -579,11 +575,13 @@ export class SignificantEventsPlugin
       const agentBuilder = plugins.agentBuilder;
       const telemetry = this.ebtTelemetryService.getClient();
 
-      const memoryToolsOptions = createMemoryToolsOptions({
-        getScopedClients: this.getScopedClients,
-        server: this.server,
-        logger: this.logger,
-      });
+      // Managed resources (templates + workflows) and agent-builder skills install on independent
+      // async paths, so on a runtime flip skills can be advertised a moment before their templates and
+      // workflows finish installing. We accept that transient window rather than serializing skills
+      // behind the installer: every installer is idempotent and self-heals, request-time gating
+      // (assertSignificantEventsAccess) already blocks calls until the feature is truly available, and
+      // runtime flips are rare admin actions. On a normal boot with the flag already on there is no
+      // window, since installation runs before any request can reach a skill.
 
       // Core skills (including investigation): registered through the start-phase skills API, gated
       // by the availability flag and (re)registered when the flag flips on.
@@ -592,7 +590,7 @@ export class SignificantEventsPlugin
         telemetry,
         streamsKIsOnboardingClient: this.streamsKIsOnboardingClient,
         maintenanceService: this.maintenanceService,
-        memoryToolsOptions,
+        getScopedClients: this.getScopedClients,
         logger: this.logger,
         isAvailable,
       })
@@ -611,27 +609,6 @@ export class SignificantEventsPlugin
         })
         .catch((err) => {
           this.logger.error(`Failed to register significant events skills: ${err.message}`);
-        });
-
-      // Memory skills: gated by availability; (re)registered when the flag flips on.
-      registerStreamsMemoryAgentBuilder({
-        agentBuilder,
-        memoryToolsOptions,
-        logger: this.logger,
-        isAvailable,
-      })
-        .then(({ ensureRegistered }) => {
-          const onFlip = () => {
-            void ensureRegistered().catch((error: unknown) => {
-              this.logSkillsRegistrationError('memory', error);
-            });
-          };
-          this.subscriptions.push(availabilityEnabled$.subscribe(onFlip));
-          // Catch up on any flip that landed before this subscription (see the note above).
-          onFlip();
-        })
-        .catch((err) => {
-          this.logger.error(`Failed to register significant events memory skills: ${err.message}`);
         });
     }
   }
