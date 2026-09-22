@@ -19,8 +19,8 @@ export const SECURITY_ALERT_ANALYSIS_WORKFLOW_ID = 'system-security-alert-analys
 export const SECURITY_ALERT_ANALYSIS_WORKFLOW = {
   id: SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
   pluginId: 'securitySolution',
-  // Tip of the Worker-callable YAML (Worker path derives rule context; agentId input bounds).
-  version: 15,
+  // Tip of the Worker-callable YAML (alerts items require _id + rule uuid).
+  version: 16,
   billable: false,
   visibility: {
     selectors: ['rule_action'],
