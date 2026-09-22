@@ -5,30 +5,12 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
+import type { SchemaOutput } from '../schema_output';
+import {
+  ObserverCodec,
+} from '../zod/ping';
 
-export const ObserverCodec = t.intersection([
-  t.type({
-    name: t.string,
-    geo: t.intersection([
-      t.type({
-        name: t.string,
-      }),
-      t.partial({
-        continent_name: t.string,
-        city_name: t.string,
-        country_iso_code: t.string,
-        location: t.union([
-          t.string,
-          t.partial({ lat: t.number, lon: t.number }),
-          t.partial({ lat: t.string, lon: t.string }),
-        ]),
-      }),
-    ]),
-  }),
-  t.partial({
-    hostname: t.string,
-    ip: t.array(t.string),
-    mac: t.array(t.string),
-  }),
-]);
+export {
+  ObserverCodec,
+};
+
