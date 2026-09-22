@@ -33,7 +33,7 @@ export const LOGS_EXAMPLES: VisualizationDatasetExample[] = withDataSource('logs
     question:
       'Create a bar chart of the number of requests by response code in kibana_sample_data_logs.',
     seriesType: ['bar', 'bar_horizontal'],
-    query: categoricalQuery(
+    query: categoricalQuery({
       index: INDEX,
       metrics: [REQUEST_COUNT],
       groupBy: 'response.keyword',
@@ -44,7 +44,7 @@ export const LOGS_EXAMPLES: VisualizationDatasetExample[] = withDataSource('logs
   metricExample({
     question:
       'Create a single metric visualization showing the total number of requests in kibana_sample_data_logs.',
-    query: totalsQuery(
+    query: totalsQuery({
       index: INDEX,
       metrics: [{ alias: 'Total Requests', expression: 'COUNT(*)' }],
     }),
@@ -60,7 +60,7 @@ export const LOGS_EXAMPLES: VisualizationDatasetExample[] = withDataSource('logs
   partitionExample({
     question: 'Create a pie chart of request counts by response code in kibana_sample_data_logs.',
     type: 'pie',
-    query: categoricalQuery(
+    query: categoricalQuery({
       index: INDEX,
       metrics: [REQUEST_COUNT],
       groupBy: 'response.keyword',
@@ -72,7 +72,7 @@ export const LOGS_EXAMPLES: VisualizationDatasetExample[] = withDataSource('logs
     question:
       'Create a horizontal bar chart of the top operating systems by request count in kibana_sample_data_logs.',
     seriesType: 'bar_horizontal',
-    query: categoricalQuery(
+    query: categoricalQuery({
       index: INDEX,
       metrics: [REQUEST_COUNT],
       groupBy: 'machine.os.keyword',
@@ -82,7 +82,7 @@ export const LOGS_EXAMPLES: VisualizationDatasetExample[] = withDataSource('logs
   }),
   tagCloudExample({
     question: 'Create a tag cloud of file extensions by request count in kibana_sample_data_logs.',
-    query: categoricalQuery(
+    query: categoricalQuery({
       index: INDEX,
       metrics: [REQUEST_COUNT],
       groupBy: 'extension.keyword',
