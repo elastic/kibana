@@ -86,13 +86,13 @@ describe('CustomYaraSignatureHighlightedFieldLink', () => {
     mockUseUserPrivileges.mockReturnValue(getUserPrivilegesMockDefaultValue());
   });
 
-  it('renders a link to the CYS edit page when privileged and entry_id is present', () => {
+  it('renders a link to the CYS view page when privileged and entry_id is present', () => {
     const { getByTestId } = renderLink(createHit(ENTRY_ID));
 
     const link = getByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID);
     expect(link).toHaveAttribute(
       'href',
-      expect.stringContaining(getCustomYaraSignaturesListPath({ show: 'edit', itemId: ENTRY_ID }))
+      expect.stringContaining(getCustomYaraSignaturesListPath({ show: 'view', itemId: ENTRY_ID }))
     );
     expect(getByTestId('cysChild')).toBeInTheDocument();
   });

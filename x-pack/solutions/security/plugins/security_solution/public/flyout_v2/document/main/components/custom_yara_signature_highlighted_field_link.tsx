@@ -46,7 +46,7 @@ export interface CustomYaraSignatureHighlightedFieldLinkProps {
 }
 
 /**
- * Renders a highlighted-field value as a link to the Custom YARA Signatures edit page
+ * Renders a highlighted-field value as a link to the Custom YARA Signatures view page
  * when the user can read CYS and the feature is enabled. Falls back to plain text otherwise.
  */
 export const CustomYaraSignatureHighlightedFieldLink: FC<
@@ -65,8 +65,7 @@ export const CustomYaraSignatureHighlightedFieldLink: FC<
     }
 
     const path = getCustomYaraSignaturesListPath({
-      // todo: view mode
-      show: 'edit',
+      show: 'view',
       // todo: we need `id` here
       itemId: entryId,
     });

@@ -433,6 +433,32 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
     });
   });
 
+  describe('and in View mode', () => {
+    beforeEach(() => {
+      act(() => {
+        history.push('somepage?show=view&itemId=123');
+      });
+    });
+
+    it('should load the item and render the edit form until a dedicated view mode exists', async () => {
+      const { getByTestId } = await render();
+
+      await waitFor(() => {
+        expect(getByTestId('formMock')).toBeTruthy();
+      });
+
+      expect(getLastFormComponentProps().mode).toBe('edit');
+      expect(mockedApi.responseProvider.trustedApp).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          path: expect.any(String),
+          query: expect.objectContaining({
+            item_id: '123',
+          }),
+        })
+      );
+    });
+  });
+
   describe('and in Edit mode', () => {
     beforeEach(() => {
       act(() => {
