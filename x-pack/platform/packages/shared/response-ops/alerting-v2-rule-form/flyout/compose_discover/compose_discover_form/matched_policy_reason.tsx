@@ -75,7 +75,7 @@ export const MatchedPolicyReason = ({ category, matcher, ruleTags }: Props) => {
     color: ${euiTheme.colors.textSubdued};
   `;
 
-  const isCatchAll = category === 'catch-all';
+  const isCatchAll = category === 'catch_all';
 
   if (isCatchAll) {
     return (
