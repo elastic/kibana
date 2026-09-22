@@ -23,6 +23,12 @@ export const selectIsSuggestionVisible = (snapshot: InteractiveModeSnapshot): bo
   snapshot.matches({ pipelineSuggestion: 'noSuggestionsFound' });
 
 /**
+ * Selects whether the editor has any step to render, as opposed to the empty prompt.
+ */
+export const selectHasSteps = (snapshot: InteractiveModeSnapshot): boolean =>
+  snapshot.context.stepRefs.length > 0;
+
+/**
  * Selects the processor marked as the draft processor.
  */
 export const selectDraftProcessor = (context: InteractiveModeContext) => {

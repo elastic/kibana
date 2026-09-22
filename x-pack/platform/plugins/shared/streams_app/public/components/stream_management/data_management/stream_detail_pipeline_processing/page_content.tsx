@@ -41,6 +41,7 @@ import { AddStepButtons } from './add_step_buttons';
 import { EditModeToggle } from './edit_mode_toggle';
 import { SimulationPlayground } from './simulation_playground';
 import {
+  selectHasSteps,
   selectIsSuggestionVisible,
   stepUnderEditSelector,
 } from './state_management/interactive_mode_machine/selectors';
@@ -134,6 +135,7 @@ export function StreamDetailEnrichmentContentImpl() {
   const isReady = useStreamEnrichmentSelector((state) => state.matches('ready'));
   const hasJsonModeRef = useStreamEnrichmentSelector((state) => Boolean(state.context.jsonModeRef));
   const showJsonEditor = hasJsonModeRef;
+  const hasSteps = useOptionalInteractiveModeSelector(selectHasSteps, false);
   const definition = useStreamEnrichmentSelector((state) => state.context.definition);
   const detectedFields = useSimulatorSelector((state) => state.context.detectedSchemaFields);
   const definitionFields = React.useMemo(() => getDefinitionFields(definition), [definition]);
@@ -323,9 +325,11 @@ export function StreamDetailEnrichmentContentImpl() {
                           </EuiToolTip>
                         </EuiFlexItem>
                       )}
-                      <EuiFlexItem grow={false}>
-                        <AddStepButtons />
-                      </EuiFlexItem>
+                      {hasSteps && (
+                        <EuiFlexItem grow={false}>
+                          <AddStepButtons />
+                        </EuiFlexItem>
+                      )}
                     </EuiFlexGroup>
                   </EuiFlexItem>
                   <EuiFlexItem grow style={{ minHeight: 0, overflow: 'auto' }}>
