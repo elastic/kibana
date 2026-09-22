@@ -27,7 +27,6 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { ConnectorFormSchema } from '@kbn/alerts-ui-shared';
-import { connectorTypeIsDual } from '@kbn/connector-specs';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import type {
@@ -38,7 +37,6 @@ import type {
   ActionTypeIndex,
 } from '../../../types';
 import { useKibana } from '../../../common/lib/kibana';
-import { isInboundEventsEnabledPayload } from '../../lib/inbound_ingress';
 import { useCreateConnector } from '../../hooks/use_create_connector';
 import type { ConnectorFormState, ResetForm } from './connector_form';
 import { ConnectorForm } from './connector_form';
@@ -62,7 +60,6 @@ const ConnectorAddModal = ({
     application: { capabilities },
     http,
     notifications: { toasts },
-    actions: { isInboundEventsEnabled: isClusterInboundEventsEnabled },
   } = useKibana().services;
   const [actionType, setActionType] = useState<ActionType>(tempActionType);
   const [loadingActionTypes, setLoadingActionTypes] = useState<boolean>(false);
@@ -77,9 +74,6 @@ const ConnectorAddModal = ({
     secrets: {},
     isMissingSecrets: false,
     isConnectorTypeDeprecated: false,
-    ...(actionType?.id && connectorTypeIsDual(actionType.id)
-      ? { isInboundEventsEnabled: false }
-      : {}),
   });
 
   const canSave = hasSaveActionsCapability(capabilities);
@@ -119,7 +113,6 @@ const ConnectorAddModal = ({
         secrets: {},
         isMissingSecrets: false,
         isConnectorTypeDeprecated: false,
-        ...(connectorTypeIsDual(id) ? { isInboundEventsEnabled: false } : {}),
       });
       if (resetConnectorForm.current) {
         resetConnectorForm.current({
@@ -129,7 +122,6 @@ const ConnectorAddModal = ({
             isDeprecated: false,
             config: {},
             secrets: {},
-            ...(connectorTypeIsDual(id) ? { isInboundEventsEnabled: false } : {}),
           },
         });
       }
@@ -176,18 +168,13 @@ const ConnectorAddModal = ({
        * and there are no pre submit error messages.
        */
 
-      const { actionTypeId, name, config, secrets, id, isInboundEventsEnabled } = data;
+      const { actionTypeId, name, config, secrets, id } = data;
       const validConnector = {
         actionTypeId,
         name: name ?? '',
         config,
         secrets,
         id: id ?? '',
-        ...isInboundEventsEnabledPayload(
-          actionTypeId,
-          isInboundEventsEnabled,
-          isClusterInboundEventsEnabled
-        ),
       };
 
       const createdConnector = await createConnector(validConnector);
@@ -206,7 +193,7 @@ const ConnectorAddModal = ({
         });
       }
     }
-  }, [submit, preSubmitValidator, createConnector, isClusterInboundEventsEnabled]);
+  }, [submit, preSubmitValidator, createConnector]);
 
   const closeModal = useCallback(() => {
     onClose();
@@ -336,6 +323,7 @@ const ConnectorAddModal = ({
                 isEdit={false}
                 onChange={setFormState}
                 setResetForm={setResetForm}
+                showInboundEvents={false}
               />
               {preSubmitValidationErrorMessage}
             </>

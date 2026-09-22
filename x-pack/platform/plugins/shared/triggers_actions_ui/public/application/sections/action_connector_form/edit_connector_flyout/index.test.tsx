@@ -390,12 +390,19 @@ describe('EditConnectorFlyout', () => {
     });
     actionTypeRegistry.get.mockReturnValue(dualActionTypeModel);
     appMockRenderer.coreStart.actions.isInboundEventsEnabled = true;
-    appMockRenderer.coreStart.http.put = jest.fn().mockResolvedValue({
-      ...updateConnectorResponse,
-      id: 'dd-1',
-      connector_type_id: '.dual',
-      is_inbound_events_enabled: true,
-    });
+    appMockRenderer.coreStart.http.put = jest
+      .fn()
+      .mockImplementation((_path: string, opts?: { body?: string }) => {
+        const body = opts?.body ? JSON.parse(opts.body) : {};
+        return Promise.resolve({
+          ...updateConnectorResponse,
+          id: 'dd-1',
+          name: body.name,
+          config: body.config,
+          connector_type_id: '.dual',
+          is_inbound_events_enabled: body.is_inbound_events_enabled === true,
+        });
+      });
     appMockRenderer.coreStart.http.post = jest.fn().mockImplementation((path: string) => {
       if (String(path).includes('_rotate_event_token')) {
         return Promise.resolve({ ingest_token: 'once-token' });
@@ -441,6 +448,41 @@ describe('EditConnectorFlyout', () => {
       })
     );
     expect(onClose).toHaveBeenCalled();
+  });
+
+  it('does not rotate when saving an inbound webhook connector', async () => {
+    const inboundConnector = createMockActionConnector({
+      id: 'sales-ingress',
+      name: 'Sales ingress',
+      actionTypeId: '.inboundWebhook',
+      config: { ingestTokenHash: 'a'.repeat(64) },
+      secrets: {},
+    });
+
+    appMockRenderer.render(
+      <EditConnectorFlyout
+        actionTypeRegistry={actionTypeRegistry}
+        onClose={onClose}
+        connector={inboundConnector}
+        onConnectorUpdated={onConnectorUpdated}
+      />
+    );
+
+    const nameInput = await screen.findByTestId('nameInput');
+    await userEvent.clear(nameInput);
+    await userEvent.click(nameInput);
+    await userEvent.paste('Renamed ingress');
+    await waitFor(() => {
+      expect(screen.getByTestId('edit-connector-flyout-save-btn')).toBeEnabled();
+    });
+    await userEvent.click(screen.getByTestId('edit-connector-flyout-save-btn'));
+
+    await waitFor(() => {
+      expect(onConnectorUpdated).toHaveBeenCalled();
+    });
+    expect(appMockRenderer.coreStart.http.post).not.toHaveBeenCalledWith(
+      expect.stringContaining('_rotate_event_token')
+    );
   });
 
   it('disables the buttons when there are error on the form', async () => {

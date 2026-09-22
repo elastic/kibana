@@ -28,6 +28,8 @@ interface ConnectorFormFieldsProps {
   settingsContent?: ReactNode;
   /** Saved inbound setting. Used to warn when turning a live dual connector off. */
   savedIsInboundEventsEnabled?: boolean;
+  /** False on the add modal, which closes before a one-time ingest token can be shown. */
+  showInboundEvents?: boolean;
 }
 
 const ConnectorFormFieldsComponent: React.FC<ConnectorFormFieldsProps> = ({
@@ -37,6 +39,7 @@ const ConnectorFormFieldsComponent: React.FC<ConnectorFormFieldsProps> = ({
   authMode,
   settingsContent,
   savedIsInboundEventsEnabled = false,
+  showInboundEvents = true,
 }) => {
   const {
     application: { capabilities },
@@ -46,7 +49,7 @@ const ConnectorFormFieldsComponent: React.FC<ConnectorFormFieldsProps> = ({
   const FieldsComponent = actionTypeModel?.actionConnectorFields ?? null;
   const actionTypeId = actionTypeModel?.id;
   const isDual = actionTypeId != null && connectorTypeIsDual(actionTypeId);
-  const showDualInbound = isDual && isClusterInboundEventsEnabled;
+  const showDualInbound = isDual && isClusterInboundEventsEnabled && showInboundEvents;
   const showSettingsSection =
     FieldsComponent !== null || settingsContent != null || showDualInbound;
   const showSettingsTitle =
@@ -89,7 +92,7 @@ const ConnectorFormFieldsComponent: React.FC<ConnectorFormFieldsProps> = ({
               settingsContent={settingsContent}
             />
           ) : null}
-          {isDual ? <OutboundSectionTitle /> : null}
+          {isDual && showInboundEvents ? <OutboundSectionTitle /> : null}
           {showSettingsTitle ? (
             <>
               <EuiTitle size="xxs" data-test-subj="connector-settings-label">

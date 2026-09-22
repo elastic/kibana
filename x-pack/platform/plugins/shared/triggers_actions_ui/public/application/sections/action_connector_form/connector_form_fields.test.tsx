@@ -230,6 +230,26 @@ describe('ConnectorFormFields', () => {
       expect(result.getByTestId('inbound-events-disable-warning')).toHaveTextContent('After save,');
     });
 
+    it('hides inbound controls when the caller cannot reveal the ingest token', async () => {
+      const result = appMockRenderer.render(
+        <FormTestProvider onSubmit={onSubmit} defaultValue={dualDefaultValue}>
+          <ConnectorFormFields
+            actionTypeModel={dualActionTypeModel}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+            showInboundEvents={false}
+          />
+        </FormTestProvider>
+      );
+
+      expect(result.queryByTestId('inbound-events-enabled-switch')).not.toBeInTheDocument();
+      expect(result.queryByTestId('connector-inbound-label')).not.toBeInTheDocument();
+      expect(result.queryByTestId('connector-outbound-label')).not.toBeInTheDocument();
+      await waitFor(() => {
+        expect(result.getByTestId('test-connector-text-field')).toBeInTheDocument();
+      });
+    });
+
     it('hides the inbound section when the cluster flag is off', async () => {
       appMockRenderer.coreStart.actions.isInboundEventsEnabled = false;
 

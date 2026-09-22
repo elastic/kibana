@@ -187,18 +187,37 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   const testConnector = useCallback(async () => {
     const createdConnector = await validateAndCreateConnector();
 
-    if (createdConnector) {
-      if (onConnectorCreated) {
-        onConnectorCreated(createdConnector);
-      }
-
-      if (onTestConnector) {
-        onTestConnector(createdConnector);
-      }
-
-      setConnectorToTest(createdConnector);
+    if (!createdConnector) {
+      return;
     }
-  }, [validateAndCreateConnector, onConnectorCreated, onTestConnector]);
+
+    let connectorForTest = createdConnector;
+    if (shouldRotateInboundAfterSave(createdConnector)) {
+      try {
+        const rotated = await rotateIngress(createdConnector.id);
+        connectorForTest = {
+          ...createdConnector,
+          secrets: { ingestToken: rotated.ingestToken },
+        } as ActionConnector;
+      } catch {
+        // Danger toast is shown by the rotate hook. Stay on the create form.
+        if (onConnectorCreated) {
+          onConnectorCreated(createdConnector);
+        }
+        return;
+      }
+    }
+
+    if (onConnectorCreated) {
+      onConnectorCreated(connectorForTest);
+    }
+
+    if (onTestConnector) {
+      onTestConnector(connectorForTest);
+    }
+
+    setConnectorToTest(connectorForTest);
+  }, [validateAndCreateConnector, onConnectorCreated, onTestConnector, rotateIngress]);
 
   const onSubmit = useCallback(async () => {
     const createdConnector = await validateAndCreateConnector();

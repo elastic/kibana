@@ -891,6 +891,34 @@ describe('CreateConnectorFlyout', () => {
       );
       expect(screen.getByTestId('inbound-ingress-ingest-token')).toHaveValue('once-token');
     });
+
+    it('rotates before Save & test when inbound events are turned on', async () => {
+      appMockRenderer.coreStart.application.capabilities = {
+        ...appMockRenderer.coreStart.application.capabilities,
+        actions: { save: true, show: true, execute: true },
+      };
+      await fillAndSave();
+
+      await userEvent.click(screen.getByTestId('inbound-events-enabled-switch'));
+      await userEvent.click(screen.getByTestId('create-connector-flyout-save-test-btn'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('edit-connector-flyout')).toBeInTheDocument();
+      });
+      expect(onClose).not.toHaveBeenCalled();
+      expect(appMockRenderer.coreStart.http.post).toHaveBeenCalledWith(
+        expect.stringContaining('_rotate_event_token')
+      );
+      expect(onTestConnector).toHaveBeenCalledWith(
+        expect.objectContaining({
+          isInboundEventsEnabled: true,
+          secrets: { ingestToken: 'once-token' },
+        })
+      );
+
+      await userEvent.click(screen.getByTestId('configureConnectorTab'));
+      expect(await screen.findByTestId('inbound-ingress-ingest-token')).toHaveValue('once-token');
+    });
   });
 
   describe('Save & Test transition', () => {

@@ -68,7 +68,7 @@ export function defineRoutes(opts: RouteOptions) {
   getAllConnectorsRoute(router, licenseState, actionsConfigUtils);
   updateConnectorRoute(router, licenseState, actionsConfigUtils);
   listTypesRoute(router, licenseState);
-  executeConnectorRoute(router, licenseState);
+  executeConnectorRoute(router, licenseState, actionsConfigUtils);
   getGlobalExecutionLogRoute(router, licenseState);
   getGlobalExecutionKPIRoute(router, licenseState);
   getOAuthAccessToken(router, licenseState, actionsConfigUtils);

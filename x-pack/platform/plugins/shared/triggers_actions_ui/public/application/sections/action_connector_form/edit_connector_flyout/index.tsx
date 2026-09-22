@@ -51,9 +51,9 @@ import { FlyoutFooter } from './footer';
 import { InboundIngressCredentials } from '../inbound_ingress_credentials';
 import { InboundEventsSaveToGenerateCallout } from '../inbound_events_save_to_generate_callout';
 import {
+  getInboundIngestToken,
   isInboundEventsEnabledPayload,
   isInboundIngressConnector,
-  shouldRotateInboundAfterSave,
 } from '../../../lib/inbound_ingress';
 import { useRotateInboundIngress } from '../../../hooks/use_rotate_inbound_ingress';
 
@@ -242,7 +242,6 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
   const [revealedInboundConnector, setRevealedInboundConnector] = useState<ActionConnector | null>(
     null
   );
-  const hasHandledInboundEnableRef = useRef(false);
   const { preSubmitValidator, submit, isValid: isFormValid, isSubmitting } = formState;
   const hasErrors = isFormValid === false;
   const isSaving = isUpdatingConnector || isSubmitting || isExecutingConnector || isRotating;
@@ -404,17 +403,15 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
          */
         onFormModifiedChange(false);
 
-        let nextConnector = updatedConnector;
-        const justEnabledInbound =
-          !hasHandledInboundEnableRef.current &&
-          shouldRotateInboundAfterSave({
-            actionTypeId: connector.actionTypeId,
-            isInboundEventsEnabled,
-          }) &&
-          connector.isInboundEventsEnabled !== true;
+        const heldConnector = revealedInboundConnector;
+        const previousEnabled = (heldConnector ?? connector).isInboundEventsEnabled === true;
+        const enablingNow =
+          connectorTypeIsDual(connector.actionTypeId) &&
+          isInboundEventsEnabled === true &&
+          !previousEnabled;
 
-        if (justEnabledInbound) {
-          hasHandledInboundEnableRef.current = true;
+        let nextConnector = updatedConnector;
+        if (enablingNow) {
           try {
             const rotated = await rotateIngress(updatedConnector.id);
             nextConnector = {
@@ -425,7 +422,17 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
             // Danger toast is shown by the rotate hook. Inbound is on; user can rotate.
           }
           setRevealedInboundConnector(nextConnector);
-        } else if (!hasHandledInboundEnableRef.current && onConnectorUpdated) {
+        } else if (heldConnector) {
+          const ingestToken =
+            nextConnector.isInboundEventsEnabled === true
+              ? getInboundIngestToken(heldConnector)
+              : undefined;
+          setRevealedInboundConnector(
+            ingestToken
+              ? ({ ...nextConnector, secrets: { ingestToken } } as ActionConnector)
+              : nextConnector
+          );
+        } else if (onConnectorUpdated) {
           onConnectorUpdated(nextConnector);
         }
         setIsSaved(true);
@@ -438,16 +445,15 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
       setShowFormErrors(true);
     }
   }, [
-    onConnectorUpdated,
     submit,
     preSubmitValidator,
-    connector.actionTypeId,
-    connector.id,
-    connector.isInboundEventsEnabled,
+    connector,
     isClusterInboundEventsEnabled,
     updateConnector,
-    rotateIngress,
     onFormModifiedChange,
+    revealedInboundConnector,
+    onConnectorUpdated,
+    rotateIngress,
   ]);
 
   const notifyRevealedInboundConnector = useCallback(() => {
