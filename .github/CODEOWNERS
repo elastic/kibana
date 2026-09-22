@@ -1389,6 +1389,7 @@ x-pack/solutions/search/packages/kbn-search-code-examples @elastic/search-ml-ux
 x-pack/solutions/search/packages/kbn-search-queries @elastic/search-ml-ux
 x-pack/solutions/search/packages/shared-ui @elastic/search-ml-ux
 x-pack/solutions/search/plugins/enterprise_search @elastic/search-ml-ux
+x-pack/solutions/search/plugins/search_alerting @elastic/search-ml-ux
 x-pack/solutions/search/plugins/search_assistant @elastic/search-ml-ux
 x-pack/solutions/search/plugins/search_getting_started @elastic/search-ml-ux
 x-pack/solutions/search/plugins/search_homepage @elastic/search-ml-ux

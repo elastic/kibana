@@ -1,0 +1,16 @@
+{
+  "type": "plugin",
+  "id": "@kbn/search-alerting-plugin",
+  "owner": ["@elastic/search-ml-ux"],
+  "group": "search",
+  "visibility": "private",
+  "description": "Search-owned mounts for Alerting pages.",
+  "plugin": {
+    "id": "searchAlerting",
+    "browser": true,
+    "server": false,
+    "requiredPlugins": ["alertingVTwo", "triggersActionsUi"],
+    "optionalPlugins": [],
+    "requiredBundles": ["alertingVTwo"]
+  }
+}

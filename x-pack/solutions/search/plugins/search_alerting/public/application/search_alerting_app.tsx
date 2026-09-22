@@ -1,0 +1,220 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { CoreStart, ChromeBreadcrumb, ScopedHistory } from '@kbn/core/public';
+import type {
+  AlertingV2PublicStart,
+  AlertingV2HostApp,
+  PrivilegeCheck,
+} from '@kbn/alerting-v2-plugin/public';
+import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import type { AppHeaderTab } from '@kbn/app-header';
+import { SEARCH_ALERTING_APP_ID } from '@kbn/deeplinks-search';
+import { i18n } from '@kbn/i18n';
+import { Route, Routes } from '@kbn/shared-ux-router';
+import React, { useCallback, useMemo } from 'react';
+import { Redirect } from 'react-router-dom';
+import { EuiPageSection } from '@elastic/eui';
+import {
+  SEARCH_ALERTING_ACTION_POLICIES_PATH,
+  SEARCH_ALERTING_BASE_PATH,
+  SEARCH_ALERTING_EXECUTION_HISTORY_PATH,
+  SEARCH_ALERTING_INBOX_PATH,
+  SEARCH_ALERTING_RULE_LIBRARY_PATH,
+  SEARCH_ALERTING_RULES_V1_PATH,
+  SEARCH_ALERTING_RULES_V2_PATH,
+} from '../constants';
+import { hasSearchAlertingPrivilege } from './has_search_alerting_privilege';
+
+interface SearchAlertingAppProps {
+  coreStart: CoreStart;
+  alertingVTwo: AlertingV2PublicStart;
+  triggersActionsUi: Pick<TriggersAndActionsUIPublicPluginStart, 'getClassicRulesPage'>;
+  history: ScopedHistory;
+  setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
+}
+
+const useSearchHostApp = (
+  createAlertingV2HostApp: AlertingV2PublicStart['createAlertingV2HostApp']
+): AlertingV2HostApp =>
+  useMemo(
+    () =>
+      createAlertingV2HostApp(SEARCH_ALERTING_APP_ID, {
+        rules: SEARCH_ALERTING_RULES_V2_PATH,
+        ruleLibrary: SEARCH_ALERTING_RULE_LIBRARY_PATH,
+        episodes: SEARCH_ALERTING_INBOX_PATH,
+        actionPolicies: SEARCH_ALERTING_ACTION_POLICIES_PATH,
+        executionHistory: SEARCH_ALERTING_EXECUTION_HISTORY_PATH,
+      }),
+    [createAlertingV2HostApp]
+  );
+
+const useSearchRulesTabs = (
+  prepend: CoreStart['http']['basePath']['prepend'],
+  selected: 'v1' | 'v2'
+): AppHeaderTab[] =>
+  useMemo(() => {
+    const v1Href = prepend(`${SEARCH_ALERTING_BASE_PATH}${SEARCH_ALERTING_RULES_V1_PATH}`);
+    const v2Href = prepend(`${SEARCH_ALERTING_BASE_PATH}${SEARCH_ALERTING_RULES_V2_PATH}`);
+
+    return [
+      {
+        id: 'v2Rules',
+        label: i18n.translate('xpack.searchAlerting.rulesPage.v2RulesTabTitle', {
+          defaultMessage: 'V2 rules',
+        }),
+        isSelected: selected === 'v2',
+        href: v2Href,
+        badge: {
+          iconType: 'sparkles',
+          tooltip: i18n.translate('xpack.searchAlerting.rulesPage.v2RulesTabNewBadgeTooltip', {
+            defaultMessage: 'New',
+          }),
+        },
+        'data-test-subj': 'v2RulesTab',
+      },
+      {
+        id: 'v1Rules',
+        label: i18n.translate('xpack.searchAlerting.rulesPage.v1RulesTabTitle', {
+          defaultMessage: 'V1 rules',
+        }),
+        isSelected: selected === 'v1',
+        href: v1Href,
+        'data-test-subj': 'v1RulesTab',
+      },
+    ];
+  }, [prepend, selected]);
+
+const ClassicRulesV1Route = ({
+  coreStart,
+  getClassicRulesPage,
+  history,
+  setBreadcrumbs,
+  tabs,
+}: {
+  coreStart: CoreStart;
+  getClassicRulesPage: TriggersAndActionsUIPublicPluginStart['getClassicRulesPage'];
+  history: ScopedHistory;
+  setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
+  tabs: AppHeaderTab[];
+}) => {
+  const classicRulesHistory = useMemo(
+    () => history.createSubHistory(SEARCH_ALERTING_RULES_V1_PATH),
+    [history]
+  );
+
+  return getClassicRulesPage({
+    coreStart,
+    setBreadcrumbs,
+    history: classicRulesHistory,
+    hideListBackButton: true,
+    host: {
+      app: SEARCH_ALERTING_APP_ID,
+      pathPrefix: SEARCH_ALERTING_RULES_V1_PATH,
+    },
+    tabs,
+  });
+};
+
+export const SearchAlertingApp = ({
+  coreStart,
+  alertingVTwo,
+  triggersActionsUi,
+  history,
+  setBreadcrumbs,
+}: SearchAlertingAppProps) => {
+  const {
+    RulesPage,
+    RuleLibraryPage,
+    EpisodesPage,
+    ActionPoliciesPage,
+    ExecutionHistoryPage,
+    createAlertingV2HostApp: createHost,
+  } = alertingVTwo;
+
+  const hostApp = useSearchHostApp(createHost);
+  const prepend = coreStart.http.basePath.prepend;
+  const rulesV1Tabs = useSearchRulesTabs(prepend, 'v1');
+  const rulesV2Tabs = useSearchRulesTabs(prepend, 'v2');
+
+  const privilegeCheck: PrivilegeCheck = useCallback(
+    (features, capability) =>
+      hasSearchAlertingPrivilege(coreStart.application.capabilities, features, capability),
+    [coreStart]
+  );
+
+  return (
+    <Routes>
+      <Route exact path="/">
+        <Redirect to={SEARCH_ALERTING_INBOX_PATH} />
+      </Route>
+      <Route path={SEARCH_ALERTING_INBOX_PATH}>
+        <EuiPageSection paddingSize="m">
+          <EpisodesPage
+            coreStart={coreStart}
+            setBreadcrumbs={setBreadcrumbs}
+            hostApp={hostApp}
+            privilegeCheck={privilegeCheck}
+          />
+        </EuiPageSection>
+      </Route>
+      <Route path={SEARCH_ALERTING_RULES_V1_PATH}>
+        <EuiPageSection paddingSize="m">
+          <ClassicRulesV1Route
+            coreStart={coreStart}
+            getClassicRulesPage={triggersActionsUi.getClassicRulesPage}
+            history={history}
+            setBreadcrumbs={setBreadcrumbs}
+            tabs={rulesV1Tabs}
+          />
+        </EuiPageSection>
+      </Route>
+      <Route path={SEARCH_ALERTING_RULES_V2_PATH}>
+        <EuiPageSection paddingSize="m">
+          <RulesPage
+            coreStart={coreStart}
+            setBreadcrumbs={setBreadcrumbs}
+            hostApp={hostApp}
+            privilegeCheck={privilegeCheck}
+            tabs={rulesV2Tabs}
+          />
+        </EuiPageSection>
+      </Route>
+      <Route path={SEARCH_ALERTING_RULE_LIBRARY_PATH}>
+        <EuiPageSection paddingSize="m">
+          <RuleLibraryPage
+            coreStart={coreStart}
+            setBreadcrumbs={setBreadcrumbs}
+            hostApp={hostApp}
+            privilegeCheck={privilegeCheck}
+          />
+        </EuiPageSection>
+      </Route>
+      <Route path={SEARCH_ALERTING_ACTION_POLICIES_PATH}>
+        <EuiPageSection paddingSize="m">
+          <ActionPoliciesPage
+            coreStart={coreStart}
+            setBreadcrumbs={setBreadcrumbs}
+            hostApp={hostApp}
+            privilegeCheck={privilegeCheck}
+          />
+        </EuiPageSection>
+      </Route>
+      <Route path={SEARCH_ALERTING_EXECUTION_HISTORY_PATH}>
+        <EuiPageSection paddingSize="m">
+          <ExecutionHistoryPage
+            coreStart={coreStart}
+            setBreadcrumbs={setBreadcrumbs}
+            hostApp={hostApp}
+            privilegeCheck={privilegeCheck}
+          />
+        </EuiPageSection>
+      </Route>
+      <Redirect to={SEARCH_ALERTING_INBOX_PATH} />
+    </Routes>
+  );
+};

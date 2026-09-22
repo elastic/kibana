@@ -152,6 +152,7 @@ export const applicationUsageSchema = {
   enterpriseSearchRedirect: commonSchema,
   searchGettingStarted: commonSchema,
   searchHomepage: commonSchema,
+  searchAlerting: commonSchema,
   graph: commonSchema,
   logs: commonSchema,
   metrics: commonSchema,
