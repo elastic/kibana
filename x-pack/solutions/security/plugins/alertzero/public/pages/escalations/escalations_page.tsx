@@ -136,9 +136,9 @@ export const EscalationsPage: React.FC = () => {
   // but not yet confirmed by the server. The avatar stack renders from this while in-flight.
   // Cleared by the list-query useEffect once refetched data arrives (success path), or
   // immediately in onError (no refetch happens on failure).
-  const [pendingAssignees, setPendingAssignees] = useState<
-    Map<string, UserProfileWithAvatar[]>
-  >(new Map());
+  const [pendingAssignees, setPendingAssignees] = useState<Map<string, UserProfileWithAvatar[]>>(
+    new Map()
+  );
 
   const handleAssigneesChange = useCallback(
     (escalationId: string, selected: UserProfileWithAvatar[]) => {
@@ -180,7 +180,7 @@ export const EscalationsPage: React.FC = () => {
       // resolved profiles, preserving unresolved UIDs as synthetic placeholders so they
       // round-trip through the replace-in-full payload and can only be removed explicitly.
       const selected: UserProfileWithAvatar[] = isUpdating
-        ? (pendingAssignees.get(escalation.id) ?? [])
+        ? pendingAssignees.get(escalation.id) ?? []
         : escalation.assigneeUids.map((uid) => {
             const resolved = profilesByUid.get(uid);
             if (resolved) return resolved;
