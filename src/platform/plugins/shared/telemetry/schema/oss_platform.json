@@ -12990,13 +12990,13 @@
         "alerting:v2:enabled": {
           "type": "boolean",
           "_meta": {
-            "description": "Non-default value of setting."
+            "description": "Enables the alerting V2 APIs and UI."
           }
         },
         "alerting:v1:showClassicAlertsTable": {
           "type": "boolean",
           "_meta": {
-            "description": "Non-default value of setting."
+            "description": "Show the classic Observability alerts table in navigation."
           }
         }
       }
