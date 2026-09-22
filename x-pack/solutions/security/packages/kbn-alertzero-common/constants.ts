@@ -93,7 +93,8 @@ export const WATCH_AUTONOMY_MANUAL = ['manual'] as const;
  * entries from this list rather than from `list_watches`.
  *
  * Deliberately free of schema imports: both consumers are page-load critical, and pulling a schema
- * in would drag Zod into that bundle. Live placeholders take name, colour and lifecycle from here.
+ * in would drag Zod into that bundle. Live placeholders take name and colour from here.
+ * `color` is an EUI token key (`euiColorVisN` or `textAssistance`), resolved at render.
  *
  * Custom (unmanaged) watches are absent by construction — they are discoverable only at runtime.
  */
@@ -102,34 +103,31 @@ export const SYSTEM_SECURITY_WATCH_CATALOG = [
     id: SYSTEM_SECURITY_WATCH_FLOOR_ID,
     deepLinkId: SecurityPageName.alertZeroWatchFloor,
     name: 'Triage Watch',
-    color: '#16b3a6',
+    color: 'euiColorVis0',
   },
   {
     id: SYSTEM_SECURITY_WATCH_OFFICER_ID,
     deepLinkId: SecurityPageName.alertZeroWatchOfficer,
     name: 'Watch Officer',
-    color: '#3b82f6',
+    color: 'euiColorVis1',
   },
   {
     id: SYSTEM_SECURITY_WATCH_HUNT_ID,
     deepLinkId: SecurityPageName.alertZeroWatchHunt,
     name: 'Hunt Watch',
-    color: '#f59e0b',
-    isBeta: true,
+    color: 'euiColorVis8',
   },
   {
     id: SYSTEM_SECURITY_WATCH_DETECTION_ID,
     deepLinkId: SecurityPageName.alertZeroWatchDetection,
     name: 'Detection Watch',
-    color: '#ec4899',
-    isBeta: true,
+    color: 'textAssistance',
   },
   {
     id: SYSTEM_SECURITY_WATCH_FORENSICS_ID,
     deepLinkId: SecurityPageName.alertZeroWatchForensics,
     name: 'Forensics Watch',
-    color: '#8b5cf6',
-    isBeta: true,
+    color: 'euiColorVis4',
   },
 ] as const;
 
