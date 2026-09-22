@@ -9,6 +9,7 @@ import { useQuery, useQueryClient } from '@kbn/react-query';
 import { useCallback } from 'react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type { RiskEngineStatusResponse } from '../../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
 import { useEntityAnalyticsRoutes } from '../api';
 const FETCH_RISK_ENGINE_STATUS = ['GET', 'FETCH_RISK_ENGINE_STATUS'];
@@ -41,12 +42,21 @@ export const useRiskEngineStatus = (
   queryOptions: Pick<
     UseQueryOptions<unknown, unknown, RiskEngineStatusResponse, string[]>,
     'refetchInterval' | 'structuralSharing'
-  > = {}
+  > = {},
+  {
+    executionContext,
+  }: {
+    /**
+     * Optional Kibana execution context forwarded to the risk-engine-status fetch so slow logs
+     * and APM traces can attribute the query to the calling page/panel.
+     */
+    executionContext?: KibanaExecutionContext;
+  } = {}
 ) => {
   const { fetchRiskEngineStatus } = useEntityAnalyticsRoutes();
   return useQuery(
     FETCH_RISK_ENGINE_STATUS,
-    async ({ signal }) => fetchRiskEngineStatus({ signal }),
+    async ({ signal }) => fetchRiskEngineStatus({ signal, context: executionContext }),
     queryOptions
   );
 };

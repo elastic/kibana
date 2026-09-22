@@ -6,6 +6,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type { EntityType } from '../../../../common/entity_analytics/types';
 import { useRiskScore, type RiskScoreState } from './use_risk_score';
 import { useResolutionGroup } from '../../components/entity_resolution/hooks/use_resolution_group';
@@ -32,8 +33,16 @@ export interface EntityRiskScoresState<T extends EntityType> {
  */
 export const useEntityRiskScores = <T extends EntityType>(
   entityType: T,
-  entityId: string | undefined
+  entityId: string | undefined,
+  options?: {
+    /**
+     * Optional Kibana execution context forwarded to both the base and resolution risk-score
+     * queries so slow logs and APM traces can attribute the queries to the calling page/panel.
+     */
+    executionContext?: KibanaExecutionContext;
+  }
 ): EntityRiskScoresState<T> => {
+  const executionContext = options?.executionContext;
   const baseFilterQuery = useMemo(
     () =>
       entityId
@@ -52,6 +61,7 @@ export const useEntityRiskScores = <T extends EntityType>(
     onlyLatest: false,
     pagination: FIRST_RECORD_PAGINATION,
     skip: !entityId,
+    executionContext,
   });
 
   const { data: resolutionGroup } = useResolutionGroup(entityId ?? '', {
@@ -83,6 +93,7 @@ export const useEntityRiskScores = <T extends EntityType>(
     onlyLatest: false,
     pagination: FIRST_RECORD_PAGINATION,
     skip: !shouldFetchResolution,
+    executionContext,
   });
 
   const refetch = useCallback(() => {
