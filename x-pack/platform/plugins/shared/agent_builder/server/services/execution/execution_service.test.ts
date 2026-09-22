@@ -1086,14 +1086,14 @@ describe('AgentExecutionService', () => {
       ]);
     });
 
-    it('rejects a conversation that predates canonical event storage', async () => {
+    it('appends to a conversation that predates canonical event storage', async () => {
+      // The client derives such a conversation's timeline from its rounds and promotes the
+      // document on write, so there is nothing to reject here.
       conversationClient.get.mockResolvedValue({ ...conversation, schema_version: undefined });
 
-      const error = await append().catch((thrown) => thrown);
+      await append();
 
-      expect(isBadRequestError(error)).toBe(true);
-      expect(error.message).toContain('canonical event storage');
-      expect(conversationClient.appendEvents).not.toHaveBeenCalled();
+      expect(conversationClient.appendEvents).toHaveBeenCalledTimes(1);
     });
 
     it('requires something to say', async () => {

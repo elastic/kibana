@@ -2939,6 +2939,46 @@ describe('ConversationClient', () => {
       expect(mockEsClient.index).toHaveBeenCalledTimes(1);
     });
 
+    it('appends to a legacy conversation by deriving its timeline first, promoting the document', async () => {
+      // A pre-events-native document: rounds only, no schema_version, no stored events.
+      mockGetDocumentResponse(
+        createConversationDocument({
+          rounds: [createRound({ id: 'round-1', status: ConversationRoundStatus.completed })],
+        })
+      );
+
+      await client.appendEvents({
+        id: 'conversation-1',
+        events: [
+          {
+            id: '9c2e0f11-0000-4000-8000-000000000001',
+            type: TimelineEventType.userMessage,
+            created_at: '2026-09-22T10:00:00.000Z',
+            actor: { type: EventActorType.user, id: 'user-1', username: 'test-user' },
+            data: { message: 'Pool limit is now 200' },
+          },
+        ],
+      });
+
+      const { document: indexed } = mockEsClient.index.mock.calls[0][0] as {
+        document: {
+          schema_version?: number;
+          events?: Array<{ id: string }>;
+          conversation_rounds: Array<{ id: string }>;
+        };
+      };
+      // The round's derived events survive, the appended message lands after them, and the
+      // document is now events-native.
+      expect(indexed.events?.map((event) => event.id)).toEqual([
+        'round-1::user_message',
+        'round-1::execution_started',
+        'round-1::execution_terminated',
+        '9c2e0f11-0000-4000-8000-000000000001',
+      ]);
+      expect(indexed.schema_version).toBe(CONVERSATION_SCHEMA_VERSION);
+      expect(indexed.conversation_rounds).toHaveLength(1);
+    });
+
     it('round-trips attachment_refs through the stored events projection', async () => {
       const attachmentRefs = [
         { attachment_id: 'attachment-a', version: 1 },

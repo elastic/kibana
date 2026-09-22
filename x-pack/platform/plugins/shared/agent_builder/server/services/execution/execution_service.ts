@@ -24,7 +24,6 @@ import {
   agentBuilderDefaultAgentId,
   createBadRequestError,
   createInternalError,
-  isEventsNativeVersion,
   isExecutionAbortReason,
   isRequestAbortedError,
   roundUserMessageEventId,
@@ -279,12 +278,6 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     }
 
     const created = conversation.operation === 'CREATE';
-
-    // A conversation this request creates is events-native from its first write; only a stored
-    // one can predate that.
-    if (!created && !isEventsNativeVersion(conversation.schema_version)) {
-      throw createBadRequestError('User messages require canonical event storage');
-    }
 
     const message = validatedParams.nextInput.message?.trim() ?? '';
     const attachments = validatedParams.nextInput.attachments ?? [];
