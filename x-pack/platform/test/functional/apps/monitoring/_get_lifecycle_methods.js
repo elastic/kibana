@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import rison from '@kbn/rison';
+import moment from 'moment';
+
 export const getLifecycleMethods = (getService, getPageObjects) => {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const client = getService('es');
-  const PageObjects = getPageObjects(['monitoring', 'timePicker', 'security', 'common']);
+  const PageObjects = getPageObjects(['monitoring', 'security', 'common']);
   let _archive;
 
   const deleteDataStream = async (index) => {
@@ -45,13 +48,18 @@ export const getLifecycleMethods = (getService, getPageObjects) => {
       await esArchiver.load(archive, { useCreate });
       await kibanaServer.uiSettings.replace({});
 
-      await PageObjects.common.navigateToApp('monitoring');
+      const dateFormat = 'MMM D, YYYY @ HH:mm:ss.SSS';
+      const globalState = rison.encode({
+        refreshInterval: { pause: true, value: 10000 },
+        time: {
+          from: moment.utc(from, dateFormat).toISOString(),
+          to: moment.utc(to, dateFormat).toISOString(),
+        },
+      });
 
-      // pause autorefresh in the time filter because we don't wait any ticks,
-      // and we don't want ES to log a warning when data gets wiped out
-      await PageObjects.timePicker.pauseAutoRefresh();
-
-      await PageObjects.timePicker.setAbsoluteRange(from, to);
+      await PageObjects.common.navigateToApp('monitoring', {
+        hash: `#/home?_g=${globalState}`,
+      });
     },
 
     async tearDown() {

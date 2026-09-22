@@ -64,9 +64,23 @@ export class TimePickerPageObject extends FtrService {
     // Wait for the page to settle before detecting, otherwise a stale picker
     // from a previous app may briefly appear during navigation.
     await this.header.awaitGlobalLoadingIndicatorHidden();
-    const isNew = await this.testSubjects.exists('dateRangePickerControlButton', {
-      timeout: 5000,
-    });
+    let isNew = false;
+    try {
+      await this.retry.tryForTime(5000, async () => {
+        if (await this.testSubjects.exists('dateRangePickerControlButton', { timeout: 0 })) {
+          isNew = true;
+          return;
+        }
+        if (
+          await this.testSubjects.exists('superDatePickerToggleQuickMenuButton', { timeout: 0 })
+        ) {
+          return;
+        }
+        throw new Error('date picker has not rendered yet');
+      });
+    } catch {
+      // Preserve the legacy fallback for pages that do not render either picker.
+    }
     this.log.debug(
       `Detected date picker variant: ${isNew ? 'DateRangePicker' : 'EuiSuperDatePicker'}`
     );
@@ -700,7 +714,7 @@ export class TimePickerPageObject extends FtrService {
       }
       await this.closeNewPickerSettingsPanel();
     } else {
-      const refreshConfig = await this.getRefreshConfig(true);
+      const refreshConfig = await this.getRefreshConfigLegacy(true);
       if (!refreshConfig.isPaused) {
         this.log.debug('pause auto refresh');
         await this.testSubjects.click('superDatePickerToggleRefreshButton');
