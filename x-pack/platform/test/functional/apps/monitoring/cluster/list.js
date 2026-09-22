@@ -63,9 +63,7 @@ export default function ({ getService, getPageObjects }) {
         it('clicking the basic cluster shows a toast message', async () => {
           const basicClusterLink = await clusterList.getClusterLink(UNSUPPORTED_CLUSTER_UUID);
           await basicClusterLink.click();
-          expect(
-            await testSubjects.waitForExists('monitoringLicenseWarning', { timeout: 2000 })
-          ).to.be(true);
+          expect(await testSubjects.exists('monitoringLicenseWarning')).to.be(true);
         });
 
         /*
@@ -158,9 +156,7 @@ export default function ({ getService, getPageObjects }) {
         it('clicking the non-primary basic cluster shows a toast message', async () => {
           const basicClusterLink = await clusterList.getClusterLink(UNSUPPORTED_CLUSTER_UUID);
           await basicClusterLink.click();
-          expect(
-            await testSubjects.waitForExists('monitoringLicenseWarning', { timeout: 2000 })
-          ).to.be(true);
+          expect(await testSubjects.exists('monitoringLicenseWarning')).to.be(true);
         });
 
         it('clicking the primary basic cluster goes to overview', async function () {
@@ -197,9 +193,7 @@ export default function ({ getService, getPageObjects }) {
       it('should show a toast when alerts are created successfully', async () => {
         await clusterList.acceptAlertsModal();
         await clusterList.confirmWatcherMigrationDone();
-        expect(await testSubjects.waitForExists('alertsCreatedToast', { timeout: 10000 })).to.be(
-          true
-        );
+        expect(await testSubjects.exists('alertsCreatedToast')).to.be(true);
       });
     });
   });

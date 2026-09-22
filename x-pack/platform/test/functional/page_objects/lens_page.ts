@@ -228,11 +228,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       disableEmptyRows?: boolean;
     }) {
       await retry.try(async () => {
-        if (
-          !(await testSubjects.waitForExists('lns-indexPattern-dimensionContainerClose', {
-            timeout: 1000,
-          }))
-        ) {
+        if (!(await testSubjects.exists('lns-indexPattern-dimensionContainerClose'))) {
           await testSubjects.click(opts.dimension);
         }
         await testSubjects.existOrFail('lns-indexPattern-dimensionContainerClose', {
@@ -902,9 +898,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       // remounts when the column label commits (DebouncedInput key). Wait for it
       // to exist, then type+assert in one retry so a remount cannot leave the
       // wait looking at a detached node.
-      await retry.waitFor('name-input to exist', async () =>
-        testSubjects.waitForExists('name-input', { timeout: 1000 })
-      );
+      await retry.waitFor('name-input to exist', async () => testSubjects.exists('name-input'));
       await retry.try(async () => {
         await testSubjects.setValue('name-input', label, { clearWithKeyboard: true });
         expect(
@@ -1047,7 +1041,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async openChartSwitchPopover(layerIndex = 0) {
       await this.ensureLayerTabIsActive(layerIndex);
 
-      if (await testSubjects.waitForExists('lnsChartSwitchList', { timeout: 200 })) {
+      if (await testSubjects.exists('lnsChartSwitchList')) {
         return;
       }
       await retry.try(async () => {
@@ -1822,13 +1816,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
               // Determine scroll direction based on tab index
               // Lower indices are on the left, higher indices are on the right
-              const scrollRightBtnExists = await testSubjects.waitForExists(
-                'unifiedTabs_tabsBar_scrollRightBtn',
-                { timeout: 500 }
+              const scrollRightBtnExists = await testSubjects.exists(
+                'unifiedTabs_tabsBar_scrollRightBtn'
               );
-              const scrollLeftBtnExists = await testSubjects.waitForExists(
-                'unifiedTabs_tabsBar_scrollLeftBtn',
-                { timeout: 500 }
+              const scrollLeftBtnExists = await testSubjects.exists(
+                'unifiedTabs_tabsBar_scrollLeftBtn'
               );
 
               // Try scrolling in the appropriate direction
@@ -1851,7 +1843,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
         // Wait for the layer panel to render
         await retry.waitFor('layer panel to be visible', async () => {
-          return await testSubjects.waitForExists(`lns-layerPanel-${index}`, { timeout: 1000 });
+          return await testSubjects.exists(`lns-layerPanel-${index}`);
         });
       }
     },
@@ -1873,7 +1865,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
           // Wait for the layer panel to render
           await retry.waitFor('layer panel to be visible', async () => {
-            return await testSubjects.waitForExists(`lns-layerPanel-${i}`, { timeout: 1000 });
+            return await testSubjects.exists(`lns-layerPanel-${i}`);
           });
           return;
         }
