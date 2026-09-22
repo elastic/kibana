@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SessionObserver, spaceTest as baseSpaceTest } from '@kbn/scout';
+import { createPlaywrightConfig } from '@kbn/scout';
 
-export const spaceTest = baseSpaceTest.extend<{ sessionObserver: SessionObserver }>({
-  sessionObserver: async ({ page }, use) => {
-    await use(new SessionObserver(page));
-  },
+export default createPlaywrightConfig({
+  testDir: './parallel_tests',
+  workers: 2,
+  runGlobalSetup: true,
 });
