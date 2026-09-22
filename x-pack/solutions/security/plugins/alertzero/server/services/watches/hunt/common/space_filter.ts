@@ -9,9 +9,8 @@ import { HUNT_GLOBAL_SPACE_ID } from '../../../../../common/constants';
 
 /**
  * Space filter for reads against `.kibana-threat-reports`: the current space
- * plus the global-catalog sentinel, mirroring mustard's `buildSpaceFilterTerms`
- * (`search_by_anchors.ts:437`, `lib/space_filter.ts`). Writes never use this —
- * F4 always tags/targets the caller's concrete space, never `'*'`.
+ * plus the global-catalog sentinel. Writes always target the caller's concrete
+ * space and never use this filter.
  */
 export const buildHuntSpaceFilterTerms = (
   currentSpaceId: string

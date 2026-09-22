@@ -794,9 +794,10 @@ export const buildPackRssCurrentReportItems = ({
 export const buildPackRssReportItemsForScenario = buildPackHistoricReportItemsForScenario;
 
 /**
- * Offline mock "upstream article" for Intelligence Hub's external link.
- * Becomes report `source.url` after mustard RSS ingestion. Requires mustard
- * `isBrowsableReportUrl` to allow `data:` (http/https alone hides the link).
+ * Builds an inline `data:text/html` article for directly seeded (non-RSS) reports.
+ * These fixtures have no real server to host the content, so the article body is
+ * embedded in the URL. RSS-ingested reports use `scenario.articleUrl` (http/https)
+ * as `source.url` instead and will show a browsable link in Intelligence Hub.
  */
 export const buildPackArticleDataUrl = (
   scenario: PackTiScenario,

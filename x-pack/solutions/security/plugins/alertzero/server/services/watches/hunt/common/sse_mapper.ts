@@ -7,26 +7,12 @@
 
 /**
  * Maps the hunt coordinator's raw Tier 1 / Tier 2 output into the
- * `security.significant_security_event` attachment data shape (PR 1,
- * `hunt-watch-attachment-types`, `significant_security_event.ts`).
+ * `security.significant_security_event` attachment data shape.
  *
- * This is the schema lock for the SSE attachment contract: once PR 1
- * lands, `SseAttachmentData` below is replaced by an import of
- * `significantSecurityEventAttachmentDataSchema`'s inferred type from
- * `alertzero/common/`, and `sse_mapper.test.ts` runs the coordinator's real
- * output through that schema directly (no cast) so a drift between the two
- * PRs fails a test instead of surfacing at demo time. Until PR 1 merges or
- * is integration-branched, this file defines a local mirror of that contract
- * so PR 3 has something concrete to build and test against.
- *
- * Amended 2026-09-21: the
- * report-to-Investigation-to-SSE join uses deterministic ids only
- * (`hunt:report:{reportId}`, `trigger-{sha256(space|reportId)}`,
- * `sse-{sha256(space|reportId[|technique])}`). Nothing is written to the
- * threat report. `buildSseData` now returns one SSE entry per confirmed
- * technique (a single report-scoped entry when Tier 2 produced none), each
- * carrying its own computed `attachment_id`; the caller (the hunt child
- * workflow) attaches every entry to the Investigation with `ai.attachment.add`.
+ * `buildSseData` returns one SSE entry per confirmed technique (a single
+ * report-scoped entry when Tier 2 produced none), each carrying its own
+ * computed `attachment_id`. The caller attaches every entry to the
+ * Investigation with `ai.attachment.add`.
  */
 
 import { createHash } from 'crypto';
@@ -91,10 +77,9 @@ export interface SseHuntResult {
 }
 
 /**
- * Minimal shape this mapper populates. Fields PR 1 owns and requires
- * (title, status, evaluation_record_ref, etc.) that the coordinator has no
- * opinion on are left to the caller (the hunt child workflow's packaging
- * step) to fill in before writing the attachment.
+ * Minimal shape this mapper populates. Fields the coordinator has no opinion
+ * on (title, status, evaluation_record_ref, etc.) are left to the caller to
+ * fill in before writing the attachment.
  */
 export interface SseAttachmentData {
   source_watch: string;
@@ -118,9 +103,8 @@ const CAPABILITY_ID = 'continuous_threat_hunt';
 
 /**
  * Subject-stable SSE attachment id: `sse-{sha256(space|reportId[|technique])}`.
- * Matches the `trigger-{sha256(space|reportId)}` convention for the
- * `security.threat` attachment (`mvp-slice.md`); omitting `technique` gives
- * the report-scoped fallback id used when Tier 2 produced no behaviors.
+ * Omitting `technique` gives the report-scoped fallback id used when Tier 2
+ * produced no behaviors.
  */
 export const buildSseAttachmentId = ({
   spaceId,
@@ -136,25 +120,16 @@ export const buildSseAttachmentId = ({
   return `sse-${hash}`;
 };
 
-/**
- * Options the caller (the hunt child workflow) supplies: everything the
- * mapper needs beyond the coordinator's own result. `requiredIndices` was
- * removed: `hunt_result.tier1.per_index[].required`
- * now comes straight from `HuntCoordinatorResult.tier1.perIndex[].required`,
- * which Tier 1 already computes via pattern matching. The mapper no longer
- * re-derives it from a raw index list (that re-derivation compared concrete
- * `_index` bucket names against wildcard patterns with exact string equality
- * and was always false in production).
- */
+/** Options the caller supplies beyond the coordinator result. */
 export interface SseMapperOptions {
   spaceId: string;
 }
 
 /**
  * Builds `security_knowledge_indicators`. When `onlyTechniqueId` is set, the
- * output is scoped to that one technique. The SSE is meant to be 1:1 with a
- * Proposal (mvp-slice.md worked example), so a two-technique hit run must
- * not put both techniques' behaviors/rule names on either SSE.
+ * output is scoped to that one technique. Each SSE is 1:1 with a Proposal, so
+ * a two-technique hit run must not put both techniques' behaviors/rule names on
+ * either SSE.
  */
 const buildSecurityKnowledgeIndicators = (
   result: HuntCoordinatorResult,
@@ -222,17 +197,9 @@ const buildEvents = (result: HuntCoordinatorResult): SseEventRef[] =>
   });
 
 /**
- * `per_index[].required` is copied straight from Tier 1's own computation
- * (`HuntCoordinatorResult.tier1.perIndex[].required`), not re-derived here.
- * Tier 1 already pattern-matches concrete `_index` bucket names against the
- * resolved technology's required index *patterns*; redoing that with a raw
- * index list and exact string equality was the bug this function used to
- * have.
- *
  * When `onlyTechniqueId` is set, `tier2.behaviors` is filtered to that one
- * technique for the same reason `buildSecurityKnowledgeIndicators` is: the
- * SSE is 1:1 with a Proposal, so a technique-scoped entry must not carry a
- * sibling technique's behavior/rule name.
+ * technique: the SSE is 1:1 with a Proposal, so a technique-scoped entry
+ * must not carry a sibling technique's behavior/rule name.
  */
 const buildHuntResult = (
   result: HuntCoordinatorResult,
