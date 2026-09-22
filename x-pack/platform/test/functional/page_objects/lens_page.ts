@@ -1234,7 +1234,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         if (tabs[index]) {
           await tabs[index].moveMouseTo();
         }
-        if (await testSubjects.exists(`lnsLayerSplitButton--${index}`)) {
+        if (await testSubjects.waitForExists(`lnsLayerSplitButton--${index}`, { timeout: 1000 })) {
           await testSubjects.click(`lnsLayerSplitButton--${index}`);
         }
         await testSubjects.click(`lnsLayerClone--${index}`);
@@ -1774,7 +1774,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         if (tabs[index]) {
           await tabs[index].moveMouseTo();
         }
-        if (await testSubjects.exists(`lnsLayerSplitButton--${index}`)) {
+        if (await testSubjects.waitForExists(`lnsLayerSplitButton--${index}`, { timeout: 1000 })) {
           await testSubjects.click(`lnsLayerSplitButton--${index}`);
         }
         await testSubjects.click(`lnsLayerRemove--${index}`);
