@@ -109,6 +109,7 @@ export const test = baseTest.extend<EdrRealFleetTestFixtures, EdrRealFleetWorker
           kbnClient,
           log,
           agentPolicyId,
+          useClosestVersionMatch: true,
         });
 
         log.info(`[edr_real_fleet] waiting for agent ${created.host.agentId} to stream data`);
