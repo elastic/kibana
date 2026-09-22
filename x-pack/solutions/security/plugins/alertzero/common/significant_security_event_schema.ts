@@ -8,17 +8,16 @@
 import { z } from '@kbn/zod/v4';
 import { ATTACHMENT_ENTITY_FIELDS } from './attachment_entity';
 import { alertZeroAttachmentDataSchema } from './attachment_data_schema';
+import { SEVERITY_LEVELS } from './attachment_enums';
 
 /**
  * Significant Security Event (SSE) attachment schema.
  *
- * Lives in `alertzero/common/` (not `server/agent_builder/attachments/`) so
- * PR 3's `sse_mapper.ts` (in `alertzero/server/services/watches/hunt/common/`)
- * can import it directly across the plugin boundary, without an HTTP
- * round-trip. This is the schema lock for the SSE attachment contract:
- * `sse_mapper.test.ts` runs `buildSseData`'s output through this schema
- * directly, so a drift between the mapper and the schema fails a test
- * instead of surfacing at demo time.
+ * Lives in `alertzero/common/` (not `server/agent_builder/attachments/`) so the SSE mapper
+ * (in `alertzero/server/services/watches/hunt/common/`) can import it directly across the
+ * plugin boundary, without an HTTP round-trip. This is the schema lock for the SSE attachment
+ * contract: the mapper's output is run through this schema directly, so a drift between the
+ * mapper and the schema fails a test instead of surfacing at demo time.
  *
  * ECS-first writer contract:
  * - `entities` are `{ field, value }` pairs using allowlisted ECS entity fields.
@@ -172,7 +171,7 @@ const mapsToProposalSchema = z
  */
 export const significantSecurityEventAttachmentDataSchema = alertZeroAttachmentDataSchema.extend({
   title: z.string().min(1).max(512),
-  severity: z.enum(['low', 'medium', 'high', 'critical']),
+  severity: z.enum(SEVERITY_LEVELS),
   confidence: z.number().min(0).max(1),
   status: z.enum(['open', 'investigating', 'resolved', 'false_positive']),
   source_watch: z.string().min(1).max(256),

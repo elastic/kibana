@@ -9,7 +9,6 @@ import React from 'react';
 import { css } from '@emotion/react';
 import {
   EuiAccordion,
-  EuiBadgeGroup,
   EuiBadge,
   EuiBasicTable,
   EuiFlexGroup,
@@ -19,7 +18,6 @@ import {
   EuiPanel,
   EuiProgress,
   EuiSpacer,
-  EuiStat,
   EuiText,
   EuiTimeline,
   EuiTimelineItem,
@@ -27,7 +25,7 @@ import {
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedDate, FormattedMessage, FormattedTime } from '@kbn/i18n-react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import { KbnInfoCallout } from '@kbn/ui-callout';
 import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
@@ -39,7 +37,12 @@ import {
   buildThreatReportLookupEsql,
 } from '../navigation';
 import { EntityChip } from '../entity_chip';
-import { IocBadge } from '../shared/ioc_badge';
+import { IocBadge, OPEN_ALERT_DETAILS_LABEL, OPEN_IN_DISCOVER_LABEL } from '../shared/ioc_badge';
+import { SectionHeading } from '../shared/section_heading';
+import { DateTime } from '../shared/date_time';
+import { CompactStat } from '../shared/compact_stat';
+import { HollowBadgeList } from '../shared/badge_list';
+import { AttachmentEmptyState } from '../shared/attachment_empty_state';
 import { LabeledBadgeTable, type LabeledBadgeTableRow } from '../shared/labeled_badge_table';
 import { formatPercent } from '../shared/severity';
 import { buildMitreTechniqueUrl } from '../shared/mitre_url';
@@ -68,13 +71,6 @@ const cellStyles = css`
   overflow-wrap: anywhere;
 `;
 
-const paginationListStyles = css`
-  .euiPagination__list {
-    list-style: none;
-    margin: 0;
-  }
-`;
-
 const visColorPalette = euiPaletteColorBlind();
 
 /** Cycles through the EUI color-blind-safe palette for distribution bar segments. */
@@ -94,8 +90,7 @@ const EventRows: React.FC<{
       render: (timestamp: string | undefined) =>
         timestamp ? (
           <span css={cellStyles}>
-            <FormattedDate value={timestamp} year="numeric" month="short" day="2-digit" />{' '}
-            <FormattedTime value={timestamp} />
+            <DateTime value={timestamp} />
           </span>
         ) : null,
     },
@@ -114,7 +109,9 @@ const EventRows: React.FC<{
           <IocBadge
             value={event.event_id}
             index={0}
-            discoverHref={href}
+            action={
+              href ? { href, iconType: 'discoverApp', label: OPEN_IN_DISCOVER_LABEL } : undefined
+            }
             testSubj={`alertzeroSignificantSecurityEventEventLink-${event.event_id}`}
           />
         );
@@ -136,7 +133,6 @@ const EventRows: React.FC<{
 
   return (
     <EuiInMemoryTable<SignificantSecurityEventRef>
-      css={paginationListStyles}
       tableCaption={i18n.translate(
         'xpack.alertzero.agentBuilder.attachments.sse.eventsTableCaption',
         { defaultMessage: 'Significant security event related events' }
@@ -161,15 +157,13 @@ const AlertList: React.FC<{
 
   return (
     <div data-test-subj="alertzeroSignificantSecurityEventAlerts">
-      <EuiText size="s">
-        <strong>
-          <FormattedMessage
-            id="xpack.alertzero.agentBuilder.attachments.sse.alertsHeading"
-            defaultMessage="{count, plural, one {# alert} other {# alerts}}"
-            values={{ count: alerts.length }}
-          />
-        </strong>
-      </EuiText>
+      <SectionHeading>
+        <FormattedMessage
+          id="xpack.alertzero.agentBuilder.attachments.sse.alertsHeading"
+          defaultMessage="{count, plural, one {# alert} other {# alerts}}"
+          values={{ count: alerts.length }}
+        />
+      </SectionHeading>
       <EuiSpacer size="xs" />
       <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
         {alerts.map((alert) => {
@@ -185,7 +179,11 @@ const AlertList: React.FC<{
               <IocBadge
                 value={alert.alert_id}
                 index={0}
-                alertDetailsHref={href}
+                action={{
+                  href,
+                  iconType: 'securitySignalDetected',
+                  label: OPEN_ALERT_DETAILS_LABEL,
+                }}
                 testSubj={`alertzeroSignificantSecurityEventAlertLink-${alert.alert_id}`}
               />
             </EuiFlexItem>
@@ -307,13 +305,11 @@ const IndicatorList: React.FC<{
 
   return (
     <div data-test-subj="alertzeroSignificantSecurityEventIndicators">
-      <EuiText size="s">
-        <strong>
-          {i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.indicators', {
-            defaultMessage: 'Indicators',
-          })}
-        </strong>
-      </EuiText>
+      <SectionHeading>
+        {i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.indicators', {
+          defaultMessage: 'Indicators',
+        })}
+      </SectionHeading>
       <EuiSpacer size="xs" />
       <LabeledBadgeTable
         rows={rows}
@@ -335,9 +331,7 @@ const EvidenceSection: React.FC<{
 
   return (
     <>
-      <EuiText size="s">
-        <strong>{label}</strong>
-      </EuiText>
+      <SectionHeading>{label}</SectionHeading>
       <EuiText size="s">
         <ul>
           {items.slice(0, EVIDENCE_BULLET_LIMIT).map((item) => (
@@ -386,20 +380,17 @@ const TimelineSection: React.FC<{ timeline: TimelineEntry[] }> = ({ timeline }) 
 
   return (
     <>
-      <EuiText size="s">
-        <strong>
-          {i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.timeline', {
-            defaultMessage: 'Timeline',
-          })}
-        </strong>
-      </EuiText>
+      <SectionHeading>
+        {i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.timeline', {
+          defaultMessage: 'Timeline',
+        })}
+      </SectionHeading>
       <EuiTimeline gutterSize="m" data-test-subj="alertzeroSignificantSecurityEventTimeline">
         {timeline.map((entry, index) => (
           <EuiTimelineItem icon="clock" verticalAlign="top" key={`${entry.at}-${index}`}>
             <EuiText size="xs" color="subdued">
               <p css={{ margin: 0 }}>
-                <FormattedDate value={entry.at} year="numeric" month="short" day="2-digit" />{' '}
-                <FormattedTime value={entry.at} />
+                <DateTime value={entry.at} />
               </p>
             </EuiText>
             <EuiText size="s">
@@ -461,15 +452,7 @@ const HuntResultSection: React.FC<{ huntResult: HuntResult }> = ({ huntResult })
       name: i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.huntResultTactics', {
         defaultMessage: 'Tactics',
       }),
-      render: (tacticIds: string[]) => (
-        <EuiBadgeGroup gutterSize="xs">
-          {tacticIds.map((tacticId) => (
-            <EuiBadge color="hollow" key={tacticId}>
-              {tacticId}
-            </EuiBadge>
-          ))}
-        </EuiBadgeGroup>
-      ),
+      render: (tacticIds: string[]) => <HollowBadgeList items={tacticIds} />,
     },
     {
       field: 'confidence',
@@ -493,39 +476,21 @@ const HuntResultSection: React.FC<{ huntResult: HuntResult }> = ({ huntResult })
 
   return (
     <div data-test-subj="alertzeroSignificantSecurityEventHuntResult">
-      <EuiText size="s">
-        <strong>
-          {i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.huntResultTitle', {
-            defaultMessage: 'Hunt result',
-          })}
-        </strong>
-      </EuiText>
+      <SectionHeading>
+        {i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.huntResultTitle', {
+          defaultMessage: 'Hunt result',
+        })}
+      </SectionHeading>
       <EuiSpacer size="xs" />
       <EuiText size="xs" color="subdued">
-        <FormattedDate
-          value={huntResult.time_range.from}
-          year="numeric"
-          month="short"
-          day="2-digit"
-        />{' '}
-        <FormattedTime value={huntResult.time_range.from} />
+        <DateTime value={huntResult.time_range.from} />
         {' - '}
-        <FormattedDate
-          value={huntResult.time_range.to}
-          year="numeric"
-          month="short"
-          day="2-digit"
-        />{' '}
-        <FormattedTime value={huntResult.time_range.to} />
+        <DateTime value={huntResult.time_range.to} />
       </EuiText>
       <EuiSpacer size="s" />
       <EuiFlexGroup gutterSize="m" responsive={false} wrap>
         <EuiFlexItem grow={false}>
-          <EuiStat
-            titleElement="span"
-            descriptionElement="span"
-            titleSize="s"
-            textAlign="left"
+          <CompactStat
             title={tier1.counts.total_hits}
             description={i18n.translate(
               'xpack.alertzero.agentBuilder.attachments.sse.huntResultTotalHits',
@@ -534,11 +499,7 @@ const HuntResultSection: React.FC<{ huntResult: HuntResult }> = ({ huntResult })
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiStat
-            titleElement="span"
-            descriptionElement="span"
-            titleSize="s"
-            textAlign="left"
+          <CompactStat
             title={tier1.counts.affected_hosts}
             description={i18n.translate(
               'xpack.alertzero.agentBuilder.attachments.sse.huntResultAffectedHosts',
@@ -547,11 +508,7 @@ const HuntResultSection: React.FC<{ huntResult: HuntResult }> = ({ huntResult })
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiStat
-            titleElement="span"
-            descriptionElement="span"
-            titleSize="s"
-            textAlign="left"
+          <CompactStat
             title={tier1.counts.affected_users}
             description={i18n.translate(
               'xpack.alertzero.agentBuilder.attachments.sse.huntResultAffectedUsers',
@@ -617,18 +574,12 @@ export const SignificantSecurityEventInlineContent: React.FC<
 
   if (!parsed) {
     return (
-      <EuiPanel
-        hasShadow={false}
-        hasBorder={false}
-        paddingSize="s"
-        data-test-subj={SSE_ATTACHMENT_EMPTY_TEST_ID}
-      >
-        <EuiText size="s" color="subdued">
-          {i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.empty', {
-            defaultMessage: 'No significant security event data available',
-          })}
-        </EuiText>
-      </EuiPanel>
+      <AttachmentEmptyState
+        testSubj={SSE_ATTACHMENT_EMPTY_TEST_ID}
+        message={i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.empty', {
+          defaultMessage: 'No significant security event data available',
+        })}
+      />
     );
   }
 
@@ -701,10 +652,15 @@ export const SignificantSecurityEventInlineContent: React.FC<
                     <IocBadge
                       value={parsed.report_id}
                       index={0}
-                      discoverHref={buildDiscoverEsqlUrl({
-                        share: navigation.share,
-                        esql: buildThreatReportLookupEsql({ reportId: parsed.report_id }),
-                      })}
+                      action={(() => {
+                        const href = buildDiscoverEsqlUrl({
+                          share: navigation.share,
+                          esql: buildThreatReportLookupEsql({ reportId: parsed.report_id }),
+                        });
+                        return href
+                          ? { href, iconType: 'discoverApp', label: OPEN_IN_DISCOVER_LABEL }
+                          : undefined;
+                      })()}
                       testSubj="alertzeroSignificantSecurityEventReportLink"
                     />
                   </EuiFlexItem>

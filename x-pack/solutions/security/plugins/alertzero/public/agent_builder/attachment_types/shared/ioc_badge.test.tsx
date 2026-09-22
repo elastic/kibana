@@ -23,58 +23,46 @@ describe('IocBadge', () => {
     expect(screen.getByLabelText('Copy')).toBeInTheDocument();
   });
 
-  it('shows an Open in Discover action only when a href is provided', () => {
-    const { rerender } = render(
-      <IocBadge value="203.0.113.4" index={0} testSubj="test-ioc-badge" />
-    );
-    let badge = screen.getByTestId('test-ioc-badge').querySelector('.euiBadge');
+  it('shows no extra action when none is provided', () => {
+    render(<IocBadge value="203.0.113.4" index={0} testSubj="test-ioc-badge" />);
+    const badge = screen.getByTestId('test-ioc-badge').querySelector('.euiBadge');
     fireEvent.mouseEnter(badge as Element);
     expect(screen.queryByLabelText('Open in Discover')).not.toBeInTheDocument();
+  });
 
-    rerender(
+  it('shows the supplied action when provided', () => {
+    render(
       <IocBadge
         value="203.0.113.4"
         index={0}
-        discoverHref="https://kbn.test/discover"
-        testSubj="test-ioc-badge"
-      />
-    );
-    badge = screen.getByTestId('test-ioc-badge').querySelector('.euiBadge');
-    fireEvent.mouseEnter(badge as Element);
-    expect(screen.getByLabelText('Open in Discover')).toBeInTheDocument();
-  });
-
-  it('shows an Open entity page action, taking priority over discoverHref, when entityPageHref is provided', () => {
-    render(
-      <IocBadge
-        value="WIN-ANALYST01"
-        index={0}
-        discoverHref="https://kbn.test/discover"
-        entityPageHref="https://kbn.test/app/security/hosts/name/WIN-ANALYST01"
+        action={{
+          href: 'https://kbn.test/discover',
+          iconType: 'discoverApp',
+          label: 'Open in Discover',
+        }}
         testSubj="test-ioc-badge"
       />
     );
     const badge = screen.getByTestId('test-ioc-badge').querySelector('.euiBadge');
     fireEvent.mouseEnter(badge as Element);
-    expect(screen.getByLabelText('Open entity page')).toBeInTheDocument();
-    expect(screen.queryByLabelText('Open in Discover')).not.toBeInTheDocument();
+    expect(screen.getByLabelText('Open in Discover')).toBeInTheDocument();
   });
 
-  it('shows an Open alert details action, taking priority over both other hrefs, when alertDetailsHref is provided', () => {
+  it('supports a caller-chosen action label and icon (e.g. Open alert details)', () => {
     render(
       <IocBadge
         value="alert-1"
         index={0}
-        discoverHref="https://kbn.test/discover"
-        entityPageHref="https://kbn.test/app/security/hosts/name/WIN-ANALYST01"
-        alertDetailsHref="https://kbn.test/app/security/alerts/redirect/alert-1"
+        action={{
+          href: 'https://kbn.test/app/security/alerts/redirect/alert-1',
+          iconType: 'securitySignalDetected',
+          label: 'Open alert details',
+        }}
         testSubj="test-ioc-badge"
       />
     );
     const badge = screen.getByTestId('test-ioc-badge').querySelector('.euiBadge');
     fireEvent.mouseEnter(badge as Element);
     expect(screen.getByLabelText('Open alert details')).toBeInTheDocument();
-    expect(screen.queryByLabelText('Open entity page')).not.toBeInTheDocument();
-    expect(screen.queryByLabelText('Open in Discover')).not.toBeInTheDocument();
   });
 });

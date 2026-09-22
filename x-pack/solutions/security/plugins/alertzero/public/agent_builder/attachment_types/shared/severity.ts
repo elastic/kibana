@@ -6,8 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { SEVERITY_LEVELS, DIAMOND_VERTICES } from '../../../../common/attachment_enums';
+import type { SeverityLevel, DiamondVertex } from '../../../../common/attachment_enums';
 
-export const SEVERITY_BADGE_COLOR: Record<'low' | 'medium' | 'high' | 'critical', string> = {
+export { SEVERITY_LEVELS, DIAMOND_VERTICES };
+export type { SeverityLevel, DiamondVertex };
+
+export const SEVERITY_BADGE_COLOR: Record<SeverityLevel, string> = {
   low: 'hollow',
   medium: 'warning',
   high: 'danger',

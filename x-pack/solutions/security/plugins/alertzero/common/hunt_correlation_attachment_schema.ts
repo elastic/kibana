@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { alertZeroAttachmentDataSchema } from './attachment_data_schema';
+import { DIAMOND_VERTICES } from './attachment_enums';
 
 export const anchorSchema = z.object({
   kind: z.enum(['hash', 'ioc_set_hash', 'actor']),
@@ -14,7 +15,7 @@ export const anchorSchema = z.object({
 });
 
 export const diamondScoreSchema = z.object({
-  vertex: z.enum(['adversary', 'capability', 'infrastructure', 'victim']),
+  vertex: z.enum(DIAMOND_VERTICES),
   related_report_id: z.string().min(1).max(512),
   score: z.number().min(0).max(1),
 });

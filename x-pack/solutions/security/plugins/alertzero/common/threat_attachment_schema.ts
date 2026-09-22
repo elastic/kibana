@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { alertZeroAttachmentDataSchema } from './attachment_data_schema';
+import { SEVERITY_LEVELS } from './attachment_enums';
 
 /**
  * By-reference trigger carrier: the payload names a threat report by id, plus captured
@@ -17,7 +18,7 @@ import { alertZeroAttachmentDataSchema } from './attachment_data_schema';
 export const threatAttachmentDataSchema = alertZeroAttachmentDataSchema.extend({
   report_id: z.string().min(1).max(512),
   title: z.string().min(1).max(512).optional(),
-  severity: z.enum(['low', 'medium', 'high', 'critical']).optional(),
+  severity: z.enum(SEVERITY_LEVELS).optional(),
   source: z.string().min(1).max(256).optional(),
 });
 

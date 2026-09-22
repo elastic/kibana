@@ -9,80 +9,49 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { ActionableBadge, type MultiValueCellAction } from '@kbn/cloud-security-posture';
 
-const OPEN_IN_DISCOVER_LABEL = i18n.translate(
+export const OPEN_IN_DISCOVER_LABEL = i18n.translate(
   'xpack.alertzero.agentBuilder.attachments.shared.iocBadgeOpenInDiscover',
   { defaultMessage: 'Open in Discover' }
 );
 
-const OPEN_ENTITY_PAGE_LABEL = i18n.translate(
+export const OPEN_ENTITY_PAGE_LABEL = i18n.translate(
   'xpack.alertzero.agentBuilder.attachments.shared.iocBadgeOpenEntityPage',
   { defaultMessage: 'Open entity page' }
 );
 
-const OPEN_ALERT_DETAILS_LABEL = i18n.translate(
+export const OPEN_ALERT_DETAILS_LABEL = i18n.translate(
   'xpack.alertzero.agentBuilder.attachments.shared.iocBadgeOpenAlertDetails',
   { defaultMessage: 'Open alert details' }
 );
 
+export interface IocBadgeAction {
+  href: string;
+  iconType: string;
+  label: string;
+}
+
 export interface IocBadgeProps {
   value: string;
-  index: number;
-  discoverHref?: string;
-  /**
-   * When set, takes priority over `discoverHref`: renders a distinct
-   * "Open entity page" action (Security host/user pages aren't Discover).
-   */
-  entityPageHref?: string;
-  /**
-   * When set, takes priority over both `entityPageHref` and `discoverHref`:
-   * renders a distinct "Open alert details" action (the Security alert
-   * flyout redirect isn't Discover either).
-   */
-  alertDetailsHref?: string;
+  index?: number;
+  /** The single hover action to offer (Open in Discover, Open entity page, Open alert details). */
+  action?: IocBadgeAction;
   testSubj?: string;
 }
 
 /**
- * `ActionableBadge` wrapper for a single queryable value (IOC, report id,
- * run id, event id, alert id, related entity/report id): always offers a
- * copy action on hover, plus an "Open in Discover", "Open entity page", or
- * "Open alert details" action when a href is available. Wrapped in a
- * `<span>` carrying `testSubj` so existing per-value link test ids survive
- * the swap from a custom `EuiBadge` / `DiscoverLink`.
+ * `ActionableBadge` wrapper for a single queryable value (IOC, report id, run id, event id,
+ * alert id, related entity/report id): always offers a copy action on hover, plus a caller-
+ * supplied action (e.g. "Open in Discover") when one is available. Wrapped in a `<span>`
+ * carrying `testSubj` so per-value link test ids survive.
  */
-export const IocBadge: React.FC<IocBadgeProps> = ({
-  value,
-  index,
-  discoverHref,
-  entityPageHref,
-  alertDetailsHref,
-  testSubj,
-}) => {
-  const actions: MultiValueCellAction[] = alertDetailsHref
+export const IocBadge: React.FC<IocBadgeProps> = ({ value, index = 0, action, testSubj }) => {
+  const actions: MultiValueCellAction[] = action
     ? [
         {
-          iconType: 'securitySignalDetected',
-          ariaLabel: OPEN_ALERT_DETAILS_LABEL,
-          title: OPEN_ALERT_DETAILS_LABEL,
-          onClick: () => window.open(alertDetailsHref, '_blank', 'noopener,noreferrer'),
-        },
-      ]
-    : entityPageHref
-    ? [
-        {
-          iconType: 'user',
-          ariaLabel: OPEN_ENTITY_PAGE_LABEL,
-          title: OPEN_ENTITY_PAGE_LABEL,
-          onClick: () => window.open(entityPageHref, '_blank', 'noopener,noreferrer'),
-        },
-      ]
-    : discoverHref
-    ? [
-        {
-          iconType: 'discoverApp',
-          ariaLabel: OPEN_IN_DISCOVER_LABEL,
-          title: OPEN_IN_DISCOVER_LABEL,
-          onClick: () => window.open(discoverHref, '_blank', 'noopener,noreferrer'),
+          iconType: action.iconType,
+          ariaLabel: action.label,
+          title: action.label,
+          onClick: () => window.open(action.href, '_blank', 'noopener,noreferrer'),
         },
       ]
     : [];

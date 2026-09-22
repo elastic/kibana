@@ -11,8 +11,11 @@ import { EuiAvatar, EuiFlexGroup, EuiFlexItem, useEuiTheme, type IconType } from
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import { buildDiscoverEsqlUrl, buildEntityLookupEsql, buildSecurityEntityUrl } from '../navigation';
-import { IocBadge } from '../shared/ioc_badge';
-import type { AttachmentEntityField, AttachmentEntityRef } from '../../../../common/attachment_entity';
+import { IocBadge, OPEN_ENTITY_PAGE_LABEL, OPEN_IN_DISCOVER_LABEL } from '../shared/ioc_badge';
+import type {
+  AttachmentEntityField,
+  AttachmentEntityRef,
+} from '../../../../common/attachment_entity';
 
 /** Visual kinds for chip icons. Entity chips derive kind from the ECS field on the payload. */
 type AttachmentEntityKind = 'user' | 'host' | 'service' | 'generic';
@@ -85,12 +88,17 @@ export const EntityChip: React.FC<EntityChipProps> = ({
             data-test-subj="alertzeroEntityChipAvatar"
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={false} style={{ minWidth: 0 }}>
+        <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
           <IocBadge
             value={value}
             index={0}
-            entityPageHref={securityEntityHref}
-            discoverHref={discoverHref}
+            action={
+              securityEntityHref
+                ? { href: securityEntityHref, iconType: 'user', label: OPEN_ENTITY_PAGE_LABEL }
+                : discoverHref
+                ? { href: discoverHref, iconType: 'discoverApp', label: OPEN_IN_DISCOVER_LABEL }
+                : undefined
+            }
             testSubj={testSubj ?? 'alertzeroEntityChipLink'}
           />
         </EuiFlexItem>

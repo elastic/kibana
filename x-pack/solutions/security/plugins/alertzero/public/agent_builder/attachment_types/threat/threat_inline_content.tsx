@@ -10,7 +10,6 @@ import { css } from '@emotion/react';
 import { groupBy } from 'lodash';
 import {
   EuiBadge,
-  EuiBadgeGroup,
   EuiBasicTable,
   EuiDescriptionList,
   EuiFlexGroup,
@@ -20,11 +19,10 @@ import {
   EuiPopover,
   EuiSkeletonText,
   EuiSpacer,
-  EuiStat,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import { KbnWarningCallout, KbnInfoCallout } from '@kbn/ui-callout';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative } from '@kbn/i18n-react';
 import type { HttpStart } from '@kbn/core-http-browser';
@@ -32,7 +30,11 @@ import { QueryClientProvider, useQuery } from '@kbn/react-query';
 import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
 import type { AttachmentNavigationDeps } from '../navigation';
 import { buildDiscoverThreatReportNestedIocUrl } from '../navigation';
-import { IocBadge } from '../shared/ioc_badge';
+import { IocBadge, OPEN_IN_DISCOVER_LABEL } from '../shared/ioc_badge';
+import { SectionHeading } from '../shared/section_heading';
+import { CompactStat } from '../shared/compact_stat';
+import { HollowBadgeList } from '../shared/badge_list';
+import { AttachmentEmptyState } from '../shared/attachment_empty_state';
 import { LabeledBadgeTable } from '../shared/labeled_badge_table';
 import { buildMitreTechniqueUrl } from '../shared/mitre_url';
 import {
@@ -87,9 +89,7 @@ const fetchThreatReport = async ({
   );
 
 const sectionHeading = (id: string, defaultMessage: string) => (
-  <EuiText size="s">
-    <strong>{i18n.translate(id, { defaultMessage })}</strong>
-  </EuiText>
+  <SectionHeading>{i18n.translate(id, { defaultMessage })}</SectionHeading>
 );
 
 /** Small `EuiPopover`-based "+N" overflow for a badge list capped at `IOC_VISIBLE_LIMIT`. */
@@ -153,7 +153,13 @@ const IocTypeValues: React.FC<{
     const tooltipContent = [ioc.tier, ioc.severity].filter(Boolean).join(', ');
     const badge = (
       <span data-test-subj={`alertzeroThreatAttachmentIocLink-${type}-${index}`}>
-        <IocBadge value={ioc.value ?? ''} index={index} discoverHref={href} />
+        <IocBadge
+          value={ioc.value ?? ''}
+          index={index}
+          action={
+            href ? { href, iconType: 'discoverApp', label: OPEN_IN_DISCOVER_LABEL } : undefined
+          }
+        />
       </span>
     );
     return (
@@ -258,15 +264,7 @@ const renderEnrichedSections = ({
         title: i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.tactics', {
           defaultMessage: 'Tactics',
         }),
-        description: (
-          <EuiBadgeGroup gutterSize="xs">
-            {tactics.map((tactic) => (
-              <EuiBadge key={tactic} color="hollow">
-                {tactic}
-              </EuiBadge>
-            ))}
-          </EuiBadgeGroup>
-        ),
+        description: <HollowBadgeList items={tactics} />,
       });
     }
     if (techniques.length) {
@@ -274,23 +272,7 @@ const renderEnrichedSections = ({
         title: i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.techniques', {
           defaultMessage: 'Techniques',
         }),
-        description: (
-          <EuiBadgeGroup gutterSize="xs">
-            {techniques.map((technique) => (
-              <EuiBadge
-                key={technique}
-                color="hollow"
-                href={buildMitreTechniqueUrl(technique)}
-                target="_blank"
-                rel="noopener noreferrer"
-                iconType="external"
-                iconSide="right"
-              >
-                {technique}
-              </EuiBadge>
-            ))}
-          </EuiBadgeGroup>
-        ),
+        description: <HollowBadgeList items={techniques} getHref={buildMitreTechniqueUrl} />,
       });
     }
     if (regions.length) {
@@ -298,15 +280,7 @@ const renderEnrichedSections = ({
         title: i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.regions', {
           defaultMessage: 'Regions',
         }),
-        description: (
-          <EuiBadgeGroup gutterSize="xs">
-            {regions.map((region) => (
-              <EuiBadge key={region} color="hollow">
-                {region}
-              </EuiBadge>
-            ))}
-          </EuiBadgeGroup>
-        ),
+        description: <HollowBadgeList items={regions} />,
       });
     }
     if (categories.length) {
@@ -314,15 +288,7 @@ const renderEnrichedSections = ({
         title: i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.categories', {
           defaultMessage: 'Categories',
         }),
-        description: (
-          <EuiBadgeGroup gutterSize="xs">
-            {categories.map((category) => (
-              <EuiBadge key={category} color="hollow">
-                {category}
-              </EuiBadge>
-            ))}
-          </EuiBadgeGroup>
-        ),
+        description: <HollowBadgeList items={categories} />,
       });
     }
     sections.push(
@@ -480,14 +446,7 @@ const renderEnrichedSections = ({
           <EuiFlexGroup gutterSize="m" wrap responsive={false}>
             {stats.map((stat, index) => (
               <EuiFlexItem grow={false} key={index}>
-                <EuiStat
-                  titleElement="span"
-                  descriptionElement="span"
-                  titleSize="s"
-                  textAlign="left"
-                  title={stat.title}
-                  description={stat.description}
-                />
+                <CompactStat title={stat.title} description={stat.description} />
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>
@@ -545,20 +504,13 @@ const ThreatAttachmentInlineContentInner: React.FC<ThreatAttachmentInlineContent
 
   if (!isValid) {
     return (
-      <EuiPanel
-        hasShadow={false}
-        hasBorder={false}
-        paddingSize="s"
-        data-test-subj={THREAT_ATTACHMENT_EMPTY_TEST_ID}
-      >
-        <KbnWarningCallout
-          announceOnMount
-          size="s"
-          title={i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.empty.title', {
-            defaultMessage: 'No threat report reference available',
-          })}
-        />
-      </EuiPanel>
+      <AttachmentEmptyState
+        testSubj={THREAT_ATTACHMENT_EMPTY_TEST_ID}
+        variant="warning"
+        message={i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.empty.title', {
+          defaultMessage: 'No threat report reference available',
+        })}
+      />
     );
   }
 
