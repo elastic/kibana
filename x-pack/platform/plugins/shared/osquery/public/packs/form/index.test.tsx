@@ -45,6 +45,11 @@ jest.mock('../../common/lib/kibana', () => ({
   useKibana: () => ({
     services: {
       notifications: { toasts: { addDanger: mockAddDanger } },
+      application: {
+        getUrlForApp: jest.fn(
+          (appId: string, opts: { path: string }) => `/app/${appId}${opts.path}`
+        ),
+      },
     },
   }),
 }));
@@ -55,6 +60,16 @@ jest.mock('../../agent_policies', () => ({
       agentPoliciesById: {},
     },
   }),
+}));
+
+jest.mock('@kbn/fleet-plugin/public', () => ({
+  pagePathGetters: {
+    policy_details: ({ policyId }: { policyId: string }) => ['', `/fleet/policies/${policyId}`],
+  },
+}));
+
+jest.mock('@kbn/fleet-plugin/common', () => ({
+  PLUGIN_ID: 'fleet',
 }));
 
 jest.mock('../use_create_pack', () => ({
