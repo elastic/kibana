@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import { randomBytes } from 'node:crypto';
 
 import type { KibanaRequest } from '@kbn/core/server';
@@ -22,6 +23,7 @@ import {
 import {
   type CreateWorkflowCommand,
   type EsWorkflow,
+  storedWorkflowAccessControlSchema,
   toCustomTriggerSchemaConfigs,
   type UpdatedWorkflowResponseDto,
   type WorkflowDetailDto,
@@ -491,7 +493,11 @@ export class WorkflowCrudService {
     ids: string[],
     spaceId: string,
     source?: string[],
-    options?: { includeDeleted?: boolean; includeGlobal?: boolean }
+    options?: {
+      includeDeleted?: boolean;
+      includeGlobal?: boolean;
+      accessControlFilter?: estypes.QueryDslQueryContainer;
+    }
   ): Promise<WorkflowPartialDetailDto[]> {
     if (ids.length === 0) {
       return [];
@@ -504,15 +510,16 @@ export class WorkflowCrudService {
     });
 
     const response = await this.deps.workflowStorage.getClient().search({
-      query: { bool: { must, must_not } },
-      _source: source ?? true,
+      query: { bool: { must, must_not, filter: options?.accessControlFilter } },
+      _source: source ? [...new Set([...source, 'access_control'])] : true,
       size: ids.length,
       track_total_hits: false,
     });
 
-    return response.hits.hits.map((hit) =>
-      transformStoragePartialToWorkflowDto(hit._id, hit._source)
-    );
+    return response.hits.hits.map((hit) => {
+      storedWorkflowAccessControlSchema.parse(hit._source?.access_control);
+      return transformStoragePartialToWorkflowDto(hit._id, hit._source);
+    });
   }
 
   async createWorkflow(

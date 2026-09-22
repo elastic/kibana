@@ -7,6 +7,7 @@
 
 import { randomUUID } from 'node:crypto';
 import { apiTest, tags } from '@kbn/scout';
+import type { ApiClientResponse } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { PolicyExecutionHistoryItem } from '@kbn/alerting-v2-schemas';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
@@ -39,13 +40,18 @@ apiTest.describe('Action policy workflow access', { tag: tags.stateful.classic }
   });
 
   apiTest.afterAll(async ({ apiClient, kbnClient, esClient }) => {
+    const deletions: ApiClientResponse[] = [];
     for (const id of ruleIds) {
-      await apiClient.delete(path(`/api/alerting/v2/rules/${id}`), { headers: credentials[0] });
+      deletions.push(
+        await apiClient.delete(path(`/api/alerting/v2/rules/${id}`), { headers: credentials[0] })
+      );
     }
     for (const id of policyIds) {
-      await apiClient.delete(path(`/api/alerting/v2/action_policies/${id}`), {
-        headers: credentials[0],
-      });
+      deletions.push(
+        await apiClient.delete(path(`/api/alerting/v2/action_policies/${id}`), {
+          headers: credentials[0],
+        })
+      );
     }
     for (const id of workflowIds) {
       expect(
@@ -59,6 +65,7 @@ apiTest.describe('Action policy workflow access', { tag: tags.stateful.classic }
     for (const username of usernames) {
       await esClient.security.deleteUser({ username });
     }
+    for (const response of deletions) expect(response).toHaveStatusCode(204);
   });
 
   for (const accessMode of ['public', 'private'] as const) {

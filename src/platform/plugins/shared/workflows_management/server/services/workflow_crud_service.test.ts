@@ -368,7 +368,44 @@ describe('WorkflowCrudService', () => {
       await service.getWorkflowsSourceByIds(['wf-1'], 'default', ['name', 'yaml']);
 
       const searchCall = client.search.mock.calls[0][0];
-      expect(searchCall._source).toEqual(['name', 'yaml']);
+      expect(searchCall._source).toEqual(['name', 'yaml', 'access_control']);
+    });
+
+    it('filters and reads the same workflow version', async () => {
+      const { deps, client } = makeDeps();
+      const accessControlFilter = { term: { 'access_control.access_mode': 'public' } };
+      client.search.mockResolvedValue({ hits: { hits: [] } });
+      const service = new WorkflowCrudService(deps);
+
+      await expect(
+        service.getWorkflowsSourceByIds(['wf-1'], 'default', ['yaml'], { accessControlFilter })
+      ).resolves.toEqual([]);
+
+      expect(client.search).toHaveBeenCalledTimes(1);
+      expect(client.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: expect.objectContaining({
+            bool: expect.objectContaining({ filter: accessControlFilter }),
+          }),
+          _source: ['yaml', 'access_control'],
+        })
+      );
+    });
+
+    it('rejects malformed stored ACLs when the caller requests only YAML', async () => {
+      const { deps, client } = makeDeps();
+      client.search.mockResolvedValue({
+        hits: {
+          hits: [
+            { _id: 'wf-1', _source: { yaml: 'private data', access_control: { entries: [] } } },
+          ],
+        },
+      });
+      const service = new WorkflowCrudService(deps);
+
+      await expect(
+        service.getWorkflowsSourceByIds(['wf-1'], 'default', ['yaml'])
+      ).rejects.toThrow();
     });
 
     it('uses _source: true when no source fields specified', async () => {

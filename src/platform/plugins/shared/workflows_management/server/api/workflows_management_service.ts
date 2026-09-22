@@ -383,7 +383,7 @@ export class WorkflowsService {
     ids: string[],
     spaceId: string,
     source?: string[],
-    options?: { includeDeleted?: boolean }
+    options?: { includeDeleted?: boolean; accessControlFilter?: estypes.QueryDslQueryContainer }
   ): Promise<WorkflowPartialDetailDto[]> {
     await this.ensureInitialized();
     return this.crudService.getWorkflowsSourceByIds(ids, spaceId, source, options);

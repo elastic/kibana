@@ -437,7 +437,15 @@ describe('WorkflowAccessControlService', () => {
       took: 1,
       timed_out: false,
       _shards: { total: 1, successful: 1, failed: 0 },
-      hits: { hits: [{ _index: 'workflows', _id: 'hidden-workflow' }] },
+      hits: {
+        hits: [
+          {
+            _index: 'workflows',
+            _id: 'hidden-workflow',
+            _source: { ...document, owner_id: 'other' },
+          },
+        ],
+      },
     });
 
     const [first, second] = await Promise.all([
@@ -456,6 +464,51 @@ describe('WorkflowAccessControlService', () => {
     await service.executionFilter('default', httpServerMock.createKibanaRequest());
     expect(client.search).toHaveBeenCalledTimes(3);
     expect(core.userProfile.getCurrentProfileId).toHaveBeenCalledTimes(2);
+  });
+
+  it('validates stored ACLs and hides only workflows the caller cannot read', async () => {
+    const client = core.elasticsearch.client.asInternalUser;
+    jest.mocked(client.openPointInTime).mockResolvedValue({
+      id: 'pit',
+      _shards: { total: 1, successful: 1, failed: 0 },
+    });
+    const grant = { type: 'user', id: 'owner', role: 'viewer', added_at: '2026-09-22' };
+    jest.mocked(client.search).mockResolvedValue({
+      took: 1,
+      timed_out: false,
+      _shards: { total: 1, successful: 1, failed: 0 },
+      hits: {
+        hits: [
+          { _index: 'workflows', _id: 'legacy', _source: {} },
+          {
+            _index: 'workflows',
+            _id: 'public',
+            _source: { access_control: { access_mode: 'public', entries: [] } },
+          },
+          { _index: 'workflows', _id: 'owned', _source: document },
+          {
+            _index: 'workflows',
+            _id: 'shared',
+            _source: { access_control: { access_mode: 'private', entries: [grant] } },
+          },
+          {
+            _index: 'workflows',
+            _id: 'hidden',
+            _source: { ...document, owner_id: 'another-owner' },
+          },
+        ],
+      },
+    });
+
+    await expect(service.executionFilter('default', request)).resolves.toEqual({
+      bool: { must_not: [{ terms: { workflowId: ['hidden'] } }] },
+    });
+    expect(client.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        _source: ['owner_id', 'access_control'],
+        query: { term: { spaceId: 'default' } },
+      })
+    );
   });
 
   it.each([

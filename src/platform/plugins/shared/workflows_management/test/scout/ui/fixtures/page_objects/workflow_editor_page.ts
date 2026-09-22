@@ -65,7 +65,10 @@ export class WorkflowEditorPage {
   }
 
   async addAccessUser(name: string): Promise<void> {
-    await this.page.getByRole('combobox', { name: 'Find users' }).fill(name);
+    await this.page.testSubj
+      .locator('entityAccessControlUserSearch')
+      .getByRole('combobox')
+      .fill(name);
     await this.page.getByRole('option', { name }).click();
   }
 

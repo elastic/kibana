@@ -168,6 +168,12 @@ steps:
         });
         expect(partial).toHaveStatusCode(200);
         expect(partial.body).toStrictEqual([{ id: workflowId }]);
+        const source = await apiClient.post(`s/${spaceId}/api/workflows/mget`, {
+          headers: readerHeaders,
+          body: { ids: [workflowId], source: ['yaml'] },
+        });
+        expect(source).toHaveStatusCode(200);
+        expect(source.body).toStrictEqual([{ id: workflowId, yaml }]);
         expect(read.body.permissions).toMatchObject({
           read: true,
           execute: role !== 'viewer',
@@ -247,6 +253,12 @@ steps:
       );
       expect(hiddenExecutions).toHaveStatusCode(200);
       expect(hiddenExecutions.body.total).toBe(0);
+      const hiddenSource = await apiClient.post(`s/${spaceId}/api/workflows/mget`, {
+        headers: readerHeaders,
+        body: { ids: [workflowId], source: ['yaml'] },
+      });
+      expect(hiddenSource).toHaveStatusCode(200);
+      expect(hiddenSource.body).toStrictEqual([]);
     }
   );
 

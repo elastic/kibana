@@ -230,6 +230,65 @@ describe('WorkflowsManagementApi', () => {
         'default'
       );
     });
+
+    it.each([
+      { entries: [] },
+      {
+        access_mode: 'private',
+        entries: [{ type: 'user', id: 'caller', role: 'invalid', added_at: '2026-09-22' }],
+      },
+      { access_mode: 'public' },
+      null,
+    ])('rejects malformed ACLs before listing execution data: %s', async (accessControl) => {
+      const core = coreMock.createStart();
+      core.userProfile.getCurrentProfileId.mockResolvedValue('caller');
+      const access = new WorkflowAccessControlService(core, {
+        getWorkflowDocumentWithVersion: jest.fn(),
+        writeWorkflowDocumentWithOcc: jest.fn(),
+      });
+      mockWorkflowsService.getAccessControl.mockResolvedValue(access);
+      const client = core.elasticsearch.client.asInternalUser;
+      jest.mocked(client.openPointInTime).mockResolvedValue({
+        id: 'pit',
+        _shards: { total: 1, successful: 1, failed: 0 },
+      });
+      jest.mocked(client.search).mockResolvedValue({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, failed: 0 },
+        hits: {
+          hits: [
+            { _index: 'workflows', _id: workflow.id, _source: { access_control: accessControl } },
+          ],
+        },
+      });
+
+      await expect(
+        api.getWorkflowExecutions({ request: mockRequest }, 'default')
+      ).rejects.toThrow();
+      expect(mockWorkflowsService.getWorkflowExecutions).not.toHaveBeenCalled();
+      expect(client.closePointInTime).toHaveBeenCalledWith({ id: 'pit' });
+    });
+  });
+
+  it('applies access control in the query that reads the requested workflow fields', async () => {
+    const access = await mockWorkflowsService.getAccessControl();
+    const filter = { term: { 'access_control.access_mode': 'public' } };
+    jest.mocked(access.readFilter).mockResolvedValue(filter);
+    mockWorkflowsService.getWorkflowsSourceByIds.mockResolvedValue([]);
+
+    await expect(
+      api.getWorkflowsSourceByIds(['workflow-123'], 'default', ['yaml'], mockRequest)
+    ).resolves.toEqual([]);
+
+    expect(access.readFilter).toHaveBeenCalledWith(mockRequest);
+    expect(mockWorkflowsService.getWorkflowsSourceByIds).toHaveBeenCalledWith(
+      ['workflow-123'],
+      'default',
+      ['yaml'],
+      { accessControlFilter: filter }
+    );
+    expect(mockWorkflowsService.getWorkflowsByIds).not.toHaveBeenCalled();
   });
 
   it.each([false, true])(

@@ -518,12 +518,10 @@ export class WorkflowsManagementApi {
     source: string[] | undefined,
     request: KibanaRequest
   ): Promise<WorkflowPartialDetailDto[]> {
-    const visible = await this.getWorkflowsByIds(ids, spaceId, request);
-    return this.workflowsService.getWorkflowsSourceByIds(
-      visible.map(({ id }) => id),
-      spaceId,
-      source
-    );
+    const access = await this.workflowsService.getAccessControl();
+    return this.workflowsService.getWorkflowsSourceByIds(ids, spaceId, source, {
+      accessControlFilter: await access.readFilter(request),
+    });
   }
 
   public async createWorkflow(

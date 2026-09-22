@@ -19,6 +19,7 @@ import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import {
   getWorkflowPermissions,
   pickWorkflowDocumentVersion,
+  storedWorkflowAccessControlSchema,
   WORKFLOW_ACCESS_CONTROL_ROLES,
   WorkflowsManagementApiActions,
 } from '@kbn/workflows';
@@ -149,7 +150,7 @@ export class WorkflowAccessControlService {
     spaceId: string,
     request?: KibanaRequest
   ): Promise<estypes.QueryDslQueryContainer> {
-    const readFilter = await this.readFilter(request);
+    const profileId = request ? await this.getProfileId(request) : undefined;
     const client = this.core.elasticsearch.client.asInternalUser;
     let pitId: string;
     try {
@@ -168,21 +169,30 @@ export class WorkflowAccessControlService {
     let searchAfter: estypes.SortResults | undefined;
     try {
       while (true) {
-        const response = await client.search({
+        const response = await client.search<WorkflowAccessSubject>({
           pit: { id: pitId, keep_alive: '1m' },
           allow_partial_search_results: false,
           size: 1000,
-          _source: false,
+          _source: ['owner_id', 'access_control'],
           sort: ['_shard_doc'],
           ...(searchAfter ? { search_after: searchAfter } : {}),
-          query: { bool: { filter: [{ term: { spaceId } }], must_not: [readFilter] } },
+          query: { term: { spaceId } },
         });
         if (response.pit_id) pitId = response.pit_id;
         if (response.timed_out || response._shards.failed > 0) {
           throw new Error('Could not determine workflow execution access from incomplete results.');
         }
-        for (const { _id: id } of response.hits.hits) {
-          if (id) hiddenIds.push(id);
+        for (const { _id: id, _source: source } of response.hits.hits) {
+          if (!id || !source) throw new Error('Missing workflow execution access document.');
+          const accessControl = storedWorkflowAccessControlSchema.parse(source.access_control);
+          if (
+            !getWorkflowPermissions(
+              { owner_id: source.owner_id, access_control: accessControl },
+              profileId
+            ).read
+          ) {
+            hiddenIds.push(id);
+          }
         }
         if (response.hits.hits.length < 1000) break;
         searchAfter = response.hits.hits.at(-1)?.sort;
