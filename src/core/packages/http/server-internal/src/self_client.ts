@@ -142,10 +142,13 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
       const selfError = isHttpSelfFetchError(error)
         ? error
         : createHttpSelfFetchError(
-            `Kibana self HTTP call failed: ${describeSelfCall(request)}: ${
-              (error as Error).message
-            }`,
-            request
+            `Kibana self HTTP call failed: ${describeSelfCall(request)}: ${describeErrorCause(
+              error
+            )}`,
+            request,
+            undefined,
+            undefined,
+            error
           );
       this.logFailure(selfError, options.target);
       throw selfError;
@@ -170,6 +173,7 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
   private logFailure(error: HttpSelfFetchError, target?: 'local'): void {
     const targetMode = this.getEffectiveTarget(target) === 'local' ? 'local' : 'public';
     const statusCode = error.response?.status;
+    const errorCode = getErrorCode(error);
 
     this.params.log.error('Kibana scoped self HTTP call failed', {
       error,
@@ -180,10 +184,11 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
       labels: {
         self_http_target_method: error.request.method,
         self_http_target_mode: targetMode,
-        self_http_target_url: describeSelfCallUrl(error.request),
+        self_http_target_origin: describeSelfCallOrigin(error.request),
         ...(statusCode !== undefined
           ? { self_http_status_class: `${Math.floor(statusCode / 100)}xx` }
           : {}),
+        ...(errorCode ? { self_http_error_code: errorCode } : {}),
       },
     });
   }
@@ -345,9 +350,13 @@ const createHttpSelfFetchError = <TResponseBody>(
   message: string,
   request: Request,
   response?: Response,
-  body?: TResponseBody
+  body?: TResponseBody,
+  cause?: unknown
 ): HttpSelfFetchError<TResponseBody> => {
-  const error = new Error(message) as HttpSelfFetchError<TResponseBody>;
+  const error = new Error(
+    message,
+    cause === undefined ? undefined : { cause }
+  ) as HttpSelfFetchError<TResponseBody>;
   error.name = 'HttpSelfFetchError';
   Object.defineProperties(error, {
     request: { value: request, enumerable: true },
@@ -361,14 +370,33 @@ const isHttpSelfFetchError = (error: unknown): error is HttpSelfFetchError => {
   return error instanceof Error && error.name === 'HttpSelfFetchError';
 };
 
-const describeSelfCallUrl = (request: Request): string => {
-  const url = new URL(request.url);
-  return `${url.origin}${url.pathname}`;
-};
+const describeSelfCallOrigin = (request: Request): string => new URL(request.url).origin;
 
 const describeSelfCall = (request: Request, response?: Response): string => {
-  const target = `${request.method} ${describeSelfCallUrl(request)}`;
+  const target = `${request.method} ${describeSelfCallOrigin(request)}`;
   return response ? `${target} → ${response.status}` : target;
+};
+
+const describeErrorCause = (error: unknown): string => {
+  if (!(error instanceof Error)) {
+    return String(error);
+  }
+  const cause = error.cause instanceof Error ? error.cause : undefined;
+  if (cause?.message && cause.message !== error.message) {
+    return `${error.message}: ${cause.message}`;
+  }
+  return error.message;
+};
+
+const getErrorCode = (error: unknown): string | undefined => {
+  let current: unknown = error;
+  for (let depth = 0; depth < 4 && current instanceof Error; depth++) {
+    if ('code' in current && typeof current.code === 'string') {
+      return current.code;
+    }
+    current = current.cause;
+  }
+  return undefined;
 };
 
 const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308]);

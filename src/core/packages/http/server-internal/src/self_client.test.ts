@@ -211,32 +211,43 @@ describe('InternalHttpSelfScopedClient', () => {
     expect(serializedLog).not.toContain('fake-request');
   });
 
-  it('logs a connect failure with the target URL and mode', async () => {
+  it('logs a connect failure with the origin, mode, and underlying TLS cause', async () => {
     const { log, self } = createClient();
-    (global.fetch as jest.Mock).mockRejectedValueOnce(new Error('fetch failed'));
-
-    await expect(self.asScoped(createRequest()).fetch('/api/status')).rejects.toThrow(
-      'Kibana self HTTP call failed: GET https://kibana.example.com/base/s/my-space/api/status: fetch failed'
+    const tlsCause = Object.assign(new Error("Hostname/IP does not match certificate's altnames"), {
+      code: 'ERR_TLS_CERT_ALTNAME_INVALID',
+    });
+    (global.fetch as jest.Mock).mockRejectedValueOnce(
+      Object.assign(new Error('fetch failed'), { cause: tlsCause })
     );
+
+    await expect(self.asScoped(createRequest()).fetch('/api/status')).rejects.toMatchObject({
+      name: 'HttpSelfFetchError',
+      message:
+        "Kibana self HTTP call failed: GET https://kibana.example.com: fetch failed: Hostname/IP does not match certificate's altnames",
+      cause: expect.objectContaining({ message: 'fetch failed', cause: tlsCause }),
+    });
     expect(log.error).toHaveBeenCalledWith(
       'Kibana scoped self HTTP call failed',
       expect.objectContaining({
         error: expect.objectContaining({
           message:
-            'Kibana self HTTP call failed: GET https://kibana.example.com/base/s/my-space/api/status: fetch failed',
+            "Kibana self HTTP call failed: GET https://kibana.example.com: fetch failed: Hostname/IP does not match certificate's altnames",
           name: 'HttpSelfFetchError',
+          cause: expect.objectContaining({ message: 'fetch failed', cause: tlsCause }),
         }),
         http: { request: { method: 'GET' } },
         labels: {
           self_http_target_method: 'GET',
           self_http_target_mode: 'public',
-          self_http_target_url: 'https://kibana.example.com/base/s/my-space/api/status',
+          self_http_target_origin: 'https://kibana.example.com',
+          self_http_error_code: 'ERR_TLS_CERT_ALTNAME_INVALID',
         },
       })
     );
+    expect(JSON.stringify((log.error as jest.Mock).mock.calls)).not.toContain('my-space');
   });
 
-  it('logs a non-success response with status and omits the query string', async () => {
+  it('logs a non-success response with status and omits the path and query', async () => {
     const { log, self } = createClient();
     (global.fetch as jest.Mock).mockResolvedValueOnce(
       new Response(JSON.stringify({ message: 'nope' }), {
@@ -246,21 +257,23 @@ describe('InternalHttpSelfScopedClient', () => {
     );
 
     await expect(
-      self.asScoped(createRequest()).fetch('/api/status', { query: { token: 'secret-query' } })
-    ).rejects.toThrow(
-      'Kibana self HTTP call failed: GET https://kibana.example.com/base/s/my-space/api/status → 502'
-    );
+      self
+        .asScoped(createRequest())
+        .fetch('/api/items/raw-id', { query: { token: 'secret-query' } })
+    ).rejects.toThrow('Kibana self HTTP call failed: GET https://kibana.example.com → 502');
     expect(log.error).toHaveBeenCalledWith(
       'Kibana scoped self HTTP call failed',
       expect.objectContaining({
         http: { request: { method: 'GET' }, response: { status_code: 502 } },
         labels: expect.objectContaining({
-          self_http_target_url: 'https://kibana.example.com/base/s/my-space/api/status',
+          self_http_target_origin: 'https://kibana.example.com',
           self_http_status_class: '5xx',
         }),
       })
     );
-    expect(JSON.stringify((log.error as jest.Mock).mock.calls)).not.toContain('secret-query');
+    const serializedLog = JSON.stringify((log.error as jest.Mock).mock.calls);
+    expect(serializedLog).not.toContain('secret-query');
+    expect(serializedLog).not.toContain('raw-id');
   });
 
   it('builds a local URL from server info when publicBaseUrl is absent', async () => {
