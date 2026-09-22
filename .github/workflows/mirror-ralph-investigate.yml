@@ -119,7 +119,7 @@ jobs:
           } > "$RUNNER_TEMP/body.md"
 
           MIRROR_URL=$(gh issue create --repo "$TARGET_REPO" \
-            --title "$ISSUE_TITLE" --body-file "$RUNNER_TEMP/body.md")
+            --title "[kibana#$ISSUE_NUMBER] $ISSUE_TITLE" --body-file "$RUNNER_TEMP/body.md")
           echo "url=$MIRROR_URL" >> "$GITHUB_OUTPUT"
 
           # Separate call on purpose. This label is what starts Detective Ralph; labels set at
