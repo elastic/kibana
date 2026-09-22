@@ -30,7 +30,6 @@ export interface ProposalsPageResponse {
   total: number;
 }
 
-/** `size: 0` asks for the group's `total` without paying for its rows. */
 export interface ProposalsPageParams {
   size: number;
   from: number;
@@ -40,10 +39,9 @@ export interface ProposalsPageParams {
 export const MAX_QUEUE_PAGE_SIZE = 100;
 
 /**
- * How far `from` can reach: Elasticsearch refuses `from + size` past
- * `index.max_result_window`, which defaults to 10,000. Going beyond needs
- * `search_after`, which is blocked until a proposal carries a unique sortable field —
- * `id` is unmapped, and revisions inherit `createdAt`, so every sort we use can tie.
+ * Elasticsearch refuses `from + size` past `index.max_result_window`. Going further
+ * needs `search_after`, which has no unique sort key to use: `id` is unmapped and
+ * revisions inherit `createdAt`, so every sort we have can tie.
  *
  * @see {@link https://www.elastic.co/docs/reference/elasticsearch/rest-apis/paginate-search-results#search-after}
  */

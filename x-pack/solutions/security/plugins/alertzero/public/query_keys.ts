@@ -16,19 +16,11 @@ export const queryKeys = {
   proposals: {
     chartsSummary: (windowHours: number, bucketMinutes: number) =>
       [...platformQueryKeys.proposals.all, 'charts-summary', windowHours, bucketMinutes] as const,
-    /**
-     * Pages of pending proposals in one category. The offset is deliberately absent:
-     * one key holds every accumulated page, which is what lets Show more append
-     * rather than replace.
-     */
+    /** No offset in the key: one entry holds every page Show more has appended. */
     byCategory: (category: string) =>
       [...platformQueryKeys.proposals.all, 'by-category', category] as const,
-    /** Pages of proposals decided in the last 72 h. */
     closed: () => [...platformQueryKeys.proposals.all, 'closed'] as const,
-    /**
-     * `size: 0` read behind a count badge. Separate from the pages above so a
-     * collapsed accordion can know its size without loading any rows.
-     */
+    /** `size: 0` reads, so a collapsed accordion knows its size without its rows. */
     byCategoryCount: (category: string) =>
       [...platformQueryKeys.proposals.all, 'by-category-count', category] as const,
     closedCount: () => [...platformQueryKeys.proposals.all, 'closed-count'] as const,

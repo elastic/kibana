@@ -17,14 +17,10 @@ import {
 import { LOADING_CONVERSATION_QUEUE } from './translations';
 
 interface ConversationQueueSkeletonProps {
-  /** Rows to stand in for; the caller knows the bucket size and its page size. */
   rows: number;
 }
 
-/**
- * Placeholder rows shaped like ConversationCard, so the list does not resize
- * when the real cards arrive.
- */
+/** Shaped like ConversationCard, so the list does not resize when the rows land. */
 export const ConversationQueueSkeleton = ({ rows }: ConversationQueueSkeletonProps) => {
   const { euiTheme } = useEuiTheme();
 

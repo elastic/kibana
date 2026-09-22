@@ -31,10 +31,8 @@ const declinedBy = (name: string) =>
   });
 
 /**
- * How a closed proposal was settled. `undefined` while it is still open.
- *
- * Derived here rather than in the shared card because only the raw proposal carries
- * `decision` and `decidedBy` — `Investigation` deliberately has no home for them.
+ * How a closed proposal was settled, `undefined` while it is still open. Derived
+ * here because only the raw proposal carries `decision` and `decidedBy`.
  */
 export const proposalOutcome = ({
   decision,
@@ -42,13 +40,13 @@ export const proposalOutcome = ({
   status,
   expired,
 }: ProposalItem): string | undefined => {
-  // Expiry wins: nobody answered, so there is no decision to attribute.
+  // Nobody answered, so there is no decision to attribute.
   if (!decision) {
     return status === 'expired' || expired ? EXPIRED : undefined;
   }
 
-  // Both name fields are nullable, and nothing writes a synthetic system user, so an
-  // unattributed decision is the only signal that no human made it.
+  // Nothing writes a synthetic system user, so an unattributed decision is the only
+  // signal that no human made it.
   const name = decidedBy?.fullName ?? decidedBy?.username;
   if (!name) {
     return decision === 'approved' ? AUTO : DECLINED;

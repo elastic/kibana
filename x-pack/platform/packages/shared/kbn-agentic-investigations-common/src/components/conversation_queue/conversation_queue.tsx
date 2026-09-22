@@ -44,33 +44,22 @@ interface ConversationQueueProps {
   briefingType: RecommendedAction;
   briefingList: Investigation[];
   /**
-   * Size of the whole bucket on the server, not the row count — a collapsed or
-   * partially loaded section still has to say how big it is. A spinner stands in
-   * until the first response, since 0 would read as empty and then jump.
+   * The whole bucket, not the rows on screen. A spinner stands in until the first
+   * response, since 0 would read as empty and then jump.
    */
   count?: number;
-  /**
-   * Controlled, because the caller drives its fetch from the open state and a second
-   * copy inside EuiAccordion would drift from it.
-   */
+  /** Controlled: the caller drives its fetch from this, so EuiAccordion must not
+   * keep a second copy to drift from. */
   isOpen: boolean;
   onToggle: (isOpen: boolean) => void;
-  /**
-   * Placeholder rows to render while the first page is in flight. The caller knows
-   * the bucket size, so the scaffold is as long as the list is about to be.
-   */
+  /** Placeholder rows while the first page is in flight, as long as the list will be. */
   loadingRows?: number;
-  /**
-   * This section's rows failed to load and it has nothing cached, so the failure
-   * replaces them. Per section: one bucket failing must not read as empty just
-   * because its neighbours loaded.
-   */
+  /** Rows failed with nothing cached. Per section: a failure must not read as empty. */
   isError?: boolean;
-  /** The count read failed, so the badge stands down rather than spinning forever. */
+  /** The count failed, so the badge stands down rather than spinning forever. */
   isCountUnavailable?: boolean;
-  /** Refetches the section. Without it the failure carries no way out but waiting. */
   onRetry?: () => void;
-  /** Rows Show more can still load. The footer hides at 0. */
+  /** The footer hides at 0. */
   remaining?: number;
   onShowMore?: () => void;
   isLoadingMore?: boolean;
@@ -78,21 +67,12 @@ interface ConversationQueueProps {
   onClickCard: (id: Investigation['id']) => void;
   onOpenChat: (id: Investigation['id']) => void;
   onClickRecommendedAction: ConversationsActionsGroupProps['onClickRecommendedAction'];
-  /**
-   * Resolves the chat URL for a card, so its chat control renders as a link. A function rather
-   * than a value because the URL is per-card and only the caller can resolve it.
-   */
+  /** A function, not a value: the URL is per-card and only the caller can resolve it. */
   getChatHref?: (id: Investigation['id']) => string | undefined;
-  /**
-   * How a decided row was settled, for the compact closed rows. A function for the
-   * same reason as `getChatHref`: only the caller can resolve it.
-   */
+  /** How a decided row was settled; per-card, like `getChatHref`. */
   getOutcomeLabel?: (id: Investigation['id']) => string | undefined;
   isFiltered?: boolean;
-  /**
-   * Ids of the cards belonging to the open details flyout, highlighted in the list. A
-   * plural because the flyout shows an investigation, which several rows can share.
-   */
+  /** Plural: the flyout shows an investigation, which several rows can share. */
   selectedIds?: readonly string[];
 }
 
@@ -134,13 +114,12 @@ export const ConversationQueue = memo<ConversationQueueProps>(
     selectedIds,
   }) => {
     const { euiTheme } = useEuiTheme();
-    // Work already finished reads as a list, not as cards. Pinned to the bucket rather
-    // than a prop: which bucket is done is the queue's own structure, not a caller's choice.
+    // Work already finished reads as a list. Pinned to the bucket, not a prop: which
+    // bucket is done is the queue's own structure.
     const isClosedBucket = briefingType === 'closed';
 
-    // Collapsing drops the section's query to a count-only read, so its rows empty on the
-    // same frame the accordion starts animating shut — it would glide down over an empty
-    // panel. Keep the last loaded rows until it opens again; while shut they are not visible.
+    // Collapsing empties the rows on the frame the accordion starts closing, so it
+    // would animate over an empty panel. Hold them until it opens again.
     const [heldRows, setHeldRows] = useState(briefingList);
     if (briefingList.length > 0 && briefingList !== heldRows) {
       setHeldRows(briefingList);
@@ -169,6 +148,94 @@ export const ConversationQueue = memo<ConversationQueueProps>(
       </EuiFlexGroup>
     );
 
+    const rowList = (
+      <EuiFlexGroup direction="column" gutterSize="none">
+        {rows.map((investigation, i) => {
+          const cardProps = {
+            investigation,
+            hasBorder: i < rows.length - 1,
+            isSelected: selectedIds?.includes(investigation.id),
+            onClickAction,
+            onClickCard,
+            onOpenChat,
+            onClickRecommendedAction,
+            chatHref: getChatHref?.(investigation.id),
+          };
+
+          return (
+            <EuiFlexItem key={investigation.id} grow={false}>
+              {isClosedBucket ? (
+                <ConversationCardCompact
+                  {...cardProps}
+                  outcome={getOutcomeLabel?.(investigation.id)}
+                />
+              ) : (
+                <ConversationCard {...cardProps} />
+              )}
+            </EuiFlexItem>
+          );
+        })}
+      </EuiFlexGroup>
+    );
+
+    const failure = (
+      // The panel sets `pointer` for the cards; only the retry is clickable here.
+      <div css={{ padding: euiTheme.size.base, cursor: 'default' }}>
+        <EuiEmptyPrompt
+          data-test-subj={`conversationQueueError-${briefingType}`}
+          color="danger"
+          paddingSize="m"
+          icon={<EuiIcon type="error" size="l" color="danger" aria-hidden={true} />}
+          title={<h4>{CONVERSATION_QUEUE_ERROR.title}</h4>}
+          titleSize="xs"
+          body={
+            <EuiText size="xs" color="subdued">
+              {CONVERSATION_QUEUE_ERROR.body}
+            </EuiText>
+          }
+          actions={
+            onRetry ? (
+              <EuiButtonEmpty
+                size="s"
+                iconType="refresh"
+                onClick={onRetry}
+                data-test-subj={`conversationQueueRetry-${briefingType}`}
+              >
+                {CONVERSATION_QUEUE_ERROR.retry}
+              </EuiButtonEmpty>
+            ) : undefined
+          }
+        />
+      </div>
+    );
+
+    const emptyState = (
+      <EuiPanel>
+        <EuiText size="xs" color="subdued">
+          {isFiltered
+            ? EMPTY_CONVERSATION_QUEUE.emptyQueueWithFilter
+            : EMPTY_CONVERSATION_QUEUE.emptyQueue}
+        </EuiText>
+      </EuiPanel>
+    );
+
+    /** One of four, chosen here rather than by four conditions agreeing not to overlap. */
+    const renderBody = () => {
+      if (loadingRows > 0) {
+        return <ConversationQueueSkeleton rows={loadingRows} />;
+      }
+      // Rows win over a failure: a refetch failing over readable rows must not
+      // replace them.
+      if (rows.length > 0) {
+        return rowList;
+      }
+      // Rendering either of the below mid-collapse is what made the copy flash.
+      if (!isOpen) {
+        return null;
+      }
+      return isError ? failure : emptyState;
+    };
+
     return (
       <EuiPanel
         borderRadius="none"
@@ -193,39 +260,10 @@ export const ConversationQueue = memo<ConversationQueueProps>(
             `,
           }}
         >
-          {loadingRows > 0 ? <ConversationQueueSkeleton rows={loadingRows} /> : null}
+          {renderBody()}
 
-          {loadingRows === 0 && rows.length > 0 ? (
-            <EuiFlexGroup direction="column" gutterSize="none">
-              {rows.map((investigation, i) => {
-                const cardProps = {
-                  investigation,
-                  hasBorder: i < rows.length - 1,
-                  isSelected: selectedIds?.includes(investigation.id),
-                  onClickAction,
-                  onClickCard,
-                  onOpenChat,
-                  onClickRecommendedAction,
-                  chatHref: getChatHref?.(investigation.id),
-                };
-
-                return (
-                  <EuiFlexItem key={investigation.id} grow={false}>
-                    {isClosedBucket ? (
-                      <ConversationCardCompact
-                        {...cardProps}
-                        outcome={getOutcomeLabel?.(investigation.id)}
-                      />
-                    ) : (
-                      <ConversationCard {...cardProps} />
-                    )}
-                  </EuiFlexItem>
-                );
-              })}
-            </EuiFlexGroup>
-          ) : null}
-
-          {/* EuiAccordion has no footer slot, so the control is the last child. */}
+          {/* Sits below the rows rather than replacing them, and EuiAccordion has no
+              footer slot, so it is the last child. */}
           {loadingRows === 0 && isOpen && remaining > 0 && onShowMore ? (
             <EuiFlexGroup
               justifyContent="center"
@@ -233,9 +271,8 @@ export const ConversationQueue = memo<ConversationQueueProps>(
               gutterSize="none"
               css={{
                 borderTop: `1px solid ${euiTheme.colors.disabled}`,
-                // Keeps the button's hover fill and focus ring off the row's borders.
+                // Keeps the hover fill and focus ring off the row's borders.
                 padding: euiTheme.size.xs,
-                // The panel sets `pointer` for the cards; only the button is clickable here.
                 cursor: 'default',
               }}
             >
@@ -253,53 +290,6 @@ export const ConversationQueue = memo<ConversationQueueProps>(
                 </EuiButtonEmpty>
               </EuiFlexItem>
             </EuiFlexGroup>
-          ) : null}
-
-          {/* Rows win over a failure: a refetch that fails over readable rows must not
-              replace them. No retry control either — the queue polls, so a transient
-              failure clears itself within the minute. */}
-          {loadingRows === 0 && isError && rows.length === 0 && isOpen ? (
-            // The panel sets `pointer` for the cards; nothing here is a card, and only
-            // the retry control is clickable.
-            <div css={{ padding: euiTheme.size.base, cursor: 'default' }}>
-              <EuiEmptyPrompt
-                data-test-subj={`conversationQueueError-${briefingType}`}
-                color="danger"
-                paddingSize="m"
-                icon={<EuiIcon type="error" size="l" color="danger" aria-hidden={true} />}
-                title={<h4>{CONVERSATION_QUEUE_ERROR.title}</h4>}
-                titleSize="xs"
-                body={
-                  <EuiText size="xs" color="subdued">
-                    {CONVERSATION_QUEUE_ERROR.body}
-                  </EuiText>
-                }
-                actions={
-                  onRetry ? (
-                    <EuiButtonEmpty
-                      size="s"
-                      iconType="refresh"
-                      onClick={onRetry}
-                      data-test-subj={`conversationQueueRetry-${briefingType}`}
-                    >
-                      {CONVERSATION_QUEUE_ERROR.retry}
-                    </EuiButtonEmpty>
-                  ) : undefined
-                }
-              />
-            </div>
-          ) : null}
-
-          {/* Only meaningful for a section someone is looking at; rendering it mid-collapse
-              is what made the empty copy flash. A failed section is not an empty one. */}
-          {loadingRows === 0 && !isError && rows.length === 0 && isOpen ? (
-            <EuiPanel>
-              <EuiText size="xs" color="subdued">
-                {isFiltered
-                  ? EMPTY_CONVERSATION_QUEUE.emptyQueueWithFilter
-                  : EMPTY_CONVERSATION_QUEUE.emptyQueue}
-              </EuiText>
-            </EuiPanel>
           ) : null}
         </StyledAccordion>
       </EuiPanel>

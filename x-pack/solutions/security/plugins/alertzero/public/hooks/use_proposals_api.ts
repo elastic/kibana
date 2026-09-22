@@ -19,9 +19,8 @@ import { MAX_QUEUE_REACH } from '../../common/proposals/list';
 import { queryKeys } from '../query_keys';
 
 /**
- * Workers add proposals on their own cadence, so the queue polls rather than waiting
- * for a decision to invalidate it. React Query does not poll a disabled query, so a
- * collapsed section refreshes only its count.
+ * Workers add proposals on their own cadence, so the queue polls. React Query does
+ * not poll a disabled query, so a collapsed section refreshes only its count.
  */
 export const PROPOSALS_POLL_INTERVAL_MS = 60_000;
 
@@ -29,16 +28,14 @@ const categoryPath = (category: string) =>
   ALERTZERO_PROPOSALS_CATEGORY_URL.replace('{category}', encodeURIComponent(category));
 
 interface PagesOptions {
-  /** Rows in the first page; later pages step by `SHOW_MORE_STEP`. */
   firstPageSize: number;
   step: number;
   enabled: boolean;
 }
 
 /**
- * Offset of the next page, or `undefined` once the bucket is exhausted or paging has
- * reached as far as `from` can go. Returning the accumulated row count rather than
- * `pages.length * size` is what lets the first page be a different size.
+ * The accumulated row count rather than `pages.length * size`, which is what lets
+ * the first page be a different size. `undefined` ends the paging.
  */
 const nextOffset = (lastPage: ProposalsPageResponse, pages: ProposalsPageResponse[]) => {
   const loaded = pages.reduce((count, page) => count + page.proposals.length, 0);
@@ -83,8 +80,7 @@ const useProposalsPages = (
     },
     getNextPageParam: nextOffset,
     enabled,
-    // A poll refetches every page already loaded, so the rows on screen all refresh
-    // rather than the list snapping back to its first page.
+    // A poll refetches every loaded page, so the list does not snap back to page one.
     refetchInterval: PROPOSALS_POLL_INTERVAL_MS,
     retry: retryOnTransientError,
   });

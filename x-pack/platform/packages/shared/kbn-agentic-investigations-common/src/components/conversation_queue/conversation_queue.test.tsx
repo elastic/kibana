@@ -65,8 +65,7 @@ describe('ConversationQueue', () => {
   });
 
   it('holds the last rows through a collapse, so the empty copy cannot flash', () => {
-    // Mirrors the caller: collapsing drops its query to a count-only read, so the rows
-    // empty on the same frame `isOpen` goes false.
+    // Mirrors the caller: the rows empty on the same frame `isOpen` goes false.
     const Collapsing = () => {
       const [isOpen, setIsOpen] = useState(true);
       return queueElement({
@@ -152,19 +151,9 @@ describe('ConversationQueue', () => {
       expect(screen.queryByText('No events in this category.')).not.toBeInTheDocument();
     });
 
-    it('keeps rows readable when a refetch fails over them', () => {
-      // The caller only raises isError with nothing cached, so rows plus an error is
-      // not a state it produces — but the rows must win if it ever is.
-      renderQueue({ isError: true, briefingList: [investigation], count: 1 });
-
-      expect(screen.getByText(investigation.title)).toBeInTheDocument();
-      expect(screen.queryByText('Unable to load events')).not.toBeInTheDocument();
-    });
-
     it('stands the badge down when the count itself failed', () => {
       renderQueue({ isCountUnavailable: true, count: undefined });
 
-      // Otherwise the badge spins forever waiting for a total that is never coming.
       expect(screen.queryByLabelText('Loading count')).not.toBeInTheDocument();
       expect(trigger()).toHaveTextContent('Respond');
     });

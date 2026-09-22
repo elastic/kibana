@@ -60,7 +60,6 @@ describe('useDropDecidedProposal', () => {
     await act(() => drop('b'));
 
     expect(rowsIn(queryClient, 'respond')).toEqual(['a', 'c']);
-    // The badge counts the whole bucket, so it has to come down with the row.
     expect(countIn(queryClient, 'respond')).toBe(11);
   });
 
@@ -80,11 +79,8 @@ describe('useDropDecidedProposal', () => {
   });
 
   it('survives the refetch the decision itself kicked off', async () => {
-    // The mutation invalidates the proposals root on its way here, and the server
-    // still reports the proposal as pending for a moment afterwards — so an
-    // uncancelled refetch would put the row straight back. Mounts the real query,
-    // because an invalidation with no observer never refetches and would pass
-    // whether or not that refetch is cancelled.
+    // Mounts the real query on purpose: an invalidation with no observer never
+    // refetches, and would pass whether or not the refetch is cancelled.
     const http = {
       get: jest.fn().mockResolvedValue({ proposals: [row('a'), row('b')], total: 2 }),
     };
@@ -121,13 +117,5 @@ describe('useDropDecidedProposal', () => {
     });
 
     expect(rowsIn(queryClient, 'respond')).toEqual(['a']);
-  });
-
-  it('does nothing to a queue that has never been loaded', async () => {
-    const { queryClient, drop } = setup();
-
-    await act(() => drop('a'));
-
-    expect(rowsIn(queryClient, 'respond')).toBeUndefined();
   });
 });

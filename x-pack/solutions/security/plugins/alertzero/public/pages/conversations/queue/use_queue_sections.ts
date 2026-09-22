@@ -12,11 +12,10 @@ import type { QueueSection } from './use_queue_section';
 import { useCategoryQueueSection, useClosedQueueSection } from './use_queue_section';
 
 export interface QueueSections {
-  /** In queue order; the page renders one accordion per entry. */
   sections: QueueSection[];
   /** Every loaded proposal, for the modals and the chat links. */
   proposalsById: Map<string, ProposalItem>;
-  /** Unfiltered union, impact-first — Impact derives its chips from the whole set. */
+  /** Unfiltered: Impact derives its chips from the whole set. */
   investigations: Investigation[];
 }
 
@@ -36,8 +35,8 @@ export const useQueueSections = (): QueueSections => {
     [sections]
   );
 
-  // Each section pages by its own recency, so the union has no single order;
-  // priorityScore is what restores an impact-first one.
+  // Each section pages by its own recency, so priorityScore is what gives the
+  // union an impact-first order.
   const investigations = useMemo(
     () =>
       sections

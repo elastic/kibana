@@ -23,10 +23,7 @@ interface ConversationCardCompactProps {
   investigation: Investigation;
   hasBorder: boolean;
   isSelected?: boolean;
-  /**
-   * How the proposal was settled. Resolved by the caller, which is the only layer
-   * holding the decision — `Investigation` carries no decision fields.
-   */
+  /** Resolved by the caller: `Investigation` carries no decision fields. */
   outcome?: string;
   onClickRecommendedAction: BaseActionsProps['onClickRecommendedAction'];
   onClickAction: BaseActionsProps['onClickAction'];
@@ -36,9 +33,8 @@ interface ConversationCardCompactProps {
 }
 
 /**
- * One line per decision, for a queue of work that is already finished: no summary and
- * no assignee, and the action reads as a label beside the title rather than a control.
- * The decided row's own actions already collapse to chat plus Open incident.
+ * One line per decision: no summary, no assignee, and the action reads as a label
+ * beside the title rather than a control.
  */
 export const ConversationCardCompact = memo<ConversationCardCompactProps>(
   ({
@@ -91,13 +87,11 @@ export const ConversationCardCompact = memo<ConversationCardCompactProps>(
             <ConversationMetaInfo createdAt={investigation.createdAt} />
           </EuiFlexItem>
           <EuiFlexItem grow={true}>
-            {/* Title and action share one line and truncate together, so the outcome
-                and the controls keep their place however long the title is. */}
+            {/* Truncate together, so the outcome and controls keep their place. */}
             <EuiText
               size="s"
               css={{
-                // Off EUI's type scale on purpose — it steps 12px to 14px, and the
-                // design puts a closed row's title between the two.
+                // Off EUI's type scale on purpose: it steps 12px to 14px.
                 fontSize: '0.8125rem',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',

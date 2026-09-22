@@ -12,7 +12,7 @@ import { queryKeys as platformQueryKeys } from '@kbn/agentic-investigations-plug
 import type { ProposalsPageResponse } from '../../../../common/proposals/list';
 import { queryKeys } from '../../../query_keys';
 
-/** The buckets a proposal can be decided from; Closed only ever gains one. */
+/** Closed only ever gains a decided proposal, never loses one. */
 const OPEN_CATEGORIES = ['respond', 'investigate', 'configure'] as const;
 
 const withoutProposal = (
@@ -34,22 +34,18 @@ const withoutProposal = (
 };
 
 /**
- * Takes a just-decided proposal out of the queue it was sitting in.
- *
- * The decision itself is recorded asynchronously: the route releases the gate and
- * the workflow writes the outcome behind it, so for a moment afterwards the server
- * still reports the proposal as pending. Waiting for it would leave the row on
- * screen until the next poll, so the row goes now and the poll reconciles — it
- * comes back if the decision never lands, and reappears under Closed once it does.
+ * Takes a just-decided proposal out of its queue. The decision is recorded
+ * asynchronously — the route releases the gate and the workflow writes the outcome
+ * behind it — so the server still reports it as pending for a moment. The row goes
+ * now and the poll reconciles.
  */
 export const useDropDecidedProposal = () => {
   const queryClient = useQueryClient();
 
   return useCallback(
     async (proposalId: string) => {
-      // The mutation invalidated the proposals root on its way here, and that
-      // refetch would read this proposal as still pending and put it straight
-      // back. Cancel it before touching the cache.
+      // The refetch the mutation just triggered would read this proposal as still
+      // pending and put the row straight back.
       await queryClient.cancelQueries({ queryKey: platformQueryKeys.proposals.all });
 
       OPEN_CATEGORIES.forEach((category) => {
@@ -64,7 +60,6 @@ export const useDropDecidedProposal = () => {
           }
         );
 
-        // Only the bucket that actually held it has one fewer to report.
         if (removed) {
           queryClient.setQueryData<ProposalsPageResponse>(
             queryKeys.proposals.byCategoryCount(category),

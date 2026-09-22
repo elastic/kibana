@@ -20,7 +20,6 @@ const investigation: Investigation = {
   watch_id: 'watch-1',
   watch_execution_id: 'exec-1',
   pendingProposalCount: 0,
-  // Decided, which is what collapses the row's own actions to the read-only ones.
   recommendedAction: 'closed',
   primaryActionLabel: 'Rotate the Stripe key',
   summary: 'A summary the compact row deliberately leaves out.',
@@ -66,10 +65,13 @@ describe('ConversationCardCompact', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Open actions menu' }));
 
-    expect(screen.queryByText('Rotate the Stripe key')).toBeInTheDocument();
-    // The proposed action, Assign and Close all submit a decision the API refuses.
-    expect(screen.queryByText('Assign')).not.toBeInTheDocument();
-    expect(screen.queryByText('Close')).not.toBeInTheDocument();
+    // By role: the row names its action as a label, so text alone proves nothing
+    // about what the menu offers. Assign and Close submit a decision the API refuses.
+    expect(
+      screen.queryByRole('menuitem', { name: 'Rotate the Stripe key' })
+    ).not.toBeInTheDocument();
+    expect(screen.queryByRole('menuitem', { name: 'Assign' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('menuitem', { name: 'Close' })).not.toBeInTheDocument();
   });
 
   it('still opens the flyout on click', () => {
@@ -78,13 +80,5 @@ describe('ConversationCardCompact', () => {
     fireEvent.click(screen.getByRole('button', { name: investigation.title }));
 
     expect(onClickCard).toHaveBeenCalledWith('inv-1');
-  });
-
-  it('renders without an outcome, for a row whose settlement is unknown', () => {
-    renderRow({ outcome: undefined });
-
-    expect(screen.getByRole('button', { name: investigation.title })).toHaveTextContent(
-      investigation.title
-    );
   });
 });

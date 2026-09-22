@@ -30,38 +30,31 @@ export const SHOW_MORE_STEP = 10;
 /** One queue accordion: its queries, its open state, its counts. */
 export interface QueueSection {
   id: RecommendedAction;
-  /**
-   * Bucket size on the server, from a count-only read so a collapsed section still
-   * knows it. `undefined` until that read lands.
-   */
+  /** Bucket size from a count-only read, so a collapsed section knows it too. */
   total: number | undefined;
   proposals: ProposalItem[];
   investigations: Investigation[];
   isOpen: boolean;
   onToggle: (isOpen: boolean) => void;
-  /**
-   * Placeholder rows to render while the first page is in flight, 0 when it is not.
-   * Bounded by the page about to arrive, so the scaffold matches the list.
-   */
+  /** Placeholder rows while the first page is in flight, bounded by what is coming. */
   loadingRows: number;
   /**
-   * The rows failed with nothing cached behind them. Judged per section and against
-   * this section's own cache: aggregating across the queue let a neighbour's success
-   * mask a failure, and a failed refetch must not blank rows still worth reading.
+   * Rows failed with nothing cached. Per section and against its own cache: an
+   * aggregate let a neighbour's success mask a failure, and a failed refetch must
+   * not blank rows still worth reading.
    */
   hasLoadError: boolean;
-  /** The count failed, so this section cannot say how big it is. */
   hasCountError: boolean;
-  /** Refetches both of this section's queries, behind the failure's retry control. */
+  /** Refetches both of this section's queries, behind the failure's retry. */
   retry: () => void;
-  /** Rows Show more can still reach. Labels the control; `canLoadMore` gates it. */
+  /** Labels Show more; `canLoadMore` is what gates it. */
   remaining: number;
   canLoadMore: boolean;
   loadMore: () => void;
   isLoadingMore: boolean;
 }
 
-/** Both of a section's keys, derived from its bucket so `retry` can stay stable. */
+/** Derived from the bucket, so `retry` stays referentially stable. */
 const keysFor = (id: RecommendedAction) =>
   id === CLOSED_GROUP_KEY
     ? { pages: queryKeys.proposals.closed(), count: queryKeys.proposals.closedCount() }
@@ -74,16 +67,16 @@ const useSectionState = (id: RecommendedAction) => {
   const [isOpen, setIsOpen] = useState(id !== CLOSED_GROUP_KEY);
   const queryClient = useQueryClient();
 
-  // Dropping the accumulated pages has to happen after the render that disabled the
-  // query, or the cache discard races a refetch of the pages we are throwing away.
+  // After the render that disabled the query, or the discard races a refetch of the
+  // pages being thrown away.
   useEffect(() => {
     if (!isOpen) {
       queryClient.removeQueries({ queryKey: keysFor(id).pages });
     }
   }, [isOpen, queryClient, id]);
 
-  // Keyed off the bucket rather than the query objects, so the memoised queue is not
-  // re-rendered by a new callback on every poll.
+  // Keyed off the bucket, not the query objects, or the memoised queue re-renders
+  // on every poll.
   const retry = useCallback(() => {
     const { pages, count } = keysFor(id);
     void queryClient.refetchQueries({ queryKey: pages });
@@ -102,7 +95,7 @@ const useSection = (
 ): QueueSection => {
   const pages = pagesQuery.data?.pages;
 
-  // Flattening on every render would re-sort the page's merged union each time.
+  // Unmemoised, this re-sorts the page's merged union on every render.
   const proposals = useMemo(() => pages?.flatMap(({ proposals: rows }) => rows) ?? [], [pages]);
   const investigations = useMemo(() => proposals.map(proposalToInvestigation), [proposals]);
 
@@ -127,8 +120,7 @@ const useSection = (
     hasLoadError: Boolean(pagesQuery.error) && proposals.length === 0,
     hasCountError: Boolean(countQuery.error) && total === undefined,
     remaining: Math.max(Math.min(total ?? 0, MAX_QUEUE_REACH) - proposals.length, 0),
-    // hasNextPage is the authority, so the control is never offered when a click
-    // would fetch nothing; `remaining` only labels it.
+    // The authority, so the control is never offered when a click fetches nothing.
     canLoadMore: (hasNextPage ?? false) && !pagesQuery.isInitialLoading,
     loadMore,
     isLoadingMore: isFetchingNextPage,
