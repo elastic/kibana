@@ -16,6 +16,7 @@ import { Subject } from 'rxjs';
 import type { TaskStore } from '../task_store';
 import {
   IdleTaskWithExpiredRunAt,
+  WaitingTaskWithExpiredRunAt,
   RunningOrClaimingTaskWithExpiredRetryAt,
   OneOfTaskTypes,
 } from '../queries/mark_available_tasks_as_claimed';
@@ -91,7 +92,11 @@ export class TaskManagerMetricsCollector implements ITaskEventEmitter<TaskLifecy
               {
                 bool: {
                   must: [OneOfTaskTypes('task.taskType', searchedTypes)],
-                  should: [IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt],
+                  should: [
+                    IdleTaskWithExpiredRunAt,
+                    WaitingTaskWithExpiredRunAt,
+                    RunningOrClaimingTaskWithExpiredRetryAt,
+                  ],
                   minimum_should_match: 1,
                 },
               },

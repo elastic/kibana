@@ -3700,7 +3700,7 @@ describe('TaskStore', () => {
 
   describe('getLifecycle', () => {
     test('returns the task status if the task exists ', async () => {
-      expect.assertions(7);
+      expect.assertions(Object.values(TaskStatus).length);
       return Promise.all(
         Object.values(TaskStatus).map(async (status) => {
           const task = {
