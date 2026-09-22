@@ -17,6 +17,37 @@ import type { WorkflowsExecutionEngineConfig } from '../config';
 import { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import { WorkflowEventLoggerService } from '../workflow_event_logger/workflow_event_logger_service';
+
+// Hoisted mock — must be in the test file (not an imported side-effect) so that
+// setup_dependencies.ts receives the mocked WorkflowEventLoggerService when it is
+// first imported. Side-effect imports (like mocks.ts) are NOT hoisted and arrive
+// too late to intercept the module cache.
+jest.mock('../workflow_event_logger/workflow_event_logger_service', () => ({
+  WorkflowEventLoggerService: jest.fn().mockImplementation(() => ({
+    createLogger: jest.fn().mockReturnValue({
+      logInfo: jest.fn(),
+      logError: jest.fn(),
+      logWarn: jest.fn(),
+      logDebug: jest.fn(),
+      startTiming: jest.fn(),
+      stopTiming: jest.fn(),
+      createStepLogger: jest.fn().mockReturnValue({
+        logInfo: jest.fn(),
+        flushEvents: jest.fn(),
+      }),
+      flushEvents: jest.fn(),
+    }),
+    createWorkflowLogger: jest.fn(),
+    createExecutionLogger: jest.fn(),
+    createStepLogger: jest.fn(),
+    getExecutionLogs: jest.fn(),
+    getStepLogs: jest.fn(),
+    getLogsByLevel: jest.fn(),
+    searchLogs: jest.fn(),
+    getRecentLogs: jest.fn(),
+  })),
+}));
 
 import '../workflow_event_logger/mocks';
 jest.mock('../repositories/workflow_execution_repository');
@@ -66,6 +97,7 @@ describe('setupDependencies', () => {
     },
     collectQueueMetrics: false,
     hitlExternalResume: { enabled: true },
+    syncExecution: { enabled: false, maxDurationMs: 60_000 },
   };
 
   let mockDependencies: ReturnType<typeof mockContextDependencies>;
@@ -124,16 +156,16 @@ describe('setupDependencies', () => {
       headers: {},
     } as KibanaRequest;
 
-    const result = await setupDependencies(
+    const result = await setupDependencies({
       workflowRunId,
       spaceId,
-      mockLogger,
-      mockConfig,
-      mockDependencies,
-      mockWorkflowExecutionRepository,
-      mockStepExecutionRepository,
-      mockFakeRequest
-    );
+      logger: mockLogger,
+      config: mockConfig,
+      dependencies: mockDependencies,
+      workflowExecutionRepository: mockWorkflowExecutionRepository,
+      stepExecutionRepository: mockStepExecutionRepository,
+      fakeRequest: mockFakeRequest,
+    });
 
     expect(mockAsScoped).toHaveBeenCalledWith(mockFakeRequest);
     expect(result.esClient).toBe(mockAsCurrentUser);
@@ -154,16 +186,16 @@ describe('setupDependencies', () => {
       headers: {},
     } as KibanaRequest;
 
-    await setupDependencies(
+    await setupDependencies({
       workflowRunId,
       spaceId,
-      mockLogger,
-      mockConfig,
-      mockDependencies,
-      mockWorkflowExecutionRepository,
-      mockStepExecutionRepository,
-      mockFakeRequest
-    );
+      logger: mockLogger,
+      config: mockConfig,
+      dependencies: mockDependencies,
+      workflowExecutionRepository: mockWorkflowExecutionRepository,
+      stepExecutionRepository: mockStepExecutionRepository,
+      fakeRequest: mockFakeRequest,
+    });
 
     expect(mockDependencies.actions.getActionsClientWithRequest).toHaveBeenCalledWith(
       mockFakeRequest
@@ -187,16 +219,16 @@ describe('setupDependencies', () => {
         headers: {},
       } as KibanaRequest;
 
-      await setupDependencies(
+      await setupDependencies({
         workflowRunId,
         spaceId,
-        mockLogger,
-        mockConfig,
-        mockDependencies,
-        mockWorkflowExecutionRepository,
-        mockStepExecutionRepository,
-        mockFakeRequest
-      );
+        logger: mockLogger,
+        config: mockConfig,
+        dependencies: mockDependencies,
+        workflowExecutionRepository: mockWorkflowExecutionRepository,
+        stepExecutionRepository: mockStepExecutionRepository,
+        fakeRequest: mockFakeRequest,
+      });
 
       expect(WorkflowGraph.fromWorkflowDefinition).toHaveBeenCalledWith(
         mockWorkflowExecution.workflowDefinition,
@@ -209,16 +241,16 @@ describe('setupDependencies', () => {
         headers: {},
       } as KibanaRequest;
 
-      await setupDependencies(
+      await setupDependencies({
         workflowRunId,
         spaceId,
-        mockLogger,
-        mockConfig,
-        mockDependencies,
-        mockWorkflowExecutionRepository,
-        mockStepExecutionRepository,
-        mockFakeRequest
-      );
+        logger: mockLogger,
+        config: mockConfig,
+        dependencies: mockDependencies,
+        workflowExecutionRepository: mockWorkflowExecutionRepository,
+        stepExecutionRepository: mockStepExecutionRepository,
+        fakeRequest: mockFakeRequest,
+      });
 
       expect(WorkflowGraph.fromWorkflowDefinition).toHaveBeenCalledWith(expect.anything(), {
         timeout: '6h',
@@ -248,16 +280,16 @@ describe('setupDependencies', () => {
       (isGraphBuildError as unknown as jest.Mock).mockReturnValue(true);
 
       await expect(
-        setupDependencies(
+        setupDependencies({
           workflowRunId,
           spaceId,
-          mockLogger,
-          mockConfig,
-          mockDependencies,
-          mockWorkflowExecutionRepository,
-          mockStepExecutionRepository,
-          mockFakeRequest
-        )
+          logger: mockLogger,
+          config: mockConfig,
+          dependencies: mockDependencies,
+          workflowExecutionRepository: mockWorkflowExecutionRepository,
+          stepExecutionRepository: mockStepExecutionRepository,
+          fakeRequest: mockFakeRequest,
+        })
       ).rejects.toBeInstanceOf(WorkflowGraphSetupError);
 
       expect(mockWorkflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
@@ -278,16 +310,16 @@ describe('setupDependencies', () => {
       (isGraphBuildError as unknown as jest.Mock).mockReturnValue(false);
 
       await expect(
-        setupDependencies(
+        setupDependencies({
           workflowRunId,
           spaceId,
-          mockLogger,
-          mockConfig,
-          mockDependencies,
-          mockWorkflowExecutionRepository,
-          mockStepExecutionRepository,
-          mockFakeRequest
-        )
+          logger: mockLogger,
+          config: mockConfig,
+          dependencies: mockDependencies,
+          workflowExecutionRepository: mockWorkflowExecutionRepository,
+          stepExecutionRepository: mockStepExecutionRepository,
+          fakeRequest: mockFakeRequest,
+        })
       ).rejects.toBe(otherError);
 
       expect(mockWorkflowExecutionRepository.updateWorkflowExecution).not.toHaveBeenCalled();
@@ -307,16 +339,16 @@ describe('setupDependencies', () => {
     });
 
     await expect(
-      setupDependencies(
+      setupDependencies({
         workflowRunId,
         spaceId,
-        mockLogger,
-        mockConfig,
-        mockDependencies,
-        mockWorkflowExecutionRepository,
-        mockStepExecutionRepository,
-        mockFakeRequest
-      )
+        logger: mockLogger,
+        config: mockConfig,
+        dependencies: mockDependencies,
+        workflowExecutionRepository: mockWorkflowExecutionRepository,
+        stepExecutionRepository: mockStepExecutionRepository,
+        fakeRequest: mockFakeRequest,
+      })
     ).rejects.toThrow(`Workflow execution with ID ${workflowRunId} not found`);
 
     expect(mockWorkflowExecutionRepository.getWorkflowExecutionById).toHaveBeenCalledWith(
@@ -350,16 +382,16 @@ describe('setupDependencies', () => {
       });
       (mockDependencies.workflowsExtensions.isReady as jest.Mock).mockReturnValue(isReadyPromise);
 
-      const setupPromise = setupDependencies(
+      const setupPromise = setupDependencies({
         workflowRunId,
         spaceId,
-        mockLogger,
-        mockConfig,
-        mockDependencies,
-        mockWorkflowExecutionRepository,
-        mockStepExecutionRepository,
-        mockFakeRequest
-      );
+        logger: mockLogger,
+        config: mockConfig,
+        dependencies: mockDependencies,
+        workflowExecutionRepository: mockWorkflowExecutionRepository,
+        stepExecutionRepository: mockStepExecutionRepository,
+        fakeRequest: mockFakeRequest,
+      });
 
       // Let any microtasks before the isReady await run
       await Promise.resolve();
@@ -374,6 +406,37 @@ describe('setupDependencies', () => {
       expect(mockWorkflowExecutionRepository.getWorkflowExecutionById).toHaveBeenCalledWith(
         workflowRunId,
         spaceId
+      );
+    });
+  });
+
+  describe('WorkflowEventLoggerService wiring', () => {
+    beforeEach(() => {
+      const mockScopedClient = {
+        search: jest.fn(),
+        index: jest.fn(),
+      } as unknown as ElasticsearchClient;
+      mockDependencies.coreStart.elasticsearch.client.asScoped = jest.fn().mockReturnValue({
+        asCurrentUser: mockScopedClient,
+      });
+    });
+
+    it('calls WorkflowEventLoggerService with dataStreams, logger, and enableConsoleLogging', async () => {
+      const mockFakeRequest = { headers: {} } as KibanaRequest;
+
+      await setupDependencies({
+        workflowRunId,
+        spaceId,
+        logger: mockLogger,
+        config: mockConfig,
+        dependencies: mockDependencies,
+        fakeRequest: mockFakeRequest,
+      });
+
+      expect(WorkflowEventLoggerService).toHaveBeenCalledWith(
+        mockDependencies.coreStart.dataStreams,
+        mockLogger,
+        mockConfig.logging.console
       );
     });
   });
