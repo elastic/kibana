@@ -28,7 +28,9 @@ interface YamlWorkflow {
   settings?: { timeout?: string };
   steps: YamlStep[];
   outputs?: Array<{ name: string }>;
-  triggers?: Array<{ inputs?: { properties?: Record<string, unknown> } }>;
+  triggers?: Array<{
+    inputs?: { properties?: Record<string, { type?: string; maxLength?: number }> };
+  }>;
 }
 
 const worker = parse(ALERTZERO_RULE_CREATION_WORKFLOW.yaml) as YamlWorkflow;
@@ -79,10 +81,18 @@ describe('Detection Rule Creation worker', () => {
     it('hands the action an ES|QL body it passes through to the API', () => {
       const props = action.triggers?.[0]?.inputs?.properties as Record<
         string,
-        { properties?: Record<string, { enum?: string[] }>; required?: string[] }
+        {
+          properties?: Record<string, { enum?: string[]; maxLength?: number; minLength?: number }>;
+          required?: string[];
+          additionalProperties?: boolean;
+        }
       >;
       expect(props.actionInput.properties?.type?.enum).toEqual(['esql']);
       expect(props.actionInput.properties?.language?.enum).toEqual(['esql']);
+      expect(props.actionInput.properties?.name?.maxLength).toBe(256);
+      expect(props.actionInput.properties?.query?.maxLength).toBe(65536);
+      expect(props.actionInput.properties?.query?.minLength).toBe(1);
+      expect(props.actionInput.additionalProperties).toBe(false);
       expect(props.actionInput.required).toEqual(
         expect.arrayContaining(['type', 'language', 'name', 'description', 'query'])
       );
@@ -91,20 +101,30 @@ describe('Detection Rule Creation worker', () => {
       expect(create?.with?.rule).toBe('${{ inputs.actionInput }}');
     });
 
-    // A draft with an empty query or no attachment is not reviewable; proposing it
-    // would ask the analyst to approve nothing.
-    it('previews and attaches only a draft with a query and an attachment', () => {
+    // A draft is reviewable only with a query, a name, a description and an attachment.
+    // The create action requires a name and a description, so proposing a draft without
+    // them would ask the analyst to approve a rule that can never be created.
+    it('previews and attaches only a complete draft with an attachment', () => {
       const ready = flagOf('draft_ready', 'ok');
-      expect(
-        evaluate(ready, draftContext({ attachment_id: 'a1', rule: { query: 'FROM x' } }))
-      ).toBe(true);
-      expect(evaluate(ready, draftContext({ attachment_id: 'a1', rule: { query: '' } }))).toBe(
-        false
-      );
-      expect(evaluate(ready, draftContext({ attachment_id: '', rule: { query: 'FROM x' } }))).toBe(
-        false
-      );
-      expect(evaluate(ready, draftContext({ rule: { query: 'FROM x' } }))).toBe(false);
+      const complete = { query: 'FROM x', name: 'Rare parent', description: 'Covers T1055' };
+      const attached = (rule: Partial<typeof complete>) =>
+        draftContext({ attachment_id: 'a1', rule });
+      const without = (field: keyof typeof complete) =>
+        Object.fromEntries(Object.entries(complete).filter(([key]) => key !== field));
+
+      expect(evaluate(ready, attached(complete))).toBe(true);
+
+      // Empty is what the prompt returns for a gap it could not draft; absent is what a
+      // model that dropped the field leaves behind. Neither is reviewable.
+      expect(evaluate(ready, attached({ ...complete, query: '' }))).toBe(false);
+      expect(evaluate(ready, attached({ ...complete, name: '' }))).toBe(false);
+      expect(evaluate(ready, attached({ ...complete, description: '' }))).toBe(false);
+      expect(evaluate(ready, attached(without('name')))).toBe(false);
+      expect(evaluate(ready, attached(without('description')))).toBe(false);
+
+      expect(evaluate(ready, draftContext({ attachment_id: '', rule: complete }))).toBe(false);
+      expect(evaluate(ready, draftContext({ rule: complete }))).toBe(false);
+
       for (const name of ['preview_creation', 'attach_draft', 'propose_creation']) {
         expect(stepByName(name)?.if).toContain('steps.draft_ready.output.ok == true');
       }
@@ -166,6 +186,17 @@ describe('Detection Rule Creation worker', () => {
       expect(worker.outputs?.map(({ name }) => name)).toEqual(
         expect.arrayContaining(['created', 'reviewed', 'decision', 'rule_name'])
       );
+    });
+  });
+
+  describe('inputs', () => {
+    it('limits the length of every string input', () => {
+      const props = worker.triggers?.[0]?.inputs?.properties;
+      expect(Object.keys(props ?? {}).length).toBeGreaterThan(0);
+      const uncapped = Object.entries(props ?? {})
+        .filter(([, schema]) => schema.type === 'string' && !schema.maxLength)
+        .map(([name]) => name);
+      expect(uncapped).toEqual([]);
     });
   });
 });

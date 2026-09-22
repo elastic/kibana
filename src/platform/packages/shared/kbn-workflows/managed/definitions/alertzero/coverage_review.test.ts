@@ -497,11 +497,15 @@ describe('Detection Coverage review', () => {
       expect(String(decision?.applied)).toContain(
         "steps.propose_install.output.status == 'succeeded'"
       );
-      expect(String(decision?.approved)).toContain(
-        "steps.propose_confirm.output.decision == 'approved'"
-      );
-      for (const name of REPORT_STEPS) {
+      // One axis per question: what the analyst concluded is read off `decision`,
+      // whether the change landed is read off `status`. Enable and install used
+      // to read `approved` from `status`, which cannot tell a dismissal from an
+      // approved action-less proposal.
+      for (const name of PROPOSAL_STEPS) {
         expect(String(decision?.approved)).toContain(`steps.${name}.output.decision == 'approved'`);
+        expect(String(decision?.dismissed)).toContain(
+          `steps.${name}.output.decision == 'dismissed'`
+        );
       }
       // The creation child reports its own gate's decision, so the investigation
       // closes on that path too.
@@ -511,11 +515,6 @@ describe('Detection Coverage review', () => {
       expect(String(decision?.dismissed)).toContain(
         "steps.run_rule_creation.output.decision == 'dismissed'"
       );
-      for (const name of PROPOSAL_STEPS) {
-        expect(String(decision?.dismissed)).toContain(
-          `steps.${name}.output.decision == 'dismissed'`
-        );
-      }
       expect(String(outcome?.decided)).toContain('steps.record_decision.output.approved == true');
       expect(String(outcome?.decided)).toContain('steps.record_decision.output.dismissed == true');
       expect(String(outcome?.decided)).toContain("verdict == 'no_coverage'");
@@ -541,7 +540,7 @@ describe('Detection Coverage review', () => {
       ],
       ['install_approved_not_applied', 'propose_install', 'steps.refetch_rule.output.id != null'],
     ])('%s flags an approval that left no evidence', (flag, gate, evidence) => {
-      expect(outcome?.[flag]).toContain(`steps.${gate}.output.status == 'succeeded'`);
+      expect(outcome?.[flag]).toContain(`steps.${gate}.output.decision == 'approved'`);
       expect(outcome?.[flag]).toContain(`not (`);
       expect(outcome?.[flag]).toContain(evidence);
     });

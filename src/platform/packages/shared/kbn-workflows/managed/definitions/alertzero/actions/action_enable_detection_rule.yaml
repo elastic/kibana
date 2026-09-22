@@ -34,12 +34,14 @@ triggers:
           properties:
             id:
               type: string
+              minLength: 1
               maxLength: 512
               description: >-
                 Saved-object id of the rule, so the change lands on the exact rule
                 incarnation the proposal was built against.
           required:
             - id
+          additionalProperties: false
       required:
         - actionInput
       additionalProperties: false

@@ -21,18 +21,25 @@ triggers:
       properties:
         technique:
           type: string
+          maxLength: 64
           description: MITRE ATT&CK technique id the new rule should cover.
         gap_description:
           type: string
+          maxLength: 2000
           description: Detection gap the new rule should cover.
         evidence:
           type: string
+          maxLength: 4000
           description: Hunt findings or event examples supporting the gap.
         confidence:
           type: number
+          minimum: 0
+          maximum: 1
           description: Confidence in the detection gap from 0 to 1.
         preview_invocation_count:
-          type: number
+          type: integer
+          minimum: 1
+          maximum: 10
           default: 2
           description: Rule executions the preview simulates.
         investigation_id:
@@ -83,10 +90,13 @@ steps:
             properties:
               name:
                 type: string
+                maxLength: 256
               description:
                 type: string
+                maxLength: 32768
               query:
                 type: string
+                maxLength: 65536
               language:
                 type: string
                 enum: [esql]
@@ -95,24 +105,32 @@ steps:
                 enum: [esql]
               interval:
                 type: string
+                maxLength: 64
               from:
                 type: string
+                maxLength: 64
               to:
                 type: string
+                maxLength: 64
               severity:
                 type: string
                 enum: [low, medium, high, critical]
               risk_score:
-                type: number
+                type: integer
+                minimum: 0
+                maximum: 100
               threat:
                 type: array
+                maxItems: 20
                 items:
                   type: object
                   additionalProperties: true
               tags:
                 type: array
+                maxItems: 50
                 items:
                   type: string
+                  maxLength: 256
             required:
               - name
               - description
@@ -128,21 +146,31 @@ steps:
               - tags
           attachment_id:
             type: string
+            maxLength: 512
           attachment_version:
             type: number
+            minimum: 0
         required:
           - rule
           - attachment_id
 
-  # A draft with an empty query or no attachment is not reviewable, so nothing below
-  # runs for it and `reviewed` stays false: the caller keeps the gap open. Step `if`
-  # cannot group with parentheses, so the compound test lives here as a flag.
+  # A draft missing its query, name, description or attachment is not reviewable, so
+  # nothing below runs for it and `reviewed` stays false: the caller keeps the gap
+  # open. The prompt returns empty strings for every rule field when the tool built
+  # nothing, and the create action requires a name and a description, so such a
+  # draft can never be created: proposing it fails the run instead of asking the
+  # analyst anything answerable. Step `if` cannot group with parentheses, so the
+  # compound test lives here as a flag.
   - name: draft_ready
     type: data.set
     with:
       ok: >-
         ${{ steps.draft_creation.output.structured_output.rule.query != null
           and steps.draft_creation.output.structured_output.rule.query != ''
+          and steps.draft_creation.output.structured_output.rule.name != null
+          and steps.draft_creation.output.structured_output.rule.name != ''
+          and steps.draft_creation.output.structured_output.rule.description != null
+          and steps.draft_creation.output.structured_output.rule.description != ''
           and steps.draft_creation.output.structured_output.attachment_id != null
           and steps.draft_creation.output.structured_output.attachment_id != '' }}
 

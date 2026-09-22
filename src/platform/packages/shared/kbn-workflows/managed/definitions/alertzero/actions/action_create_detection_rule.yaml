@@ -41,39 +41,55 @@ triggers:
               enum: ["esql"]
             name:
               type: string
+              minLength: 1
+              maxLength: 256
               description: Rule name.
             description:
               type: string
+              minLength: 1
+              maxLength: 32768
               description: Rule description.
             query:
               type: string
+              minLength: 1
+              maxLength: 65536
               description: ES|QL query the rule runs; it names its own source.
             interval:
               type: string
+              maxLength: 64
             from:
               type: string
+              maxLength: 64
             to:
               type: string
+              maxLength: 64
             severity:
               type: string
               enum: ["low", "medium", "high", "critical"]
             risk_score:
-              type: number
+              type: integer
+              minimum: 0
+              maximum: 100
             threat:
               type: array
+              maxItems: 20
               items:
                 type: object
                 additionalProperties: true
             tags:
               type: array
+              maxItems: 50
               items:
                 type: string
+                minLength: 1
+                maxLength: 256
           required:
             - type
             - language
             - name
             - description
             - query
+          additionalProperties: false
       required:
         - actionInput
       additionalProperties: false

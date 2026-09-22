@@ -38,7 +38,9 @@ triggers:
           maxLength: 256
           description: AI index that holds the indicator. The result is written to the same index.
         preview_invocation_count:
-          type: number
+          type: integer
+          minimum: 1
+          maximum: 10
           default: 2
           description: Number of rule runs the rule-creation backtest simulates.
       required: [ki_id, ai_index_id]
@@ -132,16 +134,20 @@ steps:
               - no_coverage
           rule_id:
             type: string
+            maxLength: 512
             description: >-
               Signature rule ID (the ruleId field from the find-rules tool result).
               Never use the `id` field, which is the Saved Object ID.
           rule_name:
             type: string
+            maxLength: 256
           prebuilt_version:
             type: number
+            minimum: 0
             description: Version of the matched prebuilt rule. 0 unless the verdict is prebuilt_available.
           rationale:
             type: string
+            maxLength: 8000
         required: [verdict, rule_id, rule_name, prebuilt_version, rationale]
 
   # Only an installed rule has a saved object. Step `if` cannot group with
@@ -448,12 +454,16 @@ steps:
             impact: low
             confidence: low
 
-  # The gate reports its outcome on two axes: `decision` is what the analyst
-  # concluded (`approved` / `dismissed`, absent until someone decides) and
-  # `status` is how far it got (`succeeded` once the action ran, `no_action` when
-  # there was nothing to run, `expired` when nobody answered). Spelled out per
-  # outcome rather than derived from a single flag so a run that never proposed,
-  # or whose proposal expired, matches none of them.
+  # The gate reports its outcome on two independent axes: `decision` is what the
+  # analyst concluded (`approved` / `dismissed`, absent until someone decides),
+  # and `status` is how far it got (`succeeded` once the action ran, `no_action`
+  # when there was nothing to run, `expired` when nobody answered). Spelled out
+  # per outcome rather than derived from a single flag so a run that never
+  # proposed, or whose proposal expired, matches none of them.
+  # One axis per question: what the analyst concluded is read off `decision`,
+  # whether the change landed is read off `status`. Reading a decision off
+  # `status` cannot work, because a dismissal and an approved action-less
+  # proposal both report `no_action`.
   - name: record_decision
     type: data.set
     with:
@@ -461,8 +471,8 @@ steps:
         ${{ steps.propose_enable.output.status == 'succeeded'
           or steps.propose_install.output.status == 'succeeded' }}
       approved: >-
-        ${{ steps.propose_enable.output.status == 'succeeded'
-          or steps.propose_install.output.status == 'succeeded'
+        ${{ steps.propose_enable.output.decision == 'approved'
+          or steps.propose_install.output.decision == 'approved'
           or steps.propose_confirm.output.decision == 'approved'
           or steps.report_unresolved_rule.output.decision == 'approved'
           or steps.report_missing_version.output.decision == 'approved'
@@ -578,11 +588,11 @@ steps:
     type: data.set
     with:
       enable_approved_not_applied: >-
-        ${{ steps.propose_enable.output.status == 'succeeded'
+        ${{ steps.propose_enable.output.decision == 'approved'
           and not (steps.refetch_rule.error == null
             and steps.refetch_rule.output.enabled == true) }}
       install_approved_not_applied: >-
-        ${{ steps.propose_install.output.status == 'succeeded'
+        ${{ steps.propose_install.output.decision == 'approved'
           and not (steps.refetch_rule.error == null
             and steps.refetch_rule.output.id != null) }}
       installed_not_enabled: >-

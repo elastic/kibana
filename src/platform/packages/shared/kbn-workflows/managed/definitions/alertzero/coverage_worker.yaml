@@ -40,7 +40,7 @@ triggers:
           type: integer
           minimum: 1
           maximum: 90
-          description: "How many days back the sweep looks for indicators, counted from their creation time. Default: 30. A manual run can raise or lower it."
+          description: "How many days back the sweep looks for indicators, counted from their creation time. Default: 7. A manual run can raise or lower it."
       additionalProperties: false
 outputs:
   - name: pending

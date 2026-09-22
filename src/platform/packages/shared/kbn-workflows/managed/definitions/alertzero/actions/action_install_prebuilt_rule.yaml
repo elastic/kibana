@@ -34,14 +34,17 @@ triggers:
           properties:
             rule_id:
               type: string
+              minLength: 1
               maxLength: 512
               description: Signature rule id (`rule_id`) of the prebuilt rule.
             version:
               type: number
+              minimum: 1
               description: Package version of the prebuilt rule to install.
           required:
             - rule_id
             - version
+          additionalProperties: false
       required:
         - actionInput
       additionalProperties: false

@@ -22,14 +22,21 @@ interface YamlStep {
   with?: Record<string, unknown>;
 }
 
+interface ActionInputSchema {
+  properties?: Record<string, Record<string, unknown>>;
+  required?: string[];
+  additionalProperties?: boolean;
+}
+
 interface ActionYaml {
   tags?: string[];
   consts?: { actionMetadata?: Record<string, unknown> };
   triggers?: Array<{
     type: string;
     inputs?: {
-      properties?: { actionInput?: { properties?: Record<string, unknown>; required?: string[] } };
+      properties?: { actionInput?: ActionInputSchema };
       required?: string[];
+      additionalProperties?: boolean;
     };
   }>;
   steps: YamlStep[];
@@ -75,6 +82,23 @@ describe('AlertZero action workflows', () => {
         expect(trigger?.inputs?.properties?.actionInput?.required?.length).toBeGreaterThan(0);
       });
 
+      // Unknown keys are rejected when the proposal is created, not when it is applied.
+      it('rejects unknown fields on actionInput, so they fail at proposal creation', () => {
+        const [trigger] = yaml.triggers ?? [];
+        expect(trigger?.inputs?.properties?.actionInput?.additionalProperties).toBe(false);
+      });
+
+      it('bounds every actionInput string so an unbounded value fails at proposal creation', () => {
+        const props = yaml.triggers?.[0]?.inputs?.properties?.actionInput?.properties ?? {};
+        const uncapped = Object.entries(props)
+          .filter(
+            ([, schema]) =>
+              schema.type === 'string' && schema.maxLength == null && schema.enum == null
+          )
+          .map(([name]) => name);
+        expect(uncapped).toEqual([]);
+      });
+
       it('ends in an explicit workflow.output', () => {
         expect(yaml.steps[yaml.steps.length - 1].type).toBe('workflow.output');
       });
@@ -106,7 +130,11 @@ describe('AlertZero action workflows', () => {
 
     it('installs by signature id and package version', () => {
       const [trigger] = yaml.triggers ?? [];
-      expect(trigger?.inputs?.properties?.actionInput?.required).toEqual(['rule_id', 'version']);
+      const actionInput = trigger?.inputs?.properties?.actionInput;
+      expect(actionInput?.required).toEqual(['rule_id', 'version']);
+      expect(actionInput?.properties?.version).toEqual(
+        expect.objectContaining({ type: 'number', minimum: 1 })
+      );
 
       const install = stepByName(yaml, 'install_rule');
       expect(install?.type).toBe('kibana.request');
