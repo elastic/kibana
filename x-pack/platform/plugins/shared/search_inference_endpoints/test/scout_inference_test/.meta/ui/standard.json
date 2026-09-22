@@ -1,5 +1,5 @@
 {
-  "sha1": "0073425d9c60769fee05e632914d49b388917bfb",
+  "sha1": "f41a6c893d92f84436de81d68e8d16ffa68010a8",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -61,8 +61,8 @@
       }
     },
     {
-      "id": "42293a2b206815f-b38677823af138c",
-      "title": "EIS Models Page task type filter buttons filter model cards",
+      "id": "42293a2b206815f-92c0688ca2cd666",
+      "title": "EIS Models Page model family filter filters cards by provider",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -75,20 +75,6 @@
       }
     },
     {
-      "id": "42293a2b206815f-92c0688ca2cd666",
-      "title": "EIS Models Page model family filter filters cards by provider",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@local-serverless-search"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
-        "line": 65,
-        "column": 7
-      }
-    },
-    {
       "id": "42293a2b206815f-dad678cd80df6dc",
       "title": "EIS Models Page renders status badges on deprecated and EOL model cards",
       "expectedStatus": "passed",
@@ -98,8 +84,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
-        "line": 81,
-        "column": 11
+        "line": 66,
+        "column": 5
       }
     },
     {
@@ -112,7 +98,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
-        "line": 97,
+        "line": 83,
         "column": 7
       }
     },
