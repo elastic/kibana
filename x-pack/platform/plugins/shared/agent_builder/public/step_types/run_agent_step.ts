@@ -7,7 +7,6 @@
 
 import React from 'react';
 import type { CoreSetup, HttpStart } from '@kbn/core/public';
-import { createInferenceConnectorIdSelection } from '@kbn/inference-connectors';
 import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
 import type { z } from '@kbn/zod/v4';
 import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
@@ -47,10 +46,11 @@ export const createRunAgentStepDefinition = (core: CoreSetup) => {
           selection: createAgentIdSelectionHandler(getHttp),
         },
         'connector-id': {
-          connectorIdSelection: createInferenceConnectorIdSelection({
-            getHttp,
-            featureId: 'agent_builder',
-          }),
+          connectorIdSelection: {
+            connectorTypes: ['inference.unified_completion'],
+            inferenceFeatureId: 'agent_builder',
+            enableCreation: false,
+          },
         },
       },
       dynamicSchema: {

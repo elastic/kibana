@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ALL_CONNECTOR_IDS, type ConnectorInstance, type ConnectorTypeInfo } from '@kbn/workflows';
+import { ALL_CONNECTOR_IDS, type ConnectorTypeInfo } from '@kbn/workflows';
 import { isTemplateReference } from './is_template_reference';
 import {
   getActionTypeDisplayNameFromStepType,
@@ -50,8 +50,7 @@ const TRANSLATIONS = {
 export function validateConnectorIds(
   connectorIdItems: ConnectorIdItem[],
   dynamicConnectorTypes: Record<string, ConnectorTypeInfo>,
-  connectorsManagementUrl: string,
-  customConnectorInstancesByStepType: ReadonlyMap<string, ConnectorInstance[]> = new Map()
+  connectorsManagementUrl: string
 ): YamlValidationResult[] {
   const results: YamlValidationResult[] = [];
 
@@ -79,9 +78,7 @@ export function validateConnectorIds(
       const connectorType = dynamicConnectorTypes[stepType];
       const displayName =
         connectorType?.displayName ?? getActionTypeDisplayNameFromStepType(stepType);
-      const instances =
-        customConnectorInstancesByStepType.get(stepType) ??
-        getConnectorInstancesForType(stepType, dynamicConnectorTypes);
+      const instances = getConnectorInstancesForType(stepType, dynamicConnectorTypes);
 
       const instance = instances.find((ins) => ins.id === connectorIdItem.key);
       // Create insert position at the start of the connector-id value
@@ -125,13 +122,15 @@ export function validateConnectorIds(
         results.push(errorResult);
       } else {
         const actions: string[] = [];
-        actions.push(
-          getEditConnectorHoverCommandLink({
-            text: TRANSLATIONS.editConnector,
-            connectorType: instance.connectorType ?? getActionTypeIdFromStepType(stepType),
-            connectorId: instance.id,
-          })
-        );
+        if (!instance.isInferenceEndpoint) {
+          actions.push(
+            getEditConnectorHoverCommandLink({
+              text: TRANSLATIONS.editConnector,
+              connectorType: instance.connectorType ?? getActionTypeIdFromStepType(stepType),
+              connectorId: instance.id,
+            })
+          );
+        }
         if (isCreateConnectorEnabledForStepType(stepType)) {
           actions.push(
             getCreateConnectorHoverCommandLink({

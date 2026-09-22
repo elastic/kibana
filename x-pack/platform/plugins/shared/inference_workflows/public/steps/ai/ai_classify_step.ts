@@ -6,33 +6,31 @@
  */
 
 import React from 'react';
-import type { HttpSetup } from '@kbn/core/public';
-import { createInferenceConnectorIdSelection } from '@kbn/inference-connectors';
 import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
 import {
   AiClassifyStepCommonDefinition,
   buildStructuredOutputSchema,
 } from '../../../common/steps/ai';
 
-export const createAiClassifyStepDefinition = (http: HttpSetup) =>
-  createPublicStepDefinition({
-    ...AiClassifyStepCommonDefinition,
-    icon: React.lazy(() =>
-      import('@elastic/eui/es/components/icon/assets/product_agent').then(({ icon }) => ({
-        default: icon,
-      }))
-    ),
-    editorHandlers: {
-      config: {
-        'connector-id': {
-          connectorIdSelection: createInferenceConnectorIdSelection({
-            getHttp: async () => http,
-            featureId: 'ai_classify',
-          }),
+export const AiClassifyStepDefinition = createPublicStepDefinition({
+  ...AiClassifyStepCommonDefinition,
+  icon: React.lazy(() =>
+    import('@elastic/eui/es/components/icon/assets/product_agent').then(({ icon }) => ({
+      default: icon,
+    }))
+  ),
+  editorHandlers: {
+    config: {
+      'connector-id': {
+        connectorIdSelection: {
+          connectorTypes: ['inference.unified_completion'],
+          inferenceFeatureId: 'ai_classify',
+          enableCreation: false,
         },
       },
-      dynamicSchema: {
-        getOutputSchema: ({ input }) => buildStructuredOutputSchema(input),
-      },
     },
-  });
+    dynamicSchema: {
+      getOutputSchema: ({ input }) => buildStructuredOutputSchema(input),
+    },
+  },
+});

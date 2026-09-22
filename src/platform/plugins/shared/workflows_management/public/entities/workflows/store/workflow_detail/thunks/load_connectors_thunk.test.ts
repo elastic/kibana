@@ -7,14 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { loadConnectors } from '@kbn/inference-connectors';
 import type { ConnectorTypeInfo } from '@kbn/workflows';
 import { createMockWorkflowApi } from '@kbn/workflows-ui/mocks';
 
 import { loadConnectorsThunk } from './load_connectors_thunk';
+import { stepSchemas } from '../../../../../../common/step_schemas';
 import type { ConnectorsResponse } from '../../../../connectors/model/types';
 import { createMockStore, getMockServices } from '../../__mocks__/store.mock';
 import type { MockServices, MockStore } from '../../__mocks__/store.mock';
 import { setConnectors } from '../slice';
+
+jest.mock('@kbn/inference-connectors', () => ({
+  loadConnectors: jest.fn(),
+}));
+
+const mockLoadConnectors = loadConnectors as jest.MockedFunction<typeof loadConnectors>;
 
 const mockWorkflowApi = createMockWorkflowApi();
 jest.mock('@kbn/workflows-ui', () => ({
@@ -62,10 +70,12 @@ describe('loadConnectorsThunk', () => {
   let mockServices: MockServices;
 
   beforeEach(() => {
+    jest.restoreAllMocks();
     jest.clearAllMocks();
 
     store = createMockStore();
     mockServices = getMockServices(store);
+    stepSchemas.setInferenceConnectorInstances(new Map());
   });
 
   it('should load connectors successfully for the first time', async () => {
@@ -83,6 +93,72 @@ describe('loadConnectorsThunk', () => {
     expect(result.type).toBe('detail/loadConnectorsThunk/fulfilled');
     expect(result.payload).toEqual(mockConnectorsResponse1);
     expect(store.getState().detail.connectorsLoadState).toEqual({ status: 'ready' });
+  });
+
+  it('loads inference connectors declared by registered step features', async () => {
+    jest.spyOn(stepSchemas, 'getAllRegisteredStepDefinitions').mockReturnValue([
+      {
+        editorHandlers: {
+          config: {
+            'connector-id': {
+              connectorIdSelection: {
+                connectorTypes: ['inference.unified_completion'],
+                inferenceFeatureId: 'ai_summarize',
+              },
+            },
+          },
+        },
+      } as never,
+    ]);
+    jest.spyOn(stepSchemas, 'isPublicStepDefinition').mockReturnValue(true);
+    mockWorkflowApi.getConnectors.mockResolvedValue(mockConnectorsResponse1);
+    mockLoadConnectors.mockResolvedValue([
+      {
+        id: 'endpoint-id',
+        name: 'Inference endpoint',
+        actionTypeId: '.inference',
+        isPreconfigured: true,
+        isDeprecated: false,
+        isConnectorTypeDeprecated: false,
+        isInferenceEndpoint: true,
+      } as never,
+    ]);
+
+    const result = await store.dispatch(loadConnectorsThunk());
+
+    expect(mockLoadConnectors).toHaveBeenCalledWith({
+      http: mockServices.http,
+      featureId: 'ai_summarize',
+    });
+    expect(stepSchemas.getInferenceConnectorInstances('ai_summarize')).toEqual([
+      expect.objectContaining({ id: 'endpoint-id', isInferenceEndpoint: true }),
+    ]);
+    expect(result.type).toBe('detail/loadConnectorsThunk/fulfilled');
+  });
+
+  it('fails connector loading when inference connector loading fails', async () => {
+    jest.spyOn(stepSchemas, 'getAllRegisteredStepDefinitions').mockReturnValue([
+      {
+        editorHandlers: {
+          config: {
+            'connector-id': {
+              connectorIdSelection: {
+                connectorTypes: ['inference.unified_completion'],
+                inferenceFeatureId: 'ai_summarize',
+              },
+            },
+          },
+        },
+      } as never,
+    ]);
+    jest.spyOn(stepSchemas, 'isPublicStepDefinition').mockReturnValue(true);
+    mockWorkflowApi.getConnectors.mockResolvedValue(mockConnectorsResponse1);
+    mockLoadConnectors.mockRejectedValue(new Error('Inference request failed'));
+
+    const result = await store.dispatch(loadConnectorsThunk());
+
+    expect(result.type).toBe('detail/loadConnectorsThunk/rejected');
+    expect(result.payload).toBe('Inference request failed');
   });
 
   it('tracks a connector refresh as loading until it completes', async () => {

@@ -578,6 +578,7 @@ export interface ConnectorInstance {
   isDeprecated: boolean;
   config?: ConnectorInstanceConfig;
   connectorType?: string;
+  isInferenceEndpoint?: boolean;
 }
 
 export interface ConnectorInstanceConfig {
@@ -851,9 +852,9 @@ export interface ConnectorIdSelectionHandler {
    */
   enableCreation?: boolean;
   /**
-   * Loads inference endpoints for `inference.unified_completion` selections.
+   * Feature ID used to resolve inference endpoints for this selection.
    */
-  getInferenceConnectorInstances?: () => Promise<ConnectorInstance[]>;
+  inferenceFeatureId?: string;
 }
 
 export interface ConnectorExamples {

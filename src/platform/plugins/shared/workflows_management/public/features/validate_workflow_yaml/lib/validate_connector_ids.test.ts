@@ -9,6 +9,7 @@
 
 import type { ConnectorTypeInfo } from '@kbn/workflows';
 import { validateConnectorIds } from './validate_connector_ids';
+import { stepSchemas } from '../../../../common/step_schemas';
 import type { ConnectorIdItem } from '../model/types';
 
 describe('validateConnectorIds', () => {
@@ -129,19 +130,23 @@ describe('validateConnectorIds', () => {
       });
     });
 
-    it('should use instances supplied by the connector selection', () => {
-      const results = validateConnectorIds(
-        [
-          createConnectorIdItem({
-            key: 'inference-endpoint',
-            connectorType: 'ai.summarize',
-          }),
-        ],
-        mockConnectorTypes,
-        '',
+    it('should validate inference endpoints without offering an edit connector action', () => {
+      const getStepDefinitionSpy = jest.spyOn(stepSchemas, 'getStepDefinition').mockReturnValue({
+        editorHandlers: {
+          config: {
+            'connector-id': {
+              connectorIdSelection: {
+                connectorTypes: ['inference.unified_completion'],
+                inferenceFeatureId: 'ai_summarize',
+              },
+            },
+          },
+        },
+      } as never);
+      stepSchemas.setInferenceConnectorInstances(
         new Map([
           [
-            'ai.summarize',
+            'ai_summarize',
             [
               {
                 id: 'inference-endpoint',
@@ -149,17 +154,26 @@ describe('validateConnectorIds', () => {
                 connectorType: '.inference',
                 isPreconfigured: true,
                 isDeprecated: false,
+                isInferenceEndpoint: true,
               },
             ],
           ],
         ])
       );
 
+      const results = validateConnectorIds(
+        [createConnectorIdItem({ key: 'inference-endpoint', connectorType: 'ai.summarize' })],
+        mockConnectorTypes,
+        ''
+      );
+      getStepDefinitionSpy.mockRestore();
+
       expect(results).toEqual([
         expect.objectContaining({
           severity: 'info',
           message: null,
           beforeMessage: '✓ Inference endpoint',
+          hoverMessage: expect.not.stringContaining('Edit connector'),
         }),
       ]);
     });
