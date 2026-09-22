@@ -6,6 +6,7 @@
  */
 
 import { collectColumnBindings } from '../../../src/evaluators/column_binding_integrity';
+import type { ExtractedVisualization } from '../../../src/extract_visualization';
 import { extractGoldQuery } from '../../../src/evaluators/gold_visualization_config';
 import { HOST_METRICS_INDEX, buildHostLoadEvents } from '../../../src/fixtures/host_load_metrics';
 import type { DataSource } from './factories';
@@ -75,10 +76,13 @@ describe('visualization creation dataset contract', () => {
       const config = example.output?.config ?? {};
       const query = extractGoldQuery(example.output);
       const isVega = 'spec' in config;
+      const visualization = isVega
+        ? { spec: JSON.stringify(config.spec) }
+        : (config as ExtractedVisualization['visualization']);
       const bindings = collectColumnBindings({
         esql: query,
         renderer: isVega ? 'vega' : 'lens',
-        visualization: isVega ? { spec: JSON.stringify(config.spec) } : config,
+        visualization,
       });
 
       for (const binding of bindings) {
@@ -88,9 +92,7 @@ describe('visualization creation dataset contract', () => {
   );
 
   it('references only fields the synthtrace host-load fixture writes', () => {
-    const [doc] = buildHostLoadEvents({ count: 1 })[0].serialize() as Array<
-      Record<string, unknown>
-    >;
+    const [doc] = buildHostLoadEvents({ count: 1 })[0].serialize();
     const systemLoad = doc['system.load'] as Record<string, unknown>;
 
     const hostExamples = examples.filter(

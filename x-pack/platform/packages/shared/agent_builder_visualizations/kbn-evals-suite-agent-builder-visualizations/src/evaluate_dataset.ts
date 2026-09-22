@@ -175,7 +175,7 @@ export function createEvaluateDataset({
     VisualizationAgentTaskOutput
   >({
     visualizationExtractor,
-    questionExtractor: (input) => input.question,
+    questionExtractor: (input) => input?.question ?? '',
     expectedChartFormExtractor: (expected) => extractGoldChartForm(expected),
     judge: createChartIntentJudge({ inferenceClient, log }),
   });
