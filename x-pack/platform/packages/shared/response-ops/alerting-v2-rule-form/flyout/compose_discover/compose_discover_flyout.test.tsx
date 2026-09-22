@@ -127,7 +127,6 @@ interface SandboxFlyoutMockProps {
   onApply?: () => void;
   onClose: () => void;
   helpText?: React.ReactNode;
-  headerActions?: React.ReactNode;
 }
 
 let sandboxFlyoutProps: SandboxFlyoutMockProps | undefined;
@@ -144,7 +143,6 @@ jest.mock('./query_sandbox_flyout', () => ({
     return (
       <div data-test-subj="composeDiscoverChildMock">
         <div data-test-subj="mockSandboxHelpText">{props.helpText}</div>
-        <div data-test-subj="mockSandboxHeaderActions">{props.headerActions}</div>
         {props.onTimeFieldChange ? (
           <select
             data-test-subj="querySandboxTimeField"

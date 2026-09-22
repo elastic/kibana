@@ -10,6 +10,7 @@ import type {
   ComposeDiscoverMode,
   RuleFormServices,
 } from '@kbn/alerting-v2-rule-form';
+import { ESQLMenu, EsqlEditorActionsProvider, EsqlEditorActionsRegister } from '@kbn/esql/public';
 import { ComposeDiscoverFlyout, RULE_BUILDER_REGISTRY } from '@kbn/alerting-v2-rule-form';
 import type { RuleTemplateResponse } from '@kbn/alerting-v2-schemas';
 import { PluginStart } from '@kbn/core-di';
@@ -105,6 +106,9 @@ export const useComposeDiscoverFlyout = ({
       uiActions,
       dashboard,
       cps,
+      esqlMenu: ESQLMenu,
+      esqlEditorActionsProvider: EsqlEditorActionsProvider,
+      esqlEditorActionsRegister: EsqlEditorActionsRegister,
     }),
     [
       http,

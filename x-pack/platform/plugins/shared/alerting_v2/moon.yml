@@ -32,6 +32,7 @@ dependsOn:
   - '@kbn/core-di'
   - '@kbn/core-di-browser'
   - '@kbn/core-di-server'
+  - '@kbn/esql'
   - '@kbn/esql-utils'
   - '@kbn/response-ops-retry-service'
   - '@kbn/core-application-browser'
