@@ -268,15 +268,15 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
   const onIngestTokenRotated = useCallback(
     (ingestToken: string) => {
       setRevealedInboundConnector((current) => {
-        const base = current ?? connector;
+        const base = current ?? formConnector ?? connector;
         return { ...base, secrets: { ingestToken } } as ActionConnector;
       });
     },
-    [connector]
+    [connector, formConnector]
   );
 
   const inboundSettingsContent = useMemo(() => {
-    const inboundConnector = revealedInboundConnector ?? connector;
+    const inboundConnector = revealedInboundConnector ?? formConnector ?? connector;
     if (
       isInboundIngressConnector(inboundConnector) &&
       !connectorTypeIsDual(inboundConnector.actionTypeId)
@@ -305,6 +305,7 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
   }, [
     canSave,
     connector,
+    formConnector,
     isClusterInboundEventsEnabled,
     onIngestTokenRotated,
     revealedInboundConnector,
@@ -426,7 +427,8 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
          * Set the from to clean state.
          */
         const heldConnector = revealedInboundConnector;
-        const previousEnabled = (heldConnector ?? connector).isInboundEventsEnabled === true;
+        const previousEnabled =
+          (heldConnector ?? formConnector ?? connector).isInboundEventsEnabled === true;
         const enablingNow =
           connectorTypeIsDual(connector.actionTypeId) &&
           isInboundEventsEnabled === true &&
@@ -455,7 +457,17 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
               : nextConnector
           );
         } else if (onConnectorUpdated) {
-          onConnectorUpdated(nextConnector);
+          const ingestToken =
+            nextConnector.isInboundEventsEnabled === true
+              ? getInboundIngestToken(connector)
+              : undefined;
+          const published = ingestToken
+            ? ({ ...nextConnector, secrets: { ingestToken } } as ActionConnector)
+            : nextConnector;
+          if (ingestToken) {
+            setRevealedInboundConnector(published);
+          }
+          onConnectorUpdated(published);
         }
         setFormConnector(nextConnector);
         setFormRevision((revision) => revision + 1);
@@ -475,6 +487,7 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
     updateConnector,
     onFormModifiedChange,
     revealedInboundConnector,
+    formConnector,
     onConnectorUpdated,
     rotateIngress,
   ]);
@@ -591,7 +604,7 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
 
         {actionTypeModel && !isLoadingActionTypeModel && !actionTypeModelError && (
           <TestConnectorForm
-            connector={connector}
+            connector={connectorWithoutSecrets}
             executeEnabled={!isFormModified}
             actionParams={resolvedTestExecutionActionParams}
             onEditAction={onEditAction}
@@ -605,7 +618,7 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
       </>
     );
   }, [
-    connector,
+    connectorWithoutSecrets,
     isFormModified,
     resolvedTestExecutionActionParams,
     onEditAction,

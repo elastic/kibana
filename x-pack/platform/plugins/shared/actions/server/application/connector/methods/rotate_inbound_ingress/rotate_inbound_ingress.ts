@@ -12,8 +12,11 @@ import { i18n } from '@kbn/i18n';
 
 import type { RawAction } from '../../../../types';
 import { resolveInboundEventsSpaceId } from '../../../../inbound/resolve_inbound_events_space_id';
-import { mintIngressCredential } from '../../../../inbound/ingress_credential';
-import { hasInboundEventIdentityAttributes } from '../../../../inbound/event_identity';
+import {
+  deleteIngressCredentialForConnector,
+  mintIngressCredential,
+} from '../../../../inbound/ingress_credential';
+import { hasInboundEventIdentityAttributes } from '../../../../inbound/event_identity/encode_api_key';
 import type { RotateInboundIngressParams, RotateInboundIngressResult } from './types';
 
 export async function rotateInboundIngress({
@@ -56,6 +59,27 @@ export async function rotateInboundIngress({
     auditLogger: context.auditLogger,
     logger: context.logger,
   });
+
+  if (connectorTypeIsDual(actionTypeId)) {
+    const afterMint =
+      await context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAction>(
+        'action',
+        id,
+        spaceId !== DEFAULT_SPACE_ID ? { namespace: spaceId } : {}
+      );
+    if (!hasInboundEventIdentityAttributes(afterMint.attributes)) {
+      await deleteIngressCredentialForConnector({
+        unsecuredSavedObjectsClient: context.unsecuredSavedObjectsClient,
+        connectorId: id,
+        logger: context.logger,
+      });
+      throw Boom.badRequest(
+        i18n.translate('xpack.actions.serverSideErrors.rotateInboundIngressNotEnabled', {
+          defaultMessage: 'Inbound events are not enabled for this connector.',
+        })
+      );
+    }
+  }
 
   return { ingestToken };
 }

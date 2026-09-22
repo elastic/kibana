@@ -599,6 +599,208 @@ describe('EditConnectorFlyout', () => {
     expect(onConnectorUpdated.mock.calls[0][0].secrets?.ingestToken).toBeUndefined();
   });
 
+  it('rotates when inbound events are turned back on after a disable in the same flyout', async () => {
+    const dualConnector = createMockActionConnector({
+      id: 'dd-1',
+      name: 'Datadog',
+      actionTypeId: '.dual',
+      isInboundEventsEnabled: true,
+      config: { testTextField: 'site' },
+      secrets: {},
+    });
+    const dualActionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
+      id: '.dual',
+      actionConnectorFields: lazy(() => import('../connector_mock')),
+      validateParams: (): Promise<GenericValidationResult<unknown>> =>
+        Promise.resolve({ errors: {} }),
+    });
+    actionTypeRegistry.get.mockReturnValue(dualActionTypeModel);
+    appMockRenderer.coreStart.actions.isInboundEventsEnabled = true;
+    appMockRenderer.coreStart.http.put = jest
+      .fn()
+      .mockImplementation((_path: string, opts?: { body?: string }) => {
+        const body = opts?.body ? JSON.parse(opts.body) : {};
+        return Promise.resolve({
+          ...updateConnectorResponse,
+          id: 'dd-1',
+          name: body.name,
+          config: body.config,
+          connector_type_id: '.dual',
+          is_inbound_events_enabled: body.is_inbound_events_enabled === true,
+        });
+      });
+    appMockRenderer.coreStart.http.post = jest.fn().mockImplementation((path: string) => {
+      if (String(path).includes('_rotate_event_token')) {
+        return Promise.resolve({ ingest_token: 'once-token' });
+      }
+      return Promise.resolve(executeConnectorResponse);
+    });
+
+    appMockRenderer.render(
+      <EditConnectorFlyout
+        actionTypeRegistry={actionTypeRegistry}
+        onClose={onClose}
+        connector={dualConnector}
+        onConnectorUpdated={onConnectorUpdated}
+      />
+    );
+
+    expect(await screen.findByTestId('inbound-events-enabled-switch')).toBeChecked();
+    await userEvent.click(screen.getByTestId('inbound-events-enabled-switch'));
+    await waitFor(() => {
+      expect(screen.getByTestId('edit-connector-flyout-save-btn')).toBeEnabled();
+    });
+    await userEvent.click(screen.getByTestId('edit-connector-flyout-save-btn'));
+    await waitFor(() => {
+      expect(appMockRenderer.coreStart.http.put).toHaveBeenCalledTimes(1);
+    });
+    expect(appMockRenderer.coreStart.http.post).not.toHaveBeenCalledWith(
+      expect.stringContaining('_rotate_event_token')
+    );
+
+    await userEvent.click(await screen.findByTestId('inbound-events-enabled-switch'));
+    expect(await screen.findByTestId('inbound-events-save-to-generate')).toBeInTheDocument();
+    expect(screen.queryByTestId('inbound-ingress-rotate-btn')).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByTestId('edit-connector-flyout-save-btn')).toBeEnabled();
+    });
+    await userEvent.click(screen.getByTestId('edit-connector-flyout-save-btn'));
+
+    await waitFor(() => {
+      expect(appMockRenderer.coreStart.http.post).toHaveBeenCalledWith(
+        expect.stringContaining('_rotate_event_token')
+      );
+    });
+    expect(await screen.findByTestId('inbound-ingress-ingest-token')).toHaveValue('once-token');
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it('keeps a token that arrived with the connector when a later edit is saved', async () => {
+    const dualConnector = createMockActionConnector({
+      id: 'dd-1',
+      name: 'Datadog',
+      actionTypeId: '.dual',
+      isInboundEventsEnabled: true,
+      config: { testTextField: 'site' },
+      secrets: { ingestToken: 'once-token' },
+    });
+    const dualActionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
+      id: '.dual',
+      actionConnectorFields: lazy(() => import('../connector_mock')),
+      validateParams: (): Promise<GenericValidationResult<unknown>> =>
+        Promise.resolve({ errors: {} }),
+    });
+    actionTypeRegistry.get.mockReturnValue(dualActionTypeModel);
+    appMockRenderer.coreStart.actions.isInboundEventsEnabled = true;
+    appMockRenderer.coreStart.http.put = jest
+      .fn()
+      .mockImplementation((_path: string, opts?: { body?: string }) => {
+        const body = opts?.body ? JSON.parse(opts.body) : {};
+        return Promise.resolve({
+          ...updateConnectorResponse,
+          id: 'dd-1',
+          name: body.name,
+          config: body.config,
+          connector_type_id: '.dual',
+          is_inbound_events_enabled: body.is_inbound_events_enabled === true,
+        });
+      });
+
+    appMockRenderer.render(
+      <EditConnectorFlyout
+        actionTypeRegistry={actionTypeRegistry}
+        onClose={onClose}
+        connector={dualConnector}
+        onConnectorUpdated={onConnectorUpdated}
+      />
+    );
+
+    expect(await screen.findByTestId('inbound-ingress-ingest-token')).toHaveValue('once-token');
+    const nameInput = screen.getByTestId('nameInput');
+    await userEvent.clear(nameInput);
+    await userEvent.click(nameInput);
+    await userEvent.paste('Renamed dual');
+    await waitFor(() => {
+      expect(screen.getByTestId('edit-connector-flyout-save-btn')).toBeEnabled();
+    });
+    await userEvent.click(screen.getByTestId('edit-connector-flyout-save-btn'));
+
+    await waitFor(() => {
+      expect(onConnectorUpdated).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'Renamed dual',
+          isInboundEventsEnabled: true,
+          secrets: { ingestToken: 'once-token' },
+        })
+      );
+    });
+    expect(screen.getByTestId('inbound-ingress-ingest-token')).toHaveValue('once-token');
+  });
+
+  it('passes the saved connector config to the test tab', async () => {
+    const validateParams = jest.fn().mockResolvedValue({ errors: {} });
+    const dualConnector = createMockActionConnector({
+      id: 'dd-1',
+      name: 'Datadog',
+      actionTypeId: '.dual',
+      isInboundEventsEnabled: false,
+      config: { testTextField: 'site' },
+      secrets: {},
+    });
+    const dualActionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
+      id: '.dual',
+      actionConnectorFields: lazy(() => import('../connector_mock')),
+      validateParams,
+    });
+    actionTypeRegistry.get.mockReturnValue(dualActionTypeModel);
+    appMockRenderer.coreStart.actions.isInboundEventsEnabled = true;
+    appMockRenderer.coreStart.http.put = jest
+      .fn()
+      .mockImplementation((_path: string, opts?: { body?: string }) => {
+        const body = opts?.body ? JSON.parse(opts.body) : {};
+        return Promise.resolve({
+          ...updateConnectorResponse,
+          id: 'dd-1',
+          name: body.name,
+          config: body.config,
+          connector_type_id: '.dual',
+          is_inbound_events_enabled: body.is_inbound_events_enabled === true,
+        });
+      });
+    appMockRenderer.coreStart.http.post = jest.fn().mockImplementation((path: string) => {
+      if (String(path).includes('_rotate_event_token')) {
+        return Promise.resolve({ ingest_token: 'once-token' });
+      }
+      return Promise.resolve(executeConnectorResponse);
+    });
+
+    appMockRenderer.render(
+      <EditConnectorFlyout
+        actionTypeRegistry={actionTypeRegistry}
+        onClose={onClose}
+        connector={dualConnector}
+        onConnectorUpdated={onConnectorUpdated}
+      />
+    );
+
+    const configInput = await screen.findByTestId('test-connector-text-field');
+    await userEvent.clear(configInput);
+    await userEvent.click(configInput);
+    await userEvent.paste('updated-site');
+    await userEvent.click(screen.getByTestId('inbound-events-enabled-switch'));
+    await userEvent.click(screen.getByTestId('edit-connector-flyout-save-btn'));
+    expect(await screen.findByTestId('inbound-ingress-ingest-token')).toHaveValue('once-token');
+
+    await userEvent.click(screen.getByTestId('testConnectorTab'));
+
+    await waitFor(() => {
+      expect(validateParams).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ testTextField: 'updated-site' })
+      );
+    });
+  });
+
   it('does not rotate when saving an inbound webhook connector', async () => {
     const inboundConnector = createMockActionConnector({
       id: 'sales-ingress',
