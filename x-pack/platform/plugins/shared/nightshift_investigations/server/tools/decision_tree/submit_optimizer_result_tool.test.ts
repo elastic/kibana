@@ -50,11 +50,19 @@ const createStore = (existing?: DecisionTreeDetail): jest.Mocked<DecisionTreeSto
     archive: jest.fn(),
   } as jest.Mocked<DecisionTreeStore>);
 
-const createConnectionManager = (markdown: string) => ({
-  readFiles: jest
-    .fn()
-    .mockResolvedValue([{ success: true, content: Buffer.from(markdown, 'utf8') }]),
-});
+const createSandboxStart = (markdown: string) => {
+  const session = {
+    readFiles: jest
+      .fn()
+      .mockResolvedValue([{ success: true, content: Buffer.from(markdown, 'utf8') }]),
+  };
+  return {
+    session,
+    getSandboxStart: () => ({
+      getSession: jest.fn().mockReturnValue(session),
+    }),
+  };
+};
 
 const createContext = () => ({
   request: {} as never,
@@ -76,9 +84,9 @@ const runSubmit = async ({
     evidence_gatherer_metadata: string[];
   }>;
 }) => {
-  const connectionManager = createConnectionManager(markdown);
+  const { session, getSandboxStart } = createSandboxStart(markdown);
   const tool = createSubmitOptimizerResultTool({
-    connectionManager: connectionManager as never,
+    getSandboxStart: getSandboxStart as never,
     getStore: () => store,
     getSpaceId: () => 'default',
     logger: loggerMock.create(),
@@ -99,23 +107,21 @@ const runSubmit = async ({
     createContext() as never
   );
 
-  return { result, connectionManager };
+  return { result, session };
 };
 
 describe('submit_optimizer_result', () => {
   it('reads the submitted file back from the sandbox and persists it', async () => {
     const store = createStore();
 
-    const { result, connectionManager } = await runSubmit({
+    const { result, session } = await runSubmit({
       store,
       markdown: markdownFor(FULL_TREE),
     });
 
-    expect(connectionManager.readFiles).toHaveBeenCalledWith(
-      'default__conv-1',
-      [expect.objectContaining({ path: ABSOLUTE_PATH })],
-      expect.anything()
-    );
+    expect(session.readFiles).toHaveBeenCalledWith([
+      expect.objectContaining({ path: ABSOLUTE_PATH }),
+    ]);
     expect(store.commit).toHaveBeenCalledWith(
       expect.objectContaining({
         treeId: TREE_ID,
@@ -141,7 +147,7 @@ describe('submit_optimizer_result', () => {
   it('reports no changes when nothing was submitted', async () => {
     const store = createStore();
     const tool = createSubmitOptimizerResultTool({
-      connectionManager: createConnectionManager('') as never,
+      getSandboxStart: createSandboxStart('').getSandboxStart as never,
       getStore: () => store,
       getSpaceId: () => 'default',
       logger: loggerMock.create(),
@@ -171,9 +177,9 @@ describe('submit_optimizer_result', () => {
     ]);
     const drainLearnings = jest.fn().mockReturnValue([]);
     const tool = createSubmitOptimizerResultTool({
-      connectionManager: createConnectionManager(
+      getSandboxStart: createSandboxStart(
         markdownFor('flowchart TD\n    S1([Checkout latency]) --> E1[Query logs]')
-      ) as never,
+      ).getSandboxStart as never,
       getStore: () => store,
       getSpaceId: () => 'default',
       peekLearnings,
@@ -194,7 +200,7 @@ describe('submit_optimizer_result', () => {
     expect(store.commit).not.toHaveBeenCalled();
 
     const successTool = createSubmitOptimizerResultTool({
-      connectionManager: createConnectionManager(markdownFor(FULL_TREE)) as never,
+      getSandboxStart: createSandboxStart(markdownFor(FULL_TREE)).getSandboxStart as never,
       getStore: () => createStore(),
       getSpaceId: () => 'default',
       peekLearnings,
@@ -310,9 +316,11 @@ describe('submit_optimizer_result', () => {
     it('rejects a file the sandbox could not read', async () => {
       const store = createStore();
       const tool = createSubmitOptimizerResultTool({
-        connectionManager: {
-          readFiles: jest.fn().mockResolvedValue([{ success: false }]),
-        } as never,
+        getSandboxStart: (() => ({
+          getSession: () => ({
+            readFiles: jest.fn().mockResolvedValue([{ success: false }]),
+          }),
+        })) as never,
         getStore: () => store,
         getSpaceId: () => 'default',
         logger: loggerMock.create(),

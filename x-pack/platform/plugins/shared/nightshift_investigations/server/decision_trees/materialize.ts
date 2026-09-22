@@ -13,7 +13,7 @@ import {
   symptomFilePath,
   type LearningRecord,
 } from '@kbn/nightshift-decision-trees';
-import type { SandboxApiClient } from '../tools/sandbox_bash/grpc_client';
+import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 import type { DecisionTreeStore } from './store';
 import type { DecisionTreeSummary } from '../../common/decision_trees';
 
@@ -178,15 +178,13 @@ const renderIndex = (trees: DecisionTreeSummary[]): string => {
  * selector this is a create rather than a merge.
  */
 export const materializeDecisionTrees = async ({
-  apiClient,
-  conversationId,
+  session,
   store,
   logger,
   treeIds,
   signal,
 }: {
-  apiClient: SandboxApiClient;
-  conversationId: string;
+  session: SandboxSession;
   store: DecisionTreeStore;
   logger: Logger;
   /**
@@ -215,8 +213,8 @@ export const materializeDecisionTrees = async ({
     throw new Error('Decision tree hydrate aborted');
   }
 
-  await apiClient.mkdirs(conversationId, [DECISION_TREE_WORKSPACE_ROOT]);
-  await apiClient.writeFiles(conversationId, [
+  await session.mkdirs([DECISION_TREE_WORKSPACE_ROOT]);
+  await session.writeFiles([
     {
       path: `${DECISION_TREE_WORKSPACE_ROOT}/${MONITORS_INDEX_FILENAME}`,
       content: Buffer.from(renderIndex(trees), 'utf8'),
@@ -227,8 +225,6 @@ export const materializeDecisionTrees = async ({
     })),
   ]);
 
-  logger.info(
-    `Materialized ${stored.length} decision tree(s) into sandbox conversation ${conversationId}`
-  );
+  logger.info(`Materialized ${stored.length} decision tree(s) into sandbox`);
   return trees;
 };

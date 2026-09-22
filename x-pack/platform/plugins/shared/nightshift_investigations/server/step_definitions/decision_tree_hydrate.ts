@@ -9,19 +9,18 @@ import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { Logger } from '@kbn/core/server';
-import type { SandboxConnectionManager } from '../tools/sandbox_bash/grpc_client';
+import type { SandboxPluginStart } from '@kbn/sandbox-plugin/server';
 import { hydrateDecisionTreeWorkspace } from '../decision_trees/register_decision_trees';
-import { scopeConversationId } from '../tools/sandbox_bash/tool_utils';
 import { withTimeout } from './with_timeout';
 
 /** Caps beforeAgent so a stuck sandbox allocate cannot stall the reinforcement round. */
 const HYDRATE_TIMEOUT_MS = 20_000;
 
 export const decisionTreeHydrateStepDefinition = ({
-  getConnectionManager,
+  getSandboxStart,
   logger,
 }: {
-  getConnectionManager: () => SandboxConnectionManager | undefined;
+  getSandboxStart: () => SandboxPluginStart | undefined;
   logger: Logger;
 }) =>
   createServerStepDefinition({
@@ -51,25 +50,24 @@ export const decisionTreeHydrateStepDefinition = ({
     }),
     handler: async (context) => {
       const { conversation_id: conversationId, prompt } = context.input;
-      const manager = getConnectionManager();
+      const sandboxStart = getSandboxStart();
 
-      if (!manager) {
+      if (!sandboxStart) {
         throw new Error(
-          'The Nightshift sandbox is not configured — ' +
-            'set xpack.nightshift_investigations.sandbox in kibana.yml.'
+          'The sandbox is not configured — ' +
+            'ensure the sandbox plugin is installed and configured.'
         );
       }
 
       // The hook runs this workflow in the caller's space, which is the same space the sandbox
       // tools resolve from the request, so both address the same workspace.
       const { spaceId } = context.contextManager.getContext().workflow;
-      const scopedConversationId = scopeConversationId(spaceId, conversationId);
+      const session = sandboxStart.getSessionForSpace(spaceId, conversationId);
 
       const treeCount = await withTimeout(
         (signal) =>
           hydrateDecisionTreeWorkspace({
-            apiClient: manager.apiClient,
-            conversationId: scopedConversationId,
+            session,
             esClient: context.contextManager.getScopedEsClient(),
             logger,
             spaceId,
@@ -80,6 +78,6 @@ export const decisionTreeHydrateStepDefinition = ({
         `Decision tree hydrate timed out after ${HYDRATE_TIMEOUT_MS}ms`
       );
 
-      return { output: { conversation_id: scopedConversationId, tree_count: treeCount } };
+      return { output: { conversation_id: conversationId, tree_count: treeCount } };
     },
   });

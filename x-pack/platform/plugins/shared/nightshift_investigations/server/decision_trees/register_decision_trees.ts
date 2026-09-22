@@ -8,11 +8,11 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
+import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 import {
   DECISION_TREE_AI_INDEX_DEST,
   DECISION_TREE_AI_INDEX_ID,
 } from '../../common/decision_trees';
-import type { SandboxApiClient } from '../tools/sandbox_bash/grpc_client';
 import {
   embedAccessedTreesMarker,
   extractAccessedTreeIds,
@@ -51,16 +51,14 @@ export const registerDecisionTreeAiIndex = (
 
 /** Writes the stored decision trees into the reinforcement agent's sandbox for this round. */
 export const hydrateDecisionTreeWorkspace = async ({
-  apiClient,
-  conversationId,
+  session,
   esClient,
   logger,
   spaceId,
   prompt,
   signal,
 }: {
-  apiClient: SandboxApiClient;
-  conversationId: string;
+  session: SandboxSession;
   esClient: ElasticsearchClient;
   logger: Logger;
   spaceId: string;
@@ -70,8 +68,7 @@ export const hydrateDecisionTreeWorkspace = async ({
   const store = createDecisionTreeStore({ esClient, logger, spaceId, signal });
   const accessedTreeIds = parseAccessedTreesMarker(prompt);
   const trees = await materializeDecisionTrees({
-    apiClient,
-    conversationId,
+    session,
     store,
     logger,
     signal,

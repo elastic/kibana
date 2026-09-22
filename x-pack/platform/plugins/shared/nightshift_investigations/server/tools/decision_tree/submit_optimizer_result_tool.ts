@@ -26,10 +26,10 @@ import {
   validateEvidenceMetadata,
 } from '@kbn/nightshift-decision-trees';
 import type { LearningRecord } from '@kbn/nightshift-decision-trees';
+import type { SandboxPluginStart, SandboxSession } from '@kbn/sandbox-plugin/server';
 import type { DecisionTreeStore } from '../../decision_trees/store';
-import type { SandboxConnectionManager } from '../sandbox_bash/grpc_client';
 import {
-  getSandboxCallContext,
+  getConversationId,
   getScopedConversationId,
   resolveAbsolutePath,
 } from '../sandbox_bash/tool_utils';
@@ -89,7 +89,7 @@ interface SubmissionOutcome {
  * can repair it, while the trees that passed are still written.
  */
 export const createSubmitOptimizerResultTool = ({
-  connectionManager,
+  getSandboxStart,
   getStore,
   getSpaceId,
   getUsername,
@@ -97,7 +97,7 @@ export const createSubmitOptimizerResultTool = ({
   drainLearnings,
   logger,
 }: {
-  connectionManager: SandboxConnectionManager;
+  getSandboxStart: () => SandboxPluginStart | undefined;
   getStore: (esClient: ElasticsearchClient, request: KibanaRequest) => DecisionTreeStore;
   getSpaceId: (request: KibanaRequest) => string;
   /** Resolves the authenticated user, recorded as the version author. */
@@ -123,10 +123,32 @@ export const createSubmitOptimizerResultTool = ({
   },
   handler: async (params, context) => {
     const conversationId = getScopedConversationId(context, getSpaceId);
-    if (!conversationId) {
+    const rawConversationId = getConversationId(context);
+    if (!conversationId || !rawConversationId) {
       return {
         results: [
           { type: ToolResultType.error, data: { message: 'No conversation context available.' } },
+        ],
+      };
+    }
+
+    const sandboxStart = getSandboxStart();
+    if (!sandboxStart) {
+      return {
+        results: [{ type: ToolResultType.error, data: { message: 'Sandbox is not available.' } }],
+      };
+    }
+
+    let session: SandboxSession;
+    try {
+      session = sandboxStart.getSession(context.request, rawConversationId);
+    } catch (err) {
+      return {
+        results: [
+          {
+            type: ToolResultType.error,
+            data: { message: err instanceof Error ? err.message : 'Sandbox is not available.' },
+          },
         ],
       };
     }
@@ -143,9 +165,7 @@ export const createSubmitOptimizerResultTool = ({
         outcomes.push(
           await persistSubmission({
             submission,
-            conversationId,
-            connectionManager,
-            context,
+            session,
             store,
             author,
             summary: params.summary,
@@ -216,18 +236,14 @@ export const createSubmitOptimizerResultTool = ({
 
 const persistSubmission = async ({
   submission,
-  conversationId,
-  connectionManager,
-  context,
+  session,
   store,
   author,
   summary,
   learnings,
 }: {
   submission: z.infer<typeof submissionSchema>;
-  conversationId: string;
-  connectionManager: SandboxConnectionManager;
-  context: Parameters<typeof getSandboxCallContext>[0];
+  session: SandboxSession;
   store: DecisionTreeStore;
   author: string;
   summary: string;
@@ -259,11 +275,9 @@ const persistSubmission = async ({
     );
   }
 
-  const [readResult] = await connectionManager.readFiles(
-    conversationId,
-    [{ path: resolvedPath, maxReadBytes: MAX_TREE_FILE_BYTES }],
-    getSandboxCallContext(context)
-  );
+  const [readResult] = await session.readFiles([
+    { path: resolvedPath, maxReadBytes: MAX_TREE_FILE_BYTES },
+  ]);
   if (!readResult?.success) {
     throw new DecisionTreeValidationError(treeId, `Could not read submitted file ${filePath}`);
   }

@@ -116,7 +116,7 @@ export class NightshiftInvestigationsPlugin
     this.decisionTreesEnabled =
       this.ctx.config.get().decision_trees.enabled &&
       this.cortexEnabled &&
-      Boolean(this.ctx.config.get().sandbox);
+      Boolean(plugins.sandbox?.isAvailable);
     if (this.decisionTreesEnabled) {
       registerDecisionTreeAiIndex(plugins.contextEngine, this.logger.get('decision_trees'));
     }
@@ -209,8 +209,10 @@ export class NightshiftInvestigationsPlugin
 
         if (this.decisionTreesEnabled) {
           const decisionTreeLogger = this.logger.get('decision_trees');
+          const getSpaceId = (request: KibanaRequest) =>
+            this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
           for (const tool of createDecisionTreeTools({
-            connectionManager,
+            getSandboxStart,
             connectorNames: telemetryConnectorId ? [telemetryConnectorId] : [],
             getSpaceId,
             getUsername: (req: KibanaRequest) => this.security?.authc.getCurrentUser(req)?.username,
@@ -250,7 +252,7 @@ export class NightshiftInvestigationsPlugin
           const decisionTreeLogger = this.logger.get('decision_trees');
           plugins.workflowsExtensions.registerStepDefinition(
             decisionTreeHydrateStepDefinition({
-              getConnectionManager: () => this.sandboxConnectionManager,
+              getSandboxStart: () => this.sandboxStart,
               logger: decisionTreeLogger,
             })
           );

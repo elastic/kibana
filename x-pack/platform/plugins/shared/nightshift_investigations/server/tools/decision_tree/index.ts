@@ -8,9 +8,9 @@
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { LearningRecord } from '@kbn/nightshift-decision-trees';
+import type { SandboxPluginStart } from '@kbn/sandbox-plugin/server';
 import { createDecisionTreeStore } from '../../decision_trees/store';
 import { createLearningStore } from '../../decision_trees/learning_store';
-import type { SandboxConnectionManager } from '../sandbox_bash/grpc_client';
 import {
   RECORD_REMEDIATION_TOOL_ID,
   RECORD_SYSTEM_LEARNING_TOOL_ID,
@@ -40,13 +40,13 @@ export const DECISION_TREE_TOOL_IDS = [
 ] as const;
 
 export const createDecisionTreeTools = ({
-  connectionManager,
+  getSandboxStart,
   connectorNames,
   getSpaceId,
   getUsername,
   logger,
 }: {
-  connectionManager: SandboxConnectionManager;
+  getSandboxStart: () => SandboxPluginStart | undefined;
   connectorNames: readonly string[];
   getSpaceId: (request: KibanaRequest) => string;
   getUsername?: (request: KibanaRequest) => string | undefined;
@@ -85,7 +85,7 @@ export const createDecisionTreeTools = ({
     }),
     createRecordRemediationTool({ getStore: getLearningStore, logger, getSpaceId, onRecord }),
     createSubmitOptimizerResultTool({
-      connectionManager,
+      getSandboxStart,
       getStore: getTreeStore,
       getSpaceId,
       getUsername,
