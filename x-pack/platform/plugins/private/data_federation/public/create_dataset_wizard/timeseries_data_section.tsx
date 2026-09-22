@@ -49,10 +49,12 @@ export function TimeseriesDataSection({
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxs">
-            <FormattedMessage
-              id="xpack.dataFederation.createDatasetWizard.timeseriesToggleLabel"
-              defaultMessage="Timeseries data"
-            />
+            <h3>
+              <FormattedMessage
+                id="xpack.dataFederation.createDatasetWizard.timeseriesToggleLabel"
+                defaultMessage="Timeseries data"
+              />
+            </h3>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
