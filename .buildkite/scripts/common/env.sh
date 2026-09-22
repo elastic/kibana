@@ -4,6 +4,11 @@ echo '--- Setup environment vars'
 
 export CI=true
 
+if [[ "${USE_CITADEL_PROXY:-}" == "true" ]]; then
+  export NO_PROXY="169.254.169.254,metadata.google.internal,localhost,127.0.0.1,0.0.0.0,secrets.elastic.co,iamcredentials.googleapis.com,oauth2.googleapis.com,.iamcredentials.googleapis.com,.oauth2.googleapis.com,*.iamcredentials.googleapis.com,*.oauth2.googleapis.com"
+  export no_proxy="${NO_PROXY}"
+fi
+
 KIBANA_DIR=$(pwd)
 export KIBANA_DIR
 export XPACK_DIR="$KIBANA_DIR/x-pack"
