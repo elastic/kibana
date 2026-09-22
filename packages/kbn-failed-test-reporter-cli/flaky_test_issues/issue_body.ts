@@ -258,10 +258,8 @@ const suiteDetails = (suite: FlakySuite): string => {
   const framework = FRAMEWORK_LABELS[suite.framework].long;
   const rows: string[][] = [
     ['**File**', blobLink(suite.filePath)],
-    [
-      '**Framework**',
-      suite.configPath ? `${framework} · ${blobLink(suite.configPath)}` : framework,
-    ],
+    ['**Framework**', framework],
+    ...(suite.configPath ? [['**Config**', blobLink(suite.configPath)]] : []),
     ['**Owners**', suite.owners.length > 0 ? suite.owners.map(inlineCode).join(', ') : '-'],
   ];
   return table(['Field', 'Value'], rows);
