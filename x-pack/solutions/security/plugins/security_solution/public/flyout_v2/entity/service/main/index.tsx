@@ -312,6 +312,7 @@ export const Service: FC<ServiceProps> = memo(function Service({
             scopeId={scopeId}
             openDetailsPanel={openDetailsPanel}
             isPreviewMode={false}
+            entityStoreV2Enabled
             entityStoreEntityId={entityStoreEntityId}
             onShowEntity={onShowRelatedEntityFromResolution}
             riskScoreQueryId={SERVICE_PANEL_RISK_SCORE_QUERY_ID}

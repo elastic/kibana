@@ -454,7 +454,7 @@ const HostEntityFlyoutOverviewCanvas: React.FC<{
             onAssetCriticalityChange={calculateEntityRiskScore}
             isPreviewMode={isPreviewMode}
             entityRecord={observedHost.entityRecord ?? undefined}
-            skipRiskAndCriticality={noEntityInStore}
+            noEntityInStore={noEntityInStore}
             entityStoreEntityId={entityStoreEntityId}
             prefetchedResolutionRisk={prefetchedResolutionRisk}
             riskScoreQueryId={AGENT_BUILDER_HOST_PANEL_RISK_SCORE_QUERY_ID}
@@ -765,7 +765,7 @@ const UserEntityFlyoutOverviewCanvas: React.FC<{
             isPreviewMode={isPreviewMode}
             identityFields={documentEntityIdentifiers}
             entityRecord={observedUser.entityRecord ?? undefined}
-            skipRiskAndCriticality={noEntityInStore}
+            noEntityInStore={noEntityInStore}
             entityStoreEntityId={entityStoreEntityId}
             prefetchedResolutionRisk={prefetchedResolutionRisk}
             riskScoreQueryId={AGENT_BUILDER_USER_PANEL_RISK_SCORE_QUERY_ID}
