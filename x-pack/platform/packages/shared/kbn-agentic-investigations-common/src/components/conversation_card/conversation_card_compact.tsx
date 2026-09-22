@@ -55,13 +55,14 @@ export const ConversationCardCompact = memo<ConversationCardCompactProps>(
 
     return (
       <EuiPanel
-        paddingSize="s"
+        paddingSize="none"
         role="button"
         tabIndex={0}
         aria-label={investigation.title}
         aria-current={isSelected || undefined}
         borderRadius="none"
         css={{
+          padding: `${euiTheme.size.s} ${euiTheme.size.l}`,
           cursor: 'pointer',
           borderBottom: hasBorder ? `1px solid ${euiTheme.colors.disabled}` : 'none',
           borderRadius: hasBorder ? 'none' : `0 0 ${euiTheme.size.s} ${euiTheme.size.s}`,
