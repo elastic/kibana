@@ -19,6 +19,8 @@ import type { PipelineStateStream, RuleExecutionStep } from '../types';
 import { getQueryPayload } from '../get_query_payload';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import { QueryServiceScopedSpaceRoutingToken } from '../../services/query_service/tokens';
+import type { EsqlResponseFormatServiceContract } from '../../services/esql_response_format_service/esql_response_format_service';
+import { EsqlResponseFormatServiceToken } from '../../services/esql_response_format_service/tokens';
 import { guardedExpandStep, withAtLeastOne } from '../stream_utils';
 import { RULE_EXECUTION_COUNTERS, type RuleExecutionCounter } from '../metrics/counters';
 import { type PluginConfig, getQueryRowLimit } from '../../../config';
@@ -35,11 +37,18 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
   constructor(
     @inject(QueryServiceScopedSpaceRoutingToken)
     private readonly queryService: QueryServiceContract,
+    @inject(EsqlResponseFormatServiceToken)
+    esqlResponseFormatService: EsqlResponseFormatServiceContract,
     @inject(PluginInitializer('config'))
     pluginConfigAccessor: PluginInitializerContext<PluginConfig>['config']
   ) {
     const config = pluginConfigAccessor.get<PluginConfig>();
-    this.queryRowLimit = getQueryRowLimit(config);
+    // The step is request-scoped, so the row limit is pinned to the format in
+    // effect when this execution started; `QueryService` reads the flag again
+    // when the query runs. A rollout landing inside that window can only leave
+    // the `LIMIT` stricter or looser than the transport's own cap, never
+    // unbounded — `rules.run.query.maxResponseSize` still guards the JSON path.
+    this.queryRowLimit = getQueryRowLimit(config, esqlResponseFormatService.get());
     this.maxQueryResponseSize = config.rules.run.query.maxResponseSize.getValueInBytes();
   }
 

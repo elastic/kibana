@@ -34,8 +34,17 @@ const { SCHEDULE_INTERVAL } = testData;
 const groupEventsByHost = (events: AlertEvent[]): Record<string, AlertEvent> =>
   keyBy(events, (event) => event.data['host.name'] as string);
 
-const ESQL_RESPONSE_FORMAT_SETTING = 'xpack.alerting_v2.esql.responseFormat';
+/**
+ * The ES|QL transport is selected by the `alertingV2.esqlResponseFormat` feature
+ * flag. Forcing it through `feature_flags.overrides` lets this suite exercise the
+ * Arrow path against the shared stack instead of booting a dedicated Kibana.
+ */
+const ESQL_RESPONSE_FORMAT_FLAG = 'alertingV2.esqlResponseFormat';
 type EsqlResponseFormat = 'json' | 'arrow';
+
+const forceEsqlResponseFormat = (responseFormat: EsqlResponseFormat) => ({
+  'feature_flags.overrides': { [ESQL_RESPONSE_FORMAT_FLAG]: responseFormat },
+});
 
 /**
  * Isolated cases for the alerting_v2 rule executor's persisted output.
@@ -62,7 +71,7 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
 
       apiTest.beforeAll(async ({ apiServices }) => {
         if (isArrow) {
-          await apiServices.core.settings({ [ESQL_RESPONSE_FORMAT_SETTING]: 'arrow' });
+          await apiServices.core.settings(forceEsqlResponseFormat('arrow'));
         }
 
         await apiServices.alertingV2.sourceIndex.create({
@@ -82,7 +91,9 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
         await apiServices.alertingV2.sourceIndex.delete({ index: SOURCE_INDEX });
 
         if (isArrow) {
-          await apiServices.core.settings({ [ESQL_RESPONSE_FORMAT_SETTING]: 'json' });
+          // Clear the override rather than pinning `json`, so the shared stack is
+          // left resolving the flag normally.
+          await apiServices.core.settings({ 'feature_flags.overrides': {} });
         }
       });
 
