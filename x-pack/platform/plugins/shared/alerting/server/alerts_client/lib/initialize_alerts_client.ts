@@ -48,9 +48,6 @@ interface InitializeAlertsClientOpts<Params extends RuleTypeParams> {
   runTimestamp?: Date;
   startedAt: Date | null;
   taskInstance: RuleTaskInstance;
-  // Ad hoc / backfill executions keep their own task state and do not own the
-  // rule's tracked alerts, so they must not load or untrack them.
-  ownsRuleTrackedAlerts?: boolean;
 }
 
 export const initializeAlertsClient = async <
@@ -71,7 +68,6 @@ export const initializeAlertsClient = async <
   runTimestamp,
   startedAt,
   taskInstance,
-  ownsRuleTrackedAlerts = true,
 }: InitializeAlertsClientOpts<Params>) => {
   const {
     state: {
@@ -147,7 +143,6 @@ export const initializeAlertsClient = async <
     activeAlertsFromState: alertRawInstances,
     recoveredAlertsFromState: alertRecoveredRawInstances,
     snoozedInstances: rule.snoozedInstances,
-    ownsRuleTrackedAlerts,
   });
 
   return alertsClient;

@@ -106,7 +106,6 @@ export class AlertsClient<
   // recovered alerts
   private trackedAlerts: TrackedAADAlerts<AlertData>;
 
-  private ownsRuleTrackedAlerts: boolean = true;
   private startedAtString: string | null = null;
   private runTimestampString: string | undefined;
   private rule: AlertRule;
@@ -160,8 +159,6 @@ export class AlertsClient<
     }
     await this.legacyAlertsClient.initializeExecution(opts);
 
-    this.ownsRuleTrackedAlerts = opts.ownsRuleTrackedAlerts ?? true;
-
     // No need to fetch the tracked alerts for the non-lifecycle rules
     if (this.ruleType.autoRecoverAlerts) {
       try {
@@ -173,7 +170,6 @@ export class AlertsClient<
           logger: this.options.logger,
           ruleInfoMessage: this.ruleInfoMessage,
           logTags: this.logTags,
-          ownsRuleTrackedAlerts: this.ownsRuleTrackedAlerts,
         });
       } catch (err) {
         this.options.logger.error(
@@ -424,7 +420,6 @@ export class AlertsClient<
       ruleInfoMessage: this.ruleInfoMessage,
       logTags: this.logTags,
       isUsingDataStreams: this.isUsingDataStreams(),
-      ownsRuleTrackedAlerts: this.ownsRuleTrackedAlerts,
     });
 
     const alertsToIndex = alertBuilder.buildAlerts();

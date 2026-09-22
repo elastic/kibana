@@ -56,7 +56,6 @@ interface AlertBuilderOpts<
   ruleInfoMessage: string;
   logTags: { tags: string[] };
   isUsingDataStreams: boolean;
-  ownsRuleTrackedAlerts?: boolean;
 }
 
 export class AlertBuilder<
@@ -79,7 +78,6 @@ export class AlertBuilder<
   private readonly ruleInfoMessage: string;
   private readonly logTags: { tags: string[] };
   private readonly isUsingDataStreams: boolean;
-  private readonly ownsRuleTrackedAlerts: boolean;
   private readonly reportedAlerts: Record<string, DeepPartial<AlertData>> = {};
   private legacyAlertsClient: LegacyAlertsClient<
     State,
@@ -103,7 +101,6 @@ export class AlertBuilder<
     ruleInfoMessage,
     logTags,
     isUsingDataStreams,
-    ownsRuleTrackedAlerts = true,
   }: AlertBuilderOpts<State, Context, ActionGroupIds, RecoveryActionGroupId, AlertData>) {
     this.rule = rule;
     this.currentTime = currentTime;
@@ -118,7 +115,6 @@ export class AlertBuilder<
     this.ruleInfoMessage = ruleInfoMessage;
     this.logTags = logTags;
     this.isUsingDataStreams = isUsingDataStreams;
-    this.ownsRuleTrackedAlerts = ownsRuleTrackedAlerts;
     this.legacyAlertsClient = legacyAlertsClient;
 
     this.createAlertsInAllSpaces = shouldCreateAlertsInAllSpaces({
@@ -335,15 +331,12 @@ export class AlertBuilder<
     // Tracked AAD docs that are not in this run's working set will never be
     // rebuilt. Flip tracked to false so they stop matching the tracked query.
     // Status and lifecycle fields are left unchanged; status-aware orphan
-    // reconciliation is a follow-up. Runs that do not own the rule's tracked
-    // alerts (ad hoc / backfill) must not untrack them.
-    if (this.ownsRuleTrackedAlerts) {
-      for (const [uuid, alert] of Object.entries(this.trackedAlerts.all)) {
-        if (keepUuids.has(uuid) || get(alert, ALERT_TRACKED) === false) {
-          continue;
-        }
-        recoveredAlertsToIndex.push({ ...alert, [ALERT_TRACKED]: false });
+    // reconciliation is a follow-up.
+    for (const [uuid, alert] of Object.entries(this.trackedAlerts.all)) {
+      if (keepUuids.has(uuid) || get(alert, ALERT_TRACKED) === false) {
+        continue;
       }
+      recoveredAlertsToIndex.push({ ...alert, [ALERT_TRACKED]: false });
     }
 
     return recoveredAlertsToIndex;
