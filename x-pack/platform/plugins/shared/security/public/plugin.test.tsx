@@ -95,6 +95,7 @@ describe('Security Plugin', () => {
         fatalErrors: coreSetupMock.fatalErrors,
         getStartServices: coreSetupMock.getStartServices,
         buildFlavor: expect.stringMatching(new RegExp('^serverless|traditional$')),
+        serviceAccountsAPIClient: expect.any(Object),
       });
     });
 
