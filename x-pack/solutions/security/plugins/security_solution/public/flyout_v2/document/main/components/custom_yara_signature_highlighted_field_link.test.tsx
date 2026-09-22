@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
+import { getFlyoutManagerStore } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
@@ -95,6 +96,26 @@ describe('CustomYaraSignatureHighlightedFieldLink', () => {
       expect.stringContaining(getCustomYaraSignaturesListPath({ show: 'view', itemId: ENTRY_ID }))
     );
     expect(getByTestId('cysChild')).toBeInTheDocument();
+  });
+
+  it('closes open system flyouts when the link is followed in-app', () => {
+    const closeAllFlyouts = jest.spyOn(getFlyoutManagerStore(), 'closeAllFlyouts');
+    const { getByTestId } = renderLink(createHit(ENTRY_ID));
+
+    fireEvent.click(getByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID));
+
+    expect(closeAllFlyouts).toHaveBeenCalledTimes(1);
+    closeAllFlyouts.mockRestore();
+  });
+
+  it('does not close system flyouts when the link is opened in a new tab', () => {
+    const closeAllFlyouts = jest.spyOn(getFlyoutManagerStore(), 'closeAllFlyouts');
+    const { getByTestId } = renderLink(createHit(ENTRY_ID));
+
+    fireEvent.click(getByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID), { metaKey: true });
+
+    expect(closeAllFlyouts).not.toHaveBeenCalled();
+    closeAllFlyouts.mockRestore();
   });
 
   it('renders plain text when the feature flag is disabled', () => {

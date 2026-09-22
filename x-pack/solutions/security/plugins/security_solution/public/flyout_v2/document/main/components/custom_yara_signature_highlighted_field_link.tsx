@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { FC, ReactNode } from 'react';
-import React, { useMemo } from 'react';
-import { EuiLink } from '@elastic/eui';
+import type { FC, MouseEvent, ReactNode } from 'react';
+import React, { useCallback, useMemo } from 'react';
+import { EuiLink, getFlyoutManagerStore } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
@@ -75,7 +75,18 @@ export const CustomYaraSignatureHighlightedFieldLink: FC<
     };
   }, [entryId, getAppUrl]);
 
-  const onClick = useNavigateByRouterEventHandler(toRoutePath);
+  const navigateToCustomYaraSignatures = useNavigateByRouterEventHandler(toRoutePath);
+  const onClick = useCallback(
+    (event: MouseEvent<HTMLAnchorElement>) => {
+      navigateToCustomYaraSignatures(event);
+
+      // The alert flyout is a system overlay, so in-app navigation does not unmount it.
+      if (event.defaultPrevented) {
+        getFlyoutManagerStore().closeAllFlyouts();
+      }
+    },
+    [navigateToCustomYaraSignatures]
+  );
 
   if (!isCustomYaraSignaturesEnabled || !canReadCustomYaraSignatures || !entryId) {
     return <>{children}</>;
