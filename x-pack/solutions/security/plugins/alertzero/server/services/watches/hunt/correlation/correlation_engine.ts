@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { createHash } from 'crypto';
 import { searchByAnchors } from './search_by_anchors';
 import type {
   AnchorItem,
@@ -45,6 +46,24 @@ const buildAnchorItems = (anchors: AnchorSet): AnchorItem[] => {
   return items;
 };
 
+/**
+ * Subject-stable correlation attachment id: `corr-{sha256(space|reportId)}`.
+ * Matches the `trigger-{sha256(space|reportId)}` / `sse-{sha256(...)}`
+ * convention (`sse_mapper.ts`'s `buildSseAttachmentId`, `mvp-slice.md`).
+ * Unlike the SSE id, correlation has no technique dimension: one correlation
+ * pass produces at most one attachment per report.
+ */
+export const buildCorrAttachmentId = ({
+  spaceId,
+  reportId,
+}: {
+  spaceId: string;
+  reportId: string;
+}): string => {
+  const hash = createHash('sha256').update(`${spaceId}|${reportId}`).digest('hex');
+  return `corr-${hash}`;
+};
+
 export const runCorrelationEngine = async (
   esClient: ElasticsearchClient,
   logger: Logger,
@@ -74,6 +93,10 @@ export const runCorrelationEngine = async (
         discriminating_anchor_count: 0,
       },
       toAttachmentData: () => ({
+        attachment_id: buildCorrAttachmentId({
+          spaceId,
+          reportId: searchParams.source_report_id ?? '',
+        }),
         anchors: [],
         diamond_scores: [],
         thresholds: {
@@ -101,6 +124,10 @@ export const runCorrelationEngine = async (
     diamond_scores: [], // Empty until PR 3b's diamond phase.
     anchor_summary: searchResult.anchor_summary,
     toAttachmentData: (): HuntCorrelationAttachmentData => ({
+      attachment_id: buildCorrAttachmentId({
+        spaceId,
+        reportId: searchParams.source_report_id ?? '',
+      }),
       anchors: anchorItems,
       diamond_scores: [], // Empty until PR 3b's diamond phase.
       thresholds: {
