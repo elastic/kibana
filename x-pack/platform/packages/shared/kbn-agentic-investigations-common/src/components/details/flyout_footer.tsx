@@ -75,6 +75,7 @@ export const ConversationDetailsFlyoutFooter = ({
             isFlyout={true}
             onClickAction={onClickAction}
             onClickRecommendedAction={openApproval}
+            canManageEscalations={Boolean(onOpenEscalation)}
             data-test-subj="investigationFlyoutActions"
           />
         </EuiFlexItem>

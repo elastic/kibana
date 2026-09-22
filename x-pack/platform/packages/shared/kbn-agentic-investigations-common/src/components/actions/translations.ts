@@ -22,8 +22,8 @@ export const ACTIONS_TRANSLATIONS = Object.freeze({
     openEscalation: i18n.translate('xpack.alertzero.baseActions.openEscalation', {
       defaultMessage: 'Open an escalation',
     }),
-    attachToIncident: i18n.translate('xpack.alertzero.baseActions.attachToIncident', {
-      defaultMessage: 'Attach to an incident',
+    addToEscalation: i18n.translate('xpack.alertzero.baseActions.addToEscalation', {
+      defaultMessage: 'Add to an escalation',
     }),
     assign: i18n.translate('xpack.alertzero.baseActions.assign', {
       defaultMessage: 'Assign',

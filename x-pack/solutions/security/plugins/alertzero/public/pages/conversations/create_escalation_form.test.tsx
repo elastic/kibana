@@ -54,13 +54,13 @@ describe('CreateEscalationForm', () => {
 
     fireEvent.change(screen.getByTestId('escalationModalTitleInput'), { target: { value: '' } });
 
-    expect(screen.getByTestId('escalationModalOpenIncident')).toBeDisabled();
+    expect(screen.getByTestId('escalationModalCreateEscalation')).toBeDisabled();
   });
 
   it('disables the submit button while submitting', () => {
     renderForm({ isSubmitting: true });
 
-    expect(screen.getByTestId('escalationModalOpenIncident')).toBeDisabled();
+    expect(screen.getByTestId('escalationModalCreateEscalation')).toBeDisabled();
   });
 
   it('disables submit when private mode is on but currentUserUid is empty', () => {
@@ -68,7 +68,7 @@ describe('CreateEscalationForm', () => {
 
     fireEvent.click(screen.getByTestId('escalationModalVisibilitySwitch'));
 
-    expect(screen.getByTestId('escalationModalOpenIncident')).toBeDisabled();
+    expect(screen.getByTestId('escalationModalCreateEscalation')).toBeDisabled();
   });
 
   it('does not show the collaborator section in public mode', () => {
@@ -89,7 +89,7 @@ describe('CreateEscalationForm', () => {
     const onSubmit = jest.fn();
     renderForm({ onSubmit });
 
-    fireEvent.click(screen.getByTestId('escalationModalOpenIncident'));
+    fireEvent.click(screen.getByTestId('escalationModalCreateEscalation'));
 
     expect(onSubmit).toHaveBeenCalledWith({
       title: 'Suspicious login activity',
@@ -103,7 +103,7 @@ describe('CreateEscalationForm', () => {
     renderForm({ onSubmit, currentUserUid: 'user-abc' });
 
     fireEvent.click(screen.getByTestId('escalationModalVisibilitySwitch'));
-    fireEvent.click(screen.getByTestId('escalationModalOpenIncident'));
+    fireEvent.click(screen.getByTestId('escalationModalCreateEscalation'));
 
     expect(onSubmit).toHaveBeenCalledWith({
       title: 'Suspicious login activity',

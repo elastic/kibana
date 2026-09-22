@@ -42,6 +42,8 @@ interface ConversationQueueProps {
    * plural because the flyout shows an investigation, which several rows can share.
    */
   selectedIds?: readonly string[];
+  /** When true escalation actions are shown on every card. Requires the manage capability. */
+  canManageEscalations?: boolean;
 }
 
 const StyledAccordion = styled(EuiAccordion)`
@@ -70,6 +72,7 @@ export const ConversationQueue = memo<ConversationQueueProps>(
     onOpenChat,
     getChatHref,
     selectedIds,
+    canManageEscalations,
   }) => {
     const { euiTheme } = useEuiTheme();
     const buttonContent = (
@@ -127,6 +130,7 @@ export const ConversationQueue = memo<ConversationQueueProps>(
                     onOpenChat={onOpenChat}
                     onClickRecommendedAction={onClickRecommendedAction}
                     chatHref={getChatHref?.(investigation.id)}
+                    canManageEscalations={canManageEscalations}
                   />
                 </EuiFlexItem>
               ))}

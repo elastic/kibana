@@ -66,12 +66,14 @@ const useContextMenuItems = (
   );
 };
 
-export type CardActionType = 'openIncident' | 'attachToIncident' | 'close' | 'assign';
+export type CardActionType = 'createEscalation' | 'addToEscalation' | 'close' | 'assign';
 export interface BaseActionsProps {
   investigation: Investigation;
   isFlyout?: boolean;
   onClickAction: (action: CardActionType, recordId: Investigation['recordId']) => void;
   onClickRecommendedAction?: ConversationsActionsGroupProps['onClickRecommendedAction'];
+  /** When true the escalation actions (create / add-to) appear in the menu. Requires the manage capability. */
+  canManageEscalations?: boolean;
   'data-test-subj'?: string;
 }
 
@@ -81,6 +83,7 @@ export const BaseActions = memo<BaseActionsProps>(
     isFlyout = false,
     onClickAction,
     onClickRecommendedAction,
+    canManageEscalations = false,
     'data-test-subj': dataTestSubj,
   }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -130,18 +133,22 @@ export const BaseActions = memo<BaseActionsProps>(
               },
             ]
           : []),
-        {
-          key: 'openIncident',
-          icon: 'document',
-          name: ACTIONS_TRANSLATIONS.buttons.openEscalation,
-          onClick: () => onClickAction('openIncident', investigation.recordId),
-        },
-        {
-          key: 'attachToIncident',
-          icon: 'link',
-          name: ACTIONS_TRANSLATIONS.buttons.attachToIncident,
-          onClick: () => onClickAction('attachToIncident', investigation.recordId),
-        },
+        ...(canManageEscalations
+          ? [
+              {
+                key: 'createEscalation',
+                icon: 'document' as IconType,
+                name: ACTIONS_TRANSLATIONS.buttons.openEscalation,
+                onClick: () => onClickAction('createEscalation', investigation.recordId),
+              },
+              {
+                key: 'addToEscalation',
+                icon: 'link' as IconType,
+                name: ACTIONS_TRANSLATIONS.buttons.addToEscalation,
+                onClick: () => onClickAction('addToEscalation', investigation.recordId),
+              },
+            ]
+          : []),
         ...(decided
           ? []
           : [
@@ -160,7 +167,7 @@ export const BaseActions = memo<BaseActionsProps>(
               },
             ]),
       ],
-      [onClickRecommendedAction, decided, investigation, onClickAction]
+      [onClickRecommendedAction, decided, investigation, onClickAction, canManageEscalations]
     );
 
     const items = useContextMenuItems(actionConfigs, handleClose);

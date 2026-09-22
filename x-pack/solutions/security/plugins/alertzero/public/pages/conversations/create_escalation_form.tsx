@@ -166,7 +166,7 @@ export const CreateEscalationForm = memo<CreateEscalationFormProps>(
             onClick={handleSubmit}
             isLoading={isSubmitting}
             isDisabled={isSubmitDisabled}
-            data-test-subj="escalationModalOpenIncident"
+            data-test-subj="escalationModalCreateEscalation"
           >
             {T.submitButton}
           </EuiButton>

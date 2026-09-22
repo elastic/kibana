@@ -30,6 +30,10 @@ import { useApproveProposal, useDismissProposal } from '@kbn/agentic-investigati
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
+import {
+  AGENTIC_INVESTIGATIONS_PLUGIN_ID,
+  ESCALATIONS_UI_CAPABILITY_MANAGE,
+} from '@kbn/agentic-investigations-plugin/common';
 import { useProposalChartsSummary } from '../../hooks/use_proposal_charts_summary';
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
 import { AlertZeroPageHeader } from '../../components/alertzero_page_header';
@@ -153,8 +157,13 @@ export const ConversationsPage: React.FC = () => {
   );
 
   const {
-    services: { notifications },
+    services: { notifications, application },
   } = useKibana<CoreStart>();
+
+  const canManageEscalations =
+    application?.capabilities[AGENTIC_INVESTIGATIONS_PLUGIN_ID]?.[
+      ESCALATIONS_UI_CAPABILITY_MANAGE
+    ] === true;
 
   // Both decisions close on success only, and surface the refusal otherwise: an expired
   // deadline or a proposal someone else already decided must not look like it landed.
@@ -364,6 +373,7 @@ export const ConversationsPage: React.FC = () => {
                   onOpenChat={openChatForProposal}
                   getChatHref={getChatHrefForProposal}
                   selectedIds={selectedCardIds}
+                  canManageEscalations={canManageEscalations}
                 />
               </EuiFlexItem>
             ))

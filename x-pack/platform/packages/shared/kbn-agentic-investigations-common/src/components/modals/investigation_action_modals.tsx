@@ -47,7 +47,7 @@ export interface InvestigationActionModalsProps {
    */
   renderDismissModal?: (props: { recordId: string; onClose: () => void }) => React.ReactNode;
   /**
-   * Renders the escalation modal when an 'openIncident' or 'attachToIncident' action is
+   * Renders the escalation modal when a 'createEscalation' or 'addToEscalation' action is
    * triggered. Provided by the caller so the modal can use Kibana HTTP hooks that are not
    * available in this package.
    */
@@ -111,9 +111,9 @@ export const InvestigationActionModals = ({
         )
       : null}
 
-    {(action === 'openIncident' || action === 'attachToIncident') && investigation
+    {(action === 'createEscalation' || action === 'addToEscalation') && investigation
       ? renderEscalationModal?.({
-          mode: action === 'openIncident' ? 'create' : 'addToExisting',
+          mode: action === 'createEscalation' ? 'create' : 'addToExisting',
           investigation,
           onClose: onCloseAction,
         }) ?? null

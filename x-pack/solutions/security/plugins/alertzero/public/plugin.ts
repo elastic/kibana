@@ -19,6 +19,10 @@ import {
   ALERTZERO_APP_PATH,
   TEMPLATE_ID_INVESTIGATION,
 } from '@kbn/alertzero-common';
+import {
+  AGENTIC_INVESTIGATIONS_PLUGIN_ID,
+  ESCALATIONS_UI_CAPABILITY_MANAGE,
+} from '@kbn/agentic-investigations-plugin/common';
 import React from 'react';
 import { registerAgenticInvestigationTemplateUI } from '@kbn/agentic-investigations-common';
 import { getAlertZeroDeepLinks } from './deep_links';
@@ -125,17 +129,24 @@ export class AlertZeroPublicPlugin
       return { default: WrappedModal };
     });
 
+    const canManageEscalations =
+      core.application.capabilities[AGENTIC_INVESTIGATIONS_PLUGIN_ID]?.[
+        ESCALATIONS_UI_CAPABILITY_MANAGE
+      ] === true;
+
     registerAgenticInvestigationTemplateUI({
       conversationTemplates: startDeps.agentBuilder.conversationTemplates,
       templateId: TEMPLATE_ID_INVESTIGATION,
       name: INVESTIGATION_TEMPLATE_NAME,
       icon: 'securitySignalDetected',
-      renderEscalationModal: (props) =>
-        React.createElement(
-          React.Suspense,
-          { fallback: null },
-          React.createElement(LazyEscalationModal, props)
-        ),
+      renderEscalationModal: canManageEscalations
+        ? (props) =>
+            React.createElement(
+              React.Suspense,
+              { fallback: null },
+              React.createElement(LazyEscalationModal, props)
+            )
+        : undefined,
     });
 
     return {};

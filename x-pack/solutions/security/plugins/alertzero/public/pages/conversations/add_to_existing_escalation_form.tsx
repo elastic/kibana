@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useState } from 'react';
+import React, { memo, useEffect, useState } from 'react';
 import {
   EuiBadge,
   EuiButton,
@@ -34,6 +34,7 @@ export interface AddToExistingEscalationFormProps {
   incidents: EscalationIncidentSummary[];
   isLoading: boolean;
   isError: boolean;
+  error?: unknown;
   onRetry: () => void;
   searchQuery: string;
   onSearchChange: (query: string) => void;
@@ -47,6 +48,7 @@ export const AddToExistingEscalationForm = memo<AddToExistingEscalationFormProps
     incidents,
     isLoading,
     isError,
+    error,
     onRetry,
     searchQuery,
     onSearchChange,
@@ -59,6 +61,18 @@ export const AddToExistingEscalationForm = memo<AddToExistingEscalationFormProps
 
     const isRowDisabled = (incident: EscalationIncidentSummary) =>
       incident.alreadyLinked || !incident.canManage;
+
+    // Clear the selection whenever the current results no longer include the selected id as a
+    // selectable row — covers refetch, retry, or search-driven list changes that didn't go
+    // through the search-box onChange handler.
+    useEffect(() => {
+      if (
+        selectedId !== null &&
+        !incidents.some((i) => i.id === selectedId && !isRowDisabled(i))
+      ) {
+        setSelectedId(null);
+      }
+    }, [incidents, selectedId]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const rowTooltip = (incident: EscalationIncidentSummary) => {
       if (incident.alreadyLinked) return T.alreadyLinkedTooltip;
@@ -96,6 +110,9 @@ export const AddToExistingEscalationForm = memo<AddToExistingEscalationFormProps
               iconType="error"
               data-test-subj="escalationModalLoadError"
             >
+              {error instanceof Error && error.message ? (
+                <p>{error.message}</p>
+              ) : null}
               <EuiButton size="s" color="danger" onClick={onRetry}>
                 {T.retryButton}
               </EuiButton>
@@ -133,6 +150,7 @@ export const AddToExistingEscalationForm = memo<AddToExistingEscalationFormProps
                         checked={selectedId === incident.id}
                         disabled={isRowDisabled(incident)}
                         onChange={() => !isRowDisabled(incident) && setSelectedId(incident.id)}
+                        aria-label={incident.title}
                       />
                     </EuiFlexItem>
                     <EuiFlexItem>
@@ -169,7 +187,7 @@ export const AddToExistingEscalationForm = memo<AddToExistingEscalationFormProps
             onClick={() => selectedId && onSubmit(selectedId)}
             isLoading={isSubmitting}
             isDisabled={!selectedId || isSubmitting}
-            data-test-subj="escalationModalAddToIncident"
+            data-test-subj="escalationModalAddToEscalation"
           >
             {T.submitButton}
           </EuiButton>

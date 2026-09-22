@@ -7,13 +7,12 @@
 
 import React, { memo, useState } from 'react';
 import {
+  EuiCheckableCard,
   EuiFlexGroup,
   EuiFlexItem,
   EuiModal,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiPanel,
-  EuiRadio,
   EuiSpacer,
   EuiText,
   useEuiTheme,
@@ -63,6 +62,7 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
       data: escalationsData,
       isLoading: isLoadingEscalations,
       isError: isEscalationsError,
+      error: escalationsError,
       refetch: refetchEscalations,
     } = useListEscalations(incidentSearch);
     const createEscalation = useCreateEscalation();
@@ -109,67 +109,31 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
 
           <EuiFlexGroup gutterSize="m">
             <EuiFlexItem>
-              <EuiPanel
-                hasBorder
-                paddingSize="m"
-                css={css`
-                  cursor: pointer;
-                  ${mode === 'create' ? `border-color: ${euiTheme.colors.primary};` : ''}
-                `}
-                onClick={() => setMode('create')}
+              <EuiCheckableCard
+                id="escalation-mode-create"
+                label={T.modes.create.label}
+                checked={mode === 'create'}
+                onChange={() => setMode('create')}
                 data-test-subj="escalationModalModeCreate"
               >
-                <EuiFlexGroup alignItems="center" gutterSize="s">
-                  <EuiFlexItem grow={false}>
-                    <EuiRadio
-                      id="escalation-mode-create"
-                      name="escalation-mode"
-                      checked={mode === 'create'}
-                      onChange={() => setMode('create')}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiText size="s">
-                      <strong>{T.modes.create.label}</strong>
-                    </EuiText>
-                    <EuiText size="xs" color="subdued">
-                      {T.modes.create.description}
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiPanel>
+                <EuiText size="xs" color="subdued">
+                  {T.modes.create.description}
+                </EuiText>
+              </EuiCheckableCard>
             </EuiFlexItem>
 
             <EuiFlexItem>
-              <EuiPanel
-                hasBorder
-                paddingSize="m"
-                css={css`
-                  cursor: pointer;
-                  ${mode === 'addToExisting' ? `border-color: ${euiTheme.colors.primary};` : ''}
-                `}
-                onClick={() => setMode('addToExisting')}
+              <EuiCheckableCard
+                id="escalation-mode-add-to-existing"
+                label={T.modes.addToExisting.label}
+                checked={mode === 'addToExisting'}
+                onChange={() => setMode('addToExisting')}
                 data-test-subj="escalationModalModeAddToExisting"
               >
-                <EuiFlexGroup alignItems="center" gutterSize="s">
-                  <EuiFlexItem grow={false}>
-                    <EuiRadio
-                      id="escalation-mode-add-to-existing"
-                      name="escalation-mode"
-                      checked={mode === 'addToExisting'}
-                      onChange={() => setMode('addToExisting')}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiText size="s">
-                      <strong>{T.modes.addToExisting.label}</strong>
-                    </EuiText>
-                    <EuiText size="xs" color="subdued">
-                      {T.modes.addToExisting.description}
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiPanel>
+                <EuiText size="xs" color="subdued">
+                  {T.modes.addToExisting.description}
+                </EuiText>
+              </EuiCheckableCard>
             </EuiFlexItem>
           </EuiFlexGroup>
         </div>
@@ -208,6 +172,7 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
             incidents={incidents}
             isLoading={isLoadingEscalations}
             isError={isEscalationsError}
+            error={escalationsError}
             onRetry={refetchEscalations}
             searchQuery={incidentSearch}
             onSearchChange={setIncidentSearch}

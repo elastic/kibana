@@ -176,7 +176,7 @@ describe('ConnectedEscalationModal', () => {
   it('calls createEscalation.mutate when the create form is submitted', () => {
     renderModal({ mode: 'create' });
 
-    fireEvent.click(screen.getByTestId('escalationModalOpenIncident'));
+    fireEvent.click(screen.getByTestId('escalationModalCreateEscalation'));
 
     expect(createMutate).toHaveBeenCalledWith(
       expect.objectContaining({

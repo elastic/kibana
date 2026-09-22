@@ -24,6 +24,8 @@ export interface ConversationsActionsGroupProps {
    * be able to resolve one; the control still works as a button without it.
    */
   chatHref?: string;
+  /** When true escalation actions are shown. Requires the manage escalations capability. */
+  canManageEscalations?: boolean;
 }
 
 /**
@@ -32,7 +34,14 @@ export interface ConversationsActionsGroupProps {
  * action, so the card surfaces navigation rather than a decision.
  */
 export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
-  ({ investigation, onClickRecommendedAction, onClickAction, onOpenChat, chatHref }) => {
+  ({
+    investigation,
+    onClickRecommendedAction,
+    onClickAction,
+    onOpenChat,
+    chatHref,
+    canManageEscalations,
+  }) => {
     const { euiTheme } = useEuiTheme();
 
     return (
@@ -64,6 +73,7 @@ export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
             investigation={investigation}
             onClickAction={onClickAction}
             onClickRecommendedAction={onClickRecommendedAction}
+            canManageEscalations={canManageEscalations}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

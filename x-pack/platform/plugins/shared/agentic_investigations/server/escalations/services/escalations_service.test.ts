@@ -469,4 +469,24 @@ describe('EscalationsService.list', () => {
       results: [],
     });
   });
+
+  it('forwards the search string to client.search as query', async () => {
+    const { service, client } = makeService({
+      search: jest.fn().mockResolvedValue({ results: [], total: 0 }),
+    });
+
+    await service.list(request, { page: 1, per_page: 50, search: 'critical' });
+
+    expect(client.search).toHaveBeenCalledWith(expect.objectContaining({ query: 'critical' }));
+  });
+
+  it('omits query from client.search when search is not provided', async () => {
+    const { service, client } = makeService({
+      search: jest.fn().mockResolvedValue({ results: [], total: 0 }),
+    });
+
+    await service.list(request, { page: 1, per_page: 50 });
+
+    expect(client.search).toHaveBeenCalledWith(expect.objectContaining({ query: undefined }));
+  });
 });

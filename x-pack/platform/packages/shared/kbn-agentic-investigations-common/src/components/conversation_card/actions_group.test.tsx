@@ -29,7 +29,10 @@ const makeInvestigation = (overrides: Partial<Investigation> = {}): Investigatio
 
 const renderGroup = (
   investigation: Investigation,
-  { withRecommendedAction = true }: { withRecommendedAction?: boolean } = {}
+  {
+    withRecommendedAction = true,
+    canManageEscalations = false,
+  }: { withRecommendedAction?: boolean; canManageEscalations?: boolean } = {}
 ) => {
   const onClickRecommendedAction = jest.fn();
   const onClickAction = jest.fn();
@@ -41,6 +44,7 @@ const renderGroup = (
       onClickRecommendedAction={withRecommendedAction ? onClickRecommendedAction : undefined}
       onClickAction={onClickAction}
       onOpenChat={onOpenChat}
+      canManageEscalations={canManageEscalations}
     />
   );
 
@@ -123,11 +127,20 @@ describe('ConversationsActionsGroup', () => {
       expect(screen.queryByText('Close investigation')).not.toBeInTheDocument();
     });
 
-    it('keeps the read-only items on a decided investigation', () => {
-      renderGroup(makeInvestigation({ recommendedAction: 'closed' }));
+    it('shows escalation actions when canManageEscalations is true', () => {
+      renderGroup(makeInvestigation({ recommendedAction: 'closed' }), { canManageEscalations: true });
       openMenu();
 
       expect(screen.getByText('Open an escalation')).toBeInTheDocument();
+      expect(screen.getByText('Add to an escalation')).toBeInTheDocument();
+    });
+
+    it('hides escalation actions when canManageEscalations is false (default)', () => {
+      renderGroup(makeInvestigation({ recommendedAction: 'closed' }));
+      openMenu();
+
+      expect(screen.queryByText('Open an escalation')).not.toBeInTheDocument();
+      expect(screen.queryByText('Add to an escalation')).not.toBeInTheDocument();
     });
 
     it('keeps assign and close while the decision is open', () => {
