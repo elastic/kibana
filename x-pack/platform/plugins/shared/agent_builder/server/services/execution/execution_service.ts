@@ -247,20 +247,30 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
    * {@link executeAgent}.
    */
   async maybeExecuteAgent(args: ExecuteAgentParams): Promise<MaybeExecuteAgentResult> {
-    if (
-      args.mode !== AgentExecutionMode.conversation ||
-      args.params.triggerMode !== ChatTriggerMode.Never
-    ) {
-      return this.executeAgent(args);
+    if ('triggerMode' in args.params && args.params.triggerMode === ChatTriggerMode.Never) {
+      return this.handleNeverTriggerMode(args);
     }
 
-    const { request, params } = args;
-    const validatedParams = await this.validateAttachments(params, request);
+    return this.executeAgent(args);
+  }
+
+  /**
+   * The `trigger_mode: 'never'` case: append the request's user message to the conversation,
+   * creating it when the request named none, and report it the way a run would. Only a
+   * conversation carries user messages, so only a conversation request can ask for this.
+   */
+  private async handleNeverTriggerMode(args: ExecuteAgentParams): Promise<MaybeExecuteAgentResult> {
+    if (args.mode !== AgentExecutionMode.conversation) {
+      throw createInternalError('A user message without execution needs a conversation request');
+    }
+
+    const { request } = args;
+    const validatedParams = await this.validateAttachments(args.params, request);
     const receivedAt = new Date();
 
     const { conversation, conversationClient } = await this.resolveConversation({
       request,
-      agentId: params.agentId ?? agentBuilderDefaultAgentId,
+      agentId: validatedParams.agentId ?? agentBuilderDefaultAgentId,
       params: validatedParams,
     });
 
