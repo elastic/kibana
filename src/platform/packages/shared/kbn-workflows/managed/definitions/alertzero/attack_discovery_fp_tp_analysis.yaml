@@ -70,58 +70,82 @@ triggers:
         - attack_discovery_id
         - investigation_id
       additionalProperties: false
+# The analyst-facing payload, matching the `security.attack_discovery.verdict`
+# attachment the review writes it into (merged elastic/kibana#291932).
+#
+# JSON Schema form rather than the legacy `- name:` array the other managed
+# workflows use, because only this form carries `maxLength`: the legacy
+# conversion copies type, description and default and drops everything else, so
+# a cap written there would be silently ignored. Same form the inputs above use.
+#
+# `workflow.output` validates what it emits against this schema and FAILS the run
+# when it does not match, so every constraint here is enforced at the boundary
+# rather than by convention — which is the point, since #19282 supplies the body
+# that has to honour it.
 outputs:
-  # The analyst-facing payload, matching the `security.attack_discovery.verdict`
-  # attachment the review writes it into (merged elastic/kibana#291932).
+  properties:
+    # `failed` is NOT a value this workflow emits. It is an execution state, never
+    # a classification: a timeout, a permission failure, an unavailable required
+    # source or a tool error fails the run once the retries above are exhausted,
+    # and the review maps the resulting absence of a payload onto the attachment's
+    # `failed` verdict. So the emitted classification is one of
+    # `consts.supported_verdicts`.
+    #
+    # Deliberately NOT an `enum` of those three, which is otherwise where it
+    # belongs: the editor type-checks the YAML SOURCE of `workflow.output` `with:`
+    # values, so an enum filled with the `"{{ ... }}"` template below is reported
+    # invalid — the same constraint that keeps the runner's counters `type:
+    # string`. `require_supported_verdict` applies the enum at runtime instead,
+    # and it also catches the empty string a length cap would not.
+    #
+    # `maxLength` has no such problem: the template source is well under any of
+    # these caps, so the caps constrain only the rendered value.
+    verdict:
+      type: string
+    # The attachment type renders the `# Analysis verdict: {verdict}` heading
+    # itself, so this is body markdown only.
+    #
+    # Capped to the attachment's own `z.string().max(8000)`. Without it an
+    # oversized summary completes the child, and then fails `attach_verdict` —
+    # which continues on failure, so `apply_verdict` would still close or escalate
+    # the attack with none of the evidence that justified it on the Investigation.
+    # Failing here instead routes to the review's `failed` arm, which records the
+    # failure and leaves the Investigation open. #19282 owns keeping generated
+    # markdown inside the cap; this is what makes exceeding it loud.
+    summary_markdown:
+      type: string
+      maxLength: 8000
+    # Optional. The attachment type renders the `## Rationale` heading, so this too
+    # is body markdown only, capped to the attachment's `max(50_000)` for the same
+    # reason as the summary. Emitted with `${{ }}` below so an analysis with no
+    # rationale leaves the field ABSENT rather than rendering an empty section.
+    rationale_markdown:
+      type: string
+      maxLength: 50000
+    # Internal rather than analyst-facing. This attempt's execution id, so a verdict
+    # can be traced back to the run that produced it — which is what makes distinct
+    # attempts distinguishable without any of them carrying an attempt counter.
+    analysis_execution_id:
+      type: string
+    # Read back off the loaded document, not echoed from input, so the caller can
+    # confirm the payload describes the attack it asked about.
+    attack_discovery_id:
+      type: string
+  # A run reaching `workflow.output` without these fails output validation rather
+  # than completing with a partial payload, because the review cannot tell a
+  # partial payload from a complete one: it would pair a real verdict with the
+  # "analysis failed" summary it substitutes for the missing half, and attach the
+  # contradiction to the Investigation as analyst evidence.
   #
-  # `failed` is NOT a value this workflow emits. It is an execution state, never a
-  # classification: a timeout, a permission failure, an unavailable required source
-  # or a tool error fails the run once the retries above are exhausted, and the
-  # review maps the resulting absence of a payload onto the attachment's `failed`
-  # verdict. So the emitted classification is one of `consts.supported_verdicts`.
-  #
-  # `required`, so a run that reaches `workflow.output` without them fails output
-  # validation rather than completing with a partial payload. That matters because
-  # the review cannot tell a partial payload from a complete one: it would pair a
-  # real verdict with the "analysis failed" summary it substitutes for the missing
-  # half, and attach the contradiction to the Investigation as analyst evidence.
-  #
-  # Deliberately NOT `type: choice` with the three as `options`, which is otherwise
-  # where the enum belongs: the editor type-checks the YAML SOURCE of
-  # `workflow.output` `with:` values, so a `choice` output filled with the
-  # `"{{ ... }}"` template below is reported invalid — the same constraint that
-  # keeps the runner's counters `type: string`. `require_supported_verdict` applies
-  # the enum at runtime instead, and it also catches the empty string that
-  # `required` alone accepts.
-  - name: verdict
-    type: string
-    required: true
-  # Required by the attachment, capped there at 8k. The attachment type renders the
-  # `# Analysis verdict: {verdict}` heading itself, so this is body markdown only.
-  - name: summary_markdown
-    type: string
-    required: true
-  # Optional, capped at 50k. The attachment type renders the `## Rationale` heading,
-  # so this too is body markdown only. Emitted with `${{ }}` below so an analysis
-  # with no rationale leaves the field ABSENT rather than rendering an empty section.
-  - name: rationale_markdown
-    type: string
-  # Internal rather than analyst-facing. This attempt's execution id, so a verdict
-  # can be traced back to the run that produced it — which is what makes distinct
-  # attempts distinguishable without any of them carrying an attempt counter.
-  - name: analysis_execution_id
-    type: string
-  # Read back off the loaded document, not echoed from input, so the caller can
-  # confirm the payload describes the attack it asked about.
-  - name: attack_discovery_id
-    type: string
-  #
-  # The richer execution output — per-check results, the claim-verification outcome,
-  # and whatever evaluation (#19285), telemetry (#19453) and outcome routing (#19214)
-  # need — arrives with #19282. It is internal rather than analyst-facing, and its
-  # shape follows the #19280 spike. The `corroborating_evidence` / `caveats` /
-  # `checks` field list that predates the attachment contract is illustrative only;
-  # nothing here commits to it.
+  # Not `additionalProperties: false`: the richer execution output — per-check
+  # results, the claim-verification outcome, and whatever evaluation (#19285),
+  # telemetry (#19453) and outcome routing (#19214) need — arrives with #19282,
+  # and its shape follows the #19280 spike. The `corroborating_evidence` /
+  # `caveats` / `checks` field list that predates the attachment contract is
+  # illustrative only; nothing here commits to it.
+  required:
+    - verdict
+    - summary_markdown
 consts:
   # The classifications this workflow may emit, enforced by
   # `require_supported_verdict`. `failed` is deliberately absent: the review

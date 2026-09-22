@@ -41,7 +41,10 @@ interface YamlWorkflow {
   steps: YamlStep[];
   tags?: string[];
   consts?: { supported_verdicts?: string[] };
-  outputs?: Array<{ name: string; type?: string; required?: boolean }>;
+  outputs?: {
+    properties?: Record<string, { type?: string; maxLength?: number }>;
+    required?: string[];
+  };
   settings?: {
     timeout?: string;
     concurrency?: unknown;
@@ -65,7 +68,8 @@ const stepNames = steps.map((step) => step.name);
 const stepIn = (name: string) => steps.find((step) => step.name === name);
 const trigger = analysis.triggers?.[0];
 const properties = trigger?.inputs?.properties ?? {};
-const outputNames = (analysis.outputs ?? []).map((output) => output.name);
+const outputProperties = analysis.outputs?.properties ?? {};
+const outputNames = Object.keys(outputProperties);
 
 describe('Attack Discovery FP/TP analysis workflow', () => {
   it('registers under its expected id', () => {
@@ -139,21 +143,30 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
     });
 
     it('declares a type for every output', () => {
-      expect((analysis.outputs ?? []).filter(({ type }) => type == null)).toEqual([]);
+      expect(Object.values(outputProperties).filter(({ type }) => type == null)).toEqual([]);
     });
 
     // The two halves of the attachment. Declaring them `required` is what makes a
     // partial payload fail output validation instead of completing the run.
     it.each(['verdict', 'summary_markdown'] as const)('requires %s', (name) => {
-      expect((analysis.outputs ?? []).find((output) => output.name === name)?.required).toBe(true);
+      expect(analysis.outputs?.required).toContain(name);
     });
 
     // Optional by the attachment's own schema, and the analysis is allowed to have
     // no reasoning to record.
     it('leaves the rationale optional', () => {
-      expect(
-        (analysis.outputs ?? []).find(({ name }) => name === 'rationale_markdown')?.required
-      ).toBeUndefined();
+      expect(analysis.outputs?.required).not.toContain('rationale_markdown');
+    });
+
+    // The caps the `security.attack_discovery.verdict` attachment enforces. They
+    // are declarable only in this JSON Schema form: the legacy `- name:` array
+    // conversion copies type, description and default and drops the rest, so a cap
+    // written there would be silently ignored.
+    it.each([
+      ['summary_markdown', 8000],
+      ['rationale_markdown', 50000],
+    ] as const)('caps %s at the length the attachment accepts', (name, cap) => {
+      expect(outputProperties[name]?.maxLength).toBe(cap);
     });
 
     // `failed` is an execution state, never a classification: a timeout, a
@@ -241,6 +254,23 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
     // no rationale emits.
     it('accepts a payload with no rationale', () => {
       expect(validate({ ...complete, rationale_markdown: undefined })).toBe(true);
+    });
+
+    // An oversized value would otherwise complete the child and then fail
+    // `attach_verdict`, which continues on failure — leaving `apply_verdict` to
+    // close or escalate the attack with none of the evidence that justified it.
+    it.each([
+      ['summary_markdown', 8000],
+      ['rationale_markdown', 50000],
+    ] as const)('rejects a %s longer than the attachment accepts', (name, cap) => {
+      expect(validate({ ...complete, [name]: 'x'.repeat(cap + 1) })).toBe(false);
+    });
+
+    it.each([
+      ['summary_markdown', 8000],
+      ['rationale_markdown', 50000],
+    ] as const)('accepts a %s exactly at the cap', (name, cap) => {
+      expect(validate({ ...complete, [name]: 'x'.repeat(cap) })).toBe(true);
     });
   });
 
