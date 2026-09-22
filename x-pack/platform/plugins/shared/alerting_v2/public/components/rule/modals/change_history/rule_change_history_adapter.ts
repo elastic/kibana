@@ -22,7 +22,8 @@ const toChangeHistoryItem = (item: RuleChangeHistoryListItem): ChangeHistoryList
   changes: item.changes,
   comment: item.comment,
   tags: item.tags,
-  metadata: item.metadata,
+  // The package reads `metadata.version` for version-distance telemetry.
+  metadata: item.version !== undefined ? { version: item.version } : undefined,
   isCurrent: item.is_current,
 });
 

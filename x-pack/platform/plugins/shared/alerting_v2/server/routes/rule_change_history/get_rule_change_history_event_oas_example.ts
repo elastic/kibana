@@ -25,7 +25,7 @@ export const GET_RULE_CHANGE_HISTORY_EVENT_RESPONSE: RuleChangeHistoryDetail = {
     summary: { metadata: { name: 'Host CPU high' } },
   },
   is_current: true,
-  metadata: { version: 2 },
+  version: 2,
   snapshot: {
     ...RULE_SNAPSHOT,
     metadata: {

@@ -7,6 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import type { ListRuleChangeHistoryResponse } from '@kbn/alerting-v2-schemas';
 import type { RuleChangesHistoryClientContract } from '../../lib/rule_changes_history';
 import { createRuleChangesHistoryClientMock } from '../../lib/rule_changes_history/rule_changes_history_client.mock';
 import { createRouteDependencies } from '../test_utils';
@@ -53,7 +54,7 @@ describe('ListRuleChangeHistoryRoute', () => {
 
   it('returns the client result in the response body', async () => {
     const mocks = createMocks();
-    const clientResult = {
+    const clientResult: ListRuleChangeHistoryResponse = {
       items: [
         {
           id: 'event-1',

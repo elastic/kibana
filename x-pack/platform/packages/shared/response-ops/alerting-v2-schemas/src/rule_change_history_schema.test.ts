@@ -76,12 +76,28 @@ describe('listRuleChangeHistoryResponseSchema', () => {
             actor: { name: 'elastic' },
             action: 'rule_create',
             is_current: true,
-            metadata: { version: 1 },
+            version: 1,
           },
         ],
         total: 1,
       }).success
     ).toBe(true);
+  });
+
+  it('rejects an action outside the recorded lifecycle vocabulary', () => {
+    expect(
+      listRuleChangeHistoryResponseSchema.safeParse({
+        items: [
+          {
+            id: 'event-1',
+            created_at: '2026-01-15T12:00:00.000Z',
+            actor: { name: 'elastic' },
+            action: 'rule_archive',
+          },
+        ],
+        total: 1,
+      }).success
+    ).toBe(false);
   });
 });
 

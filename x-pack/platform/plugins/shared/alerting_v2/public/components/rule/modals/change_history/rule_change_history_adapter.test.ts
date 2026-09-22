@@ -15,7 +15,7 @@ const createApiMock = () =>
       id: 'evt-1',
       created_at: '2026-01-01T00:00:00.000Z',
       actor: { name: 'elastic' },
-      action: 'update',
+      action: 'rule_update',
       snapshot: {},
     }),
   } as unknown as jest.Mocked<RuleChangeHistoryApi>);
@@ -60,7 +60,7 @@ describe('createRuleChangeHistoryAdapter', () => {
             id: 'evt-1',
             created_at: '2026-01-01T00:00:00.000Z',
             actor: { name: 'elastic' },
-            action: 'update',
+            action: 'rule_update',
           },
         ],
         total: 1,
@@ -75,7 +75,7 @@ describe('createRuleChangeHistoryAdapter', () => {
             id: 'evt-1',
             timestamp: '2026-01-01T00:00:00.000Z',
             actor: { name: 'elastic' },
-            action: 'update',
+            action: 'rule_update',
           },
         ],
         total: 1,
@@ -90,7 +90,7 @@ describe('createRuleChangeHistoryAdapter', () => {
             id: 'evt-1',
             created_at: '2026-01-01T00:00:00.000Z',
             actor: { name: 'elastic', profile_id: 'u_1' },
-            action: 'update',
+            action: 'rule_update',
             is_current: true,
           },
         ],
@@ -107,9 +107,33 @@ describe('createRuleChangeHistoryAdapter', () => {
         id: 'evt-1',
         timestamp: '2026-01-01T00:00:00.000Z',
         actor: { name: 'elastic', profileId: 'u_1' },
-        action: 'update',
+        action: 'rule_update',
         isCurrent: true,
       });
+    });
+
+    it('rebuilds the metadata bag the package reads for version-distance telemetry', async () => {
+      const api = createApiMock();
+      api.listRuleChanges.mockResolvedValueOnce({
+        items: [
+          {
+            id: 'evt-1',
+            created_at: '2026-01-01T00:00:00.000Z',
+            actor: { name: 'elastic' },
+            action: 'rule_update',
+            version: 7,
+          },
+        ],
+        total: 1,
+      });
+      const adapter = createRuleChangeHistoryAdapter(api);
+
+      const { items } = await adapter.listChanges({
+        objectId: 'rule-1',
+        page: { index: 0, size: 20 },
+      });
+
+      expect(items[0].metadata).toEqual({ version: 7 });
     });
 
     it('propagates errors', async () => {
@@ -144,7 +168,7 @@ describe('createRuleChangeHistoryAdapter', () => {
         id: 'evt-1',
         created_at: '2026-01-01T00:00:00.000Z',
         actor: { name: 'elastic', profile_id: 'u_1' },
-        action: 'update',
+        action: 'rule_update',
         is_current: true,
         reason: 'renamed',
         snapshot: { name: 'rule' },
@@ -155,7 +179,7 @@ describe('createRuleChangeHistoryAdapter', () => {
         id: 'evt-1',
         timestamp: '2026-01-01T00:00:00.000Z',
         actor: { name: 'elastic', profileId: 'u_1' },
-        action: 'update',
+        action: 'rule_update',
         isCurrent: true,
         reason: 'renamed',
         snapshot: { name: 'rule' },

@@ -61,6 +61,21 @@ export const ruleChangeHistoryActorSchema = z.object({
 export type RuleChangeHistoryActor = z.infer<typeof ruleChangeHistoryActorSchema>;
 
 /**
+ * Rule lifecycle actions recorded by the change-history write path. `unknown`
+ * is the read fallback for a document written by a newer version: the row is
+ * still returned so the audit trail stays complete.
+ */
+export const ruleChangeHistoryActionSchema = z.enum([
+  'rule_create',
+  'rule_update',
+  'rule_delete',
+  'rule_enable',
+  'rule_disable',
+  'unknown',
+]);
+export type RuleChangeHistoryAction = z.infer<typeof ruleChangeHistoryActionSchema>;
+
+/**
  * Server-computed diff vs the chronologically older version. `summary` is an
  * RFC 7396 JSON Merge Patch of previous values (opaque to the UI package).
  */
@@ -82,12 +97,17 @@ export const ruleChangeHistoryListItemSchema = z.object({
       'The ISO datetime when this change-history record was written. The rule change itself is timestamped by `updated_at` on the snapshot.'
     ),
   actor: ruleChangeHistoryActorSchema,
-  action: z.string(),
+  action: ruleChangeHistoryActionSchema,
   changes: ruleChangeHistoryChangesSchema.optional(),
   comment: z.string().optional(),
   is_current: z.boolean().optional(),
   tags: z.array(z.string()).optional(),
-  metadata: z.record(z.string(), z.unknown()).optional(),
+  version: z
+    .number()
+    .int()
+    .nonnegative()
+    .optional()
+    .describe('The rule version this change produced.'),
 });
 export type RuleChangeHistoryListItem = z.infer<typeof ruleChangeHistoryListItemSchema>;
 

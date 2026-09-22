@@ -97,10 +97,28 @@ describe('RuleChangesHistoryClient', () => {
           count: 1,
           summary: { metadata: { name: 'A' } },
         },
-        metadata: { version: 2 },
+        version: 2,
       });
       // Snapshot must not appear on list rows.
       expect(result.items[0]).not.toHaveProperty('snapshot');
+    });
+
+    it('reports an unrecognized stored action as unknown so the row is still returned', async () => {
+      const changeHistory = createChangeHistoryMock();
+      changeHistory.getHistory.mockResolvedValue({
+        items: [createDocument({ id: 'event-1', action: 'rule_archive' })],
+        total: 1,
+      });
+
+      const client = new RuleChangesHistoryClient(
+        changeHistory as unknown as ChangeHistoryClient,
+        'default'
+      );
+
+      const result = await client.listRuleChanges({ ruleId: 'rule-1', page: 1, perPage: 20 });
+
+      expect(result.items).toHaveLength(1);
+      expect(result.items[0].action).toBe('unknown');
     });
 
     it('does not mark items as current on pages after the first', async () => {
