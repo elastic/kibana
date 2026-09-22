@@ -8,7 +8,7 @@
 import { EuiFlyoutBody, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
 import { Global, css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Environment } from '../../../../common/environment_rt';
 import type { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { useTimeRange } from '../../../hooks/use_time_range';
@@ -107,12 +107,19 @@ export function ServiceFlyout({
   const titleId = useGeneratedHtmlId({ prefix: 'serviceFlyoutTitle' });
   const [flyoutEnvironment, setFlyoutEnvironment] = useState(environment);
   const [flyoutRange, setFlyoutRange] = useState({ rangeFrom, rangeTo });
-  const { start, end } = useTimeRange({
+  const { start, end, refreshTimeRange } = useTimeRange({
     rangeFrom: flyoutRange.rangeFrom,
     rangeTo: flyoutRange.rangeTo,
   });
   const [flyoutTransactionType, setFlyoutTransactionType] = useState(transactionType ?? '');
   const [refreshToken, setRefreshToken] = useState(Date.now());
+
+  const onRefresh = useCallback(() => {
+    setRefreshToken(Date.now());
+    // Bump APM timeRangeId so useFetcher-based charts/traces reload without needing
+    // refreshToken as a fake dependency in those hooks. Lens still uses refreshToken.
+    refreshTimeRange();
+  }, [refreshTimeRange]);
 
   const capabilities = useServiceFlyoutCapabilities({
     serviceName: service.name,
@@ -186,7 +193,7 @@ export function ServiceFlyout({
             end,
             setRange: setFlyoutRange,
             refreshToken,
-            onRefresh: () => setRefreshToken(Date.now()),
+            onRefresh,
             transactionType: flyoutTransactionType,
             setTransactionType: setFlyoutTransactionType,
             latencyAggregationType,

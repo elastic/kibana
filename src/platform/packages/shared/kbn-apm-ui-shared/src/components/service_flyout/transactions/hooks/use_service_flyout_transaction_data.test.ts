@@ -320,6 +320,69 @@ describe('useServiceFlyoutTransactionData', () => {
       await waitFor(() => expect(http.get).toHaveBeenCalledTimes(2));
     });
 
+    it('keeps isServerSearch true for the retained result while clearing search reloads', async () => {
+      let resolveUnsearchedMain: (value: object) => void;
+      const unsearchedMainPromise = new Promise<object>((resolve) => {
+        resolveUnsearchedMain = resolve;
+      });
+      let mainCall = 0;
+
+      const http = {
+        get: jest.fn().mockImplementation((url: string) => {
+          if (url.includes('detailed_statistics')) {
+            return Promise.resolve(EMPTY_DETAILED_RESPONSE);
+          }
+          mainCall += 1;
+          if (mainCall === 1) {
+            return Promise.resolve({
+              transactionGroups: TRANSACTION_GROUPS,
+              maxCountExceeded: true,
+              hasActiveAlerts: false,
+            });
+          }
+          if (mainCall === 2) {
+            return Promise.resolve({
+              transactionGroups: [TRANSACTION_GROUPS[0]],
+              maxCountExceeded: true,
+              hasActiveAlerts: false,
+            });
+          }
+          return unsearchedMainPromise;
+        }),
+      } as unknown as HttpStart;
+
+      const { result, rerender } = renderHook(
+        ({ searchQuery }: { searchQuery: string }) =>
+          useServiceFlyoutTransactionData({ http, ...BASE_PARAMS, searchQuery }),
+        { initialProps: { searchQuery: '' } }
+      );
+
+      await waitFor(() => expect(result.current.maxCountExceeded).toBe(true));
+      expect(result.current.isServerSearch).toBe(false);
+
+      rerender({ searchQuery: 'orders' });
+      await waitFor(() => expect(result.current.isServerSearch).toBe(true));
+      expect(result.current.items).toHaveLength(1);
+
+      // Clear search — retained narrowed rows must stay marked as server-search until the
+      // unsearched request settles (otherwise the host can falsely freeze on them).
+      rerender({ searchQuery: '' });
+
+      await waitFor(() => expect(result.current.isLoading).toBe(true));
+      expect(result.current.isServerSearch).toBe(true);
+      expect(result.current.items).toHaveLength(1);
+
+      resolveUnsearchedMain!({
+        transactionGroups: TRANSACTION_GROUPS,
+        maxCountExceeded: true,
+        hasActiveAlerts: false,
+      });
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+      expect(result.current.isServerSearch).toBe(false);
+      expect(result.current.items).toHaveLength(2);
+    });
+
     it('resets maxCountExceeded when serviceName changes', async () => {
       const http = {
         get: jest

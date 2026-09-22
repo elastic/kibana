@@ -928,7 +928,7 @@ describe('ServiceFlyoutOverview transactions section props', () => {
       transactionsSectionProps!.onTransactionsChange!([], listMeta(true, STAGING_LIST_FILTERS));
     });
 
-    // Search-filtered settle under the new filters must not freeze.
+    // Search-filtered settle that omits the selection must not freeze (cannot prove absence).
     act(() => {
       transactionsSectionProps!.onTransactionsChange!(
         [
@@ -945,10 +945,16 @@ describe('ServiceFlyoutOverview transactions section props', () => {
     });
 
     expect(mockTransactionDetailFlyoutProps).toHaveBeenLastCalledWith(
-      expect.objectContaining({ isFiltersStale: false })
+      expect.objectContaining({
+        isFiltersStale: false,
+        isFiltersPending: true,
+        filters: expect.objectContaining({
+          environment: 'production',
+        }),
+      })
     );
 
-    // Unsearched settle with the selection present confirms live filters.
+    // Search-filtered settle that still includes the selection can promote live filters.
     act(() => {
       transactionsSectionProps!.onTransactionsChange!(
         [
@@ -960,13 +966,14 @@ describe('ServiceFlyoutOverview transactions section props', () => {
             errorRate: { value: 0 },
           },
         ],
-        listMeta(false, STAGING_LIST_FILTERS)
+        listMeta(false, STAGING_LIST_FILTERS, undefined, true)
       );
     });
 
     expect(mockTransactionDetailFlyoutProps).toHaveBeenLastCalledWith(
       expect.objectContaining({
         isFiltersStale: false,
+        isFiltersPending: false,
         filters: expect.objectContaining({
           environment: 'staging',
           start: '2026-09-18T14:20:34.096Z',
@@ -1292,6 +1299,7 @@ describe('ServiceFlyoutOverview transactions section props', () => {
     expect(mockTransactionDetailFlyoutProps).toHaveBeenLastCalledWith(
       expect.objectContaining({
         isFiltersStale: true,
+        schema: 'ecs',
         filters: expect.objectContaining({
           transactionName: 'GET /api/orders',
           transactionType: 'request',

@@ -22,6 +22,7 @@ import {
   type TransactionGroup,
   type TransactionsListChangeMeta,
 } from '@kbn/apm-ui-shared';
+import type { ServiceSchemaType } from '@kbn/apm-types';
 import { i18n } from '@kbn/i18n';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -53,6 +54,8 @@ interface SelectedTransactionDetail {
   /** Last filters under which the selection was confirmed present in the list. */
   confirmedFilters: AppliedTransactionFilters;
   isFiltersStale: boolean;
+  /** Schema confirmed with the selection — kept when filters freeze (e.g. ECS → OTel). */
+  schema?: ServiceSchemaType;
 }
 
 function isSameAppliedFilters(a: AppliedTransactionFilters, b: AppliedTransactionFilters): boolean {
@@ -355,10 +358,11 @@ export function ServiceFlyoutOverview() {
           filters: liveTransactionFilters,
           confirmedFilters: liveTransactionFilters,
           isFiltersStale: false,
+          schema: capabilities.schema,
         };
       });
     },
-    [transactionType, liveTransactionFilters, liveFiltersKey]
+    [transactionType, liveTransactionFilters, liveFiltersKey, capabilities.schema]
   );
 
   const onTransactionsChange = useCallback(
@@ -386,21 +390,22 @@ export function ServiceFlyoutOverview() {
           return prev;
         }
 
-        // A server-side table search omits rows that may still exist. Do not confirm or freeze from it.
-        if (meta.isSearchFiltered) {
-          return prev;
-        }
-
         if (pendingFilterReconcileRef.current && !seenLoadingSincePendingRef.current) {
           // Previous list still on screen — do not confirm presence or mark stale yet.
           return prev;
         }
-        pendingFilterReconcileRef.current = false;
 
         const isPresent = items.some((item) => {
           const resolvedType = item.transactionType || transactionType;
           return item.name === prev.transactionName && resolvedType === prev.transactionType;
         });
+
+        // A server-side search cannot prove absence (the row may exist outside the query),
+        // but presence in the narrowed result is enough to promote live filters.
+        if (meta.isSearchFiltered && !isPresent) {
+          return prev;
+        }
+        pendingFilterReconcileRef.current = false;
 
         if (isPresent) {
           if (
@@ -415,6 +420,7 @@ export function ServiceFlyoutOverview() {
             filters: liveTransactionFilters,
             confirmedFilters: liveTransactionFilters,
             isFiltersStale: false,
+            schema: capabilities.schema,
           };
         }
 
@@ -441,7 +447,7 @@ export function ServiceFlyoutOverview() {
         };
       });
     },
-    [liveTransactionFilters, transactionType]
+    [liveTransactionFilters, transactionType, capabilities.schema]
   );
 
   const isTransactionExpanded = useCallback(
@@ -613,7 +619,7 @@ export function ServiceFlyoutOverview() {
           onClose={() => setSelectedTransaction(null)}
           historyKey={flyoutHistoryKey}
           preferDocumentBasedCharts={preferDocumentBasedCharts}
-          schema={capabilities.schema}
+          schema={selectedTransaction.schema}
           indices={indices}
         />
       )}

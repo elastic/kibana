@@ -36,6 +36,11 @@ interface MainStatisticsResponse {
   hasActiveAlerts: boolean;
 }
 
+/** Main stats plus the server search query that produced this retained value. */
+interface MainStatisticsResult extends MainStatisticsResponse {
+  appliedServerSearchQuery: string;
+}
+
 // TODO: replace with typed callApmApi once it lives in a package outside of APM (https://github.com/elastic/kibana/issues/271155)
 interface ServiceTransactionGroupDetailedStat {
   transactionName: string;
@@ -129,8 +134,11 @@ export function useServiceFlyoutTransactionData({
     loading: isMainLoading,
     error: mainStatsError,
   } = useAbortableAsync(
-    async ({ signal }) => {
+    async ({ signal }): Promise<MainStatisticsResult | undefined> => {
       if (!enabled || !dataSource) return undefined;
+      // Capture the query for this request — useAbortableAsync retains the previous
+      // value while loading, so isServerSearch must follow the retained result, not
+      // the live search input (clearing search would otherwise mislabel narrowed rows).
       const result = await http.get<MainStatisticsResponse>(
         `/internal/apm/services/${encodeURIComponent(
           serviceName
@@ -153,7 +161,7 @@ export function useServiceFlyoutTransactionData({
         }
       );
       setMaxCountExceeded((prev) => prev || result.maxCountExceeded);
-      return result;
+      return { ...result, appliedServerSearchQuery: serverSearchQuery };
     },
     [
       http,
@@ -292,7 +300,11 @@ export function useServiceFlyoutTransactionData({
     mainError: mainStatsError,
     /** Full list before client-side search. Server search still narrows this list. */
     presenceItems: allItems,
-    isServerSearch:
-      Boolean(searchQuery) && (maxCountExceeded || Boolean(mainResponse?.maxCountExceeded)),
+    /**
+     * True when the retained main-stats result was fetched with a non-empty server
+     * search — not when the live input has a query (clearing search keeps the old
+     * narrowed rows until the unsearched request settles).
+     */
+    isServerSearch: Boolean(mainResponse?.appliedServerSearchQuery),
   };
 }
