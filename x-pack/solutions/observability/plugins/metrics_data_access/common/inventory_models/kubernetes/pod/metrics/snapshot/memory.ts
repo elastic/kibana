@@ -48,16 +48,25 @@ export const memory: SchemaBasedAggregations = {
         field: SEMCONV_K8S_POD_MEMORY_NODE_UTILIZATION,
       },
     },
+    memory_node_utilization_count: {
+      value_count: {
+        field: SEMCONV_K8S_POD_MEMORY_NODE_UTILIZATION,
+      },
+    },
     memory: {
       bucket_script: {
         buckets_path: {
           with_limit: 'memory_with_limit',
           without_limit: 'memory_without_limit',
+          without_limit_count: 'memory_node_utilization_count',
         },
         script: {
-          source: 'params.with_limit > 0.0 ? params.with_limit : params.without_limit',
+          source:
+            'params.with_limit > 0.0 ? params.with_limit : (params.without_limit_count > 0 ? params.without_limit : null)',
           lang: 'painless',
         },
+        // Zeros empty limit buckets so pods without limits fall back to node utilization.
+        // A zero count means that fallback field is absent, so the value stays null.
         gap_policy: 'insert_zeros',
       },
     },

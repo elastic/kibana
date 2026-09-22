@@ -124,6 +124,8 @@ export interface SemconvPodFixture {
   name: string;
   nodeName: string;
   withoutLimits?: boolean;
+  /** Pod has kubeletstats cpu and network docs, and no memory fields. */
+  omitMemory?: boolean;
   interfaces?: string[];
 }
 

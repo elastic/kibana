@@ -19,6 +19,8 @@ const ECS_POD_COUNT = 2;
 const ECS_POD_UIDS = Array.from({ length: ECS_POD_COUNT }, (_, idx) => `pod-${idx}`);
 const SEMCONV_CPU_WITH_LIMIT = 0.46;
 const SEMCONV_CPU_WITHOUT_LIMIT = 0.32;
+const SEMCONV_MEMORY_WITH_LIMIT = 0.55;
+const SEMCONV_MEMORY_WITHOUT_LIMIT = 0.4;
 
 apiTest.describe(
   'API /api/metrics/snapshot (semconv pods)',
@@ -76,7 +78,7 @@ apiTest.describe(
         body: {
           sourceId: 'default',
           timerange: { from, to, interval: '1m' },
-          metrics: [{ type: 'cpu' }, { type: 'rx' }, { type: 'tx' }],
+          metrics: [{ type: 'cpu' }, { type: 'memory' }, { type: 'rx' }, { type: 'tx' }],
           nodeType: 'pod',
           schema: 'semconv',
           groupBy: [],
@@ -106,6 +108,16 @@ apiTest.describe(
         expect(cpu.value).toBeCloseTo(
           fixture.withoutLimits ? SEMCONV_CPU_WITHOUT_LIMIT : SEMCONV_CPU_WITH_LIMIT,
           2
+        );
+
+        const memory = findMetric(node, 'memory');
+        const expectedMemory = fixture.omitMemory
+          ? null
+          : fixture.withoutLimits
+          ? SEMCONV_MEMORY_WITHOUT_LIMIT
+          : SEMCONV_MEMORY_WITH_LIMIT;
+        expect(fixture.omitMemory ? memory.value : Number(memory.value?.toFixed(2))).toStrictEqual(
+          expectedMemory
         );
 
         const rx = findMetric(node, 'rx').value;

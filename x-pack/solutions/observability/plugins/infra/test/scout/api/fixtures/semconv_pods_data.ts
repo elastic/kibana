@@ -17,6 +17,8 @@ export interface SemconvPodFixture {
   name: string;
   nodeName: string;
   withoutLimits?: boolean;
+  /** Pod has kubeletstats cpu and network docs, and no memory fields. */
+  omitMemory?: boolean;
   interfaces?: string[];
 }
 
@@ -36,6 +38,12 @@ export const SEMCONV_PODS: SemconvPodFixture[] = [
     name: 'semconv-pod-2',
     nodeName: 'semconv-host-2',
     interfaces: ['eth0', 'net1'],
+  },
+  {
+    uid: 'semconv-pod-3',
+    name: 'semconv-pod-3',
+    nodeName: 'semconv-host-2',
+    omitMemory: true,
   },
 ];
 
@@ -57,6 +65,7 @@ export function generateSemconvPodsData({
   const podList = pods.map((pod) => ({
     entity: infra.semconvPod(pod.uid, pod.nodeName, { name: pod.name }),
     withoutLimits: pod.withoutLimits === true,
+    omitMemory: pod.omitMemory === true,
     interfaces: pod.interfaces,
   }));
 
@@ -67,7 +76,9 @@ export function generateSemconvPodsData({
       podList.flatMap((pod) => {
         // Stagger by 1 ms per doc — TSDB derives _id from dimensions that exclude
         // `direction` / `interface`, so identical @timestamp + metricset = duplicate _id.
-        const docs = pod.withoutLimits
+        const docs = pod.omitMemory
+          ? [...pod.entity.cpu(), ...pod.entity.network({ interfaces: pod.interfaces })]
+          : pod.withoutLimits
           ? [
               ...pod.entity.cpuWithoutLimit(),
               ...pod.entity.memoryWithoutLimit(),

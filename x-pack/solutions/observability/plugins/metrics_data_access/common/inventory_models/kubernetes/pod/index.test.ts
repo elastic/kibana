@@ -10,6 +10,7 @@ import {
   EVENT_MODULE,
   KUBELET_STATS_RECEIVER_OTEL,
   SEMCONV_K8S_POD_CPU_LIMIT_UTILIZATION,
+  SEMCONV_K8S_POD_MEMORY_NODE_UTILIZATION,
 } from '../../../constants';
 import { pod } from '.';
 
@@ -51,6 +52,38 @@ describe('pod inventory model', () => {
       expect(withoutSchema.get('memory')).toEqual(ecs.get('memory'));
       expect(withoutSchema.get('rx')).toEqual(ecs.get('rx'));
       expect(withoutSchema.get('tx')).toEqual(ecs.get('tx'));
+    });
+
+    it('nulls SemConv memory when node utilization is absent and keeps the limit fallback', async () => {
+      const catalog = await pod.metrics.getAggregations({ schema: 'semconv' });
+      const memory = catalog.get('memory');
+
+      expect(memory).toEqual(
+        expect.objectContaining({
+          memory_node_utilization_count: {
+            value_count: { field: SEMCONV_K8S_POD_MEMORY_NODE_UTILIZATION },
+          },
+          memory: expect.objectContaining({
+            bucket_script: expect.objectContaining({
+              gap_policy: 'insert_zeros',
+              buckets_path: expect.objectContaining({
+                without_limit_count: 'memory_node_utilization_count',
+              }),
+              script: expect.objectContaining({
+                source: expect.stringContaining('without_limit_count > 0'),
+              }),
+            }),
+          }),
+        })
+      );
+    });
+
+    it('keeps ECS memory on skip without the SemConv count guard', async () => {
+      const catalog = await pod.metrics.getAggregations({ schema: 'ecs' });
+      const memory = JSON.stringify(catalog.get('memory'));
+
+      expect(memory).toContain('"gap_policy":"skip"');
+      expect(memory).not.toContain('memory_node_utilization_count');
     });
 
     it('filters receive traffic by direction and sums interfaces for SemConv rx', async () => {
