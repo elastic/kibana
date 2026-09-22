@@ -9,6 +9,7 @@ import { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { hashEuid } from '../../../../../common/domain/euid';
 import {
+  PUBLIC_HEADERS,
   INTERNAL_HEADERS,
   ENTITY_STORE_ROUTES,
   ENTITY_STORE_TAGS,
@@ -19,19 +20,27 @@ import {
   forceLogExtraction,
   normalizeKeywordList,
   setupLogsTestDataStream,
+  startAllEntityTypes,
   teardownLogsTestDataStream,
 } from '../../../common/fixtures/helpers';
 
 apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, () => {
+  let defaultHeaders: Record<string, string>;
   let internalHeaders: Record<string, string>;
 
-  apiTest.beforeAll(async ({ samlAuth, esClient, esArchiver }) => {
+  apiTest.beforeAll(async ({ samlAuth, apiClient, esClient, esArchiver }) => {
     const credentials = await samlAuth.asInteractiveUser('admin');
+    defaultHeaders = {
+      ...credentials.cookieHeader,
+      ...PUBLIC_HEADERS,
+    };
     internalHeaders = {
       ...credentials.cookieHeader,
       ...INTERNAL_HEADERS,
     };
     await clearInstalledEntityStoreDocuments(esClient);
+    const startResponse = await startAllEntityTypes(apiClient, defaultHeaders);
+    expect(startResponse.statusCode).toBe(200);
 
     await setupLogsTestDataStream(esClient);
     await esArchiver.loadIfNeeded(

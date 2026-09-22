@@ -10,8 +10,7 @@ import { uninstallEntityStoreSuite } from '../../../common/fixtures/helpers';
 
 globalTeardownHook(
   'Uninstall Entity Store for CRUD and resolution API suite',
-  async (fixtures) => {
-    const { apiClient, esClient, kbnClient, samlAuth } = fixtures;
+  async ({ apiClient, esClient, kbnClient, samlAuth }) => {
     await uninstallEntityStoreSuite({ apiClient, esClient, kbnClient, samlAuth });
   }
 );

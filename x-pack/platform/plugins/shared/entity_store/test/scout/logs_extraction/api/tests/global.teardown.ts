@@ -8,7 +8,9 @@
 import { globalTeardownHook } from '@kbn/scout';
 import { uninstallEntityStoreSuite } from '../../../common/fixtures/helpers';
 
-globalTeardownHook('Uninstall Entity Store for logs extraction API suite', async (fixtures) => {
-  const { apiClient, esClient, kbnClient, samlAuth } = fixtures;
-  await uninstallEntityStoreSuite({ apiClient, esClient, kbnClient, samlAuth });
-});
+globalTeardownHook(
+  'Uninstall Entity Store for logs extraction API suite',
+  async ({ apiClient, esClient, kbnClient, samlAuth }) => {
+    await uninstallEntityStoreSuite({ apiClient, esClient, kbnClient, samlAuth });
+  }
+);

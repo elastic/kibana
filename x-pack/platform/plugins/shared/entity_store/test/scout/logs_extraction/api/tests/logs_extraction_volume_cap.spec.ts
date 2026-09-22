@@ -18,6 +18,7 @@ import {
   clearInstalledEntityStoreDocuments,
   ingestDoc,
   LOGS_TEST_INDEX,
+  startAllEntityTypes,
 } from '../../../common/fixtures/helpers';
 import {
   LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT,
@@ -40,7 +41,7 @@ apiTest.describe('Entity Store volume cap', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
   let internalHeaders: Record<string, string>;
 
-  apiTest.beforeAll(async ({ samlAuth, esClient }) => {
+  apiTest.beforeAll(async ({ samlAuth, apiClient, esClient }) => {
     const credentials = await samlAuth.asInteractiveUser('admin');
     defaultHeaders = {
       ...credentials.cookieHeader,
@@ -51,6 +52,8 @@ apiTest.describe('Entity Store volume cap', { tag: ENTITY_STORE_TAGS }, () => {
       ...INTERNAL_HEADERS,
     };
     await clearInstalledEntityStoreDocuments(esClient);
+    const startResponse = await startAllEntityTypes(apiClient, defaultHeaders);
+    expect(startResponse.statusCode).toBe(200);
   });
 
   // Defer: cap fires mid-window — caller uses lastSearchTimestamp to resume

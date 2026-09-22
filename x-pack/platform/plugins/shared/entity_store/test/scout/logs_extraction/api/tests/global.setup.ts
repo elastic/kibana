@@ -8,7 +8,9 @@
 import { globalSetupHook } from '@kbn/scout';
 import { installEntityStoreSuite } from '../../../common/fixtures/helpers';
 
-globalSetupHook('Install Entity Store once for logs extraction API suite', async (fixtures) => {
-  const { apiClient, kbnClient, samlAuth } = fixtures;
-  await installEntityStoreSuite({ apiClient, kbnClient, samlAuth });
-});
+globalSetupHook(
+  'Install Entity Store once for logs extraction API suite',
+  async ({ apiClient, kbnClient, samlAuth }) => {
+    await installEntityStoreSuite({ apiClient, kbnClient, samlAuth });
+  }
+);

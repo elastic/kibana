@@ -19,7 +19,10 @@ import {
   LATEST_ALIAS,
   PUBLIC_HEADERS,
 } from '../../../common/fixtures/constants';
-import { clearInstalledEntityStoreDocuments } from '../../../common/fixtures/helpers';
+import {
+  clearInstalledEntityStoreDocuments,
+  startAllEntityTypes,
+} from '../../../common/fixtures/helpers';
 
 const BROKEN_MAPPING_DATA_STREAM = 'logs-broken-mapping';
 const BROKEN_MAPPING_TEMPLATE = 'logs-broken-mapping-template';
@@ -354,7 +357,7 @@ apiTest.describe('Entity Store logs extraction broken mapping', { tag: ENTITY_ST
   let defaultHeaders: Record<string, string>;
   let internalHeaders: Record<string, string>;
 
-  apiTest.beforeAll(async ({ samlAuth, esClient }) => {
+  apiTest.beforeAll(async ({ samlAuth, apiClient, esClient }) => {
     const credentials = await samlAuth.asInteractiveUser('admin');
     defaultHeaders = {
       ...credentials.cookieHeader,
@@ -365,6 +368,8 @@ apiTest.describe('Entity Store logs extraction broken mapping', { tag: ENTITY_ST
       ...INTERNAL_HEADERS,
     };
     await clearInstalledEntityStoreDocuments(esClient);
+    const startResponse = await startAllEntityTypes(apiClient, defaultHeaders);
+    expect(startResponse.statusCode).toBe(200);
 
     await cleanupBrokenMappingArtifacts(esClient);
     await createBrokenMappingTemplate(esClient);
