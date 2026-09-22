@@ -8,6 +8,10 @@
  */
 
 import { createSelector } from 'redux-toolkit-v1';
+import {
+  buildStepDurations,
+  EMPTY_STEP_DURATIONS,
+} from '../../../../shared/lib/build_step_durations';
 import type { RootState } from '../types';
 
 // Selectors
@@ -215,6 +219,28 @@ export const selectEditorWorkflowDefinition = createSelector(
 export const selectEditorYamlLineCounter = createSelector(
   selectEditorComputed,
   (computed) => computed?.yamlLineCounter
+);
+
+/**
+ * Per-step duration map, populated whenever an execution is loaded in the store.
+ * Covers both the old sidebar (workflow tab + execution open) and the executions tab.
+ * Uses the same allow-list as the flyout tree so numbers always agree.
+ */
+export const selectStepDurations = createSelector(
+  selectStepExecutions,
+  selectEditorWorkflowLookup,
+  (stepExecutions, lookup) =>
+    stepExecutions?.length && lookup
+      ? buildStepDurations(stepExecutions, lookup.steps)
+      : EMPTY_STEP_DURATIONS
+);
+
+/**
+ * Denominator for the hotspot colour ratio: the execution's total duration in ms.
+ * Returns 0 while the run is still in flight (duration is null), which suppresses all colour.
+ */
+export const selectStepDurationDenominator = createSelector(selectExecution, (execution) =>
+  typeof execution?.duration === 'number' && execution.duration > 0 ? execution.duration : 0
 );
 
 export const selectConnectorFlyout = createSelector(
