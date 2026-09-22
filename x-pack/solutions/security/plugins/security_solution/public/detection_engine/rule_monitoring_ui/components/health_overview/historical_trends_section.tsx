@@ -61,7 +61,7 @@ export const HistoricalTrendsSection = memo(function HistoricalTrendsSection({
   if (buckets.length === 0) {
     return (
       <EuiEmptyPrompt
-        iconType="visLine"
+        iconType="chartLine"
         title={<h4>{i18n.NO_HISTORICAL_DATA_TITLE}</h4>}
         body={<p>{i18n.NO_HISTORICAL_DATA_BODY}</p>}
       />

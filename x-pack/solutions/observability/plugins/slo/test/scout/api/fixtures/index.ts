@@ -112,5 +112,6 @@ export {
   TEST_SPACE_ID,
   createApmSummaryDoc,
   createDummySummaryDoc,
+  createGroupedApmSummaryDoc,
   createGroupedSummaryDoc,
 } from './slo_test_data';

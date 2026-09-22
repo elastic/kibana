@@ -10,6 +10,7 @@ import { isEmpty } from 'lodash/fp';
 import { useCallback, useState } from 'react';
 import { useFetchAnonymizationFields } from '@kbn/elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields';
 
+import { ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING } from '../../../../common/constants';
 import { useKibana } from '../../../common/lib/kibana';
 import { AttackDiscoveryEventTypes } from '../../../common/lib/telemetry';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
@@ -59,6 +60,7 @@ export const useAttackDiscovery = ({
     http,
     notifications: { toasts },
     telemetry,
+    uiSettings,
   } = useKibana().services;
 
   // Get current space ID for workflow configuration
@@ -109,13 +111,14 @@ export const useAttackDiscovery = ({
         };
         setLoadingConnectorId?.(effectiveConnectorId ?? null);
 
-        // Check if workflow integration feature flag is enabled
-        const attackDiscoveryWorkflowsEnabled = await featureFlags.getBooleanValue(
-          'securitySolution.attackDiscoveryWorkflowsEnabled',
-          false
-        );
+        // Check if workflow integration feature flag is enabled AND the per-space uiSetting opt-in
+        const attackDiscoveryWorkflowsEnabled =
+          (await featureFlags.getBooleanValue(
+            'securitySolution.attackDiscoveryWorkflowsEnabled',
+            true
+          )) && uiSettings.get(ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING, false);
 
-        // Call appropriate API based on feature flag
+        // Call appropriate API based on feature flag + per-space setting
         if (attackDiscoveryWorkflowsEnabled) {
           if (!alertsIndexPattern) {
             throw new Error(ALERTS_INDEX_PATTERN_ERROR);
@@ -181,6 +184,7 @@ export const useAttackDiscovery = ({
       telemetry,
       toasts,
       traceOptions,
+      uiSettings,
     ]
   );
 

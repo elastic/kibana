@@ -188,7 +188,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
               ds.lifecycle.data_retention,
               `${formData.dataRetention}${formData.timeUnit}`
             )) ||
-          (ds.lifecycle?.effective_retention &&
+          (typeof ds.lifecycle?.effective_retention === 'string' &&
             isRetentionBiggerThan(
               ds.lifecycle.effective_retention,
               `${formData.dataRetention}${formData.timeUnit}`

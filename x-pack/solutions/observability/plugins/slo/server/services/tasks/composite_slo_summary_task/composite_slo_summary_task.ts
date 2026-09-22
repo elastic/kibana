@@ -54,14 +54,14 @@ export class CompositeSloSummaryTask {
         maxAttempts: 1,
         createTaskRunner: ({
           taskInstance,
-          abortController,
+          signal,
         }: {
           taskInstance: ConcreteTaskInstance;
-          abortController: AbortController;
+          signal: AbortSignal;
         }) => {
           return {
             run: async () => {
-              return this.runTask(taskInstance, core, abortController);
+              return this.runTask(taskInstance, core, signal);
             },
           };
         },
@@ -112,7 +112,7 @@ export class CompositeSloSummaryTask {
   public async runTask(
     taskInstance: ConcreteTaskInstance,
     core: CoreSetup,
-    abortController: AbortController
+    signal: AbortSignal
   ): Promise<{ state: Record<string, unknown> } | void> {
     if (!this.wasStarted) {
       this.logger.debug('runTask Aborted. Task not started yet');
@@ -152,7 +152,7 @@ export class CompositeSloSummaryTask {
       esClient,
       soClient: internalSoClient,
       logger: this.logger,
-      abortController,
+      signal,
     });
 
     return { state: { ...taskInstance.state } };

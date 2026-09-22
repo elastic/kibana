@@ -1891,6 +1891,9 @@ const createCaseWithId = async ({
       ...getPostCaseRequest(),
       ...req,
       assignees: [],
+      // Creation-request template ref (version optional) vs. persisted shape (version pinned);
+      // this fixture never sets a template, so normalize to the persisted null.
+      template: null,
       connector: {
         name: 'none',
         type: ConnectorTypes.none,

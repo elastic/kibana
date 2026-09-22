@@ -413,9 +413,9 @@ describe('Task Runner Factory', () => {
   });
 
   test('should pass abort signal to the action executor', async () => {
-    const abortController = new AbortController();
+    const { signal } = new AbortController();
     const taskRunner = taskRunnerFactory.create(
-      taskManagerMock.createRunContext({ taskInstance: mockedTaskInstance, abortController })
+      taskManagerMock.createRunContext({ taskInstance: mockedTaskInstance, signal })
     );
 
     mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
@@ -435,7 +435,7 @@ describe('Task Runner Factory', () => {
     await taskRunner.run();
 
     const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
-    expect(executeParams.signal).toBe(abortController.signal);
+    expect(executeParams.signal).toBe(signal);
   });
 
   test('passes executionUuid from RunContext as actionExecutionId to the executor', async () => {

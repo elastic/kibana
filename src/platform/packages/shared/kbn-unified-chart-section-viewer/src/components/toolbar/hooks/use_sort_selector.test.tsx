@@ -19,10 +19,23 @@ const renderSortSelector = (sort: MetricsSort) => {
 };
 
 describe('useSortSelector', () => {
-  // Hypothetical and does not apply to the current single option. This is the basis for extending testing when new comparators are added.
-  it('preserves the current direction when the sort field changes', () => {
+  it('forces ascending direction when switching to the recency field', () => {
     const { result, onChange } = renderSortSelector([
       METRICS_SORT_BY.alphabetically,
+      METRICS_SORT_DIRECTION.desc,
+    ]);
+
+    result.current.handleSortByChange({
+      value: METRICS_SORT_BY.recency,
+      label: 'Recently explored',
+    });
+
+    expect(onChange).toHaveBeenCalledWith([METRICS_SORT_BY.recency, METRICS_SORT_DIRECTION.asc]);
+  });
+
+  it('preserves the current direction when switching to a non-recency field', () => {
+    const { result, onChange } = renderSortSelector([
+      METRICS_SORT_BY.recency,
       METRICS_SORT_DIRECTION.desc,
     ]);
 
@@ -76,5 +89,31 @@ describe('useSortSelector', () => {
     );
 
     expect(selected?.checked).toBe('on');
+  });
+
+  it('emits stable telemetry attributes for sort options', () => {
+    const { result } = renderSortSelector([
+      METRICS_SORT_BY.alphabetically,
+      METRICS_SORT_DIRECTION.asc,
+    ]);
+
+    const ebtProps = result.current.options.map((option) => {
+      const attrs = option as {
+        'data-ebt-action'?: string;
+        'data-ebt-element'?: string;
+        'data-ebt-detail'?: string;
+      };
+      return {
+        action: attrs['data-ebt-action'],
+        element: attrs['data-ebt-element'],
+        detail: attrs['data-ebt-detail'],
+      };
+    });
+
+    // These are telemetry values - changing them breaks historical analysis.
+    expect(ebtProps).toEqual([
+      { action: 'setSortOption', element: 'chartsToolbar', detail: 'alphabetically' },
+      { action: 'setSortOption', element: 'chartsToolbar', detail: 'recency' },
+    ]);
   });
 });

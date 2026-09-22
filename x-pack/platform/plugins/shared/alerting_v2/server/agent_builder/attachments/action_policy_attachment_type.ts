@@ -15,11 +15,13 @@ import {
   actionPolicyAttachmentDataSchema,
   type ActionPolicyAttachmentData,
 } from '@kbn/alerting-v2-schemas';
-import type { Logger } from '@kbn/core/server';
+import Boom from '@hapi/boom';
+import { ALERTING_LOG_CODES } from '../../lib/errors/error_codes';
+import type { LoggerServiceContract } from '../../lib/services/logger_service/logger_service';
 import type { ActionPolicyClient } from '../../lib/action_policy_client/action_policy_client';
 
 interface CreateActionPolicyAttachmentTypeOptions {
-  logger: Logger;
+  logger: LoggerServiceContract;
   getActionPolicyClient: (context: AttachmentResolveContext) => ActionPolicyClient;
 }
 
@@ -74,7 +76,15 @@ export const createActionPolicyAttachmentType = ({
       const policy = await client.getActionPolicy({ id: origin });
       return actionPolicyAttachmentDataSchema.parse(policy);
     } catch (error) {
-      logger.warn(`Failed to resolve action policy attachment for origin "${origin}": ${error}`);
+      const isNotFound = Boom.isBoom(error) && error.output.statusCode === 404;
+      if (!isNotFound) {
+        logger.warn({
+          message: 'Failed to resolve action policy attachment',
+          code: ALERTING_LOG_CODES.AGENT_BUILDER_ACTION_POLICY_RESOLVE_FAILED,
+          labels: { policy_id: origin, space_id: context.spaceId },
+          error,
+        });
+      }
       return undefined;
     }
   },
@@ -99,9 +109,15 @@ export const createActionPolicyAttachmentType = ({
       }
       return false;
     } catch (error) {
-      logger.warn(
-        `Failed to check staleness for action policy attachment "${attachment.origin}": ${error}`
-      );
+      const isNotFound = Boom.isBoom(error) && error.output.statusCode === 404;
+      if (!isNotFound) {
+        logger.warn({
+          message: 'Failed to check action policy attachment staleness',
+          code: ALERTING_LOG_CODES.AGENT_BUILDER_ACTION_POLICY_STALENESS_CHECK_FAILED,
+          labels: { policy_id: attachment.origin, space_id: context.spaceId },
+          error,
+        });
+      }
       return false;
     }
   },
@@ -114,7 +130,7 @@ export const createActionPolicyAttachmentType = ({
   }),
 
   getAgentDescription: () =>
-    `An action policy attachment represents an Alerting v2 notification policy — either a proposed policy (not yet saved) or a saved policy linked via its ID. Action policies define how alert episodes are matched, grouped, and dispatched to workflow destinations. To create, inspect, or modify action policies, load the rule-management skill.`,
+    `An action policy attachment represents an Alerting v2 notification policy — either a proposed policy (not yet saved) or a saved policy linked via its ID. Action policies define how alert episodes are matched, grouped, and dispatched to workflow destinations. To create, inspect, or modify action policies, load the action-policy-management skill.`,
 
   getTools: () => [],
 });

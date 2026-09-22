@@ -13,6 +13,7 @@ import { ToolbarSelector } from '@kbn/shared-ux-toolbar-selector';
 import type { MetricsSort } from '../../types';
 import { useSortSelector } from './hooks/use_sort_selector';
 import { SortDirectionToggle } from './sort_selector_helpers';
+import { METRICS_SORT_BY } from '../../common/constants';
 
 interface SortSelectorProps {
   sort: MetricsSort;
@@ -40,7 +41,11 @@ export const SortSelector = ({ sort, onChange, fullWidth = false }: SortSelector
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <SortDirectionToggle direction={direction} onChange={handleDirectionChange} />
+        <SortDirectionToggle
+          direction={direction}
+          isDisabled={selectedValue === METRICS_SORT_BY.recency}
+          onChange={handleDirectionChange}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+/**
+ * Migration recommendation: MIGRATE TO SCOUT. Good smoke test that the search_examples search-sessions demo
+ * still wires start/save/restore against the real session APIs. (Product session coverage lives elsewhere;
+ * this is about keeping the example app working.)
+ */
+
 import type { FtrProviderContext } from '../../functional/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export

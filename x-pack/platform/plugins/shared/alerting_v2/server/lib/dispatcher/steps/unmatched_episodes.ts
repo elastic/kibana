@@ -6,6 +6,7 @@
  */
 
 import type { ActionGroup, AlertEpisode } from '../types';
+import { suppressionEpisodeKey } from './utils/suppression_key';
 
 export function getUnmatchedEpisodes(
   dispatchable: readonly AlertEpisode[],
@@ -15,12 +16,8 @@ export function getUnmatchedEpisodes(
   const handledEpisodeKeys = new Set<string>();
   for (const group of [...dispatch, ...throttled]) {
     for (const episode of group.episodes) {
-      handledEpisodeKeys.add(episodeKey(episode));
+      handledEpisodeKeys.add(suppressionEpisodeKey(episode));
     }
   }
-  return dispatchable.filter((ep) => !handledEpisodeKeys.has(episodeKey(ep)));
-}
-
-function episodeKey(episode: AlertEpisode): string {
-  return `${episode.rule_id}:${episode.group_hash}:${episode.episode_id}`;
+  return dispatchable.filter((ep) => !handledEpisodeKeys.has(suppressionEpisodeKey(ep)));
 }

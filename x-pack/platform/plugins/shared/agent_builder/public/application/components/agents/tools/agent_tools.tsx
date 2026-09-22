@@ -304,7 +304,7 @@ export const AgentTools: React.FC = () => {
                         button={
                           <EuiButton
                             fill
-                            iconType="plusInCircle"
+                            iconType="plusCircle"
                             iconSide="left"
                             onClick={() => setIsAddMenuOpen((prev) => !prev)}
                           >
@@ -320,7 +320,7 @@ export const AgentTools: React.FC = () => {
                           items={[
                             <EuiContextMenuItem
                               key="importFromLibrary"
-                              icon="importAction"
+                              icon="download"
                               onClick={handleAddFromLibrary}
                               {...getEbtProps({
                                 element: AGENT_BUILDER_UI_EBT.element.pageContent,

@@ -45,6 +45,7 @@ import type { ObservabilityAgentBuilderPluginSetup } from '@kbn/observability-ag
 import type { TelemetryEventsSender } from './telemetry/sender';
 import type { UptimeConfig } from './config';
 import type { SyntheticsEsClient } from './lib';
+import type { SyntheticsIndicesCache } from './services/synthetics_indices_cache';
 
 export interface SyntheticsServerSetup {
   router: UptimeRouter;
@@ -70,6 +71,7 @@ export interface SyntheticsServerSetup {
   getMaintenanceWindowClientInternal: (
     request: KibanaRequest
   ) => MaintenanceWindowClient | undefined;
+  syntheticsIndicesCache: SyntheticsIndicesCache;
 }
 
 export interface SyntheticsPluginsSetupDependencies {

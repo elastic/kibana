@@ -24,10 +24,12 @@ import {
 import {
   CASE_DETAILS_DESCRIPTION,
   CASE_DETAILS_PAGE_TITLE,
+  CASE_DETAILS_PARTICIPANT_AVATARS,
   CASE_DETAILS_PARTICIPANTS_PANEL,
   CASE_DETAILS_REPORTER,
   CASE_DETAILS_STATUS,
   CASE_DETAILS_TAGS,
+  CASE_DETAILS_TAGS_COMBOBOX_PILL,
   CASE_DETAILS_USER_ACTION_DESCRIPTION_EVENT,
   CASE_DETAILS_USERNAMES,
   PARTICIPANTS,
@@ -127,15 +129,36 @@ describe('Cases', { tags: ['@ess', '@serverless'] }, () => {
           cy.get(CASE_DETAILS_USERNAMES).eq(PARTICIPANTS).should('contain', username);
         },
         whenRedesign: () => {
-          // Reporter is shown in the app header metadata; participants render as avatars
-          // (name in a hover tooltip) inside the sidebar panel.
+          // Reporter is shown in the app header metadata; participants render as avatars inside
+          // the sidebar panel. EUI exposes the avatar's user label as its accessible name.
           cy.get(CASE_DETAILS_REPORTER).should('contain', username);
           cy.get(CASE_DETAILS_PARTICIPANTS_PANEL).should('exist');
+          cy.get(CASE_DETAILS_PARTICIPANT_AVATARS)
+            .invoke('attr', 'aria-label')
+            .should('contain', username);
         },
       });
     });
 
-    cy.get(CASE_DETAILS_TAGS).should('have.text', expectedTags);
+    withCasesRedesign({
+      whenLegacy: () => {
+        // Legacy renders the tag values as badges inside `case-tags`, so the element text is
+        // exactly the concatenated tags.
+        cy.get(CASE_DETAILS_TAGS).should('have.text', expectedTags);
+      },
+      whenRedesign: () => {
+        // The redesign renders the tags field as an editable combobox whose `case-tags` wrapper
+        // also contains the field label and help text. Assert on the combobox pills instead so we
+        // verify the tag values themselves.
+        cy.get(CASE_DETAILS_TAGS_COMBOBOX_PILL).should(
+          'have.length',
+          (this.mycase as TestCase).tags.length
+        );
+        (this.mycase as TestCase).tags.forEach((caseTag) => {
+          cy.get(CASE_DETAILS_TAGS_COMBOBOX_PILL).should('contain.text', caseTag);
+        });
+      },
+    });
 
     EXPECTED_METRICS.forEach((metric) => {
       cy.get(CASES_METRIC(metric)).should('exist');

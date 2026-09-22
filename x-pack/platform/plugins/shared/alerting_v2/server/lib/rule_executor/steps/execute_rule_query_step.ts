@@ -12,6 +12,7 @@ import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/se
 import { PluginInitializer } from '@kbn/core-di-server';
 import type { PluginInitializerContext } from '@kbn/core/server';
 import { isEsqlUserError } from '../../errors/esql_user_error';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type { PipelineStateStream, RuleExecutionStep } from '../types';
 import { getQueryPayload } from '../get_query_payload';
 import { injectDeduplicationMetadata } from '../deduplication_query';
@@ -54,11 +55,9 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
       return injectDeduplicationMetadata(query);
     } catch (error) {
       this.logger.warn({
-        message: `[${
-          this.name
-        }] Could not inject deduplication metadata into query for rule ${ruleId}: ${
-          error instanceof Error ? error.message : String(error)
-        }. Executing the original query.`,
+        code: ALERTING_LOG_CODES.RULE_EXECUTION_DEDUP_METADATA_INJECTION_FAILED,
+        message: `[${this.name}] Could not inject deduplication metadata into query for rule ${ruleId}. Executing the original query.`,
+        error,
       });
       return query;
     }
@@ -86,12 +85,8 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
       const boundedQuery = appendLimitToQuery(effectiveQuery, step.maxAlertsPerRun);
 
       step.logger.debug({
-        message: () =>
-          `[${step.name}] Executing ES|QL query for rule ${input.ruleId} - ${JSON.stringify({
-            query: boundedQuery,
-            filter: queryPayload.filter,
-            params: queryPayload.params,
-          })}`,
+        message: 'Executing ES|QL query',
+        labels: { rule_id: input.ruleId, step: step.name },
       });
 
       try {

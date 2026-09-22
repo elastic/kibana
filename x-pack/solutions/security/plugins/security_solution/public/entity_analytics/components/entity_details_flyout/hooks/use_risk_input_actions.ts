@@ -28,8 +28,8 @@ export const useRiskInputActions = (inputs: InputAlert[], closePopover: () => vo
         index: input.index,
         type: AttachmentType.alert,
         rule: {
-          id: get(ALERT_RULE_UUID, alert),
-          name: get(ALERT_RULE_NAME, alert),
+          id: get(ALERT_RULE_UUID, alert) ?? null,
+          name: get(ALERT_RULE_NAME, alert) ?? null,
         },
       })),
     [inputs]

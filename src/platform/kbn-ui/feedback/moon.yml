@@ -20,6 +20,7 @@ dependsOn:
   - '@kbn/i18n-react'
   - '@kbn/test-jest-helpers'
   - '@kbn/i18n'
+  - '@kbn/storybook'
 tags:
   - shared-browser
   - package

@@ -6,8 +6,7 @@
  */
 
 import React, { memo, useEffect } from 'react';
-import { EuiCallOut, EuiFlexGroup, EuiHorizontalRule, EuiLink } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiFlexGroup, EuiHorizontalRule } from '@elastic/eui';
 import { useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Title } from './title';
 import { Tags } from './tags';
@@ -21,12 +20,7 @@ import type { CasesConfigurationUI } from '../../containers/types';
 import { KibanaServices } from '../../common/lib/kibana';
 import { CreateCaseTemplateFields } from '../create/template_fields';
 import { useShowLegacyCustomFields } from '../../common/use_show_old_custom_fields';
-import {
-  useCasesFieldLibraryNavigation,
-  useConfigureCasesNavigation,
-} from '../../common/navigation';
-import * as i18n from './translations';
-import * as configureCasesI18n from '../configure_cases/translations';
+import { CustomFieldsDeprecationCallout } from './custom_fields_deprecation_callout';
 
 interface Props {
   isLoading: boolean;
@@ -46,8 +40,6 @@ const CaseFormFieldsComponent: React.FC<Props> = ({
   const { caseAssignmentAuthorized } = useCasesFeatures();
   const isTemplatesV2Enabled = KibanaServices.getConfig()?.templates?.enabled ?? false;
   const { showLegacyCustomFields } = useShowLegacyCustomFields(configurationCustomFields);
-  const { getCasesFieldLibraryUrl } = useCasesFieldLibraryNavigation();
-  const { getConfigureCasesUrl } = useConfigureCasesNavigation();
   const { setFieldValue } = useFormContext();
 
   // When templates v2 is off, always show legacy custom fields (they are the only system).
@@ -64,39 +56,7 @@ const CaseFormFieldsComponent: React.FC<Props> = ({
     }
   }, [isEditMode, showLegacyCustomFieldsInputs, setFieldValue]);
 
-  const deprecationNotice = isTemplatesV2Enabled ? (
-    <EuiCallOut
-      announceOnMount
-      color="warning"
-      iconType="warning"
-      size="s"
-      data-test-subj="legacy-custom-fields-deprecation-callout"
-    >
-      <FormattedMessage
-        id="xpack.cases.caseFormFields.legacyCustomFieldsDeprecationBody"
-        defaultMessage='These custom fields are deprecated and have already been migrated to the new system, so you may see the same fields in both places. Manage them in {customFieldsLink}. To stop showing them here, disable "{switchLabel}" in {settingsLink}.'
-        values={{
-          customFieldsLink: (
-            <EuiLink
-              href={getCasesFieldLibraryUrl()}
-              data-test-subj="legacy-custom-fields-view-new-link"
-            >
-              {i18n.LEGACY_CUSTOM_FIELDS_VIEW_CUSTOM_FIELDS}
-            </EuiLink>
-          ),
-          switchLabel: configureCasesI18n.SHOW_LEGACY_CUSTOM_FIELDS_AND_TEMPLATES,
-          settingsLink: (
-            <EuiLink
-              href={getConfigureCasesUrl()}
-              data-test-subj="legacy-custom-fields-view-settings-link"
-            >
-              {i18n.LEGACY_CUSTOM_FIELDS_VIEW_SETTINGS}
-            </EuiLink>
-          ),
-        }}
-      />
-    </EuiCallOut>
-  ) : undefined;
+  const deprecationNotice = isTemplatesV2Enabled ? <CustomFieldsDeprecationCallout /> : undefined;
 
   return (
     <EuiFlexGroup data-test-subj="case-form-fields" direction="column" gutterSize="none">

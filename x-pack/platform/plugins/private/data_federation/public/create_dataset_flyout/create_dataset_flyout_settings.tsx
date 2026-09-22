@@ -148,7 +148,7 @@ export function CreateDatasetFlyoutSettings({
       <EuiButtonEmpty
         size="s"
         flush="left"
-        iconType={isAdvancedOpen ? 'arrowDown' : 'arrowRight'}
+        iconType={isAdvancedOpen ? 'chevronSingleDown' : 'chevronSingleRight'}
         aria-expanded={isAdvancedOpen}
         aria-controls={advancedId}
         onClick={() => setIsAdvancedOpen((v) => !v)}

@@ -18,6 +18,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { SpacesListView } from './views/spaces_list';
 import type { SpacesListViewProps } from './views/spaces_list';
 import { ContextMenuView } from './views/context_menu';
@@ -134,8 +135,14 @@ export const ContextSwitcher = ({
   }, [environmentContext, spaces.active.name, spaces.items.length]);
 
   const handleSpaceSelect = useCallback<SpacesListViewProps['onSelect']>(
-    ({ item }) => {
-      spaces.onSelect(item.id);
+    ({ item, event }) => {
+      spaces.onSelect(item.id, event);
+
+      // Keep popover open when opening in a new tab/window (cmd/ctrl/shift).
+      if (event.ctrlKey || event.metaKey || event.shiftKey) {
+        return;
+      }
+
       closePopover();
     },
     [spaces, closePopover]
@@ -180,6 +187,7 @@ export const ContextSwitcher = ({
                 defaultMessage: 'Find a space',
               }),
             isClearable: true,
+            'data-test-subj': 'contextSwitcherSpacesSearchInput',
           },
         }
       : undefined;
@@ -192,6 +200,12 @@ export const ContextSwitcher = ({
     onSelect: handleSpaceSelect,
     search: searchConfig,
     isLoading: spaces.isLoading,
+    noMatchesMessage: (
+      <FormattedMessage
+        id="contextSwitcherComponents.spacesList.noSpacesFound"
+        defaultMessage="No spaces found"
+      />
+    ),
     footerAction: withClosePopoverAction(spaces.footerAction),
   };
 
@@ -244,6 +258,7 @@ export const ContextSwitcher = ({
         <ContextSwitcherTriggerButton
           solutionIcon={triggerButtonIcon}
           label={triggerLabel}
+          title={spaces.active.name}
           onClick={togglePopover}
           isSelected={isOpen}
         />
@@ -253,6 +268,7 @@ export const ContextSwitcher = ({
       anchorPosition="downLeft"
       panelStyle={{ width: POPOVER_WIDTH_PX }}
       panelPaddingSize="s"
+      panelProps={{ 'data-test-subj': 'contextSwitcherPopoverPanel' }}
       ownFocus
       repositionOnScroll
       data-test-subj="contextSwitcherPopover"

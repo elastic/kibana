@@ -389,6 +389,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                     </EuiSelectable>
                   ) : (
                     <EuiComboBox
+                      data-test-subj="restoreIndexPatternsComboBox"
                       options={comboBoxOptions}
                       renderOption={({ value }) => {
                         return value?.isDataStream ? (

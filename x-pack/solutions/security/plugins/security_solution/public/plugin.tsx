@@ -87,6 +87,7 @@ import {
   registerAiRuleCreationHandler,
   registerEntityAnalyticsDashboardAttachment,
   registerEntityAttachment,
+  registerEntityGraphAttachment,
   registerRuleAttachment,
   registerRulePreviewAttachment,
 } from './agent_builder/attachment_types';
@@ -149,7 +150,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     }
 
     if (workflowsExtensions) {
-      registerWorkflowSteps(workflowsExtensions, this.experimentalFeatures);
+      registerWorkflowSteps(workflowsExtensions);
     }
 
     // Lazily instantiate subPlugins and initialize services
@@ -364,7 +365,19 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         application: core.application,
         agentBuilder: plugins.agentBuilder,
         chrome: core.chrome,
+        experimentalFeatures: this.experimentalFeatures,
         searchSession: plugins.data.search.session,
+        uiSettings: core.uiSettings,
+      });
+      registerEntityGraphAttachment({
+        attachments: plugins.agentBuilder.attachments,
+        application: core.application,
+        http: core.http,
+        agentBuilder: plugins.agentBuilder,
+        chrome: core.chrome,
+        searchSession: plugins.data.search.session,
+        experimentalFeatures: this.experimentalFeatures,
+        uiSettings: core.uiSettings,
       });
       registerEntityAttachment({
         attachments: plugins.agentBuilder.attachments,
@@ -375,6 +388,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         resolveSecurityCanvasContext: () =>
           this.getSecurityCanvasContext(core, plugins as StartPluginsDependencies),
         searchSession: plugins.data.search.session,
+        uiSettings: core.uiSettings,
       });
       if (this.experimentalFeatures.rulePreviewAttachmentEnabled) {
         registerRulePreviewAttachment({

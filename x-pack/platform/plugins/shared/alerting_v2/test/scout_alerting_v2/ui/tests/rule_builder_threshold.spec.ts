@@ -66,7 +66,6 @@ test.describe(
       });
 
       await test.step('builder form is visible with default stat', async () => {
-        await expect(pageObjects.composeDiscover.modeSelect).toBeVisible();
         await expect(pageObjects.thresholdBuilder.addStatButton).toBeVisible();
         await expect(pageObjects.thresholdBuilder.statAggSelect(0)).toBeVisible();
       });
@@ -92,8 +91,9 @@ test.describe(
         await expect(pageObjects.composeDiscover.nextButton).toBeEnabled();
       });
 
-      await test.step('advance through Recovery Condition step', async () => {
+      await test.step('advance through Outcome step', async () => {
         await pageObjects.composeDiscover.clickNext();
+        await expect(pageObjects.composeDiscover.modeSelect).toBeVisible();
       });
 
       await test.step('advance to Details step', async () => {

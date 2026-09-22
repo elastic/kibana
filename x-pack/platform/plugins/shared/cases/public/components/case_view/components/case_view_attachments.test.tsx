@@ -74,7 +74,7 @@ const buildRegistry = () => {
   registry.register({
     id: 'comment',
     displayName: 'Comment',
-    icon: 'editorComment',
+    icon: 'comment',
     getAttachmentViewObject: () => ({ event: 'added a comment' }),
     schema: z.object({}),
   });
@@ -268,6 +268,79 @@ describe('Case View Attachments tab', () => {
     expect(
       screen.queryByTestId('case-view-attachment-accordion-security.event')
     ).not.toBeInTheDocument();
+  });
+
+  it('collapses and expands every visible attachment section', async () => {
+    const unifiedAttachmentTypeRegistry = buildRegistry();
+    const caseWithComments: CaseUI = {
+      ...basicCase,
+      comments: [alertComment, { ...eventComment, id: 'event-comment-id' }],
+    };
+
+    renderWithTestingProviders(
+      <CaseViewAttachments
+        caseData={caseWithComments}
+        onSearch={onSearchMock}
+        onUpdateField={onUpdateFieldMock}
+      />,
+      { wrapperProps: { unifiedAttachmentTypeRegistry, license: basicLicense } }
+    );
+
+    const collapseAllButton = screen.getByTestId('case-view-attachments-collapse-all');
+    const expandAllButton = screen.getByTestId('case-view-attachments-expand-all');
+
+    expect(collapseAllButton).toBeEnabled();
+    expect(expandAllButton).toBeDisabled();
+
+    await userEvent.click(collapseAllButton);
+
+    expect(
+      screen.getByTestId('case-view-attachment-accordion-toggle-security.alert')
+    ).toHaveAttribute('aria-expanded', 'false');
+    expect(
+      screen.getByTestId('case-view-attachment-accordion-toggle-security.event')
+    ).toHaveAttribute('aria-expanded', 'false');
+    expect(collapseAllButton).toBeDisabled();
+    expect(expandAllButton).toBeEnabled();
+
+    await userEvent.click(expandAllButton);
+
+    expect(
+      screen.getByTestId('case-view-attachment-accordion-toggle-security.alert')
+    ).toHaveAttribute('aria-expanded', 'true');
+    expect(
+      screen.getByTestId('case-view-attachment-accordion-toggle-security.event')
+    ).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  it('collapses only the selected attachment section', async () => {
+    const unifiedAttachmentTypeRegistry = buildRegistry();
+    const caseWithComments: CaseUI = {
+      ...basicCase,
+      comments: [alertComment, { ...eventComment, id: 'event-comment-id' }],
+    };
+
+    renderWithTestingProviders(
+      <CaseViewAttachments
+        caseData={caseWithComments}
+        onSearch={onSearchMock}
+        onUpdateField={onUpdateFieldMock}
+      />,
+      { wrapperProps: { unifiedAttachmentTypeRegistry, license: basicLicense } }
+    );
+
+    await userEvent.click(
+      screen.getByTestId('case-view-attachment-accordion-toggle-security.alert')
+    );
+
+    expect(
+      screen.getByTestId('case-view-attachment-accordion-toggle-security.alert')
+    ).toHaveAttribute('aria-expanded', 'false');
+    expect(
+      screen.getByTestId('case-view-attachment-accordion-toggle-security.event')
+    ).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.queryByTestId('test-alerts-table')).not.toBeInTheDocument();
+    expect(screen.getByTestId('test-events-table')).toBeInTheDocument();
   });
 
   it('hides the files accordion when fileStats reports 0 files', () => {

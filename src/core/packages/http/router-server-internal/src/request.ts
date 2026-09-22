@@ -42,6 +42,10 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import { RouteValidator } from './validator';
+import {
+  RequestValidationFailure,
+  type RequestValidationSource,
+} from './request_validation_failure';
 import { isSafeMethod } from './route';
 import { KibanaSocket } from './socket';
 import { patchRequest } from './patch_requests';
@@ -115,9 +119,18 @@ export class CoreKibanaRequest<
     query: Q;
     body: B;
   } {
-    const params = routeValidator.getParams(raw.params, 'request params');
-    const query = routeValidator.getQuery(raw.query, 'request query');
-    const body = routeValidator.getBody(raw.body, 'request body');
+    const params = validateRequestPart(
+      () => routeValidator.getParams(raw.params, 'request params'),
+      'params'
+    );
+    const query = validateRequestPart(
+      () => routeValidator.getQuery(raw.query, 'request query'),
+      'query'
+    );
+    const body = validateRequestPart(
+      () => routeValidator.getBody(raw.body, 'request body'),
+      'body'
+    );
     return { query, params, body };
   }
 
@@ -409,6 +422,30 @@ export class CoreKibanaRequest<
     return ((request.route?.settings as RouteOptions)?.app as KibanaRouteOptions)
       ?.excludeFromRateLimiter;
   }
+}
+
+function validateRequestPart<T>(validate: () => T, source: RequestValidationSource): T {
+  try {
+    return validate();
+  } catch (error) {
+    throw new RequestValidationFailure(
+      error instanceof Error ? error.message : String(error),
+      source,
+      getRawValidationError(error)
+    );
+  }
+}
+
+function getRawValidationError(error: unknown): unknown {
+  if (
+    error instanceof Error &&
+    'cause' in error &&
+    error.cause instanceof Error &&
+    'rawError' in error.cause
+  ) {
+    return error.cause.rawError;
+  }
+  return error;
 }
 
 /**

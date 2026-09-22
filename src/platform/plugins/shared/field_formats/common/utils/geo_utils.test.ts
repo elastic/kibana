@@ -7,7 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ddToMGRS, mgrsToDD, ddToUTM, utmToDD } from './geo_utils';
+import { ddToMGRS, mgrsToDD, ddToUTM, utmToDD, ddToDMS } from './geo_utils';
+
+describe('DMS', () => {
+  test('ddToDMS should convert lat lon to degrees minutes seconds', () => {
+    expect(ddToDMS(37.774929, -122.419416)).toEqual('374629N,1222509W');
+    expect(ddToDMS(-33.865143, 151.2099)).toEqual('335154S,1511235E');
+  });
+
+  test('ddToDMS should not mangle near-zero coordinates in exponential notation', () => {
+    // parseInt(String(1e-7)) parses "1e-7" as 1; Math.trunc must yield 0
+    expect(ddToDMS(1e-7, -1e-8)).toEqual('000000N,0000000W');
+  });
+});
 
 describe('MGRS', () => {
   test('ddToMGRS should convert lat lon to MGRS', () => {

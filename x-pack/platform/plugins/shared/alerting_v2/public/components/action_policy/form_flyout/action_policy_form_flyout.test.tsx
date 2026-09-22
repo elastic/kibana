@@ -31,7 +31,7 @@ const INLINE_DEFS = [
   {
     id: 'email',
     label: 'Email',
-    iconType: 'email',
+    iconType: 'mail',
     connectorTypeId: '.email',
     paramsTemplate: 'to: ""\n',
   },
@@ -67,8 +67,8 @@ jest.mock('../form/components/matcher_input', () => ({
   ),
 }));
 
-jest.mock('../../../hooks/use_fetch_data_fields', () => ({
-  useFetchDataFields: (_matcher?: string) => ({ data: undefined, isLoading: false }),
+jest.mock('../../../hooks/use_fetch_rule_event_fields', () => ({
+  useFetchRuleEventFields: (_matcher?: string) => ({ data: undefined, isLoading: false }),
 }));
 
 jest.mock('../../../hooks/use_fetch_rules', () => ({

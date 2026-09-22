@@ -141,7 +141,7 @@ describe('EvaluationScoreService integration', () => {
     });
     expect(dataStream.data_streams.map(({ name }) => name)).toContain(EvaluationIndices.SCORES);
 
-    const firstWrite = await service.write(payload);
+    const firstWrite = await service.write(payload, ['default']);
     expect(firstWrite).toEqual({ ingested: payload.scores.length, conflicted: 0, failed: [] });
 
     const searchResult = await service.search({
@@ -152,8 +152,10 @@ describe('EvaluationScoreService integration', () => {
       },
     });
     expect(searchResult.hits.hits).toHaveLength(payload.scores.length);
+    const sources = searchResult.hits.hits.map((hit) => hit._source as { space_ids?: string[] });
+    expect(sources.every((source) => source?.space_ids?.includes('default'))).toBe(true);
 
-    const secondWrite = await service.write(payload);
+    const secondWrite = await service.write(payload, ['default']);
     expect(secondWrite).toEqual({ ingested: 0, conflicted: payload.scores.length, failed: [] });
   });
 });

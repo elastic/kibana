@@ -66,7 +66,7 @@ const INLINE_DEFS = [
   {
     id: 'email',
     label: 'Email',
-    iconType: 'email',
+    iconType: 'mail',
     connectorTypeId: '.email',
     paramsTemplate: 'to: ""\n',
   },
@@ -142,8 +142,8 @@ jest.mock('../../hooks/use_fetch_action_policy', () => ({
   useFetchActionPolicy: (...args: unknown[]) => mockUseFetchActionPolicy(...args),
 }));
 
-jest.mock('../../hooks/use_fetch_data_fields', () => ({
-  useFetchDataFields: (_matcher?: string) => ({ data: undefined, isLoading: false }),
+jest.mock('../../hooks/use_fetch_rule_event_fields', () => ({
+  useFetchRuleEventFields: (_matcher?: string) => ({ data: undefined, isLoading: false }),
 }));
 
 jest.mock('../../hooks/use_fetch_rules', () => ({

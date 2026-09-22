@@ -8,6 +8,7 @@
  */
 
 import type { ValidateWorkflowResponseDto, WorkflowYaml } from '@kbn/workflows';
+import { validateStepNameUniqueness } from '@kbn/workflows';
 import { isGraphBuildError, WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowDiagnostic } from '@kbn/workflows/types/v1';
 import {
@@ -18,7 +19,6 @@ import {
 } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
 import { connectorParamsSchemaResolver } from './connector_params_schema_resolver';
-import { validateStepNameUniqueness } from './validate_step_names';
 import type { TriggerDefinitionForValidateTriggers } from './validate_triggers';
 import { validateTriggers } from './validate_triggers';
 

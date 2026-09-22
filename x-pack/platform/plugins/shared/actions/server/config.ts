@@ -150,7 +150,12 @@ export const configSchema = schema.object({
   customHostSettings: schema.maybe(schema.arrayOf(customHostSettingsSchema)),
   relay: schema.maybe(
     schema.object({
-      url: schema.uri({ scheme: ['https'] }),
+      url: schema.conditional(
+        schema.contextRef('dev'),
+        true,
+        schema.uri({ scheme: ['https', 'http'] }),
+        schema.uri({ scheme: ['https'] })
+      ),
       ssl: schema.maybe(relaySSLConfigSchema),
     })
   ),
@@ -267,6 +272,10 @@ export const configSchema = schema.object({
         ),
       })
     ),
+  }),
+  inboundEvents: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+    maxBodyBytes: schema.byteSize({ defaultValue: '1mb' }),
   }),
 });
 

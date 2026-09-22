@@ -10,7 +10,7 @@
   "plugin": {
     "id": "presentationUtil",
     "browser": true,
-    "server": true,
+    "server": false,
     "requiredPlugins": [
       "kibanaReact",
       "embeddable",
@@ -20,9 +20,6 @@
     ],
     "requiredBundles": [
       "savedObjects"
-    ],
-    "extraPublicDirs": [
-      "common"
     ]
   }
 }

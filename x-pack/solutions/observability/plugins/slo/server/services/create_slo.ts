@@ -243,6 +243,7 @@ export class CreateSLO {
           syncDelay: new Duration(1, DurationUnit.Minute),
           frequency: new Duration(1, DurationUnit.Minute),
           preventInitialBackfill: false,
+          preventCrossProjectSearch: false,
         },
         params.settings
       ),

@@ -13,6 +13,7 @@ import {
   applicationConnectionMatchesFreeText,
   applicationConnectionMatchesStatus,
   applicationConnectionsMatchesFreeText,
+  getConnectionStatus,
   toApplicationConnectionList,
 } from './application_connections_filters';
 import { ViewModeToggle } from './application_connections_view_mode_toggle';
@@ -28,8 +29,12 @@ import { useApplicationConnections } from '../hooks/use_application_connections'
 
 const STATUS_LABELS: Record<ApplicationConnectionStatusFilter, string> = {
   connected: labels.filters.statusConnected,
+  expired: labels.filters.statusExpired,
   revoked: labels.filters.statusRevoked,
 };
+
+const isStatusFilterValue = (value: unknown): value is ApplicationConnectionStatusFilter =>
+  value === 'connected' || value === 'expired' || value === 'revoked';
 
 export interface UseApplicationConnectionsTableSearchOptions {
   toolsLeft?: EuiSearchBarProps['toolsLeft'];
@@ -71,13 +76,12 @@ export const useApplicationConnectionsTableSearch = ({
     if (orClause) {
       const raw = Array.isArray(orClause.value) ? orClause.value : [orClause.value];
       for (const value of raw) {
-        if (value === 'connected' || value === 'revoked') statusValues.add(value);
+        if (isStatusFilterValue(value)) statusValues.add(value);
       }
     }
     const simpleClause = args.query.getSimpleFieldClause('status');
-    if (simpleClause) {
-      const value = simpleClause.value;
-      if (value === 'connected' || value === 'revoked') statusValues.add(value);
+    if (simpleClause && isStatusFilterValue(simpleClause.value)) {
+      statusValues.add(simpleClause.value);
     }
     setStatusFilter(Array.from(statusValues));
 
@@ -89,8 +93,8 @@ export const useApplicationConnectionsTableSearch = ({
 
   const matchesByStatus = useMemo(
     () =>
-      countBy(toApplicationConnectionList(applicationConnections), ({ client, connection }) =>
-        !client.revoked && !connection.revoked ? 'connected' : 'revoked'
+      countBy(toApplicationConnectionList(applicationConnections), (applicationConnection) =>
+        getConnectionStatus(applicationConnection)
       ),
     [applicationConnections]
   );

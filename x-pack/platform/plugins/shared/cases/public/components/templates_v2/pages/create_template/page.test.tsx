@@ -9,6 +9,7 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { parse as yamlParse } from 'yaml';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { CreateTemplatePage } from './page';
 import { TestProviders } from '../../../../common/mock';
 import { LOCAL_STORAGE_KEYS } from '../../../../../common/constants';
@@ -69,6 +70,16 @@ jest.mock('../../../use_breadcrumbs', () => ({
 
 const observablesEnabledFeatures = { observables: { enabled: true, autoExtract: true } };
 
+/**
+ * The template name is the editable page title, so naming a template is a header interaction rather
+ * than a trip to the Configuration tab.
+ */
+const nameTemplateFromPageTitle = async (name: string) => {
+  await userEvent.click(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.titleButton));
+  await userEvent.type(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.titleInput), name);
+  await userEvent.keyboard('{enter}');
+};
+
 describe('CreateTemplatePage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -84,7 +95,8 @@ describe('CreateTemplatePage', () => {
       </TestProviders>
     );
 
-    expect(screen.getByTestId('appHeaderTitle')).toHaveTextContent(i18n.ADD_TEMPLATE_TITLE);
+    // A new template opens unnamed, with the placeholder standing in for the name.
+    expect(screen.getByTestId('appHeaderTitle')).toHaveTextContent(i18n.UNTITLED_TEMPLATE);
     expect(screen.getByTestId('appHeaderBack')).toHaveAttribute(
       'aria-label',
       `Back to ${i18n.TEMPLATE_TITLE}`
@@ -112,10 +124,7 @@ describe('CreateTemplatePage', () => {
     expect(localStorage.getItem(storageKey)).toBe(JSON.stringify(modifiedTemplate));
 
     // Click the save button
-    // The template name is panel-owned and lives on the Configuration tab under the Fields/
-    // Configuration split, so switch to it before setting the name.
-    await userEvent.click(screen.getByRole('tab', { name: /Configuration/ }));
-    await userEvent.type(screen.getByTestId('templateMetadataNameInput'), 'My template');
+    await nameTemplateFromPageTitle('My template');
     const saveButton = screen.getByTestId('saveTemplateHeaderButton');
     await userEvent.click(saveButton);
 
@@ -148,10 +157,7 @@ describe('CreateTemplatePage', () => {
       </TestProviders>
     );
 
-    // The template name is panel-owned and lives on the Configuration tab under the Fields/
-    // Configuration split, so switch to it before setting the name.
-    await userEvent.click(screen.getByRole('tab', { name: /Configuration/ }));
-    await userEvent.type(screen.getByTestId('templateMetadataNameInput'), 'My template');
+    await nameTemplateFromPageTitle('My template');
     const saveButton = screen.getByTestId('saveTemplateHeaderButton');
     await userEvent.click(saveButton);
 
@@ -183,10 +189,7 @@ describe('CreateTemplatePage', () => {
       </TestProviders>
     );
 
-    // The template name is panel-owned and lives on the Configuration tab under the Fields/
-    // Configuration split, so switch to it before setting the name.
-    await userEvent.click(screen.getByRole('tab', { name: /Configuration/ }));
-    await userEvent.type(screen.getByTestId('templateMetadataNameInput'), 'My template');
+    await nameTemplateFromPageTitle('My template');
     const saveButton = screen.getByTestId('saveTemplateHeaderButton');
     await userEvent.click(saveButton);
 
@@ -207,8 +210,7 @@ describe('CreateTemplatePage', () => {
     );
 
     // Save without touching the settings toggles — the solution defaults must still be persisted.
-    await userEvent.click(screen.getByRole('tab', { name: /Configuration/ }));
-    await userEvent.type(screen.getByTestId('templateMetadataNameInput'), 'My template');
+    await nameTemplateFromPageTitle('My template');
     await userEvent.click(screen.getByTestId('saveTemplateHeaderButton'));
 
     await waitFor(() => {
@@ -231,8 +233,7 @@ describe('CreateTemplatePage', () => {
       </TestProviders>
     );
 
-    await userEvent.click(screen.getByRole('tab', { name: /Configuration/ }));
-    await userEvent.type(screen.getByTestId('templateMetadataNameInput'), 'My template');
+    await nameTemplateFromPageTitle('My template');
     await userEvent.click(screen.getByTestId('saveTemplateHeaderButton'));
 
     await waitFor(() => {
@@ -262,8 +263,7 @@ describe('CreateTemplatePage', () => {
       </TestProviders>
     );
 
-    await userEvent.click(screen.getByRole('tab', { name: /Configuration/ }));
-    await userEvent.type(screen.getByTestId('templateMetadataNameInput'), 'My template');
+    await nameTemplateFromPageTitle('My template');
     await userEvent.click(screen.getByTestId('saveTemplateHeaderButton'));
 
     await waitFor(() => {

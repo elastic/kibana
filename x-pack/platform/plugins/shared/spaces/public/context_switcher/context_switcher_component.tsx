@@ -23,7 +23,7 @@ import {
   useManagementActions,
   useSpaceItems,
 } from './hooks';
-import { ENTER_SPACE_PATH } from '../../common';
+import { ENTER_SPACE_PATH, SPACE_SEARCH_COUNT_THRESHOLD } from '../../common';
 import { SPACES_QUERY_KEY, useSpaces } from '../nav_control/hooks/use_spaces';
 import type { SpacesManager } from '../spaces_manager';
 
@@ -85,10 +85,17 @@ const ContextSwitcherInner = ({
     canManageSpaces: core.application.capabilities.spaces?.manage === true,
   });
 
-  const handleSpaceSelect = useCallback(
-    (spaceId: string) => {
+  const handleSpaceSelect = useCallback<ContextSwitcherSpacesConfig['onSelect']>(
+    (spaceId, event) => {
       const url = addSpaceIdToPath(core.http.basePath.serverBasePath, spaceId, ENTER_SPACE_PATH);
-      core.application.navigateToUrl(url);
+
+      if (event.shiftKey) {
+        window.open(url);
+      } else if (event.ctrlKey || event.metaKey) {
+        window.open(url, '_blank');
+      } else {
+        core.application.navigateToUrl(url);
+      }
     },
     [core]
   );
@@ -104,6 +111,7 @@ const ContextSwitcherInner = ({
       items: spaceItems,
       onSelect: handleSpaceSelect,
       ...managementActions,
+      search: { threshold: SPACE_SEARCH_COUNT_THRESHOLD },
       isLoading,
     };
   }, [activeSpaceItem, handleSpaceSelect, isLoading, managementActions, spaceItems]);

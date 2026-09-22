@@ -11,18 +11,18 @@ import { platformSignificantEventsTools, platformCoreTools } from '@kbn/agent-bu
 import { SIGNIFICANT_EVENTS_KI_GROUNDING_SKILL_ID } from '../../skills/significant_events_ki_grounding';
 import instructions from './instructions/discovery.md.text';
 
-export const SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID = 'platform.streams.sig-events.discovery';
+export const SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID = 'significant-events.discovery';
 export const SIGNIFICANT_EVENTS_DISCOVERY_AGENT_TYPE_ID = 'platform.sig_events.discovery-type';
 
 export const discoveryAgentType = {
   id: SIGNIFICANT_EVENTS_DISCOVERY_AGENT_TYPE_ID,
-  name: 'Significant Events Discovery',
+  name: 'Nightshift Triager',
   description:
-    'Triages statistical detection signals across rules, correlates related detections into incident candidates using shared infrastructure, temporal proximity, and causal plausibility, and drafts structured discovery documents with root-cause hypotheses and supporting evidence.',
+    'Correlates related detections into significant events using shared infrastructure, temporal proximity, and causal plausibility, verifies current state, and writes final event records with status, calibrated severity, and supporting evidence.',
   avatar_icon: 'logoElastic',
   baseConfiguration: {
     instructions,
-    skill_ids: [SIGNIFICANT_EVENTS_KI_GROUNDING_SKILL_ID],
+    skill_ids: [SIGNIFICANT_EVENTS_KI_GROUNDING_SKILL_ID, 'significant-events-memory'],
     // The tool set below is fully explicit — the generic platform_core_* tools are irrelevant
     // to discovery and only add noise to tool selection, so elastic capabilities stay disabled.
     enable_elastic_capabilities: false,
@@ -35,7 +35,7 @@ export const discoveryAgentType = {
           platformCoreTools.executeEsql,
           platformSignificantEventsTools.searchKnowledgeIndicators,
           platformSignificantEventsTools.searchEvent,
-          platformSignificantEventsTools.discoveryWrite,
+          platformSignificantEventsTools.eventsWrite,
         ],
       },
     ],

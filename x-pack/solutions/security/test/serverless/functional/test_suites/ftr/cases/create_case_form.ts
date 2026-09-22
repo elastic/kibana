@@ -98,6 +98,10 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
           return this.skip();
         }
 
+        // Templates v2 hides the legacy inline custom fields on Create behind a switch;
+        // reveal it so this legacy flow is exercised whether or not templates is on.
+        await cases.common.showLegacyCustomFields(owner);
+
         const customFields = [
           {
             key: 'valid_key_1',

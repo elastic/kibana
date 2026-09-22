@@ -45,6 +45,13 @@ const hitWithAncestors: DataTableRecord = {
   isAnchor: false,
 } as unknown as DataTableRecord;
 
+const hitWithAncestorsPreview: DataTableRecord = {
+  id: 'event-id',
+  raw: { _id: 'event-id', _index: '.preview.alerts-security.alerts-default' },
+  flattened: { [ALERT_ANCESTORS_ID]: 'ancestors-id' },
+  isAnchor: false,
+} as unknown as DataTableRecord;
+
 describe('useShowRelatedAlertsByAncestry', () => {
   let hookResult: RenderHookResult<
     UseShowRelatedAlertsByAncestryResult,
@@ -57,7 +64,6 @@ describe('useShowRelatedAlertsByAncestry', () => {
     hookResult = renderHook(() =>
       useShowRelatedAlertsByAncestry({
         hit: hitWithoutAncestors,
-        isRulePreview: false,
       })
     );
 
@@ -72,7 +78,6 @@ describe('useShowRelatedAlertsByAncestry', () => {
     hookResult = renderHook(() =>
       useShowRelatedAlertsByAncestry({
         hit: hitWithAncestors,
-        isRulePreview: false,
       })
     );
 
@@ -88,7 +93,6 @@ describe('useShowRelatedAlertsByAncestry', () => {
     hookResult = renderHook(() =>
       useShowRelatedAlertsByAncestry({
         hit: hitWithAncestors,
-        isRulePreview: false,
       })
     );
 
@@ -103,8 +107,7 @@ describe('useShowRelatedAlertsByAncestry', () => {
     licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
     hookResult = renderHook(() =>
       useShowRelatedAlertsByAncestry({
-        hit: hitWithAncestors,
-        isRulePreview: true,
+        hit: hitWithAncestorsPreview,
       })
     );
 

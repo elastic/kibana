@@ -20,14 +20,13 @@ export const DatasetsSelector: React.FunctionComponent<{
   onChangeDatasetSelection: (datasets: string[]) => void;
   selectedDatasets: string[];
 }> = ({ availableDatasets, isLoading = false, onChangeDatasetSelection, selectedDatasets }) => {
-  const options = useMemo<DatasetOptionProps[]>(
-    () =>
-      availableDatasets.map((dataset) => ({
-        value: dataset,
-        label: getFriendlyNameForPartitionId(dataset),
-      })),
-    [availableDatasets]
-  );
+  const options = useMemo<DatasetOptionProps[]>(() => {
+    const allDatasets = [...new Set([...availableDatasets, ...selectedDatasets])];
+    return allDatasets.map((dataset) => ({
+      value: dataset,
+      label: getFriendlyNameForPartitionId(dataset),
+    }));
+  }, [availableDatasets, selectedDatasets]);
 
   const selectedOptions = useMemo(
     () => options.filter(({ value }) => value != null && selectedDatasets.includes(value)),

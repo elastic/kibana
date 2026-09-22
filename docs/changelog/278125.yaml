@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/278125
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-21
+- product: kibana
+  target: 9.5.0
+title: "Fix prebuilt rule upgrade failures when resolving `required_fields`"
+description: "Resolving a `required_fields` conflict during a prebuilt rule upgrade no longer fails validation when the resolved value omits the server-computed `ecs` flag."

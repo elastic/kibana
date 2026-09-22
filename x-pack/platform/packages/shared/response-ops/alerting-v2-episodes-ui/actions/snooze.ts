@@ -9,7 +9,10 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
-import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
+import {
+  ALERT_EPISODE_ACTION_TYPE,
+  type BulkCreateAlertActionBody,
+} from '@kbn/alerting-v2-schemas';
 import type { EpisodeAction, EpisodeActionContext } from './types';
 import { bulkCreateAlertActions } from './bulk_create_alert_actions';
 import { uniqueByGroup, successOrPartialToast } from './helpers';
@@ -36,7 +39,7 @@ export const createSnoozeAction = (deps: SnoozeActionDeps): EpisodeAction => ({
     const expiry = await openSnoozeExpiryModal(deps.overlays, deps.rendering);
     if (expiry === undefined) return;
 
-    const items = uniqueByGroup(episodes).map((ep) => ({
+    const items: BulkCreateAlertActionBody = uniqueByGroup(episodes).map((ep) => ({
       group_hash: ep.group_hash,
       action_type: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
       ...(expiry === null ? {} : { expiry }),
@@ -44,8 +47,8 @@ export const createSnoozeAction = (deps: SnoozeActionDeps): EpisodeAction => ({
     if (!items.length) return;
 
     try {
-      const { processed, total } = await bulkCreateAlertActions(deps.http, items as any);
-      deps.notifications.toasts.add(successOrPartialToast(processed, total));
+      const response = await bulkCreateAlertActions(deps.http, items);
+      deps.notifications.toasts.add(successOrPartialToast(response));
       onSuccess?.();
     } catch {
       deps.notifications.toasts.addDanger(i18n.BULK_ERROR_TOAST);

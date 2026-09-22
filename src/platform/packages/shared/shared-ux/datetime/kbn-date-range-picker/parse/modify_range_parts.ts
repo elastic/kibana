@@ -17,6 +17,7 @@ import {
   getActiveGrammar,
   getCompiledGrammar,
   getPhraseWords,
+  normalizeDigits,
   resolveUnit,
   type LocaleGrammar,
 } from './locale_grammar';
@@ -76,12 +77,19 @@ const getRelativeValue = (part: RangePart, parts: RangePart[]): number | undefin
   return parseInt(valuePart.text, 10);
 };
 
-const isShorthandUnit = (part: RangePart, parts: RangePart[]): boolean => {
-  const valuePart = parts.find(
-    (candidate) => candidate.rangeIndex === part.rangeIndex && candidate.kind === 'relative-value'
+/**
+ * True when `part` is the unit of a shorthand datemath expression ("-7d",
+ * "now-7d/d") rather than of a natural-language phrase. Checking for `+`/`-`
+ * is needed because Japanese/Chinese can have adjacent (touching)
+ * count and unit in natural text.
+ */
+const isShorthandUnit = (part: RangePart, parts: RangePart[]): boolean =>
+  parts.some(
+    (candidate) =>
+      candidate.rangeIndex === part.rangeIndex &&
+      candidate.kind === 'relative-direction' &&
+      (candidate.text === '+' || candidate.text === '-')
   );
-  return valuePart?.end === part.start;
-};
 
 const modifyRelativeValue = (
   text: string,
@@ -95,8 +103,13 @@ const modifyRelativeValue = (
   return splicePart(text, part, String(nextValue));
 };
 
-/** The leading direction word of a `"{word} {count} {unit}"`-shaped duration template. */
-const extractLeadingWord = (template: string): string | undefined => template.match(/^(\S+)/)?.[0];
+/**
+ * The leading direction word of a `"{word}{count}{unit}"`-shaped duration
+ * template. Splitting on the placeholder e.g. `{count}` and not whitespace keeps this
+ * correct for glued CJK templates ("過去{count}{unit}" → "過去").
+ */
+const extractLeadingWord = (template: string): string | undefined =>
+  template.split(/\{count}|\{unit}/)[0].trim() || undefined;
 
 /**
  * Finds the opposite-direction word for `word` within `grammar`, or
@@ -348,16 +361,20 @@ export function applyPartModification(
   parts: RangePart[],
   locale?: string
 ): string | undefined {
+  // Parts are emitted from digit-normalized text (`parseInputParts`), so their
+  // offsets and texts only line up with `text` after the same normalization
+  // (full-width → ASCII is 1:1 in code units, so offsets are unaffected).
+  const normalized = normalizeDigits(text);
   const resolvedLocale = locale ?? i18n.getLocale();
   switch (part.kind) {
     case 'relative-value':
-      return modifyRelativeValue(text, part, action);
+      return modifyRelativeValue(normalized, part, action);
     case 'relative-direction':
-      return modifyRelativeDirection(text, part, action, resolvedLocale);
+      return modifyRelativeDirection(normalized, part, action, resolvedLocale);
     case 'relative-unit':
-      return modifyRelativeUnit(text, part, action, parts, resolvedLocale);
+      return modifyRelativeUnit(normalized, part, action, parts, resolvedLocale);
     case 'rounding-unit':
-      return modifyRoundingUnit(text, part, action);
+      return modifyRoundingUnit(normalized, part, action);
     case 'month':
     case 'day':
     case 'year':
@@ -366,9 +383,9 @@ export function applyPartModification(
     case 'second':
     case 'millisecond':
     case 'weekday':
-      return modifyAbsoluteDate(text, part, action, parts);
+      return modifyAbsoluteDate(normalized, part, action, parts);
     case 'timezone':
-      return modifyAbsoluteTimezone(text, part, action, parts);
+      return modifyAbsoluteTimezone(normalized, part, action, parts);
     default:
       return undefined;
   }

@@ -1,0 +1,13 @@
+prs:
+- https://github.com/elastic/kibana/pull/275289
+issues:
+- https://github.com/elastic/kibana/issues/259298
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-22
+- product: kibana
+title: Fix duplicate APM anomaly detection alerts
+description: APM anomaly detection rules could fire duplicate alerts because each
+  run re-queried overlapping time windows. Rules now filter ML results on `event.ingested`
+  (result write time) instead of anomaly bucket time, so each anomaly is matched once.

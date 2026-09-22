@@ -173,42 +173,6 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         description: 'Title content when the actions popover toggle is disabled',
       }
     ),
-    'euiCollapsibleNavBeta.ariaLabel': i18n.translate('core.euiCollapsibleNavBeta.ariaLabel', {
-      defaultMessage: 'Site menu',
-    }),
-    'euiCollapsedNavButton.ariaLabelButtonIcon': ({ title }: EuiValues) =>
-      i18n.translate('core.euiCollapsedNavButton.ariaLabelButtonIcon', {
-        defaultMessage: '{title}, quick navigation menu',
-        values: { title },
-      }),
-    'euiCollapsibleNavButton.ariaLabelExpand': i18n.translate(
-      'core.euiCollapsibleNavButton.ariaLabelExpand',
-      { defaultMessage: 'Expand navigation' }
-    ),
-    'euiCollapsibleNavButton.ariaLabelCollapse': i18n.translate(
-      'core.euiCollapsibleNavButton.ariaLabelCollapse',
-      { defaultMessage: 'Collapse navigation' }
-    ),
-    'euiCollapsibleNavButton.ariaLabelClose': i18n.translate(
-      'core.euiCollapsibleNavButton.ariaLabelClose',
-      { defaultMessage: 'Close navigation' }
-    ),
-    'euiCollapsibleNavButton.ariaLabelOpen': i18n.translate(
-      'core.euiCollapsibleNavButton.ariaLabelOpen',
-      { defaultMessage: 'Open navigation' }
-    ),
-    'euiCollapsibleNavKibanaSolution.switcherTitle': i18n.translate(
-      'core.euiCollapsibleNavKibanaSolution.switcherTitle',
-      { defaultMessage: 'Solution view' }
-    ),
-    'euiCollapsibleNavKibanaSolution.switcherAriaLabel': i18n.translate(
-      'core.euiCollapsibleNavKibanaSolution.switcherAriaLabel',
-      { defaultMessage: '- click to switch to another solution' }
-    ),
-    'euiCollapsibleNavKibanaSolution.groupLabel': i18n.translate(
-      'core.euiCollapsibleNavKibanaSolution.groupLabel',
-      { defaultMessage: 'Navigate to solution' }
-    ),
     'euiColorPicker.alphaLabel': i18n.translate('core.euiColorPicker.alphaLabel', {
       defaultMessage: 'Alpha channel (opacity) value',
       description: 'Label describing color alpha channel',

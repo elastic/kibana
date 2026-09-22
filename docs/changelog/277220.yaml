@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/277220
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-21
+- product: kibana
+  target: 9.5.0
+title: "Fix 'Alert processing analytics' donut failing on large AD alert counts"

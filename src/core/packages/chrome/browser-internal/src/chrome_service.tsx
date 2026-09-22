@@ -192,6 +192,7 @@ export class ChromeService {
       componentDeps: {
         basePath: http.basePath,
         legacyActionMenu$: application.currentActionMenu$,
+        capabilities: application.capabilities,
       },
     });
 

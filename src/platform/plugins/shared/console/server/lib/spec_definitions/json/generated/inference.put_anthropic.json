@@ -17,6 +17,26 @@
         "chat_completion"
       ]
     },
+    "data_autocomplete_rules": {
+      "service": {
+        "__one_of": [
+          "anthropic"
+        ]
+      },
+      "service_settings": {
+        "api_key": "",
+        "model_id": "",
+        "rate_limit": {
+          "requests_per_minute": ""
+        }
+      },
+      "task_settings": {
+        "max_tokens": "",
+        "temperature": "",
+        "top_k": "",
+        "top_p": ""
+      }
+    },
     "methods": [
       "PUT"
     ],

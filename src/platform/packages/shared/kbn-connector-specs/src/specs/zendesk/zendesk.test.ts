@@ -136,4 +136,29 @@ describe('ZendeskConnector', () => {
       );
     });
   });
+
+  // ===========================================================================
+  // test handler
+  // ===========================================================================
+
+  describe('test handler', () => {
+    const testSpec = ZendeskConnector.test;
+
+    it('should call /users/me.json and return {}', async () => {
+      mockClient.get.mockResolvedValue({ data: { user: { id: 1, name: 'Alice' } } });
+
+      const result = await testSpec.handler(mockContext);
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://test-company.zendesk.com/api/v2/users/me.json'
+      );
+      expect(result).toEqual({});
+    });
+
+    it('should throw when the API call fails', async () => {
+      mockClient.get.mockRejectedValue(new Error('Unauthorized'));
+
+      await expect(testSpec.handler(mockContext)).rejects.toThrow('Unauthorized');
+    });
+  });
 });

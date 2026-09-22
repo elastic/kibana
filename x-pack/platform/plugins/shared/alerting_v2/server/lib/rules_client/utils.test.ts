@@ -6,13 +6,23 @@
  */
 
 import type { CreateRuleData, UpdateRuleData } from '@kbn/alerting-v2-schemas';
+import { TaskStatus } from '@kbn/task-manager-plugin/server';
+import { ruleResponseSchema } from '@kbn/alerting-v2-schemas';
 import { createRuleSoAttributes } from '../test_utils';
+import type { RotationCandidate } from './types';
 import {
   transformCreateRuleBodyToRuleSoAttributes,
   transformRuleSoAttributesToRuleApiResponse,
   buildUpdateRuleAttributes,
   assertImmutableUnchanged,
   pickImmutable,
+  bulkErrorCodeForStatus,
+  toBulkError,
+  groupCandidatesByInterval,
+  isTaskMidRun,
+  ruleDisabledError,
+  ruleRunningError,
+  rotationFailedError,
 } from './utils';
 
 const serverFields = {
@@ -21,6 +31,7 @@ const serverFields = {
   createdAt: '2025-01-01T00:00:00.000Z',
   updatedBy: 'user-1',
   updatedAt: '2025-01-01T00:00:00.000Z',
+  version: 1,
 };
 
 const baseCreateData: CreateRuleData = {
@@ -30,6 +41,14 @@ const baseCreateData: CreateRuleData = {
   schedule: { every: '5m' },
   query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
 };
+
+const createRuleSoAttributesWithArtifacts = () =>
+  createRuleSoAttributes({
+    artifacts: [
+      { id: 'runbook-1', type: 'runbook', data: { content: 'steps' } },
+      { id: 'dashboard-1', type: 'dashboard', data: { dashboardId: 'dash-1' } },
+    ],
+  });
 
 describe('utils', () => {
   describe('transformCreateRuleBodyToRuleSoAttributes', () => {
@@ -78,6 +97,7 @@ describe('utils', () => {
       const result = buildUpdateRuleAttributes(existing, updateData, {
         updatedBy: 'user-2',
         updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
       });
 
       expect(result.metadata.name).toBe('original');
@@ -95,6 +115,7 @@ describe('utils', () => {
       const result = buildUpdateRuleAttributes(existing, updateData, {
         updatedBy: 'user-2',
         updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
       });
 
       expect(result.metadata.name).toBe('renamed');
@@ -112,6 +133,7 @@ describe('utils', () => {
       const result = buildUpdateRuleAttributes(existing, updateData, {
         updatedBy: 'user-2',
         updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
       });
 
       expect(result.state_transition).toBeNull();
@@ -126,6 +148,7 @@ describe('utils', () => {
       const result = buildUpdateRuleAttributes(existing, updateData, {
         updatedBy: 'user-2',
         updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
       });
 
       expect(result.state_transition).toEqual({ pending_count: 3 });
@@ -140,6 +163,7 @@ describe('utils', () => {
       const result = buildUpdateRuleAttributes(existing, updateData, {
         updatedBy: 'user-2',
         updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
       });
 
       expect(result.state_transition).toEqual({ pending_count: 5 });
@@ -156,6 +180,7 @@ describe('utils', () => {
       const result = buildUpdateRuleAttributes(existing, updateData, {
         updatedBy: 'user-2',
         updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
       });
 
       expect(result.metadata.builder_type).toBe('threshold');
@@ -172,6 +197,7 @@ describe('utils', () => {
       const result = buildUpdateRuleAttributes(existing, updateData, {
         updatedBy: 'user-2',
         updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
       });
 
       expect(result.metadata.builder_type).toBeUndefined();
@@ -189,6 +215,7 @@ describe('utils', () => {
       const result = buildUpdateRuleAttributes(existing, updateData, {
         updatedBy: 'user-2',
         updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
       });
 
       expect(result.metadata.builder_type).toBe('threshold');
@@ -205,6 +232,7 @@ describe('utils', () => {
       const result = buildUpdateRuleAttributes(existing, updateData, {
         updatedBy: 'user-2',
         updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
       });
 
       expect(result.metadata.builder_type).toBeUndefined();
@@ -222,13 +250,45 @@ describe('utils', () => {
       const result = buildUpdateRuleAttributes(existing, updateData, {
         updatedBy: 'user-2',
         updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
       });
 
       expect(result.metadata.builder_type).toBe('threshold');
     });
+
+    it('preserves stored artifacts when the update does not touch them', () => {
+      const existing = createRuleSoAttributesWithArtifacts();
+
+      const result = buildUpdateRuleAttributes(
+        existing,
+        {},
+        {
+          updatedBy: 'user-2',
+          updatedAt: '2025-01-02T00:00:00.000Z',
+          version: 2,
+        }
+      );
+
+      expect(result.artifacts).toEqual([
+        { id: 'runbook-1', type: 'runbook', data: { content: 'steps' } },
+        { id: 'dashboard-1', type: 'dashboard', data: { dashboardId: 'dash-1' } },
+      ]);
+    });
   });
 
   describe('transformRuleSoAttributesToRuleApiResponse', () => {
+    it('returns artifacts that satisfy the strict response schema', () => {
+      const attrs = createRuleSoAttributesWithArtifacts();
+
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
+
+      expect(result.artifacts).toEqual([
+        { id: 'runbook-1', type: 'runbook', data: { content: 'steps' } },
+        { id: 'dashboard-1', type: 'dashboard', data: { dashboardId: 'dash-1' } },
+      ]);
+      expect(() => ruleResponseSchema.parse(result)).not.toThrow();
+    });
+
     it('includes description in the API response', () => {
       const attrs = createRuleSoAttributes({
         metadata: { name: 'rule-1', description: 'A test description' },
@@ -290,6 +350,20 @@ describe('utils', () => {
       const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
       expect(result.version).toBeUndefined();
     });
+
+    it('exposes the persisted version as metadata.version on the API response', () => {
+      const attrs = createRuleSoAttributes({ metadata: { name: 'test-rule', version: 7 } });
+
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
+      expect(result.metadata.version).toBe(7);
+    });
+
+    it('falls back to the baseline version when the rule has no version yet', () => {
+      const attrs = createRuleSoAttributes({ metadata: { name: 'test-rule', version: undefined } });
+
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
+      expect(result.metadata.version).toBe(1);
+    });
   });
 
   describe('assertImmutableUnchanged', () => {
@@ -348,5 +422,111 @@ describe('utils', () => {
 
       expect(next.kind).toBe('alert');
     });
+  });
+});
+
+describe('bulkErrorCodeForStatus', () => {
+  it('maps 404 to RULE_NOT_FOUND', () => {
+    expect(bulkErrorCodeForStatus(404)).toBe('RULE_NOT_FOUND');
+  });
+
+  it('maps 409 to RULE_VERSION_CONFLICT', () => {
+    expect(bulkErrorCodeForStatus(409)).toBe('RULE_VERSION_CONFLICT');
+  });
+
+  it('maps any other status to INTERNAL_SERVER_ERROR', () => {
+    expect(bulkErrorCodeForStatus(500)).toBe('INTERNAL_SERVER_ERROR');
+    expect(bulkErrorCodeForStatus(400)).toBe('INTERNAL_SERVER_ERROR');
+  });
+});
+
+describe('toBulkError', () => {
+  it('builds a per-rule error from a saved-object error', () => {
+    expect(toBulkError('rule-1', { statusCode: 404, message: 'Not found' })).toEqual({
+      id: 'rule-1',
+      error: { code: 'RULE_NOT_FOUND', message: 'Not found' },
+    });
+  });
+});
+
+describe('groupCandidatesByInterval', () => {
+  const candidate = (id: string, every: string): RotationCandidate => ({
+    id,
+    taskId: `task:${id}`,
+    attrs: createRuleSoAttributes({ schedule: { every, lookback: '1m' } }),
+    version: 'v1',
+  });
+
+  it('groups candidates by their schedule interval, preserving order', () => {
+    const grouped = groupCandidatesByInterval([
+      candidate('a', '1m'),
+      candidate('b', '5m'),
+      candidate('c', '1m'),
+    ]);
+
+    expect([...grouped.keys()].sort()).toEqual(['1m', '5m']);
+    expect(grouped.get('1m')?.map((c) => c.id)).toEqual(['a', 'c']);
+    expect(grouped.get('5m')?.map((c) => c.id)).toEqual(['b']);
+  });
+
+  it('returns an empty map when there are no candidates', () => {
+    expect(groupCandidatesByInterval([]).size).toBe(0);
+  });
+});
+
+describe('rotation error builders', () => {
+  it('ruleDisabledError uses RULE_DISABLED and names the rule', () => {
+    expect(ruleDisabledError('rule-1')).toEqual({
+      id: 'rule-1',
+      error: { code: 'RULE_DISABLED', message: expect.stringContaining('rule-1') },
+    });
+  });
+
+  it('ruleRunningError uses RULE_ALREADY_RUNNING', () => {
+    expect(ruleRunningError('rule-1')).toEqual({
+      id: 'rule-1',
+      error: { code: 'RULE_ALREADY_RUNNING', message: expect.stringContaining('running') },
+    });
+  });
+
+  it('rotationFailedError maps the per-task status code', () => {
+    expect(rotationFailedError('rule-1', 409).error.code).toBe('RULE_VERSION_CONFLICT');
+  });
+
+  it('rotationFailedError defaults to INTERNAL_SERVER_ERROR without a status', () => {
+    expect(rotationFailedError('rule-1').error.code).toBe('INTERNAL_SERVER_ERROR');
+  });
+
+  it('carries the rule name in error.details when provided', () => {
+    expect(ruleDisabledError('rule-1', 'My rule').error.details).toEqual({ name: 'My rule' });
+    expect(ruleRunningError('rule-1', 'My rule').error.details).toEqual({ name: 'My rule' });
+    expect(rotationFailedError('rule-1', 409, 'My rule').error.details).toEqual({
+      name: 'My rule',
+    });
+    expect(
+      toBulkError('rule-1', { statusCode: 409, message: 'x' }, 'My rule').error.details
+    ).toEqual({ name: 'My rule' });
+  });
+
+  it('omits error.details when no name is provided (e.g. a not-found rule)', () => {
+    expect(ruleDisabledError('rule-1').error.details).toBeUndefined();
+    expect(ruleRunningError('rule-1').error.details).toBeUndefined();
+    expect(rotationFailedError('rule-1').error.details).toBeUndefined();
+    expect(toBulkError('rule-1', { statusCode: 404, message: 'x' }).error.details).toBeUndefined();
+  });
+});
+
+describe('isTaskMidRun', () => {
+  it('is true only for running and claiming tasks', () => {
+    expect(isTaskMidRun(TaskStatus.Running)).toBe(true);
+    expect(isTaskMidRun(TaskStatus.Claiming)).toBe(true);
+  });
+
+  it('is false for non-mid-run states and an unknown/absent status', () => {
+    expect(isTaskMidRun(TaskStatus.Failed)).toBe(false);
+    expect(isTaskMidRun(TaskStatus.Unrecognized)).toBe(false);
+    expect(isTaskMidRun(TaskStatus.DeadLetter)).toBe(false);
+    expect(isTaskMidRun(TaskStatus.Idle)).toBe(false);
+    expect(isTaskMidRun(undefined)).toBe(false);
   });
 });

@@ -24,6 +24,7 @@ import {
 import type { TimeKey } from '../../../../common/time';
 import {
   CategoryJobNoticesSection,
+  JobStoppedCallout,
   LogAnalysisJobProblemIndicator,
 } from '../../../components/logging/log_analysis_job_status';
 import { DatasetsSelector } from '../../../components/logging/log_analysis_results/datasets_selector';
@@ -158,6 +159,7 @@ export const LogEntryRateResultsContent: React.FunctionComponent<{
     defaultSortOptions: SORT_DEFAULTS,
     defaultPaginationOptions: PAGINATION_DEFAULTS,
     filteredDatasets: selectedDatasets,
+    jobIds,
   });
 
   const handleAutoRefreshChange = useCallback(
@@ -180,6 +182,25 @@ export const LogEntryRateResultsContent: React.FunctionComponent<{
     () => showModuleSetup('logs_ui_categories'),
     [showModuleSetup]
   );
+
+  const stoppedJobNames = useMemo(() => {
+    const names: string[] = [];
+
+    if (hasStoppedLogEntryRateJobs) {
+      names.push(logEntryRateModuleDescriptor.moduleName);
+    }
+
+    if (hasStoppedLogEntryCategoriesJobs) {
+      names.push(logEntryCategoriesModuleDescriptor.moduleName);
+    }
+
+    return names;
+  }, [
+    hasStoppedLogEntryRateJobs,
+    hasStoppedLogEntryCategoriesJobs,
+    logEntryRateModuleDescriptor.moduleName,
+    logEntryCategoriesModuleDescriptor.moduleName,
+  ]);
 
   const hasAnomalyResults = logEntryAnomalies.length > 0;
 
@@ -237,11 +258,11 @@ export const LogEntryRateResultsContent: React.FunctionComponent<{
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
+          <JobStoppedCallout stoppedJobNames={stoppedJobNames} />
           <LogAnalysisJobProblemIndicator
             hasOutdatedJobConfigurations={hasOutdatedLogEntryRateJobConfigurations}
             hasOutdatedJobDefinitions={hasOutdatedLogEntryRateJobDefinitions}
             hasSetupCapabilities={hasLogAnalysisSetupCapabilities}
-            hasStoppedJobs={hasStoppedLogEntryRateJobs}
             isFirstUse={false /* the first use message is already shown by the section below */}
             moduleName={logEntryRateModuleDescriptor.moduleName}
             onRecreateMlJobForReconfiguration={showLogEntryRateSetup}
@@ -252,7 +273,6 @@ export const LogEntryRateResultsContent: React.FunctionComponent<{
             hasOutdatedJobConfigurations={hasOutdatedLogEntryCategoriesJobConfigurations}
             hasOutdatedJobDefinitions={hasOutdatedLogEntryCategoriesJobDefinitions}
             hasSetupCapabilities={hasLogAnalysisSetupCapabilities}
-            hasStoppedJobs={hasStoppedLogEntryCategoriesJobs}
             isFirstUse={isFirstUse}
             moduleName={logEntryCategoriesModuleDescriptor.moduleName}
             onRecreateMlJobForReconfiguration={showLogEntryCategoriesSetup}

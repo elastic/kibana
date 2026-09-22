@@ -8,7 +8,7 @@
 import { useQuery } from '@kbn/react-query';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import { ALERTING_V2_INTERNAL_SUGGEST_USER_PROFILES_API_PATH } from '@kbn/alerting-v2-constants';
+import { ALERTING_V2_INTERNAL_SUGGESTIONS_USER_PROFILES_API_PATH } from '@kbn/alerting-v2-constants';
 import { queryKeys } from '../query_keys';
 
 export interface UseSuggestedProfilesParams {
@@ -36,7 +36,7 @@ export function useSuggestedProfiles({
   return useQuery({
     queryKey,
     queryFn: () =>
-      userProfile.suggest(ALERTING_V2_INTERNAL_SUGGEST_USER_PROFILES_API_PATH, {
+      userProfile.suggest(ALERTING_V2_INTERNAL_SUGGESTIONS_USER_PROFILES_API_PATH, {
         name: trimmedSearch,
         size: 20,
       }) as Promise<UserProfileWithAvatar[]>,

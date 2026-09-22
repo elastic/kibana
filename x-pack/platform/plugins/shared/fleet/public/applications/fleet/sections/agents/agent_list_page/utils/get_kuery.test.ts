@@ -35,9 +35,9 @@ describe('getKuery', () => {
     );
   });
 
-  it('should return a kuery with selected agent policies', () => {
+  it('should return a kuery with selected agent policies using policy_base_id fallback', () => {
     expect(getKuery({ selectedAgentPolicies })).toEqual(
-      'fleet-agents.policy_id : ("policy1" or "policy2" or "policy3")'
+      '(fleet-agents.policy_base_id:(policy1 or policy2 or policy3) or (fleet-agents.policy_id:(policy1 or policy2 or policy3) and not fleet-agents.policy_base_id:*))'
     );
   });
 

@@ -87,7 +87,7 @@ apiTest.describe(
           title: 'Mocked Conversation Title',
           response: 'Mocked LLM response',
         });
-        await postConverse(
+        const res = await postConverse(
           apiClient,
           adminCredentials.apiKeyHeader,
           {
@@ -98,6 +98,10 @@ apiTest.describe(
           mode
         );
         await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+        const conversationId = (res.body as { conversation_id: string }).conversation_id;
+        expect(conversationId).toBeDefined();
+        conversationIds.push(conversationId);
+
         const firstAgentRequest = llmProxy.interceptedRequests.find(
           (request) => request.matchingInterceptorName === 'final-assistant-response'
         )?.requestBody;
@@ -105,7 +109,8 @@ apiTest.describe(
         const allMessageContent = firstAgentRequest!.messages
           .map((m: { content?: unknown }) => String(m.content ?? ''))
           .join('\n');
-        expect(allMessageContent).toContain('some text content');
+        expect(allMessageContent).toContain('<attachments count="1">');
+        expect(allMessageContent).toContain('<attachment');
       });
 
       apiTest(`[${mode}] rejects attachment without data or origin`, async ({ asAdmin }) => {
@@ -148,7 +153,7 @@ apiTest.describe(
             title: 'Mocked Conversation Title',
             response: 'Mocked LLM response',
           });
-          await postConverse(
+          const res = await postConverse(
             apiClient,
             adminCredentials.apiKeyHeader,
             {
@@ -165,14 +170,21 @@ apiTest.describe(
             mode
           );
           await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
-          const firstAgentRequest = llmProxy.interceptedRequests.find(
-            (request) => request.matchingInterceptorName === 'final-assistant-response'
-          )?.requestBody;
-          expect(firstAgentRequest).toBeDefined();
-          const allMessageContent = firstAgentRequest!.messages
-            .map((m: { content?: unknown }) => String(m.content ?? ''))
-            .join('\n');
-          expect(allMessageContent).toContain('inline-payload-for-model');
+
+          const conversationId = (res.body as { conversation_id: string }).conversation_id;
+          expect(conversationId).toBeDefined();
+          conversationIds.push(conversationId);
+          const conversation = await getConversation(
+            apiClient,
+            adminCredentials.apiKeyHeader,
+            conversationId
+          );
+          expect(conversation.attachments).toBeDefined();
+          expect(conversation.attachments).toHaveLength(1);
+          expect(conversation.attachments![0].versions).toHaveLength(1);
+          expect(conversation.attachments![0].versions[0].data).toMatchObject({
+            content: 'inline-payload-for-model',
+          });
         }
       );
 

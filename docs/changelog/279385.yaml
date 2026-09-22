@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/279385
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-22
+- product: kibana
+areas:
+- Search and data
+title: Fix Model Management pages appearing on Observability Logs Essentials projects
+description: Fixes Model Management pages being reachable by URL or global search
+  on Observability Logs Essentials projects where AI features aren't supported.

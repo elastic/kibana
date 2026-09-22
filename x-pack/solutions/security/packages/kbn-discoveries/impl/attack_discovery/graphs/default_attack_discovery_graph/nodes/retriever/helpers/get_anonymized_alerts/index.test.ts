@@ -165,6 +165,49 @@ describe('getAnonymizedAlerts', () => {
     });
   });
 
+  it('searches with a plain ids query (no time range, no open/acknowledged status) when an ids filter is provided', async () => {
+    // The shared builder always injects a @timestamp range + open/acknowledged status
+    // clause; for an exact-id re-fetch (skill mode) we must bypass those so the
+    // gate-curated ids resolve regardless of the alert's age or workflow status.
+    (getOpenAndAcknowledgedAlertsQuery as jest.Mock).mockReturnValue({
+      index: [alertsIndexPattern],
+      size,
+      fields: [{ field: '*', include_unmapped: true }],
+      query: {
+        bool: {
+          filter: [
+            {
+              bool: {
+                should: [{ match_phrase: { 'kibana.alert.workflow_status': 'open' } }],
+                minimum_should_match: 1,
+              },
+            },
+            { range: { '@timestamp': { gte: 'now-24h', lte: 'now' } } },
+          ],
+        },
+      },
+    });
+
+    const alertIds = ['alert-id-1', 'alert-id-2'];
+
+    await getAnonymizedAlerts({
+      alertsIndexPattern,
+      esClient: mockEsClient,
+      filter: { ids: { values: alertIds } },
+      size,
+    });
+
+    const searchArg = (mockEsClient.search as unknown as jest.Mock).mock.calls[0][0];
+
+    expect(searchArg.query).toEqual({ ids: { values: alertIds } });
+    // the non-query scaffolding (index/size/fields) is preserved so anonymization still works
+    expect(searchArg.size).toBe(size);
+    expect(searchArg.fields).toEqual([{ field: '*', include_unmapped: true }]);
+    // the time and status constraints are gone
+    expect(JSON.stringify(searchArg)).not.toContain('@timestamp');
+    expect(JSON.stringify(searchArg)).not.toContain('workflow_status');
+  });
+
   it('returns the expected transformed (anonymized) raw data', async () => {
     const result = await getAnonymizedAlerts({
       alertsIndexPattern,

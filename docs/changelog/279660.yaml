@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/279660
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-22
+- product: kibana
+title: Fix Context Engine AI index destination prefix validation
+description: AI index `dest.value` entries must use the `ai-index-ds-*` or `ai-index-idx-*`
+  prefix instead of `.ai-index-*`.

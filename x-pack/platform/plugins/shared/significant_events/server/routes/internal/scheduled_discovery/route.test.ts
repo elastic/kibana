@@ -13,9 +13,12 @@ import {
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TARGET_COVERAGE_MINUTES,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_REVIEW_INTERVAL_MINUTES,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DISCOVERY_BATCH_SIZE,
-  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TRIAGE_BATCH_SIZE,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_MAX_REVIEW_PASSES,
+  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_FLAKY_RULE_DETECTION_THRESHOLD,
+  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_FLAKY_RULE_PROBE_AFTER_MINUTES,
+  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_FLAKY_RULE_EXEMPT_SEVERITY_SCORE,
 } from '@kbn/management-settings-ids';
+import type { SignificantEventsMaintenanceState } from '../../../../common/maintenance/state_machine';
 import { internalScheduledDiscoveryRoutes } from './route';
 import { installDiscoveryAgents } from '../../../agent_builder/agents/discovery';
 
@@ -41,17 +44,21 @@ type HandlerParams = Parameters<typeof route.handler>[0];
 const createHandlerParams = ({
   scheduledDiscovery,
   scheduledWorkflowError,
+  maintenanceState = 'enabled',
   spaceSettings = {
     [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED]: false,
     [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_INTERVAL_MINUTES]: 30,
     [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_REVIEW_INTERVAL_MINUTES]: 10,
     [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DISCOVERY_BATCH_SIZE]: 3,
-    [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TRIAGE_BATCH_SIZE]: 5,
     [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_MAX_REVIEW_PASSES]: 3,
+    [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_FLAKY_RULE_DETECTION_THRESHOLD]: 10,
+    [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_FLAKY_RULE_PROBE_AFTER_MINUTES]: 360,
+    [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_FLAKY_RULE_EXEMPT_SEVERITY_SCORE]: 80,
   },
 }: {
   scheduledDiscovery: NonNullable<HandlerParams['params']>['body']['scheduledDiscovery'];
   scheduledWorkflowError?: Error;
+  maintenanceState?: SignificantEventsMaintenanceState;
   spaceSettings?: Record<string, boolean | number>;
 }) => {
   const uiSettingsClient = {
@@ -65,6 +72,9 @@ const createHandlerParams = ({
         scheduledWorkflowError ? Promise.reject(scheduledWorkflowError) : Promise.resolve()
       ),
   };
+  const maintenanceService = {
+    getState: jest.fn().mockResolvedValue(maintenanceState),
+  };
   const agentBuilder = { agents: { ensure: jest.fn() } };
 
   const handlerParams = {
@@ -76,17 +86,23 @@ const createHandlerParams = ({
     }),
     server: { agentBuilder },
     significantEventsScheduledWorkflowsService: scheduledWorkflowService,
+    maintenanceService,
     getSpaceId: jest.fn().mockResolvedValue('space-a'),
     logger: { warn: jest.fn() },
     telemetry: {
-      startTrackingEndpointLatency: jest.fn().mockReturnValue(jest.fn()),
       reportStreamsStateError: jest.fn(),
     },
     response: {},
     context: {},
   } as unknown as HandlerParams;
 
-  return { handlerParams, uiSettingsClient, scheduledWorkflowService, agentBuilder };
+  return {
+    handlerParams,
+    uiSettingsClient,
+    scheduledWorkflowService,
+    maintenanceService,
+    agentBuilder,
+  };
 };
 
 describe('scheduled significant events discovery settings route', () => {
@@ -103,7 +119,6 @@ describe('scheduled significant events discovery settings route', () => {
           targetCoverageMinutes: 60,
           reviewIntervalMinutes: 15,
           discoveryBatchSize: 6,
-          triageBatchSize: 8,
           maxReviewPasses: 4,
         },
       });
@@ -116,7 +131,6 @@ describe('scheduled significant events discovery settings route', () => {
       [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TARGET_COVERAGE_MINUTES]: 60,
       [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_REVIEW_INTERVAL_MINUTES]: 15,
       [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DISCOVERY_BATCH_SIZE]: 6,
-      [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TRIAGE_BATCH_SIZE]: 8,
       [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_MAX_REVIEW_PASSES]: 4,
     });
     expect(installDiscoveryAgentsMock).toHaveBeenCalledWith({
@@ -137,8 +151,10 @@ describe('scheduled significant events discovery settings route', () => {
         targetCoverageMinutes: 60,
         reviewIntervalMinutes: 15,
         discoveryBatchSize: 6,
-        triageBatchSize: 8,
         maxReviewPasses: 4,
+        flakyRuleDetectionThreshold: 10,
+        flakyRuleProbeAfterMinutes: 360,
+        flakyRuleExemptSeverityScore: 80,
       },
     });
   });
@@ -153,7 +169,6 @@ describe('scheduled significant events discovery settings route', () => {
         [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_INTERVAL_MINUTES]: 30,
         [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_REVIEW_INTERVAL_MINUTES]: 10,
         [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DISCOVERY_BATCH_SIZE]: 3,
-        [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TRIAGE_BATCH_SIZE]: 5,
         [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_MAX_REVIEW_PASSES]: 3,
       },
     });
@@ -175,8 +190,10 @@ describe('scheduled significant events discovery settings route', () => {
         targetCoverageMinutes: 30,
         reviewIntervalMinutes: 10,
         discoveryBatchSize: 3,
-        triageBatchSize: 5,
         maxReviewPasses: 3,
+        flakyRuleDetectionThreshold: 10,
+        flakyRuleProbeAfterMinutes: 360,
+        flakyRuleExemptSeverityScore: 80,
       },
     });
   });
@@ -192,7 +209,6 @@ describe('scheduled significant events discovery settings route', () => {
           [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_INTERVAL_MINUTES]: 30,
           [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_REVIEW_INTERVAL_MINUTES]: 10,
           [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DISCOVERY_BATCH_SIZE]: 3,
-          [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TRIAGE_BATCH_SIZE]: 5,
           [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_MAX_REVIEW_PASSES]: 3,
         },
       });
@@ -217,8 +233,10 @@ describe('scheduled significant events discovery settings route', () => {
         targetCoverageMinutes: 30,
         reviewIntervalMinutes: 10,
         discoveryBatchSize: 3,
-        triageBatchSize: 5,
         maxReviewPasses: 3,
+        flakyRuleDetectionThreshold: 10,
+        flakyRuleProbeAfterMinutes: 360,
+        flakyRuleExemptSeverityScore: 80,
       },
     });
   });
@@ -268,7 +286,6 @@ describe('scheduled significant events discovery settings route', () => {
         [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_INTERVAL_MINUTES]: 30,
         [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_REVIEW_INTERVAL_MINUTES]: 10,
         [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DISCOVERY_BATCH_SIZE]: 3,
-        [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TRIAGE_BATCH_SIZE]: 5,
         [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_MAX_REVIEW_PASSES]: 3,
       },
     });
@@ -290,8 +307,10 @@ describe('scheduled significant events discovery settings route', () => {
         targetCoverageMinutes: 30,
         reviewIntervalMinutes: 10,
         discoveryBatchSize: 3,
-        triageBatchSize: 5,
         maxReviewPasses: 3,
+        flakyRuleDetectionThreshold: 10,
+        flakyRuleProbeAfterMinutes: 360,
+        flakyRuleExemptSeverityScore: 80,
       },
     });
   });
@@ -366,5 +385,51 @@ describe('scheduled significant events discovery settings route', () => {
       [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_INTERVAL_MINUTES]: 45,
     });
     expect(uiSettingsClient.setMany).toHaveBeenNthCalledWith(2, previousSettings);
+  });
+
+  it('rejects with 409 and persists nothing when enabling while paused', async () => {
+    const { handlerParams, uiSettingsClient, scheduledWorkflowService } = createHandlerParams({
+      scheduledDiscovery: { enabled: true },
+      maintenanceState: 'paused',
+    });
+
+    // The route wrapper maps the paused (409) StatusError to a Boom conflict.
+    await expect(route.handler(handlerParams)).rejects.toMatchObject({
+      output: { statusCode: 409 },
+    });
+    // The guard runs before any persistence or reconciliation.
+    expect(uiSettingsClient.setMany).not.toHaveBeenCalled();
+    expect(scheduledWorkflowService.ensureWorkflow).not.toHaveBeenCalled();
+  });
+
+  it('rejects with 409 when a config-only change would keep discovery enabled while paused', async () => {
+    const { handlerParams, uiSettingsClient } = createHandlerParams({
+      scheduledDiscovery: { detectionIntervalMinutes: 45 },
+      maintenanceState: 'paused',
+      spaceSettings: {
+        [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED]: true,
+      },
+    });
+
+    await expect(route.handler(handlerParams)).rejects.toMatchObject({
+      output: { statusCode: 409 },
+    });
+    expect(uiSettingsClient.setMany).not.toHaveBeenCalled();
+  });
+
+  it('rejects with 409 when disabling scheduled discovery while paused', async () => {
+    const { handlerParams, uiSettingsClient, scheduledWorkflowService } = createHandlerParams({
+      scheduledDiscovery: { enabled: false },
+      maintenanceState: 'paused',
+      spaceSettings: {
+        [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED]: true,
+      },
+    });
+
+    await expect(route.handler(handlerParams)).rejects.toMatchObject({
+      output: { statusCode: 409 },
+    });
+    expect(uiSettingsClient.setMany).not.toHaveBeenCalled();
+    expect(scheduledWorkflowService.ensureWorkflow).not.toHaveBeenCalled();
   });
 });

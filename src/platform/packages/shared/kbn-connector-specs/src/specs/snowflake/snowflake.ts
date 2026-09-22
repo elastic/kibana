@@ -200,7 +200,7 @@ export const Snowflake: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows', 'agentBuilder'],
+    supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
   },
 
   auth: {
@@ -592,29 +592,16 @@ export const Snowflake: ConnectorSpec = {
     handler: async (ctx) => {
       const { accountUrl } = ctx.config as { accountUrl: string };
       const url = `${normalizeUrl(accountUrl)}${SNOWFLAKE_SQL_API_PATH}`;
-
-      const response = await ctx.client.post(
+      await ctx.client.post(
         url,
         { statement: 'SELECT CURRENT_VERSION()' },
         {
           validateStatus: (status) => status === 200 || status === 202,
         }
       );
-
-      if (response.status === 200 && response.data?.data) {
-        return {
-          ok: true,
-          message: `Connected to Snowflake. Version: ${response.data.data[0]?.[0] ?? 'unknown'}`,
-        };
-      }
-
-      return {
-        ok: true,
-        message: `Connected to Snowflake. Statement submitted (handle: ${
-          response.data?.statementHandle ?? 'unknown'
-        }).`,
-      };
+      return {};
     },
+    enabled: true,
   },
 
   skill: [

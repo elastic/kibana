@@ -50,6 +50,7 @@ import 'monaco-editor/esm/vs/language/json/monaco.contribution.js';
 import 'monaco-editor/esm/vs/basic-languages/javascript/javascript.contribution.js'; // Needed for basic javascript support
 import 'monaco-editor/esm/vs/basic-languages/xml/xml.contribution.js'; // Needed for basic xml support
 import 'monaco-editor/esm/vs/basic-languages/yaml/yaml.contribution'; // Needed for yaml support
+import 'monaco-editor/esm/vs/basic-languages/liquid/liquid.contribution.js'; // Needed for liquid template support
 
 // config for supported base languages
 export {

@@ -9,8 +9,7 @@
 
 import React, { useCallback } from 'react';
 
-import { EuiFlexGroup, EuiSwitch, EuiButtonGroup, EuiText, EuiBadge } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiFlexGroup, EuiSwitch, EuiButtonGroup, EuiText } from '@elastic/eui';
 
 import type { TimePrecision } from '../types';
 
@@ -21,7 +20,6 @@ import {
   PanelBodySection,
   PanelBodySectionInfo,
   SubPanelHeading,
-  PanelFooter,
 } from '../date_range_picker_panel_ui';
 import { AutoRefresh } from '../settings/auto_refresh';
 import { useDateRangePickerContext } from '../date_range_picker_context';
@@ -118,15 +116,6 @@ export function SettingsPanel() {
           </EuiFlexGroup>
         </PanelBodySection>
       </PanelBody>
-      <PanelFooter>
-        <EuiBadge aria-label="Tech preview" color="hollow" iconType="flask" />
-        <EuiText size="xs" color="subdued" component="p">
-          <FormattedMessage
-            id="sharedUXPackages.dateRangePicker.settingsPanel.technicalPreviewNotice"
-            defaultMessage="This time picker is in a technical preview."
-          />
-        </EuiText>
-      </PanelFooter>
     </PanelContainer>
   );
 }

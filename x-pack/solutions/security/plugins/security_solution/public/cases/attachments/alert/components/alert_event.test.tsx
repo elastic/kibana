@@ -118,4 +118,35 @@ describe('AlertEvent', () => {
     expect(mockOpenFlyout).not.toHaveBeenCalled();
     expect(flyoutApi.openRuleFlyout).not.toHaveBeenCalled();
   });
+
+  describe('when the alert is a linked/remote (CPS) alert', () => {
+    it('renders the rule name as plain text instead of a clickable link', () => {
+      render(
+        <TestProviders>
+          <AlertEvent {...defaultProps} isRemoteAlert={true} />
+        </TestProviders>
+      );
+
+      // the rule name is still displayed within the user action title
+      expect(screen.getByTestId(`alerts-user-action-${savedObjectId}`)).toHaveTextContent(
+        'My rule'
+      );
+      // but it is no longer rendered as a clickable link
+      expect(screen.queryByTestId(ruleLinkTestId)).not.toBeInTheDocument();
+      expect(screen.queryByRole('link')).not.toBeInTheDocument();
+    });
+
+    it('does not open any flyout when the rule name is clicked', () => {
+      render(
+        <TestProviders>
+          <AlertEvent {...defaultProps} isRemoteAlert={true} />
+        </TestProviders>
+      );
+
+      fireEvent.click(screen.getByTestId(`alerts-user-action-${savedObjectId}`));
+
+      expect(mockOpenFlyout).not.toHaveBeenCalled();
+      expect(flyoutApi.openRuleFlyout).not.toHaveBeenCalled();
+    });
+  });
 });

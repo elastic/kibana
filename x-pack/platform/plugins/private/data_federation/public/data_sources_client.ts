@@ -97,7 +97,7 @@ export class DataSourcesClient {
       );
     }
 
-    return await this.http.get<DataSource>(getDataSourceByIdApiPath(trimmed));
+    return this.http.get<DataSource>(getDataSourceByIdApiPath(trimmed));
   }
 
   public async add(dataSource: DataSourceWithSecrets): Promise<void> {

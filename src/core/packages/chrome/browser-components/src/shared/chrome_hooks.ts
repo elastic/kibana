@@ -295,6 +295,16 @@ export function useContextSwitcher(): ReactNode {
   return useObservable(content$, null);
 }
 
+/**
+ * Returns the current project picker content set via
+ * `chrome.next.projectPicker.set()`, or null if not set.
+ */
+export function useProjectPicker(): ReactNode {
+  const chrome = useChromeService();
+  const content$ = useMemo(() => chrome.next.projectPicker.get$(), [chrome]);
+  return useObservable(content$, null);
+}
+
 /** Whether an inline `AppHeader` is currently mounted by the active app. */
 export function useHasInlineAppHeader(): boolean {
   const chrome = useChromeService();

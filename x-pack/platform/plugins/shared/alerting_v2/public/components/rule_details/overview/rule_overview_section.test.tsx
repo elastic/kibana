@@ -22,6 +22,9 @@ jest.mock('./signal_rule_overview', () => ({
 
 jest.mock('./artifacts', () => ({
   ArtifactsSection: () => <div data-test-subj="artifactsSectionMock">artifacts</div>,
+  SignalArtifactsSection: () => (
+    <div data-test-subj="signalArtifactsSectionMock">signal artifacts</div>
+  ),
 }));
 
 const mockCanRead = jest.fn();
@@ -35,7 +38,7 @@ const baseRule: RuleApiResponse = {
   id: 'rule-1',
   kind: 'alert',
   enabled: true,
-  metadata: { name: 'Test Rule' },
+  metadata: { name: 'Test Rule', version: 1 },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '10m' },
   query: { format: 'composed' as const, base: 'FROM logs-*', breach: { segment: '' } },
@@ -84,10 +87,12 @@ describe('RuleOverviewSection', () => {
     it('shows the artifacts section for alert rules', () => {
       renderSection({ ...baseRule, kind: 'alert' });
       expect(screen.getByTestId('artifactsSectionMock')).toBeInTheDocument();
+      expect(screen.queryByTestId('signalArtifactsSectionMock')).not.toBeInTheDocument();
     });
 
-    it('does not show artifacts for signal rules', () => {
+    it('shows the signal artifacts section for signal rules', () => {
       renderSection({ ...baseRule, kind: 'signal' });
+      expect(screen.getByTestId('signalArtifactsSectionMock')).toBeInTheDocument();
       expect(screen.queryByTestId('artifactsSectionMock')).not.toBeInTheDocument();
     });
   });

@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/272123
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-21
+- product: kibana
+  target: 9.5.0
+areas:
+- Dashboards and visualizations
+title: Fix color stops in gauge
+description: Fixes a Lens gauge color-rendering issue where, with the new API format enabled, a color band could extend beyond the configured range, and palettes could lose their continuity (open/closed range) setting on save.

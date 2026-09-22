@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/278972
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-21
+- product: kibana
+  target: 9.5.0
+title: "Fix resolver stats ignoring cold and frozen tier exclusion"
+description: "Resolver alert-hit and event stats honor the cold/frozen tier exclusion setting used by the analyzer tree queries."

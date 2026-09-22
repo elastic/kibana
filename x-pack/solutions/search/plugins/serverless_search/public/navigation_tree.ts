@@ -84,6 +84,10 @@ export function createNavigationTree({
         link: 'agent_builder',
       },
       {
+        icon: 'sparkles',
+        link: 'context_engine',
+      },
+      {
         link: 'discover',
         icon: 'productDiscover',
       },

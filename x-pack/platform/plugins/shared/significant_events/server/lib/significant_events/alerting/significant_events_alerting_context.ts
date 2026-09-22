@@ -9,21 +9,41 @@ import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import { QUERY_TYPE_STATS, type QueryType } from '@kbn/significant-events-schema';
 import type { IRulesManagementClient } from '../../knowledge_indicators/knowledge_indicator_client/rules/rules_management_client';
 import { RulesAdapterV2 } from '../../knowledge_indicators/knowledge_indicator_client/rules/v2_rules_adapter';
+import { canCompileMatchMetric } from '../rules/can_compile_match_metric';
 import type { ISignificantEventsAlertsReader } from './alerts_reader';
 import { ALERTS_READER_V2 } from './alerts_reader';
 
 export interface SignificantEventsAlertingContext {
   readonly alertsReader: ISignificantEventsAlertsReader;
   readonly rulesClient: IRulesManagementClient;
+  /**
+   * The raw alerting v2 rules client. Exposed for the maintenance (pause/resume)
+   * flow, which toggles `enabled` directly on v2 signal rules; regular rule CRUD
+   * goes through `rulesClient`.
+   */
+  readonly alertingV2RulesClient: RulesClientApi;
 }
 
 export interface ResolveSignificantEventsAlertingContextParams {
   getAlertingV2RulesClient: () => Promise<RulesClientApi>;
 }
 
-/** MATCH queries can be rule-backed; STATS cannot until rule-on-rule provisioning (#265778). */
-export function canQueryBeRuleBacked(queryType: QueryType): boolean {
-  return queryType !== QUERY_TYPE_STATS;
+export interface RuleBackedQueryCandidate {
+  type: QueryType;
+  esql: { query: string };
+}
+
+/**
+ * Whether a KI can be installed as a MATCH metric-series rule.
+ * STATS stay unbacked until rule-on-rule provisioning (#265778). MATCH must
+ * also be filter-only (`FROM` + optional `WHERE`) so the compiler can emit
+ * closed-minute counts — unsupported shapes stay stored but unbacked.
+ */
+export function canQueryBeRuleBacked(query: RuleBackedQueryCandidate): boolean {
+  if (query.type === QUERY_TYPE_STATS) {
+    return false;
+  }
+  return canCompileMatchMetric(query.esql.query);
 }
 
 /**
@@ -42,6 +62,7 @@ export function createSignificantEventsAlertingContextResolver(
       return {
         alertsReader: ALERTS_READER_V2,
         rulesClient: new RulesAdapterV2(alertingV2RulesClient),
+        alertingV2RulesClient,
       };
     })();
     return promise;

@@ -16,8 +16,8 @@ describe('getEntityIcon', () => {
     expect(getEntityIcon('host')).toBe('storage');
   });
 
-  it('returns "node" for service entity type', () => {
-    expect(getEntityIcon('service')).toBe('node');
+  it('returns "vectorTriangle" for service entity type', () => {
+    expect(getEntityIcon('service')).toBe('vectorTriangle');
   });
 
   it('returns "globe" for generic entity type', () => {

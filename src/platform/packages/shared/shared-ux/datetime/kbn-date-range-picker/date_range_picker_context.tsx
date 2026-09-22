@@ -182,7 +182,7 @@ export function DateRangePickerProvider({
   onInputChange,
   width = 'auto',
   calendarOptions,
-  settings = { roundRelativeTime: true },
+  settings = { roundRelativeTime: false },
   onSettingsChange,
   timeZone,
   onRefresh,

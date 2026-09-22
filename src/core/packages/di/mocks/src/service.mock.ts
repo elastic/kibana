@@ -29,7 +29,15 @@ function createContainer() {
   const container = new Container({ defaultScope: 'Singleton' });
   container.bind(Container).toConstantValue(container);
 
-  for (const method of ['bind', 'get', 'isBound', 'load', 'loadSync', 'unbind', 'unbindAll']) {
+  for (const method of [
+    'bind',
+    'get',
+    'isBound',
+    'loadAsync',
+    'load',
+    'unbindAsync',
+    'unbindAllAsync',
+  ]) {
     jest.spyOn(container, method as MethodKeysOf<Container>);
   }
 

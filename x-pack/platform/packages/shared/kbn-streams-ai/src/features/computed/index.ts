@@ -54,10 +54,14 @@ generators.forEach((generator) => registry.register(generator));
 /**
  * Returns formatted LLM instructions for all computed feature types.
  * This is automatically included in prompts so the LLM knows how to use each feature type.
+ *
+ * `excludedTypes` skips types a consumer never receives, so the prompt won't
+ * describe a feature type that never appears in tool results.
  */
-export function getComputedFeatureInstructions(): string {
+export function getComputedFeatureInstructions(excludedTypes: readonly string[] = []): string {
   return registry
     .getAll()
+    .filter((generator) => !excludedTypes.includes(generator.type))
     .map((generator) => `**${generator.type}**: ${generator.llmInstructions}`)
     .join('\n\n');
 }

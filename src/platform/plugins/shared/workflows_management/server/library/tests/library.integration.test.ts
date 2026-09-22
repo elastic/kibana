@@ -11,7 +11,9 @@ import { readFile } from 'fs/promises';
 import http, { type Server } from 'http';
 import path from 'path';
 
+import { parse } from 'yaml';
 import { loggerMock } from '@kbn/logging-mocks';
+import { renderInstall } from '@kbn/workflows-library';
 
 import { LibraryBundleReader, LibraryFetcher, LibraryFetchError } from '..';
 
@@ -125,6 +127,28 @@ describe('Library integration — LibraryFetcher against a local fixture CDN', (
     expect(body.body.consts).toEqual({ abuseipdb_api_key: '' });
     expect(Array.isArray(body.body.steps)).toBe(true);
     expect(body.raw).toContain('template-metadata:');
+  });
+
+  it('renders a fetched template into concrete, installable workflow YAML', async () => {
+    const fetcher = buildFetcher(server.baseUrl);
+
+    const template = await fetcher.getTemplate('ip-reputation-check');
+    const { yaml, resolved } = renderInstall({
+      template,
+      values: { 'abuseipdb-connector': 'my-abuseipdb-connector' },
+    });
+
+    expect(resolved).toEqual({ 'abuseipdb-connector': 'my-abuseipdb-connector' });
+    expect(yaml).not.toContain('template-metadata');
+    expect(yaml).not.toContain('__install__');
+
+    const workflow = parse(yaml) as {
+      triggers: unknown;
+      steps: Array<{ 'connector-id': string; with: { ipAddress: string } }>;
+    };
+    expect(workflow.triggers).toEqual([{ type: 'manual' }]);
+    expect(workflow.steps[0]['connector-id']).toBe('my-abuseipdb-connector');
+    expect(workflow.steps[0].with.ipAddress).toBe('{{ inputs.ip_address }}');
   });
 
   it('records the refresh timestamp in getHealth after the first read', async () => {

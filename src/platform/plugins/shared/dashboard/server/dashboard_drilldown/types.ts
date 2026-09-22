@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { z } from '@kbn/zod';
 import type { DrilldownState } from '@kbn/embeddable-plugin/server';
-import type { TypeOf } from '@kbn/config-schema';
 import type { dashboardDrilldownSchema } from './schemas';
 
-export type DashboardDrilldownState = DrilldownState & TypeOf<typeof dashboardDrilldownSchema>;
+export type DashboardDrilldownState = DrilldownState & z.output<typeof dashboardDrilldownSchema>;
 
 export type StoredDashboardDrilldownState = Omit<DashboardDrilldownState, 'dashboard_id'> & {
   dashboardRefName: string;

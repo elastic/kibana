@@ -119,12 +119,15 @@ export function buildRuleEventId({
 export function resolveRuleEventId(event: AlertEvent): string | undefined {
   if (event.status !== 'breached') return undefined;
 
+  const ruleId = event.rule?.id;
+  if (ruleId == null) return undefined;
+
   const sourceId = event.data?._id;
   if (typeof sourceId !== 'string' || sourceId.length === 0) return undefined;
 
   return buildRuleEventId({
     spaceId: event.space_id,
-    ruleId: event.rule.id,
+    ruleId,
     sourceId,
     sourceIndex: String(event.data._index ?? ''),
     sourceVersion: String(event.data._version ?? ''),
@@ -232,7 +235,7 @@ export interface BuildRecoveryAlertEventsOpts {
   ruleVersion: number;
   spaceId: string;
   activeGroupHashes: ActiveAlertGroupHash[];
-  breachedGroupHashes: Set<string>;
+  breachedGroupHashes: ReadonlySet<string>;
   scheduledTimestamp: string;
   type: AlertEventType;
   dataPresentGroupHashes?: ReadonlySet<string>;
@@ -369,7 +372,7 @@ export interface BuildQueryRecoveryAlertEventsOpts {
   spaceId: string;
   ruleAttributes: Pick<RuleResponse, 'grouping'>;
   activeGroupHashes: ActiveAlertGroupHash[];
-  breachedGroupHashes: Set<string>;
+  breachedGroupHashes: ReadonlySet<string>;
   esqlResponse: EsqlQueryResponse;
   scheduledTimestamp: string;
   type: AlertEventType;

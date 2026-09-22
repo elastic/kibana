@@ -38,7 +38,6 @@ export interface RuleFormProps<MetaData extends RuleTypeMetaData = RuleTypeMetaD
   filteredRuleTypes?: string[];
   shouldUseRuleProducer?: boolean;
   canShowConsumerSelection?: boolean;
-  showMustacheAutocompleteSwitch?: boolean;
   initialValues?: Partial<Omit<RuleFormData, 'ruleTypeId'>>;
   initialMetadata?: MetaData;
   initialEditStep?: RuleFormStepId;
@@ -64,7 +63,6 @@ export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
     filteredRuleTypes,
     shouldUseRuleProducer,
     canShowConsumerSelection,
-    showMustacheAutocompleteSwitch,
     initialValues,
     initialMetadata,
     initialEditStep,
@@ -125,7 +123,6 @@ export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
           onSubmit={onSubmit}
           onChangeMetaData={retypedOnChangeMetaData}
           isFlyout={isFlyout}
-          showMustacheAutocompleteSwitch={showMustacheAutocompleteSwitch}
           connectorFeatureId={connectorFeatureId}
           initialMetadata={initialMetadata}
           initialEditStep={initialEditStep}
@@ -150,7 +147,6 @@ export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
           filteredRuleTypes={filteredRuleTypes}
           shouldUseRuleProducer={shouldUseRuleProducer}
           canShowConsumerSelection={canShowConsumerSelection}
-          showMustacheAutocompleteSwitch={showMustacheAutocompleteSwitch}
           initialValues={initialValues}
           initialMetadata={initialMetadata}
           focusTrapProps={focusTrapProps}
@@ -193,7 +189,6 @@ export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
     onCancel,
     onSubmit,
     isFlyout,
-    showMustacheAutocompleteSwitch,
     connectorFeatureId,
     initialMetadata,
     initialEditStep,

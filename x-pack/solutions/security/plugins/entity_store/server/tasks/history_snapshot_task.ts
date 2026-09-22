@@ -20,6 +20,7 @@ import type { EntityStoreCoreSetup } from '../types';
 import { EntityStoreGlobalStateClient } from '../domain/saved_objects';
 import { HistorySnapshotClient } from '../domain/history_snapshot';
 import { wrapTaskRun } from '../telemetry/traces';
+import { shouldDeleteOrphanedEntityStoreTask } from './should_delete_orphaned_task';
 
 const config = TasksConfig[EntityStoreTaskType.enum.historySnapshot];
 
@@ -28,7 +29,7 @@ export const getHistorySnapshotTaskId = (namespace: string): string =>
 
 interface RunHistorySnapshotTaskParams {
   taskInstance: { state: Record<string, unknown>; id: string };
-  abortController: AbortController;
+  signal: AbortSignal;
   fakeRequest: KibanaRequest | null | undefined;
   core: EntityStoreCoreSetup;
   logger: Logger;
@@ -36,22 +37,36 @@ interface RunHistorySnapshotTaskParams {
 
 async function runHistorySnapshotTask({
   taskInstance,
-  abortController,
+  signal,
   fakeRequest,
   core,
   logger,
-}: RunHistorySnapshotTaskParams): Promise<{ state: Record<string, unknown> }> {
+}: RunHistorySnapshotTaskParams): Promise<{
+  state: Record<string, unknown>;
+  shouldDeleteTask?: boolean;
+}> {
   const namespace = taskInstance.state?.namespace as string | undefined;
   if (!namespace) {
     logger.error('History snapshot task missing namespace in state');
     return { state: taskInstance.state };
   }
+
+  const [start] = await core.getStartServices();
+  if (
+    await shouldDeleteOrphanedEntityStoreTask({
+      coreStart: start,
+      namespace,
+      logger,
+    })
+  ) {
+    return { state: taskInstance.state, shouldDeleteTask: true };
+  }
+
   if (!fakeRequest) {
     logger.error('No fake request found, skipping history snapshot task');
     return { state: taskInstance.state };
   }
 
-  const [start] = await core.getStartServices();
   const soClient = start.savedObjects.getScopedClient(fakeRequest);
   const esClient = start.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
   const taskLogger = logger.get(taskInstance.id);
@@ -65,7 +80,7 @@ async function runHistorySnapshotTask({
   });
 
   await historySnapshotClient.runHistorySnapshot({
-    abortSignal: abortController.signal,
+    abortSignal: signal,
   });
 
   return { state: taskInstance.state };
@@ -96,7 +111,7 @@ export function registerHistorySnapshotTask({
           }),
         },
       },
-      createTaskRunner: ({ taskInstance, abortController, fakeRequest }) => ({
+      createTaskRunner: ({ taskInstance, signal, fakeRequest }) => ({
         run: () =>
           wrapTaskRun({
             spanName: 'entityStore.task.history_snapshot.run',
@@ -108,7 +123,7 @@ export function registerHistorySnapshotTask({
             run: () =>
               runHistorySnapshotTask({
                 taskInstance,
-                abortController,
+                signal,
                 fakeRequest,
                 core,
                 logger,

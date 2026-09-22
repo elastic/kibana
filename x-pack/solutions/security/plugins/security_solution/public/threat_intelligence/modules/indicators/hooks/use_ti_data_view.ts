@@ -29,8 +29,8 @@ const indicatorNameField = {
 
 export const useTIDataView = (): SelectedDataView => {
   const { dataView, status } = useDataView();
-  const browserFields = useBrowserFields();
-  const selectedPatterns = useSelectedPatterns();
+  const browserFields = useBrowserFields(dataView);
+  const selectedPatterns = useSelectedPatterns(dataView);
 
   const tiBrowserFields = useMemo(() => {
     const { threat = { fields: {} } } = browserFields;

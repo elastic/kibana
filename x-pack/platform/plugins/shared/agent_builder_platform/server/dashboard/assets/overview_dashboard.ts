@@ -2242,7 +2242,7 @@ Real-time observability for **Agent Builder** OTel traces (\`data_stream.dataset
                 layer_0: {
                   index: 'traces-agent_builder.otel-__AGENT_BUILDER_TRACES_NAMESPACE__-@timestamp',
                   query: {
-                    esql: 'FROM traces-agent_builder.otel-__AGENT_BUILDER_TRACES_NAMESPACE__\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend\n| WHERE `span.name` LIKE "execute_tool *"\n| STATS total = COUNT(*), errors = COUNT(*) WHERE status.code == "Error"\n| EVAL `Success Rate (%)` = ROUND((total - errors) / total * 100, 2)\n| KEEP `Success Rate (%)`',
+                    esql: 'FROM traces-agent_builder.otel-__AGENT_BUILDER_TRACES_NAMESPACE__\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend\n| WHERE `span.name` LIKE "execute_tool *"\n| STATS total = COUNT(*), errors = COUNT(*) WHERE status.code == "Error"\n| EVAL `Success Rate (%)` = ROUND(TO_DOUBLE(total - errors) / total * 100, 2)\n| KEEP `Success Rate (%)`',
                   },
                   timeField: '@timestamp',
                   columns: [
@@ -2348,7 +2348,7 @@ Real-time observability for **Agent Builder** OTel traces (\`data_stream.dataset
             },
           },
           query: {
-            esql: 'FROM traces-agent_builder.otel-__AGENT_BUILDER_TRACES_NAMESPACE__\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend\n| WHERE `span.name` LIKE "execute_tool *"\n| STATS total = COUNT(*), errors = COUNT(*) WHERE status.code == "Error"\n| EVAL `Success Rate (%)` = ROUND((total - errors) / total * 100, 2)\n| KEEP `Success Rate (%)`',
+            esql: 'FROM traces-agent_builder.otel-__AGENT_BUILDER_TRACES_NAMESPACE__\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend\n| WHERE `span.name` LIKE "execute_tool *"\n| STATS total = COUNT(*), errors = COUNT(*) WHERE status.code == "Error"\n| EVAL `Success Rate (%)` = ROUND(TO_DOUBLE(total - errors) / total * 100, 2)\n| KEEP `Success Rate (%)`',
           },
           filters: [],
         },

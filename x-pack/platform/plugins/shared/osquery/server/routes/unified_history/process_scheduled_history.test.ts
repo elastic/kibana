@@ -142,6 +142,55 @@ describe('process_scheduled_history', () => {
       expect(result).toHaveLength(0);
     });
 
+    it('falls back to response doc labels when the pack is not in this space', () => {
+      const bucket = createMockBucket({
+        pack_id: { buckets: [{ key: 'remote-pack-1', doc_count: 5 }] },
+        pack_name: { buckets: [{ key: 'Remote Pack', doc_count: 5 }] },
+        query_name: { buckets: [{ key: 'remote_uptime', doc_count: 5 }] },
+      });
+
+      const result = processScheduledHistory({
+        scheduledBuckets: [bucket],
+        packSOs: [],
+        spaceId: 'default',
+      });
+
+      expect(result[0].packId).toBe('remote-pack-1');
+      expect(result[0].packName).toBe('Remote Pack');
+      expect(result[0].queryName).toBe('remote_uptime');
+      expect(result[0].queryText).toBe('');
+    });
+
+    it('prefers the pack saved object over response doc labels', () => {
+      const bucket = createMockBucket({
+        pack_id: { buckets: [{ key: 'remote-pack-1', doc_count: 5 }] },
+        pack_name: { buckets: [{ key: 'Remote Pack', doc_count: 5 }] },
+        query_name: { buckets: [{ key: 'remote_uptime', doc_count: 5 }] },
+      });
+
+      const result = processScheduledHistory({
+        scheduledBuckets: [bucket],
+        packSOs: [createMockPackSO()],
+        spaceId: 'default',
+      });
+
+      expect(result[0].packName).toBe('Test Pack');
+      expect(result[0].queryName).toBe('uptime');
+      expect(result[0].queryText).toBe('SELECT * FROM uptime');
+    });
+
+    it('leaves labels undefined when neither source has them', () => {
+      const result = processScheduledHistory({
+        scheduledBuckets: [createMockBucket()],
+        packSOs: [],
+        spaceId: 'default',
+      });
+
+      expect(result[0].packName).toBeUndefined();
+      expect(result[0].queryName).toBeUndefined();
+      expect(result[0].queryText).toBe('');
+    });
+
     it('resolves names even without pack_id in response docs', () => {
       const bucket = createMockBucket();
       const packSOs = [createMockPackSO()];

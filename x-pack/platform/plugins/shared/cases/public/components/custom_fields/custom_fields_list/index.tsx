@@ -135,7 +135,7 @@ const CustomFieldsListComponent: React.FC<Props> = (props) => {
       {showModal && selectedItem ? (
         <DeleteConfirmationModal
           title={i18n.DELETE_FIELD_TITLE(selectedItem.label)}
-          message={i18n.DELETE_FIELD_DESCRIPTION}
+          message={i18n.DELETE_FIELD_DESCRIPTION(selectedItem.label)}
           onCancel={onCancel}
           onConfirm={onConfirm}
         />
@@ -171,7 +171,7 @@ const CustomFieldsListComponent: React.FC<Props> = (props) => {
         {showModal && selectedItem ? (
           <DeleteConfirmationModal
             title={i18n.DELETE_FIELD_TITLE(selectedItem.label)}
-            message={i18n.DELETE_FIELD_DESCRIPTION}
+            message={i18n.DELETE_FIELD_DESCRIPTION(selectedItem.label)}
             onCancel={onCancel}
             onConfirm={onConfirm}
           />

@@ -77,7 +77,7 @@ interface IngestEntitiesParams {
   esIdField?: string;
   targetIndex: string;
   logger: Logger;
-  abortController?: AbortController;
+  signal?: AbortSignal;
   fieldsToIgnore?: string[];
   /** Optional transform applied to each document before indexing (e.g. add @timestamp, reshape for entity type). */
   transformDocument?: IngestEntitiesTransformDocument;
@@ -106,15 +106,15 @@ export async function ingestEntities({
   esIdField,
   targetIndex,
   logger,
-  abortController,
+  signal,
   fieldsToIgnore,
   transformDocument,
   refresh,
   onDropped,
 }: IngestEntitiesParams) {
   const options: TransportRequestOptions = {};
-  if (abortController?.signal) {
-    options.signal = abortController.signal;
+  if (signal) {
+    options.signal = signal;
   }
 
   const { columns, values } = esqlResponse;

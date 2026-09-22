@@ -79,9 +79,8 @@ export const AnalyzeGraph: FC = () => {
   const { from, to, shouldUpdate } = useTimelineDataFilters(isActiveTimeline(scopeId));
   const filters = useMemo(() => ({ from, to }), [from, to]);
 
-  const selectedPatterns = useSelectedPatterns(PageScope.analyzer);
-
   const { dataView, status } = useDataView(PageScope.analyzer);
+  const selectedPatterns = useSelectedPatterns(dataView);
   const isLoading: boolean = useMemo(() => status === 'loading' || status === 'pristine', [status]);
   const isDataViewInvalid: boolean = useMemo(
     () => status === 'error' || (status === 'ready' && !dataView.hasMatchedIndices()),

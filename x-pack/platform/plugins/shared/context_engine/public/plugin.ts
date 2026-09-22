@@ -6,6 +6,7 @@
  */
 
 import {
+  AppStatus,
   DEFAULT_APP_CATEGORIES,
   type AppDeepLinkLocations,
   type AppMountParameters,
@@ -17,13 +18,10 @@ import {
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
-import { combineLatest, from, map, switchMap } from 'rxjs';
-import {
-  CONTEXT_ENGINE_APP_ID,
-  CONTEXT_ENGINE_APP_PATH,
-  CONTEXT_ENGINE_ENABLED_FLAG,
-} from '../common/features';
+import { from, map, switchMap } from 'rxjs';
+import { CONTEXT_ENGINE_APP_ID, CONTEXT_ENGINE_APP_PATH } from '../common/features';
 import type {
+  ChatOpener,
   ContextEnginePluginSetup,
   ContextEnginePluginStart,
   ContextEngineSetupDependencies,
@@ -49,10 +47,20 @@ export class ContextEnginePlugin
       ContextEngineStartDependencies
     >
 {
+  /**
+   * The registered "Analyze & improve" chat opener, or `undefined` until one is registered. A
+   * getter over this field is threaded into the app so the button reacts to an opener registered
+   * after mount, rather than a value snapshotted once at mount time.
+   */
+  private chatOpener?: ChatOpener;
+
   constructor(_context: PluginInitializerContext) {}
 
   setup(core: CoreSetup<ContextEngineStartDependencies>): ContextEnginePluginSetup {
     const startServices = core.getStartServices();
+    // Captured in a closure so `mount` (where `this` is the app config) can read the opener
+    // registered on `start`.
+    const getChatOpener = () => this.chatOpener;
 
     core.application.register({
       id: CONTEXT_ENGINE_APP_ID,
@@ -60,18 +68,20 @@ export class ContextEnginePlugin
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       title: APP_TITLE,
       euiIconType: 'logoElasticsearch',
-      // Hidden by default; visible only when both the feature flag and the advanced setting are on.
-      visibleIn: [],
+      visibleIn: [...VISIBLE_LOCATIONS],
+      // Inaccessible by default: the app and its routes are gated until the advanced
+      // setting is on. While inaccessible, core also removes it from every navigation
+      // surface.
+      status: AppStatus.inaccessible,
       keywords: ['context', 'ai index', 'context engine'],
       updater$: from(startServices).pipe(
         switchMap(([coreStart]) =>
-          combineLatest([
-            coreStart.featureFlags.getBooleanValue$(CONTEXT_ENGINE_ENABLED_FLAG, false),
-            coreStart.uiSettings.get$<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID, false),
-          ]).pipe(
+          coreStart.uiSettings.get$<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID, false).pipe(
             map(
-              ([flagEnabled, settingEnabled]): AppUpdater =>
-                () => ({ visibleIn: flagEnabled && settingEnabled ? [...VISIBLE_LOCATIONS] : [] })
+              (settingEnabled): AppUpdater =>
+                () => ({
+                  status: settingEnabled ? AppStatus.accessible : AppStatus.inaccessible,
+                })
             )
           )
         )
@@ -79,9 +89,15 @@ export class ContextEnginePlugin
       defaultPath: '/',
       async mount(params: AppMountParameters) {
         const { mountApp } = await import('./application');
-        const [coreStart] = await core.getStartServices();
+        const [coreStart, pluginsStart] = await core.getStartServices();
         coreStart.chrome.docTitle.change(APP_TITLE);
-        return mountApp({ core: coreStart, element: params.element, history: params.history });
+        return mountApp({
+          core: coreStart,
+          plugins: pluginsStart,
+          element: params.element,
+          history: params.history,
+          getChatOpener,
+        });
       },
     });
 
@@ -89,7 +105,11 @@ export class ContextEnginePlugin
   }
 
   start(_core: CoreStart): ContextEnginePluginStart {
-    return {};
+    return {
+      registerChatOpener: (opener: ChatOpener) => {
+        this.chatOpener = opener;
+      },
+    };
   }
 
   stop() {}

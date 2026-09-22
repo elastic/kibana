@@ -20,6 +20,59 @@
         "rerank"
       ]
     },
+    "data_autocomplete_rules": {
+      "chunking_settings": {
+        "max_chunk_size": "",
+        "overlap": "",
+        "sentence_overlap": "",
+        "separator_group": "",
+        "separators": [],
+        "strategy": ""
+      },
+      "service": {
+        "__one_of": [
+          "amazon_sagemaker"
+        ]
+      },
+      "service_settings": {
+        "access_key": "",
+        "endpoint_name": "",
+        "api": {
+          "__one_of": [
+            "openai",
+            "elastic"
+          ]
+        },
+        "region": "",
+        "secret_key": "",
+        "similarity": {
+          "__one_of": [
+            "cosine",
+            "dot_product",
+            "l2_norm"
+          ]
+        },
+        "element_type": {
+          "__one_of": [
+            "byte",
+            "float",
+            "bit"
+          ]
+        },
+        "target_model": "",
+        "target_container_hostname": "",
+        "inference_component_name": "",
+        "batch_size": "",
+        "dimensions": ""
+      },
+      "task_settings": {
+        "custom_attributes": "",
+        "enable_explanations": "",
+        "inference_id": "",
+        "session_id": "",
+        "target_variant": ""
+      }
+    },
     "methods": [
       "PUT"
     ],

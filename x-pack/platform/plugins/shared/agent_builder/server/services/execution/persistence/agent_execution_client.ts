@@ -161,6 +161,7 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
     await this.storage.getClient().index({
       id: executionId,
       document,
+      op_type: 'create',
     });
 
     return fromEs(document);

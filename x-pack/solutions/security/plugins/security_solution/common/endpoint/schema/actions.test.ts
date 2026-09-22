@@ -658,6 +658,7 @@ describe('actions schemas', () => {
       expect(() => {
         killOrSuspendSchema.body.validate({
           endpoint_ids: ['ABC-XYZ-000'],
+          agent_type: 'endpoint',
           parameters: {
             pid: 1234,
           },
@@ -669,6 +670,7 @@ describe('actions schemas', () => {
       expect(() => {
         killOrSuspendSchema.body.validate({
           endpoint_ids: ['ABC-XYZ-000'],
+          agent_type: 'endpoint',
           parameters: {
             entity_id: 'abc123',
           },
@@ -702,10 +704,75 @@ describe('actions schemas', () => {
       expect(() => {
         killOrSuspendSchema.body.validate({
           endpoint_ids: ['ABC-XYZ-000'],
+          agent_type: 'endpoint',
           comment: 'a user comment',
           parameters: {
             pid: 1234,
           },
+        });
+      }).not.toThrow();
+    });
+  });
+
+  describe('KillProcessRouteRequestSchema `kill_descendants` parameter', () => {
+    it('should accept `kill_descendants: true` with pid for endpoint agent type', () => {
+      expect(() => {
+        KillProcessRouteRequestSchema.body.validate({
+          endpoint_ids: ['ABC-XYZ-000'],
+          agent_type: 'endpoint',
+          parameters: { pid: 1234, kill_descendants: true },
+        });
+      }).not.toThrow();
+    });
+
+    it('should accept `kill_descendants: true` with entity_id for endpoint agent type', () => {
+      expect(() => {
+        KillProcessRouteRequestSchema.body.validate({
+          endpoint_ids: ['ABC-XYZ-000'],
+          agent_type: 'endpoint',
+          parameters: { entity_id: 'abc123', kill_descendants: true },
+        });
+      }).not.toThrow();
+    });
+
+    it('should allow request without kill_descendants', () => {
+      const result = KillProcessRouteRequestSchema.body.validate({
+        endpoint_ids: ['ABC-XYZ-000'],
+        agent_type: 'endpoint',
+        parameters: { pid: 1234 },
+      });
+
+      expect('kill_descendants' in result.parameters).toBe(false);
+    });
+
+    it('should reject `kill_descendants` when agent_type is crowdstrike', () => {
+      expect(() => {
+        KillProcessRouteRequestSchema.body.validate({
+          endpoint_ids: ['ABC-XYZ-000'],
+          agent_type: 'crowdstrike',
+          parameters: { pid: 1234, kill_descendants: true },
+        });
+      }).toThrow('[parameters.kill_descendants]: is not valid with agent type of crowdstrike');
+    });
+
+    it('should reject `kill_descendants` when agent_type is microsoft_defender_endpoint', () => {
+      expect(() => {
+        KillProcessRouteRequestSchema.body.validate({
+          endpoint_ids: ['ABC-XYZ-000'],
+          agent_type: 'microsoft_defender_endpoint',
+          parameters: { pid: 1234, kill_descendants: true },
+        });
+      }).toThrow(
+        '[parameters.kill_descendants]: is not valid with agent type of microsoft_defender_endpoint'
+      );
+    });
+
+    it('should allow request without kill_descendants for non-endpoint agentType', () => {
+      expect(() => {
+        KillProcessRouteRequestSchema.body.validate({
+          endpoint_ids: ['ABC-XYZ-000'],
+          agent_type: 'microsoft_defender_endpoint',
+          parameters: { pid: 1234 },
         });
       }).not.toThrow();
     });
@@ -1374,10 +1441,14 @@ describe('actions schemas', () => {
       }).toThrow();
     });
 
-    it('should only accept process or kernel as value for type', () => {
+    it('should only accept process, kernel or raw as value for type', () => {
       expect(() => MemoryDumpActionRequestSchema.body.validate(memDumpBody)).not.toThrow();
 
       Object.assign(memDumpBody.parameters, { type: 'process', pid: 1 });
+
+      expect(() => MemoryDumpActionRequestSchema.body.validate(memDumpBody)).not.toThrow();
+
+      memDumpBody.parameters = { type: 'raw' };
 
       expect(() => MemoryDumpActionRequestSchema.body.validate(memDumpBody)).not.toThrow();
 
@@ -1392,6 +1463,20 @@ describe('actions schemas', () => {
 
       delete memDumpBody.parameters.pid;
       memDumpBody.parameters.entity_id = 'some-value';
+      expect(() => MemoryDumpActionRequestSchema.body.validate(memDumpBody)).toThrow();
+    });
+
+    it('should accept type of raw without pid or entity id', () => {
+      memDumpBody.parameters = { type: 'raw' };
+
+      expect(() => MemoryDumpActionRequestSchema.body.validate(memDumpBody)).not.toThrow();
+    });
+
+    it('should throw if pid or entity id is used with type = raw', () => {
+      memDumpBody.parameters = { type: 'raw', pid: 1 };
+      expect(() => MemoryDumpActionRequestSchema.body.validate(memDumpBody)).toThrow();
+
+      memDumpBody.parameters = { type: 'raw', entity_id: 'some-value' };
       expect(() => MemoryDumpActionRequestSchema.body.validate(memDumpBody)).toThrow();
     });
 

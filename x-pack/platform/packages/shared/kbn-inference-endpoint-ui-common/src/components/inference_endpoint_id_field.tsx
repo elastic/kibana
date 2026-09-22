@@ -24,7 +24,6 @@ import {
 import {
   getFieldValidityAndErrorMessage,
   UseField,
-  useFormContext,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -52,7 +51,6 @@ export const InferenceEndpointIdField: React.FC<InferenceEndpointIdFieldProps> =
   selectedTaskType,
   isEdit,
 }) => {
-  const { setFieldValue } = useFormContext();
   const inferenceUri = useMemo(() => `_inference/${selectedTaskType ?? ''}/`, [selectedTaskType]);
 
   return (
@@ -70,6 +68,9 @@ export const InferenceEndpointIdField: React.FC<InferenceEndpointIdFieldProps> =
       <UseField path="config.inferenceId" config={inferenceIdConfig}>
         {(field) => {
           const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
+          // Use field.value (not parent useFormData config) so the controlled input
+          // updates in the same render as onChange and keeps the cursor in place.
+          const inferenceId = (field.value as string) ?? '';
           return (
             <EuiFormRow
               id="inferenceId"
@@ -94,15 +95,13 @@ export const InferenceEndpointIdField: React.FC<InferenceEndpointIdFieldProps> =
                 data-test-subj="inference-endpoint-input-field"
                 fullWidth
                 disabled={isEdit}
-                value={config.inferenceId}
-                onChange={(e) => {
-                  setFieldValue('config.inferenceId', e.target.value);
-                }}
+                value={inferenceId}
+                onChange={field.onChange}
                 append={
                   <EuiCopy
                     beforeMessage={LABELS.COPY_TOOLTIP}
                     afterMessage={LABELS.COPIED_TOOLTIP}
-                    textToCopy={config.inferenceId ?? ''}
+                    textToCopy={inferenceId}
                   >
                     {(copy) => (
                       <EuiFormAppend
@@ -146,8 +145,10 @@ export const InferenceEndpointIdField: React.FC<InferenceEndpointIdFieldProps> =
               beforeMessage={LABELS.COPY_TOOLTIP}
               afterMessage={LABELS.COPIED_TOOLTIP}
               textToCopy={`${inferenceUri}${config.inferenceId ?? ''}`}
+              tooltipProps={{ disableScreenReaderOutput: true }}
             >
               {(copy) => (
+                /* eslint-disable-next-line @elastic/eui/tooltip-button-icon-wrap */
                 <EuiButtonIcon
                   iconType="copy"
                   aria-label={LABELS.COPY_TOOLTIP}

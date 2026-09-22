@@ -5,22 +5,20 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { lensApiConfigSchemaNoESQL } from '@kbn/lens-embeddable-utils';
 import { asCodeMetaSchema } from '@kbn/as-code-shared-schemas';
 
-import { lensCommonSavedObjectSchemaV2 } from '../../../../content_management';
-
-const savedObjectProps = lensCommonSavedObjectSchemaV2.getPropSchemas();
+import { lensCommonSavedObjectSchemaV2 } from '../../../../content_management/zod';
 
 /**
  * The Lens response item returned from the server
  */
-export const lensResponseItemSchema = schema.object(
-  {
-    id: savedObjectProps.id,
+export const lensResponseItemSchema = z
+  .object({
+    id: lensCommonSavedObjectSchemaV2.shape.id,
     data: lensApiConfigSchemaNoESQL,
     meta: asCodeMetaSchema,
-  },
-  { unknowns: 'forbid', meta: { id: 'lensResponseItem', title: 'Visualization Response' } }
-);
+  })
+  .strict()
+  .meta({ id: 'lensResponseItem', title: 'Visualization Response' });

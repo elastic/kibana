@@ -85,6 +85,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
     const { getBatchItemsPopoverContent } = useEditTimelineBatchActions({
       deleteTimelines: timelinePrivileges.crud ? deleteTimelines : undefined,
       selectedItems,
+      searchResults,
       tableRef,
       timelineType,
     });
@@ -275,6 +276,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
                         iconSide="right"
                         iconType="chevronSingleDown"
                         popoverContent={getBatchItemsPopoverContent}
+                        popoverPanelPaddingSize="none"
                         data-test-subj="utility-bar-action"
                       >
                         <span data-test-subj="utility-bar-action-button">{i18n.BATCH_ACTIONS}</span>

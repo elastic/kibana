@@ -11,9 +11,10 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { EuiLoadingChart, transparentize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import { apiCanCancelRequests, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import classNames from 'classnames';
-import React, { useLayoutEffect, useMemo } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
@@ -50,6 +51,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
   ) => {
     const dashboardApi = useDashboardApi();
     const dashboardInternalApi = useDashboardInternalApi();
+    const embeddableApiRef = useRef<DefaultEmbeddableApi | null>(null);
     const [
       hidePanelBorders,
       highlightPanelId,
@@ -120,6 +122,14 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       }
     }, [id, dashboardApi, scrollToPanelId, highlightPanelId, ref, blurPanel]);
 
+    useEffect(() => {
+      return () => {
+        if (embeddableApiRef.current && apiCanCancelRequests(embeddableApiRef.current)) {
+          embeddableApiRef.current.cancelRequests();
+        }
+      };
+    }, []);
+
     const dashboardContainerTopOffset = dashboardContainerRef?.offsetTop || 0;
     const globalNavTopOffset = appFixedViewport?.offsetTop || 0;
     const styles = useMemoCss(dashboardGridItemStyles);
@@ -128,7 +138,6 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       const panelProps = {
         showBadges: true,
         showBorder,
-        showNotifications: true,
         showShadow: false,
         setDragHandles,
       };
@@ -140,7 +149,10 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
           getParentApi={() => dashboardApi}
           key={`${type}_${id}`}
           panelProps={panelProps}
-          onApiAvailable={(api) => dashboardApi.registerChildApi(api)}
+          onApiAvailable={(api) => {
+            embeddableApiRef.current = api;
+            dashboardApi.registerChildApi(api);
+          }}
         />
       );
     }, [id, dashboardApi, type, showBorder, setDragHandles]);

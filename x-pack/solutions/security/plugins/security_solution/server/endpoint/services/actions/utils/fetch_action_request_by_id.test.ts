@@ -16,6 +16,7 @@ import { set } from '@kbn/safer-lodash-set';
 import { ALLOWED_ACTION_REQUEST_TAGS } from '../constants';
 import { REF_DATA_KEY_INITIAL_VALUE, REF_DATA_KEYS } from '../../../lib/reference_data';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
+import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { ExperimentalFeatures } from '../../../../../common';
 
 describe('fetchActionRequestById() utility', () => {
@@ -128,6 +129,146 @@ describe('fetchActionRequestById() utility', () => {
       expect(
         endpointServiceMock.getInternalFleetServices().ensureInCurrentSpace as jest.Mock
       ).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('and CPS is enabled', () => {
+    let readEsClientMock: ElasticsearchClientMock;
+    const request = httpServerMock.createKibanaRequest();
+
+    beforeEach(() => {
+      readEsClientMock = elasticsearchServiceMock.createElasticsearchClient();
+      applyActionsEsSearchMock(readEsClientMock);
+
+      endpointServiceMock.isCpsEnabled.mockReturnValue(true);
+      endpointServiceMock.getReadEsClient.mockReturnValue(readEsClientMock);
+    });
+
+    it('should read as the request user so the search can fan out to linked projects', async () => {
+      await fetchActionRequestById(endpointServiceMock, 'default', '123', {
+        scoped: endpointServiceMock.asScoped(request),
+      });
+
+      expect(endpointServiceMock.getReadEsClient).toHaveBeenCalledWith(request);
+      expect(readEsClientMock.search).toHaveBeenCalled();
+    });
+
+    it('should validate visibility against originSpaceId rather than through Fleet', async () => {
+      await fetchActionRequestById(endpointServiceMock, 'default', '123', {
+        scoped: endpointServiceMock.asScoped(request),
+      });
+
+      expect(
+        endpointServiceMock.getInternalFleetServices().ensureInCurrentSpace as jest.Mock
+      ).not.toHaveBeenCalled();
+    });
+
+    it('should error if the action belongs to another space', async () => {
+      await expect(
+        fetchActionRequestById(endpointServiceMock, 'foo', '123', {
+          scoped: endpointServiceMock.asScoped(request),
+        })
+      ).rejects.toThrow('Action [123] not found');
+    });
+
+    it('should error if the action carries no originSpaceId at all', async () => {
+      applyEsClientSearchMock({
+        esClientMock: readEsClientMock,
+        index: ENDPOINT_ACTIONS_INDEX,
+        response: set(
+          createActionRequestsEsSearchResultsMock(),
+          'hits.hits[0]._source.originSpaceId',
+          undefined
+        ),
+      });
+
+      await expect(
+        fetchActionRequestById(endpointServiceMock, 'default', '123', {
+          scoped: endpointServiceMock.asScoped(request),
+        })
+      ).rejects.toThrow('Action [123] not found');
+    });
+
+    it('should still return an orphan action in the space defined via ref. data', async () => {
+      applyEsClientSearchMock({
+        esClientMock: readEsClientMock,
+        index: ENDPOINT_ACTIONS_INDEX,
+        response: set(createActionRequestsEsSearchResultsMock(), 'hits.hits[0]._source.tags', [
+          ALLOWED_ACTION_REQUEST_TAGS.integrationPolicyDeleted,
+        ]),
+      });
+      (endpointServiceMock.getReferenceDataClient().get as jest.Mock).mockResolvedValue(
+        set(
+          await REF_DATA_KEY_INITIAL_VALUE[REF_DATA_KEYS.orphanResponseActionsSpace](
+            {} as SavedObjectsClientContract,
+            {} as ExperimentalFeatures
+          ),
+          'metadata.spaceId',
+          'foo'
+        )
+      );
+
+      await expect(
+        fetchActionRequestById(endpointServiceMock, 'foo', '123', {
+          scoped: endpointServiceMock.asScoped(request),
+        })
+      ).resolves.toEqual(
+        expect.objectContaining({
+          tags: [ALLOWED_ACTION_REQUEST_TAGS.integrationPolicyDeleted],
+        })
+      );
+    });
+
+    it('should not validate against spaces if `bypassSpaceValidation` is true', async () => {
+      await expect(
+        fetchActionRequestById(endpointServiceMock, 'foo', '123', {
+          scoped: endpointServiceMock.asScoped(request),
+          bypassSpaceValidation: true,
+        })
+      ).resolves.toEqual(expect.objectContaining({ originSpaceId: 'default' }));
+    });
+
+    it('should accept an action whose integration policy is visible in the active space even if its originSpaceId differs', async () => {
+      (
+        endpointServiceMock.getInternalFleetServices().ensureInCurrentSpace as jest.Mock
+      ).mockResolvedValueOnce(undefined);
+
+      await expect(
+        fetchActionRequestById(endpointServiceMock, 'other-space', '123', {
+          scoped: endpointServiceMock.asScoped(request),
+        })
+      ).resolves.toEqual(expect.objectContaining({ originSpaceId: 'default' }));
+
+      expect(
+        endpointServiceMock.getInternalFleetServices().ensureInCurrentSpace as jest.Mock
+      ).toHaveBeenCalledWith({
+        integrationPolicyIds: ['integration-policy-1'],
+        options: { matchAll: false },
+      });
+    });
+
+    it('should accept an action whose originSpaceId matches the active space without consulting Fleet', async () => {
+      await expect(
+        fetchActionRequestById(endpointServiceMock, 'default', '123', {
+          scoped: endpointServiceMock.asScoped(request),
+        })
+      ).resolves.toBeDefined();
+
+      expect(
+        endpointServiceMock.getInternalFleetServices().ensureInCurrentSpace as jest.Mock
+      ).not.toHaveBeenCalled();
+    });
+
+    it('should reject an action when neither originSpaceId matches nor the integration policy is visible in the active space', async () => {
+      (
+        endpointServiceMock.getInternalFleetServices().ensureInCurrentSpace as jest.Mock
+      ).mockRejectedValueOnce(new Error('policy not in space'));
+
+      await expect(
+        fetchActionRequestById(endpointServiceMock, 'other-space', '123', {
+          scoped: endpointServiceMock.asScoped(request),
+        })
+      ).rejects.toThrow('Action [123] not found');
     });
   });
 });

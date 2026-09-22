@@ -1,0 +1,8 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/workflow-yaml-validate-cli",
+  "owner": ["@elastic/workflows-eng"],
+  "group": "platform",
+  "visibility": "private",
+  "devOnly": true
+}

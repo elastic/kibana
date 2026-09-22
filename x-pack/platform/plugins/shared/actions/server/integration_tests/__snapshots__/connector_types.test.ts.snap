@@ -1067,7 +1067,6 @@ Object {
           "type": "number",
         },
         "verificationMode": Object {
-          "default": "full",
           "enum": Array [
             "full",
             "certificate",

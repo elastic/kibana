@@ -8,6 +8,7 @@
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { ActionPoliciesApi } from './action_policies_api';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
+import { ALERTING_V2_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH } from '@kbn/alerting-v2-constants';
 
 describe('ActionPoliciesApi', () => {
   const http = httpServiceMock.createStartContract();
@@ -78,46 +79,37 @@ describe('ActionPoliciesApi', () => {
     });
   });
 
-  describe('fetchDataFields', () => {
+  describe('fetchRuleEventFields', () => {
     it('omits the query param entirely when no matcher is provided', async () => {
       http.get.mockResolvedValue([]);
 
-      await api.fetchDataFields();
+      await api.fetchRuleEventFields();
 
-      expect(http.get).toHaveBeenCalledWith(
-        `${ALERTING_V2_ACTION_POLICY_API_PATH}/suggestions/data_fields`,
-        {}
-      );
+      expect(http.get).toHaveBeenCalledWith(ALERTING_V2_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH, {});
     });
 
     it('forwards the trimmed matcher as a query parameter', async () => {
       http.get.mockResolvedValue([]);
 
-      await api.fetchDataFields('  rule.id : "abc"  ');
+      await api.fetchRuleEventFields('  rule.id : "abc"  ');
 
-      expect(http.get).toHaveBeenCalledWith(
-        `${ALERTING_V2_ACTION_POLICY_API_PATH}/suggestions/data_fields`,
-        {
-          query: { matcher: 'rule.id : "abc"' },
-        }
-      );
+      expect(http.get).toHaveBeenCalledWith(ALERTING_V2_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH, {
+        query: { matcher: 'rule.id : "abc"' },
+      });
     });
 
     it('omits the query param when matcher is empty or whitespace', async () => {
       http.get.mockResolvedValue([]);
 
-      await api.fetchDataFields('   ');
+      await api.fetchRuleEventFields('   ');
 
-      expect(http.get).toHaveBeenCalledWith(
-        `${ALERTING_V2_ACTION_POLICY_API_PATH}/suggestions/data_fields`,
-        {}
-      );
+      expect(http.get).toHaveBeenCalledWith(ALERTING_V2_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH, {});
     });
 
     it('returns the response payload from the HTTP layer', async () => {
       http.get.mockResolvedValue(['data.host.name', 'data.count']);
 
-      const result = await api.fetchDataFields();
+      const result = await api.fetchRuleEventFields();
 
       expect(result).toEqual(['data.host.name', 'data.count']);
     });

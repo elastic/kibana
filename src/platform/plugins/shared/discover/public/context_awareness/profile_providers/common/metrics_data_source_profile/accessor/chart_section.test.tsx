@@ -18,8 +18,7 @@ import type {
   UnifiedHistogramFetchParams,
   UnifiedHistogramServices,
 } from '@kbn/unified-histogram/types';
-import type { MetricsGridSettings } from '@kbn/unified-chart-section-viewer';
-import { METRICS_GRID_SETTINGS_DEFAULTS } from '@kbn/unified-chart-section-viewer';
+import { METRICS_GRID_SETTINGS_DEFAULTS, type MetricsGridSettings } from '@kbn/discover-utils';
 import { createChartSection } from './chart_section';
 import type { ChartSectionConfiguration } from '../../../../types';
 import { DataSourceCategory } from '../../../../profiles';
@@ -46,6 +45,8 @@ type UnifiedGridProps = ChartSectionProps & {
   };
   gridSettings?: MetricsGridSettings;
   onGridSettingsChange?: (update: Partial<MetricsGridSettings>) => void;
+  getRecentlyExploredMetrics?: () => readonly string[];
+  onMetricExplored?: (metricUniqueKey: string) => void;
 };
 
 let unifiedGridProps: UnifiedGridProps | undefined;
@@ -54,11 +55,6 @@ jest.mock('@kbn/unified-chart-section-viewer', () => ({
   UnifiedMetricsExperienceGrid: (props: UnifiedGridProps) => {
     unifiedGridProps = props;
     return null;
-  },
-  METRICS_GRID_SETTINGS_DEFAULTS: {
-    counterAggregation: 'sum',
-    gaugeAggregation: 'avg',
-    histogramPercentile: 'p95',
   },
 }));
 
@@ -90,6 +86,14 @@ const mockEsqlReferenceHref = 'https://www.elastic.co/docs/reference/esql';
 const mockScopedLogger = { __sentinel: 'scopedLogger' };
 const mockLogger = { __sentinel: 'logger', get: jest.fn(() => mockScopedLogger) };
 const mockFeatureFlags = { __sentinel: 'featureFlags' };
+const mockStorage = {
+  get: jest.fn((): unknown => null),
+  set: jest.fn(),
+  remove: jest.fn(),
+  clear: jest.fn(),
+};
+// Stable references so the memoized RecentMetricsStorage instance survives re-renders.
+const mockHttp = { basePath: { get: () => '' } };
 
 jest.mock('../../../../../hooks/use_discover_services', () => ({
   useDiscoverServices: jest.fn(() => ({
@@ -108,7 +112,9 @@ jest.mock('../../../../../hooks/use_discover_services', () => ({
     logger: mockLogger,
     core: {
       featureFlags: mockFeatureFlags,
+      http: mockHttp,
     },
+    storage: mockStorage,
   })),
 }));
 
@@ -256,5 +262,19 @@ describe('MetricsExperienceGridWrapper', () => {
       ...METRICS_GRID_SETTINGS_DEFAULTS,
       counterAggregation: 'max',
     });
+  });
+
+  it('surfaces the persisted recently explored snapshot and records new interactions', () => {
+    mockStorage.get.mockReturnValue(['metrics-*::cpu']);
+
+    renderChartSection();
+
+    expect(unifiedGridProps?.getRecentlyExploredMetrics?.()).toEqual(['metrics-*::cpu']);
+
+    act(() => {
+      unifiedGridProps?.onMetricExplored?.('metrics-*::memory');
+    });
+
+    expect(mockStorage.set).toHaveBeenCalled();
   });
 });

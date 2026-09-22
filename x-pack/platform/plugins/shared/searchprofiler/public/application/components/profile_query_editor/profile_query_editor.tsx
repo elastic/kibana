@@ -117,6 +117,15 @@ export const ProfileQueryEditor = memo(() => {
     };
   }, [debouncedUpdateQueryStorage, initialIndexValue]);
 
+  // Seed the uncontrolled index input from the initial value. Keeping this in an
+  // effect (instead of the render-path `inputRef` callback) ensures a re-render
+  // does not clobber a value already applied from a live URL change by `applyUrlParams`.
+  useEffect(() => {
+    if (indexInputRef.current) {
+      indexInputRef.current.value = initialIndexValue;
+    }
+  }, [initialIndexValue]);
+
   const applyUrlParams = useCallback((params: URLSearchParams) => {
     const nextStoredState = readSearchProfilerState();
     const nextIndexValue = getInitialSearchProfilerIndex({
@@ -218,7 +227,6 @@ export const ProfileQueryEditor = memo(() => {
                   inputRef={(ref) => {
                     if (ref) {
                       indexInputRef.current = ref;
-                      ref.value = initialIndexValue;
                     }
                   }}
                   onChange={(event) =>

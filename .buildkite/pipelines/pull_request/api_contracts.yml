@@ -9,6 +9,9 @@ steps:
     key: check_api_contracts
     depends_on: check_oas_snapshot
     timeout_in_minutes: 30
+    # Breaking changes in stable/tech_preview APIs fail the check but only warn:
+    # soft_fail keeps the failure visible (step + PR comment) without blocking
+    # merge. Remove this line to make it a hard merge gate.
     soft_fail: true
     retry:
       automatic:

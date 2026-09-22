@@ -343,7 +343,7 @@ async function main() {
     // being routed to `*-chat-latest` and then failing with "Unknown model: *-chat-latest".
     //
     // Workaround: if a non-`-chat` sibling model exists, prefer it for the actual request model
-    // while keeping the connector id stable (so CI-configured EVALUATION_CONNECTOR_ID stays valid).
+    // while keeping the connector id stable (so CI-configured EVAL_CONNECTOR_ID stays valid).
     const fullModelSibling = fullModel.endsWith('-chat') ? fullModel.replace(/-chat$/, '') : null;
     const mappedInternal = modelInfoMappings.get(fullModel);
     const looksLikeLatestMapping =

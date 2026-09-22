@@ -104,6 +104,7 @@ describe('validateSLO', () => {
             frequency: sixHours(),
             syncDelay: oneMinute(),
             preventInitialBackfill: false,
+            preventCrossProjectSearch: false,
           },
         });
         expect(() => validateSLO(slo)).toThrowError('Invalid settings.frequency');
@@ -115,6 +116,7 @@ describe('validateSLO', () => {
             frequency: oneMinute(),
             syncDelay: sixHours(),
             preventInitialBackfill: false,
+            preventCrossProjectSearch: false,
           },
         });
         expect(() => validateSLO(slo)).toThrowError('Invalid settings.sync_delay');

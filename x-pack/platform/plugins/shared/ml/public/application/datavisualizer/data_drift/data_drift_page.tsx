@@ -14,14 +14,15 @@ import type { DataDriftSpec } from '@kbn/data-visualizer-plugin/public';
 import { MlDataSourcePicker } from '@kbn/aiops-components';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { useMlKibana } from '../../contexts/kibana';
 import { useDataSource } from '../../contexts/ml';
-import { MlPageHeader } from '../../components/page_header';
-import { PageTitle } from '../../components/page_title';
+import { MlAppHeader, useDataVisualizerBack } from '../../components/ml_app_header';
 
 export const DataDriftPage: FC = () => {
   const { services } = useMlKibana();
   const { dataVisualizer } = services;
+  const dataVisualizerBack = useDataVisualizerBack();
 
   const [DataDriftView, setDataDriftView] = useState<DataDriftSpec | null>(null);
 
@@ -45,13 +46,12 @@ export const DataDriftPage: FC = () => {
 
   return (
     <>
-      <MlPageHeader>
-        <PageTitle
-          title={
-            <FormattedMessage id="xpack.ml.dataDrift.pageHeader" defaultMessage="Data drift" />
-          }
-        />
-      </MlPageHeader>
+      <MlAppHeader
+        title={i18n.translate('xpack.ml.dataDrift.pageHeader', {
+          defaultMessage: 'Data drift',
+        })}
+        back={dataVisualizerBack}
+      />
       {dataView && DataDriftView ? (
         <DataDriftView
           key={savedSearch?.id ?? dataView.id ?? dataView.getIndexPattern()}

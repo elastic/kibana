@@ -10,6 +10,7 @@
 import * as Option from 'fp-ts/Option';
 import { omit } from 'lodash';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { Logger } from '@kbn/logging';
 import type {
   AllActionStates,
   CheckTargetTypesMappingsState,
@@ -54,7 +55,8 @@ export type ResponseType<ControlState extends AllActionStates> = Awaited<
 export const nextActionMap = (
   client: ElasticsearchClient,
   transformRawDocs: TransformRawDocs,
-  removedTypes: string[]
+  removedTypes: string[],
+  logger: Logger
 ) => {
   return {
     INIT: (state: InitState) =>
@@ -169,6 +171,8 @@ export const nextActionMap = (
          * Right now, it's performed during OUTDATED_DOCUMENTS_REFRESH step.
          */
         refresh: false,
+        fetchAllocationExplain: state.retryCount === 0,
+        logger,
       }),
     MARK_VERSION_INDEX_READY: (state: MarkVersionIndexReady) =>
       Actions.updateAliases({ client, aliasActions: state.versionIndexReadyActions.value }),
@@ -180,9 +184,10 @@ export const nextActionMap = (
 export const next = (
   client: ElasticsearchClient,
   transformRawDocs: TransformRawDocs,
-  removedTypes: string[]
+  removedTypes: string[],
+  logger: Logger
 ) => {
-  const map = nextActionMap(client, transformRawDocs, removedTypes);
+  const map = nextActionMap(client, transformRawDocs, removedTypes, logger);
   return (state: State) => {
     const delay = createDelayFn(state);
 

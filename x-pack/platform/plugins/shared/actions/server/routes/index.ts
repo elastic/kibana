@@ -59,7 +59,7 @@ export function defineRoutes(opts: RouteOptions) {
   oauthAuthorizeRoute(router, licenseState, logger, core, oauthRateLimiter, actionsConfigUtils);
   oauthCallbackRoute(router, licenseState, actionsConfigUtils, logger, core, oauthRateLimiter);
   oauthCallbackScriptRoute(router);
-  oauthDisconnectRoute(router, licenseState, logger, core);
+  oauthDisconnectRoute(router, licenseState, logger, core, actionsConfigUtils);
   oauthCancelRoute(router, licenseState, logger, core);
   getAllConnectorsIncludingSystemRoute(router, licenseState);
   connectorAuthStatusRoute(router, licenseState);

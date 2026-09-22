@@ -221,7 +221,7 @@ const UnstyledProcessEventDot = React.memo(
     /**
      * The `left` and `top` values represent the 'center' point of the process node.
      * Since the view has content to the left and above the 'center' point, offset the
-     * position to accomodate for that. This aligns the logical center of the process node
+     * position to accommodate for that. This aligns the logical center of the process node
      * with the correct position on the map.
      */
 
@@ -497,6 +497,7 @@ const UnstyledProcessEventDot = React.memo(
               zIndex: 45,
             }}
           >
+            {/* eslint-disable-next-line @elastic/eui/accessible-interactive-element */}
             <EuiButton
               iconSide={isNodeLoading ? 'right' : 'left'}
               isLoading={isNodeLoading}

@@ -862,16 +862,13 @@ describe('getAgentVersionsForAgentPolicyIds', () => {
         query: {
           bool: {
             filter: [
-              {
-                bool: {
-                  should: [
-                    { terms: { policy_id: ['policy-a', 'policy-b'] } },
-                    { prefix: { policy_id: 'policy-a#' } },
-                    { prefix: { policy_id: 'policy-b#' } },
-                  ],
-                  minimum_should_match: 1,
-                },
-              },
+              expect.objectContaining({
+                bool: expect.objectContaining({
+                  should: expect.arrayContaining([
+                    { terms: { policy_base_id: ['policy-a', 'policy-b'] } },
+                  ]),
+                }),
+              }),
             ],
           },
         },

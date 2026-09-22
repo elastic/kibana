@@ -26,9 +26,13 @@ import vsCodeIcon from '../../assets/visual-studio-code.svg';
 import { useKibana } from '../../hooks/use_kibana';
 import { PromptModal } from './prompt_modal';
 import { buildPrompt } from './util';
-import { AgentBuilderPanelContainer } from './styles';
+import { AgentBuilderPanelContainer, brandIcon } from './styles';
 import { useUsageTracker } from '../../contexts/usage_tracker_context';
 import { AnalyticsEvents } from '../../analytics/constants';
+
+const BrandIcon: React.FC<{ icon: string; title: string }> = ({ icon, title }) => (
+  <span role="img" aria-label={title} css={brandIcon(icon)} />
+);
 
 const AgentInstallPanel: React.FC<{
   icon: string;
@@ -124,43 +128,37 @@ export const AgentInstallSection = () => {
                       responsive={false}
                     >
                       <EuiFlexItem grow={false}>
-                        <EuiIcon
-                          color="subdued"
-                          size="m"
+                        <BrandIcon
+                          icon={anthropicIcon}
                           title={i18n.translate(
                             'xpack.searchGettingStarted.agentInstall.anthropicIcon.title',
                             {
                               defaultMessage: 'Anthropic Claude Code logo',
                             }
                           )}
-                          type={anthropicIcon}
                         />
                       </EuiFlexItem>
 
                       <EuiFlexItem grow={false}>
-                        <EuiIcon
-                          color="subdued"
-                          size="m"
+                        <BrandIcon
+                          icon={cursorIcon}
                           title={i18n.translate(
                             'xpack.searchGettingStarted.agentInstall.cursorIcon.title',
                             {
                               defaultMessage: 'Cursor AI logo',
                             }
                           )}
-                          type={cursorIcon}
                         />
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
-                        <EuiIcon
-                          color="subdued"
-                          size="m"
+                        <BrandIcon
+                          icon={vsCodeIcon}
                           title={i18n.translate(
                             'xpack.searchGettingStarted.agentInstall.vsCodeIcon.title',
                             {
                               defaultMessage: 'Visual Studio Code logo',
                             }
                           )}
-                          type={vsCodeIcon}
                         />
                       </EuiFlexItem>
                     </EuiFlexGroup>

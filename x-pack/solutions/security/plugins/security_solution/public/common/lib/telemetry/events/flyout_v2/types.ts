@@ -147,6 +147,8 @@ export const FLYOUT_ORIGIN = {
   // Top-level entry points outside any open flyout.
   // Alerts table row.
   ALERTS_TABLE: 'alerts_table',
+  // Discover document table row.
+  DISCOVER_TABLE: 'discover_table',
   // Attacks table row.
   ATTACKS_TABLE: 'attacks_table',
   // Attacks KPI widget.
@@ -161,6 +163,40 @@ export const FLYOUT_ORIGIN = {
   NOTE_PREVIEW: 'note_preview',
   // Threat intelligence table row.
   THREAT_INTEL_TABLE: 'threat_intel_table',
+  // Asset Inventory grid row.
+  ASSET_INVENTORY: 'asset_inventory',
+  // Explore > Hosts table host link.
+  HOSTS_TABLE: 'hosts_table',
+  // Explore > Hosts > Uncommon processes table host link.
+  UNCOMMON_PROCESSES_TABLE: 'uncommon_processes_table',
+  // Explore > Hosts/Users > Authentications table entity link.
+  AUTHENTICATIONS_TABLE: 'authentications_table',
+  // Explore > Hosts > Host risk table host link.
+  HOST_RISK_TABLE: 'host_risk_table',
+  // Explore > Users table user link.
+  USERS_TABLE: 'users_table',
+  // Explore > Users > User risk table user link.
+  USER_RISK_TABLE: 'user_risk_table',
+  // Entity Analytics entities table row or grouped-row preview.
+  ENTITIES_TABLE: 'entities_table',
+  // Entity Analytics Entity Store list preview button.
+  ENTITY_STORE_LIST: 'entity_store_list',
+  // Entity Analytics dashboard risk score table entity link.
+  ENTITY_ANALYTICS_RISK_SCORE: 'entity_analytics_risk_score',
+  // Risk score management preview table entity link.
+  RISK_SCORE_PREVIEW: 'risk_score_preview',
+  // Entity attachment action in AI chat.
+  AI_CHAT_ENTITY_ATTACHMENT: 'ai_chat_entity_attachment',
+  // Privileged user monitoring users table.
+  PRIVILEGED_USERS_TABLE: 'privileged_users_table',
+  // Privileged access detection chart entity link.
+  PRIVILEGED_ACCESS_DETECTION: 'privileged_access_detection',
+  // Recent anomalies chart entity link.
+  RECENT_ANOMALIES: 'recent_anomalies',
+  // Threat hunting lead entity badge.
+  THREAT_HUNTING_LEADS: 'threat_hunting_leads',
+  // Flyout reconstructed from URL state during application mount.
+  URL_RESTORE: 'url_restore',
   // "Analyze event" row-action button, shared across alerts table, timeline, and rule preview.
   ROW_ACTION: 'row_action',
 } as const;
@@ -214,6 +250,7 @@ export const FLYOUT_ACTION = {
   ISOLATE_HOST: 'isolate_host',
   RUN_WORKFLOW: 'run_workflow',
   RESPOND: 'respond',
+  RUN_OSQUERY: 'run_osquery',
   ADD_NOTE: 'add_note',
   INVESTIGATE_IN_TIMELINE: 'investigate_in_timeline',
   EXPLORE: 'explore',

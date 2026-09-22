@@ -113,7 +113,7 @@ const CaseInlineContent: React.FC<InlineContentProps> = ({ attachment, applicati
             <EuiFlexItem grow={false}>
               <EuiButton
                 size="s"
-                iconType="popout"
+                iconType="external"
                 iconSide="right"
                 href={caseUrls.case}
                 target="_blank"
@@ -172,7 +172,7 @@ const CaseInlineContent: React.FC<InlineContentProps> = ({ attachment, applicati
             <EuiSpacer size="s" />
             <EuiButtonEmpty
               size="xs"
-              iconType={expanded ? 'arrowUp' : 'arrowDown'}
+              iconType={expanded ? 'chevronSingleUp' : 'chevronSingleDown'}
               iconSide="right"
               onClick={toggleExpanded}
               data-test-subj="case-attachment-toggle-details"

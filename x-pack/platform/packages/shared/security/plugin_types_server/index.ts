@@ -66,6 +66,7 @@ export type {
   UserProfileServiceStart,
   UserProfileSuggestParams,
   UserProfileGetCurrentParams,
+  UserProfileGetCurrentProfileIdParams,
   UserProfileBulkGetParams,
   UserProfileRequiredPrivileges,
 } from './src/user_profile';

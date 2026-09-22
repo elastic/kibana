@@ -50,20 +50,15 @@ const remoteAlertMockHit = createMockHit(
   { _index: 'remote-cluster:index-name' }
 );
 
-const renderResponseSectionContent = ({
-  hit = alertMockHit,
-  isRulePreview = false,
-}: {
-  hit?: DataTableRecord;
-  isRulePreview?: boolean;
-} = {}) =>
+const previewAlertMockHit = createMockHit(
+  { 'event.kind': 'signal' },
+  { _index: '.preview.alerts-security.alerts-default' }
+);
+
+const renderResponseSectionContent = ({ hit = alertMockHit }: { hit?: DataTableRecord } = {}) =>
   render(
     <IntlProvider locale="en">
-      <ResponseSectionContent
-        hit={hit}
-        isRulePreview={isRulePreview}
-        onShowResponseDetails={onShowResponseDetails}
-      />
+      <ResponseSectionContent hit={hit} onShowResponseDetails={onShowResponseDetails} />
     </IntlProvider>
   );
 
@@ -107,8 +102,8 @@ describe('<ResponseSectionContent />', () => {
     expect(onShowResponseDetails).toHaveBeenCalledTimes(1);
   });
 
-  it('should render preview message if flyout is in preview', () => {
-    const { getByTestId } = renderResponseSectionContent({ isRulePreview: true });
+  it('should render preview message for a rule preview document', () => {
+    const { getByTestId } = renderResponseSectionContent({ hit: previewAlertMockHit });
     expect(getByTestId(RESPONSE_SECTION_CONTENT_TEST_ID)).toHaveTextContent(PREVIEW_MESSAGE);
   });
 

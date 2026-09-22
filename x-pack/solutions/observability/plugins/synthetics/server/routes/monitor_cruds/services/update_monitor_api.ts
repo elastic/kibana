@@ -14,6 +14,7 @@
 
 import type { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
 import { i18n } from '@kbn/i18n';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import { getSavedObjectKqlFilter } from '../../common';
 import type { MonitorConfigUpdate } from '../bulk_cruds/edit_monitor_bulk';
 import { mergeSourceMonitor } from '../formatters/saved_object_to_monitor';
@@ -92,10 +93,11 @@ export class UpdateMonitorAPI {
 
     const decryptedMonitors = await this.findDecryptedMonitors(ids);
     this.markNotFound(ids, decryptedMonitors);
+    const maintenanceWindows = await this.getMaintenanceWindows(decryptedMonitors, patchById);
 
     for (const decryptedMonitor of decryptedMonitors) {
       const patch = patchById.get(decryptedMonitor.id) ?? {};
-      await this.processMonitor(decryptedMonitor, patch);
+      await this.processMonitor(decryptedMonitor, patch, maintenanceWindows);
     }
 
     await this.rejectNameConflictsWithExistingMonitors(updates);
@@ -115,6 +117,30 @@ export class UpdateMonitorAPI {
     return monitorConfigRepository.findDecryptedMonitors({ spaceId, filter });
   }
 
+  private async getMaintenanceWindows(
+    decryptedMonitors: Array<SavedObjectsFindResult<SyntheticsMonitorWithSecretsAttributes>>,
+    patchById: Map<string, Partial<EncryptedSyntheticsMonitor>>
+  ): Promise<MaintenanceWindow[] | undefined> {
+    const hasMaintenanceWindowRefs = decryptedMonitors.some((monitor) => {
+      if (monitor.attributes[ConfigKey.MONITOR_SOURCE_TYPE] !== 'ui') {
+        return false;
+      }
+
+      const patch = patchById.get(monitor.id);
+      const refs =
+        patch?.[ConfigKey.MAINTENANCE_WINDOWS] ?? monitor.attributes[ConfigKey.MAINTENANCE_WINDOWS];
+      return (refs?.length ?? 0) > 0;
+    });
+
+    if (!hasMaintenanceWindowRefs) {
+      return undefined;
+    }
+
+    return this.routeContext.syntheticsMonitorClient.syntheticsService.getMaintenanceWindows(
+      this.routeContext.spaceId
+    );
+  }
+
   private markNotFound(
     ids: string[],
     decryptedMonitors: Array<SavedObjectsFindResult<SyntheticsMonitorWithSecretsAttributes>>
@@ -132,7 +158,8 @@ export class UpdateMonitorAPI {
 
   private async processMonitor(
     decryptedMonitor: SavedObjectsFindResult<SyntheticsMonitorWithSecretsAttributes>,
-    patch: Partial<EncryptedSyntheticsMonitor>
+    patch: Partial<EncryptedSyntheticsMonitor>,
+    maintenanceWindows?: MaintenanceWindow[]
   ) {
     const monitorId = decryptedMonitor.id;
 
@@ -176,7 +203,8 @@ export class UpdateMonitorAPI {
       normalizedMonitor = await editMonitorAPI.normalizeMonitor(
         (formattedConfig ?? merged) as CreateMonitorPayLoad,
         patch as CreateMonitorPayLoad,
-        (prevAttrs as MonitorFields)[ConfigKey.LOCATIONS]
+        (prevAttrs as MonitorFields)[ConfigKey.LOCATIONS],
+        maintenanceWindows
       );
     } catch (error) {
       this.result.perIdErrors[monitorId] = {

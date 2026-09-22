@@ -23,7 +23,7 @@ const getExpected = (config: ScoutTestConfig) => {
         'mlGroup',
         'legacyGroup',
       ],
-      count: 17,
+      count: 18,
     };
   }
 
@@ -37,7 +37,7 @@ const getExpected = (config: ScoutTestConfig) => {
         'mlGroup',
         'legacyGroup',
       ],
-      count: 20,
+      count: 21,
     };
   }
 
@@ -51,7 +51,7 @@ const getExpected = (config: ScoutTestConfig) => {
       'observabilityGroup',
       'legacyGroup',
     ],
-    count: 27,
+    count: 28,
   };
 };
 

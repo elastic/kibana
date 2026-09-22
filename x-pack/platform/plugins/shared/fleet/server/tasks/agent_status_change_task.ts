@@ -77,14 +77,14 @@ export class AgentStatusChangeTask {
         timeout: TIMEOUT,
         createTaskRunner: ({
           taskInstance,
-          abortController,
+          signal,
         }: {
           taskInstance: ConcreteTaskInstance;
-          abortController: AbortController;
+          signal: AbortSignal;
         }) => {
           return {
             run: async () => {
-              return this.runTask(taskInstance, core, abortController);
+              return this.runTask(taskInstance, core, signal);
             },
             cancel: async () => {},
           };
@@ -129,7 +129,7 @@ export class AgentStatusChangeTask {
   public runTask = async (
     taskInstance: ConcreteTaskInstance,
     core: CoreSetup,
-    abortController: AbortController
+    signal: AbortSignal
   ) => {
     if (!appContextService.getExperimentalFeatures().enableAgentStatusAlerting) {
       this.logger.debug(
@@ -155,7 +155,7 @@ export class AgentStatusChangeTask {
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
     try {
-      await this.persistAgentStatusChanges(esClient, soClient, abortController);
+      await this.persistAgentStatusChanges(esClient, soClient, signal);
 
       this.endRun('success');
     } catch (err) {
@@ -172,7 +172,7 @@ export class AgentStatusChangeTask {
   private persistAgentStatusChanges = async (
     esClient: ElasticsearchClient,
     soClient: SavedObjectsClientContract,
-    abortController: AbortController
+    signal: AbortSignal
   ) => {
     let agentlessPolicies: string[] | undefined;
     const agentsFetcher = await fetchAllAgentsByKuery(esClient, soClient, {
@@ -188,7 +188,7 @@ export class AgentStatusChangeTask {
 
       const updateErrors = {};
       const agentsToUpdate = agentPageResults;
-      throwIfAborted(abortController);
+      throwIfAborted(signal);
 
       if (agentsToUpdate.length === 0) {
         continue;

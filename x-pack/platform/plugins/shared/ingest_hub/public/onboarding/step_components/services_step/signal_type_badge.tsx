@@ -20,15 +20,10 @@ export const SIGNAL_TYPE_LABELS: Record<SignalType, string> = {
   }),
 };
 
-const COLORS: Record<SignalType, string> = {
-  logs: 'primary',
-  metrics: 'success',
-};
-
 interface SignalTypeBadgeProps {
   signalType: SignalType;
 }
 
-export const SignalTypeBadge: React.FC<SignalTypeBadgeProps> = ({ signalType }) => (
-  <EuiBadge color={COLORS[signalType]}>{SIGNAL_TYPE_LABELS[signalType]}</EuiBadge>
-);
+export const SignalTypeBadge: React.FC<SignalTypeBadgeProps> = ({ signalType }) => {
+  return <EuiBadge color="hollow">{SIGNAL_TYPE_LABELS[signalType]}</EuiBadge>;
+};

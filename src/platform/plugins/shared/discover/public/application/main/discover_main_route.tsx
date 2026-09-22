@@ -10,6 +10,7 @@
 import { useHistory, useParams } from 'react-router-dom';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { DATASETS_ROUTE, type EsqlDatasetsResult } from '@kbn/esql-types';
 import React, { useEffect, useState } from 'react';
 import useUnmount from 'react-use/lib/useUnmount';
 import type { AppMountParameters } from '@kbn/core/public';
@@ -117,16 +118,21 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
   const { initializeProfileDataViews } = useDefaultAdHocDataViews();
   const [mainRouteInitializationState, initializeMainRoute] = useAsyncFunction<InitializeMainRoute>(
     async (loadedRootProfileState) => {
-      const [hasESData, hasUserDataView, defaultDataViewExists] = await Promise.all([
-        dataViews.hasData.hasESData().catch(() => false),
-        dataViews.hasData.hasUserDataView().catch(() => false),
-        dataViews.defaultDataViewExists().catch(() => false),
-        dispatch(internalStateActions.loadDataViewList()).catch(() => {}),
-        initializeProfileDataViews(loadedRootProfileState).catch(() => {}),
-      ]);
+      const [hasESData, hasUserDataView, defaultDataViewExists, hasESQLDatasets] =
+        await Promise.all([
+          dataViews.hasData.hasESData().catch(() => false),
+          dataViews.hasData.hasUserDataView().catch(() => false),
+          dataViews.defaultDataViewExists().catch(() => false),
+          core.http
+            .get<EsqlDatasetsResult>(DATASETS_ROUTE)
+            .then((res) => res.datasets.length > 0)
+            .catch(() => false),
+          dispatch(internalStateActions.loadDataViewList()).catch(() => {}),
+          initializeProfileDataViews(loadedRootProfileState).catch(() => {}),
+        ]);
       const initializationState: DiscoverInternalState['initializationState'] = {
-        hasESData,
-        hasUserDataView: hasUserDataView && defaultDataViewExists,
+        hasESData: hasESData || hasESQLDatasets,
+        hasUserDataView: (hasUserDataView && defaultDataViewExists) || hasESQLDatasets,
       };
       const defaultProfileEsqlQuery = loadedRootProfileState.getDefaultEsqlQuery();
 

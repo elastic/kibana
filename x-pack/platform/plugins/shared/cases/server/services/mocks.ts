@@ -169,6 +169,7 @@ const createAttachmentGetterServiceMock = (): AttachmentGetterServiceMock => {
     get: jest.fn(),
     bulkGet: jest.fn(),
     getAllDocumentsAttachedToCase: jest.fn(),
+    getUnifiedAttachmentsByTypes: jest.fn().mockResolvedValue([]),
     getCaseAttatchmentStats: jest.fn(),
     getAttachmentIdsForCases: jest.fn(),
     getFileAttachments: jest.fn(),
@@ -232,9 +233,11 @@ export const createTemplatesServiceMock = (): TemplatesServiceMock => {
     updateTemplate: jest.fn(),
     incrementUsageStats: jest.fn(),
     deleteTemplate: jest.fn(),
+    validateWriteInput: jest.fn(),
     getTags: jest.fn(),
     getAuthors: jest.fn(),
     getTemplateVersionsForExtendedFieldSearch: jest.fn().mockResolvedValue([]),
+    getActiveTemplatesReferencingField: jest.fn().mockResolvedValue([]),
   });
 
   // the cast here is required because jest.Mocked tries to include private members and would throw an error

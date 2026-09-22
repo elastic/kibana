@@ -20,7 +20,7 @@ const meta = {
   argTypes: {
     iconType: {
       control: 'select',
-      options: ['aiAssistantLogo', 'sparkles', 'productAgent'],
+      options: ['aiAssistantLogo', 'sparkles', 'productAgent', 'addToChat'],
     },
     size: {
       control: 'select',

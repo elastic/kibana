@@ -7,8 +7,9 @@
 
 import { inject, injectable } from 'inversify';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { ALERT_EVENTS_DATA_STREAM } from '../../../resources/datastreams/alert_events';
+import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import type { AlertEvent } from '../../../resources/datastreams/alert_events';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import { EsServiceInternalToken } from '../../services/es_service/tokens';
 import {
   LoggerServiceToken,
@@ -94,11 +95,11 @@ export class FilterDuplicateEventsStep implements RuleExecutionStep {
             existingIds.add(hit._id);
           }
         }
-      } catch (err) {
+      } catch (error) {
         this.logger.warn({
-          message: `[${this.name}] ids pre-check failed (chunk offset=${offset}): ${
-            err instanceof Error ? err.message : String(err)
-          }. Relying on _id collision at write time for this chunk.`,
+          code: ALERTING_LOG_CODES.RULE_EXECUTION_DEDUP_PRECHECK_FAILED,
+          message: `[${this.name}] ids pre-check failed (chunk offset=${offset}). Relying on _id collision at write time for this chunk.`,
+          error,
         });
       }
     }

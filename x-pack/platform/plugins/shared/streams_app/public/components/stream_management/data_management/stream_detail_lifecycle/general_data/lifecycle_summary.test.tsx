@@ -285,7 +285,7 @@ describe('LifecycleSummary', () => {
       );
 
       expect(screen.getByTestId('lifecyclePhase-delete-button')).toHaveStyle(
-        `box-shadow: inset 0 0 0 2px #000000`
+        `box-shadow: inset 0 0 0 2px #07101F`
       );
     });
 
@@ -295,7 +295,7 @@ describe('LifecycleSummary', () => {
       renderWithSync(<LifecycleSummary definition={definition} isMetricsStream />);
 
       expect(screen.getByTestId('lifecyclePhase-delete-button')).not.toHaveStyle(
-        `box-shadow: inset 0 0 0 2px #000000`
+        `box-shadow: inset 0 0 0 2px #07101F`
       );
     });
 
@@ -698,6 +698,23 @@ describe('LifecycleSummary', () => {
       renderWithSync(<LifecycleSummary definition={definition} isMetricsStream />);
 
       expect(screen.getByTestId('dataLifecycleSummary-title')).toBeInTheDocument();
+    });
+
+    it('gives the "Add data phase" button an accessible name matching its visible label', () => {
+      const definition = createIlmDefinition();
+
+      renderWithSync(
+        <LifecycleSummary
+          definition={definition}
+          isMetricsStream={false}
+          onAddDataPhase={jest.fn()}
+        />
+      );
+
+      // WCAG 2.5.3 Label in Name: the accessible name must match the visible text.
+      expect(screen.getByTestId('dataLifecycleSummaryAddPhaseButton')).toHaveAccessibleName(
+        'Add data phase'
+      );
     });
 
     it('should show loading skeleton while fetching ILM stats', () => {

@@ -386,6 +386,8 @@ export const runSaveLensVisualization = async (
     })
   );
 
+  // New library SO (first save or save-as-copy): redirect to #/edit/{id}
+  // and set persistedDoc so dirty-check is clean before reload finishes.
   if (savedObjectId && savedObjectId !== originalSavedObjectId) {
     chrome.recentlyAccessed.add(getFullPath(savedObjectId), docToSave.title, savedObjectId);
 
@@ -397,7 +399,11 @@ export const runSaveLensVisualization = async (
     } else {
       redirectTo?.(savedObjectId);
     }
-    return { isLinkedToOriginatingApp: false };
+
+    return {
+      persistedDoc: { ...docToSave, savedObjectId },
+      isLinkedToOriginatingApp: false,
+    };
   }
 
   return {

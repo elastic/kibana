@@ -132,4 +132,90 @@ describe('TemplateActionsMenu', () => {
     await waitFor(() => expect(onChange).toHaveBeenCalledTimes(1));
     expect(onChange.mock.calls[0][0]).toContain('$ref: root_cause');
   });
+
+  describe('fieldDefinition mode', () => {
+    // The field-library document root IS a single inline field — no `fields:` array, no $ref.
+    const FIELD_DEFINITION = `name: root_cause
+control: INPUT_TEXT
+label: Root cause
+type: keyword
+`;
+
+    const renderFieldDefinitionMenu = (opts: { value?: string; onChange?: jest.Mock } = {}) => {
+      const onChange = opts.onChange ?? jest.fn();
+      renderWithTestingProviders(
+        <TemplateActionsMenu
+          editor={createEditor(1)}
+          value={opts.value ?? FIELD_DEFINITION}
+          onChange={onChange}
+          mode="fieldDefinition"
+        />
+      );
+      return { onChange };
+    };
+
+    it('offers only New field and Validation on an empty buffer, with Validation disabled', async () => {
+      renderFieldDefinitionMenu({ value: '' });
+      await user.click(screen.getByTestId('fieldDefinitionActionsMenuButton'));
+
+      expect(await screen.findByText('New field')).toBeInTheDocument();
+      expect(screen.queryByText('Field library')).not.toBeInTheDocument();
+      expect(screen.queryByText('Conditional logic')).not.toBeInTheDocument();
+      expect(screen.getByTestId('fieldDefinitionActionsMenu-validation')).toBeDisabled();
+      expect(screen.getByTestId('fieldDefinitionActionsMenu-validation')).toHaveTextContent(
+        'Create a field to enable this action'
+      );
+    });
+
+    it('creates a field scaffold at the document root from an empty buffer', async () => {
+      const { onChange } = renderFieldDefinitionMenu({ value: '' });
+      await user.click(screen.getByTestId('fieldDefinitionActionsMenuButton'));
+      await user.click(await screen.findByText('New field'));
+      await user.click(await screen.findByText('Text Input'));
+
+      await waitFor(() => expect(onChange).toHaveBeenCalledTimes(1));
+      const yaml = onChange.mock.calls[0][0];
+      expect(yaml).toContain('control: INPUT_TEXT');
+      expect(yaml).not.toContain('fields:');
+    });
+
+    it('relabels the section "Change field type" once a field exists, with Validation enabled', async () => {
+      renderFieldDefinitionMenu();
+      await user.click(screen.getByTestId('fieldDefinitionActionsMenuButton'));
+
+      expect(await screen.findByText('Change field type')).toBeInTheDocument();
+      expect(screen.queryByText('New field')).not.toBeInTheDocument();
+      expect(screen.getByTestId('fieldDefinitionActionsMenu-validation')).toBeEnabled();
+    });
+
+    it('replaces the whole definition when changing the field type', async () => {
+      const { onChange } = renderFieldDefinitionMenu();
+      await user.click(screen.getByTestId('fieldDefinitionActionsMenuButton'));
+      await user.click(await screen.findByText('Change field type'));
+      await user.click(await screen.findByText('Toggle'));
+
+      await waitFor(() => expect(onChange).toHaveBeenCalledTimes(1));
+      const yaml = onChange.mock.calls[0][0];
+      expect(yaml).toContain('control: TOGGLE');
+      expect(yaml).not.toContain('Root cause');
+    });
+
+    it('applies a validation rule to the root field', async () => {
+      const { onChange } = renderFieldDefinitionMenu();
+      await user.click(screen.getByTestId('fieldDefinitionActionsMenuButton'));
+      await user.click(await screen.findByTestId('fieldDefinitionActionsMenu-validation'));
+      await user.click(await screen.findByText('Required'));
+
+      await waitFor(() => expect(onChange).toHaveBeenCalledTimes(1));
+      expect(onChange.mock.calls[0][0]).toContain('required: true');
+    });
+
+    it('disables both sections when the buffer has YAML errors', async () => {
+      renderFieldDefinitionMenu({ value: 'name: a\n\tcontrol: INPUT_TEXT' });
+      await user.click(screen.getByTestId('fieldDefinitionActionsMenuButton'));
+
+      expect(await screen.findByTestId('fieldDefinitionActionsMenu-newField')).toBeDisabled();
+      expect(screen.getByTestId('fieldDefinitionActionsMenu-validation')).toBeDisabled();
+    });
+  });
 });

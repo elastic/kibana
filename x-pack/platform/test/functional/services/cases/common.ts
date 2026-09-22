@@ -41,6 +41,17 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
     },
 
     /**
+     * Reveals the legacy custom-fields section on Create Case / Settings / Case Details.
+     * Templates v2 hides it behind a per-owner local-storage switch (default off); flipping
+     * it on keeps legacy custom-field coverage valid regardless of the templates flag. No-op
+     * when templates is off (legacy fields are always shown). Requires the cases app origin
+     * to be loaded first (e.g. after navigating to the app).
+     */
+    async showLegacyCustomFields(owner: string): Promise<void> {
+      await browser.setLocalStorageItem(`${owner}.cases.showLegacyCustomFields`, 'true');
+    },
+
+    /**
      * Waits for the case view page to load in either design (legacy `case-view-title` or the
      * redesign app header title).
      */
@@ -182,13 +193,9 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
         `case-severity-selection-${severity}`
       );
       await testSubjects.click(`case-severity-selection-${severity}`);
-
-      // The redesign sidebar stages the change and requires an explicit confirm before it is
-      // submitted; the legacy UI commits on selection.
-      if (await this.isRedesignEnabled()) {
-        await testSubjects.click('template-field-confirm-severity');
-        await header.waitUntilLoadingHasFinished();
-      }
+      // Both designs commit on selection (the redesign sidebar persists each change immediately,
+      // with no confirm step).
+      await header.waitUntilLoadingHasFinished();
     },
 
     async expectToasterToContain(content: string) {
@@ -289,12 +296,11 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
     /**
      * Adds a category to a case from the case view sidebar in either design. The legacy UI opens an
      * edit form (`category-edit-button` + `edit-category-submit`); the redesign edits an always-visible
-     * combo box (`categories-list`) confirmed via `template-field-confirm-category`.
+     * combo box (`categories-list`) that persists a valid selection immediately.
      */
     async addCategory(category: string) {
       if (await this.isRedesignEnabled()) {
         await comboBox.setCustom('categories-list', category);
-        await testSubjects.click('template-field-confirm-category');
         await header.waitUntilLoadingHasFinished();
         return;
       }
@@ -307,12 +313,11 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
 
     /**
      * Removes the category from a case in either design. The legacy UI has a dedicated remove button;
-     * the redesign clears the combo box and confirms the change.
+     * the redesign clears the combo box, which persists the removal immediately.
      */
     async removeCategory() {
       if (await this.isRedesignEnabled()) {
         await comboBox.clear('categories-list');
-        await testSubjects.click('template-field-confirm-category');
         await header.waitUntilLoadingHasFinished();
         return;
       }
@@ -324,12 +329,11 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
     /**
      * Adds a tag to a case from the case view sidebar in either design. The legacy UI opens an edit
      * form (`tag-list-edit-button` + `edit-tags-submit`); the redesign edits an always-visible combo
-     * box (`case-tags`) confirmed via `template-field-confirm-tags`.
+     * box (`case-tags`) where each add/remove persists on its own.
      */
     async addTag(tag: string) {
       if (await this.isRedesignEnabled()) {
         await comboBox.setCustom('case-tags', tag);
-        await testSubjects.click('template-field-confirm-tags');
         await header.waitUntilLoadingHasFinished();
         return;
       }

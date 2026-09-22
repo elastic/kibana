@@ -45,7 +45,7 @@ For every failure, try to retrieve:
 
 Things to specifically check in the artifacts before forming a root-cause hypothesis:
 
-- **Did the expected element render at all?** If yes and the selector missed it → flaky selector (Tier 2 fix territory). If no → real rendering / race / data issue (Tier 1 territory).
+- **Did the expected element render at all?** If yes and the selector missed it → flaky selector (Tier 2 fix territory). If no, distinguish **not yet** (a missing test-side wait) from **never** (the awaited state is unreachable — e.g. the component doesn't re-render when its async data arrives): read the component that renders the element, or find trace evidence of it appearing later. A missing wait in the test does not by itself prove the element would eventually have rendered.
 - **Is there an error visible in the UI** (toast, banner, console error in the HTML report)? If yes → product side, not test side.
 - **Is the page in an unexpected state** (different URL, different user's data, different space)? → cleanup or isolation issue, often points at `afterEach` / `afterAll`.
 - **Does the screenshot timestamp match the failure timestamp**? Stale artifacts from a prior step can mislead.
@@ -114,6 +114,7 @@ Watch out for these pitfalls when investigating the failure:
 - **Reducing coverage surface**: don't recommend stripping tags to skip the test in certain environments (e.g. Cloud) or project types (e.g. serverless Security) unless you have a real reason it shouldn't run there. "It's flaky here" is not a real reason.
 - **Trusting flaky-test-runner alone**: a green 30/30 or 60/60 run does not prove a fix held. The runner runs tests in isolation, which isn't always the case (Scout test runs share the same test servers for multiple test configs).
 - **Assuming "fix the test, not the product"**: always ask first whether the product could be at fault. Test-only fixes are meaningfully less durable than fixes that change production code.
+- **Reading fault from the throwing stack frame**: a waiting-side timeout always throws from the waiter (FTR/Playwright service code), so the frame tells you who threw, not whose fault it is. It is not evidence against a product bug.
 - **Reporting false certainty**: "I don't know, here are the two plausible explanations and what would distinguish them" is more useful to the owning team than a confident wrong answer.
 
 ### Is a fix worth it?

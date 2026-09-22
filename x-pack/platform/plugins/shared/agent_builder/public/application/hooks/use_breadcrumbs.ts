@@ -10,6 +10,7 @@ import type { ChromeBreadcrumb } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { AGENTBUILDER_APP_ID } from '../../../common/features';
 import { useKibana } from './use_kibana';
+import { appPaths } from '../utils/app_paths';
 
 interface AgentBuilderBreadcrumb {
   text: string;
@@ -43,19 +44,29 @@ export const useBreadcrumb = (breadcrumbs: AgentBuilderBreadcrumb[]) => {
     ];
   }, [appUrl]);
 
-  useEffect(() => {
-    const additionalCrumbs = breadcrumbs.map<ChromeBreadcrumb>((crumb) => {
+  const additionalCrumbs = useMemo(() => {
+    return breadcrumbs.map<ChromeBreadcrumb>((crumb) => {
       return {
         text: crumb.text,
         href: crumb.path ? getUrl(crumb.path) : undefined,
       };
     });
+  }, [breadcrumbs, getUrl]);
 
-    chrome.setBreadcrumbs([...baseCrumbs, ...additionalCrumbs], {
-      project: { value: [...baseCrumbs, ...additionalCrumbs], absolute: true },
+  const chromeBreadcrumbs = useMemo(() => {
+    const isRootBreadcrumb =
+      breadcrumbs.length === 1 &&
+      (breadcrumbs[0].path === appPaths.root || breadcrumbs[0].path === '');
+
+    return isRootBreadcrumb ? additionalCrumbs : [...baseCrumbs, ...additionalCrumbs];
+  }, [additionalCrumbs, baseCrumbs, breadcrumbs]);
+
+  useEffect(() => {
+    chrome.setBreadcrumbs(chromeBreadcrumbs, {
+      project: { value: chromeBreadcrumbs, absolute: true },
     });
     return () => {
       chrome.setBreadcrumbs([]);
     };
-  }, [chrome, baseCrumbs, breadcrumbs, getUrl]);
+  }, [chrome, chromeBreadcrumbs]);
 };

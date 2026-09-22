@@ -466,7 +466,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
               disableScreenReaderOutput
             >
               <EuiButtonIcon
-                iconType={'expand'}
+                iconType={'maximize'}
                 onClick={handleQueryFlyoutOpen(item)}
                 aria-label={i18n.translate('xpack.osquery.pack.queriesTable.viewQueryAriaLabel', {
                   defaultMessage: 'View query',
@@ -506,7 +506,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         disableScreenReaderOutput
       >
         <EuiButtonIcon
-          iconType="expand"
+          iconType="maximize"
           onClick={handleQueryFlyoutOpen(row)}
           aria-label={i18n.translate('xpack.osquery.pack.queriesTable.viewQueryAriaLabel', {
             defaultMessage: 'View query',
@@ -529,7 +529,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
           <EuiButtonIcon
             data-test-subj={`toggleIcon-${item.id}`}
             onClick={getHandleErrorsToggle(item)}
-            iconType={itemIdToExpandedRowMap[item.id] ? 'arrowDown' : 'arrowRight'}
+            iconType={itemIdToExpandedRowMap[item.id] ? 'chevronSingleDown' : 'chevronSingleRight'}
             aria-label={i18n.translate('xpack.osquery.pack.queriesTable.toggleResultsAriaLabel', {
               defaultMessage: 'Toggle results',
             })}

@@ -80,6 +80,11 @@ const schemaLatest = schema.object(
       // We take this approach in order to have a central place (serverless.yml) for serverless config across Kibana
       serverless: schema.boolean({ defaultValue: true }),
     }),
+    enableIndexMode: offeringBasedSchema({
+      // Index mode UI is hidden on vectorDB projects; refer to the serverless.yml file as the source of truth
+      // We take this approach in order to have a central place (serverless.yml) for serverless config across Kibana
+      serverless: schema.boolean({ defaultValue: true }),
+    }),
   },
   { defaultValue: undefined }
 );
@@ -100,6 +105,7 @@ const configLatest: PluginConfigDescriptor<IndexManagementConfig> = {
     enableTogglingDataRetention: true,
     enableProjectLevelRetentionChecks: true,
     enableFailureStoreRetentionDisabling: true,
+    enableIndexMode: true,
   },
   schema: schemaLatest,
   deprecations: ({ unused }) => [unused('dev.enableIndexDetailsPage', { level: 'warning' })],

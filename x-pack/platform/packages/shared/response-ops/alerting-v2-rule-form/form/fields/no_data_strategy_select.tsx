@@ -10,6 +10,8 @@ import { EuiFormRow, EuiSuperSelect, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { NoDataStrategy } from '@kbn/alerting-v2-schemas';
 
+export const DEFAULT_NO_DATA_STRATEGY: NoDataStrategy = 'last_known_status';
+
 interface NoDataStrategySelectProps {
   value: NoDataStrategy;
   onChange: (strategy: NoDataStrategy) => void;

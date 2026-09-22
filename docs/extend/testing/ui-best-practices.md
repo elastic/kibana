@@ -277,29 +277,31 @@ await expect(page.testSubj.locator('indicesTable')).toContainText(testIndexName)
 
 :::::
 
-## Use EUI wrappers as class fields in page objects [use-eui-wrappers-as-class-fields-in-page-objects]
+## Use EUI test helpers in page objects [use-eui-test-helpers-in-page-objects]
 
-If you must interact with EUI internals, use wrappers from Scout to keep that complexity out of tests.
+Prefer a ready-made helper over raw locators for EUI components, and hold it in a `readonly` class field. `page.components` exposes the published [EUI test helpers](./eui-test-helpers.md) pre-bound to the page, so you never construct one yourself and autocomplete lists the components that are covered.
 
 :::::{dropdown} Example
 
 ```ts
-import { EuiComboBoxWrapper, ScoutPage } from '@kbn/scout';
+import type { EuiComboBoxObject, ScoutPage } from '@kbn/scout';
 
-export class StreamsAppPage {
-  public readonly fieldComboBox: EuiComboBoxWrapper;
+export class MyAppPage {
+  public readonly fieldComboBox: EuiComboBoxObject;
 
   constructor(private readonly page: ScoutPage) {
-    this.fieldComboBox = new EuiComboBoxWrapper(this.page, 'fieldSelectorComboBox');
+    this.fieldComboBox = this.page.components.comboBox('fieldSelectorComboBox');
   }
 
   async selectField(value: string) {
-    await this.fieldComboBox.selectSingleOption(value);
+    await this.fieldComboBox.setSelectedOptions([value]);
   }
 }
 ```
 
 :::::
+
+If your component isn't covered yet, `page.testSubj` locators are fine for now. When an EUI component has no helper, or its helper is missing a method, request it from the Apps DX team in `#kibana-qa` on Slack with a short justification of what your test needs, so the addition is [designed and owned together](./eui-test-helpers.md#scout-eui-test-helpers-contribute) rather than duplicated per suite. Subclassing a helper or driving the component from your page object puts you back on the selectors these helpers replace.
 
 ## Add accessibility checks at key UI checkpoints [add-a11y-checks]
 
@@ -361,5 +363,6 @@ For setup details, see [Reuse role helpers](./browser-auth.md#scout-browser-auth
 - [Write UI tests](./write-ui-tests.md)
 - [Browser authentication](./browser-auth.md)
 - [Page objects](./page-objects.md)
+- [EUI test helpers](./eui-test-helpers.md)
 - [Accessibility (a11y) checks](./a11y-checks.md)
 - [Parallelism](./parallelism.md)

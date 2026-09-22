@@ -42,7 +42,7 @@ const editedDescription = 'Edited description';
 const jobId = `egs_1_${Date.now()}`;
 
 const testData = {
-  jobType: 'regression',
+  jobType: 'regression' as const,
   jobId,
   jobDescription: 'Regression job based on ft_egs_regression dataset with runtime fields',
   source: 'ft_egs_regression',
@@ -94,6 +94,7 @@ test.describe('regression creation', { tag: '@local-stateful-classic' }, () => {
       apiServices,
       kbnClient,
       esClient,
+      jobId: testData.jobId,
       dataViewId,
       dashboardId: dashboardSavedObjectId,
       destinationIndex: testData.destinationIndex,
@@ -104,10 +105,11 @@ test.describe('regression creation', { tag: '@local-stateful-classic' }, () => {
     page,
     browserAuth,
     pageObjects: { dataFrameAnalytics },
+    apiServices,
     esClient,
   }) => {
-    // The DFA job can take up to 5 minutes to complete; allow 15 min for the full journey.
-    test.setTimeout(15 * 60 * 1000);
+    // The bounded DFA job may run for up to 2 minutes; allow another minute for the UI journey.
+    test.setTimeout(3 * 60 * 1000);
 
     await browserAuth.loginWithCustomRole(ML_USERS.mlPoweruser);
 
@@ -192,6 +194,7 @@ test.describe('regression creation', { tag: '@local-stateful-classic' }, () => {
         .locator('mlAnalyticsCreateJobWizardModelMemoryInput')
         .inputValue();
       expect(mmlValue.length).toBeGreaterThan(0);
+      await dataFrameAnalytics.setMaxTrees(10);
 
       // Continue to details step
       await dataFrameAnalytics.continueToDetails();
@@ -230,6 +233,7 @@ test.describe('regression creation', { tag: '@local-stateful-classic' }, () => {
       for (const expectedLine of testData.advancedEditorContent) {
         expect(advancedContent).toContain(expectedLine);
       }
+      expect(advancedContent).toContain('"max_trees": 10');
       await dataFrameAnalytics.closeAdvancedEditor();
 
       // Continue to the create step
@@ -245,23 +249,11 @@ test.describe('regression creation', { tag: '@local-stateful-classic' }, () => {
     await test.step('runs the analytics job and displays it correctly in the job list', async () => {
       await dataFrameAnalytics.createAndStartJob();
 
-      // Wait for the job to finish (up to 5 minutes)
-      await expect
-        .poll(
-          async () => {
-            const { data_frame_analytics: statsList } =
-              await esClient.ml.getDataFrameAnalyticsStats({
-                id: testData.jobId,
-                allow_no_match: true,
-              });
-            return statsList[0]?.state;
-          },
-          { timeout: 5 * 60 * 1000, intervals: [5_000] }
-        )
-        .toBe('stopped');
+      await apiServices.ml.dataFrameAnalytics.waitForTrainingDocs(testData.jobId);
+      await apiServices.ml.dataFrameAnalytics.waitForStopped(testData.jobId);
 
-      // Navigate to the job list and verify key table elements
-      await dataFrameAnalytics.gotoJobList();
+      // Already on the job list from createAndStartJob; wait for the table to finish loading.
+      await dataFrameAnalytics.waitForTableLoaded();
       await expect(page.testSubj.locator('~mlAnalyticsTable')).toBeVisible();
       await expect(page.testSubj.locator('mlAnalyticsStatsBar')).toBeVisible();
 
@@ -406,7 +398,7 @@ test.describe('regression creation', { tag: '@local-stateful-classic' }, () => {
       expect(countResult.count).toBeGreaterThan(0);
 
       // Results view — regression-specific panels
-      await dataFrameAnalytics.openResultsView(testData.jobId);
+      await dataFrameAnalytics.openResultsView(testData.jobId, testData.jobType);
       await expect(page.testSubj.locator('mlDFExpandableSection-RegressionEvaluation')).toBeVisible(
         { timeout: 10_000 }
       );

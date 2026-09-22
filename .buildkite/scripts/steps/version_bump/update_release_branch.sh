@@ -17,7 +17,9 @@ jq --arg branch "$BRANCH" '.branch = $branch' package.json > package.json.tmp &&
 
 # See https://github.com/elastic/kibana/pull/199404
 # Prevent backport assignments
-printf '\n# See https://github.com/elastic/kibana/pull/199404\n# Prevent backport assignments\n* @kibanamachine' >> .github/CODEOWNERS
+if ! grep -qF '* @kibanamachine' .github/CODEOWNERS; then
+  printf '\n# See https://github.com/elastic/kibana/pull/199404\n# Prevent backport assignments\n* @kibanamachine' >> .github/CODEOWNERS
+fi
 
 echo "Disabling serverless jest integration config on release branch"
 jq '. + ["src/core/server/integration_tests/saved_objects/serverless/migrations/jest.integration.config.js"] | unique' \
@@ -61,6 +63,12 @@ git add package.json .github/CODEOWNERS \
   .buildkite/disabled_jest_configs.json \
   .buildkite/ftr-manifests/*serverless*_configs.yml \
   "${SERVERLESS_TESTS[@]}"
+
+if git diff --cached --quiet; then
+  echo "No changes to commit — release branch already configured"
+  exit 0
+fi
+
 git commit -m "[release branch setup] Set branch to ${BRANCH}"
 
 git push origin "$head_branch"

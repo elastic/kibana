@@ -8,3 +8,4 @@
  */
 
 export const METRICS_INFO_EVENT_TYPE = 'discover_metrics_info';
+export const MAX_DIMENSIONS_REACHED_EVENT_TYPE = 'discover_metrics_max_dimensions_reached';

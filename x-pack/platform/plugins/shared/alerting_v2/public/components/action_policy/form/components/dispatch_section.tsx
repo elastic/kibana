@@ -10,7 +10,7 @@ import type { GroupingMode, ThrottleStrategy } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo } from 'react';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
-import { useFetchDataFields } from '../../../../hooks/use_fetch_data_fields';
+import { useFetchRuleEventFields } from '../../../../hooks/use_fetch_rule_event_fields';
 import {
   AGGREGATE_STRATEGY_HELP_TEXT,
   AGGREGATE_STRATEGY_OPTIONS,
@@ -33,7 +33,7 @@ export const DispatchSection = () => {
     control,
     name: ['groupingMode', 'groupBy', 'throttleStrategy', 'throttleInterval', 'matcher'],
   });
-  const { data: dataFieldNames } = useFetchDataFields(matcher);
+  const { data: dataFieldNames } = useFetchRuleEventFields(matcher);
 
   useEffect(() => {
     if (needsInterval(getValues('throttleStrategy')) && !getValues('throttleInterval')) {

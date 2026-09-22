@@ -295,7 +295,7 @@ describe('validateWorkflowInputs', () => {
     });
   });
 
-  it('should render provided input values before validation', async () => {
+  it('should render explicit expressions in provided input values before validation', async () => {
     setInputsSchema({
       properties: {
         severity: { type: 'string', enum: ['low', 'medium', 'high'] },
@@ -304,7 +304,7 @@ describe('validateWorkflowInputs', () => {
     });
 
     const workflowExecution = createWorkflowExecution(
-      { inputs: { severity: '{{ consts.default_severity }}' } },
+      { inputs: { severity: '${{ consts.default_severity }}' } },
       {
         workflowDefinition: {
           ...stubWorkflowExecution.workflowDefinition,
@@ -322,6 +322,75 @@ describe('validateWorkflowInputs', () => {
     expect(mockRepository.updateWorkflowExecution).toHaveBeenCalledWith({
       id: executionId,
       context: { inputs: { severity: 'high' } },
+    });
+  });
+
+  it('should preserve provided values that resemble Liquid templates', async () => {
+    setInputsSchema({
+      properties: {
+        field_syntax_markdown: { type: 'string' },
+        parser_error_syntax: { type: 'string' },
+        valid_liquid_syntax: { type: 'string' },
+      },
+      required: ['field_syntax_markdown', 'parser_error_syntax', 'valid_liquid_syntax'],
+    });
+
+    const inputs = {
+      field_syntax_markdown: 'Malware on {{ host.name SRVWIN07 }}',
+      parser_error_syntax: 'Malware on {{ host.name: web-01 }}',
+      valid_liquid_syntax: '{{ some.thing }}',
+    };
+    const workflowExecution = createWorkflowExecution({ inputs });
+
+    const result = await callValidate(workflowExecution);
+
+    expect(result).toBe(true);
+    expect(workflowExecution.context.inputs).toEqual(inputs);
+    expect(mockRepository.updateWorkflowExecution).not.toHaveBeenCalled();
+  });
+
+  it('should preserve nested provided data while rendering explicit expressions', async () => {
+    setInputsSchema({
+      properties: {
+        attack_discoveries: {
+          type: 'array',
+          items: { type: 'object', additionalProperties: true },
+        },
+      },
+      required: ['attack_discoveries'],
+    });
+
+    const workflowExecution = createWorkflowExecution(
+      {
+        inputs: {
+          attack_discoveries: [
+            {
+              details_markdown: '{{ process.name mimikatz.exe }} on {{ host.name SRVWIN07 }}',
+              severity: '${{ consts.default_severity }}',
+            },
+          ],
+        },
+      },
+      {
+        workflowDefinition: {
+          ...stubWorkflowExecution.workflowDefinition,
+          consts: {
+            default_severity: 'high',
+          },
+        },
+      }
+    );
+
+    const result = await callValidate(workflowExecution);
+
+    expect(result).toBe(true);
+    expect(workflowExecution.context.inputs).toEqual({
+      attack_discoveries: [
+        {
+          details_markdown: '{{ process.name mimikatz.exe }} on {{ host.name SRVWIN07 }}',
+          severity: 'high',
+        },
+      ],
     });
   });
 

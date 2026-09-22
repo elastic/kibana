@@ -7,6 +7,7 @@
 
 import type { ReactNode } from 'react';
 import React, { lazy, useCallback, useMemo } from 'react';
+import { useHistory } from 'react-router-dom';
 import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import {
@@ -23,10 +24,30 @@ import { useOpenFlyout } from '../shared/hooks/use_open_flyout';
 import { buildFlyoutNavTitle } from '../shared/utils/build_flyout_nav_title';
 import { formatFlyoutTitle, IOC_TITLE } from '../shared/constants/flyout_titles';
 import { useFlyoutSessionContext } from '../session_context';
+import { useFlyoutV2UrlWriter } from '../shared/url_state/flyout_v2_url_writer';
+import {
+  FLYOUT_DESCRIPTOR_KIND,
+  decodeFlyoutV2UrlParam,
+  urlParamKeyForHistoryKey,
+} from '../shared/url_state/flyout_v2_url_param';
+import type { FlyoutDescriptor } from '../shared/url_state/flyout_v2_url_param';
 
 // Lazy-loaded so consumers of this hook don't statically pull the IOC flyout graph into their
 // bundle; the chunk only loads when the flyout is actually opened.
 const IOCDetails = lazy(() => import('./main').then((m) => ({ default: m.IOCDetails })));
+
+/**
+ * The `indicator` is an ES search hit, so at runtime it carries `_index` even though the
+ * `Indicator` type only declares `_id`/`fields`. Persisting it in the URL descriptor lets the
+ * restore hook re-fetch the indicator on refresh: it filters by `_index` against the default
+ * security data view, which matches threat-intel indices (`logs-ti_*`) via its `logs-*` pattern.
+ * Falls back to '' when unavailable (e.g. a case attachment without the source hit), in which case
+ * the restore is gracefully skipped.
+ */
+const getIndicatorIndex = (indicator: Indicator): string => {
+  const rawIndex = (indicator as { _index?: unknown })._index;
+  return typeof rawIndex === 'string' ? rawIndex : '';
+};
 
 export interface OpenIocFlyoutParams {
   /** The indicator to render in the flyout. Its `_id`/`fields` are used to build the flyout's record. */
@@ -63,18 +84,26 @@ export interface IocFlyoutApi {
  * Must be used within the Security Solution app shell (Redux store + router + Kibana services).
  */
 export const useIocFlyoutApi = (): IocFlyoutApi => {
+  const history = useHistory();
   const { session: sessionMode, historyKey } = useFlyoutSessionContext();
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
   const openFlyout = useOpenFlyout();
+  const urlParamKey = urlParamKeyForHistoryKey(historyKey);
+  const { writeOnOpen, buildOnClose } = useFlyoutV2UrlWriter(urlParamKey, historyKey);
 
-  // `session` is the only thing that differs between a main and a child flyout. It is kept private
-  // here so callers never have to reason about it: they pick `openIocFlyout` (main) or
-  // `openIocFlyoutAsChild` (child) and this helper maps that to the right session.
+  const readFirstDescriptor = useCallback((): FlyoutDescriptor | null => {
+    if (!history?.location) return null;
+    const raw = new URLSearchParams(history.location.search).get(urlParamKey);
+    const stack = decodeFlyoutV2UrlParam(raw);
+    return stack?.[0] ?? null;
+  }, [history, urlParamKey]);
+
   const open = useCallback(
     (
       children: ReactNode,
       session: FlyoutSessionKind,
       title: OverlaySystemFlyoutOpenOptions['title'],
+      onClose: (() => void) | undefined,
       origin?: FlyoutOrigin
     ) => {
       const properties: OverlaySystemFlyoutOpenOptions = {
@@ -82,6 +111,7 @@ export const useIocFlyoutApi = (): IocFlyoutApi => {
         historyKey,
         session,
         title,
+        onClose,
       };
       openFlyout(
         children,
@@ -117,20 +147,39 @@ export const useIocFlyoutApi = (): IocFlyoutApi => {
   );
 
   const openIocFlyout = useCallback(
-    (params: OpenIocFlyoutParams) =>
-      open(buildContent(params), sessionMode, getTitle(params), params.origin),
-    [open, buildContent, sessionMode, getTitle]
+    (params: OpenIocFlyoutParams) => {
+      writeOnOpen({
+        kind: FLYOUT_DESCRIPTOR_KIND.ioc,
+        indicatorId: params.indicator._id as string,
+        indicatorIndex: getIndicatorIndex(params.indicator),
+      });
+      const onClose = buildOnClose(null);
+      open(buildContent(params), sessionMode, getTitle(params), onClose, params.origin);
+    },
+    [open, buildContent, sessionMode, getTitle, writeOnOpen, buildOnClose]
   );
 
   const openIocFlyoutAsChild = useCallback(
-    (params: OpenIocFlyoutParams) =>
+    (params: OpenIocFlyoutParams) => {
+      const parentDescriptor = readFirstDescriptor();
+      writeOnOpen(
+        {
+          kind: FLYOUT_DESCRIPTOR_KIND.ioc,
+          indicatorId: params.indicator._id as string,
+          indicatorIndex: getIndicatorIndex(params.indicator),
+        },
+        'inherit'
+      );
+      const onClose = buildOnClose(parentDescriptor);
       open(
         buildContent(params),
         FLYOUT_SESSION_KIND.INHERIT,
         buildFlyoutNavTitle(getTitle(params)),
+        onClose,
         params.origin
-      ),
-    [open, buildContent, getTitle]
+      );
+    },
+    [open, buildContent, getTitle, readFirstDescriptor, writeOnOpen, buildOnClose]
   );
 
   return useMemo(

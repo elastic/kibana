@@ -97,6 +97,7 @@ const TemplatesBulkActionsComponent: React.FC<TemplatesBulkActionsProps> = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiPopover
+          aria-label={i18n.BULK_ACTIONS}
           isOpen={isPopoverOpen}
           closePopover={closePopover}
           panelPaddingSize="none"

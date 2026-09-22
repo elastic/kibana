@@ -38,7 +38,7 @@ describe('yaml_form_utils', () => {
         grouping: {
           fields: ['host.name', 'service.name'],
         },
-        artifacts: [{ id: 'artifact-1', type: 'host', value: 'host-a' }],
+        artifacts: [{ id: 'artifact-1', type: 'host', data: { value: 'host-a' } }],
         stateTransitionAlertDelayMode: 'immediate',
         stateTransitionRecoveryDelayMode: 'immediate',
       };
@@ -65,7 +65,7 @@ describe('yaml_form_utils', () => {
         grouping: {
           fields: ['host.name', 'service.name'],
         },
-        artifacts: [{ id: 'artifact-1', type: 'host', value: 'host-a' }],
+        artifacts: [{ id: 'artifact-1', type: 'host', data: { value: 'host-a' } }],
       });
     });
 
@@ -154,6 +154,18 @@ describe('yaml_form_utils', () => {
       expect(result).not.toHaveProperty('state_transition');
     });
 
+    it('excludes state_transition for signal even when form state still holds it', () => {
+      const formValues: FormValues = {
+        ...defaultTestFormValues,
+        kind: 'signal',
+        stateTransition: { pendingCount: 3, recoveringCount: 1 },
+      };
+
+      const result = formValuesToYamlObject(formValues);
+
+      expect(result).not.toHaveProperty('state_transition');
+    });
+
     it('excludes empty grouping fields array', () => {
       const formValues: FormValues = {
         ...defaultTestFormValues,
@@ -196,18 +208,6 @@ describe('yaml_form_utils', () => {
 
       expect(result).not.toHaveProperty('no_data_strategy');
     });
-
-    it('excludes no_data_strategy for signal rules even when set', () => {
-      const formValues: FormValues = {
-        ...defaultTestFormValues,
-        kind: 'signal',
-        noDataStrategy: 'recover',
-      };
-
-      const result = formValuesToYamlObject(formValues);
-
-      expect(result).not.toHaveProperty('no_data_strategy');
-    });
   });
 
   describe('parseYamlToFormValues', () => {
@@ -232,8 +232,8 @@ describe('yaml_form_utils', () => {
           fields: ['host.name'],
         },
         artifacts: [
-          { id: 'artifact-1', type: 'host', value: 'host-a' },
-          { id: 'artifact-2', type: 'service', value: 'service-a' },
+          { id: 'artifact-1', type: 'host', data: { value: 'host-a' } },
+          { id: 'artifact-2', type: 'service', data: { value: 'service-a' } },
         ],
       });
 
@@ -264,8 +264,8 @@ describe('yaml_form_utils', () => {
             fields: ['host.name'],
           },
           artifacts: [
-            { id: 'artifact-1', type: 'host', value: 'host-a' },
-            { id: 'artifact-2', type: 'service', value: 'service-a' },
+            { id: 'artifact-1', type: 'host', data: { value: 'host-a' } },
+            { id: 'artifact-2', type: 'service', data: { value: 'service-a' } },
           ],
           stateTransitionAlertDelayMode: 'immediate',
           stateTransitionRecoveryDelayMode: 'immediate',
@@ -374,14 +374,18 @@ describe('yaml_form_utils', () => {
       const yaml = dump({
         metadata: { name: 'Rule with mixed artifacts' },
         query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
-        artifacts: [{ id: 'artifact-1', type: 'host', value: 'host-a' }, { id: 1 }, 'bad'],
+        artifacts: [
+          { id: 'artifact-1', type: 'host', data: { value: 'host-a' } },
+          { id: 1 },
+          'bad',
+        ],
       });
 
       const result = parseYamlToFormValues(yaml);
 
       expect(result.error).toBeNull();
       expect(result.values?.artifacts).toEqual([
-        { id: 'artifact-1', type: 'host', value: 'host-a' },
+        { id: 'artifact-1', type: 'host', data: { value: 'host-a' } },
       ]);
     });
 

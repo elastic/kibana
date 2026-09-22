@@ -72,6 +72,14 @@ export const COLUMN_DESCRIPTION = i18n.translate('xpack.evals.datasetsList.colum
   defaultMessage: 'Description',
 });
 
+export const COLUMN_TAGS = i18n.translate('xpack.evals.datasetsList.columns.tags', {
+  defaultMessage: 'Tags',
+});
+
+export const COLUMN_MATURITY = i18n.translate('xpack.evals.datasetsList.columns.maturity', {
+  defaultMessage: 'Maturity',
+});
+
 export const COLUMN_EXAMPLES = i18n.translate('xpack.evals.datasetsList.columns.examples', {
   defaultMessage: 'Examples',
 });
@@ -119,8 +127,19 @@ export const getNoMatchesBody = (searchTerm: string) =>
     values: { searchTerm },
   });
 
+export const NO_FILTER_MATCHES_BODY = i18n.translate(
+  'xpack.evals.datasetsList.noFilterMatchesBody',
+  {
+    defaultMessage: 'No datasets match the selected filters.',
+  }
+);
+
 export const CLEAR_SEARCH_BUTTON = i18n.translate('xpack.evals.datasetsList.clearSearchButton', {
   defaultMessage: 'Clear search',
+});
+
+export const CLEAR_FILTERS_BUTTON = i18n.translate('xpack.evals.datasetsList.clearFiltersButton', {
+  defaultMessage: 'Clear filters',
 });
 
 export const LOAD_ERROR_TITLE = i18n.translate('xpack.evals.datasetsList.loadErrorTitle', {

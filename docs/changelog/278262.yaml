@@ -1,0 +1,13 @@
+prs:
+- https://github.com/elastic/kibana/pull/278262
+issues:
+- https://github.com/elastic/kibana/issues/273308
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-21
+- product: kibana
+  target: 9.5.0
+areas:
+- Dashboards and visualizations
+title: "Fix PDF export using a stale time range after changing the time picker"

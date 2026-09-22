@@ -20,6 +20,8 @@ export interface ESRequest {
 
 export type BaseResponseType =
   | 'application/json'
+  | 'application/ndjson'
+  | 'application/x-ndjson'
   | 'text/csv'
   | 'text/tab-separated-values'
   | 'text/plain'

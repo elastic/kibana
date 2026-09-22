@@ -17,6 +17,7 @@ import { RUN_ATTACK_DISCOVERY_TOOL_ID, getRunAttackDiscoveryTool } from '.';
 const mockExecuteGenerationWorkflow = jest.fn();
 const mockResolveConnectorDetails = jest.fn();
 const mockGetDefaultModel = jest.fn();
+const mockIsWorkflowsEnabledForSpace = jest.fn();
 
 jest.mock('@kbn/discoveries/impl/attack_discovery/generation/execute_generation_workflow', () => ({
   executeGenerationWorkflow: (...args: unknown[]) => mockExecuteGenerationWorkflow(...args),
@@ -24,6 +25,10 @@ jest.mock('@kbn/discoveries/impl/attack_discovery/generation/execute_generation_
 
 jest.mock('../../../../workflows/helpers/resolve_connector_details', () => ({
   resolveConnectorDetails: (...args: unknown[]) => mockResolveConnectorDetails(...args),
+}));
+
+jest.mock('../../../../lib/is_workflows_enabled_for_space', () => ({
+  isWorkflowsEnabledForSpace: (...args: unknown[]) => mockIsWorkflowsEnabledForSpace(...args),
 }));
 
 const FAKE_REQUEST = httpServerMock.createKibanaRequest();
@@ -34,7 +39,12 @@ const buildToolDeps = () => ({
   getEventLogIndex: jest.fn().mockResolvedValue('event-log-*'),
   getEventLogger: jest.fn().mockResolvedValue({}),
   getStartServices: jest.fn().mockResolvedValue({
-    coreStart: {} as unknown,
+    coreStart: {
+      featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+      uiSettings: {
+        asScopedToClient: jest.fn().mockReturnValue({ get: jest.fn().mockResolvedValue(true) }),
+      },
+    } as unknown,
     pluginsStart: {
       actions: {
         getActionsClientWithRequest: jest
@@ -108,6 +118,8 @@ describe('RUN_ATTACK_DISCOVERY_TOOL_ID', () => {
 describe('getRunAttackDiscoveryTool', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+
+    mockIsWorkflowsEnabledForSpace.mockResolvedValue(true);
 
     mockResolveConnectorDetails.mockResolvedValue({
       actionTypeId: '.gen-ai',
@@ -199,7 +211,12 @@ describe('getRunAttackDiscoveryTool', () => {
     const authz = { actions: { api: { get: jest.fn() } } };
     const deps = buildToolDeps();
     deps.getStartServices = jest.fn().mockResolvedValue({
-      coreStart: {} as unknown,
+      coreStart: {
+        featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+        uiSettings: {
+          asScopedToClient: jest.fn().mockReturnValue({ get: jest.fn().mockResolvedValue(true) }),
+        },
+      } as unknown,
       pluginsStart: {
         actions: {
           getActionsClientWithRequest: jest
@@ -330,5 +347,31 @@ describe('getRunAttackDiscoveryTool', () => {
     const result = await invokeHandler({});
 
     expect(result.data).not.toHaveProperty('attack_discoveries');
+  });
+
+  describe('per-space setting check', () => {
+    it('returns an error result when isWorkflowsEnabledForSpace returns false', async () => {
+      mockIsWorkflowsEnabledForSpace.mockResolvedValue(false);
+
+      const result = await invokeHandler({});
+
+      expect(result.type).toBe(ToolResultType.error);
+    });
+
+    it('does not call executeGenerationWorkflow when isWorkflowsEnabledForSpace returns false', async () => {
+      mockIsWorkflowsEnabledForSpace.mockResolvedValue(false);
+
+      await invokeHandler({});
+
+      expect(mockExecuteGenerationWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('error message mentions the space setting when isWorkflowsEnabledForSpace returns false', async () => {
+      mockIsWorkflowsEnabledForSpace.mockResolvedValue(false);
+
+      const result = await invokeHandler({});
+
+      expect((result.data as { message: string }).message).toContain('not enabled for this space');
+    });
   });
 });

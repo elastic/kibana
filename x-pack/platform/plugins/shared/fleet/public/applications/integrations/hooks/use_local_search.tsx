@@ -13,6 +13,8 @@ import type { PackageListItem } from '../types';
 export const searchIdField = 'id';
 export const fieldsToSearch = ['name', 'title', 'description'];
 
+export type UseLocalSearchType = typeof useLocalSearch;
+
 export function useLocalSearch(
   packageList: Array<Pick<PackageListItem, 'id' | 'name' | 'title' | 'description'>>,
   isInitialLoading: boolean

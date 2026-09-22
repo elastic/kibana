@@ -19,6 +19,48 @@
         "embedding"
       ]
     },
+    "data_autocomplete_rules": {
+      "chunking_settings": {
+        "max_chunk_size": "",
+        "overlap": "",
+        "sentence_overlap": "",
+        "separator_group": "",
+        "separators": [],
+        "strategy": ""
+      },
+      "service": {
+        "__one_of": [
+          "openai"
+        ]
+      },
+      "service_settings": {
+        "api_key": "",
+        "client_id": "",
+        "client_secret": "",
+        "dimensions": "",
+        "model_id": "",
+        "organization_id": "",
+        "rate_limit": {
+          "requests_per_minute": ""
+        },
+        "scopes": [],
+        "similarity": {
+          "__one_of": [
+            "cosine",
+            "dot_product",
+            "l2_norm"
+          ]
+        },
+        "token_url": "",
+        "url": ""
+      },
+      "task_settings": {
+        "user": "",
+        "headers": {
+          "*": ""
+        }
+      }
+    },
     "methods": [
       "PUT"
     ],

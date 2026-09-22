@@ -27,26 +27,49 @@ afterEach(() => {
 describe('getAffectedProjectsMoon', () => {
   it('invokes the moon binary directly from node_modules/.bin (not via PATH)', () => {
     mockExistsSync.mockReturnValue(true);
-    mockExecSync.mockReturnValue(moonResponse);
+    mockExecSync
+      .mockReturnValueOnce('resolved-sha\n') // git merge-base
+      .mockReturnValueOnce(moonResponse); // moon query
 
     const result = getAffectedProjectsMoon('main', false);
 
     expect(result).toEqual(new Set(['@kbn/foo']));
     expect(mockExecSync).toHaveBeenCalledWith(
       expect.stringContaining('/repo/node_modules/.bin/moon'),
-      expect.objectContaining({ env: expect.objectContaining({ MOON_BASE: 'main' }) })
+      expect.objectContaining({ env: expect.objectContaining({ MOON_BASE: 'resolved-sha' }) })
+    );
+  });
+
+  it('recomputes the merge base locally instead of trusting the raw ref, mirroring the git strategy', () => {
+    mockExistsSync.mockReturnValue(true);
+    mockExecSync.mockReturnValueOnce('resolved-sha\n').mockReturnValueOnce(moonResponse);
+
+    getAffectedProjectsMoon('some-possibly-stale-ref', false);
+
+    expect(mockExecSync).toHaveBeenNthCalledWith(
+      1,
+      'git merge-base some-possibly-stale-ref HEAD',
+      expect.anything()
+    );
+    expect(mockExecSync).toHaveBeenNthCalledWith(
+      2,
+      expect.anything(),
+      expect.objectContaining({ env: expect.objectContaining({ MOON_BASE: 'resolved-sha' }) })
     );
   });
 
   it('falls back to `yarn which moon` when node_modules/.bin/moon is missing', () => {
     mockExistsSync.mockReturnValue(false);
-    mockExecSync.mockReturnValueOnce('/resolved/moon\n').mockReturnValueOnce(moonResponse);
+    mockExecSync
+      .mockReturnValueOnce('resolved-sha\n') // git merge-base
+      .mockReturnValueOnce('/resolved/moon\n') // yarn which moon
+      .mockReturnValueOnce(moonResponse); // moon query
 
     getAffectedProjectsMoon('main', false);
 
-    expect(mockExecSync).toHaveBeenNthCalledWith(1, 'yarn --silent which moon', expect.anything());
+    expect(mockExecSync).toHaveBeenNthCalledWith(2, 'yarn --silent which moon', expect.anything());
     expect(mockExecSync).toHaveBeenNthCalledWith(
-      2,
+      3,
       expect.stringContaining('/resolved/moon'),
       expect.anything()
     );

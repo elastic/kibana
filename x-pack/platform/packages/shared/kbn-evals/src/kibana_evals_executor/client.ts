@@ -84,10 +84,12 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
       );
     }
 
-    const { name, description, examples } = upstreamDataset;
+    const { name, description, tags, maturity, examples } = upstreamDataset;
     return {
       name,
       description,
+      tags,
+      maturity,
       examples,
     };
   }
@@ -207,6 +209,10 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                 }
               );
 
+              // Prefer the trace id the task itself surfaced (e.g. converse's response
+              // trace_id) over the eval client's own task-span trace id. See #276308.
+              const taskOrClientTraceId = (taskOutput as { traceId?: string })?.traceId || traceId;
+
               runs[runKey] = {
                 exampleIndex,
                 repetition: rep,
@@ -214,7 +220,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                 expected: example.output ?? null,
                 metadata: example.metadata ?? {},
                 output: taskOutput,
-                traceId,
+                traceId: taskOrClientTraceId,
               };
 
               this.options.log.info(
@@ -233,7 +239,10 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                       const _traceId = getCurrentTraceId();
                       const _result = await evaluator.evaluate({
                         input: example.input,
-                        output: { ...taskOutput, traceId },
+                        output: {
+                          ...taskOutput,
+                          traceId: taskOrClientTraceId,
+                        },
                         expected: example.output ?? null,
                         metadata: example.metadata ?? {},
                       });

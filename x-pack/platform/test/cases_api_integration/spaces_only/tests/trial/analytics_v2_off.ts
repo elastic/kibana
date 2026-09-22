@@ -6,6 +6,11 @@
  */
 
 import expect from '@kbn/expect';
+import {
+  CASE_INDEX_NAME,
+  ACTIVITY_INDEX_NAME,
+  ATTACHMENTS_INDEX_NAME,
+} from '@kbn/cases-plugin/server/cases_analytics_v2/constants';
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { getPostCaseRequest } from '../../../common/lib/mock';
 import {
@@ -38,7 +43,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const auth = getAuthWithSuperUser();
 
-  describe('cases-analytics v2 disabled (feature flag default)', () => {
+  describe('cases-analytics v2 disabled (flag pinned off)', () => {
     afterEach(async () => {
       await deleteAllCaseItems(es);
     });
@@ -68,9 +73,9 @@ export default ({ getService }: FtrProviderContext): void => {
       // with v2 off, plugin start skips every `ensure*Index` bootstrap.
       // Asserted in parallel so a regression on any surface fails here.
       const [casesExists, activityExists, attachmentsExists] = await Promise.all([
-        es.indices.exists({ index: '.cases' }),
-        es.indices.exists({ index: '.cases-activity' }),
-        es.indices.exists({ index: '.cases-attachments' }),
+        es.indices.exists({ index: CASE_INDEX_NAME }),
+        es.indices.exists({ index: ACTIVITY_INDEX_NAME }),
+        es.indices.exists({ index: ATTACHMENTS_INDEX_NAME }),
       ]);
       expect(casesExists).to.eql(false);
       expect(activityExists).to.eql(false);

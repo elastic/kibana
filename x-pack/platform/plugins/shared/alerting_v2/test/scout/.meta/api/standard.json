@@ -1,19 +1,17 @@
 {
-  "sha1": "24911ba2ed9e60760100838d8acd181467945ff3",
+  "sha1": "e677dc19e88fc81a479cd127bfd49add6dbee890",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
-      "id": "7235a50d6703290-29ade5b2a387dd7",
-      "title": "Agent Builder — alerting V2 rule-management skill gating does not list the rule-management skill when neither gate is enabled",
+      "id": "7235a50d6703290-66ac66d0fa3b285",
+      "title": "Agent Builder — alerting V2 skill gating does not list the alerting V2 skills when neither gate is enabled",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -23,23 +21,17 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/api/tests/rule_management_skill_gating.spec.ts",
-        "line": 44,
-        "column": 10
+        "line": 42,
+        "column": 21
       }
     },
     {
-      "id": "7235a50d6703290-d27424eea3d7792",
-      "title": "Agent Builder — alerting V2 rule-management skill gating does not list the rule-management skill when only experimental features are enabled",
+      "id": "7235a50d6703290-c3d78d0609f608d",
+      "title": "Agent Builder — alerting V2 skill gating does not list the alerting V2 skills when only experimental features are enabled",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -49,13 +41,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/api/tests/rule_management_skill_gating.spec.ts",
-        "line": 64,
-        "column": 10
+        "line": 55,
+        "column": 42
       }
     },
     {
-      "id": "7235a50d6703290-b7df2807b2e0561",
-      "title": "Agent Builder — alerting V2 rule-management skill gating does not list the rule-management skill when only alerting:v2:enabled is on",
+      "id": "7235a50d6703290-2686cf695ae4da2",
+      "title": "Agent Builder — alerting V2 skill gating does not list the alerting V2 skills when only alerting:v2:enabled is on",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -63,13 +55,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/api/tests/rule_management_skill_gating.spec.ts",
-        "line": 87,
-        "column": 10
+        "line": 78,
+        "column": 13
       }
     },
     {
-      "id": "7235a50d6703290-26c399118dff63f",
-      "title": "Agent Builder — alerting V2 rule-management skill gating lists the rule-management skill once both gates are enabled",
+      "id": "7235a50d6703290-93591720ca3e489",
+      "title": "Agent Builder — alerting V2 skill gating lists the alerting V2 skills once both gates are enabled",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -77,8 +69,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/api/tests/rule_management_skill_gating.spec.ts",
-        "line": 108,
-        "column": 10
+        "line": 99,
+        "column": 15
       }
     }
   ]

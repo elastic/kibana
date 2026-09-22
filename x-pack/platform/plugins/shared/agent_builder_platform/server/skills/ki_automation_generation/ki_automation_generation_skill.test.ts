@@ -57,4 +57,29 @@ describe('kiAutomationGenerationSkill', () => {
 
     expect(toolIds).toEqual(expectedTools);
   });
+
+  it('only instructs the agent to call tools that are actually bound', async () => {
+    const boundTools = (await kiAutomationGenerationSkill.getRegistryTools?.()) ?? [];
+
+    // Every `platform.core.*` / `platform.workflows.*` tool id the content tells the
+    // agent to call must be bound — guards against prose drifting from the bindings.
+    const referencedToolIds = [
+      ...new Set(
+        [
+          ...kiAutomationGenerationSkill.content.matchAll(/platform\.(?:core|workflows)\.[a-z_]+/g),
+        ].map((match) => match[0])
+      ),
+    ];
+
+    expect(referencedToolIds.length).toBeGreaterThan(0);
+
+    const unboundReferences = referencedToolIds.filter((toolId) => !boundTools.includes(toolId));
+    expect(unboundReferences).toEqual([]);
+  });
+
+  it('mentions every referencedContent entry by name in the skill content', () => {
+    for (const ref of kiAutomationGenerationSkill.referencedContent ?? []) {
+      expect(kiAutomationGenerationSkill.content).toContain(ref.name);
+    }
+  });
 });

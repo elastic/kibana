@@ -25,7 +25,7 @@ export interface ChatRequestBodyPayload {
   connector_id?: string | null;
   inference_id?: string | null;
   conversation_id?: string;
-  access_control?: ConversationAccessControl;
+  access_control?: Pick<ConversationAccessControl, 'access_mode'>;
   execution_id?: string;
   capabilities?: AgentCapabilities;
   attachments?: AttachmentInput[];

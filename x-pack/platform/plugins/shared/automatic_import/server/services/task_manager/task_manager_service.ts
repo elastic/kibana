@@ -76,7 +76,7 @@ export class TaskManagerService {
   private agentService: AgentService;
   private automaticImportSavedObjectService: AutomaticImportSavedObjectService | null = null;
   private analytics: AnalyticsServiceSetup;
-  private readonly inFlightRunAbortControllers = new Map<string, AbortController>();
+  private readonly inFlightRunAbortSignals = new Map<string, AbortSignal>();
 
   constructor(
     logger: LoggerFactory,
@@ -97,24 +97,24 @@ export class TaskManagerService {
         maxAttempts: MAX_ATTEMPTS_AI_WORKFLOWS,
         cost: TaskCost.Normal,
         priority: TaskPriority.Normal,
-        createTaskRunner: ({ taskInstance, fakeRequest, abortController }: RunContext) => ({
+        createTaskRunner: ({ taskInstance, fakeRequest, signal }: RunContext) => ({
           run: async () => {
             assert(
               this.automaticImportSavedObjectService,
               'Automatic import saved object service not initialized'
             );
             const tmTaskId = taskInstance.id;
-            this.inFlightRunAbortControllers.set(tmTaskId, abortController);
+            this.inFlightRunAbortSignals.set(tmTaskId, signal);
             try {
               return await this.runTask(
                 taskInstance,
                 core,
                 this.automaticImportSavedObjectService,
                 fakeRequest as KibanaRequest,
-                abortController.signal
+                signal
               );
             } finally {
-              this.inFlightRunAbortControllers.delete(tmTaskId);
+              this.inFlightRunAbortSignals.delete(tmTaskId);
             }
           },
           cancel: async () => {
@@ -167,10 +167,9 @@ export class TaskManagerService {
     assert(this.taskManager, 'TaskManager not initialized');
     const taskId = this.generateDataStreamTaskId(dataStreamParams);
     try {
-      const inFlightController = this.inFlightRunAbortControllers.get(taskId);
-      if (inFlightController && !inFlightController.signal.aborted) {
-        inFlightController.abort();
-        this.logger.debug(`Aborted in-flight run for task ${taskId} before removing task document`);
+      const inFlightSignal = this.inFlightRunAbortSignals.get(taskId);
+      if (inFlightSignal && !inFlightSignal.aborted) {
+        this.logger.debug(`Task ${taskId} is still in-flight, removing task document`);
       }
       await this.taskManager.removeIfExists(taskId);
       this.logger.debug(`Task deleted: ${taskId}`);

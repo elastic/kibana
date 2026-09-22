@@ -24,18 +24,18 @@ resources:
   - prefetch-pr-context.yml
 imports:
   - .github/agents/code-reviewer.md
+  - .github/workflows/shared/app-dex-agents-otel.md
 engine:
   id: claude
   version: "2.1.206"
   model: opus
   max-turns: 120
   env:
-    ANTHROPIC_API_KEY: ${{ secrets.LITELLM_API_KEY }}
-    ANTHROPIC_BASE_URL: https://elastic.litellm-prod.ai
-    # Route Claude Code's 1M Opus alias through LiteLLM.
-    ANTHROPIC_DEFAULT_OPUS_MODEL: llm-gateway/claude-opus-4-8[1m]
-    ANTHROPIC_DEFAULT_HAIKU_MODEL: llm-gateway/claude-haiku-4-5
-    ANTHROPIC_DEFAULT_SONNET_MODEL: llm-gateway/claude-sonnet-4-6
+    ANTHROPIC_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+    ANTHROPIC_BASE_URL: https://openrouter.ai/api
+    ANTHROPIC_DEFAULT_OPUS_MODEL: anthropic/claude-opus-4.8[1m]
+    ANTHROPIC_DEFAULT_HAIKU_MODEL: anthropic/claude-haiku-4.5
+    ANTHROPIC_DEFAULT_SONNET_MODEL: anthropic/claude-sonnet-4.6
     CLAUDE_CODE_EFFORT_LEVEL: high
     CLAUDE_CODE_SUBAGENT_MODEL: opus[1m]
 # Activation rules:
@@ -44,6 +44,7 @@ engine:
 # - Draft PR events activate only when the ci:draft-checks label is present.
 # - ready_for_review activates the first review when a draft is marked ready.
 # - Adding the ci:draft-checks label activates a review; other label events are ignored.
+# - Synchronize events for merge commits are ignored; only code pushes activate a new review.
 # - Comment follow-up runs are dispatched by Reviewer Comment Dispatcher after fork-safe validation.
 if: >-
   !github.event.repository.fork &&
@@ -100,9 +101,16 @@ network:
   allowed:
     - defaults
     - github
-    - elastic.litellm-prod.ai
+    - openrouter.ai
 jobs:
+  check_reviewable_commit:
+    permissions:
+      contents: read
+    uses: ./.github/workflows/check-reviewable-commit.yml
+
   prefetch_pr_context:
+    needs: check_reviewable_commit
+    if: needs.check_reviewable_commit.outputs.should_review == 'true'
     permissions:
       contents: read
       issues: read

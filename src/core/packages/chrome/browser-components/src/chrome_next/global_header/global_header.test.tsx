@@ -17,6 +17,25 @@ import { TestChromeProviders } from '../../test_helpers';
 import { ChromeNextGlobalHeader } from './global_header';
 
 describe('ChromeNextGlobalHeader', () => {
+  it('renders the project picker beside the context switcher', () => {
+    const chrome = chromeServiceMock.createStartContract();
+    chrome.next.contextSwitcher.set(<span>Context switcher</span>);
+    chrome.next.projectPicker.set(<span>Project picker</span>);
+
+    renderWithI18n(
+      <TestChromeProviders chrome={chrome}>
+        <ChromeNextGlobalHeader />
+      </TestChromeProviders>
+    );
+
+    expect(screen.getByTestId('chromeNextGlobalHeaderSwitcher')).toHaveTextContent(
+      'Context switcher'
+    );
+    expect(screen.getByTestId('chromeNextGlobalHeaderProjectPicker')).toHaveTextContent(
+      'Project picker'
+    );
+  });
+
   it('renders the help menu button', async () => {
     renderWithI18n(
       <TestChromeProviders>

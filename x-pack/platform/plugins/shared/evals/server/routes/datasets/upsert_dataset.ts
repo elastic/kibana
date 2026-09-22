@@ -75,10 +75,16 @@ export const registerUpsertDatasetRoute = ({
             });
           }
 
-          const { name, description, examples } = request.body;
+          const { name, description, tags, maturity, examples } = request.body;
           const evalsContext = await context.evals;
           const datasetClient = evalsContext.datasetService.getClient();
-          const upsertResult = await datasetClient.upsert(name, description, examples);
+          const upsertResult = await datasetClient.upsert({
+            name,
+            description,
+            tags,
+            maturity,
+            examples,
+          });
 
           return response.ok({
             body: upsertResult,
@@ -100,7 +106,8 @@ export const registerUpsertDatasetRoute = ({
           });
           if (tooLarge) return tooLarge;
 
-          logger.error(`Failed to upsert evaluation dataset: ${error}`);
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          logger.error(`Failed to upsert evaluation dataset: ${errorMessage}`);
           return response.customError({
             statusCode: 500,
             body: { message: 'Failed to upsert evaluation dataset' },

@@ -16,7 +16,7 @@ import {
   ALERTING_V2_EXECUTION_HISTORY_APP_ID,
   ALERTING_V2_RULES_APP_ID,
   ALERTING_V2_SECTION_ID,
-} from '../../../common/management_apps';
+} from '@kbn/alerting-v2-constants';
 
 describe('registerFeaturePrivileges', () => {
   const getRegisteredFeature = (id: string): KibanaFeatureConfig => {

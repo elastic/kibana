@@ -24,6 +24,7 @@ import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import { ContentFrameworkChart } from '../../../../content_framework/chart';
+import { withUnmappedFields } from '../../../../../hooks/use_discover_link_and_esql_query';
 
 const chartTitle = i18n.translate(
   'unifiedDocViewer.docViewerLogsOverview.subComponents.similarErrors.occurrences.title',
@@ -117,7 +118,7 @@ export function SimilarErrorsOccurrencesChart({
       return undefined;
     }
 
-    return from(indexes.logs)
+    const query = from(indexes.logs)
       .pipe(
         baseEsqlQuery,
         stats(
@@ -126,6 +127,8 @@ export function SimilarErrorsOccurrencesChart({
         sort(fieldConstants.TIMESTAMP_FIELD)
       )
       .toString();
+
+    return withUnmappedFields(query);
   }, [baseEsqlQuery, indexes.logs]);
 
   const getParentApi = useCallback(() => {

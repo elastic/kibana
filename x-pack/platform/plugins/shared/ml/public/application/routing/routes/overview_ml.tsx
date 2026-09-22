@@ -12,7 +12,7 @@ import React, { Suspense } from 'react';
 import { Redirect } from 'react-router-dom';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import type { NavigateToPath } from '../../contexts/kibana';
-import { useEnabledFeatures } from '../../contexts/ml/serverless_context';
+import { useEnabledFeatures } from '../../contexts/ml/enabled_features_context';
 import { getMlNodeCount } from '../../ml_nodes_check';
 import { loadMlServerInfo } from '../../services/ml_server_info';
 import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
@@ -32,7 +32,6 @@ export const overviewRouteFactory = (
   title: i18n.translate('xpack.ml.overview.overviewLabel', {
     defaultMessage: 'Overview',
   }),
-  enableDatePicker: true,
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),

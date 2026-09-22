@@ -49,6 +49,7 @@ export type LensProps = Pick<
   | 'timeRange'
   | 'attributes'
   | 'esqlVariables'
+  | 'isApproximate'
   | 'noPadding'
   | 'searchSessionId'
   | 'executionContext'
@@ -145,6 +146,7 @@ export const useLensProps = ({
         searchSessionId: fetchParams.searchSessionId,
         timeRange: fetchParams.relativeTimeRange, // same as in the time picker
         esqlVariables: fetchParams.esqlVariables,
+        isApproximate: fetchParams.isApproximate,
         attributes,
         lastReloadRequestTime: fetchParams.lastReloadRequestTime,
         description,
@@ -158,6 +160,7 @@ export const useLensProps = ({
       fetchParams.relativeTimeRange,
       fetchParams.lastReloadRequestTime,
       fetchParams.esqlVariables,
+      fetchParams.isApproximate,
       description,
       userMessages,
       profileId,
@@ -302,6 +305,7 @@ const getLensProps = ({
   lastReloadRequestTime,
   description,
   esqlVariables,
+  isApproximate,
   userMessages,
   profileId,
   chartId,
@@ -309,6 +313,7 @@ const getLensProps = ({
   searchSessionId?: string;
   attributes: LensAttributes;
   esqlVariables: ESQLControlVariable[] | undefined;
+  isApproximate?: boolean;
   timeRange: TimeRange;
   lastReloadRequestTime?: number;
   description?: string;
@@ -323,6 +328,7 @@ const getLensProps = ({
   noPadding: true,
   description,
   esqlVariables,
+  isApproximate,
   searchSessionId,
   executionContext: {
     description: 'metrics experience chart data',

@@ -48,9 +48,10 @@ export default function ({ getService }: FtrProviderContext) {
         expect(body.message).to.contain('expected value of type [string]');
       });
 
-      it('should require index mode to be provided', async () => {
-        const { body } = await create('test-create-index-2', undefined).expect(400);
-        expect(body.message).to.contain('expected value of type [string]');
+      it('should create an index without index mode', async () => {
+        const indexName = 'test-create-index-2';
+        await create(indexName, undefined).expect(200);
+        await es.indices.delete({ index: indexName });
       });
     });
 

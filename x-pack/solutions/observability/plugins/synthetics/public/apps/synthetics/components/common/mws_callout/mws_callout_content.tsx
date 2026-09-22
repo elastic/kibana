@@ -8,12 +8,12 @@ import React from 'react';
 import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { MaintenanceWindow } from '@kbn/alerts-ui-shared/src/maintenance_window_callout/types';
+import type { SyntheticsMaintenanceWindow } from '../../../hooks';
 import { MaintenanceWindowsLink } from '../../monitor_add_edit/fields/maintenance_windows/create_maintenance_windows_btn';
 import { useSyncInterval } from './use_sync_interval';
 import { SyncNowLink } from './sync_now_link';
 
-export const MwsCalloutContent = ({ activeMWs }: { activeMWs: MaintenanceWindow[] }) => {
+export const MwsCalloutContent = ({ activeMWs }: { activeMWs: SyntheticsMaintenanceWindow[] }) => {
   const syncInterval = useSyncInterval();
 
   if (activeMWs.length) {

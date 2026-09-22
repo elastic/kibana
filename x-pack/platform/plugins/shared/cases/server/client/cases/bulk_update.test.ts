@@ -38,6 +38,121 @@ describe('update', () => {
   const casesClientMock = createCasesClientMock();
   casesClientMock.configure.get = jest.fn().mockResolvedValue([]);
 
+  describe('assignee identity population', () => {
+    const clientArgs = createCasesClientMockArgs();
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      clientArgs.config = { ...clientArgs.config, assigneeIdentity: { enabled: true } };
+      clientArgs.services.caseService.getCases.mockResolvedValue({ saved_objects: mockCases });
+      clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        per_page: 10,
+        page: 1,
+      });
+      clientArgs.services.caseService.patchCases.mockResolvedValue({
+        saved_objects: [{ ...mockCases[0], attributes: { assignees: cases.cases[0].assignees } }],
+      });
+      clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+        new Map()
+      );
+      clientArgs.services.userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({
+        [mockCases[0].id]: 0,
+        [mockCases[1].id]: 0,
+      });
+    });
+
+    it('populates assignee identity on the patch payload when enabled', async () => {
+      clientArgs.securityStartPlugin.userProfiles.bulkGet.mockResolvedValue([
+        {
+          uid: '1',
+          enabled: true,
+          data: {},
+          user: { username: 'u1', full_name: 'User One', email: 'u1@e.com' },
+        },
+      ] as never);
+
+      await bulkUpdate(cases, clientArgs, casesClientMock);
+
+      expect(clientArgs.securityStartPlugin.userProfiles.bulkGet).toHaveBeenCalledTimes(1);
+      const patchArgs = clientArgs.services.caseService.patchCases.mock.calls[0][0];
+      expect(patchArgs.cases[0].updatedAttributes.assignees).toEqual([
+        { uid: '1', username: 'u1', full_name: 'User One', email: 'u1@e.com' },
+      ]);
+    });
+
+    it('does not resolve profiles when the flag is disabled', async () => {
+      clientArgs.config = { ...clientArgs.config, assigneeIdentity: { enabled: false } };
+
+      await bulkUpdate(cases, clientArgs, casesClientMock);
+
+      expect(clientArgs.securityStartPlugin.userProfiles.bulkGet).not.toHaveBeenCalled();
+      const patchArgs = clientArgs.services.caseService.patchCases.mock.calls[0][0];
+      expect(patchArgs.cases[0].updatedAttributes.assignees).toEqual([{ uid: '1' }]);
+    });
+
+    it('notifies only newly added assignees, not retained legacy uid-only ones', async () => {
+      // Pre-rollout case: the retained assignee is stored uid-only, so enrichment must not make it
+      // look newly added (notification selection compares by uid, not object identity).
+      clientArgs.services.caseService.getCases.mockResolvedValue({
+        saved_objects: [
+          {
+            ...mockCases[0],
+            attributes: { ...mockCases[0].attributes, assignees: [{ uid: 'legacy' }] },
+          },
+        ],
+      });
+      clientArgs.securityStartPlugin.userProfiles.bulkGet.mockResolvedValue([
+        {
+          uid: 'legacy',
+          enabled: true,
+          data: {},
+          user: { username: 'leg', full_name: 'Legacy', email: 'l@e.com' },
+        },
+        {
+          uid: '1',
+          enabled: true,
+          data: {},
+          user: { username: 'u1', full_name: 'User One', email: 'u1@e.com' },
+        },
+      ] as never);
+      clientArgs.services.caseService.patchCases.mockResolvedValue({
+        saved_objects: [
+          {
+            ...mockCases[0],
+            attributes: {
+              assignees: [
+                { uid: 'legacy', username: 'leg', full_name: 'Legacy', email: 'l@e.com' },
+                { uid: '1', username: 'u1', full_name: 'User One', email: 'u1@e.com' },
+              ],
+            },
+          },
+        ],
+      });
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              assignees: [{ uid: 'legacy' }, { uid: '1' }],
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(clientArgs.services.notificationService.bulkNotifyAssignees).toHaveBeenCalledTimes(1);
+      const notified = clientArgs.services.notificationService.bulkNotifyAssignees.mock.calls[0][0];
+      expect(notified[0].assignees).toEqual([
+        { uid: '1', username: 'u1', full_name: 'User One', email: 'u1@e.com' },
+      ]);
+    });
+  });
+
   describe('Assignees', () => {
     const clientArgs = createCasesClientMockArgs();
 
@@ -1417,6 +1532,9 @@ describe('update', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
+      // These tests assert the exact custom-field patch payload; the extended_fields
+      // mirroring (templates flag ON) is covered by dedicated tests below.
+      clientArgs.config = { ...clientArgs.config, templates: { enabled: false } };
       clientArgs.services.caseService.getCases.mockResolvedValue({ saved_objects: mockCases });
       clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
         saved_objects: [],
@@ -2877,7 +2995,7 @@ describe('update', () => {
     it('does not mirror customFields when templates flag is disabled', async () => {
       // FAILURE SCENARIO: adapter runs unconditionally — extended_fields is written when flag is off.
       const clientArgs = createCasesClientMockArgs();
-      // config.templates.enabled defaults to false
+      clientArgs.config = { ...clientArgs.config, templates: { enabled: false } };
       setupMocks(clientArgs);
 
       await bulkUpdate(

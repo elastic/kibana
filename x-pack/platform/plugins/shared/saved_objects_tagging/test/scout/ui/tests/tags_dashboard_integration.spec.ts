@@ -9,28 +9,25 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 import { ES_ARCHIVES, KBN_ARCHIVES, test } from '../fixtures';
-import { SavedObjectsListingPage } from '../fixtures/page_objects/saved_objects_listing_page';
 
 test.describe('Dashboard integration', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ esArchiver }) => {
     await esArchiver.loadIfNeeded(ES_ARCHIVES.LOGSTASH_FUNCTIONAL);
   });
 
-  test.beforeEach(async ({ kbnClient, browserAuth, page, pageObjects }) => {
-    await kbnClient.savedObjects.cleanStandardList();
+  test.beforeEach(async ({ browserAuth, pageObjects, kbnClient }) => {
     await kbnClient.importExport.load(KBN_ARCHIVES.DASHBOARD);
-
     await browserAuth.loginAsPrivilegedUser();
     await pageObjects.dashboard.goto();
-    await new SavedObjectsListingPage(page).waitForLoaded();
+    await pageObjects.savedObjectsListing.waitForLoaded();
   });
 
   test.afterAll(async ({ kbnClient }) => {
     await kbnClient.savedObjects.cleanStandardList();
   });
 
-  test('allows to manually type tag filter query', async ({ page }) => {
-    const listingPage = new SavedObjectsListingPage(page);
+  test('allows to manually type tag filter query', async ({ pageObjects }) => {
+    const listingPage = pageObjects.savedObjectsListing;
     await listingPage.searchForItemWithName('tag:(tag-1)', { escape: false });
 
     await expect(listingPage.getItemLinks('dashboard')).toHaveCount(2);
@@ -43,8 +40,8 @@ test.describe('Dashboard integration', { tag: tags.stateful.classic }, () => {
     }
   });
 
-  test('allows to filter by selecting a tag in the filter menu', async ({ page }) => {
-    const listingPage = new SavedObjectsListingPage(page);
+  test('allows to filter by selecting a tag in the filter menu', async ({ pageObjects }) => {
+    const listingPage = pageObjects.savedObjectsListing;
     await listingPage.selectFilterTags('tag-3');
 
     await expect(listingPage.getItemLinks('dashboard')).toHaveCount(2);
@@ -54,8 +51,8 @@ test.describe('Dashboard integration', { tag: tags.stateful.classic }, () => {
     }
   });
 
-  test('allows to filter by multiple tags', async ({ page }) => {
-    const listingPage = new SavedObjectsListingPage(page);
+  test('allows to filter by multiple tags', async ({ pageObjects }) => {
+    const listingPage = pageObjects.savedObjectsListing;
     await listingPage.selectFilterTags('tag-2', 'tag-3');
 
     await expect(listingPage.getItemLinks('dashboard')).toHaveCount(3);
@@ -70,7 +67,7 @@ test.describe('Dashboard integration', { tag: tags.stateful.classic }, () => {
   });
 
   test('allows to select tags for a new dashboard', async ({ page, pageObjects }) => {
-    const listingPage = new SavedObjectsListingPage(page);
+    const listingPage = pageObjects.savedObjectsListing;
     await pageObjects.dashboard.openNewDashboard();
 
     await page.testSubj.click('dashboardInteractiveSaveMenuItem');
@@ -87,7 +84,7 @@ test.describe('Dashboard integration', { tag: tags.stateful.classic }, () => {
   });
 
   test('allows to create a tag from the tag selector', async ({ page, pageObjects }) => {
-    const listingPage = new SavedObjectsListingPage(page);
+    const listingPage = pageObjects.savedObjectsListing;
     await pageObjects.dashboard.openNewDashboard();
 
     await page.testSubj.click('dashboardInteractiveSaveMenuItem');
@@ -112,8 +109,8 @@ test.describe('Dashboard integration', { tag: tags.stateful.classic }, () => {
     expect(itemNames).toContain('dashboard-with-new-tag');
   });
 
-  test('allows to select tags for an existing dashboard', async ({ page, pageObjects }) => {
-    const listingPage = new SavedObjectsListingPage(page);
+  test('allows to select tags for an existing dashboard', async ({ pageObjects }) => {
+    const listingPage = pageObjects.savedObjectsListing;
     await listingPage.clickItemLink('dashboard', 'dashboard 4 with real data (tag-1)');
 
     await pageObjects.dashboard.switchToEditMode();
@@ -129,8 +126,8 @@ test.describe('Dashboard integration', { tag: tags.stateful.classic }, () => {
     expect(itemNames).toContain('dashboard 4 with real data (tag-1)');
   });
 
-  test('retains dashboard saved object tags after quicksave', async ({ page, pageObjects }) => {
-    const listingPage = new SavedObjectsListingPage(page);
+  test('retains dashboard saved object tags after quicksave', async ({ pageObjects }) => {
+    const listingPage = pageObjects.savedObjectsListing;
     await listingPage.clickItemLink('dashboard', 'dashboard 4 with real data (tag-1)');
 
     await pageObjects.dashboard.switchToEditMode();

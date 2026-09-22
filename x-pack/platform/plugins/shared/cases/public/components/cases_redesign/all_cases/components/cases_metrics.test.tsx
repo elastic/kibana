@@ -9,27 +9,21 @@ import { screen, within } from '@testing-library/react';
 import React from 'react';
 
 import { renderWithTestingProviders } from '../../../../common/mock';
-import { useGetCasesMetrics } from '../../../../containers/use_get_cases_metrics';
 import { CasesMetrics } from './cases_metrics';
 
 jest.mock('pretty-ms', () => jest.fn().mockReturnValue('2ms'));
-jest.mock('../../../../containers/use_get_cases_metrics');
-
-const useGetCasesMetricsMock = useGetCasesMetrics as jest.Mock;
 
 describe('Cases metrics', () => {
-  beforeEach(() => {
-    useGetCasesMetricsMock.mockReturnValue({
-      isLoading: false,
-      data: {
-        mttr: 2000,
-        status: { open: 20, inProgress: 40, closed: 130 },
-      },
-    });
-  });
+  const props = {
+    countOpenCases: 20,
+    countInProgressCases: 40,
+    countClosedCases: 130,
+    mttr: 2000,
+    isLoading: false,
+  };
 
   it('renders the correct stats', async () => {
-    renderWithTestingProviders(<CasesMetrics />);
+    renderWithTestingProviders(<CasesMetrics {...props} />);
 
     expect(await screen.findByTestId('cases-metrics-stats')).toBeInTheDocument();
 
@@ -50,19 +44,18 @@ describe('Cases metrics', () => {
     ).toBeInTheDocument();
   });
 
-  it('should render the loading spinner when loading stats', async () => {
-    useGetCasesMetricsMock.mockReturnValue({
-      isLoading: true,
-      data: {
-        mttr: 2000,
-        status: { open: 20, inProgress: 40, closed: 130 },
-      },
-    });
+  it('renders a dash when mttr is null', async () => {
+    renderWithTestingProviders(<CasesMetrics {...props} mttr={null} />);
 
-    renderWithTestingProviders(<CasesMetrics />);
+    expect(within(await screen.findByTestId('mttrStatsHeader')).getByText('-')).toBeInTheDocument();
+  });
+
+  it('should render the loading spinner when loading stats', async () => {
+    renderWithTestingProviders(<CasesMetrics {...props} isLoading={true} />);
 
     expect(screen.getByTestId('openStatsHeader-loading-spinner')).toBeInTheDocument();
     expect(screen.getByTestId('inProgressStatsHeader-loading-spinner')).toBeInTheDocument();
     expect(screen.getByTestId('closedStatsHeader-loading-spinner')).toBeInTheDocument();
+    expect(screen.getByTestId('mttr-stat-loading-spinner')).toBeInTheDocument();
   });
 });

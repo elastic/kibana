@@ -21,6 +21,7 @@ import {
   getDataStreamPrivileges,
   storedPackagePoliciesToAgentPermissions,
   UNIVERSAL_PROFILING_PERMISSIONS,
+  UNIVERSAL_PROFILING_QUEUE_PERMISSIONS,
 } from './package_policies_to_agent_permissions';
 
 const packageInfoCache = new Map();
@@ -777,6 +778,10 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
           {
             names: ['profiling-*', 'profiles-*'],
             privileges: UNIVERSAL_PROFILING_PERMISSIONS,
+          },
+          {
+            names: ['.profiling-sq-*'],
+            privileges: UNIVERSAL_PROFILING_QUEUE_PERMISSIONS,
           },
         ],
       },

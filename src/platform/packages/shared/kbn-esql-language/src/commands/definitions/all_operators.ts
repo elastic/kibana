@@ -35,6 +35,10 @@ export const patternMatchOperators: FunctionDefinition[] = operatorFunctionDefin
   ({ name }) => name === 'like' || name === 'not like' || name === 'rlike' || name === 'not rlike'
 );
 
+export const matchOperators: FunctionDefinition[] = operatorFunctionDefinitions.filter(
+  ({ name }) => name === ':'
+);
+
 export const logicalOperators: FunctionDefinition[] = [
   {
     name: 'and',

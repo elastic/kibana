@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Migration recommendation: MIGRATE TO SCOUT. Integration test across multiple apps.
+ */
+
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
@@ -25,7 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'discover',
   ]);
 
-  describe('add new discover panel embeddable', () => {
+  describe('add new discover panel from dashboard', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
@@ -126,25 +130,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.verifyNoRenderErrors();
 
         expect(await discover.getAllSavedSearchDocumentCount()).to.eql([]);
-      });
-    });
-
-    describe('Save Discover Table Button', () => {
-      it('can save to a new Dashboard from Discover', async () => {
-        await discover.navigateToApp();
-        await discover.clickNewSearchButton();
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
-
-        await queryBar.setQuery('test');
-        await queryBar.submitQuery();
-        await discover.waitUntilTabIsLoaded();
-
-        await discover.clickSaveDiscoverTableToDashboard('By-Value Table');
-
-        await dashboard.waitForRenderComplete();
-        await dashboard.verifyNoRenderErrors();
-        expect(await discover.getAllSavedSearchDocumentCount()).to.eql(['13 documents']);
       });
     });
   });

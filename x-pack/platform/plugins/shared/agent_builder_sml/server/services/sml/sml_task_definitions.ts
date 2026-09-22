@@ -71,7 +71,7 @@ export const registerSmlCrawlerTaskDefinition = ({
       maxAttempts: 3,
       priority: TaskPriority.Low,
       createTaskRunner: (context) => {
-        const { taskInstance, abortController } = context;
+        const { taskInstance, signal } = context;
         const { attachmentType } = (taskInstance.params ?? {}) as Partial<SmlCrawlerTaskParams>;
 
         return {
@@ -109,14 +109,17 @@ export const registerSmlCrawlerTaskDefinition = ({
             }
 
             const esClient = elasticsearch.client.asInternalUser;
-            const soRepository = savedObjects.createInternalRepository();
+
+            const soRepository = savedObjects.createInternalRepository([
+              ...(definition.requiredHiddenTypes ?? []),
+            ]);
 
             try {
               await smlService.getCrawler().crawl({
                 definition,
                 esClient,
                 savedObjectsClient: soRepository,
-                abortSignal: abortController.signal,
+                abortSignal: signal,
               });
               logger.debug(`SML crawler task completed for type '${attachmentType}'`);
             } catch (error) {

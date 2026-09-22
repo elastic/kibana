@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID } from '@kbn/management-settings-ids';
 import { deleteTestOAuthConnection, seedTestOAuthConnection } from '@kbn/mock-idp-utils';
 import { expect } from '@kbn/scout/ui';
 
@@ -26,12 +25,9 @@ test.describe(
     let authHeaders: Record<string, string>;
     let clientId: string;
     const connectionIds: string[] = [];
+    let expiredConnectionId: string;
 
-    test.beforeAll(async ({ apiClient, kbnClient, samlAuth, config: { organizationId } }) => {
-      await kbnClient.uiSettings.update({
-        [AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID]: true,
-      });
-
+    test.beforeAll(async ({ apiClient, samlAuth, config: { organizationId } }) => {
       authHeaders = await createUiamAuthHeaders(samlAuth);
 
       const meResponse = await apiClient.get('internal/security/me', {
@@ -65,20 +61,38 @@ test.describe(
         }
         connectionIds.push(connectionId);
       }
+
+      // Seed a separate expired (but not revoked) connection to verify the
+      // "Expired" status is surfaced and the connection remains revocable.
+      expiredConnectionId = `scout-conn-expired-${Date.now()}`;
+      const expiredResult = await seedTestOAuthConnection({
+        connectionId: expiredConnectionId,
+        clientId,
+        organizationId: organizationId!,
+        userId,
+        resource: MCP_RESOURCE,
+        name: 'scout expired connection',
+        scopes: ['all'],
+        expired: true,
+      });
+      if (!expiredResult.success) {
+        throw new Error(`Failed to seed expired OAuth connection: ${expiredResult.message}`);
+      }
     });
 
     test.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsAdmin();
     });
 
-    test.afterAll(async ({ apiClient, kbnClient }) => {
+    test.afterAll(async ({ apiClient }) => {
       await Promise.all(
-        connectionIds.map((connectionId) => deleteTestOAuthConnection({ connectionId, clientId }))
+        [...connectionIds, expiredConnectionId]
+          .filter(Boolean)
+          .map((connectionId) => deleteTestOAuthConnection({ connectionId, clientId }))
       );
       if (clientId) {
         await revokeOAuthClient(apiClient, authHeaders, clientId);
       }
-      await kbnClient.uiSettings.unset(AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID);
     });
 
     test('shows connections in grouped and list views', async ({ page, pageObjects }) => {
@@ -127,6 +141,30 @@ test.describe(
       await expect(async () => {
         const rowText = await pageObjects.applicationConnections.getListConnectionRowText(
           connectionId
+        );
+        expect(rowText).toContain('Revoked');
+      }).toPass();
+    });
+
+    test('surfaces an "Expired" status for an expired connection that stays revocable', async ({
+      pageObjects,
+    }) => {
+      await pageObjects.applicationConnections.navigate();
+      await pageObjects.applicationConnections.switchToListView();
+      await pageObjects.applicationConnections.waitForListConnectionRow(expiredConnectionId);
+
+      await expect(async () => {
+        const rowText = await pageObjects.applicationConnections.getListConnectionRowText(
+          expiredConnectionId
+        );
+        expect(rowText).toContain('Expired');
+      }).toPass();
+
+      await pageObjects.applicationConnections.revokeConnection(expiredConnectionId);
+
+      await expect(async () => {
+        const rowText = await pageObjects.applicationConnections.getListConnectionRowText(
+          expiredConnectionId
         );
         expect(rowText).toContain('Revoked');
       }).toPass();

@@ -1,11 +1,11 @@
-# AppMenuComponent
+# @kbn/core-chrome-app-menu-components
 
-`AppMenuComponent` is the standalone component used in chrome app menu.
+Compatibility re-export of [`@kbn/ui-app-menu`](../../../../platform/kbn-ui/app-menu).
 
 ## Usage
 
 ```tsx
-import React, { useEffect } from 'react';
+import React from 'react';
 import { AppMenuComponent, type AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 
 interface Props {
@@ -16,3 +16,7 @@ const Example = ({ config }: Props) => {
   return <AppMenuComponent config={config} />;
 };
 ```
+
+## Related
+
+- [`@kbn/ui-app-menu`](../../../../platform/kbn-ui/app-menu) — implementation (this package re-exports it)

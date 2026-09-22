@@ -13,7 +13,8 @@ import { selectUnit } from '@formatjs/intl-utils';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux-v7';
 import { useLocation, useParams } from 'react-router-dom';
-import type { AppHeaderBadge } from '@kbn/app-header';
+import useObservable from 'react-use/lib/useObservable';
+import type { AppHeaderBack, AppHeaderBadge } from '@kbn/app-header';
 import { AppHeader } from '@kbn/app-header';
 import { ChangeHistoryModalContext } from '@kbn/change-history-ui';
 import type { AppMenuConfig, AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
@@ -38,7 +39,9 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { useWorkflowsExperimentalUiSetting } from '../../../hooks/use_workflows_experimental_ui_setting';
 import { getSaveWorkflowTooltipContent, getTestRunTooltipContent } from '../../../shared/ui';
+import { getAddConnectorsMenuItem } from '../../../shared/ui/get_add_connectors_menu_item';
 import {
+  getReturnDestinationFromSearch,
   navigateToWorkflowsList,
   type WorkflowDetailRouteState,
 } from '../../../shared/utils/workflow_navigation';
@@ -65,6 +68,45 @@ const Translations = {
   }),
 };
 
+const useWorkflowDetailHeaderBack = (): AppHeaderBack => {
+  const { application } = useKibana().services;
+  const location = useLocation<WorkflowDetailRouteState | undefined>();
+  const appList = useObservable(application.applications$);
+
+  // Honor `returnApp`/`returnPath` query params when the app is known.
+  return useMemo<AppHeaderBack>(() => {
+    const returnDestination = getReturnDestinationFromSearch(location.search);
+    const returnApp = returnDestination && appList?.get(returnDestination.returnAppId);
+
+    if (returnDestination && returnApp) {
+      return {
+        href: application.getUrlForApp(returnDestination.returnAppId, {
+          path: returnDestination.returnPath,
+        }),
+        label: returnApp.title,
+        onClick: (event) => {
+          event.preventDefault();
+          application.navigateToApp(
+            returnDestination.returnAppId,
+            returnDestination.returnPath ? { path: returnDestination.returnPath } : undefined
+          );
+        },
+      };
+    }
+
+    return {
+      href: `/app/${PLUGIN_ID}`,
+      label: i18n.translate('workflows.workflowDetailHeader.backLinkLabel', {
+        defaultMessage: 'Workflows',
+      }),
+      onClick: (event) => {
+        event.preventDefault();
+        void navigateToWorkflowsList(application, location.state);
+      },
+    };
+  }, [application, appList, location.search, location.state]);
+};
+
 export interface WorkflowDetailHeaderProps {
   isLoading: boolean;
   // TODO: manage it in a workflow state context
@@ -76,7 +118,7 @@ export const WorkflowDetailHeader = React.memo(
   ({ isLoading, highlightDiff, setHighlightDiff }: WorkflowDetailHeaderProps) => {
     const { id: workflowId } = useParams<{ id?: string }>();
     const { application } = useKibana().services;
-    const location = useLocation<WorkflowDetailRouteState | undefined>();
+    const back = useWorkflowDetailHeaderBack();
     const styles = useMemoCss(componentStyles);
     const dispatch = useDispatch();
     const {
@@ -294,6 +336,10 @@ export const WorkflowDetailHeader = React.memo(
     ]);
 
     const { handleRunClick, runConfirmationModal } = useRunWorkflowWithConfirmation(openTestModal);
+    const addConnectorsMenuItem = useMemo(
+      () => getAddConnectorsMenuItem(application),
+      [application]
+    );
 
     const badges = useMemo<AppHeaderBadge[]>(() => {
       const result: AppHeaderBadge[] = [];
@@ -366,6 +412,9 @@ export const WorkflowDetailHeader = React.memo(
       if (historyItem) {
         items.push(historyItem);
       }
+      if (addConnectorsMenuItem) {
+        items.push(addConnectorsMenuItem);
+      }
 
       return {
         primaryActionItem: {
@@ -395,6 +444,7 @@ export const WorkflowDetailHeader = React.memo(
       workflowId,
       executionsToggleItem,
       historyItem,
+      addConnectorsMenuItem,
       enabledSwitchConfig,
       isVisualEditorEnabled,
       handleSaveWorkflow,
@@ -416,20 +466,10 @@ export const WorkflowDetailHeader = React.memo(
         <EuiPageTemplate offset={0} minHeight={0} grow={false} css={styles.pageTemplate}>
           <AppHeader
             title={name}
-            back={{
-              href: `/app/${PLUGIN_ID}`,
-              label: i18n.translate('workflows.workflowDetailHeader.backLinkLabel', {
-                defaultMessage: 'Workflows',
-              }),
-              onClick: (event) => {
-                event.preventDefault();
-                void navigateToWorkflowsList(application, location.state);
-              },
-            }}
+            back={back}
             badges={badges}
             menu={appMenu}
             docLink={WORKFLOWS_DOCUMENTATION_URL}
-            showAddIntegrations
           />
         </EuiPageTemplate>
         {runConfirmationModal}

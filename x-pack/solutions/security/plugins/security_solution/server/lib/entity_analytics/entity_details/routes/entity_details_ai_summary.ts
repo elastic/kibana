@@ -131,7 +131,11 @@ export const entityDetailsAiSummaryRoute = ({
           }
 
           // Derive the author server-side — never trust the client-supplied value.
-          const generatedBy = coreContext.security.authc.getCurrentUser()?.username ?? 'unknown';
+          // Username is the last-resort display fallback; profile_uid enables
+          // human-friendly name resolution at read time.
+          const currentUser = coreContext.security.authc.getCurrentUser();
+          const generatedBy = currentUser?.username ?? 'unknown';
+          const authorProfileUid = currentUser?.profile_uid;
 
           // Enforce the structural caps at the authoritative persistence boundary so every
           // consumer of the datastream (flyout reopen, other users, Agent Builder) sees a
@@ -161,6 +165,7 @@ export const entityDetailsAiSummaryRoute = ({
             'entity.id': entityId,
             'entity.type': entityType,
             'Ai_summary.generated_by': generatedBy,
+            ...(authorProfileUid != null && { 'Ai_summary.author_profile_uid': authorProfileUid }),
             'Ai_summary.generated_at': summary.generated_at,
             'Ai_summary.highlights': highlights,
             ...(recommendedActions != null && {

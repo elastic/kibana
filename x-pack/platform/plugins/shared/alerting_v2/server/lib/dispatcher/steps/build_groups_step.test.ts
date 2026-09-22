@@ -375,4 +375,23 @@ describe('buildActionGroups', () => {
 
     expect(groups).toHaveLength(2);
   });
+
+  it('external episode (null rule_id) groups successfully with no rule entry in group.rules', () => {
+    const policy = createActionPolicy({ id: 'p1', spaceId: 'default' });
+    const episode = createAlertEpisode({
+      source: 'pagerduty',
+      rule_id: null,
+      space_id: 'default',
+      episode_id: 'pd-ep-1',
+      group_hash: 'pd-hash-1',
+    });
+    const matched = [createMatchedPair({ episode, policy })];
+
+    const groups = buildActionGroups(matched);
+
+    expect(groups).toHaveLength(1);
+    expect(groups[0].episodes).toHaveLength(1);
+    expect(groups[0].episodes[0]).toBe(episode);
+    expect(groups[0].rules).toEqual({});
+  });
 });

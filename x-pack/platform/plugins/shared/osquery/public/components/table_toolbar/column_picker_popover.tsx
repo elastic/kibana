@@ -74,7 +74,7 @@ const ColumnPickerPopoverComponent: React.FC<ColumnPickerPopoverProps> = ({
   const triggerButton = (
     <EuiButtonEmpty
       size="xs"
-      iconType="listAdd"
+      iconType="plusCircle"
       onClick={togglePopover}
       data-test-subj={`${dataTestSubj}-button`}
     >

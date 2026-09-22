@@ -75,7 +75,7 @@ const mockLayer = {
     return true;
   },
   getLayerTypeIconName: () => {
-    return 'vector';
+    return 'vectorSquare';
   },
   renderSourceSettingsEditor: () => {
     return <div>mockSourceSettings</div>;

@@ -79,7 +79,7 @@ export interface DateRangePickerPresetsService {
    * Whether the current user can persist presets. `false` (for example, for a
    * user without a profile) means save/delete must be disabled.
    */
-  getCanWrite$(): Observable<boolean>;
+  canPersist(): boolean;
 
   /**
    * Persists `preset`, enforcing dedupe (by `start`/`end`) and the

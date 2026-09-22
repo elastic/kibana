@@ -26,7 +26,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { MetricsGridSettings } from '../../../types';
+import type { MetricsGridSettings } from '@kbn/discover-utils';
 import { COUNTER_OPTIONS, GAUGE_OPTIONS, HISTOGRAM_OPTIONS } from './options';
 import { getChangedSettings } from './get_changed_settings';
 

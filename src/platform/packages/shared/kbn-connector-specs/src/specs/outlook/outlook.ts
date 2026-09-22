@@ -236,25 +236,12 @@ export const Outlook: ConnectorSpec = {
     }),
     handler: async (ctx) => {
       ctx.log.debug('Outlook test handler');
-
-      try {
-        const response = await ctx.client.get(`${GRAPH_BASE}/me`, {
-          params: { $select: 'displayName,mail,userPrincipalName' },
-        });
-        const displayName =
-          response.data?.displayName ??
-          response.data?.mail ??
-          response.data?.userPrincipalName ??
-          'user';
-        return {
-          ok: true,
-          message: `Successfully connected to Outlook as ${displayName}`,
-        };
-      } catch (error: unknown) {
-        const message = error instanceof Error ? error.message : 'Unknown error';
-        return { ok: false, message };
-      }
+      await ctx.client.get(`${GRAPH_BASE}/me`, {
+        params: { $select: 'displayName,mail,userPrincipalName' },
+      });
+      return {};
     },
+    enabled: true,
   },
 
   skill: [

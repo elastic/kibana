@@ -61,8 +61,9 @@ const renderTable = (
       <EntityAnalyticsAgentNavigationProvider
         application={application}
         searchSession={searchSession}
+        closeCanvas={closeCanvas}
       >
-        <EntityListTable entities={rows} closeCanvas={closeCanvas} />
+        <EntityListTable entities={rows} />
       </EntityAnalyticsAgentNavigationProvider>
     </I18nProvider>
   );

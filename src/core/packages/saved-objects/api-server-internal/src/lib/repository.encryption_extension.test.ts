@@ -24,8 +24,10 @@ import { kibanaMigratorMock } from '../mocks';
 import type { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
 import {
   MAIN_SAVED_OBJECT_INDEX,
+  isSavedObjectErrorResult,
   type ISavedObjectsEncryptionExtension,
   type SavedObjectsRawDocSource,
+  type SavedObjectBulkResult,
 } from '@kbn/core-saved-objects-server';
 import {
   bulkCreateSuccess,
@@ -47,6 +49,9 @@ import {
   type TypeIdTuple,
 } from '../test_helpers/repository.test.common';
 import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
+
+const errorOf = (so: SavedObjectBulkResult<unknown>) =>
+  isSavedObjectErrorResult(so) ? so.error : undefined;
 
 describe('SavedObjectsRepository Encryption Extension', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
@@ -508,8 +513,8 @@ describe('SavedObjectsRepository Encryption Extension', () => {
       expect(client.bulk).not.toHaveBeenCalled();
       expect(result.saved_objects).not.toBeUndefined();
       expect(result.saved_objects.length).toBe(1);
-      expect(result.saved_objects[0].error).not.toBeUndefined();
-      expect(result.saved_objects[0].error).toMatchObject({
+      expect(errorOf(result.saved_objects[0])).not.toBeUndefined();
+      expect(errorOf(result.saved_objects[0])).toMatchObject({
         statusCode: 400,
         error: 'Bad Request',
         message:
@@ -523,7 +528,7 @@ describe('SavedObjectsRepository Encryption Extension', () => {
       expect(client.bulk).toHaveBeenCalledTimes(1);
       expect(result.saved_objects).not.toBeUndefined();
       expect(result.saved_objects.length).toBe(1);
-      expect(result.saved_objects[0].error).toBeUndefined();
+      expect(errorOf(result.saved_objects[0])).toBeUndefined();
     });
 
     it(`allows a specified ID when overwriting an existing object`, async () => {
@@ -546,7 +551,7 @@ describe('SavedObjectsRepository Encryption Extension', () => {
       expect(client.bulk).toHaveBeenCalledTimes(1);
       expect(result.saved_objects).not.toBeUndefined();
       expect(result.saved_objects.length).toBe(1);
-      expect(result.saved_objects[0].error).toBeUndefined();
+      expect(errorOf(result.saved_objects[0])).toBeUndefined();
     });
 
     it('allows to opt-out of random ID enforcement', async () => {
@@ -564,7 +569,7 @@ describe('SavedObjectsRepository Encryption Extension', () => {
       expect(client.bulk).toHaveBeenCalled();
       expect(result.saved_objects).not.toBeUndefined();
       expect(result.saved_objects.length).toBe(1);
-      expect(result.saved_objects[0].error).toBeUndefined();
+      expect(errorOf(result.saved_objects[0])).toBeUndefined();
       expect(result.saved_objects[0].id).toBe(encryptedSO.id);
     });
   });

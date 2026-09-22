@@ -6,6 +6,7 @@
  */
 import type {
   AssistantMessage,
+  ChatCompletionTokenCount,
   Message,
   PromptOptions,
   ToolCall,
@@ -41,6 +42,30 @@ import type {
   ReasoningPromptResponse,
   ReasoningPromptResponseOf,
 } from './types';
+
+/**
+ * The reasoning loop issues one LLM call per step, so the caller's token
+ * accounting has to be the sum over every step, not just the final one.
+ */
+function addTokens(
+  accumulated: ChatCompletionTokenCount | undefined,
+  added: ChatCompletionTokenCount | undefined
+): ChatCompletionTokenCount | undefined {
+  if (!accumulated || !added) {
+    return accumulated ?? added;
+  }
+
+  const thinking = (accumulated.thinking ?? 0) + (added.thinking ?? 0);
+  const cached = (accumulated.cached ?? 0) + (added.cached ?? 0);
+
+  return {
+    prompt: accumulated.prompt + added.prompt,
+    completion: accumulated.completion + added.completion,
+    total: accumulated.total + added.total,
+    ...(accumulated.thinking !== undefined || added.thinking !== undefined ? { thinking } : {}),
+    ...(accumulated.cached !== undefined || added.cached !== undefined ? { cached } : {}),
+  };
+}
 
 export function executeAsReasoningAgent<
   TPrompt extends Prompt,
@@ -154,10 +179,12 @@ export async function executeAsReasoningAgent(
     messages: givenMessages,
     stepsLeft,
     temperature,
+    tokensSoFar,
   }: {
     messages: Message[];
     stepsLeft: number;
     temperature?: number;
+    tokensSoFar?: ChatCompletionTokenCount;
   }): Promise<ReasoningPromptResponse> {
     if (abortSignal?.aborted) {
       throw new Error('Request was aborted');
@@ -271,6 +298,8 @@ export async function executeAsReasoningAgent(
       stopSequences: [END_INTERNAL_REASONING_MARKER],
     });
 
+    const tokens = addTokens(tokensSoFar, response.tokens);
+
     let content = response.content;
 
     /**
@@ -328,7 +357,7 @@ export async function executeAsReasoningAgent(
       // completing
       return {
         content: response.content,
-        tokens: response.tokens,
+        tokens,
         toolCalls: response.toolCalls.filter(
           (toolCall) => toolCall.function.name === finalToolCallName
         ),
@@ -363,6 +392,7 @@ export async function executeAsReasoningAgent(
       return innerCallPromptUntil({
         messages: prevMessages.concat(assistantMessage, ...allToolMessages),
         stepsLeft: 0,
+        tokensSoFar: tokens,
       });
     }
 
@@ -373,6 +403,7 @@ export async function executeAsReasoningAgent(
         ...(nonSystemToolCalls.length ? createReasonToolCall() : [])
       ),
       stepsLeft: stepsLeft - 1,
+      tokensSoFar: tokens,
     });
   }
 

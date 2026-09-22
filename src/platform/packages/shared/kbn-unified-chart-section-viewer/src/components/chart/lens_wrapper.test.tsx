@@ -194,6 +194,7 @@ describe('LensWrapper', () => {
           disabledActions: expect.arrayContaining([
             'ACTION_CUSTOMIZE_PANEL',
             'ACTION_EXPORT_CSV',
+            'ACTION_FILTERS_NOTIFICATION',
             'alertRule',
           ]),
         }),
@@ -322,6 +323,7 @@ describe('LensWrapper', () => {
             lensProps={{
               ...mockLensProps,
               esqlVariables: [{ key: 'event_type', value: 'Bad', type: ESQLVariableType.VALUES }],
+              isApproximate: true,
               attributes: {
                 ...mockLensProps.attributes,
                 state: {
@@ -342,6 +344,9 @@ describe('LensWrapper', () => {
       expect(onExploreInDiscoverTab).toHaveBeenCalledWith(
         expect.objectContaining({
           query: { esql: 'FROM traces-apm* | WHERE "Bad" == "Bad"' },
+          tabLabel: mockLensProps.attributes.title,
+          timeRange: mockLensProps.timeRange,
+          isApproximate: true,
         })
       );
     });

@@ -291,7 +291,7 @@ describe('test getDataStateContainer', () => {
     dataState.refetch$.next('fetch_more');
   });
 
-  describe('default profile state', () => {
+  describe('profile app state defaults', () => {
     it('should populate snapshotsByProfileId when the data source profile changes', async () => {
       const toolkit = getDiscoverInternalStateMock();
 
@@ -331,7 +331,7 @@ describe('test getDataStateContainer', () => {
         })
       );
       toolkit.internalState.dispatch(
-        internalStateActions.setProfileStateFieldsToReset({
+        internalStateActions.setProfileAppStateDefaultFieldsToReset({
           tabId,
           fieldsToReset: ['columns', 'rowHeight'],
         })
@@ -340,8 +340,8 @@ describe('test getDataStateContainer', () => {
       await waitFor(() => {
         const currentTab = toolkit.getCurrentTab();
 
-        expect(currentTab.defaultProfileState.fieldsToReset).toEqual(['columns', 'rowHeight']);
-        expect(currentTab.defaultProfileState.snapshotsByProfileId[previousProfileId]).toEqual({
+        expect(currentTab.profileAppStateDefaults.fieldsToReset).toEqual(['columns', 'rowHeight']);
+        expect(currentTab.profileAppStateDefaults.snapshotsByProfileId[previousProfileId]).toEqual({
           columns: ['custom_column'],
           rowHeight: 5,
           breakdownField: 'extension',
@@ -352,7 +352,7 @@ describe('test getDataStateContainer', () => {
       fetchDocumentsDeferred.resolve({ records: [] });
     });
 
-    it('should restore previous state without applying default profile state for a previously resolved profile', async () => {
+    it('should restore previous state without applying profile app state defaults for a previously resolved profile', async () => {
       const toolkit = getDiscoverInternalStateMock();
 
       await toolkit.initializeTabs();
@@ -404,7 +404,7 @@ describe('test getDataStateContainer', () => {
         })
       );
       toolkit.internalState.dispatch(
-        internalStateActions.setProfileStateFieldsToReset({
+        internalStateActions.setProfileAppStateDefaultFieldsToReset({
           tabId,
           fieldsToReset: ['columns', 'rowHeight', 'breakdownField', 'hideChart'],
         })
@@ -456,7 +456,7 @@ describe('test getDataStateContainer', () => {
       });
     });
 
-    it('should restore previous profile state on a profile switch even when fieldsToReset has been cleared to "none"', async () => {
+    it('should restore previous profile app state snapshot on a profile switch even when fieldsToReset has been cleared to "none"', async () => {
       // Returning to a previously-visited profile must restore its saved
       // snapshot even when the reset flag was already cleared to 'none' by an earlier fetch.
       const toolkit = getDiscoverInternalStateMock();
@@ -532,7 +532,7 @@ describe('test getDataStateContainer', () => {
 
       // Simulate fieldsToReset set to 'none
       toolkit.internalState.dispatch(
-        internalStateActions.setProfileStateFieldsToReset({
+        internalStateActions.setProfileAppStateDefaultFieldsToReset({
           tabId,
           fieldsToReset: 'none',
         })
@@ -560,7 +560,7 @@ describe('test getDataStateContainer', () => {
       });
     });
 
-    it('should apply default profile state when switching to a new profile after fieldsToReset has been cleared to "none"', async () => {
+    it('should apply profile app state defaults when switching to a new profile after fieldsToReset has been cleared to "none"', async () => {
       const toolkit = getDiscoverInternalStateMock();
 
       await toolkit.initializeTabs();
@@ -630,7 +630,7 @@ describe('test getDataStateContainer', () => {
         })
       );
       toolkit.internalState.dispatch(
-        internalStateActions.setProfileStateFieldsToReset({
+        internalStateActions.setProfileAppStateDefaultFieldsToReset({
           tabId,
           fieldsToReset: 'none',
         })
@@ -646,7 +646,7 @@ describe('test getDataStateContainer', () => {
       fetchDocumentsDeferred.resolve({ records: [] });
       await toolkit.waitForDataFetching({ tabId });
 
-      expect(toolkit.getCurrentTab().defaultProfileState.fieldsToReset).toEqual('none');
+      expect(toolkit.getCurrentTab().profileAppStateDefaults.fieldsToReset).toEqual('none');
       expect(toolkit.getCurrentTab().appState.columns).toEqual(['message', 'extension']);
       expect(toolkit.getCurrentTab().appState.rowHeight).toBe(3);
       expect(toolkit.getCurrentTab().appState.breakdownField).toBe('extension');
@@ -654,7 +654,7 @@ describe('test getDataStateContainer', () => {
       expect(toolkit.getCurrentTab().appState.hideTable).toBe(false);
     });
 
-    it('should update app state from default profile state', async () => {
+    it('should update app state from profile app state defaults', async () => {
       mockFetchDocuments.mockResolvedValue({ records: [] });
       const stateContainer = getDiscoverStateMock({ isTimeBased: true });
       const dataState = initializeDataStateInDiscoverStateMock(stateContainer);
@@ -674,7 +674,9 @@ describe('test getDataStateContainer', () => {
         })
       );
       stateContainer.internalState.dispatch(
-        stateContainer.injectCurrentTab(internalStateActions.setProfileStateFieldsToReset)({
+        stateContainer.injectCurrentTab(
+          internalStateActions.setProfileAppStateDefaultFieldsToReset
+        )({
           fieldsToReset: ['columns', 'rowHeight', 'breakdownField'],
         })
       );
@@ -688,7 +690,7 @@ describe('test getDataStateContainer', () => {
       await waitFor(() => {
         expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
       });
-      expect(stateContainer.getCurrentTab().defaultProfileState.fieldsToReset).toEqual('none');
+      expect(stateContainer.getCurrentTab().profileAppStateDefaults.fieldsToReset).toEqual('none');
       expect(stateContainer.getCurrentTab().appState.columns).toEqual(['message', 'extension']);
       expect(stateContainer.getCurrentTab().appState.rowHeight).toEqual(3);
       dataUnsub();
@@ -751,7 +753,7 @@ describe('test getDataStateContainer', () => {
         })
       );
       toolkit.internalState.dispatch(
-        internalStateActions.setProfileStateFieldsToReset({
+        internalStateActions.setProfileAppStateDefaultFieldsToReset({
           tabId,
           fieldsToReset: 'none',
         })
@@ -771,14 +773,14 @@ describe('test getDataStateContainer', () => {
       fetchDocumentsDeferred.resolve({ records: [] });
       await toolkit.waitForDataFetching({ tabId });
 
-      expect(toolkit.getCurrentTab().defaultProfileState.fieldsToReset).toEqual('none');
+      expect(toolkit.getCurrentTab().profileAppStateDefaults.fieldsToReset).toEqual('none');
       expect(toolkit.getCurrentTab().appState.columns).toEqual(['default_column']);
       expect(toolkit.getCurrentTab().appState.hideChart).toBe(true);
       expect(toolkit.getCurrentTab().appState.hideTable).toBe(false);
       expect(toolkit.getCurrentTab().appState.rowHeight).toBeUndefined();
     });
 
-    it('should not update app state from default profile state', async () => {
+    it('should not update app state from profile app state defaults', async () => {
       const stateContainer = getDiscoverStateMock({ isTimeBased: true });
       const dataState = initializeDataStateInDiscoverStateMock(stateContainer);
       const dataUnsub = dataState.subscribe();
@@ -797,7 +799,9 @@ describe('test getDataStateContainer', () => {
         })
       );
       stateContainer.internalState.dispatch(
-        stateContainer.injectCurrentTab(internalStateActions.setProfileStateFieldsToReset)({
+        stateContainer.injectCurrentTab(
+          internalStateActions.setProfileAppStateDefaultFieldsToReset
+        )({
           fieldsToReset: 'none',
         })
       );
@@ -809,7 +813,7 @@ describe('test getDataStateContainer', () => {
       await waitFor(() => {
         expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
       });
-      expect(stateContainer.getCurrentTab().defaultProfileState.fieldsToReset).toEqual('none');
+      expect(stateContainer.getCurrentTab().profileAppStateDefaults.fieldsToReset).toEqual('none');
       expect(stateContainer.getCurrentTab().appState.columns).toEqual(['default_column']);
       expect(stateContainer.getCurrentTab().appState.rowHeight).toBeUndefined();
       dataUnsub();

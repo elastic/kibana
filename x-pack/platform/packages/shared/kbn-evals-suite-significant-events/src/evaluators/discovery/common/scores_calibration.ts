@@ -24,7 +24,7 @@ const SEVERITY_CALIBRATION_CRITERIA: EvaluationCriterion[] = [
   },
   {
     id: 'critical_severity_requires_confirmed_impact',
-    text: '"80-critical" severity is warranted only for confirmed user-task-blocking failures affecting a core user journey or confirmed live sensitive-data exposure with broad blast radius; bounded or partial impact belongs at "60-high" or "40-medium".',
+    text: 'Apply the `severity` field contract: `80-critical` requires confirmed impact meeting its critical definition, including a single critical operation fully blocked end-to-end. Grade the direct signal evidence over a generic "degraded" phrase in the summary. Use `60-high` or lower when the direct evidence shows completion for some users, intermittent or partial impact, a limited cohort, or unconfirmed impact.',
   },
   {
     id: 'weak_signals_low_severity',
@@ -44,7 +44,7 @@ const CONFIDENCE_CALIBRATION_CRITERIA: EvaluationCriterion[] = [
   },
   {
     id: 'strong_corroboration_high_confidence',
-    text: 'Only strongly corroborated findings (multiple confirmed evidences plus aligned KI backing, with no contradiction) may claim high confidence (>=0.85).',
+    text: 'Only strongly corroborated findings (multiple confirmed evidences plus aligned KI backing from the input topology or this cycle’s KI search, with no contradiction) may claim high confidence (>=0.85). The judge need not repeat KI search when the discovery already carries aligned causal_features or blast_radius.',
   },
 ];
 

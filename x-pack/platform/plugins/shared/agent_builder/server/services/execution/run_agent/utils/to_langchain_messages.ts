@@ -20,6 +20,7 @@ import {
   isToolCallStep,
   isBackgroundAgentCompleteStep,
   isAskUserQuestionStep,
+  isRelevantSkillsStep,
 } from '@kbn/agent-builder-common';
 import {
   createAIMessage,
@@ -28,14 +29,20 @@ import {
   wrapToolResultContent,
 } from '@kbn/agent-builder-genai-utils/langchain';
 import { generateXmlTree, type XmlNode } from '@kbn/agent-builder-genai-utils/tools/utils';
-import type { ProcessedAttachment, ProcessedRoundInput } from '@kbn/agent-builder-server';
+import type {
+  ProcessedAttachment,
+  ProcessedAttachmentType,
+  ProcessedRoundInput,
+} from '@kbn/agent-builder-server';
 import type { CompactionSummary } from '@kbn/agent-builder-common';
 import { formatSystemNotice } from '../prompts/utils/actions';
+import { createRelevantSkillsNoticeMessage } from '../prompts/utils/skills';
+import { formatDate } from '../prompts/utils/helpers';
 import type { ProcessedConversation, ProcessedConversationRound } from './prepare_conversation';
 import type { ToolCallResultTransformer } from './tool_summarization';
 import { serializeCompactionSummary } from './compaction_serialize';
 import { materializeAskUserQuestionToolCall } from './ask_user_question_tool_call';
-import { formatDate } from '../prompts/utils/helpers';
+import { attachmentTypeInstructions } from '../prompts/utils/attachments';
 
 export interface ConversationToLangchainOptions {
   conversation: ProcessedConversation;
@@ -78,6 +85,7 @@ export const convertPreviousRounds = async ({
   conversationTimestamp,
 }: ConversationToLangchainOptions): Promise<BaseMessage[]> => {
   const messages: BaseMessage[] = [];
+  const attachmentTypeInstructionsProvided = new Set<string>();
 
   let rounds = conversation.previousRounds;
   let input = conversation.nextInput;
@@ -100,25 +108,55 @@ export const convertPreviousRounds = async ({
   }
 
   for (const round of rounds) {
-    messages.push(...(await roundToLangchain(round, { resultTransformer, ignoreSteps })));
+    messages.push(
+      ...(await roundToLangchain(round, {
+        resultTransformer,
+        ignoreSteps,
+        attachmentTypes: conversation.attachmentTypes,
+        attachmentTypeInstructionsProvided,
+      }))
+    );
   }
 
-  messages.push(formatRoundInput({ input, timestamp: inputTimestamp }));
+  messages.push(
+    formatRoundInput({
+      input,
+      timestamp: inputTimestamp,
+      attachmentTypes: conversation.attachmentTypes,
+      attachmentTypeInstructionsProvided,
+    })
+  );
 
   return messages;
 };
+
+export interface RoundToLangchainOptions {
+  resultTransformer?: ToolCallResultTransformer;
+  ignoreSteps?: boolean;
+  attachmentTypes?: ProcessedAttachmentType[];
+  attachmentTypeInstructionsProvided?: Set<string>;
+}
 
 export const roundToLangchain = async (
   round: ProcessedConversationRound,
   {
     resultTransformer,
     ignoreSteps = false,
-  }: { resultTransformer?: ToolCallResultTransformer; ignoreSteps?: boolean } = {}
+    attachmentTypes,
+    attachmentTypeInstructionsProvided,
+  }: RoundToLangchainOptions = {}
 ): Promise<BaseMessage[]> => {
   const messages: BaseMessage[] = [];
 
   // user message
-  messages.push(formatRoundInput({ input: round.input, timestamp: round.started_at }));
+  messages.push(
+    formatRoundInput({
+      input: round.input,
+      timestamp: round.started_at,
+      attachmentTypes,
+      attachmentTypeInstructionsProvided,
+    })
+  );
 
   // steps
   if (!ignoreSteps) {
@@ -129,6 +167,10 @@ export const roundToLangchain = async (
     for (const step of round.steps) {
       if (isBackgroundAgentCompleteStep(step)) {
         messages.push(createUserMessage(formatSystemNotice(step)));
+      } else if (isRelevantSkillsStep(step)) {
+        if (step.skills.length > 0) {
+          messages.push(createRelevantSkillsNoticeMessage(step.skills));
+        }
       } else if (isToolCallStep(step)) {
         // Only process when we hit the first tool call of a group
         // Other tool calls in the same group are handled by createGroupedToolCallMessages
@@ -166,11 +208,15 @@ export const roundToLangchain = async (
 const formatRoundInput = ({
   input,
   timestamp,
+  attachmentTypes,
+  attachmentTypeInstructionsProvided,
 }: {
   input: ProcessedRoundInput;
   timestamp?: string;
+  attachmentTypes?: ProcessedAttachmentType[];
+  attachmentTypeInstructionsProvided?: Set<string>;
 }): HumanMessage => {
-  const { message, attachments } = input;
+  const { message, attachments, attachment_context, attachment_refs } = input;
 
   let content = message;
 
@@ -184,6 +230,31 @@ const formatRoundInput = ({
     );
 
     content += `\n\n${attachmentsXml}\n`;
+  }
+  if (attachment_context) {
+    content += `\n\n${attachment_context}\n`;
+  }
+  if (
+    attachment_refs &&
+    attachment_refs.length > 0 &&
+    attachmentTypes &&
+    attachmentTypeInstructionsProvided
+  ) {
+    const roundAttachmentTypes: ProcessedAttachmentType[] = [];
+    for (const ref of attachment_refs) {
+      if (ref.type && !attachmentTypeInstructionsProvided.has(ref.type)) {
+        attachmentTypeInstructionsProvided.add(ref.type);
+        const processedType = attachmentTypes.find((type) => type.type === ref.type);
+        if (processedType) {
+          roundAttachmentTypes.push(processedType);
+        }
+      }
+    }
+    if (roundAttachmentTypes.length > 0) {
+      const attachmentsInstructions = attachmentTypeInstructions(roundAttachmentTypes);
+
+      content += `\n\n${attachmentsInstructions}\n`;
+    }
   }
 
   if (timestamp && timestamp !== new Date(0).toISOString()) {

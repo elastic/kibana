@@ -9,11 +9,13 @@ import { act, renderHook } from '@testing-library/react';
 import { useManageRegionsState } from './use_manage_regions_state';
 import { useRegionPolicy } from '../../hooks/use_region_policy';
 import { useSaveRegionPolicy } from '../../hooks/use_save_region_policy';
+import { useDeleteRegionPolicy } from '../../hooks/use_delete_region_policy';
 import { useEisModels } from '../../hooks/use_eis_models';
 import * as eisUtils from '../../utils/eis_utils';
 
 jest.mock('../../hooks/use_region_policy');
 jest.mock('../../hooks/use_save_region_policy');
+jest.mock('../../hooks/use_delete_region_policy');
 jest.mock('../../hooks/use_eis_models');
 jest.mock('../../utils/eis_utils', () => ({
   ...jest.requireActual('../../utils/eis_utils'),
@@ -23,11 +25,13 @@ jest.mock('../../utils/eis_utils', () => ({
 
 const mockUseRegionPolicy = jest.mocked(useRegionPolicy);
 const mockUseSaveRegionPolicy = jest.mocked(useSaveRegionPolicy);
+const mockUseDeleteRegionPolicy = jest.mocked(useDeleteRegionPolicy);
 const mockUseEisModels = jest.mocked(useEisModels);
 const mockGetAvailableRegions = jest.mocked(eisUtils.getAvailableRegions);
 const mockGetAvailableGeos = jest.mocked(eisUtils.getAvailableGeos);
 
 const mockSaveMutate = jest.fn();
+const mockDeleteMutate = jest.fn();
 
 const usRegion = { csp: 'aws', region: 'us-east-1', geo: 'us' };
 const euRegion = { csp: 'gcp', region: 'europe-west1', geo: 'eu' };
@@ -44,6 +48,10 @@ describe('useManageRegionsState', () => {
       mutate: mockSaveMutate,
       isLoading: false,
     } as unknown as ReturnType<typeof useSaveRegionPolicy>);
+    mockUseDeleteRegionPolicy.mockReturnValue({
+      mutate: mockDeleteMutate,
+      isLoading: false,
+    } as unknown as ReturnType<typeof useDeleteRegionPolicy>);
     mockUseRegionPolicy.mockReturnValue({
       data: null,
       isLoading: false,
@@ -60,7 +68,7 @@ describe('useManageRegionsState', () => {
   // Initial checkbox seeding
   // ---------------------------------------------------------------------------
   describe('initial checkbox seeding', () => {
-    it('selects all regions when there is no existing policy', () => {
+    it('leaves regions unselected when there is no existing policy', () => {
       mockUseRegionPolicy.mockReturnValue({
         data: null,
         isLoading: false,
@@ -69,14 +77,12 @@ describe('useManageRegionsState', () => {
 
       const { result } = renderHook(() => useManageRegionsState(onClose));
 
-      expect(result.current.regionTab.checkedKeys).toEqual(
-        new Set(['aws::us-east-1', 'gcp::europe-west1'])
-      );
-      expect(result.current.regionTab.totalSelected).toBe(2);
-      expect(result.current.regionTab.allSelected).toBe(true);
+      expect(result.current.regionTab.checkedKeys.size).toBe(0);
+      expect(result.current.regionTab.totalSelected).toBe(0);
+      expect(result.current.regionTab.allSelected).toBe(false);
     });
 
-    it('selects all regions when the policy has an empty allowed_regions list', () => {
+    it('leaves regions unselected when the policy has an empty allowed_regions list', () => {
       mockUseRegionPolicy.mockReturnValue({
         data: { region_policy: { allowed_regions: [] }, created_at: '2024-01-01T00:00:00Z' },
         isLoading: false,
@@ -85,9 +91,7 @@ describe('useManageRegionsState', () => {
 
       const { result } = renderHook(() => useManageRegionsState(onClose));
 
-      expect(result.current.regionTab.checkedKeys).toEqual(
-        new Set(['aws::us-east-1', 'gcp::europe-west1'])
-      );
+      expect(result.current.regionTab.checkedKeys.size).toBe(0);
     });
 
     it('seeds only the policy regions when a partial policy exists', () => {
@@ -153,8 +157,8 @@ describe('useManageRegionsState', () => {
 
       const { result, rerender } = renderHook(() => useManageRegionsState(onClose));
 
-      // No policy → all regions seeded
-      expect(result.current.regionTab.checkedKeys.size).toBe(2);
+      // No policy → nothing seeded
+      expect(result.current.regionTab.checkedKeys.size).toBe(0);
 
       // Simulate a re-render with a different policy — syncedFromInitial is true, no re-seed
       mockUseRegionPolicy.mockReturnValue({
@@ -167,8 +171,8 @@ describe('useManageRegionsState', () => {
       } as unknown as ReturnType<typeof useRegionPolicy>);
       rerender();
 
-      // Still 2 — the seeding effect is guarded by syncedFromInitial
-      expect(result.current.regionTab.checkedKeys.size).toBe(2);
+      // Still 0 — the seeding effect is guarded by syncedFromInitial
+      expect(result.current.regionTab.checkedKeys.size).toBe(0);
     });
   });
 
@@ -206,7 +210,7 @@ describe('useManageRegionsState', () => {
       expect(result.current.geoTab.checkedGeos).toEqual(new Set(['eu']));
     });
 
-    it('seeds all geos and activates Geo tab when no policy exists (reflects "all routes allowed")', () => {
+    it('activates Geo tab with no pre-selected geos when no policy exists', () => {
       mockGetAvailableGeos.mockReturnValue(['eu', 'us']);
       mockUseRegionPolicy.mockReturnValue({
         data: null,
@@ -217,7 +221,7 @@ describe('useManageRegionsState', () => {
       const { result } = renderHook(() => useManageRegionsState(onClose));
 
       expect(result.current.common.activeTab).toBe('geo');
-      expect(result.current.geoTab.checkedGeos).toEqual(new Set(['eu', 'us']));
+      expect(result.current.geoTab.checkedGeos.size).toBe(0);
     });
 
     it('seeds geo tab with empty set when an explicit regions policy is active', () => {
@@ -249,6 +253,129 @@ describe('useManageRegionsState', () => {
       expect(result.current.geoTab.checkedGeos).toEqual(new Set(['eu']));
       // Regions tab must have nothing pre-selected — the geo policy owns the policy slot.
       expect(result.current.regionTab.checkedKeys).toEqual(new Set());
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // Custom-policy toggle seeding
+  // ---------------------------------------------------------------------------
+  describe('custom-policy toggle seeding', () => {
+    it('seeds useCustomPolicy=false when no policy exists', () => {
+      mockUseRegionPolicy.mockReturnValue({
+        data: null,
+        isLoading: false,
+        isError: false,
+      } as unknown as ReturnType<typeof useRegionPolicy>);
+
+      const { result } = renderHook(() => useManageRegionsState(onClose));
+
+      expect(result.current.common.useCustomPolicy).toBe(false);
+      expect(result.current.common.hasExistingPolicy).toBe(false);
+      expect(result.current.common.pendingDelete).toBe(false);
+    });
+
+    it('seeds useCustomPolicy=true when an allowed_geos policy exists', () => {
+      mockUseRegionPolicy.mockReturnValue({
+        data: { region_policy: { allowed_geos: ['eu'] }, created_at: '2024-01-01T00:00:00Z' },
+        isLoading: false,
+        isError: false,
+      } as unknown as ReturnType<typeof useRegionPolicy>);
+
+      const { result } = renderHook(() => useManageRegionsState(onClose));
+
+      expect(result.current.common.useCustomPolicy).toBe(true);
+      expect(result.current.common.hasExistingPolicy).toBe(true);
+      expect(result.current.common.pendingDelete).toBe(false);
+    });
+
+    it('seeds useCustomPolicy=true when an allowed_regions policy exists', () => {
+      mockUseRegionPolicy.mockReturnValue({
+        data: {
+          region_policy: { allowed_regions: [{ csp: 'aws', region: 'us-east-1' }] },
+          created_at: '2024-01-01T00:00:00Z',
+        },
+        isLoading: false,
+        isError: false,
+      } as unknown as ReturnType<typeof useRegionPolicy>);
+
+      const { result } = renderHook(() => useManageRegionsState(onClose));
+
+      expect(result.current.common.useCustomPolicy).toBe(true);
+      expect(result.current.common.hasExistingPolicy).toBe(true);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // Toggle-driven dirty and pending-delete behaviour
+  // ---------------------------------------------------------------------------
+  describe('toggle-driven dirty tracking', () => {
+    it('turning toggle OFF with an existing policy makes the modal dirty and pending delete', () => {
+      mockUseRegionPolicy.mockReturnValue({
+        data: { region_policy: { allowed_geos: ['eu'] }, created_at: '2024-01-01T00:00:00Z' },
+        isLoading: false,
+        isError: false,
+      } as unknown as ReturnType<typeof useRegionPolicy>);
+
+      const { result } = renderHook(() => useManageRegionsState(onClose));
+      expect(result.current.common.isDirty).toBe(false);
+
+      act(() => result.current.common.setUseCustomPolicy(false));
+
+      expect(result.current.common.useCustomPolicy).toBe(false);
+      expect(result.current.common.pendingDelete).toBe(true);
+      expect(result.current.common.isDirty).toBe(true);
+      expect(result.current.common.isSaveDisabled).toBe(false);
+    });
+
+    it('turning toggle OFF with no existing policy keeps the modal clean and Save disabled', () => {
+      mockUseRegionPolicy.mockReturnValue({
+        data: null,
+        isLoading: false,
+        isError: false,
+      } as unknown as ReturnType<typeof useRegionPolicy>);
+
+      const { result } = renderHook(() => useManageRegionsState(onClose));
+      // Toggle already OFF by default.
+      expect(result.current.common.useCustomPolicy).toBe(false);
+      expect(result.current.common.pendingDelete).toBe(false);
+      expect(result.current.common.isDirty).toBe(false);
+      expect(result.current.common.isSaveDisabled).toBe(true);
+    });
+
+    it('turning the toggle back ON before Save clears the pending delete', () => {
+      mockUseRegionPolicy.mockReturnValue({
+        data: { region_policy: { allowed_geos: ['eu'] }, created_at: '2024-01-01T00:00:00Z' },
+        isLoading: false,
+        isError: false,
+      } as unknown as ReturnType<typeof useRegionPolicy>);
+
+      const { result } = renderHook(() => useManageRegionsState(onClose));
+
+      act(() => result.current.common.setUseCustomPolicy(false));
+      expect(result.current.common.pendingDelete).toBe(true);
+
+      act(() => result.current.common.setUseCustomPolicy(true));
+      expect(result.current.common.pendingDelete).toBe(false);
+      // No selection changes → not dirty against the seeded policy.
+      expect(result.current.common.isDirty).toBe(false);
+      expect(result.current.geoTab.checkedGeos).toEqual(new Set(['eu']));
+    });
+
+    it('disables Save when an existing policy is kept ON but every selection is cleared', () => {
+      mockUseRegionPolicy.mockReturnValue({
+        data: { region_policy: { allowed_geos: ['eu'] }, created_at: '2024-01-01T00:00:00Z' },
+        isLoading: false,
+        isError: false,
+      } as unknown as ReturnType<typeof useRegionPolicy>);
+
+      const { result } = renderHook(() => useManageRegionsState(onClose));
+      expect(result.current.common.useCustomPolicy).toBe(true);
+
+      act(() => result.current.geoTab.onToggleGeo('eu'));
+
+      expect(result.current.geoTab.totalGeosSelected).toBe(0);
+      expect(result.current.common.pendingDelete).toBe(false);
+      expect(result.current.common.isSaveDisabled).toBe(true);
     });
   });
 
@@ -460,12 +587,34 @@ describe('useManageRegionsState', () => {
     it('showConfirmation is false initially', () => {
       const { result } = renderHook(() => useManageRegionsState(onClose));
       expect(result.current.common.showConfirmation).toBe(false);
+      expect(result.current.common.showDeleteConfirmation).toBe(false);
     });
 
-    it('handleRequestSave sets showConfirmation to true', () => {
+    it('handleRequestSave opens the PUT confirmation when a custom policy is active', () => {
+      mockUseRegionPolicy.mockReturnValue({
+        data: { region_policy: { allowed_geos: ['eu'] }, created_at: '2024-01-01T00:00:00Z' },
+        isLoading: false,
+        isError: false,
+      } as unknown as ReturnType<typeof useRegionPolicy>);
       const { result } = renderHook(() => useManageRegionsState(onClose));
       act(() => result.current.common.handleRequestSave());
       expect(result.current.common.showConfirmation).toBe(true);
+      expect(result.current.common.showDeleteConfirmation).toBe(false);
+    });
+
+    it('handleRequestSave opens the delete confirmation when the toggle is OFF with an existing policy', () => {
+      mockUseRegionPolicy.mockReturnValue({
+        data: { region_policy: { allowed_geos: ['eu'] }, created_at: '2024-01-01T00:00:00Z' },
+        isLoading: false,
+        isError: false,
+      } as unknown as ReturnType<typeof useRegionPolicy>);
+      const { result } = renderHook(() => useManageRegionsState(onClose));
+
+      act(() => result.current.common.setUseCustomPolicy(false));
+      act(() => result.current.common.handleRequestSave());
+
+      expect(result.current.common.showDeleteConfirmation).toBe(true);
+      expect(result.current.common.showConfirmation).toBe(false);
     });
 
     it('handleCancelConfirmation sets showConfirmation back to false', () => {
@@ -473,6 +622,58 @@ describe('useManageRegionsState', () => {
       act(() => result.current.common.handleRequestSave());
       act(() => result.current.common.handleCancelConfirmation());
       expect(result.current.common.showConfirmation).toBe(false);
+    });
+
+    it('handleCancelDeleteConfirmation sets showDeleteConfirmation back to false', () => {
+      mockUseRegionPolicy.mockReturnValue({
+        data: { region_policy: { allowed_geos: ['eu'] }, created_at: '2024-01-01T00:00:00Z' },
+        isLoading: false,
+        isError: false,
+      } as unknown as ReturnType<typeof useRegionPolicy>);
+      const { result } = renderHook(() => useManageRegionsState(onClose));
+      act(() => result.current.common.setUseCustomPolicy(false));
+      act(() => result.current.common.handleRequestSave());
+      expect(result.current.common.showDeleteConfirmation).toBe(true);
+      act(() => result.current.common.handleCancelDeleteConfirmation());
+      expect(result.current.common.showDeleteConfirmation).toBe(false);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // handleConfirmDelete
+  // ---------------------------------------------------------------------------
+  describe('handleConfirmDelete', () => {
+    beforeEach(() => {
+      mockUseRegionPolicy.mockReturnValue({
+        data: { region_policy: { allowed_geos: ['eu'] }, created_at: '2024-01-01T00:00:00Z' },
+        isLoading: false,
+        isError: false,
+      } as unknown as ReturnType<typeof useRegionPolicy>);
+    });
+
+    it('calls deletePolicy with no arguments', () => {
+      const { result } = renderHook(() => useManageRegionsState(onClose));
+      act(() => result.current.common.handleConfirmDelete());
+      expect(mockDeleteMutate).toHaveBeenCalledWith();
+    });
+
+    it('wires onClose into useDeleteRegionPolicy so it runs when delete succeeds', () => {
+      renderHook(() => useManageRegionsState(onClose));
+      expect(mockUseDeleteRegionPolicy).toHaveBeenCalledWith(onClose);
+    });
+
+    it('keeps the delete confirmation and parent modal open when delete fails', () => {
+      mockDeleteMutate.mockImplementation(() => {});
+      const { result } = renderHook(() => useManageRegionsState(onClose));
+
+      act(() => result.current.common.setUseCustomPolicy(false));
+      act(() => result.current.common.handleRequestSave());
+      expect(result.current.common.showDeleteConfirmation).toBe(true);
+
+      act(() => result.current.common.handleConfirmDelete());
+
+      expect(onClose).not.toHaveBeenCalled();
+      expect(result.current.common.showDeleteConfirmation).toBe(true);
     });
   });
 
