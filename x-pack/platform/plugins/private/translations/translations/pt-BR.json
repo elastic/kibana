@@ -29884,7 +29884,6 @@
     "xpack.lens.xyChart.showCurrenTimeMarker": "Mostrar marcador de tempo atual",
     "xpack.lens.xyChart.showEnzones": "Mostrar marcadores de dados parciais",
     "xpack.lens.xyChart.splitSeries": "Detalhamento",
-    "xpack.lens.xyChart.stackingOptions": "Empilhamento",
     "xpack.lens.xyChart.stackingOptionsPopoverAriaLabel": "Opções de empilhamento",
     "xpack.lens.xyChart.topAxisDisabledHelpText": "Essa configuração só se aplica quando o eixo superior está ativado.",
     "xpack.lens.xyChart.topAxisLabel": "Eixo superior",
