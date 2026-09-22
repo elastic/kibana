@@ -292,8 +292,11 @@ steps:
         with:
           action_input: "${{ inputs.actionInput }}"
 
+  # Async, or this run stays `waiting_for_child` for the gate's whole 72 h wait —
+  # and dies at the engine's 6 h default timeout long before that, cancelling the
+  # gate on its way out and stranding the proposal as undecidable.
   - name: create_proposal
-    type: workflow.execute
+    type: workflow.executeAsync
     with:
       workflow-id: system-create-investigation-proposal
       inputs:
@@ -306,11 +309,12 @@ steps:
         confidence: "{{ variables.confidence }}"
         autoApprove: "${{ variables.auto_approve }}"
 
+  # The gate's own execution, not the proposal: this run no longer waits for one.
   - name: emit_result
     type: workflow.output
     status: completed
     with:
-      proposal: "{{ steps.create_proposal.output }}"
+      gate: "{{ steps.create_proposal.output }}"
 WORKFLOW_YAML
 
 echo "Installing workflow \"${WORKFLOW_ID}\" on ${KIBANA_API_BASE}…"
