@@ -25,6 +25,7 @@ export { RelayAuth } from './auth_types/relay';
 export { KubernetesGkeAuth } from './auth_types/kubernetes_gke';
 export { KubernetesEksAuth } from './auth_types/kubernetes_eks';
 export { KubernetesAksAuth } from './auth_types/kubernetes_aks';
+export { ThreatQUserAuth } from './auth_types/threatq_user';
 
 // Skipping PFX and CRT exports for now as they will require updates to
 // the formbuilder to support file upload fields.

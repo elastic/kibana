@@ -14,6 +14,10 @@ import type { AxiosRequestConfig } from 'axios';
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
 import { UISchemas } from '../../connector_spec';
 import {
+  AddTagsInputSchema,
+  CreateObjectInputSchema,
+  type AddTagsInput,
+  type CreateObjectInput,
   PaginationSchema,
   SearchIndicatorsInputSchema,
   SearchObjectsInputSchema,
@@ -45,49 +49,56 @@ import {
   type ExecutePluginInput,
 } from './types';
 
+const configSchema = lazySchema(() =>
+  z.object({
+    url: UISchemas.url('https://threatq.example.com')
+      .max(2048)
+      .refine((value) => {
+        if (!URL.canParse(value)) return false;
+        const parsed = new URL(value);
+        return (
+          parsed.protocol === 'https:' &&
+          !parsed.username &&
+          !parsed.password &&
+          !parsed.search &&
+          !parsed.hash &&
+          /^\/(api\/?)?$/.test(parsed.pathname)
+        );
+      }, 'Enter an HTTPS instance URL, optionally ending in /api, without credentials, query parameters, or a fragment.')
+      .meta({
+        label: i18n.translate('core.kibanaConnectorSpecs.threatq.config.urlLabel', {
+          defaultMessage: 'ThreatQ URL',
+        }),
+        helpText: i18n.translate('core.kibanaConnectorSpecs.threatq.config.urlHelpText', {
+          defaultMessage:
+            'HTTPS URL of your hosted or on-premises ThreatQ instance, for example https://threatq.example.com. The instance must be reachable from Kibana.',
+        }),
+      }),
+    defaultSource: z
+      .string()
+      .min(1)
+      .max(200)
+      .optional()
+      .meta({
+        label: i18n.translate('core.kibanaConnectorSpecs.threatq.config.defaultSourceLabel', {
+          defaultMessage: 'Default source',
+        }),
+        helpText: i18n.translate('core.kibanaConnectorSpecs.threatq.config.defaultSourceHelp', {
+          defaultMessage:
+            'Optional source name, for example Elastic Security. Applied to object and attribute writes that accept sources when the action omits them.',
+        }),
+      }),
+  })
+);
+
+const sourcesForWrite = (ctx: ActionContext, sources?: JsonValue): JsonValue | undefined => {
+  const { defaultSource } = ctx.config as z.infer<typeof configSchema>;
+  return sources ?? (defaultSource ? [{ name: defaultSource }] : undefined);
+};
+
 const request = async (ctx: ActionContext, options: AxiosRequestConfig): Promise<JsonValue> => {
-  const { url, clientId } = ctx.config ?? {};
-  const { username, password } = ctx.secrets ?? {};
-  if (
-    typeof url !== 'string' ||
-    typeof clientId !== 'string' ||
-    typeof username !== 'string' ||
-    typeof password !== 'string' ||
-    !url ||
-    !clientId ||
-    !username ||
-    !password
-  ) {
-    throw new Error('ThreatQ requires an instance URL, client ID, email, and password.');
-  }
+  const { url } = ctx.config as z.infer<typeof configSchema>;
   const baseUrl = `${url.replace(/\/+$/, '').replace(/\/api$/, '')}/api`;
-  // The basic auth fields store account credentials; ThreatQ requests use OAuth tokens.
-  delete ctx.client.defaults.auth;
-  let token: string;
-  try {
-    const { data } = await ctx.client.post<{ access_token?: string }>(
-      `${baseUrl}/token`,
-      {
-        email: username,
-        password,
-        grant_type: 'password',
-        client_id: clientId,
-      },
-      { maxRedirects: 0, headers: { 'Content-Type': 'application/json' } }
-    );
-    if (typeof data.access_token !== 'string' || !data.access_token) {
-      throw new Error('Missing access token');
-    }
-    token = data.access_token;
-  } catch (error) {
-    const status = isAxiosError(error) ? error.response?.status : undefined;
-    // Do not expose the token request body or a server response that can contain credentials.
-    throw new Error(
-      `ThreatQ authentication failed${
-        status ? ` (HTTP ${status})` : ''
-      }. Check the account credentials and client ID.`
-    );
-  }
   try {
     const { data } = await ctx.client.request<JsonValue>({
       ...options,
@@ -96,7 +107,6 @@ const request = async (ctx: ActionContext, options: AxiosRequestConfig): Promise
       headers: {
         Accept: 'application/json',
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
       },
     });
     return data;
@@ -125,76 +135,28 @@ export const ThreatQ: ConnectorSpec = {
   auth: {
     types: [
       {
-        type: 'basic',
-        defaults: {},
+        type: 'oauth_client_credentials',
+        isRecommended: true,
+        defaults: { tokenEndpointAuthMethod: 'client_secret_basic' },
         overrides: {
-          label: i18n.translate('core.kibanaConnectorSpecs.threatq.auth.label', {
-            defaultMessage: 'ThreatQ account',
+          label: i18n.translate('core.kibanaConnectorSpecs.threatq.auth.oauthLabel', {
+            defaultMessage: 'OAuth 2.0 API credentials',
           }),
           meta: {
-            username: {
-              label: i18n.translate('core.kibanaConnectorSpecs.threatq.auth.emailLabel', {
-                defaultMessage: 'Email',
-              }),
-              helpText: i18n.translate('core.kibanaConnectorSpecs.threatq.auth.emailHelpText', {
+            tokenUrl: {
+              helpText: i18n.translate('core.kibanaConnectorSpecs.threatq.auth.tokenUrlHelp', {
                 defaultMessage:
-                  'ThreatQ account with read access to the requested objects. Changes require write access, and plugin actions require permission to run the selected operation.',
+                  'Your ThreatQ instance URL followed by /api/token. Generate API credentials with the ThreatQ CLI, or contact support for a hosted instance.',
               }),
             },
-            password: {
-              label: i18n.translate('core.kibanaConnectorSpecs.threatq.auth.passwordLabel', {
-                defaultMessage: 'Password',
-              }),
-              helpText: i18n.translate('core.kibanaConnectorSpecs.threatq.auth.passwordHelpText', {
-                defaultMessage:
-                  'Account password exchanged for a temporary OAuth token for each action. The account must support password authentication.',
-              }),
-            },
+            scope: { hidden: true },
           },
         },
       },
+      'threatq_user',
     ],
   },
-  schema: lazySchema(() =>
-    z.object({
-      url: UISchemas.url('https://threatq.example.com')
-        .max(2048)
-        .refine((value) => {
-          if (!URL.canParse(value)) return false;
-          const parsed = new URL(value);
-          return (
-            parsed.protocol === 'https:' &&
-            !parsed.username &&
-            !parsed.password &&
-            !parsed.search &&
-            !parsed.hash &&
-            /^\/(api\/?)?$/.test(parsed.pathname)
-          );
-        }, 'Enter an HTTPS instance URL, optionally ending in /api, without credentials, query parameters, or a fragment.')
-        .meta({
-          label: i18n.translate('core.kibanaConnectorSpecs.threatq.config.urlLabel', {
-            defaultMessage: 'ThreatQ URL',
-          }),
-          helpText: i18n.translate('core.kibanaConnectorSpecs.threatq.config.urlHelpText', {
-            defaultMessage:
-              'HTTPS URL of your hosted or on-premises ThreatQ instance, for example https://threatq.example.com. The instance must be reachable from Kibana.',
-          }),
-        }),
-      clientId: z
-        .string()
-        .min(1)
-        .max(200)
-        .meta({
-          label: i18n.translate('core.kibanaConnectorSpecs.threatq.config.clientIdLabel', {
-            defaultMessage: 'OAuth client ID',
-          }),
-          helpText: i18n.translate('core.kibanaConnectorSpecs.threatq.config.clientIdHelpText', {
-            defaultMessage:
-              'Client ID from the instance /assets/js/config.js file. Ask your ThreatQ administrator for this value.',
-          }),
-        }),
-    })
-  ),
+  schema: configSchema,
   validateUrls: { fields: ['url'] },
   actions: {
     searchIndicators: {
@@ -203,12 +165,15 @@ export const ThreatQ: ConnectorSpec = {
       input: SearchIndicatorsInputSchema,
       description:
         'Search indicators with ThreatQ criteria and filters for value, type, status, or score. Use this to check an IOC before enrichment. Returns one page with the original data and total fields.',
-      handler: async (ctx, { criteria, filters, ...params }: SearchIndicatorsInput) =>
+      handler: async (
+        ctx,
+        { criteria, filters, fields, with: relationships, ...params }: SearchIndicatorsInput
+      ) =>
         request(ctx, {
           method: 'POST',
           url: '/indicators/query',
-          params,
-          data: { criteria, filters },
+          params: { ...params, with: relationships?.join(',') },
+          data: { criteria, filters, fields },
         }),
     },
     searchObjects: {
@@ -219,13 +184,26 @@ export const ThreatQ: ConnectorSpec = {
         'Search the Threat Library by object type, including reports, malware, events, and adversaries. Returns the original result envelope, including total and nextCursorMark when present.',
       handler: async (
         ctx,
-        { objectType, criteria, filters, cursorMark, offset, ...params }: SearchObjectsInput
+        {
+          objectType,
+          criteria,
+          filters,
+          fields,
+          with: relationships,
+          cursorMark,
+          offset,
+          ...params
+        }: SearchObjectsInput
       ) =>
         request(ctx, {
           method: 'POST',
           url: `/${objectType}/query`,
-          params: { ...params, ...(cursorMark ? { cursorMark } : { offset }) },
-          data: { criteria, filters },
+          params: {
+            ...params,
+            ...(cursorMark ? { cursorMark } : { offset }),
+            with: relationships?.join(','),
+          },
+          data: { criteria, filters, fields },
         }),
     },
     getIndicator: {
@@ -259,7 +237,7 @@ export const ThreatQ: ConnectorSpec = {
       scope: 'read',
       input: GetRelatedObjectsInputSchema,
       description:
-        'Get one page of indicators, events, or adversaries linked to an indicator, event, or adversary. Use this to expand an investigation from a known object. Returns relationship records and pagination metadata.',
+        'Get one page of related objects, including custom object types. Use this to expand an investigation from a known object. Returns relationship records and pagination metadata.',
       handler: async (
         ctx,
         {
@@ -286,7 +264,9 @@ export const ThreatQ: ConnectorSpec = {
         request(ctx, {
           method: 'POST',
           url: '/indicators',
-          data: [{ value, type_id: typeId, status_id: statusId, sources }],
+          data: [
+            { value, type_id: typeId, status_id: statusId, sources: sourcesForWrite(ctx, sources) },
+          ],
         }),
     },
     updateIndicatorStatus: {
@@ -294,12 +274,12 @@ export const ThreatQ: ConnectorSpec = {
       scope: 'destroy',
       input: UpdateIndicatorStatusInputSchema,
       description:
-        'Change only an indicator status after triage. Use listIndicatorStatuses to find the target status ID. Returns the updated indicator in the ThreatQ data envelope.',
-      handler: async (ctx, { indicatorId, statusId }: UpdateIndicatorStatusInput) =>
+        'Change an indicator status after triage, with optional source attribution. Use listIndicatorStatuses to find the target status ID. Returns the updated indicator in the ThreatQ data envelope.',
+      handler: async (ctx, { indicatorId, statusId, sources }: UpdateIndicatorStatusInput) =>
         request(ctx, {
           method: 'PUT',
           url: `/indicators/${indicatorId}`,
-          data: { status_id: statusId },
+          data: { status_id: statusId, sources: sourcesForWrite(ctx, sources) },
         }),
     },
     addAttribute: {
@@ -307,12 +287,12 @@ export const ThreatQ: ConnectorSpec = {
       scope: 'write',
       input: AddAttributeInputSchema,
       description:
-        'Attach a named attribute to an indicator, event, or adversary to record investigation findings. Returns the created attribute and source information in the ThreatQ response.',
-      handler: async (ctx, { objectType, objectId, ...data }: AddAttributeInput) =>
+        'Attach a named attribute to a ThreatQ object to record investigation findings. Returns the created attribute and source information in the ThreatQ response.',
+      handler: async (ctx, { objectType, objectId, sources, ...data }: AddAttributeInput) =>
         request(ctx, {
           method: 'POST',
           url: `/${objectType}/${objectId}/attributes`,
-          data,
+          data: { ...data, sources: sourcesForWrite(ctx, sources) },
         }),
     },
     createEvent: {
@@ -321,11 +301,11 @@ export const ThreatQ: ConnectorSpec = {
       input: CreateEventInputSchema,
       description:
         'Create a ThreatQ event from an alert or investigation. Supply an event type configured in the instance and a UTC event time. Returns the event record and ID for linkObjects.',
-      handler: async (ctx, { happenedAt, ...data }: CreateEventInput) =>
+      handler: async (ctx, { happenedAt, sources, ...data }: CreateEventInput) =>
         request(ctx, {
           method: 'POST',
           url: '/events',
-          data: { ...data, happened_at: happenedAt },
+          data: { ...data, happened_at: happenedAt, sources: sourcesForWrite(ctx, sources) },
         }),
     },
     createAdversary: {
@@ -335,19 +315,49 @@ export const ThreatQ: ConnectorSpec = {
       description:
         'Create an adversary by name with optional source records. Use searchObjects first to check for an existing actor. Returns the adversary record and ID for linkObjects.',
       handler: async (ctx, input: CreateAdversaryInput) =>
-        request(ctx, { method: 'POST', url: '/adversaries', data: input }),
+        request(ctx, {
+          method: 'POST',
+          url: '/adversaries',
+          data: { ...input, sources: sourcesForWrite(ctx, input.sources) },
+        }),
     },
     linkObjects: {
       isTool: true,
       scope: 'write',
       input: LinkObjectsInputSchema,
       description:
-        'Link two existing indicators, events, or adversaries. Returns the related object and relationship metadata. Read the link with getRelatedObjects.',
+        'Link two existing ThreatQ objects, including custom object types. Returns the related object and relationship metadata. Read the link with getRelatedObjects.',
       handler: async (ctx, { objectType, objectId, relatedType, relatedId }: LinkObjectsInput) =>
         request(ctx, {
           method: 'POST',
           url: `/${objectType}/${objectId}/${relatedType}`,
           data: [{ id: relatedId }],
+        }),
+    },
+    addTags: {
+      isTool: true,
+      scope: 'write',
+      input: AddTagsInputSchema,
+      description:
+        'Add tags to an existing ThreatQ object, including custom object types. Use this to label investigation findings. Returns the tag records.',
+      handler: async (ctx, { objectType, objectId, tags }: AddTagsInput) =>
+        request(ctx, {
+          method: 'POST',
+          url: `/${objectType}/${objectId}/tags`,
+          data: tags.map((name) => ({ name })),
+        }),
+    },
+    createObject: {
+      isTool: false,
+      scope: 'destroy',
+      input: CreateObjectInputSchema,
+      description:
+        'Create a ThreatQ object using its endpoint name and JSON body. Use for custom object definitions; prefer the dedicated indicator, event, or adversary actions when possible. Returns the API object response.',
+      handler: async (ctx, { objectType, body }: CreateObjectInput) =>
+        request(ctx, {
+          method: 'POST',
+          url: `/${objectType}`,
+          data: { ...body, sources: sourcesForWrite(ctx, body.sources) },
         }),
     },
     listIndicatorStatuses: {
@@ -382,7 +392,7 @@ export const ThreatQ: ConnectorSpec = {
       scope: 'read',
       input: GetPluginInputSchema,
       description:
-        'Get a plugin with its action and objectType relationships. Use this to obtain the action name and case-sensitive object type for executePlugin. Returns the plugin data envelope.',
+        'Get a plugin with its action and objectType relationships. Use this to obtain the action name and object type and action parameters for executePlugin. Returns the plugin data envelope.',
       handler: async (ctx, { pluginId }: GetPluginInput) =>
         request(ctx, {
           method: 'GET',
@@ -396,11 +406,11 @@ export const ThreatQ: ConnectorSpec = {
       input: ExecutePluginInputSchema,
       description:
         'Run a configured ThreatQ plugin action against an object. This can change intelligence or call external services. Check getPlugin before selecting the operation. Returns the plugin result, which depends on the selected operation.',
-      handler: async (ctx, { pluginId, objectId, type, action }: ExecutePluginInput) =>
+      handler: async (ctx, { pluginId, objectId, type, action, parameters }: ExecutePluginInput) =>
         request(ctx, {
           method: 'POST',
           url: `/plugins/${pluginId}/execute`,
-          data: { type, id: String(objectId), action },
+          data: { type, id: String(objectId), action, parameters },
         }),
     },
   },

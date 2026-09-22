@@ -13,7 +13,7 @@ The ThreatQ connector searches and updates intelligence in a hosted or on-premis
 
 ## Before you begin
 
-You need a ThreatQ account that supports OAuth password authentication. The account needs read access to the requested objects. Changes require write access, and plugin actions require permission to run the selected operation.
+ThreatQ supports OAuth 2.0 API credentials (recommended) and user account authentication. The account needs read access to the requested objects. Changes require write access, and plugin actions require permission to run the selected operation.
 
 The instance must be reachable from {{kib}} over HTTPS. If you configure [`xpack.actions.allowedHosts`](/reference/configuration-reference/alerting-settings.md), include the ThreatQ hostname. Use a certificate trusted by {{kib}}, or configure the instance certificate authority through the action settings.
 
@@ -26,20 +26,22 @@ Find **{{connectors-ui}}** in the navigation menu or use the global search field
 ThreatQ URL
 :   HTTPS instance URL, for example `https://threatq.example.com`. An optional `/api` suffix is accepted. Do not include credentials, a query string, or a fragment.
 
-OAuth client ID
-:   The client ID from the instance's `/assets/js/config.js` file. Your ThreatQ administrator can supply this value.
+Default source
+:   Optional source name, such as `Elastic Security`. Used for object creation, status updates, and attribute creation when the action omits `sources`. Explicit action sources take precedence. If both are omitted, ThreatQ uses the source associated with the credentials.
 
-Authentication
-:   Select **ThreatQ account** and enter the account email and password. The account needs read access to the requested objects. Changes require write access, and plugin actions require permission to run the selected operation.
+### Authentication
 
-### Get API credentials
+**OAuth 2.0 API credentials (recommended)**
 
-1. Ask your ThreatQ administrator for an account that supports OAuth password authentication.
-2. Grant read access to the requested objects. Grant write access for changes and permission to run each selected plugin operation.
-3. Get the OAuth client ID from the instance's `/assets/js/config.js` file.
-4. Enter the instance URL, client ID, email, and password in the connector.
+Enter the token URL (`https://your-instance/api/token`), OAuth client ID, and client secret. Generate credentials with the ThreatQ CLI. Hosted customers must request credentials from ThreatQ support. The connector uses the client credentials grant with HTTP Basic authentication. Kibana manages token refresh.
 
-The connector exchanges the credentials for a temporary access token through `POST /api/token` for each action. Subsequent requests use that token. You do not need to copy or refresh access tokens manually.
+**ThreatQ user account**
+
+Enter the token URL (`https://your-instance/api/token`), email, password, and API password (`client_id`). Get the API password from an administrator user profile in ThreatQ. It is distinct from an OAuth client ID.
+
+The account password and API password are stored as encrypted secrets. Kibana validates the required fields before execution and exchanges them for a temporary access token. The account needs read access to the requested objects, write access for changes, and permission to run the selected plugin operation.
+
+See [ThreatQ authentication](https://helpcenter.threatq.com/Developer_Resources/SDK/Authentication.htm) for credential setup.
 
 ## Test connectors
 
@@ -53,11 +55,11 @@ Actions return the ThreatQ JSON response, including `data`, `total`, and cursor 
 
 | Action | Required parameters | Optional parameters and behavior |
 | --- | --- | --- |
-| `searchIndicators` | None | `criteria`, `filters`, `limit`, `offset`, and `sort`. Uses `POST /api/indicators/query`. |
-| `searchObjects` | `objectType` | `criteria`, `filters`, `limit`, `offset`, `sort`, and `cursorMark`. Uses `POST /api/{objectType}/query`. |
+| `searchIndicators` | None | `criteria`, `filters`, `fields`, `with`, `limit`, `offset`, and `sort`. Uses `POST /api/indicators/query`. |
+| `searchObjects` | `objectType` | `criteria`, `filters`, `fields`, `with`, `limit`, `offset`, `sort`, and `cursorMark`. Uses `POST /api/{objectType}/query`. |
 | `getIndicator` | `indicatorId` | `with` selects related fields. Defaults to attributes, sources, score, status, adversaries, and events. |
 | `getObject` | `objectType`, `objectId` | `with` selects related fields for an adversary, event, report, or another supported object type. |
-| `getRelatedObjects` | `objectType`, `objectId`, `relatedType` | `limit`, `offset`, `sort`, and `with`. Starting and related types are `indicators`, `events`, or `adversaries`. |
+| `getRelatedObjects` | `objectType`, `objectId`, `relatedType` | `limit`, `offset`, `sort`, and `with`. Starting and related types can include custom object endpoints. |
 | `listIndicatorStatuses` | None | `limit`, `offset`, and `sort`. Returns the status names and IDs configured in the instance. |
 | `listIndicatorTypes` | None | `limit`, `offset`, and `sort`. Returns indicator type names, IDs, and classes. |
 
@@ -65,7 +67,7 @@ Actions return the ThreatQ JSON response, including `data`, `total`, and cursor 
 
 The `sort` parameter accepts comma-separated fields, such as `-created_at,id`. A minus sign reverses the sort order.
 
-Search criteria and filters use ThreatQ's structured query format. The connector sends them in the request body and sends pagination fields in the query string. For example:
+Search criteria and filters use ThreatQ's structured query format. Optional `fields` selects the response fields and is sent in the JSON body. Optional `with` requests related data and is sent as a comma-separated URL parameter. The connector sends criteria and filters in the request body and pagination fields in the query string. For example:
 
 ```json
 {
@@ -86,18 +88,20 @@ Search criteria and filters use ThreatQ's structured query format. The connector
 
 Each query object accepts at most 20,000 characters, 50 entries per object or array, and five nested collection levels beneath its keys. Individual strings accept at most 2,000 characters.
 
-Pass `with` as an array of relationship names. The connector sends a comma-separated parameter. Relationship names depend on the object definitions and ThreatQ version. For example, an adversary can use `description`; some instances expose `descriptions`, `ttp`, and `attack_pattern`. Confirm the names supported by your instance. Report detail requests use the singular `report` endpoint. The API reference lists `reports` for searches; `searchObjects` accepts both names so you can use the endpoint supported by your instance.
+Pass `with` as an array of relationship names. The connector sends a comma-separated parameter. Relationship names depend on the object definitions and ThreatQ version. For example, an adversary can use `description`; some instances expose `descriptions`, `ttp`, and `attack_pattern`. Confirm the names supported by your instance. Report detail requests use the singular `report` endpoint. Use the search endpoint name supported by your instance. `objectType` and `relatedType` accept custom endpoint names with lowercase letters, digits, and underscores.
 
 ### Record investigation findings
 
 | Action | Required parameters | Optional parameters and behavior |
 | --- | --- | --- |
 | `createIndicator` | `value`, `typeId`, `statusId` | `sources`. Adds one indicator using the API's array request format. The response can identify an existing indicator. |
-| `updateIndicatorStatus` | `indicatorId`, `statusId` | Updates only `status_id`. Resolve the target ID with `listIndicatorStatuses`. |
-| `addAttribute` | `objectType`, `objectId`, `name`, `value` | `sources`. Adds an attribute to an indicator, event, or adversary. |
+| `updateIndicatorStatus` | `indicatorId`, `statusId` | `sources`. Updates `status_id` with optional source attribution. Resolve the target ID with `listIndicatorStatuses`. |
+| `addAttribute` | `objectType`, `objectId`, `name`, `value` | `sources`. Adds an attribute to an object, including custom object types. |
 | `createEvent` | `title`, `type`, `happenedAt` | `sources`. Supply a configured event type and a UTC time in `YYYY-MM-DD HH:mm:ss` format. |
 | `createAdversary` | `name` | `sources`. Returns the actor ID for subsequent relationships. |
-| `linkObjects` | `objectType`, `objectId`, `relatedType`, `relatedId` | Links two existing indicators, events, or adversaries. |
+| `addTags` | `objectType`, `objectId`, `tags` | Adds up to 50 tag names using the API's array request format. |
+| `createObject` | `objectType`, `body` | Creates an object using its endpoint and JSON payload. Supports custom object definitions. Available in Workflows. |
+| `linkObjects` | `objectType`, `objectId`, `relatedType`, `relatedId` | Links two existing objects, including custom object types. |
 
 IDs must be positive integers. Discover indicator type and status IDs in the target instance before creating or updating an indicator.
 
@@ -121,11 +125,11 @@ IDs must be positive integers. Discover indicator type and status IDs in the tar
 | --- | --- | --- |
 | `listPlugins` | None | Lists installed operations. Accepts `limit`, `offset`, and `sort`. |
 | `getPlugin` | `pluginId` | Requests the `action` and `objectType` relationships. |
-| `executePlugin` | `pluginId`, `type`, `objectId`, `action` | Runs the selected operation and returns its result. |
+| `executePlugin` | `pluginId`, `type`, `objectId`, `action` | Runs the selected operation with optional `parameters` and returns its result. |
 
-Use `listPlugins` and `getPlugin` to find the plugin ID, action name, and supported object type. The plugin must be configured and enabled in ThreatQ. The `type` parameter is case-sensitive, for example `Indicator`. An action name can be `whois`, depending on the installed plugin.
+Use `listPlugins` and `getPlugin` to find the plugin ID, action name, and supported object type. The plugin must be configured and enabled in ThreatQ. Use the object type supported by the operation, for example `indicator`. Pass required action settings in `parameters`; `getPlugin` returns their definitions. An action name can be `whois`, depending on the installed plugin.
 
-Plugin execution can change data or call external services. It is not exposed as an Agent Builder tool.
+Plugin execution can change data or call external services. `executePlugin` and the generic `createObject` action are not exposed as Agent Builder tools.
 
 ## API reference
 

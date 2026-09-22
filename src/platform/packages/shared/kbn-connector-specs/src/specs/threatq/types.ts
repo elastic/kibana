@@ -54,31 +54,14 @@ const WithSchema = lazySchema(() =>
 );
 const ObjectTypeSchema = lazySchema(() =>
   z
-    .enum([
-      'adversaries',
-      'attachments',
-      'attack_pattern',
-      'campaign',
-      'course_of_action',
-      'events',
-      'exploit_target',
-      'identity',
-      'incident',
-      'indicators',
-      'intrusion_set',
-      'malware',
-      'report',
-      'signatures',
-      'tasks',
-      'tool',
-      'ttp',
-      'vulnerability',
-    ])
+    .string()
+    .min(1)
+    .max(100)
+    .regex(/^[a-z][a-z0-9_]*$/)
     .describe(
-      'ThreatQ object endpoint name, for example indicators, adversaries, events, or report (singular).'
+      'ThreatQ object endpoint name, including custom object names. Use lowercase letters, digits, and underscores; for example indicators, adversaries, events, or report.'
     )
 );
-const CoreObjectSchema = lazySchema(() => z.enum(['indicators', 'events', 'adversaries']));
 const SourcesSchema = lazySchema(() =>
   z
     .array(
@@ -101,7 +84,9 @@ const SourcesSchema = lazySchema(() =>
       })
     )
     .max(50)
-    .describe('Optional source records for the submitted intelligence; at most 50.')
+    .describe(
+      'Source records for the submitted intelligence; at most 50. When omitted, the connector default source is used if configured.'
+    )
 );
 
 export const PaginationSchema = lazySchema(() =>
@@ -131,6 +116,14 @@ export const PaginationSchema = lazySchema(() =>
 );
 export const SearchIndicatorsInputSchema = lazySchema(() =>
   PaginationSchema.extend({
+    fields: z
+      .array(z.string().min(1).max(100))
+      .max(50)
+      .optional()
+      .describe(
+        'Fields to return, for example ["id", "value", "sources.name"]. Sent in the JSON body.'
+      ),
+    with: WithSchema.optional(),
     criteria: QuerySchema.optional().describe(
       'ThreatQ search criteria, for example {"value":{"+contains":"example.com"}}. Supports nested +and and +or operators; at most 20,000 characters.'
     ),
@@ -141,7 +134,7 @@ export const SearchIndicatorsInputSchema = lazySchema(() =>
 );
 export const SearchObjectsInputSchema = lazySchema(() =>
   SearchIndicatorsInputSchema.extend({
-    objectType: ObjectTypeSchema.or(z.literal('reports')).describe(
+    objectType: ObjectTypeSchema.describe(
       'Threat Library search endpoint name, for example indicators, adversaries, or reports. The API reference uses reports for searches; some instance object definitions use report.'
     ),
     cursorMark: z
@@ -171,12 +164,12 @@ export const GetObjectInputSchema = lazySchema(() =>
 );
 export const GetRelatedObjectsInputSchema = lazySchema(() =>
   PaginationSchema.extend({
-    objectType: CoreObjectSchema.describe(
-      'Starting object type: indicators, events, or adversaries.'
+    objectType: ObjectTypeSchema.describe(
+      'Starting object endpoint, including custom object types.'
     ),
     objectId: IdSchema.describe('Starting object ID, for example 123.'),
-    relatedType: CoreObjectSchema.describe(
-      'Related objects to retrieve: indicators, events, or adversaries.'
+    relatedType: ObjectTypeSchema.describe(
+      'Related object endpoint, including custom object types.'
     ),
     with: WithSchema.optional(),
   })
@@ -201,14 +194,15 @@ export const UpdateIndicatorStatusInputSchema = lazySchema(() =>
   z.object({
     indicatorId: IdSchema.describe('ID of the indicator to update, for example 123.'),
     statusId: IdSchema.describe(
-      'Target status ID from listIndicatorStatuses. Only the status is updated.'
+      'Target status ID from listIndicatorStatuses, for example the ID for False Positive.'
     ),
+    sources: SourcesSchema.optional(),
   })
 );
 export const AddAttributeInputSchema = lazySchema(() =>
   z.object({
-    objectType: CoreObjectSchema.describe(
-      'Object type to enrich: indicators, events, or adversaries.'
+    objectType: ObjectTypeSchema.describe(
+      'Object endpoint to enrich, including custom object types.'
     ),
     objectId: IdSchema.describe('ID of the object to enrich, for example 123.'),
     name: z
@@ -254,16 +248,36 @@ export const CreateAdversaryInputSchema = lazySchema(() =>
 );
 export const LinkObjectsInputSchema = lazySchema(() =>
   z.object({
-    objectType: CoreObjectSchema.describe(
-      'Starting object type: indicators, events, or adversaries.'
+    objectType: ObjectTypeSchema.describe(
+      'Starting object endpoint, including custom object types.'
     ),
     objectId: IdSchema.describe('Starting object ID, for example 123.'),
-    relatedType: CoreObjectSchema.describe(
-      'Type of object to link: indicators, events, or adversaries.'
+    relatedType: ObjectTypeSchema.describe(
+      'Related object endpoint to link, including custom object types.'
     ),
     relatedId: IdSchema.describe('ID of the existing object to link, for example 456.'),
   })
 );
+export const AddTagsInputSchema = lazySchema(() =>
+  z.object({
+    objectType: ObjectTypeSchema,
+    objectId: IdSchema.describe('ID of the object to tag.'),
+    tags: z
+      .array(z.string().min(1).max(200))
+      .min(1)
+      .max(50)
+      .describe('Tag names to add, for example ["Elastic triage", "EICAR"].'),
+  })
+);
+export const CreateObjectInputSchema = lazySchema(() =>
+  z.object({
+    objectType: ObjectTypeSchema,
+    body: QuerySchema.describe(
+      'JSON object accepted by the target object definition, for example {"value":"Example"}. Supports custom fields and explicit sources; at most 20,000 characters.'
+    ),
+  })
+);
+
 export const GetPluginInputSchema = lazySchema(() =>
   z.object({
     pluginId: IdSchema.describe(
@@ -273,6 +287,9 @@ export const GetPluginInputSchema = lazySchema(() =>
 );
 export const ExecutePluginInputSchema = lazySchema(() =>
   z.object({
+    parameters: QuerySchema.optional().describe(
+      'Plugin-specific action parameters from getPlugin, for example {"msg":"Elastic Security rule","action":"alert"}. At most 20,000 characters.'
+    ),
     pluginId: IdSchema.describe(
       'Plugin ID from listPlugins. The plugin must be configured and enabled in ThreatQ.'
     ),
@@ -280,7 +297,9 @@ export const ExecutePluginInputSchema = lazySchema(() =>
       .string()
       .min(1)
       .max(100)
-      .describe('Case-sensitive object type from getPlugin, for example Indicator.'),
+      .describe(
+        'Object type supported by the plugin, for example indicator. Check getPlugin and the installed operation documentation.'
+      ),
     objectId: IdSchema.describe('ID of the object passed to the plugin, for example 123.'),
     action: z
       .string()
@@ -306,3 +325,6 @@ export type CreateAdversaryInput = z.infer<typeof CreateAdversaryInputSchema>;
 export type LinkObjectsInput = z.infer<typeof LinkObjectsInputSchema>;
 export type GetPluginInput = z.infer<typeof GetPluginInputSchema>;
 export type ExecutePluginInput = z.infer<typeof ExecutePluginInputSchema>;
+
+export type AddTagsInput = z.infer<typeof AddTagsInputSchema>;
+export type CreateObjectInput = z.infer<typeof CreateObjectInputSchema>;
