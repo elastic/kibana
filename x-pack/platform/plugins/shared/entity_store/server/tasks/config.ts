@@ -50,3 +50,6 @@ export const TasksConfig = {
     timeout: '60m',
   },
 } as const satisfies Record<EntityStoreTaskType, EntityStoreTaskConfig>;
+
+export const getHistorySnapshotTaskId = (namespace: string): string =>
+  `${TasksConfig[EntityStoreTaskType.enum.historySnapshot].type}:${namespace}`;

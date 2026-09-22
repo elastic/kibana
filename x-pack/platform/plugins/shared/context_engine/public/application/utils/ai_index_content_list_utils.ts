@@ -11,12 +11,11 @@ import { defineContentListFilter } from '@kbn/content-list-provider-client';
 import type { TableListViewFindItemsFn } from '@kbn/content-list-provider-client';
 import { i18n } from '@kbn/i18n';
 import type { AiIndexHttpItem } from '../../../common/http_api/ai_indices';
-import { AI_INDEX_OWNER_LABEL, AI_INDEX_TYPE_LABEL } from '../components/ai_index_list/labels';
+import { AI_INDEX_OWNER_LABEL } from '../components/ai_index_list/labels';
 
 /** Fills four rows of the three-column card grid. */
 export const AI_INDICES_PER_PAGE = 12;
 
-export const AI_INDEX_TYPE_FILTER_ID = 'aiIndexType';
 export const AI_INDEX_OWNER_FILTER_ID = 'aiIndexOwner';
 
 export interface AiIndexUserContent extends UserContentCommonSchema {
@@ -93,18 +92,6 @@ export const createFindAiIndices =
       hits,
     };
   };
-
-export const aiIndexTypeFilter = defineContentListFilter({
-  id: AI_INDEX_TYPE_FILTER_ID,
-  title: i18n.translate('xpack.contextEngine.landing.typeFilterLabel', {
-    defaultMessage: 'Type',
-  }),
-  getItemValue: (item) => item.type,
-  options: [
-    { value: 'index', label: AI_INDEX_TYPE_LABEL.index },
-    { value: 'data_stream', label: AI_INDEX_TYPE_LABEL.data_stream },
-  ],
-});
 
 export const aiIndexOwnerFilter = defineContentListFilter({
   id: AI_INDEX_OWNER_FILTER_ID,

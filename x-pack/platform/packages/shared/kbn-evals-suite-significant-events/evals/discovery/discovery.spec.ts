@@ -12,8 +12,6 @@ import { getCurrentTraceId } from '@kbn/evals';
 import type { Detection, SignificantEvent } from '@kbn/significant-events-schema';
 import type { GcsConfig } from '../../src/data_generators/replay';
 import {
-  replayIntoManagedStream,
-  SIGEVENTS_SNAPSHOT_RUN,
   SIGEVENTS_WIRED_ROOTS,
   cleanSignificantEventsDataStreams,
   ensureStreamsEnabled,
@@ -27,9 +25,9 @@ import { seedChronicBackground } from '../../src/data_generators/seed_chronic_ba
 import { evaluate } from '../../src/evaluate';
 import {
   getActiveDatasets,
+  hasExplicitDatasetSelection,
   MANAGED_STREAM_SEARCH_PATTERN,
   resolveScenarioSnapshotSource,
-  snapshotCatalogKey,
   snapshotSourceKey,
 } from '../../src/datasets';
 import type { DiscoveryScenario } from '../../src/datasets';
@@ -37,7 +35,11 @@ import {
   createDiscoveryEvaluators,
   createContinuationEvaluators,
 } from '../../src/evaluators/discovery';
-import { buildAvailableSnapshotsBySource } from '../shared';
+import {
+  buildAvailableSnapshotsBySource,
+  hasAvailableSnapshot,
+  replayDatasetIntoManagedStream,
+} from '../shared';
 import {
   extractDiscoveriesFromToolCall,
   extractSignificantEventsFromToolCall,
@@ -57,6 +59,7 @@ evaluate.describe(
   { tag: tags.serverless.observability.complete },
   () => {
     const activeDatasets = getActiveDatasets();
+    const failOnMissingSnapshot = hasExplicitDatasetSelection(process.env.SIGEVENTS_DATASET);
     const availableSnapshotsBySource = new Map<string, Set<string>>();
 
     evaluate.beforeAll(async ({ esClient, kbnClient, log }) => {
@@ -117,14 +120,15 @@ evaluate.describe(
             });
             const key = snapshotSourceKey(snapshotSource);
 
-            const availableSnapshots =
-              availableSnapshotsBySource.get(snapshotCatalogKey(snapshotSource.gcs)) ?? new Set();
-
-            if (!availableSnapshots.has(snapshotSource.snapshotName)) {
-              log.info(
-                `Snapshot "${snapshotSource.snapshotName}" not found in run "${SIGEVENTS_SNAPSHOT_RUN}" ` +
-                  `(source: ${snapshotSource.gcs.bucket}/${snapshotSource.gcs.basePathPrefix}) — skipping scenario "${scenario.input.scenario_id}"`
-              );
+            if (
+              !hasAvailableSnapshot({
+                availableSnapshotsBySource,
+                source: snapshotSource,
+                datasetId: dataset.id,
+                failOnMissingSnapshot,
+                log,
+              })
+            ) {
               continue;
             }
 
@@ -139,12 +143,12 @@ evaluate.describe(
               }
               await ensureStreamsEnabled({ esClient, apiServices, log });
 
-              const stats = await replayIntoManagedStream(
+              const stats = await replayDatasetIntoManagedStream({
                 esClient,
                 log,
-                snapshotSource.snapshotName,
-                snapshotSource.gcs
-              );
+                dataset,
+                source: snapshotSource,
+              });
 
               if (stats.created === 0) {
                 log.info(
@@ -250,12 +254,12 @@ evaluate.describe(
                         .catch(() => {});
                     }
                     await ensureStreamsEnabled({ esClient, apiServices, log });
-                    const stats = await replayIntoManagedStream(
+                    const stats = await replayDatasetIntoManagedStream({
                       esClient,
                       log,
-                      snapshotSource.snapshotName,
-                      snapshotSource.gcs
-                    );
+                      dataset,
+                      source: snapshotSource,
+                    });
                     if (stats.created === 0) {
                       throw new Error(
                         `No documents indexed after replaying snapshot "${snapshotSource.snapshotName}"`
@@ -490,12 +494,12 @@ evaluate.describe(
                       }
 
                       await ensureStreamsEnabled({ esClient, apiServices, log });
-                      const stats = await replayIntoManagedStream(
+                      const stats = await replayDatasetIntoManagedStream({
                         esClient,
                         log,
-                        snapshotSource.snapshotName,
-                        snapshotSource.gcs
-                      );
+                        dataset,
+                        source: snapshotSource,
+                      });
                       if (stats.created === 0) {
                         throw new Error(
                           `No documents indexed after replaying snapshot "${snapshotSource.snapshotName}"`

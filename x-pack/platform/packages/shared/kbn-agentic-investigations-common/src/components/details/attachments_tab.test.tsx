@@ -14,7 +14,7 @@ import { AttachmentsTab } from './details_flyout_tab_contents';
 
 const buildAttachment = (overrides: Partial<VersionedAttachment> = {}): VersionedAttachment => ({
   id: 'attachment-1',
-  type: 'blastRadius',
+  type: 'sample',
   current_version: 2,
   versions: [
     {
@@ -25,7 +25,7 @@ const buildAttachment = (overrides: Partial<VersionedAttachment> = {}): Versione
     },
     {
       version: 2,
-      data: { content: 'blast radius attachment' },
+      data: { content: 'sample attachment' },
       created_at: '2024-01-02T00:00:00Z',
       content_hash: 'b',
     },
@@ -55,7 +55,7 @@ describe('AttachmentsTab', () => {
   it('renders the latest version through the registered details renderer', () => {
     const service = createService(
       jest.fn().mockReturnValue({
-        getLabel: () => 'Blast radius',
+        getLabel: () => 'Sample',
         renderConversationDetailsContent: ({
           attachment,
         }: {
@@ -71,8 +71,8 @@ describe('AttachmentsTab', () => {
       />
     );
 
-    expect(screen.getByText('Blast radius')).toBeInTheDocument();
-    expect(screen.getByText('blast radius attachment')).toBeInTheDocument();
+    expect(screen.getByText('Sample')).toBeInTheDocument();
+    expect(screen.getByText('sample attachment')).toBeInTheDocument();
     expect(screen.queryByText('stale')).not.toBeInTheDocument();
   });
 
@@ -92,7 +92,7 @@ describe('AttachmentsTab', () => {
   it('skips hidden attachments', () => {
     const service = createService(
       jest.fn().mockReturnValue({
-        getLabel: () => 'Blast radius',
+        getLabel: () => 'Sample',
         renderConversationDetailsContent: () => <p>{'rendered'}</p>,
       })
     );
