@@ -16646,7 +16646,6 @@
     "xpack.cases.caseAction.groupedByDesc": "已分配告警将按 {groupingDescription} 分组",
     "xpack.cases.caseAction.groupedByTitle": "正按 {groupingDescription} 分组",
     "xpack.cases.casesRedesign.bulkActionsPopover.ariaLabel": "批量操作弹出窗口",
-    "xpack.cases.casesRedesign.caseTable.showingCasesTitle": "正在显示 {pageSize} 个（共 {totalRules} 个）",
     "xpack.cases.casesRedesign.columnsPopover.ariaLabel": "列弹出框",
     "xpack.cases.casesRedesign.details.createdOn": "开启：{date}",
     "xpack.cases.casesRedesign.details.editCaseNameAria": "编辑案例名称",

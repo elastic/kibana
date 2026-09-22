@@ -16641,7 +16641,6 @@
     "xpack.cases.caseAction.groupedByDesc": "割り当てられたアラートは{groupingDescription}でグループ化されます",
     "xpack.cases.caseAction.groupedByTitle": "{groupingDescription}でグループ化中",
     "xpack.cases.casesRedesign.bulkActionsPopover.ariaLabel": "一斉操作ポップオーバー",
-    "xpack.cases.casesRedesign.caseTable.showingCasesTitle": "{totalRules}件中{pageSize}件を表示中",
     "xpack.cases.casesRedesign.columnsPopover.ariaLabel": "列ポップオーバー",
     "xpack.cases.casesRedesign.details.createdOn": "オン：{date}",
     "xpack.cases.casesRedesign.details.editCaseNameAria": "ケース名の編集",

@@ -16632,7 +16632,6 @@
     "xpack.cases.caseAction.groupedByDesc": "Os alertas designados são agrupados por {groupingDescription}",
     "xpack.cases.caseAction.groupedByTitle": "Agrupando por {groupingDescription}",
     "xpack.cases.casesRedesign.bulkActionsPopover.ariaLabel": "Popover de ações em massa",
-    "xpack.cases.casesRedesign.caseTable.showingCasesTitle": "Mostrando {pageSize} de {totalRules}",
     "xpack.cases.casesRedesign.columnsPopover.ariaLabel": "Popover de colunas",
     "xpack.cases.casesRedesign.details.createdOn": "em: {date}",
     "xpack.cases.casesRedesign.details.editCaseNameAria": "Editar nome do caso",
