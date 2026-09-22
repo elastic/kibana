@@ -54,6 +54,8 @@ export const createGetPolicyFieldReferenceTool = ({
       'Found results set `documentationAvailability` to present or absent and `longFormGuidance` to not_retrieved_by_this_tool. ' +
       '`longFormGuidance` means this tool did not retrieve long-form guidance; it is not unavailable after Integration Knowledge retrieval. ' +
       'Restate `entry.documentation` only when `documentationAvailability` is present. ' +
+      "`entry.defaultValue` is the argument-less factory default, not this deployment's environment-specific default; " +
+      'a returned baseline config overrides it for cloud- or telemetry-dependent values. ' +
       'Does not read or write live policies.',
     schema: getPolicyFieldReferenceSchema,
     run: async ({ path }: z.infer<typeof getPolicyFieldReferenceSchema>, service) => {

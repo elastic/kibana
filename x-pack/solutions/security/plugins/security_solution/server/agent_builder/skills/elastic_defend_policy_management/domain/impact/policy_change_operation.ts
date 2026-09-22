@@ -190,6 +190,7 @@ export interface PolicyAssessmentBlocker {
 export interface PolicyChangeAssessment {
   readonly policy: NormalizedEndpointPolicy;
   readonly proposed: NormalizedPolicyConfig;
+  readonly proposedConfig: PreparedPolicyChangeSet['proposedConfig'];
   readonly fields: readonly FieldRegistryEntry[];
   readonly requestedOperations: readonly PolicyChangeOperation[];
   readonly changes: readonly PolicyChangeFact[];
