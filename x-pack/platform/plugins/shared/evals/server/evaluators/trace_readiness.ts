@@ -138,8 +138,12 @@ export const awaitTraceReady = async (
     const selection = await extractSelectedEvidence(traceAccessor, request.profile);
     latestProfiles = selection.profiles ?? latestProfiles;
     const { selected } = selection;
+    const partialAutoSelection = request.profile
+      ? undefined
+      : selection.profiles?.find(({ round }) => hasResolvedEvidence(round));
+    const latestSelection = selected ?? partialAutoSelection;
 
-    if (!selected || !hasResolvedEvidence(selected.round)) {
+    if (!latestSelection || !hasResolvedEvidence(latestSelection.round)) {
       baseline = undefined;
       lastEvidence = undefined;
       throw new TraceReadinessError(
@@ -153,9 +157,17 @@ export const awaitTraceReady = async (
     }
 
     lastEvidence = {
-      ...selected,
+      ...latestSelection,
       readiness: 'best_effort',
     };
+
+    if (!selected) {
+      baseline = undefined;
+      throw new TraceReadinessError(
+        `Trace ${traceAccessor.traceId} is not ready: awaiting a fully detected instrumentation profile`,
+        'not_ready'
+      );
+    }
 
     const now = Date.now();
     if (

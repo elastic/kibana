@@ -316,6 +316,42 @@ describe('awaitTraceReady', () => {
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('best-effort'));
   });
 
+  it('returns partial auto-profile evidence as best effort after the wait budget', async () => {
+    const partialRound: EvidenceRound = {
+      input: { message: 'hello' },
+      response: { message: '' },
+      steps: [],
+    };
+    extractProfilesEvidenceMock.mockResolvedValue([
+      buildProfileExtraction('otel-genai-events', EMPTY_ROUND),
+      buildProfileExtraction('elastic-inference', partialRound),
+    ]);
+
+    await expect(run({ mode: 'stable' })).resolves.toEqual(
+      expect.objectContaining({
+        profile: 'elastic-inference',
+        round: partialRound,
+        readiness: 'best_effort',
+      })
+    );
+    expect(extractProfilesEvidenceMock).toHaveBeenCalledTimes((FAST_BUDGET.retries ?? 0) + 1);
+  });
+
+  it('does not return stale partial auto-profile evidence after a later empty poll', async () => {
+    const partialRound: EvidenceRound = {
+      input: { message: 'hello' },
+      response: { message: '' },
+      steps: [],
+    };
+    extractProfilesEvidenceMock
+      .mockResolvedValueOnce([buildProfileExtraction('elastic-inference', partialRound)])
+      .mockResolvedValue([buildProfileExtraction('elastic-inference', EMPTY_ROUND)]);
+
+    await expect(run({ mode: 'stable' })).rejects.toEqual(
+      expect.objectContaining({ kind: 'unresolvable', profiles: expect.any(Array) })
+    );
+  });
+
   it('does not return stale evidence after a later unresolved poll', async () => {
     extractEvidenceMock
       .mockResolvedValueOnce(buildExtraction(READY_ROUND))
