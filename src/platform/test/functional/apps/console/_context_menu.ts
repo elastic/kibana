@@ -28,7 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should open context menu', async () => {
-      expect(await PageObjects.console.isContextMenuOpen()).to.be(false);
+      expect(await PageObjects.console.isContextMenuOpen(0)).to.be(false);
       await PageObjects.console.clickContextMenu();
       await testSubjects.existOrFail('consoleMenu');
     });
@@ -110,7 +110,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // Verify that the Select language button is hidden for kbn request
         await PageObjects.console.clickContextMenu();
-        const selectLanguageVisible = await PageObjects.console.isSelectLanguageButtonVisible();
+        const selectLanguageVisible = await PageObjects.console.isSelectLanguageButtonVisible(0);
         expect(selectLanguageVisible).to.be(false);
       });
 
