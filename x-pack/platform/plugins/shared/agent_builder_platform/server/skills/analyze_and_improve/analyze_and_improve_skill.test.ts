@@ -6,8 +6,9 @@
  */
 
 import { isAllowedBuiltinSkill } from '@kbn/agent-builder-server/allow_lists';
-import { platformCoreTools } from '@kbn/agent-builder-common/tools';
+import { contextEngineAiIndexTools, platformCoreTools } from '@kbn/agent-builder-common/tools';
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
+import { contextEngineSkillAvailability } from '../context_engine_skill_availability';
 import {
   KI_SHAPES_REFERENCE_NAME,
   STRATEGY_CATALOG_REFERENCE_NAME,
@@ -58,8 +59,32 @@ describe('analyzeAndImproveSkill', () => {
       platformCoreTools.executeEsql,
       platformCoreTools.listIndices,
       platformCoreTools.getIndexMapping,
+      contextEngineAiIndexTools.listAiIndices,
+      contextEngineAiIndexTools.describeAiIndex,
+      contextEngineAiIndexTools.queryAiIndices,
       `${internalNamespaces.workflows}.get_workflow`,
     ]);
+  });
+
+  it('is hidden in spaces where the Context Engine is off, like the other setup skills', () => {
+    expect(analyzeAndImproveSkill.availability).toBe(contextEngineSkillAvailability);
+  });
+
+  it('reads the KIs through the space-scoped AI index tools, not raw ES|QL on ai-index-*', () => {
+    const { content } = analyzeAndImproveSkill;
+
+    expect(content).not.toMatch(/`platform\.core\.execute_esql` samples them/);
+    expect(content).toContain(`\`${contextEngineAiIndexTools.listAiIndices}\` lists`);
+    expect(content).toContain(`\`${contextEngineAiIndexTools.queryAiIndices}\` samples them`);
+  });
+
+  it('starts trace reading from the queries the attached AI index already carries', () => {
+    const { content } = analyzeAndImproveSkill;
+
+    expect(content).toMatch(
+      /When the attached AI index lists `traces`, start from each entry's `query`/
+    );
+    expect(content).toMatch(/whatever the entry's\s+`type`/);
   });
 
   it('binds no tool that writes anything, so an unattended run stays a proposer', async () => {

@@ -243,6 +243,16 @@ describe('aiIndexAutomationsSkill', () => {
     expect(writer?.content).toMatch(/ki: "\$\{\{ foreach\.item\.ki \}\}"/);
   });
 
+  it('says what the unit freshness lookup must change on a data-stream destination', () => {
+    const unitTemplate = templates().find(({ name }) => name === UNIT_PROFILE_TEMPLATE_NAME);
+
+    // The lookup matches `_id`, which equals the KI id only on an index destination.
+    expect(unitTemplate?.content).toMatch(/FROM \{\{ consts\.destination_index \}\} METADATA _id/);
+    expect(unitTemplate?.content).toMatch(
+      /On a data stream `_id` is per revision: match `id` instead and keep the newest revision/
+    );
+  });
+
   describe('KI provenance in the templates', () => {
     // Id-like provenance moved to top-level `references`; `expires_at` is top-level too.
     const MOVED_ATTRIBUTES = [
@@ -576,8 +586,12 @@ describe('aiIndexAutomationsSkill', () => {
 
     it('forbids generation outright, since unbinding the tool cannot remove it', () => {
       expect(content).toMatch(/\*\*Do not generate a workflow\.\*\*/);
-      expect(content).toMatch(/in every agent's default\s+toolset/);
       expect(content).toMatch(/must not call `platform\.core\.generate_workflow`/);
+    });
+
+    it('does not claim every agent has generate_workflow, since the Context Engine agent does not', () => {
+      expect(content).not.toMatch(/in every agent's default\s+toolset/);
+      expect(content).toMatch(/the default agent has it; the Context\s+Engine agent does not/);
     });
 
     it('keeps the attachment read-only, against the generic guidance that offers an update', () => {
@@ -693,6 +707,28 @@ describe('aiIndexAutomationsSkill', () => {
       expect(content).toMatch(/\| MV_EXPAND tags\n\| WHERE tags == "ce-pilot-<runId>"/);
       expect(content).toMatch(/`MV_EXPAND tags` is not optional/);
       expect(content).toMatch(/skips multivalued\s+rows outright/);
+    });
+
+    it('reads pilot output by KI id and shows its references, not the backing _id', () => {
+      expect(content).toMatch(/\| KEEP id, title, type, content, attributes, references\n/);
+      expect(content).not.toMatch(/FROM <destination> METADATA _id\n\| MV_EXPAND tags/);
+    });
+
+    it('cleans up by KI id, which is also the handle on a data stream', () => {
+      expect(content).toMatch(/an `elasticsearch\.esql\.query` selecting `id` for the\s+tag/);
+      expect(content).toMatch(/`ki_id` set to\s+each `id`/);
+      expect(content).not.toMatch(/`ki_id` set to\s+each `_id`/);
+    });
+
+    it('confirms cleanup on the newest revision per id, since a data stream keeps deleted ones', () => {
+      expect(content).toMatch(
+        /\| INLINE STATS latest = MAX\(@timestamp\) BY id\n\| WHERE @timestamp == latest/
+      );
+      expect(content).toMatch(
+        /\| WHERE governance\.lifecycle\.status IS NULL OR governance\.lifecycle\.status != "deleted"/
+      );
+      // Mapping only appears once something wrote the field, so the filter needs a way out.
+      expect(content).toMatch(/unknown column, drop that line/);
     });
 
     it('warns that the unexpanded query looks like a pilot that wrote nothing', () => {

@@ -118,9 +118,9 @@ orients and omits `attributes.esql` rather than carrying a query that answers no
 
 The document shape — base fields, the fixed `type` vocabulary, the domain facts inside
 `attributes`, provenance as `references`, and the rule that structured values live in both
-`content` and `attributes` — is in the `ki_shapes` reference attached to this skill. Read it before judging
-what an index holds, and before writing any `type` value: the vocabulary there is the schema, and
-a value outside it is a schema change, not a KI.
+`content` and `attributes` — is in the `ki_shapes` reference attached to this skill. Read it
+before judging what an index holds, and before writing any `type` value: the vocabulary there is
+the schema, and a value outside it is a schema change, not a KI.
 
 ## Access patterns
 
@@ -334,7 +334,13 @@ Signals classify one tool call each. Traces hold the whole conversation: the pro
 in order, the final answer, and what it cost. When the scope step put traces in, load
 `agent-builder-traces` (the platform skill; it has the index, the span fields and the ES|QL to
 read captured messages) and pull four things for the AI index in scope, each with a count over the
-window:
+window.
+
+When the attached AI index lists `traces`, start from each entry's `query`: it is the ES|QL the
+index derives for that trace source, whatever the entry's `type`, so it already selects the spans
+that belong to this index. Add the window and the conditions below to it rather than writing the
+source selection yourself. Without a `traces` entry, find the spans the way `agent-builder-traces`
+describes.
 
 1. **Rounds where the agent queried the raw indices this AI index covers.** Read the prompt and the
    queries. Repeated question shapes across conversations are candidates for a systemic family;
@@ -371,8 +377,13 @@ Before proposing a change to something, read it.
   are worded. `ai-index-automations` covers how to read one, and how to attribute a KI when several
   write to the same index. A proposal that misquotes what a workflow does will be rejected on
   sight.
-- **The KIs themselves.** `platform.core.list_indices` finds the `ai-index-*` indices;
-  `platform.core.execute_esql` samples them. Aggregating by `type` and `tags` tells you what the
+- **The KIs themselves.** `platform.context_engine.list_ai_indices` lists the AI indices and the
+  target each is queried through, `platform.context_engine.describe_ai_index` gives one index's
+  fields and example queries, and
+  `platform.context_engine.query_ai_indices` samples them with the space filter applied
+  server-side; never read an AI index with `platform.core.execute_esql`. On a data-stream
+  destination one KI can be several revisions, so read the newest per `id` as `ki_shapes`
+  describes. Aggregating by `type` and `tags` tells you what the
   index actually holds, which is what determines whether an `empty_retrieval` means "missing
   content" or "content that exists under a name the agent did not guess". This is the step signals
   cannot substitute for.
@@ -425,8 +436,9 @@ their content in its `consts` so they survive re-runs of everything else.
 A targeted KI is still produced by an automation, never written by hand, and it still needs the
 prevalence rule met. Its provenance is the ids that already exist: the `trace_ids` of the signals
 behind the finding, the `data.conversation_id`, the source index and document id, or the
-`data.error` text for a constraint. They become the KI's `references`, in the URI schemes `ki_shapes` lays out,
-and the error text stays in `attributes.error_text`.
+`data.error` text for a constraint.
+They become the KI's `references`, in the URI schemes `ki_shapes` lays out, and the error text
+stays in `attributes.error_text`.
 `ai-index-automations` has the writer template that produces one.
 
 ### Shapes you will see, and what they usually mean

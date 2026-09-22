@@ -44,7 +44,10 @@ consts:
   # The Context Engine AI index the indicators are written into.
   ai_index_id: my-ai-index
   # The backing index of that AI index, read to find a unit's existing KI for the freshness check.
-  # It is the `dest.value` of the AI index: `ai-index-idx-<ai_index_id>` for an index destination.
+  # It is the `dest.value` of the AI index: `ai-index-idx-<ai_index_id>` for an index destination,
+  # where the lookup's `_id` is the KI id.
+  # On a data stream `_id` is per revision: match `id` instead and keep the newest revision
+  # (`INLINE STATS latest = MAX(@timestamp) BY id | WHERE @timestamp == latest`).
   destination_index: ai-index-idx-my-ai-index
   # The index the units are discovered in and their activity is aggregated from.
   unit_index: my-source-index

@@ -9,6 +9,7 @@ import { isAllowedBuiltinSkill } from '@kbn/agent-builder-server/allow_lists';
 import { platformCoreTools } from '@kbn/agent-builder-common/tools';
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 import { STRATEGY_CATALOG_REFERENCE_NAME } from '../context_engine_shared';
+import { contextEngineSkillAvailability } from '../context_engine_skill_availability';
 import { aiIndexSourcesSkill } from './ai_index_sources_skill';
 
 describe('aiIndexSourcesSkill', () => {
@@ -24,6 +25,10 @@ describe('aiIndexSourcesSkill', () => {
 
   it('is gated behind experimental features', () => {
     expect(aiIndexSourcesSkill.experimental).toBe(true);
+  });
+
+  it('is hidden in spaces where the Context Engine is off, like the other setup skills', () => {
+    expect(aiIndexSourcesSkill.availability).toBe(contextEngineSkillAvailability);
   });
 
   it('ships non-empty markdown content', () => {
