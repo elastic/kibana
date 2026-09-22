@@ -11,6 +11,7 @@ import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import {
   THREAT_INTEL_DIAMOND_INFERENCE_FEATURE_ID,
   THREAT_INTEL_ENRICH_INFERENCE_FEATURE_ID,
+  THREAT_INTEL_GATE_INFERENCE_FEATURE_ID,
 } from '../../common/threat_intel';
 
 /**
@@ -21,24 +22,14 @@ import {
  */
 const SECURITY_INFERENCE_PARENT_FEATURE_ID = 'security_search_inference_parent';
 
-// Taxonomy, severity, and relevance run on every report on a 4h schedule, so
-// this is the high-volume, low-stakes tier: a small model (Haiku) keeps the
-// bill and the wall clock down. Sonnet 4.6 is the fallback so enrich degrades
-// to a still-current model instead of collapsing onto the cluster default when
-// Haiku is not provisioned; it stays below the Opus tier Diamond uses. The
-// primary is a literal because Haiku 4.5 has no `defaultInferenceEndpoints`
-// constant, and a constant would not prove the endpoint is provisioned anyway.
-const ENRICH_RECOMMENDED_MODELS = [
-  '.anthropic-claude-4.5-haiku-chat_completion',
-  defaultInferenceEndpoints.ANTHROPIC_CLAUDE_4_6_SONNET,
-];
+// Each stage is pinned to one model tier. Falling through to a different tier
+// would invalidate later quality comparisons and can silently change cost.
+const GATE_RECOMMENDED_MODELS = ['.anthropic-claude-4.5-haiku-chat_completion'];
+const ENRICH_RECOMMENDED_MODELS = [defaultInferenceEndpoints.ANTHROPIC_CLAUDE_4_6_SONNET];
 
 // Diamond extraction is the one deep-reasoning stage: it reads the whole report
 // and produces structured adversary analysis, so it gets the frontier model.
-const DIAMOND_RECOMMENDED_MODELS = [
-  defaultInferenceEndpoints.ANTHROPIC_CLAUDE_4_6_OPUS,
-  defaultInferenceEndpoints.ANTHROPIC_CLAUDE_4_6_SONNET,
-];
+const DIAMOND_RECOMMENDED_MODELS = [defaultInferenceEndpoints.ANTHROPIC_CLAUDE_4_6_OPUS];
 
 /**
  * Registers the threat intel enrich and Diamond inference features so operators
@@ -58,10 +49,16 @@ export const registerThreatIntelInferenceFeatures = (
 
   const features = [
     {
+      featureId: THREAT_INTEL_GATE_INFERENCE_FEATURE_ID,
+      featureName: 'Threat Intelligence triage gate',
+      featureDescription: 'Haiku model used to reject non-intelligence before expensive reads.',
+      recommendedEndpoints: GATE_RECOMMENDED_MODELS,
+    },
+    {
       featureId: THREAT_INTEL_ENRICH_INFERENCE_FEATURE_ID,
-      featureName: 'Threat Intelligence enrichment',
+      featureName: 'Threat Intelligence core extraction',
       featureDescription:
-        'Model used to extract taxonomy, severity, and relevance from threat reports.',
+        'Sonnet model used to extract taxonomy, severity, behaviors, artifacts, and IOC verdicts.',
       recommendedEndpoints: ENRICH_RECOMMENDED_MODELS,
     },
     {
@@ -78,7 +75,7 @@ export const registerThreatIntelInferenceFeatures = (
       parentFeatureId: SECURITY_INFERENCE_PARENT_FEATURE_ID,
       taskType: 'chat_completion',
       isTechPreview: true,
-      // The two stages are deliberately on different tiers, so letting the
+      // The stages are deliberately on different tiers, so letting the
       // cluster-wide default win would collapse them onto one model and lose
       // both the cost saving on enrich and the quality on Diamond.
       ignoreGlobalDefault: true,

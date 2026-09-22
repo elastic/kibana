@@ -11,8 +11,6 @@ import { z } from '@kbn/zod/v4';
 import { THREAT_CATEGORIES, THREAT_REGIONS } from '../../../common/threat_intel';
 import { logStageUsage } from '../lib/cost_tracker';
 
-const TAXONOMY_BODY_CHAR_LIMIT = 30_000;
-
 /**
  * Keeps only values from the closed set and caps the array length. A filter
  * rather than a hard reject: one hallucinated label should not throw away an
@@ -42,7 +40,6 @@ export interface EnrichTaxonomyParams {
 }
 
 const buildTaxonomyPrompt = (params: EnrichTaxonomyParams): string => {
-  const truncated = params.text.slice(0, TAXONOMY_BODY_CHAR_LIMIT);
   const reportIdLine = params.report_id ? `Report id: ${params.report_id}\n` : '';
   const titleLine = params.title ? `Report title: ${params.title}\n` : '';
   return `You are a threat intel taxonomist. Categorize the following report AND score how useful it is for writing a detection rule.
@@ -80,7 +77,7 @@ genuinely targets multiple continents. Do not invent values
 outside the closed sets.
 
 ${reportIdLine}${titleLine}Report text:
-${truncated}`;
+${params.text}`;
 };
 
 /**

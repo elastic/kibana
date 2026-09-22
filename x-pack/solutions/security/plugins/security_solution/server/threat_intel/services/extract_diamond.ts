@@ -10,15 +10,12 @@ import type { ScopedModel } from '@kbn/agent-builder-server';
 import { z } from '@kbn/zod/v4';
 import type { CostTraceBuilder } from '../lib/cost_tracker';
 import { logStageUsage, extractUsageFromMetadata } from '../lib/cost_tracker';
-
-/**
- * Character limit applied to report text before the LLM call. Matches the
- * 30 000-char ceiling other `enrich_threat_report` steps use (extract_behaviors,
- * enrich_taxonomy) and keeps connector latency predictable on large syndicated
- * feeds. The per-vertex fallback (hard req) handles the rare case (~1% of
- * ingests) where even this truncated text exceeds the connector's context window.
- */
-export const DIAMOND_BODY_CHAR_LIMIT = 30_000;
+import {
+  fullArticleContext,
+  isContextLengthError,
+  selectDistributedArticleContext,
+  type ArticleContext,
+} from './article_context';
 
 const VERTICES = ['adversary', 'capability', 'infrastructure', 'victim'] as const;
 type DiamondVertex = (typeof VERTICES)[number];
@@ -259,6 +256,10 @@ export interface ExtractDiamondResult {
   model_id: string;
   extracted_at: string;
   extraction_mode: DiamondExtractionMode;
+  context_mode: ArticleContext['mode'];
+  context_coverage: number;
+  context_chars: number;
+  source_chars: number;
   report_id?: string;
 }
 
@@ -292,22 +293,33 @@ export const extractDiamond = async (
   params: ExtractDiamondParams
 ): Promise<ExtractDiamondResult> => {
   const { text, report_id: reportId, traceBuilder } = params;
-  const truncated = text.slice(0, DIAMOND_BODY_CHAR_LIMIT);
   const modelId = model.connector.connectorId;
   const modelName =
     (model.connector.config?.model as string | undefined) ??
     (model.connector.config?.providerConfig as { model_id?: string } | undefined)?.model_id;
   const extractedAt = new Date().toISOString();
 
-  // Single heavy call — the normal path.
+  const structured = model.chatModel.withStructuredOutput(extractDiamondLlmOutputSchema, {
+    includeRaw: true,
+  });
+  let context = fullArticleContext(text);
+
+  // Single heavy call — first with the complete source. Only a confirmed context
+  // overflow switches to evenly distributed verbatim windows.
   try {
-    const structured = model.chatModel.withStructuredOutput(extractDiamondLlmOutputSchema, {
-      includeRaw: true,
-    });
     const t0 = Date.now();
-    const result = (await structured.invoke(
-      buildSingleCallPrompt(truncated)
-    )) as RawResult<DiamondLlmOutput>;
+    let result: RawResult<DiamondLlmOutput>;
+    try {
+      result = (await structured.invoke(
+        buildSingleCallPrompt(context.text)
+      )) as RawResult<DiamondLlmOutput>;
+    } catch (error) {
+      if (!isContextLengthError(error)) throw error;
+      context = selectDistributedArticleContext(text);
+      result = (await structured.invoke(
+        buildSingleCallPrompt(context.text)
+      )) as RawResult<DiamondLlmOutput>;
+    }
     const wallMs = Date.now() - t0;
     const output = result.parsed;
 
@@ -337,6 +349,10 @@ export const extractDiamond = async (
       model_id: modelId,
       extracted_at: extractedAt,
       extraction_mode: 'single_call',
+      context_mode: context.mode,
+      context_coverage: context.coverage,
+      context_chars: context.selected_chars,
+      source_chars: context.original_chars,
       ...(reportId ? { report_id: reportId } : {}),
     };
   } catch (singleCallErr) {
@@ -346,8 +362,8 @@ export const extractDiamond = async (
     );
   }
 
-  // Per-vertex fallback on the same model — handles context overflow and
-  // parse errors on the structured schema. Each vertex is attempted
+  // Per-vertex fallback on the same model handles parse errors on the combined
+  // structured schema. Each vertex uses the same selected source context and is attempted
   // independently; a per-vertex failure defaults to NONE rather than
   // aborting the whole extraction.
   const vertexStructured = model.chatModel.withStructuredOutput(diamondVertexSchema, {
@@ -368,7 +384,7 @@ export const extractDiamond = async (
   for (const vertex of VERTICES) {
     try {
       const vertexResult = (await vertexStructured.invoke(
-        buildVertexPrompt(vertex, truncated)
+        buildVertexPrompt(vertex, context.text)
       )) as RawResult<DiamondVertexResult>;
       vertices[vertex] = vertexResult.parsed;
       succeededVertices += 1;
@@ -423,6 +439,10 @@ export const extractDiamond = async (
     model_id: modelId,
     extracted_at: extractedAt,
     extraction_mode: 'per_vertex_fallback',
+    context_mode: context.mode,
+    context_coverage: context.coverage,
+    context_chars: context.selected_chars,
+    source_chars: context.original_chars,
     ...(reportId ? { report_id: reportId } : {}),
   };
 };

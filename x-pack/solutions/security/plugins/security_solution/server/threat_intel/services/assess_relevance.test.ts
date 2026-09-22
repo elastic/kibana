@@ -37,8 +37,17 @@ describe('assessRelevance', () => {
 
   it('returns the parsed schema from the model', async () => {
     const { model } = buildModel();
-    const result = await assessRelevance(model, logger, { text: 'Volt Typhoon used LOLBins.' });
-    expect(result).toEqual(SAMPLE_OUTPUT);
+    const text = 'Volt Typhoon used LOLBins.';
+    const result = await assessRelevance(model, logger, { text });
+    expect(result).toEqual({
+      ...SAMPLE_OUTPUT,
+      context: {
+        mode: 'full',
+        original_chars: text.length,
+        selected_chars: text.length,
+        coverage: 1,
+      },
+    });
   });
 
   it('passes text into the prompt', async () => {
@@ -86,14 +95,14 @@ describe('assessRelevance', () => {
     );
   });
 
-  it('truncates body to 30 000 chars in the prompt', async () => {
+  it('sends the full body when it fits model context', async () => {
     const { model, invoke } = buildModel();
     const longText = 'x'.repeat(40_000);
     await assessRelevance(model, logger, { text: longText });
     const prompt = invoke.mock.calls[0][0] as string;
     const articleStart = prompt.indexOf('Article text:\n') + 'Article text:\n'.length;
     const bodyInPrompt = prompt.slice(articleStart);
-    expect(bodyInPrompt.length).toBeLessThanOrEqual(30_000);
+    expect(bodyInPrompt).toBe(longText);
   });
 
   it('returns every schema field', async () => {
@@ -108,6 +117,7 @@ describe('assessRelevance', () => {
         'primary_links',
         'quality_class',
         'reason',
+        'context',
       ].sort()
     );
   });

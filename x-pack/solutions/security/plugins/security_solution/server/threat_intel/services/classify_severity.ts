@@ -16,8 +16,6 @@ import {
 import { severityScore } from './severity';
 import { logStageUsage } from '../lib/cost_tracker';
 
-const SEVERITY_BODY_CHAR_LIMIT = 30_000;
-
 const severityLevelSchema = z.enum(['low', 'medium', 'high', 'critical']);
 
 /**
@@ -58,7 +56,6 @@ export const toSeverityResult = (level: SeverityLevel): ClassifySeverityResult =
 });
 
 const buildSeverityPrompt = (params: ClassifySeverityParams): string => {
-  const truncated = params.text.slice(0, SEVERITY_BODY_CHAR_LIMIT);
   const reportIdLine = params.report_id ? `Report id: ${params.report_id}\n` : '';
   const titleLine = params.title ? `Report title: ${params.title}\n` : '';
   const categoriesLine =
@@ -91,7 +88,7 @@ Do not invent urgency. Prefer medium when uncertain between medium and high.
 Prefer low for clearly non-actionable commentary.
 
 ${reportIdLine}${titleLine}${categoriesLine}${iocLine}Report text:
-${truncated}`;
+${params.text}`;
 };
 
 /**

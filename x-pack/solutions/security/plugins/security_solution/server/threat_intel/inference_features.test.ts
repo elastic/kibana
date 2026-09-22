@@ -12,6 +12,7 @@ import { registerThreatIntelInferenceFeatures } from './inference_features';
 import {
   THREAT_INTEL_DIAMOND_INFERENCE_FEATURE_ID,
   THREAT_INTEL_ENRICH_INFERENCE_FEATURE_ID,
+  THREAT_INTEL_GATE_INFERENCE_FEATURE_ID,
 } from '../../common/threat_intel';
 
 const createSetupMock = (result: { ok: boolean; error?: string } = { ok: true }) => {
@@ -29,19 +30,20 @@ describe('registerThreatIntelInferenceFeatures', () => {
     logger = loggingSystemMock.createLogger();
   });
 
-  it('registers exactly the enrich and Diamond features', () => {
+  it('registers exactly the gate, core, and Diamond features', () => {
     const { setup, register } = createSetupMock();
 
     registerThreatIntelInferenceFeatures(setup, logger);
 
-    expect(register).toHaveBeenCalledTimes(2);
+    expect(register).toHaveBeenCalledTimes(3);
     expect(register.mock.calls.map(([arg]) => arg.featureId)).toEqual([
+      THREAT_INTEL_GATE_INFERENCE_FEATURE_ID,
       THREAT_INTEL_ENRICH_INFERENCE_FEATURE_ID,
       THREAT_INTEL_DIAMOND_INFERENCE_FEATURE_ID,
     ]);
   });
 
-  it('registers the enrich feature on the cost-saving tier', () => {
+  it('registers the gate on Haiku only', () => {
     const { setup, register } = createSetupMock();
 
     registerThreatIntelInferenceFeatures(setup, logger);
@@ -51,15 +53,25 @@ describe('registerThreatIntelInferenceFeatures', () => {
       taskType: 'chat_completion',
       isTechPreview: true,
       ignoreGlobalDefault: true,
-      featureId: THREAT_INTEL_ENRICH_INFERENCE_FEATURE_ID,
-      featureName: 'Threat Intelligence enrichment',
-      featureDescription:
-        'Model used to extract taxonomy, severity, and relevance from threat reports.',
-      recommendedEndpoints: [
-        '.anthropic-claude-4.5-haiku-chat_completion',
-        defaultInferenceEndpoints.ANTHROPIC_CLAUDE_4_6_SONNET,
-      ],
+      featureId: THREAT_INTEL_GATE_INFERENCE_FEATURE_ID,
+      featureName: 'Threat Intelligence triage gate',
+      featureDescription: 'Haiku model used to reject non-intelligence before expensive reads.',
+      recommendedEndpoints: ['.anthropic-claude-4.5-haiku-chat_completion'],
     });
+  });
+
+  it('registers consolidated core extraction on Sonnet only', () => {
+    const { setup, register } = createSetupMock();
+
+    registerThreatIntelInferenceFeatures(setup, logger);
+
+    expect(register).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        featureId: THREAT_INTEL_ENRICH_INFERENCE_FEATURE_ID,
+        recommendedEndpoints: [defaultInferenceEndpoints.ANTHROPIC_CLAUDE_4_6_SONNET],
+      })
+    );
   });
 
   it('registers the Diamond feature on the frontier tier', () => {
@@ -67,7 +79,7 @@ describe('registerThreatIntelInferenceFeatures', () => {
 
     registerThreatIntelInferenceFeatures(setup, logger);
 
-    expect(register).toHaveBeenNthCalledWith(2, {
+    expect(register).toHaveBeenNthCalledWith(3, {
       parentFeatureId: 'security_search_inference_parent',
       taskType: 'chat_completion',
       isTechPreview: true,
@@ -76,15 +88,12 @@ describe('registerThreatIntelInferenceFeatures', () => {
       featureName: 'Threat Intelligence Diamond extraction',
       featureDescription:
         'Model used to extract the Diamond Model adversary analysis from threat reports.',
-      recommendedEndpoints: [
-        defaultInferenceEndpoints.ANTHROPIC_CLAUDE_4_6_OPUS,
-        defaultInferenceEndpoints.ANTHROPIC_CLAUDE_4_6_SONNET,
-      ],
+      recommendedEndpoints: [defaultInferenceEndpoints.ANTHROPIC_CLAUDE_4_6_OPUS],
     });
   });
 
-  // The two stages sit on deliberately different tiers. If the cluster-wide
-  // default were allowed to win, both would collapse onto one model, losing the
+  // The stages sit on deliberately different tiers. If the cluster-wide
+  // default were allowed to win, they would collapse onto one model, losing the
   // cost saving on enrich and the reasoning quality on Diamond.
   it('opts both features out of the global default', () => {
     const { setup, register } = createSetupMock();
@@ -103,7 +112,7 @@ describe('registerThreatIntelInferenceFeatures', () => {
 
     registerThreatIntelInferenceFeatures(setup, logger);
 
-    const [[enrich]] = register.mock.calls;
+    const [, [enrich]] = register.mock.calls;
     expect(enrich.recommendedEndpoints).not.toContain(
       defaultInferenceEndpoints.ANTHROPIC_CLAUDE_4_6_OPUS
     );
@@ -123,7 +132,10 @@ describe('registerThreatIntelInferenceFeatures', () => {
 
     registerThreatIntelInferenceFeatures(setup, logger);
 
-    expect(logger.warn).toHaveBeenCalledTimes(2);
+    expect(logger.warn).toHaveBeenCalledTimes(3);
+    expect(logger.warn).toHaveBeenCalledWith(
+      `Failed to register inference feature "${THREAT_INTEL_GATE_INFERENCE_FEATURE_ID}": parent feature missing`
+    );
     expect(logger.warn).toHaveBeenCalledWith(
       `Failed to register inference feature "${THREAT_INTEL_ENRICH_INFERENCE_FEATURE_ID}": parent feature missing`
     );
@@ -136,14 +148,14 @@ describe('registerThreatIntelInferenceFeatures', () => {
     const register = jest
       .fn()
       .mockReturnValueOnce({ ok: false, error: 'boom' })
-      .mockReturnValueOnce({ ok: true });
+      .mockReturnValue({ ok: true });
 
     registerThreatIntelInferenceFeatures(
       { features: { register } } as unknown as SearchInferenceEndpointsPluginSetup,
       logger
     );
 
-    expect(register).toHaveBeenCalledTimes(2);
+    expect(register).toHaveBeenCalledTimes(3);
     expect(logger.warn).toHaveBeenCalledTimes(1);
   });
 });

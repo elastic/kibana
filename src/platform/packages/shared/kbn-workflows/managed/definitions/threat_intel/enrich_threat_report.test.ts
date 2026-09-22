@@ -30,7 +30,7 @@ const findStepByName = (steps: unknown[], name: string): Record<string, unknown>
  * workflow-execution harness in this package, so this cannot prove how the engine
  * evaluates the gate at run time. What it does pin is the structure the fix depends
  * on, which is where the original bug lived: the completion gate probed only two of
- * the three continued steps.
+ * all continued steps.
  */
 describe('THREAT_INTEL_ENRICH_REPORT_WORKFLOW yaml', () => {
   const workflow = parse(THREAT_INTEL_ENRICH_REPORT_WORKFLOW.yaml) as {
@@ -39,7 +39,7 @@ describe('THREAT_INTEL_ENRICH_REPORT_WORKFLOW yaml', () => {
   };
 
   /** Steps whose failure must leave the report retryable. */
-  const GATED_STEPS = ['extract_iocs', 'classify_severity', 'enrich_taxonomy'] as const;
+  const GATED_STEPS = ['extract_iocs', 'enrich_report_core'] as const;
 
   const gateCondition = (name: string) => {
     const step = findStepByName(workflow.steps, name) as {
@@ -53,16 +53,16 @@ describe('THREAT_INTEL_ENRICH_REPORT_WORKFLOW yaml', () => {
   describe('completion gate', () => {
     // The bug: extract_iocs runs with on-failure continue, but the gate only probed
     // classify_severity and enrich_taxonomy. A transient IOC-route failure therefore
-    // wrote workflow_v2, which load_pending_reports filters on, so the report was
+    // wrote a completed workflow marker, which load_pending_reports filters on, so the report was
     // never revisited and never produced an indicator.
     it.each(GATED_STEPS)('requires %s to have succeeded before marking complete', (step) => {
       const gate = gateCondition('mark_llm_enrich_complete');
       expect(gate.if).toContain(`steps.${step}.error == null`);
     });
 
-    it('marks the report workflow_v2 when the gate passes', () => {
+    it('marks the report workflow_v4 when the gate passes', () => {
       const gate = gateCondition('mark_llm_enrich_complete');
-      expect(gate.with?.extraction_method).toBe('workflow_v2');
+      expect(gate.with?.extraction_method).toBe('workflow_v4');
     });
 
     it.each(GATED_STEPS)('leaves the report pending when %s failed', (step) => {
@@ -100,6 +100,32 @@ describe('THREAT_INTEL_ENRICH_REPORT_WORKFLOW yaml', () => {
       'on-failure'?: { continue?: boolean };
     };
     expect(s?.['on-failure']?.continue).toBe(true);
+  });
+
+  it('persists only IOCs adjudicated by the consolidated core', () => {
+    const step = findStepByName(workflow.steps, 'persist_extractions') as {
+      if?: string;
+      with?: { doc?: { extracted?: { iocs?: string; ioc_set_hash?: string } } };
+    };
+
+    expect(step.if).toContain('steps.enrich_report_core.error == null');
+    expect(step.with?.doc?.extracted?.iocs).toContain('steps.enrich_report_core.output.iocs');
+    expect(step.with?.doc?.extracted?.ioc_set_hash).toContain(
+      'steps.enrich_report_core.output.ioc_set_hash'
+    );
+  });
+
+  it('hard-stops rejected reports before deterministic, Sonnet, and Opus stages', () => {
+    expect(findStepByName(workflow.steps, 'persist_gate_rejection')).toBeDefined();
+    expect(findStepByName(workflow.steps, 'stop_rejected_report')).toMatchObject({
+      type: 'loop.continue',
+      if: 'variables.gate_is_intelligence: false',
+    });
+  });
+
+  it('sends complete article text and contains no blind 30K prefix slice', () => {
+    expect(THREAT_INTEL_ENRICH_REPORT_WORKFLOW.yaml).not.toContain('slice: 0, 30000');
+    expect(THREAT_INTEL_ENRICH_REPORT_WORKFLOW.yaml).not.toContain('30000');
   });
 
   // Dropped in this PR: it was a closed-set taxonomy field nothing consumed, and the

@@ -66,6 +66,10 @@ export const normalizedReportSchema = z.object({
     title: z.string(),
     body_text: z.string(),
     language: z.string().default('en'),
+    article_url: z.string().optional(),
+    rss_body_text: z.string().optional(),
+    rss_body_chars: z.number().optional(),
+    rss_truncated: z.boolean().optional(),
   }),
   severity: z.object({
     level: z.enum(SEVERITY_LEVELS),
