@@ -31,6 +31,10 @@ jest.mock('./alert_condition_step', () => ({
   AlertConditionStep: () => <div data-test-subj="mockAlertConditionStep" />,
 }));
 
+jest.mock('@kbn/core-di-browser', () => ({
+  useService: () => ({ mgetWorkflows: jest.fn().mockResolvedValue([]) }),
+}));
+
 const createState = (overrides: Partial<ComposeDiscoverState> = {}): ComposeDiscoverState => ({
   ...createInitialState({ mode: 'create' }),
   ...overrides,
