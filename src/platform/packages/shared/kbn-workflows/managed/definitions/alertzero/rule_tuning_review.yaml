@@ -514,6 +514,9 @@ steps:
                 type: string
                 maxLength: 64
             required: [change_type, summary, title, fp_pattern, reasoning, confidence]
+            anyOf:
+              - required: [proposed_interval]
+              - required: [proposed_from]
           - type: object
             properties:
               change_type:
@@ -818,7 +821,7 @@ steps:
                     value: "${{ steps.diagnose_rule.output.structured_output.proposed_threshold_value }}"
                     field: "${{ steps.diagnose_rule.output.structured_output.proposed_threshold_field | default: steps.fetch_rule.output.threshold.field }}"
                     cardinality: "${{ steps.diagnose_rule.output.structured_output.proposed_threshold_cardinality | default: steps.fetch_rule.output.threshold.cardinality }}"
-                impact: low
+                impact: medium
                 confidence: "{{ steps.diagnose_rule.output.structured_output.confidence | default: 'medium' }}"
                 autoApprove: false
 
@@ -836,7 +839,7 @@ steps:
                   id: "{{ inputs.rule_uuid }}"
                   interval: "{% if steps.diagnose_rule.output.structured_output.proposed_interval %}{{ steps.diagnose_rule.output.structured_output.proposed_interval }}{% else %}{{ steps.fetch_rule.output.interval }}{% endif %}"
                   from: "{% if steps.diagnose_rule.output.structured_output.proposed_from %}{{ steps.diagnose_rule.output.structured_output.proposed_from }}{% else %}{{ steps.fetch_rule.output.from }}{% endif %}"
-                impact: low
+                impact: medium
                 confidence: "{{ steps.diagnose_rule.output.structured_output.confidence | default: 'medium' }}"
                 autoApprove: false
 

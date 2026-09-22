@@ -115,8 +115,6 @@ outputs:
     type: number
   - name: severity
     type: string
-  - name: threshold
-    type: object
   - name: interval
     type: string
   - name: from
