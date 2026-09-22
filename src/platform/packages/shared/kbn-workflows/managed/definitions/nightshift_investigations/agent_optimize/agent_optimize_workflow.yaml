@@ -76,4 +76,6 @@ steps:
               response: '{{ inputs.response }}'
               agent_id: '{{ inputs.agent_id }}'
               connector_id: '{{ inputs.connector_id }}'
+              conversation_id: '{{ inputs.conversation_id }}'
+              round_id: '{{ inputs.round_id }}'
               sandbox_id: '{{ steps.obtain_sandbox.output.sandbox_id }}'

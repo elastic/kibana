@@ -13,6 +13,7 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { SandboxPluginStart, SandboxSession } from '@kbn/sandbox-plugin/server';
 import { runMemoryOptimize } from '../memory/register_memory';
 import { teeWorkflowLogger } from '../lib/tee_workflow_logger';
+import type { NightshiftTelemetryClient } from '../telemetry';
 import { unscopeConversationId } from '../tools/sandbox_bash/tool_utils';
 import { withTimeout } from './with_timeout';
 
@@ -29,11 +30,13 @@ export const memoryOptimizeStepDefinition = ({
   getSandboxStart,
   logger,
   isEnabled,
+  telemetry,
 }: {
   getAgentBuilder: () => AgentBuilderPluginStart | undefined;
   getSandboxStart: () => SandboxPluginStart | undefined;
   logger: Logger;
   isEnabled?: () => boolean;
+  telemetry: NightshiftTelemetryClient;
 }) =>
   createServerStepDefinition({
     id: 'nightshift.memoryOptimize',
@@ -66,6 +69,16 @@ export const memoryOptimizeStepDefinition = ({
         .max(1024)
         .optional()
         .describe('Inference connector the triggering agent used for this round.'),
+      conversation_id: z
+        .string()
+        .max(1024)
+        .optional()
+        .describe('Agent Builder conversation id for telemetry correlation.'),
+      round_id: z
+        .string()
+        .max(1024)
+        .optional()
+        .describe('Completed Agent Builder round id for telemetry correlation.'),
     }),
     outputSchema: z.object({
       status: z.literal('ok').describe('The memory optimizer finished without throwing.'),
@@ -77,7 +90,9 @@ export const memoryOptimizeStepDefinition = ({
         return { output: { status: 'ok' as const, skipped: true } };
       }
 
-      const { spaceId } = context.contextManager.getContext().workflow;
+      const workflowContext = context.contextManager.getContext();
+      const { spaceId } = workflowContext.workflow;
+      const workflowExecutionId = workflowContext.execution.id;
       const sandboxStart = getSandboxStart();
       const sandboxId = context.input.sandbox_id?.trim() ? context.input.sandbox_id : undefined;
       let session: SandboxSession | undefined;
@@ -107,24 +122,62 @@ export const memoryOptimizeStepDefinition = ({
           `hasSession=${Boolean(session)}`
       );
 
-      await withTimeout(
-        (signal) =>
-          runMemoryOptimize({
-            request: context.contextManager.getFakeRequest(),
-            agentId: context.input.agent_id,
-            userMessage: context.input.prompt,
-            assistantMessage: context.input.response,
-            session,
-            esClient: context.contextManager.getScopedEsClient(),
-            spaceId,
-            signal,
-            logger: teeWorkflowLogger(logger, context.logger),
-            getAgentBuilder,
-            connectorId: context.input.connector_id,
-          }),
-        OPTIMIZE_TIMEOUT_MS,
-        `Memory optimize timed out after ${OPTIMIZE_TIMEOUT_MS}ms`
-      );
+      let summary: Awaited<ReturnType<typeof runMemoryOptimize>>;
+      try {
+        summary = await withTimeout(
+          (signal) =>
+            runMemoryOptimize({
+              request: context.contextManager.getFakeRequest(),
+              agentId: context.input.agent_id,
+              userMessage: context.input.prompt,
+              assistantMessage: context.input.response,
+              session,
+              esClient: context.contextManager.getScopedEsClient(),
+              spaceId,
+              signal,
+              logger: teeWorkflowLogger(logger, context.logger),
+              getAgentBuilder,
+              connectorId: context.input.connector_id,
+            }),
+          OPTIMIZE_TIMEOUT_MS,
+          `Memory optimize timed out after ${OPTIMIZE_TIMEOUT_MS}ms`
+        );
+      } catch (error) {
+        telemetry.reportSemanticMemoryOptimized({
+          agent_id: context.input.agent_id ?? 'unknown',
+          ...(context.input.conversation_id
+            ? { conversation_id: context.input.conversation_id }
+            : {}),
+          ...(context.input.round_id ? { round_id: context.input.round_id } : {}),
+          workflow_execution_id: workflowExecutionId,
+          outcome: 'failure',
+        });
+        throw error;
+      }
+
+      if (summary) {
+        telemetry.reportSemanticMemoryOptimized({
+          agent_id: context.input.agent_id ?? 'unknown',
+          ...(context.input.conversation_id
+            ? { conversation_id: context.input.conversation_id }
+            : {}),
+          ...(context.input.round_id ? { round_id: context.input.round_id } : {}),
+          workflow_execution_id: workflowExecutionId,
+          outcome: 'success',
+          recalled_count: summary.recalledCount,
+          loaded_count: summary.loadedCount,
+          useful_count: summary.usefulCount,
+          harmful_count: summary.harmfulCount,
+          extraction_proposed_count: summary.extractionProposedCount,
+          standalone_upsert_count: summary.standaloneUpsertCount,
+          safety_skip_count: summary.safetySkipCount,
+          merge_attempt_count: summary.mergeAttemptCount,
+          merge_success_count: summary.mergeSuccessCount,
+          harmful_archive_count: summary.harmfulArchiveCount,
+          merged_source_archive_count: summary.mergedSourceArchiveCount,
+          write_failure_count: summary.writeFailureCount,
+        });
+      }
 
       return { output: { status: 'ok' as const } };
     },

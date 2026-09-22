@@ -134,7 +134,7 @@ describe('materializeMemory', () => {
     store.retrieve = retrieve;
     const session = createSession();
 
-    const { recalledIds } = await materializeMemory({
+    const { recalledIds, summary } = await materializeMemory({
       session: session as never,
       store,
       logger: loggerMock.create(),
@@ -146,6 +146,14 @@ describe('materializeMemory', () => {
     expect(retrieve).toHaveBeenNthCalledWith(1, { query: 'try again', size: 50 });
     expect(retrieve).toHaveBeenNthCalledWith(2, { size: 20 });
     expect(recalledIds).toHaveLength(2);
+    expect(summary).toEqual(
+      expect.objectContaining({
+        retrievalMode: 'browse',
+        searchFallback: true,
+        candidateCount: 3,
+        recalledCount: 2,
+      })
+    );
   });
 
   it('writes a recalled-id sidecar for the optimizer', async () => {
@@ -231,7 +239,7 @@ describe('materializeMemory', () => {
       }))
     );
 
-    const { recalledIds, notification } = await materializeMemory({
+    const { recalledIds, notification, summary } = await materializeMemory({
       session: session as never,
       store,
       logger: loggerMock.create(),
@@ -258,6 +266,16 @@ describe('materializeMemory', () => {
       ].join('\n')
     );
     expect(notification).not.toContain('memory_a.md');
+    expect(summary).toEqual({
+      retrievalMode: 'browse',
+      searchFallback: false,
+      candidateCount: 2,
+      recalledCount: 2,
+      newPageCount: 1,
+      catalogSize: 2,
+      podReset: false,
+      notificationChars: notification.length,
+    });
   });
 
   it('emits an empty notification when every keep-set path already exists', async () => {

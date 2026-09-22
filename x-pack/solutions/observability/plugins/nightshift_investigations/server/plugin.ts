@@ -46,6 +46,7 @@ import { createCortexStore, registerCortexAiIndex } from './cortex/register_cort
 import { createDecisionTreeStore } from './decision_trees/store';
 import { registerDecisionTreeAiIndex } from './decision_trees/register_decision_trees';
 import { ensureMemoryIndex } from './memory/ensure_memory_index';
+import { setupNightshiftTelemetry } from './telemetry';
 import { createTriggerEmitter, type TriggerEmitter } from './workflows/triggers/emit';
 import { registerInvestigationsWorkflowTriggers } from './workflows/triggers/register_triggers';
 import { registerInvestigationAgentType } from './agents/investigation';
@@ -115,6 +116,10 @@ export class NightshiftInvestigationsPlugin
     // Core gates the plugin on xpack.nightshift_investigations.enabled.
     this.workflowsManagement = plugins.workflowsManagement;
     registerInvestigationsWorkflowTriggers(plugins.workflowsExtensions);
+    const telemetry = setupNightshiftTelemetry({
+      analytics: core.analytics,
+      logger: this.logger.get('telemetry'),
+    });
 
     this.cortexEnabled = this.ctx.config.get().cortex.enabled;
     this.memoryEnabled = this.ctx.config.get().memory.enabled;
@@ -271,6 +276,7 @@ export class NightshiftInvestigationsPlugin
             getSandboxStart: () => this.sandboxStart,
             logger: this.logger.get('memory'),
             isEnabled: () => this.memoryEnabled,
+            telemetry,
           })
         );
         plugins.workflowsExtensions.registerStepDefinition(
@@ -289,6 +295,7 @@ export class NightshiftInvestigationsPlugin
             getSandboxStart: () => this.sandboxStart,
             logger: this.logger.get('memory'),
             isEnabled: () => this.memoryEnabled,
+            telemetry,
           })
         );
         if (this.decisionTreesEnabled) {

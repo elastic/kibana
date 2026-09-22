@@ -77,6 +77,7 @@ describe('nightshift sandbox materialize workspace workflow', () => {
                   sandbox_id: '{{ steps.obtain_sandbox.output.sandbox_id }}',
                   prompt: '{{ inputs.prompt }}',
                   agent_id: '{{ inputs.agent_id }}',
+                  conversation_id: '{{ inputs.conversation_id }}',
                 },
               }),
             ],
