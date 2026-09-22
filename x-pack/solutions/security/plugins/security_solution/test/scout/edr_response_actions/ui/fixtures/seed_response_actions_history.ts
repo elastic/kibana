@@ -1,0 +1,209 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { randomUUID } from 'crypto';
+import type { EsClient, KbnClient } from '@kbn/scout-security';
+import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
+import {
+  ENDPOINT_ACTIONS_INDEX,
+  METADATA_DATASTREAM,
+  POLICY_RESPONSE_INDEX,
+} from '../../../../../common/endpoint/constants';
+import {
+  deleteIndexedHostsAndAlerts,
+  indexHostsAndAlerts,
+  type IndexedHostsAndAlertsResponse,
+} from '../../../../../common/endpoint/index_data';
+import {
+  indexEndpointRuleAlerts,
+  type IndexedEndpointRuleAlerts,
+} from '../../../../../common/endpoint/data_loaders/index_endpoint_rule_alerts';
+import {
+  ENDPOINT_ALERTS_INDEX,
+  ENDPOINT_DEVICE_INDEX,
+  ENDPOINT_EVENTS_INDEX,
+} from '../../../../../scripts/endpoint/common/constants';
+
+/**
+ * Rule id written onto automated response actions when they are indexed with
+ * alert ids. See `buildIEndpointAndFleetActionsBulkOperations`.
+ */
+export const SEEDED_AUTOMATED_ACTION_RULE_ID = 'generated_rule_id';
+
+export interface SeededResponseActionsHistory {
+  readonly agentIds: readonly string[];
+  readonly manualHostname: string;
+  readonly automatedHostname: string;
+  readonly ruleId: string;
+  cleanup: () => Promise<void>;
+}
+
+interface SeedResponseActionsHistoryParams {
+  esClient: EsClient;
+  kbnClient: KbnClient;
+  spaceId: string;
+}
+
+/**
+ * Fleet policies and response actions are visible only in the space that
+ * created them. Scope Kibana requests at the worker space so the history
+ * page, which runs in that space, can see the seeded rows.
+ */
+const scopeKbnClientToSpace = (kbnClient: KbnClient, spaceId: string): KbnClient => {
+  const prefix = `/s/${spaceId}`;
+
+  return new Proxy(kbnClient, {
+    get(target, property, receiver) {
+      if (property === 'request') {
+        return (options: Parameters<KbnClient['request']>[0]) => {
+          const path = options.path.startsWith('/') ? options.path : `/${options.path}`;
+          const scopedPath = path.startsWith(`${prefix}/`) ? path : `${prefix}${path}`;
+          return target.request({ ...options, path: scopedPath });
+        };
+      }
+
+      const value: unknown = Reflect.get(target, property, receiver);
+      return typeof value === 'function' ? value.bind(target) : value;
+    },
+  }) as KbnClient;
+};
+
+const indexResponseActionHost = ({
+  esClient,
+  kbnClient,
+  numResponseActions,
+  alertIds,
+}: Omit<SeedResponseActionsHistoryParams, 'spaceId'> & {
+  numResponseActions: number;
+  alertIds?: string[];
+}): Promise<IndexedHostsAndAlertsResponse> => {
+  return indexHostsAndAlerts(
+    esClient,
+    kbnClient,
+    `history-log-${randomUUID()}`,
+    1,
+    1,
+    METADATA_DATASTREAM,
+    POLICY_RESPONSE_INDEX,
+    ENDPOINT_EVENTS_INDEX,
+    ENDPOINT_ALERTS_INDEX,
+    ENDPOINT_DEVICE_INDEX,
+    1,
+    true,
+    {},
+    EndpointDocGenerator,
+    true,
+    numResponseActions,
+    alertIds,
+    false
+  );
+};
+
+const hostIdentity = (
+  indexed: IndexedHostsAndAlertsResponse
+): { agentId: string; hostname: string } => {
+  const host = indexed.hosts[indexed.hosts.length - 1];
+  const agentId = host?.agent.id;
+  const hostname = host?.host.name;
+
+  if (!agentId || !hostname) {
+    throw new Error('Indexed endpoint host is missing an agent id or hostname');
+  }
+
+  return { agentId, hostname };
+};
+
+/**
+ * Indexes the same mix the Cypress history spec used: two manual response
+ * actions on one host, and one rule-triggered action on another host.
+ * Response actions live in a deployment-wide index, so callers should scope
+ * the history page to `agentIds`.
+ */
+export const seedResponseActionsHistory = async ({
+  esClient,
+  kbnClient: rootKbnClient,
+  spaceId,
+}: SeedResponseActionsHistoryParams): Promise<SeededResponseActionsHistory> => {
+  const kbnClient = scopeKbnClientToSpace(rootKbnClient, spaceId);
+  let manual: IndexedHostsAndAlertsResponse | undefined;
+  let automated: IndexedHostsAndAlertsResponse | undefined;
+  let alerts: IndexedEndpointRuleAlerts | undefined;
+
+  const cleanup = async (): Promise<void> => {
+    if (automated) {
+      await deleteIndexedHostsAndAlerts(esClient, kbnClient, automated);
+    }
+    if (manual) {
+      await deleteIndexedHostsAndAlerts(esClient, kbnClient, manual);
+    }
+    if (alerts) {
+      await alerts.cleanup();
+    }
+  };
+
+  try {
+    const endpointAgentId = randomUUID();
+    alerts = await indexEndpointRuleAlerts({
+      esClient,
+      kbnClient,
+      endpointAgentId,
+      endpointHostname: `history-log-alert-${randomUUID()}`,
+      endpointIsolated: false,
+    });
+
+    const alertId = alerts.alerts[0]?._id;
+    if (!alertId) {
+      throw new Error('Failed to index an endpoint rule alert for response action history');
+    }
+
+    manual = await indexResponseActionHost({
+      esClient,
+      kbnClient,
+      numResponseActions: 2,
+    });
+    automated = await indexResponseActionHost({
+      esClient,
+      kbnClient,
+      numResponseActions: 1,
+      alertIds: [alertId],
+    });
+
+    const manualHost = hostIdentity(manual);
+    const automatedHost = hostIdentity(automated);
+    await assertAutomatedActionRuleId(esClient, automatedHost.agentId);
+
+    return {
+      agentIds: [manualHost.agentId, automatedHost.agentId],
+      manualHostname: manualHost.hostname,
+      automatedHostname: automatedHost.hostname,
+      ruleId: SEEDED_AUTOMATED_ACTION_RULE_ID,
+      cleanup,
+    };
+  } catch (error) {
+    await cleanup().catch(() => undefined);
+    throw error;
+  }
+};
+
+const assertAutomatedActionRuleId = async (esClient: EsClient, agentId: string): Promise<void> => {
+  const response = await esClient.search<{ rule?: { id?: string } }>({
+    index: ENDPOINT_ACTIONS_INDEX,
+    size: 1,
+    query: {
+      bool: {
+        filter: [{ term: { 'agent.id': agentId } }, { term: { 'user.id': 'unknown' } }],
+      },
+    },
+  });
+  const ruleId = response.hits.hits[0]?._source?.rule?.id;
+
+  if (ruleId !== SEEDED_AUTOMATED_ACTION_RULE_ID) {
+    throw new Error(
+      `Expected the seeded automated response action to reference rule "${SEEDED_AUTOMATED_ACTION_RULE_ID}", got "${ruleId}"`
+    );
+  }
+};
