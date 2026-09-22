@@ -23,7 +23,6 @@ import {
   take,
 } from 'rxjs';
 import type { Observable } from 'rxjs';
-import { v4 as uuidv4 } from 'uuid';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
@@ -61,10 +60,10 @@ import {
   handleCancellation,
   createAbortedError,
   executeAgent$,
-  getConversation,
   appendRoundTerminated$,
   appendResumeExecution$,
   executionStartedEvents$,
+  getConversation,
   resolveServices,
   convertErrors,
   toClientError,
@@ -179,7 +178,8 @@ const handleConversationExecution = async ({
     structuredOutput,
     outputSchema,
     storeConversation = true,
-    autoCreateConversationWithId = false,
+    accessControl,
+    readOnly,
     origin,
     nextInput,
     browserApiTools,
@@ -187,11 +187,9 @@ const handleConversationExecution = async ({
     telemetryMetadata,
     maxContentLength,
     reasoningLevel,
-    accessControl,
     subagentCreation,
-    readOnly,
     projectRouting,
-    roundId: providedRoundId,
+    roundId,
     conversationOperation,
   } = execution.agentParams;
 
@@ -207,35 +205,29 @@ const handleConversationExecution = async ({
     ...deps,
   });
 
-  // Get conversation — only the conversation-level part of the origin is persisted on it
-  const resolvedConversation = await getConversation({
-    agentId,
-    conversationId,
-    autoCreateConversationWithId,
-    conversationClient,
-    accessControl,
-    readOnly,
-    origin: origin ? { external_conversation_id: origin.external_conversation_id } : undefined,
-    subagentCreation,
-  });
-
   const author = await deps.conversationService.getConversationRoundAuthor({
     request,
     origin,
   });
 
-  // The execution service resolved the conversation and wrote the opening user message before
-  // this run was dispatched, so the round reuses the id it opened and reports the creation the
-  // service performed — by now the conversation is stored either way.
+  // The execution service resolved the conversation, created it when it was new and wrote the
+  // opening user message before this run was dispatched: the run reads the stored document and is
+  // told how the request resolved it, since its own read only ever sees an update. A run that does
+  // not store its conversation wrote nothing to read, so it resolves the placeholder here.
+  const conversation: ConversationWithOperation = storeConversation
+    ? { ...(await conversationClient.get(conversationId)), operation: conversationOperation }
+    : await getConversation({
+        agentId,
+        conversationId,
+        autoCreateConversationWithId: true,
+        conversationClient,
+        accessControl,
+        readOnly,
+        origin: origin ? { external_conversation_id: origin.external_conversation_id } : undefined,
+        subagentCreation,
+      });
 
-  // fallback: an execution record written before the service reserved the round id
-  const roundId = providedRoundId ?? uuidv4();
   const receivedAt = new Date();
-  const conversation: ConversationWithOperation = {
-    ...resolvedConversation,
-    // the resolution above re-reads a stored conversation, so a creation only shows up here
-    operation: conversationOperation ?? resolvedConversation.operation,
-  };
 
   const roundOrigin = origin ? { type: origin.type } : undefined;
   const telemetryOrigin = resolveTelemetryOrigin({ conversation, requestOrigin: origin?.type });
