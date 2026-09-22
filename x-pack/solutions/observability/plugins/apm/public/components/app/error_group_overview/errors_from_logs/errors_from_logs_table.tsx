@@ -22,6 +22,8 @@ interface Props {
   logsIndexPattern: string | undefined;
   tableCaption: string;
   noItemsMessage?: React.ReactNode;
+  /** Pass-through to EuiInMemoryTable — shows a spinner while a new page/query loads. */
+  loading?: boolean;
   /**
    * When true: 5 rows, no per-page options, no Type column, no search bar.
    * Mirrors ErrorGroupList's `isCompactMode` for the service Overview.
@@ -36,6 +38,7 @@ export function ErrorsFromLogsTable({
   logsIndexPattern,
   tableCaption,
   noItemsMessage,
+  loading = false,
   isCompactMode = false,
 }: Props) {
   const [searchQuery, setSearchQuery] = useState('');
@@ -76,6 +79,7 @@ export function ErrorsFromLogsTable({
           pageSize: isCompactMode ? 5 : 10,
         }}
         noItemsMessage={noItemsMessage}
+        loading={loading}
         compressed
       />
     </>

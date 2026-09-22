@@ -52,6 +52,7 @@ export function ErrorsFromLogsSection({
   rangeTo,
   rows,
   status,
+  isLoading,
   maxCountExceeded,
 }: Props) {
   const { logsIndexPattern } = useLogsIndexPattern();
@@ -181,6 +182,7 @@ export function ErrorsFromLogsSection({
                 rangeTo={rangeTo}
                 logsIndexPattern={logsIndexPattern}
                 tableCaption={tableCaption}
+                loading={isLoading}
                 noItemsMessage={
                   <EuiText size="s" color="subdued">
                     <p data-test-subj="apmErrorsFromLogsEmptyState">
