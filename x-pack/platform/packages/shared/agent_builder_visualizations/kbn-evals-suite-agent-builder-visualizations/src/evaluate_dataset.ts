@@ -55,6 +55,8 @@ export type { VisualizationGoldConfig };
 export type VisualizationDatasetExample = Example<
   {
     question: string;
+    /** Second turn in the same conversation; evaluators score the visualization it produces. */
+    followUp?: string;
   },
   {
     /**
@@ -85,6 +87,8 @@ export interface VisualizationAgentTaskOutput {
   visualizations: ExtractedVisualization[];
   agentTraceId?: string;
   traceId?: string;
+  /** Number of converse turns the task ran (1, or 2 for edit examples). */
+  turns: number;
 }
 
 export type VisualizationAgentEvaluator = Evaluator<
@@ -241,20 +245,32 @@ export function createEvaluateDataset({
       metadata,
     }) => {
       const agentId = getStringMeta(metadata, 'agentId') ?? defaultAgentId;
-      const response = await agentBuilderClient.converse({
+      const first = await agentBuilderClient.converse({
         agentId,
         input: input?.question ?? '',
       });
 
-      const visualizations = extractVisualizations(response);
+      // Edit examples continue the conversation; only the edited chart is scored,
+      // but the trajectory sees the tool calls of both turns.
+      const followUp = input?.followUp;
+      const last = followUp
+        ? await agentBuilderClient.converse({
+            agentId,
+            input: followUp,
+            conversationId: first.conversationId,
+          })
+        : first;
+
+      const visualizations = extractVisualizations(last);
 
       return {
         errors: [],
-        messages: [{ message: response.message }],
-        steps: response.steps,
+        messages: [{ message: last.message }],
+        steps: [...(first.steps ?? []), ...(followUp ? last.steps ?? [] : [])],
         visualizations,
         esql: visualizations.map((visualization) => visualization.esql).join('\n'),
-        agentTraceId: response.traceId,
+        agentTraceId: last.traceId,
+        turns: followUp ? 2 : 1,
       };
     };
 

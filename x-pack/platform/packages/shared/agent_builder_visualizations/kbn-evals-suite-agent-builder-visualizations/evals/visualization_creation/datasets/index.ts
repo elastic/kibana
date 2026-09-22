@@ -7,13 +7,14 @@
 
 import type { VisualizationDatasetExample } from '../../../src/evaluate_dataset';
 import { ECOMMERCE_EXAMPLES } from './ecommerce';
+import { VISUALIZATION_EDIT_EXAMPLES } from './edits';
 import { HOST_METRICS_EXAMPLES } from './host_metrics';
 import { LOGS_EXAMPLES } from './logs';
 import { VISUALIZATION_REFUSAL_EXAMPLES } from './negatives';
 import { VEGA_EXAMPLES } from './vega';
 
 export { GOLDEN_TOOL_PATH } from './golden_tool_path';
-export { VISUALIZATION_REFUSAL_EXAMPLES };
+export { VISUALIZATION_REFUSAL_EXAMPLES, VISUALIZATION_EDIT_EXAMPLES };
 
 export const VISUALIZATION_CREATION_EXAMPLES: VisualizationDatasetExample[] = [
   ...LOGS_EXAMPLES,

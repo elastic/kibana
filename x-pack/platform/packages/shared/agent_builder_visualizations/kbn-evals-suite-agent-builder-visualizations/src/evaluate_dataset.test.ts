@@ -45,6 +45,7 @@ const buildDeps = () => {
     message: 'Here is your chart.',
     steps: [{ type: 'tool_call', tool_id: 'load_skill', results: [] }, VISUALIZATION_STEP],
     traceId: 'trace-id-fixture',
+    conversationId: 'conversation-1',
   });
 
   return {
@@ -122,9 +123,51 @@ describe('createEvaluateDataset', () => {
       expect.objectContaining({
         esql: 'FROM kibana_sample_data_logs | STATS c = COUNT(*)',
         agentTraceId: 'trace-id-fixture',
+        turns: 1,
         messages: [{ message: 'Here is your chart.' }],
         visualizations: [
           expect.objectContaining({ chartType: 'metric', renderer: 'lens' }),
+        ],
+      })
+    );
+  });
+
+  it('runs a follow-up turn in the same conversation and scores the edited chart', async () => {
+    const { task, converse } = await runDataset();
+    converse
+      .mockResolvedValueOnce({
+        message: 'First chart.',
+        steps: [{ type: 'tool_call', tool_id: 'load_skill', results: [] }, VISUALIZATION_STEP],
+        traceId: 'trace-1',
+        conversationId: 'conversation-1',
+      })
+      .mockResolvedValueOnce({
+        message: 'Edited chart.',
+        steps: [VISUALIZATION_STEP],
+        traceId: 'trace-2',
+        conversationId: 'conversation-1',
+      });
+
+    const output = await task({
+      input: { question: 'Create a bar chart', followUp: 'Make it horizontal' },
+      metadata: {},
+    });
+
+    expect(converse).toHaveBeenCalledTimes(2);
+    expect(converse).toHaveBeenLastCalledWith({
+      agentId: 'default-agent',
+      input: 'Make it horizontal',
+      conversationId: 'conversation-1',
+    });
+    expect(output).toEqual(
+      expect.objectContaining({
+        turns: 2,
+        agentTraceId: 'trace-2',
+        messages: [{ message: 'Edited chart.' }],
+        steps: [
+          expect.objectContaining({ tool_id: 'load_skill' }),
+          expect.objectContaining({ tool_id: 'platform.core.create_visualization' }),
+          expect.objectContaining({ tool_id: 'platform.core.create_visualization' }),
         ],
       })
     );

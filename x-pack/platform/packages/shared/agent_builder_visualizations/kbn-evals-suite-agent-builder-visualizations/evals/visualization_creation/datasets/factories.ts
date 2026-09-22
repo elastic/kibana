@@ -39,6 +39,24 @@ const features = (list: Array<ConfigFeature | false>): { configFeatures?: Config
   return present.length === 0 ? {} : { configFeatures: present };
 };
 
+/**
+ * Two-turn example: `create` is asked first, `edit` continues the conversation,
+ * and `gold` describes the chart after the edit. Only the edited chart is scored.
+ */
+export const editExample = ({
+  create,
+  edit,
+  gold,
+}: {
+  create: string;
+  edit: string;
+  gold: VisualizationDatasetExample;
+}): VisualizationDatasetExample => ({
+  ...gold,
+  input: { question: create, followUp: edit },
+  metadata: { ...(gold.metadata ?? {}), multiTurn: true },
+});
+
 /** Stamps the data source onto every example of a dataset file. */
 export const withDataSource = (
   dataSource: DataSource,

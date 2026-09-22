@@ -9,7 +9,11 @@ import { collectColumnBindings } from '../../../src/evaluators/column_binding_in
 import { extractGoldQuery } from '../../../src/evaluators/gold_visualization_config';
 import { HOST_METRICS_INDEX, buildHostLoadEvents } from '../../../src/fixtures/host_load_metrics';
 import type { DataSource } from './factories';
-import { VISUALIZATION_CREATION_EXAMPLES, VISUALIZATION_REFUSAL_EXAMPLES } from '.';
+import {
+  VISUALIZATION_CREATION_EXAMPLES,
+  VISUALIZATION_EDIT_EXAMPLES,
+  VISUALIZATION_REFUSAL_EXAMPLES,
+} from '.';
 
 /**
  * Contract between the dataset and the data it runs against. Catches a gold
@@ -31,11 +35,22 @@ const stripBackticks = (value: string): string => value.replace(/`/g, '');
 const describeExample = (question: string) => question.slice(0, 60);
 
 describe('visualization creation dataset contract', () => {
-  const examples = VISUALIZATION_CREATION_EXAMPLES;
+  const examples = [...VISUALIZATION_CREATION_EXAMPLES, ...VISUALIZATION_EDIT_EXAMPLES];
 
-  it('has unique questions', () => {
-    const questions = examples.map((example) => example.input?.question);
-    expect(new Set(questions).size).toBe(questions.length);
+  it('has unique prompts within each dataset', () => {
+    for (const dataset of [VISUALIZATION_CREATION_EXAMPLES, VISUALIZATION_EDIT_EXAMPLES]) {
+      const prompts = dataset.map((example) =>
+        [example.input?.question, example.input?.followUp].join(' / ')
+      );
+      expect(new Set(prompts).size).toBe(prompts.length);
+    }
+  });
+
+  it('marks every edit example as multi-turn with a follow-up', () => {
+    for (const example of VISUALIZATION_EDIT_EXAMPLES) {
+      expect(example.input?.followUp).toEqual(expect.any(String));
+      expect(example.metadata?.multiTurn).toBe(true);
+    }
   });
 
   it.each(examples.map((example) => [describeExample(example.input?.question ?? ''), example]))(
