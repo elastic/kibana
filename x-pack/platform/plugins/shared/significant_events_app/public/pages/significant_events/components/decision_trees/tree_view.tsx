@@ -169,7 +169,7 @@ export function TreeView({ symptom }: TreeViewProps) {
           defaultMessage: 'Learnings',
         })}
       >
-        <LearningsPanel learnings={tree.learnings} />
+        <LearningsPanel key={tree.tree_id} learnings={tree.learnings} />
       </Section>
 
       <Section

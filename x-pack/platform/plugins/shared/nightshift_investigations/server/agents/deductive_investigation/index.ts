@@ -15,6 +15,7 @@ import {
   NIGHTSHIFT_DECISION_TREE_REINFORCE_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import instructions from './instructions/deductive_investigator.md.text';
+import decisionTreesSection from './instructions/decision_trees.text';
 import { SANDBOX_BASH_TOOL_ID } from '../../tools/sandbox_bash/tool';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from '../../tools/sandbox_bash/view_file_tool';
 import { SANDBOX_STR_REPLACE_TOOL_ID } from '../../tools/sandbox_bash/str_replace_tool';
@@ -24,6 +25,21 @@ export const NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_ID =
   'significant-events.deductive-investigation';
 export const NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_TYPE_ID =
   'platform.sig_events.deductive-investigation-type';
+
+/** Interpolated only when hydrate will actually write `/workspace/decision-trees/`. */
+const DECISION_TREES_LOAD_STEP =
+  ' Also check `/workspace/decision-trees/monitors.md` for a prior decision tree matching this symptom — see <decision_trees>.';
+
+const fillDecisionTreeInstructions = (includeDecisionTrees: boolean): string =>
+  instructions
+    .replace(
+      '{{decision_trees_load_step}}',
+      includeDecisionTrees ? DECISION_TREES_LOAD_STEP : ''
+    )
+    .replace(
+      '{{decision_trees_section}}',
+      includeDecisionTrees ? `\n${decisionTreesSection.trimEnd()}\n` : ''
+    );
 
 const SANDBOX_TOOL_IDS = [
   SANDBOX_BASH_TOOL_ID,
@@ -60,7 +76,7 @@ export const getDeductiveInvestigationAgentType = ({
   description: DEDUCTIVE_INVESTIGATION_AGENT_DESCRIPTION,
   avatar_icon: 'logoElastic',
   baseConfiguration: {
-    instructions,
+    instructions: fillDecisionTreeInstructions(sandboxEnabled && decisionTreesEnabled),
     skill_ids: [],
     tools: [
       {
