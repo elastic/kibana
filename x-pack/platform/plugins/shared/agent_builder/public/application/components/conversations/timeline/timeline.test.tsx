@@ -13,18 +13,8 @@ import { Timeline } from './timeline';
 
 jest.mock('./items/user_message_event', () => ({ UserMessageEvent: () => null }));
 jest.mock('./agent_turn', () => ({
-  AgentTurn: ({
-    showHeader,
-    isGroupLoading,
-  }: {
-    showHeader?: boolean;
-    isGroupLoading?: boolean;
-  }) => (
-    <div
-      data-test-subj="agentTurn"
-      data-show-header={String(showHeader)}
-      data-group-loading={String(isGroupLoading)}
-    />
+  AgentTurn: ({ isResuming }: { isResuming?: boolean }) => (
+    <div data-test-subj="agentTurn" data-resuming={String(isResuming)} />
   ),
 }));
 
@@ -50,68 +40,35 @@ describe('Timeline', () => {
     ).toEqual(['round-1::user_message', 'round-1::execution']);
   });
 
-  describe('group loading', () => {
+  describe('resume loading', () => {
     const message = (id: string): TimelineItem => ({
       kind: 'userMessage',
       key: id,
       event: createUserMessageEvent({ id, created_at: '2025-01-01T09:00:00.000Z' }),
     });
-    const turn = (
-      key: string,
-      status: 'completed' | 'running',
-      startedAt = '2025-01-01T09:00:10.000Z'
-    ): TimelineItem => ({
+    const turn = (key: string): TimelineItem => ({
       kind: 'agentTurn',
       key,
-      status,
-      startedAt,
+      status: 'completed',
+      startedAt: '2025-01-01T09:00:10.000Z',
       steps: [],
     });
 
-    const turnFlags = () =>
-      screen.getAllByTestId('agentTurn').map((el) => ({
-        header: el.getAttribute('data-show-header'),
-        loading: el.getAttribute('data-group-loading'),
-      }));
+    const resumingFlags = () =>
+      screen.getAllByTestId('agentTurn').map((el) => el.getAttribute('data-resuming'));
 
-    it('spins the header turn of a group while a later grouped turn runs', () => {
-      render(<Timeline items={[message('u1'), turn('t1', 'completed'), turn('t2', 'running')]} />);
-
-      expect(turnFlags()).toEqual([
-        { header: 'true', loading: 'true' },
-        { header: 'false', loading: 'false' },
-      ]);
-    });
-
-    it('does not spin an earlier day group when a later day turn runs', () => {
+    it('marks only the last turn as resuming while a resume is in flight', () => {
       render(
-        <Timeline
-          items={[
-            turn('t1', 'completed', '2025-01-01T09:00:10.000Z'),
-            turn('t2', 'running', '2025-01-02T09:00:10.000Z'),
-          ]}
-        />
+        <Timeline items={[message('u1'), turn('t1'), message('u2'), turn('t2')]} isResuming />
       );
 
-      // Different days render two headers; the scan must not cross the day boundary.
-      expect(turnFlags()).toEqual([
-        { header: 'true', loading: 'false' },
-        { header: 'true', loading: 'true' },
-      ]);
+      expect(resumingFlags()).toEqual(['false', 'true']);
     });
 
-    it('spins the last group while a resume is in flight with no turn yet', () => {
-      render(
-        <Timeline
-          items={[message('u1'), turn('t1', 'completed'), message('u2'), turn('t2', 'completed')]}
-          isResuming
-        />
-      );
+    it('marks no turn as resuming otherwise', () => {
+      render(<Timeline items={[message('u1'), turn('t1'), message('u2'), turn('t2')]} />);
 
-      expect(turnFlags()).toEqual([
-        { header: 'true', loading: 'false' },
-        { header: 'true', loading: 'true' },
-      ]);
+      expect(resumingFlags()).toEqual(['false', 'false']);
     });
   });
 
