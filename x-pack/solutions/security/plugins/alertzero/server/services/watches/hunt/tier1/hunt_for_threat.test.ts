@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { huntForThreat } from './hunt_for_threat';
-import type { ResolvedIndexScope } from '../common/types';
+import type { ResolvedIndexScope } from '@kbn/alertzero-common';
 
 const scope: ResolvedIndexScope = {
   technology: 'aws_iam',

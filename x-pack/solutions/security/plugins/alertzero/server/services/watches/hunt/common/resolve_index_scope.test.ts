@@ -8,7 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { resolveIndexScope } from './resolve_index_scope';
 import { HUNT_ALERTS_INDEX_PATTERN_PREFIX } from '../../../../../common/constants';
-import type { HuntTechnology } from './types';
+import type { HuntTechnology } from '@kbn/alertzero-common';
 
 const present = { indices: [{ name: 'x', attributes: [] }], aliases: [], data_streams: [] };
 const absent = { indices: [], aliases: [], data_streams: [] };
