@@ -22,6 +22,7 @@ export {
   ES_SEARCH_SYNONYMS_ID,
   SEARCH_INDEX_MANAGEMENT,
   SEARCH_QUERY_RULES_ID,
+  SEARCH_ALERTING_APP_ID,
 } from './constants';
 
 export type {
@@ -30,4 +31,5 @@ export type {
   EnterpriseSearchApplicationsApp,
   EnterpriseSearchAnalyticsApp,
   DeepLinkId,
+  SearchAlertingLinkId,
 } from './deep_links';

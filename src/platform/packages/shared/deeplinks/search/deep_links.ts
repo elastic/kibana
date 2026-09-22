@@ -20,6 +20,7 @@ import type {
   SEARCH_QUERY_RULES_ID,
   SEARCH_INDEX_MANAGEMENT,
   SEARCH_GETTING_STARTED,
+  SEARCH_ALERTING_APP_ID,
 } from './constants';
 
 export type EnterpriseSearchApp = typeof ENTERPRISE_SEARCH_APP_ID;
@@ -34,12 +35,21 @@ export type SearchQueryRulesId = typeof SEARCH_QUERY_RULES_ID;
 export type SearchHomepage = typeof SEARCH_HOMEPAGE;
 export type SearchIndexManagement = typeof SEARCH_INDEX_MANAGEMENT;
 export type SearchGettingStarted = typeof SEARCH_GETTING_STARTED;
+export type SearchAlertingApp = typeof SEARCH_ALERTING_APP_ID;
 
 export type ContentLinkId = 'connectors' | 'webCrawlers';
 
 export type ApplicationsLinkId = 'searchApplications';
 
 export type SynonymsLinkId = 'synonyms';
+
+export type SearchAlertingLinkId =
+  | 'inbox'
+  | 'rules-v1'
+  | 'rules-v2'
+  | 'rule-library'
+  | 'action-policies'
+  | 'execution-history';
 
 export type DeepLinkId =
   | EnterpriseSearchApp
@@ -56,4 +66,6 @@ export type DeepLinkId =
   | `${EnterpriseSearchApplicationsApp}:${ApplicationsLinkId}`
   | `${SearchSynonymsId}:${SynonymsLinkId}`
   | SearchIndexManagement
-  | SearchGettingStarted;
+  | SearchGettingStarted
+  | SearchAlertingApp
+  | `${SearchAlertingApp}:${SearchAlertingLinkId}`;
