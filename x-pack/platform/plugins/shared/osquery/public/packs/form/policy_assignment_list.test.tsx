@@ -101,6 +101,29 @@ describe('PolicyAssignmentList', () => {
       expect(screen.getByText('No agent policies found')).toBeInTheDocument();
     });
 
+    it('renders the field label and help text', () => {
+      render(<FormWrapper />);
+      expect(screen.getByText('Scheduled agent policies (optional)')).toBeInTheDocument();
+      expect(
+        screen.getByText('Queries in this pack are scheduled for agents in the selected policies.')
+      ).toBeInTheDocument();
+    });
+
+    it('sorts rows by name ascending by default', () => {
+      mockUseAgentPolicies.mockReturnValue({
+        data: {
+          agentPoliciesById: {
+            'policy-z': { name: 'Zeta Policy', agents: 1, id: 'policy-z', description: '' },
+            'policy-a': { name: 'Alpha Policy', agents: 2, id: 'policy-a', description: '' },
+          },
+        },
+      });
+      render(<FormWrapper />);
+      const rows = screen.getAllByRole('row').slice(1);
+      expect(rows[0]).toHaveTextContent('Alpha Policy');
+      expect(rows[1]).toHaveTextContent('Zeta Policy');
+    });
+
     it('renders View policy links for all rows', () => {
       render(<FormWrapper />);
       const links = screen.getAllByText('View policy');
@@ -130,6 +153,25 @@ describe('PolicyAssignmentList', () => {
       expect(screen.getByText('Alpha Policy')).toBeInTheDocument();
       expect(screen.queryByText('Beta Policy')).not.toBeInTheDocument();
       expect(screen.queryByText('Gamma Policy')).not.toBeInTheDocument();
+    });
+
+    it('shows a search-specific empty state when the filter matches nothing', () => {
+      render(<FormWrapper />);
+      const searchInput = screen.getByPlaceholderText('Search policies');
+      fireEvent.change(searchInput, { target: { value: 'no-such-policy' } });
+
+      expect(screen.getByText('No policies match your search')).toBeInTheDocument();
+      // The Fleet CTA is only actionable when Fleet genuinely has no policies.
+      expect(screen.queryByText('No agent policies found')).not.toBeInTheDocument();
+    });
+
+    it('does not match on policy id, only name', () => {
+      render(<FormWrapper />);
+      const searchInput = screen.getByPlaceholderText('Search policies');
+      fireEvent.change(searchInput, { target: { value: 'policy-1' } });
+
+      expect(screen.getByText('No policies match your search')).toBeInTheDocument();
+      expect(screen.queryByText('Alpha Policy')).not.toBeInTheDocument();
     });
   });
 

@@ -7,6 +7,7 @@
 
 import { recurse } from 'cypress-recurse';
 import { closeModalIfVisible, closeToastIfVisible } from './integrations';
+import { POLICY_ASSIGNMENT_TABLE } from '../screens/packs';
 import { navigateTo } from './navigation';
 
 export const preparePack = (packName: string) => {
@@ -66,4 +67,25 @@ export const changePackActiveStatus = (packName: string) => {
   cy.contains(regex).should('exist');
   closeToastIfVisible();
   cy.contains(regex).should('not.exist');
+};
+
+/**
+ * Selects an agent policy in the pack form's policy assignment list.
+ *
+ * Replaces the former `policyIdsComboBox` interaction. The list keeps selection
+ * in form state rather than in `EuiInMemoryTable`'s built-in `selection` prop,
+ * so the checkbox is an ordinary cell: narrow the table with the search box,
+ * then tick the checkbox on the matching row.
+ */
+export const selectPackPolicy = (policyName: string) => {
+  cy.getBySel(POLICY_ASSIGNMENT_TABLE).should('exist');
+  cy.getBySel(POLICY_ASSIGNMENT_TABLE).find('input[type="search"]').clear().type(policyName);
+
+  cy.contains('.euiTableRow', policyName)
+    .find('input[type="checkbox"]')
+    .should('not.be.disabled')
+    .check();
+
+  // Clear the filter so later assertions see the full list again.
+  cy.getBySel(POLICY_ASSIGNMENT_TABLE).find('input[type="search"]').clear();
 };

@@ -17,6 +17,7 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
   EuiInMemoryTable,
   EuiLink,
   EuiPanel,
@@ -213,6 +214,14 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
   // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
   const executeQueryOptions = useMemo(() => ({ defaultFields: ['name'] }), []);
 
+  // `allPolicies` comes from `Object.entries` over the Fleet response, so
+  // without an explicit default sort a server-side reorder silently reshuffles
+  // the rows between refetches.
+  const sorting = useMemo(
+    () => ({ sort: { field: 'name' as const, direction: 'asc' as const } }),
+    []
+  );
+
   const pagination = useMemo(
     () => ({
       initialPageSize: 10,
@@ -221,24 +230,44 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
     []
   );
 
-  const emptyMessage = (
-    <EuiEmptyPrompt
-      title={
-        <h3>
+  // Distinguish "Fleet has no policies at all" from "the search matched
+  // nothing" — the Fleet CTA is only actionable in the former case.
+  const emptyMessage =
+    allPolicies.length === 0 ? (
+      <EuiEmptyPrompt
+        title={
+          <h3>
+            <FormattedMessage
+              id="xpack.osquery.pack.policyList.emptyTitle"
+              defaultMessage="No agent policies found"
+            />
+          </h3>
+        }
+        body={
           <FormattedMessage
-            id="xpack.osquery.pack.policyList.emptyTitle"
-            defaultMessage="No agent policies found"
+            id="xpack.osquery.pack.policyList.emptyBody"
+            defaultMessage="Create an agent policy in Fleet to assign it to this pack."
           />
-        </h3>
-      }
-      body={
-        <FormattedMessage
-          id="xpack.osquery.pack.policyList.emptyBody"
-          defaultMessage="Create an agent policy in Fleet to assign it to this pack."
-        />
-      }
-    />
-  );
+        }
+      />
+    ) : (
+      <EuiEmptyPrompt
+        title={
+          <h3>
+            <FormattedMessage
+              id="xpack.osquery.pack.policyList.noSearchResultsTitle"
+              defaultMessage="No policies match your search"
+            />
+          </h3>
+        }
+        body={
+          <FormattedMessage
+            id="xpack.osquery.pack.policyList.noSearchResultsBody"
+            defaultMessage="Policies are matched by name. Clear or change the search to see the full list."
+          />
+        }
+      />
+    );
 
   const selectionCountValues = useMemo(
     () => ({ selected: selectedSet.size, total: allPolicies.length, agents: totalAgents }),
@@ -246,57 +275,70 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
   );
 
   return (
-    <EuiPanel hasBorder paddingSize="s">
-      <EuiFlexGroup alignItems="center" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            size="xs"
-            onClick={handleSelectAll}
-            disabled={isReadOnly || allPolicies.length === 0}
-            data-test-subj="policyAssignmentSelectAll"
-          >
-            <FormattedMessage
-              id="xpack.osquery.pack.policyList.selectAll"
-              defaultMessage="Select all"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            size="xs"
-            onClick={handleUnselectAll}
-            disabled={isReadOnly || selectedSet.size === 0}
-            data-test-subj="policyAssignmentUnselectAll"
-          >
-            <FormattedMessage
-              id="xpack.osquery.pack.policyList.unselectAll"
-              defaultMessage="Un-select all"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText size="s" color="subdued" data-test-subj="policyAssignmentCount">
-            <FormattedMessage
-              id="xpack.osquery.pack.policyList.selectionCount"
-              defaultMessage="{selected} of {total} selected | {agents, plural, one {# agent} other {# agents}} enrolled"
-              values={selectionCountValues}
-            />
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="s" />
-      <EuiInMemoryTable
-        tableCaption={tableCaption}
-        items={allPolicies}
-        columns={columns}
-        search={search}
-        pagination={pagination}
-        sorting={true}
-        noItemsMessage={emptyMessage}
-        executeQueryOptions={executeQueryOptions}
-        data-test-subj="policyAssignmentTable"
-      />
-    </EuiPanel>
+    <EuiFormRow
+      label={i18n.translate('xpack.osquery.pack.form.agentPoliciesFieldLabel', {
+        defaultMessage: 'Scheduled agent policies (optional)',
+      })}
+      helpText={
+        <FormattedMessage
+          id="xpack.osquery.pack.form.agentPoliciesFieldHelpText"
+          defaultMessage="Queries in this pack are scheduled for agents in the selected policies."
+        />
+      }
+      fullWidth
+    >
+      <EuiPanel hasBorder paddingSize="s">
+        <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="xs"
+              onClick={handleSelectAll}
+              disabled={isReadOnly || allPolicies.length === 0}
+              data-test-subj="policyAssignmentSelectAll"
+            >
+              <FormattedMessage
+                id="xpack.osquery.pack.policyList.selectAll"
+                defaultMessage="Select all"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="xs"
+              onClick={handleUnselectAll}
+              disabled={isReadOnly || selectedSet.size === 0}
+              data-test-subj="policyAssignmentUnselectAll"
+            >
+              <FormattedMessage
+                id="xpack.osquery.pack.policyList.unselectAll"
+                defaultMessage="Un-select all"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText size="s" color="subdued" data-test-subj="policyAssignmentCount">
+              <FormattedMessage
+                id="xpack.osquery.pack.policyList.selectionCount"
+                defaultMessage="{selected} of {total} selected | {agents, plural, one {# agent} other {# agents}} enrolled"
+                values={selectionCountValues}
+              />
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="s" />
+        <EuiInMemoryTable
+          tableCaption={tableCaption}
+          items={allPolicies}
+          columns={columns}
+          search={search}
+          pagination={pagination}
+          sorting={sorting}
+          noItemsMessage={emptyMessage}
+          executeQueryOptions={executeQueryOptions}
+          data-test-subj="policyAssignmentTable"
+        />
+      </EuiPanel>
+    </EuiFormRow>
   );
 };
 
