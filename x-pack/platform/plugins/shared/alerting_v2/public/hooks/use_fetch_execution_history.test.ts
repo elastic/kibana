@@ -57,7 +57,7 @@ describe('useFetchExecutionHistory', () => {
     });
   });
 
-  it('calls listActionPolicyExecutions with the provided params (page, perPage, search, outcome)', async () => {
+  it('calls listActionPolicyExecutions with the provided params (page, perPage, search, outcomes)', async () => {
     mockListActionPolicyExecutions.mockResolvedValue({
       items: [],
       page: 2,
@@ -68,7 +68,7 @@ describe('useFetchExecutionHistory', () => {
 
     renderHook(
       () =>
-        useFetchExecutionHistory({ page: 2, perPage: 25, search: 'foo', outcome: ['throttled'] }),
+        useFetchExecutionHistory({ page: 2, perPage: 25, search: 'foo', outcomes: ['throttled'] }),
       {
         wrapper: createWrapper(),
       }
@@ -79,7 +79,7 @@ describe('useFetchExecutionHistory', () => {
         page: 2,
         per_page: 25,
         search: 'foo',
-        outcome: ['throttled'],
+        outcomes: ['throttled'],
       });
     });
   });
@@ -167,7 +167,7 @@ describe('toListExecutionHistoryRequest', () => {
         perPage: 100,
         search: 'foo',
         ruleIds: ['rule-1', 'rule-2'],
-        outcome: ['dispatched'],
+        outcomes: ['dispatched'],
         episodeIds: ['ep-1'],
         startTime: '2026-01-01T00:00:00.000Z',
         endTime: '2026-01-02T00:00:00.000Z',
@@ -177,7 +177,7 @@ describe('toListExecutionHistoryRequest', () => {
       per_page: 100,
       search: 'foo',
       rule_ids: ['rule-1', 'rule-2'],
-      outcome: ['dispatched'],
+      outcomes: ['dispatched'],
       episode_ids: ['ep-1'],
       start_time: '2026-01-01T00:00:00.000Z',
       end_time: '2026-01-02T00:00:00.000Z',

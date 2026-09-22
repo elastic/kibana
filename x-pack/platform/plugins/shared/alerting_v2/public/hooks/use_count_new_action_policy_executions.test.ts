@@ -56,7 +56,7 @@ describe('useCountNewActionPolicyExecutions', () => {
           since: '2026-01-01T00:00:00.000Z',
           search: 'foo',
           ruleIds: ['rule-1'],
-          outcome: ['throttled'],
+          outcomes: ['throttled'],
         }),
       { wrapper: createWrapper() }
     );
@@ -67,7 +67,7 @@ describe('useCountNewActionPolicyExecutions', () => {
         per_page: 0,
         search: 'foo',
         rule_ids: ['rule-1'],
-        outcome: ['throttled'],
+        outcomes: ['throttled'],
       });
     });
   });

@@ -35,7 +35,7 @@ const rootCss = css`
   min-inline-size: 0;
 `;
 
-const toOutcomeParam = (filter: PolicyOutcomeFilter): PolicyExecutionOutcomeFilter | undefined =>
+const toOutcomesParam = (filter: PolicyOutcomeFilter): PolicyExecutionOutcomeFilter | undefined =>
   filter === 'all' ? undefined : [filter];
 
 interface Props {
@@ -56,21 +56,21 @@ export const PoliciesTabContent = ({ onPolicyClick, onRuleClick, activeRuleId }:
   const trimmedSearch = search.trim();
   const searchParam = trimmedSearch.length > 0 ? trimmedSearch : undefined;
   const ruleIdsParam = ruleFilters.length > 0 ? ruleFilters.map((r) => r.id) : undefined;
-  const outcomeParam = toOutcomeParam(outcome);
+  const outcomesParam = toOutcomesParam(outcome);
 
   const { data, isFetching, isError, refetch } = useFetchExecutionHistory({
     page: page + 1,
     perPage,
     search: searchParam,
     ruleIds: ruleIdsParam,
-    outcome: outcomeParam,
+    outcomes: outcomesParam,
   });
 
   const { data: newCountData } = useCountNewActionPolicyExecutions({
     since: lastSeenAt,
     search: searchParam,
     ruleIds: ruleIdsParam,
-    outcome: outcomeParam,
+    outcomes: outcomesParam,
     enabled: !isError,
   });
   const newEventsCount = newCountData?.total ?? 0;

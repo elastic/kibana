@@ -56,7 +56,7 @@ const sharedFilterFields = {
     .describe(
       'Explicit rule filter. Narrows events to those referencing at least one of the provided rule ids. Also unions with the search filter if both are provided.'
     ),
-  outcome: policyExecutionOutcomeFilterSchema
+  outcomes: policyExecutionOutcomeFilterSchema
     .optional()
     .describe(
       'Outcome filter. When omitted matches all outcomes. Pass one or more of "dispatched", "throttled", "dispatch_failed" to narrow.'

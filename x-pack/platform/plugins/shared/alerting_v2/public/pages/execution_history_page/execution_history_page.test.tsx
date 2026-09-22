@@ -332,7 +332,7 @@ describe('ExecutionHistoryPage', () => {
       expect(mockUseFetchRuleExecutions).toHaveBeenCalledWith({
         page: 1,
         perPage: 10,
-        outcome: undefined,
+        outcomes: undefined,
         sortField: 'startedAt',
         sortOrder: 'desc',
       });
@@ -478,7 +478,7 @@ describe('ExecutionHistoryPage', () => {
         perPage: 10,
         search: undefined,
         ruleIds: undefined,
-        outcome: undefined,
+        outcomes: undefined,
       });
     });
 
@@ -507,7 +507,7 @@ describe('ExecutionHistoryPage', () => {
           perPage: 10,
           search: undefined,
           ruleIds: undefined,
-          outcome: ['dispatched'],
+          outcomes: ['dispatched'],
         });
       });
     });
@@ -526,7 +526,7 @@ describe('ExecutionHistoryPage', () => {
             perPage: 10,
             search: 'cpu',
             ruleIds: undefined,
-            outcome: undefined,
+            outcomes: undefined,
           });
         },
         { timeout: 2000 }

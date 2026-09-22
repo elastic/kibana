@@ -16,7 +16,7 @@ describe('toListRuleExecutionsArgs', () => {
     expect(
       toListRuleExecutionsArgs({
         rule_ids: ['rule-1'],
-        outcome: ['success'],
+        outcomes: ['success'],
         start_time: '2026-01-01T00:00:00.000Z',
         end_time: '2026-01-02T00:00:00.000Z',
         sort_field: 'started_at',

@@ -40,7 +40,7 @@ export class ExecutionHistoryApi {
           per_page: params.per_page,
           search: params.search,
           rule_ids: params.rule_ids,
-          outcome: params.outcome,
+          outcomes: params.outcomes,
           episode_ids: params.episode_ids,
           start_time: params.start_time,
           end_time: params.end_time,

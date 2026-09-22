@@ -166,7 +166,7 @@ describe('RulesTabContent', () => {
     expect(mockUseFetchRuleExecutions).toHaveBeenCalledWith({
       page: 1,
       perPage: 10,
-      outcome: undefined,
+      outcomes: undefined,
       sortField: 'startedAt',
       sortOrder: 'desc',
     });
@@ -266,7 +266,7 @@ describe('RulesTabContent', () => {
       expect(mockUseFetchRuleExecutions).toHaveBeenLastCalledWith({
         page: 1,
         perPage: 10,
-        outcome: ['failure'],
+        outcomes: ['failure'],
         sortField: 'startedAt',
         sortOrder: 'desc',
       });

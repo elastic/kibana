@@ -52,7 +52,7 @@ const ruleIdArraySchema = arrayOrSingleSchema(
 export const listRuleExecutionsRequestSchema = z
   .object({
     rule_ids: ruleIdArraySchema.optional().describe(`Rule id filter. `),
-    outcome: outcomeArraySchema.optional().describe('Outcome filter. '),
+    outcomes: outcomeArraySchema.optional().describe('Outcome filter. '),
     start_time: z.iso
       .datetime()
       .optional()

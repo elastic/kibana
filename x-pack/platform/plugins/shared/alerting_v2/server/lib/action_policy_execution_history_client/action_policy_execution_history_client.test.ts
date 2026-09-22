@@ -250,12 +250,12 @@ describe('ActionPolicyExecutionHistoryClient', () => {
       await expect(client.listExecutionHistory({ request })).rejects.toThrow('boom');
     });
 
-    describe('outcome filter', () => {
-      it('passes the explicit outcome array through to the event log service', async () => {
+    describe('outcomes filter', () => {
+      it('passes the explicit outcomes array through to the event log service', async () => {
         const { client, eventLogService } = createMocks();
         const request = httpServerMock.createKibanaRequest();
 
-        await client.listExecutionHistory({ request, outcome: ['throttled'] });
+        await client.listExecutionHistory({ request, outcomes: ['throttled'] });
 
         expect(eventLogService.findActionPolicyExecutionEvents).toHaveBeenCalledWith(
           expect.objectContaining({ outcomes: ['throttled'] })

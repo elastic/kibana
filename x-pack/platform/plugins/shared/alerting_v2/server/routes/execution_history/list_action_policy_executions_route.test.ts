@@ -55,10 +55,10 @@ const buildRoute = (request: KibanaRequest, mocks: ReturnType<typeof createMocks
   );
 
 describe('ListActionPolicyExecutionsRoute', () => {
-  it('forwards page, perPage, search and outcome from the query to the client', async () => {
+  it('forwards page, perPage, search and outcomes from the query to the client', async () => {
     const mocks = createMocks();
     const request = httpServerMock.createKibanaRequest({
-      query: { page: 2, per_page: 25, search: 'foo', outcome: ['throttled'] },
+      query: { page: 2, per_page: 25, search: 'foo', outcomes: ['throttled'] },
     });
     const route = buildRoute(request as unknown as KibanaRequest, mocks);
 
@@ -70,7 +70,7 @@ describe('ListActionPolicyExecutionsRoute', () => {
       perPage: 25,
       search: 'foo',
       ruleIds: undefined,
-      outcome: ['throttled'],
+      outcomes: ['throttled'],
       episodeIds: undefined,
       startTime: undefined,
       endTime: undefined,
@@ -132,7 +132,7 @@ describe('ListActionPolicyExecutionsRoute', () => {
       perPage: undefined,
       search: undefined,
       ruleIds: undefined,
-      outcome: undefined,
+      outcomes: undefined,
       episodeIds: undefined,
       startTime: undefined,
       endTime: undefined,
@@ -186,7 +186,7 @@ describe('toListExecutionHistoryArgs', () => {
         per_page: 100,
         search: 'foo',
         rule_ids: ['rule-1', 'rule-2'],
-        outcome: ['dispatched'],
+        outcomes: ['dispatched'],
         episode_ids: ['ep-1'],
         start_time: '2026-01-01T00:00:00.000Z',
         end_time: '2026-01-02T00:00:00.000Z',
@@ -196,7 +196,7 @@ describe('toListExecutionHistoryArgs', () => {
       perPage: 100,
       search: 'foo',
       ruleIds: ['rule-1', 'rule-2'],
-      outcome: ['dispatched'],
+      outcomes: ['dispatched'],
       episodeIds: ['ep-1'],
       startTime: '2026-01-01T00:00:00.000Z',
       endTime: '2026-01-02T00:00:00.000Z',

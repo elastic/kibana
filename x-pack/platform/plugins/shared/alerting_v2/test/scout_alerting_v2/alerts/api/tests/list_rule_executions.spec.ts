@@ -149,7 +149,7 @@ apiTest.describe('List rule executions API', { tag: '@local-stateful-classic' },
   });
 
   apiTest('validation: rejects unknown outcome values', async ({ apiClient }) => {
-    const response = await apiClient.get(`${listRuleExecutionsUrl()}?outcome=cancelled`, {
+    const response = await apiClient.get(`${listRuleExecutionsUrl()}?outcomes=cancelled`, {
       headers: readerHeaders,
     });
     expect(response).toHaveStatusCode(400);

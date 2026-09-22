@@ -54,7 +54,7 @@ export interface ListExecutionHistoryArgs {
   perPage?: number;
   search?: string;
   ruleIds?: string[];
-  outcome?: PolicyExecutionOutcomeFilter;
+  outcomes?: PolicyExecutionOutcomeFilter;
   episodeIds?: string[];
   /**
    * Inclusive ISO timestamp lower bound for `@timestamp`. When provided it
@@ -96,7 +96,7 @@ export class ActionPolicyExecutionHistoryClient {
     perPage = EXECUTION_HISTORY_DEFAULT_PER_PAGE,
     search,
     ruleIds,
-    outcome,
+    outcomes,
     episodeIds,
     startTime,
     endTime,
@@ -124,7 +124,7 @@ export class ActionPolicyExecutionHistoryClient {
       endTime,
       page,
       perPage,
-      outcomes: outcome,
+      outcomes,
       policyIds: matchingSearchIds.policyIds,
       ruleIds: matchingSearchIds.ruleIds,
       mandatoryRuleIds: ruleIds,

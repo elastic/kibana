@@ -173,7 +173,7 @@ describe('EpisodeActionPolicyHistoryTab', () => {
     expect(mockUseFetchExecutionHistory).toHaveBeenCalledWith({
       page: 1,
       perPage: 10,
-      outcome: undefined,
+      outcomes: undefined,
       episodeIds: [EPISODE_ID],
     });
   });
@@ -185,7 +185,7 @@ describe('EpisodeActionPolicyHistoryTab', () => {
     expect(mockUseFetchExecutionHistory).toHaveBeenCalledWith({
       page: 1,
       perPage: 10,
-      outcome: undefined,
+      outcomes: undefined,
       episodeIds: [EPISODE_ID],
       startTime: '2026-01-01T00:00:00.000Z',
     });
@@ -210,7 +210,7 @@ describe('EpisodeActionPolicyHistoryTab', () => {
     );
 
     expect(mockUseFetchExecutionHistory).toHaveBeenLastCalledWith(
-      expect.objectContaining({ outcome: ['dispatched'], episodeIds: [EPISODE_ID] })
+      expect.objectContaining({ outcomes: ['dispatched'], episodeIds: [EPISODE_ID] })
     );
   });
 

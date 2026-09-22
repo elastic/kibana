@@ -106,7 +106,7 @@ describe('policy_execution_history_schema', () => {
         expect(parsed).not.toHaveProperty('search');
         expect(parsed).not.toHaveProperty('rule_ids');
         expect(parsed).not.toHaveProperty('episode_ids');
-        expect(parsed).not.toHaveProperty('outcome');
+        expect(parsed).not.toHaveProperty('outcomes');
         expect(parsed).not.toHaveProperty('start_time');
         expect(parsed).not.toHaveProperty('end_time');
       });
@@ -241,31 +241,31 @@ describe('policy_execution_history_schema', () => {
       });
     });
 
-    describe('outcome', () => {
+    describe('outcomes', () => {
       it('accepts a single string and coerces it to an array', () => {
-        const parsed = listPolicyExecutionHistoryRequestSchema.parse({ outcome: 'dispatched' });
-        expect(parsed.outcome).toEqual(['dispatched']);
+        const parsed = listPolicyExecutionHistoryRequestSchema.parse({ outcomes: 'dispatched' });
+        expect(parsed.outcomes).toEqual(['dispatched']);
       });
 
       it('accepts an array of valid outcomes', () => {
         const parsed = listPolicyExecutionHistoryRequestSchema.parse({
-          outcome: ['dispatched', 'throttled'],
+          outcomes: ['dispatched', 'throttled'],
         });
-        expect(parsed.outcome).toEqual(['dispatched', 'throttled']);
+        expect(parsed.outcomes).toEqual(['dispatched', 'throttled']);
       });
 
       it('rejects an empty array', () => {
-        expect(listPolicyExecutionHistoryRequestSchema.safeParse({ outcome: [] }).success).toBe(
+        expect(listPolicyExecutionHistoryRequestSchema.safeParse({ outcomes: [] }).success).toBe(
           false
         );
       });
 
       it('rejects outcome values the action policy stream does not emit', () => {
         expect(
-          listPolicyExecutionHistoryRequestSchema.safeParse({ outcome: ['success'] }).success
+          listPolicyExecutionHistoryRequestSchema.safeParse({ outcomes: ['success'] }).success
         ).toBe(false);
         expect(
-          listPolicyExecutionHistoryRequestSchema.safeParse({ outcome: ['unknown'] }).success
+          listPolicyExecutionHistoryRequestSchema.safeParse({ outcomes: ['unknown'] }).success
         ).toBe(false);
       });
     });
@@ -392,7 +392,7 @@ describe('policy_execution_history_schema', () => {
         episode_ids: ['episode-x', 'episode-y'],
         search: 'db outage',
         rule_ids: ['rule-x', 'rule-y'],
-        outcome: ['dispatched', 'throttled'] as const,
+        outcomes: ['dispatched', 'throttled'] as const,
       };
       expect(listPolicyExecutionHistoryRequestSchema.parse(input)).toEqual(input);
     });

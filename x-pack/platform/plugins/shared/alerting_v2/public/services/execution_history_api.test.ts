@@ -43,14 +43,14 @@ describe('ExecutionHistoryApi', () => {
     );
   });
 
-  it('forwards page, perPage, search, outcome, start_time and end_time as query params', async () => {
+  it('forwards page, perPage, search, outcomes, start_time and end_time as query params', async () => {
     const { api, http } = buildApi();
 
     await api.listActionPolicyExecutions({
       page: 3,
       per_page: 25,
       search: 'foo',
-      outcome: ['throttled'],
+      outcomes: ['throttled'],
       start_time: '2026-01-01T00:00:00.000Z',
       end_time: '2026-01-02T00:00:00.000Z',
     });
@@ -61,7 +61,7 @@ describe('ExecutionHistoryApi', () => {
         per_page: 25,
         search: 'foo',
         rule_ids: undefined,
-        outcome: ['throttled'],
+        outcomes: ['throttled'],
         episode_ids: undefined,
         start_time: '2026-01-01T00:00:00.000Z',
         end_time: '2026-01-02T00:00:00.000Z',
@@ -80,7 +80,7 @@ describe('ExecutionHistoryApi', () => {
         per_page: undefined,
         search: undefined,
         rule_ids: undefined,
-        outcome: undefined,
+        outcomes: undefined,
         episode_ids: undefined,
         start_time: undefined,
         end_time: undefined,
@@ -134,7 +134,7 @@ describe('ExecutionHistoryApi', () => {
 
     const params = {
       rule_ids: ['r1', 'r2'],
-      outcome: ['failure' as const],
+      outcomes: ['failure' as const],
       start_time: '2026-01-01T00:00:00Z',
       end_time: '2026-01-02T00:00:00Z',
       sort_field: 'duration' as const,

@@ -21,7 +21,7 @@ export interface ListExecutionHistoryUiParams {
   perPage?: number;
   search?: string;
   ruleIds?: string[];
-  outcome?: PolicyExecutionOutcomeFilter;
+  outcomes?: PolicyExecutionOutcomeFilter;
   episodeIds?: string[];
   startTime?: string;
   endTime?: string;
@@ -32,7 +32,7 @@ export const toListExecutionHistoryRequest = ({
   perPage,
   search,
   ruleIds,
-  outcome,
+  outcomes,
   episodeIds,
   startTime,
   endTime,
@@ -44,7 +44,7 @@ export const toListExecutionHistoryRequest = ({
     per_page: perPage,
     search,
     rule_ids: ruleIds,
-    outcome,
+    outcomes,
     episode_ids: episodeIds,
     start_time: startTime,
     end_time: endTime,
@@ -56,7 +56,7 @@ interface UseFetchExecutionHistoryParams {
   perPage: number;
   search?: string;
   ruleIds?: string[];
-  outcome?: PolicyExecutionOutcomeFilter;
+  outcomes?: PolicyExecutionOutcomeFilter;
   episodeIds?: string[];
   startTime?: string;
   endTime?: string;
@@ -67,7 +67,7 @@ export const useFetchExecutionHistory = ({
   perPage,
   search,
   ruleIds,
-  outcome,
+  outcomes,
   episodeIds,
   startTime,
   endTime,
@@ -80,7 +80,7 @@ export const useFetchExecutionHistory = ({
       perPage,
       search,
       ruleIds,
-      outcome,
+      outcomes,
       episodeIds,
       startTime,
       endTime,
@@ -92,7 +92,7 @@ export const useFetchExecutionHistory = ({
           perPage,
           search,
           ruleIds,
-          outcome,
+          outcomes,
           episodeIds,
           startTime,
           endTime,

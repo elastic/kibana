@@ -47,7 +47,7 @@ describe('useFetchRuleExecutions', () => {
       perPage: 50,
     });
 
-    renderHook(() => useFetchRuleExecutions({ page: 2, perPage: 50, outcome: ['failure'] }), {
+    renderHook(() => useFetchRuleExecutions({ page: 2, perPage: 50, outcomes: ['failure'] }), {
       wrapper: createWrapper(),
     });
 
@@ -55,7 +55,7 @@ describe('useFetchRuleExecutions', () => {
       expect(mockListRuleExecutions).toHaveBeenCalledWith({
         page: 2,
         per_page: 50,
-        outcome: ['failure'],
+        outcomes: ['failure'],
       });
     });
   });
@@ -107,7 +107,7 @@ describe('toListRuleExecutionsRequest', () => {
         page: 2,
         perPage: 50,
         ruleIds: ['rule-1'],
-        outcome: ['failure'],
+        outcomes: ['failure'],
         startTime: '2026-01-01T00:00:00.000Z',
         endTime: '2026-01-02T00:00:00.000Z',
         sortField: 'startedAt',
@@ -117,7 +117,7 @@ describe('toListRuleExecutionsRequest', () => {
       page: 2,
       per_page: 50,
       rule_ids: ['rule-1'],
-      outcome: ['failure'],
+      outcomes: ['failure'],
       start_time: '2026-01-01T00:00:00.000Z',
       end_time: '2026-01-02T00:00:00.000Z',
       sort_field: 'started_at',

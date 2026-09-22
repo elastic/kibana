@@ -67,10 +67,10 @@ describe('rule_execution_history_schema', () => {
         });
       });
 
-      it('does not inject rule_ids / outcome / start_time / end_time when missing', () => {
+      it('does not inject rule_ids / outcomes / start_time / end_time when missing', () => {
         const parsed = listRuleExecutionsRequestSchema.parse({});
         expect(parsed).not.toHaveProperty('rule_ids');
-        expect(parsed).not.toHaveProperty('outcome');
+        expect(parsed).not.toHaveProperty('outcomes');
         expect(parsed).not.toHaveProperty('start_time');
         expect(parsed).not.toHaveProperty('end_time');
       });
@@ -144,28 +144,28 @@ describe('rule_execution_history_schema', () => {
       });
     });
 
-    describe('outcome', () => {
+    describe('outcomes', () => {
       it('accepts a single string and coerces it to an array', () => {
-        const parsed = listRuleExecutionsRequestSchema.parse({ outcome: 'success' });
-        expect(parsed.outcome).toEqual(['success']);
+        const parsed = listRuleExecutionsRequestSchema.parse({ outcomes: 'success' });
+        expect(parsed.outcomes).toEqual(['success']);
       });
 
       it('accepts an array of valid outcomes', () => {
         const parsed = listRuleExecutionsRequestSchema.parse({
-          outcome: ['success', 'failure'],
+          outcomes: ['success', 'failure'],
         });
-        expect(parsed.outcome).toEqual(['success', 'failure']);
+        expect(parsed.outcomes).toEqual(['success', 'failure']);
       });
 
       it('rejects an empty array', () => {
-        expect(listRuleExecutionsRequestSchema.safeParse({ outcome: [] }).success).toBe(false);
+        expect(listRuleExecutionsRequestSchema.safeParse({ outcomes: [] }).success).toBe(false);
       });
 
       it('rejects outcome values Task Manager does not emit (incl. ECS `unknown`)', () => {
-        expect(listRuleExecutionsRequestSchema.safeParse({ outcome: ['skipped'] }).success).toBe(
+        expect(listRuleExecutionsRequestSchema.safeParse({ outcomes: ['skipped'] }).success).toBe(
           false
         );
-        expect(listRuleExecutionsRequestSchema.safeParse({ outcome: ['unknown'] }).success).toBe(
+        expect(listRuleExecutionsRequestSchema.safeParse({ outcomes: ['unknown'] }).success).toBe(
           false
         );
       });
@@ -173,7 +173,7 @@ describe('rule_execution_history_schema', () => {
       it('rejects arrays longer than the number of distinct outcomes', () => {
         expect(
           listRuleExecutionsRequestSchema.safeParse({
-            outcome: ['success', 'failure', 'success'],
+            outcomes: ['success', 'failure', 'success'],
           }).success
         ).toBe(false);
       });
@@ -313,7 +313,7 @@ describe('rule_execution_history_schema', () => {
     it('round-trips a fully populated query (with already-array fields)', () => {
       const input = {
         rule_ids: ['rule-x', 'rule-y'],
-        outcome: ['success', 'failure'] as const,
+        outcomes: ['success', 'failure'] as const,
         start_time: '2026-06-01T00:00:00Z',
         end_time: '2026-06-02T00:00:00Z',
         sort_field: 'duration' as const,

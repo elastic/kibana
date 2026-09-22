@@ -32,7 +32,7 @@ import { listRuleExecutionsOasExamples } from './list_rule_executions_oas_exampl
 
 export const toListRuleExecutionsArgs = ({
   rule_ids: ruleIds,
-  outcome: outcomes,
+  outcomes,
   start_time: startTime,
   end_time: endTime,
   sort_field: sortField,
