@@ -268,6 +268,11 @@ describe('propagateRoleArnToPackagePolicies', () => {
       expect.any(Object),
       expect.objectContaining({ bumpRevision: false, user })
     );
+    expect(agentPolicyService.bumpAgentPoliciesByIds).toHaveBeenCalledWith(
+      ['agent-a'],
+      { user },
+      'default'
+    );
   });
 
   it('reverts policies and throws when the agent-policy revision bump fails', async () => {
@@ -352,11 +357,13 @@ describe('propagateRoleArnToPackagePolicies', () => {
     const drifted = makePolicy('drifted', 'arn:aws:iam::123456789012:role/Drifted');
     mockListReturns([makePolicy('a'), drifted]);
 
+    const user = { username: 'sean' } as AuthenticatedUser;
     const rollback = await propagateRoleArnToPackagePolicies({
       soClient,
       esClient,
       connectorId: CONNECTOR_ID,
       newRoleArn: NEW_ARN,
+      user,
     });
 
     expect(rollback).toEqual(
@@ -378,6 +385,11 @@ describe('propagateRoleArnToPackagePolicies', () => {
     // OCC token from the successful forward write, not the original PIT version.
     expect(revertById.a.version).toBe('Wza-after');
     expect(agentPolicyService.bumpAgentPoliciesByIds).toHaveBeenCalledTimes(1);
+    expect(agentPolicyService.bumpAgentPoliciesByIds).toHaveBeenCalledWith(
+      ['agent-a', 'agent-drifted'],
+      { user },
+      'default'
+    );
   });
 
   it('rollback handle throws with revertFailed when a snapshot restore fails', async () => {

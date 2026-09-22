@@ -210,7 +210,11 @@ export const propagateRoleArnToPackagePolicies = async ({
     if (agentPolicyIds.size === 0) {
       return;
     }
-    await agentPolicyService.bumpAgentPoliciesByIds([...agentPolicyIds].sort(), {}, spaceId);
+    await agentPolicyService.bumpAgentPoliciesByIds(
+      [...agentPolicyIds].sort(),
+      user ? { user } : {},
+      spaceId
+    );
   };
 
   /** Best-effort write of each plan's previous vars/inputs; collects successes and failures. */
