@@ -16,6 +16,7 @@ import type { MlLicense } from '../../../common/license';
 import type { MlFeatures } from '../../../common/constants/app';
 import type { MlAuthorizationService } from '../../lib/capabilities/check_capabilities';
 import { hasMlCapabilitiesProvider } from '../../lib/capabilities/check_capabilities';
+import type { BuildMlClientFn } from '../ml_client_factory';
 import { AD_GET_JOB_INFO_TOOL_ID } from './tool_ids';
 
 const getCalendarsAssociatedWithJob = async (
@@ -76,7 +77,8 @@ export const createAdGetJobInfoTool = (
   resolveMlCapabilities: ResolveMlCapabilities,
   authorization?: MlAuthorizationService,
   mlLicense?: MlLicense,
-  enabledFeatures?: MlFeatures
+  enabledFeatures?: MlFeatures,
+  buildMlClient?: BuildMlClientFn
 ): BuiltinSkillBoundedTool<typeof schema> => ({
   id: AD_GET_JOB_INFO_TOOL_ID,
   type: ToolType.builtin,
@@ -84,7 +86,7 @@ export const createAdGetJobInfoTool = (
     'Read ML job state, config, runtime stats, messages, snapshots, calendar events, and available metadata. Run with operation=validate_permissions first if results look empty. Use get_job_stats to get processing counts, memory status, and datafeed state needed for scratch-run verdict evaluation.',
   experimental: true,
   schema,
-  handler: async ({ operation, job_id: jobId }, { esClient, request }) => {
+  handler: async ({ operation, job_id: jobId }, { esClient, savedObjectsClient, request }) => {
     const hasMlCapabilities = hasMlCapabilitiesProvider(
       resolveMlCapabilities,
       request,
@@ -114,7 +116,11 @@ export const createAdGetJobInfoTool = (
         }
 
         case 'get_job_stats': {
-          const response = await ml.getJobStats(jobId ? { job_id: jobId } : {});
+          // Space-filter via MlClient so a canGetJobs user cannot read stats for
+          // jobs that belong only to other Kibana Spaces.
+          const mlClient = buildMlClient?.(esClient, savedObjectsClient, request);
+          const statsApi = mlClient ?? ml;
+          const response = await statsApi.getJobStats(jobId ? { job_id: jobId } : {});
           return { results: [{ type: ToolResultType.other, data: response }] };
         }
 

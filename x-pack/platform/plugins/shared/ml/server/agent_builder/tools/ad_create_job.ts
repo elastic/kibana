@@ -190,10 +190,27 @@ export const createAdCreateJobTool = (
                     size: 0,
                     aggs: { card: { cardinality: { field } } },
                   });
-                  resolvedOverallCardinality[field] =
-                    (result.aggregations?.card as { value?: number } | undefined)?.value ?? 1000;
-                } catch {
-                  resolvedOverallCardinality[field] = 1000;
+                  const cardinality = (result.aggregations?.card as { value?: number } | undefined)
+                    ?.value;
+                  if (typeof cardinality !== 'number') {
+                    return {
+                      results: [
+                        createErrorResult(
+                          `Cannot estimate memory: cardinality aggregation for field "${field}" was missing from the source search.`
+                        ),
+                      ],
+                    };
+                  }
+                  resolvedOverallCardinality[field] = cardinality;
+                } catch (err) {
+                  const message = err instanceof Error ? err.message : String(err);
+                  return {
+                    results: [
+                      createErrorResult(
+                        `Cannot estimate memory: failed to look up cardinality for field "${field}": ${message}`
+                      ),
+                    ],
+                  };
                 }
               }
             }
@@ -221,11 +238,29 @@ export const createAdCreateJobTool = (
                       max_bucket_card: { max_bucket: { buckets_path: 'buckets>card' } },
                     },
                   });
-                  resolvedMaxBucketCardinality[field] =
-                    (result.aggregations?.max_bucket_card as { value?: number } | undefined)
-                      ?.value ?? 100;
-                } catch {
-                  resolvedMaxBucketCardinality[field] = 100;
+                  if (!result.aggregations?.max_bucket_card) {
+                    return {
+                      results: [
+                        createErrorResult(
+                          `Cannot estimate memory: max-bucket cardinality aggregation for field "${field}" was missing from the source search.`
+                        ),
+                      ],
+                    };
+                  }
+                  const maxBucketCardinality = (
+                    result.aggregations.max_bucket_card as { value?: number | null }
+                  ).value;
+                  // max_bucket returns null when the histogram has no buckets (no source docs).
+                  resolvedMaxBucketCardinality[field] = maxBucketCardinality ?? 0;
+                } catch (err) {
+                  const message = err instanceof Error ? err.message : String(err);
+                  return {
+                    results: [
+                      createErrorResult(
+                        `Cannot estimate memory: failed to look up max-bucket cardinality for field "${field}": ${message}`
+                      ),
+                    ],
+                  };
                 }
               }
             }
@@ -273,8 +308,10 @@ export const createAdCreateJobTool = (
               ],
             };
           }
-          // Ensure job_id is present in the body — the ES API requires it
-          const enrichedDatafeedConfig = { job_id: jobId, ...datafeedConfig };
+          // Ensure job_id is present in the body — the ES API requires it.
+          // The explicit job_id argument is authoritative so a stale/hallucinated
+          // datafeed_config.job_id cannot attach the datafeed to a different job.
+          const enrichedDatafeedConfig = { ...datafeedConfig, job_id: jobId };
           const mlClient = buildMlClient?.(esClient, savedObjectsClient, request);
           if (mlClient) {
             const response = await mlClient.putDatafeed({
@@ -373,7 +410,7 @@ export const createAdCreateJobTool = (
           }
 
           const combinedJob = { ...jobConfig, datafeed_config: datafeedConfig };
-          const { valid, documentsFound, error } = await validateDatafeedPreview(
+          const { valid, error } = await validateDatafeedPreview(
             mlClient,
             combinedJob as any,
             duration?.start,
@@ -391,7 +428,7 @@ export const createAdCreateJobTool = (
             };
           }
 
-          // Also fetch a small sample of actual documents for field verification
+          // Also fetch a small sample of actual documents for field verification.
           let documents: unknown[] = [];
           try {
             const preview = (await mlClient.previewDatafeed(
@@ -403,9 +440,7 @@ export const createAdCreateJobTool = (
               },
               { maxRetries: 0 }
             )) as unknown;
-            if (Array.isArray(preview)) {
-              documents = preview.slice(0, 20);
-            }
+            documents = getPreviewSampleDocuments(preview).slice(0, 20);
           } catch {
             // ignore — valid/documentsFound is the authoritative result
           }
@@ -414,7 +449,7 @@ export const createAdCreateJobTool = (
             results: [
               {
                 type: ToolResultType.other,
-                data: { valid, documentsFound, sample_documents: documents },
+                data: { valid, documentsFound: documents?.length > 0, sample_documents: documents },
               },
             ],
           };
@@ -509,6 +544,22 @@ export const createAdCreateJobTool = (
     }
   },
 });
+
+/**
+ * `validateDatafeedPreview` documents `previewDatafeed` as `{ body: unknown[] }`
+ * while the generated client type is `TDocument[]`. Accept both so Phase 1
+ * still receives sample documents for field inspection.
+ */
+const getPreviewSampleDocuments = (preview: unknown): unknown[] => {
+  if (Array.isArray(preview)) {
+    return preview;
+  }
+  if (preview === null || typeof preview !== 'object' || !('body' in preview)) {
+    return [];
+  }
+  const { body } = preview;
+  return Array.isArray(body) ? body : [];
+};
 
 /**
  * Projects a full Module to a slim summary to avoid large context from e.g. security_windows (13 jobs).

@@ -307,7 +307,7 @@ export const createAdManageJobStateTool = (
               },
             });
 
-            if (jobFailed) {
+            if (jobFailed || datafeedState === 'failed') {
               return {
                 results: [
                   {

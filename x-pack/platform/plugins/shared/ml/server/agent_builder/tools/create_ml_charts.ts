@@ -10,6 +10,8 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { createErrorResult, getToolResultId } from '@kbn/agent-builder-server';
+import { mlEntityFieldValueSchema } from '@kbn/ml-anomaly-utils/schemas';
+import { MAX_STRING_LENGTH } from '@kbn/ml-server-schemas/constants';
 import type { SeverityThreshold } from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
 import type { ResolveMlCapabilities } from '@kbn/ml-common-types/capabilities';
 import type { MlLicense } from '../../../common/license';
@@ -70,10 +72,10 @@ const schema = z.object({
       '(single_metric_viewer only) Zero-based index of the detector within the job. Use the detector_index from the anomaly record. Defaults to 0.'
     ),
   selected_entities: z
-    .record(z.string().max(1000), z.union([z.string(), z.number(), z.boolean()]).optional())
+    .record(z.string().max(MAX_STRING_LENGTH), mlEntityFieldValueSchema.optional())
     .optional()
     .describe(
-      '(single_metric_viewer only) Key-value map of partition/by/over field → value (e.g. {"host.name": "web-01"}). Populate from anomaly record fields (partition_field_value, by_field_value, over_field_value) from prior RCA results.'
+      '(single_metric_viewer only) Required when the chosen detector has partition_field_name, by_field_name, or over_field_name set. Key-value map of field name → value (e.g. {"host.name": "web-01"}). ALWAYS source these from a prior ml.query_anomalies call using the ad_query_anomaly_records reference query — extract partition_field_value / by_field_value / over_field_value from a returned record. Do not guess or omit.'
     ),
   function_description: z
     .string()
@@ -243,29 +245,48 @@ The returned \`config\` in the result can also be forwarded to \`platform.dashbo
             job_id: params.job_ids[0],
           });
           const job = jobResponse.jobs?.[0];
-          const detector = job?.analysis_config?.detectors?.[detectorIndex];
-          if (detector) {
-            const requiredFields = [
-              detector.partition_field_name,
-              detector.by_field_name,
-              detector.over_field_name,
-            ].filter((f): f is string => typeof f === 'string');
-            const provided = params.selected_entities ?? {};
-            const missing = requiredFields.filter(
-              (f) => !(f in provided) || provided[f] == null || provided[f] === ''
-            );
-            if (missing.length > 0) {
-              return {
-                results: [
-                  createErrorResult(
-                    `single_metric_viewer cannot render: the selected detector requires values for the following entity field${
-                      missing.length > 1 ? 's' : ''
-                    }: ${missing.map((f) => `"${f}"`).join(', ')}. ` +
-                      `Provide them via selected_entities (e.g. from a prior anomaly record's partition_field_value / by_field_value / over_field_value).`
-                  ),
-                ],
-              };
-            }
+          if (!job) {
+            return {
+              results: [
+                createErrorResult(
+                  `single_metric_viewer cannot render: job "${params.job_ids[0]}" was not found.`
+                ),
+              ],
+            };
+          }
+          const detectors = job.analysis_config?.detectors ?? [];
+          const detector = detectors[detectorIndex];
+          if (!detector) {
+            return {
+              results: [
+                createErrorResult(
+                  `single_metric_viewer cannot render: selected_detector_index ${detectorIndex} is out of range for job "${
+                    params.job_ids[0]
+                  }". The job has ${detectors.length} detector${detectors.length === 1 ? '' : 's'}.`
+                ),
+              ],
+            };
+          }
+          const requiredFields = [
+            detector.partition_field_name,
+            detector.by_field_name,
+            detector.over_field_name,
+          ].filter((f): f is string => typeof f === 'string');
+          const provided = params.selected_entities ?? {};
+          const missing = requiredFields.filter(
+            (f) => !(f in provided) || provided[f] == null || provided[f] === ''
+          );
+          if (missing.length > 0) {
+            return {
+              results: [
+                createErrorResult(
+                  `single_metric_viewer cannot render: the selected detector requires values for the following entity field${
+                    missing.length > 1 ? 's' : ''
+                  }: ${missing.map((f) => `"${f}"`).join(', ')}. ` +
+                    `Provide them via selected_entities (e.g. from a prior anomaly record's partition_field_value / by_field_value / over_field_value).`
+                ),
+              ],
+            };
           }
         } catch (fetchError) {
           logger.warn(

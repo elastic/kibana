@@ -260,6 +260,25 @@ describe('adManageJobStateTool', () => {
       });
     });
 
+    it('operation=await_batch_completion returns failed when the datafeed failed and the job did not', async () => {
+      const ml = createMlMock();
+      ml.getDatafeedStats.mockResolvedValue({ datafeeds: [{ state: 'failed' }] });
+      ml.getJobStats.mockResolvedValue({
+        jobs: [{ state: 'opened', data_counts: {} }],
+      });
+
+      const result = await adManageJobStateTool.handler(
+        { operation: 'await_batch_completion', job_id: 'my-job', max_wait_seconds: 0 },
+        createContext(ml)
+      );
+
+      expect(getResultData(result).data).toMatchObject({
+        status: 'failed',
+        datafeed_state: 'failed',
+        job_state: 'opened',
+      });
+    });
+
     it('operation=delete_job uses the current-user ML client when mlClient is unavailable', async () => {
       const ml = createMlMock();
       await adManageJobStateTool.handler(

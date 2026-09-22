@@ -38,12 +38,14 @@ describe('createAnomalyDetectionSkill', () => {
     expect(skill.content).toBeTruthy();
   });
 
-  it('registers only platform.core.execute_esql as a registry tool', async () => {
+  it('registers ES|QL and dashboard generation as registry tools', async () => {
     const skill = createAnomalyDetectionSkill(mockResolveMlCapabilities);
     const toolIds = await skill.getRegistryTools?.();
-    expect(toolIds).toHaveLength(1);
+    expect(toolIds).toHaveLength(2);
     // Retained for source-data ES|QL (RCA evidence / ingest latency) as the current user.
     expect(toolIds).toContain('platform.core.execute_esql');
+    // Required for Phase 4 / go-live dashboard generation.
+    expect(toolIds).toContain('platform.dashboard.generate_dashboard');
   });
 
   it('has exactly 5 referenced content items', () => {

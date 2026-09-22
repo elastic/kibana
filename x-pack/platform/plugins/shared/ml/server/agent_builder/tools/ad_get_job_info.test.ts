@@ -16,6 +16,7 @@ const adGetJobInfoTool = createAdGetJobInfoTool(resolveMlCapabilities);
 
 const createMlMock = () => ({
   getJobs: jest.fn().mockResolvedValue({ jobs: [] }),
+  getJobStats: jest.fn().mockResolvedValue({ jobs: [] }),
   getDatafeeds: jest.fn().mockResolvedValue({ datafeeds: [] }),
   getModelSnapshots: jest.fn().mockResolvedValue({ model_snapshots: [] }),
   getCalendars: jest.fn().mockResolvedValue({ calendars: [] }),
@@ -67,6 +68,39 @@ describe('adGetJobInfoTool', () => {
       await adGetJobInfoTool.handler({ operation: 'get_jobs', job_id: 'my-job' }, context);
 
       expect(ml.getJobs).toHaveBeenCalledWith({ job_id: 'my-job' });
+    });
+
+    it('operation=get_job_stats uses the internal ML client when mlClient is unavailable', async () => {
+      const ml = createMlMock();
+      const context = createContext(createEsClientMock(ml));
+
+      const result = await adGetJobInfoTool.handler(
+        { operation: 'get_job_stats', job_id: 'my-job' },
+        context
+      );
+
+      expect(ml.getJobStats).toHaveBeenCalledWith({ job_id: 'my-job' });
+      expect(result).toEqual({ results: [{ type: ToolResultType.other, data: { jobs: [] } }] });
+    });
+
+    it('operation=get_job_stats routes through mlClient when the factory is provided', async () => {
+      const internalMl = createMlMock();
+      const mlClient = createMlMock();
+      const tool = createAdGetJobInfoTool(
+        resolveMlCapabilities,
+        undefined,
+        undefined,
+        undefined,
+        () => mlClient as any
+      );
+
+      await tool.handler(
+        { operation: 'get_job_stats', job_id: 'my-job' },
+        createContext(createEsClientMock(internalMl))
+      );
+
+      expect(mlClient.getJobStats).toHaveBeenCalledWith({ job_id: 'my-job' });
+      expect(internalMl.getJobStats).not.toHaveBeenCalled();
     });
 
     it('operation=get_datafeed_config calls ml.getDatafeeds', async () => {

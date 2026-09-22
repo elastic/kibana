@@ -79,8 +79,8 @@ const AnomalyChartsContainer: FC<AnomalyChartsContainerProps> = ({
   const { val: defaultThreshold } = useDefaultSeverity();
 
   // Keep the resolved thresholds as the source of truth so a custom open-ended
-  // floor (e.g. `{ min: 30 }`) is used for fetching instead of being remapped
-  // onto canonical severity-band checkboxes.
+  // floor (e.g. `{ min: 30 }`) is used for fetching. SelectSeverityUI maps that
+  // floor onto overlapping canonical bands for the anomaly-score control.
   const [severityThresholds, setSeverityThresholds] = useState<SeverityThreshold[]>(() =>
     severityThreshold !== undefined ? resolveSeverityFormat(severityThreshold) : defaultThreshold
   );

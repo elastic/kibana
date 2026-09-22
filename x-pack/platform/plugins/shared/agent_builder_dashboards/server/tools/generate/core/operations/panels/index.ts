@@ -26,6 +26,9 @@ import {
   anomalyChartsPanelDefinition,
   anomalySwimlaneConfigInputSchema,
   anomalySwimlaneDefinition,
+  editAnomalyChartsPanelConfigInputSchema,
+  editAnomalySwimlaneConfigInputSchema,
+  editSingleMetricViewerConfigInputSchema,
   singleMetricViewerConfigInputSchema,
   singleMetricViewerPanelDefinition,
 } from './ml_panels';
@@ -136,6 +139,9 @@ export const editPanelItemSchema = z.discriminatedUnion('source', [
   z.discriminatedUnion('type', [
     editMarkdownPanelConfigInputSchema,
     editCustomContentPanelConfigInputSchema,
+    editAnomalyChartsPanelConfigInputSchema,
+    editAnomalySwimlaneConfigInputSchema,
+    editSingleMetricViewerConfigInputSchema,
   ]),
 ]);
 
