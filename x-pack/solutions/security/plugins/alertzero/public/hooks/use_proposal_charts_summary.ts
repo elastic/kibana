@@ -14,6 +14,7 @@ import {
 import type { ProposalChartsSummaryResponse } from '@kbn/agentic-investigations-plugin/common';
 import { retryOnTransientError } from '@kbn/agentic-investigations-plugin/public';
 import { queryKeys } from '../query_keys';
+import { PROPOSALS_POLL_INTERVAL_MS } from './use_proposals_api';
 
 /**
  * Exported so callers that render the window (axis labels, tooltip ranges) read
@@ -36,6 +37,9 @@ export const useProposalChartsSummary = ({
         query: { windowHours, bucketMinutes },
       }),
     keepPreviousData: true,
+    // Shares the queues' cadence: this drives the header count, which would otherwise
+    // disagree with the badges beside it for up to a minute.
+    refetchInterval: PROPOSALS_POLL_INTERVAL_MS,
     retry: retryOnTransientError,
   });
 };

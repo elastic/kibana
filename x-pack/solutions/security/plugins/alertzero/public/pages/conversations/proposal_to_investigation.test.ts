@@ -59,7 +59,6 @@ describe('proposalToInvestigation', () => {
       ['respond', 'respond'],
       ['investigate', 'investigate'],
       ['configure', 'configure'],
-      ['tune', 'configure'], // legacy mapping
     ] as const)('category %s → bucket %s', (category, expected) => {
       const result = proposalToInvestigation({ ...baseProposal, category });
       expect(result.recommendedAction).toBe(expected);

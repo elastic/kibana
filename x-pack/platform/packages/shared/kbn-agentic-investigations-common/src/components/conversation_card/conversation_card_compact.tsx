@@ -11,33 +11,40 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiText,
-  EuiTitle,
+  EuiTextColor,
   useEuiTheme,
-  EuiTextTruncate,
 } from '@elastic/eui';
 import { type Investigation } from '../../types';
 import type { BaseActionsProps } from '../actions';
 import { ConversationsActionsGroup } from './actions_group';
 import { ConversationMetaInfo } from './conversation_meta_info';
 
-interface ConversationCardProps {
+/** Fixed, so a longer age does not push the titles out of line. */
+const AGE_COLUMN_WIDTH = '6.5rem';
+
+interface ConversationCardCompactProps {
   investigation: Investigation;
   hasBorder: boolean;
-  /** Marks the card whose details flyout is currently open. */
   isSelected?: boolean;
+  /** Resolved by the caller: `Investigation` carries no decision fields. */
+  outcome?: string;
   onClickRecommendedAction: BaseActionsProps['onClickRecommendedAction'];
   onClickAction: BaseActionsProps['onClickAction'];
   onClickCard: (id: Investigation['id']) => void;
   onOpenChat: (id: Investigation['id']) => void;
-  /** URL for this card's chat, so its control renders as a link. */
   chatHref?: string;
 }
 
-export const ConversationCard = memo<ConversationCardProps>(
+/**
+ * One line per decision: no summary, no assignee, and the action reads as a label
+ * beside the title rather than a control.
+ */
+export const ConversationCardCompact = memo<ConversationCardCompactProps>(
   ({
     investigation,
     hasBorder,
     isSelected = false,
+    outcome,
     onClickRecommendedAction,
     onClickAction,
     onClickCard,
@@ -55,8 +62,7 @@ export const ConversationCard = memo<ConversationCardProps>(
         aria-current={isSelected || undefined}
         borderRadius="none"
         css={{
-          // Asymmetric by design — off EUI's padding scale, which has no 20px step.
-          padding: '20px 16px 24px 24px',
+          padding: `${euiTheme.size.s} ${euiTheme.size.l}`,
           cursor: 'pointer',
           borderBottom: hasBorder ? `1px solid ${euiTheme.colors.disabled}` : 'none',
           borderRadius: hasBorder ? 'none' : `0 0 ${euiTheme.size.s} ${euiTheme.size.s}`,
@@ -74,53 +80,58 @@ export const ConversationCard = memo<ConversationCardProps>(
         hasShadow={false}
         onClick={() => onClickCard(investigation.id)}
         onKeyDown={(event: React.KeyboardEvent) => {
+          // Only the panel itself: the nested controls handle their own keys, and
+          // preventDefault here would swallow them.
+          if (event.target !== event.currentTarget) {
+            return;
+          }
           if (event.key === 'Enter' || event.key === ' ') {
             event.preventDefault();
             onClickCard(investigation.id);
           }
         }}
       >
-        {/* The age and the actions share the top row, which leaves the title and
-            summary the full width of the card rather than the actions' leftovers. */}
-        <EuiFlexGroup gutterSize="xs" responsive direction="column">
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup
-              alignItems="center"
-              gutterSize="l"
-              responsive={false}
-              justifyContent="spaceBetween"
-              direction="row"
+        <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+          <EuiFlexItem grow={false} css={{ inlineSize: AGE_COLUMN_WIDTH }}>
+            <ConversationMetaInfo createdAt={investigation.createdAt} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={true}>
+            {/* Truncate together, so the outcome and controls keep their place. */}
+            <EuiText
+              size="s"
+              css={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
             >
-              <EuiFlexItem grow={false}>
-                <ConversationMetaInfo createdAt={investigation.createdAt} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <ConversationsActionsGroup
-                  investigation={investigation}
-                  onClickRecommendedAction={onClickRecommendedAction}
-                  onClickAction={onClickAction}
-                  onOpenChat={() => onOpenChat(investigation.id)}
-                  chatHref={chatHref}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
+              <strong>{investigation.title}</strong>
+              {investigation.primaryActionLabel ? (
+                <EuiTextColor
+                  color="subdued"
+                  css={{ fontSize: '0.75rem', paddingInlineStart: euiTheme.size.s }}
+                >
+                  {investigation.primaryActionLabel}
+                </EuiTextColor>
+              ) : null}
+            </EuiText>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="xxs">
-              <EuiTextTruncate text={investigation.title} />
-            </EuiTitle>
-          </EuiFlexItem>
-          {investigation.summary ? (
+          {outcome ? (
             <EuiFlexItem grow={false}>
-              <EuiText size="s" color="subdued">
-                <EuiTextTruncate text={investigation.summary} />
+              <EuiText size="xs" color="subdued">
+                {outcome}
               </EuiText>
             </EuiFlexItem>
           ) : null}
+          <EuiFlexItem grow={false}>
+            <ConversationsActionsGroup
+              investigation={investigation}
+              onClickRecommendedAction={onClickRecommendedAction}
+              onClickAction={onClickAction}
+              onOpenChat={() => onOpenChat(investigation.id)}
+              chatHref={chatHref}
+            />
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
     );
   }
 );
 
-ConversationCard.displayName = 'ConversationCard';
+ConversationCardCompact.displayName = 'ConversationCardCompact';
