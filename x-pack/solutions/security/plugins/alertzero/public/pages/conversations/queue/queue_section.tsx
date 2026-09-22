@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   ConversationQueue,
   type BaseActionsProps,
   type ConversationsActionsGroupProps,
   type Investigation,
 } from '@kbn/agentic-investigations-common';
+import { proposalOutcome } from '../proposal_outcome';
 import type { QueueSection as QueueSectionState } from './use_queue_section';
 
 export interface QueueSectionProps {
@@ -64,6 +65,13 @@ export const QueueSection = ({
     [proposals, selectedConversationId]
   );
 
+  // Read off the raw proposals: the adapted Investigation carries no decision.
+  const outcomes = useMemo(
+    () => new Map(proposals.map((proposal) => [proposal.id, proposalOutcome(proposal)])),
+    [proposals]
+  );
+  const getOutcomeLabel = useCallback((proposalId: string) => outcomes.get(proposalId), [outcomes]);
+
   return (
     <ConversationQueue
       briefingType={id}
@@ -77,6 +85,7 @@ export const QueueSection = ({
       isLoadingMore={isLoadingMore}
       isFiltered={Boolean(surfaceFilter)}
       selectedIds={selectedIds}
+      getOutcomeLabel={getOutcomeLabel}
       {...handlers}
     />
   );

@@ -427,10 +427,11 @@ describe('ConversationsPage decisions', () => {
     expandClosed();
     fireEvent.click(screen.getByRole('button', { name: 'Open actions menu' }));
 
-    // Asserted inside the open menu, since that is now the only place the decision
-    // could appear — a card-level assertion would pass whatever the menu contained.
-    expect(screen.queryByText('Revoke sessions')).not.toBeInTheDocument();
-    expect(screen.queryByText('Dismiss')).not.toBeInTheDocument();
+    // Asserted by role, not by text: a closed row names its action as a label beside
+    // the title, so what matters is that nothing offers it as something to click.
+    expect(screen.queryByRole('menuitem', { name: 'Revoke sessions' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('menuitem', { name: 'Assign' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('menuitem', { name: 'Close' })).not.toBeInTheDocument();
   });
 
   // That the scalar itself excludes decided proposals is covered in the service tests.

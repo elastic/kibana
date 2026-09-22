@@ -34,6 +34,7 @@ import {
 } from './translations';
 import { ConversationQueueSkeleton } from './conversation_queue_skeleton';
 import { ConversationCard, type ConversationsActionsGroupProps } from '../conversation_card';
+import { ConversationCardCompact } from '../conversation_card/conversation_card_compact';
 import { type BaseActionsProps } from '../actions';
 
 interface ConversationQueueProps {
@@ -69,6 +70,11 @@ interface ConversationQueueProps {
    * than a value because the URL is per-card and only the caller can resolve it.
    */
   getChatHref?: (id: Investigation['id']) => string | undefined;
+  /**
+   * How a decided row was settled, for the compact closed rows. A function for the
+   * same reason as `getChatHref`: only the caller can resolve it.
+   */
+  getOutcomeLabel?: (id: Investigation['id']) => string | undefined;
   isFiltered?: boolean;
   /**
    * Ids of the cards belonging to the open details flyout, highlighted in the list. A
@@ -108,9 +114,13 @@ export const ConversationQueue = memo<ConversationQueueProps>(
     onClickRecommendedAction,
     onOpenChat,
     getChatHref,
+    getOutcomeLabel,
     selectedIds,
   }) => {
     const { euiTheme } = useEuiTheme();
+    // Work already finished reads as a list, not as cards. Pinned to the bucket rather
+    // than a prop: which bucket is done is the queue's own structure, not a caller's choice.
+    const isClosedBucket = briefingType === 'closed';
 
     // Collapsing drops the section's query to a count-only read, so its rows empty on the
     // same frame the accordion starts animating shut — it would glide down over an empty
@@ -171,20 +181,31 @@ export const ConversationQueue = memo<ConversationQueueProps>(
 
           {loadingRows === 0 && rows.length > 0 ? (
             <EuiFlexGroup direction="column" gutterSize="none">
-              {rows.map((investigation, i) => (
-                <EuiFlexItem key={investigation.id} grow={false}>
-                  <ConversationCard
-                    investigation={investigation}
-                    hasBorder={i < rows.length - 1}
-                    isSelected={selectedIds?.includes(investigation.id)}
-                    onClickAction={onClickAction}
-                    onClickCard={onClickCard}
-                    onOpenChat={onOpenChat}
-                    onClickRecommendedAction={onClickRecommendedAction}
-                    chatHref={getChatHref?.(investigation.id)}
-                  />
-                </EuiFlexItem>
-              ))}
+              {rows.map((investigation, i) => {
+                const cardProps = {
+                  investigation,
+                  hasBorder: i < rows.length - 1,
+                  isSelected: selectedIds?.includes(investigation.id),
+                  onClickAction,
+                  onClickCard,
+                  onOpenChat,
+                  onClickRecommendedAction,
+                  chatHref: getChatHref?.(investigation.id),
+                };
+
+                return (
+                  <EuiFlexItem key={investigation.id} grow={false}>
+                    {isClosedBucket ? (
+                      <ConversationCardCompact
+                        {...cardProps}
+                        outcome={getOutcomeLabel?.(investigation.id)}
+                      />
+                    ) : (
+                      <ConversationCard {...cardProps} />
+                    )}
+                  </EuiFlexItem>
+                );
+              })}
             </EuiFlexGroup>
           ) : null}
 
