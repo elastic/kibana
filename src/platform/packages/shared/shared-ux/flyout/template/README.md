@@ -49,7 +49,7 @@ Tab selection props also live on the root: `selectedTabId` (controlled), `defaul
 - `FlyoutTemplate.Footer.PrimaryAction` — rendered as an `EuiButton`, filled.
 - `FlyoutTemplate.Footer.SecondaryAction` — rendered as an `EuiButtonEmpty`.
 
-Both actions accept `label`, `onClick`, an optional `id`, any `data-*` attributes, and the rest of their underlying EUI button props. `PrimaryAction` accepts all `EuiButtonProps` except `children` and `fill` (it is always filled). `SecondaryAction` accepts all `EuiButtonEmptyProps` except `children`, `href`, `target`, `rel`, and `buttonRef` (it always renders a button, never an anchor). The `id` is forwarded to the button element.
+Both actions accept `label`, `onClick`, an optional `id`, any `data-*` attributes, and the rest of their underlying EUI button props. Neither accepts `children` or the anchor props (`download`, `href`, `hrefLang`, `media`, `ping`, `referrerPolicy`, `rel`, `target`), so an action always renders a button. `PrimaryAction` additionally rejects `fill`, since it is always filled; `SecondaryAction` additionally rejects `buttonRef`. The `id` is forwarded to the button element.
 
 ## Behavior
 
@@ -62,7 +62,7 @@ Both actions accept `label`, `onClick`, an optional `id`, any `data-*` attribute
 
 ## Tabs
 
-Pass `tabs` to the root to render a tab bar at the bottom of the header. Each entry takes an `id` (the logical tab id used to match a `Body.TabPanel`, distinct from the auto-generated DOM `id`) and a `label`. It also accepts any `data-*` attributes and the rest of `EuiTabProps` (such as `disabled`, `prepend`, `append`, `className`, `css`, `aria-label`, `data-test-subj`). `isSelected` is not accepted, as selection is derived from the root. Declare a `Body.TabPanel` for each tab id; the template wires the `tab`/`tabpanel` accessibility relationship and mounts only the selected panel.
+Pass `tabs` to the root to render a tab bar at the bottom of the header. Each entry takes an `id` (the logical tab id used to match a `Body.TabPanel`, distinct from the auto-generated DOM `id`) and a `label`. It also accepts any `data-*` attributes and the rest of `EuiTabProps` (such as `disabled`, `prepend`, `append`, `className`, `css`, `aria-label`, `data-test-subj`). The template owns `aria-controls`, `children`, `isSelected`, and `onClick`, so an entry cannot set them: selection derives from the root and clicks route through `onTabChange`. Declare a `Body.TabPanel` for each tab id; the template wires the `tab`/`tabpanel` accessibility relationship and mounts only the selected panel.
 
 ```tsx
 <FlyoutTemplate
