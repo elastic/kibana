@@ -50,12 +50,12 @@ export const AWS_WORKLOAD_IDENTITY_CLOUD_FORMATION_TEMPLATE_URL =
 
 /**
  * Packages whose Identity Federation option moved to the WII template, with the first package
- * version that carries it. Prerelease tags are ignored when comparing, so `8.5.0-beta` and
- * `8.5.0` both qualify for `aws`.
+ * version that carries it. Prerelease tags are ignored when comparing, so `8.4.0-beta` and
+ * `8.4.0` both qualify for `aws`.
  */
 export const AWS_WORKLOAD_IDENTITY_TEMPLATE_MIN_PACKAGE_VERSIONS: Readonly<Record<string, string>> =
   {
-    aws: '8.5.0',
+    aws: '8.4.0',
     aws_bedrock: '2.2.0',
     aws_logs: '2.1.0',
     aws_mq: '2.1.0',

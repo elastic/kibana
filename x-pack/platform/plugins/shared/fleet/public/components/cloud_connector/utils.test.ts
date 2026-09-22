@@ -1590,8 +1590,8 @@ describe('isAwsWorkloadIdentityTemplatePackage', () => {
   });
 
   it('rejects versions of a listed package that predate the template', () => {
-    expect(isAwsWorkloadIdentityTemplatePackage('aws', '8.4.9')).toBe(false);
-    expect(isAwsWorkloadIdentityTemplatePackage('aws', '8.4.9-beta')).toBe(false);
+    expect(isAwsWorkloadIdentityTemplatePackage('aws', '8.3.9')).toBe(false);
+    expect(isAwsWorkloadIdentityTemplatePackage('aws', '8.3.9-beta')).toBe(false);
     expect(isAwsWorkloadIdentityTemplatePackage('aws_bedrock', '2.1.0')).toBe(false);
     expect(isAwsWorkloadIdentityTemplatePackage('aws_securityhub', '2.2.9')).toBe(false);
     expect(isAwsWorkloadIdentityTemplatePackage('aws_bedrock_agentcore', '1.0.0')).toBe(false);
@@ -1660,7 +1660,7 @@ describe('getAwsIdentityFederationTemplateUrl', () => {
       getAwsIdentityFederationTemplateUrl({
         isWorkloadIdentityTemplateEnabled: true,
         packageName: 'aws',
-        packageVersion: '8.4.0',
+        packageVersion: '8.3.0',
         iacTemplateUrl: packageUrl,
       })
     ).toBe(packageUrl);
