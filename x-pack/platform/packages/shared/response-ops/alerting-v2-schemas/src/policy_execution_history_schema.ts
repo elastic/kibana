@@ -14,6 +14,9 @@ import {
   EXECUTION_HISTORY_DEFAULT_PER_PAGE,
   EXECUTION_HISTORY_MAX_RESULT_WINDOW,
   EXECUTION_HISTORY_MAX_RULE_ID_FILTER,
+  EXECUTION_HISTORY_DEFAULT_PAGE,
+  EXECUTION_HISTORY_DEFAULT_SORT,
+  EXECUTION_HISTORY_DEFAULT_SORT_ORDER,
 } from './constants';
 
 /**
@@ -66,12 +69,10 @@ const sharedFilterFields = {
 export const listPolicyExecutionHistoryRequestSchema = z
   .object({
     page: queryIntSchema({ min: 1, max: EXECUTION_HISTORY_MAX_RESULT_WINDOW })
-      .default(1)
-      .optional()
+      .default(EXECUTION_HISTORY_DEFAULT_PAGE)
       .describe('Page number (1-indexed). Defaults to 1.'),
     per_page: queryIntSchema({ min: 0, max: EXECUTION_HISTORY_MAX_PER_PAGE })
       .default(EXECUTION_HISTORY_DEFAULT_PER_PAGE)
-      .optional()
       .describe(
         `Number of events per page. Defaults to ${EXECUTION_HISTORY_DEFAULT_PER_PAGE}. Pass 0 for a count-only read.`
       ),
@@ -92,15 +93,17 @@ export const listPolicyExecutionHistoryRequestSchema = z
       ),
     sort: z
       .enum(['dispatched_at'])
-      .default('dispatched_at')
-      .optional()
-      .describe('Sort field. Defaults to dispatched_at.'),
-    sort_order: z.enum(['asc', 'desc']).default('desc').optional().describe('Sort direction.'),
+      .default(EXECUTION_HISTORY_DEFAULT_SORT)
+      .describe(`Sort field. Defaults to ${EXECUTION_HISTORY_DEFAULT_SORT}.`),
+    sort_order: z
+      .enum(['asc', 'desc'])
+      .default(EXECUTION_HISTORY_DEFAULT_SORT_ORDER)
+      .describe(`Sort direction. Defaults to ${EXECUTION_HISTORY_DEFAULT_SORT_ORDER}`),
     ...sharedFilterFields,
   })
   .strict()
   .refine(
-    ({ page = 1, per_page: perPage = EXECUTION_HISTORY_DEFAULT_PER_PAGE }) =>
+    ({ page, per_page: perPage }) =>
       (perPage !== 0 && page * perPage <= EXECUTION_HISTORY_MAX_RESULT_WINDOW) || perPage === 0,
     {
       message: `page * per_page cannot exceed ${EXECUTION_HISTORY_MAX_RESULT_WINDOW}.`,
@@ -108,14 +111,17 @@ export const listPolicyExecutionHistoryRequestSchema = z
     }
   );
 
+type ParsedListRequest = z.infer<typeof listPolicyExecutionHistoryRequestSchema>;
+type DefaultedKeys = 'page' | 'per_page' | 'sort' | 'sort_order';
 /**
  * Request-side params for the list endpoint (snake_case API contract). All
  * fields are optional: `page`/`per_page` default server-side and the filters
  * are opt-in, so callers building query strings need not supply pagination.
  */
-export type ListPolicyExecutionHistoryRequest = z.infer<
-  typeof listPolicyExecutionHistoryRequestSchema
->;
+export type ListPolicyExecutionHistoryRequest = Omit<ParsedListRequest, DefaultedKeys> &
+  Partial<Pick<ParsedListRequest, DefaultedKeys>>;
+// Explicitly setting these values as optional because z.infer assumes the .default() value is applied and therefore required.
+// Using .optional() on the schema along with .default() does not solve this
 
 export const namedRefSchema = z.object({
   id: z.string(),

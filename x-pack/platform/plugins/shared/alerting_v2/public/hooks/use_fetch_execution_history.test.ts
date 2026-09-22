@@ -155,8 +155,6 @@ describe('toListExecutionHistoryRequest', () => {
         ruleIds: ['rule-1', 'rule-2'],
         outcome: ['dispatched'],
         episodeIds: ['ep-1'],
-        from: '2026-01-01T00:00:00.000Z',
-        to: '2026-01-02T00:00:00.000Z',
         sort: 'dispatchedAt',
         sortOrder: 'asc',
       })
@@ -167,8 +165,6 @@ describe('toListExecutionHistoryRequest', () => {
       rule_ids: ['rule-1', 'rule-2'],
       outcome: ['dispatched'],
       episode_ids: ['ep-1'],
-      from: '2026-01-01T00:00:00.000Z',
-      to: '2026-01-02T00:00:00.000Z',
       sort: 'dispatched_at',
       sort_order: 'asc',
     });
