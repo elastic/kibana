@@ -24,6 +24,7 @@ export function useErrorStats() {
     locations,
     tags,
     projects,
+    schedules,
     statusCodes,
   } = urlParams;
 
@@ -40,6 +41,7 @@ export function useErrorStats() {
     locations,
     tags,
     projects,
+    schedules,
     statusCodes,
   ]);
 

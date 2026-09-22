@@ -27,17 +27,17 @@ describe('useMonitorFilters', () => {
     expect(result.current).toEqual([]);
   });
 
-  it('should return filters for allIds and schedules', () => {
+  it('should return monitor.interval filters for schedules', () => {
     spaceSpy.mockReturnValue({} as any);
-    paramSpy.mockReturnValue({ schedules: 'daily' } as any);
+    paramSpy.mockReturnValue({ schedules: ['3', '10'] } as any);
     selSPy.mockReturnValue({ status: { allIds: ['id1', 'id2'] } });
 
     const { result } = renderHook(() => useMonitorFilters({}), { wrapper: WrappedHelper });
 
-    expect(result.current).toEqual([{ field: 'monitor.id', values: ['id1', 'id2'] }]);
+    expect(result.current).toEqual([{ field: 'monitor.interval', values: ['180', '600'] }]);
   });
 
-  it('should return filters for allIds and empty schedules', () => {
+  it('should return filters for empty schedules', () => {
     spaceSpy.mockReturnValue({} as any);
     paramSpy.mockReturnValue({ schedules: [] } as any);
     selSPy.mockReturnValue({ status: { allIds: ['id1', 'id2'] } });
@@ -45,6 +45,19 @@ describe('useMonitorFilters', () => {
     const { result } = renderHook(() => useMonitorFilters({}), { wrapper: WrappedHelper });
 
     expect(result.current).toEqual([]);
+  });
+
+  it('should fall back to allIds when locations use AND', () => {
+    spaceSpy.mockReturnValue({} as any);
+    paramSpy.mockReturnValue({
+      locations: ['location1', 'location2'],
+      useLogicalAndFor: ['locations'],
+    } as any);
+    selSPy.mockReturnValue({ status: { allIds: ['id1', 'id2'] } });
+
+    const { result } = renderHook(() => useMonitorFilters({}), { wrapper: WrappedHelper });
+
+    expect(result.current).toEqual([{ field: 'monitor.id', values: ['id1', 'id2'] }]);
   });
 
   it('should return filters for project IDs', () => {
@@ -104,6 +117,7 @@ describe('useMonitorFilters', () => {
       tags: ['tagB'],
       locations: ['locationC'],
       monitorTypes: 'http',
+      schedules: ['3'],
     } as any);
 
     const { result } = renderHook(() => useMonitorFilters({ forAlerts: false }), {
@@ -115,6 +129,7 @@ describe('useMonitorFilters', () => {
       { field: 'monitor.type', values: ['http'] },
       { field: 'tags', values: ['tagB'] },
       { field: 'observer.geo.name', values: ['locationC'] },
+      { field: 'monitor.interval', values: ['180'] },
       { field: 'meta.space_id', values: ['space3'] },
     ]);
   });

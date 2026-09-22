@@ -54,16 +54,9 @@ const mixUrlValues = (
 
 export const FilterGroup = ({
   handleFilterChange,
-  excludeFields,
   showRemoteClusterFilter = false,
 }: {
   handleFilterChange: SyntheticsMonitorFilterChangeHandler;
-  /**
-   * Fields to omit from the filter group. Useful on views (e.g. the global
-   * Errors tab) where some monitor-config filters (like `schedules`) don't
-   * apply because the data being filtered isn't backed by monitor configs.
-   */
-  excludeFields?: ReadonlyArray<SyntheticsMonitorFilterItem['field']>;
   /**
    * Whether to render the "Remote cluster" filter. Only meaningful on the
    * overview page (`MonitorListContainer` renders `FilterGroup` too via
@@ -168,12 +161,9 @@ export const FilterGroup = ({
     });
   }
 
-  const excluded = new Set(excludeFields ?? []);
-  const filters = allFilters.filter((f) => !excluded.has(f.field));
-
   return (
     <EuiFilterGroup>
-      {filters.map((filter, index) => (
+      {allFilters.map((filter, index) => (
         <FilterButton
           key={index}
           filter={filter}

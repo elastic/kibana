@@ -23,12 +23,14 @@ export const getErrorStatsRoute: SyntheticsRestApiRouteFactory = () => ({
       locations: z.string().max(MAX_ROUTE_STRING_LENGTH).optional(),
       tags: z.string().max(MAX_ROUTE_STRING_LENGTH).optional(),
       projects: z.string().max(MAX_ROUTE_STRING_LENGTH).optional(),
+      schedules: z.string().max(MAX_ROUTE_STRING_LENGTH).optional(),
       statusCodes: z.string().max(MAX_ROUTE_STRING_LENGTH).optional(),
       query: z.string().max(MAX_ROUTE_STRING_LENGTH).optional(),
     }),
   },
   handler: async ({ syntheticsEsClient, request, spaceId }) => {
-    const { from, to, monitorTypes, locations, tags, projects, statusCodes, query } = request.query;
+    const { from, to, monitorTypes, locations, tags, projects, schedules, statusCodes, query } =
+      request.query;
 
     return await getErrorStats({
       syntheticsEsClient,
@@ -38,6 +40,7 @@ export const getErrorStatsRoute: SyntheticsRestApiRouteFactory = () => ({
       locations: safeJsonParse(locations),
       tags: safeJsonParse(tags),
       projects: safeJsonParse(projects),
+      schedules: safeJsonParse(schedules),
       statusCodes: safeJsonParse(statusCodes),
       query: query || undefined,
       spaceId,

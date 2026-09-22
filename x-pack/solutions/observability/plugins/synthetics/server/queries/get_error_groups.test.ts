@@ -79,6 +79,24 @@ describe('getErrorGroups', () => {
     });
   });
 
+  it('filters by monitor.interval seconds when schedules are provided', async () => {
+    const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+    esClient.search.mockResponseOnce(emptyAggsResponse as any);
+
+    await getErrorGroups({
+      syntheticsEsClient,
+      from: '2026-06-20T08:00:00.000Z',
+      to: '2026-06-27T08:00:00.000Z',
+      spaceId: 'default',
+      schedules: ['3', '10'],
+    });
+
+    const call: any = esClient.search.mock.calls[0][0];
+    expect(call.query.bool.filter).toEqual(
+      expect.arrayContaining([{ terms: { 'monitor.interval': [180, 600] } }])
+    );
+  });
+
   it('maps category buckets into error groups with histograms', async () => {
     const { esClient, syntheticsEsClient } = getUptimeESMockClient();
     esClient.search.mockResponseOnce({

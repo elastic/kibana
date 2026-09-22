@@ -26,6 +26,7 @@ export function useErrorGroups() {
     locations,
     tags,
     projects,
+    schedules,
     statusCodes,
   } = urlParams;
 
@@ -42,6 +43,7 @@ export function useErrorGroups() {
     locations,
     tags,
     projects,
+    schedules,
     statusCodes,
   ]);
 

@@ -14,6 +14,7 @@ import {
   getQueryFilters,
 } from '../../common/constants/client_defaults';
 import type { SyntheticsEsClient } from '../lib';
+import { scheduleFilterToMonitorIntervals } from '../../common/lib/schedule_to_time';
 import type {
   ErrorGroupsResponse,
   ErrorGroup,
@@ -83,6 +84,7 @@ interface GetErrorGroupsParams {
   locations?: string[];
   tags?: string[];
   projects?: string[];
+  schedules?: string[];
   statusCodes?: string[];
   query?: string;
   spaceId: string;
@@ -96,6 +98,7 @@ export async function getErrorGroups({
   locations,
   tags,
   projects,
+  schedules,
   statusCodes,
   query,
   spaceId,
@@ -119,6 +122,10 @@ export async function getErrorGroups({
   }
   if (projects?.length) {
     filters.push({ terms: { 'monitor.project.id': projects } });
+  }
+  const monitorIntervals = scheduleFilterToMonitorIntervals(schedules);
+  if (monitorIntervals.length) {
+    filters.push({ terms: { 'monitor.interval': monitorIntervals } });
   }
   if (statusCodes?.length) {
     // `http.response.status_code` is mapped as a numeric field, so coerce

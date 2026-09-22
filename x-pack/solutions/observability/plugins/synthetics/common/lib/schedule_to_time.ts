@@ -17,6 +17,20 @@ export function scheduleToMinutes(schedule: SyntheticsMonitorSchedule): number {
   return Math.floor(scheduleToMilli(schedule) / (60 * 1000));
 }
 
+/**
+ * Frequency filter values are unit-less `schedule.number` strings (minutes).
+ * Ping documents store `monitor.interval` in seconds.
+ */
+export function scheduleFilterToMonitorIntervals(schedules?: string | string[]): number[] {
+  if (!schedules) {
+    return [];
+  }
+  const values = Array.isArray(schedules) ? schedules : [schedules];
+  return values
+    .map((value) => Number(value) * 60)
+    .filter((interval) => Number.isFinite(interval) && interval > 0);
+}
+
 function getMilliFactorForScheduleUnit(scheduleUnit: ScheduleUnit): number {
   switch (scheduleUnit) {
     case ScheduleUnit.SECONDS:
