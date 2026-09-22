@@ -49,7 +49,6 @@ import { EditConnectorFlyoutContent } from '../edit_connector_flyout';
 import { FlyoutHeader } from './header';
 import { FlyoutFooter } from './footer';
 import { UpgradeLicenseCallOut } from './upgrade_license_callout';
-import { InboundIngressCredentials } from '../inbound_ingress_credentials';
 import { InboundEventsSaveToGenerateCallout } from '../inbound_events_save_to_generate_callout';
 import { shouldRotateInboundAfterSave } from '../../../lib/inbound_ingress';
 import { useRotateInboundIngress } from '../../../hooks/use_rotate_inbound_ingress';
@@ -177,9 +176,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   const resetActionType = useCallback(() => setActionType(null), []);
 
   const [connectorToTest, setConnectorToTest] = useState<ActionConnector | null>(null);
-  const [createdInboundConnector, setCreatedInboundConnector] = useState<ActionConnector | null>(
-    null
-  );
+  const [editTab, setEditTab] = useState(EditConnectorTabs.Test);
   const [isFormModified, setIsFormModified] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const { isLoading: isRotating, rotateIngress } = useRotateInboundIngress();
@@ -200,10 +197,12 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
           secrets: { ingestToken: rotated.ingestToken },
         } as ActionConnector;
       } catch {
-        // Danger toast is shown by the rotate hook. Stay on the create form.
+        // Danger toast is shown by the rotate hook. Edit the connector that was created.
         if (onConnectorCreated) {
           onConnectorCreated(createdConnector);
         }
+        setEditTab(EditConnectorTabs.Configuration);
+        setConnectorToTest(createdConnector);
         return;
       }
     }
@@ -216,6 +215,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
       onTestConnector(connectorForTest);
     }
 
+    setEditTab(EditConnectorTabs.Test);
     setConnectorToTest(connectorForTest);
   }, [validateAndCreateConnector, onConnectorCreated, onTestConnector, rotateIngress]);
 
@@ -227,15 +227,18 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
       }
 
       if (shouldRotateInboundAfterSave(createdConnector)) {
+        let connectorForEdit = createdConnector;
         try {
           const rotated = await rotateIngress(createdConnector.id);
-          setCreatedInboundConnector({
+          connectorForEdit = {
             ...createdConnector,
             secrets: { ingestToken: rotated.ingestToken },
-          } as ActionConnector);
+          } as ActionConnector;
         } catch {
-          // Danger toast is shown by the rotate hook. Stay on the create form.
+          // Danger toast is shown by the rotate hook. Edit the connector that was created.
         }
+        setEditTab(EditConnectorTabs.Configuration);
+        setConnectorToTest(connectorForEdit);
         return;
       }
 
@@ -282,9 +285,6 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   }, []);
 
   const inboundSettingsContent = useMemo(() => {
-    if (createdInboundConnector) {
-      return <InboundIngressCredentials allowRotate connector={createdInboundConnector} />;
-    }
     if (actionType == null) {
       return undefined;
     }
@@ -295,7 +295,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
       return <InboundEventsSaveToGenerateCallout />;
     }
     return undefined;
-  }, [actionType, createdInboundConnector, isClusterInboundEventsEnabled]);
+  }, [actionType, isClusterInboundEventsEnabled]);
 
   const beforeCloseRef = useRef<() => void>(() => undefined);
 
@@ -320,7 +320,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
           actionTypeRegistry={actionTypeRegistry}
           connector={connectorToTest}
           onClose={onClose}
-          tab={EditConnectorTabs.Test}
+          tab={editTab}
           onConnectorUpdated={setConnectorToTest}
           icon={icon}
           isFormModified={isFormModified}

@@ -236,8 +236,11 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
     [testExecutionResult, setTestExecutionResult]
   );
 
-  const [isEdit, setIsEdit] = useState<boolean>(true);
+  const [isEdit] = useState<boolean>(true);
   const [isSaved, setIsSaved] = useState<boolean>(false);
+  // Bumped after each save so the form remounts against the saved connector.
+  const [formRevision, setFormRevision] = useState(0);
+  const [formConnector, setFormConnector] = useState<ActionConnector | null>(null);
   // One-time ingest token. Parents unmount the flyout from onConnectorUpdated, so notify on close.
   const [revealedInboundConnector, setRevealedInboundConnector] = useState<ActionConnector | null>(
     null
@@ -262,6 +265,16 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
   const isSpecConnector = !actionTypeRegistry.has(connector.actionTypeId);
   const isTestable = actionTypeModel?.isTestable ?? actionTypeRegistry.has(connector.actionTypeId);
 
+  const onIngestTokenRotated = useCallback(
+    (ingestToken: string) => {
+      setRevealedInboundConnector((current) => {
+        const base = current ?? connector;
+        return { ...base, secrets: { ingestToken } } as ActionConnector;
+      });
+    },
+    [connector]
+  );
+
   const inboundSettingsContent = useMemo(() => {
     const inboundConnector = revealedInboundConnector ?? connector;
     if (
@@ -272,6 +285,7 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
         <InboundIngressCredentials
           connector={inboundConnector}
           allowRotate={canSave && !inboundConnector.isPreconfigured}
+          onIngestTokenRotated={onIngestTokenRotated}
         />
       );
     }
@@ -281,13 +295,20 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
           <InboundIngressCredentials
             connector={inboundConnector}
             allowRotate={canSave && !inboundConnector.isPreconfigured}
+            onIngestTokenRotated={onIngestTokenRotated}
           />
         );
       }
       return <InboundEventsSaveToGenerateCallout />;
     }
     return undefined;
-  }, [canSave, connector, isClusterInboundEventsEnabled, revealedInboundConnector]);
+  }, [
+    canSave,
+    connector,
+    isClusterInboundEventsEnabled,
+    onIngestTokenRotated,
+    revealedInboundConnector,
+  ]);
 
   // Delay the spinner so quick spec loads don't flash a loading state.
   const [showLoadingSpinner, setShowLoadingSpinner] = useState(false);
@@ -312,9 +333,12 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
   const connectorWithoutSecrets = useMemo(
     () =>
       getConnectorWithoutSecrets(
-        connector as UserConfiguredActionConnector<Record<string, unknown>, Record<string, unknown>>
+        (formConnector ?? connector) as UserConfiguredActionConnector<
+          Record<string, unknown>,
+          Record<string, unknown>
+        >
       ),
-    [connector]
+    [connector, formConnector]
   );
 
   const resolvedTestExecutionActionParams = useMemo(
@@ -401,8 +425,6 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
          * ConnectorFormSchema has been saved.
          * Set the from to clean state.
          */
-        onFormModifiedChange(false);
-
         const heldConnector = revealedInboundConnector;
         const previousEnabled = (heldConnector ?? connector).isInboundEventsEnabled === true;
         const enablingNow =
@@ -435,9 +457,10 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
         } else if (onConnectorUpdated) {
           onConnectorUpdated(nextConnector);
         }
+        setFormConnector(nextConnector);
+        setFormRevision((revision) => revision + 1);
+        onFormModifiedChange(false);
         setIsSaved(true);
-        setIsEdit(false);
-        setIsEdit(true);
       }
 
       return updatedConnector;
@@ -515,6 +538,7 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
               {actionTypeModel && !isLoadingActionTypeModel && !actionTypeModelError && (
                 <>
                   <ConnectorForm
+                    key={formRevision}
                     actionTypeModel={actionTypeModel}
                     connector={connectorWithoutSecrets}
                     isEdit={isEdit}
@@ -553,6 +577,7 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
     preSubmitValidationErrorMessage,
     refetchConnectorSpec,
     inboundSettingsContent,
+    formRevision,
   ]);
 
   const renderTestTab = useCallback(() => {

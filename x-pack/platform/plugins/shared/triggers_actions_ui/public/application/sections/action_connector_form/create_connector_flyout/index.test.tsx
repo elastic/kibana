@@ -744,7 +744,7 @@ describe('CreateConnectorFlyout', () => {
       await userEvent.click(screen.getByTestId('create-connector-flyout-save-btn'));
 
       await waitFor(() => {
-        expect(screen.getByTestId('inbound-ingress-credentials')).toBeInTheDocument();
+        expect(screen.getByTestId('edit-connector-flyout')).toBeInTheDocument();
       });
 
       expect(onClose).not.toHaveBeenCalled();
@@ -754,11 +754,11 @@ describe('CreateConnectorFlyout', () => {
       );
       expect(screen.getByTestId('inbound-ingress-ingest-token')).toHaveValue('once-token');
       expect(screen.getByTestId('connector-settings-label')).toBeInTheDocument();
-      expect(screen.getByTestId('create-connector-flyout-save-btn')).toBeInTheDocument();
-      expect(screen.getByTestId('create-connector-flyout-back-btn')).toBeInTheDocument();
+      expect(screen.getByTestId('edit-connector-flyout-save-btn')).toBeInTheDocument();
+      expect(screen.queryByTestId('create-connector-flyout-save-btn')).not.toBeInTheDocument();
     });
 
-    it('stays on the create form when inbound rotate fails after create', async () => {
+    it('edits the created connector when inbound rotate fails after create', async () => {
       appMockRenderer.coreStart.http.post = jest.fn().mockImplementation((path: string) => {
         if (String(path).includes('_rotate_event_token')) {
           return Promise.reject({ name: 'Error', body: { message: 'Cannot rotate' } });
@@ -768,6 +768,11 @@ describe('CreateConnectorFlyout', () => {
           connector_type_id: '.inboundWebhook',
           config: {},
         });
+      });
+      appMockRenderer.coreStart.http.put = jest.fn().mockResolvedValue({
+        ...createConnectorResponse,
+        connector_type_id: '.inboundWebhook',
+        name: 'Renamed ingress',
       });
 
       appMockRenderer.render(
@@ -794,14 +799,34 @@ describe('CreateConnectorFlyout', () => {
       await userEvent.click(screen.getByTestId('create-connector-flyout-save-btn'));
 
       await waitFor(() => {
-        expect(onConnectorCreated).toHaveBeenCalled();
+        expect(screen.getByTestId('edit-connector-flyout')).toBeInTheDocument();
       });
 
       expect(onClose).not.toHaveBeenCalled();
-      expect(screen.queryByTestId('inbound-ingress-credentials')).not.toBeInTheDocument();
+      expect(onConnectorCreated).toHaveBeenCalled();
       expect(screen.queryByTestId('inbound-ingress-ingest-token')).not.toBeInTheDocument();
-      expect(screen.getByTestId('create-connector-flyout-save-btn')).toBeInTheDocument();
-      expect(screen.getByTestId('create-connector-flyout-back-btn')).toBeInTheDocument();
+      expect(screen.queryByTestId('create-connector-flyout-save-btn')).not.toBeInTheDocument();
+
+      const createCalls = (appMockRenderer.coreStart.http.post as jest.Mock).mock.calls.filter(
+        ([path]) => !String(path).includes('_rotate_event_token')
+      );
+      const nameInput = screen.getByTestId('nameInput');
+      await userEvent.clear(nameInput);
+      await userEvent.click(nameInput);
+      await userEvent.paste('Renamed ingress');
+      await waitFor(() => {
+        expect(screen.getByTestId('edit-connector-flyout-save-btn')).toBeEnabled();
+      });
+      await userEvent.click(screen.getByTestId('edit-connector-flyout-save-btn'));
+
+      await waitFor(() => {
+        expect(appMockRenderer.coreStart.http.put).toHaveBeenCalled();
+      });
+      expect(
+        (appMockRenderer.coreStart.http.post as jest.Mock).mock.calls.filter(
+          ([path]) => !String(path).includes('_rotate_event_token')
+        )
+      ).toHaveLength(createCalls.length);
     });
   });
 
@@ -890,6 +915,52 @@ describe('CreateConnectorFlyout', () => {
         expect.stringContaining('_rotate_event_token')
       );
       expect(screen.getByTestId('inbound-ingress-ingest-token')).toHaveValue('once-token');
+      expect(screen.getByTestId('edit-connector-flyout')).toBeInTheDocument();
+      expect(screen.queryByTestId('create-connector-flyout-save-btn')).not.toBeInTheDocument();
+    });
+
+    it('updates the created connector when inbound events are turned off', async () => {
+      appMockRenderer.coreStart.http.put = jest
+        .fn()
+        .mockImplementation((_path: string, opts?: { body?: string }) => {
+          const body = opts?.body ? JSON.parse(opts.body) : {};
+          return Promise.resolve({
+            ...createConnectorResponse,
+            connector_type_id: '.dual',
+            name: body.name,
+            is_inbound_events_enabled: body.is_inbound_events_enabled === true,
+          });
+        });
+      await fillAndSave();
+
+      await userEvent.click(screen.getByTestId('inbound-events-enabled-switch'));
+      await userEvent.click(screen.getByTestId('create-connector-flyout-save-btn'));
+
+      expect(await screen.findByTestId('inbound-ingress-ingest-token')).toHaveValue('once-token');
+      const createCalls = (appMockRenderer.coreStart.http.post as jest.Mock).mock.calls.filter(
+        ([path]) => !String(path).includes('_rotate_event_token')
+      );
+
+      await userEvent.click(screen.getByTestId('inbound-events-enabled-switch'));
+      expect(screen.getByTestId('inbound-events-disable-warning')).toHaveTextContent('After save,');
+      await waitFor(() => {
+        expect(screen.getByTestId('edit-connector-flyout-save-btn')).toBeEnabled();
+      });
+      await userEvent.click(screen.getByTestId('edit-connector-flyout-save-btn'));
+
+      await waitFor(() => {
+        expect(appMockRenderer.coreStart.http.put).toHaveBeenCalledWith(
+          expect.stringContaining('/connector/123'),
+          expect.objectContaining({
+            body: expect.stringContaining('"is_inbound_events_enabled":false'),
+          })
+        );
+      });
+      expect(
+        (appMockRenderer.coreStart.http.post as jest.Mock).mock.calls.filter(
+          ([path]) => !String(path).includes('_rotate_event_token')
+        )
+      ).toHaveLength(createCalls.length);
     });
 
     it('rotates before Save & test when inbound events are turned on', async () => {
