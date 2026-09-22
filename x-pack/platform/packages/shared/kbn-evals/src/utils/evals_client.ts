@@ -16,11 +16,13 @@ import {
   EVALS_DATASET_UPSERT_URL,
   EVALS_DATASET_URL,
   EVALS_EXPERIMENT_SCORES_URL,
+  EVALS_EXPERIMENT_DATASET_EXAMPLES_URL,
   EVALS_EXPERIMENT_URL,
   EVALS_EXPERIMENTS_URL,
   EVALS_SCORES_URL,
   GetEvaluationDatasetResponse,
   GetEvaluationExperimentResponse,
+  GetEvaluationExperimentDatasetExamplesResponse,
   GetEvaluationExperimentScoresResponse,
   GetEvaluationExperimentsResponse,
   IngestScoresRequestBody,
@@ -298,6 +300,24 @@ export class EvalsClient {
       );
       return [];
     }
+  }
+
+  /** Reads complete per-example score evidence from the run's home Space. */
+  async getExperimentDatasetExamples(
+    experimentId: string,
+    datasetId: string
+  ): Promise<GetEvaluationExperimentDatasetExamplesResponse> {
+    const response = await this.kbnClient.request({
+      path: this.path(
+        EVALS_EXPERIMENT_DATASET_EXAMPLES_URL.replace(
+          '{experimentId}',
+          encodeURIComponent(experimentId)
+        ).replace('{datasetId}', encodeURIComponent(datasetId))
+      ),
+      method: 'GET',
+      headers: VERSIONED_HEADERS,
+    });
+    return GetEvaluationExperimentDatasetExamplesResponse.parse(getResponseData(response));
   }
 
   /**
