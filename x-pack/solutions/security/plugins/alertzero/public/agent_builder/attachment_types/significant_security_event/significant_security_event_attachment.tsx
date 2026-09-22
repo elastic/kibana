@@ -12,7 +12,7 @@ import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import type { AttachmentUIDefinition, HeaderBadge } from '@kbn/agent-builder-browser/attachments';
 import type { AttachmentNavigationDeps } from '../navigation';
 import { buildAlertsLookupEsql, buildDiscoverEsqlUrl, buildEventsLookupEsql } from '../navigation';
-import { severityBadgeColor, formatPercent } from '../shared/severity';
+import { formatPercent } from '../shared/severity';
 import { parseSignificantSecurityEventData } from './types';
 import type { SignificantSecurityEventAttachment } from './types';
 
@@ -28,6 +28,11 @@ const OPEN_EVENTS_LABEL = i18n.translate(
 const OPEN_ALERTS_LABEL = i18n.translate(
   'xpack.alertzero.agentBuilder.attachments.sse.openAlertsInDiscover',
   { defaultMessage: 'Open alerts in Discover' }
+);
+
+const HUNT_FINDING_BADGE_LABEL = i18n.translate(
+  'xpack.alertzero.agentBuilder.attachments.sse.typeBadge',
+  { defaultMessage: 'Hunt finding' }
 );
 
 const LazySignificantSecurityEventInlineContent = React.lazy(() =>
@@ -51,18 +56,34 @@ export const createSignificantSecurityEventAttachmentDefinition = ({
 }: {
   navigation: AttachmentNavigationDeps;
 }): AttachmentUIDefinition<SignificantSecurityEventAttachment> => ({
-  getLabel: (attachment) =>
-    attachment?.data?.attachmentLabel ?? attachment?.data?.title ?? DEFAULT_LABEL,
-  getIcon: () => 'flag',
+  // The SSE mapper copies the report title into the SSE today, so the attachment title cannot
+  // yet say which finding it is; the long-term fix is a finding-shaped title written
+  // server-side, tracked separately. Until then, lead with the hit count when we have one.
+  getLabel: (attachment) => {
+    const data = attachment?.data;
+    const parsed = parseSignificantSecurityEventData(data);
+    const title = data?.attachmentLabel ?? data?.title ?? DEFAULT_LABEL;
+    const totalHits = parsed?.huntResult?.tier1.counts.totalHits;
+    if (typeof totalHits === 'number') {
+      return i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.labelWithHits', {
+        defaultMessage: '{count, plural, one {# hit confirms} other {# hits confirm}}: {title}',
+        values: { count: totalHits, title },
+      });
+    }
+    return title;
+  },
+  getIcon: () => 'securitySignalDetected',
   getHeader: ({ attachment }) => {
     const data = attachment?.data;
     const parsed = parseSignificantSecurityEventData(data);
-    const subtitle = [data?.source_watch, data?.capability].filter(Boolean).join(' · ');
+    const subtitle = parsed?.reportId
+      ? i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.subtitleFromReport', {
+          defaultMessage: 'From {reportId} · {capability}',
+          values: { reportId: parsed.reportId, capability: data?.capability ?? '' },
+        })
+      : [data?.source_watch, data?.capability].filter(Boolean).join(' · ');
 
-    const badges: HeaderBadge[] = [];
-    if (parsed?.severity) {
-      badges.push({ label: parsed.severity, color: severityBadgeColor(parsed.severity) });
-    }
+    const badges: HeaderBadge[] = [{ label: HUNT_FINDING_BADGE_LABEL, color: 'primary' }];
     if (parsed?.status) {
       badges.push({ label: parsed.status, color: 'hollow' });
     }
@@ -70,14 +91,13 @@ export const createSignificantSecurityEventAttachmentDefinition = ({
       badges.push({
         label: formatPercent(parsed.confidence),
         color: 'hollow',
-        ...(parsed.huntResult?.hasConfirmedHit ? { iconType: 'securitySignalDetected' } : {}),
       });
     }
 
     return {
-      icon: 'flag',
+      icon: 'securitySignalDetected',
       ...(subtitle ? { subtitle } : {}),
-      ...(badges.length > 0 ? { badges } : {}),
+      badges,
     };
   },
   renderInlineContent: (props) => (

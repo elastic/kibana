@@ -60,38 +60,82 @@ describe('createSignificantSecurityEventAttachmentDefinition', () => {
       } as unknown as SignificantSecurityEventAttachment;
       expect(definition.getLabel(attachment)).toBe('Custom label');
     });
+
+    it('leads with the confirmed hit count when hunt_result has total_hits', () => {
+      const definition = createSignificantSecurityEventAttachmentDefinition({ navigation });
+      const attachment = {
+        data: {
+          ...baseData,
+          hunt_result: {
+            has_confirmed_hit: true,
+            time_range: { from: '2024-01-01T00:00:00Z', to: '2024-01-02T00:00:00Z' },
+            tier1: {
+              status: 'environment_hits_found',
+              counts: { total_hits: 3, returned_hits: 3, affected_hosts: 1, affected_users: 1 },
+              per_index: [],
+              resolved_iocs: [],
+            },
+          },
+        },
+      } as unknown as SignificantSecurityEventAttachment;
+      expect(definition.getLabel(attachment)).toBe('3 hits confirm: Suspicious lateral movement');
+    });
+
+    it('falls back to the title when hunt_result has no total_hits', () => {
+      const definition = createSignificantSecurityEventAttachmentDefinition({ navigation });
+      const attachment = { data: baseData } as unknown as SignificantSecurityEventAttachment;
+      expect(definition.getLabel(attachment)).toBe('Suspicious lateral movement');
+    });
   });
 
   describe('getIcon', () => {
-    it('returns the flag icon', () => {
+    it('returns the securitySignalDetected icon', () => {
       const definition = createSignificantSecurityEventAttachmentDefinition({ navigation });
-      expect(definition.getIcon?.()).toBe('flag');
+      expect(definition.getIcon?.()).toBe('securitySignalDetected');
     });
   });
 
   describe('getHeader', () => {
-    it('returns the flag icon and the source watch / capability subtitle without run_id', () => {
+    it('returns the securitySignalDetected icon, hunt finding badge, and source/capability subtitle without report_id', () => {
       const definition = createSignificantSecurityEventAttachmentDefinition({ navigation });
       const header = definition.getHeader?.({
         attachment: { data: baseData } as unknown as SignificantSecurityEventAttachment,
       } as never);
-      expect(header?.icon).toBe('flag');
+      expect(header?.icon).toBe('securitySignalDetected');
       expect(header?.subtitle).toBe('watch-1 · lateral-movement-detector');
+      expect(header?.badges).toEqual([
+        { label: 'Hunt finding', color: 'primary' },
+        { label: 'open', color: 'hollow' },
+        { label: '80%', color: 'hollow' },
+      ]);
     });
 
-    it('returns no badges and an empty header for a malformed attachment', () => {
+    it('leads the subtitle with "From {report_id}" when a report_id is present', () => {
       const definition = createSignificantSecurityEventAttachmentDefinition({ navigation });
-      expect(definition.getHeader?.({ attachment: {} as never })).toEqual({ icon: 'flag' });
+      const header = definition.getHeader?.({
+        attachment: {
+          data: { ...baseData, report_id: 'r-1' },
+        } as unknown as SignificantSecurityEventAttachment,
+      } as never);
+      expect(header?.subtitle).toBe('From r-1 · lateral-movement-detector');
     });
 
-    it('renders a severity badge with the severity badge color', () => {
+    it('returns the hunt finding badge and an empty header for a malformed attachment', () => {
+      const definition = createSignificantSecurityEventAttachmentDefinition({ navigation });
+      expect(definition.getHeader?.({ attachment: {} as never })).toEqual({
+        icon: 'securitySignalDetected',
+        badges: [{ label: 'Hunt finding', color: 'primary' }],
+      });
+    });
+
+    it('never renders a severity badge, even when severity is present', () => {
       const definition = createSignificantSecurityEventAttachmentDefinition({ navigation });
       const header = definition.getHeader?.({
         attachment: {
           data: { ...baseData, severity: 'critical' },
         } as unknown as SignificantSecurityEventAttachment,
       } as never);
-      expect(header?.badges).toContainEqual({ label: 'critical', color: 'danger' });
+      expect(header?.badges).not.toContainEqual(expect.objectContaining({ label: 'critical' }));
     });
 
     it('renders a status badge with a hollow color', () => {
@@ -104,7 +148,7 @@ describe('createSignificantSecurityEventAttachmentDefinition', () => {
       expect(header?.badges).toContainEqual({ label: 'investigating', color: 'hollow' });
     });
 
-    it('renders a confidence badge without the confirmed-hit icon when there is no hunt_result', () => {
+    it('renders a confidence badge with no icon', () => {
       const definition = createSignificantSecurityEventAttachmentDefinition({ navigation });
       const header = definition.getHeader?.({
         attachment: {
@@ -114,7 +158,7 @@ describe('createSignificantSecurityEventAttachmentDefinition', () => {
       expect(header?.badges).toContainEqual({ label: '90%', color: 'hollow' });
     });
 
-    it('renders a confidence badge with the confirmed-hit icon when hunt_result has a confirmed hit', () => {
+    it('renders a confidence badge with no icon even when hunt_result has a confirmed hit', () => {
       const definition = createSignificantSecurityEventAttachmentDefinition({ navigation });
       const header = definition.getHeader?.({
         attachment: {
@@ -134,11 +178,7 @@ describe('createSignificantSecurityEventAttachmentDefinition', () => {
           },
         } as unknown as SignificantSecurityEventAttachment,
       } as never);
-      expect(header?.badges).toContainEqual({
-        label: '90%',
-        color: 'hollow',
-        iconType: 'securitySignalDetected',
-      });
+      expect(header?.badges).toContainEqual({ label: '90%', color: 'hollow' });
     });
   });
 

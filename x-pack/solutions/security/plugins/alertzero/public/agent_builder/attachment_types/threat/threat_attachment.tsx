@@ -45,16 +45,25 @@ export const createThreatAttachmentDefinition = ({
 }): AttachmentUIDefinition<ThreatAttachment> => ({
   getLabel: (attachment) =>
     attachment?.data?.attachmentLabel ?? attachment?.data?.title ?? DEFAULT_LABEL,
-  getIcon: () => 'warning',
+  getIcon: () => 'document',
   getHeader: ({ attachment }) => {
     const data = attachment?.data;
-    const badges: HeaderBadge[] = [];
+    const badges: HeaderBadge[] = [
+      {
+        label: i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.typeBadge', {
+          defaultMessage: 'Threat report',
+        }),
+        color: 'hollow',
+        iconType: 'document',
+      },
+    ];
     if (data?.severity) {
       badges.push({ label: data.severity, color: severityBadgeColor(data.severity) });
     }
+    const subtitle = [data?.source, data?.report_id].filter(Boolean).join(' · ');
     return {
-      icon: 'warning',
-      subtitle: data?.source,
+      icon: 'document',
+      ...(subtitle ? { subtitle } : {}),
       badges,
     };
   },

@@ -44,14 +44,14 @@ describe('createThreatAttachmentDefinition', () => {
   });
 
   describe('getIcon', () => {
-    it('returns the warning icon', () => {
+    it('returns the document icon', () => {
       const definition = createThreatAttachmentDefinition({ http, navigation });
-      expect(definition.getIcon?.()).toBe('warning');
+      expect(definition.getIcon?.()).toBe('document');
     });
   });
 
   describe('getHeader', () => {
-    it('returns the warning icon, source subtitle, and severity badge for a full payload', () => {
+    it('returns the document icon, type badge, severity badge, and name-then-id subtitle', () => {
       const definition = createThreatAttachmentDefinition({ http, navigation });
       const attachment = {
         data: { report_id: 'r-1', source: 'Feed A', severity: 'high' },
@@ -59,20 +59,25 @@ describe('createThreatAttachmentDefinition', () => {
 
       const header = definition.getHeader?.({ attachment } as never);
 
-      expect(header?.icon).toBe('warning');
-      expect(header?.subtitle).toBe('Feed A');
-      expect(header?.badges).toEqual([{ label: 'high', color: 'danger' }]);
+      expect(header?.icon).toBe('document');
+      expect(header?.subtitle).toBe('Feed A · r-1');
+      expect(header?.badges).toEqual([
+        { label: 'Threat report', color: 'hollow', iconType: 'document' },
+        { label: 'high', color: 'danger' },
+      ]);
     });
 
-    it('returns no subtitle and empty badges when source and severity are missing', () => {
+    it('omits the severity badge and subtitle segments when source and severity are missing', () => {
       const definition = createThreatAttachmentDefinition({ http, navigation });
       const attachment = { data: { report_id: 'r-1' } } as ThreatAttachment;
 
       const header = definition.getHeader?.({ attachment } as never);
 
-      expect(header?.icon).toBe('warning');
-      expect(header?.subtitle).toBeUndefined();
-      expect(header?.badges).toEqual([]);
+      expect(header?.icon).toBe('document');
+      expect(header?.subtitle).toBe('r-1');
+      expect(header?.badges).toEqual([
+        { label: 'Threat report', color: 'hollow', iconType: 'document' },
+      ]);
     });
   });
 

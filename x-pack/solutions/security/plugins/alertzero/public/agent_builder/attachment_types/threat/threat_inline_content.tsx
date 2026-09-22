@@ -30,11 +30,7 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import { QueryClientProvider, useQuery } from '@kbn/react-query';
 import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
 import type { AttachmentNavigationDeps } from '../navigation';
-import {
-  buildDiscoverEsqlUrl,
-  buildDiscoverThreatReportNestedIocUrl,
-  buildThreatReportLookupEsql,
-} from '../navigation';
+import { buildDiscoverThreatReportNestedIocUrl } from '../navigation';
 import { IocBadge } from '../shared/ioc_badge';
 import { LabeledBadgeTable } from '../shared/labeled_badge_table';
 import { buildMitreTechniqueUrl } from '../shared/mitre_url';
@@ -264,9 +260,11 @@ const IocTypeValues: React.FC<{
 const renderEnrichedSections = ({
   liveData,
   navigation,
+  severityScore,
 }: {
   liveData?: ThreatReportLiveData;
   navigation: AttachmentNavigationDeps;
+  severityScore?: number;
 }): React.ReactNode => {
   if (!liveData) {
     return null;
@@ -501,12 +499,20 @@ const renderEnrichedSections = ({
     );
   }
 
-  if (liveData.evidence) {
+  if (liveData.evidence || severityScore != null) {
     const corroboratedRank =
-      liveData.evidence.corroboratedRankScore ?? liveData.corroboratedRankScore;
+      liveData.evidence?.corroboratedRankScore ?? liveData.corroboratedRankScore;
 
     const stats: Array<{ title: React.ReactNode; description: string }> = [];
-    if (liveData.evidence.alertHitsTotal != null) {
+    if (severityScore != null) {
+      stats.push({
+        title: severityScore,
+        description: i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.rank', {
+          defaultMessage: 'Rank',
+        }),
+      });
+    }
+    if (liveData.evidence?.alertHitsTotal != null) {
       stats.push({
         title: liveData.evidence.alertHitsTotal,
         description: i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.alertHits', {
@@ -514,7 +520,7 @@ const renderEnrichedSections = ({
         }),
       });
     }
-    if (liveData.evidence.lastHuntStatus != null) {
+    if (liveData.evidence?.lastHuntStatus != null) {
       stats.push({
         title: liveData.evidence.lastHuntStatus,
         description: i18n.translate(
@@ -532,7 +538,7 @@ const renderEnrichedSections = ({
         ),
       });
     }
-    if (liveData.evidence.lastHuntedAt != null) {
+    if (liveData.evidence?.lastHuntedAt != null) {
       stats.push({
         title: <FormattedRelative value={liveData.evidence.lastHuntedAt} />,
         description: i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.lastHunted', {
@@ -637,9 +643,6 @@ const ThreatAttachmentInlineContentInner: React.FC<ThreatAttachmentInlineContent
 
   const hasAnyField = Boolean(title || severityLevel || sourceName);
 
-  const reportEsql = buildThreatReportLookupEsql({ reportId: data.report_id });
-  const reportHref = buildDiscoverEsqlUrl({ share: navigation.share, esql: reportEsql });
-
   return (
     <EuiPanel
       hasShadow={false}
@@ -651,28 +654,7 @@ const ThreatAttachmentInlineContentInner: React.FC<ThreatAttachmentInlineContent
         <EuiSkeletonText lines={2} />
       ) : (
         <>
-          <EuiFlexGroup alignItems="center" gutterSize="s" wrap responsive={false}>
-            <EuiFlexItem grow={false}>
-              <IocBadge
-                value={data.report_id}
-                index={0}
-                discoverHref={reportHref}
-                testSubj="alertzeroThreatAttachmentReportLink"
-              />
-            </EuiFlexItem>
-            {useLive && severityScore != null && (
-              <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow">
-                  {i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.rankBadge', {
-                    defaultMessage: 'Rank {score}',
-                    values: { score: severityScore },
-                  })}
-                </EuiBadge>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-
-          {useLive && renderEnrichedSections({ liveData, navigation })}
+          {useLive && renderEnrichedSections({ liveData, navigation, severityScore })}
           {!useLive && (
             <>
               <EuiSpacer size="s" />
