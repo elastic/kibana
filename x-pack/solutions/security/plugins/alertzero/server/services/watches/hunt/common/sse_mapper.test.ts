@@ -96,6 +96,12 @@ const HIT_TIER2_RESULT_TWO_BEHAVIORS = {
   next_step: 'Review the proposed rules.',
 };
 
+// The coordinator loads the report when only report_id is given; these tests
+// supply text and IOCs themselves, so the loader returns an empty context.
+jest.mock('./load_report_context', () => ({
+  loadReportHuntContext: jest.fn().mockResolvedValue({ iocs: [], techniques: [] }),
+}));
+
 jest.mock('../tier1/hunt_for_threat', () => ({
   ...jest.requireActual('../tier1/hunt_for_threat'),
   huntForThreat: jest.fn(),
