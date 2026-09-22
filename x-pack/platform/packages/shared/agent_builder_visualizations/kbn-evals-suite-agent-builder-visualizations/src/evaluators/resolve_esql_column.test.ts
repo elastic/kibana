@@ -30,6 +30,15 @@ describe('columnsReferToSameExpression', () => {
     ).toBe(true);
   });
 
+  it('matches a .keyword twin inside an aggregation argument', () => {
+    const gold = `FROM kibana_sample_data_logs
+| STATS \`Unique URLs\` = COUNT_DISTINCT(url.keyword) BY clientip`;
+    const actual = `FROM kibana_sample_data_logs
+| STATS urls = COUNT_DISTINCT(url) BY clientip`;
+
+    expect(columnsReferToSameExpression('Unique URLs', gold, 'urls', actual)).toBe(true);
+  });
+
   it('matches a BY alias back to the grouped field', () => {
     const actualQuery = `FROM kibana_sample_data_logs
 | STATS count = COUNT(*) BY \`Response Code\` = response.keyword`;

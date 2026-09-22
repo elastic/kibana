@@ -8,13 +8,15 @@
 import { Parser, isAssignment, isColumn, isOptionNode, singleItems } from '@elastic/esql';
 import type { ESQLAstItem, ESQLColumn, ESQLSingleAstItem } from '@elastic/esql/types';
 
-const KEYWORD_SUFFIX = /\.keyword$/i;
+// Anywhere in the expression, so `count_distinct(url.keyword)` matches `count_distinct(url)`.
+const KEYWORD_SUFFIX = /\.keyword\b/gi;
 
 /**
  * True when two Lens/Vega column names refer to the same ES|QL expression after
  * resolving STATS/EVAL/BY aliases. Column alias wording is ignored; `.keyword`
- * twins, COUNT()/COUNT(*), HOUR()/DATE_EXTRACT hour-of-day, and BUCKET/TBUCKET
- * time buckets count as the same expression.
+ * twins (as a grouping or inside an aggregation), COUNT()/COUNT(*),
+ * HOUR()/DATE_EXTRACT hour-of-day, and BUCKET/TBUCKET time buckets count as
+ * the same expression.
  */
 export function columnsReferToSameExpression(
   goldColumn: string,
