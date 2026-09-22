@@ -262,16 +262,16 @@ function hasObjectLevelChecks(schema: z.ZodObject): boolean {
 }
 
 /**
- * Re-attaches the object-level checks of `paramsSchema` to the widened object, but only for values
- * that do not carry a template.
+ * Re-attaches the object-level checks of `paramsSchema` to the widened object.
  *
  * Those checks are written against the declared field types, so once a field accepts
  * `array | string` a refinement like `(v) => v.ids.every(...)` receives a string and throws a
  * TypeError. That exception escapes `safeParse` and fails the whole create/update request, so the
- * checks cannot simply be preserved as-is. A templated value cannot be meaningfully checked before
- * it is rendered anyway, so it skips them; every other value runs the original object-level checks
- * against the already-parsed field output (without re-running field schemas, which would re-apply
- * non-idempotent transforms).
+ * checks cannot simply be preserved as-is. When a widened field holds a template, each check is
+ * tried on its own and checks that throw (because they need the unresolved array) are skipped —
+ * other checks, including those on unrelated fields, still run. Non-templated values run every
+ * object-level check against the already-parsed field output (without re-running field schemas,
+ * which would re-apply non-idempotent transforms).
  */
 function deferChecksForTemplateValues(
   paramsSchema: z.ZodObject,
@@ -289,32 +289,45 @@ function deferChecksForTemplateValues(
   // original schema accepts. `z.any()` fields + the original object checks validate the output
   // shape without touching the fields again.
   const objectChecks = paramsSchema.def.checks ?? [];
-  const outputChecksOnly = z
-    .object(
-      Object.fromEntries(
-        Object.keys(paramsSchema.shape as Record<string, z.ZodType>).map((key) => [key, z.any()])
-      ) as z.ZodRawShape
-    )
-    .check(...objectChecks);
+  const anyShape = Object.fromEntries(
+    Object.keys(paramsSchema.shape as Record<string, z.ZodType>).map((key) => [key, z.any()])
+  ) as z.ZodRawShape;
+  const outputChecksOnly = z.object(anyShape).check(...objectChecks);
 
-  return widened.superRefine((value, ctx) => {
-    const params = value as Record<string, unknown>;
-    if (widenedKeys.some((key) => typeof params[key] === 'string')) {
-      return;
-    }
-    const result = outputChecksOnly.safeParse(value);
-    if (result.success) {
-      return;
-    }
+  const replayIssues = (issues: z.ZodError['issues'], ctx: z.RefinementCtx): void => {
     // Replaying path and message keeps the issue pointing at the offending field, which both
     // Monaco markers and the template-error suppression in parseWorkflowYamlToJSON rely on.
-    for (const issue of result.error.issues) {
+    for (const issue of issues) {
       ctx.addIssue({
         code: 'custom',
         path: issue.path,
         message: issue.message,
         input: issue.input,
       });
+    }
+  };
+
+  return widened.superRefine((value, ctx) => {
+    const params = value as Record<string, unknown>;
+    if (!widenedKeys.some((key) => typeof params[key] === 'string')) {
+      const result = outputChecksOnly.safeParse(value);
+      if (!result.success) {
+        replayIssues(result.error.issues, ctx);
+      }
+      return;
+    }
+
+    // Template present: do not bail on every object check. Run each check alone and skip only
+    // those that throw when they assume a declared array/object field type.
+    for (const check of objectChecks) {
+      try {
+        const result = z.object(anyShape).check(check).safeParse(value);
+        if (!result.success) {
+          replayIssues(result.error.issues, ctx);
+        }
+      } catch {
+        // Check depended on an unresolved templated field (e.g. called `.every` on a string).
+      }
     }
   });
 }

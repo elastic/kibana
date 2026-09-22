@@ -489,6 +489,33 @@ describe('generateYamlSchemaFromConnectors', () => {
         expect(parseRefined({ ids: '${{ workflow.inputs.ids }}', name: 'x' }).success).toBe(true);
       });
 
+      it('still enforces object checks that do not depend on templated fields', () => {
+        // A template on `ids` must not disable unrelated refinements — otherwise invalid sibling
+        // params (e.g. an disallowed mode) can be persisted.
+        const crossField: ConnectorContractUnion = {
+          summary: 'CrossField',
+          description: null,
+          type: 'cross.field.step',
+          paramsSchema: z
+            .object({
+              ids: z.array(z.string()),
+              mode: z.enum(['a', 'b']),
+            })
+            .refine((v) => v.mode === 'a', 'mode must be a')
+            .refine((v) => v.ids.every((id) => id.length > 0), 'ids must all be non-empty'),
+          outputSchema: z.unknown(),
+        };
+        const schema = generateYamlSchemaFromConnectors([crossField]);
+        const parseWith = (withValue: unknown) =>
+          schema.safeParse({
+            ...BASE_WORKFLOW,
+            steps: [{ name: 's', type: 'cross.field.step', with: withValue }],
+          });
+
+        expect(parseWith({ ids: '${{ workflow.inputs.ids }}', mode: 'b' }).success).toBe(false);
+        expect(parseWith({ ids: '${{ workflow.inputs.ids }}', mode: 'a' }).success).toBe(true);
+      });
+
       it('still enforces the refinement for ordinary array values', () => {
         expect(parseRefined({ ids: ['a'], name: 'x' }).success).toBe(true);
         expect(parseRefined({ ids: [''], name: 'x' }).success).toBe(false);
