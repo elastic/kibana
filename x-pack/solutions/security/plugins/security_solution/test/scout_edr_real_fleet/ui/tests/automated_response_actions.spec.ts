@@ -7,13 +7,13 @@
 
 import { expect } from '@kbn/scout-security/ui';
 import { createEnabledRuleWithAutomatedResponseActions } from '../fixtures/seed_rule';
-import { tags, test } from '../fixtures';
+import { test } from '../fixtures';
 
 const ALERT_TIMEOUT_MS = 180_000;
 const RESPONSE_STATUS_TIMEOUT_MS = 180_000;
 const TEST_TIMEOUT_MS = 15 * 60 * 1000;
 
-test.describe('Automated response actions', { tag: tags.stateful.classic }, () => {
+test.describe('Automated response actions', { tag: ['@local-stateful-classic'] }, () => {
   test.setTimeout(TEST_TIMEOUT_MS);
 
   test.beforeEach(async ({ browserAuth }) => {

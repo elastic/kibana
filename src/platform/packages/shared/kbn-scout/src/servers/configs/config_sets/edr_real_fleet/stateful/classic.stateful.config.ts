@@ -34,8 +34,8 @@ export const servers: ScoutServerConfig = {
     ...defaultConfig.esTestCluster,
     serverArgs: [
       ...defaultConfig.esTestCluster.serverArgs,
+      // Docker Fleet Server and the Endpoint VM cannot reach ES on localhost.
       'http.host=0.0.0.0',
-      'xpack.security.enabled=true',
     ],
   },
 
