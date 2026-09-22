@@ -183,6 +183,7 @@ describe('createChangePointDataSourceProfileProvider', () => {
       });
       expect(getDefaultAppState({ dataView: {} as DataView })).toEqual({
         columns: [{ name: 'type' }, { name: SOURCE_COLUMN }, { name: 'pvalue' }],
+        rowHeight: 3,
       });
     });
 
@@ -193,6 +194,7 @@ describe('createChangePointDataSourceProfileProvider', () => {
       });
       expect(getDefaultAppState({ dataView: {} as DataView })).toEqual({
         columns: [{ name: 'change_type' }, { name: SOURCE_COLUMN }, { name: 'p_value' }],
+        rowHeight: 3,
       });
     });
   });

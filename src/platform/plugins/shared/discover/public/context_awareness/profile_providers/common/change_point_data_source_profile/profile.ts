@@ -18,7 +18,7 @@ import type {
   CustomGridColumnProps,
   CustomCellRenderer,
 } from '@kbn/unified-data-table';
-import { SOURCE_COLUMN } from '@kbn/unified-data-table';
+import { ROWS_HEIGHT_OPTIONS, SOURCE_COLUMN } from '@kbn/unified-data-table';
 import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
 import type { DataSourceProfileProvider } from '../../../profiles';
 import { DataSourceCategory } from '../../../profiles';
@@ -68,6 +68,7 @@ export const createChangePointDataSourceProfileProvider = (
           { name: SOURCE_COLUMN },
           { name: context.pvalueColumnId },
         ],
+        rowHeight: ROWS_HEIGHT_OPTIONS.default,
       }),
     getChartSectionConfiguration:
       (prev, { context, toolkit }) =>
