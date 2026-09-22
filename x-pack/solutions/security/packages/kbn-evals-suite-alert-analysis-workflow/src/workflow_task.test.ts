@@ -69,20 +69,26 @@ describe('readAgentVerdict', () => {
     expect(readAgentVerdict(steps, alertId)?.classification).toBe('true_positive');
   });
 
-  it('still matches legacy `alert_id` if present', () => {
+  it('does not credit a legacy `alert_id` match (production pairs on `id` only)', () => {
     const steps = [
       step({
         output: {
           structured_output: {
+            // Simulate a non-schema reply that only has alert_id — production apply_verdicts
+            // would not pair this, so neither should the eval harness.
             verdicts: [
-              { alert_id: alertId, classification: 'false_positive', confidence_score: 0.9 },
+              {
+                alert_id: alertId,
+                classification: 'false_positive',
+                confidence_score: 0.9,
+              },
             ],
           },
         },
       }),
     ];
 
-    expect(readAgentVerdict(steps, alertId)?.classification).toBe('false_positive');
+    expect(readAgentVerdict(steps, alertId)).toBeUndefined();
   });
 
   it('returns undefined when no verdict matches the seeded alert id', () => {
