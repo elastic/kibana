@@ -313,9 +313,21 @@ export class FindService extends FtrService {
     timeout: number = this.WAIT_FOR_EXISTS_TIME
   ): Promise<boolean> {
     this.log.debug(`Find.existsByCssSelector('${selector}') with timeout=${timeout}`);
-    return await this.exists(async (drive) => {
-      return this.wrapAll(await drive.findElements(By.css(selector)));
-    }, timeout);
+    // Keep the implicit wait at zero while driver.wait owns the polling budget. Otherwise a
+    // missing element blocks the WebDriver connection for the full timeout on every attempt.
+    await this._withTimeout(0);
+    try {
+      // Selenium treats timeout=0 as unbounded; 1ms preserves a single immediate probe.
+      await this.driver.wait(async () => {
+        const elements = await this.driver.findElements(By.css(selector));
+        return elements.length > 0 || null;
+      }, timeout || 1);
+      return true;
+    } catch {
+      return false;
+    } finally {
+      await this._withTimeout(this.defaultFindTimeout);
+    }
   }
 
   public async existsByXpath(
