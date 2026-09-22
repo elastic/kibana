@@ -35,8 +35,15 @@ import { useDiscoverGridImplementation } from './use_discover_grid_implementatio
 export interface DiscoverGridProps extends UnifiedDataTableProps {
   query?: DiscoverAppState['query'];
   cascadedDocumentsContext?: CascadedDocumentsContext;
-  tanStackToolbarLeftSide?: ReactNode;
-  tanStackToolbarTrailingControl?: ReactNode;
+  /**
+   * Shared toolbar slot rendered by both grids when supported.
+   * Currently consumed by TanStack as `toolbarLeftSide`.
+   */
+  toolbarLeftSide?: ReactNode;
+  /**
+   * Shared toolbar trailing slot. Currently consumed by TanStack as `toolbarTrailingControl`.
+   */
+  toolbarTrailingControl?: ReactNode;
   /**
    * App-state grid implementation. Used when `onChangeGridImplementation` is provided
    * so the choice is stored in Discover URL state instead of local storage.
@@ -46,8 +53,8 @@ export interface DiscoverGridProps extends UnifiedDataTableProps {
 }
 
 /**
- * Customized version of the UnifiedDataTable
- * @constructor
+ * Customized Discover documents grid that can render either UnifiedDataTable (EUI)
+ * or TanStackDataGrid behind a shared Discover/Unified props surface.
  */
 export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
   ({
@@ -56,8 +63,8 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
     externalAdditionalControls: customExternalAdditionalControls,
     rowAdditionalLeadingControls: customRowAdditionalLeadingControls,
     onFullScreenChange,
-    tanStackToolbarLeftSide,
-    tanStackToolbarTrailingControl,
+    toolbarLeftSide,
+    toolbarTrailingControl,
     gridImplementation,
     onChangeGridImplementation,
     ...props
@@ -158,12 +165,25 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
       isCascadedDocumentsAvailable,
     ]);
 
-    const gridImplementationSwitch = (
+    const additionalDisplaySettingsContent = (
       <DiscoverGridImplementationSwitch
         usesUnifiedDataTable={usesUnifiedDataTable}
         onSwitch={toggleImplementation}
       />
     );
+
+    // Props both implementations already honor — keep this list the swap contract for A/B testing.
+    const sharedGridProps = {
+      showColumnTokens: true as const,
+      enableComparisonMode: true as const,
+      showSummaryColumnToggle: true as const,
+      getRowIndicator,
+      rowAdditionalLeadingControls,
+      shouldKeepAdHocDataViewImmutable: true as const,
+      externalAdditionalControls,
+      onFullScreenChange,
+      additionalDisplaySettingsContent,
+    };
 
     if (isCascadedDocumentsAvailable && cascadedDocumentsContext.selectedCascadeGroups.length) {
       return (
@@ -185,6 +205,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
     if (!usesUnifiedDataTable) {
       return (
         <TanStackDataGrid
+          {...sharedGridProps}
           rows={props.rows ?? []}
           columns={props.columns}
           columnsMeta={props.columnsMeta}
@@ -192,7 +213,6 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
           query={isOfAggregateQueryType(query) ? query : undefined}
           showTimeCol={props.showTimeCol}
           isPlainRecord={props.isPlainRecord}
-          showColumnTokens
           sort={props.sort}
           onSort={props.onSort}
           isSortEnabled={props.isSortEnabled}
@@ -206,9 +226,6 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
           loadingState={props.loadingState}
           onFilter={props.onFilter}
           onFieldEdited={props.onFieldEdited}
-          shouldKeepAdHocDataViewImmutable={props.shouldKeepAdHocDataViewImmutable}
-          getRowIndicator={getRowIndicator}
-          rowAdditionalLeadingControls={rowAdditionalLeadingControls}
           dataGridDensityState={props.dataGridDensityState}
           onUpdateDataGridDensity={props.onUpdateDataGridDensity}
           rowHeightState={props.rowHeightState}
@@ -220,15 +237,10 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
           maxAllowedSampleSize={props.maxAllowedSampleSize}
           sampleSizeState={props.sampleSizeState}
           onUpdateSampleSize={props.onUpdateSampleSize}
-          onFullScreenChange={onFullScreenChange}
           services={services}
-          externalAdditionalControls={externalAdditionalControls}
-          gridImplementationSwitch={gridImplementationSwitch}
-          toolbarLeftSide={tanStackToolbarLeftSide}
-          toolbarTrailingControl={tanStackToolbarTrailingControl}
+          toolbarLeftSide={toolbarLeftSide}
+          toolbarTrailingControl={toolbarTrailingControl}
           showKeyboardShortcuts={props.showKeyboardShortcuts}
-          showSummaryColumnToggle
-          enableComparisonMode
           ariaLabelledBy={props.ariaLabelledBy}
           showFullScreenButton={props.showFullScreenButton}
         />
@@ -237,22 +249,14 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
 
     return (
       <UnifiedDataTable
-        showColumnTokens
         canDragAndDropColumns
-        enableComparisonMode
         enableInTableSearch
-        showSummaryColumnToggle
         renderCustomToolbar={renderCustomToolbar}
-        getRowIndicator={getRowIndicator}
-        rowAdditionalLeadingControls={rowAdditionalLeadingControls}
-        visibleCellActions={3} // this allows to show up to 3 actions on cell hover if available (filter in, filter out, and copy)
+        visibleCellActions={3} // up to 3 actions on cell hover (filter in/out, copy)
         paginationMode={paginationModeConfig.paginationMode}
         customGridColumnsConfiguration={customGridColumnsConfiguration}
-        shouldKeepAdHocDataViewImmutable
-        externalAdditionalControls={externalAdditionalControls}
-        onFullScreenChange={onFullScreenChange}
         {...props}
-        additionalDisplaySettingsContent={gridImplementationSwitch}
+        {...sharedGridProps}
       />
     );
   }

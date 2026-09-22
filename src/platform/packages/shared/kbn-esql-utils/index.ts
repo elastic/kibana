@@ -75,8 +75,6 @@ export {
   getProjectRoutingFromEsqlQuery,
   hasOnlySourceCommand,
   hasTimeseriesInfoCommand,
-  getMultiplierFromESQLQuery,
-  MAX_MULTIPLIED_ROWS,
   hasChangePointCommand,
   getChangePointOutputColumnNames,
   getChangePointSeriesColumns,

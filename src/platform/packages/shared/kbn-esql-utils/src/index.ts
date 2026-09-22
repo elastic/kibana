@@ -31,8 +31,6 @@ export {
   getRemoteClustersFromESQLQuery,
   convertTimeseriesCommandToFrom,
   hasOnlySourceCommand,
-  getMultiplierFromESQLQuery,
-  MAX_MULTIPLIED_ROWS,
   hasTimeseriesInfoCommand,
 } from './utils/query_parsing_helpers';
 export {

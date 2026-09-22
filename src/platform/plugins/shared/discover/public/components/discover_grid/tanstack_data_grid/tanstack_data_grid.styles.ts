@@ -343,48 +343,22 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
     borderRadius: 0,
   }),
 
-  // -- Cell popover --
-  cellPopoverBackdrop: css({
-    position: 'fixed',
-    inset: 0,
-    zIndex: 999,
-  }),
-
-  cellPopover: css({
-    position: 'fixed',
-    zIndex: 1000,
-    minWidth: 200,
-    maxWidth: '75vw',
-    maxHeight: '50vh',
+  // -- Cell popover (panel sizing matches EuiDataGrid via panelStyle) --
+  cellPopoverPanel: css({
     overflow: 'auto',
-    backgroundColor: euiTheme.colors.backgroundBasePlain,
-    border: euiTheme.border.thin,
-    borderRadius: euiTheme.border.radius.small,
-    boxShadow: `0 4px 16px ${euiTheme.colors.shadow ?? 'rgba(0,0,0,.15)'}`,
-    padding: euiTheme.size.s,
   }),
 
-  cellPopoverHeader: css({
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: euiTheme.size.xs,
+  cellPopoverPanelWide: css({
+    overflow: 'auto',
+    maxInlineSize: 'min(75vw, 600px) !important',
   }),
 
   cellPopoverValue: css({
-    flex: 1,
-    minWidth: 0,
     fontFamily: euiTheme.font.familyCode,
     whiteSpace: 'pre-wrap',
     wordBreak: 'break-word',
-  }),
-
-  cellPopoverActions: css({
-    display: 'flex',
-    alignItems: 'center',
-    gap: euiTheme.size.s,
-    flexWrap: 'wrap',
-    paddingTop: euiTheme.size.xs,
+    maxHeight: 350,
+    overflow: 'auto',
   }),
 
   // -- Keyboard focus ring --
