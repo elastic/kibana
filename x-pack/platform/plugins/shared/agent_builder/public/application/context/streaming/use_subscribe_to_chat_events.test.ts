@@ -76,6 +76,64 @@ const attachmentFixture: VersionedAttachment[] = [
   },
 ];
 
+describe('subscribeToChatEvents — messageComplete', () => {
+  it('forwards message_content and structured_output to setAssistantMessage', async () => {
+    const events$ = new Subject<ChatEvent>();
+    const conversationActions = buildActionsMock();
+    const structuredOutput = { verdict: 'covered_enabled', rule_id: 'abc-123' };
+
+    const done = subscribeToChatEvents({
+      events$,
+      conversationActions,
+      isAborted: () => false,
+    });
+
+    events$.next({
+      type: ChatEventType.messageComplete,
+      data: {
+        message_id: 'msg-1',
+        message_content: JSON.stringify(structuredOutput),
+        structured_output: structuredOutput,
+      },
+    });
+    events$.complete();
+
+    await done;
+
+    expect(conversationActions.setAssistantMessage).toHaveBeenCalledWith({
+      assistantMessage: JSON.stringify(structuredOutput),
+      structuredOutput,
+    });
+  });
+
+  it('forwards only message_content when structured_output is absent', async () => {
+    const events$ = new Subject<ChatEvent>();
+    const conversationActions = buildActionsMock();
+
+    const done = subscribeToChatEvents({
+      events$,
+      conversationActions,
+      isAborted: () => false,
+    });
+
+    events$.next({
+      type: ChatEventType.messageComplete,
+      data: {
+        message_id: 'msg-1',
+        message_content: 'plain text response',
+      },
+    });
+    events$.complete();
+
+    await done;
+
+    expect(conversationActions.setAssistantMessage).toHaveBeenCalledWith({
+      assistantMessage: 'plain text response',
+      structuredOutput: undefined,
+    });
+  });
+});
+
 describe('subscribeToChatEvents — roundComplete', () => {
   it('forwards canonical attachments to conversationActions.setAttachments', async () => {
     const events$ = new Subject<ChatEvent>();

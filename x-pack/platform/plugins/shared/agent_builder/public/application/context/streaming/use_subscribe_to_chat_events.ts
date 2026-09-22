@@ -64,6 +64,7 @@ export const subscribeToChatEvents = ({
     } else if (isMessageCompleteEvent(event)) {
       conversationActions.setAssistantMessage({
         assistantMessage: event.data.message_content,
+        structuredOutput: event.data.structured_output,
       });
     } else if (isToolProgressEvent(event)) {
       conversationActions.setToolCallProgress({
