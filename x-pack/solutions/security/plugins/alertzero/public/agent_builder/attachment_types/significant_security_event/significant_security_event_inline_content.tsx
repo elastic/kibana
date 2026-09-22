@@ -108,7 +108,6 @@ const EventRows: React.FC<{
         return (
           <IocBadge
             value={event.event_id}
-            index={0}
             action={
               href ? { href, iconType: 'discoverApp', label: OPEN_IN_DISCOVER_LABEL } : undefined
             }
@@ -178,7 +177,6 @@ const AlertList: React.FC<{
             <EuiFlexItem grow={false} key={`${alert.index}:${alert.alert_id}`}>
               <IocBadge
                 value={alert.alert_id}
-                index={0}
                 action={{
                   href,
                   iconType: 'securitySignalDetected',
@@ -631,7 +629,6 @@ export const SignificantSecurityEventInlineContent: React.FC<
                   <EuiFlexItem grow={false}>
                     <IocBadge
                       value={parsed.run_id}
-                      index={0}
                       testSubj="alertzeroSignificantSecurityEventRunId"
                     />
                   </EuiFlexItem>
@@ -651,7 +648,6 @@ export const SignificantSecurityEventInlineContent: React.FC<
                   <EuiFlexItem grow={false}>
                     <IocBadge
                       value={parsed.report_id}
-                      index={0}
                       action={(() => {
                         const href = buildDiscoverEsqlUrl({
                           share: navigation.share,

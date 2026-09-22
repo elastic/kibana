@@ -186,7 +186,6 @@ export const HuntCorrelationInlineContent: React.FC<HuntCorrelationInlineContent
         return (
           <IocBadge
             value={relatedReportId}
-            index={0}
             action={
               href ? { href, iconType: 'discoverApp', label: OPEN_IN_DISCOVER_LABEL } : undefined
             }

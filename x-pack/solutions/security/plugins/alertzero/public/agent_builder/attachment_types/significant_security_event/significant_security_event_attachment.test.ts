@@ -107,6 +107,16 @@ describe('createSignificantSecurityEventAttachmentDefinition', () => {
       });
     });
 
+    it('omits the trailing separator when capability is absent from the fallback fields', () => {
+      const definition = createSignificantSecurityEventAttachmentDefinition({ navigation });
+      const header = definition.getHeader?.({
+        attachment: {
+          data: { source_watch: 'watch-1' },
+        } as unknown as SignificantSecurityEventAttachment,
+      } as never);
+      expect(header?.subtitle).toBe('watch-1');
+    });
+
     it('returns just the hunt finding badge for a malformed attachment', () => {
       const definition = createSignificantSecurityEventAttachmentDefinition({ navigation });
       expect(definition.getHeader?.({ attachment: {} as never })).toEqual({

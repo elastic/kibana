@@ -91,7 +91,6 @@ export const EntityChip: React.FC<EntityChipProps> = ({
         <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
           <IocBadge
             value={value}
-            index={0}
             action={
               securityEntityHref
                 ? { href: securityEntityHref, iconType: 'user', label: OPEN_ENTITY_PAGE_LABEL }

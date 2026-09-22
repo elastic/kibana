@@ -68,9 +68,8 @@ export const createSignificantSecurityEventAttachmentDefinition = ({
 }: {
   navigation: AttachmentNavigationDeps;
 }): AttachmentUIDefinition<SignificantSecurityEventAttachment> => ({
-  // The SSE mapper copies the report title into the SSE today, so the attachment title cannot
-  // yet say which finding it is; the long-term fix is a finding-shaped title written
-  // server-side. Until then, lead with the hit count when we have one.
+  // The attachment title lags one write behind the finding shown, so it cannot yet say
+  // which finding it is. Lead with the hit count when we have one.
   getLabel: (attachment) => {
     const data = attachment?.data;
     const parsed = parseSignificantSecurityEventData(data);
