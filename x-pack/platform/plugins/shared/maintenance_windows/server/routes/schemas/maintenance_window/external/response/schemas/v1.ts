@@ -6,9 +6,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { MAX_KQL_LENGTH } from '@kbn/alerting-v2-schemas';
 import { maintenanceWindowStatus as maintenanceWindowStatusV1 } from '../constants/v1';
 import { scheduleResponseSchemaV1 } from '../../../../schedule';
-import { maintenanceWindowScopeSchemaV1 } from '../../scope_schema_v1';
 
 export const maintenanceWindowResponseSchema = schema.object(
   {
@@ -68,7 +68,61 @@ export const maintenanceWindowResponseSchema = schema.object(
       }
     ),
 
-    scope: schema.maybe(maintenanceWindowScopeSchemaV1),
+    scope: schema.maybe(
+      schema.object(
+        {
+          // `alerting` is optional in the response to accommodate maintenance windows that only
+          // target alerting v2 (no v1 scope). When present, `query` is always required to
+          // preserve the GA API contract: clients reading this response can rely on
+          // `scope.alerting.query` being set whenever `scope.alerting` exists.
+          alerting: schema.maybe(
+            schema.object({
+              query: schema.object({
+                kql: schema.string({
+                  meta: {
+                    description:
+                      'A filter written in Kibana Query Language (KQL). Only alerts matching this query will be suppressed by the maintenance window.',
+                  },
+                }),
+              }),
+            })
+          ),
+          alerting_v2: schema.maybe(
+            schema.object(
+              {
+                enabled: schema.maybe(
+                  schema.boolean({
+                    defaultValue: true,
+                    meta: {
+                      description:
+                        'Whether the maintenance window applies to alerting v2 episodes.',
+                    },
+                  })
+                ),
+                query: schema.maybe(
+                  schema.object({
+                    kql: schema.string({
+                      maxLength: MAX_KQL_LENGTH,
+                      meta: {
+                        description:
+                          'A filter written in Kibana Query Language (KQL). Only matching alerting v2 episodes will be suppressed.',
+                      },
+                    }),
+                  })
+                ),
+              },
+              {
+                meta: {
+                  description:
+                    'Scope configuration for alerting v2. When present, the maintenance window applies to alerting v2 episodes.',
+                },
+              }
+            )
+          ),
+        },
+        { meta: { id: 'maintenance_window_scope' } }
+      )
+    ),
 
     schedule: schema.object({
       custom: scheduleResponseSchemaV1,

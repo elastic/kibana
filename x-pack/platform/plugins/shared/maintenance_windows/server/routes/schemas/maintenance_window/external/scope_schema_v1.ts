@@ -9,10 +9,10 @@ import { schema } from '@kbn/config-schema';
 import { MAX_KQL_LENGTH } from '@kbn/alerting-v2-schemas';
 
 /**
- * Shared scope schema for all three external API surfaces (create request, update request,
- * response). All three must reference the same `meta.id` so the OAS bundler emits a single
- * `$ref: '#/components/schemas/maintenance_window_scope'` instead of conflicting definitions.
- * Import this constant rather than re-declaring the object inline in each file.
+ * Shared scope schema for request bodies (create / update). Permissive: both alerting and
+ * alerting_v2 keys are optional, and query is optional inside each. The response schema
+ * maintains the stricter v1 contract (see response/schemas/v1.ts) to preserve backward
+ * compatibility of the stable API.
  */
 export const maintenanceWindowScopeSchemaV1 = schema.object(
   {
@@ -83,5 +83,5 @@ export const maintenanceWindowScopeSchemaV1 = schema.object(
       )
     ),
   },
-  { meta: { id: 'maintenance_window_scope' } }
+  { meta: { id: 'maintenance_window_scope_request' } }
 );

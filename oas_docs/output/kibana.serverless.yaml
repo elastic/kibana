@@ -104318,10 +104318,49 @@ components:
       properties:
         alerting:
           additionalProperties: false
+          type: object
+          properties:
+            query:
+              additionalProperties: false
+              type: object
+              properties:
+                kql:
+                  description: A filter written in Kibana Query Language (KQL). Only alerts matching this query will be suppressed by the maintenance window.
+                  type: string
+              required:
+                - kql
+          required:
+            - query
+        alerting_v2:
+          additionalProperties: false
+          description: Scope configuration for alerting v2. When present, the maintenance window applies to alerting v2 episodes.
+          type: object
+          properties:
+            enabled:
+              description: Whether the maintenance window applies to alerting v2 episodes.
+              type: boolean
+            query:
+              additionalProperties: false
+              type: object
+              properties:
+                kql:
+                  description: A filter written in Kibana Query Language (KQL). Only matching alerting v2 episodes will be suppressed.
+                  maxLength: 4096
+                  type: string
+              required:
+                - kql
+      title: maintenance_window_scope
+      type: object
+    Kibana_HTTP_APIs_maintenance_window_scope_request:
+      additionalProperties: false
+      properties:
+        alerting:
+          additionalProperties: false
           description: Scope configuration for alerting v1. When present, the maintenance window applies to alerting v1 alerts. An absent `alerting` key means this MW does not apply to alerting v1.
           type: object
           properties:
             enabled:
+              default: true
               description: Whether the maintenance window applies to alerting v1 alerts.
               type: boolean
             query:
@@ -104340,6 +104379,7 @@ components:
           type: object
           properties:
             enabled:
+              default: true
               description: Whether the maintenance window applies to alerting v2 episodes.
               type: boolean
             query:
@@ -104352,7 +104392,7 @@ components:
                   type: string
               required:
                 - kql
-      title: maintenance_window_scope
+      title: maintenance_window_scope_request
       type: object
     Kibana_HTTP_APIs_managed_integration:
       additionalProperties: false
@@ -107655,7 +107695,7 @@ components:
           required:
             - custom
         scope:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_maintenance_window_scope'
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_maintenance_window_scope_request'
         title:
           description: The name of the maintenance window. While this name does not have to be unique, a distinctive name can help you identify a specific maintenance window.
           type: string
@@ -115685,7 +115725,7 @@ components:
           required:
             - custom
         scope:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_maintenance_window_scope'
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_maintenance_window_scope_request'
         title:
           description: The name of the maintenance window. While this name does not have to be unique, a distinctive name can help you identify a specific maintenance window.
           type: string
