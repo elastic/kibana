@@ -181,7 +181,6 @@ export const resolveIndexRoute = createServerRoute({
   },
 });
 
-
 export const internalCrudRoutes = {
   ...listStreamsRoute,
   ...streamDetailRoute,

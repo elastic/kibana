@@ -202,7 +202,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             body: { query: { esql } },
           },
         });
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
         expect(String((response.body as any)?.message ?? '')).not.to.contain('[request body');
       });
     });
