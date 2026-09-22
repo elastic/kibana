@@ -255,6 +255,83 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
     expect(deleteObserved).toBe(false);
   });
 
+  test('agent-based cleanup: removing a service updates the shared package policy for the surviving service (PUT, not DELETE)', async ({
+    browserAuth,
+    page,
+  }) => {
+    // Simulate: two services (elb + removed-svc) were deployed to the same package policy
+    // ('shared-pkg-policy'). removed-svc was then deselected from Step 1. policyIdsByInstance
+    // still holds both entries — live-stale detection triggers cleanup on the next Next click.
+    //
+    // Before the isAlreadyDeployed fix: isAlreadyDeployed returned true (elb had a policy ID),
+    // so handleNext short-circuited without calling handleDeploy, and the PUT never fired.
+    //
+    // Expected after fix:
+    //   PUT /api/fleet/package_policies/shared-pkg-policy fires (update for surviving elb).
+    //   DELETE must NOT fire — the policy survives because elb is still a member.
+    await navigateToOnboardingStep(browserAuth, page, 'authenticate-and-deploy', {
+      selectedServiceIds: ['elb'],
+      globalRegion: 'us-east-1',
+      instances: [{ instanceId: 'elb', serviceId: 'elb', isDuplicate: false }],
+      serviceVars: {
+        elb: {
+          enabledDataStreams: ['elb_logs'],
+          varsByDataStream: {
+            elb_logs: {
+              enabledInputs: ['aws-s3'],
+              varsByInput: { 'aws-s3': { bucket_arn: 'arn:aws:s3:::test-bucket' } },
+            },
+          },
+        },
+      },
+      authenticateAndDeployStep: {
+        deploymentMethod: 'agent_based',
+        agentHostsMode: 'existing',
+        selectedAgentPolicyIds: ['mock-agent-policy-id'],
+      },
+      detectAndReviewStep: {
+        // Both elb and the removed service share the same package policy.
+        policyIdsByInstance: { 'removed-svc': 'shared-pkg-policy', elb: 'shared-pkg-policy' },
+        serviceStatuses: {},
+      },
+    });
+
+    await page.route(
+      (url) => /\/api\/fleet\/agent_policies/.test(url.pathname),
+      (route) =>
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ items: [] }),
+        })
+    );
+
+    // Intercept DELETE to detect misrouted cleanup — DELETE must NOT fire.
+    let deleteObserved = false;
+    await page.route(
+      (url) => /\/api\/fleet\/package_policies\//.test(url.pathname),
+      (route) => {
+        if (route.request().method() === 'DELETE') deleteObserved = true;
+        route.fulfill({ status: 200, contentType: 'application/json', body: '{}' });
+      }
+    );
+
+    await expect(page.testSubj.locator('agentBasedSection')).toBeVisible();
+
+    const updateRequestPromise = page.waitForRequest(
+      (req) =>
+        req.method() === 'PUT' &&
+        /\/api\/fleet\/package_policies\/shared-pkg-policy$/.test(new URL(req.url()).pathname)
+    );
+
+    const nextButton = page.testSubj.locator('authenticateAndDeployStep-nextButton');
+    await expect(nextButton).toBeEnabled();
+    await nextButton.click();
+
+    await updateRequestPromise;  // PUT — shared policy updated with elb inputs only
+    expect(deleteObserved).toBe(false);
+  });
+
   test('agent-based: deploy fires POST /api/fleet/package_policies for existing agent policy', async ({
     browserAuth,
     page,
