@@ -25,7 +25,6 @@ export class FindService extends FtrService {
   private readonly retryOnStale = this.ctx.getService('retryOnStale');
 
   private readonly WAIT_FOR_EXISTS_TIME = this.config.get('timeouts.waitForExists');
-  private readonly POLLING_TIME = 500;
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
   private readonly fixedHeaderHeight = this.config.get('layout.fixedHeaderHeight');
 
@@ -475,7 +474,9 @@ export class FindService extends FtrService {
     timeout: number = this.defaultFindTimeout
   ) {
     this.log.debug(`Find.waitForDeletedByCssSelector('${selector}') with timeout=${timeout}`);
-    await this._withTimeout(this.POLLING_TIME);
+    // Explicitly poll with driver.wait rather than making every "not found" check
+    // block for the implicit timeout before it can report that deletion succeeded.
+    await this._withTimeout(0);
     try {
       await this.driver.wait(
         async () => {

@@ -54,7 +54,7 @@ export class ToastsService extends FtrService {
   }
 
   public async dismissIfExists(): Promise<void> {
-    const toastShown = await this.find.existsByCssSelector('.euiToast');
+    const toastShown = await this.find.existsByCssSelector('.euiToast', 0);
     if (toastShown) {
       try {
         await this.testSubjects.click('toastCloseButton');
@@ -78,7 +78,9 @@ export class ToastsService extends FtrService {
   }
 
   public async dismissAll(): Promise<void> {
-    const allToastElements = await this.getAll();
+    if (!(await this.testSubjects.exists('globalToastList', { timeout: 0 }))) return;
+
+    const allToastElements = await this.getAll({ timeout: 0 });
 
     if (allToastElements.length === 0) return;
 
@@ -138,9 +140,9 @@ export class ToastsService extends FtrService {
     return await elem.getVisibleText();
   }
 
-  public async getAll(): Promise<WebElementWrapper[]> {
+  public async getAll(options?: { timeout?: number }): Promise<WebElementWrapper[]> {
     const list = await this.getGlobalList();
-    return await list.findAllByCssSelector(`.euiToast`);
+    return await list.findAllByCssSelector(`.euiToast`, options?.timeout);
   }
 
   private async getGlobalList(options?: { timeout?: number }): Promise<WebElementWrapper> {

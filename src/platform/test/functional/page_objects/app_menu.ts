@@ -47,16 +47,16 @@ export class AppMenuPageObject extends FtrService {
   }
 
   async menuItemExists(testId: string) {
-    if (await this.testSubjects.exists(testId)) {
+    if (await this.testSubjects.exists(testId, { timeout: 0 })) {
       return true;
     }
 
-    if (!(await this.testSubjects.exists(APP_MENU_OVERFLOW_BUTTON))) {
+    if (!(await this.testSubjects.exists(APP_MENU_OVERFLOW_BUTTON, { timeout: 0 }))) {
       return false;
     }
 
     await this.openOverflowPopover();
-    const exists = await this.testSubjects.exists(testId);
+    const exists = await this.testSubjects.exists(testId, { timeout: 0 });
     await this.ensureOverflowPopoverClosed();
     return exists;
   }

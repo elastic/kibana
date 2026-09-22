@@ -301,7 +301,7 @@ export class ListingTableService extends FtrService {
     await this.retry.try(async () => {
       const elements = await this.find.allByCssSelector(
         itemLinkSelector(appName),
-        findTimeout ?? 10000
+        findTimeout ?? 0
       );
       expect(elements.length).to.equal(count);
     });
@@ -350,12 +350,13 @@ export class ListingTableService extends FtrService {
       let matches: number;
       if (await this.testSubjects.exists(CONTENT_LIST_TABLE, { timeout: 1000 })) {
         // Content List item links carry no per-item subject; match on exact text.
-        const links = await this.testSubjects.findAll(CONTENT_LIST_ITEM_LINK);
+        const links = await this.testSubjects.findAll(CONTENT_LIST_ITEM_LINK, 0);
         const texts = await Promise.all(links.map((link) => link.getVisibleText()));
         matches = texts.filter((text) => text.trim() === name).length;
       } else {
         const links = await this.testSubjects.findAll(
-          `${PREFIX_MAP[appName]}ListingTitleLink-${name.replace(/ /g, '-')}`
+          `${PREFIX_MAP[appName]}ListingTitleLink-${name.replace(/ /g, '-')}`,
+          0
         );
         matches = links.length;
       }
@@ -405,7 +406,7 @@ export class ListingTableService extends FtrService {
       return;
     }
     // Content List item links carry no per-item subject; match on exact text.
-    const links = await this.testSubjects.findAll(CONTENT_LIST_ITEM_LINK);
+    const links = await this.testSubjects.findAll(CONTENT_LIST_ITEM_LINK, 0);
     for (const link of links) {
       if ((await link.getVisibleText()).trim() === name) {
         await link.click();

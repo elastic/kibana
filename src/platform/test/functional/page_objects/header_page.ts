@@ -54,15 +54,6 @@ export class HeaderPageObject extends FtrService {
   }
 
   public async waitUntilLoadingHasFinished() {
-    try {
-      await this.isGlobalLoadingIndicatorVisible();
-    } catch (exception) {
-      if (exception.name === 'ElementNotVisible') {
-        // selenium might just have been too slow to catch it
-      } else {
-        throw exception;
-      }
-    }
     await this.awaitGlobalLoadingIndicatorHidden();
   }
 
@@ -84,7 +75,7 @@ export class HeaderPageObject extends FtrService {
   }
 
   public async onAppLeaveWarning(ignoreWarning = false) {
-    const warning = await this.testSubjects.exists('confirmModalTitleText');
+    const warning = await this.testSubjects.exists('confirmModalTitleText', { timeout: 0 });
     if (warning) {
       await this.testSubjects.click(
         ignoreWarning ? 'confirmModalConfirmButton' : 'confirmModalCancelButton'

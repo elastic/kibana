@@ -18,21 +18,7 @@ export class AppsMenuService extends FtrService {
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
 
   private async waitUntilLoadingHasFinished() {
-    try {
-      await this.isGlobalLoadingIndicatorVisible();
-    } catch (exception) {
-      if (exception.name === 'ElementNotVisible') {
-        // selenium might just have been too slow to catch it
-      } else {
-        throw exception;
-      }
-    }
     await this.awaitGlobalLoadingIndicatorHidden();
-  }
-
-  private async isGlobalLoadingIndicatorVisible() {
-    this.log.debug('isGlobalLoadingIndicatorVisible');
-    return await this.testSubjects.exists('globalLoadingIndicator', { timeout: 1500 });
   }
 
   private async awaitGlobalLoadingIndicatorHidden() {
@@ -47,7 +33,7 @@ export class AppsMenuService extends FtrService {
    */
   public async closeCollapsibleNav() {
     const CLOSE_BUTTON = '[data-test-subj=collapsibleNav] > button';
-    if (await this.find.existsByCssSelector(CLOSE_BUTTON)) {
+    if (await this.find.existsByCssSelector(CLOSE_BUTTON, 0)) {
       // Close button is only visible when focused
       const button = await this.find.byCssSelector(CLOSE_BUTTON);
       await button.focus();
@@ -57,10 +43,10 @@ export class AppsMenuService extends FtrService {
   }
 
   public async openCollapsibleNav() {
-    if (!(await this.testSubjects.exists('collapsibleNav'))) {
+    if (!(await this.testSubjects.exists('collapsibleNav', { timeout: 0 }))) {
       await this.testSubjects.click('toggleNavButton');
     }
-    await this.testSubjects.exists('collapsibleNav');
+    await this.testSubjects.existOrFail('collapsibleNav');
   }
 
   /**
