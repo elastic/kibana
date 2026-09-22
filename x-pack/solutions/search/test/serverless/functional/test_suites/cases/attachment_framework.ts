@@ -11,11 +11,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const dashboard = getPageObject('dashboard');
-  const lens = getPageObject('lens');
   const svlSearchNavigation = getService('svlSearchNavigation');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const svlCommonPage = getPageObject('svlCommonPage');
-  const settings = getPageObject('settings');
+  const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
 
   describe('persistable attachment', () => {
@@ -32,15 +31,14 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           'x-pack/platform/test/functional/fixtures/kbn_archives/lens/lens_basic.json'
         );
 
-        await settings.refreshDataViewFieldList('default:all-data', { ignoreMissing: true });
-
         await svlSearchNavigation.navigateToLandingPage();
 
         await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'dashboards' });
 
         await dashboard.clickNewDashboard();
 
-        await lens.createAndAddLensFromDashboard({ ignoreTimeFilter: true });
+        await dashboardAddPanel.addEmbeddable('lnsXYvis', 'lens');
+        await dashboard.waitForRenderComplete();
       });
 
       after(async () => {

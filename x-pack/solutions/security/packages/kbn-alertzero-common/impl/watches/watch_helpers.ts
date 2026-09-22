@@ -27,7 +27,7 @@ const PLACEHOLDER_SCHEDULE: Watch['schedule'] = {
 };
 
 /**
- * Live not-installed row: catalog identity plus empty runtime fields. Does not read mock fixtures.
+ * Live not-installed row: catalog identity plus empty runtime fields.
  */
 export function createCatalogWatchPlaceholder(watchId: CatalogWatchId): Watch {
   const index = SYSTEM_SECURITY_WATCH_IDS.indexOf(watchId);

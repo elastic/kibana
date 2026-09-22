@@ -28,8 +28,6 @@ export {
 } from './src/service_account_workloads';
 export type {
   ServiceAccount,
-  ServiceAccountAssumableBy,
-  ServiceAccountRoleAssignments,
   CreateServiceAccountParams,
   ServiceAccountWorkloadBinder,
   ServiceAccountWorkloadBinding,
