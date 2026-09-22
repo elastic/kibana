@@ -2852,7 +2852,7 @@ describe('softDeleteByQuery', () => {
       query: gapQuery,
       script: {
         source:
-          'if (ctx._source.kibana?.alert?.rule?.gap != null) { ctx._source.kibana.alert.rule.gap.deleted = true; }',
+          "if (ctx._source.kibana?.alert?.rule?.gap != null) { ctx._source.kibana.alert.rule.gap.deleted = true; } else { ctx.op = 'noop'; }",
         lang: 'painless',
       },
     });
@@ -2863,7 +2863,7 @@ describe('softDeleteByQuery', () => {
 
     const [call] = clusterClient.updateByQuery.mock.calls[0] as [estypes.UpdateByQueryRequest];
     expect(call.script).toEqual({
-      source: 'if (ctx._source.a != null) { ctx._source.a.b = true; }',
+      source: "if (ctx._source.a != null) { ctx._source.a.b = true; } else { ctx.op = 'noop'; }",
       lang: 'painless',
     });
   });

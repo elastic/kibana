@@ -834,7 +834,7 @@ export class ClusterClientAdapter<
         .slice(1)
         .map((segment) => `?.${segment}`)
         .join('')}`;
-      return `if (${guardPath} != null) { ${assignPath} = true; }`;
+      return `if (${guardPath} != null) { ${assignPath} = true; } else { ctx.op = 'noop'; }`;
     };
 
     const source = buildSetFieldTrueScript();
