@@ -12,7 +12,7 @@ import {
 } from '@kbn/nightshift-ai';
 import {
   SIGNIFICANT_EVENTS_SEMANTIC_CODE_SEARCH_GROUNDING_ENABLED_FLAG,
-  STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG,
+  STREAMS_SIGNIFICANT_EVENTS_APPS_ENABLED_FLAG,
 } from '@kbn/significant-events-plugin/common';
 import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import { tags } from '@kbn/scout';
@@ -281,7 +281,7 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                 headers: { 'elastic-api-version': '1' },
                 body: {
                   'feature_flags.overrides': {
-                    [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: true,
+                    [STREAMS_SIGNIFICANT_EVENTS_APPS_ENABLED_FLAG]: true,
                     [SIGNIFICANT_EVENTS_SEMANTIC_CODE_SEARCH_GROUNDING_ENABLED_FLAG]: enabled,
                   },
                 },
@@ -501,7 +501,7 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
             headers: { 'elastic-api-version': '1' },
             body: {
               'feature_flags.overrides': {
-                [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: true,
+                [STREAMS_SIGNIFICANT_EVENTS_APPS_ENABLED_FLAG]: true,
                 [SIGNIFICANT_EVENTS_SEMANTIC_CODE_SEARCH_GROUNDING_ENABLED_FLAG]: false,
               },
             },
