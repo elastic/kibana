@@ -115,6 +115,19 @@ const pushLiquidError = (
 };
 
 /**
+ * Single well-formed `${{ ... }}` covering the entire scalar. Runtime
+ * (`WorkflowTemplatingEngine.renderValueRecursively`) dispatches any string that
+ * `startsWith('${{') && endsWith('}}')` as ONE typed expression via evaluateExpression
+ * (first `{{` … last `}}`). A scalar like `${{ a }} {{ b }}` matches that dispatch
+ * but is not a single dynamic segment — validate it as invalid rather than accepting
+ * each segment independently.
+ */
+const WHOLE_SCALAR_TYPED_EXPRESSION = /^\$\{\{(?:[^}]|\}(?!\}))*\}\}$/;
+
+const isRuntimeTypedExpressionDispatch = (value: string): boolean =>
+  value.startsWith('${{') && value.endsWith('}}');
+
+/**
  * Validate each `${{ ... }}` with the same Liquid grammar the runtime uses
  * (`${{ expr }}` → drop `$` → parse as `{{ expr }}`, matching evaluateExpression).
  * Catches unknown filters and invalid syntax (e.g. ternaries) that wholesale blanking
@@ -139,6 +152,32 @@ const validateDynamicExpressions = (
   }
 };
 
+/**
+ * Scalars that runtime sends to evaluateExpression wholesale. Must be exactly one
+ * `${{ ... }}`; otherwise report an error (mixed `${{ a }} {{ b }}` false-negative fix).
+ */
+const validateRuntimeTypedExpressionScalar = (
+  yamlString: string,
+  node: Scalar,
+  value: string,
+  errors: LiquidValidationError[]
+): void => {
+  if (!WHOLE_SCALAR_TYPED_EXPRESSION.test(value)) {
+    // Synthesize a Liquid-like error so pushLiquidError can map the full scalar span.
+    pushLiquidError(
+      errors,
+      yamlString,
+      node,
+      value,
+      new Error(
+        'Invalid typed expression: values that start with "${{" and end with "}}" are evaluated as a single expression (first "{{" through last "}}"). Use one ${{ ... }} or a plain Liquid string template.'
+      )
+    );
+    return;
+  }
+  validateDynamicExpressions(yamlString, node, value, errors);
+};
+
 export function validateLiquidTemplate(
   yamlString: string,
   yamlDocument: Document
@@ -151,8 +190,13 @@ export function validateLiquidTemplate(
       if (!node.range) return;
       if (typeof node.value !== 'string') return;
 
-      // Validate typed expressions with the runtime Liquid grammar before blanking them
-      // out of the surrounding scalar (mixed `${{ }}` + `{{ }}` / `{% %}` values).
+      // Runtime typed-expression dispatch: whole scalar → evaluateExpression.
+      if (isRuntimeTypedExpressionDispatch(node.value)) {
+        validateRuntimeTypedExpressionScalar(yamlString, node, node.value, errors);
+        return;
+      }
+
+      // Embedded `${{ }}` inside a string template (does not start with `${{`).
       validateDynamicExpressions(yamlString, node, node.value, errors);
 
       // Blank ${{ ... }} before validating remaining Liquid — avoids double-reporting the
