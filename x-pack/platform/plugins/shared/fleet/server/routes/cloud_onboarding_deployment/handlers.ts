@@ -44,7 +44,6 @@ function validateAuthMethod(
   }
   if (
     (mechanisms.includes('managed_integration') || mechanisms.includes('ecf')) &&
-    !mechanisms.includes('agent_based') &&
     !MANAGED_INTEGRATION_AUTH_METHODS.has(authMethod)
   ) {
     return `authMethod '${authMethod}' is not valid for managed_integration/ecf deployments. Allowed: ${[

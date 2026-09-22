@@ -98,8 +98,6 @@ export async function hydrateOnboardingSession(
             // 'existing' mode — otherwise the hook's new-policy route would create another.
             agentHostsMode: policyIds.length ? 'existing' : 'new',
             selectedAgentPolicyIds: policyIds,
-            // First id drives single-policy queries (enrollment token, agent count) in step 4.
-            agentPolicyId: policyIds[0],
             // Secrets are never persisted; restoring the method puts the right form in front of the user.
             agentCredentialMethod: fromSOAuthMethod(item.authMethod),
           })
@@ -113,8 +111,10 @@ export async function hydrateOnboardingSession(
     // packagePolicyIds is a flat list — we don't know which id maps to which instance, but any
     // truthy value per instance is enough to satisfy the isAlreadyDeployed check. Use the first
     // id as a placeholder for all services in the SO's services list.
+    // Only seed for fully succeeded deploys — a failed status means some services need retry
+    // and fabricating completion for them would prevent that retry path from running.
     const policyIdsByInstance: Record<string, string> =
-      item.packagePolicyIds?.length && item.services?.length
+      item.status === 'succeeded' && item.packagePolicyIds?.length && item.services?.length
         ? Object.fromEntries(
             item.services.map((svc, i) => [
               svc,

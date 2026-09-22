@@ -117,8 +117,10 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
       setIsDeploying(true);
       updateDetectAndReviewStep({ isDeploying: true });
 
-      // Hoisted so the catch block can best-effort update the SO to 'failed' on unexpected errors.
+      // Hoisted so the catch block can best-effort update the SO to 'failed' on unexpected errors,
+      // including the agent policy ids known at the time of failure.
       let onboardingDeploymentId = detectAndReviewStep.onboardingDeploymentId;
+      let resolvedAgentPolicyIds: string[] = [];
 
       try {
         const { agentHostsMode, agentPolicyId, selectedAgentPolicyIds, agentCredentialMethod } =
@@ -159,8 +161,6 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
         let policyIdsByInstance: Record<string, string> = {};
         let failed: string[] = [];
         let errorsByInstance: Record<string, string> = {};
-        // Resolved agent policy ids to write to the SO after deploy.
-        let resolvedAgentPolicyIds: string[] = [];
 
         // Route to the existing-policy path when:
         // - agentHostsMode === 'existing': user selected an existing policy.
@@ -252,8 +252,13 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
           deployErrors: Object.fromEntries(allIds.map((id) => [id, msg])),
         });
         // Best-effort: mark the SO as failed so resume doesn't see a stale 'pending' record.
+        // Include any agent policy ids already resolved before the throw (e.g. from existing-policy
+        // path where resolvedAgentPolicyIds was set before deployToExistingAgentPolicies threw).
         if (onboardingDeploymentId) {
-          await updateDeployment(onboardingDeploymentId, { status: 'failed' });
+          await updateDeployment(onboardingDeploymentId, {
+            ...(resolvedAgentPolicyIds.length ? { agentPolicyIds: resolvedAgentPolicyIds } : {}),
+            status: 'failed',
+          });
         }
         return { failed: true };
       } finally {

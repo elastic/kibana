@@ -284,6 +284,20 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(400);
       });
+
+      it('should return 400 when mixed agent_based+managed_integration deployment uses assume_role authMethod', async () => {
+        await supertest
+          .post(BASE_URL)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            provider: 'aws',
+            connectorId: primaryConnectorId,
+            mechanisms: ['agent_based', 'managed_integration'],
+            services: ['ec2_otel', 'cloudtrail'],
+            authMethod: 'assume_role',
+          })
+          .expect(400);
+      });
     });
 
     describe('GET /api/fleet/cloud_onboarding_deployments/{id}', () => {

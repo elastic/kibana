@@ -1,34 +1,64 @@
 {
   "10.1.0": [
     {
-      "TODO": "Please create one or more sample objects with properties that reflect real '[object Object]' objects",
-      "NOTE": "That each modelVersion has a corresponding fixture file, which defines the previous and current versions.",
-      "NOTE2": "These fixtures define the before and after state, and are used for both upgrade and rollback testing.",
-      "HINT": "You can use the template below and create sample objects for 10.1.0 and 10.2.0 versions.",
-      "HINT2": "Alternatively, you can copy the contents from older fixture files (if they exist) and adapt them accordingly.",
-      "IMPORTANT": "The current version fixtures (below) are defining how objects from the previous version fixtures (this array) would look like AFTER upgrading.",
-      "IMPORTANT2": "They are NOT defining random sample objects with properties that are valid for the current model version."
+      "provider": "aws",
+      "connectorId": "my-cloud-connector-id",
+      "mechanisms": ["managed_integration"],
+      "deploymentId": "deployment-abc-123",
+      "deploymentName": "My AWS Deployment",
+      "services": ["aws.cloudtrail", "aws.vpcflow"],
+      "status": "succeeded",
+      "attemptCount": 1,
+      "serviceVars": {
+        "aws.cloudtrail": { "bucket_arn": "arn:aws:s3:::my-bucket" }
+      },
+      "globalRegion": "us-east-1",
+      "dataFormat": "ecs",
+      "authMethod": "static_keys",
+      "packagePolicyIds": ["pkg-policy-id-1", "pkg-policy-id-2"],
+      "agentPolicyId": "agent-policy-id-1",
+      "apiKeyId": "api-key-id-1"
+    },
+    {
+      "provider": "aws",
+      "mechanisms": ["agent_based"],
+      "services": ["aws.cloudtrail"],
+      "status": "succeeded",
+      "attemptCount": 1,
+      "globalRegion": "us-east-1",
+      "dataFormat": "ecs",
+      "packagePolicyIds": ["pkg-policy-id-3"]
     }
   ],
   "10.2.0": [
     {
-      "provider": "aws|azure|gcp",
-      "connectorId": "string?",
-      "mechanisms": "array",
-      "deploymentId": "string?",
-      "deploymentName": "string?",
-      "services": "array",
-      "status": "pending?|deploying?|succeeded?|failed?",
-      "statusMessage": "string?",
-      "attemptCount": "number?",
-      "serviceVars": "record?",
-      "globalRegion": "string?",
-      "dataFormat": "ecs?|otel?",
-      "authMethod": "identity_federation?|static_keys?|temporary_keys?|shared_credentials?|assume_role?",
-      "packagePolicyIds": "array?",
-      "agentPolicyIds": "array?",
-      "apiKeyId": "string?",
-      "ecfStacks": "array?"
+      "provider": "aws",
+      "connectorId": "my-cloud-connector-id",
+      "mechanisms": ["managed_integration"],
+      "deploymentId": "deployment-abc-123",
+      "deploymentName": "My AWS Deployment",
+      "services": ["aws.cloudtrail", "aws.vpcflow"],
+      "status": "succeeded",
+      "attemptCount": 1,
+      "serviceVars": {
+        "aws.cloudtrail": { "bucket_arn": "arn:aws:s3:::my-bucket" }
+      },
+      "globalRegion": "us-east-1",
+      "dataFormat": "ecs",
+      "authMethod": "static_keys",
+      "packagePolicyIds": ["pkg-policy-id-1", "pkg-policy-id-2"],
+      "agentPolicyId": "agent-policy-id-1",
+      "apiKeyId": "api-key-id-1"
+    },
+    {
+      "provider": "aws",
+      "mechanisms": ["agent_based"],
+      "services": ["aws.cloudtrail"],
+      "status": "succeeded",
+      "attemptCount": 1,
+      "globalRegion": "us-east-1",
+      "dataFormat": "ecs",
+      "packagePolicyIds": ["pkg-policy-id-3"]
     }
   ]
 }
