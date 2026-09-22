@@ -51,7 +51,7 @@ export const HeaderSlot = ({ conversation }: InvestigationSlotProps) => (
 
 export interface FooterSlotProps extends InvestigationSlotProps {
   onOpenChat: () => void;
-  onAssignSubmit?: (assignee: string) => void;
+  onAssignSubmit?: (assignee: string, rationale: string) => void | Promise<void>;
 }
 
 export const FooterSlot = ({ conversation, onOpenChat, onAssignSubmit }: FooterSlotProps) => (

@@ -21,6 +21,10 @@ import {
 } from '@kbn/alertzero-common';
 import { registerAgenticInvestigationTemplateUI } from '@kbn/agentic-investigations-common';
 import { getAlertZeroDeepLinks } from './deep_links';
+import {
+  ASSIGN_ERROR_MESSAGE,
+  updateInvestigationAssignees,
+} from './hooks/update_investigation_assignees';
 import type {
   AlertZeroClientConfig,
   AlertZeroPublicSetup,
@@ -79,7 +83,6 @@ export class AlertZeroPublicPlugin
           coreStart,
           startDeps,
           params,
-          config: this.config,
         });
       },
     });
@@ -97,11 +100,15 @@ export class AlertZeroPublicPlugin
       templateId: TEMPLATE_ID_INVESTIGATION,
       name: INVESTIGATION_TEMPLATE_NAME,
       icon: 'securitySignalDetected',
-      onAssignSubmit: (conversationId, assignees) => {
-        core.http.patch(
-          `/internal/investigations/${encodeURIComponent(conversationId)}/assignees`,
-          { version: '1', body: JSON.stringify({ assignees }) }
-        );
+      // Returned rather than fired and forgotten: the footer's modal closes on resolve, so a
+      // failed write leaves it open instead of looking like it landed.
+      onAssignSubmit: async (conversationId, assignees) => {
+        try {
+          await updateInvestigationAssignees(core.http, conversationId, assignees);
+        } catch (error) {
+          core.notifications.toasts.addDanger(ASSIGN_ERROR_MESSAGE);
+          throw error;
+        }
       },
     });
 

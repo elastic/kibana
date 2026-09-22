@@ -17,6 +17,7 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { AgentBuilderPlatformPluginSetup } from '@kbn/agent-builder-platform-plugin/server';
 import type { ProposalsService } from './proposals/services/proposals_service';
+import type { ProposalPrivilegesChecker } from './proposals/services/check_proposal_privileges';
 import type { EscalationsService } from './escalations/services/escalations_service';
 import type { InvestigationsService } from './investigations/services/investigations_service';
 
@@ -47,6 +48,8 @@ export interface AgenticInvestigationsStartDependencies {
  */
 export interface AgenticInvestigationsPluginStart {
   getProposalsService: () => ProposalsService;
+  /** For in-process callers (Agent Builder tools) that bypass the route's `security.authz`. */
+  getProposalPrivileges: () => ProposalPrivilegesChecker;
   getEscalationsService: () => EscalationsService;
   getInvestigationsService: () => InvestigationsService;
 }

@@ -20,11 +20,16 @@ import {
   CheckDecidePrivilegesStepId,
   CloneProposalStepId,
   CreateProposalStepId,
+  GetLatestRevisionStepId,
   GetProposalStepId,
   UpdateProposalStepId,
 } from '../common/proposals/step_types';
 import { AgenticInvestigationsPlugin } from './plugin';
 import { initializeManagedWorkflows } from './proposals/managed_workflows/initialize_managed_workflows';
+import {
+  INVESTIGATIONS_API_PRIVILEGE_MANAGE,
+  INVESTIGATIONS_API_PRIVILEGE_READ,
+} from './investigations/constants';
 import {
   PROPOSALS_API_PRIVILEGE_MANAGE,
   PROPOSALS_API_PRIVILEGE_READ,
@@ -151,6 +156,44 @@ describe('AgenticInvestigationsPlugin', () => {
       expect(privileges.read.ui).toEqual([PROPOSALS_UI_CAPABILITY_SHOW]);
     });
 
+    // Investigations are a sub-feature rather than part of the base grants, so an admin can
+    // hand out investigation management without also handing out proposal decisions.
+    it('keeps investigation privileges out of the base grants', () => {
+      const { features } = setupPlugin();
+      const { privileges } = registeredFeature(features);
+
+      expect(privileges.all.api).not.toContain(INVESTIGATIONS_API_PRIVILEGE_MANAGE);
+      expect(privileges.read.api).not.toContain(INVESTIGATIONS_API_PRIVILEGE_READ);
+    });
+
+    it('exposes investigations as a mutually exclusive manage/read sub-feature', () => {
+      const { features } = setupPlugin();
+      const { subFeatures } = registeredFeature(features);
+
+      const investigations = subFeatures.find(
+        (subFeature: { privilegeGroups: Array<{ privileges: Array<{ id: string }> }> }) =>
+          subFeature.privilegeGroups.some(({ privileges }) =>
+            privileges.some(({ id }) => id === 'investigations_all')
+          )
+      );
+
+      expect(investigations.privilegeGroups).toEqual([
+        expect.objectContaining({ groupType: 'mutually_exclusive' }),
+      ]);
+      expect(investigations.privilegeGroups[0].privileges).toEqual([
+        expect.objectContaining({
+          id: 'investigations_all',
+          includeIn: 'all',
+          api: [INVESTIGATIONS_API_PRIVILEGE_READ, INVESTIGATIONS_API_PRIVILEGE_MANAGE],
+        }),
+        expect.objectContaining({
+          id: 'investigations_read',
+          includeIn: 'read',
+          api: [INVESTIGATIONS_API_PRIVILEGE_READ],
+        }),
+      ]);
+    });
+
     it('registers as a managed workflow owner, or the startup sweep deletes our workflows', () => {
       const { workflowsExtensions } = setupPlugin();
 
@@ -172,6 +215,7 @@ describe('AgenticInvestigationsPlugin', () => {
         CheckDecidePrivilegesStepId,
         GetProposalStepId,
         CloneProposalStepId,
+        GetLatestRevisionStepId,
       ]);
     });
 

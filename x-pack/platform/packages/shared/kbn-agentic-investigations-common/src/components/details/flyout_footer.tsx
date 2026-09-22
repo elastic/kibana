@@ -7,7 +7,6 @@
 
 import React, { useCallback, useState } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { useBoolean } from '@kbn/react-hooks';
 import type { Investigation } from '../../types';
 import { BaseActions, type CardActionType } from '../actions';
 import { InvestigationActionModals } from '../modals/investigation_action_modals';
@@ -18,12 +17,10 @@ export interface ConversationDetailsFlyoutFooterProps {
   /** Supplied by the caller because flyout slots render outside a `KibanaContextProvider`. */
   onOpenChat: () => void;
   /**
-   * Commits the assignee write. Supplied by the solution layer which owns the HTTP client.
-   * The modal closes immediately after this is called; the implementation handles errors
-   * internally (e.g. via a toast or promise rejection).
-   * When absent, clicking Assign closes the modal without writing.
+   * Commits the assignee write, for the same reason `onOpenChat` is passed in. The modal closes
+   * when the returned promise resolves; when absent, confirming just closes it.
    */
-  onAssignSubmit?: (assignee: string) => void;
+  onAssignSubmit?: (assignee: string, rationale: string) => void | Promise<void>;
 }
 
 interface ModalState {
@@ -43,17 +40,8 @@ export const ConversationDetailsFlyoutFooter = ({
   onAssignSubmit,
 }: ConversationDetailsFlyoutFooterProps) => {
   const [modalState, setModalState] = useState<ModalState>(CLOSED_MODAL);
-  const [isApprovalOpen, { on: openApproval, off: closeApproval }] = useBoolean();
 
   const closeModal = useCallback(() => setModalState(CLOSED_MODAL), []);
-
-  const handleAssignSubmit = useCallback(
-    (assignee: string) => {
-      onAssignSubmit?.(assignee);
-      closeModal();
-    },
-    [onAssignSubmit, closeModal]
-  );
 
   const onClickAction = useCallback(
     (action: CardActionType, recordId: Investigation['recordId']) => {
@@ -76,11 +64,13 @@ export const ConversationDetailsFlyoutFooter = ({
           </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
+          {/* No `onClickRecommendedAction`: approving needs the proposal, and this footer is
+              handed a conversation-derived investigation. Omitting it drops the menu entry
+              rather than offering a decision this host cannot record. */}
           <BaseActions
             investigation={investigation}
             isFlyout={true}
             onClickAction={onClickAction}
-            onClickRecommendedAction={openApproval}
             data-test-subj="investigationFlyoutActions"
           />
         </EuiFlexItem>
@@ -90,10 +80,9 @@ export const ConversationDetailsFlyoutFooter = ({
         action={modalState.type}
         recordId={modalState.recordId}
         initialAssignee={investigation.conversationAssignees[0] ?? null}
-        approvalInvestigation={isApprovalOpen ? investigation : undefined}
         onCloseAction={closeModal}
-        onCloseApproval={closeApproval}
-        onAssignSubmit={onAssignSubmit ? handleAssignSubmit : undefined}
+        onCloseApproval={closeModal}
+        onAssignSubmit={onAssignSubmit}
       />
     </>
   );

@@ -56,7 +56,7 @@ export interface RegisterAgenticInvestigationTemplateUIOptions {
    * resolved assignees list (may be empty to clear). Supplied by the solution layer that owns
    * the HTTP client; when absent, clicking Assign in the flyout closes the modal without writing.
    */
-  onAssignSubmit?: (conversationId: string, assignees: string[]) => void;
+  onAssignSubmit?: (conversationId: string, assignees: string[]) => void | Promise<void>;
 }
 
 /**

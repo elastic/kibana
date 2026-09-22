@@ -51,25 +51,15 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
     privileges: {
       all: {
         app: [],
-        api: [
-          PROPOSALS_API_PRIVILEGE_READ,
-          PROPOSALS_API_PRIVILEGE_MANAGE,
-          INVESTIGATIONS_API_PRIVILEGE_READ,
-          INVESTIGATIONS_API_PRIVILEGE_MANAGE,
-        ],
+        api: [PROPOSALS_API_PRIVILEGE_READ, PROPOSALS_API_PRIVILEGE_MANAGE],
         savedObject: { all: [], read: [] },
-        ui: [
-          PROPOSALS_UI_CAPABILITY_SHOW,
-          PROPOSALS_UI_CAPABILITY_DECIDE,
-          INVESTIGATIONS_UI_CAPABILITY_SHOW,
-          INVESTIGATIONS_UI_CAPABILITY_MANAGE,
-        ],
+        ui: [PROPOSALS_UI_CAPABILITY_SHOW, PROPOSALS_UI_CAPABILITY_DECIDE],
       },
       read: {
         app: [],
-        api: [PROPOSALS_API_PRIVILEGE_READ, INVESTIGATIONS_API_PRIVILEGE_READ],
+        api: [PROPOSALS_API_PRIVILEGE_READ],
         savedObject: { all: [], read: [] },
-        ui: [PROPOSALS_UI_CAPABILITY_SHOW, INVESTIGATIONS_UI_CAPABILITY_SHOW],
+        ui: [PROPOSALS_UI_CAPABILITY_SHOW],
       },
     },
     subFeatures: [
@@ -100,6 +90,39 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
                 api: [ESCALATIONS_API_PRIVILEGE_READ],
                 savedObject: { all: [], read: [] },
                 ui: [ESCALATIONS_UI_CAPABILITY_SHOW],
+              },
+            ],
+          },
+        ],
+      },
+      {
+        name: i18n.translate('xpack.agenticInvestigations.investigationsSubFeatureName', {
+          defaultMessage: 'Investigations',
+        }),
+        privilegeGroups: [
+          {
+            groupType: 'mutually_exclusive',
+            privileges: [
+              {
+                id: 'investigations_all',
+                name: i18n.translate('xpack.agenticInvestigations.investigationsAllPrivilegeName', {
+                  defaultMessage: 'Update and view investigations',
+                }),
+                includeIn: 'all',
+                api: [INVESTIGATIONS_API_PRIVILEGE_READ, INVESTIGATIONS_API_PRIVILEGE_MANAGE],
+                savedObject: { all: [], read: [] },
+                ui: [INVESTIGATIONS_UI_CAPABILITY_SHOW, INVESTIGATIONS_UI_CAPABILITY_MANAGE],
+              },
+              {
+                id: 'investigations_read',
+                name: i18n.translate(
+                  'xpack.agenticInvestigations.investigationsReadPrivilegeName',
+                  { defaultMessage: 'View investigations' }
+                ),
+                includeIn: 'read',
+                api: [INVESTIGATIONS_API_PRIVILEGE_READ],
+                savedObject: { all: [], read: [] },
+                ui: [INVESTIGATIONS_UI_CAPABILITY_SHOW],
               },
             ],
           },

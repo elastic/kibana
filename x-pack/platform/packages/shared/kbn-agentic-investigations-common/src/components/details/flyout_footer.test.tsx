@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, screen } from '@testing-library/react';
+import { fireEvent, screen, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import type { Investigation } from '../../types';
 import { ConversationDetailsFlyoutFooter } from './flyout_footer';
@@ -53,8 +53,18 @@ describe('ConversationDetailsFlyoutFooter', () => {
     expect(screen.getByText('Assign proposal')).toBeInTheDocument();
   });
 
-  it('calls onAssignSubmit and closes the modal when the user confirms assignment', () => {
-    const onAssignSubmit = jest.fn();
+  const submitAssignment = () => {
+    openActionsMenu();
+    fireEvent.click(screen.getByText('Assign'));
+
+    // Select an assignee and enter a rationale so the Assign button becomes enabled.
+    fireEvent.change(screen.getByRole('combobox'), { target: { value: 'ava' } });
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'on-call rotation' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Assign' }));
+  };
+
+  it('hands onAssignSubmit the rationale the modal collected, not just the assignee', async () => {
+    const onAssignSubmit = jest.fn().mockResolvedValue(undefined);
 
     renderWithKibanaRenderContext(
       <ConversationDetailsFlyoutFooter
@@ -64,17 +74,27 @@ describe('ConversationDetailsFlyoutFooter', () => {
       />
     );
 
-    openActionsMenu();
-    fireEvent.click(screen.getByText('Assign'));
+    submitAssignment();
 
-    // Select an assignee and enter a rationale so the Assign button becomes enabled.
-    fireEvent.change(screen.getByRole('combobox'), { target: { value: 'ava' } });
-    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'on-call rotation' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Assign' }));
+    expect(onAssignSubmit).toHaveBeenCalledWith('ava', 'on-call rotation');
+    await waitForElementToBeRemoved(() => screen.queryByText('Assign proposal'));
+  });
 
-    expect(onAssignSubmit).toHaveBeenCalledWith('ava');
-    // Modal closes after the callback fires.
-    expect(screen.queryByText('Assign proposal')).not.toBeInTheDocument();
+  it('keeps the modal open when the write fails, so the assignment can be retried', async () => {
+    const onAssignSubmit = jest.fn().mockRejectedValue(new Error('boom'));
+
+    renderWithKibanaRenderContext(
+      <ConversationDetailsFlyoutFooter
+        investigation={investigation}
+        onOpenChat={jest.fn()}
+        onAssignSubmit={onAssignSubmit}
+      />
+    );
+
+    submitAssignment();
+
+    await waitFor(() => expect(onAssignSubmit).toHaveBeenCalled());
+    expect(screen.getByText('Assign proposal')).toBeInTheDocument();
   });
 
   it('owns the close investigation modal', () => {
