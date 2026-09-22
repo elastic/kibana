@@ -113,7 +113,6 @@ export const IndexDocuments: React.FC<IndexDocumentsProps> = ({
             size="s"
             onClick={onRefresh}
             isLoading={isLoading}
-            isDisabled={isLoading}
             data-test-subj="indexDetailsDataPreviewRefreshButton"
           >
             <FormattedMessage
