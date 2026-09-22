@@ -73,7 +73,6 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
       },
     } as unknown as AgentBuilderPluginSetup;
 
-
     registerContextEngineAgentBuilderIntegration({
       coreSetup,
       agentBuilder,
