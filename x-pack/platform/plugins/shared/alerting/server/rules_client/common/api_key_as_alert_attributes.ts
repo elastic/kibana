@@ -134,7 +134,7 @@ export function updateMissingUiamKeyTag(
     ? tagsWithoutMissingUiamKeyTags
     : [...tagsWithoutMissingUiamKeyTags, MISSING_UIAM_API_KEY_TAG];
 
-  // Preserve the original reference so the rule loader can skip an unnecessary write.
+  // Preserve the original reference so the reconciler can skip an unnecessary write.
   return updatedTags.length === tags.length &&
     updatedTags.every((tag, index) => tag === tags[index])
     ? tags

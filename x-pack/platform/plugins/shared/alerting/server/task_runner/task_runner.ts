@@ -60,6 +60,7 @@ import { IN_MEMORY_METRICS } from '../monitoring';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 import { getDecryptedRule, validateRuleAndCreateFakeRequest } from './rule_loader';
+import { updateRuleMissingUiamKeyTag } from './update_rule_missing_uiam_key_tag';
 import { TaskRunnerTimer, TaskRunnerTimerSpan } from './task_runner_timer';
 import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
 import { lastRunToRaw } from '../lib/last_run_status';
@@ -678,8 +679,11 @@ export class TaskRunner<
         this.timer.setDuration(TaskRunnerTimerSpan.StartTaskRun, startedAt);
       }
 
-      const ruleData = await withAlertingSpan('alerting:get-decrypted-rule', () =>
+      const loadedRuleData = await withAlertingSpan('alerting:get-decrypted-rule', () =>
         getDecryptedRule(this.context, ruleId, spaceId)
+      );
+      const ruleData = await withAlertingSpan('alerting:update-missing-uiam-api-key-tag', () =>
+        updateRuleMissingUiamKeyTag(this.context, ruleId, spaceId, loadedRuleData)
       );
 
       // Check that this task is current

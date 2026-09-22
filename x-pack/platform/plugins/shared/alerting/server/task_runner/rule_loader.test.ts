@@ -29,10 +29,7 @@ import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { getErrorSource, TaskErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { getAlertFromRaw } from '../rules_client/lib/get_alert_from_raw';
 import { alertingUiamTelemetry } from '../otel/uiam_telemetry';
-import {
-  LEGACY_MISSING_UIAM_API_KEY_TAG,
-  MISSING_UIAM_API_KEY_TAG,
-} from '../application/rule/constants';
+import { LEGACY_MISSING_UIAM_API_KEY_TAG } from '../application/rule/constants';
 
 // create mocks
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -226,7 +223,7 @@ describe('rule_loader', () => {
   });
 
   describe('getDecryptedAttributes()', () => {
-    test('replaces the legacy missing UIAM API key tag before execution', async () => {
+    test('loads the decrypted rule without updating missing UIAM API key tags', async () => {
       encryptedSavedObjects.getDecryptedAsInternalUser.mockImplementation(
         mockGetDecrypted({
           ...mockedRawRuleSO.attributes,
@@ -248,52 +245,8 @@ describe('rule_loader', () => {
         spaceId
       );
 
-      expect(mockUnsafeSavedObjectsClientUpdate).toHaveBeenCalledWith(
-        RULE_SAVED_OBJECT_TYPE,
-        ruleId,
-        expect.objectContaining({
-          apiKey,
-          tags: ['existing-tag', MISSING_UIAM_API_KEY_TAG],
-        }),
-        {
-          mergeAttributes: false,
-          namespace: undefined,
-          version: '1',
-        }
-      );
-      expect(result.rawRule.tags).toEqual(['existing-tag', MISSING_UIAM_API_KEY_TAG]);
-      expect(result.version).toBe('2');
-    });
-
-    test('removes missing UIAM API key tags when the key exists', async () => {
-      encryptedSavedObjects.getDecryptedAsInternalUser.mockImplementation(
-        mockGetDecrypted({
-          ...mockedRawRuleSO.attributes,
-          enabled,
-          consumer,
-          uiamApiKey: 'uiam-key',
-          tags: [MISSING_UIAM_API_KEY_TAG, LEGACY_MISSING_UIAM_API_KEY_TAG, 'existing-tag'],
-        })
-      );
-
-      const result = await getDecryptedRule(
-        {
-          ...context,
-          isServerless: true,
-          shouldGrantUiam: true,
-          apiKeyType: ApiKeyType.UIAM,
-        },
-        ruleId,
-        spaceId
-      );
-
-      expect(result.rawRule.tags).toEqual(['existing-tag']);
-      expect(mockUnsafeSavedObjectsClientUpdate).toHaveBeenCalledWith(
-        RULE_SAVED_OBJECT_TYPE,
-        ruleId,
-        expect.objectContaining({ tags: ['existing-tag'], uiamApiKey: 'uiam-key' }),
-        expect.objectContaining({ mergeAttributes: false, version: '1' })
-      );
+      expect(result.rawRule.tags).toEqual(['existing-tag', LEGACY_MISSING_UIAM_API_KEY_TAG]);
+      expect(mockUnsafeSavedObjectsClientUpdate).not.toHaveBeenCalled();
     });
 
     test('succeeds with default space', async () => {

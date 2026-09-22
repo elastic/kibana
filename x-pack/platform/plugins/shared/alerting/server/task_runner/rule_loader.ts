@@ -18,7 +18,6 @@ import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import { SPACES_EXTENSION_ID } from '@kbn/core/server';
 import { ApiKeyType, type RunRuleParams, type TaskRunnerContext } from './types';
 import { ErrorWithReason, validateRuleTypeParams } from '../lib';
 import type { RawRule, RuleTypeRegistry, RuleTypeParamsValidator } from '../types';
@@ -26,7 +25,6 @@ import { RuleExecutionStatusErrorReasons } from '../types';
 import type { RuleTypeParams } from '../../common';
 import { MONITORING_HISTORY_LIMIT } from '../../common';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
-import { updateMissingUiamKeyTag } from '../rules_client/common/api_key_as_alert_attributes';
 import { getAlertFromRaw } from '../rules_client/lib';
 import { UIAM_LOGS_USAGE_TAGS } from '../constants';
 import {
@@ -35,7 +33,7 @@ import {
   type CredentialType,
 } from '../otel/uiam_telemetry';
 
-interface RuleData {
+export interface RuleData {
   rawRule: RawRule;
   version: string | undefined;
   references: SavedObjectReference[];
@@ -179,41 +177,9 @@ export async function getDecryptedRule(
     throw createTaskRunError(error, TaskErrorSource.FRAMEWORK);
   }
 
-  const tags = updateMissingUiamKeyTag(
-    rawRule.attributes.tags,
-    rawRule.attributes.uiamApiKey,
-    context.isServerless,
-    context.shouldGrantUiam,
-    context.apiKeyType
-  );
-
-  if (tags === rawRule.attributes.tags) {
-    return {
-      version: rawRule.version,
-      rawRule: rawRule.attributes,
-      references: rawRule.references,
-    };
-  }
-
-  const updatedRawRule = { ...rawRule.attributes, tags };
-  const savedObjectsClient = context.savedObjects.getUnsafeInternalClient({
-    includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE],
-    excludedExtensions: [SPACES_EXTENSION_ID],
-  });
-  const updatedSavedObject = await savedObjectsClient.update<RawRule>(
-    RULE_SAVED_OBJECT_TYPE,
-    ruleId,
-    updatedRawRule,
-    {
-      mergeAttributes: false,
-      namespace,
-      version: rawRule.version,
-    }
-  );
-
   return {
-    version: updatedSavedObject.version,
-    rawRule: updatedRawRule,
+    version: rawRule.version,
+    rawRule: rawRule.attributes,
     references: rawRule.references,
   };
 }
