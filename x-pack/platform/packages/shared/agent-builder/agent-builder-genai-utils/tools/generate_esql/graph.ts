@@ -58,7 +58,7 @@ const StateAnnotation = Annotation.Root({
   // inputs
   nlQuery: Annotation<string>(),
   target: Annotation<string>(),
-  executeQuery: Annotation<boolean>(),
+  execute: Annotation<'none' | 'schema' | 'data'>(),
   maxRetries: Annotation<number>(),
   additionalInstructions: Annotation<string | undefined>(),
   additionalContext: Annotation<string | undefined>(),
@@ -232,7 +232,7 @@ export const createNlToEsqlGraph = ({
   };
 
   const branchAfterAutocorrect = async (state: StateType) => {
-    if (state.executeQuery) {
+    if (state.execute !== 'none') {
       return 'execute_query';
     } else {
       return 'validate_query';
@@ -301,10 +301,12 @@ export const createNlToEsqlGraph = ({
     }
 
     let action: ExecuteQueryAction;
+    const schemaOnly = state.execute === 'schema';
     try {
       const results = await executeEsql({
         query,
         params: buildTimeRangeParams(state.timeRange),
+        ...(schemaOnly ? { limit: 1, dropNullColumns: false } : {}),
         esClient,
       });
       action = {
@@ -352,7 +354,7 @@ export const createNlToEsqlGraph = ({
         error: lastAction.error,
       };
     }
-    // ended via AST validation when executeQuery=false - success or failure hitting max retries
+    // ended via AST validation when execute is 'none' - success or failure hitting max retries
     if (isValidateQueryAction(lastAction)) {
       return {
         answer: generateActions[generateActions.length - 1].response,
@@ -360,7 +362,7 @@ export const createNlToEsqlGraph = ({
         error: lastAction.error,
       };
     }
-    // ended via autocorrect - when executeQuery=false and validation was skipped (should not happen after adding validate_query)
+    // ended via autocorrect - when execute is 'none' and validation was skipped (should not happen after adding validate_query)
     if (isAutocorrectQueryAction(lastAction)) {
       return {
         answer: generateActions[generateActions.length - 1].response,

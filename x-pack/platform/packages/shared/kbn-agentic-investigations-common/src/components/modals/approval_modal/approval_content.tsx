@@ -10,8 +10,8 @@ import { css } from '@emotion/react';
 import { EuiButton, EuiButtonEmpty, useEuiTheme, type EuiButtonColor } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
 import { ApprovalModalHeader } from './approval_modal_header';
-import { BlastRadiusSection } from './blast_radius_section';
-import type { BlastRadiusContent } from './blast_radius_section';
+import { ActionImpactSection } from './action_impact_section';
+import type { ActionImpactContent } from './action_impact_section';
 import { ApprovalActorRow } from './approval_actor_row';
 import { AlwaysAllowCheckbox } from './always_allow_checkbox';
 import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
@@ -37,10 +37,10 @@ export interface ApprovalAction {
 export interface ApprovalContentProps {
   title: string;
   tone: 'primary' | 'danger';
-  /** Used for the header avatar, the blast-radius default icon colour, and (fallback) the primary-action button icon. */
+  /** Used for the header avatar, the action-impact default icon colour, and (fallback) the primary-action button icon. */
   iconType: IconType;
-  blastRadius: BlastRadiusContent;
-  /** Optional prose rendered above the blast radius section. */
+  actionImpact: ActionImpactContent;
+  /** Optional prose rendered above the action impact section. */
   description?: React.ReactNode;
   /**
    * Show the avatar + warning-label + title header.
@@ -51,7 +51,7 @@ export interface ApprovalContentProps {
   titleId?: string;
   warningLabel?: string;
   /**
-   * Show the actor row (who is acting) below the blast radius.
+   * Show the actor row (who is acting) below the action impact section.
    * @default true
    */
   showActorRow?: boolean;
@@ -80,7 +80,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     title,
     tone,
     iconType,
-    blastRadius,
+    actionImpact,
     description,
     showHeader = true,
     titleId,
@@ -117,7 +117,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
           {description !== undefined && (
             <div css={css({ marginBottom: euiTheme.size.m })}>{description}</div>
           )}
-          <BlastRadiusSection content={blastRadius} defaultItemIconColor={iconColor} />
+          <ActionImpactSection content={actionImpact} defaultItemIconColor={iconColor} />
           {showActorRow && <ApprovalActorRow />}
         </div>
 

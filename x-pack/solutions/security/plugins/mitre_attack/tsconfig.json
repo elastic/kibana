@@ -17,6 +17,7 @@
     "@kbn/core-saved-objects-server",
     "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/es-query",
+    "@kbn/react-query",
     "@kbn/securitysolution-es-utils",
     "@kbn/security-mitre-attack-common",
     "@kbn/security-mitre-attack-server",
