@@ -12,6 +12,7 @@ import { expect } from '@kbn/scout/api';
 import {
   AgentBuilderErrorCode,
   ConversationOriginType,
+  ConversationRoundStatus,
   TimelineEventType,
   isConversationCreatedEvent,
   isConversationUpdatedEvent,
@@ -201,7 +202,7 @@ apiTest.describe(
 
     for (const mode of EXECUTION_MODES) {
       apiTest(
-        `[${mode}] persists a failed execution and surfaces it to the next round`,
+        `[${mode}] persists a failed execution as an interrupted round and surfaces it to the next round`,
         async ({ apiClient }) => {
           // 1. a successful first round (title generation happens here)
           await setupAgentDirectAnswer({
@@ -242,13 +243,19 @@ apiTest.describe(
           expect(failureBody.message).toContain('Error calling connector');
           await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
-          // 3. the failed execution is on the conversation as a full projection, not as a round
+          // 3. the failed execution is on the conversation as a full projection AND as a round:
+          //    completed, with an empty response and the interruption recorded
           const conversation = await getConversation(
             apiClient,
             adminCredentials.apiKeyHeader,
             conversationId
           );
-          expect(conversation.rounds).toHaveLength(1);
+          expect(conversation.rounds).toHaveLength(2);
+          const failedRound = conversation.rounds[1];
+          expect(failedRound.status).toBe(ConversationRoundStatus.completed);
+          expect(failedRound.response.message).toBe('');
+          expect(failedRound.interruption?.type).toBe('failed');
+          expect(failedRound.input.message).toBe(`second ${mode}`);
           const failed = (conversation.events ?? []).filter(
             (event) => event.type === TimelineEventType.executionFailed
           );
@@ -311,9 +318,10 @@ apiTest.describe(
             adminCredentials.apiKeyHeader,
             conversationId
           );
-          expect(after.rounds).toHaveLength(2);
+          expect(after.rounds).toHaveLength(3);
           expect(after.rounds.map((round) => round.input.message)).toStrictEqual([
             `first ${mode}`,
+            `second ${mode}`,
             `third ${mode}`,
           ]);
         }
@@ -321,7 +329,7 @@ apiTest.describe(
     }
 
     apiTest(
-      'aborted execution (callback / task manager) is persisted, reports aborted, and is hidden from the next round',
+      "aborted execution (callback / task manager) is persisted as an interrupted round and stays in the next round's context",
       async ({ apiClient }) => {
         const externalConversationId = `team:T123/channel:C123/thread:interrupted-abort-${RUN_ID}`;
         const converseViaCallback = (input: string, idempotencyKey: string, token: string) =>
@@ -398,7 +406,13 @@ apiTest.describe(
             TERMINAL_EVENT_TYPES.includes(event.type)
           )
         ).toHaveLength(1);
-        expect(conversation!.rounds).toHaveLength(1);
+        // the aborted execution is a round of its own: completed, empty response, interruption
+        expect(conversation!.rounds).toHaveLength(2);
+        expect(conversation!.rounds[1].interruption).toMatchObject({
+          type: 'aborted',
+          aborted_by: { source: 'api' },
+        });
+        expect(conversation!.rounds[1].response.message).toBe('');
         // the abort came through the API: the terminal records the source and the requesting user
         const abortedBy = (
           aborted[0].data as {
@@ -436,7 +450,7 @@ apiTest.describe(
         expect(doc!._source?.abort_reason?.source).toBe('api');
         expect(doc!._source?.error?.meta?.abort_reason?.source).toBe('api');
 
-        // 5. a third round does not see the aborted round's input
+        // 5. a third round sees the aborted round's input followed by the interruption notice
         await setupAgentDirectAnswer({
           proxy: llmProxy,
           continueConversation: true,
@@ -457,7 +471,14 @@ apiTest.describe(
           'third after abort',
           requestsBeforeThird
         );
-        expect(userMessages.some((content) => content.includes('second aborted'))).toBe(false);
+        const history = userMessages.join('\n');
+        const abortedAt = history.indexOf('second aborted');
+        const noticeAt = history.indexOf('<system_notice>');
+        expect(abortedAt).toBeGreaterThanOrEqual(0);
+        expect(noticeAt).toBeGreaterThan(abortedAt);
+        expect(noticeAt).toBeLessThan(history.lastIndexOf('third after abort'));
+        expect(history).toContain('interrupted before the agent finished');
+        expect(history).toContain('<interruption source="api"');
       }
     );
   }
