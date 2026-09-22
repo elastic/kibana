@@ -108,12 +108,23 @@ describe('Nightshift remote telemetry configuration', () => {
 
   it('reserves capacity for sixteen normal workflow tasks plus background tasks', () => {
     process.env.NIGHTSHIFT_CONCURRENCY = '16';
-    expect(readServers().kbnTestServer.serverArgs).toContain('--xpack.task_manager.capacity=42');
+    expect(readServers().kbnTestServer.serverArgs).toContain('--xpack.task_manager.capacity=21');
   });
 
-  it.each(['0', '21', '1.5', 'invalid'])('rejects unsupported concurrency %s', (value) => {
+  it.each([
+    ['2', '--xpack.task_manager.capacity=10'],
+    ['45', '--xpack.task_manager.capacity=50'],
+  ])(
+    'respects the default floor and maximum capacity for concurrency %s',
+    (concurrency, capacity) => {
+      process.env.NIGHTSHIFT_CONCURRENCY = concurrency;
+      expect(readServers().kbnTestServer.serverArgs).toContain(capacity);
+    }
+  );
+
+  it.each(['0', '46', '1.5', 'invalid'])('rejects unsupported concurrency %s', (value) => {
     process.env.NIGHTSHIFT_CONCURRENCY = value;
-    expect(readServers).toThrow('NIGHTSHIFT_CONCURRENCY must be an integer between 1 and 20');
+    expect(readServers).toThrow('NIGHTSHIFT_CONCURRENCY must be an integer between 1 and 45');
   });
 
   it.each([

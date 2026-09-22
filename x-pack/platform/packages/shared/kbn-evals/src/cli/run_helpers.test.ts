@@ -57,7 +57,7 @@ describe('investigation CLI options', () => {
     expect(readInvestigationRunEnv(new FlagsReader({}), 'nightshift-investigations')).toEqual({});
   });
 
-  it.each(['0', '21', '1.5', 'invalid'])(
+  it.each(['0', '46', '1.5', 'invalid'])(
     'rejects unsupported concurrency %s before starting services',
     (value) => {
       expect(() =>
@@ -65,7 +65,7 @@ describe('investigation CLI options', () => {
           new FlagsReader({ concurrency: value }),
           'nightshift-investigations'
         )
-      ).toThrow('integer between 1 and 20');
+      ).toThrow('integer between 1 and 45');
     }
   );
 

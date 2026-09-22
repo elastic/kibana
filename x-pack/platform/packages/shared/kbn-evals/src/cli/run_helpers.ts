@@ -420,8 +420,8 @@ export const readInvestigationRunEnv = (
     throw createFlagError('Choose either --dataset-id or NIGHTSHIFT_EXAMPLES_FILE, not both');
   }
   const concurrency = Number(concurrencyFlag ?? process.env.NIGHTSHIFT_CONCURRENCY ?? 2);
-  if (!Number.isInteger(concurrency) || concurrency < 1 || concurrency > 20) {
-    throw createFlagError('--concurrency must be an integer between 1 and 20');
+  if (!Number.isInteger(concurrency) || concurrency < 1 || concurrency > 45) {
+    throw createFlagError('--concurrency must be an integer between 1 and 45');
   }
   return {
     NIGHTSHIFT_DATASETS: 'trace-only',

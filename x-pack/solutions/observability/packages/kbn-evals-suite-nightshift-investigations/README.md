@@ -53,6 +53,12 @@ supply `SANDBOX_CA_CERT_PATH`. `SANDBOX_API_HOST` and `SANDBOX_API_PORT` default
 allow sandbox-api to reach its containers. Leave sandbox-service's `WORKSPACE_SNAPSHOT_*`
 settings unset for isolated conversations. Provisioning the sandbox is a separate follow-up.
 
+Set `SANDBOX_MAX_CONCURRENT_SESSIONS` on the external sandbox-api process to at least the requested
+eval concurrency (for example, 64 for this 61-example, concurrency-16 run). Its default pool holds only ten active
+sessions; changing Kibana Task Manager capacity does not resize it. Restart sandbox-api with the
+new value after active runs finish. Verify concurrent sandbox commands can allocate successfully
+before launching a larger dataset; completed reports can still contain sandbox resource errors.
+
 Use an existing evaluations profile with a model endpoint and a results/trace destination:
 
 ```bash
@@ -154,11 +160,14 @@ with `NIGHTSHIFT_EXAMPLES_FILE`. The dataset's telemetry source still needs the 
 telemetry settings below; selecting a dataset does not provision its source data.
 
 `--concurrency` also selects trace-only investigations. It defaults to 2 and accepts integers
-from 1 to 20. The managed stack allocates two Task Manager capacity units per concurrent workflow
-plus ten units for background tasks: concurrency 16 sets `xpack.task_manager.capacity=42`.
+from 1 to 45. The managed stack allocates one normal-task slot per concurrent workflow
+plus five background task slots, with a minimum capacity of 10: concurrency 16 sets
+`xpack.task_manager.capacity=21` (42 raw cost units).
 The workflow executes its agent inline, without a second Task Manager task. The upper bound keeps
-capacity within Kibana's supported maximum of 50. The test timeout scales with the number of
-example/repetition batches and the existing 20-minute investigation deadline.
+capacity within Kibana's supported maximum of 50 normal-task slots. The test timeout scales with
+the number of example/repetition batches and the existing 20-minute investigation deadline, with
+two additional minutes per batch for agent and evaluator trace ingestion. Independent trace
+checks use the same concurrency limit.
 
 Both flags work with `start` and `run`. Prefer `start` after changing concurrency: it restarts
 Scout when concurrency or smoke/trace-only selection changes. `run` and `start --skip-server`

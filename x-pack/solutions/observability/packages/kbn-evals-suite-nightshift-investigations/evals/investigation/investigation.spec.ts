@@ -8,6 +8,7 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { expect } from '@playwright/test';
+import pMap from 'p-map';
 import { tags } from '@kbn/evals';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -25,12 +26,12 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.
     async ({ executorClient, connector, fetch, evalsClient, traceEsClient, repetitions, log }) => {
       const dataset = await loadInvestigationDataset(evalsClient);
       const concurrency = Number(process.env.NIGHTSHIFT_CONCURRENCY ?? 2);
-      if (!Number.isInteger(concurrency) || concurrency < 1 || concurrency > 20) {
-        throw new Error('NIGHTSHIFT_CONCURRENCY must be an integer between 1 and 20');
+      if (!Number.isInteger(concurrency) || concurrency < 1 || concurrency > 45) {
+        throw new Error('NIGHTSHIFT_CONCURRENCY must be an integer between 1 and 45');
       }
       evaluate.setTimeout(
         Math.ceil((dataset.examples.length * repetitions) / concurrency) *
-          INVESTIGATION_TIMEOUT_MS +
+          (INVESTIGATION_TIMEOUT_MS + 2 * 60_000) +
           5 * 60_000
       );
       // The typed agent API omits inherited instructions; the source prompt is the acceptance oracle.
@@ -91,77 +92,81 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.
       const scores = examples.flatMap((example) => example.scores);
       expect(scores).toHaveLength(runs.length);
 
-      for (const run of runs) {
-        const output = run.output as InvestigationTaskOutput;
-        // The placeholder stays at one even on failure; these checks alone establish execution acceptance.
-        expect(output.execution_error).toBeUndefined();
-        expect(output.workflow_status).toBe('completed');
-        expect(output.investigation_id).toEqual(expect.any(String));
-        expect(output.conversation_id).toEqual(expect.any(String));
-        expect(
-          output.structured_report?.conclusion || output.structured_report?.summary
-        ).toBeTruthy();
-        expect(output.conversation?.rounds.length).toBeGreaterThan(0);
-        if (!process.env.NIGHTSHIFT_EXAMPLES_FILE && !process.env.NIGHTSHIFT_DATASET_ID) {
-          assertSuccessfulSandboxCommand(output.conversation?.rounds ?? []);
-        }
-        expect(output.traceId).toMatch(/^[a-f0-9]{32}$/);
-        expect(run.traceId).toBe(output.traceId);
+      await pMap(
+        runs,
+        async (run) => {
+          const output = run.output as InvestigationTaskOutput;
+          // The placeholder stays at one even on failure; these checks alone establish execution acceptance.
+          expect(output.execution_error).toBeUndefined();
+          expect(output.workflow_status).toBe('completed');
+          expect(output.investigation_id).toEqual(expect.any(String));
+          expect(output.conversation_id).toEqual(expect.any(String));
+          expect(
+            output.structured_report?.conclusion || output.structured_report?.summary
+          ).toBeTruthy();
+          expect(output.conversation?.rounds.length).toBeGreaterThan(0);
+          if (!process.env.NIGHTSHIFT_EXAMPLES_FILE && !process.env.NIGHTSHIFT_DATASET_ID) {
+            assertSuccessfulSandboxCommand(output.conversation?.rounds ?? []);
+          }
+          expect(output.traceId).toMatch(/^[a-f0-9]{32}$/);
+          expect(run.traceId).toBe(output.traceId);
 
-        const exampleScores = scores.filter(
-          (score) =>
-            score.example.index === run.exampleIndex &&
-            score.task.repetition_index === run.repetition
-        );
-        expect(exampleScores).toHaveLength(1);
-        const [score] = exampleScores;
-        expect(score.example.metadata?.case_id).toBe(output.case_id);
-        expect(score.task.trace_id).toBe(output.traceId);
-        expect(score.task.output).toEqual(JSON.parse(JSON.stringify(output)));
-        expect(score.evaluator).toMatchObject({
-          name: 'ungraded_placeholder',
-          kind: 'code',
-          direction: 'neutral',
-          score: 1,
-          label: 'ungraded',
-          explanation: expect.stringContaining('no quality evaluation was performed'),
-        });
-        expect(score.evaluator.trace_id).not.toBe(output.traceId);
-
-        const agentTraceIds =
-          output.conversation?.rounds.flatMap(({ trace_id: traceId }) =>
-            typeof traceId === 'string' ? [traceId] : traceId ?? []
-          ) ?? [];
-        await expect(async () => {
-          const spans = await traceEsClient.search<{ attributes: GenAISemConvAttributes }>({
-            index: 'traces-*',
-            size: 1_000,
-            query: { terms: { 'trace.id': agentTraceIds } },
-            _source: ['attributes'],
-          });
-          assertAgentTrace(
-            spans.hits.hits.flatMap(({ _source: source }) => (source ? [source.attributes] : [])),
-            {
-              question: output.query,
-              conversationId: output.conversation_id,
-              systemInstructions,
-              rounds: output.conversation?.rounds ?? [],
-            }
+          const exampleScores = scores.filter(
+            (score) =>
+              score.example.index === run.exampleIndex &&
+              score.task.repetition_index === run.repetition
           );
-        }).toPass({ timeout: 60_000 });
-        log.info(
-          JSON.stringify({
-            experiment_id: experiment.id,
-            dataset_id: experiment.datasetId,
-            example_index: run.exampleIndex,
-            case_id: output.case_id,
-            investigation_id: output.investigation_id,
-            conversation_id: output.conversation_id,
-            trace_id: output.traceId,
-            evaluation: 'ungraded',
-          })
-        );
-      }
+          expect(exampleScores).toHaveLength(1);
+          const [score] = exampleScores;
+          expect(score.example.metadata?.case_id).toBe(output.case_id);
+          expect(score.task.trace_id).toBe(output.traceId);
+          expect(score.task.output).toEqual(JSON.parse(JSON.stringify(output)));
+          expect(score.evaluator).toMatchObject({
+            name: 'ungraded_placeholder',
+            kind: 'code',
+            direction: 'neutral',
+            score: 1,
+            label: 'ungraded',
+            explanation: expect.stringContaining('no quality evaluation was performed'),
+          });
+          expect(score.evaluator.trace_id).not.toBe(output.traceId);
+
+          const agentTraceIds =
+            output.conversation?.rounds.flatMap(({ trace_id: traceId }) =>
+              typeof traceId === 'string' ? [traceId] : traceId ?? []
+            ) ?? [];
+          await expect(async () => {
+            const spans = await traceEsClient.search<{ attributes: GenAISemConvAttributes }>({
+              index: 'traces-*',
+              size: 1_000,
+              query: { terms: { 'trace.id': agentTraceIds } },
+              _source: ['attributes'],
+            });
+            assertAgentTrace(
+              spans.hits.hits.flatMap(({ _source: source }) => (source ? [source.attributes] : [])),
+              {
+                question: output.query,
+                conversationId: output.conversation_id,
+                systemInstructions,
+                rounds: output.conversation?.rounds ?? [],
+              }
+            );
+          }).toPass({ timeout: 60_000 });
+          log.info(
+            JSON.stringify({
+              experiment_id: experiment.id,
+              dataset_id: experiment.datasetId,
+              example_index: run.exampleIndex,
+              case_id: output.case_id,
+              investigation_id: output.investigation_id,
+              conversation_id: output.conversation_id,
+              trace_id: output.traceId,
+              evaluation: 'ungraded',
+            })
+          );
+        },
+        { concurrency }
+      );
 
       const evaluatorTraces = experiment.evaluationRuns
         .map(({ traceId }) => traceId)
@@ -169,20 +174,24 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.
       expect(experiment.evaluationRuns).toHaveLength(runs.length);
       expect(experiment.evaluationRuns.every(({ kind }) => kind === 'CODE')).toBe(true);
       expect(evaluatorTraces).toHaveLength(runs.length);
-      for (const traceId of evaluatorTraces) {
-        await expect
-          .poll(
-            async () =>
-              (
-                await traceEsClient.count({
-                  index: 'traces-*',
-                  query: { term: { 'trace.id': traceId } },
-                })
-              ).count,
-            { timeout: 60_000 }
-          )
-          .toBeGreaterThan(0);
-      }
+      await pMap(
+        evaluatorTraces,
+        async (traceId) => {
+          await expect
+            .poll(
+              async () =>
+                (
+                  await traceEsClient.count({
+                    index: 'traces-*',
+                    query: { term: { 'trace.id': traceId } },
+                  })
+                ).count,
+              { timeout: 60_000 }
+            )
+            .toBeGreaterThan(0);
+        },
+        { concurrency }
+      );
       const judgeCalls = await traceEsClient.count({
         index: 'traces-*',
         query: {
