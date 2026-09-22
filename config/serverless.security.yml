@@ -238,6 +238,9 @@ console.ui.embeddedEnabled: false
 # Enable project level rentention checks in DSL form from Index Management UI
 xpack.index_management.enableProjectLevelRetentionChecks: true
 
+## ES|QL Data Federation in stack management
+xpack.dataFederation.enabled: true
+
 # Increase task manager capacity because security projects have more resources (Memory and CPU)
 xpack.task_manager.capacity: 20
 
