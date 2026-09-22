@@ -33,9 +33,10 @@ export const generateEntityToken = (
     throw new Error('entityClass must be a non-empty string');
   }
 
+  const flooredLen = Math.floor(hashLength);
   const clampedLen =
-    Number.isFinite(hashLength) && hashLength > 0
-      ? Math.min(Math.floor(hashLength), MAX_HASH_LENGTH)
+    Number.isFinite(hashLength) && flooredLen > 0
+      ? Math.min(flooredLen, MAX_HASH_LENGTH)
       : DEFAULT_HASH_LENGTH;
 
   // Length-prefixed format prevents delimiter collisions when components

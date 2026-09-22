@@ -51,6 +51,12 @@ describe('generateEntityToken', () => {
       expect(withZero.slice('IP_'.length)).toHaveLength(32);
       expect(withNeg.slice('IP_'.length)).toHaveLength(32);
     });
+
+    it('falls back to the default (32) for fractional hashLength that floors to 0', () => {
+      const token = generateEntityToken('scope', 'EMAIL', 'a@example.com', 0.5);
+      expect(token.slice('EMAIL_'.length)).toHaveLength(32);
+      expect(token).not.toBe('EMAIL_');
+    });
   });
 
   describe('determinism', () => {
