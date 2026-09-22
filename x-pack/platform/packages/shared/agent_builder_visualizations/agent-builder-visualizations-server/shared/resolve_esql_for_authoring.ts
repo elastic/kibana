@@ -142,7 +142,8 @@ export const resolveEsqlForAuthoring = async ({
 
     query = generated.query;
     logger.debug(`Generated ES|QL query: ${query}`);
-    columns = generated.columns ?? (await probeEsqlColumns(query, esClient, logger));
+    // Generation validated with a schema probe, so its columns are authoritative.
+    columns = generated.columns;
   }
 
   return { query, columns };
