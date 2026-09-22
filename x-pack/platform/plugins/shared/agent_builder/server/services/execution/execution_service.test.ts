@@ -1019,7 +1019,7 @@ describe('AgentExecutionService', () => {
     });
   });
 
-  describe('executeAgent with trigger_mode never', () => {
+  describe('maybeExecuteAgent with trigger_mode never', () => {
     const conversation = createEmptyConversation({
       id: 'conversation-1',
       agent_id: 'agent-1',
@@ -1027,7 +1027,7 @@ describe('AgentExecutionService', () => {
     });
 
     const append = (params: Record<string, unknown> = {}) =>
-      service.executeAgent({
+      service.maybeExecuteAgent({
         mode: AgentExecutionMode.conversation,
         request: httpServerMock.createKibanaRequest(),
         params: {
@@ -1053,7 +1053,7 @@ describe('AgentExecutionService', () => {
     });
 
     it('persists the message without recording an execution', async () => {
-      const result = await append();
+      await append();
 
       expect(conversationClient.appendEvents).toHaveBeenCalledTimes(1);
       const [{ events }] = conversationClient.appendEvents.mock.calls[0];
@@ -1063,7 +1063,6 @@ describe('AgentExecutionService', () => {
 
       expect(mockExecutionClient.create).not.toHaveBeenCalled();
       expect(mockHandleAgentExecution).not.toHaveBeenCalled();
-      expect(result.executionId).toBeUndefined();
     });
 
     it('reports the conversation through the same events an execution would', async () => {

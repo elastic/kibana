@@ -199,8 +199,8 @@ export type AgentExecution = ConversationAgentExecution | StandaloneAgentExecuti
  * Result of executing an agent.
  */
 export interface ExecuteAgentResult {
-  /** The unique execution ID. Absent when `trigger_mode: 'never'` persisted a message instead. */
-  executionId?: string;
+  /** The unique execution ID. */
+  executionId: string;
   /**
    * Observable of events for this execution.
    * - Local mode: the live agent event stream (multicasted).
@@ -208,6 +208,15 @@ export interface ExecuteAgentResult {
    */
   events$: Observable<ChatEvent>;
 }
+
+/**
+ * Result of a request that may not have run the agent. The execution id is absent when
+ * `trigger_mode: 'never'` persisted the user message instead of starting a run, so there is
+ * nothing to address; a caller that always needs one runs the agent through
+ * {@link AgentExecutionService.executeAgent}.
+ */
+export type MaybeExecuteAgentResult = Pick<ExecuteAgentResult, 'events$'> &
+  Partial<Pick<ExecuteAgentResult, 'executionId'>>;
 
 /**
  * Base parameters for {@link AgentExecutionService.executeAgent}.
@@ -313,6 +322,11 @@ export interface AgentExecutionService {
    * Creates an execution document and returns the execution ID along with an events observable.
    */
   executeAgent(params: ExecuteAgentParams): Promise<ExecuteAgentResult>;
+  /**
+   * Persists the request's user message, then runs the agent unless its trigger mode said not to.
+   * The chat API's entry point; a caller that always runs the agent calls `executeAgent`.
+   */
+  maybeExecuteAgent(params: ExecuteAgentParams): Promise<MaybeExecuteAgentResult>;
 
   /**
    * Retrieve an agent execution by its ID.

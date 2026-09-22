@@ -43,7 +43,7 @@ export function registerChatApiRoutes({
 }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
 
-  const { validateConfigurationOverrides, executeAgent } = getConverseHelpers({
+  const { validateConfigurationOverrides, maybeExecuteAgent } = getConverseHelpers({
     getInternalServices,
   });
 
@@ -83,7 +83,7 @@ export function registerChatApiRoutes({
 
         await validateConfigurationOverrides({ payload, request });
 
-        const { events$: chatEvents$ } = await executeAgent({
+        const { events$: chatEvents$ } = await maybeExecuteAgent({
           payload,
           request,
           executionService,
@@ -139,7 +139,7 @@ export function registerChatApiRoutes({
           abortController.abort();
         });
 
-        const { events$: chatEvents$ } = await executeAgent({
+        const { events$: chatEvents$ } = await maybeExecuteAgent({
           payload,
           request,
           executionService,

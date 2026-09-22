@@ -40,6 +40,7 @@ import type {
   ConversationExecutionParams,
   ExecuteAgentParams,
   ExecuteAgentResult,
+  MaybeExecuteAgentResult,
   FollowExecutionOptions,
   FindExecutionsOptions,
 } from '@kbn/agent-builder-server/execution';
@@ -140,17 +141,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       ? await this.resolveConversation({ request, agentId, params: conversationParams })
       : undefined;
 
-    if (conversationParams && target) {
-      if (conversationParams.triggerMode === ChatTriggerMode.Never) {
-        return this.appendUserMessage({
-          request,
-          params: conversationParams,
-          target,
-          receivedAt,
-        });
-      }
-    }
-
+    // Reserved for the round this run opens, so its events are named after it.
     const roundId = uuidv4();
 
     let execution: AgentExecution;
@@ -206,13 +197,13 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       throw err;
     }
 
-    // After the record, so an idempotency-key replay is detected before a second message lands.
+    // After the record, so an idempotency-key replay is recognised before a second message lands.
     if (conversationParams && target && this.shouldPersistRoundInput(conversationParams, target)) {
       await persistUserMessage({
         conversation: target.conversation,
         conversationClient: target.conversationClient,
-        eventId: roundUserMessageEventId(roundId),
         receivedAt,
+        eventId: roundUserMessageEventId(roundId),
         input: conversationParams.nextInput,
         author: await this.deps.conversationService.getConversationRoundAuthor({
           request,
@@ -248,6 +239,91 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     } else {
       return this.executeLocally({ execution, request, interactivity });
     }
+  }
+
+  /**
+   * The chat API's entry point: persists the request's user message, then runs the agent unless
+   * `trigger_mode: 'never'` asked for the message alone. Callers that always run the agent use
+   * {@link executeAgent}.
+   */
+  async maybeExecuteAgent(args: ExecuteAgentParams): Promise<MaybeExecuteAgentResult> {
+    if (
+      args.mode !== AgentExecutionMode.conversation ||
+      args.params.triggerMode !== ChatTriggerMode.Never
+    ) {
+      return this.executeAgent(args);
+    }
+
+    const { request, params } = args;
+    const validatedParams = await this.validateAttachments(params, request);
+    const receivedAt = new Date();
+
+    const { conversation, conversationClient } = await this.resolveConversation({
+      request,
+      agentId: params.agentId ?? agentBuilderDefaultAgentId,
+      params: validatedParams,
+    });
+
+    if (validatedParams.storeConversation === false) {
+      throw createInternalError('A user message without execution has to be stored');
+    }
+
+    const created = conversation.operation === 'CREATE';
+
+    // A conversation this request creates is events-native from its first write; only a stored
+    // one can predate that.
+    if (!created && !isEventsNativeVersion(conversation.schema_version)) {
+      throw createBadRequestError('User messages require canonical event storage');
+    }
+
+    const message = validatedParams.nextInput.message?.trim() ?? '';
+    const attachments = validatedParams.nextInput.attachments ?? [];
+
+    if (!message && attachments.length === 0) {
+      throw createBadRequestError('User message requests require input or attachments');
+    }
+
+    // With no run to merge them later, the attachments become conversation-level versions here.
+    const snapshot = conversation.attachments ?? [];
+    const stateManager = this.deps.attachmentsService.createStateManager(snapshot);
+
+    await this.deps.attachmentsService.mergeAttachmentInputs({
+      stateManager,
+      inputs: attachments,
+      request,
+      actor: ATTACHMENT_REF_ACTOR.user,
+    });
+
+    const user = await this.deps.conversationService.getCurrentUser({ request });
+    const author = await this.deps.conversationService.getConversationRoundAuthor({ request });
+
+    await persistUserMessage({
+      conversation,
+      conversationClient,
+      receivedAt,
+      // A uuid, so no round write can claim this message as its own.
+      eventId: uuidv4(),
+      input: { message, attachment_refs: stateManager.getAccessedRefs() },
+      author,
+      user,
+      additionalEvents: attachmentChangesToEvents(stateManager.drainChanges(), {
+        source: 'chat_input',
+        actor: userMessageActor({ ...conversation, user }, { author }),
+        created_at: receivedAt.toISOString(),
+      }),
+      attachments: { snapshot, produced: stateManager.getAll() },
+    });
+
+    // The conversation events a run would emit, so a caller reads its id the one way whether or
+    // not the agent was asked to answer.
+    const stored = await conversationClient.get(conversation.id);
+
+    return {
+      events$: of(
+        ...(created ? [createConversationIdSetEvent(stored.id)] : []),
+        created ? createConversationCreatedEvent(stored) : createConversationUpdatedEvent(stored)
+      ),
+    };
   }
 
   async getExecution(executionId: string): Promise<AgentExecution | undefined> {
@@ -606,76 +682,6 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
    * the execution options unused. Emits the same conversation events an execution would, so
    * callers read the conversation id the one way.
    */
-  private async appendUserMessage({
-    request,
-    params,
-    target: { conversation, conversationClient },
-    receivedAt,
-  }: {
-    request: KibanaRequest;
-    params: ConversationExecutionParams;
-    target: ConversationTarget;
-    receivedAt: Date;
-  }): Promise<ExecuteAgentResult> {
-    if (params.storeConversation === false) {
-      throw createInternalError('A user message without execution has to be stored');
-    }
-
-    const created = conversation.operation === 'CREATE';
-
-    // A conversation this request creates is events-native from its first write; only a stored
-    // one can predate that.
-    if (!created && !isEventsNativeVersion(conversation.schema_version)) {
-      throw createBadRequestError('User messages require canonical event storage');
-    }
-
-    const message = params.nextInput.message?.trim() ?? '';
-    const attachments = params.nextInput.attachments ?? [];
-
-    if (!message && attachments.length === 0) {
-      throw createBadRequestError('User message requests require input or attachments');
-    }
-
-    const snapshot = conversation.attachments ?? [];
-    const stateManager = this.deps.attachmentsService.createStateManager(snapshot);
-
-    await this.deps.attachmentsService.mergeAttachmentInputs({
-      stateManager,
-      inputs: attachments,
-      request,
-      actor: ATTACHMENT_REF_ACTOR.user,
-    });
-
-    const user = await this.deps.conversationService.getCurrentUser({ request });
-    const author = await this.deps.conversationService.getConversationRoundAuthor({ request });
-    const createdAt = receivedAt.toISOString();
-
-    await persistUserMessage({
-      conversation,
-      conversationClient,
-      eventId: uuidv4(),
-      receivedAt,
-      input: { message, attachment_refs: stateManager.getAccessedRefs() },
-      author,
-      user,
-      additionalEvents: attachmentChangesToEvents(stateManager.drainChanges(), {
-        source: 'chat_input',
-        actor: userMessageActor({ ...conversation, user }, { author }),
-        created_at: createdAt,
-      }),
-      attachments: { snapshot, produced: stateManager.getAll() },
-    });
-
-    const stored = await conversationClient.get(conversation.id);
-
-    return {
-      events$: of(
-        ...(created ? [createConversationIdSetEvent(stored.id)] : []),
-        created ? createConversationCreatedEvent(stored) : createConversationUpdatedEvent(stored)
-      ),
-    };
-  }
-
   private createExecutionClient(): AgentExecutionClient {
     return createAgentExecutionClient({
       logger: this.logger.get('execution-client'),

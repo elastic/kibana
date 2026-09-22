@@ -18,6 +18,7 @@ import {
 } from '@kbn/agent-builder-common';
 import type {
   AgentExecutionService,
+  ExecuteAgentParams,
   ExecutionConversationOrigin,
 } from '@kbn/agent-builder-server/execution';
 import {
@@ -109,17 +110,15 @@ export const getConverseHelpers = ({
     };
   };
 
-  const executeAgent = async ({
+  const toExecuteParams = ({
     payload,
     request,
-    executionService,
     executionOptions,
   }: {
     payload: ChatRequestBodyPayload;
     request: KibanaRequest;
-    executionService: AgentExecutionService;
     executionOptions?: ResolvedExecutionOptions;
-  }) => {
+  }): ExecuteAgentParams => {
     const {
       agent_id: agentId,
       conversation_id: conversationId,
@@ -139,7 +138,7 @@ export const getConverseHelpers = ({
     const { useTaskManager, origin, callback, executionId, metadata } =
       executionOptions ?? defaultExecutionOptions(payload);
 
-    return executionService.executeAgent({
+    return {
       mode: AgentExecutionMode.conversation,
       request,
       executionId,
@@ -165,8 +164,24 @@ export const getConverseHelpers = ({
         },
         ...(triggerMode ? { triggerMode } : {}),
       },
-    });
+    };
   };
 
-  return { validateConfigurationOverrides, executeAgent };
+  /** Runs the agent. For the chat API, which honours `trigger_mode`, use `maybeExecuteAgent`. */
+  const executeAgent = async (options: {
+    payload: ChatRequestBodyPayload;
+    request: KibanaRequest;
+    executionService: AgentExecutionService;
+    executionOptions?: ResolvedExecutionOptions;
+  }) => options.executionService.executeAgent(toExecuteParams(options));
+
+  /** Persists the request's user message, and runs the agent unless the trigger mode says not to. */
+  const maybeExecuteAgent = async (options: {
+    payload: ChatRequestBodyPayload;
+    request: KibanaRequest;
+    executionService: AgentExecutionService;
+    executionOptions?: ResolvedExecutionOptions;
+  }) => options.executionService.maybeExecuteAgent(toExecuteParams(options));
+
+  return { validateConfigurationOverrides, executeAgent, maybeExecuteAgent };
 };
