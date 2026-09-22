@@ -24,10 +24,6 @@ export const servers: ScoutServerConfig = {
   ...defaultConfig,
   kbnTestServer: {
     ...defaultConfig.kbnTestServer,
-    serverArgs: [
-      ...defaultConfig.kbnTestServer.serverArgs,
-      pluginPath,
-      '--xpack.security.serviceAccounts.enabled=true',
-    ],
+    serverArgs: [...defaultConfig.kbnTestServer.serverArgs, pluginPath],
   },
 };

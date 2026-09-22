@@ -1,0 +1,112 @@
+{
+  "sha1": "e6b50502cc4f6feb7c40dafaaa328d6c8bc1ee3c",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "59645759a29407d-2d51a0be839ac57",
+      "title": "[NON-MKI] Saved workflow service account execution runs the saved definition as its bound account and rejects modified test YAML",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
+        "line": 217,
+        "column": 32
+      }
+    },
+    {
+      "id": "59645759a29407d-616861f11af8511",
+      "title": "[NON-MKI] Saved workflow service account execution rejects service-account step tests even with unchanged saved YAML",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
+        "line": 248,
+        "column": 7
+      }
+    },
+    {
+      "id": "59645759a29407d-1011aad880151c4",
+      "title": "[NON-MKI] Saved workflow service account execution allows an executor to run but prevents definition edits without manage_security",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
+        "line": 287,
+        "column": 16
+      }
+    },
+    {
+      "id": "59645759a29407d-4eecc0ce72fbf26",
+      "title": "[NON-MKI] Saved workflow service account execution resumes with the original service account",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
+        "line": 345,
+        "column": 6
+      }
+    },
+    {
+      "id": "59645759a29407d-2482183f7a649fb",
+      "title": "[NON-MKI] Saved workflow service account execution fails resume after rebind without executing the next step",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
+        "line": 350,
+        "column": 20
+      }
+    },
+    {
+      "id": "59645759a29407d-930803d430a6144",
+      "title": "[NON-MKI] Saved workflow service account execution scheduled execution uses its service account",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
+        "line": 368,
+        "column": 14
+      }
+    },
+    {
+      "id": "59645759a29407d-f540b6f10298e00",
+      "title": "[NON-MKI] Saved workflow service account execution clone and bulk import create independent bindings, and overwrite can unbind",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
+        "line": 394,
+        "column": 8
+      }
+    },
+    {
+      "id": "59645759a29407d-2686bef061f6fc6",
+      "title": "[NON-MKI] Saved workflow service account execution a nested child selects its own account",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
+        "line": 443,
+        "column": 16
+      }
+    }
+  ]
+}
