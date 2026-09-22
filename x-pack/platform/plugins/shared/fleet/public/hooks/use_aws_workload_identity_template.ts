@@ -6,32 +6,22 @@
  */
 
 import { useMemo } from 'react';
-import useObservable from 'react-use/lib/useObservable';
 
-import { AWS_WORKLOAD_IDENTITY_TEMPLATE_ENABLED_FLAG } from '../../common/constants/cloud_connector';
 import { getAwsIdentityFederationTemplateUrl } from '../components/cloud_connector/utils';
 
-import { useStartServices } from './use_core';
+import { useDisabledIdentityFederationProviders } from './use_disabled_identity_federation_providers';
 
 /**
- * Whether `fleet.awsWorkloadIdentityTemplateEnabled` is on. When it is, the aws packages'
- * Identity Federation option launches the hardcoded Elastic Workload Identity CloudFormation
- * template instead of the package's `iac_template_url`.
+ * Whether the aws packages' Identity Federation option should launch the hardcoded Elastic
+ * Workload Identity CloudFormation template instead of the package's `iac_template_url`.
  *
- * Subscribes to `getBooleanValue$` so a flag flipped while the form is open takes effect
- * without a reload. Falls back to enabled when LaunchDarkly is unavailable.
- * TODO: switch the fallback back to `false` before this ships; `true` is only for local testing.
+ * Driven by the existing `fleet.awsIdentityFederationEnabled` LaunchDarkly flag (on in
+ * Serverless, off on ECH): the same switch that shows the aws Identity Federation option also
+ * points it at the Workload Identity template. Reacts to a flag flip without a reload.
  */
 export function useAwsWorkloadIdentityTemplateEnabled(): boolean {
-  const { featureFlags } = useStartServices();
-
-  // getBooleanValue$ builds a new observable per call, so memoize it or useObservable
-  // re-subscribes on every render.
-  const enabled$ = useMemo(
-    () => featureFlags.getBooleanValue$(AWS_WORKLOAD_IDENTITY_TEMPLATE_ENABLED_FLAG, true),
-    [featureFlags]
-  );
-  return useObservable(enabled$, true);
+  const disabledProviders = useDisabledIdentityFederationProviders();
+  return !disabledProviders.includes('aws');
 }
 
 export interface UseAwsIdentityFederationTemplateUrlParams {

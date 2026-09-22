@@ -37,7 +37,7 @@ export interface CloudConnectorSetupProps {
   /**
    * Optional IaC template URL from var_group selection. When provided, overrides template URL from packageInfo.policy_templates.
    * For the aws packages that moved to the Workload Identity template it is in turn replaced by
-   * the hardcoded WII URL while `fleet.awsWorkloadIdentityTemplateEnabled` is on.
+   * the hardcoded WII URL while `fleet.awsIdentityFederationEnabled` is on.
    */
   iacTemplateUrl?: string;
 }

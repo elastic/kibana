@@ -393,7 +393,7 @@ export const isAwsWorkloadIdentityTemplatePackage = (
 };
 
 export interface GetAwsIdentityFederationTemplateUrlParams {
-  /** `fleet.awsWorkloadIdentityTemplateEnabled` (Serverless on, ECH off). */
+  /** `fleet.awsIdentityFederationEnabled` (Serverless on, ECH off). */
   isWorkloadIdentityTemplateEnabled: boolean;
   packageName: string | undefined;
   packageVersion: string | undefined;

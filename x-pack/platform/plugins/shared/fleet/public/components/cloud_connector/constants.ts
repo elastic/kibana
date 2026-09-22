@@ -42,7 +42,7 @@ export type ElasticCloudEnvironment =
 /**
  * Quick-create URL of the Elastic Workload Identity (WII) CloudFormation template for the aws
  * packages' Identity Federation option (elastic/integrations#21331). Used in place of the
- * package's `iac_template_url` while `fleet.awsWorkloadIdentityTemplateEnabled` is on; the
+ * package's `iac_template_url` while `fleet.awsIdentityFederationEnabled` is on; the
  * tokens are filled by `getCloudConnectorRemoteRoleTemplate` like any package-provided URL.
  */
 export const AWS_WORKLOAD_IDENTITY_CLOUD_FORMATION_TEMPLATE_URL =

@@ -8,7 +8,7 @@
 import { renderHook, act } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 
-import { AWS_WORKLOAD_IDENTITY_TEMPLATE_ENABLED_FLAG } from '../../common/constants/cloud_connector';
+import { AWS_IDENTITY_FEDERATION_ENABLED_FLAG } from '../../common/constants/cloud_connector';
 import { AWS_WORKLOAD_IDENTITY_CLOUD_FORMATION_TEMPLATE_URL } from '../components/cloud_connector/constants';
 
 import { useStartServices } from './use_core';
@@ -35,12 +35,9 @@ describe('useAwsWorkloadIdentityTemplateEnabled', () => {
     mockUseStartServices.mockReturnValue({ featureFlags: { getBooleanValue$ } } as any);
   });
 
-  it('subscribes to the flag with an enabled fallback (testing default)', () => {
+  it('reuses the aws identity federation flag, with its enabled fallback', () => {
     renderHook(() => useAwsWorkloadIdentityTemplateEnabled());
-    expect(getBooleanValue$).toHaveBeenCalledWith(
-      AWS_WORKLOAD_IDENTITY_TEMPLATE_ENABLED_FLAG,
-      true
-    );
+    expect(getBooleanValue$).toHaveBeenCalledWith(AWS_IDENTITY_FEDERATION_ENABLED_FLAG, true);
   });
 
   it('follows the flag value and reacts to a LaunchDarkly flip', () => {
