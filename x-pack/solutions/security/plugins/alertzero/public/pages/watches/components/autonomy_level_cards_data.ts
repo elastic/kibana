@@ -538,22 +538,22 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
         facts: [
           {
             label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.endpointAnalysis.manual.analysis',
-              { defaultMessage: 'Analysis' }
+              'xpack.alertzero.watches.settings.autonomyCards.endpointAnalysis.manual.findings',
+              { defaultMessage: 'Findings' }
             ),
             value: factValue(
               'xpack.alertzero.watches.settings.autonomyCards.endpointAnalysis.manual.analysisValue',
-              '<worker> reconstructs the attack and adds its findings to the Investigation'
+              '<worker> reconstructs the attack and adds its findings to the investigation'
             ),
           },
           {
             label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.endpointAnalysis.manual.containment',
-              { defaultMessage: 'Containment' }
+              'xpack.alertzero.watches.settings.autonomyCards.endpointAnalysis.manual.response',
+              { defaultMessage: 'Response' }
             ),
             value: factValue(
               'xpack.alertzero.watches.settings.autonomyCards.endpointAnalysis.manual.containmentValue',
-              '<you> approve each Proposal — isolating a host, killing or suspending a process'
+              '<you> approve each proposed response — isolate host, kill process, or suspend process'
             ),
           },
         ],
