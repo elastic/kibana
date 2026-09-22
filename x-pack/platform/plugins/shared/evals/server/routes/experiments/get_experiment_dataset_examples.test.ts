@@ -22,6 +22,7 @@ import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks
 import { createEvaluatorRegistryMock } from '../../evaluators/registry.mock';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { registerGetExperimentDatasetExamplesRoute } from './get_experiment_dataset_examples';
+import { previewScriptField } from './preview_source_script';
 
 describe('GET /internal/evals/experiments/{experimentId}/datasets/{datasetId}/examples', () => {
   const setup = () => {
@@ -190,10 +191,18 @@ describe('GET /internal/evals/experiments/{experimentId}/datasets/{datasetId}/ex
     );
   });
 
-  it('adds independently bounded previews from one collapsed source-filtered read', async () => {
+  it('copies scripted previews from one terms and top_hits aggregation', async () => {
     const { handler, context, evaluationScoreService } = setup();
-    const largeInput = { value: `input-${'a'.repeat(5000)}-full-input-sentinel` };
-    const largeOutput = { value: `output-${'b'.repeat(5000)}-full-output-sentinel` };
+    const truncatedInput = {
+      content: 'i'.repeat(EXPERIMENT_EXAMPLE_PREVIEW_MAX_LENGTH),
+      truncated: true,
+    };
+    const truncatedOutput = {
+      content: 'o'.repeat(EXPERIMENT_EXAMPLE_PREVIEW_MAX_LENGTH),
+      truncated: true,
+    };
+    const shortInput = { content: '{"prompt":"c"}', truncated: false };
+    const shortOutput = { content: '{"short":"value"}', truncated: false };
     evaluationScoreService.search.mockResolvedValueOnce({
       hits: {
         hits: [
@@ -202,29 +211,69 @@ describe('GET /internal/evals/experiments/{experimentId}/datasets/{datasetId}/ex
           { _source: makeScore('example-c', 3, 'eval-1') },
         ],
       },
-    } as any);
-    evaluationScoreService.search.mockResolvedValueOnce({
-      hits: {
-        hits: [
-          {
-            _source: {
-              example: { id: 'example-a', input: largeInput },
-              task: { repetition_index: 0, output: largeOutput },
+      aggregations: {
+        previews: {
+          buckets: [
+            {
+              key: 'example-a',
+              first_repetition: {
+                hits: {
+                  hits: [
+                    {
+                      _source: { task: { repetition_index: 0 } },
+                      fields: {
+                        input_preview: [truncatedInput],
+                        output_preview: [truncatedOutput],
+                      },
+                    },
+                  ],
+                },
+              },
             },
-          },
-          {
-            _source: {
-              example: { id: 'example-b' },
-              task: { repetition_index: 1, output: null },
+            {
+              key: 'example-b',
+              first_repetition: {
+                hits: {
+                  hits: [
+                    {
+                      _source: { task: { repetition_index: 1 } },
+                      fields: { input_preview: [null], output_preview: [null] },
+                    },
+                  ],
+                },
+              },
             },
-          },
-          {
-            _source: {
-              example: { id: 'example-c', input: 'c'.repeat(2046) },
-              task: { repetition_index: 2, output: { short: 'value' } },
+            {
+              key: 'missing-example',
+              first_repetition: {
+                hits: {
+                  hits: [
+                    {
+                      _source: { task: { repetition_index: 0 } },
+                      fields: {
+                        input_preview: [shortInput],
+                        output_preview: [shortOutput],
+                      },
+                    },
+                  ],
+                },
+              },
             },
-          },
-        ],
+            {
+              key: 'example-c',
+              first_repetition: {
+                hits: {
+                  hits: [
+                    {
+                      _source: { task: { repetition_index: 2 } },
+                      fields: { input_preview: [shortInput], output_preview: [shortOutput] },
+                    },
+                  ],
+                },
+              },
+            },
+          ],
+        },
       },
     } as any);
 
@@ -234,38 +283,44 @@ describe('GET /internal/evals/experiments/{experimentId}/datasets/{datasetId}/ex
       kibanaResponseFactory
     );
 
-    expect(evaluationScoreService.search).toHaveBeenCalledTimes(2);
-    expect(evaluationScoreService.search).toHaveBeenNthCalledWith(2, {
+    expect(evaluationScoreService.search).toHaveBeenCalledTimes(1);
+    expect(evaluationScoreService.search).toHaveBeenCalledWith({
       query: {
         bool: {
           must: [
             { term: { 'example.dataset.id': 'dataset-123' } },
             { term: { experiment_id: 'experiment-123' } },
             buildSpaceFilter('default'),
-            { terms: { 'example.id': ['example-a', 'example-b', 'example-c'] } },
           ],
         },
       },
-      size: 3,
-      _source_includes: ['example.id', 'example.input', 'task.repetition_index', 'task.output'],
-      collapse: { field: 'example.id' },
-      sort: [
-        { 'task.repetition_index': { order: 'asc', missing: '_last' } },
-        { _shard_doc: { order: 'asc' } },
-      ],
-      track_total_hits: false,
+      sort: SCORES_SORT_ORDER,
+      size: 10000,
+      _source_excludes: ['example.input', 'task.output'],
+      aggs: {
+        previews: {
+          terms: { field: 'example.id', size: 10000 },
+          aggs: {
+            first_repetition: {
+              top_hits: {
+                size: 1,
+                sort: [{ 'task.repetition_index': { order: 'asc', missing: '_last' } }],
+                _source: { includes: ['task.repetition_index'] },
+                script_fields: {
+                  input_preview: previewScriptField('example', 'input'),
+                  output_preview: previewScriptField('task', 'output'),
+                },
+              },
+            },
+          },
+        },
+      },
     });
     expect(response.payload.examples[0].preview).toEqual({
       repetition_index: 0,
-      input: { content: expect.any(String), truncated: true },
-      output: { content: expect.any(String), truncated: true },
+      input: truncatedInput,
+      output: truncatedOutput,
     });
-    expect(response.payload.examples[0].preview.input.content).toHaveLength(
-      EXPERIMENT_EXAMPLE_PREVIEW_MAX_LENGTH
-    );
-    expect(response.payload.examples[0].preview.output.content).toHaveLength(
-      EXPERIMENT_EXAMPLE_PREVIEW_MAX_LENGTH
-    );
     expect(response.payload.examples[1].preview).toEqual({
       repetition_index: 1,
       input: null,
@@ -273,20 +328,10 @@ describe('GET /internal/evals/experiments/{experimentId}/datasets/{datasetId}/ex
     });
     expect(response.payload.examples[2].preview).toEqual({
       repetition_index: 2,
-      input: {
-        content: expect.any(String),
-        truncated: false,
-      },
-      output: {
-        content: '{\n  "short": "value"\n}',
-        truncated: false,
-      },
+      input: shortInput,
+      output: shortOutput,
     });
-    expect(response.payload.examples[2].preview.input.content).toHaveLength(
-      EXPERIMENT_EXAMPLE_PREVIEW_MAX_LENGTH
-    );
-    expect(JSON.stringify(response.payload)).not.toContain('full-input-sentinel');
-    expect(JSON.stringify(response.payload)).not.toContain('full-output-sentinel');
+    expect(response.payload.examples).toHaveLength(3);
   });
 
   it('returns 500 when ES throws', async () => {

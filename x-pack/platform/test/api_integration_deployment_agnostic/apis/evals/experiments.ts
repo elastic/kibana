@@ -347,8 +347,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(Object.keys(previewResponse)).to.eql(['examples']);
         expect(previewResponse.examples.length).to.eql(1);
 
-        const serializedInput = JSON.stringify(largeInput, null, 2);
-        const serializedOutput = JSON.stringify(largeOutput, null, 2);
+        const serializedInput = JSON.stringify(largeInput);
+        const serializedOutput = JSON.stringify(largeOutput);
         const [example] = previewResponse.examples;
         expect(example.preview?.repetition_index).to.eql(0);
         expect(example.preview?.input).to.eql({

@@ -8,7 +8,6 @@
 import {
   EVALS_EXPERIMENT_DATASET_EXAMPLES_URL,
   API_VERSIONS,
-  EXPERIMENT_EXAMPLE_PREVIEW_MAX_LENGTH,
   INTERNAL_API_ACCESS,
   MAX_SCORES_PER_QUERY,
   buildDatasetExampleScoresQuery,
@@ -19,34 +18,28 @@ import {
   type EvaluationScoreDocument,
   type GetEvaluationExperimentDatasetExamplesResponse,
 } from '@kbn/evals-common';
-import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
 import { handleMaximumResponseSizeExceededError } from '../utils/handle_response_size_error';
+import { previewScriptField } from './preview_source_script';
 
 type GroupedExampleScores = GetEvaluationExperimentDatasetExamplesResponse['examples'][number];
 type ContentPreview = NonNullable<EvaluationExperimentExamplePreview['input']>;
 
 const BULK_SCORE_SOURCE_EXCLUDES = ['example.input', 'task.output'];
 
-const PREVIEW_SOURCE_FIELDS = [
-  'example.id',
-  'example.input',
-  'task.repetition_index',
-  'task.output',
-] as const;
+interface ScriptedPreviewHit {
+  _source?: { task?: { repetition_index?: number } };
+  fields?: { input_preview?: unknown; output_preview?: unknown };
+}
 
-interface PreviewSource {
-  example?: {
-    id?: string;
-    input?: unknown;
-  };
-  task?: {
-    repetition_index?: number;
-    output?: unknown;
-  };
+interface PreviewTermsAggregation {
+  buckets?: Array<{
+    key?: string | number;
+    first_repetition?: { hits?: { hits?: ScriptedPreviewHit[] } };
+  }>;
 }
 
 const getExampleId = ({ example }: EvaluationScoreDocument): string => example.id;
@@ -63,40 +56,18 @@ const isValidScoreDocument = (source: unknown): source is EvaluationScoreDocumen
   return typeof maybeScore.example?.id === 'string' && maybeScore.example.id.length > 0;
 };
 
-const toContentPreview = (value: unknown): ContentPreview | null => {
-  if (value == null) {
+const readScriptedPreview = (value: unknown): ContentPreview | null => {
+  const entry = Array.isArray(value) ? value[0] : value;
+  if (entry == null || typeof entry !== 'object') {
     return null;
   }
 
-  const serialized = JSON.stringify(value, null, 2);
-  if (serialized === undefined) {
+  const preview = entry as { content?: unknown; truncated?: unknown };
+  if (typeof preview.content !== 'string' || typeof preview.truncated !== 'boolean') {
     return null;
   }
 
-  return {
-    content: serialized.slice(0, EXPERIMENT_EXAMPLE_PREVIEW_MAX_LENGTH),
-    truncated: serialized.length > EXPERIMENT_EXAMPLE_PREVIEW_MAX_LENGTH,
-  };
-};
-
-const toExamplePreview = (
-  hit: SearchHit
-): { exampleId: string; preview: EvaluationExperimentExamplePreview } | undefined => {
-  const source = hit._source as PreviewSource | undefined;
-  const exampleId = source?.example?.id;
-  const repetitionIndex = source?.task?.repetition_index;
-  if (!exampleId || repetitionIndex === undefined) {
-    return undefined;
-  }
-
-  return {
-    exampleId,
-    preview: {
-      repetition_index: repetitionIndex,
-      input: toContentPreview(source.example?.input),
-      output: toContentPreview(source.task?.output),
-    },
-  };
+  return { content: preview.content, truncated: preview.truncated };
 };
 
 export const registerGetExperimentDatasetExamplesRoute = ({
@@ -139,6 +110,28 @@ export const registerGetExperimentDatasetExamplesRoute = ({
             sort: SCORES_SORT_ORDER,
             size: MAX_SCORES_PER_QUERY,
             _source_excludes: BULK_SCORE_SOURCE_EXCLUDES,
+            ...(includePreviews
+              ? {
+                  aggs: {
+                    previews: {
+                      terms: { field: 'example.id', size: MAX_SCORES_PER_QUERY },
+                      aggs: {
+                        first_repetition: {
+                          top_hits: {
+                            size: 1,
+                            sort: [{ 'task.repetition_index': { order: 'asc', missing: '_last' } }],
+                            _source: { includes: ['task.repetition_index'] },
+                            script_fields: {
+                              input_preview: previewScriptField('example', 'input'),
+                              output_preview: previewScriptField('task', 'output'),
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                }
+              : {}),
           });
 
           const scores = (searchResponse.hits?.hits ?? [])
@@ -166,35 +159,24 @@ export const registerGetExperimentDatasetExamplesRoute = ({
             if (right.example_index === null) return -1;
             return left.example_index - right.example_index;
           });
-          const exampleIds = examples.map(({ example_id: exampleId }) => exampleId);
-
-          if (includePreviews && exampleIds.length > 0) {
-            const previewQuery = buildDatasetExampleScoresQuery(datasetId, filterId, {
-              filterField,
-              spaceId,
-            });
-            previewQuery.bool.must.push({ terms: { 'example.id': exampleIds } });
-            const previewsResponse = await evalsContext.evaluationScoreService.search({
-              query: previewQuery,
-              size: exampleIds.length,
-              _source_includes: [...PREVIEW_SOURCE_FIELDS],
-              collapse: { field: 'example.id' },
-              sort: [
-                { 'task.repetition_index': { order: 'asc', missing: '_last' } },
-                { _shard_doc: { order: 'asc' } },
-              ],
-              track_total_hits: false,
-            });
-
-            for (const hit of previewsResponse.hits?.hits ?? []) {
-              const result = toExamplePreview(hit);
-              if (result) {
-                const example = groupedExamplesById.get(result.exampleId);
-                if (example) {
-                  example.preview = result.preview;
-                }
-              }
+          const previewAggregation = (
+            searchResponse.aggregations as { previews?: PreviewTermsAggregation } | undefined
+          )?.previews;
+          const previewBuckets = previewAggregation?.buckets;
+          for (const bucket of previewBuckets ?? []) {
+            const exampleId = bucket.key == null ? undefined : String(bucket.key);
+            const hit = bucket.first_repetition?.hits?.hits?.[0];
+            const repetitionIndex = hit?._source?.task?.repetition_index;
+            const example = exampleId ? groupedExamplesById.get(exampleId) : undefined;
+            if (!example || repetitionIndex === undefined || !hit) {
+              continue;
             }
+
+            example.preview = {
+              repetition_index: repetitionIndex,
+              input: readScriptedPreview(hit.fields?.input_preview),
+              output: readScriptedPreview(hit.fields?.output_preview),
+            };
           }
 
           return response.ok({ body: { examples } });
