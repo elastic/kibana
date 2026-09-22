@@ -97,9 +97,9 @@ describe('IndicatorAddToCaseContextMenuItem', () => {
     expect(getByTestId(TEST_ID)).toBeDisabled();
   });
 
-  it('is disabled when the user has createComment but neither create nor update permission', () => {
+  it('is enabled when the user has createComment and read but neither create nor update permission', () => {
     const { getByTestId } = renderWithPermissions(
-      { createComment: true, create: false, update: false },
+      { createComment: true, read: true, create: false, update: false },
       <IndicatorAddToCaseContextMenuItem
         indicator={indicator}
         onClick={onClick}
@@ -107,6 +107,6 @@ describe('IndicatorAddToCaseContextMenuItem', () => {
       />
     );
 
-    expect(getByTestId(TEST_ID)).toBeDisabled();
+    expect(getByTestId(TEST_ID)).toBeEnabled();
   });
 });
