@@ -995,7 +995,7 @@ export const Gitlab: ConnectorSpec = {
       isTool: true,
       scope: 'write',
       description:
-        'Retry failed jobs in a finished CI/CD pipeline. Creates a new pipeline run for the failed jobs. Returns the updated pipeline object.',
+        'Retry failed or canceled jobs in the existing CI/CD pipeline. Returns the updated pipeline object.',
       input: PipelineActionInputSchema,
       handler: async (ctx, input: PipelineActionInput) => {
         const apiUrl = ctx.config?.apiUrl as string;
@@ -1070,7 +1070,7 @@ export const Gitlab: ConnectorSpec = {
     '- Pagination: all list actions return up to perPage results (default 20, max 100). Pass page=2 and beyond to get more results.',
     '- For updateIssue and updateMergeRequest, the labels field REPLACES all existing labels — include all desired labels, not just the ones to add.',
     '- acceptMergeRequest fails with 405 if the MR has merge conflicts or pending required approvals — check getMergeRequest first.',
-    '- searchCode without a projectId or groupId requires Advanced Search (GitLab Premium/Ultimate) and returns 403 on lower tiers.',
+    '- Artifact files require a completed job and unexpired artifacts; job traces can be read while the job is running.',
     '- getJobArtifact requires that the job has completed and artifacts have not expired.',
     '- Self-managed GitLab instances require the apiUrl connector config to point to their own API, e.g. https://gitlab.example.com/api/v4.',
   ].join('\n'),
