@@ -73,8 +73,14 @@ describe('createEsqlResultEquivalenceEvaluator', () => {
 
   it('scores 1 when rows match regardless of alias and column order', async () => {
     const esClient = buildEsClient({
-      'c = COUNT': [['200', 10], ['404', 5]],
-      'n = COUNT': [[5, '404'], [10, '200']],
+      'c = COUNT': [
+        ['200', 10],
+        ['404', 5],
+      ],
+      'n = COUNT': [
+        [5, '404'],
+        [10, '200'],
+      ],
     });
 
     const result = await evaluate(esClient);
@@ -85,8 +91,14 @@ describe('createEsqlResultEquivalenceEvaluator', () => {
 
   it('gives partial credit for overlapping rows', async () => {
     const esClient = buildEsClient({
-      'c = COUNT': [['200', 10], ['404', 5]],
-      'n = COUNT': [['200', 10], ['503', 1]],
+      'c = COUNT': [
+        ['200', 10],
+        ['404', 5],
+      ],
+      'n = COUNT': [
+        ['200', 10],
+        ['503', 1],
+      ],
     });
 
     const result = await evaluate(esClient);
@@ -95,12 +107,16 @@ describe('createEsqlResultEquivalenceEvaluator', () => {
     expect(result.label).toBe('partial-match');
   });
 
-  it('substitutes bind params before executing both queries', async () => {
+  it('strips the time-picker WHERE and bind params before executing both queries', async () => {
     const esClient = buildEsClient({});
-    await evaluate(esClient);
+    await evaluate(
+      esClient,
+      'FROM logs | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS c = COUNT(*)'
+    );
 
     const queries = (esClient.esql.query as jest.Mock).mock.calls.map(([{ query }]) => query);
     expect(queries).toHaveLength(2);
+    expect(queries[0]).toBe('FROM logs | STATS c = COUNT(*)');
     expect(queries.join('\n')).not.toContain('?_tstart');
   });
 

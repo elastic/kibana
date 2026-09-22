@@ -8,6 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EvaluationResult, Evaluator, Example, TaskOutput } from '@kbn/evals';
 import { substituteEsqlBindParams } from './esql_bind_params';
+import { normalizeEsqlForEquivalence } from './normalize_esql_for_equivalence';
 
 export const ESQL_RESULT_EQUIVALENCE_EVALUATOR_NAME = 'ES|QL Result Equivalence';
 
@@ -33,11 +34,7 @@ export function normalizeRows(values: unknown[][], options: RowNormalizeOptions 
   const { floatTolerance = 2 } = options;
   return values
     .map((row) =>
-      JSON.stringify(
-        row
-          .map((value) => JSON.stringify(roundValue(value, floatTolerance)))
-          .sort()
-      )
+      JSON.stringify(row.map((value) => JSON.stringify(roundValue(value, floatTolerance))).sort())
     )
     .sort();
 }
@@ -80,8 +77,9 @@ const errorMessage = (reason: unknown): string =>
   reason instanceof Error ? reason.message : String(reason);
 
 /**
- * CODE evaluator: executes the gold and candidate ES|QL and scores the Jaccard
- * overlap of their result rows. Sits between "the query runs" and the LLM
+ * CODE evaluator: executes the gold and candidate ES|QL (with the optional
+ * time-picker WHERE stripped from both) and scores the Jaccard overlap of
+ * their result rows. Sits between "the query runs" and the LLM
  * equivalence judge: a candidate that groups by the wrong field or drops a
  * filter produces different rows no matter how plausible it reads.
  */
@@ -126,12 +124,14 @@ export function createEsqlResultEquivalenceEvaluator<
         };
       }
 
+      // The suite treats the time-picker WHERE as cosmetic (the chart supplies the
+      // window), so strip it from both sides before executing, as the LLM judge does.
       const [goldResult, candidateResult] = await Promise.allSettled([
         esClient.esql.query({
-          query: substituteEsqlBindParams(goldQuery),
+          query: substituteEsqlBindParams(normalizeEsqlForEquivalence(goldQuery)),
         }) as Promise<EsqlQueryResult>,
         esClient.esql.query({
-          query: substituteEsqlBindParams(candidateQuery),
+          query: substituteEsqlBindParams(normalizeEsqlForEquivalence(candidateQuery)),
         }) as Promise<EsqlQueryResult>,
       ]);
 

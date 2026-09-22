@@ -29,8 +29,7 @@ const evaluate = async ({
   });
 
   // Gold ES|QL lives inside the config; tests pass it separately for brevity.
-  const gold =
-    query === undefined ? config : { ...config, data_source: { type: 'esql', query } };
+  const gold = query === undefined ? config : { ...config, data_source: { type: 'esql', query } };
 
   return evaluator.evaluate({
     input: { question: 'unused' },
@@ -149,7 +148,9 @@ describe('createVisualizationConfigVsIntentEvaluator', () => {
     });
 
     expect(result.score).toBe(0);
-    expect(mismatchesOf(result)).toEqual(['layers[0].y[0]: expected Request Count, got total']);
+    expect(mismatchesOf(result)).toEqual([
+      'layers[0].y[0]: expected Request Count (count(*)), got total (sum(bytes))',
+    ]);
   });
 
   it('reports every gold leaf when the actual config has no layers', async () => {
@@ -330,9 +331,7 @@ describe('createVisualizationConfigVsIntentEvaluator', () => {
     });
 
     expect(result.score).toBe(0.5);
-    expect(mismatchesOf(result)).toEqual([
-      'ignore_global_filters: expected false, got undefined',
-    ]);
+    expect(mismatchesOf(result)).toEqual(['ignore_global_filters: expected false, got undefined']);
   });
 
   it('scores 0 when no visualization was produced but a structural config was expected', async () => {

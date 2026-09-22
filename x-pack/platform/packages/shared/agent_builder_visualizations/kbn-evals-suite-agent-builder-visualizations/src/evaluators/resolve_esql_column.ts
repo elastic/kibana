@@ -32,7 +32,8 @@ export function columnsReferToSameExpression(
   );
 }
 
-function resolveColumnExpression(column: string, query: string): string {
+/** The normalized expression a chart column name stands for in a query (alias -> source). */
+export function resolveColumnExpression(column: string, query: string): string {
   const key = normalizeExpression(column);
   return buildAliasMap(query).get(key) ?? key;
 }

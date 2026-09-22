@@ -13,7 +13,7 @@ import {
   hasStructuralGoldConfig,
   type VisualizationGoldConfig,
 } from './gold_visualization_config';
-import { columnsReferToSameExpression } from './resolve_esql_column';
+import { columnsReferToSameExpression, resolveColumnExpression } from './resolve_esql_column';
 
 export const VISUALIZATION_CONFIG_VS_INTENT_EVALUATOR_NAME = 'Visualization Config vs Intent';
 
@@ -195,7 +195,11 @@ function matchValue(
     if (!actualColumn) {
       report.mismatches.push(`${path}: missing column`);
     } else if (!columnsReferToSameExpression(goldColumn, goldQuery, actualColumn, actualQuery)) {
-      report.mismatches.push(`${path}: expected ${goldColumn}, got ${actualColumn}`);
+      const goldExpression = resolveColumnExpression(goldColumn, goldQuery || actualQuery);
+      const actualExpression = resolveColumnExpression(actualColumn, actualQuery || goldQuery);
+      report.mismatches.push(
+        `${path}: expected ${goldColumn} (${goldExpression}), got ${actualColumn} (${actualExpression})`
+      );
     }
   }
 
