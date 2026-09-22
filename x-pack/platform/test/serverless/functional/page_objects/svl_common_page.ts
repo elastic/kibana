@@ -116,7 +116,7 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
             );
           }
           // Verifying that we are logged in
-          if (await testSubjects.exists('userMenuButton')) {
+          if (await testSubjects.waitForExists('userMenuButton', { timeout: 10_000 })) {
             log.debug('userMenuButton found, login passed');
             return true;
           } else {
