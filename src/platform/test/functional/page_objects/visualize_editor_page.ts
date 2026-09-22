@@ -333,7 +333,17 @@ export class VisualizeEditorPageObject extends FtrService {
   }
 
   public async toggleScaleMetrics() {
+    const toState =
+      (await this.testSubjects.getAttribute('scaleMetricsSwitch', 'aria-checked')) === 'true'
+        ? 'false'
+        : 'true';
     await this.testSubjects.click('scaleMetricsSwitch');
+    await this.retry.waitForWithTimeout(
+      `scale metrics switch to be checked=${toState}`,
+      2000,
+      async () =>
+        (await this.testSubjects.getAttribute('scaleMetricsSwitch', 'aria-checked')) === toState
+    );
   }
 
   public async toggleAutoMode() {
@@ -379,9 +389,19 @@ export class VisualizeEditorPageObject extends FtrService {
   }
 
   public async toggleAdvancedParams(aggId: string) {
-    const accordion = await this.testSubjects.find(`advancedParams-${aggId}`);
-    const accordionButton = await this.find.descendantDisplayedByCssSelector('button', accordion);
+    const findAccordionButton = async () => {
+      const accordion = await this.testSubjects.find(`advancedParams-${aggId}`);
+      return await this.find.descendantDisplayedByCssSelector('button', accordion);
+    };
+    const accordionButton = await findAccordionButton();
+    const toState =
+      (await accordionButton.getAttribute('aria-expanded')) === 'true' ? 'false' : 'true';
     await accordionButton.click();
+    await this.retry.waitForWithTimeout(
+      `advanced params accordion ${aggId} to be expanded=${toState}`,
+      2000,
+      async () => (await (await findAccordionButton()).getAttribute('aria-expanded')) === toState
+    );
   }
 
   public async inputValueInCodeEditor(value: string) {

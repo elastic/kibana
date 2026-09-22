@@ -7,11 +7,12 @@
 
 import type { ObltPageObjects, ObltTestFixtures, ObltWorkerFixtures } from '@kbn/scout-oblt';
 import { test as baseTest, createLazyPageObject } from '@kbn/scout-oblt';
-import { ObservabilityAlertingPage } from './page_objects';
+import { ObservabilityAlertingPage, ObservabilityClassicRulesPage } from './page_objects';
 
 export interface ExtScoutTestFixtures extends ObltTestFixtures {
   pageObjects: ObltPageObjects & {
     observabilityAlerting: ObservabilityAlertingPage;
+    observabilityClassicRules: ObservabilityClassicRulesPage;
   };
 }
 
@@ -31,6 +32,7 @@ export const test = baseTest.extend<ExtScoutTestFixtures, ObltWorkerFixtures>({
     const extendedPageObjects = {
       ...pageObjects,
       observabilityAlerting: createLazyPageObject(ObservabilityAlertingPage, page, kbnUrl),
+      observabilityClassicRules: createLazyPageObject(ObservabilityClassicRulesPage, page, kbnUrl),
     };
 
     await use(extendedPageObjects);

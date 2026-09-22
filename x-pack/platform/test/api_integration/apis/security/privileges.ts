@@ -310,6 +310,7 @@ export default function ({ getService }: FtrProviderContext) {
         'elastic_managed_locations_enabled',
         'can_manage_private_locations',
         'can_read_param_values',
+        'can_manage_rules',
       ],
       securitySolutionAssistant: [
         'all',
@@ -490,6 +491,7 @@ export default function ({ getService }: FtrProviderContext) {
       maintenanceWindow: ['all', 'read', 'minimal_all', 'minimal_read'],
       queryActivity: ['all', 'read', 'minimal_all', 'minimal_read'],
       streams: ['all', 'read', 'minimal_all', 'minimal_read'],
+      nightshift: ['all', 'read', 'minimal_all', 'minimal_read', 'manage-engines'],
       alerting_v2_rules: ['all', 'read', 'minimal_all', 'minimal_read'],
       alerting_v2_alerts: ['all', 'read', 'minimal_all', 'minimal_read'],
       alerting_v2_action_policies: ['all', 'read', 'minimal_all', 'minimal_read'],

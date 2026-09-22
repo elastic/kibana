@@ -72,7 +72,7 @@ export const detectDataPresence = async ({
     return collectGroupHashesFromRows({ rule, rows, input });
   } catch (error) {
     if (isMaximumResponseSizeExceededError(error)) {
-      const sizeError = toQueryResponseSizeExceededError(error, maxResponseSize);
+      const sizeError = toQueryResponseSizeExceededError(error, 'data_presence', maxResponseSize);
       logger.warn({
         message: `Data-presence query: ${sizeError.message}`,
         code: ALERTING_LOG_CODES.RULE_EXECUTION_QUERY_RESPONSE_SIZE_EXCEEDED,

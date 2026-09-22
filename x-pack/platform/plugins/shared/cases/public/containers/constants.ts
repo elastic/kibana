@@ -36,7 +36,6 @@ export const casesQueriesKeys = {
     [...casesQueriesKeys.fieldDefinitions, 'list', params] as const,
   connectorsList: () => [...casesQueriesKeys.connectors, 'list'] as const,
   casesList: () => [...casesQueriesKeys.all, 'list'] as const,
-  casesMetrics: () => [...casesQueriesKeys.casesList(), 'metrics'] as const,
   casesStatuses: () => [...casesQueriesKeys.casesList(), 'statuses'] as const,
   cases: (params: unknown) => [...casesQueriesKeys.casesList(), 'all-cases', params] as const,
   similarCases: (id: string, params: unknown) =>
@@ -52,6 +51,8 @@ export const casesQueriesKeys = {
     [...casesQueriesKeys.case(id), 'metrics', features] as const,
   caseConnectors: (id: string) => [...casesQueriesKeys.case(id), 'connectors'],
   caseUsers: (id: string) => [...casesQueriesKeys.case(id), 'users'],
+  conversationAccess: (conversationId: string) =>
+    [...casesQueriesKeys.userActions, 'conversation-access', conversationId] as const,
   caseUserActions: (id: string, params: unknown) =>
     [...casesQueriesKeys.case(id), ...casesQueriesKeys.userActions, params] as const,
   caseUserActionsStats: (id: string) => [

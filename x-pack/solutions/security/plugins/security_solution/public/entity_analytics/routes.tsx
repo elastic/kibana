@@ -12,20 +12,21 @@ import { withSecurityRoutePageWrapper } from '../common/components/security_rout
 import {
   ENTITY_ANALYTICS_ASSET_CRITICALITY_PATH,
   ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH,
-  ENTITY_ANALYTICS_LANDING_PATH,
   ENTITY_ANALYTICS_MANAGEMENT_PATH,
   ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
-  ENTITY_ANALYTICS_OVERVIEW_PATH,
   ENTITY_ANALYTICS_HOME_PAGE_PATH,
+  ENTITY_ANALYTICS_LANDING_PATH,
+  ENTITY_ANALYTICS_OVERVIEW_PATH,
   SecurityPageName,
+  USE_NEW_ENTITY_ANALYTICS_HOME_PAGE_FLAG,
 } from '../../common/constants';
 import { EntityAnalyticsManagementPage } from './pages/entity_analytics_management_page';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
-import { EntityAnalyticsLandingPage } from './pages/entity_analytics_landing';
 import { EntityAnalyticsPrivilegedUserMonitoringPage } from './pages/entity_analytics_privileged_user_monitoring_page';
-import { OverviewDashboard } from './pages/entity_analytics_overview_page';
 import { EntityAnalyticsHomePage } from './pages/entity_analytics_home_page';
+import { EntityAnalyticsNewHomePage } from './pages/entity_analytics_new_home_page';
 import { useIsExperimentalFeatureEnabled } from '../common/hooks/use_experimental_features';
+import { useKibana } from '../common/lib/kibana';
 
 // ---- Management routes ----
 const EntityAnalyticsManagementWrapper = () => (
@@ -97,24 +98,6 @@ const EntityAnalyticsEntityStoreRedirectContainer: React.FC = React.memo(() => {
 EntityAnalyticsEntityStoreRedirectContainer.displayName =
   'EntityAnalyticsEntityStoreRedirectContainer';
 
-// ---- Landing routes ----
-const EntityAnalyticsLandingWrapper = () => (
-  <PluginTemplateWrapper>
-    <EntityAnalyticsLandingPage />
-  </PluginTemplateWrapper>
-);
-
-const EntityAnalyticsLandingContainer: React.FC = React.memo(() => {
-  return (
-    <Routes>
-      <Route path={ENTITY_ANALYTICS_LANDING_PATH} exact component={EntityAnalyticsLandingWrapper} />
-      <Route component={NotFoundPage} />
-    </Routes>
-  );
-});
-
-EntityAnalyticsLandingContainer.displayName = 'EntityAnalyticsLandingContainer';
-
 // ---- Privileged user monitoring routes ----
 const EntityAnalyticsPrivilegedUserMonitoringWrapper = () => (
   <PluginTemplateWrapper>
@@ -152,42 +135,25 @@ const EntityAnalyticsPrivilegedUserMonitoringContainer: React.FC = React.memo(()
 EntityAnalyticsPrivilegedUserMonitoringContainer.displayName =
   'EntityAnalyticsPrivilegedUserMonitoringContainer';
 
-// ---- Overview routes ----
-const EntityAnalyticsOverviewWrapper = () => (
-  <PluginTemplateWrapper>
-    <OverviewDashboard />
-  </PluginTemplateWrapper>
-);
-
-const EntityAnalyticsOverviewContainer: React.FC = React.memo(() => {
-  return (
-    <Routes>
-      <Route
-        path={ENTITY_ANALYTICS_OVERVIEW_PATH}
-        exact
-        component={EntityAnalyticsOverviewWrapper}
-      />
-      <Route component={NotFoundPage} />
-    </Routes>
-  );
-});
-
-EntityAnalyticsOverviewContainer.displayName = 'EntityAnalyticsOverviewContainer';
-
 // ---- Entity analytics home page routes ----
-const EntityAnalyticsHomePageWrapper = () => (
-  <PluginTemplateWrapper>
-    <EntityAnalyticsHomePage />
-  </PluginTemplateWrapper>
-);
-
 const EntityAnalyticsHomePageContainer: React.FC = React.memo(() => {
+  const {
+    featureFlags: { getBooleanValue },
+  } = useKibana().services;
+  const isNewHomePageEnabled = getBooleanValue(USE_NEW_ENTITY_ANALYTICS_HOME_PAGE_FLAG, false);
+
+  const PageComponent = isNewHomePageEnabled ? EntityAnalyticsNewHomePage : EntityAnalyticsHomePage;
+
   return (
     <Routes>
       <Route
         path={ENTITY_ANALYTICS_HOME_PAGE_PATH}
         exact
-        component={EntityAnalyticsHomePageWrapper}
+        render={() => (
+          <PluginTemplateWrapper>
+            <PageComponent />
+          </PluginTemplateWrapper>
+        )}
       />
       <Route component={NotFoundPage} />
     </Routes>
@@ -195,6 +161,10 @@ const EntityAnalyticsHomePageContainer: React.FC = React.memo(() => {
 });
 
 EntityAnalyticsHomePageContainer.displayName = 'EntityAnalyticsHomePageContainer';
+
+const RedirectToEntityAnalyticsHome: React.FC = () => (
+  <Redirect to={ENTITY_ANALYTICS_HOME_PAGE_PATH} />
+);
 
 // ---- Route definitions ----
 export const routes = [
@@ -214,24 +184,10 @@ export const routes = [
     component: EntityAnalyticsEntityStoreRedirectContainer,
   },
   {
-    path: ENTITY_ANALYTICS_LANDING_PATH,
-    component: withSecurityRoutePageWrapper(
-      EntityAnalyticsLandingContainer,
-      SecurityPageName.entityAnalyticsLanding
-    ),
-  },
-  {
     path: ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
     component: withSecurityRoutePageWrapper(
       EntityAnalyticsPrivilegedUserMonitoringContainer,
       SecurityPageName.entityAnalyticsPrivilegedUserMonitoring
-    ),
-  },
-  {
-    path: ENTITY_ANALYTICS_OVERVIEW_PATH,
-    component: withSecurityRoutePageWrapper(
-      EntityAnalyticsOverviewContainer,
-      SecurityPageName.entityAnalyticsOverview
     ),
   },
   {
@@ -240,5 +196,13 @@ export const routes = [
       EntityAnalyticsHomePageContainer,
       SecurityPageName.entityAnalyticsHomePage
     ),
+  },
+  {
+    path: ENTITY_ANALYTICS_LANDING_PATH,
+    component: RedirectToEntityAnalyticsHome,
+  },
+  {
+    path: ENTITY_ANALYTICS_OVERVIEW_PATH,
+    component: RedirectToEntityAnalyticsHome,
   },
 ];

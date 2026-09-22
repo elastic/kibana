@@ -11,7 +11,7 @@ import {
   DataGridDensity,
   DiscoverTabType,
   UnifiedHistogramSuggestionType,
-} from '@kbn/discover-utils';
+} from '@kbn/discover-session-constants';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
 import type { DiscoverSessionApiData } from '../schema';
@@ -305,11 +305,9 @@ export const discoverSessionApiData: DiscoverSessionApiData = {
       header_row_height: 1,
       density: DataGridDensity.COMPACT,
       documents_display_mode: 'json',
-      json_mode_settings: {
-        hide_nulls: true,
-        wrap_lines: false,
-        default_rendered_nodes: 10,
-      },
+      hide_nulls: true,
+      wrap_lines: false,
+      default_rendered_nodes: 10,
       query: {
         expression: '',
         language: 'kql',
@@ -359,11 +357,9 @@ export const discoverSessionApiData: DiscoverSessionApiData = {
       header_row_height: 1,
       density: DataGridDensity.COMPACT,
       documents_display_mode: 'json',
-      json_mode_settings: {
-        hide_nulls: true,
-        wrap_lines: false,
-        default_rendered_nodes: 10,
-      },
+      hide_nulls: true,
+      wrap_lines: false,
+      default_rendered_nodes: 10,
       data_source: {
         type: 'esql',
         query: 'FROM logs*,-logstash*,filebeat-* | WHERE ??field_name == ?field_value',

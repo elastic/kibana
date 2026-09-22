@@ -51,18 +51,15 @@ export type {
   DiscoverSessionEmbeddableByReferenceState,
   DiscoverSessionEmbeddableState,
 } from './embeddable';
-export { discoverSessionApiResponseSchema, discoverSessionApiDataSchema } from './api/schema';
+export { discoverSessionApiResponseSchema } from './api/schema';
 export { transformDiscoverSessionIn, transformDiscoverSessionOut } from './api/transforms';
 export type {
-  DiscoverSessionApiClassicTab,
-  DiscoverSessionApiEsqlTab,
-  DiscoverSessionApiMetricsTab,
   DiscoverSessionApiResponse,
-  DiscoverSessionApiTab,
   DiscoverSessionApiData,
   DiscoverSessionApiDataInput,
   DiscoverSessionSanitizeResponse,
   DiscoverSessionWarning,
+  DiscoverSessionGetResponse,
 } from './api/schema';
 export type { DiscoverSessionSanitizeRequest } from './api/session_sanitize';
 

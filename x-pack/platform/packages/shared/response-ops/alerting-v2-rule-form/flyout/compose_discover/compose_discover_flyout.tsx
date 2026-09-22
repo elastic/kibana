@@ -32,12 +32,7 @@ import { inlineEsqlVariables } from '../../utils/esql_rule_utils';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 import { RuleFormProvider } from '../../form/contexts/rule_form_context';
 import { ConfirmRuleClose } from '../confirm_rule_close';
-import type {
-  FormValues,
-  RecoveryStrategy,
-  RuleNotificationsValue,
-  RuleQuery,
-} from '../../form/types';
+import type { FormValues, RecoveryStrategy, RuleQuery } from '../../form/types';
 import { getBreachQuery } from '../../form/utils/query_helpers';
 import { enterManualSplitQuery, exitManualSplitQuery } from './manual_split_query';
 import { parseYamlToFormValues, serializeFormToYaml } from '../../form/utils/yaml_form_utils';
@@ -108,6 +103,11 @@ const QUERY_SANDBOX_LABEL = i18n.translate(
   {
     defaultMessage: 'Query sandbox',
   }
+);
+
+const PREVIEW_BUTTON_LABEL = i18n.translate(
+  'xpack.alertingV2.composeDiscover.builderMode.previewButtonLabel',
+  { defaultMessage: 'Preview' }
 );
 
 const EDIT_MODE_LEGEND = i18n.translate('xpack.alertingV2.composeDiscover.editMode.legend', {
@@ -221,24 +221,13 @@ export interface ComposeDiscoverFlyoutProps {
   onClose: () => void;
   services: RuleFormServices;
   /**
-   * Called with the create payload when the user submits in create mode. When the user
-   * enables the notifications step, `notifications` carries the captured action draft list;
-   * otherwise it is `undefined`.
+   * Called with the create payload when the user submits in create mode.
    */
-  onCreateRule: (
-    payload: ReturnType<typeof composeFormToCreateRequest>,
-    notifications?: RuleNotificationsValue
-  ) => void;
+  onCreateRule: (payload: ReturnType<typeof composeFormToCreateRequest>) => void;
   /**
-   * Called with id + update payload when the user submits in edit mode. When the user
-   * configures simple actions, `notifications` carries the captured action draft list so
-   * the caller can create linked action policies; otherwise it is `undefined`.
+   * Called with id + update payload when the user submits in edit mode.
    */
-  onUpdateRule?: (
-    id: string,
-    payload: ReturnType<typeof composeFormToUpdateRequest>,
-    notifications?: RuleNotificationsValue
-  ) => void;
+  onUpdateRule?: (id: string, payload: ReturnType<typeof composeFormToUpdateRequest>) => void;
   /** True while a create/update mutation is in flight. */
   isSaving?: boolean;
   builderType?: string;
@@ -355,7 +344,7 @@ export function ComposeDiscoverFlyout({
   );
 
   const [uiState, rawDispatch] = useComposeDiscoverState({
-    mode: mode === 'clone' ? 'edit' : mode,
+    mode,
     initialKind,
     isQueryPrePopulated: isDiscoverQueryPopulated || (mode === 'create' && isRuleQueryPopulated),
     forceYamlMode,
@@ -628,10 +617,7 @@ export function ComposeDiscoverFlyout({
 
   const applyYamlValuesToFormAndSandbox = useCallback(
     (parsed: FormValues): FormValues => {
-      const composed = {
-        ...mapYamlFormValuesToComposeFormValues(parsed),
-        notifications: methods.getValues('notifications'),
-      };
+      const composed = mapYamlFormValuesToComposeFormValues(parsed);
       methods.reset(composed);
       setSandboxQuery(composed.query);
       setSandboxTimeField(composed.timeField);
@@ -966,10 +952,11 @@ export function ComposeDiscoverFlyout({
         return;
       }
     }
+
     if (isCreate) {
-      onCreateRule(composeFormToCreateRequest(values, builderType), values.notifications);
+      onCreateRule(composeFormToCreateRequest(values, builderType));
     } else if (ruleId && onUpdateRule) {
-      onUpdateRule(ruleId, composeFormToUpdateRequest(values, builderType), values.notifications);
+      onUpdateRule(ruleId, composeFormToUpdateRequest(values, builderType));
     }
   });
 
@@ -1211,6 +1198,21 @@ export function ComposeDiscoverFlyout({
     handleDisableManualSplit,
   ]);
 
+  /*
+   * Header row shown above the editor: the helper text plus the Split (gear)
+   * control on the right. The gear lives here — outside the editor toolbar —
+   * because it acts on how the editor(s) below are rendered (single vs split),
+   * so it reads as an outer control rather than part of the editor's own toolbar.
+   * `sandboxHelpText` and `sandboxHeaderActions` share the same gate, so they
+   * appear (or not) together.
+   */
+  const sandboxHelpContent = sandboxHelpText ? (
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+      <EuiFlexItem>{sandboxHelpText}</EuiFlexItem>
+      {sandboxHeaderActions && <EuiFlexItem grow={false}>{sandboxHeaderActions}</EuiFlexItem>}
+    </EuiFlexGroup>
+  ) : undefined;
+
   // Freeze the view toggle while the sandbox is open in FORM mode. In YAML mode the
   // sandbox stays open by design, so the toggle remains enabled (#623 gating table).
   const modeToggleSandboxLocked = uiState.childOpen && !uiState.yamlMode;
@@ -1273,19 +1275,49 @@ export function ComposeDiscoverFlyout({
                     />
                   </EuiFlexItem>
                 )}
-                {isBuilderMode && isEditing && onSwitchToEsql && (
+                {isBuilderMode && (
                   <EuiFlexItem grow={false}>
-                    <EuiButtonGroup
-                      legend={BUILDER_MODE_LEGEND}
-                      options={BUILDER_MODE_OPTIONS}
-                      idSelected="builder"
-                      onChange={(id) => {
-                        if (id === 'esql') onSwitchToEsql();
-                      }}
-                      isIconOnly
-                      buttonSize="compressed"
-                      data-test-subj="composeDiscoverSwitchToEsql"
-                    />
+                    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                      <EuiFlexItem grow={false}>
+                        <EuiButton
+                          size="s"
+                          color="text"
+                          iconType="chevronLimitLeft"
+                          isDisabled={uiState.childOpen}
+                          onClick={() =>
+                            dispatch({
+                              type: 'OPEN_CHILD_FOR_STEP',
+                              step: uiState.step,
+                              isAlert,
+                              focusedTab: getDefaultOpenTab(
+                                isAlert,
+                                uiState.step,
+                                hasCustomRecovery,
+                                uiState.manualSplitEnabled
+                              ),
+                            })
+                          }
+                          data-test-subj="ruleBuilderOpenPreview"
+                        >
+                          {PREVIEW_BUTTON_LABEL}
+                        </EuiButton>
+                      </EuiFlexItem>
+                      {isEditing && onSwitchToEsql ? (
+                        <EuiFlexItem grow={false}>
+                          <EuiButtonGroup
+                            legend={BUILDER_MODE_LEGEND}
+                            options={BUILDER_MODE_OPTIONS}
+                            idSelected="builder"
+                            onChange={(id) => {
+                              if (id === 'esql') onSwitchToEsql();
+                            }}
+                            isIconOnly
+                            buttonSize="compressed"
+                            data-test-subj="composeDiscoverSwitchToEsql"
+                          />
+                        </EuiFlexItem>
+                      ) : null}
+                    </EuiFlexGroup>
                   </EuiFlexItem>
                 )}
                 {!isBuilderMode && (
@@ -1366,7 +1398,6 @@ export function ComposeDiscoverFlyout({
                       onRecoveryTypeChange={handleRecoveryTypeChange}
                       onKindChange={handleKindChange}
                       isEditing={isEditing}
-                      ruleId={ruleId}
                       builderType={builderType}
                     />
                   </BuilderStateProvider>
@@ -1408,8 +1439,7 @@ export function ComposeDiscoverFlyout({
                 onBaseEditorMount={onBaseEditorMount}
                 onSingleEditorMount={onSingleEditorMount}
                 onClose={handleSandboxClose}
-                helpText={sandboxHelpText}
-                headerActions={sandboxHeaderActions}
+                helpText={sandboxHelpContent}
                 onApply={isBuilderMode ? undefined : handleSandboxApply}
                 title={getQuerySandboxTitle(isBuilderMode)}
               />
