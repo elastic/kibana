@@ -18,12 +18,25 @@ export const INVESTIGATION_TEMPLATE_ID = 'investigation' as const;
 /** The escalation template field that holds linked investigation conversation ids. */
 export const ESCALATION_LINKED_INVESTIGATIONS_FIELD = 'linked_investigations' as const;
 
+/** The escalation template field that holds the open/closed status. */
+export const ESCALATION_STATUS_FIELD = 'status' as const;
+
+/** The escalation template field that holds the list of assigned user profile uids. */
+export const ESCALATION_ASSIGNEES_FIELD = 'assignees' as const;
+
 /**
  * An escalation must never list more linked investigations than this. Chosen to match
  * CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES (100) so a private escalation can have one
  * collaborator per linked investigation without hitting a separate limit.
  */
 export const MAX_ESCALATION_LINKED_INVESTIGATIONS = 100;
+
+/**
+ * Maximum number of assignees per escalation. Matches
+ * CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES (100) for the same reason as the linked
+ * investigations bound above.
+ */
+export const MAX_ESCALATION_ASSIGNEES = 100;
 
 /**
  * UI capabilities. Capabilities are namespaced by feature id rather than by

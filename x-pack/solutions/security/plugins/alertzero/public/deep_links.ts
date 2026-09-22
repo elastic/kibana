@@ -43,6 +43,12 @@ export const getAlertZeroDeepLinks = (): AppDeepLink[] => [
     visibleIn: ['globalSearch', 'projectSideNav'],
   },
   {
+    id: SecurityPageName.alertZeroEscalations,
+    title: i18n.NAV_ESCALATIONS,
+    path: '/escalations',
+    visibleIn: ['globalSearch', 'projectSideNav'],
+  },
+  {
     id: SecurityPageName.alertZeroWatches,
     title: i18n.NAV_WATCHES,
     path: '/watches',

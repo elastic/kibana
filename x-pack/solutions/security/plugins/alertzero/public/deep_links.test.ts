@@ -17,6 +17,7 @@ describe('getAlertZeroDeepLinks', () => {
       SecurityPageName.attacks,
       SecurityPageName.alertZeroThreatHunt,
       SecurityPageName.alertZeroStreams,
+      SecurityPageName.alertZeroEscalations,
       SecurityPageName.alertZeroWatches,
     ]);
     expect(ids).not.toContain('discover');

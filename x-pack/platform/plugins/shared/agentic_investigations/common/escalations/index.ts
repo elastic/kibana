@@ -6,13 +6,16 @@
  */
 
 export {
+  ESCALATION_ASSIGNEES_FIELD,
   ESCALATION_BY_ID_URL,
   ESCALATION_LINKED_INVESTIGATIONS_FIELD,
+  ESCALATION_STATUS_FIELD,
   ESCALATION_TEMPLATE_ID,
   ESCALATIONS_INTERNAL_URL,
   ESCALATIONS_UI_CAPABILITY_MANAGE,
   ESCALATIONS_UI_CAPABILITY_SHOW,
   INVESTIGATION_TEMPLATE_ID,
+  MAX_ESCALATION_ASSIGNEES,
   MAX_ESCALATION_LINKED_INVESTIGATIONS,
   MAX_ESCALATIONS_PAGE_SIZE,
   MAX_ESCALATIONS_RESULT_WINDOW,
@@ -20,6 +23,7 @@ export {
 
 export {
   createEscalationRequestSchema,
+  escalationStatusSchema,
   escalationVisibilitySchema,
   listEscalationsQuerySchema,
   updateEscalationRequestSchema,
@@ -29,6 +33,7 @@ export type {
   CreateEscalationRequest,
   EscalationConversation,
   EscalationConversationSummary,
+  EscalationStatus,
   EscalationVisibility,
   ListEscalationsQuery,
   ListEscalationsResponse,

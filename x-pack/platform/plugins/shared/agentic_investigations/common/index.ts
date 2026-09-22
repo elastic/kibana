@@ -73,21 +73,32 @@ export type {
 } from './proposals';
 
 export {
+  ESCALATION_ASSIGNEES_FIELD,
   ESCALATION_BY_ID_URL,
   ESCALATION_LINKED_INVESTIGATIONS_FIELD,
+  ESCALATION_STATUS_FIELD,
   ESCALATION_TEMPLATE_ID,
   ESCALATIONS_INTERNAL_URL,
   ESCALATIONS_UI_CAPABILITY_MANAGE,
+  ESCALATIONS_UI_CAPABILITY_SHOW,
   INVESTIGATION_TEMPLATE_ID,
+  MAX_ESCALATION_ASSIGNEES,
   MAX_ESCALATION_LINKED_INVESTIGATIONS,
+  MAX_ESCALATIONS_PAGE_SIZE,
   createEscalationRequestSchema,
+  escalationStatusSchema,
   escalationVisibilitySchema,
+  listEscalationsQuerySchema,
   updateEscalationRequestSchema,
 } from './escalations';
 
 export type {
   CreateEscalationRequest,
   EscalationConversation,
+  EscalationConversationSummary,
+  EscalationStatus,
   EscalationVisibility,
+  ListEscalationsQuery,
+  ListEscalationsResponse,
   UpdateEscalationRequest,
 } from './escalations';

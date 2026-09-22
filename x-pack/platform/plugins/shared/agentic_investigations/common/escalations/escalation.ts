@@ -17,7 +17,9 @@ import type {
 } from '@kbn/agent-builder-common';
 import { z } from '@kbn/zod/v4';
 import {
+  ESCALATION_ASSIGNEES_FIELD,
   ESCALATION_LINKED_INVESTIGATIONS_FIELD,
+  MAX_ESCALATION_ASSIGNEES,
   MAX_ESCALATION_LINKED_INVESTIGATIONS,
   MAX_ESCALATIONS_PAGE_SIZE,
   MAX_ESCALATIONS_RESULT_WINDOW,
@@ -39,6 +41,14 @@ const collaboratorIdSchema = z
 
 export const escalationVisibilitySchema = z.enum(['private', 'public']);
 export type EscalationVisibility = z.infer<typeof escalationVisibilitySchema>;
+
+/**
+ * The open/closed status of an escalation. Values must stay in sync with the `status`
+ * field options in the escalation conversation template
+ * (`agent_builder_platform/server/conversation_templates/escalation.ts`).
+ */
+export const escalationStatusSchema = z.enum(['open', 'closed']);
+export type EscalationStatus = z.infer<typeof escalationStatusSchema>;
 
 export const createEscalationRequestSchema = z
   .object({
@@ -96,11 +106,36 @@ export const updateEscalationRequestSchema = z
       .min(1)
       .max(MAX_ESCALATION_LINKED_INVESTIGATIONS)
       .optional(),
+    /**
+     * Full replacement list of user profile uids assigned to this escalation.
+     * Unlike `linked_investigations` this is a replace-in-full, not an append:
+     * the caller sends the complete desired set.
+     *
+     * May be combined with `linked_investigations`, `assignees`, or `status` in a single
+     * request (all are `patchMetadata` writes). Cannot be combined with `title`.
+     */
+    [ESCALATION_ASSIGNEES_FIELD]: z
+      .array(collaboratorIdSchema)
+      .max(MAX_ESCALATION_ASSIGNEES)
+      .optional(),
+    /**
+     * Open/closed state of the escalation. Uses replace semantics on `metadata.status`.
+     *
+     * May be combined with other metadata writes (`linked_investigations`, `assignees`).
+     * Cannot be combined with `title`.
+     */
+    status: escalationStatusSchema.optional(),
   })
   .refine(
     (value) =>
-      value.title !== undefined || value[ESCALATION_LINKED_INVESTIGATIONS_FIELD] !== undefined,
-    { message: 'at least one of title or linked_investigations must be provided' }
+      value.title !== undefined ||
+      value[ESCALATION_LINKED_INVESTIGATIONS_FIELD] !== undefined ||
+      value[ESCALATION_ASSIGNEES_FIELD] !== undefined ||
+      value.status !== undefined,
+    {
+      message:
+        'at least one of title, linked_investigations, assignees, or status must be provided',
+    }
   )
   .refine(
     (value) =>
@@ -108,6 +143,20 @@ export const updateEscalationRequestSchema = z
     {
       message:
         'title and linked_investigations cannot be updated in the same request; send separate PATCH calls',
+    }
+  )
+  .refine(
+    (value) => !(value.title !== undefined && value[ESCALATION_ASSIGNEES_FIELD] !== undefined),
+    {
+      message:
+        'title and assignees cannot be updated in the same request; send separate PATCH calls',
+    }
+  )
+  .refine(
+    (value) => !(value.title !== undefined && value.status !== undefined),
+    {
+      message:
+        'title and status cannot be updated in the same request; send separate PATCH calls',
     }
   );
 
@@ -120,6 +169,9 @@ export type UpdateEscalationRequest = z.infer<typeof updateEscalationRequestSche
  * The `page * per_page` refinement mirrors agent_builder's `_search` route guard:
  * results beyond MAX_ESCALATIONS_RESULT_WINDOW are unreachable through offset
  * pagination, so requesting them is always an error rather than an empty page.
+ *
+ * `status` defaults to `'open'` to preserve backward compatibility for callers
+ * that do not send the parameter. `'all'` is provided for admin / diagnostic use.
  */
 export const listEscalationsQuerySchema = z
   .object({
@@ -130,6 +182,7 @@ export const listEscalationsQuerySchema = z
       .min(1)
       .max(MAX_ESCALATIONS_PAGE_SIZE)
       .default(MAX_ESCALATIONS_PAGE_SIZE),
+    status: z.enum(['open', 'closed', 'all']).default('open'),
   })
   .refine(({ page, per_page: perPage }) => page * perPage <= MAX_ESCALATIONS_RESULT_WINDOW, {
     message: `page * per_page must not exceed ${MAX_ESCALATIONS_RESULT_WINDOW}; escalations beyond that are not reachable through this API`,

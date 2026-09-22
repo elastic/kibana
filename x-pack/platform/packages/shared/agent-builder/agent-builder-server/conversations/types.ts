@@ -83,7 +83,8 @@ export interface ConversationPublicClient {
   create(request: ConversationCreatePublicRequest): Promise<ConversationWithPermissions>;
   /**
    * Validate updates against the conversation's template and merge them into its metadata.
-   * Requires the caller to be the conversation owner. The conversation must have a template applied.
+   * Requires converse access (owner, collaborator, or any user for public conversations).
+   * The conversation must have a template applied.
    */
   patchMetadata(
     conversationId: string,

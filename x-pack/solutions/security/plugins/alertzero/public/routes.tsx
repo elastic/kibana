@@ -15,6 +15,7 @@ import {
   NAV_THREAT_HUNT,
 } from './components/app_chrome/translations';
 import { ConversationsPage } from './pages/conversations';
+import { EscalationsPage } from './pages/escalations';
 import { SettingsPage } from './pages/settings';
 import { WatchesRoutes } from './pages/watches/routes';
 
@@ -29,6 +30,7 @@ import { WatchesRoutes } from './pages/watches/routes';
 export const AlertZeroRoutes: React.FC = () => (
   <Routes>
     <Route path="/" exact component={ConversationsPage} />
+    <Route path="/escalations" component={EscalationsPage} />
     <Route path="/alerts" render={() => <PlaceholderPage title={NAV_ALERTS} />} />
     <Route path="/attacks" render={() => <PlaceholderPage title={NAV_ATTACKS} />} />
     <Route path="/threat-hunt" render={() => <PlaceholderPage title={NAV_THREAT_HUNT} />} />

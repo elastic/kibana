@@ -999,10 +999,11 @@ class ConversationClientImpl implements ConversationClient {
     updates: Record<string, unknown>
   ): Promise<{ conversation: Conversation; changedFields: string[] }> {
     let changedFields: string[] = [];
+    const access: ConversationAccess = 'converse';
 
     const result = await this.writeConversation({
       conversationId,
-      access: 'owner',
+      access,
       fields: (current) => {
         if (!current.template_id) {
           throw createBadRequestError(

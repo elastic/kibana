@@ -370,6 +370,37 @@ describe('EscalationsService.update', () => {
     expect(client.patchMetadata).not.toHaveBeenCalled();
   });
 
+  it('calls patchMetadata with status when status is provided', async () => {
+    const { service, client } = makeService({
+      get: jest.fn().mockResolvedValue({
+        id: 'escalation-1',
+        template_id: ESCALATION_TEMPLATE_ID,
+        metadata: { status: 'open' },
+      }),
+    });
+
+    await service.update(request, 'escalation-1', { status: 'closed' });
+
+    expect(client.patchMetadata).toHaveBeenCalledWith(
+      'escalation-1',
+      expect.objectContaining({ status: 'closed' })
+    );
+  });
+
+  it('does not call client.update for a status-only update', async () => {
+    const { service, client } = makeService({
+      get: jest.fn().mockResolvedValue({
+        id: 'escalation-1',
+        template_id: ESCALATION_TEMPLATE_ID,
+        metadata: { status: 'open' },
+      }),
+    });
+
+    await service.update(request, 'escalation-1', { status: 'closed' });
+
+    expect(client.update).not.toHaveBeenCalled();
+  });
+
   it('does not call client.update for a links-only update', async () => {
     const { service, client } = makeService({
       get: jest.fn().mockResolvedValue({
@@ -399,7 +430,7 @@ describe('EscalationsService.list', () => {
       search: jest.fn().mockResolvedValue({ results: [MOCK_SUMMARY], total: 1 }),
     });
 
-    await service.list(request, { page: 1, per_page: 50 });
+    await service.list(request, { page: 1, per_page: 50, status: 'open' });
 
     expect(client.search).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -425,7 +456,7 @@ describe('EscalationsService.list', () => {
       search: jest.fn().mockResolvedValue({ results: [], total: 0 }),
     });
 
-    await service.list(request, { page: 1, per_page: 50 });
+    await service.list(request, { page: 1, per_page: 50, status: 'open' });
 
     expect(client.search).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -439,7 +470,7 @@ describe('EscalationsService.list', () => {
       search: jest.fn().mockResolvedValue({ results: [], total: 0 }),
     });
 
-    await service.list(request, { page: 3, per_page: 25 });
+    await service.list(request, { page: 3, per_page: 25, status: 'open' });
 
     expect(client.search).toHaveBeenCalledWith(expect.objectContaining({ page: 3, perPage: 25 }));
   });
@@ -449,7 +480,7 @@ describe('EscalationsService.list', () => {
       search: jest.fn().mockResolvedValue({ results: [MOCK_SUMMARY], total: 42 }),
     });
 
-    const result = await service.list(request, { page: 2, per_page: 10 });
+    const result = await service.list(request, { page: 2, per_page: 10, status: 'open' });
 
     expect(result).toEqual({
       pagination: { total: 42, page: 2, per_page: 10 },
@@ -462,7 +493,7 @@ describe('EscalationsService.list', () => {
       search: jest.fn().mockResolvedValue({ results: [], total: 0 }),
     });
 
-    const result = await service.list(request, { page: 1, per_page: 50 });
+    const result = await service.list(request, { page: 1, per_page: 50, status: 'open' });
 
     expect(result).toEqual({
       pagination: { total: 0, page: 1, per_page: 50 },

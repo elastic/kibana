@@ -5,6 +5,16 @@
  * 2.0.
  */
 
+export {
+  EscalationQueue,
+  EscalationCard,
+  EscalationAssignees,
+  EscalationMetaInfo,
+  LinkedInvestigationsBadge,
+  type EscalationQueueItem,
+  type EscalationStatus,
+} from './src/components/escalation_queue';
+
 export { ActionButton } from './src/components/actions/action_button';
 export {
   BaseActions,

@@ -24,7 +24,9 @@ import type {
   UpdateEscalationRequest,
 } from '../../../common/escalations/escalation';
 import {
+  ESCALATION_ASSIGNEES_FIELD,
   ESCALATION_LINKED_INVESTIGATIONS_FIELD,
+  ESCALATION_STATUS_FIELD,
   ESCALATION_TEMPLATE_ID,
   INVESTIGATION_TEMPLATE_ID,
   MAX_ESCALATION_LINKED_INVESTIGATIONS,
@@ -36,10 +38,23 @@ import {
 } from './errors';
 import { filterMetadataToTemplateFields } from './filter_template_metadata';
 
-// Scopes list results to escalations and hides closed ones. Uses `metadata.status` (the
-// template field), not the bare `status` field (which tracks round execution state).
-const NON_CLOSED_ESCALATIONS_FILTER =
-  `template_id: "${ESCALATION_TEMPLATE_ID}" and not (metadata.status: "closed")` as const;
+/**
+ * Builds the Elasticsearch filter clause for the list endpoint.
+ *
+ * "open" is expressed as *not closed* rather than `metadata.status: "open"` so
+ * escalations created before the template default was applied (and therefore
+ * missing a status value) still appear in the open bucket.
+ *
+ * Uses `metadata.status` (the template field), not the bare `status` field
+ * (which tracks round execution state).
+ */
+const buildEscalationsFilter = (status: ListEscalationsQuery['status']): string => {
+  const base = `template_id: "${ESCALATION_TEMPLATE_ID}"`;
+  if (status === 'all') return base;
+  if (status === 'closed') return `${base} and metadata.status: "closed"`;
+  // 'open' — fall through. "not closed" instead of "open" for the reason above.
+  return `${base} and not (metadata.status: "closed")`;
+};
 
 const ESCALATIONS_LIST_SORT: ConversationSearchSort = { field: 'updated_at', order: 'desc' };
 
@@ -171,6 +186,21 @@ export class EscalationsService {
       result = conversation;
     }
 
+    if (body.assignees !== undefined) {
+      // Replace-in-full: the caller sends the complete desired assignee set.
+      const { conversation } = await client.patchMetadata(escalationId, {
+        [ESCALATION_ASSIGNEES_FIELD]: body.assignees,
+      });
+      result = conversation;
+    }
+
+    if (body.status !== undefined) {
+      const { conversation } = await client.patchMetadata(escalationId, {
+        [ESCALATION_STATUS_FIELD]: body.status,
+      });
+      result = conversation;
+    }
+
     if (body.title !== undefined) {
       result = await client.update({ id: escalationId, title: body.title });
     }
@@ -185,7 +215,7 @@ export class EscalationsService {
     const client = await this.getConversationClient(request);
 
     const { results, total } = await client.search({
-      filter: NON_CLOSED_ESCALATIONS_FILTER,
+      filter: buildEscalationsFilter(query.status),
       sort: ESCALATIONS_LIST_SORT,
       page: query.page,
       perPage: query.per_page,
