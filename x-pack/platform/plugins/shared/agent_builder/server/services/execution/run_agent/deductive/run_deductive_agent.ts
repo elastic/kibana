@@ -109,9 +109,14 @@ export const runDeductiveAgent = async (
         outputSchema,
         abortSignal: params.abortSignal,
         callbacks: {
-          onAnswerChunk: (content) => {
-            context.events.emit(createTextChunkEvent(content, { messageId }));
-          },
+          // Suppress streaming chunks for structured output: the raw JSON fragments
+          // would render as an ugly blob. The client receives the parsed object via
+          // the messageComplete event instead and renders it as a formatted block.
+          onAnswerChunk: params.structuredOutput
+            ? undefined
+            : (content) => {
+                context.events.emit(createTextChunkEvent(content, { messageId }));
+              },
           onProgress: (progress) => {
             logger.debug(`deductive progress: ${progress}`);
           },

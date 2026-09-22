@@ -249,17 +249,21 @@ describe('runDeductiveAgent', () => {
     await expect(runDeductiveAgent(baseParams(), ctx)).rejects.toThrow('session not found');
   });
 
-  it('emits message_complete with structured_output when answer is valid JSON', async () => {
+  it('suppresses message_chunk events and emits message_complete with structured_output for valid JSON', async () => {
     const ctx = context();
     const structuredOutput = { verdict: 'covered_enabled', rule_id: 'abc-123' };
     const jsonAnswer = JSON.stringify(structuredOutput);
 
-    clientMock.sendDeductiveMessageAndReadSse.mockResolvedValue({
-      answer: jsonAnswer,
-      timeToFirstTokenMs: 50,
+    clientMock.sendDeductiveMessageAndReadSse.mockImplementation(async (opts) => {
+      opts.callbacks?.onAnswerChunk?.(jsonAnswer.slice(0, 10));
+      opts.callbacks?.onAnswerChunk?.(jsonAnswer.slice(10));
+      return { answer: jsonAnswer, timeToFirstTokenMs: 50 };
     });
 
     const result = await runDeductiveAgent({ ...baseParams(), structuredOutput: true }, ctx);
+
+    const types = ctx.events.emit.mock.calls.map((c: any) => c[0].type as string);
+    expect(types.filter((t: string) => t === 'message_chunk')).toHaveLength(0);
 
     const messageCompleteEvent = ctx.events.emit.mock.calls
       .map((c: any) => c[0])
