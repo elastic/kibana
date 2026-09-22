@@ -113,7 +113,7 @@ test.describe(
       await expect(containerPadding(page)).toHaveText(NO_PADDING);
     });
 
-    test('resizing a standalone push flyout behind an active system push flyout keeps following the active one', async ({
+    test('resizing a standalone push flyout behind an active system push flyout follows the widest one', async ({
       page,
     }) => {
       await toggle(page, 'Standalone A').click();
@@ -124,6 +124,8 @@ test.describe(
       const pushedPadding = await page.testSubj.innerText('pushPaddingContainerValue');
 
       // Keyboard resize (10px per key press) works while A sits behind C, unlike a mouse drag.
+      // A and C start at the same size, so widening A makes it the widest pushed flyout and the
+      // padding grows with it. Once A closes, the padding falls back to C.
       const resizeHandle = standaloneFlyout(page, 'Standalone A').locator(
         '[data-test-subj="euiResizableButton"]'
       );
@@ -131,7 +133,7 @@ test.describe(
       for (let i = 0; i < 5; i++) {
         await page.keyboard.press('ArrowLeft');
       }
-      await expect(containerPadding(page)).toHaveText(pushedPadding);
+      await expect(containerPadding(page)).toHaveText(`${parseInt(pushedPadding, 10) + 50}px`);
 
       await toggle(page, 'Standalone A').click();
       await expect(standaloneFlyout(page, 'Standalone A')).toHaveCount(0);

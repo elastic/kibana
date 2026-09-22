@@ -267,7 +267,7 @@ const SCENARIOS: Scenario[] = [
   {
     title: 'Resize a backgrounded push flyout while another push flyout is active',
     steps:
-      'Open Standalone A, open System push C, then drag-resize A. Expected: padding keeps following C, the active flyout. Bug: padding jumps to the width of A, and closing A afterwards leaves C unpushed.',
+      'Open Standalone A, open System push C, then drag-resize A wider than C. Expected: padding follows the widest pushed flyout, so it grows with A and returns to the width of C once A closes. Bug: closing A afterwards leaves C unpushed.',
     status: 'passing',
     resolution: { text: 'Fixed by', href: EUI_PUSH_PADDING_PR, linkText: 'elastic/eui#10063' },
   },
