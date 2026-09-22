@@ -637,6 +637,8 @@ See our current reference documentation for [Kibana](https://www.elastic.co/docs
 
 See [this tutorial](../../tutorials/generating-oas-for-http-apis.md) about the code-first approach to generating OpenAPI spec available in Kibana.
 
+On public routes, set an explicit `operationId` instead of relying on the name derived from the method and path. See [Set an operation ID](../../tutorials/generating-oas-for-http-apis.md#set-an-operation-id).
+
 If a public REST API is undocumented, you should either document it, or make it internal.
 
 ### Release tags

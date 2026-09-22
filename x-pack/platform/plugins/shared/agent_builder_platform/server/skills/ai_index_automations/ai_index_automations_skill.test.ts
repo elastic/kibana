@@ -6,12 +6,13 @@
  */
 
 import { isAllowedBuiltinSkill } from '@kbn/agent-builder-server/allow_lists';
-import { platformCoreTools } from '@kbn/agent-builder-common/tools';
+import { contextEngineAiIndexTools, platformCoreTools } from '@kbn/agent-builder-common/tools';
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 import {
   KI_SHAPES_REFERENCE_NAME,
   STRATEGY_CATALOG_REFERENCE_NAME,
 } from '../context_engine_shared';
+import { contextEngineSkillAvailability } from '../context_engine_skill_availability';
 import {
   aiIndexAutomationsSkill,
   DOCUMENT_TEMPLATE_NAME,
@@ -63,8 +64,9 @@ describe('aiIndexAutomationsSkill', () => {
     expect(isAllowedBuiltinSkill(aiIndexAutomationsSkill.id)).toBe(true);
   });
 
-  it('is gated behind experimental features', () => {
+  it('is gated behind experimental features and Context Engine availability', () => {
     expect(aiIndexAutomationsSkill.experimental).toBe(true);
+    expect(aiIndexAutomationsSkill.availability).toBe(contextEngineSkillAvailability);
   });
 
   it('ships non-empty markdown content', () => {
@@ -200,6 +202,7 @@ describe('aiIndexAutomationsSkill', () => {
       platformCoreTools.getWorkflowExecutionStatus,
       platformCoreTools.generateEsql,
       platformCoreTools.executeEsql,
+      contextEngineAiIndexTools.queryAiIndices,
       `${internalNamespaces.workflows}.validate_workflow`,
       `${internalNamespaces.workflows}.get_workflow`,
       `${internalNamespaces.workflows}.get_step_definitions`,
@@ -534,6 +537,9 @@ describe('aiIndexAutomationsSkill', () => {
     });
 
     it('expands tags before filtering, since == skips multivalued rows', () => {
+      expect(content).toContain(
+        `Query\nthe tag back with \`${contextEngineAiIndexTools.queryAiIndices}\``
+      );
       expect(content).toMatch(/\| MV_EXPAND tags\n\| WHERE tags == "ce-pilot-<runId>"/);
       expect(content).toMatch(/`MV_EXPAND tags` is not optional/);
       expect(content).toMatch(/skips multivalued\s+rows outright/);

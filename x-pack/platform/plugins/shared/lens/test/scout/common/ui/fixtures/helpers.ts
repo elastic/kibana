@@ -7,6 +7,7 @@
 
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import {
+  AppMenu,
   extendPlaywrightPage,
   KibanaCodeEditorWrapper,
   QueryBar,
@@ -103,10 +104,13 @@ export async function createRuntimeFieldFromEditor(
  * Dual-path handling lives here (not in the spec) for `playwright/no-conditional-in-test`.
  */
 export async function completeLensCsvExport(page: ScoutPage): Promise<void> {
-  const exportButton = page.testSubj.locator('lnsApp_exportButton');
   const csvMenuItem = page.testSubj.locator('exportMenuItem-CSV');
+  const exportButton = page.testSubj.locator('lnsApp_exportButton');
 
+  // Toasts sit over the AppMenu; closing them after overflow is open dismisses the menu.
+  await page.components.toast().closeAll();
   // Readiness before click: csvEnabled / shareUrlEnabled both require hasData.
+  await new AppMenu(page).openOverflow();
   await expect(exportButton).toBeEnabled();
   await exportButton.click();
 

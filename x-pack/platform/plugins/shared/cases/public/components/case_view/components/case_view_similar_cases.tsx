@@ -13,7 +13,7 @@ import type { CaseUI } from '../../../../common/ui/types';
 
 import { CASES_TABLE_PER_PAGE_VALUES, type EuiBasicTableOnChange } from '../../all_cases/types';
 import { SimilarCasesTable } from '../../similar_cases/table';
-import { SidebarToggleButton } from '../../cases_redesign/case_view/components/sidebar/sidebar_toggle_button';
+import { SidebarToggleButton } from './sidebar/sidebar_toggle_button';
 
 interface CaseViewSimilarCasesProps {
   caseData: CaseUI;
@@ -31,9 +31,11 @@ export const CaseViewSimilarCases = ({ caseData }: CaseViewSimilarCasesProps) =>
     enabled: true,
   });
 
-  const tableOnChangeCallback = useCallback(({ page, sort }: EuiBasicTableOnChange) => {
-    setPageIndex(page.index);
-    setPageSize(page.size);
+  const tableOnChangeCallback = useCallback(({ page }: EuiBasicTableOnChange) => {
+    if (page) {
+      setPageIndex(page.index);
+      setPageSize(page.size);
+    }
   }, []);
 
   const pagination = useMemo(

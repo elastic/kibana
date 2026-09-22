@@ -165,6 +165,7 @@ export type {
   GetListAgentPolicyOutputsRequest,
   GetListAgentPolicyOutputsResponse,
   CloudConnector,
+  CloudConnectorIacState,
   CloudConnectorListOptions,
   CreateCloudConnectorRequest,
   CloudConnectorVars,

@@ -55,7 +55,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
 
 // this covers external dependency changes, which the package graph below cannot see.
 const STORYBOOK_BUILD_CRITICAL_PATHS = [
-  /^yarn\.lock$/,
+  /^pnpm-lock\.yaml$/,
   /^pnpm-workspace\.yaml$/,
   /^\.buildkite\/scripts\/steps\/storybooks\//,
 ];
@@ -339,12 +339,6 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
       (await isStorybookBuildAffected())
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/storybooks.yml', cancelable));
-    }
-
-    if (GITHUB_PR_LABELS.includes('ci:build-webpack-bundle-analyzer')) {
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/webpack_bundle_analyzer.yml', cancelable)
-      );
     }
 
     if (
