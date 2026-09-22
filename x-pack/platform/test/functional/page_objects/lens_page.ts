@@ -1744,14 +1744,21 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         return Number(renderingCount);
       }
       await header.waitUntilLoadingHasFinished();
+      let previousCount: number | undefined;
+      let stablePolls = 0;
+      const requiredStablePolls = 3;
+
       await retry.waitFor('rendering count to stabilize', async () => {
-        const firstCount = await getRenderingCount();
+        const currentCount = await getRenderingCount();
 
-        await common.sleep(1000);
+        if (currentCount === previousCount) {
+          stablePolls++;
+        } else {
+          previousCount = currentCount;
+          stablePolls = 0;
+        }
 
-        const secondCount = await getRenderingCount();
-
-        return firstCount === secondCount;
+        return stablePolls >= requiredStablePolls;
       });
     },
 
