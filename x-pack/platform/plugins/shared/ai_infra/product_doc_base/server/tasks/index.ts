@@ -11,33 +11,36 @@ import { registerEnsureUpToDateTaskDefinition } from './ensure_up_to_date';
 import { registerEnsureSecurityLabsUpToDateTaskDefinition } from './ensure_security_labs_up_to_date';
 import { registerInstallAllTaskDefinition } from './install_all';
 import { registerUninstallAllTaskDefinition } from './uninstall_all';
+import type { InstallLockManager } from './utils';
 
 export const registerTaskDefinitions = ({
   getServices,
   taskManager,
+  lockManager,
 }: {
   getServices: () => InternalServices;
   taskManager: TaskManagerSetupContract;
+  lockManager: InstallLockManager;
 }) => {
-  registerEnsureUpToDateTaskDefinition({ getServices, taskManager });
-  registerEnsureSecurityLabsUpToDateTaskDefinition({ getServices, taskManager });
-  registerInstallAllTaskDefinition({ getServices, taskManager });
-  registerUninstallAllTaskDefinition({ getServices, taskManager });
+  registerEnsureUpToDateTaskDefinition({ getServices, taskManager, lockManager });
+  registerEnsureSecurityLabsUpToDateTaskDefinition({ getServices, taskManager, lockManager });
+  registerInstallAllTaskDefinition({ getServices, taskManager, lockManager });
+  registerUninstallAllTaskDefinition({ getServices, taskManager, lockManager });
 };
 
-export { scheduleEnsureUpToDateTask, ENSURE_DOC_UP_TO_DATE_TASK_ID } from './ensure_up_to_date';
+export { scheduleEnsureUpToDateTask } from './ensure_up_to_date';
 export {
   scheduleEnsureSecurityLabsUpToDateTask,
   ENSURE_SECURITY_LABS_UP_TO_DATE_TASK_ID,
 } from './ensure_security_labs_up_to_date';
-export {
-  scheduleInstallAllTask,
-  INSTALL_ALL_TASK_ID,
-  INSTALL_ALL_TASK_ID_MULTILINGUAL,
-} from './install_all';
+export { scheduleInstallAllTask, getInstallAllTaskStatus } from './install_all';
 export {
   scheduleUninstallAllTask,
   UNINSTALL_ALL_TASK_ID,
   UNINSTALL_ALL_TASK_ID_MULTILINGUAL,
 } from './uninstall_all';
-export { waitUntilTaskCompleted, getTaskStatus } from './utils';
+export {
+  waitUntilTaskCompleted,
+  INSTALL_TASK_WAIT_TIMEOUT_MS,
+  type InstallLockManager,
+} from './utils';
