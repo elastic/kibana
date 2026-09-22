@@ -21,7 +21,7 @@
 
 import type { AssignTag, CaptureTag, ForTag, Tag, Template } from 'liquidjs';
 import { LRUCache } from 'lru-cache';
-import { parseTemplateString } from '../../liquid/liquid_parse_cache';
+import { getLiquidInstance, parseTemplateString } from '../../liquid/liquid_parse_cache';
 
 export interface AssignVariable {
   name: string;
@@ -416,10 +416,11 @@ function getTemplateLocalIndex(templateString: string): TemplateLocalIndex {
     return cached;
   }
   const index = buildTemplateLocalIndex(templateString);
-  // A template the engine refused to parse has nothing to keep, and keying an
-  // empty index by a string of any size is how this cache would exceed its
-  // ceiling.
-  if (index !== EMPTY_INDEX) {
+  // A failed parse is cached like any other: a malformed scalar is otherwise
+  // parsed again for every reference in it. Only a template over the engine's
+  // parse limit is left out — it is rejected on length before any scanning, so
+  // recomputing costs nothing and caching would only retain the string.
+  if (templateString.length <= getLiquidInstance().options.parseLimit) {
     indexCache.set(templateString, index);
   }
   return index;

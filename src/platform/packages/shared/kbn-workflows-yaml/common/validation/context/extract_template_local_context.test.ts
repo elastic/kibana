@@ -363,9 +363,17 @@ describe('template index cache', () => {
     expect(hasCachedTemplateLocalIndex(oldest)).toBe(false);
   });
 
-  it('does not cache a template the Liquid engine refuses to parse', () => {
-    // Above the engine's 150,000-character parse limit, so the index is empty
-    // and keeping it would retain the string for nothing.
+  it('caches a template that failed to parse, so it is parsed once', () => {
+    const malformed = '{% assign broken = ';
+
+    getTemplateLocalContext(malformed, malformed.length);
+
+    expect(hasCachedTemplateLocalIndex(malformed)).toBe(true);
+  });
+
+  it('does not cache a template over the parse limit', () => {
+    // Rejected on length before any scanning, so there is nothing to save and
+    // caching would only retain the string.
     const huge = templateOfSize(200_000, 'huge');
 
     getTemplateLocalContext(huge, 0);

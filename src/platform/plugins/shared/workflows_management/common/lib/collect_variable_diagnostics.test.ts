@@ -141,6 +141,23 @@ describe('variable validation budgets', () => {
     ]);
   });
 
+  it('parses a malformed scalar once, not once per reference in it', () => {
+    // An unterminated tag fails the Liquid parse, and until failed parses were
+    // cached every one of the references behind it parsed the scalar again:
+    // ~570 ms for this body, ~27 ms once cached.
+    const yaml = buildWorkflowFrom('malformed-fixture', ['  seed: hello'], 1, () =>
+      [
+        `{% assign broken = ${'x'.repeat(120_000)}`,
+        ...Array.from({ length: MAX_VARIABLES_FOR_VARIABLE_VALIDATION }, () => '{{ consts.seed }}'),
+      ].join(' ')
+    );
+
+    const result = validate(yaml);
+
+    expect(result.diagnostics.map(({ source }) => source)).toContain('liquid');
+    expect(result.notChecked).toBeUndefined();
+  });
+
   it('does not exhaust the heap on a workflow at the route body limit', () => {
     // Before the budgets, a body this size took the whole Node process down.
     const yaml = buildWorkflow(20000, 5).slice(0, MAX_WORKFLOW_YAML_LENGTH);
