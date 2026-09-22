@@ -1060,6 +1060,9 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   },
   'alerting:v1:showClassicAlertsTable': {
     type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
+    _meta: {
+      description:
+        'Whether the classic Observability alerts table is shown when Alerting v2 is enabled.',
+    },
   },
 };
