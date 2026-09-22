@@ -44,6 +44,15 @@ describe('Navigation Tree', () => {
     });
   });
 
+  it('includes service accounts in Admin and Settings', () => {
+    const adminSettingsNode = getAdminSettingsNode({ core });
+    const accessSection = adminSettingsNode.children?.find((item) => item.id === 'access');
+
+    expect(accessSection?.children).toContainEqual(
+      expect.objectContaining({ link: 'management:service_accounts' })
+    );
+  });
+
   it('shows Nightshift first when significant events are available', () => {
     const navigation = createNavigationTree({
       core,
