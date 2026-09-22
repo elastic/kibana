@@ -86,7 +86,12 @@ export const clearInstalledEntityStoreDocuments = async (esClient: EsClient) => 
   const resolved = await esClient.indices.resolveIndex({ name: HISTORY_INDEX_PATTERN });
   const historyIndices = resolved.indices.map((i) => i.name);
   if (historyIndices.length > 0) {
-    await esClient.indices.delete({ index: historyIndices, ignore_unavailable: true }, { ignore: [404] });
+    // History snapshots use timestamped concrete indices; deleting them entirely is
+    // simpler and safe because no stable write alias points to old snapshot indices.
+    await esClient.indices.delete(
+      { index: historyIndices, ignore_unavailable: true },
+      { ignore: [404] }
+    );
   }
 };
 
@@ -195,10 +200,13 @@ export const installEntityStoreSuite = async ({
   const stopResponse = await stopAllEntityTypes(apiClient, defaultHeaders);
   expect(stopResponse.statusCode).toBe(200);
 
-  const maintainersResponse = await apiClient.get(ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_GET, {
-    headers: internalHeaders,
-    responseType: 'json',
-  });
+  const maintainersResponse = await apiClient.get(
+    ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_GET,
+    {
+      headers: internalHeaders,
+      responseType: 'json',
+    }
+  );
   expect(maintainersResponse.statusCode).toBe(200);
 
   const { maintainers } = maintainersResponse.body as GetEntityMaintainersResponse;

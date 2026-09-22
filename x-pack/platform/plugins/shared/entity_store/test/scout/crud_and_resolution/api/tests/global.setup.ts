@@ -11,6 +11,6 @@ import { installEntityStoreSuite } from '../../../common/fixtures/helpers';
 globalSetupHook(
   'Install Entity Store once for CRUD and resolution API suite',
   async ({ apiClient, kbnClient, samlAuth }) => {
-  await installEntityStoreSuite({ apiClient, kbnClient, samlAuth });
+    await installEntityStoreSuite({ apiClient, kbnClient, samlAuth });
   }
 );
