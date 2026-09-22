@@ -7,13 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { REPO_ROOT } from '@kbn/repo-info';
 import fs from 'node:fs';
-import path from 'node:path';
 
 import type { Ignore } from 'ignore';
 import ignore from 'ignore';
-import { CODE_OWNERS_FILE, throwIfPathIsMissing, throwIfPathNotInRepo } from './path';
+import {
+  CODE_OWNERS_FILE,
+  getRepoRelativePath,
+  throwIfPathIsMissing,
+  throwIfPathNotInRepo,
+} from './path';
 import type { CodeOwnerArea } from './code_owner_areas';
 import { findAreaForCodeOwner } from './code_owner_areas';
 
@@ -102,7 +105,8 @@ export function getCodeOwnersEntries(): CodeOwnersEntry[] {
  *   If you're making a lot of calls to this function, fetch the code owner paths once using
  *   `getCodeOwnersEntries` and pass it in the `getCodeOwnersEntries` parameter to speed up your queries.
  *
- * @param searchPath The path to find code owners for
+ * @param searchPath The path to find code owners for. Either absolute, or relative to the repo root
+ *                   (relative paths are never resolved against the current working directory).
  * @param codeOwnersEntries Pre-defined list of code owner paths to search in
  *
  * @returns Code owners entry if a match is found.
@@ -114,7 +118,7 @@ export function findCodeOwnersEntryForPath(
 ): CodeOwnersEntry | undefined {
   throwIfPathIsMissing(CODE_OWNERS_FILE, 'Code owners file');
   throwIfPathNotInRepo(searchPath);
-  const searchPathRelativeToRepo = path.relative(REPO_ROOT, searchPath);
+  const searchPathRelativeToRepo = getRepoRelativePath(searchPath);
 
   return (codeOwnersEntries || getCodeOwnersEntries()).find(
     (p) => p.matcher.test(searchPathRelativeToRepo).ignored
@@ -128,7 +132,8 @@ export function findCodeOwnersEntryForPath(
  *   If you're making a lot of calls to this function, fetch the code owner paths once using
  *   `getCodeOwnersEntries` and pass it in the `getCodeOwnersEntries` parameter to speed up your queries.
  *
- * @param searchPath The path to find code owners for
+ * @param searchPath The path to find code owners for. Either absolute, or relative to the repo root
+ *                   (relative paths are never resolved against the current working directory).
  * @param codeOwnersEntries Pre-defined list of code owner entries
  *
  * @returns List of code owners for the given path. Empty list if no matching entry is found.

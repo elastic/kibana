@@ -5,25 +5,14 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo } from 'react';
 import { css } from '@emotion/react';
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiModal,
-  EuiModalBody,
-  EuiModalFooter,
-  useEuiTheme,
-} from '@elastic/eui';
-import type { Investigation } from '../../../types';
-import { getActionButtonIconProps } from '../../helpers';
-import { ApprovalModalHeader } from './approval_modal_header';
-import { BlastRadiusSection } from './blast_radius_section';
-import { ApprovalActorRow } from './approval_actor_row';
-import { AlwaysAllowCheckbox } from './always_allow_checkbox';
+import { EuiModal, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
+import { ApprovalContent } from './approval_content';
+import { getProposalTone, isProposalExpired } from './proposal_helpers';
+import { toActionImpactItems } from './to_action_impact_items';
 import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
-
-const TITLE_ID = 'approvalModalTitle';
+import type { ApprovalProposal } from './types';
 
 export interface ApprovalModalProps {
   alwaysAllow?: {
@@ -32,99 +21,70 @@ export interface ApprovalModalProps {
     checked: boolean;
     onChange: (checked: boolean) => void;
   };
-  selectedRecommendedActionConversation?: Investigation;
+  proposal: ApprovalProposal;
   onConfirm: () => void;
   onClose: () => void;
+  /**
+   * Renders Dismiss beside Approve. Omitted by hosts that cannot record a dismissal, which is
+   * why there is no Cancel here — `EuiModal`'s own close control already covers walking away.
+   */
+  onDismiss?: () => void;
   'data-test-subj'?: string;
 }
 
+/**
+ * Asks for a decision on one proposal.
+ *
+ * Takes the proposal rather than something adapted from it: the title, tone and expiry all come
+ * off the proposal, so this modal and the Agent Builder card derive them the same way instead of
+ * from whatever each host happened to keep.
+ */
 export const ApprovalModal = memo<ApprovalModalProps>(
-  ({
-    alwaysAllow,
-    selectedRecommendedActionConversation,
-    onConfirm,
-    onClose,
-    'data-test-subj': dataTestSubj,
-  }) => {
+  ({ alwaysAllow, proposal, onConfirm, onClose, onDismiss, 'data-test-subj': dataTestSubj }) => {
     const { euiTheme } = useEuiTheme();
+    const titleId = useGeneratedHtmlId({ prefix: 'approvalModalHeader' });
 
-    const title = selectedRecommendedActionConversation?.primaryActionLabel ?? '';
-
-    const recommendedActionIconProps = useMemo(
-      () =>
-        selectedRecommendedActionConversation
-          ? getActionButtonIconProps(selectedRecommendedActionConversation)
-          : { type: 'gear' as const, color: 'primary' as const },
-      [selectedRecommendedActionConversation]
-    );
-
-    const { buttonColor, iconColor } = useMemo(
-      () =>
-        recommendedActionIconProps.color === 'danger'
-          ? { buttonColor: 'danger' as const, iconColor: euiTheme.colors.danger }
-          : { buttonColor: 'primary' as const, iconColor: euiTheme.colors.primary },
-      [recommendedActionIconProps.color, euiTheme.colors.danger, euiTheme.colors.primary]
-    );
+    const title =
+      proposal.action?.name ?? proposal.actionWorkflowId ?? APPROVAL_MODAL_TRANSLATIONS.noAction;
+    const isExpired = isProposalExpired(proposal);
 
     return (
       <EuiModal
-        aria-labelledby={TITLE_ID}
+        aria-labelledby={titleId}
         onClose={onClose}
         css={css({ maxWidth: 560, width: '100%', borderRadius: euiTheme.size.m })}
         data-test-subj={dataTestSubj}
       >
-        <ApprovalModalHeader
-          tone={recommendedActionIconProps.color === 'danger' ? 'danger' : 'primary'}
-          iconType={recommendedActionIconProps.type}
-          warningLabel={APPROVAL_MODAL_TRANSLATIONS.warningLabel}
+        <ApprovalContent
           title={title}
-          titleId={TITLE_ID}
+          tone={getProposalTone(proposal)}
+          iconType="lock"
+          comment={proposal.comment}
+          actionImpact={{ variant: 'list', items: toActionImpactItems(proposal) }}
+          titleId={titleId}
+          warningLabel={APPROVAL_MODAL_TRANSLATIONS.warningLabel}
+          alwaysAllow={alwaysAllow}
+          data-test-subj={dataTestSubj}
+          primaryAction={{
+            label: APPROVAL_MODAL_TRANSLATIONS.approve,
+            onClick: onConfirm,
+            isDisabled: isExpired,
+            'data-test-subj': dataTestSubj ? `${dataTestSubj}-confirm` : undefined,
+          }}
+          secondaryActions={
+            onDismiss
+              ? [
+                  {
+                    label: APPROVAL_MODAL_TRANSLATIONS.dismiss,
+                    iconType: 'cross',
+                    color: 'text',
+                    onClick: onDismiss,
+                    'data-test-subj': dataTestSubj ? `${dataTestSubj}-dismiss` : undefined,
+                  },
+                ]
+              : undefined
+          }
         />
-
-        <EuiModalBody css={css({ padding: `${euiTheme.size.m} 0` })}>
-          <BlastRadiusSection
-            content={{
-              variant: 'description',
-              description: selectedRecommendedActionConversation?.summary ?? '',
-            }}
-            defaultItemIconColor={iconColor}
-          />
-          <ApprovalActorRow />
-        </EuiModalBody>
-
-        {alwaysAllow && (
-          <AlwaysAllowCheckbox
-            option={alwaysAllow}
-            data-test-subj={dataTestSubj ? `${dataTestSubj}-always-allow` : undefined}
-          />
-        )}
-
-        <EuiModalFooter
-          css={css({
-            justifyContent: 'flex-start',
-            padding: euiTheme.size.m,
-            borderTop: `1px solid ${euiTheme.colors.lightestShade}`,
-          })}
-        >
-          <EuiButton
-            fill
-            size="s"
-            color={buttonColor}
-            iconType={recommendedActionIconProps.type}
-            onClick={onConfirm}
-            data-test-subj={dataTestSubj ? `${dataTestSubj}-confirm` : undefined}
-          >
-            {title}
-          </EuiButton>
-          <EuiButtonEmpty
-            size="s"
-            color="text"
-            onClick={onClose}
-            data-test-subj={dataTestSubj ? `${dataTestSubj}-cancel` : undefined}
-          >
-            {APPROVAL_MODAL_TRANSLATIONS.cancel}
-          </EuiButtonEmpty>
-        </EuiModalFooter>
       </EuiModal>
     );
   }

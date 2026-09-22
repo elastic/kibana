@@ -65,7 +65,11 @@ export const getRunStepDefinition = ({
           connector_id: connectorId,
           end,
           esql_query: esqlQuery,
+          feature_id: featureId,
           filter,
+          // The engine does not apply the schema's zod defaults to
+          // `context.input`, so the default is mirrored here (see the note above).
+          include_attack_discoveries: includeAttackDiscoveries = true,
           mode = 'sync',
           size = 100,
           start,
@@ -103,9 +107,11 @@ export const getRunStepDefinition = ({
         const effectiveConnectorId = connectorId
           ? connectorId
           : await resolveDefaultConnectorId({
+              featureId,
               inference: pluginsStart.inference,
               logger,
               request,
+              searchInferenceEndpoints: pluginsStart.searchInferenceEndpoints,
               uiSettingsClient,
             });
 
@@ -182,6 +188,12 @@ export const getRunStepDefinition = ({
           },
           logger,
           request,
+          // Forward the step's cancellation as the pipeline's stop probe. The
+          // engine aborts this signal when the step (or the enclosing parallel
+          // branch) times out, but the pipeline is a plain `await` that is not
+          // otherwise tied to it — without this it keeps making inference calls
+          // after the step has already been marked failed.
+          shouldStopExecution: () => context.abortSignal?.aborted === true,
           size,
           start,
           trigger: 'workflow',
@@ -222,16 +234,22 @@ export const getRunStepDefinition = ({
               alerts_context_count: alertRetrievalResult.alertsContextCount,
               // R3: the run step persists via the persist step and returns exactly the
               // discoveries it was handed (`[]` when the persist step did not run).
-              attack_discoveries: (validationResult.discoveriesToPersist ?? []) as Array<{
-                alert_ids: string[];
-                details_markdown: string;
-                entity_summary_markdown?: string;
-                id?: string;
-                mitre_attack_tactics?: string[];
-                summary_markdown: string;
-                timestamp?: string;
-                title: string;
-              }>,
+              // Omitted entirely — not nulled — when the caller opts out, so the
+              // output carries none of their weight.
+              ...(includeAttackDiscoveries
+                ? {
+                    attack_discoveries: (validationResult.discoveriesToPersist ?? []) as Array<{
+                      alert_ids: string[];
+                      details_markdown: string;
+                      entity_summary_markdown?: string;
+                      id?: string;
+                      mitre_attack_tactics?: string[];
+                      summary_markdown: string;
+                      timestamp?: string;
+                      title: string;
+                    }>,
+                  }
+                : {}),
               discovery_count: validationResult.generatedCount,
               execution_uuid: generationResult.executionUuid,
               status: 'completed' as const,
@@ -244,7 +262,7 @@ export const getRunStepDefinition = ({
         return {
           output: {
             alerts_context_count: 0,
-            attack_discoveries: null,
+            ...(includeAttackDiscoveries ? { attack_discoveries: null } : {}),
             discovery_count: 0,
             execution_uuid: executionUuid,
             status: 'completed' as const,

@@ -14,13 +14,26 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useParams } from 'react-router-dom';
 import { CreateMonitorButton } from '../monitors_page/create_monitor_button';
 import { useMonitorListBreadcrumbs } from '../monitors_page/hooks/use_breadcrumbs';
+import { MONITORS_ROUTE } from '../../../../../common/constants';
 import { PLUGIN } from '../../../../../common/constants/plugin';
 import type { ClientPluginsStart } from '../../../../plugin';
+import { MONITORS_TITLE, SyntheticsPage } from '../common/app_header';
 
 export const MonitorNotFoundPage: React.FC = () => {
   useMonitorListBreadcrumbs([{ text: MONITOR_NOT_FOUND_TITLE }]);
+  const { application } = useKibana<ClientPluginsStart>().services;
 
-  return <MonitorNotFoundPrompt />;
+  return (
+    <SyntheticsPage
+      title={MONITORS_TITLE}
+      back={{
+        href: `${application.getUrlForApp(PLUGIN.SYNTHETICS_PLUGIN_ID)}${MONITORS_ROUTE}`,
+        label: MONITORS_TITLE,
+      }}
+    >
+      <MonitorNotFoundPrompt />
+    </SyntheticsPage>
+  );
 };
 
 export const MonitorNotFoundPrompt: React.FC = () => {

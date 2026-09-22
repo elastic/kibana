@@ -63,15 +63,15 @@ ${
     },
     {
       description: `ES serverless start script for Security project.
-This is a bypass utility that calls ${cyan('yarn es serverless')} along with some default options
+This is a bypass utility that calls ${cyan('pnpm es serverless')} along with some default options
 that will enable users and roles to be loaded into ES.
 `,
       flags: {
         allowUnexpected: true,
         help: `
-Any option supported by ${cyan('yarn es')} can also be used with this utility.
+Any option supported by ${cyan('pnpm es')} can also be used with this utility.
 
-For more on ${cyan('yarn es')} usage, enter: ${cyan('yarn es --help')}
+For more on ${cyan('pnpm es')} usage, enter: ${cyan('pnpm es --help')}
 `,
       },
     }
