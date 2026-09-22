@@ -37,6 +37,7 @@ dependsOn:
   - '@kbn/agent-builder-common'
   - '@kbn/logging-mocks'
   - '@kbn/significant-events-schema'
+  - '@kbn/nightshift-shared'
   - '@kbn/agent-builder-server'
   - '@kbn/i18n'
   - '@kbn/core-saved-objects-server'

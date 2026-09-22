@@ -6,7 +6,7 @@
  */
 
 import { sumTokens, type InferenceDocument } from '@kbn/nightshift-ai';
-import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
+import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import { compactInferenceDocuments } from '@kbn/significant-events-plugin/server';
 import { tags } from '@kbn/scout';
 import {
@@ -53,7 +53,7 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
       headers: { 'elastic-api-version': '1' },
       body: {
         'feature_flags.overrides': {
-          [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: true,
+          [NIGHTSHIFT_ENABLED_FLAG]: true,
         },
       },
     });
@@ -76,7 +76,7 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
       headers: { 'elastic-api-version': '1' },
       body: {
         'feature_flags.overrides': {
-          [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: null,
+          [NIGHTSHIFT_ENABLED_FLAG]: null,
         },
       },
     });

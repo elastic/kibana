@@ -9,7 +9,7 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_co
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
   // Significant events API suites. These hit routes guarded by the
-  // streams.significantEventsAvailable feature flag, which the parent config forces on. They
+  // nightshift.enabled feature flag, which the parent config forces on. They
   // cannot run in the default deployment-agnostic configs (the flag defaults to false there and
   // those configs cannot set it on ECH), so they live in this dedicated feature-flag config.
   describe('apis', () => {

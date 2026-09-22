@@ -208,7 +208,7 @@ describe('registerSignificantEventsSkills', () => {
     await ensureRegistered();
 
     expect(options.logger.info).toHaveBeenCalledWith(
-      'Significant events skills registered (streams.significantEventsAvailable is enabled)'
+      'Significant events skills registered (nightshift.enabled is enabled)'
     );
 
     agentBuilder.skills.register.mockClear();

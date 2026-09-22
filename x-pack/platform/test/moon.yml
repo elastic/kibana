@@ -157,6 +157,7 @@ dependsOn:
   - '@kbn/deeplinks-analytics'
   - '@kbn/core-user-profile-common'
   - '@kbn/significant-events-plugin'
+  - '@kbn/nightshift-shared'
   - '@kbn/alerting-v2-schemas'
 tags:
   - test-helper

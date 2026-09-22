@@ -27,7 +27,7 @@ node scripts/scout run-tests --arch stateful --domain classic \
   --config x-pack/platform/plugins/shared/significant_events/test/scout/api/playwright.config.ts
 ```
 
-Significant events is gated behind the `streams.significantEventsAvailable` feature flag, which
+Significant events is gated behind the `nightshift.enabled` feature flag, which
 defaults to false. `global.setup.ts` forces it on for the run and `global.teardown.ts` reverts it —
 without that, every route returns a 403.
 

@@ -6,11 +6,9 @@
  */
 
 import { setTimeout as delay } from 'timers/promises';
+import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import { globalSetupHook } from '@kbn/scout';
-import {
-  STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG,
-  type SignificantEventsAvailabilityResponse,
-} from '../../../../common';
+import type { SignificantEventsAvailabilityResponse } from '../../../../common';
 import { COMMON_API_HEADERS } from '../fixtures/constants';
 
 const AVAILABILITY_PATH = '/internal/significant_events/availability';
@@ -24,12 +22,12 @@ globalSetupHook(
     await apiServices.streams.enable();
     log.debug('[setup] Streams enabled successfully');
 
-    // Significant events is gated behind the streams.significantEventsAvailable feature flag, which
+    // Significant events is gated behind the nightshift.enabled feature flag, which
     // falls back to false. Force it on as the sole availability gate for the API tests.
     log.debug('[setup] Enabling significant events availability feature flag...');
     await apiServices.core.settings({
       'feature_flags.overrides': {
-        [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: true,
+        [NIGHTSHIFT_ENABLED_FLAG]: true,
       },
     });
 

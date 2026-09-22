@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-schema';
-
 /**
  * Enables grounding of significant events query generation against source code indexed via
  * Semantic Code Search (SCS). When enabled and a stream is linked to a code index, the query
