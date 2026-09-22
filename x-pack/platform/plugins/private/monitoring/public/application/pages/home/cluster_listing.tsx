@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { Redirect } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -35,11 +35,12 @@ const getAlerts = (clusters: any[]) => {
   );
 };
 
-export const ClusterListing: React.FC<ComponentProps> = () => {
+export const ClusterListing: React.FC<ComponentProps> = ({ clusters: initialClusters }) => {
   const globalState = useContext(GlobalStateContext);
   const externalConfig = useContext(ExternalConfigContext);
   const { services } = useKibana<{ data: any }>();
-  const [clusters, setClusters] = useState([] as any);
+  const [clusters, setClusters] = useState<Array<{ cluster_uuid: string }>>(initialClusters);
+  const shouldUseInitialClusters = useRef(true);
   const { update: updateBreadcrumbs } = useBreadcrumbContainerContext();
 
   const fakeScope = {
@@ -68,6 +69,12 @@ export const ClusterListing: React.FC<ComponentProps> = () => {
   ];
 
   const getPageData = useCallback(async () => {
+    // RouteInit already fetched this cluster list; refetch only after the time range changes.
+    if (shouldUseInitialClusters.current) {
+      shouldUseInitialClusters.current = false;
+      return;
+    }
+
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
     if (services.http?.fetch) {
       const response = await fetchClusters({
