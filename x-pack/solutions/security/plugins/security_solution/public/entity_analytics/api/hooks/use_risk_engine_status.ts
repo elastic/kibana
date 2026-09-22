@@ -7,8 +7,6 @@
 import type { UseQueryOptions } from '@kbn/react-query';
 import { useQuery, useQueryClient } from '@kbn/react-query';
 import { useCallback } from 'react';
-import moment from 'moment';
-import { i18n } from '@kbn/i18n';
 import type { RiskEngineStatusResponse } from '../../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
 import { useEntityAnalyticsRoutes } from '../api';
 const FETCH_RISK_ENGINE_STATUS = ['GET', 'FETCH_RISK_ENGINE_STATUS'];
@@ -21,20 +19,6 @@ export const useInvalidateRiskEngineStatusQuery = () => {
       refetchType: 'active',
     });
   }, [queryClient]);
-};
-
-export const useRiskEngineCountdownTime = (riskEngineStatus?: RiskEngineStatusResponse): string => {
-  const { status, runAt } = riskEngineStatus?.risk_engine_task_status || {};
-  const isRunning = status === 'running' || (!!runAt && new Date(runAt) < new Date());
-
-  return isRunning
-    ? i18n.translate(
-        'xpack.securitySolution.entityAnalytics.assetCriticalityResultStep.riskEngine.nowRunningMessage',
-        {
-          defaultMessage: 'Now running',
-        }
-      )
-    : moment(runAt).fromNow(true);
 };
 
 export const useRiskEngineStatus = (
