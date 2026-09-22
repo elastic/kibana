@@ -521,6 +521,26 @@ describe('TakeAction', () => {
         });
       });
     });
+
+    it('refreshes attack discoveries after adding to a case', () => {
+      const refetchFindAttackDiscoveries = jest.fn();
+
+      render(
+        <TestProviders>
+          <TakeAction
+            {...defaultProps}
+            refetchFindAttackDiscoveries={refetchFindAttackDiscoveries}
+          />
+        </TestProviders>
+      );
+
+      const { useAddToCase } = jest.requireMock('./use_add_to_case');
+      expect(useAddToCase).toHaveBeenCalledWith(
+        expect.objectContaining({
+          onSuccess: refetchFindAttackDiscoveries,
+        })
+      );
+    });
   });
 
   describe('when case permissions are disabled', () => {
