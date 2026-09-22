@@ -25,6 +25,6 @@ export const useIacProvisioner = (): { isIacProvisionerEnabled: boolean } => {
     isIacProvisionerEnabled:
       isHosted &&
       config.agentless?.enabled === true &&
-      featureFlags.getBooleanValue(ENABLE_IAC_PROVISIONER_FLAG, false),
+      featureFlags.useBooleanValue(ENABLE_IAC_PROVISIONER_FLAG, false),
   };
 };

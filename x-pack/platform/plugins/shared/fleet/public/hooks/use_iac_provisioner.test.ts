@@ -30,7 +30,7 @@ const mockEnvironment = ({
   } as any);
   mockedUseStartServices.mockReturnValue({
     cloud: { isCloudEnabled, isServerlessEnabled },
-    featureFlags: { getBooleanValue: jest.fn().mockReturnValue(iacProvisionerEnabled) },
+    featureFlags: { useBooleanValue: jest.fn().mockReturnValue(iacProvisionerEnabled) },
   } as any);
 };
 
@@ -86,17 +86,17 @@ describe('useIacProvisioner', () => {
   });
 
   it('evaluates fleet.enableIacProvisioner with fallback false', () => {
-    const getBooleanValue = jest.fn().mockReturnValue(true);
+    const useBooleanValue = jest.fn().mockReturnValue(true);
     mockedUseConfig.mockReturnValue({
       agentless: { enabled: true },
     } as any);
     mockedUseStartServices.mockReturnValue({
       cloud: { isCloudEnabled: true, isServerlessEnabled: false },
-      featureFlags: { getBooleanValue },
+      featureFlags: { useBooleanValue },
     } as any);
 
     renderHook(() => useIacProvisioner());
 
-    expect(getBooleanValue).toHaveBeenCalledWith(ENABLE_IAC_PROVISIONER_FLAG, false);
+    expect(useBooleanValue).toHaveBeenCalledWith(ENABLE_IAC_PROVISIONER_FLAG, false);
   });
 });
