@@ -11,6 +11,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -18,7 +19,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
-import type { ImpactAttachmentData, ImpactedEntity } from './types';
+import { impactedEntitySchema } from '../../../../common/agent_builder/impact_attachment';
 
 export const IMPACT_ATTACHMENT_TEST_ID = 'securitySolutionAgentBuilderImpactAttachment';
 export const IMPACT_ATTACHMENT_TRUNCATED_TEST_ID =
@@ -35,47 +36,6 @@ interface EntityRow {
   inconclusive: number;
 }
 
-const isImpactedEntity = (value: unknown): value is ImpactedEntity =>
-  typeof value === 'object' &&
-  value !== null &&
-  ((value as ImpactedEntity).entity_type === 'host' ||
-    (value as ImpactedEntity).entity_type === 'user') &&
-  typeof (value as ImpactedEntity).name === 'string' &&
-  (value as ImpactedEntity).name.length > 0;
-
-const parseEntities = (data: unknown): EntityRow[] => {
-  if (typeof data !== 'object' || data === null) {
-    return [];
-  }
-  const payload = data as { entities?: unknown };
-  if (!Array.isArray(payload.entities)) {
-    return [];
-  }
-  return payload.entities.filter(isImpactedEntity).map((e, i) => ({
-    id: `${e.entity_type}-${e.name}-${i}`,
-    entity_type: e.entity_type,
-    name: e.name,
-    alert_count: e.alert_count,
-    true_positive: e.verdicts?.true_positive ?? 0,
-    false_positive: e.verdicts?.false_positive ?? 0,
-    inconclusive: e.verdicts?.inconclusive ?? 0,
-  }));
-};
-
-const parseTruncation = (
-  data: unknown
-): { truncated: boolean; totalAlertCount: number | undefined } => {
-  if (typeof data !== 'object' || data === null) {
-    return { truncated: false, totalAlertCount: undefined };
-  }
-  const payload = data as ImpactAttachmentData;
-  return {
-    truncated: payload.truncated === true,
-    totalAlertCount:
-      typeof payload.total_alert_count === 'number' ? payload.total_alert_count : undefined,
-  };
-};
-
 const formatEntityType = (entityType: string): string => {
   switch (entityType) {
     case 'host':
@@ -89,6 +49,49 @@ const formatEntityType = (entityType: string): string => {
     default:
       return entityType;
   }
+};
+
+const parseTotalAlertCount = (value: unknown): number | undefined => {
+  if (typeof value === 'number' && Number.isInteger(value) && value >= 0) {
+    return value;
+  }
+  if (typeof value === 'string' && /^\d+$/.test(value)) {
+    return Number(value);
+  }
+  return undefined;
+};
+
+const parseImpactRows = (
+  data: unknown
+): { rows: EntityRow[]; truncated: boolean; totalAlertCount?: number } => {
+  if (!data || typeof data !== 'object' || Array.isArray(data)) {
+    return { rows: [], truncated: false };
+  }
+  const record = data as Record<string, unknown>;
+  const rawEntities = Array.isArray(record.entities) ? record.entities : [];
+  const rows = rawEntities.flatMap((entity, i) => {
+    const parsed = impactedEntitySchema.safeParse(entity);
+    if (!parsed.success) {
+      return [];
+    }
+    const { entity_type, name, alert_count, verdicts } = parsed.data;
+    return [
+      {
+        id: `${entity_type}-${name}-${i}`,
+        entity_type,
+        name,
+        alert_count,
+        true_positive: verdicts.true_positive,
+        false_positive: verdicts.false_positive,
+        inconclusive: verdicts.inconclusive,
+      },
+    ];
+  });
+  return {
+    rows,
+    truncated: record.truncated === true || record.truncated === 'true',
+    totalAlertCount: parseTotalAlertCount(record.total_alert_count),
+  };
 };
 
 const COLUMNS: Array<EuiBasicTableColumn<EntityRow>> = [
@@ -115,23 +118,53 @@ const COLUMNS: Array<EuiBasicTableColumn<EntityRow>> = [
   },
   {
     field: 'true_positive',
-    name: i18n.translate('xpack.securitySolution.agentBuilder.impact.tpColumn', {
-      defaultMessage: 'TP',
-    }),
+    name: (
+      <EuiToolTip
+        content={i18n.translate('xpack.securitySolution.agentBuilder.impact.tpColumnTooltip', {
+          defaultMessage: 'True positive',
+        })}
+      >
+        <span tabIndex={0}>
+          {i18n.translate('xpack.securitySolution.agentBuilder.impact.tpColumn', {
+            defaultMessage: 'TP',
+          })}
+        </span>
+      </EuiToolTip>
+    ),
     width: '4em',
   },
   {
     field: 'false_positive',
-    name: i18n.translate('xpack.securitySolution.agentBuilder.impact.fpColumn', {
-      defaultMessage: 'FP',
-    }),
+    name: (
+      <EuiToolTip
+        content={i18n.translate('xpack.securitySolution.agentBuilder.impact.fpColumnTooltip', {
+          defaultMessage: 'False positive',
+        })}
+      >
+        <span tabIndex={0}>
+          {i18n.translate('xpack.securitySolution.agentBuilder.impact.fpColumn', {
+            defaultMessage: 'FP',
+          })}
+        </span>
+      </EuiToolTip>
+    ),
     width: '4em',
   },
   {
     field: 'inconclusive',
-    name: i18n.translate('xpack.securitySolution.agentBuilder.impact.incColumn', {
-      defaultMessage: 'Inc',
-    }),
+    name: (
+      <EuiToolTip
+        content={i18n.translate('xpack.securitySolution.agentBuilder.impact.incColumnTooltip', {
+          defaultMessage: 'Inconclusive',
+        })}
+      >
+        <span tabIndex={0}>
+          {i18n.translate('xpack.securitySolution.agentBuilder.impact.incColumn', {
+            defaultMessage: 'Inc',
+          })}
+        </span>
+      </EuiToolTip>
+    ),
     width: '4em',
   },
 ];
@@ -140,9 +173,8 @@ const COLUMNS: Array<EuiBasicTableColumn<EntityRow>> = [
 export const ImpactInlineContent: React.FC<AttachmentRenderProps<Attachment<string, unknown>>> = ({
   attachment,
 }) => {
-  const rows = useMemo(() => parseEntities(attachment.data), [attachment.data]);
-  const { truncated, totalAlertCount } = useMemo(
-    () => parseTruncation(attachment.data),
+  const { rows, truncated, totalAlertCount } = useMemo(
+    () => parseImpactRows(attachment.data),
     [attachment.data]
   );
 

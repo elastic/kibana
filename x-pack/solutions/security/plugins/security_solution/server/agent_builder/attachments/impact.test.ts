@@ -225,6 +225,19 @@ describe('createImpactAttachmentType', () => {
         expect(representation.value).toContain('No impacted entities recorded');
       }
     });
+
+    it('returns a safe failure message when attachment data fails schema validation', async () => {
+      const formatted = await attachmentType.format(
+        makeAttachment({ entities: [{ entity_type: 'host', name: 'bad' }] }),
+        formatContext
+      );
+      const representation = await formatted.getRepresentation?.();
+
+      expect(representation?.type).toBe('text');
+      if (representation?.type === 'text') {
+        expect(representation.value).toContain('Invalid impact attachment data');
+      }
+    });
   });
 
   describe('getAgentDescription', () => {

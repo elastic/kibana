@@ -25,6 +25,10 @@ import type { ExperimentalFeatures } from '../../../common/experimental_features
 import type { SecurityCanvasEmbeddedBundle } from '../components/security_redux_embedded_provider';
 import type { SecurityAgentBuilderChrome } from './entity_explore_navigation';
 import type { AiRuleCreationService } from '../../detection_engine/common/ai_rule_creation_store';
+import {
+  AlertsConversationDetailsContent,
+  type AlertsAttachmentData,
+} from './alerts_conversation_details';
 
 /**
  * Extension of UnknownAttachment that includes an optional attachmentLabel field in the data property
@@ -76,7 +80,7 @@ export const registerAttachmentUiDefinitions = (attachments: AttachmentServiceSt
     createAttachmentTypeConfig(ALERT_ATTACHMENT_CONFIG.label, ALERT_ATTACHMENT_CONFIG.icon)
   );
 
-  attachments.addAttachmentType<Attachment<string, { alertIds?: unknown[] }>>(
+  attachments.addAttachmentType<Attachment<string, AlertsAttachmentData>>(
     SecurityAgentBuilderAttachments.alerts,
     {
       getLabel: (attachment) => {
@@ -89,22 +93,8 @@ export const registerAttachmentUiDefinitions = (attachments: AttachmentServiceSt
           : ALERTS_DEFAULT_LABEL;
       },
       getIcon: () => 'bell',
-      renderConversationDetailsContent: ({ attachment }) => {
-        const ids = (attachment.data?.alertIds ?? []) as string[];
-        return React.createElement(
-          'ul',
-          {
-            style: {
-              listStyle: 'none',
-              padding: 0,
-              margin: 0,
-              fontFamily: 'monospace',
-              fontSize: 12,
-            },
-          },
-          ...ids.map((id) => React.createElement('li', { key: id }, id))
-        );
-      },
+      renderConversationDetailsContent: (props) =>
+        React.createElement(AlertsConversationDetailsContent, props),
     }
   );
 };
