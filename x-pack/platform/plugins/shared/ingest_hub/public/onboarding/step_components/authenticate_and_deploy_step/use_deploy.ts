@@ -22,7 +22,7 @@ import {
 import type { DeployGroup } from './deploy_groups';
 import { toSOServiceVars } from './package_inputs';
 import { useOnboardingSO } from './use_onboarding_so';
-import { cleanupAgentlessPolicies } from './policy_cleanup';
+import { cleanupManagedIntegrationsPolicies } from './policy_cleanup_managed_integrations';
 import type { PolicyCleanupOps } from './policy_cleanup';
 
 export {
@@ -177,7 +177,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
         onContinue();
 
         if (hasPendingCleanup) {
-          cleanupOps = await cleanupAgentlessPolicies({
+          cleanupOps = await cleanupManagedIntegrationsPolicies({
             pendingCleanupPolicyIds: effectivePendingCleanup,
             currentPolicyIdsByInstance: detectAndReviewStep.policyIdsByInstance,
             instances: serviceSettings?.instances ?? [],

@@ -1,0 +1,171 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+jest.mock('@kbn/fleet-plugin/public', () => ({
+  sendDeletePackagePolicy: jest.fn(),
+  sendUpdatePackagePolicy: jest.fn(),
+  sendGetPackageInfoByKey: jest.fn(),
+}));
+
+import {
+  sendDeletePackagePolicy,
+  sendUpdatePackagePolicy,
+  sendGetPackageInfoByKey,
+} from '@kbn/fleet-plugin/public';
+
+import { cleanupAgentBasedPolicies } from './policy_cleanup_agent_based';
+import type { ServiceInstance } from '../service_settings_step/use_service_settings';
+import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
+
+const mockDeletePackagePolicy = sendDeletePackagePolicy as jest.Mock;
+const mockUpdatePackagePolicy = sendUpdatePackagePolicy as jest.Mock;
+const mockGetPackageInfo = sendGetPackageInfoByKey as jest.Mock;
+
+function makeInstance(instanceId: string, serviceId: string = instanceId): ServiceInstance {
+  return { instanceId, serviceId, name: `AWS ${serviceId}`, isDuplicate: false };
+}
+
+function makeService(id: string, packageName = 'aws'): AwsServiceMatrixEntry {
+  return {
+    id,
+    name: `AWS ${id}`,
+    packageName,
+    dataStreams: [id],
+    inputs: ['aws-s3'],
+    showInUI: true,
+    deploymentMethods: [{ method: 'managed_integration', preferred: true }],
+    varDefsByInput: {},
+    varDefsByDataStream: {},
+  } as unknown as AwsServiceMatrixEntry;
+}
+
+const BASE_OPTS = {
+  namespace: 'default',
+  globalRegion: 'us-east-1',
+  storedServiceVars: {},
+  authenticateAndDeployStep: {} as never,
+  instances: [] as ServiceInstance[],
+  servicesMap: new Map<string, AwsServiceMatrixEntry>(),
+};
+
+beforeEach(() => {
+  jest.clearAllMocks();
+  mockGetPackageInfo.mockResolvedValue({ data: { item: { version: '3.0.0', vars: [] } } });
+  mockDeletePackagePolicy.mockResolvedValue({});
+  mockUpdatePackagePolicy.mockResolvedValue({});
+});
+
+// ── cleanupAgentBasedPolicies ─────────────────────────────────────────────────
+
+describe('cleanupAgentBasedPolicies', () => {
+  it('makes no Fleet calls when pending is empty', async () => {
+    await cleanupAgentBasedPolicies({
+      ...BASE_OPTS,
+      pendingCleanupPolicyIds: {},
+      currentPolicyIdsByInstance: {},
+      selectedAgentPolicyIds: [],
+    });
+    expect(mockDeletePackagePolicy).not.toHaveBeenCalled();
+    expect(mockUpdatePackagePolicy).not.toHaveBeenCalled();
+  });
+
+  it('calls sendDeletePackagePolicy for each policy in toDelete', async () => {
+    await cleanupAgentBasedPolicies({
+      ...BASE_OPTS,
+      pendingCleanupPolicyIds: { 'inst-a': 'policy-1', 'inst-b': 'policy-2' },
+      currentPolicyIdsByInstance: {},
+      selectedAgentPolicyIds: [],
+    });
+    expect(mockDeletePackagePolicy).toHaveBeenCalledWith({ packagePolicyIds: ['policy-1'] });
+    expect(mockDeletePackagePolicy).toHaveBeenCalledWith({ packagePolicyIds: ['policy-2'] });
+  });
+
+  it('swallows individual delete failures — does not reject the whole call', async () => {
+    mockDeletePackagePolicy.mockRejectedValue(new Error('Fleet 500'));
+    await expect(
+      cleanupAgentBasedPolicies({
+        ...BASE_OPTS,
+        pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+        currentPolicyIdsByInstance: {},
+        selectedAgentPolicyIds: [],
+      })
+    ).resolves.toBeUndefined();
+  });
+
+  it('calls sendGetPackageInfoByKey when toUpdate has entries and surviving members resolve', async () => {
+    const instance = makeInstance('inst-b', 'vpcflow');
+    const service = makeService('vpcflow');
+    await cleanupAgentBasedPolicies({
+      ...BASE_OPTS,
+      instances: [instance],
+      servicesMap: new Map([['vpcflow', service]]),
+      pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+      currentPolicyIdsByInstance: { 'inst-b': 'policy-1' },
+      selectedAgentPolicyIds: ['agent-policy-1'],
+    });
+    expect(mockGetPackageInfo).toHaveBeenCalledWith('aws');
+  });
+
+  it('swallows individual update failures — does not reject the whole call', async () => {
+    const instance = makeInstance('inst-b', 'vpcflow');
+    const service = makeService('vpcflow');
+    mockGetPackageInfo.mockRejectedValue(new Error('pkg fetch failed'));
+    await expect(
+      cleanupAgentBasedPolicies({
+        ...BASE_OPTS,
+        instances: [instance],
+        servicesMap: new Map([['vpcflow', service]]),
+        pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+        currentPolicyIdsByInstance: { 'inst-b': 'policy-1' },
+        selectedAgentPolicyIds: ['agent-policy-1'],
+      })
+    ).resolves.toBeUndefined();
+  });
+});
+
+// ── updateAgentBasedPolicy — payload shape ────────────────────────────────────
+
+describe('updateAgentBasedPolicy — payload shape', () => {
+  const vpcflow = makeService('vpcflow');
+  const instance = makeInstance('inst-b', 'vpcflow');
+
+  it('sends correct package, namespace, enabled flag, and policy_ids', async () => {
+    mockGetPackageInfo.mockResolvedValue({
+      data: { item: { version: '2.5.0', vars: [], policy_templates: [] } },
+    });
+    await cleanupAgentBasedPolicies({
+      ...BASE_OPTS,
+      instances: [instance],
+      servicesMap: new Map([['vpcflow', vpcflow]]),
+      pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+      currentPolicyIdsByInstance: { 'inst-b': 'policy-1' },
+      selectedAgentPolicyIds: ['agent-policy-1', 'agent-policy-2'],
+    });
+    const payload = mockUpdatePackagePolicy.mock.calls[0][1];
+    expect(payload.package).toEqual({ name: 'aws', version: '2.5.0' });
+    expect(payload.namespace).toBe('default');
+    expect(payload.enabled).toBe(true);
+    expect(payload.policy_ids).toEqual(['agent-policy-1', 'agent-policy-2']);
+  });
+
+  it('includes enabled input for the surviving service', async () => {
+    mockGetPackageInfo.mockResolvedValue({
+      data: { item: { version: '2.5.0', vars: [], policy_templates: [] } },
+    });
+    await cleanupAgentBasedPolicies({
+      ...BASE_OPTS,
+      instances: [instance],
+      servicesMap: new Map([['vpcflow', vpcflow]]),
+      pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+      currentPolicyIdsByInstance: { 'inst-b': 'policy-1' },
+      selectedAgentPolicyIds: ['agent-policy-1'],
+    });
+    const payload = mockUpdatePackagePolicy.mock.calls[0][1];
+    expect(payload.inputs['vpcflow-aws-s3']).toBeDefined();
+    expect(payload.inputs['vpcflow-aws-s3'].enabled).toBe(true);
+  });
+});

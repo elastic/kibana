@@ -24,8 +24,8 @@ jest.mock('./agent_based_deploy', () => ({
   buildAgentPolicyName: jest.fn(),
 }));
 
-jest.mock('./policy_cleanup', () => ({
-  cleanupPackagePolicies: jest.fn(),
+jest.mock('./policy_cleanup_agent_based', () => ({
+  cleanupAgentBasedPolicies: jest.fn(),
 }));
 
 import { useOnboardingFlow } from '../../onboarding_flow_context';
@@ -36,7 +36,7 @@ import {
   buildAgentBasedInstanceStatuses,
   extractErrorMessage,
 } from './agent_based_deploy';
-import { cleanupPackagePolicies } from './policy_cleanup';
+import { cleanupAgentBasedPolicies } from './policy_cleanup_agent_based';
 
 import { useAgentBasedDeploy } from './use_agent_based_deploy';
 
@@ -46,7 +46,7 @@ const mockBuildAgentBasedTargets = buildAgentBasedTargets as jest.Mock;
 const mockDeployToExistingAgentPolicies = deployToExistingAgentPolicies as jest.Mock;
 const mockBuildAgentBasedInstanceStatuses = buildAgentBasedInstanceStatuses as jest.Mock;
 const mockExtractErrorMessage = extractErrorMessage as jest.Mock;
-const mockCleanupPackagePolicies = cleanupPackagePolicies as jest.Mock;
+const mockCleanupAgentBasedPolicies = cleanupAgentBasedPolicies as jest.Mock;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -249,7 +249,7 @@ describe('useAgentBasedDeploy — isAlreadyDeployed', () => {
 describe('useAgentBasedDeploy — cleanup orchestration', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockCleanupPackagePolicies.mockResolvedValue(undefined);
+    mockCleanupAgentBasedPolicies.mockResolvedValue(undefined);
     mockBuildAgentBasedInstanceStatuses.mockReturnValue({});
     mockExtractErrorMessage.mockReturnValue('error');
   });
@@ -284,8 +284,8 @@ describe('useAgentBasedDeploy — cleanup orchestration', () => {
       await result.current.handleDeploy();
     });
 
-    expect(mockCleanupPackagePolicies).toHaveBeenCalledTimes(1);
-    const cleanupCall = mockCleanupPackagePolicies.mock.calls[0][0];
+    expect(mockCleanupAgentBasedPolicies).toHaveBeenCalledTimes(1);
+    const cleanupCall = mockCleanupAgentBasedPolicies.mock.calls[0][0];
     expect(cleanupCall.pendingCleanupPolicyIds).toEqual({ instA: 'pkg-policy-A' });
     expect(cleanupCall.selectedAgentPolicyIds).toEqual(['agent-policy-1']);
 
@@ -325,7 +325,7 @@ describe('useAgentBasedDeploy — cleanup orchestration', () => {
 
     expect(deployResult).toEqual({ failed: false });
     expect(mockDeployToExistingAgentPolicies).not.toHaveBeenCalled();
-    expect(mockCleanupPackagePolicies).toHaveBeenCalledTimes(1);
+    expect(mockCleanupAgentBasedPolicies).toHaveBeenCalledTimes(1);
   });
 
   it('skips cleanup on retry even when pendingCleanupPolicyIds is non-empty', async () => {
@@ -361,7 +361,7 @@ describe('useAgentBasedDeploy — cleanup orchestration', () => {
       await result.current.handleDeploy(['serviceA']);
     });
 
-    expect(mockCleanupPackagePolicies).not.toHaveBeenCalled();
+    expect(mockCleanupAgentBasedPolicies).not.toHaveBeenCalled();
   });
 
   it('skips cleanup when pendingCleanupPolicyIds is empty', async () => {
@@ -379,7 +379,7 @@ describe('useAgentBasedDeploy — cleanup orchestration', () => {
       await result.current.handleDeploy();
     });
 
-    expect(mockCleanupPackagePolicies).not.toHaveBeenCalled();
+    expect(mockCleanupAgentBasedPolicies).not.toHaveBeenCalled();
   });
 
   it('triggers cleanup for services deselected from Step 1 (policyIdsByInstance has stale entry not in targets)', async () => {
@@ -423,8 +423,8 @@ describe('useAgentBasedDeploy — cleanup orchestration', () => {
       await result.current.handleDeploy();
     });
 
-    expect(mockCleanupPackagePolicies).toHaveBeenCalledTimes(1);
-    const cleanupCall = mockCleanupPackagePolicies.mock.calls[0][0];
+    expect(mockCleanupAgentBasedPolicies).toHaveBeenCalledTimes(1);
+    const cleanupCall = mockCleanupAgentBasedPolicies.mock.calls[0][0];
     expect(cleanupCall.pendingCleanupPolicyIds).toEqual({ 'old-svc': 'pkg-policy-OLD' });
 
     expect(removeDeployInstances).toHaveBeenCalledWith(['old-svc']);

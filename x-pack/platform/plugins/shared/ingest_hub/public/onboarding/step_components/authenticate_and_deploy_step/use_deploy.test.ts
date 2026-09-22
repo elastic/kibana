@@ -42,8 +42,8 @@ jest.mock('@kbn/fleet-plugin/public', () => ({
   sendUpdateCloudOnboardingDeployment: jest.fn(),
 }));
 
-jest.mock('./policy_cleanup', () => ({
-  cleanupAgentlessPolicies: jest.fn(),
+jest.mock('./policy_cleanup_managed_integrations', () => ({
+  cleanupManagedIntegrationsPolicies: jest.fn(),
 }));
 
 jest.mock('../../use_aws_service_matrix', () => {
@@ -156,10 +156,10 @@ import { useAwsServicesMap } from '../../use_aws_service_matrix';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { useHistory, useParams } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { cleanupAgentlessPolicies } from './policy_cleanup';
+import { cleanupManagedIntegrationsPolicies } from './policy_cleanup_managed_integrations';
 
 const mockSendCreateAgentlessPolicy = sendCreateAgentlessPolicy as jest.Mock;
-const mockCleanupAgentlessPolicies = cleanupAgentlessPolicies as jest.Mock;
+const mockCleanupManagedIntegrationsPolicies = cleanupManagedIntegrationsPolicies as jest.Mock;
 const mockSendGetPackageInfoByKey = sendGetPackageInfoByKey as jest.Mock;
 const mockSendCreateCloudOnboardingDeployment = sendCreateCloudOnboardingDeployment as jest.Mock;
 const mockSendUpdateCloudOnboardingDeployment = sendUpdateCloudOnboardingDeployment as jest.Mock;
@@ -1513,10 +1513,10 @@ describe('useDeploy — cleanup orchestration', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     // Default: cleanup returns no-op ops.
-    mockCleanupAgentlessPolicies.mockResolvedValue({ toDelete: [], toUpdate: [] });
+    mockCleanupManagedIntegrationsPolicies.mockResolvedValue({ toDelete: [], toUpdate: [] });
   });
 
-  it('calls cleanupAgentlessPolicies and clears pendingCleanupPolicyIds when cleanup is pending', async () => {
+  it('calls cleanupManagedIntegrationsPolicies and clears pendingCleanupPolicyIds when cleanup is pending', async () => {
     setupMocks({
       selectedServiceIds: [],
       detectAndReviewStep: {
@@ -1537,8 +1537,8 @@ describe('useDeploy — cleanup orchestration', () => {
       await result.current.handleDeploy();
     });
 
-    expect(mockCleanupAgentlessPolicies).toHaveBeenCalledTimes(1);
-    const cleanupCall = mockCleanupAgentlessPolicies.mock.calls[0][0];
+    expect(mockCleanupManagedIntegrationsPolicies).toHaveBeenCalledTimes(1);
+    const cleanupCall = mockCleanupManagedIntegrationsPolicies.mock.calls[0][0];
     expect(cleanupCall.pendingCleanupPolicyIds).toEqual({ instA: 'policy-A' });
 
     expect(updateDetectAndReviewStep).toHaveBeenCalledWith(
@@ -1546,7 +1546,7 @@ describe('useDeploy — cleanup orchestration', () => {
     );
   });
 
-  it('skips cleanupAgentlessPolicies when pendingCleanupPolicyIds is empty', async () => {
+  it('skips cleanupManagedIntegrationsPolicies when pendingCleanupPolicyIds is empty', async () => {
     setupMocks({
       selectedServiceIds: ['ec2'],
       detectAndReviewStep: { pendingCleanupPolicyIds: {}, policyIdsByInstance: {} },
@@ -1558,7 +1558,7 @@ describe('useDeploy — cleanup orchestration', () => {
       await result.current.handleDeploy();
     });
 
-    expect(mockCleanupAgentlessPolicies).not.toHaveBeenCalled();
+    expect(mockCleanupManagedIntegrationsPolicies).not.toHaveBeenCalled();
   });
 
   it('cleanup-only path: no new targets but pending cleanup → calls cleanup and returns without deploying', async () => {
@@ -1578,7 +1578,7 @@ describe('useDeploy — cleanup orchestration', () => {
       await result.current.handleDeploy();
     });
 
-    expect(mockCleanupAgentlessPolicies).toHaveBeenCalledTimes(1);
+    expect(mockCleanupManagedIntegrationsPolicies).toHaveBeenCalledTimes(1);
     // No agentless policy creation should fire.
     expect(mockSendCreateAgentlessPolicy).not.toHaveBeenCalled();
   });
@@ -1586,7 +1586,7 @@ describe('useDeploy — cleanup orchestration', () => {
   it('excludes only deleted policy IDs (not updated ones) from packagePolicyIds in SO update', async () => {
     // policy-B is updated (survivors remain) and must stay in the SO record.
     // policy-A is deleted and must be excluded.
-    mockCleanupAgentlessPolicies.mockResolvedValue({
+    mockCleanupManagedIntegrationsPolicies.mockResolvedValue({
       toDelete: ['policy-A'],
       toUpdate: [{ policyId: 'policy-B', survivingInstanceIds: ['instB'] }],
     });
@@ -1618,7 +1618,7 @@ describe('useDeploy — cleanup orchestration', () => {
     // 'vpcflow' was deployed but is no longer selected — its instanceId is in policyIdsByInstance
     // but NOT in selectedServiceIds → liveStalePolicyIds should pick it up without needing
     // pendingCleanupPolicyIds to be set.
-    mockCleanupAgentlessPolicies.mockResolvedValue({ toDelete: ['policy-VPC'], toUpdate: [] });
+    mockCleanupManagedIntegrationsPolicies.mockResolvedValue({ toDelete: ['policy-VPC'], toUpdate: [] });
     setupMocks({
       selectedServiceIds: [], // vpcflow deselected
       detectAndReviewStep: {
@@ -1639,14 +1639,14 @@ describe('useDeploy — cleanup orchestration', () => {
       await result.current.handleDeploy();
     });
 
-    expect(mockCleanupAgentlessPolicies).toHaveBeenCalledTimes(1);
-    const cleanupCall = mockCleanupAgentlessPolicies.mock.calls[0][0];
+    expect(mockCleanupManagedIntegrationsPolicies).toHaveBeenCalledTimes(1);
+    const cleanupCall = mockCleanupManagedIntegrationsPolicies.mock.calls[0][0];
     expect(cleanupCall.pendingCleanupPolicyIds).toEqual({ vpcflow: 'policy-VPC' });
     // removeDeployInstances must prune the stale entry from policyIdsByInstance in one write.
     expect(removeDeployInstances).toHaveBeenCalledWith(['vpcflow']);
   });
 
-  it('does not call cleanupAgentlessPolicies on retry (instanceIds provided)', async () => {
+  it('does not call cleanupManagedIntegrationsPolicies on retry (instanceIds provided)', async () => {
     setupMocks({
       selectedServiceIds: ['ec2'],
       detectAndReviewStep: {
@@ -1664,6 +1664,6 @@ describe('useDeploy — cleanup orchestration', () => {
       await result.current.handleDeploy(['ec2']);
     });
 
-    expect(mockCleanupAgentlessPolicies).not.toHaveBeenCalled();
+    expect(mockCleanupManagedIntegrationsPolicies).not.toHaveBeenCalled();
   });
 });

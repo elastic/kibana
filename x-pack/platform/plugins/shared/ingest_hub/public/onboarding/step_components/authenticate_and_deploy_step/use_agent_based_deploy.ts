@@ -21,7 +21,7 @@ import {
 } from './agent_based_deploy';
 import type { AgentCredentialVars } from './package_inputs';
 import type { DeployGroup } from './deploy_groups';
-import { cleanupPackagePolicies } from './policy_cleanup';
+import { cleanupAgentBasedPolicies } from './policy_cleanup_agent_based';
 
 export interface UseAgentBasedDeployResult {
   targets: DeployGroup[];
@@ -158,7 +158,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
         // Clean up package policies for removed services before creating new ones.
         if (hasPendingCleanup) {
           const targetPolicyIds = agentPolicyId ? [agentPolicyId] : selectedAgentPolicyIds ?? [];
-          await cleanupPackagePolicies({
+          await cleanupAgentBasedPolicies({
             pendingCleanupPolicyIds: effectivePendingCleanup,
             currentPolicyIdsByInstance: detectAndReviewStep.policyIdsByInstance ?? {},
             instances: serviceSettings?.instances ?? [],
