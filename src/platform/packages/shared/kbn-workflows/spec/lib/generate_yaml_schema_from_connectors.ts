@@ -184,6 +184,28 @@ const LIQUID_TEMPLATE_SCHEMA = z
 type FieldWrapperChecks = NonNullable<z.ZodOptional['def']['checks']>;
 
 /**
+ * Zod types `def.checks` as `$ZodCheck<never>[]`. At runtime they accept the parsed value; this
+ * cast is what lets us re-attach them to a differently shaped replay schema.
+ */
+type ReplayableCheck = z.core.$ZodCheck<unknown>;
+
+const asReplayableChecks = (checks: readonly unknown[]): ReplayableCheck[] =>
+  checks as ReplayableCheck[];
+
+/** Replays a Zod issue onto a `.check()` context (`input` is required on the push target). */
+const pushIssue = (
+  ctx: { value: unknown; issues: Array<Record<string, unknown>> },
+  issue: { path?: PropertyKey[]; message?: string; input?: unknown }
+): void => {
+  ctx.issues.push({
+    code: 'custom',
+    path: issue.path ?? [],
+    message: issue.message ?? '',
+    input: issue.input ?? ctx.value,
+  });
+};
+
+/**
  * A `.optional()` / `.default()` layer stripped off a params field so it can be replayed verbatim.
  * Defaults keep a getter rather than a captured value: in Zod v4, `def.defaultValue` evaluates a
  * factory (or shallow-clones a static value) on every read, so reading it once at unwrap time would
@@ -224,17 +246,18 @@ function applyWrapperChecks(field: z.ZodType, checks: FieldWrapperChecks): z.Zod
   if (checks.length === 0) {
     return field;
   }
+  const replayable = asReplayableChecks(checks);
   return field.check((ctx) => {
     if (typeof ctx.value === 'string') {
       return;
     }
     const result = z
       .any()
-      .check(...checks)
+      .check(...replayable)
       .safeParse(ctx.value);
     if (!result.success) {
       for (const issue of result.error.issues) {
-        ctx.issues.push(issue);
+        pushIssue(ctx, issue);
       }
       return;
     }
@@ -262,14 +285,50 @@ function hasObjectLevelChecks(schema: z.ZodObject): boolean {
 }
 
 /**
+ * Placeholder for a templated field while replaying object-level checks. Any property access
+ * throws so refinements that depend on the unresolved value — including operations that are valid
+ * on both arrays and strings, such as `.length` — are skipped, while checks that never touch the
+ * field still run.
+ */
+function unresolvedTemplatePlaceholder(fieldKey: string): unknown {
+  return new Proxy(
+    {},
+    {
+      get(_target, prop) {
+        throw new TypeError(
+          `Cannot evaluate object check against templated field "${fieldKey}" (accessed .${String(
+            prop
+          )})`
+        );
+      },
+    }
+  );
+}
+
+function withUnresolvedTemplates(
+  value: Record<string, unknown>,
+  templatedKeys: string[]
+): Record<string, unknown> {
+  if (templatedKeys.length === 0) {
+    return value;
+  }
+  const probe: Record<string, unknown> = { ...value };
+  for (const key of templatedKeys) {
+    probe[key] = unresolvedTemplatePlaceholder(key);
+  }
+  return probe;
+}
+
+/**
  * Re-attaches the object-level checks of `paramsSchema` to the widened object.
  *
  * Those checks are written against the declared field types, so once a field accepts
  * `array | string` a refinement like `(v) => v.ids.every(...)` receives a string and throws a
  * TypeError. That exception escapes `safeParse` and fails the whole create/update request, so the
  * checks cannot simply be preserved as-is. When a widened field holds a template, each check is
- * tried on its own and checks that throw (because they need the unresolved array) are skipped —
- * other checks, including those on unrelated fields, still run. Non-templated values run every
+ * tried against a probe where templated fields are inaccessible placeholders — checks that touch
+ * those fields throw and are skipped (covering both throwing APIs like `.every` and silent ones
+ * like `.length`), while checks on unrelated fields still run. Non-templated values run every
  * object-level check against the already-parsed field output (without re-running field schemas,
  * which would re-apply non-idempotent transforms). Successful check output is written back so
  * object-level `.overwrite()` transforms are not discarded.
@@ -291,7 +350,7 @@ function deferChecksForTemplateValues(
   // shape without touching the fields again. Passthrough keeps keys that `widened` already
   // accepted via catchall — a plain `z.object` would strip them before checks run and from
   // `result.data` written back to `ctx.value`.
-  const objectChecks = paramsSchema.def.checks ?? [];
+  const objectChecks = asReplayableChecks(paramsSchema.def.checks ?? []);
   const anyShape = Object.fromEntries(
     Object.keys(paramsSchema.shape as Record<string, z.ZodType>).map((key) => [key, z.any()])
   ) as z.ZodRawShape;
@@ -308,7 +367,7 @@ function deferChecksForTemplateValues(
         // Replaying path and message keeps the issue pointing at the offending field, which both
         // Monaco markers and the template-error suppression in parseWorkflowYamlToJSON rely on.
         for (const issue of result.error.issues) {
-          ctx.issues.push(issue);
+          pushIssue(ctx, issue);
         }
         return;
       }
@@ -316,22 +375,29 @@ function deferChecksForTemplateValues(
       return;
     }
 
-    // Template present: do not bail on every object check. Run each check alone and skip only
-    // those that throw when they assume a declared array/object field type. Thread `current`
-    // forward so an overwrite that does not touch the templated field still applies.
-    let current = ctx.value;
+    // Template present: do not bail on every object check. Run each check alone against a probe
+    // where templated fields throw on access, and skip only those that depend on them. Thread
+    // `current` forward so an overwrite that does not touch the templated field still applies.
+    const templatedKeys = widenedKeys.filter((key) => typeof params[key] === 'string');
+    let current = params;
     for (const check of objectChecks) {
       try {
-        const result = checksOnlyObject().check(check).safeParse(current);
+        const result = checksOnlyObject()
+          .check(check)
+          .safeParse(withUnresolvedTemplates(current, templatedKeys));
         if (!result.success) {
           for (const issue of result.error.issues) {
-            ctx.issues.push(issue);
+            pushIssue(ctx, issue);
           }
         } else {
-          current = result.data;
+          // Restore the original template strings — the probe replaced them with placeholders.
+          current = { ...(result.data as Record<string, unknown>) };
+          for (const key of templatedKeys) {
+            current[key] = params[key];
+          }
         }
       } catch {
-        // Check depended on an unresolved templated field (e.g. called `.every` on a string).
+        // Check depended on an unresolved templated field.
       }
     }
     ctx.value = current;

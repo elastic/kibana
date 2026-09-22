@@ -516,6 +516,36 @@ describe('generateYamlSchemaFromConnectors', () => {
         expect(parseWith({ ids: '${{ workflow.inputs.ids }}', mode: 'a' }).success).toBe(true);
       });
 
+      it('does not evaluate .length refinements against the template source string', () => {
+        // Strings and arrays both have `.length`, so a check that only throws on array-only APIs
+        // would still run against the expression text. A long `${{ … }}` must not be rejected
+        // (or accepted) based on character length vs the eventual array length.
+        const lengthBound: ConnectorContractUnion = {
+          summary: 'LengthBound',
+          description: null,
+          type: 'length.bound.step',
+          paramsSchema: z
+            .object({
+              ids: z.array(z.string()),
+              max: z.number(),
+            })
+            .refine((v) => v.ids.length <= v.max, 'ids too long'),
+          outputSchema: z.unknown(),
+        };
+        const schema = generateYamlSchemaFromConnectors([lengthBound]);
+        const parseWith = (withValue: unknown) =>
+          schema.safeParse({
+            ...BASE_WORKFLOW,
+            steps: [{ name: 's', type: 'length.bound.step', with: withValue }],
+          });
+
+        // Expression text is longer than max=5 characters; must still accept (check skipped).
+        expect(parseWith({ ids: '${{ workflow.inputs.ids }}', max: 5 }).success).toBe(true);
+        // Ordinary arrays are still enforced.
+        expect(parseWith({ ids: ['a', 'b', 'c'], max: 2 }).success).toBe(false);
+        expect(parseWith({ ids: ['a'], max: 2 }).success).toBe(true);
+      });
+
       it('still enforces the refinement for ordinary array values', () => {
         expect(parseRefined({ ids: ['a'], name: 'x' }).success).toBe(true);
         expect(parseRefined({ ids: [''], name: 'x' }).success).toBe(false);
