@@ -303,7 +303,9 @@ export class DashboardPageControls extends FtrService {
     await this.retry.try(async () => {
       await elementToHover.moveMouseTo();
       await elementToHover.focus();
-      expect(this.testSubjects.descendantExists(`hover-actions-${controlId}`, elementToHover));
+      expect(
+        await this.testSubjects.descendantExists(`hover-actions-${controlId}`, elementToHover)
+      ).to.be(true);
     });
   }
 

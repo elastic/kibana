@@ -103,7 +103,6 @@ export function SvlRuleDetailsPageProvider({ getService }: FtrProviderContext) {
     async isViewInAppEnabled() {
       await retry.try(async () => {
         const viewInAppButton = await testSubjects.find(`ruleDetails-viewInDiscover`);
-        await new Promise((resolve) => {});
         expect(await viewInAppButton.getAttribute('disabled')).to.not.eql('true');
       });
       return true;
@@ -114,7 +113,7 @@ export function SvlRuleDetailsPageProvider({ getService }: FtrProviderContext) {
     async getNoOpAppTitle() {
       await retry.try(async () => {
         const title = await testSubjects.find('noop-title');
-        expect(title.isDisplayed()).to.eql(true);
+        expect(await title.isDisplayed()).to.eql(true);
       });
       return await testSubjects.getVisibleText('noop-title');
     },

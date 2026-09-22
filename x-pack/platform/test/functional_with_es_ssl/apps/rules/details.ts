@@ -820,7 +820,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         let statusFilter = await testSubjects.find('eventLogStatusFilterButton');
         let statusNumber = await statusFilter.findByCssSelector('.euiNotificationBadge');
 
-        expect(statusNumber.getVisibleText()).to.eql(0);
+        expect(await statusNumber.getVisibleText()).to.eql('0');
 
         await statusFilter.click();
 
@@ -832,7 +832,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         statusFilter = await testSubjects.find('eventLogStatusFilterButton');
         statusNumber = await statusFilter.findByCssSelector('.euiNotificationBadge');
 
-        expect(statusNumber.getVisibleText()).to.eql(1);
+        expect(await statusNumber.getVisibleText()).to.eql('1');
 
         const eventLogList = await find.byCssSelector('.euiDataGridRow');
         const rows = await eventLogList.parseDomContent();

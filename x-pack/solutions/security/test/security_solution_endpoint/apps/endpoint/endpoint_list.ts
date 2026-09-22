@@ -260,9 +260,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               'endpoint details flyout title to exist',
               1500,
               async () => {
-                return (await testSubjects.getVisibleText('endpointDetailsFlyoutTitle')) !== '';
-                expect(testSubjects.getVisibleText('endpointDetailsFlyoutTitle')).to.equal(
-                  endpointDetailTitleInitial
+                const endpointDetailTitle = await testSubjects.getVisibleText(
+                  'endpointDetailsFlyoutTitle'
+                );
+                return (
+                  endpointDetailTitle !== '' && endpointDetailTitle === endpointDetailTitleInitial
                 );
               }
             );
