@@ -1715,9 +1715,11 @@ steps:
                         # host/user without re-reading the alerts. Read from the alert document,
                         # never from the model's reply. `__missing__` keeps grouping total (an
                         # alert with no host still belongs in exactly one group) and cannot
-                        # collide with a real ECS host/user named "unknown".
-                        host_name: "{{ foreach.item.host.name | default: '__missing__' }}"
-                        user_name: "{{ foreach.item.user.name | default: '__missing__' }}"
+                        # collide with a real ECS host/user named "unknown". Truncate to the
+                        # workflow.output / Zod maxLength (512) so a long caller-supplied name
+                        # cannot fail emit after tags/notes are already written.
+                        host_name: "{{ foreach.item.host.name | default: '__missing__' | truncate: 512, '' }}"
+                        user_name: "{{ foreach.item.user.name | default: '__missing__' | truncate: 512, '' }}"
 
                   - name: accumulate_output_verdict
                     type: data.set
