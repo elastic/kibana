@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { VisualizationGoldConfig } from '../../src/evaluators/gold_visualization_config';
-import { HOST_METRICS_INDEX } from '../../src/fixtures/host_load_metrics';
+import type { VisualizationGoldConfig } from '../../../src/evaluators/gold_visualization_config';
+import { HOST_METRICS_INDEX } from '../../../src/fixtures/host_load_metrics';
+import { GOLDEN_TOOL_PATH } from './golden_tool_path';
 
 export const HOST_METRICS_QUESTION =
   'Show CPU load average metrics over time as a line chart. Include system.load.1 (1-minute), system.load.5 (5-minute), and system.load.15 (15-minute) as separate lines, bucketed by auto time interval.';
@@ -37,6 +38,6 @@ export const HOST_METRICS_EXAMPLE = {
         },
       ],
     } satisfies VisualizationGoldConfig,
-    goldenToolPath: ['load_skill', 'platform.core.create_visualization'],
+    goldenToolPath: GOLDEN_TOOL_PATH,
   },
 };
