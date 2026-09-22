@@ -439,7 +439,7 @@ export class DashboardPageControls extends FtrService {
     await this.retry.try(async () => {
       const isPopoverOpen = await this.isOptionsListPopoverOpen(controlId);
       if (isPopoverOpen) {
-        await this.browser.clickMouseButton({ x: 0, y: 0 });
+        await this.testSubjects.click(`optionsList-control-${controlId}`);
         await this.testSubjects.waitForDeleted(`optionsList-control-available-options`);
       }
     });
@@ -467,11 +467,11 @@ export class DashboardPageControls extends FtrService {
     const optionsCount = await this.optionsListPopoverGetAvailableOptionsCount();
 
     const selectableListItems = await availableOptions.findByClassName('euiSelectableList__list');
+    const list = await selectableListItems.findByCssSelector(`ul[role="listbox"]`);
     const suggestions: { [key: string]: number } = {};
     while (Object.keys(suggestions).length < optionsCount) {
-      await selectableListItems._webElement.sendKeys(this.browser.keys.ARROW_DOWN);
+      await list._webElement.sendKeys(this.browser.keys.ARROW_DOWN);
 
-      const list = await selectableListItems.findByCssSelector(`ul[role="listbox"]`);
       const activeDescendantId = await list.getAttribute('aria-activedescendant');
 
       if (activeDescendantId) {
