@@ -63,8 +63,8 @@ export interface RelayBindingsPage {
 }
 
 /**
- * The Relay resolves the target from `tenantKey` + `channel`, so `channel` must be the Slack channel
- * *id* (a binding's `scope_id`), not a display name.
+ * The Relay resolves `channel` to a bound Slack conversation. Accepts a conversation id (`C…` /
+ * `G…` / `D…`) or a connected channel name (`#general`, `general`).
  */
 export interface RelayTriggerInput {
   tenantKey: string;
@@ -78,6 +78,8 @@ export interface RelayTriggerResponse {
   /** The posted message's Slack `ts`. */
   ref: string;
   tenantKey: string;
+  /** Slack conversation id after Relay resolved a name, or the id that was sent. */
+  channel: string;
 }
 
 export interface RelayClientContract {
@@ -96,7 +98,7 @@ export interface RelayClientContract {
   bind(tenantKey: string, channelId: string): Promise<void>;
   /** Release a channel binding owned by this deployment (404 if none; 403 if owned by another). */
   unbindChannel(tenantKey: string, channelId: string): Promise<void>;
-  /** Post a message to a channel bound here (403 if not bound; 409 if the app was uninstalled). */
+  /** Post to a bound channel. `channel` is an id or a connected name. 403 if not bound; 409 if uninstalled; 429 if Slack throttled the lookup. */
   trigger(input: RelayTriggerInput): Promise<RelayTriggerResponse>;
   isRelayOrigin(url: string): boolean;
   postCallback(url: string, body: unknown, signal: AbortSignal): Promise<RelayCallbackResponse>;
