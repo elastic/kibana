@@ -112,22 +112,45 @@ export class TimePickerPageObject extends FtrService {
     await this.testSubjects.pressEnter(dataTestSubj);
   }
 
+  /**
+   * Reveals the SuperDatePicker's start/end date popover buttons.
+   *
+   * The picker hides those buttons whenever it is collapsed (a single "Show
+   * dates" button, shown for pretty relative ranges) or disabled by its consumer.
+   * Retry until the popover buttons are actually shown so callers can rely on
+   * them being present.
+   */
   private async showStartEndTimes() {
     // This first await makes sure the superDatePicker has loaded before we check for the ShowDatesButton
     await this.testSubjects.existOrFail('superDatePickerToggleQuickMenuButton', { timeout: 20000 });
-    await this.retry.tryForTime(5000, async () => {
-      const isShowDatesButton = await this.testSubjects.exists('superDatePickerShowDatesButton');
-      if (isShowDatesButton) {
-        await this.testSubjects.click('superDatePickerShowDatesButton', 50);
-      }
-      // Close the start date popover which opens automatically if `superDatePickerShowDatesButton` is clicked
-      if (isShowDatesButton) {
+
+    await this.retry.waitForWithTimeout(
+      'start and end date popover buttons to be shown',
+      20000,
+      async () => {
+        // Already expanded: the popover buttons are present.
+        if (await this.testSubjects.exists('superDatePickerstartDatePopoverButton')) {
+          return true;
+        }
+        // Otherwise the picker is collapsed to a single "Show dates" button, which may be
+        // rendered disabled while the consumer resolves its time field.
+        if (!(await this.testSubjects.exists('superDatePickerShowDatesButton'))) {
+          return false;
+        }
+        const showDatesButton = await this.testSubjects.find('superDatePickerShowDatesButton');
+        if (!(await showDatesButton.isEnabled())) {
+          return false;
+        }
+        await showDatesButton.moveMouseTo();
+        await showDatesButton.click();
+        // Close the start date popover which opens automatically
         await this.testSubjects.existOrFail('superDatePickerstartDatePopoverButton', {
           timeout: 1000,
         });
         await this.testSubjects.click('superDatePickerstartDatePopoverButton');
+        return true;
       }
-    });
+    );
   }
 
   /**
@@ -149,10 +172,9 @@ export class TimePickerPageObject extends FtrService {
       }
     }
     this.log.debug(`Setting absolute range to ${fromTime} to ${toTime}`);
-    await this.showStartEndTimes();
-
     // set to time
     await this.retry.waitFor(`endDate is set to ${toTime}`, async () => {
+      await this.showStartEndTimes();
       await this.testSubjects.click('superDatePickerendDatePopoverButton');
       await this.testSubjects.click('superDatePickerAbsoluteTab');
       await this.testSubjects.click('superDatePickerAbsoluteDateInput');
@@ -167,6 +189,7 @@ export class TimePickerPageObject extends FtrService {
 
     // set from time
     await this.retry.waitFor(`startDate is set to ${fromTime}`, async () => {
+      await this.showStartEndTimes();
       await this.testSubjects.click('superDatePickerstartDatePopoverButton');
       await this.testSubjects.click('superDatePickerAbsoluteTab');
       await this.testSubjects.click('superDatePickerAbsoluteDateInput');
