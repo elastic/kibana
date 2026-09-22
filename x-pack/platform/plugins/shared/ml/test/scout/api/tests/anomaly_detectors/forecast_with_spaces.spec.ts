@@ -21,9 +21,6 @@ apiTest.describe(
   'POST anomaly_detectors _forecast with spaces',
   { tag: '@local-stateful-classic' },
   () => {
-    // Shared across serial tests in this describe (create → viewer denied → delete).
-    let forecastId: string;
-
     apiTest.beforeAll(async ({ apiServices, esArchiver }) => {
       await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
       await apiServices.spaces.create({ id: SPACE_1, name: 'space_one', disabledFeatures: [] });
@@ -119,22 +116,6 @@ apiTest.describe(
         await apiServices.ml.anomalyDetection.openJob(JOB_ID);
       });
 
-      await apiTest.step('poweruser can run forecast on open job with data', async () => {
-        const res = await apiClient.post(
-          `s/${SPACE_1}/internal/ml/anomaly_detectors/${JOB_ID}/_forecast`,
-          {
-            headers: { ...INTERNAL_API_HEADERS, ...poweruserCookie },
-            body: { duration: '1d' },
-            responseType: 'json',
-          }
-        );
-        expect(res).toHaveStatusCode(200);
-        forecastId = (res.body as { forecast_id: string }).forecast_id;
-        expect(forecastId).toBeDefined();
-
-        await apiServices.ml.anomalyDetection.waitForForecastResults(JOB_ID);
-      });
-
       await apiTest.step('invalid duration returns 400', async () => {
         const res = await apiClient.post(
           `s/${SPACE_1}/internal/ml/anomaly_detectors/${JOB_ID}/_forecast`,
@@ -146,26 +127,38 @@ apiTest.describe(
         );
         expect(res).toHaveStatusCode(400);
       });
-    });
 
-    apiTest('poweruser can delete the forecast', async ({ apiClient, samlAuth }) => {
-      const { cookieHeader: poweruserCookie } = await samlAuth.asMlPoweruser();
+      await apiTest.step('poweruser can run and delete a forecast', async () => {
+        const res = await apiClient.post(
+          `s/${SPACE_1}/internal/ml/anomaly_detectors/${JOB_ID}/_forecast`,
+          {
+            headers: { ...INTERNAL_API_HEADERS, ...poweruserCookie },
+            body: { duration: '1d' },
+            responseType: 'json',
+          }
+        );
+        expect(res).toHaveStatusCode(200);
+        const { forecast_id: forecastId } = res.body as { forecast_id: string };
+        expect(forecastId).toBeDefined();
 
-      // Forecasting is asynchronous and Elasticsearch refuses to delete a forecast that is
-      // still running, so the first attempt can transiently fail. Retry for a bounded period
-      // and let the poll time out if it never succeeds.
-      await expect
-        .poll(
-          async () => {
-            const res = await apiClient.delete(
-              `s/${SPACE_1}/internal/ml/anomaly_detectors/${JOB_ID}/_forecast/${forecastId}`,
-              { headers: { ...INTERNAL_API_HEADERS, ...poweruserCookie } }
-            );
-            return res.statusCode;
-          },
-          { timeout: 10_000, intervals: [500] }
-        )
-        .toBe(200);
+        await apiServices.ml.anomalyDetection.waitForForecastResults(JOB_ID);
+
+        // Forecasting is asynchronous and Elasticsearch refuses to delete a forecast that is
+        // still running, so the first attempt can transiently fail. Retry for a bounded period
+        // and let the poll time out if it never succeeds.
+        await expect
+          .poll(
+            async () => {
+              const deleteRes = await apiClient.delete(
+                `s/${SPACE_1}/internal/ml/anomaly_detectors/${JOB_ID}/_forecast/${forecastId}`,
+                { headers: { ...INTERNAL_API_HEADERS, ...poweruserCookie } }
+              );
+              return deleteRes.statusCode;
+            },
+            { timeout: 10_000, intervals: [500] }
+          )
+          .toBe(200);
+      });
     });
   }
 );
