@@ -18,6 +18,7 @@ import {
   useDataset,
   useDatasets,
   useDeleteDataset,
+  useExperimentDatasetExamples,
 } from './use_evals_api';
 
 const DATASET_ID = 'dataset-1';
@@ -120,5 +121,55 @@ describe('useAddExamples', () => {
         version: '1',
       }
     );
+  });
+});
+
+describe('useExperimentDatasetExamples', () => {
+  it('fetches summaries first and deduplicates lazy requests without mixing repetitions', async () => {
+    const { http, wrapper, queryClient } = setup();
+    http.get.mockResolvedValue({ examples: [] });
+    const { result } = renderHook(
+      () => useExperimentDatasetExamples('experiment/1', DATASET_ID, 'execution-1'),
+      { wrapper }
+    );
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(http.get).toHaveBeenCalledTimes(1);
+    expect(http.get).toHaveBeenLastCalledWith(
+      '/internal/evals/experiments/experiment%2F1/datasets/dataset-1/examples',
+      {
+        version: '1',
+        query: { view: 'summary', execution_id: 'execution-1' },
+      }
+    );
+
+    const loadExample = (id: string, repetition: number, version?: string) =>
+      queryClient.fetchQuery({
+        ...result.current.getExampleQueryOptions(id, repetition, version),
+        staleTime: Infinity,
+      });
+    await Promise.all([loadExample('example-1', 0), loadExample('example-1', 0)]);
+    expect(http.get).toHaveBeenCalledTimes(2);
+    expect(http.get).toHaveBeenLastCalledWith(expect.any(String), {
+      version: '1',
+      query: {
+        view: 'full',
+        execution_id: 'execution-1',
+        example_id: 'example-1',
+        repetition_index: 0,
+      },
+    });
+    await loadExample('example-1', 1);
+    expect(http.get).toHaveBeenCalledTimes(3);
+    expect(http.get).toHaveBeenLastCalledWith(expect.any(String), {
+      version: '1',
+      query: {
+        view: 'full',
+        execution_id: 'execution-1',
+        example_id: 'example-1',
+        repetition_index: 1,
+      },
+    });
+    await loadExample('example-1', 1, 'updated-score');
+    expect(http.get).toHaveBeenCalledTimes(4);
   });
 });

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { GetEvaluationExperimentDatasetExamplesRequestQuery } from '@kbn/evals-common';
+
 export const queryKeys = {
   datasets: {
     all: ['evals', 'datasets'] as const,
@@ -39,7 +41,12 @@ export const queryKeys = {
       ['evals', 'experiments', 'detail', experimentId, executionId] as const,
     scores: (experimentId: string, executionId?: string) =>
       ['evals', 'experiments', 'scores', experimentId, executionId] as const,
-    datasetExamples: (experimentId: string, datasetId: string, executionId?: string) =>
+    datasetExamples: (
+      experimentId: string,
+      datasetId: string,
+      executionId?: string,
+      query?: GetEvaluationExperimentDatasetExamplesRequestQuery
+    ) =>
       [
         'evals',
         'experiments',
@@ -48,6 +55,7 @@ export const queryKeys = {
         experimentId,
         datasetId,
         executionId,
+        query,
       ] as const,
     compare: (type: string, baselineId: string, targetId: string) =>
       ['evals', 'experiments', 'compare', type, baselineId, targetId] as const,

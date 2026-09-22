@@ -21,6 +21,7 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
+import { UNBOUNDED_SCORE_FIELDS } from '../utils/score_source_fields';
 import { handleMaximumResponseSizeExceededError } from '../utils/handle_response_size_error';
 
 type GroupedExampleScores = GetEvaluationExperimentDatasetExamplesResponse['examples'][number];
@@ -68,14 +69,33 @@ export const registerGetExperimentDatasetExamplesRoute = ({
       async (context, request, response) => {
         try {
           const { experimentId, datasetId } = request.params;
-          const { execution_id: executionId } = request.query;
+          const {
+            execution_id: executionId,
+            view,
+            example_id: requestedExampleId,
+            repetition_index: repetitionIndex,
+          } = request.query;
           const evalsContext = await context.evals;
           const spaceId = getSpaceId ? await getSpaceId(request) : DEFAULT_SPACE_ID;
 
           const filterId = executionId ?? experimentId;
           const filterField = executionId ? 'metadata.execution_id' : 'experiment_id';
+          const query = buildDatasetExampleScoresQuery(datasetId, filterId, {
+            filterField,
+            spaceId,
+          });
+          if (requestedExampleId)
+            query.bool.must.push({ term: { 'example.id': requestedExampleId } });
+          if (repetitionIndex !== undefined) {
+            query.bool.must.push({ term: { 'task.repetition_index': repetitionIndex } });
+          }
           const searchResponse = await evalsContext.evaluationScoreService.search({
-            query: buildDatasetExampleScoresQuery(datasetId, filterId, { filterField, spaceId }),
+            query,
+            ...(view === 'summary'
+              ? {
+                  _source_excludes: [...UNBOUNDED_SCORE_FIELDS, 'evaluator.explanation'],
+                }
+              : {}),
             sort: SCORES_SORT_ORDER,
             size: MAX_SCORES_PER_QUERY,
           });
