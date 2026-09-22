@@ -108,10 +108,16 @@ describe('POST /internal/evals/evaluators/_test', () => {
     } as unknown as Parameters<ReturnType<typeof setup>['handler']>[1]);
 
   beforeEach(() => {
+    const round = { input: { message: 'Question' }, response: { message: 'Answer' }, steps: [] };
     awaitTraceReadyMock.mockResolvedValue({
-      input: { message: 'Question' },
-      response: { message: 'Answer' },
-      steps: [],
+      round,
+      profile: 'elastic-inference',
+      readiness: 'complete',
+      evidence: {
+        user_query: { status: 'found' },
+        agent_response: { status: 'found' },
+        tool_calls: { status: 'not_found' },
+      },
     });
   });
 

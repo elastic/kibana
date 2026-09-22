@@ -11,23 +11,17 @@ import {
   EVALS_RESOLVE_INSTRUMENTATION_URL,
   INTERNAL_API_ACCESS,
   ResolveInstrumentationRequestBody,
-  type ResolveInstrumentationResponse,
 } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { EVALS_API_PRIVILEGES } from '../../../common';
-import { hasTraceDocuments, probeProfiles } from '../../evaluators/evidence/evidence_service';
+import {
+  getRecommendedInstrumentationProfile,
+  hasTraceDocuments,
+  probeProfiles,
+} from '../../evaluators/evidence/evidence_service';
 import { createTraceAccessor } from '../../evaluators/trace_accessor';
+import { getNoTraceDocumentsMessage } from '../../evaluators/trace_readiness_errors';
 import type { RouteDependencies } from '../register_routes';
-
-const getRecommendedInstrumentation = (
-  profiles: ResolveInstrumentationResponse['profiles']
-): ResolveInstrumentationResponse['recommended_instrumentation'] => {
-  const firstFullyResolvedProfile = profiles.find(({ evidence }) =>
-    [evidence.user_query, evidence.agent_response].every(({ status }) => status === 'found')
-  );
-
-  return firstFullyResolvedProfile ? { profile: firstFullyResolvedProfile.profile } : null;
-};
 
 export const registerResolveInstrumentationRoute = ({ router }: RouteDependencies) => {
   router.versioned
@@ -69,17 +63,22 @@ export const registerResolveInstrumentationRoute = ({ router }: RouteDependencie
         if (!(await hasTraceDocuments(traceAccessor))) {
           return response.notFound({
             body: {
-              message: `Trace ${traceId} is not ready: no documents indexed in traces-* or logs-* yet`,
+              // Main's shared wording, without its `Error:` prefix: the body is already an
+              // error, so the prefix only shows up doubled in the UI.
+              message: getNoTraceDocumentsMessage(traceId),
             },
           });
         }
 
         const profiles = await probeProfiles(traceAccessor);
+        const recommendedProfile = getRecommendedInstrumentationProfile(profiles);
 
         return response.ok({
           body: {
             profiles,
-            recommended_instrumentation: getRecommendedInstrumentation(profiles),
+            recommended_instrumentation: recommendedProfile
+              ? { profile: recommendedProfile }
+              : null,
           },
         });
       }

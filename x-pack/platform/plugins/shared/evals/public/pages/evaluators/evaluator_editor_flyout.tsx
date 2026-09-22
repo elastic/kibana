@@ -150,8 +150,6 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
   const [testError, setTestError] = useState<{ title: string; message: string } | null>(null);
   const [testResult, setTestResult] = useState<TestEvaluatorResponse['result'] | null>(null);
   const testRunIdRef = useRef(0);
-  // Spans the whole run. The mutation flags go quiet between probe attempts, which would
-  // otherwise re-enable Save and let a second run start on top of the first.
   const [isRunningTest, setIsRunningTest] = useState(false);
   // Held separately from `testRunIdRef`, which an edit also bumps. A run whose result was
   // discarded still has to hand the controls back, so staleness cannot decide this.

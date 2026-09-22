@@ -17,7 +17,6 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { Logger } from '@kbn/logging';
 import { z } from '@kbn/zod/v4';
 import { withEvaluatorNameBaggage } from '../../../evaluators/evaluator_tracing_context';
-import { getInstrumentationProfile } from '../../../evaluators/evidence/resolve_instrumentation';
 import { formatEvidenceSchemaIssues } from '../../../evaluators/evidence/schema_issues';
 import { createTraceAccessor } from '../../../evaluators/trace_accessor';
 import { awaitTraceReady, TraceReadinessError } from '../../../evaluators/trace_readiness';
@@ -106,11 +105,14 @@ export const executeEvaluators = async ({
 
   const traceAccessor = createTraceAccessor({ traceId, esClient: traceReader });
   const activeProfile = subject.instrumentation?.profile ?? 'elastic-inference';
-  const resolvedMapping = getInstrumentationProfile(activeProfile);
 
-  let round: Awaited<ReturnType<typeof awaitTraceReady>>;
+  let round: Awaited<ReturnType<typeof awaitTraceReady>>['round'];
   try {
-    round = await awaitTraceReady(traceAccessor, resolvedMapping, activeProfile, logger);
+    ({ round } = await awaitTraceReady(
+      traceAccessor,
+      { mode: 'complete', profile: activeProfile },
+      logger
+    ));
   } catch (error) {
     if (error instanceof TraceReadinessError) {
       throw new EvaluationExecutionError(error.message, 'notFound');
