@@ -53,6 +53,30 @@ describe('ConversationDetailsFlyoutFooter', () => {
     expect(screen.getByText('Assign proposal')).toBeInTheDocument();
   });
 
+  it('calls onAssignSubmit and closes the modal when the user confirms assignment', () => {
+    const onAssignSubmit = jest.fn();
+
+    renderWithKibanaRenderContext(
+      <ConversationDetailsFlyoutFooter
+        investigation={investigation}
+        onOpenChat={jest.fn()}
+        onAssignSubmit={onAssignSubmit}
+      />
+    );
+
+    openActionsMenu();
+    fireEvent.click(screen.getByText('Assign'));
+
+    // Select an assignee and enter a rationale so the Assign button becomes enabled.
+    fireEvent.change(screen.getByRole('combobox'), { target: { value: 'ava' } });
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'on-call rotation' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Assign' }));
+
+    expect(onAssignSubmit).toHaveBeenCalledWith('ava');
+    // Modal closes after the callback fires.
+    expect(screen.queryByText('Assign proposal')).not.toBeInTheDocument();
+  });
+
   it('owns the close investigation modal', () => {
     renderWithKibanaRenderContext(
       <ConversationDetailsFlyoutFooter investigation={investigation} onOpenChat={jest.fn()} />

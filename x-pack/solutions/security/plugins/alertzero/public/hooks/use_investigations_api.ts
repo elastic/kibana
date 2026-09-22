@@ -45,10 +45,14 @@ export const useUpdateAssignees = () => {
         version: API_VERSIONS.internal.v1,
         body: JSON.stringify({ assignees }),
       }),
-    onSuccess: async () => {
-      // Invalidate the proposals list so the queue re-fetches and reflects any
-      // server-side side-effects (e.g. the flyout header avatar).
-      await queryClient.invalidateQueries({ queryKey: platformQueryKeys.proposals.all });
+    onSuccess: async (_, { id }) => {
+      await Promise.all([
+        // Refresh the queue so any server-side side-effects are visible.
+        queryClient.invalidateQueries({ queryKey: platformQueryKeys.proposals.all }),
+        // Refresh the flyout header which reads assignees from the conversation cache.
+        // Key matches agent_builder's queryKeys.conversations.byId(id).
+        queryClient.invalidateQueries({ queryKey: ['conversations', id] }),
+      ]);
     },
   });
 };

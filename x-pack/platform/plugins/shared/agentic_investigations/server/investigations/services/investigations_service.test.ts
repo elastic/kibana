@@ -133,6 +133,20 @@ describe('InvestigationsService.updateAssignees', () => {
     expect(error.message).toContain('"uid-missing"');
   });
 
+  it('deduplicates assignees before writing so duplicate UIDs in one request are not stored twice', async () => {
+    const client = makeClient(makeConversation());
+    const service = makeService(client, ['uid-1', 'uid-2']);
+
+    const result = await service.updateAssignees(request, 'inv-1', {
+      assignees: ['uid-1', 'uid-2', 'uid-1'],
+    });
+
+    expect(client.patchMetadata).toHaveBeenCalledWith('inv-1', {
+      assignees: ['uid-1', 'uid-2'],
+    });
+    expect(result.assignees).toEqual(['uid-1', 'uid-2']);
+  });
+
   it('returns a one-element array when ES collapses the stored value to a bare string', async () => {
     // Elasticsearch's `flattened` field type collapses a single-element array to a bare
     // string on round-trip. patchMetadata returns the stored document, so after writing

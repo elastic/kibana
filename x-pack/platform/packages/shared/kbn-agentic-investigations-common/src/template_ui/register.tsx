@@ -51,6 +51,12 @@ export interface RegisterAgenticInvestigationTemplateUIOptions {
   /** Localized template display name, shown in Agent Builder's title badge. */
   name: string;
   icon?: IconType;
+  /**
+   * Commits an assignee write from the flyout footer. Receives the conversation id and the
+   * resolved assignees list (may be empty to clear). Supplied by the solution layer that owns
+   * the HTTP client; when absent, clicking Assign in the flyout closes the modal without writing.
+   */
+  onAssignSubmit?: (conversationId: string, assignees: string[]) => void;
 }
 
 /**
@@ -65,6 +71,7 @@ export const registerAgenticInvestigationTemplateUI = ({
   templateId,
   name,
   icon,
+  onAssignSubmit,
 }: RegisterAgenticInvestigationTemplateUIOptions): void => {
   const [overviewTabId, attachmentsTabId, timelineTabId] = getInvestigationTabIds(templateId);
 
@@ -132,6 +139,11 @@ export const registerAgenticInvestigationTemplateUI = ({
                     conversationId: conversation.id,
                     agentId: conversation.agent_id,
                   })
+                }
+                onAssignSubmit={
+                  onAssignSubmit
+                    ? (assignee) => onAssignSubmit(conversation.id, assignee ? [assignee] : [])
+                    : undefined
                 }
               />
             </Suspense>
