@@ -25,6 +25,16 @@ export const ENABLED_SWITCH_LABEL = i18n.translate(
   }
 );
 
+export const VIEW_EXECUTIONS = i18n.translate('xpack.alertzero.watches.settings.viewExecutions', {
+  defaultMessage: 'View executions',
+});
+
+export const viewExecutionsAriaLabel = (workerName: string) =>
+  i18n.translate('xpack.alertzero.watches.settings.viewExecutionsAriaLabel', {
+    defaultMessage: 'View executions for {workerName}',
+    values: { workerName },
+  });
+
 export const SAVE_WATCH_SETTINGS = i18n.translate(
   'xpack.alertzero.watches.settings.saveWatchSettings',
   { defaultMessage: 'Save' }

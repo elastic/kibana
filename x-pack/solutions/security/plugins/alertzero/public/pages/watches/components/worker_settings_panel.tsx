@@ -10,6 +10,7 @@ import { css } from '@emotion/react';
 import {
   EuiAccordion,
   EuiBadge,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -25,6 +26,9 @@ import {
   type WorkerSettings,
   type WorkerSettingsWrite,
 } from '@kbn/alertzero-common';
+import type { CoreStart } from '@kbn/core/public';
+import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AutonomyLevelControl } from './autonomy_level_control';
 import { getAutonomyLevelCards } from './autonomy_level_cards_data';
 import { ScheduleIntervalField } from './schedule_interval_field';
@@ -76,6 +80,9 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
   draftResetKey,
 }: WorkerSettingsPanelProps) {
   const { euiTheme } = useEuiTheme();
+  const {
+    services: { application },
+  } = useKibana<CoreStart>();
   const name = workerName(worker.id, worker.name);
   const description = workerDescription(worker.id);
   const autonomyLabel = settingsI18n.autonomyLevelName(settings.autonomy);
@@ -84,6 +91,11 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
       ? workerScheduleCadenceLabel(settings.scheduleInterval)
       : undefined;
   const controlsDisabled = settingsLocked || isSaving;
+  const executionsHref = worker.workflowId
+    ? application.getUrlForApp(WORKFLOWS_APP_ID, {
+        path: `/${encodeURIComponent(worker.workflowId)}?tab=executions`,
+      })
+    : undefined;
   const CustomSettings = getWorkerCustomSettingsComponent(worker.id);
   const autonomyIntro = getAutonomyLevelCards(worker.id)?.intro;
 
@@ -216,6 +228,29 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
     />
   );
 
+  const headerActions = (
+    <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap={false}>
+      {executionsHref ? (
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            size="s"
+            color="text"
+            iconType="external"
+            iconSide="right"
+            href={executionsHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={settingsI18n.viewExecutionsAriaLabel(name)}
+            data-test-subj={`alertZeroWorkerViewExecutions-${worker.id}`}
+          >
+            {settingsI18n.VIEW_EXECUTIONS}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      ) : null}
+      <EuiFlexItem grow={false}>{enabledSwitch}</EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
   const settingsBody = (
     <>
       {settingsLocked ? (
@@ -309,7 +344,7 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
               onClick={stopAccordionToggle}
               onKeyDown={stopAccordionToggle}
             >
-              {enabledSwitch}
+              {headerActions}
             </div>
           }
           data-test-subj={`alertZeroWatchWorkerAccordion-${worker.id}`}
@@ -345,7 +380,7 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
         `}
       >
         <div css={{ flex: 1, minWidth: 0 }}>{headerBandContent(`${worker.id}-heading`, 'h2')}</div>
-        {enabledSwitch}
+        <div css={{ flexShrink: 0 }}>{headerActions}</div>
       </div>
       <div css={{ padding: euiTheme.size.base }}>{settingsBody}</div>
     </EuiPanel>
