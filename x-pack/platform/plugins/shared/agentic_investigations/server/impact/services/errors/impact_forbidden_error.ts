@@ -5,6 +5,10 @@
  * 2.0.
  */
 
-export { ImpactForbiddenError } from './impact_forbidden_error';
-export { ImpactNotFoundError } from './impact_not_found_error';
-export { ImpactInvalidRequestError } from './impact_invalid_request_error';
+/** Thrown when the acting principal lacks the privilege the operation needs. */
+export class ImpactForbiddenError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'ImpactForbiddenError';
+  }
+}

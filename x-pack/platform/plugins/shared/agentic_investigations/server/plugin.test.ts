@@ -248,13 +248,13 @@ describe('AgenticInvestigationsPlugin', () => {
       expect(initializeManagedWorkflows).toHaveBeenCalledTimes(1);
     });
 
-    it('exposes the proposals, impact, and escalations services for in-process callers', () => {
+    it('exposes proposals, a request-scoped impact client, and escalations for in-process callers', () => {
       const { plugin } = setupPlugin();
 
       const { contract } = startPlugin(plugin);
 
       expect(contract.getProposalsService()).toBeDefined();
-      expect(contract.getImpactService()).toBeDefined();
+      expect(contract.getImpactClient).toEqual(expect.any(Function));
       expect(contract.getProposalPrivileges()).toBeDefined();
       expect(contract.getEscalationsService()).toBeDefined();
     });

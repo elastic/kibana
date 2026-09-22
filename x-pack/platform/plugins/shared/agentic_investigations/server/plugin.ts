@@ -17,6 +17,8 @@ import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugi
 import { AGENTIC_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER_ID } from '../common/constants';
 import { registerFeatures } from './features';
 import { registerImpactRoutes } from './impact/routes/register_routes';
+import { createImpactPrivilegesChecker } from './impact/services/check_impact_privileges';
+import { createImpactClient } from './impact/services/impact_client';
 import { ImpactService } from './impact/services/impact_service';
 import { createImpactStorageClient } from './impact/storage/impact_storage';
 import { initializeManagedWorkflows } from './proposals/managed_workflows/initialize_managed_workflows';
@@ -171,9 +173,18 @@ export class AgenticInvestigationsPlugin
       );
     });
 
+    const getImpactClient = createImpactClient({
+      getImpactService: () => this.requireImpactService(),
+      getSpaceId: (request) => this.getSpaceId(request),
+      privileges: createImpactPrivilegesChecker({
+        getSecurity: async () => plugins.security,
+        logger: this.logger,
+      }),
+    });
+
     return {
       getProposalsService: () => this.requireProposalsService(),
-      getImpactService: () => this.requireImpactService(),
+      getImpactClient,
       getProposalPrivileges: () => this.requireProposalPrivileges(),
       getEscalationsService: () => this.requireEscalationsService(),
     };

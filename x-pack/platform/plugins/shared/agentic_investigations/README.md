@@ -74,7 +74,7 @@ An **Impact** record is the set of entities (users, hosts, services) an investig
 - AlertZero may attach `{ id }` only. The pill label stays the id until Entity Store hydration. Nightshift attaches `{ id, name, type?, featureId?, streamName? }`.
 - Writes are **upsert/merge**: attaching more entities unions them by `id` onto the existing document rather than appending a new one. A later attach fills in fields the first write omitted. That is load-bearing for hydrate-by-conversationId plus filtering on `entities.id`.
 - Evidence is not on this document. Nightshift's current evidence shape cannot represent non-local data, and that format is still open.
-- HTTP: `POST /internal/investigations/impact` (`manage_impact`) and `GET ...?conversationId=` (`read_impact`). Bulk hydrate is in-process via `getImpactService().listByConversationIds()`.
+- HTTP: `POST /internal/investigations/impact` (`manage_impact`) and `GET ...?conversationId=` (`read_impact`). Bulk hydrate is in-process via `getImpactClient(request).listByConversationIds()`, which checks `read_impact` and uses the request's space. The raw service stays internal to the routes.
 
 ## Proposals
 

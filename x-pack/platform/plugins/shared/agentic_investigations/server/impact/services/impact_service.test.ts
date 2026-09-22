@@ -136,6 +136,20 @@ describe('ImpactService', () => {
       ]);
     });
 
+    it('refuses a create that exceeds the entity id ceiling', async () => {
+      const storage = createStorage();
+      const service = createService(storage);
+      const entities = Array.from({ length: MAX_ENTITY_IDS + 1 }, (_, i) => ({
+        id: `entity-${i}`,
+      }));
+
+      await expect(
+        service.attach({ conversationId: CONVERSATION_ID, entities }, { spaceId: SPACE_ID })
+      ).rejects.toBeInstanceOf(ImpactInvalidRequestError);
+      expect(storage.search).not.toHaveBeenCalled();
+      expect(storage.index).not.toHaveBeenCalled();
+    });
+
     it('refuses a merge that would exceed the entity id ceiling', async () => {
       const existing = Array.from({ length: MAX_ENTITY_IDS }, (_, i) => ({ id: `entity-${i}` }));
       const storage = createStorage(baseDocument({ entities: existing }));
