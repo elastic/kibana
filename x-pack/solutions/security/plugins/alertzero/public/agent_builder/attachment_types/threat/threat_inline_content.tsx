@@ -7,6 +7,7 @@
 
 import React, { useState } from 'react';
 import { css } from '@emotion/react';
+import { groupBy } from 'lodash';
 import {
   EuiBadge,
   EuiBadgeGroup,
@@ -34,15 +35,14 @@ import { buildDiscoverThreatReportNestedIocUrl } from '../navigation';
 import { IocBadge } from '../shared/ioc_badge';
 import { LabeledBadgeTable } from '../shared/labeled_badge_table';
 import { buildMitreTechniqueUrl } from '../shared/mitre_url';
-import { THREAT_REPORT_API_PATH, THREAT_REPORT_API_VERSION } from './threat_report_api';
+import {
+  THREAT_REPORT_API_PATH,
+  THREAT_REPORT_API_VERSION,
+  type ThreatReportApiResponse,
+} from './threat_report_api';
 import { threatAttachmentQueryClient } from './query_client';
 import { isValidThreatAttachmentData } from './types';
-import type {
-  ThreatAttachment,
-  ThreatReportDiamondVertex,
-  ThreatReportIoc,
-  ThreatReportLiveData,
-} from './types';
+import type { ThreatAttachment } from './types';
 
 export const THREAT_ATTACHMENT_TEST_ID = 'alertzeroThreatAttachment';
 export const THREAT_ATTACHMENT_EMPTY_TEST_ID = 'alertzeroThreatAttachmentEmpty';
@@ -70,38 +70,6 @@ const clampedSummaryStyles = css`
   overflow: hidden;
 `;
 
-interface ThreatReportResponse {
-  reportId?: string;
-  content?: {
-    title?: string;
-    external_references?: Array<{ source_name?: string; url?: string; external_id?: string }>;
-  };
-  severity?: { level?: string; score?: number };
-  source?: { name?: string };
-  extracted?: {
-    iocs?: Array<{ type?: string; value?: string; severity?: string; tier?: string }>;
-    ttps?: { tactics?: string[]; techniques?: string[] };
-    categories?: string[];
-    diamond?: {
-      adversary?: { signal?: string; summary?: string };
-      capability?: { signal?: string; summary?: string };
-      infrastructure?: { signal?: string; summary?: string };
-      victim?: { signal?: string; summary?: string };
-      signal_count?: number;
-      suitable?: boolean;
-    };
-  };
-  geography?: { regions?: string[] };
-  rank_score?: number;
-  evidence?: {
-    alert_hits_total?: number;
-    last_hunt_status?: string;
-    last_hunted_at?: string;
-    last_hunt_run_id?: string;
-    corroborated_rank_score?: number;
-  };
-}
-
 const DIAMOND_VERTICES = ['adversary', 'capability', 'infrastructure', 'victim'] as const;
 
 const fetchThreatReport = async ({
@@ -112,66 +80,11 @@ const fetchThreatReport = async ({
   http: HttpStart;
   reportId: string;
   signal?: AbortSignal;
-}): Promise<ThreatReportLiveData> => {
-  const response = await http.fetch<ThreatReportResponse>(
+}): Promise<ThreatReportApiResponse> =>
+  http.fetch<ThreatReportApiResponse>(
     THREAT_REPORT_API_PATH.replace('{reportId}', encodeURIComponent(reportId)),
     { version: THREAT_REPORT_API_VERSION, method: 'GET', signal }
   );
-
-  const diamondSource = response?.extracted?.diamond;
-  const diamondVertices = diamondSource
-    ? DIAMOND_VERTICES.filter((vertex) => diamondSource[vertex] != null).map((vertex) => ({
-        vertex,
-        signal: diamondSource[vertex]?.signal,
-        summary: diamondSource[vertex]?.summary,
-      }))
-    : [];
-
-  return {
-    title: response?.content?.title,
-    severityLevel: response?.severity?.level,
-    severityScore: response?.severity?.score,
-    sourceName: response?.source?.name,
-    iocs: response?.extracted?.iocs?.map((ioc) => ({
-      type: ioc.type ?? 'unknown',
-      value: ioc.value ?? '',
-      severity: ioc.severity,
-      tier: ioc.tier,
-    })),
-    ttps:
-      response?.extracted?.ttps &&
-      (response.extracted.ttps.tactics?.length || response.extracted.ttps.techniques?.length)
-        ? {
-            tactics: response.extracted.ttps.tactics ?? [],
-            techniques: response.extracted.ttps.techniques ?? [],
-          }
-        : undefined,
-    diamond: diamondVertices.length
-      ? {
-          vertices: diamondVertices,
-          signalCount: diamondSource?.signal_count,
-          suitable: diamondSource?.suitable,
-        }
-      : undefined,
-    categories: response?.extracted?.categories,
-    regions: response?.geography?.regions,
-    corroboratedRankScore: response?.evidence?.corroborated_rank_score,
-    evidence: response?.evidence
-      ? {
-          alertHitsTotal: response.evidence.alert_hits_total,
-          lastHuntStatus: response.evidence.last_hunt_status,
-          lastHuntedAt: response.evidence.last_hunted_at,
-          lastHuntRunId: response.evidence.last_hunt_run_id,
-          corroboratedRankScore: response.evidence.corroborated_rank_score,
-        }
-      : undefined,
-    externalReferences: response?.content?.external_references?.map((ref) => ({
-      sourceName: ref.source_name,
-      url: ref.url,
-      externalId: ref.external_id,
-    })),
-  };
-};
 
 const sectionHeading = (id: string, defaultMessage: string) => (
   <EuiText size="s">
@@ -215,25 +128,32 @@ const IocOverflowBadge: React.FC<{ hiddenCount: number; children: React.ReactNod
   );
 };
 
+interface ThreatIoc {
+  type?: string;
+  value?: string;
+  severity?: string;
+  tier?: string;
+}
+
 const IocTypeValues: React.FC<{
   type: string;
-  iocs: ThreatReportIoc[];
+  iocs: ThreatIoc[];
   navigation: AttachmentNavigationDeps;
 }> = ({ type, iocs, navigation }) => {
   const visible = iocs.slice(0, IOC_VISIBLE_LIMIT);
   const hidden = iocs.slice(IOC_VISIBLE_LIMIT);
 
-  const renderBadge = (ioc: ThreatReportIoc, index: number) => {
+  const renderBadge = (ioc: ThreatIoc, index: number) => {
     // Threat report IOCs live on nested `extracted.iocs`, not inventable logs-* fields.
     const href = buildDiscoverThreatReportNestedIocUrl({
       share: navigation.share,
-      iocType: ioc.type,
-      value: ioc.value,
+      iocType: ioc.type ?? type,
+      value: ioc.value ?? '',
     });
     const tooltipContent = [ioc.tier, ioc.severity].filter(Boolean).join(', ');
     const badge = (
       <span data-test-subj={`alertzeroThreatAttachmentIocLink-${type}-${index}`}>
-        <IocBadge value={ioc.value} index={index} discoverHref={href} />
+        <IocBadge value={ioc.value ?? ''} index={index} discoverHref={href} />
       </span>
     );
     return (
@@ -257,14 +177,18 @@ const IocTypeValues: React.FC<{
   );
 };
 
+interface DiamondVertexRow {
+  vertex: (typeof DIAMOND_VERTICES)[number];
+  signal?: string;
+  summary?: string;
+}
+
 const renderEnrichedSections = ({
   liveData,
   navigation,
-  severityScore,
 }: {
-  liveData?: ThreatReportLiveData;
+  liveData?: ThreatReportApiResponse;
   navigation: AttachmentNavigationDeps;
-  severityScore?: number;
 }): React.ReactNode => {
   if (!liveData) {
     return null;
@@ -272,7 +196,7 @@ const renderEnrichedSections = ({
 
   const sections: React.ReactNode[] = [];
 
-  const externalRefsWithUrl = liveData.externalReferences?.filter(
+  const externalRefsWithUrl = liveData.content?.external_references?.filter(
     (ref) => typeof ref.url === 'string' && isHttpExternalUrl(ref.url)
   );
   if (externalRefsWithUrl?.length) {
@@ -292,7 +216,7 @@ const renderEnrichedSections = ({
                   rel="noopener noreferrer"
                   data-test-subj={THREAT_EXTERNAL_REF_LINK_TEST_ID}
                 >
-                  {ref.sourceName || ref.externalId || ref.url}
+                  {ref.source_name || ref.external_id || ref.url}
                 </EuiLink>
               </li>
             ))}
@@ -302,13 +226,8 @@ const renderEnrichedSections = ({
     );
   }
 
-  if (liveData.iocs?.length) {
-    const iocsByType = new Map<string, ThreatReportIoc[]>();
-    for (const ioc of liveData.iocs) {
-      const bucket = iocsByType.get(ioc.type) ?? [];
-      bucket.push(ioc);
-      iocsByType.set(ioc.type, bucket);
-    }
+  if (liveData.extracted?.iocs?.length) {
+    const iocsByType = groupBy(liveData.extracted.iocs, (ioc) => ioc.type);
     sections.push(
       <div key="iocs">
         {sectionHeading('xpack.alertzero.agentBuilder.attachments.threat.iocs', 'Indicators')}
@@ -318,7 +237,7 @@ const renderEnrichedSections = ({
             'xpack.alertzero.agentBuilder.attachments.threat.iocTableCaption',
             { defaultMessage: 'Indicators of compromise by type' }
           )}
-          rows={[...iocsByType.entries()].map(([type, iocs]) => ({
+          rows={Object.entries(iocsByType).map(([type, iocs]) => ({
             id: type,
             label: type,
             values: <IocTypeValues type={type} iocs={iocs} navigation={navigation} />,
@@ -328,21 +247,20 @@ const renderEnrichedSections = ({
     );
   }
 
-  if (
-    liveData.ttps?.tactics.length ||
-    liveData.ttps?.techniques.length ||
-    liveData.regions?.length ||
-    liveData.categories?.length
-  ) {
+  const tactics = liveData.extracted?.ttps?.tactics ?? [];
+  const techniques = liveData.extracted?.ttps?.techniques ?? [];
+  const regions = liveData.geography?.regions ?? [];
+  const categories = liveData.extracted?.categories ?? [];
+  if (tactics.length || techniques.length || regions.length || categories.length) {
     const listItems: Array<{ title: string; description: React.ReactElement }> = [];
-    if (liveData.ttps?.tactics.length) {
+    if (tactics.length) {
       listItems.push({
         title: i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.tactics', {
           defaultMessage: 'Tactics',
         }),
         description: (
           <EuiBadgeGroup gutterSize="xs">
-            {liveData.ttps.tactics.map((tactic) => (
+            {tactics.map((tactic) => (
               <EuiBadge key={tactic} color="hollow">
                 {tactic}
               </EuiBadge>
@@ -351,14 +269,14 @@ const renderEnrichedSections = ({
         ),
       });
     }
-    if (liveData.ttps?.techniques.length) {
+    if (techniques.length) {
       listItems.push({
         title: i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.techniques', {
           defaultMessage: 'Techniques',
         }),
         description: (
           <EuiBadgeGroup gutterSize="xs">
-            {liveData.ttps.techniques.map((technique) => (
+            {techniques.map((technique) => (
               <EuiBadge
                 key={technique}
                 color="hollow"
@@ -375,14 +293,14 @@ const renderEnrichedSections = ({
         ),
       });
     }
-    if (liveData.regions?.length) {
+    if (regions.length) {
       listItems.push({
         title: i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.regions', {
           defaultMessage: 'Regions',
         }),
         description: (
           <EuiBadgeGroup gutterSize="xs">
-            {liveData.regions.map((region) => (
+            {regions.map((region) => (
               <EuiBadge key={region} color="hollow">
                 {region}
               </EuiBadge>
@@ -391,14 +309,14 @@ const renderEnrichedSections = ({
         ),
       });
     }
-    if (liveData.categories?.length) {
+    if (categories.length) {
       listItems.push({
         title: i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.categories', {
           defaultMessage: 'Categories',
         }),
         description: (
           <EuiBadgeGroup gutterSize="xs">
-            {liveData.categories.map((category) => (
+            {categories.map((category) => (
               <EuiBadge key={category} color="hollow">
                 {category}
               </EuiBadge>
@@ -414,7 +332,15 @@ const renderEnrichedSections = ({
     );
   }
 
-  if (liveData.diamond?.vertices.length) {
+  const diamond = liveData.extracted?.diamond;
+  const diamondRows: DiamondVertexRow[] = diamond
+    ? DIAMOND_VERTICES.filter((vertex) => diamond[vertex] != null).map((vertex) => ({
+        vertex,
+        signal: diamond[vertex]?.signal,
+        summary: diamond[vertex]?.summary,
+      }))
+    : [];
+  if (diamondRows.length) {
     const suitableBadge = i18n.translate(
       'xpack.alertzero.agentBuilder.attachments.threat.diamondSuitable',
       { defaultMessage: 'Suitable' }
@@ -426,7 +352,7 @@ const renderEnrichedSections = ({
     sections.push(
       <div key="diamond">
         {sectionHeading('xpack.alertzero.agentBuilder.attachments.threat.diamond', 'Diamond model')}
-        <EuiBasicTable<ThreatReportDiamondVertex>
+        <EuiBasicTable<DiamondVertexRow>
           compressed
           tableLayout="auto"
           responsiveBreakpoint={false}
@@ -434,7 +360,7 @@ const renderEnrichedSections = ({
             'xpack.alertzero.agentBuilder.attachments.threat.diamondTableCaption',
             { defaultMessage: 'Diamond model signals' }
           )}
-          items={liveData.diamond.vertices}
+          items={diamondRows}
           columns={[
             {
               field: 'vertex',
@@ -468,27 +394,27 @@ const renderEnrichedSections = ({
             },
           ]}
         />
-        {(liveData.diamond.signalCount != null || liveData.diamond.suitable != null) && (
+        {(diamond?.signal_count != null || diamond?.suitable != null) && (
           <>
             <EuiSpacer size="xs" />
             <EuiFlexGroup gutterSize="xs" responsive={false}>
-              {liveData.diamond.signalCount != null && (
+              {diamond?.signal_count != null && (
                 <EuiFlexItem grow={false}>
                   <EuiBadge color="hollow">
                     {i18n.translate(
                       'xpack.alertzero.agentBuilder.attachments.threat.diamondSignalCount',
                       {
                         defaultMessage: '{count} signals',
-                        values: { count: liveData.diamond.signalCount },
+                        values: { count: diamond.signal_count },
                       }
                     )}
                   </EuiBadge>
                 </EuiFlexItem>
               )}
-              {liveData.diamond.suitable != null && (
+              {diamond?.suitable != null && (
                 <EuiFlexItem grow={false}>
                   <EuiBadge color="hollow">
-                    {liveData.diamond.suitable ? suitableBadge : notSuitableBadge}
+                    {diamond.suitable ? suitableBadge : notSuitableBadge}
                   </EuiBadge>
                 </EuiFlexItem>
               )}
@@ -499,9 +425,9 @@ const renderEnrichedSections = ({
     );
   }
 
+  const severityScore = liveData.severity?.score;
   if (liveData.evidence || severityScore != null) {
-    const corroboratedRank =
-      liveData.evidence?.corroboratedRankScore ?? liveData.corroboratedRankScore;
+    const corroboratedRank = liveData.evidence?.corroborated_rank_score;
 
     const stats: Array<{ title: React.ReactNode; description: string }> = [];
     if (severityScore != null) {
@@ -512,17 +438,17 @@ const renderEnrichedSections = ({
         }),
       });
     }
-    if (liveData.evidence?.alertHitsTotal != null) {
+    if (liveData.evidence?.alert_hits_total != null) {
       stats.push({
-        title: liveData.evidence.alertHitsTotal,
+        title: liveData.evidence.alert_hits_total,
         description: i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.alertHits', {
           defaultMessage: 'Alert hits',
         }),
       });
     }
-    if (liveData.evidence?.lastHuntStatus != null) {
+    if (liveData.evidence?.last_hunt_status != null) {
       stats.push({
-        title: liveData.evidence.lastHuntStatus,
+        title: liveData.evidence.last_hunt_status,
         description: i18n.translate(
           'xpack.alertzero.agentBuilder.attachments.threat.lastHuntStatus',
           { defaultMessage: 'Last hunt status' }
@@ -538,9 +464,9 @@ const renderEnrichedSections = ({
         ),
       });
     }
-    if (liveData.evidence?.lastHuntedAt != null) {
+    if (liveData.evidence?.last_hunted_at != null) {
       stats.push({
-        title: <FormattedRelative value={liveData.evidence.lastHuntedAt} />,
+        title: <FormattedRelative value={liveData.evidence.last_hunted_at} />,
         description: i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.lastHunted', {
           defaultMessage: 'Last hunted',
         }),
@@ -606,9 +532,14 @@ const ThreatAttachmentInlineContentInner: React.FC<ThreatAttachmentInlineContent
     isLoading,
     error,
     data: liveData,
-  } = useQuery<ThreatReportLiveData, unknown>({
+  } = useQuery({
     queryKey: ['ALERTZERO_THREAT_ATTACHMENT', reportId],
-    queryFn: ({ signal }) => fetchThreatReport({ http, reportId: reportId as string, signal }),
+    queryFn: ({ signal }) => {
+      if (!reportId) {
+        throw new Error('threat attachment fetch called without a report id');
+      }
+      return fetchThreatReport({ http, reportId, signal });
+    },
     enabled: reportId != null,
   });
 
@@ -636,12 +567,7 @@ const ThreatAttachmentInlineContentInner: React.FC<ThreatAttachmentInlineContent
   // or failed for any reason.
   const useLive = !isLoading && !error && liveData != null;
 
-  const title = useLive ? liveData?.title ?? data.title : data.title;
-  const severityLevel = useLive ? liveData?.severityLevel ?? data.severity : data.severity;
-  const severityScore = useLive ? liveData?.severityScore : undefined;
-  const sourceName = useLive ? liveData?.sourceName ?? data.source : data.source;
-
-  const hasAnyField = Boolean(title || severityLevel || sourceName);
+  const hasAnyField = Boolean(data.title || data.severity || data.source);
 
   return (
     <EuiPanel
@@ -654,7 +580,7 @@ const ThreatAttachmentInlineContentInner: React.FC<ThreatAttachmentInlineContent
         <EuiSkeletonText lines={2} />
       ) : (
         <>
-          {useLive && renderEnrichedSections({ liveData, navigation, severityScore })}
+          {useLive && renderEnrichedSections({ liveData, navigation })}
           {!useLive && (
             <>
               <EuiSpacer size="s" />
