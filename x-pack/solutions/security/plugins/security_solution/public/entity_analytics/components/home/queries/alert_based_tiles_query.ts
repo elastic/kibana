@@ -18,6 +18,10 @@ const alertsIndex = (spaceId: string) => `.alerts-security.alerts-${spaceId}`;
  * This avoids running the EUID pipeline twice (once per tile). Both tile 1 and tile 5
  * consume their respective columns from the single STATS result.
  *
+ * Performance: a STATS BY entity.id deduplication step runs before the LOOKUP JOIN,
+ * reducing join cardinality from O(alerts) to O(distinct entities). The @timestamp
+ * rename dance is not needed because @timestamp is dropped by the deduplication STATS.
+ *
  * Watchlist filtering uses entity.attributes.watchlists IS NOT NULL evaluated after
  * the LOOKUP JOIN, replacing the old entity-latest last_seen approach. An entity
  * qualifies for the watchlist tile when it is watchlisted AND has an alert in the
@@ -40,12 +44,12 @@ export const buildAlertBasedTilesQuery = (
   parts.push(`| WHERE @timestamp >= NOW() - ${timeRange}`);
   parts.push(...buildAlertEuidPipeline(euid));
 
-  // RENAME @timestamp to avoid it being overwritten by entity-latest's own @timestamp
-  // during the LOOKUP JOIN.
-  parts.push(`| RENAME @timestamp AS event_timestamp`);
+  // Deduplicate to one row per entity before the LOOKUP JOIN — reduces join cardinality
+  // from O(alerts) to O(distinct entities). @timestamp is intentionally dropped here;
+  // no rename dance needed because the JOIN's own @timestamp is never used downstream.
+  parts.push(`| STATS BY entity.id`);
   parts.push(`| LOOKUP JOIN ${entitiesIndexName} ON entity.id`);
-  parts.push(`| RENAME event_timestamp AS @timestamp`);
-  // Discard alert rows that did not match any entity in entity-latest.
+  // Discard entity IDs that have no entity-latest record (unrecognised identifiers).
   parts.push(`| WHERE entity.name IS NOT NULL`);
   parts.push(...entityFilterClauses);
 

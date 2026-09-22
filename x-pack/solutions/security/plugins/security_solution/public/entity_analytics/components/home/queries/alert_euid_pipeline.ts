@@ -15,10 +15,13 @@ const ENTITY_TYPES = ['user', 'host', 'service'] as const;
  * Fast path: reads from `kibana.alert.entity.id`, stamped at enrichment time (#285223).
  * Fallback: derives EUID from identity fields for alerts that predate the stamp.
  *
- * MV_EXPAND is required because `kibana.alert.entity.id` is string[] — a multi-entity
- * alert becomes one row per entity so the LOOKUP JOIN key is always scalar. For alerts
- * where the field is null (pre-#285223), MV_EXPAND produces one row with null and
- * COALESCE falls through to the derived EUID.
+ * For multi-entity alerts (e.g. a lateral movement rule with both user + host context):
+ * - Stamped path: `kibana.alert.entity.id` is already a multi-value array — one row per entity after MV_EXPAND.
+ * - Fallback path: each entity type EUID is computed independently, then combined into a
+ *   multi-value field with MV_APPEND so all entity types survive — not just the first non-null.
+ *
+ * After MV_EXPAND the entity.id column is always scalar; nulls are filtered out so
+ * non-matching entity types don't produce phantom rows downstream.
  */
 export const buildAlertEuidPipeline = (euid: EntityStoreEuid): string[] => {
   const parts: string[] = [];
@@ -31,9 +34,18 @@ export const buildAlertEuidPipeline = (euid: EntityStoreEuid): string[] => {
     parts.push(`| EVAL ${euid.esql.getEuidEvaluation(entityType, `${entityType}_euid`)}`);
   }
 
-  parts.push(`| EVAL derived_euid = COALESCE(${ENTITY_TYPES.map((t) => `${t}_euid`).join(', ')})`);
-  parts.push('| MV_EXPAND `kibana.alert.entity.id`');
-  parts.push('| EVAL entity.id = COALESCE(`kibana.alert.entity.id`, derived_euid)');
+  // Build derived_euids as a multi-value field so a user+host alert contributes both
+  // entities on the fallback path — COALESCE(a,b,c) would drop all but the first non-null.
+  // Produces: MV_APPEND(user_euid, MV_APPEND(host_euid, service_euid))
+  // Nulls from absent entity types survive but are filtered by the WHERE below.
+  const euidVars = ENTITY_TYPES.map((t) => `${t}_euid`);
+  const nestedMvAppend = euidVars
+    .slice(0, -1)
+    .reduceRight((inner, v) => `MV_APPEND(${v}, ${inner})`, euidVars[euidVars.length - 1]);
+  parts.push(`| EVAL derived_euids = ${nestedMvAppend}`);
+  parts.push('| EVAL entity_ids = COALESCE(`kibana.alert.entity.id`, derived_euids)');
+  parts.push('| MV_EXPAND entity_ids');
+  parts.push('| EVAL entity.id = entity_ids');
   parts.push('| WHERE entity.id IS NOT NULL');
 
   return parts;
