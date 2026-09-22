@@ -176,7 +176,7 @@ const boundsFromNodes = (nodes: readonly Node[]): GraphBounds | undefined => {
   let maxY = -Infinity;
   for (const n of nodes) {
     const w = typeof n.width === 'number' ? n.width : 300;
-    const h = typeof n.height === 'number' ? n.height : 64;
+    const h = typeof n.height === 'number' ? n.height : 56;
     if (n.position.x < minX) minX = n.position.x;
     if (n.position.y < minY) minY = n.position.y;
     if (n.position.x + w > maxX) maxX = n.position.x + w;
@@ -530,9 +530,10 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
     [edgeZIndex]
   );
   const { euiTheme } = useEuiTheme();
-  // Match design mockups: denser, higher-contrast dots that still read as texture
-  // (not ink) in both color modes — no mode-specific branch.
-  const backgroundDotColor = transparentize(euiTheme.colors.borderBaseProminent, 0.75);
+  // Readable grid texture so nodes lift off the canvas — keep dots soft so
+  // they don't compete with graph chrome. `borderBaseProminent` at 40% alpha
+  // holds in both color modes without a mode-specific branch.
+  const backgroundDotColor = transparentize(euiTheme.colors.borderBaseProminent, 0.4);
 
   const {
     nodes,
@@ -998,8 +999,8 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
                 <Background
                   bgColor={euiTheme.colors.backgroundBaseSubdued}
                   color={backgroundDotColor}
-                  gap={12}
-                  size={1.5}
+                  gap={16}
+                  size={1.25}
                 />
               )}
               {toolbar}

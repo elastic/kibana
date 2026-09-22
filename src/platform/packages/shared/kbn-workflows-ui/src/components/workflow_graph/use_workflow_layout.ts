@@ -447,7 +447,7 @@ export function useWorkflowLayout({
       } else if (e.branchType === 'then' || e.branchType === 'else') {
         sourceHandle = e.branchType;
       } else if (nodesWithFailureHandle.has(e.source)) {
-        // Owner mounts dual handles (`step` + `error`) once on-failure exists.
+        // Owner mounts dual handles (`step` + `error`) once a fallback exists.
         sourceHandle = 'step';
       }
       return {

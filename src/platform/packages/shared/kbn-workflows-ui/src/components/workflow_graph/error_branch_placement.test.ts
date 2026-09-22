@@ -17,7 +17,7 @@ import {
   isErrorLaneOccupied,
   resolveErrorBranchPlacement,
 } from './error_branch_placement';
-import { ERROR_PORT_INSET } from './port_geometry';
+import { ERROR_PORT_FRACTION } from './port_geometry';
 import { WORKFLOW_NODE_SEP, WORKFLOW_RANK_SEP } from './workflow_layout_pipeline';
 
 describe('error_branch_placement', () => {
@@ -43,7 +43,7 @@ describe('error_branch_placement', () => {
     it('detects a sibling sitting in the horizontal-run band', () => {
       const ownerBottom = 64;
       const laneY = 64 + WORKFLOW_RANK_SEP;
-      const dropX = 300 - ERROR_PORT_INSET;
+      const dropX = 300 * ERROR_PORT_FRACTION;
       const fallbackLeft = 300 + WORKFLOW_NODE_SEP;
       expect(
         isErrorLaneOccupied({
@@ -114,7 +114,7 @@ describe('error_branch_placement', () => {
         isErrorLaneOccupied({
           laneY: origin.y,
           laneHeight: 64,
-          dropX: owner.maxX - ERROR_PORT_INSET,
+          dropX: owner.maxX * ERROR_PORT_FRACTION,
           fallbackLeft: origin.x,
           ownerBottom: owner.maxY,
           obstacles: [shiftedSibling],

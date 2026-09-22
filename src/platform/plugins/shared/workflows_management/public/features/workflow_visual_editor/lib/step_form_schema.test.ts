@@ -102,6 +102,120 @@ describe('step_form_schema', () => {
       expect(byKey.failOnError.label).toBe('Fail on error');
     });
 
+    it('maps ES|QL query strings to an esql code field (not JSON)', () => {
+      const esqlConnectors: ConnectorContractUnion[] = [
+        {
+          type: 'elasticsearch.esql.query',
+          hasConnectorId: false,
+          paramsSchema: z.object({
+            query: z.string().min(1).describe('ES|QL query string'),
+            format: z.string().optional(),
+            filter: z.record(z.string(), z.unknown()).optional(),
+          }),
+          outputSchema: z.unknown(),
+          summary: 'Run an ES|QL query',
+          description: null,
+        } as unknown as ConnectorContractUnion,
+      ];
+      const schema = getStepFormSchema('elasticsearch.esql.query', esqlConnectors)!;
+      const byKey = Object.fromEntries(schema.fields.map((f) => [f.key, f]));
+      expect(byKey.query).toMatchObject({
+        kind: 'code',
+        language: 'esql',
+        path: ['with', 'query'],
+        required: true,
+      });
+      // Object-shaped siblings still use JSON.
+      expect(byKey.filter).toMatchObject({ kind: 'code', language: 'json' });
+    });
+
+    it('keeps object-shaped query fields as JSON code', () => {
+      const searchConnectors: ConnectorContractUnion[] = [
+        {
+          type: 'elasticsearch.search',
+          hasConnectorId: false,
+          paramsSchema: z.object({
+            index: z.string().optional(),
+            query: z.record(z.string(), z.unknown()).optional(),
+          }),
+          outputSchema: z.unknown(),
+          summary: null,
+          description: null,
+        } as unknown as ConnectorContractUnion,
+      ];
+      const schema = getStepFormSchema('elasticsearch.search', searchConnectors)!;
+      expect(schema.fields.find((f) => f.key === 'query')).toMatchObject({
+        kind: 'code',
+        language: 'json',
+      });
+    });
+
+    it('maps string body fields to plaintext code (not JSON)', () => {
+      const httpConnectors: ConnectorContractUnion[] = [
+        {
+          type: 'http',
+          hasConnectorId: false,
+          paramsSchema: z.object({
+            url: z.string(),
+            body: z.string().optional(),
+          }),
+          outputSchema: z.unknown(),
+          summary: null,
+          description: null,
+        } as unknown as ConnectorContractUnion,
+      ];
+      const schema = getStepFormSchema('http', httpConnectors)!;
+      expect(schema.fields.find((f) => f.key === 'body')).toMatchObject({
+        kind: 'code',
+        language: 'plaintext',
+      });
+    });
+
+    it('resolves Kibana aliases and deprecations to a connector schema', () => {
+      const connectors: ConnectorContractUnion[] = [
+        {
+          type: 'kibana.createCase',
+          hasConnectorId: false,
+          paramsSchema: z.object({
+            title: z.string(),
+            description: z.string().optional(),
+          }),
+          outputSchema: z.unknown(),
+          summary: 'Create a case',
+          description: null,
+        } as unknown as ConnectorContractUnion,
+      ];
+      const schema = getStepFormSchema('kibana.createCaseDefaultSpace', connectors)!;
+      expect(schema).toBeDefined();
+      const byKey = Object.fromEntries(schema.fields.map((f) => [f.key, f]));
+      expect(byKey.title).toMatchObject({
+        path: ['with', 'title'],
+        required: true,
+        kind: 'text',
+      });
+      expect(byKey.description).toMatchObject({ required: false });
+    });
+
+    it('follows deprecation replacements when only the new type is registered', () => {
+      const connectors: ConnectorContractUnion[] = [
+        {
+          type: 'cases.createCase',
+          hasConnectorId: false,
+          paramsSchema: z.object({
+            title: z.string(),
+          }),
+          outputSchema: z.unknown(),
+          summary: 'Create a case',
+          description: null,
+        } as unknown as ConnectorContractUnion,
+      ];
+      const schema = getStepFormSchema('kibana.createCaseDefaultSpace', connectors)!;
+      expect(schema.fields.find((f) => f.key === 'title')).toMatchObject({
+        path: ['with', 'title'],
+        required: true,
+      });
+    });
+
     it('maps built-in `if` to a KQL code field and hides nested step arrays', () => {
       const schema = getStepFormSchema('if', connectors);
       const keys = schema!.fields.map((f) => f.key);

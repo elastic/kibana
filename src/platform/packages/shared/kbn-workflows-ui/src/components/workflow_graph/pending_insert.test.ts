@@ -11,7 +11,7 @@ import type { Node } from '@xyflow/react';
 import { transformWorkflowToGraph } from '@kbn/workflows';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { computeInsertionPoints } from './compute_insertion_points';
-import { ERROR_PORT_INSET } from './port_geometry';
+import { ERROR_PORT_FRACTION } from './port_geometry';
 import {
   computePendingInsertConnector,
   computePendingInsertOrigin,
@@ -153,7 +153,7 @@ describe('computePendingInsertConnector', () => {
     });
     const connector = computePendingInsertConnector(context, origin!, nodes, points, 'TB');
     expect(connector).toMatchObject({
-      sourceX: 20 + PENDING_NODE_WIDTH - ERROR_PORT_INSET,
+      sourceX: 20 + PENDING_NODE_WIDTH * ERROR_PORT_FRACTION,
       sourceY: 40 + PENDING_NODE_HEIGHT,
       targetX: origin!.x + PENDING_NODE_WIDTH / 2,
       targetY: origin!.y,
@@ -173,7 +173,7 @@ describe('computePendingInsertConnector', () => {
     });
     const connector = computePendingInsertConnector(context, origin!, nodes, points, 'LR');
     expect(connector).toEqual({
-      sourceX: 20 + PENDING_NODE_WIDTH - ERROR_PORT_INSET,
+      sourceX: 20 + PENDING_NODE_WIDTH * ERROR_PORT_FRACTION,
       sourceY: 40 + PENDING_NODE_HEIGHT,
       targetX: origin!.x,
       targetY: origin!.y + PENDING_NODE_HEIGHT / 2,

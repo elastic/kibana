@@ -95,7 +95,17 @@ describe('useInsertLayoutAnimation', () => {
       ({ nodes, flashNodeId }: { nodes: Node[]; flashNodeId?: string }) =>
         useInsertLayoutAnimation({
           nodes,
-          edges: [edge('into', 'a', 'new'), edge('out', 'new', 'b')],
+          edges: [
+            {
+              ...edge('into', 'a', 'new'),
+              data: { points: [{ x: 0, y: 50 }] },
+            },
+            edge('out', 'new', 'b'),
+            {
+              ...edge('unrelated', 'a', 'b'),
+              data: { points: [{ x: 10, y: 60 }] },
+            },
+          ],
           flashNodeId,
         }),
       { initialProps: { nodes: initial, flashNodeId: undefined as string | undefined } }
@@ -109,9 +119,52 @@ describe('useInsertLayoutAnimation', () => {
     act(() => {
       jest.advanceTimersByTime(16);
     });
+    const sliding = result.current.edges;
     expect(
-      result.current.edges.filter((e) => (e.data as { drawIn?: boolean } | undefined)?.drawIn)
+      sliding.filter((e) => (e.data as { drawIn?: boolean } | undefined)?.drawIn)
     ).toHaveLength(2);
+    // Absolute waypoints are cleared for every edge while nodes tween.
+    for (const e of sliding) {
+      expect((e.data as { points?: unknown } | undefined)?.points).toBeUndefined();
+    }
+  });
+
+  it('restores edge waypoints after the slide completes', () => {
+    const initial = [node('a', 0, 0), node('b', 0, 100)];
+    const edgeWithPoints = {
+      ...edge('into', 'a', 'new'),
+      data: { points: [{ x: 0, y: 50 }, { x: 0, y: 80 }] },
+    };
+    const { result, rerender } = renderHook(
+      ({ nodes, flashNodeId }: { nodes: Node[]; flashNodeId?: string }) =>
+        useInsertLayoutAnimation({
+          nodes,
+          edges: [edgeWithPoints, edge('out', 'new', 'b')],
+          flashNodeId,
+        }),
+      { initialProps: { nodes: initial, flashNodeId: undefined as string | undefined } }
+    );
+
+    rerender({
+      nodes: [node('a', 0, 0), node('new', 0, 100), node('b', 0, 230)],
+      flashNodeId: 'new',
+    });
+
+    act(() => {
+      jest.advanceTimersByTime(16);
+    });
+    expect(result.current.isSliding).toBe(true);
+
+    act(() => {
+      jest.advanceTimersByTime(INSERT_LAYOUT_MS + 50);
+    });
+    expect(result.current.isSliding).toBe(false);
+    const restored = result.current.edges.find((e) => e.id === 'into');
+    expect((restored?.data as { points?: unknown; drawIn?: boolean } | undefined)?.drawIn).toBeUndefined();
+    expect((restored?.data as { points?: unknown } | undefined)?.points).toEqual([
+      { x: 0, y: 50 },
+      { x: 0, y: 80 },
+    ]);
   });
 
   it('marks the inserted node with flash after the slide', () => {

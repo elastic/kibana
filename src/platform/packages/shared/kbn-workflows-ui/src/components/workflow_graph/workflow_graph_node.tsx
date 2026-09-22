@@ -24,6 +24,7 @@ import { keyframes } from '@emotion/react';
 import { Handle, Position } from '@xyflow/react';
 import type { Node, NodeProps } from '@xyflow/react';
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus, TRIGGER_STEP_TYPES } from '@kbn/workflows';
@@ -43,7 +44,6 @@ import {
 } from './port_geometry';
 import { WorkflowGraphConnectionPorts } from './workflow_graph_connection_ports';
 import { PORT_SPRING_EASE, PORT_SPRING_MS } from './workflow_graph_connection_ports';
-import { toAnchorRect } from './workflow_graph_insert_control';
 import { INSERT_FLASH_MS } from './use_insert_layout_animation';
 import { getStepIconType, getTriggerTypeIconType } from '../step_icons';
 
@@ -61,12 +61,16 @@ export interface WorkflowGraphNodeData extends Record<string, unknown> {
   /**
    * Raw step definition attached by `transformWorkflowToGraph`. Read by the
    * node to surface configuration the row UI cares about (e.g. retry-on-failure
-   * `max-attempts` for the badge) without having to thread the workflow YAML
-   * down a second time.
+   * `max-attempts` / continue-on-failure for corner badges) without having to
+   * thread the workflow YAML down a second time.
    */
   readonly step?: {
     readonly retry?: { readonly 'max-attempts'?: number };
-    readonly 'on-failure'?: { readonly retry?: { readonly 'max-attempts'?: number } };
+    readonly 'on-failure'?: {
+      readonly retry?: { readonly 'max-attempts'?: number };
+      readonly continue?: boolean;
+      readonly fallback?: readonly unknown[];
+    };
   };
 }
 
@@ -95,7 +99,18 @@ function getStepMaxAttempts(step: WorkflowGraphNodeData['step']): number | undef
   return typeof value === 'number' && value > 0 ? value : undefined;
 }
 
-const CHIP_SIZE = 28;
+/** True when `on-failure.continue` is enabled. */
+function getStepContinuesOnFailure(step: WorkflowGraphNodeData['step']): boolean {
+  return step?.['on-failure']?.continue === true;
+}
+
+/** True when `on-failure.fallback` has at least one step (graph error route). */
+function getStepHasFallback(step: WorkflowGraphNodeData['step']): boolean {
+  const fallback = step?.['on-failure']?.fallback;
+  return Array.isArray(fallback) && fallback.length > 0;
+}
+
+const CHIP_SIZE = 32;
 
 type EuiTheme = ReturnType<typeof useEuiTheme>['euiTheme'];
 
@@ -201,15 +216,12 @@ function NodeIconChip({
   border,
   borderRadius,
   children,
-  fill,
   useAiGradient,
 }: {
   background: string;
   border: string;
   borderRadius: string | number;
   children: React.ReactNode;
-  /** Stretch to the node's inner height so padding stays even on all sides. */
-  fill?: boolean;
   useAiGradient?: boolean;
 }) {
   const euiThemeContext = useEuiTheme();
@@ -218,9 +230,8 @@ function NodeIconChip({
       css={[
         {
           flex: '0 0 auto',
-          ...(fill
-            ? { alignSelf: 'stretch', aspectRatio: '1 / 1', width: 'auto' }
-            : { width: CHIP_SIZE, height: CHIP_SIZE }),
+          width: CHIP_SIZE,
+          height: CHIP_SIZE,
           ...(useAiGradient
             ? {}
             : { background, border: `1px solid ${border}` }),
@@ -310,58 +321,32 @@ function NodePreviewCard({
   );
 }
 
-function NodeRetryBadge({ maxAttempts }: { maxAttempts: number }) {
-  const { euiTheme } = useEuiTheme();
-  const retryAria = i18n.translate('workflowsUi.graphNode.retryBadgeAria', {
-    defaultMessage: '{count, plural, one {# retry} other {# retries}} on failure',
-    values: { count: maxAttempts },
-  });
-  return (
-    <EuiToolTip
-      content={i18n.translate('workflowsUi.graphNode.retryBadgeTooltip', {
-        defaultMessage:
-          'Retries on failure up to {count, plural, one {# attempt} other {# attempts}}',
-        values: { count: maxAttempts },
-      })}
-      position="top"
-      disableScreenReaderOutput
-      display="block"
-      // Position the tooltip anchor (not the child) so the tip tracks the badge
-      // instead of the node's untransformed flow box.
-      anchorProps={{
-        css: {
-          position: 'absolute',
-          top: 0,
-          right: 0,
-          transform: 'translate(40%, -40%)',
-          zIndex: 1,
-        },
-      }}
-    >
-      <span
-        tabIndex={0}
-        data-test-subj="workflowGraphNodeRetryBadge"
-        aria-label={retryAria}
-        css={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: 2,
-          padding: '1px 6px',
-          background: euiTheme.colors.backgroundBaseWarning,
-          border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseWarning}`,
-          borderRadius: euiTheme.size.l,
-          color: euiTheme.colors.textWarning,
-          fontFamily: euiTheme.font.family,
-          fontSize: 11,
-          fontWeight: 600,
-          lineHeight: '16px',
-        }}
-      >
-        <EuiIcon type="refresh" size="s" color={euiTheme.colors.textWarning} aria-hidden={true} />
-        {maxAttempts}
-      </span>
-    </EuiToolTip>
-  );
+/**
+ * Compact subtitle under the step name for on-failure retry / continue.
+ * Keeps count when retrying; fits the existing ~56px node without growing it.
+ */
+function getOnFailureDescription(
+  maxAttempts: number | undefined,
+  continuesOnFailure: boolean
+): string | undefined {
+  if (maxAttempts != null && continuesOnFailure) {
+    return i18n.translate('workflowsUi.graphNode.retryAndContinueOnFailure', {
+      defaultMessage: 'Retry ({count}) and continue on failure',
+      values: { count: maxAttempts },
+    });
+  }
+  if (maxAttempts != null) {
+    return i18n.translate('workflowsUi.graphNode.retryOnFailure', {
+      defaultMessage: 'Retry on failure ({count})',
+      values: { count: maxAttempts },
+    });
+  }
+  if (continuesOnFailure) {
+    return i18n.translate('workflowsUi.graphNode.continueOnFailure', {
+      defaultMessage: 'Continue on failure',
+    });
+  }
+  return undefined;
 }
 
 function NodeStatusIcon({
@@ -474,33 +459,33 @@ function NodeIncompleteIndicator() {
   );
 }
 
+/** Closed, or open from the ⋯ button / a right-click at viewport coords. */
+type NodeMenuState =
+  | { readonly open: false }
+  | { readonly open: true; readonly at?: { readonly x: number; readonly y: number } };
+
 /**
  * Right-aligned node control: ⋯ opens the step context menu.
+ * Right-click passes `at` so the same menu opens under the cursor.
  */
 function NodeActionCluster({
   nodeId,
   kind,
-  canAddErrorHandling,
   edit,
-  onMenuOpenChange,
+  menu,
+  onMenuChange,
 }: {
   nodeId: string;
   kind: NodeKind;
-  canAddErrorHandling: boolean;
   edit: WorkflowGraphEditActions;
-  onMenuOpenChange?: (open: boolean) => void;
+  menu: NodeMenuState;
+  onMenuChange: (next: NodeMenuState) => void;
 }) {
   const { euiTheme } = useEuiTheme();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const clusterRef = useRef<HTMLDivElement | null>(null);
-  const setMenuOpen = useCallback(
-    (open: boolean) => {
-      setIsMenuOpen(open);
-      onMenuOpenChange?.(open);
-    },
-    [onMenuOpenChange]
-  );
-  const closeMenu = useCallback(() => setMenuOpen(false), [setMenuOpen]);
+  const isMenuOpen = menu.open;
+  const cursorAt = menu.open ? menu.at : undefined;
+  const closeMenu = useCallback(() => onMenuChange({ open: false }), [onMenuChange]);
 
   // React Flow's pane uses pointer events / stopPropagation that can skip
   // EuiPopover's document mouseup outside-click detector — close on any
@@ -515,6 +500,7 @@ function NodeActionCluster({
       }
       if (clusterRef.current?.contains(target)) return;
       if (target.closest('[data-test-subj="workflowGraphNodeMenuPanel"]')) return;
+      if (target.closest('[data-test-subj="workflowGraphNodeContextMenuAnchor"]')) return;
       closeMenu();
     };
     document.addEventListener('pointerdown', onPointerDown, true);
@@ -547,26 +533,6 @@ function NodeActionCluster({
     >
       {i18n.translate('workflowsUi.graphNode.editStep', { defaultMessage: 'Edit step' })}
     </EuiContextMenuItem>,
-  ];
-  if (kind !== 'trigger' && canAddErrorHandling) {
-    items.push(
-      <EuiContextMenuItem
-        key="error"
-        icon="branch"
-        onClick={(e: React.MouseEvent<Element>) => {
-          const anchor = toAnchorRect(e.currentTarget);
-          closeMenu();
-          edit.onInsert({ mode: 'error', stepId: nodeId }, anchor);
-        }}
-        data-test-subj="workflowGraphNodeMenuAddErrorHandling"
-      >
-        {i18n.translate('workflowsUi.graphNode.addErrorHandling', {
-          defaultMessage: 'Add error handling',
-        })}
-      </EuiContextMenuItem>
-    );
-  }
-  items.push(
     <EuiContextMenuItem
       key="delete"
       icon="trash"
@@ -575,7 +541,24 @@ function NodeActionCluster({
       data-test-subj="workflowGraphNodeMenuDelete"
     >
       {deleteLabel}
-    </EuiContextMenuItem>
+    </EuiContextMenuItem>,
+  ];
+
+  const menuPanel = <EuiContextMenuPanel items={items} />;
+
+  const ellipsisButton = (
+    <EuiToolTip content={menuLabel} disableScreenReaderOutput>
+      <EuiButtonIcon
+        iconType="boxesVertical"
+        size="s"
+        color="text"
+        aria-label={menuLabel}
+        aria-haspopup="menu"
+        aria-expanded={isMenuOpen}
+        onClick={() => onMenuChange(isMenuOpen ? { open: false } : { open: true })}
+        data-test-subj="workflowGraphNodeMenuButton"
+      />
+    </EuiToolTip>
   );
 
   return (
@@ -588,31 +571,54 @@ function NodeActionCluster({
       role="presentation"
       data-test-subj="workflowGraphNodeActionCluster"
     >
-      <EuiPopover
-        isOpen={isMenuOpen}
-        closePopover={closeMenu}
-        panelPaddingSize="none"
-        anchorPosition="downRight"
-        aria-label={menuLabel}
-        ownFocus
-        panelProps={{ 'data-test-subj': 'workflowGraphNodeMenuPanel' }}
-        button={
-          <EuiToolTip content={menuLabel} disableScreenReaderOutput>
-            <EuiButtonIcon
-              iconType="boxesVertical"
-              size="s"
-              color="text"
-              aria-label={menuLabel}
-              aria-haspopup="menu"
-              aria-expanded={isMenuOpen}
-              onClick={() => setMenuOpen(!isMenuOpen)}
-              data-test-subj="workflowGraphNodeMenuButton"
-            />
-          </EuiToolTip>
-        }
-      >
-        <EuiContextMenuPanel items={items} />
-      </EuiPopover>
+      {cursorAt
+        ? createPortal(
+            <div
+              data-test-subj="workflowGraphNodeContextMenuAnchor"
+              css={{
+                position: 'fixed',
+                left: cursorAt.x,
+                top: cursorAt.y,
+                width: 0,
+                height: 0,
+                zIndex: 10000,
+              }}
+            >
+              <EuiPopover
+                isOpen
+                closePopover={closeMenu}
+                panelPaddingSize="none"
+                anchorPosition="downLeft"
+                aria-label={menuLabel}
+                ownFocus
+                panelProps={{ 'data-test-subj': 'workflowGraphNodeMenuPanel' }}
+                button={<span />}
+              >
+                {menuPanel}
+              </EuiPopover>
+            </div>,
+            document.body
+          )
+        : null}
+      {/* Keep the ⋯ control in-tree; when right-click is open it is visual-only
+          (panel is portaled at the cursor). Button click still toggles the
+          button-anchored popover when there is no cursor anchor. */}
+      {cursorAt ? (
+        ellipsisButton
+      ) : (
+        <EuiPopover
+          isOpen={isMenuOpen}
+          closePopover={closeMenu}
+          panelPaddingSize="none"
+          anchorPosition="downRight"
+          aria-label={menuLabel}
+          ownFocus
+          panelProps={{ 'data-test-subj': 'workflowGraphNodeMenuPanel' }}
+          button={ellipsisButton}
+        >
+          {menuPanel}
+        </EuiPopover>
+      )}
     </div>
   );
 }
@@ -688,14 +694,19 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
   const displayLabel = isTriggerNode ? label : deslugifyStepName(label);
 
   const iconType = isTriggerNode ? getTriggerTypeIconType(stepType) : getStepIconType(stepType);
-  const maxAttempts = getStepMaxAttempts(step);
+  const onFailureDescription = getOnFailureDescription(
+    getStepMaxAttempts(step),
+    getStepContinuesOnFailure(step)
+  );
+  const hasFallback = getStepHasFallback(step);
   const targetHandlePos = node.targetPosition ?? Position.Top;
   const sourceHandlePos = node.sourcePosition ?? Position.Bottom;
 
   const isActive = node.selected;
   const [isHovered, setIsHovered] = useState(false);
   const [isFocusWithin, setIsFocusWithin] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [menu, setMenu] = useState<NodeMenuState>({ open: false });
+  const isMenuOpen = menu.open;
   const { onStepRun, canRunSteps, renderStepIcon, onStepSelect, edit, incompleteNodeIds, portTargetsByNodeId } =
     useWorkflowGraphActions();
 
@@ -707,7 +718,6 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
     Boolean(canRunSteps && onStepRun) && !isTrigger && !colors.hasStatusIcon;
   const isFallback = Boolean(fallbackOf);
   const nodeKind: NodeKind = isTriggerNode ? 'trigger' : isFallback ? 'fallback' : 'step';
-  const hasOnFailure = Boolean((step as Record<string, unknown> | undefined)?.['on-failure']);
   const isIncomplete = Boolean(incompleteNodeIds?.has(node.id));
   const editMode = edit !== undefined && !preview;
   const isIfNode = stepType === 'if';
@@ -770,6 +780,12 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
           e.stopPropagation();
           onStepSelect?.(node.id);
         }}
+        onContextMenu={(e) => {
+          if (!editMode) return;
+          e.preventDefault();
+          e.stopPropagation();
+          setMenu({ open: true, at: { x: e.clientX, y: e.clientY } });
+        }}
         data-test-subj={`workflowGraphNode-${node.id}`}
         css={[
           {
@@ -817,7 +833,6 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
           background={colors.chipBackground}
           border={colors.chipBorder}
           borderRadius={borderRadius}
-          fill
           useAiGradient={colors.chipUseAiGradient}
         >
           <NodeStepIcon
@@ -830,28 +845,56 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
           />
         </NodeIconChip>
 
-        <span
+        <div
           css={{
             flex: '1 1 auto',
-            fontFamily: euiTheme.font.family,
-            fontSize: 12,
-            fontStyle: 'normal',
-            fontWeight: 500,
-            lineHeight: '24px',
-            color: colors.stepLabelColor,
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
             minWidth: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            gap: onFailureDescription ? 2 : 0,
+            // Nudge the stack up slightly when a subtitle is present so both
+            // lines fit the fixed ~56px node without growing the card.
+            transform: onFailureDescription ? 'translateY(-1px)' : undefined,
           }}
-          title={displayLabel}
         >
-          {displayLabel}
-        </span>
+          <span
+            css={{
+              fontFamily: euiTheme.font.family,
+              fontSize: 12,
+              fontStyle: 'normal',
+              fontWeight: 500,
+              lineHeight: onFailureDescription ? '16px' : '24px',
+              color: colors.stepLabelColor,
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            }}
+            title={displayLabel}
+          >
+            {displayLabel}
+          </span>
+          {onFailureDescription ? (
+            <span
+              data-test-subj="workflowGraphNodeOnFailureDescription"
+              title={onFailureDescription}
+              css={{
+                fontFamily: euiTheme.font.family,
+                fontSize: 10,
+                fontWeight: 400,
+                lineHeight: '14px',
+                color: euiTheme.colors.textSubdued,
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}
+            >
+              {onFailureDescription}
+            </span>
+          ) : null}
+        </div>
 
         {isIncomplete && <NodeIncompleteIndicator />}
-
-        {maxAttempts != null && <NodeRetryBadge maxAttempts={maxAttempts} />}
 
         {colors.hasStatusIcon && (
           <NodeStatusIcon
@@ -890,17 +933,9 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
               <NodeActionCluster
                 nodeId={node.id}
                 kind={nodeKind}
-                canAddErrorHandling={
-                  nodeKind === 'step' &&
-                  !hasOnFailure &&
-                  stepType !== 'if' &&
-                  stepType !== 'foreach' &&
-                  stepType !== 'parallel' &&
-                  stepType !== 'while' &&
-                  stepType !== 'merge'
-                }
                 edit={edit}
-                onMenuOpenChange={setIsMenuOpen}
+                menu={menu}
+                onMenuChange={setMenu}
               />
             )}
           </div>
@@ -929,7 +964,7 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
             position={sourceHandlePos}
             style={{ opacity: 0, ...handleAlongStyle(IF_PORT_FALSE, isHorizontal) }}
           />
-          {hasOnFailure && (
+          {hasFallback && (
             <Handle
               type="source"
               id="error"
@@ -939,7 +974,7 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
             />
           )}
         </>
-      ) : hasOnFailure ? (
+      ) : hasFallback ? (
         <>
           <Handle
             type="source"

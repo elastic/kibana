@@ -9,13 +9,16 @@
 
 import {
   EuiAccordion,
-  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiEmptyPrompt,
   EuiFieldNumber,
   EuiFieldText,
   EuiFormRow,
+  EuiPopover,
   EuiSelect,
   EuiSwitch,
   EuiTab,
@@ -30,7 +33,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { isMap, parseDocument, stringify as stringifyYaml } from 'yaml';
 import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
-import { XJSON_LANG_ID, YAML_LANG_ID } from '@kbn/monaco';
+import { ESQL_LANG_ID, XJSON_LANG_ID, YAML_LANG_ID } from '@kbn/monaco';
 import type { ConnectorContractUnion, WorkflowYaml } from '@kbn/workflows';
 import { getBuiltInStepDefinition } from '@kbn/workflows';
 import { ensureWorkflowGraphEuiIcons, stepSupportsErrorHandling, WORKFLOWS_MONACO_EDITOR_THEME } from '@kbn/workflows-ui';
@@ -115,6 +118,8 @@ const monacoLanguageFor = (field: StepFormField): string => {
   switch (field.language) {
     case 'json':
       return XJSON_LANG_ID;
+    case 'esql':
+      return ESQL_LANG_ID;
     case 'kuery':
     case 'plaintext':
     default:
@@ -636,11 +641,12 @@ export function StepConfigPanel({
         css={{
           flex: '1 1 auto',
           minHeight: 0,
-          overflow: view === 'yaml' ? 'hidden' : 'auto',
+          overflow: 'hidden',
           ...(view === 'form'
             ? {
+                display: 'flex',
+                flexDirection: 'column' as const,
                 paddingInline: euiTheme.size.m,
-                paddingBlock: euiTheme.size.s,
                 boxSizing: 'border-box' as const,
               }
             : null),
@@ -649,9 +655,10 @@ export function StepConfigPanel({
         {view === 'form' ? (
           parsed.valid ? (
             <StepForm
+              key={initialFragment}
               fields={fields}
+              hasSchema={schema !== undefined}
               fragment={fragment}
-              initialFragment={initialFragment}
               indent={indent}
               stepType={stepType}
               showValidation={showValidation}
@@ -735,8 +742,8 @@ export function StepConfigPanel({
 
 function StepForm({
   fields,
+  hasSchema,
   fragment,
-  initialFragment,
   indent,
   stepType,
   showValidation,
@@ -750,8 +757,9 @@ function StepForm({
   onViewFallbackOnCanvas,
 }: {
   fields: readonly StepFormField[];
+  /** False when no connector/built-in schema was resolved for this step type. */
+  hasSchema: boolean;
   fragment: string;
-  initialFragment: string;
   indent: number;
   stepType: string;
   showValidation: boolean;
@@ -765,41 +773,70 @@ function StepForm({
   onViewFallbackOnCanvas?: (stepName: string) => void;
 }) {
   const { euiTheme } = useEuiTheme();
-  const configurationId = useGeneratedHtmlId({ prefix: 'workflowStepConfigConfiguration' });
-  const advancedId = useGeneratedHtmlId({ prefix: 'workflowStepConfigAdvancedFields' });
   const errorHandlingId = useGeneratedHtmlId({ prefix: 'workflowStepConfigErrorHandling' });
+  const [optionalPickerOpen, setOptionalPickerOpen] = useState(false);
 
-  // Placement is a pure function of the schema — never of field values.
-  // Required → Configuration; optionals → Advanced unless `advanced: false` promotes.
-  const { configurationFields, advancedFields } = useMemo(() => {
-    const configuration: StepFormField[] = [];
-    const advanced: StepFormField[] = [];
+  // Primary = required or `advanced: false` (promoted). Everything else is optional
+  // and only appears after the user adds it (or when it already has a value).
+  const { primaryFields, optionalFields } = useMemo(() => {
+    const primary: StepFormField[] = [];
+    const optional: StepFormField[] = [];
     for (const field of fields) {
-      if (field.required || field.advanced === false) configuration.push(field);
-      else advanced.push(field);
+      if (field.required || field.advanced === false) primary.push(field);
+      else optional.push(field);
     }
-    return { configurationFields: configuration, advancedFields: advanced };
+    return { primaryFields: primary, optionalFields: optional };
   }, [fields]);
 
-  const showErrorHandling =
-    !isFallbackStep && stepSupportsErrorHandling(stepType);
-  const showAdvanced = advancedFields.length > 0;
-  const sectionCount = 1 + (showAdvanced ? 1 : 0) + (showErrorHandling ? 1 : 0);
-  const useAccordionChrome = sectionCount >= 2;
+  const optionalById = useMemo(() => {
+    const map = new Map<string, StepFormField>();
+    for (const field of optionalFields) map.set(fieldId(field), field);
+    return map;
+  }, [optionalFields]);
 
-  // Live count from the same requiredness source as the node incomplete indicator.
-  const liveMissingRequiredCount = useMemo(() => {
-    let count = missingName ? 1 : 0;
-    for (const field of fields) {
-      if (!field.required) continue;
-      if (isEmptyFieldValue(toJs(readFragmentValue(fragment, field.path)))) count += 1;
+  const [revealedOptionalIds, setRevealedOptionalIds] = useState<readonly string[]>(() => {
+    const ids: string[] = [];
+    for (const field of optionalFields) {
+      if (!isEmptyFieldValue(toJs(readFragmentValue(fragment, field.path)))) {
+        ids.push(fieldId(field));
+      }
     }
-    return count;
-  }, [fields, fragment, missingName]);
+    return ids;
+  });
+
+  // Auto-reveal optionals that gain a value (e.g. YAML tab edits).
+  useEffect(() => {
+    setRevealedOptionalIds((prev) => {
+      let next: string[] | undefined;
+      for (const field of optionalFields) {
+        const id = fieldId(field);
+        if (prev.includes(id)) continue;
+        if (isEmptyFieldValue(toJs(readFragmentValue(fragment, field.path)))) continue;
+        if (!next) next = [...prev];
+        next.push(id);
+      }
+      return next ?? prev;
+    });
+  }, [fragment, optionalFields]);
+
+  const revealedOptionalFields = useMemo(() => {
+    const out: StepFormField[] = [];
+    for (const id of revealedOptionalIds) {
+      const field = optionalById.get(id);
+      if (field) out.push(field);
+    }
+    return out;
+  }, [optionalById, revealedOptionalIds]);
+
+  const availableOptionalFields = useMemo(
+    () => optionalFields.filter((field) => !revealedOptionalIds.includes(fieldId(field))),
+    [optionalFields, revealedOptionalIds]
+  );
+
+  const showErrorHandling = !isFallbackStep && stepSupportsErrorHandling(stepType);
 
   const errorConfigured = showErrorHandling && hasOnFailureConfigured(fragment);
 
-  // Sibling EuiFormRows: within-field gap is EUI row-gap (4px); between-field gap is size.l.
   const formStackCss = {
     '.euiFormRow + .euiFormRow': {
       marginTop: euiTheme.size.l,
@@ -819,143 +856,162 @@ function StepForm({
     />
   );
 
-  const configurationBody = (
-    <div css={formStackCss}>
-      {configurationFields.map((field) => renderField(field, true))}
-    </div>
-  );
+  const addOptionalField = useCallback((field: StepFormField) => {
+    const id = fieldId(field);
+    setRevealedOptionalIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
+    setOptionalPickerOpen(false);
+  }, []);
 
-  const advancedBody =
-    showAdvanced ? (
-      <div css={formStackCss}>
-        {advancedFields.map((field) => renderField(field, false))}
-      </div>
-    ) : null;
-
-  const errorBody = showErrorHandling ? (
-    <StepErrorHandlingSection
-      fragment={fragment}
-      indent={indent}
-      onFragmentChange={onFragmentChange}
-      onRevealErrorPort={onRevealErrorPort}
-      onViewFallbackOnCanvas={onViewFallbackOnCanvas}
-    />
-  ) : null;
-
-  if (!useAccordionChrome) {
-    return (
-      <div
-        data-test-subj="workflowStepConfigPanelForm"
-        key={initialFragment}
-        // Match the scroll container's inline padding when accordion chrome is absent.
-        css={{ paddingTop: euiTheme.size.m }}
-      >
-        {configurationBody}
-      </div>
-    );
-  }
-
-  const sectionDivider = {
-    borderTop: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
-  };
-
-  // Match shared-ux FlyoutAccordion: EuiTitle xs (16px), no EUI default underline.
   const accordionButtonCss = {
     minHeight: 42,
     alignItems: 'center' as const,
-    // EUI accordion buttons underline on hover/focus by default.
     '&:hover, &:focus': {
       textDecoration: 'none !important',
     },
   };
 
-  const sectionHeader = (title: string, badge?: React.ReactNode) => (
-    <span
+  const optionalPickerItems = availableOptionalFields.map((field) => (
+    <EuiContextMenuItem
+      key={fieldId(field)}
+      onClick={() => addOptionalField(field)}
+      data-test-subj={`workflowStepConfigAddOptionalOption-${fieldId(field)}`}
+    >
+      {field.label}
+    </EuiContextMenuItem>
+  ));
+
+  return (
+    <div
+      data-test-subj="workflowStepConfigPanelForm"
       css={{
         display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: euiTheme.size.s,
-        width: '100%',
-        paddingRight: euiTheme.size.s,
+        flexDirection: 'column',
+        flex: '1 1 auto',
+        minHeight: 0,
+        height: '100%',
       }}
     >
-      <EuiTitle size="xs" css={{ fontSize: euiTheme.size.base }}>
-        <span>{title}</span>
-      </EuiTitle>
-      {badge}
-    </span>
-  );
-
-  const missingBadge =
-    liveMissingRequiredCount > 0 ? (
-      <EuiBadge
-        color="warning"
-        iconType="warning"
-        data-test-subj="workflowStepConfigMissingRequiredBadge"
+      <div
+        css={{
+          flex: '1 1 auto',
+          minHeight: 0,
+          overflow: 'auto',
+          paddingBlock: euiTheme.size.m,
+        }}
       >
-        {liveMissingRequiredCount === 1
-          ? i18n.translate('workflows.stepConfigPanel.oneRequiredMissing', {
-              defaultMessage: '1 required field missing',
-            })
-          : i18n.translate('workflows.stepConfigPanel.nRequiredMissing', {
-              defaultMessage: '{count} required fields missing',
-              values: { count: liveMissingRequiredCount },
-            })}
-      </EuiBadge>
-    ) : null;
-
-  // Remount accordions when the panel rebinds so section defaults reset.
-  return (
-    <div data-test-subj="workflowStepConfigPanelForm" key={initialFragment}>
-      <EuiAccordion
-        id={configurationId}
-        initialIsOpen
-        buttonProps={{ css: accordionButtonCss }}
-        buttonContent={sectionHeader(
-          i18n.translate('workflows.stepConfigPanel.required', {
-            defaultMessage: 'Required',
-          }),
-          missingBadge
+        {fields.length === 0 ? (
+          <EuiEmptyPrompt
+            paddingSize="m"
+            titleSize="xs"
+            iconType={hasSchema ? 'checkCircleFill' : 'code'}
+            title={
+              <h3>
+                {hasSchema
+                  ? i18n.translate('workflows.stepConfigPanel.noInputsTitle', {
+                      defaultMessage: 'No configuration needed',
+                    })
+                  : i18n.translate('workflows.stepConfigPanel.formUnavailableTitle', {
+                      defaultMessage: 'Form unavailable',
+                    })}
+              </h3>
+            }
+            body={
+              <EuiText size="s" color="subdued">
+                {hasSchema
+                  ? i18n.translate('workflows.stepConfigPanel.noInputsBody', {
+                      defaultMessage:
+                        'This step has no inputs to set. You can still rename it above or configure error handling below.',
+                    })
+                  : i18n.translate('workflows.stepConfigPanel.formUnavailableBody', {
+                      defaultMessage:
+                        'This step type is not mapped to a form. Switch to the YAML tab to edit its configuration.',
+                    })}
+              </EuiText>
+            }
+            data-test-subj="workflowStepConfigPanelEmpty"
+          />
+        ) : (
+          <div css={formStackCss} data-test-subj="workflowStepConfigPrimaryFields">
+            {primaryFields.map((field) => renderField(field, true))}
+            {revealedOptionalFields.map((field) => renderField(field, false))}
+          </div>
         )}
-        data-test-subj="workflowStepConfigConfiguration"
-      >
-        <div css={{ paddingBottom: euiTheme.size.m }}>{configurationBody}</div>
-      </EuiAccordion>
 
-      {showAdvanced ? (
-        <div css={sectionDivider}>
-          <EuiAccordion
-            id={advancedId}
-            initialIsOpen={false}
-            buttonProps={{ css: accordionButtonCss }}
-            buttonContent={sectionHeader(
-              i18n.translate('workflows.stepConfigPanel.optional', {
-                defaultMessage: 'Optional',
-              })
-            )}
-            data-test-subj="workflowStepConfigAdvancedFields"
-          >
-            <div css={{ paddingBottom: euiTheme.size.m }}>{advancedBody}</div>
-          </EuiAccordion>
-        </div>
-      ) : null}
+        {availableOptionalFields.length > 0 ? (
+          <div css={{ marginTop: euiTheme.size.m }}>
+            <EuiPopover
+              isOpen={optionalPickerOpen}
+              closePopover={() => setOptionalPickerOpen(false)}
+              panelPaddingSize="none"
+              anchorPosition="downLeft"
+              button={
+                <EuiButtonEmpty
+                  size="s"
+                  iconType="plusCircle"
+                  flush="left"
+                  onClick={() => setOptionalPickerOpen((open) => !open)}
+                  data-test-subj="workflowStepConfigAddOptionalField"
+                >
+                  {i18n.translate('workflows.stepConfigPanel.addOptionalField', {
+                    defaultMessage: 'Add optional field',
+                  })}
+                </EuiButtonEmpty>
+              }
+            >
+              <EuiContextMenuPanel
+                size="s"
+                items={optionalPickerItems}
+                data-test-subj="workflowStepConfigOptionalFieldMenu"
+              />
+            </EuiPopover>
+          </div>
+        ) : null}
+      </div>
 
       {showErrorHandling ? (
-        <div css={sectionDivider}>
+        <div
+          css={{
+            flex: '0 0 auto',
+            borderTop: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
+            background: euiTheme.colors.backgroundBasePlain,
+          }}
+        >
           <EuiAccordion
             id={errorHandlingId}
             initialIsOpen={false}
             buttonProps={{ css: accordionButtonCss }}
-            buttonContent={sectionHeader(
-              i18n.translate('workflows.stepConfigPanel.errorHandling', {
-                defaultMessage: 'Error handling',
-              }),
-              errorConfigured ? <ErrorHandlingConfiguredBadge /> : null
-            )}
+            buttonContent={
+              <span
+                css={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: euiTheme.size.s,
+                  width: '100%',
+                  paddingRight: euiTheme.size.s,
+                }}
+              >
+                <EuiTitle size="xs" css={{ fontSize: euiTheme.size.base }}>
+                  <span>
+                    {i18n.translate('workflows.stepConfigPanel.errorHandling', {
+                      defaultMessage: 'Error handling',
+                    })}
+                  </span>
+                </EuiTitle>
+                {errorConfigured ? <ErrorHandlingConfiguredBadge /> : null}
+              </span>
+            }
             data-test-subj="workflowStepConfigErrorHandlingSection"
           >
-            <div css={{ paddingBottom: euiTheme.size.m }}>{errorBody}</div>
+            <div css={{ paddingBottom: euiTheme.size.m }}>
+              <StepErrorHandlingSection
+                fragment={fragment}
+                indent={indent}
+                onFragmentChange={onFragmentChange}
+                onRevealErrorPort={onRevealErrorPort}
+                onViewFallbackOnCanvas={onViewFallbackOnCanvas}
+              />
+            </div>
           </EuiAccordion>
         </div>
       ) : null}
@@ -1015,14 +1071,18 @@ function StepFieldRow({
     if (showValidation) setAccused(true);
   }, [showValidation]);
 
-  useEffect(() => () => onDraftErrorChange(undefined), [onDraftErrorChange]);
+  const onDraftErrorChangeRef = useRef(onDraftErrorChange);
+  onDraftErrorChangeRef.current = onDraftErrorChange;
+  // Clear parent draft-error slot only when this row unmounts — not when the
+  // parent re-creates the callback identity on every render.
+  useEffect(() => () => onDraftErrorChangeRef.current(undefined), []);
 
   const setDraftError = useCallback(
     (error: string | undefined) => {
       setJsonDraftError(error);
-      onDraftErrorChange(error);
+      onDraftErrorChangeRef.current(error);
     },
-    [onDraftErrorChange]
+    []
   );
 
   const optionalLabel = i18n.translate('workflows.stepConfigPanel.optional', {
@@ -1272,6 +1332,8 @@ function CodeField({
   onDraftErrorChange: (error: string | undefined) => void;
 }) {
   const { euiTheme } = useEuiTheme();
+  // Match EUI textarea / form-control padding (`controlPadding` = size.m).
+  const controlPaddingPx = parseInt(String(euiTheme.size.m), 10);
   const isJson = field.language === 'json';
   const shellRef = useRef<HTMLDivElement | null>(null);
   const editorRef = useRef<{
@@ -1287,10 +1349,14 @@ function CodeField({
   }, [value, isJson]);
   const [draft, setDraft] = useState(external);
 
+  // Sync from the form value only when that value changes — do not depend on
+  // unstable callback identities (those re-created every parent render and would
+  // reset the draft on every keystroke).
   useEffect(() => {
     setDraft(external);
     onDraftErrorChange(undefined);
-  }, [external, onDraftErrorChange]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- onDraftErrorChange is intentionally omitted
+  }, [external]);
 
   useEffect(() => {
     const shell = shellRef.current;
@@ -1358,8 +1424,8 @@ function CodeField({
             <div
               css={{
                 position: 'absolute',
-                top: euiTheme.size.xxs,
-                right: euiTheme.size.xxs,
+                top: euiTheme.size.m,
+                right: euiTheme.size.m,
                 zIndex: 2,
               }}
             >
@@ -1396,6 +1462,29 @@ function CodeField({
                     editor.revealPosition(pos);
                     editor.focus();
                   },
+                  replaceText: (start: number, end: number, text: string) => {
+                    const model = editor.getModel();
+                    if (!model) return false;
+                    const startPos = model.getPositionAt(Math.max(0, start));
+                    const endPos = model.getPositionAt(Math.max(0, end));
+                    editor.focus();
+                    editor.executeEdits('workflow-data-reference', [
+                      {
+                        range: {
+                          startLineNumber: startPos.lineNumber,
+                          startColumn: startPos.column,
+                          endLineNumber: endPos.lineNumber,
+                          endColumn: endPos.column,
+                        },
+                        text,
+                        forceMoveMarkers: true,
+                      },
+                    ]);
+                    const nextPos = model.getPositionAt(start + text.length);
+                    editor.setPosition(nextPos);
+                    editor.revealPosition(nextPos);
+                    return true;
+                  },
                 };
                 editorRef.current = bridge;
                 registerSelection(bridge);
@@ -1406,7 +1495,13 @@ function CodeField({
                 fontSize: 12,
                 minimap: { enabled: false },
                 lineNumbers: 'off',
+                lineNumbersMinChars: 0,
+                glyphMargin: false,
                 folding: false,
+                // Monaco only pads top/bottom; lineDecorationsWidth insets the left
+                // when line numbers are off — matches EUI textarea controlPadding.
+                padding: { top: controlPaddingPx, bottom: controlPaddingPx },
+                lineDecorationsWidth: controlPaddingPx,
                 scrollBeyondLastLine: false,
                 wordWrap: 'on',
                 scrollbar: { vertical: 'auto', horizontal: 'hidden' },

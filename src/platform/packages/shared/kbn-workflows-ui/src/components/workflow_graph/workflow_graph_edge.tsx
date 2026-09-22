@@ -135,9 +135,12 @@ function WorkflowGraphEdgeInner(props: EdgeProps) {
         css={
           drawIn
             ? {
-                strokeDasharray: 1,
-                strokeDashoffset: 1,
+                // Only apply dash offset inside the animation media query so a
+                // skipped/interrupted animation can never leave the stroke
+                // permanently dashed-out (invisible).
                 [euiCanAnimate]: {
+                  strokeDasharray: 1,
+                  strokeDashoffset: 1,
                   animation: `${drawInStroke} ${INSERT_LAYOUT_MS}ms ease-out forwards`,
                 },
               }

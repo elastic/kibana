@@ -477,29 +477,49 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
       if (!stepType) return;
       setInsertion(null);
       setPendingInsert(null);
-      setPanel({ mode: 'edit', stepName, stepType, fragment });
+      setPanel((current) => {
+        // Don't clobber an in-progress insert panel; skip no-op re-opens.
+        if (current?.mode === 'insert') return current;
+        if (current?.mode === 'edit' && current.stepName === stepName) return current;
+        return { mode: 'edit', stepName, stepType, fragment };
+      });
     },
     [stepsByName, editorYaml]
   );
+
+  // Single source of truth: canvas/URL selection drives the edit config panel.
+  // Only re-run when the selected node changes — not when openEditPanel's
+  // identity churns with editorYaml (that was resetting the panel mid-edit).
+  const openEditPanelRef = useRef(openEditPanel);
+  openEditPanelRef.current = openEditPanel;
+  const stepNameOfRef = useRef(stepNameOf);
+  stepNameOfRef.current = stepNameOf;
+  useEffect(() => {
+    if (!canEdit) return;
+    if (!selectedStepId) {
+      setPanel((current) => (current?.mode === 'edit' ? null : current));
+      return;
+    }
+    const stepName = stepNameOfRef.current(selectedStepId);
+    if (!stepName) {
+      setPanel((current) => (current?.mode === 'edit' ? null : current));
+      return;
+    }
+    openEditPanelRef.current(stepName);
+  }, [canEdit, selectedStepId]);
 
   const editActions = useMemo<WorkflowGraphEditActions | undefined>(() => {
     if (!canEdit) return undefined;
     return {
       onInsert: (context, anchor) => {
         setPanel(null);
+        setSelectedStep(null);
         setInsertion({ context, anchor });
         const pendingContext = toPendingContext(context);
         setPendingInsert(pendingContext ? { phase: 'choosing', context: pendingContext } : null);
       },
       onEditStep: (nodeId) => {
-        const stepName = stepNameOf(nodeId);
-        if (stepName) {
-          setSelectedStep(nodeId);
-          openEditPanel(stepName);
-        } else {
-          // Triggers have no config form; show the read-only flyout instead.
-          setSelectedStep(nodeId);
-        }
+        setSelectedStep(nodeId);
       },
       onDeleteNode: (nodeId) => {
         const ref = transformed.nodeRefs[nodeId];
@@ -552,8 +572,6 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
     };
   }, [
     canEdit,
-    stepNameOf,
-    openEditPanel,
     setSelectedStep,
     editorYaml,
     applyMutation,
@@ -619,15 +637,8 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
   const handleStepSelect = useCallback(
     (id: string | undefined) => {
       setSelectedStep(id ?? null);
-      if (!canEdit) return;
-      if (!id) {
-        setPanel(null);
-        return;
-      }
-      const stepName = stepNameOf(id);
-      if (stepName) openEditPanel(stepName);
     },
-    [setSelectedStep, canEdit, stepNameOf, openEditPanel]
+    [setSelectedStep]
   );
 
   const handleStepRun = useCallback(
@@ -805,6 +816,11 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
             }}
           />
           <StepConfigPanel
+            key={
+              panel.mode === 'edit'
+                ? `edit:${panel.stepName}`
+                : `insert:${panel.stepType}:${panel.actionLabel}`
+            }
             mode={panel.mode}
             stepType={panel.stepType}
             actionLabel={panel.mode === 'insert' ? panel.actionLabel : undefined}

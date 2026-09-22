@@ -14,7 +14,8 @@ import { i18n } from '@kbn/i18n';
 import type { LayoutDirection } from '@kbn/workflows';
 import type { NodePortTargets, StepPortTarget } from './compute_insertion_points';
 import {
-  ERROR_PORT_INSET,
+  ERROR_PORT_ALONG,
+  ERROR_PORT_FRACTION,
   IF_PORT_FALSE,
   IF_PORT_TRUE,
   PORT_DOT_SIZE,
@@ -33,7 +34,8 @@ import { useWorkflowGraphActions } from './workflow_graph_actions_context';
 import { toAnchorRect } from './workflow_graph_insert_control';
 
 export {
-  ERROR_PORT_INSET,
+  ERROR_PORT_ALONG,
+  ERROR_PORT_FRACTION,
   IF_PORT_FALSE,
   IF_PORT_TRUE,
   PORT_DOT_SIZE,
@@ -42,13 +44,13 @@ export {
   PORT_STRADDLE_OUTSET,
   STEP_PORT,
 };
-/** @deprecated Prefer ERROR_PORT_INSET. */
-export { ERROR_PORT_OFFSET, IF_PORT_ERROR, STEP_ERROR_PORT } from './port_geometry';
+/** @deprecated Prefer ERROR_PORT_FRACTION. */
+export { ERROR_PORT_INSET, ERROR_PORT_OFFSET, IF_PORT_ERROR, STEP_ERROR_PORT } from './port_geometry';
 /** @deprecated Prefer IF_PORT_FALSE / IF_PORT_TRUE. */
 export const BRANCH_FALSE_LEFT = IF_PORT_FALSE;
 export const BRANCH_TRUE_LEFT = IF_PORT_TRUE;
-/** @deprecated Prefer ERROR_PORT_INSET positioning. */
-export const ERROR_PORT_LEFT = `calc(100% - ${ERROR_PORT_INSET}px)`;
+/** @deprecated Prefer ERROR_PORT_ALONG. */
+export const ERROR_PORT_LEFT = ERROR_PORT_ALONG;
 
 /** Shared spring used by ports and trailing node actions. */
 export const PORT_SPRING_EASE = 'cubic-bezier(.34,1.56,.64,1)';
@@ -216,7 +218,7 @@ export function WorkflowGraphConnectionPorts({
           euiThemeContext={euiThemeContext}
           onActivate={(anchor) => insertError(ports.errorStepId!, anchor)}
           data-test-subj="workflowGraphPort-error"
-          iconType="branch"
+          iconType="warning"
           hiddenUntilHover
           forceActive={creatingError}
         />
@@ -227,7 +229,7 @@ export function WorkflowGraphConnectionPorts({
 }
 
 /**
- * Non-interactive error port once an on-failure route exists — persistent rest
+ * Non-interactive error port once a fallback route exists — persistent rest
  * dot so the failure edge never emerges without a visible origin anchor.
  */
 function ConnectedErrorPort() {
@@ -281,7 +283,7 @@ function PortButton({
   readonly euiThemeContext: ReturnType<typeof useEuiTheme>;
   readonly onActivate: (anchor: WorkflowGraphAnchorRect) => void;
   readonly 'data-test-subj': string;
-  readonly iconType: 'plus' | 'branch';
+  readonly iconType: 'plus' | 'warning';
   readonly hiddenUntilHover?: boolean;
   /** Error-path definition in progress — keep expanded/active without hover. */
   readonly forceActive?: boolean;

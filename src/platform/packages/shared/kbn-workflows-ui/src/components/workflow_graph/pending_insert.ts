@@ -42,9 +42,9 @@ export type PendingInsertVisual =
       readonly label: string;
     };
 
-/** Matches the laid-out step node footprint. */
+/** Matches the laid-out step node footprint (`DEFAULT_NODE_STYLE`). */
 export const PENDING_NODE_WIDTH = 300;
-export const PENDING_NODE_HEIGHT = 64;
+export const PENDING_NODE_HEIGHT = 56;
 
 /** Same edge-to-edge gap dagre uses between sequential ranks. */
 const PENDING_NODE_GAP = WORKFLOW_RANK_SEP;

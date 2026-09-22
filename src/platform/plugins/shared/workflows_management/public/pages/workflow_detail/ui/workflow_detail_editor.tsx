@@ -14,6 +14,7 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiToolTip,
   useEuiShadow,
 } from '@elastic/eui';
@@ -310,7 +311,21 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
       {
         id: 'documentation',
         content: (
-          <EuiToolTip content={documentationLabel} disableScreenReaderOutput>
+          <EuiToolTip
+            content={
+              <span
+                css={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 4,
+                }}
+              >
+                {documentationLabel}
+                <EuiIcon type="popout" size="s" aria-hidden />
+              </span>
+            }
+            disableScreenReaderOutput
+          >
             <EuiButtonIcon
               iconType="documentation"
               href={WORKFLOWS_DOCUMENTATION_URL}

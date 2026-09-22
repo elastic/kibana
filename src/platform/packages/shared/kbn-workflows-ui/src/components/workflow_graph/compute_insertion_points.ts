@@ -27,9 +27,9 @@ export interface NodePortTargets {
   readonly else?: StepPortTarget;
   /** If-node true-branch port → index 0 of `steps`. */
   readonly then?: StepPortTarget;
-  /** Error port — only when the step can still receive `on-failure`. */
+  /** Error port — only when the step can still receive a fallback step. */
   readonly errorStepId?: string;
-  /** Show a non-interactive error port when `on-failure` is already attached. */
+  /** Show a non-interactive error port when a fallback route already exists. */
   readonly errorConnected?: boolean;
 }
 
@@ -48,8 +48,13 @@ const asSteps = (value: unknown): StepRecord[] =>
 const stepName = (step: StepRecord): string | undefined =>
   typeof step.name === 'string' ? step.name : undefined;
 
-const hasOnFailure = (step: StepRecord): boolean =>
-  step['on-failure'] !== undefined && step['on-failure'] !== null;
+/** True when `on-failure.fallback` has at least one step (graph error route). */
+const hasFallbackSteps = (step: StepRecord): boolean => {
+  const onFailure = step['on-failure'];
+  if (typeof onFailure !== 'object' || onFailure === null) return false;
+  const fallback = (onFailure as Record<string, unknown>).fallback;
+  return Array.isArray(fallback) && fallback.length > 0;
+};
 
 /**
  * Derives node-anchored connection-point targets from the workflow + graph
@@ -130,7 +135,7 @@ export function computeInsertionPoints(
           sourceNodeId: nodeId,
         },
         ...(stepSupportsErrorHandling(type)
-          ? hasOnFailure(step)
+          ? hasFallbackSteps(step)
             ? { errorConnected: true }
             : { errorStepId: nodeId }
           : {}),

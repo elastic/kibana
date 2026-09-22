@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getBuiltInStepDefinition } from '@kbn/workflows';
+import {
+  getBuiltInStepDefinition,
+  getStepDeprecationInfo,
+  resolveKibanaStepTypeAlias,
+} from '@kbn/workflows';
 import type { ConnectorContractUnion } from '@kbn/workflows';
 import { unwrapSchema } from '@kbn/workflows/common/utils/zod';
 import { i18n } from '@kbn/i18n';
@@ -19,7 +23,7 @@ import { prettifyCatalogKey } from '../../../shared/utils/catalog_display_name';
  * Monaco editor in `language`; everything else is a plain EUI control.
  */
 export type StepFieldKind = 'text' | 'number' | 'boolean' | 'select' | 'code';
-export type StepFieldLanguage = 'json' | 'kuery' | 'plaintext';
+export type StepFieldLanguage = 'json' | 'kuery' | 'plaintext' | 'esql';
 
 export interface StepFormField {
   /** Key inside its owner (`with.<key>` or a root step key). */
@@ -66,6 +70,16 @@ const CODE_KEY_LANGUAGE: Readonly<Record<string, StepFieldLanguage>> = {
   aggregations: 'json',
   script: 'json',
   prompt: 'plaintext',
+};
+
+/**
+ * When a CODE_KEY would map a *string* schema to JSON (e.g. ES|QL `query`),
+ * prefer this language instead so the editor stores plaintext / Liquid.
+ */
+const STRING_CODE_LANGUAGE_BY_STEP: Readonly<
+  Record<string, Readonly<Record<string, StepFieldLanguage>>>
+> = {
+  'elasticsearch.esql.query': { query: 'esql' },
 };
 
 /** Transport-only params that would only add noise to the form. */
@@ -195,13 +209,35 @@ const isNestedStepsSchema = (schema: z.ZodType): boolean => {
 
 const isNeverSchema = (schema: z.ZodType): boolean => unwrapSchema(schema) instanceof z.ZodNever;
 
+const isStringLikeSchema = (schema: z.ZodType): boolean => {
+  const inner = unwrapSchema(schema);
+  if (inner instanceof z.ZodString) return true;
+  if (inner instanceof z.ZodUnion) {
+    const members = (inner.options as z.ZodType[]).map(unwrapSchema);
+    return members.every((m) => m instanceof z.ZodString || m instanceof z.ZodLiteral);
+  }
+  return false;
+};
+
 const resolveKind = (
+  stepType: string,
   key: string,
   schema: z.ZodType
 ): Pick<StepFormField, 'kind' | 'language' | 'options'> => {
   const inner = unwrapSchema(schema);
   const namedLanguage = CODE_KEY_LANGUAGE[key];
-  if (namedLanguage) return { kind: 'code', language: namedLanguage };
+  if (namedLanguage) {
+    // String schemas (ES|QL query, plaintext body, …) must not use JSON mode —
+    // JSON.parse would reject Liquid tokens and block the reference picker.
+    if (isStringLikeSchema(schema)) {
+      const stepOverride = STRING_CODE_LANGUAGE_BY_STEP[stepType]?.[key];
+      return {
+        kind: 'code',
+        language: stepOverride ?? (namedLanguage === 'json' ? 'plaintext' : namedLanguage),
+      };
+    }
+    return { kind: 'code', language: namedLanguage };
+  }
 
   if (inner instanceof z.ZodEnum) {
     return { kind: 'select', options: inner.options.map(String) };
@@ -243,7 +279,7 @@ const fieldsFromObject = (
         !HIDDEN_KEYS.has(key) && !isNestedStepsSchema(fieldSchema) && !isNeverSchema(fieldSchema)
     )
     .map(([key, fieldSchema]): StepFormField => {
-      const { kind, language, options } = resolveKind(key, fieldSchema);
+      const { kind, language, options } = resolveKind(stepType, key, fieldSchema);
       const advanced = resolveAdvancedHint(stepType, key, fieldSchema);
       return {
         key,
@@ -258,6 +294,22 @@ const fieldsFromObject = (
         defaultValue: getDefault(fieldSchema),
       };
     });
+};
+
+/**
+ * Connector type lookup candidates for a step: exact type, Kibana OAS aliases
+ * (`kibana.createCaseDefaultSpace` → `kibana.createCase`), then deprecation
+ * replacements (`kibana.createCase` → `cases.createCase`).
+ */
+const connectorTypeCandidates = (stepType: string): readonly string[] => {
+  const candidates: string[] = [stepType];
+  const aliased = resolveKibanaStepTypeAlias(stepType);
+  if (aliased !== stepType) candidates.push(aliased);
+  for (const candidate of [...candidates]) {
+    const replacement = getStepDeprecationInfo(candidate)?.replacementStepType;
+    if (replacement && !candidates.includes(replacement)) candidates.push(replacement);
+  }
+  return candidates;
 };
 
 /**
@@ -281,7 +333,11 @@ export const getStepFormSchema = (
     };
   }
 
-  const connector = connectors.find((c) => c.type === stepType);
+  let connector: ConnectorContractUnion | undefined;
+  for (const candidate of connectorTypeCandidates(stepType)) {
+    connector = connectors.find((c) => c.type === candidate);
+    if (connector) break;
+  }
   if (!connector) return undefined;
 
   const fields: StepFormField[] = [];
@@ -294,6 +350,8 @@ export const getStepFormSchema = (
       kind: 'text',
     });
   }
+  // Field paths stay under the edited step type; only the schema is resolved
+  // through aliases so deprecated YAML types still get a usable form.
   fields.push(...fieldsFromObject(stepType, connector.paramsSchema, ['with']));
   return { stepType, fields };
 };

@@ -17,6 +17,11 @@ export interface ReferenceSelectionBridge {
   readonly focus: () => void;
   readonly getCaret: () => number;
   readonly setCaret: (offset: number) => void;
+  /**
+   * Replace [start, end) with `text` in a way that joins the editor undo stack.
+   * Returns true when the edit was applied.
+   */
+  readonly replaceText?: (start: number, end: number, text: string) => boolean;
 }
 
 export interface ReferenceCapableBind {
@@ -94,13 +99,29 @@ export function ReferenceCapableField({
   const handleInsert = useCallback(
     (token: string) => {
       const bridge = selectionBridgeRef.current;
-      const caret =
-        bridge?.getCaret() ?? inputRef.current?.selectionStart ?? value.length;
+      const input = inputRef.current;
+      const caret = bridge?.getCaret() ?? input?.selectionStart ?? value.length;
       const range = replaceRangeRef.current ?? { start: caret, end: caret };
-      const next = `${value.slice(0, range.start)}${token}${value.slice(range.end)}`;
-      onChange(next);
+
       setIsOpen(false);
       replaceRangeRef.current = null;
+
+      // Prefer undo-aware edits so Cmd/Ctrl+Z reverts the insertion.
+      if (bridge?.replaceText?.(range.start, range.end, token)) {
+        return;
+      }
+
+      if (input) {
+        input.focus();
+        input.setSelectionRange(range.start, range.end);
+        // insertText participates in the browser undo stack (unlike setting value).
+        if (document.execCommand('insertText', false, token)) {
+          return;
+        }
+      }
+
+      const next = `${value.slice(0, range.start)}${token}${value.slice(range.end)}`;
+      onChange(next);
       window.requestAnimationFrame(() => {
         focusAndSetCaret(range.start + token.length);
       });

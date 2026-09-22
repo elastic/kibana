@@ -8,7 +8,9 @@
  */
 
 import {
-  ERROR_PORT_INSET,
+  ERROR_PORT_ALONG,
+  ERROR_PORT_FRACTION,
+  ERROR_PORT_TRAIL_T,
   FLOW_BAND_END,
   FLOW_BAND_START,
   FLOW_PORT_MIN_GAP,
@@ -66,7 +68,7 @@ describe('port_geometry', () => {
     it('requires enough span for the last-flow → error gap', () => {
       const min = minCrossSizeForPorts(1, true);
       const lastFlowX = flowPortFraction(0, 1) * min;
-      const errorX = min - ERROR_PORT_INSET;
+      const errorX = ERROR_PORT_FRACTION * min;
       expect(errorX - lastFlowX).toBeGreaterThanOrEqual(FLOW_TO_ERROR_MIN_GAP);
     });
 
@@ -90,14 +92,19 @@ describe('port_geometry', () => {
       expect(center.x).toBe(10 + 300 * 0.5);
     });
 
-    it('TB: error port center sits on the bottom border at the right inset', () => {
+    it('TB: error port sits on the bottom border near the start of the trailing band', () => {
       const bounds = { minX: 10, minY: 20, maxX: 310, maxY: 84 };
       const center = errorPortCenter(bounds, 'TB');
       expect(center.y).toBe(bounds.maxY);
-      expect(center.x).toBe(bounds.maxX - ERROR_PORT_INSET);
+      expect(center.x).toBe(bounds.minX + 300 * ERROR_PORT_FRACTION);
+      expect(ERROR_PORT_FRACTION).toBeCloseTo(
+        FLOW_BAND_END + (1 - FLOW_BAND_END) * ERROR_PORT_TRAIL_T
+      );
+      expect(ERROR_PORT_FRACTION).toBeGreaterThan(FLOW_BAND_END);
+      expect(ERROR_PORT_FRACTION).toBeLessThan(0.8);
     });
 
-    it('LR: flow on the right edge; error stays bottom-right (same as TB)', () => {
+    it('LR: flow on the right edge; error stays on the bottom edge (same as TB)', () => {
       const bounds = { minX: 10, minY: 20, maxX: 310, maxY: 84 };
       const flow = portCenterOnSourceEdge(bounds, 0.32, 'LR');
       expect(flow.x).toBe(bounds.maxX);
@@ -105,15 +112,15 @@ describe('port_geometry', () => {
       const errTb = errorPortCenter(bounds, 'TB');
       const errLr = errorPortCenter(bounds, 'LR');
       expect(errLr).toEqual(errTb);
-      expect(errLr.x).toBe(bounds.maxX - ERROR_PORT_INSET);
+      expect(errLr.x).toBe(bounds.minX + 300 * ERROR_PORT_FRACTION);
       expect(errLr.y).toBe(bounds.maxY);
     });
 
-    it('errorPortEdgeStyle is orientation-invariant (bottom + right inset)', () => {
+    it('errorPortEdgeStyle is orientation-invariant (bottom + trailing-band fraction)', () => {
       const style = errorPortEdgeStyle();
-      expect(style.right).toBe(ERROR_PORT_INSET);
+      expect(style.left).toBe(ERROR_PORT_ALONG);
       expect(style.bottom).toBe(-PORT_STRADDLE_OUTSET);
-      expect(style.transform).toBe('translateX(50%)');
+      expect(style.transform).toBe('translateX(-50%)');
     });
   });
 

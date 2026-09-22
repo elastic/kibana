@@ -34,6 +34,12 @@ interface Position {
   readonly y: number;
 }
 
+function sameNodeIds(a: readonly Node[], b: readonly Node[]): boolean {
+  if (a.length !== b.length) return false;
+  const ids = new Set(a.map((n) => n.id));
+  return b.every((n) => ids.has(n.id));
+}
+
 /**
  * After a step insert (`flashNodeId` set), interpolates existing node positions
  * from their previous layout to the new one so downstream steps slide along the
@@ -43,6 +49,9 @@ interface Position {
  *
  * Slide also starts when a new node appears and peers move before `flashNodeId`
  * arrives (Redux yaml update can paint one frame ahead of local flash state).
+ *
+ * While sliding, dagre waypoints are dropped so strokes follow live endpoints
+ * (absolute final-layout points would render off-canvas mid-tween).
  */
 export function useInsertLayoutAnimation({
   nodes,
@@ -63,6 +72,8 @@ export function useInsertLayoutAnimation({
   const [flashReady, setFlashReady] = useState(false);
   const rafRef = useRef<number | null>(null);
   const insertedIdsRef = useRef<Set<string>>(new Set());
+  /** Bumps on every effect run so a stale RAF cannot call finish after cleanup. */
+  const slideGenRef = useRef(0);
 
   // Delay the border flash until the slide completes.
   useEffect(() => {
@@ -82,7 +93,10 @@ export function useInsertLayoutAnimation({
       nextPositions.set(n.id, { x: n.position.x, y: n.position.y });
     }
 
+    const slideGen = ++slideGenRef.current;
+
     const finish = () => {
+      if (slideGen !== slideGenRef.current) return;
       prevPositionsRef.current = nextPositions;
       setDisplayNodes(nodes);
       setIsSliding(false);
@@ -137,6 +151,7 @@ export function useInsertLayoutAnimation({
 
     const startedAt = performance.now();
     const tick = (now: number) => {
+      if (slideGen !== slideGenRef.current) return;
       const t = Math.min(1, (now - startedAt) / INSERT_LAYOUT_MS);
       const eased = easeOutCubic(t);
       setDisplayNodes(
@@ -162,14 +177,29 @@ export function useInsertLayoutAnimation({
     rafRef.current = requestAnimationFrame(tick);
 
     return () => {
+      slideGenRef.current += 1;
       if (rafRef.current != null) {
         cancelAnimationFrame(rafRef.current);
         rafRef.current = null;
+        // Snap to this effect's target so a re-run never leaves nodes mid-tween
+        // while edges still carry final-layout dagre waypoints (invisible paths).
+        prevPositionsRef.current = nextPositions;
+        setDisplayNodes(nodes);
+        insertedIdsRef.current = new Set();
       }
+      // Always clear sliding — a completed RAF nulls rafRef before finish()'s
+      // setState flushes, and a parent update can tear down this effect in that
+      // window, leaving edges on cleared waypoints / draw-in forever.
+      setIsSliding(false);
     };
   }, [nodes]);
 
-  const animatedNodes = displayNodes.map((n) => {
+  // If state is briefly behind the latest layout (new node id not in
+  // displayNodes yet), prefer `nodes` so React Flow can resolve edge
+  // endpoints — missing nodes make edges drop out of the graph entirely.
+  const nodesForRender = sameNodeIds(displayNodes, nodes) ? displayNodes : nodes;
+
+  const animatedNodes = nodesForRender.map((n) => {
     if (!flashNodeId || n.id !== flashNodeId || !flashReady) return n;
     return {
       ...n,
@@ -180,10 +210,19 @@ export function useInsertLayoutAnimation({
   const animatedEdges = isSliding
     ? edges.map((edge) => {
         const targets = insertedIdsRef.current;
-        if (!targets.has(edge.source) && !targets.has(edge.target)) return edge;
+        const drawIn = targets.has(edge.source) || targets.has(edge.target);
+        const { points: _drop, ...restData } = (edge.data ?? {}) as Record<string, unknown> & {
+          points?: unknown;
+        };
         return {
           ...edge,
-          data: { ...edge.data, drawIn: true },
+          data: {
+            ...restData,
+            // Dagre waypoints are absolute coords for the *final* layout. While
+            // nodes interpolate, those points no longer match endpoints and the
+            // stroke can vanish off-canvas — fall back to smooth-step instead.
+            ...(drawIn ? { drawIn: true } : {}),
+          },
         };
       })
     : edges;

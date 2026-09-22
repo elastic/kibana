@@ -9,8 +9,7 @@
 
 import { EuiPageTemplate } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { selectUnit } from '@formatjs/intl-utils';
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux-v7';
 import { useLocation, useParams } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
@@ -22,11 +21,14 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/workflows';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
+import { RunAsPill, useOptionalRunAsPrototype } from './run_as_prototype';
 import { useRunWorkflowWithConfirmation } from './use_run_workflow_with_confirmation';
+import { WorkflowSettingsFlyout } from './workflow_settings_flyout';
 import { PLUGIN_ID, WORKFLOWS_DOCUMENTATION_URL } from '../../../../common';
 import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
 import { useUpdateWorkflow } from '../../../entities/workflows/model/use_update_workflow';
 import {
+  selectEditorWorkflowDefinition,
   selectHasChanges,
   selectHasYamlSchemaValidationErrors,
   selectIsSavingYaml,
@@ -36,6 +38,7 @@ import {
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import { setIsTestModalOpen } from '../../../entities/workflows/store/workflow_detail/slice';
 import { useKibana } from '../../../hooks/use_kibana';
+import { useWorkflowEditorReadOnly } from '../../../hooks/use_workflow_editor_read_only';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { useWorkflowsExperimentalUiSetting } from '../../../hooks/use_workflows_experimental_ui_setting';
 import { getSaveWorkflowTooltipContent, getTestRunTooltipContent } from '../../../shared/ui';
@@ -141,7 +144,12 @@ export const WorkflowDetailHeader = React.memo(
     const isExecutionsTab = activeTab === 'executions';
 
     const workflow = useSelector(selectWorkflow);
+    const editorDefinition = useSelector(selectEditorWorkflowDefinition);
     const isManagedWorkflow = workflow?.managed === true;
+    const isEditorReadOnly = useWorkflowEditorReadOnly();
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+    const runAsPrototype = useOptionalRunAsPrototype();
+    const isRunAsBindingDirty = runAsPrototype?.isBindingDirty ?? false;
     const canReadVisibleWorkflowExecution =
       canReadWorkflowExecution && (!isManagedWorkflow || canReadManagedWorkflowExecution);
     const executionsTabDisabledTooltip = isManagedWorkflow
@@ -152,14 +160,20 @@ export const WorkflowDetailHeader = React.memo(
     const hasUnsavedChanges = useSelector(selectHasChanges);
     const isYamlSynced = useSelector(selectIsYamlSynced);
 
-    const { name, isEnabled, lastUpdatedAt } = useMemo(
+    const { name, isEnabled } = useMemo(
       () => ({
-        name: workflow?.name ?? 'New workflow',
+        name: editorDefinition?.name ?? workflow?.name ?? 'New workflow',
         isEnabled: workflow?.enabled ?? false,
-        lastUpdatedAt: workflow ? new Date(workflow.lastUpdatedAt) : null,
       }),
-      [workflow]
+      [editorDefinition?.name, workflow]
     );
+
+    const openSettings = useCallback(() => {
+      setIsSettingsOpen(true);
+    }, []);
+    const closeSettings = useCallback(() => {
+      setIsSettingsOpen(false);
+    }, []);
 
     const saveYaml = useSaveYaml();
     const isSaving = useSelector(selectIsSavingYaml);
@@ -172,42 +186,6 @@ export const WorkflowDetailHeader = React.memo(
     const openTestModal = useCallback(() => {
       dispatch(setIsTestModalOpen(true));
     }, [dispatch]);
-
-    const [savedLabel, setSavedLabel] = useState<string>('');
-
-    useEffect(() => {
-      if (hasUnsavedChanges || !workflowId || !lastUpdatedAt) {
-        return;
-      }
-
-      const formatter = new Intl.RelativeTimeFormat(i18n.getLocale(), {
-        numeric: 'auto',
-        style: 'short',
-      });
-
-      const updateLabel = () => {
-        const { value, unit } = selectUnit(lastUpdatedAt);
-        if (unit === 'second') {
-          setSavedLabel(
-            i18n.translate('workflows.savedJustNow', {
-              defaultMessage: 'Saved just now',
-            })
-          );
-        } else {
-          setSavedLabel(
-            i18n.translate('workflows.savedAgo', {
-              defaultMessage: 'Saved {relativeTime}',
-              values: { relativeTime: formatter.format(value, unit) },
-            })
-          );
-        }
-      };
-
-      updateLabel();
-      const interval = setInterval(updateLabel, 30_000);
-
-      return () => clearInterval(interval);
-    }, [hasUnsavedChanges, workflowId, lastUpdatedAt]);
 
     // Combined validity: syntax must parse AND no strict validation errors AND server considers it valid.
     // workflow?.valid !== false covers the initial page load before Monaco validates.
@@ -306,15 +284,31 @@ export const WorkflowDetailHeader = React.memo(
 
       return {
         id: 'workflowHistory',
-        order: 2,
+        order: 3,
         label: i18n.translate('workflows.workflowDetailHeader.historyButton', {
           defaultMessage: 'History',
         }),
         iconType: 'clock',
         run: openHistoryModal,
+        // Occasional / retrospective — keep in the ⋮ overflow with other object actions.
+        overflow: true,
         testId: 'workflowDetailHistoryButton',
       };
     }, [showHistoryButton, openHistoryModal]);
+
+    const settingsItem = useMemo<AppMenuItemType>(
+      () => ({
+        id: 'workflowSettings',
+        order: 1,
+        label: i18n.translate('workflows.workflowDetailHeader.settingsButton', {
+          defaultMessage: 'Settings',
+        }),
+        iconType: 'gear',
+        run: openSettings,
+        testId: 'workflowSettingsButton',
+      }),
+      [openSettings]
+    );
 
     const enabledSwitchConfig = useMemo<NonNullable<AppMenuConfig['switch']> | undefined>(() => {
       if (!workflowId) {
@@ -353,7 +347,14 @@ export const WorkflowDetailHeader = React.memo(
     );
 
     const badges = useMemo<AppHeaderBadge[]>(() => {
-      const result: AppHeaderBadge[] = [];
+      const result: AppHeaderBadge[] = [
+        {
+          label: i18n.translate('workflows.runAsPrototype.pill.badgeLabel', {
+            defaultMessage: 'Execution identity',
+          }),
+          renderCustomBadge: () => <RunAsPill />,
+        },
+      ];
 
       if (isManagedWorkflow) {
         result.push({
@@ -368,7 +369,7 @@ export const WorkflowDetailHeader = React.memo(
         });
       }
 
-      if (hasUnsavedChanges) {
+      if (hasUnsavedChanges || isRunAsBindingDirty) {
         result.push({
           label: i18n.translate('workflows.unsavedChangesBadge', {
             defaultMessage: 'Unsaved changes',
@@ -384,33 +385,21 @@ export const WorkflowDetailHeader = React.memo(
               }),
           'data-test-subj': 'workflowUnsavedChangesBadge',
         });
-      } else if (workflowId && savedLabel) {
-        result.push({
-          label: savedLabel,
-          color: 'primary',
-          'data-test-subj': 'workflowSavedChangesBadge',
-        });
       }
 
       return result;
-    }, [
-      isManagedWorkflow,
-      hasUnsavedChanges,
-      workflowId,
-      savedLabel,
-      highlightDiff,
-      setHighlightDiff,
-    ]);
+    }, [isManagedWorkflow, hasUnsavedChanges, isRunAsBindingDirty, highlightDiff, setHighlightDiff]);
 
     const appMenu = useMemo<AppMenuConfig>(() => {
       const items: AppMenuItemType[] = [];
       if (workflowId) {
         items.push(executionsToggleItem);
       }
+      items.push(settingsItem);
       if (!isVisualEditorEnabled) {
         items.push({
           id: 'runWorkflow',
-          order: 1,
+          order: 2,
           label: Translations.runWorkflow,
           iconType: 'play',
           run: handleRunClick,
@@ -454,6 +443,7 @@ export const WorkflowDetailHeader = React.memo(
       isExecutionsTab,
       workflowId,
       executionsToggleItem,
+      settingsItem,
       historyItem,
       addConnectorsMenuItem,
       enabledSwitchConfig,
@@ -484,6 +474,11 @@ export const WorkflowDetailHeader = React.memo(
             spacing="compact"
           />
         </EuiPageTemplate>
+        <WorkflowSettingsFlyout
+          isOpen={isSettingsOpen}
+          onClose={closeSettings}
+          readOnly={isEditorReadOnly}
+        />
         {runConfirmationModal}
       </>
     );

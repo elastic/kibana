@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { ConnectorContractUnion } from '@kbn/workflows';
@@ -176,13 +176,14 @@ describe('StepConfigPanel', () => {
     expect(screen.queryByText('Name')).not.toBeInTheDocument();
     expect(screen.getByText('Connector id')).toBeInTheDocument();
     expect(screen.getByText('Message')).toBeInTheDocument();
-    // Uncurated: optional fields (query) land in Advanced via requiredness.
-    expect(screen.getByTestId('workflowStepConfigAdvancedFields')).toBeInTheDocument();
-    fireEvent.click(screen.getByTestId('workflowStepConfigAdvancedFields'));
+    // Uncurated optionals stay behind "Add optional field" until chosen.
+    expect(screen.queryByTestId('workflowStepConfigField-with.query')).not.toBeInTheDocument();
+    expect(screen.getByTestId('workflowStepConfigAddOptionalField')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('workflowStepConfigAddOptionalField'));
+    fireEvent.click(screen.getByTestId('workflowStepConfigAddOptionalOption-with.query'));
     expect(screen.getByTestId('workflowStepConfigField-with.query')).toBeInTheDocument();
     expect(screen.getByTestId('workflowStepConfigErrorHandlingSection')).toBeInTheDocument();
-    expect(screen.getByTestId('workflowStepConfigConfiguration')).toHaveTextContent('Required');
-    expect(screen.getByTestId('workflowStepConfigAdvancedFields')).toHaveTextContent('Optional');
+    expect(screen.queryByTestId('workflowStepConfigConfiguration')).not.toBeInTheDocument();
     // Casing-only labels skip the YAML-key hint.
     expect(screen.queryByTestId('workflowStepConfigFieldKey-with.message')).not.toBeInTheDocument();
     // query is a JSON code field; message is a plain text field.
@@ -283,16 +284,17 @@ describe('StepConfigPanel', () => {
     });
     expect(screen.getByText('File hash')).toBeInTheDocument();
     expect(screen.getByTestId('workflowStepConfigFieldKey-with.hash')).toHaveTextContent('hash');
-    // Uncurated optional → Advanced.
-    expect(screen.getByTestId('workflowStepConfigAdvancedFields')).toBeInTheDocument();
-    fireEvent.click(screen.getByTestId('workflowStepConfigAdvancedFields'));
+    // Uncurated optional → Add optional field picker.
+    expect(screen.queryByText('Fail on error')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('workflowStepConfigAddOptionalField'));
+    fireEvent.click(screen.getByTestId('workflowStepConfigAddOptionalOption-with.failOnError'));
     expect(screen.getByText('Fail on error')).toBeInTheDocument();
     expect(
       screen.queryByTestId('workflowStepConfigFieldKey-with.failOnError')
     ).not.toBeInTheDocument();
   });
 
-  it('keeps all optional fields in Optional regardless of values', () => {
+  it('auto-reveals optional fields that already have values; others stay in the picker', () => {
     const requestConnectors: ConnectorContractUnion[] = [
       {
         type: 'kibana.request',
@@ -334,24 +336,22 @@ with:
       </I18nProvider>
     );
 
-    // Promoted / required fields stay in Configuration.
+    // Promoted / required fields stay inline.
     expect(screen.queryByTestId('workflowStepConfigField-name')).not.toBeInTheDocument();
     expect(screen.getByTestId('workflowStepConfigField-with.method')).toBeInTheDocument();
     expect(screen.getByTestId('workflowStepConfigField-with.path')).toBeInTheDocument();
     expect(screen.getByTestId('workflowStepConfigField-with.body')).toBeInTheDocument();
     expect(screen.getByTestId('workflowStepConfigField-with.headers')).toBeInTheDocument();
 
-    // All advanced keys live in Optional — valued query does not promote inline.
-    expect(screen.getByTestId('workflowStepConfigAdvancedFields')).toBeInTheDocument();
-    expect(screen.queryByTestId('workflowStepConfigAdvancedCountBadge')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('workflowStepConfigAdvancedSetBadge')).not.toBeInTheDocument();
-
-    fireEvent.click(screen.getByTestId('workflowStepConfigAdvancedFields'));
+    // Valued optional query is auto-revealed; empty form_data stays in the picker.
     expect(screen.getByTestId('workflowStepConfigField-with.query')).toBeInTheDocument();
+    expect(screen.queryByTestId('workflowStepConfigField-with.form_data')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('workflowStepConfigAddOptionalField'));
+    fireEvent.click(screen.getByTestId('workflowStepConfigAddOptionalOption-with.form_data'));
     expect(screen.getByTestId('workflowStepConfigField-with.form_data')).toBeInTheDocument();
   });
 
-  it('keeps http primary fields inline and all curated advanced keys in Advanced', () => {
+  it('keeps http primary fields inline and optional keys behind Add optional field', () => {
     const httpConnectors: ConnectorContractUnion[] = [
       {
         type: 'http',
@@ -381,30 +381,31 @@ with:
     expect(screen.getByTestId('workflowStepConfigField-with.method')).toBeInTheDocument();
     expect(screen.getByTestId('workflowStepConfigField-with.headers')).toBeInTheDocument();
     expect(screen.getByTestId('workflowStepConfigField-with.body')).toBeInTheDocument();
-    expect(screen.getByTestId('workflowStepConfigAdvancedFields')).toBeInTheDocument();
-    expect(screen.queryByTestId('workflowStepConfigAdvancedCountBadge')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('workflowStepConfigAdvancedSetBadge')).not.toBeInTheDocument();
+    // path already has a value → auto-revealed; other optionals stay in the picker.
+    expect(screen.getByTestId('workflowStepConfigField-with.path')).toBeInTheDocument();
+    expect(screen.getByTestId('workflowStepConfigAddOptionalField')).toBeInTheDocument();
 
-    // Required may show Optional on hint-promoted fields; Optional never does.
+    // Promoted primary optionals may show Optional; picker-added fields never do.
     const urlRow = screen.getByTestId('workflowStepConfigField-with.url').closest('.euiFormRow');
     expect(urlRow).toHaveTextContent('Optional');
-    fireEvent.click(screen.getByTestId('workflowStepConfigAdvancedFields'));
-    const pathRow = screen.getByTestId('workflowStepConfigField-with.path').closest('.euiFormRow');
-    expect(pathRow).not.toHaveTextContent('Optional');
+    fireEvent.click(screen.getByTestId('workflowStepConfigAddOptionalField'));
+    fireEvent.click(screen.getByTestId('workflowStepConfigAddOptionalOption-with.query'));
+    const queryRow = screen.getByTestId('workflowStepConfigField-with.query').closest('.euiFormRow');
+    expect(queryRow).not.toHaveTextContent('Optional');
   });
 
-  it('puts uncurated optionals in Advanced via requiredness', () => {
+  it('puts uncurated optionals behind Add optional field unless valued', () => {
     renderPanel({
       initialFragment:
         'name: n\ntype: slack\nconnector-id: a\nwith:\n  message: hi\n  query:\n    q: "1"\n',
     });
-    expect(screen.getByTestId('workflowStepConfigAdvancedFields')).toBeInTheDocument();
-    // Error handling remains — Configuration + Advanced + Error handling use accordion chrome.
-    expect(screen.getByTestId('workflowStepConfigConfiguration')).toBeInTheDocument();
+    // Valued query auto-reveals; error handling stays sticky at the bottom.
+    expect(screen.getByTestId('workflowStepConfigField-with.query')).toBeInTheDocument();
+    expect(screen.getByTestId('workflowStepConfigPrimaryFields')).toBeInTheDocument();
     expect(screen.getByTestId('workflowStepConfigErrorHandlingSection')).toBeInTheDocument();
   });
 
-  it('renders a plain form with no accordion chrome when only Configuration applies', () => {
+  it('renders a plain form with no error handling when the step is ineligible', () => {
     renderPanel({
       stepType: 'if',
       initialFragment: 'name: branch\ntype: if\ncondition: "true"\n',
@@ -412,7 +413,7 @@ with:
       isFallbackStep: false,
     });
     expect(screen.queryByTestId('workflowStepConfigConfiguration')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('workflowStepConfigAdvancedFields')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('workflowStepConfigAddOptionalField')).not.toBeInTheDocument();
     expect(screen.queryByTestId('workflowStepConfigErrorHandlingSection')).not.toBeInTheDocument();
     expect(screen.getByTestId('workflowStepConfigPanelForm')).toBeInTheDocument();
   });
@@ -468,15 +469,6 @@ with:
     expect(screen.queryByTestId('workflowStepConfigErrorAddFallback')).not.toBeInTheDocument();
     fireEvent.click(screen.getByTestId('workflowStepConfigErrorShowMe'));
     expect(onRevealErrorPort).toHaveBeenCalled();
-  });
-
-  it('shows a live missing-required badge on Configuration when a required field is empty', () => {
-    renderPanel({
-      initialFragment: 'name: n\ntype: slack\nconnector-id: abc\nwith: {}\n',
-    });
-    expect(screen.getByTestId('workflowStepConfigMissingRequiredBadge')).toHaveTextContent(
-      /required field/
-    );
   });
 
   it('round-trips Form → YAML preserving comments, unknown keys and Liquid', () => {
@@ -555,12 +547,12 @@ with:
       connectors: boolConnectors,
       initialFragment: 'name: t\ntype: toggle\nwith:\n  debug: true\n',
     });
-    fireEvent.click(screen.getByTestId('workflowStepConfigAdvancedFields'));
+    // Valued optional boolean auto-reveals.
     const switchEl = screen.getByTestId('workflowStepConfigField-with.debug');
     const row = screen.getByTestId('workflowStepConfigField-with.debug-row');
     expect(row).toContainElement(switchEl);
     expect(row).toHaveTextContent('Debug');
-    // Optional markers are Configuration-only; Advanced never shows them.
+    // Optional markers are primary-only; revealed optionals never show them.
     expect(row).not.toHaveTextContent('Optional');
     expect(row).toHaveTextContent('Include debug output');
     // Switch is not alone on a stacked field row — label is associated via htmlFor.
@@ -627,7 +619,8 @@ with:
     expect(body.querySelector('[data-test-subj="workflowStepConfigDataReference"]')).not.toBeNull();
     expect(headers.querySelector('[data-test-subj="workflowStepConfigDataReference"]')).not.toBeNull();
 
-    fireEvent.click(screen.getByTestId('workflowStepConfigAdvancedFields'));
+    fireEvent.click(screen.getByTestId('workflowStepConfigAddOptionalField'));
+    fireEvent.click(screen.getByTestId('workflowStepConfigAddOptionalOption-with.query'));
     const query = screen.getByTestId('workflowStepConfigField-with.query');
     expect(query.querySelector('[data-test-subj="workflowStepConfigDataReference"]')).not.toBeNull();
 
@@ -648,6 +641,60 @@ with:
     expect(screen.queryByTestId('workflowDataReferenceSearch')).not.toBeInTheDocument();
   });
 
+  it('shows an empty state when the step has no form fields', () => {
+    const bareConnectors: ConnectorContractUnion[] = [
+      {
+        type: 'noop.action',
+        hasConnectorId: false,
+        paramsSchema: z.object({}),
+        outputSchema: z.unknown(),
+        summary: 'Noop',
+        description: null,
+      } as unknown as ConnectorContractUnion,
+    ];
+    renderPanel({
+      stepType: 'noop.action',
+      connectors: bareConnectors,
+      initialFragment: 'name: n\ntype: noop.action\n',
+    });
+    expect(screen.getByTestId('workflowStepConfigPanelEmpty')).toHaveTextContent(
+      'No configuration needed'
+    );
+  });
+
+  it('shows a YAML fallback empty state when the step type has no schema', () => {
+    renderPanel({
+      stepType: 'unknown.missing',
+      connectors: [],
+      initialFragment: 'name: n\ntype: unknown.missing\n',
+    });
+    expect(screen.getByTestId('workflowStepConfigPanelEmpty')).toHaveTextContent('Form unavailable');
+  });
+
+  it('resolves createCaseDefaultSpace alias fields in the form', () => {
+    const connectors: ConnectorContractUnion[] = [
+      {
+        type: 'kibana.createCase',
+        hasConnectorId: false,
+        paramsSchema: z.object({
+          title: z.string(),
+          description: z.string().optional(),
+        }),
+        outputSchema: z.unknown(),
+        summary: 'Create a case',
+        description: null,
+      } as unknown as ConnectorContractUnion,
+    ];
+    renderPanel({
+      stepType: 'kibana.createCaseDefaultSpace',
+      connectors,
+      initialFragment:
+        'name: createCase\ntype: kibana.createCaseDefaultSpace\nwith:\n  title: t\n',
+    });
+    expect(screen.getByTestId('workflowStepConfigField-with.title')).toBeInTheDocument();
+    expect(screen.queryByTestId('workflowStepConfigPanelEmpty')).not.toBeInTheDocument();
+  });
+
   it('opens the picker from a Slack message body on typed @', () => {
     renderPanel();
     const message = screen.getByTestId('workflowStepConfigField-with.message') as HTMLInputElement;
@@ -658,5 +705,56 @@ with:
     expect(affordance).toBeEnabled();
     fireEvent.change(message, { target: { value: 'Hi @', selectionStart: 4, selectionEnd: 4 } });
     expect(screen.getByTestId('workflowDataReferenceSearch')).toBeInTheDocument();
+  });
+
+  it('lets ES|QL query fields accept Liquid references without JSON parsing', () => {
+    const esqlConnectors: ConnectorContractUnion[] = [
+      {
+        type: 'elasticsearch.esql.query',
+        hasConnectorId: false,
+        paramsSchema: z.object({
+          query: z.string().min(1),
+        }),
+        outputSchema: z.unknown(),
+        summary: 'Run an ES|QL query',
+        description: null,
+      } as unknown as ConnectorContractUnion,
+    ];
+    const onSave = jest.fn();
+    render(
+      <I18nProvider>
+        <StepConfigPanel
+          mode="edit"
+          stepType="elasticsearch.esql.query"
+          initialFragment={`name: run_esql
+type: elasticsearch.esql.query
+with:
+  query: "FROM logs"
+`}
+          connectors={esqlConnectors}
+          onSave={onSave}
+          onCancel={jest.fn()}
+        />
+      </I18nProvider>
+    );
+
+    const query = screen.getByTestId('workflowStepConfigField-with.query');
+    expect(query).toHaveAttribute('data-language', 'esql');
+    expect(query.querySelector('[data-test-subj="workflowStepConfigDataReference"]')).not.toBeNull();
+
+    const editor = within(query).getByTestId('mocked-code-editor') as HTMLTextAreaElement;
+    fireEvent.change(editor, {
+      target: {
+        value: 'FROM logs | WHERE host == "{{ steps.prev.output }}"',
+        selectionStart: 48,
+        selectionEnd: 48,
+      },
+    });
+
+    fireEvent.click(screen.getByTestId('workflowStepConfigPanelSave'));
+    expect(onSave).toHaveBeenCalled();
+    const saved = onSave.mock.calls[0][0] as string;
+    expect(saved).toContain('{{ steps.prev.output }}');
+    expect(saved).not.toMatch(/Must be valid JSON/);
   });
 });

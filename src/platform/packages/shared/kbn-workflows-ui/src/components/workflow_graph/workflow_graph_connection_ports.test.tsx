@@ -15,7 +15,7 @@ import {
   type WorkflowGraphEditActions,
 } from './workflow_graph_actions_context';
 import {
-  ERROR_PORT_INSET,
+  ERROR_PORT_ALONG,
   PORT_HIT_SIZE,
   PORT_STRADDLE_OUTSET,
   WorkflowGraphConnectionPorts,
@@ -118,7 +118,7 @@ describe('WorkflowGraphConnectionPorts', () => {
     const stepAnchor = portAnchor('workflowGraphPort-step');
     expect(getComputedStyle(stepAnchor).right).toBe(`-${PORT_STRADDLE_OUTSET}px`);
     const errorAnchor = portAnchor('workflowGraphPort-error');
-    expect(getComputedStyle(errorAnchor).right).toBe(`${ERROR_PORT_INSET}px`);
+    expect(getComputedStyle(errorAnchor).left).toBe(ERROR_PORT_ALONG);
     expect(getComputedStyle(errorAnchor).bottom).toBe(`-${PORT_STRADDLE_OUTSET}px`);
   });
 
@@ -184,7 +184,7 @@ describe('WorkflowGraphConnectionPorts', () => {
     jest.useRealTimers();
   });
 
-  it('renders a persistent connected error port when on-failure exists', () => {
+  it('renders a persistent connected error port when a fallback route exists', () => {
     const ports: NodePortTargets = {
       step: { index: 1, sourceNodeId: 'a' },
       errorConnected: true,

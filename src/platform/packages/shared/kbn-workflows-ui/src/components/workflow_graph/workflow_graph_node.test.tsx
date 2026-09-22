@@ -117,23 +117,54 @@ describe('WorkflowGraphNode', () => {
     expect(screen.getByLabelText('Running')).toBeInTheDocument();
   });
 
-  it('renders the retry badge when step has retry max-attempts', () => {
+  it('shows retry description when step has retry max-attempts', () => {
     renderNode({
       step: { retry: { 'max-attempts': 3 } },
     });
-    expect(screen.getByTestId('workflowGraphNodeRetryBadge')).toHaveTextContent('3');
+    expect(screen.getByTestId('workflowGraphNodeOnFailureDescription')).toHaveTextContent(
+      'Retry on failure (3)'
+    );
   });
 
-  it('renders the retry badge from on-failure.retry', () => {
+  it('shows retry description from on-failure.retry', () => {
     renderNode({
       step: { 'on-failure': { retry: { 'max-attempts': 2 } } },
     });
-    expect(screen.getByTestId('workflowGraphNodeRetryBadge')).toBeInTheDocument();
+    expect(screen.getByTestId('workflowGraphNodeOnFailureDescription')).toHaveTextContent(
+      'Retry on failure (2)'
+    );
   });
 
-  it('does NOT render the retry badge when max-attempts is absent', () => {
+  it('does NOT show on-failure description when neither retry nor continue is set', () => {
     renderNode({ step: {} });
-    expect(screen.queryByTestId('workflowGraphNodeRetryBadge')).toBeNull();
+    expect(screen.queryByTestId('workflowGraphNodeOnFailureDescription')).toBeNull();
+  });
+
+  it('shows continue description when on-failure.continue is true', () => {
+    renderNode({
+      step: { 'on-failure': { continue: true } },
+    });
+    expect(screen.getByTestId('workflowGraphNodeOnFailureDescription')).toHaveTextContent(
+      'Continue on failure'
+    );
+  });
+
+  it('shows combined description when retry and continue are both configured', () => {
+    renderNode({
+      step: { 'on-failure': { retry: { 'max-attempts': 10 }, continue: true } },
+    });
+    expect(screen.getByTestId('workflowGraphNodeOnFailureDescription')).toHaveTextContent(
+      'Retry (10) and continue on failure'
+    );
+  });
+
+  it('shows retry-only description when continue is false', () => {
+    renderNode({
+      step: { 'on-failure': { continue: false, retry: { 'max-attempts': 2 } } },
+    });
+    expect(screen.getByTestId('workflowGraphNodeOnFailureDescription')).toHaveTextContent(
+      'Retry on failure (2)'
+    );
   });
 
   it('does not show run action in read-only mode', () => {
@@ -330,6 +361,36 @@ describe('WorkflowGraphNode — edit mode', () => {
     expect(screen.getByTestId('workflowGraphNodeMenuPanel')).toBeInTheDocument();
     fireEvent.pointerDown(document.body);
     expect(menuButton).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('opens the step actions menu on right-click in edit mode', () => {
+    renderNode({}, false, { edit: makeEdit() });
+    const card = screen.getByRole('button', { name: /Test Step/ });
+    fireEvent.contextMenu(card, { clientX: 140, clientY: 90 });
+    expect(screen.getByTestId('workflowGraphNodeMenuButton')).toHaveAttribute(
+      'aria-expanded',
+      'true'
+    );
+    expect(screen.getByTestId('workflowGraphNodeMenuPanel')).toBeInTheDocument();
+    const anchor = screen.getByTestId('workflowGraphNodeContextMenuAnchor');
+    expect(anchor).toHaveStyle({ left: '140px', top: '90px' });
+  });
+
+  it('does not open a menu on right-click in read-only mode', () => {
+    renderNode();
+    fireEvent.contextMenu(screen.getByRole('button', { name: /Test Step/ }), {
+      clientX: 10,
+      clientY: 10,
+    });
+    expect(screen.queryByTestId('workflowGraphNodeMenuPanel')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('workflowGraphNodeContextMenuAnchor')).not.toBeInTheDocument();
+  });
+
+  it('anchors the ⋯ menu to the button, not a cursor position', () => {
+    renderNode({}, false, { edit: makeEdit() });
+    fireEvent.click(screen.getByTestId('workflowGraphNodeMenuButton'));
+    expect(screen.getByTestId('workflowGraphNodeMenuPanel')).toBeInTheDocument();
+    expect(screen.queryByTestId('workflowGraphNodeContextMenuAnchor')).not.toBeInTheDocument();
   });
 
   it('draws a solid border for fallback nodes (no dashed styling)', () => {

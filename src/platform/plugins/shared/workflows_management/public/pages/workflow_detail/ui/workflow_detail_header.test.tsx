@@ -76,9 +76,11 @@ jest.mock('../../../hooks/use_workflows_experimental_ui_setting', () => ({
   useWorkflowsExperimentalUiSetting: jest.fn().mockReturnValue(false),
 }));
 
-// The run action renders inline in the app menu.
-const openRunWorkflowButton = async (): Promise<HTMLElement> =>
-  screen.getByTestId('runWorkflowHeaderButton');
+// Run sits in the overflow when Settings occupies an inline slot (APP_MENU_ITEM_LIMIT).
+const openRunWorkflowButton = async (): Promise<HTMLElement> => {
+  await openAppMenuOverflow();
+  return screen.getByTestId('runWorkflowHeaderButton');
+};
 
 describe('WorkflowDetailHeader', () => {
   const defaultProps: WorkflowDetailHeaderProps = {
@@ -237,6 +239,14 @@ describe('WorkflowDetailHeader', () => {
   it('should render', () => {
     const { getAllByText } = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
     expect(getAllByText('Test Workflow').length).toBeGreaterThan(0);
+  });
+
+  it('opens the workflow settings flyout from the Settings header action', () => {
+    const { getByTestId } = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
+
+    expect(screen.queryByTestId('workflowSettingsFlyout')).not.toBeInTheDocument();
+    fireEvent.click(getByTestId('workflowSettingsButton'));
+    expect(getByTestId('workflowSettingsFlyout')).toBeInTheDocument();
   });
 
   it('links to connector management from the overflow menu', async () => {

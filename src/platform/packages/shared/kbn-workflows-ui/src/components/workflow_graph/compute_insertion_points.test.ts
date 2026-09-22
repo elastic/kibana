@@ -44,7 +44,7 @@ describe('computeInsertionPoints', () => {
     });
   });
 
-  it('keeps a connected error port (non-insert) when on-failure already exists', () => {
+  it('keeps a connected error port (non-insert) when a fallback route exists', () => {
     const workflow = wf([
       { name: 'a', type: 'console', 'on-failure': { fallback: [{ name: 'fb', type: 'console' }] } },
     ]);
@@ -52,6 +52,19 @@ describe('computeInsertionPoints', () => {
     expect(points.byNodeId.get('a')?.errorStepId).toBeUndefined();
     expect(points.byNodeId.get('a')?.errorConnected).toBe(true);
     expect(points.byNodeId.get('a')?.step).toEqual({ index: 1, sourceNodeId: 'a' });
+  });
+
+  it('keeps the insertable error port when on-failure is retry/continue only', () => {
+    const workflow = wf([
+      {
+        name: 'a',
+        type: 'console',
+        'on-failure': { retry: { 'max-attempts': 3 }, continue: true },
+      },
+    ]);
+    const points = computeInsertionPoints(workflow, transformWorkflowToGraph(workflow));
+    expect(points.byNodeId.get('a')?.errorStepId).toBe('a');
+    expect(points.byNodeId.get('a')?.errorConnected).toBeUndefined();
   });
 
   it('gives if-nodes then/else ports only (error port deferred — TODO(engine))', () => {

@@ -13,10 +13,6 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type { DataReferenceCatalog } from '../lib/build_data_reference_catalog';
 import { DataReferencePicker } from './data_reference_picker';
 
-jest.mock('@kbn/react-field', () => ({
-  FieldIcon: () => <span data-test-subj="mocked-field-icon" />,
-}));
-
 const makeItems = (prefix: string, count: number) =>
   Array.from({ length: count }, (_, i) => ({
     path: `${prefix}.f${i}`,
@@ -92,24 +88,9 @@ describe('DataReferencePicker scaling', () => {
     expect(screen.queryByTestId('workflowDataReferenceShowAll-event')).not.toBeInTheDocument();
   });
 
-  it('renders jump chips for present groups only and keeps them keyboard-reachable', () => {
+  it('does not render jump-link chips', () => {
     renderOpen();
-
-    const jumps = screen.getByTestId('workflowDataReferenceJumpLinks');
-    expect(within(jumps).getByTestId('workflowDataReferenceJump-event')).toHaveTextContent(
-      'Trigger'
-    );
-    expect(within(jumps).getByTestId('workflowDataReferenceJump-steps')).toHaveTextContent(
-      'Steps'
-    );
-    expect(within(jumps).getByTestId('workflowDataReferenceJump-context')).toHaveTextContent(
-      'Context'
-    );
-    expect(within(jumps).queryByTestId('workflowDataReferenceJump-consts')).not.toBeInTheDocument();
-
-    const triggerChip = within(jumps).getByTestId('workflowDataReferenceJump-event');
-    expect(triggerChip.tagName).toBe('BUTTON');
-    triggerChip.focus();
-    expect(triggerChip).toHaveFocus();
+    expect(screen.queryByTestId('workflowDataReferenceJumpLinks')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('workflowDataReferenceJump-event')).not.toBeInTheDocument();
   });
 });

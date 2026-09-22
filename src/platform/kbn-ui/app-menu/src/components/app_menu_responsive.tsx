@@ -35,7 +35,7 @@ export const VIEWPORT_LAYOUTS: Record<EuiBreakpointSize, AppMenuLayout> = {
 export const AppMenuHeaderLinks = ({ children }: { children: React.ReactNode }) => (
   <EuiHeaderLinks
     data-test-subj={APP_MENU_TEST_SUBJECTS.root}
-    gutterSize="xs"
+    gutterSize="s"
     popoverBreakpoints="none"
     className="kbnTopNavMenu__wrapper"
   >

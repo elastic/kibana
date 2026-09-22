@@ -11,7 +11,8 @@ import type { WorkflowYaml } from '../spec/schema';
 
 export type Step = WorkflowYaml['steps'][number];
 
-export const DEFAULT_NODE_STYLE = { width: 300, height: 52 } as const;
+/** Step card: 32px icon chip + 12px padding top/bottom. */
+export const DEFAULT_NODE_STYLE = { width: 300, height: 56 } as const;
 
 export const FLOW_CONTROL_STEP_TYPES: ReadonlySet<string> = new Set([
   'if',

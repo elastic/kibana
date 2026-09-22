@@ -9,7 +9,7 @@
 
 import type { DagPositionedEdge, DagPositionedNode } from '@kbn/dag-layout';
 import type { GraphEdge, LayoutDirection } from '@kbn/workflows';
-import { ERROR_PORT_INSET } from './port_geometry';
+import { errorPortCenter } from './port_geometry';
 import { WORKFLOW_NODE_SEP, WORKFLOW_RANK_SEP } from './workflow_layout_pipeline';
 
 /** Min gap between an error-edge segment and any node it does not connect. */
@@ -141,7 +141,7 @@ export function resolveErrorBranchPlacement({
   readonly obstacleIds?: readonly string[];
 }): ErrorBranchPlacementResult {
   const ideal = computeErrorBranchNodeOrigin(owner, direction);
-  const dropX = owner.maxX - ERROR_PORT_INSET;
+  const dropX = errorPortCenter(owner).x;
   const step = errorLaneStep(fallbackSize.height, direction);
 
   const free = !isErrorLaneOccupied({

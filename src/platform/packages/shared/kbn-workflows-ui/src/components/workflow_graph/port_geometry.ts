@@ -33,13 +33,17 @@ export const FLOW_PORT_MIN_GAP = 28;
 export const FLOW_TO_ERROR_MIN_GAP = 20;
 
 /**
- * Error-port center inset from the RIGHT corner on the BOTTOM edge.
- * Orientation-invariant: only flow ports rotate with layout; error stays here.
+ * Error-port fraction along the bottom edge. Sits a short way into the trailing
+ * band past flow ports (`FLOW_BAND_END`…`1`) — closer to mid-card than centering
+ * in that band (which pushed the port too far toward the right corner).
  */
-export const ERROR_PORT_INSET = 24;
+export const ERROR_PORT_TRAIL_T = 0.2;
+export const ERROR_PORT_FRACTION = FLOW_BAND_END + (1 - FLOW_BAND_END) * ERROR_PORT_TRAIL_T;
 
-/** @deprecated Use ERROR_PORT_INSET — center+offset error placement is gone. */
-export const ERROR_PORT_OFFSET = ERROR_PORT_INSET;
+/** @deprecated Prefer ERROR_PORT_FRACTION / errorPortCenter. */
+export const ERROR_PORT_INSET = ERROR_PORT_FRACTION;
+/** @deprecated Prefer ERROR_PORT_FRACTION / errorPortCenter. */
+export const ERROR_PORT_OFFSET = ERROR_PORT_FRACTION;
 
 /**
  * Cross-axis fraction (0–1) for flow port `i` of `count` ports in declaration
@@ -64,19 +68,18 @@ export const IF_PORT_FALSE = flowPortAlong(1, 2); // 68%
 export const STEP_PORT = flowPortAlong(0, 1); // 50%
 
 /**
- * CSS position for the error-port center along the bottom edge
- * (`left: calc(100% - inset)`). Prefer `errorPortEdgeStyle` for absolute nodes.
+ * CSS percentage for the error-port center along the bottom edge.
  */
-export const ERROR_PORT_ALONG = `calc(100% - ${ERROR_PORT_INSET}px)`;
+export const ERROR_PORT_ALONG = `${ERROR_PORT_FRACTION * 100}%`;
 
 /** @deprecated Prefer ERROR_PORT_ALONG / errorPortEdgeStyle. */
 export const STEP_ERROR_PORT = ERROR_PORT_ALONG;
-/** @deprecated Prefer ERROR_PORT_ALONG — if and step share the same right-inset. */
+/** @deprecated Prefer ERROR_PORT_ALONG — if and step share the same placement. */
 export const IF_PORT_ERROR = ERROR_PORT_ALONG;
 
 /**
  * Minimum node WIDTH so flow ports on the bottom edge (TB) keep ≥28px gaps and
- * the last flow port stays ≥20px from the error inset. Also used as the height
+ * the last flow port stays ≥20px from the error port. Also used as the height
  * floor for LR flow-port spacing on the right edge (error lives on a different
  * edge there, so only the flow-flow constraint applies when `hasErrorPort` is
  * false for the LR height check — callers pass hasErrorPort for width only).
@@ -87,11 +90,11 @@ export function minCrossSizeForPorts(flowCount: number, hasErrorPort: boolean): 
     min = Math.max(min, (FLOW_PORT_MIN_GAP * (flowCount - 1)) / FLOW_BAND_SPAN);
   }
   if (hasErrorPort) {
-    // Same-edge clearance along the bottom (TB). Error is always bottom-right.
+    // Same-edge clearance along the bottom (TB).
     const lastFlow = flowPortFraction(Math.max(flowCount - 1, 0), Math.max(flowCount, 1));
-    const denom = 1 - lastFlow;
+    const denom = ERROR_PORT_FRACTION - lastFlow;
     if (denom > 0) {
-      min = Math.max(min, (FLOW_TO_ERROR_MIN_GAP + ERROR_PORT_INSET) / denom);
+      min = Math.max(min, FLOW_TO_ERROR_MIN_GAP / denom);
     }
   }
   return Math.ceil(min);
@@ -124,8 +127,8 @@ export function portCenterOnSourceEdge(
 }
 
 /**
- * Error-port center — always bottom edge, ERROR_PORT_INSET from the right.
- * Identical in TB and LR (orientation-invariant corner anchor).
+ * Error-port center — always bottom edge at ERROR_PORT_FRACTION along the width.
+ * Identical in TB and LR (orientation-invariant bottom-edge anchor).
  */
 export function errorPortCenter(
   nodeBounds: {
@@ -136,7 +139,11 @@ export function errorPortCenter(
   },
   _direction?: LayoutDirection
 ): { x: number; y: number } {
-  return { x: nodeBounds.maxX - ERROR_PORT_INSET, y: nodeBounds.maxY };
+  const width = nodeBounds.maxX - nodeBounds.minX;
+  return {
+    x: nodeBounds.minX + width * ERROR_PORT_FRACTION,
+    y: nodeBounds.maxY,
+  };
 }
 
 export const isHorizontalDirection = (direction: LayoutDirection): boolean => direction === 'LR';
@@ -148,24 +155,22 @@ export const handleAlongStyle = (
 ): CSSProperties => (isHorizontal ? { top: along } : { left: along });
 
 /**
- * Absolute-position style for the error port: bottom edge, right inset,
+ * Absolute-position style for the error port: bottom edge at ERROR_PORT_FRACTION,
  * straddling the border. Same in both orientations — do not put the error
  * port on the right edge in LR.
  */
 export const errorPortEdgeStyle = (
   straddleOutset: number = PORT_STRADDLE_OUTSET
 ): CSSProperties => ({
-  left: 'auto',
-  right: ERROR_PORT_INSET,
+  left: ERROR_PORT_ALONG,
+  right: 'auto',
   bottom: -straddleOutset,
-  // `right` + translateX(50%): positive X shifts toward the left of the card,
-  // centering the hit target on the inset.
-  transform: 'translateX(50%)',
+  transform: 'translateX(-50%)',
 });
 
 /**
  * Handle style for the error source handle. Always on the bottom edge
- * (`Position.Bottom`); inset from the right via left calc.
+ * (`Position.Bottom`); along-fraction via left percentage.
  */
 export const errorHandleStyle = (): CSSProperties => ({
   left: ERROR_PORT_ALONG,
@@ -173,7 +178,7 @@ export const errorHandleStyle = (): CSSProperties => ({
 
 /**
  * Centers of all ports on a node when fully expanded (for overlap regression).
- * Flow ports sit on the outgoing edge; error stays at the bottom-right corner.
+ * Flow ports sit on the outgoing edge; error stays on the bottom edge.
  */
 export function expandedPortCenters(
   nodeWidth: number,
