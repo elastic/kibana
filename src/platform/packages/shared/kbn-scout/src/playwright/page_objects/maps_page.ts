@@ -8,6 +8,7 @@
  */
 
 import type { ScoutPage } from '..';
+import { expect } from '..';
 import { AppMenu } from './app_menu';
 import { SavedObjectSaveModal } from './saved_object_save_modal';
 
@@ -191,5 +192,26 @@ export class MapsPage {
     const zoom = await this.page.testSubj.locator('zoomInput').inputValue();
     await this.closeSetViewPopover();
     return { lat: parseFloat(lat), lon: parseFloat(lon), zoom: parseFloat(zoom) };
+  }
+
+  /**
+   * Clicks the map at a position relative to the container's center to lock the tooltip.
+   * xOffset/yOffset follow the FTR convention: positive x = right, negative y = up.
+   * Retries until mapTooltipCloseButton appears (i.e. a feature was hit and tooltip locked).
+   */
+  async lockTooltipAtPosition(xOffset: number, yOffset: number) {
+    const mapContainer = this.page.testSubj.locator('mapContainer');
+    await mapContainer.waitFor({ state: 'visible' });
+    const closeButton = this.page.testSubj.locator('mapTooltipCloseButton');
+
+    await expect(async () => {
+      const box = await mapContainer.boundingBox();
+      if (!box) throw new Error('Map container bounding box not found');
+      await this.page.mouse.click(
+        box.x + box.width / 2 + xOffset,
+        box.y + box.height / 2 + yOffset
+      );
+      await closeButton.waitFor({ state: 'visible', timeout: 2000 });
+    }).toPass({ timeout: 15000 });
   }
 }
