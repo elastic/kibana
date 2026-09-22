@@ -65,7 +65,26 @@ describe('self-call observer', () => {
     expect(serializedLog).not.toContain('filter=raw-value');
   });
 
-  it('warns when an inbound self-call completes with a non-success status', () => {
+  it('logs inbound client errors at debug', () => {
+    const log = loggingSystemMock.createLogger();
+    const request = createRequest();
+    request.response = { statusCode: 404 } as Request['response'];
+
+    invoke(createSelfCallPreHandler(), request);
+    invoke(createSelfCallPreResponseHandler(log), request);
+
+    expect(log.warn).not.toHaveBeenCalled();
+    expect(log.info).not.toHaveBeenCalled();
+    expect(log.debug).toHaveBeenCalledWith(
+      'Kibana self HTTP call completed',
+      expect.objectContaining({
+        http: { request: { method: 'GET' }, response: { status_code: 404 } },
+        labels: expect.objectContaining({ self_http_status_class: '4xx' }),
+      })
+    );
+  });
+
+  it('warns when an inbound self-call completes with a server error status', () => {
     const log = loggingSystemMock.createLogger();
     const request = createRequest();
     request.response = { statusCode: 502 } as Request['response'];
@@ -76,7 +95,7 @@ describe('self-call observer', () => {
     expect(log.debug).not.toHaveBeenCalled();
     expect(log.info).not.toHaveBeenCalled();
     expect(log.warn).toHaveBeenCalledWith(
-      'Kibana self HTTP call completed with a non-success status',
+      'Kibana self HTTP call completed with a server error status',
       {
         event: { action: SELF_CALL_OBSERVED_EVENT_ACTION },
         http: {

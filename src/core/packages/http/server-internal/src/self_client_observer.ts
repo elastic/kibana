@@ -78,10 +78,10 @@ export const createSelfCallPreResponseHandler = (log: Logger): Lifecycle.Method 
       },
     };
 
-    if (statusCode >= 200 && statusCode < 300) {
-      log.debug('Kibana self HTTP call completed', meta);
+    if (statusCode >= 500) {
+      log.warn('Kibana self HTTP call completed with a server error status', meta);
     } else {
-      log.warn('Kibana self HTTP call completed with a non-success status', meta);
+      log.debug('Kibana self HTTP call completed', meta);
     }
 
     return responseToolkit.continue;

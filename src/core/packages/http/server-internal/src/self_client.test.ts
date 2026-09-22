@@ -268,7 +268,8 @@ describe('InternalHttpSelfScopedClient', () => {
         .asScoped(createRequest())
         .fetch('/api/items/raw-id', { query: { token: 'secret-query' } })
     ).rejects.toThrow('Kibana self HTTP call failed: GET https://kibana.example.com → 502');
-    expect(log.error).toHaveBeenCalledWith(
+    expect(log.error).not.toHaveBeenCalled();
+    expect(log.warn).toHaveBeenCalledWith(
       'Kibana scoped self HTTP call failed',
       expect.objectContaining({
         http: { request: { method: 'GET' }, response: { status_code: 502 } },
@@ -278,10 +279,51 @@ describe('InternalHttpSelfScopedClient', () => {
         }),
       })
     );
-    const serializedLog = JSON.stringify((log.error as jest.Mock).mock.calls);
+    const serializedLog = JSON.stringify((log.warn as jest.Mock).mock.calls);
     expect(serializedLog).not.toContain('secret-query');
     expect(serializedLog).not.toContain('raw-id');
     expect(serializedLog).not.toContain('nope');
+  });
+
+  it('does not log outbound client-error statuses', async () => {
+    const { log, self } = createClient();
+    (global.fetch as jest.Mock).mockResolvedValueOnce(
+      new Response(JSON.stringify({ message: 'missing' }), {
+        status: 404,
+        headers: { 'content-type': 'application/json' },
+      })
+    );
+
+    await expect(self.asScoped(createRequest()).fetch('/api/status')).rejects.toThrow(
+      'Kibana self HTTP call failed: GET https://kibana.example.com → 404'
+    );
+    expect(log.warn).not.toHaveBeenCalled();
+    expect(log.error).not.toHaveBeenCalled();
+  });
+
+  it('warns on a raw 5xx response without throwing', async () => {
+    const { log, self } = createClient();
+    (global.fetch as jest.Mock).mockResolvedValueOnce(
+      new Response(JSON.stringify({ message: 'nope' }), {
+        status: 502,
+        headers: { 'content-type': 'application/json' },
+      })
+    );
+
+    await expect(
+      self.asScoped(createRequest()).fetch('/api/status', { asResponse: true, rawResponse: true })
+    ).resolves.toEqual(
+      expect.objectContaining({
+        response: expect.objectContaining({ status: 502 }),
+      })
+    );
+    expect(log.error).not.toHaveBeenCalled();
+    expect(log.warn).toHaveBeenCalledWith(
+      'Kibana scoped self HTTP call failed',
+      expect.objectContaining({
+        http: { request: { method: 'GET' }, response: { status_code: 502 } },
+      })
+    );
   });
 
   it('does not treat a name-colliding error as a self-fetch error', async () => {
@@ -312,7 +354,8 @@ describe('InternalHttpSelfScopedClient', () => {
     await expect(self.asScoped(createRequest()).fetch('/api/status')).rejects.toThrow(
       'Kibana self HTTP call failed: GET https://kibana.example.com → 502: invalid JSON response body'
     );
-    expect(log.error).toHaveBeenCalledWith(
+    expect(log.error).not.toHaveBeenCalled();
+    expect(log.warn).toHaveBeenCalledWith(
       'Kibana scoped self HTTP call failed',
       expect.objectContaining({
         http: { request: { method: 'GET' }, response: { status_code: 502 } },
@@ -419,12 +462,18 @@ describe('InternalHttpSelfScopedClient', () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce(
       new Response(null, { status: 302, headers: { location: '/api/next' } })
     );
-    const { self } = createClient();
+    const { log, self } = createClient();
 
     await expect(self.asScoped(createFakeRequest()).fetch('/api/status')).rejects.toThrow(
       'server.selfHttp.maxRedirects is 0'
     );
     expect(global.fetch).toHaveBeenCalledTimes(1);
+    expect(log.error).toHaveBeenCalledWith(
+      'Kibana scoped self HTTP call failed',
+      expect.objectContaining({
+        http: { request: { method: 'GET' }, response: { status_code: 302 } },
+      })
+    );
   });
 
   it('follows a same-origin redirect when maxRedirects allows it', async () => {

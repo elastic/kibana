@@ -120,6 +120,7 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
       response = followed.response;
 
       if (options.rawResponse) {
+        this.logHttpStatus(request, response, options.target);
         return { fetchOptions, request, response };
       }
 
@@ -172,12 +173,43 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
     });
   }
 
+  private logHttpStatus(request: Request, response: Response, target?: 'local'): void {
+    if (response.status < 500) {
+      return;
+    }
+    this.writeFailureLog(
+      'warn',
+      createHttpSelfFetchError(
+        `Kibana self HTTP call failed: ${describeSelfCall(request, response)}`,
+        request,
+        response
+      ),
+      target
+    );
+  }
+
   private logFailure(error: HttpSelfFetchError, target?: 'local'): void {
+    const statusCode = error.response?.status;
+    if (statusCode === 304 || (statusCode !== undefined && statusCode >= 400 && statusCode < 500)) {
+      return;
+    }
+    this.writeFailureLog(
+      statusCode !== undefined && statusCode >= 500 ? 'warn' : 'error',
+      error,
+      target
+    );
+  }
+
+  private writeFailureLog(
+    level: 'warn' | 'error',
+    error: HttpSelfFetchError,
+    target?: 'local'
+  ): void {
     const targetMode = this.getEffectiveTarget(target) === 'local' ? 'local' : 'public';
     const statusCode = error.response?.status;
     const errorCode = getErrorCode(error);
 
-    this.params.log.error('Kibana scoped self HTTP call failed', {
+    this.params.log[level]('Kibana scoped self HTTP call failed', {
       error: projectLoggedError(error),
       http: {
         request: { method: error.request.method },
