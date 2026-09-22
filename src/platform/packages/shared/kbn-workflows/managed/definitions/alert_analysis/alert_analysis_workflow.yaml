@@ -1498,6 +1498,10 @@ steps:
                           maxItems: 3
                           items:
                             type: string
+                            # Matches workflow.output / AlertAnalysisVerdict — unbounded factors
+                            # would pass the agent schema then fail final output validation after
+                            # tags/notes have already been written.
+                            maxLength: 100
                           description: At most 3 short phrases (max 6 words each) naming the strongest contributing factors
                       required:
                         - id
