@@ -181,11 +181,15 @@ describe('getMergedConfig', () => {
 
   describe('single mode', () => {
     it('resolves to the code defaults when nothing is overridden', () => {
-      expect(getMergedConfig('user', {}, undefined, 'single')).toEqual(LATEST_LOG_EXTRACTION_DEFAULTS);
+      expect(getMergedConfig('user', {}, undefined, 'single')).toEqual(
+        LATEST_LOG_EXTRACTION_DEFAULTS
+      );
     });
 
     it('is the default extractionMode', () => {
-      expect(getMergedConfig('user', {}, undefined)).toEqual(getMergedConfig('user', {}, undefined, 'single'));
+      expect(getMergedConfig('user', {}, undefined)).toEqual(
+        getMergedConfig('user', {}, undefined, 'single')
+      );
     });
 
     it('applies a global override', () => {

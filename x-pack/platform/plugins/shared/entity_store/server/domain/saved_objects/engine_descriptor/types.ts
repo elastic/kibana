@@ -368,7 +368,6 @@ const logExtractionConfigSchemaV8 = schema.object({
   ),
 });
 
-
 const engineDescriptorSchemaV8 = engineDescriptorSchemaV7.extends({
   logExtractionConfig: schema.maybe(logExtractionConfigSchemaV8),
 });
