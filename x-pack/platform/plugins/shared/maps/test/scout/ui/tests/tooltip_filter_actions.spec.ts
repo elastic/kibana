@@ -36,48 +36,21 @@ test.describe(
       await uiSettings.unset('defaultIndex');
     });
 
-    test.describe('apply filter to current view', () => {
-      test('apply filter to current view lifecycle', async ({ page, pageObjects }) => {
-        await pageObjects.dashboard.openDashboardWithId(TOOLTIP_FILTER_ACTION_DASHBOARD_ID);
-        await pageObjects.maps.lockTooltipAtPosition(200, -200);
+    test('apply filter action', async ({ page, pageObjects }) => {
+      await pageObjects.dashboard.openDashboardWithId(TOOLTIP_FILTER_ACTION_DASHBOARD_ID);
+      await pageObjects.maps.lockTooltipAtPosition(200, -200);
 
-        await test.step('create filter button is visible when tooltip is locked', async () => {
-          await expect(page.testSubj.locator('mapTooltipCreateFilterButton')).toBeVisible();
-        });
-
-        await test.step('clicking create filter button adds a join filter', async () => {
-          await page.testSubj.click('mapTooltipCreateFilterButton');
-          await pageObjects.dashboard.waitForRenderComplete();
-          await pageObjects.maps.waitForLayersToLoad();
-
-          const numFilters = await pageObjects.filterBar.getFilterCount();
-          expect(numFilters).toBe(1);
-
-          const hasJoinFilter = await pageObjects.filterBar.hasFilter({
-            field: 'runtime_shape_name',
-            value: 'charlie',
-          });
-          expect(hasJoinFilter).toBe(true);
-        });
+      await test.step('create filter button is visible when tooltip is locked', async () => {
+        await expect(page.testSubj.locator('mapTooltipCreateFilterButton')).toBeVisible();
       });
-    });
 
-    test.describe('panel actions', () => {
-      test('should trigger dashboard drilldown action when clicked', async ({
-        page,
-        pageObjects,
-      }) => {
-        await pageObjects.dashboard.openDashboardWithId(TOOLTIP_FILTER_ACTION_DASHBOARD_ID);
-        await pageObjects.maps.lockTooltipAtPosition(200, -200);
-
-        await page.testSubj.click('mapTooltipMoreActionsButton');
-        await page.testSubj.click('mapFilterActionButton__drilldown1');
-
-        // Assert we landed on the target dashboard with filter from drilldown action
-        await expect(pageObjects.dashboard.getAppTitle()).toContainText('map embeddable example');
+      await test.step('clicking create filter button adds a join filter', async () => {
+        await page.testSubj.click('mapTooltipCreateFilterButton');
         await pageObjects.dashboard.waitForRenderComplete();
-        const panelCount = await pageObjects.dashboard.getPanelCount();
-        expect(panelCount).toBe(2);
+        await pageObjects.maps.waitForLayersToLoad();
+
+        const numFilters = await pageObjects.filterBar.getFilterCount();
+        expect(numFilters).toBe(1);
 
         const hasJoinFilter = await pageObjects.filterBar.hasFilter({
           field: 'runtime_shape_name',
@@ -85,22 +58,42 @@ test.describe(
         });
         expect(hasJoinFilter).toBe(true);
       });
+    });
 
-      test('should trigger url drilldown action when clicked', async ({ page, pageObjects }) => {
-        await pageObjects.dashboard.openDashboardWithId(TOOLTIP_FILTER_ACTION_DASHBOARD_ID);
-        await pageObjects.maps.lockTooltipAtPosition(200, -200);
+    test('dashboard drilldown action', async ({ page, pageObjects }) => {
+      await pageObjects.dashboard.openDashboardWithId(TOOLTIP_FILTER_ACTION_DASHBOARD_ID);
+      await pageObjects.maps.lockTooltipAtPosition(200, -200);
 
-        await page.testSubj.click('mapTooltipMoreActionsButton');
-        await page.testSubj.click('mapFilterActionButton__urlDrilldownToDiscover');
+      await page.testSubj.click('mapTooltipMoreActionsButton');
+      await page.testSubj.click('mapFilterActionButton__drilldown1');
 
-        // Assert we landed on Discover with filter from drilldown action
-        await page.locator('.dscPage').waitFor({ state: 'visible' });
-        const hasFilter = await pageObjects.filterBar.hasFilter({
-          field: 'name',
-          value: 'charlie',
-        });
-        expect(hasFilter).toBe(true);
+      // Assert we landed on the target dashboard with filter from drilldown action
+      await expect(pageObjects.dashboard.getAppTitle()).toContainText('map embeddable example');
+      await pageObjects.dashboard.waitForRenderComplete();
+      const panelCount = await pageObjects.dashboard.getPanelCount();
+      expect(panelCount).toBe(2);
+
+      const hasJoinFilter = await pageObjects.filterBar.hasFilter({
+        field: 'runtime_shape_name',
+        value: 'charlie',
       });
+      expect(hasJoinFilter).toBe(true);
+    });
+
+    test('url drilldown action', async ({ page, pageObjects }) => {
+      await pageObjects.dashboard.openDashboardWithId(TOOLTIP_FILTER_ACTION_DASHBOARD_ID);
+      await pageObjects.maps.lockTooltipAtPosition(200, -200);
+
+      await page.testSubj.click('mapTooltipMoreActionsButton');
+      await page.testSubj.click('mapFilterActionButton__urlDrilldownToDiscover');
+
+      // Assert we landed on Discover with filter from drilldown action
+      await page.locator('.dscPage').waitFor({ state: 'visible' });
+      const hasFilter = await pageObjects.filterBar.hasFilter({
+        field: 'name',
+        value: 'charlie',
+      });
+      expect(hasFilter).toBe(true);
     });
   }
 );
