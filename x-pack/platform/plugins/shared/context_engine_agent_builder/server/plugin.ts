@@ -41,7 +41,10 @@ export class ContextEngineAgentBuilderPlugin
     return {};
   }
 
-  start(_coreStart: CoreStart): ContextEngineAgentBuilderPluginStart {
+  start(
+    _coreStart: CoreStart,
+    _startDeps: ContextEngineAgentBuilderStartDependencies
+  ): ContextEngineAgentBuilderPluginStart {
     return {};
   }
 
