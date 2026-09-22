@@ -16,6 +16,7 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiButton,
+  EuiToolTip,
 } from '@elastic/eui';
 
 export enum SubmittingType {
@@ -35,6 +36,7 @@ interface FooterProps {
   canSave: boolean;
   isManaged: boolean;
   isDuplicating: boolean;
+  hasCustomId: boolean;
 }
 
 const closeButtonLabel = i18n.translate('indexPatternEditor.editor.flyoutCloseButtonLabel', {
@@ -67,6 +69,18 @@ const exploreButtonLabel = i18n.translate('indexPatternEditor.editor.flyoutExplo
   defaultMessage: 'Use without saving',
 });
 
+const exploreButtonTitle = i18n.translate('indexPatternEditor.editor.flyoutExploreButtonTitle', {
+  defaultMessage: 'Use this data view without creating a saved object',
+});
+
+const exploreButtonCustomIdTitle = i18n.translate(
+  'indexPatternEditor.editor.flyoutExploreButtonCustomIdTitle',
+  {
+    defaultMessage:
+      'A custom data view ID is not supported without saving, as it is not guaranteed to be unique. Clear the ID to continue.',
+  }
+);
+
 export const Footer = ({
   onCancel,
   onSubmit,
@@ -79,6 +93,7 @@ export const Footer = ({
   onDuplicate,
   isManaged,
   isDuplicating,
+  hasCustomId,
 }: FooterProps) => {
   const isEditingAdHoc = hasEditData && !isPersisted;
 
@@ -118,18 +133,17 @@ export const Footer = ({
 
             {allowAdHoc && (
               <EuiFlexItem grow={false}>
-                <EuiButton
-                  color="primary"
-                  onClick={submitAdHoc}
-                  data-test-subj="exploreIndexPatternButton"
-                  disabled={submitDisabled}
-                  isLoading={submittingType === SubmittingType.savingAsAdHoc}
-                  title={i18n.translate('indexPatternEditor.editor.flyoutExploreButtonTitle', {
-                    defaultMessage: 'Use this data view without creating a saved object',
-                  })}
-                >
-                  {exploreButtonLabel}
-                </EuiButton>
+                <EuiToolTip content={hasCustomId ? exploreButtonCustomIdTitle : exploreButtonTitle}>
+                  <EuiButton
+                    color="primary"
+                    onClick={submitAdHoc}
+                    data-test-subj="exploreIndexPatternButton"
+                    disabled={submitDisabled || hasCustomId}
+                    isLoading={submittingType === SubmittingType.savingAsAdHoc}
+                  >
+                    {exploreButtonLabel}
+                  </EuiButton>
+                </EuiToolTip>
               </EuiFlexItem>
             )}
 
