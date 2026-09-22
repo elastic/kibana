@@ -103,6 +103,7 @@ describe('propagateRoleArnToPackagePolicies', () => {
       id,
       version: `Wz${id}-after`,
     }));
+    (agentPolicyService.bumpAgentPoliciesByIds as jest.Mock).mockResolvedValue({});
   });
 
   it('updates every referencing package policy with the new ARN', async () => {
@@ -245,6 +246,40 @@ describe('propagateRoleArnToPackagePolicies', () => {
       {},
       'default'
     );
+  });
+
+  it('reverts policies and throws when the agent-policy revision bump fails', async () => {
+    // With bumpRevision: false on every package-policy write, the deferred bump is the only
+    // deployment trigger. Reporting success while it fails would leave agents on the old ARN.
+    mockListReturns([makePolicy('a'), makePolicy('b')]);
+    (agentPolicyService.bumpAgentPoliciesByIds as jest.Mock).mockRejectedValue(
+      new Error('bump boom')
+    );
+
+    let caught: CloudConnectorRoleArnPropagationError | undefined;
+    try {
+      await propagateRoleArnToPackagePolicies({
+        soClient,
+        esClient,
+        connectorId: CONNECTOR_ID,
+        newRoleArn: NEW_ARN,
+      });
+    } catch (err) {
+      caught = err as CloudConnectorRoleArnPropagationError;
+    }
+
+    expect(caught).toBeInstanceOf(CloudConnectorRoleArnPropagationError);
+    expect(caught?.message).toMatch(/Failed to bump agent policy revisions/);
+    expect(caught?.message).toMatch(/reverted successfully/);
+    expect(caught?.detail.updateFailed).toEqual(['a', 'b']);
+    expect(caught?.detail.revertFailed).toEqual([]);
+
+    const revertCalls = (packagePolicyService.update as jest.Mock).mock.calls.filter(
+      ([, , , update]) => update.inputs[0].vars.role_arn.value === OLD_ARN
+    );
+    expect(revertCalls.map(([, , id]) => id).sort()).toEqual(['a', 'b']);
+    // Forward bump once, then a second bump after revert so agents drop the brief new ARN.
+    expect(agentPolicyService.bumpAgentPoliciesByIds).toHaveBeenCalledTimes(2);
   });
 
   it('bumps the reverted agent policies after a failed fan-out', async () => {

@@ -68,11 +68,11 @@ const renderPolicyIds = (ids: string[]): string => {
  * Exit points (in source order):
  *   1. `return` — no package policy references the connector (nothing to do).
  *   2. `return` — policies reference the connector but none carry a `role_arn` variable.
- *   3. `return` — Phase 1 forward writes all succeeded; agent-policy revisions bumped once.
- *      Caller is safe to write the connector.
- *   4. `throw`  — Phase 1 had one or more failures; Phase 2 best-effort reverts the successful
- *      ones and throws `CloudConnectorRoleArnPropagationError` carrying `updateFailed` and
- *      `revertFailed` id lists. Caller must NOT write the connector.
+ *   3. `return` — Phase 1 forward writes all succeeded and the agent-policy revision bump
+ *      succeeded. Caller is safe to write the connector.
+ *   4. `throw`  — Phase 1 had policy failures, or the post-Phase-1 agent-policy bump failed;
+ *      successful policy writes are reverted and `CloudConnectorRoleArnPropagationError` is
+ *      thrown with `updateFailed` / `revertFailed` id lists. Caller must NOT write the connector.
  */
 export const propagateRoleArnToPackagePolicies = async ({
   soClient,
@@ -161,11 +161,12 @@ export const propagateRoleArnToPackagePolicies = async ({
     );
 
   /**
-   * Best effort: the policies already hold the new ARN, so a failed bump only delays agents
-   * picking it up until the next revision change. Failing the fan-out here would be worse — it
-   * would leave the connector on the old ARN while the policies are on the new one.
+   * Bumps every agent policy referenced by `bumped`. Throws on failure — with
+   * `bumpRevision: false` on every package-policy write, this is the only deployment
+   * trigger in the fan-out; swallowing it would report success while agents keep the
+   * old compiled ARN indefinitely.
    */
-  const bumpAgentPolicies = async (bumped: PolicyPlan[]) => {
+  const bumpAgentPolicies = async (bumped: PolicyPlan[]): Promise<void> => {
     const agentPolicyIds = new Set<string>();
     for (const { policy } of bumped) {
       for (const agentPolicyId of policy.policy_ids ?? []) {
@@ -175,14 +176,32 @@ export const propagateRoleArnToPackagePolicies = async ({
     if (agentPolicyIds.size === 0) {
       return;
     }
-    try {
-      await agentPolicyService.bumpAgentPoliciesByIds([...agentPolicyIds].sort(), {}, spaceId);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      logger.error(
-        `Failed to bump agent policy revisions in space ${spaceId} after the role ARN fan-out for connector ${connectorId}: ${message}`
-      );
-    }
+    await agentPolicyService.bumpAgentPoliciesByIds([...agentPolicyIds].sort(), {}, spaceId);
+  };
+
+  /** Best-effort write of each plan's previous vars/inputs; collects successes and failures. */
+  const revertPlans = async (
+    toRevert: PolicyPlan[]
+  ): Promise<{ reverted: PolicyPlan[]; revertFailed: string[] }> => {
+    const revertFailed: string[] = [];
+    const reverted: PolicyPlan[] = [];
+    await pMap(
+      toRevert,
+      async (plan) => {
+        try {
+          await writePolicyRoleArn(plan, plan.previousVars, plan.previousInputs, plan.writeVersion);
+          reverted.push(plan);
+        } catch (error) {
+          const message = error instanceof Error ? error.message : String(error);
+          logger.error(
+            `Failed to revert package policy ${plan.policy.id} to previous role ARN: ${message}`
+          );
+          revertFailed.push(plan.policy.id);
+        }
+      },
+      { concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS, stopOnError: false }
+    );
+    return { reverted, revertFailed };
   };
 
   // ── Phase 1: forward writes (plans → new ARN) ──────────────────────────────────────────────
@@ -239,7 +258,45 @@ export const propagateRoleArnToPackagePolicies = async ({
   );
 
   if (updateFailed.length === 0) {
-    await bumpAgentPolicies(succeeded);
+    try {
+      await bumpAgentPolicies(succeeded);
+    } catch (bumpError) {
+      // Policies already hold the new ARN; without a bump agents keep the old compiled one.
+      // Revert so the connector write below never runs against a half-applied fan-out.
+      const bumpMessage = bumpError instanceof Error ? bumpError.message : String(bumpError);
+      logger.error(
+        `Failed to bump agent policy revisions in space ${spaceId} after the role ARN fan-out for connector ${connectorId}: ${bumpMessage}. Reverting package policies.`
+      );
+
+      const { reverted, revertFailed } = await revertPlans(succeeded);
+      try {
+        await bumpAgentPolicies(reverted);
+      } catch (revertBumpError) {
+        const revertBumpMessage =
+          revertBumpError instanceof Error ? revertBumpError.message : String(revertBumpError);
+        logger.error(
+          `Failed to bump agent policy revisions after reverting the role ARN fan-out for connector ${connectorId}: ${revertBumpMessage}`
+        );
+      }
+
+      const failedIds = succeeded.map((plan) => plan.policy.id).sort();
+      revertFailed.sort();
+      throw new CloudConnectorRoleArnPropagationError(
+        `Failed to bump agent policy revisions after updating role ARN on ${
+          failedIds.length
+        } package ${failedIds.length === 1 ? 'policy' : 'policies'} for connector ${connectorId}` +
+          ` (ids: ${renderPolicyIds(failedIds)}): ${bumpMessage}` +
+          (revertFailed.length > 0
+            ? `. Revert also failed for ${revertFailed.length} previously updated ${
+                revertFailed.length === 1 ? 'policy' : 'policies'
+              } (ids: ${renderPolicyIds(
+                revertFailed
+              )}); those policies are now on the new role ARN while the connector still holds the old one.`
+            : `. All previously updated policies were reverted successfully; the connector is unchanged.`),
+        { updateFailed: failedIds, revertFailed }
+      );
+    }
+
     logger.info(
       `Successfully fanned out new role ARN to ${succeeded.length} package ${
         succeeded.length === 1 ? 'policy' : 'policies'
@@ -260,29 +317,20 @@ export const propagateRoleArnToPackagePolicies = async ({
     } after ${updateFailed.length} failed role ARN update(s) for connector ${connectorId}.`
   );
 
-  const revertFailed: string[] = [];
-  const reverted: PolicyPlan[] = [];
-  await pMap(
-    succeeded,
-    async (plan) => {
-      try {
-        await writePolicyRoleArn(plan, plan.previousVars, plan.previousInputs, plan.writeVersion);
-        reverted.push(plan);
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        logger.error(
-          `Failed to revert package policy ${plan.policy.id} to previous role ARN: ${message}`
-        );
-        revertFailed.push(plan.policy.id);
-      }
-    },
-    { concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS, stopOnError: false }
-  );
+  const { reverted, revertFailed } = await revertPlans(succeeded);
 
   // Bump agent policies for the ones we successfully reverted — their package-policy `revision`
   // moved (once forward, once back), so agents need one bump to re-fetch and discard the stale
-  // compiled version they may already have cached.
-  await bumpAgentPolicies(reverted);
+  // compiled version they may already have cached. Already throwing below, so a bump failure
+  // here is logged rather than nested into a second error path.
+  try {
+    await bumpAgentPolicies(reverted);
+  } catch (bumpError) {
+    const bumpMessage = bumpError instanceof Error ? bumpError.message : String(bumpError);
+    logger.error(
+      `Failed to bump agent policy revisions in space ${spaceId} after reverting the role ARN fan-out for connector ${connectorId}: ${bumpMessage}`
+    );
+  }
 
   // `pMap` resolves out of order, so sort before reporting: the message and the detail have to be
   // the same for the same failure, whatever order the writes happened to finish in.
