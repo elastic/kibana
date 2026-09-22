@@ -82,5 +82,12 @@ export interface MatrixTraceEntry {
  */
 export type MatrixTraceData = Record<string, MatrixTraceEntry>;
 
-/** Build the trace-data lookup key. */
+/**
+ * Build the trace-data lookup key.
+ *
+ * Model and column ids are config-controlled and colon-free in practice (the
+ * renderer's own `prefix:` keys are the only colons in play), so a plain join
+ * is unambiguous here. It would not be if an id ever contained a colon:
+ * `('a:b', 'c')` and `('a', 'b:c')` would resolve to the same entry.
+ */
 export const traceKey = (modelId: string, columnId: string): string => `${modelId}:${columnId}`;

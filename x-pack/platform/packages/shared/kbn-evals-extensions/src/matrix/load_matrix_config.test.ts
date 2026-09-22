@@ -18,6 +18,23 @@ describe('parseMatrixConfig', () => {
     models: [{ id: 'eis/foo', label: 'Foo' }],
   };
 
+  it('rejects a column id containing a colon', () => {
+    // Trace keys are `${modelId}:${columnId}`; a colon inside either id makes
+    // two different pairs collide on one entry.
+    expect(() =>
+      parseMatrixConfig({
+        ...minimalConfig,
+        columns: [{ id: 'alert:triage', label: 'Alert Triage', suites: ['s'] }],
+      })
+    ).toThrow(/must not contain ':'/);
+  });
+
+  it('rejects a model id containing a colon', () => {
+    expect(() =>
+      parseMatrixConfig({ ...minimalConfig, models: [{ id: 'eis:foo', label: 'Foo' }] })
+    ).toThrow(/must not contain ':'/);
+  });
+
   it('applies defaults for optional fields', () => {
     const config = parseMatrixConfig(minimalConfig);
 

@@ -26,9 +26,22 @@ const MAX_ARRAY_SIZE = 1000;
  * allowlist (with display names + open-source classification), and describes how
  * raw evaluator scores are normalized onto the published 0-10 scale.
  */
+
+/**
+ * Identifier used to build trace lookup keys (`${modelId}:${columnId}`).
+ *
+ * Colons are rejected because the key is a plain join: an id carrying its own
+ * colon makes two different (model, column) pairs resolve to the same trace.
+ */
+const idSchema = schema.string({
+  minLength: 1,
+  maxLength: MAX_STRING_LENGTH,
+  validate: (value) => (value.includes(':') ? `must not contain ':' (got "${value}")` : undefined),
+});
+
 const columnSchema = schema.object({
   /** Stable identifier for the column (used as the CSV/JSON key). */
-  id: schema.string({ minLength: 1, maxLength: MAX_STRING_LENGTH }),
+  id: idSchema,
   /** Human-facing column header (e.g. "Alert Triage"). */
   label: schema.string({ minLength: 1, maxLength: MAX_STRING_LENGTH }),
   /**
@@ -112,7 +125,7 @@ const columnSchema = schema.object({
  */
 const compositeSchema = schema.object({
   /** Stable identifier for the composite (used as the CSV/JSON key). */
-  id: schema.string({ minLength: 1, maxLength: MAX_STRING_LENGTH }),
+  id: idSchema,
   /** Human-facing column header (e.g. "Agent Builder Score"). */
   label: schema.string({ minLength: 1, maxLength: MAX_STRING_LENGTH }),
   /** Optional grouped-header label (see `columnSchema.group`). */
@@ -126,7 +139,7 @@ const compositeSchema = schema.object({
 
 const modelSchema = schema.object({
   /** Primary `task.model.id` value to match against. */
-  id: schema.string({ minLength: 1, maxLength: MAX_STRING_LENGTH }),
+  id: idSchema,
   /** Display name shown in the published matrix (e.g. "Claude Sonnet 4"). */
   label: schema.string({ minLength: 1, maxLength: MAX_STRING_LENGTH }),
   /** Additional `task.model.id` values that should map to the same row. */
