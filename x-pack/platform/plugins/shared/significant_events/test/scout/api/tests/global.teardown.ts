@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import { globalTeardownHook } from '@kbn/scout';
-import { NIGHTSHIFT_ENABLED_FLAG } from '../../../../common';
 
 globalTeardownHook(
   'Teardown environment for Significant Events API tests',

@@ -12,7 +12,7 @@ import {
   type AnalysisTarget,
   type ExistingQuerySummary,
 } from '@kbn/nightshift-ai';
-import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/significant-events-plugin/common';
+import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import { tags } from '@kbn/scout';
 
 import {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/significant-events-plugin/common';
+import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import { createServerlessFeatureFlagTestConfig } from '../../default_configs/feature_flag.serverless.config.base';
 import { services } from '../../services';
 

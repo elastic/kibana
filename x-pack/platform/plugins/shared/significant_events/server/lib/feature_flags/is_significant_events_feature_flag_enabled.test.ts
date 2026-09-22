@@ -6,7 +6,7 @@
  */
 
 import type { FeatureFlagsStart } from '@kbn/core/server';
-import { NIGHTSHIFT_ENABLED_FLAG } from '../../../common/feature_flags';
+import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import { isSignificantEventsFeatureFlagEnabled } from './is_significant_events_feature_flag_enabled';
 
 describe('isSignificantEventsFeatureFlagEnabled', () => {

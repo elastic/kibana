@@ -9,7 +9,6 @@ export { QUERY_STATUSES } from './queries';
 export type { QueryStatus } from './queries';
 
 export {
-  NIGHTSHIFT_ENABLED_FLAG,
   SIGNIFICANT_EVENTS_SEMANTIC_CODE_SEARCH_GROUNDING_ENABLED_FLAG,
   STREAMS_SIGNIFICANT_EVENTS_APPS_ENABLED_FLAG,
 } from './feature_flags';

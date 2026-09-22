@@ -335,7 +335,7 @@ Features behind flags are registered as `uiSettings` in `feature_flags.ts`:
 - `observability:streamsEnableCanvas`
 
 Significant events is **not** gated here — it lives in the `significant_events` plugin behind the
-`nightshift.enabled` feature flag (`significant_events/common/feature_flags.ts`).
+`nightshift.enabled` feature flag (`NIGHTSHIFT_ENABLED_FLAG` in `@kbn/nightshift-shared`).
 
 ## streams_app Plugin Architecture
 

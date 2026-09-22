@@ -6,11 +6,9 @@
  */
 
 import { setTimeout as delay } from 'timers/promises';
+import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import { globalSetupHook } from '@kbn/scout';
-import {
-  NIGHTSHIFT_ENABLED_FLAG,
-  type SignificantEventsAvailabilityResponse,
-} from '../../../../common';
+import type { SignificantEventsAvailabilityResponse } from '../../../../common';
 import { COMMON_API_HEADERS } from '../fixtures/constants';
 
 const AVAILABILITY_PATH = '/internal/significant_events/availability';

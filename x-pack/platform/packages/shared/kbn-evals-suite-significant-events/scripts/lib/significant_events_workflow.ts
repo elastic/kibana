@@ -10,6 +10,7 @@ import type {
   MappingTypeMapping,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
+import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Feature, SignificantEvent } from '@kbn/significant-events-schema';
 import { KIsOnboardingStep } from '@kbn/significant-events-schema';
@@ -18,7 +19,6 @@ import {
   SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
 } from '@kbn/significant-events-schema';
-import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/significant-events-plugin/common';
 import type { ConnectionConfig } from './get_connection_config';
 import { kibanaRequest } from './kibana';
 import { withTempSuperuser } from './user_utils';

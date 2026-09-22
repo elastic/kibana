@@ -172,5 +172,3 @@ export {
 } from './src/inference_feature_ids';
 
 export type { KnowledgeIndicatorClientContract } from './src/knowledge_indicator_client';
-
-export { NIGHTSHIFT_ENABLED_FLAG } from './src/feature_flags';

@@ -11,7 +11,7 @@ import {
   createChatCallsEvaluator,
   createSpanLatencyEvaluator,
 } from '@kbn/evals';
-import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/significant-events-plugin/common';
+import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import type { GcsConfig } from '../../src/data_generators/replay';
 import { cleanSignificantEventsDataStreams } from '../../src/data_generators/replay';
 import { evaluate } from '../../src/evaluate';

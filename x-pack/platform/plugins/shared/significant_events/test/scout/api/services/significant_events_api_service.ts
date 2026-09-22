@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import type { KbnClient, ScoutLogger } from '@kbn/scout/src/common';
 import { measurePerformanceAsync } from '@kbn/scout/src/common';
 import { COMMON_API_HEADERS } from '../fixtures/constants';
-import { NIGHTSHIFT_ENABLED_FLAG } from '../../../../common';
 
 export interface SignificantEventsTestApiService {
   runSignificantEventsDiscovery: () => Promise<{ executionId: string }>;

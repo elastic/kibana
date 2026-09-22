@@ -6,7 +6,7 @@
  */
 
 import { sumTokens, type InferenceDocument } from '@kbn/nightshift-ai';
-import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/significant-events-plugin/common';
+import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import { compactInferenceDocuments } from '@kbn/significant-events-plugin/server';
 import { tags } from '@kbn/scout';
 import {

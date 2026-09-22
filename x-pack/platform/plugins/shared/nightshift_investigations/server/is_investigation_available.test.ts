@@ -6,7 +6,7 @@
  */
 
 import type { FeatureFlagsStart, KibanaRequest } from '@kbn/core/server';
-import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/significant-events-schema';
+import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import { isInvestigationAvailable } from './is_investigation_available';
 
 const request = {} as KibanaRequest;
