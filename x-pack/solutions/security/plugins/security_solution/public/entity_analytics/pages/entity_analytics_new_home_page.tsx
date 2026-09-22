@@ -90,6 +90,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
 
   if (isDataViewLoading || entityStoreInstalling) return <PageLoader />;
   if (isDataViewError) return <DataViewErrorComponent />;
+  if (!dataView) return null;
   if (entityStoreDisabled) return <EntityStoreDisabledEmptyPrompt />;
 
   return (
