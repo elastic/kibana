@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { render, screen, within, fireEvent } from '@testing-library/react';
+import { screen, within, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { I18nProvider } from '@kbn/i18n-react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import {
   SignificantSecurityEventInlineContent,
@@ -17,6 +17,7 @@ import {
 } from './significant_security_event_inline_content';
 import type { SignificantSecurityEventAttachment } from './types';
 import { buildEntityLookupEsql, buildEventLookupEsql } from '../navigation';
+import { createMockShare, createMockNavigation } from '../test_utils';
 
 const buildAttachment = (
   data: SignificantSecurityEventAttachment['data']
@@ -27,25 +28,9 @@ const buildAttachment = (
     data,
   } as SignificantSecurityEventAttachment);
 
-const mockShare = {
-  url: {
-    locators: {
-      get: () => ({
-        getRedirectUrl: (params: { query?: { esql?: string } }) => {
-          if (params.query?.esql) {
-            return `https://example.test/discover?esql=${encodeURIComponent(params.query.esql)}`;
-          }
-          return 'https://example.test/discover?nested=1';
-        },
-      }),
-    },
-  },
-} as unknown as SharePluginStart;
+const mockShare = createMockShare();
 
-const defaultNavigation = {
-  spaceId: 'default',
-  prependPath: (path: string) => path,
-};
+const defaultNavigation = createMockNavigation();
 
 const renderProps = (
   attachment: SignificantSecurityEventAttachment,
@@ -55,8 +40,6 @@ const renderProps = (
   navigation,
   isSidebar: false,
 });
-
-const renderWithIntl = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
 const baseData = {
   title: 'Suspicious lateral movement',
@@ -108,7 +91,7 @@ const huntResult = {
 
 describe('SignificantSecurityEventInlineContent', () => {
   it('renders the empty state for malformed data', () => {
-    renderWithIntl(
+    renderWithI18n(
       <SignificantSecurityEventInlineContent
         {...renderProps(buildAttachment({} as SignificantSecurityEventAttachment['data']))}
       />
@@ -117,7 +100,7 @@ describe('SignificantSecurityEventInlineContent', () => {
   });
 
   it('renders the run_id and report link, hypothesis, timeline, and entities from a valid payload', () => {
-    renderWithIntl(
+    renderWithI18n(
       <SignificantSecurityEventInlineContent {...renderProps(buildAttachment(baseData))} />
     );
     expect(screen.getByTestId(SSE_ATTACHMENT_TEST_ID)).toBeInTheDocument();
@@ -132,7 +115,7 @@ describe('SignificantSecurityEventInlineContent', () => {
   });
 
   it('does not render a title/severity/status header row (moved to the attachment header)', () => {
-    renderWithIntl(
+    renderWithI18n(
       <SignificantSecurityEventInlineContent {...renderProps(buildAttachment(baseData))} />
     );
     expect(screen.queryByText('Suspicious lateral movement')).not.toBeInTheDocument();
@@ -140,7 +123,7 @@ describe('SignificantSecurityEventInlineContent', () => {
   });
 
   it('does not render the evidence/indicators summary footer', () => {
-    renderWithIntl(
+    renderWithI18n(
       <SignificantSecurityEventInlineContent {...renderProps(buildAttachment(baseData))} />
     );
     expect(
@@ -149,7 +132,7 @@ describe('SignificantSecurityEventInlineContent', () => {
   });
 
   it('renders nothing for the timeline section when there are no entries', () => {
-    renderWithIntl(
+    renderWithI18n(
       <SignificantSecurityEventInlineContent
         {...renderProps(buildAttachment({ ...baseData, timeline: [] }))}
       />
@@ -161,7 +144,7 @@ describe('SignificantSecurityEventInlineContent', () => {
   });
 
   it('renders nothing for the entities section when entities is empty', () => {
-    renderWithIntl(
+    renderWithI18n(
       <SignificantSecurityEventInlineContent
         {...renderProps(buildAttachment({ ...baseData, entities: [] }))}
       />
@@ -179,7 +162,7 @@ describe('SignificantSecurityEventInlineContent', () => {
     const roleEsql = buildEntityLookupEsql({ field: 'user.name', value: 'escalated-role' });
     const hostEsql = buildEntityLookupEsql({ field: 'host.name', value: 'ci-deploy-runner-07' });
 
-    renderWithIntl(
+    renderWithI18n(
       <SignificantSecurityEventInlineContent
         {...renderProps(buildAttachment({ ...baseData, entities }), {
           ...defaultNavigation,
@@ -235,10 +218,14 @@ describe('SignificantSecurityEventInlineContent', () => {
       ...baseData,
       security_knowledge_indicators: [
         ...baseData.security_knowledge_indicators,
-        { type: 'ioc' as const, value: '203.0.113.4', ioc: { type: 'ip' as const, value: '203.0.113.4' } },
+        {
+          type: 'ioc' as const,
+          value: '203.0.113.4',
+          ioc: { type: 'ip' as const, value: '203.0.113.4' },
+        },
       ],
     };
-    renderWithIntl(
+    renderWithI18n(
       <SignificantSecurityEventInlineContent {...renderProps(buildAttachment(data))} />
     );
 
@@ -254,7 +241,7 @@ describe('SignificantSecurityEventInlineContent', () => {
   });
 
   it('links a technique indicator to its MITRE ATT&CK reference', () => {
-    renderWithIntl(
+    renderWithI18n(
       <SignificantSecurityEventInlineContent {...renderProps(buildAttachment(baseData))} />
     );
 
@@ -264,7 +251,7 @@ describe('SignificantSecurityEventInlineContent', () => {
   });
 
   it('renders nothing for indicators when the list is empty', () => {
-    renderWithIntl(
+    renderWithI18n(
       <SignificantSecurityEventInlineContent
         {...renderProps(buildAttachment({ ...baseData, security_knowledge_indicators: [] }))}
       />
@@ -286,7 +273,7 @@ describe('SignificantSecurityEventInlineContent', () => {
     });
     const expectedHref = `https://example.test/discover?esql=${encodeURIComponent(expectedEsql)}`;
 
-    renderWithIntl(
+    renderWithI18n(
       <SignificantSecurityEventInlineContent
         {...renderProps(buildAttachment({ ...baseData, events: [event] }), {
           ...defaultNavigation,
@@ -320,7 +307,7 @@ describe('SignificantSecurityEventInlineContent', () => {
       source_index: 'logs-endpoint.events.process-default',
     };
 
-    renderWithIntl(
+    renderWithI18n(
       <SignificantSecurityEventInlineContent
         {...renderProps(buildAttachment({ ...baseData, events: [event] }))}
       />
@@ -337,7 +324,7 @@ describe('SignificantSecurityEventInlineContent', () => {
   });
 
   it('renders nothing for the events accordion when there are no events or alerts', () => {
-    renderWithIntl(
+    renderWithI18n(
       <SignificantSecurityEventInlineContent
         {...renderProps(buildAttachment({ ...baseData, events: [], alerts: [] }))}
       />
@@ -348,7 +335,7 @@ describe('SignificantSecurityEventInlineContent', () => {
   });
 
   it('renders nothing for alerts when the list is empty', () => {
-    renderWithIntl(
+    renderWithI18n(
       <SignificantSecurityEventInlineContent
         {...renderProps(
           buildAttachment({
@@ -365,7 +352,7 @@ describe('SignificantSecurityEventInlineContent', () => {
   });
 
   it('renders nothing for evidence sections when both are empty', () => {
-    renderWithIntl(
+    renderWithI18n(
       <SignificantSecurityEventInlineContent
         {...renderProps(buildAttachment({ ...baseData, evidence_for: [], evidence_against: [] }))}
       />
@@ -375,7 +362,7 @@ describe('SignificantSecurityEventInlineContent', () => {
   });
 
   it('renders the evidence for section when populated', () => {
-    renderWithIntl(
+    renderWithI18n(
       <SignificantSecurityEventInlineContent {...renderProps(buildAttachment(baseData))} />
     );
     expect(screen.getByText('Evidence for')).toBeInTheDocument();
@@ -385,14 +372,14 @@ describe('SignificantSecurityEventInlineContent', () => {
 
   describe('hunt result', () => {
     it('renders nothing when hunt_result is absent', () => {
-      renderWithIntl(
+      renderWithI18n(
         <SignificantSecurityEventInlineContent {...renderProps(buildAttachment(baseData))} />
       );
       expect(screen.queryByText('Hunt result')).not.toBeInTheDocument();
     });
 
     it('renders total hits, affected hosts/users stats, and the time range', () => {
-      renderWithIntl(
+      renderWithI18n(
         <SignificantSecurityEventInlineContent
           {...renderProps(buildAttachment({ ...baseData, hunt_result: huntResult }))}
         />
@@ -404,7 +391,7 @@ describe('SignificantSecurityEventInlineContent', () => {
     });
 
     it('renders a distribution bar row per index with an events-across-indices summary', () => {
-      renderWithIntl(
+      renderWithI18n(
         <SignificantSecurityEventInlineContent
           {...renderProps(buildAttachment({ ...baseData, hunt_result: huntResult }))}
         />
@@ -413,7 +400,7 @@ describe('SignificantSecurityEventInlineContent', () => {
     });
 
     it('renders the tier2 behaviors table with technique, rule, tactics, and confidence', () => {
-      renderWithIntl(
+      renderWithI18n(
         <SignificantSecurityEventInlineContent
           {...renderProps(buildAttachment({ ...baseData, hunt_result: huntResult }))}
         />
@@ -425,7 +412,7 @@ describe('SignificantSecurityEventInlineContent', () => {
 
     it('renders no tier2 table when tier2 is absent', () => {
       const { tier2, ...tier1Only } = huntResult;
-      renderWithIntl(
+      renderWithI18n(
         <SignificantSecurityEventInlineContent
           {...renderProps(buildAttachment({ ...baseData, hunt_result: tier1Only }))}
         />
@@ -436,7 +423,7 @@ describe('SignificantSecurityEventInlineContent', () => {
 
   describe('timeline', () => {
     it('renders each entry as an EuiTimeline item with a formatted date/time and the what text', () => {
-      renderWithIntl(
+      renderWithI18n(
         <SignificantSecurityEventInlineContent {...renderProps(buildAttachment(baseData))} />
       );
       expect(screen.getByTestId('alertzeroSignificantSecurityEventTimeline')).toBeInTheDocument();
@@ -444,7 +431,7 @@ describe('SignificantSecurityEventInlineContent', () => {
     });
 
     it('renders nothing (no heading) when the timeline is empty', () => {
-      renderWithIntl(
+      renderWithI18n(
         <SignificantSecurityEventInlineContent
           {...renderProps(buildAttachment({ ...baseData, timeline: [] }))}
         />
@@ -458,7 +445,7 @@ describe('SignificantSecurityEventInlineContent', () => {
 
   describe('events accordion', () => {
     it('is collapsed by default', () => {
-      renderWithIntl(
+      renderWithI18n(
         <SignificantSecurityEventInlineContent
           {...renderProps(
             buildAttachment({
@@ -479,7 +466,7 @@ describe('SignificantSecurityEventInlineContent', () => {
 
     it('expands on click to reveal the events table', async () => {
       const user = userEvent.setup();
-      renderWithIntl(
+      renderWithI18n(
         <SignificantSecurityEventInlineContent
           {...renderProps(
             buildAttachment({

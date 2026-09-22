@@ -8,20 +8,12 @@
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { createSignificantSecurityEventAttachmentDefinition } from './significant_security_event_attachment';
 import type { SignificantSecurityEventAttachment } from './types';
+import { createMockShare, createMockNavigation } from '../test_utils';
 
 describe('createSignificantSecurityEventAttachmentDefinition', () => {
-  const navigation = { spaceId: 'default', prependPath: (path: string) => path };
+  const navigation = createMockNavigation();
 
-  const mockShare = {
-    url: {
-      locators: {
-        get: () => ({
-          getRedirectUrl: ({ query }: { query: { esql: string } }) =>
-            `https://example.test/discover?esql=${encodeURIComponent(query.esql)}`,
-        }),
-      },
-    },
-  } as unknown as SharePluginStart;
+  const mockShare = createMockShare();
 
   const baseData = {
     title: 'Suspicious lateral movement',
@@ -97,21 +89,25 @@ describe('createSignificantSecurityEventAttachmentDefinition', () => {
   });
 
   describe('getHeader', () => {
-    it('leads the subtitle with "From {report_id}" and the capability', () => {
+    it('builds the full header for a payload with severity, status, and confidence', () => {
       const definition = createSignificantSecurityEventAttachmentDefinition({ navigation });
       const header = definition.getHeader?.({
-        attachment: { data: baseData } as unknown as SignificantSecurityEventAttachment,
+        attachment: {
+          data: { ...baseData, severity: 'critical', status: 'investigating', confidence: 0.9 },
+        } as unknown as SignificantSecurityEventAttachment,
       } as never);
-      expect(header?.icon).toBe('securitySignalDetected');
-      expect(header?.subtitle).toBe('From ti-report-1 · lateral-movement-detector');
-      expect(header?.badges).toEqual([
-        { label: 'Hunt finding', color: 'primary' },
-        { label: 'open', color: 'hollow' },
-        { label: '80%', color: 'hollow' },
-      ]);
+      expect(header).toEqual({
+        icon: 'securitySignalDetected',
+        subtitle: 'From ti-report-1 · lateral-movement-detector',
+        badges: [
+          { label: 'Hunt finding', color: 'primary' },
+          { label: 'investigating', color: 'hollow' },
+          { label: '90%', color: 'hollow' },
+        ],
+      });
     });
 
-    it('returns the hunt finding badge and an empty header for a malformed attachment', () => {
+    it('returns just the hunt finding badge for a malformed attachment', () => {
       const definition = createSignificantSecurityEventAttachmentDefinition({ navigation });
       expect(definition.getHeader?.({ attachment: {} as never })).toEqual({
         icon: 'securitySignalDetected',
@@ -119,37 +115,7 @@ describe('createSignificantSecurityEventAttachmentDefinition', () => {
       });
     });
 
-    it('never renders a severity badge, even when severity is present', () => {
-      const definition = createSignificantSecurityEventAttachmentDefinition({ navigation });
-      const header = definition.getHeader?.({
-        attachment: {
-          data: { ...baseData, severity: 'critical' },
-        } as unknown as SignificantSecurityEventAttachment,
-      } as never);
-      expect(header?.badges).not.toContainEqual(expect.objectContaining({ label: 'critical' }));
-    });
-
-    it('renders a status badge with a hollow color', () => {
-      const definition = createSignificantSecurityEventAttachmentDefinition({ navigation });
-      const header = definition.getHeader?.({
-        attachment: {
-          data: { ...baseData, status: 'investigating' },
-        } as unknown as SignificantSecurityEventAttachment,
-      } as never);
-      expect(header?.badges).toContainEqual({ label: 'investigating', color: 'hollow' });
-    });
-
-    it('renders a confidence badge with no icon', () => {
-      const definition = createSignificantSecurityEventAttachmentDefinition({ navigation });
-      const header = definition.getHeader?.({
-        attachment: {
-          data: { ...baseData, confidence: 0.9 },
-        } as unknown as SignificantSecurityEventAttachment,
-      } as never);
-      expect(header?.badges).toContainEqual({ label: '90%', color: 'hollow' });
-    });
-
-    it('renders a confidence badge with no icon even when hunt_result has a confirmed hit', () => {
+    it('keeps the confidence badge when hunt_result has a confirmed hit', () => {
       const definition = createSignificantSecurityEventAttachmentDefinition({ navigation });
       const header = definition.getHeader?.({
         attachment: {

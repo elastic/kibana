@@ -5,25 +5,16 @@
  * 2.0.
  */
 
-import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import { createHuntCorrelationAttachmentDefinition } from './hunt_correlation_attachment';
 import type { HuntCorrelationAttachment } from './types';
 import { buildThreatReportsInEsql } from '../navigation';
+import { createMockShare, createMockNavigation } from '../test_utils';
 
 describe('createHuntCorrelationAttachmentDefinition', () => {
-  const navigation = { spaceId: 'default', prependPath: (path: string) => path };
+  const navigation = createMockNavigation();
 
-  const mockShare = {
-    url: {
-      locators: {
-        get: () => ({
-          getRedirectUrl: ({ query }: { query: { esql: string } }) =>
-            `https://example.test/discover?esql=${encodeURIComponent(query.esql)}`,
-        }),
-      },
-    },
-  } as unknown as SharePluginStart;
+  const mockShare = createMockShare();
 
   const baseData: HuntCorrelationAttachment['data'] = {
     anchors: [{ kind: 'hash', value: 'abc123' }],

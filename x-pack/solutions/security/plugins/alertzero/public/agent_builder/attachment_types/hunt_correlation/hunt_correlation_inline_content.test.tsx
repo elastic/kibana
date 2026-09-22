@@ -20,34 +20,14 @@ import {
   buildThreatReportIocSetHashLookupEsql,
   buildThreatReportLookupEsql,
 } from '../navigation';
+import { createMockShare, createMockNavigation } from '../test_utils';
 
 const buildAttachment = (data: HuntCorrelationAttachment['data']): HuntCorrelationAttachment =>
   ({ id: 'att-1', type: 'security.hunt_correlation', data } as HuntCorrelationAttachment);
 
-const mockShare = {
-  url: {
-    locators: {
-      get: () => ({
-        getRedirectUrl: (params: { query?: { esql?: string }; filters?: unknown[] }) => {
-          if (params.query?.esql) {
-            return `https://example.test/discover?esql=${encodeURIComponent(params.query.esql)}`;
-          }
-          if (params.filters) {
-            return `https://example.test/discover?nested=${encodeURIComponent(
-              JSON.stringify(params.filters)
-            )}`;
-          }
-          return 'https://example.test/discover';
-        },
-      }),
-    },
-  },
-} as unknown as SharePluginStart;
+const mockShare = createMockShare();
 
-const defaultNavigation = {
-  spaceId: 'default',
-  prependPath: (path: string) => path,
-};
+const defaultNavigation = createMockNavigation();
 
 const renderProps = (
   attachment: HuntCorrelationAttachment,

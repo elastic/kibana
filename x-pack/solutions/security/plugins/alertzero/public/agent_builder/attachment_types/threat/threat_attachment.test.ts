@@ -6,26 +6,17 @@
  */
 
 import type { HttpStart } from '@kbn/core-http-browser';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import { createThreatAttachmentDefinition } from './threat_attachment';
 import type { ThreatAttachment } from './types';
 import { buildThreatReportLookupEsql } from '../navigation';
+import { createMockShare, createMockNavigation } from '../test_utils';
 
 describe('createThreatAttachmentDefinition', () => {
   const http = {} as HttpStart;
-  const navigation = { spaceId: 'default', prependPath: (path: string) => path };
+  const navigation = createMockNavigation();
 
-  const mockShare = {
-    url: {
-      locators: {
-        get: () => ({
-          getRedirectUrl: ({ query }: { query: { esql: string } }) =>
-            `https://example.test/discover?esql=${encodeURIComponent(query.esql)}`,
-        }),
-      },
-    },
-  } as unknown as SharePluginStart;
+  const mockShare = createMockShare();
 
   describe('getLabel', () => {
     it('returns the default label when no attachmentLabel is set', () => {

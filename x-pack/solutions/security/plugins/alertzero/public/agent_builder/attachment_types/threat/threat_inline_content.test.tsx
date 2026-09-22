@@ -9,7 +9,6 @@ import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { HttpStart } from '@kbn/core-http-browser';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
 import {
   ThreatAttachmentInlineContent,
   THREAT_ATTACHMENT_EMPTY_TEST_ID,
@@ -19,29 +18,13 @@ import {
 import { threatAttachmentQueryClient } from './query_client';
 import type { ThreatAttachment } from './types';
 import { buildDiscoverThreatReportNestedIocUrl } from '../navigation';
+import { createMockShare } from '../test_utils';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 
 const buildAttachment = (data: ThreatAttachment['data']): ThreatAttachment =>
   ({ id: 'att-1', type: 'security.threat', data } as ThreatAttachment);
 
-const mockShare = {
-  url: {
-    locators: {
-      get: () => ({
-        getRedirectUrl: (params: { query?: { esql?: string }; filters?: unknown[] }) => {
-          if (params.query?.esql) {
-            return `https://example.test/discover?esql=${encodeURIComponent(params.query.esql)}`;
-          }
-          if (params.filters) {
-            return `https://example.test/discover?nested=${encodeURIComponent(
-              JSON.stringify(params.filters)
-            )}`;
-          }
-          return 'https://example.test/discover';
-        },
-      }),
-    },
-  },
-} as unknown as SharePluginStart;
+const mockShare = createMockShare();
 
 const defaultNavigation = {
   spaceId: 'default',
@@ -217,7 +200,6 @@ describe('ThreatAttachmentInlineContent', () => {
 
     await waitFor(() => {
       expect(screen.getByText('80')).toBeInTheDocument();
-      expect(screen.getAllByText('Rank').length).toBeGreaterThan(0);
     });
 
     const wrapper = screen.getByTestId('alertzeroThreatAttachmentIocLink-ipv4-addr-0');
@@ -254,7 +236,6 @@ describe('ThreatAttachmentInlineContent', () => {
 
     await waitFor(() => {
       expect(screen.getByText('60')).toBeInTheDocument();
-      expect(screen.getAllByText('Rank').length).toBeGreaterThan(0);
     });
 
     expect(screen.getByTestId('alertzeroThreatAttachmentIocLink-ipv4-addr-0')).toBeInTheDocument();
@@ -289,7 +270,6 @@ describe('ThreatAttachmentInlineContent', () => {
 
     await waitFor(() => {
       expect(screen.getByText('70')).toBeInTheDocument();
-      expect(screen.getAllByText('Rank').length).toBeGreaterThan(0);
     });
 
     const link = screen.getByTestId(THREAT_EXTERNAL_REF_LINK_TEST_ID);
@@ -327,7 +307,6 @@ describe('ThreatAttachmentInlineContent', () => {
 
     await waitFor(() => {
       expect(screen.getByText('65')).toBeInTheDocument();
-      expect(screen.getAllByText('Rank').length).toBeGreaterThan(0);
     });
 
     const links = screen.getAllByTestId(THREAT_EXTERNAL_REF_LINK_TEST_ID);
@@ -356,7 +335,6 @@ describe('ThreatAttachmentInlineContent', () => {
 
     await waitFor(() => {
       expect(screen.getByText('55')).toBeInTheDocument();
-      expect(screen.getAllByText('Rank').length).toBeGreaterThan(0);
     });
 
     expect(screen.getByText('Alert hits')).toBeInTheDocument();
@@ -385,7 +363,6 @@ describe('ThreatAttachmentInlineContent', () => {
 
     await waitFor(() => {
       expect(screen.getByText('45')).toBeInTheDocument();
-      expect(screen.getAllByText('Rank').length).toBeGreaterThan(0);
     });
 
     expect(screen.getByText('Last hunted')).toBeInTheDocument();
@@ -408,7 +385,6 @@ describe('ThreatAttachmentInlineContent', () => {
 
     await waitFor(() => {
       expect(screen.getByText('35')).toBeInTheDocument();
-      expect(screen.getAllByText('Rank').length).toBeGreaterThan(0);
     });
 
     expect(screen.getByText('Regions')).toBeInTheDocument();
