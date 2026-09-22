@@ -14,7 +14,6 @@ import { useContentListPhase } from '@kbn/content-list-provider';
 import { i18n } from '@kbn/i18n';
 import { canAccessTriggersActionsRules, triggersActionsRoute } from '@kbn/rule-data-utils';
 import { useHostTabs } from '../../application/tabs_context';
-import { experimentalBadge } from '../../components/experimental_badge';
 import { paths } from '../../constants';
 
 const RULES_LIST_PAGE_TITLE = i18n.translate('xpack.alertingV2.rulesList.pageTitle', {
@@ -189,7 +188,6 @@ export const RulesListHeader = ({
         sticky={false}
         title={RULES_LIST_PAGE_TITLE}
         tabs={tabs}
-        badges={[experimentalBadge]}
         spacing="bleed"
         menu={headerMenu}
       />

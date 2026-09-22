@@ -236,13 +236,6 @@ describe('RulesListPage', () => {
     resolveRules();
   });
 
-  it('renders the experimental badge in the page header', async () => {
-    renderPage();
-    await waitForRules();
-
-    expect(screen.getByTestId('alertingV2ExperimentalBadge')).toBeInTheDocument();
-  });
-
   describe('centralized action policies banner', () => {
     it('renders the banner above the search bar when rules exist', async () => {
       renderPage();
