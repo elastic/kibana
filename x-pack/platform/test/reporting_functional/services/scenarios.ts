@@ -173,11 +173,10 @@ export function createScenarios(
       );
     });
 
-    if (await testSubjects.exists('exportPopoverPanel', { timeout: 500 })) {
-      await testSubjects.missingOrFail('exportMenuItem-PDF');
-      await testSubjects.missingOrFail('exportMenuItem-PNG');
-      await testSubjects.missingOrFail('exportMenuItem-CSV');
-    }
+    await testSubjects.missingOrFail('exportMenuItem-PDF');
+    await testSubjects.missingOrFail('exportMenuItem-PNG');
+    await testSubjects.missingOrFail('exportMenuItem-CSV');
+    await testSubjects.missingOrFail('generateReportButton');
   };
 
   return {
