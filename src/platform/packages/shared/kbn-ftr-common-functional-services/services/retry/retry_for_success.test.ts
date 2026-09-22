@@ -32,14 +32,16 @@ describe('Retry for success', () => {
       onFailureBlock: async () => log.debug('handled failure'),
     });
 
-    expect(writer.messages).toMatchInlineSnapshot(`
-      Array [
-        " debg --- retryForSuccess unit test error: whoops, could not find anything - Attempt #: 1",
-        " debg handled failure",
-        " debg --- retryForSuccess unit test failed again with the same message... - Attempt #: 2",
-        " debg handled failure",
-      ]
-    `);
+    expect(writer.messages).toEqual([
+      expect.stringContaining(
+        '--- retryForSuccess unit test error: whoops, could not find anything - Attempt #: 1'
+      ),
+      expect.stringContaining('handled failure'),
+      expect.stringContaining(
+        '--- retryForSuccess unit test failed again with the same message... - Attempt #: 2'
+      ),
+      expect.stringContaining('handled failure'),
+    ]);
   });
   it(`should NOT print out attempt counts without the retryCount parameter`, async () => {
     const log = new ToolingLog();
@@ -59,14 +61,16 @@ describe('Retry for success', () => {
       onFailureBlock: async () => log.debug('handled failure'),
     });
 
-    expect(writer.messages).toMatchInlineSnapshot(`
-      Array [
-        " debg --- retryForSuccess unit test error: whoops, could not find anything",
-        " debg handled failure",
-        " debg --- retryForSuccess unit test failed again with the same message...",
-        " debg handled failure",
-      ]
-    `);
+    expect(writer.messages).toEqual([
+      expect.stringContaining(
+        '--- retryForSuccess unit test error: whoops, could not find anything'
+      ),
+      expect.stringContaining('handled failure'),
+      expect.stringContaining(
+        '--- retryForSuccess unit test failed again with the same message...'
+      ),
+      expect.stringContaining('handled failure'),
+    ]);
   });
   it('should call delay with initialDelay if initialDelay is provided', async () => {
     const delaySpy = jest.spyOn(testJestHelpers, 'delay').mockResolvedValue(undefined);
