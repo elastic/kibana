@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
@@ -78,10 +78,10 @@ describe('ActionPolicySnoozeButton', () => {
     expect(screen.getByTestId('actionPolicyUnsnoozeButton')).toHaveTextContent(formattedDate);
   });
 
-  it('unsnoozes directly when the snoozed button is clicked', async () => {
+  it('unsnoozes directly when the snoozed button is clicked', () => {
     renderButton(createPolicy({ snoozed_until: new Date(Date.now() + 86_400_000).toISOString() }));
 
-    await userEvent.click(screen.getByTestId('actionPolicyUnsnoozeButton'));
+    fireEvent.click(screen.getByTestId('actionPolicyUnsnoozeButton'));
 
     expect(onCancelSnooze).toHaveBeenCalledWith('policy-1');
     expect(onSnooze).not.toHaveBeenCalled();
