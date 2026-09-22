@@ -590,6 +590,20 @@ describe('ai indices routes', () => {
       expect(response.ok).toHaveBeenCalledWith({ body: { status: 'updated' } });
     });
 
+    it('returns 400 without updating when an ES|QL source is invalid', async () => {
+      await callRoute('PUT', aiIndexByIdPath, {
+        ...putRequest,
+        body: { ...putRequest.body, sources: [{ type: 'esql', value: 'FROM logs | WHERE' }] },
+      });
+
+      expect(aiIndexService.put).not.toHaveBeenCalled();
+      expect(response.badRequest).toHaveBeenCalledWith({
+        body: {
+          message: expect.stringMatching(/^ES\|QL source 'FROM logs \| WHERE' is invalid: /),
+        },
+      });
+    });
+
     it('returns 400 without updating when a connector source is not a data connector', async () => {
       actionsClient.getBulk.mockResolvedValue([buildConnector('slack-1', '.slack')]);
 
