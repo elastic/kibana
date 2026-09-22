@@ -288,6 +288,28 @@ describe('parseOasdiff', () => {
       expect(change.policyReason).toEqual(expect.any(String));
     });
 
+    it('keeps response-property-enum-value-added when oasdiff warns or errors', () => {
+      for (const level of [2, 3]) {
+        const [change] = parseOasdiff([
+          entry({
+            id: 'response-property-enum-value-added',
+            text: 'added the new `api_contracts_probe` enum value',
+            operation: 'GET',
+            path: '/api/cases/{caseId}/user_actions/_find',
+            level,
+          }),
+        ]);
+
+        expect(change).toMatchObject({
+          path: '/api/cases/{caseId}/user_actions/_find',
+          method: 'GET',
+          oasdiffId: 'response-property-enum-value-added',
+          reportOnly: true,
+        });
+        expect(change.policyReason).toContain('response enum');
+      }
+    });
+
     it('leaves blocking changes without report-only fields', () => {
       const [change] = parseOasdiff([entry({ id: 'api-removed-without-deprecation', level: 3 })]);
 

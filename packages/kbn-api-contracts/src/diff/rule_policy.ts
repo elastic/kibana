@@ -38,6 +38,11 @@ export const OASDIFF_RULE_POLICY: Readonly<Record<string, RulePolicyEntry>> = {
     reason:
       'Adding a variant to a response body oneOf is additive. Clients keep receiving the variants they already handle, so this is reported for awareness rather than gated. See https://github.com/elastic/kibana/pull/287992.',
   },
+  'response-property-enum-value-added': {
+    disposition: 'report_only',
+    reason:
+      'Adding a value to a response enum is additive. Clients keep receiving the values they already handle, so this is reported for awareness rather than gated. See https://github.com/elastic/kibana/pull/287992.',
+  },
 };
 
 /** Kibana's declared policy for an oasdiff rule, if it has one. */

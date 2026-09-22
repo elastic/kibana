@@ -70,7 +70,7 @@ oasdiff decides what changed. `src/diff/rule_policy.ts` decides what that means 
 Two dispositions:
 
 - **`blocking`** — a warning-level oasdiff rule treated as a breaking change. These are the ⚠️ rows above.
-- **`report_only`** — stays in the report and does not gate the check, whatever level oasdiff assigned. The rows below are error-level today.
+- **`report_only`** — stays in the report and does not gate the check, whatever level oasdiff assigned. A warning listed here is kept instead of dropped. An error listed here does not gate.
 
 Rules that are not in the table keep oasdiff's own level: error gates, warning is dropped.
 
@@ -81,6 +81,7 @@ Rules that are not in the table keep oasdiff's own level: error gates, warning i
 | `response-optional-property-removed` | `blocking` | Removing an optional response property breaks any client that reads it                   |
 | `response-property-one-of-added` | `report_only` | Adding a variant to a response `oneOf` is additive; clients keep receiving what they handle |
 | `response-body-one-of-added`     | `report_only` | Same, for the response body `oneOf`                                                      |
+| `response-property-enum-value-added` | `report_only` | Adding a response enum value is additive. oasdiff 1.15.1 warns; later versions error. Either way it is reported and does not gate |
 
 The request side stays strict. A new variant a client may have to send is not the same as a new variant it may receive, so request-side rules are not demoted.
 
