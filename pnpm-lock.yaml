@@ -2053,6 +2053,9 @@ importers:
       '@kbn/esql-validation-example-plugin':
         specifier: workspace:*
         version: link:examples/esql_validation_example
+      '@kbn/esql-views-plugin':
+        specifier: workspace:*
+        version: link:x-pack/platform/plugins/private/esql_views
       '@kbn/eval-kql':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-eval-kql
@@ -9170,6 +9173,8 @@ importers:
   x-pack/platform/plugins/private/discover_enhanced: {}
 
   x-pack/platform/plugins/private/drilldowns/url_drilldown: {}
+
+  x-pack/platform/plugins/private/esql_views: {}
 
   x-pack/platform/plugins/private/feedback: {}
 

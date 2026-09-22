@@ -225,10 +225,6 @@ export class EisModelsPage {
     return this.page.testSubj.locator(`eisModelCard-${modelName}`);
   }
 
-  public taskTypeFilter(category: string): Locator {
-    return this.page.testSubj.locator(`eisTaskTypeFilter-${category}`);
-  }
-
   public endpointRow(inferenceId: string): Locator {
     return this.page.testSubj.locator(`endpoint-row-${inferenceId}`);
   }
