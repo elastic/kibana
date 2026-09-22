@@ -248,6 +248,10 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
                   id: { type: string };
                   classification: { enum: string[] };
                   confidence_score: { minimum: number; maximum: number };
+                  contributing_factors: {
+                    maxItems: number;
+                    items: { type: string; maxLength: number };
+                  };
                 };
               };
             };
@@ -277,6 +281,10 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     // `score <= 1.0` would never hold for a meaningful score.
     expect(verdicts.items.properties.confidence_score.minimum).toBe(0);
     expect(verdicts.items.properties.confidence_score.maximum).toBe(1);
+    // Must match workflow.output / Zod — otherwise a long factor passes the agent schema and
+    // fails final output validation after tags/notes are already written.
+    expect(verdicts.items.properties.contributing_factors.maxItems).toBe(3);
+    expect(verdicts.items.properties.contributing_factors.items.maxLength).toBe(100);
   });
 
   it('tells the model how to behave in a batch: one verdict per id, judged independently', () => {
