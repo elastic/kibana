@@ -36,12 +36,14 @@ import { isHttpFetchError } from '@kbn/core-http-browser';
 import type { EvaluatorStats } from '@kbn/evals-common';
 import { TraceWaterfall, useTraceSpans } from '@kbn/llm-trace-waterfall';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import { useQueryClient } from '@kbn/react-query';
 import {
   useDatasets,
   useEvaluationExperiment,
   useEvalsTraceFetcher,
   useExperimentDatasetExamples,
 } from '../../hooks/use_evals_api';
+import { queryKeys } from '../../query_keys';
 import type {
   LaunchedExperimentConfig,
   RunExperimentRequest,
@@ -93,6 +95,7 @@ export const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
   onDatasetToggle,
 }) => {
   const history = useHistory();
+  const queryClient = useQueryClient();
   const {
     data: datasetExamples,
     isLoading: examplesLoading,
@@ -123,14 +126,26 @@ export const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
   }, [datasetExamplePreviews?.examples, datasetExamples?.examples]);
 
   // When the run settles and polling stops, pull the final example set once in case the last poll
-  // fired just before the last example's scores were indexed.
+  // fired just before the last example's scores were indexed. Previews are not polled, so invalidate
+  // that cache too — including while the accordion is collapsed, where the hook's refetch targets a
+  // disabled query.
   const wasRunningRef = useRef(isRunning);
   useEffect(() => {
-    if (wasRunningRef.current && !isRunning && isOpen) {
-      refetchExamples();
+    if (wasRunningRef.current && !isRunning) {
+      if (isOpen) {
+        refetchExamples();
+      }
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.experiments.datasetExamples(
+          experimentId,
+          group.datasetId,
+          executionId,
+          true
+        ),
+      });
     }
     wasRunningRef.current = isRunning;
-  }, [isRunning, isOpen, refetchExamples]);
+  }, [isRunning, isOpen, refetchExamples, queryClient, experimentId, executionId, group.datasetId]);
 
   return (
     <>
