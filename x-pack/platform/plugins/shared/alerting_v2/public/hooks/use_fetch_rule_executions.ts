@@ -28,6 +28,14 @@ export interface ListRuleExecutionsUiParams {
   enabled?: boolean;
 }
 
+const SORT_FIELD_BY_UI_FIELD = {
+  startedAt: 'started_at',
+  duration: 'duration_ms',
+} as const satisfies Record<
+  NonNullable<ListRuleExecutionsUiParams['sortField']>,
+  ListRuleExecutionsRequest['sort_field']
+>;
+
 export const toListRuleExecutionsRequest = ({
   page,
   perPage,
@@ -47,7 +55,7 @@ export const toListRuleExecutionsRequest = ({
     outcomes,
     start_time: startTime,
     end_time: endTime,
-    sort_field: sortField === 'startedAt' ? 'started_at' : sortField,
+    sort_field: sortField && SORT_FIELD_BY_UI_FIELD[sortField],
     sort_order: sortOrder,
   };
 };

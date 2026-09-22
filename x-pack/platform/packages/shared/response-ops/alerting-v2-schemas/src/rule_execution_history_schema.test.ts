@@ -25,7 +25,7 @@ const validView = {
   space_id: 'default',
   started_at: '2026-06-01T00:00:00.000Z',
   ended_at: '2026-06-01T00:00:01.500Z',
-  timings: { duration: 1500, scheduled_delay: 250 },
+  timings: { duration_ms: 1500, scheduled_delay_ms: 250 },
   outcome: 'success' as const,
   reason: null,
   error: null,
@@ -208,8 +208,8 @@ describe('rule_execution_history_schema', () => {
         expect(listRuleExecutionsRequestSchema.parse({ sort_field: 'started_at' }).sort_field).toBe(
           'started_at'
         );
-        expect(listRuleExecutionsRequestSchema.parse({ sort_field: 'duration' }).sort_field).toBe(
-          'duration'
+        expect(listRuleExecutionsRequestSchema.parse({ sort_field: 'duration_ms' }).sort_field).toBe(
+          'duration_ms'
         );
       });
 
@@ -316,7 +316,7 @@ describe('rule_execution_history_schema', () => {
         outcomes: ['success', 'failure'] as const,
         start_time: '2026-06-01T00:00:00Z',
         end_time: '2026-06-02T00:00:00Z',
-        sort_field: 'duration' as const,
+        sort_field: 'duration_ms' as const,
         sort_order: 'asc' as const,
         page: 2,
         per_page: 25,
@@ -375,17 +375,17 @@ describe('rule_execution_history_schema', () => {
     });
 
     it('rejects negative duration', () => {
-      const row = { ...validView, timings: { duration: -1, scheduled_delay: 0 } };
+      const row = { ...validView, timings: { duration_ms: -1, scheduled_delay_ms: 0 } };
       expect(ruleExecutionViewSchema.safeParse(row).success).toBe(false);
     });
 
-    it('allows a negative scheduled_delay (run started ahead of scheduled time)', () => {
-      const row = { ...validView, timings: { duration: 100, scheduled_delay: -50 } };
-      expect(ruleExecutionViewSchema.parse(row).timings.scheduled_delay).toBe(-50);
+    it('allows a negative scheduled_delay_ms (run started ahead of scheduled time)', () => {
+      const row = { ...validView, timings: { duration_ms: 100, scheduled_delay_ms: -50 } };
+      expect(ruleExecutionViewSchema.parse(row).timings.scheduled_delay_ms).toBe(-50);
     });
 
     it('rejects non-integer timings', () => {
-      const row = { ...validView, timings: { duration: 1.5, scheduled_delay: 0 } };
+      const row = { ...validView, timings: { duration_ms: 1.5, scheduled_delay_ms: 0 } };
       expect(ruleExecutionViewSchema.safeParse(row).success).toBe(false);
     });
 

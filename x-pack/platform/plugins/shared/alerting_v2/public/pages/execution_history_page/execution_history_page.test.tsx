@@ -295,7 +295,7 @@ describe('ExecutionHistoryPage', () => {
               space_id: 'default',
               started_at: '2026-05-05T10:00:00.000Z',
               ended_at: '2026-05-05T10:00:01.000Z',
-              timings: { duration: 1000, scheduled_delay: 0 },
+              timings: { duration_ms: 1000, scheduled_delay_ms: 0 },
               outcome: 'success',
               reason: null,
               error: null,

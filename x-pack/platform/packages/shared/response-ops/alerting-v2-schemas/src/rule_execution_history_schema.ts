@@ -62,7 +62,7 @@ export const listRuleExecutionsRequestSchema = z
       .optional()
       .describe('Inclusive ISO datetime upper bound on event.start.'),
     sort_field: z
-      .enum(['started_at', 'duration'])
+      .enum(['started_at', 'duration_ms'])
       .default('started_at')
       .describe('Sort field. Defaults to started_at.'),
     sort_order: z.enum(['asc', 'desc']).default('desc').describe('Sort direction.'),
@@ -91,8 +91,17 @@ export const ruleExecutionViewSchema = z
     started_at: z.iso.datetime(),
     ended_at: z.iso.datetime(),
     timings: z.object({
-      duration: z.number().int().nonnegative(),
-      scheduled_delay: z.number().int(),
+      duration_ms: z
+        .number()
+        .int()
+        .nonnegative()
+        .describe('Wall-clock duration of the run, in milliseconds.'),
+      scheduled_delay_ms: z
+        .number()
+        .int()
+        .describe(
+          'Delay between the scheduled run time and the actual start, in milliseconds. Negative when the run started ahead of its scheduled time.'
+        ),
     }),
     outcome: ruleExecutionOutcomeSchema,
     reason: z.string().nullable(),

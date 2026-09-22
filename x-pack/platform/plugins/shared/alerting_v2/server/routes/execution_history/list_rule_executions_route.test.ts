@@ -60,7 +60,7 @@ describe('toListRuleExecutionsResponse', () => {
             space_id: 'default',
             started_at: '2026-01-01T00:00:00.000Z',
             ended_at: '2026-01-01T00:00:01.500Z',
-            timings: { duration: 1500, scheduled_delay: 250 },
+            timings: { duration_ms: 1500, scheduled_delay_ms: 250 },
             outcome: 'success',
             reason: null,
             error: null,

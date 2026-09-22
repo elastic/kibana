@@ -137,7 +137,7 @@ describe('ExecutionHistoryApi', () => {
       outcomes: ['failure' as const],
       start_time: '2026-01-01T00:00:00Z',
       end_time: '2026-01-02T00:00:00Z',
-      sort_field: 'duration' as const,
+      sort_field: 'duration_ms' as const,
       sort_order: 'asc' as const,
       page: 3,
       per_page: 50,
