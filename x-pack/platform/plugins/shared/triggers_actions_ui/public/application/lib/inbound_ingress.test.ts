@@ -62,14 +62,18 @@ describe('inbound ingress helpers', () => {
     expect(isInboundEventsEnabledPayload('.http', true, true)).toEqual({});
   });
 
-  it('rotates after save for inbound-only and enabled dual', () => {
-    expect(shouldRotateInboundAfterSave({ actionTypeId: '.inboundWebhook' })).toBe(true);
+  it('rotates after save for inbound-only and enabled dual when the cluster flag is on', () => {
+    expect(shouldRotateInboundAfterSave({ actionTypeId: '.inboundWebhook' }, true)).toBe(true);
     expect(
-      shouldRotateInboundAfterSave({ actionTypeId: '.dual', isInboundEventsEnabled: true })
+      shouldRotateInboundAfterSave({ actionTypeId: '.dual', isInboundEventsEnabled: true }, true)
     ).toBe(true);
     expect(
-      shouldRotateInboundAfterSave({ actionTypeId: '.dual', isInboundEventsEnabled: false })
+      shouldRotateInboundAfterSave({ actionTypeId: '.dual', isInboundEventsEnabled: false }, true)
     ).toBe(false);
-    expect(shouldRotateInboundAfterSave({ actionTypeId: '.http' })).toBe(false);
+    expect(shouldRotateInboundAfterSave({ actionTypeId: '.http' }, true)).toBe(false);
+    expect(shouldRotateInboundAfterSave({ actionTypeId: '.inboundWebhook' }, false)).toBe(false);
+    expect(
+      shouldRotateInboundAfterSave({ actionTypeId: '.dual', isInboundEventsEnabled: true }, false)
+    ).toBe(false);
   });
 });

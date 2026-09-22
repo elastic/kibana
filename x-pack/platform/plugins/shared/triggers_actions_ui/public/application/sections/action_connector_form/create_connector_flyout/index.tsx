@@ -191,7 +191,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     }
 
     let connectorForTest = createdConnector;
-    if (shouldRotateInboundAfterSave(createdConnector)) {
+    if (shouldRotateInboundAfterSave(createdConnector, isClusterInboundEventsEnabled)) {
       try {
         const rotated = await rotateIngress(createdConnector.id);
         connectorForTest = {
@@ -219,7 +219,13 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
 
     setEditTab(EditConnectorTabs.Test);
     setConnectorToTest(connectorForTest);
-  }, [validateAndCreateConnector, onConnectorCreated, onTestConnector, rotateIngress]);
+  }, [
+    validateAndCreateConnector,
+    onConnectorCreated,
+    onTestConnector,
+    rotateIngress,
+    isClusterInboundEventsEnabled,
+  ]);
 
   const onSubmit = useCallback(async () => {
     const createdConnector = await validateAndCreateConnector();
@@ -228,7 +234,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
         onConnectorCreated(createdConnector);
       }
 
-      if (shouldRotateInboundAfterSave(createdConnector)) {
+      if (shouldRotateInboundAfterSave(createdConnector, isClusterInboundEventsEnabled)) {
         let connectorForEdit = createdConnector;
         try {
           const rotated = await rotateIngress(createdConnector.id);
@@ -246,7 +252,13 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
 
       onClose();
     }
-  }, [validateAndCreateConnector, onClose, onConnectorCreated, rotateIngress]);
+  }, [
+    validateAndCreateConnector,
+    onClose,
+    onConnectorCreated,
+    rotateIngress,
+    isClusterInboundEventsEnabled,
+  ]);
 
   const handleSearchValueChange = useCallback((newValue: string) => {
     setSearchValue(newValue);
@@ -290,7 +302,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     if (actionType == null) {
       return undefined;
     }
-    if (connectorTypeIsInboundOnly(actionType.id)) {
+    if (isClusterInboundEventsEnabled && connectorTypeIsInboundOnly(actionType.id)) {
       return <InboundEventsSaveToGenerateCallout />;
     }
     if (connectorTypeIsDual(actionType.id) && isClusterInboundEventsEnabled) {

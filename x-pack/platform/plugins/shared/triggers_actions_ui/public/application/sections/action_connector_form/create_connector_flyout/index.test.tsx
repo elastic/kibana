@@ -710,6 +710,7 @@ describe('CreateConnectorFlyout', () => {
     });
 
     it('keeps the flyout open and shows webhook URL and ingest token after inbound create', async () => {
+      appMockRenderer.coreStart.actions.isInboundEventsEnabled = true;
       appMockRenderer.coreStart.http.post = jest.fn().mockImplementation((path: string) => {
         if (String(path).includes('_rotate_event_token')) {
           return Promise.resolve({ ingest_token: 'once-token' });
@@ -760,6 +761,7 @@ describe('CreateConnectorFlyout', () => {
     });
 
     it('edits the created connector when inbound rotate fails after create', async () => {
+      appMockRenderer.coreStart.actions.isInboundEventsEnabled = true;
       appMockRenderer.coreStart.http.post = jest.fn().mockImplementation((path: string) => {
         if (String(path).includes('_rotate_event_token')) {
           return Promise.reject({ name: 'Error', body: { message: 'Cannot rotate' } });
@@ -828,6 +830,62 @@ describe('CreateConnectorFlyout', () => {
           ([path]) => !String(path).includes('_rotate_event_token')
         )
       ).toHaveLength(createCalls.length);
+    });
+
+    it('closes after creating an inbound webhook when the cluster flag is off', async () => {
+      appMockRenderer.coreStart.actions.isInboundEventsEnabled = false;
+      const inboundModel = actionTypeRegistryMock.createMockActionTypeModel({
+        id: '.inboundWebhook',
+        actionConnectorFields: lazy(() => import('../connector_mock')),
+        validateParams: jest.fn().mockResolvedValue({ errors: {} }),
+      });
+      actionTypeRegistry.get.mockReturnValue(inboundModel);
+      loadActionTypes.mockResolvedValue([
+        {
+          id: '.inboundWebhook',
+          enabled: true,
+          name: 'Inbound Webhook',
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic' as const,
+          supportedFeatureIds: ['alerting'],
+        },
+      ]);
+      appMockRenderer.coreStart.http.post = jest.fn().mockResolvedValue({
+        ...createConnectorResponse,
+        connector_type_id: '.inboundWebhook',
+        config: {},
+      });
+
+      appMockRenderer.render(
+        <CreateConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          onConnectorCreated={onConnectorCreated}
+          onTestConnector={onTestConnector}
+        />
+      );
+
+      await userEvent.click(await screen.findByTestId('.inboundWebhook-card'));
+      await waitFor(() => {
+        expect(screen.getByTestId('test-connector-text-field')).toBeInTheDocument();
+      });
+      expect(screen.queryByTestId('inbound-events-save-to-generate')).not.toBeInTheDocument();
+
+      await userEvent.click(await screen.findByTestId('nameInput'));
+      await userEvent.paste('My test');
+      await userEvent.click(screen.getByTestId('test-connector-text-field'));
+      await userEvent.paste('My text field');
+      await userEvent.click(screen.getByTestId('create-connector-flyout-save-btn'));
+
+      await waitFor(() => {
+        expect(onClose).toHaveBeenCalled();
+      });
+      expect(onConnectorCreated).toHaveBeenCalled();
+      expect(appMockRenderer.coreStart.http.post).not.toHaveBeenCalledWith(
+        expect.stringContaining('_rotate_event_token')
+      );
+      expect(screen.queryByTestId('edit-connector-flyout')).not.toBeInTheDocument();
     });
   });
 

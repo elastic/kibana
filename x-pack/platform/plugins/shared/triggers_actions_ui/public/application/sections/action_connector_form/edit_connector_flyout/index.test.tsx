@@ -256,6 +256,7 @@ describe('EditConnectorFlyout', () => {
       config: { ingestTokenHash: 'a'.repeat(64) },
       secrets: {},
     });
+    appMockRenderer.coreStart.actions.isInboundEventsEnabled = true;
 
     appMockRenderer.render(
       <EditConnectorFlyout
@@ -272,6 +273,31 @@ describe('EditConnectorFlyout', () => {
     expect(screen.getByTestId('inbound-ingress-token-hidden')).toBeInTheDocument();
     expect(screen.queryByTestId('inbound-events-enabled-switch')).not.toBeInTheDocument();
     expect(screen.queryByTestId('connector-outbound-label')).not.toBeInTheDocument();
+  });
+
+  it('hides inbound webhook credentials when the cluster flag is off', async () => {
+    const inboundConnector = createMockActionConnector({
+      id: 'sales-ingress',
+      name: 'Sales ingress',
+      actionTypeId: '.inboundWebhook',
+      config: { ingestTokenHash: 'a'.repeat(64) },
+      secrets: {},
+    });
+    appMockRenderer.coreStart.actions.isInboundEventsEnabled = false;
+
+    appMockRenderer.render(
+      <EditConnectorFlyout
+        actionTypeRegistry={actionTypeRegistry}
+        onClose={onClose}
+        connector={inboundConnector}
+        onConnectorUpdated={onConnectorUpdated}
+      />
+    );
+
+    expect(await screen.findByTestId('nameInput')).toBeInTheDocument();
+    expect(screen.queryByTestId('inbound-ingress-credentials')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('inbound-ingress-webhook-url')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('inbound-ingress-rotate-btn')).not.toBeInTheDocument();
   });
 
   it('shows the receive-events switch off for a dual connector', async () => {

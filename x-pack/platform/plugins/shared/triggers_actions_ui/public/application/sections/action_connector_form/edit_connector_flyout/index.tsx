@@ -278,6 +278,7 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
   const inboundSettingsContent = useMemo(() => {
     const inboundConnector = revealedInboundConnector ?? formConnector ?? connector;
     if (
+      isClusterInboundEventsEnabled &&
       isInboundIngressConnector(inboundConnector) &&
       !connectorTypeIsDual(inboundConnector.actionTypeId)
     ) {

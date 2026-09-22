@@ -36,10 +36,14 @@ export const isInboundEventsEnabledPayload = (
   return {};
 };
 
-/** Create stays open and rotates when inbound-only, or dual with inbound turned on. */
+/** Create stays open and rotates when inbound events are enabled for the cluster and the connector is inbound-only, or dual with inbound turned on. */
 export const shouldRotateInboundAfterSave = (
-  connector: Pick<ActionConnector, 'actionTypeId'> & { isInboundEventsEnabled?: boolean }
+  connector: Pick<ActionConnector, 'actionTypeId'> & { isInboundEventsEnabled?: boolean },
+  isClusterInboundEventsEnabled: boolean
 ): boolean => {
+  if (!isClusterInboundEventsEnabled) {
+    return false;
+  }
   if (connectorTypeIsInboundOnly(connector.actionTypeId)) {
     return true;
   }
