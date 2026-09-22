@@ -15,6 +15,7 @@ compatibility:
   against the equivalent `platform_context_engine_*` tools where a runtime exposes them over MCP. The caller needs Agent
   Builder `read` and Context Engine `read`, plus Elasticsearch `read` and `view_index_metadata` on the backing
   `ai-index-*` indices.
+experimental: true
 ---
 
 # Query Context Engine AI Indices
@@ -145,7 +146,7 @@ gives:
 
 - `id`, to pass to describe.
 - `esql_target`, the exact string to put after `FROM`. Use it verbatim: it differs from the id (`sales-knowledge` →
-  `ai-index-idx-sales-knowledge`) and may be a data stream.
+  `ai-index-idx-sales-knowledge`) and may be a wildcard or a data stream.
 - `description` and `managed`, to choose between entries.
 - `assigned_to_agent`, present only when running inside an Agent Builder agent: whether that agent is set up with this
   index.
