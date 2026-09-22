@@ -24,9 +24,11 @@ export function columnsReferToSameExpression(
   actualColumn: string,
   actualQuery: string
 ): boolean {
+  // A structural-only gold has no query; its column names then refer to the
+  // aliases of the query that was actually produced.
   return expressionsEquivalent(
-    resolveColumnExpression(goldColumn, goldQuery),
-    resolveColumnExpression(actualColumn, actualQuery)
+    resolveColumnExpression(goldColumn, goldQuery || actualQuery),
+    resolveColumnExpression(actualColumn, actualQuery || goldQuery)
   );
 }
 

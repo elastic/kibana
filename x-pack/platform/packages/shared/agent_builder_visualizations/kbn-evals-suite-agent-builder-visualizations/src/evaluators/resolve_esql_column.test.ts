@@ -74,6 +74,14 @@ describe('columnsReferToSameExpression', () => {
     expect(columnsReferToSameExpression('Time Bucket', gold, 'ts', actual)).toBe(true);
   });
 
+  it('resolves gold columns against the actual query when the gold has no query', () => {
+    const actual = `FROM kibana_sample_data_logs
+| STATS \`Total Requests\` = COUNT(*), bytes = SUM(bytes)`;
+
+    expect(columnsReferToSameExpression('Total Requests', '', 'Total Requests', actual)).toBe(true);
+    expect(columnsReferToSameExpression('Total Requests', '', 'bytes', actual)).toBe(false);
+  });
+
   it('does not match different aggregations', () => {
     const actualQuery = `FROM kibana_sample_data_logs
 | STATS total = SUM(bytes) BY response.keyword`;
