@@ -34,7 +34,6 @@ describe('setDynamicSettings', () => {
       expect.objectContaining({
         rebalancePrivateLocationShardsEnabled: false,
       }),
-      expect.anything(),
       expect.objectContaining({ version: '2023-10-31' })
     );
   });
