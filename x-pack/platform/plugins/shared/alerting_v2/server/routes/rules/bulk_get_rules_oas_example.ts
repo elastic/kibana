@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { BulkGetRulesParams, BulkGetRulesResponse } from '@kbn/alerting-v2-schemas';
+import type { BulkByIdsParams, BulkGetRulesResponse } from '@kbn/alerting-v2-schemas';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { buildOasOperation, invalidResponseExample } from '../oas_utils';
 import type { AlertingOasOperationObject } from '../oas_types';
 import { RULE_RESPONSE } from './rule_oas_shared_examples';
 
-export const BULK_GET_RULES_REQUEST: BulkGetRulesParams = {
+export const BULK_GET_RULES_REQUEST: BulkByIdsParams = {
   ids: ['rule-1', 'rule-2'],
 };
 
