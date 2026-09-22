@@ -5,39 +5,22 @@
  * 2.0.
  */
 
-import type { VisualizationGoldConfig } from '../../../src/evaluators/gold_visualization_config';
+import type { VisualizationDatasetExample } from '../../../src/evaluate_dataset';
 import { HOST_METRICS_INDEX } from '../../../src/fixtures/host_load_metrics';
-import { GOLDEN_TOOL_PATH } from './golden_tool_path';
+import { TIME_BUCKET_COLUMN, timeSeriesQuery, xyExample } from './factories';
 
-export const HOST_METRICS_QUESTION =
-  'Show CPU load average metrics over time as a line chart. Include system.load.1 (1-minute), system.load.5 (5-minute), and system.load.15 (15-minute) as separate lines, bucketed by auto time interval.';
+const LOAD_AVERAGES = [
+  { alias: '1-Minute Load', expression: 'AVG(`system.load.1`)' },
+  { alias: '5-Minute Load', expression: 'AVG(`system.load.5`)' },
+  { alias: '15-Minute Load', expression: 'AVG(`system.load.15`)' },
+];
 
-export const HOST_METRICS_QUERY = `FROM ${HOST_METRICS_INDEX}
-| STATS \`1-Minute Load\` = AVG(\`system.load.1\`), \`5-Minute Load\` = AVG(\`system.load.5\`), \`15-Minute Load\` = AVG(\`system.load.15\`) BY \`Time Bucket\` = BUCKET(@timestamp, 75, ?_tstart, ?_tend)`;
-
-export const HOST_METRICS_EXAMPLE = {
-  input: {
-    question: HOST_METRICS_QUESTION,
-  },
-  output: {
-    config: {
-      type: 'xy',
-      layers: [
-        {
-          type: 'line',
-          data_source: {
-            type: 'esql',
-            query: HOST_METRICS_QUERY,
-          },
-          x: { column: 'Time Bucket' },
-          y: [
-            { column: '1-Minute Load' },
-            { column: '5-Minute Load' },
-            { column: '15-Minute Load' },
-          ],
-        },
-      ],
-    } satisfies VisualizationGoldConfig,
-    goldenToolPath: GOLDEN_TOOL_PATH,
-  },
-};
+/** Host metrics from the synthtrace Beats load fixture: three load averages as separate lines. */
+export const HOST_METRICS_EXAMPLE: VisualizationDatasetExample = xyExample({
+  question:
+    'Show CPU load average metrics over time as a line chart. Include system.load.1 (1-minute), system.load.5 (5-minute), and system.load.15 (15-minute) as separate lines, bucketed by auto time interval.',
+  seriesType: 'line',
+  query: timeSeriesQuery({ index: HOST_METRICS_INDEX, metrics: LOAD_AVERAGES }),
+  x: TIME_BUCKET_COLUMN,
+  y: LOAD_AVERAGES.map(({ alias }) => alias),
+});

@@ -40,7 +40,7 @@ Seed examples live in `evals/visualization_creation/datasets/`, one file per dat
 - **ecommerce** (`kibana_sample_data_ecommerce`): metric / pie / xy over `order_date` + numeric revenue/quantity fields
 - **host metrics** (synthtrace Beats load fixture): multi-series load averages on `metrics-system.load-default`
 
-Each positive example carries a partial Lens Config API gold (`config`): chart `type`, layer type / column roles, and ground-truth ES|QL nested in `data_source.query`. Negatives / recovery / multi-turn edits are still follow-ups.
+Each positive example carries a partial Lens Config API gold (`config`): chart `type`, layer type / column roles, and ground-truth ES|QL nested in `data_source.query`. Examples are built with the factories in `datasets/factories.ts` (`xyExample`, `metricExample`, `partitionExample`, …) over the query builders `categoricalQuery`, `timeSeriesQuery`, and `totalsQuery`, so adding an example is one call and every gold query follows the same idiom by construction.|QL nested in `data_source.query`. Negatives / recovery / multi-turn edits are still follow-ups.
 
 ### What a gold `config` can assert
 
