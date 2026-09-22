@@ -17,8 +17,9 @@
  *   - the canonical K8s sub-type ordering shared by both views.
  */
 
-import React, { useMemo } from 'react';
-import { EuiSelect } from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
+import { EuiComboBox, EuiSelect } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Entity } from './fake_entities';
 import { labThings, useIsElasticOn } from '../lab_terminology';
@@ -342,27 +343,38 @@ export const KubernetesResourceTypeFilter = ({
     'xpack.streams.entityCentricLab.entities.kubernetesResourceTypeFilter.allOption',
     { defaultMessage: 'All resource types' }
   );
-  const options = useMemo(
-    () => [
-      { value: KUBERNETES_RESOURCE_TYPE_ALL, text: allLabel },
-      ...KUBERNETES_SUB_TYPE_ORDER.map((subType) => ({
-        value: subType,
-        text: subType,
-      })),
-    ],
-    [allLabel]
+  const options = useMemo<EuiComboBoxOptionOption[]>(
+    () => KUBERNETES_SUB_TYPE_ORDER.map((subType) => ({ label: subType, value: subType })),
+    []
+  );
+  const selectedOptions = useMemo<EuiComboBoxOptionOption[]>(
+    () =>
+      value === KUBERNETES_RESOURCE_TYPE_ALL
+        ? []
+        : options.filter((o) => o.value === value),
+    [value, options]
+  );
+  const handleChange = useCallback(
+    (selected: EuiComboBoxOptionOption[]) => {
+      onChange(selected.length > 0 ? (selected[0].value as string) : KUBERNETES_RESOURCE_TYPE_ALL);
+    },
+    [onChange]
   );
   return (
-    <EuiSelect
+    <EuiComboBox
       compressed
+      singleSelection={{ asPlainText: true }}
       options={options}
-      value={value}
-      onChange={(event) => onChange(event.target.value)}
+      selectedOptions={selectedOptions}
+      onChange={handleChange}
+      placeholder={allLabel}
+      isClearable
       aria-label={i18n.translate(
         'xpack.streams.entityCentricLab.entities.kubernetesResourceTypeFilter.ariaLabel',
         { defaultMessage: 'Filter Kubernetes entities by resource type' }
       )}
       data-test-subj="entityCentricLabKubernetesResourceTypeFilter"
+      style={{ minWidth: 180 }}
     />
   );
 };
@@ -393,28 +405,32 @@ export const KubernetesClusterFilter = ({
     'xpack.streams.entityCentricLab.entities.kubernetesClusterFilter.allOption',
     { defaultMessage: 'All clusters' }
   );
-  const options = useMemo(
-    () => [
-      {
-        value: KUBERNETES_FILTER_ALL,
-        text: allClustersLabel,
-      },
-      ...clusterNames.map((name) => ({
-        value: name,
-        text: i18n.translate(
-          'xpack.streams.entityCentricLab.entities.kubernetesClusterFilter.clusterOption',
-          { defaultMessage: 'Cluster: {name}', values: { name } }
-        ),
-      })),
-    ],
-    [clusterNames, allClustersLabel]
+  const options = useMemo<EuiComboBoxOptionOption[]>(
+    () => clusterNames.map((name) => ({ label: name, value: name })),
+    [clusterNames]
+  );
+  const selectedOptions = useMemo<EuiComboBoxOptionOption[]>(
+    () =>
+      value === KUBERNETES_FILTER_ALL
+        ? []
+        : [{ label: `Cluster: ${value}`, value }],
+    [value]
+  );
+  const handleChange = useCallback(
+    (selected: EuiComboBoxOptionOption[]) => {
+      onChange(selected.length > 0 ? (selected[0].value as string) : KUBERNETES_FILTER_ALL);
+    },
+    [onChange]
   );
   return (
-    <EuiSelect
+    <EuiComboBox
       compressed
+      singleSelection={{ asPlainText: true }}
       options={options}
-      value={value}
-      onChange={(event) => onChange(event.target.value)}
+      selectedOptions={selectedOptions}
+      onChange={handleChange}
+      placeholder={allClustersLabel}
+      isClearable
       aria-label={i18n.translate(
         'xpack.streams.entityCentricLab.entities.kubernetesClusterFilter.ariaLabel',
         {
@@ -423,6 +439,7 @@ export const KubernetesClusterFilter = ({
         }
       )}
       data-test-subj="entityCentricLabKubernetesClusterFilter"
+      style={{ minWidth: 200 }}
     />
   );
 };
@@ -446,30 +463,38 @@ export const KubernetesNamespaceFilter = ({
     'xpack.streams.entityCentricLab.entities.kubernetesNamespaceFilter.allOption',
     { defaultMessage: 'All namespaces' }
   );
-  const options = useMemo(
-    () => [
-      { value: KUBERNETES_FILTER_ALL, text: allLabel },
-      ...namespaceNames.map((name) => ({
-        value: name,
-        text: i18n.translate(
-          'xpack.streams.entityCentricLab.entities.kubernetesNamespaceFilter.option',
-          { defaultMessage: 'Namespace: {name}', values: { name } }
-        ),
-      })),
-    ],
-    [namespaceNames, allLabel]
+  const options = useMemo<EuiComboBoxOptionOption[]>(
+    () => namespaceNames.map((name) => ({ label: name, value: name })),
+    [namespaceNames]
+  );
+  const selectedOptions = useMemo<EuiComboBoxOptionOption[]>(
+    () =>
+      value === KUBERNETES_FILTER_ALL
+        ? []
+        : [{ label: `Namespace: ${value}`, value }],
+    [value]
+  );
+  const handleChange = useCallback(
+    (selected: EuiComboBoxOptionOption[]) => {
+      onChange(selected.length > 0 ? (selected[0].value as string) : KUBERNETES_FILTER_ALL);
+    },
+    [onChange]
   );
   return (
-    <EuiSelect
+    <EuiComboBox
       compressed
+      singleSelection={{ asPlainText: true }}
       options={options}
-      value={value}
-      onChange={(event) => onChange(event.target.value)}
+      selectedOptions={selectedOptions}
+      onChange={handleChange}
+      placeholder={allLabel}
+      isClearable
       aria-label={i18n.translate(
         'xpack.streams.entityCentricLab.entities.kubernetesNamespaceFilter.ariaLabel',
         { defaultMessage: 'Filter Kubernetes entities by namespace' }
       )}
       data-test-subj="entityCentricLabKubernetesNamespaceFilter"
+      style={{ minWidth: 170 }}
     />
   );
 };
@@ -493,30 +518,38 @@ export const KubernetesDeploymentFilter = ({
     'xpack.streams.entityCentricLab.entities.kubernetesDeploymentFilter.allOption',
     { defaultMessage: 'All deployments' }
   );
-  const options = useMemo(
-    () => [
-      { value: KUBERNETES_FILTER_ALL, text: allLabel },
-      ...deploymentNames.map((name) => ({
-        value: name,
-        text: i18n.translate(
-          'xpack.streams.entityCentricLab.entities.kubernetesDeploymentFilter.option',
-          { defaultMessage: 'Deployment: {name}', values: { name } }
-        ),
-      })),
-    ],
-    [deploymentNames, allLabel]
+  const options = useMemo<EuiComboBoxOptionOption[]>(
+    () => deploymentNames.map((name) => ({ label: name, value: name })),
+    [deploymentNames]
+  );
+  const selectedOptions = useMemo<EuiComboBoxOptionOption[]>(
+    () =>
+      value === KUBERNETES_FILTER_ALL
+        ? []
+        : [{ label: `Deployment: ${value}`, value }],
+    [value]
+  );
+  const handleChange = useCallback(
+    (selected: EuiComboBoxOptionOption[]) => {
+      onChange(selected.length > 0 ? (selected[0].value as string) : KUBERNETES_FILTER_ALL);
+    },
+    [onChange]
   );
   return (
-    <EuiSelect
+    <EuiComboBox
       compressed
+      singleSelection={{ asPlainText: true }}
       options={options}
-      value={value}
-      onChange={(event) => onChange(event.target.value)}
+      selectedOptions={selectedOptions}
+      onChange={handleChange}
+      placeholder={allLabel}
+      isClearable
       aria-label={i18n.translate(
         'xpack.streams.entityCentricLab.entities.kubernetesDeploymentFilter.ariaLabel',
         { defaultMessage: 'Filter Kubernetes entities by deployment' }
       )}
       data-test-subj="entityCentricLabKubernetesDeploymentFilter"
+      style={{ minWidth: 170 }}
     />
   );
 };
@@ -540,30 +573,38 @@ export const KubernetesNodeFilter = ({
     'xpack.streams.entityCentricLab.entities.kubernetesNodeFilter.allOption',
     { defaultMessage: 'All nodes' }
   );
-  const options = useMemo(
-    () => [
-      { value: KUBERNETES_FILTER_ALL, text: allLabel },
-      ...nodeNames.map((name) => ({
-        value: name,
-        text: i18n.translate(
-          'xpack.streams.entityCentricLab.entities.kubernetesNodeFilter.option',
-          { defaultMessage: 'Node: {name}', values: { name } }
-        ),
-      })),
-    ],
-    [nodeNames, allLabel]
+  const options = useMemo<EuiComboBoxOptionOption[]>(
+    () => nodeNames.map((name) => ({ label: name, value: name })),
+    [nodeNames]
+  );
+  const selectedOptions = useMemo<EuiComboBoxOptionOption[]>(
+    () =>
+      value === KUBERNETES_FILTER_ALL
+        ? []
+        : [{ label: `Node: ${value}`, value }],
+    [value]
+  );
+  const handleChange = useCallback(
+    (selected: EuiComboBoxOptionOption[]) => {
+      onChange(selected.length > 0 ? (selected[0].value as string) : KUBERNETES_FILTER_ALL);
+    },
+    [onChange]
   );
   return (
-    <EuiSelect
+    <EuiComboBox
       compressed
+      singleSelection={{ asPlainText: true }}
       options={options}
-      value={value}
-      onChange={(event) => onChange(event.target.value)}
+      selectedOptions={selectedOptions}
+      onChange={handleChange}
+      placeholder={allLabel}
+      isClearable
       aria-label={i18n.translate(
         'xpack.streams.entityCentricLab.entities.kubernetesNodeFilter.ariaLabel',
         { defaultMessage: 'Filter Kubernetes entities by node' }
       )}
       data-test-subj="entityCentricLabKubernetesNodeFilter"
+      style={{ minWidth: 150 }}
     />
   );
 };

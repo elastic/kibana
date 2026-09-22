@@ -49,17 +49,7 @@ const NO_GROW = css`
 `;
 
 const k8sFilterGroupCss = css`
-  & > .euiFlexItem:not(:first-child) .euiFormControlLayout {
-    margin-left: -1px;
-  }
-  & > .euiFlexItem:not(:first-child) .euiSelect {
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
-  }
-  & > .euiFlexItem:not(:last-child) .euiSelect {
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
-  }
+  gap: 4px;
 `;
 
 // Fixed-width column for the in-page Cloud tree so the main content keeps

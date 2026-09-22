@@ -23,6 +23,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
+  EuiPanel,
   EuiPopover,
   EuiSelectable,
   EuiSpacer,
@@ -37,6 +38,17 @@ import { css } from '@emotion/react';
 import { getOotbDashboards } from './dashboards_tab';
 import type { DashboardDescriptor } from './dashboards_tab';
 import { entityTypeToKind, inferEntityKind } from './kind_templates';
+
+// @ts-expect-error image import
+import clusterDetailThumb from './assets/dashboard_thumbnails/cluster_detail.jpg';
+// @ts-expect-error image import
+import nodeDetailThumb from './assets/dashboard_thumbnails/node_detail.jpg';
+// @ts-expect-error image import
+import namespaceDetailThumb from './assets/dashboard_thumbnails/namespace_detail.jpg';
+// @ts-expect-error image import
+import deploymentDetailThumb from './assets/dashboard_thumbnails/deployment_detail.jpg';
+// @ts-expect-error image import
+import podDetailThumb from './assets/dashboard_thumbnails/pod_detail.jpg';
 
 // ---------------------------------------------------------------------------
 // Fake available dashboards for the custom picker
@@ -128,19 +140,148 @@ const saveCustomDashboards = (kind: string, dashboards: StoredCustomDashboard[])
 };
 
 // ---------------------------------------------------------------------------
+// Dashboard thumbnail mapping
+// ---------------------------------------------------------------------------
+
+const DASHBOARD_THUMBNAILS: Record<string, string> = {
+  cluster: clusterDetailThumb,
+  node: nodeDetailThumb,
+  namespace: namespaceDetailThumb,
+  deployment: deploymentDetailThumb,
+  pod: podDetailThumb,
+};
+
+const getThumbnailForDashboard = (dashboard: { title: string; id?: string }): string | undefined => {
+  const t = dashboard.title.toLowerCase();
+  if (t.includes('cluster')) return DASHBOARD_THUMBNAILS.cluster;
+  if (t.includes('node')) return DASHBOARD_THUMBNAILS.node;
+  if (t.includes('pod')) return DASHBOARD_THUMBNAILS.pod;
+  if (t.includes('namespace')) return DASHBOARD_THUMBNAILS.namespace;
+  if (t.includes('deployment')) return DASHBOARD_THUMBNAILS.deployment;
+  return undefined;
+};
+
+// ---------------------------------------------------------------------------
+// Thumbnail cell with hover-to-enlarge popover
+// ---------------------------------------------------------------------------
+
+const thumbnailSmallCss = css`
+  width: 64px;
+  height: 40px;
+  object-fit: cover;
+  object-position: top left;
+  border-radius: 3px;
+  cursor: pointer;
+`;
+
+const thumbnailLargeCss = css`
+  width: 480px;
+  max-height: 320px;
+  object-fit: contain;
+  border-radius: 4px;
+`;
+
+const placeholderCss = css`
+  width: 64px;
+  height: 40px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const ThumbnailCell: React.FC<{ title: string; id?: string }> = ({ title, id }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const { euiTheme } = useEuiTheme();
+  const src = getThumbnailForDashboard({ title, id });
+
+  if (!src) {
+    return (
+      <div
+        css={placeholderCss}
+        style={{ background: euiTheme.colors.lightShade }}
+      >
+        <EuiText size="xs" color="subdued">—</EuiText>
+      </div>
+    );
+  }
+
+  return (
+    <EuiPopover
+      isOpen={isOpen}
+      closePopover={() => setIsOpen(false)}
+      button={
+        <img
+          src={src}
+          alt={title}
+          css={thumbnailSmallCss}
+          onMouseEnter={() => setIsOpen(true)}
+          onMouseLeave={() => setIsOpen(false)}
+        />
+      }
+      panelPaddingSize="s"
+      anchorPosition="rightCenter"
+      onMouseEnter={() => setIsOpen(true)}
+      onMouseLeave={() => setIsOpen(false)}
+    >
+      <EuiPanel paddingSize="none" hasShadow={false}>
+        <img src={src} alt={title} css={thumbnailLargeCss} />
+      </EuiPanel>
+    </EuiPopover>
+  );
+};
+
+// ---------------------------------------------------------------------------
 // Managed dashboards description mapping
 // ---------------------------------------------------------------------------
 
 const dashboardDescription = (d: DashboardDescriptor): string => {
-  if (d.title.includes('Node')) return 'Node-level resource metrics and health status';
-  if (d.title.includes('Pod')) return 'Pod lifecycle, restarts, and resource consumption';
-  if (d.title.includes('Cluster')) return 'Cluster-wide capacity and workload distribution';
-  if (d.title.includes('Namespace')) return 'Namespace resource quotas and pod health';
-  if (d.title.includes('Host') || d.title.includes('host'))
+  const t = d.title;
+  if (t.includes('Node')) return 'Node-level resource metrics and health status';
+  if (t.includes('Pod')) return 'Pod lifecycle, restarts, and resource consumption';
+  if (t.includes('Cluster')) return 'Cluster-wide capacity and workload distribution';
+  if (t.includes('Namespace')) return 'Namespace resource quotas and pod health';
+  if (t.includes('Deployment')) return 'Deployment rollout status, replica counts, and availability';
+  if (t.includes('Workload')) return 'Workload health, replica sets, and rollout status';
+  if (t.includes('Host') || t.includes('host'))
     return 'Host CPU, memory, disk, and network metrics';
-  if (d.title.includes('Service') || d.title.includes('APM'))
+  if (t.includes('Service') || t.includes('APM'))
     return 'Service latency, throughput, and error rates';
   return 'Dashboard metrics and visualizations';
+};
+
+// ---------------------------------------------------------------------------
+// Dashboard deep-link URL builder
+// ---------------------------------------------------------------------------
+
+/**
+ * Derive the Kibana base path from the current URL.
+ * E.g. `http://host:5601/nid/s/nicolas-prouvost/app/streams/...`
+ *  → `/nid/s/nicolas-prouvost`
+ */
+const getBasePath = (): string => {
+  const idx = window.location.pathname.indexOf('/app/');
+  return idx > 0 ? window.location.pathname.slice(0, idx) : '';
+};
+
+/**
+ * Build a Kibana dashboard deep-link URL for a managed dashboard, scoped
+ * to a specific entity. The entity filter is placed in `_a` (app state)
+ * so it merges with the dashboard's built-in search-source filters.
+ * Time range goes in `_g` (global state).
+ */
+const buildDashboardHref = (dashboard: DashboardDescriptor, entityName: string): string => {
+  const id = dashboard.savedObjectId ?? dashboard.id;
+  const basePath = getBasePath();
+
+  const globalState = `_g=(refreshInterval:(pause:!t,value:60000),time:(from:now-24h,to:now))`;
+
+  const appState =
+    dashboard.scopeField && entityName
+      ? `&_a=(filters:!((query:(match_phrase:(${dashboard.scopeField}:'${entityName}')))))`
+      : '';
+
+  return `${basePath}/app/dashboards#/view/${id}?${globalState}${appState}`;
 };
 
 // ---------------------------------------------------------------------------
@@ -205,14 +346,26 @@ export const DashboardsListTab: React.FC<DashboardsListTabProps> = ({
   const managedColumns = useMemo<Array<EuiBasicTableColumn<DashboardDescriptor>>>(
     () => [
       {
+        field: 'id',
+        name: '',
+        width: '80px',
+        render: (_: string, item: DashboardDescriptor) => (
+          <ThumbnailCell title={item.title} id={item.id} />
+        ),
+      },
+      {
         field: 'title',
         name: i18n.translate('entityCentricLabFlyout.dashboardsList.managed.name', {
           defaultMessage: 'Name',
         }),
+        width: '40%',
         render: (title: string, item: DashboardDescriptor) => (
           <EuiLink
-            href={`/app/dashboards#/view/${item.savedObjectId ?? item.id}`}
-            target="_blank"
+            href={buildDashboardHref(item, entityName)}
+            onClick={(e: React.MouseEvent) => {
+              e.preventDefault();
+              window.open(buildDashboardHref(item, entityName), '_blank', 'noopener');
+            }}
             external
           >
             {title}
@@ -231,21 +384,37 @@ export const DashboardsListTab: React.FC<DashboardsListTabProps> = ({
         ),
       },
     ],
-    []
+    [entityName]
   );
 
   // --- Custom table columns ---
   const customColumns = useMemo<Array<EuiBasicTableColumn<StoredCustomDashboard>>>(
     () => [
       {
+        field: 'id',
+        name: '',
+        width: '80px',
+        render: (_: string, item: StoredCustomDashboard) => (
+          <ThumbnailCell title={item.title} id={item.id} />
+        ),
+      },
+      {
         field: 'title',
         name: i18n.translate('entityCentricLabFlyout.dashboardsList.custom.name', {
           defaultMessage: 'Name',
         }),
+        width: '40%',
         render: (title: string, item: StoredCustomDashboard) => (
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
             <EuiFlexItem grow={false}>
-              <EuiLink href={`/app/dashboards#/view/${item.id}`} target="_blank" external>
+              <EuiLink
+                href={`${getBasePath()}/app/dashboards#/view/${item.id}`}
+                onClick={(e: React.MouseEvent) => {
+                  e.preventDefault();
+                  window.open(`${getBasePath()}/app/dashboards#/view/${item.id}`, '_blank', 'noopener');
+                }}
+                external
+              >
                 {title}
               </EuiLink>
             </EuiFlexItem>

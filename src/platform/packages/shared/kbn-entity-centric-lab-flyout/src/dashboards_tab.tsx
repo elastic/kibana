@@ -60,8 +60,8 @@ export interface DashboardDescriptor {
 const OOTB_DASHBOARDS: Record<string, readonly DashboardDescriptor[]> = {
   node: [
     {
-      id: 'k8s-node-detail',
-      title: '[Kubernetes] Node detail',
+      id: 'kubernetes_otel-8c71876b-ee61-4bdf-b3a4-1abc848d9c33',
+      title: '[Kubernetes OTel] Node Detail',
       savedObjectTitle: '[Kubernetes OTel] Node Detail',
       scopeField: 'k8s.node.name',
       hiddenPanelIds: new Set([
@@ -74,8 +74,8 @@ const OOTB_DASHBOARDS: Record<string, readonly DashboardDescriptor[]> = {
   ],
   pod: [
     {
-      id: 'k8s-pod-detail',
-      title: '[Kubernetes] Pod detail',
+      id: 'kubernetes_otel-2a4e0bbf-43c9-4a02-b97d-87a4d05270fd',
+      title: '[Kubernetes OTel] Pod Detail',
       savedObjectTitle: '[Kubernetes OTel] Pod Detail',
       scopeField: 'k8s.pod.name',
       hiddenPanelIds: new Set([
@@ -90,8 +90,8 @@ const OOTB_DASHBOARDS: Record<string, readonly DashboardDescriptor[]> = {
   ],
   cluster: [
     {
-      id: 'k8s-cluster-overview',
-      title: '[Kubernetes] Cluster overview',
+      id: 'kubernetes_otel-7b103a47-6eda-47e5-a949-9855bd58aa13',
+      title: '[Kubernetes OTel] Cluster Detail',
       savedObjectTitle: '[Kubernetes OTel] Cluster Detail',
       scopeField: 'k8s.cluster.name',
       hiddenPanelIds: new Set([
@@ -103,8 +103,8 @@ const OOTB_DASHBOARDS: Record<string, readonly DashboardDescriptor[]> = {
   ],
   namespace: [
     {
-      id: 'k8s-namespace-overview',
-      title: '[Kubernetes] Namespace overview',
+      id: 'kubernetes_otel-286af595-d3df-4b11-a127-bb096d86db62',
+      title: '[Kubernetes OTel] Namespace Detail',
       savedObjectTitle: '[Kubernetes OTel] Namespace Detail',
       scopeField: 'k8s.namespace.name',
       hiddenPanelIds: new Set([
@@ -113,6 +113,14 @@ const OOTB_DASHBOARDS: Record<string, readonly DashboardDescriptor[]> = {
         'v3-nsd-status',
         'v4-nsd-logs-card',
       ]),
+    },
+  ],
+  deployment: [
+    {
+      id: 'kubernetes_otel-8cf34def-60de-4bf3-9b06-d4ffc6cb4236',
+      title: '[Kubernetes OTel] Deployment Detail',
+      savedObjectTitle: '[Kubernetes OTel] Deployment Detail',
+      scopeField: 'k8s.deployment.name',
     },
   ],
   host: [
