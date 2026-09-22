@@ -26,6 +26,10 @@ import {
 import React from 'react';
 import { registerAgenticInvestigationTemplateUI } from '@kbn/agentic-investigations-common';
 import { getAlertZeroDeepLinks } from './deep_links';
+import {
+  ASSIGN_ERROR_MESSAGE,
+  updateInvestigationAssignees,
+} from './hooks/update_investigation_assignees';
 import { EscalationModalBoundary } from './pages/conversations/escalation_modal_boundary';
 import type {
   AlertZeroClientConfig,
@@ -144,6 +148,16 @@ export class AlertZeroPublicPlugin
       templateId: TEMPLATE_ID_INVESTIGATION,
       name: INVESTIGATION_TEMPLATE_NAME,
       icon: 'securitySignalDetected',
+      // Returned rather than fired and forgotten: the footer's modal closes on resolve, so a
+      // failed write leaves it open instead of looking like it landed.
+      onAssignSubmit: async (conversationId, assignees) => {
+        try {
+          await updateInvestigationAssignees(core.http, conversationId, assignees);
+        } catch (error) {
+          core.notifications.toasts.addDanger(ASSIGN_ERROR_MESSAGE);
+          throw error;
+        }
+      },
       renderEscalationModal: canManageEscalations
         ? (props) =>
             React.createElement(

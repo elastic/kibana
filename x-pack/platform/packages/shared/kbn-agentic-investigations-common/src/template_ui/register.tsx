@@ -52,6 +52,12 @@ export interface RegisterAgenticInvestigationTemplateUIOptions {
   name: string;
   icon?: IconType;
   /**
+   * Commits an assignee write from the flyout footer. Receives the conversation id and the
+   * resolved assignees list (may be empty to clear). Supplied by the solution layer that owns
+   * the HTTP client; when absent, clicking Assign in the flyout closes the modal without writing.
+   */
+  onAssignSubmit?: (conversationId: string, assignees: string[]) => void | Promise<void>;
+  /**
    * When provided, the flyout footer renders a dedicated "Open escalation" primary button and
    * delegates modal rendering to this function. Supplied by the caller so the modal can use
    * Kibana HTTP hooks unavailable in this package.
@@ -71,6 +77,7 @@ export const registerAgenticInvestigationTemplateUI = ({
   templateId,
   name,
   icon,
+  onAssignSubmit,
   renderEscalationModal,
 }: RegisterAgenticInvestigationTemplateUIOptions): void => {
   const [overviewTabId, attachmentsTabId, timelineTabId] = getInvestigationTabIds(templateId);
@@ -139,6 +146,11 @@ export const registerAgenticInvestigationTemplateUI = ({
                     conversationId: conversation.id,
                     agentId: conversation.agent_id,
                   })
+                }
+                onAssignSubmit={
+                  onAssignSubmit
+                    ? (assignee) => onAssignSubmit(conversation.id, assignee ? [assignee] : [])
+                    : undefined
                 }
                 onOpenEscalation={renderEscalationModal}
               />

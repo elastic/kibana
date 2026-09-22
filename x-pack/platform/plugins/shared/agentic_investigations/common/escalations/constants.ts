@@ -13,9 +13,8 @@ export const ESCALATION_BY_ID_URL = `${ESCALATIONS_INTERNAL_URL}/{id}` as const;
 export const ESCALATIONS_SUGGEST_USERS_URL =
   `${ESCALATIONS_INTERNAL_URL}/_suggest_user_profiles` as const;
 
-/** Template ids. Owned by agent_builder_platform; referenced here for guard checks. */
+/** Template id for escalation conversations. */
 export const ESCALATION_TEMPLATE_ID = 'escalation' as const;
-export const INVESTIGATION_TEMPLATE_ID = 'investigation' as const;
 
 /** The escalation template field that holds linked investigation conversation ids. */
 export const ESCALATION_LINKED_INVESTIGATIONS_FIELD = 'linked_investigations' as const;

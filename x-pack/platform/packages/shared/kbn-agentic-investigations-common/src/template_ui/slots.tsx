@@ -52,13 +52,20 @@ export const HeaderSlot = ({ conversation }: InvestigationSlotProps) => (
 
 export interface FooterSlotProps extends InvestigationSlotProps {
   onOpenChat: () => void;
+  onAssignSubmit?: ConversationDetailsFlyoutFooterProps['onAssignSubmit'];
   onOpenEscalation?: ConversationDetailsFlyoutFooterProps['onOpenEscalation'];
 }
 
-export const FooterSlot = ({ conversation, onOpenChat, onOpenEscalation }: FooterSlotProps) => (
+export const FooterSlot = ({
+  conversation,
+  onOpenChat,
+  onAssignSubmit,
+  onOpenEscalation,
+}: FooterSlotProps) => (
   <ConversationDetailsFlyoutFooter
     investigation={conversationToInvestigation(conversation)}
     onOpenChat={onOpenChat}
+    onAssignSubmit={onAssignSubmit}
     onOpenEscalation={onOpenEscalation}
   />
 );

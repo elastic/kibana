@@ -21,6 +21,7 @@ import type { ImpactReadClient } from './impact/services/impact_client';
 import type { ProposalsService } from './proposals/services/proposals_service';
 import type { ProposalPrivilegesChecker } from './proposals/services/check_proposal_privileges';
 import type { EscalationsService } from './escalations/services/escalations_service';
+import type { InvestigationsService } from './investigations/services/investigations_service';
 
 export interface AgenticInvestigationsSetupDependencies {
   features: FeaturesPluginSetup;
@@ -58,6 +59,7 @@ export interface AgenticInvestigationsPluginStart {
   /** For in-process callers (Agent Builder tools) that bypass the route's `security.authz`. */
   getProposalPrivileges: () => ProposalPrivilegesChecker;
   getEscalationsService: () => EscalationsService;
+  getInvestigationsService: () => InvestigationsService;
 }
 
 export type AgenticInvestigationsPluginSetup = Record<string, never>;

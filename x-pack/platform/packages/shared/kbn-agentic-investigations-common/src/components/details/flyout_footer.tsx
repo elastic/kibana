@@ -20,6 +20,11 @@ export interface ConversationDetailsFlyoutFooterProps {
   /** Supplied by the caller because flyout slots render outside a `KibanaContextProvider`. */
   onOpenChat: () => void;
   /**
+   * Commits the assignee write, for the same reason `onOpenChat` is passed in. The modal closes
+   * when the returned promise resolves; when absent, confirming just closes it.
+   */
+  onAssignSubmit?: (assignee: string, rationale: string) => void | Promise<void>;
+  /**
    * When provided, the "Open an escalation" item in the actions menu opens the escalation modal.
    * Supplied by the caller who has access to Kibana HTTP hooks unavailable in this package.
    */
@@ -40,6 +45,7 @@ const CLOSED_MODAL: ModalState = { type: null, recordId: null };
 export const ConversationDetailsFlyoutFooter = ({
   investigation,
   onOpenChat,
+  onAssignSubmit,
   onOpenEscalation,
 }: ConversationDetailsFlyoutFooterProps) => {
   const [modalState, setModalState] = useState<ModalState>(CLOSED_MODAL);
@@ -84,10 +90,11 @@ export const ConversationDetailsFlyoutFooter = ({
       <InvestigationActionModals
         action={modalState.type}
         recordId={modalState.recordId}
-        initialAssignee={investigation.assignee}
+        initialAssignee={investigation.conversationAssignees[0] ?? null}
         investigation={investigation}
         onCloseAction={closeModal}
         onCloseApproval={closeModal}
+        onAssignSubmit={onAssignSubmit}
         renderEscalationModal={onOpenEscalation}
       />
     </>

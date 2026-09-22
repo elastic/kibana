@@ -19,6 +19,7 @@ const investigation: Investigation = {
   updatedAt: new Date().toISOString(),
   watch_id: 'watch-1',
   watch_execution_id: 'exec-1',
+  conversationAssignees: [],
   pendingProposalCount: 0,
   recommendedAction: 'closed',
   primaryActionLabel: 'Rotate the Stripe key',

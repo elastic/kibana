@@ -110,10 +110,7 @@ export const proposalToInvestigation = (proposal: ProposalItem): Investigation =
     conversationId: proposal.conversationId,
     summary: proposal.comment,
     primaryActionLabel: proposal.action?.name,
-    // `conversationAssignees` is an array but `Investigation.assignee` is singular,
-    // because the flyout header renders one avatar. First entry wins, as in the
-    // conversation adapter.
-    assignee: proposal.conversationAssignees[0] ?? null,
+    conversationAssignees: proposal.conversationAssignees,
     events: [],
     // affectedSurface left undefined → Impact self-hides (returns null).
   };

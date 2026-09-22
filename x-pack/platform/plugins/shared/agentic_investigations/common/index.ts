@@ -98,7 +98,6 @@ export {
   ESCALATIONS_INTERNAL_URL,
   ESCALATIONS_SUGGEST_USERS_URL,
   ESCALATIONS_UI_CAPABILITY_MANAGE,
-  INVESTIGATION_TEMPLATE_ID,
   MAX_ESCALATION_LINKED_INVESTIGATIONS,
   createEscalationRequestSchema,
   escalationVisibilitySchema,
@@ -113,3 +112,20 @@ export type {
   ListEscalationsResponse,
   UpdateEscalationRequest,
 } from './escalations';
+
+export {
+  INVESTIGATION_ASSIGNEES_URL,
+  INVESTIGATION_BY_ID_URL,
+  INVESTIGATION_TEMPLATE_ID,
+  INVESTIGATIONS_UI_CAPABILITY_MANAGE,
+  INVESTIGATIONS_UI_CAPABILITY_SHOW,
+  MAX_INVESTIGATION_ASSIGNEES,
+  investigationIdParamsSchema,
+  updateAssigneesRequestSchema,
+} from './investigations';
+
+export type {
+  InvestigationIdParams,
+  UpdateAssigneesRequest,
+  UpdateAssigneesResponse,
+} from './investigations';

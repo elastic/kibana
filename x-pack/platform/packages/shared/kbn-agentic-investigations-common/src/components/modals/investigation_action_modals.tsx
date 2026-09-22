@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import type { Investigation } from '../../types';
 import type { CardActionType } from '../actions/base_actions';
 import type { EscalationModalMode } from './escalation_modal/types';
@@ -51,6 +51,12 @@ export interface InvestigationActionModalsProps<
    */
   onDismissApproval?: (proposal: TProposal) => void;
   /**
+   * Commits the assignee write. Supplied by the solution layer, which owns the HTTP client.
+   * The modal closes only once the returned promise resolves, so a rejected write leaves it
+   * open and retryable. When absent, confirming just closes the modal rather than writing.
+   */
+  onAssignSubmit?: (assignee: string, rationale: string) => void | Promise<void>;
+  /**
    * Replaces the default rationale-only dismiss modal. Supplied when a solution's
    * dismissal captures more than a rationale — a structured reason, say — which changes
    * what the modal renders and what local state it owns, not just what confirming does.
@@ -80,55 +86,69 @@ export const InvestigationActionModals = <TProposal extends ApprovalProposal = A
   onCloseApproval,
   onConfirmApproval,
   onDismissApproval,
+  onAssignSubmit,
   renderDismissModal,
   renderEscalationModal,
-}: InvestigationActionModalsProps<TProposal>) => (
-  <>
-    {approvalProposal ? (
-      <ApprovalModal
-        proposal={approvalProposal}
-        onConfirm={() =>
-          onConfirmApproval ? onConfirmApproval(approvalProposal) : onCloseApproval()
-        }
-        onClose={onCloseApproval}
-        onDismiss={onDismissApproval ? () => onDismissApproval(approvalProposal) : undefined}
-      />
-    ) : null}
+}: InvestigationActionModalsProps<TProposal>) => {
+  const onAssign = useCallback(
+    (assignee: string, rationale: string) => {
+      if (!onAssignSubmit) {
+        onCloseAction();
+        return;
+      }
+      // A rejected write keeps the modal open; the host surfaces the reason.
+      Promise.resolve(onAssignSubmit(assignee, rationale)).then(onCloseAction, () => undefined);
+    },
+    [onAssignSubmit, onCloseAction]
+  );
 
-    {action === 'assign' && recordId ? (
-      <AssignActionModal
-        recordId={recordId}
-        initialAssignee={initialAssignee}
-        onClose={onCloseAction}
-        // TODO: use assign action API call hook
-        onAssign={onCloseAction}
-      />
-    ) : null}
+  return (
+    <>
+      {approvalProposal ? (
+        <ApprovalModal
+          proposal={approvalProposal}
+          onConfirm={() =>
+            onConfirmApproval ? onConfirmApproval(approvalProposal) : onCloseApproval()
+          }
+          onClose={onCloseApproval}
+          onDismiss={onDismissApproval ? () => onDismissApproval(approvalProposal) : undefined}
+        />
+      ) : null}
 
-    {action === 'close' && recordId
-      ? renderDismissModal?.({ recordId, onClose: onCloseAction }) ?? (
-          <BaseActionModal
-            type="dismiss"
-            title={MODAL_TRANSLATIONS.dismiss.title}
-            recordId={recordId}
-            onClose={onCloseAction}
-            rationalePlaceholder={MODAL_TRANSLATIONS.dismiss.rationalePlaceholder}
-            primaryAction={{
-              color: 'danger',
-              label: MODAL_TRANSLATIONS.dismiss.actionButtonLabel,
-              // TODO: use dismiss action API call hook
-              onClick: onCloseAction,
-            }}
-          />
-        )
-      : null}
+      {action === 'assign' && recordId ? (
+        <AssignActionModal
+          recordId={recordId}
+          initialAssignee={initialAssignee}
+          onClose={onCloseAction}
+          onAssign={onAssign}
+        />
+      ) : null}
 
-    {(action === 'createEscalation' || action === 'addToEscalation') && investigation
-      ? renderEscalationModal?.({
-          mode: action === 'createEscalation' ? 'create' : 'addToExisting',
-          investigation,
-          onClose: onCloseAction,
-        }) ?? null
-      : null}
-  </>
-);
+      {action === 'close' && recordId
+        ? renderDismissModal?.({ recordId, onClose: onCloseAction }) ?? (
+            <BaseActionModal
+              type="dismiss"
+              title={MODAL_TRANSLATIONS.dismiss.title}
+              recordId={recordId}
+              onClose={onCloseAction}
+              rationalePlaceholder={MODAL_TRANSLATIONS.dismiss.rationalePlaceholder}
+              primaryAction={{
+                color: 'danger',
+                label: MODAL_TRANSLATIONS.dismiss.actionButtonLabel,
+                // TODO: use dismiss action API call hook
+                onClick: onCloseAction,
+              }}
+            />
+          )
+        : null}
+
+      {(action === 'createEscalation' || action === 'addToEscalation') && investigation
+        ? renderEscalationModal?.({
+            mode: action === 'createEscalation' ? 'create' : 'addToExisting',
+            investigation,
+            onClose: onCloseAction,
+          }) ?? null
+        : null}
+    </>
+  );
+};

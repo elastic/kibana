@@ -38,6 +38,12 @@ export const LIST_ESCALATIONS_PATH = 'internal/investigations/escalations';
 export const CREATE_ESCALATION_PATH = 'internal/investigations/escalations';
 export const ESCALATION_BY_ID_PATH = (id: string) => `internal/investigations/escalations/${id}`;
 
+export const INVESTIGATION_ASSIGNEES_PATH = (id: string) =>
+  `internal/investigations/${id}/assignees`;
+
+/** Returns the calling user's own profile, the only uid guaranteed to resolve in a test run. */
+export const CURRENT_USER_PROFILE_PATH = 'internal/security/user_profile';
+
 /** Agent Builder public conversations API. */
 export const AB_CONVERSATIONS_PATH = 'api/agent_builder/conversations';
 export const AB_CONVERSATION_BY_ID_PATH = (id: string) => `api/agent_builder/conversations/${id}`;

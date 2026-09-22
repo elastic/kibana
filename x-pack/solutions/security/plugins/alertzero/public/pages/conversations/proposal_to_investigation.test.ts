@@ -140,22 +140,21 @@ describe('proposalToInvestigation', () => {
     });
   });
 
-  describe('assignee', () => {
-    // `Investigation.assignee` is singular because the flyout header renders one avatar.
-    it('takes the first assignee', () => {
+  describe('conversationAssignees', () => {
+    it('carries every assignee through', () => {
       const result = proposalToInvestigation({
         ...baseProposal,
         conversationAssignees: ['first.analyst', 'second.analyst'],
       });
-      expect(result.assignee).toBe('first.analyst');
+      expect(result.conversationAssignees).toEqual(['first.analyst', 'second.analyst']);
     });
 
-    it('is null when nobody is assigned', () => {
+    it('is empty when nobody is assigned', () => {
       const result = proposalToInvestigation({
         ...baseProposal,
         conversationAssignees: [],
       });
-      expect(result.assignee).toBeNull();
+      expect(result.conversationAssignees).toEqual([]);
     });
   });
 

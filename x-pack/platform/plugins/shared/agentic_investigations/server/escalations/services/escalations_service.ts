@@ -26,9 +26,9 @@ import type {
 import {
   ESCALATION_LINKED_INVESTIGATIONS_FIELD,
   ESCALATION_TEMPLATE_ID,
-  INVESTIGATION_TEMPLATE_ID,
   MAX_ESCALATION_LINKED_INVESTIGATIONS,
 } from '../../../common/escalations/constants';
+import { INVESTIGATION_TEMPLATE_ID } from '../../../common/investigations/constants';
 import {
   InvalidLinkedInvestigationError,
   NotAnEscalationError,

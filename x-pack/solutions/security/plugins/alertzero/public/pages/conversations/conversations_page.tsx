@@ -30,6 +30,8 @@ import { useProposalChartsSummary } from '../../hooks/use_proposal_charts_summar
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
 import { AlertZeroPageHeader } from '../../components/alertzero_page_header';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
+import { useUpdateAssignees } from '../../hooks/use_investigations_api';
+import { ASSIGN_ERROR_MESSAGE } from '../../hooks/update_investigation_assignees';
 import { useOpenInChat } from '../../hooks/use_open_in_chat';
 import { useConversationsUrlParams } from './conversations_url_params';
 import { useInvestigationDetails } from './use_investigation_details';
@@ -64,6 +66,7 @@ export const ConversationsPage: React.FC = () => {
 
   const approve = useApproveProposal();
   const dismiss = useDismissProposal();
+  const updateAssignees = useUpdateAssignees();
   const dropDecided = useDropDecidedProposal();
   const [surfaceFilter, setSurfaceFilter] = useState<string | null>(null);
   useAlertZeroDocTitle(QUEUE_PAGE_INFO.pageTitle);
@@ -166,6 +169,32 @@ export const ConversationsPage: React.FC = () => {
     [closeApproval]
   );
 
+  // `modalState.recordId` carries the proposal id; the conversation id lives on the raw proposal.
+  // Rejecting rather than swallowing is what keeps the modal open for a retry.
+  const onAssignSubmit = useCallback(
+    async (assignee: string) => {
+      const conversationId = modalState.recordId
+        ? proposalsById.get(modalState.recordId)?.conversationId
+        : undefined;
+
+      if (!conversationId) {
+        notifications?.toasts.addDanger(ASSIGN_ERROR_MESSAGE);
+        throw new Error(ASSIGN_ERROR_MESSAGE);
+      }
+
+      try {
+        await updateAssignees.mutateAsync({
+          id: conversationId,
+          assignees: assignee ? [assignee] : [],
+        });
+      } catch (error) {
+        notifications?.toasts.addDanger(ASSIGN_ERROR_MESSAGE);
+        throw error;
+      }
+    },
+    [modalState.recordId, proposalsById, updateAssignees, notifications]
+  );
+
   const renderDismissModal = useCallback(
     ({ recordId, onClose }: { recordId: string; onClose: () => void }) => (
       <DismissProposalModal
@@ -239,13 +268,14 @@ export const ConversationsPage: React.FC = () => {
       <InvestigationActionModals
         action={modalState.type}
         recordId={modalState.recordId}
-        initialAssignee={actionInvestigation?.assignee}
+        initialAssignee={actionInvestigation?.conversationAssignees[0] ?? null}
         investigation={actionInvestigation}
         approvalProposal={selectedProposal}
         onCloseAction={closeModal}
         onCloseApproval={closeApproval}
         onConfirmApproval={confirmApproval}
         onDismissApproval={dismissApproval}
+        onAssignSubmit={onAssignSubmit}
         renderDismissModal={renderDismissModal}
         renderEscalationModal={renderEscalationModal}
       />
