@@ -9,7 +9,7 @@ import type { IndexEndpointHostsCyTaskOptions } from '../types';
 import type {
   IndexedHostsAndAlertsResponse,
   DeleteIndexedHostsAndAlertsResponse,
-} from '../../../../common/endpoint/index_data';
+} from '../../../../common/endpoint/index_data.test_helpers';
 
 export interface CyIndexEndpointHosts {
   data: IndexedHostsAndAlertsResponse;

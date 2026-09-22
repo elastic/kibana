@@ -7,7 +7,7 @@
 import { unzip } from 'zlib';
 import { promisify } from 'util';
 import expect from '@kbn/expect';
-import type { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
+import type { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data.test_helpers';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { ArtifactElasticsearchProperties } from '@kbn/fleet-plugin/server/services';
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';

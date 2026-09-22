@@ -18,12 +18,12 @@ import {
 import type {
   DeleteIndexedHostsAndAlertsResponse,
   IndexedHostsAndAlertsResponse,
-} from '@kbn/security-solution-plugin/common/endpoint/index_data';
+} from '@kbn/security-solution-plugin/common/endpoint/index_data.test_helpers';
 import {
   deleteIndexedHostsAndAlerts,
   indexHostsAndAlerts,
-} from '@kbn/security-solution-plugin/common/endpoint/index_data';
-import { getEndpointPackageInfo } from '@kbn/security-solution-plugin/common/endpoint/utils/package';
+} from '@kbn/security-solution-plugin/common/endpoint/index_data.test_helpers';
+import { getEndpointPackageInfo } from '@kbn/security-solution-plugin/common/endpoint/utils/package.test_helpers';
 import { isEndpointPackageV2 } from '@kbn/security-solution-plugin/common/endpoint/utils/package_v2';
 import { installOrUpgradeEndpointFleetPackage } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/setup_fleet_for_endpoint';
 import { EndpointError } from '@kbn/security-solution-plugin/common/endpoint/errors';
@@ -45,7 +45,7 @@ import {
   startMetadataTransforms,
   stopMetadataTransforms,
   waitForMetadataTransformsReady,
-} from '@kbn/security-solution-plugin/common/endpoint/utils/transforms';
+} from '@kbn/security-solution-plugin/common/endpoint/utils/transforms.test_helpers';
 import type { FtrProviderContext } from '../configs/ftr_provider_context';
 
 export type IndexedHostsAndAlertsResponseExtended = IndexedHostsAndAlertsResponse & {

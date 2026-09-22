@@ -30,8 +30,8 @@ import {
   waitForMetadataTransformsReady,
   stopMetadataTransforms,
   startMetadataTransforms,
-} from './utils/transforms';
-import { getEndpointPackageInfo } from './utils/package';
+} from './utils/transforms.test_helpers';
+import { getEndpointPackageInfo } from './utils/package.test_helpers';
 
 export type IndexedHostsAndAlertsResponse = IndexedHostsResponse;
 

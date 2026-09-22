@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import type { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
+import type { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data.test_helpers';
 import type { FtrProviderContext } from '../../configs/ftr_provider_context';
 
 import { targetTags } from '../../target_tags';

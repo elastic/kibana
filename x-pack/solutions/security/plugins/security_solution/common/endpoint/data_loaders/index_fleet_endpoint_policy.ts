@@ -26,7 +26,7 @@ import { memoize } from 'lodash';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { catchHttpErrorFormatAndThrow } from '../format_http_error';
 import { usageTracker } from './usage_tracker';
-import { getEndpointPackageInfo } from '../utils/package';
+import { getEndpointPackageInfo } from '../utils/package.test_helpers';
 import type { PolicyData } from '../types';
 import { policyFactory as policyConfigFactory } from '../models/policy_config';
 import { RETRYABLE_TRANSIENT_ERRORS, retryOnError, wrapErrorAndRejectPromise } from './utils';

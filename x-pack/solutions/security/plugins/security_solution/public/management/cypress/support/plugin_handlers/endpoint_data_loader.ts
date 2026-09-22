@@ -35,8 +35,8 @@ import {
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import type { GetCustomEndpointMetadataGeneratorOptions } from '../../../../../common/endpoint/data_generators/endpoint_metadata_generator';
 import { EndpointMetadataGenerator } from '../../../../../common/endpoint/data_generators/endpoint_metadata_generator';
-import { indexHostsAndAlerts } from '../../../../../common/endpoint/index_data';
-import type { IndexedHostsAndAlertsResponse } from '../../../../../common/endpoint/index_data';
+import { indexHostsAndAlerts } from '../../../../../common/endpoint/index_data.test_helpers';
+import type { IndexedHostsAndAlertsResponse } from '../../../../../common/endpoint/index_data.test_helpers';
 
 export interface CyLoadEndpointDataOptions
   extends Pick<GetCustomEndpointMetadataGeneratorOptions, 'version' | 'os'> {

@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import type { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
+import type { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data.test_helpers';
 import { PROTECTION_NOTICE_SUPPORTED_ENDPOINT_VERSION } from '@kbn/security-solution-plugin/public/management/pages/policy/view/policy_settings_form/protection_notice_supported_endpoint_version';
 import { getPolicySettingsFormTestSubjects } from '@kbn/security-solution-plugin/public/management/pages/policy/view/policy_settings_form/mocks';
 import type { FtrProviderContext } from '../../configs/ftr_provider_context';

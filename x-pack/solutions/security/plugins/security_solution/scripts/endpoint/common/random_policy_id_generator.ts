@@ -15,7 +15,7 @@ import { catchHttpErrorFormatAndThrow } from '../../../common/endpoint/format_ht
 import { indexFleetEndpointPolicy } from '../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { setupFleetForEndpoint } from '../../../common/endpoint/data_loaders/setup_fleet_for_endpoint';
 import type { GetPolicyListResponse } from '../../../public/management/pages/policy/types';
-import { getEndpointPackageInfo } from '../../../common/endpoint/utils/package';
+import { getEndpointPackageInfo } from '../../../common/endpoint/utils/package.test_helpers';
 
 const fetchEndpointPolicies = (
   kbnClient: KbnClient

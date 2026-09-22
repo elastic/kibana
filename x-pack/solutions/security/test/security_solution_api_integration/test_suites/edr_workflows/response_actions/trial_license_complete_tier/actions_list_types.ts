@@ -13,7 +13,7 @@ import {
   indexEndpointAndFleetActionsForHost,
   type IndexedEndpointAndFleetActionsForHostResponse,
 } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_endpoint_fleet_actions';
-import type { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
+import type { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data.test_helpers';
 import type { ActionListApiResponse } from '@kbn/security-solution-plugin/common/endpoint/types';
 import type TestAgent from 'supertest/lib/agent';
 import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';

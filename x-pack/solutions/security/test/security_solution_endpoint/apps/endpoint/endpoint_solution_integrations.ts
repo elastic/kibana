@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
+import type { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data.test_helpers';
 import type { PatchTimelineResponse } from '@kbn/security-solution-plugin/common/api/timeline';
 // @ts-expect-error we have to check types with "allowJs: false" for now, causing this import to fail
 import { kibanaPackageJson } from '@kbn/repo-info';

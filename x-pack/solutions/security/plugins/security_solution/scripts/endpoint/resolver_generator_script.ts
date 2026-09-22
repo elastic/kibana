@@ -19,7 +19,7 @@ import { createToolingLogger } from '../../common/endpoint/data_loaders/utils';
 import { EndpointSecurityTestRolesLoader } from './common/role_and_user_loader';
 import { METADATA_DATASTREAM } from '../../common/endpoint/constants';
 import { EndpointMetadataGenerator } from '../../common/endpoint/data_generators/endpoint_metadata_generator';
-import { indexHostsAndAlerts } from '../../common/endpoint/index_data';
+import { indexHostsAndAlerts } from '../../common/endpoint/index_data.test_helpers';
 import { ANCESTRY_LIMIT, EndpointDocGenerator } from '../../common/endpoint/generate_data';
 import { fetchStackVersion } from './common/stack_services';
 import {

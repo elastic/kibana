@@ -19,7 +19,7 @@ import type {
 import { agentPolicyRouteService, packagePolicyRouteService } from '@kbn/fleet-plugin/common';
 import type { DeepPartial } from 'utility-types';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { startMetadataTransforms, stopMetadataTransforms } from '../utils/transforms';
+import { startMetadataTransforms, stopMetadataTransforms } from '../utils/transforms.test_helpers';
 import { catchHttpErrorFormatAndThrow } from '../format_http_error';
 import { EndpointError } from '../errors';
 import { usageTracker } from './usage_tracker';

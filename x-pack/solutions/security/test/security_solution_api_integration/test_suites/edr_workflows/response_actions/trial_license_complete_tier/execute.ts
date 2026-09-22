@@ -10,7 +10,7 @@ import {
   ACTION_AGENT_FILE_INFO_ROUTE,
   EXECUTE_ROUTE,
 } from '@kbn/security-solution-plugin/common/endpoint/constants';
-import type { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
+import type { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data.test_helpers';
 import type { ActionDetails } from '@kbn/security-solution-plugin/common/endpoint/types';
 import { getFileDownloadId } from '@kbn/security-solution-plugin/common/endpoint/service/response_actions/get_file_download_id';
 import type TestAgent from 'supertest/lib/agent';

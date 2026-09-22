@@ -16,7 +16,7 @@ import {
 } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 import { indexFleetEndpointPolicy } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_fleet_endpoint_policy';
-import type { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
+import type { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data.test_helpers';
 
 import type { MetadataListResponse } from '@kbn/security-solution-plugin/common/endpoint/types';
 import { EndpointSortableField } from '@kbn/security-solution-plugin/common/endpoint/types';

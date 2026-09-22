@@ -70,8 +70,8 @@ import {
   deleteIndexedEndpointRuleAlerts,
   indexEndpointRuleAlerts,
 } from '../../../../common/endpoint/data_loaders/index_endpoint_rule_alerts';
-import type { IndexedHostsAndAlertsResponse } from '../../../../common/endpoint/index_data';
-import { deleteIndexedHostsAndAlerts } from '../../../../common/endpoint/index_data';
+import type { IndexedHostsAndAlertsResponse } from '../../../../common/endpoint/index_data.test_helpers';
+import { deleteIndexedHostsAndAlerts } from '../../../../common/endpoint/index_data.test_helpers';
 import type { IndexedCase } from '../../../../common/endpoint/data_loaders/index_case';
 import { deleteIndexedCase, indexCase } from '../../../../common/endpoint/data_loaders/index_case';
 import {

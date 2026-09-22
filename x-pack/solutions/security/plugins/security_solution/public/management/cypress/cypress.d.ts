@@ -42,7 +42,7 @@ import type {
   DeletedIndexedCase,
   IndexedCase,
 } from '../../../common/endpoint/data_loaders/index_case';
-import type { IndexedHostsAndAlertsResponse } from '../../../common/endpoint/index_data';
+import type { IndexedHostsAndAlertsResponse } from '../../../common/endpoint/index_data.test_helpers';
 import type { DeleteIndexedEndpointHostsResponse } from '../../../common/endpoint/data_loaders/index_endpoint_hosts';
 import type {
   DeletedIndexedEndpointRuleAlerts,
