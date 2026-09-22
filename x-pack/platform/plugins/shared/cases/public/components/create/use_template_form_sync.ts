@@ -205,7 +205,8 @@ export const useTemplateFormSync = (
   // to the `.none` connector when it no longer exists. Shares react-query cache with the form.
   const { data: connectors = [], isLoading: isLoadingConnectors } =
     useGetSupportedActionConnectors();
-  const { data: configurations } = useGetAllCaseConfigurations();
+  const { data: configurations, isLoading: isLoadingConfigurations } =
+    useGetAllCaseConfigurations();
   const spaceExtractObservables = getSpaceExtractObservables(
     getConfigurationByOwner({
       configurations: configurations ?? null,
@@ -243,11 +244,12 @@ export const useTemplateFormSync = (
     }
 
     const { definition } = template;
-    // Exclusion set and spaceExtractObservables are part of the applied identity: when legacy
-    // custom-field visibility changes, or when case configurations finish loading and flip the
-    // space default, the same template must re-sync so omitted extractObservables tracks space.
+    // Exclusion set is part of the applied identity so a legacy-visibility change re-syncs the form.
+    // spaceExtractObservables is intentionally excluded from the key: the isLoadingConfigurations
+    // guard below prevents committing the key until configurations have settled, so the correct
+    // spaceExtractObservables is always used when the key is first written.
     const exclusionIdentity = [...excludedLinkedRefNames].sort().join('|');
-    const key = `${template.templateId}:${template.templateVersion}:${exclusionIdentity}:${spaceExtractObservables}`;
+    const key = `${template.templateId}:${template.templateVersion}:${exclusionIdentity}`;
     if (appliedRef.current === key) {
       return;
     }
@@ -279,10 +281,11 @@ export const useTemplateFormSync = (
       spaceExtractObservables
     );
 
-    // Wait for field definitions AND supported connectors to load before finishing. Connectors are
-    // needed to resolve the template's default connector; field defs to resolve $ref field defaults.
-    // Do NOT set appliedRef.current yet — the effect must re-run once both are available.
-    if (isLoadingFieldDefs || isLoadingConnectors) return;
+    // Wait for field definitions, supported connectors, AND case configurations to load before
+    // finishing. Connectors resolve the template's default connector; field defs resolve $ref
+    // defaults; configurations supply the correct spaceExtractObservables used just above.
+    // Do NOT set appliedRef.current yet — the effect must re-run once all three are available.
+    if (isLoadingFieldDefs || isLoadingConnectors || isLoadingConfigurations) return;
 
     syncTemplateConnector(
       definition.connector,
@@ -318,6 +321,7 @@ export const useTemplateFormSync = (
     excludedLinkedRefNames,
     connectors,
     isLoadingConnectors,
+    isLoadingConfigurations,
     spaceExtractObservables,
   ]);
 
