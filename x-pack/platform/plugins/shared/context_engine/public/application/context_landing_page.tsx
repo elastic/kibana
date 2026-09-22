@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { EuiHorizontalRule, useEuiTheme } from '@elastic/eui';
+import { EuiHorizontalRule, EuiLink, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ContentList, ContentListFooter, ContentListToolbar } from '@kbn/content-list';
 import { ContentListClientProvider, createFilterControl } from '@kbn/content-list-provider-client';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
@@ -30,12 +31,7 @@ import {
   AI_INDICES_PER_PAGE,
   AI_INDEX_LIST_LABELS,
   aiIndexOwnerFilter,
-  aiIndexTypeFilter,
 } from './utils/ai_index_content_list_utils';
-
-const AiIndexTypeFilter = createFilterControl(aiIndexTypeFilter, {
-  'data-test-subj': 'contextAiIndexListTypeFilter',
-});
 
 const AiIndexOwnerFilter = createFilterControl(aiIndexOwnerFilter, {
   'data-test-subj': 'contextAiIndexListOwnerFilter',
@@ -49,6 +45,8 @@ const ContextLandingPageContent = ({
   isLoading: boolean;
 }) => {
   const { euiTheme } = useEuiTheme();
+  const { services } = useKibana();
+  const contextEngineLinks = services.docLinks.links.contextEngine;
   const { mode, error } = useAiIndexListMode(hasCustomAiIndices, isLoading);
 
   return (
@@ -57,10 +55,21 @@ const ContextLandingPageContent = ({
         pageTitle={i18n.translate('xpack.contextEngine.landing.title', {
           defaultMessage: 'Context',
         })}
-        description={i18n.translate('xpack.contextEngine.landing.description', {
-          defaultMessage:
-            'Manage AI Indexes to organize and retrieve contextual knowledge for your agents.',
-        })}
+        description={
+          <FormattedMessage
+            id="xpack.contextEngine.landing.description"
+            defaultMessage="Turn raw source data into distilled context agents can use to solve problems faster. {learnMoreLink}"
+            values={{
+              learnMoreLink: (
+                <EuiLink href={contextEngineLinks.overview} target="_blank">
+                  {i18n.translate('xpack.contextEngine.landing.learnMore', {
+                    defaultMessage: 'Learn more',
+                  })}
+                </EuiLink>
+              ),
+            }}
+          />
+        }
         restrictWidth
         bottomBorder={false}
         css={css`
@@ -87,7 +96,6 @@ const ContextLandingPageContent = ({
               <>
                 <ContentListToolbar data-test-subj="contextAiIndexList">
                   <ContentListToolbar.Filters>
-                    <AiIndexTypeFilter />
                     <AiIndexOwnerFilter />
                   </ContentListToolbar.Filters>
                 </ContentListToolbar>
@@ -120,7 +128,6 @@ export const ContextLandingPage = () => {
           pageSizeOptions: [AI_INDICES_PER_PAGE],
         },
         filters: {
-          aiIndexType: aiIndexTypeFilter,
           aiIndexOwner: aiIndexOwnerFilter,
         },
       }}

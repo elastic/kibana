@@ -200,7 +200,7 @@ describe('eventsToRounds (events-input-only)', () => {
         actor: { type: EventActorType.agent, id: 'agent-1' },
         execution_id: 'exec-1',
         trigger_event_id: 'um',
-        data: { error: { message: 'boom' } as never },
+        data: { time_to_last_token: 1000, error: { message: 'boom' } as never },
       },
     ];
 

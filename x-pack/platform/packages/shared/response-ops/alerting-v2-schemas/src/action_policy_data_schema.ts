@@ -6,10 +6,12 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { durationSchema } from './common';
+import { durationSchema, queryIntSchema } from './common';
 import { bulkByIdsSchema } from './bulk_operation_schema';
 import {
   ACTION_POLICY_MAX_DESTINATIONS,
+  FIND_DEFAULT_PER_PAGE,
+  FIND_MAX_RESULT_WINDOW,
   VERSION_MAX_LENGTH,
   ID_MAX_LENGTH,
   MAX_DESCRIPTION_LENGTH,
@@ -275,29 +277,34 @@ export const findActionPoliciesSortFieldSchema = z
 export type FindActionPoliciesSortField = z.infer<typeof findActionPoliciesSortFieldSchema>;
 
 /** Query parameters for the find action policies (list) API. */
-export const findActionPoliciesRequestSchema = z.object({
-  page: z.coerce.number().min(1).optional().describe('The page number to return. Defaults to 1.'),
-  per_page: z.coerce
-    .number()
-    .min(1)
-    .max(100)
-    .optional()
-    .describe('The number of action policies to return per page. Defaults to 20.'),
-  search: z
-    .string()
-    .min(1)
-    .max(256)
-    .optional()
-    .describe('A text string to search across action policy fields.'),
-  enabled: z
-    .enum(['true', 'false'])
-    .transform((v) => v === 'true')
-    .optional()
-    .describe('Filter by enabled status. Accepts the strings true or false.'),
-  sort_field: findActionPoliciesSortFieldSchema
-    .optional()
-    .describe('The field to sort action policies by.'),
-  sort_order: z.enum(['asc', 'desc']).optional().describe('The sort direction.'),
-});
+export const findActionPoliciesRequestSchema = z
+  .object({
+    page: queryIntSchema({ min: 1, max: FIND_MAX_RESULT_WINDOW })
+      .optional()
+      .describe('The page number to return. Defaults to 1.'),
+    per_page: queryIntSchema({ min: 1, max: 100 })
+      .optional()
+      .describe('The number of action policies to return per page. Defaults to 20.'),
+    search: z
+      .string()
+      .min(1)
+      .max(256)
+      .optional()
+      .describe('A text string to search across action policy fields.'),
+    enabled: z
+      .enum(['true', 'false'])
+      .transform((v) => v === 'true')
+      .optional()
+      .describe('Filter by enabled status. Accepts the strings true or false.'),
+    sort_field: findActionPoliciesSortFieldSchema
+      .optional()
+      .describe('The field to sort action policies by.'),
+    sort_order: z.enum(['asc', 'desc']).optional().describe('The sort direction.'),
+  })
+  .strict()
+  .refine(
+    ({ page = 1, per_page = FIND_DEFAULT_PER_PAGE }) => page * per_page <= FIND_MAX_RESULT_WINDOW,
+    { message: `page * per_page cannot exceed ${FIND_MAX_RESULT_WINDOW}.`, path: ['page'] }
+  );
 
 export type FindActionPoliciesRequest = z.infer<typeof findActionPoliciesRequestSchema>;
