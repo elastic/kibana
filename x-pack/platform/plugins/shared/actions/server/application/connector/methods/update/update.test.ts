@@ -911,7 +911,6 @@ describe('update()', () => {
       securityService,
     };
 
-    const storedHash = 'b'.repeat(64);
     const previousApiKey = encodeApiKey('old-id', 'old-secret');
     const nextApiKey = encodeApiKey('es-id', 'es-secret');
 
@@ -932,7 +931,7 @@ describe('update()', () => {
         attributes: {
           ...existingRawAction.attributes,
           actionTypeId: '.inboundWebhook',
-          config: { ingestTokenHash: storedHash },
+          config: {},
           apiKey: previousApiKey,
         },
       } as never);
@@ -955,62 +954,13 @@ describe('update()', () => {
       }));
     });
 
-    test('keeps the stored hash and does not return a new token', async () => {
-      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
-        ...existingRawAction,
-        attributes: {
-          ...existingRawAction.attributes,
-          actionTypeId: '.inboundWebhook',
-          config: { ingestTokenHash: storedHash },
-        },
-      } as never);
-
-      const result = await update({
-        context: inboundContext,
-        id: 'connector-id',
-        action: { name: 'renamed', config: {}, secrets: {} },
-      });
-
-      const saved = unsecuredSavedObjectsClient.create.mock.calls[0][1] as {
-        config: { ingestTokenHash: string };
-      };
-      expect(saved.config.ingestTokenHash).toBe(storedHash);
-      expect(result).not.toHaveProperty('secrets');
-    });
-
-    test('ignores a client-supplied ingestTokenHash', async () => {
-      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
-        ...existingRawAction,
-        attributes: {
-          ...existingRawAction.attributes,
-          actionTypeId: '.inboundWebhook',
-          config: { ingestTokenHash: storedHash },
-        },
-      } as never);
-
-      await update({
-        context: inboundContext,
-        id: 'connector-id',
-        action: {
-          name: 'renamed',
-          config: { ingestTokenHash: 'c'.repeat(64) },
-          secrets: {},
-        },
-      });
-
-      const saved = unsecuredSavedObjectsClient.create.mock.calls[0][1] as {
-        config: { ingestTokenHash: string };
-      };
-      expect(saved.config.ingestTokenHash).toBe(storedHash);
-    });
-
     test('remints the last-saver API key and invalidates the previous framework key', async () => {
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
         ...existingRawAction,
         attributes: {
           ...existingRawAction.attributes,
           actionTypeId: '.inboundWebhook',
-          config: { ingestTokenHash: storedHash },
+          config: {},
         },
       } as never);
 
@@ -1037,7 +987,7 @@ describe('update()', () => {
         attributes: {
           ...existingRawAction.attributes,
           actionTypeId: '.inboundWebhook',
-          config: { ingestTokenHash: storedHash },
+          config: {},
           apiKey: 'from-client',
         },
       } as never);
@@ -1060,7 +1010,7 @@ describe('update()', () => {
         attributes: {
           ...existingRawAction.attributes,
           actionTypeId: '.inboundWebhook',
-          config: { ingestTokenHash: storedHash },
+          config: {},
         },
       } as never);
 

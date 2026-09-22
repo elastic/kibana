@@ -103,4 +103,6 @@ export type {
   ClientRegistry,
   ClientTypeId,
   ClientTypeSpecs,
+  HostTarget,
+  PlatformServices,
 } from './src/lib/clients';

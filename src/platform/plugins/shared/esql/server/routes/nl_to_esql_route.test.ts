@@ -129,7 +129,7 @@ describe('registerNLtoESQLRoute', () => {
     request.body = { nlInstruction: 'show me all flights' };
     await handler(requestHandlerContext, request, response);
 
-    expect(generateEsql).toHaveBeenCalledWith(expect.objectContaining({ executeQuery: false }));
+    expect(generateEsql).toHaveBeenCalledWith(expect.objectContaining({ execute: 'none' }));
     expect(response.ok).toHaveBeenCalledWith({
       body: { content: 'FROM kibana_sample_data_flights' },
     });
