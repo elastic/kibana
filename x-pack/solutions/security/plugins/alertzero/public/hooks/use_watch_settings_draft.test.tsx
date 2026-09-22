@@ -25,6 +25,7 @@ const createWorker = (overrides: Partial<Worker> & Pick<Worker, 'id' | 'name'>):
   lastRun: null,
   state: 'paused',
   settingsRevision: 1,
+  workflowId: null,
   settings: {
     workerId: overrides.id,
     autonomy: 'manual',
