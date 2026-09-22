@@ -11,6 +11,7 @@ import type { ProposalPrivilegesChecker } from '../server/proposals/services/che
 import { getCheckDecidePrivilegesStepDefinition } from '../server/proposals/step_types/check_decide_privileges_step';
 import { getCloneProposalStepDefinition } from '../server/proposals/step_types/clone_proposal_step';
 import { getCreateProposalStepDefinition } from '../server/proposals/step_types/create_proposal_step';
+import { getGetLatestRevisionStepDefinition } from '../server/proposals/step_types/get_latest_revision_step';
 import { getGetProposalStepDefinition } from '../server/proposals/step_types/get_proposal_step';
 import { getUpdateProposalStepDefinition } from '../server/proposals/step_types/update_proposal_step';
 
@@ -43,6 +44,7 @@ export const registerStepDefinitionsForTest = ({
     getCheckDecidePrivilegesStepDefinition({ privileges }),
     getGetProposalStepDefinition({ getProposalsService, privileges }),
     getCloneProposalStepDefinition({ getProposalsService, privileges }),
+    getGetLatestRevisionStepDefinition({ getProposalsService, privileges }),
   ];
 
   const byId = new Map(definitions.map((definition) => [definition.id, definition]));

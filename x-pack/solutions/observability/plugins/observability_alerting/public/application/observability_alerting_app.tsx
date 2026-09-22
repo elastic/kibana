@@ -29,7 +29,7 @@ import {
   OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
 } from '../constants';
 import { createInvestigateEpisodeAction } from '../actions/investigate_episode_action';
-import { hasObservabilityAlertingPrivilege } from './has_observability_alerting_privilege';
+import { hasObservabilityAlertingCapabilities } from './has_observability_alerting_privilege';
 
 const createObservabilityEpisodeActions = () => [createInvestigateEpisodeAction()];
 
@@ -58,24 +58,20 @@ const useObservabilityHostApp = (
 
 const useObservabilityRulesTabs = (
   prepend: CoreStart['http']['basePath']['prepend'],
-  selected: 'v1' | 'v2'
+  selected: 'v1' | 'v2',
+  { showV1, showV2 }: { showV1: boolean; showV2: boolean }
 ): AppHeaderTab[] =>
   useMemo(() => {
-    const v1Href = prepend(
-      `${OBSERVABILITY_ALERTING_BASE_PATH}${OBSERVABILITY_ALERTING_RULES_V1_PATH}`
-    );
-    const v2Href = prepend(
-      `${OBSERVABILITY_ALERTING_BASE_PATH}${OBSERVABILITY_ALERTING_RULES_V2_PATH}`
-    );
+    const tabs: AppHeaderTab[] = [];
 
-    return [
-      {
+    if (showV2) {
+      tabs.push({
         id: 'v2Rules',
         label: i18n.translate('xpack.observabilityAlerting.rulesPage.v2RulesTabTitle', {
           defaultMessage: 'V2 rules',
         }),
         isSelected: selected === 'v2',
-        href: v2Href,
+        href: prepend(`${OBSERVABILITY_ALERTING_BASE_PATH}${OBSERVABILITY_ALERTING_RULES_V2_PATH}`),
         badge: {
           iconType: 'sparkles',
           tooltip: i18n.translate(
@@ -84,18 +80,23 @@ const useObservabilityRulesTabs = (
           ),
         },
         'data-test-subj': 'v2RulesTab',
-      },
-      {
+      });
+    }
+
+    if (showV1) {
+      tabs.push({
         id: 'v1Rules',
         label: i18n.translate('xpack.observabilityAlerting.rulesPage.v1RulesTabTitle', {
           defaultMessage: 'V1 rules',
         }),
         isSelected: selected === 'v1',
-        href: v1Href,
+        href: prepend(`${OBSERVABILITY_ALERTING_BASE_PATH}${OBSERVABILITY_ALERTING_RULES_V1_PATH}`),
         'data-test-subj': 'v1RulesTab',
-      },
-    ];
-  }, [prepend, selected]);
+      });
+    }
+
+    return tabs.length > 1 ? tabs : [];
+  }, [prepend, selected, showV1, showV2]);
 
 const ClassicRulesV1Route = ({
   coreStart,
@@ -146,12 +147,22 @@ export const ObservabilityAlertingApp = ({
 
   const hostApp = useObservabilityHostApp(createHost);
   const prepend = coreStart.http.basePath.prepend;
-  const rulesV1Tabs = useObservabilityRulesTabs(prepend, 'v1');
-  const rulesV2Tabs = useObservabilityRulesTabs(prepend, 'v2');
+  const { v1: hasV1Rules, v2: hasV2Rules } = hasObservabilityAlertingCapabilities(
+    coreStart.application.capabilities,
+    'rules'
+  );
+  const rulesTabVisibility = { showV1: hasV1Rules, showV2: hasV2Rules };
+  const rulesV1Tabs = useObservabilityRulesTabs(prepend, 'v1', rulesTabVisibility);
+  const rulesV2Tabs = useObservabilityRulesTabs(prepend, 'v2', rulesTabVisibility);
 
   const privilegeCheck: PrivilegeCheck = useCallback(
-    (features, capability) =>
-      hasObservabilityAlertingPrivilege(coreStart.application.capabilities, features, capability),
+    (features, _capability) => {
+      const { v1, v2 } = hasObservabilityAlertingCapabilities(
+        coreStart.application.capabilities,
+        features[0]
+      );
+      return v1 || v2;
+    },
     [coreStart]
   );
 
@@ -162,6 +173,7 @@ export const ObservabilityAlertingApp = ({
       </Route>
       <Route path={OBSERVABILITY_ALERTING_INBOX_PATH}>
         <EuiPageSection paddingSize="m">
+          {/* Serves both v1 and v2 users, so privilegeCheck grants access via either path */}
           <EpisodesPage
             coreStart={coreStart}
             setBreadcrumbs={setBreadcrumbs}
@@ -188,13 +200,13 @@ export const ObservabilityAlertingApp = ({
             coreStart={coreStart}
             setBreadcrumbs={setBreadcrumbs}
             hostApp={hostApp}
-            privilegeCheck={privilegeCheck}
             tabs={rulesV2Tabs}
           />
         </EuiPageSection>
       </Route>
       <Route path={OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH}>
         <EuiPageSection paddingSize="m">
+          {/* Serves both v1 and v2 users, so privilegeCheck grants access via either path */}
           <RuleLibraryPage
             coreStart={coreStart}
             setBreadcrumbs={setBreadcrumbs}
@@ -209,7 +221,6 @@ export const ObservabilityAlertingApp = ({
             coreStart={coreStart}
             setBreadcrumbs={setBreadcrumbs}
             hostApp={hostApp}
-            privilegeCheck={privilegeCheck}
           />
         </EuiPageSection>
       </Route>
@@ -219,7 +230,6 @@ export const ObservabilityAlertingApp = ({
             coreStart={coreStart}
             setBreadcrumbs={setBreadcrumbs}
             hostApp={hostApp}
-            privilegeCheck={privilegeCheck}
           />
         </EuiPageSection>
       </Route>

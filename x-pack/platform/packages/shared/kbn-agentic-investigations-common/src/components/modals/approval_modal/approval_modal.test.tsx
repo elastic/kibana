@@ -58,9 +58,9 @@ describe('ApprovalModal', () => {
     ).toBeInTheDocument();
   });
 
-  it('renders the blast radius section label', () => {
+  it('renders the action impact section label', () => {
     renderModal();
-    expect(screen.getByText('Blast radius')).toBeInTheDocument();
+    expect(screen.getByText('Impact')).toBeInTheDocument();
   });
 
   it('always renders the actor row', () => {
