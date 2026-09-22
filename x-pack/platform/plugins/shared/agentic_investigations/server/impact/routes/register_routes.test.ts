@@ -9,7 +9,11 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { IMPACT_INTERNAL_URL } from '../../../common/impact/constants';
 import { IMPACT_API_PRIVILEGE_MANAGE, IMPACT_API_PRIVILEGE_READ } from '../constants';
-import { ImpactInvalidRequestError, ImpactNotFoundError } from '../services/errors';
+import {
+  ImpactConflictError,
+  ImpactInvalidRequestError,
+  ImpactNotFoundError,
+} from '../services/errors';
 import type { ImpactService } from '../services/impact_service';
 import type { ImpactRouteDependencies } from '../types';
 import { registerImpactRoutes } from './register_routes';
@@ -121,5 +125,21 @@ describe('investigation impact routes', () => {
     );
 
     expect(response.badRequest).toHaveBeenCalled();
+  });
+
+  it('maps an attach that lost every version check to 409', async () => {
+    const attach = jest.fn().mockRejectedValue(new ImpactConflictError('conv-1'));
+    const { posts } = registerAndCollect({ attach });
+    const response = httpServerMock.createResponseFactory();
+
+    await posts[0].handler(
+      {},
+      httpServerMock.createKibanaRequest({
+        body: { conversationId: 'conv-1', entities: [{ id: 'user-1' }] },
+      }),
+      response
+    );
+
+    expect(response.conflict).toHaveBeenCalled();
   });
 });

@@ -69,10 +69,10 @@ All checks **fail closed**, including when the `security` plugin is absent entir
 
 ## Impact
 
-An **Impact** record is the set of entities (users, hosts, services) an investigation is about. It lives in `.kibana-investigation-impact`, one document per conversation, and is the source for both the AlertZero landing-page pills and the investigation flyout. Nightshift writes the same document: `id` is the filter key, and `name`, `type`, `featureId`, and `streamName` carry the fields on its existing `InvestigationImpactEntity`.
+An **Impact** record is the set of entities (users, hosts, services) an investigation is about. It lives in `.kibana-investigation-impact`, one document per space and conversation, and is the source for both the AlertZero landing-page pills and the investigation flyout. Nightshift writes the same document: `id` is the filter key, and `name`, `type`, `featureId`, and `streamName` carry the fields on its existing `InvestigationImpactEntity`.
 
 - AlertZero may attach `{ id }` only. The pill label stays the id until Entity Store hydration. Nightshift attaches `{ id, name, type?, featureId?, streamName? }`.
-- Writes are **upsert/merge**: attaching more entities unions them by `id` onto the existing document rather than appending a new one. A later attach fills in fields the first write omitted. That is load-bearing for hydrate-by-conversationId plus filtering on `entities.id`.
+- Writes are **upsert/merge**: attaching more entities unions them by `id` onto the existing document rather than appending a new one. A later attach fills in fields the first write omitted. That is load-bearing for hydrate-by-conversationId plus filtering on `entities.id`. The document `_id` is a hash of `(spaceId, conversationId)`. Attach reads that id and retries the union when a concurrent create or update wins the version check, so both writers' entities land on the one record.
 - Evidence is not on this document. Nightshift's current evidence shape cannot represent non-local data, and that format is still open.
 - HTTP: `POST /internal/investigations/impact` (`manage_impact`) and `GET ...?conversationId=` (`read_impact`). Bulk hydrate is in-process via `getImpactClient(request).listByConversationIds()`, which checks `read_impact` and uses the request's space. The raw service stays internal to the routes.
 
