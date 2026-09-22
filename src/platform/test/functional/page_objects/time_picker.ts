@@ -714,9 +714,12 @@ export class TimePickerPageObject extends FtrService {
     this.log.debug('resumeAutoRefresh');
     if (await this.isNewDateRangePicker()) {
       // The auto-refresh button is only rendered when isEnabled=true.
-      const buttonExists = await this.testSubjects.waitForExists('dateRangePickerAutoRefreshButton', {
-        timeout: 1000,
-      });
+      const buttonExists = await this.testSubjects.waitForExists(
+        'dateRangePickerAutoRefreshButton',
+        {
+          timeout: 1000,
+        }
+      );
       if (buttonExists) {
         // Button is visible — only click it if it's in the "resume" (paused) state;
         // if it's already showing "pause", auto-refresh is running and we do nothing.
