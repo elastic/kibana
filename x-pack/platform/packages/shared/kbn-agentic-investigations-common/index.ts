@@ -76,6 +76,12 @@ export {
   type ApprovalAction,
   type AlwaysAllowOption,
 } from './src/components/modals/approval_modal/approval_content';
+export {
+  getProposalTone,
+  isProposalExpired,
+} from './src/components/modals/approval_modal/proposal_helpers';
+export { toActionImpactItems } from './src/components/modals/approval_modal/to_action_impact_items';
+export type { ApprovalProposal } from './src/components/modals/approval_modal/types';
 export { type ActionImpactItemProps } from './src/components/modals/approval_modal/action_impact_item';
 export {
   ActionImpactSection,
