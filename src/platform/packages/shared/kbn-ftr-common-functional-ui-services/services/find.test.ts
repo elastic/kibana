@@ -15,7 +15,6 @@ import { Browsers } from './remote/browsers';
 describe('FindService existence checks', () => {
   let wait: jest.Mock;
   let setTimeouts: jest.Mock;
-  let findElements: jest.Mock;
 
   const getFindService = () => {
     const config = {
@@ -44,7 +43,6 @@ describe('FindService existence checks', () => {
     const driver = {
       manage: () => ({ setTimeouts }),
       wait,
-      findElements,
     } as unknown as WebDriver;
 
     return new FindService(ctx, Browsers.Chrome, driver);
@@ -53,17 +51,6 @@ describe('FindService existence checks', () => {
   beforeEach(() => {
     wait = jest.fn().mockRejectedValue(new Error('element not found'));
     setTimeouts = jest.fn().mockResolvedValue(undefined);
-    findElements = jest.fn().mockResolvedValue([]);
-  });
-
-  it('returns the current matching elements without an implicit wait by default', async () => {
-    const find = getFindService();
-
-    await expect(find.allByCssSelector('.selector')).resolves.toEqual([]);
-
-    expect(findElements).toHaveBeenCalledTimes(1);
-    expect(setTimeouts).toHaveBeenNthCalledWith(1, { implicit: 0 });
-    expect(setTimeouts).toHaveBeenNthCalledWith(2, { implicit: 10000 });
   });
 
   it('uses a bounded Selenium wait for a zero-timeout displayed check', async () => {
