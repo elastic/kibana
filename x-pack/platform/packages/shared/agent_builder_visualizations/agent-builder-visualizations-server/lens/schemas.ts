@@ -70,6 +70,38 @@ const isSchemaMetadata = (key: string, value: unknown): boolean =>
 const dropSchemaMetadata = (node: JsonSchemaNode): JsonSchemaNode =>
   Object.fromEntries(Object.entries(node).filter(([key, value]) => !isSchemaMetadata(key, value)));
 
+const isBareLiteral = (branch: unknown): branch is { type: string; const: unknown } =>
+  isSchemaNode(branch) &&
+  typeof branch.type === 'string' &&
+  'const' in branch &&
+  Object.keys(branch).every((key) => key === 'type' || key === 'const');
+
+/**
+ * Rewrites `anyOf`/`oneOf` unions of same-typed bare literals, which zod emits
+ * for `z.union([z.literal(...)])`, as a single `enum`.
+ */
+const collapseLiteralUnions = (node: JsonSchemaNode): JsonSchemaNode => {
+  const unionKey = (['anyOf', 'oneOf'] as const).find((key) => Array.isArray(node[key]));
+  if (!unionKey) {
+    return node;
+  }
+  const branches = node[unionKey] as unknown[];
+  const [first] = branches;
+  if (
+    branches.length < 2 ||
+    !isBareLiteral(first) ||
+    !branches.every((branch) => isBareLiteral(branch) && branch.type === first.type)
+  ) {
+    return node;
+  }
+  const { [unionKey]: dropped, ...rest } = node;
+  return {
+    ...rest,
+    type: first.type,
+    enum: branches.map((branch) => (branch as { const: unknown }).const),
+  };
+};
+
 const dropSystemOwnedProperties = (node: JsonSchemaNode): JsonSchemaNode => {
   const { properties, required } = node;
   if (!isSchemaNode(properties)) {
@@ -132,7 +164,7 @@ const dropUnreachableDefs = (schema: JsonSchemaNode): JsonSchemaNode => {
 
 const toPromptSchema = (schema: z.ZodType): object => {
   const jsonSchema = mapSchemaNodes(z.toJSONSchema(schema), (node) =>
-    dropSystemOwnedProperties(dropSchemaMetadata(trimDescription(node)))
+    dropSystemOwnedProperties(collapseLiteralUnions(dropSchemaMetadata(trimDescription(node))))
   ) as JsonSchemaNode;
   return dropUnreachableDefs(jsonSchema);
 };
