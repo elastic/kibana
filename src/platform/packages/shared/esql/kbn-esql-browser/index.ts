@@ -8,3 +8,4 @@
  */
 
 export { ESQLValuesPreview } from './src/esql_values_preview';
+export { ApproximationBadge } from './src/approximation_badge';
