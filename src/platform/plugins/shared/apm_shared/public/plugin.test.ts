@@ -30,15 +30,16 @@ describe('ApmSharedPlugin', () => {
     core.featureFlags.getBooleanValue$.mockReturnValue(isCpsEnabled$);
 
     const cps = cpsPluginMock.createStartContract();
-    const { callApmApi } = new ApmSharedPlugin().start(core, { cps });
+    const plugin = new ApmSharedPlugin();
+    const { callApmApi } = plugin.start(core, { cps });
 
-    // The client is only typed for known endpoints; the test asserts on how it is built, not on the call itself.
+    // The client is only typed for known endpoints; the tests assert on how it is built, not on the call itself.
     const callAnyEndpoint = callApmApi as unknown as (
       endpoint: string,
       options: Record<string, unknown>
     ) => Promise<unknown>;
 
-    return { core, cps, callAnyEndpoint };
+    return { core, cps, plugin, callAnyEndpoint };
   };
 
   beforeEach(() => {
@@ -79,5 +80,37 @@ describe('ApmSharedPlugin', () => {
     await callAnyEndpoint('GET /internal/apm/traces/{traceId}', {});
 
     expect(createCallApmApiV2Mock).toHaveBeenCalledWith(core, { cpsManager: cps.cpsManager });
+  });
+
+  it('reuses the client while the flag is unchanged', async () => {
+    const { callAnyEndpoint } = startPlugin(new BehaviorSubject(true));
+
+    await callAnyEndpoint('GET /internal/apm/traces/{traceId}', {});
+    await callAnyEndpoint('GET /internal/apm/traces/{traceId}', {});
+
+    expect(createCallApmApiV2Mock).toHaveBeenCalledTimes(1);
+  });
+
+  it('rebuilds the client when the flag changes after it was built', async () => {
+    const isCpsEnabled$ = new BehaviorSubject(true);
+    const { core, callAnyEndpoint } = startPlugin(isCpsEnabled$);
+
+    await callAnyEndpoint('GET /internal/apm/traces/{traceId}', {});
+    isCpsEnabled$.next(false);
+    await callAnyEndpoint('GET /internal/apm/traces/{traceId}', {});
+
+    expect(createCallApmApiV2Mock).toHaveBeenCalledTimes(2);
+    expect(createCallApmApiV2Mock).toHaveBeenLastCalledWith(core, { cpsManager: undefined });
+  });
+
+  it('stops observing the flag on stop', async () => {
+    const isCpsEnabled$ = new BehaviorSubject(true);
+    const { plugin } = startPlugin(isCpsEnabled$);
+
+    expect(isCpsEnabled$.observed).toBe(true);
+
+    plugin.stop();
+
+    expect(isCpsEnabled$.observed).toBe(false);
   });
 });
