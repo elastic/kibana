@@ -59,7 +59,8 @@ test.describe(
         await controls.clearSelections(ALERT_STATUS_CONTROL_ID);
         await alertsTablePage.waitForTableToLoad();
         await controls.optionsList.openPopover(ALERT_STATUS_CONTROL_ID);
-        await controls.optionsList.selectOption('recovered');
+        // The alert status control has a fixed, static option set and renders no search input.
+        await controls.optionsList.selectOption('recovered', { search: false });
         await controls.optionsList.ensurePopoverIsClosed();
         await alertsTablePage.waitForTableToLoad();
         await alertsTablePage.setPageSize(10);

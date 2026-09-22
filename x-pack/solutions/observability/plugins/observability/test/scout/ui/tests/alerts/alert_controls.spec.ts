@@ -44,7 +44,8 @@ test.describe(
 
       await test.step('shows only recovered alerts when selected via the filter', async () => {
         await controls.optionsList.openPopover(ALERT_STATUS_CONTROL_ID);
-        await controls.optionsList.selectOption('recovered');
+        // The alert status control has a fixed, static option set and renders no search input.
+        await controls.optionsList.selectOption('recovered', { search: false });
         await controls.optionsList.ensurePopoverIsClosed();
         await alertsTablePage.waitForTableToLoad();
         await expect.poll(() => alertsTablePage.getRowCount()).toBe(ALERT_COUNTS.RECOVERED);
