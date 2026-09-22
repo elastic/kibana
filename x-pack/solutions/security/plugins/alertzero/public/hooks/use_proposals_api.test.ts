@@ -9,6 +9,7 @@ import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { queryKeys as platformQueryKeys } from '@kbn/agentic-investigations-plugin/public';
 import {
   PROPOSALS_POLL_INTERVAL_MS,
   useClosedProposals,
@@ -27,7 +28,7 @@ const createWrapper = () => {
   });
   const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) =>
     React.createElement(QueryClientProvider, { client: queryClient }, children);
-  return Wrapper;
+  return { Wrapper, queryClient };
 };
 
 const page = (rows: number, total: number) => ({
@@ -50,7 +51,7 @@ describe('useProposalsByCategory', () => {
 
     const { result } = renderHook(
       () => useProposalsByCategory('respond', { firstPageSize: 10, step: 10, enabled: true }),
-      { wrapper: createWrapper() }
+      { wrapper: createWrapper().Wrapper }
     );
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -62,7 +63,7 @@ describe('useProposalsByCategory', () => {
 
     const { result } = renderHook(
       () => useProposalsByCategory('respond', { firstPageSize: 10, step: 10, enabled: true }),
-      { wrapper: createWrapper() }
+      { wrapper: createWrapper().Wrapper }
     );
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
@@ -79,7 +80,7 @@ describe('useProposalsByCategory', () => {
 
     const { result } = renderHook(
       () => useProposalsByCategory('respond', { firstPageSize: 10, step: 10, enabled: true }),
-      { wrapper: createWrapper() }
+      { wrapper: createWrapper().Wrapper }
     );
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -89,7 +90,7 @@ describe('useProposalsByCategory', () => {
   it('issues no request while the section is collapsed', () => {
     renderHook(
       () => useProposalsByCategory('respond', { firstPageSize: 10, step: 10, enabled: false }),
-      { wrapper: createWrapper() }
+      { wrapper: createWrapper().Wrapper }
     );
 
     expect(http.get).not.toHaveBeenCalled();
@@ -101,7 +102,7 @@ describe('useProposalsByCategory', () => {
 
     const { result } = renderHook(
       () => useProposalsByCategory('respond', { firstPageSize: 10, step: 10, enabled: true }),
-      { wrapper: createWrapper() }
+      { wrapper: createWrapper().Wrapper }
     );
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
@@ -118,7 +119,7 @@ describe('useClosedProposals', () => {
 
     const { result } = renderHook(
       () => useClosedProposals({ firstPageSize: 25, step: 10, enabled: true }),
-      { wrapper: createWrapper() }
+      { wrapper: createWrapper().Wrapper }
     );
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -126,11 +127,77 @@ describe('useClosedProposals', () => {
   });
 });
 
+describe('refreshing after a decision', () => {
+  // Approving or dismissing invalidates the platform's proposals root. Every key
+  // here hangs off that root, which is the only reason a decision refreshes the
+  // queue at all — these pin that, and the open/collapsed asymmetry it buys.
+  const decide = (queryClient: QueryClient) =>
+    queryClient.invalidateQueries({ queryKey: platformQueryKeys.proposals.all });
+
+  it('refetches the queue the proposal was popped from', async () => {
+    http.get.mockResolvedValue(page(10, 30));
+    const { Wrapper, queryClient } = createWrapper();
+
+    const { result } = renderHook(
+      () => useProposalsByCategory('respond', { firstPageSize: 10, step: 10, enabled: true }),
+      { wrapper: Wrapper }
+    );
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    void decide(queryClient);
+
+    await waitFor(() => expect(http.get).toHaveBeenCalledTimes(2));
+  });
+
+  it('refetches the closed rows while that section is open', async () => {
+    http.get.mockResolvedValue(page(25, 60));
+    const { Wrapper, queryClient } = createWrapper();
+
+    const { result } = renderHook(
+      () => useClosedProposals({ firstPageSize: 25, step: 10, enabled: true }),
+      { wrapper: Wrapper }
+    );
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    void decide(queryClient);
+
+    await waitFor(() => expect(http.get).toHaveBeenCalledTimes(2));
+  });
+
+  it('leaves a collapsed closed section alone, and refreshes only its count', async () => {
+    http.get.mockResolvedValue(page(0, 42));
+    const { Wrapper, queryClient } = createWrapper();
+
+    const { result } = renderHook(
+      () => ({
+        count: useClosedProposalsCount(),
+        // Collapsed, so its rows query is disabled and therefore inactive.
+        rows: useClosedProposals({ firstPageSize: 25, step: 10, enabled: false }),
+      }),
+      { wrapper: Wrapper }
+    );
+    await waitFor(() => expect(result.current.count.isSuccess).toBe(true));
+    expect(http.get).toHaveBeenCalledTimes(1);
+
+    void decide(queryClient);
+
+    // Exactly one more request: the count. Invalidation refetches active queries
+    // only, so the collapsed rows are marked stale and fetched when it opens.
+    await waitFor(() => expect(http.get).toHaveBeenCalledTimes(2));
+    expect(queryOf(1)).toEqual({ from: 0, size: 0 });
+    // Asserted over every call rather than the count, which a late rows request
+    // would satisfy before arriving.
+    expect(http.get.mock.calls.map(([, options]) => options.query.size)).toEqual([0, 0]);
+  });
+});
+
 describe('useClosedProposalsCount', () => {
   it('reads the total without any rows', async () => {
     http.get.mockResolvedValue(page(0, 42));
 
-    const { result } = renderHook(() => useClosedProposalsCount(), { wrapper: createWrapper() });
+    const { result } = renderHook(() => useClosedProposalsCount(), {
+      wrapper: createWrapper().Wrapper,
+    });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(queryOf(0)).toEqual({ from: 0, size: 0 });
