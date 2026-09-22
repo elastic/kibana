@@ -16,6 +16,8 @@ import {
 } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
 import { ApprovalModalHeader } from './approval_modal_header';
+import { ActionImpactSection } from './action_impact_section';
+import type { ActionImpactContent } from './action_impact_section';
 import { ApprovalActorRow } from './approval_actor_row';
 import { AlwaysAllowCheckbox } from './always_allow_checkbox';
 import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
@@ -41,10 +43,12 @@ export interface ApprovalAction {
 export interface ApprovalContentProps {
   title: string;
   tone: 'primary' | 'danger';
-  /** Used for the header avatar and, as a fallback, the primary-action button icon. */
+  /** Used for the header avatar, the impact-row default icon colour, and (fallback) the primary-action button icon. */
   iconType: IconType;
-  /** The proposal's own markdown, rendered as the body. */
+  /** The proposal's own markdown, rendered as the body above the impact section. */
   comment?: string;
+  /** What the action would touch: its category, impact, reversibility and decision deadline. */
+  actionImpact?: ActionImpactContent;
   /**
    * Show the avatar + warning-label + title header.
    * Set to `false` when a host (e.g. Agent Builder attachment framework) already draws its own header.
@@ -54,7 +58,7 @@ export interface ApprovalContentProps {
   titleId?: string;
   warningLabel?: string;
   /**
-   * Show the actor row (who is acting) below the comment.
+   * Show the actor row (who is acting) below the impact section.
    * @default true
    */
   showActorRow?: boolean;
@@ -84,6 +88,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     tone,
     iconType,
     comment,
+    actionImpact,
     showHeader = true,
     titleId,
     warningLabel,
@@ -96,6 +101,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
   }) => {
     const { euiTheme } = useEuiTheme();
 
+    const iconColor = tone === 'danger' ? euiTheme.colors.danger : euiTheme.colors.primary;
     const defaultButtonColor: EuiButtonColor = tone === 'danger' ? 'danger' : 'primary';
 
     const hasFooter =
@@ -132,6 +138,9 @@ export const ApprovalContent = memo<ApprovalContentProps>(
                 {comment}
               </EuiMarkdownFormat>
             </div>
+          )}
+          {actionImpact && (
+            <ActionImpactSection content={actionImpact} defaultItemIconColor={iconColor} />
           )}
           {showActorRow && <ApprovalActorRow />}
         </div>

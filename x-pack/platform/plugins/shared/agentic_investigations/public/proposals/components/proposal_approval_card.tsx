@@ -15,6 +15,7 @@ import {
   ApprovalContent,
   getProposalTone,
   isProposalExpired,
+  toActionImpactItems,
 } from '@kbn/agentic-investigations-common';
 import type { ApprovalAction } from '@kbn/agentic-investigations-common';
 import { isAwaitingDecision } from '../../../common';
@@ -264,6 +265,7 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
           tone={getProposalTone(liveProposal)}
           iconType="lock"
           comment={liveProposal.comment}
+          actionImpact={{ variant: 'list', items: toActionImpactItems(liveProposal) }}
           primaryAction={primaryAction}
           secondaryActions={secondaryActions}
         >

@@ -42,10 +42,12 @@ jest.mock('@kbn/agentic-investigations-common', () => ({
     secondaryActions,
     tone,
     comment,
+    actionImpact,
   }: {
     children?: React.ReactNode;
     tone?: string;
     comment?: string;
+    actionImpact?: { variant: string; items: Array<{ id: string; text?: string }> };
     primaryAction?: {
       label: string;
       onClick: () => void;
@@ -79,9 +81,14 @@ jest.mock('@kbn/agentic-investigations-common', () => ({
           {a.label}
         </button>
       ))}
-      {/* Surfaced so the comment is observable: the real component renders it as a prop
-          rather than as children. */}
+      {/* Surfaced so the comment and the impact rows are observable: the real component
+          renders them as props rather than as children. */}
       <div data-test-subj="approval-comment">{comment}</div>
+      {actionImpact?.items?.map((item) => (
+        <div key={item.id} data-test-subj={`action-impact-${item.id}`}>
+          {item.text}
+        </div>
+      ))}
       {children}
     </div>
   ),
@@ -205,6 +212,7 @@ describe('ProposalApprovalCard', () => {
       const { getByTestId } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
 
       expect(getByTestId('approval-content')).toHaveAttribute('data-tone', 'danger');
+      expect(getByTestId('action-impact-impact')).toHaveTextContent('high impact');
     });
 
     it("falls back to the action's impact when the proposal sets none", () => {
@@ -220,6 +228,7 @@ describe('ProposalApprovalCard', () => {
       const { getByTestId } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
 
       expect(getByTestId('approval-content')).toHaveAttribute('data-tone', 'danger');
+      expect(getByTestId('action-impact-impact')).toHaveTextContent('critical impact');
     });
   });
 

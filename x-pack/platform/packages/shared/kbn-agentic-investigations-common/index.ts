@@ -57,7 +57,7 @@ export {
   CONVERSATION_CATEGORY_COLORS,
 } from './src/types/queue';
 
-export { BlastRadius } from './src/components/filters/blast_radius/blast_radius';
+export { Impact } from './src/components/filters/impact/impact';
 
 export { BaseActionModal } from './src/components/modals/base_action_modal';
 export { AssignActionModal } from './src/components/modals/assign_action_modal';
@@ -80,4 +80,11 @@ export {
   getProposalTone,
   isProposalExpired,
 } from './src/components/modals/approval_modal/proposal_helpers';
+export { toActionImpactItems } from './src/components/modals/approval_modal/to_action_impact_items';
 export type { ApprovalProposal } from './src/components/modals/approval_modal/types';
+export { type ActionImpactItemProps } from './src/components/modals/approval_modal/action_impact_item';
+export {
+  ActionImpactSection,
+  type ActionImpactContent,
+  type ActionImpactSectionProps,
+} from './src/components/modals/approval_modal/action_impact_section';

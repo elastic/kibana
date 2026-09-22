@@ -10,6 +10,7 @@ import { css } from '@emotion/react';
 import { EuiModal, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
 import { ApprovalContent } from './approval_content';
 import { getProposalTone, isProposalExpired } from './proposal_helpers';
+import { toActionImpactItems } from './to_action_impact_items';
 import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
 import type { ApprovalProposal } from './types';
 
@@ -59,6 +60,7 @@ export const ApprovalModal = memo<ApprovalModalProps>(
           tone={getProposalTone(proposal)}
           iconType="lock"
           comment={proposal.comment}
+          actionImpact={{ variant: 'list', items: toActionImpactItems(proposal) }}
           titleId={titleId}
           warningLabel={APPROVAL_MODAL_TRANSLATIONS.warningLabel}
           alwaysAllow={alwaysAllow}

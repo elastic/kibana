@@ -25,10 +25,16 @@ export interface ApprovalProposal {
   status: string;
   /** The deadline evaluated on read, which `status` does not cover until the workflow settles it. */
   expired: boolean;
+  /** Grouping axis the action declares. An arbitrary keyword — no package owns the vocabulary. */
+  category?: string;
+  /** Decision deadline, rendered as a row in the impact section. */
+  expiresAt?: string;
   actionWorkflowId?: string;
   /** Resolved from the action workflow's own metadata on read. */
   action?: {
     name?: string;
     impact?: ApprovalProposalImpact;
+    category?: string;
+    reversible?: boolean;
   };
 }

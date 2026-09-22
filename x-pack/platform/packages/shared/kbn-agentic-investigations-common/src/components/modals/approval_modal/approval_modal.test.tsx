@@ -65,6 +65,21 @@ describe('ApprovalModal', () => {
     ).toBeInTheDocument();
   });
 
+  it('builds the impact rows from the proposal, so the modal matches the Agent Builder card', () => {
+    renderModal({
+      proposal: {
+        ...mockProposal,
+        category: 'configure',
+        action: { name: 'Apply monitored exception', reversible: true },
+      },
+    });
+
+    expect(screen.getByText('Impact')).toBeInTheDocument();
+    expect(screen.getByText('configure')).toBeInTheDocument();
+    expect(screen.getByText('low impact')).toBeInTheDocument();
+    expect(screen.getByText('Reversible')).toBeInTheDocument();
+  });
+
   it('always renders the actor row', () => {
     renderModal();
     expect(screen.getByText('You')).toBeInTheDocument();
