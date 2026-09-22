@@ -230,7 +230,7 @@ export class GraphPageObject extends FtrService {
       } else {
         await this.testSubjects.click('breadcrumb graphHomeBreadcrumb first');
       }
-      if (await this.testSubjects.exists('confirmModalConfirmButton')) {
+      if (await this.testSubjects.waitForExists('confirmModalConfirmButton', { timeout: 2000 })) {
         await this.common.clickConfirmOnModal();
       }
       await this.testSubjects.existOrFail('contentListToolbar-searchBox', { timeout: 5000 });
