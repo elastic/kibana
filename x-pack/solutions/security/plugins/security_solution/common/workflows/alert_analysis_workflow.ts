@@ -53,8 +53,9 @@ export const AlertAnalysisWorkflowSettings = z.object({
 
 export type AlertAnalysisWorkflowSettings = z.infer<typeof AlertAnalysisWorkflowSettings>;
 
-// Per-alert verdict emitted in the workflow.output block; matches the all_verdicts accumulator
-// shape built by the classify_alert_batches loop (and the ai.agent structured output schema).
+// Per-alert verdict emitted in the workflow.output block; matches the output_verdicts
+// accumulator shape built by the classify_alert_batches loop (Worker path) and the
+// standalone all_verdicts pairing key (alert_id is the real foreach.item._id).
 export const AlertAnalysisVerdict = z.object({
   alert_id: z.string(),
   classification: z.enum(['true_positive', 'false_positive', 'inconclusive']),
@@ -62,8 +63,24 @@ export const AlertAnalysisVerdict = z.object({
   rationale: z.string(),
   // Required by the ai.agent schema; at most 3 short phrases naming the strongest signals.
   contributing_factors: z.array(z.string()),
+  // Entity fields carried for Worker grouping / security.impact; defaulted to "unknown"
+  // in YAML when the alert document has no host/user name.
+  host_name: z.string(),
+  user_name: z.string(),
 });
 export type AlertAnalysisVerdict = z.infer<typeof AlertAnalysisVerdict>;
+
+export const AlertAnalysisImpactedEntity = z.object({
+  entity_type: z.enum(['host', 'user']),
+  name: z.string(),
+  alert_count: z.number().int().min(0),
+  verdicts: z.object({
+    true_positive: z.number().int().min(0),
+    false_positive: z.number().int().min(0),
+    inconclusive: z.number().int().min(0),
+  }),
+});
+export type AlertAnalysisImpactedEntity = z.infer<typeof AlertAnalysisImpactedEntity>;
 
 // Structured output block emitted by the workflow when invoked by a caller (Worker path).
 // Also available on the standalone path — accumulators are always initialised so the output
@@ -75,6 +92,13 @@ export const AlertAnalysisWorkflowOutput = z
     true_positive_count: z.number().int().min(0),
     inconclusive_count: z.number().int().min(0),
     auto_closed_ids: z.array(z.string()),
+    grouped_counts_summary: z.string(),
+    generated_summary: z.string(),
+    connector_id: z.string(),
+    agent_id: z.string(),
+    impacted_entities: z.array(AlertAnalysisImpactedEntity),
+    // YAML emits the boolean as a string ("true" / "false") from Liquid.
+    impacted_entities_truncated: z.string(),
   })
   .superRefine(
     ({ verdicts, false_positive_count, true_positive_count, inconclusive_count }, ctx) => {

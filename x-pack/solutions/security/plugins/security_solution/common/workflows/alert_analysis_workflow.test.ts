@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { AlertAnalysisWorkflowSettings, isThresholdRangeValid } from './alert_analysis_workflow';
+import {
+  AlertAnalysisWorkflowOutput,
+  AlertAnalysisWorkflowSettings,
+  isThresholdRangeValid,
+} from './alert_analysis_workflow';
 
 const baseSettings = {
   autoCloseEnabled: true,
@@ -64,6 +68,79 @@ describe('isThresholdRangeValid', () => {
         autoCloseConfidenceScoreMinThreshold: 0.9,
         autoCloseConfidenceScoreMaxThreshold: 0.9,
       })
+    ).toBe(false);
+  });
+});
+
+describe('AlertAnalysisWorkflowOutput', () => {
+  const sampleOutput = {
+    verdicts: [
+      {
+        alert_id: 'a1',
+        classification: 'true_positive' as const,
+        confidence_score: 0.9,
+        rationale: 'c2 url',
+        contributing_factors: ['external url'],
+        host_name: 'ws-1',
+        user_name: 'alice',
+      },
+      {
+        alert_id: 'a2',
+        classification: 'false_positive' as const,
+        confidence_score: 0.8,
+        rationale: 'signed installer',
+        contributing_factors: ['vendor signature'],
+        host_name: 'ws-1',
+        user_name: 'bob',
+      },
+    ],
+    false_positive_count: 1,
+    true_positive_count: 1,
+    inconclusive_count: 0,
+    auto_closed_ids: [] as string[],
+    grouped_counts_summary: ' 2 alert(s) for host ws-1 classified as true positive.',
+    generated_summary: 'Hosts look compromised.',
+    connector_id: 'connector-1',
+    agent_id: 'elastic-ai-agent',
+    impacted_entities: [
+      {
+        entity_type: 'host' as const,
+        name: 'ws-1',
+        alert_count: 2,
+        verdicts: { true_positive: 1, false_positive: 1, inconclusive: 0 },
+      },
+    ],
+    impacted_entities_truncated: 'false',
+  };
+
+  it('accepts a full workflow.output payload including attribution and impact fields', () => {
+    const parsed = AlertAnalysisWorkflowOutput.safeParse(sampleOutput);
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect(parsed.data.verdicts[0].host_name).toBe('ws-1');
+      expect(parsed.data.impacted_entities).toHaveLength(1);
+      expect(parsed.data.generated_summary).toBe('Hosts look compromised.');
+    }
+  });
+
+  it('rejects when verdict counts do not sum to verdicts.length', () => {
+    expect(
+      AlertAnalysisWorkflowOutput.safeParse({
+        ...sampleOutput,
+        true_positive_count: 0,
+      }).success
+    ).toBe(false);
+  });
+
+  it('rejects when host_name / user_name are missing from a verdict', () => {
+    const { host_name: _h, user_name: _u, ...verdictWithoutEntities } = sampleOutput.verdicts[0];
+    expect(
+      AlertAnalysisWorkflowOutput.safeParse({
+        ...sampleOutput,
+        verdicts: [verdictWithoutEntities],
+        true_positive_count: 1,
+        false_positive_count: 0,
+      }).success
     ).toBe(false);
   });
 });
