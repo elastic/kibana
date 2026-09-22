@@ -1778,8 +1778,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
           await testSubjects.click(`lnsLayerSplitButton--${index}`);
         }
         await testSubjects.click(`lnsLayerRemove--${index}`);
-        if (await testSubjects.exists('lnsLayerRemoveModal')) {
-          await testSubjects.exists('lnsLayerRemoveConfirmButton');
+        if (await testSubjects.waitForExists('lnsLayerRemoveModal', { timeout: 2000 })) {
           await testSubjects.click('lnsLayerRemoveConfirmButton');
         }
       });
