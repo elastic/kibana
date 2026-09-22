@@ -465,19 +465,15 @@ describe('AlertEpisodeDetailsFlyout', () => {
   it('shows who snoozed the episode in an info block', () => {
     mockUseEpisodeDetailsHeaderData.mockReturnValue({
       ...baseHeaderData,
-      episode: {
-        ...mockEpisode,
-        last_snooze_action: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
-        snooze_expiry: '2030-01-01T00:00:00.000Z',
-      } as AlertEpisode,
+      episode: mockEpisode,
       groupAction: {
         groupHash: 'gh-1',
         ruleId: 'rule-1',
         lastDeactivateAction: null,
         lastDeactivateActor: null,
-        lastSnoozeAction: null,
+        lastSnoozeAction: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
         lastSnoozeActor: 'user-snoozer',
-        snoozeExpiry: null,
+        snoozeExpiry: '2030-01-01T00:00:00.000Z',
         tags: [],
       },
     });
@@ -584,17 +580,13 @@ describe('AlertEpisodeDetailsFlyout', () => {
     const user = userEvent.setup();
     mockUseEpisodeDetailsHeaderData.mockReturnValue({
       ...baseHeaderData,
-      episode: {
-        ...mockEpisode,
-        last_snooze_action: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
-        snooze_expiry: '2035-06-15T14:30:00.000Z',
-      } as AlertEpisode,
+      episode: mockEpisode,
       groupAction: {
         groupHash: 'group-1',
         ruleId: 'rule-1',
         lastDeactivateAction: null,
-        lastSnoozeAction: null,
-        snoozeExpiry: null,
+        lastSnoozeAction: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
+        snoozeExpiry: '2035-06-15T14:30:00.000Z',
         tags: [],
         lastSnoozeActor: null,
         lastDeactivateActor: null,
