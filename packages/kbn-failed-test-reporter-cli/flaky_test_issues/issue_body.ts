@@ -38,8 +38,6 @@ const LEGACY_TITLE_PATTERN = /^Flaky\b.*\btest suite:\s*(\S+\.[jt]sx?)\s*$/;
 /** Namespace of the hidden `kibanaCiData` block at the end of the issue body and comments. */
 export const FLAKY_TEST_SUITE_METADATA_PREFIX = 'flaky-test-suite';
 
-/** Pipelines whose fail rate readers care about most; it is shown in bold. */
-const HIGHLIGHTED_PIPELINES = new Set(['kibana-on-merge', 'kibana-pull-request']);
 const RANK_TIERS = [5, 10, 20, 30, 50, 100];
 const MAX_TEST_ROWS = 15;
 const MAX_DISTINCT_FAILURES = 2;
@@ -196,13 +194,31 @@ const skippedNote = (suite: FlakySuite): string | undefined => {
   return `Latest run on ${inlineCode(latestRun.branch)} was skipped (${since}).`;
 };
 
+/**
+ * `fails in **3% of builds on \`9.5\`** (4 of 122)`: the rate of the worst test on the branch it
+ * qualified on, the number the thresholds were checked against. Reports written before that
+ * branch was recorded name the branches failing most instead.
+ */
+const headlineRate = (suite: FlakySuite): string => {
+  const [worst] = suite.tests;
+  const { flakiestBranch } = worst;
+  if (!flakiestBranch) {
+    const branches = headlineBranches(suite);
+    return `fails frequently${branches ? ` on ${branches}` : ''}`;
+  }
+  const rate =
+    `**${formatPercent(flakiestBranch.buildFailRate)} of builds on ` +
+    `${inlineCode(flakiestBranch.branch)}** (${flakiestBranch.failedBuilds} of ${
+      flakiestBranch.builds
+    })`;
+  return suite.tests.length > 1 ? `whose flakiest test fails in ${rate}` : `fails in ${rate}`;
+};
+
 const headline = (suite: FlakySuite, ctx: FlakySuiteIssueContext): string => {
   const { report, dashboardUrl } = ctx;
-  const branches = headlineBranches(suite);
-  const where = branches ? ` on ${branches}` : '';
   const dashboard = dashboardUrl ? ` — [dashboard with latest stats](${dashboardUrl})` : '';
   return [
-    `A **flaky** test suite fails frequently${where}: ${rankTierLabel(suite.tests[0], report)} ` +
+    `A **flaky** test suite ${headlineRate(suite)}: ${rankTierLabel(suite.tests[0], report)} ` +
       `${formatWindow(report)}${dashboard}.`,
     skippedNote(suite),
   ]
@@ -283,24 +299,23 @@ const pipelineLink = (pipeline: string): string =>
   `[${inlineCode(pipeline)}](${BUILDKITE_ORG_URL}/${pipeline})`;
 
 const pipelineFailedBuilds = ({
-  pipeline,
   builds,
   failedBuilds,
   buildFailRate,
-}: FlakySuite['byPipeline'][number]): string => {
-  const percent = formatPercent(buildFailRate);
-  const rate = HIGHLIGHTED_PIPELINES.has(pipeline) ? `**${percent}**` : percent;
-  return `${failedBuilds} / ${builds} (${rate})`;
-};
+}: FlakySuite['byPipeline'][number]): string =>
+  `${failedBuilds} / ${builds} (${formatPercent(buildFailRate)})`;
 
-/** Per-pipeline breakdown over every pipeline and branch, not just the report scope. */
+/**
+ * Where else the suite fails: every pipeline and branch, not just the report scope. Rates here
+ * are over all branches and say how widely it hurts, not how flaky it is; that is the table above.
+ */
 const failuresByPipeline = (suite: FlakySuite, report: FlakyTestReport): string | undefined => {
   if (suite.byPipeline.length === 0) {
     return undefined;
   }
-  const scope = `${formatDateRange(report.window.from, report.window.to)}, all branches${
-    suite.tests.length > 1 ? ', any of the tests above' : ''
-  }:`;
+  const scope =
+    `Where it failed ${formatDateRange(report.window.from, report.window.to)}, across ` +
+    `all pipelines and branches${suite.tests.length > 1 ? ', any of the tests above' : ''}:`;
   const rows = suite.byPipeline.map((stats) => [
     pipelineLink(stats.pipeline),
     pipelineFailedBuilds(stats),

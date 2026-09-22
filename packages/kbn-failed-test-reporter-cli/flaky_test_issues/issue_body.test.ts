@@ -183,6 +183,25 @@ describe('rankTierLabel', () => {
 });
 
 describe('renderFlakySuiteIssueBody', () => {
+  it('opens with the rate of the worst test on the branch it qualified on', () => {
+    const single = singleTestReport();
+    expect(renderFlakySuiteIssueBody(single.suite, { report: single.report })).toContain(
+      'A **flaky** test suite fails in **10% of builds on `main`** (49 of 509): in the top'
+    );
+    const multi = multiTestReport();
+    expect(renderFlakySuiteIssueBody(multi.suite, { report: multi.report })).toContain(
+      'A **flaky** test suite whose flakiest test fails in **'
+    );
+  });
+
+  it('names the branches failing most when the report has no qualifying branch', () => {
+    const { report } = singleTestReport();
+    const [suite] = groupIntoSuites([flakyTest({ flakiestBranch: undefined })]);
+    expect(renderFlakySuiteIssueBody(suite, { report })).toContain(
+      'A **flaky** test suite fails frequently on `main`: in the top'
+    );
+  });
+
   it('renders a single-test suite with a dashboard link', () => {
     const { suite, report } = singleTestReport();
     expect(
