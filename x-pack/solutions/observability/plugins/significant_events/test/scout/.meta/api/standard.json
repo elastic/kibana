@@ -1,14 +1,19 @@
 {
-  "sha1": "0ec40595ca16abaf67963cafb22cfaef6e19f229",
+  "sha1": "a9c406d3daed07578691cc770ded49b9c521016d",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
     {
-      "id": "aba317166d7aac7-81c41da1351e0a5",
+      "id": "422cf71ab4351e5-81c41da1351e0a5",
       "title": "Setup environment for Significant Events API tests",
       "expectedStatus": "passed",
-      "tags": [],
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/global.setup.ts",
         "line": 16,
@@ -16,7 +21,7 @@
       }
     },
     {
-      "id": "7998edec061cd06-a13b0f9a554b008",
+      "id": "00dd0a8438a57c0-a13b0f9a554b008",
       "title": "Significant Events run quota authorization allows a Streams reader to inspect the deployment-wide snapshot",
       "expectedStatus": "passed",
       "tags": [
@@ -32,7 +37,7 @@
       }
     },
     {
-      "id": "7998edec061cd06-474b7573b22c201",
+      "id": "00dd0a8438a57c0-474b7573b22c201",
       "title": "Significant Events run quota authorization denies a manager whose Nightshift privilege is limited to one space",
       "expectedStatus": "passed",
       "tags": [
@@ -48,7 +53,7 @@
       }
     },
     {
-      "id": "7998edec061cd06-ef381f2f9a77c63",
+      "id": "00dd0a8438a57c0-ef381f2f9a77c63",
       "title": "Significant Events run quota authorization allows an all-spaces Nightshift manager to update and restore settings",
       "expectedStatus": "passed",
       "tags": [
@@ -64,7 +69,7 @@
       }
     },
     {
-      "id": "ecbf3d1a454ed9a-b35fb312b482350",
+      "id": "62c972b07ef604e-b35fb312b482350",
       "title": "Significant Events run quota API records admissions while enforcement is disabled and the limit is unlimited",
       "expectedStatus": "passed",
       "tags": [
@@ -80,7 +85,7 @@
       }
     },
     {
-      "id": "ecbf3d1a454ed9a-7c9fd91e22b351c",
+      "id": "62c972b07ef604e-7c9fd91e22b351c",
       "title": "Significant Events run quota API denies an admission at a finite limit without incrementing",
       "expectedStatus": "passed",
       "tags": [
@@ -96,7 +101,7 @@
       }
     },
     {
-      "id": "ecbf3d1a454ed9a-6b943913f2a8fcb",
+      "id": "62c972b07ef604e-6b943913f2a8fcb",
       "title": "Significant Events run quota API denies an investigation at a finite limit without incrementing",
       "expectedStatus": "passed",
       "tags": [
@@ -112,7 +117,7 @@
       }
     },
     {
-      "id": "3b914c845b72751-1d8b985de6fcd2d",
+      "id": "670d85d4e7806a5-1d8b985de6fcd2d",
       "title": "Onboarding bulk status API returns not_started for every requested stream that has never been onboarded",
       "expectedStatus": "passed",
       "tags": [
@@ -128,7 +133,7 @@
       }
     },
     {
-      "id": "3b914c845b72751-6eae18e8b4c773e",
+      "id": "670d85d4e7806a5-6eae18e8b4c773e",
       "title": "Onboarding bulk status API rejects an empty streamNames array",
       "expectedStatus": "passed",
       "tags": [
@@ -144,7 +149,7 @@
       }
     },
     {
-      "id": "3b914c845b72751-4d182347c2af93f",
+      "id": "670d85d4e7806a5-4d182347c2af93f",
       "title": "Onboarding bulk status API returns 403 when significant events is disabled",
       "expectedStatus": "passed",
       "tags": [
@@ -160,7 +165,7 @@
       }
     },
     {
-      "id": "cf67417434c65bf-5c3eced8e270bba",
+      "id": "72ee039d3c328bc-5c3eced8e270bba",
       "title": "Significant Events plugin hard-disable (Logs Essentials) availability API returns 404 when the plugin is unloaded",
       "expectedStatus": "passed",
       "tags": [
@@ -174,7 +179,7 @@
       }
     },
     {
-      "id": "b1abf6ccaccb508-5f6e05f92b17cee",
+      "id": "5f916a82265f552-5f6e05f92b17cee",
       "title": "Significant Events plugin loaded (Complete / classic) availability API is registered when the plugin is enabled",
       "expectedStatus": "passed",
       "tags": [
@@ -186,11 +191,11 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/significant_events/plugin_loaded.spec.ts",
         "line": 22,
-        "column": 37
+        "column": 35
       }
     },
     {
-      "id": "0d69f0f4d0e3e1c-365722779727e4f",
+      "id": "c6e32cc39c4c727-365722779727e4f",
       "title": "Managed workflows system-significant-events-discovery: is installed and valid",
       "expectedStatus": "passed",
       "tags": [
@@ -206,10 +211,15 @@
       }
     },
     {
-      "id": "145dd70ebc9c35e-9f78923f57eb20e",
+      "id": "18f2a10a6bb6ad0-9f78923f57eb20e",
       "title": "Teardown environment for Significant Events API tests",
       "expectedStatus": "passed",
-      "tags": [],
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/global.teardown.ts",
         "line": 5,
