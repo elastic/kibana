@@ -40,7 +40,7 @@ describe('AlertZero schema smoke tests', () => {
   });
 
   it('parses a live Worker without Worker-specific settings', () => {
-    const worker = Worker.parse({
+    const workerBody = {
       id: 'system-security-hunt-continuous-threat-hunt',
       name: 'Continuous Threat Hunt',
       watchIds: ['system-security-watch-hunt'],
@@ -52,13 +52,22 @@ describe('AlertZero schema smoke tests', () => {
         autonomy: 'manual',
       },
       settingsRevision: null,
-    });
+      workflowId: null,
+    };
+    const worker = Worker.parse(workerBody);
 
     expect(WorkerSettings.parse(worker.settings)).toEqual(worker.settings);
     expect(worker.settings).toEqual({
       workerId: 'system-security-hunt-continuous-threat-hunt',
       autonomy: 'manual',
     });
+    expect(worker.workflowId).toBeNull();
+    expect(
+      Worker.parse({ ...workerBody, workflowId: 'opaque-installed-workflow' }).workflowId
+    ).toBe('opaque-installed-workflow');
+    const { workflowId, ...withoutWorkflowId } = workerBody;
+    expect(workflowId).toBeNull();
+    expect(Worker.safeParse(withoutWorkflowId).success).toBe(false);
   });
 
   it('rejects unknown top-level settings keys but leaves extras open on the wire', () => {
