@@ -823,7 +823,7 @@ describe('create', () => {
             ],
             description: 'testing sir',
             owner: 'securitySolution',
-            settings: { syncAlerts: true },
+            settings: { syncAlerts: true, extractObservables: false },
             severity: 'low',
             tags: [],
             title: 'My Case',
@@ -853,7 +853,7 @@ describe('create', () => {
             customFields: caseWithOptionalFields.customFields,
             description: 'testing sir',
             owner: 'securitySolution',
-            settings: { syncAlerts: true },
+            settings: { syncAlerts: true, extractObservables: false },
             severity: 'critical',
             tags: [],
             title: 'My Case',
@@ -2374,6 +2374,65 @@ describe('create', () => {
           ).rejects.toThrow('Field "risk_score" must be at most 3 characters');
         });
       });
+    });
+  });
+
+  describe('extractObservables defaulting from space configuration', () => {
+    const extractObservablesCasesClient = createCasesClientMock();
+
+    const createClientArgsWithConfig = (extractObservables: boolean) => {
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
+      extractObservablesCasesClient.configure.get = jest.fn().mockResolvedValue([
+        {
+          owner: theCase.owner,
+          customFields: [],
+          extractObservables,
+        },
+      ]);
+      return clientArgs;
+    };
+
+    it('inherits extractObservables from the space configuration when omitted', async () => {
+      const clientArgs = createClientArgsWithConfig(true);
+
+      await create(theCase, clientArgs, extractObservablesCasesClient);
+
+      const createCaseCall = clientArgs.services.caseService.createCase.mock.calls[0][0].attributes;
+      expect(createCaseCall.settings.extractObservables).toBe(true);
+    });
+
+    it('inherits extractObservables false from the space configuration', async () => {
+      const clientArgs = createClientArgsWithConfig(false);
+
+      await create(theCase, clientArgs, extractObservablesCasesClient);
+
+      const createCaseCall = clientArgs.services.caseService.createCase.mock.calls[0][0].attributes;
+      expect(createCaseCall.settings.extractObservables).toBe(false);
+    });
+
+    it('uses explicit extractObservables over space configuration', async () => {
+      const clientArgs = createClientArgsWithConfig(true);
+      const caseWithExplicitSetting = {
+        ...theCase,
+        settings: { syncAlerts: true, extractObservables: false },
+      };
+
+      await create(caseWithExplicitSetting, clientArgs, extractObservablesCasesClient);
+
+      const createCaseCall = clientArgs.services.caseService.createCase.mock.calls[0][0].attributes;
+      expect(createCaseCall.settings.extractObservables).toBe(false);
+    });
+
+    it('falls back to true when no space configuration exists', async () => {
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
+      extractObservablesCasesClient.configure.get = jest.fn().mockResolvedValue([]);
+
+      await create(theCase, clientArgs, extractObservablesCasesClient);
+
+      const createCaseCall = clientArgs.services.caseService.createCase.mock.calls[0][0].attributes;
+      expect(createCaseCall.settings.extractObservables).toBe(true);
     });
   });
 });

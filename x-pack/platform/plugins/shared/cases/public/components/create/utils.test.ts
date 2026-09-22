@@ -200,6 +200,25 @@ describe('utils', () => {
       });
     });
 
+    it('inherits extractObservables from the space configuration when the form value is undefined', () => {
+      const { extractObservables: _omit, ...dataWithoutExtract } = dataToSerialize;
+
+      expect(
+        createFormSerializer(
+          [],
+          { ...casesConfigurationsMock, extractObservables: false },
+          // @ts-expect-error testing omitted extractObservables
+          dataWithoutExtract
+        )
+      ).toEqual({
+        ...serializedFormData,
+        settings: {
+          syncAlerts: false,
+          extractObservables: false,
+        },
+      });
+    });
+
     it('normalizes action connectors', () => {
       expect(
         createFormSerializer(

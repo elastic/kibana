@@ -559,6 +559,11 @@
                           }
                         }
                       },
+                      "extractObservables": {
+                        "type": "boolean",
+                        "description": "Indicates whether observables are automatically extracted from alerts when they are added to new cases. Defaults to `true`.\n",
+                        "example": true
+                      },
                       "owner": {
                         "$ref": "#/components/schemas/owner"
                       },
@@ -818,6 +823,11 @@
                           }
                         }
                       }
+                    },
+                    "extractObservables": {
+                      "type": "boolean",
+                      "description": "Indicates whether observables are automatically extracted from alerts when they are added to new cases. Defaults to `true`.\n",
+                      "example": true
                     },
                     "owner": {
                       "$ref": "#/components/schemas/owner"
@@ -1082,6 +1092,11 @@
                           }
                         }
                       }
+                    },
+                    "extractObservables": {
+                      "type": "boolean",
+                      "description": "Indicates whether observables are automatically extracted from alerts when they are added to new cases. Defaults to `true`.\n",
+                      "example": true
                     },
                     "owner": {
                       "$ref": "#/components/schemas/owner"
@@ -4929,6 +4944,10 @@
               }
             }
           },
+          "extractObservables": {
+            "type": "boolean",
+            "description": "Indicates whether observables are automatically extracted from alerts when they are added to new cases. When omitted, defaults to `true`.\n"
+          },
           "owner": {
             "$ref": "#/components/schemas/owner"
           },
@@ -5027,6 +5046,10 @@
                 }
               }
             }
+          },
+          "extractObservables": {
+            "type": "boolean",
+            "description": "Indicates whether observables are automatically extracted from alerts when they are added to new cases.\n"
           },
           "templates": {
             "$ref": "#/components/schemas/templates"
@@ -5209,7 +5232,7 @@
       },
       "template_write_request": {
         "title": "Template write request",
-        "description": "The body for creating or fully replacing a case template. Server-managed attributes (author, usage statistics, field summaries, version flags) are computed and cannot be set.\n\nResource limits (enforced on write; a violation returns `400`): an owner may have at most 200 templates per space, and a definition may declare at most 200 fields. Version history is intentionally uncapped. A single stored extended-field value may not exceed 30000 UTF-8 bytes.\n",
+        "description": "The body for creating or fully replacing a case template. Server-managed attributes (author, usage statistics, field summaries, version flags) are computed and cannot be set.\n\nResource limits (enforced on write; a violation returns `400`): an owner may have at most 200 templates per space, and a definition may declare at most 200 fields. Version history is intentionally uncapped. A single stored extended-field value may not exceed 30000 UTF-8 bytes. The YAML `definition` string itself may not exceed 30000 characters (enforced on create, update, and `dry_run`).\n",
         "type": "object",
         "required": [
           "owner",
@@ -5227,6 +5250,7 @@
           },
           "definition": {
             "type": "string",
+            "maxLength": 30000,
             "description": "The template definition as a YAML string: case defaults (name, severity, category, tags, assignees, connector, settings) and a `fields` array of inline field definitions or `$ref` entries pointing into the owner's field library. Stored field values appear on cases under `extended_fields` keys shaped `<field_name>_as_<storage_type>`.\n",
             "example": "name: Security incident\nseverity: high\ntags: [security]\nfields:\n  - name: priority\n    label: Priority\n    type: keyword\n    control: SELECT_BASIC\n    metadata:\n      options: [low, medium, high]\n      default: medium\n  - $ref: risk_score\n"
           },
@@ -6722,6 +6746,7 @@
               }
             ],
             "observableTypes": [],
+            "extractObservables": true,
             "owner": "cases",
             "created_at": "2024-07-01T17:07:17.767Z",
             "created_by": {
@@ -6877,6 +6902,7 @@
               ]
             }
           ],
+          "extractObservables": true,
           "owner": "cases",
           "created_at": "2024-07-01T17:07:17.767Z",
           "created_by": {
@@ -6967,6 +6993,7 @@
               "type": "toggle"
             }
           ],
+          "extractObservables": true,
           "owner": "cases",
           "created_at": "2024-07-01T17:07:17.767Z",
           "created_by": {

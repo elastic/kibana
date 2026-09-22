@@ -72,6 +72,9 @@ export const caseConfigureSavedObjectType: SavedObjectsType = {
       owner: {
         type: 'keyword',
       },
+      extractObservables: {
+        type: 'boolean',
+      },
       /*
       updated_at: {
         type: 'date',
@@ -102,6 +105,42 @@ export const caseConfigureSavedObjectType: SavedObjectsType = {
       schemas: {
         forwardCompatibility: (attrs) => attrs,
         create: schema.object({}, { unknowns: 'allow' }),
+      },
+    },
+    '2': {
+      changes: [
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            extractObservables: {
+              type: 'boolean',
+            },
+          },
+        },
+        {
+          type: 'data_backfill',
+          backfillFn: (doc) => {
+            if (doc.attributes.extractObservables !== undefined) {
+              return { attributes: {} };
+            }
+            // Match configure service / Settings UI default-on for documents that lack the field.
+            return { attributes: { extractObservables: true } };
+          },
+        },
+      ],
+      schemas: {
+        forwardCompatibility: schema.object(
+          {
+            extractObservables: schema.maybe(schema.boolean()),
+          },
+          { unknowns: 'ignore' }
+        ),
+        create: schema.object(
+          {
+            extractObservables: schema.maybe(schema.boolean()),
+          },
+          { unknowns: 'allow' }
+        ),
       },
     },
   },

@@ -11,6 +11,7 @@ import { GENERAL_CASES_OWNER } from '../../../common';
 import { CASE_EXTENDED_FIELDS } from '../../../common/constants';
 import type { ActionConnector } from '../../../common/types/domain';
 import { getInitialCaseValue } from '../../../common/utils/get_initial_case_value';
+import { getCaseSettings } from '../../../common/utils/case_settings';
 import { getNoneConnector } from '../../../common/utils/connectors';
 import type { CasesConfigurationUI } from '../../containers/types';
 import type { CaseFormFieldsSchemaProps } from '../case_form_fields/schema';
@@ -21,6 +22,21 @@ import {
   getConnectorById,
   getConnectorsFormSerializer,
 } from '../utils';
+
+/** Space-level extractObservables default; falls back to the advertised default-on when absent. */
+export const getSpaceExtractObservables = (configuration: CasesConfigurationUI): boolean =>
+  configuration.extractObservables ?? true;
+
+export const getInitialCreateCaseSettings = (
+  owner: string,
+  configuration: CasesConfigurationUI
+): { syncAlerts: boolean; extractObservables: boolean } => {
+  const { syncAlerts } = getCaseSettings(owner);
+  return {
+    syncAlerts,
+    extractObservables: getSpaceExtractObservables(configuration),
+  };
+};
 
 export const trimUserFormData = (
   userFormData: Omit<
@@ -65,7 +81,7 @@ export const createFormDeserializer = (data: CasePostRequest): CaseFormFieldsSch
     connectorId: connector.id,
     fields: connector.fields,
     syncAlerts: settings.syncAlerts,
-    extractObservables: settings.extractObservables ?? false,
+    extractObservables: settings.extractObservables ?? true,
     customFields: customFieldsFormDeserializer(customFields) ?? {},
     ...(extendedFieldsFromResponse != null
       ? { [CASE_EXTENDED_FIELDS]: extendedFieldsFromResponse }
@@ -91,6 +107,7 @@ export const createFormSerializer = (
     return getInitialCaseValue({
       owner: currentConfiguration.owner,
       connector: currentConfiguration.connector,
+      settings: getInitialCreateCaseSettings(currentConfiguration.owner, currentConfiguration),
     });
   }
 
@@ -123,7 +140,10 @@ export const createFormSerializer = (
   return {
     ...trimmedData,
     connector: connectorToUpdate,
-    settings: { syncAlerts: syncAlerts ?? false, extractObservables: extractObservables ?? false },
+    settings: {
+      syncAlerts: syncAlerts ?? false,
+      extractObservables: extractObservables ?? getSpaceExtractObservables(currentConfiguration),
+    },
     owner: currentConfiguration.owner,
     customFields: transformedCustomFields,
     ...(extendedFields != null ? { [CASE_EXTENDED_FIELDS]: extendedFields } : {}),

@@ -364,6 +364,11 @@ paths:
                             type: string
                             description: The observable type label.
                             example: My observable type
+                    extractObservables:
+                      type: boolean
+                      description: |
+                        Indicates whether observables are automatically extracted from alerts when they are added to new cases. Defaults to `true`.
+                      example: true
                     owner:
                       $ref: '#/components/schemas/owner'
                     templates:
@@ -549,6 +554,11 @@ paths:
                           type: string
                           description: The observable type label.
                           example: My observable type
+                  extractObservables:
+                    type: boolean
+                    description: |
+                      Indicates whether observables are automatically extracted from alerts when they are added to new cases. Defaults to `true`.
+                    example: true
                   owner:
                     $ref: '#/components/schemas/owner'
                   templates:
@@ -736,6 +746,11 @@ paths:
                           type: string
                           description: The observable type label.
                           example: My observable type
+                  extractObservables:
+                    type: boolean
+                    description: |
+                      Indicates whether observables are automatically extracted from alerts when they are added to new cases. Defaults to `true`.
+                    example: true
                   owner:
                     $ref: '#/components/schemas/owner'
                   templates:
@@ -3406,6 +3421,10 @@ components:
                 enum:
                   - text
                   - toggle
+        extractObservables:
+          type: boolean
+          description: |
+            Indicates whether observables are automatically extracted from alerts when they are added to new cases. When omitted, defaults to `true`.
         owner:
           $ref: '#/components/schemas/owner'
         templates:
@@ -3481,6 +3500,10 @@ components:
                 enum:
                   - text
                   - toggle
+        extractObservables:
+          type: boolean
+          description: |
+            Indicates whether observables are automatically extracted from alerts when they are added to new cases.
         templates:
           $ref: '#/components/schemas/templates'
         version:
@@ -4738,6 +4761,7 @@ components:
               required: false
               type: text
           observableTypes: []
+          extractObservables: true
           owner: cases
           created_at: '2024-07-01T17:07:17.767Z'
           created_by:
@@ -4841,6 +4865,7 @@ components:
             description: A description of the template.
             tags:
               - Template tag 1
+        extractObservables: true
         owner: cases
         created_at: '2024-07-01T17:07:17.767Z'
         created_by:
@@ -4905,6 +4930,7 @@ components:
             label: my-toggle
             required: false
             type: toggle
+        extractObservables: true
         owner: cases
         created_at: '2024-07-01T17:07:17.767Z'
         created_by:
