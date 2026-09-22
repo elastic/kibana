@@ -1,5 +1,5 @@
 {
-  "sha1": "50fbae70d9a322f1f4b4da1c3a293cce97160179",
+  "sha1": "106473d754734b1274a774abe27e19b283609228",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -294,7 +294,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 126,
+        "line": 128,
         "column": 23
       }
     },
@@ -308,7 +308,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 220,
+        "line": 222,
         "column": 17
       }
     },
@@ -322,7 +322,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 234,
+        "line": 236,
         "column": 16
       }
     },
@@ -336,7 +336,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 251,
+        "line": 253,
         "column": 71
       }
     },
@@ -350,7 +350,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 260,
+        "line": 262,
         "column": 22
       }
     },
@@ -364,7 +364,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 271,
+        "line": 273,
         "column": 11
       }
     },
@@ -378,7 +378,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 278,
+        "line": 280,
         "column": 12
       }
     },
@@ -392,7 +392,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 285,
+        "line": 287,
         "column": 13
       }
     },
@@ -406,7 +406,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 293,
+        "line": 295,
         "column": 59
       }
     },
@@ -420,7 +420,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 321,
+        "line": 323,
         "column": 21
       }
     },
@@ -434,7 +434,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 348,
+        "line": 350,
         "column": 14
       }
     },
@@ -448,7 +448,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 395,
+        "line": 397,
         "column": 16
       }
     },
@@ -462,7 +462,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 439,
+        "line": 441,
         "column": 80
       }
     },
@@ -476,8 +476,22 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 447,
+        "line": 449,
         "column": 58
+      }
+    },
+    {
+      "id": "ec1ea961b0a61a1-d7d6d6d7eabb846",
+      "title": "context engine AI indices API rejects an alias dest",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
+        "line": 462,
+        "column": 16
       }
     },
     {
@@ -490,8 +504,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 460,
-        "column": 16
+        "line": 476,
+        "column": 27
       }
     },
     {
@@ -504,8 +518,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 512,
-        "column": 91
+        "line": 525,
+        "column": 53
       }
     },
     {
@@ -518,8 +532,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 540,
-        "column": 9
+        "line": 552,
+        "column": 33
       }
     },
     {
@@ -532,8 +546,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 570,
-        "column": 5
+        "line": 578,
+        "column": 9
       }
     },
     {
@@ -546,8 +560,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 596,
-        "column": 30
+        "line": 608,
+        "column": 5
       }
     },
     {
@@ -560,8 +574,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 628,
-        "column": 24
+        "line": 639,
+        "column": 30
       }
     },
     {
@@ -574,8 +588,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 648,
-        "column": 29
+        "line": 659,
+        "column": 30
       }
     },
     {
@@ -588,8 +602,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 668,
-        "column": 22
+        "line": 680,
+        "column": 68
       }
     },
     {
@@ -602,8 +616,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 684,
-        "column": 27
+        "line": 696,
+        "column": 14
       }
     },
     {
@@ -616,8 +630,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 702,
-        "column": 27
+        "line": 714,
+        "column": 14
       }
     }
   ]
