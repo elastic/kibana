@@ -78,6 +78,10 @@ Column resolution follows one alias hop inside `STATS` and `EVAL`, tolerates `.k
 
 This keeps gold and candidate structurally parallel so the equivalence evaluators measure real differences instead of cosmetic ones. The `?_tstart` / `?_tend` bind params substitute to a **now-relative** window (see `src/evaluators/esql_bind_params.ts`), which brackets both `kibana_sample_data_logs` and the synthtrace host-load fixture.
 
+### Judge calibration
+
+`evals/judge_calibration/chart_intent_judge.spec.ts` runs the Chart Type vs Intent judge over the fixed pairs in `chart_intent_pairs.ts`, each with a human verdict and rationale, and scores agreement. It runs as its own dataset so a drop after a rubric or judge-model change reads as judge drift rather than agent regression. When you change the rubric, bump `CHART_TYPE_VS_INTENT_JUDGE_VERSION`, run this spec, and record the agreement in the PR.
+
 ### Host-load fixture
 
 `src/fixtures/host_load_metrics.ts` uses `@kbn/synthtrace` to write Beats `system.load.{1,5,15}` documents for host `viz-eval-host` into `metrics-system.load-default`. `beforeAll` throws if that stream is missing or empty after seeding.

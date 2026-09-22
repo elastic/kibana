@@ -132,7 +132,7 @@ describe('createEvaluateDataset', () => {
     );
   });
 
-  it('runs a follow-up turn in the same conversation and scores the edited chart', async () => {
+  it('runs a follow-up turn in the same conversation and scores the edit', async () => {
     const { task, converse } = await runDataset();
     converse
       .mockResolvedValueOnce({
