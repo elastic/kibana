@@ -98,19 +98,9 @@ export const eventsForContext = (conversation: Conversation): TimelineEvent[] =>
   // Folding drops the standalone messages and the executions that never terminated, so re-add
   // them and restore the order they were stored in. Timestamps come first because folding also
   // synthesizes events that were never stored; stored position then breaks ties, keeping a message
-  // and a round sent in the same second apart.
-  //
-  // Failed initial executions are surfaced (capped to the most recent ones, so repeated failures
-  // cannot grow the context without bound); aborted executions and failed resumes never are.
-  const failed = groupTimelineFailedExecutions(timelineEvents)
-    .sort(
-      (left, right) =>
-        right.userMessage.created_at.localeCompare(left.userMessage.created_at) ||
-        position(right.userMessage.id) - position(left.userMessage.id)
-    )
-    .slice(0, MAX_FAILED_EXECUTIONS_IN_CONTEXT)
-    .flatMap((entry) => entry.events);
-  return [...folded, ...standaloneUserMessages(timelineEvents), ...failed].sort(
+  // and a round sent in the same second apart. Interrupted executions fold into rounds like any
+  // other, so nothing else is re-added.
+  return [...folded, ...standaloneUserMessages(timelineEvents)].sort(
     (left, right) =>
       left.created_at.localeCompare(right.created_at) || position(left.id) - position(right.id)
   );

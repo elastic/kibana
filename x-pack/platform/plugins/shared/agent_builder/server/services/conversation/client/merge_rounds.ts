@@ -48,6 +48,8 @@ export const mergeRounds = (
     origin: previous.origin,
     author: previous.author,
     configuration_overrides: next.configuration_overrides ?? previous.configuration_overrides,
+    // The folded round is interrupted iff its last execution is.
+    ...(next.interruption ? { interruption: next.interruption } : {}),
   };
 
   return mergedRound;
@@ -113,6 +115,7 @@ export const applyResumeResolution = (
           ...(resolved.progression !== undefined
             ? { progression: [...(step.progression ?? []), ...resolved.progression] }
             : {}),
+          ...(resolved.interrupted ? { interrupted: true as const } : {}),
         };
       }
     }
