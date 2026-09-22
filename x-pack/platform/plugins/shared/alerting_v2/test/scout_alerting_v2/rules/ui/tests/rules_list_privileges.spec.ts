@@ -17,11 +17,8 @@ import {
  * Verifies that the server-side Kibana feature capability (alerting_v2_rules
  * `read` vs `all`) actually reaches the client and drives
  * `UserCapabilities.canWrite('rules')` on the Rules list page.
- * Custom-role auth (`browserAuth.loginWithCustomRole`) is not yet supported on
- * Elastic Cloud Hosted, so this suite only runs on local stateful (classic)
- * until ECH support lands.
  */
-test.describe('Rules list - read/write privileges', { tag: '@local-stateful-classic' }, () => {
+test.describe('Rules list - read/write privileges', { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] }, () => {
   let ruleId: string;
 
   test.beforeAll(async ({ apiServices }) => {

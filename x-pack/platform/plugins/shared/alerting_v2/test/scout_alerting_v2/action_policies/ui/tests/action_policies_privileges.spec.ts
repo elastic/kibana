@@ -19,12 +19,8 @@ import {
  * every write affordance (create, row edit/actions, snooze toggle, details
  * flyout Take action button) is hidden and the `/edit/:id` route is gated by
  * the required-privileges interstitial.
- *
- * Custom-role auth (`browserAuth.loginWithCustomRole`) is not yet supported on
- * Elastic Cloud Hosted, so this suite only runs on local stateful (classic)
- * until ECH support lands.
  */
-test.describe('Action Policies - read/write privileges', { tag: '@local-stateful-classic' }, () => {
+test.describe('Action Policies - read/write privileges', { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] }, () => {
   let policyId: string;
   let policyName: string;
 

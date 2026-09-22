@@ -6,6 +6,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
+import type { AlertingMountConfig } from './alerting_mount_config';
 
 /**
  * Combo box options are fetched from the workflows plugin behind a 300ms
@@ -34,7 +35,7 @@ export class ActionPolicyFormPage {
   /** Shown instead of the workflows combo box when `workflows:ui:enabled` is off. */
   public readonly workflowsDisabledCallout: Locator;
 
-  constructor(private readonly page: ScoutPage) {
+  constructor(private readonly page: ScoutPage, private readonly mountConfig: AlertingMountConfig) {
     this.container = this.page.testSubj.locator('actionPolicyFormPage');
     this.pageTitle = this.container.getByTestId('pageTitle');
     this.nameInput = this.container.getByTestId('nameInput');
@@ -46,12 +47,16 @@ export class ActionPolicyFormPage {
   }
 
   async gotoCreate() {
-    await this.page.gotoApp('management/alertingV2/action_policies/create');
+    await this.page.gotoApp(
+      `${this.mountConfig.appRoute}${this.mountConfig.subPaths.actionPoliciesCreate}`
+    );
     await this.container.waitFor({ state: 'visible' });
   }
 
   async gotoEdit(policyId: string) {
-    await this.page.gotoApp(`management/alertingV2/action_policies/edit/${policyId}`);
+    await this.page.gotoApp(
+      `${this.mountConfig.appRoute}${this.mountConfig.subPaths.actionPoliciesEdit(policyId)}`
+    );
     await this.container.waitFor({ state: 'visible' });
   }
 

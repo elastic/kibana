@@ -6,6 +6,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
+import type { AlertingMountConfig } from './alerting_mount_config';
 
 /**
  * Drives the Action Policies list page. Exposes the write affordances gated by
@@ -21,7 +22,7 @@ export class ActionPoliciesListPage {
   /** "Take action" button inside the details flyout footer; hidden for read-only users. */
   public readonly detailsFlyoutTakeActionButton: Locator;
 
-  constructor(private readonly page: ScoutPage) {
+  constructor(private readonly page: ScoutPage, private readonly mountConfig: AlertingMountConfig) {
     this.createButton = this.page.testSubj.locator('createActionPolicyButton');
     this.detailsFlyout = this.page.testSubj.locator('actionPolicyDetailsFlyout');
     this.detailsFlyoutTakeActionButton = this.page.testSubj.locator(
@@ -30,11 +31,15 @@ export class ActionPoliciesListPage {
   }
 
   async goto() {
-    await this.page.gotoApp('management/alertingV2/action_policies');
+    await this.page.gotoApp(
+      `${this.mountConfig.appRoute}${this.mountConfig.paths.actionPolicies}`
+    );
   }
 
   async gotoEdit(policyId: string) {
-    await this.page.gotoApp(`management/alertingV2/action_policies/edit/${policyId}`);
+    await this.page.gotoApp(
+      `${this.mountConfig.appRoute}${this.mountConfig.subPaths.actionPoliciesEdit(policyId)}`
+    );
   }
 
   detailsLink(policyName: string) {

@@ -19,12 +19,8 @@ import {
  * read-only users only get the read-safe "Open in Discover" action, while
  * editors get the mutating actions (resolve, ack, snooze, tag, assign, ...)
  * which collapse into the overflow actions menu.
- *
- * Custom-role auth (`browserAuth.loginWithCustomRole`) is not yet supported on
- * Elastic Cloud Hosted, so this suite only runs on local stateful (classic)
- * until ECH support lands.
  */
-test.describe('Alerts page - read/write privileges', { tag: '@local-stateful-classic' }, () => {
+test.describe('Alerts page - read/write privileges', { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] }, () => {
   test.beforeAll(async ({ apiServices }) => {
     await apiServices.alertingV2.ruleEvents.cleanUp();
     // Seed a single active episode so the episodes table renders a row whose

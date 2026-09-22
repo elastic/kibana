@@ -10,15 +10,10 @@ import { test } from '../fixtures';
 
 const SAMPLE_DATA_SET = 'ecommerce';
 
-/*
- * Custom-role auth (`browserAuth.loginWithCustomRole`) is not yet supported on
- * Elastic Cloud Hosted, so this suite only runs on local stateful (classic)
- * until ECH support lands.
- */
 test.describe(
   'Discover Alerts menu with alerting v2',
   {
-    tag: '@local-stateful-classic',
+    tag: ['@local-stateful-classic', '@local-serverless-observability_complete'],
   },
   () => {
     test.beforeAll(async ({ apiServices }) => {

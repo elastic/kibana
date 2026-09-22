@@ -8,12 +8,7 @@
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 
-/*
- * Custom-role auth (`browserAuth.loginWithCustomRole`) is not yet supported on
- * Elastic Cloud Hosted, so this suite only runs on local stateful (classic)
- * until ECH support lands.
- */
-test.describe('Rule name validation — Discover flyout', { tag: '@local-stateful-classic' }, () => {
+test.describe('Rule name validation — Discover flyout', { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] }, () => {
   const SOURCE_INDEX = 'test-discover-rule-validation';
 
   test.beforeAll(async ({ esClient }) => {

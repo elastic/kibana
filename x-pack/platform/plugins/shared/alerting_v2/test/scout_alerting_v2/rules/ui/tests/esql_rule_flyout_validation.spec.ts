@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 
@@ -17,7 +16,7 @@ const SAMPLE_DATA_SET = 'ecommerce';
  * in esql_rule_utils.test.ts; these tests verify the resulting UI state (callout
  * visibility, save button enabled/disabled) end-to-end in the browser.
  */
-test.describe('ES|QL rule flyout — ?param validation', { tag: tags.stateful.classic }, () => {
+test.describe('ES|QL rule flyout — ?param validation', { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] }, () => {
   test.beforeAll(async ({ apiServices }) => {
     await apiServices.sampleData.install(SAMPLE_DATA_SET);
   });

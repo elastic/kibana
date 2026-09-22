@@ -20,7 +20,7 @@ import { buildCreateRuleData, test } from '../fixtures';
  */
 const TEST_INDEX = 'test-rule-tags-edit';
 
-test.describe('Rule tags — edit via ES|QL form', { tag: '@local-stateful-classic' }, () => {
+test.describe('Rule tags — edit via ES|QL form', { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] }, () => {
   test.beforeAll(async ({ esClient, apiServices }) => {
     await apiServices.alertingV2.rules.cleanUp();
     await esClient.indices.create(

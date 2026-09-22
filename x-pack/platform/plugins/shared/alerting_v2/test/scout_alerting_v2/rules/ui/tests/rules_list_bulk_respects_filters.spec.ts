@@ -8,14 +8,9 @@
 import { expect } from '@kbn/scout/ui';
 import { buildCreateRuleData, test } from '../fixtures';
 
-/*
- * Custom-role auth (`browserAuth.loginWithCustomRole`) is not yet supported on
- * Elastic Cloud Hosted, so this suite only runs on local stateful (classic)
- * until ECH support lands.
- */
 test.describe(
   'Rules list bulk actions respect active filters',
-  { tag: '@local-stateful-classic' },
+  { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
   () => {
     const tagA = 'scout-bulk-filter-a';
     const tagB = 'scout-bulk-filter-b';

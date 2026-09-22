@@ -12,14 +12,9 @@ const RULE_ID = 'episode-policy-history-rule';
 const GROUP_HASH = 'episode-policy-history-series-1';
 const EPISODE_ID = 'episode-policy-history-ep-1';
 
-/*
- * Custom-role auth (`browserAuth.loginWithCustomRole`) is not yet supported on
- * Elastic Cloud Hosted, so this suite only runs on local stateful (classic)
- * until ECH support lands.
- */
 test.describe(
   'Episode details — action policy history tab',
-  { tag: '@local-stateful-classic' },
+  { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
   () => {
     test.beforeAll(async ({ apiServices }) => {
       await apiServices.alertingV2.alertActionsEvents.cleanUp();

@@ -13,12 +13,7 @@ const INITIAL_INDEX = 'logs-*';
 const UPDATED_QUERY = `FROM ${TEST_INDEX} | WHERE message != ""`;
 const UPDATED_ALERT_CONDITION = 'WHERE message != ""';
 
-/*
- * Custom-role auth (`browserAuth.loginWithCustomRole`) is not yet supported on
- * Elastic Cloud Hosted, so this suite only runs on local stateful (classic)
- * until ECH support lands.
- */
-test.describe('Discover query sync — Rule flyout', { tag: '@local-stateful-classic' }, () => {
+test.describe('Discover query sync — Rule flyout', { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] }, () => {
   test.beforeAll(async ({ esClient }) => {
     await esClient.indices.create(
       {

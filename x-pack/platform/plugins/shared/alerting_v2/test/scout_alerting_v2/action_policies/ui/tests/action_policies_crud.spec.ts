@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   ALERTING_V2_ACTION_POLICY_FORM_ROLE,
@@ -21,7 +20,7 @@ import {
  * accept fails the test — something the RTL suite cannot catch because it
  * asserts against a mocked client.
  */
-test.describe('Action Policies - create and edit', { tag: [...tags.stateful.classic] }, () => {
+test.describe('Action Policies - create and edit', { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] }, () => {
   const CREATED_POLICY_NAME = 'scout-action-policy-created';
   const SEEDED_POLICY_NAME = 'scout-action-policy-to-edit';
   const EDITED_POLICY_NAME = 'scout-action-policy-edited';

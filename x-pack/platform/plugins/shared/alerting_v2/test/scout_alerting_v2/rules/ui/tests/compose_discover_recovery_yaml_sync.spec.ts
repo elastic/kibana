@@ -44,14 +44,9 @@ const yamlRule = ({
   return lines.join('\n');
 };
 
-/*
- * Custom-role auth (`browserAuth.loginWithCustomRole`) is not yet supported on
- * Elastic Cloud Hosted, so this suite only runs on local stateful (classic)
- * until ECH support lands.
- */
 test.describe(
   'ComposeDiscoverFlyout — recovery strategy YAML <-> GUI round trip (#278327)',
-  { tag: '@local-stateful-classic' },
+  { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
   () => {
     test.beforeAll(async ({ esClient, apiServices }) => {
       await esClient.indices.create(
