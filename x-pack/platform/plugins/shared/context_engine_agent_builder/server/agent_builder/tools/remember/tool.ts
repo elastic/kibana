@@ -107,11 +107,11 @@ export const createRememberTool = ({
   `,
   schema: rememberSchema,
   handler: async (params, context) => {
-    const { request, spaceId, esClient, runContext, logger } = context;
+    const { request, spaceId, esClient, runContext, logger, callContext } = context;
     const agent = getAgentFromRunContext(runContext);
     const conversationId = agent?.conversationId;
 
-    if (!conversationId) {
+    if (!conversationId && callContext.callSource !== 'mcp') {
       return {
         results: [
           {
@@ -224,10 +224,12 @@ export const createRememberTool = ({
           ? { expires_at: existingDocument.expires_at }
           : {}),
         updated_at: now,
-        references: addConversationReference(existingDocument?.references, conversationId),
+        references: conversationId
+          ? addConversationReference(existingDocument?.references, conversationId)
+          : existingDocument?.references ?? [],
         attributes: {
           ...existingDocument?.attributes,
-          'memory.session_id': conversationId,
+          ...(conversationId && { 'memory.session_id': conversationId }),
         },
         governance: updateMemoryProvenance(
           existingDocument?.governance,

@@ -68,13 +68,14 @@ describe('remember tool', () => {
 
   const run = async (
     input: Parameters<NonNullable<ReturnType<typeof createTool>['handler']>>[0] = params,
-    conversationId: string | undefined = 'conversation-1'
+    conversationId: string | undefined = 'conversation-1',
+    contextOverrides: Partial<ToolHandlerContext> = {}
   ) => {
     const handler = createTool().handler;
     if (!handler) {
       throw new Error('Expected remember tool handler');
     }
-    return handler(input, createContext(conversationId));
+    return handler(input, { ...createContext(conversationId), ...contextOverrides });
   };
 
   beforeEach(() => {
@@ -116,6 +117,76 @@ describe('remember tool', () => {
       ],
     });
     expect(assertContextEngineWriteAccessMock).not.toHaveBeenCalled();
+    expect(index).not.toHaveBeenCalled();
+  });
+
+  const mcpContext: Partial<ToolHandlerContext> = {
+    callContext: { callSource: 'mcp' },
+    runContext: { runId: 'mcp-run', stack: [] },
+  };
+
+  it('allows MCP writes without inventing conversation metadata', async () => {
+    const result = await run(params, '', mcpContext);
+
+    expect(result).toEqual({
+      results: [{ type: ToolResultType.other, data: { id: 'logical-memory-id' } }],
+    });
+    expect(assertContextEngineWriteAccessMock).toHaveBeenCalledWith(
+      expect.objectContaining({ spaceId: 'space-1', requireMemoryEnabled: true })
+    );
+    expect(get).toHaveBeenCalledWith('support', 'space-1');
+    const document = index.mock.calls[0][0].document;
+    expect(document.references).toEqual([]);
+    expect(document.attributes).toEqual({});
+    expect(document.governance.provenance.created_by).toEqual({
+      uri: 'tool://platform.context_engine.remember',
+      metadata: { run_id: 'mcp-run' },
+    });
+  });
+
+  it('preserves conversation metadata when MCP revises an existing memory', async () => {
+    const references = [{ uri: 'conversation://original', relation: 'derived_from' }];
+    search.mockResolvedValue({
+      hits: {
+        hits: [
+          {
+            _index: 'ai-index-idx-support',
+            _seq_no: 1,
+            _primary_term: 1,
+            _source: {
+              '@timestamp': '2026-09-01T00:00:00.000Z',
+              id: 'memory-1',
+              type: 'memory.session_fact',
+              references,
+              attributes: { 'memory.session_id': 'original' },
+            },
+          },
+        ],
+      },
+    });
+
+    const result = await run({ ...params, id: 'memory-1' }, '', mcpContext);
+
+    expect(result.results[0].type).toBe(ToolResultType.other);
+    expect(index).toHaveBeenCalledWith(
+      expect.objectContaining({
+        if_seq_no: 1,
+        if_primary_term: 1,
+        document: expect.objectContaining({
+          references,
+          attributes: { 'memory.session_id': 'original' },
+        }),
+      })
+    );
+  });
+
+  it('still enforces write authorization for MCP calls', async () => {
+    assertContextEngineWriteAccessMock.mockRejectedValue(new Error('Memory is disabled'));
+
+    const result = await run(params, '', mcpContext);
+
+    expect(result.results[0].type).toBe(ToolResultType.error);
+    expect(assertContextEngineWriteAccessMock).toHaveBeenCalled();
     expect(index).not.toHaveBeenCalled();
   });
 
