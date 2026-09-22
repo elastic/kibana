@@ -5,11 +5,86 @@
  * 2.0.
  */
 
-import type { EvaluationResult } from '@kbn/evals';
+import type { EvaluationResult, Evaluator, Example, TaskOutput } from '@kbn/evals';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { ExtractedVisualization } from './extract_visualization';
 
 /** Shared result for evaluators with nothing to check; `null` keeps them out of averages. */
 export const skippedResult = (explanation: string): EvaluationResult => ({
   score: null,
   label: 'skipped',
   explanation,
+});
+
+interface LoggableOutput {
+  visualizations?: ExtractedVisualization[];
+  messages?: Array<{ message?: string }>;
+  errors?: unknown[];
+  agentTraceId?: string;
+  traceId?: string;
+}
+
+const formatValue = (value: unknown): string => {
+  if (value === undefined || value === null) {
+    return String(value);
+  }
+  return typeof value === 'string' ? value : JSON.stringify(value, null, 2);
+};
+
+const formatVisualization = (visualization: ExtractedVisualization, index: number): string =>
+  [
+    `  [${index}] renderer=${visualization.renderer ?? 'lens'} chart_type=${
+      visualization.chartType ?? '(none)'
+    }`,
+    `      esql: ${visualization.esql}`,
+    visualization.visualization
+      ? `      config: ${JSON.stringify(visualization.visualization)}`
+      : undefined,
+  ]
+    .filter((line): line is string => line !== undefined)
+    .join('\n');
+
+/**
+ * Logs everything needed to diagnose a score below 1 in one place: the
+ * question, the gold, every produced visualization with its ES|QL and config,
+ * the evaluator's explanation and metadata, and the agent trace id.
+ */
+export const withLowScoreLogging = <
+  TExample extends Example = Example,
+  TTaskOutput extends TaskOutput = TaskOutput
+>(
+  evaluator: Evaluator<TExample, TTaskOutput>,
+  log: ToolingLog
+): Evaluator<TExample, TTaskOutput> => ({
+  ...evaluator,
+  evaluate: async (params) => {
+    const result = await evaluator.evaluate(params);
+    if (typeof result.score !== 'number' || result.score >= 1) {
+      return result;
+    }
+
+    const output = (params.output ?? {}) as LoggableOutput;
+    const question = (params.input as { question?: string } | undefined)?.question;
+    const visualizations = output.visualizations ?? [];
+    const errors = output.errors ?? [];
+    const traceId = output.agentTraceId ?? output.traceId;
+
+    const sections = [
+      `\n━━━━━━ LOW SCORE: ${evaluator.name} = ${result.score} ━━━━━━`,
+      question ? `Question:    ${question}` : undefined,
+      result.label ? `Label:       ${result.label}` : undefined,
+      `Explanation: ${result.explanation ?? '(none)'}`,
+      `--- Gold ---\n${formatValue(params.expected)}`,
+      visualizations.length > 0
+        ? `--- Produced visualizations ---\n${visualizations.map(formatVisualization).join('\n')}`
+        : `--- Produced visualizations ---\n  (none)`,
+      result.metadata ? `--- Evaluator metadata ---\n${formatValue(result.metadata)}` : undefined,
+      errors.length > 0 ? `--- Task errors ---\n${formatValue(errors)}` : undefined,
+      traceId ? `Trace id:    ${traceId}` : undefined,
+      '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
+    ].filter((section): section is string => section !== undefined);
+
+    log.warning(sections.join('\n'));
+    return result;
+  },
 });

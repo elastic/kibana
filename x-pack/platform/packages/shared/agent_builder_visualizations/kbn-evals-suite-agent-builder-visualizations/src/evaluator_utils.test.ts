@@ -5,7 +5,40 @@
  * 2.0.
  */
 
-import { skippedResult } from './evaluator_utils';
+import type { Evaluator } from '@kbn/evals';
+import type { ToolingLog } from '@kbn/tooling-log';
+import { skippedResult, withLowScoreLogging } from './evaluator_utils';
+
+const buildEvaluator = (score: number | null): Evaluator => ({
+  name: 'Fixture Evaluator',
+  kind: 'CODE',
+  direction: 'maximize',
+  evaluate: jest.fn().mockResolvedValue({
+    score,
+    label: 'fixture',
+    explanation: 'because',
+    metadata: { mismatches: ['x: missing column'] },
+  }),
+});
+
+const params = {
+  input: { question: 'Create a bar chart.' },
+  output: {
+    errors: [],
+    messages: [],
+    agentTraceId: 'trace-123',
+    visualizations: [
+      {
+        esql: 'FROM a | STATS c = COUNT(*)',
+        chartType: 'xy',
+        renderer: 'lens' as const,
+        visualization: { type: 'xy' },
+      },
+    ],
+  },
+  expected: { config: { type: 'xy' } },
+  metadata: {},
+};
 
 describe('skippedResult', () => {
   it('returns a null score with the skipped label', () => {
@@ -14,5 +47,43 @@ describe('skippedResult', () => {
       label: 'skipped',
       explanation: 'nothing to check',
     });
+  });
+});
+
+describe('withLowScoreLogging', () => {
+  const buildLog = () => ({ warning: jest.fn() } as unknown as ToolingLog);
+
+  it('keeps name, kind, and result unchanged', async () => {
+    const wrapped = withLowScoreLogging(buildEvaluator(0.5), buildLog());
+
+    expect(wrapped.name).toBe('Fixture Evaluator');
+    expect(wrapped.kind).toBe('CODE');
+    await expect(wrapped.evaluate(params)).resolves.toEqual(
+      expect.objectContaining({ score: 0.5, label: 'fixture' })
+    );
+  });
+
+  it('logs question, gold, produced visualizations, metadata, and trace id on a low score', async () => {
+    const log = buildLog();
+
+    await withLowScoreLogging(buildEvaluator(0.5), log).evaluate(params);
+
+    expect(log.warning).toHaveBeenCalledTimes(1);
+    const [message] = (log.warning as jest.Mock).mock.calls[0];
+    expect(message).toContain('LOW SCORE: Fixture Evaluator = 0.5');
+    expect(message).toContain('Create a bar chart.');
+    expect(message).toContain('"type": "xy"');
+    expect(message).toContain('FROM a | STATS c = COUNT(*)');
+    expect(message).toContain('x: missing column');
+    expect(message).toContain('trace-123');
+  });
+
+  it('stays quiet for a full score and for a skipped null score', async () => {
+    const log = buildLog();
+
+    await withLowScoreLogging(buildEvaluator(1), log).evaluate(params);
+    await withLowScoreLogging(buildEvaluator(null), log).evaluate(params);
+
+    expect(log.warning).not.toHaveBeenCalled();
   });
 });

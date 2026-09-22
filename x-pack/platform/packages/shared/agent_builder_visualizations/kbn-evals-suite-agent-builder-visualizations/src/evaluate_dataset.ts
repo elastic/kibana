@@ -30,6 +30,7 @@ import {
   createChartIntentJudge,
   createChartTypeVsIntentEvaluator,
 } from './evaluators/chart_type_vs_intent';
+import { withLowScoreLogging } from './evaluator_utils';
 import { createEsqlExecutionEvaluator } from './evaluators/esql_execution';
 import { createCalibratedEsqlEquivalenceEvaluator } from './evaluators/esql_functional_equivalence';
 import {
@@ -230,7 +231,7 @@ export function createEvaluateDataset({
       };
     };
 
-    await executorClient.runExperiment({ datasets: [dataset], task }, [
+    const evaluatorStack = [
       esqlExecutionEvaluator,
       esqlEquivalenceEvaluator,
       chartTypeVsIntentEvaluator,
@@ -240,6 +241,11 @@ export function createEvaluateDataset({
       chartCompatibleResultEvaluator,
       trajectoryEvaluator,
       ...Object.values(evaluators.traceBasedEvaluators).map(useAgentTraceId),
-    ]);
+    ];
+
+    await executorClient.runExperiment(
+      { datasets: [dataset], task },
+      evaluatorStack.map((evaluator) => withLowScoreLogging(evaluator, log))
+    );
   };
 }
