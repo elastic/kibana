@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import React, { type ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
+import React, {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   EuiAccordion,
   EuiBadge,
@@ -15,6 +23,7 @@ import {
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiLoadingSpinner,
   EuiPagination,
   EuiSpacer,
@@ -235,31 +244,68 @@ const renderJsonPreview = (value: unknown) => {
   );
 };
 
-const renderSerializedPreview = (
-  preview: EvaluationExperimentExamplePreview['input'] | undefined
-) => {
-  if (!preview) {
-    return '-';
+const PREVIEW_MAX_HEIGHT_PX = 200;
+const PREVIEW_FADE_HEIGHT_PX = 32;
+
+const previewDetailCss = css`
+  width: 100%;
+`;
+
+const previewFrameCss = css`
+  max-height: ${PREVIEW_MAX_HEIGHT_PX}px;
+  overflow: hidden;
+`;
+
+const previewFadeButtonCss = (backgroundColor: string, focusColor: string, overlap: boolean) => css`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: ${PREVIEW_FADE_HEIGHT_PX}px;
+  margin: ${overlap ? -PREVIEW_FADE_HEIGHT_PX : 0}px 0 0;
+  padding: 0;
+  border: none;
+  cursor: pointer;
+  background: linear-gradient(to bottom, transparent, ${backgroundColor});
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+
+  &:focus-visible {
+    outline: 2px solid ${focusColor};
+    outline-offset: -2px;
   }
+`;
+
+const PreviewFadeButton: React.FC<{
+  field: 'input' | 'output';
+  expanded: boolean;
+  overlap: boolean;
+  onClick: () => void;
+}> = ({ field, expanded, overlap, onClick }) => {
+  const { euiTheme } = useEuiTheme();
+  const viewLabel =
+    field === 'input' ? i18n.VIEW_FULL_INPUT_BUTTON_LABEL : i18n.VIEW_FULL_OUTPUT_BUTTON_LABEL;
+  const hideLabel =
+    field === 'input' ? i18n.HIDE_FULL_INPUT_ARIA_LABEL : i18n.HIDE_FULL_OUTPUT_ARIA_LABEL;
+  const label = expanded ? hideLabel : viewLabel;
 
   return (
-    <>
-      <EuiCodeBlock
-        css={{ width: '100%' }}
-        overflowHeight={200}
-        language="json"
-        paddingSize="none"
-        transparentBackground
-        fontSize="s"
-      >
-        {preview.content}
-      </EuiCodeBlock>
-      {preview.truncated && (
-        <EuiText size="xs" color="subdued">
-          {i18n.PREVIEW_TRUNCATED_LABEL}
-        </EuiText>
-      )}
-    </>
+    <button
+      type="button"
+      aria-expanded={expanded}
+      aria-label={label}
+      onClick={onClick}
+      className={previewFadeButtonCss(euiTheme.colors.emptyShade, euiTheme.colors.primary, overlap)}
+    >
+      <EuiIcon
+        type={expanded ? 'chevronSingleUp' : 'chevronSingleDown'}
+        size="m"
+        color="subdued"
+        aria-hidden={true}
+      />
+    </button>
   );
 };
 
@@ -269,7 +315,12 @@ const PreviewJsonDetail: React.FC<{
   preview?: EvaluationExperimentExamplePreview;
 }> = ({ detailsContext, field, preview }) => {
   const [requested, setRequested] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const frameRef = useRef<HTMLDivElement>(null);
+  const [frameHeight, setFrameHeight] = useState(0);
   const { experimentId, datasetId, executionId, exampleId, repetitionIndex } = detailsContext;
+  const serializedPreview =
+    preview?.repetition_index === repetitionIndex ? preview[field] : undefined;
   const { data, isLoading, error } = useExperimentExampleDetails(
     experimentId,
     datasetId,
@@ -279,34 +330,64 @@ const PreviewJsonDetail: React.FC<{
     { enabled: requested }
   );
 
-  if (!requested) {
+  useLayoutEffect(() => {
+    const node = frameRef.current;
+    setFrameHeight(node?.scrollHeight ?? 0);
+  }, [serializedPreview?.content, expanded]);
+
+  const toggle = () => {
+    setRequested(true);
+    setExpanded((current) => !current);
+  };
+
+  const overlap =
+    (Boolean(serializedPreview?.truncated) || frameHeight > PREVIEW_MAX_HEIGHT_PX) &&
+    frameHeight > PREVIEW_FADE_HEIGHT_PX;
+
+  if (expanded && isLoading) {
+    return <EuiLoadingSpinner size="m" data-test-subj="evalsExampleDetailsLoading" />;
+  }
+
+  if (expanded && error) {
     return (
-      <div>
-        {renderSerializedPreview(
-          preview?.repetition_index === repetitionIndex ? preview[field] : undefined
-        )}
-        <EuiButtonEmpty size="xs" onClick={() => setRequested(true)}>
-          {field === 'input'
-            ? i18n.VIEW_FULL_INPUT_BUTTON_LABEL
-            : i18n.VIEW_FULL_OUTPUT_BUTTON_LABEL}
-        </EuiButtonEmpty>
+      <div className={previewDetailCss}>
+        <EuiText color="danger" size="xs">
+          {i18n.getDetailsLoadErrorMessage(String(error))}
+        </EuiText>
+        <PreviewFadeButton field={field} expanded overlap={false} onClick={toggle} />
       </div>
     );
   }
 
-  if (isLoading) {
-    return <EuiLoadingSpinner size="m" data-test-subj="evalsExampleDetailsLoading" />;
-  }
-
-  if (error) {
+  if (expanded && data) {
     return (
-      <EuiText color="danger" size="xs">
-        {i18n.getDetailsLoadErrorMessage(String(error))}
-      </EuiText>
+      <div className={previewDetailCss}>
+        {renderJsonPreview(field === 'input' ? data.example.input : data.task.output)}
+        <PreviewFadeButton field={field} expanded overlap={false} onClick={toggle} />
+      </div>
     );
   }
 
-  return renderJsonPreview(field === 'input' ? data?.example.input : data?.task.output);
+  return (
+    <div className={previewDetailCss}>
+      <div ref={frameRef} className={previewFrameCss}>
+        {serializedPreview ? (
+          <EuiCodeBlock
+            css={{ width: '100%' }}
+            language="json"
+            paddingSize="none"
+            transparentBackground
+            fontSize="s"
+          >
+            {serializedPreview.content}
+          </EuiCodeBlock>
+        ) : (
+          '-'
+        )}
+      </div>
+      <PreviewFadeButton field={field} expanded={false} overlap={overlap} onClick={toggle} />
+    </div>
+  );
 };
 
 const EvaluatorScoreAccordion: React.FC<{

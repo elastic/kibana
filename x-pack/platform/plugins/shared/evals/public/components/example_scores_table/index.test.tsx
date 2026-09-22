@@ -165,7 +165,11 @@ describe('ExampleScoresTable', () => {
     expect(screen.queryByText(/output-r1/)).not.toBeInTheDocument();
     expect(screen.getByText(truncatedInputPreview)).toBeInTheDocument();
     expect(screen.getByText('{"completion":"preview-output"}')).toBeInTheDocument();
-    expect(screen.getByText('Preview truncated to 2,048 characters')).toBeInTheDocument();
+    expect(screen.queryByText(/Preview truncated/)).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'View full input' })).toHaveAttribute(
+      'aria-expanded',
+      'false'
+    );
     expect(
       mockUseExperimentExampleDetails.mock.calls.every(([, , , , , options]) => !options?.enabled)
     ).toBe(true);
@@ -180,7 +184,18 @@ describe('ExampleScoresTable', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'View full input' }));
     expect(screen.getByText(/"prompt": "input-r1"/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Hide full input' })).toHaveAttribute(
+      'aria-expanded',
+      'true'
+    );
     expect(screen.getByText('{"completion":"preview-output"}')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Hide full input' }));
+    expect(screen.queryByText(/"prompt": "input-r1"/)).not.toBeInTheDocument();
+    expect(screen.getByText(truncatedInputPreview)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'View full input' }));
+    expect(screen.getByText(/"prompt": "input-r1"/)).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'View full output' }));
     expect(screen.getByText(/"completion": "output-r1"/)).toBeInTheDocument();

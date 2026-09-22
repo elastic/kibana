@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EXPERIMENT_EXAMPLE_PREVIEW_MAX_LENGTH } from '@kbn/evals-common';
 
 export const COLUMN_EXAMPLE_ID = i18n.translate('xpack.evals.exampleScoresTable.columnExampleId', {
   defaultMessage: 'Example ID',
@@ -121,13 +120,17 @@ export const VIEW_FULL_OUTPUT_BUTTON_LABEL = i18n.translate(
   }
 );
 
-export const PREVIEW_TRUNCATED_LABEL = i18n.translate(
-  'xpack.evals.exampleScoresTable.previewTruncatedLabel',
+export const HIDE_FULL_INPUT_ARIA_LABEL = i18n.translate(
+  'xpack.evals.exampleScoresTable.hideFullInputAriaLabel',
   {
-    defaultMessage: 'Preview truncated to {maxPreviewLength} characters',
-    values: {
-      maxPreviewLength: EXPERIMENT_EXAMPLE_PREVIEW_MAX_LENGTH.toLocaleString('en-US'),
-    },
+    defaultMessage: 'Hide full input',
+  }
+);
+
+export const HIDE_FULL_OUTPUT_ARIA_LABEL = i18n.translate(
+  'xpack.evals.exampleScoresTable.hideFullOutputAriaLabel',
+  {
+    defaultMessage: 'Hide full output',
   }
 );
 
