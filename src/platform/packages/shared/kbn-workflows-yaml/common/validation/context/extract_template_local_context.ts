@@ -365,8 +365,21 @@ const EMPTY_INDEX: TemplateLocalIndex = {
 
 let nextIndexId = 1;
 
-const MAX_INDEX_CACHE_SIZE = 64;
+/**
+ * Cap on the template text the index cache may hold. Counted in characters
+ * rather than entries: 64 entries is 64 MiB of one scalar near the route's body
+ * limit and a rounding error of 64 short ones, so the entry count says nothing
+ * about the memory retained. The cap is the route's own 1 MiB body limit, so a
+ * single worst-case body still fits.
+ */
+const MAX_INDEX_CACHE_CHARS = 1024 * 1024;
 const indexCache = new Map<string, TemplateLocalIndex>();
+let indexCacheChars = 0;
+
+/** Cache contents, for tests that assert eviction. */
+export function getTemplateLocalIndexCacheStats(): { entries: number; chars: number } {
+  return { entries: indexCache.size, chars: indexCacheChars };
+}
 
 function buildTemplateLocalIndex(templateString: string): TemplateLocalIndex {
   const templates = safeParseTemplate(templateString);
@@ -389,7 +402,13 @@ function buildTemplateLocalIndex(templateString: string): TemplateLocalIndex {
   };
 }
 
-/** Bounded LRU, mirroring the Liquid parse cache this sits on top of. */
+/**
+ * LRU over the templates seen so far, bounded by the characters they hold.
+ *
+ * This cache is deliberately not scoped to one validation run: a keystroke
+ * reparses the document, and every scalar the edit did not touch keys the same
+ * string, so the reuse that matters in the editor is the reuse across runs.
+ */
 function getTemplateLocalIndex(templateString: string): TemplateLocalIndex {
   if (!templateString.includes('{%')) {
     return EMPTY_INDEX;
@@ -401,12 +420,19 @@ function getTemplateLocalIndex(templateString: string): TemplateLocalIndex {
     return cached;
   }
   const index = buildTemplateLocalIndex(templateString);
+  // A template larger than the whole cap would evict everything and then itself.
+  if (templateString.length > MAX_INDEX_CACHE_CHARS) {
+    return index;
+  }
   indexCache.set(templateString, index);
-  if (indexCache.size > MAX_INDEX_CACHE_SIZE) {
-    const oldest = indexCache.keys().next().value;
-    if (oldest !== undefined) {
-      indexCache.delete(oldest);
+  indexCacheChars += templateString.length;
+  while (indexCacheChars > MAX_INDEX_CACHE_CHARS) {
+    const oldest: string | undefined = indexCache.keys().next().value;
+    if (oldest === undefined) {
+      break;
     }
+    indexCache.delete(oldest);
+    indexCacheChars -= oldest.length;
   }
   return index;
 }

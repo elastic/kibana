@@ -11,6 +11,7 @@ import {
   forLoopScopesContainingOffset,
   getAllForLoopScopes,
   getTemplateLocalContext,
+  getTemplateLocalIndexCacheStats,
   isLiquidRangeLiteral,
   resolveAssignChain,
 } from './extract_template_local_context';
@@ -342,5 +343,28 @@ describe('isLiquidRangeLiteral', () => {
 
   it.each(['consts.items', 'rows', '(1..n)'])('returns false for %s', (value) => {
     expect(isLiquidRangeLiteral(value)).toBe(false);
+  });
+});
+
+describe('template index cache', () => {
+  const MAX_CHARS = 1024 * 1024;
+  /** A distinct template of roughly `chars` characters. */
+  const templateOfSize = (chars: number, marker: string) =>
+    `{% assign ${marker} = "x" %}`.padEnd(chars, ' ');
+
+  it('keeps the cached template text under the cap', () => {
+    for (const marker of ['one', 'two', 'three', 'four']) {
+      getTemplateLocalContext(templateOfSize(400_000, marker), 0);
+    }
+
+    expect(getTemplateLocalIndexCacheStats().chars).toBeLessThanOrEqual(MAX_CHARS);
+  });
+
+  it('does not cache a template larger than the whole cap', () => {
+    const before = getTemplateLocalIndexCacheStats();
+
+    getTemplateLocalContext(templateOfSize(MAX_CHARS + 1, 'huge'), 0);
+
+    expect(getTemplateLocalIndexCacheStats()).toEqual(before);
   });
 });
