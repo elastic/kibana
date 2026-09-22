@@ -85,7 +85,7 @@ export const useRiskScore = <T extends EntityType>({
     data: riskEngineStatus,
     isFetching: isStatusLoading,
     refetch: refetchEngineStatus,
-  } = useRiskEngineStatus();
+  } = useRiskEngineStatus({}, { executionContext });
   const factoryQueryType = EntityRiskQueries.list;
   const { querySize, cursorStart } = pagination || {};
   const { addError } = useAppToasts();

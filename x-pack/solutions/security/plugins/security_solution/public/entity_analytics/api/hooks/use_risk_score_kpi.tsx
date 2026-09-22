@@ -57,7 +57,7 @@ export const useRiskScoreKpi = ({
     data: riskEngineStatus,
     isFetching: isStatusLoading,
     refetch: refetchEngineStatus,
-  } = useRiskEngineStatus();
+  } = useRiskEngineStatus({}, { executionContext });
   const riskEngineHasBeenEnabled = riskEngineStatus?.risk_engine_status !== 'NOT_INSTALLED';
   const { loading, result, search, refetch, inspect, error } =
     useSearchStrategy<EntityRiskQueries.kpi>({

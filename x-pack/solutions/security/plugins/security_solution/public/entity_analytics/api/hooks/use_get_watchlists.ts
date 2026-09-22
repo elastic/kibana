@@ -6,10 +6,18 @@
  */
 
 import { useQuery } from '@kbn/react-query';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { useEntityAnalyticsRoutes } from '../api';
-import { buildExecutionContext } from '../../../common/utils/execution_context';
 
-export const useGetWatchlists = () => {
+export const useGetWatchlists = ({
+  executionContext,
+}: {
+  /**
+   * Optional Kibana execution context forwarded to the watchlists fetch so slow logs and
+   * APM traces can attribute the query to the calling page/panel.
+   */
+  executionContext?: KibanaExecutionContext;
+} = {}) => {
   const { fetchWatchlists } = useEntityAnalyticsRoutes();
 
   return useQuery({
@@ -17,7 +25,7 @@ export const useGetWatchlists = () => {
     queryFn: ({ signal }) =>
       fetchWatchlists({
         signal,
-        context: buildExecutionContext('entity_analytics:watchlists', 'watchlists_list'),
+        context: executionContext,
       }),
   });
 };
