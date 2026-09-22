@@ -180,9 +180,6 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
         )
       : validatedActionTypeConfig;
 
-  const previousIdentity = connectorTypeHasInboundEvents(actionTypeId)
-    ? await loadPreviousConnectorEventIdentity(context, id)
-    : undefined;
   const previouslyEnabled = resolveInboundEventsEnabled({
     actionTypeId,
     hasIdentity: hasInboundEventIdentityAttributes(attributes),
@@ -193,16 +190,25 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
     previouslyEnabled,
   });
   const shouldDisableInbound =
-    connectorTypeIsDual(actionTypeId) && !isInboundEventsEnabled && previouslyEnabled;
+    connectorTypeIsDual(actionTypeId) && requestedInboundEventsEnabled === false;
 
-  // Delete credentials first so the hub 404s immediately. If the overwrite then
-  // fails, identity is still present and rotate can mint a new token.
-  if (shouldDisableInbound) {
-    await deleteIngressCredentialForConnector({
-      unsecuredSavedObjectsClient: context.unsecuredSavedObjectsClient,
-      connectorId: id,
-      logger: context.logger,
-    });
+  let previousIdentity: Awaited<ReturnType<typeof loadPreviousConnectorEventIdentity>>;
+  if (connectorTypeHasInboundEvents(actionTypeId)) {
+    try {
+      previousIdentity = await loadPreviousConnectorEventIdentity(context, id);
+    } catch (err) {
+      previousIdentity = undefined;
+      if (!shouldDisableInbound) {
+        throw err;
+      }
+      context.logger.error(
+        `Failed to decrypt previous connector event identity for "${id}"; disable will continue and the stored framework key may remain valid: ${
+          err instanceof Error ? err.message : String(err)
+        }`
+      );
+    }
+  } else {
+    previousIdentity = undefined;
   }
 
   const identityAttributes = shouldMintInboundIdentity({ actionTypeId, isInboundEventsEnabled })
@@ -247,6 +253,13 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
   if (result instanceof Error) {
     await invalidateStoredConnectorEventIdentity(context, id, identityAttributes);
   } else {
+    if (shouldDisableInbound) {
+      await deleteIngressCredentialForConnector({
+        unsecuredSavedObjectsClient: context.unsecuredSavedObjectsClient,
+        connectorId: id,
+        logger: context.logger,
+      });
+    }
     await invalidateStoredConnectorEventIdentity(context, id, previousIdentity);
   }
 

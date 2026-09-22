@@ -1231,7 +1231,129 @@ describe('update()', () => {
       const actionCreateOrder = unsecuredSavedObjectsClient.create.mock.invocationCallOrder.find(
         (_, index) => unsecuredSavedObjectsClient.create.mock.calls[index][0] === 'action'
       );
-      expect(bulkDeleteOrder).toBeLessThan(actionCreateOrder ?? Number.POSITIVE_INFINITY);
+      expect(actionCreateOrder).toBeLessThan(bulkDeleteOrder ?? Number.POSITIVE_INFINITY);
+    });
+
+    test('disabling deletes credentials when the previous identity cannot be decrypted', async () => {
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+        ...dualExisting,
+        attributes: {
+          ...dualExisting.attributes,
+          hasInboundEventIdentity: true,
+        },
+      } as never);
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockRejectedValue(
+        new Error('unable to decrypt')
+      );
+      unsecuredSavedObjectsClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'cred-1',
+            type: CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
+            attributes: { connectorId: 'connector-id' },
+            references: [],
+          },
+        ],
+        total: 1,
+        page: 1,
+        per_page: 10,
+      } as never);
+      unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+        statuses: [{ id: 'cred-1', success: true }],
+      } as never);
+
+      const result = await update({
+        context: dualContext,
+        id: 'connector-id',
+        action: { name: 'renamed', config: {}, secrets: {}, isInboundEventsEnabled: false },
+      });
+
+      expect(result.isInboundEventsEnabled).toBe(false);
+      expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledWith([
+        { type: CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE, id: 'cred-1' },
+      ]);
+      const actionCreateOrder = unsecuredSavedObjectsClient.create.mock.invocationCallOrder.find(
+        (_, index) => unsecuredSavedObjectsClient.create.mock.calls[index][0] === 'action'
+      );
+      expect(actionCreateOrder).toBeLessThan(
+        unsecuredSavedObjectsClient.bulkDelete.mock.invocationCallOrder[0]
+      );
+      expect(securityService.authc.apiKeys.invalidateAsInternalUser).not.toHaveBeenCalled();
+      const saved = unsecuredSavedObjectsClient.create.mock.calls.find(
+        (call) => call[0] === 'action'
+      )?.[1] as { hasInboundEventIdentity?: boolean };
+      expect(saved.hasInboundEventIdentity).toBe(false);
+    });
+
+    test('a failed disable leaves the existing ingress credential in place', async () => {
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+        ...dualExisting,
+        attributes: {
+          ...dualExisting.attributes,
+          hasInboundEventIdentity: true,
+        },
+      } as never);
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+        ...dualExisting,
+        attributes: {
+          ...dualExisting.attributes,
+          hasInboundEventIdentity: true,
+          apiKey: encodeApiKey('old-id', 'old-secret'),
+        },
+      } as never);
+      unsecuredSavedObjectsClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'cred-1',
+            type: CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
+            attributes: { connectorId: 'connector-id' },
+            references: [],
+          },
+        ],
+        total: 1,
+        page: 1,
+        per_page: 10,
+      } as never);
+      unsecuredSavedObjectsClient.create.mockRejectedValueOnce(new Error('version conflict'));
+
+      await expect(
+        update({
+          context: dualContext,
+          id: 'connector-id',
+          action: { name: 'renamed', config: {}, secrets: {}, isInboundEventsEnabled: false },
+        })
+      ).rejects.toThrow('version conflict');
+      expect(unsecuredSavedObjectsClient.bulkDelete).not.toHaveBeenCalled();
+    });
+
+    test('an explicit disable deletes credentials when inbound events are already off', async () => {
+      unsecuredSavedObjectsClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'cred-1',
+            type: CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
+            attributes: { connectorId: 'connector-id' },
+            references: [],
+          },
+        ],
+        total: 1,
+        page: 1,
+        per_page: 10,
+      } as never);
+      unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+        statuses: [{ id: 'cred-1', success: true }],
+      } as never);
+
+      const result = await update({
+        context: dualContext,
+        id: 'connector-id',
+        action: { name: 'renamed', config: {}, secrets: {}, isInboundEventsEnabled: false },
+      });
+
+      expect(result.isInboundEventsEnabled).toBe(false);
+      expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledWith([
+        { type: CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE, id: 'cred-1' },
+      ]);
     });
 
     test('rejects the flag on a non-dual type', async () => {

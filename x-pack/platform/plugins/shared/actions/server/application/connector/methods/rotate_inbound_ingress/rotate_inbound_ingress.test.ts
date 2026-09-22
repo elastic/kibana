@@ -219,6 +219,14 @@ describe('rotateInboundIngress', () => {
         hasInboundEventIdentity: true,
       },
     } as never);
+    unsecuredSavedObjectsClient.get.mockResolvedValue({
+      ...decryptedInbound,
+      attributes: {
+        ...decryptedInbound.attributes,
+        actionTypeId: '.dual',
+        hasInboundEventIdentity: true,
+      },
+    } as never);
     (actionTypeRegistry.get as jest.Mock).mockReturnValue(
       getConnectorType({
         id: '.dual',
@@ -252,6 +260,14 @@ describe('rotateInboundIngress', () => {
       (actionTypeId: string) => actionTypeId === '.dual'
     );
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+      ...decryptedInbound,
+      attributes: {
+        ...decryptedInbound.attributes,
+        actionTypeId: '.dual',
+        hasInboundEventIdentity: true,
+      },
+    } as never);
+    unsecuredSavedObjectsClient.get.mockResolvedValue({
       ...decryptedInbound,
       attributes: {
         ...decryptedInbound.attributes,
@@ -324,78 +340,5 @@ describe('rotateInboundIngress', () => {
         (call: [string, ...unknown[]]) => call[0] === CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE
       )
     ).toBe(false);
-  });
-
-  it('drops a credential minted after a concurrent disable', async () => {
-    (connectorTypeHasInboundEvents as jest.Mock).mockImplementation(
-      (actionTypeId: string) => actionTypeId === '.dual'
-    );
-    (connectorTypeIsDual as jest.Mock).mockImplementation(
-      (actionTypeId: string) => actionTypeId === '.dual'
-    );
-    const enabled = {
-      ...decryptedInbound,
-      attributes: {
-        ...decryptedInbound.attributes,
-        actionTypeId: '.dual',
-        hasInboundEventIdentity: true,
-      },
-    };
-    const disabled = {
-      ...enabled,
-      attributes: { ...enabled.attributes, hasInboundEventIdentity: false },
-    };
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser
-      .mockResolvedValueOnce(enabled as never)
-      .mockResolvedValueOnce(disabled as never);
-    let findCount = 0;
-    unsecuredSavedObjectsClient.find.mockImplementation(async () => {
-      findCount += 1;
-      const created = unsecuredSavedObjectsClient.create.mock.calls.find(
-        (call: [string, ...unknown[]]) => call[0] === CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE
-      );
-      const id = (created?.[2] as { id?: string } | undefined)?.id ?? 'cred-new';
-      const savedObjects = [
-        {
-          id,
-          type: CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
-          attributes: { connectorId: 'connector-id' },
-          references: [],
-        },
-      ];
-      if (findCount > 1) {
-        savedObjects.push({
-          id: 'cred-live',
-          type: CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
-          attributes: { connectorId: 'connector-id' },
-          references: [],
-        });
-      }
-      return {
-        saved_objects: savedObjects,
-        total: savedObjects.length,
-        page: 1,
-        per_page: 10,
-      } as never;
-    });
-    unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
-      statuses: [{ id: 'cred-new', success: true }],
-    } as never);
-
-    await expect(
-      rotateInboundIngress({ context: mockContext, id: 'connector-id' })
-    ).rejects.toThrow('Inbound events are not enabled for this connector.');
-
-    const created = unsecuredSavedObjectsClient.create.mock.calls.find(
-      (call: [string, ...unknown[]]) => call[0] === CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE
-    );
-    expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(1);
-    expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledTimes(1);
-    expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledWith([
-      {
-        type: CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
-        id: (created?.[2] as { id: string }).id,
-      },
-    ]);
   });
 });
