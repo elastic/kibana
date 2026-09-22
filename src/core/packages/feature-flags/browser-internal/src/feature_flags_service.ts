@@ -20,8 +20,11 @@ import type {
 import { apm } from '@elastic/apm-rum';
 import { type Client, ClientProviderEvents, OpenFeature } from '@openfeature/web-sdk';
 import deepMerge from 'deepmerge';
+import { useMemo } from 'react';
+import type { Observable } from 'rxjs';
 import { filter, map, merge, startWith, Subject } from 'rxjs';
 import { get } from 'lodash';
+import { useObservable } from '@kbn/use-observable';
 import { buildPath } from '@kbn/core-http-browser';
 
 /**
@@ -62,6 +65,24 @@ const getFeatureFlagValueType = (value: FeatureFlagValue): FeatureFlagValueType 
 
   return 'string';
 };
+
+/** Subscribes to a flag and seeds the first render from the synchronous evaluation. */
+function useFeatureFlagValue<T extends FeatureFlagValue>(
+  flagName: string,
+  fallbackValue: T,
+  getValue$: (flagName: string, fallbackValue: T) => Observable<T>,
+  getValue: (flagName: string, fallbackValue: T) => T
+): T {
+  const value$ = useMemo(
+    () => getValue$(flagName, fallbackValue),
+    [getValue$, flagName, fallbackValue]
+  );
+  const initialValue = useMemo(
+    () => getValue(flagName, fallbackValue),
+    [getValue, flagName, fallbackValue]
+  );
+  return useObservable(value$, initialValue);
+}
 
 export class FeatureFlagsService {
   private readonly featureFlagsClient: Client;
@@ -149,43 +170,37 @@ export class FeatureFlagsService {
 
     await this.waitForProviderInitialization();
 
+    const getBooleanValue = (flagName: string, fallbackValue: boolean) =>
+      this.evaluateFlag(this.featureFlagsClient.getBooleanValue, flagName, fallbackValue);
+    const getBooleanValue$ = (flagName: string, fallbackValue: boolean) =>
+      observeFeatureFlag$(flagName).pipe(map(() => getBooleanValue(flagName, fallbackValue)));
+    const getStringValue = <Value extends string>(flagName: string, fallbackValue: Value) =>
+      this.evaluateFlag<Value>(this.featureFlagsClient.getStringValue, flagName, fallbackValue);
+    const getStringValue$ = <Value extends string>(flagName: string, fallbackValue: Value) =>
+      observeFeatureFlag$(flagName).pipe(map(() => getStringValue(flagName, fallbackValue)));
+    const getNumberValue = <Value extends number>(flagName: string, fallbackValue: Value) =>
+      this.evaluateFlag<Value>(this.featureFlagsClient.getNumberValue, flagName, fallbackValue);
+    const getNumberValue$ = <Value extends number>(flagName: string, fallbackValue: Value) =>
+      observeFeatureFlag$(flagName).pipe(map(() => getNumberValue(flagName, fallbackValue)));
+
+    const useBooleanValue = (flagName: string, fallbackValue: boolean): boolean =>
+      useFeatureFlagValue(flagName, fallbackValue, getBooleanValue$, getBooleanValue);
+    const useStringValue = <Value extends string>(flagName: string, fallbackValue: Value): Value =>
+      useFeatureFlagValue(flagName, fallbackValue, getStringValue$, getStringValue);
+    const useNumberValue = <Value extends number>(flagName: string, fallbackValue: Value): Value =>
+      useFeatureFlagValue(flagName, fallbackValue, getNumberValue$, getNumberValue);
+
     return {
       appendContext: (contextToAppend) => this.appendContext(contextToAppend),
-      getBooleanValue: (flagName: string, fallbackValue: boolean) =>
-        this.evaluateFlag(this.featureFlagsClient.getBooleanValue, flagName, fallbackValue),
-      getStringValue: <Value extends string>(flagName: string, fallbackValue: Value) =>
-        this.evaluateFlag<Value>(this.featureFlagsClient.getStringValue, flagName, fallbackValue),
-      getNumberValue: <Value extends number>(flagName: string, fallbackValue: Value) =>
-        this.evaluateFlag<Value>(this.featureFlagsClient.getNumberValue, flagName, fallbackValue),
-      getBooleanValue$: (flagName, fallbackValue) => {
-        return observeFeatureFlag$(flagName).pipe(
-          map(() =>
-            this.evaluateFlag(this.featureFlagsClient.getBooleanValue, flagName, fallbackValue)
-          )
-        );
-      },
-      getStringValue$: <Value extends string>(flagName: string, fallbackValue: Value) => {
-        return observeFeatureFlag$(flagName).pipe(
-          map(() =>
-            this.evaluateFlag<Value>(
-              this.featureFlagsClient.getStringValue,
-              flagName,
-              fallbackValue
-            )
-          )
-        );
-      },
-      getNumberValue$: <Value extends number>(flagName: string, fallbackValue: Value) => {
-        return observeFeatureFlag$(flagName).pipe(
-          map(() =>
-            this.evaluateFlag<Value>(
-              this.featureFlagsClient.getNumberValue,
-              flagName,
-              fallbackValue
-            )
-          )
-        );
-      },
+      getBooleanValue,
+      getStringValue,
+      getNumberValue,
+      getBooleanValue$,
+      useBooleanValue,
+      getStringValue$,
+      useStringValue,
+      getNumberValue$,
+      useNumberValue,
     };
   }
 
