@@ -85,7 +85,7 @@ const runRequest = async <Response>(request: () => Promise<Response>): Promise<R
 
 const getViewRoute = (name: string) => `${VIEWS_ROUTE}/${encodeURIComponent(name)}`;
 
-export const createEsqlViewsClient = (http: HttpStart): EsqlViewsClient => {
+export const createEsqlViewsManagementClient = (http: HttpStart): EsqlViewsClient => {
   const getViews = (signal?: AbortSignal) =>
     runRequest(() =>
       http.get<EsqlViewsResult>(VIEWS_ROUTE, {

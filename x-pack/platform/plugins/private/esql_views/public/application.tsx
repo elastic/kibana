@@ -8,7 +8,7 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import type { CoreStart } from '@kbn/core/public';
-import { createEsqlViewsClient } from '@kbn/esql-utils';
+import { createEsqlViewsManagementClient } from '@kbn/esql-utils';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { PLUGIN_NAME } from '../common';
 import { ManagementApp } from './management_app';
@@ -21,7 +21,7 @@ export const mountManagementSection = (
   docTitle.change(PLUGIN_NAME);
   setBreadcrumbs([{ text: PLUGIN_NAME }]);
 
-  const client = createEsqlViewsClient(coreStart.http);
+  const client = createEsqlViewsManagementClient(coreStart.http);
   const root = createRoot(element);
   root.render(
     coreStart.rendering.addContext(

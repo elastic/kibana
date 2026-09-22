@@ -102,7 +102,7 @@ export {
   isSingleSource,
   type ESQLSourceKind,
   ensureApproximationLicense,
-  createEsqlViewsClient,
+  createEsqlViewsManagementClient,
   EsqlViewsClientError,
   type EsqlViewsClient,
 } from './src';

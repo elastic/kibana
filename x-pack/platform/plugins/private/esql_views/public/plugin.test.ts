@@ -16,7 +16,7 @@ jest.mock('@kbn/app-header', () => ({
 }));
 
 jest.mock('@kbn/esql-utils', () => ({
-  createEsqlViewsClient: () => ({
+  createEsqlViewsManagementClient: () => ({
     getViews: jest.fn().mockResolvedValue({ views: [] }),
   }),
 }));
