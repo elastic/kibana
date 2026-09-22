@@ -23,6 +23,7 @@ import { KI_SUMMARY_PAGE_SIZE } from '../../../common/constants';
 import {
   AutomationsPanel,
   DescriptionPanel,
+  TracesPanel,
   LockedSectionPanel,
   SignalsPanel,
   SourcesPanel,
@@ -153,6 +154,13 @@ export const AiIndexDetailPage = () => {
       {selectedTab === 'overview' && (
         <>
           <DescriptionPanel
+            isLoading={isLoading}
+            aiIndex={aiIndex}
+            onSaved={refetch}
+            isManaged={!!aiIndex?.managed}
+          />
+          <EuiSpacer size="m" />
+          <TracesPanel
             isLoading={isLoading}
             aiIndex={aiIndex}
             onSaved={refetch}
