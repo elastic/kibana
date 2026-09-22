@@ -212,7 +212,6 @@ export const getPolicySettingsFormTestSubjects = (
       windows: {
         row: perOsEventCollectionTestSubj('windows'),
         optionsContainer: perOsEventCollectionTestSubj('windows-options'),
-        selectedCount: perOsEventCollectionTestSubj('windows-selectedCount'),
         credentialsCheckbox: perOsEventCollectionTestSubj('windows-credential_access'),
         dllCheckbox: perOsEventCollectionTestSubj('windows-dll_and_driver_load'),
         dnsCheckbox: perOsEventCollectionTestSubj('windows-dns'),
@@ -225,7 +224,6 @@ export const getPolicySettingsFormTestSubjects = (
       mac: {
         row: perOsEventCollectionTestSubj('mac'),
         optionsContainer: perOsEventCollectionTestSubj('mac-options'),
-        selectedCount: perOsEventCollectionTestSubj('mac-selectedCount'),
         dnsCheckbox: perOsEventCollectionTestSubj('mac-dns'),
         fileCheckbox: perOsEventCollectionTestSubj('mac-file'),
         networkCheckbox: perOsEventCollectionTestSubj('mac-network'),
@@ -235,7 +233,6 @@ export const getPolicySettingsFormTestSubjects = (
       linux: {
         row: perOsEventCollectionTestSubj('linux'),
         optionsContainer: perOsEventCollectionTestSubj('linux-options'),
-        selectedCount: perOsEventCollectionTestSubj('linux-selectedCount'),
         dnsCheckbox: perOsEventCollectionTestSubj('linux-dns'),
         fileCheckbox: perOsEventCollectionTestSubj('linux-file'),
         networkCheckbox: perOsEventCollectionTestSubj('linux-network'),

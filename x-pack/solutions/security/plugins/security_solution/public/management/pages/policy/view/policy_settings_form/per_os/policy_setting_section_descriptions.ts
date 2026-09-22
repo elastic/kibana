@@ -36,8 +36,7 @@ export const POLICY_SETTING_SECTION_DESCRIPTIONS = Object.freeze({
   antivirusSolution: i18n.translate(
     'xpack.securitySolution.endpoint.policy.details.antivirusSolutionDescription',
     {
-      defaultMessage:
-        'Register Elastic as an official Antivirus solution for Windows OS. This will also disable Windows Defender.',
+      defaultMessage: 'Register Elastic as an official Antivirus solution.',
     }
   ),
   deviceControl: i18n.translate(

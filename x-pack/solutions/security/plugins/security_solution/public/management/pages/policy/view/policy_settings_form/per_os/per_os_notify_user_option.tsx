@@ -61,6 +61,10 @@ type ReadonlyNotificationPolicyBranch<Protection extends PolicyProtection> = {
 /** The notification branches this component writes; optional, since an older policy may lack one. */
 type MutableNotificationBranches = Partial<Record<PolicyProtection, NotificationFields>>;
 
+/** Rule-based protections describe their notification's dynamic content as a detection { rule }; the rest describe it as a { filename }. */
+const isRuleBasedNotificationProtection = (protectionType: PolicyProtection): boolean =>
+  protectionType === 'memory_protection' || protectionType === 'behavior_protection';
+
 type NotifyUserOSes = ProtectionOperatingSystems[PolicyProtection];
 
 export type PerOsNotifyUserOptionProps = {
@@ -138,7 +142,7 @@ export const PerOsNotifyUserOption = memo<PerOsNotifyUserOptionProps>(
     }, []);
 
     const tooltipBracketText = useCallback((protectionType: PolicyProtection) => {
-      if (protectionType === 'memory_protection' || protectionType === 'behavior_protection') {
+      if (isRuleBasedNotificationProtection(protectionType)) {
         return i18n.translate('xpack.securitySolution.endpoint.policyDetail.rule', {
           defaultMessage: 'rule',
         });
@@ -183,6 +187,7 @@ export const PerOsNotifyUserOption = memo<PerOsNotifyUserOptionProps>(
         color="subdued"
         paddingSize="s"
         hasShadow={false}
+        hasBorder={true}
         data-test-subj={getTestId()}
         css={osRowPanelCss}
       >
@@ -213,9 +218,15 @@ export const PerOsNotifyUserOption = memo<PerOsNotifyUserOptionProps>(
                       />
                       <EuiSpacer size="m" />
                       <FormattedMessage
-                        id="xpack.securitySolution.endpoint.policyDetailsConfig.notifyUserTooltip.c"
-                        defaultMessage="The user notification can be customized in the text box below. Bracketed tags can be used to dynamically populate the applicable action (such as prevented or detected) and the { bracketText }."
-                        values={{ bracketText: tooltipBracketText(protection) }}
+                        id="xpack.securitySolution.endpoint.policyDetailsConfig.perOs.notifyUserTooltip.customization"
+                        defaultMessage="The user notification can be customized in the text box. Bracketed tags are replaced at runtime: {actionToken} becomes the applicable action, such as prevented or detected, and {contentToken} becomes the {contentName}."
+                        values={{
+                          actionToken: '{action}',
+                          contentToken: isRuleBasedNotificationProtection(protection)
+                            ? '{rule}'
+                            : '{filename}',
+                          contentName: tooltipBracketText(protection),
+                        }}
                       />
                       <EuiSpacer size="s" />
                       <SupportedVersionForProtectionNotice

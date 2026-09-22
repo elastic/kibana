@@ -15,7 +15,6 @@ import {
   EuiIconTip,
   EuiPanel,
   EuiSwitch,
-  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
@@ -208,10 +207,6 @@ const renderPerOsEventCollectionRow = <OS extends EventCollectionOs>(
   inputIdPrefix: string
 ) => {
   const isEditMode = mode === 'edit';
-  const totalOptions = options.length;
-  // Count the rendered options only: a field hidden by a feature flag must not appear in the
-  // numerator while the denominator excludes it. Supplemental fields count toward neither.
-  const selectedCount = countSelectedEvents(selection, options);
 
   return (
     <OsRow
@@ -239,20 +234,6 @@ const renderPerOsEventCollectionRow = <OS extends EventCollectionOs>(
             </EuiFlexItem>
           ))}
         </EuiFlexGroup>
-      }
-      inlineControls={
-        <EuiText size="s" color="subdued" data-test-subj={getTestId('selectedCount')}>
-          {i18n.translate(
-            'xpack.securitySolution.endpoint.policy.details.perOs.eventCollectionsEnabled',
-            {
-              defaultMessage: '{selected} / {total} event collections enabled',
-              values: {
-                selected: selectedCount,
-                total: totalOptions,
-              },
-            }
-          )}
-        </EuiText>
       }
       isLast={isLast}
       data-test-subj={getTestId()}
@@ -349,11 +330,6 @@ const hasSelectedEvent = <OS extends OperatingSystem>(
   selection: EventFormSelection<OS>,
   options: ReadonlyArray<EventFormOption<OS>>
 ): boolean => options.some(({ protectionField }) => Boolean(selection[protectionField]));
-
-const countSelectedEvents = <OS extends OperatingSystem>(
-  selection: EventFormSelection<OS>,
-  options: ReadonlyArray<EventFormOption<OS>>
-): number => options.filter(({ protectionField }) => Boolean(selection[protectionField])).length;
 
 const isLinuxSupplementalOptionDisabled = (
   field: ProtectionField<OperatingSystem.LINUX>,

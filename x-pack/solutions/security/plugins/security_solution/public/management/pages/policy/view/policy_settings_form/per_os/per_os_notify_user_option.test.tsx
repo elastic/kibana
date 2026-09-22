@@ -80,6 +80,19 @@ describe('PerOsNotifyUserOption', () => {
     expect(renderResult.getByRole('textbox', { name: 'Customize message' })).toBeInTheDocument();
   });
 
+  it('shows the { action } and { filename } tokens in the notify tooltip for malware', async () => {
+    render();
+
+    await userEvent.hover(renderResult.getByTestId('test-tooltipIcon'));
+
+    expect(
+      await renderResult.findByText(
+        'The user notification can be customized in the text box. Bracketed tags are replaced at runtime: {action} becomes the applicable action, such as prevented or detected, and {filename} becomes the filename.',
+        { exact: false }
+      )
+    ).toBeInTheDocument();
+  });
+
   it('renders the message input in checked and unchecked states and disables it when unchecked', () => {
     render();
     expect(renderResult.getByTestId('test-customMessage')).toBeEnabled();

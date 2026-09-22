@@ -106,13 +106,13 @@ describe('PerOsAntivirusRegistrationCard', () => {
   });
 
   it.each([AntivirusRegistrationModes.enabled, AntivirusRegistrationModes.disabled])(
-    'hides the sync-behaviour warning when the mode is %s',
+    'hides the sync explanation when the mode is %s',
     (mode) => {
       policy.windows.antivirus_registration.mode = mode;
       render();
 
       expect(
-        renderResult.queryByTestId(`${testSubj.card}-windows-syncTooltip`)
+        renderResult.queryByTestId(`${testSubj.card}-windows-syncExplanation`)
       ).not.toBeInTheDocument();
       // the OS restriction is unconditional, so it must still be there
       expect(
@@ -121,11 +121,29 @@ describe('PerOsAntivirusRegistrationCard', () => {
     }
   );
 
-  it('shows the sync-behaviour warning only when the sync mode is selected', () => {
+  // Rendered text rather than tooltip content: an `EuiIconTip` keeps its message out of the DOM
+  // until the user hovers, so finding it on a plain render is what proves it is inline now.
+  it('shows the sync explanation inline when the sync mode is selected', () => {
     policy.windows.antivirus_registration.mode = AntivirusRegistrationModes.sync;
     render();
 
-    expect(renderResult.getByTestId(`${testSubj.card}-windows-syncTooltip`)).toBeInTheDocument();
+    expect(renderResult.getByTestId(`${testSubj.card}-windows-syncExplanation`)).toHaveTextContent(
+      'Use this setting to automatically enable antivirus registration if malware protection is set to Prevent. ' +
+        'In any other case, antivirus registration will be disabled.'
+    );
+  });
+
+  it.each([
+    AntivirusRegistrationModes.enabled,
+    AntivirusRegistrationModes.disabled,
+    AntivirusRegistrationModes.sync,
+  ])('shows the Windows Defender notice regardless of mode (%s)', (mode) => {
+    policy.windows.antivirus_registration.mode = mode;
+    render();
+
+    expect(renderResult.getByTestId(`${testSubj.card}-windows-defenderNotice`)).toHaveTextContent(
+      'This will also disable Windows Defender.'
+    );
   });
 
   it('exposes all three AntivirusRegistrationModes values in the dropdown', async () => {

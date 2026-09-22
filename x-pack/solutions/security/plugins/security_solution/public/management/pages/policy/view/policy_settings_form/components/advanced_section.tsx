@@ -153,7 +153,9 @@ export const AdvancedSection = memo<AdvancedSectionProps>(
           aria-controls={showAdvancedPolicy ? advancedSettingsId : undefined}
           {...(fullWidthToggle
             ? {
-                iconType: showAdvancedPolicy ? ('arrowUp' as const) : ('arrowDown' as const),
+                iconType: showAdvancedPolicy
+                  ? ('chevronSingleUp' as const)
+                  : ('chevronSingleDown' as const),
                 // EuiButtonEmpty exposes no fullWidth prop (only `flush`/`size`), so the
                 // supported composition point is EUI's css prop. The chevron is what tests
                 // assert on; no styling-free class is added purely as a selector.

@@ -42,9 +42,16 @@ export const OS_LABEL_COLUMN_WIDTH = '5rem';
 export const OS_CONTROL_WIDTH = '22rem';
 
 /**
- * Top margin for the subdued panel that sits below an OS row's controls — the notify-user
- * panel and the Linux session-data panel. Shared so the two cannot drift: they previously
- * used different spacing (a `marginTop` token versus an `EuiSpacer`), which read as a
- * misalignment between cards.
+ * Spacing and surface for the panel that sits below an OS row's controls: the notify-user panel,
+ * the Linux session-data panel and the supplemental event-collection panel. Shared so they cannot
+ * drift; they previously used different spacing (a `marginTop` token versus an `EuiSpacer`),
+ * which read as a misalignment between cards.
+ *
+ * The panels use `EuiPanel`'s `subdued` surface with a border. The palette has no shade between
+ * `subdued` and the next step up, so the border, not a darker fill, is what separates the panel
+ * from the card. Everything about their appearance comes from `EuiPanel` props; only the top
+ * margin lives here.
  */
-export const osRowPanelCss = ({ euiTheme }: UseEuiTheme) => ({ marginTop: euiTheme.size.m });
+export const osRowPanelCss = ({ euiTheme }: UseEuiTheme) => ({
+  marginTop: euiTheme.size.m,
+});

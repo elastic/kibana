@@ -75,6 +75,22 @@ const OS_RESTRICTION = i18n.translate(
   }
 );
 
+const SYNC_EXPLANATION = i18n.translate(
+  'xpack.securitySolution.endpoint.policy.details.antivirusRegistration.syncWithMalwarePrevent.tooltip',
+  {
+    defaultMessage:
+      'Use this setting to automatically enable antivirus registration if malware protection is set to Prevent. ' +
+      'In any other case, antivirus registration will be disabled.',
+  }
+);
+
+const WINDOWS_DEFENDER_NOTICE = i18n.translate(
+  'xpack.securitySolution.endpoint.policy.details.antivirusRegistration.windowsDefenderNotice',
+  {
+    defaultMessage: 'This will also disable Windows Defender.',
+  }
+);
+
 const ANTIVIRUS_REGISTRATION_MODE_OPTIONS = buildOsControlSelectOptions([
   {
     value: AntivirusRegistrationModes.disabled,
@@ -140,58 +156,64 @@ export const PerOsAntivirusRegistrationCard = memo<PerOsAntivirusRegistrationCar
             />
           }
           primaryControl={
-            <EuiFlexGroup alignItems="center" gutterSize="s">
-              <EuiFlexItem
-                grow={false}
-                data-test-subj={getTestId('windows-mode-fixedWidth')}
-                css={{ inlineSize: OS_CONTROL_WIDTH, maxInlineSize: '100%' }}
-              >
-                <EuiSuperSelect<AntivirusRegistrationModes>
-                  options={ANTIVIRUS_REGISTRATION_MODE_OPTIONS}
-                  valueOfSelected={currentMode}
-                  onChange={handleModeChange}
-                  disabled={!isEditMode}
-                  fullWidth={true}
-                  data-test-subj={getTestId('windows-mode')}
-                  aria-label={ANTIVIRUS_REGISTRATION_MODE_SELECT_ARIA_LABEL}
-                />
-              </EuiFlexItem>
-              {currentMode === AntivirusRegistrationModes.sync && (
-                <EuiFlexItem grow={false}>
-                  <EuiIconTip
-                    type="warning"
-                    color="warning"
-                    position="right"
-                    anchorProps={{ 'data-test-subj': getTestId('windows-syncTooltip') }}
-                    content={i18n.translate(
-                      'xpack.securitySolution.endpoint.policy.details.antivirusRegistration.syncWithMalwarePrevent.tooltip',
-                      {
-                        defaultMessage:
-                          'Use this setting to automatically enable antivirus registration if malware protection is set to Prevent. ' +
-                          'In any other case, antivirus registration will be disabled.',
-                      }
-                    )}
-                  />
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
+            <div
+              data-test-subj={getTestId('windows-mode-fixedWidth')}
+              css={{ inlineSize: OS_CONTROL_WIDTH, maxInlineSize: '100%' }}
+            >
+              <EuiSuperSelect<AntivirusRegistrationModes>
+                options={ANTIVIRUS_REGISTRATION_MODE_OPTIONS}
+                valueOfSelected={currentMode}
+                onChange={handleModeChange}
+                disabled={!isEditMode}
+                fullWidth={true}
+                data-test-subj={getTestId('windows-mode')}
+                aria-label={ANTIVIRUS_REGISTRATION_MODE_SELECT_ARIA_LABEL}
+              />
+            </div>
           }
           isLast={true}
           data-test-subj={getTestId('windows')}
         >
-          {currentMode === AntivirusRegistrationModes.sync && (
-            <EuiText color={isEditMode ? 'subdued' : undefined} size="xs">
-              {i18n.translate(
-                'xpack.securitySolution.endpoint.policy.details.antivirusRegistration.syncWithMalwarePrevent.currentOutcome',
-                {
-                  defaultMessage: '(Current level: {currentOutcome})',
-                  values: {
-                    currentOutcome,
-                  },
-                }
-              )}
-            </EuiText>
-          )}
+          {/* Matches the column gutter below, so the first line clears the select by the same
+              amount the lines clear each other. */}
+          <EuiSpacer size="xs" />
+          <EuiFlexGroup direction="column" gutterSize="xs">
+            <EuiFlexItem grow={false}>
+              <EuiText
+                color={isEditMode ? 'subdued' : undefined}
+                size="xs"
+                data-test-subj={getTestId('windows-defenderNotice')}
+              >
+                {WINDOWS_DEFENDER_NOTICE}
+              </EuiText>
+            </EuiFlexItem>
+            {currentMode === AntivirusRegistrationModes.sync && (
+              <>
+                <EuiFlexItem grow={false}>
+                  <EuiText
+                    color={isEditMode ? 'subdued' : undefined}
+                    size="xs"
+                    data-test-subj={getTestId('windows-syncExplanation')}
+                  >
+                    {SYNC_EXPLANATION}
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText color={isEditMode ? 'subdued' : undefined} size="xs">
+                    {i18n.translate(
+                      'xpack.securitySolution.endpoint.policy.details.antivirusRegistration.syncWithMalwarePrevent.currentOutcome',
+                      {
+                        defaultMessage: '(Current level: {currentOutcome})',
+                        values: {
+                          currentOutcome,
+                        },
+                      }
+                    )}
+                  </EuiText>
+                </EuiFlexItem>
+              </>
+            )}
+          </EuiFlexGroup>
         </OsRow>
       </PerOsSettingCard>
     );

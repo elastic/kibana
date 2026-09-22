@@ -14,7 +14,7 @@ import type { AppContextTestRender } from '../../../../../../common/mock/endpoin
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
 import { FleetPackagePolicyGenerator } from '../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import type { PolicyConfig } from '../../../../../../../common/endpoint/types';
-import { exactMatchText, expectIsViewOnly, getPolicySettingsFormTestSubjects } from '../mocks';
+import { expectIsViewOnly, getPolicySettingsFormTestSubjects } from '../mocks';
 import type { PerOsEventCollectionCardProps } from './per_os_event_collection_card';
 import { PerOsEventCollectionCard } from './per_os_event_collection_card';
 
@@ -198,21 +198,6 @@ describe('PerOsEventCollectionCard', () => {
     ).toHaveLength(3);
   });
 
-  // A stored `dns` selection must not be counted while the flag hides its checkbox, or the row
-  // reports more selected events than it renders.
-  it('excludes a hidden Linux DNS selection from the count when linuxDnsEvents is disabled', () => {
-    mockedContext.setExperimentalFlag({ linuxDnsEvents: false });
-    policy.linux.events.dns = true;
-    policy.linux.events.file = true;
-    policy.linux.events.network = true;
-    policy.linux.events.process = true;
-    render();
-
-    expect(renderResult.getByTestId(testSubj.linux.selectedCount)).toHaveTextContent(
-      '3 / 3 event collections enabled'
-    );
-  });
-
   it('disables tty_io while session_data is false', () => {
     policy.linux.events.process = true;
     policy.linux.events.session_data = false;
@@ -265,54 +250,5 @@ describe('PerOsEventCollectionCard', () => {
     render();
 
     expect(renderResult.getByTestId(testSubj.windows.fileCheckbox)).not.toBeChecked();
-  });
-
-  it('shows the selected / total event collection count on each OS row', () => {
-    render();
-
-    expect(renderResult.getByTestId(`${testSubj.windows.row}-selectedCount`)).toHaveTextContent(
-      exactMatchText('8 / 8 event collections enabled')
-    );
-    expect(renderResult.getByTestId(`${testSubj.mac.row}-selectedCount`)).toHaveTextContent(
-      exactMatchText('5 / 5 event collections enabled')
-    );
-    expect(renderResult.getByTestId(`${testSubj.linux.row}-selectedCount`)).toHaveTextContent(
-      exactMatchText('4 / 4 event collections enabled')
-    );
-  });
-
-  it('updates only the Windows count when a Windows checkbox is toggled', async () => {
-    render();
-
-    await userEvent.click(renderResult.getByTestId(testSubj.windows.fileCheckbox));
-    policy = getUpdatedPolicy();
-    renderResult.rerender(<PerOsEventCollectionCard {...props} policy={policy} />);
-
-    expect(renderResult.getByTestId(`${testSubj.windows.row}-selectedCount`)).toHaveTextContent(
-      exactMatchText('7 / 8 event collections enabled')
-    );
-    expect(renderResult.getByTestId(`${testSubj.mac.row}-selectedCount`)).toHaveTextContent(
-      exactMatchText('5 / 5 event collections enabled')
-    );
-    expect(renderResult.getByTestId(`${testSubj.linux.row}-selectedCount`)).toHaveTextContent(
-      exactMatchText('4 / 4 event collections enabled')
-    );
-  });
-
-  it('does not count Linux session_data or tty_io toward selected or total', () => {
-    policy.linux.events.session_data = true;
-    policy.linux.events.tty_io = true;
-    policy.linux.events.file = false;
-    render();
-
-    expect(renderResult.getByTestId(`${testSubj.linux.row}-selectedCount`)).toHaveTextContent(
-      exactMatchText('3 / 4 event collections enabled')
-    );
-    expect(renderResult.getByTestId(`${testSubj.windows.row}-selectedCount`)).toHaveTextContent(
-      exactMatchText('8 / 8 event collections enabled')
-    );
-    expect(renderResult.getByTestId(`${testSubj.mac.row}-selectedCount`)).toHaveTextContent(
-      exactMatchText('5 / 5 event collections enabled')
-    );
   });
 });

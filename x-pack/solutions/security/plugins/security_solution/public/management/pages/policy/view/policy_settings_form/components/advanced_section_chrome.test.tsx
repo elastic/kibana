@@ -43,21 +43,28 @@ describe('Policy Advanced Settings section chrome', () => {
     const renderResult = renderSection();
     const toggle = getToggle(renderResult);
 
-    expect(toggle.querySelector('[data-euiicon-type="arrowDown"]')).not.toBeInTheDocument();
-    expect(toggle.querySelector('[data-euiicon-type="arrowUp"]')).not.toBeInTheDocument();
+    expect(toggle.querySelector('[data-euiicon-type="chevronSingleDown"]')).not.toBeInTheDocument();
+    expect(toggle.querySelector('[data-euiicon-type="chevronSingleUp"]')).not.toBeInTheDocument();
   });
 
+  // The jsdom `EuiIcon` mock echoes any `iconType` string onto `data-euiicon-type` without
+  // checking it is a real icon, which is how `arrowUp`/`arrowDown` shipped rendering nothing.
+  // Asserting the exact name at least pins the one that was verified in a browser.
   it('renders a full-width toggle with a chevron when fullWidthToggle is true', async () => {
     const renderResult = renderSection({ fullWidthToggle: true });
     const toggle = getToggle(renderResult);
 
-    expect(toggle.querySelector('[data-euiicon-type="arrowDown"]')).toBeInTheDocument();
+    expect(toggle.querySelector('[data-euiicon-type]')).toHaveAttribute(
+      'data-euiicon-type',
+      'chevronSingleDown'
+    );
 
     await userEvent.click(toggle);
 
-    expect(
-      getToggle(renderResult).querySelector('[data-euiicon-type="arrowUp"]')
-    ).toBeInTheDocument();
+    expect(getToggle(renderResult).querySelector('[data-euiicon-type]')).toHaveAttribute(
+      'data-euiicon-type',
+      'chevronSingleUp'
+    );
   });
 
   it('sets aria-expanded to false when collapsed and true after click', async () => {

@@ -111,6 +111,7 @@ export const PerOsDeviceControlNotifyUserOption = memo<PerOsDeviceControlNotifyU
         color="subdued"
         paddingSize="s"
         hasShadow={false}
+        hasBorder={true}
         data-test-subj={getTestId()}
         css={osRowPanelCss}
       >
@@ -139,9 +140,13 @@ export const PerOsDeviceControlNotifyUserOption = memo<PerOsDeviceControlNotifyU
                         defaultMessage="Selecting the user notification option will display a notification to the host user when device access is blocked or restricted."
                       />
                       <EuiSpacer size="m" />
+                      {/* No bracketed tags here on purpose: unlike the other protections, the
+                          device-control default message carries no placeholders and none are
+                          documented, so naming tokens would invite the user to type ones the
+                          endpoint never substitutes. */}
                       <FormattedMessage
-                        id="xpack.securitySolution.endpoint.policyDetailsConfig.deviceControl.notifyUserTooltip.c"
-                        defaultMessage="The user notification can be customized in the text box below. Bracketed tags can be used to dynamically populate the applicable action and device type."
+                        id="xpack.securitySolution.endpoint.policyDetailsConfig.deviceControl.perOs.notifyUserTooltip.customization"
+                        defaultMessage="The user notification can be customized in the text box."
                       />
                     </>
                   }
