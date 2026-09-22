@@ -18,13 +18,6 @@ import { AbstractFileSystem } from './abstract_file_system';
 import type { ArchiveMetadata } from './types';
 import { join } from './utils';
 
-function getGsutilArgs(args: string[]): string[] {
-  const caCertificatesFile = process.env.SSL_CERT_FILE;
-  return caCertificatesFile
-    ? ['-o', `Boto:ca_certificates_file=${caCertificatesFile}`, ...args]
-    : args;
-}
-
 export class GcsFileSystem extends AbstractFileSystem {
   constructor(log: SomeDevLog) {
     super(log);
@@ -98,7 +91,7 @@ export class GcsFileSystem extends AbstractFileSystem {
   protected async hasArchive(archivePath: string): Promise<boolean> {
     const commands: Array<[cmd: string, args: string[]]> = [
       ['gcloud', ['storage', 'ls', '--uri', archivePath]],
-      ['gsutil', getGsutilArgs(['-q', 'ls', archivePath])],
+      ['gsutil', ['-q', 'ls', archivePath]],
     ];
 
     for (const [cmd, args] of commands) {
@@ -119,7 +112,7 @@ export class GcsFileSystem extends AbstractFileSystem {
   protected async readMetadata(metadataPath: string): Promise<ArchiveMetadata | undefined> {
     const commands: Array<[cmd: string, args: string[]]> = [
       ['gcloud', ['storage', 'cat', metadataPath]],
-      ['gsutil', getGsutilArgs(['cat', metadataPath])],
+      ['gsutil', ['cat', metadataPath]],
     ];
 
     for (const [cmd, args] of commands) {

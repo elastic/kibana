@@ -7,6 +7,7 @@ export CI=true
 if [[ "${USE_CITADEL_PROXY:-}" == "true" ]]; then
   export NO_PROXY="169.254.169.254,metadata.google.internal,localhost,127.0.0.1,0.0.0.0,secrets.elastic.co,iamcredentials.googleapis.com,oauth2.googleapis.com,.iamcredentials.googleapis.com,.oauth2.googleapis.com,*.iamcredentials.googleapis.com,*.oauth2.googleapis.com"
   export no_proxy="${NO_PROXY}"
+  export CLOUDSDK_CORE_CUSTOM_CA_CERTS_FILE="${SSL_CERT_FILE}"
 fi
 
 KIBANA_DIR=$(pwd)
