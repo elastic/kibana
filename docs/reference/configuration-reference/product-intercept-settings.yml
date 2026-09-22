@@ -1,6 +1,6 @@
 ---
 # This file is used to generate "Product intercept settings" page in the product docs
-# For the schema and an example refer to the automated settings reference: 
+# For the schema and an example refer to the automated settings reference:
 # https://github.com/elastic/docs-builder/blob/main/docs/syntax/automated_settings.md
 
 product: Kibana
@@ -21,7 +21,7 @@ groups:
         datatype: bool
         default: true
         applies_to:
-          stack: ga 9.1
+          stack: ga 8.19.4
           ech: ga
           self: ga
 
@@ -31,6 +31,6 @@ groups:
         datatype: string
         default: '90d'
         applies_to:
-          stack: ga 9.1
+          stack: ga 8.19.4
           ech: ga
           self: ga
