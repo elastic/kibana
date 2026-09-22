@@ -117,3 +117,15 @@ describe('MatcherSuggestionsService.getRuleEventFieldNames', () => {
     await expect(service.getRuleEventFieldNames()).rejects.toBe(error);
   });
 });
+
+describe('MatcherSuggestionsService.getSuggestions', () => {
+  const service = new MatcherSuggestionsService(createMockEsClient());
+
+  it('suggests episode status values using the episode index field name', async () => {
+    await expect(service.getSuggestions('episode.status', 'act')).resolves.toEqual(['active']);
+  });
+
+  it('suggests severity values', async () => {
+    await expect(service.getSuggestions('severity', 'h')).resolves.toContain('high');
+  });
+});
