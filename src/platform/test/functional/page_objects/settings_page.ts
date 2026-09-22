@@ -500,7 +500,7 @@ export class SettingsPageObject extends FtrService {
   }
 
   async isIndexPatternListEmpty() {
-    return !(await this.testSubjects.exists('indexPatternTable', { timeout: 5000 }));
+    return !(await this.testSubjects.waitForExists('indexPatternTable', { timeout: 5000 }));
   }
 
   async removeLogstashIndexPatternIfExist() {

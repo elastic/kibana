@@ -358,7 +358,7 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       return testSubjects.findAll('anomalyRow');
     },
     async setAnomaliesDate(date: string) {
-      if (await testSubjects.exists('dateRangePickerControlButton', { timeout: 2000 })) {
+      if (await testSubjects.waitForExists('dateRangePickerControlButton', { timeout: 2000 })) {
         // New DateRangePicker: open custom range panel and set the start date,
         // leaving the existing end date untouched.
         await testSubjects.click('dateRangePickerControlButton');
@@ -413,7 +413,7 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
     async dismissDatePickerTooltip() {
       const datePicker = await this.getDatePickerInput();
       return retry.try(async () => {
-        const isTooltipOpen = await testSubjects.exists(`waffleDatePickerIntervalTooltip`, {
+        const isTooltipOpen = await testSubjects.waitForExists(`waffleDatePickerIntervalTooltip`, {
           timeout: 3000,
         });
 
@@ -528,7 +528,7 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
     async closeFlyoutWithEscape() {
       await retry.tryForTime(5000, async () => {
         await browser.pressKeys(browser.keys.ESCAPE);
-        const flyoutClosed = !(await testSubjects.exists('euiFlyoutCloseButton', {
+        const flyoutClosed = !(await testSubjects.waitForExists('euiFlyoutCloseButton', {
           timeout: 1000,
         }));
         if (!flyoutClosed) {

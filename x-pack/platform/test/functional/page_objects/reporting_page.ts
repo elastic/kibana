@@ -200,7 +200,7 @@ export class ReportingPageObject extends FtrService {
 
   async checkForReportingToasts() {
     this.log.debug('Reporting:checkForReportingToasts');
-    const isToastPresent = await this.testSubjects.exists('completeReportSuccess', {
+    const isToastPresent = await this.testSubjects.waitForExists('completeReportSuccess', {
       allowHidden: true,
       timeout: 90000,
     });

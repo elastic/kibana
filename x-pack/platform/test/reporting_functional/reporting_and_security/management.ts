@@ -91,11 +91,11 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
         await retry.try(async () => {
           if (
-            !(await testSubjects.exists('exportDerivativeFlyout-scheduledReports', {
+            !(await testSubjects.waitForExists('exportDerivativeFlyout-scheduledReports', {
               timeout: 1000,
             }))
           ) {
-            if (!(await testSubjects.exists('scheduleExport', { timeout: 1000 }))) {
+            if (!(await testSubjects.waitForExists('scheduleExport', { timeout: 1000 }))) {
               await PageObjects.exports.clickExportTopNavButton();
             }
             await (await testSubjects.find('scheduleExport')).click();

@@ -117,7 +117,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         for (const operation of allOperations) {
           expect(
-            testSubjects.exists(`lns-indexPatternDimension-${operation} incompatible`, {
+            testSubjects.waitForExists(`lns-indexPatternDimension-${operation} incompatible`, {
               timeout: 500,
             })
           ).to.eql(false);
