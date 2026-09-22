@@ -7,13 +7,9 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
-import {
-  isConversationNotFoundError,
-  type MetadataFieldValue,
-} from '@kbn/agent-builder-common';
+import type { MetadataFieldValue } from '@kbn/agent-builder-common';
 import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
 import type { ProposalWithMetadata } from '@kbn/agentic-investigations-plugin/common';
-import type { Investigation } from '@kbn/agentic-investigations-common';
 import type { ProposalItem, ProposalsPageResponse } from '../../../common/proposals/list';
 
 type ProposalsService = ReturnType<AgenticInvestigationsPluginStart['getProposalsService']>;
@@ -89,49 +85,6 @@ export class ConversationProposalsService {
     );
 
     return { proposals: this.enrichProposals(proposals, conversations), total };
-  }
-
-  async getInvestigation(
-    conversationId: string,
-    request: KibanaRequest,
-    spaceId: string
-  ): Promise<Investigation | null> {
-    const client = await this.agentBuilder.conversations.getScopedClient({ request });
-
-    let conversation: Awaited<ReturnType<typeof client.get>>;
-    try {
-      conversation = await client.get(conversationId);
-    } catch (err) {
-      if (isConversationNotFoundError(err)) {
-        return null;
-      }
-      throw err;
-    }
-
-    const { total: pendingProposalCount } = await this.proposalsService.list(
-      {
-        conversationId,
-        status: 'pending',
-        size: 1,
-        from: 0,
-        excludeSuperseded: false,
-        excludeExpired: false,
-      },
-      spaceId
-    );
-
-    return {
-      id: conversationId,
-      template_id: 'investigation',
-      title: conversation.title,
-      createdAt: conversation.created_at,
-      updatedAt: conversation.updated_at,
-      // No workflow metadata is stored on the conversation; fabricated like proposalToInvestigation.
-      watch_id: '',
-      watch_execution_id: '',
-      pendingProposalCount,
-      events: [],
-    };
   }
 
   /** Returns an empty map if the read fails: enrichment is decoration, not load-bearing. */
