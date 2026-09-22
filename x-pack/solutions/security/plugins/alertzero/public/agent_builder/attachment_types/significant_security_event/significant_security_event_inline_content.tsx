@@ -319,7 +319,14 @@ const IndicatorList: React.FC<{
                 {...linkProps}
               >
                 <span css={cellStyles}>
-                  {indicator.value}
+                  {/*
+                   * `technique_id` is required for technique indicators and is what the MITRE
+                   * link targets, but `value` is a free-text label that need not contain it.
+                   * Show the ID so the card names the technique the link actually opens.
+                   */}
+                  {indicator.technique_id && !indicator.value.includes(indicator.technique_id)
+                    ? `${indicator.technique_id} · ${indicator.value}`
+                    : indicator.value}
                   {indicator.confidence != null ? ` (${formatPercent(indicator.confidence)})` : ''}
                 </span>
               </EuiBadge>

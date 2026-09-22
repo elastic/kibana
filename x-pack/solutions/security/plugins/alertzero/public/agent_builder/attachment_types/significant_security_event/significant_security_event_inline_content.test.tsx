@@ -271,6 +271,28 @@ describe('SignificantSecurityEventInlineContent', () => {
     );
   });
 
+  it('names the technique id when the label does not contain it', () => {
+    // `value` is free text and need not mention the technique, but the badge links to
+    // `technique_id`, so a label-only badge sends the analyst somewhere it never named.
+    renderWithI18n(
+      <SignificantSecurityEventInlineContent
+        {...renderProps(
+          buildAttachment({
+            ...baseData,
+            security_knowledge_indicators: [
+              { type: 'technique' as const, value: 'Credential abuse', technique_id: 'T1078' },
+            ],
+          })
+        )}
+      />
+    );
+
+    const badge = screen.getByTestId('alertzeroSignificantSecurityEventIndicator-technique-0');
+    expect(badge).toHaveTextContent('T1078');
+    expect(badge).toHaveTextContent('Credential abuse');
+    expect(badge).toHaveAttribute('href', 'https://attack.mitre.org/techniques/T1078/');
+  });
+
   it('links a technique indicator to its MITRE ATT&CK reference', () => {
     renderWithI18n(
       <SignificantSecurityEventInlineContent {...renderProps(buildAttachment(baseData))} />
