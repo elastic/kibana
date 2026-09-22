@@ -7,23 +7,12 @@
 
 import { expect } from '@kbn/scout/api';
 import { mlApiTest as apiTest, INTERNAL_API_HEADERS } from '../../fixtures';
+import { getADFqSingleMetricJobConfig } from '../../services/ml_common_configs';
 
 const JOB_ID = 'fq_single_with_datafeed';
 
 const REQUEST_BODY = {
-  job_id: JOB_ID,
-  description:
-    'Single metric job based on the farequote dataset with 30m bucketspan and mean(responsetime)',
-  groups: ['automated', 'farequote', 'single-metric'],
-  analysis_config: {
-    bucket_span: '30m',
-    detectors: [{ function: 'mean', field_name: 'responsetime' }],
-    influencers: [],
-    summary_count_field_name: 'doc_count',
-  },
-  data_description: { time_field: '@timestamp' },
-  analysis_limits: { model_memory_limit: '11MB' },
-  model_plot_config: { enabled: true },
+  ...getADFqSingleMetricJobConfig(JOB_ID),
   datafeed_config: {
     datafeed_id: `datafeed-${JOB_ID}`,
     indices: ['farequote-*'],

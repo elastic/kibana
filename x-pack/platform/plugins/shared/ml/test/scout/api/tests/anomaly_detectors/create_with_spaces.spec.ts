@@ -23,11 +23,11 @@ apiTest.describe(
     });
 
     apiTest.afterAll(async ({ apiServices }) => {
-      await apiServices.spaces.delete(SPACE_1);
-      await apiServices.spaces.delete(SPACE_2);
       await apiServices.ml.indices.cleanAnomalyDetection();
       await apiServices.ml.savedObjects.sync(false, SPACE_1);
       await apiServices.ml.savedObjects.sync(false, SPACE_2);
+      await apiServices.spaces.delete(SPACE_1);
+      await apiServices.spaces.delete(SPACE_2);
     });
 
     apiTest(

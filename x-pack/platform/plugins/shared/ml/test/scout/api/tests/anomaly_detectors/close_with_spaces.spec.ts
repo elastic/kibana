@@ -43,10 +43,13 @@ apiTest.describe(
 
         const res = await apiClient.post(
           `s/${SPACE_1}/internal/ml/anomaly_detectors/${jobId}/_close`,
-          { headers: { ...INTERNAL_API_HEADERS, ...cookieHeader } }
+          { headers: { ...INTERNAL_API_HEADERS, ...cookieHeader }, responseType: 'json' }
         );
 
         expect(res).toHaveStatusCode(200);
+        expect(res.body.closed).toBe(true);
+
+        await apiServices.ml.anomalyDetection.waitForJobState(jobId, 'closed');
       }
     );
 
@@ -69,7 +72,11 @@ apiTest.describe(
 
         expect(res).toHaveStatusCode(404);
 
+        // the rejected request must leave the job running, not close it as a side effect
+        await apiServices.ml.anomalyDetection.waitForJobState(jobId, 'opened');
+
         await apiServices.ml.anomalyDetection.closeJob(jobId);
+        await apiServices.ml.anomalyDetection.waitForJobState(jobId, 'closed');
       }
     );
   }

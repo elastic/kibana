@@ -7,21 +7,7 @@
 
 import { expect } from '@kbn/scout/api';
 import { mlApiTest as apiTest, INTERNAL_API_HEADERS } from '../../fixtures';
-
-const BASE_JOB_CONFIG = {
-  description:
-    'Single metric job based on the farequote dataset with 30m bucketspan and mean(responsetime)',
-  groups: ['automated', 'farequote', 'single-metric'],
-  analysis_config: {
-    bucket_span: '30m',
-    detectors: [{ function: 'mean', field_name: 'responsetime' }],
-    influencers: [],
-    summary_count_field_name: 'doc_count',
-  },
-  data_description: { time_field: '@timestamp' },
-  analysis_limits: { model_memory_limit: '11MB' },
-  model_plot_config: { enabled: true },
-};
+import { getADFqSingleMetricJobConfig } from '../../services/ml_common_configs';
 
 apiTest.describe('create anomaly detector job', { tag: '@local-stateful-classic' }, () => {
   apiTest.afterAll(async ({ apiServices }) => {
@@ -31,20 +17,21 @@ apiTest.describe('create anomaly detector job', { tag: '@local-stateful-classic'
   apiTest('ML poweruser creates a single metric job', async ({ apiClient, samlAuth }) => {
     const { cookieHeader } = await samlAuth.asMlPoweruser();
     const jobId = 'fq_single_create_poweruser';
+    const jobConfig = getADFqSingleMetricJobConfig(jobId);
 
     const res = await apiClient.put(`internal/ml/anomaly_detectors/${jobId}`, {
       headers: { ...INTERNAL_API_HEADERS, ...cookieHeader },
-      body: { ...BASE_JOB_CONFIG, job_id: jobId },
+      body: jobConfig,
       responseType: 'json',
     });
 
     expect(res).toHaveStatusCode(200);
     expect(res.body.job_id).toBe(jobId);
-    expect(res.body.groups).toStrictEqual(BASE_JOB_CONFIG.groups);
-    expect(res.body.analysis_config.bucket_span).toBe(BASE_JOB_CONFIG.analysis_config.bucket_span);
+    expect(res.body.groups).toStrictEqual(jobConfig.groups);
+    expect(res.body.analysis_config.bucket_span).toBe(jobConfig.analysis_config.bucket_span);
     expect(res.body.analysis_config.detectors).toHaveLength(1);
     expect(res.body.analysis_config.detectors[0]).toMatchObject(
-      BASE_JOB_CONFIG.analysis_config.detectors[0]
+      jobConfig.analysis_config.detectors[0]
     );
   });
 
@@ -54,7 +41,7 @@ apiTest.describe('create anomaly detector job', { tag: '@local-stateful-classic'
 
     const res = await apiClient.put(`internal/ml/anomaly_detectors/${jobId}`, {
       headers: { ...INTERNAL_API_HEADERS, ...cookieHeader },
-      body: { ...BASE_JOB_CONFIG, job_id: jobId },
+      body: getADFqSingleMetricJobConfig(jobId),
       responseType: 'json',
     });
 

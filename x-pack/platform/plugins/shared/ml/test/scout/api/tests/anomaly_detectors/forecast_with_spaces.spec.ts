@@ -43,11 +43,11 @@ apiTest.describe(
       } catch {
         // ignore
       }
-      await apiServices.spaces.delete(SPACE_1);
-      await apiServices.spaces.delete(SPACE_2);
       await apiServices.ml.indices.cleanAnomalyDetection();
       await apiServices.ml.savedObjects.sync(false, SPACE_1);
       await apiServices.ml.savedObjects.sync(false, SPACE_2);
+      await apiServices.spaces.delete(SPACE_1);
+      await apiServices.spaces.delete(SPACE_2);
     });
 
     apiTest('forecast for non-existent job returns 404', async ({ apiClient, samlAuth }) => {
@@ -151,12 +151,21 @@ apiTest.describe(
     apiTest('poweruser can delete the forecast', async ({ apiClient, samlAuth }) => {
       const { cookieHeader: poweruserCookie } = await samlAuth.asMlPoweruser();
 
-      const res = await apiClient.delete(
-        `s/${SPACE_1}/internal/ml/anomaly_detectors/${JOB_ID}/_forecast/${forecastId}`,
-        { headers: { ...INTERNAL_API_HEADERS, ...poweruserCookie } }
-      );
-
-      expect(res).toHaveStatusCode(200);
+      // Forecasting is asynchronous and Elasticsearch refuses to delete a forecast that is
+      // still running, so the first attempt can transiently fail. Retry for a bounded period
+      // and let the poll time out if it never succeeds.
+      await expect
+        .poll(
+          async () => {
+            const res = await apiClient.delete(
+              `s/${SPACE_1}/internal/ml/anomaly_detectors/${JOB_ID}/_forecast/${forecastId}`,
+              { headers: { ...INTERNAL_API_HEADERS, ...poweruserCookie } }
+            );
+            return res.statusCode;
+          },
+          { timeout: 10_000, intervals: [500] }
+        )
+        .toBe(200);
     });
   }
 );
