@@ -16,11 +16,23 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { useCaseDisabled } from '../hooks/use_case_permission';
 
 interface IndicatorAddToCaseContextMenuItemProps {
+  /**
+   * Indicator to attach to the selected case.
+   */
   indicator: Indicator;
+  /**
+   * Callback invoked before the case selector opens.
+   */
   onClick: () => void;
+  /**
+   * Test subject applied to the context menu item.
+   */
   ['data-test-subj']?: string;
 }
 
+/**
+ * Renders an action that opens the case selector with an attachment generated from the indicator.
+ */
 export const IndicatorAddToCaseContextMenuItem = ({
   indicator,
   onClick,
