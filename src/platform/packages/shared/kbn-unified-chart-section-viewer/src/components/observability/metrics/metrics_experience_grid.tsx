@@ -11,7 +11,7 @@ import React, { useCallback, useEffect } from 'react';
 import { keys } from '@elastic/eui';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
-import { DiscoverFlyouts } from '@kbn/discover-utils';
+import { DiscoverFlyouts, openAfterDismissingOtherFlyouts } from '@kbn/discover-utils';
 import useToggle from 'react-use/lib/useToggle';
 import { useFetchMetricsData } from './hooks/use_fetch_metrics_data';
 import { METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ } from '../../../common/constants';
@@ -22,7 +22,6 @@ import { useToolbarActions } from '../../toolbar/hooks/use_toolbar_actions';
 import { MetricsExperienceGridContent } from './metrics_experience_grid_content';
 import { ChartSectionSearchError } from '../../chart_section_search_error/chart_section_search_error';
 import { GridSettingsFlyout } from '../../flyout';
-import { openAfterDismissingOtherFlyouts } from '../../flyout/utils';
 import type { UnifiedMetricsGridProps } from '../../../types';
 import {
   useDimensionsWipe,

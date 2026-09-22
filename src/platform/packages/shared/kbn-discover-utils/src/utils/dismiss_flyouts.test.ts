@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DiscoverFlyouts } from '@kbn/discover-utils';
-import { openAfterDismissingOtherFlyouts } from './open_after_dismissing_other_flyouts';
+import { DiscoverFlyouts, openAfterDismissingOtherFlyouts } from './dismiss_flyouts';
 
 const FLYOUT_TEST_SUBJS: Record<string, string> = {
   [DiscoverFlyouts.metricInsights]: 'metricsExperienceFlyout',
   [DiscoverFlyouts.inspectorPanel]: 'inspectorPanel',
+  [DiscoverFlyouts.lensEdit]: 'lnsEditOnFlyFlyout',
 };
 
 // Mounts a flyout that, like EUI, unmounts on the render after its close button is clicked.
@@ -21,7 +21,12 @@ const mountFlyout = (flyout: DiscoverFlyouts) => {
   root.dataset.testSubj = FLYOUT_TEST_SUBJS[flyout];
 
   const closeButton = document.createElement('button');
-  closeButton.dataset.testSubj = 'euiFlyoutCloseButton';
+  // The Lens edit flyout renders with `hideCloseButton`, so it has no `euiFlyoutCloseButton`.
+  if (flyout === DiscoverFlyouts.lensEdit) {
+    closeButton.id = 'lnsCancelEditOnFlyFlyout';
+  } else {
+    closeButton.dataset.testSubj = 'euiFlyoutCloseButton';
+  }
   closeButton.addEventListener('click', () => {
     requestAnimationFrame(() => root.remove());
   });
@@ -61,5 +66,28 @@ describe('openAfterDismissingOtherFlyouts', () => {
 
     expect(open).toHaveBeenCalledTimes(1);
     expect(document.querySelector('[data-test-subj="inspectorPanel"]')).toBeNull();
+  });
+
+  it('waits for a dismissed flyout that hides the EUI close button', async () => {
+    mountFlyout(DiscoverFlyouts.lensEdit);
+    const open = jest.fn();
+
+    openAfterDismissingOtherFlyouts(DiscoverFlyouts.metricInsights, open);
+
+    expect(open).not.toHaveBeenCalled();
+
+    await flushFrames();
+
+    expect(open).toHaveBeenCalledTimes(1);
+    expect(document.querySelector('[data-test-subj="lnsEditOnFlyFlyout"]')).toBeNull();
+  });
+
+  it('opens right away when only the excluded flyout is mounted', () => {
+    mountFlyout(DiscoverFlyouts.metricInsights);
+    const open = jest.fn();
+
+    openAfterDismissingOtherFlyouts(DiscoverFlyouts.metricInsights, open);
+
+    expect(open).toHaveBeenCalledTimes(1);
   });
 });

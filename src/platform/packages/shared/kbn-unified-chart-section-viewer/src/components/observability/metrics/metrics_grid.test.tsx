@@ -20,7 +20,7 @@ import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/publ
 import type { UnifiedHistogramFetch$ } from '@kbn/unified-histogram/types';
 import type { UnifiedMetricsGridProps } from '../../../types';
 import { createESQLQuery } from '../../../common/utils';
-import { openAfterDismissingOtherFlyouts } from '../../flyout/utils';
+import { openAfterDismissingOtherFlyouts } from '@kbn/discover-utils';
 import {
   MetricsExperienceStateProvider,
   useMetricsExperienceState,
@@ -38,16 +38,13 @@ jest.mock('@kbn/discover-utils', () => {
 
   return {
     DiscoverFlyouts: { metricInsights: 'metricInsights' },
+    openAfterDismissingOtherFlyouts: jest.fn((_flyout: string, open: () => void) => open()),
     METRICS_GRID_HISTOGRAM_PERCENTILES,
     METRICS_GRID_SETTINGS_DEFAULTS,
     METRICS_GRID_SIMPLE_AGGREGATIONS,
     METRICS_GRID_SORT_DEFAULTS,
   };
 });
-
-jest.mock('../../flyout/utils/open_after_dismissing_other_flyouts', () => ({
-  openAfterDismissingOtherFlyouts: jest.fn((_flyout: string, open: () => void) => open()),
-}));
 
 jest.mock('@elastic/eui', () => {
   const actual = jest.requireActual('@elastic/eui');

@@ -8,4 +8,3 @@
  */
 
 export { calculateFlyoutContentHeight, DEFAULT_MARGIN_BOTTOM } from './get_height';
-export { openAfterDismissingOtherFlyouts } from './open_after_dismissing_other_flyouts';
