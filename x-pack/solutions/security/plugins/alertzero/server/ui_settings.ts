@@ -25,13 +25,13 @@ export const registerUiSettings = (uiSettings: UiSettingsServiceSetup): void => 
       }),
       description: i18n.translate('xpack.alertzero.uiSettings.enableAlertZero.description', {
         defaultMessage:
-          'Enable AlertZero for this space. When enabled, the AlertZero app, its Security navigation entries, and its internal APIs become available. Has no effect when AlertZero is disabled at the deployment level.',
+          'Enable AlertZero for this space. AlertZero is the agentic SecOps layer that does the work and returns proposals, while a person still reviews them.',
       }),
       type: 'boolean',
       value: false,
       scope: 'namespace',
       category: [SECURITY_SOLUTION_CATEGORY],
-      solutionViews: ['classic', 'security'],
+      solutionViews: ['security'],
       experimental: true,
       // Agent Builder's conversation template contract has no deregistration counterpart, so the
       // Investigation template and its tabs cannot be removed once registered. Prompting for a
