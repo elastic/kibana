@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
-import type { InfiniteData } from '@kbn/react-query';
+import type { InfiniteData, QueryFilters } from '@kbn/react-query';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { ProposalsPageResponse } from '../../../../common/proposals/list';
 import { queryKeys as platformQueryKeys } from '@kbn/agentic-investigations-plugin/public';
@@ -129,7 +129,11 @@ describe('useDropDecidedProposal', () => {
 
     await act(() => drop('b'));
 
-    expect(cancelQueries.mock.calls.map(([filters]) => filters?.queryKey)).toEqual([
+    // Annotated: `cancelQueries` is overloaded, and the spy resolves to the
+    // bare-`QueryKey` signature rather than the filters object we pass.
+    const calls = cancelQueries.mock.calls as Array<[QueryFilters | undefined]>;
+
+    expect(calls.map(([filters]) => filters?.queryKey)).toEqual([
       queryKeys.proposals.byCategory('respond'),
       queryKeys.proposals.byCategoryCount('respond'),
     ]);

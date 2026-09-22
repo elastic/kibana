@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { SortCombinations } from '@elastic/elasticsearch/lib/api/types';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { MetadataFieldValue } from '@kbn/agent-builder-common';
@@ -40,9 +41,9 @@ const CLOSED_DECIDED_WITHIN_HOURS = 72;
  * — an original and its clone — never appear together, since both queues exclude
  * superseded records.
  */
-const TIEBREAKER = [
-  { rootProposalId: { order: 'asc' as const } },
-  { revision: { order: 'asc' as const } },
+const TIEBREAKER: SortCombinations[] = [
+  { rootProposalId: { order: 'asc' } },
+  { revision: { order: 'asc' } },
 ];
 
 export class ConversationProposalsService {
