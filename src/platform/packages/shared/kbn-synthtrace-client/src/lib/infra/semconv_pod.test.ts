@@ -10,11 +10,20 @@
 import {
   K8S_NAMESPACE_NAME,
   K8S_NODE_NAME,
+  K8S_POD_CPU_LIMIT_UTILIZATION,
+  K8S_POD_CPU_NODE_UTILIZATION,
+  K8S_POD_CPU_USAGE,
+  K8S_POD_MEMORY_LIMIT_UTILIZATION,
+  K8S_POD_MEMORY_NODE_UTILIZATION,
+  K8S_POD_MEMORY_USAGE,
+  K8S_POD_MEMORY_WORKING_SET,
   K8S_POD_NAME,
+  K8S_POD_NETWORK_IO,
   K8S_POD_UID,
   KUBELETSTATS_DATASET,
   SEMCONV_K8S_POD_CPU_LIMIT_UTILIZATION,
   SEMCONV_K8S_POD_CPU_NODE_UTILIZATION,
+  SEMCONV_K8S_POD_CPU_USAGE,
   SEMCONV_K8S_POD_MEMORY_LIMIT_UTILIZATION,
   SEMCONV_K8S_POD_MEMORY_NODE_UTILIZATION,
   SEMCONV_K8S_POD_MEMORY_USAGE,
@@ -55,9 +64,15 @@ describe('semconvPod', () => {
     const [withLimit] = pod.cpu();
     const [withoutLimit] = pod.cpuWithoutLimit();
 
+    expect(withLimit.fields[K8S_POD_CPU_LIMIT_UTILIZATION]).toBe(0.46);
     expect(withLimit.fields[SEMCONV_K8S_POD_CPU_LIMIT_UTILIZATION]).toBe(0.46);
+    expect(withLimit.fields[K8S_POD_CPU_NODE_UTILIZATION]).toBe(0.32);
     expect(withLimit.fields[SEMCONV_K8S_POD_CPU_NODE_UTILIZATION]).toBe(0.32);
+    expect(withLimit.fields[K8S_POD_CPU_USAGE]).toBe(0.21);
+    expect(withLimit.fields[SEMCONV_K8S_POD_CPU_USAGE]).toBe(0.21);
+    expect(withoutLimit.fields[K8S_POD_CPU_LIMIT_UTILIZATION]).toBeUndefined();
     expect(withoutLimit.fields[SEMCONV_K8S_POD_CPU_LIMIT_UTILIZATION]).toBeUndefined();
+    expect(withoutLimit.fields[K8S_POD_CPU_NODE_UTILIZATION]).toBe(0.32);
     expect(withoutLimit.fields[SEMCONV_K8S_POD_CPU_NODE_UTILIZATION]).toBe(0.32);
   });
 
@@ -66,13 +81,21 @@ describe('semconvPod', () => {
     const [withLimit] = pod.memory();
     const [withoutLimit] = pod.memoryWithoutLimit();
 
+    expect(withLimit.fields[K8S_POD_MEMORY_LIMIT_UTILIZATION]).toBe(0.55);
     expect(withLimit.fields[SEMCONV_K8S_POD_MEMORY_LIMIT_UTILIZATION]).toBe(0.55);
+    expect(withLimit.fields[K8S_POD_MEMORY_NODE_UTILIZATION]).toBe(0.4);
     expect(withLimit.fields[SEMCONV_K8S_POD_MEMORY_NODE_UTILIZATION]).toBe(0.4);
+    expect(withLimit.fields[K8S_POD_MEMORY_WORKING_SET]).toBe(400 * 1024 * 1024);
     expect(withLimit.fields[SEMCONV_K8S_POD_MEMORY_WORKING_SET]).toBe(400 * 1024 * 1024);
+    expect(withLimit.fields[K8S_POD_MEMORY_USAGE]).toBe(512 * 1024 * 1024);
     expect(withLimit.fields[SEMCONV_K8S_POD_MEMORY_USAGE]).toBe(512 * 1024 * 1024);
+    expect(withoutLimit.fields[K8S_POD_MEMORY_LIMIT_UTILIZATION]).toBeUndefined();
     expect(withoutLimit.fields[SEMCONV_K8S_POD_MEMORY_LIMIT_UTILIZATION]).toBeUndefined();
+    expect(withoutLimit.fields[K8S_POD_MEMORY_NODE_UTILIZATION]).toBe(0.4);
     expect(withoutLimit.fields[SEMCONV_K8S_POD_MEMORY_NODE_UTILIZATION]).toBe(0.4);
+    expect(withoutLimit.fields[K8S_POD_MEMORY_WORKING_SET]).toBe(400 * 1024 * 1024);
     expect(withoutLimit.fields[SEMCONV_K8S_POD_MEMORY_WORKING_SET]).toBe(400 * 1024 * 1024);
+    expect(withoutLimit.fields[K8S_POD_MEMORY_USAGE]).toBe(512 * 1024 * 1024);
     expect(withoutLimit.fields[SEMCONV_K8S_POD_MEMORY_USAGE]).toBe(512 * 1024 * 1024);
 
     const workingSet = withLimit.fields[SEMCONV_K8S_POD_MEMORY_WORKING_SET];
@@ -107,6 +130,8 @@ describe('semconvPod', () => {
       if (firstIo === undefined || secondIo === undefined) {
         throw new Error('network docs must include metrics.k8s.pod.network.io');
       }
+      expect(firstDoc.fields[K8S_POD_NETWORK_IO]).toBe(firstIo);
+      expect(match.fields[K8S_POD_NETWORK_IO]).toBe(secondIo);
       expect(secondIo).toBeGreaterThan(firstIo);
     }
   });
