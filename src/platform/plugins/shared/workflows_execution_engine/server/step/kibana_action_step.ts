@@ -193,14 +193,13 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
   }
 
   private async shouldUseCoreSelfClient(): Promise<boolean> {
-    // Generated kibana.* actions already use Core self-client on this PR. The flag is
-    // only the incremental rollback for raw `kibana.request` (fetcher / URL / TLS).
-    if (this.node.configuration.type !== 'kibana.request') {
-      return true;
+    const stepType = this.node.configuration.type;
+    if (stepType === 'kibana.request') {
+      return this.stepExecutionRuntime.contextManager
+        .getCoreStart()
+        .featureFlags.getBooleanValue(WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG, false);
     }
-    return this.stepExecutionRuntime.contextManager
-      .getCoreStart()
-      .featureFlags.getBooleanValue(WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG, false);
+    return true;
   }
 
   private async executeViaSelfClient(
@@ -325,8 +324,7 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
   }
 
   /**
-   * Main's outbound fetch path. Fetcher/redirect/304 behaviour is preserved so
-   * flag-off rollback matches production `kibana.request`, not a cleaned rewrite.
+   * Global `fetch` client used when `kibana.request` is not routed through Core self-client.
    */
   private async executeViaLegacy(
     kibanaUrl: string,

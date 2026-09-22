@@ -8,8 +8,10 @@
  */
 
 import {
+  collectIgnoredKibanaFetcherOccurrences,
   collectIgnoredKibanaFetcherPaths,
   collectIgnoredKibanaFetcherStepNames,
+  shouldWarnIgnoredKibanaFetcher,
   stepHasIgnoredKibanaFetcher,
 } from './ignored_kibana_fetcher';
 import type { WorkflowYaml } from './schema';
@@ -84,5 +86,19 @@ describe('ignored kibana fetcher helpers', () => {
     expect(collectIgnoredKibanaFetcherPaths(steps)).toEqual([
       ['steps', 0, 'branches', 1, 'steps', 0, 'with', 'fetcher'],
     ]);
+    expect(collectIgnoredKibanaFetcherOccurrences(steps)).toEqual([
+      expect.objectContaining({
+        path: ['steps', 0, 'branches', 1, 'steps', 0, 'with', 'fetcher'],
+        stepType: 'kibana.request',
+        stepName: 'status',
+      }),
+    ]);
+  });
+
+  it('warns generated kibana.* steps regardless of the kibana.request flag', () => {
+    expect(shouldWarnIgnoredKibanaFetcher('kibana.createCase', false)).toBe(true);
+    expect(shouldWarnIgnoredKibanaFetcher('kibana.request', false)).toBe(false);
+    expect(shouldWarnIgnoredKibanaFetcher('kibana.request', true)).toBe(true);
+    expect(shouldWarnIgnoredKibanaFetcher('http', true)).toBe(false);
   });
 });

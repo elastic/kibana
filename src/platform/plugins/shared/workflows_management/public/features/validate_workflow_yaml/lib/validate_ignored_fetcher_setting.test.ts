@@ -50,9 +50,48 @@ describe('validateIgnoredFetcherSetting', () => {
       throw new Error('Expected kibana fetcher fixture to parse');
     }
 
-    const results = validateIgnoredFetcherSetting(workflowLookup, yamlLineCounter);
+    const results = validateIgnoredFetcherSetting(workflowLookup, yamlLineCounter, true);
 
     expect(results).toEqual([
+      expect.objectContaining({
+        owner: 'deprecated-step-validation',
+        ruleId: 'ignoredFetcherSetting',
+        severity: 'warning',
+        message: IGNORED_KIBANA_FETCHER_SETTING_MESSAGE,
+      }),
+    ]);
+  });
+
+  it('does not warn on kibana.request fetcher when the self-client path is off', () => {
+    const { workflowLookup, yamlLineCounter } = performComputation(KIBANA_FETCHER_YAML);
+    if (!workflowLookup || !yamlLineCounter) {
+      throw new Error('Expected kibana fetcher fixture to parse');
+    }
+
+    expect(validateIgnoredFetcherSetting(workflowLookup, yamlLineCounter)).toEqual([]);
+  });
+
+  it('warns generated kibana.* fetcher even when the kibana.request flag is off', () => {
+    const yaml = [
+      "version: '1'",
+      'name: kibana-generated-fetcher',
+      'enabled: true',
+      'triggers:',
+      '  - type: manual',
+      'steps:',
+      '  - name: get-case',
+      '    type: kibana.getCase',
+      '    with:',
+      '      caseId: test-case',
+      '      fetcher:',
+      '        skip_ssl_verification: true',
+    ].join('\n');
+    const { workflowLookup, yamlLineCounter } = performComputation(yaml);
+    if (!workflowLookup || !yamlLineCounter) {
+      throw new Error('Expected generated kibana fetcher fixture to parse');
+    }
+
+    expect(validateIgnoredFetcherSetting(workflowLookup, yamlLineCounter)).toEqual([
       expect.objectContaining({
         owner: 'deprecated-step-validation',
         ruleId: 'ignoredFetcherSetting',

@@ -31,57 +31,89 @@ export const stepHasIgnoredKibanaFetcher = (step: { type?: string; with?: unknow
 
 type DiagnosticPath = Array<string | number>;
 
+export interface IgnoredKibanaFetcherOccurrence {
+  path: DiagnosticPath;
+  stepType: string;
+  stepName?: string;
+}
+
+/** Generated `kibana.*` steps always ignore YAML `fetcher`. Raw `kibana.request` only does when the self-client path is on. */
+export const shouldWarnIgnoredKibanaFetcher = (
+  stepType: string,
+  warnKibanaRequestFetcher: boolean
+): boolean => {
+  if (!isKibanaWorkflowStepType(stepType)) {
+    return false;
+  }
+  if (stepType === 'kibana.request') {
+    return warnKibanaRequestFetcher;
+  }
+  return true;
+};
+
 const ON_FAILURE_STEP_KEYS = ['on-failure', 'iteration-on-failure'] as const;
 
 const asStepArray = (value: unknown): WorkflowYaml['steps'] | undefined =>
   Array.isArray(value) ? (value as WorkflowYaml['steps']) : undefined;
 
-const collectIgnoredKibanaFetcherPathsFromSteps = (
+const collectIgnoredKibanaFetcherOccurrencesFromSteps = (
   steps: WorkflowYaml['steps'],
   prefix: DiagnosticPath,
-  paths: DiagnosticPath[]
+  occurrences: IgnoredKibanaFetcherOccurrence[]
 ): void => {
   steps.forEach((step, index) => {
     const stepPath = [...prefix, index];
     if (stepHasIgnoredKibanaFetcher(step)) {
-      paths.push([...stepPath, 'with', 'fetcher']);
+      occurrences.push({
+        path: [...stepPath, 'with', 'fetcher'],
+        stepType: step.type,
+        stepName: typeof step.name === 'string' ? step.name : undefined,
+      });
     }
-    collectIgnoredKibanaFetcherPathsFromContainers(
+    collectIgnoredKibanaFetcherOccurrencesFromContainers(
       step as Record<string, unknown>,
       stepPath,
-      paths
+      occurrences
     );
   });
 };
 
-const collectIgnoredKibanaFetcherPathsFromContainers = (
+const collectIgnoredKibanaFetcherOccurrencesFromContainers = (
   step: Record<string, unknown>,
   stepPath: DiagnosticPath,
-  paths: DiagnosticPath[]
+  occurrences: IgnoredKibanaFetcherOccurrence[]
 ): void => {
   const childSteps = asStepArray(step.steps);
   if (childSteps) {
-    collectIgnoredKibanaFetcherPathsFromSteps(childSteps, [...stepPath, 'steps'], paths);
+    collectIgnoredKibanaFetcherOccurrencesFromSteps(
+      childSteps,
+      [...stepPath, 'steps'],
+      occurrences
+    );
   }
 
   const elseSteps = asStepArray(step.else);
   if (elseSteps) {
-    collectIgnoredKibanaFetcherPathsFromSteps(elseSteps, [...stepPath, 'else'], paths);
+    collectIgnoredKibanaFetcherOccurrencesFromSteps(elseSteps, [...stepPath, 'else'], occurrences);
   }
 
   const defaultSteps = asStepArray(step.default);
   if (defaultSteps) {
-    collectIgnoredKibanaFetcherPathsFromSteps(defaultSteps, [...stepPath, 'default'], paths);
+    collectIgnoredKibanaFetcherOccurrencesFromSteps(
+      defaultSteps,
+      [...stepPath, 'default'],
+      occurrences
+    );
   }
 
   if (Array.isArray(step.cases)) {
     step.cases.forEach((switchCase, caseIndex) => {
       const caseSteps = isRecord(switchCase) ? asStepArray(switchCase.steps) : undefined;
       if (caseSteps) {
-        collectIgnoredKibanaFetcherPathsFromSteps(
+        collectIgnoredKibanaFetcherOccurrencesFromSteps(
           caseSteps,
           [...stepPath, 'cases', caseIndex, 'steps'],
-          paths
+          occurrences
         );
       }
     });
@@ -91,10 +123,10 @@ const collectIgnoredKibanaFetcherPathsFromContainers = (
     step.branches.forEach((branch, branchIndex) => {
       const branchSteps = isRecord(branch) ? asStepArray(branch.steps) : undefined;
       if (branchSteps) {
-        collectIgnoredKibanaFetcherPathsFromSteps(
+        collectIgnoredKibanaFetcherOccurrencesFromSteps(
           branchSteps,
           [...stepPath, 'branches', branchIndex, 'steps'],
-          paths
+          occurrences
         );
       }
     });
@@ -104,26 +136,31 @@ const collectIgnoredKibanaFetcherPathsFromContainers = (
     const container = step[key];
     const fallbackSteps = isRecord(container) ? asStepArray(container.fallback) : undefined;
     if (fallbackSteps) {
-      collectIgnoredKibanaFetcherPathsFromSteps(
+      collectIgnoredKibanaFetcherOccurrencesFromSteps(
         fallbackSteps,
         [...stepPath, key, 'fallback'],
-        paths
+        occurrences
       );
     }
   }
 };
 
-/** Structural `WorkflowDiagnostic.path` values for ignored kibana `with.fetcher` settings. */
-export const collectIgnoredKibanaFetcherPaths = (
+/** Structural `WorkflowDiagnostic.path` values plus step type for ignored kibana `with.fetcher` settings. */
+export const collectIgnoredKibanaFetcherOccurrences = (
   steps: WorkflowYaml['steps'] | undefined
-): DiagnosticPath[] => {
+): IgnoredKibanaFetcherOccurrence[] => {
   if (!steps) {
     return [];
   }
-  const paths: DiagnosticPath[] = [];
-  collectIgnoredKibanaFetcherPathsFromSteps(steps, ['steps'], paths);
-  return paths;
+  const occurrences: IgnoredKibanaFetcherOccurrence[] = [];
+  collectIgnoredKibanaFetcherOccurrencesFromSteps(steps, ['steps'], occurrences);
+  return occurrences;
 };
+
+/** Structural `WorkflowDiagnostic.path` values for ignored kibana `with.fetcher` settings. */
+export const collectIgnoredKibanaFetcherPaths = (
+  steps: WorkflowYaml['steps'] | undefined
+): DiagnosticPath[] => collectIgnoredKibanaFetcherOccurrences(steps).map(({ path }) => path);
 
 /** Step names whose YAML still sets `with.fetcher` on a kibana.* step. */
 export const collectIgnoredKibanaFetcherStepNames = (

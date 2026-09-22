@@ -74,9 +74,7 @@ export function runWorkflowYamlValidations({
   if (workflowLookup && lineCounter) {
     results.push(
       ...validateDeprecatedStepTypes(workflowLookup, lineCounter),
-      ...(warnIgnoredKibanaFetcher
-        ? validateIgnoredFetcherSetting(workflowLookup, lineCounter)
-        : []),
+      ...validateIgnoredFetcherSetting(workflowLookup, lineCounter, warnIgnoredKibanaFetcher),
       ...validateIfConditions(workflowLookup, lineCounter),
       ...validateParallelMode(workflowLookup, lineCounter),
       ...validateParallelFanOut(workflowLookup, lineCounter)

@@ -971,7 +971,7 @@ groups:
       - setting: server.selfHttp.maxRedirects
         id: server-selfhttp-maxredirects
         description: |
-          Sets how many same-origin HTTP redirects Kibana follows for requests it makes to its own APIs, including workflow `kibana.request` steps. `0` rejects redirects. Values `1` through `20` allow that many same-origin hops. Scheme, host, and port must match. Cross-origin redirects are always rejected.
+          Sets how many same-origin HTTP redirects Kibana follows for requests it makes to its own APIs. This includes generated workflow `kibana.*` steps, and `kibana.request` steps when they use Core `http.selfClient` (`workflows.kibanaRequest.coreSelfClientEnabled`). When that flag is off, `kibana.request` uses the global fetch client and this setting does not apply. `0` rejects redirects. Values `1` through `20` allow that many same-origin hops. Scheme, host, and port must match. Cross-origin redirects are always rejected.
         datatype: int
         default: 0
         applies_to:

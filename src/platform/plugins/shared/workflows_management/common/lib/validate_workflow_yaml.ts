@@ -8,8 +8,9 @@
  */
 
 import {
-  collectIgnoredKibanaFetcherPaths,
+  collectIgnoredKibanaFetcherOccurrences,
   IGNORED_KIBANA_FETCHER_SETTING_MESSAGE,
+  shouldWarnIgnoredKibanaFetcher,
   validateStepNameUniqueness,
 } from '@kbn/workflows';
 import type { ValidateWorkflowResponseDto, WorkflowYaml } from '@kbn/workflows';
@@ -29,8 +30,8 @@ import { validateTriggers } from './validate_triggers';
 export interface ValidateWorkflowYamlOptions {
   triggerDefinitions?: TriggerDefinitionForValidateTriggers[];
   /**
-   * When true, kibana-step YAML `fetcher` is warned as ignored (self-client path).
-   * Default false so the warning is not a lie while the legacy transport still honors it.
+   * When true, `kibana.request` YAML `fetcher` is warned as ignored.
+   * Generated `kibana.*` steps always warn because they always use Core self-client.
    */
   warnIgnoredKibanaFetcher?: boolean;
 }
@@ -132,13 +133,14 @@ export function validateWorkflowYaml(
       diagnostics.push({ severity: 'error', message, source: 'graph', ruleId: 'graphBuildError' });
     }
 
-    if (options?.warnIgnoredKibanaFetcher) {
-      for (const path of collectIgnoredKibanaFetcherPaths(parsedWorkflow.steps)) {
+    const warnKibanaRequestFetcher = options?.warnIgnoredKibanaFetcher ?? false;
+    for (const occurrence of collectIgnoredKibanaFetcherOccurrences(parsedWorkflow.steps)) {
+      if (shouldWarnIgnoredKibanaFetcher(occurrence.stepType, warnKibanaRequestFetcher)) {
         diagnostics.push({
           severity: 'warning',
           message: IGNORED_KIBANA_FETCHER_SETTING_MESSAGE,
           source: 'deprecation',
-          path,
+          path: occurrence.path,
           ruleId: 'ignoredFetcherSetting',
         });
       }

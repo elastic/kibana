@@ -649,6 +649,34 @@ steps:
       ]);
     });
 
+    it('warns generated kibana.* fetcher even when the kibana.request flag is off', () => {
+      const yaml = `
+version: '1'
+name: kibana-generated-fetcher
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: get-case
+    type: kibana.getCase
+    with:
+      caseId: test-case
+      fetcher:
+        skip_ssl_verification: true
+`;
+      const result = validateWorkflowYaml(yaml, schema);
+
+      expect(result.diagnostics).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            severity: 'warning',
+            ruleId: 'ignoredFetcherSetting',
+            path: ['steps', 0, 'with', 'fetcher'],
+          }),
+        ])
+      );
+    });
+
     it('does not warn when the self-client path is off', () => {
       const yaml = `
 version: '1'

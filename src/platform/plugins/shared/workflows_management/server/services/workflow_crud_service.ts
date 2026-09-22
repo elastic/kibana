@@ -804,6 +804,9 @@ export class WorkflowCrudService {
               workflowYaml,
               zodSchema,
               triggerDefinitions,
+              logger: this.deps.logger,
+              warnIgnoredKibanaFetcher: await this.shouldWarnIgnoredKibanaFetcher(),
+              workflowId: id,
             }),
           }
         : undefined;

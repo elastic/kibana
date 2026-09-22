@@ -9,8 +9,9 @@
 
 import type { Logger } from '@kbn/logging';
 import {
-  collectIgnoredKibanaFetcherStepNames,
+  collectIgnoredKibanaFetcherOccurrences,
   IGNORED_KIBANA_FETCHER_SETTING_MESSAGE,
+  shouldWarnIgnoredKibanaFetcher,
   transformWorkflowYamlJsontoEsWorkflow,
 } from '@kbn/workflows';
 import type { EsWorkflow, EsWorkflowCreate, WorkflowYaml } from '@kbn/workflows';
@@ -22,6 +23,40 @@ import { validateWorkflowYaml } from '../../../common/lib/validate_workflow_yaml
 import { updateWorkflowYamlFields } from '../../../common/lib/yaml';
 import { INITIAL_WORKFLOW_VERSION } from '../../lib/workflow_version';
 import type { WorkflowProperties } from '../../storage/workflow_storage';
+
+/** Persist-time warning for ignored kibana YAML `fetcher` settings. */
+export const logIgnoredKibanaFetcherOnPersist = (params: {
+  logger?: Logger;
+  warnIgnoredKibanaFetcher?: boolean;
+  steps: WorkflowYaml['steps'] | undefined;
+  workflowName: string;
+  workflowId?: string;
+}): void => {
+  const { logger, steps, workflowName, workflowId } = params;
+  if (!logger) {
+    return;
+  }
+  const ignoredFetcherSteps = collectIgnoredKibanaFetcherOccurrences(steps)
+    .filter((occurrence) =>
+      shouldWarnIgnoredKibanaFetcher(occurrence.stepType, params.warnIgnoredKibanaFetcher ?? false)
+    )
+    .map((occurrence) => occurrence.stepName)
+    .filter((name): name is string => typeof name === 'string' && name.length > 0);
+  if (ignoredFetcherSteps.length === 0) {
+    return;
+  }
+  logger.warn(
+    `Workflow "${workflowName}" contains a deprecated kibana step "fetcher" setting. ${IGNORED_KIBANA_FETCHER_SETTING_MESSAGE}`,
+    {
+      event: { action: 'workflow-persist' },
+      tags: ['kibana', 'deprecated'],
+      labels: {
+        ...(workflowId ? { workflow_id: workflowId } : {}),
+        step_names: ignoredFetcherSteps.join(','),
+      },
+    }
+  );
+};
 
 /** Derives a list of trigger type ids from a workflow definition. */
 export const getTriggerTypesFromDefinition = (
@@ -119,22 +154,13 @@ export const prepareWorkflowDocumentFromYaml = (params: {
 
   const id = providedId || generateWorkflowId(workflowToCreate.name);
 
-  const ignoredFetcherSteps = warnIgnoredKibanaFetcher
-    ? collectIgnoredKibanaFetcherStepNames(validation.parsedWorkflow?.steps)
-    : [];
-  if (logger && ignoredFetcherSteps.length > 0) {
-    logger.warn(
-      `Workflow "${workflowToCreate.name}" contains a deprecated kibana step "fetcher" setting. ${IGNORED_KIBANA_FETCHER_SETTING_MESSAGE}`,
-      {
-        event: { action: 'workflow-persist' },
-        tags: ['kibana', 'deprecated'],
-        labels: {
-          workflow_id: id,
-          step_names: ignoredFetcherSteps.join(','),
-        },
-      }
-    );
-  }
+  logIgnoredKibanaFetcherOnPersist({
+    logger,
+    warnIgnoredKibanaFetcher,
+    steps: validation.parsedWorkflow?.steps,
+    workflowName: workflowToCreate.name,
+    workflowId: id,
+  });
 
   const workflowData: WorkflowProperties = {
     name: workflowToCreate.name,
@@ -170,13 +196,33 @@ export const applyYamlUpdate = (params: {
   workflowYaml: string;
   zodSchema: z.ZodType;
   triggerDefinitions: Array<{ id: string; eventSchema: z.ZodType }>;
+  logger?: Logger;
+  warnIgnoredKibanaFetcher?: boolean;
+  workflowId?: string;
 }): {
   updatedDataPatch: Partial<WorkflowProperties>;
   validationErrors: string[];
   shouldUpdateScheduler: boolean;
 } => {
-  const { workflowYaml, zodSchema, triggerDefinitions } = params;
+  const {
+    workflowYaml,
+    zodSchema,
+    triggerDefinitions,
+    logger,
+    warnIgnoredKibanaFetcher = false,
+    workflowId,
+  } = params;
   const validation = validateWorkflowYaml(workflowYaml, zodSchema, { triggerDefinitions });
+  logIgnoredKibanaFetcherOnPersist({
+    logger,
+    warnIgnoredKibanaFetcher,
+    steps: validation.parsedWorkflow?.steps,
+    workflowName:
+      validation.parsedWorkflow?.name ??
+      extractLooseMetadataFields(workflowYaml).name ??
+      'Untitled workflow',
+    workflowId,
+  });
 
   if (!validation.valid || !validation.parsedWorkflow) {
     const looseMetadata = extractLooseMetadataFields(workflowYaml);
