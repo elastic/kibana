@@ -136,7 +136,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   const isAgentIdValid = validateAgentId(agentId);
 
   const isAgentDeleted = !isAgentIdValid && isFetched && Boolean(agentId);
-  const isInputDisabled = isAgentDeleted || isAwaitingPrompt || isResuming;
+  const isInputDisabled = isAgentDeleted || isAwaitingPrompt || isCreatingConversation;
   const isSubmitDisabled =
     messageEditorController.isEmpty ||
     isResponseLoading ||
