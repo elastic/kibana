@@ -19,9 +19,8 @@ export const SECURITY_ALERT_ANALYSIS_WORKFLOW_ID = 'system-security-alert-analys
 export const SECURITY_ALERT_ANALYSIS_WORKFLOW = {
   id: SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
   pluginId: 'securitySolution',
-  // Tip of the Worker-callable YAML (umbrella history landed as 3→8; this PR adds a manual
-  // trigger for caller inputs and aligns output schema with Zod).
-  version: 12,
+  // Tip of the Worker-callable YAML (enforce contributing_factors maxItems: 3 across contracts).
+  version: 13,
   billable: false,
   visibility: {
     selectors: ['rule_action'],
