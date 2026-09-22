@@ -121,8 +121,7 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
     });
 
     await page.route(
-      (url) =>
-        /\/api\/fleet\/managed_integrations(\/mock-old-policy-id)?$/.test(url.pathname),
+      (url) => /\/api\/fleet\/managed_integrations(\/mock-old-policy-id)?$/.test(url.pathname),
       (route) =>
         route.fulfill({
           status: 200,
@@ -191,7 +190,10 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
       },
       detectAndReviewStep: {
         // Both elb and the removed service share the same policy.
-        policyIdsByInstance: { elb: 'mock-shared-policy-id', 'removed-svc': 'mock-shared-policy-id' },
+        policyIdsByInstance: {
+          elb: 'mock-shared-policy-id',
+          'removed-svc': 'mock-shared-policy-id',
+        },
         serviceStatuses: {},
       },
     });
@@ -207,7 +209,8 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
         route.fulfill({
           status: 200,
           contentType: 'application/json',
-          body: method === 'PUT' ? '{}' : JSON.stringify({ item: { id: 'mock-new-elb-policy-id' } }),
+          body:
+            method === 'PUT' ? '{}' : JSON.stringify({ item: { id: 'mock-new-elb-policy-id' } }),
         });
       }
     );
@@ -247,8 +250,8 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
 
     await deployButton.click();
 
-    await updateRequestPromise;  // PUT — shared policy updated with elb inputs only
-    await createRequestPromise;  // POST — new elb policy created for this session
+    await updateRequestPromise; // PUT — shared policy updated with elb inputs only
+    await createRequestPromise; // POST — new elb policy created for this session
     expect(deleteObserved).toBe(false);
   });
 
