@@ -81,10 +81,17 @@ const LIQUID_TAG_PATTERN = '{%';
 // Matches ${{ ... }} — typed expressions (WorkflowTemplatingEngine.evaluateExpression).
 // Same Liquid value grammar as runtime (evalValueSync after stripping the leading `$`).
 const DYNAMIC_EXPRESSION_PATTERN = /\$\{\{(?:[^}]|\}(?!\}))*\}\}/g;
+// Liquid lexical contexts where content is literal, not executed (incl. whitespace-trim tags).
+const RAW_OR_COMMENT_BLOCK_PATTERN = /\{%-?\s*(raw|comment)\s*-?%\}[\s\S]*?\{%-?\s*end\1\s*-?%\}/gi;
+
+const blankWithSameLength = (value: string, pattern: RegExp): string =>
+  value.replace(pattern, (match) => ' '.repeat(match.length));
+
+const blankRawAndCommentBlocks = (value: string): string =>
+  blankWithSameLength(value, RAW_OR_COMMENT_BLOCK_PATTERN);
 
 const blankDynamicExpressions = (value: string): string =>
-  value.replace(DYNAMIC_EXPRESSION_PATTERN, (match) => ' '.repeat(match.length));
-
+  blankWithSameLength(value, DYNAMIC_EXPRESSION_PATTERN);
 const pushLiquidError = (
   errors: LiquidValidationError[],
   yamlString: string,
@@ -190,18 +197,24 @@ export function validateLiquidTemplate(
       if (!node.range) return;
       if (typeof node.value !== 'string') return;
 
+      // Blank {% raw %} / {% comment %} first so embedded ${{ }} / {{ }} inside them are
+      // treated as literal (same as Liquid render), then validate the remainder.
+      const valueOutsideLiteralBlocks = blankRawAndCommentBlocks(node.value);
+
       // Runtime typed-expression dispatch: whole scalar → evaluateExpression.
+      // Only applies when the unmasked scalar is a typed expression (raw/comment wrappers
+      // mean the value is a string template, not evaluateExpression dispatch).
       if (isRuntimeTypedExpressionDispatch(node.value)) {
         validateRuntimeTypedExpressionScalar(yamlString, node, node.value, errors);
         return;
       }
 
       // Embedded `${{ }}` inside a string template (does not start with `${{`).
-      validateDynamicExpressions(yamlString, node, node.value, errors);
+      validateDynamicExpressions(yamlString, node, valueOutsideLiteralBlocks, errors);
 
       // Blank ${{ ... }} before validating remaining Liquid — avoids double-reporting the
       // same expression, and keeps mixed-value offsets aligned with the original scalar.
-      const liquidValue = blankDynamicExpressions(node.value);
+      const liquidValue = blankDynamicExpressions(valueOutsideLiteralBlocks);
 
       if (!liquidValue.includes(LIQUID_OUTPUT_PATTERN) && !liquidValue.includes(LIQUID_TAG_PATTERN))
         return;
