@@ -10,6 +10,7 @@ import { generateEsql, executeEsql } from '@kbn/agent-builder-genai-utils';
 import type { ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
+import { createEsqlResponseError } from '../shared/esql_response_error.mock';
 import { createVisualizationGraph } from './graph_lens';
 import type { VisualizationConfig } from './types';
 
@@ -123,7 +124,9 @@ describe('createVisualizationGraph', () => {
   });
 
   it('regenerates esql when the provided query fails to execute', async () => {
-    mockedExecuteEsql.mockRejectedValueOnce(new Error('verification_exception'));
+    mockedExecuteEsql.mockRejectedValueOnce(
+      createEsqlResponseError('verification_exception', 'Unknown column [missing_field]')
+    );
     mockedGenerateEsql.mockResolvedValue({
       query: 'FROM logs-* | STATS count = COUNT(*)',
       results: { columns: EXECUTED_COLUMNS, values: [] },

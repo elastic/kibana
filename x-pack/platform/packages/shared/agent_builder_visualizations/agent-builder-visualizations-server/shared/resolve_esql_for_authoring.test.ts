@@ -9,6 +9,7 @@ import { executeEsql } from '@kbn/agent-builder-genai-utils';
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
+import { createEsqlResponseError } from './esql_response_error.mock';
 import { generateVisualizationEsql } from './generate_visualization_esql';
 import { resolveEsqlForAuthoring } from './resolve_esql_for_authoring';
 
@@ -79,8 +80,10 @@ describe('resolveEsqlForAuthoring', () => {
     expect(mockedGenerate).not.toHaveBeenCalled();
   });
 
-  it('regenerates when the provided query fails to execute', async () => {
-    mockedExecuteEsql.mockRejectedValue(new Error('unknown column foo'));
+  it('regenerates when Elasticsearch rejects the provided query', async () => {
+    mockedExecuteEsql.mockRejectedValue(
+      createEsqlResponseError('verification_exception', 'unknown column foo')
+    );
     mockedGenerate.mockResolvedValue({
       query: 'FROM logs-* | STATS count = COUNT(*)',
       columns: COLUMNS,

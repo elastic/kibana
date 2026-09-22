@@ -9,6 +9,7 @@ import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server'
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { generateEsql, executeEsql } from '@kbn/agent-builder-genai-utils';
+import { createEsqlResponseError } from '../shared/esql_response_error.mock';
 import { VEGA_LITE_SCHEMA } from './normalize_spec';
 import { createVegaGraph } from './graph';
 
@@ -339,7 +340,10 @@ describe('createVegaGraph', () => {
     // The provided query throws (an invalid, agent-invented query); generation
     // then supplies a runnable query and its schema-probe columns.
     mockedExecuteEsql.mockRejectedValueOnce(
-      new Error('verification_exception: second argument of [half_ms * 1ms] must be [numeric]')
+      createEsqlResponseError(
+        'verification_exception',
+        'second argument of [half_ms * 1ms] must be [numeric]'
+      )
     );
     mockedGenerateEsql.mockResolvedValue({
       query: GENERATED_ESQL,
@@ -358,7 +362,10 @@ describe('createVegaGraph', () => {
 
   it('aborts only after both the provided query and regeneration fail to execute', async () => {
     mockedExecuteEsql.mockRejectedValue(
-      new Error('verification_exception: second argument of [half_ms * 1ms] must be [numeric]')
+      createEsqlResponseError(
+        'verification_exception',
+        'second argument of [half_ms * 1ms] must be [numeric]'
+      )
     );
     mockedGenerateEsql.mockResolvedValue({
       error: 'verification_exception: second argument of [half_ms * 1ms] must be [numeric]',

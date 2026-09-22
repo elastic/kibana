@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import type { EsqlEsqlColumnInfo } from '@elastic/elasticsearch/lib/api/types';
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
@@ -64,6 +65,25 @@ const executeForSchema = (
     esClient: esClient.asCurrentUser,
   });
 
+const getEsErrorBody = (error: unknown): { type?: string; reason?: string } | undefined =>
+  error instanceof errors.ResponseError
+    ? (error.body as { error?: { type?: string; reason?: string } } | undefined)?.error
+    : undefined;
+
+/**
+ * True when Elasticsearch rejected the query itself. ES|QL reports unknown
+ * indices and columns as `verification_exception`, so it covers those too.
+ * Anything else (timeouts, circuit breakers, response-size limits, access)
+ * says nothing about whether the query is well-formed.
+ */
+const isQueryRejected = (error: unknown): boolean => {
+  const { type } = getEsErrorBody(error) ?? {};
+  return type === 'verification_exception' || type === 'parsing_exception';
+};
+
+const describeEsError = (error: unknown): string =>
+  getEsErrorBody(error)?.reason ?? (error instanceof Error ? error.message : String(error));
+
 /**
  * Collect result columns for a query that must be kept as-is. A failed probe
  * only costs column information (authoring infers fields from the query text);
@@ -104,21 +124,28 @@ export const resolveEsqlForAuthoring = async ({
 
   // A provided query is only trustworthy if it actually runs: the caller may
   // pass an LLM-invented query whose error (e.g. a type mismatch) AST
-  // validation never catches. Execute it; if it throws, discard it and fall
-  // through to self-correcting generation rather than author around a query
-  // that can never render. Seed generation with the failed query and error so
-  // the model can correct it instead of starting from scratch.
+  // validation never catches. Execute it; if Elasticsearch rejects the query,
+  // discard it and fall through to self-correcting generation rather than
+  // author around a query that can never render, seeding generation with the
+  // failed query and error so the model can correct it. Any other failure is
+  // about the cluster, not the query, so keep the query and only lose columns.
   if (query) {
     logger.debug('Validating provided ES|QL query for visualization');
     try {
       ({ columns } = await executeForSchema(query, esClient));
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.warn(
-        `Provided ES|QL query failed to execute (${errorMessage}); regenerating a corrected query`
-      );
-      failedProvidedQueryContext = `A provided ES|QL query failed to execute: "${query}" (error: ${errorMessage}). Avoid repeating this mistake.`;
-      query = '';
+      const errorMessage = describeEsError(error);
+      if (isQueryRejected(error)) {
+        logger.warn(
+          `Provided ES|QL query failed to execute (${errorMessage}); regenerating a corrected query`
+        );
+        failedProvidedQueryContext = `A provided ES|QL query failed to execute: "${query}" (error: ${errorMessage}). Avoid repeating this mistake.`;
+        query = '';
+      } else {
+        logger.warn(
+          `Provided ES|QL query could not be probed for columns (${errorMessage}); keeping it and inferring fields from the query text`
+        );
+      }
     }
   }
 
