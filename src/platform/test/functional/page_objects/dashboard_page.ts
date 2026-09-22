@@ -462,7 +462,9 @@ export class DashboardPageObject extends FtrService {
     options: AddNewDashboardOptions = { continueEditing: false, expectWarning: false }
   ) {
     const { continueEditing, expectWarning } = options;
-    const discardButtonExists = await this.testSubjects.exists('discardDashboardPromptButton');
+    const discardButtonExists = await this.testSubjects.exists('discardDashboardPromptButton', {
+      timeout: 0,
+    });
     if (!continueEditing && discardButtonExists) {
       this.log.debug('found discard button');
       await this.testSubjects.click('discardDashboardPromptButton');
@@ -929,7 +931,7 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async verifyNoRenderErrors() {
-    const errorEmbeddables = await this.testSubjects.findAll('embeddableError');
+    const errorEmbeddables = await this.testSubjects.findAll('embeddableError', 0);
     for (const errorEmbeddable of errorEmbeddables) {
       this.log.error(`Found embeddable with error: "${await errorEmbeddable.getVisibleText()}"`);
     }
