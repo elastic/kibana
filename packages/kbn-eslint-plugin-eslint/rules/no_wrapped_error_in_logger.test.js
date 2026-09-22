@@ -8,7 +8,7 @@
  */
 
 const { RuleTester } = require('eslint');
-const rule = require('./no_wrapped_error_in_logger');
+const rule = require('../oxlint_plugin').rules.no_wrapped_error_in_logger;
 const dedent = require('dedent');
 
 const ruleTester = new RuleTester({

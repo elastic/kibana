@@ -37,4 +37,7 @@ require('../no_constructor_args_in_property_initializers.test.js');
 require('../no_this_in_property_initializers.test.js');
 require('../no_trailing_import_slash.test.js');
 require('../no_unsafe_console.test.js');
+require('../no_unsafe_dynamic_http_path.test.js');
+require('../no_wrapped_error_in_logger.test.js');
+require('../no_npx_playwright.test.js');
 require('../require_kibana_feature_privileges_naming.test.js');

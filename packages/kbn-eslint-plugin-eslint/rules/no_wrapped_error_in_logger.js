@@ -91,7 +91,7 @@ module.exports = {
     fixable: 'code',
     schema: [],
   },
-  create: (context) => ({
+  createOnce: (context) => ({
     CallExpression(_) {
       const node = /** @type {CallExpression} */ (_);
 
@@ -125,7 +125,7 @@ module.exports = {
             message: ERROR_MSG,
             fix: (fixer) => {
               if (messageProp && messageProp.type === esTypes.Property) {
-                const sourceCode = context.getSourceCode();
+                const sourceCode = context.sourceCode;
                 const errorVarText = sourceCode.getText(messageProp.value);
                 return fixer.replaceText(prop, `error: ${errorVarText}`);
               }
