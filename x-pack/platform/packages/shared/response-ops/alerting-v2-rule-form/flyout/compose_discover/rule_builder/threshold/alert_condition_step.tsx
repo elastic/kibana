@@ -249,14 +249,14 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
       );
       const updatedRecoveryConditions = thresholdValues.recovery
         ? syncConditionsForLabelChange(
-          thresholdValues.recovery.conditions,
-          statLabels,
-          index,
-          oldLabel,
-          newLabel,
-          next,
-          thresholdValues.evaluations
-        )
+            thresholdValues.recovery.conditions,
+            statLabels,
+            index,
+            oldLabel,
+            newLabel,
+            next,
+            thresholdValues.evaluations
+          )
         : undefined;
       onThresholdValuesChange({
         ...thresholdValues,
@@ -302,15 +302,15 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
       );
       const cleanedRecoveryConditions = thresholdValues.recovery
         ? reconcileAlertConditionMetrics(
-          clearConditionsForRemovedMetric(
-            thresholdValues.recovery.conditions,
-            removedLabel,
+            clearConditionsForRemovedMetric(
+              thresholdValues.recovery.conditions,
+              removedLabel,
+              remainingStats,
+              thresholdValues.evaluations
+            ),
             remainingStats,
             thresholdValues.evaluations
-          ),
-          remainingStats,
-          thresholdValues.evaluations
-        )
+          )
         : undefined;
       onThresholdValuesChange({
         ...thresholdValues,
@@ -354,14 +354,14 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
       );
       const updatedRecoveryConditions = thresholdValues.recovery
         ? syncConditionsForLabelChange(
-          thresholdValues.recovery.conditions,
-          evalLabels,
-          index,
-          oldLabel,
-          newLabel,
-          thresholdValues.stats,
-          next
-        )
+            thresholdValues.recovery.conditions,
+            evalLabels,
+            index,
+            oldLabel,
+            newLabel,
+            thresholdValues.stats,
+            next
+          )
         : undefined;
       onThresholdValuesChange({
         ...thresholdValues,
@@ -397,15 +397,15 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
       );
       const cleanedRecoveryConditions = thresholdValues.recovery
         ? reconcileAlertConditionMetrics(
-          clearConditionsForRemovedMetric(
-            thresholdValues.recovery.conditions,
-            removedLabel,
+            clearConditionsForRemovedMetric(
+              thresholdValues.recovery.conditions,
+              removedLabel,
+              thresholdValues.stats,
+              remainingEvaluations
+            ),
             thresholdValues.stats,
             remainingEvaluations
-          ),
-          thresholdValues.stats,
-          remainingEvaluations
-        )
+          )
         : undefined;
       onThresholdValuesChange({
         ...thresholdValues,
@@ -468,7 +468,9 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
   const removeCondition = useCallback(
     (index: number) => {
       const filtered = thresholdValues.alertConditions.filter((_, i) => i !== index);
-      const next = filtered.length ? filtered : [{ id: generateId(), ...DEFAULT_ALERT_CONDITION, metric: metricOptions[0] ?? '' }];
+      const next = filtered.length
+        ? filtered
+        : [{ id: generateId(), ...DEFAULT_ALERT_CONDITION, metric: metricOptions[0] ?? '' }];
       onThresholdValuesChange({
         ...thresholdValues,
         alertConditions: next,
