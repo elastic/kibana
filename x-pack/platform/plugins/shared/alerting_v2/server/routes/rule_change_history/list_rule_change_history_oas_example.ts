@@ -14,7 +14,7 @@ export const LIST_RULE_CHANGE_HISTORY_RESPONSE: ListRuleChangeHistoryResponse = 
   items: [
     {
       id: '0194f0c8-aaaa-7bbb-8ccc-ddddeeeeffff',
-      timestamp: '2026-01-15T12:05:00.000Z',
+      created_at: '2026-01-15T12:05:00.000Z',
       actor: { name: 'elastic', profile_id: 'u_profile_1' },
       action: 'rule_update',
       changes: {
@@ -26,7 +26,7 @@ export const LIST_RULE_CHANGE_HISTORY_RESPONSE: ListRuleChangeHistoryResponse = 
     },
     {
       id: '0194f0c8-1111-7222-8333-444455556666',
-      timestamp: '2026-01-15T12:00:00.000Z',
+      created_at: '2026-01-15T12:00:00.000Z',
       actor: { name: 'elastic', profile_id: 'u_profile_1' },
       action: 'rule_create',
       metadata: { version: 1 },

@@ -17,7 +17,7 @@ const { version: _occVersion, ...RULE_SNAPSHOT } = RULE_RESPONSE;
 
 export const GET_RULE_CHANGE_HISTORY_EVENT_RESPONSE: RuleChangeHistoryDetail = {
   id: '0194f0c8-aaaa-7bbb-8ccc-ddddeeeeffff',
-  timestamp: '2026-01-15T12:05:00.000Z',
+  created_at: '2026-01-15T12:05:00.000Z',
   actor: { name: 'elastic', profile_id: 'u_profile_1' },
   action: 'rule_update',
   changes: {

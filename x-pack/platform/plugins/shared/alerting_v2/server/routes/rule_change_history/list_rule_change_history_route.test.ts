@@ -57,7 +57,7 @@ describe('ListRuleChangeHistoryRoute', () => {
       items: [
         {
           id: 'event-1',
-          timestamp: '2026-01-15T12:00:00.000Z',
+          created_at: '2026-01-15T12:00:00.000Z',
           actor: { name: 'elastic' },
           action: 'rule_create',
         },
@@ -98,7 +98,7 @@ describe('GetRuleChangeHistoryEventRoute', () => {
     const mocks = createMocks();
     mocks.ruleChangesHistoryClient.getRuleChange.mockResolvedValue({
       id: 'event-1',
-      timestamp: '2026-01-15T12:00:00.000Z',
+      created_at: '2026-01-15T12:00:00.000Z',
       actor: { name: 'elastic' },
       action: 'rule_create',
       snapshot: { id: 'rule-1' },

@@ -221,7 +221,7 @@ describe('rule change history schemas', () => {
         items: [
           {
             id: 'event-1',
-            timestamp: '2026-01-15T12:00:00.000Z',
+            created_at: '2026-01-15T12:00:00.000Z',
             actor: { name: 'elastic' },
             action: 'rule_create',
           },
@@ -233,7 +233,7 @@ describe('rule change history schemas', () => {
     expect(
       ruleChangeHistoryDetailSchema.safeParse({
         id: 'event-1',
-        timestamp: '2026-01-15T12:00:00.000Z',
+        created_at: '2026-01-15T12:00:00.000Z',
         actor: { name: 'elastic' },
         action: 'rule_create',
         snapshot: { id: 'rule-1', metadata: { name: 'Rule' } },

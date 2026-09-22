@@ -57,9 +57,11 @@ export const actionPolicyResponseSchema = z
       })
       .describe('Authentication and ownership information.'),
     created_by: z.string().nullable().describe('The user ID who created the action policy.'),
-    created_at: z.string().describe('The ISO datetime when the action policy was created.'),
+    created_at: z.iso.datetime().describe('The ISO datetime when the action policy was created.'),
     updated_by: z.string().nullable().describe('The user ID who last updated the action policy.'),
-    updated_at: z.string().describe('The ISO datetime when the action policy was last updated.'),
+    updated_at: z.iso
+      .datetime()
+      .describe('The ISO datetime when the action policy was last updated.'),
   })
   .meta({ id: 'alerting_action_policy_response' });
 

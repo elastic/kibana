@@ -771,9 +771,9 @@ export const ruleResponseSchema = createRuleDataBaseSchema
     metadata: ruleResponseMetadataSchema,
     enabled: z.boolean().describe('Whether the rule is enabled.'),
     created_by: z.string().nullable().describe('User who created the rule.'),
-    created_at: z.string().describe('ISO timestamp when the rule was created.'),
+    created_at: z.iso.datetime().describe('ISO timestamp when the rule was created.'),
     updated_by: z.string().nullable().describe('User who last updated the rule.'),
-    updated_at: z.string().describe('ISO timestamp when the rule was last updated.'),
+    updated_at: z.iso.datetime().describe('ISO timestamp when the rule was last updated.'),
     version: z
       .string()
       .optional()

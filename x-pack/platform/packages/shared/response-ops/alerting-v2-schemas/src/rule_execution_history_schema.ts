@@ -88,8 +88,8 @@ export const ruleExecutionViewSchema = z
       version: z.number().int().nullable(),
     }),
     space_id: z.string(),
-    started_at: z.string(),
-    ended_at: z.string(),
+    started_at: z.iso.datetime(),
+    ended_at: z.iso.datetime(),
     timings: z.object({
       duration: z.number().int().nonnegative(),
       scheduled_delay: z.number().int(),

@@ -34,7 +34,7 @@ export function toListItem(
 
   const item: RuleChangeHistoryListItem = {
     id: document.event.id,
-    timestamp: document['@timestamp'],
+    created_at: document['@timestamp'],
     actor: {
       name: document.user.name,
       ...(document.user.id ? { profile_id: document.user.id } : {}),

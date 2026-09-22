@@ -127,7 +127,7 @@ const episodeRefSchema = z.object({ id: z.string() });
 
 export const policyExecutionHistoryItemSchema = z
   .object({
-    dispatched_at: z.string(),
+    dispatched_at: z.iso.datetime(),
     policy: namedRefSchema,
     outcome: policyExecutionOutcomeSchema,
     episode_count: z.number(),

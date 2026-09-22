@@ -76,7 +76,11 @@ export type RuleChangeHistoryChanges = z.infer<typeof ruleChangeHistoryChangesSc
  */
 export const ruleChangeHistoryListItemSchema = z.object({
   id: z.string(),
-  timestamp: z.string(),
+  created_at: z.iso
+    .datetime()
+    .describe(
+      'The ISO datetime when this change-history record was written. The rule change itself is timestamped by `updated_at` on the snapshot.'
+    ),
   actor: ruleChangeHistoryActorSchema,
   action: z.string(),
   changes: ruleChangeHistoryChangesSchema.optional(),

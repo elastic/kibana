@@ -72,7 +72,7 @@ describe('listRuleChangeHistoryResponseSchema', () => {
         items: [
           {
             id: 'event-1',
-            timestamp: '2026-01-15T12:00:00.000Z',
+            created_at: '2026-01-15T12:00:00.000Z',
             actor: { name: 'elastic' },
             action: 'rule_create',
             is_current: true,
@@ -90,7 +90,7 @@ describe('ruleChangeHistoryDetailSchema', () => {
     expect(
       ruleChangeHistoryDetailSchema.safeParse({
         id: 'event-1',
-        timestamp: '2026-01-15T12:00:00.000Z',
+        created_at: '2026-01-15T12:00:00.000Z',
         actor: { name: 'elastic', profile_id: 'u_1' },
         action: 'rule_update',
         changes: { count: 1, summary: { metadata: { name: 'old' } } },
@@ -103,7 +103,7 @@ describe('ruleChangeHistoryDetailSchema', () => {
     expect(
       ruleChangeHistoryDetailSchema.safeParse({
         id: 'event-1',
-        timestamp: '2026-01-15T12:00:00.000Z',
+        created_at: '2026-01-15T12:00:00.000Z',
         actor: { name: 'elastic' },
         action: 'rule_create',
       }).success
