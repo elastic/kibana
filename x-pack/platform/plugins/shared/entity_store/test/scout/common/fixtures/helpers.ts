@@ -8,12 +8,15 @@
 import type { EsClient } from '@kbn/scout';
 import type { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
+import { FF_ENABLE_ENTITY_STORE_V2, type GetEntityMaintainersResponse } from '../../../../common';
 import type { EntityStoreStatusResponseBody } from '../../../../server/routes/apis/status';
 import { hashEuid } from '../../../../common/domain/euid';
 import type { EntityType } from '../../../../common';
 
 import {
   ENTITY_STORE_ROUTES,
+  INTERNAL_HEADERS,
+  PUBLIC_HEADERS,
   HISTORY_INDEX_PATTERN,
   LATEST_ALIAS,
   LATEST_INDEX,
@@ -23,6 +26,8 @@ import {
 
 type ApiWorkerFixtures = Parameters<Parameters<typeof apiTest>[2]>[0];
 export type ApiClientFixture = ApiWorkerFixtures['apiClient'];
+type KbnClientFixture = ApiWorkerFixtures['kbnClient'];
+type SamlAuthFixture = ApiWorkerFixtures['samlAuth'];
 type ApiClientResponse = Awaited<ReturnType<ApiClientFixture['get']>>; // ApiClientResponse is the same for all methods
 /**
  * Normalizes values that may be stored as a single keyword or as keyword[] after
@@ -57,6 +62,32 @@ export const clearEntityStoreIndices = async (esClient: EsClient) => {
 
   await esClient.indices.deleteDataStream({ name: LOGS_TEST_INDEX }).catch(() => {});
   await esClient.indices.deleteDataStream({ name: QUERY_TRANSLATION_TEST_INDEX }).catch(() => {});
+};
+
+/**
+ * Clears installed entity documents while keeping indices and aliases intact.
+ * This is used by suites that install once and isolate test files via document wipes.
+ */
+export const clearInstalledEntityStoreDocuments = async (esClient: EsClient) => {
+  await esClient.deleteByQuery({
+    index: LATEST_ALIAS,
+    refresh: true,
+    query: { match_all: {} },
+    ignore_unavailable: true,
+  });
+
+  await esClient.deleteByQuery({
+    index: UPDATES_INDEX,
+    refresh: true,
+    query: { match_all: {} },
+    ignore_unavailable: true,
+  });
+
+  const resolved = await esClient.indices.resolveIndex({ name: HISTORY_INDEX_PATTERN });
+  const historyIndices = resolved.indices.map((i) => i.name);
+  if (historyIndices.length > 0) {
+    await esClient.indices.delete({ index: historyIndices, ignore_unavailable: true }, { ignore: [404] });
+  }
 };
 
 /**
@@ -139,6 +170,76 @@ export const teardownQueryTranslationTestDataStream = async (esClient: EsClient)
   await esClient.indices
     .deleteIndexTemplate({ name: 'entity-store-query-translation-test' })
     .catch(() => {});
+};
+
+export const installEntityStoreSuite = async ({
+  apiClient,
+  kbnClient,
+  samlAuth,
+}: {
+  apiClient: ApiClientFixture;
+  kbnClient: KbnClientFixture;
+  samlAuth: SamlAuthFixture;
+}) => {
+  const credentials = await samlAuth.asInteractiveUser('admin');
+  const defaultHeaders = { ...credentials.cookieHeader, ...PUBLIC_HEADERS };
+  const internalHeaders = { ...credentials.cookieHeader, ...INTERNAL_HEADERS };
+
+  await kbnClient.uiSettings.update({
+    [FF_ENABLE_ENTITY_STORE_V2]: true,
+  });
+
+  const installResponse = await installAllEntityTypes(apiClient, defaultHeaders);
+  expect([200, 201]).toContain(installResponse.statusCode);
+
+  const stopResponse = await stopAllEntityTypes(apiClient, defaultHeaders);
+  expect(stopResponse.statusCode).toBe(200);
+
+  const maintainersResponse = await apiClient.get(ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_GET, {
+    headers: internalHeaders,
+    responseType: 'json',
+  });
+  expect(maintainersResponse.statusCode).toBe(200);
+
+  const { maintainers } = maintainersResponse.body as GetEntityMaintainersResponse;
+  for (const maintainer of maintainers) {
+    if (maintainer.taskStatus !== 'stopped') {
+      continue;
+    }
+
+    const startResponse = await apiClient.put(
+      ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_START(maintainer.id),
+      {
+        headers: internalHeaders,
+        responseType: 'json',
+        body: {},
+      }
+    );
+    expect(startResponse.statusCode).toBe(200);
+  }
+};
+
+export const uninstallEntityStoreSuite = async ({
+  apiClient,
+  esClient,
+  kbnClient,
+  samlAuth,
+}: {
+  apiClient: ApiClientFixture;
+  esClient: EsClient;
+  kbnClient: KbnClientFixture;
+  samlAuth: SamlAuthFixture;
+}) => {
+  const credentials = await samlAuth.asInteractiveUser('admin');
+  const defaultHeaders = { ...credentials.cookieHeader, ...PUBLIC_HEADERS };
+
+  const uninstallResponse = await uninstallAllEntityTypes(apiClient, defaultHeaders);
+  expect(uninstallResponse.statusCode).toBe(200);
+  await clearEntityStoreIndices(esClient);
+
+  await kbnClient.uiSettings.update({
+    [FF_ENABLE_ENTITY_STORE_V2]: false,
+  });
 };
 
 export const searchDocById = async (esClient: EsClient, id: string) => {

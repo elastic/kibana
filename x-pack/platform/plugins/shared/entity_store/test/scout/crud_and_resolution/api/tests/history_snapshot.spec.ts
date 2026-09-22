@@ -9,15 +9,13 @@ import { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { hashEuid } from '../../../../../common/domain/euid';
 import {
-  PUBLIC_HEADERS,
   INTERNAL_HEADERS,
   ENTITY_STORE_ROUTES,
   ENTITY_STORE_TAGS,
   LATEST_ALIAS,
 } from '../../../common/fixtures/constants';
-import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common';
 import {
-  clearEntityStoreIndices,
+  clearInstalledEntityStoreDocuments,
   forceLogExtraction,
   normalizeKeywordList,
   setupLogsTestDataStream,
@@ -25,30 +23,15 @@ import {
 } from '../../../common/fixtures/helpers';
 
 apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, () => {
-  let defaultHeaders: Record<string, string>;
   let internalHeaders: Record<string, string>;
 
-  apiTest.beforeAll(async ({ samlAuth, apiClient, esClient, esArchiver, kbnClient }) => {
+  apiTest.beforeAll(async ({ samlAuth, esClient, esArchiver }) => {
     const credentials = await samlAuth.asInteractiveUser('admin');
-    defaultHeaders = {
-      ...credentials.cookieHeader,
-      ...PUBLIC_HEADERS,
-    };
     internalHeaders = {
       ...credentials.cookieHeader,
       ...INTERNAL_HEADERS,
     };
-
-    await kbnClient.uiSettings.update({
-      [FF_ENABLE_ENTITY_STORE_V2]: true,
-    });
-
-    const installResponse = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: { historySnapshot: { frequency: '24h' } },
-    });
-    expect(installResponse.statusCode).toBe(201);
+    await clearInstalledEntityStoreDocuments(esClient);
 
     await setupLogsTestDataStream(esClient);
     await esArchiver.loadIfNeeded(
@@ -56,14 +39,7 @@ apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, ()
     );
   });
 
-  apiTest.afterAll(async ({ apiClient, esClient }) => {
-    const response = await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: {},
-    });
-    expect(response.statusCode).toBe(200);
-    await clearEntityStoreIndices(esClient);
+  apiTest.afterAll(async ({ esClient }) => {
     await teardownLogsTestDataStream(esClient);
   });
 
