@@ -67,7 +67,7 @@ const baseData = {
   capability: 'lateral-movement-detector',
   run_id: 'run-1',
   security_knowledge_indicators: [
-    { type: 'technique', value: 'T1021', confidence: 0.9, technique_id: 'T1021' },
+    { type: 'technique' as const, value: 'T1021', confidence: 0.9, technique_id: 'T1021' },
   ],
   report_id: 'ti-report-1',
   entities: [
@@ -146,23 +146,6 @@ describe('SignificantSecurityEventInlineContent', () => {
     expect(
       screen.queryByText('Evidence for: 2 · Evidence against: 0 · Indicators: 1')
     ).not.toBeInTheDocument();
-  });
-
-  it('drops malformed timeline entries but still renders the valid ones', () => {
-    const data = {
-      ...baseData,
-      timeline: [
-        { at: '2024-01-01T00:00:00Z', what: 'valid entry' },
-        { at: 123, what: 'bad at type' },
-        { what: 'missing at' },
-      ] as unknown as SignificantSecurityEventAttachment['data']['timeline'],
-    };
-    renderWithIntl(
-      <SignificantSecurityEventInlineContent {...renderProps(buildAttachment(data))} />
-    );
-    expect(screen.getByText('valid entry')).toBeInTheDocument();
-    expect(screen.queryByText('bad at type')).not.toBeInTheDocument();
-    expect(screen.queryByText('missing at')).not.toBeInTheDocument();
   });
 
   it('renders nothing for the timeline section when there are no entries', () => {
@@ -252,7 +235,7 @@ describe('SignificantSecurityEventInlineContent', () => {
       ...baseData,
       security_knowledge_indicators: [
         ...baseData.security_knowledge_indicators,
-        { type: 'ioc', value: '203.0.113.4', ioc: { type: 'ip', value: '203.0.113.4' } },
+        { type: 'ioc' as const, value: '203.0.113.4', ioc: { type: 'ip' as const, value: '203.0.113.4' } },
       ],
     };
     renderWithIntl(

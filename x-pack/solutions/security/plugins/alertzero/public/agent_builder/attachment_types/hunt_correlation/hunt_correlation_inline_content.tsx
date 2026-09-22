@@ -164,7 +164,7 @@ export const HuntCorrelationInlineContent: React.FC<HuntCorrelationInlineContent
     ),
   }));
 
-  const diamondScoreRows = groupDiamondScoresByReport(parsed.diamondScores);
+  const diamondScoreRows = groupDiamondScoresByReport(parsed.diamond_scores);
   const diamondVertexThreshold = parsed.thresholds?.diamond_vertex;
 
   const diamondColumns: Array<EuiBasicTableColumn<DiamondScoreRow>> = [

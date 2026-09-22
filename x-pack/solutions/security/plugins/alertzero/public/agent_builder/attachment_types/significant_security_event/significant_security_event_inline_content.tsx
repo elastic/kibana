@@ -45,7 +45,7 @@ import { formatPercent } from '../shared/severity';
 import { buildMitreTechniqueUrl } from '../shared/mitre_url';
 import { parseSignificantSecurityEventData } from './types';
 import type {
-  ParsedHuntResult,
+  HuntResult,
   SignificantSecurityAlertRef,
   SignificantSecurityEventAttachment,
   SignificantSecurityEventRef,
@@ -413,25 +413,25 @@ const TimelineSection: React.FC<{ timeline: TimelineEntry[] }> = ({ timeline }) 
 };
 
 interface Tier2TableRow {
-  techniqueId: string;
-  tacticIds: string[];
+  technique_id: string;
+  tactic_ids: string[];
   confidence: number;
-  ruleName: string;
+  rule_name: string;
 }
 
-const HuntResultSection: React.FC<{ huntResult: ParsedHuntResult }> = ({ huntResult }) => {
+const HuntResultSection: React.FC<{ huntResult: HuntResult }> = ({ huntResult }) => {
   const { tier1, tier2 } = huntResult;
-  const distributionStats = tier1.perIndex.map((row, index) => ({
+  const distributionStats = tier1.per_index.map((row, index) => ({
     key: row.index,
-    count: row.hitCount,
+    count: row.hit_count,
     label: row.index,
     color: visColorAt(index),
   }));
-  const totalDistributedHits = tier1.perIndex.reduce((sum, row) => sum + row.hitCount, 0);
+  const totalDistributedHits = tier1.per_index.reduce((sum, row) => sum + row.hit_count, 0);
 
   const tier2Columns: Array<EuiBasicTableColumn<Tier2TableRow>> = [
     {
-      field: 'techniqueId',
+      field: 'technique_id',
       name: i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.huntResultTechnique', {
         defaultMessage: 'Technique',
       }),
@@ -450,14 +450,14 @@ const HuntResultSection: React.FC<{ huntResult: ParsedHuntResult }> = ({ huntRes
       ),
     },
     {
-      field: 'ruleName',
+      field: 'rule_name',
       name: i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.huntResultRule', {
         defaultMessage: 'Rule',
       }),
       render: (ruleName: string) => <span css={cellStyles}>{ruleName}</span>,
     },
     {
-      field: 'tacticIds',
+      field: 'tactic_ids',
       name: i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.huntResultTactics', {
         defaultMessage: 'Tactics',
       }),
@@ -485,10 +485,10 @@ const HuntResultSection: React.FC<{ huntResult: ParsedHuntResult }> = ({ huntRes
 
   const tier2Rows: Tier2TableRow[] =
     tier2?.behaviors.map((behavior) => ({
-      techniqueId: behavior.techniqueId,
-      tacticIds: behavior.tacticIds,
+      technique_id: behavior.technique_id,
+      tactic_ids: behavior.tactic_ids,
       confidence: behavior.confidence,
-      ruleName: behavior.ruleName,
+      rule_name: behavior.rule_name,
     })) ?? [];
 
   return (
@@ -503,20 +503,20 @@ const HuntResultSection: React.FC<{ huntResult: ParsedHuntResult }> = ({ huntRes
       <EuiSpacer size="xs" />
       <EuiText size="xs" color="subdued">
         <FormattedDate
-          value={huntResult.timeRange.from}
+          value={huntResult.time_range.from}
           year="numeric"
           month="short"
           day="2-digit"
         />{' '}
-        <FormattedTime value={huntResult.timeRange.from} />
+        <FormattedTime value={huntResult.time_range.from} />
         {' - '}
         <FormattedDate
-          value={huntResult.timeRange.to}
+          value={huntResult.time_range.to}
           year="numeric"
           month="short"
           day="2-digit"
         />{' '}
-        <FormattedTime value={huntResult.timeRange.to} />
+        <FormattedTime value={huntResult.time_range.to} />
       </EuiText>
       <EuiSpacer size="s" />
       <EuiFlexGroup gutterSize="m" responsive={false} wrap>
@@ -526,7 +526,7 @@ const HuntResultSection: React.FC<{ huntResult: ParsedHuntResult }> = ({ huntRes
             descriptionElement="span"
             titleSize="s"
             textAlign="left"
-            title={tier1.counts.totalHits}
+            title={tier1.counts.total_hits}
             description={i18n.translate(
               'xpack.alertzero.agentBuilder.attachments.sse.huntResultTotalHits',
               { defaultMessage: 'Total hits' }
@@ -539,7 +539,7 @@ const HuntResultSection: React.FC<{ huntResult: ParsedHuntResult }> = ({ huntRes
             descriptionElement="span"
             titleSize="s"
             textAlign="left"
-            title={tier1.counts.affectedHosts}
+            title={tier1.counts.affected_hosts}
             description={i18n.translate(
               'xpack.alertzero.agentBuilder.attachments.sse.huntResultAffectedHosts',
               { defaultMessage: 'Affected hosts' }
@@ -552,7 +552,7 @@ const HuntResultSection: React.FC<{ huntResult: ParsedHuntResult }> = ({ huntRes
             descriptionElement="span"
             titleSize="s"
             textAlign="left"
-            title={tier1.counts.affectedUsers}
+            title={tier1.counts.affected_users}
             description={i18n.translate(
               'xpack.alertzero.agentBuilder.attachments.sse.huntResultAffectedUsers',
               { defaultMessage: 'Affected users' }
@@ -583,7 +583,7 @@ const HuntResultSection: React.FC<{ huntResult: ParsedHuntResult }> = ({ huntRes
             <FormattedMessage
               id="xpack.alertzero.agentBuilder.attachments.sse.huntResultDistributionSummary"
               defaultMessage="{hits, plural, one {# event} other {# events}} across {indices, plural, one {# index} other {# indices}}"
-              values={{ hits: totalDistributedHits, indices: tier1.perIndex.length }}
+              values={{ hits: totalDistributedHits, indices: tier1.per_index.length }}
             />
           </EuiText>
         </>
@@ -596,7 +596,7 @@ const HuntResultSection: React.FC<{ huntResult: ParsedHuntResult }> = ({ huntRes
             compressed
             tableLayout="auto"
             responsiveBreakpoint={false}
-            rowHeader="techniqueId"
+            rowHeader="technique_id"
             tableCaption={i18n.translate(
               'xpack.alertzero.agentBuilder.attachments.sse.huntResultBehaviorsTableCaption',
               { defaultMessage: 'Hunt result behaviors' }
@@ -632,7 +632,7 @@ export const SignificantSecurityEventInlineContent: React.FC<
     );
   }
 
-  const hasEventsOrAlerts = parsed.events.length > 0 || parsed.alerts.length > 0;
+  const hasEventsOrAlerts = (parsed.events ?? []).length > 0 || (parsed.alerts ?? []).length > 0;
 
   return (
     <EuiPanel hasBorder={false} paddingSize="s" data-test-subj={SSE_ATTACHMENT_TEST_ID}>
@@ -646,13 +646,13 @@ export const SignificantSecurityEventInlineContent: React.FC<
               defaultMessage: 'Payload truncated',
             })}
             text={
-              parsed.truncatedOriginalCount != null
+              parsed.truncated_original_count != null
                 ? i18n.translate(
                     'xpack.alertzero.agentBuilder.attachments.sse.truncatedWithCount',
                     {
                       defaultMessage:
                         'This attachment was truncated. Original count: {originalCount}.',
-                      values: { originalCount: parsed.truncatedOriginalCount },
+                      values: { originalCount: parsed.truncated_original_count },
                     }
                   )
                 : i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.truncated', {
@@ -664,10 +664,10 @@ export const SignificantSecurityEventInlineContent: React.FC<
         </>
       )}
 
-      {(parsed.runId || parsed.reportId) && (
+      {(parsed.run_id || parsed.report_id) && (
         <>
           <EuiFlexGroup alignItems="center" gutterSize="xs" wrap responsive={false}>
-            {parsed.runId && (
+            {parsed.run_id && (
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
                   <EuiFlexItem grow={false}>
@@ -679,7 +679,7 @@ export const SignificantSecurityEventInlineContent: React.FC<
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <IocBadge
-                      value={parsed.runId}
+                      value={parsed.run_id}
                       index={0}
                       testSubj="alertzeroSignificantSecurityEventRunId"
                     />
@@ -687,7 +687,7 @@ export const SignificantSecurityEventInlineContent: React.FC<
                 </EuiFlexGroup>
               </EuiFlexItem>
             )}
-            {parsed.reportId && (
+            {parsed.report_id && (
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
                   <EuiFlexItem grow={false}>
@@ -699,11 +699,11 @@ export const SignificantSecurityEventInlineContent: React.FC<
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <IocBadge
-                      value={parsed.reportId}
+                      value={parsed.report_id}
                       index={0}
                       discoverHref={buildDiscoverEsqlUrl({
                         share: navigation.share,
-                        esql: buildThreatReportLookupEsql({ reportId: parsed.reportId }),
+                        esql: buildThreatReportLookupEsql({ reportId: parsed.report_id }),
                       })}
                       testSubj="alertzeroSignificantSecurityEventReportLink"
                     />
@@ -716,16 +716,16 @@ export const SignificantSecurityEventInlineContent: React.FC<
         </>
       )}
 
-      {parsed.hypothesisTested && (
+      {parsed.hypothesis_tested && (
         <>
-          <HypothesisSection hypothesis={parsed.hypothesisTested} />
+          <HypothesisSection hypothesis={parsed.hypothesis_tested} />
           <EuiSpacer size="s" />
         </>
       )}
 
-      {parsed.huntResult && (
+      {parsed.hunt_result && (
         <>
-          <HuntResultSection huntResult={parsed.huntResult} />
+          <HuntResultSection huntResult={parsed.hunt_result} />
           <EuiSpacer size="s" />
         </>
       )}
@@ -744,39 +744,39 @@ export const SignificantSecurityEventInlineContent: React.FC<
               <FormattedMessage
                 id="xpack.alertzero.agentBuilder.attachments.sse.eventsAccordionButton"
                 defaultMessage="{count, plural, one {# event} other {# events}}"
-                values={{ count: parsed.events.length }}
+                values={{ count: (parsed.events ?? []).length }}
               />
             }
           >
             <EuiSpacer size="s" />
-            <EventRows events={parsed.events} navigation={navigation} />
+            <EventRows events={parsed.events ?? []} navigation={navigation} />
           </EuiAccordion>
         </>
       )}
 
-      <AlertList alerts={parsed.alerts} navigation={navigation} />
+      <AlertList alerts={parsed.alerts ?? []} navigation={navigation} />
 
-      {parsed.indicators.length > 0 && (
+      {parsed.security_knowledge_indicators.length > 0 && (
         <>
           <EuiSpacer size="s" />
-          <IndicatorList indicators={parsed.indicators} />
+          <IndicatorList indicators={parsed.security_knowledge_indicators} />
         </>
       )}
 
-      {(parsed.evidenceFor.length > 0 || parsed.evidenceAgainst.length > 0) && (
+      {(parsed.evidence_for.length > 0 || parsed.evidence_against.length > 0) && (
         <>
           <EuiSpacer size="s" />
           <EvidenceSection
             label={i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.evidenceFor', {
               defaultMessage: 'Evidence for',
             })}
-            items={parsed.evidenceFor}
+            items={parsed.evidence_for}
           />
           <EvidenceSection
             label={i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.evidenceAgainst', {
               defaultMessage: 'Evidence against',
             })}
-            items={parsed.evidenceAgainst}
+            items={parsed.evidence_against}
           />
         </>
       )}

@@ -52,7 +52,7 @@ export const createHuntCorrelationAttachmentDefinition = ({
     const parsed = parseHuntCorrelationData(attachment?.data);
     const anchorCount = parsed?.anchors.length ?? 0;
     const reportCount = parsed
-      ? new Set(parsed.diamondScores.map((score) => score.related_report_id)).size
+      ? new Set(parsed.diamond_scores.map((score) => score.related_report_id)).size
       : 0;
 
     const subtitle = i18n.translate(
@@ -65,7 +65,7 @@ export const createHuntCorrelationAttachmentDefinition = ({
     );
 
     const badges: HeaderBadge[] = [];
-    const scores = parsed?.diamondScores ?? [];
+    const scores = parsed?.diamond_scores ?? [];
     if (scores.length > 0 && parsed?.thresholds) {
       const threshold = parsed.thresholds.diamond_vertex;
       const allAboveThreshold = scores.every((score) => score.score >= threshold);
@@ -92,7 +92,7 @@ export const createHuntCorrelationAttachmentDefinition = ({
       return [];
     }
 
-    const reportIds = [...new Set(parsed.diamondScores.map((score) => score.related_report_id))];
+    const reportIds = [...new Set(parsed.diamond_scores.map((score) => score.related_report_id))];
     if (reportIds.length === 0) {
       return [];
     }

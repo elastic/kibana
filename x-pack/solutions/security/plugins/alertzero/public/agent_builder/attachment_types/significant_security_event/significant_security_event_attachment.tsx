@@ -63,7 +63,7 @@ export const createSignificantSecurityEventAttachmentDefinition = ({
     const data = attachment?.data;
     const parsed = parseSignificantSecurityEventData(data);
     const title = data?.attachmentLabel ?? data?.title ?? DEFAULT_LABEL;
-    const totalHits = parsed?.huntResult?.tier1.counts.totalHits;
+    const totalHits = parsed?.hunt_result?.tier1.counts.total_hits;
     if (typeof totalHits === 'number') {
       return i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.labelWithHits', {
         defaultMessage: '{count, plural, one {# hit confirms} other {# hits confirm}}: {title}',
@@ -76,10 +76,10 @@ export const createSignificantSecurityEventAttachmentDefinition = ({
   getHeader: ({ attachment }) => {
     const data = attachment?.data;
     const parsed = parseSignificantSecurityEventData(data);
-    const subtitle = parsed?.reportId
+    const subtitle = parsed?.report_id
       ? i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.subtitleFromReport', {
           defaultMessage: 'From {reportId} · {capability}',
-          values: { reportId: parsed.reportId, capability: data?.capability ?? '' },
+          values: { reportId: parsed.report_id, capability: parsed.capability },
         })
       : [data?.source_watch, data?.capability].filter(Boolean).join(' · ');
 
@@ -111,10 +111,12 @@ export const createSignificantSecurityEventAttachmentDefinition = ({
       return [];
     }
 
+    const events = parsed.events ?? [];
+    const alerts = parsed.alerts ?? [];
     const exit =
-      parsed.events.length > 0
-        ? { esql: buildEventsLookupEsql({ events: parsed.events }), label: OPEN_EVENTS_LABEL }
-        : { esql: buildAlertsLookupEsql({ alerts: parsed.alerts }), label: OPEN_ALERTS_LABEL };
+      events.length > 0
+        ? { esql: buildEventsLookupEsql({ events }), label: OPEN_EVENTS_LABEL }
+        : { esql: buildAlertsLookupEsql({ alerts }), label: OPEN_ALERTS_LABEL };
     if (!exit.esql) {
       return [];
     }

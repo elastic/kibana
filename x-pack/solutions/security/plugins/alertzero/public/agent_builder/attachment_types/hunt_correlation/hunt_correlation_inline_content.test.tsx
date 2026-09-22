@@ -211,20 +211,6 @@ describe('HuntCorrelationInlineContent', () => {
     openWindowSpy.mockRestore();
   });
 
-  it('drops malformed anchor entries but keeps the valid ones', () => {
-    const data = {
-      ...baseData,
-      anchors: [
-        { kind: 'hash', value: 'valid-anchor' },
-        { kind: 'hash' },
-        { value: 'missing-kind' },
-      ] as unknown as HuntCorrelationAttachment['data']['anchors'],
-    };
-    render(<HuntCorrelationInlineContent {...renderProps(buildAttachment(data))} />);
-    expect(screen.getByText('valid-anchor')).toBeInTheDocument();
-    expect(screen.queryByText('missing-kind')).not.toBeInTheDocument();
-  });
-
   it('shows the empty-anchors sentinel when anchors is empty', () => {
     render(
       <HuntCorrelationInlineContent

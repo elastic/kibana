@@ -5,31 +5,18 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
 import type {
   AttachmentTypeDefinition,
   AttachmentFormatContext,
 } from '@kbn/agent-builder-server/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { ALERTZERO_ATTACHMENT_TYPES } from '../../../common/constants';
-import { alertZeroAttachmentDataSchema } from '../../../common/attachment_data_schema';
+import {
+  threatAttachmentDataSchema,
+  type ThreatAttachmentData,
+} from '../../../common/threat_attachment_schema';
 
 export const THREAT_ATTACHMENT_ID = ALERTZERO_ATTACHMENT_TYPES.threat;
-
-/**
- * By-reference trigger carrier: the payload names a threat report by id, plus captured
- * display fallbacks. The live document itself is resolved client-side, space-projected,
- * by the `security.threat` renderer — the server only validates and formats the
- * reference and its fallback fields.
- */
-export const threatAttachmentDataSchema = alertZeroAttachmentDataSchema.extend({
-  report_id: z.string().min(1).max(512),
-  title: z.string().min(1).max(512).optional(),
-  severity: z.enum(['low', 'medium', 'high', 'critical']).optional(),
-  source: z.string().min(1).max(256).optional(),
-});
-
-export type ThreatAttachmentData = z.infer<typeof threatAttachmentDataSchema>;
 
 const formatThreatForAgent = (data: ThreatAttachmentData): string => {
   const lines = ['Threat report reference', `Report id: ${data.report_id}`];

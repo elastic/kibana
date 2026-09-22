@@ -6,86 +6,18 @@
  */
 
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
+import { huntCorrelationAttachmentDataSchema } from '../../../../common/hunt_correlation_attachment_schema';
+import type { HuntCorrelationAttachmentData } from '../../../../common/hunt_correlation_attachment_schema';
 
-export interface Anchor {
-  kind: 'hash' | 'ioc_set_hash' | 'actor';
-  value: string;
-}
-
-export interface DiamondScore {
-  vertex: 'adversary' | 'capability' | 'infrastructure' | 'victim';
-  related_report_id: string;
-  score: number;
-}
-
-export interface Thresholds {
-  anchor_match: number;
-  diamond_vertex: number;
-}
-
-/** Mirrors `huntCorrelationAttachmentDataSchema` (server/agent_builder/attachments/hunt_correlation.ts). */
-export interface HuntCorrelationAttachmentData {
-  attachmentLabel?: string;
-  anchors: Anchor[];
-  diamond_scores: DiamondScore[];
-  thresholds: Thresholds;
-  self_match_excluded: true;
-  report_revision?: string;
-}
-
+export type { HuntCorrelationAttachmentData };
 export type HuntCorrelationAttachment = Attachment<string, HuntCorrelationAttachmentData>;
+export type Anchor = HuntCorrelationAttachmentData['anchors'][number];
+export type DiamondScore = HuntCorrelationAttachmentData['diamond_scores'][number];
 
-const isValidAnchor = (candidate: unknown): candidate is Anchor =>
-  Boolean(
-    candidate &&
-      typeof candidate === 'object' &&
-      typeof (candidate as Anchor).kind === 'string' &&
-      typeof (candidate as Anchor).value === 'string'
-  );
-
-const isValidDiamondScore = (candidate: unknown): candidate is DiamondScore =>
-  Boolean(
-    candidate &&
-      typeof candidate === 'object' &&
-      typeof (candidate as DiamondScore).vertex === 'string' &&
-      typeof (candidate as DiamondScore).related_report_id === 'string' &&
-      typeof (candidate as DiamondScore).score === 'number'
-  );
-
-export interface ParsedHuntCorrelation {
-  anchors: Anchor[];
-  diamondScores: DiamondScore[];
-  thresholds?: Thresholds;
-}
-
-/**
- * Structural, defensive parser mirroring the SSE type's approach: the server already validates
- * this payload on write, but the renderer drops malformed array entries rather than throwing.
- */
-export const parseHuntCorrelationData = (candidate: unknown): ParsedHuntCorrelation | undefined => {
-  if (!candidate || typeof candidate !== 'object') return undefined;
-  const record = candidate as Record<string, unknown>;
-
-  const thresholdsCandidate = record.thresholds as Record<string, unknown> | undefined;
-  const thresholds =
-    thresholdsCandidate &&
-    typeof thresholdsCandidate.anchor_match === 'number' &&
-    typeof thresholdsCandidate.diamond_vertex === 'number'
-      ? {
-          anchor_match: thresholdsCandidate.anchor_match,
-          diamond_vertex: thresholdsCandidate.diamond_vertex,
-        }
-      : undefined;
-
-  if (!Array.isArray(record.anchors) && !Array.isArray(record.diamond_scores) && !thresholds) {
-    return undefined;
-  }
-
-  return {
-    anchors: Array.isArray(record.anchors) ? record.anchors.filter(isValidAnchor) : [],
-    diamondScores: Array.isArray(record.diamond_scores)
-      ? record.diamond_scores.filter(isValidDiamondScore)
-      : [],
-    thresholds,
-  };
+/** Validates a raw attachment payload against the shared zod schema. */
+export const parseHuntCorrelationData = (
+  candidate: unknown
+): HuntCorrelationAttachmentData | undefined => {
+  const result = huntCorrelationAttachmentDataSchema.safeParse(candidate);
+  return result.success ? result.data : undefined;
 };

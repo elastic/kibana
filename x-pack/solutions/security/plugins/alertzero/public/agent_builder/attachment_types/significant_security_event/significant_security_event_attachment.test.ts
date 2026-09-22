@@ -31,6 +31,7 @@ describe('createSignificantSecurityEventAttachmentDefinition', () => {
     source_watch: 'watch-1',
     capability: 'lateral-movement-detector',
     run_id: 'run-1',
+    report_id: 'ti-report-1',
     security_knowledge_indicators: [],
     entities: [],
     timeline: [],
@@ -96,28 +97,18 @@ describe('createSignificantSecurityEventAttachmentDefinition', () => {
   });
 
   describe('getHeader', () => {
-    it('returns the securitySignalDetected icon, hunt finding badge, and source/capability subtitle without report_id', () => {
+    it('leads the subtitle with "From {report_id}" and the capability', () => {
       const definition = createSignificantSecurityEventAttachmentDefinition({ navigation });
       const header = definition.getHeader?.({
         attachment: { data: baseData } as unknown as SignificantSecurityEventAttachment,
       } as never);
       expect(header?.icon).toBe('securitySignalDetected');
-      expect(header?.subtitle).toBe('watch-1 · lateral-movement-detector');
+      expect(header?.subtitle).toBe('From ti-report-1 · lateral-movement-detector');
       expect(header?.badges).toEqual([
         { label: 'Hunt finding', color: 'primary' },
         { label: 'open', color: 'hollow' },
         { label: '80%', color: 'hollow' },
       ]);
-    });
-
-    it('leads the subtitle with "From {report_id}" when a report_id is present', () => {
-      const definition = createSignificantSecurityEventAttachmentDefinition({ navigation });
-      const header = definition.getHeader?.({
-        attachment: {
-          data: { ...baseData, report_id: 'r-1' },
-        } as unknown as SignificantSecurityEventAttachment,
-      } as never);
-      expect(header?.subtitle).toBe('From r-1 · lateral-movement-detector');
     });
 
     it('returns the hunt finding badge and an empty header for a malformed attachment', () => {

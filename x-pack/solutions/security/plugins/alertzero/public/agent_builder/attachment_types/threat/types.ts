@@ -6,20 +6,9 @@
  */
 
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
+import type { ThreatAttachmentData } from '../../../../common/threat_attachment_schema';
 
-/**
- * Payload shape captured server-side by `threatAttachmentDataSchema`
- * (`server/agent_builder/attachments/threat.ts`). The server only validates
- * and formats this reference + fallback snapshot; the live document is
- * resolved client-side, space-projected, by the renderer below.
- */
-export interface ThreatAttachmentData {
-  attachmentLabel?: string;
-  report_id: string;
-  title?: string;
-  severity?: 'low' | 'medium' | 'high' | 'critical';
-  source?: string;
-}
+export type { ThreatAttachmentData } from '../../../../common/threat_attachment_schema';
 
 export type ThreatAttachment = Attachment<string, ThreatAttachmentData>;
 

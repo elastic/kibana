@@ -5,49 +5,18 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
 import type {
   AttachmentTypeDefinition,
   AttachmentFormatContext,
 } from '@kbn/agent-builder-server/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { ALERTZERO_ATTACHMENT_TYPES } from '../../../common/constants';
-import { alertZeroAttachmentDataSchema } from '../../../common/attachment_data_schema';
+import {
+  huntCorrelationAttachmentDataSchema,
+  type HuntCorrelationAttachmentData,
+} from '../../../common/hunt_correlation_attachment_schema';
 
 export const HUNT_CORRELATION_ATTACHMENT_ID = ALERTZERO_ATTACHMENT_TYPES.huntCorrelation;
-
-const anchorSchema = z.object({
-  kind: z.enum(['hash', 'ioc_set_hash', 'actor']),
-  value: z.string().min(1).max(2048),
-});
-
-const diamondScoreSchema = z.object({
-  vertex: z.enum(['adversary', 'capability', 'infrastructure', 'victim']),
-  related_report_id: z.string().min(1).max(512),
-  score: z.number().min(0).max(1),
-});
-
-const thresholdsSchema = z.object({
-  anchor_match: z.number().min(0).max(1),
-  diamond_vertex: z.number().min(0).max(1),
-});
-
-/**
- * Report-to-report correlation evidence, per D39
- * (docs/working-groups/dark-watch/artifacts/mvp-slice.md:666-682).
- *
- * Note: `diamond_scores` is capped at 100 rows, not the usual 50 — a deliberate exception
- * because each report can score against up to four Diamond Model vertices per related report.
- */
-export const huntCorrelationAttachmentDataSchema = alertZeroAttachmentDataSchema.extend({
-  anchors: z.array(anchorSchema).max(50),
-  diamond_scores: z.array(diamondScoreSchema).max(100),
-  thresholds: thresholdsSchema,
-  self_match_excluded: z.literal(true),
-  report_revision: z.string().min(1).max(256).optional(),
-});
-
-export type HuntCorrelationAttachmentData = z.infer<typeof huntCorrelationAttachmentDataSchema>;
 
 const formatHuntCorrelationForAgent = (data: HuntCorrelationAttachmentData): string => {
   const lines: string[] = ['Hunt correlation evidence', '', 'Anchors:'];
