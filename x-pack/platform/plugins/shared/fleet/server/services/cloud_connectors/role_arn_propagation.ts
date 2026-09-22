@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type {
-  ElasticsearchClient,
-  SavedObjectsClientContract,
-  AuthenticatedUser,
+import {
+  isSavedObjectErrorResult,
+  type AuthenticatedUser,
+  type ElasticsearchClient,
+  type SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
@@ -210,11 +211,26 @@ export const propagateRoleArnToPackagePolicies = async ({
     if (agentPolicyIds.size === 0) {
       return;
     }
-    await agentPolicyService.bumpAgentPoliciesByIds(
-      [...agentPolicyIds].sort(),
+    const ids = [...agentPolicyIds].sort();
+    const response = await agentPolicyService.bumpAgentPoliciesByIds(
+      ids,
       user ? { user } : {},
       spaceId
     );
+    // bulkUpdate resolves with per-object errors (for example an OCC conflict) instead of
+    // rejecting. Awaiting the call without reading those results reports a successful fan-out
+    // while some agents stay on the old compiled ARN.
+    const failed = (response?.saved_objects ?? []).filter(isSavedObjectErrorResult);
+    if (failed.length > 0) {
+      const detail = failed
+        .map((so) => `${so.id}: ${so.error?.message ?? 'unknown error'}`)
+        .join('; ');
+      throw new Error(
+        `Failed to bump ${failed.length} agent ${
+          failed.length === 1 ? 'policy' : 'policies'
+        } (${detail})`
+      );
+    }
   };
 
   /** Best-effort write of each plan's previous vars/inputs; collects successes and failures. */

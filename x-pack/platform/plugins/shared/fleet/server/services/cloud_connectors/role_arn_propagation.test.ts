@@ -275,6 +275,38 @@ describe('propagateRoleArnToPackagePolicies', () => {
     );
   });
 
+  it('treats a partial agent-policy bump response as a failure', async () => {
+    mockListReturns([makePolicy('a'), makePolicy('b')]);
+    (agentPolicyService.bumpAgentPoliciesByIds as jest.Mock).mockResolvedValueOnce({
+      saved_objects: [
+        { id: 'agent-a', type: 'agent-policy', attributes: {}, references: [] },
+        {
+          id: 'agent-b',
+          type: 'agent-policy',
+          error: { error: 'Conflict', message: 'version conflict', statusCode: 409 },
+        },
+      ],
+    });
+
+    let caught: CloudConnectorRoleArnPropagationError | undefined;
+    try {
+      await propagateRoleArnToPackagePolicies({
+        soClient,
+        esClient,
+        connectorId: CONNECTOR_ID,
+        newRoleArn: NEW_ARN,
+      });
+    } catch (err) {
+      caught = err as CloudConnectorRoleArnPropagationError;
+    }
+
+    expect(caught).toBeInstanceOf(CloudConnectorRoleArnPropagationError);
+    expect(caught?.message).toMatch(/Failed to bump agent policy revisions/);
+    expect(caught?.message).toMatch(/agent-b/);
+    expect(caught?.message).toMatch(/version conflict/);
+    expect(caught?.detail.bumpFailed).toBe(false);
+  });
+
   it('reverts policies and throws when the agent-policy revision bump fails', async () => {
     // With bumpRevision: false on every package-policy write, the deferred bump is the only
     // deployment trigger. Reporting success while it fails would leave agents on the old ARN.
