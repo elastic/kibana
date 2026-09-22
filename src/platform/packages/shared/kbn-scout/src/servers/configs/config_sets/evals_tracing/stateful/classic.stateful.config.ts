@@ -53,6 +53,15 @@ const { TRACING_EXPORTERS: tracingExporters } = process.env;
 if (tracingExporters) {
   JSON.parse(tracingExporters); // validate parseable JSON; throws early if malformed
 }
+// Agent Builder maintains its own tracer provider (register_tracing.ts) whose
+// spans back the trace-based evaluators. It always exports to the LOCAL ES via
+// ElasticsearchOtlpExporter; entries here are APPENDED, so setting this adds a
+// remote destination (e.g. the golden cluster) without losing local fidelity.
+const { AGENT_BUILDER_TRACING_EXPORTERS: agentBuilderTracingExporters } = process.env;
+if (agentBuilderTracingExporters) {
+  JSON.parse(agentBuilderTracingExporters); // validate parseable JSON; throws early if malformed
+}
+
 const isCi = Boolean(process.env.CI);
 const shouldEnableTracing = Boolean(tracingExporters) || !isCi;
 const exporters = tracingExporters ?? defaultExporters;
@@ -88,6 +97,14 @@ export const servers: ScoutServerConfig = {
     serverArgs: [
       ...defaultConfig.kbnTestServer.serverArgs,
       '--xpack.evals.enabled=true',
+      // Unconditional, unlike the redaction overrides below: Agent Builder keeps its own
+      // tracer provider that always exports to the local ES, and that is what the
+      // trace-based evaluators read. Its span processor strips gen_ai.tool.call.arguments
+      // and .result from every tool span unless this is on (it defaults to false for
+      // privacy), so gating it on `shouldEnableTracing` silently drops tool details on CI
+      // whenever exporters are unset -- SkillInvoked then scores 0 for every model and
+      // reads as a model failure rather than a missing attribute.
+      '--uiSettings.overrides.agentBuilder:tracing:includeToolDetails=true',
       ...(shouldEnableTracing
         ? [
             '--elastic.apm.active=false',
@@ -96,6 +113,9 @@ export const servers: ScoutServerConfig = {
             '--telemetry.tracing.enabled=true',
             '--telemetry.tracing.sample_rate=1',
             `--telemetry.tracing.exporters=${exporters}`,
+            ...(agentBuilderTracingExporters
+              ? [`--xpack.agentBuilder.tracing.exporters=${agentBuilderTracingExporters}`]
+              : []),
             /* Disable tracing redaction so exported spans carry real prompt/response and
              * tool-call content when inspecting eval runs in Phoenix or Kibana's Tracing UI.
              * Every config set that extends this one (agent-builder, security, workflows,
@@ -104,7 +124,6 @@ export const servers: ScoutServerConfig = {
             '--uiSettings.overrides.agentBuilder:tracing:includeUserPrompts=true',
             '--uiSettings.overrides.agentBuilder:tracing:includeSystemPrompt=true',
             '--uiSettings.overrides.agentBuilder:tracing:includeLlmResponses=true',
-            '--uiSettings.overrides.agentBuilder:tracing:includeToolDetails=true',
             '--uiSettings.overrides.agentBuilder:tracing:includeRealNames=true',
             '--uiSettings.overrides.agentBuilder:tracing:includeRealIds=true',
           ]

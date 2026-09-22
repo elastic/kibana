@@ -7,7 +7,7 @@
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { Evaluator } from '@kbn/evals';
+import { TRACE_INDEX_PATTERN, type Evaluator } from '@kbn/evals';
 import { DRAFT_STEP_ID, RULE_CREATION_TOOL_ID } from '../constants';
 import type { RuleCreationResult } from '../rule_creation_client';
 
@@ -84,7 +84,7 @@ export function createToolRoutingEvaluator({
 }): Evaluator {
   const countToolSpans = async (where: string): Promise<number | undefined> => {
     const response = (await traceEsClient.esql.query({
-      query: `FROM traces-*\n| WHERE ${where} AND ${TOOL_KIND}\n| STATS tool_calls = COUNT(*),\n  required_tool_calls = COUNT(CASE(attributes.gen_ai.tool.name == "${RULE_CREATION_TOOL_ID}", 1, NULL))`,
+      query: `FROM ${TRACE_INDEX_PATTERN}\n| WHERE ${where} AND ${TOOL_KIND}\n| STATS tool_calls = COUNT(*),\n  required_tool_calls = COUNT(CASE(attributes.gen_ai.tool.name == "${RULE_CREATION_TOOL_ID}", 1, NULL))`,
     })) as unknown as EsqlResponse;
     const row = response.values?.[0];
     if (!row) return undefined;
@@ -142,7 +142,7 @@ export function createToolRoutingEvaluator({
       let diagnosis = 'probe did not run';
       try {
         const probe = (await traceEsClient.esql.query({
-          query: `FROM traces-*
+          query: `FROM ${TRACE_INDEX_PATTERN}
 | WHERE attributes.elastic.inference.span.kind == "TOOL"
 | STATS tool_spans = COUNT(*)`,
         })) as unknown as EsqlResponse;
@@ -199,7 +199,7 @@ export const assertToolSpansReachable = async ({
   for (const clause of clauses) {
     try {
       const response = (await traceEsClient.esql.query({
-        query: `FROM traces-*\n| WHERE ${clause.where} AND ${LLM_ISSUED_TOOL_SPAN}\n| STATS tool_spans = COUNT(*)`,
+        query: `FROM ${TRACE_INDEX_PATTERN}\n| WHERE ${clause.where} AND ${LLM_ISSUED_TOOL_SPAN}\n| STATS tool_spans = COUNT(*)`,
       })) as unknown as EsqlResponse;
       if (Number(response.values?.[0]?.[0] ?? 0) > 0) {
         log.info(`Tool spans reachable via ${clause.name}`);

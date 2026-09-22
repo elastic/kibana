@@ -19,12 +19,14 @@ import {
   EVALS_EXPERIMENT_DATASET_EXAMPLES_URL,
   EVALS_EXPERIMENT_URL,
   EVALS_EXPERIMENTS_URL,
+  EVALS_EXAMPLE_SCORES_URL,
   EVALS_SCORES_URL,
   GetEvaluationDatasetResponse,
   GetEvaluationExperimentResponse,
   GetEvaluationExperimentDatasetExamplesResponse,
   GetEvaluationExperimentScoresResponse,
   GetEvaluationExperimentsResponse,
+  GetExampleScoresResponse,
   IngestScoresRequestBody,
   IngestScoresResponse,
   MAX_SCORES_PER_QUERY,
@@ -33,6 +35,7 @@ import {
   UpsertEvaluationDatasetResponse,
   getDatasetId,
   type DatasetMaturity,
+  type EvaluationExperimentSummary,
   type EvaluationScoreDocument,
   type IngestScoresRequestBodyInput,
   type Model as EvalsModel,
@@ -190,6 +193,18 @@ const buildExperimentQuery = (options?: GetExperimentFilters) => ({
 
 const VERSIONED_HEADERS = { 'elastic-api-version': API_VERSIONS.internal.v1 };
 
+export interface ListExperimentsFilters {
+  suiteId?: string;
+  taskModelId?: string;
+  branch?: string;
+  datasetId?: string;
+  buildId?: string;
+  /** Maximum number of experiments to return (newest first). Defaults to and capped at 100 (the route's per_page maximum). */
+  limit?: number;
+}
+
+export const MAX_LIST_EXPERIMENTS = 100;
+
 export class EvalsClient {
   /** The spaces this run writes to, in the order they were listed. */
   private readonly spaceIds: string[];
@@ -318,6 +333,51 @@ export class EvalsClient {
       headers: VERSIONED_HEADERS,
     });
     return GetEvaluationExperimentDatasetExamplesResponse.parse(getResponseData(response));
+  }
+
+  /**
+   * Retrieves scores for a single example across all experiments that include
+   * it. Unlike {@link getExperimentScores}, the response is NOT stripped of
+   * unbounded fields (`task.output`, `example.input`, `example.metadata`),
+   * because this route does not apply `_source_excludes`.
+   */
+  async getExampleScores(
+    exampleId: string,
+    filters?: { executionId?: string; modelId?: string }
+  ): Promise<EvaluationScoreDocument[]> {
+    try {
+      const query: Record<string, string> = {};
+      if (filters?.executionId) {
+        query.execution_id = filters.executionId;
+      }
+      if (filters?.modelId) {
+        query.model_id = filters.modelId;
+      }
+      const response = await this.kbnClient.request({
+        path: this.path(
+          EVALS_EXAMPLE_SCORES_URL.replace('{exampleId}', encodeURIComponent(exampleId))
+        ),
+        method: 'GET',
+        headers: VERSIONED_HEADERS,
+        ...(Object.keys(query).length > 0 ? { query } : {}),
+      });
+      const parsed = GetExampleScoresResponse.parse(getResponseData(response));
+
+      if (parsed.total > MAX_SCORES_PER_QUERY) {
+        throw new Error(
+          `Example ${exampleId} returned ${parsed.total} scores, which exceeds MAX_SCORES_PER_QUERY (${MAX_SCORES_PER_QUERY})`
+        );
+      }
+
+      return parsed.scores;
+    } catch (error: unknown) {
+      this.log.error(
+        `Failed to retrieve scores for example ID ${exampleId}: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      return [];
+    }
   }
 
   /**
@@ -596,5 +656,29 @@ export class EvalsClient {
     } catch (error) {
       return undefined;
     }
+  }
+
+  async listExperiments(filters?: ListExperimentsFilters): Promise<EvaluationExperimentSummary[]> {
+    const limit = Math.min(filters?.limit ?? MAX_LIST_EXPERIMENTS, MAX_LIST_EXPERIMENTS);
+    const response = await this.kbnClient.request({
+      path: EVALS_EXPERIMENTS_URL,
+      method: 'GET',
+      query: {
+        suite_id: filters?.suiteId,
+        model_id: filters?.taskModelId,
+        branch: filters?.branch,
+        dataset_id: filters?.datasetId,
+        build_id: filters?.buildId,
+        page: 1,
+        per_page: limit,
+      },
+      headers: VERSIONED_HEADERS,
+    });
+
+    const parsed = GetEvaluationExperimentsResponse.parse(getResponseData(response));
+    if (!filters?.branch) {
+      return parsed.experiments;
+    }
+    return parsed.experiments.filter((experiment) => experiment.git_branch === filters.branch);
   }
 }

@@ -58,6 +58,7 @@ export const goldenPathExamples: AttackDiscoveryAgentBuilderExample[] = [
     metadata: {
       alertCount: providedAlertFixture.alertCount,
       fixture: 'provided-alerts',
+      scenarioKey: 'provided-alerts',
     },
   },
   {
@@ -95,6 +96,7 @@ export const goldenPathExamples: AttackDiscoveryAgentBuilderExample[] = [
     metadata: {
       alertCount: liveRetrievalFixture.alertCount,
       fixture: 'live-retrieval',
+      scenarioKey: 'live-retrieval',
     },
   },
   {
@@ -118,6 +120,7 @@ export const goldenPathExamples: AttackDiscoveryAgentBuilderExample[] = [
     metadata: {
       alertCount: multipleAlertSetsFixture.alertCount,
       fixture: 'multiple-alert-sets',
+      scenarioKey: 'multiple-alert-sets',
     },
   },
   {
@@ -142,6 +145,7 @@ export const goldenPathExamples: AttackDiscoveryAgentBuilderExample[] = [
     metadata: {
       alertCount: missingAlertRetrievalFixture.alertCount,
       fixture: 'missing-alert-retrieval',
+      scenarioKey: 'missing-alert-retrieval',
     },
   },
   {
@@ -161,6 +165,7 @@ export const goldenPathExamples: AttackDiscoveryAgentBuilderExample[] = [
     metadata: {
       alertCount: statusOnlyFixture.alertCount,
       fixture: 'status-only',
+      scenarioKey: 'status-only',
     },
   },
 ];

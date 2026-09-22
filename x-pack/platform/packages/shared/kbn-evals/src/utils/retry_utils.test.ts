@@ -45,11 +45,19 @@ describe('withRetry', () => {
     expect(fn).toHaveBeenCalledTimes(2);
   });
 
-  it('does NOT retry on HTTP 500 (treated as deterministic in this stack)', async () => {
+  it('retries an EIS-shaped HTTP 500 (transient upstream provider fault)', async () => {
+    // A truly deterministic 500 costs one extra call; a transient one costs a sweep.
+    const fn = jest.fn().mockRejectedValueOnce(makeStatusError(500)).mockResolvedValueOnce('ok');
+    const result = await withRetry(fn, fastRetryOptions);
+    expect(result).toBe('ok');
+    expect(fn).toHaveBeenCalledTimes(2);
+  });
+
+  it('gives up on a persistent HTTP 500 instead of retrying forever', async () => {
     const err = makeStatusError(500);
     const fn = jest.fn().mockRejectedValue(err);
-    await expect(withRetry(fn, fastRetryOptions)).rejects.toBe(err);
-    expect(fn).toHaveBeenCalledTimes(1);
+    await expect(withRetry(fn, { ...fastRetryOptions, maxAttempts: 3 })).rejects.toBe(err);
+    expect(fn).toHaveBeenCalledTimes(3);
   });
 
   it('does NOT retry on HTTP 413 (payload too large)', async () => {
