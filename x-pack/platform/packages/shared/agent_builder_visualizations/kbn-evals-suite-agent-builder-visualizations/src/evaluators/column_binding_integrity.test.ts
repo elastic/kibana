@@ -63,6 +63,25 @@ describe('collectColumnBindings', () => {
     ]);
   });
 
+  it('treats heatmap x and y as axes, not measures', () => {
+    expect(
+      collectColumnBindings({
+        esql: 'FROM a',
+        chartType: 'heatmap',
+        visualization: {
+          type: 'heatmap',
+          x: { column: 'hour' },
+          y: { column: 'response.keyword' },
+          metric: { column: 'count' },
+        },
+      }).map(({ column, role }) => [column, role])
+    ).toEqual([
+      ['hour', 'dimension'],
+      ['response.keyword', 'dimension'],
+      ['count', 'measure'],
+    ]);
+  });
+
   it('collects Vega encoding fields from the spec string', () => {
     expect(
       collectColumnBindings({

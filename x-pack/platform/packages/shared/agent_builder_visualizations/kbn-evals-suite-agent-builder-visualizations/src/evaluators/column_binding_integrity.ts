@@ -31,6 +31,8 @@ export interface BindingCheck extends ColumnBinding {
 
 // Lens Config API keys whose ES|QL column must be numeric for the chart to render a value.
 const MEASURE_KEYS = new Set(['y', 'metric', 'metrics']);
+// Charts where `x` / `y` are axes (buckets), not series values.
+const AXIS_ONLY_CHART_TYPES = new Set(['heatmap']);
 // Keys that bucket or split the data; any column type is acceptable.
 const DIMENSION_KEYS = new Set([
   'x',
@@ -46,7 +48,14 @@ const SKIP_KEYS = new Set(['data_source']);
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
-const roleForKey = (key: string): BindingRole => {
+const roleForKey = (key: string, chartType: string | undefined): BindingRole => {
+  if (
+    chartType !== undefined &&
+    AXIS_ONLY_CHART_TYPES.has(chartType) &&
+    (key === 'x' || key === 'y')
+  ) {
+    return 'dimension';
+  }
   if (MEASURE_KEYS.has(key)) {
     return 'measure';
   }
@@ -64,8 +73,11 @@ export function collectColumnBindings(visualization: ExtractedVisualization): Co
   if (visualization.renderer === 'vega') {
     return collectVegaBindings(config.spec);
   }
+  const chartType = (
+    typeof config.type === 'string' ? config.type : visualization.chartType
+  )?.toLowerCase();
   const bindings: ColumnBinding[] = [];
-  walkLens(config, '', 'other', bindings);
+  walkLens(config, '', 'other', chartType, bindings);
   return bindings;
 }
 
@@ -73,10 +85,11 @@ function walkLens(
   value: unknown,
   path: string,
   role: BindingRole,
+  chartType: string | undefined,
   bindings: ColumnBinding[]
 ): void {
   if (Array.isArray(value)) {
-    value.forEach((item, index) => walkLens(item, `${path}[${index}]`, role, bindings));
+    value.forEach((item, index) => walkLens(item, `${path}[${index}]`, role, chartType, bindings));
     return;
   }
   if (!isRecord(value)) {
@@ -90,7 +103,7 @@ function walkLens(
     if (SKIP_KEYS.has(key)) {
       continue;
     }
-    walkLens(child, path ? `${path}.${key}` : key, roleForKey(key), bindings);
+    walkLens(child, path ? `${path}.${key}` : key, roleForKey(key, chartType), chartType, bindings);
   }
 }
 
@@ -151,8 +164,11 @@ export function createColumnBindingIntegrityEvaluator<
   visualizationExtractor: (output: TTaskOutput) => ExtractedVisualization[];
   name?: string;
 }): Evaluator<TExample, TTaskOutput> {
-  const { esClient, visualizationExtractor, name = COLUMN_BINDING_INTEGRITY_EVALUATOR_NAME } =
-    config;
+  const {
+    esClient,
+    visualizationExtractor,
+    name = COLUMN_BINDING_INTEGRITY_EVALUATOR_NAME,
+  } = config;
 
   return {
     name,
