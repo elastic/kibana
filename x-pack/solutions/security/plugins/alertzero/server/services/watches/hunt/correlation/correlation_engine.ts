@@ -76,7 +76,9 @@ export const runCorrelationEngine = async (
     logger.warn(`correlation_engine: searchByAnchors failed — ${(err as Error).message}`);
   }
 
-  const anchors = searchParams.anchors ?? {};
+  // Report the anchors the search actually used: on a source_report_id-only
+  // call those are the source report's own, not the (empty) request anchors.
+  const anchors = searchResult?.anchors ?? searchParams.anchors ?? {};
   const status: CorrelationEngineResult['status'] = !searchResult
     ? 'unavailable'
     : searchResult.hits.length > 0
@@ -85,6 +87,7 @@ export const runCorrelationEngine = async (
   const resolvedResult = searchResult ?? {
     hits: [],
     total: 0,
+    anchors,
     anchor_summary: EMPTY_ANCHOR_SUMMARY,
   };
   const anchorItems = buildAnchorItems(anchors);

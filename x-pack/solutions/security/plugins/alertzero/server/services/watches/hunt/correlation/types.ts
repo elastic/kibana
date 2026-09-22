@@ -54,6 +54,8 @@ export interface AnchorHit {
 export interface SearchByAnchorsResult {
   hits: AnchorHit[];
   total: number;
+  /** The anchors the search actually ran with: the caller's, or the source report's when only `source_report_id` was given. */
+  anchors: AnchorSet;
   anchor_summary: {
     hash_ioc_count: number;
     network_ioc_count: number;

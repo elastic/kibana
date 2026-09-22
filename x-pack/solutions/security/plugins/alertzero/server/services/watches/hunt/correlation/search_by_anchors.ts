@@ -222,6 +222,7 @@ const nestedIocConstantScore = (
 });
 
 const emptyResult = (
+  anchors: AnchorSet,
   iocSetHash: string | null,
   hashCount: number,
   networkCount: number,
@@ -230,6 +231,7 @@ const emptyResult = (
 ): SearchByAnchorsResult => ({
   hits: [],
   total: 0,
+  anchors,
   anchor_summary: {
     hash_ioc_count: hashCount,
     network_ioc_count: networkCount,
@@ -267,7 +269,7 @@ export const searchByAnchors = async (
     const fetched = await fetchSourceAnchors(esClient, spaceId, sourceReportId);
     if (!fetched) {
       logger.warn(`search_by_anchors: source report "${sourceReportId}" not found`);
-      return emptyResult(null, 0, 0, 0, 0);
+      return emptyResult({}, null, 0, 0, 0, 0);
     }
     anchors = fetched;
   }
@@ -297,7 +299,7 @@ export const searchByAnchors = async (
     logger.debug(
       `search_by_anchors: no discriminating anchors (hash/ioc_set_hash/actor) in space="${spaceId}"; skipping query`
     );
-    return { hits: [], total: 0, anchor_summary: anchorSummary };
+    return { hits: [], total: 0, anchors: anchors ?? {}, anchor_summary: anchorSummary };
   }
 
   // Discriminating filter gate — ≥1 clause must match.
@@ -401,5 +403,5 @@ export const searchByAnchors = async (
       `discriminating_count=${anchorSummary.discriminating_anchor_count}`
   );
 
-  return { hits, total, anchor_summary: anchorSummary };
+  return { hits, total, anchors: anchors ?? {}, anchor_summary: anchorSummary };
 };

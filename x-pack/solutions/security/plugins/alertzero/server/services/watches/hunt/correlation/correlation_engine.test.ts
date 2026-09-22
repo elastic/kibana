@@ -30,6 +30,52 @@ const run = (params: Parameters<typeof runCorrelationEngine>[3], revision?: stri
   return runCorrelationEngine(esClient, logger, 'hunt-a', params, revision);
 };
 
+describe('runCorrelationEngine with only a source_report_id', () => {
+  const sourceHit = {
+    took: 0,
+    timed_out: false,
+    _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+    hits: {
+      total: { value: 1, relation: 'eq' as const },
+      hits: [
+        {
+          _index: '.kibana-threat-reports',
+          _id: 'rpt-1',
+          _source: {
+            extracted: {
+              iocs: [{ type: 'hash', value: 'a'.repeat(64) }],
+              ioc_set_hash: null,
+              threat_actors: ['TA-DEMO-SHADOW-ADMIN'],
+              ttps: { techniques: ['T1078.004'] },
+            },
+          },
+        },
+      ],
+    },
+  } as unknown as SearchResponse<unknown, unknown>;
+
+  it("builds the attachment anchors from the source report's own anchors", async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.search.mockResolvedValueOnce(sourceHit).mockResolvedValueOnce(emptySearchResponse);
+    const result = await runCorrelationEngine(esClient, logger, 'hunt-a', {
+      source_report_id: 'rpt-1',
+    });
+    expect(result.attachment_data.anchors).toEqual([
+      { kind: 'hash', value: 'a'.repeat(64) },
+      { kind: 'actor', value: 'TA-DEMO-SHADOW-ADMIN' },
+    ]);
+  });
+
+  it("reports the source report's anchors on the engine result too", async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.search.mockResolvedValueOnce(sourceHit).mockResolvedValueOnce(emptySearchResponse);
+    const result = await runCorrelationEngine(esClient, logger, 'hunt-a', {
+      source_report_id: 'rpt-1',
+    });
+    expect(result.anchors.actors).toEqual(['TA-DEMO-SHADOW-ADMIN']);
+  });
+});
+
 describe('runCorrelationEngine attachment_data', () => {
   it('parses against the security.hunt_correlation attachment schema', async () => {
     const result = await run({ source_report_id: 'rpt-1', anchors: { actors: ['APT29'] } });
