@@ -64,6 +64,28 @@ const executeForSchema = (
     esClient: esClient.asCurrentUser,
   });
 
+/**
+ * Collect result columns for a query that must be kept as-is. A failed probe
+ * only costs column information (authoring infers fields from the query text);
+ * it never discards or regenerates the query.
+ */
+export const probeEsqlColumns = async (
+  query: string,
+  esClient: IScopedClusterClient,
+  logger: Logger
+): Promise<EsqlEsqlColumnInfo[] | undefined> => {
+  try {
+    const { columns } = await executeForSchema(query, esClient);
+    return columns;
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    logger.warn(
+      `ES|QL query executed without returning columns (${errorMessage}); authoring will infer fields from the query text`
+    );
+    return undefined;
+  }
+};
+
 /** Resolve a runnable ES|QL query and its schema-probe columns for visualization authoring. */
 export const resolveEsqlForAuthoring = async ({
   providedQuery,
@@ -120,17 +142,7 @@ export const resolveEsqlForAuthoring = async ({
 
     query = generated.query;
     logger.debug(`Generated ES|QL query: ${query}`);
-    columns = generated.columns;
-    if (columns === undefined) {
-      try {
-        ({ columns } = await executeForSchema(query, esClient));
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        logger.warn(
-          `Generated ES|QL query executed without returning columns (${errorMessage}); authoring will infer fields from the query text`
-        );
-      }
-    }
+    columns = generated.columns ?? (await probeEsqlColumns(query, esClient, logger));
   }
 
   return { query, columns };

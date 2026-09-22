@@ -8,14 +8,16 @@
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
-import { resolveEsqlForAuthoring } from './resolve_esql_for_authoring';
+import { probeEsqlColumns, resolveEsqlForAuthoring } from './resolve_esql_for_authoring';
 import { runResolveEsqlNode } from './run_resolve_esql_node';
 
 jest.mock('./resolve_esql_for_authoring', () => ({
   resolveEsqlForAuthoring: jest.fn(),
+  probeEsqlColumns: jest.fn(),
 }));
 
 const mockedResolve = jest.mocked(resolveEsqlForAuthoring);
+const mockedProbe = jest.mocked(probeEsqlColumns);
 
 const COLUMNS = [{ name: 'count', type: 'long' as const }];
 const logger = { debug: jest.fn(), warn: jest.fn(), error: jest.fn() } as unknown as Logger;
@@ -38,16 +40,23 @@ const params = {
 describe('runResolveEsqlNode', () => {
   beforeEach(() => {
     mockedResolve.mockReset();
+    mockedProbe.mockReset();
     jest.mocked(logger.error).mockClear();
   });
 
-  it('keeps the stored query and skips resolve on appearance-only edits', async () => {
+  it('keeps the stored query and only probes its columns on appearance-only edits', async () => {
+    mockedProbe.mockResolvedValue(COLUMNS);
+
     const result = await runResolveEsqlNode({ ...params, preserveESQL: true });
 
     expect(mockedResolve).not.toHaveBeenCalled();
+    expect(mockedProbe).toHaveBeenCalledWith(params.esqlQuery, esClient, logger);
     expect(result).toEqual({
       esqlQuery: params.esqlQuery,
-      actions: [{ type: 'generate_esql', success: true, query: params.esqlQuery }],
+      columns: COLUMNS,
+      actions: [
+        { type: 'generate_esql', success: true, query: params.esqlQuery, columns: COLUMNS },
+      ],
     });
   });
 

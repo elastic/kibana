@@ -7,6 +7,7 @@
 
 import type { EsqlEsqlColumnInfo } from '@elastic/elasticsearch/lib/api/types';
 import {
+  probeEsqlColumns,
   resolveEsqlForAuthoring,
   type ResolveEsqlForAuthoringParams,
 } from './resolve_esql_for_authoring';
@@ -23,7 +24,10 @@ export interface ResolveEsqlAction {
 
 export interface RunResolveEsqlNodeParams
   extends Omit<ResolveEsqlForAuthoringParams, 'providedQuery'> {
-  /** Appearance-only restyle: keep `esqlQuery` and skip the schema probe. */
+  /**
+   * Appearance-only restyle: keep `esqlQuery` verbatim and never regenerate
+   * it. The query is still probed for result columns, tolerating failure.
+   */
   preserveESQL?: boolean;
   /** Caller-provided or stored query. Empty falls through to generation. */
   esqlQuery: string;
@@ -36,8 +40,9 @@ export interface RunResolveEsqlNodeResult {
 }
 
 /**
- * Shared Lens/Vega graph node: skip the probe on appearance-only edits,
- * otherwise resolve a query and map the outcome onto a generate_esql action.
+ * Shared Lens/Vega graph node: on appearance-only edits keep the stored query
+ * and only probe it for columns, otherwise resolve a query; either outcome is
+ * mapped onto a generate_esql action.
  */
 export const runResolveEsqlNode = async ({
   preserveESQL = false,
@@ -52,9 +57,13 @@ export const runResolveEsqlNode = async ({
   esClient,
 }: RunResolveEsqlNodeParams): Promise<RunResolveEsqlNodeResult> => {
   if (preserveESQL) {
+    // Vega re-authors the whole spec, so it still needs the executed column
+    // names/types; a failed probe must not fail or regenerate the stored query.
+    const columns = await probeEsqlColumns(esqlQuery, esClient, logger);
     return {
       esqlQuery,
-      actions: [{ type: 'generate_esql', success: true, query: esqlQuery }],
+      columns,
+      actions: [{ type: 'generate_esql', success: true, query: esqlQuery, columns }],
     };
   }
 

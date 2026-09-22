@@ -400,7 +400,7 @@ describe('createVegaGraph', () => {
     expect(invoke).toHaveBeenCalledTimes(3);
   });
 
-  it('authors an appearance-only edit without resolving ES|QL', async () => {
+  it('authors an appearance-only edit without regenerating ES|QL when the probe fails', async () => {
     mockedExecuteEsql.mockRejectedValue(new Error('verification_exception'));
     mockedGenerateEsql.mockResolvedValue({
       error: 'verification_exception',
@@ -409,8 +409,11 @@ describe('createVegaGraph', () => {
 
     const state = await run({ esqlQuery: PROVIDED_ESQL, preserveESQL: true });
 
-    expect(mockedExecuteEsql).not.toHaveBeenCalled();
+    expect(mockedExecuteEsql).toHaveBeenCalledWith(
+      expect.objectContaining({ query: PROVIDED_ESQL, dropNullColumns: false, limit: 1 })
+    );
     expect(mockedGenerateEsql).not.toHaveBeenCalled();
+    expect(JSON.stringify(invoke.mock.calls[0][0])).toContain('No column information is available');
     expect(state.actions).toEqual(
       expect.arrayContaining([
         expect.objectContaining({

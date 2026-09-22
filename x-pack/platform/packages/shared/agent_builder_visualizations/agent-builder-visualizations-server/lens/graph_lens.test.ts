@@ -497,7 +497,7 @@ describe('createVisualizationGraph', () => {
     );
   });
 
-  it('authors an appearance-only edit without resolving ES|QL', async () => {
+  it('authors an appearance-only edit without regenerating ES|QL when the probe fails', async () => {
     mockedExecuteEsql.mockRejectedValue(new Error('verification_exception'));
     mockedGenerateEsql.mockResolvedValue({
       error: 'verification_exception',
@@ -538,7 +538,9 @@ describe('createVisualizationGraph', () => {
       error: null,
     });
 
-    expect(mockedExecuteEsql).not.toHaveBeenCalled();
+    expect(mockedExecuteEsql).toHaveBeenCalledWith(
+      expect.objectContaining({ query: existingQuery, dropNullColumns: false, limit: 1 })
+    );
     expect(mockedGenerateEsql).not.toHaveBeenCalled();
     expect(finalState.actions).toEqual(
       expect.arrayContaining([
