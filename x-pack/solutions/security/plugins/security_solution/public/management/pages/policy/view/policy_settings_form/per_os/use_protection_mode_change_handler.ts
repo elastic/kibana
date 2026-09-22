@@ -18,7 +18,7 @@ import type {
 } from '../../../types';
 import type { PolicyFormComponentCommonProps } from '../types';
 import type { PerOsPolicyAccessor } from './policy_accessor';
-import { createProtectionBranch } from './create_protection_branch';
+import { createPopupBranch, createProtectionBranch } from './create_protection_branch';
 
 interface ProtectionOperatingSystems {
   malware: MalwareProtectionOSes;
@@ -32,7 +32,7 @@ interface ProtectionOperatingSystems {
 type ProtectionPolicyBranch<Protection extends PolicyProtection> = {
   [Key in Protection]: ProtectionFields & { supported?: boolean };
 } & {
-  popup: { [Key in Protection]: { enabled: boolean } };
+  popup: { [Key in Protection]: { enabled: boolean; message: string } };
 };
 
 export const useProtectionModeChangeHandler = <Protection extends PolicyProtection>(
@@ -60,6 +60,7 @@ export const useProtectionModeChangeHandler = <Protection extends PolicyProtecti
         // off is the only mode that leaves popup.enabled untouched.
         if (isPlatinumPlus && nextMode !== ProtectionModes.off) {
           protectionPolicy.popup[protection] = {
+            ...createPopupBranch(protection, nextMode === ProtectionModes.prevent),
             ...protectionPolicy.popup[protection],
             enabled: nextMode === ProtectionModes.prevent,
           };

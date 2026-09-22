@@ -11,7 +11,6 @@ import { EuiSwitch } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
 import type { ImmutableArray, PolicyConfig } from '../../../../../../../common/endpoint/types';
 import { ProtectionModes } from '../../../../../../../common/endpoint/types';
-import { DefaultPolicyNotificationMessage } from '../../../../../../../common/endpoint/models/policy_config';
 import { useLicense } from '../../../../../../common/hooks/use_license';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import type {
@@ -23,7 +22,7 @@ import type {
   PolicyProtection,
   RansomwareProtectionOSes,
 } from '../../../types';
-import { createProtectionBranch } from './create_protection_branch';
+import { createPopupBranch, createProtectionBranch } from './create_protection_branch';
 
 type PerOsProtectionOperatingSystem =
   | MalwareProtectionOSes
@@ -112,10 +111,7 @@ export const PerOsProtectionMasterToggle = memo(
           osPolicy[protection] = protectionBranch;
 
           if (isPlatinumPlus) {
-            const popupBranch = osPolicy.popup[protection] ?? {
-              enabled: value,
-              message: DefaultPolicyNotificationMessage,
-            };
+            const popupBranch = osPolicy.popup[protection] ?? createPopupBranch(protection, value);
             popupBranch.enabled = value;
             osPolicy.popup[protection] = popupBranch;
 

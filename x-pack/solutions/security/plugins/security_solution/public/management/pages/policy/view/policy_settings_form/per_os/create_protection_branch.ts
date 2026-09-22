@@ -6,6 +6,10 @@
  */
 
 import type { ProtectionModes } from '../../../../../../../common/endpoint/types';
+import {
+  DefaultPolicyNotificationMessage,
+  DefaultPolicyRuleNotificationMessage,
+} from '../../../../../../../common/endpoint/models/policy_config';
 import type { PolicyProtection } from '../../../types';
 
 /**
@@ -39,3 +43,31 @@ export const createProtectionBranch = (
   isPlatinumPlus: boolean
 ): CreatedProtectionBranch =>
   HAS_SUPPORTED_FLAG[protection] ? { mode, supported: isPlatinumPlus } : { mode };
+
+/**
+ * Default notification text per protection. Rule-based protections name the rule that fired,
+ * the file-based ones name the file, which is what `policyFactory` seeds.
+ */
+const DEFAULT_NOTIFICATION_MESSAGE: Record<PolicyProtection, string> = {
+  malware: DefaultPolicyNotificationMessage,
+  ransomware: DefaultPolicyNotificationMessage,
+  memory_protection: DefaultPolicyRuleNotificationMessage,
+  behavior_protection: DefaultPolicyRuleNotificationMessage,
+};
+
+export interface CreatedPopupBranch {
+  enabled: boolean;
+  message: string;
+}
+
+/**
+ * Builds the notification branch to store when the policy carries none.
+ *
+ * `PolicyConfig` requires both `enabled` and `message` on every non-device popup branch, and a
+ * policy that set a mode through the 9.4 advanced field never wrote one. Seeding only `enabled`
+ * would emit a notification with no text for the endpoint to render.
+ */
+export const createPopupBranch = (
+  protection: PolicyProtection,
+  enabled: boolean
+): CreatedPopupBranch => ({ enabled, message: DEFAULT_NOTIFICATION_MESSAGE[protection] });

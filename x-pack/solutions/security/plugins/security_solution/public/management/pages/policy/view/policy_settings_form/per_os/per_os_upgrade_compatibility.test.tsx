@@ -30,7 +30,10 @@ import {
   isEndpointPolicyValidForLicense,
   unsetPolicyFeaturesAccordingToLicenseLevel,
 } from '../../../../../../../common/license/policy_config';
-import { policyFactoryWithSupportedFeatures } from '../../../../../../../common/endpoint/models/policy_config';
+import {
+  DefaultPolicyNotificationMessage,
+  policyFactoryWithSupportedFeatures,
+} from '../../../../../../../common/endpoint/models/policy_config';
 
 jest.mock('../../../../../../common/hooks/use_license');
 jest.mock('../hooks/use_get_protections_unavailable_component');
@@ -191,5 +194,36 @@ describe('per-OS form upgrade compatibility with 9.4 policies', () => {
 
     const { updatedPolicy } = onChange.mock.calls.at(-1)![0];
     expect(updatedPolicy.mac.popup.ransomware).toEqual({ enabled: true, message: '' });
+  });
+
+  // Changing the mode syncs the notification on Platinum, so it has to create a complete branch
+  // when the policy carries none: `PolicyConfig` requires a message alongside `enabled`.
+  it('writes a complete notification branch when the mode changes and the popup branch is absent', async () => {
+    const onChange = jest.fn();
+    policy.windows.ransomware.mode = ProtectionModes.off;
+    policy.mac.ransomware.mode = ProtectionModes.off;
+    // @ts-expect-error reproducing a policy whose notification branch was never written
+    delete policy.mac.popup.ransomware;
+
+    renderResult = mockedContext.render(
+      <PerOsRansomwareProtectionCard
+        policy={policy}
+        onChange={onChange}
+        mode="edit"
+        data-test-subj={testSubjects.perOsRansomware.card}
+      />
+    );
+
+    await selectOsControlOption(
+      renderResult,
+      testSubjects.perOsRansomware.mac.modeSelect,
+      /^Detect & prevent$/
+    );
+
+    const { updatedPolicy } = onChange.mock.calls.at(-1)![0];
+    expect(updatedPolicy.mac.popup.ransomware).toEqual({
+      enabled: true,
+      message: DefaultPolicyNotificationMessage,
+    });
   });
 });
