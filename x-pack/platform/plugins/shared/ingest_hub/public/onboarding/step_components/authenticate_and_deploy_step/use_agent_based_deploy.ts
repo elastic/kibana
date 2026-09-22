@@ -238,7 +238,11 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
           });
         }
 
-        setFailedInstances(failed);
+        // Use mergedFailed (not just the current-attempt `failed`) for local state too.
+        // On a partial retry, `failed` contains only the current attempt's failures, so using
+        // it directly would clear previously-failed instances from `failedInstances`, causing
+        // `isAgentDone` to evaluate as true and advancing Next even though B was never retried.
+        setFailedInstances(mergedFailed);
         updateDetectAndReviewStep({
           isDeploying: false,
           serviceStatuses: statuses,
@@ -246,22 +250,29 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
           failedInstances: mergedFailed,
           deployErrors: errorsByInstance,
         });
-        return { failed: failed.length > 0 };
+        return { failed: mergedFailed.length > 0 };
       } catch (err) {
-        // Unexpected error — mark all as failed.
+        // Unexpected error — mark all retried instances as failed.
         const msg = extractErrorMessage(err);
         const allIds = targetsToDeploy.flatMap((g) => g.instanceIds);
+        // On a partial retry, merge with previously-failed instances that were not retried.
+        // Without this, B (failed previously, not retried) disappears from the failure set; a
+        // later successful retry of A can then compute an empty merged set and mark the SO
+        // succeeded even though B was never retried.
+        const mergedCatchFailed = isRetry
+          ? [...getLatestFailedInstances().filter((id) => !allIds.includes(id)), ...allIds]
+          : allIds;
         const statuses = buildAgentBasedInstanceStatuses(targetsToDeploy, allIds);
-        setFailedInstances(allIds);
+        setFailedInstances(mergedCatchFailed);
         updateDetectAndReviewStep({
           isDeploying: false,
           serviceStatuses: statuses,
-          failedInstances: allIds,
+          failedInstances: mergedCatchFailed,
           deployErrors: Object.fromEntries(allIds.map((id) => [id, msg])),
         });
         // Best-effort: mark the SO as failed so resume doesn't see a stale 'pending' record.
-        // Include any agent policy ids already resolved before the throw (e.g. from existing-policy
-        // path where resolvedAgentPolicyIds was set before deployToExistingAgentPolicies threw).
+        // Include any agent policy ids already resolved before the throw, and the merged
+        // failure set so SO status accurately reflects the full deployment state.
         if (onboardingDeploymentId) {
           await updateDeployment(onboardingDeploymentId, {
             ...(resolvedAgentPolicyIds.length ? { agentPolicyIds: resolvedAgentPolicyIds } : {}),

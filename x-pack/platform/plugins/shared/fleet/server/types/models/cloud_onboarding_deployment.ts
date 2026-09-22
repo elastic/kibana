@@ -50,7 +50,7 @@ export const CloudOnboardingDeploymentSchemaV2 = schema.object({
     ])
   ),
   packagePolicyIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
-  agentPolicyIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+  agentPolicyIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1000 })),
   apiKeyId: schema.maybe(schema.string()),
   ecfStacks: schema.maybe(
     schema.arrayOf(

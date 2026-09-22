@@ -133,14 +133,14 @@ const CloudOnboardingDeploymentItemSchema = schema.object({
       {
         meta: {
           description:
-            'Authentication method. managed_integration: identity_federation | static_keys. agent_based: static_keys (direct_access_keys) | temporary_keys | shared_credentials | assume_role.',
+            'Authentication method. Allowed values depend on the delivery mechanism:\n\n- managed_integration: identity_federation | static_keys\n- agent_based: static_keys (direct_access_keys) | temporary_keys | shared_credentials | assume_role',
         },
       }
     )
   ),
   agentPolicyIds: schema.maybe(
     schema.arrayOf(schema.string(), {
-      maxSize: 100,
+      maxSize: 1000,
       meta: {
         description:
           'Agent policy IDs for agent_based deployments. Single-element for new-policy deploys; multiple for existing-policy deploys targeting several policies.',
@@ -220,7 +220,7 @@ export const CreateCloudOnboardingDeploymentRequestSchema = {
         {
           meta: {
             description:
-              'Authentication method. managed_integration: identity_federation | static_keys. agent_based: static_keys (direct_access_keys) | temporary_keys | shared_credentials | assume_role.',
+              'Authentication method. Allowed values depend on the delivery mechanism:\n\n- managed_integration: identity_federation | static_keys\n- agent_based: static_keys (direct_access_keys) | temporary_keys | shared_credentials | assume_role',
           },
         }
       )
@@ -285,7 +285,7 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
     ),
     agentPolicyIds: schema.maybe(
       schema.arrayOf(schema.string({ maxLength: 255 }), {
-        maxSize: 100,
+        maxSize: 1000,
         meta: {
           description:
             'Agent policy IDs for agent_based deployments. Single-element for new-policy deploys; multiple for existing-policy deploys targeting several policies.',
