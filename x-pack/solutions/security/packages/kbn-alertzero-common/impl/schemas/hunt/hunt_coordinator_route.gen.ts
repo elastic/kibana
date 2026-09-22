@@ -230,6 +230,20 @@ export const HuntCoordinatorResponse = lazySchema(() =>
       .describe(
         'True when the run completed without hard errors. The calling workflow checks this before writing hunt evidence, so a failed run writes nothing.'
       ),
+    /**
+     * Populated when Tier 1 confirmed a hit: one entry per confirmed technique (a single report-scoped entry when Tier 2 produced none). The caller fans out over this array with ai.attachment.add, one call per entry; no templated fields.
+     */
+    sse: z
+      .array(
+        z.object({
+          attachment_id: z.string(),
+          data: z.object({}).catchall(z.unknown()),
+        })
+      )
+      .optional()
+      .describe(
+        'Populated when Tier 1 confirmed a hit: one entry per confirmed technique (a single report-scoped entry when Tier 2 produced none). The caller fans out over this array with ai.attachment.add, one call per entry; no templated fields.'
+      ),
   })
 );
 export type HuntCoordinatorResponse = z.infer<typeof HuntCoordinatorResponse>;
