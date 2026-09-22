@@ -41,6 +41,7 @@
     "@kbn/i18n-react",
     "@kbn/app-menu",
     "@kbn/search-inference-endpoints",
-    "@kbn/user-profile-components"
+    "@kbn/user-profile-components",
+    "@kbn/shared-ux-error-boundary"
   ]
 }

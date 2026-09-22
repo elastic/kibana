@@ -53,6 +53,7 @@ dependsOn:
   - '@kbn/app-menu'
   - '@kbn/search-inference-endpoints'
   - '@kbn/user-profile-components'
+  - '@kbn/shared-ux-error-boundary'
 tags:
   - plugin
   - prod

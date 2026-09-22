@@ -67,6 +67,16 @@ const useContextMenuItems = (
 };
 
 export type CardActionType = 'createEscalation' | 'addToEscalation' | 'close' | 'assign';
+
+/**
+ * Returns true when at least one action will appear in the menu for this investigation.
+ * Use this to decide whether to render the menu trigger at all; an empty menu should not
+ * be reachable.
+ */
+export const hasAvailableActions = (
+  investigation: Investigation,
+  canManageEscalations = false
+): boolean => !isDecided(investigation) || canManageEscalations;
 export interface BaseActionsProps {
   investigation: Investigation;
   isFlyout?: boolean;
@@ -171,6 +181,9 @@ export const BaseActions = memo<BaseActionsProps>(
     );
 
     const items = useContextMenuItems(actionConfigs, handleClose);
+
+    // Hook order is stable; we check emptiness after all hooks have run.
+    if (items.length === 0) return null;
 
     return (
       <EuiPopover

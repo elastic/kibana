@@ -67,8 +67,13 @@ export const CreateEscalationForm = memo<CreateEscalationFormProps>(
       onSubmit({
         title,
         visibility: isPrivate ? 'private' : 'public',
+        // The owner uid is always prepended; filter it from the selected list first so
+        // a user who picked themselves in the picker is not duplicated in the ACL.
         collaboratorUids: isPrivate
-          ? [currentUserUid, ...selectedCollaborators.map((p) => p.uid)]
+          ? [
+              currentUserUid,
+              ...selectedCollaborators.filter((p) => p.uid !== currentUserUid).map((p) => p.uid),
+            ]
           : [],
       });
     }, [onSubmit, title, isPrivate, currentUserUid, selectedCollaborators]);

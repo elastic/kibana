@@ -47,6 +47,7 @@ import { ProposalsTrendChartRow } from '../../components/proposals_trend_chart';
 import { DismissProposalModal } from '../../components/pending_proposals/dismiss_proposal_modal';
 import type { ProposalItem } from '../../../common/proposals/list';
 import { proposalToInvestigation } from './proposal_to_investigation';
+import { EscalationModalBoundary } from './escalation_modal_boundary';
 
 // Lazy-loaded so that the escalation modal tree (React Query hooks, form components,
 // translations, and user-profile API) stays out of alertzero's main chunk.
@@ -206,9 +207,9 @@ export const ConversationsPage: React.FC = () => {
 
   const renderEscalationModal = useCallback(
     (props: EscalationModalRenderProps) => (
-      <React.Suspense fallback={null}>
+      <EscalationModalBoundary>
         <LazyConnectedEscalationModal {...props} />
-      </React.Suspense>
+      </EscalationModalBoundary>
     ),
     []
   );

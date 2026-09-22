@@ -97,11 +97,12 @@ describe('ConversationsActionsGroup', () => {
     });
 
     it('omits the recommended action on a decided investigation', () => {
-      // A decided proposal sits in the Closed bucket. Approving it again submits a
-      // decision the API refuses, so the item must not be there to click.
+      // A decided proposal without canManageEscalations has no available actions at all —
+      // the menu trigger is hidden rather than opening an empty popover.
       renderGroup(makeInvestigation({ recommendedAction: 'closed' }));
-      openMenu();
 
+      // Absence of the trigger proves no decision item can be reached.
+      expect(screen.queryByRole('button', { name: 'Open actions menu' })).not.toBeInTheDocument();
       expect(screen.queryByText('Revoke sessions')).not.toBeInTheDocument();
     });
 
@@ -120,11 +121,19 @@ describe('ConversationsActionsGroup', () => {
     });
 
     it('drops assign and close on a decided investigation', () => {
+      // A decided investigation with canManageEscalations=false has no available actions;
+      // the trigger is hidden and there is nothing to open.
       renderGroup(makeInvestigation({ recommendedAction: 'closed' }));
-      openMenu();
 
-      expect(screen.queryByText('Assign')).not.toBeInTheDocument();
-      expect(screen.queryByText('Close investigation')).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Open actions menu' })).not.toBeInTheDocument();
+    });
+
+    it('shows the menu trigger for a decided investigation when escalations are available', () => {
+      renderGroup(makeInvestigation({ recommendedAction: 'closed' }), {
+        canManageEscalations: true,
+      });
+
+      expect(screen.getByRole('button', { name: 'Open actions menu' })).toBeInTheDocument();
     });
 
     it('shows escalation actions when canManageEscalations is true', () => {
@@ -138,7 +147,8 @@ describe('ConversationsActionsGroup', () => {
     });
 
     it('hides escalation actions when canManageEscalations is false (default)', () => {
-      renderGroup(makeInvestigation({ recommendedAction: 'closed' }));
+      // Open investigation: trigger exists, menu opens, escalation items absent.
+      renderGroup(makeInvestigation());
       openMenu();
 
       expect(screen.queryByText('Open an escalation')).not.toBeInTheDocument();

@@ -26,6 +26,7 @@ import {
 import React from 'react';
 import { registerAgenticInvestigationTemplateUI } from '@kbn/agentic-investigations-common';
 import { getAlertZeroDeepLinks } from './deep_links';
+import { EscalationModalBoundary } from './pages/conversations/escalation_modal_boundary';
 import type {
   AlertZeroClientConfig,
   AlertZeroPublicSetup,
@@ -110,15 +111,19 @@ export class AlertZeroPublicPlugin
         import('./pages/conversations/connected_escalation_modal'),
       ]);
 
-      // QueryClient is created once here (inside the lazy factory) so it is stable across renders.
+      // Both `flyoutQueryClient` and `stableServices` are created once inside the lazy factory
+      // so they are stable across renders. KibanaContextProvider compares `services` by reference;
+      // a spread inside the component body would create a new object on every render and
+      // cause all consumers to re-render unnecessarily.
       const flyoutQueryClient = new QueryClient();
+      const stableServices = { ...core, ...startDeps };
 
       const WrappedModal: React.FC<React.ComponentProps<typeof ConnectedEscalationModal>> = (
         props
       ) =>
         React.createElement(
           KibanaContextProvider,
-          { services: { ...core, ...startDeps } },
+          { services: stableServices },
           React.createElement(
             QueryClientProvider,
             { client: flyoutQueryClient },
@@ -142,8 +147,8 @@ export class AlertZeroPublicPlugin
       renderEscalationModal: canManageEscalations
         ? (props) =>
             React.createElement(
-              React.Suspense,
-              { fallback: null },
+              EscalationModalBoundary,
+              null,
               React.createElement(LazyEscalationModal, props)
             )
         : undefined,

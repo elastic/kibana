@@ -275,6 +275,20 @@ describe('EscalationsService.create', () => {
     expect(title).toBe(MOCK_INVESTIGATION.title);
   });
 
+  it('uses a caller-supplied title instead of the investigation title when provided', async () => {
+    const { service, client } = makeService();
+
+    await service.create(request, {
+      linked_investigation_id: 'inv-1',
+      title: 'Custom escalation title',
+      visibility: 'public',
+      collaborators: [],
+    });
+
+    const { title } = client.create.mock.calls[0][0];
+    expect(title).toBe('Custom escalation title');
+  });
+
   it('throws when the escalation template is not found', async () => {
     const { service, conversationTemplates } = makeService();
     conversationTemplates.get.mockResolvedValue(undefined);
