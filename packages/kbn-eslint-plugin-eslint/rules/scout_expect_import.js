@@ -75,18 +75,21 @@ module.exports = {
     },
   },
 
-  create(context) {
-    const filePath = context.getFilename();
-    const testType = getTestType(filePath);
-
-    if (!testType) {
-      return {};
-    }
-
-    const recommendedPackage = getRecommendedPackage(filePath);
-    const recommendedImport = `${recommendedPackage}/${testType}`;
+  createOnce(context) {
+    let testType;
+    let recommendedImport;
 
     return {
+      before() {
+        const filePath = context.filename;
+        testType = getTestType(filePath);
+
+        if (!testType) {
+          return false;
+        }
+
+        recommendedImport = `${getRecommendedPackage(filePath)}/${testType}`;
+      },
       ImportDeclaration(node) {
         const source = node.source.value;
 
@@ -116,7 +119,7 @@ module.exports = {
             actualImport: source,
           },
           fix(fixer) {
-            const sourceText = context.getSourceCode();
+            const sourceText = context.sourceCode;
             // Preserve the alias if present (e.g., "expect as e" or just "expect")
             const importedName = expectSpecifier.imported?.name || 'expect';
             const localName = expectSpecifier.local?.name;
