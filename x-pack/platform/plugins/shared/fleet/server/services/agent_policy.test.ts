@@ -183,6 +183,30 @@ function getAgentPolicyCreateMock() {
   });
   return soClient;
 }
+
+function mockPackagePolicySOs(
+  soClient: ReturnType<typeof getSavedObjectMock>,
+  attributesList: Array<Record<string, unknown>>
+) {
+  soClient.find.mockImplementation(async (options) => {
+    if (options.type === PACKAGE_POLICY_SAVED_OBJECT_TYPE) {
+      return {
+        saved_objects: attributesList.map((attributes, index) => ({
+          id: `pp-${index}`,
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          references: [],
+          score: 1,
+          attributes,
+        })),
+        total: attributesList.length,
+        page: 1,
+        per_page: attributesList.length,
+      };
+    }
+    return { saved_objects: [], total: 0, page: 1, per_page: 1 };
+  });
+}
+
 let mockedLogger: jest.Mocked<Logger>;
 
 let otelExporter: tracing.InMemorySpanExporter;
@@ -1134,31 +1158,6 @@ describe('Agent policy', () => {
   });
 
   describe('bumpRevision', () => {
-    // computeMinAgentVersionData reads package policy saved objects directly (bypassing
-    // packagePolicyService) so it can project just the fields it needs in a single query.
-    function mockPackagePolicySOs(
-      soClient: ReturnType<typeof getSavedObjectMock>,
-      attributesList: Array<Record<string, any>>
-    ) {
-      soClient.find.mockImplementation(async (options: any) => {
-        if (options.type === PACKAGE_POLICY_SAVED_OBJECT_TYPE) {
-          return {
-            saved_objects: attributesList.map((attributes, index) => ({
-              id: `pp-${index}`,
-              type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-              references: [],
-              score: 1,
-              attributes,
-            })),
-            total: attributesList.length,
-            page: 1,
-            per_page: attributesList.length,
-          };
-        }
-        return { saved_objects: [], total: 0, page: 1, per_page: 1 };
-      });
-    }
-
     beforeEach(() => {
       mockedPackagePolicyService.findAllForAgentPolicy.mockResolvedValue([]);
     });
@@ -1254,10 +1253,6 @@ describe('Agent policy', () => {
         asyncDeploy: true,
       });
 
-      // computeMinAgentVersionData reads package policies via a direct, field-projected
-      // soClient.find (not packagePolicyService.findAllForAgentPolicy), and `_update`'s eager
-      // full fetch (for the deploy event it never triggers on this branch) is skipped for async
-      // deploys — so findAllForAgentPolicy should never be called on this path.
       expect(soClient.find).toHaveBeenCalledWith(
         expect.objectContaining({ type: PACKAGE_POLICY_SAVED_OBJECT_TYPE })
       );
@@ -2264,29 +2259,12 @@ describe('Agent policy', () => {
         saved_objects: [{ attributes: {}, id: 'agent-policy', type: 'mocked', references: [] }],
       });
 
-      // computeMinAgentVersionData reads package policy saved objects directly.
-      soClient.find.mockImplementation(async (options: any) => {
-        if (options.type === PACKAGE_POLICY_SAVED_OBJECT_TYPE) {
-          return {
-            saved_objects: [
-              {
-                id: 'pp-1',
-                type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-                references: [],
-                score: 1,
-                attributes: {
-                  package: { name: 'apache', title: 'Apache', version: '1.3.2' },
-                  package_agent_version_condition: '>=9.3.0',
-                },
-              },
-            ],
-            total: 1,
-            page: 1,
-            per_page: 1,
-          } as any;
-        }
-        return { saved_objects: [], total: 0, page: 1, per_page: 1 } as any;
-      });
+      mockPackagePolicySOs(soClient, [
+        {
+          package: { name: 'apache', title: 'Apache', version: '1.3.2' },
+          package_agent_version_condition: '>=9.3.0',
+        },
+      ]);
 
       await agentPolicyService.update(soClient, esClient, 'agent-policy', {
         name: 'updated',

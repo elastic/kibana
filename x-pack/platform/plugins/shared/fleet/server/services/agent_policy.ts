@@ -1326,99 +1326,17 @@ class AgentPolicyService {
     minAgentVersion: string | undefined;
     packageAgentVersionConditions: AgentPolicyAgentVersionCondition[] | undefined;
   }> {
-    // A single, field-projected query covers both the per-policy version condition (falling back to
-    // the installed package's condition below) and the `inputs_for_versions` template-condition check.
-    // `inputs_for_versions` is stripped from the mapped PackagePolicy type by
-    // mapPackagePolicySavedObjectToPackagePolicy, so this reads the saved object directly rather than
-    // going through packagePolicyService.findAllForAgentPolicy (which would also over-fetch full
-    // policy documents — inputs, streams, vars — that aren't needed here).
-    const savedObjectType = await getPackagePolicySavedObjectType();
-    const packagePolicySOs = await soClient
-      .find<PackagePolicySOAttributes>({
-        type: savedObjectType,
-        filter: buildCurrentRevisionFilter(
-          savedObjectType,
-          `${savedObjectType}.attributes.policy_ids:${escapeSearchQueryPhrase(policyId)}`
-        ),
-        fields: ['package', 'package_agent_version_condition', 'inputs_for_versions'],
-        perPage: SO_SEARCH_LIMIT,
-      })
-      .catch(
-        catchAndSetErrorStackTrace.withMessage(
-          `Error encountered while attempting to get all package policies for agent policy [${policyId}]`
-        )
-      );
-
-    // compilePackagePolicyForVersions only populates `inputs_for_versions` when
-    // hasAgentVersionConditionInInputTemplate is true, so its presence means the policy requires
-    // version-specific behaviour (HBS templates referencing _meta.agent.version).
-    let hasTemplateConditions = false;
-    const conditions: AgentPolicyAgentVersionCondition[] = [];
-
-    for (const so of packagePolicySOs.saved_objects) {
-      const {
-        package: pkg,
-        package_agent_version_condition: condition,
-        inputs_for_versions: inputsForVersions,
-      } = so.attributes;
-
-      if (inputsForVersions && Object.keys(inputsForVersions).length > 0) {
-        hasTemplateConditions = true;
-      }
-
-      let versionCondition = condition;
-
-      // For package policies created before this field was introduced, fall back
-      // to looking up the installed package info to get the version condition.
-      if (!versionCondition && pkg?.name && pkg?.version) {
-        try {
-          const pkgInfo = await getPackageInfo({
-            savedObjectsClient: soClient,
-            pkgName: pkg.name,
-            pkgVersion: pkg.version,
-            prerelease: true,
-          });
-          versionCondition = pkgInfo.conditions?.agent?.version;
-        } catch {
-          // ignore — package might not be installed or accessible
-        }
-      }
-
-      if (versionCondition) {
-        conditions.push({
-          name: pkg?.name ?? '',
-          title: pkg?.title ?? '',
-          version_condition: versionCondition,
-        });
-      }
-    }
-
-    const hasAgentVersionConditions = conditions.length > 0 || hasTemplateConditions;
-
-    if (conditions.length === 0) {
-      return {
-        hasAgentVersionConditions,
-        minAgentVersion: undefined,
-        packageAgentVersionConditions: undefined,
-      };
-    }
-
-    let highestMinVersion: string | undefined;
-    for (const { version_condition: condition } of conditions) {
-      try {
-        const parsed = minVersion(condition);
-        if (parsed && (!highestMinVersion || gt(parsed.version, highestMinVersion))) {
-          highestMinVersion = parsed.version;
-        }
-      } catch {
-        // skip invalid version condition
-      }
-    }
+    const packagePolicies = await findPackagePoliciesForVersionCheck(soClient, policyId);
+    const { conditions, hasTemplateConditions } = await collectAgentVersionConditions(
+      soClient,
+      packagePolicies
+    );
+    const hasConditions = conditions.length > 0;
 
     return {
-      hasAgentVersionConditions,
-      minAgentVersion: highestMinVersion,
-      packageAgentVersionConditions: conditions,
+      hasAgentVersionConditions: hasConditions || hasTemplateConditions,
+      minAgentVersion: hasConditions ? highestMinAgentVersion(conditions) : undefined,
+      packageAgentVersionConditions: hasConditions ? conditions : undefined,
     };
   }
 
@@ -3077,6 +2995,119 @@ class AgentPolicyService {
 }
 
 export const agentPolicyService = new AgentPolicyService();
+
+type PackagePolicyVersionAttributes = Pick<
+  PackagePolicySOAttributes,
+  'package' | 'package_agent_version_condition' | 'inputs_for_versions'
+>;
+
+// `inputs_for_versions` is stripped from mapped PackagePolicy, so read the saved object directly.
+async function findPackagePoliciesForVersionCheck(
+  soClient: SavedObjectsClientContract,
+  policyId: string
+): Promise<Array<SavedObject<PackagePolicyVersionAttributes>>> {
+  const savedObjectType = await getPackagePolicySavedObjectType();
+  const packagePolicySOs = await soClient
+    .find<PackagePolicyVersionAttributes>({
+      type: savedObjectType,
+      filter: buildCurrentRevisionFilter(
+        savedObjectType,
+        `${savedObjectType}.attributes.policy_ids:${escapeSearchQueryPhrase(policyId)}`
+      ),
+      fields: ['package', 'package_agent_version_condition', 'inputs_for_versions'],
+      perPage: SO_SEARCH_LIMIT,
+    })
+    .catch(
+      catchAndSetErrorStackTrace.withMessage(
+        `Error encountered while attempting to get all package policies for agent policy [${policyId}]`
+      )
+    );
+
+  return packagePolicySOs.saved_objects;
+}
+
+async function collectAgentVersionConditions(
+  soClient: SavedObjectsClientContract,
+  packagePolicies: Array<SavedObject<PackagePolicyVersionAttributes>>
+): Promise<{
+  conditions: AgentPolicyAgentVersionCondition[];
+  hasTemplateConditions: boolean;
+}> {
+  const conditions: AgentPolicyAgentVersionCondition[] = [];
+  let hasTemplateConditions = false;
+
+  for (const { attributes } of packagePolicies) {
+    const {
+      package: pkg,
+      package_agent_version_condition: storedCondition,
+      inputs_for_versions: inputsForVersions,
+    } = attributes;
+
+    if (hasTemplateVersionCondition(inputsForVersions)) {
+      hasTemplateConditions = true;
+    }
+
+    const versionCondition = await resolveAgentVersionCondition(soClient, pkg, storedCondition);
+    if (versionCondition) {
+      conditions.push({
+        name: pkg?.name ?? '',
+        title: pkg?.title ?? '',
+        version_condition: versionCondition,
+      });
+    }
+  }
+
+  return { conditions, hasTemplateConditions };
+}
+
+// Present only when an input template references the agent version.
+function hasTemplateVersionCondition(
+  inputsForVersions: PackagePolicySOAttributes['inputs_for_versions']
+): boolean {
+  return !!inputsForVersions && Object.keys(inputsForVersions).length > 0;
+}
+
+// Older policies omit `package_agent_version_condition`; fall back to the installed package.
+async function resolveAgentVersionCondition(
+  soClient: SavedObjectsClientContract,
+  pkg: PackagePolicySOAttributes['package'],
+  storedCondition: string | undefined
+): Promise<string | undefined> {
+  if (storedCondition || !pkg?.name || !pkg.version) {
+    return storedCondition;
+  }
+
+  try {
+    const pkgInfo = await getPackageInfo({
+      savedObjectsClient: soClient,
+      pkgName: pkg.name,
+      pkgVersion: pkg.version,
+      prerelease: true,
+    });
+    return pkgInfo.conditions?.agent?.version;
+  } catch {
+    return undefined;
+  }
+}
+
+function highestMinAgentVersion(
+  conditions: AgentPolicyAgentVersionCondition[]
+): string | undefined {
+  let highestMinVersion: string | undefined;
+
+  for (const { version_condition: condition } of conditions) {
+    try {
+      const parsed = minVersion(condition);
+      if (parsed && (!highestMinVersion || gt(parsed.version, highestMinVersion))) {
+        highestMinVersion = parsed.version;
+      }
+    } catch {
+      // skip invalid version condition
+    }
+  }
+
+  return highestMinVersion;
+}
 
 function buildVerifierCredentialVars(
   provider: string,
