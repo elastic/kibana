@@ -96,20 +96,28 @@ export function SignificantEventsPage() {
   const nightshiftLabel = i18n.translate('xpack.significantEventsApp.nightshiftButtonLabel', {
     defaultMessage: 'Nightshift',
   });
+  const settingsLabel = i18n.translate('xpack.significantEventsApp.settingsPage.title', {
+    defaultMessage: 'Settings',
+  });
+  const nightshiftHref = getUrlForApp(NIGHTSHIFT_APP_ID);
 
-  const menu = useMemo<AppHeaderMenu>(
-    () => ({
-      items: [
-        {
-          id: 'nightshift',
-          order: 1,
-          label: nightshiftLabel,
-          iconType: 'moon',
-          href: getUrlForApp(NIGHTSHIFT_APP_ID),
-        },
-      ],
-    }),
-    [getUrlForApp, nightshiftLabel]
+  const menu = useMemo<AppHeaderMenu | undefined>(
+    () =>
+      canConfigure
+        ? {
+            items: [
+              {
+                id: 'settings',
+                order: 1,
+                label: settingsLabel,
+                iconType: 'gear',
+                href: router.link('/settings'),
+                testId: 'significantEventsSettingsLink',
+              },
+            ],
+          }
+        : undefined,
+    [canConfigure, router, settingsLabel]
   );
 
   useEffect(() => {
@@ -186,8 +194,7 @@ export function SignificantEventsPage() {
   }
 
   if (!availability || !availability.available) {
-    const reason =
-      availability && !availability.available ? availability.reason : ('unknown' as const);
+    const reason = availability?.reason ?? 'unknown';
     return (
       <SignificantEventsAppPageTemplate.Body grow>
         <SignificantEventsNotEnabledPrompt reason={reason} />
@@ -206,7 +213,12 @@ export function SignificantEventsPage() {
 
   return (
     <>
-      <SignificantEventsAppHeader title={pageTitle} menu={menu} tabs={tabs} />
+      <SignificantEventsAppHeader
+        title={pageTitle}
+        back={{ href: nightshiftHref, label: nightshiftLabel }}
+        menu={menu}
+        tabs={tabs}
+      />
       <SignificantEventsPageProvider>
         <SignificantEventsAppPageTemplate.Body grow>
           {isMaintenanceStatusLoading && (

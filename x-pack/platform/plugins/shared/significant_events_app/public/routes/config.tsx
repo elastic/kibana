@@ -12,6 +12,7 @@ import { SignificantEventsAppPageTemplate } from '../components/page_template';
 import { RedirectTo } from '../components/redirect_to';
 import { SettingsPage } from '../pages/settings/page';
 import { SignificantEventsPage } from '../pages/significant_events/page';
+import { SETTINGS_ROUTE } from './route_paths';
 
 /**
  * The array of route definitions to be used when the application creates the routes.
@@ -30,7 +31,7 @@ const significantEventsAppRoutes = {
       '/': {
         element: <RedirectTo path="/{tab}" params={{ path: { tab: 'streams' } }} />,
       },
-      '/settings': {
+      [SETTINGS_ROUTE]: {
         element: <SettingsPage />,
       },
       '/{tab}': {

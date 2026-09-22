@@ -8,6 +8,7 @@
 import React, { useLayoutEffect, useEffect, useCallback, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { useKibana } from '../hooks/use_kibana';
+import { SETTINGS_ROUTE } from '../routes/route_paths';
 
 /**
  * Hook to check if time range params are set and provide a redirect function.
@@ -34,7 +35,7 @@ function useDateRangeRedirect() {
       rangeTo: searchParams.get('rangeTo'),
     };
   }, [location.search]);
-  const requiresDateRange = location.pathname !== '/settings';
+  const requiresDateRange = location.pathname !== SETTINGS_ROUTE;
 
   const redirect = useCallback(() => {
     const { timefilter } = queryService.timefilter;

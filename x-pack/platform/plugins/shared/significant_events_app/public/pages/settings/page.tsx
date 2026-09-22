@@ -69,8 +69,7 @@ export function SettingsPage() {
   }
 
   if (!availability || !availability.available) {
-    const reason =
-      availability && !availability.available ? availability.reason : ('unknown' as const);
+    const reason = availability?.reason ?? 'unknown';
     return (
       <SignificantEventsAppPageTemplate.Body grow>
         <SignificantEventsNotEnabledPrompt reason={reason} />

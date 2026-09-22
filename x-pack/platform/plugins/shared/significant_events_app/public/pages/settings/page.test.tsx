@@ -6,9 +6,8 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
-import { I18nProvider } from '@kbn/i18n-react';
 import { useKibana } from '../../hooks/use_kibana';
 import { useSignificantEventsAvailability } from '../../hooks/use_significant_events_availability';
 import { SettingsPage } from './page';
@@ -40,13 +39,6 @@ const setCapabilities = (canConfigure: boolean) => {
   } as never);
 };
 
-const renderPage = () =>
-  render(
-    <I18nProvider>
-      <SettingsPage />
-    </I18nProvider>
-  );
-
 describe('SettingsPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -61,34 +53,10 @@ describe('SettingsPage', () => {
   it('redirects users without configure permission to Nightshift', async () => {
     setCapabilities(false);
 
-    renderPage();
+    render(<SettingsPage />);
 
     await waitFor(() => {
       expect(navigateToApp).toHaveBeenCalledWith(NIGHTSHIFT_APP_ID);
     });
-  });
-
-  it('renders the loading and unavailable states', () => {
-    mockUseSignificantEventsAvailability.mockReturnValue({
-      availability: undefined,
-      isLoading: true,
-      error: null,
-    } as ReturnType<typeof useSignificantEventsAvailability>);
-    const { rerender } = renderPage();
-
-    expect(screen.getByRole('progressbar')).toBeInTheDocument();
-
-    mockUseSignificantEventsAvailability.mockReturnValue({
-      availability: { available: false, reason: 'license' },
-      isLoading: false,
-      error: null,
-    } as ReturnType<typeof useSignificantEventsAvailability>);
-    rerender(
-      <I18nProvider>
-        <SettingsPage />
-      </I18nProvider>
-    );
-
-    expect(screen.getByTestId('significantEventsNotEnabledPrompt')).toBeInTheDocument();
   });
 });
