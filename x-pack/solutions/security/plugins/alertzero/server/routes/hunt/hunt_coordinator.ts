@@ -85,7 +85,8 @@ export const registerHuntCoordinatorRoute = ({
             tier2_when,
             max_tier2_sample_events,
             trigger,
-            runId,
+            run_id: runId,
+            technology,
           } = request.body;
 
           const result = await huntCoordinator(esClient, model, logger, {
@@ -101,6 +102,7 @@ export const registerHuntCoordinatorRoute = ({
             tier2_when,
             max_tier2_sample_events,
             trigger,
+            technology,
             // The Worker fan-out supplies a run id so one sweep's children share it,
             // which is what the packaging barrier and conclusion dedupe key off. Only
             // mint one when the caller has no sweep to tie the run to.

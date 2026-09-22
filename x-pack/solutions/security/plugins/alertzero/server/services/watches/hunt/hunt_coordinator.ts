@@ -14,7 +14,8 @@ import type {
   HuntIoc,
   HuntTechnology,
 } from '@kbn/alertzero-common';
-import { resolveIndexScope } from './common/resolve_index_scope';
+import { resolveHuntScope } from './common/resolve_index_scope';
+import type { HuntScope } from './common/resolve_index_scope';
 import { huntForThreat, emptyHuntForThreatResult } from './tier1/hunt_for_threat';
 import { huntBehavior } from './tier2/hunt_behavior';
 import type { HuntBehaviorResult } from './tier2/types';
@@ -25,11 +26,17 @@ export type HuntCoordinatorTier2SkipReason =
   | 'no_environment_hits'
   | 'no_report_text'
   | 'no_searchable_input'
+  | 'scope_blocked'
   | 'tier2_failed';
 
 export interface HuntCoordinatorParams {
   report_id?: string;
   spaceId: string;
+  /**
+   * Pins the hunt to one technology's index scope. Absent, the coordinator
+   * resolves every known technology and hunts the ones present in the space.
+   */
+  technology?: HuntTechnology;
   text?: string;
   iocs?: HuntIoc[];
   techniques?: string[];
@@ -55,6 +62,8 @@ export interface HuntCoordinatorResult {
   status: HuntCoordinatorStatus;
   report_id?: string;
   runId: string;
+  /** Technologies whose indices the hunt actually ran against; empty when the scope was blocked. */
+  technologies: HuntTechnology[];
   tier1: HuntCoordinatorTier1;
   tier2?: HuntCoordinatorTier2;
   tier2_skipped_reason?: HuntCoordinatorTier2SkipReason;
@@ -136,17 +145,14 @@ export const huntCoordinator = async (
     max_tier2_sample_events: maxSamples = DEFAULT_TIER2_SAMPLE_EVENTS,
     text,
     runId,
+    technology,
   } = params;
 
-  // Resolve index scope. For now defaults to aws_iam; in production the coordinator
-  // is called per-report and technology is resolved from the report.
-  let scope;
+  // Resolve the index scope from the environment: the named technology, or every
+  // technology whose required indices exist in this space.
+  let scope: HuntScope;
   try {
-    scope = await resolveIndexScope({
-      esClient,
-      technology: 'aws_iam' as HuntTechnology,
-      spaceId,
-    });
+    scope = await resolveHuntScope({ esClient, spaceId, technology });
   } catch (err) {
     logger.warn(`hunt_coordinator: scope resolution failed — ${(err as Error).message}`);
     // Return a degraded result rather than hard-failing.
@@ -164,6 +170,7 @@ export const huntCoordinator = async (
       status: 'tier1_only',
       report_id: reportId,
       runId,
+      technologies: [],
       tier1: emptyTier1,
       tier2_skipped_reason: 'no_searchable_input',
       message: `Scope resolution failed: ${(err as Error).message}`,
@@ -172,8 +179,40 @@ export const huntCoordinator = async (
     };
   }
 
+  const { technologies, ...indexScope } = scope;
+
+  // A blocked scope is a failed run, never a clean one: no required index exists,
+  // so there is nothing to hunt and the caller must not write hunt evidence.
+  if (indexScope.status === 'blocked') {
+    const target = technology ?? 'any configured technology';
+    const message = `No required index resolved for ${target} in space ${spaceId} (missing: ${indexScope.missing.join(
+      ', '
+    )}).`;
+    return {
+      status: 'blocked',
+      report_id: reportId,
+      runId,
+      technologies,
+      tier1: {
+        tier: 1,
+        ...emptyHuntForThreatResult(
+          'scope_blocked',
+          iocs,
+          techniques,
+          timeRange ?? indexScope.window,
+          message
+        ),
+      },
+      tier2_skipped_reason: 'scope_blocked',
+      message,
+      next_step:
+        'Install the integration whose indices this hunt needs, or pass a technology whose indices exist in this space.',
+      completedSuccessfully: false,
+    };
+  }
+
   const tier1Raw = await huntForThreat(esClient, {
-    scope,
+    scope: indexScope,
     iocs,
     techniques,
     timeRange,
@@ -197,6 +236,7 @@ export const huntCoordinator = async (
     status: 'tier1_only',
     report_id: reportId,
     runId,
+    technologies,
     tier1,
     tier2_skipped_reason: reason,
     message,
@@ -232,6 +272,7 @@ export const huntCoordinator = async (
       status: 'tier2_only_skipped',
       report_id: reportId,
       runId,
+      technologies,
       tier1,
       tier2_skipped_reason: 'no_report_text',
       message: `Tier 1: ${tier1Raw.status}. Tier 2 skipped (no report text).`,
@@ -272,6 +313,7 @@ export const huntCoordinator = async (
     status: 'tier1_and_tier2',
     report_id: reportId,
     runId,
+    technologies,
     tier1,
     tier2,
     message: `Tier 1: ${tier1Raw.status}. Tier 2: ${tier2Raw.status} (${tier2Raw.behaviors.length} proposed).`,

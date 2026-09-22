@@ -111,3 +111,66 @@ export const resolveIndexScope = async ({
     rowLimit,
   };
 };
+
+/** Every technology the hunt knows how to scope. Derived from the map so the two cannot drift. */
+export const HUNT_TECHNOLOGIES = Object.keys(TECHNOLOGY_INDEX_MAP) as HuntTechnology[];
+
+/**
+ * The scope a hunt actually runs against: one or more technologies' patterns
+ * merged. `technologies` lists the technologies whose required indices exist in
+ * the space; empty means nothing resolved and the hunt must not run.
+ */
+export type HuntScope = Omit<ResolvedIndexScope, 'technology'> & {
+  technologies: HuntTechnology[];
+};
+
+const uniq = (values: string[]): string[] => Array.from(new Set(values));
+
+/**
+ * Resolves the hunt scope for a space. With an explicit `technology` it resolves
+ * that one entry. Without one it resolves every known technology and keeps the
+ * ones whose required indices exist, so a hunt never assumes a vendor the
+ * environment does not have; when none are present the result is `blocked` and
+ * `missing` lists every pattern that was checked.
+ */
+export const resolveHuntScope = async ({
+  esClient,
+  spaceId,
+  technology,
+  window,
+  rowLimit,
+}: {
+  esClient: ElasticsearchClient;
+  spaceId: string;
+  technology?: HuntTechnology;
+  window?: IndexScopeWindow;
+  rowLimit?: number;
+}): Promise<HuntScope> => {
+  const candidates = technology ? [technology] : HUNT_TECHNOLOGIES;
+  const scopes = await Promise.all(
+    candidates.map((candidate) =>
+      resolveIndexScope({ esClient, technology: candidate, spaceId, window, rowLimit })
+    )
+  );
+  const present = scopes.filter((scope) => scope.status !== 'blocked');
+  const source = present.length > 0 ? present : scopes;
+
+  let status: ResolvedIndexScope['status'];
+  if (present.length === 0) {
+    status = 'blocked';
+  } else if (present.some((scope) => scope.status === 'degraded')) {
+    status = 'degraded';
+  } else {
+    status = 'ok';
+  }
+
+  return {
+    technologies: present.map((scope) => scope.technology),
+    status,
+    required: uniq(source.flatMap((scope) => scope.required)),
+    optional: uniq(source.flatMap((scope) => scope.optional)),
+    missing: uniq(source.flatMap((scope) => scope.missing)),
+    window: scopes[0].window,
+    rowLimit: scopes[0].rowLimit,
+  };
+};

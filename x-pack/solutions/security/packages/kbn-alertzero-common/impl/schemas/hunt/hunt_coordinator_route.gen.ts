@@ -16,10 +16,10 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
-import { HuntIoc, HuntForThreatResult } from '../components/hunt.gen';
+import { HuntTechnology, HuntIoc, HuntForThreatResult } from '../components/hunt.gen';
 
 export const HuntCoordinatorStatus = lazySchema(() =>
-  z.enum(['tier1_only', 'tier1_and_tier2', 'tier2_only_skipped'])
+  z.enum(['blocked', 'tier1_only', 'tier1_and_tier2', 'tier2_only_skipped'])
 );
 export type HuntCoordinatorStatus = z.infer<typeof HuntCoordinatorStatus>;
 export type HuntCoordinatorStatusEnum = typeof HuntCoordinatorStatus.enum;
@@ -32,12 +32,18 @@ export const HuntCoordinatorRequestBody = lazySchema(() =>
       /**
        * Run id supplied by the Worker fan-out so every child of one sweep shares it, which is what the packaging barrier and the conclusion dedupe key off. The route mints one only when the caller has no sweep to tie the run to.
        */
-      runId: z
+      run_id: z
         .string()
         .optional()
         .describe(
           'Run id supplied by the Worker fan-out so every child of one sweep shares it, which is what the packaging barrier and the conclusion dedupe key off. The route mints one only when the caller has no sweep to tie the run to.'
         ),
+      /**
+       * Pins the hunt to one technology's index scope. Omit it and the coordinator resolves every known technology and hunts the ones whose required indices exist in the space.
+       */
+      technology: HuntTechnology.optional().describe(
+        "Pins the hunt to one technology's index scope. Omit it and the coordinator resolves every known technology and hunts the ones whose required indices exist in the space."
+      ),
       text: z.string().max(200000).optional(),
       iocs: z.array(HuntIoc).optional(),
       techniques: z.array(z.string()).optional(),
@@ -64,6 +70,14 @@ export const HuntCoordinatorResponse = lazySchema(() =>
     status: HuntCoordinatorStatus,
     report_id: z.string().optional(),
     runId: z.string(),
+    /**
+     * Technologies whose indices the hunt ran against. Empty when the scope was blocked.
+     */
+    technologies: z
+      .array(HuntTechnology)
+      .describe(
+        'Technologies whose indices the hunt ran against. Empty when the scope was blocked.'
+      ),
     tier1: HuntForThreatResult.merge(
       z.object({
         tier: z.number().int(),
