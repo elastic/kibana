@@ -1492,6 +1492,10 @@ steps:
                           description: Confidence score from 0.0-1.0 indicating certainty of the classification
                         rationale:
                           type: string
+                          # Matches workflow.output / AlertAnalysisVerdict — unbounded rationale
+                          # would pass the agent schema then fail final output validation after
+                          # tags/notes have already been written.
+                          maxLength: 500
                           description: One short sentence (max 20 words) naming the decision gate and the strongest evidence
                         contributing_factors:
                           type: array
