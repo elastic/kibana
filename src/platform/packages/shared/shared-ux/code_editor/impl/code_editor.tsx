@@ -725,6 +725,10 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
               // @ts-expect-error, see https://github.com/microsoft/monaco-editor/issues/3829
               'bracketPairColorization.enabled': false,
               ...options,
+              hover: {
+                sticky: true,
+                ...options?.hover,
+              },
               // Explicit links prop always takes precedence over any value passed in options
               links,
               // Explicit not possible to override because of the way the suggestion widget is rendered in a separate container

@@ -24,7 +24,7 @@ declare module 'monaco-editor/editor/editor.api' {
   export namespace editor {
     // Define overloads for the getContribution method to allow for
     // better typing of the editor contributions of concerns to us
-    interface ICodeEditor {
+    export interface ICodeEditor {
       getContribution(id: 'editor.contrib.suggestController'):
         | (editor.IEditorContribution & {
             // add type augmentation for the suggestController contribution for the widget property
