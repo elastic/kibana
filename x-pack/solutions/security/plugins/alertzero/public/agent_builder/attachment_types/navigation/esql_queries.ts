@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import {
-  DEFAULT_ALERTS_INDEX,
-  DEFAULT_LOGS_INDEX_PATTERN,
-  THREAT_REPORTS_INDEX_PATTERN,
-} from './constants';
+export const DEFAULT_ALERTS_INDEX = '.alerts-security.alerts' as const;
+export const THREAT_REPORTS_INDEX_PATTERN = '.kibana-threat-reports*' as const;
+/** Best-effort default for IOC Discover lookups when no index pattern is provided. */
+export const DEFAULT_LOGS_INDEX_PATTERN = 'logs-*' as const;
 
 /** Escape a value for use inside a double-quoted ES|QL string literal. */
 export const escapeEsqlString = (value: string): string =>
@@ -96,19 +95,6 @@ export const buildAlertsLookupEsql = ({
     refs: alerts.map((alert) => ({ id: alert.alert_id, index: alert.index })),
     idField: 'kibana.alert.uuid',
   });
-
-export const buildAlertLookupEsql = ({
-  spaceId,
-  alertId,
-}: {
-  spaceId: string;
-  alertId: string;
-}): string => {
-  const escapedAlertId = escapeEsqlString(alertId);
-  return `FROM ${quoteEsqlIdentifier(
-    getAlertsIndex(spaceId)
-  )} METADATA _id | WHERE kibana.alert.uuid == "${escapedAlertId}" OR _id == "${escapedAlertId}"`;
-};
 
 export const buildThreatReportLookupEsql = ({ reportId }: { reportId: string }): string => {
   const escapedReportId = escapeEsqlString(reportId);

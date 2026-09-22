@@ -6,7 +6,6 @@
  */
 
 import {
-  buildAlertLookupEsql,
   buildAlertsLookupEsql,
   buildActorLookupEsql,
   buildEntityLookupEsql,
@@ -76,12 +75,6 @@ describe('esql_queries', () => {
         'WHERE kibana.alert.uuid IN ("alert-1", "alert-2") OR _id IN ("alert-1", "alert-2")'
     );
     expect(buildAlertsLookupEsql({ alerts: [] })).toBeUndefined();
-  });
-
-  it('builds alert lookup ES|QL against space alerts index', () => {
-    expect(buildAlertLookupEsql({ spaceId: 'default', alertId: 'alert-1' })).toBe(
-      'FROM ".alerts-security.alerts-default" METADATA _id | WHERE kibana.alert.uuid == "alert-1" OR _id == "alert-1"'
-    );
   });
 
   it('builds threat report lookup ES|QL', () => {
