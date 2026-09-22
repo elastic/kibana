@@ -109,6 +109,19 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
     snapshots.forEach((v, k) => availableSnapshotsBySource.set(k, v));
   });
 
+  evaluate.afterAll(async ({ kbnClient }) => {
+    await kbnClient.request({
+      path: '/internal/core/_settings',
+      method: 'PUT',
+      headers: { 'elastic-api-version': '1' },
+      body: {
+        'feature_flags.overrides': {
+          [NIGHTSHIFT_ENABLED_FLAG]: null,
+        },
+      },
+    });
+  });
+
   for (const dataset of activeDatasets) {
     for (const kiSource of KI_FEATURE_SOURCES_TO_RUN) {
       evaluate.describe(`${dataset.id} (${kiSource})`, () => {

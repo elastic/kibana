@@ -86,6 +86,19 @@ evaluate.describe(
       snapshots.forEach((v, k) => availableSnapshotsBySource.set(k, v));
     });
 
+    evaluate.afterAll(async ({ kbnClient }) => {
+      await kbnClient.request({
+        path: '/internal/core/_settings',
+        method: 'PUT',
+        headers: { 'elastic-api-version': '1' },
+        body: {
+          'feature_flags.overrides': {
+            [NIGHTSHIFT_ENABLED_FLAG]: null,
+          },
+        },
+      });
+    });
+
     for (const dataset of activeDatasets) {
       if (dataset.discovery.length === 0) {
         continue;
