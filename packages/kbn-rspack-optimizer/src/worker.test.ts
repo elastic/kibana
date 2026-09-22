@@ -237,5 +237,27 @@ describe('worker', () => {
 
       exitSpy.mockRestore();
     });
+
+    it('invalidates the active watch build', async () => {
+      const invalidate = jest.fn();
+      jest.mocked(runBuild).mockResolvedValue({
+        success: true,
+        entryCount: 1,
+        totalSize: 0,
+        invalidate,
+      });
+
+      (process as unknown as NodeJS.EventEmitter).emit('message', {
+        type: 'start',
+        options: { repoRoot: '/repo', watch: true, buildSharedDeps: false },
+      });
+      await Promise.resolve();
+      await Promise.resolve();
+
+      (process as unknown as NodeJS.EventEmitter).emit('message', { type: 'invalidate' });
+
+      expect(invalidate).toHaveBeenCalled();
+      expect(runBuild).toHaveBeenCalledWith(expect.objectContaining({ buildSharedDeps: false }));
+    });
   });
 });
