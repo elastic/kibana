@@ -222,6 +222,11 @@ export const TEST_DESCRIPTION = i18n.translate('xpack.evals.evaluators.testDescr
 export const CONNECTOR_LABEL = i18n.translate('xpack.evals.evaluators.connectorLabel', {
   defaultMessage: 'Model connector',
 });
+export const CONNECTORS_LOAD_ERROR = (message: string) =>
+  i18n.translate('xpack.evals.evaluators.connectorsLoadErrorMessage', {
+    defaultMessage: 'Could not load model connectors: {message}',
+    values: { message },
+  });
 export const TRACE_ID_LABEL = i18n.translate('xpack.evals.evaluators.traceIdLabel', {
   defaultMessage: 'Trace ID',
 });

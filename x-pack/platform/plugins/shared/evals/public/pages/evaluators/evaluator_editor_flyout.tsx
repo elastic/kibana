@@ -36,6 +36,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { NotificationsStart } from '@kbn/core/public';
 import {
   UserDefinedEvaluatorDraft,
+  type EvaluationInstrumentationProfile,
   type JudgeEvidence,
   type JudgeScore,
   type LlmJudgeConfig,
@@ -80,6 +81,8 @@ const EMPTY_SCORE: ScoreFormValue = {
 };
 
 const TRACE_ID_PATTERN = /^[0-9a-fA-F]{32}$/;
+const PROFILE_PROBE_ATTEMPTS = 3;
+const PROFILE_PROBE_DELAY_MS = 1000;
 const EVIDENCE_PROFILE_KEYS = {
   input: 'user_query',
   response: 'agent_response',
@@ -112,7 +115,11 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
     isLoading: isLoadingEvaluator,
     error: loadEvaluatorError,
   } = useEvaluator(mode === 'edit' ? evaluatorName : undefined);
-  const { connectors, isLoading: isLoadingConnectors } = useModelConnectors();
+  const {
+    connectors,
+    isLoading: isLoadingConnectors,
+    error: connectorsError,
+  } = useModelConnectors();
   const createEvaluator = useCreateEvaluator();
   const updateEvaluator = useUpdateEvaluator();
   const testEvaluator = useTestEvaluator();
@@ -331,19 +338,42 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
     }
 
     try {
-      const instrumentation = await resolveInstrumentation.mutateAsync(traceId.trim());
-      // Checked before the judge call, so an edit during the probe costs no model invocation
-      // and cannot raise an error against a draft that has since changed.
-      if (isStaleRun()) {
-        return;
+      let resolvedProfile: EvaluationInstrumentationProfile | undefined;
+      let probeError: unknown;
+
+      // The probe reports the documents indexed right now, while `_test` waits for the
+      // trace to finish exporting. A trace still being written matches nothing yet and
+      // can even 404, so re-probe before calling it unsupported.
+      for (let attempt = 0; attempt < PROFILE_PROBE_ATTEMPTS && !resolvedProfile; attempt++) {
+        if (attempt > 0) {
+          await new Promise((resolve) => setTimeout(resolve, PROFILE_PROBE_DELAY_MS));
+        }
+
+        try {
+          const instrumentation = await resolveInstrumentation.mutateAsync(traceId.trim());
+          probeError = undefined;
+          // The recommendation only weighs the query and the response, so a draft that
+          // declared `steps` must not take it on trust: pick a profile that supplies
+          // everything this draft asks for.
+          resolvedProfile = instrumentation.profiles.find((profile) =>
+            evidence.every((key) => profile.evidence[EVIDENCE_PROFILE_KEYS[key]].status === 'found')
+          )?.profile;
+        } catch (error) {
+          probeError = error;
+        }
+
+        // Checked before the judge call, so an edit during the probe costs no model
+        // invocation and cannot raise an error against a draft that has since changed.
+        if (isStaleRun()) {
+          return;
+        }
       }
-      const resolvedProfile =
-        instrumentation.recommended_instrumentation?.profile ??
-        instrumentation.profiles.find((profile) =>
-          evidence.every((key) => profile.evidence[EVIDENCE_PROFILE_KEYS[key]].status === 'found')
-        )?.profile;
+
       if (!resolvedProfile) {
-        setFormError(i18n.NO_INSTRUMENTATION_ERROR);
+        setTestError({
+          title: i18n.TEST_ERROR_TITLE,
+          message: probeError ? getErrorMessage(probeError) : i18n.NO_INSTRUMENTATION_ERROR,
+        });
         return;
       }
       const response = await testEvaluator.mutateAsync({
@@ -621,6 +651,12 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
               selectedConnectorIds={connectorId ? [connectorId] : []}
               onChange={(selected) => setConnectorId(selected[0] ?? '')}
               isLoading={isLoadingConnectors}
+              isInvalid={Boolean(connectorsError)}
+              error={
+                connectorsError
+                  ? i18n.CONNECTORS_LOAD_ERROR(getErrorMessage(connectorsError))
+                  : undefined
+              }
               singleSelection
               dataTestSubj="evalsEvaluatorConnector"
             />

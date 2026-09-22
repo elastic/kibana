@@ -23,6 +23,7 @@ import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/s
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { AbortError } from 'p-retry';
+import Mustache from 'mustache';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import { createEvaluatorRegistryMock } from '../../evaluators/registry.mock';
 import { compileUserDefinedEvaluator } from '../../evaluators/user_defined/compile';
@@ -78,13 +79,22 @@ describe('POST /internal/evals/evaluators/_test', () => {
     const route = versionedRouter.getRoute('post', EVALS_TEST_EVALUATOR_URL);
     const { handler } = route.versions[API_VERSIONS.internal.v1];
     const routeConfig = versionedRouter.post.mock.calls[0][0];
+    const asInternalUser = { search: jest.fn() };
+    const asCurrentUser = { search: jest.fn() };
     const context = {
-      core: Promise.resolve({
-        elasticsearch: { client: { asInternalUser: { search: jest.fn() } } },
-      }),
+      core: Promise.resolve({ elasticsearch: { client: { asInternalUser, asCurrentUser } } }),
     } as unknown as Parameters<typeof handler>[0];
 
-    return { handler, routeConfig, context, prompt, getClient, logger };
+    return {
+      handler,
+      routeConfig,
+      context,
+      prompt,
+      getClient,
+      logger,
+      asInternalUser,
+      asCurrentUser,
+    };
   };
 
   const request = (overrides: Record<string, unknown> = {}) =>
@@ -270,6 +280,39 @@ describe('POST /internal/evals/evaluators/_test', () => {
     expect(logger.error).toHaveBeenCalledWith(
       'Failed to execute evaluator "quality": inference failure stack'
     );
+  });
+
+  it('reads the trace as the caller, not as the internal user', async () => {
+    const { handler, context, asCurrentUser } = setup();
+
+    await handler(context, request(), kibanaResponseFactory);
+
+    // The caller supplies the trace id and the prompt, so the judge's explanation can
+    // quote back whatever the read returned. It has to be their own privileges.
+    expect(awaitTraceReadyMock.mock.calls[0][0].esClient).toBe(asCurrentUser);
+  });
+
+  it('leaves no draft template behind in the global Mustache cache', async () => {
+    const { handler, context } = setup();
+    // A draft is unique per keystroke and never stored, so anything it renders is dead
+    // weight in a cache that never evicts on its own. The sentinel stands in for those
+    // entries, since the templates a run caches are an implementation detail.
+    Mustache.templateCache?.set('sentinel', 'cached');
+
+    await handler(context, request(), kibanaResponseFactory);
+
+    expect(Mustache.templateCache?.get('sentinel')).toBeUndefined();
+  });
+
+  it('clears the cache even when execution fails', async () => {
+    const { handler, context } = setup({
+      prompt: jest.fn().mockRejectedValue(new AbortError(new Error('offline'))),
+    });
+    Mustache.templateCache?.set('sentinel', 'cached');
+
+    await handler(context, request(), kibanaResponseFactory);
+
+    expect(Mustache.templateCache?.get('sentinel')).toBeUndefined();
   });
 
   it('uses the same strict trace shape for evaluator request schemas', () => {

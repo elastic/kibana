@@ -103,7 +103,16 @@ describe('EvaluatorEditorFlyout', () => {
     updateMutateAsync.mockResolvedValue({ evaluator: { name: 'tone-judge', version: '1.1.0' } });
     resolveMutateAsync.mockResolvedValue({
       recommended_instrumentation: { profile: 'elastic-inference' },
-      profiles: [],
+      profiles: [
+        {
+          profile: 'elastic-inference',
+          evidence: {
+            user_query: { status: 'found' },
+            agent_response: { status: 'found' },
+            tool_calls: { status: 'found' },
+          },
+        },
+      ],
     });
     testMutateAsync.mockResolvedValue({
       result: {
@@ -383,6 +392,111 @@ describe('EvaluatorEditorFlyout', () => {
       expect(onClose).not.toHaveBeenCalled();
     });
 
+    it('ignores a recommendation that cannot supply the declared evidence', async () => {
+      // The server recommends on query + response alone, so a draft needing tool calls
+      // must not take the recommendation on trust.
+      resolveMutateAsync.mockResolvedValueOnce({
+        recommended_instrumentation: { profile: 'otel-genai-events' },
+        profiles: [
+          {
+            profile: 'otel-genai-events',
+            evidence: {
+              user_query: { status: 'found' },
+              agent_response: { status: 'found' },
+              tool_calls: { status: 'not_found' },
+            },
+          },
+          {
+            profile: 'elastic-inference',
+            evidence: {
+              user_query: { status: 'found' },
+              agent_response: { status: 'found' },
+              tool_calls: { status: 'found' },
+            },
+          },
+        ],
+      });
+      renderCreate();
+      fillValidDraft();
+      fireEvent.click(screen.getByLabelText('Tool calls'));
+      chooseConnector();
+      setField('evalsEvaluatorTraceId', TRACE_ID);
+
+      runTest();
+
+      await waitFor(() => expect(testMutateAsync).toHaveBeenCalled());
+      expect(testMutateAsync.mock.calls[0][0].subject.instrumentation).toEqual({
+        profile: 'elastic-inference',
+      });
+    });
+
+    it('re-probes a trace whose documents have not landed yet', async () => {
+      // The probe 404s until the first span is indexed, which is exactly the window a
+      // user hits right after running an agent.
+      resolveMutateAsync
+        .mockRejectedValueOnce(new Error('Trace 0af7... was not found'))
+        .mockResolvedValueOnce({
+          recommended_instrumentation: { profile: 'elastic-inference' },
+          profiles: [
+            {
+              profile: 'elastic-inference',
+              evidence: {
+                user_query: { status: 'found' },
+                agent_response: { status: 'found' },
+                tool_calls: { status: 'found' },
+              },
+            },
+          ],
+        });
+      renderCreate();
+      fillValidDraft();
+      chooseConnector();
+      setField('evalsEvaluatorTraceId', TRACE_ID);
+
+      runTest();
+
+      await waitFor(() => expect(testMutateAsync).toHaveBeenCalled(), { timeout: 8000 });
+      expect(screen.queryByTestId('evalsEvaluatorTestError')).not.toBeInTheDocument();
+    });
+
+    it('re-probes a trace that is still being exported', async () => {
+      const empty = {
+        recommended_instrumentation: null,
+        profiles: [
+          {
+            profile: 'elastic-inference',
+            evidence: {
+              user_query: { status: 'not_found' },
+              agent_response: { status: 'not_found' },
+              tool_calls: { status: 'not_found' },
+            },
+          },
+        ],
+      };
+      resolveMutateAsync.mockResolvedValueOnce(empty).mockResolvedValueOnce({
+        recommended_instrumentation: { profile: 'elastic-inference' },
+        profiles: [
+          {
+            profile: 'elastic-inference',
+            evidence: {
+              user_query: { status: 'found' },
+              agent_response: { status: 'found' },
+              tool_calls: { status: 'found' },
+            },
+          },
+        ],
+      });
+      renderCreate();
+      fillValidDraft();
+      chooseConnector();
+      setField('evalsEvaluatorTraceId', TRACE_ID);
+
+      runTest();
+
+      await waitFor(() => expect(testMutateAsync).toHaveBeenCalled(), { timeout: 8000 });
+      expect(resolveMutateAsync).toHaveBeenCalledTimes(2);
+    });
+
     it('falls back to a profile that supplies the declared evidence', async () => {
       resolveMutateAsync.mockResolvedValueOnce({
         recommended_instrumentation: null,
@@ -418,8 +532,9 @@ describe('EvaluatorEditorFlyout', () => {
       });
     });
 
-    it('stops when no profile can supply the declared evidence', async () => {
-      resolveMutateAsync.mockResolvedValueOnce({
+    it('gives up after re-probing a trace that never resolves', async () => {
+      // Every attempt, not just the first: the probe is retried before giving up.
+      resolveMutateAsync.mockResolvedValue({
         recommended_instrumentation: null,
         profiles: [
           {
@@ -440,8 +555,9 @@ describe('EvaluatorEditorFlyout', () => {
       runTest();
 
       expect(
-        await screen.findByText('No supported instrumentation profile could resolve this trace.')
-      ).toBeInTheDocument();
+        await screen.findByTestId('evalsEvaluatorTestError', undefined, { timeout: 8000 })
+      ).toHaveTextContent('No supported instrumentation profile could resolve this trace.');
+      expect(resolveMutateAsync).toHaveBeenCalledTimes(3);
       expect(testMutateAsync).not.toHaveBeenCalled();
     });
 
@@ -530,7 +646,8 @@ describe('EvaluatorEditorFlyout', () => {
     });
 
     it('explains a failed test run beside the test controls, not at the top of the form', async () => {
-      resolveMutateAsync.mockRejectedValueOnce(new Error('Trace is not ready'));
+      // Every attempt, since a probe failure is retried before it reaches the user.
+      resolveMutateAsync.mockRejectedValue(new Error('Trace is not ready'));
       renderCreate();
       fillValidDraft();
       chooseConnector();
@@ -538,7 +655,9 @@ describe('EvaluatorEditorFlyout', () => {
 
       runTest();
 
-      const testError = await screen.findByTestId('evalsEvaluatorTestError');
+      const testError = await screen.findByTestId('evalsEvaluatorTestError', undefined, {
+        timeout: 8000,
+      });
       expect(testError).toHaveTextContent('Trace is not ready');
       // The save callout sits above the form; a test failure there would be off-screen.
       expect(screen.queryByTestId('evalsEvaluatorSubmitError')).not.toBeInTheDocument();
@@ -549,14 +668,14 @@ describe('EvaluatorEditorFlyout', () => {
     });
 
     it('clears a test failure once the draft changes', async () => {
-      resolveMutateAsync.mockRejectedValueOnce(new Error('Trace is not ready'));
+      resolveMutateAsync.mockRejectedValue(new Error('Trace is not ready'));
       renderCreate();
       fillValidDraft();
       chooseConnector();
       setField('evalsEvaluatorTraceId', TRACE_ID);
 
       runTest();
-      await screen.findByTestId('evalsEvaluatorTestError');
+      await screen.findByTestId('evalsEvaluatorTestError', undefined, { timeout: 8000 });
 
       setField('evalsEvaluatorPrompt', 'Rate {{{agent_response}}} strictly.');
 

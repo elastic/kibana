@@ -84,6 +84,11 @@ export const registerEvaluateRoute = ({
             evaluators: resolvedEvaluators,
             logger,
             getInferenceStart,
+            // Unchanged from before this route was refactored: experiment runs reach here
+            // through a workflow's fake request, so scoping the read to the caller needs
+            // its own change. Only persisted evaluators run here, so the prompt is not
+            // caller-controlled the way it is on `_test`.
+            traceReader: coreContext.elasticsearch.client.asInternalUser,
           });
 
           return response.ok({ body: { results } });

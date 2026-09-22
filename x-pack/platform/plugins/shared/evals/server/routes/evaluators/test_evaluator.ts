@@ -13,6 +13,7 @@ import {
   type TestEvaluatorResponse,
 } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import Mustache from 'mustache';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import { compileUserDefinedEvaluator } from '../../evaluators/user_defined/compile';
 import {
@@ -82,6 +83,10 @@ export const registerTestEvaluatorRoute = ({
             evaluators: [{ definition: evaluator, connectorId }],
             logger,
             getInferenceStart,
+            // The caller picks the trace and writes the prompt, so an internal-user read
+            // would let `manage_evals` alone pull back trace content the caller has no
+            // Elasticsearch privileges for.
+            traceReader: coreContext.elasticsearch.client.asCurrentUser,
           });
           const testResult: TestEvaluatorResponse['result'] = {
             ...result,
@@ -99,6 +104,11 @@ export const registerTestEvaluatorRoute = ({
             return response[error.responseType]({ body: { message: error.message } });
           }
           throw error;
+        } finally {
+          // Rendering a judge goes through Mustache's default writer, whose cache never
+          // evicts. Persisted evaluators are a bounded set of templates, but a draft is
+          // unique per keystroke and never stored, so its entries are dead on arrival.
+          Mustache.clearCache();
         }
       }
     );

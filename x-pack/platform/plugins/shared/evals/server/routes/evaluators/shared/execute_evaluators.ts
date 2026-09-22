@@ -6,7 +6,11 @@
  */
 
 import { isValidTraceId } from '@opentelemetry/api';
-import type { CoreRequestHandlerContext, KibanaRequest } from '@kbn/core/server';
+import type {
+  CoreRequestHandlerContext,
+  ElasticsearchClient,
+  KibanaRequest,
+} from '@kbn/core/server';
 import type { EvaluationSubject, EvaluateResponse, Model } from '@kbn/evals-common';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
@@ -39,6 +43,12 @@ interface ExecuteEvaluatorsOptions {
   evaluators: ResolvedEvaluator[];
   logger: Logger;
   getInferenceStart?: () => Promise<InferenceServerStart>;
+  /**
+   * Identity the trace and log documents are read under. Callers that let the requester
+   * choose both the trace and the prompt must pass `asCurrentUser`, because the judge's
+   * explanation can quote back whatever it was shown.
+   */
+  traceReader: ElasticsearchClient;
 }
 
 export const executeEvaluators = async ({
@@ -48,6 +58,7 @@ export const executeEvaluators = async ({
   evaluators,
   logger,
   getInferenceStart,
+  traceReader,
 }: ExecuteEvaluatorsOptions): Promise<EvaluateResponse['results']> => {
   if (subject.mode === 'multi-turn') {
     throw new EvaluationExecutionError('multi-turn evaluation is not yet supported', 'badRequest');
@@ -93,10 +104,7 @@ export const executeEvaluators = async ({
     parsedReferenceData.set(definition, parsed.data as Record<string, unknown>);
   }
 
-  const traceAccessor = createTraceAccessor({
-    traceId,
-    esClient: coreContext.elasticsearch.client.asInternalUser,
-  });
+  const traceAccessor = createTraceAccessor({ traceId, esClient: traceReader });
   const activeProfile = subject.instrumentation?.profile ?? 'elastic-inference';
   const resolvedMapping = getInstrumentationProfile(activeProfile);
 
