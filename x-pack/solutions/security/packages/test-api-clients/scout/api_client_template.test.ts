@@ -13,6 +13,7 @@ import {
 import type { OsqueryExportLiveQueryResultsResponse } from '@kbn/osquery-plugin/common/api/live_query/live_queries.gen';
 import type { ReadRuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/read_rule/read_rule_route.gen';
 import { SecuritySolutionScoutApiServiceProvider as createDetectionsApi } from './detections.gen';
+import { SecuritySolutionScoutApiServiceProvider as createDiscoveriesApi } from './discoveries.gen';
 import { SecuritySolutionScoutApiServiceProvider as createOsqueryApi } from './osquery.gen';
 
 /**
@@ -149,6 +150,17 @@ describe('generated Scout API client (api_client_scout template)', () => {
       Authorization: authorization,
       'kbn-xsrf': 'true',
     });
+  });
+
+  it('percent-encodes reserved characters in path params', async () => {
+    const apiClient = createApiClientMock();
+    const discoveriesApi = createDiscoveriesApi(apiClient);
+
+    await discoveriesApi.getAttackDiscoverySchedule({ params: { id: 'team/alice?x#y' } });
+
+    const [url] = apiClient.get.mock.calls[0];
+
+    expect(url).toBe('/internal/attack_discovery/schedules/team%2Falice%3Fx%23y');
   });
 
   it('treats the default space as no prefix', async () => {

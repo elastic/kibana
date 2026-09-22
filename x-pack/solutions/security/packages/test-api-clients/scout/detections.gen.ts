@@ -19,7 +19,7 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import { replaceParams } from '@kbn/openapi-common/shared';
+import { encodePathParams, replaceParams } from '@kbn/openapi-common/shared';
 import { stringify as stringifyQuery } from 'query-string';
 
 import type {
@@ -790,7 +790,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
       '/internal/detection_engine/rules/{ruleId}/execution/results',
-      props.params
+      encodePathParams(props.params)
     )}`;
 
     return apiClient.post<ScoutResponseBody<TResponseType, ReadRuleExecutionResultsResponse>>(
@@ -840,7 +840,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
       '/internal/detection_engine/rules/{ruleId}/history/{changeId}/_restore',
-      props.params
+      encodePathParams(props.params)
     )}`;
 
     return apiClient.post<ScoutResponseBody<TResponseType, RestoreRuleFromHistoryResponse>>(path, {
@@ -912,7 +912,7 @@ the immediately preceding revision in `old_values`.
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
       '/internal/detection_engine/rules/{ruleId}/history/_list',
-      props.params
+      encodePathParams(props.params)
     )}`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, RuleChangesHistoryResponse>>(

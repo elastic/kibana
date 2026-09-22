@@ -19,7 +19,7 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import { replaceParams } from '@kbn/openapi-common/shared';
+import { encodePathParams, replaceParams } from '@kbn/openapi-common/shared';
 import { stringify as stringifyQuery } from 'query-string';
 
 import type {
@@ -130,7 +130,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
       '/internal/attack_discovery/schedules/{id}',
-      props.params
+      encodePathParams(props.params)
     )}`;
 
     return apiClient.delete<
@@ -159,7 +159,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
       '/internal/attack_discovery/schedules/{id}/_disable',
-      props.params
+      encodePathParams(props.params)
     )}`;
 
     return apiClient.post<ScoutResponseBody<TResponseType, DisableAttackDiscoveryScheduleResponse>>(
@@ -189,7 +189,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
       '/internal/attack_discovery/schedules/{id}/_enable',
-      props.params
+      encodePathParams(props.params)
     )}`;
 
     return apiClient.post<ScoutResponseBody<TResponseType, EnableAttackDiscoveryScheduleResponse>>(
@@ -246,7 +246,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
       '/internal/attack_discovery/schedules/{id}',
-      props.params
+      encodePathParams(props.params)
     )}`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, GetAttackDiscoveryScheduleResponse>>(
@@ -320,7 +320,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
       '/internal/attack_discovery/schedules/{id}',
-      props.params
+      encodePathParams(props.params)
     )}`;
 
     return apiClient.put<ScoutResponseBody<TResponseType, UpdateAttackDiscoveryScheduleResponse>>(

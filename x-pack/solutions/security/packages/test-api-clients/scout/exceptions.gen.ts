@@ -19,7 +19,7 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import { replaceParams } from '@kbn/openapi-common/shared';
+import { encodePathParams, replaceParams } from '@kbn/openapi-common/shared';
 import { stringify as stringifyQuery } from 'query-string';
 
 import type {
@@ -178,7 +178,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
       '/api/detection_engine/rules/{id}/exceptions',
-      props.params
+      encodePathParams(props.params)
     )}`;
 
     return apiClient.post<ScoutResponseBody<TResponseType, CreateRuleExceptionListItemsResponse>>(

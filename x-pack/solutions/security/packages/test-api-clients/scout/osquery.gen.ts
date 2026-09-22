@@ -19,7 +19,7 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import { replaceParams } from '@kbn/openapi-common/shared';
+import { encodePathParams, replaceParams } from '@kbn/openapi-common/shared';
 import { stringify as stringifyQuery } from 'query-string';
 
 import type {
@@ -140,7 +140,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
       '/internal/osquery/fleet_wrapper/agents/{id}',
-      props.params
+      encodePathParams(props.params)
     )}`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, GetAgentDetailsResponse>>(path, {
@@ -198,7 +198,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
       '/internal/osquery/fleet_wrapper/agent_policies/{id}',
-      props.params
+      encodePathParams(props.params)
     )}`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, GetAgentPolicyResponse>>(path, {
@@ -243,7 +243,10 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, OsqueryCopyPacksResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
-    const path = `${basePath}${replaceParams('/api/osquery/packs/{id}/copy', props.params)}`;
+    const path = `${basePath}${replaceParams(
+      '/api/osquery/packs/{id}/copy',
+      encodePathParams(props.params)
+    )}`;
 
     return apiClient.post<ScoutResponseBody<TResponseType, OsqueryCopyPacksResponse>>(path, {
       headers: {
@@ -267,7 +270,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
       '/api/osquery/saved_queries/{id}/copy',
-      props.params
+      encodePathParams(props.params)
     )}`;
 
     return apiClient.post<ScoutResponseBody<TResponseType, OsqueryCopySavedQueryResponse>>(path, {
@@ -356,7 +359,10 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, OsqueryDeletePacksResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
-    const path = `${basePath}${replaceParams('/api/osquery/packs/{id}', props.params)}`;
+    const path = `${basePath}${replaceParams(
+      '/api/osquery/packs/{id}',
+      encodePathParams(props.params)
+    )}`;
 
     return apiClient.delete<ScoutResponseBody<TResponseType, OsqueryDeletePacksResponse>>(path, {
       headers: {
@@ -378,7 +384,10 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, OsqueryDeleteSavedQueryResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
-    const path = `${basePath}${replaceParams('/api/osquery/saved_queries/{id}', props.params)}`;
+    const path = `${basePath}${replaceParams(
+      '/api/osquery/saved_queries/{id}',
+      encodePathParams(props.params)
+    )}`;
 
     return apiClient.delete<ScoutResponseBody<TResponseType, OsqueryDeleteSavedQueryResponse>>(
       path,
@@ -408,7 +417,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
       '/api/osquery/live_queries/{id}/results/{actionId}/_export',
-      props.params
+      encodePathParams(props.params)
     )}`;
 
     return apiClient.post<ScoutResponseBody<TResponseType, OsqueryExportLiveQueryResultsResponse>>(
@@ -439,7 +448,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
       '/api/osquery/scheduled_results/{scheduleId}/{executionCount}/_export',
-      props.params
+      encodePathParams(props.params)
     )}`;
 
     return apiClient.post<
@@ -541,7 +550,10 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
-    const path = `${basePath}${replaceParams('/api/osquery/live_queries/{id}', props.params)}`;
+    const path = `${basePath}${replaceParams(
+      '/api/osquery/live_queries/{id}',
+      encodePathParams(props.params)
+    )}`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, OsqueryGetLiveQueryDetailsResponse>>(
       path,
@@ -570,7 +582,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
       '/api/osquery/live_queries/{id}/results/{actionId}',
-      props.params
+      encodePathParams(props.params)
     )}`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, OsqueryGetLiveQueryResultsResponse>>(
@@ -596,7 +608,10 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, OsqueryGetPacksDetailsResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
-    const path = `${basePath}${replaceParams('/api/osquery/packs/{id}', props.params)}`;
+    const path = `${basePath}${replaceParams(
+      '/api/osquery/packs/{id}',
+      encodePathParams(props.params)
+    )}`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, OsqueryGetPacksDetailsResponse>>(path, {
       headers: {
@@ -620,7 +635,10 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
-    const path = `${basePath}${replaceParams('/api/osquery/saved_queries/{id}', props.params)}`;
+    const path = `${basePath}${replaceParams(
+      '/api/osquery/saved_queries/{id}',
+      encodePathParams(props.params)
+    )}`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, OsqueryGetSavedQueryDetailsResponse>>(
       path,
@@ -650,7 +668,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
       '/api/osquery/scheduled_results/{scheduleId}/{executionCount}',
-      props.params
+      encodePathParams(props.params)
     )}`;
 
     return apiClient.get<
@@ -680,7 +698,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
       '/api/osquery/scheduled_results/{scheduleId}/{executionCount}/results',
-      props.params
+      encodePathParams(props.params)
     )}`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, OsqueryGetScheduledQueryResultsResponse>>(
@@ -737,7 +755,10 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, OsqueryUpdatePacksResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
-    const path = `${basePath}${replaceParams('/api/osquery/packs/{id}', props.params)}`;
+    const path = `${basePath}${replaceParams(
+      '/api/osquery/packs/{id}',
+      encodePathParams(props.params)
+    )}`;
 
     return apiClient.put<ScoutResponseBody<TResponseType, OsqueryUpdatePacksResponse>>(path, {
       headers: {
@@ -762,7 +783,10 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, OsqueryUpdateSavedQueryResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
-    const path = `${basePath}${replaceParams('/api/osquery/saved_queries/{id}', props.params)}`;
+    const path = `${basePath}${replaceParams(
+      '/api/osquery/saved_queries/{id}',
+      encodePathParams(props.params)
+    )}`;
 
     return apiClient.put<ScoutResponseBody<TResponseType, OsqueryUpdateSavedQueryResponse>>(path, {
       headers: {

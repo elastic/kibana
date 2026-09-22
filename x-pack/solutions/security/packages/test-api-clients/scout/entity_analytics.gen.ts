@@ -19,7 +19,7 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import { replaceParams } from '@kbn/openapi-common/shared';
+import { encodePathParams, replaceParams } from '@kbn/openapi-common/shared';
 import { stringify as stringifyQuery } from 'query-string';
 
 import type { AssetCriticalityGetPrivilegesResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/get_asset_criticality_privileges.gen';
@@ -265,7 +265,7 @@ is added to its existing source labels instead.
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
       '/api/entity_analytics/watchlists/{watchlist_id}/entities/assign',
-      props.params
+      encodePathParams(props.params)
     )}`;
 
     return apiClient.post<ScoutResponseBody<TResponseType, AssignWatchlistEntitiesResponse>>(path, {
@@ -501,7 +501,7 @@ Creates a new privileged user to be monitored by the Privilege Monitoring Engine
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
       '/api/entity_analytics/watchlists/{watchlist_id}/entity_source',
-      props.params
+      encodePathParams(props.params)
     )}`;
 
     return apiClient.post<ScoutResponseBody<TResponseType, CreateWatchlistEntitySourceResponse>>(
@@ -562,7 +562,7 @@ Delete an entity source configuration.
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
       '/api/entity_analytics/monitoring/entity_source/{id}',
-      props.params
+      encodePathParams(props.params)
     )}`;
 
     return apiClient.delete<ScoutResponseBody<TResponseType>>(path, {
@@ -615,7 +615,7 @@ Removes a privileged user from monitoring by their document ID.
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
       '/api/entity_analytics/monitoring/users/{id}',
-      props.params
+      encodePathParams(props.params)
     )}`;
 
     return apiClient.delete<ScoutResponseBody<TResponseType, DeletePrivMonUserResponse>>(path, {
@@ -637,7 +637,7 @@ Removes a privileged user from monitoring by their document ID.
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
       '/api/entity_analytics/watchlists/{watchlist_id}/entity_source/{id}',
-      props.params
+      encodePathParams(props.params)
     )}`;
 
     return apiClient.delete<ScoutResponseBody<TResponseType>>(path, {
@@ -793,7 +793,7 @@ Removes a privileged user from monitoring by their document ID.
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
       '/internal/entity_analytics/entities/{entity_type}/{entity_id}/anomaly_overview',
-      props.params
+      encodePathParams(props.params)
     )}`;
 
     return apiClient.post<ScoutResponseBody<TResponseType, GetAnomalyOverviewResponse>>(path, {
@@ -818,7 +818,7 @@ Removes a privileged user from monitoring by their document ID.
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
       '/internal/entity_analytics/entities/{entity_type}/{entity_id}/anomaly_summary',
-      props.params
+      encodePathParams(props.params)
     )}`;
 
     return apiClient.post<ScoutResponseBody<TResponseType, GetAnomalySummaryResponse>>(path, {
@@ -900,7 +900,7 @@ Get an entity source configuration by ID.
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
       '/api/entity_analytics/monitoring/entity_source/{id}',
-      props.params
+      encodePathParams(props.params)
     )}`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, GetEntitySourceResponse>>(path, {
@@ -998,7 +998,7 @@ Get an entity source configuration by ID.
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
       '/api/entity_analytics/watchlists/{id}',
-      props.params
+      encodePathParams(props.params)
     )}`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, GetWatchlistResponse>>(path, {
@@ -1022,7 +1022,7 @@ Get an entity source configuration by ID.
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
       '/api/entity_analytics/watchlists/{watchlist_id}/entity_source/{id}',
-      props.params
+      encodePathParams(props.params)
     )}`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, GetWatchlistEntitySourceResponse>>(path, {
@@ -1201,7 +1201,7 @@ Returns a list of all privileged users currently being monitored. Supports optio
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
       '/api/entity_analytics/watchlists/{watchlist_id}/entity_source/list',
-      props.params
+      encodePathParams(props.params)
     )}`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, ListWatchlistEntitySourcesResponse>>(
@@ -1478,7 +1478,7 @@ Search Indices for Privileges Monitoring import.
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
       '/api/entity_analytics/watchlists/{watchlist_id}/sync',
-      props.params
+      encodePathParams(props.params)
     )}`;
 
     return apiClient.post<ScoutResponseBody<TResponseType, SyncWatchlistResponse>>(path, {
@@ -1536,7 +1536,7 @@ remain on the watchlist.
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
       '/api/entity_analytics/watchlists/{watchlist_id}/entities/unassign',
-      props.params
+      encodePathParams(props.params)
     )}`;
 
     return apiClient.post<ScoutResponseBody<TResponseType, UnassignWatchlistEntitiesResponse>>(
@@ -1567,7 +1567,7 @@ Update an entity source configuration.
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
       '/api/entity_analytics/monitoring/entity_source/{id}',
-      props.params
+      encodePathParams(props.params)
     )}`;
 
     return apiClient.put<ScoutResponseBody<TResponseType, UpdateEntitySourceResponse>>(path, {
@@ -1595,7 +1595,7 @@ Updates the details of an existing monitored privileged user by their document I
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
       '/api/entity_analytics/monitoring/users/{id}',
-      props.params
+      encodePathParams(props.params)
     )}`;
 
     return apiClient.put<ScoutResponseBody<TResponseType, UpdatePrivMonUserResponse>>(path, {
@@ -1620,7 +1620,7 @@ Updates the details of an existing monitored privileged user by their document I
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
       '/api/entity_analytics/watchlists/{id}',
-      props.params
+      encodePathParams(props.params)
     )}`;
 
     return apiClient.put<ScoutResponseBody<TResponseType, UpdateWatchlistResponse>>(path, {
@@ -1644,7 +1644,7 @@ Updates the details of an existing monitored privileged user by their document I
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
       '/api/entity_analytics/watchlists/{watchlist_id}/entity_source/{id}',
-      props.params
+      encodePathParams(props.params)
     )}`;
 
     return apiClient.put<ScoutResponseBody<TResponseType, UpdateWatchlistEntitySourceResponse>>(
@@ -1707,7 +1707,7 @@ Each row will match up to 10,000 entities.
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
       '/api/entity_analytics/watchlists/{watchlist_id}/csv_upload',
-      props.params
+      encodePathParams(props.params)
     )}`;
 
     return apiClient.post<ScoutResponseBody<TResponseType, UploadWatchlistCsvResponse>>(path, {

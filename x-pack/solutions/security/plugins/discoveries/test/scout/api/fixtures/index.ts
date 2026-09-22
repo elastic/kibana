@@ -30,20 +30,24 @@ export const apiTest = mergeTests(baseApiTest, securitySolutionApiFixture).exten
 
       log.debug(`[scheduleSpace] creating space "${id}"`);
       await kbnClient.spaces.create({ id, name: id });
-      // The internal routes are gated per space by this Advanced Setting (see
-      // `isWorkflowsEnabledForSpace`), on top of the process-wide feature flag enabled in
-      // `global.setup.ts`.
-      await kbnClient.uiSettings.update(
-        { [ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING]: true },
-        {
-          space: id,
-        }
-      );
 
-      await use({ id });
+      try {
+        // The internal routes are gated per space by this Advanced Setting (see
+        // `isWorkflowsEnabledForSpace`), on top of the process-wide feature flag enabled in
+        // `global.setup.ts`.
+        await kbnClient.uiSettings.update(
+          { [ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING]: true },
+          {
+            space: id,
+          }
+        );
 
-      log.debug(`[scheduleSpace] deleting space "${id}"`);
-      await kbnClient.spaces.delete(id);
+        await use({ id });
+      } finally {
+        // Also runs when enabling the setting fails, so a broken setup never leaks the space
+        log.debug(`[scheduleSpace] deleting space "${id}"`);
+        await kbnClient.spaces.delete(id);
+      }
     },
     { scope: 'worker' },
   ],
