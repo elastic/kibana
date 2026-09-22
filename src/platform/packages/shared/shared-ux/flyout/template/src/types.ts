@@ -211,12 +211,14 @@ export type FlyoutFooterMenuPanel = Omit<
  */
 type MenuTriggerOwnedProps =
   | 'children'
+  | 'color'
   | 'fill'
   | 'iconType'
   | 'iconSide'
   | 'element'
   | 'onClick'
   | 'isSelected'
+  | 'size'
   | 'aria-haspopup'
   | 'aria-pressed'
   | 'type';
