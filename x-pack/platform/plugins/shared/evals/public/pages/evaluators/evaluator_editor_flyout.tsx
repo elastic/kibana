@@ -21,6 +21,7 @@ import {
   EuiForm,
   EuiFormErrorText,
   EuiFormRow,
+  EuiHorizontalRule,
   EuiLoadingSpinner,
   EuiPanel,
   EuiSelect,
@@ -612,6 +613,7 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
                       </EuiToolTip>
                     </EuiFlexItem>
                   </EuiFlexGroup>
+                  <EuiSpacer size="m" />
                   <EuiFormRow label={i18n.SCORE_DESCRIPTION_LABEL} fullWidth>
                     <EuiTextArea
                       value={score.description}
@@ -637,14 +639,17 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
               </React.Fragment>
             ))}
 
-            <EuiSpacer size="m" />
+            <EuiSpacer size="l" />
+            <EuiHorizontalRule margin="none" />
+            <EuiSpacer size="l" />
             <EuiTitle size="s">
               <h3>{i18n.TEST_TITLE}</h3>
             </EuiTitle>
-            <EuiText size="s">
+            <EuiSpacer size="s" />
+            <EuiText size="s" color="subdued">
               <p>{i18n.TEST_DESCRIPTION}</p>
             </EuiText>
-            <EuiSpacer size="s" />
+            <EuiSpacer size="m" />
             <ConnectorSelector
               label={i18n.CONNECTOR_LABEL}
               connectorOptions={connectorOptions}

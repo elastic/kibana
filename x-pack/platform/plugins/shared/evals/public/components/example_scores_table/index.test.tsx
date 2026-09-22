@@ -20,6 +20,7 @@ const buildScore = ({
   evaluatorMetadata,
   evaluatorTraceId,
   evaluatorModelId = 'evaluator-model-1',
+  evaluatorVersion,
   repetitionIndex,
   exampleInput,
   taskOutput,
@@ -33,6 +34,7 @@ const buildScore = ({
   evaluatorMetadata?: Record<string, unknown> | null;
   evaluatorTraceId?: string | null;
   evaluatorModelId?: string;
+  evaluatorVersion?: string;
   repetitionIndex: number;
   exampleInput?: Record<string, unknown> | null;
   taskOutput?: Record<string, unknown> | null;
@@ -63,6 +65,7 @@ const buildScore = ({
     explanation: evaluatorExplanation,
     metadata: evaluatorMetadata,
     trace_id: evaluatorTraceId,
+    version: evaluatorVersion,
     model: {
       id: evaluatorModelId,
     },
@@ -213,6 +216,52 @@ describe('ExampleScoresTable', () => {
 
       expect(screen.getAllByText('groundedness:')).toHaveLength(1);
       expect(screen.queryByText('groundedness')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('evaluator version', () => {
+    const buildVersionedExample = (
+      versions: [string, string, string]
+    ): EvaluationExperimentDatasetExample => {
+      const example = buildMixedJudgeExample();
+      return {
+        ...example,
+        scores: example.scores.map((score, index) => ({
+          ...score,
+          evaluator: { ...score.evaluator, version: versions[index] },
+        })),
+      };
+    };
+
+    it('names the definition once per evaluator, not once per sub-score', () => {
+      render(
+        <ExampleScoresTable
+          examples={[buildVersionedExample(['1.2.0', '1.2.0', '2.0.0'])]}
+          onTraceClick={jest.fn()}
+        />
+      );
+
+      // `correctness` produced two sub-scores from one definition, so it is labelled once.
+      expect(screen.getAllByText('v1.2.0')).toHaveLength(1);
+      expect(screen.getAllByText('v2.0.0')).toHaveLength(1);
+    });
+
+    it('falls back to per-score labels when an edit landed mid-run', () => {
+      render(
+        <ExampleScoresTable
+          examples={[buildVersionedExample(['1.2.0', '1.3.0', '2.0.0'])]}
+          onTraceClick={jest.fn()}
+        />
+      );
+
+      expect(screen.getByText('v1.2.0')).toBeInTheDocument();
+      expect(screen.getByText('v1.3.0')).toBeInTheDocument();
+    });
+
+    it('says nothing for scores written before the version was recorded', () => {
+      render(<ExampleScoresTable examples={[buildMixedJudgeExample()]} onTraceClick={jest.fn()} />);
+
+      expect(screen.queryByText(/^v\d/)).not.toBeInTheDocument();
     });
   });
 

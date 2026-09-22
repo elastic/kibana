@@ -32,7 +32,12 @@ interface UpdateEvaluatorVariables {
   updates: UpdateEvaluatorRequestBodyInput;
 }
 
-const retryOnServerError = (_failureCount: number, error: unknown): boolean => {
+const MAX_RETRIES = 3;
+
+const retryOnServerError = (failureCount: number, error: unknown): boolean => {
+  if (failureCount >= MAX_RETRIES) {
+    return false;
+  }
   if (isHttpFetchError(error)) {
     return !error.response?.status || error.response.status >= 500;
   }
@@ -56,18 +61,23 @@ export const useEvaluators = () => {
   });
 };
 
-export const useEvaluator = (name?: string) => {
+/** Omit `version` for the current definition, or pass one to read a point in its history. */
+export const useEvaluator = (name?: string, version?: string) => {
   const { services } = useKibana();
 
   return useQuery({
-    queryKey: queryKeys.evaluators.detail(name ?? ''),
+    queryKey: queryKeys.evaluators.detail(name ?? '', version),
     enabled: Boolean(name),
     queryFn: async (): Promise<GetEvaluatorResponse> =>
       services.http!.get<GetEvaluatorResponse>(getEvaluatorUrl(name ?? ''), {
         version: API_VERSIONS.internal.v1,
+        ...(version ? { query: { version } } : {}),
       }),
     retry: retryOnServerError,
     refetchOnWindowFocus: false,
+    // Paging through version history changes the key, and without this the cache miss
+    // unmounts the rendered definition until the next one lands.
+    keepPreviousData: true,
   });
 };
 

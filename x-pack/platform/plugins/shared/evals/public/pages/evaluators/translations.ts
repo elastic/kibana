@@ -213,11 +213,74 @@ export const REMOVE_SCORE_ARIA_LABEL = i18n.translate(
   'xpack.evals.evaluators.removeScoreAriaLabel',
   { defaultMessage: 'Remove score' }
 );
+export const DETAILS_ARIA_LABEL = (name: string) =>
+  i18n.translate('xpack.evals.evaluators.detailsAriaLabel', {
+    defaultMessage: 'View details for {name}',
+    values: { name },
+  });
+export const DETAILS_FLYOUT_TITLE = i18n.translate('xpack.evals.evaluators.detailsFlyoutTitle', {
+  defaultMessage: 'Evaluator details',
+});
+export const DETAILS_LOAD_ERROR_TITLE = i18n.translate(
+  'xpack.evals.evaluators.detailsLoadErrorTitle',
+  { defaultMessage: 'Could not load this evaluator' }
+);
+export const KIND_LABEL = i18n.translate('xpack.evals.evaluators.kindLabel', {
+  defaultMessage: 'Kind',
+});
+export const ORIGIN_LABEL = i18n.translate('xpack.evals.evaluators.originLabel', {
+  defaultMessage: 'Origin',
+});
+export const VERSION_LABEL = i18n.translate('xpack.evals.evaluators.versionLabel', {
+  defaultMessage: 'Version',
+});
+export const LAST_UPDATED_LABEL = i18n.translate('xpack.evals.evaluators.lastUpdatedLabel', {
+  defaultMessage: 'Last updated',
+});
+export const CREATED_BY_LABEL = i18n.translate('xpack.evals.evaluators.createdByLabel', {
+  defaultMessage: 'Created by',
+});
+export const VERSION_HISTORY_HELP = i18n.translate(
+  'xpack.evals.evaluators.versionHistoryHelpDescription',
+  {
+    defaultMessage:
+      'Every saved change keeps its own version. Pick one to see how it was defined. A new major version means the scores or required inputs changed, so results from earlier versions no longer compare.',
+  }
+);
+export const CURRENT_VERSION_OPTION = (version: string) =>
+  i18n.translate('xpack.evals.evaluators.currentVersionDropDownOptionLabel', {
+    defaultMessage: '{version} (current)',
+    values: { version },
+  });
+export const BUILT_IN_DETAILS_NOTE = i18n.translate(
+  'xpack.evals.evaluators.builtInDetailsNoteDescription',
+  { defaultMessage: 'Built-in evaluators are defined in code, so they have no editable prompt.' }
+);
+export const CLOSE_BUTTON = i18n.translate('xpack.evals.evaluators.closeButtonLabel', {
+  defaultMessage: 'Close',
+});
+export const EDIT_BUTTON = i18n.translate('xpack.evals.evaluators.editButtonLabel', {
+  defaultMessage: 'Edit',
+});
+export const NUMERIC_SCORE_SUMMARY = i18n.translate(
+  'xpack.evals.evaluators.numericScoreSummaryDescription',
+  { defaultMessage: 'Number from 0 to 1' }
+);
+export const CATEGORICAL_SCORE_SUMMARY = (labels: string) =>
+  i18n.translate('xpack.evals.evaluators.categoricalScoreSummaryDescription', {
+    defaultMessage: 'Categorical: {labels}',
+    values: { labels },
+  });
+export const NO_REFERENCE_DATA_KEYS = i18n.translate(
+  'xpack.evals.evaluators.noReferenceDataKeysDescription',
+  { defaultMessage: 'None' }
+);
 export const TEST_TITLE = i18n.translate('xpack.evals.evaluators.testTitle', {
   defaultMessage: 'Test before saving',
 });
 export const TEST_DESCRIPTION = i18n.translate('xpack.evals.evaluators.testDescription', {
-  defaultMessage: 'Optionally run this draft against an indexed trace. The connector is not saved.',
+  defaultMessage:
+    'Optionally run this draft against an indexed trace to see how it scores. The connector below is used only for this test run and is not saved with the evaluator.',
 });
 export const CONNECTOR_LABEL = i18n.translate('xpack.evals.evaluators.connectorLabel', {
   defaultMessage: 'Model connector',

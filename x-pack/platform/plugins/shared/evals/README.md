@@ -231,7 +231,19 @@ The plugin UI is organized into five navigation tabs:
 
 - **Experiments** — paginated listing of evaluation experiments, detail view with per-evaluator stats, and a comparison view with paired t-test results. The **New experiment** flow launches or saves workflow-based runs and streams live progress on the detail page (see [Workflow-based experiment execution](#workflow-based-experiment-execution)).
 - **Datasets** — manage evaluation datasets and examples (CRUD, JSON editor), tag and set the maturity of a dataset, and filter the listing by tag or maturity
-- **Evaluators** — a catalog of every evaluator in the space, searchable and filterable by kind (LLM judge or code) and origin (built-in or user-defined), showing each one's version and required inputs. Built-ins are read-only; user-defined judges can be created, edited, and deleted here by users holding `manage_evals`. The editor collects the judge's prompts, the trace evidence it needs, and its output scores, and can run the draft against a real trace ID before saving — the connector chosen for that test is not stored on the definition.
+- **Evaluators** — a catalog of every evaluator in the space, searchable and filterable by kind (LLM judge or code) and origin (built-in or user-defined), showing each one's version and required inputs. Selecting a name opens a read-only view of the stored definition, including the versions saved before it. Built-ins are read-only; user-defined judges can be created, edited, and deleted here by users holding `manage_evals`. The editor collects the judge's prompts, the trace evidence it needs, and its output scores, and can run the draft against a real trace ID before saving — the connector chosen for that test is not stored on the definition.
+
+#### Evaluator versions
+
+Every saved change writes a new immutable version; saving without changing anything writes nothing. The semver level is **derived from the edit rather than chosen by the author**, because a judge offers no way to verify a claim that a change was safe — a one-word rubric change can move every score.
+
+| Level | What changed | Effect on past scores |
+| --- | --- | --- |
+| `patch` | Only the catalog description, which the judge never sees | Still comparable |
+| `minor` | The judge's instructions: prompts, or the criteria attached to a score | Scores may shift, but still line up |
+| `major` | The scores themselves (added, removed, renamed, retyped, or relabelled) or the required evidence and reference data keys | Earlier runs no longer line up |
+
+A major is therefore a mechanical statement that results before and after cannot be compared, not an opinion about how large the edit was. Reordering scores or evidence is presentational and never raises the level on its own.
 - **Tracing** — browse tracing projects with metrics, drill into individual traces with a waterfall view
 - **Remotes** — configure remote Kibana instances for cross-cluster dataset management
 

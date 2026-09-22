@@ -16,6 +16,7 @@ import { queryKeys } from '../query_keys';
 import {
   useCreateEvaluator,
   useDeleteEvaluator,
+  useEvaluator,
   useEvaluators,
   useUpdateEvaluator,
 } from './use_evaluators_api';
@@ -89,5 +90,54 @@ describe('evaluator API hooks', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(queryClient.getQueryData(queryKeys.evaluators.list())).toEqual({ evaluators: [] });
+  });
+
+  it('gives up on a server error so the page can show its retry callout', async () => {
+    const { http } = setup();
+    // Retrying forever would leave the catalog loading through an outage, with its own
+    // Retry affordance never reachable.
+    http.get.mockRejectedValue(
+      Object.assign(new Error('Service Unavailable'), { response: { status: 503 } })
+    );
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retryDelay: 0 }, mutations: { retry: false } },
+    });
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <KibanaContextProvider services={{ http }}>
+        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      </KibanaContextProvider>
+    );
+
+    const { result } = renderHook(() => useEvaluators(), { wrapper });
+
+    await waitFor(() => expect(result.current.isError).toBe(true), { timeout: 5000 });
+    // The initial attempt plus MAX_RETRIES.
+    expect(listCalls(http)).toBe(4);
+  });
+
+  it('reads a past version when one is asked for', async () => {
+    const { http, wrapper } = setup();
+    http.get.mockResolvedValue({ evaluator: { name: 'quality', versions: ['1.1.0', '1.0.0'] } });
+
+    const { result } = renderHook(() => useEvaluator('quality', '1.0.0'), { wrapper });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(http.get).toHaveBeenCalledWith(
+      '/internal/evals/evaluators/quality',
+      expect.objectContaining({ query: { version: '1.0.0' } })
+    );
+  });
+
+  it('omits the version so the current definition is served', async () => {
+    const { http, wrapper } = setup();
+    http.get.mockResolvedValue({ evaluator: { name: 'quality', versions: ['1.1.0'] } });
+
+    const { result } = renderHook(() => useEvaluator('quality'), { wrapper });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(http.get).toHaveBeenCalledWith(
+      '/internal/evals/evaluators/quality',
+      expect.not.objectContaining({ query: expect.anything() })
+    );
   });
 });

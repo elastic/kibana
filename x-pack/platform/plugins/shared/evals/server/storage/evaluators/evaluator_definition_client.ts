@@ -55,6 +55,49 @@ const isSameJudge = (a: LlmJudgeConfig, b: LlmJudgeConfig): boolean => {
   return isEqual(normalize(a), normalize(b));
 };
 
+/**
+ * The part of a judge that decides whether two runs can be compared: which scores come back,
+ * on what scale, and which inputs an example has to supply. Compared as sets, so reordering
+ * is a presentational change rather than a contract change.
+ */
+const comparabilityContract = (judge: LlmJudgeConfig) => ({
+  evidence: [...judge.evidence].sort(),
+  reference_data_keys: [...(judge.reference_data_keys ?? [])].sort(),
+  scores: [...judge.output.scores]
+    .map(({ name, type, labels }) => ({
+      name,
+      type,
+      labels: [...(labels ?? [])].map(({ value, score }) => `${value}=${score}`).sort(),
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name)),
+});
+
+/**
+ * Derives the bump from what changed, so the level states a fact about the edit rather than a
+ * claim the author has to make honestly — a distinction that matters for a judge, where a
+ * one-word rubric change can move every score.
+ *
+ * - `major`: the scores or required inputs changed, so earlier runs no longer line up.
+ * - `minor`: the judge's instructions changed, so scores may shift but still compare.
+ * - `patch`: only the catalog description changed, which the judge never sees.
+ *
+ * Returns `null` when the edit says nothing new, so no version is minted.
+ */
+const getVersionBump = (
+  current: { description: string; judge: LlmJudgeConfig },
+  next: { description: string; judge: LlmJudgeConfig }
+): 'major' | 'minor' | 'patch' | null => {
+  const judgeChanged = !isSameJudge(current.judge, next.judge);
+
+  if (!judgeChanged) {
+    return current.description === next.description ? null : 'patch';
+  }
+
+  return isEqual(comparabilityContract(current.judge), comparabilityContract(next.judge))
+    ? 'minor'
+    : 'major';
+};
+
 export type EvaluatorsStorageAdapter = StorageIndexAdapter<
   typeof evaluatorsStorageSettings,
   EvaluatorStorageDocument
@@ -225,6 +268,9 @@ export class EvaluatorDefinitionClient {
    * over the latest version, so an update that only changes the description
    * carries the judge config forward unchanged. An update that changes nothing
    * returns the current version instead of writing a duplicate of it.
+   *
+   * The version level is derived from the edit rather than chosen: see
+   * `getVersionBump`.
    */
   async update(
     name: string,
@@ -246,14 +292,16 @@ export class EvaluatorDefinitionClient {
       const nextDescription = description ?? current.description;
       const nextJudge = judge ?? current.judge;
 
+      const bump = getVersionBump(current, { description: nextDescription, judge: nextJudge });
+
       // Saving without changing anything would otherwise mint a version identical to the one
       // below it, inflating a history `listVersions` caps and making `name@version` ambiguous
       // about which edit it represents.
-      if (nextDescription === current.description && isSameJudge(nextJudge, current.judge)) {
+      if (!bump) {
         return current;
       }
 
-      const nextVersion = semverInc(current.version, 'minor');
+      const nextVersion = semverInc(current.version, bump);
       if (!nextVersion) {
         throw new Error(
           `Cannot derive the next version of evaluator "${name}" from "${current.version}"`

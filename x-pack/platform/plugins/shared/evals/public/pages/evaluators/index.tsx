@@ -16,6 +16,7 @@ import {
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiPageSection,
   EuiSelect,
   EuiSpacer,
@@ -31,6 +32,7 @@ import type { NotificationsStart } from '@kbn/core/public';
 import { useDeleteEvaluator, useEvaluators } from '../../hooks/use_evaluators_api';
 import { useEvalsPermissions } from '../../hooks/use_evals_permissions';
 import { getErrorMessage } from '../../utils/get_error_message';
+import { EvaluatorDetailFlyout } from './evaluator_detail_flyout';
 import { EvaluatorEditorFlyout } from './evaluator_editor_flyout';
 import * as i18n from './translations';
 
@@ -81,6 +83,7 @@ export const EvaluatorsPage: React.FC = () => {
   const [kind, setKind] = useState<'all' | EvaluatorSummary['kind']>('all');
   const [origin, setOrigin] = useState<'all' | EvaluatorSummary['origin']>('all');
   const [editor, setEditor] = useState<EditorState | null>(null);
+  const [detailName, setDetailName] = useState<string | null>(null);
   const [pendingDelete, setPendingDelete] = useState<EvaluatorSummary | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
 
@@ -104,7 +107,20 @@ export const EvaluatorsPage: React.FC = () => {
       {
         field: 'name',
         name: i18n.COLUMN_NAME,
-        render: (name: string) => <strong>{name}</strong>,
+        // Only user-defined evaluators have a stored definition worth opening. A built-in
+        // keeps its prompt in code, so its details would repeat this row and nothing more.
+        render: (name: string, evaluator: EvaluatorSummary) =>
+          evaluator.origin === 'built_in' ? (
+            <strong>{name}</strong>
+          ) : (
+            <EuiLink
+              onClick={() => setDetailName(name)}
+              aria-label={i18n.DETAILS_ARIA_LABEL(name)}
+              data-test-subj={`evalsEvaluatorDetailLink-${name}`}
+            >
+              <strong>{name}</strong>
+            </EuiLink>
+          ),
       },
       { field: 'description', name: i18n.COLUMN_DESCRIPTION },
       {
@@ -330,6 +346,18 @@ export const EvaluatorsPage: React.FC = () => {
           mode={editor.mode}
           evaluatorName={editor.evaluatorName}
           onClose={() => setEditor(null)}
+        />
+      ) : null}
+
+      {detailName && !editor ? (
+        <EvaluatorDetailFlyout
+          evaluatorName={detailName}
+          canEdit={canManage}
+          onEdit={() => {
+            setEditor({ mode: 'edit', evaluatorName: detailName });
+            setDetailName(null);
+          }}
+          onClose={() => setDetailName(null)}
         />
       ) : null}
 

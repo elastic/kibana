@@ -121,7 +121,10 @@ export const registerValidateRoute = ({
         const coreContext = await context.core;
         const traceAccessor = createTraceAccessor({
           traceId,
-          esClient: coreContext.elasticsearch.client.asInternalUser,
+          // Reports only whether evidence is present, but that is still the caller asking
+          // about a trace, so it reads under their privileges like `_test` and
+          // `_resolve_instrumentation`.
+          esClient: coreContext.elasticsearch.client.asCurrentUser,
         });
 
         // A dry run, so it neither waits for the trace nor requires one to exist: callers use

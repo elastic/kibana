@@ -18,6 +18,22 @@ jest.mock('./evaluator_editor_flyout', () => ({
     <div data-test-subj="mockEditorFlyout">{`${mode}:${evaluatorName ?? ''}`}</div>
   ),
 }));
+jest.mock('./evaluator_detail_flyout', () => ({
+  EvaluatorDetailFlyout: ({
+    evaluatorName,
+    onEdit,
+  }: {
+    evaluatorName: string;
+    onEdit: () => void;
+  }) => (
+    <div data-test-subj="mockDetailFlyout">
+      {evaluatorName}
+      <button type="button" onClick={onEdit}>
+        {'Edit from details'}
+      </button>
+    </div>
+  ),
+}));
 
 const mockAddSuccess = jest.fn();
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
@@ -206,6 +222,32 @@ describe('EvaluatorsPage', () => {
 
     clickAction('evalsEvaluatorEdit');
     expect(screen.getByTestId('mockEditorFlyout')).toHaveTextContent('edit:tone-judge');
+  });
+
+  it('opens read-only details from the evaluator name', () => {
+    renderPage();
+
+    fireEvent.click(screen.getByTestId('evalsEvaluatorDetailLink-tone-judge'));
+
+    expect(screen.getByTestId('mockDetailFlyout')).toHaveTextContent('tone-judge');
+    expect(screen.queryByTestId('mockEditorFlyout')).not.toBeInTheDocument();
+  });
+
+  it('leaves a built-in name unlinked, since its details add nothing to the row', () => {
+    renderPage();
+
+    expect(screen.queryByTestId('evalsEvaluatorDetailLink-groundedness')).not.toBeInTheDocument();
+    expect(screen.getByText('groundedness')).toBeInTheDocument();
+  });
+
+  it('hands off from details to the editor without stacking flyouts', () => {
+    renderPage();
+
+    fireEvent.click(screen.getByTestId('evalsEvaluatorDetailLink-tone-judge'));
+    fireEvent.click(screen.getByRole('button', { name: 'Edit from details' }));
+
+    expect(screen.getByTestId('mockEditorFlyout')).toHaveTextContent('edit:tone-judge');
+    expect(screen.queryByTestId('mockDetailFlyout')).not.toBeInTheDocument();
   });
 
   it('deletes only after the confirmation is accepted', async () => {

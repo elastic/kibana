@@ -60,7 +60,10 @@ export const registerResolveInstrumentationRoute = ({ router }: RouteDependencie
         const coreContext = await context.core;
         const traceAccessor = createTraceAccessor({
           traceId,
-          esClient: coreContext.elasticsearch.client.asInternalUser,
+          // The probed evidence carries samples of the query, response and tool calls, so
+          // reading as the internal user would hand trace content to a caller who holds
+          // `manage_evals` but no Elasticsearch access to the trace.
+          esClient: coreContext.elasticsearch.client.asCurrentUser,
         });
 
         if (!(await hasTraceDocuments(traceAccessor))) {

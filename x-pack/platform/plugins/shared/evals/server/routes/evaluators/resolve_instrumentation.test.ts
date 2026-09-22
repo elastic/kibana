@@ -336,9 +336,10 @@ describe('POST /internal/evals/traces/_resolve_instrumentation', () => {
       core: Promise.resolve({
         elasticsearch: {
           client: {
-            asInternalUser: {
-              search: searchMock,
-            },
+            // The probe returns samples of the trace, so it reads under the caller's
+            // privileges. An internal-user search here would be a bug.
+            asCurrentUser: { search: searchMock },
+            asInternalUser: { search: jest.fn() },
           },
         },
       }),

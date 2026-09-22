@@ -183,9 +183,8 @@ describe('POST /internal/evals/evaluators/_validate', () => {
       core: Promise.resolve({
         elasticsearch: {
           client: {
-            asInternalUser: {
-              search: searchMock,
-            },
+            asCurrentUser: { search: searchMock },
+            asInternalUser: { search: jest.fn() },
           },
         },
       }),
