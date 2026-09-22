@@ -724,6 +724,33 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(overrideStep.condition).toBe('${{ inputs.calledByWorker == true }}');
     expect(overrideStep.steps[0].with.alert_set).toBe('${{ inputs.alerts }}');
 
+    // Worker child runs have no event.rule — derive from the supplied alert set.
+    const ruleContext = findStepByName(workflow.steps, 'set_rule_context') as {
+      with: { rule_id: string; rule_name: string };
+    };
+    expect(ruleContext.with.rule_id).toBe('{{ event.rule.id }}');
+    expect(ruleContext.with.rule_name).toBe('{{ event.rule.name }}');
+
+    const deriveRule = findStepByName(workflow.steps, 'derive_rule_context_from_alerts') as {
+      condition: string;
+      steps: Array<{ with: { rule_id: string; rule_name: string } }>;
+    };
+    expect(deriveRule.condition).toBe('${{ inputs.calledByWorker == true }}');
+    expect(deriveRule.steps[0].with.rule_id).toBe(
+      '{{ variables.alert_set[0].kibana.alert.rule.uuid }}'
+    );
+    expect(deriveRule.steps[0].with.rule_name).toBe(
+      '{{ variables.alert_set[0].kibana.alert.rule.name }}'
+    );
+
+    // Enrichment / logs must use the resolved variables, not the (missing) child event.rule.
+    const stepsWithoutRuleSource = (workflow.steps as Array<{ name: string }>).filter(
+      ({ name }) => name !== 'set_rule_context'
+    );
+    expect(JSON.stringify(stepsWithoutRuleSource)).not.toContain('event.rule.id');
+    expect(JSON.stringify(stepsWithoutRuleSource)).not.toContain('event.rule.name');
+    expect(JSON.stringify(workflow.steps)).toContain('variables.rule_id');
+
     // Every site that iterates or counts alerts must read the resolved set, or a caller's
     // alerts would be analysed in one place and ignored in another. `set_alert_set` is the
     // sole legitimate reader of the trigger event.
