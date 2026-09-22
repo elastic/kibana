@@ -39,6 +39,14 @@ const SUITES = {
       configPath: 'x-pack/smoke-tests/playwright.config.ts',
       defaultModelGroups: ['eis/anthropic-claude-4.5-haiku'],
     },
+    {
+      id: 'sandboxed',
+      name: 'Sandboxed',
+      ciLabels: ['evals:sandboxed'],
+      configPath: 'x-pack/sandboxed/playwright.config.ts',
+      serverConfigSet: 'evals_sandboxed',
+      ci: { serverConfigSet: 'evals_tracing', env: { SANDBOXED_DATASETS: 'smoke' } },
+    },
   ],
 };
 
@@ -54,6 +62,7 @@ describe('eval_pipeline', () => {
     jest.resetAllMocks();
     process.env = { ...ORIGINAL_ENV };
     delete process.env.EVAL_PREEMPTIBLE;
+    delete process.env.EVAL_SERVER_CONFIG_SET;
 
     readFileSync.mockReturnValue(JSON.stringify(SUITES));
     // Treat every suite config path as present in the git tree.
@@ -246,6 +255,23 @@ describe('eval_pipeline', () => {
       expect(yaml).not.toContain("exit_status: '-1'");
       // A single generic retry is still allowed.
       expect(yaml).toContain("exit_status: '*'");
+    });
+  });
+
+  describe('getEvalPipeline server config set', () => {
+    it('prefers the CI config set a suite declares over its local default', () => {
+      const yaml = getEvalPipeline('evals:sandboxed,models:eis/openai-gpt-5.4') as string;
+
+      expect(yaml).toContain('EVAL_SERVER_CONFIG_SET: "evals_tracing"');
+      expect(yaml).not.toContain('evals_sandboxed');
+    });
+
+    it('carries an explicit build-level override through instead of the declared defaults', () => {
+      process.env.EVAL_SERVER_CONFIG_SET = 'evals_sandboxed';
+      const yaml = getEvalPipeline('evals:sandboxed,models:eis/openai-gpt-5.4') as string;
+
+      expect(yaml).toContain('EVAL_SERVER_CONFIG_SET: "evals_sandboxed"');
+      expect(yaml).not.toContain('evals_tracing');
     });
   });
 
