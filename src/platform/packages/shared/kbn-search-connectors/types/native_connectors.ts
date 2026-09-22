@@ -1454,6 +1454,29 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: false,
       },
+      include_full_raw_message: {
+        default_value: null,
+        depends_on: [],
+        display: TOGGLE,
+        label: translate('searchConnectors.nativeConnectors.gmail.include_full_raw_message.label', {
+          defaultMessage: 'Index full raw email (including headers)',
+        }),
+        options: [],
+        order: 5,
+        required: true,
+        sensitive: false,
+        tooltip: translate(
+          'searchConnectors.nativeConnectors.gmail.include_full_raw_message.tooltip',
+          {
+            defaultMessage:
+              'When disabled (default), the email body and a small set of headers (such as Subject, From, and To) are indexed. Enable to keep the full raw message including routing and authentication headers - useful for edge cases where body extraction misses content.',
+          }
+        ),
+        type: BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: false,
+      },
       use_document_level_security: {
         default_value: null,
         depends_on: [],
@@ -1465,7 +1488,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           }
         ),
         options: [],
-        order: 5,
+        order: 6,
         required: true,
         sensitive: false,
         tooltip: translate(
@@ -3924,6 +3947,32 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         ),
         type: BOOLEAN,
         ui_restrictions: ['advanced'],
+        validations: [],
+        value: false,
+      },
+      include_full_raw_message: {
+        default_value: null,
+        depends_on: [],
+        display: TOGGLE,
+        label: translate(
+          'searchConnectors.nativeConnectors.outlook.include_full_raw_message.label',
+          {
+            defaultMessage: 'Index full raw email (including headers)',
+          }
+        ),
+        options: [],
+        order: 13,
+        required: true,
+        sensitive: false,
+        tooltip: translate(
+          'searchConnectors.nativeConnectors.outlook.include_full_raw_message.tooltip',
+          {
+            defaultMessage:
+              'When disabled (default), the email body and a small set of headers (such as Subject, From, and To) are indexed. Enable to keep the full raw message including routing and authentication headers - useful for edge cases where body extraction misses content.',
+          }
+        ),
+        type: BOOLEAN,
+        ui_restrictions: [],
         validations: [],
         value: false,
       },
