@@ -41,13 +41,31 @@ const ACTION = (over: Partial<Record<string, unknown>> = {}) => ({
 describe('listActionsTool', () => {
   it('lists all actions when called without categories', async () => {
     const list = jest.fn().mockResolvedValue({
-      actions: [ACTION(), ACTION({ workflowId: 'a2', name: 'Isolate host', category: 'contain' })],
+      actions: [
+        ACTION({
+          inputSchema: {
+            properties: {
+              actionInput: { type: 'object', properties: { name: { type: 'string' } } },
+            },
+            required: ['actionInput'],
+          },
+        }),
+        ACTION({ workflowId: 'a2', name: 'Isolate host', category: 'contain' }),
+      ],
       total: 2,
     });
     const result = await run(serviceWith(list));
     expect(list).toHaveBeenCalledWith('space-a', request, undefined);
     expect(result.results[0].type).toBe(ToolResultType.other);
-    expect(result.results[0].data).toMatchObject({ total: 2 });
+    expect(result.results[0].data).toMatchObject({
+      total: 2,
+      actions: [
+        expect.objectContaining({
+          inputSchema: expect.objectContaining({ required: ['actionInput'] }),
+        }),
+        expect.objectContaining({ workflowId: 'a2' }),
+      ],
+    });
   });
 
   it('forwards categories to the service and reports empty results explicitly', async () => {

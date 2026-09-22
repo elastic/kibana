@@ -30,7 +30,12 @@ const makeManagement = (
   };
 };
 
-const workflowItem = (id: string, actionMetadata: unknown, tags: string[] = ['action']) => ({
+const workflowItem = (
+  id: string,
+  actionMetadata: unknown,
+  tags: string[] = ['action'],
+  extraDefinition: Record<string, unknown> = {}
+) => ({
   id,
   name: id,
   description: '',
@@ -39,7 +44,7 @@ const workflowItem = (id: string, actionMetadata: unknown, tags: string[] = ['ac
   managedBy: 'alertzero',
   definition: (actionMetadata === null
     ? null
-    : { consts: { actionMetadata } }) as WorkflowListItemDto['definition'],
+    : { consts: { actionMetadata }, ...extraDefinition }) as WorkflowListItemDto['definition'],
   createdAt: '2026-01-01T00:00:00.000Z',
   tags,
   valid: true,
@@ -188,5 +193,79 @@ describe('ActionsService', () => {
     const service = new ActionsService(() => client, logger);
     const result = await service.list('default', request);
     expect(result.actions.map((a) => a.name)).toEqual(['Alpha action', 'Zeta action']);
+  });
+
+  it('projects the manual trigger inputs JSON Schema verbatim as inputSchema', async () => {
+    const inputSchema = {
+      properties: {
+        actionInput: {
+          type: 'object',
+          properties: { name: { type: 'string' }, query: { type: 'string' } },
+          required: ['name', 'query'],
+        },
+      },
+      required: ['actionInput'],
+      additionalProperties: false,
+      // x- prefixed annotations are legal JSON Schema but unknown to the
+      // workflow's zod schema, which would strip them from its parsed copy —
+      // the catalog must publish the original object, verbatim.
+      'x-es-validation': { message: 'Action input' },
+    };
+    const { client } = makeManagement([
+      page([
+        workflowItem('action-create-rule', { name: 'Create detection rule' }, ['action'], {
+          triggers: [{ type: 'manual', inputs: inputSchema }],
+        }),
+      ]),
+    ]);
+    const service = new ActionsService(() => client, logger);
+    const result = await service.list('default', request);
+    expect(result.actions[0].inputSchema).toEqual(inputSchema);
+  });
+
+  it('omits inputSchema when the definition has no manual-trigger inputs schema', async () => {
+    const { client } = makeManagement([
+      page([
+        // No triggers at all.
+        workflowItem('no-triggers', { name: 'No triggers' }),
+        // A manual trigger with no inputs.
+        workflowItem('manual-no-inputs', { name: 'Manual no inputs' }, ['action'], {
+          triggers: [{ type: 'manual' }],
+        }),
+        // A non-manual trigger carrying inputs — must not be read.
+        workflowItem('alert-trigger', { name: 'Alert trigger' }, ['action'], {
+          triggers: [{ type: 'alert', inputs: { properties: {} } }],
+        }),
+        // Schema-shaped but malformed values the manual-trigger schema rejects.
+        workflowItem('properties-array', { name: 'Properties array' }, ['action'], {
+          triggers: [{ type: 'manual', inputs: { properties: [] } }],
+        }),
+        workflowItem('properties-null', { name: 'Properties null' }, ['action'], {
+          triggers: [{ type: 'manual', inputs: { properties: null } }],
+        }),
+      ]),
+    ]);
+    const service = new ActionsService(() => client, logger);
+    const result = await service.list('default', request);
+    expect(result.actions).toEqual([
+      expect.not.objectContaining({ inputSchema: expect.anything() }),
+      expect.not.objectContaining({ inputSchema: expect.anything() }),
+      expect.not.objectContaining({ inputSchema: expect.anything() }),
+      expect.not.objectContaining({ inputSchema: expect.anything() }),
+      expect.not.objectContaining({ inputSchema: expect.anything() }),
+    ]);
+  });
+
+  it('omits inputSchema for legacy array-format trigger inputs', async () => {
+    const { client } = makeManagement([
+      page([
+        workflowItem('legacy-inputs', { name: 'Legacy inputs' }, ['action'], {
+          triggers: [{ type: 'manual', inputs: [{ name: 'actionInput', type: 'string' }] }],
+        }),
+      ]),
+    ]);
+    const service = new ActionsService(() => client, logger);
+    const result = await service.list('default', request);
+    expect(result.actions[0]).not.toHaveProperty('inputSchema');
   });
 });

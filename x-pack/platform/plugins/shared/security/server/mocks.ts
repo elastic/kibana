@@ -47,6 +47,7 @@ function createStartMock() {
     authc: lazyObject({
       apiKeys: mockAuthc.apiKeys,
       getCurrentUser: mockAuthc.getCurrentUser,
+      systemIdentity: mockAuthc.systemIdentity,
     }),
     authz: lazyObject({
       actions: mockAuthz.actions,

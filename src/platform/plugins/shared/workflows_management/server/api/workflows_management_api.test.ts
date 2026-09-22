@@ -38,6 +38,7 @@ import {
 } from './workflows_management_api';
 import type { WorkflowsService } from './workflows_management_service';
 import { WorkflowAccessControlService } from '../services/workflow_access_control';
+import { WorkflowAccessDeniedError } from '../services/workflow_access_denied_error';
 
 jest.mock('./external_resume/external_resume_service', () => ({
   ...jest.requireActual('./external_resume/external_resume_service'),
@@ -116,6 +117,7 @@ describe('WorkflowsManagementApi', () => {
         .fn()
         .mockResolvedValue({ id: 'run-1', workflowId: 'workflow-123' }),
       getWorkflowExecutions: jest.fn(),
+      getExecutionStepExecutions: jest.fn(),
       markStepAsResponded: jest.fn(),
       getWaitingStepExecutionId: jest.fn(),
       getWorkflowsExecutionEngine: () => mockWorkflowsExecutionEngine,
@@ -129,7 +131,7 @@ describe('WorkflowsManagementApi', () => {
     mockRequest = httpServerMock.createKibanaRequest();
   });
 
-  describe('workflow execution list access', () => {
+  describe('workflow execution history access', () => {
     const workflow = {
       id: 'workflow-123',
       name: 'Test workflow',
@@ -184,6 +186,19 @@ describe('WorkflowsManagementApi', () => {
           'default'
         );
         expect(core.elasticsearch.client.asInternalUser.openPointInTime).not.toHaveBeenCalled();
+
+        const stepParams = { executionId: 'run-1', page: 1, size: 50 };
+        const steps = api.getExecutionStepExecutions(stepParams, 'default', mockRequest);
+        if (allowed) {
+          await steps;
+          expect(mockWorkflowsService.getExecutionStepExecutions).toHaveBeenCalledWith(
+            stepParams,
+            'default'
+          );
+        } else {
+          await expect(steps).rejects.toBeInstanceOf(WorkflowAccessDeniedError);
+          expect(mockWorkflowsService.getExecutionStepExecutions).not.toHaveBeenCalled();
+        }
       }
     );
 

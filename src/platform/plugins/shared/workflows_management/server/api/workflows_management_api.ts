@@ -72,6 +72,7 @@ import {
   resumeWorkflowExecutionExternallyViaGet,
   resumeWorkflowExecutionExternallyWithInput,
 } from './external_resume/external_resume_service';
+import type { GetExecutionStepExecutionsResult } from './lib/get_execution_step_executions';
 import type { StepExecutionListResult } from './lib/search_step_executions';
 import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
 import { ManagedWorkflowUpdateForbiddenError } from './managed_workflow_errors';
@@ -170,6 +171,12 @@ export interface WorkflowExecutionLogsDto {
 export interface GetStepExecutionParams {
   executionId: string;
   id: string;
+}
+
+export interface GetExecutionStepExecutionsParams {
+  executionId: string;
+  page: number;
+  size: number;
 }
 
 export interface SearchStepExecutionsParams {
@@ -1078,7 +1085,12 @@ export class WorkflowsManagementApi {
   public async getWorkflowExecution(
     workflowExecutionId: string,
     spaceId: string,
-    options: { includeInput?: boolean; includeOutput?: boolean; request: KibanaRequest }
+    options: {
+      includeInput?: boolean;
+      includeOutput?: boolean;
+      omitStepExecutions?: boolean;
+      request: KibanaRequest;
+    }
   ): Promise<WorkflowExecutionDto | null> {
     const execution = await this.workflowsService.getWorkflowExecution(
       workflowExecutionId,
@@ -1120,6 +1132,15 @@ export class WorkflowsManagementApi {
       workflows.filter((_, index) => permissions[index].read).map(({ id }) => id)
     );
     return children.filter(({ workflowId }) => visibleIds.has(workflowId));
+  }
+
+  public async getExecutionStepExecutions(
+    params: GetExecutionStepExecutionsParams,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<GetExecutionStepExecutionsResult> {
+    await this.assertExecutionAccess(params.executionId, spaceId, 'read', request);
+    return this.workflowsService.getExecutionStepExecutions(params, spaceId);
   }
 
   public async getWorkflowExecutionLogs(params: {
@@ -1198,7 +1219,9 @@ export class WorkflowsManagementApi {
     operation: WorkflowAccessOperation,
     request: KibanaRequest
   ): Promise<void> {
-    const execution = await this.workflowsService.getWorkflowExecution(executionId, spaceId);
+    const execution = await this.workflowsService.getWorkflowExecution(executionId, spaceId, {
+      omitStepExecutions: true,
+    });
     if (!execution) throw new WorkflowNotFoundError(executionId);
     if (!execution.workflowId) return;
     const workflow = await this.workflowsService.getWorkflow(execution.workflowId, spaceId, {

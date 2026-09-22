@@ -30,8 +30,6 @@ import type {
   ListInvestigationItem,
   ListInvestigationsRequest,
   ListInvestigationsResponse,
-  SeverityCountsRequest,
-  SeverityCountsResponse,
   UpdateInvestigationRequest,
   StartInvestigationRequest,
   StartInvestigationResponse,
@@ -791,39 +789,5 @@ export class NightshiftInvestigationsClient {
       size: result.size,
       total: result.total,
     };
-  }
-
-  /**
-   * Severity facet counts under the given filters, for the homepage tiles.
-   *
-   * Separate from `list()` because the counts are independent of pagination and sort — bundling
-   * them would recompute an identical aggregation on every page change.
-   */
-  async getSeverityCounts({
-    statuses,
-    subject_types,
-    query,
-    concurrency_key,
-    created_after,
-    created_before,
-    started_after,
-    started_before,
-    completed_after,
-    completed_before,
-  }: SeverityCountsRequest = {}): Promise<SeverityCountsResponse> {
-    const severityCounts = await this.investigationRepository.countBySeverity({
-      statuses,
-      subjectTypes: subject_types,
-      query,
-      concurrencyKey: concurrency_key,
-      createdAfter: created_after,
-      createdBefore: created_before,
-      startedAfter: started_after,
-      startedBefore: started_before,
-      completedAfter: completed_after,
-      completedBefore: completed_before,
-    });
-
-    return { severity_counts: severityCounts };
   }
 }

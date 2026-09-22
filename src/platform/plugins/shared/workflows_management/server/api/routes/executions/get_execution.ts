@@ -9,6 +9,9 @@
 
 import path from 'path';
 import { schema } from '@kbn/config-schema';
+import { isMaximumResponseSizeExceededError } from '@kbn/es-errors';
+import { i18n } from '@kbn/i18n';
+import { WORKFLOW_EXECUTION_EMBEDDED_STEPS_MAX_COUNT } from '../../../../common';
 import type { RouteDependencies } from '../types';
 import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
@@ -50,6 +53,12 @@ export function registerGetExecutionRoute({ router, api, spaces }: RouteDependen
                 defaultValue: false,
                 meta: { description: 'Include execution output data.' },
               }),
+              omitStepExecutions: schema.boolean({
+                defaultValue: false,
+                meta: {
+                  description: `When \`true\`, omit the embedded \`stepExecutions\` array. Defaults to \`false\`. When this is \`false\`, the embed is capped at ${WORKFLOW_EXECUTION_EMBEDDED_STEPS_MAX_COUNT} steps.`,
+                },
+              }),
             }),
           },
         },
@@ -57,12 +66,13 @@ export function registerGetExecutionRoute({ router, api, spaces }: RouteDependen
       withAvailabilityCheck(async (context, request, response) => {
         try {
           const { executionId } = request.params;
-          const { includeInput, includeOutput } = request.query;
+          const { includeInput, includeOutput, omitStepExecutions } = request.query;
           const spaceId = spaces.getSpaceId(request);
           const workflowExecution = await api.getWorkflowExecution(executionId, spaceId, {
             request,
             includeInput,
             includeOutput,
+            ...(omitStepExecutions ? { omitStepExecutions: true } : {}),
           });
           if (!workflowExecution) {
             return response.notFound();
@@ -70,6 +80,20 @@ export function registerGetExecutionRoute({ router, api, spaces }: RouteDependen
           assertCanReadManagedWorkflowExecution(request, workflowExecution);
           return response.ok({ body: workflowExecution });
         } catch (error) {
+          if (isMaximumResponseSizeExceededError(error)) {
+            return response.customError({
+              statusCode: 413,
+              body: {
+                message: i18n.translate(
+                  'workflows.getWorkflowExecution.responseTooLargeErrorMessage',
+                  {
+                    defaultMessage:
+                      'This workflow execution is too large to load. Try viewing individual steps or a smaller execution.',
+                  }
+                ),
+              },
+            });
+          }
           return handleRouteError(response, error);
         }
       })

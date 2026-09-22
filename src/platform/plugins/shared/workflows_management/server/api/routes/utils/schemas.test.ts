@@ -15,13 +15,13 @@ describe.each([
   { parameter: 'workflowId', schema: workflowIdParamSchema },
 ])('$parameter route parameter', ({ parameter, schema }) => {
   it('accepts an ID at the length limit', () => {
-    const params = { [parameter]: 'a'.repeat(512) };
+    const params = { [parameter]: 'a'.repeat(255) };
     expect(schema.validate(params)).toEqual(params);
   });
 
   it('rejects an ID above the length limit', () => {
-    expect(() => schema.validate({ [parameter]: 'a'.repeat(513) })).toThrow(
-      'value has length [513] but it must have a maximum length of [512]'
+    expect(() => schema.validate({ [parameter]: 'a'.repeat(256) })).toThrow(
+      'value has length [256] but it must have a maximum length of [255]'
     );
   });
 });

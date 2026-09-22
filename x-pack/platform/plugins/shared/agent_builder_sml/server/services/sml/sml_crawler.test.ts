@@ -30,6 +30,7 @@ jest.mock('./sml_crawler_state_storage', () => {
 
 jest.mock('./sml_storage', () => ({
   smlIndexName: '.test-sml-data',
+  INGESTION_METHOD_FIELD: 'governance.provenance.updated_by.metadata.ingestion_method',
   reconcileSmlIndex: jest.fn(),
 }));
 
@@ -485,7 +486,7 @@ describe('SmlCrawlerImpl', () => {
       // findManualOriginUris returns one of the candidates as manual
       (esClient.search as jest.Mock).mockResolvedValue({
         hits: {
-          hits: [{ _source: { attributes: { origin: { uri: 'test-type://manual-origin' } } } }],
+          hits: [{ _source: { id: 'test-type:manual-origin' } }],
         },
       });
 
