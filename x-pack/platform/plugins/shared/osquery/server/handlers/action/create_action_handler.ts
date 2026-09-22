@@ -15,7 +15,11 @@ import { createDynamicQueries, replacedQueries } from './create_queries';
 import { parseAgentSelection } from '../../lib/parse_agent_groups';
 import { packSavedObjectType } from '../../../common/types';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
-import { convertSOQueriesToPack } from '../../routes/pack/utils';
+import {
+  convertSOQueriesToPack,
+  isPackQueryEnabled,
+  resolveEffectiveQueryExecution,
+} from '../../routes/pack/utils';
 import { ACTIONS_INDEX, ACTION_EXPIRATION_WEEKS, QUERY_TIMEOUT } from '../../../common/constants';
 import { TELEMETRY_EBT_LIVE_QUERY_EVENT } from '../../lib/telemetry/constants';
 import type { PackSavedObject } from '../../common/types';
@@ -118,24 +122,34 @@ export const createActionHandler = async (
     tags: [],
     space_id: options.space?.id ?? DEFAULT_SPACE_ID,
     queries: packSO
-      ? map(convertSOQueriesToPack(packSO.attributes.queries), (packQuery, packQueryId) => {
-          const replacedQuery = replacedQueries(packQuery.query, alertData);
+      ? map(
+          pickBy(convertSOQueriesToPack(packSO.attributes.queries), isPackQueryEnabled),
+          (packQuery, packQueryId) => {
+            const replacedQuery = replacedQueries(packQuery.query, alertData);
+            // Same per-query-wins / empty-or-all-OS-inherits rule as the
+            // scheduled emit. `result_type` is intentionally not applied —
+            // live-query Fleet actions do not carry snapshot/removed.
+            const { version, platform } = resolveEffectiveQueryExecution(packQuery, {
+              min_osquery_version: packSO.attributes.min_osquery_version,
+              platform: packSO.attributes.platform ?? undefined,
+            });
 
-          return pickBy(
-            {
-              action_id: uuidv4(),
-              id: packQueryId,
-              ...replacedQuery,
-              ...(error ? { error } : {}),
-              ecs_mapping: packQuery.ecs_mapping,
-              version: packQuery.version,
-              platform: packQuery.platform,
-              timeout: packQuery.timeout,
-              agents: selectedAgents,
-            },
-            (value) => !isEmpty(value) || isNumber(value)
-          );
-        })
+            return pickBy(
+              {
+                action_id: uuidv4(),
+                id: packQueryId,
+                ...replacedQuery,
+                ...(error ? { error } : {}),
+                ecs_mapping: packQuery.ecs_mapping,
+                version,
+                platform,
+                timeout: packQuery.timeout,
+                agents: selectedAgents,
+              },
+              (value) => !isEmpty(value) || isNumber(value)
+            );
+          }
+        )
       : await createDynamicQueries({
           params,
           alertData,
