@@ -58,6 +58,8 @@ export type InitTrigger =
   | { readonly type: 'contract'; readonly callerPlugin: string }
   | { readonly type: 'explicit' };
 
+type PluginSource = 'oss' | 'x-pack' | 'external';
+
 interface DeferredInitRecord {
   readonly state$: BehaviorSubject<InitState>;
   runner?: DeferredInitRunner;
@@ -82,6 +84,8 @@ interface DeferredInitRecord {
   firstTrigger?: InitTrigger;
   /** process.hrtime.bigint() captured when the plugin first transitions to 'initializing'. */
   initStartedAtNs?: bigint;
+  /** Where the plugin lives in the repo; attached at {@link DeferredInitEngine.register}. */
+  source?: PluginSource;
 }
 
 const METER_NAME = 'kibana.plugins';
@@ -139,6 +143,15 @@ const triggerAttributes = (trigger: InitTrigger | undefined): Record<string, str
       return { 'trigger.type': 'explicit', 'trigger.detail': '—' };
   }
 };
+
+const metricAttributes = (
+  pluginId: string,
+  record: DeferredInitRecord
+): Record<string, string> => ({
+  'plugin.id': pluginId,
+  'plugin.source': record.source ?? 'external',
+  ...triggerAttributes(record.firstTrigger),
+});
 
 /**
  * Per-instance engine that tracks each lazy plugin's state and runs its deferred phases on
@@ -199,8 +212,11 @@ export class DeferredInitEngine {
    * Reserve a slot for a plugin id and set its state to `idle`. Called during setup so
    * the state endpoint and `/status` can reflect the plugin before its runner is attached.
    */
-  public register(pluginId: string): void {
-    this.ensureRecord(pluginId);
+  public register(pluginId: string, source?: PluginSource): void {
+    const record = this.ensureRecord(pluginId);
+    if (source) {
+      record.source = source;
+    }
   }
 
   /**
@@ -377,13 +393,9 @@ export class DeferredInitEngine {
         record.lastFailedPhase = undefined;
         record.state$.next('available');
         const inst = getInstruments();
-        const commonAttrs = {
-          'plugin.id': pluginId,
-          ...triggerAttributes(record.firstTrigger),
-        };
         inst.timeToAvailableHistogram.record(
           Number(process.hrtime.bigint() - this.engineStartedAtNs) / 1e6,
-          commonAttrs
+          { ...metricAttributes(pluginId, record), outcome: 'available' }
         );
         this.log.info(`Lazy plugin "${pluginId}" is available; routes are now served.`);
       },
@@ -412,10 +424,7 @@ export class DeferredInitEngine {
     onPhase: (phase: DeferredInitPhase) => void
   ): Promise<void> {
     const inst = getInstruments();
-    const commonAttrs = {
-      'plugin.id': pluginId,
-      ...triggerAttributes(record.firstTrigger),
-    };
+    const commonAttrs = metricAttributes(pluginId, record);
     const startedAtNs = process.hrtime.bigint();
     let outcome: 'available' | 'failed' = 'failed';
 
@@ -423,25 +432,31 @@ export class DeferredInitEngine {
       await withActiveSpan(
         'kibana.plugin.deferred_init',
         { attributes: commonAttrs },
-        async () => {
-          if (!record.initialized) {
-            onPhase('lazyInitialize');
-            await runner.lazyInitialize();
-            record.initialized = true;
-          }
+        async (span) => {
+          try {
+            if (!record.initialized) {
+              onPhase('lazyInitialize');
+              await runner.lazyInitialize();
+              record.initialized = true;
+            }
 
-          onPhase('start');
-          // `withTimeout` is Promise.race: it does not cancel `runner.start()`. A timeout only
-          // fails this engine attempt; the plugin's start() keeps running until it settles.
-          const result = await withTimeout({
-            promise: runner.start(),
-            timeoutMs: DEFERRED_START_TIMEOUT_MS,
-          });
-          if (result.timedout) {
-            throw new Error(
-              `Start lifecycle of lazy plugin "${pluginId}" wasn't completed in ` +
-                `${DEFERRED_START_TIMEOUT_MS / 1000}sec.`
-            );
+            onPhase('start');
+            // `withTimeout` is Promise.race: it does not cancel `runner.start()`. A timeout only
+            // fails this engine attempt; the plugin's start() keeps running until it settles.
+            const result = await withTimeout({
+              promise: runner.start(),
+              timeoutMs: DEFERRED_START_TIMEOUT_MS,
+            });
+            if (result.timedout) {
+              throw new Error(
+                `Start lifecycle of lazy plugin "${pluginId}" wasn't completed in ` +
+                  `${DEFERRED_START_TIMEOUT_MS / 1000}sec.`
+              );
+            }
+            span?.setAttribute('outcome', 'available');
+          } catch (error) {
+            span?.setAttribute('outcome', 'failed');
+            throw error;
           }
         }
       );

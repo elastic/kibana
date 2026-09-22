@@ -166,6 +166,9 @@ This is the headline metric for understanding how "lazy" a plugin actually is in
 production: a plugin initialized 2 seconds after boot is effectively eager; a plugin
 initialized 3 days after boot is genuinely deferring a large chunk of startup work.
 
+**Additional attribute:** `outcome` is always `available` — this instrument is only
+emitted on the successful transition.
+
 **Questions answered:**
 - How long after deployment does each plugin actually get used for the first time?
 - Which plugins are candidates for lazy init (rarely used, long time-to-available)?
