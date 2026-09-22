@@ -520,6 +520,70 @@ describe('check_contracts', () => {
       });
     });
 
+    it('reports a report-only change on a stable API without gating on it', async () => {
+      mockParseOasdiff.mockReturnValue([
+        {
+          ...stableChange,
+          oasdiffId: 'response-property-one-of-added',
+          reason: 'added a variant to the payload oneOf',
+          reportOnly: true,
+          policyReason: 'Adding a variant to a response oneOf is additive.',
+        },
+      ]);
+      primeLoadOas(baseSpec({ '/api/x': { post: { 'x-state': 'Generally available' } } }));
+
+      await runCallback({
+        flags: { ...defaultFlags, reportPath: 'target/reports/stack-impact.json' },
+        log: mockLog,
+      });
+
+      expect(mockLog.info).toHaveBeenCalledWith(
+        '1 change(s) matched a report-only rule (informational, not blocking)'
+      );
+      expect(mockLog.success).toHaveBeenCalledWith(
+        'No breaking changes detected in stable or tech_preview APIs'
+      );
+
+      const reportCall = mockWriteFileSync.mock.calls.find(([path]) =>
+        String(path).endsWith('stack-impact.json')
+      );
+      expect(JSON.parse(reportCall![1] as string)).toEqual({
+        entries: [
+          {
+            path: '/api/x',
+            method: 'POST',
+            reason: 'added a variant to the payload oneOf',
+            oasdiffId: 'response-property-one-of-added',
+            tier: 'stable',
+            reportOnly: true,
+            policyReason: 'Adding a variant to a response oneOf is additive.',
+          },
+        ],
+      });
+    });
+
+    it('still gates on a stable change when a report-only change is present', async () => {
+      mockParseOasdiff.mockReturnValue([
+        stableChange,
+        {
+          ...techPreviewChange,
+          oasdiffId: 'response-body-one-of-added',
+          reportOnly: true,
+          policyReason: 'Additive response variant.',
+        },
+      ]);
+      primeLoadOas(
+        baseSpec({
+          '/api/x': { post: { 'x-state': 'Generally available' } },
+          '/api/tp': { post: { 'x-state': 'Technical Preview' } },
+        })
+      );
+
+      await expect(runCallback({ flags: defaultFlags, log: mockLog })).rejects.toThrow(
+        'Detected 1 breaking change(s) in stable/tech_preview APIs: 1 stable, 0 tech_preview'
+      );
+    });
+
     it('gates on stable and tech_preview while reporting experimental in a mixed run', async () => {
       mockParseOasdiff.mockReturnValue([stableChange, techPreviewChange, experimentalChange]);
       primeLoadOas(

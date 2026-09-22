@@ -8,8 +8,21 @@
  */
 
 export { loadOas } from './src/input/load_oas';
-export { runOasdiff, parseOasdiff, applyAllowlist } from './src/diff';
-export type { OasdiffEntry, BreakingChange, FilterResult } from './src/diff';
+export {
+  runOasdiff,
+  parseOasdiff,
+  applyAllowlist,
+  OASDIFF_RULE_POLICY,
+  getRulePolicy,
+  isReportOnlyRule,
+} from './src/diff';
+export type {
+  OasdiffEntry,
+  BreakingChange,
+  FilterResult,
+  RuleDisposition,
+  RulePolicyEntry,
+} from './src/diff';
 export { formatFailure } from './src/report/format_failure';
 export { ESCALATION_LINK } from './src/report/links';
 export { loadAllowlist } from './src/allowlist/load_allowlist';
