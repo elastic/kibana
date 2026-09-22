@@ -338,7 +338,40 @@ describe('AgentExecutionService', () => {
       // Allow microtasks to settle
       await new Promise((resolve) => setTimeout(resolve, 10));
 
-      expect(receivedEvents).toEqual([fakeEvent]);
+      // The request created the conversation, so its id is reported before the run's own events.
+      expect(receivedEvents).toEqual([
+        { type: ChatEventType.conversationIdSet, data: { conversation_id: expect.any(String) } },
+        fakeEvent,
+      ]);
+    });
+
+    it('does not report a conversation id for a run that continues an existing conversation', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      const eventsSubject = new Subject<ChatEvent>();
+
+      const existing = createEmptyConversation({ id: 'conversation-1', agent_id: 'agent-1' });
+      conversationClient.exists.mockResolvedValue(true);
+      conversationClient.get.mockResolvedValue(existing);
+      mockHandleAgentExecution.mockResolvedValue(eventsSubject.asObservable());
+
+      const { events$ } = await service.executeAgent({
+        mode: AgentExecutionMode.conversation,
+        request,
+        params: {
+          agentId: 'agent-1',
+          conversationId: existing.id,
+          nextInput: { message: 'hello' },
+        },
+        useTaskManager: false,
+      });
+
+      const receivedEvents: ChatEvent[] = [];
+      events$.subscribe({ next: (event) => receivedEvents.push(event) });
+
+      eventsSubject.complete();
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      expect(receivedEvents).toEqual([]);
     });
   });
 

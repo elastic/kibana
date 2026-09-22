@@ -16,6 +16,7 @@ export {
   appendResumeExecution$,
   persistExecutionInterruption,
   isPendingResumeConversation,
+  isPlaceholderUser,
   placeholderConversation,
   type ConversationWithOperation,
   type PersistExecutionInterruptionParams,

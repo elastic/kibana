@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { Observable } from 'rxjs';
-import { of, shareReplay } from 'rxjs';
+import { concat, of, shareReplay } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
@@ -240,11 +240,23 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     }
 
     const useScheduledTask = await this.shouldUseScheduledTask(request, useTaskManager);
-    if (useScheduledTask) {
-      return this.executeWithScheduledTask({ executionId, agentId, request });
-    } else {
-      return this.executeLocally({ execution, request, interactivity });
+    const result = useScheduledTask
+      ? await this.executeWithScheduledTask({ executionId, agentId, request })
+      : await this.executeLocally({ execution, request, interactivity });
+
+    // The conversation this request created is already stored, so its id is reported before the
+    // run starts — a task-manager run is only queued at this point.
+    if (
+      target?.conversation.operation === 'CREATE' &&
+      conversationParams?.storeConversation !== false
+    ) {
+      return {
+        ...result,
+        events$: concat(of(createConversationIdSetEvent(target.conversation.id)), result.events$),
+      };
     }
+
+    return result;
   }
 
   /**

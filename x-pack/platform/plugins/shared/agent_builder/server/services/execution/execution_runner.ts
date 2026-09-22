@@ -35,7 +35,6 @@ import {
   isRoundCompleteEvent,
   isRoundStartedEvent,
   isRoundInterruptedEvent,
-  isConversationCreatedEvent,
   isAgentBuilderError,
   AgentExecutionMode,
   createInternalError,
@@ -68,12 +67,12 @@ import {
   convertErrors,
   toClientError,
   isPendingResumeConversation,
+  isPlaceholderUser,
   resolveTelemetryOrigin,
   persistExecutionInterruption,
   trackExecutionInterruption,
   type ConversationWithOperation,
 } from './utils';
-import { createConversationIdSetEvent } from './utils/events';
 import type { AnalyticsService, TrackingService } from '../../telemetry';
 import { loadTracingPrivacySettings, withConverseSpan } from '../../tracing';
 import { getCurrentSpaceId } from '../../utils/spaces';
@@ -197,7 +196,7 @@ const handleConversationExecution = async ({
   // round carries none of the three. It cannot be run: nothing has been written for it and its
   // round has no id, so it fails here, before any write, and the caller sends the request again.
   if (!conversationId || !roundId || !conversationOperation) {
-    throw createInternalError('Execution predates request-node conversation resolution');
+    throw createInternalError('Execution is missing required conversation parameters');
   }
 
   const { logger, runAgent, trackingService, analyticsService, meteringService, agentService } =
@@ -243,12 +242,6 @@ const handleConversationExecution = async ({
   // being resumed: any rejection before the stream exists would leave it dangling, so the setup
   // window is guarded and its failure recorded as an interrupted execution.
   try {
-    // Emit conversation ID for new conversations (only when persisting)
-    const conversationIdEvent$ =
-      storeConversation && conversation.operation === 'CREATE'
-        ? of(createConversationIdSetEvent(conversation.id))
-        : EMPTY;
-
     // Execute agent
     const agentEvents$ = executeAgent$({
       agentId,
@@ -337,7 +330,9 @@ const handleConversationExecution = async ({
         opikHeaders,
       },
       (span) => {
-        if (author || conversation.operation !== 'CREATE') {
+        // The conversation is stored by now, so its owner is known — except for a run that does
+        // not store one, whose placeholder owner is nobody and stays unreported.
+        if (author || !isPlaceholderUser(conversation.user)) {
           setUserAttributes(span, {
             id: author?.id ?? conversation.user.id,
             username: author?.username ?? conversation.user.username,
@@ -353,13 +348,7 @@ const handleConversationExecution = async ({
             )
           : EMPTY;
 
-        return merge(
-          conversationIdEvent$,
-          agentEvents$,
-          startedEvents$,
-          persistenceEvents$,
-          titleAttr$
-        ).pipe(
+        return merge(agentEvents$, startedEvents$, persistenceEvents$, titleAttr$).pipe(
           // Graceful cancellation first, so an abort is normalised to RequestAbortedError before the
           // interruption tracker classifies the error.
           handleCancellation(abortSignal),
@@ -387,13 +376,6 @@ const handleConversationExecution = async ({
           // it from the client-facing stream so it doesn't duplicate the follow-up round's steps.
           map(stripResumeExecution),
           tap((event) => {
-            if (isConversationCreatedEvent(event) && !author) {
-              setUserAttributes(span, {
-                id: event.data.user.id,
-                username: event.data.user.username,
-              });
-            }
-
             try {
               if (isRoundCompleteEvent(event)) {
                 const isReplacingRound = event.data?.resumed === true;

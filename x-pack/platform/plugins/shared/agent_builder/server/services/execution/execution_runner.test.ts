@@ -402,7 +402,7 @@ describe('handleAgentExecution', () => {
         },
         conversationClient,
       })
-    ).rejects.toThrow('Execution predates request-node conversation resolution');
+    ).rejects.toThrow('Execution is missing required conversation parameters');
 
     // Nothing is written for a record it cannot run, so the request can simply be sent again.
     expect(conversationClient.get).not.toHaveBeenCalled();
@@ -587,7 +587,7 @@ describe('handleAgentExecution', () => {
       expect(mockSpanSetAttribute).not.toHaveBeenCalledWith(UserAttributes.UserId, 'owner-id');
     });
 
-    it('defers private CREATE identity until ConversationCreatedEvent', async () => {
+    it('reports the stored owner of a conversation this request created', async () => {
       const createdUser = { id: 'created-user-id', username: 'created_user' };
       const createdConversation = createEmptyConversation({
         id: 'new-conversation',
@@ -618,6 +618,27 @@ describe('handleAgentExecution', () => {
       expect(mockSpanSetAttribute).not.toHaveBeenCalledWith(UserAttributes.UserName, 'unknown');
       expect(mockSpanSetAttribute).toHaveBeenCalledWith(UserAttributes.UserId, 'created-user-id');
       expect(mockSpanSetAttribute).toHaveBeenCalledWith(UserAttributes.UserName, 'created_user');
+    });
+
+    it('reports no identity for a run whose conversation is never stored', async () => {
+      const conversationClient = createConversationClientMock();
+      mockAgentStream([makeRoundStartedEvent(), makeRoundCompleteEvent()]);
+      stubResolveServices(conversationClient);
+
+      const events$ = await runHandle({
+        agentParams: {
+          agentId: 'test-agent',
+          nextInput: { message: 'Hello' },
+          storeConversation: false,
+        },
+        conversationClient,
+      });
+
+      await lastValueFrom(events$.pipe(toArray()));
+
+      // The placeholder owner is nobody, and no write will ever resolve one.
+      expect(mockSpanSetAttribute).not.toHaveBeenCalledWith(UserAttributes.UserId, 'unknown');
+      expect(mockSpanSetAttribute).not.toHaveBeenCalledWith(UserAttributes.UserName, 'unknown');
     });
   });
 
