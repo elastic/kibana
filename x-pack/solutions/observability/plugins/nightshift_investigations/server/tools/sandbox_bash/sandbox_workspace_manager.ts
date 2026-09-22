@@ -22,11 +22,13 @@ import { writeElasticManifest } from './elastic_manifest';
 export const createSandboxWorkspaceManager = ({
   getDeps,
   telemetryConnectorId,
+  telemetryReadableIndices,
   logger,
 }: {
   getDeps: () => { actions?: ActionsPluginStart };
   /** When set, `/workspace/elastic.md` is (re-)seeded alongside the connector manifest. */
   telemetryConnectorId?: string;
+  telemetryReadableIndices?: string;
   logger: Logger;
 }) => {
   const lastConnectorIds = new Map<SandboxSession, string>();
@@ -51,17 +53,18 @@ export const createSandboxWorkspaceManager = ({
 
       try {
         await writeConnectorManifest({ session, callContext, getActionsClient, logger });
+        if (telemetryConnectorId) {
+          await writeElasticManifest({
+            session,
+            connectorId: telemetryConnectorId,
+            readableIndices: telemetryReadableIndices,
+            logger,
+          });
+        }
         lastConnectorIds.set(session, currentKey);
       } catch (err) {
-        logger.warn(`Connector manifest write failed: ${(err as Error).message}`);
-      }
-
-      if (telemetryConnectorId) {
-        try {
-          await writeElasticManifest({ session, connectorId: telemetryConnectorId, logger });
-        } catch (err) {
-          logger.warn(`Elastic manifest write failed: ${(err as Error).message}`);
-        }
+        lastConnectorIds.delete(session);
+        logger.warn(`Sandbox manifest write failed: ${(err as Error).message}`);
       }
     },
   };

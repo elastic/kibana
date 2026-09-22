@@ -26,6 +26,19 @@ describe('renderElasticManifest', () => {
     expect(content).toContain('"$CONNECTOR_CONFIG_URL/_remote/info"');
     expect(content).toContain('"$CONNECTOR_CONFIG_URL/_query"');
   });
+
+  it('uses operator-supplied remote index guidance and bounds telemetry queries', () => {
+    const content = renderElasticManifest('remote-telemetry', {
+      readableIndices: 'Read `logging-region:logs-service-*`; no local telemetry is available.',
+    });
+
+    expect(content).toContain('Read `logging-region:logs-service-*`');
+    expect(content).not.toContain('FROM *:logs-*');
+    expect(content).toContain('--max-time 120');
+    expect(content).toContain('@timestamp');
+    expect(content).toContain('Name each remote explicitly');
+    expect(content).toContain('never use wildcard remote names');
+  });
 });
 
 describe('writeElasticManifest', () => {

@@ -198,6 +198,25 @@ describe('createSandboxWorkspaceManager', () => {
       );
     });
 
+    it('passes the configured readable indices to the telemetry manifest', async () => {
+      const session = createSessionMock(false);
+      const configuredManager = createSandboxWorkspaceManager({
+        getDeps: () => ({}),
+        telemetryConnectorId: 'elasticsearch-telemetry',
+        telemetryReadableIndices: 'Read remote-a:logs-service-*',
+        logger,
+      });
+
+      await configuredManager.ensureWorkspaceReady({
+        session,
+        callContext: createCallContext(['elasticsearch-telemetry']),
+      });
+
+      expect(mockWriteElasticManifest).toHaveBeenCalledWith(
+        expect.objectContaining({ readableIndices: 'Read remote-a:logs-service-*' })
+      );
+    });
+
     it('does not write elastic manifest when telemetryConnectorId is not set', async () => {
       const session = createSessionMock(true);
       await manager.ensureWorkspaceReady({
@@ -220,6 +239,23 @@ describe('createSandboxWorkspaceManager', () => {
       ).resolves.toBeUndefined();
 
       expect(loggingSystemMock.collect(logger).warn).toHaveLength(1);
+    });
+
+    it('retries the telemetry manifest after a failed refresh on an initialized session', async () => {
+      const { session, setIsReset } = createMutableSessionMock();
+      const callContext = createCallContext(['elasticsearch-telemetry']);
+      await managerWithTelemetry.ensureWorkspaceReady({ session, callContext });
+
+      setIsReset(true);
+      mockWriteElasticManifest.mockRejectedValueOnce(new Error('write failed'));
+      await managerWithTelemetry.ensureWorkspaceReady({ session, callContext });
+      mockWriteElasticManifest.mockClear();
+
+      // A later command can succeed on the pod even though the telemetry file was never written.
+      setIsReset(false);
+      await managerWithTelemetry.ensureWorkspaceReady({ session, callContext });
+
+      expect(mockWriteElasticManifest).toHaveBeenCalledTimes(1);
     });
   });
 });

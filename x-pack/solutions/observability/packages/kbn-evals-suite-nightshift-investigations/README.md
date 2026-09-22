@@ -136,6 +136,56 @@ is a separate follow-up. Use `evals run` to repeat a run with unchanged startup 
 `start` and CI keep the original smoke selection and `evals_tracing` behavior, without requiring
 sandbox credentials.
 
+## Remote telemetry investigations
+
+Use the same `trace-only` selection, file loader, investigation task, placeholder evaluator and
+trace acceptance checks to investigate an operator-configured Elasticsearch cluster. The telemetry
+source is independent of the evaluations profile: the sandbox queries the remote cluster, while
+the profile still selects where experiment results and agent traces are persisted.
+
+Configure a dedicated API key restricted to `read` and `view_index_metadata` on the telemetry
+patterns the example needs, with only the cluster privileges required for discovery. For
+cross-cluster search, verify that the key can read the intended remote and index pattern. Keep
+endpoints, keys, readable-index hints and customer examples in private, uncommitted files.
+
+| Variable | Purpose |
+| --- | --- |
+| `NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL` | Remote Elasticsearch endpoint. Requires the API key below. |
+| `NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY` | Encoded restricted API key, without the `ApiKey` prefix. Requires the URL above. |
+| `NIGHTSHIFT_SANDBOX_READABLE_INDICES` | Optional manifest guidance naming readable index patterns and explicit remote names (up to 10,000 characters). |
+| `NIGHTSHIFT_EXAMPLES_FILE` | The same file format documented above; only questions and stable case IDs are required. |
+
+With those variables and the external sandbox's mTLS settings configured:
+
+```bash
+node scripts/evals stop
+NIGHTSHIFT_DATASETS=trace-only NIGHTSHIFT_EXAMPLES_FILE=/private/path/examples.json \
+  node scripts/evals start --suite nightshift-investigations --profile golden \
+  --model openrouter-anthropic-claude-sonnet-4-6 --judge openrouter-anthropic-claude-sonnet-4-6
+```
+
+The runtime config creates the preconfigured `nightshift-evals-telemetry` webhook with a secret
+`Authorization` header. The existing credential resolver authorizes connector access and execution,
+checks the agent's allow-list, and exposes the API key only to the requesting sandbox command.
+Credentials remain in the owner-only temporary config, alongside the existing mTLS configuration.
+`/workspace/elastic.md` contains variable names and query guidance, never credential values. Its
+examples bound requests by time and advise using explicit remote names and narrow index patterns.
+These are instructions for the agent; the API key's privileges enforce the read restrictions.
+
+Choose an example whose required telemetry is still retained and verify a bounded query with the
+restricted key first. For connectivity acceptance, inspect the persisted agent trace's command and
+actual Elasticsearch response: confirm it queried the configured endpoint through the telemetry
+connector and returned data from the intended remote/index and time range without query or remote
+failures. Record the tested commit, experiment and trace links, plus sanitized query evidence. A
+`connector_id`, exit code zero, completed investigation or placeholder score alone does not prove
+connectivity. This workflow remains ungraded and requires no reference answer or quality threshold.
+
+Restart the managed stack after changing any `NIGHTSHIFT_SANDBOX_*` setting as well as the sandbox
+settings described above. Leave the remote settings unset for the bundled synthetic examples;
+synthetic execution continues to need no telemetry connector. The former `remote` selection and
+`NIGHTSHIFT_REMOTE_EXAMPLES_FILE` are replaced by this shared file workflow. Grading, snapshot
+provisioning and micro-evals are separate follow-ups.
+
 ## Two kinds of dataset
 
 The word "dataset" means two different things in evals, and this suite keeps them apart deliberately. It is worth reading once.

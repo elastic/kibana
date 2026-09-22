@@ -35,8 +35,18 @@ const createInvestigationConfig = (): ScoutServerConfig => {
   const exporters: Array<{ http?: { url: string; headers?: Record<string, string> } }> = exporterArg
     ? JSON.parse(exporterArg.slice(exporterPrefix.length))
     : [];
+  const telemetryUrl = process.env.NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL?.trim();
+  const telemetryApiKey = process.env.NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY?.trim();
+  const readableIndices = process.env.NIGHTSHIFT_SANDBOX_READABLE_INDICES;
+  if ((telemetryUrl || telemetryApiKey || readableIndices) && !(telemetryUrl && telemetryApiKey)) {
+    throw new Error(
+      'Remote telemetry requires both NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL and NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY'
+    );
+  }
+  const connectorPrefix = '--xpack.actions.preconfigured=';
+  const connectorArg = parentArgs.find((arg) => arg.startsWith(connectorPrefix));
 
-  // Keep sandbox and trace-exporter credentials out of process arguments and logs.
+  // Keep sandbox, telemetry and trace-exporter credentials out of process arguments and logs.
   const configDirectory = mkdtempSync(join(tmpdir(), 'nightshift-evals-'));
   const removeConfigDirectory = () => rmSync(configDirectory, { recursive: true, force: true });
   process.once('exit', removeConfigDirectory);
@@ -51,6 +61,23 @@ const createInvestigationConfig = (): ScoutServerConfig => {
   }
   const sandboxConfig = {
     ...(exporterArg ? { 'telemetry.tracing.exporters': exporters } : {}),
+    ...(telemetryUrl && telemetryApiKey
+      ? {
+          'xpack.actions.preconfigured': {
+            ...(connectorArg ? JSON.parse(connectorArg.slice(connectorPrefix.length)) : {}),
+            'nightshift-evals-telemetry': {
+              name: 'Remote Elasticsearch telemetry',
+              actionTypeId: '.webhook',
+              config: { url: telemetryUrl, method: 'post', hasAuth: false, authType: null },
+              secrets: { secretHeaders: { Authorization: `ApiKey ${telemetryApiKey}` } },
+            },
+          },
+          'xpack.nightshift_investigations.sandbox': {
+            telemetry_connector_id: 'nightshift-evals-telemetry',
+            ...(readableIndices ? { telemetry_readable_indices: readableIndices } : {}),
+          },
+        }
+      : {}),
     'xpack.sandbox': {
       enabled: true,
       host: process.env.SANDBOX_API_HOST ?? 'localhost',
@@ -71,7 +98,11 @@ const createInvestigationConfig = (): ScoutServerConfig => {
     kbnTestServer: {
       ...tracing.kbnTestServer,
       serverArgs: [
-        ...parentArgs.filter((arg) => !arg.startsWith(exporterPrefix)),
+        ...parentArgs.filter(
+          (arg) =>
+            !arg.startsWith(exporterPrefix) &&
+            !(telemetryUrl && telemetryApiKey && arg.startsWith(connectorPrefix))
+        ),
         '--xpack.nightshift_investigations.enabled=true',
         '--feature_flags.overrides.streams.significantEventsAvailable=true',
         '--xpack.nightshift_investigations.cortex.enabled=false',
