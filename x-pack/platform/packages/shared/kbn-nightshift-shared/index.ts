@@ -7,6 +7,9 @@
 
 export const NIGHTSHIFT_FEATURE_ID = 'nightshift';
 
+/** Saved object type registered by `nightshiftSources` and granted by the Nightshift feature. */
+export const NIGHTSHIFT_SOURCE_SO_TYPE = 'nightshift-source';
+
 export const NIGHTSHIFT_MANAGE_ENGINES_SUB_FEATURE_ID = 'manage-engines';
 
 /** HTTP `security.authz.requiredPrivileges` tags registered on the Nightshift feature. */
@@ -38,3 +41,39 @@ export function getNightshiftCapabilities(
     canConfigure: nightshift?.[NIGHTSHIFT_UI_PRIVILEGES.configure] === true,
   };
 }
+
+export {
+  MAX_SOURCE_SLUG_LENGTH,
+  MAX_SOURCE_SPACE_ID_LENGTH,
+  MAX_SOURCE_VIEW_NAME_LENGTH,
+  NIGHTSHIFT_SOURCE_VIEW_PREFIX,
+  getNightshiftSourceViewName,
+  getSourceSlugCandidate,
+  getSourceSlugFromTitle,
+} from './src/sources/view_name';
+
+export {
+  MAX_SOURCE_DESCRIPTION_LENGTH,
+  MAX_SOURCE_ESQL_LENGTH,
+  MAX_SOURCE_TAG_LENGTH,
+  MAX_SOURCE_TAGS,
+  MAX_SOURCE_TITLE_LENGTH,
+  createSourceRequestSchema,
+  listSourcesQuerySchema,
+  updateSourceRequestSchema,
+  type CreateSourceRequest,
+  type DeleteSourceResponse,
+  type ListSourcesResponse,
+  type NightshiftSource,
+  type SourceHealth,
+  type SourceInput,
+  type SourceMutationResponse,
+  type SourceWithHealth,
+  type UpdateSourceRequest,
+} from './src/sources/schema';
+
+export {
+  getSourceCommandQuery,
+  hasMultipleSourceIndices,
+  validateSourceQuery,
+} from './src/sources/validate_source_query';
