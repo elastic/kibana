@@ -85,8 +85,7 @@ const emptyAiIndex = (destValue: string, traces: AiIndexTrace[] = []) => ({
   traces,
 });
 
-// Failing: See https://github.com/elastic/kibana/issues/291053
-apiTest.describe.skip('context engine AI indices API', { tag: tags.stateful.classic }, () => {
+apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }, () => {
   let adminApiCredentials: RoleApiCredentials;
   let viewerApiCredentials: RoleApiCredentials;
 
