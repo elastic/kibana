@@ -8,8 +8,8 @@
 import type { NewPackagePolicyInput, PackagePolicyConfigRecord } from '../../../common/types';
 
 // Two names are in use in AWS packages: the CSPM/Asset-Discovery form (`aws.role_arn`) and the
-// direct form (`role_arn`). Both appear at input-level and stream-level. Rewriting only the keys
-// that already exist keeps this a safe operation on any policy.
+// direct form (`role_arn`). Both appear at package-policy level, input level, and stream level.
+// Rewriting only the keys that already exist keeps this a safe operation on any policy.
 const ROLE_ARN_KEYS = ['role_arn', 'aws.role_arn'] as const;
 
 const rewriteVars = (
@@ -29,20 +29,10 @@ const rewriteVars = (
   return { vars: changed && next ? next : vars, changed };
 };
 
-export interface UpdateInputsWithRoleArnResult<T> {
-  updated: T[];
-  changed: boolean;
-}
-
-/**
- * Rewrite every `role_arn` / `aws.role_arn` occurrence in a package policy's `inputs` (input-
- * level and per-stream) to `newValue`. Returns the original inputs and `changed: false` if
- * nothing needed to change; otherwise returns a fresh array (structural sharing where safe).
- */
-export const updateInputsWithRoleArn = <T extends NewPackagePolicyInput>(
+const rewriteInputs = <T extends NewPackagePolicyInput>(
   inputs: T[],
   newValue: string
-): UpdateInputsWithRoleArnResult<T> => {
+): { inputs: T[]; changed: boolean } => {
   let changed = false;
   const updated = inputs.map((input) => {
     const inputVarsResult = rewriteVars(input.vars, newValue);
@@ -62,5 +52,39 @@ export const updateInputsWithRoleArn = <T extends NewPackagePolicyInput>(
       ...(streamsChanged ? { streams } : {}),
     };
   });
-  return changed ? { updated, changed } : { updated: inputs, changed };
+  return changed ? { inputs: updated, changed } : { inputs, changed };
+};
+
+export interface RewritePolicyRoleArnPolicy {
+  vars?: PackagePolicyConfigRecord;
+  inputs: NewPackagePolicyInput[];
+}
+
+export interface RewritePolicyRoleArnResult<T extends RewritePolicyRoleArnPolicy> {
+  vars: T['vars'];
+  inputs: T['inputs'];
+  changed: boolean;
+}
+
+/**
+ * Rewrite every `role_arn` / `aws.role_arn` occurrence in a package policy to `newValue`. Covers
+ * three shapes seen across AWS-family packages:
+ *  - top-level `packagePolicy.vars` (shared package vars — used by the `aws` package)
+ *  - `input.vars` (input-level — used by CSPM / Asset-Discovery)
+ *  - `stream.vars` (per-stream)
+ *
+ * Returns `changed: false` and the original refs when nothing needed to change; otherwise returns
+ * fresh objects for the paths that changed (structural sharing everywhere else).
+ */
+export const rewritePolicyRoleArn = <T extends RewritePolicyRoleArnPolicy>(
+  policy: T,
+  newValue: string
+): RewritePolicyRoleArnResult<T> => {
+  const varsResult = rewriteVars(policy.vars, newValue);
+  const inputsResult = rewriteInputs(policy.inputs, newValue);
+  return {
+    vars: (varsResult.changed ? varsResult.vars : policy.vars) as T['vars'],
+    inputs: (inputsResult.changed ? inputsResult.inputs : policy.inputs) as T['inputs'],
+    changed: varsResult.changed || inputsResult.changed,
+  };
 };

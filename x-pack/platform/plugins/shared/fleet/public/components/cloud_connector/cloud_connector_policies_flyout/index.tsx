@@ -116,10 +116,12 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
   const [editedIacDeploymentId, setEditedIacDeploymentId] = useState(iacDeploymentId ?? '');
   const existingRoleArn = useMemo(() => {
     if (isAwsCloudConnectorVars(cloudConnectorVars, provider)) {
-      return String(cloudConnectorVars.role_arn?.value ?? '');
+      return String(cloudConnectorVars.role_arn?.value ?? '').trim();
     }
     return '';
   }, [cloudConnectorVars, provider]);
+  // `editedRoleArn` stays trimmed because `RoleArnField` trims on input; seed the initial state
+  // trimmed as well so the first render's "changed" check compares like against like.
   const [editedRoleArn, setEditedRoleArn] = useState(existingRoleArn);
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -134,21 +136,16 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
   // Clearing the field is not a way to remove the role: RoleArnField says so and Save blocks on
   // it, rather than dropping the empty value from the payload and discarding the edit in silence.
   const roleArnCleared = isIamRoleArnCleared(editedRoleArn, existingRoleArn);
-  const trimmedEditedRoleArn = editedRoleArn.trim();
-  const roleArnChanged = trimmedEditedRoleArn !== existingRoleArn.trim();
+  const roleArnChanged = editedRoleArn !== existingRoleArn;
   const roleArnToSave =
-    provider === AWS_PROVIDER && !roleArnInvalid && roleArnChanged && trimmedEditedRoleArn !== ''
-      ? trimmedEditedRoleArn
-      : undefined;
+    isAws && !roleArnInvalid && roleArnChanged && editedRoleArn !== '' ? editedRoleArn : undefined;
   // The API replaces `vars` wholesale (the package-policy save path depends on that), so the
   // edited ARN has to travel with the connector's other vars. Dropping `external_id` here would
   // orphan its secret in `.fleet-secrets` and leave every later read without an external ID.
-  const varsToSave = useMemo<AwsCloudConnectorVars | undefined>(() => {
-    if (roleArnToSave === undefined || !isAwsCloudConnectorVars(cloudConnectorVars, provider)) {
-      return undefined;
-    }
-    return { ...cloudConnectorVars, role_arn: { type: 'text', value: roleArnToSave } };
-  }, [cloudConnectorVars, provider, roleArnToSave]);
+  const varsToSave: AwsCloudConnectorVars | undefined =
+    roleArnToSave !== undefined && isAwsCloudConnectorVars(cloudConnectorVars, provider)
+      ? { ...cloudConnectorVars, role_arn: { type: 'text', value: roleArnToSave } }
+      : undefined;
 
   // IacTemplateDetails trims on input, so the value judged here is the value that gets saved.
   const deploymentIdInvalid = isStackArnInvalid(editedIacDeploymentId);

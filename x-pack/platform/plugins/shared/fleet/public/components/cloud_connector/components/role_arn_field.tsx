@@ -63,7 +63,8 @@ export const RoleArnField: React.FC<RoleArnFieldProps> = ({
     : isCleared
     ? CLEARED_IAM_ROLE_ARN_MESSAGE
     : undefined;
-  const isEdited = storedValue !== undefined && value.trim() !== storedValue.trim();
+  // `value` is already trimmed by the input handler below, matching IacTemplateDetails.
+  const isEdited = storedValue !== undefined && value !== storedValue.trim();
   const showCallout = isEdited && errorMessage === undefined;
 
   return (
@@ -82,7 +83,7 @@ export const RoleArnField: React.FC<RoleArnFieldProps> = ({
         <EuiFieldText
           data-test-subj={ROLE_ARN_FIELD_TEST_SUBJECTS.INPUT}
           value={value}
-          onChange={(event) => onChange(event.target.value)}
+          onChange={(event) => onChange(event.target.value.trim())}
           isInvalid={errorMessage !== undefined}
           fullWidth
         />

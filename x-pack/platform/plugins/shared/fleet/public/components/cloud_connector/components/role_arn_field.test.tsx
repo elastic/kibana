@@ -28,7 +28,7 @@ describe('RoleArnField', () => {
     );
   });
 
-  it('reports edits via onChange with the raw value', () => {
+  it('trims the value on input so callers get the ARN they will save', () => {
     const onChange = jest.fn();
     renderWithI18n(
       <RoleArnField
@@ -40,7 +40,7 @@ describe('RoleArnField', () => {
     fireEvent.change(screen.getByTestId(ROLE_ARN_FIELD_TEST_SUBJECTS.INPUT), {
       target: { value: '  arn:aws:iam::123456789012:role/New  ' },
     });
-    expect(onChange).toHaveBeenLastCalledWith('  arn:aws:iam::123456789012:role/New  ');
+    expect(onChange).toHaveBeenLastCalledWith('arn:aws:iam::123456789012:role/New');
   });
 
   it('shows the inline error text for an invalid value', () => {

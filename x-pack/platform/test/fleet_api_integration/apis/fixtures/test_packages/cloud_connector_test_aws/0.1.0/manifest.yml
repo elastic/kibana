@@ -16,6 +16,16 @@ icons:
     title: Sample logo
     size: 32x32
     type: image/svg+xml
+# Top-level package vars: this is the shape the real `aws` integration uses — a single shared
+# `role_arn` referenced by every input/stream via handlebars. The fan-out has to rewrite here.
+vars:
+  - name: role_arn
+    type: text
+    title: Role ARN
+    multi: false
+    required: true
+    show_user: true
+    description: The AWS IAM role ARN assumed by every integration in this policy
 policy_templates:
   - name: aws
     title: AWS role ARN test

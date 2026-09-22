@@ -17,7 +17,7 @@ import { propagateRoleArnToPackagePolicies } from './role_arn_propagation';
 
 jest.mock('../package_policy', () => ({
   packagePolicyService: {
-    list: jest.fn(),
+    fetchAllItems: jest.fn(),
     update: jest.fn(),
   },
   toPackagePolicyUpdate: (policy: {
@@ -81,6 +81,16 @@ const makePolicy = (id: string, roleArn = OLD_ARN, spaceIds = ['default']) => ({
   ],
 });
 
+// Mirror `packagePolicyService.fetchAllItems`: a Promise resolving to an async iterable of pages.
+// Tests care about the collected items, not the page boundary, so one page is enough.
+const mockListReturns = (items: unknown[]) => {
+  (packagePolicyService.fetchAllItems as jest.Mock).mockResolvedValue({
+    async *[Symbol.asyncIterator]() {
+      yield items;
+    },
+  });
+};
+
 describe('propagateRoleArnToPackagePolicies', () => {
   const soClient = savedObjectsClientMock.create();
   const spacelessSoClient = savedObjectsClientMock.create();
@@ -95,12 +105,7 @@ describe('propagateRoleArnToPackagePolicies', () => {
   });
 
   it('updates every referencing package policy with the new ARN', async () => {
-    (packagePolicyService.list as jest.Mock).mockResolvedValue({
-      items: [makePolicy('a'), makePolicy('b')],
-      total: 2,
-      page: 1,
-      perPage: 10000,
-    });
+    mockListReturns([makePolicy('a'), makePolicy('b')]);
     (packagePolicyService.update as jest.Mock).mockResolvedValue({});
 
     await propagateRoleArnToPackagePolicies({
@@ -120,13 +125,40 @@ describe('propagateRoleArnToPackagePolicies', () => {
     }
   });
 
-  it('reads package policies from every space', async () => {
-    (packagePolicyService.list as jest.Mock).mockResolvedValue({
-      items: [],
-      total: 0,
-      page: 1,
-      perPage: 10000,
-    });
+  it('rewrites role_arn at top-level packagePolicy.vars (AWS-package shape)', async () => {
+    // The `aws` integration stores the ARN once on the package policy's top-level `vars` and
+    // every input/stream references it via a handlebars template at compile time. If the fan-out
+    // only walked input/stream vars (as it did initially) every AWS-integration policy would go
+    // stale — the bug caught in issue 9666 / PR 292515.
+    const awsPolicy = {
+      id: 'aws-1',
+      name: 'aws-1',
+      policy_ids: ['agent-aws'],
+      namespace: 'default',
+      spaceIds: ['default'],
+      enabled: true,
+      package: { name: 'aws', title: 'AWS', version: '8.4.0' },
+      vars: {
+        role_arn: { type: 'text', value: OLD_ARN },
+        default_region: { type: 'text', value: 'us-east-2' },
+      },
+      cloud_connector_id: CONNECTOR_ID,
+      inputs: [
+        {
+          type: 'aws/metrics',
+          enabled: true,
+          streams: [
+            {
+              enabled: true,
+              data_stream: { type: 'metrics', dataset: 'aws.ec2' },
+              vars: { period: { type: 'text', value: '5m' } },
+            },
+          ],
+        },
+      ],
+    };
+    mockListReturns([awsPolicy]);
+    (packagePolicyService.update as jest.Mock).mockResolvedValue({});
 
     await propagateRoleArnToPackagePolicies({
       esClient,
@@ -134,24 +166,41 @@ describe('propagateRoleArnToPackagePolicies', () => {
       newRoleArn: NEW_ARN,
     });
 
-    const [listSoClient, listOptions] = (packagePolicyService.list as jest.Mock).mock.calls[0];
+    expect(packagePolicyService.update).toHaveBeenCalledTimes(1);
+    const update = (packagePolicyService.update as jest.Mock).mock.calls[0][3];
+    expect(update.vars.role_arn.value).toBe(NEW_ARN);
+    // Unrelated shared vars must be preserved because the SO write replaces `vars` wholesale.
+    expect(update.vars.default_region.value).toBe('us-east-2');
+    // Inputs untouched: the top-level rewrite alone should be enough.
+    expect(update.inputs).toEqual(awsPolicy.inputs);
+  });
+
+  it('reads package policies from every space', async () => {
+    mockListReturns([]);
+
+    await propagateRoleArnToPackagePolicies({
+      esClient,
+      connectorId: CONNECTOR_ID,
+      newRoleArn: NEW_ARN,
+    });
+
+    const [listSoClient, listOptions] = (packagePolicyService.fetchAllItems as jest.Mock).mock
+      .calls[0];
     // The route's client is scoped to the caller's space; a connector is shared across spaces.
     expect(listSoClient).toBe(spacelessSoClient);
     expect(listOptions).toEqual(
       expect.objectContaining({
-        spaceId: '*',
+        spaceIds: ['*'],
         kuery: `fleet-package-policies.attributes.cloud_connector_id:"${CONNECTOR_ID}"`,
       })
     );
   });
 
   it('updates policies in other spaces through their own space client', async () => {
-    (packagePolicyService.list as jest.Mock).mockResolvedValue({
-      items: [makePolicy('a', OLD_ARN, ['default']), makePolicy('b', OLD_ARN, ['marketing'])],
-      total: 2,
-      page: 1,
-      perPage: 10000,
-    });
+    mockListReturns([
+      makePolicy('a', OLD_ARN, ['default']),
+      makePolicy('b', OLD_ARN, ['marketing']),
+    ]);
     (packagePolicyService.update as jest.Mock).mockResolvedValue({});
 
     await propagateRoleArnToPackagePolicies({
@@ -182,12 +231,7 @@ describe('propagateRoleArnToPackagePolicies', () => {
       ...policy,
       policy_ids: ['agent-shared'],
     }));
-    (packagePolicyService.list as jest.Mock).mockResolvedValue({
-      items: shared,
-      total: 2,
-      page: 1,
-      perPage: 10000,
-    });
+    mockListReturns(shared);
     (packagePolicyService.update as jest.Mock).mockResolvedValue({});
 
     await propagateRoleArnToPackagePolicies({
@@ -208,12 +252,7 @@ describe('propagateRoleArnToPackagePolicies', () => {
   });
 
   it('bumps the reverted agent policies after a failed fan-out', async () => {
-    (packagePolicyService.list as jest.Mock).mockResolvedValue({
-      items: [makePolicy('a'), makePolicy('b')],
-      total: 2,
-      page: 1,
-      perPage: 10000,
-    });
+    mockListReturns([makePolicy('a'), makePolicy('b')]);
     (packagePolicyService.update as jest.Mock).mockImplementation(async (_so, _es, id: string) => {
       if (id === 'b') throw new Error('boom');
       return {};
@@ -237,12 +276,7 @@ describe('propagateRoleArnToPackagePolicies', () => {
   });
 
   it('does not bump anything when there is nothing to fan out', async () => {
-    (packagePolicyService.list as jest.Mock).mockResolvedValue({
-      items: [],
-      total: 0,
-      page: 1,
-      perPage: 10000,
-    });
+    mockListReturns([]);
 
     await propagateRoleArnToPackagePolicies({
       esClient,
@@ -255,12 +289,7 @@ describe('propagateRoleArnToPackagePolicies', () => {
 
   it('omits package from the update payload when the policy has none', async () => {
     const { package: _package, ...policyWithoutPackage } = makePolicy('a');
-    (packagePolicyService.list as jest.Mock).mockResolvedValue({
-      items: [policyWithoutPackage],
-      total: 1,
-      page: 1,
-      perPage: 10000,
-    });
+    mockListReturns([policyWithoutPackage]);
     (packagePolicyService.update as jest.Mock).mockResolvedValue({});
 
     await propagateRoleArnToPackagePolicies({
@@ -276,12 +305,7 @@ describe('propagateRoleArnToPackagePolicies', () => {
   });
 
   it('is a no-op when no policies reference the connector', async () => {
-    (packagePolicyService.list as jest.Mock).mockResolvedValue({
-      items: [],
-      total: 0,
-      page: 1,
-      perPage: 10000,
-    });
+    mockListReturns([]);
     await propagateRoleArnToPackagePolicies({
       esClient,
       connectorId: CONNECTOR_ID,
@@ -295,12 +319,7 @@ describe('propagateRoleArnToPackagePolicies', () => {
       ...makePolicy('a'),
       inputs: [{ type: 'x', enabled: true, vars: { other: { value: 'v' } }, streams: [] }],
     };
-    (packagePolicyService.list as jest.Mock).mockResolvedValue({
-      items: [policyWithoutRoleArn],
-      total: 1,
-      page: 1,
-      perPage: 10000,
-    });
+    mockListReturns([policyWithoutRoleArn]);
     await propagateRoleArnToPackagePolicies({
       esClient,
       connectorId: CONNECTOR_ID,
@@ -310,12 +329,7 @@ describe('propagateRoleArnToPackagePolicies', () => {
   });
 
   it('reverts successful policies and throws when one fan-out entry fails', async () => {
-    (packagePolicyService.list as jest.Mock).mockResolvedValue({
-      items: [makePolicy('a'), makePolicy('b'), makePolicy('c')],
-      total: 3,
-      page: 1,
-      perPage: 10000,
-    });
+    mockListReturns([makePolicy('a'), makePolicy('b'), makePolicy('c')]);
     (packagePolicyService.update as jest.Mock).mockImplementation(async (_so, _es, id: string) => {
       if (id === 'b') throw new Error('boom');
       return {};
@@ -338,12 +352,7 @@ describe('propagateRoleArnToPackagePolicies', () => {
   });
 
   it('includes both updateFailed and revertFailed in the thrown detail', async () => {
-    (packagePolicyService.list as jest.Mock).mockResolvedValue({
-      items: [makePolicy('a'), makePolicy('b')],
-      total: 2,
-      page: 1,
-      perPage: 10000,
-    });
+    mockListReturns([makePolicy('a'), makePolicy('b')]);
     (packagePolicyService.update as jest.Mock).mockImplementation(
       async (
         _so,
@@ -377,12 +386,7 @@ describe('propagateRoleArnToPackagePolicies', () => {
     // `pMap` resolves out of order, so the same failure must not produce a different message
     // each time; a connector with hundreds of policies must not produce an unreadable one.
     const ids = Array.from({ length: 25 }, (_, index) => `p${String(index).padStart(2, '0')}`);
-    (packagePolicyService.list as jest.Mock).mockResolvedValue({
-      items: ids.map((id) => makePolicy(id)),
-      total: ids.length,
-      page: 1,
-      perPage: 10000,
-    });
+    mockListReturns(ids.map((id) => makePolicy(id)));
     (packagePolicyService.update as jest.Mock).mockRejectedValue(new Error('boom'));
 
     let caught: CloudConnectorRoleArnPropagationError | undefined;
@@ -403,12 +407,7 @@ describe('propagateRoleArnToPackagePolicies', () => {
 
   it('captures the per-policy pre-update value for revert (not the connector old value)', async () => {
     const drifted = makePolicy('drifted', 'arn:aws:iam::123456789012:role/Drifted');
-    (packagePolicyService.list as jest.Mock).mockResolvedValue({
-      items: [makePolicy('a'), drifted],
-      total: 2,
-      page: 1,
-      perPage: 10000,
-    });
+    mockListReturns([makePolicy('a'), drifted]);
     (packagePolicyService.update as jest.Mock).mockImplementation(
       async (
         _so,

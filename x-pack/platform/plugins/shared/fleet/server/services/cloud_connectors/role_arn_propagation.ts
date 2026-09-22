@@ -11,7 +11,7 @@ import pMap from 'p-map';
 
 import { ALL_SPACES_ID, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import type { NewPackagePolicy, PackagePolicy } from '../../../common/types';
-import { MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS, SO_SEARCH_LIMIT } from '../../constants';
+import { MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS } from '../../constants';
 import { CloudConnectorRoleArnPropagationError } from '../../errors';
 import { agentPolicyService } from '../agent_policy';
 import { appContextService } from '../app_context';
@@ -19,7 +19,7 @@ import { packagePolicyService, toPackagePolicyUpdate } from '../package_policy';
 import { escapeSearchQueryPhrase } from '../saved_object';
 import { getSpaceForPackagePolicy } from '../spaces/helpers';
 
-import { updateInputsWithRoleArn } from './update_input_vars_with_role_arn';
+import { rewritePolicyRoleArn } from './update_input_vars_with_role_arn';
 
 interface PropagateArgs {
   esClient: ElasticsearchClient;
@@ -29,6 +29,8 @@ interface PropagateArgs {
 
 interface PolicyPlan {
   policy: PackagePolicy;
+  previousVars: NewPackagePolicy['vars'];
+  updatedVars: NewPackagePolicy['vars'];
   previousInputs: NewPackagePolicy['inputs'];
   updatedInputs: NewPackagePolicy['inputs'];
 }
@@ -47,7 +49,17 @@ const renderPolicyIds = (ids: string[]): string => {
  *
  * Semantics: "policies first, then connector; on any policy failure, revert successful policies."
  * The caller writes the connector AFTER a successful call to this function. Idempotent: policies
- * whose inputs contain no `role_arn` (or already hold the new value) are silently skipped.
+ * that carry no `role_arn` variable (or already hold the new value) at any of top-level
+ * `packagePolicy.vars`, input-level `vars`, or per-stream `vars` are silently skipped.
+ *
+ * Exit points (in source order):
+ *   1. `return` — no package policy references the connector (nothing to do).
+ *   2. `return` — policies reference the connector but none carry a `role_arn` variable.
+ *   3. `return` — Phase 1 forward writes all succeeded; agent-policy revisions bumped once per
+ *      space. Caller is safe to write the connector.
+ *   4. `throw`  — Phase 1 had one or more failures; Phase 2 best-effort reverts the successful
+ *      ones and throws `CloudConnectorRoleArnPropagationError` carrying `updateFailed` and
+ *      `revertFailed` id lists. Caller must NOT write the connector.
  */
 export const propagateRoleArnToPackagePolicies = async ({
   esClient,
@@ -67,25 +79,39 @@ export const propagateRoleArnToPackagePolicies = async ({
   // A connector saved object is shared across spaces, so the policies referencing it can live in
   // any of them. The route's request-scoped client only sees the caller's space, which would
   // silently skip the rest; each policy is then written back through its own space client.
-  const { items: policies } = await packagePolicyService.list(
+  //
+  // `fetchAllItems` pages under a Point-In-Time snapshot, so we neither cap at SO_SEARCH_LIMIT
+  // (a heavy-usage connector would silently keep the tail on the old ARN) nor race with a
+  // concurrent policy edit (the connector write below would then disagree with what got
+  // rewritten here).
+  const policies: PackagePolicy[] = [];
+  for await (const page of await packagePolicyService.fetchAllItems(
     appContextService.getInternalUserSOClientWithoutSpaceExtension(),
-    {
-      kuery,
-      perPage: SO_SEARCH_LIMIT,
-      page: 1,
-      spaceId: ALL_SPACES_ID,
-    }
-  );
+    { kuery, spaceIds: [ALL_SPACES_ID] }
+  )) {
+    policies.push(...page);
+  }
 
   if (policies.length === 0) {
     logger.debug(`No package policies reference connector ${connectorId}; nothing to fan out.`);
-    return;
+    return; // exit 1/4: nothing references this connector
   }
 
+  // ── Plan ────────────────────────────────────────────────────────────────────────────────────
+  // Compute the pre/post snapshots in memory. Anything that doesn't actually change is dropped
+  // here so Phases 1 and 2 only touch policies that need it.
   const plans = policies
     .map((policy): PolicyPlan | null => {
-      const { updated, changed } = updateInputsWithRoleArn(policy.inputs, newRoleArn);
-      return changed ? { policy, previousInputs: policy.inputs, updatedInputs: updated } : null;
+      const { vars, inputs, changed } = rewritePolicyRoleArn(policy, newRoleArn);
+      return changed
+        ? {
+            policy,
+            previousVars: policy.vars,
+            updatedVars: vars,
+            previousInputs: policy.inputs,
+            updatedInputs: inputs,
+          }
+        : null;
     })
     .filter((plan): plan is PolicyPlan => plan !== null);
 
@@ -93,7 +119,7 @@ export const propagateRoleArnToPackagePolicies = async ({
     logger.debug(
       `Connector ${connectorId} has ${policies.length} referencing package policies but none carry a role_arn variable; nothing to fan out.`
     );
-    return;
+    return; // exit 2/4: policies reference this connector but hold no role_arn to rewrite
   }
 
   logger.info(
@@ -105,12 +131,16 @@ export const propagateRoleArnToPackagePolicies = async ({
   const soFor = (policy: PackagePolicy) =>
     appContextService.getInternalUserSOClientForSpaceId(getSpaceForPackagePolicy(policy));
 
-  const writeInputs = (plan: PolicyPlan, inputs: NewPackagePolicy['inputs']) =>
+  const writePolicyRoleArn = (
+    plan: PolicyPlan,
+    vars: NewPackagePolicy['vars'],
+    inputs: NewPackagePolicy['inputs']
+  ) =>
     packagePolicyService.update(
       soFor(plan.policy),
       esClient,
       plan.policy.id,
-      { ...toPackagePolicyUpdate(plan.policy), inputs },
+      { ...toPackagePolicyUpdate(plan.policy), vars, inputs },
       // Policies sharing an agent policy would each read-modify-write the same `revision`
       // concurrently; the whole fan-out is bumped once per space below instead.
       { bumpRevision: false }
@@ -147,6 +177,10 @@ export const propagateRoleArnToPackagePolicies = async ({
     }
   };
 
+  // ── Phase 1: forward writes (plans → new ARN) ──────────────────────────────────────────────
+  // pMap swallows per-plan errors into `updateFailed` so control flow after the pMap can decide
+  // between the happy exit and the revert phase; `stopOnError: false` guarantees every plan
+  // settles before that decision is made.
   const updateFailed: string[] = [];
   const succeeded: PolicyPlan[] = [];
 
@@ -154,7 +188,7 @@ export const propagateRoleArnToPackagePolicies = async ({
     plans,
     async (plan) => {
       try {
-        await writeInputs(plan, plan.updatedInputs);
+        await writePolicyRoleArn(plan, plan.updatedVars, plan.updatedInputs);
         succeeded.push(plan);
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
@@ -174,9 +208,14 @@ export const propagateRoleArnToPackagePolicies = async ({
         succeeded.length === 1 ? 'policy' : 'policies'
       }.`
     );
-    return;
+    return; // exit 3/4: happy path — caller may now write the connector
   }
 
+  // ── Phase 2: revert successful forward writes ──────────────────────────────────────────────
+  // Best effort: iterates only over `succeeded` (never `plans`), writing each plan's snapshot
+  // back so the connector-still-holds-old-ARN world matches the policies-still-hold-old-ARN
+  // world. Same swallow-and-collect pattern as Phase 1; `revertFailed` is what the caller
+  // learns about when we throw below.
   logger.warn(
     `Reverting ${succeeded.length} package ${
       succeeded.length === 1 ? 'policy' : 'policies'
@@ -189,7 +228,7 @@ export const propagateRoleArnToPackagePolicies = async ({
     succeeded,
     async (plan) => {
       try {
-        await writeInputs(plan, plan.previousInputs);
+        await writePolicyRoleArn(plan, plan.previousVars, plan.previousInputs);
         reverted.push(plan);
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
@@ -202,6 +241,9 @@ export const propagateRoleArnToPackagePolicies = async ({
     { concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS, stopOnError: false }
   );
 
+  // Bump agent policies for the ones we successfully reverted — their package-policy `revision`
+  // moved (once forward, once back), so agents need one bump to re-fetch and discard the stale
+  // compiled version they may already have cached.
   await bumpAgentPolicies(reverted);
 
   // `pMap` resolves out of order, so sort before reporting: the message and the detail have to be
@@ -222,5 +264,6 @@ export const propagateRoleArnToPackagePolicies = async ({
         )}); those policies are now on the new role ARN while the connector still holds the old one.`
       : `. All previously updated policies were reverted successfully; the connector is unchanged.`);
 
+  // exit 4/4: partial failure — caller must NOT write the connector; `detail` carries the ids.
   throw new CloudConnectorRoleArnPropagationError(message, { updateFailed, revertFailed });
 };

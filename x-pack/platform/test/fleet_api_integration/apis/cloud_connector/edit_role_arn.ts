@@ -52,6 +52,9 @@ export default function (providerContext: FtrProviderContext) {
     const expectRoleArnEverywhere = async (expectedArn: string) => {
       for (const id of packagePolicyIds) {
         const { body } = await supertest.get(`/api/fleet/package_policies/${id}`).expect(200);
+        // The real `aws` integration keeps `role_arn` as a top-level shared package var — the
+        // fan-out has to rewrite this or every AWS-integration policy goes stale. Guard for it.
+        expect(body.item.vars.role_arn.value).to.eql(expectedArn);
         for (const input of body.item.inputs) {
           expect(input.vars.role_arn.value).to.eql(expectedArn);
           for (const stream of input.streams) {
@@ -108,6 +111,9 @@ export default function (providerContext: FtrProviderContext) {
             package: PKG,
             // Only the full-form body accepts cloud_connector_id; the simplified form rejects it.
             cloud_connector_id: connectorId,
+            // Top-level `vars.role_arn` mirrors the real `aws` integration's shared-var shape;
+            // input/stream `vars.role_arn` mirrors CSPM/Asset-Discovery. Cover both.
+            vars: { role_arn: { type: 'text', value: OLD_ARN } },
             inputs: [
               {
                 type: INPUT_TYPE,
