@@ -67,11 +67,15 @@ triggers:
       properties:
         alerts:
           type: array
+          # Cap matches the Kibana alerting max-alerts-per-run ceiling so a Worker cannot
+          # submit an unbounded array (each item still becomes LLM work via batch_size chunks).
+          maxItems: 1000
           description: >
             Alert documents to analyse, supplied by a `workflow.execute` caller such as the
             AlertZero Alert Triage Worker. A child run receives no trigger event, so without
             this the workflow sees zero alerts and silently skips. Absent on the standalone
             path, which keeps reading the alert trigger's own `event.alerts`.
+            Bounded to 1000 items; execution still chunks by consts.batch_size.
         autoCloseEnabled:
           type: boolean
           description: >
