@@ -11,7 +11,7 @@ import { hydrateMemoryWorkspace } from '../memory/register_memory';
 import { memoryMaterializeToSandboxStepDefinition } from './memory_materialize_to_sandbox';
 
 jest.mock('../memory/register_memory', () => ({
-  hydrateMemoryWorkspace: jest.fn().mockResolvedValue(undefined),
+  hydrateMemoryWorkspace: jest.fn().mockResolvedValue(''),
 }));
 
 describe('memoryMaterializeToSandboxStepDefinition', () => {
@@ -29,10 +29,15 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
     getScopedEsClient.mockReturnValue(esClient);
   });
 
-  const createContext = (sandboxId: string, spaceId = 'default', prompt?: string) =>
+  const createContext = (
+    sandboxId: string,
+    spaceId = 'default',
+    prompt?: string,
+    agentId?: string
+  ) =>
     ({
-      input: { sandbox_id: sandboxId, prompt },
-      rawInput: { sandbox_id: sandboxId, prompt },
+      input: { sandbox_id: sandboxId, prompt, agent_id: agentId },
+      rawInput: { sandbox_id: sandboxId, prompt, agent_id: agentId },
       contextManager: {
         getContext: jest.fn().mockReturnValue({ workflow: { spaceId } }),
         getFakeRequest: jest.fn(),
@@ -44,7 +49,7 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
       abortSignal: new AbortController().signal,
       stepId: 'memory_materialize_to_sandbox',
       stepType: 'nightshift.memoryMaterializeToSandbox',
-    }) as never;
+    } as never);
 
   it('materializes memory into the sandbox with the request-scoped ES client', async () => {
     const sandboxStart = makeSandboxStart();
@@ -54,19 +59,24 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
     });
 
     const result = await definition.handler(
-      createContext('default__conv-1', 'default', 'checkout lag')
+      createContext(
+        'default__conv-1',
+        'default',
+        'checkout lag',
+        'significant-events.deductive-investigation'
+      )
     );
 
     expect(sandboxStart.getSessionForSpace).toHaveBeenCalledWith('default', 'conv-1');
     expect(hydrateMemoryWorkspace).toHaveBeenCalledWith({
       session: mockSession,
       esClient,
-      spaceId: 'default',
+      agentId: 'significant-events.deductive-investigation',
       query: 'checkout lag',
       signal: expect.any(AbortSignal),
       logger: expect.anything(),
     });
-    expect(result).toEqual({ output: { sandbox_id: 'default__conv-1' } });
+    expect(result).toEqual({ output: { sandbox_id: 'default__conv-1', notification: '' } });
   });
 
   it('uses the obtained sandbox_id without re-scoping it', async () => {
@@ -76,13 +86,15 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
       logger: loggerMock.create(),
     });
 
-    const result = await definition.handler(createContext('marketing__conv-1', 'marketing'));
+    const result = await definition.handler(
+      createContext('marketing__conv-1', 'marketing', undefined, 'agent-1')
+    );
 
     expect(sandboxStart.getSessionForSpace).toHaveBeenCalledWith('marketing', 'conv-1');
     expect(hydrateMemoryWorkspace).toHaveBeenCalledWith(
-      expect.objectContaining({ session: mockSession })
+      expect.objectContaining({ session: mockSession, agentId: 'agent-1' })
     );
-    expect(result).toEqual({ output: { sandbox_id: 'marketing__conv-1' } });
+    expect(result).toEqual({ output: { sandbox_id: 'marketing__conv-1', notification: '' } });
   });
 
   it('throws when the sandbox is not configured', async () => {
@@ -91,9 +103,9 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
       logger: loggerMock.create(),
     });
 
-    await expect(definition.handler(createContext('default__conv-1'))).rejects.toThrow(
-      /sandbox is not configured/
-    );
+    await expect(
+      definition.handler(createContext('default__conv-1', 'default', undefined, 'agent-1'))
+    ).rejects.toThrow(/sandbox is not configured/);
     expect(hydrateMemoryWorkspace).not.toHaveBeenCalled();
   });
 
@@ -107,6 +119,22 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
     const result = await definition.handler(createContext('default__conv-1'));
 
     expect(hydrateMemoryWorkspace).not.toHaveBeenCalled();
-    expect(result).toEqual({ output: { sandbox_id: 'default__conv-1', skipped: true } });
+    expect(result).toEqual({
+      output: { sandbox_id: 'default__conv-1', skipped: true, notification: '' },
+    });
+  });
+
+  it('skips memory materialize when agent_id is missing', async () => {
+    const definition = memoryMaterializeToSandboxStepDefinition({
+      getSandboxStart: () => makeSandboxStart(),
+      logger: loggerMock.create(),
+    });
+
+    const result = await definition.handler(createContext('default__conv-1', 'default', 'task'));
+
+    expect(hydrateMemoryWorkspace).not.toHaveBeenCalled();
+    expect(result).toEqual({
+      output: { sandbox_id: 'default__conv-1', skipped: true, notification: '' },
+    });
   });
 });

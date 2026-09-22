@@ -9,9 +9,9 @@ import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { Logger } from '@kbn/core/server';
-import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import { runCortexOptimize } from '../cortex/register_cortex';
+import { teeWorkflowLogger } from '../lib/tee_workflow_logger';
 import { withTimeout } from './with_timeout';
 
 const MAX_ROUND_TEXT_LENGTH = 65_536;
@@ -23,13 +23,11 @@ const MAX_ROUND_TEXT_LENGTH = 65_536;
 const OPTIMIZE_TIMEOUT_MS = 120_000;
 
 export const cortexOptimizeStepDefinition = ({
-  getInference,
-  getSearchInferenceEndpoints,
+  getAgentBuilder,
   logger,
   isEnabled,
 }: {
-  getInference: () => InferenceServerStart | undefined;
-  getSearchInferenceEndpoints: () => SearchInferenceEndpointsPluginStart | undefined;
+  getAgentBuilder: () => AgentBuilderPluginStart | undefined;
   logger: Logger;
   isEnabled?: () => boolean;
 }) =>
@@ -56,6 +54,11 @@ export const cortexOptimizeStepDefinition = ({
         .max(1024)
         .optional()
         .describe('Workspace key from nightshift.obtainSandbox. Already space-scoped.'),
+      connector_id: z
+        .string()
+        .max(1024)
+        .optional()
+        .describe('Inference connector the triggering agent used for this round.'),
     }),
     outputSchema: z.object({
       status: z.literal('ok').describe('The optimizer finished without throwing.'),
@@ -63,8 +66,13 @@ export const cortexOptimizeStepDefinition = ({
     }),
     handler: async (context) => {
       if (isEnabled && !isEnabled()) {
+        context.logger.info('Skipped Cortex optimize (flag off)');
         return { output: { status: 'ok' as const, skipped: true } };
       }
+
+      context.logger.info(
+        `Running Cortex optimize for agent ${context.input.agent_id ?? 'unknown'}`
+      );
 
       await withTimeout(
         (signal) =>
@@ -76,9 +84,9 @@ export const cortexOptimizeStepDefinition = ({
             esClient: context.contextManager.getScopedEsClient(),
             spaceId: context.contextManager.getContext().workflow.spaceId,
             signal,
-            logger,
-            getInference,
-            getSearchInferenceEndpoints,
+            logger: teeWorkflowLogger(logger, context.logger),
+            getAgentBuilder,
+            connectorId: context.input.connector_id,
           }),
         OPTIMIZE_TIMEOUT_MS,
         `Cortex optimize timed out after ${OPTIMIZE_TIMEOUT_MS}ms`

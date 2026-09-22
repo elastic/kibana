@@ -11,9 +11,13 @@ import {
   MEMORY_EXTRACT_GUIDELINES,
   MEMORY_EXTRACT_SYSTEM_PROMPT,
   applyMemoryEdits,
+  canonicalizeMemoryLabelId,
+  canonicalizeMemoryLabelIds,
   contentOverlap,
+  createLlmProposeMemoryExtractions,
   isDuplicateExtraction,
   optimizeMemory,
+  unwrapUserTask,
 } from './optimize';
 import type { MemoryPageStore } from './page_store';
 import type { MemoryPage } from '../../common/memory';
@@ -25,7 +29,7 @@ const page = (id: string, title = id, content = 'body'): MemoryPage => ({
   content,
   tags: ['memory'],
   status: 'established',
-  space_id: 'default',
+  agent_id: 'agent-1',
   categories: [],
   references: [],
   created_at: '2026-01-01T00:00:00.000Z',
@@ -53,6 +57,63 @@ const createStore = (overrides: Partial<MemoryPageStore> = {}): MemoryPageStore 
     ...overrides,
   } as MemoryPageStore);
 
+describe('createLlmProposeMemoryExtractions', () => {
+  it('normalizes object-shaped merge target groups from the bound model', async () => {
+    const output = jest.fn().mockResolvedValue({
+      output: {
+        merge_targets: [{ ids: ['memory_a', 'memory_b'] }],
+        extractions: [],
+      },
+    });
+    const propose = createLlmProposeMemoryExtractions({
+      inferenceClient: { output } as never,
+    });
+
+    await expect(propose({ transcript: 'task', recalledMemories: [] })).resolves.toEqual({
+      mergeTargets: [['memory_a', 'memory_b']],
+      extractions: [],
+    });
+    expect(output).toHaveBeenCalledWith(
+      expect.objectContaining({
+        schema: expect.objectContaining({
+          properties: expect.objectContaining({
+            merge_targets: expect.objectContaining({
+              items: expect.objectContaining({ type: 'object' }),
+            }),
+          }),
+        }),
+      })
+    );
+  });
+});
+
+describe('canonicalizeMemoryLabelId', () => {
+  it('keeps a raw page id', () => {
+    expect(canonicalizeMemoryLabelId('memory_checkout-redis-evictions')).toBe(
+      'memory_checkout-redis-evictions'
+    );
+  });
+
+  it('extracts id= from a recalled-line echo', () => {
+    expect(
+      canonicalizeMemoryLabelId(
+        "id=memory_checkout-redis-evictions | title='Checkout Redis evictions' | content='Checkout latency'"
+      )
+    ).toBe('memory_checkout-redis-evictions');
+  });
+
+  it('dedupes a mixed list', () => {
+    expect(
+      canonicalizeMemoryLabelIds([
+        'memory_a',
+        'id=memory_a | title="A"',
+        'not a memory id',
+        'memory_b',
+      ])
+    ).toEqual(['memory_a', 'memory_b']);
+  });
+});
+
 describe('applyMemoryEdits', () => {
   it('archives harmful ids and batches useful/unrelated counter updates', async () => {
     const store = createStore();
@@ -65,7 +126,7 @@ describe('applyMemoryEdits', () => {
       logger: loggerMock.create(),
     });
 
-    expect(store.archive).toHaveBeenCalledWith('memory_c');
+    expect(store.archive).toHaveBeenCalledWith('memory_c', 'harmful');
     expect(store.applyCounterUpdates).toHaveBeenCalledWith([
       { id: 'memory_a', addImp: 1, addConv: 1 },
       { id: 'memory_b', addImp: 1, addConv: 0 },
@@ -73,63 +134,130 @@ describe('applyMemoryEdits', () => {
     expect(store.list).not.toHaveBeenCalled();
   });
 
-  it('skips extractions that duplicate recalled slugs', async () => {
+  it('archives when the critique echoes the recalled line instead of a raw id', async () => {
     const store = createStore();
 
     await applyMemoryEdits({
       store,
-      recalledIds: ['memory_kafka-lag'],
-      labels: { useful: [], harmful: [] },
-      extractions: [
-        {
-          slug: 'kafka-lag',
-          title: 'Kafka lag',
-          content: 'Already recalled.',
-          tags: [],
-          categories: [],
-        },
-      ],
+      recalledIds: ['memory_checkout-redis-evictions'],
+      labels: {
+        useful: [],
+        harmful: [
+          "id=memory_checkout-redis-evictions | title='Checkout Redis evictions' | content='Checkout latency followed Redis memory eviction on the cart cache.'",
+        ],
+      },
+      extractions: [],
       logger: loggerMock.create(),
     });
 
-    expect(store.upsert).not.toHaveBeenCalled();
+    expect(store.archive).toHaveBeenCalledWith('memory_checkout-redis-evictions', 'harmful');
+    expect(store.applyCounterUpdates).toHaveBeenCalledWith([]);
   });
 
-  it('skips extractions whose title matches a recalled page', async () => {
-    const store = createStore();
+  it('merges an extraction that duplicates a recalled page instead of upserting it', async () => {
+    const source = page('memory_kafka-lag', 'Kafka consumer lag', 'Scale the consumer.');
+    source.context = 'why is checkout slow redis lag';
+    source.telemetry = {
+      impressions: 2,
+      conversions: 1,
+      last_impression_time: '2026-01-01T00:00:00.000Z',
+    };
+    const store = createStore({
+      get: jest
+        .fn()
+        .mockImplementation(async (id: string) => (id === source.id ? source : undefined)),
+    });
 
     await applyMemoryEdits({
       store,
       recalledIds: ['memory_kafka-lag'],
-      recalledMemories: [page('memory_kafka-lag', 'Kafka consumer lag')],
+      recalledMemories: [source],
       labels: { useful: [], harmful: [] },
       extractions: [
         {
           slug: 'checkout-kafka',
           title: 'Kafka consumer lag',
           content: 'Same fact, new slug.',
+          tags: ['kafka'],
+          categories: ['ops'],
+        },
+      ],
+      context:
+        'why is checkout slow?\n\n<system_update>\nSemantic memories materialized this turn:\n- `/x` — X\n</system_update>',
+      synthesizeMemoryGroup: async () => ({
+        title: 'Checkout Kafka lag',
+        content: 'Checkout consumer lag is a durable fact.',
+        context: 'checkout latency kafka consumer lag',
+      }),
+      now: () => Date.parse('2026-01-01T00:00:00.000Z') / 1000,
+      logger: loggerMock.create(),
+    });
+
+    expect(store.upsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        slug: 'checkout-kafka-lag',
+        context: 'checkout latency kafka consumer lag',
+        status: 'established',
+        source: 'Merged from memories: memory_kafka-lag, memory_checkout-kafka',
+        merged_from: ['memory_kafka-lag', 'memory_checkout-kafka'],
+        user: 'nightshift-optimizer',
+        telemetry: expect.objectContaining({ impressions: 2, conversions: 1 }),
+      })
+    );
+    expect(store.archive).toHaveBeenCalledWith('memory_kafka-lag', 'merged');
+    expect(store.upsert).not.toHaveBeenCalledWith(
+      expect.objectContaining({ slug: 'checkout-kafka' })
+    );
+  });
+
+  it('does not merge when synthesis returns an empty context', async () => {
+    const source = page('memory_kafka-lag', 'Kafka consumer lag');
+    source.context = 'why is checkout slow';
+    const store = createStore({
+      get: jest.fn().mockResolvedValue(source),
+    });
+
+    await applyMemoryEdits({
+      store,
+      recalledIds: ['memory_kafka-lag'],
+      recalledMemories: [source],
+      labels: { useful: [], harmful: [] },
+      extractions: [
+        {
+          slug: 'checkout-kafka',
+          title: 'Kafka consumer lag',
+          content: 'Same fact.',
           tags: [],
           categories: [],
         },
       ],
+      context: 'why is checkout slow?',
+      synthesizeMemoryGroup: async () => ({
+        title: 'Merged',
+        content: 'Body',
+        context: '',
+      }),
       logger: loggerMock.create(),
     });
 
     expect(store.upsert).not.toHaveBeenCalled();
-    expect(store.list).not.toHaveBeenCalled();
+    expect(store.archive).not.toHaveBeenCalled();
   });
 
-  it('skips extractions that overlap a catalog hit with a different slug', async () => {
+  it('merges a catalog overlap and sums decayed telemetry', async () => {
+    const hit = page(
+      'memory_checkout-redis',
+      'Checkout Redis',
+      'Checkout uses Redis db 2 for sessions and evicts on memory pressure.'
+    );
+    hit.telemetry = {
+      impressions: 4,
+      conversions: 2,
+      last_impression_time: '2026-01-01T00:00:00.000Z',
+    };
     const store = createStore({
-      retrieve: jest
-        .fn()
-        .mockResolvedValue([
-          page(
-            'memory_checkout-redis',
-            'Checkout Redis',
-            'Checkout uses Redis db 2 for sessions and evicts on memory pressure.'
-          ),
-        ]),
+      retrieve: jest.fn().mockResolvedValue([hit]),
+      get: jest.fn().mockImplementation(async (id: string) => (id === hit.id ? hit : undefined)),
     });
 
     await applyMemoryEdits({
@@ -145,11 +273,28 @@ describe('applyMemoryEdits', () => {
           categories: [],
         },
       ],
+      context: 'redis eviction on cart cache',
+      synthesizeMemoryGroup: async () => ({
+        title: 'Checkout cart cache',
+        content: 'Checkout sessions live in Redis and evict under memory pressure.',
+        context: 'checkout latency redis cart-cache evictions',
+      }),
+      now: () => Date.parse('2026-01-01T00:00:00.000Z') / 1000,
       logger: loggerMock.create(),
     });
 
-    expect(store.upsert).not.toHaveBeenCalled();
-    expect(store.retrieve).toHaveBeenCalledWith({ query: 'Checkout Redis', size: 5 });
+    expect(store.retrieve).toHaveBeenCalledWith({
+      query: 'Checkout Redis',
+      size: 5,
+      match: 'content',
+    });
+    expect(store.upsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        slug: 'checkout-cart-cache',
+        telemetry: expect.objectContaining({ impressions: 4, conversions: 2 }),
+      })
+    );
+    expect(store.archive).toHaveBeenCalledWith('memory_checkout-redis', 'merged');
   });
 
   it('still upserts when a catalog hit is the same slug', async () => {
@@ -230,7 +375,7 @@ describe('optimizeMemory', () => {
       get: jest.fn().mockImplementation(async (id: string) => page(id)),
     });
     const proposeLabels = jest.fn().mockResolvedValue({ useful: ['memory_a'], harmful: [] });
-    const proposeExtractions = jest.fn().mockResolvedValue([]);
+    const proposeExtractions = jest.fn().mockResolvedValue({ extractions: [], mergeTargets: [] });
 
     await optimizeMemory({
       store,
@@ -256,15 +401,18 @@ describe('optimizeMemory', () => {
   it('still extracts on a cold-start round with no recalled pages', async () => {
     const store = createStore();
     const proposeLabels = jest.fn();
-    const proposeExtractions = jest.fn().mockResolvedValue([
-      {
-        slug: 'checkout-redis',
-        title: 'Checkout Redis',
-        content: 'Checkout uses Redis db 2 for sessions.',
-        tags: ['redis'],
-        categories: [],
-      },
-    ]);
+    const proposeExtractions = jest.fn().mockResolvedValue({
+      extractions: [
+        {
+          slug: 'checkout-redis',
+          title: 'Checkout Redis',
+          content: 'Checkout uses Redis db 2 for sessions.',
+          tags: ['redis'],
+          categories: [],
+        },
+      ],
+      mergeTargets: [],
+    });
 
     await optimizeMemory({
       store,
@@ -279,7 +427,44 @@ describe('optimizeMemory', () => {
     expect(proposeLabels).not.toHaveBeenCalled();
     expect(proposeExtractions).toHaveBeenCalled();
     expect(store.upsert).toHaveBeenCalledWith(
-      expect.objectContaining({ slug: 'checkout-redis', status: 'tentative' })
+      expect.objectContaining({
+        slug: 'checkout-redis',
+        status: 'tentative',
+        context: 'why is checkout slow?',
+      })
+    );
+  });
+
+  it('stores extract context as the task with system_update removed', async () => {
+    const store = createStore();
+    const proposeLabels = jest.fn();
+    const proposeExtractions = jest.fn().mockResolvedValue({
+      extractions: [
+        {
+          slug: 'checkout-redis',
+          title: 'Checkout Redis',
+          content: 'Checkout uses Redis db 2 for sessions.',
+          tags: [],
+          categories: [],
+        },
+      ],
+      mergeTargets: [],
+    });
+
+    await optimizeMemory({
+      store,
+      recalledIds: [],
+      proposeLabels,
+      proposeExtractions,
+      userMessage:
+        'why is checkout slow?\n\n<system_update>\nSemantic memories materialized this turn:\n- `/workspace/memories/memory_a.md` — Alpha\n</system_update>',
+      assistantMessage: 'Redis evictions on checkout.',
+      logger: loggerMock.create(),
+    });
+
+    expect(unwrapUserTask).toBeDefined();
+    expect(store.upsert).toHaveBeenCalledWith(
+      expect.objectContaining({ context: 'why is checkout slow?' })
     );
   });
 

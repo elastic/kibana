@@ -31,6 +31,9 @@ triggers:
         agent_id:
           type: string
           description: Agent id that produced the round.
+        connector_id:
+          type: string
+          description: Inference connector the triggering agent used for this round.
         tool_calls:
           type: array
           description: Tool calls from the completed round. Unused by this workflow.
@@ -62,6 +65,7 @@ steps:
               prompt: '{{ inputs.prompt }}'
               response: '{{ inputs.response }}'
               agent_id: '{{ inputs.agent_id }}'
+              connector_id: '{{ inputs.connector_id }}'
               sandbox_id: '{{ steps.obtain_sandbox.output.sandbox_id }}'
       - name: memory
         steps:
@@ -71,4 +75,5 @@ steps:
               prompt: '{{ inputs.prompt }}'
               response: '{{ inputs.response }}'
               agent_id: '{{ inputs.agent_id }}'
+              connector_id: '{{ inputs.connector_id }}'
               sandbox_id: '{{ steps.obtain_sandbox.output.sandbox_id }}'

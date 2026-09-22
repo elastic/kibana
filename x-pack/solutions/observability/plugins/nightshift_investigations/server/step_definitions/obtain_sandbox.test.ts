@@ -26,7 +26,8 @@ describe('obtainSandboxStepDefinition', () => {
   const createContext = (
     conversationId: string,
     spaceId = 'default',
-    extra: { required?: boolean } = {}
+    extra: { required?: boolean } = {},
+    workflowLogger = loggerMock.create()
   ) =>
     ({
       input: { conversation_id: conversationId, ...extra },
@@ -38,23 +39,25 @@ describe('obtainSandboxStepDefinition', () => {
         renderInputTemplate: jest.fn((val) => val),
         callKibanaApi: jest.fn(),
       },
-      logger: loggerMock.create(),
+      logger: workflowLogger,
       abortSignal: new AbortController().signal,
       stepId: 'obtain_sandbox',
       stepType: 'nightshift.obtainSandbox',
-    }) as never;
+    } as never);
 
   it('allocates the sandbox and returns the space-scoped sandbox_id', async () => {
     const sandboxStart = makeSandboxStart();
+    const workflowLogger = loggerMock.create();
     const definition = obtainSandboxStepDefinition({
       getSandboxStart: () => sandboxStart,
       logger: loggerMock.create(),
     });
 
-    const result = await definition.handler(createContext('conv-1'));
+    const result = await definition.handler(createContext('conv-1', 'default', {}, workflowLogger));
 
     expect(sandboxStart.getSessionForSpace).toHaveBeenCalledWith('default', 'conv-1');
     expect(statFiles).toHaveBeenCalledWith(['/workspace']);
+    expect(workflowLogger.info).toHaveBeenCalledWith('Obtained sandbox default__conv-1');
     expect(result).toEqual({
       output: { sandbox_id: 'default__conv-1', conversation_id: 'conv-1' },
     });
@@ -95,7 +98,9 @@ describe('obtainSandboxStepDefinition', () => {
       logger: loggerMock.create(),
     });
 
-    const result = await definition.handler(createContext('conv-1', 'default', { required: false }));
+    const result = await definition.handler(
+      createContext('conv-1', 'default', { required: false })
+    );
 
     expect(statFiles).not.toHaveBeenCalled();
     expect(result).toEqual({

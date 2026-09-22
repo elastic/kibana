@@ -5,25 +5,26 @@
  * 2.0.
  */
 
-export const MEMORY_AI_INDEX_ID = 'nightshift-semantic-memory';
-export const MEMORY_AI_INDEX_DEST = 'ai-index-idx-nightshift-semantic-memory';
+/** Plugin-owned standard index. Must not use the `ai-index-idx-` prefix. */
+export const MEMORY_INDEX = 'nightshift-semantic-memory';
 
 export type StoredMemoryStatus = 'established' | 'tentative' | 'archived';
 
+export type MemoryArchiveReason = 'merged' | 'harmful';
+
 /**
- * Standard Knowledge Indicator (KI) schema representing a Semantic Memory.
+ * Semantic Memory document. Recall key is `context` (the task that produced the
+ * page). `title` / `content` are what the agent reads after recall.
  */
 export interface StoredMemoryPage {
   '@timestamp'?: string;
-  type?: string;          // Always 'memory'
+  type?: string;
   title?: string;
   description?: string;
-  content?: string;        // The Markdown memory content
-  tags?: string[];         // Keywords
-  search_embedding?: {
-    type?: string;
-    inference_id?: string;
-  } | string;
+  content?: string;
+  /** User task at extract time — the field hydrate searches. */
+  context?: string;
+  tags?: string[];
   attributes: {
     status?: StoredMemoryStatus;
     impressions?: number;
@@ -32,7 +33,12 @@ export interface StoredMemoryPage {
     categories?: string[];
     references?: string[];
     slug?: string;
+    /** Leftover on pre-cut docs. New writes use `agent_id` and do not query this. */
     space_id?: string;
+    agent_id?: string;
+    source?: string;
+    merged_from?: string[];
+    archive_reason?: MemoryArchiveReason;
     created_at?: string;
     updated_at?: string;
     created_by?: string;
@@ -46,9 +52,13 @@ export interface MemoryPage {
   title: string;
   description?: string;
   content: string;
+  context?: string;
   tags: string[];
   status: StoredMemoryStatus;
-  space_id: string;
+  agent_id: string;
+  source?: string;
+  merged_from?: string[];
+  archive_reason?: MemoryArchiveReason;
   categories: string[];
   references: string[];
   created_at: string;

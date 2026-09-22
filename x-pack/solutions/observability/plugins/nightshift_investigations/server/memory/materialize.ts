@@ -7,7 +7,9 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { SandboxSession } from '@kbn/sandbox-plugin/server';
+import { formatHydrateNotification } from '../lib/hydrate_notification';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from '../tools/sandbox_bash/view_file_tool';
+import { formatPageRefs, previewText } from './log_format';
 import type { MemoryPageStore } from './page_store';
 import { toMemoryDisplayTelemetry } from './page_store';
 import { rankForMode, type RankedArm, type SampleBeta } from './ranking';
@@ -15,8 +17,21 @@ import { type MemoryPage } from '../../common/memory';
 
 export const MEMORY_WORKSPACE_ROOT = '/workspace/memories';
 export const MEMORY_RECALLED_PATH = `${MEMORY_WORKSPACE_ROOT}/.recalled.json`;
+export const MEMORY_INDEX_PATH = `${MEMORY_WORKSPACE_ROOT}/.index.json`;
 export const MEMORY_KEEP_COUNT = 15;
 export const MEMORY_RECALLED_MAX_BYTES = 65_536;
+export const MEMORY_INDEX_MAX_BYTES = 262_144;
+
+export interface MemoryCatalogEntry {
+  id: string;
+  title: string;
+  path: string;
+}
+
+export interface MaterializeMemoryResult {
+  recalledIds: string[];
+  notification: string;
+}
 
 export const parseRecalledSidecar = (raw: string): string[] => {
   try {
@@ -50,42 +65,65 @@ export const readRecalledIds = async ({
 
 const README_CONTENT = `# Semantic Memories
 
-Past investigation observations and learnings. Read relevant files at the start of
-every investigation to find prior context.
+Past investigation observations and learnings. Historical — independently verify
+all claims against current data before relying on them.
 
-Start here, then open \`INDEX.md\` and read pages with \`${SANDBOX_VIEW_FILE_TOOL_ID}\`.
-Memories are historical observations — independently verify all claims against current
-data before relying on them. Do not edit these pages yourself — a parallel optimizer
+The conversation catalog is \`.index.json\` (\`entries\` of \`id\`, \`title\`, \`path\`).
+Read it with \`${SANDBOX_VIEW_FILE_TOOL_ID}\` or \`jq\`. This turn's new pages also
+arrive in \`<system_update>\`. Open the page files with \`${SANDBOX_VIEW_FILE_TOOL_ID}\`.
+This README is not a catalog. Do not edit these pages yourself — a parallel optimizer
 evaluates useful pages after the run.
 `;
 
 const pagePath = (page: MemoryPage): string => `${MEMORY_WORKSPACE_ROOT}/${page.id}.md`;
 
-const renderIndex = (pages: MemoryPage[], nowSec: number): string => {
-  const lines = [
-    '# Memory index',
-    '',
-    `Open a page with \`${SANDBOX_VIEW_FILE_TOOL_ID}\` using the path in parentheses.`,
-    'This is the ranked recall set for this round, not the full wiki.',
-    '',
-  ];
-
-  for (const page of pages) {
-    const display = toMemoryDisplayTelemetry(page, nowSec);
-    const usefulnessPct = Math.round(display.conversionRate * 100);
-    lines.push(
-      `- **${page.title}** (Useful: ${usefulnessPct}%, Impressions: ${Math.round(
-        display.impressions
-      )}x) — \`${pagePath(page)}\``
-    );
+export const parseMemoryCatalog = (raw: string): MemoryCatalogEntry[] => {
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (typeof parsed !== 'object' || parsed === null || !('entries' in parsed)) {
+      return [];
+    }
+    const entries = (parsed as { entries: unknown }).entries;
+    if (!Array.isArray(entries)) {
+      return [];
+    }
+    return entries.flatMap((entry) => {
+      if (typeof entry !== 'object' || entry === null) {
+        return [];
+      }
+      const row = entry as { id?: unknown; title?: unknown; path?: unknown };
+      if (typeof row.id !== 'string' || row.id.length === 0) {
+        return [];
+      }
+      if (typeof row.title !== 'string' || typeof row.path !== 'string') {
+        return [];
+      }
+      return [{ id: row.id, title: row.title, path: row.path }];
+    });
+  } catch {
+    return [];
   }
+};
 
-  if (pages.length === 0) {
-    lines.push('_No Semantic Memories recalled for this round._');
-    lines.push('');
+const readMemoryCatalog = async (session: SandboxSession): Promise<MemoryCatalogEntry[]> => {
+  const [result] = await session.readFiles([
+    { path: MEMORY_INDEX_PATH, maxReadBytes: MEMORY_INDEX_MAX_BYTES },
+  ]);
+  if (!result?.success) {
+    return [];
   }
+  return parseMemoryCatalog(result.content.toString('utf8'));
+};
 
-  return lines.join('\n');
+const existingFilePaths = async (
+  session: SandboxSession,
+  paths: string[]
+): Promise<Set<string>> => {
+  if (paths.length === 0) {
+    return new Set();
+  }
+  const stats = await session.statFiles(paths);
+  return new Set(stats.filter((stat) => stat.exists && !stat.is_dir).map((stat) => stat.path));
 };
 
 const renderPage = (page: MemoryPage, nowSec: number): string => {
@@ -102,6 +140,10 @@ const renderPage = (page: MemoryPage, nowSec: number): string => {
     `confidence: ${display.confidence.toFixed(2)}`,
     `updated_at: ${page.updated_at}`,
     ...(page.description !== undefined ? [`description: ${page.description}`] : []),
+    ...(page.source !== undefined ? [`source: ${JSON.stringify(page.source)}`] : []),
+    ...(page.merged_from !== undefined && page.merged_from.length > 0
+      ? [`merged_from: ${JSON.stringify(page.merged_from.join(', '))}`]
+      : []),
     `---`,
     '',
     `# ${page.title}`,
@@ -126,13 +168,38 @@ export const materializeMemory = async ({
   sampleBeta?: SampleBeta;
   now?: () => number;
   keepCount?: number;
-}): Promise<string[]> => {
+}): Promise<MaterializeMemoryResult> => {
   const trimmedQuery = query?.trim();
-  const mode = trimmedQuery ? 'search' : 'browse';
-  const candidates = await store.retrieve({
+  let mode: 'search' | 'browse' = trimmedQuery ? 'search' : 'browse';
+  const retrieveSize = mode === 'search' ? 50 : keepCount * 10;
+  logger.debug(
+    `Memory materialize start mode=${mode} keepCount=${keepCount} retrieveSize=${retrieveSize} ` +
+      `queryChars=${trimmedQuery?.length ?? 0} query=${JSON.stringify(previewText(trimmedQuery))}`
+  );
+  let candidates = await store.retrieve({
     query: trimmedQuery,
-    size: mode === 'search' ? 50 : keepCount * 10,
+    size: retrieveSize,
   });
+
+  // A short retry prompt like "try again" is a real user message, so the
+  // workflow always forwards it as `query`. Strict title/content match then
+  // returns nothing even when the catalog has pages. Fall back to browse so
+  // hydrate still seeds the workspace.
+  if (mode === 'search' && candidates.length === 0) {
+    logger.info(
+      `Memory search query ${JSON.stringify(
+        trimmedQuery
+      )} matched 0 page(s) — falling back to browse`
+    );
+    mode = 'browse';
+    candidates = await store.retrieve({ size: keepCount * 10 });
+  } else if (mode === 'search') {
+    logger.info(
+      `Memory search query ${JSON.stringify(trimmedQuery)} matched ${candidates.length} page(s)`
+    );
+  } else {
+    logger.info(`Memory browse loaded ${candidates.length} page(s)`);
+  }
 
   const nowSec = now();
   const states: Record<string, Pick<RankedArm, 'impressions' | 'conversions'>> = {};
@@ -140,6 +207,21 @@ export const materializeMemory = async ({
     const display = toMemoryDisplayTelemetry(page, nowSec);
     states[page.id] = { impressions: display.impressions, conversions: display.conversions };
   }
+  logger.debug(
+    `Memory materialize candidates (${mode}, ${candidates.length}): ` +
+      (candidates.length === 0
+        ? '(none)'
+        : candidates
+            .map((page) => {
+              const display = toMemoryDisplayTelemetry(page, nowSec);
+              return (
+                `${page.id} cr=${display.conversionRate.toFixed(2)} ` +
+                `imp=${display.impressions.toFixed(2)} conf=${display.confidence.toFixed(2)} ` +
+                `ctx=${JSON.stringify(previewText(page.context, 80))}`
+              );
+            })
+            .join(' | '))
+  );
 
   const rankedIds = rankForMode({
     mode,
@@ -148,6 +230,10 @@ export const materializeMemory = async ({
     browseRanker: 'thompson',
     sampleBeta,
   });
+  logger.debug(
+    `Memory materialize ranker=${mode === 'search' ? 'passthrough' : 'thompson'} ` +
+      `ranked=${rankedIds.join(', ') || '(none)'}`
+  );
 
   const byId = new Map(candidates.map((page) => [page.id, page]));
   const pages = rankedIds
@@ -155,6 +241,39 @@ export const materializeMemory = async ({
     .map((id) => byId.get(id))
     .filter((page): page is MemoryPage => page !== undefined);
   const recalledIds = pages.map((page) => page.id);
+  logger.debug(
+    `Memory materialize keep ${recalledIds.length}/${candidates.length}: ${formatPageRefs(pages)}`
+  );
+
+  // Pod eviction clears /workspace. Read the catalog and existing paths before
+  // any write, which clears session.isReset.
+  const podReset = session.isReset;
+  const priorCatalog = podReset ? [] : await readMemoryCatalog(session);
+  const keepPaths = pages.map(pagePath);
+  const alreadyOnDisk = podReset ? new Set<string>() : await existingFilePaths(session, keepPaths);
+
+  const priorById = new Map(priorCatalog.map((entry) => [entry.id, entry]));
+  const carried: MemoryCatalogEntry[] = [];
+  for (const entry of priorCatalog) {
+    if (recalledIds.includes(entry.id)) {
+      continue;
+    }
+    const existing = await store.get(entry.id);
+    if (!existing || existing.status === 'archived') {
+      continue;
+    }
+    carried.push(priorById.get(entry.id) ?? entry);
+  }
+  const entries: MemoryCatalogEntry[] = [
+    ...carried,
+    ...pages.map((page) => ({ id: page.id, title: page.title, path: pagePath(page) })),
+  ];
+
+  const newPages = pages.filter((page) => !alreadyOnDisk.has(pagePath(page)));
+  const notification = formatHydrateNotification(
+    'Semantic memories materialized this turn:',
+    newPages.map((page) => ({ path: pagePath(page), title: page.title }))
+  );
 
   await session.mkdirs([MEMORY_WORKSPACE_ROOT]);
 
@@ -168,15 +287,24 @@ export const materializeMemory = async ({
   await session.writeFiles([
     { path: `${MEMORY_WORKSPACE_ROOT}/README.md`, content: Buffer.from(README_CONTENT, 'utf8') },
     {
-      path: `${MEMORY_WORKSPACE_ROOT}/INDEX.md`,
-      content: Buffer.from(renderIndex(pages, nowSec), 'utf8'),
+      path: MEMORY_INDEX_PATH,
+      content: Buffer.from(JSON.stringify({ entries }), 'utf8'),
     },
     {
       path: MEMORY_RECALLED_PATH,
       content: Buffer.from(JSON.stringify({ ids: recalledIds }), 'utf8'),
     },
   ]);
+  logger.debug(
+    `Memory materialize wrote ${pages.length} page file(s) plus README.md, .index.json (${entries.length} catalog), ${MEMORY_RECALLED_PATH}; notification pages=${newPages.length}`
+  );
 
-  logger.info(`Materialized ${pages.length} Semantic Memory page(s) into the sandbox workspace`);
-  return recalledIds;
+  logger.info(
+    recalledIds.length > 0
+      ? `Materialized ${
+          pages.length
+        } Semantic Memory page(s) into the sandbox workspace (${mode}): ${recalledIds.join(', ')}`
+      : `Materialized 0 Semantic Memory page(s) into the sandbox workspace (${mode})`
+  );
+  return { recalledIds, notification };
 };

@@ -2,6 +2,15 @@
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the "Elastic License
  * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
  * Public License, v 1"; you may not use this file except in compliance with, at
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
@@ -67,11 +76,22 @@ describe('nightshift sandbox materialize workspace workflow', () => {
                 with: {
                   sandbox_id: '{{ steps.obtain_sandbox.output.sandbox_id }}',
                   prompt: '{{ inputs.prompt }}',
+                  agent_id: '{{ inputs.agent_id }}',
                 },
               }),
             ],
           }),
         ],
+      }),
+      expect.objectContaining({
+        name: 'compose_prompt',
+        type: 'nightshift.composeHydrateNotifications',
+        with: {
+          notifications: [
+            '{{ steps.hydrate_cortex.output.notification }}',
+            '{{ steps.memory_materialize_to_sandbox.output.notification }}',
+          ],
+        },
       }),
     ]);
   });

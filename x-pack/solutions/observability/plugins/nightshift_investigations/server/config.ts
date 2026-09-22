@@ -39,7 +39,7 @@ const decisionTreesConfigSchema = schema.object({
 });
 
 const memoryConfigSchema = schema.object({
-  // Governs Semantic Memory independently of Cortex: AI index registration, hydrate/
+  // Governs Semantic Memory independently of Cortex: index ensure, hydrate/
   // optimize hooks on the deductive agent, and the matching managed workflows.
   enabled: schema.boolean({ defaultValue: false }),
 });

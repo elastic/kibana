@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { InferenceClient } from '@kbn/inference-common';
+import type { BoundInferenceClient } from '@kbn/inference-common';
 import {
   CORTEX_ENTITY_TYPES,
   type CortexEntityType,
@@ -108,10 +108,8 @@ const normalizeProposal = (value: unknown): CortexEditProposal | undefined => {
 
 export const createLlmProposeCortexEdits = ({
   inferenceClient,
-  connectorId,
 }: {
-  inferenceClient: InferenceClient;
-  connectorId: string;
+  inferenceClient: BoundInferenceClient;
 }): ProposeCortexEdits => {
   return async ({ transcript, catalog }) => {
     const catalogLines =
@@ -129,7 +127,6 @@ export const createLlmProposeCortexEdits = ({
 
     const response = await inferenceClient.output({
       id: 'nightshift_cortex_optimize',
-      connectorId,
       system: `You maintain a team-wide wiki called Cortex. After an investigation, propose a small set of durable page edits.
 
 Rules:
@@ -186,6 +183,11 @@ export const applyCortexEdits = async ({
   logger: Logger;
 }): Promise<void> => {
   const { pages } = await store.list();
+  logger.info(
+    `Applying ${edits.length} Cortex edit(s): ${edits
+      .map((edit) => `${edit.action}:${edit.entity_type}/${edit.slug}`)
+      .join(', ')}`
+  );
   for (const edit of edits) {
     const slug = resolveSlug(edit, pages);
     // The reinforcement agent validates every write to its own pages against the Mermaid node
@@ -258,8 +260,8 @@ export const optimizeCortex = async ({
   ].join('\n');
 
   const { edits } = await proposeEdits({ transcript, catalog: pages });
+  logger.info(`Cortex optimizer proposed ${edits.length} edit(s)`);
   if (edits.length === 0) {
-    logger.debug('Cortex optimizer proposed no edits');
     return;
   }
 
