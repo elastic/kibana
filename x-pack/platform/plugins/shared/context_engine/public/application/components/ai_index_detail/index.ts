@@ -18,4 +18,3 @@ export { ScopedImprovements } from './scoped_improvements';
  */
 export { SignalsPanel } from './signals_panel';
 export { SourcesPanel } from './sources_panel';
-export { TracesPanel } from './traces_panel';

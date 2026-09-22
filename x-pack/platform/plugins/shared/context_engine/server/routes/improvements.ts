@@ -411,9 +411,7 @@ export const registerImprovementRoutes = ({
         }
 
         try {
-          // No space: the schedule is pinned where it was installed, so a run started from
-          // another space still addresses the one instance rather than a second, invisible one.
-          const executionId = await getScheduleService().run({ aiIndexId, request });
+          const executionId = await getScheduleService().run({ aiIndexId, spaceId, request });
           auditLogger.log(
             improvementDecisionAuditEvent({ action: ImprovementAuditAction.RUN, aiIndexId })
           );
