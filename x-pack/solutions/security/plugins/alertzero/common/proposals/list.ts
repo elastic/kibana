@@ -36,5 +36,15 @@ export interface ProposalsPageParams {
   from: number;
 }
 
-/** Mirrors the proposals service cap; beyond it paging needs `search_after`. */
+/** Rows per request. `from` walks the queue; this only bounds one page of it. */
 export const MAX_QUEUE_PAGE_SIZE = 100;
+
+/**
+ * How far `from` can reach: Elasticsearch refuses `from + size` past
+ * `index.max_result_window`, which defaults to 10,000. Going beyond needs
+ * `search_after`, which is blocked until a proposal carries a unique sortable field —
+ * `id` is unmapped, and revisions inherit `createdAt`, so every sort we use can tie.
+ *
+ * @see {@link https://www.elastic.co/docs/reference/elasticsearch/rest-apis/paginate-search-results#search-after}
+ */
+export const MAX_QUEUE_REACH = 10_000;

@@ -25,3 +25,16 @@ export const CONVERSATION_QUEUE_COUNT_LOADING = i18n.translate(
   'xpack.alertzero.conversationQueue.countLoading',
   { defaultMessage: 'Loading count' }
 );
+
+export const showMoreLabel = (count: number) =>
+  i18n.translate('xpack.alertzero.conversationQueue.showMore', {
+    defaultMessage: 'Show more ({count})',
+    values: { count },
+  });
+
+/** Every bucket renders a Show more, so the accessible name has to say which one. */
+export const showMoreAriaLabel = (bucket: string, count: number) =>
+  i18n.translate('xpack.alertzero.conversationQueue.showMoreAriaLabel', {
+    defaultMessage: 'Show {count, plural, one {# more event} other {# more events}} in {bucket}',
+    values: { bucket, count },
+  });

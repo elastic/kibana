@@ -10,6 +10,7 @@ import styled from '@emotion/styled';
 import {
   EuiAccordion,
   EuiBadge,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
@@ -25,7 +26,12 @@ import {
   type Investigation,
   type RecommendedAction,
 } from '../../types';
-import { CONVERSATION_QUEUE_COUNT_LOADING, EMPTY_CONVERSATION_QUEUE } from './translations';
+import {
+  CONVERSATION_QUEUE_COUNT_LOADING,
+  EMPTY_CONVERSATION_QUEUE,
+  showMoreAriaLabel,
+  showMoreLabel,
+} from './translations';
 import { ConversationQueueSkeleton } from './conversation_queue_skeleton';
 import { ConversationCard, type ConversationsActionsGroupProps } from '../conversation_card';
 import { type BaseActionsProps } from '../actions';
@@ -50,6 +56,10 @@ interface ConversationQueueProps {
    * the bucket size, so the scaffold is as long as the list is about to be.
    */
   loadingRows?: number;
+  /** Rows Show more can still load. The footer hides at 0. */
+  remaining?: number;
+  onShowMore?: () => void;
+  isLoadingMore?: boolean;
   onClickAction: BaseActionsProps['onClickAction'];
   onClickCard: (id: Investigation['id']) => void;
   onOpenChat: (id: Investigation['id']) => void;
@@ -89,6 +99,9 @@ export const ConversationQueue = memo<ConversationQueueProps>(
     isOpen,
     onToggle,
     loadingRows = 0,
+    remaining = 0,
+    onShowMore,
+    isLoadingMore = false,
     isFiltered = false,
     onClickAction,
     onClickCard,
@@ -172,6 +185,36 @@ export const ConversationQueue = memo<ConversationQueueProps>(
                   />
                 </EuiFlexItem>
               ))}
+            </EuiFlexGroup>
+          ) : null}
+
+          {/* EuiAccordion has no footer slot, so the control is the last child. */}
+          {loadingRows === 0 && isOpen && remaining > 0 && onShowMore ? (
+            <EuiFlexGroup
+              justifyContent="center"
+              responsive={false}
+              gutterSize="none"
+              css={{
+                borderTop: `1px solid ${euiTheme.colors.disabled}`,
+                // Keeps the button's hover fill and focus ring off the row's borders.
+                padding: euiTheme.size.xs,
+                // The panel sets `pointer` for the cards; only the button is clickable here.
+                cursor: 'default',
+              }}
+            >
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  size="xs"
+                  color="text"
+                  iconType="chevronSingleDown"
+                  isLoading={isLoadingMore}
+                  onClick={onShowMore}
+                  aria-label={showMoreAriaLabel(CONVERSATION_QUEUE_LABELS[briefingType], remaining)}
+                  data-test-subj={`conversationQueueShowMore-${briefingType}`}
+                >
+                  {showMoreLabel(remaining)}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
             </EuiFlexGroup>
           ) : null}
 

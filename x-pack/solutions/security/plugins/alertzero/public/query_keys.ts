@@ -6,7 +6,6 @@
  */
 
 import { queryKeys as platformQueryKeys } from '@kbn/agentic-investigations-plugin/public';
-import type { ProposalsPageParams } from '../common/proposals/list';
 
 export const queryKeys = {
   /**
@@ -18,15 +17,21 @@ export const queryKeys = {
     chartsSummary: (windowHours: number, bucketMinutes: number) =>
       [...platformQueryKeys.proposals.all, 'charts-summary', windowHours, bucketMinutes] as const,
     /**
-     * Pending proposals for one action category — drives a queue accordion. The page
-     * params are part of the key: a collapsed accordion asks for `size: 0`, and that
-     * response must not shadow the rows an expanded one fetches.
+     * Pages of pending proposals in one category. The offset is deliberately absent:
+     * one key holds every accumulated page, which is what lets Show more append
+     * rather than replace.
      */
-    byCategory: (category: string, page: ProposalsPageParams) =>
-      [...platformQueryKeys.proposals.all, 'by-category', category, page] as const,
-    /** Proposals decided in the last 72 h — drives the closed queue accordion. */
-    closed: (page: ProposalsPageParams) =>
-      [...platformQueryKeys.proposals.all, 'closed', page] as const,
+    byCategory: (category: string) =>
+      [...platformQueryKeys.proposals.all, 'by-category', category] as const,
+    /** Pages of proposals decided in the last 72 h. */
+    closed: () => [...platformQueryKeys.proposals.all, 'closed'] as const,
+    /**
+     * `size: 0` read behind a count badge. Separate from the pages above so a
+     * collapsed accordion can know its size without loading any rows.
+     */
+    byCategoryCount: (category: string) =>
+      [...platformQueryKeys.proposals.all, 'by-category-count', category] as const,
+    closedCount: () => [...platformQueryKeys.proposals.all, 'closed-count'] as const,
   },
   watches: {
     all: ['alertzero', 'watches'] as const,

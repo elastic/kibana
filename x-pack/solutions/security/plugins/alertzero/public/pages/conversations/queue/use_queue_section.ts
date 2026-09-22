@@ -5,24 +5,34 @@
  * 2.0.
  */
 
-import { useCallback, useState } from 'react';
-import type { UseQueryResult } from '@kbn/react-query';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { UseInfiniteQueryResult, UseQueryResult } from '@kbn/react-query';
+import { useQueryClient } from '@kbn/react-query';
 import type { Investigation, RecommendedAction } from '@kbn/agentic-investigations-common';
-import { useClosedProposals, useProposalsByCategory } from '../../../hooks/use_proposals_api';
+import {
+  useClosedProposals,
+  useClosedProposalsCount,
+  useProposalsByCategory,
+  useProposalsByCategoryCount,
+} from '../../../hooks/use_proposals_api';
 import type { ProposalItem, ProposalsPageResponse } from '../../../../common/proposals/list';
-import { CLOSED_GROUP_KEY, MAX_QUEUE_PAGE_SIZE } from '../../../../common/proposals/list';
+import { CLOSED_GROUP_KEY, MAX_QUEUE_REACH } from '../../../../common/proposals/list';
+import { queryKeys } from '../../../query_keys';
 import { proposalToInvestigation } from '../proposal_to_investigation';
 
-/** Category queues page in smaller steps than Closed, which is a 72 h backlog. */
+/** Category queues open smaller than Closed, which is a 72 h backlog. */
 export const CATEGORY_PAGE_SIZE = 10;
 export const CLOSED_PAGE_SIZE = 25;
 
-/** One queue accordion: its query, its open state, its page size, its counts. */
+/** Every queue grows by this much per Show more, whatever it opened with. */
+export const SHOW_MORE_STEP = 10;
+
+/** One queue accordion: its queries, its open state, its counts. */
 export interface QueueSection {
   id: RecommendedAction;
   /**
-   * Bucket size on the server, independent of how many rows are loaded.
-   * `undefined` until the first response.
+   * Bucket size on the server, from a count-only read so a collapsed section still
+   * knows it. `undefined` until that read lands.
    */
   total: number | undefined;
   proposals: ProposalItem[];
@@ -35,76 +45,103 @@ export interface QueueSection {
    */
   loadingRows: number;
   error: unknown;
-  hasMore: boolean;
+  /** Rows Show more can still reach. Labels the control; `canLoadMore` gates it. */
+  remaining: number;
+  canLoadMore: boolean;
   loadMore: () => void;
+  isLoadingMore: boolean;
 }
 
-/**
- * Open state drives the page size: a collapsed section asks for `size: 0`, which
- * returns the bucket total and no rows. Collapsing also resets the cursor, so
- * reopening refetches from the first page.
- */
-const useSectionState = (id: RecommendedAction, pageSize: number) => {
+const useSectionState = (
+  id: RecommendedAction,
+  pagesQueryKey: readonly unknown[]
+): { isOpen: boolean; onToggle: (isOpen: boolean) => void } => {
   const [isOpen, setIsOpen] = useState(id !== CLOSED_GROUP_KEY);
-  const [pages, setPages] = useState(1);
+  const queryClient = useQueryClient();
 
-  const onToggle = useCallback((next: boolean) => {
-    setIsOpen(next);
-    if (!next) {
-      setPages(1);
+  // Dropping the accumulated pages has to happen after the render that disabled the
+  // query, or the cache discard races a refetch of the pages we are throwing away.
+  useEffect(() => {
+    if (!isOpen) {
+      queryClient.removeQueries({ queryKey: pagesQueryKey });
     }
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, queryClient]);
 
-  const loadMore = useCallback(() => setPages((current) => current + 1), []);
-  const size = isOpen ? Math.min(pages * pageSize, MAX_QUEUE_PAGE_SIZE) : 0;
-
-  return { isOpen, onToggle, loadMore, size };
+  return { isOpen, onToggle: setIsOpen };
 };
 
-const toSection = (
+const useSection = (
   id: RecommendedAction,
-  state: ReturnType<typeof useSectionState>,
-  pageSize: number,
-  query: UseQueryResult<ProposalsPageResponse>
+  firstPageSize: number,
+  isOpen: boolean,
+  onToggle: (isOpen: boolean) => void,
+  countQuery: UseQueryResult<ProposalsPageResponse>,
+  pagesQuery: UseInfiniteQueryResult<ProposalsPageResponse>
 ): QueueSection => {
-  const proposals = query.data?.proposals ?? [];
-  const total = query.data?.total;
-  // keepPreviousData holds the previous page across a size change, so isFetching
-  // rather than isLoading is what says "rows are on the way".
-  const isLoadingRows = state.isOpen && query.isFetching && proposals.length === 0;
+  const pages = pagesQuery.data?.pages;
+
+  // Flattening on every render would re-sort the page's merged union each time.
+  const proposals = useMemo(() => pages?.flatMap(({ proposals: rows }) => rows) ?? [], [pages]);
+  const investigations = useMemo(() => proposals.map(proposalToInvestigation), [proposals]);
+
+  const total = countQuery.data?.total;
+  const { fetchNextPage, hasNextPage, isFetchingNextPage } = pagesQuery;
+
+  const loadMore = useCallback(() => {
+    if (hasNextPage && !isFetchingNextPage) {
+      void fetchNextPage();
+    }
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   return {
     id,
     total,
     proposals,
-    investigations: proposals.map(proposalToInvestigation),
-    isOpen: state.isOpen,
-    onToggle: state.onToggle,
-    loadingRows: isLoadingRows ? Math.min(total ?? pageSize, pageSize) : 0,
-    error: query.error,
-    hasMore: total !== undefined && proposals.length < total,
-    loadMore: state.loadMore,
+    investigations,
+    isOpen,
+    onToggle,
+    loadingRows: pagesQuery.isInitialLoading ? Math.min(total ?? firstPageSize, firstPageSize) : 0,
+    error: countQuery.error ?? pagesQuery.error,
+    remaining: Math.max(Math.min(total ?? 0, MAX_QUEUE_REACH) - proposals.length, 0),
+    // hasNextPage is the authority, so the control is never offered when a click
+    // would fetch nothing; `remaining` only labels it.
+    canLoadMore: (hasNextPage ?? false) && !pagesQuery.isInitialLoading,
+    loadMore,
+    isLoadingMore: isFetchingNextPage,
   };
 };
 
 export const useCategoryQueueSection = (category: RecommendedAction): QueueSection => {
-  const state = useSectionState(category, CATEGORY_PAGE_SIZE);
+  const { isOpen, onToggle } = useSectionState(category, queryKeys.proposals.byCategory(category));
 
-  return toSection(
+  return useSection(
     category,
-    state,
     CATEGORY_PAGE_SIZE,
-    useProposalsByCategory(category, { size: state.size, from: 0 })
+    isOpen,
+    onToggle,
+    useProposalsByCategoryCount(category),
+    useProposalsByCategory(category, {
+      firstPageSize: CATEGORY_PAGE_SIZE,
+      step: SHOW_MORE_STEP,
+      enabled: isOpen,
+    })
   );
 };
 
 export const useClosedQueueSection = (): QueueSection => {
-  const state = useSectionState(CLOSED_GROUP_KEY, CLOSED_PAGE_SIZE);
+  const { isOpen, onToggle } = useSectionState(CLOSED_GROUP_KEY, queryKeys.proposals.closed());
 
-  return toSection(
+  return useSection(
     CLOSED_GROUP_KEY,
-    state,
     CLOSED_PAGE_SIZE,
-    useClosedProposals({ size: state.size, from: 0 })
+    isOpen,
+    onToggle,
+    useClosedProposalsCount(),
+    useClosedProposals({
+      firstPageSize: CLOSED_PAGE_SIZE,
+      step: SHOW_MORE_STEP,
+      enabled: isOpen,
+    })
   );
 };

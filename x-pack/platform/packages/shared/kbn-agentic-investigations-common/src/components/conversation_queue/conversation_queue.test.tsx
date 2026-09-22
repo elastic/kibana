@@ -41,7 +41,7 @@ const queueElement = (props: Partial<React.ComponentProps<typeof ConversationQue
 const renderQueue = (props: Partial<React.ComponentProps<typeof ConversationQueue>> = {}) =>
   renderWithKibanaRenderContext(queueElement(props));
 
-const trigger = () => screen.getByRole('button', { name: /Respond/ });
+const trigger = () => screen.getByRole('button', { name: /^Respond/ });
 
 describe('ConversationQueue', () => {
   it('counts the whole bucket, not the rows it was given', () => {
@@ -99,6 +99,49 @@ describe('ConversationQueue', () => {
     fireEvent.click(trigger());
 
     expect(onToggle).toHaveBeenCalledWith(true);
+  });
+
+  describe('show more', () => {
+    const showMore = () => screen.getByTestId('conversationQueueShowMore-respond');
+
+    it('offers only the rows it can still load', () => {
+      renderQueue({ count: 100, remaining: 30, onShowMore: jest.fn() });
+
+      expect(showMore()).toHaveTextContent('Show more (30)');
+    });
+
+    it('is absent with nothing left to load', () => {
+      renderQueue({ count: 1, remaining: 0, onShowMore: jest.fn() });
+
+      expect(screen.queryByTestId('conversationQueueShowMore-respond')).not.toBeInTheDocument();
+    });
+
+    it('is absent while closed', () => {
+      renderQueue({ isOpen: false, remaining: 30, onShowMore: jest.fn() });
+
+      expect(screen.queryByTestId('conversationQueueShowMore-respond')).not.toBeInTheDocument();
+    });
+
+    it('asks the caller for the next page', () => {
+      const onShowMore = jest.fn();
+      renderQueue({ remaining: 30, onShowMore });
+
+      fireEvent.click(showMore());
+
+      expect(onShowMore).toHaveBeenCalledTimes(1);
+    });
+
+    it('disables itself while the next page is in flight', () => {
+      renderQueue({ remaining: 30, onShowMore: jest.fn(), isLoadingMore: true });
+
+      expect(showMore()).toBeDisabled();
+    });
+
+    it('names the bucket, since every queue renders one', () => {
+      renderQueue({ remaining: 30, onShowMore: jest.fn() });
+
+      expect(showMore()).toHaveAccessibleName('Show 30 more events in Respond');
+    });
   });
 
   it('scaffolds one placeholder per incoming row rather than a single spinner', () => {

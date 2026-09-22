@@ -32,7 +32,19 @@ export const QueueSection = ({
   selectedConversationId,
   ...handlers
 }: QueueSectionProps) => {
-  const { investigations, proposals, total, id, isOpen, onToggle, loadingRows } = section;
+  const {
+    investigations,
+    proposals,
+    total,
+    id,
+    isOpen,
+    onToggle,
+    loadingRows,
+    remaining,
+    canLoadMore,
+    loadMore,
+    isLoadingMore,
+  } = section;
 
   const briefingList = useMemo(
     () =>
@@ -60,6 +72,9 @@ export const QueueSection = ({
       isOpen={isOpen}
       onToggle={onToggle}
       loadingRows={loadingRows}
+      remaining={canLoadMore ? remaining : 0}
+      onShowMore={loadMore}
+      isLoadingMore={isLoadingMore}
       isFiltered={Boolean(surfaceFilter)}
       selectedIds={selectedIds}
       {...handlers}
