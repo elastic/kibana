@@ -9,18 +9,22 @@ import { expect } from '@kbn/scout/api';
 import { mlApiTest as apiTest, INTERNAL_API_HEADERS } from '../../fixtures';
 import { getADFqSingleMetricJobConfig } from '../../services/ml_common_configs';
 
-const JOB_ID = 'fq_single_get';
+// Two jobs so the comma-separated multi-job routes can be exercised. Elasticsearch returns
+// jobs ordered by job_id, so the `_1` / `_2` suffixes fix the expected order.
+const JOB_ID_1 = 'fq_single_get_1';
+const JOB_ID_2 = 'fq_single_get_2';
 
 apiTest.describe('get anomaly detector jobs', { tag: '@local-stateful-classic' }, () => {
   apiTest.beforeAll(async ({ apiServices }) => {
-    await apiServices.ml.anomalyDetection.createViaKibana(getADFqSingleMetricJobConfig(JOB_ID));
+    await apiServices.ml.anomalyDetection.createViaKibana(getADFqSingleMetricJobConfig(JOB_ID_1));
+    await apiServices.ml.anomalyDetection.createViaKibana(getADFqSingleMetricJobConfig(JOB_ID_2));
   });
 
   apiTest.afterAll(async ({ apiServices }) => {
     await apiServices.ml.indices.cleanAnomalyDetection();
   });
 
-  apiTest('GET all jobs returns the created job', async ({ apiClient, samlAuth }) => {
+  apiTest('GET all jobs returns the created jobs', async ({ apiClient, samlAuth }) => {
     const { cookieHeader } = await samlAuth.asMlPoweruser();
 
     const res = await apiClient.get('internal/ml/anomaly_detectors', {
@@ -29,25 +33,42 @@ apiTest.describe('get anomaly detector jobs', { tag: '@local-stateful-classic' }
     });
 
     expect(res).toHaveStatusCode(200);
-    expect(res.body.count).toBeGreaterThanOrEqual(1);
-    const job = (res.body.jobs as Array<{ job_id: string }>).find((j) => j.job_id === JOB_ID);
-    expect(job).toBeDefined();
+    expect(res.body.count).toBeGreaterThanOrEqual(2);
+    const jobIds = (res.body.jobs as Array<{ job_id: string }>).map((j) => j.job_id);
+    expect(jobIds).toContain(JOB_ID_1);
+    expect(jobIds).toContain(JOB_ID_2);
   });
 
   apiTest('GET job by ID returns the expected job', async ({ apiClient, samlAuth }) => {
     const { cookieHeader } = await samlAuth.asMlPoweruser();
 
-    const res = await apiClient.get(`internal/ml/anomaly_detectors/${JOB_ID}`, {
+    const res = await apiClient.get(`internal/ml/anomaly_detectors/${JOB_ID_1}`, {
       headers: { ...INTERNAL_API_HEADERS, ...cookieHeader },
       responseType: 'json',
     });
 
     expect(res).toHaveStatusCode(200);
     expect(res.body.count).toBe(1);
-    expect(res.body.jobs[0].job_id).toBe(JOB_ID);
+    expect(res.body.jobs).toHaveLength(1);
+    expect(res.body.jobs[0].job_id).toBe(JOB_ID_1);
   });
 
-  apiTest('GET stats for all jobs returns the created job', async ({ apiClient, samlAuth }) => {
+  apiTest('GET jobs by comma-separated IDs returns both jobs', async ({ apiClient, samlAuth }) => {
+    const { cookieHeader } = await samlAuth.asMlPoweruser();
+
+    const res = await apiClient.get(`internal/ml/anomaly_detectors/${JOB_ID_1},${JOB_ID_2}`, {
+      headers: { ...INTERNAL_API_HEADERS, ...cookieHeader },
+      responseType: 'json',
+    });
+
+    expect(res).toHaveStatusCode(200);
+    expect(res.body.count).toBe(2);
+    expect(res.body.jobs).toHaveLength(2);
+    const jobIds = (res.body.jobs as Array<{ job_id: string }>).map((j) => j.job_id);
+    expect(jobIds).toStrictEqual([JOB_ID_1, JOB_ID_2]);
+  });
+
+  apiTest('GET stats for all jobs returns the created jobs', async ({ apiClient, samlAuth }) => {
     const { cookieHeader } = await samlAuth.asMlPoweruser();
 
     const res = await apiClient.get('internal/ml/anomaly_detectors/_stats', {
@@ -56,21 +77,48 @@ apiTest.describe('get anomaly detector jobs', { tag: '@local-stateful-classic' }
     });
 
     expect(res).toHaveStatusCode(200);
-    expect(res.body.count).toBeGreaterThanOrEqual(1);
-    const jobStats = (res.body.jobs as Array<{ job_id: string }>).find((j) => j.job_id === JOB_ID);
-    expect(jobStats).toBeDefined();
+    expect(res.body.count).toBeGreaterThanOrEqual(2);
+    const jobIds = (res.body.jobs as Array<{ job_id: string }>).map((j) => j.job_id);
+    expect(jobIds).toContain(JOB_ID_1);
+    expect(jobIds).toContain(JOB_ID_2);
   });
 
   apiTest('GET stats by job ID returns the expected job', async ({ apiClient, samlAuth }) => {
     const { cookieHeader } = await samlAuth.asMlPoweruser();
 
-    const res = await apiClient.get(`internal/ml/anomaly_detectors/${JOB_ID}/_stats`, {
+    const res = await apiClient.get(`internal/ml/anomaly_detectors/${JOB_ID_1}/_stats`, {
       headers: { ...INTERNAL_API_HEADERS, ...cookieHeader },
       responseType: 'json',
     });
 
     expect(res).toHaveStatusCode(200);
     expect(res.body.count).toBe(1);
-    expect(res.body.jobs[0].job_id).toBe(JOB_ID);
+    expect(res.body.jobs).toHaveLength(1);
+
+    const [jobStats] = res.body.jobs;
+    expect(jobStats.job_id).toBe(JOB_ID_1);
+    expect(jobStats.timing_stats).toBeDefined();
+    expect(jobStats.state).toBeDefined();
+    expect(jobStats.forecasts_stats).toBeDefined();
+    expect(jobStats.model_size_stats).toBeDefined();
+    expect(jobStats.data_counts).toBeDefined();
+  });
+
+  apiTest('GET stats by comma-separated IDs returns both jobs', async ({ apiClient, samlAuth }) => {
+    const { cookieHeader } = await samlAuth.asMlPoweruser();
+
+    const res = await apiClient.get(
+      `internal/ml/anomaly_detectors/${JOB_ID_1},${JOB_ID_2}/_stats`,
+      {
+        headers: { ...INTERNAL_API_HEADERS, ...cookieHeader },
+        responseType: 'json',
+      }
+    );
+
+    expect(res).toHaveStatusCode(200);
+    expect(res.body.count).toBe(2);
+    expect(res.body.jobs).toHaveLength(2);
+    const jobIds = (res.body.jobs as Array<{ job_id: string }>).map((j) => j.job_id);
+    expect(jobIds).toStrictEqual([JOB_ID_1, JOB_ID_2]);
   });
 });
