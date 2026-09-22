@@ -73,9 +73,14 @@ export const buildAlertDetailsUrl = ({
 /**
  * Security entity detail page URL for a `host.*` or `user.*` chip. Returns
  * `undefined` for `service.*` fields (no Security entity page exists for
- * services) and when `getUrlForApp` isn't wired (e.g. tests), so
- * the caller can fall back to its Discover ES|QL link.
+ * services), for id/email entity fields (the `.../name/:name` route only
+ * resolves display names, so `host.id`, `user.id`, and `user.email` would
+ * open a name lookup for a non-name value and usually land on the wrong or
+ * an empty entity page), and when `getUrlForApp` isn't wired (e.g. tests) —
+ * so the caller can fall back to its exact-field Discover ES|QL link.
  */
+const NAME_ROUTE_FIELDS: ReadonlySet<string> = new Set(['host.name', 'host.hostname', 'user.name']);
+
 export const buildSecurityEntityUrl = ({
   getUrlForApp,
   field,
@@ -85,7 +90,7 @@ export const buildSecurityEntityUrl = ({
   field: string;
   value: string;
 }): string | undefined => {
-  if (!getUrlForApp) {
+  if (!getUrlForApp || !NAME_ROUTE_FIELDS.has(field)) {
     return undefined;
   }
 

@@ -101,7 +101,10 @@ export const createHuntCorrelationAttachmentDefinition = ({
     }
 
     const reportIds = [...new Set(parsed.diamond_scores.map((score) => score.related_report_id))];
-    const esql = reportIds.length > 0 ? buildThreatReportsInEsql({ reportIds }) : undefined;
+    const esql =
+      reportIds.length > 0
+        ? buildThreatReportsInEsql({ reportIds, spaceId: navigation.spaceId })
+        : undefined;
 
     return buildDiscoverActionButton({
       share: navigation.share,

@@ -39,7 +39,7 @@ import {
   buildMitreTechniqueUrl,
 } from '../shared/primitives';
 import { LabeledBadgeTable } from '../shared/labeled_badge_table';
-import { DIAMOND_VERTICES } from '../shared/severity';
+import { DIAMOND_VERTICES, severityBadgeColor } from '../shared/severity';
 import {
   THREAT_REPORT_API_PATH,
   THREAT_REPORT_API_VERSION,
@@ -457,6 +457,42 @@ const renderEvidenceSection = (liveData: ThreatReportApiResponse): React.ReactNo
   );
 };
 
+const renderHeadlineSection = (liveData: ThreatReportApiResponse): React.ReactNode => {
+  const title = liveData.content?.title;
+  const severityLevel = liveData.severity?.level;
+  const sourceName = liveData.source?.name;
+
+  if (!title && !severityLevel && !sourceName) {
+    return null;
+  }
+
+  return (
+    <div key="headline" data-test-subj="alertzeroThreatAttachmentHeadline">
+      {title && (
+        <EuiText size="s">
+          <strong>{title}</strong>
+        </EuiText>
+      )}
+      {(severityLevel || sourceName) && (
+        <EuiFlexGroup gutterSize="s" wrap responsive={false}>
+          {severityLevel && (
+            <EuiFlexItem grow={false}>
+              <EuiBadge color={severityBadgeColor(severityLevel)}>{severityLevel}</EuiBadge>
+            </EuiFlexItem>
+          )}
+          {sourceName && (
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                {sourceName}
+              </EuiText>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      )}
+    </div>
+  );
+};
+
 const renderEnrichedSections = ({
   liveData,
   navigation,
@@ -469,6 +505,7 @@ const renderEnrichedSections = ({
   }
 
   const sections = [
+    renderHeadlineSection(liveData),
     renderExternalReferencesSection(liveData),
     renderIocsSection(liveData, navigation),
     renderTtpsGeoCategoriesSection(liveData),

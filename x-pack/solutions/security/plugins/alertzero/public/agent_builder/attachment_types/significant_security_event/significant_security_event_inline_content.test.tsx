@@ -487,4 +487,39 @@ describe('SignificantSecurityEventInlineContent', () => {
       ).toBeInTheDocument();
     });
   });
+
+  it('renders the proposal section when maps_to_proposal has fields set', () => {
+    renderWithI18n(
+      <SignificantSecurityEventInlineContent
+        {...renderProps(
+          buildAttachment({
+            ...baseData,
+            maps_to_proposal: {
+              category: 'credential_theft',
+              impact: 'Attacker can pivot to additional hosts using stolen credentials.',
+              confidence: 0.75,
+              actionWorkflowId: 'wf-isolate-host',
+              manual_remediation: ['Rotate the affected credentials', 'Isolate host-1'],
+            },
+          })
+        )}
+      />
+    );
+    expect(screen.getByText('credential_theft')).toBeInTheDocument();
+    expect(
+      screen.getByText('Attacker can pivot to additional hosts using stolen credentials.')
+    ).toBeInTheDocument();
+    expect(screen.getByText('wf-isolate-host', { exact: false })).toBeInTheDocument();
+    expect(screen.getByText('Rotate the affected credentials')).toBeInTheDocument();
+    expect(screen.getByText('Isolate host-1')).toBeInTheDocument();
+  });
+
+  it('renders nothing for the proposal section when maps_to_proposal has no fields set', () => {
+    renderWithI18n(
+      <SignificantSecurityEventInlineContent
+        {...renderProps(buildAttachment({ ...baseData, maps_to_proposal: {} }))}
+      />
+    );
+    expect(screen.queryByTestId('alertzeroSignificantSecurityEventProposal')).toBeNull();
+  });
 });

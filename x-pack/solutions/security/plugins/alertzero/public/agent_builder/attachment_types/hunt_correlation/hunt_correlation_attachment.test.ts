@@ -74,6 +74,7 @@ describe('createHuntCorrelationAttachmentDefinition', () => {
     const attachment = { data: baseData } as unknown as HuntCorrelationAttachment;
     const expectedEsql = buildThreatReportsInEsql({
       reportIds: ['report-2', 'report-3', 'report-2'],
+      spaceId: 'default',
     });
 
     expect(definition.getActionButtons?.({ attachment } as never)).toEqual([

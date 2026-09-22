@@ -46,8 +46,11 @@ const quoteEsqlList = (values: string[]): string =>
 
 /**
  * One Discover exit for a whole set of document refs, each carrying its own index.
- * ES|QL `FROM` accepts a comma-separated source list, so refs spread across several
- * indices still open as a single query.
+ * ES|QL `FROM` accepts a comma-separated source list, but a flat `_id IN (...)`
+ * filter across all sources loses the id-to-index pairing (a matching id can land
+ * in the wrong source index and surface an unrelated document). Group refs by
+ * index and OR each group's own `_id IN (...)` clause, scoped to its index via
+ * `_index ==`, so only the exact (index, id) pairs match.
  */
 const buildDocRefsLookupEsql = ({
   refs,
@@ -62,17 +65,32 @@ const buildDocRefsLookupEsql = ({
    */
   idField?: string;
 }): string | undefined => {
-  const ids = uniqueNonEmpty(refs.map((ref) => ref.id));
-  const indices = uniqueNonEmpty(refs.map((ref) => ref.index));
-  if (ids.length === 0 || indices.length === 0) {
+  const byIndex = new Map<string, string[]>();
+  for (const ref of refs) {
+    const index = ref.index.trim();
+    const id = ref.id.trim();
+    if (!index || !id) {
+      continue;
+    }
+    const ids = byIndex.get(index) ?? [];
+    ids.push(id);
+    byIndex.set(index, ids);
+  }
+
+  if (byIndex.size === 0) {
     return undefined;
   }
 
-  const quotedIds = quoteEsqlList(ids);
-  const idFieldClause = idField ? `${idField} IN (${quotedIds}) OR ` : '';
+  const indices = [...byIndex.keys()];
+  const perIndexClauses = indices.map((index) => {
+    const quotedIds = quoteEsqlList(uniqueNonEmpty(byIndex.get(index) ?? []));
+    const idFieldClause = idField ? `${idField} IN (${quotedIds}) OR ` : '';
+    return `(_index == ${quoteEsqlIdentifier(index)} AND (${idFieldClause}_id IN (${quotedIds})))`;
+  });
+
   return `FROM ${indices
     .map(quoteEsqlIdentifier)
-    .join(', ')} METADATA _id | WHERE ${idFieldClause}_id IN (${quotedIds})`;
+    .join(', ')} METADATA _id, _index | WHERE ${perIndexClauses.join(' OR ')}`;
 };
 
 /** Discover exit for all of an SSE's `events[]` refs at once. */
@@ -96,17 +114,40 @@ export const buildAlertsLookupEsql = ({
     idField: 'kibana.alert.uuid',
   });
 
-export const buildThreatReportLookupEsql = ({ reportId }: { reportId: string }): string => {
+/** Sentinel space id for global/shared threat-intel rows (mirrors GLOBAL_SPACE_ID in security_solution). */
+export const GLOBAL_THREAT_INTEL_SPACE_ID = '*' as const;
+
+/**
+ * Threat reports are logically space-scoped (`space_id` keyword field), same as
+ * the threat-intel route's own space filtering. Discover exits query the shared
+ * hidden index directly, bypassing the route, so they must apply the same
+ * `space_id IN (currentSpace, '*')` filter themselves or a user could read
+ * another space's report by following this link.
+ */
+const buildThreatReportSpaceWhere = (spaceId: string): string =>
+  `space_id IN (${quoteEsqlList([spaceId, GLOBAL_THREAT_INTEL_SPACE_ID])})`;
+
+export const buildThreatReportLookupEsql = ({
+  reportId,
+  spaceId,
+}: {
+  reportId: string;
+  spaceId: string;
+}): string => {
   const escapedReportId = escapeEsqlString(reportId);
   return `FROM ${quoteEsqlIdentifier(
     THREAT_REPORTS_INDEX_PATTERN
-  )} METADATA _id | WHERE _id == "${escapedReportId}"`;
+  )} METADATA _id | WHERE _id == "${escapedReportId}" AND ${buildThreatReportSpaceWhere(
+    spaceId
+  )}`;
 };
 
 export const buildThreatReportsInEsql = ({
   reportIds,
+  spaceId,
 }: {
   reportIds: string[];
+  spaceId: string;
 }): string | undefined => {
   const uniqueReportIds = [...new Set(reportIds)];
   if (uniqueReportIds.length === 0) {
@@ -116,7 +157,7 @@ export const buildThreatReportsInEsql = ({
   const quotedIds = uniqueReportIds.map((reportId) => `"${escapeEsqlString(reportId)}"`).join(', ');
   return `FROM ${quoteEsqlIdentifier(
     THREAT_REPORTS_INDEX_PATTERN
-  )} METADATA _id | WHERE _id IN (${quotedIds})`;
+  )} METADATA _id | WHERE _id IN (${quotedIds}) AND ${buildThreatReportSpaceWhere(spaceId)}`;
 };
 
 /**

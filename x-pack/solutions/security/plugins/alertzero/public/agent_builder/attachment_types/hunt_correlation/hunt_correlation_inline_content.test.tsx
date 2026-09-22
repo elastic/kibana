@@ -85,7 +85,7 @@ describe('HuntCorrelationInlineContent', () => {
 
   it('renders related report id as a Discover link when share is present', () => {
     const reportId = 'report-2';
-    const expectedEsql = buildThreatReportLookupEsql({ reportId });
+    const expectedEsql = buildThreatReportLookupEsql({ reportId, spaceId: 'default' });
     const expectedHref = `https://example.test/discover?esql=${encodeURIComponent(expectedEsql)}`;
 
     render(

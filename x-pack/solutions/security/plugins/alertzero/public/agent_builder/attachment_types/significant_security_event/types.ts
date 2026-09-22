@@ -27,6 +27,9 @@ export type SignificantSecurityAlertRef = NonNullable<
   SignificantSecurityEventAttachmentData['alerts']
 >[number];
 export type HuntResult = NonNullable<SignificantSecurityEventAttachmentData['hunt_result']>;
+export type MapsToProposal = NonNullable<
+  SignificantSecurityEventAttachmentData['maps_to_proposal']
+>;
 
 /**
  * Validates the raw attachment payload against the zod schema. The server already

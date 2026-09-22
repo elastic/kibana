@@ -116,7 +116,8 @@ describe('createSignificantSecurityEventAttachmentDefinition', () => {
     expect(eventButtons?.[0].label).toBe('Open events in Discover');
     expect(decodeURIComponent(eventButtons?.[0].href ?? '')).toContain(
       'FROM "logs-endpoint.events.process-default", "logs-endpoint.events.network-default" ' +
-        'METADATA _id | WHERE _id IN ("evt-1", "evt-2")'
+        'METADATA _id, _index | WHERE (_index == "logs-endpoint.events.process-default" AND ' +
+        '(_id IN ("evt-1"))) OR (_index == "logs-endpoint.events.network-default" AND (_id IN ("evt-2")))'
     );
 
     const alertButtons = getButtons({

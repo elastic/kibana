@@ -97,7 +97,7 @@ export const createSignificantSecurityEventAttachmentDefinition = ({
     const parsed = parseOnce(data);
     const title = data?.attachmentLabel ?? data?.title ?? DEFAULT_LABEL;
     const totalHits = parsed?.hunt_result?.tier1.counts.total_hits;
-    if (typeof totalHits === 'number') {
+    if (parsed?.hunt_result?.has_confirmed_hit && typeof totalHits === 'number') {
       return i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.labelWithHits', {
         defaultMessage: '{count, plural, one {# hit confirms} other {# hits confirm}}: {title}',
         values: { count: totalHits, title },

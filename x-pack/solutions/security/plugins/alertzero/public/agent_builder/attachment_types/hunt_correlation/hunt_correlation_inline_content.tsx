@@ -162,7 +162,10 @@ export const HuntCorrelationInlineContent: React.FC<HuntCorrelationInlineContent
         { defaultMessage: 'Related report' }
       ),
       render: (relatedReportId: string) => {
-        const esql = buildThreatReportLookupEsql({ reportId: relatedReportId });
+        const esql = buildThreatReportLookupEsql({
+          reportId: relatedReportId,
+          spaceId: navigation.spaceId,
+        });
         const href = buildDiscoverEsqlUrl({ share: navigation.share, esql });
         return (
           <IocBadge

@@ -58,7 +58,7 @@ describe('createThreatAttachmentDefinition', () => {
     const definition = createThreatAttachmentDefinition({ http, navigation: withShare });
     const reportId = 'r-action';
     const attachment = { data: { report_id: reportId } } as ThreatAttachment;
-    const expectedEsql = buildThreatReportLookupEsql({ reportId });
+    const expectedEsql = buildThreatReportLookupEsql({ reportId, spaceId: 'default' });
 
     expect(definition.getActionButtons?.({ attachment } as never)).toEqual([
       expect.objectContaining({

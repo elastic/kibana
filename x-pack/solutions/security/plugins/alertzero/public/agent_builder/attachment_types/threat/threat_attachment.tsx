@@ -84,7 +84,10 @@ export const createThreatAttachmentDefinition = ({
     if (!isValidThreatAttachmentData(attachment?.data)) {
       return [];
     }
-    const esql = buildThreatReportLookupEsql({ reportId: attachment.data.report_id });
+    const esql = buildThreatReportLookupEsql({
+      reportId: attachment.data.report_id,
+      spaceId: navigation.spaceId,
+    });
     return buildDiscoverActionButton({ share: navigation.share, esql, label: OPEN_REPORT_LABEL });
   },
 });

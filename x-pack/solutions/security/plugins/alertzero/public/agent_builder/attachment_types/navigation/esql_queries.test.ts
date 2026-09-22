@@ -32,7 +32,7 @@ describe('esql_queries', () => {
     ).toBe('FROM "logs-endpoint.events.process-default" METADATA _id | WHERE _id == "abc\\"def"');
   });
 
-  it('builds one multi-index events lookup and de-dupes ids and indices', () => {
+  it('builds one multi-index events lookup, groups ids per index, and de-dupes', () => {
     expect(
       buildEventsLookupEsql({
         events: [
@@ -42,13 +42,32 @@ describe('esql_queries', () => {
         ],
       })
     ).toBe(
-      'FROM "logs-a-default", "logs-b-default" METADATA _id | ' + 'WHERE _id IN ("evt-1", "evt-2")'
+      'FROM "logs-a-default", "logs-b-default" METADATA _id, _index | ' +
+        'WHERE (_index == "logs-a-default" AND (_id IN ("evt-1"))) OR ' +
+        '(_index == "logs-b-default" AND (_id IN ("evt-2")))'
+    );
+  });
+
+  it('scopes each id to its own source index so a shared id cannot cross-match', () => {
+    // Same id in two different indices must not surface the other index's document.
+    expect(
+      buildEventsLookupEsql({
+        events: [
+          { event_id: 'shared-id', source_index: 'logs-a-default' },
+          { event_id: 'shared-id', source_index: 'logs-b-default' },
+        ],
+      })
+    ).toBe(
+      'FROM "logs-a-default", "logs-b-default" METADATA _id, _index | ' +
+        'WHERE (_index == "logs-a-default" AND (_id IN ("shared-id"))) OR ' +
+        '(_index == "logs-b-default" AND (_id IN ("shared-id")))'
     );
   });
 
   it('escapes quotes in event ids and indices', () => {
     expect(buildEventsLookupEsql({ events: [{ event_id: 'a"b', source_index: 'logs-"x"' }] })).toBe(
-      'FROM "logs-\\"x\\"" METADATA _id | WHERE _id IN ("a\\"b")'
+      'FROM "logs-\\"x\\"" METADATA _id, _index | ' +
+        'WHERE (_index == "logs-\\"x\\"" AND (_id IN ("a\\"b")))'
     );
   });
 
@@ -71,26 +90,29 @@ describe('esql_queries', () => {
         ],
       })
     ).toBe(
-      'FROM ".alerts-security.alerts-soc" METADATA _id | ' +
-        'WHERE kibana.alert.uuid IN ("alert-1", "alert-2") OR _id IN ("alert-1", "alert-2")'
+      'FROM ".alerts-security.alerts-soc" METADATA _id, _index | ' +
+        'WHERE (_index == ".alerts-security.alerts-soc" AND ' +
+        '(kibana.alert.uuid IN ("alert-1", "alert-2") OR _id IN ("alert-1", "alert-2")))'
     );
     expect(buildAlertsLookupEsql({ alerts: [] })).toBeUndefined();
   });
 
-  it('builds threat report lookup ES|QL', () => {
-    expect(buildThreatReportLookupEsql({ reportId: 'default:fp1' })).toBe(
-      'FROM ".kibana-threat-reports*" METADATA _id | WHERE _id == "default:fp1"'
+  it('builds threat report lookup ES|QL scoped to the current space and global sentinel', () => {
+    expect(buildThreatReportLookupEsql({ reportId: 'default:fp1', spaceId: 'soc' })).toBe(
+      'FROM ".kibana-threat-reports*" METADATA _id | WHERE _id == "default:fp1" AND ' +
+        'space_id IN ("soc", "*")'
     );
   });
 
-  it('builds IN query for multiple report ids and de-dupes', () => {
-    expect(buildThreatReportsInEsql({ reportIds: ['r1', 'r2', 'r1'] })).toBe(
-      'FROM ".kibana-threat-reports*" METADATA _id | WHERE _id IN ("r1", "r2")'
+  it('builds IN query for multiple report ids and de-dupes, scoped to the current space', () => {
+    expect(buildThreatReportsInEsql({ reportIds: ['r1', 'r2', 'r1'], spaceId: 'soc' })).toBe(
+      'FROM ".kibana-threat-reports*" METADATA _id | WHERE _id IN ("r1", "r2") AND ' +
+        'space_id IN ("soc", "*")'
     );
   });
 
   it('returns undefined for an empty report ids array', () => {
-    expect(buildThreatReportsInEsql({ reportIds: [] })).toBeUndefined();
+    expect(buildThreatReportsInEsql({ reportIds: [], spaceId: 'soc' })).toBeUndefined();
   });
 
   it('builds entity lookup ES|QL on the exact ECS field', () => {

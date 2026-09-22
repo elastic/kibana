@@ -53,7 +53,7 @@ describe('buildAlertDetailsUrl', () => {
 });
 
 describe('buildSecurityEntityUrl', () => {
-  it('builds a hosts deep link for a host.* field', () => {
+  it('builds a hosts deep link for a host.name field', () => {
     const getUrlForApp = jest
       .fn()
       .mockReturnValue('https://kbn.test/app/security/hosts/name/WIN-ANALYST01');
@@ -70,7 +70,7 @@ describe('buildSecurityEntityUrl', () => {
     expect(url).toBe('https://kbn.test/app/security/hosts/name/WIN-ANALYST01');
   });
 
-  it('builds a users deep link for a user.* field', () => {
+  it('builds a users deep link for a user.name field', () => {
     const getUrlForApp = jest
       .fn()
       .mockReturnValue('https://kbn.test/app/security/users/name/dev-user');
@@ -88,6 +88,21 @@ describe('buildSecurityEntityUrl', () => {
     const url = buildSecurityEntityUrl({ getUrlForApp, field: 'service.name', value: 'checkout' });
 
     expect(url).toBeUndefined();
+    expect(getUrlForApp).not.toHaveBeenCalled();
+  });
+
+  it('returns undefined for id/email entity fields, which the name route cannot resolve', () => {
+    const getUrlForApp = jest.fn();
+
+    expect(
+      buildSecurityEntityUrl({ getUrlForApp, field: 'host.id', value: 'host-euid-123' })
+    ).toBeUndefined();
+    expect(
+      buildSecurityEntityUrl({ getUrlForApp, field: 'user.id', value: 'user-euid-123' })
+    ).toBeUndefined();
+    expect(
+      buildSecurityEntityUrl({ getUrlForApp, field: 'user.email', value: 'dev@example.com' })
+    ).toBeUndefined();
     expect(getUrlForApp).not.toHaveBeenCalled();
   });
 

@@ -52,6 +52,7 @@ import { formatPercent } from '../shared/severity';
 import { parseSignificantSecurityEventData } from './types';
 import type {
   HuntResult,
+  MapsToProposal,
   SignificantSecurityAlertRef,
   SignificantSecurityEventAttachment,
   SignificantSecurityEventRef,
@@ -123,6 +124,29 @@ const EventRows: React.FC<{
         defaultMessage: 'Index',
       }),
       render: (index: string) => <span css={cellStyles}>{index}</span>,
+    },
+    {
+      field: 'matched',
+      name: i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.eventMatched', {
+        defaultMessage: 'Matched on',
+      }),
+      render: (matched: SignificantSecurityEventRef['matched']) => {
+        if (!matched) {
+          return null;
+        }
+        const matchedValue = matched.ioc?.value ?? matched.technique_id;
+        if (!matchedValue) {
+          return <span css={cellStyles}>{matched.field}</span>;
+        }
+        return (
+          <span css={cellStyles}>
+            {matchedValue}
+            {' ('}
+            {matched.field}
+            {')'}
+          </span>
+        );
+      },
     },
   ];
 
@@ -317,18 +341,30 @@ const EvidenceSection: React.FC<{
     return null;
   }
 
+  const visibleItems = items.slice(0, EVIDENCE_BULLET_LIMIT);
+  const hiddenCount = items.length - visibleItems.length;
+
   return (
     <>
       <SectionHeading>{label}</SectionHeading>
       <EuiText size="s">
         <ul>
-          {items.slice(0, EVIDENCE_BULLET_LIMIT).map((item) => (
+          {visibleItems.map((item) => (
             <li key={item}>
               <span css={cellStyles}>{item}</span>
             </li>
           ))}
         </ul>
       </EuiText>
+      {hiddenCount > 0 && (
+        <EuiText size="xs" color="subdued" data-test-subj="alertzeroSignificantSecurityEventEvidenceOverflow">
+          <FormattedMessage
+            id="xpack.alertzero.agentBuilder.attachments.sse.evidenceOverflow"
+            defaultMessage="+{hiddenCount} more"
+            values={{ hiddenCount }}
+          />
+        </EuiText>
+      )}
     </>
   );
 };
@@ -557,6 +593,71 @@ const HuntResultSection: React.FC<{ huntResult: HuntResult }> = ({ huntResult })
   );
 };
 
+const ProposalSection: React.FC<{ proposal: MapsToProposal }> = ({ proposal }) => {
+  const { category, impact, confidence, actionWorkflowId, manual_remediation: manualSteps } =
+    proposal;
+
+  if (
+    !category &&
+    !impact &&
+    confidence == null &&
+    !actionWorkflowId &&
+    !manualSteps?.length
+  ) {
+    return null;
+  }
+
+  return (
+    <div data-test-subj="alertzeroSignificantSecurityEventProposal">
+      <SectionHeading>
+        {i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.proposal', {
+          defaultMessage: 'Proposal',
+        })}
+      </SectionHeading>
+      <EuiFlexGroup gutterSize="s" wrap responsive={false} alignItems="center">
+        {category && (
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="hollow">{category}</EuiBadge>
+          </EuiFlexItem>
+        )}
+        {confidence != null && (
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" color="subdued">
+              {formatPercent(confidence)}
+            </EuiText>
+          </EuiFlexItem>
+        )}
+        {actionWorkflowId && (
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" color="subdued">
+              {i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.proposalWorkflow', {
+                defaultMessage: 'Action workflow: {actionWorkflowId}',
+                values: { actionWorkflowId },
+              })}
+            </EuiText>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+      {impact && (
+        <EuiText size="s">
+          <span css={cellStyles}>{impact}</span>
+        </EuiText>
+      )}
+      {manualSteps && manualSteps.length > 0 && (
+        <EuiText size="s">
+          <ul>
+            {manualSteps.map((step) => (
+              <li key={step}>
+                <span css={cellStyles}>{step}</span>
+              </li>
+            ))}
+          </ul>
+        </EuiText>
+      )}
+    </div>
+  );
+};
+
 export const SignificantSecurityEventInlineContent: React.FC<
   SignificantSecurityEventInlineContentProps
 > = ({ attachment, navigation }) => {
@@ -573,7 +674,7 @@ export const SignificantSecurityEventInlineContent: React.FC<
     );
   }
 
-  const hasEventsOrAlerts = (parsed.events ?? []).length > 0 || (parsed.alerts ?? []).length > 0;
+  const hasEvents = (parsed.events ?? []).length > 0;
 
   return (
     <EuiPanel hasBorder={false} paddingSize="s" data-test-subj={SSE_ATTACHMENT_TEST_ID}>
@@ -643,7 +744,10 @@ export const SignificantSecurityEventInlineContent: React.FC<
                       action={discoverAction(
                         buildDiscoverEsqlUrl({
                           share: navigation.share,
-                          esql: buildThreatReportLookupEsql({ reportId: parsed.report_id }),
+                          esql: buildThreatReportLookupEsql({
+                            reportId: parsed.report_id,
+                            spaceId: navigation.spaceId,
+                          }),
                         })
                       )}
                       testSubj="alertzeroSignificantSecurityEventReportLink"
@@ -671,9 +775,16 @@ export const SignificantSecurityEventInlineContent: React.FC<
         </>
       )}
 
+      {parsed.maps_to_proposal && (
+        <>
+          <ProposalSection proposal={parsed.maps_to_proposal} />
+          <EuiSpacer size="s" />
+        </>
+      )}
+
       <TimelineSection timeline={parsed.timeline} />
 
-      {hasEventsOrAlerts && (
+      {hasEvents && (
         <>
           <EuiSpacer size="s" />
           <EuiAccordion
