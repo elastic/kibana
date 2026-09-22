@@ -45,8 +45,8 @@ import {
 } from './discoveries';
 import { NIGHTSHIFT_CORTEX_HYDRATE_WORKFLOW } from './nightshift_investigations/cortex_hydrate';
 import { NIGHTSHIFT_CORTEX_OPTIMIZE_WORKFLOW } from './nightshift_investigations/cortex_optimize';
-import { NIGHTSHIFT_INVESTIGATION_WORKFLOW } from './nightshift_investigations/nightshift_investigation';
 import { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW } from './nightshift_investigations/investigation';
+import { NIGHTSHIFT_INVESTIGATION_WORKFLOW } from './nightshift_investigations/nightshift_investigation';
 import {
   SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW,
   SIGNIFICANT_EVENTS_DETECTION_WORKFLOW,

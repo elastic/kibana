@@ -41,10 +41,7 @@ export const ensureInvestigationAgentStepDefinition = (
       'Installs an investigation agent in the space this workflow runs in, so any caller can start an investigation without installing it first. Idempotent: an existing agent is left untouched.',
     inputSchema: z.object({
       agent_id: z
-        .enum([
-          SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_ID,
-          NIGHTSHIFT_INVESTIGATION_AGENT_ID,
-        ])
+        .enum([SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_ID, NIGHTSHIFT_INVESTIGATION_AGENT_ID])
         .optional()
         .describe(
           `Which investigation agent to install. Defaults to ${SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_ID}.`
