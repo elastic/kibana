@@ -46,7 +46,7 @@ fi
 
 for zip_file in "${ZIP_FILES[@]}"; do
   echo "[upload_kb_artifacts] Uploading $(basename "$zip_file") to $GCS_BUCKET (overwriting if exists)"
-  gsutil -o "GSUtil:no_clobber=False" cp "$zip_file" "$GCS_BUCKET/"
+  gcloud storage cp "$zip_file" "$GCS_BUCKET/"
   echo "[upload_kb_artifacts] Finished uploading $(basename "$zip_file")"
 done
 

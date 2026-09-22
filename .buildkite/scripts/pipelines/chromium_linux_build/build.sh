@@ -9,6 +9,7 @@ echo "---Preparing to build Chromium of commit hash: $CHROMIUM_COMMIT_HASH"
 BUILD_ROOT_DIR="$HOME/chromium"
 
 KIBANA_CHECKOUT_DIR="$(pwd)"
+export KIBANA_CHECKOUT_DIR
 
 BUILD_SCRIPT="$KIBANA_CHECKOUT_DIR/x-pack/build_chromium"
 
@@ -25,7 +26,7 @@ ARTIFACT_QUERY="chromium-${CHROMIUM_COMMIT_HASH:0:7}-.*_$PLATFORM_VARIANT"
 
 # Query to determine if expected build artifact from a prior build exists, 
 # the build.py script uploads the build artifact to the staging bucket
-artifacts=$(gsutil ls "$ARTIFACT_STAGING_STORAGE_BUCKET" | grep "$ARTIFACT_QUERY" || true)
+artifacts=$(gcloud storage ls "$ARTIFACT_STAGING_STORAGE_BUCKET" | grep "$ARTIFACT_QUERY" || true)
 
 if [[ -z "$artifacts" ]]; then
   echo "No files found matching the query: $ARTIFACT_QUERY"
@@ -48,6 +49,8 @@ if [[ -z "$artifacts" ]]; then
     # Install the OS packages, configure the environment, download the chromium source (56GB)
     python3 "$BUILD_SCRIPT_SYMLINK/init.py"
 
+    "$KIBANA_CHECKOUT_DIR/.buildkite/scripts/common/activate_service_account.sh" "kibana-ci-access-chromium-blds"
+
     echo "---Building $PLATFORM_VARIANT Chromium of commit hash: $CHROMIUM_COMMIT_HASH"
 
     # Run the build script with the path to the chromium src directory, the git commit hash
@@ -55,7 +58,8 @@ if [[ -z "$artifacts" ]]; then
 
     echo "---Upload build artefact to prod storage bucket"
 
-    gsutil cp "$BUILD_ROOT_DIR/chromium/src/out/headless/chromium-*" "$ARTIFACT_PROD_STORAGE_BUCKET"
+    "$KIBANA_CHECKOUT_DIR/.buildkite/scripts/common/activate_service_account.sh" "kibana-ci-access-chromium-blds"
+    gcloud storage cp "$BUILD_ROOT_DIR/chromium/src/out/headless/chromium-*" "$ARTIFACT_PROD_STORAGE_BUCKET"
 
     echo "---Persisting build artefact to buildkite for following steps"
 
@@ -63,7 +67,8 @@ if [[ -z "$artifacts" ]]; then
 
 else
   echo "$artifacts" | while read -r file; do
-    gsutil cp "$file" .
+    "$KIBANA_CHECKOUT_DIR/.buildkite/scripts/common/activate_service_account.sh" "kibana-ci-access-chromium-blds"
+    gcloud storage cp "$file" .
   done
 
   shopt -s nullglob
