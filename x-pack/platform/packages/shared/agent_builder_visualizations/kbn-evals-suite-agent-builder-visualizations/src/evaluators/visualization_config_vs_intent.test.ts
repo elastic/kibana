@@ -36,6 +36,11 @@ const evaluate = async ({
   });
 };
 
+const mismatchesOf = (result: { metadata?: Record<string, unknown> }) =>
+  (result.metadata?.visualizations as Array<{ mismatches: string[] }>).flatMap(
+    (detail) => detail.mismatches
+  );
+
 describe('createVisualizationConfigVsIntentEvaluator', () => {
   it('skips when no gold config is declared', async () => {
     const result = await evaluate({
@@ -56,7 +61,23 @@ describe('createVisualizationConfigVsIntentEvaluator', () => {
     expect(result.label).toBe('skipped');
   });
 
-  it('scores 1 when xy layer type and column roles match after alias resolution', async () => {
+  it('skips gold configs that only declare type and mark, which the chart-form judge owns', async () => {
+    const lens = await evaluate({
+      visualizations: [{ esql: GOLD_QUERY, chartType: 'xy', visualization: { type: 'pie' } }],
+      config: { type: 'xy', layers: [{ type: 'bar' }] },
+    });
+    const vega = await evaluate({
+      visualizations: [
+        { esql: GOLD_QUERY, renderer: 'vega', visualization: { spec: '{"mark":"bar"}' } },
+      ],
+      config: { spec: { mark: 'point' } },
+    });
+
+    expect(lens.label).toBe('skipped');
+    expect(vega.label).toBe('skipped');
+  });
+
+  it('scores 1 when column roles match after alias resolution', async () => {
     const result = await evaluate({
       query: GOLD_QUERY,
       config: {
@@ -77,13 +98,7 @@ describe('createVisualizationConfigVsIntentEvaluator', () => {
           renderer: 'lens',
           visualization: {
             type: 'xy',
-            layers: [
-              {
-                type: 'bar',
-                x: { column: 'response' },
-                y: [{ column: 'count' }],
-              },
-            ],
+            layers: [{ type: 'line', x: { column: 'response' }, y: [{ column: 'count' }] }],
           },
         },
       ],
@@ -91,22 +106,7 @@ describe('createVisualizationConfigVsIntentEvaluator', () => {
 
     expect(result.score).toBe(1);
     expect(result.label).toBe('match');
-  });
-
-  it('scores 0 when chart type mismatches', async () => {
-    const result = await evaluate({
-      config: { type: 'pie' },
-      visualizations: [
-        {
-          esql: GOLD_QUERY,
-          chartType: 'xy',
-          visualization: { type: 'xy', layers: [] },
-        },
-      ],
-    });
-
-    expect(result.score).toBe(0);
-    expect(result.label).toBe('mismatch');
+    expect(result.metadata).toEqual(expect.objectContaining({ checkedLeaves: 2 }));
   });
 
   it('gives partial credit when one gold y column is missing', async () => {
@@ -114,79 +114,38 @@ describe('createVisualizationConfigVsIntentEvaluator', () => {
       query: GOLD_QUERY,
       config: {
         type: 'xy',
-        layers: [
-          {
-            type: 'bar',
-            y: [{ column: 'Request Count' }, { column: 'Total Bytes' }],
-          },
-        ],
+        layers: [{ type: 'bar', y: [{ column: 'Request Count' }, { column: 'Total Bytes' }] }],
       },
       visualizations: [
         {
           esql: `FROM kibana_sample_data_logs | STATS count = COUNT(*) BY response.keyword`,
-          visualization: {
-            type: 'xy',
-            layers: [{ type: 'bar', y: [{ column: 'count' }] }],
-          },
+          visualization: { type: 'xy', layers: [{ type: 'bar', y: [{ column: 'count' }] }] },
         },
       ],
     });
 
-    expect(result.score).toBe(0.75);
+    expect(result.score).toBe(0.5);
     expect(result.label).toBe('partial');
     expect(result.metadata).toEqual(
-      expect.objectContaining({
-        matchedLeaves: 3,
-        checkedLeaves: 4,
-        visualizations: [
-          expect.objectContaining({
-            mismatches: ['layers[0].y[1]: missing column'],
-          }),
-        ],
-      })
+      expect.objectContaining({ matchedLeaves: 1, checkedLeaves: 2 })
     );
+    expect(mismatchesOf(result)).toEqual(['layers[0].y[1]: missing column']);
   });
 
-  it('gives partial credit when the layer type is wrong but the columns are right', async () => {
+  it('fails a column bound to a different aggregation', async () => {
     const result = await evaluate({
       query: GOLD_QUERY,
-      config: {
-        type: 'xy',
-        layers: [
-          {
-            type: 'line',
-            x: { column: 'response.keyword' },
-            y: [{ column: 'Request Count' }],
-          },
-        ],
-      },
+      config: { type: 'xy', layers: [{ y: [{ column: 'Request Count' }] }] },
       visualizations: [
         {
-          esql: GOLD_QUERY,
-          visualization: {
-            type: 'xy',
-            layers: [
-              {
-                type: 'bar',
-                x: { column: 'response.keyword' },
-                y: [{ column: 'Request Count' }],
-              },
-            ],
-          },
+          esql: `FROM kibana_sample_data_logs | STATS total = SUM(bytes) BY response.keyword`,
+          visualization: { type: 'xy', layers: [{ type: 'bar', y: [{ column: 'total' }] }] },
         },
       ],
     });
 
-    expect(result.score).toBe(0.75);
-    expect(result.metadata).toEqual(
-      expect.objectContaining({
-        visualizations: [
-          expect.objectContaining({
-            mismatches: ['layers[0].type: expected line, got bar'],
-          }),
-        ],
-      })
-    );
+    expect(result.score).toBe(0);
+    expect(mismatchesOf(result)).toEqual(['layers[0].y[0]: expected Request Count, got total']);
   });
 
   it('reports every gold leaf when the actual config has no layers', async () => {
@@ -194,38 +153,22 @@ describe('createVisualizationConfigVsIntentEvaluator', () => {
       query: GOLD_QUERY,
       config: {
         type: 'xy',
-        layers: [{ type: 'bar', y: [{ column: 'Request Count' }] }],
+        layers: [{ x: { column: 'response.keyword' }, y: [{ column: 'Request Count' }] }],
       },
-      visualizations: [
-        {
-          esql: GOLD_QUERY,
-          visualization: { type: 'xy' },
-        },
-      ],
+      visualizations: [{ esql: GOLD_QUERY, visualization: { type: 'xy' } }],
     });
 
-    expect(result.score).toBeCloseTo(1 / 3);
-    expect(result.metadata).toEqual(
-      expect.objectContaining({
-        visualizations: [
-          expect.objectContaining({
-            mismatches: [
-              'layers[0].type: expected bar, got undefined',
-              'layers[0].y[0]: missing column',
-            ],
-          }),
-        ],
-      })
-    );
+    expect(result.score).toBe(0);
+    expect(mismatchesOf(result)).toEqual([
+      'layers[0].x: missing column',
+      'layers[0].y[0]: missing column',
+    ]);
   });
 
   it('allows extra actual y series beyond the gold bindings', async () => {
     const result = await evaluate({
       query: GOLD_QUERY,
-      config: {
-        type: 'xy',
-        layers: [{ type: 'bar', y: [{ column: 'Request Count' }] }],
-      },
+      config: { type: 'xy', layers: [{ y: [{ column: 'Request Count' }] }] },
       visualizations: [
         {
           esql: `FROM kibana_sample_data_logs
@@ -272,7 +215,7 @@ describe('createVisualizationConfigVsIntentEvaluator', () => {
     expect(result.score).toBe(1);
   });
 
-  it('matches a Vega spec mark and encoding fields after alias resolution', async () => {
+  it('matches Vega encoding fields after alias resolution and ignores the mark', async () => {
     const query = `FROM kibana_sample_data_logs
 | STATS \`Average Bytes\` = AVG(bytes), \`Request Count\` = COUNT(*), \`Unique URLs\` = COUNT_DISTINCT(url.keyword) BY clientip`;
 
@@ -282,7 +225,7 @@ describe('createVisualizationConfigVsIntentEvaluator', () => {
         spec: {
           mark: 'point',
           encoding: {
-            x: { field: 'Average Bytes' },
+            x: { field: 'Average Bytes', type: 'quantitative' },
             y: { field: 'Request Count' },
             size: { field: 'Unique URLs' },
           },
@@ -295,9 +238,9 @@ describe('createVisualizationConfigVsIntentEvaluator', () => {
           renderer: 'vega',
           visualization: {
             spec: JSON.stringify({
-              mark: { type: 'circle' },
+              mark: { type: 'bar' },
               encoding: {
-                x: { field: 'avg_bytes' },
+                x: { field: 'avg_bytes', type: 'nominal' },
                 y: { field: 'requests' },
                 size: { field: 'urls' },
               },
@@ -308,6 +251,28 @@ describe('createVisualizationConfigVsIntentEvaluator', () => {
     });
 
     expect(result.score).toBe(1);
+    expect(result.metadata).toEqual(expect.objectContaining({ checkedLeaves: 3 }));
+  });
+
+  it('compares plain strings exactly', async () => {
+    const result = await evaluate({
+      config: { type: 'metric', title: 'Total Requests', metrics: [{ column: 'Total Requests' }] },
+      visualizations: [
+        {
+          esql: `FROM kibana_sample_data_logs | STATS \`Total Requests\` = COUNT(*)`,
+          visualization: {
+            type: 'metric',
+            title: 'total requests',
+            metrics: [{ column: 'Total Requests' }],
+          },
+        },
+      ],
+    });
+
+    expect(result.score).toBe(0.5);
+    expect(mismatchesOf(result)).toEqual([
+      'title: expected "Total Requests", got "total requests"',
+    ]);
   });
 
   it('asserts boolean and numeric gold leaves with strict equality', async () => {
@@ -327,7 +292,7 @@ describe('createVisualizationConfigVsIntentEvaluator', () => {
       ],
     });
     expect(matching.score).toBe(1);
-    expect(matching.metadata).toEqual(expect.objectContaining({ checkedLeaves: 3 }));
+    expect(matching.metadata).toEqual(expect.objectContaining({ checkedLeaves: 2 }));
 
     const mismatching = await evaluate({
       config,
@@ -338,19 +303,11 @@ describe('createVisualizationConfigVsIntentEvaluator', () => {
         },
       ],
     });
-    expect(mismatching.score).toBeCloseTo(1 / 3);
-    expect(mismatching.metadata).toEqual(
-      expect.objectContaining({
-        visualizations: [
-          expect.objectContaining({
-            mismatches: [
-              'sampling: expected 1, got "1"',
-              'ignore_global_filters: expected false, got true',
-            ],
-          }),
-        ],
-      })
-    );
+    expect(mismatching.score).toBe(0);
+    expect(mismatchesOf(mismatching)).toEqual([
+      'sampling: expected 1, got "1"',
+      'ignore_global_filters: expected false, got true',
+    ]);
   });
 
   it('counts a primitive gold leaf as failed when the actual key is absent', async () => {
@@ -368,16 +325,10 @@ describe('createVisualizationConfigVsIntentEvaluator', () => {
       ],
     });
 
-    expect(result.score).toBeCloseTo(2 / 3);
-    expect(result.metadata).toEqual(
-      expect.objectContaining({
-        visualizations: [
-          expect.objectContaining({
-            mismatches: ['ignore_global_filters: expected false, got undefined'],
-          }),
-        ],
-      })
-    );
+    expect(result.score).toBe(0.5);
+    expect(mismatchesOf(result)).toEqual([
+      'ignore_global_filters: expected false, got undefined',
+    ]);
   });
 
   it('scores 0 when no visualization was produced but a structural config was expected', async () => {

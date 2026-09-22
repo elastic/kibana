@@ -51,6 +51,34 @@ export function extractGoldChartType(expected: unknown): string | string[] | und
   );
 }
 
+/** Chart form the gold pins down; string arrays list acceptable alternatives. */
+export interface GoldChartForm {
+  chartType?: string | string[];
+  layerTypes?: Array<string | string[]>;
+  mark?: string | string[];
+}
+
+export function extractGoldChartForm(expected: unknown): GoldChartForm | undefined {
+  const output = asRecord(expected);
+  const config = asRecord(output.config);
+  const chartType = extractGoldChartType(expected);
+  const layerTypes = (Array.isArray(config.layers) ? config.layers : []).flatMap((layer) => {
+    const layerType = asStringOrStringArray(asRecord(layer).type);
+    return layerType === undefined ? [] : [layerType];
+  });
+  const spec = asRecord(config.spec);
+  const mark = asStringOrStringArray(spec.mark) ?? asStringOrStringArray(asRecord(spec.mark).type);
+
+  if (chartType === undefined && layerTypes.length === 0 && mark === undefined) {
+    return undefined;
+  }
+  return {
+    ...(chartType === undefined ? {} : { chartType }),
+    ...(layerTypes.length === 0 ? {} : { layerTypes }),
+    ...(mark === undefined ? {} : { mark }),
+  };
+}
+
 export function extractGoldRenderer(expected: unknown): 'lens' | 'vega' | undefined {
   const output = asRecord(expected);
   if (output.renderer === 'lens' || output.renderer === 'vega') {

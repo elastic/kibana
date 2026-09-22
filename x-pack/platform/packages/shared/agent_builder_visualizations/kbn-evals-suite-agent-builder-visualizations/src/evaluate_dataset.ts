@@ -26,10 +26,14 @@ import {
   type ExtractedVisualization,
 } from './extract_visualization';
 import { createChartCompatibleResultEvaluator } from './evaluators/chart_compatible_result';
-import { createChartTypeVsIntentEvaluator } from './evaluators/chart_type_vs_intent';
+import {
+  createChartIntentJudge,
+  createChartTypeVsIntentEvaluator,
+} from './evaluators/chart_type_vs_intent';
 import { createEsqlExecutionEvaluator } from './evaluators/esql_execution';
 import { createCalibratedEsqlEquivalenceEvaluator } from './evaluators/esql_functional_equivalence';
 import {
+  extractGoldChartForm,
   extractGoldChartType,
   extractGoldQuery,
   extractGoldRenderer,
@@ -156,7 +160,9 @@ export function createEvaluateDataset({
     VisualizationAgentTaskOutput
   >({
     visualizationExtractor,
-    expectedChartTypeExtractor: (expected) => extractGoldChartType(expected),
+    questionExtractor: (input) => input.question,
+    expectedChartFormExtractor: (expected) => extractGoldChartForm(expected),
+    judge: createChartIntentJudge({ inferenceClient, log }),
   });
 
   const rendererVsIntentEvaluator = createRendererVsIntentEvaluator<

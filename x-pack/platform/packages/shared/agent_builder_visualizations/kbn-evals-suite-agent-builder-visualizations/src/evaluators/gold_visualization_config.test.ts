@@ -6,6 +6,7 @@
  */
 
 import {
+  extractGoldChartForm,
   extractGoldChartType,
   extractGoldQuery,
   extractGoldRenderer,
@@ -61,6 +62,40 @@ describe('extractGoldChartType', () => {
 
   it('falls back to top-level chartType', () => {
     expect(extractGoldChartType({ chartType: 'xy' })).toBe('xy');
+  });
+});
+
+describe('extractGoldChartForm', () => {
+  it('collects chart type and per-layer types from a Lens gold', () => {
+    expect(
+      extractGoldChartForm({
+        config: {
+          type: 'xy',
+          layers: [{ type: ['bar', 'bar_horizontal'], x: { column: 'a' } }],
+        },
+      })
+    ).toEqual({ chartType: 'xy', layerTypes: [['bar', 'bar_horizontal']] });
+  });
+
+  it('collects the mark from a Vega gold', () => {
+    expect(extractGoldChartForm({ config: { spec: { mark: 'point' } } })).toEqual({
+      mark: 'point',
+    });
+    expect(extractGoldChartForm({ config: { spec: { mark: { type: 'circle' } } } })).toEqual({
+      mark: 'circle',
+    });
+  });
+
+  it('falls back to a top-level chartType', () => {
+    expect(extractGoldChartForm({ chartType: ['metric', 'gauge'] })).toEqual({
+      chartType: ['metric', 'gauge'],
+    });
+  });
+
+  it('returns undefined for a query-only gold', () => {
+    expect(
+      extractGoldChartForm({ config: { data_source: { type: 'esql', query: QUERY } } })
+    ).toBeUndefined();
   });
 });
 

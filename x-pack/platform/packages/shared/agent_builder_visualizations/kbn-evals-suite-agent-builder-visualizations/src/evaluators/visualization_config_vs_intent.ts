@@ -16,8 +16,9 @@ import { columnsReferToSameExpression } from './resolve_esql_column';
 
 export const VISUALIZATION_CONFIG_VS_INTENT_EVALUATOR_NAME = 'Visualization Config vs Intent';
 
-const SCATTER_MARKS = new Set(['point', 'circle']);
-const SKIP_KEYS = new Set(['data_source']);
+// `data_source` is scored by the ES|QL evaluators; `type` / `mark` by the Chart Type vs Intent judge.
+const SKIP_KEYS = new Set(['data_source', 'type', 'mark']);
+const COLUMN_KEYS = new Set(['column', 'field']);
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -37,10 +38,10 @@ const mergeReports = (target: MatchReport, source: MatchReport): void => {
 /**
  * CODE evaluator: subset-matches gold Config API against the generated
  * visualization and scores the fraction of gold leaf assertions that hold.
- * Leaves are `type`-style strings (with alternatives), `{ column }` / `{ field }`
- * bindings (alias-tolerant), and number / boolean / null values (strict
- * equality). Keys absent from gold are never checked, so titles, styling, and
- * alias wording are ignored unless the gold spells them out.
+ * Leaves are `column` / `field` bindings (alias-tolerant) and string / number /
+ * boolean / null values (strict equality). `type` and `mark` are left to the
+ * Chart Type vs Intent judge. Keys absent from gold are never checked, so
+ * titles, styling, and alias wording are ignored unless the gold spells them out.
  */
 export function createVisualizationConfigVsIntentEvaluator<
   TExample extends Example = Example,
@@ -118,6 +119,15 @@ export function createVisualizationConfigVsIntentEvaluator<
       const checkedLeaves = details.reduce((sum, detail) => sum + detail.checkedLeaves, 0);
       const mismatches = details.flatMap((detail) => detail.mismatches);
 
+      if (checkedLeaves === 0) {
+        return {
+          score: 1,
+          label: 'skipped',
+          explanation:
+            'Gold config declares only chart type / mark / data source, which other evaluators score.',
+        };
+      }
+
       return {
         score,
         label: score === 1 ? 'match' : score === 0 ? 'mismatch' : 'partial',
@@ -140,9 +150,6 @@ export function createVisualizationConfigVsIntentEvaluator<
 
 function actualConfig(visualization: ExtractedVisualization): Record<string, unknown> {
   const actual: Record<string, unknown> = { ...(visualization.visualization ?? {}) };
-  if (typeof actual.type !== 'string' && visualization.chartType) {
-    actual.type = visualization.chartType;
-  }
   if (typeof actual.spec !== 'string') {
     return actual;
   }
@@ -168,22 +175,11 @@ function matchValue(
   if (gold === undefined) {
     return;
   }
-  if (isStringAlternatives(gold)) {
-    report.checked += 1;
-    if (!typeMatches(gold, actual)) {
-      report.mismatches.push(
-        `${path || 'value'}: expected ${formatExpected(gold)}, got ${
-          readType(actual) ?? 'undefined'
-        }`
-      );
-    }
-    return;
-  }
   if (Array.isArray(gold)) {
     matchObjectArray(gold, actual, path, goldQuery, actualQuery, report);
     return;
   }
-  if (isPrimitiveLeaf(gold)) {
+  if (isPrimitiveLeaf(gold) || typeof gold === 'string') {
     report.checked += 1;
     if (actual !== gold) {
       report.mismatches.push(
@@ -204,18 +200,15 @@ function matchValue(
     const actualColumn = readColumn(actual);
     if (!actualColumn) {
       report.mismatches.push(`${path}: missing column`);
-      return;
-    }
-    if (!columnsReferToSameExpression(goldColumn, goldQuery, actualColumn, actualQuery)) {
+    } else if (!columnsReferToSameExpression(goldColumn, goldQuery, actualColumn, actualQuery)) {
       report.mismatches.push(`${path}: expected ${goldColumn}, got ${actualColumn}`);
     }
-    return;
   }
 
   // A missing parent still recurses so every gold leaf below it is counted and reported.
   const actualRecord = isRecord(actual) ? actual : {};
   for (const [key, goldChild] of Object.entries(gold)) {
-    if (goldChild === undefined || SKIP_KEYS.has(key)) {
+    if (goldChild === undefined || SKIP_KEYS.has(key) || (goldColumn && COLUMN_KEYS.has(key))) {
       continue;
     }
     matchValue(
@@ -231,8 +224,8 @@ function matchValue(
 
 /**
  * Each gold item is paired with the unused actual item that satisfies the most
- * of its leaves, so a layer with the right columns but wrong type earns partial
- * credit instead of failing wholesale. Unpaired gold items report every leaf.
+ * of its leaves, so a layer with most columns right earns partial credit
+ * instead of failing wholesale. Unpaired gold items report every leaf.
  */
 function matchObjectArray(
   gold: unknown[],
@@ -274,44 +267,6 @@ function matchObjectArray(
 
 function isPrimitiveLeaf(value: unknown): value is number | boolean | null {
   return value === null || typeof value === 'number' || typeof value === 'boolean';
-}
-
-function isStringAlternatives(value: unknown): value is string | string[] {
-  return (
-    typeof value === 'string' ||
-    (Array.isArray(value) && value.length > 0 && value.every((item) => typeof item === 'string'))
-  );
-}
-
-function typeMatches(gold: unknown, actual: unknown): boolean {
-  const expected = (Array.isArray(gold) ? gold : [gold])
-    .filter((value): value is string => typeof value === 'string')
-    .map((value) => value.trim().toLowerCase());
-  const got = readType(actual);
-  if (expected.length === 0 || !got) {
-    return false;
-  }
-  return (
-    expected.includes(got) ||
-    (SCATTER_MARKS.has(got) && expected.some((value) => SCATTER_MARKS.has(value)))
-  );
-}
-
-function readType(value: unknown): string | undefined {
-  if (typeof value === 'string' && value.trim().length > 0) {
-    return value.trim().toLowerCase();
-  }
-  if (isRecord(value) && typeof value.type === 'string' && value.type.trim().length > 0) {
-    return value.type.trim().toLowerCase();
-  }
-  return undefined;
-}
-
-function formatExpected(gold: unknown): string {
-  const values = (Array.isArray(gold) ? gold : [gold]).filter(
-    (value): value is string => typeof value === 'string'
-  );
-  return values.join(' | ');
 }
 
 function readColumn(value: unknown): string | undefined {
