@@ -162,6 +162,96 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
     // Both requests fired — DELETE for the stale policy and POST for the new elb policy.
   });
 
+  test('policy cleanup same-package: removing a service updates the shared policy (PUT, not DELETE) for the surviving service', async ({
+    browserAuth,
+    page,
+  }) => {
+    // Simulate: two services (elb + a now-removed service) were deployed under the SAME
+    // aws-package policy 'mock-shared-policy-id'. The user deselected the removed service
+    // from Step 1 while keeping elb selected. policyIdsByInstance has both mapped to the
+    // same policy ID. elb has no serviceStatuses entry yet → Deploy button is active.
+    //
+    // Expected:
+    //   1. PUT /api/fleet/managed_integrations/mock-shared-policy-id fires (UPDATE for survivor elb).
+    //   2. POST /api/fleet/managed_integrations fires (new deploy for elb).
+    //   DELETE must NOT fire — the policy survives because elb is still a member.
+    await navigateToOnboardingStep(browserAuth, page, 'authenticate-and-deploy', {
+      selectedServiceIds: ['elb'],
+      globalRegion: 'us-east-1',
+      serviceVars: {
+        elb: {
+          enabledDataStreams: ['elb_logs'],
+          varsByDataStream: {
+            elb_logs: {
+              enabledInputs: ['aws-s3'],
+              varsByInput: { 'aws-s3': { bucket_arn: 'arn:aws:s3:::test-bucket' } },
+            },
+          },
+        },
+      },
+      detectAndReviewStep: {
+        // Both elb and the removed service share the same policy.
+        policyIdsByInstance: { elb: 'mock-shared-policy-id', 'removed-svc': 'mock-shared-policy-id' },
+        serviceStatuses: {},
+      },
+    });
+
+    // Intercept DELETE to detect misrouted cleanup — DELETE must NOT fire for the
+    // partial-survival case. The handler fulfills so the test doesn't hang if it does fire.
+    let deleteObserved = false;
+    await page.route(
+      (url) => /\/api\/fleet\/managed_integrations\//.test(url.pathname),
+      (route) => {
+        const method = route.request().method();
+        if (method === 'DELETE') deleteObserved = true;
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: method === 'PUT' ? '{}' : JSON.stringify({ item: { id: 'mock-new-elb-policy-id' } }),
+        });
+      }
+    );
+    await page.route(
+      (url) => /\/api\/fleet\/managed_integrations$/.test(url.pathname),
+      (route) =>
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ item: { id: 'mock-new-elb-policy-id' } }),
+        })
+    );
+
+    await expect(page.testSubj.locator('managedIntegrationsSection')).toBeVisible();
+
+    const accessKeyField = page.testSubj.locator('awsStaticKeysForm-accessKeyId');
+    const secretKeyField = page.testSubj.locator('awsStaticKeysForm-secretAccessKey');
+    await expect(accessKeyField).toBeVisible();
+    await accessKeyField.fill('AKIATEST');
+    await secretKeyField.fill('secrettest');
+
+    const deployButton = page.testSubj.locator('managedIntegrationsSection-deployButton');
+    await expect(deployButton).toBeEnabled();
+
+    const updateRequestPromise = page.waitForRequest(
+      (req) =>
+        req.method() === 'PUT' &&
+        /\/api\/fleet\/managed_integrations\/mock-shared-policy-id$/.test(
+          new URL(req.url()).pathname
+        )
+    );
+    const createRequestPromise = page.waitForRequest(
+      (req) =>
+        req.method() === 'POST' &&
+        /\/api\/fleet\/managed_integrations$/.test(new URL(req.url()).pathname)
+    );
+
+    await deployButton.click();
+
+    await updateRequestPromise;  // PUT — shared policy updated with elb inputs only
+    await createRequestPromise;  // POST — new elb policy created for this session
+    expect(deleteObserved).toBe(false);
+  });
+
   test('deploy fires POST /api/fleet/managed_integrations and shows success state', async ({
     browserAuth,
     page,
