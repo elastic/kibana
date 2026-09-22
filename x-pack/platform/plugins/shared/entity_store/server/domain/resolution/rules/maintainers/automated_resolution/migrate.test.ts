@@ -33,6 +33,10 @@ const FIXTURES: Record<string, unknown> = {
         lastProcessedTimestamp: '2026-05-31T08:30:00Z',
         lastRun: { resolutionsCreated: 7, skippedAmbiguousBuckets: 1 },
       },
+      [SID_RULE]: {
+        lastProcessedTimestamp: '2026-09-10T12:00:00Z',
+        lastRun: { resolutionsCreated: 0, skippedAmbiguousBuckets: 0 },
+      },
       some_future_rule: {
         lastProcessedTimestamp: '2026-06-01T09:00:00Z',
         lastRun: { resolutionsCreated: 2, skippedAmbiguousBuckets: 0 },
@@ -61,6 +65,10 @@ const FIXTURES: Record<string, unknown> = {
       [EMAIL_RULE]: {
         lastProcessedTimestamp: '2026-05-31T08:30:00Z',
         lastRun: { resolutionsCreated: 7, skippedAmbiguousBuckets: 1 },
+      },
+      [SID_RULE]: {
+        lastProcessedTimestamp: '2026-09-10T00:00:00Z',
+        lastRun: { resolutionsCreated: 0, skippedAmbiguousBuckets: 0 },
       },
     },
   },
@@ -127,6 +135,7 @@ describe('automated-resolution state migration', () => {
 
     expect(output.version).toBe(AUTOMATED_RESOLUTION_STATE_VERSION);
     expect(output.rules[EMAIL_RULE].lastProcessedTimestamp).toBe('2026-05-31T08:30:00Z');
+    expect(output.rules[SID_RULE].lastProcessedTimestamp).toBe('2026-09-10T12:00:00Z');
     expect(output.rules.some_future_rule).toEqual({
       lastProcessedTimestamp: '2026-06-01T09:00:00Z',
       lastRun: { resolutionsCreated: 2, skippedAmbiguousBuckets: 0, ...ZEROED_STATS },
@@ -152,6 +161,7 @@ describe('automated-resolution state migration', () => {
 
     expect(output.version).toBe(AUTOMATED_RESOLUTION_STATE_VERSION);
     expect(output.rules[EMAIL_RULE].lastProcessedTimestamp).toBeNull();
+    expect(output.rules[SID_RULE].lastProcessedTimestamp).toBeNull();
     expect(output.rules[EMAIL_RULE].lastRun).toEqual({
       resolutionsCreated: 7,
       skippedAmbiguousBuckets: 1,
