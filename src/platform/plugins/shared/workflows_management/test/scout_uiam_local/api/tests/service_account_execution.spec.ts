@@ -7,10 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MOCK_IDP_UIAM_ORG_ADMIN_API_KEY } from '@kbn/mock-idp-utils';
-import { apiTest, tags } from '@kbn/scout';
+import { Agent, fetch } from 'undici';
+import {
+  generateCosmosDBApiRequestHeaders,
+  MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_ORGANIZATION_SERVICE_ACCOUNTS,
+  MOCK_IDP_UIAM_COSMOS_DB_NAME,
+  MOCK_IDP_UIAM_COSMOS_DB_URL,
+  MOCK_IDP_UIAM_ORG_ADMIN_API_KEY,
+} from '@kbn/mock-idp-utils';
+import { apiTest } from '@kbn/scout';
 import type { ApiClientFixture } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
+import { NonTerminalExecutionStatuses } from '@kbn/workflows';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
 
 const authenticationStep = `  - name: authenticate
@@ -43,12 +51,13 @@ ${steps}`;
 
 apiTest.describe(
   '[NON-MKI] Saved workflow service account execution',
-  { tag: tags.serverless.search },
+  { tag: ['@local-serverless-search'] },
   () => {
     let headers: Record<string, string>;
     let accountId: string;
     let otherAccountId: string;
     const workflowIds = new Set<string>();
+    const accountIds = new Set<string>();
 
     const create = async (apiClient: ApiClientFixture, yaml: string): Promise<string> => {
       const id = `cp2-${Date.now()}-${workflowIds.size}`;
@@ -130,18 +139,76 @@ apiTest.describe(
           responseType: 'json',
         });
         expect(response, JSON.stringify(response.body)).toHaveStatusCode(200);
+        accountIds.add(response.body.id as string);
         accounts.push(response.body.id as string);
       }
       [accountId, otherAccountId] = accounts;
     });
+
     apiTest.afterEach(async ({ apiClient }) => {
       for (const id of workflowIds) {
-        const response = await apiClient.delete(`api/workflows/workflow/${id}?force=true`, {
+        const disabled = await apiClient.put(`api/workflows/workflow/${id}`, {
           headers,
+          body: { enabled: false },
+          responseType: 'json',
+        });
+        expect(disabled, JSON.stringify(disabled.body)).toHaveStatusCode(200);
+        const query = new URLSearchParams(
+          NonTerminalExecutionStatuses.map((status) => ['statuses', status])
+        );
+        await expect
+          .poll(
+            async () => {
+              const active = await apiClient.get(
+                `api/workflows/workflow/${id}/executions?${query}`,
+                { headers, responseType: 'json' }
+              );
+              expect(active).toHaveStatusCode(200);
+              return active.body.results.map((execution: WorkflowExecutionDto) => ({
+                id: execution.id,
+                status: execution.status,
+              }));
+            },
+            { timeout: 30_000 }
+          )
+          .toStrictEqual([]);
+        const response = await apiClient.delete('api/workflows?force=true', {
+          headers,
+          body: { ids: [id] },
           responseType: 'json',
         });
         expect(response, JSON.stringify(response.body)).toHaveStatusCode(200);
+        expect(response.body.failures).toStrictEqual([]);
+        expect(response.body.deleted).toBe(1);
+        const remaining = await apiClient.get(`api/workflows/workflow/${id}`, {
+          headers,
+          responseType: 'json',
+        });
+        expect(remaining).toHaveStatusCode(404);
         workflowIds.delete(id);
+      }
+    });
+
+    apiTest.afterAll(async () => {
+      // Remove only this suite's disposable Cosmos fixtures; project-account revocation
+      // is not authorized by the seeded organization API key in the local UIAM image.
+      const dispatcher = new Agent({ connect: { rejectUnauthorized: false } });
+      try {
+        for (const id of accountIds) {
+          const resource = `dbs/${MOCK_IDP_UIAM_COSMOS_DB_NAME}/colls/${MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_ORGANIZATION_SERVICE_ACCOUNTS}/docs/${id}`;
+          const response = await fetch(`${MOCK_IDP_UIAM_COSMOS_DB_URL}/${resource}`, {
+            method: 'DELETE',
+            dispatcher,
+            headers: {
+              ...generateCosmosDBApiRequestHeaders('DELETE', 'docs', resource),
+              'x-ms-documentdb-partitionkey': JSON.stringify([id]),
+            },
+          });
+          expect(response.status, await response.text()).toBe(204);
+          accountIds.delete(id);
+        }
+      } finally {
+        await dispatcher.close();
       }
     });
 
@@ -236,6 +303,16 @@ apiTest.describe(
           responseType: 'json',
         });
         expect(edit, JSON.stringify(edit.body)).toHaveStatusCode(403);
+        const deletion = await apiClient.delete(`api/workflows/workflow/${id}?force=true`, {
+          headers: executorHeaders,
+          responseType: 'json',
+        });
+        expect(deletion, JSON.stringify(deletion.body)).toHaveStatusCode(403);
+        const existing = await apiClient.get(`api/workflows/workflow/${id}`, {
+          headers,
+          responseType: 'json',
+        });
+        expect(existing).toHaveStatusCode(200);
         expectAccount(await wait(apiClient, await run(apiClient, id, executorHeaders)), accountId);
       }
     );

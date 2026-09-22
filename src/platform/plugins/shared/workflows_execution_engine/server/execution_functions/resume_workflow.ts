@@ -31,6 +31,7 @@ import {
   ensureWorkflowIdleTimeoutResumeAfterLoop,
   getIdleTimeoutResumeDeadlineMs,
 } from '../workflow_execution_loop/handle_execution_delay';
+import { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 
 async function resumeWorkflowWithRequest({
   workflowRunId,
@@ -217,6 +218,12 @@ export const resumeWorkflow = async (
         status: ExecutionStatus.FAILED,
         finishedAt: new Date().toISOString(),
         error: executionError,
+      });
+      await handlePostExecutionLoop({
+        ...params,
+        fakeRequest: getWorkflowOriginalRequest(params.fakeRequest),
+        workflowTaskManager: new WorkflowTaskManager(params.dependencies.taskManager),
+        cloudSetup: params.dependencies.cloudSetup,
       });
     }
     throw error;

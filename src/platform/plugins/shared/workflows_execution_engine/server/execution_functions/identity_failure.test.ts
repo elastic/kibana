@@ -1,0 +1,139 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { usageApiPluginMock } from '@kbn/usage-api-plugin/server/mocks';
+import { ExecutionStatus } from '@kbn/workflows';
+import type { EsWorkflowExecution } from '@kbn/workflows';
+import { mockContextDependencies } from './__mock__/context_dependencies';
+import {
+  createFakeKibanaRequest,
+  createMockLogger,
+  createMockStepExecutionRepository,
+  createMockWorkflowExecutionEngineConfig,
+} from './execution_functions_test_utils';
+import { resumeWorkflow } from './resume_workflow';
+import { runWorkflow } from './run_workflow';
+import { setupDependencies } from './setup_dependencies';
+import { drainConcurrencyQueueSlots } from '../concurrency/concurrency_queue_drainer';
+import { WorkflowsMeteringService } from '../metering';
+import { workflowsExecutionEngineMock } from '../mocks';
+import { createMockWorkflowDataClient } from '../repositories/data_access_layer/mocks';
+import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+
+jest.mock('./setup_dependencies');
+jest.mock('../concurrency/concurrency_queue_drainer');
+
+const setup = () => {
+  const dependencies = mockContextDependencies();
+  const accounts = dependencies.coreStart.security.serviceAccounts;
+  jest.spyOn(accounts, 'isEnabled').mockReturnValue(true);
+  jest
+    .spyOn(accounts, 'withScopedRequestForWorkload')
+    .mockRejectedValue(new Error('Binding changed'));
+  let execution: EsWorkflowExecution = {
+    id: 'child',
+    workflowId: 'workflow',
+    spaceId: 'default',
+    status: ExecutionStatus.RUNNING,
+    isTestRun: false,
+    context: { parentWorkflowInvocation: 'sync', parentWorkflowExecutionId: 'parent' },
+    yaml: '',
+    scopeStack: [],
+    createdAt: '2026-09-22T00:00:00Z',
+    startedAt: '2026-09-22T00:00:00Z',
+    finishedAt: '',
+    error: null,
+    cancelRequested: false,
+    duration: 0,
+    concurrencyGroupKey: 'group',
+    workflowDefinition: {
+      version: '1',
+      name: 'Bound child',
+      enabled: true,
+      triggers: [{ type: 'manual' }],
+      steps: [],
+      settings: { run_as: 'account-a', concurrency: { strategy: 'queue', max: 1 } },
+    },
+  };
+  const repository = new WorkflowExecutionRepository(createMockWorkflowDataClient());
+  jest.spyOn(repository, 'getWorkflowExecutionById').mockImplementation(async () => execution);
+  jest.spyOn(repository, 'updateWorkflowExecution').mockImplementation(async (update) => {
+    execution = { ...execution, ...update };
+  });
+  const meteringService = new WorkflowsMeteringService(
+    usageApiPluginMock.createSetupContract().usageReporting,
+    createMockLogger()
+  );
+  jest.spyOn(meteringService, 'reportWorkflowExecution').mockResolvedValue(undefined);
+  return {
+    accounts,
+    setStatus: (status: ExecutionStatus) => {
+      execution.status = status;
+    },
+    params: {
+      workflowRunId: 'child',
+      spaceId: 'default',
+      signal: new AbortController().signal,
+      logger: createMockLogger(),
+      config: createMockWorkflowExecutionEngineConfig(),
+      fakeRequest: createFakeKibanaRequest(),
+      dependencies,
+      workflowsExecutionEngine: workflowsExecutionEngineMock.createStart(),
+      internalResumeWorkflowExecution: jest.fn().mockResolvedValue(undefined),
+      meteringService,
+      workflowExecutionRepository: repository,
+      stepExecutionRepository: createMockStepExecutionRepository(),
+    },
+  };
+};
+
+describe.each([
+  ['run', runWorkflow],
+  ['resume', resumeWorkflow],
+] as const)('%s identity failure', (_name, execute) => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('finalizes the execution and immediately wakes its parent, drains the queue and reports metering', async () => {
+    const { params } = setup();
+    await expect(execute(params)).rejects.toThrow('Binding changed');
+    expect(params.stepExecutionRepository.markNonTerminalStepsFailed).toHaveBeenCalledWith(
+      'child',
+      expect.objectContaining({ type: 'ServiceAccountExecutionError' })
+    );
+    expect(params.internalResumeWorkflowExecution).toHaveBeenCalledWith(
+      'parent',
+      'default',
+      undefined,
+      params.fakeRequest
+    );
+    expect(drainConcurrencyQueueSlots).toHaveBeenCalledWith(
+      expect.objectContaining({ concurrencyGroupKey: 'group' })
+    );
+    expect(params.meteringService.reportWorkflowExecution).toHaveBeenCalledWith(
+      expect.objectContaining({ status: ExecutionStatus.FAILED, finishedAt: expect.any(String) }),
+      params.dependencies.cloudSetup
+    );
+    expect(setupDependencies).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ExecutionStatus.COMPLETED,
+    ExecutionStatus.FAILED,
+    ExecutionStatus.CANCELLED,
+    ExecutionStatus.SKIPPED,
+  ])('does not remint or rewrite a terminal execution (%s)', async (status) => {
+    const { params, accounts, setStatus } = setup();
+    setStatus(status);
+    await execute(params);
+    expect(accounts.withScopedRequestForWorkload).not.toHaveBeenCalled();
+    expect(params.workflowExecutionRepository.updateWorkflowExecution).not.toHaveBeenCalled();
+    expect(params.stepExecutionRepository.markNonTerminalStepsFailed).not.toHaveBeenCalled();
+    expect(setupDependencies).not.toHaveBeenCalled();
+  });
+});

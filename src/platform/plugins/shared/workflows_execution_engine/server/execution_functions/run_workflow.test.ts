@@ -551,7 +551,9 @@ describe('runWorkflow', () => {
           spaceId,
           status: ExecutionStatus.FAILED,
         };
-        workflowExecutionRepository.getWorkflowExecutionById.mockResolvedValue(failedExecution);
+        workflowExecutionRepository.getWorkflowExecutionById
+          .mockResolvedValueOnce(defaultRunningExecution())
+          .mockResolvedValue(failedExecution);
 
         await runWorkflowWithDefaults({ meteringService });
 

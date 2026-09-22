@@ -39,7 +39,10 @@ import type {
   WorkflowDocumentGetOptions,
   WriteWorkflowDocumentWithOccParams,
 } from './workflow_occ_types';
-import { withWorkflowBindingChange } from './workflow_service_account_binding';
+import {
+  ensureWorkflowServiceAccountMutationAuthorized,
+  withWorkflowBindingChange,
+} from './workflow_service_account_binding';
 import {
   WORKFLOW_CHANGE_HISTORY_OBJECT_TYPE,
   WorkflowChangeHistoryAction,
@@ -204,20 +207,30 @@ export class WorkflowCrudService {
 
   private async getWorkflowRevision(
     id: string
-  ): Promise<Pick<VersionedWorkflowDocument, 'seqNo' | 'primaryTerm'> | null> {
+  ): Promise<
+    (Pick<VersionedWorkflowDocument, 'seqNo' | 'primaryTerm'> & { accountId?: string }) | null
+  > {
     try {
       // A real-time GET observes writes that are not yet visible to search.
-      const response = await this.deps.getCoreStart().elasticsearch.client.asInternalUser.get({
-        index: workflowIndexName,
-        id,
-        _source: false,
-        realtime: true,
-      });
+      const response = await this.deps
+        .getCoreStart()
+        .elasticsearch.client.asInternalUser.get<WorkflowProperties>({
+          index: workflowIndexName,
+          id,
+          _source_includes: ['definition.settings.run_as', 'deleted_at'],
+          realtime: true,
+        });
       if (!response.found) return null;
-      if (response._seq_no == null || response._primary_term == null) {
-        throw new Error(`Missing workflow revision for ${id}.`);
+      if (response._seq_no == null || response._primary_term == null || !response._source) {
+        throw new Error(`Missing workflow revision or source for ${id}.`);
       }
-      return { seqNo: response._seq_no, primaryTerm: response._primary_term };
+      return {
+        seqNo: response._seq_no,
+        primaryTerm: response._primary_term,
+        accountId: response._source?.deleted_at
+          ? undefined
+          : response._source?.definition?.settings?.run_as,
+      };
     } catch (error) {
       if (isNotFoundError(error)) return null;
       throw error;
@@ -1022,6 +1035,7 @@ export class WorkflowCrudService {
     if (bindings) {
       const workflows = await this.getWorkflowsByIds(ids, spaceId, { includeDeleted: true });
       if (workflows.some((workflow) => workflow.definition?.settings?.run_as)) {
+        await ensureWorkflowServiceAccountMutationAuthorized(this.deps.getCoreStart(), request);
         const result: DeleteWorkflowsResponse = {
           total: ids.length,
           deleted: 0,
@@ -1088,11 +1102,20 @@ export class WorkflowCrudService {
     disabled: number;
     failures: Array<{ id: string; error: string }>;
   }> {
+    let canModifyBoundWorkflows = !request;
+    if (request && this.deps.getServiceAccountBindings?.()?.isEnabled()) {
+      const privileges = await this.deps
+        .getCoreStart()
+        .elasticsearch.client.asScoped(request)
+        .asCurrentUser.security.hasPrivileges({ cluster: ['manage_security'] });
+      canModifyBoundWorkflows = privileges.has_all_requested;
+    }
     const result = await disableAllWorkflows({
       storage: this.deps.workflowStorage,
       taskScheduler: this.deps.getTaskScheduler(),
       logger: this.deps.logger,
       spaceId,
+      canModifyBoundWorkflows,
     });
 
     if (spaceId && result.disabledWorkflows.length > 0) {

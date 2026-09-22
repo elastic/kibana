@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Boom from '@hapi/boom';
 import type { Logger } from '@kbn/core/server';
 
 import { bulkIndexWithOccRetry, toOccHit } from './bulk_occ_index';
@@ -36,13 +37,14 @@ export const disableAllWorkflows = async (params: {
   taskScheduler: WorkflowTaskScheduler | null;
   logger: Logger;
   spaceId?: string;
+  canModifyBoundWorkflows?: boolean;
 }): Promise<{
   total: number;
   disabled: number;
   failures: Array<{ id: string; error: string }>;
   disabledWorkflows: Array<{ id: string; document: WorkflowProperties }>;
 }> => {
-  const { storage, taskScheduler, logger, spaceId } = params;
+  const { storage, taskScheduler, logger, spaceId, canModifyBoundWorkflows = true } = params;
   const bumpVersion = Boolean(spaceId);
   const client = storage.getClient();
   const pageSize = 1000;
@@ -84,7 +86,15 @@ export const disableAllWorkflows = async (params: {
         } = await bulkIndexWithOccRetry({
           client,
           hits: occHits,
-          mutate: (hit) => mutateWorkflowToDisabled(hit._source),
+          mutate: (hit) => {
+            // This runs again on the refreshed document after an OCC conflict.
+            if (hit._source.definition?.settings?.run_as && !canModifyBoundWorkflows) {
+              throw Boom.forbidden(
+                'Modifying a service-account workflow requires manage_security.'
+              );
+            }
+            return mutateWorkflowToDisabled(hit._source);
+          },
           logger,
           bumpVersion,
         });

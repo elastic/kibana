@@ -14,6 +14,23 @@ import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-executi
 
 type Bindings = WorkflowsExecutionEnginePluginStart['serviceAccountBindings'];
 
+export const ensureWorkflowServiceAccountMutationAuthorized = async (
+  core: CoreStart,
+  request?: KibanaRequest
+): Promise<KibanaRequest> => {
+  if (!request)
+    throw Boom.forbidden('An authenticated request is required to modify a bound workflow.');
+  const privileges = await core.elasticsearch.client
+    .asScoped(request)
+    .asCurrentUser.security.hasPrivileges({
+      cluster: ['manage_security'],
+    });
+  if (!privileges.has_all_requested) {
+    throw Boom.forbidden('Modifying a service-account workflow requires manage_security.');
+  }
+  return request;
+};
+
 export const withWorkflowBindingChange = async <T>({
   bindings,
   core,
@@ -35,34 +52,31 @@ export const withWorkflowBindingChange = async <T>({
   previousAccountId?: string;
   accountId?: string;
   write: () => Promise<T>;
-  getWorkflowRevision: () => Promise<{ seqNo: number; primaryTerm: number } | null>;
+  getWorkflowRevision: () => Promise<{
+    seqNo: number;
+    primaryTerm: number;
+    accountId?: string;
+  } | null>;
 }): Promise<T> => {
   if (!previousAccountId && !accountId) return write();
   if (!bindings.isEnabled()) throw Boom.forbidden('Service account execution is disabled.');
-  if (!request)
-    throw Boom.forbidden('An authenticated request is required to modify a bound workflow.');
-  const privileges = await core.elasticsearch.client
-    .asScoped(request)
-    .asCurrentUser.security.hasPrivileges({
-      cluster: ['manage_security'],
-    });
-  if (!privileges.has_all_requested) {
-    throw Boom.forbidden('Modifying a service-account workflow requires manage_security.');
-  }
+  const authenticatedRequest = await ensureWorkflowServiceAccountMutationAuthorized(core, request);
   const coordinates = { workloadType: 'workflow', workloadId: workflowId, spaceId };
-  const previousRevision = await getWorkflowRevision();
   const previous = await bindings.getWorkloadBinding(coordinates);
   const changed = accountId !== previous?.serviceAccountId;
   let written = previous;
   if (changed) {
     if (accountId) {
-      written = await bindings.bindWorkload(request, {
+      written = await bindings.bindWorkload(authenticatedRequest, {
         workloadType: 'workflow',
         workloadId: workflowId,
         serviceAccountId: accountId,
       });
     } else {
-      await bindings.unbindWorkload(request, { workloadType: 'workflow', workloadId: workflowId });
+      await bindings.unbindWorkload(authenticatedRequest, {
+        workloadType: 'workflow',
+        workloadId: workflowId,
+      });
       written = null;
     }
   }
@@ -74,15 +88,17 @@ export const withWorkflowBindingChange = async <T>({
         const current = await bindings.getWorkloadBinding(coordinates);
         const currentRevision = await getWorkflowRevision();
         // Both reads are best effort: workflow storage and bindings have no shared CAS.
-        if (isEqual(current, written) && isEqual(currentRevision, previousRevision)) {
-          if (previous) {
-            await bindings.bindWorkload(request, {
+        if (isEqual(current, written)) {
+          const targetAccountId = currentRevision?.accountId;
+          // Reconcile to the persisted winner, not the losing operation's original binding.
+          if (targetAccountId && targetAccountId !== current?.serviceAccountId) {
+            await bindings.bindWorkload(authenticatedRequest, {
               workloadType: 'workflow',
               workloadId: workflowId,
-              serviceAccountId: previous.serviceAccountId,
+              serviceAccountId: targetAccountId,
             });
-          } else {
-            await bindings.unbindWorkload(request, {
+          } else if (!targetAccountId && current) {
+            await bindings.unbindWorkload(authenticatedRequest, {
               workloadType: 'workflow',
               workloadId: workflowId,
             });

@@ -131,7 +131,9 @@ describe('concurrent workflow writes sharing a binding', () => {
       let currentBinding = previousAccountId
         ? { ...binding, serviceAccountId: previousAccountId }
         : null;
-      let revision = previousAccountId ? { seqNo: 1, primaryTerm: 1 } : null;
+      let revision = previousAccountId
+        ? { seqNo: 1, primaryTerm: 1, accountId: previousAccountId }
+        : null;
       params.getWorkflowRevision.mockImplementation(async () => revision);
       bindings.getWorkloadBinding.mockImplementation(async () => currentBinding);
       bindings.bindWorkload.mockImplementation(async () => {
@@ -144,7 +146,7 @@ describe('concurrent workflow writes sharing a binding', () => {
           ...params,
           previousAccountId,
           write: async () => {
-            revision = { seqNo: 2, primaryTerm: 1 };
+            revision = { seqNo: 2, primaryTerm: 1, accountId: 'a' };
             return 'winner';
           },
         });
@@ -157,18 +159,14 @@ describe('concurrent workflow writes sharing a binding', () => {
       expect(currentBinding).toEqual(binding);
       expect(bindings.bindWorkload).toHaveBeenCalledTimes(1);
       expect(bindings.unbindWorkload).not.toHaveBeenCalled();
-      expect(params.logger.error).toHaveBeenCalledWith(
-        expect.stringContaining('compensation skipped')
-      );
+      expect(params.logger.error).not.toHaveBeenCalled();
     }
   );
 
   it('does not restore a binding when a failed deletion actually removed the workflow', async () => {
     const { params, bindings, binding } = setup();
     bindings.getWorkloadBinding.mockResolvedValueOnce(binding).mockResolvedValueOnce(null);
-    params.getWorkflowRevision
-      .mockResolvedValueOnce({ seqNo: 1, primaryTerm: 1 })
-      .mockResolvedValueOnce(null);
+    params.getWorkflowRevision.mockResolvedValue(null);
     params.write.mockRejectedValue(new Error('delete response lost'));
     await expect(
       withWorkflowBindingChange({
@@ -183,11 +181,87 @@ describe('concurrent workflow writes sharing a binding', () => {
   it('does not compensate when the workflow revision cannot be re-read', async () => {
     const { params, bindings, binding } = setup();
     bindings.getWorkloadBinding.mockResolvedValueOnce(null).mockResolvedValueOnce(binding);
-    params.getWorkflowRevision
-      .mockResolvedValueOnce(null)
-      .mockRejectedValueOnce(new Error('unavailable'));
+    params.getWorkflowRevision.mockRejectedValueOnce(new Error('unavailable'));
     params.write.mockRejectedValue(new Error('write failed'));
     await expect(withWorkflowBindingChange(params)).rejects.toThrow('compensation failed');
     expect(bindings.unbindWorkload).not.toHaveBeenCalled();
   });
+});
+
+describe('concurrent workflow writes with different accounts', () => {
+  it('reconciles the losing binding to the persisted winning workflow', async () => {
+    const { params, bindings, binding } = setup();
+    let currentBinding = { ...binding, serviceAccountId: 'original' };
+    let revision = { seqNo: 1, primaryTerm: 1, accountId: 'original' };
+    params.getWorkflowRevision.mockImplementation(async () => revision);
+    bindings.getWorkloadBinding.mockImplementation(async () => currentBinding);
+    bindings.bindWorkload.mockImplementation(async (_request, options) => {
+      currentBinding = { ...binding, serviceAccountId: options.serviceAccountId };
+      return currentBinding;
+    });
+    params.write.mockImplementationOnce(async () => {
+      // X has bound A. Y binds B, but X wins the document write before Y loses OCC.
+      await expect(
+        withWorkflowBindingChange({
+          ...params,
+          previousAccountId: 'original',
+          accountId: 'b',
+          write: async () => {
+            revision = { seqNo: 2, primaryTerm: 1, accountId: 'a' };
+            throw new Error('Y lost OCC');
+          },
+        })
+      ).rejects.toThrow('Y lost OCC');
+      return 'X won';
+    });
+    await expect(
+      withWorkflowBindingChange({ ...params, previousAccountId: 'original' })
+    ).resolves.toBe('X won');
+    expect(currentBinding.serviceAccountId).toBe(revision.accountId);
+    expect(bindings.bindWorkload.mock.calls.map(([, options]) => options.serviceAccountId)).toEqual(
+      ['a', 'b', 'a']
+    );
+    expect(bindings.unbindWorkload).not.toHaveBeenCalled();
+  });
+});
+
+it('reconciles to persisted identity when both competing writes fail', async () => {
+  const { params, bindings, binding } = setup();
+  let currentBinding = { ...binding, serviceAccountId: 'original' };
+  params.getWorkflowRevision.mockResolvedValue({ seqNo: 1, primaryTerm: 1, accountId: 'original' });
+  bindings.getWorkloadBinding.mockImplementation(async () => currentBinding);
+  bindings.bindWorkload.mockImplementation(async (_request, options) => {
+    currentBinding = { ...binding, serviceAccountId: options.serviceAccountId };
+    return currentBinding;
+  });
+  let failFirstWrite: () => void = () => {};
+  const firstFailure = new Promise<void>((resolve) => {
+    failFirstWrite = resolve;
+  });
+  let markFirstWriteReached: () => void = () => {};
+  const firstReachedWrite = new Promise<void>((resolve) => {
+    markFirstWriteReached = resolve;
+  });
+  const first = withWorkflowBindingChange({
+    ...params,
+    write: async () => {
+      markFirstWriteReached();
+      await firstFailure;
+      throw new Error('X failed');
+    },
+  });
+  const firstRejected = expect(first).rejects.toThrow('X failed');
+  await firstReachedWrite;
+  await expect(
+    withWorkflowBindingChange({
+      ...params,
+      accountId: 'b',
+      write: async () => {
+        failFirstWrite();
+        await firstRejected;
+        throw new Error('Y failed');
+      },
+    })
+  ).rejects.toThrow('Y failed');
+  expect(currentBinding.serviceAccountId).toBe('original');
 });

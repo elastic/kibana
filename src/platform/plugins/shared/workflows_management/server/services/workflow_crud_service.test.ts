@@ -2632,6 +2632,42 @@ describe('WorkflowCrudService', () => {
       });
     });
 
+    it.each([true, false])(
+      'passes the caller manage_security result to bulk disable (%s)',
+      async (allowed) => {
+        const core = {
+          ...coreMock.createStart(),
+          elasticsearch: elasticsearchServiceMock.createStart(),
+          security: securityServiceMock.createStart(),
+        };
+        core.security.serviceAccounts.isEnabled.mockReturnValue(true);
+        core.elasticsearch.client
+          .asScoped()
+          .asCurrentUser.security.hasPrivileges.mockResolvedValue({
+            username: 'editor',
+            has_all_requested: allowed,
+            cluster: { manage_security: allowed },
+            index: {},
+            application: {},
+          });
+        mockedDisableAllWorkflowsLib.mockResolvedValue({
+          total: 0,
+          disabled: 0,
+          failures: [],
+          disabledWorkflows: [],
+        });
+        const { deps } = makeDeps(undefined, {
+          getCoreStart: () => core,
+          getServiceAccountBindings: () => core.security.serviceAccounts,
+        });
+        await new WorkflowCrudService(deps).disableAllWorkflows('default', request);
+        expect(core.elasticsearch.client.asScoped).toHaveBeenCalledWith(request);
+        expect(mockedDisableAllWorkflowsLib).toHaveBeenCalledWith(
+          expect.objectContaining({ canModifyBoundWorkflows: allowed })
+        );
+      }
+    );
+
     it('passes request to logWorkflowChangesAfterWrite when space-scoped', async () => {
       const logSpy = jest
         .spyOn(WorkflowCrudService.prototype, 'logWorkflowChangesAfterWrite')
@@ -2747,9 +2783,12 @@ describe('binding compensation revision reads', () => {
       _primary_term: 1,
       _version: 1,
     };
-    core.elasticsearch.client.asInternalUser.get
-      .mockResolvedValueOnce(revision)
-      .mockResolvedValueOnce({ ...revision, _seq_no: 2, _version: 2 });
+    core.elasticsearch.client.asInternalUser.get.mockResolvedValueOnce({
+      ...revision,
+      _seq_no: 2,
+      _version: 2,
+      _source: { definition: { settings: { run_as: 'b' } } },
+    });
     const { deps, client } = makeDeps(undefined, {
       getCoreStart: () => core,
       getServiceAccountBindings: () => bindings,
@@ -2787,11 +2826,11 @@ describe('binding compensation revision reads', () => {
         }
       )
     ).rejects.toThrow('OCC conflict');
-    expect(core.elasticsearch.client.asInternalUser.get).toHaveBeenCalledTimes(2);
+    expect(core.elasticsearch.client.asInternalUser.get).toHaveBeenCalledTimes(1);
     expect(core.elasticsearch.client.asInternalUser.get).toHaveBeenCalledWith({
       index: '.workflows-workflows',
       id: 'workflow',
-      _source: false,
+      _source_includes: ['definition.settings.run_as', 'deleted_at'],
       realtime: true,
     });
     expect(bindings.bindWorkload).toHaveBeenCalledTimes(1);

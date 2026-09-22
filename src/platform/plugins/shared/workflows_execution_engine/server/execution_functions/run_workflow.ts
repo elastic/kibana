@@ -33,6 +33,7 @@ import type {
 } from '../types';
 import type { ContextDependencies } from '../workflow_context_manager/types';
 import { workflowExecutionLoop } from '../workflow_execution_loop';
+import { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 
 export interface RunWorkflowResult {
   /** Dormant queued `workflow:run` tasks must be deleted by Task Manager after handling. */
@@ -247,6 +248,15 @@ export const runWorkflow = async (
   if (!execution) {
     throw new Error('Workflow execution not found.');
   }
+  if (isTerminalStatus(execution.status)) {
+    await handlePostExecutionLoop({
+      ...params,
+      fakeRequest: getWorkflowOriginalRequest(params.fakeRequest),
+      workflowTaskManager: new WorkflowTaskManager(params.dependencies.taskManager),
+      cloudSetup: params.dependencies.cloudSetup,
+    });
+    return;
+  }
   let enteredExecution = false;
   try {
     return await withWorkflowExecutionIdentity(
@@ -271,6 +281,12 @@ export const runWorkflow = async (
         status: ExecutionStatus.FAILED,
         finishedAt: new Date().toISOString(),
         error: executionError,
+      });
+      await handlePostExecutionLoop({
+        ...params,
+        fakeRequest: getWorkflowOriginalRequest(params.fakeRequest),
+        workflowTaskManager: new WorkflowTaskManager(params.dependencies.taskManager),
+        cloudSetup: params.dependencies.cloudSetup,
       });
     }
     throw error;

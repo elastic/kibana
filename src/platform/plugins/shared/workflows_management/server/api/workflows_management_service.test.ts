@@ -307,7 +307,7 @@ describe('WorkflowsService (facade)', () => {
         overwrite: true,
       });
       await service.updateWorkflow('wf-1', { name: 'new' } as any, 'default', request);
-      await service.deleteWorkflows(['wf-1'], 'default', { force: true });
+      await service.deleteWorkflows(['wf-1'], 'default', { force: true }, request);
       await service.disableAllWorkflows('my-space', request);
 
       expect(crudSpies.getWorkflow).toHaveBeenCalledWith('wf-1', 'default', {
@@ -334,7 +334,12 @@ describe('WorkflowsService (facade)', () => {
         'default',
         request
       );
-      expect(crudSpies.deleteWorkflows).toHaveBeenCalledWith(['wf-1'], 'default', { force: true });
+      expect(crudSpies.deleteWorkflows).toHaveBeenCalledWith(
+        ['wf-1'],
+        'default',
+        { force: true },
+        request
+      );
       expect(crudSpies.disableAllWorkflows).toHaveBeenCalledWith('my-space', request);
     });
 
