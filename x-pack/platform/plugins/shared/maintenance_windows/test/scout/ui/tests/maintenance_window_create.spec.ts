@@ -96,8 +96,12 @@ const openEditFlowByTitle = async (
   const searchBox = page.locator('.euiFieldSearch:not(.euiSelectableTemplateSitewide__search)');
   await searchBox.fill(name);
   await searchBox.press('Enter');
-  await page.locator(TABLE_LOADED_CSS).waitFor();
-  await page.testSubj.click('table-actions-popover');
+  // Scope to the row with this title: the pre-search table can still be rendered at this point.
+  const row = page.testSubj
+    .locator('maintenance-windows-table')
+    .locator('tbody tr', { hasText: name });
+  await expect(row).toHaveCount(1);
+  await row.locator('[data-test-subj="table-actions-popover"]').click();
   await page.testSubj.click('table-actions-edit');
   await expect(page.testSubj.locator(CREATE_FORM)).toBeVisible();
 };
@@ -240,7 +244,7 @@ test.describe('Maintenance window create form', { tag: tags.stateful.classic }, 
     await expect(page.testSubj.locator('alertingV2ScopedQuerySwitch')).toBeChecked();
 
     // Episodes KQL must be restored.
-    await expect(page.testSubj.locator('maintenanceWindowAlertingV2FilterInput')).toContainText(
+    await expect(page.testSubj.locator('maintenanceWindowAlertingV2FilterInput')).toHaveValue(
       'episode_id: "test-episode"'
     );
   });
