@@ -884,8 +884,10 @@ export class CasesConnectorExecutor {
     const builtCustomFields = buildCustomFieldsForRequest(customFieldsConfigurations).filter(
       (customField) => !legacyKeysWithV2Values?.has(customField.key)
     );
-    const { syncAlerts } = getCaseSettings(params.owner);
-    const extractObservables = spaceExtractObservables ?? true;
+    const { syncAlerts, extractObservables: ownerExtractObservables } = getCaseSettings(
+      params.owner
+    );
+    const extractObservables = spaceExtractObservables ?? ownerExtractObservables;
 
     const baseRequest: Omit<BulkCreateCasesRequest['cases'][number], 'id'> & { id: string } = {
       id: caseId,
@@ -974,8 +976,10 @@ export class CasesConnectorExecutor {
       })
     );
 
-    const { syncAlerts } = getCaseSettings(params.owner);
-    const extractObservables = spaceExtractObservables ?? true;
+    const { syncAlerts, extractObservables: ownerExtractObservables } = getCaseSettings(
+      params.owner
+    );
+    const extractObservables = spaceExtractObservables ?? ownerExtractObservables;
 
     return {
       id: caseId,
