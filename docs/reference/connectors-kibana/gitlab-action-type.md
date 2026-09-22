@@ -11,6 +11,10 @@ applies_to:
 
 The GitLab connector connects to the GitLab REST API v4. It supports searching projects, listing and managing issues and merge requests, browsing repository branches and files, listing commits and CI/CD pipelines, and triggering new pipeline runs. Both GitLab.com and self-managed GitLab instances are supported.
 
+::::{note}
+This connector is currently available in **Agent Builder** only. Workflow support is planned for a future release.
+::::
+
 ## Create connectors in {{kib}} [define-gitlab-ui]
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
@@ -34,7 +38,7 @@ You can test connectors when you create or edit the connector in {{kib}}. The te
 The GitLab connector exposes the following actions:
 
 `getCurrentUser`
-:   Get the profile of the currently authenticated GitLab user. Returns the username, name, email, and user ID. Call this first to confirm authentication and to resolve "me" to a real user ID.
+:   Get the profile of the currently authenticated GitLab user. Returns the username, name, email, and user ID. Call this first to confirm authentication and to retrieve the authenticated user's ID.
 
 `searchProjects`
 :   Search for GitLab projects (repositories) by name or keyword. Returns project IDs, names, namespace paths, and descriptions. Use the returned project ID or namespace path in other actions.

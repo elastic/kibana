@@ -65,6 +65,10 @@ describe('Gitlab connector', () => {
     it('requires enterprise license', () => {
       expect(Gitlab.metadata.minimumLicense).toBe('enterprise');
     });
+
+    it('is marked as technical preview', () => {
+      expect(Gitlab.metadata.isTechnicalPreview).toBe(true);
+    });
   });
 
   describe('auth', () => {

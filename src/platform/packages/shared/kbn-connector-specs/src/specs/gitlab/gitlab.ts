@@ -122,6 +122,7 @@ export const Gitlab: ConnectorSpec = {
         'Search projects, manage issues and merge requests, browse repository files, and trigger CI/CD pipelines in GitLab.',
     }),
     minimumLicense: 'enterprise',
+    isTechnicalPreview: true,
     // New connector: ship with agentBuilder only. Add 'workflows' in a follow-up PR
     // once this connector type reaches Production-NonCanary on all nodes.
     supportedFeatureIds: ['agentBuilder'],
@@ -1026,7 +1027,7 @@ export const Gitlab: ConnectorSpec = {
     '### Key concepts',
     '- A "project" is GitLab\'s term for a repository. Identify a project by its numeric ID or namespace path (e.g. "elastic/kibana").',
     '- Issues and merge requests use an "IID" (internal ID within the project), which is the number shown in the GitLab UI (e.g. #42). This is distinct from the global database ID.',
-    '- GitLab calls PR comments "notes" — use addIssueNote to comment on an issue.',
+    '- GitLab calls PR comments "notes" — use addIssueNote to comment on an issue and addMergeRequestNote to comment on a merge request.',
     '',
     '### Action strategy',
     "- Start with getCurrentUser to confirm authentication and resolve the current user's ID.",
