@@ -10,6 +10,8 @@ import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { AlertEpisodeRunbook } from './runbook';
 
+const RUNBOOK_PREVIEW_MASK = 'linear-gradient(to bottom,#000 55%,transparent 100%)';
+
 describe('AlertEpisodeRunbook', () => {
   it('renders the empty state when no content is provided', () => {
     render(
@@ -51,7 +53,7 @@ describe('AlertEpisodeRunbook', () => {
 
     expect(screen.getByTestId('alertingV2EpisodeDetailsRunbookPreview')).not.toHaveStyleRule(
       'mask-image',
-      'linear-gradient(to bottom, #000 55%, transparent 100%)'
+      RUNBOOK_PREVIEW_MASK
     );
   });
 
@@ -67,7 +69,7 @@ describe('AlertEpisodeRunbook', () => {
 
     expect(screen.getByTestId('alertingV2EpisodeDetailsRunbookPreview')).toHaveStyleRule(
       'mask-image',
-      'linear-gradient(to bottom, #000 55%, transparent 100%)'
+      RUNBOOK_PREVIEW_MASK
     );
   });
 
