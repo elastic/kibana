@@ -60,7 +60,7 @@ export const SignalsPanel = ({ isLoading, aiIndex }: SignalsPanelProps) => {
 
   const loading = isLoading || isLoadingGroups;
 
-  const hasFeedbackAgent = Boolean(aiIndex?.feedback_agent_id);
+  const hasFeedbackAgent = Boolean(aiIndex?.feedback_analysis?.agent_id);
 
   const handleAnalyze = () => {
     if (aiIndex) {

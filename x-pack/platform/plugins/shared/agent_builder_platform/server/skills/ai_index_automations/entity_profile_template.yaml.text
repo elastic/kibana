@@ -1,0 +1,268 @@
+version: "1"
+# Cumulative / Wiki-style strategy — one `entity` KI per recurring entity in a corpus.
+#
+# This is a working workflow, not a sketch. Edit the `consts` block and it runs as it stands;
+# everything below `consts` is already correct and does not need to be rewritten to make it work.
+#
+# To adapt it:
+#   1. Set every value in `consts`.
+#   2. Add the metrics that actually distinguish one entity from another to `entity_totals`, and
+#      extend `entity_metrics` with a line per new column. Sibling entity KIs look alike to a
+#      retriever unless their descriptions carry real differentiating numbers, so this is the step
+#      that decides whether the KIs are usable.
+#   3. Reference each metric you added in the prompt and in the KI `description`.
+#
+# `entity_totals` returns one row and `entity_metrics` reads it by column position, so the order
+# of the STATS columns and the order of the lines in `entity_metrics` have to stay in step.
+#
+# Re-runs replace each entity's KI, because `ki_id` is derived from the entity. To accumulate
+# instead — enriching a profile over successive runs rather than overwriting it — read the stored
+# indicator first and write with `context-engine.updateKi`, which fails when the indicator does not
+# yet exist and so needs the create above it to have run.
+name: Entity profile KI automation
+description: >
+  Generates one Knowledge Indicator per distinct entity found in a source index, each grounded in
+  per-entity ES|QL aggregations, written into a Context Engine AI index.
+enabled: true
+
+consts:
+  # The Context Engine AI index the indicators are written into.
+  ai_index_id: my-ai-index
+  # The index the entities are discovered in and profiled from.
+  source_index: my-source-index
+  # The keyword field holding the entity identity — one KI is produced per distinct value.
+  entity_field: my_entity_field
+  # A second field whose per-entity distribution characterises the entity.
+  breakdown_field: my_breakdown_field
+  # Upper bound on the number of entities profiled in one run. Each costs a model call, so keep
+  # this deliberate: a high-cardinality field will produce one KI per value.
+  max_entities: 25
+
+tags:
+  - entity-profile
+
+triggers:
+  - type: manual
+
+steps:
+  - name: discover_entities
+    type: elasticsearch.esql.query
+    with:
+      query: |
+        FROM {{ consts.source_index }}
+        | STATS count = COUNT(*) BY {{ consts.entity_field }}
+        | SORT count DESC
+        | LIMIT {{ consts.max_entities }}
+        | KEEP {{ consts.entity_field }}
+
+  - name: loop_entities
+    type: foreach
+    foreach: "{{ steps.discover_entities.output.values | json }}"
+    # One entity that fails to profile should not cost the rest of the batch.
+    iteration-on-failure:
+      continue: true
+    steps:
+      # `KEEP` above leaves one column, so the entity is item[0]. Adding columns to that query
+      # moves this index.
+      - name: entity_context
+        type: data.set
+        with:
+          entity: "{{ foreach.item[0] }}"
+          entity_escaped: "{{ foreach.item[0] | replace: '\"', '\\\"' }}"
+
+      - name: entity_totals
+        type: elasticsearch.esql.query
+        with:
+          query: |
+            FROM {{ consts.source_index }}
+            | WHERE {{ consts.entity_field }} == "{{ steps.entity_context.output.entity_escaped }}"
+            | STATS doc_count = COUNT(*),
+                    distinct_breakdown = COUNT_DISTINCT({{ consts.breakdown_field }})
+
+      - name: entity_metrics
+        type: data.set
+        with:
+          doc_count: "{{ steps.entity_totals.output.values[0][0] }}"
+          distinct_breakdown: "{{ steps.entity_totals.output.values[0][1] }}"
+
+      - name: entity_breakdown
+        type: elasticsearch.esql.query
+        with:
+          query: |
+            FROM {{ consts.source_index }}
+            | WHERE {{ consts.entity_field }} == "{{ steps.entity_context.output.entity_escaped }}"
+            | STATS count = COUNT(*) BY {{ consts.breakdown_field }}
+            | SORT count DESC
+            | LIMIT 10
+
+      - name: profile_entity
+        type: ai.prompt
+        with:
+          systemPrompt: |
+            You are a precise data analyst assistant. Ground every statement strictly in the
+            numeric ES|QL results provided in the prompt. Never invent, estimate or extrapolate a
+            figure that is not present in that data. Every ES|QL query you write must be
+            syntactically and semantically valid against the mapping described to you.
+          prompt: |
+            You are writing a factual profile of the {{ consts.entity_field }}
+            "{{ steps.entity_context.output.entity }}", based on aggregated data from the
+            {{ consts.source_index }} index.
+
+            Use ONLY the numbers below. Do not invent, estimate or hallucinate any other figure.
+
+            ### Totals for this entity (columns: doc_count, distinct_breakdown)
+            {{ steps.entity_totals.output | json }}
+
+            ### Breakdown by {{ consts.breakdown_field }} (ES|QL result)
+            {{ steps.entity_breakdown.output | json }}
+
+            Write a structured profile grounded strictly in the data above.
+
+            This profile sits alongside one sibling KI per other {{ consts.entity_field }} value,
+            all with near-identical titles. The `summary` is what a retriever uses to tell them
+            apart, so lead it with the numbers that make this entity different from its siblings
+            rather than with what they all have in common.
+
+            For `access_patterns` give at least 3 distinct analyst questions about this entity,
+            each with:
+            - question_type: a short label for the kind of question.
+            - esql_template: an ES|QL query scoped to this entity using a named parameter in the
+              form {{ consts.entity_field }} == "?entity" — do not hardcode the entity value in
+              the template.
+            - esql_example: the same query with "{{ steps.entity_context.output.entity }}"
+              substituted in and a small LIMIT so it is cheap to run.
+            - params: the named parameters used, each with name/type/example.
+            - returns: a short description of what the query returns.
+
+            ES|QL correctness rules — esql_template and esql_example are both executed by the
+            verifier, so both must be valid and runnable:
+            - Start with `FROM {{ consts.source_index }}`; use `|` between commands; use real
+              field names only.
+            - Scope every query to this entity with
+              `WHERE {{ consts.entity_field }} == "..."` (or the ?entity param in the template).
+            - Quote string literals with double quotes; do not quote numbers or booleans.
+            - Boolean fields take `COUNT(*) WHERE field == true`, never SUM()/AVG()/MIN()/MAX(),
+              which fail at runtime on a boolean. For a rate, divide that count by the total with
+              `EVAL rate = TO_DOUBLE(count_true) / total`.
+            - Only use AVG()/SUM() on genuinely numeric fields.
+            - Keep esql_example runnable and cheap: end it with a small `| LIMIT n` (n <= 20).
+          schema:
+            type: object
+            properties:
+              display_name:
+                type: string
+              summary:
+                type: string
+                description: "What distinguishes this entity from its siblings, in numbers"
+              notable_values:
+                type: array
+                items:
+                  type: string
+                description: "Standout values from the breakdown aggregation"
+              when_to_use:
+                type: string
+                description: "When an analyst or agent should consult this KI"
+              access_patterns:
+                type: array
+                minItems: 3
+                items:
+                  type: object
+                  properties:
+                    question_type:
+                      type: string
+                    esql_template:
+                      type: string
+                    esql_example:
+                      type: string
+                    params:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                          type:
+                            type: string
+                          example:
+                            type: string
+                        required: ["name", "type", "example"]
+                    returns:
+                      type: string
+                  required: ["question_type", "esql_template", "esql_example", "params", "returns"]
+            required: ["display_name", "summary", "notable_values", "when_to_use", "access_patterns"]
+
+      # Built once so verify_ki and create_ki see exactly the same document.
+      - name: assemble_ki
+        type: data.set
+        with:
+          ki:
+            type: entity
+            title: "{{ steps.entity_context.output.entity }} — {{ consts.entity_field }} profile"
+            # The description is the differentiator between near-identical sibling KIs, so it
+            # carries this entity's own numbers rather than a generic sentence.
+            description: >-
+              {{ steps.entity_context.output.entity }}: {{ steps.entity_metrics.output.doc_count }}
+              records across {{ steps.entity_metrics.output.distinct_breakdown }} distinct
+              {{ consts.breakdown_field }} values.
+              {{ steps.profile_entity.output.content.summary }}
+            content: |
+              # {{ steps.entity_context.output.entity }}
+
+              ## Summary
+              {{ steps.profile_entity.output.content.summary }}
+
+              ## Key metrics (grounded in ES|QL aggregations)
+              - Records: {{ steps.entity_metrics.output.doc_count }}
+              - Distinct {{ consts.breakdown_field }}: {{ steps.entity_metrics.output.distinct_breakdown }}
+
+              ## Notable values
+              {% for value in steps.profile_entity.output.content.notable_values -%}
+              - {{ value }}
+              {% endfor %}
+              ## When to use
+              {{ steps.profile_entity.output.content.when_to_use }}
+
+              ## Access patterns
+              {% for ap in steps.profile_entity.output.content.access_patterns -%}
+              - [{{ ap.question_type }}] {{ ap.returns }}
+                Template: `{{ ap.esql_template }}`
+                Example: `{{ ap.esql_example }}`
+              {% endfor %}
+            tags:
+              - "{{ steps.entity_context.output.entity }}"
+              - entity
+            attributes:
+              # Every ES|QL the KI carries goes here, which is what the verifiers check.
+              esql: "${{ steps.profile_entity.output.content.access_patterns | map: 'esql_example' }}"
+              doc_count: "${{ steps.entity_metrics.output.doc_count }}"
+              distinct_breakdown: "${{ steps.entity_metrics.output.distinct_breakdown }}"
+
+      - name: verify_ki
+        type: context-engine.verifyKi
+        with:
+          verifiers:
+            - esql-valid-syntax
+            - esql-valid-runtime
+          ki: "${{ steps.assemble_ki.output.ki }}"
+
+      - name: check_verification
+        type: if
+        condition: "steps.verify_ki.output.passed : true"
+        steps:
+          # `ki_id` is derived from the entity, so a re-run replaces that entity's profile rather
+          # than appending a second copy. Omit `ki_id` entirely on a data-stream destination,
+          # which rejects it.
+          - name: create_ki
+            type: context-engine.createKi
+            with:
+              ai_index_id: "{{ consts.ai_index_id }}"
+              ki_id: "entity-{{ steps.entity_context.output.entity | slugify }}"
+              ki: "${{ steps.assemble_ki.output.ki }}"
+        else:
+          - name: log_verification_failure
+            type: console
+            with:
+              message: |
+                KI verification failed for {{ consts.entity_field }}
+                "{{ steps.entity_context.output.entity }}".
+                Results: {{ steps.verify_ki.output.results | json }}

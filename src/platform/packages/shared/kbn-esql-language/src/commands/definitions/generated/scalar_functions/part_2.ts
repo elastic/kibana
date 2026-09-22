@@ -1170,9 +1170,9 @@ const mvLessDefinition: FunctionDefinition = {
         {
           name: 'options',
           type: 'function_named_parameters',
+          optional: true,
           mapParams:
             "{name='include_bound', values=[true, false], description='Whether the bound is inclusive. Defaults to `false` (strict `<`); `true` makes it inclusive (`<=`).', type=[boolean]}",
-          optional: true,
           description: '(Optional) Bound inclusivity options.',
         },
       ],
@@ -1235,9 +1235,9 @@ const mvLessDefinition: FunctionDefinition = {
         {
           name: 'options',
           type: 'function_named_parameters',
+          optional: true,
           mapParams:
             "{name='include_bound', values=[true, false], description='Whether the bound is inclusive. Defaults to `false` (strict `<`); `true` makes it inclusive (`<=`).', type=[boolean]}",
-          optional: true,
           description: '(Optional) Bound inclusivity options.',
         },
       ],
@@ -1281,9 +1281,9 @@ const mvLessDefinition: FunctionDefinition = {
         {
           name: 'options',
           type: 'function_named_parameters',
+          optional: true,
           mapParams:
             "{name='include_bound', values=[true, false], description='Whether the bound is inclusive. Defaults to `false` (strict `<`); `true` makes it inclusive (`<=`).', type=[boolean]}",
-          optional: true,
           description: '(Optional) Bound inclusivity options.',
         },
       ],
@@ -1346,9 +1346,9 @@ const mvLessDefinition: FunctionDefinition = {
         {
           name: 'options',
           type: 'function_named_parameters',
+          optional: true,
           mapParams:
             "{name='include_bound', values=[true, false], description='Whether the bound is inclusive. Defaults to `false` (strict `<`); `true` makes it inclusive (`<=`).', type=[boolean]}",
-          optional: true,
           description: '(Optional) Bound inclusivity options.',
         },
       ],
@@ -1411,9 +1411,9 @@ const mvLessDefinition: FunctionDefinition = {
         {
           name: 'options',
           type: 'function_named_parameters',
+          optional: true,
           mapParams:
             "{name='include_bound', values=[true, false], description='Whether the bound is inclusive. Defaults to `false` (strict `<`); `true` makes it inclusive (`<=`).', type=[boolean]}",
-          optional: true,
           description: '(Optional) Bound inclusivity options.',
         },
       ],
@@ -1543,11 +1543,11 @@ const mvLikeDefinition: FunctionDefinition = {
           name: 'pattern',
           type: 'keyword',
           optional: false,
-          description:
-            'Wildcard pattern. Must be a constant. `*` matches any run of characters, `?` matches a single character; escape either with `\\`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Wildcard pattern. Must be a constant. `*` matches any run of characters, `?` matches a single character; escape either with `\\`.',
         },
       ],
       returnType: 'boolean',
@@ -1565,11 +1565,11 @@ const mvLikeDefinition: FunctionDefinition = {
           name: 'pattern',
           type: 'text',
           optional: false,
-          description:
-            'Wildcard pattern. Must be a constant. `*` matches any run of characters, `?` matches a single character; escape either with `\\`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Wildcard pattern. Must be a constant. `*` matches any run of characters, `?` matches a single character; escape either with `\\`.',
         },
       ],
       returnType: 'boolean',
@@ -1587,11 +1587,11 @@ const mvLikeDefinition: FunctionDefinition = {
           name: 'pattern',
           type: 'keyword',
           optional: false,
-          description:
-            'Wildcard pattern. Must be a constant. `*` matches any run of characters, `?` matches a single character; escape either with `\\`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Wildcard pattern. Must be a constant. `*` matches any run of characters, `?` matches a single character; escape either with `\\`.',
         },
       ],
       returnType: 'boolean',
@@ -1609,11 +1609,11 @@ const mvLikeDefinition: FunctionDefinition = {
           name: 'pattern',
           type: 'text',
           optional: false,
-          description:
-            'Wildcard pattern. Must be a constant. `*` matches any run of characters, `?` matches a single character; escape either with `\\`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Wildcard pattern. Must be a constant. `*` matches any run of characters, `?` matches a single character; escape either with `\\`.',
         },
       ],
       returnType: 'boolean',
@@ -2325,11 +2325,11 @@ const mvPseriesWeightedSumDefinition: FunctionDefinition = {
           name: 'p',
           type: 'double',
           optional: false,
-          description:
-            'It is a constant number that represents the *p* parameter in the P-Series. It impacts every element’s contribution to the weighted sum.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'It is a constant number that represents the *p* parameter in the P-Series. It impacts every element’s contribution to the weighted sum.',
         },
       ],
       returnType: 'double',
@@ -2380,11 +2380,11 @@ const mvRlikeDefinition: FunctionDefinition = {
           name: 'pattern',
           type: 'keyword',
           optional: false,
-          description:
-            'Regular expression. Must be a constant. The pattern must match a value in full, as with `RLIKE`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Regular expression. Must be a constant. The pattern must match a value in full, as with `RLIKE`.',
         },
       ],
       returnType: 'boolean',
@@ -2402,11 +2402,11 @@ const mvRlikeDefinition: FunctionDefinition = {
           name: 'pattern',
           type: 'text',
           optional: false,
-          description:
-            'Regular expression. Must be a constant. The pattern must match a value in full, as with `RLIKE`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Regular expression. Must be a constant. The pattern must match a value in full, as with `RLIKE`.',
         },
       ],
       returnType: 'boolean',
@@ -2424,11 +2424,11 @@ const mvRlikeDefinition: FunctionDefinition = {
           name: 'pattern',
           type: 'keyword',
           optional: false,
-          description:
-            'Regular expression. Must be a constant. The pattern must match a value in full, as with `RLIKE`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Regular expression. Must be a constant. The pattern must match a value in full, as with `RLIKE`.',
         },
       ],
       returnType: 'boolean',
@@ -2446,11 +2446,11 @@ const mvRlikeDefinition: FunctionDefinition = {
           name: 'pattern',
           type: 'text',
           optional: false,
-          description:
-            'Regular expression. Must be a constant. The pattern must match a value in full, as with `RLIKE`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Regular expression. Must be a constant. The pattern must match a value in full, as with `RLIKE`.',
         },
       ],
       returnType: 'boolean',
@@ -3041,11 +3041,11 @@ const mvSortDefinition: FunctionDefinition = {
           name: 'order',
           type: 'keyword',
           optional: true,
-          description: 'Sort order. The valid options are ASC and DESC, the default is ASC.',
           hint: {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
+          description: 'Sort order. The valid options are ASC and DESC, the default is ASC.',
         },
       ],
       returnType: 'boolean',
@@ -3075,11 +3075,11 @@ const mvSortDefinition: FunctionDefinition = {
           name: 'order',
           type: 'keyword',
           optional: true,
-          description: 'Sort order. The valid options are ASC and DESC, the default is ASC.',
           hint: {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
+          description: 'Sort order. The valid options are ASC and DESC, the default is ASC.',
         },
       ],
       returnType: 'date',
@@ -3109,11 +3109,11 @@ const mvSortDefinition: FunctionDefinition = {
           name: 'order',
           type: 'keyword',
           optional: true,
-          description: 'Sort order. The valid options are ASC and DESC, the default is ASC.',
           hint: {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
+          description: 'Sort order. The valid options are ASC and DESC, the default is ASC.',
         },
       ],
       returnType: 'date_nanos',
@@ -3143,11 +3143,11 @@ const mvSortDefinition: FunctionDefinition = {
           name: 'order',
           type: 'keyword',
           optional: true,
-          description: 'Sort order. The valid options are ASC and DESC, the default is ASC.',
           hint: {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
+          description: 'Sort order. The valid options are ASC and DESC, the default is ASC.',
         },
       ],
       returnType: 'double',
@@ -3177,11 +3177,11 @@ const mvSortDefinition: FunctionDefinition = {
           name: 'order',
           type: 'keyword',
           optional: true,
-          description: 'Sort order. The valid options are ASC and DESC, the default is ASC.',
           hint: {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
+          description: 'Sort order. The valid options are ASC and DESC, the default is ASC.',
         },
       ],
       returnType: 'integer',
@@ -3211,11 +3211,11 @@ const mvSortDefinition: FunctionDefinition = {
           name: 'order',
           type: 'keyword',
           optional: true,
-          description: 'Sort order. The valid options are ASC and DESC, the default is ASC.',
           hint: {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
+          description: 'Sort order. The valid options are ASC and DESC, the default is ASC.',
         },
       ],
       returnType: 'ip',
@@ -3245,11 +3245,11 @@ const mvSortDefinition: FunctionDefinition = {
           name: 'order',
           type: 'keyword',
           optional: true,
-          description: 'Sort order. The valid options are ASC and DESC, the default is ASC.',
           hint: {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
+          description: 'Sort order. The valid options are ASC and DESC, the default is ASC.',
         },
       ],
       returnType: 'keyword',
@@ -3279,11 +3279,11 @@ const mvSortDefinition: FunctionDefinition = {
           name: 'order',
           type: 'keyword',
           optional: true,
-          description: 'Sort order. The valid options are ASC and DESC, the default is ASC.',
           hint: {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
+          description: 'Sort order. The valid options are ASC and DESC, the default is ASC.',
         },
       ],
       returnType: 'long',
@@ -3313,11 +3313,11 @@ const mvSortDefinition: FunctionDefinition = {
           name: 'order',
           type: 'keyword',
           optional: true,
-          description: 'Sort order. The valid options are ASC and DESC, the default is ASC.',
           hint: {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
+          description: 'Sort order. The valid options are ASC and DESC, the default is ASC.',
         },
       ],
       returnType: 'keyword',
@@ -3347,11 +3347,11 @@ const mvSortDefinition: FunctionDefinition = {
           name: 'order',
           type: 'keyword',
           optional: true,
-          description: 'Sort order. The valid options are ASC and DESC, the default is ASC.',
           hint: {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
+          description: 'Sort order. The valid options are ASC and DESC, the default is ASC.',
         },
       ],
       returnType: 'unsigned_long',
@@ -3381,11 +3381,11 @@ const mvSortDefinition: FunctionDefinition = {
           name: 'order',
           type: 'keyword',
           optional: true,
-          description: 'Sort order. The valid options are ASC and DESC, the default is ASC.',
           hint: {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
+          description: 'Sort order. The valid options are ASC and DESC, the default is ASC.',
         },
       ],
       returnType: 'version',
@@ -4693,17 +4693,17 @@ const qstrDefinition: FunctionDefinition = {
           name: 'query',
           type: 'keyword',
           optional: false,
-          description: 'Query string in Lucene query string format.',
           hint: {
             kind: 'constant',
           },
+          description: 'Query string in Lucene query string format.',
         },
         {
           name: 'options',
           type: 'function_named_parameters',
+          optional: true,
           mapParams:
             "{name='default_field', values=[standard], description='Default field to search if no field is provided in the query string. Supports wildcards (*).', type=[keyword]}, {name='allow_leading_wildcard', values=[true, false], description='If true, the wildcard characters * and ? are allowed as the first character of the query string. Defaults to true.', type=[boolean]}, {name='allow_wildcard', values=[false, true], description='If true, the query attempts to analyze wildcard terms in the query string. Defaults to false.', type=[boolean]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into tokens. Defaults to the index-time analyzer mapped for the default_field.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.', type=[float]}, {name='default_operator', values=[OR, AND], description='Default boolean logic used to interpret text in the query string if no operators are specified.', type=[keyword]}, {name='enable_position_increments', values=[true, false], description='If true, enable position increments in queries constructed from a query_string search. Defaults to true.', type=[boolean]}, {name='fields', values=[standard], description='Array of fields to search. Supports wildcards (*).', type=[keyword]}, {name='fuzzy_max_expansions', values=[50], description='Maximum number of terms to which the query expands for fuzzy matching. Defaults to 50.', type=[integer]}, {name='fuzzy_prefix_length', values=[0], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='max_determinized_states', values=[10000], description='Maximum number of automaton states required for the query. Default is 10000.', type=[integer]}, {name='minimum_should_match', values=[standard], description='Minimum number of clauses that must match for a document to be returned.', type=[string]}, {name='quote_analyzer', values=[standard], description='Analyzer used to convert quoted text in the query string into tokens. Defaults to the search_quote_analyzer mapped for the default_field.', type=[keyword]}, {name='phrase_slop', values=[0], description='Maximum number of positions allowed between matching tokens for phrases. Defaults to 0 (which means exact matches are required).', type=[integer]}, {name='quote_field_suffix', values=[standard], description='Suffix appended to quoted text in the query string.', type=[keyword]}, {name='rewrite', values=[standard], description='Method used to rewrite the query.', type=[keyword]}, {name='time_zone', values=[standard], description='Coordinated Universal Time (UTC) offset or IANA time zone used to convert date values in the query string to UTC.', type=[keyword]}",
-          optional: true,
           description:
             '(Optional) Additional options for Query String as <<esql-function-named-params,function named parameters>>. See <<query-dsl-query-string-query,query string query>> for more information.',
           hint: {
@@ -4719,17 +4719,17 @@ const qstrDefinition: FunctionDefinition = {
           name: 'query',
           type: 'text',
           optional: false,
-          description: 'Query string in Lucene query string format.',
           hint: {
             kind: 'constant',
           },
+          description: 'Query string in Lucene query string format.',
         },
         {
           name: 'options',
           type: 'function_named_parameters',
+          optional: true,
           mapParams:
             "{name='default_field', values=[standard], description='Default field to search if no field is provided in the query string. Supports wildcards (*).', type=[keyword]}, {name='allow_leading_wildcard', values=[true, false], description='If true, the wildcard characters * and ? are allowed as the first character of the query string. Defaults to true.', type=[boolean]}, {name='allow_wildcard', values=[false, true], description='If true, the query attempts to analyze wildcard terms in the query string. Defaults to false.', type=[boolean]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into tokens. Defaults to the index-time analyzer mapped for the default_field.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.', type=[float]}, {name='default_operator', values=[OR, AND], description='Default boolean logic used to interpret text in the query string if no operators are specified.', type=[keyword]}, {name='enable_position_increments', values=[true, false], description='If true, enable position increments in queries constructed from a query_string search. Defaults to true.', type=[boolean]}, {name='fields', values=[standard], description='Array of fields to search. Supports wildcards (*).', type=[keyword]}, {name='fuzzy_max_expansions', values=[50], description='Maximum number of terms to which the query expands for fuzzy matching. Defaults to 50.', type=[integer]}, {name='fuzzy_prefix_length', values=[0], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='max_determinized_states', values=[10000], description='Maximum number of automaton states required for the query. Default is 10000.', type=[integer]}, {name='minimum_should_match', values=[standard], description='Minimum number of clauses that must match for a document to be returned.', type=[string]}, {name='quote_analyzer', values=[standard], description='Analyzer used to convert quoted text in the query string into tokens. Defaults to the search_quote_analyzer mapped for the default_field.', type=[keyword]}, {name='phrase_slop', values=[0], description='Maximum number of positions allowed between matching tokens for phrases. Defaults to 0 (which means exact matches are required).', type=[integer]}, {name='quote_field_suffix', values=[standard], description='Suffix appended to quoted text in the query string.', type=[keyword]}, {name='rewrite', values=[standard], description='Method used to rewrite the query.', type=[keyword]}, {name='time_zone', values=[standard], description='Coordinated Universal Time (UTC) offset or IANA time zone used to convert date values in the query string to UTC.', type=[keyword]}",
-          optional: true,
           description:
             '(Optional) Additional options for Query String as <<esql-function-named-params,function named parameters>>. See <<query-dsl-query-string-query,query string query>> for more information.',
           hint: {
@@ -5904,10 +5904,10 @@ const roundToDefinition: FunctionDefinition = {
           name: 'points',
           type: 'date',
           optional: false,
-          description: 'Remaining rounding points. Must be constants.',
           hint: {
             kind: 'constant',
           },
+          description: 'Remaining rounding points. Must be constants.',
         },
       ],
       returnType: 'date',
@@ -5925,10 +5925,10 @@ const roundToDefinition: FunctionDefinition = {
           name: 'points',
           type: 'date_nanos',
           optional: false,
-          description: 'Remaining rounding points. Must be constants.',
           hint: {
             kind: 'constant',
           },
+          description: 'Remaining rounding points. Must be constants.',
         },
       ],
       returnType: 'date_nanos',
@@ -5946,10 +5946,10 @@ const roundToDefinition: FunctionDefinition = {
           name: 'points',
           type: 'double',
           optional: false,
-          description: 'Remaining rounding points. Must be constants.',
           hint: {
             kind: 'constant',
           },
+          description: 'Remaining rounding points. Must be constants.',
         },
       ],
       returnType: 'double',
@@ -5967,10 +5967,10 @@ const roundToDefinition: FunctionDefinition = {
           name: 'points',
           type: 'integer',
           optional: false,
-          description: 'Remaining rounding points. Must be constants.',
           hint: {
             kind: 'constant',
           },
+          description: 'Remaining rounding points. Must be constants.',
         },
       ],
       returnType: 'double',
@@ -5988,10 +5988,10 @@ const roundToDefinition: FunctionDefinition = {
           name: 'points',
           type: 'long',
           optional: false,
-          description: 'Remaining rounding points. Must be constants.',
           hint: {
             kind: 'constant',
           },
+          description: 'Remaining rounding points. Must be constants.',
         },
       ],
       returnType: 'double',
@@ -6009,10 +6009,10 @@ const roundToDefinition: FunctionDefinition = {
           name: 'points',
           type: 'double',
           optional: false,
-          description: 'Remaining rounding points. Must be constants.',
           hint: {
             kind: 'constant',
           },
+          description: 'Remaining rounding points. Must be constants.',
         },
       ],
       returnType: 'double',
@@ -6030,10 +6030,10 @@ const roundToDefinition: FunctionDefinition = {
           name: 'points',
           type: 'integer',
           optional: false,
-          description: 'Remaining rounding points. Must be constants.',
           hint: {
             kind: 'constant',
           },
+          description: 'Remaining rounding points. Must be constants.',
         },
       ],
       returnType: 'integer',
@@ -6051,10 +6051,10 @@ const roundToDefinition: FunctionDefinition = {
           name: 'points',
           type: 'long',
           optional: false,
-          description: 'Remaining rounding points. Must be constants.',
           hint: {
             kind: 'constant',
           },
+          description: 'Remaining rounding points. Must be constants.',
         },
       ],
       returnType: 'long',
@@ -6072,10 +6072,10 @@ const roundToDefinition: FunctionDefinition = {
           name: 'points',
           type: 'double',
           optional: false,
-          description: 'Remaining rounding points. Must be constants.',
           hint: {
             kind: 'constant',
           },
+          description: 'Remaining rounding points. Must be constants.',
         },
       ],
       returnType: 'double',
@@ -6093,10 +6093,10 @@ const roundToDefinition: FunctionDefinition = {
           name: 'points',
           type: 'integer',
           optional: false,
-          description: 'Remaining rounding points. Must be constants.',
           hint: {
             kind: 'constant',
           },
+          description: 'Remaining rounding points. Must be constants.',
         },
       ],
       returnType: 'long',
@@ -6114,10 +6114,10 @@ const roundToDefinition: FunctionDefinition = {
           name: 'points',
           type: 'long',
           optional: false,
-          description: 'Remaining rounding points. Must be constants.',
           hint: {
             kind: 'constant',
           },
+          description: 'Remaining rounding points. Must be constants.',
         },
       ],
       returnType: 'long',
@@ -6995,10 +6995,10 @@ const stBufferDefinition: FunctionDefinition = {
           name: 'distance',
           type: 'double',
           optional: false,
-          description: 'Buffer distance in the units of the input spatial reference system',
           hint: {
             kind: 'constant',
           },
+          description: 'Buffer distance in the units of the input spatial reference system',
         },
       ],
       returnType: 'cartesian_shape',
@@ -7016,10 +7016,10 @@ const stBufferDefinition: FunctionDefinition = {
           name: 'distance',
           type: 'float',
           optional: false,
-          description: 'Buffer distance in the units of the input spatial reference system',
           hint: {
             kind: 'constant',
           },
+          description: 'Buffer distance in the units of the input spatial reference system',
         },
       ],
       returnType: 'cartesian_shape',
@@ -7037,10 +7037,10 @@ const stBufferDefinition: FunctionDefinition = {
           name: 'distance',
           type: 'integer',
           optional: false,
-          description: 'Buffer distance in the units of the input spatial reference system',
           hint: {
             kind: 'constant',
           },
+          description: 'Buffer distance in the units of the input spatial reference system',
         },
       ],
       returnType: 'cartesian_shape',
@@ -7058,10 +7058,10 @@ const stBufferDefinition: FunctionDefinition = {
           name: 'distance',
           type: 'long',
           optional: false,
-          description: 'Buffer distance in the units of the input spatial reference system',
           hint: {
             kind: 'constant',
           },
+          description: 'Buffer distance in the units of the input spatial reference system',
         },
       ],
       returnType: 'cartesian_shape',
@@ -7079,10 +7079,10 @@ const stBufferDefinition: FunctionDefinition = {
           name: 'distance',
           type: 'double',
           optional: false,
-          description: 'Buffer distance in the units of the input spatial reference system',
           hint: {
             kind: 'constant',
           },
+          description: 'Buffer distance in the units of the input spatial reference system',
         },
       ],
       returnType: 'cartesian_shape',
@@ -7100,10 +7100,10 @@ const stBufferDefinition: FunctionDefinition = {
           name: 'distance',
           type: 'float',
           optional: false,
-          description: 'Buffer distance in the units of the input spatial reference system',
           hint: {
             kind: 'constant',
           },
+          description: 'Buffer distance in the units of the input spatial reference system',
         },
       ],
       returnType: 'cartesian_shape',
@@ -7121,10 +7121,10 @@ const stBufferDefinition: FunctionDefinition = {
           name: 'distance',
           type: 'integer',
           optional: false,
-          description: 'Buffer distance in the units of the input spatial reference system',
           hint: {
             kind: 'constant',
           },
+          description: 'Buffer distance in the units of the input spatial reference system',
         },
       ],
       returnType: 'cartesian_shape',
@@ -7142,10 +7142,10 @@ const stBufferDefinition: FunctionDefinition = {
           name: 'distance',
           type: 'long',
           optional: false,
-          description: 'Buffer distance in the units of the input spatial reference system',
           hint: {
             kind: 'constant',
           },
+          description: 'Buffer distance in the units of the input spatial reference system',
         },
       ],
       returnType: 'cartesian_shape',
@@ -7163,10 +7163,10 @@ const stBufferDefinition: FunctionDefinition = {
           name: 'distance',
           type: 'double',
           optional: false,
-          description: 'Buffer distance in the units of the input spatial reference system',
           hint: {
             kind: 'constant',
           },
+          description: 'Buffer distance in the units of the input spatial reference system',
         },
       ],
       returnType: 'geo_shape',
@@ -7184,10 +7184,10 @@ const stBufferDefinition: FunctionDefinition = {
           name: 'distance',
           type: 'float',
           optional: false,
-          description: 'Buffer distance in the units of the input spatial reference system',
           hint: {
             kind: 'constant',
           },
+          description: 'Buffer distance in the units of the input spatial reference system',
         },
       ],
       returnType: 'geo_shape',
@@ -7205,10 +7205,10 @@ const stBufferDefinition: FunctionDefinition = {
           name: 'distance',
           type: 'integer',
           optional: false,
-          description: 'Buffer distance in the units of the input spatial reference system',
           hint: {
             kind: 'constant',
           },
+          description: 'Buffer distance in the units of the input spatial reference system',
         },
       ],
       returnType: 'geo_shape',
@@ -7226,10 +7226,10 @@ const stBufferDefinition: FunctionDefinition = {
           name: 'distance',
           type: 'long',
           optional: false,
-          description: 'Buffer distance in the units of the input spatial reference system',
           hint: {
             kind: 'constant',
           },
+          description: 'Buffer distance in the units of the input spatial reference system',
         },
       ],
       returnType: 'geo_shape',
@@ -7247,10 +7247,10 @@ const stBufferDefinition: FunctionDefinition = {
           name: 'distance',
           type: 'double',
           optional: false,
-          description: 'Buffer distance in the units of the input spatial reference system',
           hint: {
             kind: 'constant',
           },
+          description: 'Buffer distance in the units of the input spatial reference system',
         },
       ],
       returnType: 'geo_shape',
@@ -7268,10 +7268,10 @@ const stBufferDefinition: FunctionDefinition = {
           name: 'distance',
           type: 'float',
           optional: false,
-          description: 'Buffer distance in the units of the input spatial reference system',
           hint: {
             kind: 'constant',
           },
+          description: 'Buffer distance in the units of the input spatial reference system',
         },
       ],
       returnType: 'geo_shape',
@@ -7289,10 +7289,10 @@ const stBufferDefinition: FunctionDefinition = {
           name: 'distance',
           type: 'integer',
           optional: false,
-          description: 'Buffer distance in the units of the input spatial reference system',
           hint: {
             kind: 'constant',
           },
+          description: 'Buffer distance in the units of the input spatial reference system',
         },
       ],
       returnType: 'geo_shape',
@@ -7310,10 +7310,10 @@ const stBufferDefinition: FunctionDefinition = {
           name: 'distance',
           type: 'long',
           optional: false,
-          description: 'Buffer distance in the units of the input spatial reference system',
           hint: {
             kind: 'constant',
           },
+          description: 'Buffer distance in the units of the input spatial reference system',
         },
       ],
       returnType: 'geo_shape',
@@ -8266,11 +8266,11 @@ const stGeohashDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'integer',
           optional: false,
-          description:
-            'Expression of type `integer`. If `null`, the function returns `null`. Valid values are between [1 and 12](https://en.wikipedia.org/wiki/Geohash).',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Expression of type `integer`. If `null`, the function returns `null`. Valid values are between [1 and 12](https://en.wikipedia.org/wiki/Geohash).',
         },
       ],
       returnType: 'geohash',
@@ -8288,21 +8288,21 @@ const stGeohashDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'integer',
           optional: false,
-          description:
-            'Expression of type `integer`. If `null`, the function returns `null`. Valid values are between [1 and 12](https://en.wikipedia.org/wiki/Geohash).',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Expression of type `integer`. If `null`, the function returns `null`. Valid values are between [1 and 12](https://en.wikipedia.org/wiki/Geohash).',
         },
         {
           name: 'bounds',
           type: 'geo_shape',
           optional: true,
-          description:
-            'Optional bounds to filter the grid tiles, a `geo_shape` of type `BBOX`. Use [`ST_ENVELOPE`](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/spatial-functions/st_envelope) if the `geo_shape` is of any other type.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Optional bounds to filter the grid tiles, a `geo_shape` of type `BBOX`. Use [`ST_ENVELOPE`](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/spatial-functions/st_envelope) if the `geo_shape` is of any other type.',
         },
       ],
       returnType: 'geohash',
@@ -8320,15 +8320,15 @@ const stGeohashDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'integer',
           optional: false,
-          description:
-            'Expression of type `integer`. If `null`, the function returns `null`. Valid values are between [1 and 12](https://en.wikipedia.org/wiki/Geohash).',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Expression of type `integer`. If `null`, the function returns `null`. Valid values are between [1 and 12](https://en.wikipedia.org/wiki/Geohash).',
         },
       ],
-      license: 'platinum',
       returnType: 'geohash',
+      license: 'platinum',
     },
     {
       params: [
@@ -8343,25 +8343,25 @@ const stGeohashDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'integer',
           optional: false,
-          description:
-            'Expression of type `integer`. If `null`, the function returns `null`. Valid values are between [1 and 12](https://en.wikipedia.org/wiki/Geohash).',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Expression of type `integer`. If `null`, the function returns `null`. Valid values are between [1 and 12](https://en.wikipedia.org/wiki/Geohash).',
         },
         {
           name: 'bounds',
           type: 'geo_shape',
           optional: true,
-          description:
-            'Optional bounds to filter the grid tiles, a `geo_shape` of type `BBOX`. Use [`ST_ENVELOPE`](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/spatial-functions/st_envelope) if the `geo_shape` is of any other type.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Optional bounds to filter the grid tiles, a `geo_shape` of type `BBOX`. Use [`ST_ENVELOPE`](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/spatial-functions/st_envelope) if the `geo_shape` is of any other type.',
         },
       ],
-      license: 'platinum',
       returnType: 'geohash',
+      license: 'platinum',
     },
   ],
   locationsAvailable: [
@@ -8409,15 +8409,15 @@ const stGeohexDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'integer',
           optional: false,
-          description:
-            'Expression of type `integer`. If `null`, the function returns `null`. Valid values are between [0 and 15](https://h3geo.org/docs/core-library/restable/).',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Expression of type `integer`. If `null`, the function returns `null`. Valid values are between [0 and 15](https://h3geo.org/docs/core-library/restable/).',
         },
       ],
-      license: 'platinum',
       returnType: 'geohex',
+      license: 'platinum',
     },
     {
       params: [
@@ -8432,25 +8432,25 @@ const stGeohexDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'integer',
           optional: false,
-          description:
-            'Expression of type `integer`. If `null`, the function returns `null`. Valid values are between [0 and 15](https://h3geo.org/docs/core-library/restable/).',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Expression of type `integer`. If `null`, the function returns `null`. Valid values are between [0 and 15](https://h3geo.org/docs/core-library/restable/).',
         },
         {
           name: 'bounds',
           type: 'geo_shape',
           optional: true,
-          description:
-            'Optional bounds to filter the grid tiles, a `geo_shape` of type `BBOX`. Use [`ST_ENVELOPE`](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/spatial-functions/st_envelope) if the `geo_shape` is of any other type.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Optional bounds to filter the grid tiles, a `geo_shape` of type `BBOX`. Use [`ST_ENVELOPE`](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/spatial-functions/st_envelope) if the `geo_shape` is of any other type.',
         },
       ],
-      license: 'platinum',
       returnType: 'geohex',
+      license: 'platinum',
     },
     {
       params: [
@@ -8465,15 +8465,15 @@ const stGeohexDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'integer',
           optional: false,
-          description:
-            'Expression of type `integer`. If `null`, the function returns `null`. Valid values are between [0 and 15](https://h3geo.org/docs/core-library/restable/).',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Expression of type `integer`. If `null`, the function returns `null`. Valid values are between [0 and 15](https://h3geo.org/docs/core-library/restable/).',
         },
       ],
-      license: 'platinum',
       returnType: 'geohex',
+      license: 'platinum',
     },
     {
       params: [
@@ -8488,25 +8488,25 @@ const stGeohexDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'integer',
           optional: false,
-          description:
-            'Expression of type `integer`. If `null`, the function returns `null`. Valid values are between [0 and 15](https://h3geo.org/docs/core-library/restable/).',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Expression of type `integer`. If `null`, the function returns `null`. Valid values are between [0 and 15](https://h3geo.org/docs/core-library/restable/).',
         },
         {
           name: 'bounds',
           type: 'geo_shape',
           optional: true,
-          description:
-            'Optional bounds to filter the grid tiles, a `geo_shape` of type `BBOX`. Use [`ST_ENVELOPE`](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/spatial-functions/st_envelope) if the `geo_shape` is of any other type.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Optional bounds to filter the grid tiles, a `geo_shape` of type `BBOX`. Use [`ST_ENVELOPE`](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/spatial-functions/st_envelope) if the `geo_shape` is of any other type.',
         },
       ],
-      license: 'platinum',
       returnType: 'geohex',
+      license: 'platinum',
     },
   ],
   locationsAvailable: [
@@ -8636,11 +8636,11 @@ const stGeotileDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'integer',
           optional: false,
-          description:
-            'Expression of type `integer`. If `null`, the function returns `null`. Valid values are between [0 and 29](https://wiki.openstreetmap.org/wiki/Zoom_levels).',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Expression of type `integer`. If `null`, the function returns `null`. Valid values are between [0 and 29](https://wiki.openstreetmap.org/wiki/Zoom_levels).',
         },
       ],
       returnType: 'geotile',
@@ -8658,21 +8658,21 @@ const stGeotileDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'integer',
           optional: false,
-          description:
-            'Expression of type `integer`. If `null`, the function returns `null`. Valid values are between [0 and 29](https://wiki.openstreetmap.org/wiki/Zoom_levels).',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Expression of type `integer`. If `null`, the function returns `null`. Valid values are between [0 and 29](https://wiki.openstreetmap.org/wiki/Zoom_levels).',
         },
         {
           name: 'bounds',
           type: 'geo_shape',
           optional: true,
-          description:
-            'Optional bounds to filter the grid tiles, a `geo_shape` of type `BBOX`. Use [`ST_ENVELOPE`](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/spatial-functions/st_envelope) if the `geo_shape` is of any other type.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Optional bounds to filter the grid tiles, a `geo_shape` of type `BBOX`. Use [`ST_ENVELOPE`](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/spatial-functions/st_envelope) if the `geo_shape` is of any other type.',
         },
       ],
       returnType: 'geotile',
@@ -8690,15 +8690,15 @@ const stGeotileDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'integer',
           optional: false,
-          description:
-            'Expression of type `integer`. If `null`, the function returns `null`. Valid values are between [0 and 29](https://wiki.openstreetmap.org/wiki/Zoom_levels).',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Expression of type `integer`. If `null`, the function returns `null`. Valid values are between [0 and 29](https://wiki.openstreetmap.org/wiki/Zoom_levels).',
         },
       ],
-      license: 'platinum',
       returnType: 'geotile',
+      license: 'platinum',
     },
     {
       params: [
@@ -8713,25 +8713,25 @@ const stGeotileDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'integer',
           optional: false,
-          description:
-            'Expression of type `integer`. If `null`, the function returns `null`. Valid values are between [0 and 29](https://wiki.openstreetmap.org/wiki/Zoom_levels).',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Expression of type `integer`. If `null`, the function returns `null`. Valid values are between [0 and 29](https://wiki.openstreetmap.org/wiki/Zoom_levels).',
         },
         {
           name: 'bounds',
           type: 'geo_shape',
           optional: true,
-          description:
-            'Optional bounds to filter the grid tiles, a `geo_shape` of type `BBOX`. Use [`ST_ENVELOPE`](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/spatial-functions/st_envelope) if the `geo_shape` is of any other type.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Optional bounds to filter the grid tiles, a `geo_shape` of type `BBOX`. Use [`ST_ENVELOPE`](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/spatial-functions/st_envelope) if the `geo_shape` is of any other type.',
         },
       ],
-      license: 'platinum',
       returnType: 'geotile',
+      license: 'platinum',
     },
   ],
   locationsAvailable: [
@@ -9424,10 +9424,10 @@ const stSimplifyDefinition: FunctionDefinition = {
           name: 'tolerance',
           type: 'double',
           optional: false,
-          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
           hint: {
             kind: 'constant',
           },
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
         },
       ],
       returnType: 'cartesian_point',
@@ -9445,10 +9445,10 @@ const stSimplifyDefinition: FunctionDefinition = {
           name: 'tolerance',
           type: 'float',
           optional: false,
-          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
           hint: {
             kind: 'constant',
           },
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
         },
       ],
       returnType: 'cartesian_point',
@@ -9466,10 +9466,10 @@ const stSimplifyDefinition: FunctionDefinition = {
           name: 'tolerance',
           type: 'integer',
           optional: false,
-          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
           hint: {
             kind: 'constant',
           },
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
         },
       ],
       returnType: 'cartesian_point',
@@ -9487,10 +9487,10 @@ const stSimplifyDefinition: FunctionDefinition = {
           name: 'tolerance',
           type: 'long',
           optional: false,
-          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
           hint: {
             kind: 'constant',
           },
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
         },
       ],
       returnType: 'cartesian_point',
@@ -9508,10 +9508,10 @@ const stSimplifyDefinition: FunctionDefinition = {
           name: 'tolerance',
           type: 'double',
           optional: false,
-          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
           hint: {
             kind: 'constant',
           },
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
         },
       ],
       returnType: 'cartesian_shape',
@@ -9529,10 +9529,10 @@ const stSimplifyDefinition: FunctionDefinition = {
           name: 'tolerance',
           type: 'float',
           optional: false,
-          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
           hint: {
             kind: 'constant',
           },
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
         },
       ],
       returnType: 'cartesian_shape',
@@ -9550,10 +9550,10 @@ const stSimplifyDefinition: FunctionDefinition = {
           name: 'tolerance',
           type: 'integer',
           optional: false,
-          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
           hint: {
             kind: 'constant',
           },
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
         },
       ],
       returnType: 'cartesian_shape',
@@ -9571,10 +9571,10 @@ const stSimplifyDefinition: FunctionDefinition = {
           name: 'tolerance',
           type: 'long',
           optional: false,
-          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
           hint: {
             kind: 'constant',
           },
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
         },
       ],
       returnType: 'cartesian_shape',
@@ -9592,10 +9592,10 @@ const stSimplifyDefinition: FunctionDefinition = {
           name: 'tolerance',
           type: 'double',
           optional: false,
-          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
           hint: {
             kind: 'constant',
           },
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
         },
       ],
       returnType: 'geo_point',
@@ -9613,10 +9613,10 @@ const stSimplifyDefinition: FunctionDefinition = {
           name: 'tolerance',
           type: 'float',
           optional: false,
-          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
           hint: {
             kind: 'constant',
           },
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
         },
       ],
       returnType: 'geo_point',
@@ -9634,10 +9634,10 @@ const stSimplifyDefinition: FunctionDefinition = {
           name: 'tolerance',
           type: 'integer',
           optional: false,
-          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
           hint: {
             kind: 'constant',
           },
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
         },
       ],
       returnType: 'geo_point',
@@ -9655,10 +9655,10 @@ const stSimplifyDefinition: FunctionDefinition = {
           name: 'tolerance',
           type: 'long',
           optional: false,
-          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
           hint: {
             kind: 'constant',
           },
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
         },
       ],
       returnType: 'geo_point',
@@ -9676,10 +9676,10 @@ const stSimplifyDefinition: FunctionDefinition = {
           name: 'tolerance',
           type: 'double',
           optional: false,
-          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
           hint: {
             kind: 'constant',
           },
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
         },
       ],
       returnType: 'geo_shape',
@@ -9697,10 +9697,10 @@ const stSimplifyDefinition: FunctionDefinition = {
           name: 'tolerance',
           type: 'float',
           optional: false,
-          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
           hint: {
             kind: 'constant',
           },
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
         },
       ],
       returnType: 'geo_shape',
@@ -9718,10 +9718,10 @@ const stSimplifyDefinition: FunctionDefinition = {
           name: 'tolerance',
           type: 'integer',
           optional: false,
-          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
           hint: {
             kind: 'constant',
           },
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
         },
       ],
       returnType: 'geo_shape',
@@ -9739,10 +9739,10 @@ const stSimplifyDefinition: FunctionDefinition = {
           name: 'tolerance',
           type: 'long',
           optional: false,
-          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
           hint: {
             kind: 'constant',
           },
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
         },
       ],
       returnType: 'geo_shape',
@@ -9793,10 +9793,10 @@ const stSimplifypreservetopologyDefinition: FunctionDefinition = {
           name: 'tolerance',
           type: 'double',
           optional: false,
-          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
           hint: {
             kind: 'constant',
           },
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
         },
       ],
       returnType: 'cartesian_point',
@@ -9814,10 +9814,10 @@ const stSimplifypreservetopologyDefinition: FunctionDefinition = {
           name: 'tolerance',
           type: 'float',
           optional: false,
-          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
           hint: {
             kind: 'constant',
           },
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
         },
       ],
       returnType: 'cartesian_point',
@@ -9835,10 +9835,10 @@ const stSimplifypreservetopologyDefinition: FunctionDefinition = {
           name: 'tolerance',
           type: 'integer',
           optional: false,
-          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
           hint: {
             kind: 'constant',
           },
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
         },
       ],
       returnType: 'cartesian_point',
@@ -9856,10 +9856,10 @@ const stSimplifypreservetopologyDefinition: FunctionDefinition = {
           name: 'tolerance',
           type: 'long',
           optional: false,
-          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
           hint: {
             kind: 'constant',
           },
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
         },
       ],
       returnType: 'cartesian_point',
@@ -9877,10 +9877,10 @@ const stSimplifypreservetopologyDefinition: FunctionDefinition = {
           name: 'tolerance',
           type: 'double',
           optional: false,
-          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
           hint: {
             kind: 'constant',
           },
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
         },
       ],
       returnType: 'cartesian_shape',
@@ -9898,10 +9898,10 @@ const stSimplifypreservetopologyDefinition: FunctionDefinition = {
           name: 'tolerance',
           type: 'float',
           optional: false,
-          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
           hint: {
             kind: 'constant',
           },
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
         },
       ],
       returnType: 'cartesian_shape',
@@ -9919,10 +9919,10 @@ const stSimplifypreservetopologyDefinition: FunctionDefinition = {
           name: 'tolerance',
           type: 'integer',
           optional: false,
-          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
           hint: {
             kind: 'constant',
           },
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
         },
       ],
       returnType: 'cartesian_shape',
@@ -9940,10 +9940,10 @@ const stSimplifypreservetopologyDefinition: FunctionDefinition = {
           name: 'tolerance',
           type: 'long',
           optional: false,
-          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
           hint: {
             kind: 'constant',
           },
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
         },
       ],
       returnType: 'cartesian_shape',
@@ -9961,10 +9961,10 @@ const stSimplifypreservetopologyDefinition: FunctionDefinition = {
           name: 'tolerance',
           type: 'double',
           optional: false,
-          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
           hint: {
             kind: 'constant',
           },
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
         },
       ],
       returnType: 'geo_point',
@@ -9982,10 +9982,10 @@ const stSimplifypreservetopologyDefinition: FunctionDefinition = {
           name: 'tolerance',
           type: 'float',
           optional: false,
-          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
           hint: {
             kind: 'constant',
           },
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
         },
       ],
       returnType: 'geo_point',
@@ -10003,10 +10003,10 @@ const stSimplifypreservetopologyDefinition: FunctionDefinition = {
           name: 'tolerance',
           type: 'integer',
           optional: false,
-          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
           hint: {
             kind: 'constant',
           },
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
         },
       ],
       returnType: 'geo_point',
@@ -10024,10 +10024,10 @@ const stSimplifypreservetopologyDefinition: FunctionDefinition = {
           name: 'tolerance',
           type: 'long',
           optional: false,
-          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
           hint: {
             kind: 'constant',
           },
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
         },
       ],
       returnType: 'geo_point',
@@ -10045,10 +10045,10 @@ const stSimplifypreservetopologyDefinition: FunctionDefinition = {
           name: 'tolerance',
           type: 'double',
           optional: false,
-          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
           hint: {
             kind: 'constant',
           },
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
         },
       ],
       returnType: 'geo_shape',
@@ -10066,10 +10066,10 @@ const stSimplifypreservetopologyDefinition: FunctionDefinition = {
           name: 'tolerance',
           type: 'float',
           optional: false,
-          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
           hint: {
             kind: 'constant',
           },
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
         },
       ],
       returnType: 'geo_shape',
@@ -10087,10 +10087,10 @@ const stSimplifypreservetopologyDefinition: FunctionDefinition = {
           name: 'tolerance',
           type: 'integer',
           optional: false,
-          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
           hint: {
             kind: 'constant',
           },
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
         },
       ],
       returnType: 'geo_shape',
@@ -10108,10 +10108,10 @@ const stSimplifypreservetopologyDefinition: FunctionDefinition = {
           name: 'tolerance',
           type: 'long',
           optional: false,
-          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
           hint: {
             kind: 'constant',
           },
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
         },
       ],
       returnType: 'geo_shape',
@@ -11519,22 +11519,22 @@ const textEmbeddingDefinition: FunctionDefinition = {
           name: 'inference_id',
           type: 'keyword',
           optional: false,
-          description:
-            'Identifier of an existing inference endpoint that will generate the embeddings. The inference endpoint must have the `text_embedding` task type and should use the same model that was used to embed your indexed data.',
           hint: {
-            entityType: 'inference_endpoint',
             kind: 'entity',
+            entityType: 'inference_endpoint',
             constraints: {
               task_type: 'text_embedding',
             },
           },
+          description:
+            'Identifier of an existing inference endpoint that will generate the embeddings. The inference endpoint must have the `text_embedding` task type and should use the same model that was used to embed your indexed data.',
         },
         {
           name: 'options',
           type: 'function_named_parameters',
+          optional: true,
           mapParams:
             '{name=\'timeout\', values=[], description=\'Timeout for the inference request (e.g. "30s", "1m").\', type=[keyword]}',
-          optional: true,
           description: '(Optional) Options for the inference request.',
         },
       ],
@@ -12278,10 +12278,10 @@ const toDateperiodDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date_period',
           optional: false,
-          description: 'Input value. The input is a valid constant date period expression.',
           hint: {
             kind: 'constant',
           },
+          description: 'Input value. The input is a valid constant date period expression.',
         },
       ],
       returnType: 'date_period',
@@ -12292,10 +12292,10 @@ const toDateperiodDefinition: FunctionDefinition = {
           name: 'field',
           type: 'keyword',
           optional: false,
-          description: 'Input value. The input is a valid constant date period expression.',
           hint: {
             kind: 'constant',
           },
+          description: 'Input value. The input is a valid constant date period expression.',
         },
       ],
       returnType: 'date_period',
@@ -12306,10 +12306,10 @@ const toDateperiodDefinition: FunctionDefinition = {
           name: 'field',
           type: 'text',
           optional: false,
-          description: 'Input value. The input is a valid constant date period expression.',
           hint: {
             kind: 'constant',
           },
+          description: 'Input value. The input is a valid constant date period expression.',
         },
       ],
       returnType: 'date_period',
@@ -13745,9 +13745,9 @@ const toIpDefinition: FunctionDefinition = {
         {
           name: 'options',
           type: 'function_named_parameters',
+          optional: true,
           mapParams:
             "{name='leading_zeros', values=[reject, octal, decimal], description='What to do with leading 0s in IPv4 addresses.', type=[keyword]}",
-          optional: true,
           description: '(Optional) Additional options.',
         },
       ],
@@ -13777,9 +13777,9 @@ const toIpDefinition: FunctionDefinition = {
         {
           name: 'options',
           type: 'function_named_parameters',
+          optional: true,
           mapParams:
             "{name='leading_zeros', values=[reject, octal, decimal], description='What to do with leading 0s in IPv4 addresses.', type=[keyword]}",
-          optional: true,
           description: '(Optional) Additional options.',
         },
       ],
@@ -13809,9 +13809,9 @@ const toIpDefinition: FunctionDefinition = {
         {
           name: 'options',
           type: 'function_named_parameters',
+          optional: true,
           mapParams:
             "{name='leading_zeros', values=[reject, octal, decimal], description='What to do with leading 0s in IPv4 addresses.', type=[keyword]}",
-          optional: true,
           description: '(Optional) Additional options.',
         },
       ],

@@ -10,13 +10,20 @@
     "browser": true,
     "server": true,
     "configPath": ["xpack", "nightshift_investigations"],
-    "requiredPlugins": [],
+    "requiredPlugins": ["share", "taskManager"],
     "optionalPlugins": [
+      "actions",
       "agentBuilder",
+      "contextEngine",
+      "inference",
+      "ruleRegistry",
+      "sandbox",
+      "searchInferenceEndpoints",
       "spaces",
       "workflowsExtensions",
-      "workflowsManagement"
+      "workflowsManagement",
     ],
-    "requiredBundles": []
-  }
+    "requiredBundles": [],
+    "extraPublicDirs": ["common"],
+  },
 }

@@ -1,7 +1,7 @@
 {
   "type": "shared-browser",
   "id": "@kbn/investigation-output",
-  "owner": "@elastic/nightshift-context-and-research-team",
+  "owner": ["@elastic/nightshift-context-and-research-team", "@elastic/nightshift-sre-agent-team"],
   "group": "observability",
   "visibility": "shared"
 }

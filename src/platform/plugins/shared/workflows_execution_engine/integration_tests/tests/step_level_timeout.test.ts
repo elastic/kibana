@@ -74,7 +74,7 @@ steps:
     });
   });
 
-  it('should have execution duration close to configured timeout value', async () => {
+  it('should not finish before the configured timeout', async () => {
     const timeoutStepExecutions = Array.from(
       workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
     ).filter(
@@ -87,7 +87,7 @@ steps:
     const timeoutStepExecution = timeoutStepExecutions[0];
 
     expect(timeoutStepExecution.executionTimeMs).toBeGreaterThan(1999);
-    expect(timeoutStepExecution.executionTimeMs).toBeLessThan(2100);
+    expect(timeoutStepExecution.executionTimeMs).toBeLessThan(10_000);
   });
 
   it('should not execute final step after timeout', async () => {

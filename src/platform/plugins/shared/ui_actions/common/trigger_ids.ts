@@ -30,7 +30,7 @@ export const EMBEDDABLE_EDITOR_MENU_TRIGGER = 'EMBEDDABLE_EDITOR_MENU_TRIGGER';
  * Actions attached to ADD_PANEL_TRIGGER trigger
  * are displayed in dashboards' add panel menu
  *
- * Please consult with @elastic/kibana-presentation before attaching
+ * Please consult with @elastic/kibana-dashboards before attaching
  * new actions to this trigger.
  */
 export const ADD_PANEL_TRIGGER = 'ADD_PANEL_TRIGGER';
@@ -38,7 +38,7 @@ export const ADD_PANEL_TRIGGER = 'ADD_PANEL_TRIGGER';
  * Actions attached to FEATURED_ADD_PANEL_TRIGGER trigger
  * are displayed at top of dashboards' add panel menu with distinct UI
  *
- * Please consult with @elastic/kibana-presentation before attaching
+ * Please consult with @elastic/kibana-dashboards before attaching
  * new actions to this trigger.
  */
 export const FEATURED_ADD_PANEL_TRIGGER = 'FEATURED_ADD_PANEL_TRIGGER';

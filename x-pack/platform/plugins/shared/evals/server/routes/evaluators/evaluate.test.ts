@@ -24,6 +24,7 @@ import { createEvaluatorRegistryMock } from '../../evaluators/registry.mock';
 import type { EvaluatorDefinition, EvaluatorRegistry } from '../../evaluators/types';
 import { awaitTraceReady, TraceReadinessError } from '../../evaluators/trace_readiness';
 import { getInstrumentationProfile } from '../../evaluators/evidence/resolve_instrumentation';
+import { withEvaluatorNameBaggage } from '../../evaluators/evaluator_tracing_context';
 import { registerEvaluateRoute } from './evaluate';
 import {
   buildClaudeCodeApiResponseDoc,
@@ -38,7 +39,13 @@ jest.mock('../../evaluators/trace_readiness', () => ({
   ...jest.requireActual('../../evaluators/trace_readiness'),
   awaitTraceReady: jest.fn(),
 }));
+jest.mock('../../evaluators/evaluator_tracing_context', () => ({
+  withEvaluatorNameBaggage: jest.fn((_: string, fn: () => unknown) => fn()),
+}));
 const awaitTraceReadyMock = awaitTraceReady as jest.MockedFunction<typeof awaitTraceReady>;
+const withEvaluatorNameBaggageMock = withEvaluatorNameBaggage as jest.MockedFunction<
+  typeof withEvaluatorNameBaggage
+>;
 const DEFAULT_ROUND = {
   input: { message: 'default input' },
   response: { message: 'default response' },
@@ -295,6 +302,16 @@ describe('POST /internal/evals/_evaluate', () => {
         inferenceClient: expect.any(Object),
         log: logger,
       })
+    );
+    expect(withEvaluatorNameBaggageMock).toHaveBeenNthCalledWith(
+      1,
+      'groundedness',
+      expect.any(Function)
+    );
+    expect(withEvaluatorNameBaggageMock).toHaveBeenNthCalledWith(
+      2,
+      'correctness',
+      expect.any(Function)
     );
   });
 

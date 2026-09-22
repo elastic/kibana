@@ -53,6 +53,7 @@ dependsOn:
   - '@kbn/test-es-server'
   - '@kbn/scout'
   - '@kbn/core-feature-flags-server'
+  - '@kbn/usage-collection-plugin'
 tags:
   - plugin
   - prod

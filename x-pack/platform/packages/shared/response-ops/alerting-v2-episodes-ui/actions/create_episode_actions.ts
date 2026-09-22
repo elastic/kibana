@@ -15,6 +15,7 @@ import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { QueryClient } from '@kbn/react-query';
+import type { EpisodeActionExtension, EpisodeDataSource } from '../types/episode_data_source';
 import type { EpisodeAction } from './types';
 import { createAckAction } from './ack';
 import { createUnackAction } from './unack';
@@ -52,17 +53,41 @@ export interface EpisodeActionsDeps {
     episodeIsoTimestamp: string;
     ruleId: string;
   }) => string | undefined | Promise<string | undefined>;
+  additionalDataSource?: EpisodeDataSource;
 }
 
-export const createEpisodeActions = (deps: EpisodeActionsDeps): EpisodeAction[] =>
-  [
-    createAckAction(deps),
-    createUnackAction(deps),
-    createSnoozeAction(deps),
-    createUnsnoozeAction(deps),
-    createResolveAction(deps),
+export const createEpisodeActions = (deps: EpisodeActionsDeps): EpisodeAction[] => {
+  const { additionalDataSource } = deps;
+  const ext = (id: string) =>
+    additionalDataSource?.actionExtensions?.find((e) => e.actionId === id);
+  const actionDeps = { http: deps.http, notifications: deps.notifications };
+
+  return [
+    createAckAction(actionDeps, ext('ALERTING_V2_ACK_EPISODE')),
+    createUnackAction(actionDeps, ext('ALERTING_V2_UNACK_EPISODE')),
+    createSnoozeAction(
+      deps,
+      ext('ALERTING_V2_SNOOZE_EPISODE') as
+        | EpisodeActionExtension<{ expiry: string | null }>
+        | undefined
+    ),
+    createUnsnoozeAction(actionDeps, ext('ALERTING_V2_UNSNOOZE_EPISODE')),
+    createResolveAction(actionDeps, ext('ALERTING_V2_RESOLVE_EPISODE')),
     createUnresolveAction(deps),
-    createEditTagsAction(deps),
+    createEditTagsAction(
+      {
+        ...deps,
+        fetchAdditionalTagSuggestions: additionalDataSource?.fetchTagOptions
+          ? () =>
+              additionalDataSource.fetchTagOptions!({
+                services: { http: deps.http },
+              })
+          : undefined,
+      },
+      ext('ALERTING_V2_EDIT_EPISODE_TAGS') as EpisodeActionExtension<{ tags: string[] }> | undefined
+    ),
     createEditAssigneeAction(deps),
     createOpenInDiscoverAction(deps),
+    ...(additionalDataSource?.createActions?.(deps) ?? []),
   ].sort((a, b) => a.order - b.order);
+};

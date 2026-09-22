@@ -5,22 +5,26 @@
  * 2.0.
  */
 
+import { ENABLE_IAC_PROVISIONER_FLAG } from '../../common/constants';
+
 import { useConfig, useStartServices } from '.';
 
 /**
  * Client-side mirror of the server's `isIacProvisionerEnabled()` gate: the IaC
  * Provisioner is only available where agentless is (cloud or serverless with
- * `xpack.fleet.agentless.enabled`) and the `xpack.fleet.iacProvisioner.enabled`
- * flag is on. On-prem support is pending the auth decision in
- * https://github.com/elastic/security-team/issues/18240.
+ * `xpack.fleet.agentless.enabled`) and the `fleet.enableIacProvisioner`
+ * LaunchDarkly flag is on (fallback false). On-prem support is pending the
+ * auth decision in https://github.com/elastic/security-team/issues/18240.
  */
 export const useIacProvisioner = (): { isIacProvisionerEnabled: boolean } => {
   const config = useConfig();
-  const { cloud } = useStartServices();
+  const { cloud, featureFlags } = useStartServices();
   const isHosted = Boolean(cloud?.isCloudEnabled || cloud?.isServerlessEnabled);
 
   return {
     isIacProvisionerEnabled:
-      isHosted && config.agentless?.enabled === true && config.iacProvisioner?.enabled === true,
+      isHosted &&
+      config.agentless?.enabled === true &&
+      featureFlags.getBooleanValue(ENABLE_IAC_PROVISIONER_FLAG, false),
   };
 };

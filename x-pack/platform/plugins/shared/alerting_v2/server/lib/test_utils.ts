@@ -12,6 +12,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import { Type } from 'apache-arrow/Arrow.node';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import type {
   PipelineStateStream,
   RuleExecutionInput,
@@ -111,7 +112,7 @@ export function createRuleExecutionInput(
 
   return {
     ruleId: 'rule-1',
-    spaceId: 'default',
+    spaceId: asSpaceId('default'),
     scheduledAt: '2025-01-01T00:00:00.000Z',
     executionContext: createExecutionContext(abortSignal),
     ...overrides,
@@ -123,7 +124,7 @@ export function createRuleExecutionPipelineInput(
 ): RuleExecutionPipelineInput {
   return {
     ruleId: 'rule-1',
-    spaceId: 'default',
+    spaceId: asSpaceId('default'),
     scheduledAt: '2025-01-01T00:00:00.000Z',
     executionUuid: 'execution-uuid',
     abortSignal: new AbortController().signal,

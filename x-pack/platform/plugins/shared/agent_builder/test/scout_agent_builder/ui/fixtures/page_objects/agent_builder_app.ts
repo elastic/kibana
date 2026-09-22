@@ -494,7 +494,7 @@ export class AgentBuilderApp {
   async selectAgentLabel(label: string) {
     const contentSelector = subj('agentBuilderAgentsListContent');
     const labelsButtonSelector = `${contentSelector} button[type="button"][aria-label="Labels Selection"]`;
-    const optionSelector = `ul[role="listbox"][aria-label="Labels"] > li[role="option"][title="${label}"]`;
+    const optionSelector = `ul[role="listbox"][aria-label="Labels"] > li[role="option"] span[title="${label}"]`;
     await this.page.locator(labelsButtonSelector).click();
     await this.page.locator(optionSelector).click();
   }

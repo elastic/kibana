@@ -323,16 +323,16 @@ bundle:
   profiles:
     kibana-release:
       output_products: 'kibana {version} {lifecycle}'
-      # output: 'kibana/{version}.yaml'
+      output_directory: docs/releases/kibana
     observability-release:
       output_products: 'observability {version} {lifecycle}'
-      # output: 'observability/{version}.yaml'
+      output_directory: docs/releases/observability
     security-release:
       output_products: 'security {version} {lifecycle}'
-      # output: 'security/{version}.yaml'
+      output_directory: docs/releases/security
     serverless-release:
       output_products: 'cloud-serverless {version} {lifecycle}'
-      # output: 'cloud-serverless/kibana-{version}.yaml'
+      output_directory: docs/releases/cloud-serverless
       # Feature IDs to hide when bundling with this profile (accepts string or list)
       hide_features:
         - data-federation

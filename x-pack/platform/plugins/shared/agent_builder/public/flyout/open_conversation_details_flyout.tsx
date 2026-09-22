@@ -48,6 +48,8 @@ export const openConversationDetailsFlyout = async ({
     ),
     {
       size: 's',
+      flyoutMenuDisplayMode: 'always',
+      flyoutMenuProps: {},
       type: 'push',
       paddingSize: 'm',
       role: 'region',

@@ -316,6 +316,9 @@ export interface RawAction extends Record<string, unknown> {
   config: Record<string, unknown>;
   secrets: Record<string, unknown>;
   authMode?: AuthMode;
+  apiKey?: string | null;
+  uiamApiKey?: string | null;
+  uiamApiKeyExternal?: boolean;
 }
 
 export interface ActionTaskParams extends SavedObjectAttributes {
@@ -325,6 +328,11 @@ export interface ActionTaskParams extends SavedObjectAttributes {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   params: Record<string, any>;
   apiKey?: string;
+  /**
+   * Id of the UIAM API key in `apiKey`. Unencrypted and mapped so the alerting API key
+   * invalidation task can see this pending execution still needs the key.
+   */
+  uiamApiKeyId?: string;
   /**
    * True when `apiKey` is an external (user-created Cloud) UIAM API key. Marks the execution
    * fake request so the Elasticsearch cluster client does not attach the UIAM shared secret,

@@ -10,7 +10,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiDescribedFormGroup,
   EuiFieldNumber,
   EuiFlexGroup,
@@ -23,6 +22,7 @@ import {
 import { useDispatch, useSelector } from 'react-redux-v7';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { isEqual } from 'lodash';
 import {
   DYNAMIC_SETTINGS_DEFAULTS,
@@ -95,13 +95,12 @@ export const AdvancedSettingsForm = () => {
       <EuiSpacer size="m" />
       {!canEdit && (
         <>
-          <EuiCallOut
+          <KbnInfoCallout
             announceOnMount
             title={i18n.translate('xpack.synthetics.settings.advanced.readOnly', {
               defaultMessage:
                 'You do not have sufficient permissions to edit these settings. Contact your administrator.',
             })}
-            iconType="lock"
             size="s"
           />
           <EuiSpacer size="m" />
@@ -169,7 +168,7 @@ export const AdvancedSettingsForm = () => {
         description={
           <FormattedMessage
             id="xpack.synthetics.settings.advanced.rebalanceShards.description"
-            defaultMessage="Reassign monitors across the healthy agents of scalable private locations. Disabling this pauses rebalancing without unscheduling the underlying task."
+            defaultMessage="Reassign monitors across the healthy agents of scalable private locations. Applies to all Kibana spaces. Disabling this pauses rebalancing and removes agent pins from existing monitors in the background."
           />
         }
       >

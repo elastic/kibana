@@ -119,4 +119,26 @@ describe('createCommonUpdateUserActionBuilder ', () => {
     await userEvent.click(screen.getByLabelText('Highlight the referenced comment'));
     expect(handleOutlineComment).toHaveBeenCalled();
   });
+
+  it('appends the action source to the event', () => {
+    const userAction = getUserAction('title', UserActionActions.update, {
+      source: { type: 'agent', id: 'agent-1', name: 'Elastic AI Agent' },
+    });
+    const builder = createCommonUpdateUserActionBuilder({
+      userProfiles: userProfilesMap,
+      userAction,
+      label,
+      icon: 'dot',
+      handleOutlineComment,
+    });
+
+    render(
+      <TestProviders>
+        <EuiCommentList comments={builder.build()} />
+      </TestProviders>
+    );
+
+    expect(screen.getByText(/A label/)).toBeInTheDocument();
+    expect(screen.getByTestId('user-action-via-source')).toHaveTextContent('via Elastic AI Agent');
+  });
 });

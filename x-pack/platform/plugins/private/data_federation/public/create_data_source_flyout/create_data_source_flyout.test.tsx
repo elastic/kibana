@@ -155,4 +155,44 @@ describe('CreateDataSourceFlyout', () => {
       expect(queryByText('Region is required.')).not.toBeInTheDocument();
     });
   });
+
+  it('shows an error', async () => {
+    const services: DataFederationKibanaServices = {
+      dataSourcesClient: createClientMock(),
+      datasetsClient: createDatasetsClientMock(),
+      toasts: createToastsMock(),
+      docLinks: createDocLinksMock(),
+      featureFlags: {},
+    };
+    const onSave = jest.fn().mockResolvedValue('validation_exception: something went wrong');
+
+    const initialDataSource: DataSource = {
+      type: 's3',
+      name: 'ds',
+      description: '',
+      settings: {
+        region: 'us-east-1',
+      } as any,
+    } as any;
+
+    const { findByTestId } = render(
+      <EuiProvider>
+        <KibanaContextProvider services={services}>
+          <CreateDataSourceFlyout
+            onClose={jest.fn()}
+            onSave={onSave}
+            existingDataSourceNames={[]}
+            initialDataSource={initialDataSource}
+          />
+        </KibanaContextProvider>
+      </EuiProvider>
+    );
+
+    fireEvent.click(await findByTestId('createDataSourceFlyoutSubmit'));
+
+    const banner = await findByTestId('createDataSourceFlyoutSaveError');
+    expect(banner).toHaveTextContent('Could not save the data source');
+    expect(banner).toHaveTextContent('validation_exception: something went wrong');
+    expect(await findByTestId('createDataSourceFlyoutFooter')).toContainElement(banner);
+  });
 });

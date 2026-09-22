@@ -261,6 +261,27 @@ export class DiscoverPageObject extends FtrService {
     });
   }
 
+  /**
+   * Opens a new Discover tab and runs the current query so the tab is initialized.
+   * New ES|QL tabs start empty, so the previous query is copied onto the tab first.
+   * Use `unifiedTabs.createNewTab()` for the uninitialized empty state.
+   */
+  public async createNewTabAndSearch() {
+    const unifiedTabs = this.ctx.getPageObject('unifiedTabs');
+    const esqlQuery = (await this.testSubjects.exists('ESQLEditor'))
+      ? (await this.ctx.getService('esql').getEsqlEditorQuery()).trim()
+      : '';
+
+    await unifiedTabs.createNewTab();
+
+    if (esqlQuery) {
+      await this.ctx.getService('monacoEditor').setCodeEditorValue(esqlQuery);
+    }
+
+    await this.queryBar.clickQuerySubmitButton();
+    await this.waitUntilTabIsLoaded();
+  }
+
   public async getColumnHeaders() {
     return await this.dataGrid.getHeaderFields();
   }
@@ -593,7 +614,7 @@ export class DiscoverPageObject extends FtrService {
     });
 
     const option = await this.find.byCssSelector(
-      `[data-test-subj="unifiedHistogramTimeIntervalSelectorSelectable"] .euiSelectableListItem[title="${intervalTitle}"]`
+      `[data-test-subj="unifiedHistogramTimeIntervalSelectorSelectable"] .euiSelectableListItem span[title="${intervalTitle}"]`
     );
     await option.click();
     return await this.header.waitUntilLoadingHasFinished();

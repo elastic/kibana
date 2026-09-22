@@ -9,7 +9,7 @@ import { notFound } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
 import { concat, from, map, of, switchMap, takeWhile, timer } from 'rxjs';
 import type { InvestigationStatusEvent } from '../../common';
-import { InvestigationNotFoundError } from '../client/investigations_client';
+import { InvestigationNotFoundError } from '../client/errors';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
 
 const POLL_INTERVAL_MS = 2_000;

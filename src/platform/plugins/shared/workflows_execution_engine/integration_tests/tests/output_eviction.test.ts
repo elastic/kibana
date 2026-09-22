@@ -231,7 +231,7 @@ steps:
 
   describe('after resume', () => {
     beforeAll(async () => {
-      await workflowRunFixture.resumeWorkflow();
+      await workflowRunFixture.resumeWorkflowAtScheduledTime();
     });
 
     it('should complete workflow successfully', () => {
@@ -319,7 +319,7 @@ steps:
 
   describe('after resume', () => {
     beforeAll(async () => {
-      await workflowRunFixture.resumeWorkflow();
+      await workflowRunFixture.resumeWorkflowAtScheduledTime();
     });
 
     it('should complete workflow successfully despite dynamic steps access', () => {
@@ -473,7 +473,7 @@ steps:
     });
 
     it('should complete after resume with step_a output rehydrated', async () => {
-      await workflowRunFixture.resumeWorkflow();
+      await workflowRunFixture.resumeWorkflowAtScheduledTime();
 
       const execution = workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
         'fake_workflow_execution_id'
@@ -598,7 +598,7 @@ steps:
     });
 
     it('should pause at second wait after first resume', async () => {
-      await workflowRunFixture.resumeWorkflow();
+      await workflowRunFixture.resumeWorkflowAtScheduledTime();
 
       const execution = workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
         'fake_workflow_execution_id'
@@ -613,7 +613,7 @@ steps:
     });
 
     it('should complete after second resume', async () => {
-      await workflowRunFixture.resumeWorkflow();
+      await workflowRunFixture.resumeWorkflowAtScheduledTime();
 
       const execution = workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
         'fake_workflow_execution_id'
@@ -687,7 +687,7 @@ steps:
 
   describe('after resume', () => {
     beforeAll(async () => {
-      await workflowRunFixture.resumeWorkflow();
+      await workflowRunFixture.resumeWorkflowAtScheduledTime();
     });
 
     it('should complete workflow successfully after resume with evicted outputs restored', () => {

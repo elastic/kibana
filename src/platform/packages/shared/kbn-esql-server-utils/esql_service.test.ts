@@ -114,3 +114,27 @@ describe('EsqlService.getAllIndices', () => {
     });
   });
 });
+
+describe('EsqlService ES|QL views', () => {
+  const makeViewsClient = (getView: jest.Mock) =>
+    ({ esql: { getView } } as unknown as ElasticsearchClient);
+
+  it('gets all views through the generated Elasticsearch client', async () => {
+    const response = {
+      views: [{ name: 'my-view', query: 'FROM logs-*', description: 'Logs' }],
+    };
+    const getView = jest.fn().mockResolvedValue(response);
+    const service = new EsqlService({ client: makeViewsClient(getView) });
+
+    await expect(service.getViews()).resolves.toEqual(response);
+    expect(getView).toHaveBeenCalledWith();
+  });
+
+  it('propagates Elasticsearch errors', async () => {
+    const error = new Error('Elasticsearch unavailable');
+    const getView = jest.fn().mockRejectedValue(error);
+    const service = new EsqlService({ client: makeViewsClient(getView) });
+
+    await expect(service.getViews()).rejects.toBe(error);
+  });
+});

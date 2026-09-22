@@ -37,10 +37,12 @@ export {
   hasChangePointCommand,
   getChangePointOutputColumnNames,
   getChangePointSeriesColumns,
+  getChangePointByColumns,
   buildChangePointLineDataQuery,
   appendEntityFiltersToChangePointLineEsql,
   formatEsqlIdentifier,
   formatEsqlLiteral,
+  formatEsqlEntityPredicate,
 } from './utils/change_point_helpers';
 export {
   getIndexPatternFromESQLQuery,
@@ -93,6 +95,11 @@ export {
 } from './utils/cascaded_documents_helpers/utils';
 export { getProjectRoutingFromEsqlQuery } from './utils/set_instructions_helpers';
 export { isComputedColumn, getQuerySummary } from './utils/get_query_summary';
+export {
+  createEsqlViewsClient,
+  EsqlViewsClientError,
+  type EsqlViewsClient,
+} from './utils/esql_views_client';
 export { getEsqlControls, getAllEsqlControls, getVariableNamePrefix } from './utils/controls';
 export {
   getColumnsWithHighlights,

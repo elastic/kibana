@@ -20,7 +20,6 @@ import { ObservabilityIntegrationsSection } from '../add_data_page/integrations_
 import { useObservabilityDocsLinks } from '../add_data_page/observability_docs_links';
 import { ObservabilitySearchResults } from '../add_data_page/observability_search_results';
 import { useAddDataSearchUrlSync } from '../add_data_page/use_add_data_search_url_sync';
-import { useCollectionTilesEnabled } from '../add_data_page/use_collection_tiles_enabled';
 import { ApiEndpoints } from '../api_endpoints/api_endpoints';
 import { LandingHeader } from '../header';
 import { OnboardingFlowForm } from '../onboarding_flow_form/onboarding_flow_form';
@@ -57,11 +56,6 @@ const AddDataPageV2 = () => {
 
   const closeCollection = useCallback(() => setCollectionParam(undefined), [setCollectionParam]);
 
-  // Fleet's packages are only worth fetching for the search results and for the
-  // grid badges Fleet's grouping flag turns on. A default visit needs neither, so
-  // it makes no registry request.
-  const needsFleetPackages = useCollectionTilesEnabled() || searchTerm !== '';
-
   return (
     <EuiPageTemplate paddingSize="none" data-test-subj="addDataPageV2">
       <LandingHeader />
@@ -74,7 +68,7 @@ const AddDataPageV2 = () => {
           })}
           data-test-subj="observabilityOnboardingIntegrationsSearchFieldSearch"
         />
-        <FleetCardsProvider enabled={needsFleetPackages}>
+        <FleetCardsProvider>
           {searchTerm !== '' && (
             <>
               <EuiSpacer size="l" />

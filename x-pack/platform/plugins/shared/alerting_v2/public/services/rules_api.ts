@@ -13,6 +13,8 @@ import type {
   BulkByIdsParams,
   BulkByQueryParams,
   BulkByQueryResult,
+  BulkCreateRulesParams,
+  BulkCreateRulesResponse,
   BulkResponse,
   CreateRuleData,
   DryRunResponse,
@@ -23,7 +25,7 @@ import type {
   RuleTagsParams,
   TagsResponse,
 } from '@kbn/alerting-v2-schemas';
-import { ALERTING_V2_RULE_API_PATH } from '../constants';
+import { ALERTING_V2_RULE_API_PATH, ALERTING_V2_INTERNAL_RULE_API_PATH } from '../constants';
 
 /**
  * Encodes the `id` path parameter safely. Wraps `buildPath` so a single call
@@ -35,14 +37,22 @@ const buildRulePath = (id: string): string =>
 /** Re-exported from the shared schemas package. */
 export type { RuleResponse as RuleApiResponse, FindRulesResponse };
 
-export type { BulkByIdsParams, BulkByQueryParams, BulkByQueryResult, BulkResponse, DryRunResponse };
+export type {
+  BulkByIdsParams,
+  BulkByQueryParams,
+  BulkByQueryResult,
+  BulkCreateRulesParams,
+  BulkCreateRulesResponse,
+  BulkResponse,
+  DryRunResponse,
+};
 
 @injectable()
 export class RulesApi {
   constructor(@inject(CoreStart('http')) private readonly http: HttpStart) {}
 
   public async listTags(params: RuleTagsParams = {}): Promise<TagsResponse> {
-    return this.http.get<TagsResponse>(`${ALERTING_V2_RULE_API_PATH}/tags`, {
+    return this.http.get<TagsResponse>(`${ALERTING_V2_INTERNAL_RULE_API_PATH}/tags`, {
       query: {
         search: params.search || undefined,
         kind: params.kind || undefined,
@@ -59,6 +69,12 @@ export class RulesApi {
   public async createRule(payload: CreateRuleData) {
     return this.http.post<RuleResponse>(ALERTING_V2_RULE_API_PATH, {
       body: JSON.stringify(payload),
+    });
+  }
+
+  public async bulkCreateRules(params: BulkCreateRulesParams) {
+    return this.http.post<BulkCreateRulesResponse>(`${ALERTING_V2_RULE_API_PATH}/_bulk_create`, {
+      body: JSON.stringify(params),
     });
   }
 

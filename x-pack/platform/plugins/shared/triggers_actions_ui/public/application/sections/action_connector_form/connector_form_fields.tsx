@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ReactNode } from 'react';
 import React, { memo, Suspense } from 'react';
 
 import { EuiTitle, EuiSpacer, EuiErrorBoundary } from '@elastic/eui';
@@ -21,6 +22,8 @@ interface ConnectorFormFieldsProps {
   isEdit: boolean;
   registerPreSubmitValidator: (validator: ConnectorValidationFunc) => void;
   authMode?: 'shared' | 'per-user';
+  /** Optional content rendered under Connector settings (e.g. inbound webhook URL). */
+  settingsContent?: ReactNode;
 }
 
 const ConnectorFormFieldsComponent: React.FC<ConnectorFormFieldsProps> = ({
@@ -28,20 +31,24 @@ const ConnectorFormFieldsComponent: React.FC<ConnectorFormFieldsProps> = ({
   isEdit,
   registerPreSubmitValidator,
   authMode,
+  settingsContent,
 }) => {
   const {
     application: { capabilities },
   } = useKibana().services;
   const canSave = hasSaveActionsCapability(capabilities);
   const FieldsComponent = actionTypeModel?.actionConnectorFields ?? null;
+  const showSettingsSection = FieldsComponent !== null || settingsContent != null;
+  const showSettingsTitle =
+    settingsContent != null || !Boolean(actionTypeModel?.connectorForm?.hideSettingsTitle);
 
   return (
     <>
       <ConnectorFormFieldsGlobal canSave={canSave} isEdit={isEdit} />
       <EuiSpacer size="m" />
-      {FieldsComponent !== null ? (
+      {showSettingsSection ? (
         <>
-          {Boolean(actionTypeModel?.connectorForm?.hideSettingsTitle) ? null : (
+          {showSettingsTitle ? (
             <>
               <EuiTitle size="xxs" data-test-subj="connector-settings-label">
                 <h4>
@@ -53,26 +60,29 @@ const ConnectorFormFieldsComponent: React.FC<ConnectorFormFieldsProps> = ({
               </EuiTitle>
               <EuiSpacer size="s" />
             </>
-          )}
-          <EuiErrorBoundary>
-            <Suspense
-              fallback={
-                <SectionLoading>
-                  <FormattedMessage
-                    id="xpack.triggersActionsUI.sections.actionConnectorForm.loadingConnectorSettingsDescription"
-                    defaultMessage="Loading connector settings…"
-                  />
-                </SectionLoading>
-              }
-            >
-              <FieldsComponent
-                readOnly={!canSave}
-                isEdit={isEdit}
-                registerPreSubmitValidator={registerPreSubmitValidator}
-                authMode={authMode}
-              />
-            </Suspense>
-          </EuiErrorBoundary>
+          ) : null}
+          {settingsContent}
+          {FieldsComponent !== null ? (
+            <EuiErrorBoundary>
+              <Suspense
+                fallback={
+                  <SectionLoading>
+                    <FormattedMessage
+                      id="xpack.triggersActionsUI.sections.actionConnectorForm.loadingConnectorSettingsDescription"
+                      defaultMessage="Loading connector settings…"
+                    />
+                  </SectionLoading>
+                }
+              >
+                <FieldsComponent
+                  readOnly={!canSave}
+                  isEdit={isEdit}
+                  registerPreSubmitValidator={registerPreSubmitValidator}
+                  authMode={authMode}
+                />
+              </Suspense>
+            </EuiErrorBoundary>
+          ) : null}
         </>
       ) : null}
     </>

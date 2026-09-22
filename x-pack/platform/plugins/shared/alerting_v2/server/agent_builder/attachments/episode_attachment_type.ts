@@ -17,14 +17,15 @@ import {
   episodeAttachmentDataSchema,
   type EpisodeAttachmentData,
 } from '@kbn/alerting-v2-schemas';
+import { alertEpisodeToEpisodeAttachment } from '@kbn/alerting-v2-utils';
 import { ALERTING_LOG_CODES } from '../../lib/errors/error_codes';
 import type { LoggerServiceContract } from '../../lib/services/logger_service/logger_service';
-import { alertEpisodeToEpisodeAttachment } from '../../../common/agent_builder/episode_mappers';
 import type { EpisodesClient } from '../../lib/episodes_client';
 import type { RulesClient } from '../../lib/rules_client';
 import { loadRuleMetadata } from '../common/load_rule_metadata';
 import type { PrivilegeChecker } from '../../lib/services/privilege_checker/privilege_checker';
 import { getRuleTool, getRuleToolId } from '../tools/get_rule';
+import { getRuleEventsTool, getRuleEventsToolId } from '../tools/get_rule_events';
 import { refreshEpisodeTool, refreshEpisodeToolId } from '../tools/refresh_episode';
 
 interface CreateEpisodeAttachmentTypeOptions {
@@ -41,11 +42,13 @@ const formatEpisodeDescription = ({
   data,
   refreshToolId,
   getRuleToolId: ruleToolId,
+  ruleEventsToolId,
 }: {
   attachmentId: string;
   data: EpisodeAttachmentData;
   refreshToolId: string;
   getRuleToolId: string;
+  ruleEventsToolId: string;
 }): string => {
   const lines = [
     'This is a platform alert, not a Security/SIEM detection alert.',
@@ -92,6 +95,9 @@ const formatEpisodeDescription = ({
   );
   lines.push(
     `Use the ${ruleToolId} tool to fetch the alert rule associated with this episode, then query that rule's source indices. To modify that rule, or create a new rule, load the ${RULE_MANAGEMENT_SKILL_ID} skill.`
+  );
+  lines.push(
+    `Use the ${ruleEventsToolId} tool to fetch this episode's rule events from .rule-events, including timestamp, episode.status, severity, source, group_hash, and event data. Call it with no arguments; pass start/end only to narrow the window. It returns at most 100 rows (oldest first). If truncated is true, call again with start set to the last event's @timestamp and the same end; skip the overlapping first row. Do not retry the same window. If truncated is still true for a very small window, stop and use the rows you have.`
   );
 
   return lines.join('\n');
@@ -190,6 +196,7 @@ export const createEpisodeAttachmentType = ({
       const ruleId = attachment.data['rule.id'];
       const refreshToolId = refreshEpisodeToolId(attachment.id);
       const ruleToolId = getRuleToolId(attachment.id);
+      const ruleEventsToolId = getRuleEventsToolId(attachment.id);
 
       return {
         getRepresentation: () => ({
@@ -199,6 +206,7 @@ export const createEpisodeAttachmentType = ({
             data: attachment.data,
             refreshToolId,
             getRuleToolId: ruleToolId,
+            ruleEventsToolId,
           }),
         }),
         getBoundedTools: () => [
@@ -218,12 +226,19 @@ export const createEpisodeAttachmentType = ({
             getRulesClient,
             getPrivilegeChecker,
           }),
+          getRuleEventsTool({
+            attachmentId: attachment.id,
+            episodeId,
+            logger: attachmentLogger,
+            getEpisodesClient,
+            getPrivilegeChecker,
+          }),
         ],
       };
     },
 
     getAgentDescription: () =>
-      `A platform alert episode attachment — a stateful lifecycle of related alert events for a platform alert rule and group. This is not a Security/SIEM detection alert: do not use the security alert-analysis skill, detection-rule tools, or .alerts-security.alerts-* indices. It is read-only snapshot context. Use the attachment-scoped refresh_episode tool when you need the latest episode state, and get_rule to fetch the associated platform alert rule and its source indices. To create, explain, or modify that rule, load the ${RULE_MANAGEMENT_SKILL_ID} skill.`,
+      `A platform alert episode attachment — a stateful lifecycle of related alert events for a platform alert rule and group. This is not a Security/SIEM detection alert: do not use the security alert-analysis skill, detection-rule tools, or .alerts-security.alerts-* indices. It is read-only snapshot context. Use the attachment-scoped refresh_episode tool when you need the latest episode state, get_rule to fetch the associated platform alert rule and its source indices, and get_rule_events to fetch the episode's underlying rule events. To create, explain, or modify that rule, load the ${RULE_MANAGEMENT_SKILL_ID} skill.`,
 
     isReadonly: true,
 

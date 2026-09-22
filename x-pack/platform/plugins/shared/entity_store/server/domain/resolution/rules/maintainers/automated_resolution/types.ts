@@ -7,12 +7,15 @@
 
 import type { EntityMaintainerState } from '../../../../../tasks/entity_maintainers/types';
 
-// These extend `EntityMaintainerState` (the framework's JSON-serializable task-state
-// type) so the maintainer can hand them to task-manager directly, without casting at
-// the persistence boundary.
+export const AUTOMATED_RESOLUTION_STATE_VERSION = 2;
+
 export interface PerRuleLastRunStats extends EntityMaintainerState {
   resolutionsCreated: number;
   skippedAmbiguousBuckets: number;
+  skippedOversizedBuckets: number;
+  skippedNoopBuckets: number;
+  cascadeRetargeted: number;
+  cascadesBlocked: number;
 }
 
 export interface PerRuleState extends EntityMaintainerState {
@@ -24,17 +27,10 @@ export interface PerRuleState extends EntityMaintainerState {
 // entry backfills (null watermark → full scan) on its first run, so new rules can be
 // added without a state migration, and watermarks for rules this version doesn't know
 // (e.g. written by a newer node during a rolling upgrade) pass through untouched.
+//
+// `version` tracks one-time upgrades of this state blob (currently: reset the email
+// rule watermark so case-insensitive matching can heal pre-existing case-split groups).
 export interface AutomatedResolutionState extends EntityMaintainerState {
+  version: number;
   rules: Record<string, PerRuleState>;
-}
-
-export interface EntityHit {
-  entityId: string;
-  namespace: string;
-}
-
-export interface MatchBucket {
-  emailValue: string;
-  unresolvedEntities: EntityHit[];
-  existingTargetIds: string[];
 }

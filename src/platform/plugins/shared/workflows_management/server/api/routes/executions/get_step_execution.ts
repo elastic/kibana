@@ -10,7 +10,12 @@
 import path from 'path';
 import { schema } from '@kbn/config-schema';
 import type { RouteDependencies } from '../types';
-import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
+import {
+  API_VERSION,
+  AVAILABILITY,
+  MAX_WORKFLOW_ENTITY_ID_LENGTH,
+  OAS_TAG,
+} from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import {
   assertCanReadManagedWorkflowExecution,
@@ -40,8 +45,14 @@ export function registerGetStepExecutionRoute({ router, api, spaces }: RouteDepe
         validate: {
           request: {
             params: schema.object({
-              executionId: schema.string({ meta: { description: 'Workflow execution ID.' } }),
-              stepExecutionId: schema.string({ meta: { description: 'Step execution ID.' } }),
+              executionId: schema.string({
+                maxLength: MAX_WORKFLOW_ENTITY_ID_LENGTH,
+                meta: { description: 'Workflow execution ID.' },
+              }),
+              stepExecutionId: schema.string({
+                maxLength: MAX_WORKFLOW_ENTITY_ID_LENGTH,
+                meta: { description: 'Step execution ID.' },
+              }),
             }),
           },
         },
@@ -50,7 +61,9 @@ export function registerGetStepExecutionRoute({ router, api, spaces }: RouteDepe
         try {
           const { executionId, stepExecutionId } = request.params;
           const spaceId = spaces.getSpaceId(request);
-          const workflowExecution = await api.getWorkflowExecution(executionId, spaceId);
+          const workflowExecution = await api.getWorkflowExecution(executionId, spaceId, {
+            omitStepExecutions: true,
+          });
           if (!workflowExecution) {
             return response.notFound();
           }

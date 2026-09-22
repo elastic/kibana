@@ -30,10 +30,14 @@ export const interceptActionRequests = (
   }).as(alias);
 };
 
-export const sendActionResponse = (action: ActionDetails): void => {
+export const sendActionResponse = (
+  action: ActionDetails,
+  options?: { responseCode?: string }
+): void => {
   cy.task('sendHostActionResponse', {
     action,
     state: { state: 'success' },
+    responseCode: options?.responseCode,
   });
 };
 

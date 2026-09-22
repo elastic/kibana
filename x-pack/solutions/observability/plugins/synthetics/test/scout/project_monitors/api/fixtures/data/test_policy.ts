@@ -546,6 +546,35 @@ export const omitIds = (policy: PackagePolicy) => {
   return omit(policy, ignoreTestFields);
 };
 
+// Fields the `synthetics` Fleet package's agent-stream templates only emit in
+// `compiled_stream` when they hold a non-default (truthy) value, guarded with
+// `{{#if}}`. Older package versions always emitted them (as their falsy
+// default), so drop them wherever they're falsy on both sides being compared -
+// that way `comparePolicies` doesn't depend on which package version rendered
+// the policy.
+const OMITTED_WHEN_FALSY_FIELDS = [
+  '__ui',
+  'timeout',
+  'max_redirects',
+  'response.include_body',
+  'check.request.method',
+  'proxy_use_local_resolver',
+  'wait',
+];
+
+const normalizeCompiledStreamDefaults = (compiledStream: Record<string, unknown>) => {
+  // `enabled` is guarded with `{{#unless}}`: omitted only when true (the
+  // Heartbeat default); a disabled monitor still emits an explicit `false`.
+  if (!('enabled' in compiledStream)) {
+    compiledStream.enabled = true;
+  }
+  for (const field of OMITTED_WHEN_FALSY_FIELDS) {
+    if (field in compiledStream && !compiledStream[field]) {
+      delete compiledStream[field];
+    }
+  }
+};
+
 export const comparePolicies = (aPolicy: PackagePolicy | undefined, bPolicy: PackagePolicy) => {
   if (!aPolicy) {
     throw new Error('comparePolicies: expected a defined package policy but received undefined');
@@ -561,6 +590,14 @@ export const comparePolicies = (aPolicy: PackagePolicy | undefined, bPolicy: Pac
     (b.inputs ?? []).filter((input) => input.enabled),
     'type'
   );
+
+  [...actualInputs, ...expectedInputs].forEach((input) => {
+    input.streams?.forEach((stream) => {
+      if (stream.compiled_stream) {
+        normalizeCompiledStreamDefaults(stream.compiled_stream as Record<string, unknown>);
+      }
+    });
+  });
 
   expect(actualInputs).toStrictEqual(expectedInputs);
 

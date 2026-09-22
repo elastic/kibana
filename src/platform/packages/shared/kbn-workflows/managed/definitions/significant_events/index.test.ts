@@ -15,7 +15,9 @@ import {
 
 interface WorkflowStep {
   name: string;
+  type?: string;
   condition?: string;
+  'on-failure'?: { continue?: boolean };
   steps?: WorkflowStep[];
   with?: {
     path?: string;
@@ -52,7 +54,18 @@ const investigationCompleted = parse(SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_
 
 describe('significant events persistence workflow contracts', () => {
   it('bumps managed workflow versions for the bulk persistence contract', () => {
-    expect(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.version).toBe(18);
+    expect(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.version).toBe(20);
+  });
+
+  it('bootstraps per-space cleanup before discovery work', () => {
+    expect(discovery.steps[0]).toMatchObject({
+      name: 'bootstrap_cleanup_workflow',
+      type: 'kibana.request',
+      with: {
+        path: '/s/{{ workflow.spaceId }}/internal/significant_events/maintenance/cleanup/_bootstrap',
+      },
+      'on-failure': { continue: true },
+    });
   });
 
   it('marks discovery-triggered investigations as automatic', () => {
@@ -88,6 +101,6 @@ describe('significant events persistence workflow contracts', () => {
     const attach = requireStep(investigationCompleted, 'attach_completed_investigation');
     expect(getInvestigation.with?.path).toContain('/internal/nightshift/investigations/');
     expect(attach.with?.path).toContain('/internal/significant_events/events/');
-    expect(attach.with?.body?.trigger_feedback).toContain('result.trigger_feedback');
+    expect(attach.with?.body?.trigger_feedback).toContain('output.trigger_feedback');
   });
 });

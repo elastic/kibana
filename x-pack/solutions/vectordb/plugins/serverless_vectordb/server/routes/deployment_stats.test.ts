@@ -17,7 +17,7 @@ import { fetchDashboardsCount } from '../lib/dashboards';
 import {
   fetchApiKeysStats,
   fetchIndexStats,
-  hasIndexManagePrivilege,
+  fetchMonitorPrivileges,
 } from '../lib/deployment_stats';
 import { registerDeploymentStatsRoute } from './deployment_stats';
 
@@ -29,8 +29,8 @@ const mockFetchDashboardsCount = fetchDashboardsCount as jest.MockedFunction<
   typeof fetchDashboardsCount
 >;
 const mockFetchApiKeysStats = fetchApiKeysStats as jest.MockedFunction<typeof fetchApiKeysStats>;
-const mockHasIndexManagePrivilege = hasIndexManagePrivilege as jest.MockedFunction<
-  typeof hasIndexManagePrivilege
+const mockFetchMonitorPrivileges = fetchMonitorPrivileges as jest.MockedFunction<
+  typeof fetchMonitorPrivileges
 >;
 
 describe('registerDeploymentStatsRoute', () => {
@@ -45,7 +45,10 @@ describe('registerDeploymentStatsRoute', () => {
     logger = loggingSystemMock.createLogger();
     esClient = elasticsearchServiceMock.createScopedClusterClient();
     soClient = savedObjectsClientMock.create();
-    mockHasIndexManagePrivilege.mockResolvedValue(true);
+    mockFetchMonitorPrivileges.mockResolvedValue({
+      canMonitorAllIndices: true,
+      canMonitorCluster: true,
+    });
     mockFetchApiKeysStats.mockResolvedValue({ total: null, expiring: null });
 
     registerDeploymentStatsRoute(router, logger);
@@ -69,6 +72,7 @@ describe('registerDeploymentStatsRoute', () => {
       storeSizeBytes: 1024,
       vectorCount: 5,
       documentsCount: 4,
+      newIndex: null,
     });
     mockFetchDashboardsCount.mockResolvedValue(2);
     mockFetchApiKeysStats.mockResolvedValue({ total: 6, expiring: 1 });
@@ -87,6 +91,7 @@ describe('registerDeploymentStatsRoute', () => {
         dashboardsCount: 2,
         apiKeysCount: 6,
         expiringApiKeysCount: 1,
+        newIndex: null,
       },
     });
   });
@@ -97,6 +102,7 @@ describe('registerDeploymentStatsRoute', () => {
       storeSizeBytes: null,
       vectorCount: null,
       documentsCount: null,
+      newIndex: null,
     });
     mockFetchDashboardsCount.mockResolvedValue(null);
 
@@ -114,13 +120,24 @@ describe('registerDeploymentStatsRoute', () => {
         dashboardsCount: null,
         apiKeysCount: null,
         expiringApiKeysCount: null,
+        newIndex: null,
       },
     });
     expect(response.customError).not.toHaveBeenCalled();
   });
 
-  it('withholds index stats but still returns the dashboard count without the `manage` privilege', async () => {
-    mockHasIndexManagePrivilege.mockResolvedValue(false);
+  it('forwards the resolved monitor privileges to the index stats lookup', async () => {
+    mockFetchMonitorPrivileges.mockResolvedValue({
+      canMonitorAllIndices: false,
+      canMonitorCluster: true,
+    });
+    mockFetchIndexStats.mockResolvedValue({
+      indicesCount: 3,
+      storeSizeBytes: 1024,
+      vectorCount: null,
+      documentsCount: 4,
+      newIndex: null,
+    });
     mockFetchDashboardsCount.mockResolvedValue(2);
 
     const request = httpServerMock.createKibanaRequest();
@@ -128,17 +145,21 @@ describe('registerDeploymentStatsRoute', () => {
 
     await getHandler()(createContext(), request, response);
 
-    expect(mockFetchIndexStats).not.toHaveBeenCalled();
+    expect(mockFetchIndexStats).toHaveBeenCalledWith(esClient, logger, {
+      canMonitorAllIndices: false,
+      canMonitorCluster: true,
+    });
     expect(response.forbidden).not.toHaveBeenCalled();
     expect(response.ok).toHaveBeenCalledWith({
       body: {
-        indicesCount: null,
-        storeSizeBytes: null,
+        indicesCount: 3,
+        storeSizeBytes: 1024,
         vectorCount: null,
-        documentsCount: null,
+        documentsCount: 4,
         dashboardsCount: 2,
         apiKeysCount: null,
         expiringApiKeysCount: null,
+        newIndex: null,
       },
     });
   });

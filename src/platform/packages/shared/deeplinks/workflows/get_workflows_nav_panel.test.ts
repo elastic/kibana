@@ -66,7 +66,7 @@ describe('getWorkflowsNavPanel', () => {
     ]);
   });
 
-  it('returns a panel opener with list, library, and executions children when both are enabled', () => {
+  it('returns a panel opener with list, executions, and library children when both are enabled', () => {
     expect(
       getWorkflowsNavPanel(createCore({ libraryEnabled: true, executionsViewEnabled: true }))
     ).toEqual([

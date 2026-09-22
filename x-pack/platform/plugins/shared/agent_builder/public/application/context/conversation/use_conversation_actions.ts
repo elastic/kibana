@@ -56,7 +56,6 @@ export interface ConversationActions {
     agentId: string;
   }) => Promise<void>;
   removeOptimisticRound: () => void;
-  clearLastRoundResponse: () => void;
   addReasoningStep: ({ step }: { step: ReasoningStep }) => void;
   addToolCall: ({ step }: { step: ToolCallStep }) => void;
   setToolCallProgress: ({
@@ -73,7 +72,13 @@ export interface ConversationActions {
     results: ToolResult[];
     toolCallId: string;
   }) => void;
-  setAssistantMessage: ({ assistantMessage }: { assistantMessage: string }) => void;
+  setAssistantMessage: ({
+    assistantMessage,
+    structuredOutput,
+  }: {
+    assistantMessage: string;
+    structuredOutput?: object;
+  }) => void;
   addAssistantMessageChunk: ({ messageChunk }: { messageChunk: string }) => void;
   clearAssistantMessage: () => void;
   setTimeToFirstToken: ({ timeToFirstToken }: { timeToFirstToken: number }) => void;
@@ -200,13 +205,6 @@ export const createConversationActions = ({
         })
       );
     },
-    clearLastRoundResponse: () => {
-      setCurrentRound((round) => {
-        round.response.message = '';
-        round.steps = [];
-        round.status = ConversationRoundStatus.inProgress;
-      });
-    },
     addReasoningStep: ({ step }: { step: ReasoningStep }) => {
       setCurrentRound((round) => {
         round.steps.push(step);
@@ -294,9 +292,18 @@ export const createConversationActions = ({
         }
       });
     },
-    setAssistantMessage: ({ assistantMessage }: { assistantMessage: string }) => {
+    setAssistantMessage: ({
+      assistantMessage,
+      structuredOutput,
+    }: {
+      assistantMessage: string;
+      structuredOutput?: object;
+    }) => {
       setCurrentRound((round) => {
         round.response.message = assistantMessage;
+        if (structuredOutput !== undefined) {
+          round.response.structured_output = structuredOutput;
+        }
       });
     },
     addAssistantMessageChunk: ({ messageChunk }: { messageChunk: string }) => {

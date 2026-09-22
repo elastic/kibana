@@ -133,4 +133,4 @@ node scripts/playwright test --config x-pack/solutions/security/plugins/discover
 | Tag missing on schedule create | Internal API short-circuited before the data client applied the tag | Verify the route went through `createScheduleDataClient` with `applyTags: [ATTACK_DISCOVERY_SCHEDULE_TAG]` |
 | RBAC test passes a write that should 403 | Viewer role mis-mapped or the advanced setting is off | Check the role used by the test fixture; check the `securitySolution:securityAttackDiscoverySchedulesEnabled` setting state |
 | Connector flake | LLM connector not configured in the Scout image | The schedule API tests don't invoke the LLM — but a misconfigured connector can break unrelated steps in the same workflow. Confirm the test's `apiConfig.connectorId` points at a valid mock connector |
-| Local dev server still running | Stale ES/Kibana ports collide with Scout | Stop your `yarn es` / `yarn start` dev servers before running Scout |
+| Local dev server still running | Stale ES/Kibana ports collide with Scout | Stop your `pnpm es` / `pnpm start` dev servers before running Scout |

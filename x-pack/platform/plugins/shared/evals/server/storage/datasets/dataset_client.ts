@@ -31,6 +31,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { DatasetStorageProperties } from './datasets_storage';
 import { DatasetAlreadyExistsError } from './dataset_already_exists_error';
 import { ExampleAlreadyExistsError } from './example_already_exists_error';
+import { DatasetExamplesLimitExceededError } from './dataset_examples_limit_exceeded_error';
 import { ExampleNotFoundError } from './example_not_found_error';
 import { LastSpaceError } from './last_space_error';
 import type { datasetsStorageSettings } from './datasets_storage';
@@ -313,22 +314,32 @@ export class DatasetClient {
 
     const datasetId = await this.indexNewDataset({ name, targetSpaceIds, document });
 
-    // A dataset is deleted document-first, so one whose delete died in between
-    // could have left examples behind under an id this name derives again.
-    await this.deleteExamplesByDatasetId(datasetId);
+    try {
+      // A dataset is deleted document-first, so one whose delete died in between
+      // could have left examples behind under an id this name derives again.
+      await this.deleteExamplesByDatasetId(datasetId);
 
-    if (examples.length > 0) {
-      await this.addExamples(datasetId, examples, { touchDataset: false });
-      // Persist the count without advancing updated_at past the creation timestamp.
-      await this.touchDataset(datasetId, { bumpUpdatedAt: false });
+      if (examples.length > 0) {
+        await this.addExamples(datasetId, examples, { touchDataset: false });
+        // Persist the count without advancing updated_at past the creation timestamp.
+        await this.touchDataset(datasetId, { bumpUpdatedAt: false });
+      }
+
+      const created = await this.get(datasetId);
+      if (!created) {
+        throw new Error(`Failed to create dataset "${datasetId}"`);
+      }
+
+      return created;
+    } catch (error) {
+      try {
+        await this.datasetsStorage.delete({ id: datasetId });
+        await this.deleteExamplesByDatasetId(datasetId);
+      } catch {
+        // Best-effort; the caller must see the original create failure.
+      }
+      throw error;
     }
-
-    const created = await this.get(datasetId);
-    if (!created) {
-      throw new Error(`Failed to create dataset "${datasetId}"`);
-    }
-
-    return created;
   }
 
   /**
@@ -393,6 +404,30 @@ export class DatasetClient {
       ...dataset,
       examples,
     };
+  }
+
+  async copy(
+    sourceDatasetId: string,
+    { name, description }: { name: string; description?: string }
+  ): Promise<DatasetWithExamples | undefined> {
+    const sourceDataset = await this.get(sourceDatasetId);
+    if (!sourceDataset) {
+      return undefined;
+    }
+
+    const examples = sourceDataset.examples.map(({ input, output, metadata }) => ({
+      input,
+      output,
+      metadata,
+    }));
+
+    return this.create({
+      name,
+      description: description ?? sourceDataset.description,
+      tags: sourceDataset.tags,
+      maturity: sourceDataset.maturity,
+      examples,
+    });
   }
 
   /**
@@ -761,10 +796,22 @@ export class DatasetClient {
   async addExamples(
     datasetId: string,
     examples: DatasetExampleInput[],
-    options: { touchDataset?: boolean; rejectDuplicates?: boolean } = {}
-  ): Promise<{ added: number }> {
+    options: {
+      touchDataset?: boolean;
+      rejectDuplicates?: boolean;
+      source?: 'import';
+      enforceDatasetLimit?: boolean;
+    } = {}
+  ): Promise<{ added: number; conflicts: number }> {
     if (examples.length === 0) {
-      return { added: 0 };
+      return { added: 0, conflicts: 0 };
+    }
+
+    if (options.enforceDatasetLimit ?? true) {
+      const existingExamples = await this.countExamplesByDatasetId(datasetId);
+      if (existingExamples + examples.length > MAX_EXAMPLES_PER_DATASET) {
+        throw new DatasetExamplesLimitExceededError(MAX_EXAMPLES_PER_DATASET);
+      }
     }
 
     const rejectDuplicates = options.rejectDuplicates ?? true;
@@ -773,7 +820,7 @@ export class DatasetClient {
       examples.map((example) => {
         const normalizedExample = normalizeExample(example);
         return {
-          index: {
+          create: {
             _id: DatasetClient.getExampleId({
               datasetId,
               example: normalizedExample,
@@ -781,6 +828,7 @@ export class DatasetClient {
             document: {
               dataset_id: datasetId,
               ...normalizedExample,
+              ...(options.source ? { source: options.source } : {}),
               created_at: now,
               updated_at: now,
             },
@@ -808,7 +856,7 @@ export class DatasetClient {
       await this.touchDataset(datasetId);
     }
 
-    return { added };
+    return { added, conflicts };
   }
 
   async updateExample(
@@ -855,6 +903,7 @@ export class DatasetClient {
       document: {
         dataset_id: existing.dataset_id,
         ...updatedExample,
+        ...(existing.source ? { source: existing.source } : {}),
         created_at: existing.created_at,
         updated_at: updatedAt,
       },
@@ -993,7 +1042,11 @@ export class DatasetClient {
     const toDelete = Array.from(existingExampleIdsByHash.values());
 
     const [{ added }] = await Promise.all([
-      this.addExamples(existing.id, toAdd, { touchDataset: false, rejectDuplicates: false }),
+      this.addExamples(existing.id, toAdd, {
+        touchDataset: false,
+        rejectDuplicates: false,
+        enforceDatasetLimit: false,
+      }),
       this.examplesStorage.bulk({
         operations: toDelete.map((id) => ({
           delete: { _id: id },
@@ -1387,6 +1440,9 @@ const parseFacets = (aggregations: Record<string, unknown> | undefined): Dataset
 
 const EMPTY_EXAMPLE_METADATA = { description: 'empty-example' } as const;
 
+const isEmptyMetadataValue = (value: unknown): boolean =>
+  typeof value !== 'number' && typeof value !== 'boolean' && isEmpty(value);
+
 const normalizeExample = (example: DatasetExampleInput): NormalizedExample => {
   const hasInput = example.input != null;
   const hasOutput = example.output != null;
@@ -1399,12 +1455,16 @@ const normalizeExample = (example: DatasetExampleInput): NormalizedExample => {
   return {
     ...(hasInput ? { input: example.input } : {}),
     ...(hasOutput ? { output: example.output } : {}),
-    ...(hasMetadata ? { metadata: omitBy(example.metadata!, isEmpty) } : {}),
+    ...(hasMetadata ? { metadata: omitBy(example.metadata!, isEmptyMetadataValue) } : {}),
   };
 };
 
 const summarizeBulkResult = (
-  items: Array<{ index?: { status: number }; delete?: { status: number } }>
+  items: Array<{
+    index?: { status: number };
+    create?: { status: number };
+    delete?: { status: number };
+  }>
 ): {
   conflicts: number;
   failed: number;
@@ -1413,7 +1473,7 @@ const summarizeBulkResult = (
   let failed = 0;
 
   for (const item of items) {
-    const status = item.index?.status ?? item.delete?.status;
+    const status = item.index?.status ?? item.create?.status ?? item.delete?.status;
     if (!status) {
       continue;
     }

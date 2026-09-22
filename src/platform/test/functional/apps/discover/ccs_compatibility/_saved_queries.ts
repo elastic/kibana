@@ -11,6 +11,15 @@ import expect from '@kbn/expect';
 
 import type { FtrProviderContext } from '../ftr_provider_context';
 
+/**
+ * Migration recommendation: DELETE. See individual tests. Saved-query CRUD through the
+ * popover is already covered in
+ * src/platform/plugins/shared/unified_search/test/scout/ui/tests/saved_query_menu_crud.spec.ts.
+ * Discover "New" clearing filters/query is covered in
+ * src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/new_search_action.spec.ts.
+ * The CCS variant only swaps the index pattern to `ftr-remote:logstash-*`.
+ */
+
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const log = getService('log');
@@ -104,6 +113,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('saved query selection', () => {
       before(async () => await setUpQueriesWithFilters());
 
+      /**
+       * Migration recommendation: DELETE. Clearing filters and the query on New is covered in
+       * new_search_action.spec.ts. Switching data views afterward does not change that contract.
+       */
       it(`should unselect saved query when navigating to a 'new'`, async function () {
         await savedQueryManagementComponent.saveNewQuery(
           'test-unselect-saved-query',
@@ -144,6 +157,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('saved query management component functionality', function () {
       before(async () => await setUpQueriesWithFilters());
 
+      /**
+       * Migration recommendation: DELETE. Empty-list disablement belongs in a unit test of the
+       * saved-query menu, not a Discover CCS browser test.
+       */
       it('should show the saved query management load button as disabled when there are no saved queries', async () => {
         await savedQueryManagementComponent.openSavedQueryManagementComponent();
         const loadFilterSetBtn = await testSubjects.find('saved-query-management-load-button');
@@ -151,6 +168,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(isDisabled).to.equal('true');
       });
 
+      /**
+       * Migration recommendation: DELETE. Covered by saved_query_menu_crud.spec.ts
+       * ("save a brand-new query").
+       */
       it('should allow a query to be saved via the saved objects management component', async () => {
         await savedQueryManagementComponent.saveNewQuery(
           'OkResponse',
@@ -163,6 +184,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await savedQueryManagementComponent.savedQueryTextExist('response:200');
       });
 
+      /**
+       * Migration recommendation: DELETE. Load-with-filters is covered by saved_query_menu_crud.spec.ts
+       * ("load the preloaded `OKJpgs` query"). Time-range restore is saved-query payload, not CCS.
+       */
       it('reinstates filters and the time filter when a saved query has filters and a time filter included', async () => {
         await timePicker.setDefaultAbsoluteRange();
         await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
@@ -173,6 +198,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(timePickerValues.end).to.eql(to);
       });
 
+      /**
+       * Migration recommendation: DELETE. URL/state restore of a loaded saved query is not
+       * CCS-specific. Cover in the unified_search Scout suite or a Discover URL-state spec if
+       * still missing there — not a second copy here.
+       */
       it('preserves the currently loaded query when the page is reloaded', async () => {
         await browser.refresh();
         const timePickerValues = await timePicker.getTimeConfigAsAbsoluteTimes();
@@ -187,6 +217,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await savedQueryManagementComponent.getCurrentlyLoadedQueryID()).to.be('OkResponse');
       });
 
+      /**
+       * Migration recommendation: DELETE. Covered by saved_query_menu_crud.spec.ts
+       * ("update the loaded query and re-load it").
+       */
       it('allows saving changes to a currently loaded query via the saved query management component', async () => {
         await savedQueryManagementComponent.closeSavedQueryManagementComponent();
         await queryBar.setQuery('response:404');
@@ -204,6 +238,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await queryBar.getQueryString()).to.eql('response:404');
       });
 
+      /**
+       * Migration recommendation: DELETE. Covered by saved_query_menu_crud.spec.ts
+       * ("save the loaded query as a new copy").
+       */
       it('allows saving the currently loaded query as a new query', async () => {
         await queryBar.setQuery('response:400');
         await savedQueryManagementComponent.saveCurrentlyLoadedAsNewQuery(
@@ -215,12 +253,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await savedQueryManagementComponent.savedQueryExistOrFail('OkResponseCopy');
       });
 
+      /**
+       * Migration recommendation: DELETE. Covered by saved_query_menu_crud.spec.ts
+       * ("delete the saved queries we created").
+       */
       it('allows deleting the currently loaded saved query in the saved query management component and clears the query', async () => {
         await savedQueryManagementComponent.deleteSavedQuery('OkResponseCopy');
         await savedQueryManagementComponent.savedQueryMissingOrFail('OkResponseCopy');
         expect(await queryBar.getQueryString()).to.eql('');
       });
 
+      /**
+       * Migration recommendation: DELETE. Duplicate-name validation belongs in a unit test of
+       * the saved-query form, not a browser test.
+       */
       it('does not allow saving a query with a non-unique name', async () => {
         // this check allows this test to run stand alone, also should fix occacional flakiness
         const savedQueryExists = await savedQueryManagementComponent.savedQueryExist('OkResponse');
@@ -237,6 +283,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await savedQueryManagementComponent.saveNewQueryWithNameError('OkResponse');
       });
 
+      /**
+       * Migration recommendation: DELETE. Reloading a saved query to discard local edits is the
+       * same load path already covered in saved_query_menu_crud.spec.ts.
+       */
       it('resets any changes to a loaded query on reloading the same saved query', async () => {
         await savedQueryManagementComponent.loadSavedQuery('OkResponse');
         await queryBar.setQuery('response:503');
@@ -244,12 +294,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await queryBar.getQueryString()).to.eql('response:404');
       });
 
+      /**
+       * Migration recommendation: DELETE. Covered by saved_query_menu_crud.spec.ts
+       * (`clearLoadedQuery` in the update step).
+       */
       it('allows clearing the currently loaded saved query', async () => {
         await savedQueryManagementComponent.loadSavedQuery('OkResponse');
         await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
         expect(await queryBar.getQueryString()).to.eql('');
       });
 
+      /**
+       * Migration recommendation: DELETE. Query-language localStorage is unified_search behavior,
+       * not Discover CCS. Cover in a unified_search unit test if still missing.
+       */
       it('allows clearing if non default language was remembered in localstorage', async () => {
         await savedQueryManagementComponent.openSavedQueryManagementComponent();
         await queryBar.switchQueryLanguage('lucene');
@@ -264,6 +322,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await queryBar.expectQueryLanguageOrFail('lucene');
       });
 
+      /**
+       * Migration recommendation: DELETE. Language switch clearing the loaded saved query belongs
+       * in a unified_search unit test, not a CCS browser test.
+       */
       it('changing language removes saved query', async () => {
         await savedQueryManagementComponent.loadSavedQuery('OkResponse');
         await savedQueryManagementComponent.openSavedQueryManagementComponent();
@@ -271,6 +333,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await queryBar.getQueryString()).to.eql('');
       });
 
+      /**
+       * Migration recommendation: DELETE. Save-button enablement after a filter change belongs
+       * in a unit test of the saved-query menu dirty state.
+       */
       it('checks if the "Save query" button becomes enabled after adding filters, even when the query was saved with "Include filters" unchecked', async () => {
         await queryBar.setQuery('response:200');
         await queryBar.submitQuery();

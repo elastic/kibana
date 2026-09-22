@@ -92,3 +92,25 @@ export function buildWorkflowContext(
     inputs: inputsWithDefaults,
   };
 }
+
+/** Liquid render context with `event.inputs` aliased. Do not persist this object. */
+export function buildWorkflowRenderContext(
+  workflowExecution: EsWorkflowExecution,
+  coreStart?: CoreStart,
+  dependencies?: ContextDependencies
+): WorkflowContext {
+  const context = buildWorkflowContext(workflowExecution, coreStart, dependencies);
+  const rawEvent = context.event as Record<string, unknown> | undefined;
+  const shouldAliasInputs =
+    rawEvent?.type === 'manual' || (!rawEvent && context.inputs !== undefined);
+  const event = (
+    shouldAliasInputs
+      ? { spaceId: workflowExecution.spaceId, ...rawEvent, inputs: context.inputs }
+      : rawEvent
+  ) as WorkflowContext['event'];
+
+  return {
+    ...context,
+    event,
+  };
+}

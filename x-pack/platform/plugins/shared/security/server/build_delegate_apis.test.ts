@@ -7,7 +7,11 @@
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import type { AuditLogger, CoreSecurityDelegateContract } from '@kbn/core-security-server';
+import type {
+  AuditLogger,
+  CoreSecurityDelegateContract,
+  ServiceAccount,
+} from '@kbn/core-security-server';
 import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 import type { UserProfileData } from '@kbn/core-user-profile-common';
 import type { CoreUserProfileDelegateContract } from '@kbn/core-user-profile-server';
@@ -16,6 +20,7 @@ import { auditServiceMock } from './audit/mocks';
 import { authenticationServiceMock } from './authentication/authentication_service.mock';
 import { buildSecurityApi, buildUserProfileApi } from './build_delegate_apis';
 import { securityMock } from './mocks';
+import { serviceAccountsServiceMock } from './service_accounts/service_accounts_service.mock';
 import { getPrintableSessionId } from './session_management';
 import { sessionMock } from './session_management/session.mock';
 import { userProfileServiceMock } from './user_profile/user_profile_service.mock';
@@ -24,6 +29,7 @@ describe('buildSecurityApi', () => {
   let authc: ReturnType<typeof authenticationServiceMock.createStart>;
   let auditService: ReturnType<typeof auditServiceMock.create>;
   let session: ReturnType<typeof sessionMock.create>;
+  let serviceAccounts: ReturnType<typeof serviceAccountsServiceMock.createStart> | null;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let api: CoreSecurityDelegateContract;
 
@@ -31,10 +37,12 @@ describe('buildSecurityApi', () => {
     authc = authenticationServiceMock.createStart();
     auditService = auditServiceMock.create();
     session = sessionMock.create();
+    serviceAccounts = serviceAccountsServiceMock.createStart();
     logger = loggingSystemMock.createLogger();
     api = buildSecurityApi({
       getAuthc: () => authc,
       getSession: () => session,
+      getServiceAccounts: () => serviceAccounts,
       audit: auditService,
       config: { uiam: { enabled: false } },
       logger,
@@ -167,6 +175,7 @@ describe('buildSecurityApi', () => {
       buildSecurityApi({
         getAuthc: () => authc,
         getSession: () => session,
+        getServiceAccounts: () => serviceAccounts,
         audit: auditService,
         config,
         logger,
@@ -189,6 +198,148 @@ describe('buildSecurityApi', () => {
     });
   });
 
+  describe('serviceAccounts.create', () => {
+    const params = { name: 'nightshift-relay' };
+
+    it('resolves the service lazily rather than at build time', () => {
+      const getServiceAccounts = jest.fn().mockReturnValue(serviceAccounts);
+
+      buildSecurityApi({
+        getAuthc: () => authc,
+        getSession: () => session,
+        getServiceAccounts,
+        audit: auditService,
+        config: {},
+        logger,
+      });
+
+      expect(getServiceAccounts).not.toHaveBeenCalled();
+    });
+
+    it('properly delegates to the service', async () => {
+      const request = httpServerMock.createKibanaRequest();
+
+      await api.serviceAccounts.create(request, params);
+
+      expect(serviceAccounts!.backend.create).toHaveBeenCalledTimes(1);
+      expect(serviceAccounts!.backend.create).toHaveBeenCalledWith(request, params);
+    });
+
+    it('returns the result from the service', async () => {
+      // Annotated, so a change to the contract shape fails here rather than sliding through:
+      // passing an un-annotated variable to `mockResolvedValue` skips the excess-property check.
+      const created: ServiceAccount = { id: 'service-account-id', name: 'nightshift-relay' };
+      serviceAccounts!.backend.create.mockResolvedValue(created);
+
+      await expect(
+        api.serviceAccounts.create(httpServerMock.createKibanaRequest(), params)
+      ).resolves.toBe(created);
+    });
+
+    it('throws when service accounts are not enabled', async () => {
+      serviceAccounts = null;
+
+      await expect(
+        api.serviceAccounts.create(httpServerMock.createKibanaRequest(), params)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Service accounts are not enabled"`);
+    });
+  });
+
+  describe('workload bindings', () => {
+    // Mutations name a workload; reads and executions name the space it lives in as well.
+    const WORKLOAD = { workloadType: 'rule', workloadId: 'rule-id' };
+    const WORKLOAD_IN_SPACE = { ...WORKLOAD, spaceId: 'default' };
+
+    it('delegates bindWorkload, forwarding the plugin id Core supplied', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      const params = { serviceAccountId: 'service-account-id', ...WORKLOAD };
+
+      await api.serviceAccounts.bindWorkload('alerting', request, params);
+
+      expect(serviceAccounts!.workloads.bindWorkload).toHaveBeenCalledWith(
+        'alerting',
+        request,
+        params
+      );
+    });
+
+    it('delegates unbindWorkload', async () => {
+      const request = httpServerMock.createKibanaRequest();
+
+      await api.serviceAccounts.unbindWorkload('alerting', request, WORKLOAD);
+
+      expect(serviceAccounts!.workloads.unbindWorkload).toHaveBeenCalledWith(
+        'alerting',
+        request,
+        WORKLOAD
+      );
+    });
+
+    it('delegates getBinding and returns its result', async () => {
+      const binding = { pluginId: 'alerting' } as never;
+      serviceAccounts!.workloads.getBinding.mockResolvedValue(binding);
+
+      await expect(
+        api.serviceAccounts.getWorkloadBinding('alerting', WORKLOAD_IN_SPACE)
+      ).resolves.toBe(binding);
+      expect(serviceAccounts!.workloads.getBinding).toHaveBeenCalledWith(
+        'alerting',
+        WORKLOAD_IN_SPACE
+      );
+    });
+
+    it('delegates withScopedRequest, passing the callback through', async () => {
+      const fn = jest.fn();
+
+      await api.serviceAccounts.withScopedRequestForWorkload('alerting', WORKLOAD_IN_SPACE, fn);
+
+      expect(serviceAccounts!.workloads.withScopedRequest).toHaveBeenCalledWith(
+        'alerting',
+        WORKLOAD_IN_SPACE,
+        fn
+      );
+    });
+
+    it.each([
+      [
+        'bindWorkload',
+        () =>
+          api.serviceAccounts.bindWorkload('alerting', httpServerMock.createKibanaRequest(), {
+            serviceAccountId: 'sa',
+            ...WORKLOAD,
+          }),
+      ],
+      [
+        'unbindWorkload',
+        () =>
+          api.serviceAccounts.unbindWorkload(
+            'alerting',
+            httpServerMock.createKibanaRequest(),
+            WORKLOAD
+          ),
+      ],
+      [
+        'getWorkloadBinding',
+        () => api.serviceAccounts.getWorkloadBinding('alerting', WORKLOAD_IN_SPACE),
+      ],
+      [
+        'withScopedRequestForWorkload',
+        () =>
+          api.serviceAccounts.withScopedRequestForWorkload(
+            'alerting',
+            WORKLOAD_IN_SPACE,
+            jest.fn()
+          ),
+      ],
+    ])('rejects %s when service accounts are not enabled', async (_name, invoke) => {
+      serviceAccounts = null;
+
+      await expect(invoke()).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Service accounts are not enabled"`
+      );
+    });
+  });
+
   describe('config.uiam', () => {
     describe('when uiam is enabled', () => {
       beforeEach(() => {
@@ -198,6 +349,7 @@ describe('buildSecurityApi', () => {
         api = buildSecurityApi({
           getAuthc: () => authc,
           getSession: () => session,
+          getServiceAccounts: () => serviceAccounts,
           audit: auditService,
           config: { uiam: { enabled: true } },
           logger,
@@ -259,6 +411,7 @@ describe('buildSecurityApi', () => {
         api = buildSecurityApi({
           getAuthc: () => authc,
           getSession: () => session,
+          getServiceAccounts: () => serviceAccounts,
           audit: auditService,
           config: { uiam: { enabled: false } },
           logger,
@@ -278,6 +431,7 @@ describe('buildSecurityApi', () => {
         api = buildSecurityApi({
           getAuthc: () => authc,
           getSession: () => session,
+          getServiceAccounts: () => serviceAccounts,
           audit: auditService,
           config: {},
           logger,

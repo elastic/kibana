@@ -510,9 +510,9 @@ describe('When using the kill-process action from response actions console', () 
       });
     });
 
-    it('should error if the Endpoint does not support the `kill_process_descendents` capability', async () => {
+    it('should error if the Endpoint does not support the `kill_process_descendants` capability', async () => {
       setConsoleCommands(
-        ENDPOINT_CAPABILITIES.filter((capability) => capability !== 'kill_process_descendents')
+        ENDPOINT_CAPABILITIES.filter((capability) => capability !== 'kill_process_descendants')
       );
       await render();
       await enterConsoleCommand(renderResult, user, 'kill-process --pid 123 --kill-descendants');
@@ -524,6 +524,11 @@ describe('When using the kill-process action from response actions console', () 
   });
 
   describe('and the `--kill-descendants` feature flag is disabled', () => {
+    beforeEach(() => {
+      mockedContext.setExperimentalFlag({ responseActionsEndpointKillProcessDescendants: false });
+      setConsoleCommands();
+    });
+
     it('should treat `--kill-descendants` as an unsupported argument', async () => {
       await render();
       await enterConsoleCommand(renderResult, user, 'kill-process --pid 123 --kill-descendants');

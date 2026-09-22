@@ -37,6 +37,8 @@ export interface WorkflowDetailState {
   computed?: ComputedData;
   /** The currently selected execution (when viewing executions tab) */
   execution?: WorkflowExecutionDto;
+  /** `total` from the paginated execution-steps list; used for the truncation callout. */
+  stepExecutionsTotal: number;
   /** The computed data derived from the selected execution, it is updated by the loadExecutionThunk */
   computedExecution?: ComputedData;
   /** The active tab (workflow or executions) */

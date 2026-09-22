@@ -11,7 +11,7 @@ const mockGetEvalPipeline = jest.fn();
 const mockEmitPipeline = jest.fn();
 const mockGetPipeline = jest.fn();
 
-jest.mock('../../../pipelines/evals/eval_pipeline', () => ({
+jest.mock('../../../pipelines/evals/eval_pipeline.ts', () => ({
   getEvalPipeline: mockGetEvalPipeline,
 }));
 
@@ -24,7 +24,7 @@ const ORIGINAL_ENV = process.env;
 
 const importPipelineModule = async () => {
   await jest.isolateModulesAsync(async () => {
-    await import('./pipeline');
+    await import('./pipeline.ts');
   });
 };
 

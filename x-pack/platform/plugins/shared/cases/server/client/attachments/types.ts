@@ -9,13 +9,8 @@ import type { KueryNode } from '@kbn/es-query';
 import type { Readable } from 'stream';
 import type { ReplaySubject } from 'rxjs';
 import type { AttachmentType } from '../../../common';
-import type {
-  BulkCreateAttachmentsRequestV2,
-  AttachmentPatchRequestV2,
-  AttachmentRequestV2,
-  FindAttachmentsQueryParams,
-} from '../../../common/types/api';
-import type { AttachmentMode } from '../../../common/types/domain/attachment/v2';
+import type { FindAttachmentsQueryParams } from '../../../common/types/api';
+import type { UnifiedAttachmentPayload } from '../../../common/types/domain/attachment/v2';
 
 /**
  * The arguments needed for creating a new attachment to a case.
@@ -26,16 +21,19 @@ export interface AddArgs {
    */
   caseId: string;
   /**
-   * The attachment values.
+   * Unified payload. Public POST /comments converts first via
+   * toUnifiedAttachmentRequest.
    */
-  comment: AttachmentRequestV2;
-  mode?: AttachmentMode;
+  comment: UnifiedAttachmentPayload;
 }
 
 export interface BulkCreateArgs {
   caseId: string;
-  attachments: BulkCreateAttachmentsRequestV2;
-  mode?: AttachmentMode;
+  /**
+   * Unified payloads only. Callers with mixed wire shapes convert first via
+   * toUnifiedAttachmentRequest.
+   */
+  attachments: UnifiedAttachmentPayload[];
 }
 
 /**
@@ -88,7 +86,6 @@ export interface FindCommentsArgs {
    * Optional parameters for filtering the returned attachments
    */
   findQueryParams?: FindAttachmentsQueryParams;
-  mode?: AttachmentMode;
 }
 
 /**
@@ -99,7 +96,6 @@ export interface GetAllArgs {
    * The case ID to retrieve all attachments for
    */
   caseID: string;
-  mode?: AttachmentMode;
 }
 
 export interface GetArgs {
@@ -111,10 +107,6 @@ export interface GetArgs {
    * The ID of the attachment to retrieve
    */
   savedObjectId: string;
-  /**
-   * Intermediate mode to specific the response format
-   */
-  mode?: AttachmentMode;
 }
 
 export interface BulkGetArgs {
@@ -123,10 +115,6 @@ export interface BulkGetArgs {
    * The saved object ids of the attachments
    */
   savedObjectIds: string[];
-  /**
-   * Intermediate mode to specific the response format
-   */
-  mode?: AttachmentMode;
 }
 
 export interface GetAllDocumentsAttachedToCase {
@@ -152,13 +140,10 @@ export interface UpdateArgs {
    */
   caseID: string;
   /**
-   * The full attachment request with the fields updated with appropriate values
+   * Unified payload. Public PATCH /comments converts first via
+   * toUnifiedAttachmentPatchRequest.
    */
-  updateRequest: AttachmentPatchRequestV2;
-  /**
-   * Intermediate mode to specific the response format
-   */
-  mode?: AttachmentMode;
+  updateRequest: UnifiedAttachmentPayload & { id: string; version: string };
 }
 
 export interface HapiReadableStream extends Readable {
@@ -192,8 +177,4 @@ export interface AddFileArgs {
    * An observable that can be used to abort the upload at any time.
    */
   $abort?: ReplaySubject<unknown>;
-  /**
-   * Intermediate mode to specific the response format
-   */
-  mode?: AttachmentMode;
 }

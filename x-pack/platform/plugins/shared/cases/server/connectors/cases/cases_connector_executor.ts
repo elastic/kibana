@@ -30,7 +30,8 @@ import {
 import { COMMENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 import { toUnifiedAttachmentType } from '../../../common/utils/attachments';
 import { getCaseSettings } from '../../../common/utils/case_settings';
-import type { AttachmentRequestV2, BulkCreateCasesRequest } from '../../../common/types/api';
+import type { BulkCreateCasesRequest } from '../../../common/types/api';
+import type { UnifiedAttachmentPayload } from '../../../common/types/domain/attachment/v2';
 import type { Case, CaseSeverity } from '../../../common';
 import { ConnectorTypes, AttachmentType } from '../../../common';
 import { INITIAL_ORACLE_RECORD_COUNTER, MAX_CONCURRENT_ES_REQUEST } from './constants';
@@ -1313,7 +1314,7 @@ export class CasesConnectorExecutor {
       this.getLogMetadata(params, { tags: ['case-connector:attachAlertsToCases'] })
     );
 
-    const { internallyManagedAlerts, rule } = params;
+    const { source, rule } = params;
 
     const [casesUnderAlertLimit, casesOverAlertLimit] = partition(
       Array.from(groupedAlertsWithCases.values()),
@@ -1344,15 +1345,14 @@ export class CasesConnectorExecutor {
 
     const bulkCreateAlertsRequest: BulkCreateAlertsReq[] = casesUnderAlertLimit.map(
       ({ theCase, alerts, comments }) => {
-        const extraComments: AttachmentRequestV2[] =
+        const extraComments: UnifiedAttachmentPayload[] =
           comments?.map((comment) => ({
             type: COMMENT_ATTACHMENT_TYPE,
             data: { content: comment },
             owner: theCase.owner,
           })) ?? [];
-        const rulePayload = internallyManagedAlerts
-          ? { id: null, name: null }
-          : { id: rule.id, name: rule.name };
+        const rulePayload =
+          source === 'attack' ? { id: null, name: null } : { id: rule.id, name: rule.name };
         // Collect the parallel alertId / alertIndex arrays in a single pass.
         // Order is preserved by reduce per the ECMA-262 spec.
         const { alertIds, alertIndices } = alerts.reduce<{
@@ -1367,7 +1367,7 @@ export class CasesConnectorExecutor {
           { alertIds: [], alertIndices: [] }
         );
 
-        const alertAttachment: AttachmentRequestV2 = {
+        const alertAttachment: UnifiedAttachmentPayload = {
           type: toUnifiedAttachmentType(AttachmentType.alert, theCase.owner),
           attachmentId: alertIds,
           metadata: { index: alertIndices, rule: rulePayload },
@@ -1388,15 +1388,9 @@ export class CasesConnectorExecutor {
        */
       async (req: BulkCreateAlertsReq) => {
         if (this.logger.isLevelEnabled('debug')) {
-          const attachmentIdsForLogging = req.attachments.flatMap((attachment) => {
-            if ('alertId' in attachment) {
-              return toStringArray(attachment.alertId);
-            }
-            if ('attachmentId' in attachment) {
-              return toStringArray(attachment.attachmentId);
-            }
-            return [];
-          });
+          const attachmentIdsForLogging = req.attachments.flatMap((attachment) =>
+            'attachmentId' in attachment ? toStringArray(attachment.attachmentId) : []
+          );
 
           this.logger.debug(
             `[CasesConnector][CasesConnectorExecutor][attachAlertsToCases] Attaching ${req.attachments.length} alerts to case with ID ${req.caseId}`,

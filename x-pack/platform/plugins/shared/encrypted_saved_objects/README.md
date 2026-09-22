@@ -256,7 +256,7 @@ Run Jest tests:
 Documentation: https://www.elastic.co/guide/en/kibana/current/development-tests.html#_unit_testing
 
 ```
-yarn test:jest x-pack/platform/plugins/shared/encrypted_saved_objects --watch
+pnpm test:jest x-pack/platform/plugins/shared/encrypted_saved_objects --watch
 ```
 
 ### API Integration tests

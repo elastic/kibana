@@ -18,7 +18,10 @@ import { triggerSchemas } from '../../trigger_schemas';
 import type { YamlValidationResult } from '../validate_workflow_yaml/model/types';
 
 describe('collectYamlSchemaValidationResults', () => {
-  const workflowZodSchema = getWorkflowZodSchema({}, triggerSchemas.getRegisteredIds());
+  const workflowZodSchema = getWorkflowZodSchema(
+    {},
+    triggerSchemas.getRegisteredTriggersForSchema()
+  );
 
   it('returns formatted yaml schema validation results from monaco markers', () => {
     const yaml = 'name: test-workflow\n';

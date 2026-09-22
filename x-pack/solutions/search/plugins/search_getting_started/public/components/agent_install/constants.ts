@@ -13,3 +13,10 @@ export const INSTALL_LINES_CLI = [
 ];
 
 export const AGENT_ONBOARDING_MESSAGE = '/elasticsearch-onboarding';
+
+export const CLI_INSTALL_COMMAND = 'npm install -g @elastic/cli';
+export const CLI_VERIFY_COMMAND = 'elastic es info';
+export const CLI_CONTEXT_NAME = 'my-deployment';
+export const CLI_API_KEY_PLACEHOLDER = '<your-api-key>';
+export const CLI_REPO_URL = 'https://github.com/elastic/cli';
+export const CLI_COMMAND_REFERENCE_URL = 'https://github.com/elastic/cli#commands';

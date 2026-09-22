@@ -14,29 +14,33 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { NonEmptyString } from '../../../common_attributes.gen';
 
+export const DisableAttackDiscoveryScheduleRequestParams = lazySchema(() =>
+  z.object({
+    /**
+     * The unique identifier of the schedule to disable
+     */
+    id: NonEmptyString.describe('The unique identifier of the schedule to disable'),
+  })
+);
 export type DisableAttackDiscoveryScheduleRequestParams = z.infer<
   typeof DisableAttackDiscoveryScheduleRequestParams
 >;
-export const DisableAttackDiscoveryScheduleRequestParams = z.object({
-  /**
-   * The unique identifier of the schedule to disable
-   */
-  id: NonEmptyString,
-});
 export type DisableAttackDiscoveryScheduleRequestParamsInput = z.input<
   typeof DisableAttackDiscoveryScheduleRequestParams
 >;
 
+export const DisableAttackDiscoveryScheduleResponse = lazySchema(() =>
+  z.object({
+    /**
+     * The unique identifier of the disabled schedule
+     */
+    id: NonEmptyString.describe('The unique identifier of the disabled schedule'),
+  })
+);
 export type DisableAttackDiscoveryScheduleResponse = z.infer<
   typeof DisableAttackDiscoveryScheduleResponse
 >;
-export const DisableAttackDiscoveryScheduleResponse = z.object({
-  /**
-   * The unique identifier of the disabled schedule
-   */
-  id: NonEmptyString,
-});

@@ -12,6 +12,7 @@ import type {
   AttachmentVersion,
   UpdateOriginResponse,
   ScreenContextAttachmentData,
+  VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
 
 export enum ActionButtonType {
@@ -33,6 +34,14 @@ export interface AttachmentRenderProps<TAttachment extends UnknownAttachment = U
   screenContext?: ScreenContextAttachmentData;
   /** Callback to open the agent builder sidebar with the current conversation loaded. Undefined when already in the sidebar. */
   openSidebarConversation?: () => void;
+}
+
+/** Props passed to attachment renderers in the conversation details flyout. */
+export interface ConversationDetailsRenderProps<
+  TAttachment extends UnknownAttachment = UnknownAttachment
+> {
+  /** The attachment to render, with version data selected by the consumer. */
+  attachment: TAttachment;
 }
 
 /**
@@ -178,6 +187,11 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
    */
   getIcon?: () => IconType;
   /**
+   * Returns a URL (or data URL) to use as a thumbnail image for the attachment.
+   * When provided, renders an <img> instead of an EuiIcon in the pill icon slot.
+   */
+  getThumbnail?: (attachment: TAttachment) => string | undefined;
+  /**
    * Returns header metadata (icon, subtitle, badges) for the attachment header
    * (inline / canvas). Omitted fields fall back to their defaults (no icon, no
    * subtitle, no badges).
@@ -199,6 +213,10 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
   renderInlineContent?: (
     props: AttachmentRenderProps<TAttachment>,
     callbacks?: InlineRenderCallbacks
+  ) => ReactNode;
+  /** Render attachment content in the conversation details flyout. */
+  renderConversationDetailsContent?: (
+    props: ConversationDetailsRenderProps<TAttachment>
   ) => ReactNode;
   /**
    * Optional preferred width for the canvas flyout when opened in full-screen context.
@@ -234,6 +252,74 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
 }
 
 /**
+ * Result of a `list` call on the browser client.
+ */
+export interface ListAttachmentsResult {
+  results: VersionedAttachment[];
+  total_token_estimate: number;
+}
+
+/**
+ * Arguments for {@link AttachmentBrowserClient.create}.
+ */
+export interface CreateAttachmentArgs {
+  conversationId: string;
+  id?: string;
+  type: string;
+  data?: unknown;
+  origin?: string;
+  description?: string;
+  hidden?: boolean;
+}
+
+/**
+ * Arguments for {@link AttachmentBrowserClient.get}.
+ */
+export interface GetAttachmentArgs {
+  conversationId: string;
+  attachmentId: string;
+}
+
+/**
+ * Arguments for {@link AttachmentBrowserClient.update}.
+ */
+export interface UpdateAttachmentArgs {
+  conversationId: string;
+  attachmentId: string;
+  data?: unknown;
+  description?: string;
+}
+
+/**
+ * Arguments for {@link AttachmentBrowserClient.delete}.
+ */
+export interface DeleteAttachmentArgs {
+  conversationId: string;
+  attachmentId: string;
+  permanent?: boolean;
+}
+
+/**
+ * Arguments for {@link AttachmentBrowserClient.list}.
+ */
+export interface ListAttachmentsArgs {
+  conversationId: string;
+  includeDeleted?: boolean;
+}
+
+/**
+ * A client for the AgentBuilder attachment HTTP APIs.
+ * Obtain via {@link AttachmentServiceStartContract.getClient}.
+ */
+export interface AttachmentBrowserClient {
+  create(args: CreateAttachmentArgs): Promise<VersionedAttachment>;
+  get(args: GetAttachmentArgs): Promise<VersionedAttachment>;
+  update(args: UpdateAttachmentArgs): Promise<VersionedAttachment>;
+  delete(args: DeleteAttachmentArgs): Promise<void>;
+  list(args: ListAttachmentsArgs): Promise<ListAttachmentsResult>;
+}
+
+/**
  * Public-facing contract for the attachment service.
  */
 export interface AttachmentServiceStartContract {
@@ -257,4 +343,9 @@ export interface AttachmentServiceStartContract {
   getAttachmentUiDefinition: <TAttachment extends UnknownAttachment = UnknownAttachment>(
     attachmentType: string
   ) => AttachmentUIDefinition<TAttachment> | undefined;
+
+  /**
+   * Returns a client for interacting with attachment HTTP APIs.
+   */
+  getClient(): AttachmentBrowserClient;
 }

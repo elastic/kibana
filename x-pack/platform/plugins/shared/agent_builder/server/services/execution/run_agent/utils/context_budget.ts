@@ -54,16 +54,18 @@ const sumTokens = (counts: number[]): number => counts.reduce((total, count) => 
  *
  * When an existing summary is provided, the effective token count is the summary's
  * token cost plus only the rounds not yet covered by the summary, rather than the
- * raw total of all stored rounds.
+ * raw total of all stored rounds. `failedEntryTokens` is the cost of the failed
+ * executions that survive the same cut (they are rendered in the prompt too).
  */
 export const shouldTriggerCompaction = (
   perRoundTokenCounts: number[],
   budget: ContextBudget,
-  existingSummary?: CompactionSummary
+  existingSummary?: CompactionSummary,
+  failedEntryTokens: number = 0
 ): boolean => {
   const effectiveTokens = existingSummary
     ? existingSummary.token_count +
       sumTokens(perRoundTokenCounts.slice(existingSummary.summarized_round_count))
     : sumTokens(perRoundTokenCounts);
-  return effectiveTokens > budget.triggerThreshold;
+  return effectiveTokens + failedEntryTokens > budget.triggerThreshold;
 };

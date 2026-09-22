@@ -32,6 +32,14 @@ export const createNewConversation = ({
 
 export const pendingRoundId = '__pending__';
 
+export const isPendingCurrentRound = ({
+  isCurrentRound,
+  roundId,
+}: {
+  isCurrentRound: boolean;
+  roundId: string;
+}): boolean => isCurrentRound && roundId === pendingRoundId;
+
 export const createNewRound = ({
   userMessage,
   attachments,

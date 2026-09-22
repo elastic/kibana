@@ -7,6 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Migration recommendation: MIGRATE TO SCOUT API. All 4 tests call plugin-registered HTTP routes
+ * via supertest and assert on JSON response bodies — no browser interaction required.
+ *
+ * Migration notes:
+ * - The routes under test are registered by the `index_patterns` fixture plugin
+ *   (src/platform/test/plugin_functional/plugins/index_patterns). That plugin must be kept
+ *   registered for the Scout run, or its CRUD route logic replaced by direct calls to the
+ *   public index-patterns REST API (`/api/index_patterns/index_pattern`).
+ * - Tests are sequential: `indexPatternId` created in test 1 is reused by tests 2–4, and the
+ *   pattern is deleted in test 4. Either chain them with `test.step` or give each test its own
+ *   setup/teardown so they are independently retryable.
+ * - The `before` hook calls `esArchiver.emptyKibanaIndex()`; reproduce this with the Scout
+ *   `kibanaServer.savedObjects.clean` equivalent before the suite runs.
+ */
 import expect from '@kbn/expect';
 import type { PluginFunctionalProviderContext } from '../../services';
 import '@kbn/core-provider-plugin/types';

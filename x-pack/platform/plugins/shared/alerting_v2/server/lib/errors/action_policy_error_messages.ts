@@ -8,13 +8,13 @@
 export type ActionPolicyValidationContext = 'create' | 'update' | 'upsert';
 
 export const getActionPolicyNotFoundMessage = (id: string): string =>
-  `Action policy with id "${id}" not found`;
+  `Action policy with ID "${id}" not found`;
 
 export const getActionPolicyAlreadyExistsMessage = (id: string): string =>
-  `Action policy with id "${id}" already exists`;
+  `Action policy with ID "${id}" already exists`;
 
 export const getActionPolicyVersionConflictMessage = (id: string): string =>
-  `Action policy with id "${id}" has already been updated by another user`;
+  `Action policy with ID "${id}" has already been updated by another user`;
 
 export const getInvalidActionPolicyDataMessage = (
   context: ActionPolicyValidationContext,

@@ -1,5 +1,5 @@
 {
-  "sha1": "c76858f372aed263e977625a010487b2b2e0f8d2",
+  "sha1": "9581ab6c7811b5c7e0d80b38f8e70868b9bdb414",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -336,8 +336,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_update_delete_params.spec.ts",
-        "line": 222,
-        "column": 8
+        "line": 231,
+        "column": 24
       }
     },
     {
@@ -350,8 +350,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_update_delete_params.spec.ts",
-        "line": 230,
-        "column": 22
+        "line": 239,
+        "column": 15
       }
     },
     {
@@ -364,8 +364,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_update_delete_params.spec.ts",
-        "line": 249,
-        "column": 49
+        "line": 256,
+        "column": 67
       }
     },
     {
@@ -378,8 +378,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_update_delete_params.spec.ts",
-        "line": 266,
-        "column": 13
+        "line": 273,
+        "column": 71
       }
     },
     {
@@ -392,8 +392,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_update_delete_params.spec.ts",
-        "line": 296,
-        "column": 10
+        "line": 304,
+        "column": 63
       }
     },
     {
@@ -406,8 +406,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_update_delete_params.spec.ts",
-        "line": 306,
-        "column": 15
+        "line": 315,
+        "column": 23
       }
     },
     {
@@ -420,8 +420,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_update_delete_params.spec.ts",
-        "line": 335,
-        "column": 19
+        "line": 345,
+        "column": 13
       }
     },
     {
@@ -434,8 +434,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_update_delete_params.spec.ts",
-        "line": 363,
-        "column": 29
+        "line": 373,
+        "column": 30
       }
     },
     {
@@ -448,8 +448,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_update_delete_params.spec.ts",
-        "line": 370,
-        "column": 7
+        "line": 375,
+        "column": 82
       }
     },
     {
@@ -462,8 +462,22 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_update_delete_params.spec.ts",
-        "line": 393,
-        "column": 13
+        "line": 388,
+        "column": 26
+      }
+    },
+    {
+      "id": "0a2f53a204e0cde-de1bb7c6bb12e63",
+      "title": "AddEditParams returns 409 when sharing a key that exists in another space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_update_delete_params.spec.ts",
+        "line": 415,
+        "column": 17
       }
     },
     {
@@ -476,8 +490,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_update_delete_params.spec.ts",
-        "line": 409,
-        "column": 16
+        "line": 434,
+        "column": 7
       }
     },
     {
@@ -490,7 +504,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_update_delete_params.spec.ts",
-        "line": 423,
+        "line": 448,
         "column": 17
       }
     },
@@ -504,8 +518,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_update_delete_params.spec.ts",
-        "line": 446,
-        "column": 17
+        "line": 471,
+        "column": 11
       }
     },
     {
@@ -518,7 +532,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_update_delete_params.spec.ts",
-        "line": 472,
+        "line": 497,
         "column": 31
       }
     },
@@ -532,8 +546,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_update_delete_params.spec.ts",
-        "line": 489,
-        "column": 31
+        "line": 514,
+        "column": 28
       }
     },
     {
@@ -546,8 +560,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_update_delete_params.spec.ts",
-        "line": 507,
-        "column": 24
+        "line": 533,
+        "column": 9
       }
     },
     {
@@ -560,8 +574,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_update_delete_params.spec.ts",
-        "line": 521,
-        "column": 7
+        "line": 546,
+        "column": 14
       }
     },
     {
@@ -574,8 +588,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_update_delete_params.spec.ts",
-        "line": 595,
-        "column": 27
+        "line": 561,
+        "column": 7
       }
     },
     {
@@ -588,21 +602,21 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_update_delete_params.spec.ts",
-        "line": 550,
-        "column": 69
+        "line": 575,
+        "column": 13
       }
     },
     {
       "id": "0a2f53a204e0cde-45fa932e3a8687d",
       "title": "AddEditParams returns a 409 conflict when creating a duplicate key",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_update_delete_params.spec.ts",
-        "line": 564,
+        "line": 588,
         "column": 82
       }
     },
@@ -616,7 +630,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_update_delete_params.spec.ts",
-        "line": 651,
+        "line": 684,
         "column": 27
       }
     },

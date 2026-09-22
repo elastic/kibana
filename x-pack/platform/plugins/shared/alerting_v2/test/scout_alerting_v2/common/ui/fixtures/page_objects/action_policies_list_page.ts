@@ -10,28 +10,22 @@ import type { Locator, ScoutPage } from '@kbn/scout';
 /**
  * Drives the Action Policies list page. Exposes the write affordances gated by
  * the `actionPolicies` write capability (create button, row edit/actions,
- * details-flyout edit + actions menu) so specs can assert they are visible for
+ * details-flyout Take action button) so specs can assert they are visible for
  * editors and hidden for read-only users.
  */
 export class ActionPoliciesListPage {
   /** Header "Create policy" button; hidden for read-only users. */
   public readonly createButton: Locator;
-  /** Row "view details" icon; visible to every role with read access. */
-  public readonly viewDetailsButton: Locator;
   /** Details flyout container; a privilege-independent anchor that it opened. */
   public readonly detailsFlyout: Locator;
-  /** Edit button inside the details flyout footer; hidden for read-only users. */
-  public readonly detailsFlyoutEditButton: Locator;
-  /** Overflow actions menu inside the details flyout; hidden for read-only users. */
-  public readonly detailsFlyoutActionsMenuButton: Locator;
+  /** "Take action" button inside the details flyout footer; hidden for read-only users. */
+  public readonly detailsFlyoutTakeActionButton: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.createButton = this.page.testSubj.locator('createActionPolicyButton');
-    this.viewDetailsButton = this.page.testSubj.locator('actionPolicyViewDetailsButton');
     this.detailsFlyout = this.page.testSubj.locator('actionPolicyDetailsFlyout');
-    this.detailsFlyoutEditButton = this.page.testSubj.locator('detailsFlyoutEditButton');
-    this.detailsFlyoutActionsMenuButton = this.page.testSubj.locator(
-      'detailsFlyoutActionsMenuButton'
+    this.detailsFlyoutTakeActionButton = this.page.testSubj.locator(
+      'detailsFlyoutTakeActionButton'
     );
   }
 
@@ -47,7 +41,7 @@ export class ActionPoliciesListPage {
     return this.page.testSubj.locator(`content-list-table-item-link`, { hasText: policyName });
   }
 
-  async openDetailsFlyout() {
-    await this.viewDetailsButton.click();
+  async openDetailsFlyout(policyName: string) {
+    await this.detailsLink(policyName).click();
   }
 }

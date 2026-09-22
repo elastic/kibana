@@ -315,6 +315,10 @@ export const EARS_LABEL = i18n.translate('connectorSpecs.ears.label', {
   defaultMessage: 'Quick Connect OAuth 2.0',
 });
 
+export const RELAY_LABEL = i18n.translate('connectorSpecs.relay.label', {
+  defaultMessage: 'Elastic app (bot user)',
+});
+
 export const GCP_SERVICE_ACCOUNT_LABEL = i18n.translate('connectorSpecs.gcpServiceAccount.label', {
   defaultMessage: 'GCP Service Account',
 });
@@ -389,6 +393,13 @@ export const BEARER_WITH_TLS_AUTH_TOKEN_REQUIRED_MESSAGE = i18n.translate(
   'connectorSpecs.bearerWithTlsAuth.token.requiredMessage',
   {
     defaultMessage: 'An API token is required.',
+  }
+);
+
+export const API_KEY_HEADER_WITH_TLS_AUTH_LABEL = i18n.translate(
+  'connectorSpecs.apiKeyHeaderWithTlsAuth.label',
+  {
+    defaultMessage: 'API key header (with TLS)',
   }
 );
 

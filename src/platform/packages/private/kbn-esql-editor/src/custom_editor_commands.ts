@@ -332,7 +332,10 @@ export const addEditorKeyBindings = (
       }),
       // eslint-disable-next-line no-bitwise
       keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
-      run: () => onQuerySubmit(QuerySource.MANUAL),
+      run: () => {
+        if (!editor.getValue().trim()) return;
+        onQuerySubmit(QuerySource.MANUAL);
+      },
     }),
     editor.addAction({
       id: 'esql.insertNewline',

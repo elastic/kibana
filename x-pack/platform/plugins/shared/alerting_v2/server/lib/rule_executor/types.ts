@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { SpaceId } from '@kbn/core-spaces-common';
+
 import type { QueryPayload } from './get_query_payload';
 import type { RuleResponse } from '../rules_client';
 import type { AlertEvent } from '../../resources/datastreams/alert_events';
@@ -15,12 +17,12 @@ import type { ActiveAlertGroupHash } from './queries';
 
 export interface RuleExecutorTaskParams {
   ruleId: string;
-  spaceId: string;
+  spaceId: SpaceId;
 }
 
 export interface RuleExecutionInput {
   readonly ruleId: string;
-  readonly spaceId: string;
+  readonly spaceId: SpaceId;
   readonly scheduledAt: string;
   readonly executionContext: ExecutionContext;
 }

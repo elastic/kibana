@@ -20,13 +20,14 @@ const mockProductFeaturesService = {
 } as unknown as ProductFeaturesService;
 
 describe('getMigrationRulesTool', () => {
-  const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
+  const { mockCore, mockLogger, mockEsClient, mockSecurityStart, mockRequest } =
+    createToolTestMocks();
   const tool = getMigrationRulesTool(mockCore, mockLogger, mockProductFeaturesService);
   let mockFetch: jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    const mockCoreStart = setupMockCoreStartServices(mockCore, mockEsClient);
+    const mockCoreStart = setupMockCoreStartServices(mockCore, mockEsClient, mockSecurityStart);
     mockFetch = jest.fn();
     (mockCoreStart.http.selfClient.asScoped as unknown as jest.Mock).mockReturnValue({
       fetch: mockFetch,
@@ -99,7 +100,7 @@ describe('getMigrationRulesTool', () => {
     });
   });
 
-  it('should apply default sort (elastic_rule.title asc) when no sort is provided', async () => {
+  it('should not impose a hardcoded sort — lets the API default apply when no sort is provided', async () => {
     mockFetch.mockResolvedValueOnce({
       fetchOptions: { path: '/internal/siem_migrations/rules/abc/rules' },
       request: new Request('http://localhost/x'),
@@ -112,15 +113,11 @@ describe('getMigrationRulesTool', () => {
       createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
     );
 
-    expect(mockFetch).toHaveBeenCalledWith(
-      expect.any(String),
-      expect.objectContaining({
-        query: expect.objectContaining({
-          sort_field: 'elastic_rule.title',
-          sort_direction: 'asc',
-        }),
-      })
-    );
+    // When the model does not supply sort_field / sort_direction, neither is set in the query
+    // — the server applies DEFAULT_SORTING (translation_result desc), matching the Kibana UI.
+    const query = (mockFetch.mock.calls[0][1] as { query: Record<string, unknown> }).query;
+    expect(query.sort_field).toBeUndefined();
+    expect(query.sort_direction).toBeUndefined();
   });
 
   it('should pass filters and pagination through in the query', async () => {

@@ -111,6 +111,58 @@ function seedCompletedStepWithSize(
 describe('StepIoService', () => {
   const EVICTION_THRESHOLD = 100; // bytes
 
+  describe('flush', () => {
+    it('persists step changes before a terminal workflow status', async () => {
+      const { state, service, stepExecutionRepository, workflowExecutionRepository } =
+        buildHarness();
+      const stepWrite = Promise.withResolvers<void>();
+      stepExecutionRepository.bulkUpsert.mockReturnValue(stepWrite.promise);
+      state.upsertStep({
+        id: 'step-1',
+        stepId: 'myStep',
+        status: ExecutionStatus.COMPLETED,
+      });
+      service.setStepOutput('step-1', { result: 'done' });
+      state.updateWorkflowExecution({ status: ExecutionStatus.COMPLETED });
+
+      const flushPromise = service.flush();
+      await Promise.resolve();
+
+      expect(stepExecutionRepository.bulkUpsert).toHaveBeenCalled();
+      expect(workflowExecutionRepository.updateWorkflowExecution).not.toHaveBeenCalled();
+
+      stepWrite.resolve();
+      await flushPromise;
+
+      expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalled();
+    });
+
+    it('persists non-terminal workflow and step changes concurrently', async () => {
+      const { state, service, stepExecutionRepository, workflowExecutionRepository } =
+        buildHarness();
+      const workflowWrite = Promise.withResolvers<void>();
+      const stepWrite = Promise.withResolvers<void>();
+      workflowExecutionRepository.updateWorkflowExecution.mockReturnValue(workflowWrite.promise);
+      stepExecutionRepository.bulkUpsert.mockReturnValue(stepWrite.promise);
+      state.upsertStep({
+        id: 'step-1',
+        stepId: 'myStep',
+        status: ExecutionStatus.RUNNING,
+      });
+      state.updateWorkflowExecution({ status: ExecutionStatus.RUNNING });
+
+      const flushPromise = service.flush();
+      await Promise.resolve();
+
+      expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalled();
+      expect(stepExecutionRepository.bulkUpsert).toHaveBeenCalled();
+
+      workflowWrite.resolve();
+      stepWrite.resolve();
+      await flushPromise;
+    });
+  });
+
   describe('IO reads/writes', () => {
     it('returns step output via service when state owns the doc', () => {
       const { state, service } = buildHarness();
@@ -2534,6 +2586,136 @@ describe('StepIoService', () => {
         service.releaseReadPins('unrelated-exec');
         expect(service.getStepOutput('src-exec')).toBeUndefined();
       });
+    });
+  });
+
+  // The downstream symptom is a `parallel` step's aggregate reading back as
+  // `null` for every step after it. Every branch's `prepareForRead` names the
+  // enclosing parallel step as a rehydration target, so with `concurrency > 1`
+  // the same id is rehydrated more than once in a single tick.
+  describe('rehydration must not clobber a freshly written output', () => {
+    it('keeps an output that was rewritten after being rehydrated twice in one tick', async () => {
+      const { state, service, stepExecutionRepository } = buildHarness({
+        evictionMinBytes: EVICTION_THRESHOLD,
+      });
+      const id = 'exec_parallel';
+      state.upsertStep({ id, stepId: 'fan_out', status: ExecutionStatus.COMPLETED });
+
+      // Get it into the evicted set the ordinary way: a large output, then the
+      // two flush cycles the deferred eviction queue needs.
+      service.setStepOutput(id, null, EVICTION_THRESHOLD * 2);
+      await service.flushStepChanges();
+      await service.flushStepChanges();
+
+      // The step is still running, so its doc carries no aggregate yet.
+      (stepExecutionRepository.getStepExecutionsByIds as jest.Mock).mockResolvedValue([
+        { id, output: null, workflowRunId: 'test-workflow-execution-id' },
+      ]);
+
+      // Two branches in the same tick each name the enclosing parallel step.
+      // Concurrently, not in sequence: that is what `concurrency > 1` means
+      // here, and it is load-bearing. Both calls read `evictedOutputIds`
+      // before either finishes clearing it, so both fetch and both record a
+      // transient for the same id.
+      await Promise.all([service.rehydrateOutputs([id]), service.rehydrateOutputs([id])]);
+
+      // The parallel step then writes its real aggregate. Its own write must
+      // reclaim the id: the transient tracking no longer owns it.
+      const aggregate = { results: [1, 2], total: 2 } as unknown as JsonValue;
+      service.setStepOutput(id, aggregate, 10);
+
+      // A later step needs none of the transients. Before the fix the stale
+      // duplicate entry survived here and released the aggregate, after which
+      // the next read re-fetched the pre-write doc and installed `null`.
+      await service.prepareForRead({
+        node: { id: 'later', stepId: 'later', type: 'atomic' } as never,
+        predecessorsResolver: () => [],
+        consumerId: 'later',
+      });
+
+      expect(service.getStepOutput(id)).toEqual(aggregate);
+    });
+
+    // The ordering the previous test cannot reach: it completes both fetches
+    // before the aggregate is written. Here the fetch is still in flight when
+    // the owner writes, so the response that lands afterwards carries the
+    // pre-write document. Applying it unconditionally would replace the correct
+    // aggregate with the older `null` -- a direct overwrite, independent of the
+    // transient bookkeeping.
+    it('discards a fetch that lands after the owner rewrote the output', async () => {
+      const { state, service, stepExecutionRepository } = buildHarness({
+        evictionMinBytes: EVICTION_THRESHOLD,
+      });
+      const id = 'exec_parallel';
+      state.upsertStep({ id, stepId: 'fan_out', status: ExecutionStatus.COMPLETED });
+      service.setStepOutput(id, null, EVICTION_THRESHOLD * 2);
+      await service.flushStepChanges();
+      await service.flushStepChanges();
+
+      // Hold the read open so the write below lands mid-flight.
+      let releaseRead: (docs: unknown[]) => void = () => {};
+      (stepExecutionRepository.getStepExecutionsByIds as jest.Mock).mockReturnValue(
+        new Promise((resolve) => {
+          releaseRead = resolve as (docs: unknown[]) => void;
+        })
+      );
+
+      const inFlight = service.rehydrateOutputs([id]);
+
+      // The step settles and writes its real aggregate while the fetch is open.
+      const aggregate = { results: [1, 2], total: 2 } as unknown as JsonValue;
+      service.setStepOutput(id, aggregate, 10);
+
+      // Only now does Elasticsearch answer, with the document as it looked
+      // before that write.
+      releaseRead([{ id, output: null, workflowRunId: 'test-workflow-execution-id' }]);
+      await inFlight;
+
+      expect(service.getStepOutput(id)).toEqual(aggregate);
+    });
+
+    // The evicted flag alone cannot carry this one. An output over
+    // `evictionMinBytes` can be written, flushed and evicted AGAIN while a fetch
+    // from before the write is still outstanding, so by the time the response
+    // lands the flag is true for a second, unrelated reason. Applying it then
+    // would install the older value and clear the flag, leaving nothing to
+    // re-fetch the correct one. The per-id write generation is what separates
+    // "same eviction episode" from "a newer value exists".
+    it('discards a stale fetch even when the output was evicted again meanwhile', async () => {
+      const { state, service, stepExecutionRepository } = buildHarness({
+        evictionMinBytes: EVICTION_THRESHOLD,
+      });
+      const id = 'exec_parallel';
+      state.upsertStep({ id, stepId: 'fan_out', status: ExecutionStatus.COMPLETED });
+      service.setStepOutput(id, null, EVICTION_THRESHOLD * 2);
+      await service.flushStepChanges();
+      await service.flushStepChanges();
+
+      let releaseRead: (docs: unknown[]) => void = () => {};
+      (stepExecutionRepository.getStepExecutionsByIds as jest.Mock).mockReturnValue(
+        new Promise((resolve) => {
+          releaseRead = resolve as (docs: unknown[]) => void;
+        })
+      );
+
+      const inFlight = service.rehydrateOutputs([id]);
+
+      // Written large enough to be an eviction candidate once flushed.
+      const aggregate = { results: [1, 2], total: 2 } as unknown as JsonValue;
+      service.setStepOutput(id, aggregate, EVICTION_THRESHOLD * 2);
+
+      // Flush, then the deferred cycle evicts it -- the flag is true again.
+      await service.flushStepChanges();
+      await service.flushStepChanges();
+      expect(service.getStepOutput(id)).toBeUndefined();
+
+      releaseRead([{ id, output: null, workflowRunId: 'test-workflow-execution-id' }]);
+      await inFlight;
+
+      // The stale document must not be installed, and the id must stay evicted
+      // so the next read fetches the aggregate that IS now in Elasticsearch.
+      expect(service.getStepOutput(id)).toBeUndefined();
+      expect(service.hasEvictedOutputs()).toBe(true);
     });
   });
 });

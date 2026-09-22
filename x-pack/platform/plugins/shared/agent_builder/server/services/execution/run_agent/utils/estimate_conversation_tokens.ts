@@ -8,10 +8,15 @@
 import type { BaseMessage, MessageContentComplex } from '@langchain/core/messages';
 import { isAIMessage } from '@langchain/core/messages';
 import { estimateTokens } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
-import type { ProcessedConversationRound } from './prepare_conversation';
+import type { ProcessedTimelineEvent } from './context_timeline';
+import {
+  groupTimelineFailedExecutions,
+  groupTimelineRounds,
+  sliceTimelineRounds,
+} from './context_timeline';
 import type { ToolSummarizationDeps } from './tool_summarization';
 import { createSummarizationTransformer } from './tool_summarization';
-import { roundToLangchain } from './to_langchain_messages';
+import { failedExecutionToLangchain, roundToLangchain } from './to_langchain_messages';
 
 // Flat per-image cost. Measured internally: vision models tile images into 16x16
 // pixel patches, ~1 token per patch. For a representative 500x500 image, that's
@@ -47,14 +52,51 @@ export const estimateMessagesTokens = (messages: BaseMessage[]): number => {
   return total;
 };
 
+/** Token estimates for the timeline's rounds, in round order (the order compaction indexes). */
 export const estimatePerRoundTokens = async (
-  rounds: ProcessedConversationRound[],
+  timeline: ProcessedTimelineEvent[],
   deps: ToolSummarizationDeps
 ): Promise<number[]> => {
   const resultTransformer = createSummarizationTransformer(deps);
   return Promise.all(
-    rounds.map(async (round) =>
+    groupTimelineRounds(timeline).map(async (round) =>
       estimateMessagesTokens(await roundToLangchain(round, { resultTransformer }))
     )
   );
+};
+
+/**
+ * Token estimate of each failed execution surfaced on the timeline (its user message plus the
+ * failure notice, as rendered), keyed by the entry's user message id.
+ */
+export const estimateFailedEntryTokens = (
+  timeline: ProcessedTimelineEvent[]
+): Map<string, number> =>
+  new Map(
+    groupTimelineFailedExecutions(timeline).map((entry) => [
+      entry.userMessage.id,
+      estimateMessagesTokens(failedExecutionToLangchain(entry)),
+    ])
+  );
+
+/**
+ * Sum of the failed-entry tokens that survive `sliceTimelineRounds(timeline, start)`: the term
+ * every compaction comparison adds to its round tokens so the arithmetic matches the prompt.
+ */
+export const survivingFailedEntryTokens = (
+  timeline: ProcessedTimelineEvent[],
+  start: number,
+  tokensByEntry: Map<string, number>
+): number => {
+  if (tokensByEntry.size === 0) {
+    return 0;
+  }
+  const kept = new Set(sliceTimelineRounds(timeline, start).map((event) => event.id));
+  let total = 0;
+  for (const [userMessageId, tokens] of tokensByEntry) {
+    if (kept.has(userMessageId)) {
+      total += tokens;
+    }
+  }
+  return total;
 };

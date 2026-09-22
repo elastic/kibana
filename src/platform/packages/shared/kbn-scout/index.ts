@@ -48,6 +48,7 @@ export * from './src/playwright/ui_components';
 
 // Page-object wrappers and helpers for shared Kibana surfaces.
 export {
+  AppMenu,
   ContentListWrapper,
   DataGrid,
   DiscoverApp,
@@ -55,11 +56,8 @@ export {
   LensApp,
   QueryBar,
   UnifiedTabs,
-  buildContentListSearch,
-  buildContentListUrlRegex,
   ListingTable,
 } from './src/playwright/page_objects';
-export type { ContentListUrlState } from './src/playwright/page_objects';
 
 // Scout core types
 export type {
@@ -112,6 +110,7 @@ export type { Locator, CDPSession } from 'playwright/test';
 
 // Config-set constants — exported so test files can import instead of redeclaring.
 export { AUDIT_LOG_PATH } from './src/servers/configs/config_sets/security_audit/shared';
+export { ELASTICSEARCH_MAX_RESPONSE_SIZE_BYTES } from './src/servers/configs/config_sets/es_max_response_size/shared';
 export {
   OTEL_RECEIVER_PORT,
   OTEL_TEST_PROJECT_ID,

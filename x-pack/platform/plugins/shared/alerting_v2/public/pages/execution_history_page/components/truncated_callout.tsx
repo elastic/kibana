@@ -45,7 +45,7 @@ export const TruncatedCallout = ({ data, searchParam }: Props) => {
 const renderTruncatedPart = (matches: SearchMatchCounts, type: TruncatedType): string =>
   type === 'policies'
     ? i18n.translate('xpack.alertingV2.executionHistory.searchTruncatedCallout.policiesPart', {
-        defaultMessage: '{cap} of {total} matching policies',
+        defaultMessage: '{cap} of {total} matching action policies',
         values: { cap: matches.cap, total: matches.policies },
       })
     : i18n.translate('xpack.alertingV2.executionHistory.searchTruncatedCallout.rulesPart', {

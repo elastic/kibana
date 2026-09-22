@@ -9,8 +9,10 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
+import { UnifiedDataTable } from '@kbn/unified-data-table';
 import type { PolicyExecutionHistoryItem } from '../../../services/execution_history_api';
 import { PoliciesExecutionHistoryTable } from './policies_execution_history_table';
+import { POLICY_EXECUTION_FIELDS } from '../data_view';
 
 let mockCanReadRules = true;
 let mockCanReadActionPolicies = true;
@@ -26,15 +28,56 @@ jest.mock('@kbn/core-di-browser', () => ({
     if (typeof token === 'function') {
       const canRead = (feature: string) =>
         feature === 'actionPolicies' ? mockCanReadActionPolicies : mockCanReadRules;
-      return {
-        canRead,
-        canWrite: canRead,
-        can: () => true,
-      };
+      return { canRead, canWrite: canRead, can: () => true };
     }
     return {};
   },
   CoreStart: (key: string) => key,
+}));
+
+// Render each row's cells through the custom renderers the component supplies, so the cell
+// renderers stay covered without mounting the real virtualized data grid.
+jest.mock('@kbn/unified-data-table', () => {
+  const ReactActual = jest.requireActual('react');
+  return {
+    DataLoadingState: { loading: 'loading', loaded: 'loaded' },
+    ROWS_HEIGHT_OPTIONS: { auto: -1, single: 1, default: 3 },
+    UnifiedDataTable: jest.fn(({ rows, columns, externalCustomRenderers }: Record<string, any>) =>
+      ReactActual.createElement(
+        'div',
+        { 'data-test-subj': 'unifiedDataTable' },
+        rows.map((row: any) =>
+          ReactActual.createElement(
+            'div',
+            { key: row.id, role: 'row' },
+            columns.map((columnId: string) => {
+              const Renderer = externalCustomRenderers?.[columnId];
+              return ReactActual.createElement(
+                'div',
+                { key: columnId, role: 'cell' },
+                Renderer
+                  ? ReactActual.createElement(Renderer, { row, columnId })
+                  : String(row.flattened?.[columnId] ?? '')
+              );
+            })
+          )
+        )
+      )
+    ),
+  };
+});
+
+jest.mock('@kbn/cell-actions', () => ({
+  CellActionsProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
+
+jest.mock('../data_view', () => ({
+  ...jest.requireActual('../data_view'),
+  usePolicyExecutionsDataView: () => ({ dataView: {}, error: undefined }),
+}));
+
+jest.mock('../hooks/use_unified_data_table_services', () => ({
+  useUnifiedDataTableServices: () => ({}),
 }));
 
 const buildItem = (
@@ -54,7 +97,8 @@ const buildItem = (
 
 const onPolicyClick = jest.fn();
 const onRuleClick = jest.fn();
-const onChange = jest.fn();
+const onChangePage = jest.fn();
+const onChangeItemsPerPage = jest.fn();
 
 const renderTable = (props: Partial<React.ComponentProps<typeof PoliciesExecutionHistoryTable>>) =>
   render(
@@ -62,18 +106,25 @@ const renderTable = (props: Partial<React.ComponentProps<typeof PoliciesExecutio
       <PoliciesExecutionHistoryTable
         items={[buildItem()]}
         loading={false}
-        pageIndex={0}
-        pageSize={10}
-        totalItemCount={1}
-        onChange={onChange}
+        page={0}
+        perPage={10}
+        total={1}
+        onChangePage={onChangePage}
+        onChangeItemsPerPage={onChangeItemsPerPage}
         onPolicyClick={onPolicyClick}
         onRuleClick={onRuleClick}
         activeRuleId={null}
         noItemsMessage="No items"
+        tableCaption="Policy execution history"
         {...props}
       />
     </I18nProvider>
   );
+
+const lastGridColumns = (): string[] => {
+  const calls = jest.mocked(UnifiedDataTable).mock.calls;
+  return (calls[calls.length - 1][0] as Record<string, any>).columns;
+};
 
 describe('PoliciesExecutionHistoryTable', () => {
   beforeEach(() => {
@@ -95,26 +146,30 @@ describe('PoliciesExecutionHistoryTable', () => {
   it('shows the Episodes and Action groups columns by default', () => {
     renderTable({});
 
-    expect(screen.getByRole('columnheader', { name: /Episodes/i })).toBeInTheDocument();
-    expect(screen.getByRole('columnheader', { name: /Action groups/i })).toBeInTheDocument();
+    expect(lastGridColumns()).toEqual(
+      expect.arrayContaining([
+        POLICY_EXECUTION_FIELDS.episodeCount,
+        POLICY_EXECUTION_FIELDS.actionGroupCount,
+      ])
+    );
   });
 
   it('hides the Episodes and Action groups columns when showEpisodeColumns is false', () => {
     renderTable({ showEpisodeColumns: false });
 
-    expect(screen.queryByRole('columnheader', { name: /Episodes/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole('columnheader', { name: /Action groups/i })).not.toBeInTheDocument();
-    // Other columns remain
-    expect(screen.getByRole('columnheader', { name: /Policy/i })).toBeInTheDocument();
-    expect(screen.getByRole('columnheader', { name: /Workflows/i })).toBeInTheDocument();
+    const columns = lastGridColumns();
+    expect(columns).not.toContain(POLICY_EXECUTION_FIELDS.episodeCount);
+    expect(columns).not.toContain(POLICY_EXECUTION_FIELDS.actionGroupCount);
+    expect(columns).toEqual(
+      expect.arrayContaining([POLICY_EXECUTION_FIELDS.policy, POLICY_EXECUTION_FIELDS.workflows])
+    );
   });
 
   it('hides the Rules column when showRulesColumn is false', () => {
     renderTable({ showRulesColumn: false });
 
-    expect(screen.queryByRole('columnheader', { name: /Rules/i })).not.toBeInTheDocument();
+    expect(lastGridColumns()).not.toContain(POLICY_EXECUTION_FIELDS.rules);
     expect(screen.queryByText('My Rule')).not.toBeInTheDocument();
-    expect(screen.getByRole('columnheader', { name: /Policy/i })).toBeInTheDocument();
   });
 
   it('calls onPolicyClick when the policy link is clicked', async () => {
@@ -147,8 +202,23 @@ describe('PoliciesExecutionHistoryTable', () => {
     expect(workflowLink).toHaveAttribute('target', '_blank');
   });
 
+  it('renders the failure reason and outcome for a failed dispatch', () => {
+    renderTable({
+      items: [
+        buildItem({
+          outcome: 'dispatch_failed',
+          failure_reason: 'workflow_not_found',
+          error: { message: 'Workflow not found' },
+        }),
+      ],
+    });
+
+    expect(screen.getByText('Failed')).toBeInTheDocument();
+    expect(screen.getByText('workflow_not_found')).toBeInTheDocument();
+  });
+
   it('shows the noItemsMessage when there are no items', () => {
-    renderTable({ items: [], totalItemCount: 0, noItemsMessage: 'Nothing here' });
+    renderTable({ items: [], total: 0, noItemsMessage: 'Nothing here' });
 
     expect(screen.getByText('Nothing here')).toBeInTheDocument();
   });

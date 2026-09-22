@@ -14,7 +14,14 @@ import { v4 } from 'uuid';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { SignificantEventsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
-import { bulkQueries, getQueries, deleteFeature, upsertFeature } from './helpers/requests';
+import {
+  bulkQueries,
+  deleteQueries,
+  getQueries,
+  deleteFeature,
+  upsertFeature,
+  upsertQuery,
+} from './helpers/requests';
 import {
   deleteStream,
   disableStreams,
@@ -157,7 +164,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(getQueriesResponse.queries).to.eql([]);
     });
 
-    describe('PUT /api/streams/{name}/queries/{queryId}', () => {
+    describe('PUT /internal/significant_events/queries/{queryId}', () => {
       it('inserts a query when inexistant', async () => {
         const query = {
           id: v4(),
@@ -168,18 +175,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("message:'initial query'")`,
           },
         };
-        const upsertQueryResponse = await apiClient
-          .fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
-            params: {
-              path: { name: STREAM_NAME, queryId: query.id },
-              body: {
-                title: query.title,
-                esql: query.esql,
-              },
-            },
-          })
-          .expect(200)
-          .then((res) => res.body);
+        const upsertQueryResponse = await upsertQuery(apiClient, STREAM_NAME, query.id, {
+          title: query.title,
+          esql: query.esql,
+        });
         expect(upsertQueryResponse.acknowledged).to.be(true);
 
         const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
@@ -192,17 +191,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('returns 400 and does not save when ES|QL query references invalid sources', async () => {
         const queryId = v4();
-        await apiClient
-          .fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
-            params: {
-              path: { name: STREAM_NAME, queryId },
-              body: {
-                title: 'invalid sources',
-                esql: { query: 'FROM logs.ecs' },
-              },
-            },
-          })
-          .expect(400);
+        await upsertQuery(
+          apiClient,
+          STREAM_NAME,
+          queryId,
+          {
+            title: 'invalid sources',
+            esql: { query: 'FROM logs.ecs' },
+          },
+          400
+        );
 
         const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
         expect(getQueriesResponse.queries).to.eql([]);
@@ -222,18 +220,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const initialRules = await alertingApi.searchRulesV2(roleAuthc);
 
         const updatedEsql = `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("updated query")`;
-        const upsertQueryResponse = await apiClient
-          .fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
-            params: {
-              path: { name: STREAM_NAME, queryId: query.id },
-              body: {
-                title: query.title,
-                esql: { query: updatedEsql },
-              },
-            },
-          })
-          .expect(200)
-          .then((res) => res.body);
+        const upsertQueryResponse = await upsertQuery(apiClient, STREAM_NAME, query.id, {
+          title: query.title,
+          esql: { query: updatedEsql },
+        });
         expect(upsertQueryResponse.acknowledged).to.be(true);
 
         const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
@@ -269,18 +259,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await bulkQueries(apiClient, STREAM_NAME, [{ index: omit(query, 'type') }]);
         const initialRules = await alertingApi.searchRulesV2(roleAuthc);
 
-        const upsertQueryResponse = await apiClient
-          .fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
-            params: {
-              path: { name: STREAM_NAME, queryId: query.id },
-              body: {
-                title: 'updated title',
-                esql: query.esql,
-              },
-            },
-          })
-          .expect(200)
-          .then((res) => res.body);
+        const upsertQueryResponse = await upsertQuery(apiClient, STREAM_NAME, query.id, {
+          title: 'updated title',
+          esql: query.esql,
+        });
         expect(upsertQueryResponse.acknowledged).to.be(true);
 
         const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
@@ -318,13 +300,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         },
       ]);
 
-      const deleteQueryResponse = await apiClient
-        .fetch('DELETE /api/streams/{name}/queries/{queryId} 2023-10-31', {
-          params: { path: { name: STREAM_NAME, queryId } },
-        })
-        .expect(200)
-        .then((res) => res.body);
-      expect(deleteQueryResponse.acknowledged).to.be(true);
+      const deleteQueryResponse = await deleteQueries(apiClient, [queryId]);
+      expect(deleteQueryResponse).to.eql({ succeeded: 1, failed: 0, skipped: 0 });
 
       const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
       expect(getQueriesResponse.queries).to.eql([]);
@@ -333,70 +310,45 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(rules.body.items).to.have.length(0);
     });
 
-    it('returns a 404 when deleting an inexistant query', async () => {
+    it('skips unknown ids when deleting an inexistant query', async () => {
       const queryId = v4();
-      await apiClient
-        .fetch('DELETE /api/streams/{name}/queries/{queryId} 2023-10-31', {
-          params: { path: { name: STREAM_NAME, queryId } },
-        })
-        .expect(404);
+      const deleteQueryResponse = await deleteQueries(apiClient, [queryId]);
+      expect(deleteQueryResponse).to.eql({ succeeded: 0, failed: 0, skipped: 1 });
     });
 
     it('deletes an already-expired query instead of reporting it as not found', async () => {
       // The existence check must pass includeExpired, or an expired query looks gone.
       const queryId = v4();
-      await apiClient
-        .fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
-          params: {
-            path: { name: STREAM_NAME, queryId },
-            body: {
-              title: 'already expired',
-              esql: {
-                query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("message:'expired'")`,
-              },
-              expires_at: '2020-01-01T00:00:00.000Z',
-            },
-          },
-        })
-        .expect(200);
+      await upsertQuery(apiClient, STREAM_NAME, queryId, {
+        title: 'already expired',
+        esql: {
+          query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("message:'expired'")`,
+        },
+        expires_at: '2020-01-01T00:00:00.000Z',
+      });
       expect((await getQueries(apiClient, STREAM_NAME)).queries).to.eql([]);
 
-      const deleteQueryResponse = await apiClient
-        .fetch('DELETE /api/streams/{name}/queries/{queryId} 2023-10-31', {
-          params: { path: { name: STREAM_NAME, queryId } },
-        })
-        .expect(200)
-        .then((res) => res.body);
-      expect(deleteQueryResponse.acknowledged).to.be(true);
+      const deleteQueryResponse = await deleteQueries(apiClient, [queryId]);
+      expect(deleteQueryResponse).to.eql({ succeeded: 1, failed: 0, skipped: 0 });
 
       const rules = await alertingApi.searchRulesV2(roleAuthc);
       expect(rules.body.items).to.have.length(0);
 
-      // Repeating the delete on the same id must now 404, proving it was a real
+      // Repeating the delete on the same id must skip, proving it was a real
       // delete and not another silent no-op.
-      await apiClient
-        .fetch('DELETE /api/streams/{name}/queries/{queryId} 2023-10-31', {
-          params: { path: { name: STREAM_NAME, queryId } },
-        })
-        .expect(404);
+      const secondDelete = await deleteQueries(apiClient, [queryId]);
+      expect(secondDelete).to.eql({ succeeded: 0, failed: 0, skipped: 1 });
     });
 
     it('cleans up an already-expired query and its rule when the stream itself is deleted', async () => {
       const queryId = v4();
-      await apiClient
-        .fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
-          params: {
-            path: { name: STREAM_NAME, queryId },
-            body: {
-              title: 'lingering expired query',
-              esql: {
-                query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("message:'lingering'")`,
-              },
-              expires_at: '2020-01-01T00:00:00.000Z',
-            },
-          },
-        })
-        .expect(200);
+      await upsertQuery(apiClient, STREAM_NAME, queryId, {
+        title: 'lingering expired query',
+        esql: {
+          query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("message:'lingering'")`,
+        },
+        expires_at: '2020-01-01T00:00:00.000Z',
+      });
 
       // Deliberately left in place, expired but never explicitly deleted, so
       // teardown (deleteStream -> deleteAllQueries) must be the one to catch it.
@@ -461,34 +413,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         },
       };
 
-      const bulkResponse = await apiClient
-        .fetch('POST /api/streams/{name}/queries/_bulk 2023-10-31', {
-          params: {
-            path: { name: STREAM_NAME },
-            body: {
-              operations: [
-                {
-                  index: newQuery,
-                },
-                {
-                  delete: {
-                    id: 'inexistant',
-                  },
-                },
-                {
-                  index: updateThirdQuery,
-                },
-                {
-                  delete: {
-                    id: 'second',
-                  },
-                },
-              ],
-            },
-          },
-        })
-        .expect(200)
-        .then((res) => res.body);
+      const bulkResponse = await bulkQueries(apiClient, STREAM_NAME, [
+        { index: newQuery },
+        { delete: { id: 'inexistant' } },
+        { index: updateThirdQuery },
+        { delete: { id: 'second' } },
+      ]);
       expect(bulkResponse).to.have.property('acknowledged', true);
 
       const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
@@ -518,7 +448,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       );
     });
 
-    it('returns 400 and does not apply changes when bulk includes an invalid ES|QL query', async () => {
+    it('returns 400 and does not apply changes when upserting an invalid ES|QL query', async () => {
       const firstQuery = {
         id: 'first',
         type: 'match' as const,
@@ -540,20 +470,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         },
       };
 
-      const response = await apiClient
-        .fetch('POST /api/streams/{name}/queries/_bulk 2023-10-31', {
-          params: {
-            path: { name: STREAM_NAME },
-            body: {
-              operations: [{ index: invalidQuery }, { delete: { id: firstQuery.id } }],
-            },
-          },
-        })
-        .expect(400)
-        .then((res) => res.body);
+      const response = await upsertQuery(
+        apiClient,
+        STREAM_NAME,
+        invalidQuery.id,
+        {
+          title: invalidQuery.title,
+          description: invalidQuery.description,
+          esql: invalidQuery.esql,
+        },
+        400
+      );
       // Pin the rejection to ES|QL validation so the test cannot pass on an unrelated 400.
-      expect((response as unknown as { message: string }).message).to.eql(
-        'One or more ES|QL queries are invalid'
+      expect((response as unknown as { message: string }).message).to.contain(
+        'Invalid ES|QL query'
       );
 
       const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
@@ -589,22 +519,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         };
 
-        await apiClient
-          .fetch('POST /api/streams/{name}/queries/_bulk 2023-10-31', {
-            params: {
-              path: { name: STREAM_NAME },
-              body: { operations: [{ index: firstQuery }] },
-            },
-          })
-          .expect(200);
-        await apiClient
-          .fetch('POST /api/streams/{name}/queries/_bulk 2023-10-31', {
-            params: {
-              path: { name: SECOND_STREAM_NAME },
-              body: { operations: [{ index: secondQuery }] },
-            },
-          })
-          .expect(200);
+        await bulkQueries(apiClient, STREAM_NAME, [{ index: firstQuery }]);
+        await bulkQueries(apiClient, SECOND_STREAM_NAME, [{ index: secondQuery }]);
 
         const response = await apiClient
           .fetch('POST /internal/streams/queries/_bulk_delete', {
@@ -758,17 +674,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         return response.persistedQueries[0].id as string;
       }
 
-      it('reconcileStream still tombstones a survivor of the public bulk queries endpoint once its feature is gone', async () => {
-        // Regression: the bulk endpoint's rewrite used to drop expires_at on unrelated
-        // queries, making this survivor durable and immune to the reconciliation below.
+      it('reconcileStream still tombstones a persist-created query once its feature is gone', async () => {
+        // Regression: rewriting other queries used to drop expires_at on this survivor,
+        // making it durable and immune to the reconciliation below.
         const { uuid: featureUuid } = await upsertFeature(apiClient, STREAM_NAME, testFeature);
-        const survivorId = await persistGroundedQuery('persist-survivor-public-bulk');
+        const survivorId = await persistGroundedQuery('persist-survivor-unrelated-upsert');
 
         await bulkQueries(apiClient, STREAM_NAME, [
           {
             index: {
               id: v4(),
-              title: 'public bulk unrelated draft',
+              title: 'unrelated draft',
               description: '',
               esql: {
                 query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("message:'unrelated'")`,

@@ -73,13 +73,13 @@ export interface SuspendProcessActionOutputContent {
 
 /** A single killed process descendant. Only for Endpoint starting with v9.6 */
 export interface KilledProcessDescendant {
+  code?: string;
   pid?: number;
   parent_pid?: number;
   entity_id?: string;
   parent_entity_id?: string;
   process_name?: string;
   command?: string;
-  was_killed?: boolean;
   error?: string;
 }
 

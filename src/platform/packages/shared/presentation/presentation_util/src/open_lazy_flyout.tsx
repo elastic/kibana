@@ -75,6 +75,7 @@ export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
       size: 500,
       type,
       paddingSize: 'm',
+      minWidth: 400,
       maxWidth: 800,
       ownFocus,
       isResizable: true,

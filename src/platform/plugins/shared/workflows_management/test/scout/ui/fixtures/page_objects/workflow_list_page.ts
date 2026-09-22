@@ -6,11 +6,15 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { Locator, ScoutPage } from '@kbn/scout';
+import { AppMenu, type Locator, type ScoutPage } from '@kbn/scout';
 import { PLUGIN_ID } from '../../../../../common';
 
 export class WorkflowListPage {
-  constructor(private readonly page: ScoutPage) {}
+  private readonly appMenu: AppMenu;
+
+  constructor(private readonly page: ScoutPage) {
+    this.appMenu = new AppMenu(page);
+  }
 
   /** Navigates to the workflows list page. */
   async navigate() {
@@ -113,11 +117,7 @@ export class WorkflowListPage {
 
   /** Clicks the import workflows button in the toolbar. */
   async clickImportButton() {
-    // The import action is forced into the app menu overflow ("More") popover, so it is
-    // not present in the DOM until the overflow button is opened.
-    await this.page.testSubj.click('app-menu-overflow-button');
-    await this.page.testSubj.waitForSelector('importWorkflowsButton', { state: 'visible' });
-    await this.page.testSubj.click('importWorkflowsButton');
+    await this.appMenu.clickItem('importWorkflowsButton');
   }
 
   /** Returns the import flyout locator. */

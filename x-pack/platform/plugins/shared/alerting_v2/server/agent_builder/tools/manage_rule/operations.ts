@@ -32,14 +32,15 @@ import {
   isStateTransitionAllowed,
   isSignalUsingStandaloneFormat,
   isSignalQueryBreachOnly,
+  isRecoveryTransitionConsistentWithStrategy,
   isRecoveryQueryConsistentWithStrategy,
   isRecoveryQueryProvidedForStrategy,
   isNoDataQueryConsistentWithStrategy,
   isNoDataQueryProvidedForStrategy,
 } from '@kbn/alerting-v2-schemas';
 import { resolveArtifactId } from '@kbn/alerting-v2-utils';
+import { buildRulePayload } from '@kbn/alerting-v2-utils';
 import { dashboardIdSchema } from '../../../lib/artifact_types';
-import { buildRulePayload } from '../../../../common/agent_builder/rule_mappers';
 import { AGENT_BUILDER_TAG } from '../../common/constants';
 import { resolveTimeFieldForQuery } from './resolve_time_field';
 
@@ -47,7 +48,7 @@ type RuleArtifact = NonNullable<RuleAttachmentData['artifacts']>[number];
 
 type DashboardArtifact = RuleArtifact & {
   type: typeof DASHBOARD_ARTIFACT_TYPE;
-  data: { dashboardId: string };
+  data: { dashboard_id: string };
 };
 
 type RunbookArtifact = RuleArtifact & {
@@ -96,7 +97,7 @@ const toDashboardArtifacts = (
 ): DashboardArtifact[] => {
   const existingIdByDashboardId = new Map<string, string>();
   for (const artifact of existingArtifacts) {
-    existingIdByDashboardId.set(artifact.data.dashboardId, artifact.id);
+    existingIdByDashboardId.set(artifact.data.dashboard_id, artifact.id);
   }
 
   const seen = new Set<string>();
@@ -109,7 +110,7 @@ const toDashboardArtifacts = (
     dashboards.push({
       id: resolveArtifactId(DASHBOARD_ARTIFACT_TYPE, existingIdByDashboardId.get(dashboardId)),
       type: DASHBOARD_ARTIFACT_TYPE,
-      data: { dashboardId },
+      data: { dashboard_id: dashboardId },
     });
   }
   return dashboards;
@@ -200,7 +201,7 @@ export const setDashboardsOperationSchema = z
       ),
   })
   .describe(
-    'Use `set_dashboards` to link investigation dashboards to the rule by saved-object ID. Each ID is stored as a `dashboard` artifact (`{ id, type: "dashboard", data: { dashboardId } }`), matching the create/update API. Replaces any previously linked dashboards; other artifacts (e.g. runbooks) are preserved. Pass an empty array to unlink all dashboards.'
+    'Use `set_dashboards` to link investigation dashboards to the rule by saved-object ID. Each ID is stored as a `dashboard` artifact (`{ id, type: "dashboard", data: { dashboard_id } }`), matching the create/update API. Replaces any previously linked dashboards; other artifacts (e.g. runbooks) are preserved. Pass an empty array to unlink all dashboards.'
   );
 
 export const setRunbookOperationSchema = z
@@ -567,6 +568,12 @@ export const executeRuleOperations = async (
   if (!isSignalQueryBreachOnly(next)) {
     throw new RuleOperationValidationError(
       'Signal rules cannot set recovery_strategy or no_data_strategy.'
+    );
+  }
+
+  if (!isRecoveryTransitionConsistentWithStrategy(next)) {
+    throw new RuleOperationValidationError(
+      'state_transition.recovering_count and recovering_timeframe have no effect when recovery is disabled (recovery_strategy is "none" or unset).'
     );
   }
 

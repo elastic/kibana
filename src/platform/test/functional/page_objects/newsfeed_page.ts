@@ -12,7 +12,6 @@ import { FtrService } from '../ftr_provider_context';
 
 export class NewsfeedPageObject extends FtrService {
   private readonly log = this.ctx.getService('log');
-  private readonly find = this.ctx.getService('find');
   private readonly retry = this.ctx.getService('retry');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly common = this.ctx.getPageObject('common');
@@ -42,7 +41,7 @@ export class NewsfeedPageObject extends FtrService {
   }
 
   async getRedButtonSign() {
-    return await this.find.existsByCssSelector('.euiHeaderSectionItemButton__notification--dot');
+    return await this.testSubjects.exists('headerActionButtonNotification', { timeout: 0 });
   }
 
   async getNewsfeedList() {

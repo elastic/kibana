@@ -86,10 +86,6 @@ jest.mock('../../../hooks/use_fetch_rule_tags', () => ({
   useFetchRuleTags: () => ({ data: [], isLoading: false }),
 }));
 
-jest.mock('../../../hooks/use_fetch_tags', () => ({
-  useFetchTags: () => ({ data: [], isLoading: false }),
-}));
-
 jest.mock('../../../hooks/use_fetch_workflows', () => ({
   useFetchWorkflows: () => ({
     data: { results: [], total: 0, page: 1, size: 100 },
@@ -128,11 +124,6 @@ describe('ActionPolicyForm', () => {
   beforeEach(() => {
     mockWorkflowsEnabled = true;
     jest.clearAllMocks();
-  });
-
-  it('renders tags input', () => {
-    renderForm();
-    expect(screen.getByTestId('tagsInput')).toBeInTheDocument();
   });
 
   it('shows required errors for name on blur', async () => {

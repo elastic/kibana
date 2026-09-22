@@ -87,6 +87,8 @@ jest.mock('./repositories/workflow_execution_repository', () => ({
   })),
 }));
 
+import { UNKNOWN_EXECUTION_IDENTITY } from './lib/execution_identity';
+import { getAuthenticatedUser } from './lib/get_user';
 import { WorkflowsExecutionEnginePlugin } from './plugin';
 import { WORKFLOW_SCHEDULED_TASK_TYPE } from './workflow_task_manager/types';
 
@@ -507,6 +509,71 @@ describe('workflow:scheduled task runner', () => {
       workflow_id: workflowId,
       space_id: spaceId,
       outcome: 'cancelled',
+    });
+  });
+
+  it('completes without creating an execution when claimed without a Task Manager identity', async () => {
+    setupPlugin();
+
+    const setCustomTaskRunEventFields = jest.fn();
+    const runner = taskDefinitions[WORKFLOW_SCHEDULED_TASK_TYPE]!.createTaskRunner(
+      taskManagerMock.createRunContext({
+        taskInstance: createTaskInstance(),
+        fakeRequest: undefined,
+        setCustomTaskRunEventFields,
+      })
+    );
+
+    await runner.run();
+
+    expect(mockCreateWorkflowExecution).not.toHaveBeenCalled();
+    expect(mockRunWorkflow).not.toHaveBeenCalled();
+    expect(setCustomTaskRunEventFields).toHaveBeenCalledWith({
+      workflow_id: workflowId,
+      space_id: spaceId,
+      outcome: 'failed',
+    });
+  });
+
+  it('persists a failed execution and does not run when no identity is resolved', async () => {
+    setupPlugin();
+    (getAuthenticatedUser as jest.Mock).mockResolvedValueOnce(undefined);
+    mockGetWorkflow.mockResolvedValue({
+      id: workflowId,
+      enabled: true,
+      yaml: 'name: test',
+      definition: {
+        name: 'test',
+        enabled: true,
+        triggers: [{ type: 'scheduled' }],
+        steps: [],
+      },
+    });
+
+    const setCustomTaskRunEventFields = jest.fn();
+    const runner = taskDefinitions[WORKFLOW_SCHEDULED_TASK_TYPE]!.createTaskRunner(
+      taskManagerMock.createRunContext({
+        taskInstance: createTaskInstance(),
+        fakeRequest: {} as KibanaRequest,
+        setCustomTaskRunEventFields,
+      })
+    );
+
+    await runner.run();
+
+    expect(mockCreateWorkflowExecution).toHaveBeenCalledWith(
+      expect.objectContaining({
+        status: ExecutionStatus.FAILED,
+        executedBy: UNKNOWN_EXECUTION_IDENTITY,
+      }),
+      { refresh: 'wait_for' }
+    );
+    expect(mockRunWorkflow).not.toHaveBeenCalled();
+    expect(setCustomTaskRunEventFields).toHaveBeenCalledWith({
+      workflow_execution_id: expect.any(String),
+      workflow_id: workflowId,
+      space_id: spaceId,
+      outcome: 'failed',
     });
   });
 });

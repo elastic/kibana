@@ -3,18 +3,21 @@
 exports[`StatusFilterComponent renders without errors for valid props 1`] = `
 <div
   class="euiFilterGroup emotion-euiFilterGroup-uncompressed"
+  data-display="regular"
+  data-dividers="true"
 >
   <div
-    class="euiFilterButton__wrapper css-1anz60t-wrapper-withNext-hasToggle"
+    class="euiFilterButton__wrapper css-1x0f2lv-wrapper-withNext-hasDividers"
   >
     <button
       aria-pressed="true"
-      class="euiButtonGroupButton euiButtonGroupButton-isSelected euiFilterButton euiFilterButton-isSelected euiFilterButton-hasActiveFilters euiFilterButton-isToggle emotion-euiButtonDisplay-s-defaultMinWidth-euiButtonGroupButton-compressed-fill-text-euiFilterButton-hasActiveFilters-toggle"
+      class="euiButton euiFilterButton euiFilterButton-isSelected euiFilterButton-hasActiveFilters euiFilterButton-isToggle emotion-euiButtonDisplay-s-defaultMinWidth-base-text-euiFilterButton-hasActiveFilters-toggle-isSelected"
       data-test-subj="xpack.synthetics.filterBar.filterStatusAll"
+      id="filter-button_generated-id"
       type="button"
     >
       <span
-        class="emotion-euiButtonDisplayContent-euiButtonGroupButton__content-compressed-euiFilterButton__content"
+        class="emotion-euiButtonDisplayContent-euiFilterButton__content"
       >
         <span
           class="euiFilterButton__text emotion-euiFilterButton__text"
@@ -27,16 +30,17 @@ exports[`StatusFilterComponent renders without errors for valid props 1`] = `
     </button>
   </div>
   <div
-    class="euiFilterButton__wrapper css-1anz60t-wrapper-withNext-hasToggle"
+    class="euiFilterButton__wrapper css-1x0f2lv-wrapper-withNext-hasDividers"
   >
     <button
       aria-pressed="false"
-      class="euiButtonGroupButton euiFilterButton euiFilterButton-isToggle emotion-euiButtonDisplay-s-defaultMinWidth-euiButtonGroupButton-compressed-empty-text-euiFilterButton-toggle"
+      class="euiButton euiFilterButton euiFilterButton-isToggle emotion-euiButtonDisplay-s-defaultMinWidth-base-text-euiFilterButton-toggle"
       data-test-subj="xpack.synthetics.filterBar.filterStatusUp"
+      id="filter-button_generated-id"
       type="button"
     >
       <span
-        class="emotion-euiButtonDisplayContent-euiButtonGroupButton__content-compressed-euiFilterButton__content"
+        class="emotion-euiButtonDisplayContent-euiFilterButton__content"
       >
         <span
           class="euiFilterButton__text emotion-euiFilterButton__text"
@@ -49,16 +53,17 @@ exports[`StatusFilterComponent renders without errors for valid props 1`] = `
     </button>
   </div>
   <div
-    class="euiFilterButton__wrapper css-1nn8k4u-wrapper-hasToggle"
+    class="euiFilterButton__wrapper css-lcbovg-wrapper-hasDividers"
   >
     <button
       aria-pressed="false"
-      class="euiButtonGroupButton euiFilterButton euiFilterButton-isToggle emotion-euiButtonDisplay-s-defaultMinWidth-euiButtonGroupButton-compressed-empty-text-euiFilterButton-toggle"
+      class="euiButton euiFilterButton euiFilterButton-isToggle emotion-euiButtonDisplay-s-defaultMinWidth-base-text-euiFilterButton-toggle"
       data-test-subj="xpack.synthetics.filterBar.filterStatusDown"
+      id="filter-button_generated-id"
       type="button"
     >
       <span
-        class="emotion-euiButtonDisplayContent-euiButtonGroupButton__content-compressed-euiFilterButton__content"
+        class="emotion-euiButtonDisplayContent-euiFilterButton__content"
       >
         <span
           class="euiFilterButton__text emotion-euiFilterButton__text"

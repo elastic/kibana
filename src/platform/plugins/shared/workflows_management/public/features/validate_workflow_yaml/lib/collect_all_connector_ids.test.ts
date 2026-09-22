@@ -125,4 +125,25 @@ steps:
     expect(result[1].key).toBe('my-slack-api');
     expect(result[1].connectorType).toBe('slack_api');
   });
+
+  it('maps trigger connector-id to the connector type id from the event spec', () => {
+    const yaml = `
+name: Test Workflow
+triggers:
+  - type: inboundWebhook.received
+    connector-id: testyng
+steps:
+  - name: hello
+    type: console
+    with:
+      message: hello
+`;
+    const lineCounter = new LineCounter();
+    const yamlDocument = parseDocument(yaml, { lineCounter });
+    const result = collectAllConnectorIds(yamlDocument, lineCounter);
+
+    expect(result).toHaveLength(1);
+    expect(result[0].key).toBe('testyng');
+    expect(result[0].connectorType).toBe('.inboundWebhook');
+  });
 });

@@ -97,3 +97,46 @@ export const buildReadAccessFilter = ({
     },
   };
 };
+
+/**
+ * Filter clauses for the conversation list endpoint's `pinned` query parameter, empty when it is
+ * unset. The per-user match is the Elasticsearch counterpart of `isPinnedBy` (see
+ * `client/pinned_by.ts`): `pinned_by` is a nested field, so membership needs a nested query, and
+ * `ignore_unmapped` covers indices whose template predates it. The second `should` clause is the
+ * same legacy owner-only `pinned` fallback that helper applies; every write since `pinned_by`
+ * existed clears that boolean, so the two clauses never both match a document.
+ *
+ * `pinned: false` negates the match rather than being a `term` on the stored boolean, so
+ * documents that predate the field are included instead of silently dropped.
+ */
+export const buildPinnedFilter = ({
+  user,
+  pinned,
+}: {
+  user: UserIdAndName;
+  pinned?: boolean;
+}): Array<Record<string, unknown>> => {
+  if (pinned === undefined) {
+    return [];
+  }
+
+  const shouldClauses: Array<Record<string, unknown>> = [];
+
+  if (user.id !== undefined) {
+    shouldClauses.push({
+      nested: {
+        path: 'pinned_by',
+        ignore_unmapped: true,
+        query: { term: { 'pinned_by.userId': user.id } },
+      },
+    });
+  }
+
+  shouldClauses.push({
+    bool: { filter: [{ term: { pinned: true } }, buildOwnedConversationFilter({ user })] },
+  });
+
+  const pinnedByUser = { bool: { should: shouldClauses, minimum_should_match: 1 } };
+
+  return pinned ? [pinnedByUser] : [{ bool: { must_not: pinnedByUser } }];
+};

@@ -100,10 +100,7 @@ export const AlertingDateRangePicker = ({
         .pipe(distinctUntilChanged()),
     [featureFlags]
   );
-  const isDateRangePickerEnabled = useObservable(
-    isDateRangePickerEnabled$,
-    featureFlags.getBooleanValue(DATE_RANGE_PICKER_FEATURE_FLAG, true)
-  );
+  const isDateRangePickerEnabled = useObservable(isDateRangePickerEnabled$, true);
 
   const dateRangePickerPresets = useDateRangePickerPresets({
     service: data.dateRangePickerPresets,
@@ -119,6 +116,7 @@ export const AlertingDateRangePicker = ({
   const value = `${from} to ${to}`;
   const timeZone = uiSettings.get<string>('dateFormat:tz', 'Browser');
   const dateFormat = uiSettings.get<string>('dateFormat');
+  const inputDateFormats = useMemo(() => (dateFormat ? [dateFormat] : undefined), [dateFormat]);
   const canAccessAdvancedSettings =
     (application.capabilities.advancedSettings?.save as boolean | undefined) ?? false;
 
@@ -196,7 +194,7 @@ export const AlertingDateRangePicker = ({
       width={width}
       compressed={compressed}
       collapsed={collapsed}
-      dateFormat={dateFormat}
+      inputDateFormats={inputDateFormats}
       timeZone={timeZone}
       prependBasePath={http.basePath.prepend}
       canAccessAdvancedSettings={canAccessAdvancedSettings}

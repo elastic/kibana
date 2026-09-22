@@ -160,7 +160,7 @@ export const InfoBlocks: FunctionComponent<InfoBlocksProps> = ({
         data-test-subj={rest['data-test-subj'] ?? 'infoBlocks'}
       >
         {items.map((item, index) => (
-          <div key={item['data-test-subj'] ?? index} css={memoized.cell}>
+          <div key={item.id ?? index} css={memoized.cell}>
             <InfoBlock {...item} />
           </div>
         ))}

@@ -19,6 +19,17 @@ components:
         Commas are not allowed because tag filters are comma-separated.
         Tags describe what a dataset is about; they never affect who can see it.
 
+    Direction:
+      type: string
+      enum:
+        - maximize
+        - minimize
+        - neutral
+      description: >-
+        Metric polarity. `maximize` means a higher score is better (e.g. faithfulness,
+        accuracy). `minimize` means a lower score is better (e.g. latency, token count).
+        `neutral` means the metric is informational only and has no improvement direction.
+
     DatasetMaturity:
       type: string
       enum:
@@ -248,15 +259,7 @@ components:
           maxLength: 256
           nullable: true
         direction:
-          type: string
-          enum:
-            - maximize
-            - minimize
-            - neutral
-          description: >-
-            Whether a higher score is an improvement (`maximize`), a lower
-            score is an improvement (`minimize`), or the score cannot be
-            compared across arms at all (`neutral`).
+          $ref: '#/components/schemas/Direction'
         model:
           $ref: '#/components/schemas/Model'
         kind:

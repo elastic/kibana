@@ -19,6 +19,22 @@ export const DATE_NESTED_KBN_ARCHIVE =
 export const DATE_NESTED_ES_ARCHIVE =
   'src/platform/test/functional/fixtures/es_archiver/date_nested';
 
+export const DATE_NANOS_MIXED_ES_ARCHIVE =
+  'src/platform/test/functional/fixtures/es_archiver/date_nanos_mixed';
+
+export const DATE_NANOS_MIXED_KBN_ARCHIVE =
+  'src/platform/test/functional/fixtures/kbn_archiver/date_nanos_mixed.json';
+
+export const DATE_NANOS_MIXED_DATA_VIEW = 'timestamp-*';
+
+export const LONG_WINDOW_LOGSTASH_ES_ARCHIVE =
+  'src/platform/test/functional/fixtures/es_archiver/long_window_logstash';
+
+export const LONG_WINDOW_LOGSTASH_KBN_ARCHIVE =
+  'src/platform/test/functional/fixtures/kbn_archiver/long_window_logstash_index_pattern';
+
+export const LONG_WINDOW_LOGSTASH_DATA_VIEW = 'long-window-logstash-*';
+
 export const FLIGHTS_KBN_ARCHIVE =
   'src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern';
 
@@ -86,6 +102,35 @@ export const SESSION_WITH_CONTROL_TITLE = 'ESQL control unlink test';
  */
 export const ESQL_CONTROLS_BY_VALUE_DASHBOARD_KBN_ARCHIVE =
   'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/esql_controls_by_value';
+
+export const INVALID_SCRIPTED_FIELD_KBN_ARCHIVE =
+  'src/platform/test/functional/fixtures/kbn_archiver/invalid_scripted_field';
+
+export const DASHBOARD_DRILLDOWNS_KBN_ARCHIVE =
+  'x-pack/platform/test/functional/fixtures/kbn_archives/dashboard_drilldowns/drilldowns';
+
+export const ECOMMERCE_ES_ARCHIVE = 'x-pack/platform/test/fixtures/es_archives/reporting/ecommerce';
+
+export const ECOMMERCE_KBN_ARCHIVE =
+  'x-pack/platform/test/functional/fixtures/kbn_archives/reporting/ecommerce.json';
+
+/**
+ * Data view name for the ecommerce sample data, used with
+ * `scoutSpace.uiSettings.setDefaultIndex()` in parallel tests.
+ */
+export const ECOMMERCE_DATA_VIEW = 'ecommerce';
+
+/**
+ * Outside the `logstash_functional` data range, for asserting that value suggestions
+ * are suppressed when the time range covers no documents.
+ */
+export const LOGSTASH_OUT_OF_RANGE_DATES = {
+  from: 'Mar 1, 2020 @ 00:00:00.000',
+  to: 'Nov 1, 2020 @ 00:00:00.000',
+};
+
+/** Message used in `toHaveCount()` assertions on the query-bar autocomplete suggestion list. */
+export const SUGGESTIONS_COUNT_ASSERTION_MESSAGE = 'The query bar suggestions count should be';
 
 export const DEFAULT_DATA_VIEW = 'logstash-*';
 

@@ -19,7 +19,7 @@ spec:
       description: Builds and publishes @kbn/one-console to Artifactory on each merge to main when console code changes
     spec:
       env:
-        SLACK_NOTIFICATIONS_CHANNEL: '#kibana-management'
+        SLACK_NOTIFICATIONS_CHANNEL: '#kbn-ui-alerts'
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
       allow_rebuilds: true
       branch_configuration: main

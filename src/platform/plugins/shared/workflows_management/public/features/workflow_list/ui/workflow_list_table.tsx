@@ -308,7 +308,7 @@ export const WorkflowListTable = ({
                 ? i18n.translate('workflows.workflowList.editManagedDisabled', {
                     defaultMessage: 'Managed workflows cannot be edited',
                   })
-                : i18n.translate('workflows.workflowList.edit', {
+                : i18n.translate('workflows.workflowList.editWorkflow', {
                     defaultMessage: 'Edit workflow',
                   }),
             onClick: (item: WorkflowListItemDto) => onEditWorkflow(item),
@@ -316,25 +316,21 @@ export const WorkflowListTable = ({
           {
             enabled: () => canCreateWorkflow && canReadWorkflow,
             type: 'icon',
-            color: 'primary',
+            color: 'text',
             name: i18n.translate('workflows.workflowList.clone', { defaultMessage: 'Clone' }),
             'data-test-subj': 'cloneWorkflowAction',
             icon: 'copy',
-            description: i18n.translate('workflows.workflowList.clone', {
-              defaultMessage: 'Clone workflow',
-            }),
+            description: '',
             onClick: (item: WorkflowListItemDto) => onCloneWorkflow(item),
           },
           {
             enabled: (item) => item.definition !== null && canReadWorkflow,
             type: 'icon',
-            color: 'primary',
+            color: 'text',
             name: i18n.translate('workflows.workflowList.export', { defaultMessage: 'Export' }),
             'data-test-subj': 'exportWorkflowAction',
             icon: 'export',
-            description: i18n.translate('workflows.workflowList.export', {
-              defaultMessage: 'Export workflow',
-            }),
+            description: '',
             onClick: (item: WorkflowListItemDto) => onExportWorkflow(item),
           },
           {
@@ -349,9 +345,7 @@ export const WorkflowListTable = ({
                 ? i18n.translate('workflows.workflowList.deleteManagedDisabled', {
                     defaultMessage: 'Managed workflows cannot be deleted',
                   })
-                : i18n.translate('workflows.workflowList.deleteDescription', {
-                    defaultMessage: 'Delete workflow',
-                  }),
+                : '',
             onClick: (item: WorkflowListItemDto) => onDeleteWorkflow(item),
           },
         ],

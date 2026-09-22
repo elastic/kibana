@@ -79,9 +79,16 @@ export function resolveFieldMeta(
  * Convert a string draft value to the typed value Fleet's component and buildStreamVars expect.
  * bool → boolean, multi → string[], otherwise string.
  */
-export function toTyped(raw: string | undefined, meta: FieldMeta): string | boolean | string[] {
-  if (meta.isBool) return raw === undefined ? meta.def.default === true : raw === 'true';
+export function toTyped(
+  raw: string | string[] | undefined,
+  meta: FieldMeta
+): string | boolean | string[] {
+  if (meta.isBool) {
+    const s = Array.isArray(raw) ? raw[0] : raw;
+    return s === undefined ? meta.def.default === true : s === 'true';
+  }
   if (meta.multi) {
+    if (Array.isArray(raw)) return raw;
     if (raw)
       return raw
         .split(',')
@@ -90,9 +97,10 @@ export function toTyped(raw: string | undefined, meta: FieldMeta): string | bool
     if (raw === undefined && Array.isArray(meta.def.default)) return meta.def.default as string[];
     return [];
   }
+  const s = Array.isArray(raw) ? raw.join(',') : raw;
   // For unset fields, surface the manifest default (string or number/duration) so the flyout pre-fills.
-  if (raw === undefined && meta.def.default != null) return String(meta.def.default);
-  return raw ?? '';
+  if (s === undefined && meta.def.default != null) return String(meta.def.default);
+  return s ?? '';
 }
 
 /**

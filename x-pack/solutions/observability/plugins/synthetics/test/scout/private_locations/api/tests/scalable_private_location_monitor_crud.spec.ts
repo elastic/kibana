@@ -77,12 +77,10 @@ apiTest.describe(
         const monitorId = (res.body as { id: string }).id;
 
         try {
-          // The package policy is written synchronously; its `condition` field
-          // (and the coalesced agent-policy revision bump behind it) confirms
-          // the create actually went through the batched path, not merely that
-          // the HTTP call happened to return 200. `condition` is meaningful
-          // evidence only here: before the create there is no package policy
-          // at all, so any string value proves the batched path ran.
+          // The package policy is written synchronously. CI locations have no
+          // enrolled agents, so we omit `${agent.id}` rather than pin to a
+          // sentinel; existence of the policy is what proves the batched
+          // create path ran.
           await tryForTime(30_000, async () => {
             const policy = await getPackagePolicyForMonitor(
               apiClient,
@@ -90,7 +88,8 @@ apiTest.describe(
               monitorId,
               privateLocation.id
             );
-            expect(typeof policy?.condition).toBe('string');
+            expect(policy).toBeDefined();
+            expect(policy?.condition).toBeUndefined();
           });
 
           const revisionBeforeEdit = await getAgentPolicyRevision(
@@ -107,13 +106,10 @@ apiTest.describe(
             schedule: { number: '10', unit: 'm' },
           });
 
-          // Unlike the create phase, the package policy here already has a
-          // `condition` string from the create, so re-asserting that shape
-          // wouldn't observe anything the edit itself did -- it would pass
-          // even if the edit silently no-oped on the batched path. Assert the
-          // agent-policy revision strictly increased instead: that is the
-          // actual, directly-observable side effect of the batched bump this
-          // PR introduces.
+          // The package policy already exists after create, so re-asserting
+          // its presence wouldn't observe the edit. Assert the agent-policy
+          // revision strictly increased instead: that is the actual,
+          // directly-observable side effect of the batched bump.
           await tryForTime(30_000, async () => {
             const revisionAfterEdit = await getAgentPolicyRevision(
               apiClient,

@@ -9,7 +9,11 @@
 
 import { v4 } from 'uuid';
 import { type KibanaRequest, SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { type TaskManagerStartContract, TaskStatus } from '@kbn/task-manager-plugin/server';
+import {
+  TaskAlreadyRunningError,
+  type TaskManagerStartContract,
+  TaskStatus,
+} from '@kbn/task-manager-plugin/server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
 import { getWorkflowRunTaskId } from './get_workflow_run_task_id';
 import { WORKFLOW_RESUME_TASK_TYPE, WORKFLOW_RUN_TASK_TYPE } from './types';
@@ -25,11 +29,16 @@ export const getWorkflowGlobalTimeoutResumeTaskId = (workflowExecutionId: string
 
 /**
  * Stable task id / deduplication key for any immediate `workflow:resume` (no runAt).
- * Using a deterministic id makes scheduleImmediateResume idempotent (removeIfExists + schedule)
- * so concurrent callers cannot create two resume tasks for the same execution.
+ * Task Manager owns this document throughout the run; callers must never replace it.
  */
 export const getWorkflowImmediateResumeTaskId = (workflowExecutionId: string): string =>
   `workflow-immediate-resume-${workflowExecutionId}`;
+
+/** Stable authenticated wake-up retained until its workflow execution is terminal. */
+export const getWorkflowWakeTaskId = (executionId: string): string =>
+  `workflow-wake-${executionId}`;
+
+export const WORKFLOW_WAKE_POLL_INTERVAL_MS = 30_000;
 
 export class WorkflowTaskManager {
   constructor(private taskManager: TaskManagerStartContract) {}
@@ -53,13 +62,19 @@ export class WorkflowTaskManager {
   }): Promise<{ taskId: string }> {
     const taskId = getWorkflowGlobalTimeoutResumeTaskId(workflowExecution.id);
     const desiredRunAtMs = resumeAt.getTime();
+    await this.ensureWakeTask({
+      executionId: workflowExecution.id,
+      spaceId: workflowExecution.spaceId,
+      fakeRequest,
+      runAt: resumeAt,
+    });
 
     try {
       const existing = await this.taskManager.get(taskId);
       if (existing.status === TaskStatus.Running || existing.status === TaskStatus.Claiming) {
-        // External resume runs inside this task; rescheduling while it is active would
-        // remove the in-flight task. The resume loop re-schedules after the run completes.
-        return { taskId: existing.id };
+        // Do not replace a claimed notification. Preserve the next deadline in
+        // a separate notification if the current one has not finished dispatching.
+        return this.scheduleResumeTask({ workflowExecution, resumeAt, fakeRequest });
       }
 
       if (existing.runAt != null) {
@@ -86,6 +101,7 @@ export class WorkflowTaskManager {
       {
         id: taskId,
         taskType: WORKFLOW_RESUME_TASK_TYPE,
+        timeoutOverride: '1m',
         params: {
           workflowRunId: workflowExecution.id,
           spaceId: workflowExecution.spaceId,
@@ -115,6 +131,7 @@ export class WorkflowTaskManager {
       {
         id: v4(),
         taskType: WORKFLOW_RESUME_TASK_TYPE,
+        timeoutOverride: '1m',
         params: {
           workflowRunId: workflowExecution.id,
           spaceId: workflowExecution.spaceId,
@@ -226,12 +243,7 @@ export class WorkflowTaskManager {
     );
   }
 
-  /**
-   * Schedules an immediate `workflow:resume` for the given execution using a stable,
-   * deterministic task id. Calls `removeIfExists` before scheduling so concurrent
-   * callers cannot create two resume tasks for the same execution: the last writer wins
-   * and there is always exactly one immediate-resume task outstanding per execution.
-   */
+  /** Ensures the immediate runner exists without replacing an active Task Manager claim. */
   async scheduleImmediateResume({
     executionId,
     spaceId,
@@ -242,45 +254,129 @@ export class WorkflowTaskManager {
     fakeRequest?: KibanaRequest;
   }): Promise<{ taskId: string }> {
     const taskId = getWorkflowImmediateResumeTaskId(executionId);
-
-    await this.taskManager.removeIfExists(taskId);
-
-    const task = await this.taskManager.schedule(
+    await this.taskManager.ensureScheduled(
       {
         id: taskId,
         taskType: WORKFLOW_RESUME_TASK_TYPE,
-        params: {
-          workflowRunId: executionId,
-          spaceId,
-        } satisfies ResumeWorkflowExecutionParams,
+        params: { workflowRunId: executionId, spaceId } satisfies ResumeWorkflowExecutionParams,
         state: {},
         scope: [`workflow:execution:${executionId}`],
       },
       fakeRequest ? { request: fakeRequest, cloneApiKey: true } : undefined
     );
-
-    return {
-      taskId: task.id,
-    };
+    return { taskId };
   }
 
-  /**
-   * Schedules an immediate `workflow:resume` and nudges Task Manager to claim it
-   * right away via `runSoon`. Every call site that wants a deterministic, immediate
-   * parent resume should use this instead of calling `scheduleImmediateResume` +
-   * `runSoon` separately — keeping them together prevents callers from forgetting the nudge.
-   */
-  async scheduleAndRunImmediateResume({
-    executionId,
-    spaceId,
-    fakeRequest,
-  }: {
+  /** Returns false when a wake-up must be retried after the current runner releases its claim. */
+  async tryRunImmediateResume(params: {
+    executionId: string;
+    spaceId: string;
+    fakeRequest?: KibanaRequest;
+  }): Promise<boolean> {
+    const { taskId } = await this.scheduleImmediateResume(params);
+    try {
+      const result = await this.taskManager.runSoon(taskId);
+      return !result?.conflict;
+    } catch (error) {
+      // The task may complete between ensureScheduled and runSoon. Neither a busy
+      // claim nor deletion at completion means the wake-up has been consumed.
+      if (
+        error instanceof TaskAlreadyRunningError ||
+        SavedObjectsErrorHelpers.isNotFoundError(error)
+      ) {
+        return false;
+      }
+      throw error;
+    }
+  }
+
+  /** Persists a retryable wake-up when the immediate runner is already claimed. */
+  async scheduleAndRunImmediateResume(params: {
     executionId: string;
     spaceId: string;
     fakeRequest?: KibanaRequest;
   }): Promise<void> {
-    const { taskId } = await this.scheduleImmediateResume({ executionId, spaceId, fakeRequest });
-    await this.taskManager.runSoon(taskId);
+    if (await this.tryRunImmediateResume(params)) return;
+    await this.ensureWakeTask(params);
+    try {
+      await this.runSoonWithConflictRetry(getWorkflowWakeTaskId(params.executionId));
+    } catch (error) {
+      // A claimed wake task is retained and polls again; it cannot delete this request on success.
+      if (!(error instanceof TaskAlreadyRunningError)) throw error;
+    }
+  }
+
+  /** Ensures a retained wake task with cloned execution credentials exists before handoff. */
+  async ensureWakeTask(params: {
+    executionId: string;
+    spaceId: string;
+    fakeRequest?: KibanaRequest;
+    runAt?: Date;
+  }): Promise<void> {
+    await this.taskManager.ensureScheduled(
+      {
+        id: getWorkflowWakeTaskId(params.executionId),
+        taskType: WORKFLOW_RESUME_TASK_TYPE,
+        timeoutOverride: '1m',
+        params: { workflowRunId: params.executionId, spaceId: params.spaceId },
+        state: {},
+        runAt: params.runAt ?? new Date(Date.now() + 1000),
+        scope: [`workflow:execution:${params.executionId}`],
+      },
+      params.fakeRequest ? { request: params.fakeRequest, cloneApiKey: true } : undefined
+    );
+  }
+
+  /** Wakes an existing authenticated timer without creating a task lacking execution credentials. */
+  async runExistingResumeTask(executionId: string): Promise<void> {
+    try {
+      await this.runSoonWithConflictRetry(getWorkflowWakeTaskId(executionId));
+      return;
+    } catch (error) {
+      if (error instanceof TaskAlreadyRunningError) return;
+      if (!SavedObjectsErrorHelpers.isNotFoundError(error)) throw error;
+    }
+    // Older executions may only have the original authenticated timeout task.
+    try {
+      await this.runSoonWithConflictRetry(getWorkflowGlobalTimeoutResumeTaskId(executionId));
+    } catch (error) {
+      // Every claimed resume task installs the retained wake before it dispatches or exits.
+      if (error instanceof TaskAlreadyRunningError) return;
+      if (!SavedObjectsErrorHelpers.isNotFoundError(error)) throw error;
+      // A claimed global notification can hand its next deadline to a separate
+      // timer. That timer retains the identity needed for an external HITL resume.
+      const { docs } = await this.taskManager.fetch({
+        size: 1,
+        query: {
+          bool: {
+            filter: [
+              { term: { 'task.scope': `workflow:execution:${executionId}` } },
+              { term: { 'task.taskType': WORKFLOW_RESUME_TASK_TYPE } },
+              { term: { 'task.status': TaskStatus.Idle } },
+            ],
+          },
+        },
+      });
+      if (!docs.length) throw error;
+      try {
+        await this.runSoonWithConflictRetry(docs[0].id);
+      } catch (wakeError) {
+        if (!(wakeError instanceof TaskAlreadyRunningError)) throw wakeError;
+      }
+    }
+  }
+
+  private async runSoonWithConflictRetry(taskId: string): Promise<void> {
+    // Re-read after a conflicting update; never report a wake-up that was not accepted.
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const result = await this.taskManager.runSoon(taskId);
+      if (!result.conflict) return;
+    }
+    throw SavedObjectsErrorHelpers.createConflictError(
+      'task',
+      taskId,
+      'Failed to wake resume task after conflicting updates'
+    );
   }
 
   async forceRunIdleTasks(

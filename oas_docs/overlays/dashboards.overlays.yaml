@@ -134,7 +134,7 @@ actions:
         | `field_stats_table` | Field statistics table |
 
         > info
-        > The following panel types are supported in the Kibana UI but not yet by the REST API: `map`, `legacy_vis`. Write operations (`POST`, `PUT`) return a `400` error when these panel types are included. Read operations (`GET`) strip these panels from the response and include them in a list of warnings.
+        > The following panel types are supported in the Kibana UI but not yet by the REST API: `map`, `legacy_vis`, `alerts_table`. Write operations (`POST`, `PUT`) return a `400` error when these panel types are included. Read operations (`GET`) strip these panels from the response and include them in a list of warnings.
 
         ### Embedding library items
 
@@ -260,13 +260,3 @@ actions:
     description: "Pin operationId for DELETE /api/dashboards/{id}"
     update:
       operationId: delete-dashboard
-
-  # Hide Discover JSON document view fields (feature-flagged).
-  # Same pattern as connectors.overlays.yaml: JSONPath + remove: true.
-  # These properties are inlined on tabs and overrides, not a single $ref.
-  - target: "$.components.schemas['Kibana_HTTP_APIs_kbn-dashboard-panel-type-discover_session']..properties.documents_display_mode"
-    description: Remove documents_display_mode — behind a feature flag
-    remove: true
-  - target: "$.components.schemas['Kibana_HTTP_APIs_kbn-dashboard-panel-type-discover_session']..properties.json_mode_settings"
-    description: Remove json_mode_settings — behind a feature flag
-    remove: true

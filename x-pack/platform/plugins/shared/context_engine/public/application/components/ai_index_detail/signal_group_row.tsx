@@ -18,7 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { SignalGroup } from '../../../../common/http_api/signals';
-import { humanizeTagType, tagDescription } from './signal_format';
+import { tagLabel, tagDescription } from './signal_format';
 
 interface SignalGroupRowProps {
   group: SignalGroup;
@@ -44,7 +44,7 @@ export const SignalGroupRow = ({ group, onView }: SignalGroupRowProps) => (
     <EuiFlexGroup alignItems="flexStart" gutterSize="m" responsive={false}>
       <EuiFlexItem>
         <EuiTitle size="xxs">
-          <h4>{humanizeTagType(group.tag)}</h4>
+          <h4>{tagLabel(group.tag)}</h4>
         </EuiTitle>
         <EuiSpacer size="xs" />
         <EuiText size="xs" color="subdued">

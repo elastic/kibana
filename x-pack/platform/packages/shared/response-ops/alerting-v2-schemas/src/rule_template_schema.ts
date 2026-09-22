@@ -7,9 +7,15 @@
 
 import { z } from '@kbn/zod/v4';
 import { MAX_TAG_LENGTH, MAX_TAGS } from '@kbn/alerting-v2-constants';
-import { arrayOrSingleSchema } from './common';
+import { arrayOrSingleSchema, queryIntSchema } from './common';
 import { createRuleDataSchema } from './rule_data_schema';
-import { ID_MAX_LENGTH, MAX_SEARCH_LENGTH, RULE_TEMPLATE_MAX_PER_PAGE } from './constants';
+import {
+  FIND_DEFAULT_PER_PAGE,
+  FIND_MAX_RESULT_WINDOW,
+  ID_MAX_LENGTH,
+  MAX_SEARCH_LENGTH,
+  RULE_TEMPLATE_MAX_PER_PAGE,
+} from './constants';
 
 const engineField = z
   .literal('v2')
@@ -40,31 +46,39 @@ export type RuleTemplateResponse = z.infer<typeof ruleTemplateResponseSchema>;
 export const findRuleTemplatesSortFieldSchema = z.enum(['name', 'tags']);
 export type FindRuleTemplatesSortField = z.infer<typeof findRuleTemplatesSortFieldSchema>;
 
-export const findRuleTemplatesRequestSchema = z.object({
-  page: z.coerce.number().min(1).optional().describe('The page number to return. Defaults to 1.'),
-  per_page: z.coerce
-    .number()
-    .min(1)
-    .max(RULE_TEMPLATE_MAX_PER_PAGE)
-    .optional()
-    .describe('The number of rule templates to return per page. Defaults to 20.'),
-  search: z
-    .string()
-    .trim()
-    .min(1)
-    .max(MAX_SEARCH_LENGTH)
-    .optional()
-    .describe('A text string to search across rule template name and description.'),
-  sort_field: findRuleTemplatesSortFieldSchema
-    .optional()
-    .describe('The field to sort rule templates by. Defaults to name.'),
-  sort_order: z.enum(['asc', 'desc']).optional().describe('The direction to sort rule templates.'),
-  tags: arrayOrSingleSchema(z.string().min(1).max(MAX_TAG_LENGTH), MAX_TAGS)
-    .optional()
-    .describe(
-      'Only return templates carrying at least one of these tags. Accepts a single tag or a repeated parameter.'
-    ),
-});
+export const findRuleTemplatesRequestSchema = z
+  .object({
+    page: queryIntSchema({ min: 1, max: FIND_MAX_RESULT_WINDOW })
+      .optional()
+      .describe('The page number to return. Defaults to 1.'),
+    per_page: queryIntSchema({ min: 1, max: RULE_TEMPLATE_MAX_PER_PAGE })
+      .optional()
+      .describe('The number of rule templates to return per page. Defaults to 20.'),
+    search: z
+      .string()
+      .trim()
+      .min(1)
+      .max(MAX_SEARCH_LENGTH)
+      .optional()
+      .describe('A text string to search across rule template name and description.'),
+    sort_field: findRuleTemplatesSortFieldSchema
+      .optional()
+      .describe('The field to sort rule templates by. Defaults to name.'),
+    sort_order: z
+      .enum(['asc', 'desc'])
+      .optional()
+      .describe('The direction to sort rule templates.'),
+    tags: arrayOrSingleSchema(z.string().min(1).max(MAX_TAG_LENGTH), MAX_TAGS)
+      .optional()
+      .describe(
+        'Only return templates carrying at least one of these tags. Accepts a single tag or a repeated parameter.'
+      ),
+  })
+  .strict()
+  .refine(
+    ({ page = 1, per_page = FIND_DEFAULT_PER_PAGE }) => page * per_page <= FIND_MAX_RESULT_WINDOW,
+    { message: `page * per_page cannot exceed ${FIND_MAX_RESULT_WINDOW}.`, path: ['page'] }
+  );
 
 export type FindRuleTemplatesRequest = z.infer<typeof findRuleTemplatesRequestSchema>;
 
@@ -79,8 +93,10 @@ export const findRuleTemplatesResponseSchema = z
 
 export type FindRuleTemplatesResponse = z.infer<typeof findRuleTemplatesResponseSchema>;
 
-export const ruleTemplateIdParamsSchema = z.object({
-  id: z.string().min(1).max(ID_MAX_LENGTH).describe('The identifier for the rule template.'),
-});
+export const ruleTemplateIdParamsSchema = z
+  .object({
+    id: z.string().min(1).max(ID_MAX_LENGTH).describe('The identifier for the rule template.'),
+  })
+  .strict();
 
 export type RuleTemplateIdParams = z.infer<typeof ruleTemplateIdParamsSchema>;

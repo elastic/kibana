@@ -7,6 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Migration recommendation: MIGRATE TO SCOUT API. All 3 tests call plugin-registered HTTP routes
+ * via supertest and assert on JSON response bodies — no browser interaction required.
+ *
+ * Migration notes:
+ * - The routes under test are registered by the `data_search_plugin` fixture plugin
+ *   (src/platform/test/plugin_functional/plugins/data_search). That plugin must either be kept
+ *   alive for the Scout run or its route logic extracted into a Scout `apiService` that calls
+ *   the real data plugin APIs directly.
+ * - Tests are independent (no shared mutable state between cases); they can run in parallel
+ *   without test.step grouping.
+ * - Replace `supertest` calls with Scout's `apiClient` / `requestAuth` helpers and assert with
+ *   Playwright `expect`.
+ */
 import expect from '@kbn/expect';
 import type { PluginFunctionalProviderContext } from '../../services';
 

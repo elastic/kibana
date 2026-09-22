@@ -1,5 +1,5 @@
 {
-  "sha1": "eca40d9e3beab916950c1d36db4e3c8972900a1d",
+  "sha1": "9a287a76929564dc2fc5c7673b71958116c1f63a",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -18,6 +18,19 @@
       }
     },
     {
+      "id": "b52d7aefd4c2e4a-ea56eef63465547",
+      "title": "Background search management — accessibility Background search management states have no accessibility violations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout_search_sessions/ui/parallel_tests/background_search_a11y.spec.ts",
+        "line": 40,
+        "column": 23
+      }
+    },
+    {
       "id": "42c36eb222a9c69-d56fcb76a2cca72",
       "title": "Background Search management UI saves a background search from a dashboard, verifies it in management",
       "expectedStatus": "passed",
@@ -26,8 +39,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout_search_sessions/ui/parallel_tests/background_search_management.spec.ts",
-        "line": 89,
-        "column": 51
+        "line": 47,
+        "column": 7
       }
     },
     {

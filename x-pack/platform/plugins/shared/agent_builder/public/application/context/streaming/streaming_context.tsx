@@ -163,7 +163,7 @@ export const StreamingProvider = ({ children }: { children: React.ReactNode }) =
   const mutateSendMessage = useCallback(
     (vars: SendMessageVars) => {
       setActiveStream(vars.conversationId, {
-        type: vars.action === 'regenerate' ? 'regenerate' : 'send',
+        type: 'send',
       });
       sendMutate(vars);
     },

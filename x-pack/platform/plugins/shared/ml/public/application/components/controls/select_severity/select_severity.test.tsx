@@ -77,25 +77,23 @@ describe('SelectSeverity', () => {
     expect(getByTestId('mlAnomalySeverityThresholdControls')).toBeInTheDocument();
   });
 
-  it('opens popover when clicked', async () => {
-    const { getByTestId, getByRole } = render(<SelectSeverity />);
+  it('opens popover when clicked', () => {
+    const { getByTestId, getAllByRole } = render(<SelectSeverity />);
 
     // Click the button inside the control to open popover
     const control = getByTestId('mlAnomalySeverityThresholdControls');
     const button = control.querySelector('button');
     expect(button).toBeInTheDocument();
-    act(() => {
-      fireEvent.click(button!);
-    });
+    fireEvent.click(button!);
 
     // Should show the selectable options with threshold ranges
-    await waitFor(() => {
-      expect(getByRole('option', { name: '0-3' })).toBeInTheDocument();
-      expect(getByRole('option', { name: '3-25' })).toBeInTheDocument();
-      expect(getByRole('option', { name: '25-50' })).toBeInTheDocument();
-      expect(getByRole('option', { name: '50-75' })).toBeInTheDocument();
-      expect(getByRole('option', { name: '75-100' })).toBeInTheDocument();
-    });
+    expect(getAllByRole('option').map((option) => option.textContent)).toEqual([
+      '0-3',
+      '3-25',
+      '25-50',
+      '50-75',
+      '75-100',
+    ]);
   });
 
   it('allows deselecting severity options', async () => {

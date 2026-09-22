@@ -31,9 +31,6 @@ import {
 } from '../../../signatures';
 import { isTupleExpression } from '../utils';
 
-// TODO: Remove this flag when multi-column IN subqueries become generally available in Elasticsearch.
-export const PARENTHESIZED_EXPRESSION_COMMA_AUTOCOMPLETE_ENABLED = false;
-
 /**
  * Handler for autocomplete suggestions after complete expressions.
  * Handles after_complete position for all complete expression types:
@@ -213,7 +210,6 @@ export async function suggestAfterComplete(ctx: ExpressionContext): Promise<ISug
 
   // This context requires `)` after the cursor, so an existing comma cannot reach this branch.
   if (
-    PARENTHESIZED_EXPRESSION_COMMA_AUTOCOMPLETE_ENABLED &&
     options.allowSubquery &&
     !functionParameterContext &&
     ctx.parenthesizedExpressionPosition === 'inside'

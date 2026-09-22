@@ -109,4 +109,74 @@ describe('getColumnsWithHighlights', () => {
       },
     });
   });
+
+  it('returns HIGHLIGHT command columns with the default prefix and em tags', () => {
+    const query = 'FROM books | HIGHLIGHT "Tolkien" ON title';
+    expect(getColumnsWithHighlights(query)).toEqual({
+      highlight_title: {
+        preTag: DEFAULT_HIGHLIGHT_PRE_TAG,
+        postTag: DEFAULT_HIGHLIGHT_POST_TAG,
+      },
+    });
+  });
+
+  it('returns one HIGHLIGHT column per ON field', () => {
+    const query = 'FROM books | HIGHLIGHT "Tolkien" ON title, description';
+    expect(getColumnsWithHighlights(query)).toEqual({
+      highlight_title: {
+        preTag: DEFAULT_HIGHLIGHT_PRE_TAG,
+        postTag: DEFAULT_HIGHLIGHT_POST_TAG,
+      },
+      highlight_description: {
+        preTag: DEFAULT_HIGHLIGHT_PRE_TAG,
+        postTag: DEFAULT_HIGHLIGHT_POST_TAG,
+      },
+    });
+  });
+
+  it('applies a custom HIGHLIGHT prefix to generated column names', () => {
+    const query = 'FROM books | HIGHLIGHT prefix = "hl_" "Tolkien" ON title';
+    expect(getColumnsWithHighlights(query)).toEqual({
+      hl_title: {
+        preTag: DEFAULT_HIGHLIGHT_PRE_TAG,
+        postTag: DEFAULT_HIGHLIGHT_POST_TAG,
+      },
+    });
+  });
+
+  it('overwrites the source column when HIGHLIGHT prefix is empty', () => {
+    const query = 'FROM books | HIGHLIGHT prefix = "" "Tolkien" ON title';
+    expect(getColumnsWithHighlights(query)).toEqual({
+      title: {
+        preTag: DEFAULT_HIGHLIGHT_PRE_TAG,
+        postTag: DEFAULT_HIGHLIGHT_POST_TAG,
+      },
+    });
+  });
+
+  it('uses the first HIGHLIGHT pre_tags and post_tags values', () => {
+    const query =
+      'FROM books | HIGHLIGHT "Tolkien" ON title WITH { "pre_tags": ["<mark>"], "post_tags": ["</mark>"] }';
+    expect(getColumnsWithHighlights(query)).toEqual({
+      highlight_title: {
+        preTag: '<mark>',
+        postTag: '</mark>',
+      },
+    });
+  });
+
+  it('combines TOP_SNIPPETS and HIGHLIGHT columns from the same query', () => {
+    const query =
+      'FROM books | EVAL snippets = TOP_SNIPPETS(description, "Tolkien", { "highlight": true }) | HIGHLIGHT "Tolkien" ON title';
+    expect(getColumnsWithHighlights(query)).toEqual({
+      snippets: {
+        preTag: DEFAULT_HIGHLIGHT_PRE_TAG,
+        postTag: DEFAULT_HIGHLIGHT_POST_TAG,
+      },
+      highlight_title: {
+        preTag: DEFAULT_HIGHLIGHT_PRE_TAG,
+        postTag: DEFAULT_HIGHLIGHT_POST_TAG,
+      },
+    });
+  });
 });

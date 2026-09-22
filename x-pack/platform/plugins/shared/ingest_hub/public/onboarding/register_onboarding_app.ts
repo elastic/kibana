@@ -13,7 +13,8 @@ import { INGEST_HUB_ONBOARDING_ENABLED_FLAG } from '../../common/constants';
 
 export function registerOnboardingApp(
   coreSetup: CoreSetup<IngestHubStartDependencies>,
-  startServicesPromise: ReturnType<CoreSetup<IngestHubStartDependencies>['getStartServices']>
+  startServicesPromise: ReturnType<CoreSetup<IngestHubStartDependencies>['getStartServices']>,
+  kibanaVersion: string
 ) {
   coreSetup.application.register({
     id: 'onboarding',
@@ -45,7 +46,7 @@ export function registerOnboardingApp(
       }
 
       const { renderOnboardingApp } = await import('./onboarding_app');
-      return renderOnboardingApp(coreStart, params, deps);
+      return renderOnboardingApp(coreStart, params, deps, kibanaVersion);
     },
   });
 }

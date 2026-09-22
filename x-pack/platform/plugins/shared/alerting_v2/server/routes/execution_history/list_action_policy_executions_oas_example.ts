@@ -13,7 +13,7 @@ export const LIST_ACTION_POLICY_EXECUTIONS_RESPONSE: ListPolicyExecutionHistoryR
   items: [
     {
       dispatched_at: '2026-01-15T12:05:00.000Z',
-      policy: { id: 'action-policy-1', name: 'Notify on host alerts' },
+      policy: { id: 'action-policy-1', name: 'Notify on production alerts' },
       outcome: 'dispatched',
       episode_count: 1,
       episodes: [{ id: 'episode-1' }],

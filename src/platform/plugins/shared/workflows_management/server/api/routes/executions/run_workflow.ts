@@ -9,9 +9,7 @@
 
 import path from 'path';
 import { schema } from '@kbn/config-schema';
-import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
 import { toWorkflowExecutionEngineModel } from '@kbn/workflows';
-import { preprocessAlertInputs } from './utils/preprocess_alert_inputs';
 import type { RouteDependencies } from '../types';
 import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
@@ -81,24 +79,14 @@ export function registerRunWorkflowRoute(deps: RouteDependencies) {
 
           const { inputs, metadata } = request.body;
 
-          let processedInputs = inputs;
-          const event = inputs.event as { triggerType?: string; alertIds?: unknown[] } | undefined;
-          const hasAlertTrigger =
-            event?.triggerType === 'alert' && event?.alertIds && event.alertIds.length > 0;
-          if (hasAlertTrigger) {
-            processedInputs = await preprocessAlertInputs(inputs, context, spaceId, logger);
-          }
-
-          const workflowForExecution: WorkflowExecutionEngineModel =
-            toWorkflowExecutionEngineModel(workflow);
-          const workflowExecutionId = await api.runWorkflow(
-            workflowForExecution,
+          const { workflowExecutionId } = await api.runWorkflowWithAlertPreprocessing({
+            workflow: toWorkflowExecutionEngineModel(workflow),
             spaceId,
-            processedInputs,
+            inputs,
             request,
-            undefined,
-            metadata
-          );
+            preprocessingContext: context,
+            metadata,
+          });
           audit.logWorkflowRun(request, {
             workflowId: id,
             executionId: workflowExecutionId,
@@ -109,7 +97,14 @@ export function registerRunWorkflowRoute(deps: RouteDependencies) {
             workflowId: request.params.id,
             error,
           });
-          return handleRouteError(response, error);
+          return handleRouteError(response, error, {
+            logger,
+            logContext: {
+              route: 'POST /api/workflows/workflow/{id}/run',
+              workflowId: request.params.id,
+              spaceId: spaces.getSpaceId(request),
+            },
+          });
         }
       })
     );

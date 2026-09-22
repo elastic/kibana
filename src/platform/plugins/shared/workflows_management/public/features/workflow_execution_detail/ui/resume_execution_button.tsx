@@ -117,7 +117,10 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
         ? Math.max(0, submittedAt - stepStartMs)
         : undefined;
       try {
-        await workflowsApi.resumeExecution(executionId, { input: stepInputs });
+        await workflowsApi.resumeExecution(executionId, {
+          input: stepInputs,
+          stepExecutionId: waitingStepExecutionId,
+        });
         await queryClient.invalidateQueries({ queryKey: ['stepExecution', executionId] });
         notifications?.toasts.addSuccess({
           title: i18n.translate(
@@ -161,6 +164,7 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
       notifications,
       telemetry,
       closeModal,
+      waitingStepExecutionId,
     ]
   );
 

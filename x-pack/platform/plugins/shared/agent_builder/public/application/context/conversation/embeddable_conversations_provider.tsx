@@ -253,13 +253,13 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
   const conversationContextValue = useMemo(
     () => ({
       conversationId,
-      shouldStickToBottom: true,
       isEmbeddedContext: true,
       sessionTag: currentProps.sessionTag,
       agentId: currentProps.agentId ?? agentBuilderDefaultAgentId,
       initialMessage: currentProps.initialMessage,
       autoSendInitialMessage: currentProps.autoSendInitialMessage ?? false,
       greetingMessage: currentProps.greetingMessage,
+      onSubmit: currentProps.onSubmit,
       resetInitialMessage,
       browserApiTools: currentProps.browserApiTools,
       setConversationId,
@@ -277,6 +277,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       currentProps.initialMessage,
       currentProps.autoSendInitialMessage,
       currentProps.greetingMessage,
+      currentProps.onSubmit,
       currentProps.browserApiTools,
       currentProps.attachments,
       upsertAttachments,

@@ -24,8 +24,18 @@ export const queryKeys = {
     pageSize: number,
     filterState?: EpisodesFilterState,
     sortState?: EpisodesSortState,
-    timeRange?: { from: string; to: string } | null
-  ) => [...queryKeys.listAll(), spaceId, pageSize, filterState, sortState, timeRange] as const,
+    timeRange?: { from: string; to: string } | null,
+    additionalSourceId?: string
+  ) =>
+    [
+      ...queryKeys.listAll(),
+      spaceId,
+      pageSize,
+      filterState,
+      sortState,
+      timeRange,
+      additionalSourceId,
+    ] as const,
   episodeAll: () => [...queryKeys.all, 'episode'] as const,
   episode: (spaceId: string, episodeId: string) =>
     [...queryKeys.episodeAll(), spaceId, episodeId] as const,
@@ -72,27 +82,50 @@ export const queryKeys = {
   episodeEventData: (spaceId: string, episodeId: string) =>
     [...queryKeys.episodeEventDataAll(), spaceId, episodeId] as const,
   tagOptionsAll: () => [...queryKeys.all, 'tag-options'] as const,
-  tagOptions: (spaceId: string, timeRange?: { from: string; to: string } | null) =>
-    [...queryKeys.tagOptionsAll(), spaceId, timeRange] as const,
+  tagOptions: (
+    spaceId: string,
+    timeRange?: { from: string; to: string } | null,
+    additionalSourceId?: string
+  ) => [...queryKeys.tagOptionsAll(), spaceId, timeRange, additionalSourceId] as const,
   tagSuggestionsAll: () => [...queryKeys.all, 'tag-suggestions'] as const,
   tagSuggestions: (spaceId: string) => [...queryKeys.tagSuggestionsAll(), spaceId] as const,
   assigneeSuggestions: (searchTerm: string) =>
     [...queryKeys.all, 'assignee-suggestions', searchTerm] as const,
   bulkGetProfiles: (uids: string[]) => [...queryKeys.all, 'bulk-get-profiles', ...uids] as const,
   fetchRule: (id: string) => [...queryKeys.all, 'fetch-rule', id] as const,
+  fetchSourceRule: (sourceId: string, id: string) =>
+    [...queryKeys.all, 'fetch-source-rule', sourceId, id] as const,
   histogramAll: () => [...queryKeys.all, 'histogram'] as const,
   histogram: (
     spaceId: string | undefined,
     filterState: EpisodesFilterState,
     timeRange: TimeRange | undefined,
-    breakdownField: string | undefined
-  ) => [...queryKeys.histogramAll(), spaceId, filterState, timeRange, breakdownField] as const,
+    breakdownField: string | undefined,
+    additionalSourceId?: string
+  ) =>
+    [
+      ...queryKeys.histogramAll(),
+      spaceId,
+      filterState,
+      timeRange,
+      breakdownField,
+      additionalSourceId,
+    ] as const,
   currentUserProfile: () => [...queryKeys.all, 'current-user-profile'] as const,
   kpisAll: () => [...queryKeys.all, 'kpis'] as const,
   kpis: (
     spaceId: string,
     filterState?: EpisodesFilterState,
     timeRange?: { from: string; to: string } | null,
-    currentUserUid?: string
-  ) => [...queryKeys.kpisAll(), spaceId, filterState, timeRange, currentUserUid] as const,
+    currentUserUid?: string,
+    additionalSourceId?: string
+  ) =>
+    [
+      ...queryKeys.kpisAll(),
+      spaceId,
+      filterState,
+      timeRange,
+      currentUserUid,
+      additionalSourceId,
+    ] as const,
 };

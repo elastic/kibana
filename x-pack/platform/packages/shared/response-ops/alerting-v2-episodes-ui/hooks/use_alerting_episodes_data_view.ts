@@ -61,6 +61,11 @@ const computedFields: Record<string, RuntimeField> = {
     script: { source: "emit('')" },
     customLabel: i18n.ASSIGNEES_FIELD_LABEL,
   },
+  rule_tags: {
+    type: 'keyword',
+    script: { source: "emit('')" },
+    customLabel: i18n.RULE_TAGS_FIELD_LABEL,
+  },
 };
 
 /**

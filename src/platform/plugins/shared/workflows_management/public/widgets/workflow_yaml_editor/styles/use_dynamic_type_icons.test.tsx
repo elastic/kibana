@@ -34,7 +34,11 @@ function connectorTypeStub(actionTypeId: string): ConnectorTypeInfo {
 }
 
 describe('useDynamicTypeIcons', () => {
-  it('does not call actionTypeRegistry.get for connector types missing from the UI registry', async () => {
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('does not call actionTypeRegistry.get for connector types missing from the UI registry', () => {
     const registeredId = '.registered';
     const unregisteredId = '.notInRegistry';
 
@@ -63,14 +67,12 @@ describe('useDynamicTypeIcons', () => {
       },
     };
 
+    jest.useFakeTimers();
     const { unmount } = renderHook(() => useDynamicTypeIcons(connectorsData, undefined, true), {
       wrapper: getTestProvider({ services }),
     });
 
-    await waitFor(() => {
-      expect(get).toHaveBeenCalledTimes(1);
-    });
-
+    expect(get).toHaveBeenCalledTimes(1);
     expect(get).toHaveBeenCalledWith(registeredId);
     expect(has).toHaveBeenCalledWith(unregisteredId);
 

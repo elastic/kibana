@@ -11,7 +11,7 @@
  * RSPack Worker Process
  *
  * This script runs RSPack in a separate child process, similar to how
- * @kbn/optimizer runs webpack in worker threads. This allows the main
+ * @kbn/rspack-optimizer runs webpack in worker threads. This allows the main
  * process to cleanly terminate the build by killing this worker.
  *
  * Communication with parent process via IPC:
@@ -76,8 +76,10 @@ async function handleStart(options: StartMessage['options']) {
     });
 
     if (result.success) {
-      const entryLabel = result.entryCount === 1 ? 'entry' : 'entries';
-      const summary = `${result.entryCount} ${entryLabel}, ${formatSize(result.totalSize ?? 0)}`;
+      const bundleLabel = result.bundleCount === 1 ? 'bundle' : 'bundles';
+      const summary = `${result.bundleCount ?? 0} ${bundleLabel}, ${formatSize(
+        result.totalSize ?? 0
+      )}`;
       process.send?.({ type: 'done', success: true, summary });
     } else {
       process.send?.({ type: 'done', success: false, errors: result.errors });

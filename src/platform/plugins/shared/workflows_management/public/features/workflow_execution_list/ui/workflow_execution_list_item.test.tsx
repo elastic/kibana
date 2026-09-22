@@ -7,19 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EuiThemeProvider } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import { ExecutionStatus } from '@kbn/workflows';
-import { WorkflowExecutionListItem } from './workflow_execution_list_item';
-
-jest.mock('../../../shared/ui/formatted_relative_enhanced/formatted_relative_enhanced', () => ({
-  FormattedRelativeEnhanced: ({ value }: { value: Date }) => <span>{value.toISOString()}</span>,
-}));
-
-jest.mock('../../../shared/ui/use_formatted_date', () => ({
-  useGetFormattedDateTime: () => (date: Date) => date.toISOString(),
-}));
+import { ExecutionStatus, type WorkflowExecutionListItemDto } from '@kbn/workflows';
+import {
+  EXECUTION_HISTORY_COLUMN_WIDTHS,
+  getExecutionHistoryColumns,
+} from './workflow_execution_list_columns';
 
 const executedByProfile: UserProfileWithAvatar = {
   uid: 'u_tal',
@@ -32,58 +28,146 @@ const executedByProfile: UserProfileWithAvatar = {
   data: {},
 };
 
-const defaultProps = {
+const baseExecution: WorkflowExecutionListItemDto = {
+  id: 'exec-1',
+  spaceId: 'default',
   status: ExecutionStatus.COMPLETED,
   isTestRun: false,
-  startedAt: new Date('2026-01-01T00:00:00Z'),
+  startedAt: '2026-01-01T15:35:00Z',
+  finishedAt: '2026-01-01T15:36:00Z',
+  error: null,
   duration: 1000,
-  executedByProfile,
+  workflowId: 'wf-1',
+  workflowName: 'Test Workflow',
+  executedBy: 'u_tal',
   triggeredBy: 'manual',
 };
 
-describe('WorkflowExecutionListItem', () => {
-  describe('showExecutor feature flag', () => {
-    it('should not render executor when showExecutor is false (default)', () => {
-      render(<WorkflowExecutionListItem {...defaultProps} />);
+const renderColumns = (
+  execution: WorkflowExecutionListItemDto,
+  overrides: Partial<Parameters<typeof getExecutionHistoryColumns>[0]> = {}
+) => {
+  const columns = getExecutionHistoryColumns({
+    euiTheme: {
+      colors: { textSubdued: '#666' },
+    } as Parameters<typeof getExecutionHistoryColumns>[0]['euiTheme'],
+    showExecutor: true,
+    executedByUserProfiles: new Map([['u_tal', executedByProfile]]),
+    showUnresolvedExecutors: true,
+    timeZoneSetting: 'UTC',
+    ...overrides,
+  });
 
-      expect(screen.queryByText('Tal Borenstein')).not.toBeInTheDocument();
+  return render(
+    <EuiThemeProvider>
+      <table>
+        <tbody>
+          <tr>
+            {columns.map((col, i) => {
+              const field =
+                'field' in col ? (col.field as keyof WorkflowExecutionListItemDto) : undefined;
+              const value = field ? execution[field] : undefined;
+              const node =
+                'render' in col && col.render ? col.render(value as never, execution) : null;
+              return <td key={i}>{node}</td>;
+            })}
+          </tr>
+        </tbody>
+      </table>
+    </EuiThemeProvider>
+  );
+};
+
+describe('execution history columns', () => {
+  it('uses fixed widths that leave room for Status/Started/Duration headers', () => {
+    expect(EXECUTION_HISTORY_COLUMN_WIDTHS.status).toBe('120px');
+    expect(EXECUTION_HISTORY_COLUMN_WIDTHS.started).toBe('120px');
+    expect(EXECUTION_HISTORY_COLUMN_WIDTHS.duration).toBe('72px');
+  });
+
+  it('orders columns Status → Started → Duration → Executed by', () => {
+    const columns = getExecutionHistoryColumns({
+      euiTheme: {
+        colors: { textSubdued: '#666' },
+      } as Parameters<typeof getExecutionHistoryColumns>[0]['euiTheme'],
+      showExecutor: true,
+      executedByUserProfiles: new Map(),
+      showUnresolvedExecutors: true,
+      timeZoneSetting: 'UTC',
     });
+    expect(columns.map((c) => ('field' in c ? c.field : undefined))).toEqual([
+      'status',
+      'startedAt',
+      'duration',
+      'executedBy',
+    ]);
+  });
 
-    it('should not render executor when showExecutor is explicitly false', () => {
-      render(<WorkflowExecutionListItem {...defaultProps} showExecutor={false} />);
+  it('renders Success / Failed labels (never Completed / Error)', () => {
+    renderColumns({ ...baseExecution, status: ExecutionStatus.COMPLETED });
+    expect(screen.getByText('Success')).toBeInTheDocument();
 
-      expect(screen.queryByText('Tal Borenstein')).not.toBeInTheDocument();
+    renderColumns({ ...baseExecution, status: ExecutionStatus.FAILED, id: 'exec-2' });
+    expect(screen.getByText('Failed')).toBeInTheDocument();
+    expect(screen.queryByText('Completed')).not.toBeInTheDocument();
+    expect(screen.queryByText('Error')).not.toBeInTheDocument();
+  });
+
+  it('renders a flask for test runs and none for production', () => {
+    const { unmount } = renderColumns({ ...baseExecution, isTestRun: false });
+    expect(screen.queryByTestId('workflowExecutionListItemRunModeIcon')).not.toBeInTheDocument();
+    unmount();
+
+    renderColumns({ ...baseExecution, isTestRun: true });
+    expect(screen.getByLabelText('Test run')).toBeInTheDocument();
+  });
+
+  it('renders Step test tooltip when stepId is set', () => {
+    renderColumns({ ...baseExecution, isTestRun: true, stepId: 'analyze_alerts' });
+    expect(screen.getByLabelText('Step test: analyze_alerts')).toBeInTheDocument();
+  });
+
+  it('middle-truncates long executed-by principals next to the avatar', () => {
+    const longUid = `u_mGBROF_q5bm${'x'.repeat(40)}_A5E_0`;
+    renderColumns(
+      {
+        ...baseExecution,
+        executedBy: longUid,
+        status: ExecutionStatus.FAILED,
+        isTestRun: true,
+      },
+      {
+        executedByUserProfiles: new Map(),
+        showUnresolvedExecutors: true,
+      }
+    );
+
+    const cell = screen.getByTestId('workflowExecutionListExecutedByCell');
+    expect(cell).toBeInTheDocument();
+    // Name label is present as a sibling of the avatar (not avatar-only).
+    expect(cell.textContent).toContain(longUid);
+    expect(cell.querySelector('.euiTextTruncate, [class*="euiTextTruncate"]')).toBeTruthy();
+    expect(screen.getByTestId('workflowExecutionListDurationCell')).toHaveTextContent('1s');
+  });
+
+  it('shows an em-dash duration for running executions', () => {
+    renderColumns({
+      ...baseExecution,
+      status: ExecutionStatus.RUNNING,
+      duration: null,
     });
+    expect(screen.getByTestId('workflowExecutionListStatusPill')).toHaveTextContent('Running');
+    expect(screen.getByTestId('workflowExecutionListDurationCell')).toHaveTextContent('—');
+  });
 
-    it('should render executor when showExecutor is true and the profile is resolved', () => {
-      render(<WorkflowExecutionListItem {...defaultProps} showExecutor={true} />);
+  it('hides unresolved executor labels when showExecutor is false', () => {
+    renderColumns(baseExecution, { showExecutor: false });
+    expect(screen.queryByText('Tal Borenstein')).not.toBeInTheDocument();
+    expect(screen.getByTestId('workflowExecutionListExecutedByCell')).toHaveTextContent('—');
+  });
 
-      expect(screen.getByText('Tal Borenstein')).toBeInTheDocument();
-    });
-
-    it('should render unresolved executor labels when provided', () => {
-      render(
-        <WorkflowExecutionListItem
-          {...defaultProps}
-          executedByLabel="elastic"
-          executedByProfile={undefined}
-          showExecutor={true}
-        />
-      );
-
-      expect(screen.getByText('elastic')).toBeInTheDocument();
-    });
-
-    it('should not render unresolved executor values without a label', () => {
-      render(
-        <WorkflowExecutionListItem
-          {...defaultProps}
-          executedByProfile={undefined}
-          showExecutor={true}
-        />
-      );
-
-      expect(screen.queryByText('Tal Borenstein')).not.toBeInTheDocument();
-    });
+  it('renders resolved executor display names when showExecutor is true', () => {
+    renderColumns(baseExecution, { showExecutor: true });
+    expect(screen.getByText('Tal Borenstein')).toBeInTheDocument();
   });
 });

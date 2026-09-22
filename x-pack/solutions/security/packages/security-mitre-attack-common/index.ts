@@ -15,3 +15,35 @@ export type {
 } from './src/schema';
 
 export { mitreEntitySchema, mitreEntitiesSchema } from './src/schema';
+
+export type {
+  MitreEntityStatus,
+  MitreEntityBuckets,
+  MitreEntityCollection,
+  MitreListParams,
+  MitreTacticSummary,
+  MitreTechniqueSummary,
+  MitreSubtechniqueSummary,
+  MitreEntitySummary,
+  MitreEntitySummaryBuckets,
+  MitreEntitySummaryCollection,
+} from './src/types';
+
+export {
+  DEFAULT_MITRE_FRAMEWORK,
+  DEFAULT_MITRE_ENTITY_STATUS,
+  MITRE_INTERNAL_URL,
+  GET_MITRE_ENTITIES_URL,
+  MITRE_ATTACK_ENTITY_SO_TYPE,
+} from './src/constants';
+
+export { buildSoId, getMitreEntityDisplayName } from './src/utils';
+
+export { GetMitreEntitiesRequestQuery } from './src/api';
+
+export type {
+  GetMitreEntitiesRequestQueryInput,
+  GetMitreEntitiesRequestQueryOutput,
+  GetMitreEntitiesRequestParams,
+  GetMitreEntitiesResponse,
+} from './src/api';

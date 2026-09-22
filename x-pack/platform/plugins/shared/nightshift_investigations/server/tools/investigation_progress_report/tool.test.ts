@@ -31,6 +31,28 @@ describe('investigation_progress_report tool', () => {
     expect(tool.availability).toBeUndefined();
   });
 
+  it('requires and ranks confidence-scored current output', () => {
+    const tool = createTool();
+    const baseState = { summary: 'Investigation complete.', hypotheses: [] };
+
+    expect(() =>
+      tool.schema.parse({ ...baseState, recommendations: [{ title: 'Restart the service' }] })
+    ).toThrow();
+
+    const parsed = tool.schema.parse({
+      ...baseState,
+      recommendations: [
+        { title: 'Lower relevance', confidence: 0.5 },
+        { title: 'Higher relevance', confidence: 0.9 },
+      ],
+    });
+
+    expect(parsed.recommendations?.map(({ title }) => title)).toEqual([
+      'Higher relevance',
+      'Lower relevance',
+    ]);
+  });
+
   it('emits a tool_ui event with the full reported state and acknowledges', async () => {
     const tool = createTool();
     const context = agentBuilderMocks.tools.createHandlerContext();

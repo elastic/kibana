@@ -13,7 +13,6 @@ export interface BootstrapTemplateData {
   jsDependencyPaths: string[];
   publicPathMap: string;
   useHMR?: boolean;
-  useRspack?: boolean;
 }
 
 export const renderTemplate = ({
@@ -22,7 +21,6 @@ export const renderTemplate = ({
   jsDependencyPaths,
   publicPathMap,
   useHMR = false,
-  useRspack = false,
 }: BootstrapTemplateData) => {
   const kbnThemeTagTemplate =
     colorMode === 'system'
@@ -104,11 +102,11 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
   var loadingMessage = document.getElementById('kbn_loading_message');
   loadingMessage.style.display = 'flex';
 
-  // Legacy: window.onload waits for ALL resources (fonts, favicons, images).
-  // RSPack: IIFE executes immediately -- safe because this script is at the
-  // bottom of <body> (DOM parsed) and <head> CSS is parser-blocking (loaded).
-  // Avoids blocking on font/favicon downloads before starting bundle loads.
-  ${useRspack ? '(function () {' : 'window.onload = function () {'}
+  // The IIFE executes immediately -- safe because this script is at the bottom
+  // of <body> (DOM parsed) and <head> CSS is parser-blocking (loaded). Unlike
+  // window.onload, this avoids blocking on font/favicon downloads before
+  // starting bundle loads.
+  (function () {
     function failure() {
       // make subsequent calls to failure() noop
       failure = function () {};
@@ -123,22 +121,23 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
       err.style.fontFamily = 'Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif';
 
       var errorTitleEl = document.createElement('h1');
+      errorTitleEl.className = 'kbnBootstrapErrorTitle';
       errorTitleEl.innerText = errorTitle;
       errorTitleEl.style.margin = '20px';
-      errorTitleEl.style.color = '#1a1c21';
 
       var errorTextEl = document.createElement('p');
+      errorTextEl.className = 'kbnBootstrapErrorText';
       errorTextEl.innerText = errorText;
       errorTextEl.style.margin = '20px';
-      errorTextEl.style.color = '#343741';
 
       var errorReloadEl = document.createElement('button');
+      errorReloadEl.className = 'kbnBootstrapErrorButton';
       errorReloadEl.innerText = errorReload;
       errorReloadEl.onclick = function () {
         location.reload();
       };
       errorReloadEl.setAttribute('style',
-       'cursor: pointer; padding-inline: 12px; block-size: 40px; font-size: 1rem; line-height: 1.4286rem; border-radius: 6px; min-inline-size: 112px; color: rgb(255, 255, 255); background-color: rgb(0, 119, 204); outline-color: rgb(0, 0, 0); border:none'
+       'cursor: pointer; padding-inline: 12px; block-size: 40px; font-size: 1rem; line-height: 1.4286rem; border-radius: 6px; min-inline-size: 112px; outline-color: rgb(0, 0, 0); border:none'
       );
 
       err.appendChild(errorTitleEl);
@@ -203,7 +202,7 @@ ${reactDevtoolsHookStub}
       }
       __kbnBundles__.get('entry/core/public').__kbnBootstrap__();
     });
-  ${useRspack ? '})();' : '}'}
+  })();
 }
   `;
 };

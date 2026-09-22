@@ -6,6 +6,7 @@
  */
 
 import { coreMock } from '@kbn/core/server/mocks';
+import { ByteSizeValue } from '@kbn/config-schema';
 import type { Logger } from '@kbn/core/server';
 import { CreateAlertEventsStep } from './create_alert_events_step';
 import {
@@ -35,7 +36,7 @@ describe('CreateAlertEventsStep', () => {
         run: {
           alerts: { max: 10000 },
           maxGroupsPerExecution: 10000,
-          query: { maxResponseSize: 50 * 1024 * 1024 },
+          query: { maxResponseSize: ByteSizeValue.parse('50mb') },
         },
         ...rulesConfigOverrides,
       },
@@ -172,7 +173,7 @@ describe('CreateAlertEventsStep', () => {
         run: {
           alerts: { max: 10000 },
           maxGroupsPerExecution: 2,
-          query: { maxResponseSize: 50 * 1024 * 1024 },
+          query: { maxResponseSize: ByteSizeValue.parse('50mb') },
         },
       });
 
@@ -219,7 +220,7 @@ describe('CreateAlertEventsStep', () => {
         run: {
           alerts: { max: 10000 },
           maxGroupsPerExecution: 1,
-          query: { maxResponseSize: 50 * 1024 * 1024 },
+          query: { maxResponseSize: ByteSizeValue.parse('50mb') },
         },
       });
 
@@ -255,7 +256,7 @@ describe('CreateAlertEventsStep', () => {
         run: {
           alerts: { max: 10000 },
           maxGroupsPerExecution: 10,
-          query: { maxResponseSize: 50 * 1024 * 1024 },
+          query: { maxResponseSize: ByteSizeValue.parse('50mb') },
         },
       });
 
@@ -283,7 +284,7 @@ describe('CreateAlertEventsStep', () => {
         run: {
           alerts: { max: 10000 },
           maxGroupsPerExecution: 2,
-          query: { maxResponseSize: 50 * 1024 * 1024 },
+          query: { maxResponseSize: ByteSizeValue.parse('50mb') },
         },
       });
 
@@ -340,7 +341,7 @@ describe('CreateAlertEventsStep', () => {
         run: {
           alerts: { max: 10000 },
           maxGroupsPerExecution: 1,
-          query: { maxResponseSize: 50 * 1024 * 1024 },
+          query: { maxResponseSize: ByteSizeValue.parse('50mb') },
         },
       });
 

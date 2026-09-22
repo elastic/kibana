@@ -19,6 +19,7 @@ export type * from './sentinel_one';
 export type * from './microsoft_defender_endpoint';
 export type { ConditionEntriesMap, ConditionEntry } from './exception_list_items';
 export type * from './scripts_library';
+export * from './libyara';
 
 /**
  * Supported React-Router state for the Policy Details page

@@ -35,6 +35,7 @@ export const ALERTING_ERROR_CODES = {
   INVALID_ARTIFACT_DATA: 'INVALID_ARTIFACT_DATA',
   /** `state_transition` cannot be applied to the rule's `kind`. */
   INVALID_STATE_TRANSITION: 'INVALID_STATE_TRANSITION',
+  INVALID_STATE_TRANSITION_CONFIG: 'INVALID_STATE_TRANSITION_CONFIG',
   /** A signal rule's merged shape violates signal constraints. */
   INVALID_SIGNAL_RULE: 'INVALID_SIGNAL_RULE',
   /**
@@ -442,6 +443,11 @@ export const ALERTING_LOG_CODES = {
    * The active-group fetch hit its `alerts.max` bound, so the active set may be truncated.
    */
   RULE_EXECUTION_ACTIVE_GROUPS_TRUNCATED: 'RULE_EXECUTION_ACTIVE_GROUPS_TRUNCATED',
+  /**
+   * The breach, recovery or data-presence ES|QL response exceeded
+   * `rules.run.query.maxResponseSize`; the run failed as a user error.
+   */
+  RULE_EXECUTION_QUERY_RESPONSE_SIZE_EXCEEDED: 'RULE_EXECUTION_QUERY_RESPONSE_SIZE_EXCEEDED',
 
   // ──────────────────────────── Rules client ─────────────────────────
   /**
@@ -513,6 +519,10 @@ export const ALERTING_LOG_CODES = {
   AGENT_BUILDER_EPISODE_REFRESH_FAILED: 'AGENT_BUILDER_EPISODE_REFRESH_FAILED',
   /** `get_rule` failed; tool returns an error result. */
   AGENT_BUILDER_EPISODE_GET_RULE_FAILED: 'AGENT_BUILDER_EPISODE_GET_RULE_FAILED',
+  /** `get_rule_events` failed; tool returns an error result. */
+  AGENT_BUILDER_EPISODE_GET_RULE_EVENTS_FAILED: 'AGENT_BUILDER_EPISODE_GET_RULE_EVENTS_FAILED',
+  /** `get_rule_events` existence lookup (`get`) failed; tool returns an error result. */
+  AGENT_BUILDER_EPISODE_LOOKUP_FAILED: 'AGENT_BUILDER_EPISODE_LOOKUP_FAILED',
   /** Episode attachment resolve failed; returns undefined. */
   AGENT_BUILDER_EPISODE_RESOLVE_FAILED: 'AGENT_BUILDER_EPISODE_RESOLVE_FAILED',
   /** Episode attachment isStale check failed; returns false. */

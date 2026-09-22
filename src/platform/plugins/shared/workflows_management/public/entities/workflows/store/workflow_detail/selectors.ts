@@ -23,6 +23,10 @@ export const selectYamlString = createSelector(selectDetail, (detail) => detail.
 export const selectWorkflowId = createSelector(selectWorkflow, (workflow) => workflow?.id);
 export const selectIsEnabled = createSelector(selectWorkflow, (workflow) => !!workflow?.enabled);
 export const selectWorkflowName = createSelector(selectWorkflow, (workflow) => workflow?.name);
+export const selectWorkflowTags = createSelector(
+  selectWorkflow,
+  (workflow) => workflow?.tags ?? []
+);
 
 export const selectHasChanges = createSelector(
   selectDetail,
@@ -119,6 +123,10 @@ export const selectSchema = createSelector(selectDetail, (detail) => detail.sche
 
 export const selectActiveTab = createSelector(selectDetail, (detail) => detail.activeTab);
 export const selectExecution = createSelector(selectDetail, (detail) => detail.execution);
+export const selectStepExecutionsTotal = createSelector(
+  selectDetail,
+  (detail) => detail.stepExecutionsTotal
+);
 export const selectStepExecutions = createSelector(
   selectExecution,
   (execution) => execution?.stepExecutions

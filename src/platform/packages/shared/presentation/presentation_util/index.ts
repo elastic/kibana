@@ -12,5 +12,6 @@ export {
   openLazySystemFlyout,
   type OpenLazySystemFlyoutParams,
 } from './src/open_lazy_system_flyout';
+export { openLazyModal } from './src/open_lazy_modal';
 export { getPanelContextMenuTriggerId } from './src/focus_helpers';
 export { tracksOverlays, type TracksOverlays } from './src/tracks_overlays';

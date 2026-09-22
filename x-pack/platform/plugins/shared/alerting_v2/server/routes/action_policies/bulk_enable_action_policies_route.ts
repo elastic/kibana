@@ -27,6 +27,7 @@ export class BulkEnableActionPoliciesRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
+    access: 'public' as const,
     summary: 'Enable action policies in bulk by ID',
     oasOperationObject: bulkEnableActionPoliciesOasExamples,
   } as const;

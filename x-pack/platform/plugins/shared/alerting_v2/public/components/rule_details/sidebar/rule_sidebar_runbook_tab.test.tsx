@@ -73,7 +73,7 @@ describe('RuleSidebarRunbookTab', () => {
     renderRunbookTab({
       ...baseRule,
       artifacts: [
-        { id: 'other-1', type: 'dashboard', data: { dashboardId: 'some-dashboard-id' } },
+        { id: 'other-1', type: 'dashboard', data: { dashboard_id: 'some-dashboard-id' } },
         { id: 'runbook-1', type: 'runbook', data: { content: '# First Runbook' } },
         { id: 'runbook-2', type: 'runbook', data: { content: '# Second Runbook' } },
       ],

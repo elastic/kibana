@@ -26,8 +26,7 @@ import { getConversation, postConverse } from '../fixtures/converse_http';
 
 const CONVERSATIONS_PATH = `${API_AGENT_BUILDER}/conversations`;
 
-// The three events every completed round projects to, in stored order.
-const ROUND_DERIVED_EVENT_TYPES = [
+const ROUND_BOUNDARY_EVENT_TYPES = [
   TimelineEventType.userMessage,
   TimelineEventType.executionStarted,
   TimelineEventType.executionTerminated,
@@ -102,7 +101,7 @@ apiTest.describe(
       'a completed round is persisted as a stored events projection that GET serves verbatim',
       async ({ apiClient, esClient }) => {
         // A single real round through `converse` drives the production write path
-        // (upsertRound -> reconcile -> toEs -> storage.index).
+        // (replaceRoundEvents -> reconcile -> toEs -> storage.index).
         await setupAgentDirectAnswer({
           proxy: llmProxy,
           title: 'Events-native round',
@@ -129,7 +128,10 @@ apiTest.describe(
         });
         expect(rawDoc._source?.schema_version).toBe(CONVERSATION_SCHEMA_VERSION);
         const storedEvents = rawDoc._source?.events ?? [];
-        expect(storedEvents.map((event) => event.type)).toStrictEqual(ROUND_DERIVED_EVENT_TYPES);
+        expect(storedEvents.map((event) => event.type)).toStrictEqual(ROUND_BOUNDARY_EVENT_TYPES);
+        expect(storedEvents.every((event) => event.type !== TimelineEventType.executionStep)).toBe(
+          true
+        );
 
         // GET serves the stored projection verbatim for an events-native doc.
         const fetched = await getConversation(

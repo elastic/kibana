@@ -21,7 +21,6 @@ export const useCreateActionPolicy = () => {
     mutationFn: (data) => actionPoliciesApi.createActionPolicy(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: actionPolicyKeys.lists(), exact: false });
-      queryClient.invalidateQueries({ queryKey: actionPolicyKeys.allTags(), exact: false });
       toasts.addSuccess(
         i18n.translate('xpack.alertingV2.actionPolicy.createSuccess', {
           defaultMessage: 'Action policy created successfully',

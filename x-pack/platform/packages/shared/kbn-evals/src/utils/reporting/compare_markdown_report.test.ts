@@ -13,8 +13,8 @@ const makeResult = (overrides: Partial<PairedTTestResult> = {}): PairedTTestResu
   datasetName: 'Dataset One',
   evaluatorName: 'Criteria',
   sampleSize: 10,
-  meanA: 0.8,
-  meanB: 0.7,
+  meanTarget: 0.8,
+  meanBaseline: 0.7,
   pValue: 0.03,
   direction: 'maximize',
   ...overrides,
@@ -23,8 +23,8 @@ const makeResult = (overrides: Partial<PairedTTestResult> = {}): PairedTTestResu
 describe('formatMarkdownCompareReport', () => {
   it('renders a basic comparison table', () => {
     const output = formatMarkdownCompareReport({
-      experimentIdA: 'exp-a',
-      experimentIdB: 'exp-b',
+      targetExperimentId: 'exp-a',
+      baselineExperimentId: 'exp-b',
       results: [makeResult()],
     });
 
@@ -42,8 +42,8 @@ describe('formatMarkdownCompareReport', () => {
 
   it('reports no significant regressions when all p-values are above threshold', () => {
     const output = formatMarkdownCompareReport({
-      experimentIdA: 'exp-a',
-      experimentIdB: 'exp-b',
+      targetExperimentId: 'exp-a',
+      baselineExperimentId: 'exp-b',
       results: [makeResult({ pValue: 0.5 })],
     });
 
@@ -52,8 +52,8 @@ describe('formatMarkdownCompareReport', () => {
 
   it('separates significant and non-significant results', () => {
     const output = formatMarkdownCompareReport({
-      experimentIdA: 'exp-a',
-      experimentIdB: 'exp-b',
+      targetExperimentId: 'exp-a',
+      baselineExperimentId: 'exp-b',
       results: [
         makeResult({ evaluatorName: 'Sig', pValue: 0.01 }),
         makeResult({ evaluatorName: 'NotSig', pValue: 0.5 }),
@@ -67,8 +67,8 @@ describe('formatMarkdownCompareReport', () => {
 
   it('includes compare page URL when provided', () => {
     const output = formatMarkdownCompareReport({
-      experimentIdA: 'exp-a',
-      experimentIdB: 'exp-b',
+      targetExperimentId: 'exp-a',
+      baselineExperimentId: 'exp-b',
       results: [makeResult()],
       comparePageUrl: 'https://kibana.example.com/compare?a=1&b=2',
     });
@@ -80,8 +80,8 @@ describe('formatMarkdownCompareReport', () => {
 
   it('includes refresh baseline link when provided', () => {
     const output = formatMarkdownCompareReport({
-      experimentIdA: 'exp-a',
-      experimentIdB: 'exp-b',
+      targetExperimentId: 'exp-a',
+      baselineExperimentId: 'exp-b',
       results: [makeResult()],
       refreshBaselineUrl:
         'https://buildkite.com/elastic/kibana-pull-request/builds/123#kbn-evals-refresh-block',
@@ -94,8 +94,8 @@ describe('formatMarkdownCompareReport', () => {
 
   it('uses the provided baselineBranch instead of "main"', () => {
     const output = formatMarkdownCompareReport({
-      experimentIdA: 'exp-a',
-      experimentIdB: 'exp-b',
+      targetExperimentId: 'exp-a',
+      baselineExperimentId: 'exp-b',
       results: [makeResult()],
       baselineBranch: 'release/9.x',
       refreshBaselineUrl: 'https://buildkite.com/builds/456#block',
@@ -110,8 +110,8 @@ describe('formatMarkdownCompareReport', () => {
 
   it('renders both compare and refresh links separated by pipe', () => {
     const output = formatMarkdownCompareReport({
-      experimentIdA: 'exp-a',
-      experimentIdB: 'exp-b',
+      targetExperimentId: 'exp-a',
+      baselineExperimentId: 'exp-b',
       results: [makeResult()],
       comparePageUrl: 'https://kibana.example.com/compare',
       refreshBaselineUrl: 'https://buildkite.com/builds/123#kbn-evals-refresh-block',
@@ -125,8 +125,8 @@ describe('formatMarkdownCompareReport', () => {
 
   it('omits refresh link when not provided', () => {
     const output = formatMarkdownCompareReport({
-      experimentIdA: 'exp-a',
-      experimentIdB: 'exp-b',
+      targetExperimentId: 'exp-a',
+      baselineExperimentId: 'exp-b',
       results: [makeResult()],
     });
 
@@ -136,8 +136,8 @@ describe('formatMarkdownCompareReport', () => {
   describe('skipped pairs', () => {
     it('shows a note when skippedMissingPairs > 0', () => {
       const output = formatMarkdownCompareReport({
-        experimentIdA: 'exp-a',
-        experimentIdB: 'exp-b',
+        targetExperimentId: 'exp-a',
+        baselineExperimentId: 'exp-b',
         results: [makeResult()],
         skippedMissingPairs: 5,
       });
@@ -148,8 +148,8 @@ describe('formatMarkdownCompareReport', () => {
 
     it('shows a note when skippedNullScores > 0', () => {
       const output = formatMarkdownCompareReport({
-        experimentIdA: 'exp-a',
-        experimentIdB: 'exp-b',
+        targetExperimentId: 'exp-a',
+        baselineExperimentId: 'exp-b',
         results: [makeResult()],
         skippedNullScores: 3,
       });
@@ -160,8 +160,8 @@ describe('formatMarkdownCompareReport', () => {
 
     it('combines both counts in one note', () => {
       const output = formatMarkdownCompareReport({
-        experimentIdA: 'exp-a',
-        experimentIdB: 'exp-b',
+        targetExperimentId: 'exp-a',
+        baselineExperimentId: 'exp-b',
         results: [makeResult()],
         skippedMissingPairs: 4,
         skippedNullScores: 2,
@@ -173,8 +173,8 @@ describe('formatMarkdownCompareReport', () => {
 
     it('omits the note when both counts are zero', () => {
       const output = formatMarkdownCompareReport({
-        experimentIdA: 'exp-a',
-        experimentIdB: 'exp-b',
+        targetExperimentId: 'exp-a',
+        baselineExperimentId: 'exp-b',
         results: [makeResult()],
         skippedMissingPairs: 0,
         skippedNullScores: 0,
@@ -185,8 +185,8 @@ describe('formatMarkdownCompareReport', () => {
 
     it('omits the note when neither count is provided', () => {
       const output = formatMarkdownCompareReport({
-        experimentIdA: 'exp-a',
-        experimentIdB: 'exp-b',
+        targetExperimentId: 'exp-a',
+        baselineExperimentId: 'exp-b',
         results: [makeResult()],
       });
 
@@ -197,9 +197,11 @@ describe('formatMarkdownCompareReport', () => {
   describe('outcome column', () => {
     it('shows Improvement for maximize direction with positive delta', () => {
       const output = formatMarkdownCompareReport({
-        experimentIdA: 'exp-a',
-        experimentIdB: 'exp-b',
-        results: [makeResult({ meanA: 0.8, meanB: 0.7, pValue: 0.03, direction: 'maximize' })],
+        targetExperimentId: 'exp-a',
+        baselineExperimentId: 'exp-b',
+        results: [
+          makeResult({ meanTarget: 0.8, meanBaseline: 0.7, pValue: 0.03, direction: 'maximize' }),
+        ],
       });
       const dataRow = output.split('\n').find((l) => l.includes('Criteria'));
       expect(dataRow).toContain('Improvement');
@@ -207,9 +209,11 @@ describe('formatMarkdownCompareReport', () => {
 
     it('shows Regression for maximize direction with negative delta', () => {
       const output = formatMarkdownCompareReport({
-        experimentIdA: 'exp-a',
-        experimentIdB: 'exp-b',
-        results: [makeResult({ meanA: 0.6, meanB: 0.8, pValue: 0.03, direction: 'maximize' })],
+        targetExperimentId: 'exp-a',
+        baselineExperimentId: 'exp-b',
+        results: [
+          makeResult({ meanTarget: 0.6, meanBaseline: 0.8, pValue: 0.03, direction: 'maximize' }),
+        ],
       });
       const dataRow = output.split('\n').find((l) => l.includes('Criteria'));
       expect(dataRow).toContain('Regression');
@@ -217,9 +221,11 @@ describe('formatMarkdownCompareReport', () => {
 
     it('shows Improvement for minimize direction with negative delta', () => {
       const output = formatMarkdownCompareReport({
-        experimentIdA: 'exp-a',
-        experimentIdB: 'exp-b',
-        results: [makeResult({ meanA: 100, meanB: 150, pValue: 0.03, direction: 'minimize' })],
+        targetExperimentId: 'exp-a',
+        baselineExperimentId: 'exp-b',
+        results: [
+          makeResult({ meanTarget: 100, meanBaseline: 150, pValue: 0.03, direction: 'minimize' }),
+        ],
       });
       const dataRow = output.split('\n').find((l) => l.includes('Criteria'));
       expect(dataRow).toContain('Improvement');
@@ -227,8 +233,8 @@ describe('formatMarkdownCompareReport', () => {
 
     it('shows - for neutral direction', () => {
       const output = formatMarkdownCompareReport({
-        experimentIdA: 'exp-a',
-        experimentIdB: 'exp-b',
+        targetExperimentId: 'exp-a',
+        baselineExperimentId: 'exp-b',
         results: [makeResult({ pValue: 0.03, direction: 'neutral' })],
       });
       const dataRow = output.split('\n').find((l) => l.includes('Criteria'));
@@ -238,9 +244,11 @@ describe('formatMarkdownCompareReport', () => {
 
     it('shows - for non-significant results regardless of direction', () => {
       const output = formatMarkdownCompareReport({
-        experimentIdA: 'exp-a',
-        experimentIdB: 'exp-b',
-        results: [makeResult({ meanA: 0.8, meanB: 0.7, pValue: 0.5, direction: 'maximize' })],
+        targetExperimentId: 'exp-a',
+        baselineExperimentId: 'exp-b',
+        results: [
+          makeResult({ meanTarget: 0.8, meanBaseline: 0.7, pValue: 0.5, direction: 'maximize' }),
+        ],
       });
       const dataRow = output.split('\n').find((l) => l.includes('Criteria'));
       expect(dataRow).not.toContain('Improvement');
@@ -250,8 +258,8 @@ describe('formatMarkdownCompareReport', () => {
 
   it('handles null p-values as n/a', () => {
     const output = formatMarkdownCompareReport({
-      experimentIdA: 'exp-a',
-      experimentIdB: 'exp-b',
+      targetExperimentId: 'exp-a',
+      baselineExperimentId: 'exp-b',
       results: [makeResult({ pValue: null })],
     });
 
@@ -261,8 +269,8 @@ describe('formatMarkdownCompareReport', () => {
 
   it('handles NaN p-values consistently with formatPValue', () => {
     const output = formatMarkdownCompareReport({
-      experimentIdA: 'exp-a',
-      experimentIdB: 'exp-b',
+      targetExperimentId: 'exp-a',
+      baselineExperimentId: 'exp-b',
       results: [makeResult({ pValue: NaN })],
     });
 
@@ -274,8 +282,8 @@ describe('formatMarkdownCompareReport', () => {
 
   it('handles -Infinity p-values consistently with formatPValue', () => {
     const output = formatMarkdownCompareReport({
-      experimentIdA: 'exp-a',
-      experimentIdB: 'exp-b',
+      targetExperimentId: 'exp-a',
+      baselineExperimentId: 'exp-b',
       results: [makeResult({ pValue: -Infinity })],
     });
 
@@ -288,8 +296,8 @@ describe('formatMarkdownCompareReport', () => {
   describe('baseline staleness', () => {
     it('displays baseline commit SHA and age', () => {
       const output = formatMarkdownCompareReport({
-        experimentIdA: 'exp-a',
-        experimentIdB: 'exp-b',
+        targetExperimentId: 'exp-a',
+        baselineExperimentId: 'exp-b',
         results: [makeResult()],
         baselineTimestamp: new Date().toISOString(),
         baselineCommitSha: 'abc1234567890def',
@@ -302,8 +310,8 @@ describe('formatMarkdownCompareReport', () => {
     it('shows staleness warning for old baselines', () => {
       const fourDaysAgo = new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString();
       const output = formatMarkdownCompareReport({
-        experimentIdA: 'exp-a',
-        experimentIdB: 'exp-b',
+        targetExperimentId: 'exp-a',
+        baselineExperimentId: 'exp-b',
         results: [makeResult()],
         baselineTimestamp: fourDaysAgo,
         baselineCommitSha: 'deadbeef',
@@ -316,8 +324,8 @@ describe('formatMarkdownCompareReport', () => {
     it('does not show staleness warning for recent baselines', () => {
       const yesterday = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString();
       const output = formatMarkdownCompareReport({
-        experimentIdA: 'exp-a',
-        experimentIdB: 'exp-b',
+        targetExperimentId: 'exp-a',
+        baselineExperimentId: 'exp-b',
         results: [makeResult()],
         baselineTimestamp: yesterday,
         baselineCommitSha: 'abc123',

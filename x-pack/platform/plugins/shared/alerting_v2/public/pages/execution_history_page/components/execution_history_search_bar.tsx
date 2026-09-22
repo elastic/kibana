@@ -121,7 +121,7 @@ export const ExecutionHistorySearchBar = ({
           onChange={(e) => setSearchInput(e.target.value)}
           aria-label={i18n.translate(
             'xpack.alertingV2.executionHistory.searchBar.searchAriaLabel',
-            { defaultMessage: 'Search execution history by policy or rule' }
+            { defaultMessage: 'Search execution history by action policy or rule' }
           )}
         />
       </EuiFlexItem>

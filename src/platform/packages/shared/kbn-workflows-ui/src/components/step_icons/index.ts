@@ -8,6 +8,7 @@
  */
 
 export { getBaseConnectorType } from './get_base_connector_type';
+export { getStepFamily, type StepFamily } from './get_step_family';
 export { getConnectorSpecIcon } from './get_connector_spec_icon';
 export {
   getDataUrlFromReactComponent,

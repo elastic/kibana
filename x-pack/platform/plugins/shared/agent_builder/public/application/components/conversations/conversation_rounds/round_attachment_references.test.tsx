@@ -16,6 +16,7 @@ import type {
 import {
   ATTACHMENT_REF_ACTOR,
   ATTACHMENT_REF_OPERATION,
+  AttachmentType,
 } from '@kbn/agent-builder-common/attachments';
 import { RoundAttachmentReferences } from './round_attachment_references';
 
@@ -263,5 +264,70 @@ describe('RoundAttachmentReferences', () => {
 
     const pills = screen.getAllByText(/27 Alerts/);
     expect(pills).toHaveLength(1);
+  });
+
+  describe('excludeTypes', () => {
+    const makeImageVersioned = (id: string, description?: string): VersionedAttachment => ({
+      id,
+      type: AttachmentType.image,
+      versions: [{ version: 1, data: {}, created_at: '2024-01-01T00:00:00Z', content_hash: 'x' }],
+      current_version: 1,
+      active: true,
+      ...(description !== undefined ? { description } : {}),
+    });
+
+    it('hides image-type refs when excludeTypes includes image', () => {
+      const { container } = render(
+        <RoundAttachmentReferences
+          attachmentRefs={[makeRef('img1')]}
+          conversationAttachments={[makeImageVersioned('img1', 'photo.png')]}
+          excludeTypes={[AttachmentType.image]}
+        />
+      );
+      expect(container.firstChild).toBeNull();
+    });
+
+    it('hides "Added" label when only image refs remain after exclusion', () => {
+      const { container } = render(
+        <RoundAttachmentReferences
+          attachmentRefs={[makeRef('img1')]}
+          conversationAttachments={[makeImageVersioned('img1', 'photo.png')]}
+          excludeTypes={[AttachmentType.image]}
+        />
+      );
+      expect(container.firstChild).toBeNull();
+      expect(screen.queryByText('Added')).not.toBeInTheDocument();
+    });
+
+    it('still renders non-image refs when excludeTypes includes image', () => {
+      render(
+        <RoundAttachmentReferences
+          attachmentRefs={[makeRef('img1'), makeRef('txt1')]}
+          conversationAttachments={[
+            makeImageVersioned('img1', 'photo.png'),
+            makeVersioned('txt1', 'Text Label'),
+          ]}
+          excludeTypes={[AttachmentType.image]}
+        />
+      );
+      expect(screen.getByText('Added')).toBeInTheDocument();
+      expect(screen.getByText('Text Label')).toBeInTheDocument();
+      expect(screen.queryByText('photo.png')).not.toBeInTheDocument();
+    });
+
+    it('renders all refs when excludeTypes is empty', () => {
+      render(
+        <RoundAttachmentReferences
+          attachmentRefs={[makeRef('img1'), makeRef('txt1')]}
+          conversationAttachments={[
+            makeImageVersioned('img1', 'photo.png'),
+            makeVersioned('txt1', 'Text Label'),
+          ]}
+          excludeTypes={[]}
+        />
+      );
+      expect(screen.getByText('Added')).toBeInTheDocument();
+      expect(screen.getAllByTestId('agentBuilderRoundAttachmentReferencePill')).toHaveLength(2);
+    });
   });
 });

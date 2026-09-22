@@ -2,18 +2,26 @@ version: "1"
 # Every 4h: IOC extract, taxonomy, severity, and Diamond for pending reports.
 # Driver `size: 50` caps wall clock and inference load. Each item runs several
 # LLM steps sequentially; partial drain per pass is intentional.
-# Scoped to `workflow.spaceId` plus global (`*`) report rows via `space_id`.
-# The LLM steps do not name an inference endpoint. Each route resolves its own
-# model through the inference feature registry, so operators pick the models in
-# Stack Management > Model Settings rather than by editing this workflow.
+# Installed once globally: enrichment is content-only and space-blind, so it
+# selects all pending reports regardless of `space_id` (analyst-paste and
+# future custom-source reports included). The `kibana.request` steps below
+# call the enrich routes with no `/s/{id}/` prefix, so every request resolves
+# to the `default` space, including the per-space LLM connector each route
+# reads via Stack Management > Model Settings. That means every report in the
+# deployment is enriched using only the `default` space's Model Settings
+# regardless of which space it's tagged to. Accepted MVP simplification
+# (sources are global-only for now too), not an oversight: once reports need
+# distinct model config per owning space, these calls have to resolve a space
+# per report inside `extract_each_report`, from that report's own `space_id`
+# (already stamped by the ingest adapters).
 name: Enrich threat report
 description: Extract IOCs, taxonomy, severity, and Diamond from pending reports
 tags:
   - threat-intel
-enabled: true
+enabled: false
 settings:
   concurrency:
-    key: "threat-intel-enrich-{{ workflow.spaceId }}"
+    key: "threat-intel-enrich"
     strategy: drop
     max: 1
 triggers:
@@ -21,11 +29,6 @@ triggers:
     with:
       every: "4h"
 steps:
-  - name: set_space_context
-    type: data.set
-    with:
-      spaceId: "{{ workflow.spaceId }}"
-
   - name: load_pending_reports
     type: elasticsearch.search
     with:
@@ -41,11 +44,8 @@ steps:
           must:
             - term:
                 lineage.extraction_method: pending
-          filter:
-            - terms:
-                space_id:
-                  - "{{ variables.spaceId }}"
-                  - "*"
+          # Space-blind: enrichment is content-only. Pinning to `*` would skip
+          # analyst-paste reports (tagged their real space) and custom-source rows.
       # Field-name strings sort ascending. Object form `{ "@timestamp": "asc" }` is rejected.
       sort:
         - "@timestamp"
@@ -73,11 +73,6 @@ steps:
                 - ids:
                     values:
                       - "{{ foreach.item._id }}"
-              filter:
-                - terms:
-                    space_id:
-                      - "{{ variables.spaceId }}"
-                      - "*"
       - name: skip_already_extracted
         type: loop.continue
         if: "steps.check_already_extracted.output.hits.total.value > 0"
@@ -97,12 +92,11 @@ steps:
         type: kibana.request
         with:
           method: POST
-          path: "/s/{{ variables.spaceId }}/internal/threat_intel/assess_relevance"
+          path: "/internal/threat_intel/assess_relevance"
           headers:
             elastic-api-version: "1"
             x-elastic-internal-origin: "kibana"
           body:
-            html: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.body_html }}"
             text: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.body_text | slice: 0, 30000 }}"
             title: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.title }}"
         on-failure:
@@ -123,12 +117,11 @@ steps:
         type: kibana.request
         with:
           method: POST
-          path: "/s/{{ variables.spaceId }}/internal/threat_intel/extract_iocs"
+          path: "/internal/threat_intel/extract_iocs"
           headers:
             elastic-api-version: "1"
             x-elastic-internal-origin: "kibana"
           body:
-            html: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.body_html }}"
             text: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.body_text }}"
             defang: true
         on-failure:
@@ -139,7 +132,7 @@ steps:
         type: kibana.request
         with:
           method: POST
-          path: "/s/{{ variables.spaceId }}/internal/threat_intel/enrich_taxonomy"
+          path: "/internal/threat_intel/enrich_taxonomy"
           headers:
             elastic-api-version: "1"
             x-elastic-internal-origin: "kibana"
@@ -154,7 +147,7 @@ steps:
         type: kibana.request
         with:
           method: POST
-          path: "/s/{{ variables.spaceId }}/internal/threat_intel/classify_severity"
+          path: "/internal/threat_intel/classify_severity"
           headers:
             elastic-api-version: "1"
             x-elastic-internal-origin: "kibana"
@@ -208,7 +201,7 @@ steps:
         if: "variables.diamond_suitable: true"
         with:
           method: POST
-          path: "/s/{{ variables.spaceId }}/internal/threat_intel/extract_diamond"
+          path: "/internal/threat_intel/extract_diamond"
           headers:
             elastic-api-version: "1"
             x-elastic-internal-origin: "kibana"
@@ -256,11 +249,7 @@ steps:
           query:
             bool:
               minimum_should_match: 1
-              filter:
-                - terms:
-                    space_id:
-                      - "{{ variables.spaceId }}"
-                      - "*"
+              # Space-blind: relatedness is content-based, not space-scoped.
               must_not:
                 - ids:
                     values:

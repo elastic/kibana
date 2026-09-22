@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ScoutPage } from '@kbn/scout';
+import type { DiscoverApp, ScoutPage } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
@@ -14,19 +14,8 @@ import { ES_ARCHIVES, KBN_ARCHIVES, test } from '../fixtures';
 const toSavedSearchTitleTestSubj = (title: string) =>
   `savedObjectTitle${title.split(' ').join('-')}`;
 
-const openLoadSavedSearchPanel = async (page: ScoutPage) => {
-  const openButton = page.testSubj.locator('discoverOpenButton');
-  if (await openButton.isVisible()) {
-    await openButton.click();
-  } else {
-    const overflowButton = page.testSubj.locator('app-menu-overflow-button');
-    await expect(overflowButton).toBeVisible();
-    await overflowButton.click();
-    await page.testSubj
-      .locator('app-menu-popover')
-      .locator('[data-test-subj="discoverOpenButton"]')
-      .click();
-  }
+const openLoadSavedSearchPanel = async (page: ScoutPage, discover: DiscoverApp) => {
+  await discover.clickAppMenuItem('discoverOpenButton');
   await page.testSubj.waitForSelector('loadSearchForm', { state: 'visible' });
 };
 
@@ -54,8 +43,8 @@ test.describe('Tags - discover integration', { tag: tags.stateful.classic }, () 
     await kbnClient.savedObjects.cleanStandardList();
   });
 
-  test('open search allows manually typing tag filter query', async ({ page }) => {
-    await openLoadSavedSearchPanel(page);
+  test('open search allows manually typing tag filter query', async ({ page, pageObjects }) => {
+    await openLoadSavedSearchPanel(page, pageObjects.discover);
     const searchInput = page.testSubj.locator('savedObjectFinderSearchInput');
     await searchInput.fill('tag:(tag-1)');
     await searchInput.press('Enter');
@@ -64,8 +53,11 @@ test.describe('Tags - discover integration', { tag: tags.stateful.classic }, () 
     await expect(page.testSubj.locator(toSavedSearchTitleTestSubj('A Saved Search'))).toBeVisible();
   });
 
-  test('open search allows filtering by selecting a tag in the filter menu', async ({ page }) => {
-    await openLoadSavedSearchPanel(page);
+  test('open search allows filtering by selecting a tag in the filter menu', async ({
+    page,
+    pageObjects,
+  }) => {
+    await openLoadSavedSearchPanel(page, pageObjects.discover);
     await selectFilterTags(page, 'tag-2');
 
     await expect(page.testSubj.locator('savedObjectFinderTitle')).toHaveCount(2);
@@ -75,8 +67,8 @@ test.describe('Tags - discover integration', { tag: tags.stateful.classic }, () 
     await expect(page.testSubj.locator(toSavedSearchTitleTestSubj('A Saved Search'))).toBeVisible();
   });
 
-  test('open search allows filtering by selecting multiple tags', async ({ page }) => {
-    await openLoadSavedSearchPanel(page);
+  test('open search allows filtering by selecting multiple tags', async ({ page, pageObjects }) => {
+    await openLoadSavedSearchPanel(page, pageObjects.discover);
     await selectFilterTags(page, 'tag-2', 'tag-3');
 
     await expect(page.testSubj.locator('savedObjectFinderTitle')).toHaveCount(3);
@@ -101,7 +93,7 @@ test.describe('Tags - discover integration', { tag: tags.stateful.classic }, () 
     await page.testSubj.click('confirmSaveSavedObjectButton');
     await page.testSubj.waitForSelector('savedObjectSaveModal', { state: 'hidden' });
 
-    await openLoadSavedSearchPanel(page);
+    await openLoadSavedSearchPanel(page, pageObjects.discover);
     await selectFilterTags(page, 'tag-1', 'tag-2');
     await expect(page.testSubj.locator('savedObjectFinderTitle')).toHaveCount(3);
     await expect(
@@ -129,7 +121,7 @@ test.describe('Tags - discover integration', { tag: tags.stateful.classic }, () 
     await page.testSubj.click('confirmSaveSavedObjectButton');
     await page.testSubj.waitForSelector('savedObjectSaveModal', { state: 'hidden' });
 
-    await openLoadSavedSearchPanel(page);
+    await openLoadSavedSearchPanel(page, pageObjects.discover);
     await selectFilterTags(page, 'my-new-tag');
     await expect(page.testSubj.locator('savedObjectFinderTitle')).toHaveCount(1);
     await expect(
@@ -150,7 +142,7 @@ test.describe('Tags - discover integration', { tag: tags.stateful.classic }, () 
     await page.testSubj.click('confirmSaveSavedObjectButton');
     await page.testSubj.waitForSelector('savedObjectSaveModal', { state: 'hidden' });
 
-    await openLoadSavedSearchPanel(page);
+    await openLoadSavedSearchPanel(page, pageObjects.discover);
     await selectFilterTags(page, 'tag-3');
     await expect(page.testSubj.locator('savedObjectFinderTitle')).toHaveCount(3);
     await expect(

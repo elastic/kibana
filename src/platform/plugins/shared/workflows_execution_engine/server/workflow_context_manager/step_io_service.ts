@@ -10,7 +10,7 @@
 import type { Logger } from '@kbn/core/server';
 import type { JsonValue } from '@kbn/utility-types';
 import type { EsWorkflowStepExecution, SerializedError } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
+import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import { extractPropertyPathsFromKql, scanForTemplateVariables } from '@kbn/workflows/common/utils';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import {
@@ -226,7 +226,15 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
    * don't progressively grow in-memory state by accumulating predecessor
    * outputs they only briefly needed.
    */
-  private transientlyRehydratedIds: string[] = [];
+  private transientlyRehydratedIds = new Set<string>();
+  /**
+   * Bumped per step execution on every output write. {@link rehydrateOutputs}
+   * snapshots it before its fetch and re-checks after, so a response issued
+   * before a write cannot be applied on top of it. The evicted flag cannot
+   * carry this alone: an output over `evictionMinBytes` can be written, flushed
+   * and evicted again inside that window, making the flag true a second time.
+   */
+  private outputWriteGenerations = new Map<string, number>();
   /**
    * Per-consumer read-pins: the step execution ids each consuming node has
    * pinned for the duration of its own execution. Keyed by
@@ -394,6 +402,10 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     // matters for re-entrant aggregators (e.g. `parallel`) that finish on a
     // resume tick and are consumed by the next step before the flush lands.
     this.forgetTransientRehydration(stepExecutionId);
+    this.outputWriteGenerations.set(
+      stepExecutionId,
+      (this.outputWriteGenerations.get(stepExecutionId) ?? 0) + 1
+    );
 
     if (this.state.getStepExecution(stepExecutionId)?.stepType === 'data.set') {
       this.recordDataSetOutput(stepExecutionId, output);
@@ -482,6 +494,12 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
    * on the freshly-flushed step IDs.
    */
   public async flush(): Promise<void> {
+    if (isTerminalStatus(this.state.getWorkflowExecutionStatus())) {
+      await this.flushStepChanges();
+      await this.state.flushWorkflowDoc();
+      return;
+    }
+
     await Promise.all([this.state.flushWorkflowDoc(), this.flushStepChanges()]);
   }
 
@@ -662,7 +680,7 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
 
     // Zero-ES-call fast path: nothing is evicted and no stale transients need
     // releasing. The read-pin above still fires so the source stays protected.
-    const noPriorTransients = this.transientlyRehydratedIds.length === 0;
+    const noPriorTransients = this.transientlyRehydratedIds.size === 0;
     if (!this.hasEvictedOutputs() && noPriorTransients) {
       return;
     }
@@ -688,6 +706,23 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
    */
   public releaseReadPins(consumerId: string): void {
     this.readPinnedOutputIdsByConsumer.delete(consumerId);
+  }
+
+  /**
+   * Read-pins an explicit set of step execution ids for `consumerId`.
+   *
+   * {@link prepareForRead} pins the ids it derives from static template
+   * analysis; this is the equivalent for a caller that names the ids itself
+   * (see `StepExecutionRuntime.rehydrateStepOutputs`). Both must pin *before*
+   * awaiting {@link rehydrateOutputs}: that call snapshots only the ids which
+   * are evicted at entry, so a resident id in the set would otherwise be
+   * eligible for the concurrent eviction cycle during the ES round trip and
+   * end up neither fetched nor resident.
+   *
+   * Released by {@link releaseReadPins} under the same `consumerId`.
+   */
+  public pinOutputsForRead(consumerId: string, stepExecutionIds: ReadonlyArray<string>): void {
+    this.readPinnedOutputIdsByConsumer.set(consumerId, new Set(stepExecutionIds));
   }
 
   /**
@@ -976,19 +1011,19 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
    * by `isReleaseCandidate`).
    */
   private releaseTransientExcept(keepIds: ReadonlySet<string> | undefined): void {
-    if (this.transientlyRehydratedIds.length === 0) {
+    if (this.transientlyRehydratedIds.size === 0) {
       return;
     }
 
     const ids = this.transientlyRehydratedIds;
-    const remaining: string[] = [];
+    const remaining = new Set<string>();
     let releasedCount = 0;
 
     for (const id of ids) {
       if (keepIds?.has(id)) {
         // Keep this output resident; the upcoming step needs it. It will be
         // re-evaluated for release at the *next* prepareForRead.
-        remaining.push(id);
+        remaining.add(id);
       } else if (this.isReleaseCandidate(id)) {
         const sizeBytes = this.outputSizes.get(id);
         this.outputs.delete(id);
@@ -1002,7 +1037,7 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
 
     if (releasedCount > 0) {
       this.logger?.debug(
-        `Released ${releasedCount} transiently rehydrated step output(s); ${remaining.length} kept resident; total evicted: ${this.evictedOutputIds.size}`
+        `Released ${releasedCount} transiently rehydrated step output(s); ${remaining.size} kept resident; total evicted: ${this.evictedOutputIds.size}`
       );
     }
   }
@@ -1016,13 +1051,7 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
    * before the flush lands).
    */
   private forgetTransientRehydration(stepExecutionId: string): void {
-    if (this.transientlyRehydratedIds.length === 0) {
-      return;
-    }
-    const idx = this.transientlyRehydratedIds.indexOf(stepExecutionId);
-    if (idx !== -1) {
-      this.transientlyRehydratedIds.splice(idx, 1);
-    }
+    this.transientlyRehydratedIds.delete(stepExecutionId);
   }
 
   /**
@@ -1048,11 +1077,20 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
 
     const startMs = performance.now();
     const expectedRunId = this.state.getWorkflowExecutionId();
+    // Snapshot BEFORE the fetch so a write that lands during it is detectable.
+    const generationsAtRequest = new Map(
+      idsToRehydrate.map((id) => [id, this.outputWriteGenerations.get(id) ?? 0])
+    );
     const fetched = await this.stepRepository.getStepExecutionsByIds(idsToRehydrate, [
       'id',
       'output',
       'workflowRunId',
     ]);
+    // Responses we deliberately drop. Must not be mistaken for ids Elasticsearch
+    // never returned: the cleanup at the end clears the evicted flag for those,
+    // which here would leave the id neither resident nor evicted.
+    const supersededIds = new Set<string>();
+
     // Defensive cross-execution filter: mget targets documents by `_id` only,
     // and step execution IDs are constructed from the workflow execution ID,
     // so a collision is improbable but not impossible (e.g. someone running
@@ -1064,6 +1102,23 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
         this.logger?.error(
           `Cross-execution doc skipped during rehydration: id=${doc.id} expected runId=${expectedRunId} got=${doc.workflowRunId}`
         );
+        return false;
+      }
+      // A write during the fetch supersedes this response, whatever the evicted
+      // flag now says. See `outputWriteGenerations`.
+      if ((this.outputWriteGenerations.get(doc.id) ?? 0) !== generationsAtRequest.get(doc.id)) {
+        this.logger?.debug(
+          `Stale rehydration response discarded for step '${doc.id}': its output was rewritten while the fetch was in flight`
+        );
+        supersededIds.add(doc.id);
+        return false;
+      }
+      // Still being evicted is what makes this document authoritative.
+      if (!this.evictedOutputIds.has(doc.id)) {
+        this.logger?.debug(
+          `Stale rehydration response discarded for step '${doc.id}': its output was rewritten or restored while the fetch was in flight`
+        );
+        supersededIds.add(doc.id);
         return false;
       }
       return true;
@@ -1080,7 +1135,10 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
       this.outputs.set(doc.id, doc.output ?? null);
       // Track for transient release: predecessors brought back into memory
       // for one step's read should not stay there forever.
-      this.transientlyRehydratedIds.push(doc.id);
+      // A set: the same id is legitimately rehydrated more than once per tick
+      // (every branch names its enclosing scope), and a duplicate used to outlive
+      // `forgetTransientRehydration`, releasing an already-rewritten output.
+      this.transientlyRehydratedIds.add(doc.id);
       restoredCount++;
 
       // Restore size tracking so:
@@ -1104,7 +1162,9 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     }
 
     // Defensive: drop IDs not returned by ES so we don't retry forever.
-    const stillEvictedAfterFetch = idsToRehydrate.filter((id) => this.evictedOutputIds.has(id));
+    const stillEvictedAfterFetch = idsToRehydrate.filter(
+      (id) => this.evictedOutputIds.has(id) && !supersededIds.has(id)
+    );
     for (const id of stillEvictedAfterFetch) {
       this.clearEvicted(id);
     }
@@ -1262,8 +1322,23 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     }
   }
 
+  /**
+   * True when a newer output is queued for the next bulk-upsert and therefore
+   * not in Elasticsearch yet. Ordinary eviction is safe *because* the doc holds
+   * the same value; between a write and its flush it does not, so a rehydrate
+   * would install the pre-write value over the correct one.
+   */
+  private hasUnflushedOutput(stepExecutionId: string): boolean {
+    const pending = this.pendingIoChanges.get(stepExecutionId);
+    return pending !== undefined && 'output' in pending;
+  }
+
   private isEvictionCandidate(stepExecutionId: string, step: StepExecutionMetadata): boolean {
     if (this.evictedOutputIds.has(stepExecutionId)) {
+      return false;
+    }
+    // Not yet in ES — evicting would make a later rehydrate read the stale doc.
+    if (this.hasUnflushedOutput(stepExecutionId)) {
       return false;
     }
     // Pinned outputs (e.g. an active loop's source) must stay resident.
@@ -1301,6 +1376,8 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     const step = this.state.getStepExecution(stepExecutionId);
     if (!step) return false;
     if (this.evictedOutputIds.has(stepExecutionId)) return false;
+    // Not yet in ES — see `hasUnflushedOutput`.
+    if (this.hasUnflushedOutput(stepExecutionId)) return false;
     // Pinned outputs (e.g. an active loop's source) must stay resident.
     if (this.isPinned(stepExecutionId)) return false;
     if (step.status !== ExecutionStatus.COMPLETED) return false;

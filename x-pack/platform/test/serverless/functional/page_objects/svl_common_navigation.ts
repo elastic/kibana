@@ -19,13 +19,8 @@ export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
   };
 }
 
-// chrome-next opens global search in an overlay modal toggled by a header button; classic chrome
-// reveals an inline popover. These helpers support both so they work regardless of chrome-next.
-// Input and result handling are inherited from the base page object.
 const CHROME_NEXT_SEARCH_BUTTON = 'chromeNextGlobalHeaderSearchButton';
 const CHROME_NEXT_SEARCH_MODAL = 'chromeNextSearchModal';
-const CLASSIC_SEARCH_REVEAL = 'nav-search-reveal';
-const CLASSIC_SEARCH_CONCEAL = 'nav-search-conceal';
 
 class SvlNavigationSearchPageObject extends NavigationalSearchPageObject {
   constructor(ctx: FtrProviderContext) {
@@ -35,34 +30,9 @@ class SvlNavigationSearchPageObject extends NavigationalSearchPageObject {
 
   async showSearch() {
     const testSubjects = this.ctx.getService('testSubjects');
-    const retry = this.ctx.getService('retry');
-    const isChromeNext = await retry.try(async () => {
-      if (await testSubjects.exists(CHROME_NEXT_SEARCH_BUTTON, { timeout: 0 })) {
-        return true;
-      }
-      if (await testSubjects.exists(CLASSIC_SEARCH_REVEAL, { timeout: 0 })) {
-        return false;
-      }
-      // Classic chrome swaps the reveal button for the conceal button once the bar is open,
-      // so an already-open bar means we're in classic chrome, not missing a trigger.
-      if (await testSubjects.exists(CLASSIC_SEARCH_CONCEAL, { timeout: 0 })) {
-        return false;
-      }
-      throw new Error('No global search trigger is present');
-    });
-
-    if (isChromeNext) {
-      if (await testSubjects.exists(CHROME_NEXT_SEARCH_MODAL, { timeout: 0 })) return;
-      await testSubjects.click(CHROME_NEXT_SEARCH_BUTTON);
-      await testSubjects.existOrFail(CHROME_NEXT_SEARCH_MODAL);
-      return;
-    }
-    // Already open? classic chrome swaps reveal → conceal once the bar is open.
-    if (await testSubjects.exists(CLASSIC_SEARCH_CONCEAL, { timeout: 0 })) return;
-    // Click waits for reveal to be actionable, tolerating a transient header
-    // re-render that a zero-timeout `exists` guard would skip the click on.
-    await testSubjects.click(CLASSIC_SEARCH_REVEAL);
-    await testSubjects.existOrFail(CLASSIC_SEARCH_CONCEAL);
+    if (await testSubjects.exists(CHROME_NEXT_SEARCH_MODAL, { timeout: 0 })) return;
+    await testSubjects.click(CHROME_NEXT_SEARCH_BUTTON);
+    await testSubjects.existOrFail(CHROME_NEXT_SEARCH_MODAL);
   }
 
   async hideSearch() {
@@ -74,11 +44,6 @@ class SvlNavigationSearchPageObject extends NavigationalSearchPageObject {
       // (Selecting a result already closes the modal, so this only runs if still open.)
       await browser.pressKeys(browser.keys.ESCAPE);
       await testSubjects.missingOrFail(CHROME_NEXT_SEARCH_MODAL);
-      return;
-    }
-    if (await testSubjects.exists(CLASSIC_SEARCH_CONCEAL, { timeout: 0 })) {
-      await testSubjects.click(CLASSIC_SEARCH_CONCEAL);
-      await testSubjects.missingOrFail(CLASSIC_SEARCH_CONCEAL);
     }
   }
 }

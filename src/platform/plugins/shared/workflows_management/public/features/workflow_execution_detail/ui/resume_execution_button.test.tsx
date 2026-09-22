@@ -28,7 +28,9 @@ const { convertJsonSchemaToZod } = jest.requireMock(
 );
 
 // Capture callbacks and props exposed by ResumeExecutionModal so tests can inspect them.
-let capturedOnSubmit: ((params: { stepInputs: Record<string, unknown> }) => void) | undefined;
+let capturedOnSubmit:
+  | ((params: { stepInputs: Record<string, unknown> }) => Promise<void>)
+  | undefined;
 let capturedContextOverride: ContextOverrideData | undefined;
 
 jest.mock('@kbn/workflows-ui', () => ({
@@ -41,7 +43,7 @@ jest.mock('@kbn/workflows-ui', () => ({
     resumeMessage,
     initialcontextOverride,
   }: {
-    onSubmit?: (params: { stepInputs: Record<string, unknown> }) => void;
+    onSubmit?: (params: { stepInputs: Record<string, unknown> }) => Promise<void>;
     onClose: () => void;
     resumeMessage?: string;
     initialcontextOverride?: ContextOverrideData;
@@ -69,6 +71,7 @@ describe('ResumeExecutionButton', () => {
 
   const defaultProps = {
     executionId: 'exec-123',
+    waitingStepExecutionId: 'wait-step-exec-1',
   };
 
   beforeEach(() => {
@@ -180,7 +183,10 @@ describe('ResumeExecutionButton', () => {
       });
       await waitFor(() => {
         expect(mockHttpPost).toHaveBeenCalledWith('/api/workflows/executions/exec-123/resume', {
-          body: JSON.stringify({ input: { approved: true } }),
+          body: JSON.stringify({
+            input: { approved: true },
+            stepExecutionId: 'wait-step-exec-1',
+          }),
           version: '2023-10-31',
         });
       });
@@ -190,13 +196,11 @@ describe('ResumeExecutionButton', () => {
       renderComponent();
       fireEvent.click(screen.getByTestId('provideActionButton'));
       await waitFor(() => expect(capturedOnSubmit).toBeDefined());
-      act(() => {
-        capturedOnSubmit!({ stepInputs: {} });
+      await act(async () => {
+        await capturedOnSubmit?.({ stepInputs: {} });
       });
-      await waitFor(() => {
-        expect(mockAddSuccess).toHaveBeenCalledTimes(1);
-        expect(screen.queryByTestId('resume-execution-modal')).not.toBeInTheDocument();
-      });
+      expect(mockAddSuccess).toHaveBeenCalledTimes(1);
+      expect(screen.queryByTestId('resume-execution-modal')).not.toBeInTheDocument();
     });
 
     it('shows error toast and keeps modal open on failed submit', async () => {
@@ -300,7 +304,10 @@ describe('ResumeExecutionButton', () => {
       fireEvent.click(screen.getByTestId('approveActionButton'));
       await waitFor(() => {
         expect(mockHttpPost).toHaveBeenCalledWith('/api/workflows/executions/exec-123/resume', {
-          body: JSON.stringify({ input: { approved: true } }),
+          body: JSON.stringify({
+            input: { approved: true },
+            stepExecutionId: 'wait-step-exec-1',
+          }),
           version: '2023-10-31',
         });
       });
@@ -311,7 +318,10 @@ describe('ResumeExecutionButton', () => {
       fireEvent.click(screen.getByTestId('rejectActionButton'));
       await waitFor(() => {
         expect(mockHttpPost).toHaveBeenCalledWith('/api/workflows/executions/exec-123/resume', {
-          body: JSON.stringify({ input: { approved: false } }),
+          body: JSON.stringify({
+            input: { approved: false },
+            stepExecutionId: 'wait-step-exec-1',
+          }),
           version: '2023-10-31',
         });
       });

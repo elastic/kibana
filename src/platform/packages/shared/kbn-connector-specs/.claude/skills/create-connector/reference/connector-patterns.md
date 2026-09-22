@@ -80,6 +80,7 @@ export const YourConnector: ConnectorSpec = {
   actions: {
     search: {
       isTool: true,
+      scope: 'read',
       description: 'Search items by keyword. Returns a ranked list of matching results with IDs and summaries.',
       input: SearchInputSchema,
       handler: async (ctx, input: SearchInput) => {
@@ -89,6 +90,7 @@ export const YourConnector: ConnectorSpec = {
     },
     getItem: {
       isTool: true,
+      scope: 'read',
       description: 'Retrieve full details for a single item by ID. Use the IDs returned by the search action.',
       input: GetItemInputSchema,
       handler: async (ctx, input: GetItemInput) => {
@@ -185,6 +187,7 @@ export const YourMcpConnector: ConnectorSpec = {
   actions: {
     search: {
       isTool: true,
+      scope: 'read',
       description: 'Search Your Service by keyword using the underlying MCP tool.',
       input: z.object({
         query: z.string().describe('Keyword or natural-language search query'),
@@ -196,6 +199,7 @@ export const YourMcpConnector: ConnectorSpec = {
     // Escape hatches for dynamic tool discovery
     listTools: {
       isTool: true,
+      scope: 'read',
       description: 'List all MCP tools exposed by the server. Useful for dynamic discovery.',
       input: z.object({}),
       handler: withMcpClient(async (client) => {
@@ -204,6 +208,7 @@ export const YourMcpConnector: ConnectorSpec = {
     },
     callTool: {
       isTool: true,
+      scope: 'destroy',
       description: 'Call any MCP tool by name with arbitrary arguments. Use listTools first to discover available tools.',
       input: z.object({
         name: z.string().describe('The MCP tool name (from listTools)'),
@@ -490,6 +495,44 @@ Connectors surface three levels of natural-language guidance to AI agents: the c
 Set `isTool: true` on actions that should be discoverable by AI agents in Agent Builder. This is the common case — most actions should be tools. The default is `false`, so omitting it silently hides the action from agents.
 
 Set `isTool: false` (or omit it) for actions that exist for completeness but should not be invoked by an agent autonomously — for example, destructive operations, admin-only actions, or low-level helpers that are only useful as building blocks for other actions.
+
+### `scope` — classifying side effects for every `isTool: true` action
+
+Every `isTool: true` action **must** include an explicit `scope` field. This is an advisory signal to the LLM and orchestration layer about what side effects the action may have — it does not enforce access control at runtime.
+
+| Value | When to use |
+|---|---|
+| `'read'` | Action only reads data; no external state is modified. Pure lookups, searches, listings, downloads. |
+| `'write'` | Action creates or appends new data but does not overwrite or delete existing state. Examples: send a message, create a resource, add a comment, post an event. |
+| `'destroy'` | Action may overwrite, update, or delete existing data. Examples: resolve an issue, update a record, delete a resource, patch an entity, scale a workload. Also use for generic escape-hatch actions (`request`, `callTool`, `callRestApi`, `callGraphAPI`) since they can do anything. |
+
+**Decision rule**: if the action only sends GET requests (or equivalent read-only API calls), use `'read'`. If it creates new, distinct records without touching existing ones, use `'write'`. If it can overwrite, update, or remove, use `'destroy'`. When uncertain, prefer `'destroy'` — it's safer to over-classify than under-classify.
+
+```typescript
+// Read-only lookup
+listIssues: {
+  isTool: true,
+  scope: 'read',
+  description: '...',
+  ...
+},
+
+// Creates a new record
+createIssue: {
+  isTool: true,
+  scope: 'write',
+  description: '...',
+  ...
+},
+
+// Modifies existing state
+resolveIssue: {
+  isTool: true,
+  scope: 'destroy',
+  description: '...',
+  ...
+},
+```
 
 ### Action descriptions
 

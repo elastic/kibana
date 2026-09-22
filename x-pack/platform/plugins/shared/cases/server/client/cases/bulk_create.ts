@@ -57,6 +57,11 @@ import {
   throwIfFieldRepresentationConflicts,
   throwIfInvalidLinkedFieldValues,
 } from '../../common/utils/pair_field_representations';
+import {
+  CREATE_CASE_WITHOUT_TEMPLATE_COUNTER,
+  CREATE_CASE_WITH_TEMPLATE_COUNTER,
+  incrementCasesClientCounter,
+} from '../usage_counters';
 
 /**
  * Internal (non-wire) options for bulkCreate. These are only settable by in-process callers
@@ -73,6 +78,26 @@ export interface BulkCreateCasesClientOptions {
    */
   relaxRequiredFields?: boolean;
 }
+
+/**
+ * Tallies how many of the created cases carry each template, so the usage stats count cases rather
+ * than distinct templates while still writing once per template.
+ */
+const countCasesPerTemplateId = (
+  casesSOs: Array<SavedObject<CaseTransformedAttributes>>
+): Map<string, number> => {
+  const casesPerTemplateId = new Map<string, number>();
+
+  for (const { attributes } of casesSOs) {
+    const templateId = attributes.template?.id;
+
+    if (templateId != null) {
+      casesPerTemplateId.set(templateId, (casesPerTemplateId.get(templateId) ?? 0) + 1);
+    }
+  }
+
+  return casesPerTemplateId;
+};
 
 export const bulkCreate = async (
   data: BulkCreateCasesRequest,
@@ -354,16 +379,27 @@ export const bulkCreate = async (
       await notificationService.bulkNotifyAssignees(assigneesPerCase);
     }
 
-    const templateIds = [
-      ...new Set(
-        casesSOs.map((c) => c.attributes.template?.id).filter((id): id is string => id != null)
-      ),
-    ];
+    const casesCreatedWithTemplate = casesSOs.filter(
+      (c) => c.attributes.template?.id != null
+    ).length;
+
+    incrementCasesClientCounter(
+      clientArgs,
+      CREATE_CASE_WITH_TEMPLATE_COUNTER,
+      casesCreatedWithTemplate
+    );
+    incrementCasesClientCounter(
+      clientArgs,
+      CREATE_CASE_WITHOUT_TEMPLATE_COUNTER,
+      casesSOs.length - casesCreatedWithTemplate
+    );
+
+    const casesPerTemplateId = countCasesPerTemplateId(casesSOs);
 
     await Promise.allSettled(
-      templateIds.map(async (templateId) => {
+      [...casesPerTemplateId].map(async ([templateId, caseCount]) => {
         try {
-          await templatesService.incrementUsageStats(templateId);
+          await templatesService.incrementUsageStats(templateId, caseCount);
         } catch (error) {
           logger.warn(`Failed to update template usage stats for template ${templateId}: ${error}`);
         }

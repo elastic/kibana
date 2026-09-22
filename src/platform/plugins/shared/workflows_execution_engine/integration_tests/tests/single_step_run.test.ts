@@ -113,11 +113,16 @@ steps:
     with:
       input: 'Hi there! Are you alive?'
 
+  - name: set_channel_variable_step
+    type: data.set
+    with:
+      channel: '#one-workflow'
+
   - name: step2
     type: ${FakeConnectors.slack1.actionTypeId}
     connector-id: ${FakeConnectors.slack1.name}
     with:
-      message: 'Inference result: {{steps.step1.output[0].result}}'
+      message: 'Inference result: {{steps.step1.output[0].result}}; Channel: {{variables.channel}}'
 
   - name: step3
     type: ${FakeConnectors.slack1.actionTypeId}
@@ -131,6 +136,9 @@ steps:
             step1: {
               output: [{ result: 'I am alive!' }],
             },
+          },
+          variables: {
+            channel: '#one-workflow',
           },
         },
       });
@@ -159,7 +167,7 @@ steps:
         expect.objectContaining({
           id: FakeConnectors.slack1.id,
           params: {
-            message: `Inference result: I am alive!`,
+            message: `Inference result: I am alive!; Channel: #one-workflow`,
           },
         })
       );

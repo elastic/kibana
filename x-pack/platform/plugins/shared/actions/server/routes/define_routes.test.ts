@@ -11,9 +11,13 @@ import { actionsConfigMock } from '../actions_config.mock';
 import { OAuthRateLimiter } from '../lib/oauth_rate_limiter';
 import { defineRoutes } from '.';
 import { inboundEventsRoute } from './inbound_events';
+import { rotateInboundIngressRoute } from './connector/rotate_inbound_ingress';
 
 jest.mock('./inbound_events', () => ({
   inboundEventsRoute: jest.fn(),
+}));
+jest.mock('./connector/rotate_inbound_ingress', () => ({
+  rotateInboundIngressRoute: jest.fn(),
 }));
 
 jest.mock('./connector/create', () => ({ createConnectorRoute: jest.fn() }));
@@ -41,6 +45,9 @@ jest.mock('./connector/list_types_system', () => ({ listTypesWithSystemRoute: je
 jest.mock('./connector/get_spec', () => ({ getConnectorSpecRoute: jest.fn() }));
 
 const inboundEventsRouteMock = inboundEventsRoute as jest.MockedFunction<typeof inboundEventsRoute>;
+const rotateInboundIngressRouteMock = rotateInboundIngressRoute as jest.MockedFunction<
+  typeof rotateInboundIngressRoute
+>;
 
 describe('defineRoutes', () => {
   const baseOpts = () => ({
@@ -76,10 +83,15 @@ describe('defineRoutes', () => {
       inboundEventsClient: inboundEvents.client,
       getSpaceId: inboundEvents.getSpaceId,
     });
+    expect(rotateInboundIngressRouteMock).toHaveBeenCalledWith(
+      expect.any(Object),
+      expect.any(Object)
+    );
   });
 
   it('skips inbound events registration when inboundEvents opts are omitted', () => {
     defineRoutes(baseOpts());
     expect(inboundEventsRouteMock).not.toHaveBeenCalled();
+    expect(rotateInboundIngressRouteMock).not.toHaveBeenCalled();
   });
 });

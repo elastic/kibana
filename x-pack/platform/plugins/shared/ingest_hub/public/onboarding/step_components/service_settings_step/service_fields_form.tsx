@@ -88,7 +88,7 @@ function VarField({
   service: AwsServiceMatrixEntry;
   activeInput: string;
   fieldName: string;
-  draft: Record<string, Record<string, string>>;
+  draft: Record<string, Record<string, string | string[]>>;
   onFieldChange: (input: string, fieldName: string, value: string) => void;
   forceShowErrors?: boolean;
   datastreams?: InputFieldProps['datastreams'];
@@ -162,7 +162,7 @@ function InputVarFields({
 }: {
   service: AwsServiceMatrixEntry;
   activeInput: string;
-  varsByInput: Record<string, Record<string, string>>;
+  varsByInput: Record<string, Record<string, string | string[]>>;
   globalRegion: string;
   onFieldChange: (input: string, fieldName: string, value: string) => void;
 }) {

@@ -8,7 +8,7 @@
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import moment from 'moment';
-import { EMPTY_VALUE } from '../components/rule_details/utils';
+import { EMPTY_VALUE } from '../utils/rule_display';
 import { useBulkGetUserProfiles } from './use_bulk_get_user_profiles';
 import { resolveDisplayName } from '../utils/resolve_display_name';
 

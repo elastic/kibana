@@ -28,7 +28,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-export type DeploymentMethod = 'managed_integrations';
+import type { DeploymentMethod } from '../../aws_service_matrix';
+
+// Re-export the canonical type from the matrix so all consumers use the same spelling.
+export type { DeploymentMethod };
 
 interface DeploymentMethodOption {
   value: DeploymentMethod;
@@ -42,7 +45,7 @@ interface DeploymentMethodOption {
 
 const DEPLOYMENT_METHOD_OPTIONS: DeploymentMethodOption[] = [
   {
-    value: 'managed_integrations',
+    value: 'managed_integration',
     text: i18n.translate(
       'xpack.ingestHub.authenticateAndDeployStep.deploymentMethod.managedIntegrations.selectText',
       { defaultMessage: 'Elastic Managed Integrations' }
@@ -54,6 +57,21 @@ const DEPLOYMENT_METHOD_OPTIONS: DeploymentMethodOption[] = [
     tagline: i18n.translate(
       'xpack.ingestHub.authenticateAndDeployStep.deploymentMethod.managedIntegrations.tagline',
       { defaultMessage: 'Simpler setup, no agent required.' }
+    ),
+  },
+  {
+    value: 'agent_based',
+    text: i18n.translate(
+      'xpack.ingestHub.authenticateAndDeployStep.deploymentMethod.agentBased.selectText',
+      { defaultMessage: 'Agent-based' }
+    ),
+    name: i18n.translate(
+      'xpack.ingestHub.authenticateAndDeployStep.deploymentMethod.agentBased.name',
+      { defaultMessage: 'Agent-based' }
+    ),
+    tagline: i18n.translate(
+      'xpack.ingestHub.authenticateAndDeployStep.deploymentMethod.agentBased.tagline',
+      { defaultMessage: 'For environments that require an Elastic Agent.' }
     ),
   },
 ];
@@ -69,7 +87,11 @@ export function DeploymentMethodCard({ selectedMethod, onChange }: DeploymentMet
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [draftMethod, setDraftMethod] = useState<DeploymentMethod>(selectedMethod);
 
-  const selectedOption = DEPLOYMENT_METHOD_OPTIONS.find((o) => o.value === selectedMethod)!;
+  // Defensive fallback: if a stale/hand-edited session-storage value carries an unknown method,
+  // show the first option rather than crashing. The type permits any DeploymentMethod string.
+  const selectedOption =
+    DEPLOYMENT_METHOD_OPTIONS.find((o) => o.value === selectedMethod) ??
+    DEPLOYMENT_METHOD_OPTIONS[0];
 
   const panelCss = css`
     border: 1px solid ${euiTheme.colors.borderBaseSubdued};

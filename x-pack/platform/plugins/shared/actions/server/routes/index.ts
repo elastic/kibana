@@ -21,6 +21,7 @@ import { deleteConnectorRoute } from './connector/delete';
 import { executeConnectorRoute } from './connector/execute';
 import { getConnectorRoute } from './connector/get';
 import { updateConnectorRoute } from './connector/update';
+import { rotateInboundIngressRoute } from './connector/rotate_inbound_ingress';
 import { getOAuthAccessToken } from './get_oauth_access_token';
 import { oauthAuthorizeRoute } from './oauth_authorize';
 import { oauthCallbackRoute, oauthCallbackScriptRoute } from './oauth_callback';
@@ -90,5 +91,6 @@ export function defineRoutes(opts: RouteOptions) {
       inboundEventsClient: inboundEvents.client,
       getSpaceId: inboundEvents.getSpaceId,
     });
+    rotateInboundIngressRoute(router, licenseState);
   }
 }

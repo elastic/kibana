@@ -8,9 +8,10 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { ConnectorContractUnion } from '../..';
+import { CONNECTOR_ID_MAX_LENGTH } from '../../common/constants';
 import { getShape } from '../../common/utils/zod/get_shape';
 import { getZodSchemaType } from '../../common/utils/zod/get_zod_schema_type';
+import type { ConnectorContractUnion } from '../../types/v1';
 import { StepWithIfConditionSchema, TimeoutPropSchema } from '../schema';
 import type { BaseStepDefinition } from '../step_definition_types';
 import { StepCategory } from '../step_definition_types';
@@ -39,10 +40,14 @@ export function buildConnectorStepSchema(connector: ConnectorContractUnion): z.Z
   };
 
   if (connector.hasConnectorId === 'required') {
-    props['connector-id'] = z.string().describe('ID of the connector instance to use');
+    props['connector-id'] = z
+      .string()
+      .max(CONNECTOR_ID_MAX_LENGTH)
+      .describe('ID of the connector instance to use');
   } else if (connector.hasConnectorId === 'optional') {
     props['connector-id'] = z
       .string()
+      .max(CONNECTOR_ID_MAX_LENGTH)
       .optional()
       .describe('Optional connector instance ID (omit to use the system connector)');
   }

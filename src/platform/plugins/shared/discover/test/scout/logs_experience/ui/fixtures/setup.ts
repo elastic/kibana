@@ -78,14 +78,19 @@ export async function createNonLogsDiscoverSession(
 }
 
 /**
- * Delete the synthetic data seeded by global setup. Scoped to this suite's own data stream and
+ * Delete the synthetic data seeded by global setup. Scoped to this suite's own data streams and
  * index: `logsEsClient.clean()` resolves `logs-*-*`, so it would take every other suite's logs
  * data down with it on a shared or long-lived stack. Shared by global setup (which deletes before
  * seeding so doc counts stay stable across re-runs) and global teardown.
  */
 export async function deleteLogsExperienceData(esClient: EsClient) {
   await esClient.indices.deleteDataStream(
-    { name: `logs-${LOGS.SYNTH_LOGS_DATASET}-${LOGS.SYNTH_LOGS_NAMESPACE}` },
+    {
+      name: [
+        `logs-${LOGS.SYNTH_LOGS_DATASET}-${LOGS.SYNTH_LOGS_NAMESPACE}`,
+        `logs-${LOGS.SYNTH_DOCVIEWER_DATASET}-${LOGS.SYNTH_LOGS_NAMESPACE}`,
+      ].join(','),
+    },
     { ignore: [404] }
   );
 

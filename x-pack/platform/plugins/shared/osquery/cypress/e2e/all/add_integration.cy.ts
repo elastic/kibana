@@ -71,6 +71,7 @@ describe.skip('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => 
       cy.contains('Add this integration to run and schedule queries for Elastic Agent.');
       cy.contains('Add Osquery Manager');
       cy.getBySel('osquery-add-integration-button');
+      cy.getBySel('chromeNextGlobalHeaderSearchButton').click();
       cy.getBySel('nav-search-input').type('Osquery');
       cy.get(`[url="${NAV_SEARCH_INPUT_OSQUERY_RESULTS.MANAGEMENT}"]`).should('exist');
       cy.get(`[url="${NAV_SEARCH_INPUT_OSQUERY_RESULTS.LOGS}"]`).should('exist');

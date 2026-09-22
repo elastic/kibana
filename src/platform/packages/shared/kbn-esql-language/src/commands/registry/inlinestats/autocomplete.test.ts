@@ -100,4 +100,25 @@ describe('INLINE STATS Multi-token Autocomplete', () => {
       { name: 'avg_field1', type: 'double', userDefined: true, location: { min: 15, max: 24 } },
     ]);
   });
+
+  test('suggests subqueries after IN in WHERE', async () => {
+    await inlineStatsExpectSuggestions(
+      'FROM a | INLINE STATS MIN(b) WHERE keywordField IN ',
+      ['($0)', '(FROM $0)', '(ROW $0)', '(TS $0)'],
+      mockCallbacks
+    );
+    await inlineStatsExpectSuggestions(
+      'FROM a | INLINE STATS MIN(b) WHERE keywordField NOT IN ',
+      ['($0)', '(FROM $0)', '(ROW $0)', '(TS $0)'],
+      mockCallbacks
+    );
+  });
+
+  test('does not suggest subqueries after IN outside WHERE', async () => {
+    await inlineStatsExpectSuggestions(
+      'FROM a | INLINE STATS MIN(b) BY keywordField IN ',
+      ['($0)'],
+      mockCallbacks
+    );
+  });
 });

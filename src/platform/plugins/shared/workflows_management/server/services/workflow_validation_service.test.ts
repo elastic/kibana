@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { CustomTriggerSchemaConfig } from '@kbn/workflows';
 import type { WorkflowValidationDeps } from './types';
 import { WorkflowValidationService } from './workflow_validation_service';
 
 const makeDeps = (
-  listedTriggers: Array<{ id: string }> = []
+  listedTriggers: CustomTriggerSchemaConfig[] = []
 ): {
   deps: WorkflowValidationDeps;
   actionsClient: { getAll: jest.Mock };
@@ -104,6 +105,57 @@ describe('WorkflowValidationService', () => {
         'enabled: true',
         'triggers:',
         '  - type: manual',
+        'steps:',
+        '  - name: step-one',
+        '    type: console',
+        '    with:',
+        '      message: "hello"',
+        '',
+      ].join('\n');
+
+      const result = await service.validateWorkflow(yaml, 'default', request);
+
+      expect(result.valid).toBe(true);
+    });
+
+    it('fails save when a requiresConnectorId trigger is missing connector-id', async () => {
+      const connectorEventTriggerId = 'example.connector_event';
+      const { deps } = makeDeps([{ id: connectorEventTriggerId, requiresConnectorId: true }]);
+      const service = new WorkflowValidationService(deps);
+      const request = {} as any;
+
+      const yaml = [
+        'name: connector-event',
+        'enabled: true',
+        'triggers:',
+        `  - type: ${connectorEventTriggerId}`,
+        'steps:',
+        '  - name: step-one',
+        '    type: console',
+        '    with:',
+        '      message: "hello"',
+        '',
+      ].join('\n');
+
+      const result = await service.validateWorkflow(yaml, 'default', request);
+
+      expect(result.valid).toBe(false);
+      expect(result.diagnostics.some((d) => d.source === 'schema')).toBe(true);
+      expect(result.diagnostics.some((d) => d.message.includes('connector-id'))).toBe(true);
+    });
+
+    it('accepts a requiresConnectorId trigger when connector-id is present', async () => {
+      const connectorEventTriggerId = 'example.connector_event';
+      const { deps } = makeDeps([{ id: connectorEventTriggerId, requiresConnectorId: true }]);
+      const service = new WorkflowValidationService(deps);
+      const request = {} as any;
+
+      const yaml = [
+        'name: connector-event',
+        'enabled: true',
+        'triggers:',
+        `  - type: ${connectorEventTriggerId}`,
+        '    connector-id: webhook-1',
         'steps:',
         '  - name: step-one',
         '    type: console',

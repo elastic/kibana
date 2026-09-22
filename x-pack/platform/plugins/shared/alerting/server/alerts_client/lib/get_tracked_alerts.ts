@@ -22,6 +22,7 @@ import {
 import { get } from 'lodash';
 import type { RawAlertInstance, RuleAlertData } from '../../types';
 import type { TrackedAADAlerts, SearchResult } from '../types';
+import { retryTransientEsErrors } from '../../lib/retry_transient_es_errors';
 
 export interface GetTrackedAlertsParams<AlertData extends RuleAlertData> {
   ruleId: string;
@@ -48,11 +49,14 @@ export async function getTrackedAlerts<AlertData extends RuleAlertData>({
 }: GetTrackedAlertsParams<AlertData>): Promise<TrackedAADAlerts<AlertData>> {
   const trackedAlerts = createEmptyTrackedAlerts<AlertData>();
 
+  const searchWithRetry = (queryBody: Record<string, unknown>) =>
+    retryTransientEsErrors(() => search(queryBody), { logger });
+
   const hits = await fetchTrackedAlertsByExecution({
     ruleId,
     lookBackWindow,
     maxAlertLimit,
-    search,
+    search: searchWithRetry,
   });
 
   populateTrackedAlerts(trackedAlerts, hits);
@@ -72,7 +76,7 @@ export async function getTrackedAlerts<AlertData extends RuleAlertData>({
       const missingHits = await fetchAlertsByIds({
         ruleId,
         alertUuids: missingUuids,
-        search,
+        search: searchWithRetry,
       });
 
       populateTrackedAlerts(trackedAlerts, missingHits);

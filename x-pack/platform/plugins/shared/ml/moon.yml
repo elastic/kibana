@@ -98,6 +98,7 @@ dependsOn:
   - '@kbn/ml-url-state'
   - '@kbn/ml-validators'
   - '@kbn/ml-cps'
+  - '@kbn/ml-cps-common'
   - '@kbn/monaco'
   - '@kbn/observability-ai-assistant-plugin'
   - '@kbn/presentation-publishing'

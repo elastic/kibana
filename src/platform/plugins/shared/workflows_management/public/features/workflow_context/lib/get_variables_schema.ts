@@ -9,6 +9,7 @@
 
 import { getStepId } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
+import { isDataSet } from '@kbn/workflows/graph';
 import { inferZodType } from '@kbn/workflows-yaml';
 import { z } from '@kbn/zod/v4';
 
@@ -32,7 +33,7 @@ export function getVariablesSchema(
     predecessors = workflowExecutionGraph.getAllPredecessors(stepNode.id);
   }
 
-  const dataSetSteps = predecessors.filter((node) => node.stepType === 'data.set');
+  const dataSetSteps = predecessors.filter(isDataSet);
 
   if (dataSetSteps.length === 0) {
     return EMPTY_VARIABLES_SCHEMA;
@@ -41,7 +42,7 @@ export function getVariablesSchema(
   const allFields: Record<string, z.ZodTypeAny> = {};
 
   for (const node of dataSetSteps) {
-    if (node.type === 'data.set' && node.configuration.with) {
+    if (node.configuration.with) {
       const withConfig = node.configuration.with as Record<string, unknown>;
       for (const key of Object.keys(withConfig)) {
         allFields[key] = inferZodType(withConfig[key]);

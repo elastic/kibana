@@ -12,6 +12,7 @@ import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { LinkedActionPoliciesStep } from './linked_action_policies_step';
 import { useWatch } from 'react-hook-form';
 import { useMatchedActionPolicies } from './use_matched_action_policies';
+import { useActionPolicyConnectorTypes } from './use_action_policy_connector_types';
 
 jest.mock('react-hook-form', () => ({
   ...jest.requireActual('react-hook-form'),
@@ -19,9 +20,14 @@ jest.mock('react-hook-form', () => ({
 }));
 
 jest.mock('./use_matched_action_policies');
+jest.mock('./use_action_policy_connector_types');
 
 const mockUseMatchedActionPolicies = useMatchedActionPolicies as jest.MockedFunction<
   typeof useMatchedActionPolicies
+>;
+
+const mockUseActionPolicyConnectorTypes = useActionPolicyConnectorTypes as jest.MockedFunction<
+  typeof useActionPolicyConnectorTypes
 >;
 
 const mockUseWatch = useWatch as jest.Mock;
@@ -32,24 +38,42 @@ const renderComponent = (
   const http = httpServiceMock.createStartContract();
   return render(
     <IntlProvider locale="en">
-      <LinkedActionPoliciesStep http={http} ruleId="rule-1" {...props} />
+      <LinkedActionPoliciesStep http={http} {...props} />
     </IntlProvider>
   );
 };
 
 describe('LinkedActionPoliciesStep', () => {
-  it('always renders the title and subtext', () => {
+  beforeEach(() => {
+    mockUseActionPolicyConnectorTypes.mockReturnValue({
+      connectorTypesByPolicy: new Map(),
+      isLoading: false,
+    });
+  });
+
+  it('renders the title and the matching subtext when policies are present', () => {
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
       error: null,
-      items: [],
-      total: 0,
+      items: [
+        {
+          action_policy: { id: 'ap-1', name: 'Global Policy', matcher: null } as any,
+          category: 'catch_all',
+        },
+      ],
+      total: 1,
+      evaluatedCount: 1,
+      isTruncated: false,
     });
 
     renderComponent();
 
     expect(screen.getByText('Action policies')).toBeInTheDocument();
-    expect(screen.getByText('These policies currently match this rule.')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'These policies match this rule by catch-all or tag. Policies with a query condition may also match at dispatch time based on alert data.'
+      )
+    ).toBeInTheDocument();
   });
 
   it('shows a loading spinner while fetching', () => {
@@ -58,6 +82,8 @@ describe('LinkedActionPoliciesStep', () => {
       error: null,
       items: [],
       total: 0,
+      evaluatedCount: 0,
+      isTruncated: false,
     });
 
     renderComponent();
@@ -71,37 +97,185 @@ describe('LinkedActionPoliciesStep', () => {
       error: null,
       items: [],
       total: 0,
+      evaluatedCount: 0,
+      isTruncated: false,
     });
 
     renderComponent();
 
     expect(screen.getByTestId('linkedActionPoliciesEmpty')).toBeInTheDocument();
-    expect(screen.getByText('0 matching action policies')).toBeInTheDocument();
+    expect(screen.getByText('No matching action policies found.')).toBeInTheDocument();
   });
 
-  it('renders policy names with category badges in an EuiSelectable', () => {
+  it('renders a catch-all badge for a global policy', () => {
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
       error: null,
       items: [
         {
-          actionPolicy: { id: 'ap-1', name: 'Global Policy' } as any,
-          category: 'global',
-        },
-        {
-          actionPolicy: { id: 'ap-2', name: 'Tag Filtered Policy' } as any,
-          category: 'global-filtered',
+          action_policy: { id: 'ap-1', name: 'Global Policy', matcher: null } as any,
+          category: 'catch_all',
         },
       ],
-      total: 2,
+      total: 1,
+      evaluatedCount: 1,
+      isTruncated: false,
     });
 
     renderComponent();
 
     expect(screen.getByText('Global Policy')).toBeInTheDocument();
-    expect(screen.getByText('Tag Filtered Policy')).toBeInTheDocument();
-    expect(screen.getByText('Global policies')).toBeInTheDocument();
-    expect(screen.getByText('Matching global policies')).toBeInTheDocument();
+    expect(screen.getByTestId('matchedPolicyReasonCatchAll')).toBeInTheDocument();
+    expect(screen.queryByTestId('matchedPolicyReasonTags')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('matchedPolicyReasonExpression')).not.toBeInTheDocument();
+  });
+
+  it('renders a tags badge for a policy matched by tags', () => {
+    mockUseWatch.mockReturnValue({ name: 'My Rule', tags: ['env:prod', 'other'] });
+    mockUseMatchedActionPolicies.mockReturnValue({
+      isLoading: false,
+      error: null,
+      items: [
+        {
+          action_policy: {
+            id: 'ap-2',
+            name: 'Tag Policy',
+            matcher: { tags: ['env:prod', 'team:sre'] },
+          } as any,
+          category: 'tags',
+        },
+      ],
+      total: 1,
+      evaluatedCount: 1,
+      isTruncated: false,
+    });
+
+    renderComponent();
+
+    expect(screen.getByTestId('matchedPolicyReasonTags')).toBeInTheDocument();
+    expect(screen.getByTestId('matchedPolicyReasonTags')).toHaveAttribute(
+      'aria-label',
+      'Matching rule tags: env:prod'
+    );
+    expect(screen.queryByTestId('matchedPolicyReasonCatchAll')).not.toBeInTheDocument();
+  });
+
+  it('renders both tags and expression badges when the matcher has both clauses', () => {
+    mockUseWatch.mockReturnValue({ name: 'My Rule', tags: ['env:prod'] });
+    mockUseMatchedActionPolicies.mockReturnValue({
+      isLoading: false,
+      error: null,
+      items: [
+        {
+          action_policy: {
+            id: 'ap-4',
+            name: 'Combined Policy',
+            matcher: { tags: ['env:prod'], expression: 'data.error_count > 0' },
+          } as any,
+          category: 'tags',
+        },
+      ],
+      total: 1,
+      evaluatedCount: 1,
+      isTruncated: false,
+    });
+
+    renderComponent();
+
+    expect(screen.getByTestId('matchedPolicyReasonTags')).toBeInTheDocument();
+    expect(screen.getByTestId('matchedPolicyReasonExpression')).toBeInTheDocument();
+  });
+
+  it('renders the edit link for each policy row with the correct href', () => {
+    const http = httpServiceMock.createStartContract();
+    // createStartContract uses a real BasePath instance with basePath='', so prepend() is a pass-through.
+
+    mockUseMatchedActionPolicies.mockReturnValue({
+      isLoading: false,
+      error: null,
+      items: [
+        {
+          action_policy: { id: 'ap-1', name: 'Global Policy', matcher: null } as any,
+          category: 'catch_all',
+        },
+      ],
+      total: 1,
+      evaluatedCount: 1,
+      isTruncated: false,
+    });
+
+    render(
+      <IntlProvider locale="en">
+        <LinkedActionPoliciesStep http={http} />
+      </IntlProvider>
+    );
+
+    const editLink = screen.getByTestId('linkedActionPolicyEdit-ap-1');
+    expect(editLink).toBeInTheDocument();
+    expect(editLink).toHaveTextContent('Global Policy');
+    expect(editLink).toHaveAttribute(
+      'href',
+      '/app/management/alertingV2/action_policies/edit/ap-1'
+    );
+    expect(editLink).toHaveAttribute('target', '_blank');
+    expect(editLink).toHaveAttribute('rel', 'noopener noreferrer');
+  });
+
+  it('renders connector icons for a policy from the batched connector-types hook', () => {
+    mockUseMatchedActionPolicies.mockReturnValue({
+      isLoading: false,
+      error: null,
+      items: [
+        {
+          action_policy: {
+            id: 'ap-1',
+            name: 'Global Policy',
+            matcher: null,
+            destinations: [{ type: 'workflow', id: 'wf-1' }],
+          } as any,
+          category: 'catch_all',
+        },
+      ],
+      total: 1,
+      evaluatedCount: 1,
+      isTruncated: false,
+    });
+    mockUseActionPolicyConnectorTypes.mockReturnValue({
+      connectorTypesByPolicy: new Map([['ap-1', ['email', 'slack']]]),
+      isLoading: false,
+    });
+
+    renderComponent();
+
+    expect(mockUseActionPolicyConnectorTypes).toHaveBeenCalledWith([
+      expect.objectContaining({ id: 'ap-1' }),
+    ]);
+    expect(screen.getByTestId('linkedActionPolicyConnectorIcons-ap-1')).toBeInTheDocument();
+  });
+
+  it('does not render a connector-icons row when the policy has no connector types', () => {
+    mockUseMatchedActionPolicies.mockReturnValue({
+      isLoading: false,
+      error: null,
+      items: [
+        {
+          action_policy: {
+            id: 'ap-1',
+            name: 'Global Policy',
+            matcher: null,
+            destinations: [],
+          } as any,
+          category: 'catch_all',
+        },
+      ],
+      total: 1,
+      evaluatedCount: 1,
+      isTruncated: false,
+    });
+
+    renderComponent();
+
+    expect(screen.queryByTestId('linkedActionPolicyConnectorIcons-ap-1')).not.toBeInTheDocument();
   });
 
   it('shows an error callout when the fetch fails', () => {
@@ -110,6 +284,8 @@ describe('LinkedActionPoliciesStep', () => {
       error: new Error('Network error'),
       items: [],
       total: 0,
+      evaluatedCount: 0,
+      isTruncated: false,
     });
 
     renderComponent();
@@ -117,35 +293,21 @@ describe('LinkedActionPoliciesStep', () => {
     expect(screen.getByTestId('linkedActionPoliciesError')).toBeInTheDocument();
   });
 
-  it('passes name and tags from form values when ruleId is not provided', () => {
+  it('passes the current form tags to the matcher hook so unsaved changes are reflected', () => {
     mockUseWatch.mockReturnValue({ name: 'My Rule', tags: ['env:prod'] });
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
       error: null,
       items: [],
       total: 0,
+      evaluatedCount: 0,
+      isTruncated: false,
     });
 
-    renderComponent({ ruleId: undefined });
+    renderComponent();
 
     expect(mockUseMatchedActionPolicies).toHaveBeenCalledWith(
-      expect.objectContaining({ ruleId: undefined, name: 'My Rule', tags: ['env:prod'] })
-    );
-  });
-
-  it('passes current form name and tags alongside ruleId so unsaved changes are reflected', () => {
-    mockUseWatch.mockReturnValue({ name: 'My Rule', tags: ['env:prod'] });
-    mockUseMatchedActionPolicies.mockReturnValue({
-      isLoading: false,
-      error: null,
-      items: [],
-      total: 0,
-    });
-
-    renderComponent({ ruleId: 'rule-abc' });
-
-    expect(mockUseMatchedActionPolicies).toHaveBeenCalledWith(
-      expect.objectContaining({ ruleId: 'rule-abc', name: 'My Rule', tags: ['env:prod'] })
+      expect.objectContaining({ tags: ['env:prod'] })
     );
   });
 });

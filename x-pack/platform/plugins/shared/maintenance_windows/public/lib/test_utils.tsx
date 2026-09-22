@@ -8,6 +8,7 @@
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { RenderOptions, RenderResult } from '@testing-library/react';
@@ -31,9 +32,6 @@ export interface AppMockRenderer {
   coreStart: CoreStart;
   queryClient: QueryClient;
   AppWrapper: FC<PropsWithChildren<unknown>>;
-  mocked: {
-    setBadge: jest.Mock;
-  };
 }
 
 export const createAppMockRenderer = ({
@@ -59,7 +57,6 @@ export const createAppMockRenderer = ({
     },
   });
 
-  const mockedSetBadge = jest.fn();
   const core = coreMock.createStart();
   const services = {
     ...core,
@@ -74,16 +71,14 @@ export const createAppMockRenderer = ({
       license != null
         ? { ...licensingPluginMock, license$: new BehaviorSubject(license) }
         : licensingPluginMock,
-    chrome: {
-      ...core.chrome,
-      setBadge: mockedSetBadge,
-    },
   };
   const AppWrapper = React.memo<PropsWithChildren<unknown>>(({ children }) =>
     core.rendering.addContext(
-      <KibanaContextProvider services={services}>
-        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-      </KibanaContextProvider>
+      <MockAppHeaderProvider>
+        <KibanaContextProvider services={services}>
+          <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+        </KibanaContextProvider>
+      </MockAppHeaderProvider>
     )
   );
 
@@ -101,8 +96,5 @@ export const createAppMockRenderer = ({
     render,
     queryClient,
     AppWrapper,
-    mocked: {
-      setBadge: mockedSetBadge,
-    },
   };
 };

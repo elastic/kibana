@@ -21,7 +21,6 @@ import { spaceUrl } from '../fixtures/space_paths';
 const GATED_TOOL_IDS = [
   platformCoreTools.cases,
   platformCoreCasesTools.manage,
-  platformCoreCasesTools.attachments,
   platformCoreCasesTools.getAttachments,
   platformCoreCasesTools.manageAttachments,
   platformCoreCasesTools.observables,

@@ -54,6 +54,8 @@ export interface RunnerFactoryDeps {
   /** Lazy getter for the execution service (breaks circular dep with runner). */
   getExecutionService: () => AgentExecutionService;
   conversationTemplates: ConversationTemplatesServiceStart;
+  /** `xpack.agentBuilder.deductive.register` for this deployment. */
+  deductiveRegister: boolean;
 }
 
 export interface RunnerFactory {

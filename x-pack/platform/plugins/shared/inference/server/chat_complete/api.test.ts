@@ -610,6 +610,213 @@ describe('createChatCompleteApi', () => {
     });
   });
 
+  describe('default connector only restriction', () => {
+    const createChatCompleteWithCheck = ({
+      isDefaultConnectorOnly,
+      getDefaultConnectorId,
+    }: {
+      isDefaultConnectorOnly: () => Promise<boolean>;
+      getDefaultConnectorId: () => Promise<string | undefined>;
+    }) => {
+      const callbackApi = createChatCompleteCallbackApi({
+        request,
+        namespace: 'default',
+        actions,
+        logger,
+        anonymizationRulesPromise: Promise.resolve([]),
+        regexWorker,
+        esClient: mockEsClient,
+        endpointIdCache,
+        isDefaultConnectorOnly,
+        getDefaultConnectorId,
+      });
+      return createChatCompleteApi({ callbackApi });
+    };
+
+    it('blocks the call when the setting is enabled and another connector is used', async () => {
+      const isDefaultConnectorOnly = jest.fn().mockResolvedValue(true);
+      const getDefaultConnectorId = jest.fn().mockResolvedValue('default-connector-id');
+      const chatCompleteWithCheck = createChatCompleteWithCheck({
+        isDefaultConnectorOnly,
+        getDefaultConnectorId,
+      });
+
+      await expect(
+        chatCompleteWithCheck({
+          connectorId: 'connectorId',
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          maxRetries: 0,
+        })
+      ).rejects.toMatchObject({
+        code: InferenceTaskErrorCode.requestError,
+        message: expect.stringContaining('not allowed'),
+      });
+
+      expect(isDefaultConnectorOnly).toHaveBeenCalledTimes(1);
+      expect(getInferenceExecutorMock).not.toHaveBeenCalled();
+      expect(inferenceAdapter.chatComplete).not.toHaveBeenCalled();
+    });
+
+    it('allows the call when the connector matches the default connector', async () => {
+      const isDefaultConnectorOnly = jest.fn().mockResolvedValue(true);
+      const getDefaultConnectorId = jest.fn().mockResolvedValue('connectorId');
+      const chatCompleteWithCheck = createChatCompleteWithCheck({
+        isDefaultConnectorOnly,
+        getDefaultConnectorId,
+      });
+
+      const response = await chatCompleteWithCheck({
+        connectorId: 'connectorId',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        maxRetries: 0,
+      });
+
+      expect(response.content).toBe('chunk-1');
+      expect(getDefaultConnectorId).toHaveBeenCalledTimes(1);
+      expect(inferenceAdapter.chatComplete).toHaveBeenCalledTimes(1);
+    });
+
+    it('allows other connectors when the setting is disabled', async () => {
+      const isDefaultConnectorOnly = jest.fn().mockResolvedValue(false);
+      const getDefaultConnectorId = jest.fn().mockResolvedValue('default-connector-id');
+      const chatCompleteWithCheck = createChatCompleteWithCheck({
+        isDefaultConnectorOnly,
+        getDefaultConnectorId,
+      });
+
+      const response = await chatCompleteWithCheck({
+        connectorId: 'connectorId',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        maxRetries: 0,
+      });
+
+      expect(response.content).toBe('chunk-1');
+      expect(isDefaultConnectorOnly).toHaveBeenCalledTimes(1);
+      expect(getDefaultConnectorId).not.toHaveBeenCalled();
+      expect(inferenceAdapter.chatComplete).toHaveBeenCalledTimes(1);
+    });
+
+    it('blocks the call when the setting is enabled and no default connector resolves', async () => {
+      const isDefaultConnectorOnly = jest.fn().mockResolvedValue(true);
+      const getDefaultConnectorId = jest.fn().mockResolvedValue(undefined);
+      const chatCompleteWithCheck = createChatCompleteWithCheck({
+        isDefaultConnectorOnly,
+        getDefaultConnectorId,
+      });
+
+      await expect(
+        chatCompleteWithCheck({
+          connectorId: 'connectorId',
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          maxRetries: 0,
+        })
+      ).rejects.toMatchObject({
+        code: InferenceTaskErrorCode.requestError,
+        message: expect.stringContaining('not allowed'),
+      });
+
+      expect(inferenceAdapter.chatComplete).not.toHaveBeenCalled();
+    });
+
+    it('allows an inference endpoint whose id matches the default connector id', async () => {
+      mockEsClient.inference.get.mockResolvedValueOnce({
+        endpoints: [
+          { inference_id: 'my-endpoint', task_type: 'chat_completion', service: 'openai' },
+        ],
+      });
+      resolveInferenceEndpointMock.mockResolvedValue({
+        inferenceId: 'my-endpoint',
+        provider: 'openai',
+        modelId: 'gpt-4o',
+        taskType: 'chat_completion',
+      });
+      createInferenceEndpointExecutorMock.mockReturnValue({ invoke: jest.fn() });
+      inferenceEndpointAdapterMock.chatComplete.mockReturnValue(of(chunkEvent('endpoint-chunk')));
+
+      const isDefaultConnectorOnly = jest.fn().mockResolvedValue(true);
+      const getDefaultConnectorId = jest.fn().mockResolvedValue('my-endpoint');
+      const chatCompleteWithCheck = createChatCompleteWithCheck({
+        isDefaultConnectorOnly,
+        getDefaultConnectorId,
+      });
+
+      const response = await chatCompleteWithCheck({
+        connectorId: 'my-endpoint',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        maxRetries: 0,
+      });
+
+      expect(response.content).toBe('endpoint-chunk');
+      expect(inferenceEndpointAdapterMock.chatComplete).toHaveBeenCalledTimes(1);
+    });
+
+    it('fails closed when reading the setting fails', async () => {
+      const isDefaultConnectorOnly = jest.fn().mockRejectedValue(new Error('ui settings down'));
+      const getDefaultConnectorId = jest.fn().mockResolvedValue('connectorId');
+      const chatCompleteWithCheck = createChatCompleteWithCheck({
+        isDefaultConnectorOnly,
+        getDefaultConnectorId,
+      });
+
+      await expect(
+        chatCompleteWithCheck({
+          connectorId: 'connectorId',
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          maxRetries: 0,
+        })
+      ).rejects.toMatchObject({
+        code: InferenceTaskErrorCode.internalError,
+        message: 'Failed to verify the default AI connector restriction',
+      });
+
+      expect(inferenceAdapter.chatComplete).not.toHaveBeenCalled();
+    });
+
+    it('fails closed when resolving the default connector fails', async () => {
+      const isDefaultConnectorOnly = jest.fn().mockResolvedValue(true);
+      const getDefaultConnectorId = jest.fn().mockRejectedValue(new Error('so client down'));
+      const chatCompleteWithCheck = createChatCompleteWithCheck({
+        isDefaultConnectorOnly,
+        getDefaultConnectorId,
+      });
+
+      await expect(
+        chatCompleteWithCheck({
+          connectorId: 'connectorId',
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          maxRetries: 0,
+        })
+      ).rejects.toMatchObject({
+        code: InferenceTaskErrorCode.internalError,
+        message: 'Failed to verify the default AI connector restriction',
+      });
+
+      expect(inferenceAdapter.chatComplete).not.toHaveBeenCalled();
+    });
+
+    it('blocks an inference endpoint whose id differs from the default connector id', async () => {
+      const isDefaultConnectorOnly = jest.fn().mockResolvedValue(true);
+      const getDefaultConnectorId = jest.fn().mockResolvedValue('other-endpoint');
+      const chatCompleteWithCheck = createChatCompleteWithCheck({
+        isDefaultConnectorOnly,
+        getDefaultConnectorId,
+      });
+
+      await expect(
+        chatCompleteWithCheck({
+          connectorId: 'my-endpoint',
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          maxRetries: 0,
+        })
+      ).rejects.toMatchObject({
+        code: InferenceTaskErrorCode.requestError,
+        message: expect.stringContaining('not allowed'),
+      });
+
+      expect(inferenceEndpointAdapterMock.chatComplete).not.toHaveBeenCalled();
+    });
+  });
+
   describe('upstream provider 404 errors', () => {
     it('does not rewrite upstream provider 404 errors as connector-not-found errors', async () => {
       const providerError = createInferenceProviderError(

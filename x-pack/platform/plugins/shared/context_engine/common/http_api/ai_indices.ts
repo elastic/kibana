@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-/**
- * The type of backing store an AI index is attached to. `index` covers a
- * concrete index name or an index pattern (e.g. `foo`, `foo,bar`, `foo*`).
- */
+import type { EsqlEsqlColumnInfo, FieldValue } from '@elastic/elasticsearch/lib/api/types';
+import type { ImprovementAction } from './improvement_actions';
+
+/** The type of backing store an AI index is attached to. */
 export type AiIndexType = 'data_stream' | 'index';
 
 export interface AiIndexDest {
@@ -23,6 +23,18 @@ export interface AiIndexSource {
   value: string;
 }
 
+export type AiIndexTraceType = 'elastic_agent' | 'index' | 'esql';
+
+export interface AiIndexTrace {
+  type: AiIndexTraceType;
+  value: string;
+}
+
+/** A trace entry with its derived ES|QL query. Query is computed at read time, never stored. */
+export interface AiIndexTraceWithQuery extends AiIndexTrace {
+  query: string;
+}
+
 export type AiIndexAutomationType = 'workflow';
 
 export interface AiIndexAutomation {
@@ -30,20 +42,63 @@ export interface AiIndexAutomation {
   value: string;
 }
 
+/**
+ * Which signals the feedback analysis reads. A read filter only: it narrows the
+ * `@timestamp` range the analysis selects over, and never deletes or retains
+ * signals. `relative` is date math evaluated per run (`now-30d`); `absolute` is
+ * an open-ended "since this ISO date".
+ */
+export type AiIndexSignalTimeRange =
+  | { type: 'relative'; from: string }
+  | { type: 'absolute'; from: string };
+
+/**
+ * Per-index control plane for the feedback loop: whether to analyze this
+ * index's signals, with which agent, how often, and over what window.
+ */
+export interface AiIndexFeedbackAnalysis {
+  /**
+   * Desired state, reconciled onto the scheduler after the write. The scheduler
+   * remains authoritative for whether analysis is actually running, because
+   * enabling also binds the credentials a run executes under.
+   */
+  enabled: boolean;
+  /** Agent Builder agent to analyze with. */
+  agent_id?: string;
+  schedule?: { interval: string };
+  signal_time_range?: AiIndexSignalTimeRange;
+  /**
+   * KQL narrowing which signals a run analyzes, applied on top of
+   * `signal_time_range`. It belongs here rather than in the generation pipeline
+   * because generation is global and stateful: every index reads the same
+   * signals, and dropping a signal at write time would drop it for every
+   * consumer, permanently.
+   */
+  signal_filter?: string;
+  /**
+   * Which improvement actions this index's analysis may propose. Prompting an
+   * agent to stay away from an action does not stop it, so the allowed set is
+   * config rather than instruction. An empty list is observe-only: the run
+   * still reports what it found but may not propose a change.
+   */
+  allowed_actions?: ImprovementAction[];
+}
+
 export interface AiIndexProperties {
   description?: string;
   dest: AiIndexDest;
   automations: AiIndexAutomation[];
   sources: AiIndexSource[];
-  /** Agent Builder agent id used for this index's Analyze & improve analysis. */
-  feedback_agent_id?: string;
+  traces: AiIndexTrace[];
+  feedback_analysis?: AiIndexFeedbackAnalysis;
 }
 
-export interface AiIndexHttpItem extends AiIndexProperties {
+export interface AiIndexHttpItem extends Omit<AiIndexProperties, 'traces'> {
   id: string;
   managed: boolean;
   date_created: string;
   date_modified: string;
+  traces: AiIndexTraceWithQuery[];
 }
 
 export type GetAiIndexResponse = AiIndexHttpItem;
@@ -56,6 +111,13 @@ export interface CreateAiIndexRequest extends AiIndexProperties {
   id: string;
 }
 
+export type PutAiIndexFeedbackAnalysisRequest = AiIndexFeedbackAnalysis;
+
+export interface PutAiIndexFeedbackAnalysisResponse {
+  /** The stored block with defaults resolved, so callers see what will actually run. */
+  feedback_analysis: AiIndexFeedbackAnalysis;
+}
+
 export interface CreateAiIndexResponse {
   status: 'created';
 }
@@ -66,9 +128,30 @@ export interface PutAiIndexResponse {
 
 export interface DeleteAiIndexResponse {
   acknowledged: boolean;
+  errors: string[];
 }
 
 export interface KiTypeCount {
   type: string;
   count: number;
+}
+
+export type AiIndexQueryParamValue = string | number | boolean;
+
+/** The query decides the target; the server injects the space filter and a row limit. */
+export interface QueryAiIndicesRequest {
+  query: string;
+  params?: Record<string, AiIndexQueryParamValue>;
+  /** Defaults to `DEFAULT_AI_INDEX_QUERY_LIMIT`. Capped at `MAX_AI_INDEX_QUERY_LIMIT`. */
+  limit?: number;
+}
+
+export interface QueryAiIndicesResponse {
+  columns: EsqlEsqlColumnInfo[];
+  values: FieldValue[][];
+}
+
+/** Free-form context block for an agent: what the index is, its fields, and how to query it. */
+export interface DescribeAiIndexResponse {
+  response: string;
 }

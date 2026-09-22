@@ -10,10 +10,15 @@ import { isResponseError } from '@kbn/es-errors';
 import { updateKiStepCommonDefinition } from '../../common/step_types/update_ki';
 import type { KiStepDependencies } from './helpers';
 import {
+  appendKiRevision,
   assertContextEngineEnabled,
   assertKiWritePrivilege,
-  findKiBackingIndex,
+  findKiRevision,
+  isKiDeleted,
+  kiConflictError,
+  kiDeletedError,
   kiNotFoundError,
+  kiWriterFromContext,
   resolveAiIndex,
   withKiWriteTelemetry,
 } from './helpers';
@@ -29,43 +34,78 @@ export const getUpdateKiStepDefinition = ({
     ...updateKiStepCommonDefinition,
     handler: async (context) => {
       const request = context.contextManager.getFakeRequest();
-      await assertContextEngineEnabled(isContextEngineEnabled, request);
+      const spaceId = context.contextManager.getContext().workflow.spaceId;
+      await assertContextEngineEnabled(isContextEngineEnabled, spaceId);
 
-      const { ai_index_id: aiIndexId, ki_id: kiId, ki } = context.input;
+      const { ai_index_id: aiIndexId, ki_id: kiId, ki, lifecycle, force = false } = context.input;
       return withKiWriteTelemetry({
         action: 'update',
         aiIndexId,
         analyticsService,
         logger,
         run: async (setManaged) => {
-          await assertKiWritePrivilege(checkWritePrivilege, request);
+          await assertKiWritePrivilege(checkWritePrivilege, request, spaceId);
 
-          const { dest, managed } = await resolveAiIndex(getAiIndexService, aiIndexId);
+          const { dest, managed } = await resolveAiIndex(getAiIndexService, aiIndexId, spaceId);
           setManaged(managed);
           const esClient = context.contextManager.getScopedEsClient();
 
-          const backingIndex = await findKiBackingIndex({
+          const revision = await findKiRevision({
             esClient,
             aiIndexId,
-            destValue: dest.value,
+            dest,
             kiId,
             abortSignal: context.abortSignal,
           });
+          if (!revision) {
+            throw kiNotFoundError(aiIndexId, kiId);
+          }
+          if (isKiDeleted(revision.source) && !force) {
+            throw kiDeletedError(aiIndexId, kiId);
+          }
+          if (Object.keys(ki).length === 0 && lifecycle === undefined) {
+            return { output: { id: kiId, result: 'noop' as const } };
+          }
+
+          const now = new Date().toISOString();
+          const writer = kiWriterFromContext(context.contextManager.getContext());
+          const changes = {
+            ...ki,
+            updated_at: now,
+            governance: { provenance: { updated_by: writer }, ...(lifecycle && { lifecycle }) },
+          };
+
+          if (dest.type === 'data_stream') {
+            await appendKiRevision({
+              esClient,
+              destValue: dest.value,
+              kiId,
+              source: revision.source,
+              changes,
+              abortSignal: context.abortSignal,
+            });
+            return { output: { id: kiId, result: 'updated' as const } };
+          }
 
           const response = await esClient
             .update(
               {
-                index: backingIndex,
-                id: kiId,
-                doc: ki,
+                index: revision.index,
+                id: revision.documentId,
+                doc: changes,
+                if_seq_no: revision.seqNo,
+                if_primary_term: revision.primaryTerm,
                 refresh: 'wait_for',
               },
               { signal: context.abortSignal }
             )
             .catch((error) => {
-              // The KI may have been removed concurrently.
+              // The KI may have been removed or rewritten concurrently.
               if (isResponseError(error) && error.statusCode === 404) {
                 throw kiNotFoundError(aiIndexId, kiId);
+              }
+              if (isResponseError(error) && error.statusCode === 409) {
+                throw kiConflictError(aiIndexId, kiId);
               }
               throw error;
             });

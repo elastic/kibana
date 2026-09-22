@@ -8,7 +8,12 @@
 import { isPlainObject } from 'lodash';
 import type { Logger } from '@kbn/logging';
 import { RESOLUTION_RULE_IDS } from '../../../../../../common/domain/resolution_rules/constants';
-import type { AutomatedResolutionState, PerRuleLastRunStats, PerRuleState } from './types';
+import {
+  AUTOMATED_RESOLUTION_STATE_VERSION,
+  type AutomatedResolutionState,
+  type PerRuleLastRunStats,
+  type PerRuleState,
+} from './types';
 
 const isRecord = (value: unknown): value is Record<string, unknown> => isPlainObject(value);
 
@@ -34,32 +39,85 @@ const toLastRun = (value: unknown): PerRuleLastRunStats | null => {
     return {
       resolutionsCreated: value.resolutionsCreated,
       skippedAmbiguousBuckets: value.skippedAmbiguousBuckets,
+      skippedOversizedBuckets:
+        typeof value.skippedOversizedBuckets === 'number' ? value.skippedOversizedBuckets : 0,
+      skippedNoopBuckets:
+        typeof value.skippedNoopBuckets === 'number' ? value.skippedNoopBuckets : 0,
+      cascadeRetargeted: typeof value.cascadeRetargeted === 'number' ? value.cascadeRetargeted : 0,
+      cascadesBlocked: typeof value.cascadesBlocked === 'number' ? value.cascadesBlocked : 0,
     };
   }
   return null;
+};
+
+const sanitizeLastRun = (value: unknown): PerRuleState['lastRun'] => {
+  if (value == null) {
+    return null;
+  }
+  const matcherStats = toLastRun(value);
+  if (matcherStats) {
+    return matcherStats;
+  }
+  // related_user (and future non-matcher rules) store a different lastRun
+  // shape. Do not coerce those into matcher stats or drop them.
+  if (isRecord(value) && !Object.hasOwn(value, 'resolutionsCreated')) {
+    return value as PerRuleState['lastRun'];
+  }
+  return null;
+};
+
+const sanitizeRule = (value: unknown, logger: Logger): PerRuleState => {
+  const record = isRecord(value) ? value : {};
+  return {
+    lastProcessedTimestamp: toWatermark(record.lastProcessedTimestamp, logger),
+    lastRun: sanitizeLastRun(record.lastRun),
+  };
+};
+
+const sanitizeRules = (value: unknown, logger: Logger): Record<string, PerRuleState> => {
+  if (!isRecord(value)) {
+    return {};
+  }
+  const rules: Record<string, PerRuleState> = {};
+  for (const [id, rule] of Object.entries(value)) {
+    rules[id] = sanitizeRule(rule, logger);
+  }
+  return rules;
 };
 
 /**
  * Reshapes the persisted automated-resolution task state into the per-rule map.
  * Runs every cycle, so it must never throw and must be idempotent.
  *
- * In practice there are only two real inputs:
- *  - the current `{ rules }` shape — passed through untouched, which also preserves
- *    rule ids this version may not know yet (e.g. written by a newer node during a
- *    rolling upgrade);
- *  - the original flat `{ lastProcessedTimestamp, lastRun }` — the email rule's
- *    watermark, moved into `rules[email_exact_match]`.
+ * In practice there are three real inputs:
+ *  - the current `{ version, rules }` shape — passed through when version is current,
+ *    which also preserves rule ids this version may not know yet;
+ *  - `{ rules }` without `version` — email watermark is reset so case-insensitive
+ *    matching can heal pre-existing case-split groups (one-time);
+ *  - the original flat `{ lastProcessedTimestamp, lastRun }` — moved into
+ *    `rules[email_exact_match]`, then the same email reset applies.
  *
  * Anything else (empty / null / garbage) yields an empty map; a rule with no entry
  * backfills on its first run.
+ *
+ * If a newer Kibana stored `version` above this binary's current version, leave
+ * that marker alone. Writing CURRENT over it would re-run the newer node's
+ * one-time work when it wakes up. A mixed window can still re-fire *this*
+ * version's email reset if an older node drops `version`; that is an extra
+ * email rescan, not data loss. Do not hide a sentinel inside `rules` — that
+ * map's contract is unknown rule ids pass through.
  */
 export function migrate(input: unknown, logger: Logger): AutomatedResolutionState {
   const source = isRecord(input) ? input : {};
-  const emailRuleId = RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH;
+  const storedVersion = typeof source.version === 'number' ? source.version : 0;
 
-  const rules: Record<string, PerRuleState> = isRecord(source.rules)
-    ? { ...(source.rules as Record<string, PerRuleState>) }
-    : {};
+  if (storedVersion > AUTOMATED_RESOLUTION_STATE_VERSION) {
+    const rules = isRecord(source.rules) ? (source.rules as Record<string, PerRuleState>) : {};
+    return { version: storedVersion, rules };
+  }
+
+  const rules = sanitizeRules(source.rules, logger);
+  const emailRuleId = RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH;
 
   // Move the legacy flat state into the email rule slot — unless it was already
   // migrated, in which case keep the newer progress (idempotent / crash-retry safe).
@@ -72,5 +130,13 @@ export function migrate(input: unknown, logger: Logger): AutomatedResolutionStat
     };
   }
 
-  return { rules };
+  if (storedVersion < AUTOMATED_RESOLUTION_STATE_VERSION && Object.hasOwn(rules, emailRuleId)) {
+    const emailState = rules[emailRuleId];
+    rules[emailRuleId] = {
+      lastProcessedTimestamp: null,
+      lastRun: sanitizeLastRun(emailState.lastRun),
+    };
+  }
+
+  return { version: AUTOMATED_RESOLUTION_STATE_VERSION, rules };
 }

@@ -11,23 +11,22 @@ import {
   EuiFieldSearch,
   EuiFlexItem,
   EuiFlexGroup,
-  EuiImage,
+  EuiIllustration,
   EuiSpacer,
   EuiSuperUpdateButton,
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { notFound } from '@elastic/eui-illustrations';
 import { CaseViewFilters } from './case_view_filters';
 import { useCaseViewFilters } from '../hooks/use_case_view_filters';
 import { useRefreshCaseViewPage } from '../use_on_refresh_case_view_page';
-import noResultsIllustration from '../../../assets/illustration_product_no_results_magnifying_glass.svg';
 import type { CaseUI } from '../../../../common';
 import { FILE_ATTACHMENT_TYPE } from '../../../../common/constants';
 import { resolveUnifiedAttachmentType } from '../../../../common/utils/attachments/migration_utils';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { useCasesFeatures } from '../../../common/use_cases_features';
-import { useCasesConfig } from '../../../common/lib/kibana';
 import { SEARCH_PLACEHOLDER } from '../../actions/translations';
 import { CaseViewAttachButton } from './case_view_attach_button';
 import { CaseViewObservables, OBSERVABLES_FILTER_ID } from './case_view_observables';
@@ -44,7 +43,7 @@ import {
   EXPAND_ALL_ATTACHMENTS,
   NO_COLLAPSIBLE_ATTACHMENTS,
 } from './translations';
-import { SidebarToggleButton } from '../../cases_redesign/case_view/components/sidebar/sidebar_toggle_button';
+import { SidebarToggleButton } from './sidebar/sidebar_toggle_button';
 
 interface CaseViewAttachmentsProps {
   caseData: CaseUI;
@@ -76,7 +75,6 @@ export const CaseViewAttachments = ({
   onUpdateField,
 }: CaseViewAttachmentsProps) => {
   const { euiTheme } = useEuiTheme();
-  const { detailsRedesignEnabled } = useCasesConfig();
   const { unifiedAttachmentTypeRegistry } = useCasesContext();
   const { observablesAuthorized, isObservablesFeatureEnabled } = useCasesFeatures();
   const { data: fileStats } = useGetCaseFileStats({ caseId: caseData.id, searchTerm });
@@ -228,7 +226,7 @@ export const CaseViewAttachments = ({
 
   return (
     <>
-      <EuiFlexItem grow={detailsRedesignEnabled ? false : 6} data-test-subj="case-view-attachments">
+      <EuiFlexItem grow={false} data-test-subj="case-view-attachments">
         <EuiSpacer size="s" />
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem grow>
@@ -253,11 +251,9 @@ export const CaseViewAttachments = ({
           <EuiFlexItem grow={false}>
             <CaseViewAttachButton caseData={caseData} attachLocation="attachments" fill />
           </EuiFlexItem>
-          {detailsRedesignEnabled && (
-            <EuiFlexItem grow={false}>
-              <SidebarToggleButton />
-            </EuiFlexItem>
-          )}
+          <EuiFlexItem grow={false}>
+            <SidebarToggleButton />
+          </EuiFlexItem>
         </EuiFlexGroup>
         {hasActiveFilter ? (
           <>
@@ -320,11 +316,11 @@ export const CaseViewAttachments = ({
             color="transparent"
             css={{ paddingBlockStart: euiTheme.size.xxl }}
             icon={
-              <EuiImage
-                css={{ width: 200, height: 148 }}
-                size="200"
+              <EuiIllustration
+                type={notFound}
                 alt=""
-                url={noResultsIllustration}
+                fullWidth={false}
+                style={{ maxInlineSize: 160 }}
               />
             }
             title={<h2>{NO_SEARCH_RESULTS_TITLE}</h2>}

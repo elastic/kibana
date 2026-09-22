@@ -72,121 +72,69 @@ const flyoutRef = overlays.openFlyout(
 flyoutRef.close();
 ```
 
-### `overlays.openSystemFlyout`
+### `overlays.openFlyoutTemplate`
 
-Opens a system flyout that integrates with the EUI Flyout Manager. Using a mount point would break the context propogation of the EUI Flyout Manager, so this method accepts React elements directly rather than `toMountPoint`.
+Opens a system flyout rendered as a `FlyoutTemplate` — the sanctioned way to build flyout content in Kibana. It takes the template's props, then a component that renders the template and its zones. Like `openSystemFlyout`, it integrates with the EUI Flyout Manager for session, history, and cascade-close support.
 
-```typescript
-import React, { useRef } from 'react';
-import { 
-  EuiFlyoutBody, 
-  EuiFlyoutFooter,
-  EuiText,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem 
-} from '@elastic/eui';
-import type { OverlayRef } from '@kbn/core-mount-utils-browser';
+The component is a real React boundary: it may use hooks, load its own data, and re-render as that data arrives.
 
-// Create a component or function that opens the system flyout
-const openMySystemFlyout = (overlays) => {
-  const flyoutRef = useRef<OverlayRef | null>(null);
-  
-  const handleClose = () => {
-    if (flyoutRef.current) {
-      flyoutRef.current.close();
-    }
-  };
+```tsx
+const MyFlyout = ({ onClose }) => {
+  const details = useDetails();
 
-  const FlyoutContent = () => (
-    <>
-      <EuiFlyoutBody>
-        <EuiText>
-          <p>This is a system flyout that integrates with EUI Flyout Manager.</p>
-          <p>The header is automatically created from the title option.</p>
-        </EuiText>
-      </EuiFlyoutBody>
-      <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={handleClose}>
-              Cancel
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton onClick={() => console.log('Save')} fill>
-              Save
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
-    </>
+  return (
+    <FlyoutTemplate onClose={onClose}>
+      <FlyoutTemplate.Header title="My Flyout" />
+      <FlyoutTemplate.Body>
+        <FlyoutTemplate.Body.Section title="Details">
+          {details ? <Details value={details} /> : <EuiSkeletonText />}
+        </FlyoutTemplate.Body.Section>
+      </FlyoutTemplate.Body>
+      <FlyoutTemplate.Footer>
+        <FlyoutTemplate.Footer.SecondaryAction label="Cancel" onClick={onClose} />
+        <FlyoutTemplate.Footer.PrimaryAction label="Save" onClick={save} />
+      </FlyoutTemplate.Footer>
+    </FlyoutTemplate>
   );
-
-  flyoutRef.current = overlays.openSystemFlyout(<FlyoutContent />, {
-    title: 'My System Flyout',
-    type: 'overlay',
-    size: 'm',
-    maxWidth: 600,
-    ownFocus: false,
-    onClose: () => {
-      console.log('System flyout closed');
-      flyoutRef.current = null;
-    },
-    onActive: () => {
-      console.log('System flyout became active');
-    },
-  });
-
-  return flyoutRef.current;
 };
 
-// Open the flyout
-const flyoutRef = openMySystemFlyout(overlays);
+const flyoutRef = overlays.openFlyoutTemplate(
+  { size: 'm', maxWidth: 600, ownFocus: false },
+  MyFlyout
+);
 
-// Close the flyout programmatically from outside
+// Close the flyout programmatically
 flyoutRef.close();
 ```
 
-#### Title Configuration
+**`onClose` is the only root prop the content sets**, and it arrives as a prop on the content component. It stays required so the declarative contract cannot be satisfied by a flyout nobody can dismiss. Every other root prop comes from the options argument, which is also the only place that can vary them per call — props passed to a managed `FlyoutTemplate` are ignored and warn in development. A flyout whose root props depend on its own data has to own its lifecycle and render `FlyoutTemplate` directly in a React tree.
 
-The `title` option is used by the EUI Flyout Manager for history navigation and creates the flyout menu header. You can provide the title in two ways:
+Wrapping `onClose` to add behaviour is fine, but **declining to call it does not keep the flyout open.** The flyout manager routes the close button, history navigation, and cascade closes through that prop, and has already removed the flyout by the time any handler runs, so the template tears down either way. This also differs from `openFlyout`, where `options.onClose` replaces the close and a handler that skips `flyout.close()` does keep the flyout open. A consumer migrating a guard of that shape needs to know it cannot work here.
 
-1. **Top-level `title` option**:
-```typescript
-overlays.openSystemFlyout(<MyContent />, {
-  title: 'My Flyout Title',
-  // ... other options
-});
+`useFlyoutClose` exists for content nested too deeply to receive the `onClose` prop — a button inside a `Body.Section`, say — and is not needed at the top level.
+
+Content with nothing to load is the same shape, just without the hooks. The second argument is always a component, so nothing inside it is evaluated until the flyout mounts.
+
+```tsx
+const StaticFlyout = ({ onClose }) => (
+  <FlyoutTemplate onClose={onClose}>
+    <FlyoutTemplate.Header title="Static" />
+    <FlyoutTemplate.Body>Nothing to load.</FlyoutTemplate.Body>
+  </FlyoutTemplate>
+);
+
+overlays.openFlyoutTemplate({ size: 'm' }, StaticFlyout);
 ```
 
-2. **Within `flyoutMenuProps.title`**:
-```typescript
-overlays.openSystemFlyout(<MyContent />, {
-  flyoutMenuProps: {
-    title: 'My Flyout Title',
-    hideTitle: false,
-    'data-test-subj': 'myFlyout',
-    // ... other flyout menu props
-  },
-  // ... other options
-});
-```
+Callers import `FlyoutTemplate` from `@kbn/flyout-template` and need a `kbn_references` entry for it. `useFlyoutClose`, from the same package, closes the flyout from anywhere inside the content without threading the `OverlayRef` through.
 
-**Precedence behavior:** If you provide `title` in both places, `flyoutMenuProps.title` takes precedence over the top-level `title`.
+For what each zone accepts — sections, subsections, accordions, tabs, header badges/meta blocks/info blocks, footer actions — see the [`@kbn/flyout-template` README](../../../../platform/packages/shared/shared-ux/flyout/template/README.md).
 
-```typescript
-// Example: flyoutMenuProps.title takes precedence
-overlays.openSystemFlyout(<MyContent />, {
-  title: 'Default Title',  // This will be ignored
-  flyoutMenuProps: {
-    title: 'Override Title',  // This will be used
-  },
-});
-```
+### `overlays.openSystemFlyout` (deprecated)
+
+> **Deprecated.** Use [`overlays.openFlyoutTemplate`](#overlaysopenflyouttemplate) instead.
 
 ### Key Differences
 
 - **`openFlyout`**: Traditional method that requires `toMountPoint`. Opens flyouts with `session="never"`. Content should include `EuiFlyoutHeader` and `EuiFlyoutBody`. Optionally include `EuiFlyoutFooter`.
-- **`openSystemFlyout`**: Modern method that accepts React elements directly. Opens flyouts with `session="start"` for full EUI Flyout System integration, supporting features like flyout navigation and stacking. Content should not include `EuiFlyoutHeader`, as an `EuiFlyoutMenu` is created automatically from the `title` option. Content should include `EuiFlyoutBody`, and optionally `EuiFlyoutFooter`.
+- **`openFlyoutTemplate`**: The recommended method for session-based flyouts. Opens flyouts with `session="start"` for full EUI Flyout System integration, rendered as a `FlyoutTemplate` from its props plus a component that composes its zones — no hand-composed `EuiFlyoutHeader`/`Body`/`Footer`.

@@ -36,6 +36,10 @@ import {
 } from '../api/lib/build_workflow_executions_search_query';
 import { isIndexNotFoundError } from '../api/lib/es_error_helpers';
 import { getChildWorkflowExecutions } from '../api/lib/get_child_workflow_executions';
+import {
+  getExecutionStepExecutions,
+  type GetExecutionStepExecutionsResult,
+} from '../api/lib/get_execution_step_executions';
 import { getWorkflowExecution } from '../api/lib/get_workflow_execution';
 import {
   searchStepExecutions,
@@ -43,6 +47,7 @@ import {
 } from '../api/lib/search_step_executions';
 import { searchWorkflowExecutions } from '../api/lib/search_workflow_executions';
 import type {
+  GetExecutionStepExecutionsParams,
   GetStepExecutionParams,
   SearchStepExecutionsParams,
 } from '../api/workflows_management_api';
@@ -126,7 +131,7 @@ export class WorkflowExecutionQueryService {
   async getWorkflowExecution(
     executionId: string,
     spaceId: string,
-    options?: { includeInput?: boolean; includeOutput?: boolean }
+    options?: { includeInput?: boolean; includeOutput?: boolean; omitStepExecutions?: boolean }
   ): Promise<WorkflowExecutionDto | null> {
     return getWorkflowExecution({
       workflowExecutionsDataClient: this.deps.workflowExecutionsDataClient,
@@ -136,6 +141,7 @@ export class WorkflowExecutionQueryService {
       spaceId,
       includeInput: options?.includeInput,
       includeOutput: options?.includeOutput,
+      omitStepExecutions: options?.omitStepExecutions,
     });
   }
 
@@ -148,6 +154,21 @@ export class WorkflowExecutionQueryService {
       stepExecutionsDataClient: this.deps.stepExecutionsDataClient,
       parentExecutionId,
       spaceId,
+    });
+  }
+
+  async getExecutionStepExecutions(
+    params: GetExecutionStepExecutionsParams,
+    spaceId: string
+  ): Promise<GetExecutionStepExecutionsResult> {
+    return getExecutionStepExecutions({
+      workflowExecutionsDataClient: this.deps.workflowExecutionsDataClient,
+      stepExecutionsDataClient: this.deps.stepExecutionsDataClient,
+      logger: this.deps.logger,
+      workflowExecutionId: params.executionId,
+      spaceId,
+      page: params.page,
+      size: params.size,
     });
   }
 
@@ -212,9 +233,12 @@ export class WorkflowExecutionQueryService {
 
     const page = params.page ?? 1;
     const size = params.size ?? DEFAULT_PAGE_SIZE;
-    const from = (page - 1) * size;
+    const from = params.searchAfter?.length ? undefined : (page - 1) * size;
     const sort = params.sortField
-      ? [{ [params.sortField]: { order: params.sortOrder ?? 'desc' } }]
+      ? ([
+          { [params.sortField]: { order: params.sortOrder ?? 'desc' } },
+          { id: 'desc' },
+        ] as estypes.Sort)
       : undefined;
 
     return searchWorkflowExecutions({
@@ -225,6 +249,7 @@ export class WorkflowExecutionQueryService {
       from,
       page,
       sort,
+      searchAfter: params.searchAfter,
       collapse: params.collapse ? { field: params.collapse } : undefined,
     });
   }
@@ -792,7 +817,13 @@ export class WorkflowExecutionQueryService {
     }
   }
 
-  /** Returns the claimable `waitForInput` step currently blocking the run. */
+  /**
+   * Returns the HITL wait step currently blocking the run, whether or not it
+   * has already been claimed, so the atomic `markStepAsResponded` write stays
+   * the single first-writer-wins arbiter for concurrent resumes. Callers that
+   * already know the step id (inbox, Kibana UI, Scout) should pass it and skip
+   * this lookup.
+   */
   async getWaitingStepExecutionId(executionId: string, spaceId: string): Promise<string | null> {
     try {
       const response = (await this.deps.stepExecutionsDataClient.search({
@@ -801,13 +832,10 @@ export class WorkflowExecutionQueryService {
             must: [
               { term: { workflowRunId: executionId } },
               { term: { spaceId } },
-              { term: { stepType: 'waitForInput' } },
+              { terms: { stepType: ['waitForInput', 'waitForApproval'] } },
               { term: { status: 'waiting_for_input' } },
             ],
-            must_not: [
-              { exists: { field: 'finishedAt' } },
-              { exists: { field: 'hitl.respondedAt' } },
-            ],
+            must_not: [{ exists: { field: 'finishedAt' } }],
           },
         },
         _source: ['id'],
@@ -822,9 +850,9 @@ export class WorkflowExecutionQueryService {
         return null;
       }
       this.deps.logger.warn(
-        `Failed to resolve the waiting step execution for ${executionId}: ${error}`
+        `Failed to resolve the waiting step execution for ${executionId} in space ${spaceId}: ${error}`
       );
-      return null;
+      throw error;
     }
   }
 
@@ -860,7 +888,7 @@ export class WorkflowExecutionQueryService {
    */
   async markStepAsResponded(
     stepExecutionId: string,
-    audit: { respondedBy: string; respondedAt: string; channel: string },
+    audit: { respondedBy: string; respondedAt: string; channel?: string },
     spaceId: string
   ): Promise<boolean> {
     try {
@@ -878,13 +906,13 @@ export class WorkflowExecutionQueryService {
           'if (ctx._source.hitl == null) { ctx._source.hitl = [:]; }' +
           'ctx._source.hitl.respondedBy = params.respondedBy;' +
           'ctx._source.hitl.respondedAt = params.respondedAt;' +
-          'ctx._source.hitl.channel = params.channel;' +
+          'if (params.channel != null) { ctx._source.hitl.channel = params.channel; }' +
           'if (ctx._source.input != null) { ctx._source.input.remove(params.tokenHashField); ctx._source.input.remove(params.tokenExpiresAtField); }',
         params: {
           spaceId,
           respondedBy: audit.respondedBy,
           respondedAt: audit.respondedAt,
-          channel: audit.channel,
+          channel: audit.channel ?? null,
           settledStatuses: SETTLED_STEP_STATUSES,
           tokenHashField: HITL_TOKEN_HASH_INPUT_FIELD,
           tokenExpiresAtField: HITL_TOKEN_EXPIRES_AT_INPUT_FIELD,

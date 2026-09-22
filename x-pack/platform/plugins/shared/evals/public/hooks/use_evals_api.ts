@@ -23,6 +23,7 @@ import {
   EVALS_DATASETS_URL,
   EVALS_DATASET_URL,
   EVALS_DATASET_EXAMPLES_URL,
+  EVALS_DATASET_COPY_URL,
   EVALS_DATASET_EXAMPLE_URL,
   API_VERSIONS,
   type DatasetMaturity,
@@ -37,6 +38,8 @@ import {
   type DeleteEvaluationDatasetResponse,
   type AddEvaluationDatasetExamplesRequestBodyInput,
   type AddEvaluationDatasetExamplesResponse,
+  type CopyEvaluationDatasetRequestBodyInput,
+  type CopyEvaluationDatasetResponse,
   type UpdateEvaluationDatasetExampleRequestBodyInput,
   type UpdateEvaluationDatasetExampleResponse,
   type DeleteEvaluationDatasetExampleResponse,
@@ -105,6 +108,10 @@ interface AddExamplesVariables extends DatasetWithId {
   body: AddEvaluationDatasetExamplesRequestBodyInput;
 }
 
+interface CopyDatasetVariables extends DatasetWithId {
+  body: CopyEvaluationDatasetRequestBodyInput;
+}
+
 interface DeleteDatasetVariables extends DatasetWithId {
   /**
    * Which outcome the confirmation the user saw described, so the server can
@@ -126,6 +133,9 @@ const getDatasetUrl = (datasetId: string) =>
 
 const getDatasetExamplesUrl = (datasetId: string) =>
   EVALS_DATASET_EXAMPLES_URL.replace('{datasetId}', encodeURIComponent(datasetId));
+
+const getDatasetCopyUrl = (datasetId: string) =>
+  EVALS_DATASET_COPY_URL.replace('{datasetId}', encodeURIComponent(datasetId));
 
 const getDatasetExampleUrl = (datasetId: string, exampleId: string) =>
   EVALS_DATASET_EXAMPLE_URL.replace('{datasetId}', encodeURIComponent(datasetId)).replace(
@@ -295,6 +305,31 @@ export const useAddExamples = () => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: queryKeys.datasets.all }),
         queryClient.invalidateQueries({ queryKey: queryKeys.datasets.detail(datasetId) }),
+      ]);
+    },
+  });
+};
+
+export const useCopyDataset = () => {
+  const { services } = useKibana();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      datasetId,
+      body,
+    }: CopyDatasetVariables): Promise<CopyEvaluationDatasetResponse> => {
+      return services.http!.post<CopyEvaluationDatasetResponse>(getDatasetCopyUrl(datasetId), {
+        body: JSON.stringify(body),
+        version: API_VERSIONS.internal.v1,
+      });
+    },
+    onSuccess: async () => {
+      // As with deletion, avoid refetching a detail page whose dataset is not
+      // affected by this mutation. The caller navigates to the new dataset.
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.datasets.lists }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.datasets.tagSuggestions() }),
       ]);
     },
   });

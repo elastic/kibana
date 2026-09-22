@@ -8,7 +8,7 @@ To run the stateful onboarding flows start Kibana as usual.
 
 ## Serverless onboarding
 
-To run the serverless onboarding flows start Kibana using `yarn serverless-oblt`.
+To run the serverless onboarding flows start Kibana using `pnpm serverless-oblt`.
 
 ## Development
 
@@ -17,13 +17,13 @@ To run the serverless onboarding flows start Kibana using `yarn serverless-oblt`
 Kibana primarily uses Jest for unit testing. Each plugin or package defines a `jest.config.js` that extends a preset provided by the `@kbn/test` package. The following command runs all onboarding unit tests:
 
 ```sh
-yarn jest --config x-pack/solutions/observability/plugins/observability_onboarding/jest.config.js
+pnpm exec jest --config x-pack/solutions/observability/plugins/observability_onboarding/jest.config.js
 ```
 
 You can also run a specific test by passing the filepath as an argument, e.g.:
 
 ```sh
-yarn jest --config x-pack/solutions/observability/plugins/observability_onboarding/jest.config.js x-pack/solutions/observability/plugins/observability_onboarding/public/application/header/custom_header.test.tsx
+pnpm exec jest --config x-pack/solutions/observability/plugins/observability_onboarding/jest.config.js x-pack/solutions/observability/plugins/observability_onboarding/public/application/header/custom_header.test.tsx
 ```
 
 ### Deployment-agnostic API tests
@@ -56,16 +56,16 @@ node scripts/functional_test_runner --config x-pack/solutions/observability/test
 
 ```sh
 # start server
-yarn test:ftr:server --config ./x-pack/solutions/observability/test/serverless/functional/configs/config.ts
+pnpm test:ftr:server --config ./x-pack/solutions/observability/test/serverless/functional/configs/config.ts
 
 # run tests
-yarn test:ftr:runner --config ./x-pack/solutions/observability/test/serverless/functional/configs/config.ts --include ./x-pack/solutions/observability/test/serverless/functional/test_suites/onboarding/index.ts
+pnpm test:ftr:runner --config ./x-pack/solutions/observability/test/serverless/functional/configs/config.ts --include ./x-pack/solutions/observability/test/serverless/functional/test_suites/onboarding/index.ts
 ```
 
 ##### Running Individual Tests
 
 ```sh
-yarn test:ftr:runner --config ./x-pack/solutions/observability/test/serverless/functional/configs/config.ts --include ./x-pack/solutions/observability/test/serverless/functional/test_suites/onboarding/index.ts/$1
+pnpm test:ftr:runner --config ./x-pack/solutions/observability/test/serverless/functional/configs/config.ts --include ./x-pack/solutions/observability/test/serverless/functional/test_suites/onboarding/index.ts/$1
 ```
 
 ### Playwright tests (Scout)

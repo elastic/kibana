@@ -8,6 +8,7 @@
 import * as t from 'io-ts';
 import type { Mixed } from 'io-ts';
 import { useLogicalAndFields } from '../../constants/filters_fields_with_logical_and';
+import { MONITOR_STATUS_ENUM } from '../../constants/monitor_management';
 
 const useLogicalAndFileLiteral = useLogicalAndFields.map((f) => t.literal(f)) as unknown as [
   Mixed,
@@ -52,6 +53,15 @@ export type FetchMonitorManagementListQueryArgs = t.TypeOf<
 export const FetchMonitorOverviewQueryArgsCodec = t.partial({
   ...FetchMonitorQueryArgsCommon,
   includeHeartbeatMonitors: t.boolean,
+  page: t.number,
+  perPage: t.number,
+  statusFilter: t.union([
+    t.literal(MONITOR_STATUS_ENUM.UP),
+    t.literal(MONITOR_STATUS_ENUM.DOWN),
+    t.literal(MONITOR_STATUS_ENUM.PENDING),
+    t.literal(MONITOR_STATUS_ENUM.STALE),
+    t.literal(MONITOR_STATUS_ENUM.DISABLED),
+  ]),
 });
 
 export type FetchMonitorOverviewQueryArgs = t.TypeOf<typeof FetchMonitorOverviewQueryArgsCodec>;

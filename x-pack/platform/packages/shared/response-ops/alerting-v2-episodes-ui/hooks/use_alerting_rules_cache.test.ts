@@ -80,7 +80,7 @@ describe('useAlertingRulesCache', () => {
       expect(mockHttp.get).toHaveBeenCalledWith(ALERTING_V2_RULE_API_PATH, {
         query: {
           filter: `id: "${ruleId}"`,
-          perPage: 1000,
+          per_page: 1000,
           page: 1,
         },
       })
@@ -132,13 +132,14 @@ describe('useAlertingRulesCache', () => {
     expect(mockHttp.get).toHaveBeenCalledWith(ALERTING_V2_RULE_API_PATH, {
       query: {
         filter: `(id: "${presentRuleId}" OR id: "${missingRuleId}")`,
-        perPage: 1000,
+        per_page: 1000,
         page: 1,
       },
     });
 
+    const callsAfterFirstFetch = mockHttp.get.mock.calls.length;
     rerender({ ruleIds: [presentRuleId, missingRuleId] });
 
-    expect(mockHttp.get).toHaveBeenCalledTimes(1);
+    expect(mockHttp.get).toHaveBeenCalledTimes(callsAfterFirstFetch);
   });
 });

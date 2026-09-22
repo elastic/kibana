@@ -9,6 +9,7 @@ import { BehaviorSubject, EMPTY } from 'rxjs';
 import type {
   AgentsServiceStartContract,
   AttachmentServiceStartContract,
+  ConversationsServiceStartContract,
   ConversationTemplateServiceStartContract,
   RendererServiceStartContract,
   ToolServiceStartContract,
@@ -29,6 +30,7 @@ export type AttachmentServiceStartContractMock = jest.Mocked<AttachmentServiceSt
 export type ConversationTemplateServiceStartContractMock =
   jest.Mocked<ConversationTemplateServiceStartContract>;
 export type RendererServiceStartContractMock = jest.Mocked<RendererServiceStartContract>;
+export type ConversationsServiceStartContractMock = jest.Mocked<ConversationsServiceStartContract>;
 export type ToolServiceStartContractMock = jest.Mocked<ToolServiceStartContract>;
 
 export type AgentBuilderPluginStartMock = jest.Mocked<AgentBuilderPluginStart> & {
@@ -50,6 +52,13 @@ const createAttachmentStartMock = (): AttachmentServiceStartContractMock => {
   return {
     addAttachmentType: jest.fn(),
     getAttachmentUiDefinition: jest.fn(),
+    getClient: jest.fn(() => ({
+      create: jest.fn(),
+      get: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      list: jest.fn().mockResolvedValue({ results: [], total_token_estimate: 0 }),
+    })),
   };
 };
 
@@ -79,6 +88,10 @@ const createToolStartMock = (): ToolServiceStartContractMock => {
   };
 };
 
+const createConversationsStartMock = (): ConversationsServiceStartContractMock => {
+  return { addEvents: jest.fn() };
+};
+
 const createStartContractMock = (): AgentBuilderPluginStartMock => {
   return {
     agents: createAgentStartMock(),
@@ -86,6 +99,7 @@ const createStartContractMock = (): AgentBuilderPluginStartMock => {
     conversationTemplates: createConversationTemplatesStartMock(),
     renderers: createRendererStartMock(),
     tools: createToolStartMock(),
+    conversations: createConversationsStartMock(),
     events: {
       chat$: EMPTY,
       getChatEvents$: jest.fn().mockReturnValue(EMPTY),

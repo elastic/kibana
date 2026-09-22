@@ -373,6 +373,8 @@ exports[`EventsTable Renders events table with search bar 1`] = `
       >
         <div
           class="euiFilterGroup emotion-euiFilterGroup-uncompressed"
+          data-display="regular"
+          data-dividers="true"
         />
       </div>
       <div

@@ -42,7 +42,10 @@ import { useWaffleTimeContext } from '../../hooks/use_waffle_time';
 import { useWaffleFiltersContext } from '../../hooks/use_waffle_filters';
 import { MetricExplorerSeriesChart } from '../../../metrics_explorer/components/series_chart';
 import { MetricsExplorerChartType } from '../../../metrics_explorer/hooks/use_metrics_explorer_options';
-import { calculateDomain } from '../../../metrics_explorer/components/helpers/calculate_domain';
+import {
+  applyHeadroomToDomain,
+  calculateDomain,
+} from '../../../metrics_explorer/components/helpers/calculate_domain';
 import type { InfraFormatter } from '../../../../../common/inventory/types';
 import { useMetricsHostsAnomaliesResults } from '../../hooks/use_metrics_hosts_anomalies';
 import { DEFAULT_SCHEMA } from '../../../../../../common/constants';
@@ -151,12 +154,7 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
   };
 
   const dataDomain = timeseries ? calculateDomain(timeseries, [chartMetric], false) : null;
-  const domain = dataDomain
-    ? {
-        max: dataDomain.max * 1.1, // add 10% headroom.
-        min: dataDomain.min,
-      }
-    : { max: 0, min: 0 };
+  const domain = dataDomain ? applyHeadroomToDomain(dataDomain) : { max: 0, min: 0 };
 
   const onClickPoint: ElementClickListener = useCallback(
     ([elementEvent]) => {

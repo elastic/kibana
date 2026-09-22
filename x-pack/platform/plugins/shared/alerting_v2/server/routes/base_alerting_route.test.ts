@@ -291,7 +291,7 @@ describe('BaseAlertingRoute', () => {
     it('returns default options when no routeOptions are declared', () => {
       expect(TestRoute.options).toEqual(
         expect.objectContaining({
-          access: 'public',
+          access: 'internal',
           tags: ['oas-tag:alerting-v2'],
           availability: { stability: 'experimental', since: '9.5.0' },
           oasOperationObject: expect.any(Function),
@@ -304,7 +304,7 @@ describe('BaseAlertingRoute', () => {
 
       expect(TestRoute.options).toEqual(
         expect.objectContaining({
-          access: 'public',
+          access: 'internal',
           tags: ['oas-tag:alerting-v2'],
           availability: { stability: 'experimental', since: '9.5.0' },
           summary: 'Get a rule',
@@ -314,11 +314,11 @@ describe('BaseAlertingRoute', () => {
     });
 
     it('overrides defaults with child values', () => {
-      TestRoute.routeOptions = { access: 'internal' };
+      TestRoute.routeOptions = { access: 'public' };
 
       expect(TestRoute.options).toEqual(
         expect.objectContaining({
-          access: 'internal',
+          access: 'public',
           tags: ['oas-tag:alerting-v2'],
           availability: { stability: 'experimental', since: '9.5.0' },
           oasOperationObject: expect.any(Function),
@@ -331,7 +331,7 @@ describe('BaseAlertingRoute', () => {
 
       expect(TestRoute.options).toEqual(
         expect.objectContaining({
-          access: 'public',
+          access: 'internal',
           tags: ['oas-tag:alerting-v2', 'extra-tag'],
           availability: { stability: 'experimental', since: '9.5.0' },
           oasOperationObject: expect.any(Function),
@@ -344,7 +344,7 @@ describe('BaseAlertingRoute', () => {
 
       expect(TestRoute.options).toEqual(
         expect.objectContaining({
-          access: 'public',
+          access: 'internal',
           tags: ['oas-tag:alerting-v2'],
           availability: { stability: 'experimental', since: '1.0' },
           oasOperationObject: expect.any(Function),

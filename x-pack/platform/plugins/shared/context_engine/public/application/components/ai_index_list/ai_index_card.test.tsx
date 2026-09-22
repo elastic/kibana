@@ -7,7 +7,7 @@
 
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import type { AiIndexHttpItem } from '../../../../common/http_api/ai_indices';
 import { AiIndexCard } from './ai_index_card';
@@ -19,6 +19,7 @@ const buildAiIndex = (overrides: Partial<AiIndexHttpItem> = {}): AiIndexHttpItem
   dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
   automations: [],
   sources: [],
+  traces: [],
   date_created: '2026-07-17T00:00:00.000Z',
   date_modified: '2026-07-17T00:00:00.000Z',
   ...overrides,
@@ -26,12 +27,13 @@ const buildAiIndex = (overrides: Partial<AiIndexHttpItem> = {}): AiIndexHttpItem
 
 const renderAiIndexCard = (
   aiIndex: AiIndexHttpItem,
-  href = '/app/context_engine/ai_index/my-ai-index'
+  href = '/app/context_engine/ai_index/my-ai-index',
+  onDeleteClick = jest.fn()
 ) =>
   render(
     <I18nProvider>
       <EuiProvider>
-        <AiIndexCard aiIndex={aiIndex} href={href} />
+        <AiIndexCard aiIndex={aiIndex} href={href} onDeleteClick={onDeleteClick} />
       </EuiProvider>
     </I18nProvider>
   );
@@ -126,5 +128,28 @@ describe('AiIndexCard', () => {
 
     expect(screen.getByTestId('contextAiIndexCardUpdated')).toHaveTextContent('Updated');
     expect(screen.queryByTestId('contextAiIndexCardManaged')).not.toBeInTheDocument();
+  });
+
+  it('calls onDeleteClick when the delete action is selected', () => {
+    const onDeleteClick = jest.fn();
+    renderAiIndexCard(buildAiIndex({ managed: false }), undefined, onDeleteClick);
+
+    fireEvent.click(screen.getByTestId('contextAiIndexCardActionsButton'));
+    fireEvent.click(screen.getByTestId('contextAiIndexCardDeleteAction'));
+
+    expect(onDeleteClick).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows a tooltip explaining why the delete action is disabled for managed indices', async () => {
+    renderAiIndexCard(buildAiIndex({ managed: true }));
+
+    fireEvent.click(screen.getByTestId('contextAiIndexCardActionsButton'));
+    const deleteAction = screen.getByTestId('contextAiIndexCardDeleteAction');
+    expect(deleteAction).toHaveAttribute('aria-disabled', 'true');
+    fireEvent.mouseOver(deleteAction.parentElement ?? deleteAction);
+
+    expect(
+      await screen.findByText('This AI index is managed and cannot be deleted.')
+    ).toBeInTheDocument();
   });
 });

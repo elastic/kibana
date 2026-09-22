@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { FieldValue } from '@elastic/elasticsearch/lib/api/types';
 import path from 'path';
 import { schema, type Type } from '@kbn/config-schema';
 import type {
@@ -170,6 +171,16 @@ export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: Rout
                   meta: { description: 'Number of results per page.' },
                 })
               ),
+              searchAfter: schema.maybe(
+                schema.string({
+                  maxLength: 4096,
+                  meta: {
+                    description:
+                      'JSON-encoded search_after sort values from a prior response for cursor pagination.',
+                    availability: EXECUTION_QUERY_PARAM_AVAILABILITY,
+                  },
+                })
+              ),
               startedAfter: schema.maybe(
                 schema.string({
                   meta: {
@@ -199,6 +210,22 @@ export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: Rout
           const workflow = await api.getWorkflow(workflowId, spaceId);
           assertCanReadManagedWorkflowExecution(request, workflow);
           const executedBy = request.query.executedBy;
+          let searchAfter: FieldValue[] | undefined;
+          if (request.query.searchAfter) {
+            try {
+              const parsed: unknown = JSON.parse(request.query.searchAfter);
+              if (!Array.isArray(parsed) || !parsed.every(isSearchAfterFieldValue)) {
+                return response.badRequest({
+                  body: 'searchAfter must be a JSON array of sort values',
+                });
+              }
+              searchAfter = parsed;
+            } catch {
+              return response.badRequest({
+                body: 'searchAfter must be valid JSON',
+              });
+            }
+          }
           const params: SearchWorkflowExecutionsParams = {
             workflowId,
             statuses: parseExecutionStatuses(request.query.statuses),
@@ -219,6 +246,7 @@ export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: Rout
             collapse: request.query.collapse,
             sortField: request.query.sortField,
             sortOrder: request.query.sortOrder,
+            searchAfter,
           };
           return response.ok({
             body: await api.getWorkflowExecutions(params, spaceId),
@@ -244,4 +272,13 @@ function parseExecutionTypes(
   return typeof executionTypes === 'string'
     ? ([executionTypes] as ExecutionType[])
     : executionTypes;
+}
+
+function isSearchAfterFieldValue(value: unknown): value is FieldValue {
+  return (
+    value === null ||
+    typeof value === 'string' ||
+    typeof value === 'boolean' ||
+    typeof value === 'number'
+  );
 }

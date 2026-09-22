@@ -23,6 +23,8 @@ export type EsqlConversionFailureReason =
   | 'drop_partials_not_supported'
   | 'include_empty_rows_not_supported'
   | 'terms_not_supported'
+  | 'terms_other_bucket_not_supported'
+  | 'terms_order_by_not_supported'
   | 'saved_to_library_not_supported'
   | 'trendline_not_supported'
   | 'unsupported_settings'
@@ -83,6 +85,19 @@ export const esqlConversionFailureReasonMessages: Record<EsqlConversionFailureRe
     defaultMessage:
       'Cannot convert to ES|QL: Top values (terms) aggregation will be supported in an upcoming update.',
   }),
+  terms_other_bucket_not_supported: i18n.translate(
+    'xpack.lens.config.cannotConvertToEsqlTermsOtherBucketTooltip',
+    {
+      defaultMessage: 'Cannot convert to ES|QL: "Group other values as Other" is not supported.',
+    }
+  ),
+  terms_order_by_not_supported: i18n.translate(
+    'xpack.lens.config.cannotConvertToEsqlTermsOrderByTooltip',
+    {
+      defaultMessage:
+        'Cannot convert to ES|QL: This Top values ranking option is not supported for conversion.',
+    }
+  ),
   saved_to_library_not_supported: i18n.translate(
     'xpack.lens.config.cannotConvertSavedToLibraryTooltip',
     {

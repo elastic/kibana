@@ -76,10 +76,10 @@ apiTest.describe('POST /api/discover_sessions', { tag: tags.deploymentAgnostic }
         expect.objectContaining({
           id: 'main',
           label: 'Main',
+          type: 'default',
           hide_chart: false,
           hide_table: false,
           sort: [],
-          time_restore: false,
           data_source: {
             type: 'esql',
             query: 'FROM logs-* | LIMIT 10',

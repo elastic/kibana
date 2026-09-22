@@ -11,7 +11,8 @@ import { deleteAllConversationsFromEs } from '../../../scout_agent_builder_share
 import { setupAgentDirectAnswer } from '../../../scout_agent_builder_shared/lib/proxy_scenario';
 import { test } from '../fixtures';
 
-test.describe(
+// Failing: See https://github.com/elastic/kibana/issues/289096
+test.describe.skip(
   'Agent Builder — sidebar conversation flow',
   { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   () => {

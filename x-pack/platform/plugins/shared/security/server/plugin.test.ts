@@ -8,9 +8,12 @@
 import type { Client } from '@elastic/elasticsearch';
 import { of } from 'rxjs';
 
+import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
 import { ByteSizeValue } from '@kbn/config-schema';
+import type { PackageInfo } from '@kbn/core/server';
 import type { PluginInitializerContextMock } from '@kbn/core/server/mocks';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -18,6 +21,7 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ConfigSchema } from './config';
 import type { PluginSetupDependencies, PluginStartDependencies } from './plugin';
 import { SecurityPlugin } from './plugin';
+import { ServiceAccountsService } from './service_accounts';
 import { userProfileServiceMock } from './user_profile/user_profile_service.mock';
 
 describe('Security Plugin', () => {
@@ -61,6 +65,7 @@ describe('Security Plugin', () => {
       },
       features: featuresPluginMock.createSetup(),
       taskManager: taskManagerMock.createSetup(),
+      encryptedSavedObjects: encryptedSavedObjectsMock.createSetup(),
     } as unknown as PluginSetupDependencies;
 
     mockCoreStart = coreMock.createStart();
@@ -81,6 +86,7 @@ describe('Security Plugin', () => {
       features: featuresPluginMock.createStart(),
       licensing: licensingMock.createStart(),
       taskManager: taskManagerMock.createStart(),
+      encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
     };
   });
 
@@ -209,6 +215,7 @@ describe('Security Plugin', () => {
               "validate": [Function],
             },
             "getCurrentUser": [Function],
+            "systemIdentity": undefined,
           },
           "authz": Object {
             "actions": Actions {
@@ -256,6 +263,69 @@ describe('Security Plugin', () => {
           },
         }
       `);
+    });
+  });
+
+  describe('service account project context', () => {
+    it.each([
+      [
+        'complete',
+        'organization-id',
+        'project-id',
+        'workplaceai',
+        { organizationId: 'organization-id', projectId: 'project-id', projectType: 'workplaceai' },
+      ],
+      ['missing organization', undefined, 'project-id', 'workplaceai', undefined],
+      ['missing project', 'organization-id', undefined, 'workplaceai', undefined],
+      ['missing type', 'organization-id', 'project-id', undefined, undefined],
+    ] as const)(
+      'passes %s context to the service',
+      (_label, organizationId, projectId, projectType, expected) => {
+        const cloud = cloudMock.createSetup();
+        cloud.organizationId = organizationId;
+        cloud.serverless = { ...cloud.serverless, projectId, projectType };
+        mockSetupDependencies.cloud = cloud;
+        const start = jest.spyOn(ServiceAccountsService.prototype, 'start').mockReturnValue(null);
+        try {
+          plugin.setup(mockCoreSetup, mockSetupDependencies);
+          plugin.start(mockCoreStart, mockStartDependencies);
+          expect(start).toHaveBeenCalledWith(
+            expect.objectContaining({ cloudProjectContext: expected })
+          );
+        } finally {
+          start.mockRestore();
+        }
+      }
+    );
+  });
+
+  describe('serverless', () => {
+    const serverlessPlugin = (uiam?: Record<string, unknown>) => {
+      const context = coreMock.createPluginInitializerContext(
+        ConfigSchema.validate(
+          { encryptionKey: 'z'.repeat(32), ...(uiam ? { uiam } : {}) },
+          { serverless: true, dist: true }
+        )
+      );
+      // Force type-cast to convert `ReadOnly<PackageInfo>` to mutable `PackageInfo`.
+      (context.env.packageInfo as PackageInfo).buildFlavor = 'serverless';
+      return new SecurityPlugin(context);
+    };
+
+    it('setup() throws when UIAM is not enabled', () => {
+      expect(() => serverlessPlugin().setup(mockCoreSetup, mockSetupDependencies)).toThrow(
+        '`xpack.security.uiam.enabled` must be `true` on serverless deployments.'
+      );
+    });
+
+    it('setup() succeeds when UIAM is enabled', () => {
+      expect(() =>
+        serverlessPlugin({
+          enabled: true,
+          url: 'https://uiam',
+          sharedSecret: 'shared-secret',
+        }).setup(mockCoreSetup, mockSetupDependencies)
+      ).not.toThrow();
     });
   });
 

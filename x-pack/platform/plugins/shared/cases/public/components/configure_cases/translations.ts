@@ -291,3 +291,11 @@ export const ADD_LEGACY_TEMPLATE = i18n.translate('xpack.cases.configureCases.ad
 export const DEPRECATED_BADGE = i18n.translate('xpack.cases.configureCases.deprecatedBadge', {
   defaultMessage: 'Deprecated',
 });
+
+export const CASE_SETTINGS_TITLE = i18n.translate('xpack.cases.casesRedesign.settings.title', {
+  defaultMessage: 'Cases settings',
+});
+
+export const BACK_TO_CASES = i18n.translate('xpack.cases.casesRedesign.settings.backToCases', {
+  defaultMessage: 'Cases',
+});

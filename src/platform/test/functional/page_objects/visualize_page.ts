@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { VisualizeConstants } from '@kbn/visualizations-common';
 import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { FtrService } from '../ftr_provider_context';
@@ -43,6 +44,7 @@ export class VisualizePageObject extends FtrService {
   private readonly header = this.ctx.getPageObject('header');
   private readonly timePicker = this.ctx.getPageObject('timePicker');
   private readonly visChart = this.ctx.getPageObject('visChart');
+  private readonly appMenu = this.ctx.getPageObject('appMenu');
   private readonly toasts = this.ctx.getService('toasts');
 
   index = {
@@ -69,9 +71,50 @@ export class VisualizePageObject extends FtrService {
   }
 
   /**
-   *  Try to speed resets a bit if the Visualize library breadcrumb is available
+   * Clicks the AppHeader back control when it points at the Visualize library.
+   * AppHeader lives in the app, so flyouts with `belowHeader` overlays intercept
+   * the back control; it is skipped when an overlay is open.
+   * Returns `'confirmed'` when an unsaved-changes modal had to be dismissed,
+   * `'clicked'` when the control was clicked, and `false` when it was not used.
+   */
+  private async clickVisualizeLibraryBack(): Promise<'confirmed' | 'clicked' | false> {
+    if (await this.find.existsByCssSelector('.euiOverlayMask', 250)) {
+      return false;
+    }
+    if (!(await this.testSubjects.exists(APP_HEADER_TEST_SUBJECTS.back, { timeout: 500 }))) {
+      return false;
+    }
+    const ariaLabel = await this.testSubjects.getAttribute(
+      APP_HEADER_TEST_SUBJECTS.back,
+      'aria-label'
+    );
+    if (!ariaLabel?.includes('Visualize library')) {
+      return false;
+    }
+    try {
+      await this.testSubjects.click(APP_HEADER_TEST_SUBJECTS.back);
+      if (await this.testSubjects.exists('confirmModalConfirmButton')) {
+        await this.testSubjects.click('confirmModalConfirmButton');
+        return 'confirmed';
+      }
+      return 'clicked';
+    } catch (error) {
+      this.log.debug(`clickVisualizeLibraryBack failed: ${error}`);
+      return false;
+    }
+  }
+
+  /**
+   * Try to speed resets a bit if the Visualize library back control or breadcrumb is available.
+   * This is only a speed-up: unless an unsaved-changes modal had to be confirmed, the caller
+   * still performs a full `navigateToApp` so state left by the previous suite (space, filters,
+   * time range, cached uiSettings) does not leak into the next one.
    */
   private async clickOnVisualizeLibraryBreadcrumb() {
+    const backResult = await this.clickVisualizeLibraryBack();
+    if (backResult) {
+      return backResult === 'confirmed';
+    }
     // Try to navigate to the Visualize Listing page from breadcrumb if available
     const selector = '[data-test-subj="breadcrumb first"][title="Visualize library"]';
     const visualizeLibraryBreadcrumb = await this.find.existsByCssSelector(selector);
@@ -84,6 +127,7 @@ export class VisualizePageObject extends FtrService {
         return true;
       }
     }
+    return false;
   }
 
   public async gotoVisualizationLandingPage(
@@ -95,15 +139,16 @@ export class VisualizePageObject extends FtrService {
   }
 
   public async selectVisualizationsTab() {
-    await this.listingTable.selectTab(1);
+    await this.testSubjects.click('visualizationsListingTab');
   }
 
   public async selectAnnotationsTab() {
-    await this.listingTable.selectTab(2);
+    await this.testSubjects.click('annotationsListingTab');
   }
 
   public async clickNewVisualization() {
-    await this.listingTable.clickNewButton();
+    await this.appMenu.clickMenuItem('newItemButton');
+    await this.waitForGroupsSelectPage();
   }
 
   public async clickAggBasedVisualizations() {
@@ -116,7 +161,7 @@ export class VisualizePageObject extends FtrService {
   }
 
   public async createVisualizationPromptButton() {
-    await this.testSubjects.click('newItemButton');
+    await this.appMenu.clickMenuItem('newItemButton');
   }
 
   public async getChartTypes() {
@@ -190,11 +235,11 @@ export class VisualizePageObject extends FtrService {
   }
 
   public async navigateToLensFromAnotherVisualization() {
-    await this.testSubjects.click('visualizeEditInLensButton');
+    await this.appMenu.clickMenuItem('visualizeEditInLensButton');
   }
 
   public async hasNavigateToLensButton() {
-    return await this.testSubjects.exists('visualizeEditInLensButton');
+    return await this.appMenu.menuItemExists('visualizeEditInLensButton');
   }
 
   public async hasVisType(type: string) {
@@ -313,7 +358,7 @@ export class VisualizePageObject extends FtrService {
       await this.listingTable.checkListingSelectAllCheckbox();
       await this.listingTable.clickDeleteSelected();
       await this.common.clickConfirmOnModal();
-      await this.testSubjects.find('newItemButton');
+      await this.appMenu.existOrFail('newItemButton');
     });
   }
 
@@ -343,7 +388,6 @@ export class VisualizePageObject extends FtrService {
 
   public async clickSavedSearch(savedSearchName: string) {
     await this.testSubjects.click(`savedObjectTitle${savedSearchName.split(' ').join('-')}`);
-    await this.header.waitUntilLoadingHasFinished();
   }
 
   public async clickUnlinkSavedSearch() {
@@ -357,11 +401,14 @@ export class VisualizePageObject extends FtrService {
     await this.header.waitUntilLoadingHasFinished();
     const isOpen = await this.testSubjects.exists('savedObjectSaveModal', { timeout: 5000 });
     if (!isOpen) {
-      await this.testSubjects.click('visualizeSaveButton');
+      await this.appMenu.clickMenuItem('visualizeSaveButton');
     }
   }
 
   public async clickLoadSavedVisButton() {
+    if (await this.clickVisualizeLibraryBack()) {
+      return;
+    }
     await this.testSubjects.click('breadcrumb first');
   }
 
@@ -388,6 +435,9 @@ export class VisualizePageObject extends FtrService {
 
   public async clickLandingPageBreadcrumbLink() {
     this.log.debug('clickLandingPageBreadcrumbLink');
+    if (await this.clickVisualizeLibraryBack()) {
+      return;
+    }
     await this.find.clickByCssSelector(`a[href="#${VisualizeConstants.LANDING_PAGE_PATH}"]`);
   }
 
@@ -513,24 +563,27 @@ export class VisualizePageObject extends FtrService {
 
   public async saveVisualizationAndReturn() {
     await this.header.waitUntilLoadingHasFinished();
-    await this.testSubjects.existOrFail('visualizesaveAndReturnButton');
-    await this.testSubjects.click('visualizesaveAndReturnButton');
+    await this.appMenu.existOrFail('visualizesaveAndReturnButton');
+    await this.appMenu.clickMenuItem('visualizesaveAndReturnButton');
   }
 
   public async linkedToOriginatingApp() {
     await this.header.waitUntilLoadingHasFinished();
-    await this.testSubjects.existOrFail('visualizesaveAndReturnButton');
+    await this.appMenu.existOrFail('visualizesaveAndReturnButton');
   }
 
   public async notLinkedToOriginatingApp() {
     await this.header.waitUntilLoadingHasFinished();
-    await this.testSubjects.missingOrFail('visualizesaveAndReturnButton');
+    const exists = await this.appMenu.menuItemExists('visualizesaveAndReturnButton');
+    if (exists) {
+      throw new Error('Expected visualizesaveAndReturnButton to be missing');
+    }
   }
 
   public async cancelAndReturn(showConfirmModal: boolean) {
     await this.header.waitUntilLoadingHasFinished();
-    await this.testSubjects.existOrFail('visualizeCancelAndReturnButton');
-    await this.testSubjects.click('visualizeCancelAndReturnButton');
+    await this.appMenu.existOrFail('visualizeCancelAndReturnButton');
+    await this.appMenu.clickMenuItem('visualizeCancelAndReturnButton');
     if (showConfirmModal) {
       await this.retry.waitFor(
         'confirm modal to show',

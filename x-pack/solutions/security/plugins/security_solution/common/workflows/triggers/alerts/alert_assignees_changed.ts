@@ -19,8 +19,8 @@ import {
   ALERT_ASSIGNEES_CHANGED_TRIGGER_DESCRIPTION,
   ALERT_ASSIGNEES_CHANGED_TRIGGER_DOCUMENTATION_DETAILS,
   ALERT_ASSIGNEES_CHANGED_TRIGGER_TITLE,
-  TRIGGER_SCHEMA_ASSIGNEES_TO_ADD_DESCRIPTION,
-  TRIGGER_SCHEMA_ASSIGNEES_TO_REMOVE_DESCRIPTION,
+  TRIGGER_SCHEMA_ASSIGNEES_ADDED_DESCRIPTION,
+  TRIGGER_SCHEMA_ASSIGNEES_REMOVED_DESCRIPTION,
 } from '../translations';
 
 export const AlertAssigneesChangedTriggerId = 'security.alertAssigneesChanged' as const;
@@ -30,7 +30,7 @@ const documentationExample = `## Run when an alert is assigned
 triggers:
   - type: security.alertAssigneesChanged
     on:
-      condition: 'event.assigneesToAdd: *'
+      condition: 'event.assigneesAdded: *'
 \`\`\``;
 
 const alertAssigneesChangedEventSchema = z.object({
@@ -38,14 +38,14 @@ const alertAssigneesChangedEventSchema = z.object({
     .array(z.string().min(1).max(MAX_ID_LENGTH))
     .max(MAX_ALERTS_PER_TRIGGER)
     .meta({ description: ALERT_ASSIGNEES_CHANGED_SCHEMA_ALERT_IDS_DESCRIPTION }),
-  assigneesToAdd: z
+  assigneesAdded: z
     .array(z.string().min(1).max(MAX_ASSIGNEE_UID_LENGTH))
     .max(MAX_ASSIGNEES_PER_OPERATION)
-    .meta({ description: TRIGGER_SCHEMA_ASSIGNEES_TO_ADD_DESCRIPTION }),
-  assigneesToRemove: z
+    .meta({ description: TRIGGER_SCHEMA_ASSIGNEES_ADDED_DESCRIPTION }),
+  assigneesRemoved: z
     .array(z.string().min(1).max(MAX_ASSIGNEE_UID_LENGTH))
     .max(MAX_ASSIGNEES_PER_OPERATION)
-    .meta({ description: TRIGGER_SCHEMA_ASSIGNEES_TO_REMOVE_DESCRIPTION }),
+    .meta({ description: TRIGGER_SCHEMA_ASSIGNEES_REMOVED_DESCRIPTION }),
   truncated: z
     .boolean()
     .meta({ description: ALERT_ASSIGNEES_CHANGED_SCHEMA_TRUNCATED_DESCRIPTION }),

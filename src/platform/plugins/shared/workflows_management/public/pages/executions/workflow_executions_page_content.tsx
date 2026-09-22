@@ -170,6 +170,28 @@ export const WorkflowExecutionsPageContent = React.memo(() => {
     [applyWorkflowIdFilter, setSelectedExecution]
   );
 
+  const handleTimeRangeLinkClick = useCallback(() => {
+    // Prefer focusing the date-range toggle so the user can narrow the window.
+    // Fallbacks cover unified-search markup differences across versions.
+    const datePickerTrigger =
+      document.querySelector<HTMLElement>(
+        '[data-test-subj="workflowExecutionsSearchBar"] [data-test-subj="superDatePickerToggleQuickMenuButton"]'
+      ) ??
+      document.querySelector<HTMLElement>(
+        '[data-test-subj="workflowExecutionsSearchBar"] [data-test-subj="superDatePickerShowDatesButton"]'
+      ) ??
+      document.querySelector<HTMLElement>(
+        '[data-test-subj="workflowExecutionsSearchBar"] [data-test-subj="superDatePickerstartDatePopoverButton"]'
+      );
+
+    if (datePickerTrigger) {
+      datePickerTrigger.focus();
+      datePickerTrigger.click();
+    }
+
+    // TODO: Wire a SearchBar/date-picker ref API when available instead of DOM query.
+  }, []);
+
   return (
     <div data-test-subj="workflowExecutionsPageContent">
       <WorkflowExecutionsSearchBar
@@ -203,6 +225,7 @@ export const WorkflowExecutionsPageContent = React.memo(() => {
           }
           onReRunExecution={rerunExecution}
           onViewAllExecutionsForWorkflow={handleViewAllExecutionsForWorkflow}
+          onTimeRangeLinkClick={handleTimeRangeLinkClick}
           query={submittedQuery}
           spaceId={spaceId}
           timeRange={timeRange}

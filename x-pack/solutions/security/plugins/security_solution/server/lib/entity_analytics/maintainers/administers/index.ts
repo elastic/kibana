@@ -66,10 +66,10 @@ export const administersMaintainer: RegisterEntityMaintainerConfig = {
         proposed: result.totalRecords, // engine has no distinct proposal phase; echo qualified
         applied: result.totalWritten,
         droppedNotInStore: result.totalNotFound,
+        targetIdsNotInStore: result.totalTargetIdsNotInStore,
         failed: result.totalWriteErrors,
         metadataDocsApplied: result.totalMetadataDocsApplied,
-        // TODO: investigate whether to extend the telemetry funnel schema with a new field for
-        // droppedTargets (result.totalDroppedTargets) or map it to an existing field before wiring.
+        metadataDocsFailed: result.totalMetadataDocsFailed,
       },
       sources: collector.sources,
       ...(Object.keys(collector.relationshipTypeApplied).length > 0 && {
@@ -81,7 +81,7 @@ export const administersMaintainer: RegisterEntityMaintainerConfig = {
     });
 
     logger.info(
-      `[administers] Completed run: ${result.totalBuckets} buckets, ${result.totalRecords} records, ${result.totalWritten} entities written, ${result.totalDroppedTargets} targets dropped, ${result.totalMetadataDocsApplied} metadata docs appended`
+      `[administers] Completed run: ${result.totalBuckets} buckets, ${result.totalRecords} records, ${result.totalWritten} entities written, ${result.totalTargetIdsNotInStore} targetIdsNotInStore, ${result.totalMetadataDocsApplied} metadata docs appended, ${result.totalMetadataDocsFailed} metadata docs failed`
     );
 
     // Do not advance the watermark if the run was aborted — the next run should

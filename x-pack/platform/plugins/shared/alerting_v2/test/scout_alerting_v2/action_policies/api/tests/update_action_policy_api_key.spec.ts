@@ -65,7 +65,7 @@ apiTest.describe('Update action policy API key API', { tag: '@local-stateful-cla
           name: 'preserve-attrs-policy',
           description: 'preserve-attrs-policy description',
           destinations: [{ type: 'workflow', id: 'preserve-workflow-id' }],
-          matcher: "env == 'production' && region == 'us-east-1'",
+          matcher: { expression: "env == 'production' && region == 'us-east-1'" },
           group_by: ['service.name'],
           throttle: { interval: '5m' },
         })

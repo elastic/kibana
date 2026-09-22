@@ -13,14 +13,21 @@ import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ChatEvent, InteractivityConfig } from '@kbn/agent-builder-common';
+import type {
+  ChatEvent,
+  ExecutionAbortReason,
+  InteractivityConfig,
+} from '@kbn/agent-builder-common';
 import {
   agentBuilderDefaultAgentId,
   createBadRequestError,
+  isExecutionAbortReason,
+  isRequestAbortedError,
   normalizeInteractive,
 } from '@kbn/agent-builder-common';
-import type { Attachment, AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type {
+  AbortExecutionOptions,
+  AbortExecutionResult,
   AgentExecutionService,
   AgentExecution,
   ExecuteAgentParams,
@@ -28,7 +35,8 @@ import type {
   FollowExecutionOptions,
   FindExecutionsOptions,
 } from '@kbn/agent-builder-server/execution';
-import { ExecutionStatus } from '@kbn/agent-builder-common';
+import { ExecutionStatus, isExecutionTerminalEvent } from '@kbn/agent-builder-common';
+import { ABORT_WAIT_FOR_TERMINAL_TIMEOUT_MS, FOLLOW_POLL_INTERVAL_MS } from './constants';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import { isVersionConflictError } from '../../utils/is_version_conflict_error';
 import type { AttachmentServiceStart } from '../attachments';
@@ -37,9 +45,9 @@ import { createAgentExecutionClient, type AgentExecutionClient } from './persist
 import {
   handleAgentExecution,
   collectAndWriteEvents,
-  serializeExecutionError,
   type AgentExecutionDeps,
 } from './execution_runner';
+import { serializeExecutionError } from './utils';
 import { AbortMonitor } from './task/abort_monitor';
 import { HeartbeatReporter } from './task/heartbeat_reporter';
 import { followExecution$ } from './execution_follower';
@@ -85,12 +93,18 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
 
     const executionClient = this.createExecutionClient();
 
-    const validatedAttachments = await this.validateAttachmentsIfProvided(
+    const validatedAttachments = await this.deps.attachmentsService.validateAttachmentInputs(
       params.nextInput.attachments,
       request
     );
     const validatedParams = validatedAttachments
-      ? { ...params, nextInput: { ...params.nextInput, attachments: validatedAttachments } }
+      ? {
+          ...params,
+          nextInput: {
+            ...params.nextInput,
+            attachments: validatedAttachments,
+          },
+        }
       : params;
 
     let execution: AgentExecution;
@@ -135,10 +149,18 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       throw err;
     }
 
-    // Wire up external abort signal to execution abort
+    // Wire up external abort signal to execution abort. A cascaded abort keeps the original
+    // actor (a user aborting the parent execution) so the child records who asked.
     if (abortSignal) {
       const onAbort = () => {
-        this.abortExecution(executionId).catch(noop);
+        const cause = isExecutionAbortReason(abortSignal.reason) ? abortSignal.reason : undefined;
+        const reason: ExecutionAbortReason = {
+          source: 'caller',
+          ...(params.parentExecutionId ? { parent_execution_id: params.parentExecutionId } : {}),
+          ...(cause?.actor ? { actor: cause.actor } : {}),
+        };
+        // fire and forget: the caller is winding down itself, nothing waits on the record
+        this.abortExecution(executionId, { reason, waitForTerminal: false }).catch(noop);
       };
       if (abortSignal.aborted) {
         onAbort();
@@ -160,13 +182,16 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     return executionClient.get(executionId);
   }
 
-  async abortExecution(executionId: string): Promise<void> {
+  async abortExecution(
+    executionId: string,
+    { reason = { source: 'api' }, waitForTerminal = true }: AbortExecutionOptions = {}
+  ): Promise<AbortExecutionResult> {
     const executionClient = this.createExecutionClient();
     const execution = await executionClient.get(executionId);
 
     if (!execution) {
       this.logger.warn(`Ignoring abort for unknown execution ${executionId}`);
-      return;
+      return { acknowledged: false, terminalPersisted: false };
     }
 
     if (
@@ -176,11 +201,60 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       this.logger.debug(
         `Ignoring abort for execution ${executionId} with terminal status ${execution.status}`
       );
-      return;
+      return { acknowledged: false, terminalPersisted: false };
     }
 
-    await executionClient.updateStatus(executionId, ExecutionStatus.aborted);
-    this.logger.debug(`Aborted execution ${executionId}`);
+    await executionClient.updateStatus(executionId, ExecutionStatus.aborted, {
+      abortReason: reason,
+    });
+    this.logger.debug(`Aborted execution ${executionId} (${reason.source})`);
+
+    // A scheduled execution never starts (the task handler sees `aborted` and skips it), so there
+    // is no record to wait for. A running one is wound down by the executing node, which writes
+    // the interruption to the conversation and then flushes the terminal event to the execution
+    // document: that flush is the signal the record has landed.
+    if (!waitForTerminal || execution.status !== ExecutionStatus.running) {
+      return { acknowledged: true, terminalPersisted: false };
+    }
+    const terminalPersisted = await this.waitForTerminalEvent({
+      executionClient,
+      executionId,
+      since: execution.eventCount,
+    });
+    if (!terminalPersisted) {
+      this.logger.warn(
+        `Execution ${executionId} did not record its interruption within ${ABORT_WAIT_FOR_TERMINAL_TIMEOUT_MS}ms of the abort`
+      );
+    }
+    return { acknowledged: true, terminalPersisted };
+  }
+
+  /** Polls the execution document until a terminal timeline event lands or the bound elapses. */
+  private async waitForTerminalEvent({
+    executionClient,
+    executionId,
+    since,
+  }: {
+    executionClient: AgentExecutionClient;
+    executionId: string;
+    since: number;
+  }): Promise<boolean> {
+    const deadline = Date.now() + ABORT_WAIT_FOR_TERMINAL_TIMEOUT_MS;
+    let lastEventIndex = since;
+    while (true) {
+      const peek = await executionClient.peek(executionId);
+      if (peek && peek.eventCount > lastEventIndex) {
+        const { events } = await executionClient.readEvents(executionId, lastEventIndex);
+        lastEventIndex += events.length;
+        if (events.some(isExecutionTerminalEvent)) {
+          return true;
+        }
+      }
+      if (Date.now() >= deadline) {
+        return false;
+      }
+      await new Promise<void>((resolve) => setTimeout(resolve, FOLLOW_POLL_INTERVAL_MS));
+    }
   }
 
   followExecution(executionId: string, options?: FollowExecutionOptions): Observable<ChatEvent> {
@@ -297,6 +371,18 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     } catch (e) {
       abortMonitor.stop();
       heartbeatReporter.stop();
+      // The stream never existed, so the stream-based status writers never ran: record the
+      // terminal status here instead of leaving the document `running` forever.
+      const status = isRequestAbortedError(e) ? ExecutionStatus.aborted : ExecutionStatus.failed;
+      try {
+        await executionClient.updateStatus(executionId, status, {
+          error: serializeExecutionError(e),
+        });
+      } catch (statusErr) {
+        this.logger.error(
+          `Failed to update status for local execution ${executionId}: ${statusErr.message}`
+        );
+      }
       throw e;
     }
   }
@@ -333,12 +419,14 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       .catch(async (error) => {
         this.logger.error(`Local execution ${executionId} failed: ${error.message}`);
 
+        // Same classification as the Task Manager handler: an abort is recorded as `aborted`.
+        const status = isRequestAbortedError(error)
+          ? ExecutionStatus.aborted
+          : ExecutionStatus.failed;
         try {
-          await executionClient.updateStatus(
-            executionId,
-            ExecutionStatus.failed,
-            serializeExecutionError(error)
-          );
+          await executionClient.updateStatus(executionId, status, {
+            error: serializeExecutionError(error),
+          });
         } catch (statusErr) {
           this.logger.error(
             `Failed to update status for local execution ${executionId}: ${statusErr.message}`
@@ -392,34 +480,5 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       logger: this.logger.get('execution-client'),
       esClient: this.deps.elasticsearch.client.asInternalUser,
     });
-  }
-
-  private async validateAttachmentsIfProvided(
-    attachments: AttachmentInput[] | undefined,
-    request: KibanaRequest
-  ): Promise<AttachmentInput[] | undefined> {
-    if (!attachments || attachments.length === 0) {
-      return undefined;
-    }
-
-    const validated: AttachmentInput[] = [];
-    for (const attachment of attachments) {
-      const result = await this.deps.attachmentsService.validate(attachment, request);
-      if (!result.valid) {
-        throw createBadRequestError(`Attachment validation failed: ${result.error}`);
-      }
-      const a = result.attachment as Attachment;
-      validated.push({
-        id: a.id,
-        type: a.type,
-        data: a.data,
-        ...(a.description !== undefined ? { description: a.description } : {}),
-        ...(a.hidden !== undefined ? { hidden: a.hidden } : {}),
-        ...(a.origin !== undefined ? { origin: a.origin } : {}),
-        ...(a.groupId !== undefined ? { group_id: a.groupId } : {}),
-      });
-    }
-
-    return validated;
   }
 }

@@ -15,7 +15,6 @@ import type { ToolHandlerContextMock } from '@kbn/agent-builder-plugin/server/mo
 import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
 import type { LoggerServiceContract } from '../../../lib/services/logger_service/logger_service';
 import { manageActionPolicyTool, type ManageActionPolicyToolDeps } from './manage_action_policy';
-import { AGENT_BUILDER_TAG } from '../../common/constants';
 
 const createLogger = (): jest.Mocked<
   Pick<LoggerServiceContract, 'debug' | 'info' | 'warn' | 'error' | 'forSubsystem'>
@@ -132,12 +131,6 @@ describe('manageActionPolicyTool', () => {
       expect(ctx.attachments.add).not.toHaveBeenCalled();
       const { results } = result as { results: Array<{ type: string }> };
       expect(results[0].type).toBe(ToolResultType.other);
-
-      // The agent-builder-assisted tag is stamped on the data persisted via update()
-      const updateCall = ctx.attachments.update.mock.calls[0][1] as {
-        data: { tags?: string[] };
-      };
-      expect(updateCall.data.tags).toContain(AGENT_BUILDER_TAG);
     });
 
     it('returns an error when creating a policy without a name', async () => {
@@ -221,7 +214,7 @@ describe('manageActionPolicyTool', () => {
             operation: 'set_destinations',
             destinations: [{ type: 'workflow', id: 'wf-1' }],
           },
-          { operation: 'set_matcher', matcher: 'rule.id: "rule-abc"' },
+          { operation: 'set_matcher', matcher: { tags: ['rule-abc'] } },
         ],
       },
       ctx
@@ -232,14 +225,14 @@ describe('manageActionPolicyTool', () => {
         type: string;
         data?: {
           actionPolicyAttachment?: {
-            matcher?: string | null;
+            matcher?: unknown;
             name?: string;
           };
         };
       }>;
     };
     expect(results[0].type).toBe(ToolResultType.other);
-    expect(results[0].data?.actionPolicyAttachment?.matcher).toBe('rule.id: "rule-abc"');
+    expect(results[0].data?.actionPolicyAttachment?.matcher).toEqual({ tags: ['rule-abc'] });
     expect(results[0].data?.actionPolicyAttachment?.name).toBe('Rule-scoped Policy');
   });
 

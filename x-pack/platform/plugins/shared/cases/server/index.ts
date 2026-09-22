@@ -25,12 +25,6 @@ export const config: PluginConfigDescriptor<ConfigType> = {
     runWorkflows: {
       enabled: true,
     },
-    // NOTE: these are visibility flags (expose to browser), not the feature flag values.
-    casesRedesign: {
-      list: true,
-      details: true,
-      settings: true,
-    },
     attachments: {
       enabled: true,
     },
@@ -38,8 +32,14 @@ export const config: PluginConfigDescriptor<ConfigType> = {
       enabled: true,
     },
   },
-  deprecations: ({ renameFromRoot }) => [
+  deprecations: ({ renameFromRoot, unused }) => [
     renameFromRoot('xpack.case.enabled', 'xpack.cases.enabled', { level: 'critical' }),
+    // The Cases UX redesign shipped as the only implementation in 9.6. These keys are still
+    // accepted and ignored so that upgrading with them present logs a warning rather than
+    // failing config validation. Removing the last leaf also drops the empty parent object.
+    unused('casesRedesign.list', { level: 'warning' }),
+    unused('casesRedesign.details', { level: 'warning' }),
+    unused('casesRedesign.settings', { level: 'warning' }),
   ],
 };
 export const plugin = async (initializerContext: PluginInitializerContext) => {

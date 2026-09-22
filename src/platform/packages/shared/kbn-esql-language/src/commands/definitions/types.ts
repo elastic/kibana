@@ -227,6 +227,7 @@ export enum PromQLFunctionDefinitionTypes {
   SCALAR_CONVERSION = 'scalar_conversion',
   TIME = 'time',
   HISTOGRAM = 'histogram',
+  METADATA = 'metadata',
 }
 
 export type PromQLFunctionParamType = 'instant_vector' | 'range_vector' | 'scalar' | 'string';

@@ -8,7 +8,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import type { ValidateWorkflowResponseDto } from '@kbn/workflows';
+import { toCustomTriggerSchemaConfigs, type ValidateWorkflowResponseDto } from '@kbn/workflows';
 import type { GetAvailableConnectorsResponse } from '@kbn/workflows/types/v1';
 import type { ServerTriggerDefinition } from '@kbn/workflows-extensions/server';
 import type { z } from '@kbn/zod/v4';
@@ -53,7 +53,9 @@ export class WorkflowValidationService {
     request: KibanaRequest
   ): Promise<z.ZodType> {
     const { connectorTypes } = await this.getAvailableConnectors(spaceId, request);
-    const registeredTriggerIds = this.getRegisteredCustomTriggerDefinitions().map((t) => t.id);
-    return getWorkflowZodSchema(connectorTypes, registeredTriggerIds);
+    const registeredTriggers = toCustomTriggerSchemaConfigs(
+      this.getRegisteredCustomTriggerDefinitions()
+    );
+    return getWorkflowZodSchema(connectorTypes, registeredTriggers);
   }
 }

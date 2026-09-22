@@ -12,7 +12,7 @@ import type {
   ThrottleStrategy,
   UpdateActionPolicyData,
 } from '@kbn/alerting-v2-schemas';
-import { needsInterval } from '@kbn/alerting-v2-schemas';
+import { needsInterval, type PolicyMatcher } from '@kbn/alerting-v2-schemas';
 import { z } from '@kbn/zod/v4';
 import type { ActionPolicySavedObjectAttributes } from '../../saved_objects';
 import { ALERTING_ERROR_CODES } from '../errors/error_codes';
@@ -92,7 +92,7 @@ export const buildCreateActionPolicyAttributes = ({
     destinations: data.destinations,
     matcher: data.matcher ?? null,
     groupBy: data.group_by ?? null,
-    tags: data.tags ?? null,
+    tags: null,
     groupingMode: data.grouping_mode ?? null,
     throttle: normalizeThrottle(data.throttle),
     snoozedUntil: null,
@@ -124,7 +124,9 @@ export const buildUpdateActionPolicyAttributes = ({
     destinations: update.destinations ?? existing.destinations,
     matcher: resolveNextNullableField(update.matcher, existing.matcher),
     groupBy: resolveNextNullableField(update.group_by, existing.groupBy),
-    tags: resolveNextNullableField(update.tags, existing.tags),
+    // Tags are excluded from the PATCH schema; always carry the stored value through.
+    // If tags is re-added to updateActionPolicyDataSchema, switch to resolveNextNullableField.
+    tags: normalizeNullableField(existing.tags),
     groupingMode: resolveNextNullableField(update.grouping_mode, existing.groupingMode),
     throttle: normalizeThrottle(resolveNextNullableField(update.throttle, existing.throttle)),
     snoozedUntil: normalizeNullableField(existing.snoozedUntil),
@@ -152,9 +154,8 @@ export const transformActionPolicySoAttributesToApiResponse = ({
     description: attributes.description,
     enabled: attributes.enabled,
     destinations: attributes.destinations,
-    matcher: normalizeNullableField(attributes.matcher),
+    matcher: normalizeNullableField(attributes.matcher) as PolicyMatcher | null,
     group_by: normalizeNullableField(attributes.groupBy),
-    tags: normalizeNullableField(attributes.tags),
     grouping_mode: normalizeNullableField(attributes.groupingMode),
     throttle: normalizeThrottle(attributes.throttle),
     snoozed_until: normalizeNullableField(attributes.snoozedUntil),

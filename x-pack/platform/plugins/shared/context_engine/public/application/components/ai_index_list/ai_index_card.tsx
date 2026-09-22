@@ -8,15 +8,21 @@
 import {
   EuiBadge,
   EuiBadgeGroup,
+  EuiButtonIcon,
   EuiCard,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiPopover,
   EuiText,
   EuiTextBlockTruncate,
+  EuiToolTip,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
-import React from 'react';
+import React, { useState } from 'react';
 import type { AiIndexHttpItem } from '../../../../common/http_api/ai_indices';
 import { AI_INDEX_TYPE_LABEL } from './labels';
 
@@ -39,8 +45,24 @@ const AiIndexCardFooter = ({ aiIndex }: { aiIndex: AiIndexHttpItem }) => (
   </>
 );
 
-export const AiIndexCard = ({ aiIndex, href }: { aiIndex: AiIndexHttpItem; href: string }) => {
+interface AiIndexCardProps {
+  aiIndex: AiIndexHttpItem;
+  href: string;
+  onDeleteClick: () => void;
+}
+
+export const AiIndexCard = ({ aiIndex, href, onDeleteClick }: AiIndexCardProps) => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const footer = aiIndex.managed ? undefined : <AiIndexCardFooter aiIndex={aiIndex} />;
+  const actionsAriaLabel = i18n.translate('xpack.contextEngine.landing.card.actionsAriaLabel', {
+    defaultMessage: 'AI Index actions',
+  });
+
+  const openActionsMenu = (event: React.MouseEvent | React.KeyboardEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setIsMenuOpen((open) => !open);
+  };
 
   return (
     <EuiCard
@@ -50,19 +72,79 @@ export const AiIndexCard = ({ aiIndex, href }: { aiIndex: AiIndexHttpItem; href:
       titleElement="h4"
       paddingSize="l"
       title={
-        <EuiFlexGroup gutterSize="s" alignItems="baseline" responsive={false}>
+        <EuiFlexGroup
+          gutterSize="s"
+          alignItems="center"
+          justifyContent="spaceBetween"
+          responsive={false}
+        >
           <EuiFlexItem className="eui-textTruncate">
-            <span className="eui-textTruncate">{aiIndex.id}</span>
+            <EuiFlexGroup gutterSize="s" alignItems="baseline" responsive={false}>
+              <EuiFlexItem className="eui-textTruncate">
+                <span className="eui-textTruncate">{aiIndex.id}</span>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText
+                  component="span"
+                  size="xs"
+                  color="subdued"
+                  data-test-subj="contextAiIndexCardType"
+                >
+                  {AI_INDEX_TYPE_LABEL[aiIndex.dest.type]}
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiText
-              component="span"
-              size="xs"
-              color="subdued"
-              data-test-subj="contextAiIndexCardType"
+            <EuiPopover
+              panelPaddingSize="none"
+              anchorPosition="downRight"
+              isOpen={isMenuOpen}
+              closePopover={() => setIsMenuOpen(false)}
+              aria-label={actionsAriaLabel}
+              button={
+                <EuiToolTip content={actionsAriaLabel} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    iconType="ellipsis"
+                    color="text"
+                    data-test-subj="contextAiIndexCardActionsButton"
+                    aria-label={actionsAriaLabel}
+                    onClick={openActionsMenu}
+                  />
+                </EuiToolTip>
+              }
             >
-              {AI_INDEX_TYPE_LABEL[aiIndex.dest.type]}
-            </EuiText>
+              <EuiContextMenuPanel
+                items={[
+                  <EuiContextMenuItem
+                    key="delete"
+                    icon="trash"
+                    hasAriaDisabled={aiIndex.managed}
+                    disabled={aiIndex.managed}
+                    toolTipContent={
+                      aiIndex.managed
+                        ? i18n.translate(
+                            'xpack.contextEngine.landing.card.deleteActionManagedTooltip',
+                            { defaultMessage: 'This AI index is managed and cannot be deleted.' }
+                          )
+                        : undefined
+                    }
+                    data-test-subj="contextAiIndexCardDeleteAction"
+                    onClick={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      setIsMenuOpen(false);
+                      onDeleteClick();
+                    }}
+                  >
+                    <FormattedMessage
+                      id="xpack.contextEngine.landing.card.deleteAction"
+                      defaultMessage="Delete AI index"
+                    />
+                  </EuiContextMenuItem>,
+                ]}
+              />
+            </EuiPopover>
           </EuiFlexItem>
         </EuiFlexGroup>
       }
@@ -93,11 +175,7 @@ export const AiIndexCard = ({ aiIndex, href }: { aiIndex: AiIndexHttpItem; href:
 
         <EuiFlexItem grow={false}>
           <EuiBadgeGroup gutterSize="s">
-            <EuiBadge
-              color="hollow"
-              iconType="documents"
-              data-test-subj="contextAiIndexCardSources"
-            >
+            <EuiBadge color="hollow" iconType="document" data-test-subj="contextAiIndexCardSources">
               <FormattedMessage
                 id="xpack.contextEngine.landing.card.sourcesCount"
                 defaultMessage="{count, plural, one {# source} other {# sources}}"

@@ -240,14 +240,26 @@ describe('Custom Editor Commands', () => {
       expect(mockToggleVisor).toHaveBeenCalledTimes(1);
     });
 
-    it('calls onQuerySubmit on CMD+Enter', () => {
+    it('calls onQuerySubmit on CMD+Enter when query is non-empty', () => {
       const mockOnQuerySubmit = jest.fn();
+      (mockEditor.getValue as jest.Mock).mockReturnValue('FROM logs');
       addEditorKeyBindings(mockEditor, mockOnQuerySubmit, jest.fn(), jest.fn());
 
       // eslint-disable-next-line no-bitwise
       findAction(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter).run();
 
       expect(mockOnQuerySubmit).toHaveBeenCalledWith('manual');
+    });
+
+    it('does not call onQuerySubmit on CMD+Enter when query is empty', () => {
+      const mockOnQuerySubmit = jest.fn();
+      (mockEditor.getValue as jest.Mock).mockReturnValue('   ');
+      addEditorKeyBindings(mockEditor, mockOnQuerySubmit, jest.fn(), jest.fn());
+
+      // eslint-disable-next-line no-bitwise
+      findAction(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter).run();
+
+      expect(mockOnQuerySubmit).not.toHaveBeenCalled();
     });
 
     it('calls onPrettifyQuery on CMD+I', () => {

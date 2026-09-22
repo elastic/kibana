@@ -47,6 +47,8 @@ import { ConnectorRulesList } from '../connector_rules_list';
 import { useExecuteConnector } from '../../../hooks/use_execute_connector';
 import { FlyoutHeader } from './header';
 import { FlyoutFooter } from './footer';
+import { InboundIngressCredentials } from '../inbound_ingress_credentials';
+import { isInboundIngressConnector } from '../../../lib/inbound_ingress';
 
 export interface EditConnectorFlyoutProps {
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -245,6 +247,18 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
   const isSpecConnector = !actionTypeRegistry.has(connector.actionTypeId);
   const isTestable = actionTypeModel?.isTestable ?? actionTypeRegistry.has(connector.actionTypeId);
 
+  const inboundSettingsContent = useMemo(() => {
+    if (!isInboundIngressConnector(connector)) {
+      return undefined;
+    }
+    return (
+      <InboundIngressCredentials
+        connector={connector}
+        allowRotate={canSave && !connector.isPreconfigured}
+      />
+    );
+  }, [canSave, connector]);
+
   // Delay the spinner so quick spec loads don't flash a loading state.
   const [showLoadingSpinner, setShowLoadingSpinner] = useState(false);
   useDebounce(() => setShowLoadingSpinner(isLoadingActionTypeModel), 300, [
@@ -421,6 +435,7 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
                     isEdit={isEdit}
                     onChange={setFormState}
                     onFormModifiedChange={onFormModifiedChange}
+                    settingsContent={inboundSettingsContent}
                   />
                   {!!preSubmitValidationErrorMessage && <p>{preSubmitValidationErrorMessage}</p>}
                 </>
@@ -452,6 +467,7 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
     onFormModifiedChange,
     preSubmitValidationErrorMessage,
     refetchConnectorSpec,
+    inboundSettingsContent,
   ]);
 
   const renderTestTab = useCallback(() => {

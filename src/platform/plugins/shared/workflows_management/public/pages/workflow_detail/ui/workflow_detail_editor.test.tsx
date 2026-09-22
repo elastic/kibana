@@ -277,6 +277,20 @@ describe('WorkflowDetailEditor', () => {
       expect(getByTestId('workflowEditorReadOnlyBadge')).toHaveTextContent('Read only');
     });
 
+    it('hides the bottom-bar actions menu on the executions tab', () => {
+      (useWorkflowsExperimentalUiSetting as jest.Mock).mockReturnValue(true);
+      mockUseWorkflowUrlState.mockReturnValue({
+        ...mockUseWorkflowUrlState(),
+        activeTab: 'executions',
+        selectedExecutionId: 'execution-1',
+      });
+
+      const { queryByTestId, getByTestId } = renderEditor();
+
+      expect(queryByTestId('workflowBottomBarActionsMenu')).not.toBeInTheDocument();
+      expect(getByTestId('workflowBottomBarDocumentation')).toBeInTheDocument();
+    });
+
     it('shows the read-only badge for managed workflows', () => {
       mockUseSelector.mockImplementation((selector: any) => {
         if (selector === selectWorkflow) return { managed: true };

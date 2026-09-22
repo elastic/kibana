@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/esql-utils'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/kibana-esql'
+  defaultOwner: '@elastic/kibana-discover'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/esql-utils'
   description: Moon project for @kbn/esql-utils
   channel: ''
-  owner: '@elastic/kibana-esql'
+  owner: '@elastic/kibana-discover'
   sourceRoot: src/platform/packages/shared/kbn-esql-utils
 dependsOn:
   - '@kbn/data-views-plugin'

@@ -29,6 +29,7 @@ export class RunRuleRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
+    access: 'public' as const,
     summary: 'Run a rule now',
     oasOperationObject: runRuleOasExamples,
   } as const;
@@ -37,7 +38,7 @@ export class RunRuleRoute extends BaseAlertingRoute {
       params: ruleIdParamsSchema,
     },
     response: {
-      204: {
+      202: {
         description: 'The rule run was triggered successfully.',
       },
       400: {
@@ -73,6 +74,6 @@ export class RunRuleRoute extends BaseAlertingRoute {
 
   protected async execute() {
     await this.rulesClient.runRuleNow({ id: this.request.params.id });
-    return this.ctx.response.noContent();
+    return this.ctx.response.accepted();
   }
 }

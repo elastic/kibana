@@ -1,12 +1,12 @@
 {
-  "sha1": "ce1d00512d7385139cb10eb5350d830bbb49231a",
+  "sha1": "450235000fc212dca1dfa90a3e8808f8713fa2f8",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
     {
-      "id": "1f74745923a4dea-e395ce97cca539e",
-      "title": "Automated email resolution integration tests Basic email matching — two entities with same email",
+      "id": "1f74745923a4dea-85b893dcdf56a8f",
+      "title": "Automated resolution integration tests Basic email matching — two entities with same email",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -21,8 +21,8 @@
       }
     },
     {
-      "id": "1f74745923a4dea-2925171d96b5532",
-      "title": "Automated email resolution integration tests Namespace priority — AD entity selected as target over Okta and Entra",
+      "id": "1f74745923a4dea-20e5fadcb4b4671",
+      "title": "Automated resolution integration tests Namespace priority — AD entity selected as target over Okta and Entra",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -37,8 +37,8 @@
       }
     },
     {
-      "id": "1f74745923a4dea-a99ccef61b945a2",
-      "title": "Automated email resolution integration tests Alphabetical fallback — unknown namespaces use entity ID tiebreaker",
+      "id": "1f74745923a4dea-a54f897d02b75cd",
+      "title": "Automated resolution integration tests Alphabetical fallback — unknown namespaces use entity ID tiebreaker",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -53,8 +53,8 @@
       }
     },
     {
-      "id": "1f74745923a4dea-c07a229a984ea45",
-      "title": "Automated email resolution integration tests Extend existing group — new entity with matching email joins pre-existing resolution group",
+      "id": "1f74745923a4dea-5236db9d8f050d5",
+      "title": "Automated resolution integration tests Extend existing group — new entity with matching email joins pre-existing resolution group",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -69,8 +69,8 @@
       }
     },
     {
-      "id": "1f74745923a4dea-5571f3104035a1d",
-      "title": "Automated email resolution integration tests Incremental pickup — watermark advances; second run processes only new entities",
+      "id": "1f74745923a4dea-79f1b3d6beb623c",
+      "title": "Automated resolution integration tests Incremental pickup — watermark advances; second run processes only new entities",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -85,8 +85,8 @@
       }
     },
     {
-      "id": "1f74745923a4dea-a84792155c15c5b",
-      "title": "Automated email resolution integration tests Multi-value email excluded — entity with array user.email is not matched",
+      "id": "1f74745923a4dea-acdb240e921048f",
+      "title": "Automated resolution integration tests Multi-value email excluded — entity with array user.email is not matched",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -101,8 +101,8 @@
       }
     },
     {
-      "id": "1f74745923a4dea-d8f28015196c6d3",
-      "title": "Automated email resolution integration tests Ambiguous buckets skipped — multiple existing targets for same email",
+      "id": "1f74745923a4dea-f2914868832b05a",
+      "title": "Automated resolution integration tests Cascade merges two existing groups that share a match value",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -112,13 +112,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 288,
-        "column": 20
+        "line": 290,
+        "column": 9
       }
     },
     {
-      "id": "1f74745923a4dea-bfb4b3b43243881",
-      "title": "Automated email resolution integration tests Manual override preserved — manually linked entity not re-resolved; new entity extends group",
+      "id": "1f74745923a4dea-3bf9f48f48b5eeb",
+      "title": "Automated resolution integration tests Manual override preserved — manually linked entity not re-resolved; new entity extends group",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -128,13 +128,109 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 330,
+        "line": 338,
+        "column": 23
+      }
+    },
+    {
+      "id": "1f74745923a4dea-69926bbc0df8e43",
+      "title": "Automated resolution integration tests Manually unlinked entity not re-resolved after new activity updates timestamp",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
+        "line": 379,
+        "column": 57
+      }
+    },
+    {
+      "id": "1f74745923a4dea-a7804f6c3ebe002",
+      "title": "Automated resolution integration tests Email matching is case-insensitive",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
+        "line": 433,
+        "column": 14
+      }
+    },
+    {
+      "id": "1f74745923a4dea-811d683453a65ea",
+      "title": "Automated resolution integration tests Windows SID bridge links system account-management (IAM) entities to Active Directory",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
+        "line": 445,
+        "column": 63
+      }
+    },
+    {
+      "id": "1f74745923a4dea-b9c178d584a1b4e",
+      "title": "Automated resolution integration tests Entra GUID bridge links Defender to Entra ID",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
+        "line": 464,
+        "column": 17
+      }
+    },
+    {
+      "id": "1f74745923a4dea-e6f67952fd801be",
+      "title": "Automated resolution integration tests CrowdStrike SID bridge links CrowdStrike to Active Directory",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
+        "line": 485,
+        "column": 13
+      }
+    },
+    {
+      "id": "1f74745923a4dea-8da26b1670c058e",
+      "title": "Automated resolution integration tests UPN cross-field bridge links microsoft_365 user.id to entra_id user.name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
+        "line": 504,
         "column": 18
       }
     },
     {
-      "id": "1f74745923a4dea-b01d67b7c6944c4",
-      "title": "Automated email resolution integration tests Manually unlinked entity not re-resolved after new activity updates timestamp",
+      "id": "1f74745923a4dea-a79599fb5f46b57",
+      "title": "Automated resolution integration tests Well-known Windows SIDs are not bridged",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -144,8 +240,24 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 409,
-        "column": 24
+        "line": 527,
+        "column": 23
+      }
+    },
+    {
+      "id": "1f74745923a4dea-3cf9dc4c868f729",
+      "title": "Automated resolution integration tests Disabling the email rule stops it producing links",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
+        "line": 552,
+        "column": 23
       }
     },
     {

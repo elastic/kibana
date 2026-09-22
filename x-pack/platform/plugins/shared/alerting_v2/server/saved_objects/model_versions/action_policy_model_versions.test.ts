@@ -47,6 +47,35 @@ const createV1PolicyDocument = (overrides: Record<string, unknown> = {}): SavedO
   references: [],
 });
 
+const createV2PolicyDocument = (overrides: Record<string, unknown> = {}): SavedObject => ({
+  id: 'policy-1',
+  type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+  attributes: {
+    name: 'test-policy',
+    description: 'A test action policy',
+    enabled: true,
+    destinations: [{ type: 'workflow', id: 'workflow-1' }],
+    matcher: 'rule.tags : "production"',
+    groupBy: null,
+    tags: null,
+    groupingMode: null,
+    throttle: null,
+    snoozedUntil: null,
+    apiKeyOwner: 'elastic',
+    apiKeyCreatedByUser: true,
+    auth: {
+      owner: 'elastic',
+      createdByUser: true,
+    },
+    createdBy: 'elastic',
+    updatedBy: 'elastic',
+    createdAt: '2025-01-01T00:00:00.000Z',
+    updatedAt: '2025-01-01T00:00:00.000Z',
+    ...overrides,
+  },
+  references: [],
+});
+
 describe('actionPolicyModelVersions', () => {
   describe('v1 to v2 migration', () => {
     const migrator = createModelVersionTestMigrator({ type: actionPolicyType });
@@ -111,6 +140,40 @@ describe('actionPolicyModelVersions', () => {
       const attrs = migrated.attributes as Record<string, unknown>;
       expect(attrs.apiKeyOwner).toBe('');
       expect(attrs.apiKeyCreatedByUser).toBe(false);
+    });
+  });
+
+  describe('v2 to v3 migration', () => {
+    const migrator = createModelVersionTestMigrator({ type: actionPolicyType });
+
+    it('wraps a raw KQL matcher into the structured matcher expression', () => {
+      const document = createV2PolicyDocument();
+      const migrated = migrator.migrate({ document, fromVersion: 2, toVersion: 3 });
+      const attrs = migrated.attributes as Record<string, unknown>;
+      expect(attrs.matcher).toEqual({ expression: 'rule.tags : "production"' });
+    });
+
+    it('leaves a null matcher (catch-all policy) untouched', () => {
+      const document = createV2PolicyDocument({ matcher: null });
+      const migrated = migrator.migrate({ document, fromVersion: 2, toVersion: 3 });
+      const attrs = migrated.attributes as Record<string, unknown>;
+      expect(attrs.matcher).toBeNull();
+    });
+
+    it('does not backfill a matcher when the document has none', () => {
+      const document = createV2PolicyDocument({ matcher: undefined });
+      const migrated = migrator.migrate({ document, fromVersion: 2, toVersion: 3 });
+      const attrs = migrated.attributes as Record<string, unknown>;
+      expect(attrs.matcher).toBeUndefined();
+    });
+
+    it('preserves unrelated attributes unchanged', () => {
+      const document = createV2PolicyDocument();
+      const migrated = migrator.migrate({ document, fromVersion: 2, toVersion: 3 });
+      expect(migrated.attributes).toEqual({
+        ...(document.attributes as Record<string, unknown>),
+        matcher: { expression: 'rule.tags : "production"' },
+      });
     });
   });
 });

@@ -1,0 +1,276 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { bulkUpdateAlertWorkflowStatus } from '@kbn/response-ops-alerts-apis/apis/bulk_update_alert_workflow_status';
+import { bulkUpdateAlertTags } from '@kbn/response-ops-alerts-apis/apis/bulk_update_alert_tags';
+import { bulkUntrackAlerts } from '@kbn/response-ops-alerts-apis/apis/bulk_untrack_alerts';
+import { bulkMuteAlerts } from '@kbn/response-ops-alerts-apis/apis/bulk_mute_alerts';
+import { bulkUnmuteAlerts } from '@kbn/response-ops-alerts-apis/apis/bulk_unmute_alerts';
+import { snoozeAlertInstance } from '@kbn/response-ops-alerts-apis/apis/snooze_alert_instance';
+import { unsnoozeAlertInstance } from '@kbn/response-ops-alerts-apis/apis/unsnooze_alert_instance';
+import type { HttpStart } from '@kbn/core-http-browser';
+import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
+import type { AlertEpisode } from '../queries/episodes_query';
+import type { EpisodeActionExtension, SourceActionResult } from '../types/episode_data_source';
+import { isEpisodeSnoozed } from '../utils/is_episode_snoozed';
+import type { ClassicAlertActionContext } from './utils/map_alert';
+
+const getActionContext = (episode: {
+  source_action_context?: unknown;
+}): ClassicAlertActionContext => episode.source_action_context as ClassicAlertActionContext;
+
+const groupByIndex = (episodes: AlertEpisode[]): Array<{ index: string; ids: string[] }> => {
+  const groups = new Map<string, string[]>();
+  for (const ep of episodes) {
+    const ctx = getActionContext(ep);
+    const ids = groups.get(ctx.index) ?? [];
+    ids.push(ctx.alertUuid);
+    groups.set(ctx.index, ids);
+  }
+  return [...groups.entries()].map(([index, ids]) => ({ index, ids }));
+};
+
+const groupByRule = (
+  episodes: AlertEpisode[]
+): Array<{ rule_id: string; alert_instance_ids: string[] }> => {
+  const groups = new Map<string, string[]>();
+  for (const ep of episodes) {
+    const ctx = getActionContext(ep);
+    if (!ctx.instanceId) continue;
+    const ids = groups.get(ctx.ruleId) ?? [];
+    ids.push(ctx.instanceId);
+    groups.set(ctx.ruleId, ids);
+  }
+  return [...groups.entries()].map(([rule_id, alert_instance_ids]) => ({
+    rule_id,
+    alert_instance_ids,
+  }));
+};
+
+const updateWorkflowStatus = async (
+  episodes: AlertEpisode[],
+  http: HttpStart,
+  status: string
+): Promise<SourceActionResult> => {
+  const groups = groupByIndex(episodes);
+  const results = await Promise.allSettled(
+    groups.map(({ index, ids }) => bulkUpdateAlertWorkflowStatus({ http, ids, status, index }))
+  );
+
+  let succeeded = 0;
+  let failed = 0;
+  const errors: string[] = [];
+
+  for (let i = 0; i < results.length; i++) {
+    const result = results[i];
+    if (result.status === 'fulfilled') {
+      succeeded += groups[i].ids.length;
+    } else {
+      failed += groups[i].ids.length;
+      errors.push(result.reason?.message ?? 'Unknown error');
+    }
+  }
+
+  return { succeeded, failed, errors };
+};
+
+const updateWorkflowTags = async (
+  episodes: AlertEpisode[],
+  http: HttpStart,
+  context?: { tags: string[] }
+): Promise<SourceActionResult> => {
+  const tags = context?.tags ?? [];
+  const groups = groupByIndex(episodes);
+
+  const allCurrentTags = new Set<string>();
+  for (const ep of episodes) {
+    for (const tag of getActionContext(ep).workflowTags) {
+      allCurrentTags.add(tag);
+    }
+  }
+
+  const add = tags;
+  const remove = [...allCurrentTags].filter((t) => !tags.includes(t));
+
+  if (add.length === 0 && remove.length === 0) {
+    return { succeeded: episodes.length, failed: 0 };
+  }
+
+  const results = await Promise.allSettled(
+    groups.map(({ index, ids }) => bulkUpdateAlertTags({ http, alertIds: ids, index, add, remove }))
+  );
+
+  let succeeded = 0;
+  let failed = 0;
+  const errors: string[] = [];
+
+  for (let idx = 0; idx < results.length; idx++) {
+    const result = results[idx];
+    if (result.status === 'fulfilled') {
+      succeeded += groups[idx].ids.length;
+    } else {
+      failed += groups[idx].ids.length;
+      errors.push(result.reason?.message ?? 'Unknown error');
+    }
+  }
+
+  return { succeeded, failed, errors };
+};
+
+export const classicActionExtensions: Array<EpisodeActionExtension<any>> = [
+  {
+    actionId: 'ALERTING_V2_ACK_EPISODE',
+    isCompatible: (ep) => {
+      const { workflowStatus } = getActionContext(ep);
+      return workflowStatus === 'open' || workflowStatus == null;
+    },
+    execute: (eps, http) => updateWorkflowStatus(eps, http, 'acknowledged'),
+  },
+  {
+    actionId: 'ALERTING_V2_UNACK_EPISODE',
+    isCompatible: (ep) => getActionContext(ep).workflowStatus === 'acknowledged',
+    execute: (eps, http) => updateWorkflowStatus(eps, http, 'open'),
+  },
+  {
+    actionId: 'ALERTING_V2_RESOLVE_EPISODE',
+    isCompatible: (ep) => ep['episode.status'] !== ALERT_EPISODE_STATUS.INACTIVE,
+    execute: async (eps, http) => {
+      const groups = groupByIndex(eps);
+      const indices = groups.map((g) => g.index);
+      const alertUuids = groups.flatMap((g) => g.ids);
+      try {
+        await bulkUntrackAlerts({ http, indices, alertUuids });
+        return { succeeded: alertUuids.length, failed: 0 };
+      } catch (e) {
+        return { succeeded: 0, failed: alertUuids.length, errors: [e?.message ?? 'Unknown error'] };
+      }
+    },
+  },
+  {
+    actionId: 'ALERTING_V2_SNOOZE_EPISODE',
+    isCompatible: (ep) => {
+      const ctx = getActionContext(ep);
+      return (
+        Boolean(ctx?.instanceId) &&
+        Boolean(ctx?.ruleId) &&
+        !isEpisodeSnoozed(ep.last_snooze_action, ep.snooze_expiry)
+      );
+    },
+    execute: async (eps, http, context) => {
+      const expiry: string | null = context?.expiry ?? null;
+      let succeeded = 0;
+      let failed = 0;
+      const errors: string[] = [];
+
+      if (expiry === null) {
+        const rules = groupByRule(eps);
+        try {
+          await bulkMuteAlerts({ http, rules });
+          succeeded = eps.length;
+        } catch (e) {
+          failed = eps.length;
+          errors.push(e?.message ?? 'Unknown error');
+        }
+      } else {
+        const episodesByRuleId = new Map<string, AlertEpisode[]>();
+        for (const ep of eps) {
+          const ruleId = getActionContext(ep).ruleId;
+          const ruleEpisodes = episodesByRuleId.get(ruleId) ?? [];
+          ruleEpisodes.push(ep);
+          episodesByRuleId.set(ruleId, ruleEpisodes);
+        }
+
+        await Promise.allSettled(
+          [...episodesByRuleId.values()].map(async (sameRuleEpisodes) => {
+            for (const ep of sameRuleEpisodes) {
+              const ctx = getActionContext(ep);
+              try {
+                await snoozeAlertInstance({
+                  http,
+                  id: ctx.ruleId,
+                  instanceId: ctx.instanceId!,
+                  expiresAt: expiry,
+                });
+                succeeded++;
+              } catch (e) {
+                failed++;
+                errors.push(e?.message ?? 'Unknown error');
+              }
+            }
+          })
+        );
+      }
+
+      return { succeeded, failed, errors };
+    },
+  },
+  {
+    actionId: 'ALERTING_V2_UNSNOOZE_EPISODE',
+    isCompatible: (ep) => {
+      const ctx = getActionContext(ep);
+      return (
+        Boolean(ctx?.instanceId) &&
+        Boolean(ctx?.ruleId) &&
+        isEpisodeSnoozed(ep.last_snooze_action, ep.snooze_expiry)
+      );
+    },
+    execute: async (eps, http) => {
+      let succeeded = 0;
+      let failed = 0;
+      const errors: string[] = [];
+
+      const epsToUnmute = eps.filter((ep) => ep.is_muted === true);
+      const epsToUnsnooze = eps.filter((ep) => ep.snooze_expiry != null);
+
+      let unmuteFailed = false;
+
+      if (epsToUnmute.length > 0) {
+        const rules = groupByRule(epsToUnmute);
+        const mutedOnlyCount = epsToUnmute.filter((ep) => ep.snooze_expiry == null).length;
+        try {
+          await bulkUnmuteAlerts({ http, rules });
+          succeeded += mutedOnlyCount;
+        } catch (e) {
+          unmuteFailed = true;
+          failed += epsToUnmute.length;
+          errors.push(e?.message ?? 'Unknown error');
+        }
+      }
+
+      if (epsToUnsnooze.length > 0) {
+        const results = await Promise.allSettled(
+          epsToUnsnooze.map((ep) => {
+            const ctx = getActionContext(ep);
+            return unsnoozeAlertInstance({
+              http,
+              id: ctx.ruleId,
+              instanceId: ctx.instanceId!,
+            });
+          })
+        );
+        for (let i = 0; i < results.length; i++) {
+          const r = results[i];
+          // Already counted as failed in the unmute path above
+          const skipCount = unmuteFailed && epsToUnsnooze[i].is_muted === true;
+          if (r.status === 'fulfilled') {
+            if (!skipCount) succeeded++;
+          } else {
+            if (!skipCount) failed++;
+            errors.push(r.reason?.message ?? 'Unknown error');
+          }
+        }
+      }
+
+      return { succeeded, failed, errors };
+    },
+  },
+  {
+    actionId: 'ALERTING_V2_EDIT_EPISODE_TAGS',
+    isCompatible: () => true,
+    execute: (eps, http, context) => updateWorkflowTags(eps, http, context),
+  },
+];

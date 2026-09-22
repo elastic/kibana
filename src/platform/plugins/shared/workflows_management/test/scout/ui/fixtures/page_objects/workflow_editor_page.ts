@@ -22,6 +22,9 @@ export class WorkflowEditorPage {
   public bulkBar: Locator;
   public graphCanvas: Locator;
   public graphYamlErrorCallout: Locator;
+  public actionsMenuButton: Locator;
+  public actionsMenuSearch: Locator;
+  public readOnlyBadge: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.yamlEditor = this.page.testSubj.locator('workflowYamlEditor');
@@ -39,6 +42,9 @@ export class WorkflowEditorPage {
     this.bulkBar = this.page.testSubj.locator('wfDiffBulkBar');
     this.graphCanvas = this.page.testSubj.locator('workflowGraphCanvas');
     this.graphYamlErrorCallout = this.page.testSubj.locator('workflowGraphYamlErrorCallout');
+    this.actionsMenuButton = this.page.testSubj.locator('workflowBottomBarActionsMenu');
+    this.actionsMenuSearch = this.page.locator('#actions-menu-search');
+    this.readOnlyBadge = this.page.testSubj.locator('workflowEditorReadOnlyBadge');
   }
 
   /**
@@ -99,6 +105,25 @@ export class WorkflowEditorPage {
    */
   async switchToYamlView(): Promise<void> {
     await this.page.testSubj.click('workflowEditorViewToggle-yaml');
+  }
+
+  /**
+   * Expand the floating bottom toolbar if it has auto-collapsed to the pill.
+   */
+  async expandBottomBar(): Promise<void> {
+    const yamlViewToggle = this.page.testSubj.locator('workflowEditorViewToggle-yaml');
+    if (!(await yamlViewToggle.isVisible())) {
+      await this.page.getByRole('button', { name: 'Show toolbar' }).hover();
+    }
+    await yamlViewToggle.waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Open the actions menu from the bottom bar.
+   */
+  async openActionsMenu(): Promise<void> {
+    await this.expandBottomBar();
+    await this.actionsMenuButton.click();
   }
 
   /**
@@ -397,7 +422,11 @@ export class WorkflowEditorPage {
    * Finds the first occurrence of `searchText` in the editor and places the cursor
    * at the end of it, then triggers autocomplete via Ctrl+Space.
    */
-  async triggerAutocompleteAfter(yamlContent: string, searchText: string) {
+  async triggerAutocompleteAfter(
+    yamlContent: string,
+    searchText: string,
+    textToInsert: string = ''
+  ): Promise<void> {
     await this.setYamlEditorValue(yamlContent);
 
     // Wait for the workflow definition to be parsed after setting the YAML.
@@ -407,7 +436,7 @@ export class WorkflowEditorPage {
     // Use Monaco API to find the text and position cursor right after it
     const uri = await this.getEditorUri(this.yamlEditor);
     await this.page.evaluate(
-      ({ modelUri, text }) => {
+      ({ modelUri, text, insertion }) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any -- monaco environment is global, but we don't have a type for it
         const monacoEnv = (window as any).MonacoEnvironment;
         if (!monacoEnv?.monaco?.editor) {
@@ -431,15 +460,22 @@ export class WorkflowEditorPage {
 
         // Get the editor instance and set cursor position + focus
         const editors = monacoEnv.monaco.editor.getEditors();
-        if (editors.length > 0) {
-          const editor = editors[0];
-          editor.setPosition(position);
-          editor.focus();
-          // Trigger suggest directly via the editor command
-          editor.trigger('autocomplete-test', 'editor.action.triggerSuggest', {});
+        const editor = editors.find(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Monaco editor instances are untyped in the browser context
+          (candidate: any) => candidate.getModel()?.uri?.toString() === model.uri.toString()
+        );
+        if (!editor) {
+          throw new Error('No editor instance found for the YAML model');
         }
+
+        editor.setPosition(position);
+        editor.focus();
+        if (insertion) {
+          editor.trigger('autocomplete-test', 'type', { text: insertion });
+        }
+        editor.trigger('autocomplete-test', 'editor.action.triggerSuggest', {});
       },
-      { modelUri: uri, text: searchText }
+      { modelUri: uri, text: searchText, insertion: textToInsert }
     );
   }
 

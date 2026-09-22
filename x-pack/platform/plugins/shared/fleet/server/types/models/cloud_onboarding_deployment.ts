@@ -9,12 +9,11 @@ import { schema } from '@kbn/config-schema';
 
 export const CloudOnboardingDeploymentSchemaV1 = schema.object({
   provider: schema.oneOf([schema.literal('aws'), schema.literal('azure'), schema.literal('gcp')]),
-  connectorId: schema.string({ minLength: 1 }),
+  connectorId: schema.maybe(schema.string({ minLength: 1 })),
   mechanisms: schema.arrayOf(
     schema.oneOf([
-      schema.literal('agentless'),
-      schema.literal('firehose'),
-      schema.literal('cloud_forwarder'),
+      schema.literal('managed_integration'),
+      schema.literal('ecf'),
       schema.literal('agent_based'),
     ]),
     { maxSize: 10 }
@@ -34,12 +33,31 @@ export const CloudOnboardingDeploymentSchemaV1 = schema.object({
   statusMessage: schema.maybe(schema.string()),
   attemptCount: schema.number({ min: 1, defaultValue: 1 }),
   serviceVars: schema.maybe(
-    schema.recordOf(
-      schema.string({ minLength: 1 }),
-      schema.arrayOf(schema.recordOf(schema.string(), schema.any()), { maxSize: 100 })
-    )
+    schema.recordOf(schema.string({ minLength: 1 }), schema.recordOf(schema.string(), schema.any()))
+  ),
+  globalRegion: schema.maybe(schema.string()),
+  dataFormat: schema.maybe(schema.oneOf([schema.literal('ecs'), schema.literal('otel')])),
+  authMethod: schema.maybe(
+    schema.oneOf([schema.literal('identity_federation'), schema.literal('static_keys')])
   ),
   packagePolicyIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
   agentPolicyId: schema.maybe(schema.string()),
   apiKeyId: schema.maybe(schema.string()),
+  /** ECF CloudFormation stacks launched for this deployment, one entry per template family. */
+  ecfStacks: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        family: schema.oneOf([
+          schema.literal('unified'),
+          schema.literal('otel'),
+          schema.literal('crowdstrike'),
+        ]),
+        /** CloudFormation stack name; bounded by the 128-char AWS limit. */
+        stackName: schema.string({ minLength: 1, maxLength: 128 }),
+        /** ECF semantic version resolved at launch time, e.g. "1.10.0". */
+        templateVersion: schema.string({ minLength: 1, maxLength: 32 }),
+      }),
+      { maxSize: 10 }
+    )
+  ),
 });

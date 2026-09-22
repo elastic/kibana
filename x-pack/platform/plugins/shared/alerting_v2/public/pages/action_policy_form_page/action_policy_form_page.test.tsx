@@ -11,7 +11,10 @@ import userEvent from '@testing-library/user-event';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ActionPolicyFormPage } from './action_policy_form_page';
-import { useActionPolicyAutoAttach } from '../../agent_builder/use_action_policy_auto_attach';
+import { useActionPolicyAutoAttach } from '@kbn/alerting-v2-browser-shared';
+import { createMockLocators, MockLocatorProvider } from '../../test_utils/test_providers';
+
+const mockLocators = createMockLocators();
 
 const mockNavigateToUrl = jest.fn();
 const mockBasePath = { prepend: jest.fn((path: string) => `/mock${path}`) };
@@ -119,7 +122,8 @@ const mockUpdateMutateAsync = jest.fn();
 const mockCreateInlineWorkflows = jest.fn();
 const mockRollbackWorkflows = jest.fn();
 
-jest.mock('../../agent_builder/use_action_policy_auto_attach', () => ({
+jest.mock('@kbn/alerting-v2-browser-shared', () => ({
+  ...jest.requireActual('@kbn/alerting-v2-browser-shared'),
   useActionPolicyAutoAttach: jest.fn(),
 }));
 
@@ -161,10 +165,6 @@ jest.mock('../../hooks/use_fetch_rule_tags', () => ({
   useFetchRuleTags: () => ({ data: [], isLoading: false }),
 }));
 
-jest.mock('../../hooks/use_fetch_tags', () => ({
-  useFetchTags: () => ({ data: [], isLoading: false }),
-}));
-
 jest.mock('../../hooks/use_fetch_workflows', () => ({
   useFetchWorkflows: () => ({
     data: {
@@ -199,9 +199,8 @@ const EXISTING_POLICY: ActionPolicyResponse = {
   name: 'Critical production alerts',
   description: 'Routes critical alerts',
   enabled: true,
-  matcher: 'data.severity : "critical"',
+  matcher: { expression: 'data.severity : "critical"' },
   group_by: ['host.name', 'service.name'],
-  tags: ['production'],
   grouping_mode: 'per_field',
   throttle: { strategy: 'time_interval', interval: '5m' },
   snoozed_until: null,
@@ -218,9 +217,11 @@ const EXISTING_POLICY: ActionPolicyResponse = {
 
 const renderPage = () => {
   return render(
-    <I18nProvider>
-      <ActionPolicyFormPage />
-    </I18nProvider>
+    <MockLocatorProvider locators={mockLocators}>
+      <I18nProvider>
+        <ActionPolicyFormPage />
+      </I18nProvider>
+    </MockLocatorProvider>
   );
 };
 
@@ -283,7 +284,9 @@ describe('ActionPolicyFormPage', () => {
       );
       expect(mockCreateInlineWorkflows).toHaveBeenCalledWith([]);
       await waitFor(() =>
-        expect(mockNavigateToUrl).toHaveBeenCalledWith(expect.stringContaining('/action_policies'))
+        expect(mockLocators.actionPolicyLocators.navigateSync).toHaveBeenCalledWith({
+          page: 'list',
+        })
       );
     });
 
@@ -340,9 +343,7 @@ describe('ActionPolicyFormPage', () => {
       await user.click(saveButton);
 
       await waitFor(() => expect(mockRollbackWorkflows).toHaveBeenCalledWith(['wf-new']));
-      expect(mockNavigateToUrl).not.toHaveBeenCalledWith(
-        expect.stringContaining('/action_policies')
-      );
+      expect(mockLocators.actionPolicyLocators.navigateSync).not.toHaveBeenCalled();
     });
 
     it('navigates to listing page on cancel', async () => {
@@ -351,13 +352,13 @@ describe('ActionPolicyFormPage', () => {
 
       await user.click(screen.getByTestId(TEST_SUBJ.cancelButton));
 
-      expect(mockNavigateToUrl).toHaveBeenCalledWith(expect.stringContaining('/action_policies'));
+      expect(mockLocators.actionPolicyLocators.navigateSync).toHaveBeenCalledWith({ page: 'list' });
     });
 
     it('passes undefined to useActionPolicyAutoAttach in create mode', () => {
       renderPage();
 
-      expect(mockUseActionPolicyAutoAttach).toHaveBeenCalledWith(undefined);
+      expect(mockUseActionPolicyAutoAttach).toHaveBeenCalledWith(undefined, expect.any(Object));
     });
   });
 
@@ -435,8 +436,7 @@ describe('ActionPolicyFormPage', () => {
           name: 'Critical production alerts',
           description: 'Routes critical alerts',
           grouping_mode: 'per_field',
-          tags: ['production'],
-          matcher: 'data.severity : "critical"',
+          matcher: { expression: 'data.severity : "critical"' },
           group_by: ['host.name', 'service.name'],
           throttle: { strategy: 'time_interval', interval: '5m' },
           destinations: [{ type: 'workflow', id: 'workflow-2' }],
@@ -457,7 +457,7 @@ describe('ActionPolicyFormPage', () => {
 
       await user.click(screen.getByTestId(TEST_SUBJ.cancelButton));
 
-      expect(mockNavigateToUrl).toHaveBeenCalledWith(expect.stringContaining('/action_policies'));
+      expect(mockLocators.actionPolicyLocators.navigateSync).toHaveBeenCalledWith({ page: 'list' });
     });
 
     describe('Agent Builder auto-attach', () => {
@@ -471,7 +471,10 @@ describe('ActionPolicyFormPage', () => {
 
         renderPage();
 
-        expect(mockUseActionPolicyAutoAttach).toHaveBeenCalledWith(EXISTING_POLICY);
+        expect(mockUseActionPolicyAutoAttach).toHaveBeenCalledWith(
+          EXISTING_POLICY,
+          expect.any(Object)
+        );
       });
     });
   });

@@ -136,7 +136,12 @@ const CODES = Object.freeze({
   // -----------------------------------------------------------------
   'ra_kill-process_success_done': i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.killProcess.successDone',
-    { defaultMessage: 'Action completed successfully' }
+    { defaultMessage: 'Killed' }
+  ),
+
+  'ra_kill-process_success_partial-descendants': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.killProcess.successPartialDescendants',
+    { defaultMessage: 'Action completed successfully, but some descendants were not killed' }
   ),
 
   /**
@@ -181,6 +186,45 @@ const CODES = Object.freeze({
   'ra_kill-process_error_failure': i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.killProcess.failure',
     { defaultMessage: 'Failed to kill the process' }
+  ),
+
+  // ---------------[ Codes for kill-process descendant processes ]------------ \\
+
+  'ra_kill-process_descendant_success_done': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.killProcess.descendantSuccessDone',
+    { defaultMessage: 'Killed' }
+  ),
+
+  /**
+   * Used with descendant processes. The Process was identified as a descendant of the provided root
+   * process but was not found when Endpoint attempted to terminate it. We should not show this one
+   * as an error in the UI - just regular text.
+   */
+  'ra_kill-process_descendant_error_not-found': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.killProcess.descendantNotFound',
+    { defaultMessage: 'Process was not found (may have terminated prior to action being taken)' }
+  ),
+
+  'ra_kill-process_descendant_error_failure': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.killProcess.descendantFailureGeneric',
+    { defaultMessage: 'Failed to kill process' }
+  ),
+
+  'ra_kill-process_descendant_error_not-permitted': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.killProcess.descendantErrorNotPermitted',
+    { defaultMessage: 'Process cannot be killed' }
+  ),
+
+  'ra_kill-process_descendant_error_not-supported': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.killProcess.descendantErrorNotSupported',
+    { defaultMessage: 'Process is not supported by kill-process' }
+  ),
+
+  'ra_kill-process_descendant_error_invalid-input': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.killProcess.descendantErrorInvalidInput',
+    {
+      defaultMessage: 'Invalid input',
+    }
   ),
 
   // -----------------------------------------------------------------

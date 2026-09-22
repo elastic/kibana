@@ -44,6 +44,7 @@ export function fromStoredDataView(
     ...(index.allowHidden !== undefined ? { allow_hidden_indices: index.allowHidden } : {}),
     ...(fieldSettings && { field_settings: fieldSettings }),
     ...(index.name && { name: index.name }),
+    ...toAsCodeFieldFilters(index.sourceFilters),
   };
 }
 
@@ -63,9 +64,15 @@ export function fromStoredDataViewToAsCodeSavedSchema(index: DataViewSpec): AsCo
     time_field: index.timeFieldName,
     allow_hidden_indices: index.allowHidden,
     field_settings: fieldSettings,
-    ...(index.sourceFilters &&
-      index.sourceFilters.length > 0 && {
-        field_filters: index.sourceFilters.map((sourceFilter) => sourceFilter.value),
-      }),
+    ...toAsCodeFieldFilters(index.sourceFilters),
+  };
+}
+
+function toAsCodeFieldFilters(sourceFilters: DataViewSpec['sourceFilters']): {
+  field_filters?: string[];
+} {
+  if (!sourceFilters || sourceFilters.length === 0) return {};
+  return {
+    field_filters: sourceFilters.map((sourceFilter) => sourceFilter.value),
   };
 }

@@ -27,11 +27,15 @@ describe('Attachment Routes', () => {
     update: jest.MockedFunction<
       (params: { id: string; attachments: VersionedAttachment[] }) => Promise<void>
     >;
+    appendEvents: jest.MockedFunction<(params: { id: string }) => Promise<void>>;
   };
   let mockGetInternalServices: jest.MockedFunction<
     () => {
       conversations: {
         getScopedClient: jest.MockedFunction<() => Promise<typeof mockConversationsClient>>;
+        getConversationRoundAuthor: jest.MockedFunction<
+          () => Promise<{ id: string; username?: string } | undefined>
+        >;
       };
       attachments: {
         getTypeDefinition: jest.MockedFunction<(type: string) => any>;
@@ -93,11 +97,15 @@ describe('Attachment Routes', () => {
     mockConversationsClient = {
       get: jest.fn(),
       update: jest.fn().mockResolvedValue(undefined),
+      appendEvents: jest.fn().mockResolvedValue(undefined),
     };
 
     mockGetInternalServices = jest.fn().mockReturnValue({
       conversations: {
         getScopedClient: jest.fn().mockResolvedValue(mockConversationsClient),
+        getConversationRoundAuthor: jest
+          .fn()
+          .mockResolvedValue({ id: 'user-1', username: 'test-user' }),
       },
       attachments: {
         getTypeDefinition: jest.fn().mockImplementation((type: string) => ({
@@ -187,6 +195,7 @@ describe('Attachment Routes', () => {
             getScopedClient: jest.fn().mockReturnValue({}),
           },
         },
+        {},
       ]),
     };
 
@@ -371,7 +380,13 @@ describe('Attachment Routes', () => {
         current_version: 1,
       });
       expect(result.body.attachment.id).toBeDefined();
-      expect(mockConversationsClient.update).toHaveBeenCalled();
+      expect(mockConversationsClient.appendEvents).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'conv-1',
+          events: [expect.objectContaining({ type: 'attachment_added' })],
+        }),
+        { access: 'owner' }
+      );
     });
 
     it('creates attachment with client-provided ID', async () => {
@@ -411,7 +426,8 @@ describe('Attachment Routes', () => {
 
       await handler(createMockContext(), request, mockResponse);
 
-      expect(mockResponse.conflict).toHaveBeenCalledWith({
+      expect(mockResponse.customError).toHaveBeenCalledWith({
+        statusCode: 409,
         body: { message: "Attachment with ID 'existing-id' already exists" },
       });
     });
@@ -668,7 +684,8 @@ describe('Attachment Routes', () => {
 
       await handler(createMockContext(), request, mockResponse);
 
-      expect(mockResponse.notFound).toHaveBeenCalledWith({
+      expect(mockResponse.customError).toHaveBeenCalledWith({
+        statusCode: 404,
         body: { message: "Attachment 'non-existent' not found" },
       });
     });
@@ -687,7 +704,8 @@ describe('Attachment Routes', () => {
 
       await handler(createMockContext(), request, mockResponse);
 
-      expect(mockResponse.badRequest).toHaveBeenCalledWith({
+      expect(mockResponse.customError).toHaveBeenCalledWith({
+        statusCode: 400,
         body: { message: "Cannot update deleted attachment 'att-1'. Restore it first." },
       });
     });
@@ -714,7 +732,18 @@ describe('Attachment Routes', () => {
           permanent: false,
         },
       });
-      expect(mockConversationsClient.update).toHaveBeenCalled();
+      expect(mockConversationsClient.appendEvents).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'conv-1',
+          events: [
+            expect.objectContaining({
+              type: 'attachment_deleted',
+              data: expect.objectContaining({ hard_delete: false, source: 'http_api' }),
+            }),
+          ],
+        }),
+        { access: 'owner' }
+      );
     });
 
     it('permanently deletes unreferenced attachment when permanent=true', async () => {
@@ -776,7 +805,8 @@ describe('Attachment Routes', () => {
 
       await handler(createMockContext(), request, mockResponse);
 
-      expect(mockResponse.conflict).toHaveBeenCalledWith({
+      expect(mockResponse.customError).toHaveBeenCalledWith({
+        statusCode: 409,
         body: {
           message:
             "Cannot permanently delete attachment 'att-1' because it is referenced in conversation rounds",
@@ -807,7 +837,8 @@ describe('Attachment Routes', () => {
 
       await handler(createMockContext(), request, mockResponse);
 
-      expect(mockResponse.conflict).toHaveBeenCalledWith({
+      expect(mockResponse.customError).toHaveBeenCalledWith({
+        statusCode: 409,
         body: {
           message:
             "Cannot permanently delete attachment 'att-1' because it was created from flyout configuration",
@@ -832,7 +863,8 @@ describe('Attachment Routes', () => {
 
       await handler(createMockContext(), request, mockResponse);
 
-      expect(mockResponse.badRequest).toHaveBeenCalledWith({
+      expect(mockResponse.customError).toHaveBeenCalledWith({
+        statusCode: 400,
         body: { message: 'Screen context attachments cannot be deleted' },
       });
     });
@@ -848,7 +880,8 @@ describe('Attachment Routes', () => {
 
       await handler(createMockContext(), request, mockResponse);
 
-      expect(mockResponse.notFound).toHaveBeenCalledWith({
+      expect(mockResponse.customError).toHaveBeenCalledWith({
+        statusCode: 404,
         body: { message: "Attachment 'non-existent' not found" },
       });
     });
@@ -865,7 +898,8 @@ describe('Attachment Routes', () => {
 
       await handler(createMockContext(), request, mockResponse);
 
-      expect(mockResponse.badRequest).toHaveBeenCalledWith({
+      expect(mockResponse.customError).toHaveBeenCalledWith({
+        statusCode: 400,
         body: { message: "Attachment 'att-1' is already deleted" },
       });
     });

@@ -15,7 +15,6 @@ export class NavigationPage {
   async gotoHome() {
     await this.page.goto(this.kbnUrl.app('home'));
     await this.globalSearchInput
-      .or(this.globalSearchRevealButton)
       .or(this.globalSearchButton)
       .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
   }
@@ -38,24 +37,13 @@ export class NavigationPage {
     return this.page.getByTestId('nav-search-input');
   }
 
-  // In serverless (project chrome style) the search input starts collapsed
-  // behind a reveal button and is only rendered once clicked. In classic
-  // chrome style the input is always rendered, so this button never appears.
-  public get globalSearchRevealButton() {
-    return this.page.getByTestId('nav-search-reveal');
-  }
-
   public get globalSearchButton() {
     return this.page.getByTestId('chromeNextGlobalHeaderSearchButton');
   }
 
   async searchGlobalNav(keyword: string) {
-    // Open the global search if it is not already open (the input may be behind a
-    // header or reveal button, or rendered inline).
     if (!(await this.globalSearchInput.isVisible())) {
-      // Only one opener renders at a time (chrome-next header button or classic reveal button),
-      // so `.or()` clicks whichever is present.
-      await this.globalSearchButton.or(this.globalSearchRevealButton).click();
+      await this.globalSearchButton.click();
       await this.globalSearchInput.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
     }
 
@@ -64,13 +52,11 @@ export class NavigationPage {
   }
 
   private get virtualizedSearchList() {
-    return this.page.locator(
-      '.navSearch__panel .euiSelectableList__list, [data-test-subj="chromeNextSearchModal"] .euiSelectableList__list'
-    );
+    return this.page.locator('[data-test-subj="chromeNextSearchModal"] .euiSelectableList__list');
   }
 
   private get searchPanel() {
-    return this.page.locator('.navSearch__panel, [data-test-subj="chromeNextSearchModal"]');
+    return this.page.locator('[data-test-subj="chromeNextSearchModal"]');
   }
 
   private async waitForSearchResults() {
