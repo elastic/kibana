@@ -46,7 +46,7 @@ describe('getDateHistogramSerializedFormat', () => {
     // 23:00–01:00 UTC crosses midnight in UTC.
     const result = getDateHistogramSerializedFormat(
       column,
-      undefined,
+      column,
       indexPattern,
       makeUiSettings('UTC'),
       { fromDate: '2020-03-25T23:00:00.000Z', toDate: '2020-03-26T01:00:00.000Z' }
@@ -58,7 +58,7 @@ describe('getDateHistogramSerializedFormat', () => {
     // 00:00–23:00 UTC stays on the same UTC day.
     const result = getDateHistogramSerializedFormat(
       column,
-      undefined,
+      column,
       indexPattern,
       makeUiSettings('UTC'),
       { fromDate: '2020-03-25T00:00:00.000Z', toDate: '2020-03-25T23:00:00.000Z' }
@@ -70,7 +70,7 @@ describe('getDateHistogramSerializedFormat', () => {
     // 06:30–07:30 UTC is one UTC day, but is 23:30–00:30 in America/Los_Angeles (UTC-7).
     const result = getDateHistogramSerializedFormat(
       column,
-      undefined,
+      column,
       indexPattern,
       makeUiSettings('America/Los_Angeles'),
       { fromDate: '2023-06-16T06:30:00.000Z', toDate: '2023-06-16T07:30:00.000Z' }
@@ -82,7 +82,7 @@ describe('getDateHistogramSerializedFormat', () => {
     // 14:00–23:00 UTC is 07:00–16:00 in America/Los_Angeles — same calendar day.
     const result = getDateHistogramSerializedFormat(
       column,
-      undefined,
+      column,
       indexPattern,
       makeUiSettings('America/Los_Angeles'),
       { fromDate: '2023-06-16T14:00:00.000Z', toDate: '2023-06-16T23:00:00.000Z' }
@@ -105,7 +105,7 @@ describe('getDateHistogramSerializedFormat', () => {
     // Crosses midnight — but the format already carries a date, so no double-prefix.
     const result = getDateHistogramSerializedFormat(
       column,
-      undefined,
+      column,
       indexPattern,
       settingsWithDate,
       { fromDate: '2020-03-25T23:00:00.000Z', toDate: '2020-03-26T01:00:00.000Z' }
