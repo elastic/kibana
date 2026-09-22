@@ -171,7 +171,15 @@ export class ProposalsService {
 
     await this.deps.storage.index({ id, document, op_type: 'create' });
 
-    await this.attachToConversation(id, params.conversationId, request);
+    // The action's name, since a proposal has no title of its own yet; the
+    // workflow id is the last resort so an unnamed action still reads as
+    // something more specific than the generic fallback.
+    await this.attachToConversation(
+      id,
+      params.conversationId,
+      metadata?.name ?? actionWorkflowId,
+      request
+    );
 
     return toProposal(id, document);
   }
@@ -187,6 +195,7 @@ export class ProposalsService {
   private async attachToConversation(
     proposalId: string,
     conversationId: string,
+    title: string | undefined,
     request: KibanaRequest
   ): Promise<void> {
     try {
@@ -197,7 +206,10 @@ export class ProposalsService {
         // Both: `origin` is what the card reads to look the proposal up, and a
         // payload is required because this type declares no `resolve()` hook.
         origin: proposalId,
-        data: { proposalId },
+        // The title rides along because the card's label is rendered
+        // synchronously and so cannot read the proposal; everything else the
+        // card shows is read live.
+        data: { proposalId, title },
         // The analyst has to see the decision on opening the conversation; the
         // agent referencing it first would make the card conditional on chat.
         render_inline: true,

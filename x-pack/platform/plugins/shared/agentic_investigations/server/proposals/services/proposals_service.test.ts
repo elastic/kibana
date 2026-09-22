@@ -188,21 +188,51 @@ describe('ProposalsService', () => {
         {
           conversationId: 'conv-1',
           comment: 'Tune the noisy rule',
+          actionWorkflowId: 'system-alertzero-action-create-rule',
+          actionInput: { name: 'Suspicious PowerShell' },
           confidence: 'medium',
           origin: 'worker',
         },
         { spaceId: SPACE_ID, request: REQUEST }
       );
 
-      // Only the id: the proposal is the source of truth, so a snapshot here
+      // The id, plus a title the synchronous card label cannot read live. No
+      // other field: the proposal is the source of truth, so a snapshot here
       // would keep saying "pending" after the analyst had decided.
       expect(attachmentsClient.create).toHaveBeenCalledWith({
         conversationId: 'conv-1',
         type: 'investigation_proposal',
         origin: proposal.id,
-        data: { proposalId: proposal.id },
+        // The action's own name, so the card is distinguishable at a glance.
+        data: { proposalId: proposal.id, title: 'Create detection rule' },
         render_inline: true,
       });
+    });
+
+    // Falls back rather than leaving the card untitled, so an action whose
+    // workflow declares no metadata still reads as something specific.
+    it('should title the attachment with the workflow id when the action has no metadata', async () => {
+      const storage = createStorage();
+      const workflowsApi = createWorkflowsApi();
+      workflowsApi.getWorkflow.mockResolvedValue({ definition: {} });
+      const { service, attachmentsClient } = createService(storage, workflowsApi);
+
+      await service.create(
+        {
+          conversationId: 'conv-1',
+          comment: 'Tune the noisy rule',
+          actionWorkflowId: 'system-alertzero-action-create-rule',
+          confidence: 'medium',
+          origin: 'worker',
+        },
+        { spaceId: SPACE_ID, request: REQUEST }
+      );
+
+      expect(attachmentsClient.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ title: 'system-alertzero-action-create-rule' }),
+        })
+      );
     });
 
     it('should still return the proposal when the conversation attachment fails', async () => {

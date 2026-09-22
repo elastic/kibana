@@ -19,6 +19,26 @@ export interface ProposalAttachmentTypeDeps {
 }
 
 /**
+ * Where the decision stands, as the agent needs to understand it.
+ *
+ * Expiry is reported by the banner instead: an expired proposal has no decision
+ * to report, and `Decision: pending` underneath `EXPIRED` told the agent one was
+ * still coming. That is reachable on every read now that `expired` is evaluated
+ * live rather than snapshotted when the attachment was written.
+ */
+const describeOutcome = (proposal: ProposalWithMetadata, isExpired: boolean): string => {
+  if (isExpired) {
+    return '';
+  }
+  if (proposal.status === 'pending') {
+    return 'Awaiting a human decision. Do not attempt to approve or dismiss this proposal yourself.';
+  }
+  return `Decision: ${proposal.status}${
+    proposal.decidedBy?.username ? ` by ${proposal.decidedBy.username}` : ''
+  }`;
+};
+
+/**
  * Format a proposal for the LLM.  Keep it terse: the human decision is the
  * only action the agent can request — it cannot run the action itself.
  */
@@ -31,10 +51,15 @@ const formatProposalForAgent = (proposal: ProposalWithMetadata): string => {
     proposal.actionWorkflowId ??
     'No automated action — analyst carries this out themselves';
 
+  // Both, because they can disagree: `expired` is the deadline evaluated on
+  // read, while `status: 'expired'` is the settlement the gate writes when
+  // nobody answered — which it can do before the deadline itself passes.
+  const isExpired = proposal.expired || proposal.status === 'expired';
+
   const lines: string[] = [
     `## Investigation proposal: ${label}`,
     `Status: ${proposal.status}`,
-    proposal.expired ? 'EXPIRED: the decision deadline has passed' : '',
+    isExpired ? 'EXPIRED: the decision deadline has passed, and it can no longer be decided.' : '',
     '',
     proposal.comment,
     '',
@@ -46,11 +71,7 @@ const formatProposalForAgent = (proposal: ProposalWithMetadata): string => {
       : '',
     proposal.expiresAt ? `Decision deadline: ${proposal.expiresAt}` : '',
     '',
-    proposal.status === 'pending' && !proposal.expired
-      ? 'Awaiting a human decision. Do not attempt to approve or dismiss this proposal yourself.'
-      : `Decision: ${proposal.status}${
-          proposal.decidedBy?.username ? ` by ${proposal.decidedBy.username}` : ''
-        }`,
+    describeOutcome(proposal, isExpired),
   ];
 
   return lines.filter((l) => l !== '').join('\n');

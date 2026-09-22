@@ -89,6 +89,17 @@ describe('proposalAttachmentType', () => {
       });
     });
 
+    // The only thing the synchronous card label has to go on, so it is the one
+    // field allowed alongside the id.
+    it('should accept the title the card labels itself with', () => {
+      const { type } = createType();
+
+      expect(type.validate({ proposalId: 'proposal-1', title: 'Create rule' })).toEqual({
+        valid: true,
+        data: { proposalId: 'proposal-1', title: 'Create rule' },
+      });
+    });
+
     // The old shape was the whole proposal. Anything still carrying a snapshot
     // must be refused rather than silently stripped down to nothing.
     it('should reject a payload with no proposal id', () => {
@@ -110,6 +121,24 @@ describe('proposalAttachmentType', () => {
         type: 'text',
         value: expect.stringContaining('Status: no_action'),
       });
+    });
+
+    // Reachable on every read now that `expired` is evaluated live: saying a
+    // decision was pending underneath the expiry banner contradicted it, and
+    // dropped the "do not decide this yourself" instruction exactly where it
+    // matters most.
+    it.each([
+      ['the deadline has passed', proposal({ status: 'pending', expired: true })],
+      ['the gate settled it as expired', proposal({ status: 'expired', expired: false })],
+    ])('should not report a pending decision when %s', async (_, expiredProposal) => {
+      const { type, get } = createType();
+      get.mockResolvedValue(expiredProposal);
+
+      const { value } = (await represent(type)) as { value: string };
+
+      expect(value).toContain('EXPIRED');
+      expect(value).not.toContain('Decision: pending');
+      expect(value).not.toContain('Awaiting a human decision');
     });
 
     it('should read the id from the payload when the attachment has no origin', async () => {

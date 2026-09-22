@@ -150,7 +150,10 @@ ATTACH1=$(add_attachment "$CONV1" "$(jq -n \
     type: $type,
     origin: $origin,
     render_inline: true,
-    data: { proposalId: $origin }
+    data: {
+      proposalId: $origin,
+      title: "Block outbound \u2014 seed"
+    }
   }')")
 
 echo "  conversation: $CONV1, proposal: $P1_ID, attachment: $ATTACH1"
@@ -195,7 +198,10 @@ ATTACH2=$(add_attachment "$CONV2" "$(jq -n \
     type: $type,
     origin: $origin,
     render_inline: true,
-    data: { proposalId: $origin }
+    data: {
+      proposalId: $origin,
+      title: "Detect repeated SSH login failures"
+    }
   }')")
 
 echo "  conversation: $CONV2, proposal: $P2_ID, attachment: $ATTACH2"

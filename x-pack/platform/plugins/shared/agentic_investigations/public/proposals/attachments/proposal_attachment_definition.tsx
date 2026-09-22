@@ -19,19 +19,19 @@ export type ProposalAttachment = Attachment<
 >;
 
 /**
- * Fixed, because `getLabel` is synchronous and the attachment carries only a
- * proposal id — there is nothing to title it by without a fetch. The action
- * name, impact and decision are rendered live by the card instead, which is
+ * Shown when the proposal carries no action to name. `getLabel` is synchronous,
+ * so it can only title a card from what the attachment itself stores — the
+ * impact, status and decision are rendered live by the card instead, which is
  * also why this type contributes no `getHeader` badges.
  */
 const ATTACHMENT_LABEL = i18n.translate('xpack.agenticInvestigations.proposals.attachments.label', {
-  defaultMessage: 'Investigation proposal',
+  defaultMessage: 'Proposed action',
 });
 
 /** Factory for the browser-side proposal attachment UI definition. */
 export const createProposalAttachmentDefinition =
   (): AttachmentUIDefinition<ProposalAttachment> => ({
-    getLabel: () => ATTACHMENT_LABEL,
+    getLabel: ({ data }) => data.title ?? ATTACHMENT_LABEL,
 
     getIcon: () => 'lock',
 
