@@ -92,6 +92,76 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
     await mockAwsPackage(page, MOCK_AWS_PACKAGE_WITH_VERSION);
   });
 
+  test('policy cleanup: deselecting a service fires DELETE before deploying new service', async ({
+    browserAuth,
+    page,
+  }) => {
+    // Simulate: user previously deployed 'old-svc' (policy 'mock-old-policy-id'), then went back
+    // to Step 1, deselected it, and selected 'elb' instead. policyIdsByInstance still has the
+    // stale entry because removeDeployInstance was never called for Step 1 deselections.
+    // The live-stale detection in handleDeploy should fire DELETE before creating the new elb policy.
+    await navigateToOnboardingStep(browserAuth, page, 'authenticate-and-deploy', {
+      selectedServiceIds: ['elb'],
+      globalRegion: 'us-east-1',
+      serviceVars: {
+        elb: {
+          enabledDataStreams: ['elb_logs'],
+          varsByDataStream: {
+            elb_logs: {
+              enabledInputs: ['aws-s3'],
+              varsByInput: { 'aws-s3': { bucket_arn: 'arn:aws:s3:::test-bucket' } },
+            },
+          },
+        },
+      },
+      detectAndReviewStep: {
+        policyIdsByInstance: { 'old-svc': 'mock-old-policy-id' },
+        serviceStatuses: {},
+      },
+    });
+
+    await page.route(
+      (url) =>
+        /\/api\/fleet\/managed_integrations(\/mock-old-policy-id)?$/.test(url.pathname),
+      (route) =>
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify(
+            route.request().method() === 'POST' ? { item: { id: 'mock-new-policy-id' } } : {}
+          ),
+        })
+    );
+
+    await expect(page.testSubj.locator('managedIntegrationsSection')).toBeVisible();
+
+    const accessKeyField = page.testSubj.locator('awsStaticKeysForm-accessKeyId');
+    const secretKeyField = page.testSubj.locator('awsStaticKeysForm-secretAccessKey');
+    await expect(accessKeyField).toBeVisible();
+    await accessKeyField.fill('AKIATEST');
+    await secretKeyField.fill('secrettest');
+
+    const deployButton = page.testSubj.locator('managedIntegrationsSection-deployButton');
+    await expect(deployButton).toBeEnabled();
+
+    const deleteRequestPromise = page.waitForRequest(
+      (req) =>
+        req.method() === 'DELETE' &&
+        /\/api\/fleet\/managed_integrations\/mock-old-policy-id$/.test(new URL(req.url()).pathname)
+    );
+    const createRequestPromise = page.waitForRequest(
+      (req) =>
+        req.method() === 'POST' &&
+        /\/api\/fleet\/managed_integrations$/.test(new URL(req.url()).pathname)
+    );
+
+    await deployButton.click();
+
+    await deleteRequestPromise;
+    await createRequestPromise;
+    // Both requests fired — DELETE for the stale policy and POST for the new elb policy.
+  });
+
   test('deploy fires POST /api/fleet/managed_integrations and shows success state', async ({
     browserAuth,
     page,

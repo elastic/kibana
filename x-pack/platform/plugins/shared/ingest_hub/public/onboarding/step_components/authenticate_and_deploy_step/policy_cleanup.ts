@@ -54,7 +54,9 @@ export function computePolicyCleanupOps(
   }
 
   for (const [instanceId, policyId] of Object.entries(currentPolicyIdsByInstance)) {
-    if (policyMap.has(policyId)) {
+    // Exclude instances that are in the pending-removal set — they're being removed, not surviving.
+    // This matters for the live-stale path where policyIdsByInstance isn't pre-pruned.
+    if (policyMap.has(policyId) && !(instanceId in pendingCleanupPolicyIds)) {
       policyMap.get(policyId)!.surviving.push(instanceId);
     }
   }

@@ -129,6 +129,28 @@ describe('computePolicyCleanupOps', () => {
     expect(ops.toDelete).toEqual(['policy-1']);
     expect(ops.toUpdate).toEqual([]);
   });
+
+  it('deletes policy when currentPolicyIdsByInstance still has the removed instance (live-stale path)', () => {
+    // When deselecting from Step 1, removeDeployInstance is never called, so
+    // policyIdsByInstance is NOT pre-pruned. The removed instance appears in both
+    // pendingCleanupPolicyIds AND currentPolicyIdsByInstance. Must not count it as a survivor.
+    const ops = computePolicyCleanupOps(
+      { 'security_hub': 'policy-1' }, // pending removal
+      { 'security_hub': 'policy-1' }  // still in policyIdsByInstance (not pre-pruned)
+    );
+    expect(ops.toDelete).toEqual(['policy-1']);
+    expect(ops.toUpdate).toEqual([]);
+  });
+
+  it('correctly handles partial survival when currentPolicyIdsByInstance includes the removed instance', () => {
+    // Similar to live-stale path but another instance genuinely survives.
+    const ops = computePolicyCleanupOps(
+      { 'vpcflow': 'policy-1' },
+      { 'vpcflow': 'policy-1', 'guardduty': 'policy-1' }
+    );
+    expect(ops.toDelete).toEqual([]);
+    expect(ops.toUpdate).toEqual([{ policyId: 'policy-1', survivingInstanceIds: ['guardduty'] }]);
+  });
 });
 
 // ── cleanupAgentlessPolicies ──────────────────────────────────────────────────
