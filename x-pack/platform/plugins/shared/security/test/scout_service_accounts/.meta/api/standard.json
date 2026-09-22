@@ -1,5 +1,5 @@
 {
-  "sha1": "a10b555c0ff9d8f57d2485cd280a33f5ca98a2fd",
+  "sha1": "e4597345758719fbbb06c31a127cbb3b81511a92",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -174,8 +174,8 @@
       }
     },
     {
-      "id": "99ae9153aa6c845-adee786dda9dcb7",
-      "title": "List and get Elasticsearch service accounts answers 404 for an unknown account and for a built-in one",
+      "id": "99ae9153aa6c845-8d653fad5eaa674",
+      "title": "List and get Elasticsearch service accounts answers 404 for an unknown account, a built-in one, and an id that is no principal at all",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -187,29 +187,16 @@
       }
     },
     {
-      "id": "99ae9153aa6c845-d36d77c79aef740",
-      "title": "List and get Elasticsearch service accounts rejects an id that is not a service account principal",
+      "id": "99ae9153aa6c845-f132f1bdd3be274",
+      "title": "List and get Elasticsearch service accounts rejects a page size outside 1 to 100",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 271,
-        "column": 22
-      }
-    },
-    {
-      "id": "99ae9153aa6c845-7021ab46422ebc5",
-      "title": "List and get Elasticsearch service accounts rejects a page size outside 1 to 100 and a foreign cursor",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 282,
-        "column": 23
+        "line": 272,
+        "column": 9
       }
     },
     {
@@ -221,8 +208,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 297,
-        "column": 81
+        "line": 281,
+        "column": 18
       }
     },
     {
@@ -234,8 +221,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 342,
-        "column": 23
+        "line": 335,
+        "column": 40
       }
     }
   ]

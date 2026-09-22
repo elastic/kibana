@@ -22,6 +22,7 @@ import { licenseMock } from '../../common/licensing/index.mock';
 import {
   ES_SERVICE_ACCOUNT_TOKEN_MAX_LENGTH,
   SERVICE_ACCOUNT_MAX_ROLES,
+  SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH,
 } from '../../common/service_accounts';
 import { securityTelemetry } from '../otel/instrumentation';
 
@@ -266,8 +267,8 @@ describe('EsServiceAccounts', () => {
       expect(credentialStore.set).not.toHaveBeenCalled();
     });
 
-    // A third account type, a renamed field, or a role list outside Kibana's caps would
-    // otherwise read as "the name is free", and the PUT that follows is a full replacement.
+    // A third account type or a renamed field would otherwise read as "the name is free", and
+    // the PUT that follows is a full replacement.
     it('refuses rather than overwriting an account it cannot read', async () => {
       esClient.asCurrentUser.transport.request.mockResolvedValueOnce({
         'kibana/nightshift-relay': { type: 'user_managed', roles: 'superuser', enabled: true },
@@ -939,6 +940,20 @@ describe('EsServiceAccounts', () => {
         });
       }
       expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
+    });
+
+    // Elasticsearch caps neither the role count nor the role name length, so an account created
+    // outside Kibana can sit outside the bounds Kibana puts on its own creates. Such an account
+    // lists fine, and must open fine too.
+    it('reads an account whose roles fall outside the bounds of a Kibana create', async () => {
+      const roles = Array.from({ length: SERVICE_ACCOUNT_MAX_ROLES + 1 }, (_, i) => `role-${i}`);
+      roles.push('a'.repeat(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH + 1));
+      esClient.asCurrentUser.transport.request.mockResolvedValueOnce(accountEntry({ roles }));
+
+      await expect(serviceAccounts.get(request, ACCOUNT_ID)).resolves.toMatchObject({
+        id: ACCOUNT_ID,
+        roles,
+      });
     });
 
     it('rejects with a 502 when the account is reported in an unrecognized shape', async () => {

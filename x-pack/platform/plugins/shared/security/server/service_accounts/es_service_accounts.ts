@@ -36,8 +36,6 @@ import {
   ES_SERVICE_ACCOUNT_TOKEN_MAX_LENGTH,
   ES_SERVICE_ACCOUNT_TOKEN_NAME,
   SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE,
-  SERVICE_ACCOUNT_MAX_ROLES,
-  serviceAccountRoleNameSchema,
   serviceAccountRolesSchema,
 } from '../../common/service_accounts';
 import { getDetailedErrorMessage } from '../errors';
@@ -53,9 +51,14 @@ const userManagedEntrySchema = z.object({ type: z.literal('user_managed') });
  * The rest of what Elasticsearch reports for an account keyed by its `{namespace}/{service}`
  * principal. Parsed separately from the discriminator above, so "this is not Kibana's account"
  * and "Kibana cannot read this account" stay different answers.
+ *
+ * Shape only, matching what {@link list} takes from the query API. The caps Kibana puts on a
+ * create are its own and Elasticsearch enforces none of them, so an account created outside
+ * Kibana may hold more roles, or longer role names, than Kibana would ever have written. Holding
+ * a read to the bounds of a write would let such an account list cleanly and then fail to open.
  */
 const accountEntrySchema = z.object({
-  roles: z.array(serviceAccountRoleNameSchema).max(SERVICE_ACCOUNT_MAX_ROLES),
+  roles: z.array(z.string()),
   enabled: z.boolean(),
 });
 
@@ -261,9 +264,8 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
    * The roles a new account gets when the caller named none: the creator's own, or the fallback
    * role when the creator reports none, as an API-key authentication does.
    *
-   * The creator's roles are held to the same bounds as an explicit `roles`. Elasticsearch caps
-   * neither the count nor the name length, so without this the account could be written and then
-   * refused by `readAccount`, turning the next create for that name into a 502 rather than a 409.
+   * The creator's roles are held to the same bounds as an explicit `roles`, so that an account
+   * Kibana fills in for is never given something a caller could not have asked for by name.
    */
   private deriveRoles(user: AuthenticatedUser, serviceAccountId: string): string[] {
     if (user.roles.length === 0) {
