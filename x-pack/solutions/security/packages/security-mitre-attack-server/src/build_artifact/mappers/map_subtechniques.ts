@@ -25,7 +25,8 @@ import {
 export const mapSubtechniques = (
   bundle: StixBundle,
   framework: MitreFramework,
-  frameworkVersion: string
+  frameworkVersion: string,
+  sourceName: 'mitre-attack' | 'mitre-atlas' = 'mitre-attack'
 ): MitreSubtechnique[] => {
   const { objects } = bundle;
 
@@ -46,16 +47,17 @@ export const mapSubtechniques = (
 
   return subtechniqueEntities
     .flatMap((stixEntity) => {
-      const mitreReference = getMitreReference(stixEntity);
+      const mitreReference = getMitreReference(stixEntity, sourceName);
       if (mitreReference == null) return [];
 
       const parentStixId = subtechniqueParentRef.get(stixEntity.id);
-      const dotPrefixId = mitreReference.id.split('.')[0];
+      const dotPrefixId = mitreReference.id.slice(0, mitreReference.id.lastIndexOf('.'));
 
       let techniqueId: string;
       if (parentStixId != null) {
         const parentEntity = entityById.get(parentStixId);
-        const parentMitreReference = parentEntity != null ? getMitreReference(parentEntity) : null;
+        const parentMitreReference =
+          parentEntity != null ? getMitreReference(parentEntity, sourceName) : null;
         const relationshipId = parentMitreReference?.id ?? dotPrefixId;
         if (parentMitreReference != null && relationshipId !== dotPrefixId) {
           throw new Error(
@@ -80,8 +82,13 @@ export const mapSubtechniques = (
           description: stixEntity.description ?? '',
           revoked: stixEntity.revoked === true,
           deprecated: stixEntity.x_mitre_deprecated === true,
-          superseded_by_id: resolveSupersededBy(stixEntity.id, entityById, revokedByTargetRefs),
-          tactic_ids: resolveTacticIds(stixEntity, tacticByShortname),
+          superseded_by_id: resolveSupersededBy(
+            stixEntity.id,
+            entityById,
+            revokedByTargetRefs,
+            sourceName
+          ),
+          tactic_ids: resolveTacticIds(stixEntity, tacticByShortname, sourceName),
           technique_id: techniqueId,
         },
       ];

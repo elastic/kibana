@@ -4,8 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
+import React, { useState } from 'react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiSpacer,
+  EuiTab,
+  EuiTabs,
+  EuiText,
+} from '@elastic/eui';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import { CoverageOverviewLink } from '../../../../common/components/links_to_docs';
 import { HeaderPage } from '../../../../common/components/header_page';
@@ -17,6 +25,9 @@ import { CoverageOverviewFiltersPanel } from './filters_panel';
 import { useCoverageOverviewDashboardContext } from './coverage_overview_dashboard_context';
 import { CoverageOverviewInvalidMitreRulesCallout } from './invalid_mitre_rules_callout';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { AtlasCoverageGrid } from './atlas_coverage_grid';
+
+type CoverageTab = 'attack' | 'atlas';
 
 const CoverageOverviewHeaderComponent = () => (
   <HeaderPage
@@ -38,53 +49,71 @@ const CoverageOverviewDashboardComponent = () => {
   const isMitreAttackUpdatesUIEnabled = useIsExperimentalFeatureEnabled(
     'mitreAttackUpdatesUIEnabled'
   );
+  const [activeTab, setActiveTab] = useState<CoverageTab>('attack');
 
   return (
     <>
       <CoverageOverviewHeader />
-      {isMitreAttackUpdatesUIEnabled && <CoverageOverviewInvalidMitreRulesCallout />}
+      <EuiTabs>
+        <EuiTab isSelected={activeTab === 'attack'} onClick={() => setActiveTab('attack')}>
+          {i18n.ATTACK_TAB_LABEL}
+        </EuiTab>
+        <EuiTab isSelected={activeTab === 'atlas'} onClick={() => setActiveTab('atlas')}>
+          {i18n.ATLAS_TAB_LABEL}
+        </EuiTab>
+      </EuiTabs>
+      <EuiSpacer />
+      {isMitreAttackUpdatesUIEnabled && activeTab === 'attack' && (
+        <CoverageOverviewInvalidMitreRulesCallout />
+      )}
       <CoverageOverviewFiltersPanel />
       <EuiSpacer />
-      {isLoading ? (
-        <EuiFlexGroup justifyContent="center" data-test-subj="coverageOverviewLoadingSpinner">
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="xl" />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ) : isMitreError ? (
-        <KbnDangerCallout
-          announceOnMount
-          title={i18n.COVERAGE_OVERVIEW_MITRE_ERROR_TITLE}
-          data-test-subj="coverageOverviewMitreErrorCallout"
-        >
-          <p>{i18n.COVERAGE_OVERVIEW_MITRE_ERROR_BODY}</p>
-        </KbnDangerCallout>
+      {activeTab === 'atlas' ? (
+        <AtlasCoverageGrid />
       ) : (
-        <EuiFlexGroup
-          gutterSize="m"
-          className="eui-xScroll"
-          tabIndex={0}
-          data-test-subj="coverageOverviewMatrix"
-        >
-          {data?.mitreTactics.map((tactic) => (
-            <EuiFlexGroup
-              data-test-subj={`coverageOverviewTacticGroup-${tactic.id}`}
-              direction="column"
-              key={tactic.id}
-              gutterSize="s"
-            >
+        <>
+          {isLoading ? (
+            <EuiFlexGroup justifyContent="center" data-test-subj="coverageOverviewLoadingSpinner">
               <EuiFlexItem grow={false}>
-                <CoverageOverviewTacticPanel tactic={tactic} />
+                <EuiLoadingSpinner size="xl" />
               </EuiFlexItem>
+            </EuiFlexGroup>
+          ) : isMitreError ? (
+            <KbnDangerCallout
+              announceOnMount
+              title={i18n.COVERAGE_OVERVIEW_MITRE_ERROR_TITLE}
+              data-test-subj="coverageOverviewMitreErrorCallout"
+            >
+              <p>{i18n.COVERAGE_OVERVIEW_MITRE_ERROR_BODY}</p>
+            </KbnDangerCallout>
+          ) : (
+            <EuiFlexGroup
+              gutterSize="m"
+              className="eui-xScroll"
+              tabIndex={0}
+              data-test-subj="coverageOverviewMatrix"
+            >
+              {data?.mitreTactics.map((tactic) => (
+                <EuiFlexGroup
+                  data-test-subj={`coverageOverviewTacticGroup-${tactic.id}`}
+                  direction="column"
+                  key={tactic.id}
+                  gutterSize="s"
+                >
+                  <EuiFlexItem grow={false}>
+                    <CoverageOverviewTacticPanel tactic={tactic} />
+                  </EuiFlexItem>
 
-              {tactic.techniques.map((technique, techniqueKey) => (
-                <EuiFlexItem grow={false} key={`${technique.id}-${techniqueKey}`}>
-                  <CoverageOverviewMitreTechniquePanelPopover technique={technique} />
-                </EuiFlexItem>
+                  {tactic.techniques.map((technique, techniqueKey) => (
+                    <EuiFlexItem grow={false} key={`${technique.id}-${techniqueKey}`}>
+                      <CoverageOverviewMitreTechniquePanelPopover technique={technique} />
+                    </EuiFlexItem>
+                  ))}
+                </EuiFlexGroup>
               ))}
             </EuiFlexGroup>
-          ))}
-        </EuiFlexGroup>
+          )}
+        </>
       )}
     </>
   );

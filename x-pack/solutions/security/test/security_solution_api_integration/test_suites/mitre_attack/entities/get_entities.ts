@@ -525,7 +525,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('request validation', () => {
       it('rejects an unsupported framework value with 400', async () => {
-        const { status } = await mitreAttackApi.getEntities({ framework: 'atlas' });
+        const { status } = await mitreAttackApi.getEntities({ framework: 'mobile' });
         expect(status).to.eql(400);
       });
 

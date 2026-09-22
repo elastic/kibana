@@ -7,9 +7,8 @@
 
 import type { StixBundle } from './types';
 
-/** Fetches the enterprise ATT&CK STIX bundle for a mitre/cti tag, e.g. 'ATT&CK-v19.1'. */
-export const fetchStixBundle = async (tag: string): Promise<StixBundle> => {
-  const url = `https://raw.githubusercontent.com/mitre/cti/${tag}/enterprise-attack/enterprise-attack.json`;
+/** Fetches a STIX bundle from the given URL. */
+export const fetchStixBundle = async (url: string): Promise<StixBundle> => {
   const response = await fetch(url);
   if (!response.ok) {
     throw new Error(
