@@ -46,7 +46,7 @@ test.describe(
       }
       await apiServices.core.settings({
         'feature_flags.overrides': {
-          [NIGHTSHIFT_ENABLED_FLAG]: false,
+          [NIGHTSHIFT_ENABLED_FLAG]: null,
         },
       });
     });
