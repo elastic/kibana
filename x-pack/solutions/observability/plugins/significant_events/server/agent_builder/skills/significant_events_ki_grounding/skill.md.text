@@ -126,7 +126,7 @@ Stored form (written to evidence.esql_query — no executed ordering/limit tail)
 }
 ```
 
-**Budget — exactly 1 call per matched rule.** Every rule with a matched backed query KI gets exactly 1 confirmation call. Never skip a rule's query based on overlap with other rules' features, expected grouping, or any downstream reasoning — confirmation is per-rule and unconditional. Do not run contradiction follow-ups, retries, or a third wave. Note any checks skipped because the budget was exhausted in `summary`.
+**Budget — one confirmation result per matched rule.** Every rule with a matched backed query KI gets a confirmation result. Never skip a rule based on overlap with other rules' features, expected grouping, or any downstream reasoning — confirmation is per-rule and unconditional. Identical or subset queries may share a single `platform_core_execute_esql` execution (see Deduplication below); that shared result still counts as confirmation for each involved rule. Do not run contradiction follow-ups or retries. Dispatch as many waves of up to 10 as needed so every remaining distinct confirmation query runs; wave count is not a cap on matched rules.
 
 **Deduplication before executing:**
 - Identical query bodies (after `METADATA` stripped and the bounded sample tail applied): execute once, write 1 `signals` entry per KI.
@@ -136,7 +136,7 @@ Stored form (written to evidence.esql_query — no executed ordering/limit tail)
 
 ### Step 4: Record Signal Verdicts
 
-**One `signals` entry per rule — never two**, regardless of how many calls you made for it. When a contradiction follow-up ran, the single entry narrates both attempts and its `evidence.esql_query`/`evidence.result` reflect the resolving (second) call. In both primary and follow-up calls, `evidence.esql_query` stores the reader-facing query rather than copying `data.esql` from the tool result. Each signal entry combines detection metadata and query result. See `<output_format>` for the exact format.
+**One `signals` entry per rule — never two.** `evidence.esql_query`/`evidence.result` reflect the single confirmation query (or the shared deduplicated execution). `evidence.esql_query` stores the reader-facing query rather than copying `data.esql` from the tool result. Each signal entry combines detection metadata and query result. See `<output_format>` for the exact format.
 
 1. **Write the Signal Description** using the compact **Found / Impact** format (keep under 350 chars). **Found** names the concrete row signature and failing target from the query result without reproducing raw sensitive values; refer to sensitive field names and exposure type only. Never say only that rows were returned. **Impact** names who or what is blocked, degraded, or unaffected — outcome language only. The structured `verdict` carries the conclusion. Do not put dependency chains, upstream causes, or topology in the description — record those in Step 5 `causal_features` and `blast_radius`. Budget order when over limit: shorten Found first; never omit Impact on `confirms`. Concretely:
    - **Confirms**: `"Found: dial tcp inventory-db:5432 connection refused. Impact: db-dependent requests blocked."`
