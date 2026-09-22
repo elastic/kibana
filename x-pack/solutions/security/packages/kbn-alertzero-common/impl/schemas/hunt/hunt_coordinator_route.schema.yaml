@@ -10,9 +10,8 @@ paths:
       operationId: HuntCoordinator
       description: >-
         Chains Tier 1 into Tier 2 with tier2_when gating and no-model
-        degradation (plan.md Phase 6). Writes no feedback of its own: it
-        returns completedSuccessfully so the calling workflow decides whether
-        to write the per-space evidence[] element.
+        degradation. Returns completedSuccessfully so the calling workflow
+        decides whether to write the per-space evidence[] element.
       summary: Run the hunt coordinator
       tags:
         - AlertZero API
