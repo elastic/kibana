@@ -46,6 +46,16 @@ export const buildDiscoverActionButton = ({
 };
 
 /**
+ * Whether Agent Builder will render its chrome header for an attachment. The platform's
+ * `AttachmentHeader` returns `null` when there is no close button and no action button, and
+ * the inline renderer never passes `onClose`, so an attachment with no action button gets no
+ * header at all. Inline content uses this to decide whether it must render the headline
+ * fields (title, severity, status, confidence) itself instead of relying on the header.
+ */
+export const hasChromeHeaderForActions = (actionButtons: ActionButton[]): boolean =>
+  actionButtons.length > 0;
+
+/**
  * Wraps a lazily-imported inline content component in a `Suspense` boundary with the given
  * skeleton line count, so each attachment definition doesn't repeat the same
  * `React.lazy(() => import(...).then(...))` + `Suspense` wrapper.

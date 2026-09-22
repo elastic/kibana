@@ -114,11 +114,19 @@ describe('SignificantSecurityEventInlineContent', () => {
     expect(screen.getByText('user-1')).toBeInTheDocument();
   });
 
-  it('does not render a title/severity/status header row (moved to the attachment header)', () => {
+  it('defers the title/severity/status row to the chrome header when one is rendered', () => {
     renderWithI18n(
-      <SignificantSecurityEventInlineContent {...renderProps(buildAttachment(baseData))} />
+      <SignificantSecurityEventInlineContent
+        {...renderProps(
+          buildAttachment({
+            ...baseData,
+            events: [{ event_id: 'evt-1', source_index: 'logs-default' }],
+          }),
+          { ...defaultNavigation, share: createMockShare() }
+        )}
+      />
     );
-    expect(screen.queryByText('Suspicious lateral movement')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('alertzeroSignificantSecurityEventHeadline')).toBeNull();
     expect(screen.queryByText('high (0.8)')).not.toBeInTheDocument();
   });
 
@@ -544,5 +552,78 @@ describe('SignificantSecurityEventInlineContent', () => {
       />
     );
     expect(screen.queryByTestId('alertzeroSignificantSecurityEventProposal')).toBeNull();
+  });
+
+  it('renders a proposal carrying only actionInput', () => {
+    renderWithI18n(
+      <SignificantSecurityEventInlineContent
+        {...renderProps(
+          buildAttachment({
+            ...baseData,
+            maps_to_proposal: { actionInput: { endpoint_ids: 'abc-123' } },
+          })
+        )}
+      />
+    );
+    expect(screen.getByTestId('alertzeroSignificantSecurityEventProposal')).toBeInTheDocument();
+    expect(screen.getByText('endpoint_ids: abc-123')).toBeInTheDocument();
+  });
+
+  it('renders resolved_iocs from the hunt result', () => {
+    renderWithI18n(
+      <SignificantSecurityEventInlineContent
+        {...renderProps(
+          buildAttachment({
+            ...baseData,
+            hunt_result: {
+              ...huntResult,
+              tier1: {
+                ...huntResult.tier1,
+                resolved_iocs: [
+                  { type: 'ip' as const, value: '203.0.113.5' },
+                  { type: 'hash' as const, value: 'deadbeef' },
+                ],
+              },
+            },
+          })
+        )}
+      />
+    );
+    expect(
+      screen.getByTestId('alertzeroSignificantSecurityEventHuntResultResolvedIocs')
+    ).toBeInTheDocument();
+    expect(screen.getByText('203.0.113.5')).toBeInTheDocument();
+    expect(screen.getByText('deadbeef')).toBeInTheDocument();
+  });
+
+  describe('headline fallback when Agent Builder omits its chrome header', () => {
+    it('renders title, severity, status and confidence when there is no action button', () => {
+      // No events and no alerts means no Discover action, so the platform header is absent.
+      renderWithI18n(
+        <SignificantSecurityEventInlineContent {...renderProps(buildAttachment(baseData))} />
+      );
+
+      const headline = screen.getByTestId('alertzeroSignificantSecurityEventHeadline');
+      expect(headline).toHaveTextContent('Suspicious lateral movement');
+      expect(headline).toHaveTextContent('high');
+      expect(headline).toHaveTextContent('open');
+      expect(headline).toHaveTextContent('80%');
+    });
+
+    it('omits the headline when an action button gives the attachment a header', () => {
+      renderWithI18n(
+        <SignificantSecurityEventInlineContent
+          {...renderProps(
+            buildAttachment({
+              ...baseData,
+              events: [{ event_id: 'evt-1', source_index: 'logs-default' }],
+            }),
+            { ...defaultNavigation, share: createMockShare() }
+          )}
+        />
+      );
+
+      expect(screen.queryByTestId('alertzeroSignificantSecurityEventHeadline')).toBeNull();
+    });
   });
 });

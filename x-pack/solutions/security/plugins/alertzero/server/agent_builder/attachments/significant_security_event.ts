@@ -154,6 +154,15 @@ const formatSignificantSecurityEventForAgent = (
     if (proposal.actionWorkflowId) {
       lines.push(`  Action workflow: ${proposal.actionWorkflowId}`);
     }
+    if (proposal.actionInput) {
+      const inputEntries = Object.entries(proposal.actionInput);
+      if (inputEntries.length > 0) {
+        lines.push('  Action input:');
+        for (const [key, value] of inputEntries) {
+          lines.push(`    ${key}: ${typeof value === 'string' ? value : JSON.stringify(value)}`);
+        }
+      }
+    }
     if (proposal.manual_remediation && proposal.manual_remediation.length > 0) {
       lines.push('  Manual remediation:');
       for (const step of proposal.manual_remediation) {

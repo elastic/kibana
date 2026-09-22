@@ -175,6 +175,7 @@ describe('createSignificantSecurityEventAttachmentType', () => {
             impact: 'Isolate affected hosts',
             confidence: 0.7,
             actionWorkflowId: 'workflow-1',
+            actionInput: { endpoint_ids: 'abc-123', force: true },
             manual_remediation: ['Rotate the compromised key'],
           },
         },
@@ -190,6 +191,9 @@ describe('createSignificantSecurityEventAttachmentType', () => {
       expect(value).toContain('Category: containment');
       expect(value).toContain('Impact: Isolate affected hosts');
       expect(value).toContain('Action workflow: workflow-1');
+      expect(value).toContain('Action input:');
+      expect(value).toContain('endpoint_ids: abc-123');
+      expect(value).toContain('force: true');
       expect(value).toContain('- Rotate the compromised key');
     });
 
@@ -277,6 +281,20 @@ describe('createSignificantSecurityEventAttachmentType', () => {
               rule_name: 'r'.repeat(256),
             })),
           },
+        },
+        // `maps_to_proposal` at its schema maximums, including the 32KB `actionInput` cap,
+        // since the formatter now emits every one of these fields.
+        maps_to_proposal: {
+          category: 'c'.repeat(256),
+          impact: 'i'.repeat(2000),
+          confidence: 1,
+          actionWorkflowId: 'w'.repeat(512),
+          // 50 keys at the 256-char key cap, with values sized so the serialized payload sits
+          // just under the 32768-byte `actionInput` cap (32601 bytes).
+          actionInput: Object.fromEntries(
+            Array.from({ length: 50 }, (_, i) => [`key-${i}`.padEnd(256, 'k'), 'v'.repeat(390)])
+          ),
+          manual_remediation: Array.from({ length: 50 }, () => 'm'.repeat(2000)),
         },
       };
 

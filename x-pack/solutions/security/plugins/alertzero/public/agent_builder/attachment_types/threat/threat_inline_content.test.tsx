@@ -13,6 +13,7 @@ import {
   ThreatAttachmentInlineContent,
   THREAT_ATTACHMENT_EMPTY_TEST_ID,
   THREAT_ATTACHMENT_UNAVAILABLE_TEST_ID,
+  THREAT_ATTACHMENT_CAPTURED_FIELDS_TEST_ID,
   THREAT_EXTERNAL_REF_LINK_TEST_ID,
 } from './threat_inline_content';
 import { threatAttachmentQueryClient } from './query_client';
@@ -157,9 +158,12 @@ describe('ThreatAttachmentInlineContent', () => {
     await waitFor(() => {
       expect(screen.getByTestId(THREAT_ATTACHMENT_UNAVAILABLE_TEST_ID)).toBeInTheDocument();
     });
-    // Captured fields no longer render inline (title/severity/source/report id moved to the
-    // header); the fallback callout is the observable signal that the live fetch failed.
-    expect(screen.getByTestId(THREAT_ATTACHMENT_UNAVAILABLE_TEST_ID)).toBeInTheDocument();
+    // The captured snapshot is the only view of the report when the live fetch fails, and the
+    // chrome header is absent whenever there is no Discover action, so render it inline.
+    const captured = screen.getByTestId(THREAT_ATTACHMENT_CAPTURED_FIELDS_TEST_ID);
+    expect(captured).toHaveTextContent('Captured Title');
+    expect(captured).toHaveTextContent('medium');
+    expect(captured).toHaveTextContent('Captured Source');
   });
 
   it('shows "Report unavailable" when neither live nor captured fields exist', async () => {

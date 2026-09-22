@@ -6,6 +6,10 @@
  */
 
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
+import type { ActionButton } from '@kbn/agent-builder-browser/attachments';
+import type { AttachmentNavigationDeps } from '../navigation';
+import { buildAlertsLookupEsql, buildEventsLookupEsql } from '../navigation';
+import { buildDiscoverActionButton } from '../shared/attachment_definition_helpers';
 import { significantSecurityEventAttachmentDataSchema } from '../../../../common/significant_security_event_schema';
 import type { SignificantSecurityEventAttachmentData } from '../../../../common/significant_security_event_schema';
 
@@ -41,4 +45,39 @@ export const parseSignificantSecurityEventData = (
 ): SignificantSecurityEventAttachmentData | undefined => {
   const result = significantSecurityEventAttachmentDataSchema.safeParse(candidate);
   return result.success ? result.data : undefined;
+};
+
+/**
+ * The single Discover exit the SSE header offers: all of its referenced events at once, or
+ * its alerts when it carries no events. Shared with inline content, which renders the
+ * headline fields itself when this yields no button (Agent Builder then omits the chrome
+ * header entirely, so title/severity/status/confidence would otherwise be invisible).
+ */
+export const buildSignificantSecurityEventActionButtons = ({
+  parsed,
+  navigation,
+  openEventsLabel,
+  openAlertsLabel,
+}: {
+  parsed: SignificantSecurityEventAttachmentData | undefined;
+  navigation: AttachmentNavigationDeps;
+  openEventsLabel: string;
+  openAlertsLabel: string;
+}): ActionButton[] => {
+  if (!parsed) {
+    return [];
+  }
+
+  const events = parsed.events ?? [];
+  const alerts = parsed.alerts ?? [];
+  const exit =
+    events.length > 0
+      ? { esql: buildEventsLookupEsql({ events }), label: openEventsLabel }
+      : { esql: buildAlertsLookupEsql({ alerts }), label: openAlertsLabel };
+
+  return buildDiscoverActionButton({
+    share: navigation.share,
+    esql: exit.esql,
+    label: exit.label,
+  });
 };

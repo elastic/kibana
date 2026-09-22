@@ -52,6 +52,7 @@ import type { ThreatAttachment } from './types';
 export const THREAT_ATTACHMENT_TEST_ID = 'alertzeroThreatAttachment';
 export const THREAT_ATTACHMENT_EMPTY_TEST_ID = 'alertzeroThreatAttachmentEmpty';
 export const THREAT_ATTACHMENT_UNAVAILABLE_TEST_ID = 'alertzeroThreatAttachmentUnavailable';
+export const THREAT_ATTACHMENT_CAPTURED_FIELDS_TEST_ID = 'alertzeroThreatAttachmentCapturedFields';
 export const THREAT_EXTERNAL_REF_LINK_TEST_ID = 'alertzeroThreatExternalRefLink';
 
 /** Max IOCs shown per type before collapsing the remainder behind an overflow popover. */
@@ -613,6 +614,55 @@ const ThreatAttachmentInlineContentInner: React.FC<ThreatAttachmentInlineContent
                       )
                 }
               />
+              {hasAnyField && (
+                <>
+                  <EuiSpacer size="s" />
+                  <EuiDescriptionList
+                    compressed
+                    type="column"
+                    data-test-subj={THREAT_ATTACHMENT_CAPTURED_FIELDS_TEST_ID}
+                    listItems={[
+                      ...(data.title
+                        ? [
+                            {
+                              title: i18n.translate(
+                                'xpack.alertzero.agentBuilder.attachments.threat.capturedTitle',
+                                { defaultMessage: 'Title' }
+                              ),
+                              description: data.title,
+                            },
+                          ]
+                        : []),
+                      ...(data.severity
+                        ? [
+                            {
+                              title: i18n.translate(
+                                'xpack.alertzero.agentBuilder.attachments.threat.capturedSeverity',
+                                { defaultMessage: 'Severity' }
+                              ),
+                              description: (
+                                <EuiBadge color={severityBadgeColor(data.severity)}>
+                                  {data.severity}
+                                </EuiBadge>
+                              ),
+                            },
+                          ]
+                        : []),
+                      ...(data.source
+                        ? [
+                            {
+                              title: i18n.translate(
+                                'xpack.alertzero.agentBuilder.attachments.threat.capturedSource',
+                                { defaultMessage: 'Source' }
+                              ),
+                              description: data.source,
+                            },
+                          ]
+                        : []),
+                    ]}
+                  />
+                </>
+              )}
             </>
           )}
         </>

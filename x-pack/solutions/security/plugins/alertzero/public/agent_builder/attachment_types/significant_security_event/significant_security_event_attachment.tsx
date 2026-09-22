@@ -9,14 +9,12 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { AttachmentUIDefinition, HeaderBadge } from '@kbn/agent-builder-browser/attachments';
 import type { AttachmentNavigationDeps } from '../navigation';
-import { buildAlertsLookupEsql, buildEventsLookupEsql } from '../navigation';
 import { formatPercent } from '../shared/severity';
+import { joinSubtitle, lazyInlineContent } from '../shared/attachment_definition_helpers';
 import {
-  buildDiscoverActionButton,
-  joinSubtitle,
-  lazyInlineContent,
-} from '../shared/attachment_definition_helpers';
-import { parseSignificantSecurityEventData } from './types';
+  buildSignificantSecurityEventActionButtons,
+  parseSignificantSecurityEventData,
+} from './types';
 import type { SignificantSecurityEventAttachment } from './types';
 import type { SignificantSecurityEventInlineContentProps } from './significant_security_event_inline_content';
 
@@ -135,23 +133,11 @@ export const createSignificantSecurityEventAttachmentDefinition = ({
   renderInlineContent: (props) => (
     <LazySignificantSecurityEventInlineContent {...props} navigation={navigation} />
   ),
-  getActionButtons: ({ attachment }) => {
-    const parsed = parseOnce(attachment?.data);
-    if (!parsed) {
-      return [];
-    }
-
-    const events = parsed.events ?? [];
-    const alerts = parsed.alerts ?? [];
-    const exit =
-      events.length > 0
-        ? { esql: buildEventsLookupEsql({ events }), label: OPEN_EVENTS_LABEL }
-        : { esql: buildAlertsLookupEsql({ alerts }), label: OPEN_ALERTS_LABEL };
-
-    return buildDiscoverActionButton({
-      share: navigation.share,
-      esql: exit.esql,
-      label: exit.label,
-    });
-  },
+  getActionButtons: ({ attachment }) =>
+    buildSignificantSecurityEventActionButtons({
+      parsed: parseOnce(attachment?.data),
+      navigation,
+      openEventsLabel: OPEN_EVENTS_LABEL,
+      openAlertsLabel: OPEN_ALERTS_LABEL,
+    }),
 });

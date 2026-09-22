@@ -48,8 +48,12 @@ import {
   buildMitreTechniqueUrl,
 } from '../shared/primitives';
 import { LabeledBadgeTable, type LabeledBadgeTableRow } from '../shared/labeled_badge_table';
-import { formatPercent } from '../shared/severity';
-import { parseSignificantSecurityEventData } from './types';
+import { formatPercent, severityBadgeColor } from '../shared/severity';
+import { hasChromeHeaderForActions } from '../shared/attachment_definition_helpers';
+import {
+  buildSignificantSecurityEventActionButtons,
+  parseSignificantSecurityEventData,
+} from './types';
 import type {
   HuntResult,
   MapsToProposal,
@@ -67,6 +71,7 @@ export interface SignificantSecurityEventInlineContentProps
 
 export const SSE_ATTACHMENT_TEST_ID = 'alertzeroSignificantSecurityEventAttachment';
 export const SSE_ATTACHMENT_EMPTY_TEST_ID = 'alertzeroSignificantSecurityEventAttachmentEmpty';
+export const SSE_ATTACHMENT_HEADLINE_TEST_ID = 'alertzeroSignificantSecurityEventHeadline';
 
 const HYPOTHESIS_ACCORDION_THRESHOLD = 160;
 const EVIDENCE_BULLET_LIMIT = 5;
@@ -450,6 +455,28 @@ const HuntResultSection: React.FC<{ huntResult: HuntResult }> = ({ huntResult })
   }));
   const totalDistributedHits = tier1.per_index.reduce((sum, row) => sum + row.hit_count, 0);
 
+  // `resolved_iocs` are the concrete indicators that produced the hit counts above, so they
+  // belong on the analyst-facing card and not only in the agent representation.
+  const resolvedIocsByType = groupBy(tier1.resolved_iocs, (ioc) => ioc.type);
+  const resolvedIocRows: LabeledBadgeTableRow[] = Object.entries(resolvedIocsByType).map(
+    ([iocType, group]) => ({
+      id: iocType,
+      label: iocType,
+      values: (
+        <>
+          {group.map((ioc, index) => (
+            <IocBadge
+              key={`${ioc.type}-${ioc.value}-${index}`}
+              value={ioc.value}
+              index={index}
+              testSubj={`alertzeroSignificantSecurityEventHuntResultResolvedIoc-${iocType}-${index}`}
+            />
+          ))}
+        </>
+      ),
+    })
+  );
+
   const tier2Columns: Array<EuiBasicTableColumn<Tier2TableRow>> = [
     {
       field: 'technique_id',
@@ -576,6 +603,25 @@ const HuntResultSection: React.FC<{ huntResult: HuntResult }> = ({ huntResult })
         </>
       )}
 
+      {resolvedIocRows.length > 0 && (
+        <>
+          <EuiSpacer size="s" />
+          <SectionHeading>
+            {i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.huntResultResolvedIocs', {
+              defaultMessage: 'Resolved IOCs',
+            })}
+          </SectionHeading>
+          <LabeledBadgeTable
+            rows={resolvedIocRows}
+            testSubj="alertzeroSignificantSecurityEventHuntResultResolvedIocs"
+            caption={i18n.translate(
+              'xpack.alertzero.agentBuilder.attachments.sse.huntResultResolvedIocsTableCaption',
+              { defaultMessage: 'Resolved IOCs for the hunt result' }
+            )}
+          />
+        </>
+      )}
+
       {tier2Rows.length > 0 && (
         <>
           <EuiSpacer size="s" />
@@ -603,10 +649,20 @@ const ProposalSection: React.FC<{ proposal: MapsToProposal }> = ({ proposal }) =
     impact,
     confidence,
     actionWorkflowId,
+    actionInput,
     manual_remediation: manualSteps,
   } = proposal;
 
-  if (!category && !impact && confidence == null && !actionWorkflowId && !manualSteps?.length) {
+  const actionInputEntries = Object.entries(actionInput ?? {});
+
+  if (
+    !category &&
+    !impact &&
+    confidence == null &&
+    !actionWorkflowId &&
+    !actionInputEntries.length &&
+    !manualSteps?.length
+  ) {
     return null;
   }
 
@@ -646,6 +702,19 @@ const ProposalSection: React.FC<{ proposal: MapsToProposal }> = ({ proposal }) =
           <span css={cellStyles}>{impact}</span>
         </EuiText>
       )}
+      {actionInputEntries.length > 0 && (
+        <EuiText size="s">
+          <ul>
+            {actionInputEntries.map(([key, value]) => (
+              <li key={key}>
+                <span css={cellStyles}>
+                  {key}: {typeof value === 'string' ? value : JSON.stringify(value)}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </EuiText>
+      )}
       {manualSteps && manualSteps.length > 0 && (
         <EuiText size="s">
           <ul>
@@ -679,8 +748,46 @@ export const SignificantSecurityEventInlineContent: React.FC<
 
   const hasEvents = (parsed.events ?? []).length > 0;
 
+  const hasChromeHeader = hasChromeHeaderForActions(
+    buildSignificantSecurityEventActionButtons({
+      parsed,
+      navigation,
+      // Labels only affect button text, not whether a button exists.
+      openEventsLabel: '',
+      openAlertsLabel: '',
+    })
+  );
+
   return (
     <EuiPanel hasBorder={false} paddingSize="s" data-test-subj={SSE_ATTACHMENT_TEST_ID}>
+      {!hasChromeHeader && (
+        <>
+          <EuiFlexGroup
+            alignItems="center"
+            gutterSize="xs"
+            wrap
+            responsive={false}
+            data-test-subj={SSE_ATTACHMENT_HEADLINE_TEST_ID}
+          >
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">
+                <strong>{parsed.title}</strong>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBadge color={severityBadgeColor(parsed.severity)}>{parsed.severity}</EuiBadge>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="hollow">{parsed.status}</EuiBadge>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="hollow">{formatPercent(parsed.confidence)}</EuiBadge>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="s" />
+        </>
+      )}
+
       {parsed.truncated && (
         <>
           <KbnInfoCallout
