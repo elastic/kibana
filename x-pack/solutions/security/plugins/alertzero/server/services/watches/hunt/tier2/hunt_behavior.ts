@@ -8,7 +8,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { z } from '@kbn/zod/v4';
-import { subtechniqueById, tacticsToIds, techniqueById } from '@kbn/securitysolution-mitre-catalog';
+import type { HuntBehaviorArticleContext, HuntBehaviorIoc } from '@kbn/alertzero-common';
 import {
   huntBehaviorLlmExtractionSchema,
   huntBehaviorEsqlGenerationSchema,
@@ -17,7 +17,7 @@ import {
   ESQL_GENERATION_PROMPT,
 } from './extraction_contract';
 import { toIndexedBehaviors } from './indexed_behaviors';
-import type { HuntBehaviorArticleContext, HuntBehaviorIoc } from '@kbn/alertzero-common';
+import { getMitreCatalog } from './mitre_catalog';
 import type {
   HuntBehaviorParams,
   HuntBehaviorResult,
@@ -347,6 +347,7 @@ export const huntBehavior = async (
   const validated: ValidatedBehavior[] = [];
   const droppedIds: string[] = [];
 
+  const { techniqueById, subtechniqueById } = getMitreCatalog();
   for (const candidate of candidates) {
     const technique = techniqueById.get(candidate.technique_id);
     const subtechnique = technique ? undefined : subtechniqueById.get(candidate.technique_id);
@@ -355,18 +356,22 @@ export const huntBehavior = async (
       droppedIds.push(candidate.technique_id);
       continue;
     }
-    const tacticIds = tacticsToIds(entry.tactics);
+    // A revoked id resolves to its live successor; carry the live id forward so
+    // the proposed rule and the indexed projection never cite a retired technique.
+    const techniqueId = entry.id;
+    const tacticIds = entry.tacticIds;
     const severity = severityFromConfidence(candidate.llm_confidence);
-    const parentTechniqueId = subtechnique?.techniqueId;
+    const parentTechniqueId = subtechnique?.parentTechniqueId;
     validated.push({
       ...candidate,
+      technique_id: techniqueId,
       confidence: candidate.llm_confidence,
       technique_name: entry.name,
       reference: entry.reference,
       tactic_ids: tacticIds,
       ...(parentTechniqueId ? { parent_technique_id: parentTechniqueId } : {}),
       proposed_esql_rule: proposedEsqlRule({
-        technique_id: candidate.technique_id,
+        technique_id: techniqueId,
         technique_name: entry.name,
         tactic_ids: tacticIds,
         evidence_quote: candidate.evidence_quote,
@@ -375,7 +380,7 @@ export const huntBehavior = async (
         report_id: reportId,
         ...(parentTechniqueId ? { parent_technique_id: parentTechniqueId } : {}),
       }),
-      rule_name: sanitizeRuleName(candidate.technique_id, entry.name, reportId),
+      rule_name: sanitizeRuleName(techniqueId, entry.name, reportId),
       severity,
       risk_score: severityToRiskScore(severity),
     });

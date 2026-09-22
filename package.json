@@ -1175,7 +1175,6 @@
     "@kbn/securitysolution-list-hooks": "workspace:*",
     "@kbn/securitysolution-list-utils": "workspace:*",
     "@kbn/securitysolution-lists-common": "workspace:*",
-    "@kbn/securitysolution-mitre-catalog": "workspace:*",
     "@kbn/securitysolution-rules": "workspace:*",
     "@kbn/securitysolution-t-grid": "workspace:*",
     "@kbn/securitysolution-utils": "workspace:*",
