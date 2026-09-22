@@ -28,7 +28,7 @@ test.describe(
     });
 
     test.beforeEach(async ({ browserAuth }) => {
-      await browserAuth.loginAsAdmin();
+      await browserAuth.loginAsViewer();
     });
 
     test.afterAll(async ({ kbnClient, uiSettings }) => {

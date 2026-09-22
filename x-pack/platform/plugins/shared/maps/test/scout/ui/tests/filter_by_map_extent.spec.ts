@@ -29,7 +29,7 @@ test.describe(
     });
 
     test.beforeEach(async ({ browserAuth }) => {
-      await browserAuth.loginAsAdmin();
+      await browserAuth.loginAsPrivilegedUser();
     });
 
     test.afterAll(async ({ kbnClient, uiSettings }) => {
