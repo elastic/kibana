@@ -146,7 +146,7 @@ apiTest.describe(
             }
           );
           expect(run, JSON.stringify(run.body)).toHaveStatusCode(200);
-          expect(run.body.errors, JSON.stringify(run.body)).toBeFalsy();
+          expect(run.body.errors, JSON.stringify(run.body)).toBeUndefined();
           expect(run.body.params).toBe(submittedParams);
           expect(JSON.stringify(run.body)).not.toContain(storedSecret);
 
@@ -158,7 +158,7 @@ apiTest.describe(
                 JSON.stringify(policy).includes(storedSecret) &&
                 JSON.stringify(policy).includes(replacement)
             );
-            expect(found, 'run-once package policy with restored params').toBeTruthy();
+            expect(found, 'run-once package policy with restored params').toBeDefined();
             return found;
           });
           expect(JSON.stringify(testPolicy)).toContain(storedSecret);
