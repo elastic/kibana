@@ -46,11 +46,12 @@ Whatever the strategy, a generated workflow has to:
   detections a distribution aggregation whose observed counts every threshold must quote. Sample
   with `function_score` + `random_score` so repeated runs see different records rather than always
   the first-ingested ones.
-- **Use `ai.prompt` rather than `ai.agent`** unless tool use is genuinely required, and leave its
-  `connector-id` off. The field is optional, and omitting it resolves the deployment's default AI
-  connector at run time. Naming one pins a saved automation to a connector that can be renamed,
-  removed, or run out of billing quota long after the conversation that wrote it — and the failure
-  lands on a scheduled run with nobody watching.
+- **Use `ai.prompt` rather than `ai.agent`** unless tool use is genuinely required, and set its
+  `connector-id` to `.google-gemini-3.5-flash-chat_completion`. That is the default model for
+  every prompt step in every automation this skill produces: the templates carry it, and a
+  workflow you assemble outside the templates carries it too, on each `ai.prompt` and `ai.agent`
+  step. Use a different connector only when the user names one; they can change it after the
+  save, in the workflow editor, without your involvement.
 - **Retry every `ai.prompt`**: `on-failure.retry` with three attempts, exponential delay and
   jitter. Rate limits, transient connector errors and a structured output that failed to parse
   once are the ordinary failures of a model call, and without the retry each one costs the unit
@@ -62,7 +63,8 @@ Whatever the strategy, a generated workflow has to:
   re-run replaces rather than duplicates. This is the whole dedup mechanism; get it wrong and every
   run grows the index.
 - **Put every ES|QL the indicator carries into `attributes.esql`**, and mirror structured values
-  into both `content` and `attributes`.
+  into both `content` and `attributes`. An indicator with no runnable query omits the key rather
+  than writing an empty list.
 
 Four complete automations are attached to this skill as templates — `index-metadata-template`,
 `unit-profile-template`, `document-template` and `targeted-ki-writer`. Each runs as it stands once
@@ -122,9 +124,12 @@ An unknown id fails the step. Gate every write on this: an indicator carrying ES
 is worse than a missing one, because retrieval surfaces it as though it worked.
 
 `attributes` values are strings, numbers, booleans or arrays of strings — never nested objects. A
-single value caps at 10,000 characters, which is what bounds the ES|QL an indicator can carry. What
-the fields mean, which `type` values exist, and which provenance keys go in `attributes` is
-`ki_shapes`; this section is only the step's input contract.
+single value caps at 10,000 characters, which is what bounds the ES|QL an indicator can carry. A
+`null` value omits the attribute: `esql: "${{ patterns | map: 'esql_example' | default: nil }}"`
+leaves `attributes.esql` out when the list is empty, and the verifiers skip an indicator without it.
+Never write an empty list or an empty string there; both fail verification. What the fields mean,
+which `type` values exist, and which provenance keys go in `attributes` is `ki_shapes`; this
+section is only the step's input contract.
 
 ## Two shapes that produce the wrong thing without failing
 
@@ -302,8 +307,9 @@ across runs rather than replace, read the stored indicator and merge through
 each through `verifyKi` and `createKi` with a stable `ki_id`. The content comes from the counted
 finding in the brief, and so does the provenance — `trace_ids`, `conversation_id`, `error_text`,
 `source_index` — from ids that already exist. Any ES|QL the KI recommends goes in
-`attributes.esql` as well as `content`, so the verifiers run it. This is the shape for a rule
-agents keep breaking or a recipe they keep rediscovering, when no systemic family would carry it.
+`attributes.esql` as well as `content`, so the verifiers run it; a KI with none leaves the key out.
+This is the shape for a rule agents keep breaking or a recipe they keep rediscovering, when no
+systemic family would carry it.
 
 **Selective / Outlier** (`type: event`) — start from `document-template`. Filter the ES|QL to
 notable records, have the `ai.prompt` return a significance verdict alongside the indicator, and
@@ -325,8 +331,8 @@ single profile prompt with two passes. Two complementary passes in one workflow,
 grounding: an error sample, a `CATEGORIZE` pass clustering messages into templates, and a
 distribution aggregation. One `ai.prompt` emits detections (each a complete runnable query, not a
 template, with a severity score); a separate one emits features (inventory entries with a subtype
-and a stable slug). Every threshold and every evidence string must quote a value from the grounding
-— no invented numbers. Guard ratio detections with a denominator floor so they cannot fire on a
+and a stable slug). Every threshold and every figure the detection's content quotes must come from
+the grounding — no invented numbers. Guard ratio detections with a denominator floor so they cannot fire on a
 handful of documents, set thresholds above the observed baseline with margin, and cap detections
 per signal rather than emitting near-duplicate conditions. Derive `query_type` by parsing the ES|QL
 for a `STATS` command rather than asking the model for it.
@@ -370,7 +376,9 @@ will invent it confidently. Put in the prompt:
   the way to author a workflow. Saying nothing leaves that as the only instruction on the subject
   the subagent has
 - the pilot tag you have chosen for this attempt
-- that the complete final YAML must come back verbatim
+- that the complete final YAML must come back verbatim, together with the pilot's run time (the
+  `started_at` and `finished_at` the execution result carries) and how many units the pilot
+  wrote, which is what the time estimate before the save is computed from
 - the three rules below, restated in the prompt rather than left to the skill: start from the named
   template rather than writing a workflow, never generate one, and never validate a definition you
   are about to run. A skill read on the second call cannot govern the first, and a subagent that
@@ -384,6 +392,12 @@ replaced by a comment.
 Give it a budget, too. A subagent shares this run's step limit, and "keep going until it works" is
 an unbounded instruction — tell it to make at most five attempts and to come back describing what
 is still wrong rather than burning the budget silently.
+
+**Never run the build subagent on `effort: low`.** `run_subagent` takes an `effort` level, and
+`low` routes the subagent to the fast model. Drafting, piloting and fixing a workflow is the
+hardest step in this flow, and a template edit that drops a `consts` key or a pilot read that
+misses an empty field is exactly what a smaller model gets wrong. Leave `effort` at its default
+or set it higher; the saving from `low` is one cheaper call against a build that has to be redone.
 
 ## The loop a subagent runs
 
@@ -414,9 +428,11 @@ Each template opens with a comment saying what to change and what to leave. Take
 Rewriting the parts it tells you to leave is how a draft acquires faults the template does not
 have, and none of them announce themselves — the workflow still runs, and still writes indicators.
 
-The templates carry no `connector-id` on their `ai.prompt` steps, which is deliberate rather than an
-omission: the field is optional, and leaving it off resolves the deployment's default connector at
-run time. Do not add one.
+Every `ai.prompt` step in the templates carries `connector-id: .google-gemini-3.5-flash-chat_completion`.
+That is the default, not a placeholder: leave it as it stands unless the user has named another
+connector, and put the same id on any prompt step you add or write outside the templates. A
+workflow whose prompt step has no `connector-id` falls back to whatever the deployment happens to
+call its default, which is not what the user approved.
 
 **Do not generate a workflow.** `platform.core.generate_workflow` is in every agent's default
 toolset, so you have it here whether or not any skill offered it, and both its own description and
@@ -532,8 +548,13 @@ each `_id`. Query the tag once more afterwards and confirm it returns nothing. D
 **Strip the tag, then hand it back.** Remove the `ce-pilot-*` tag from the indicator's `tags` and
 widen the `consts` bounds back to what the brief specified — the pilot's narrow filter is not the
 automation.
-Return the finished YAML in full, a plain-language account of what the workflow does, and what the
-pilot indicators looked like. The last of those is the evidence the reviewer approves on.
+Return the finished YAML in full, a plain-language account of what the workflow does, what the
+pilot indicators looked like, and what the pilot cost: how many units it wrote and how long the
+successful run took, from the `started_at` and `finished_at` on the execution result
+(`platform.core.execute_workflow` returns them when it waits;
+`platform.core.get_workflow_execution_status` returns them when it did not). The indicators are
+the evidence the reviewer approves on; the run time is what the full-corpus estimate is computed
+from.
 
 ## Saving what comes back
 
@@ -544,6 +565,23 @@ has run.
 Present the subagent's summary and its pilot indicators before you save. The save confirmation names
 the workflow and the index but shows none of its content, so that account is the only thing the user
 has to approve on.
+
+**State the time estimate from the pilot in the same message.** The save dialog approves a run over
+the whole corpus, so the cost of that run has to be on the table before it opens. Take the pilot's
+duration and the number of units it wrote, divide to get a per-unit time, and multiply by the
+unit count from the proposal's Unit section (units, not rows — a unit profile over 62,884 sales
+rows may have 2,517 units): "the pilot wrote 4 indicators in 64 seconds; the full run covers
+2,517 units, so expect at least 11 hours". Say *at least*: a pilot skips the batch overhead and
+the verification retries that a full run pays for, so a straight-line projection is a floor.
+Show the three numbers, not only the result, so the reader can see what was assumed.
+
+**When the projection exceeds one hour, put the estimate in bold between 🚨 markers** so it
+cannot be skimmed past: "🚨 **The full run over 2,517 units will take at least 11 hours** 🚨".
+Under an hour, write it in plain text. A projection that comes out in hours is a finding of its
+own, and the answer is usually a narrower corpus filter or a cheaper unit rather than a shrug, so
+follow the warning with the option you would take. Report token usage only when the execution
+result carries it; the workflow engine records it per `ai.*` step where the connector reports it,
+and where it did not, say the token count was not measured rather than estimating one.
 
 ## Running one is a separate decision
 

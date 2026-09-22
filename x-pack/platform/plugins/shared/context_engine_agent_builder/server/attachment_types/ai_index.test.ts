@@ -129,6 +129,16 @@ describe('createAiIndexAttachmentType', () => {
     expect(description).toMatch(/Lay the plan out in chat before it/);
   });
 
+  it('lays the plan out in the proposal shape the analysis skill defines, grounded in queries', () => {
+    const description = attachmentType.getAgentDescription?.();
+
+    expect(description).toMatch(
+      new RegExp(`proposal shape \`${ANALYZE_AND_IMPROVE_SKILL_ID}\` defines`)
+    );
+    expect(description).toMatch(/with its Evidence and Cost sections filled from queries you ran/);
+    expect(description).toMatch(/rather than from the mapping/);
+  });
+
   it('suppresses the workflow preview, which other attachments ask the agent to render', () => {
     const description = attachmentType.getAgentDescription?.();
 

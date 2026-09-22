@@ -98,9 +98,17 @@ describe('aiIndexAutomationsSkill', () => {
     }
   });
 
-  it('pins no connector in any template, so ai.prompt resolves the default at run time', () => {
+  it('pins every ai.prompt to the default connector, which the user can change after the save', () => {
+    const blocks = templates().flatMap(({ content: yaml }) => aiPromptBlocks(yaml));
+
+    expect(blocks.length).toBeGreaterThan(0);
+    for (const block of blocks) {
+      expect(block).toMatch(/^\s*connector-id: \.google-gemini-3\.5-flash-chat_completion\s*$/m);
+    }
+    // The connector belongs on the prompt steps only; nothing else in a template names one.
     for (const reference of templates()) {
-      expect(reference.content).not.toContain('connector-id');
+      const pinned = reference.content.match(/connector-id:/g) ?? [];
+      expect(pinned).toHaveLength(aiPromptBlocks(reference.content).length);
     }
   });
 
@@ -113,6 +121,37 @@ describe('aiIndexAutomationsSkill', () => {
       expect(block).toMatch(/strategy: exponential/);
       expect(block).toMatch(/jitter: true/);
     }
+  });
+
+  it('lets access_patterns be empty and omits attributes.esql when it is, so the verifiers skip rather than fail', () => {
+    const modelDriven = templates().filter(({ name }) => name !== TARGETED_KI_WRITER_TEMPLATE_NAME);
+    expect(modelDriven).toHaveLength(3);
+
+    for (const { content: yaml } of modelDriven) {
+      // No minimum on the prompt's access_patterns array: an invented query is worse than none.
+      const accessPatternsSchema = yaml.match(/access_patterns:\n\s+type: array\n(\s+)(\w+):/);
+      expect(accessPatternsSchema?.[2]).toBe('items');
+      expect(yaml).toMatch(/Return\s+an\s+empty\s+array\s+rather\s+than\s+an\s+invented\s+query/);
+      // `default: nil` turns an empty list into null, which the createKi schema drops.
+      expect(yaml).toMatch(/esql: "\$\{\{ [^"]*\| map: 'esql_example' \| default: nil \}\}"/);
+      // The content block says so too, instead of rendering an empty heading.
+      expect(yaml).toMatch(/access_patterns\.size > 0/);
+    }
+  });
+
+  it('tells targeted-ki-writer authors to leave the esql key out for a KI with no query', () => {
+    const targeted = templates().find(({ name }) => name === TARGETED_KI_WRITER_TEMPLATE_NAME);
+
+    expect(targeted?.content).toMatch(/leaves the `esql` key out entirely/);
+    expect(targeted?.content).toMatch(/never an empty list/);
+  });
+
+  it('documents the null-omits-attribute contract for attributes.esql in the step contract', () => {
+    expect(aiIndexAutomationsSkill.content).toMatch(/A\s+`null` value omits the attribute/);
+    expect(aiIndexAutomationsSkill.content).toMatch(/default: nil/);
+    expect(aiIndexAutomationsSkill.content).toMatch(
+      /verifiers skip an indicator without it\.\s+Never write an empty list or an empty string there/
+    );
   });
 
   it('pages the unit template on a cursor and skips units whose source has not changed', () => {
@@ -332,6 +371,45 @@ describe('aiIndexAutomationsSkill', () => {
       expect(content).toMatch(/at most five attempts/);
     });
 
+    it('keeps the build subagent off the fast model', () => {
+      expect(content).toMatch(/\*\*Never run the build subagent on `effort: low`\.\*\*/);
+      expect(content).toMatch(/`low` routes the subagent to the fast model/);
+      expect(content).toMatch(/Leave `effort` at its default\s+or set it higher/);
+    });
+
+    it('has the subagent bring back the pilot run time and unit count', () => {
+      expect(content).toMatch(/together with the pilot's run time/);
+      expect(content).toMatch(/`started_at` and `finished_at`/);
+      expect(content).toMatch(
+        /what the pilot cost: how many units it wrote and how long the\s+successful run took/
+      );
+    });
+
+    it('states the full-run time estimate from the pilot before the save, as a floor', () => {
+      expect(content).toMatch(
+        /\*\*State the time estimate from the pilot in the same message\.\*\*/
+      );
+      expect(content).toMatch(/divide to get a per-unit time, and multiply by the\s+unit count/);
+      expect(content).toMatch(/units, not rows/);
+      expect(content).toMatch(/Say \*at least\*/);
+      expect(content).toMatch(/Show the three numbers, not only the result/);
+    });
+
+    it('flags a projection over one hour in bold between siren markers', () => {
+      expect(content).toMatch(
+        /\*\*When the projection exceeds one hour, put the estimate in bold between 🚨 markers\*\*/
+      );
+      expect(content).toMatch(
+        /"🚨 \*\*The full run over 2,517 units will take at least 11 hours\*\* 🚨"/
+      );
+      expect(content).toMatch(/Under an hour, write it in plain text/);
+    });
+
+    it('reports token usage only when the execution carries it', () => {
+      expect(content).toMatch(/Report token usage only when the execution\s+result carries it/);
+      expect(content).toMatch(/say the token count was not measured rather than estimating one/);
+    });
+
     it('has the subagent load the skill by id rather than search for an id it was given', () => {
       expect(content).toMatch(/`load_skill` on `ai-index-automations`/);
       expect(content).toMatch(/do not reach for\s+`search_relevant_skills`/);
@@ -418,14 +496,25 @@ describe('aiIndexAutomationsSkill', () => {
       expect(content).toMatch(/one call for the example library rather than one per step/);
     });
 
-    it('leaves ai.prompt unpinned so it resolves the default connector at run time', () => {
-      expect(content).toMatch(/leave its\s+`connector-id` off/);
-      expect(content).toMatch(/omitting it resolves the deployment's default AI\s+connector/);
+    it('names the default connector for every prompt step, inside and outside the templates', () => {
+      expect(content).toMatch(
+        /set its\s+`connector-id` to `\.google-gemini-3\.5-flash-chat_completion`/
+      );
+      expect(content).toMatch(/default model for\s+every prompt step in every automation/);
+      expect(content).toMatch(
+        /a\s+workflow you assemble outside the templates carries it too, on each `ai\.prompt` and `ai\.agent`\s+step/
+      );
+      expect(content).toMatch(/Use a different connector only when the user names one/);
     });
 
-    it('says the templates omit connector-id deliberately, so none is added back', () => {
-      expect(content).toMatch(/carry no `connector-id` on their `ai\.prompt` steps/);
-      expect(content).toMatch(/Do not add one/);
+    it('says the templates carry the default connector and it is not a placeholder', () => {
+      expect(content).toMatch(
+        /Every `ai\.prompt` step in the templates carries `connector-id: \.google-gemini-3\.5-flash-chat_completion`/
+      );
+      expect(content).toMatch(/That is the default, not a placeholder/);
+      expect(content).toMatch(
+        /put the same id on any prompt step you add or write outside the templates/
+      );
     });
 
     it('requires ${{ }} for non-strings, since {{ }} stringifies objects and booleans', () => {

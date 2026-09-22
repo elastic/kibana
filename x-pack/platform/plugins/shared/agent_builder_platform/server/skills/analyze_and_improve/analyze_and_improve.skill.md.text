@@ -110,11 +110,13 @@ Each KI does two things:
    `execute_connector_sub_action` call descriptions for connector sources.
 
 A KI that only orients sends the agent somewhere with no way to get there. A KI that only carries
-a query is a snippet the retriever cannot route to. Both halves earn their place.
+a query is a snippet the retriever cannot route to. Both halves earn their place. The exception is
+a unit with no meaningful query — a document reached only by its id, a prose-only constraint: it
+orients and omits `attributes.esql` rather than carrying a query that answers nothing.
 
 ## KI document shape
 
-The document shape — base fields, the fixed `type` vocabulary, the quality, lifecycle and
+The document shape — base fields, the fixed `type` vocabulary, the domain, lifecycle and
 provenance fields inside `attributes`, and the rule that structured values live in both `content`
 and `attributes` — is in the `ki_shapes` reference attached to this skill. Read it before judging
 what an index holds, and before writing any `type` value: the vocabulary there is the schema, and
@@ -225,26 +227,83 @@ and running the source query, not guessing from the symptom.
 
 ## Confidence
 
-One calibration applies to everything this skill produces — the `attributes.confidence` an
-automation writes onto a KI, and how sure you say you are of a finding. Both are claims about
-evidence strength, so they use one scale:
+Confidence is something you state about a finding, never something a KI carries. A KI's quality
+is judged at the pilot inspection step in `ai-index-automations`, by reading what the pilot wrote
+against the source; `ki_shapes` has no confidence, coverage or evidence attribute, and a proposal
+that asks an automation to write one is asking the model to grade itself. How sure you say you are
+of a finding is a claim about evidence strength, on one scale:
 
 | Band | Meaning |
 |---|---|
 | 0.9–1.0 | Explicit, unambiguous evidence |
 | 0.7–0.89 | Strong pattern, several corroborating signals |
 | 0.5–0.69 | Clear indicators, some ambiguity |
-| 0.3–0.49 | Weak inference — must be tagged `inferred` |
+| 0.3–0.49 | Weak inference — say so in the finding |
 | < 0.3 | Do not emit |
 
-**Non-empty grounding gate.** Do not emit a KI, or state a finding, that you cannot back with a
-stable identifying property *and* concrete evidence. Ungrounded output with a confidence score
-attached is a hallucination wearing a number.
+**Non-empty grounding gate.** Do not state a finding that you cannot back with a stable
+identifying property *and* concrete evidence. Ungrounded output with a confidence score attached
+is a hallucination wearing a number.
 
-**Evidence discipline.** Two to five short, specific evidence strings quoting real observed values
-in `field.path=value` notation — `service.name=checkout`,
-`error.type=timeout (312/1,204)`. When derived from specific documents, record the minimal
-covering set of source ids: enough to trace every claim, no more.
+**Evidence discipline.** Two to five short, specific evidence lines quoting real observed values —
+`service.name=checkout`, `error.type=timeout (312 of 1,204)`,
+`customer_flight_activity.Loyalty Number: 0 of 31,901 populated`. When derived from specific
+documents, record the minimal covering set of source ids: enough to trace every claim, no more.
+
+## Ground the proposal in the data before writing it
+
+A mapping says which fields exist, not which are populated, and a field that is mapped on both
+sides of a join can be empty on both. A proposal written from the mapping alone will name joins
+that do not work and units that do not exist, and the pilot is a slow and expensive way to find
+that out. Before any proposal, run these through `platform.core.execute_esql`, and quote the
+results as evidence lines:
+
+1. **One sampling query per source in scope.** The row count and a handful of rows:
+   `FROM <index> METADATA _id | LIMIT 5` for the rows, `FROM <index> | STATS rows = COUNT(*)` for
+   the count. Read the rows: a field that is null in all five sampled rows needs the step-2 probe
+   before the proposal names it, and a field the proposal leans on that the sample never showed
+   populated is a claim you have not yet earned.
+2. **One probe per join or identifier the proposal names.** Count the populated values on each
+   side — `FROM <index> | STATS total = COUNT(*), populated = COUNT(<field>)` — and state the
+   result as `<index>.<field>: <populated> of <total> populated`. `COUNT(<field>)` counts values,
+   so on an array field `populated` counts values rather than rows and can exceed `total`; say so
+   when it does. A key populated on neither side is not a join; find the path that works (often
+   the document `_id`, reached with `METADATA _id`) or drop the claim. A key populated on one side
+   only is a one-way lookup, and the proposal says which way.
+
+That is the whole budget: one query per source and one per claimed join. Do not profile the index
+here — distributions, top values and per-unit figures are what the automation is for. The point of
+these queries is that every sentence in the proposal about the data cites a number you observed,
+in the form the Evidence section below requires.
+
+## The proposal
+
+A proposal is what the person approves a build on, so it has one shape. Use it for every proposal
+this skill produces unless the run names another form; keep the headings and the order, so two
+proposals for the same index read the same way:
+
+- **Suggested automation** — the strategy by name where a catalog strategy fits (or "custom" with
+  the unit named), the template it starts from, and whether it is new or replaces an automation,
+  naming which.
+- **Unit** — what one KI is about, and how many units the corpus holds (a count you ran).
+- **Carries** — what one KI carries: the orientation and the access patterns, and the grounded
+  figures that separate it from its siblings.
+- **Found and refreshed** — the discovery query, the corpus filter, and whether a unit is
+  re-profiled every run, only when its source changed, or never.
+- **Evidence** — required. The sampling and probe lines from the section above, one per line, and
+  for an existing index the counted findings with their denominators and windows. Every claim the
+  proposal makes about the data points at a line here; a proposal with an empty Evidence section
+  is not ready.
+- **Cost** — required. The corpus size, how many units one run writes, how many model calls that
+  is (one per unit for the profile templates, one per document for the document template), and,
+  once a pilot has run, the pilot's duration and the projected duration of a full run from it, as
+  `ai-index-automations` lays out. Before the pilot, say the time is not yet measured rather than
+  guessing.
+- **Example questions** — optional. Include it only when you are sure: a question belongs here
+  only if an access pattern the KI will carry answers it, and every field that pattern filters or
+  aggregates on was non-null in the sampled rows or had a probe count above zero. Do not run extra
+  queries to qualify a question. When no question meets that bar, omit the section; a plausible
+  question the data cannot answer is the kind of claim the pilot exists to catch.
 
 ## Where the evidence lives
 
@@ -452,8 +511,11 @@ For each finding, make these legible:
 - **Why it should help** — the link from the evidence to the change.
 - **How confident you are, on the bands above, and what would raise it.**
 
-Report in whatever form the run asks for. Do not invent an output mechanism, and do not assume one:
-how a proposal is recorded, reviewed, or applied is a property of the run that invoked you.
+Findings feed the proposal shape above, which is the form a proposal takes unless the run names
+another: each finding's evidence and its confidence band go into the Evidence section, one line
+each, and the change it argues for is folded into Suggested automation and Found and refreshed. Do
+not invent an output mechanism, and do not assume one: how a proposal is recorded, reviewed, or
+applied is a property of the run that invoked you.
 
 ## Handling edge cases
 
@@ -462,12 +524,13 @@ against data you cannot see.
 
 **Sources only, and nothing built yet.** This is the setup case. Do not go looking for signals: an
 index nobody has built cannot have been queried, and a probe that comes back empty only costs a
-turn. The analysis is of the data itself: what it contains (`platform.core.get_index_mapping` and a
-sample through `platform.core.execute_esql`), what questions it could answer, and which strategy
-fits, stated as the three answers. Start at Index/Table Metadata, and say that the proposal rests
-on the shape of the data rather than on observed retrieval. Load `ai-index-sources` after the
-strategy, to write the source query and the filter the strategy calls for — not before, because
-the filter depends on the unit.
+turn. The analysis is of the data itself: what it contains (`platform.core.get_index_mapping`,
+then the sampling queries and join probes from "Ground the proposal in the data"), what questions
+it could answer, and which strategy fits, stated as the three answers. Start at Index/Table
+Metadata, and say that the proposal rests on the shape of the data rather than on observed
+retrieval — with the Evidence section carrying the counts that shape was read from.
+Load `ai-index-sources` after the strategy, to write the source query and the filter the strategy
+calls for — not before, because the filter depends on the unit.
 
 **No signals, on an index that exists.** Not evidence of health: an index nobody queries and an
 index that works perfectly look the same from here. Say which you can and cannot rule out rather

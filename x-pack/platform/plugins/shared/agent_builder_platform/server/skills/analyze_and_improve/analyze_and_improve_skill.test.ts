@@ -11,6 +11,7 @@ import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 import {
   KI_SHAPES_REFERENCE_NAME,
   STRATEGY_CATALOG_REFERENCE_NAME,
+  kiShapesReference,
 } from '../context_engine_shared';
 import { analyzeAndImproveSkill } from './analyze_and_improve_skill';
 
@@ -202,10 +203,84 @@ describe('analyzeAndImproveSkill', () => {
       expect(content).toMatch(/coverage-gap finding that does not\s+say which it is/);
     });
 
-    it('uses one calibrated confidence scale for both KIs and findings', () => {
-      expect(content).toContain('attributes.confidence');
+    it('calibrates confidence for findings only, and keeps it off the KI', () => {
+      expect(content).toMatch(
+        /Confidence is something you state about a finding, never something a KI carries/
+      );
+      expect(content).not.toContain('attributes.confidence');
       expect(content).toMatch(/0\.9–1\.0/);
       expect(content).toContain('Do not emit');
+    });
+
+    it('says KI quality is judged at the pilot inspection, not self-reported', () => {
+      expect(content).toMatch(/judged at the pilot inspection step in `ai-index-automations`/);
+      expect(content).toMatch(/asking the model to grade itself/);
+    });
+
+    it('requires one sampling query per source and one probe per claimed join before proposing', () => {
+      expect(content).toContain('## Ground the proposal in the data before writing it');
+      expect(content).toMatch(/\*\*One sampling query per source in scope\.\*\*/);
+      expect(content).toMatch(/\*\*One probe per join or identifier the proposal names\.\*\*/);
+      expect(content).toMatch(/STATS total = COUNT\(\*\), populated = COUNT\(<field>\)/);
+      expect(content).toMatch(/<index>\.<field>: <populated> of <total> populated/);
+      expect(content).toMatch(/A key populated on neither side\s+is not a join/);
+    });
+
+    it('bounds the grounding to one query per source and one per join, leaving profiling to the automation', () => {
+      expect(content).toMatch(
+        /one query per source and one per claimed join\. Do not profile the index/
+      );
+    });
+
+    it('fixes the proposal shape, with Evidence and Cost required and Example questions optional', () => {
+      expect(content).toContain('## The proposal');
+      const headings = [
+        '**Suggested automation**',
+        '**Unit**',
+        '**Carries**',
+        '**Found and refreshed**',
+        '**Evidence**',
+        '**Cost**',
+        '**Example questions**',
+      ];
+      const positions = headings.map((heading) => content.indexOf(heading));
+      expect(positions.every((position) => position > 0)).toBe(true);
+      expect(positions).toEqual([...positions].sort((a, b) => a - b));
+      expect(content).toMatch(/\*\*Evidence\*\* — required/);
+      expect(content).toMatch(/\*\*Cost\*\* — required/);
+      expect(content).toMatch(/\*\*Example questions\*\* — optional/);
+    });
+
+    it('lets example questions in only when the fields they rest on were seen populated', () => {
+      expect(content).toMatch(/only if an access pattern the KI will carry answers it/);
+      expect(content).toMatch(
+        /was non-null in the sampled rows or had a probe count above zero\. Do not run extra\s+queries to qualify a question/
+      );
+      expect(content).toMatch(/When no question meets that bar, omit the section/);
+    });
+
+    it('warns that COUNT on an array field counts values, not rows', () => {
+      expect(content).toMatch(/on an array field `populated` counts values rather than rows/);
+    });
+
+    it('has the cost section carry the pilot time estimate once a pilot has run, and no guess before', () => {
+      expect(content).toMatch(/the pilot's duration and the projected duration of a full run/);
+      expect(content).toMatch(
+        /Before the pilot, say the time is not yet measured rather than\s+guessing/
+      );
+    });
+
+    it('sends the setup case through the grounding queries, with the evidence in the proposal', () => {
+      expect(content).toMatch(
+        /then the sampling queries and join probes from "Ground the proposal in the data"/
+      );
+      expect(content).toMatch(
+        /with the Evidence section carrying the counts that shape was read from/
+      );
+    });
+
+    it('quotes evidence as populated-of-total lines, the way the trace findings do', () => {
+      expect(content).toMatch(/0 of 31,901 populated/);
     });
 
     it('carries no human-in-the-loop choreography, which belongs to the invoking run', () => {
@@ -265,5 +340,49 @@ describe('analyzeAndImproveSkill', () => {
       // returning nothing — which reads as a broken lookup unless the skill says otherwise.
       expect(content).toMatch(/Unknown index.*means nothing has ever been proposed/s);
     });
+  });
+
+  describe('ki_shapes reference', () => {
+    const shapes = kiShapesReference.content;
+
+    it('lists no self-reported quality attribute', () => {
+      for (const attribute of ['confidence', 'coverage', 'evidence']) {
+        expect(shapes).not.toMatch(new RegExp(`\\| \`attributes\\.${attribute}\``));
+      }
+      expect(shapes).toMatch(/No KI carries a self-reported quality number/);
+      expect(shapes).toMatch(/Do not add `confidence`, `coverage` or `evidence` attributes/);
+    });
+
+    it('keeps the domain attributes the retrieval prompt needs, each tied to the template that writes it', () => {
+      for (const attribute of ['esql', 'unit_key', 'unit', 'prevalence', 'error_text']) {
+        expect(shapes).toMatch(new RegExp(`\\| \`attributes\\.${attribute}\``));
+      }
+      expect(shapes).toMatch(/\| `attributes\.unit_key` \|[^|]*\| `unit-profile-template` \|/);
+      expect(shapes).toMatch(/\| `attributes\.prevalence` \|[^|]*\| `targeted-ki-writer` \|/);
+    });
+
+    it('casts an attribute a template actually writes in its ES|QL example', () => {
+      expect(shapes).toContain('FIELD_EXTRACT(attributes, "doc_count")');
+      expect(shapes).not.toContain('FIELD_EXTRACT(attributes, "coverage")');
+    });
+
+    it('makes attributes.esql optional for a KI with no runnable query, never an empty list', () => {
+      const esqlRow = shapes.split('\n').find((line) => line.startsWith('| `attributes.esql` |'));
+
+      expect(esqlRow).toContain('a KI with no runnable query omits it');
+      expect(esqlRow).toContain('the verifiers skip it. Never an empty list.');
+      expect(esqlRow).toMatch(/\| every template, when the KI has a query \|$/);
+    });
+  });
+
+  it('allows a KI that only orients when the unit has no meaningful query', () => {
+    const { content } = analyzeAndImproveSkill;
+
+    expect(content).toMatch(
+      /Both halves earn their place\. The exception is\s+a unit with no meaningful query/
+    );
+    expect(content).toMatch(
+      /omits `attributes\.esql` rather than carrying a query that answers nothing/
+    );
   });
 });

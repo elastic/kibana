@@ -20,7 +20,9 @@ version: "1"
 #      `source_index` the rule is about. At least one of them. Never invent an id.
 #   4. Put any ES|QL the KI recommends in `attributes.esql` as well as in `content`, so the
 #      verifiers run it. A constraint about a query that must be written a certain way carries the
-#      corrected query, not the failing one.
+#      corrected query, not the failing one. A KI with no runnable query (a disambiguation, a
+#      prose-only constraint) leaves the `esql` key out entirely — never an empty list, which the
+#      verifiers fail; without the key they skip it.
 #
 # Leave the shape alone: the verify/gate/create sequence is what keeps a KI carrying broken ES|QL
 # out of the index.
