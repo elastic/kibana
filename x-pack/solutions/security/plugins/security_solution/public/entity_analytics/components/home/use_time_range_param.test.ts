@@ -7,7 +7,8 @@
 
 import { renderHook, act } from '@testing-library/react';
 import React from 'react';
-import { MemoryRouter, Router } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
+import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
 import { useTimeRangeParam } from './use_time_range_param';
 
