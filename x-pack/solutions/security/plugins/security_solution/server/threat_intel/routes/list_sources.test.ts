@@ -9,8 +9,8 @@ import {
   loadSourceReportStatsByAdapterId,
   loadSourceForMutation,
   mapSourceHit,
-  updateSourceBodySchema,
 } from './list_sources';
+import { updateSourceBodySchema } from '../../../common/threat_intel';
 
 describe('loadSourceReportStatsByAdapterId', () => {
   const logger = {
