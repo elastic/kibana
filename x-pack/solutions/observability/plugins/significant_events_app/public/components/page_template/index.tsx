@@ -7,13 +7,14 @@
 
 import React from 'react';
 import type { EuiPageSectionProps } from '@elastic/eui';
-import { EuiPageTemplate } from '@elastic/eui';
+import { EuiLoadingElastic, EuiPageTemplate } from '@elastic/eui';
 import { css, cx } from '@emotion/css';
 import type { AppHeaderProps } from '@kbn/app-header';
 import { AppHeader } from '@kbn/app-header';
+import { i18n } from '@kbn/i18n';
 
 const templateClassName = css`
-  height: 0;
+  height: var(--kbn-application--content-height, 100vh);
 `;
 
 const noPaddingClassName = css`
@@ -32,9 +33,29 @@ const bodyContentClassName = css`
 
 export const SignificantEventsAppHeader = (props: AppHeaderProps) => <AppHeader {...props} />;
 
+export const SignificantEventsAppLoading = () => (
+  <EuiPageTemplate.EmptyPrompt
+    color="transparent"
+    icon={
+      <EuiLoadingElastic
+        size="xxl"
+        aria-label={i18n.translate('xpack.significantEventsApp.loadingLabel', {
+          defaultMessage: 'Loading',
+        })}
+      />
+    }
+  />
+);
+
 export function SignificantEventsAppPageTemplate({ children }: { children: React.ReactNode }) {
   return (
-    <EuiPageTemplate offset={0} minHeight={0} restrictWidth={false} className={templateClassName}>
+    <EuiPageTemplate
+      grow={false}
+      offset={0}
+      minHeight={0}
+      restrictWidth={false}
+      className={templateClassName}
+    >
       {children}
     </EuiPageTemplate>
   );
