@@ -53,10 +53,10 @@ const mockLicensing = (available: boolean): LicensingPluginStart =>
     license$: of({
       getFeature: () => ({ isEnabled: available, isAvailable: available }),
     }),
-  }) as unknown as LicensingPluginStart;
+  } as unknown as LicensingPluginStart);
 
 const startDeps = (licensing: LicensingPluginStart): FleetStartDeps =>
-  ({ licensing }) as FleetStartDeps;
+  ({ licensing } as FleetStartDeps);
 
 describe('FleetPlugin#lazyInitialize', () => {
   beforeEach(() => {
