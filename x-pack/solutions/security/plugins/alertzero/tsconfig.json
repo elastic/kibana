@@ -48,6 +48,7 @@
     "@kbn/security-solution-distribution-bar",
     "@kbn/core-application-browser",
     "@kbn/test-jest-helpers",
-    "@kbn/ui-callout"
+    "@kbn/ui-callout",
+    "@kbn/core-http-browser-mocks"
   ]
 }
