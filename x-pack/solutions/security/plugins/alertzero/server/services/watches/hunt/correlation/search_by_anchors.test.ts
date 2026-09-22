@@ -5,12 +5,16 @@
  * 2.0.
  */
 
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { searchByAnchors } from './search_by_anchors';
 
 const logger = loggingSystemMock.createLogger();
 
-const emptySearchResponse = {
+const emptySearchResponse: SearchResponse<unknown, unknown> = {
+  took: 0,
+  timed_out: false,
+  _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
   hits: { hits: [], total: { value: 0, relation: 'eq' as const } },
 };
 
@@ -27,7 +31,7 @@ describe('searchByAnchors', () => {
     });
     expect(result.hits).toHaveLength(0);
     expect(result.anchor_summary.discriminating_anchor_count).toBe(0);
-    expect(esClient.search as jest.Mock).not.toHaveBeenCalled();
+    expect(esClient.search as unknown as jest.Mock).not.toHaveBeenCalled();
   });
 
   it('queries when hash IOC is present', async () => {
@@ -43,7 +47,7 @@ describe('searchByAnchors', () => {
         ],
       },
     });
-    expect(esClient.search as jest.Mock).toHaveBeenCalledTimes(1);
+    expect(esClient.search as unknown as jest.Mock).toHaveBeenCalledTimes(1);
   });
 
   it('excludes self-match when source_report_id provided', async () => {
@@ -55,7 +59,7 @@ describe('searchByAnchors', () => {
         actors: ['APT29'],
       },
     });
-    const callArg = (esClient.search as jest.Mock).mock.calls[0][0];
+    const callArg = (esClient.search as unknown as jest.Mock).mock.calls[0][0];
     expect(JSON.stringify(callArg.query)).toContain('rpt-self');
   });
 

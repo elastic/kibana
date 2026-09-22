@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import type { HuntCoordinatorResponse } from '@kbn/alertzero-common';
 import {
   ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
   API_VERSIONS,
   HuntCoordinatorRequestBody,
-  HuntCoordinatorResponse,
   INTERNAL_API_ACCESS,
 } from '@kbn/alertzero-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
@@ -113,7 +113,9 @@ export const registerHuntCoordinatorRoute = ({
               ? buildSseData(result, report_id, { spaceId })
               : undefined;
 
-          const body: HuntCoordinatorResponse = sse ? { ...result, sse } : result;
+          const body: HuntCoordinatorResponse = sse
+            ? { ...result, sse: sse as unknown as HuntCoordinatorResponse['sse'] }
+            : result;
           return response.ok({ body });
         } catch (err) {
           logger.error(`hunt_coordinator route failed: ${(err as Error).message}`);

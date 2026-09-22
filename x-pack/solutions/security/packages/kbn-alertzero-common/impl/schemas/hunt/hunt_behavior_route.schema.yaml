@@ -55,10 +55,71 @@ paths:
                     type: array
                     items:
                       type: object
+                      required:
+                        - technique_id
+                        - evidence_quote
+                        - llm_confidence
+                        - confidence
+                        - technique_name
+                        - reference
+                        - tactic_ids
+                        - proposed_esql_rule
+                        - rule_name
+                        - severity
+                        - risk_score
+                      properties:
+                        technique_id:
+                          type: string
+                        evidence_quote:
+                          type: string
+                        llm_confidence:
+                          type: number
+                        confidence:
+                          type: number
+                        technique_name:
+                          type: string
+                        reference:
+                          type: string
+                        tactic_ids:
+                          type: array
+                          items:
+                            type: string
+                        parent_technique_id:
+                          type: string
+                        proposed_esql_rule:
+                          type: string
+                        rule_name:
+                          type: string
+                        severity:
+                          type: string
+                          enum: [critical, high, medium, low]
+                        risk_score:
+                          type: number
                   indexed_behaviors:
                     type: array
                     items:
                       type: object
+                      required:
+                        - id
+                        - technique_id
+                        - description
+                        - llm_confidence
+                        - confidence
+                      properties:
+                        id:
+                          type: string
+                        technique_id:
+                          type: string
+                        description:
+                          type: string
+                        telemetry_targets:
+                          type: array
+                          items:
+                            type: string
+                        llm_confidence:
+                          type: number
+                        confidence:
+                          type: number
                   dropped_unknown_ids:
                     type: array
                     items:

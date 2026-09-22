@@ -102,7 +102,24 @@ export const CorrelateResponse = lazySchema(() =>
   z.object({
     status: CorrelationEngineStatus,
     anchors: AnchorSet,
-    matches: z.array(z.object({})),
+    matches: z.array(
+      z.object({
+        report_id: z.string(),
+        score: z.number().nullable(),
+        title: z.string(),
+        severity: z.string(),
+        source_type: z.string(),
+        extracted_at: z.string(),
+        match_breakdown: z.object({
+          ioc_hash_hits: z.array(z.string()),
+          ioc_network_hits: z.array(z.string()),
+          ioc_set_hash_match: z.boolean(),
+          actor_hits: z.array(z.string()),
+          technique_hits: z.array(z.string()),
+          discriminating_match_count: z.number().int(),
+        }),
+      })
+    ),
     thresholds: z.object({
       discriminating_min: z.number(),
     }),
