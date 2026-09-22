@@ -258,10 +258,7 @@ describe('AiIndexDetailPage', () => {
       'Automations locked. Add a source above to unlock automations.'
     );
     expect(screen.queryByTestId('contextAiIndexAutomationsEmpty')).not.toBeInTheDocument();
-    expect(screen.getByTestId('contextSignalsLocked')).toHaveAttribute(
-      'aria-label',
-      'Signals locked. Create an automation above to start collecting signals.'
-    );
+    expect(screen.queryByTestId('contextSignalsLocked')).not.toBeInTheDocument();
   });
 
   it('hides the signals section when the feedback loop is disabled', async () => {
@@ -288,7 +285,7 @@ describe('AiIndexDetailPage', () => {
 
     expect(screen.queryByTestId('contextAutomationsLocked')).not.toBeInTheDocument();
     expect(screen.getByTestId('contextAiIndexAutomationsEmpty')).toBeInTheDocument();
-    expect(screen.getByTestId('contextSignalsLocked')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextSignalsLocked')).not.toBeInTheDocument();
   });
 
   it('keeps automations visible when sources are removed but automations remain', async () => {
@@ -310,7 +307,7 @@ describe('AiIndexDetailPage', () => {
     );
   });
 
-  it('shows signals once automations are configured', async () => {
+  it('shows automations list once automations are configured', async () => {
     const services = createServices();
     services.http.get.mockResolvedValue({
       ...aiIndex,
@@ -323,7 +320,8 @@ describe('AiIndexDetailPage', () => {
     await waitForAiIndexDetailLoaded();
 
     expect(screen.queryByTestId('contextSignalsLocked')).not.toBeInTheDocument();
-    expect(screen.getByTestId('contextSignalsPanel')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextSignalsPanel')).not.toBeInTheDocument();
+    expect(await screen.findByTestId('contextAiIndexAutomationRow')).toBeInTheDocument();
   });
 
   it('renders an error state when the fetch fails', async () => {
@@ -632,7 +630,7 @@ describe('AiIndexDetailPage', () => {
     expect(screen.queryByTestId('contextAutomationsLocked')).not.toBeInTheDocument();
     expect(screen.queryByTestId('contextSignalsLocked')).not.toBeInTheDocument();
     expect(screen.getByTestId('contextAiIndexAutomationsEmpty')).toBeInTheDocument();
-    expect(screen.getByTestId('contextSignalsPanel')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextSignalsPanel')).not.toBeInTheDocument();
   });
 
   it('shows edit controls and no managed badge for non-managed AI indexes', async () => {
