@@ -11,12 +11,10 @@ export interface BridgedToolResponse {
   results: Array<{ type: string; data: unknown }>;
   count: number;
   error?: string;
-  // Index signature so the response satisfies the inference `ToolResponse`
-  // (a `Record<string, unknown>`) when returned from a typed callback.
+  // Required by the inference ToolResponse's Record<string, unknown> constraint.
   [key: string]: unknown;
 }
 
-/** Maps Agent Builder tool results into a plain, LLM-friendly payload. */
 export const formatToolResults = (results: ToolResult[] | undefined): BridgedToolResponse => {
   const list = results ?? [];
   const errors = list

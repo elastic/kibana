@@ -82,10 +82,7 @@ export const getToolUsageFromOutput = (
 ): SignificantEventsToolUsage | undefined =>
   output && !Array.isArray(output) ? output.toolUsage : undefined;
 
-/**
- * Reads the attempt diagnostics a task returns when `collectQueryAttempts` is on.
- * `undefined` means the task did not collect them, which is distinct from an empty run.
- */
+/** Reads adapted validation attempts, preserving absent diagnostics as `undefined`. */
 export const getQueryAttempts = (output: unknown): QueryAttempt[] | undefined =>
   output &&
   typeof output === 'object' &&

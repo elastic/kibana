@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-/**
- * Agent Builder tool IDs installed by Semantic Code Search (SCS) via
- * `scs install-agentic-interfaces`, registered under `scs.<workflow_name>`.
- */
 export const SCS_SEMANTIC_SEARCH_TOOL_ID = 'scs.semantic_search';
 export const SCS_READ_FILE_TOOL_ID = 'scs.read_file_from_chunks';
 export const SCS_SYMBOL_ANALYSIS_TOOL_ID = 'scs.symbol_analysis';

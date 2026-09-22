@@ -38,7 +38,20 @@ export interface RunKIQueryGenerationAgentResult {
 }
 
 const GET_FEATURES_STEP_TOOL_ID = 'platform_sig_events_ki_features_get';
+const QUERY_INTENT_EVAL_INSTRUCTIONS =
+  'Evaluation metadata: include `expects_matches` on every candidate query. Set it to `true` when the query should match rows in the current evaluation window, or `false` when it deliberately watches for a plausible future condition.';
 const normalizedToolId = (toolId: string): string => toolId.replaceAll('.', '_');
+
+export const buildKIQueryGenerationEvalUserMessage = ({
+  target,
+  groundingContext,
+}: {
+  target: AnalysisTarget;
+  groundingContext?: string;
+}): string =>
+  [buildKIQueryGenerationUserMessage(target), QUERY_INTENT_EVAL_INSTRUCTIONS, groundingContext]
+    .filter((part): part is string => Boolean(part))
+    .join('\n\n');
 
 /** Adapts Agent Builder tool events to the legacy evaluator telemetry shape. */
 export const computeToolUsage = (steps: ConverseStep[]): SignificantEventsToolUsage => {
@@ -215,9 +228,7 @@ export async function runKIQueryGenerationAgent({
     agentId: KI_QUERY_GENERATION_AGENT_ID,
     title: `KI query generation: ${target.name}`,
   });
-  const userMessage = [buildKIQueryGenerationUserMessage(target), groundingContext]
-    .filter((part): part is string => Boolean(part))
-    .join('\n\n');
+  const userMessage = buildKIQueryGenerationEvalUserMessage({ target, groundingContext });
   const result = await agentBuilderClient.converse({
     agentId: KI_QUERY_GENERATION_AGENT_ID,
     conversationId: conversation.id,

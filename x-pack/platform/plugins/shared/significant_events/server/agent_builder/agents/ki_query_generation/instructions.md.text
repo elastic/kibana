@@ -31,6 +31,6 @@ Run these steps directly, in order. This sequence is fixed and short: do not use
 3. **Evaluate existing queries** — for each entry in `existing_queries`, determine SKIP / REPLACE / NEW QUERY based on the current features (see the system prompt checklist).
 4. **Search prior events (when available)** — if `platform_sig_events_event_search` is available, call it for the current stream and use relevant assessment or investigation outcomes to avoid known-noisy query paths.
 5. **Verify against source (when available and useful)** — if `scs_*` tools are available and the features leave a specific source-code hypothesis unresolved, verify it with SCS as described above.
-6. **Generate candidates** — produce candidate queries grounded in the retrieved features. Every query must reference at least one `feature_id` and declare `expects_matches`.
+6. **Generate candidates** — produce candidate queries grounded in the retrieved features. Every query must reference at least one `feature_id`.
 7. **Validate / repair / finalize** — call `platform_sig_events_ki_queries_validate` with the full batch. If `finalized` is false, repair rejected queries and resubmit the full batch. Finish only after the latest call returns `finalized: true`. Pass an empty `queries` array to finalize when no queries are justified by the evidence.
 8. **Confirm** — respond with a brief 2–3 sentence plain-text summary of the finalized queries (or state that none were justified).

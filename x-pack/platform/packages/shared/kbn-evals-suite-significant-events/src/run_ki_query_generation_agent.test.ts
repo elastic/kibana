@@ -7,10 +7,30 @@
 
 import { SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID } from '@kbn/significant-events-plugin/server';
 import {
+  buildKIQueryGenerationEvalUserMessage,
   collectQueryAttempts,
   computeToolUsage,
   getFinalizedQueries,
 } from './run_ki_query_generation_agent';
+
+describe('buildKIQueryGenerationEvalUserMessage', () => {
+  it('adds intent metadata instructions only in the eval harness', () => {
+    const message = buildKIQueryGenerationEvalUserMessage({
+      target: {
+        id: 'logs.test',
+        name: 'logs.test',
+        description: 'Test logs',
+        sources: ['logs.test'],
+        samplingSource: 'logs.test',
+      },
+      groundingContext: 'Use repository test/repo.',
+    });
+
+    expect(message).toContain('`target_id`: logs.test');
+    expect(message).toContain('include `expects_matches` on every candidate query');
+    expect(message).toContain('Use repository test/repo.');
+  });
+});
 
 describe('computeToolUsage', () => {
   it('matches canonical dotted tool ids to model-facing underscored ids', () => {

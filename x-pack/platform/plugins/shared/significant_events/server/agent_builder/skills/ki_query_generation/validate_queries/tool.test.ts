@@ -115,7 +115,7 @@ describe('ki_queries_validate tool', () => {
       logger,
     });
 
-  it('bounds its input and leaves expects_matches enforcement to the handler', () => {
+  it('bounds its input and keeps evaluation intent optional', () => {
     const tool = createTool();
     if (!('schema' in tool)) {
       throw new Error('Expected a schema-backed tool registration');
@@ -167,14 +167,15 @@ describe('ki_queries_validate tool', () => {
         features: [{ id: 'feature-1', run_id: 'run-1', type: 'entity' }],
         esClient: streamDataEsClient,
         queryValidationTimeoutMs: 12_000,
-        requireQueryIntent: true,
-        collectQueryAttempts: true,
       })
     );
+    expect(validateKIQueriesMock.mock.calls[0][0]).not.toHaveProperty('requireQueryIntent');
+    expect(validateKIQueriesMock.mock.calls[0][0]).toHaveProperty('collectQueryAttempts', true);
     expect(result.results).toEqual([
       {
         type: 'other',
         data: {
+          target_id: 'logs.test',
           queries: [{ query: candidate, valid: true, status: 'Added' }],
           finalized: true,
           finalized_queries: [
@@ -215,6 +216,7 @@ describe('ki_queries_validate tool', () => {
       {
         type: 'other',
         data: {
+          target_id: 'logs.test',
           queries: [{ query: candidate, valid: false, status: 'Failed to add' }],
           finalized: false,
         },
@@ -236,7 +238,12 @@ describe('ki_queries_validate tool', () => {
     expect(result.results).toEqual([
       {
         type: 'other',
-        data: { queries: [], finalized: true, finalized_queries: [] },
+        data: {
+          target_id: 'logs.test',
+          queries: [],
+          finalized: true,
+          finalized_queries: [],
+        },
       },
     ]);
   });

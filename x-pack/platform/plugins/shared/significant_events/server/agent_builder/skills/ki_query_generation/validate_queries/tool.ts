@@ -75,7 +75,7 @@ const candidateQuerySchema = z.object({
     .boolean()
     .optional()
     .describe(
-      'Required intent declaration. true: the query is grounded in evidence currently present and should match rows in the evaluation window. false: the query deliberately watches for a plausible future condition not present in the current evidence. Queries without it are rejected for repair.'
+      'Optional evaluation metadata. true: the query is grounded in current evidence and should match rows in the evaluation window. false: the query deliberately watches for a plausible future condition not present in the current evidence.'
     ),
   feature_ids: z
     .array(z.string().max(MAX_ID_LENGTH))
@@ -118,7 +118,12 @@ export const createValidateQueriesTool = ({
           results: [
             {
               type: ToolResultType.other,
-              data: { queries: [], finalized: true, finalized_queries: [] },
+              data: {
+                target_id: targetId,
+                queries: [],
+                finalized: true,
+                finalized_queries: [],
+              },
             },
           ],
         };
@@ -164,7 +169,6 @@ export const createValidateQueriesTool = ({
           signal,
           logger,
           queryValidationTimeoutMs: scopedClients.tuningConfig.query_validation_timeout_ms,
-          requireQueryIntent: true,
           collectQueryAttempts: true,
         });
 
@@ -179,6 +183,7 @@ export const createValidateQueriesTool = ({
             {
               type: ToolResultType.other,
               data: {
+                target_id: target.id,
                 queries: results,
                 finalized,
                 ...(finalized ? { finalized_queries: validatedQueries } : {}),

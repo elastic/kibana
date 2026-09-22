@@ -288,7 +288,6 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
               });
             };
 
-            // Agent Builder fetches features from the KI store rather than the eval input.
             const seedKIFeatures = async (scenarioId: string, features: Feature[]) => {
               if (lastSeededScenarioId === scenarioId) {
                 return;

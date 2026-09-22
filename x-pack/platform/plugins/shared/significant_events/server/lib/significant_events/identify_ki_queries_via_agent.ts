@@ -36,6 +36,7 @@ import { streamToAnalysisTarget } from './stream_to_analysis_target';
 const QUERY_GENERATION_MAX_DURATION_MS = 300_000;
 
 interface FinalizedValidationData {
+  target_id: string;
   finalized: true;
   finalized_queries: AcceptedQuery[];
 }
@@ -43,6 +44,8 @@ interface FinalizedValidationData {
 const isFinalizedValidationData = (data: unknown): data is FinalizedValidationData =>
   typeof data === 'object' &&
   data !== null &&
+  'target_id' in data &&
+  typeof data.target_id === 'string' &&
   'finalized' in data &&
   data.finalized === true &&
   'finalized_queries' in data &&
@@ -110,6 +113,11 @@ export async function executeKIQueryGenerationAgent({
 
   if (!finalizedData) {
     throw new Error('KI query generation agent did not finalize validate_queries');
+  }
+  if (finalizedData.target_id !== target.id) {
+    throw new Error(
+      `KI query generation agent finalized for unexpected target "${finalizedData.target_id}"`
+    );
   }
 
   const roundEvent = events.find(isRoundCompleteEvent);

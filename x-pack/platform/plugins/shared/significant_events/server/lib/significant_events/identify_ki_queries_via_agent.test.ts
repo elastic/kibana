@@ -15,6 +15,20 @@ import type { Streams } from '@kbn/streams-schema';
 import { SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID } from '../../agent_builder/skills/ki_query_generation';
 import { executeKIQueryGenerationAgent } from './identify_ki_queries_via_agent';
 
+const definition: Streams.WiredStream.Definition = {
+  name: 'logs.test',
+  description: 'Test logs',
+  updated_at: new Date().toISOString(),
+  type: 'wired',
+  ingest: {
+    lifecycle: { inherit: {} },
+    processing: { steps: [], updated_at: new Date().toISOString() },
+    settings: {},
+    failure_store: { inherit: {} },
+    wired: { fields: {}, routing: [] },
+  },
+};
+
 describe('executeKIQueryGenerationAgent', () => {
   afterEach(() => {
     jest.restoreAllMocks();
@@ -41,6 +55,7 @@ describe('executeKIQueryGenerationAgent', () => {
               {
                 type: ToolResultType.other,
                 data: {
+                  target_id: 'logs.other',
                   finalized: true,
                   finalized_queries: [
                     { ...validatedQuery, esql: { query: 'FROM superseded-validation' } },
@@ -58,7 +73,11 @@ describe('executeKIQueryGenerationAgent', () => {
             results: [
               {
                 type: ToolResultType.other,
-                data: { finalized: true, finalized_queries: [validatedQuery] },
+                data: {
+                  target_id: 'logs.test',
+                  finalized: true,
+                  finalized_queries: [validatedQuery],
+                },
               },
             ],
           },
@@ -91,19 +110,6 @@ describe('executeKIQueryGenerationAgent', () => {
     const executionSignal = new AbortController().signal;
     const timeoutSpy = jest.spyOn(AbortSignal, 'timeout').mockReturnValue(timeoutSignal);
     const anySpy = jest.spyOn(AbortSignal, 'any').mockReturnValue(executionSignal);
-    const definition: Streams.WiredStream.Definition = {
-      name: 'logs.test',
-      description: 'Test logs',
-      updated_at: new Date().toISOString(),
-      type: 'wired',
-      ingest: {
-        lifecycle: { inherit: {} },
-        processing: { steps: [], updated_at: new Date().toISOString() },
-        settings: {},
-        failure_store: { inherit: {} },
-        wired: { fields: {}, routing: [] },
-      },
-    };
 
     await expect(
       executeKIQueryGenerationAgent({
@@ -140,5 +146,45 @@ describe('executeKIQueryGenerationAgent', () => {
     expect(executeAgent).toHaveBeenCalledWith(
       expect.objectContaining({ abortSignal: executionSignal })
     );
+  });
+
+  it('rejects queries finalized for a different target', async () => {
+    const executeAgent = jest.fn().mockResolvedValue({
+      events$: of({
+        type: ChatEventType.toolResult,
+        data: {
+          tool_id: SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID,
+          tool_call_id: 'validate-1',
+          results: [
+            {
+              type: ToolResultType.other,
+              data: {
+                target_id: 'logs.other',
+                finalized: true,
+                finalized_queries: [],
+              },
+            },
+          ],
+        },
+      }),
+    });
+    const agentBuilder = {
+      conversations: {
+        getScopedClient: jest.fn().mockResolvedValue({
+          create: jest.fn().mockResolvedValue({ id: 'conversation-1' }),
+        }),
+      },
+      execution: { executeAgent },
+    } as unknown as AgentBuilderPluginStart;
+
+    await expect(
+      executeKIQueryGenerationAgent({
+        agentBuilder,
+        request: {} as KibanaRequest,
+        connectorId: 'connector-1',
+        definition,
+        logger: loggerMock.create(),
+      })
+    ).rejects.toThrow('KI query generation agent finalized for unexpected target "logs.other"');
   });
 });
