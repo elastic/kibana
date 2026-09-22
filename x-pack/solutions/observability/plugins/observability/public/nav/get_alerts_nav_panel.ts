@@ -76,7 +76,7 @@ const getAlertsSection = (core: CoreStart): PanelOpenerChildDefinition[] => {
     alertsChildren.push({
       link: ALERTS_LINK,
       title: i18n.translate('xpack.observability.nav.alertsV1', {
-        defaultMessage: 'Alerts V1',
+        defaultMessage: 'Alerts (V1)',
       }),
     });
   }

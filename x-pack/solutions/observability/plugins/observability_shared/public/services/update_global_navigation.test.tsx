@@ -388,6 +388,50 @@ describe('updateGlobalNavigation', () => {
           visibleIn: ['classicSideNav', 'projectSideNav', 'home', 'kibanaOverview', 'globalSearch'],
         });
       });
+
+      it('excludes the alerts deep link from globalSearch when showClassicAlertsInGlobalSearch is false', () => {
+        const capabilities = {
+          [casesFeatureId]: { read_cases: true },
+          logs: { show: true },
+          navLinks: { apm: true, logs: false, metrics: false, uptime: false },
+        } as unknown as ApplicationStart['capabilities'];
+
+        const deepLinks = [
+          {
+            id: 'alerts',
+            title: 'Alerts',
+            order: 8001,
+            path: '/alerts',
+            visibleIn: [],
+          },
+        ];
+        const callback = jest.fn();
+        const updater$ = {
+          next: (cb: AppUpdater) => callback(cb(app)),
+        } as unknown as Subject<AppUpdater>;
+
+        updateGlobalNavigation({
+          capabilities,
+          deepLinks,
+          updater$,
+          pricing,
+          showClassicAlertsInGlobalSearch: false,
+        });
+
+        expect(callback).toHaveBeenCalledWith({
+          deepLinks: [
+            {
+              id: 'alerts',
+              title: 'Alerts',
+              order: 8001,
+              path: '/alerts',
+              visibleIn: ['classicSideNav', 'projectSideNav'],
+            },
+          ],
+          status: AppStatus.accessible,
+          visibleIn: ['classicSideNav', 'projectSideNav', 'home', 'kibanaOverview', 'globalSearch'],
+        });
+      });
     });
   });
 });

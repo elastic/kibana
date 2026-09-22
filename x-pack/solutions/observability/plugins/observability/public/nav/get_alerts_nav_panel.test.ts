@@ -218,7 +218,7 @@ describe('getAlertsNavPanel', () => {
         expect.objectContaining({ link: 'observabilityAlerting:alerts' }),
         expect.objectContaining({
           link: 'observability-overview:alerts',
-          title: 'Alerts V1',
+          title: 'Alerts (V1)',
         }),
       ]);
     });
