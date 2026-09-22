@@ -7,7 +7,7 @@
 
 import type { VisualizationDatasetExample } from '../../../src/evaluate_dataset';
 import { HOST_METRICS_INDEX } from '../../../src/fixtures/host_load_metrics';
-import { TIME_BUCKET_COLUMN, timeSeriesQuery, xyExample } from './factories';
+import { TIME_BUCKET_COLUMN, timeSeriesQuery, withDataSource, xyExample } from './factories';
 
 const LOAD_AVERAGES = [
   { alias: '1-Minute Load', expression: 'AVG(`system.load.1`)' },
@@ -16,11 +16,13 @@ const LOAD_AVERAGES = [
 ];
 
 /** Host metrics from the synthtrace Beats load fixture: three load averages as separate lines. */
-export const HOST_METRICS_EXAMPLE: VisualizationDatasetExample = xyExample({
-  question:
-    'Show CPU load average metrics over time as a line chart. Include system.load.1 (1-minute), system.load.5 (5-minute), and system.load.15 (15-minute) as separate lines, bucketed by auto time interval.',
-  seriesType: 'line',
-  query: timeSeriesQuery({ index: HOST_METRICS_INDEX, metrics: LOAD_AVERAGES }),
-  x: TIME_BUCKET_COLUMN,
-  y: LOAD_AVERAGES.map(({ alias }) => alias),
-});
+export const HOST_METRICS_EXAMPLES: VisualizationDatasetExample[] = withDataSource('host_metrics', [
+  xyExample({
+    question:
+      'Show CPU load average metrics over time as a line chart. Include system.load.1 (1-minute), system.load.5 (5-minute), and system.load.15 (15-minute) as separate lines, bucketed by auto time interval.',
+    seriesType: 'line',
+    query: timeSeriesQuery({ index: HOST_METRICS_INDEX, metrics: LOAD_AVERAGES }),
+    x: TIME_BUCKET_COLUMN,
+    y: LOAD_AVERAGES.map(({ alias }) => alias),
+  }),
+]);

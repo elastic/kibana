@@ -8,6 +8,37 @@
 import type { VisualizationDatasetExample } from '../../../src/evaluate_dataset';
 import { GOLDEN_TOOL_PATH } from './golden_tool_path';
 
+/** Slicing keys stored on every example so golden-cluster results can be split by chart family. */
+export interface ExampleMetadata {
+  chartFamily: ChartFamily;
+  dataSource?: DataSource;
+  [key: string]: unknown;
+}
+
+export type ChartFamily =
+  | 'xy'
+  | 'metric'
+  | 'gauge'
+  | 'pie'
+  | 'treemap'
+  | 'tag_cloud'
+  | 'data_table'
+  | 'heatmap'
+  | 'vega'
+  | 'query_only';
+
+export type DataSource = 'logs' | 'ecommerce' | 'host_metrics';
+
+/** Stamps the data source onto every example of a dataset file. */
+export const withDataSource = (
+  dataSource: DataSource,
+  examples: VisualizationDatasetExample[]
+): VisualizationDatasetExample[] =>
+  examples.map((example) => ({
+    ...example,
+    metadata: { ...(example.metadata ?? {}), dataSource },
+  }));
+
 /** One STATS output: the alias the chart binds to and the aggregation behind it. */
 export interface GoldMetric {
   alias: string;
@@ -72,6 +103,7 @@ export const xyExample = ({
   y: string[];
 }): VisualizationDatasetExample => ({
   input: { question },
+  metadata: { chartFamily: 'xy' },
   output: {
     config: {
       type: 'xy',
@@ -91,6 +123,7 @@ export const metricExample = ({
   metrics: string[];
 }): VisualizationDatasetExample => ({
   input: { question },
+  metadata: { chartFamily: 'metric' },
   output: {
     config: { type: 'metric', data_source: esql(query), metrics: metrics.map(column) },
     goldenToolPath: GOLDEN_TOOL_PATH,
@@ -107,6 +140,7 @@ export const gaugeExample = ({
   metric: string;
 }): VisualizationDatasetExample => ({
   input: { question },
+  metadata: { chartFamily: 'gauge' },
   output: {
     config: { type: 'gauge', data_source: esql(query), metric: column(metric) },
     goldenToolPath: GOLDEN_TOOL_PATH,
@@ -128,6 +162,7 @@ export const partitionExample = ({
   groupBy: string[];
 }): VisualizationDatasetExample => ({
   input: { question },
+  metadata: { chartFamily: type },
   output: {
     config: {
       type,
@@ -151,6 +186,7 @@ export const tagCloudExample = ({
   tagBy: string;
 }): VisualizationDatasetExample => ({
   input: { question },
+  metadata: { chartFamily: 'tag_cloud' },
   output: {
     config: {
       type: 'tag_cloud',
@@ -174,6 +210,7 @@ export const dataTableExample = ({
   metrics: string[];
 }): VisualizationDatasetExample => ({
   input: { question },
+  metadata: { chartFamily: 'data_table' },
   output: {
     config: {
       type: 'data_table',
@@ -199,6 +236,7 @@ export const heatmapExample = ({
   metric: string;
 }): VisualizationDatasetExample => ({
   input: { question },
+  metadata: { chartFamily: 'heatmap' },
   output: {
     config: {
       type: 'heatmap',
@@ -220,6 +258,7 @@ export const queryOnlyExample = ({
   query: string;
 }): VisualizationDatasetExample => ({
   input: { question },
+  metadata: { chartFamily: 'query_only' },
   output: {
     config: { data_source: esql(query) },
     goldenToolPath: GOLDEN_TOOL_PATH,

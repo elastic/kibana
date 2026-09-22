@@ -9,6 +9,7 @@ import type { VisualizationDatasetExample } from '../../../src/evaluate_dataset'
 import {
   TIME_BUCKET_COLUMN,
   categoricalQuery,
+  withDataSource,
   dataTableExample,
   gaugeExample,
   heatmapExample,
@@ -27,7 +28,7 @@ const TOTAL_BYTES = { alias: 'Total Bytes', expression: 'SUM(bytes)' };
 const AVERAGE_BYTES = { alias: 'Average Bytes', expression: 'AVG(bytes)' };
 
 /** kibana_sample_data_logs: one example per core Lens chart type plus a multi-series line. */
-export const LOGS_EXAMPLES: VisualizationDatasetExample[] = [
+export const LOGS_EXAMPLES: VisualizationDatasetExample[] = withDataSource('logs', [
   xyExample({
     question:
       'Create a bar chart of the number of requests by response code in kibana_sample_data_logs.',
@@ -111,4 +112,4 @@ export const LOGS_EXAMPLES: VisualizationDatasetExample[] = [
       'Create a line chart of request count and average bytes over time in kibana_sample_data_logs as two series.',
     query: timeSeriesQuery({ index: INDEX, metrics: [REQUEST_COUNT, AVERAGE_BYTES] }),
   }),
-];
+]);

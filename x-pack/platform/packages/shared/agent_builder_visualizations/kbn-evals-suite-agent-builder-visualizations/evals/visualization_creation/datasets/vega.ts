@@ -17,6 +17,7 @@ export const VEGA_EXAMPLES: VisualizationDatasetExample[] = [
       question:
         'Create a Vega-Lite scatter plot of average bytes vs request count by client IP in kibana_sample_data_logs, with point size encoding the number of unique URLs.',
     },
+    metadata: { chartFamily: 'vega', dataSource: 'logs' },
     output: {
       renderer: 'vega',
       config: {

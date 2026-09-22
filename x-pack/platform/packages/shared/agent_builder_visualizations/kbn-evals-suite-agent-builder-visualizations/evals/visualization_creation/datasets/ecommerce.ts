@@ -13,6 +13,7 @@ import {
   partitionExample,
   timeSeriesQuery,
   totalsQuery,
+  withDataSource,
   xyExample,
 } from './factories';
 
@@ -23,7 +24,7 @@ const ORDER_COUNT = { alias: 'Order Count', expression: 'COUNT(*)' };
 const TOTAL_QUANTITY = { alias: 'Total Quantity', expression: 'SUM(total_quantity)' };
 
 /** kibana_sample_data_ecommerce: metric, pie, and xy over order_date and revenue fields. */
-export const ECOMMERCE_EXAMPLES: VisualizationDatasetExample[] = [
+export const ECOMMERCE_EXAMPLES: VisualizationDatasetExample[] = withDataSource('ecommerce', [
   metricExample({
     question:
       'Create a metric visualization of total revenue (taxful_total_price) in kibana_sample_data_ecommerce.',
@@ -62,4 +63,4 @@ export const ECOMMERCE_EXAMPLES: VisualizationDatasetExample[] = [
     x: 'manufacturer.keyword',
     y: [TOTAL_QUANTITY.alias],
   }),
-];
+]);
