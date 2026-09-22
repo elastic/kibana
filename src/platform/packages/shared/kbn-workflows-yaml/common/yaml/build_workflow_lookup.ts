@@ -9,6 +9,7 @@
 
 import type { LineCounter } from 'yaml';
 import YAML from 'yaml';
+import { STEP_CHILD_CONTAINER_KEYS } from '@kbn/workflows';
 
 export interface StepInfo {
   stepId: string;
@@ -134,17 +135,9 @@ export function isNestedStepKey(value: unknown): value is StepBodyKey {
  * Superset of `STEP_BODY_KEYS` — adds `branches`, `cases`, and `default` so
  * switch-case and parallel-branch steps get distinct `branchKey` values
  * (e.g. `'cases[0].steps'`) rather than inheriting the parent's key.
+ * Built from the canonical constant so future slot additions stay in sync.
  */
-const STEP_CHILD_CONTAINER_KEY_SET: ReadonlySet<string> = new Set([
-  'steps',
-  'else',
-  'branches',
-  'cases',
-  'default',
-  'on-failure',
-  'iteration-on-failure',
-  'fallback',
-]);
+const STEP_CHILD_CONTAINER_KEY_SET: ReadonlySet<string> = new Set(STEP_CHILD_CONTAINER_KEYS);
 
 export function inspectStep(
   node: any,

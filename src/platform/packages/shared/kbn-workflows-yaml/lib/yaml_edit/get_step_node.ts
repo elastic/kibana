@@ -23,12 +23,25 @@ function findInNode(node: unknown, stepName: string): YAMLMap | null {
     if (node.get('name') === stepName) return node;
 
     for (const pair of node.items) {
-      if (
-        isPair(pair) &&
-        isScalar(pair.key) &&
-        typeof pair.key.value === 'string' &&
-        STEP_CHILD_CONTAINER_KEY_SET.has(pair.key.value)
-      ) {
+      if (!isPair(pair) || !isScalar(pair.key) || typeof pair.key.value !== 'string') continue;
+      const keyValue = pair.key.value;
+      if (keyValue === 'branches' && isSeq(pair.value)) {
+        // Slot-aware: parallel branch wrappers have a `name` that is NOT a step name.
+        // Descend only into each branch's `steps`, skipping the wrapper itself.
+        for (const branch of pair.value.items) {
+          if (!isMap(branch)) continue;
+          for (const branchPair of branch.items) {
+            if (
+              isPair(branchPair) &&
+              isScalar(branchPair.key) &&
+              branchPair.key.value === 'steps'
+            ) {
+              const found = findInNode(branchPair.value, stepName);
+              if (found) return found;
+            }
+          }
+        }
+      } else if (STEP_CHILD_CONTAINER_KEY_SET.has(keyValue)) {
         const found = findInNode(pair.value, stepName);
         if (found) return found;
       }

@@ -8,17 +8,18 @@
  */
 
 import { render, screen } from '@testing-library/react';
+import { Handle } from '@xyflow/react';
 import type { Node, NodeProps } from '@xyflow/react';
 import React from 'react';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { WorkflowGraphForeachGroupNode } from './workflow_graph_foreach_group_node';
 
-// Stub @xyflow/react's Handle — it requires an internal React Flow context that
-// isn't available in unit tests, and we're not testing connection logic here.
+// Stub @xyflow/react's Handle as a spy — records calls so handle ids can be
+// asserted, but has no React Flow context requirements.
 jest.mock('@xyflow/react', () => ({
   ...jest.requireActual('@xyflow/react'),
-  Handle: () => null,
+  Handle: jest.fn().mockReturnValue(null),
   Position: { Top: 'top', Bottom: 'bottom' },
 }));
 
@@ -68,7 +69,13 @@ const makeNodeProps = (
 const renderGroup = (data: Partial<ForeachGroupNodeData> = {}) =>
   render(<WorkflowGraphForeachGroupNode {...makeNodeProps(data)} />);
 
+const mockHandle = Handle as unknown as jest.Mock;
+
 describe('WorkflowGraphForeachGroupNode', () => {
+  beforeEach(() => {
+    mockHandle.mockClear();
+  });
+
   it('renders the deslugified label', () => {
     renderGroup({ label: 'per-extension', stepType: 'foreach' });
     expect(screen.getByTitle('Per Extension')).toBeInTheDocument();
@@ -89,6 +96,12 @@ describe('WorkflowGraphForeachGroupNode', () => {
     renderGroup();
     const chip = screen.getByTestId('workflowGraphForeachGroupChip');
     expect(chip.querySelector('[data-euiicon-type="refresh"]')).toBeInTheDocument();
+  });
+
+  it('renders a fallback handle so failure edges from foreach/while containers are not dropped', () => {
+    renderGroup();
+    const ids = mockHandle.mock.calls.map((args: [{ id?: string }]) => args[0]?.id).filter(Boolean);
+    expect(ids).toContain('fallback');
   });
 
   describe('execution outcome colours', () => {

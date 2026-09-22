@@ -295,6 +295,25 @@ steps:
     });
   });
 
+  describe('branch name shadowing — parallel branch named same as a step inside it', () => {
+    it('should return the step, not the branch wrapper, when branch name matches step name', () => {
+      const doc = parse(`
+steps:
+  - name: par
+    type: parallel
+    branches:
+      - name: worker
+        steps:
+          - name: worker
+            type: http
+`);
+      const node = getStepNode(doc, 'worker');
+      expect(node).not.toBeNull();
+      // The step has a 'type' key; the branch wrapper does not.
+      expect(node!.get('type')).toBe('http');
+    });
+  });
+
   describe('node identity', () => {
     it('should return the same YAMLMap node from the document AST', () => {
       const doc = parse(`

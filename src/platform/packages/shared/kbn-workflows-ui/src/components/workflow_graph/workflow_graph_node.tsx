@@ -254,17 +254,17 @@ function NodePreviewCard({
         />
       </div>
       <Handle type="source" position={sourceHandlePos} style={{ opacity: 0 }} />
-      {/* Secondary source handle for the failure edge — always on the bottom
+      {/* Secondary source handle for the fallback edge — always on the bottom
           edge, inset from the right corner. `Position.Bottom` is unconditional:
           in LR the fallback margin is below the spine, so the route must leave
           the bottom edge rather than the right centre. `transform: 'none'`
           overrides React Flow's `.react-flow__handle-bottom` default of
           `translate(-50%, 0)` so that `right` + `left: auto` places the handle
           precisely. The visible port is spec 07's; React Flow reads
-          sourceHandle="failure" on the edge to pick these coordinates. */}
+          sourceHandle="fallback" on the edge to pick these coordinates. */}
       <Handle
         type="source"
-        id="failure"
+        id="fallback"
         position={Position.Bottom}
         style={{ opacity: 0, right: FAILURE_PORT_RIGHT_INSET, left: 'auto', transform: 'none' }}
       />
@@ -573,10 +573,10 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
         )}
       </div>
       <Handle type="source" position={sourceHandlePos} style={{ opacity: 0 }} />
-      {/* See note on the preview-mode component above for failure handle semantics. */}
+      {/* See note on the preview-mode component above for fallback handle semantics. */}
       <Handle
         type="source"
-        id="failure"
+        id="fallback"
         position={Position.Bottom}
         style={{ opacity: 0, right: FAILURE_PORT_RIGHT_INSET, left: 'auto', transform: 'none' }}
       />

@@ -478,7 +478,7 @@ export function useWorkflowLayout({
         target: e.target,
         // Failure edges exit via the dedicated bottom-right handle so React Flow
         // hands computeEdgePath the correct sourceX (right edge, not centre).
-        sourceHandle: isFailure ? 'failure' : undefined,
+        sourceHandle: isFailure ? 'fallback' : undefined,
         type: 'workflowEdge',
         data: {
           label: e.label,
