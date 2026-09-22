@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import { EventLogClient } from './event_log_client';
 import type { EsContext } from './es';
 import { contextMock } from './es/context.mock';
@@ -287,7 +288,7 @@ describe('EventLogStart', () => {
       field: 'kibana.alert.rule.gap.deleted' as const,
     };
 
-    test('delegates to the adapter with namespace scoping injected', async () => {
+    test('delegates to the adapter with nested namespace scoping injected', async () => {
       await eventLogClient.softDeleteByQuery(validParams);
       expect(esContext.esAdapter.softDeleteByQuery).toHaveBeenCalledWith({
         ...validParams,
@@ -295,7 +296,43 @@ describe('EventLogStart', () => {
           bool: {
             must: [
               validParams.query,
-              { bool: { must_not: { exists: { field: 'kibana.saved_objects.namespace' } } } },
+              {
+                nested: {
+                  path: 'kibana.saved_objects',
+                  query: {
+                    bool: { must_not: { exists: { field: 'kibana.saved_objects.namespace' } } },
+                  },
+                },
+              },
+            ],
+          },
+        },
+      });
+    });
+
+    test('injects a nested term filter for a named space', async () => {
+      const spacedClient = new EventLogClient({
+        esContext,
+        savedObjectGetter,
+        request: FakeRequest(),
+        spaceId: 'my-space',
+        spacesService: { spaceIdToNamespace: (id: string) => id } as unknown as SpacesServiceStart,
+      });
+      await spacedClient.softDeleteByQuery(validParams);
+      expect(esContext.esAdapter.softDeleteByQuery).toHaveBeenCalledWith({
+        ...validParams,
+        query: {
+          bool: {
+            must: [
+              validParams.query,
+              {
+                nested: {
+                  path: 'kibana.saved_objects',
+                  query: {
+                    term: { 'kibana.saved_objects.namespace': { value: 'my-space' } },
+                  },
+                },
+              },
             ],
           },
         },

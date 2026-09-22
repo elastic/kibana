@@ -254,10 +254,16 @@ export class EventLogClient implements IEventLogClient {
   ): Promise<estypes.UpdateByQueryResponse> {
     softDeleteByQuerySchema.validate(params);
     const namespace = await this.getNamespace();
-    const namespaceFilter: estypes.QueryDslQueryContainer =
+    const innerNamespaceFilter: estypes.QueryDslQueryContainer =
       namespace === undefined
         ? { bool: { must_not: { exists: { field: 'kibana.saved_objects.namespace' } } } }
         : { term: { 'kibana.saved_objects.namespace': { value: namespace } } };
+    const namespaceFilter: estypes.QueryDslQueryContainer = {
+      nested: {
+        path: 'kibana.saved_objects',
+        query: innerNamespaceFilter,
+      },
+    };
     const scopedQuery: estypes.QueryDslQueryContainer = {
       bool: {
         must: [params.query, namespaceFilter],
