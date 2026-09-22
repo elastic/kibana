@@ -19,6 +19,13 @@ const ACTION_ICONS_MAP: Record<RecommendedAction, IconType> = {
 
 const PRIMARY_COLOR_ACTIONS: RecommendedAction[] = ['investigate', 'configure'];
 
+/**
+ * A decision has already been made on this investigation, so the actions that would
+ * make one — approve, assign, dismiss — no longer apply. Read-only actions still do.
+ */
+export const isDecided = (investigation: Investigation): boolean =>
+  investigation.recommendedAction === 'closed';
+
 export const getActionButtonIconProps = (
   investigation: Investigation
 ): {

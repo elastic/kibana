@@ -39,10 +39,12 @@ describe('Severity form field', () => {
     );
 
     expect(allOptions.length).toBe(4);
-    expect(allOptions[0]).toHaveAttribute('title', CaseSeverity.LOW);
-    expect(allOptions[1]).toHaveAttribute('title', CaseSeverity.MEDIUM);
-    expect(allOptions[2]).toHaveAttribute('title', CaseSeverity.HIGH);
-    expect(allOptions[3]).toHaveAttribute('title', CaseSeverity.CRITICAL);
+
+    [CaseSeverity.LOW, CaseSeverity.MEDIUM, CaseSeverity.HIGH, CaseSeverity.CRITICAL].forEach(
+      (severity, i) => {
+        expect(within(allOptions[i]).getByTitle(severity)).toBeInTheDocument();
+      }
+    );
   });
 
   it('selects the correct value when changed', async () => {

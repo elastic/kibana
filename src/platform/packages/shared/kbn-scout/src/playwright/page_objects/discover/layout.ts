@@ -101,7 +101,11 @@ export abstract class LayoutMixin extends SaveMixin {
     return this.getDataViewSwitchName(await this.getVisibleDataViewSwitch());
   }
 
-  private async fillAndSubmitDataViewEditor({ name, adHoc = false }: DataViewOptions) {
+  private async fillAndSubmitDataViewEditor({
+    name,
+    adHoc = false,
+    waitUntilLoaded = true,
+  }: DataViewOptions) {
     // Minimal inline interaction with the data view editor flyout. The full
     // `DataViewEditorPage` object lives in the `data_view_editor` plugin, but
     // `kbn-scout` is a base package and must not depend on a plugin, so the few
@@ -154,7 +158,11 @@ export abstract class LayoutMixin extends SaveMixin {
       await expect(this.getSelectedDataView()).toHaveAccessibleName(title, { timeout: 20_000 });
     }).toPass({ timeout: 45_000, intervals: [0] });
 
-    await this.waitUntilTabIsLoaded();
+    // New empty tabs stay uninitialized after a data-view change; the caller knows
+    // that and should pass `waitUntilLoaded: false` instead of probing the prompt.
+    if (waitUntilLoaded) {
+      await this.waitUntilTabIsLoaded();
+    }
   }
 
   /**
@@ -710,7 +718,7 @@ export abstract class LayoutMixin extends SaveMixin {
     });
     await this.page
       .locator(
-        `[data-test-subj="unifiedHistogramTimeIntervalSelectorSelectable"] .euiSelectableListItem[title="${intervalTitle}"]`
+        `[data-test-subj="unifiedHistogramTimeIntervalSelectorSelectable"] .euiSelectableListItem span[title="${intervalTitle}"]`
       )
       .click();
     await this.page.testSubj.waitForSelector('unifiedHistogramTimeIntervalSelectorSelectable', {
@@ -789,6 +797,41 @@ export abstract class LayoutMixin extends SaveMixin {
     await this.getLensEditFlyout().waitFor({ state: 'visible' });
   }
 
+  async changeVisualizationShape(seriesType: string) {
+    await this.openLensEditFlyout();
+    const chartSwitch = this.page.testSubj.locator('lnsChartSwitchPopover');
+    await chartSwitch.click();
+    await this.page.testSubj.fill('lnsChartSwitchSearch', seriesType);
+    await this.page.testSubj.locator(`lnsChartSwitchPopover_${seriesType.toLowerCase()}`).click();
+    await chartSwitch.getByText(seriesType, { exact: true }).waitFor({ state: 'visible' });
+    await this.page.testSubj.locator('applyFlyoutButton').scrollIntoViewIfNeeded();
+    await this.page.testSubj.click('applyFlyoutButton');
+    await this.page.testSubj.locator('customizeLens').waitFor({ state: 'hidden' });
+    await this.waitUntilSearchingHasFinished();
+  }
+
+  async chooseVisualizationSuggestion(suggestionType: string) {
+    await this.openLensEditFlyout();
+    await this.page.testSubj.click('lensSuggestionsPanelToggleButton');
+    const suggestion = this.page.testSubj.locator(`lnsSuggestion-${suggestionType}`);
+    await suggestion.waitFor({ state: 'visible' });
+    await suggestion.click();
+    await suggestion
+      .locator('[data-test-subj="lnsSuggestion"]')
+      .and(this.page.locator('[aria-current="true"]'))
+      .waitFor({ state: 'visible' });
+    await this.page.testSubj.locator('applyFlyoutButton').scrollIntoViewIfNeeded();
+    await this.page.testSubj.click('applyFlyoutButton');
+    await this.waitUntilSearchingHasFinished();
+  }
+
+  async getVisualizationTitle(): Promise<string> {
+    await this.openLensEditFlyout();
+    const title = await this.page.testSubj.innerText('lnsChartSwitchPopover');
+    await this.page.testSubj.click('cancelFlyoutButton');
+    return title;
+  }
+
   getLensEditFlyout(): Locator {
     return this.page.testSubj.locator('lnsChartSwitchPopover');
   }
@@ -822,8 +865,8 @@ export abstract class LayoutMixin extends SaveMixin {
     return this.getHitCountLocator().innerText();
   }
 
-  getRefreshDataButton(): Locator {
-    return this.page.testSubj.locator('refreshDataButton');
+  getQueryInEsqlButton(): Locator {
+    return this.page.testSubj.locator('queryInEsqlButton');
   }
 
   getQuerySubmitButton(): Locator {
