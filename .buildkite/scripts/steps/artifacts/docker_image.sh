@@ -126,8 +126,6 @@ if [[ "$SKIP_BUILD" == "false" ]]; then
   echo "--- Upload CDN assets"
   CDN_CREDS_DIR="$(mktemp -d)"
 
-  buildkite-agent oidc request-token --audience "$GCS_SA_CDN_AUDIENCE" > "$CDN_CREDS_DIR/token.jwt"
-
   gcloud iam workload-identity-pools create-cred-config \
     "${GCS_SA_CDN_AUDIENCE#//iam.googleapis.com/}" \
     --service-account="$GCS_SA_CDN_EMAIL" \
@@ -136,6 +134,7 @@ if [[ "$SKIP_BUILD" == "false" ]]; then
     --output-file="$CDN_CREDS_DIR/credentials.json"
 
   cdn_gcloud() {
+    buildkite-agent oidc request-token --audience "$GCS_SA_CDN_AUDIENCE" > "$CDN_CREDS_DIR/token.jwt"
     CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE="$CDN_CREDS_DIR/credentials.json" gcloud "$@"
   }
 
