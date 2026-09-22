@@ -203,8 +203,8 @@ export function FieldMappingForm({
             </EuiFormRow>
           </EuiFlexItem>
 
-          <EuiFlexItem>
-            {isDateType ? (
+          {isDateType ? (
+            <EuiFlexItem>
               <EuiFormRow
                 label={i18n.translate('xpack.dataFederation.mappingEditor.formatLabel', {
                   defaultMessage: 'format (optional)',
@@ -221,19 +221,10 @@ export function FieldMappingForm({
                   data-test-subj="dataFederationMappingEditorFieldFormat"
                 />
               </EuiFormRow>
-            ) : (
-              <div aria-hidden="true" style={{ visibility: 'hidden' }}>
-                <EuiFormRow
-                  label={i18n.translate('xpack.dataFederation.mappingEditor.formatLabel', {
-                    defaultMessage: 'format (optional)',
-                  })}
-                  fullWidth
-                >
-                  <EuiFieldText fullWidth value="" onChange={() => {}} />
-                </EuiFormRow>
-              </div>
-            )}
-          </EuiFlexItem>
+            </EuiFlexItem>
+          ) : (
+            <></>
+          )}
         </EuiFlexGroup>
       </EuiFlexItem>
 
