@@ -29,14 +29,21 @@ export const ALERTZERO_WORKER_URL_TEMPLATE = `${ALERTZERO_WORKERS_URL}/{workerId
 export const buildWorkerUrl = (workerId: string) =>
   `${ALERTZERO_WORKERS_URL}/${encodeURIComponent(workerId)}`;
 
-/** Proposals grouped by category — AlertZero landing page. */
-export const ALERTZERO_PROPOSALS_URL = `${ALERTZERO_INTERNAL_URL}/proposals` as const;
+/** Pending proposals for a single action category. */
+export const ALERTZERO_PROPOSALS_CATEGORY_URL =
+  `${ALERTZERO_INTERNAL_URL}/proposals/category/{category}` as const;
+
+/** Proposals decided in the last 72 h (any non-pending status, including expired). */
+export const ALERTZERO_PROPOSALS_CLOSED_URL = `${ALERTZERO_INTERNAL_URL}/proposals/closed` as const;
 
 /** Action catalog — category-scoped discovery of installed action workflows. */
 export const ALERTZERO_ACTIONS_URL = `${ALERTZERO_INTERNAL_URL}/actions` as const;
 
 /** Agent Builder builtin tool wrapping the action catalog API. */
 export const ALERTZERO_ACTIONS_LIST_TOOL_ID = 'security.alertzero.actions.list' as const;
+
+/** Agent Builder builtin tool that appends a revision to a proposal chain — see elastic/security-team#19289. */
+export const ALERTZERO_PROPOSALS_REVISE_TOOL_ID = 'security.alertzero.proposals.revise' as const;
 
 /**
  * Shared thin AlertZero agent for all Worker `ai.agent` steps.

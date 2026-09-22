@@ -6,6 +6,7 @@
  */
 
 import type { Capabilities } from '@kbn/core/public';
+import { STACK_ALERTS_ONLY_FEATURE_ID, canAccessTriggersActionsRules } from '@kbn/rule-data-utils';
 
 const ALERTING_V2_FEATURE_IDS: Record<string, string> = {
   rules: 'alerting_v2_rules',
@@ -39,12 +40,16 @@ export const hasObservabilityAlertingCapabilities = (
 /** Capability-based check: does the user have any observability alerting access? */
 export const hasObservabilityAlertsV1Capability = (capabilities: Capabilities): boolean =>
   hasObservabilityRulesV1Capability(capabilities) ||
-  capabilities.observabilityAlerts?.show === true;
+  capabilities.observabilityAlerts?.show === true ||
+  capabilities[STACK_ALERTS_ONLY_FEATURE_ID]?.show === true;
 
 /** Capability-based check: does the user have any observability rules access? */
 export const hasObservabilityRulesV1Capability = (capabilities: Capabilities): boolean => {
   const { apm, metrics, uptime, synthetics, slo } = capabilities.navLinks;
   const logs = capabilities.logs?.show;
+  // Stack Rules (`stackAlerts`) registers no UI capability. It grants the
+  // Stack Management Rules page instead.
+  const stackRules = canAccessTriggersActionsRules(capabilities);
 
-  return Object.values({ apm, logs, metrics, uptime, synthetics, slo }).some(Boolean);
+  return Object.values({ apm, logs, metrics, uptime, synthetics, slo, stackRules }).some(Boolean);
 };

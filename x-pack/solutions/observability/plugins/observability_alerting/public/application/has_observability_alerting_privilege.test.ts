@@ -12,7 +12,7 @@ import {
   hasObservabilityRulesV1Capability,
 } from './has_observability_alerting_privilege';
 
-const capabilities = (features: Record<string, Record<string, boolean>>): Capabilities =>
+const capabilities = (features: Record<string, unknown>): Capabilities =>
   ({
     navLinks: {},
     management: {},
@@ -51,6 +51,16 @@ describe('hasObservabilityRulesV1Capability', () => {
     expect(hasObservabilityRulesV1Capability(capabilities({ logs: { show: true } }))).toBe(true);
   });
 
+  it('returns true for stack rules (triggersActionsRules)', () => {
+    expect(
+      hasObservabilityRulesV1Capability(
+        capabilities({
+          management: { insightsAndAlerting: { triggersActionsRules: true } },
+        })
+      )
+    ).toBe(true);
+  });
+
   it('returns false without any observability capability', () => {
     expect(hasObservabilityRulesV1Capability(capabilities({}))).toBe(false);
   });
@@ -60,6 +70,12 @@ describe('hasObservabilityAlertsV1Capability', () => {
   it('returns true for observabilityAlerts.show', () => {
     expect(
       hasObservabilityAlertsV1Capability(capabilities({ observabilityAlerts: { show: true } }))
+    ).toBe(true);
+  });
+
+  it('returns true for stackAlertsOnly.show', () => {
+    expect(
+      hasObservabilityAlertsV1Capability(capabilities({ stackAlertsOnly: { show: true } }))
     ).toBe(true);
   });
 
@@ -79,6 +95,14 @@ describe('hasObservabilityAlertingCapabilities', () => {
     it('returns v1: true for observabilityAlerts.show', () => {
       const result = hasObservabilityAlertingCapabilities(
         capabilities({ observabilityAlerts: { show: true } }),
+        'alerts'
+      );
+      expect(result).toEqual({ v1: true, v2: false });
+    });
+
+    it('returns v1: true for stackAlertsOnly.show', () => {
+      const result = hasObservabilityAlertingCapabilities(
+        capabilities({ stackAlertsOnly: { show: true } }),
         'alerts'
       );
       expect(result).toEqual({ v1: true, v2: false });
@@ -126,6 +150,16 @@ describe('hasObservabilityAlertingCapabilities', () => {
       expect(result).toEqual({ v1: true, v2: false });
     });
 
+    it('returns v1: true for stack rules (triggersActionsRules)', () => {
+      const result = hasObservabilityAlertingCapabilities(
+        capabilities({
+          management: { insightsAndAlerting: { triggersActionsRules: true } },
+        }),
+        'rules'
+      );
+      expect(result).toEqual({ v1: true, v2: false });
+    });
+
     it('returns v2: true for alerting_v2_rules read', () => {
       const result = hasObservabilityAlertingCapabilities(
         capabilities({ alerting_v2_rules: { read: true } }),
@@ -136,6 +170,14 @@ describe('hasObservabilityAlertingCapabilities', () => {
 
     it('returns both false without any rules capability', () => {
       const result = hasObservabilityAlertingCapabilities(capabilities({}), 'rules');
+      expect(result).toEqual({ v1: false, v2: false });
+    });
+
+    it('returns v1: false for stackAlertsOnly.show', () => {
+      const result = hasObservabilityAlertingCapabilities(
+        capabilities({ stackAlertsOnly: { show: true } }),
+        'rules'
+      );
       expect(result).toEqual({ v1: false, v2: false });
     });
   });
