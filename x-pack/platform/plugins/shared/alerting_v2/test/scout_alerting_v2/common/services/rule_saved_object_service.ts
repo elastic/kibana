@@ -8,18 +8,9 @@
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import type { ScoutLogger, ScoutTestConfig } from '@kbn/scout';
+import type { ScoutLogger, SystemIndicesEsClientFixture } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../common/saved_object_types';
-import { createSystemIndicesEsClient } from './system_indices_es_client';
-
-/**
- * System / restricted indices additionally require the Kibana product-origin
- * header (same pattern as `rule_changes_history_service`).
- */
-const SAVED_OBJECT_ES_HEADERS = {
-  'x-elastic-product-origin': 'kibana',
-};
 
 const DEFAULT_SPACE_ID = 'default';
 
@@ -55,29 +46,15 @@ export interface RuleSavedObjectService {
 
 export const getRuleSavedObjectService = ({
   log,
-  esClient,
-  config,
+  systemIndicesEsClient,
 }: {
   log: ScoutLogger;
-  esClient: EsClient;
-  config: ScoutTestConfig;
+  systemIndicesEsClient: SystemIndicesEsClientFixture;
 }): RuleSavedObjectService => {
-  let savedObjectClientPromise: Promise<EsClient> | undefined;
-
-  /**
-   * Lazy: provision `system_indices_superuser` once, then return a child client
-   * that always sends the product-origin header. `.kibana_alerting_cases` is a
-   * restricted index, so the plain `elastic` superuser can read it but is
-   * denied writes even with the header.
-   */
-  const getSavedObjectClient = (): Promise<EsClient> => {
-    if (!savedObjectClientPromise) {
-      savedObjectClientPromise = createSystemIndicesEsClient(esClient, config).then((client) =>
-        client.child({ headers: SAVED_OBJECT_ES_HEADERS })
-      );
-    }
-    return savedObjectClientPromise;
-  };
+  // `.kibana_alerting_cases` is a restricted index, so the plain `elastic` superuser can
+  // read it but is denied writes. The fixture provisions `system_indices_superuser` on the
+  // first call and hands back a client that sends the product-origin header.
+  const getSavedObjectClient = (): Promise<EsClient> => systemIndicesEsClient.getClient();
 
   return {
     getReferences: (ruleId, spaceId = DEFAULT_SPACE_ID) =>

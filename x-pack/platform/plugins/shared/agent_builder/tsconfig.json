@@ -143,8 +143,6 @@
     "@kbn/test-subj-selector",
     "@kbn/gen-ai-functional-testing",
     "@kbn/repo-info",
-    "@kbn/es",
-    "@kbn/test-es-server",
     "@kbn/user-profile-components",
     "@kbn/telemetry",
     "@kbn/embeddable-plugin",

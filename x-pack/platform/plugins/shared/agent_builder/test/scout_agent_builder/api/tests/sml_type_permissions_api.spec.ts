@@ -14,7 +14,6 @@ import type { SmlSearchHttpResponse } from '@kbn/agent-builder-sml-plugin/common
 import { AGENT_BUILDER_SML_FEATURE_ID } from '@kbn/agent-builder-sml-plugin/common/features';
 import type { SmlDocument } from '@kbn/agent-builder-sml-plugin/server';
 import { smlIndexName } from '@kbn/agent-builder-sml-plugin/server';
-import { createSystemIndicesEsClient } from '../../../scout_agent_builder_shared/lib/system_indices_es_client';
 import { apiTest } from '../fixtures';
 import { COMMON_HEADERS, INTERNAL_AGENT_BUILDER_SML } from '../fixtures/constants';
 
@@ -163,13 +162,13 @@ apiTest.describe(
       return (response.body as SmlSearchHttpResponse).results.map((hit) => hit.type);
     };
 
-    apiTest.beforeAll(async ({ requestAuth, kbnClient, apiClient, esClient, config }) => {
+    apiTest.beforeAll(async ({ requestAuth, kbnClient, apiClient, systemIndicesEsClient }) => {
       // Scout's default test timeout is 60s and a beforeAll hook is billed against it, so the
       // readiness poll below cannot outlive its own budget: without this the hook is killed at 60s
       // and reports "Received: false" rather than whatever the crawl was actually doing.
       apiTest.setTimeout(CRAWL_POLL_TIMEOUT_MS + 30_000);
 
-      sysEsClient = await createSystemIndicesEsClient(esClient, config);
+      sysEsClient = await systemIndicesEsClient.getClient();
 
       await kbnClient.spaces.create({
         id: OTHER_SPACE_ID,

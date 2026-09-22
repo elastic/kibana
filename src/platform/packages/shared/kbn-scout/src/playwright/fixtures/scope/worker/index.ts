@@ -40,3 +40,6 @@ export type { ApiClientFixture, ApiClientOptions, ApiClientResponse } from './ap
 
 export { defaultRolesFixture } from './default_roles';
 export type { DefaultRolesFixture } from './default_roles';
+
+export { systemIndicesEsClientFixture, SYSTEM_INDICES_HEADERS } from './system_indices_es_client';
+export type { SystemIndicesEsClientFixture } from './system_indices_es_client';

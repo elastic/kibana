@@ -16,7 +16,6 @@ import { apiTest, testData } from '../fixtures';
 import {
   cleanupIndices,
   cleanupReindexOperations,
-  createSystemIndicesEsClient,
   waitForReindexToComplete,
 } from '../fixtures/helpers';
 
@@ -37,10 +36,10 @@ apiTest.describe('Reindex service batch API', { tag: tags.stateful.classic }, ()
   // System-index privileges for the `.kibana` reindex-operation saved objects.
   let sysEsClient: EsClient;
 
-  apiTest.beforeAll(async ({ requestAuth, config, esClient }) => {
+  apiTest.beforeAll(async ({ requestAuth, esClient, systemIndicesEsClient }) => {
     adminCredentials = await requestAuth.getApiKey('admin');
     headers = { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader };
-    sysEsClient = await createSystemIndicesEsClient(esClient, config);
+    sysEsClient = await systemIndicesEsClient.getClient();
 
     await cleanupReindexOperations(sysEsClient);
     await cleanupIndices(esClient, [INDEX_CLEANUP_PATTERN]);

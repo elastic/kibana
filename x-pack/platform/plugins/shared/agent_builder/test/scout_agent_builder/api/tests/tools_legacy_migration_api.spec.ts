@@ -9,7 +9,6 @@ import type { Client } from '@elastic/elasticsearch';
 import { chatSystemIndex } from '@kbn/agent-builder-server';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import { createSystemIndicesEsClient } from '../../../scout_agent_builder_shared/lib/system_indices_es_client';
 import { apiTest } from '../fixtures';
 import { API_AGENT_BUILDER } from '../fixtures/constants';
 
@@ -50,8 +49,15 @@ apiTest.describe(
       },
     };
 
-    apiTest.beforeAll(async ({ asAdmin, esClient, config }) => {
-      sysEsClient = await createSystemIndicesEsClient(esClient, config);
+    apiTest.beforeAll(async ({ asAdmin, systemIndicesEsClient }) => {
+      // `system_indices_superuser` does not exist on Cloud serverless (MKI) and cannot be
+      // provisioned there, and every test below needs it.
+      apiTest.skip(
+        !systemIndicesEsClient.isAvailable,
+        'system_indices_superuser does not exist on Cloud serverless (MKI)'
+      );
+
+      sysEsClient = await systemIndicesEsClient.getClient();
       await asAdmin.post(`${API_AGENT_BUILDER}/tools`, {
         body: {
           id: dummyToolId,

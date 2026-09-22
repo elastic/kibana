@@ -5,19 +5,14 @@
  * 2.0.
  */
 
-import type { Client } from '@elastic/elasticsearch';
 import { apiTest } from '@kbn/scout';
+import type { EsClient } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { PUBLIC_HEADERS, ENTITY_STORE_TAGS } from '../../../common/fixtures/constants';
 import { installAllEntityTypes, uninstallAllEntityTypes } from '../../../common/fixtures/helpers';
-import { createSystemIndicesEsClient } from '../fixtures/system_indices_es_client';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common';
 
 const KIBANA_INDEX = '.kibana';
-
-// The `.kibana` index is a system index; direct access additionally requires
-// the x-elastic-product-origin header alongside allow_restricted_indices.
-const SYSTEM_INDEX_HEADERS = { 'x-elastic-product-origin': 'kibana' };
 
 // entity-definition was a `multiple-isolated` SO type, so the raw .kibana
 // document id is `entity-definition:<objectId>` with no namespace prefix
@@ -41,15 +36,15 @@ apiTest.describe('Entity Store remove_v1 SO cleanup', { tag: ENTITY_STORE_TAGS }
   // It does not exist on Cloud serverless (MKI), so this client is only created
   // on non-MKI targets. Tests that need it guard themselves with
   // config.isCloud && config.serverless.
-  let systemIndicesEsClient: Client | undefined;
+  let sysEsClient: EsClient | undefined;
 
-  apiTest.beforeAll(async ({ samlAuth, kbnClient, esClient, config }) => {
+  apiTest.beforeAll(async ({ samlAuth, kbnClient, systemIndicesEsClient }) => {
     const credentials = await samlAuth.asInteractiveUser('admin');
     defaultHeaders = { ...credentials.cookieHeader, ...PUBLIC_HEADERS };
     await kbnClient.uiSettings.update({ [FF_ENABLE_ENTITY_STORE_V2]: true });
 
-    if (!(config.isCloud && config.serverless)) {
-      systemIndicesEsClient = await createSystemIndicesEsClient(esClient, config);
+    if (systemIndicesEsClient.isAvailable) {
+      sysEsClient = await systemIndicesEsClient.getClient();
     }
   });
 
@@ -58,12 +53,12 @@ apiTest.describe('Entity Store remove_v1 SO cleanup', { tag: ENTITY_STORE_TAGS }
     // install nor a failed uninstall can leak legacy documents into sibling suites
     // sharing this cluster. Only attempted when the privileged client was created
     // (i.e. not on Cloud serverless / MKI).
-    if (systemIndicesEsClient !== undefined) {
+    if (sysEsClient !== undefined) {
       await Promise.all(
         ALL_ENTITY_TYPES.map((type) =>
-          systemIndicesEsClient!.delete(
+          sysEsClient!.delete(
             { index: KIBANA_INDEX, id: v1EntityDefinitionDocId(type, 'default'), refresh: true },
-            { headers: SYSTEM_INDEX_HEADERS, ignore: [404] }
+            { ignore: [404] }
           )
         )
       );
@@ -97,29 +92,21 @@ apiTest.describe('Entity Store remove_v1 SO cleanup', { tag: ENTITY_STORE_TAGS }
       // we simulate their presence to verify that stopAndRemoveV1 deletes them.
       await Promise.all(
         soDocIds.map((id) =>
-          systemIndicesEsClient!.index(
-            {
-              index: KIBANA_INDEX,
-              id,
-              document: {
-                type: 'entity-definition',
-                references: [],
-                updated_at: new Date().toISOString(),
-              },
-              refresh: 'wait_for',
+          sysEsClient!.index({
+            index: KIBANA_INDEX,
+            id,
+            document: {
+              type: 'entity-definition',
+              references: [],
+              updated_at: new Date().toISOString(),
             },
-            { headers: SYSTEM_INDEX_HEADERS }
-          )
+            refresh: 'wait_for',
+          })
         )
       );
 
       const beforeExists = await Promise.all(
-        soDocIds.map((id) =>
-          systemIndicesEsClient!.exists(
-            { index: KIBANA_INDEX, id },
-            { headers: SYSTEM_INDEX_HEADERS }
-          )
-        )
+        soDocIds.map((id) => sysEsClient!.exists({ index: KIBANA_INDEX, id }))
       );
       expect(beforeExists).toStrictEqual([true, true, true, true]);
 
@@ -130,12 +117,7 @@ apiTest.describe('Entity Store remove_v1 SO cleanup', { tag: ENTITY_STORE_TAGS }
       expect(install.statusCode).toBe(201);
 
       const afterExists = await Promise.all(
-        soDocIds.map((id) =>
-          systemIndicesEsClient!.exists(
-            { index: KIBANA_INDEX, id },
-            { headers: SYSTEM_INDEX_HEADERS }
-          )
-        )
+        soDocIds.map((id) => sysEsClient!.exists({ index: KIBANA_INDEX, id }))
       );
       expect(afterExists).toStrictEqual([false, false, false, false]);
     }
@@ -156,12 +138,7 @@ apiTest.describe('Entity Store remove_v1 SO cleanup', { tag: ENTITY_STORE_TAGS }
       // Confirm nothing pre-exists — install must not fail when there is
       // nothing to clean up (the delete uses ignore: [404]).
       const beforeExists = await Promise.all(
-        soDocIds.map((id) =>
-          systemIndicesEsClient!.exists(
-            { index: KIBANA_INDEX, id },
-            { headers: SYSTEM_INDEX_HEADERS }
-          )
-        )
+        soDocIds.map((id) => sysEsClient!.exists({ index: KIBANA_INDEX, id }))
       );
       expect(beforeExists).toStrictEqual([false, false, false, false]);
 

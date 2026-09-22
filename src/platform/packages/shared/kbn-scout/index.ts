@@ -28,6 +28,8 @@ export {
   apiClientFixture,
   coreWorkerFixtures,
   esArchiverFixture,
+  systemIndicesEsClientFixture,
+  SYSTEM_INDICES_HEADERS,
   networkFixture,
   createPlaywrightConfig,
   createLazyPageObject,
@@ -83,6 +85,7 @@ export type {
   SamlAuth,
   ScoutSpaceParallelFixture,
   SpaceSolutionView,
+  SystemIndicesEsClientFixture,
 } from './src/playwright';
 
 // Service & configuration types

@@ -18,8 +18,6 @@ project:
   sourceRoot: x-pack/platform/plugins/private/reindex_service
 dependsOn:
   - '@kbn/scout'
-  - '@kbn/es'
-  - '@kbn/test-es-server'
   - '@kbn/security-plugin'
   - '@kbn/es-ui-shared-plugin'
   - '@kbn/licensing-plugin'

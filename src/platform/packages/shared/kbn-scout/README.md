@@ -123,7 +123,46 @@ The `fixtures/scope` directory contains core Scout capabilities required for tes
 - `kbnClient`
 - `esArchiver`
 - `samlAuth`
+- `systemIndicesEsClient` (`apiTest` and single-thread UI tests only)
 - `linkedProject` (Cross-Project Search only -- provides `esClient` and `esArchiver` for the linked cluster)
+
+##### `systemIndicesEsClient`
+
+The default `esClient` authenticates as `elastic`, whose `superuser` role stops at restricted
+system indices: reads of `.kibana` and friends work, writes are refused. `systemIndicesEsClient`
+provisions the `system_indices_superuser` account (once per worker, on first use) and hands back a
+client that can write them, with the required `x-elastic-product-origin: kibana` header already
+attached.
+
+Prefer Kibana's HTTP APIs. Reach for this only for state those APIs cannot produce or observe --
+`legacy-url-alias` documents, hidden saved object types, framework-owned fields such as
+`references[]`.
+
+```ts
+apiTest('reads a hidden saved object', async ({ systemIndicesEsClient }) => {
+  const esClient = await systemIndicesEsClient.getClient();
+  const doc = await esClient.get({ index: '.kibana', id: 'my-type:my-id' });
+  // ...
+});
+```
+
+On serverless the account is bind-mounted by `@kbn/es`, so nothing is created. Everywhere else the
+fixture creates the role and account itself, using the deployment's own admin password so that it
+does not add a weaker credential to a cluster that outlives the run. Neither is deleted afterwards:
+workers share a cluster, so a teardown delete would pull the account out from under a sibling worker.
+
+Cloud serverless (MKI) is the one target this cannot work on, because the bind-mounted account is not
+there and cannot be provisioned. `isAvailable` is `false` there and `getClient()` throws, rather than
+handing back a client that would fail to authenticate on first use. Keep suites that need the client
+on local targets, or branch on `isAvailable` and skip:
+
+```ts
+apiTest.beforeAll(async ({ systemIndicesEsClient }) => {
+  // skip() throws, so the rest of the hook is skipped along with every test in the suite.
+  apiTest.skip(!systemIndicesEsClient.isAvailable, 'needs system_indices_superuser');
+  // ...
+});
+```
 
 Synthetic APM / logs / infra data via [`@kbn/synthtrace`](https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/kbn-synthtrace) is **not** part of `@kbn/scout`. Use the optional add-on [`@kbn/scout-synthtrace`](../kbn-scout-synthtrace/README.md) and merge its Playwright fixtures where you need `apmSynthtraceEsClient`, `infraSynthtraceEsClient`, or `logsSynthtraceEsClient`. `@kbn/scout-oblt`, `@kbn/scout-search`, and `@kbn/scout-security` do not bundle or re-export it.
 

@@ -8,7 +8,7 @@
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ChangeHistoryDocument } from '@kbn/change-history';
 import { DATA_STREAM_NAME as CHANGE_HISTORY_DATA_STREAM } from '@kbn/change-history';
-import type { ScoutLogger, ScoutTestConfig } from '@kbn/scout';
+import type { ScoutLogger, SystemIndicesEsClientFixture } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { RuleChangesHistoryActionType } from '../../../../server/lib/rule_changes_history/audit_actions';
@@ -18,18 +18,8 @@ import {
 } from '../../../../common/rule_changes_history_constants';
 import { RULE_CHANGES_HISTORY_OBJECT_TYPE } from '../../../../server/lib/rule_changes_history/constants';
 import { POLL_INTERVAL_MS, POLL_TIMEOUT_MS } from '../constants';
-import { createSystemIndicesEsClient } from './system_indices_es_client';
 
 const DEFAULT_SPACE_ID = 'default';
-
-/**
- * System / restricted data streams additionally require the Kibana
- * product-origin header (same pattern as entity_store Scout helpers and
- * `@kbn/change-history` integration tests).
- */
-const CHANGE_HISTORY_ES_HEADERS = {
-  'x-elastic-product-origin': 'kibana',
-};
 
 export interface RuleChangesHistoryFilter {
   ruleId: string;
@@ -59,28 +49,15 @@ export interface RuleChangesHistoryApiService {
 
 export const getRuleChangesHistoryApiService = ({
   log,
-  esClient,
-  config,
+  systemIndicesEsClient,
 }: {
   log: ScoutLogger;
-  esClient: EsClient;
-  config: ScoutTestConfig;
+  systemIndicesEsClient: SystemIndicesEsClientFixture;
 }): RuleChangesHistoryApiService => {
-  let changeHistoryClientPromise: Promise<EsClient> | undefined;
-
-  /**
-   * Lazy: provision `system_indices_superuser` once, then return a child client
-   * that always sends the product-origin header. Restricted indices reject the
-   * plain `elastic` superuser even when the header is present.
-   */
-  const getChangeHistoryClient = (): Promise<EsClient> => {
-    if (!changeHistoryClientPromise) {
-      changeHistoryClientPromise = createSystemIndicesEsClient(esClient, config).then((client) =>
-        client.child({ headers: CHANGE_HISTORY_ES_HEADERS })
-      );
-    }
-    return changeHistoryClientPromise;
-  };
+  // `.kibana_change_history` is restricted, and the plain `elastic` superuser is rejected
+  // there even with the product-origin header. The fixture provisions
+  // `system_indices_superuser` on the first call and sends the header for us.
+  const getChangeHistoryClient = (): Promise<EsClient> => systemIndicesEsClient.getClient();
 
   const find: RuleChangesHistoryApiService['find'] = ({
     ruleId,

@@ -17,12 +17,12 @@ export { buildAlertingApiServices } from '../../alerting_api_services';
 export const apiTest = baseApiTest.extend<{}, { apiServices: AlertingApiServicesFixture }>({
   apiServices: [
     async (
-      { apiServices, esClient, kbnClient, log, config },
+      { apiServices, esClient, kbnClient, log, systemIndicesEsClient },
       use: (extendedApiServices: AlertingApiServicesFixture) => Promise<void>
     ) => {
       const extendedApiServices: AlertingApiServicesFixture = {
         ...apiServices,
-        alertingV2: buildAlertingApiServices({ esClient, kbnClient, log, config }),
+        alertingV2: buildAlertingApiServices({ esClient, kbnClient, log, systemIndicesEsClient }),
       };
       await use(extendedApiServices);
     },
