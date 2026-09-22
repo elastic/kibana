@@ -9,6 +9,8 @@ import { v4 as uuidv4 } from 'uuid';
 import type { LlmProxy } from '@kbn/ftr-llm-proxy';
 import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
+import { getLeadsIndexName } from '../../../../../../common/entity_analytics/lead_generation/constants';
+import { generateLeadIndexMappings } from '../../../../../../server/lib/entity_analytics/lead_generation/indices/mappings';
 import {
   LEAD_GENERATION_ROUTES,
   INTERNAL_HEADERS,
@@ -28,8 +30,7 @@ import {
   clearEntityStoreIndices,
 } from '../../fixtures/maintainers/helpers';
 
-// Failing: See https://github.com/elastic/kibana/issues/291899
-apiTest.describe.skip(
+apiTest.describe(
   'Lead Generation - POST /internal/entity_analytics/leads/generate',
   { tag: LEAD_GENERATION_TAGS },
   () => {
@@ -54,11 +55,16 @@ apiTest.describe.skip(
 
       ({ connectorId, llmProxy } = await createLeadGenerationConnector({ apiServices, log }));
 
-      await apiClient.post(LEAD_GENERATION_ROUTES.ENABLE, {
-        headers: defaultHeaders,
-        responseType: 'json',
-        body: { connectorId },
-      });
+      // /enable also schedules a task that can race the ad-hoc generation below.
+      // Only the index is needed here; /generate saves the connector configuration.
+      const index = getLeadsIndexName(DEFAULT_SPACE_ID);
+      if (!(await esClient.indices.exists({ index }))) {
+        await esClient.indices.create({
+          index,
+          mappings: generateLeadIndexMappings(),
+          settings: { hidden: true, auto_expand_replicas: '0-1' },
+        });
+      }
     });
 
     apiTest.beforeEach(async ({ esClient }) => {
@@ -68,11 +74,6 @@ apiTest.describe.skip(
 
     apiTest.afterAll(async ({ apiClient, esClient, apiServices }) => {
       await cleanupLeadsIndex(esClient, DEFAULT_SPACE_ID);
-      await apiClient.post(LEAD_GENERATION_ROUTES.DISABLE, {
-        headers: defaultHeaders,
-        responseType: 'json',
-        body: {},
-      });
       await cleanupLeadGenerationConnector({ apiServices, connectorId, llmProxy });
       await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
         headers: publicHeaders,
