@@ -856,8 +856,6 @@ export class DiscoverPageObject extends FtrService {
         await this.testSubjects.waitForExists('select-text-based-language-btn', { timeout: 1000 })
       ) {
         await this.testSubjects.click('select-text-based-language-btn');
-        await this.header.waitUntilLoadingHasFinished();
-        await this.waitUntilSearchingHasFinished();
         return;
       }
 
@@ -874,8 +872,6 @@ export class DiscoverPageObject extends FtrService {
           await this.testSubjects.waitForExists('select-text-based-language-btn', { timeout: 2000 })
         ) {
           await this.testSubjects.click('select-text-based-language-btn');
-          await this.header.waitUntilLoadingHasFinished();
-          await this.waitUntilSearchingHasFinished();
           return;
         }
 

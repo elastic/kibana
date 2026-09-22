@@ -454,7 +454,9 @@ export function AddCisIntegrationFormPageProvider({
   };
 
   const checkIntegrationPliAuthBlockExists = async () => {
-    return await testSubjects.waitForExists(TEST_IDS.CLOUD_SECURITY_POSTURE_PLI_AUTH_BLOCK);
+    return await testSubjects.waitForExists(TEST_IDS.CLOUD_SECURITY_POSTURE_PLI_AUTH_BLOCK, {
+      timeout: 5000,
+    });
   };
 
   const pasteTextInField = async (selector: string, text: string) => {
