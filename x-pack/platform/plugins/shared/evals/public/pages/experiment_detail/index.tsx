@@ -27,7 +27,6 @@ import {
   EuiFlyoutBody,
   EuiFlyoutResizable,
   EuiTitle,
-  useEuiTheme,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
@@ -235,7 +234,6 @@ export const ExperimentDetailPage: React.FC = () => {
   const { experimentId } = useParams<{ experimentId: string }>();
   const history = useHistory();
   const location = useLocation();
-  const { euiTheme } = useEuiTheme();
 
   const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
   const executionId = searchParams.get('execution_id') ?? undefined;
@@ -489,7 +487,7 @@ export const ExperimentDetailPage: React.FC = () => {
 
   if (experimentLoading && !isLaunching) {
     return (
-      <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
+      <EuiPageSection paddingSize="none">
         <EuiLoadingSpinner size="xl" />
       </EuiPageSection>
     );
@@ -500,7 +498,7 @@ export const ExperimentDetailPage: React.FC = () => {
 
   if (experimentError && !showLaunchView) {
     return (
-      <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
+      <EuiPageSection paddingSize="none">
         <EuiEmptyPrompt
           color={isNotFound ? 'subdued' : 'danger'}
           iconType={isNotFound ? 'magnify' : 'warning'}
@@ -526,7 +524,7 @@ export const ExperimentDetailPage: React.FC = () => {
 
   return (
     <>
-      <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
+      <EuiPageSection paddingSize="none">
         <EuiTitle size="m">
           <h2>{pageTitle}</h2>
         </EuiTitle>
