@@ -13,6 +13,12 @@
     "@kbn/evals",
     "@kbn/kibana-api-cli",
     "@kbn/scout",
-    "@kbn/tooling-log"
+    "@kbn/tooling-log",
+    "@kbn/agent-builder-common",
+    "@kbn/core",
+    "@kbn/nightshift-investigations-plugin",
+    "@kbn/significant-events-schema",
+    "@kbn/workflows",
+    "@kbn/zod"
   ]
 }
