@@ -73,6 +73,9 @@ import {
 const DEFAULT_PAGE = 1;
 const DEFAULT_PER_PAGE = 20;
 
+const getActionPolicyApiKeyName = (policyName: string): string =>
+  `Action Policy: ${policyName.trim()}`;
+
 /**
  * Concurrency cap for {@link ActionPolicyClient.bulkUpdateActionPoliciesApiKey}.
  * Unlike the other by-ID bulk endpoints, API-key rotation cannot be done in a
@@ -226,7 +229,7 @@ export class ActionPolicyClient {
     const userProfileUid = await this.userService.getCurrentUserProfileUid();
     const now = new Date().toISOString();
 
-    const apiKeyAttrs = await this.apiKeyService.create(`Action Policy: ${parsed.name}`);
+    const apiKeyAttrs = await this.apiKeyService.create(getActionPolicyApiKeyName(parsed.name));
 
     const attributes = buildCreateActionPolicyAttributes({
       data: parsed,
@@ -315,7 +318,7 @@ export class ActionPolicyClient {
     const oldAuth = await this.getDecryptedAuth(params.options.id);
 
     const policyName = parsed.name ?? existingPolicy.name;
-    const apiKeyAttrs = await this.apiKeyService.create(`Action Policy: ${policyName}`);
+    const apiKeyAttrs = await this.apiKeyService.create(getActionPolicyApiKeyName(policyName));
 
     const nextAttrs = buildUpdateActionPolicyAttributes({
       existing: existingPolicy,
@@ -436,7 +439,9 @@ export class ActionPolicyClient {
     const oldAuth = await this.getDecryptedAuth(id);
     const userProfileUid = await this.userService.getCurrentUserProfileUid();
     const now = new Date().toISOString();
-    const apiKeyAttrs = await this.apiKeyService.create(`Action Policy: ${existingPolicy.name}`);
+    const apiKeyAttrs = await this.apiKeyService.create(
+      getActionPolicyApiKeyName(existingPolicy.name)
+    );
 
     try {
       await this.writeActionPolicyAttrs({
@@ -881,7 +886,7 @@ export class ActionPolicyClient {
     // only after the SO write succeeds, so a failed replace doesn't leave
     // the policy with a key that has already been invalidated.
     const oldAuth = await this.getDecryptedAuth(id);
-    const apiKeyAttrs = await this.apiKeyService.create(`Action Policy: ${parsed.name}`);
+    const apiKeyAttrs = await this.apiKeyService.create(getActionPolicyApiKeyName(parsed.name));
 
     // PUT replaces every field accepted by createActionPolicyDataSchema. Audit
     // metadata (createdBy/createdAt) and operational state (enabled,
