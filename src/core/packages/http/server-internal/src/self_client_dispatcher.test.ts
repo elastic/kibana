@@ -146,17 +146,18 @@ describe('SelfHttpDispatcherProvider', () => {
 
   describe('local target', () => {
     it('treats full as a leaf pin so the loopback hostname is not required to match the SAN', () => {
+      const leaf = '-----BEGIN CERTIFICATE-----\nLEAF\n-----END CERTIFICATE-----';
       const { provider } = createProvider({
         verificationMode: 'full',
         target: 'local',
-        serverCertificate: 'local server certificate',
+        serverCertificate: `${leaf}\n-----BEGIN CERTIFICATE-----\nINTERMEDIATE\n-----END CERTIFICATE-----`,
       });
 
       provider.get(HTTPS_URL, 'local');
 
       const connect = connectOptionsOf(0);
-      expect(connect.ca).toEqual(['local server certificate']);
-      expect(connect.allowPartialTrustChain).toBe(true);
+      expect(connect.ca).toEqual([leaf]);
+      expect(connect).not.toHaveProperty('allowPartialTrustChain');
       expect(connect.rejectUnauthorized).toBe(true);
       expect(connect.checkServerIdentity('localhost', {})).toBeUndefined();
     });

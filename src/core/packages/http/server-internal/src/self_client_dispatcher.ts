@@ -22,6 +22,12 @@ interface SelfHttpDispatcherProviderParams {
   readonly target: 'auto' | 'local';
 }
 
+const PEM_CERTIFICATE = /-----BEGIN CERTIFICATE-----[\s\S]+?-----END CERTIFICATE-----/;
+
+const extractLeafCertificate = (certificate: string): string => {
+  return certificate.match(PEM_CERTIFICATE)?.[0] ?? certificate;
+};
+
 const buildConnectOptions = (
   verificationMode: VerificationMode,
   certificateAuthorities: string[],
@@ -30,15 +36,11 @@ const buildConnectOptions = (
   // Omitting `ca` keeps Node's default trust store, which includes NODE_EXTRA_CA_CERTS.
   // Passing `rootCertificates` instead would replace it and trust less than `full` does.
   // Exclusive trust is the local-`full` pin: only this process's leaf, no public roots.
-  const connect: ConnectOptions =
-    certificateAuthorities.length === 0
-      ? {}
-      : {
-          ca: exclusiveTrust
-            ? certificateAuthorities
-            : [...rootCertificates, ...certificateAuthorities],
-          allowPartialTrustChain: true,
-        };
+  const connect: ConnectOptions = exclusiveTrust
+    ? { ca: certificateAuthorities }
+    : certificateAuthorities.length === 0
+    ? {}
+    : { ca: [...rootCertificates, ...certificateAuthorities], allowPartialTrustChain: true };
 
   switch (verificationMode) {
     case 'none':
@@ -68,13 +70,15 @@ export class SelfHttpDispatcherProvider {
     const config = this.params.getHttpConfig();
     const usesLocalTarget = target === 'local';
     const configuredMode = config.selfHttp.ssl.verificationMode;
+    // SslConfig already materializes PKCS#12 keystores into ssl.certificate.
     const localCertificate = usesLocalTarget ? config.ssl.certificate : undefined;
     // Local hops use this process's listener. The cert SAN is usually the public
     // hostname, not `localhost` / the bind address, so `full` would fail identity.
     // Pin the listener leaf only; honor explicit `certificate` / `none`.
-    const pinLocalLeaf = usesLocalTarget && configuredMode === 'full' && Boolean(localCertificate);
+    const pinLocalLeaf =
+      usesLocalTarget && configuredMode === 'full' && typeof localCertificate === 'string';
     const additionalCertificateAuthorities = pinLocalLeaf
-      ? [localCertificate]
+      ? [extractLeafCertificate(localCertificate)]
       : usesLocalTarget
       ? [config.ssl.certificate, ...(config.ssl.certificateAuthorities ?? [])]
       : config.selfHttp.ssl.certificateAuthorities ?? [];
