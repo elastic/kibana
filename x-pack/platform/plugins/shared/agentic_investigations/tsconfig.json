@@ -28,15 +28,18 @@
     "@kbn/zod",
     "@kbn/core-http-server-mocks",
     "@kbn/zod-helpers",
-    "@kbn/agent-builder-browser",
-    "@kbn/agent-builder-server",
+    "@kbn/std",
     "@kbn/agent-builder-common",
+    "@kbn/agent-builder-server",
+    "@kbn/agent-builder-platform-plugin",
+    "@kbn/agent-builder-browser",
     "@kbn/agentic-investigations-common",
     "@kbn/core-http-browser",
     "@kbn/ui-callout",
     "@kbn/std",
     "@kbn/react-query",
-    "@kbn/kibana-react-plugin"
+    "@kbn/kibana-react-plugin",
+    "@kbn/user-profile-components"
   ],
   "exclude": ["target/**/*"]
 }
