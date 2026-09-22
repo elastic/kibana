@@ -458,10 +458,6 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         updateAttributes.accountType = cloudConnectorUpdate.accountType;
       }
 
-      if (cloudConnectorUpdate.vars) {
-        updateAttributes.vars = cloudConnectorUpdate.vars;
-      }
-
       Object.assign(updateAttributes, iacAttributesFromConfirm(cloudConnectorUpdate));
 
       const isAws = existingCloudConnector.attributes.cloudProvider === 'aws';
@@ -473,6 +469,17 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       const newRoleArn = incomingAwsVars?.role_arn?.value;
       const roleArnChanged = isAws && typeof newRoleArn === 'string' && newRoleArn !== oldRoleArn;
       const esClient = options?.esClient;
+
+      if (cloudConnectorUpdate.vars) {
+        // Role ARN edits (API or flyout) may send only `{ role_arn }`. A wholesale replace would
+        // orphan `external_id`'s Fleet secret and break later auth. Merge for AWS role ARN
+        // changes; other vars updates stay a full replace (package-policy create/update
+        // depends on that contract).
+        updateAttributes.vars =
+          roleArnChanged && existingCloudConnector.attributes.vars
+            ? { ...existingCloudConnector.attributes.vars, ...cloudConnectorUpdate.vars }
+            : cloudConnectorUpdate.vars;
+      }
 
       if (roleArnChanged) {
         if (!esClient) {

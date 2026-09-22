@@ -1417,7 +1417,7 @@ describe('CloudConnectorService', () => {
       });
 
       // `external_id` is a Fleet secret reference that only lives on the connector; nothing
-      // re-derives it. These two tests pin the contract the browser's merge depends on.
+      // re-derives it. Role ARN edits merge server-side so a role-only payload cannot orphan it.
       describe('vars replacement', () => {
         const externalId = {
           type: 'password' as const,
@@ -1455,9 +1455,8 @@ describe('CloudConnectorService', () => {
           );
         });
 
-        it('replaces vars wholesale, so a partial payload drops external_id', async () => {
-          // Deliberate: the package-policy save path relies on PUT vars being a full replacement.
-          // Callers that only mean to change the ARN have to merge first.
+        it('merges existing vars on a role-only update so external_id is preserved', async () => {
+          // A partial `{ vars: { role_arn } }` must not orphan the Fleet secret behind external_id.
           await service.update(
             mockSoClient,
             connectorId,
@@ -1468,7 +1467,9 @@ describe('CloudConnectorService', () => {
           expect(mockSoClient.update).toHaveBeenCalledWith(
             CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
             connectorId,
-            expect.objectContaining({ vars: { role_arn: { type: 'text', value: newArn } } })
+            expect.objectContaining({
+              vars: { role_arn: { type: 'text', value: newArn }, external_id: externalId },
+            })
           );
         });
       });
