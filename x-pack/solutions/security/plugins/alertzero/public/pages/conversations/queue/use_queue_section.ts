@@ -44,7 +44,7 @@ export interface QueueSection {
    * not blank rows still worth reading.
    */
   hasLoadError: boolean;
-  /** A later page failed while earlier ones render, which `hasLoadError` cannot see. */
+  /** The analyst's own Show more failed, as opposed to a poll they never asked for. */
   hasLoadMoreError: boolean;
   hasCountError: boolean;
   /** Refetches both of this section's queries, behind the failure's retry. */
@@ -124,9 +124,23 @@ const useSection = (
   const total = totalFromPages(pagesQuery) ?? countQuery.data?.total;
   const { fetchNextPage, hasNextPage, isFetchingNextPage } = pagesQuery;
 
+  // Tracked from the click rather than read off `pagesQuery.error`, which a failed
+  // poll sets just the same — and a poll the analyst did not ask for must not
+  // report that their Show more failed.
+  const [hasLoadMoreError, setHasLoadMoreError] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setHasLoadMoreError(false);
+    }
+  }, [isOpen]);
+
   const loadMore = useCallback(() => {
     if (hasNextPage && !isFetchingNextPage) {
-      void fetchNextPage();
+      setHasLoadMoreError(false);
+      // `throwOnError` is the only way to hear about this fetch alone: v4 has no
+      // `isFetchNextPageError`, and the query's own error outlives it.
+      fetchNextPage({ throwOnError: true }).catch(() => setHasLoadMoreError(true));
     }
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
@@ -140,7 +154,7 @@ const useSection = (
     retry,
     loadingRows: pagesQuery.isInitialLoading ? Math.min(total ?? firstPageSize, firstPageSize) : 0,
     hasLoadError: Boolean(pagesQuery.error) && proposals.length === 0,
-    hasLoadMoreError: Boolean(pagesQuery.error) && proposals.length > 0 && !isFetchingNextPage,
+    hasLoadMoreError,
     hasCountError: Boolean(countQuery.error) && total === undefined,
     remaining: Math.max(Math.min(total ?? 0, MAX_QUEUE_REACH) - proposals.length, 0),
     // The authority, so the control is never offered when a click fetches nothing.

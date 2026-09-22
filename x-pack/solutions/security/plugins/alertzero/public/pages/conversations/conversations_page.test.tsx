@@ -65,7 +65,8 @@ const mockProposals = (groups: Record<string, ProposalItem[]>) => {
   });
 
   const pages = (bucket: string, all: ProposalItem[], firstPageSize: number, enabled: boolean) => {
-    fetchNextPage[bucket] = fetchNextPage[bucket] ?? jest.fn();
+    // Resolves, like the real one: the caller waits on it to hear that a page failed.
+    fetchNextPage[bucket] = fetchNextPage[bucket] ?? jest.fn().mockResolvedValue({});
     if (!enabled) {
       return {
         data: undefined,
