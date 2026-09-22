@@ -13,6 +13,7 @@ import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
 import {
   EVALS_EXPERIMENT_DATASET_EXAMPLES_URL,
   API_VERSIONS,
+  EXPERIMENT_EXAMPLE_PREVIEW_MAX_LENGTH,
   SCORES_SORT_ORDER,
   buildSpaceFilter,
 } from '@kbn/evals-common';
@@ -52,7 +53,11 @@ describe('GET /internal/evals/experiments/{experimentId}/datasets/{datasetId}/ex
     return { handler, context, evaluationScoreService, logger };
   };
 
-  const makeRequest = (experimentId = 'experiment-123', datasetId = 'dataset-123') =>
+  const makeRequest = (
+    experimentId = 'experiment-123',
+    datasetId = 'dataset-123',
+    query: { execution_id?: string; include_previews?: boolean } = {}
+  ) =>
     httpServerMock.createKibanaRequest({
       method: 'get',
       path: EVALS_EXPERIMENT_DATASET_EXAMPLES_URL.replace('{experimentId}', experimentId).replace(
@@ -60,40 +65,65 @@ describe('GET /internal/evals/experiments/{experimentId}/datasets/{datasetId}/ex
         datasetId
       ),
       params: { experimentId, datasetId },
-      query: {},
+      query,
     });
 
-  it('uses the correct query parameters', async () => {
+  const makeScore = (exampleId: string, exampleIndex: number, evaluatorName: string) => ({
+    '@timestamp': '2026-09-22T10:00:00.000Z',
+    experiment_id: 'experiment-123',
+    example: {
+      id: exampleId,
+      index: exampleIndex,
+      metadata: { source: 'retained-example-metadata' },
+      dataset: { id: 'dataset-123', name: 'Dataset' },
+    },
+    task: {
+      repetition_index: 0,
+      trace_id: `task-trace-${exampleId}`,
+      model: { id: 'task-model' },
+    },
+    evaluator: {
+      name: evaluatorName,
+      score: 0.75,
+      explanation: 'retained evaluator explanation',
+      metadata: { source: 'retained-evaluator-metadata' },
+    },
+    metadata: { execution_id: 'execution-123' },
+  });
+
+  it('uses one unpaginated score search that excludes only complete input and output', async () => {
     const { handler, context, evaluationScoreService } = setup();
-    evaluationScoreService.search.mockResolvedValueOnce({ hits: { hits: [] } } as any);
 
     await handler(context, makeRequest(), kibanaResponseFactory);
 
-    expect(evaluationScoreService.search).toHaveBeenCalledWith(
-      expect.objectContaining({
-        sort: SCORES_SORT_ORDER,
-        size: 10000,
-        query: {
-          bool: {
-            must: [
-              { term: { 'example.dataset.id': 'dataset-123' } },
-              { term: { experiment_id: 'experiment-123' } },
-              buildSpaceFilter('default'),
-            ],
-          },
+    expect(evaluationScoreService.search).toHaveBeenCalledTimes(1);
+    expect(evaluationScoreService.search).toHaveBeenCalledWith({
+      query: {
+        bool: {
+          must: [
+            { term: { 'example.dataset.id': 'dataset-123' } },
+            { term: { experiment_id: 'experiment-123' } },
+            buildSpaceFilter('default'),
+          ],
         },
-      })
-    );
+      },
+      sort: SCORES_SORT_ORDER,
+      size: 10000,
+      _source_excludes: ['example.input', 'task.output'],
+    });
   });
 
-  it('groups scores by example id and sorts by example index', async () => {
+  it('groups full score documents by example index while retaining eager evaluator details', async () => {
     const { handler, context, evaluationScoreService } = setup();
+    const exampleBScore1 = makeScore('example-b', 2, 'eval-1');
+    const exampleAScore = makeScore('example-a', 1, 'eval-1');
+    const exampleBScore2 = makeScore('example-b', 2, 'eval-2');
     evaluationScoreService.search.mockResolvedValueOnce({
       hits: {
         hits: [
-          { _source: { example: { id: 'example-b', index: 2 }, evaluator: { name: 'eval-1' } } },
-          { _source: { example: { id: 'example-a', index: 1 }, evaluator: { name: 'eval-1' } } },
-          { _source: { example: { id: 'example-b', index: 2 }, evaluator: { name: 'eval-2' } } },
+          { _source: exampleBScore1 },
+          { _source: exampleAScore },
+          { _source: exampleBScore2 },
           { _source: { evaluator: { name: 'no-example' } } },
           { _source: undefined },
         ],
@@ -103,21 +133,160 @@ describe('GET /internal/evals/experiments/{experimentId}/datasets/{datasetId}/ex
     const response = await handler(context, makeRequest(), kibanaResponseFactory);
 
     expect(response.status).toBe(200);
-    expect(response.payload.examples).toEqual([
-      {
-        example_id: 'example-a',
-        example_index: 1,
-        scores: [{ example: { id: 'example-a', index: 1 }, evaluator: { name: 'eval-1' } }],
-      },
-      {
-        example_id: 'example-b',
-        example_index: 2,
-        scores: [
-          { example: { id: 'example-b', index: 2 }, evaluator: { name: 'eval-1' } },
-          { example: { id: 'example-b', index: 2 }, evaluator: { name: 'eval-2' } },
+    expect(response.payload).toEqual({
+      examples: [
+        {
+          example_id: 'example-a',
+          example_index: 1,
+          scores: [exampleAScore],
+        },
+        {
+          example_id: 'example-b',
+          example_index: 2,
+          scores: [exampleBScore1, exampleBScore2],
+        },
+      ],
+    });
+    expect(response.payload.examples[0].scores[0]).toEqual(
+      expect.objectContaining({
+        example: expect.objectContaining({
+          metadata: { source: 'retained-example-metadata' },
+        }),
+        evaluator: expect.objectContaining({
+          explanation: 'retained evaluator explanation',
+          metadata: { source: 'retained-evaluator-metadata' },
+        }),
+      })
+    );
+    expect(response.payload.examples[0].scores[0].example).not.toHaveProperty('input');
+    expect(response.payload.examples[0].scores[0].task).not.toHaveProperty('output');
+    expect(response.payload).not.toHaveProperty('page');
+    expect(response.payload).not.toHaveProperty('per_page');
+    expect(response.payload).not.toHaveProperty('total');
+  });
+
+  it('filters the bulk read by execution without requesting previews by default', async () => {
+    const { handler, context, evaluationScoreService } = setup();
+
+    await handler(
+      context,
+      makeRequest('experiment-123', 'dataset-123', { execution_id: 'execution-123' }),
+      kibanaResponseFactory
+    );
+
+    expect(evaluationScoreService.search).toHaveBeenCalledTimes(1);
+    expect(evaluationScoreService.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: {
+          bool: {
+            must: [
+              { term: { 'example.dataset.id': 'dataset-123' } },
+              { term: { 'metadata.execution_id': 'execution-123' } },
+              buildSpaceFilter('default'),
+            ],
+          },
+        },
+      })
+    );
+  });
+
+  it('adds independently bounded previews from one collapsed source-filtered read', async () => {
+    const { handler, context, evaluationScoreService } = setup();
+    const largeInput = { value: `input-${'a'.repeat(5000)}-full-input-sentinel` };
+    const largeOutput = { value: `output-${'b'.repeat(5000)}-full-output-sentinel` };
+    evaluationScoreService.search.mockResolvedValueOnce({
+      hits: {
+        hits: [
+          { _source: makeScore('example-b', 2, 'eval-1') },
+          { _source: makeScore('example-a', 1, 'eval-1') },
+          { _source: makeScore('example-c', 3, 'eval-1') },
         ],
       },
-    ]);
+    } as any);
+    evaluationScoreService.search.mockResolvedValueOnce({
+      hits: {
+        hits: [
+          {
+            _source: {
+              example: { id: 'example-a', input: largeInput },
+              task: { repetition_index: 0, output: largeOutput },
+            },
+          },
+          {
+            _source: {
+              example: { id: 'example-b' },
+              task: { repetition_index: 1, output: null },
+            },
+          },
+          {
+            _source: {
+              example: { id: 'example-c', input: 'c'.repeat(2046) },
+              task: { repetition_index: 2, output: { short: 'value' } },
+            },
+          },
+        ],
+      },
+    } as any);
+
+    const response = await handler(
+      context,
+      makeRequest('experiment-123', 'dataset-123', { include_previews: true }),
+      kibanaResponseFactory
+    );
+
+    expect(evaluationScoreService.search).toHaveBeenCalledTimes(2);
+    expect(evaluationScoreService.search).toHaveBeenNthCalledWith(2, {
+      query: {
+        bool: {
+          must: [
+            { term: { 'example.dataset.id': 'dataset-123' } },
+            { term: { experiment_id: 'experiment-123' } },
+            buildSpaceFilter('default'),
+            { terms: { 'example.id': ['example-a', 'example-b', 'example-c'] } },
+          ],
+        },
+      },
+      size: 3,
+      _source_includes: ['example.id', 'example.input', 'task.repetition_index', 'task.output'],
+      collapse: { field: 'example.id' },
+      sort: [
+        { 'task.repetition_index': { order: 'asc', missing: '_last' } },
+        { _shard_doc: { order: 'asc' } },
+      ],
+      track_total_hits: false,
+    });
+    expect(response.payload.examples[0].preview).toEqual({
+      repetition_index: 0,
+      input: { content: expect.any(String), truncated: true },
+      output: { content: expect.any(String), truncated: true },
+    });
+    expect(response.payload.examples[0].preview.input.content).toHaveLength(
+      EXPERIMENT_EXAMPLE_PREVIEW_MAX_LENGTH
+    );
+    expect(response.payload.examples[0].preview.output.content).toHaveLength(
+      EXPERIMENT_EXAMPLE_PREVIEW_MAX_LENGTH
+    );
+    expect(response.payload.examples[1].preview).toEqual({
+      repetition_index: 1,
+      input: null,
+      output: null,
+    });
+    expect(response.payload.examples[2].preview).toEqual({
+      repetition_index: 2,
+      input: {
+        content: expect.any(String),
+        truncated: false,
+      },
+      output: {
+        content: '{\n  "short": "value"\n}',
+        truncated: false,
+      },
+    });
+    expect(response.payload.examples[2].preview.input.content).toHaveLength(
+      EXPERIMENT_EXAMPLE_PREVIEW_MAX_LENGTH
+    );
+    expect(JSON.stringify(response.payload)).not.toContain('full-input-sentinel');
+    expect(JSON.stringify(response.payload)).not.toContain('full-output-sentinel');
   });
 
   it('returns 500 when ES throws', async () => {

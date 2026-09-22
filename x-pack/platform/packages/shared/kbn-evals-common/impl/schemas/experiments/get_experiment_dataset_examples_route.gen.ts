@@ -15,14 +15,35 @@
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
+import { BooleanFromString } from '@kbn/zod-helpers/v4';
 
 import { EvaluationScoreDocument } from '../common_attributes.gen';
+
+export const EvaluationExperimentExamplePreview = lazySchema(() =>
+  z.object({
+    repetition_index: z.number().int(),
+    input: z
+      .object({
+        content: z.string().max(2048),
+        truncated: z.boolean(),
+      })
+      .nullable(),
+    output: z
+      .object({
+        content: z.string().max(2048),
+        truncated: z.boolean(),
+      })
+      .nullable(),
+  })
+);
+export type EvaluationExperimentExamplePreview = z.infer<typeof EvaluationExperimentExamplePreview>;
 
 export const EvaluationExperimentDatasetExample = lazySchema(() =>
   z.object({
     example_id: z.string().max(1024),
     example_index: z.number().int().nullable(),
     scores: z.array(EvaluationScoreDocument),
+    preview: EvaluationExperimentExamplePreview.optional(),
   })
 );
 export type EvaluationExperimentDatasetExample = z.infer<typeof EvaluationExperimentDatasetExample>;
@@ -32,7 +53,12 @@ export const GetEvaluationExperimentDatasetExamplesRequestQuery = lazySchema(() 
     /**
      * When provided, fetches examples for all experiments in this execution
      */
-    execution_id: z.string().max(1024).optional(),
+    execution_id: z
+      .string()
+      .max(1024)
+      .optional()
+      .describe('When provided, fetches examples for all experiments in this execution'),
+    include_previews: BooleanFromString.optional().default(false),
   })
 );
 export type GetEvaluationExperimentDatasetExamplesRequestQuery = z.infer<

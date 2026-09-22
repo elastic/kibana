@@ -15,6 +15,7 @@ import {
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
   EuiPagination,
   EuiSpacer,
   EuiText,
@@ -25,8 +26,10 @@ import {
 import { css } from '@emotion/css';
 import type {
   EvaluationExperimentDatasetExample,
+  EvaluationExperimentExamplePreview,
   EvaluationScoreDocument,
 } from '@kbn/evals-common';
+import { useExperimentExampleDetails } from '../../hooks/use_evals_api';
 import * as i18n from './translations';
 
 const formatScore = (score: number | null | undefined) =>
@@ -197,6 +200,115 @@ const JudgeLabel: React.FC<{ modelId: string }> = ({ modelId }) => (
   </EuiText>
 );
 
+interface ExampleDetailsContext {
+  experimentId: string;
+  datasetId: string;
+  executionId?: string;
+  exampleId: string;
+  repetitionIndex: number;
+}
+
+const renderJsonPreview = (value: unknown) => {
+  if (value == null) {
+    return '-';
+  }
+
+  const serializedValue = JSON.stringify(value, null, 2);
+  if (!serializedValue) {
+    return '-';
+  }
+
+  return (
+    <EuiCodeBlock
+      // Table cell content is a flex container, so without an explicit width the block
+      // shrink-wraps the JSON and pulls its copy/expand controls in with it.
+      css={{ width: '100%' }}
+      overflowHeight={200}
+      language="json"
+      paddingSize="none"
+      transparentBackground
+      fontSize="s"
+      isCopyable
+    >
+      {serializedValue}
+    </EuiCodeBlock>
+  );
+};
+
+const renderSerializedPreview = (
+  preview: EvaluationExperimentExamplePreview['input'] | undefined
+) => {
+  if (!preview) {
+    return '-';
+  }
+
+  return (
+    <>
+      <EuiCodeBlock
+        css={{ width: '100%' }}
+        overflowHeight={200}
+        language="json"
+        paddingSize="none"
+        transparentBackground
+        fontSize="s"
+      >
+        {preview.content}
+      </EuiCodeBlock>
+      {preview.truncated && (
+        <EuiText size="xs" color="subdued">
+          {i18n.PREVIEW_TRUNCATED_LABEL}
+        </EuiText>
+      )}
+    </>
+  );
+};
+
+const PreviewJsonDetail: React.FC<{
+  detailsContext: ExampleDetailsContext;
+  field: 'input' | 'output';
+  preview?: EvaluationExperimentExamplePreview;
+}> = ({ detailsContext, field, preview }) => {
+  const [requested, setRequested] = useState(false);
+  const { experimentId, datasetId, executionId, exampleId, repetitionIndex } = detailsContext;
+  const { data, isLoading, error } = useExperimentExampleDetails(
+    experimentId,
+    datasetId,
+    exampleId,
+    repetitionIndex,
+    executionId,
+    { enabled: requested }
+  );
+
+  if (!requested) {
+    return (
+      <div>
+        {renderSerializedPreview(
+          preview?.repetition_index === repetitionIndex ? preview[field] : undefined
+        )}
+        <EuiButtonEmpty size="xs" onClick={() => setRequested(true)}>
+          {field === 'input'
+            ? i18n.VIEW_FULL_INPUT_BUTTON_LABEL
+            : i18n.VIEW_FULL_OUTPUT_BUTTON_LABEL}
+        </EuiButtonEmpty>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return <EuiLoadingSpinner size="m" data-test-subj="evalsExampleDetailsLoading" />;
+  }
+
+  if (error) {
+    return (
+      <EuiText color="danger" size="xs">
+        {i18n.getDetailsLoadErrorMessage(String(error))}
+      </EuiText>
+    );
+  }
+
+  return renderJsonPreview(field === 'input' ? data?.example.input : data?.task.output);
+};
+
 const EvaluatorScoreAccordion: React.FC<{
   score: EvaluationScoreDocument;
   exampleId: string;
@@ -348,17 +460,24 @@ const EvaluatorScoreGroupBlock: React.FC<{
 interface ExampleScoreRow {
   exampleId: string;
   exampleIndex: number | null;
+  preview?: EvaluationExperimentExamplePreview;
   repetitionIndices: number[];
   scoresByRepetition: Record<number, EvaluationExperimentDatasetExample['scores']>;
 }
 
 export interface ExampleScoresTableProps {
+  experimentId: string;
+  datasetId: string;
+  executionId?: string;
   examples: EvaluationExperimentDatasetExample[];
   selectedExampleId?: string | null;
   onTraceClick: (traceId: string, exampleId: string) => void;
 }
 
 export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
+  experimentId,
+  datasetId,
+  executionId,
   examples,
   selectedExampleId,
   onTraceClick,
@@ -424,6 +543,7 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
         return {
           exampleId: example.example_id,
           exampleIndex: example.example_index ?? null,
+          preview: example.preview,
           repetitionIndices,
           scoresByRepetition,
         };
@@ -460,33 +580,6 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
           .filter((value): value is string => Boolean(value))
       )
     );
-
-  const renderJsonPreview = (value: unknown) => {
-    if (value == null) {
-      return '-';
-    }
-
-    const serializedValue = JSON.stringify(value, null, 2);
-    if (!serializedValue) {
-      return '-';
-    }
-
-    return (
-      <EuiCodeBlock
-        // Table cell content is a flex container, so without an explicit width the block
-        // shrink-wraps the JSON and pulls its copy/expand controls in with it.
-        css={{ width: '100%' }}
-        overflowHeight={200}
-        language="json"
-        paddingSize="none"
-        transparentBackground
-        fontSize="s"
-        isCopyable
-      >
-        {serializedValue}
-      </EuiCodeBlock>
-    );
-  };
 
   const itemIdToExpandedRowMap = useMemo<Record<string, ReactNode>>(() => {
     return rows.reduce<Record<string, ReactNode>>((acc, row) => {
@@ -534,31 +627,51 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
     {
       field: 'scoresByRepetition',
       name: i18n.COLUMN_INPUT,
-      width: '18%',
+      width: '240px',
       render: (
         _scoresByRepetition: ExampleScoreRow['scoresByRepetition'],
         row: ExampleScoreRow
-      ) => {
-        const firstScoreDocument = getScoresForSelectedRepetition(row)[0];
-        return renderJsonPreview(firstScoreDocument?.example.input);
-      },
+      ) => (
+        <PreviewJsonDetail
+          key={`input-${row.exampleId}-${getSelectedRepetitionIndex(row)}`}
+          field="input"
+          preview={row.preview}
+          detailsContext={{
+            experimentId,
+            datasetId,
+            executionId,
+            exampleId: row.exampleId,
+            repetitionIndex: getSelectedRepetitionIndex(row),
+          }}
+        />
+      ),
     },
     {
       field: 'scoresByRepetition',
       name: i18n.COLUMN_OUTPUT,
-      width: '30%',
+      width: '360px',
       render: (
         _scoresByRepetition: ExampleScoreRow['scoresByRepetition'],
         row: ExampleScoreRow
-      ) => {
-        const firstScoreDocument = getScoresForSelectedRepetition(row)[0];
-        return renderJsonPreview(firstScoreDocument?.task.output);
-      },
+      ) => (
+        <PreviewJsonDetail
+          key={`output-${row.exampleId}-${getSelectedRepetitionIndex(row)}`}
+          field="output"
+          preview={row.preview}
+          detailsContext={{
+            experimentId,
+            datasetId,
+            executionId,
+            exampleId: row.exampleId,
+            repetitionIndex: getSelectedRepetitionIndex(row),
+          }}
+        />
+      ),
     },
     {
       field: 'scoresByRepetition',
       name: i18n.COLUMN_EVALUATOR_SCORES,
-      width: '30%',
+      width: '360px',
       render: (
         _scoresByRepetition: ExampleScoreRow['scoresByRepetition'],
         row: ExampleScoreRow

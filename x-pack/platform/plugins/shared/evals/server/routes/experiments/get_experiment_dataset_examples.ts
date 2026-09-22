@@ -8,15 +8,18 @@
 import {
   EVALS_EXPERIMENT_DATASET_EXAMPLES_URL,
   API_VERSIONS,
+  EXPERIMENT_EXAMPLE_PREVIEW_MAX_LENGTH,
   INTERNAL_API_ACCESS,
   MAX_SCORES_PER_QUERY,
   buildDatasetExampleScoresQuery,
   SCORES_SORT_ORDER,
   GetEvaluationExperimentDatasetExamplesRequestParams,
   GetEvaluationExperimentDatasetExamplesRequestQuery,
+  type EvaluationExperimentExamplePreview,
   type EvaluationScoreDocument,
   type GetEvaluationExperimentDatasetExamplesResponse,
 } from '@kbn/evals-common';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { EVALS_API_PRIVILEGES } from '../../../common';
@@ -24,6 +27,27 @@ import type { RouteDependencies } from '../register_routes';
 import { handleMaximumResponseSizeExceededError } from '../utils/handle_response_size_error';
 
 type GroupedExampleScores = GetEvaluationExperimentDatasetExamplesResponse['examples'][number];
+type ContentPreview = NonNullable<EvaluationExperimentExamplePreview['input']>;
+
+const BULK_SCORE_SOURCE_EXCLUDES = ['example.input', 'task.output'];
+
+const PREVIEW_SOURCE_FIELDS = [
+  'example.id',
+  'example.input',
+  'task.repetition_index',
+  'task.output',
+] as const;
+
+interface PreviewSource {
+  example?: {
+    id?: string;
+    input?: unknown;
+  };
+  task?: {
+    repetition_index?: number;
+    output?: unknown;
+  };
+}
 
 const getExampleId = ({ example }: EvaluationScoreDocument): string => example.id;
 
@@ -37,6 +61,42 @@ const isValidScoreDocument = (source: unknown): source is EvaluationScoreDocumen
 
   const maybeScore = source as { example?: { id?: unknown } };
   return typeof maybeScore.example?.id === 'string' && maybeScore.example.id.length > 0;
+};
+
+const toContentPreview = (value: unknown): ContentPreview | null => {
+  if (value == null) {
+    return null;
+  }
+
+  const serialized = JSON.stringify(value, null, 2);
+  if (serialized === undefined) {
+    return null;
+  }
+
+  return {
+    content: serialized.slice(0, EXPERIMENT_EXAMPLE_PREVIEW_MAX_LENGTH),
+    truncated: serialized.length > EXPERIMENT_EXAMPLE_PREVIEW_MAX_LENGTH,
+  };
+};
+
+const toExamplePreview = (
+  hit: SearchHit
+): { exampleId: string; preview: EvaluationExperimentExamplePreview } | undefined => {
+  const source = hit._source as PreviewSource | undefined;
+  const exampleId = source?.example?.id;
+  const repetitionIndex = source?.task?.repetition_index;
+  if (!exampleId || repetitionIndex === undefined) {
+    return undefined;
+  }
+
+  return {
+    exampleId,
+    preview: {
+      repetition_index: repetitionIndex,
+      input: toContentPreview(source.example?.input),
+      output: toContentPreview(source.task?.output),
+    },
+  };
 };
 
 export const registerGetExperimentDatasetExamplesRoute = ({
@@ -68,7 +128,7 @@ export const registerGetExperimentDatasetExamplesRoute = ({
       async (context, request, response) => {
         try {
           const { experimentId, datasetId } = request.params;
-          const { execution_id: executionId } = request.query;
+          const { execution_id: executionId, include_previews: includePreviews } = request.query;
           const evalsContext = await context.evals;
           const spaceId = getSpaceId ? await getSpaceId(request) : DEFAULT_SPACE_ID;
 
@@ -78,6 +138,7 @@ export const registerGetExperimentDatasetExamplesRoute = ({
             query: buildDatasetExampleScoresQuery(datasetId, filterId, { filterField, spaceId }),
             sort: SCORES_SORT_ORDER,
             size: MAX_SCORES_PER_QUERY,
+            _source_excludes: BULK_SCORE_SOURCE_EXCLUDES,
           });
 
           const scores = (searchResponse.hits?.hits ?? [])
@@ -105,10 +166,38 @@ export const registerGetExperimentDatasetExamplesRoute = ({
             if (right.example_index === null) return -1;
             return left.example_index - right.example_index;
           });
+          const exampleIds = examples.map(({ example_id: exampleId }) => exampleId);
 
-          return response.ok({
-            body: { examples },
-          });
+          if (includePreviews && exampleIds.length > 0) {
+            const previewQuery = buildDatasetExampleScoresQuery(datasetId, filterId, {
+              filterField,
+              spaceId,
+            });
+            previewQuery.bool.must.push({ terms: { 'example.id': exampleIds } });
+            const previewsResponse = await evalsContext.evaluationScoreService.search({
+              query: previewQuery,
+              size: exampleIds.length,
+              _source_includes: [...PREVIEW_SOURCE_FIELDS],
+              collapse: { field: 'example.id' },
+              sort: [
+                { 'task.repetition_index': { order: 'asc', missing: '_last' } },
+                { _shard_doc: { order: 'asc' } },
+              ],
+              track_total_hits: false,
+            });
+
+            for (const hit of previewsResponse.hits?.hits ?? []) {
+              const result = toExamplePreview(hit);
+              if (result) {
+                const example = groupedExamplesById.get(result.exampleId);
+                if (example) {
+                  example.preview = result.preview;
+                }
+              }
+            }
+          }
+
+          return response.ok({ body: { examples } });
         } catch (error) {
           const tooLarge = handleMaximumResponseSizeExceededError({
             error,

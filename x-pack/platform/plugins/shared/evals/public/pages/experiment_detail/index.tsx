@@ -79,7 +79,7 @@ interface DatasetStatsAccordionProps {
   onDatasetToggle: (datasetId: string, isOpen: boolean) => void;
 }
 
-const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
+export const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
   experimentId,
   executionId,
   group,
@@ -102,6 +102,25 @@ const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
     refetchInterval: isRunning ? RUN_POLL_INTERVAL_MS : false,
     staleTime: isRunning ? 0 : undefined,
   });
+  const { data: datasetExamplePreviews } = useExperimentDatasetExamples(
+    experimentId,
+    isOpen ? group.datasetId : '',
+    executionId,
+    { includePreviews: true }
+  );
+
+  const examplesWithPreviews = useMemo(() => {
+    const previewsByExampleId = new Map(
+      (datasetExamplePreviews?.examples ?? []).map(({ example_id: exampleId, preview }) => [
+        exampleId,
+        preview,
+      ])
+    );
+    return (datasetExamples?.examples ?? []).map((example) => {
+      const preview = previewsByExampleId.get(example.example_id);
+      return preview ? { ...example, preview } : example;
+    });
+  }, [datasetExamplePreviews?.examples, datasetExamples?.examples]);
 
   // When the run settles and polling stops, pull the final example set once in case the last poll
   // fired just before the last example's scores were indexed.
@@ -166,7 +185,10 @@ const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
           <EuiLoadingSpinner size="m" />
         ) : (
           <ExampleScoresTable
-            examples={datasetExamples?.examples ?? []}
+            experimentId={experimentId}
+            datasetId={group.datasetId}
+            executionId={executionId}
+            examples={examplesWithPreviews}
             selectedExampleId={selectedExampleId}
             onTraceClick={onTraceClick}
           />
