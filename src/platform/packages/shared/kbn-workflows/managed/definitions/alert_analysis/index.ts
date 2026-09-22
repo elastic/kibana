@@ -19,7 +19,9 @@ export const SECURITY_ALERT_ANALYSIS_WORKFLOW_ID = 'system-security-alert-analys
 export const SECURITY_ALERT_ANALYSIS_WORKFLOW = {
   id: SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
   pluginId: 'securitySolution',
-  version: 8,
+  // Tip of the Worker-callable YAML (umbrella history landed as 3→8; this PR adds a manual
+  // trigger for caller inputs, so bump again for managed install/update).
+  version: 9,
   billable: false,
   visibility: {
     selectors: ['rule_action'],
