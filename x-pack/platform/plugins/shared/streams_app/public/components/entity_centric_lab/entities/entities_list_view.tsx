@@ -434,6 +434,10 @@ type ListItem =
       nested?: boolean;
       /** Nesting depth for custom grouping indentation (0 = top, 1 = under group, 2 = under sub-group). */
       depth?: number;
+      /** When true, always use the basic EuiInMemoryTable even in ElasticOn
+       *  mode. Used for the flat ungrouped view where entities span multiple
+       *  categories and a single bucket key can't represent them. */
+      forceBasicTable?: boolean;
       rows: Entity[];
     }
   | { kind: 'kubernetes-header'; total: number }
@@ -629,17 +633,21 @@ export const EntitiesListView = ({
       // Flat / ungrouped: a single "All entities" table (nested so the header
       // shows the label, not the first entity's category name).
       if (customGroupBy.length === 0) {
-        return effectiveEntities.length === 0
-          ? []
-          : [
-              {
-                kind: 'panel',
-                category: effectiveEntities[0].category,
-                subTypeLabel: UNGROUPED_LABEL,
-                nested: true,
-                rows: [...effectiveEntities],
-              },
-            ];
+        if (effectiveEntities.length === 0) return [];
+        // Check if entities span multiple categories — if so, no single
+        // bucket key can represent the mix, so force the basic table.
+        const firstCategory = effectiveEntities[0].category;
+        const isMixed = effectiveEntities.some((e) => e.category !== firstCategory);
+        return [
+          {
+            kind: 'panel',
+            category: firstCategory,
+            subTypeLabel: UNGROUPED_LABEL,
+            nested: true,
+            forceBasicTable: isMixed,
+            rows: [...effectiveEntities],
+          },
+        ];
       }
       const nodes = groupEntities(effectiveEntities, customGroupBy);
       const custom: ListItem[] = [];
@@ -891,7 +899,7 @@ export const EntitiesListView = ({
               ...((item.depth ?? 0) > 0 ? { marginLeft: (item.depth ?? 0) * 16 } : {}),
             }}
           >
-            {enableColumnSettings ? (
+            {enableColumnSettings && !item.forceBasicTable ? (
               <EntityDataGridSection
                 category={item.category}
                 subTypeLabel={item.subTypeLabel}
