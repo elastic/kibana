@@ -1789,34 +1789,41 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     /** resets visualization/layer or removes a layer */
     async removeLayer(index: number = 0) {
-      await retry.try(async () => {
-        await timePicker.ensureHiddenNoDataPopover();
+      await retry.try(
+        async () => {
+          await timePicker.ensureHiddenNoDataPopover();
 
-        // Hover over the tab to make the layer actions button visible
-        const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]', 0);
-        if (tabs[index]) {
-          await tabs[index].moveMouseTo();
-        }
+          // Hover over the tab to make the layer actions button visible
+          const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]', 0);
+          if (tabs[index]) {
+            await tabs[index].moveMouseTo();
+          }
 
-        const splitButtonExists = await testSubjects.exists(`lnsLayerSplitButton--${index}`, {
-          timeout: 0,
-        });
-        const removeButtonExists = await testSubjects.exists(`lnsLayerRemove--${index}`, {
-          timeout: 0,
-        });
-        if (!splitButtonExists && !removeButtonExists) {
-          throw new Error(`Layer ${index} actions are not visible`);
-        }
+          const splitButtonExists = await testSubjects.exists(`lnsLayerSplitButton--${index}`, {
+            timeout: 0,
+          });
+          const removeButtonExists = await testSubjects.exists(`lnsLayerRemove--${index}`, {
+            timeout: 0,
+          });
+          if (!splitButtonExists && !removeButtonExists) {
+            throw new Error(`Layer ${index} actions are not visible`);
+          }
 
-        if (splitButtonExists) {
-          await testSubjects.click(`lnsLayerSplitButton--${index}`);
+          if (splitButtonExists) {
+            await testSubjects.click(`lnsLayerSplitButton--${index}`);
+          }
+          await testSubjects.click(`lnsLayerRemove--${index}`);
+          if (await testSubjects.exists('lnsLayerRemoveModal')) {
+            await testSubjects.exists('lnsLayerRemoveConfirmButton');
+            await testSubjects.click('lnsLayerRemoveConfirmButton');
+          }
+        },
+        async () => {
+          // Search completion can open this popover after the initial visibility check and
+          // intercept the remove click. Dismiss it before retrying the interaction.
+          await browser.pressKeys(browser.keys.ESCAPE);
         }
-        await testSubjects.click(`lnsLayerRemove--${index}`);
-        if (await testSubjects.exists('lnsLayerRemoveModal')) {
-          await testSubjects.exists('lnsLayerRemoveConfirmButton');
-          await testSubjects.click('lnsLayerRemoveConfirmButton');
-        }
-      });
+      );
     },
 
     async ensureLayerTabIsActive(index: number = 0) {
