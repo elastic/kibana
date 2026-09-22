@@ -52,6 +52,7 @@ describe('AlertZero schema smoke tests', () => {
         autonomy: 'manual',
       },
       settingsRevision: null,
+      workflowId: null,
     });
 
     expect(WorkerSettings.parse(worker.settings)).toEqual(worker.settings);

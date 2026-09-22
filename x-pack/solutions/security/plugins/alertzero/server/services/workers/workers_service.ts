@@ -305,6 +305,9 @@ export class WorkersService {
         : {}),
       settings,
       settingsRevision,
+      // The installed document id (`<workerId>-<spaceId>`). Null until that document exists —
+      // first enable, or a settings save — so the client can link to it without rebuilding the id.
+      workflowId: status.installed ? status.workflowId : null,
       skills: projectSkillsFromDefinition(definition, agentLookupCallback),
     };
   }

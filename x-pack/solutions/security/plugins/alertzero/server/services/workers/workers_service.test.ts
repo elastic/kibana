@@ -154,7 +154,8 @@ describe('WorkersService', () => {
     expect(response.workers.map(({ id }) => id)).toEqual([...SYSTEM_SECURITY_WORKER_IDS]);
     expect(
       response.workers.every(
-        ({ enabled, settingsRevision }) => !enabled && settingsRevision === null
+        ({ enabled, settingsRevision, workflowId }) =>
+          !enabled && settingsRevision === null && workflowId === null
       )
     ).toBe(true);
   });
@@ -175,6 +176,7 @@ describe('WorkersService', () => {
       throw new Error('Expected configure-before-enable to succeed');
     expect(result.response.worker.enabled).toBe(false);
     expect(result.response.worker.settings.autonomy).toBe('assisted');
+    expect(result.response.worker.workflowId).toBe(`${TRIAGE}-${SPACE}`);
     expect(harness.documents.get(`${TRIAGE}-${SPACE}`)?.enabled).toBe(false);
   });
 
@@ -432,6 +434,7 @@ describe('WorkersService', () => {
     expect(disabled.outcome).toBe('updated');
     if (disabled.outcome !== 'updated') throw new Error('Expected disable to succeed');
     expect(disabled.response.worker.enabled).toBe(false);
+    expect(disabled.response.worker.workflowId).toBe(`${TRIAGE}-space-a`);
     expect(harness.documents.has(`${TRIAGE}-space-a`)).toBe(true);
   });
 
