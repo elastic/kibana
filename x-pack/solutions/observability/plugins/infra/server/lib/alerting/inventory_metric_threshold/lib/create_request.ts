@@ -76,6 +76,8 @@ export const createRequest = async (
   );
   const bucketSelector = createBucketSelector(metric, condition, customMetric);
 
+  // Container context stays on the ECS pod uid (`kubernetes.pod.uid` → `container.id`).
+  // SemConv pod documents do not populate it.
   const containerContextAgg: Record<string, estypes.AggregationsAggregationContainer> | undefined =
     nodeType === 'pod' && fieldsExisted && fieldsExisted[termsAggField[KUBERNETES_POD_UID]]
       ? {

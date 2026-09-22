@@ -6,8 +6,13 @@
  */
 
 import { COMPARATORS } from '@kbn/alerting-comparators';
-import type { DataSchemaFormat, InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import {
+  SEMCONV_K8S_POD_NETWORK_IO,
+  type DataSchemaFormat,
+  type InventoryItemType,
+} from '@kbn/metrics-data-access-plugin/common';
 import type { InventoryMetricConditions } from '../../../../../common/alerting/metrics';
+import { createMetricAggregations } from './create_metric_aggregations';
 import { createRequest } from './create_request';
 
 const condition: InventoryMetricConditions = {
@@ -104,6 +109,29 @@ describe('createRequest composite identity', () => {
 
     expect(JSON.stringify(request)).toContain('hostmetricsreceiver.otel');
     await expectCompositeIdField('host', 'host.name', 'semconv');
+  });
+
+  it('rebuilds SemConv pod rx as interface rates filtered to receive', async () => {
+    const aggs = await createMetricAggregations(timerange, 'pod', 'rx', undefined, 'semconv');
+
+    expect(aggs).toEqual(
+      expect.objectContaining({
+        rx_first_bucket: expect.objectContaining({
+          filter: expect.objectContaining({
+            bool: expect.objectContaining({
+              must: expect.arrayContaining([{ term: { direction: 'receive' } }]),
+            }),
+          }),
+          aggs: expect.objectContaining({
+            interfaces: expect.objectContaining({
+              terms: { field: 'interface' },
+              aggs: { maxValue: { max: { field: SEMCONV_K8S_POD_NETWORK_IO } } },
+            }),
+          }),
+        }),
+        rx_second_bucket: expect.any(Object),
+      })
+    );
   });
 
   it('leaves an omitted host schema unfiltered', async () => {

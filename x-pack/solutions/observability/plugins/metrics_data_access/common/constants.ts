@@ -11,7 +11,9 @@ export const TIMESTAMP = '@timestamp';
 export const HOST_NAME = 'host.name';
 export const HOST_HOSTNAME = 'host.hostname';
 export const CONTAINER_ID = 'container.id';
+/** Metricbeat / ECS pod identity. */
 export const KUBERNETES_POD_UID = 'kubernetes.pod.uid';
+/** OpenTelemetry / SemConv pod identity. */
 export const K8S_POD_UID = 'k8s.pod.uid';
 export const K8S_POD_NAME = 'k8s.pod.name';
 export const K8S_NAMESPACE_NAME = 'k8s.namespace.name';

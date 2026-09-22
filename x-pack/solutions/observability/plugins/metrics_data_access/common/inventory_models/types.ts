@@ -295,7 +295,7 @@ export interface InventoryModel<
   singularDisplayName: string;
   requiredIntegration: Integrations;
   fields: InventoryModelFields;
-  /** Per-schema overrides for identity/label fields. Absent → `fields` applies to every schema. */
+  /** Identity for one schema. `findInventoryFields` returns a present entry as-is. A missing key falls back to `fields`. */
   schemaFields?: Partial<Record<DataSchemaFormat, InventoryModelFields>>;
   crosslinkSupport: {
     details: boolean;

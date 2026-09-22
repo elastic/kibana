@@ -27,7 +27,7 @@ export const pod = createInventoryModel('pod', {
   }),
   requiredIntegration: {
     beats: 'kubernetes',
-    otel: 'kubeletstatsreceiver.otel',
+    otel: KUBELET_STATS_RECEIVER_OTEL,
   },
   crosslinkSupport: {
     details: true,
@@ -40,6 +40,7 @@ export const pod = createInventoryModel('pod', {
     name: 'kubernetes.pod.name',
     ip: 'kubernetes.pod.ip',
   },
+  // Whole SemConv identity: uid and name. These documents have no ip field.
   schemaFields: {
     semconv: { id: K8S_POD_UID, name: K8S_POD_NAME },
   },

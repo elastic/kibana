@@ -67,6 +67,7 @@ export const memory: SchemaBasedAggregations = {
         },
         // Zeros empty limit buckets so pods without limits fall back to node utilization.
         // A zero count means that fallback field is absent, so the value stays null.
+        // ECS memory keeps skip and does not use this fallback.
         gap_policy: 'insert_zeros',
       },
     },
