@@ -142,7 +142,7 @@ export class DatastreamInitializer implements IResourceInitializer {
         const props = index.mappings?.properties;
         if (props && 'episode' in props) {
           const episode = props.episode;
-          if (episode && 'type' in episode && episode.type === 'object') return true;
+          if (episode && 'properties' in episode) return true;
         }
       }
       return false;
