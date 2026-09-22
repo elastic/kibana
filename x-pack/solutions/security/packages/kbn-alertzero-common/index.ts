@@ -133,14 +133,6 @@ export {
   HuntCoordinatorRequestBody,
   HuntCoordinatorResponse,
   HuntCoordinatorStatus,
-  AnchorIoc,
-  AnchorItem,
-  AnchorSet,
-  CorrelateRequestBody,
-  CorrelateResponse,
-  CorrelationEngineStatus,
-  HuntCorrelationAttachmentData,
-  HuntCorrelationAttachmentThresholds,
 } from './impl/schemas';
 
 export {
