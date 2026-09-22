@@ -8,26 +8,21 @@
 import type { ServiceAccountWorkloadBinder } from '@kbn/core-security-common';
 
 /**
- * The principal that created an account. The binder's fields identify it durably; `displayName`
- * is what to show, when the backend can say. `userProfileId` is included so the UI can link to
- * the person where a profile exists.
+ * The principal that created an account.
  */
 export type ServiceAccountDirectoryCreator = ServiceAccountWorkloadBinder & {
   displayName?: string;
 };
 
 /**
- * A service account as the directory routes report it, in one shape for every backend. Where a
- * backend cannot answer a question, the field holds a constant rather than going missing, so the
- * UI renders the same way on both.
+ * A service account as the directory routes report it.
  */
 export interface ServiceAccountDirectoryEntry {
   /** Opaque identifier. Its structure differs between backends and must not be parsed. */
   id: string;
   name: string;
   /**
-   * Role names assigned to the account. Empty on UIAM until it reports application roles: a UIAM
-   * account is granted its creator's privileges rather than named roles.
+   * Role names assigned to the account.
    */
   roles: string[];
   /** Whether the account can authenticate. Always `true` on UIAM, which has no disabled state. */
@@ -53,12 +48,6 @@ export interface ServiceAccountDirectoryEntry {
   /**
    * The principal that created the account. Reported on UIAM, which records a creator of its
    * own, and absent on Elasticsearch until Elasticsearch stores one too.
-   *
-   * Kibana will not stand in for it in the meantime. The only creator it could name on
-   * Elasticsearch is the one on the credential it stored, which says who asked Kibana to create
-   * the account rather than who owns it now, and goes stale the moment someone recreates the
-   * account out of band. Reporting it would have the UI show an attribution it then has to
-   * unlearn, so the field waits for Elasticsearch in a followup.
    */
   createdBy?: ServiceAccountDirectoryCreator;
   // No creation time. UIAM reports no timestamp of any kind, and the only one Elasticsearch could

@@ -16,4 +16,3 @@ export type {
 } from './credential_saved_object';
 export { ServiceAccountCredentialStore } from './credential_store';
 export type { ServiceAccountCredentialStoreOptions } from './credential_store';
-export type { ServiceAccountCredentialMetadata } from './credential_saved_object';

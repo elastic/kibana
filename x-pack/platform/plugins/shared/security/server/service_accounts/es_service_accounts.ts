@@ -323,10 +323,10 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
    * page, which `search_after` resumes from — the last one reported, not the last one returned,
    * so that an account this page skipped is stepped over rather than served again.
    *
-   * Unlike {@link get}, the stored credentials joined here are taken at face value. Confirming
-   * each one the way {@link isAssumable} does would cost an Elasticsearch round trip per account,
-   * up to a hundred of them on one page, so a listed account that was deleted and recreated
-   * outside Kibana keeps a stale `assumable` until it is opened.
+   * Unlike {@link get}, a stored credential is taken at face value here. Confirming each one the
+   * way {@link isAssumable} does would cost an Elasticsearch round trip per account, up to a
+   * hundred of them on one page, so a listed account that was deleted and recreated outside
+   * Kibana keeps a stale `assumable` until it is opened.
    */
   async list(
     request: KibanaRequest,
@@ -406,10 +406,10 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       return [{ id: username, ...principal, roles, enabled }];
     });
 
-    const credentials = await this.credentialStore.getMetadata(accounts.map(({ id }) => id));
+    const credentialled = await this.credentialStore.findExisting(accounts.map(({ id }) => id));
 
     const serviceAccounts = accounts.map((account) =>
-      toDirectoryEntry(account, credentials.has(account.id))
+      toDirectoryEntry(account, credentialled.has(account.id))
     );
 
     if (rawAccounts.length <= limit) {
@@ -467,7 +467,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       throw Boom.notFound(`Service account [${id}] was not found`);
     }
 
-    const stored = (await this.credentialStore.getMetadata([id])).has(id);
+    const stored = (await this.credentialStore.findExisting([id])).has(id);
     return toDirectoryEntry(account, await this.isAssumable(esClient, principal, stored));
   }
 

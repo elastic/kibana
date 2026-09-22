@@ -11,10 +11,7 @@ import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { isSavedObjectErrorResult, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 
-import type {
-  ServiceAccountCredentialAttributes,
-  ServiceAccountCredentialMetadata,
-} from './credential_saved_object';
+import type { ServiceAccountCredentialAttributes } from './credential_saved_object';
 import { getCredentialId, SERVICE_ACCOUNT_CREDENTIAL_TYPE } from './credential_saved_object';
 import { getDetailedErrorMessage } from '../../errors';
 
@@ -83,29 +80,35 @@ export class ServiceAccountCredentialStore {
   }
 
   /**
-   * Reads the metadata of the credentials held for the given accounts, keyed by service account
-   * id. Accounts with no credential are simply absent from the result.
+   * Which of the given accounts Kibana holds a credential for. Accounts with none are simply
+   * absent from the result.
    *
-   * Reads the plain documents rather than decrypting them, so the answer is cheap for a whole
-   * page but also unverified: use it to describe an account, never to decide what it may do.
+   * Existence is the whole answer: nothing outside this store reads a credential's attributes,
+   * and what the caller does with the answer is its own business. The documents are read without
+   * decrypting, so this says a credential is on file, not that it still works.
+   *
+   * An account whose credential cannot be read throws rather than resolving absent. Absent means
+   * "Kibana holds nothing for this account", which a caller is entitled to act on, and a document
+   * Kibana failed to read is not that.
    */
-  async getMetadata(
-    serviceAccountIds: string[]
-  ): Promise<Map<string, ServiceAccountCredentialMetadata>> {
-    const metadata = new Map<string, ServiceAccountCredentialMetadata>();
+  async findExisting(serviceAccountIds: string[]): Promise<Set<string>> {
+    const existing = new Set<string>();
     if (serviceAccountIds.length === 0) {
-      return metadata;
+      return existing;
     }
 
-    const { saved_objects: savedObjects } =
-      await this.client.bulkGet<ServiceAccountCredentialMetadata>(
-        serviceAccountIds.map((serviceAccountId) => ({
-          type: SERVICE_ACCOUNT_CREDENTIAL_TYPE,
-          id: getCredentialId(serviceAccountId),
-          // The token is ciphertext and nothing here needs it, so it is left out of the read.
-          fields: ['createdAt', 'createdBy'],
-        }))
-      );
+    const { saved_objects: savedObjects } = await this.client.bulkGet<
+      Pick<ServiceAccountCredentialAttributes, 'serviceAccountId'>
+    >(
+      serviceAccountIds.map((serviceAccountId) => ({
+        type: SERVICE_ACCOUNT_CREDENTIAL_TYPE,
+        id: getCredentialId(serviceAccountId),
+        // Nothing here reads an attribute, but the list cannot be empty: the saved objects client
+        // reads that as "no filtering" and hands back the whole document, ciphertext included.
+        // One cheap field keeps the token out of the response.
+        fields: ['serviceAccountId'],
+      }))
+    );
 
     savedObjects.forEach((result, index) => {
       const serviceAccountId = serviceAccountIds[index];
@@ -114,16 +117,15 @@ export class ServiceAccountCredentialStore {
           return;
         }
         throw new Error(
-          `Failed to read the credential metadata of service account [${serviceAccountId}] ` +
+          `Failed to read the credential of service account [${serviceAccountId}] ` +
             `(credential [${result.id}]): ${result.error.message}`
         );
       }
 
-      const { createdAt, createdBy } = result.attributes;
-      metadata.set(serviceAccountId, { createdAt, createdBy });
+      existing.add(serviceAccountId);
     });
 
-    return metadata;
+    return existing;
   }
 
   /**
