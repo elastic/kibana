@@ -665,6 +665,7 @@ export class NightshiftInvestigationsClient {
         spaceId,
         {
           message,
+          title: subject.summary ?? SLACK_INVESTIGATION_FALLBACK_TITLE,
           stream_names: [],
           investigation_id: investigationId,
           conversation_id: conversationId,

@@ -186,6 +186,17 @@ describe('NightshiftInvestigationsClient.admitSlackInput()', () => {
     expect(second.execution_id).toBe('exec-2');
     expect(duplicate).toEqual(second);
     expect(mockManagement.runWorkflow).toHaveBeenCalledTimes(2);
+    expect(mockManagement.runWorkflow).toHaveBeenNthCalledWith(
+      1,
+      expect.anything(),
+      SPACE_ID,
+      expect.objectContaining({
+        message: 'Why did checkout fail?',
+        title: 'Why did checkout fail?',
+      }),
+      expect.anything(),
+      'nightshift-slack'
+    );
     expect(stored).toEqual(
       expect.objectContaining({
         conversation_id: expect.any(String),

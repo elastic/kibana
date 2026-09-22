@@ -34,7 +34,9 @@ export const ensureInvestigationRoute = createNightshiftInvestigationsServerRout
       .object({
         execution_id: z.string().min(1).max(MAX_KEYWORD_LENGTH).optional(),
       })
-      .optional(),
+      // A POST without a body reaches validation as `null`, and older stored workflow
+      // definitions still call this route without one.
+      .nullish(),
   }),
   handler: async ({ request, params, getInvestigationsClient }) => {
     const client = getInvestigationsClient(request);

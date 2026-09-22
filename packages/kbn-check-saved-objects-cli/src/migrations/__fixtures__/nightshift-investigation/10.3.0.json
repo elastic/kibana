@@ -1,50 +1,156 @@
 {
   "10.2.0": [
     {
-      "TODO": "Please create one or more sample objects with properties that reflect real '[object Object]' objects",
-      "NOTE": "That each modelVersion has a corresponding fixture file, which defines the previous and current versions.",
-      "NOTE2": "These fixtures define the before and after state, and are used for both upgrade and rollback testing.",
-      "HINT": "You can use the template below and create sample objects for 10.2.0 and 10.3.0 versions.",
-      "HINT2": "Alternatively, you can copy the contents from older fixture files (if they exist) and adapt them accordingly.",
-      "IMPORTANT": "The current version fixtures (below) are defining how objects from the previous version fixtures (this array) would look like AFTER upgrading.",
-      "IMPORTANT2": "They are NOT defining random sample objects with properties that are valid for the current model version."
+      "status": "completed",
+      "subject_type": "alert",
+      "subject_id": "3f2b9c0e-6d1a-4f7b-9c2e-8a1d5b4c7e90",
+      "subject_summary": "Checkout API latency threshold",
+      "trigger_type": "manual",
+      "concurrency_key": "3f2b9c0e-6d1a-4f7b-9c2e-8a1d5b4c7e90",
+      "created_at": "2026-09-01T10:00:00.000Z",
+      "started_at": "2026-09-01T10:00:05.000Z",
+      "completed_at": "2026-09-01T10:12:30.000Z",
+      "executed_by": "elastic",
+      "summary": "Checkout p99 latency rose above 2s after the 09:55 deploy exhausted the Redis connection pool.",
+      "conclusion": "The 09:55 checkout deploy lowered the Redis pool size, so requests queued on connection acquisition.",
+      "severity": "60-high",
+      "hypotheses": [
+        {
+          "candidate": "Redis connection pool exhaustion after the 09:55 deploy",
+          "confidence": 0.9,
+          "status": "confirmed",
+          "reason": "Connection wait time correlates with the latency rise and the deploy timestamp."
+        },
+        {
+          "candidate": "Upstream payment provider degradation",
+          "confidence": 0.1,
+          "status": "dismissed",
+          "reason": "Payment provider latency stayed flat across the window."
+        }
+      ],
+      "recommendations": [
+        {
+          "title": "Restore the previous Redis pool size",
+          "confidence": 0.8,
+          "description": "Roll back the pool size change or raise it to the previous value."
+        }
+      ],
+      "blind_spots": [
+        {
+          "title": "No Redis server-side metrics",
+          "confidence": 0.6,
+          "description": "Only client-side connection metrics were available."
+        }
+      ],
+      "trigger_feedback": [],
+      "conversation_id": "6c1f2a4e-9b3d-4e8f-a1c5-2d7e9f0b3a64",
+      "impact": {
+        "entities": [
+          {
+            "name": "checkout",
+            "type": "service"
+          }
+        ]
+      },
+      "title": "Checkout API latency threshold"
+    },
+    {
+      "status": "running",
+      "subject_type": "significant_event",
+      "subject_id": "checkout-latency-breach",
+      "subject_summary": "P99 latency on checkout climbed above 2s for 20 minutes during peak traffic.",
+      "trigger_type": "automatic",
+      "concurrency_key": "checkout-latency-breach",
+      "created_at": "2026-09-02T08:00:00.000Z",
+      "started_at": "2026-09-02T08:00:03.000Z",
+      "executed_by": "elastic",
+      "title": "Checkout latency breach"
+    },
+    {
+      "status": "pending",
+      "subject_type": "alert",
+      "subject_id": "9a7d3e1b-2c4f-4b6a-8e0d-5f1c7b9a2d43",
+      "trigger_type": "manual",
+      "concurrency_key": "9a7d3e1b-2c4f-4b6a-8e0d-5f1c7b9a2d43",
+      "created_at": "2026-09-03T12:00:00.000Z",
+      "title": "Investigate alert 9a7d3e1b"
     }
   ],
   "10.3.0": [
     {
-      "status": "string",
-      "subject_type": "string",
-      "subject_id": "string",
-      "subject_summary": "string?",
-      "trigger_type": "string",
-      "concurrency_key": "string?",
-      "created_at": "string",
-      "started_at": "string?",
-      "completed_at": "string?",
-      "executed_by": "string?",
-      "error": "string?",
-      "summary": "string?",
-      "conclusion": "string?",
-      "severity": "string?",
-      "hypotheses": "array?",
-      "recommendations": "array?",
-      "blind_spots": "array?",
-      "trigger_feedback": "array?",
-      "conversation_id": "string?",
-      "title": "string",
-      "latest_execution_id": "string?",
-      "source_keys": "array?",
-      "admissions": "array?",
+      "status": "completed",
+      "subject_type": "alert",
+      "subject_id": "3f2b9c0e-6d1a-4f7b-9c2e-8a1d5b4c7e90",
+      "subject_summary": "Checkout API latency threshold",
+      "trigger_type": "manual",
+      "concurrency_key": "3f2b9c0e-6d1a-4f7b-9c2e-8a1d5b4c7e90",
+      "created_at": "2026-09-01T10:00:00.000Z",
+      "started_at": "2026-09-01T10:00:05.000Z",
+      "completed_at": "2026-09-01T10:12:30.000Z",
+      "executed_by": "elastic",
+      "summary": "Checkout p99 latency rose above 2s after the 09:55 deploy exhausted the Redis connection pool.",
+      "conclusion": "The 09:55 checkout deploy lowered the Redis pool size, so requests queued on connection acquisition.",
+      "severity": "60-high",
+      "hypotheses": [
+        {
+          "candidate": "Redis connection pool exhaustion after the 09:55 deploy",
+          "confidence": 0.9,
+          "status": "confirmed",
+          "reason": "Connection wait time correlates with the latency rise and the deploy timestamp."
+        },
+        {
+          "candidate": "Upstream payment provider degradation",
+          "confidence": 0.1,
+          "status": "dismissed",
+          "reason": "Payment provider latency stayed flat across the window."
+        }
+      ],
+      "recommendations": [
+        {
+          "title": "Restore the previous Redis pool size",
+          "confidence": 0.8,
+          "description": "Roll back the pool size change or raise it to the previous value."
+        }
+      ],
+      "blind_spots": [
+        {
+          "title": "No Redis server-side metrics",
+          "confidence": 0.6,
+          "description": "Only client-side connection metrics were available."
+        }
+      ],
+      "trigger_feedback": [],
+      "conversation_id": "6c1f2a4e-9b3d-4e8f-a1c5-2d7e9f0b3a64",
       "impact": {
-        "entities": "array"
+        "entities": [
+          {
+            "name": "checkout",
+            "type": "service"
+          }
+        ]
       },
-      "reply_target": {
-        "surface": "slack",
-        "tenant_key": "string",
-        "channel": "string",
-        "thread_ts": "string",
-        "message_ts": "string?"
-      }
+      "title": "Checkout API latency threshold"
+    },
+    {
+      "status": "running",
+      "subject_type": "significant_event",
+      "subject_id": "checkout-latency-breach",
+      "subject_summary": "P99 latency on checkout climbed above 2s for 20 minutes during peak traffic.",
+      "trigger_type": "automatic",
+      "concurrency_key": "checkout-latency-breach",
+      "created_at": "2026-09-02T08:00:00.000Z",
+      "started_at": "2026-09-02T08:00:03.000Z",
+      "executed_by": "elastic",
+      "title": "Checkout latency breach"
+    },
+    {
+      "status": "pending",
+      "subject_type": "alert",
+      "subject_id": "9a7d3e1b-2c4f-4b6a-8e0d-5f1c7b9a2d43",
+      "trigger_type": "manual",
+      "concurrency_key": "9a7d3e1b-2c4f-4b6a-8e0d-5f1c7b9a2d43",
+      "created_at": "2026-09-03T12:00:00.000Z",
+      "title": "Investigate alert 9a7d3e1b"
     }
   ]
 }
