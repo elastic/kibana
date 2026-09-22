@@ -11,14 +11,12 @@ import Path from 'path';
 import { type FlakyTestReport } from '@kbn/scout-reporting';
 import { getIssueMetadata, updateIssueMetadata } from '../failed_tests_reporter/issue_metadata';
 import {
-  branchesByFailedBuilds,
   BUILDKITE_ORG_URL,
   codeBlock,
   formatBuildLink,
   formatDateRange,
   formatFailureMessage,
   formatPercent,
-  formatPipelines,
   FRAMEWORK_LABELS,
   inlineCode,
   KIBANA_BLOB_URL,
@@ -42,13 +40,10 @@ const MAX_TEST_ROWS = 15;
 const MAX_DISTINCT_FAILURES = 2;
 /** GitHub rejects longer issue titles with a 422. */
 const MAX_TITLE_LENGTH = 256;
-/** A branch is named in the headline when it fails at least this share of the flakiest one. */
-const HEADLINE_BRANCH_SHARE = 0.25;
-const MAX_HEADLINE_BRANCHES = 2;
 
 export interface FlakySuiteIssueContext {
   report: FlakyTestReport;
-  /** Dashboard with the live numbers, linked from the headline when given. */
+  /** Dashboard with the live numbers, linked under the tests table when given. */
   dashboardUrl?: string;
   /** Numbers of issues that mention the suite's file without being about it. */
   relatedIssues?: number[];
@@ -150,26 +145,6 @@ export const flakySuiteIssueTitle = (
   return lead + (subject.length > room ? `${subject.slice(0, room - 1)}…` : subject);
 };
 
-/** `` `main` `` or `` `main` and `9.2` ``: the branches that fail materially. */
-const headlineBranches = (suite: FlakySuite): string | undefined => {
-  // Only the branches the report's thresholds were met on; every branch for reports without them
-  const qualifying = new Set(
-    suite.tests.flatMap((test) => (test.flakiestBranch ? [test.flakiestBranch.branch] : []))
-  );
-  const ranked = branchesByFailedBuilds(suite.tests).filter(
-    (stats) => stats.failedBuilds > 0 && (qualifying.size === 0 || qualifying.has(stats.branch))
-  );
-  if (ranked.length === 0) {
-    return undefined;
-  }
-  const threshold = ranked[0].failedBuilds * HEADLINE_BRANCH_SHARE;
-  return ranked
-    .filter((stats) => stats.failedBuilds >= threshold)
-    .slice(0, MAX_HEADLINE_BRANCHES)
-    .map((stats) => inlineCode(stats.branch))
-    .join(' and ');
-};
-
 /** `Skipped on \`main\` since 2026-09-09.` when the latest run of the worst test was a skip. */
 const skippedNote = (suite: FlakySuite): string | undefined => {
   const { latestRun } = suite.tests[0];
@@ -177,78 +152,26 @@ const skippedNote = (suite: FlakySuite): string | undefined => {
     return undefined;
   }
   const since = latestRun.timestamp.toISOString().slice(0, 10);
-  return `**Latest run:** skipped on ${inlineCode(latestRun.branch)} since ${since}`;
+  return `Latest run on ${inlineCode(latestRun.branch)} was skipped (${since}).`;
 };
 
-/**
- * `**3%** of builds on \`9.5\` (4 of 122)`: the rate of the worst test on the branch it qualified
- * on, the number the thresholds were checked against. Absent for reports written before that
- * branch was recorded.
- */
-const flakyRate = (suite: FlakySuite): string | undefined => {
-  const { flakiestBranch } = suite.tests[0];
-  if (!flakiestBranch) {
-    return undefined;
-  }
-  const rate =
-    `**${formatPercent(flakiestBranch.buildFailRate)}** of builds on ` +
-    `${inlineCode(flakiestBranch.branch)} (${flakiestBranch.failedBuilds} of ${
-      flakiestBranch.builds
-    })`;
-  // The worst test's rate; the suite as a whole fails at least that often
-  return suite.tests.length > 1 ? `up to ${rate}` : rate;
-};
-
-/**
- * `` `kibana-pull-request` (1 of 895 builds) `` for every pipeline outside the report scope the
- * suite failed on, a preview of the breakdown further down.
- */
-const otherPipelines = (suite: FlakySuite, report: FlakyTestReport): string | undefined => {
-  const inScope = new Set(report.scope.pipelines);
-  const others = suite.byPipeline.filter(
-    (stats) => !inScope.has(stats.pipeline) && stats.failedBuilds > 0
-  );
-  if (others.length === 0) {
-    return undefined;
-  }
-  return others
-    .map(
-      (stats) =>
-        `${inlineCode(stats.pipeline)} (${stats.failedBuilds} of ${plural(stats.builds, 'build')})`
-    )
-    .join(', ');
-};
-
-/** One line counting the tests and naming the suite, then the facts a reader needs first. */
-const overview = (suite: FlakySuite, ctx: FlakySuiteIssueContext): string => {
-  const { report, dashboardUrl } = ctx;
+/** `3 tests in the \`Default status alert\` suite appear to be flaky:` */
+const opening = (suite: FlakySuite): string => {
   const subject = suite.suiteTitle ?? Path.basename(suite.filePath);
   const count = suite.tests.length;
-  const opening =
+  return (
     `${plural(count, 'test')} in the ${inlineCode(subject)} suite ` +
-    `${count === 1 ? 'appears' : 'appear'} to be flaky:`;
-  const rate = flakyRate(suite);
-  // Older reports do not record the qualifying branch; name the branches failing most instead
-  const branches = rate === undefined ? headlineBranches(suite) : undefined;
-  const { pipelines } = report.scope;
-  const bullets = [
-    rate && `**Flaky rate:** ${rate}`,
-    branches && `**Failing on:** ${branches}`,
-    `**${pipelines.length === 1 ? 'Pipeline' : 'Pipelines'}:** ` +
-      `${pipelines.length > 0 ? formatPipelines(report) : 'all pipelines'}, last ` +
-      `${plural(report.window.lookbackDays, 'day')} (${formatDateRange(
-        report.window.from,
-        report.window.to
-      )})`,
-    otherPipelines(suite, report) && `**Also failed on:** ${otherPipelines(suite, report)}`,
+    `${count === 1 ? 'appears' : 'appear'} to be flaky:`
+  );
+};
+
+/** Remarks under the tests table, only when they apply. */
+const notes = (suite: FlakySuite, ctx: FlakySuiteIssueContext): string | undefined => {
+  const lines = [
     skippedNote(suite),
-    dashboardUrl && `**Dashboard:** [latest stats](${dashboardUrl})`,
-  ];
-  const list = bullets
-    .filter((bullet): bullet is string => typeof bullet === 'string')
-    .map((bullet) => `- ${bullet}`)
-    .join('\n');
-  return `${opening}\n\n${list}`;
+    ctx.dashboardUrl && `[Dashboard with latest stats](${ctx.dashboardUrl}).`,
+  ].filter((line): line is string => typeof line === 'string');
+  return lines.length > 0 ? lines.join(' ') : undefined;
 };
 
 const blobLink = (repoRelativePath: string): string =>
@@ -365,14 +288,15 @@ export const renderFlakySuiteIssueBody = (
   ctx: FlakySuiteIssueContext
 ): string => {
   const sections = [
-    overview(suite, ctx),
-    suiteDetails(suite),
-    '### Flaky Tests',
+    opening(suite),
     testsTable(suite.tests, {
       withTestId: true,
       maxRows: MAX_TEST_ROWS,
       minFailRate: ctx.report.thresholds.minFailRate,
     }),
+    notes(suite, ctx),
+    '### Suite',
+    suiteDetails(suite),
     '### Failures',
     failuresSection(suite),
     failuresByPipeline(suite, ctx.report),

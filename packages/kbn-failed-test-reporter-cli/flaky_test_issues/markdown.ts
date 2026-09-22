@@ -99,18 +99,21 @@ export const branchesByFailedBuilds = (
 };
 
 /**
- * `` **`9.5` 3% (4 / 122)** `` over `` `main` 0% (0 / 547) ``, one line per branch the test ran on,
- * highest rate first, in bold where it clears the report's `minFailRate`. The total over branches
- * is left out on purpose, a clean branch dilutes it below what qualified.
+ * `` **`9.5` 3% (4 / 122)** ``, one line per branch on which the test's failure rate clears the
+ * report's `minFailRate`, highest first; every branch when the report has no rate threshold. The
+ * total over branches is left out on purpose, a clean branch dilutes it below what qualified.
  */
 export const formatBranchRates = (
   test: Pick<FlakyTestEntry, 'byBranch'>,
   minFailRate: number
 ): string => {
-  if (test.byBranch.length === 0) {
+  const flaky = test.byBranch.filter(
+    (stats) => minFailRate === 0 || stats.buildFailRate >= minFailRate
+  );
+  if (flaky.length === 0) {
     return '-';
   }
-  return [...test.byBranch]
+  return flaky
     .sort(
       (a, b) =>
         b.buildFailRate - a.buildFailRate ||

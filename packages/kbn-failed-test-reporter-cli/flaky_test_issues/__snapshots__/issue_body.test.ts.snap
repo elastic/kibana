@@ -3,9 +3,15 @@
 exports[`renderFlakySuiteIssueBody renders a multi-test suite with distinct failures, a skipped note and related issues 1`] = `
 "3 tests in the \`Default status alert\` suite appear to be flaky:
 
-- **Flaky rate:** up to **10%** of builds on \`main\` (49 of 509)
-- **Pipeline:** \`kibana-on-merge\`, last 7 days (2–9 Sep 2026)
-- **Latest run:** skipped on \`main\` since 2026-09-09
+| Test | Flaky rate by branch | Test ID |
+|---|---|---|
+| does not keep a hidden histogram after visiting Dashboard | **\`main\` 10% (20 / 200)**<br>**\`9.2\` 5% (3 / 64)** | a |
+| reverts breakdown, interval, and visibility on a saved session | **\`main\` 10% (49 / 509)** | b |
+| persists hide/show of the histogram on a saved session | **\`main\` 10% (49 / 509)** | c |
+
+Latest run on \`main\` was skipped (2026-09-09).
+
+### Suite
 
 | Field | Value |
 |---|---|
@@ -13,14 +19,6 @@ exports[`renderFlakySuiteIssueBody renders a multi-test suite with distinct fail
 | **Framework** | Scout (Playwright) |
 | **Config** | [\`x-pack/solutions/observability/plugins/synthetics/test/scout/ui/playwright.config.ts\`](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/synthetics/test/scout/ui/playwright.config.ts) |
 | **Owners** | \`elastic/obs-ux-management-team\`, \`elastic/kibana-data-discovery\`, \`elastic/other-team\` |
-
-### Flaky Tests
-
-| Test | Flaky rate by branch | Test ID |
-|---|---|---|
-| does not keep a hidden histogram after visiting Dashboard | **\`main\` 10% (20 / 200)**<br>**\`9.2\` 5% (3 / 64)** | a |
-| reverts breakdown, interval, and visibility on a saved session | **\`main\` 10% (49 / 509)** | b |
-| persists hide/show of the histogram on a saved session | **\`main\` 10% (49 / 509)** | c |
 
 ### Failures
 
@@ -48,10 +46,13 @@ Possibly related: #7, #8.
 exports[`renderFlakySuiteIssueBody renders a single-test suite with a dashboard link 1`] = `
 "1 test in the \`Default status alert\` suite appears to be flaky:
 
-- **Flaky rate:** **10%** of builds on \`main\` (49 of 509)
-- **Pipeline:** \`kibana-on-merge\`, last 7 days (2–9 Sep 2026)
-- **Also failed on:** \`kibana-pull-request\` (70 of 661 builds), \`kibana-elasticsearch-snapshot-verify\` (1 of 5 builds)
-- **Dashboard:** [latest stats](https://dashboard.example)
+| Test | Flaky rate by branch | Test ID |
+|---|---|---|
+| creates default alert, triggers on down status, and recovers | **\`main\` 10% (49 / 509)** | playwright:default_status_alert:creates default alert |
+
+[Dashboard with latest stats](https://dashboard.example).
+
+### Suite
 
 | Field | Value |
 |---|---|
@@ -59,12 +60,6 @@ exports[`renderFlakySuiteIssueBody renders a single-test suite with a dashboard 
 | **Framework** | Scout (Playwright) |
 | **Config** | [\`x-pack/solutions/observability/plugins/synthetics/test/scout/ui/playwright.config.ts\`](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/synthetics/test/scout/ui/playwright.config.ts) |
 | **Owners** | \`elastic/obs-ux-management-team\` |
-
-### Flaky Tests
-
-| Test | Flaky rate by branch | Test ID |
-|---|---|---|
-| creates default alert, triggers on down status, and recovers | **\`main\` 10% (49 / 509)** | playwright:default_status_alert:creates default alert |
 
 ### Failures
 

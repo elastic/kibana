@@ -62,15 +62,17 @@ describe('formatBranchRates', () => {
     ],
   });
 
-  it('lists every branch by rate on its own line, in bold where the rate clears the threshold', () => {
-    expect(formatBranchRates(test, 0.03)).toBe(
-      '**`9.5` 3% (4 / 122)**<br>`9.4` 2% (2 / 100)<br>`main` 0% (0 / 547)'
-    );
+  it('lists only the branches clearing the threshold, highest rate first, in bold', () => {
+    expect(formatBranchRates(test, 0.03)).toBe('**`9.5` 3% (4 / 122)**');
+    expect(formatBranchRates(test, 0.02)).toBe('**`9.5` 3% (4 / 122)**<br>**`9.4` 2% (2 / 100)**');
   });
 
-  it('bolds nothing without a rate threshold, and shows a dash without branches', () => {
-    expect(formatBranchRates(test, 0)).not.toContain('**');
+  it('lists every branch, none in bold, without a rate threshold, and a dash without branches', () => {
+    expect(formatBranchRates(test, 0)).toBe(
+      '`9.5` 3% (4 / 122)<br>`9.4` 2% (2 / 100)<br>`main` 0% (0 / 547)'
+    );
     expect(formatBranchRates(flakyTest({ byBranch: [] }), 0.03)).toBe('-');
+    expect(formatBranchRates(test, 0.5)).toBe('-');
   });
 });
 

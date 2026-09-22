@@ -161,32 +161,19 @@ describe('readSuiteFilePathFromTitle', () => {
 });
 
 describe('renderFlakySuiteIssueBody', () => {
-  it('opens by counting the tests and naming the suite, then rate, pipeline and other pipelines', () => {
+  it('opens by counting the tests and naming the suite, then the tests table', () => {
     const single = singleTestReport();
     expect(renderFlakySuiteIssueBody(single.suite, { report: single.report })).toContain(
       [
         '1 test in the `Default status alert` suite appears to be flaky:',
         '',
-        '- **Flaky rate:** **10%** of builds on `main` (49 of 509)',
-        '- **Pipeline:** `kibana-on-merge`, last 7 days (2–9 Sep 2026)',
-        '- **Also failed on:** `kibana-pull-request` (70 of 661 builds), `kibana-elasticsearch-snapshot-verify` (1 of 5 builds)',
-        '',
-        '| Field | Value |',
-        '|---|---|',
-        '| **File** |',
+        '| Test | Flaky rate by branch | Test ID |',
       ].join('\n')
     );
     const multi = multiTestReport();
     expect(renderFlakySuiteIssueBody(multi.suite, { report: multi.report })).toContain(
-      '3 tests in the `Default status alert` suite appear to be flaky:\n\n' +
-        '- **Flaky rate:** up to **10%** of builds on `main` (49 of 509)\n- **Pipeline:**'
+      '3 tests in the `Default status alert` suite appear to be flaky:\n\n| Test |'
     );
-  });
-
-  it('names the branches failing most when the report has no qualifying branch', () => {
-    const { report } = singleTestReport();
-    const [suite] = groupIntoSuites([flakyTest({ flakiestBranch: undefined })]);
-    expect(renderFlakySuiteIssueBody(suite, { report })).toContain('- **Failing on:** `main`\n');
   });
 
   it('renders a single-test suite with a dashboard link', () => {
