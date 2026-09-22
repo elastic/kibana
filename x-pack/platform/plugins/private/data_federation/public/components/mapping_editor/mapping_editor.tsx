@@ -287,7 +287,7 @@ export const MappingEditor: FC<MappingEditorProps> = ({
   }, [draftField, onChange, reservedFieldNames, value.fields]);
 
   return (
-    <div data-test-subj="dataFederationMappingEditor" style={{ padding: euiTheme.size.m }}>
+    <div data-test-subj="dataFederationMappingEditor">
       {!validation.isValid && shouldShowValidationCallout ? (
         <>
           <KbnDangerCallout
