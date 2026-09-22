@@ -65,6 +65,7 @@ export const setYaraLogger = (nextLogger: Logger | undefined): void => {
  * Reloads the module if a WASM trap leaves it unusable.
  * LRU-caches successful parses and compile errors by SHA-256 of the source
  * (up to 10,000 entries); WASM traps and internal errors are not cached.
+ * Each call returns a deep copy so caller mutations do not change the cached result.
  */
 export const validateYaraRule = async (source: string): Promise<YaraValidateResult> => {
   const cacheKey = hashYaraSource(source);
@@ -79,13 +80,16 @@ export const validateYaraRule = async (source: string): Promise<YaraValidateResu
           validateResultCache.calculatedSize
         ).format('0.[00] b')}]`
     );
-    return cached;
+    return cloneYaraValidateResult(cached);
   }
 
   const result = await compileYaraRule(source);
   validateResultCache.set(cacheKey, result);
-  return result;
+  return cloneYaraValidateResult(result);
 };
+
+const cloneYaraValidateResult = (result: YaraValidateResult): YaraValidateResult =>
+  structuredClone(result);
 
 async function compileYaraRule(source: string): Promise<YaraValidateResult> {
   const started = performance.now();
