@@ -7,12 +7,12 @@
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
-import { DECISION_TREE_REINFORCEMENT_SYSTEM_PROMPT } from '@kbn/nightshift-decision-trees';
+import { buildReinforcementSystemPrompt } from '@kbn/nightshift-decision-trees';
 import { NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from '../../tools/sandbox_bash/view_file_tool';
 import { SANDBOX_STR_REPLACE_TOOL_ID } from '../../tools/sandbox_bash/str_replace_tool';
 import { SANDBOX_WRITE_FILE_TOOL_ID } from '../../tools/sandbox_bash/write_file_tool';
-import { DECISION_TREE_TOOL_IDS } from '../../tools/decision_tree';
+import { DECISION_TREE_PROMPT_TOOLS, DECISION_TREE_TOOL_IDS } from '../../tools/decision_tree';
 
 export const NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID =
   'significant-events.decision-tree-reinforcement';
@@ -46,7 +46,7 @@ export const getDecisionTreeReinforcementAgentType = (): AgentTypeDefinition => 
   description: DECISION_TREE_REINFORCEMENT_AGENT_DESCRIPTION,
   avatar_icon: 'logoElastic',
   baseConfiguration: {
-    instructions: DECISION_TREE_REINFORCEMENT_SYSTEM_PROMPT,
+    instructions: buildReinforcementSystemPrompt(DECISION_TREE_PROMPT_TOOLS),
     skill_ids: [],
     tools: [{ tool_ids: [...SANDBOX_FILE_TOOL_IDS, ...DECISION_TREE_TOOL_IDS] }],
     enable_elastic_capabilities: false,

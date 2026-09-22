@@ -282,6 +282,25 @@ const pruneDisconnected = (
   };
 };
 
+/** Serializes evidence-node descriptions back to the `<node_id>: <description>` form. */
+export const serializeEvidenceMetadata = (tree: DecisionTreeView): string[] =>
+  tree.nodes.flatMap((node) =>
+    node.node_type === 'evidence_gatherer' && node.node_metadata?.description
+      ? [`${node.node_id}: ${node.node_metadata.description}`]
+      : []
+  );
+
+/** Parses stored Mermaid and reapplies persisted evidence metadata. */
+export const parseStoredDecisionTree = (
+  mermaid: string,
+  treeId: string,
+  metadata: string[] = []
+): DecisionTreeView => {
+  const tree = parseMermaidDecisionTree(mermaid, treeId);
+  applyEvidenceMetadata(tree, metadata);
+  return tree;
+};
+
 /** Attaches `<node_id>: <description>` entries onto their evidence nodes, in place. */
 export const applyEvidenceMetadata = (tree: DecisionTreeView, entries: string[]): void => {
   if (entries.length === 0) {

@@ -25,7 +25,13 @@ export type {
   ToolLearningCategory,
 } from './src/types';
 
-export { applyEvidenceMetadata, extractMermaid, parseMermaidDecisionTree } from './src/mermaid';
+export {
+  applyEvidenceMetadata,
+  extractMermaid,
+  parseMermaidDecisionTree,
+  parseStoredDecisionTree,
+  serializeEvidenceMetadata,
+} from './src/mermaid';
 
 export { diffDecisionTrees } from './src/diff';
 export type {
@@ -39,6 +45,7 @@ export {
   DecisionTreeValidationError,
   MAX_DROPPED_NODE_RATIO,
   MIN_RETAINED_SIZE_RATIO,
+  enforceMinimumGraph,
   enforceNodePreservation,
   enforceParsedSizeFloor,
   enforceRawSizeFloor,
@@ -61,15 +68,13 @@ export {
   DECISION_TREE_ABSTRACTION_RULES,
   DECISION_TREE_FORMAT_GUIDE,
   DECISION_TREE_MERGE_DISCIPLINE,
-  DECISION_TREE_REINFORCEMENT_SYSTEM_PROMPT,
-  SCRIPT_FOLLOWUP_EXTEND,
-  SCRIPT_INITIAL_CREATE,
-  SCRIPT_INITIAL_MERGE,
-  SCRIPT_REINFORCE,
   buildDecisionTreePlanSystemPrompt,
+  buildReinforcementSystemPrompt,
   buildTurnPrompt,
+  buildTurnScripts,
   selectTurnScript,
 } from './src/prompts';
+export type { DecisionTreePromptTools, DecisionTreeTurnScripts } from './src/prompts';
 
 export { decisionTreePlanSchema } from './src/plan';
 export type { DecisionTreePlan } from './src/plan';

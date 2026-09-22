@@ -22,6 +22,7 @@ const TREE: DecisionTreeDetail = {
   updated_at: '2026-09-09T12:00:00.000Z',
   markdown: '# Checkout\n\n```mermaid\nflowchart TD\n    S1([Latency]) --> X1((Pool))\n```\n',
   mermaid: '```mermaid\nflowchart TD\n    S1([Latency]) --> X1((Pool))\n```',
+  evidence_gatherer_metadata: [],
   learnings: [],
 };
 

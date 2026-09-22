@@ -24,6 +24,7 @@ import {
   createSubmitOptimizerResultTool,
 } from './submit_optimizer_result_tool';
 
+export { DECISION_TREE_PROMPT_TOOLS } from './prompt_tools';
 export {
   DECISION_TREE_SUBMIT_TOOL_ID,
   RECORD_REMEDIATION_TOOL_ID,

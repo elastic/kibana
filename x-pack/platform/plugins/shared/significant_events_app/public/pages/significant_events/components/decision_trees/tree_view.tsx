@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { parseMermaidDecisionTree } from '@kbn/nightshift-decision-trees';
+import { parseStoredDecisionTree } from '@kbn/nightshift-decision-trees';
 import { ChangesPanel } from './changes_panel';
 import { EdgesTable } from './edges_table';
 import { getDecisionTreeStatusLabel } from './labels';
@@ -73,7 +73,14 @@ export function TreeView({ symptom }: TreeViewProps) {
   const versions = versionsData?.versions ?? [];
 
   const parsed = useMemo(
-    () => (tree ? parseMermaidDecisionTree(tree.mermaid, tree.tree_id) : undefined),
+    () =>
+      tree
+        ? parseStoredDecisionTree(
+            tree.mermaid,
+            tree.tree_id,
+            tree.evidence_gatherer_metadata
+          )
+        : undefined,
     [tree]
   );
 

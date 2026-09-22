@@ -37,6 +37,7 @@ const stored = (mermaidBody: string): DecisionTreeDetail => ({
   updated_at: '2026-09-09T12:00:00.000Z',
   markdown: markdownFor(mermaidBody),
   mermaid: `\`\`\`mermaid\n${mermaidBody}\n\`\`\``,
+  evidence_gatherer_metadata: [],
   learnings: [],
 });
 
@@ -128,12 +129,29 @@ describe('submit_optimizer_result', () => {
         markdown: markdownFor(FULL_TREE),
         author: 'system',
         summary: 'Merged this run.',
+        reinforced: false,
+        evidenceGathererMetadata: [],
       })
     );
     expect('results' in result && result.results[0].type).toBe(ToolResultType.other);
   });
 
-  it('marks the tree reinforced when the submission carries a causal path', async () => {
+  it('persists evidence metadata on the committed tree', async () => {
+    const store = createStore();
+    const metadata = ['E1: Query checkout logs in logs-*'];
+
+    await runSubmit({
+      store,
+      markdown: markdownFor(FULL_TREE),
+      submission: { evidence_gatherer_metadata: metadata },
+    });
+
+    expect(store.commit).toHaveBeenCalledWith(
+      expect.objectContaining({ evidenceGathererMetadata: metadata })
+    );
+  });
+
+  it('does not mark a new tree reinforced just because it carries a taken path', async () => {
     const store = createStore();
 
     await runSubmit({
@@ -141,7 +159,30 @@ describe('submit_optimizer_result', () => {
       markdown: markdownFor(FULL_TREE.replace('-->|yes|', '-->|✅ yes|')),
     });
 
+    expect(store.commit).toHaveBeenCalledWith(expect.objectContaining({ reinforced: false }));
+  });
+
+  it('marks an existing tree reinforced only when the submission adds a newly taken edge', async () => {
+    const store = createStore(stored(FULL_TREE));
+
+    await runSubmit({
+      store,
+      markdown: markdownFor(FULL_TREE.replace('-->|yes|', '-->|✅ yes|')),
+    });
+
     expect(store.commit).toHaveBeenCalledWith(expect.objectContaining({ reinforced: true }));
+  });
+
+  it('does not mark an existing tree reinforced when the taken edges already existed', async () => {
+    const taken = FULL_TREE.replace('-->|yes|', '-->|✅ yes|');
+    const store = createStore(stored(taken));
+
+    await runSubmit({
+      store,
+      markdown: markdownFor(taken),
+    });
+
+    expect(store.commit).toHaveBeenCalledWith(expect.objectContaining({ reinforced: false }));
   });
 
   it('reports no changes when nothing was submitted', async () => {
@@ -161,6 +202,48 @@ describe('submit_optimizer_result', () => {
     expect(store.commit).not.toHaveBeenCalled();
     expect('results' in result && result.results[0].data).toEqual(
       expect.objectContaining({ text: expect.stringContaining('No decision-tree changes') })
+    );
+  });
+
+  it('attaches buffered learnings to existing trees when nothing was submitted', async () => {
+    const store = createStore(stored(FULL_TREE));
+    const buffered = [
+      {
+        kind: 'system' as const,
+        tree_id: TREE_ID,
+        category: 'architecture',
+        content: 'Checkout writes through a pool.',
+        keywords: [],
+      },
+    ];
+    const peekLearnings = jest.fn().mockReturnValue(buffered);
+    const drainLearnings = jest.fn().mockReturnValue([]);
+    const tool = createSubmitOptimizerResultTool({
+      getSandboxStart: createSandboxStart('').getSandboxStart as never,
+      getStore: () => store,
+      getSpaceId: () => 'default',
+      peekLearnings,
+      drainLearnings,
+      logger: loggerMock.create(),
+    });
+
+    const result = await tool.handler(
+      { symptom_trees: [], summary: 'Learnings only.' },
+      createContext() as never
+    );
+
+    expect(store.commit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        treeId: TREE_ID,
+        markdown: stored(FULL_TREE).markdown,
+        reinforced: false,
+        learnings: buffered,
+        evidenceGathererMetadata: [],
+      })
+    );
+    expect(drainLearnings).toHaveBeenCalledWith('default__conv-1');
+    expect('results' in result && result.results[0].data).toEqual(
+      expect.objectContaining({ text: expect.stringContaining('Attached learnings') })
     );
   });
 
@@ -303,6 +386,18 @@ describe('submit_optimizer_result', () => {
       });
 
       expectRejected(result, /must resolve raw memory references/);
+    });
+
+    it('rejects a tree that is only an evidence node', async () => {
+      const store = createStore();
+
+      const { result } = await runSubmit({
+        store,
+        markdown: markdownFor('flowchart TD\n    E1[Query logs]'),
+      });
+
+      expectRejected(result, /must include a symptom node, an end node, and at least one edge/);
+      expect(store.commit).not.toHaveBeenCalled();
     });
 
     it('rejects a file whose Mermaid cannot be found', async () => {

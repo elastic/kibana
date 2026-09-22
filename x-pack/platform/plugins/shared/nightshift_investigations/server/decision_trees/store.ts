@@ -63,6 +63,7 @@ interface DecisionTreeHeadSource {
   tags: string[];
   attributes?: DecisionTreeAttributes;
   learnings: LearningRecord[];
+  evidence_gatherer_metadata?: string[];
 }
 
 /** An append-only version document, one per reinforcement turn. */
@@ -74,6 +75,7 @@ interface DecisionTreeVersionSource {
   tags: string[];
   attributes?: DecisionTreeAttributes;
   learnings: LearningRecord[];
+  evidence_gatherer_metadata?: string[];
 }
 
 export interface DecisionTreeStore {
@@ -90,6 +92,8 @@ export interface DecisionTreeStore {
     summary: string;
     /** Learnings recorded during this turn; merged single-slot into the head. */
     learnings: LearningRecord[];
+    /** Evidence-node descriptions; persisted so later reads can reapply them. */
+    evidenceGathererMetadata: string[];
   }) => Promise<DecisionTreeDetail>;
   listVersions: (treeId: string) => Promise<DecisionTreeVersionSummary[]>;
   getVersion: (treeId: string, version: number) => Promise<DecisionTreeVersionDetail | undefined>;
@@ -176,6 +180,7 @@ const headToDetail = (source: DecisionTreeHeadSource): DecisionTreeDetail => ({
   ...headToSummary(source),
   markdown: source.content,
   mermaid: safeExtractMermaid(source.content),
+  evidence_gatherer_metadata: source.evidence_gatherer_metadata ?? [],
   learnings: source.learnings,
 });
 
@@ -195,6 +200,7 @@ const versionToDetail = (source: DecisionTreeVersionSource): DecisionTreeVersion
   tree_id: source.attributes?.tree_id ?? '',
   markdown: source.content,
   mermaid: safeExtractMermaid(source.content),
+  evidence_gatherer_metadata: source.evidence_gatherer_metadata ?? [],
   learnings: source.learnings,
 });
 
@@ -259,7 +265,16 @@ export const createDecisionTreeStore = ({
       return source ? headToDetail(source) : undefined;
     },
 
-    commit: async ({ treeId, markdown, tree, reinforced, author, summary, learnings }) => {
+    commit: async ({
+      treeId,
+      markdown,
+      tree,
+      reinforced,
+      author,
+      summary,
+      learnings,
+      evidenceGathererMetadata,
+    }) => {
       const symptom = symptomSlugFromTreeId(treeId);
       const existing = await getHead(symptom);
       const nextVersion = toCount(existing?.attributes?.version) + 1;
@@ -293,6 +308,7 @@ export const createDecisionTreeStore = ({
           space_id: spaceId,
         },
         learnings,
+        evidence_gatherer_metadata: evidenceGathererMetadata,
       };
 
       const headDoc: DecisionTreeHeadSource = {
@@ -311,6 +327,7 @@ export const createDecisionTreeStore = ({
           space_id: spaceId,
         },
         learnings: mergeLearnings(existing?.learnings ?? [], learnings),
+        evidence_gatherer_metadata: evidenceGathererMetadata,
       };
 
       await esClient.index(

@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/nightshift-decision-trees'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/nightshift-context-and-research-team'
+  defaultOwner: '@elastic/nightshift-investigations-team'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/nightshift-decision-trees'
   description: Moon project for @kbn/nightshift-decision-trees
   channel: ''
-  owner: '@elastic/nightshift-context-and-research-team'
+  owner: '@elastic/nightshift-investigations-team'
   sourceRoot: x-pack/platform/packages/shared/kbn-nightshift-decision-trees
 dependsOn:
   - '@kbn/zod'

@@ -7,6 +7,7 @@
 
 import {
   DecisionTreeValidationError,
+  enforceMinimumGraph,
   enforceNodePreservation,
   enforceParsedSizeFloor,
   enforceRawSizeFloor,
@@ -165,6 +166,36 @@ describe('validateShortText', () => {
   it('rejects unresolved memory handles', () => {
     expect(() => validateShortText('See MEM_12 for details', 'Remediation')).toThrow(
       /must resolve raw memory references/
+    );
+  });
+});
+
+describe('enforceMinimumGraph', () => {
+  it('accepts a tree with a symptom, an end, and an edge', () => {
+    const tree = parseMermaidDecisionTree(
+      'flowchart TD\n    S1([Checkout latency]) --> X1((Pool leak))',
+      TREE_ID
+    );
+
+    expect(() => enforceMinimumGraph(tree)).not.toThrow();
+  });
+
+  it('rejects a lone evidence node', () => {
+    const tree = parseMermaidDecisionTree('flowchart TD\n    E1[Query logs]', TREE_ID);
+
+    expect(() => enforceMinimumGraph(tree)).toThrow(
+      /must include a symptom node, an end node, and at least one edge/
+    );
+  });
+
+  it('rejects a symptom with no end node', () => {
+    const tree = parseMermaidDecisionTree(
+      'flowchart TD\n    S1([Checkout latency]) --> E1[Query logs]',
+      TREE_ID
+    );
+
+    expect(() => enforceMinimumGraph(tree)).toThrow(
+      /must include a symptom node, an end node, and at least one edge/
     );
   });
 });

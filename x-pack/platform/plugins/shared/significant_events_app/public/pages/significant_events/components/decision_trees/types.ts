@@ -33,6 +33,7 @@ export interface DecisionTreeSummary {
 export interface DecisionTreeDetail extends DecisionTreeSummary {
   markdown: string;
   mermaid: string;
+  evidence_gatherer_metadata: string[];
   learnings: LearningRecord[];
 }
 
@@ -51,6 +52,7 @@ export interface DecisionTreeVersionDetail extends DecisionTreeVersionSummary {
   tree_id: string;
   markdown: string;
   mermaid: string;
+  evidence_gatherer_metadata: string[];
   learnings: LearningRecord[];
   diff?: DecisionTreeDiff;
 }

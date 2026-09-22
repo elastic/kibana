@@ -5,26 +5,37 @@
  * 2.0.
  */
 
+import type { DecisionTreePromptTools } from './prompts';
 import {
   DECISION_TREE_FORMAT_GUIDE,
-  DECISION_TREE_REINFORCEMENT_SYSTEM_PROMPT,
-  SCRIPT_FOLLOWUP_EXTEND,
-  SCRIPT_INITIAL_CREATE,
-  SCRIPT_INITIAL_MERGE,
-  SCRIPT_REINFORCE,
+  buildReinforcementSystemPrompt,
   buildTurnPrompt,
+  buildTurnScripts,
   selectTurnScript,
 } from './prompts';
 
+const TOOLS: DecisionTreePromptTools = {
+  viewFileTool: 'view_file_tool_id',
+  strReplaceTool: 'str_replace_tool_id',
+  writeFileTool: 'write_file_tool_id',
+  submitTool: 'submit_optimizer_result',
+  recordSystemTool: 'record_system_learning',
+  recordToolTool: 'record_tool_learning',
+  recordRemediationTool: 'record_remediation',
+};
+
 describe('selectTurnScript', () => {
+  const scripts = buildTurnScripts(TOOLS);
+
   it('seeds a new tree when an initial investigation hydrated nothing', () => {
     expect(
       selectTurnScript({
         turnKind: 'initial_investigation',
         causalConfirmed: false,
         hasExistingTrees: false,
+        tools: TOOLS,
       })
-    ).toBe(SCRIPT_INITIAL_CREATE);
+    ).toBe(scripts.initialCreate);
   });
 
   it('merges into hydrated trees on an initial investigation', () => {
@@ -33,8 +44,9 @@ describe('selectTurnScript', () => {
         turnKind: 'initial_investigation',
         causalConfirmed: false,
         hasExistingTrees: true,
+        tools: TOOLS,
       })
-    ).toBe(SCRIPT_INITIAL_MERGE);
+    ).toBe(scripts.initialMerge);
   });
 
   it('reinforces once a root cause is confirmed', () => {
@@ -43,8 +55,9 @@ describe('selectTurnScript', () => {
         turnKind: 'feedback_reinforcement',
         causalConfirmed: true,
         hasExistingTrees: true,
+        tools: TOOLS,
       })
-    ).toBe(SCRIPT_REINFORCE);
+    ).toBe(scripts.reinforce);
   });
 
   it('extends without claiming causality when nothing is confirmed', () => {
@@ -53,8 +66,9 @@ describe('selectTurnScript', () => {
         turnKind: 'feedback_reinforcement',
         causalConfirmed: false,
         hasExistingTrees: true,
+        tools: TOOLS,
       })
-    ).toBe(SCRIPT_FOLLOWUP_EXTEND);
+    ).toBe(scripts.followupExtend);
   });
 
   it('ignores hydrated trees once past the initial investigation', () => {
@@ -63,26 +77,45 @@ describe('selectTurnScript', () => {
         turnKind: 'feedback_reinforcement',
         causalConfirmed: true,
         hasExistingTrees: false,
+        tools: TOOLS,
       })
-    ).toBe(SCRIPT_REINFORCE);
+    ).toBe(scripts.reinforce);
   });
 });
 
-describe('DECISION_TREE_REINFORCEMENT_SYSTEM_PROMPT', () => {
+describe('buildReinforcementSystemPrompt', () => {
+  const prompt = buildReinforcementSystemPrompt(TOOLS);
+
   it('states the guardrail thresholds the submit tool actually enforces', () => {
-    expect(DECISION_TREE_REINFORCEMENT_SYSTEM_PROMPT).toContain('drop more than 30% of original');
-    expect(DECISION_TREE_REINFORCEMENT_SYSTEM_PROMPT).toContain('shrink below 50% of the original');
+    expect(prompt).toContain('drop more than 30% of original');
+    expect(prompt).toContain('shrink below 50% of the original');
   });
 
   it('embeds the node-shape contract the parser recognizes', () => {
-    expect(DECISION_TREE_REINFORCEMENT_SYSTEM_PROMPT).toContain(DECISION_TREE_FORMAT_GUIDE);
+    expect(prompt).toContain(DECISION_TREE_FORMAT_GUIDE);
   });
 
   it('names the symptom file convention rather than the legacy monitors path', () => {
-    expect(DECISION_TREE_REINFORCEMENT_SYSTEM_PROMPT).toContain(
-      'decision-trees/decision_tree_<symptom>.md'
+    expect(prompt).toContain('decision-trees/decision_tree_<symptom>.md');
+    expect(prompt).not.toContain('monitor');
+  });
+
+  it('interpolates the registered tool ids and leaves no placeholders', () => {
+    expect(prompt).toContain('view_file_tool_id');
+    expect(prompt).toContain('str_replace_tool_id');
+    expect(prompt).toContain('write_file_tool_id');
+    expect(prompt).toContain('submit_optimizer_result');
+    expect(prompt).toContain('record_system_learning');
+    expect(prompt).toContain('record_tool_learning');
+    expect(prompt).toContain('record_remediation');
+    expect(prompt).not.toMatch(
+      /\{\{(view_file_tool|str_replace_tool|write_file_tool|submit_tool|record_system_tool|record_tool_tool|record_remediation_tool|decision_tree_directory|dropped_node_percent|retained_size_percent|merge_discipline|abstraction_rules|format_guide)\}\}/
     );
-    expect(DECISION_TREE_REINFORCEMENT_SYSTEM_PROMPT).not.toContain('monitor');
+  });
+
+  it('does not rewrite Mermaid decision-node shape markers', () => {
+    expect(prompt).toContain('`{{label}}`');
+    expect(prompt).toContain('D1{{Database-related errors?}}');
   });
 });
 
@@ -95,23 +128,25 @@ describe('DECISION_TREE_FORMAT_GUIDE', () => {
 });
 
 describe('buildTurnPrompt', () => {
+  const scripts = buildTurnScripts(TOOLS);
+
   it('lists editable files and active learnings', () => {
     const prompt = buildTurnPrompt({
       editableTreePaths: ['symptom:checkout-latency: /workspace/decision-trees/x.md'],
       activeSystemLearnings: ['Checkout writes before syncing.', 'Redis is the session store.'],
       activeToolLearnings: ['query_pattern, elasticsearch: Filter by service.name.'],
-      activeRemediation: 'Roll back the pool-size change.',
+      activeRemediations: ['symptom:checkout-high-latency: Roll back the pool-size change.'],
       connectorNames: ['elasticsearch'],
       referencedMemories: undefined,
-      script: SCRIPT_REINFORCE,
+      script: scripts.reinforce,
     });
 
     expect(prompt).toContain('- symptom:checkout-latency: /workspace/decision-trees/x.md');
     expect(prompt).toContain('- Checkout writes before syncing.');
     expect(prompt).toContain('- Redis is the session store.');
-    expect(prompt).toContain('- remediation: Roll back the pool-size change.');
+    expect(prompt).toContain('- symptom:checkout-high-latency: Roll back the pool-size change.');
     expect(prompt).toContain('Referenced memories:\nNone');
-    expect(prompt).toContain(SCRIPT_REINFORCE);
+    expect(prompt).toContain(scripts.reinforce);
   });
 
   it('renders None for every empty slot', () => {
@@ -120,7 +155,7 @@ describe('buildTurnPrompt', () => {
       activeSystemLearnings: [],
       activeToolLearnings: [],
       connectorNames: [],
-      script: SCRIPT_INITIAL_CREATE,
+      script: scripts.initialCreate,
     });
 
     expect(prompt).toContain('Decision-tree files available for edit:\n- None');

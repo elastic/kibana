@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import {
-  SCRIPT_FOLLOWUP_EXTEND,
-  SCRIPT_INITIAL_CREATE,
-  SCRIPT_INITIAL_MERGE,
-  SCRIPT_REINFORCE,
-} from '@kbn/nightshift-decision-trees';
+import { buildTurnScripts } from '@kbn/nightshift-decision-trees';
 import type { LearningRecord } from '@kbn/nightshift-decision-trees';
+import { DECISION_TREE_PROMPT_TOOLS } from '../tools/decision_tree/prompt_tools';
 import type { DecisionTreeSummary } from './store';
 import { buildReinforcementPrompt, deriveCausalConfirmed, deriveTurnKind } from './turn';
+
+const scripts = buildTurnScripts(DECISION_TREE_PROMPT_TOOLS);
 
 const tree = (overrides: Partial<DecisionTreeSummary> = {}): DecisionTreeSummary => ({
   tree_id: 'symptom:checkout-high-latency',
@@ -71,14 +69,14 @@ describe('buildReinforcementPrompt', () => {
   it('asks for a new tree when the investigator did not open one', () => {
     const message = buildReinforcementPrompt({ ...base, trees: [] });
 
-    expect(message).toContain(SCRIPT_INITIAL_CREATE);
+    expect(message).toContain(scripts.initialCreate);
     expect(message).toContain('Decision-tree files available for edit:\n- None');
   });
 
   it('asks for a merge when the investigator opened a first-version tree', () => {
     const message = buildReinforcementPrompt({ ...base, trees: [tree()] });
 
-    expect(message).toContain(SCRIPT_INITIAL_MERGE);
+    expect(message).toContain(scripts.initialMerge);
     expect(message).toContain(
       'symptom:checkout-high-latency — /workspace/decision-trees/decision_tree_checkout-high-latency.md'
     );
@@ -91,13 +89,13 @@ describe('buildReinforcementPrompt', () => {
       response: '{"hypotheses":[{"status":"confirmed"}]}',
     });
 
-    expect(message).toContain(SCRIPT_REINFORCE);
+    expect(message).toContain(scripts.reinforce);
   });
 
   it('asks for an extension on a follow-up with no confirmed root cause', () => {
     const message = buildReinforcementPrompt({ ...base, trees: [tree({ version: 3 })] });
 
-    expect(message).toContain(SCRIPT_FOLLOWUP_EXTEND);
+    expect(message).toContain(scripts.followupExtend);
   });
 
   it('carries the transcript and the active learnings', () => {
@@ -140,6 +138,12 @@ describe('buildReinforcementPrompt', () => {
           content: 'Raise the pool size.',
           keywords: [],
         },
+        {
+          kind: 'remediation',
+          tree_id: 'symptom:checkout-high-latency',
+          content: 'Restart the checkout workers.',
+          keywords: [],
+        },
       ],
     });
 
@@ -149,7 +153,8 @@ describe('buildReinforcementPrompt', () => {
     expect(message).toContain('- Checkout shares a connection pool.');
     expect(message).not.toContain('Payments use a different cluster.');
     expect(message).toContain('- elastic-telemetry, query_pattern: Filter by service.name.');
-    expect(message).toContain('- remediation: Raise the pool size.');
+    expect(message).toContain('- symptom:checkout-high-latency: Raise the pool size.');
+    expect(message).toContain('- symptom:checkout-high-latency: Restart the checkout workers.');
     expect(message).toContain('elastic-telemetry');
   });
 });

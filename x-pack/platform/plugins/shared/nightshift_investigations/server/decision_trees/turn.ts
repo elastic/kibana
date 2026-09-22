@@ -11,6 +11,7 @@ import {
   symptomSlugFromTreeId,
 } from '@kbn/nightshift-decision-trees';
 import type { DecisionTreeTurnKind, LearningRecord } from '@kbn/nightshift-decision-trees';
+import { DECISION_TREE_PROMPT_TOOLS } from '../tools/decision_tree/prompt_tools';
 import type { DecisionTreeSummary } from './store';
 import { workspacePathForTree } from './materialize';
 
@@ -53,6 +54,7 @@ export const buildReinforcementPrompt = ({
     // True only when the investigator read at least one tree file this round. Callers must pass
     // that accessed subset — not every tree in the index.
     hasExistingTrees: trees.length > 0,
+    tools: DECISION_TREE_PROMPT_TOOLS,
   });
 
   const relevantLearnings = learnings.filter((learning) => {
@@ -73,8 +75,9 @@ export const buildReinforcementPrompt = ({
     activeToolLearnings: relevantLearnings
       .filter((learning) => learning.kind === 'tool')
       .map((learning) => `${learning.connector_name}, ${learning.category}: ${learning.content}`),
-    activeRemediation: relevantLearnings.find((learning) => learning.kind === 'remediation')
-      ?.content,
+    activeRemediations: relevantLearnings
+      .filter((learning) => learning.kind === 'remediation')
+      .map((learning) => `${learning.tree_id}: ${learning.content}`),
     connectorNames,
     script,
   });

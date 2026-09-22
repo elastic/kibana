@@ -89,6 +89,8 @@ export interface DecisionTreeDetail extends DecisionTreeSummary {
   markdown: string;
   /** The Mermaid block pulled out of {@link markdown}, fences included. */
   mermaid: string;
+  /** `<node_id>: <description>` entries for evidence nodes, persisted with the tree. */
+  evidence_gatherer_metadata: string[];
   learnings: LearningRecord[];
 }
 
@@ -107,6 +109,7 @@ export interface DecisionTreeVersionDetail extends DecisionTreeVersionSummary {
   tree_id: string;
   markdown: string;
   mermaid: string;
+  evidence_gatherer_metadata: string[];
   learnings: LearningRecord[];
   /** Against the previous version. Absent for v1, which has no predecessor. */
   diff?: DecisionTreeDiff;

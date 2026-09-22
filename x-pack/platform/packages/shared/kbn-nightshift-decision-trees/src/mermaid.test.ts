@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { applyEvidenceMetadata, extractMermaid, parseMermaidDecisionTree } from './mermaid';
+import {
+  applyEvidenceMetadata,
+  extractMermaid,
+  parseMermaidDecisionTree,
+  parseStoredDecisionTree,
+  serializeEvidenceMetadata,
+} from './mermaid';
 
 const TREE = `flowchart TD
     S1([High checkout error rate]) -->|✅| E1[Query error logs]
@@ -177,5 +183,26 @@ describe('applyEvidenceMetadata', () => {
 
     expect(tree.nodes.find((node) => node.node_id === 'E1')?.node_metadata).toBeUndefined();
     expect(tree.nodes.find((node) => node.node_id === 'E2')?.node_metadata).toBeUndefined();
+  });
+});
+
+describe('serializeEvidenceMetadata', () => {
+  it('emits node_id: description for evidence nodes that have metadata', () => {
+    const tree = parseMermaidDecisionTree(TREE);
+    applyEvidenceMetadata(tree, ['E1: Search checkout-* logs']);
+
+    expect(serializeEvidenceMetadata(tree)).toEqual(['E1: Search checkout-* logs']);
+  });
+});
+
+describe('parseStoredDecisionTree', () => {
+  it('reapplies persisted evidence metadata onto the parsed graph', () => {
+    const tree = parseStoredDecisionTree(TREE, 'symptom:checkout-error-rate', [
+      'E1: Search checkout-* logs',
+    ]);
+
+    expect(tree.nodes.find((node) => node.node_id === 'E1')?.node_metadata).toEqual({
+      description: 'Search checkout-* logs',
+    });
   });
 });

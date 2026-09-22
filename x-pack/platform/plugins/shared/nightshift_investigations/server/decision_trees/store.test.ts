@@ -52,12 +52,14 @@ describe('commit', () => {
       author: 'jdoe',
       summary: 'Initial tree.',
       learnings: [learning],
+      evidenceGathererMetadata: [],
     });
 
     expect(detail.version).toBe(1);
     expect(detail.status).toBe('tentative');
     expect(detail.node_count).toBe(TREE.nodes.length);
     expect(detail.learnings).toEqual([learning]);
+    expect(detail.evidence_gatherer_metadata).toEqual([]);
 
     const [versionCall, headCall] = esClient.index.mock.calls;
     expect(versionCall[0]).toMatchObject({
@@ -73,6 +75,7 @@ describe('commit', () => {
           space_id: 'default',
         }),
         learnings: [learning],
+        evidence_gatherer_metadata: [],
       }),
     });
     expect(headCall[0]).toMatchObject({
@@ -99,6 +102,7 @@ describe('commit', () => {
       author: 'jdoe',
       summary: 'Initial tree.',
       learnings: [],
+      evidenceGathererMetadata: [],
     });
 
     expect(indices.create).not.toHaveBeenCalled();
@@ -136,6 +140,7 @@ describe('commit', () => {
       author: 'jdoe',
       summary: 'Reinforced.',
       learnings: [],
+      evidenceGathererMetadata: [],
     });
 
     expect(detail.version).toBe(3);
@@ -187,10 +192,15 @@ describe('commit', () => {
       author: 'jdoe',
       summary: '',
       learnings: [updatedSystem, learning],
+      evidenceGathererMetadata: ['E1: Query checkout logs in logs-*'],
     });
 
     // The dependency slot is replaced, the remediation slot is added: two learnings, not three.
     expect(detail.learnings).toEqual([updatedSystem, learning]);
+    expect(detail.evidence_gatherer_metadata).toEqual(['E1: Query checkout logs in logs-*']);
+    expect(esClient.index.mock.calls[0][0].document.evidence_gatherer_metadata).toEqual([
+      'E1: Query checkout logs in logs-*',
+    ]);
   });
 });
 
@@ -291,6 +301,7 @@ describe('get', () => {
           edge_count: 4,
         },
         learnings: [],
+        evidence_gatherer_metadata: ['E1: Query checkout logs in logs-*'],
       },
     });
 
@@ -302,6 +313,7 @@ describe('get', () => {
     );
     expect(tree?.markdown).toBe(MARKDOWN);
     expect(tree?.mermaid).toContain('flowchart TD');
+    expect(tree?.evidence_gatherer_metadata).toEqual(['E1: Query checkout logs in logs-*']);
   });
 
   it('returns undefined when the head is missing', async () => {

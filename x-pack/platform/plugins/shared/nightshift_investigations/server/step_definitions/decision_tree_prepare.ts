@@ -74,7 +74,7 @@ export const decisionTreePrepareStepDefinition = ({
 
       // Only the deductive investigator's rounds feed the decision trees: this workflow is its
       // post-execution hook, and another agent's round must not rewrite the trees.
-      if (agentId && agentId !== NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_ID) {
+      if (agentId !== NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_ID) {
         return { output: { message: '', tree_count: 0, skipped: true } };
       }
 

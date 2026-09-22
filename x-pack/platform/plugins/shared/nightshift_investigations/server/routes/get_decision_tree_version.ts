@@ -9,7 +9,7 @@ import { notFound } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
 import {
   diffDecisionTrees,
-  parseMermaidDecisionTree,
+  parseStoredDecisionTree,
   symptomTreeId,
 } from '@kbn/nightshift-decision-trees';
 import { MAX_KEYWORD_LENGTH } from '../../common';
@@ -53,8 +53,12 @@ export const getDecisionTreeVersionRoute = createNightshiftInvestigationsServerR
         withDiff = {
           ...version,
           diff: diffDecisionTrees(
-            parseMermaidDecisionTree(previous.mermaid, treeId),
-            parseMermaidDecisionTree(version.mermaid, treeId)
+            parseStoredDecisionTree(
+              previous.mermaid,
+              treeId,
+              previous.evidence_gatherer_metadata
+            ),
+            parseStoredDecisionTree(version.mermaid, treeId, version.evidence_gatherer_metadata)
           ),
         };
       }

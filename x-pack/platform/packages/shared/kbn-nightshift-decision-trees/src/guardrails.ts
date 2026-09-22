@@ -174,6 +174,23 @@ export const validateShortText = (content: string, label: string): string => {
   return trimmed;
 };
 
+/**
+ * Rejects a newly authored graph that is not a usable decision tree.
+ *
+ * Prompt text is not enough: a lone evidence node parses and would otherwise be
+ * written into the durable index and re-hydrated on later investigations.
+ */
+export const enforceMinimumGraph = (tree: DecisionTreeView): void => {
+  const hasSymptom = tree.nodes.some((node) => node.node_type === 'symptom');
+  const hasEnd = tree.nodes.some((node) => node.node_type === 'end');
+  if (!hasSymptom || !hasEnd || tree.edges.length === 0) {
+    throw new DecisionTreeValidationError(
+      tree.tree_id,
+      `New decision tree ${tree.tree_id} must include a symptom node, an end node, and at least one edge`
+    );
+  }
+};
+
 /** Rejects evidence metadata that still carries raw `MEM_*` handles. */
 export const validateEvidenceMetadata = (treeId: string, entries: string[]): void => {
   if (entries.some((entry) => MEMORY_REFERENCE_RE.test(entry ?? ''))) {

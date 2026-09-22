@@ -14,27 +14,29 @@ import {
   DECISION_TREE_DIRECTORY,
   DecisionTreeValidationError,
   applyEvidenceMetadata,
+  enforceMinimumGraph,
   enforceNodePreservation,
   enforceParsedSizeFloor,
   enforceRawSizeFloor,
   extractMermaid,
   isSymptomTreeId,
   parseMermaidDecisionTree,
+  parseStoredDecisionTree,
   symptomFilePath,
   symptomSlugError,
   symptomSlugFromTreeId,
   validateEvidenceMetadata,
 } from '@kbn/nightshift-decision-trees';
-import type { LearningRecord } from '@kbn/nightshift-decision-trees';
+import type { DecisionTreeView, LearningRecord } from '@kbn/nightshift-decision-trees';
 import type { SandboxPluginStart, SandboxSession } from '@kbn/sandbox-plugin/server';
-import type { DecisionTreeStore } from '../../decision_trees/store';
+import type { DecisionTreeDetail, DecisionTreeStore } from '../../decision_trees/store';
 import {
   getConversationId,
   getScopedConversationId,
   resolveAbsolutePath,
 } from '../sandbox_bash/tool_utils';
 
-export const DECISION_TREE_SUBMIT_TOOL_ID = 'nightshift_submit_optimizer_result';
+export const DECISION_TREE_SUBMIT_TOOL_ID = 'submit_optimizer_result';
 
 const MAX_TREE_FILE_BYTES = 2 * 1024 * 1024;
 const MAX_SUBMISSIONS = 10;
@@ -159,6 +161,32 @@ export const createSubmitOptimizerResultTool = ({
     // when the agent has to fix a rejected file and call submit again.
     const turnLearnings = peekLearnings?.(conversationId) ?? [];
     const outcomes: SubmissionOutcome[] = [];
+
+    if (params.symptom_trees.length === 0) {
+      const attached = await persistLearningsWithoutEdits({
+        store,
+        author,
+        summary: params.summary,
+        learnings: turnLearnings,
+      });
+      drainLearnings?.(conversationId);
+      return {
+        results: [
+          {
+            type: ToolResultType.other,
+            data: {
+              text:
+                attached.length === 0
+                  ? 'No decision-tree changes submitted. Turn complete.'
+                  : `No structural edits. Attached learnings to ${attached.length} tree(s):\n${attached
+                      .map((treeId) => `- ${treeId}`)
+                      .join('\n')}`,
+              summary: params.summary,
+            },
+          },
+        ],
+      };
+    }
 
     for (const submission of params.symptom_trees) {
       try {
@@ -294,6 +322,7 @@ const persistSubmission = async ({
 
   validateEvidenceMetadata(treeId, metadata);
   applyEvidenceMetadata(newTree, metadata);
+  enforceMinimumGraph(newTree);
 
   const existing = await store.get(treeId);
   const originalMermaid = existing?.mermaid ?? '';
@@ -305,10 +334,19 @@ const persistSubmission = async ({
     newNodeIds: new Set(newTree.nodes.map((node) => node.node_id)),
   });
 
-  // A taken path only exists once the investigation confirmed which branch was causal, so it is
-  // the signal that promotes a tree from tentative to established.
-  const reinforced = newTree.edges.some((edge) => edge.is_taken);
-  await store.commit({ treeId, markdown, tree: newTree, reinforced, author, summary, learnings });
+  // Initial trees mark the path they walked with ✅ even without a confirmed root cause.
+  // Only a newly taken edge on an existing tree is a causal reinforcement.
+  const reinforced = hasNewlyTakenEdges(existing, newTree);
+  await store.commit({
+    treeId,
+    markdown,
+    tree: newTree,
+    reinforced,
+    author,
+    summary,
+    learnings,
+    evidenceGathererMetadata: metadata,
+  });
 
   return {
     tree_id: treeId,
@@ -318,4 +356,74 @@ const persistSubmission = async ({
       reinforced ? ', causal path marked' : ''
     }`,
   };
+};
+
+const takenEdgeKey = (edge: DecisionTreeView['edges'][number]): string =>
+  `${edge.source_node_id}\u0000${edge.target_node_id}\u0000${edge.condition}`;
+
+/** True when this edit introduces a taken edge the previous version did not have. */
+const hasNewlyTakenEdges = (
+  existing: DecisionTreeDetail | undefined,
+  newTree: DecisionTreeView
+): boolean => {
+  if (!existing) {
+    return false;
+  }
+  const original = parseStoredDecisionTree(
+    existing.mermaid,
+    existing.tree_id,
+    existing.evidence_gatherer_metadata
+  );
+  const originalTaken = new Set(
+    original.edges.filter((edge) => edge.is_taken).map(takenEdgeKey)
+  );
+  return newTree.edges.some((edge) => edge.is_taken && !originalTaken.has(takenEdgeKey(edge)));
+};
+
+/** Commits this turn's learnings onto existing trees when the agent made no file edits. */
+const persistLearningsWithoutEdits = async ({
+  store,
+  author,
+  summary,
+  learnings,
+}: {
+  store: DecisionTreeStore;
+  author: string;
+  summary: string;
+  learnings: LearningRecord[];
+}): Promise<string[]> => {
+  const byTree = new Map<string, LearningRecord[]>();
+  for (const learning of learnings) {
+    if (!learning.tree_id) {
+      continue;
+    }
+    const existing = byTree.get(learning.tree_id) ?? [];
+    existing.push(learning);
+    byTree.set(learning.tree_id, existing);
+  }
+
+  const attached: string[] = [];
+  for (const [treeId, treeLearnings] of byTree) {
+    const existing = await store.get(treeId);
+    if (!existing) {
+      continue;
+    }
+    const tree = parseStoredDecisionTree(
+      existing.mermaid,
+      treeId,
+      existing.evidence_gatherer_metadata
+    );
+    await store.commit({
+      treeId,
+      markdown: existing.markdown,
+      tree,
+      reinforced: false,
+      author,
+      summary,
+      learnings: treeLearnings,
+      evidenceGathererMetadata: existing.evidence_gatherer_metadata,
+    });
+    attached.push(treeId);
+  }
+  return attached;
 };
