@@ -42,6 +42,7 @@ export const QueueSection = ({
     onToggle,
     loadingRows,
     hasLoadError,
+    hasLoadMoreError,
     hasCountError,
     retry,
     remaining,
@@ -89,6 +90,7 @@ export const QueueSection = ({
       remaining={canLoadMore ? remaining : 0}
       onShowMore={loadMore}
       isLoadingMore={isLoadingMore}
+      hasLoadMoreError={hasLoadMoreError}
       isFiltered={Boolean(surfaceFilter)}
       selectedIds={selectedIds}
       getOutcomeLabel={getOutcomeLabel}

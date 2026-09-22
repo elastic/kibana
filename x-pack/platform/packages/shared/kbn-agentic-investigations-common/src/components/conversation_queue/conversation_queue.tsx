@@ -63,6 +63,8 @@ interface ConversationQueueProps {
   remaining?: number;
   onShowMore?: () => void;
   isLoadingMore?: boolean;
+  /** A later page failed over rows already on screen, which no other state shows. */
+  hasLoadMoreError?: boolean;
   onClickAction: BaseActionsProps['onClickAction'];
   onClickCard: (id: Investigation['id']) => void;
   onOpenChat: (id: Investigation['id']) => void;
@@ -104,6 +106,7 @@ export const ConversationQueue = memo<ConversationQueueProps>(
     remaining = 0,
     onShowMore,
     isLoadingMore = false,
+    hasLoadMoreError = false,
     isFiltered = false,
     onClickAction,
     onClickCard,
@@ -120,8 +123,10 @@ export const ConversationQueue = memo<ConversationQueueProps>(
 
     // Collapsing empties the rows on the frame the accordion starts closing, so it
     // would animate over an empty panel. Hold them until it opens again.
+    // Tracked only while open, empty lists included: a queue that legitimately
+    // emptied must not put its old rows back on the way closed.
     const [heldRows, setHeldRows] = useState(briefingList);
-    if (briefingList.length > 0 && briefingList !== heldRows) {
+    if (isOpen && briefingList !== heldRows) {
       setHeldRows(briefingList);
     }
     const rows = isOpen ? briefingList : heldRows;
@@ -266,7 +271,8 @@ export const ConversationQueue = memo<ConversationQueueProps>(
               footer slot, so it is the last child. */}
           {loadingRows === 0 && isOpen && remaining > 0 && onShowMore ? (
             <EuiFlexGroup
-              justifyContent="center"
+              direction="column"
+              alignItems="center"
               responsive={false}
               gutterSize="none"
               css={{
@@ -276,17 +282,31 @@ export const ConversationQueue = memo<ConversationQueueProps>(
                 cursor: 'default',
               }}
             >
+              {/* The rows that did load stay put; only this says the click failed,
+                  and the control below it is the retry. */}
+              {hasLoadMoreError ? (
+                <EuiFlexItem grow={false}>
+                  <EuiText
+                    size="xs"
+                    color="danger"
+                    role="alert"
+                    data-test-subj={`conversationQueueLoadMoreError-${briefingType}`}
+                  >
+                    {CONVERSATION_QUEUE_ERROR.loadMore}
+                  </EuiText>
+                </EuiFlexItem>
+              ) : null}
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   size="xs"
-                  color="text"
-                  iconType="chevronSingleDown"
+                  color={hasLoadMoreError ? 'danger' : 'text'}
+                  iconType={hasLoadMoreError ? 'refresh' : 'chevronSingleDown'}
                   isLoading={isLoadingMore}
                   onClick={onShowMore}
                   aria-label={showMoreAriaLabel(CONVERSATION_QUEUE_LABELS[briefingType], remaining)}
                   data-test-subj={`conversationQueueShowMore-${briefingType}`}
                 >
-                  {showMoreLabel(remaining)}
+                  {hasLoadMoreError ? CONVERSATION_QUEUE_ERROR.retry : showMoreLabel(remaining)}
                 </EuiButtonEmpty>
               </EuiFlexItem>
             </EuiFlexGroup>

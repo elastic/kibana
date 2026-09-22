@@ -44,6 +44,8 @@ export interface QueueSection {
    * not blank rows still worth reading.
    */
   hasLoadError: boolean;
+  /** A later page failed while earlier ones render, which `hasLoadError` cannot see. */
+  hasLoadMoreError: boolean;
   hasCountError: boolean;
   /** Refetches both of this section's queries, behind the failure's retry. */
   retry: () => void;
@@ -138,6 +140,7 @@ const useSection = (
     retry,
     loadingRows: pagesQuery.isInitialLoading ? Math.min(total ?? firstPageSize, firstPageSize) : 0,
     hasLoadError: Boolean(pagesQuery.error) && proposals.length === 0,
+    hasLoadMoreError: Boolean(pagesQuery.error) && proposals.length > 0 && !isFetchingNextPage,
     hasCountError: Boolean(countQuery.error) && total === undefined,
     remaining: Math.max(Math.min(total ?? 0, MAX_QUEUE_REACH) - proposals.length, 0),
     // The authority, so the control is never offered when a click fetches nothing.

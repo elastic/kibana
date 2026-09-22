@@ -40,8 +40,9 @@ export const MAX_QUEUE_PAGE_SIZE = 100;
 
 /**
  * Elasticsearch refuses `from + size` past `index.max_result_window`. Going further
- * needs `search_after`, which has no unique sort key to use: `id` is unmapped and
- * revisions inherit `createdAt`, so every sort we have can tie.
+ * needs `search_after`, which the queue sorts are now ordered enough to support —
+ * `rootProposalId` plus `revision` breaks every tie among live proposals — but which
+ * nothing implements yet.
  *
  * @see {@link https://www.elastic.co/docs/reference/elasticsearch/rest-apis/paginate-search-results#search-after}
  */

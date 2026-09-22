@@ -227,7 +227,7 @@ export const ConversationsPage: React.FC = () => {
             // The header renders the charts-summary count, so it tracks that query
             // rather than the section pages, which now load independently.
             isLoading={chartsSummary.isLoading}
-            hasError={Boolean(chartsSummary.error)}
+            hasError={Boolean(chartsSummary.error) && chartsSummary.data === undefined}
             // Closed proposals are rows but not work: a window holding only decisions
             // already made is an empty queue, and must not read as "0 actions need you"
             // beside a populated header.

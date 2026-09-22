@@ -120,6 +120,32 @@ describe('useProposalsByCategory', () => {
     expect(http.get).not.toHaveBeenCalled();
   });
 
+  it('polls only the leading page, however many the analyst has opened', async () => {
+    // Before the render, or the poll's interval is scheduled on the real clock.
+    jest.useFakeTimers();
+    http.get.mockResolvedValue(page(10, 30));
+    const { Wrapper, queryClient } = createWrapper();
+
+    const { result } = renderHook(
+      () => useProposalsByCategory('respond', { firstPageSize: 10, step: 10, enabled: true }),
+      { wrapper: Wrapper }
+    );
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    await result.current.fetchNextPage();
+    expect(http.get).toHaveBeenCalledTimes(2);
+
+    jest.advanceTimersByTime(PROPOSALS_POLL_INTERVAL_MS);
+
+    // Settled, not merely started: a replay of the second page trails the first and
+    // would slip past a check that stops at the request it expected.
+    await waitFor(() => expect(queryClient.isFetching()).toBe(0));
+
+    // One request, not two: replaying every opened page would make each Show more
+    // cost another request a minute, for as long as the page stays open.
+    expect(http.get.mock.calls.map(([, options]) => options.query.from)).toEqual([0, 10, 0]);
+    jest.useRealTimers();
+  });
+
   it('polls, so a worker adding a proposal shows up without a reload', async () => {
     jest.useFakeTimers();
     http.get.mockResolvedValue(page(10, 30));

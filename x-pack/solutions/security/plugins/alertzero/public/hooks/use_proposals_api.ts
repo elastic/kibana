@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useEffect } from 'react';
 import type { UseInfiniteQueryResult, UseQueryResult } from '@kbn/react-query';
 import { useInfiniteQuery, useQuery } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -66,6 +67,9 @@ const useProposalsCount = (
   });
 };
 
+/** Only the newest window moves on its own; the rest is history the analyst paged into. */
+const isLeadingPage = (_page: ProposalsPageResponse, index: number) => index === 0;
+
 const useProposalsPages = (
   queryKey: readonly unknown[],
   path: string,
@@ -73,7 +77,7 @@ const useProposalsPages = (
 ): UseInfiniteQueryResult<ProposalsPageResponse> => {
   const { services } = useKibana();
 
-  return useInfiniteQuery({
+  const query = useInfiniteQuery({
     queryKey,
     // React Query v4 calls the first page with `pageParam: undefined`.
     queryFn: async ({ pageParam }: { pageParam?: number }): Promise<ProposalsPageResponse> => {
@@ -88,10 +92,24 @@ const useProposalsPages = (
     },
     getNextPageParam: nextOffset,
     enabled,
-    // A poll refetches every loaded page, so the list does not snap back to page one.
-    refetchInterval: PROPOSALS_POLL_INTERVAL_MS,
     retry: retryOnTransientError,
   });
+
+  // Not `refetchInterval`, which replays every page the analyst has opened and grows
+  // the steady-state request count with each Show more.
+  const { refetch } = query;
+  useEffect(() => {
+    if (!enabled) {
+      return;
+    }
+    const poll = setInterval(
+      () => void refetch({ refetchPage: isLeadingPage }),
+      PROPOSALS_POLL_INTERVAL_MS
+    );
+    return () => clearInterval(poll);
+  }, [enabled, refetch]);
+
+  return query;
 };
 
 export const useProposalsByCategoryCount = (category: string, enabled: boolean) =>

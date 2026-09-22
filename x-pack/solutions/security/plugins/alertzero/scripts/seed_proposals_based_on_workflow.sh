@@ -98,7 +98,8 @@ kibana_curl() {
 
 # ---- 1. install the helper workflow ----------------------------------------
 
-WORKFLOW_YAML_FILE="$(mktemp -t alertzero-seed-workflow)"
+# Explicit template: GNU mktemp rejects `-t` without one.
+WORKFLOW_YAML_FILE="$(mktemp "${TMPDIR:-/tmp}/alertzero-seed-workflow.XXXXXX")"
 trap 'rm -f "$WORKFLOW_YAML_FILE"' EXIT
 
 cat > "$WORKFLOW_YAML_FILE" <<'WORKFLOW_YAML'

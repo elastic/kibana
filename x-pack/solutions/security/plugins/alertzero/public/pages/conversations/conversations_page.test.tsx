@@ -449,6 +449,21 @@ describe('ConversationsPage decisions', () => {
     expect(screen.getByText('1 action needs you')).toBeInTheDocument();
   });
 
+  it('keeps the last good count when a poll fails, rather than reporting it lost', () => {
+    mockProposals({ respond: [actionProposal] });
+    // React Query keeps `data` and sets `error` when a background refetch fails.
+    mockUseProposalChartsSummary.mockReturnValue({
+      data: { currentOpen: 1, buckets: [] },
+      isLoading: false,
+      error: new Error('poll failed'),
+    });
+
+    renderPage('/');
+
+    expect(screen.getByText('1 action needs you')).toBeInTheDocument();
+    expect(screen.queryByText("Your action count couldn't be loaded")).not.toBeInTheDocument();
+  });
+
   it('reads as an empty queue when the window holds only decisions already made', () => {
     mockProposals({ closed: [{ ...actionProposal, decidedAt: '2024-01-02T00:00:00Z' }] });
     mockOpenCount(0);

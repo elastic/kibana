@@ -81,4 +81,20 @@ describe('ConversationCardCompact', () => {
 
     expect(onClickCard).toHaveBeenCalledWith('inv-1');
   });
+
+  it('opens the flyout from the keyboard', () => {
+    const { onClickCard } = renderRow();
+
+    fireEvent.keyDown(screen.getByRole('button', { name: investigation.title }), { key: 'Enter' });
+
+    expect(onClickCard).toHaveBeenCalledWith('inv-1');
+  });
+
+  it('leaves the keyboard to the nested controls, which the row would otherwise swallow', () => {
+    const { onClickCard } = renderRow();
+
+    fireEvent.keyDown(screen.getByRole('button', { name: 'Open actions menu' }), { key: 'Enter' });
+
+    expect(onClickCard).not.toHaveBeenCalled();
+  });
 });

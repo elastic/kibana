@@ -85,6 +85,30 @@ describe('ConversationQueue', () => {
     expect(screen.queryByText('No events in this category.')).not.toBeInTheDocument();
   });
 
+  it('does not put the rows back when an open section emptied before the collapse', () => {
+    // The last proposal is decided while open, and only then is the section closed.
+    const Emptying = () => {
+      const [isOpen, setIsOpen] = useState(true);
+      const [rows, setRows] = useState([investigation]);
+      return (
+        <>
+          <button type="button" onClick={() => setRows([])}>
+            decide
+          </button>
+          {queueElement({ isOpen, briefingList: rows, count: rows.length, onToggle: setIsOpen })}
+        </>
+      );
+    };
+
+    renderWithKibanaRenderContext(<Emptying />);
+    fireEvent.click(screen.getByRole('button', { name: 'decide' }));
+    expect(screen.queryByText(investigation.title)).not.toBeInTheDocument();
+
+    fireEvent.click(trigger());
+
+    expect(screen.queryByText(investigation.title)).not.toBeInTheDocument();
+  });
+
   it('shows the empty state once an open section really is empty', () => {
     renderQueue({ isOpen: true, briefingList: [], count: 0 });
 
@@ -171,6 +195,21 @@ describe('ConversationQueue', () => {
       renderQueue({ isError: true, isOpen: false, briefingList: [] });
 
       expect(screen.queryByText('Unable to load events')).not.toBeInTheDocument();
+    });
+
+    it('says a Show more failed, which the rows on screen otherwise hide', () => {
+      const onShowMore = jest.fn();
+      renderQueue({ remaining: 30, onShowMore, hasLoadMoreError: true });
+
+      // The rows that did load stay, so this is the only sign the click failed.
+      expect(screen.getByText(investigation.title)).toBeInTheDocument();
+      expect(screen.getByTestId('conversationQueueLoadMoreError-respond')).toHaveTextContent(
+        'Could not load more events.'
+      );
+
+      fireEvent.click(screen.getByTestId('conversationQueueShowMore-respond'));
+
+      expect(onShowMore).toHaveBeenCalledTimes(1);
     });
   });
 

@@ -26,6 +26,10 @@ export const CONVERSATION_QUEUE_ERROR = Object.freeze({
   retry: i18n.translate('xpack.alertzero.conversationQueue.loadErrorRetry', {
     defaultMessage: 'Try again',
   }),
+  /** Beside the rows that did load, so it cannot read as the whole queue failing. */
+  loadMore: i18n.translate('xpack.alertzero.conversationQueue.loadMoreError', {
+    defaultMessage: 'Could not load more events.',
+  }),
 });
 
 export const LOADING_CONVERSATION_QUEUE = i18n.translate(

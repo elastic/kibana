@@ -80,6 +80,11 @@ export const ConversationCardCompact = memo<ConversationCardCompactProps>(
         hasShadow={false}
         onClick={() => onClickCard(investigation.id)}
         onKeyDown={(event: React.KeyboardEvent) => {
+          // Only the panel itself: the nested controls handle their own keys, and
+          // preventDefault here would swallow them.
+          if (event.target !== event.currentTarget) {
+            return;
+          }
           if (event.key === 'Enter' || event.key === ' ') {
             event.preventDefault();
             onClickCard(investigation.id);
