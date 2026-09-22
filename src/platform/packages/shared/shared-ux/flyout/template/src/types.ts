@@ -142,6 +142,16 @@ export interface FlyoutBodyProps {
   children?: ReactNode;
 }
 
+type ActionAnchorProps =
+  | 'download'
+  | 'href'
+  | 'hrefLang'
+  | 'media'
+  | 'ping'
+  | 'referrerPolicy'
+  | 'rel'
+  | 'target';
+
 /** Props shared by the declarative footer action parts. Both render a button and never an anchor. */
 interface FlyoutFooterActionBaseProps extends DataAttributeProps {
   /** HTML id forwarded to the button element. */
@@ -152,13 +162,16 @@ interface FlyoutFooterActionBaseProps extends DataAttributeProps {
 }
 
 /** Props for the declarative `FlyoutTemplate.Footer.PrimaryAction` part. */
-export type FlyoutFooterPrimaryActionProps = Omit<EuiButtonProps, 'children' | 'fill'> &
+export type FlyoutFooterPrimaryActionProps = Omit<
+  EuiButtonProps,
+  'children' | 'fill' | ActionAnchorProps
+> &
   FlyoutFooterActionBaseProps;
 
 /** Props for the declarative `FlyoutTemplate.Footer.SecondaryAction` part. */
 export type FlyoutFooterSecondaryActionProps = Omit<
   EuiButtonEmptyProps,
-  'children' | 'onClick' | 'href' | 'target' | 'rel' | 'buttonRef'
+  'children' | 'onClick' | 'buttonRef' | ActionAnchorProps
 > &
   FlyoutFooterActionBaseProps;
 
