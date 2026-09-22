@@ -307,7 +307,9 @@ describe('FlyoutTemplate header blocks', () => {
       </FlyoutTemplate.Header.MetaBlock>
     );
 
-    expect(screen.getByTestId('metaUpdated')).toHaveAttribute('data-foo', 'metaFoo');
+    const block = screen.getByTestId('metaUpdated');
+    expect(block).toHaveAttribute('data-foo', 'metaFoo');
+    expect(block).toHaveTextContent('Last updated');
   });
 
   it('forwards a custom data attribute through the InfoBlock part', () => {
@@ -321,7 +323,9 @@ describe('FlyoutTemplate header blocks', () => {
       </FlyoutTemplate.Header.InfoBlock>
     );
 
-    expect(screen.getByTestId('infoRisk')).toHaveAttribute('data-foo', 'infoFoo');
+    const block = screen.getByTestId('infoRisk');
+    expect(block).toHaveAttribute('data-foo', 'infoFoo');
+    expect(block).toHaveTextContent('Risk score');
   });
 
   it('hides the blocks from assistive tech when the header is collapsed', () => {
