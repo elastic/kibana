@@ -67,7 +67,7 @@ export class MatcherSuggestionsService {
     }
   }
 
-  async getDataFieldNames(matcher?: string): Promise<string[]> {
+  async getRuleEventFieldNames(matcher?: string): Promise<string[]> {
     try {
       const result = await this.esClient.search({
         index: ALERT_EVENTS_DATA_STREAM,
