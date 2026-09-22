@@ -65,7 +65,7 @@ export class FlyoutService extends FtrService {
     const managedFlyoutCloseButton = `${testSubjectPrefix}euiFlyoutCloseButton`;
     const unmanagedFlyoutCloseButton = `${testSubjectPrefix}closeFlyoutButton`;
 
-    if (await this.testSubjects.exists(managedFlyoutCloseButton)) {
+    if (await this.testSubjects.exists(managedFlyoutCloseButton, { timeout: 0 })) {
       await this.testSubjects.click(managedFlyoutCloseButton);
     } else {
       await this.testSubjects.click(unmanagedFlyoutCloseButton);

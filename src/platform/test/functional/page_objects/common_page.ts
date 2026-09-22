@@ -330,10 +330,12 @@ export class CommonPageObject extends FtrService {
         // accept alert if it pops up
         const alert = await this.browser.getAlert();
         await alert?.accept();
-        // browser.get() waits for document.readyState==='complete' before returning,
-        // so no sleep is needed here; the refresh below starts from a fully loaded page.
-        this.log.debug('returned from get, calling refresh');
-        await this.browser.refresh();
+        // A timestamp makes browser.get() perform a full navigation even when the app URL is
+        // unchanged. Without one, refresh explicitly preserves the previous reload behavior.
+        if (!insertTimestamp) {
+          this.log.debug('returned from get without a timestamp, calling refresh');
+          await this.browser.refresh();
+        }
         let currentUrl = shouldLoginIfPrompted
           ? await this.loginIfPrompted(appUrl, insertTimestamp, disableWelcomePrompt)
           : await this.browser.getCurrentUrl();
@@ -500,7 +502,7 @@ export class CommonPageObject extends FtrService {
   }
 
   async isFatalErrorScreen() {
-    return await this.testSubjects.exists('fatalErrorScreen');
+    return await this.testSubjects.exists('fatalErrorScreen', { timeout: 0 });
   }
 
   async waitForTopNavToBeVisible() {
