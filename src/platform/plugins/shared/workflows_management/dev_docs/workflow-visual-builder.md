@@ -94,7 +94,7 @@ The mutation source is always `selectYamlString`, never `selectEditorYaml`. On t
 
 ## Vocabulary
 
-See [`@kbn/workflows/CONTEXT.md`](../../../packages/shared/kbn-workflows/CONTEXT.md) for the canonical glossary. Key terms:
+See [`@kbn/workflows/CONTEXT.md`](../../../../packages/shared/kbn-workflows/CONTEXT.md) for the canonical glossary. Key terms:
 
 - **lane** — the cross-axis extent of one child slot's steps; declaration order is the invariant enforced post-dagre
 - **port** — the interactive attachment point (affordance), not the ReactFlow `Handle` primitive

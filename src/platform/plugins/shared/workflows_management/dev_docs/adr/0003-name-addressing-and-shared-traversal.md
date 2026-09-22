@@ -53,7 +53,7 @@ type WorkflowGraphInsertionContext =
 
 ### Shared traversal
 
-Extend `visitStepChildren` in [`walk_step_tree.ts`](../../../../packages/shared/kbn-workflows/graph_layout/walk_step_tree.ts) — the most complete of the four enumerations — with `on-failure.fallback` and `iteration-on-failure`, and give each callback its slot identity so callers can distinguish "case 2 of switch X" from "the `then` of if Y".
+Extend `visitStepChildren` in [`walk_step_tree.ts`](../../../../../packages/shared/kbn-workflows/graph_layout/walk_step_tree.ts) — the most complete of the four enumerations — with `on-failure.fallback` and `iteration-on-failure`, and give each callback its slot identity so callers can distinguish "case 2 of switch X" from "the `then` of if Y".
 
 `kbn-workflows-yaml` imports this function and deletes `NESTED_STEP_KEYS`. `compute_topology_fingerprint.ts`'s `walkStepsWithSlot` and `transform_workflow_to_graph.ts` both route through it.
 

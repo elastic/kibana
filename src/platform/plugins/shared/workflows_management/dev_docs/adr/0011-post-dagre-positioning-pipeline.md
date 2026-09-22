@@ -32,7 +32,7 @@ the post-dagre pass.
 ## Decision
 
 Replace the single-pass permutation (ADR-0008) with a five-pass pipeline in
-`computeWorkflowLayout` ([workflow_layout_pipeline.ts](../../../../packages/shared/kbn-workflows-ui/src/components/workflow_graph/workflow_layout_pipeline.ts)).
+`computeWorkflowLayout` ([workflow_layout_pipeline.ts](../../../../../packages/shared/kbn-workflows-ui/src/components/workflow_graph/workflow_layout_pipeline.ts)).
 
 ### Pipeline shape
 

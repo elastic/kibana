@@ -9,8 +9,8 @@
 [elastic/security-team#19376](https://github.com/elastic/security-team/issues/19376) requests turning the workflow graph from a read-only viewer into an authoring surface. [PR #288472](https://github.com/elastic/kibana/pull/288472) is an open 133-file / +19k POC that implements an early version of this alongside a full restyle, a step-config panel, a data-reference picker, a creation panel, and a template-recommendation feature.
 
 The graph is currently documented and implemented as read-only end to end:
-- [`graph_layout/README.md:3`](../../../../packages/shared/kbn-workflows/graph_layout/README.md): "read-only visualisation editor"
-- [`workflow_graph_canvas.tsx:725-728`](../../../packages/shared/kbn-workflows-ui/src/components/workflow_graph/workflow_graph_canvas.tsx): `nodesConnectable={false}`, handles at `opacity: 0`
+- [`graph_layout/README.md:3`](../../../../../packages/shared/kbn-workflows/graph_layout/README.md): "read-only visualisation editor"
+- [`workflow_graph_canvas.tsx:725-728`](../../../../../packages/shared/kbn-workflows-ui/src/components/workflow_graph/workflow_graph_canvas.tsx): `nodesConnectable={false}`, handles at `opacity: 0`
 - [`workflow_visual_editor_stateful.tsx:66-74`](../../public/features/workflow_visual_editor/ui/workflow_visual_editor_stateful.tsx): "Glue layer between Redux + plugin services and the read-only graph canvas"
 
 There is no mutation path from the graph to the YAML. Making it editable touches the domain model, the layout pipeline, the rendering layer, the action menu and the Redux write path — five layers that want independent review.

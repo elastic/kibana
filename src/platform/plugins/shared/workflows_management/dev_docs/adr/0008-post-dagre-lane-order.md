@@ -23,9 +23,9 @@ lane. The same declaration-order invariant applies.
 ## Decision
 
 Two pure post-dagre passes added to `computeWorkflowLayout` in
-[workflow_layout_pipeline.ts](../../../../packages/shared/kbn-workflows-ui/src/components/workflow_graph/workflow_layout_pipeline.ts),
+[workflow_layout_pipeline.ts](../../../../../packages/shared/kbn-workflows-ui/src/components/workflow_graph/workflow_layout_pipeline.ts),
 implemented in
-[enforce_lane_order.ts](../../../../packages/shared/kbn-workflows-ui/src/components/workflow_graph/enforce_lane_order.ts).
+[enforce_lane_order.ts](../../../../../packages/shared/kbn-workflows-ui/src/components/workflow_graph/enforce_lane_order.ts).
 
 ### One pass per laid-out graph
 

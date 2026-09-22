@@ -46,7 +46,7 @@ The graph insertion gesture writes `on-failure.fallback` only. It never writes `
 
 ### Rename the affordance
 
-The user-facing label "Add error handling" (from the mockup) is retired in favour of **"Add fallback steps"** in internal code. `fallback` means "on failure, also run these"; `continue` means "and then don't fail". Conflating them in one label creates the trap described above. The final user-facing label is pending design sign-off and may differ from the internal name — see [`CONTEXT.md`](../../../../packages/shared/kbn-workflows/CONTEXT.md) for the code/copy divergence policy.
+The user-facing label "Add error handling" (from the mockup) is retired in favour of **"Add fallback steps"** in internal code. `fallback` means "on failure, also run these"; `continue` means "and then don't fail". Conflating them in one label creates the trap described above. The final user-facing label is pending design sign-off and may differ from the internal name — see [`CONTEXT.md`](../../../../../packages/shared/kbn-workflows/CONTEXT.md) for the code/copy divergence policy.
 
 ## Alternatives considered
 
