@@ -96,18 +96,41 @@ export const AlertAnalysisWorkflowOutput = z
     generated_summary: z.string(),
     connector_id: z.string(),
     agent_id: z.string(),
-    impacted_entities: z.array(AlertAnalysisImpactedEntity),
+    impacted_entities: z.array(AlertAnalysisImpactedEntity).max(50),
     // YAML emits the boolean as a string ("true" / "false") from Liquid.
     impacted_entities_truncated: z.string(),
   })
   .superRefine(
     ({ verdicts, false_positive_count, true_positive_count, inconclusive_count }, ctx) => {
-      const total = false_positive_count + true_positive_count + inconclusive_count;
-      if (total !== verdicts.length) {
+      const expectedFalsePositive = verdicts.filter(
+        ({ classification }) => classification === 'false_positive'
+      ).length;
+      const expectedTruePositive = verdicts.filter(
+        ({ classification }) => classification === 'true_positive'
+      ).length;
+      const expectedInconclusive = verdicts.filter(
+        ({ classification }) => classification === 'inconclusive'
+      ).length;
+
+      if (false_positive_count !== expectedFalsePositive) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: `Verdict counts (${total}) do not sum to verdicts.length (${verdicts.length})`,
+          message: `false_positive_count (${false_positive_count}) does not match verdicts with classification false_positive (${expectedFalsePositive})`,
           path: ['false_positive_count'],
+        });
+      }
+      if (true_positive_count !== expectedTruePositive) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `true_positive_count (${true_positive_count}) does not match verdicts with classification true_positive (${expectedTruePositive})`,
+          path: ['true_positive_count'],
+        });
+      }
+      if (inconclusive_count !== expectedInconclusive) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `inconclusive_count (${inconclusive_count}) does not match verdicts with classification inconclusive (${expectedInconclusive})`,
+          path: ['inconclusive_count'],
         });
       }
     }
