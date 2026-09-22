@@ -1253,14 +1253,14 @@ class OutputService {
     // Include both data_output_id and monitoring_output_id so monitoring-only outputs
     // are counted correctly. Also cover the is_default fallback (no explicit data_output_id).
     let agentPoliciesKuery =
-      `${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${escaped}" or ` +
-      `${AGENT_POLICY_SAVED_OBJECT_TYPE}.monitoring_output_id:"${escaped}"`;
+      `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${escaped}" or ` +
+      `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.monitoring_output_id:"${escaped}"`;
 
     if (output.is_default) {
-      agentPoliciesKuery += ` or (not ${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:*)`;
+      agentPoliciesKuery += ` or (not ${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:*)`;
     }
     if (output.is_default_monitoring) {
-      agentPoliciesKuery += ` or (not ${AGENT_POLICY_SAVED_OBJECT_TYPE}.monitoring_output_id:*)`;
+      agentPoliciesKuery += ` or (not ${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.monitoring_output_id:*)`;
     }
     const packagePoliciesKuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.output_id:"${escaped}"`;
 
@@ -1277,7 +1277,6 @@ class OutputService {
     const pkgDerivedIdSet = new Set<string>();
     for await (const pkgPolicies of await packagePolicyService.fetchAllItems(internalSoClient, {
       kuery: packagePoliciesKuery,
-      spaceIds: ['*'],
     })) {
       for (const pp of pkgPolicies) {
         for (const id of pp.policy_ids) {
