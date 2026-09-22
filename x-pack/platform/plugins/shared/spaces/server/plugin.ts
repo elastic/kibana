@@ -130,7 +130,9 @@ export class SpacesPlugin
   ): SpacesPluginSetupApi {
     const spacesClientSetup = this.spacesClientService.setup({ config$: this.config$ });
 
-    const spacesServiceSetup = this.spacesService.setup();
+    const spacesServiceSetup = this.spacesService.setup({
+      spacesClientService: spacesClientSetup,
+    });
 
     const getSpacesService = () => {
       if (!this.spacesServiceStart) {

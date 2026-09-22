@@ -257,7 +257,8 @@ describe('#getAll', () => {
       [],
       'traditional',
       featuresStart,
-      undefined
+      undefined,
+      []
     );
     const actualSpaces = await client.getAll();
 
@@ -286,7 +287,8 @@ describe('#getAll', () => {
       [],
       'serverless',
       featuresStart,
-      undefined
+      undefined,
+      []
     );
     const [actualSpace] = await client.getAll();
     const [{ solution, disabledFeatures, ...expectedSpace }] = expectedSpaces;
@@ -315,7 +317,8 @@ describe('#getAll', () => {
       [],
       'traditional',
       featuresStart,
-      undefined
+      undefined,
+      []
     );
     await expect(
       client.getAll({ purpose: 'invalid_purpose' as GetAllSpacesPurpose })
@@ -364,7 +367,8 @@ describe('#get', () => {
       [],
       'traditional',
       featuresStart,
-      undefined
+      undefined,
+      []
     );
     const id = savedObject.id;
     const actualSpace = await client.get(id);
@@ -389,7 +393,8 @@ describe('#get', () => {
       [],
       'serverless',
       featuresStart,
-      undefined
+      undefined,
+      []
     );
     const id = savedObject.id;
     const actualSpace = await client.get(id);
@@ -414,7 +419,8 @@ describe('#get', () => {
       [],
       'traditional',
       featuresStart,
-      undefined
+      undefined,
+      []
     );
     const id = savedObject.id;
     const actualSpace = await client.get(id);
@@ -446,7 +452,8 @@ describe('#getPersistedFeatureVisibility', () => {
       [],
       'traditional',
       featuresStart,
-      undefined
+      undefined,
+      []
     );
 
     const result = await client.getPersistedFeatureVisibility('foo');
@@ -473,7 +480,8 @@ describe('#getPersistedFeatureVisibility', () => {
       [],
       'traditional',
       featuresStart,
-      undefined
+      undefined,
+      []
     );
 
     const result = await client.getPersistedFeatureVisibility('foo');
@@ -496,7 +504,8 @@ describe('#getPersistedFeatureVisibility', () => {
       [],
       'traditional',
       featuresStart,
-      undefined
+      undefined,
+      []
     );
 
     await expect(client.getPersistedFeatureVisibility('not-found')).rejects.toThrow(
@@ -524,7 +533,8 @@ describe('#isInitialSolutionSetupRequired', () => {
       [],
       'traditional',
       featuresStart,
-      undefined
+      undefined,
+      []
     );
 
     await expect(client.isInitialSolutionSetupRequired()).resolves.toBe(true);
@@ -549,7 +559,8 @@ describe('#isInitialSolutionSetupRequired', () => {
       [],
       'traditional',
       featuresStart,
-      undefined
+      undefined,
+      []
     );
 
     await expect(client.isInitialSolutionSetupRequired()).resolves.toBe(false);
@@ -576,7 +587,8 @@ describe('#completeInitialSolutionSetup', () => {
       [],
       'traditional',
       featuresStart,
-      undefined
+      undefined,
+      []
     );
 
     await client.completeInitialSolutionSetup('oblt');
@@ -607,7 +619,8 @@ describe('#completeInitialSolutionSetup', () => {
       [],
       'traditional',
       featuresStart,
-      undefined
+      undefined,
+      []
     );
 
     await expect(client.completeInitialSolutionSetup('es')).rejects.toThrow(
@@ -676,7 +689,8 @@ describe('#create', () => {
       [],
       'traditional',
       featuresStart,
-      undefined
+      undefined,
+      []
     );
 
     const actualSpace = await client.create({ ...spaceToCreate, solution: 'es' });
@@ -723,7 +737,8 @@ describe('#create', () => {
       [],
       'traditional',
       featuresStart,
-      undefined
+      undefined,
+      []
     );
 
     await client.create({ ...spaceToCreate, name: '  foo-name  ' });
@@ -758,7 +773,8 @@ describe('#create', () => {
       [],
       'traditional',
       featuresStart,
-      undefined
+      undefined,
+      []
     );
 
     await expect(client.create(spaceToCreate)).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -796,7 +812,8 @@ describe('#create', () => {
       [],
       'serverless',
       featuresStart,
-      undefined
+      undefined,
+      []
     );
 
     await expect(
@@ -845,7 +862,8 @@ describe('#create', () => {
       [],
       'traditional',
       featuresStart,
-      undefined
+      undefined,
+      []
     );
 
     const actualSpace = await client.create({ ...spaceToCreate, solution: 'es' });
@@ -894,7 +912,8 @@ describe('#create', () => {
         [],
         'traditional',
         featuresStart,
-        undefined
+        undefined,
+        []
       );
 
       const actualSpace = await client.create(spaceToCreate);
@@ -933,7 +952,8 @@ describe('#create', () => {
         [],
         'traditional',
         featuresStart,
-        undefined
+        undefined,
+        []
       );
 
       await expect(
@@ -975,7 +995,8 @@ describe('#create', () => {
         [],
         'traditional',
         featuresStart,
-        undefined
+        undefined,
+        []
       );
 
       await expect(
@@ -1045,7 +1066,8 @@ describe('#update', () => {
       [],
       'traditional',
       featuresStart,
-      undefined
+      undefined,
+      []
     );
     const id = savedObject.id;
     const actualSpace = await client.update(id, { ...spaceToUpdate, solution: 'es' });
@@ -1093,7 +1115,8 @@ describe('#update', () => {
       [],
       'traditional',
       featuresStart,
-      undefined
+      undefined,
+      []
     );
 
     await client.update(DEFAULT_SPACE_ID, {
@@ -1132,7 +1155,8 @@ describe('#update', () => {
       [],
       'traditional',
       featuresStart,
-      undefined
+      undefined,
+      []
     );
     const id = savedObject.id;
     await client.update(id, { ...spaceToUpdate, name: '  foo-name  ' });
@@ -1157,7 +1181,8 @@ describe('#update', () => {
       [],
       'traditional',
       featuresStart,
-      undefined
+      undefined,
+      []
     );
     const id = savedObject.id;
     await client.update(id, { ...spaceToUpdate, name: '  new-name  ' });
@@ -1182,7 +1207,8 @@ describe('#update', () => {
       [],
       'serverless',
       featuresStart,
-      undefined
+      undefined,
+      []
     );
     const id = savedObject.id;
 
@@ -1216,7 +1242,8 @@ describe('#update', () => {
       [],
       'traditional',
       featuresStart,
-      undefined
+      undefined,
+      []
     );
     const id = savedObject.id;
 
@@ -1244,7 +1271,8 @@ describe('#update', () => {
       [],
       'traditional',
       featuresStart,
-      undefined
+      undefined,
+      []
     );
     const id = savedObject.id;
     await client.update(id, { ...spaceToUpdate, solution: 'es' });
@@ -1278,7 +1306,8 @@ describe('#update', () => {
         [],
         'traditional',
         featuresStart,
-        undefined
+        undefined,
+        []
       );
       const id = savedObject.id;
       await client.update(id, { ...spaceToUpdate, solution: 'es', disabledFeatures: [] });
@@ -1311,7 +1340,8 @@ describe('#update', () => {
         [],
         'traditional',
         featuresStart,
-        undefined
+        undefined,
+        []
       );
       const id = savedObject.id;
       await client.update(id, { ...spaceToUpdate, solution: 'es', disabledFeatures: [] });
@@ -1344,7 +1374,8 @@ describe('#update', () => {
         [],
         'traditional',
         featuresStart,
-        undefined
+        undefined,
+        []
       );
       const id = savedObject.id;
       await client.update(id, {
@@ -1381,7 +1412,8 @@ describe('#update', () => {
         [],
         'traditional',
         featuresStart,
-        undefined
+        undefined,
+        []
       );
       const id = savedObject.id;
       await client.update(id, {
@@ -1418,7 +1450,8 @@ describe('#update', () => {
         [],
         'traditional',
         featuresStart,
-        undefined
+        undefined,
+        []
       );
       const id = savedObject.id;
       await client.update(id, {
@@ -1454,7 +1487,8 @@ describe('#update', () => {
         [],
         'traditional',
         featuresStart,
-        undefined
+        undefined,
+        []
       );
       const id = savedObject.id;
       const actualSpace = await client.update(id, spaceToUpdate);
@@ -1482,7 +1516,8 @@ describe('#update', () => {
         [],
         'traditional',
         featuresStart,
-        undefined
+        undefined,
+        []
       );
       const id = savedObject.id;
 
@@ -1516,7 +1551,8 @@ describe('#update', () => {
         [],
         'traditional',
         featuresStart,
-        undefined
+        undefined,
+        []
       );
       const id = savedObject.id;
 
@@ -1571,7 +1607,8 @@ describe('#delete', () => {
       [],
       'traditional',
       featuresStart,
-      undefined
+      undefined,
+      []
     );
 
     await expect(client.delete(id)).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -1594,7 +1631,8 @@ describe('#delete', () => {
       [],
       'traditional',
       featuresStart,
-      undefined
+      undefined,
+      []
     );
 
     await client.delete(id);
@@ -1602,6 +1640,54 @@ describe('#delete', () => {
     expect(mockCallWithRequestRepository.get).toHaveBeenCalledWith('space', id);
     expect(mockCallWithRequestRepository.delete).toHaveBeenCalledWith('space', id);
     expect(mockCallWithRequestRepository.deleteByNamespace).toHaveBeenCalledWith(id);
+  });
+
+  test(`runs space delete handlers after the saved objects are deleted`, async () => {
+    const mockDebugLogger = createMockDebugLogger();
+    const mockConfig = createMockConfig();
+    const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+    mockCallWithRequestRepository.get.mockResolvedValue(notReservedSavedObject);
+    const handler = jest.fn().mockResolvedValue(undefined);
+
+    const client = new SpacesClient(
+      mockDebugLogger,
+      mockConfig,
+      mockCallWithRequestRepository,
+      [],
+      'traditional',
+      featuresStart,
+      undefined,
+      [handler]
+    );
+
+    await client.delete(id);
+
+    expect(handler).toHaveBeenCalledWith(id);
+    expect(handler.mock.invocationCallOrder[0]).toBeGreaterThan(
+      mockCallWithRequestRepository.deleteByNamespace.mock.invocationCallOrder[0]
+    );
+  });
+
+  test(`propagates space delete handler errors`, async () => {
+    const mockDebugLogger = createMockDebugLogger();
+    const mockConfig = createMockConfig();
+    const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+    mockCallWithRequestRepository.get.mockResolvedValue(notReservedSavedObject);
+    const handler = jest.fn().mockRejectedValue(new Error('handler failed'));
+
+    const client = new SpacesClient(
+      mockDebugLogger,
+      mockConfig,
+      mockCallWithRequestRepository,
+      [],
+      'traditional',
+      featuresStart,
+      undefined,
+      [handler]
+    );
+
+    await expect(client.delete(id)).rejects.toThrow('handler failed');
+    expect(mockCallWithRequestRepository.delete).toHaveBeenCalledWith('space', id);
   });
 });
 
@@ -1618,7 +1704,8 @@ describe('#disableLegacyUrlAliases', () => {
       [],
       'traditional',
       featuresStart,
-      undefined
+      undefined,
+      []
     );
     const aliases = [
       { targetSpace: 'space1', targetType: 'foo', sourceId: '123' },
@@ -1659,7 +1746,8 @@ describe('projectRouting functionality', () => {
         [],
         'traditional',
         featuresStart,
-        mockNpreClient
+        mockNpreClient,
+        []
       );
 
       const space = await client.get('foo');
@@ -1691,7 +1779,8 @@ describe('projectRouting functionality', () => {
         [],
         'traditional',
         featuresStart,
-        mockNpreClient
+        mockNpreClient,
+        []
       );
 
       const space = await client.get('foo');
@@ -1721,7 +1810,8 @@ describe('projectRouting functionality', () => {
         [],
         'traditional',
         featuresStart,
-        undefined
+        undefined,
+        []
       );
 
       const space = await client.get('foo');
@@ -1756,7 +1846,8 @@ describe('projectRouting functionality', () => {
         [],
         'traditional',
         featuresStart,
-        mockNpreClient
+        mockNpreClient,
+        []
       );
 
       const spaceToCreate = {
@@ -1795,7 +1886,8 @@ describe('projectRouting functionality', () => {
         [],
         'traditional',
         featuresStart,
-        undefined
+        undefined,
+        []
       );
 
       const spaceToCreate = {
@@ -1825,7 +1917,8 @@ describe('projectRouting functionality', () => {
         [],
         'traditional',
         featuresStart,
-        mockNpreClient
+        mockNpreClient,
+        []
       );
 
       const spaceToCreate = {
@@ -1853,7 +1946,8 @@ describe('projectRouting functionality', () => {
         [],
         'traditional',
         featuresStart,
-        undefined
+        undefined,
+        []
       );
 
       const spaceToCreate = {
@@ -1891,7 +1985,8 @@ describe('projectRouting functionality', () => {
         [],
         'traditional',
         featuresStart,
-        mockNpreClient
+        mockNpreClient,
+        []
       );
 
       const spaceToCreate = {
@@ -1935,7 +2030,8 @@ describe('projectRouting functionality', () => {
         [],
         'traditional',
         featuresStart,
-        mockNpreClient
+        mockNpreClient,
+        []
       );
 
       const spaceToUpdate = {
@@ -1980,7 +2076,8 @@ describe('projectRouting functionality', () => {
         [],
         'traditional',
         featuresStart,
-        mockNpreClient
+        mockNpreClient,
+        []
       );
 
       const spaceToUpdate = {
@@ -2009,7 +2106,8 @@ describe('projectRouting functionality', () => {
         [],
         'traditional',
         featuresStart,
-        undefined
+        undefined,
+        []
       );
 
       const spaceToUpdate = {
@@ -2036,7 +2134,8 @@ describe('projectRouting functionality', () => {
         [],
         'traditional',
         featuresStart,
-        undefined
+        undefined,
+        []
       );
 
       const spaceToUpdate = {
@@ -2077,7 +2176,8 @@ describe('projectRouting functionality', () => {
         [],
         'traditional',
         featuresStart,
-        mockNpreClient
+        mockNpreClient,
+        []
       );
 
       await client.delete('foo');
@@ -2131,7 +2231,8 @@ describe('projectRouting functionality', () => {
         [],
         'traditional',
         featuresStart,
-        mockNpreClient
+        mockNpreClient,
+        []
       );
 
       await client.delete('foo');
@@ -2162,7 +2263,8 @@ describe('projectRouting functionality', () => {
         [],
         'traditional',
         featuresStart,
-        undefined
+        undefined,
+        []
       );
 
       await client.delete('foo');
@@ -2191,7 +2293,8 @@ describe('projectRouting functionality', () => {
         [],
         'traditional',
         featuresStart,
-        undefined
+        undefined,
+        []
       );
 
       await client.delete('foo');

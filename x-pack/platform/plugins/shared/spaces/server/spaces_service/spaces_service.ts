@@ -10,7 +10,12 @@ import { DEFAULT_SPACE_ID, type SpaceId } from '@kbn/core-spaces-common';
 
 import type { Space } from '../../common';
 import { namespaceToSpaceId, spaceIdToNamespace } from '../lib/utils/namespace';
-import type { ISpacesClient, SpacesClientServiceStart } from '../spaces_client';
+import type {
+  ISpacesClient,
+  SpaceDeleteHandler,
+  SpacesClientServiceSetup,
+  SpacesClientServiceStart,
+} from '../spaces_client';
 
 /**
  * The Spaces service setup contract.
@@ -33,6 +38,12 @@ export interface SpacesServiceSetup {
    * @param namespace the namespace to convert.
    */
   namespaceToSpaceId(namespace: string | undefined): string;
+
+  /**
+   * Registers a handler that runs after a space and its saved objects have been deleted.
+   * @param handler the handler to run.
+   */
+  registerSpaceDeleteHandler(handler: SpaceDeleteHandler): void;
 }
 
 /**
@@ -76,6 +87,10 @@ export interface SpacesServiceStart {
   namespaceToSpaceId(namespace: string | undefined): string;
 }
 
+interface SpacesServiceSetupDeps {
+  spacesClientService: SpacesClientServiceSetup;
+}
+
 interface SpacesServiceStartDeps {
   spacesClientService: SpacesClientServiceStart;
 }
@@ -84,11 +99,12 @@ interface SpacesServiceStartDeps {
  * Service for interacting with spaces.
  */
 export class SpacesService {
-  public setup(): SpacesServiceSetup {
+  public setup({ spacesClientService }: SpacesServiceSetupDeps): SpacesServiceSetup {
     return {
       getSpaceId: (request: KibanaRequest) => request.spaceId ?? DEFAULT_SPACE_ID,
       spaceIdToNamespace,
       namespaceToSpaceId,
+      registerSpaceDeleteHandler: spacesClientService.registerSpaceDeleteHandler,
     };
   }
 

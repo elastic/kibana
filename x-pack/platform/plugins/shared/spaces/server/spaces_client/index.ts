@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export type { ISpacesClient } from './spaces_client';
+export type { ISpacesClient, SpaceDeleteHandler } from './spaces_client';
 export { SpacesClient } from './spaces_client';
 export type {
   SpacesClientServiceSetup,

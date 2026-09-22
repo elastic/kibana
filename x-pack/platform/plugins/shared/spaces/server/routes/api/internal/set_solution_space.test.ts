@@ -15,6 +15,7 @@ import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { initSetSolutionSpaceApi } from './set_solution_space';
 import { spacesConfig } from '../../../lib/__fixtures__';
 import { SpacesClientService } from '../../../spaces_client';
+import { spacesClientServiceMock } from '../../../spaces_client/spaces_client_service.mock';
 import { SpacesService } from '../../../spaces_service';
 import {
   createMockSavedObjectsRepository,
@@ -40,7 +41,7 @@ describe('PUT /internal/spaces/space/{id}/solution', () => {
       .setClientRepositoryFactory(() => savedObjectsRepositoryMock);
 
     const service = new SpacesService();
-    service.setup();
+    service.setup({ spacesClientService: spacesClientServiceMock.createSetup() });
 
     const clientServiceStart = clientService.start(
       coreStart,

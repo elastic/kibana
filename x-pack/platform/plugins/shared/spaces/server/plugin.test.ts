@@ -45,11 +45,13 @@ describe('Spaces plugin', () => {
           },
           "spacesClient": Object {
             "registerClientWrapper": [Function],
+            "registerSpaceDeleteHandler": [Function],
             "setClientRepositoryFactory": [Function],
           },
           "spacesService": Object {
             "getSpaceId": [Function],
             "namespaceToSpaceId": [Function],
+            "registerSpaceDeleteHandler": [Function],
             "spaceIdToNamespace": [Function],
           },
         }

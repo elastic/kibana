@@ -23,6 +23,7 @@ import type { SpaceContentTypeSummaryItem } from './get_content_summary';
 import { initGetSpaceContentSummaryApi } from './get_content_summary';
 import { spacesConfig } from '../../../lib/__fixtures__';
 import { SpacesClientService } from '../../../spaces_client';
+import { spacesClientServiceMock } from '../../../spaces_client/spaces_client_service.mock';
 import { SpacesService } from '../../../spaces_service';
 import {
   createMockSavedObjectsRepository,
@@ -77,7 +78,7 @@ describe('GET /internal/spaces/{spaceId}/content_summary', () => {
     );
 
     const service = new SpacesService();
-    service.setup();
+    service.setup({ spacesClientService: spacesClientServiceMock.createSetup() });
 
     const clientServiceStart = clientService.start(
       coreStart,

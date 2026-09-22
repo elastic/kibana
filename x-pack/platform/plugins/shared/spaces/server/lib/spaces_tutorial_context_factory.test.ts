@@ -34,7 +34,7 @@ describe('createSpacesTutorialContextFactory', () => {
   });
 
   it('should create context with the current space id for the default space', async () => {
-    service.setup();
+    service.setup({ spacesClientService: spacesClientServiceMock.createSetup() });
     const contextFactory = createSpacesTutorialContextFactory(() =>
       service.start({
         spacesClientService: spacesClientServiceMock.createStart(),

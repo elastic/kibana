@@ -20,6 +20,7 @@ import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { initDisableLegacyUrlAliasesApi } from './disable_legacy_url_aliases';
 import { spacesConfig } from '../../../lib/__fixtures__';
 import { SpacesClientService } from '../../../spaces_client';
+import { spacesClientServiceMock } from '../../../spaces_client/spaces_client_service.mock';
 import { SpacesService } from '../../../spaces_service';
 import { usageStatsClientMock } from '../../../usage_stats/usage_stats_client.mock';
 import { usageStatsServiceMock } from '../../../usage_stats/usage_stats_service.mock';
@@ -49,7 +50,7 @@ describe('_disable_legacy_url_aliases', () => {
       .setClientRepositoryFactory(() => savedObjectsRepositoryMock);
 
     const service = new SpacesService();
-    service.setup();
+    service.setup({ spacesClientService: spacesClientServiceMock.createSetup() });
 
     const usageStatsClient = usageStatsClientMock.create();
     const usageStatsServicePromise = Promise.resolve(

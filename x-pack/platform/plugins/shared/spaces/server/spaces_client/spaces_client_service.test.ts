@@ -7,7 +7,7 @@
 
 import * as Rx from 'rxjs';
 
-import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import { coreMock, httpServerMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import type { CPSServerStart } from '@kbn/cps/server/types';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
@@ -61,6 +61,29 @@ describe('SpacesClientService', () => {
   });
 
   describe('#start', () => {
+    it('passes registered space delete handlers to the client', async () => {
+      const service = new SpacesClientService(debugLogger, 'traditional');
+      const setup = service.setup({ config$: Rx.of(spacesConfig) });
+
+      const handler = jest.fn().mockResolvedValue(undefined);
+      setup.registerSpaceDeleteHandler(handler);
+
+      const coreStart = coreMock.createStart();
+      const repository = savedObjectsRepositoryMock.create();
+      repository.get.mockResolvedValue({
+        id: 'foo',
+        type: 'space',
+        references: [],
+        attributes: { name: 'foo' },
+      });
+      coreStart.savedObjects.createScopedRepository.mockReturnValue(repository);
+      const start = service.start(coreStart, featuresPluginMock.createStart(), undefined);
+
+      await start.createSpacesClient(httpServerMock.createKibanaRequest()).delete('foo');
+
+      expect(handler).toHaveBeenCalledWith('foo');
+    });
+
     it('throws if config is not available', () => {
       const service = new SpacesClientService(debugLogger, 'traditional');
       service.setup({ config$: new Rx.Observable<ConfigType>() });

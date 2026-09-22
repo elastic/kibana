@@ -50,11 +50,13 @@ const createService = () => {
   coreStart.savedObjects.createInternalRepository.mockReturnValue(respositoryMock);
   coreStart.savedObjects.createScopedRepository.mockReturnValue(respositoryMock);
 
-  const spacesServiceSetup = spacesService.setup();
-
   const spacesClientService = new SpacesClientService(jest.fn(), 'traditional');
-  spacesClientService.setup({
+  const spacesClientServiceSetup = spacesClientService.setup({
     config$: Rx.of(spacesConfig),
+  });
+
+  const spacesServiceSetup = spacesService.setup({
+    spacesClientService: spacesClientServiceSetup,
   });
 
   const spacesClientServiceStart = spacesClientService.start(

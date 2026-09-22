@@ -18,7 +18,7 @@ describe('GET /internal/spaces/_active_space', () => {
     const router = httpServiceMock.createRouter();
 
     const service = new SpacesService();
-    service.setup();
+    service.setup({ spacesClientService: spacesClientServiceMock.createSetup() });
 
     initGetActiveSpaceApi({
       router,

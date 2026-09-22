@@ -12,6 +12,7 @@ const createSpacesClientServiceSetupMock = () =>
   ({
     registerClientWrapper: jest.fn(),
     setClientRepositoryFactory: jest.fn(),
+    registerSpaceDeleteHandler: jest.fn(),
   } as jest.Mocked<SpacesClientServiceSetup>);
 
 const createSpacesClientServiceStartMock = () =>

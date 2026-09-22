@@ -38,6 +38,12 @@ const DEFAULT_PURPOSE = 'any';
 const LEGACY_URL_ALIAS_TYPE = 'legacy-url-alias';
 
 /**
+ * Runs after a space and its saved objects have been deleted.
+ * @param spaceId the id of the deleted space.
+ */
+export type SpaceDeleteHandler = (spaceId: string) => Promise<void>;
+
+/**
  * Client interface for interacting with spaces.
  */
 export interface ISpacesClient {
@@ -122,7 +128,8 @@ export class SpacesClient implements ISpacesClient {
     private readonly nonGlobalTypeNames: string[],
     private readonly buildFlavour: BuildFlavor,
     private readonly features: FeaturesPluginStart,
-    private readonly npreClient: INpreClient | undefined
+    private readonly npreClient: INpreClient | undefined,
+    private readonly spaceDeleteHandlers: readonly SpaceDeleteHandler[]
   ) {
     this.isServerless = this.buildFlavour === 'serverless';
     this.deprecatedFeaturesReferences = this.collectDeprecatedFeaturesReferences(
@@ -387,6 +394,10 @@ export class SpacesClient implements ISpacesClient {
           throw error;
         }
       }
+    }
+
+    for (const handler of this.spaceDeleteHandlers) {
+      await handler(id);
     }
   }
 

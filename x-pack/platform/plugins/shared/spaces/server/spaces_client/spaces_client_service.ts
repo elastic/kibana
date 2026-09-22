@@ -17,7 +17,7 @@ import type {
 import type { CPSServerStart } from '@kbn/cps/server';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/server';
 
-import type { ISpacesClient } from './spaces_client';
+import type { ISpacesClient, SpaceDeleteHandler } from './spaces_client';
 import { SpacesClient } from './spaces_client';
 import type { ConfigType } from '../config';
 
@@ -55,6 +55,11 @@ export interface SpacesClientServiceSetup {
    * to register multiple wrappers at this time.
    */
   registerClientWrapper: (wrapper: SpacesClientWrapper) => void;
+
+  /**
+   * Registers a handler that runs after a space and its saved objects have been deleted.
+   */
+  registerSpaceDeleteHandler: (handler: SpaceDeleteHandler) => void;
 }
 
 export interface SpacesClientServiceStart {
@@ -74,6 +79,8 @@ export class SpacesClientService {
   private config?: ConfigType;
 
   private clientWrapper?: SpacesClientWrapper;
+
+  private readonly spaceDeleteHandlers: SpaceDeleteHandler[] = [];
 
   constructor(
     private readonly debugLogger: (message: string) => void,
@@ -97,6 +104,9 @@ export class SpacesClientService {
           throw new Error(`Client wrapper has already been set`);
         }
         this.clientWrapper = wrapper;
+      },
+      registerSpaceDeleteHandler: (handler: SpaceDeleteHandler) => {
+        this.spaceDeleteHandlers.push(handler);
       },
     };
   }
@@ -130,7 +140,8 @@ export class SpacesClientService {
           nonGlobalTypeNames,
           this.buildFlavour,
           features,
-          cps?.createNpreClient(request)
+          cps?.createNpreClient(request),
+          this.spaceDeleteHandlers
         );
         if (this.clientWrapper) {
           return this.clientWrapper(request, baseClient);

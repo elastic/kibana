@@ -16,6 +16,7 @@ const createSetupContractMock = (spaceId = DEFAULT_SPACE_ID) => {
     namespaceToSpaceId: jest.fn().mockImplementation(namespaceToSpaceId),
     spaceIdToNamespace: jest.fn().mockImplementation(spaceIdToNamespace),
     getSpaceId: jest.fn().mockReturnValue(spaceId),
+    registerSpaceDeleteHandler: jest.fn(),
   };
   return setupContract;
 };

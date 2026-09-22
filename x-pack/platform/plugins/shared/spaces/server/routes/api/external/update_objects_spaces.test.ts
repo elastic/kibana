@@ -21,6 +21,7 @@ import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { initUpdateObjectsSpacesApi } from './update_objects_spaces';
 import { spacesConfig } from '../../../lib/__fixtures__';
 import { SpacesClientService } from '../../../spaces_client';
+import { spacesClientServiceMock } from '../../../spaces_client/spaces_client_service.mock';
 import { SpacesService } from '../../../spaces_service';
 import { usageStatsServiceMock } from '../../../usage_stats/usage_stats_service.mock';
 import {
@@ -50,7 +51,7 @@ describe('update_objects_spaces', () => {
       .setClientRepositoryFactory(() => savedObjectsRepositoryMock);
 
     const service = new SpacesService();
-    service.setup();
+    service.setup({ spacesClientService: spacesClientServiceMock.createSetup() });
 
     const usageStatsServicePromise = Promise.resolve(usageStatsServiceMock.createSetupContract());
 
