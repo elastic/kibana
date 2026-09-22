@@ -125,7 +125,7 @@ test.describe('Security - Users management', { tag: tags.stateful.classic }, () 
         email: 'optionalUser@elastic.co',
       });
 
-      await expect(page).toHaveURL(/management\/security\/users/);
+      await expect(page).toHaveURL(/\/management\/security\/users\/?(?:\?.*)?$/);
 
       const users = await pageObjects.securityUsers.getAllUsers();
       const user = users.find((u) => u.username === optionalUser.username);

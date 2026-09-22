@@ -83,6 +83,7 @@ export class SecurityUsersPage {
 
   async submitUpdateUser() {
     await this.page.getByRole('button', { name: 'Update user' }).click();
+    await this.createUserButton.waitFor({ state: 'visible' });
   }
 
   async createUser(user: UserFormValues) {
