@@ -594,6 +594,73 @@ describe('propagateRoleArnToPackagePolicies', () => {
     expect(packagePolicyService.update).not.toHaveBeenCalled();
   });
 
+  it('rejects managed package policies before any write', async () => {
+    // packagePolicyService.update only refuses a managed policy when the incoming payload sets
+    // is_managed. Omitting it lets a connector edit rewrite Role ARN vars the normal update
+    // flow would reject.
+    mockListReturns([{ ...makePolicy('a'), is_managed: true }, makePolicy('b')]);
+
+    let caught: CloudConnectorRoleArnPropagationError | undefined;
+    try {
+      await propagateRoleArnToPackagePolicies({
+        soClient,
+        esClient,
+        connectorId: CONNECTOR_ID,
+        newRoleArn: NEW_ARN,
+      });
+    } catch (err) {
+      caught = err as CloudConnectorRoleArnPropagationError;
+    }
+
+    expect(caught).toBeInstanceOf(CloudConnectorRoleArnPropagationError);
+    expect(caught?.detail.updateFailed).toEqual(['a']);
+    expect(caught?.message).toMatch(/managed/i);
+    expect(packagePolicyService.update).not.toHaveBeenCalled();
+    expect(soClient.update).not.toHaveBeenCalled();
+  });
+
+  it('rejects a managed rollback snapshot before rewriting it', async () => {
+    mockListReturns([makePolicy('a', NEW_ARN)]);
+    soClient.find.mockResolvedValue({
+      saved_objects: [
+        {
+          id: 'a:prev',
+          version: 'Wz-prev',
+          attributes: {
+            is_managed: true,
+            latest_revision: false,
+            inputs: [
+              {
+                type: 'cloudbeat/cis_aws',
+                enabled: true,
+                vars: { role_arn: { type: 'text', value: OLD_ARN } },
+                streams: [],
+              },
+            ],
+          },
+        },
+      ],
+      total: 1,
+    });
+
+    let caught: CloudConnectorRoleArnPropagationError | undefined;
+    try {
+      await propagateRoleArnToPackagePolicies({
+        soClient,
+        esClient,
+        connectorId: CONNECTOR_ID,
+        newRoleArn: NEW_ARN,
+      });
+    } catch (err) {
+      caught = err as CloudConnectorRoleArnPropagationError;
+    }
+
+    expect(caught).toBeInstanceOf(CloudConnectorRoleArnPropagationError);
+    expect(caught?.detail.updateFailed).toEqual(['a:prev']);
+    expect(soClient.update).not.toHaveBeenCalled();
+    expect(packagePolicyService.update).not.toHaveBeenCalled();
+  });
+
   it('is a no-op when no policies reference the connector', async () => {
     mockListReturns([]);
     await propagateRoleArnToPackagePolicies({

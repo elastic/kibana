@@ -102,6 +102,9 @@ const renderPolicyIds = (ids: string[]): string => {
  *   1. `return undefined` — no package policy references the connector (nothing to do).
  *   2. `return undefined` — policies reference the connector but none carry a `role_arn` variable.
  *   3. `throw`  — one or more referencing policies lack a `package` (cannot be updated).
+ *   3b. `throw` — one or more policies (or `:prev` snapshots) are managed. `packagePolicyService.update`
+ *      rejects those only when the payload sets `is_managed`, so the fan-out also refuses them
+ *      before any write.
  *   4. `return RoleArnPropagationRollback` — Phase 1 forward writes all succeeded and the
  *      agent-policy revision bump succeeded. Caller is safe to write the connector; on that
  *      write's failure call `rollback.revert()` to restore exact per-policy snapshots.
@@ -159,6 +162,7 @@ export const propagateRoleArnToPackagePolicies = async ({
     })
     .filter((plan): plan is PolicyPlan => plan !== null);
 
+  const managedSnapshotIds: string[] = [];
   const PREVIOUS_REVISION_PAGE_SIZE = 100;
 
   /**
@@ -194,6 +198,11 @@ export const propagateRoleArnToPackagePolicies = async ({
         );
         if (!changed) {
           continue;
+        }
+        // Snapshot writes go through `soClient.update`, which has no managed-policy guard.
+        // Collect them here so the fan-out can refuse the whole rewrite before any mutation.
+        if (attributes.is_managed) {
+          managedSnapshotIds.push(savedObject.id);
         }
         plansForSnapshots.push({
           id: savedObject.id,
@@ -299,6 +308,21 @@ export const propagateRoleArnToPackagePolicies = async ({
     );
   }
 
+  // Managed policies are immutable unless the caller passes `force`. Fail before any write so a
+  // mixed set does not update the unmanaged policies and then have to roll them back.
+  const managedIds = [
+    ...plans.filter((plan) => plan.policy.is_managed).map((plan) => plan.policy.id),
+    ...managedSnapshotIds,
+  ].sort();
+  if (managedIds.length > 0) {
+    throw new CloudConnectorRoleArnPropagationError(
+      `Cannot fan out role ARN for connector ${connectorId}: ${managedIds.length} managed package ${
+        managedIds.length === 1 ? 'policy cannot' : 'policies cannot'
+      } be updated (ids: ${renderPolicyIds(managedIds)}).`,
+      { updateFailed: managedIds, revertFailed: [], bumpFailed: false }
+    );
+  }
+
   if (plans.length > 0) {
     logger.info(
       `Fanning out new role ARN to ${plans.length} package ${
@@ -319,6 +343,10 @@ export const propagateRoleArnToPackagePolicies = async ({
       plan.policy.id,
       {
         ...toPackagePolicyUpdate(plan.policy),
+        // The service rejects managed policies only when the incoming payload sets this flag,
+        // not from the stored policy. Keep it so a managed policy cannot be rewritten as if it
+        // were unmanaged.
+        ...(plan.policy.is_managed ? { is_managed: true } : {}),
         vars,
         inputs,
         // `packagePolicyService.update` passes this through to `soClient.update` as the OCC
