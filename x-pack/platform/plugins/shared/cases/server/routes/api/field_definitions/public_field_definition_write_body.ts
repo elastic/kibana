@@ -11,6 +11,7 @@ import {
   MAX_FIELD_DEFINITION_NAME_LENGTH,
   MAX_FIELD_DEFINITION_DESCRIPTION_LENGTH,
   MAX_FIELD_DEFINITION_DEFINITION_LENGTH,
+  MAX_OWNER_LENGTH,
 } from '../../../../common/constants';
 
 /**
@@ -26,7 +27,7 @@ import {
  */
 export const PublicFieldDefinitionWriteBodySchema = z.strictObject({
   name: z.string().min(1).max(MAX_FIELD_DEFINITION_NAME_LENGTH).optional(),
-  owner: FieldDefinitionSchema.shape.owner,
+  owner: z.string().min(1).max(MAX_OWNER_LENGTH),
   definition: z.string().max(MAX_FIELD_DEFINITION_DEFINITION_LENGTH),
   description: z.string().max(MAX_FIELD_DEFINITION_DESCRIPTION_LENGTH).optional(),
   isGlobal: FieldDefinitionSchema.shape.isGlobal,

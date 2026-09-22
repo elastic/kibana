@@ -105,11 +105,20 @@ post:
             $ref: '../components/examples/field_definition_write_request.yaml'
   responses:
     '200':
-      description: Indicates a successful call. Returns the created field definition.
+      description: >
+        Indicates a successful call. Returns the created field definition, or `{ "valid": true }`
+        when `dry_run=true`.
       content:
         application/json:
           schema:
-            $ref: '../components/schemas/field_definition_response.yaml'
+            oneOf:
+              - $ref: '../components/schemas/field_definition_response.yaml'
+              - type: object
+                required:
+                  - valid
+                properties:
+                  valid:
+                    type: boolean
           examples:
             createCaseFieldDefinitionResponse:
               $ref: '../components/examples/get_case_field_definition_response.yaml'

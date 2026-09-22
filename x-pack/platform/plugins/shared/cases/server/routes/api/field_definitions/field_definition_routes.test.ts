@@ -13,6 +13,7 @@ import {
   CASE_FIELD_DEFINITION_DETAILS_URL,
 } from '../../../../common/constants';
 import { getPublicFieldDefinitionsRoute } from './get_public_field_definitions_route';
+import { getPublicFieldDefinitionRoute } from './get_public_field_definition_route';
 import { postPublicFieldDefinitionRoute } from './post_public_field_definition_route';
 import { putPublicFieldDefinitionRoute } from './put_public_field_definition_route';
 import { deletePublicFieldDefinitionRoute } from './delete_public_field_definition_route';
@@ -404,6 +405,189 @@ describe('Public Field Definition Routes', () => {
       await putPublicFieldDefinitionRoute.handler({ context, request, response });
 
       expect(response.forbidden).toHaveBeenCalled();
+    });
+  });
+
+  describe('GET /api/cases/field_definitions/{field_definition_id}', () => {
+    it('returns the field definition for the given ID', async () => {
+      const context = createMockContext();
+      const request = { params: { field_definition_id: 'fd-1' } };
+      const response = createMockResponse();
+
+      // @ts-expect-error: mocking necessary properties for handler logic only
+      await getPublicFieldDefinitionRoute.handler({ context, request, response });
+
+      expect(response.ok).toHaveBeenCalledWith({
+        body: expect.objectContaining({ fieldDefinitionId: 'fd-1', name: 'priority' }),
+      });
+    });
+
+    it('omits legacyKey from the response', async () => {
+      const client = createMockFieldDefinitionsClient();
+      client.getFieldDefinition.mockResolvedValue(
+        toSavedObject({ ...makeFieldDef(), legacyKey: 'ck-1' })
+      );
+      const context = createMockContext(client);
+      const request = { params: { field_definition_id: 'fd-1' } };
+      const response = createMockResponse();
+
+      // @ts-expect-error: mocking necessary properties for handler logic only
+      await getPublicFieldDefinitionRoute.handler({ context, request, response });
+
+      const body = response.ok.mock.calls[0][0].body;
+      expect(body).not.toHaveProperty('legacyKey');
+    });
+
+    it('returns 404 when the field definition is not found', async () => {
+      const client = createMockFieldDefinitionsClient();
+      client.getFieldDefinition.mockRejectedValue(Boom.notFound('Field definition not found'));
+      const context = createMockContext(client);
+      const request = { params: { field_definition_id: 'fd-missing' } };
+      const response = createMockResponse();
+
+      // @ts-expect-error: mocking necessary properties for handler logic only
+      await getPublicFieldDefinitionRoute.handler({ context, request, response });
+
+      expect(response.notFound).toHaveBeenCalled();
+      expect(response.ok).not.toHaveBeenCalled();
+    });
+
+    it('returns 403 when the user lacks read permission', async () => {
+      const client = createMockFieldDefinitionsClient();
+      client.getFieldDefinition.mockRejectedValue(Boom.forbidden('Insufficient privileges'));
+      const context = createMockContext(client);
+      const request = { params: { field_definition_id: 'fd-1' } };
+      const response = createMockResponse();
+
+      // @ts-expect-error: mocking necessary properties for handler logic only
+      await getPublicFieldDefinitionRoute.handler({ context, request, response });
+
+      expect(response.forbidden).toHaveBeenCalled();
+      expect(response.ok).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('POST /api/cases/field_definitions — dry_run=true', () => {
+    const validBody = {
+      name: 'priority',
+      owner: 'cases',
+      definition: buildDefinitionYaml('priority'),
+      description: 'Priority level',
+      isGlobal: false,
+    };
+
+    it('calls validateCreateFieldDefinition, does not call createFieldDefinition, and returns { valid: true }', async () => {
+      const client = createMockFieldDefinitionsClient();
+      const context = createMockContext(client);
+      const request = { body: validBody, query: { dry_run: true } };
+      const response = createMockResponse();
+
+      // @ts-expect-error: mocking necessary properties for handler logic only
+      await postPublicFieldDefinitionRoute.handler({ context, request, response });
+
+      expect(client.validateCreateFieldDefinition).toHaveBeenCalled();
+      expect(client.createFieldDefinition).not.toHaveBeenCalled();
+      expect(response.ok).toHaveBeenCalledWith({ body: { valid: true } });
+    });
+
+    it('returns 409 when the validator detects a name conflict', async () => {
+      const client = createMockFieldDefinitionsClient();
+      client.validateCreateFieldDefinition.mockRejectedValue(
+        Boom.conflict('A field definition with name "priority" already exists for this owner.')
+      );
+      const context = createMockContext(client);
+      const request = { body: validBody, query: { dry_run: true } };
+      const response = createMockResponse();
+
+      // @ts-expect-error: mocking necessary properties for handler logic only
+      await postPublicFieldDefinitionRoute.handler({ context, request, response });
+
+      expect(response.conflict).toHaveBeenCalled();
+      expect(response.ok).not.toHaveBeenCalled();
+    });
+
+    it('returns 403 when the validator throws forbidden', async () => {
+      const client = createMockFieldDefinitionsClient();
+      client.validateCreateFieldDefinition.mockRejectedValue(
+        Boom.forbidden('Insufficient privileges')
+      );
+      const context = createMockContext(client);
+      const request = { body: validBody, query: { dry_run: true } };
+      const response = createMockResponse();
+
+      // @ts-expect-error: mocking necessary properties for handler logic only
+      await postPublicFieldDefinitionRoute.handler({ context, request, response });
+
+      expect(response.forbidden).toHaveBeenCalled();
+      expect(response.ok).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('PUT /api/cases/field_definitions/{field_definition_id} — dry_run=true', () => {
+    const validBody = {
+      name: 'priority',
+      owner: 'cases',
+      definition: buildDefinitionYaml('priority'),
+      description: 'Updated priority level',
+      isGlobal: false,
+    };
+
+    it('calls validateUpdateFieldDefinition, does not call updateFieldDefinition, and returns { valid: true }', async () => {
+      const client = createMockFieldDefinitionsClient();
+      const context = createMockContext(client);
+      const request = {
+        params: { field_definition_id: 'fd-1' },
+        body: validBody,
+        query: { dry_run: true },
+      };
+      const response = createMockResponse();
+
+      // @ts-expect-error: mocking necessary properties for handler logic only
+      await putPublicFieldDefinitionRoute.handler({ context, request, response });
+
+      expect(client.validateUpdateFieldDefinition).toHaveBeenCalled();
+      expect(client.updateFieldDefinition).not.toHaveBeenCalled();
+      expect(response.ok).toHaveBeenCalledWith({ body: { valid: true } });
+    });
+
+    it('returns 404 when the field definition is not found during dry_run', async () => {
+      const client = createMockFieldDefinitionsClient();
+      client.validateUpdateFieldDefinition.mockRejectedValue(
+        Boom.notFound('Field definition not found')
+      );
+      const context = createMockContext(client);
+      const request = {
+        params: { field_definition_id: 'fd-missing' },
+        body: validBody,
+        query: { dry_run: true },
+      };
+      const response = createMockResponse();
+
+      // @ts-expect-error: mocking necessary properties for handler logic only
+      await putPublicFieldDefinitionRoute.handler({ context, request, response });
+
+      expect(response.notFound).toHaveBeenCalled();
+      expect(response.ok).not.toHaveBeenCalled();
+    });
+
+    it('returns 409 when the validator detects an identity-immutable violation', async () => {
+      const client = createMockFieldDefinitionsClient();
+      client.validateUpdateFieldDefinition.mockRejectedValue(
+        Boom.conflict('Cannot change name of field definition')
+      );
+      const context = createMockContext(client);
+      const request = {
+        params: { field_definition_id: 'fd-1' },
+        body: validBody,
+        query: { dry_run: true },
+      };
+      const response = createMockResponse();
+
+      // @ts-expect-error: mocking necessary properties for handler logic only
+      await putPublicFieldDefinitionRoute.handler({ context, request, response });
+
+      expect(response.conflict).toHaveBeenCalled();
+      expect(response.ok).not.toHaveBeenCalled();
     });
   });
 

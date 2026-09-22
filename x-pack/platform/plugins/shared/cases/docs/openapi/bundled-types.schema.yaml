@@ -1247,11 +1247,19 @@ paths:
                 $ref: '#/components/examples/field_definition_write_request'
       responses:
         '200':
-          description: Indicates a successful call. Returns the created field definition.
+          description: |
+            Indicates a successful call. Returns the created field definition, or `{ "valid": true }` when `dry_run=true`.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/field_definition_response'
+                oneOf:
+                  - $ref: '#/components/schemas/field_definition_response'
+                  - type: object
+                    required:
+                      - valid
+                    properties:
+                      valid:
+                        type: boolean
               examples:
                 createCaseFieldDefinitionResponse:
                   $ref: '#/components/examples/get_case_field_definition_response'
@@ -1344,7 +1352,7 @@ paths:
       summary: Update editable attributes of a reusable field definition
       operationId: updateCaseFieldDefinitionDefaultSpace
       description: |
-        Updates editable attributes of a reusable field definition. Server-managed attributes (`displayOrder`, `legacyKey`) are preserved. You must have the "Manage templates" sub-privilege for the Cases feature of the owning solution. A field's `name` and YAML `type` are immutable after creation — an attempt to change either returns `409` with `attributes.code = "field_identity_immutable"` and `attributes.changed` listing which identity attributes were modified. Once `isGlobal` is set to `true` it cannot be set back to `false`. Requires the Cases feature to be enabled in the space. Use `dry_run=true` to validate the request without writing anything.
+        Updates editable attributes of a reusable field definition. Server-managed attributes (`displayOrder`, `legacyKey`) are preserved. You must have the "Manage templates" sub-privilege for the Cases feature of the owning solution. A field's `name` and YAML `type` are immutable after creation — an attempt to change either returns `409` with `attributes.code = "field_identity_immutable"` and `attributes.changed` listing which identity attributes were modified. Setting `isGlobal` to `false` when the field is linked to an active v1 custom field in the Cases configuration returns `409`; otherwise demotion is allowed. Requires the Cases feature to be enabled in the space. Use `dry_run=true` to validate the request without writing anything.
       x-state: Technical preview
       tags:
         - cases
@@ -1369,11 +1377,19 @@ paths:
                 $ref: '#/components/examples/field_definition_write_request'
       responses:
         '200':
-          description: Indicates a successful call. Returns the updated field definition.
+          description: |
+            Indicates a successful call. Returns the updated field definition, or `{ "valid": true }` when `dry_run=true`.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/field_definition_response'
+                oneOf:
+                  - $ref: '#/components/schemas/field_definition_response'
+                  - type: object
+                    required:
+                      - valid
+                    properties:
+                      valid:
+                        type: boolean
               examples:
                 updateCaseFieldDefinitionResponse:
                   $ref: '#/components/examples/get_case_field_definition_response'
@@ -1556,7 +1572,7 @@ paths:
                 getDefaultCaseResponse:
                   $ref: '#/components/examples/get_case_response'
                 getDefaultObservabilityCaseResponse:
-                  $ref: '#/components/examples/get_case_observability_response'
+                  $ref: ../components/examples/get_case_observability_response.yaml
         '401':
           description: Authorization information is missing or invalid.
           content:
@@ -4085,6 +4101,7 @@ components:
 
         Identity constraints: the `name` property must match the `name` key in the YAML `definition`. When `name` is omitted, the server extracts it from the `definition` YAML automatically. Once created, a field's `name` and YAML `type` are immutable — they determine the key under which case values are stored. An attempt to change either returns `409` with `attributes.code = "field_identity_immutable"` and `attributes.changed` listing which identity attributes were modified.
       type: object
+      additionalProperties: false
       required:
         - owner
         - definition
@@ -5740,51 +5757,6 @@ components:
           type: .none
           fields: null
         external_service: null
-    get_case_observability_response:
-      summary: Get case response (Observability). Comments are not included; use the find case comments API. totalComment reflects the actual count.
-      value:
-        description: An Observability case description.
-        owner: observability
-        settings:
-          syncAlerts: false
-          extractObservables: false
-        tags:
-          - observability
-          - tag 1
-        title: Observability case title 1
-        category: null
-        customFields: []
-        observables: []
-        assignees:
-          - uid: u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0
-        connector:
-          id: none
-          type: .none
-          fields: null
-          name: none
-        severity: low
-        status: in-progress
-        duration: null
-        closed_at: null
-        closed_by: null
-        created_at: '2023-11-06T19:29:04.086Z'
-        created_by:
-          username: elastic
-          full_name: null
-          email: null
-        updated_at: '2023-11-06T19:47:55.662Z'
-        updated_by:
-          username: elastic
-          full_name: null
-          email: null
-          profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
-        external_service: null
-        id: c3ff7550-def1-4e90-b6bc-c9969a4a09b1
-        version: WzI0NywyXQ==
-        totalComment: 1
-        totalAlerts: 1
-        totalEvents: 0
-        total_observables: 0
     get_case_alerts_response:
       summary: Retrieves all alerts attached to a case
       value:
