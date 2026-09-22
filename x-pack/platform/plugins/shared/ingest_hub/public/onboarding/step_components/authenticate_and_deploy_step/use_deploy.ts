@@ -177,7 +177,19 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
           updateDetectAndReviewStep({ pendingCleanupPolicyIds: {} });
         }
 
-        if (targets.length === 0) return;
+        if (targets.length === 0) {
+          // Cleanup-only: no new deploys, but deleted policies must be pruned from the SO record.
+          const existingDeploymentId = detectAndReviewStep.onboardingDeploymentId;
+          if (existingDeploymentId && cleanupOps.toDelete.length > 0) {
+            const deletedIds = new Set(cleanupOps.toDelete);
+            await updateDeployment(existingDeploymentId, {
+              packagePolicyIds: Object.values(detectAndReviewStep.policyIdsByInstance).filter(
+                (id) => !deletedIds.has(id)
+              ),
+            });
+          }
+          return;
+        }
       } else {
         // Retry: select any group that intersects the requested instanceIds.
         // A bundled group is re-run as a whole — retrying one bundled original re-runs its bundle.

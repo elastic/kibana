@@ -275,3 +275,154 @@ describe('cleanupPackagePolicies', () => {
     ).resolves.toBeUndefined();
   });
 });
+
+// ── update payload correctness ────────────────────────────────────────────────
+
+describe('updateAgentlessPolicy — payload shape', () => {
+  const vpcflow = makeService('vpcflow');
+  const instance = makeInstance('inst-b', 'vpcflow');
+
+  it('sends correct package name and version', async () => {
+    mockGetPackageInfo.mockResolvedValue({
+      data: { item: { version: '2.5.0', vars: [], policy_templates: [] } },
+    });
+    await cleanupAgentlessPolicies({
+      ...BASE_OPTS,
+      instances: [instance],
+      servicesMap: new Map([['vpcflow', vpcflow]]),
+      pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+      currentPolicyIdsByInstance: { 'inst-b': 'policy-1' },
+    });
+    const payload = mockUpdateAgentless.mock.calls[0][1];
+    expect(payload.package).toEqual({ name: 'aws', version: '2.5.0' });
+    expect(payload.namespace).toBe('default');
+  });
+
+  it('includes enabled input for the surviving service', async () => {
+    mockGetPackageInfo.mockResolvedValue({
+      data: { item: { version: '2.5.0', vars: [], policy_templates: [] } },
+    });
+    await cleanupAgentlessPolicies({
+      ...BASE_OPTS,
+      instances: [instance],
+      servicesMap: new Map([['vpcflow', vpcflow]]),
+      pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+      currentPolicyIdsByInstance: { 'inst-b': 'policy-1' },
+    });
+    const payload = mockUpdateAgentless.mock.calls[0][1];
+    // buildPackageInputs produces key '<serviceId>-<inputType>'
+    expect(payload.inputs['vpcflow-aws-s3']).toBeDefined();
+    expect(payload.inputs['vpcflow-aws-s3'].enabled).toBe(true);
+  });
+
+  it('disables unrelated policy_template inputs not in surviving services', async () => {
+    // unrelated_svc is in the package policy_templates but not in surviving members.
+    // The disable loop must add it as enabled: false.
+    mockGetPackageInfo.mockResolvedValue({
+      data: {
+        item: {
+          version: '2.5.0',
+          vars: [],
+          policy_templates: [
+            { name: 'unrelated_svc', input: 'httpjson' },
+          ],
+        },
+      },
+    });
+    await cleanupAgentlessPolicies({
+      ...BASE_OPTS,
+      instances: [instance],
+      servicesMap: new Map([['vpcflow', vpcflow]]),
+      pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+      currentPolicyIdsByInstance: { 'inst-b': 'policy-1' },
+    });
+    const payload = mockUpdateAgentless.mock.calls[0][1];
+    expect(payload.inputs['unrelated_svc-httpjson']).toEqual({ enabled: false, streams: {} });
+  });
+
+  it('includes static-key vars when authenticateAndDeployStep has staticKeys', async () => {
+    mockGetPackageInfo.mockResolvedValue({
+      data: {
+        item: {
+          version: '2.5.0',
+          vars: [{ name: 'access_key_id' }, { name: 'secret_access_key' }],
+          policy_templates: [],
+        },
+      },
+    });
+    await cleanupAgentlessPolicies({
+      ...BASE_OPTS,
+      authenticateAndDeployStep: {
+        staticKeys: { access_key_id: 'AKID', secret_access_key: 'SECRET' },
+      } as never,
+      instances: [instance],
+      servicesMap: new Map([['vpcflow', vpcflow]]),
+      pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+      currentPolicyIdsByInstance: { 'inst-b': 'policy-1' },
+    });
+    const payload = mockUpdateAgentless.mock.calls[0][1];
+    expect(payload.vars?.access_key_id).toBe('AKID');
+    expect(payload.vars?.secret_access_key).toBe('SECRET');
+  });
+
+  it('includes cloud_connector block when connectorId is set', async () => {
+    mockGetPackageInfo.mockResolvedValue({
+      data: { item: { version: '2.5.0', vars: [], policy_templates: [] } },
+    });
+    await cleanupAgentlessPolicies({
+      ...BASE_OPTS,
+      authenticateAndDeployStep: { connectorId: 'conn-abc' } as never,
+      instances: [instance],
+      servicesMap: new Map([['vpcflow', vpcflow]]),
+      pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+      currentPolicyIdsByInstance: { 'inst-b': 'policy-1' },
+    });
+    const payload = mockUpdateAgentless.mock.calls[0][1];
+    expect(payload.cloud_connector).toEqual({
+      enabled: true,
+      cloud_connector_id: 'conn-abc',
+      target_csp: 'aws',
+    });
+  });
+});
+
+describe('updatePackagePolicy — payload shape', () => {
+  const vpcflow = makeService('vpcflow');
+  const instance = makeInstance('inst-b', 'vpcflow');
+
+  it('sends correct package, namespace, enabled flag, and policy_ids', async () => {
+    mockGetPackageInfo.mockResolvedValue({
+      data: { item: { version: '2.5.0', vars: [], policy_templates: [] } },
+    });
+    await cleanupPackagePolicies({
+      ...BASE_OPTS,
+      instances: [instance],
+      servicesMap: new Map([['vpcflow', vpcflow]]),
+      pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+      currentPolicyIdsByInstance: { 'inst-b': 'policy-1' },
+      selectedAgentPolicyIds: ['agent-policy-1', 'agent-policy-2'],
+    });
+    const payload = mockUpdatePackagePolicy.mock.calls[0][1];
+    expect(payload.package).toEqual({ name: 'aws', version: '2.5.0' });
+    expect(payload.namespace).toBe('default');
+    expect(payload.enabled).toBe(true);
+    expect(payload.policy_ids).toEqual(['agent-policy-1', 'agent-policy-2']);
+  });
+
+  it('includes enabled input for the surviving service', async () => {
+    mockGetPackageInfo.mockResolvedValue({
+      data: { item: { version: '2.5.0', vars: [], policy_templates: [] } },
+    });
+    await cleanupPackagePolicies({
+      ...BASE_OPTS,
+      instances: [instance],
+      servicesMap: new Map([['vpcflow', vpcflow]]),
+      pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+      currentPolicyIdsByInstance: { 'inst-b': 'policy-1' },
+      selectedAgentPolicyIds: ['agent-policy-1'],
+    });
+    const payload = mockUpdatePackagePolicy.mock.calls[0][1];
+    expect(payload.inputs['vpcflow-aws-s3']).toBeDefined();
+    expect(payload.inputs['vpcflow-aws-s3'].enabled).toBe(true);
+  });
+});
