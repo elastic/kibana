@@ -47,7 +47,7 @@ export const createDefaultPolicy = (
   experimentalFeatures: ExperimentalFeatures
 ): PolicyConfig => {
   // Pass license and cloud information to use in Policy creation
-  const factoryPolicy = policyConfigFactory({
+  let factoryPolicy = policyConfigFactory({
     license: licenseService.getLicenseType(),
     cloud: cloud?.isCloudEnabled,
     licenseUuid: licenseService.getLicenseUID(),
@@ -57,19 +57,19 @@ export const createDefaultPolicy = (
     isGlobalTelemetryEnabled: telemetryConfigProvider.getIsOptedIn(),
   });
 
-  let defaultPolicyPerType: PolicyConfig =
-    config?.type === 'cloud'
-      ? getCloudPolicyConfig(factoryPolicy)
-      : getEndpointPolicyWithIntegrationConfig(factoryPolicy, config);
-
-  // Strip custom YARA signatures before the license-tier clamp below runs, so a below-Enterprise
-  // license never sees a field it can't configure and materializes an explicit `false` for it.
+  // Sanitize factory defaults before presets turn `true` into `false`, which the shared
+  // sanitizer preserves as an explicit opt-out.
   if (
     !productFeatures.isEnabled(ProductFeatureSecurityKey.endpointCustomYaraSignatures) ||
     !experimentalFeatures.customYaraSignaturesEnabled
   ) {
-    defaultPolicyPerType = removeCustomYaraSignatures(defaultPolicyPerType);
+    factoryPolicy = removeCustomYaraSignatures(factoryPolicy);
   }
+
+  let defaultPolicyPerType: PolicyConfig =
+    config?.type === 'cloud'
+      ? getCloudPolicyConfig(factoryPolicy)
+      : getEndpointPolicyWithIntegrationConfig(factoryPolicy, config);
 
   if (!licenseService.isPlatinumPlus()) {
     defaultPolicyPerType = policyConfigFactoryWithoutPaidFeatures(defaultPolicyPerType);

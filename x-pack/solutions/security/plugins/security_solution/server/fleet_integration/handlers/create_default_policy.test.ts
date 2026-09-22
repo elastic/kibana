@@ -653,6 +653,100 @@ describe('Create Default Policy tests ', () => {
 
       expectCustomYaraSignatures(policy, false);
     });
+
+    // Regression coverage: gating must run before presets manufacture an explicit `false`.
+    describe('when unavailable, across preset/policy shapes', () => {
+      const createDefaultPolicyWithCysFlagDisabled = async (
+        config?: AnyPolicyCreateConfig
+      ): Promise<PolicyConfig> => {
+        const experimentalFeaturesWithCysDisabled = {
+          trustedDevices: true,
+          linuxDnsEvents: true,
+          customYaraSignaturesEnabled: false,
+        } as ExperimentalFeatures;
+
+        const esClientInfo = await elasticsearchServiceMock
+          .createClusterClient()
+          .asInternalUser.info();
+        esClientInfo.cluster_name = '';
+        esClientInfo.cluster_uuid = '';
+        return createDefaultPolicy(
+          licenseService,
+          config,
+          cloud,
+          esClientInfo,
+          productFeaturesService,
+          telemetryConfigProviderMock,
+          experimentalFeaturesWithCysDisabled
+        );
+      };
+
+      const disableCustomYaraSignaturesProductFeature = () => {
+        productFeaturesService = createProductFeaturesServiceMock(
+          ALL_PRODUCT_FEATURE_KEYS.filter(
+            (key) => key !== ProductFeatureSecurityKey.endpointCustomYaraSignatures
+          )
+        );
+      };
+
+      it('should omit custom YARA signatures for the Data Collection preset when the product feature is off', async () => {
+        licenseEmitter.next(Enterprise);
+        disableCustomYaraSignaturesProductFeature();
+
+        const policy = await createDefaultPolicyCallback(dataCollectionConfig);
+
+        expectCustomYaraSignaturesAbsent(policy);
+      });
+
+      it('should omit custom YARA signatures for a cloud policy when the experimental flag is off', async () => {
+        const policy = await createDefaultPolicyWithCysFlagDisabled({
+          type: 'cloud',
+        } as PolicyCreateCloudConfig);
+
+        expectCustomYaraSignaturesAbsent(policy);
+      });
+
+      it('should omit custom YARA signatures for a cloud policy when the product feature is off', async () => {
+        disableCustomYaraSignaturesProductFeature();
+
+        const policy = await createDefaultPolicyCallback({
+          type: 'cloud',
+        } as PolicyCreateCloudConfig);
+
+        expectCustomYaraSignaturesAbsent(policy);
+      });
+
+      it('should omit custom YARA signatures for the default (no config) policy when the experimental flag is off', async () => {
+        const policy = await createDefaultPolicyWithCysFlagDisabled(undefined);
+
+        expectCustomYaraSignaturesAbsent(policy);
+      });
+
+      it('should omit custom YARA signatures for the default (no config) policy when the product feature is off', async () => {
+        disableCustomYaraSignaturesProductFeature();
+
+        const policy = await createDefaultPolicyCallback(undefined);
+
+        expectCustomYaraSignaturesAbsent(policy);
+      });
+
+      // Covers each downstream license-tier clamp branch: none (Enterprise), paid-enterprise
+      // (Platinum), paid (Basic).
+      it.each([
+        ['basic', Basic],
+        ['platinum', Platinum],
+        ['enterprise', Enterprise],
+      ] as Array<[tier: string, license: ILicense]>)(
+        'should omit custom YARA signatures for the Data Collection preset on %s license when the experimental flag is off',
+        async (_tier, license) => {
+          licenseEmitter.next(license);
+
+          const policy = await createDefaultPolicyWithCysFlagDisabled(dataCollectionConfig);
+
+          expectCustomYaraSignaturesAbsent(policy);
+        }
+      );
+    });
   });
 
   describe('Linux DNS Events Feature Flag', () => {
