@@ -32,7 +32,7 @@ import {
   useNodeFillColor,
 } from './styles';
 import { NodeExpandButton } from './node_expand_button';
-import { ENTITY_CARD_HEADER_HEIGHT, NODE_HEIGHT, NODE_WIDTH } from '../constants';
+import { ENTITY_CARD_HEADER_HEIGHT, NODE_WIDTH } from '../constants';
 import {
   GRAPH_ENTITY_NODE_ID,
   GRAPH_ENTITY_NODE_RISK_BADGE_ID,
@@ -945,9 +945,12 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
 
         {interactive && (
           <>
+            {/* Cover only the header row so the button does not steal mouse events
+                from the metadata panel (which has its own interactive elements) or
+                from nodes that are vertically adjacent to the expanded card body. */}
             <NodeButton
               width={NODE_WIDTH}
-              height={NODE_HEIGHT}
+              height={ENTITY_CARD_HEADER_HEIGHT}
               onClick={(e) => nodeClick?.(e, props)}
             />
             {/* Expand button — hidden visually when the NodeToolbar is wired, but always
@@ -962,6 +965,10 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
           </>
         )}
 
+        {/* Handles sit at top: 50% of NodeShapeContainer (= NODE_HEIGHT / 2 = 120 px),
+            which lands at the card's visual centre (header + ~½ metadata panel).
+            Relationship/event nodes are centred at the same Dagre Y, so edges
+            connect at exactly the card midpoint. */}
         <Handle
           type="target"
           isConnectable={false}

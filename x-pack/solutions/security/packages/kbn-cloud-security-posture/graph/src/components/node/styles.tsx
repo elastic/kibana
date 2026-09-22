@@ -45,13 +45,15 @@ export const ENTITY_NODE_TOTAL_HEIGHT = 360;
 export const NODE_WIDTH = 300;
 
 /**
- * The visual height of the entity card node body (header + metadata rows, excluding
- * hover-only action buttons). Used to anchor the node's Y position in the Dagre layout.
- * A bit less than ENTITY_NODE_TOTAL_HEIGHT so the card sits with a small top margin
- * within its reserved space.
- * Must be a multiple of `GRID_SIZE * 2`.
+ * The visual height of the entity card node body (header + metadata rows).
+ * Used to anchor the node's Y position in the Dagre layout:
+ *   entity_node_top = dagreNode.y − NODE_HEIGHT / 2
+ * so the card's visual centre aligns with the Dagre Y, which is where
+ * relationship/event nodes are placed by the layout algorithm.
+ * Approximate actual rendered height: 60 px header + ~175 px metadata ≈ 235 px.
+ * Rounded up to the nearest GRID_SIZE × 2 multiple (20 px).
  */
-export const NODE_HEIGHT = 300;
+export const NODE_HEIGHT = 240;
 
 /**
  * The height of the entity card's fixed header row (icon | name+tag | risk badge), in pixels.

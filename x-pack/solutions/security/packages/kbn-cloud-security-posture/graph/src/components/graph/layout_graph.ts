@@ -140,6 +140,10 @@ export const layoutGraph = (
 
     if (isEntityNode(node.data)) {
       const x = snapped(Math.round(dagreNode.x - (dagreNode.width ?? 0) / 2));
+      // Place the entity card so its visual centre aligns with the Dagre Y.
+      // NODE_HEIGHT ≈ actual rendered card height, so NODE_HEIGHT / 2 puts the
+      // card's midpoint at dagreNode.y — exactly where relationship/event nodes
+      // (also centred at Y) are positioned by the layout algorithm.
       const y = Math.round(dagreNode.y - NODE_HEIGHT / 2);
 
       return {
