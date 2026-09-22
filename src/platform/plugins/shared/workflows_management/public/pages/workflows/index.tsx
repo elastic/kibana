@@ -16,11 +16,9 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { EMPTY } from 'rxjs';
 import { AppHeader } from '@kbn/app-header';
 import type { AppMenuConfig, AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
 import { i18n } from '@kbn/i18n';
-import { useObservable } from '@kbn/use-observable';
 import type { WorkflowsSearchParams } from '@kbn/workflows';
 import { WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID } from '@kbn/workflows/common/constants';
 import {
@@ -141,12 +139,10 @@ export function WorkflowsPage() {
   /** Import uses bulk APIs that require both create and update; gate UI to match server authz. */
   const canImportWorkflows = Boolean(canCreateWorkflow && canUpdateWorkflow);
   const addConnectorsMenuItem = useMemo(() => getAddConnectorsMenuItem(application), [application]);
-  const isExecutionStatsBarEnabled$ = useMemo(
-    () =>
-      featureFlags?.getBooleanValue$(WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID, false) ?? EMPTY,
-    [featureFlags]
+  const isExecutionStatsBarEnabled = featureFlags.useBooleanValue(
+    WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID,
+    false
   );
-  const isExecutionStatsBarEnabled = useObservable(isExecutionStatsBarEnabled$, false);
 
   // Check if we should show empty state
   const shouldShowEmptyState = shouldShowWorkflowsEmptyState(workflows, search);

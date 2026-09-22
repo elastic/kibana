@@ -10,7 +10,6 @@
 import { EuiProvider } from '@elastic/eui';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import { of } from 'rxjs';
 import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { I18nProvider } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -139,7 +138,7 @@ function mockCapabilities(
         navigateToApp: mockNavigateToApp,
       },
       featureFlags: {
-        getBooleanValue$: () => of(isExecutionStatsBarEnabled),
+        useBooleanValue: () => isExecutionStatsBarEnabled,
       },
     },
   } as ReturnType<typeof useKibana>);
