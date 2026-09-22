@@ -1526,9 +1526,9 @@ describe('useDeploy — cleanup orchestration', () => {
       },
     });
     const onContinue = jest.fn();
-    const updateDetectAndReviewStep = (mockUseOnboardingFlow() as ReturnType<
-      typeof mockUseOnboardingFlow
-    >).updateDetectAndReviewStep as jest.Mock;
+    const updateDetectAndReviewStep = (
+      mockUseOnboardingFlow() as ReturnType<typeof mockUseOnboardingFlow>
+    ).updateDetectAndReviewStep as jest.Mock;
 
     const { result } = renderHook(() => useDeploy({ onContinue }));
 

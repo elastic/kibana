@@ -108,10 +108,7 @@ describe('computePolicyCleanupOps', () => {
   });
 
   it('de-dups: same policyId across multiple removed instances → one entry in toDelete', () => {
-    const ops = computePolicyCleanupOps(
-      { 'inst-a': 'policy-1', 'inst-b': 'policy-1' },
-      {}
-    );
+    const ops = computePolicyCleanupOps({ 'inst-a': 'policy-1', 'inst-b': 'policy-1' }, {});
     expect(ops.toDelete).toHaveLength(1);
     expect(ops.toDelete).toEqual(['policy-1']);
   });
@@ -128,10 +125,7 @@ describe('computePolicyCleanupOps', () => {
 
   it('ignores surviving instances whose policy is not in pending', () => {
     // inst-b maps to policy-2 which has no removed instances → not in policyMap
-    const ops = computePolicyCleanupOps(
-      { 'inst-a': 'policy-1' },
-      { 'inst-b': 'policy-2' }
-    );
+    const ops = computePolicyCleanupOps({ 'inst-a': 'policy-1' }, { 'inst-b': 'policy-2' });
     expect(ops.toDelete).toEqual(['policy-1']);
     expect(ops.toUpdate).toEqual([]);
   });

@@ -227,7 +227,9 @@ describe('useServiceSettings — lazy serviceVars prune', () => {
     // After mount the effect should prune 'old_service' because it has no matching instance.
     let storedState: unknown = {
       globalRegion: 'us-east-1',
-      instances: [{ instanceId: 'guardduty', serviceId: 'guardduty', name: 'GuardDuty', isDuplicate: false }],
+      instances: [
+        { instanceId: 'guardduty', serviceId: 'guardduty', name: 'GuardDuty', isDuplicate: false },
+      ],
       serviceVars: {
         guardduty: { enabledDataStreams: ['guardduty'], varsByDataStream: {} },
         old_service: { enabledDataStreams: ['old_service'], varsByDataStream: {} },
@@ -259,7 +261,9 @@ describe('useServiceSettings — lazy serviceVars prune', () => {
   it('does not call setPersisted when there are no stale keys', () => {
     const storedState = {
       globalRegion: 'us-east-1',
-      instances: [{ instanceId: 'guardduty', serviceId: 'guardduty', name: 'GuardDuty', isDuplicate: false }],
+      instances: [
+        { instanceId: 'guardduty', serviceId: 'guardduty', name: 'GuardDuty', isDuplicate: false },
+      ],
       serviceVars: {
         guardduty: { enabledDataStreams: ['guardduty'], varsByDataStream: {} },
       },
