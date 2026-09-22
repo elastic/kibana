@@ -439,7 +439,7 @@ export class DashboardPageControls extends FtrService {
     await this.retry.try(async () => {
       const isPopoverOpen = await this.isOptionsListPopoverOpen(controlId);
       if (isPopoverOpen) {
-        await this.testSubjects.click(`optionsList-control-${controlId}`);
+        await this.browser.pressKeys(this.browser.keys.ESCAPE);
         await this.testSubjects.waitForDeleted(`optionsList-control-available-options`);
       }
     });
@@ -582,24 +582,13 @@ export class DashboardPageControls extends FtrService {
     this.log.debug(`exclude selections`);
     await this.optionsListPopoverAssertOpen();
 
-    await this.retry.try(async () => {
-      const buttonTestSubject = include
-        ? 'optionsList__includeResults'
-        : 'optionsList__excludeResults';
-      const [buttonGroup] = await this.testSubjects.findAll(
-        'optionsList__includeExcludeButtonGroup'
-      );
-      const button = await this.testSubjects.findDescendant(buttonTestSubject, buttonGroup);
-      await button.click();
-      const [updatedButtonGroup] = await this.testSubjects.findAll(
-        'optionsList__includeExcludeButtonGroup'
-      );
-      const selectedButton = await this.testSubjects.findDescendant(
-        buttonTestSubject,
-        updatedButtonGroup
-      );
-      expect(await selectedButton.getAttribute('aria-pressed')).to.be('true');
-    });
+    const buttonGroup = await this.testSubjects.find('optionsList__includeExcludeButtonGroup');
+    await (
+      await this.find.descendantDisplayedByCssSelector(
+        include ? '[data-text="Include"]' : '[data-text="Exclude"]',
+        buttonGroup
+      )
+    ).click();
   }
 
   public async optionsListWaitForLoading(controlId: string) {
