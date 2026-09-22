@@ -1,5 +1,5 @@
 {
-  "sha1": "6c596bc642b459a0b7451b83e71a2266405d585b",
+  "sha1": "4e3cd975bb3f926932bc2618696281c631f14b9e",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -13,8 +13,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
-        "line": 37,
-        "column": 86
+        "line": 128,
+        "column": 24
       }
     },
     {
@@ -26,8 +26,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
-        "line": 61,
-        "column": 23
+        "line": 156,
+        "column": 22
       }
     },
     {
@@ -39,8 +39,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
-        "line": 86,
-        "column": 29
+        "line": 180,
+        "column": 39
       }
     },
     {
@@ -52,8 +52,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
-        "line": 103,
-        "column": 38
+        "line": 197,
+        "column": 43
       }
     },
     {
@@ -65,8 +65,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
-        "line": 129,
-        "column": 26
+        "line": 224,
+        "column": 20
       }
     },
     {
@@ -78,8 +78,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
-        "line": 159,
-        "column": 33
+        "line": 252,
+        "column": 20
       }
     },
     {
@@ -91,8 +91,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
-        "line": 193,
-        "column": 9
+        "line": 287,
+        "column": 14
       }
     },
     {
@@ -104,138 +104,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
-        "line": 226,
-        "column": 18
-      }
-    },
-    {
-      "id": "99ae9153aa6c845-62b1cce9a885512",
-      "title": "List and get Elasticsearch service accounts lists every user-managed account, whichever namespace it lives in",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 138,
-        "column": 1
-      }
-    },
-    {
-      "id": "99ae9153aa6c845-9543b0bec995b1c",
-      "title": "List and get Elasticsearch service accounts pages through the directory with `limit` and `after`",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 158,
-        "column": 24
-      }
-    },
-    {
-      "id": "99ae9153aa6c845-9ccd0292d444cf1",
-      "title": "List and get Elasticsearch service accounts gets an account by its URL-encoded id",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 187,
-        "column": 24
-      }
-    },
-    {
-      "id": "99ae9153aa6c845-a830f1cd5ce4ec5",
-      "title": "List and get Elasticsearch service accounts gets an account Kibana holds no credential for",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 195,
-        "column": 92
-      }
-    },
-    {
-      "id": "99ae9153aa6c845-069f32a1b9ed3cc",
-      "title": "List and get Elasticsearch service accounts stops claiming a credential once the account is recreated outside Kibana",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 209,
-        "column": 24
-      }
-    },
-    {
-      "id": "99ae9153aa6c845-adee786dda9dcb7",
-      "title": "List and get Elasticsearch service accounts answers 404 for an unknown account and for a built-in one",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 269,
-        "column": 15
-      }
-    },
-    {
-      "id": "99ae9153aa6c845-d36d77c79aef740",
-      "title": "List and get Elasticsearch service accounts rejects an id that is not a service account principal",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 283,
-        "column": 22
-      }
-    },
-    {
-      "id": "99ae9153aa6c845-7021ab46422ebc5",
-      "title": "List and get Elasticsearch service accounts rejects a page size outside 1 to 100 and a foreign cursor",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 294,
-        "column": 23
-      }
-    },
-    {
-      "id": "99ae9153aa6c845-d578af991c99a56",
-      "title": "List and get Elasticsearch service accounts allows a caller with `read_security` to read but not to create",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 310,
-        "column": 11
-      }
-    },
-    {
-      "id": "99ae9153aa6c845-bbaea54c7e12533",
-      "title": "List and get Elasticsearch service accounts refuses a caller without `read_security`",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 354,
-        "column": 9
+        "line": 316,
+        "column": 35
       }
     }
   ]
