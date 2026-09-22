@@ -7,9 +7,7 @@
 
 import { expect } from '@kbn/scout/api';
 import { apiTest, type EsClient } from '@kbn/scout';
-import {
-  ENTITY_STORE_TAGS,
-} from '../../../common/fixtures/constants';
+import { ENTITY_STORE_TAGS } from '../../../common/fixtures/constants';
 import {
   ingestDoc,
   QUERY_TRANSLATION_TEST_INDEX,

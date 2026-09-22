@@ -19,9 +19,7 @@ import {
   LATEST_ALIAS,
   PUBLIC_HEADERS,
 } from '../../../common/fixtures/constants';
-import {
-  clearInstalledEntityStoreDocuments,
-} from '../../../common/fixtures/helpers';
+import { clearInstalledEntityStoreDocuments } from '../../../common/fixtures/helpers';
 
 const BROKEN_MAPPING_DATA_STREAM = 'logs-broken-mapping';
 const BROKEN_MAPPING_TEMPLATE = 'logs-broken-mapping-template';

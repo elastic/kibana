@@ -7,10 +7,7 @@
 
 import { globalSetupHook } from '@kbn/scout';
 import { PUBLIC_HEADERS } from '../../../common/fixtures/constants';
-import {
-  installEntityStoreSuite,
-  startAllEntityTypes,
-} from '../../../common/fixtures/helpers';
+import { installEntityStoreSuite, startAllEntityTypes } from '../../../common/fixtures/helpers';
 
 globalSetupHook(
   'Install Entity Store once for logs extraction API suite',
