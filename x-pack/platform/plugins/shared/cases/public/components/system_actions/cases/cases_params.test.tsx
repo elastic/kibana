@@ -32,16 +32,16 @@ jest.mock('../../templates_v2/hooks/use_get_templates', () => ({
   useGetTemplates: (...args: unknown[]) => mockUseGetTemplates(...args),
 }));
 
-// Mock the entire TemplateSelectorV2 to control its onChange callback in isolation tests
+// Mock TemplateSelectorV2 to control its onChange callback in isolation tests.
+// Use requireActual so the real findV2Template implementation is available to cases_params.tsx.
 jest.mock('./template_selector_v2', () => ({
+  ...jest.requireActual('./template_selector_v2'),
   TemplateSelectorV2: ({
     onChange,
-    owner,
     isDisabled,
     templateId,
   }: {
     onChange: (p: { templateId: string | null; templateVersion: string | null }) => void;
-    owner: string;
     isDisabled?: boolean;
     templateId: string | null;
   }) => (
@@ -51,7 +51,7 @@ jest.mock('./template_selector_v2', () => ({
       disabled={isDisabled}
       onClick={() => onChange({ templateId: 'tmpl-v2', templateVersion: '1' })}
     >
-      {`V2 Selector owner=${owner} templateId=${templateId}`}
+      {`V2 Selector templateId=${templateId}`}
     </button>
   ),
 }));

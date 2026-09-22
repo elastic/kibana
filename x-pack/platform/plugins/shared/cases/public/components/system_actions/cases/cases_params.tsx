@@ -38,7 +38,7 @@ import { getTimeUnitOptions } from './utils';
 import { useKibana } from '../../../common/lib/kibana';
 import { KibanaServices } from '../../../common/lib/kibana/services';
 import { TemplateSelector } from '../../create/templates';
-import { TemplateSelectorV2 } from './template_selector_v2';
+import { TemplateSelectorV2, findV2Template } from './template_selector_v2';
 import { useGetTemplates } from '../../templates_v2/hooks/use_get_templates';
 import {
   getTemplateSettingsAndConnectorFromYaml,
@@ -233,20 +233,11 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
 
   const selectedV2TemplateHasConnector = useMemo(() => {
     if (!isTemplatesV2Enabled || !templateId) return false;
-    const v2Templates = v2TemplatesData?.templates ?? [];
-    // Mirror the three-step bridge used by TemplateSelectorV2's effectiveTemplateId so that rules
-    // storing a legacy v1 key in templateId still show the checkbox before the user re-selects.
-    let v2Template = v2Templates.find((t) => t.templateId === templateId);
-    if (!v2Template) {
-      v2Template = v2Templates.find((t) => t.legacyKey === templateId);
-    }
-    if (!v2Template) {
-      const legacyName = currentConfiguration.templates.find((t) => t.key === templateId)?.name;
-      if (legacyName) {
-        const normalizedName = legacyName.trim().toLocaleLowerCase();
-        v2Template = v2Templates.find((t) => t.name.trim().toLocaleLowerCase() === normalizedName);
-      }
-    }
+    const v2Template = findV2Template(
+      templateId,
+      v2TemplatesData?.templates ?? [],
+      currentConfiguration.templates
+    );
     if (!v2Template?.definition) return false;
     const { connector } = getTemplateSettingsAndConnectorFromYaml(v2Template.definition);
     return !!normalizeTemplateConnector(connector);
@@ -256,6 +247,10 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
     v2TemplatesData?.templates,
     currentConfiguration.templates,
   ]);
+
+  const showAutoPushCheckbox =
+    (!isTemplatesV2Enabled && selectedTemplateHasConnector) ||
+    (!isLoadingV2Templates && selectedV2TemplateHasConnector);
 
   const defaultTemplate = useMemo(() => {
     return {
@@ -308,8 +303,9 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
       >
         {isTemplatesV2Enabled ? (
           <TemplateSelectorV2
-            owner={owner}
             templateId={templateId ?? null}
+            templates={v2TemplatesData?.templates ?? []}
+            isLoadingTemplates={isLoadingV2Templates}
             legacyTemplates={currentConfiguration.templates}
             isLoading={isLoadingCaseConfiguration}
             isDisabled={true}
@@ -411,8 +407,9 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
         <EuiFlexItem grow={true}>
           {isTemplatesV2Enabled ? (
             <TemplateSelectorV2
-              owner={owner}
               templateId={templateId ?? null}
+              templates={v2TemplatesData?.templates ?? []}
+              isLoadingTemplates={isLoadingV2Templates}
               legacyTemplates={currentConfiguration.templates}
               isLoading={isLoadingCaseConfiguration}
               onChange={onV2TemplateChange}
@@ -427,8 +424,7 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
             />
           )}
         </EuiFlexItem>
-        {(!isTemplatesV2Enabled && selectedTemplateHasConnector) ||
-        (!isLoadingV2Templates && selectedV2TemplateHasConnector) ? (
+        {showAutoPushCheckbox ? (
           <EuiFlexItem grow={true}>
             <EuiCheckbox
               id={`auto-push-case-${index}`}
