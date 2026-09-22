@@ -113,7 +113,9 @@ export type ScoutResponseBody<
   TJsonBody = ApiClientResponse['body']
 > = TResponseType extends 'text' ? string : TResponseType extends 'buffer' ? Buffer : TJsonBody;
 
-export interface ScoutApiRequestOptions<TResponseType extends ScoutResponseType = 'json'> {
+export interface ScoutApiRequestOptions<
+  TResponseType extends ScoutResponseType = ScoutResponseType
+> {
   /** Extra headers merged on top of the defaults, e.g. an API key or a SAML cookie for auth */
   headers?: Record<string, string>;
   /** Kibana space id the request targets. Omit or pass 'default' for the default space */

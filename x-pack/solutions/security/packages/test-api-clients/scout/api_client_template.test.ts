@@ -15,6 +15,7 @@ import type { ReadRuleResponse } from '@kbn/security-solution-plugin/common/api/
 import { SecuritySolutionScoutApiServiceProvider as createDetectionsApi } from './detections.gen';
 import { SecuritySolutionScoutApiServiceProvider as createDiscoveriesApi } from './discoveries.gen';
 import { SecuritySolutionScoutApiServiceProvider as createOsqueryApi } from './osquery.gen';
+import type { ScoutApiRequestOptions } from '.';
 
 /**
  * Guards the runtime behaviour of the `api_client_scout` generator template through one of its
@@ -150,6 +151,26 @@ describe('generated Scout API client (api_client_scout template)', () => {
       Authorization: authorization,
       'kbn-xsrf': 'true',
     });
+  });
+
+  it('lets the exported options type describe a reusable text download', async () => {
+    const apiClient = createApiClientMock();
+    const osqueryApi = createOsqueryApi(apiClient);
+    // Compiles only while the exported type defaults to the full response-type union
+    const downloadOptions: ScoutApiRequestOptions = { responseType: 'text' };
+
+    await osqueryApi.osqueryExportLiveQueryResults(
+      {
+        params: { id: 'live-query-1', actionId: 'action-1' },
+        query: { format: 'ndjson' },
+        body: {},
+      },
+      downloadOptions
+    );
+
+    const [, options] = apiClient.post.mock.calls[0];
+
+    expect(options?.responseType).toBe('text');
   });
 
   it('percent-encodes reserved characters in path params', async () => {
