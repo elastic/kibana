@@ -308,6 +308,34 @@ export const waitForRelationshipIds = async (
   );
 };
 
+/**
+ * Asserts no entity document exists for `entityId`.
+ *
+ * Distinct from `assertNoRelationshipId`, which maps a missing document to `[]`
+ * and so cannot tell "no entity" apart from "entity with no such relationship".
+ * Use this to prove the maintainer did not mint an entity from an unresolvable
+ * foreign key (e.g. a `Manager_ID` that matches nothing in the store).
+ */
+export const assertEntityDoesNotExist = async (
+  esClient: EsClient,
+  entityId: string
+): Promise<void> => {
+  await esClient.indices.refresh({ index: LATEST_ALIAS });
+  const response = await esClient.search({
+    index: LATEST_ALIAS,
+    query: { bool: { filter: [{ term: { 'entity.id': entityId } }] } },
+    size: 1,
+  });
+  const hits = response.hits.hits.map((hit) => hit._id);
+  if (hits.length > 0) {
+    throw new Error(
+      `Expected no entity document for '${entityId}', but found ${hits.length} (_id: ${hits.join(
+        ', '
+      )})`
+    );
+  }
+};
+
 /** Returns the current `entity.relationships.<key>.ids` array for an entity (empty if absent). */
 export const getRelationshipIds = async (
   esClient: EsClient,

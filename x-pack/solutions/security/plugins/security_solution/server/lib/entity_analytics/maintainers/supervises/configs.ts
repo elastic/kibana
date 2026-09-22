@@ -106,6 +106,24 @@ const WORKDAY_MANAGER_EMAIL_FIELD = 'workday.user.Manager_Email';
 const WORKDAY_MANAGER_ID_FIELD = 'workday.user.Manager_ID';
 const WORKDAY_NAMESPACE = 'workday';
 /**
+ * Step 2 row cap for the Workday config.
+ *
+ * Unlike every other maintainer, this config's actor EUID is NOT a function of a
+ * single identity field: `MV_EXPAND managerKey` turns one composite bucket
+ * `(Manager_Email, Manager_ID)` into up to two distinct `actorUserId` groups.
+ * That breaks the "EUID collapse" invariant documented in
+ * `engine/build_actor_discovery_query.ts`, which the shared `COMPOSITE_PAGE_SIZE`
+ * limit assumes — a full page of 3500 buckets can produce up to 7000 grouped
+ * rows, and a 3500 limit would silently discard half of them. Composite paging is
+ * one-way (`after_key`), so the dropped actors are never revisited and their
+ * reports are simply never written.
+ *
+ * The factor is the number of fields unioned into `managerKey`; keep it in sync
+ * if another manager identifier is added.
+ */
+const WORKDAY_ACTOR_EXPANSION_FACTOR = 2;
+const WORKDAY_ESQL_LIMIT = COMPOSITE_PAGE_SIZE * WORKDAY_ACTOR_EXPANSION_FACTOR;
+/**
  * Generous against a 24h poll: tolerates sync outages and backfills without
  * losing relationships. Declared once as a day count so the DSL and ES|QL forms
  * of the same window cannot drift — Step 1 and Step 2 must narrow identically.
@@ -124,6 +142,23 @@ const WORKDAY_INGESTED_LOOKBACK_ESQL = `NOW() - ${WORKDAY_INGESTED_LOOKBACK_DAYS
  * The actor is a union of two manager fields, which is why this is a
  * `kind: 'override'` config — the standard builder only `MV_EXPAND`s the target,
  * so a multi-valued actor would mis-group under `STATS ... BY actorUserId`.
+ *
+ * Expanding the actor also makes this the one config where a Step 1 bucket can
+ * yield more than one `actorUserId`, so the Step 2 row cap is
+ * `WORKDAY_ESQL_LIMIT` rather than the shared `COMPOSITE_PAGE_SIZE`. See that
+ * constant for why reusing the page size silently drops managers.
+ *
+ * **Latest-row collapse is load-bearing, not an optimisation.** The CEL input
+ * re-fetches the whole inventory on every poll, so the index accumulates one
+ * document per worker per poll. Grouping those snapshots directly would emit a
+ * worker under *every* manager they have ever had: if Alice's older row names
+ * Bob and her newer row names Carol, both `user:bob@workday` and
+ * `user:carol@workday` get Alice as a report. Writes are additive (nothing is
+ * retracted), so that wrong edge is permanent. `VALUES()` cannot save us — it
+ * deduplicates a report *within* one manager's group, never across groups.
+ * The `LAST(managerKey, event.ingested) BY targetEntityId` stage therefore
+ * collapses each worker to the manager named by their newest snapshot before the
+ * actor is expanded and grouped.
  *
  * `Worker_s_Manager` is deliberately unused: it is a display name
  * ("Alex Manager (000687)"), not a resolvable identifier.
@@ -152,15 +187,16 @@ function buildWorkdaySupervisesEsqlQuery(
   return `FROM ${logIndex}
 | WHERE (${WORKDAY_MANAGER_EMAIL_FIELD} IS NOT NULL OR ${WORKDAY_MANAGER_ID_FIELD} IS NOT NULL)${ingestedClause}
 | EVAL ${targetEuidEval}
+| WHERE COALESCE(targetEntityId, "") != ""
 | EVAL managerKey = CASE(${WORKDAY_MANAGER_EMAIL_FIELD} IS NULL, ${WORKDAY_MANAGER_ID_FIELD}, ${WORKDAY_MANAGER_ID_FIELD} IS NULL, ${WORKDAY_MANAGER_EMAIL_FIELD}, MV_APPEND(${WORKDAY_MANAGER_EMAIL_FIELD}, ${WORKDAY_MANAGER_ID_FIELD}))
+| STATS managerKey = LAST(managerKey, event.ingested) BY targetEntityId
 | MV_EXPAND managerKey
 | EVAL ${ENGINE_COLUMNS.actor} = CONCAT("user:", managerKey, "@${WORKDAY_NAMESPACE}")
 | WHERE COALESCE(${ENGINE_COLUMNS.actor}, "") != ""
     AND ${ENGINE_COLUMNS.actor} != "user:@${WORKDAY_NAMESPACE}"
     AND ${ENGINE_COLUMNS.actor} RLIKE ".+:.+@.+"
-    AND COALESCE(targetEntityId, "") != ""
 | STATS ${RELATIONSHIP_KEY} = VALUES(targetEntityId) BY ${ENGINE_COLUMNS.actor}
-| LIMIT ${COMPOSITE_PAGE_SIZE}`;
+| LIMIT ${WORKDAY_ESQL_LIMIT}`;
 }
 
 function buildWorkdaySupervisesConfig(

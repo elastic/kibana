@@ -23,6 +23,7 @@ import {
   waitForEntityStoreRunning,
   getRelationshipIds,
   assertNoRelationshipId,
+  assertEntityDoesNotExist,
 } from '../../fixtures/maintainers/helpers';
 
 const LOG_INDEX = 'logs-workday.user-default';
@@ -41,6 +42,8 @@ interface WorkdayRow {
   userEmail: string;
   managerEmail?: string;
   managerId?: string;
+  /** How long ago this snapshot was ingested; lets a test seed an older row. */
+  ingestedAgoMinutes?: number;
 }
 
 // Workday field names use PascalCase_with_underscores, which the ESLint naming-
@@ -64,12 +67,12 @@ const buildWorkdayUserFields = ({
 
 const seedWorkdayRow = async (
   esClient: Parameters<typeof seedLogDocument>[0],
-  { userEmail, managerEmail, managerId }: WorkdayRow
+  { userEmail, managerEmail, managerId, ingestedAgoMinutes = 5 }: WorkdayRow
 ) =>
   seedLogDocument(esClient, {
     index: LOG_INDEX,
     timestamp: HIRE_DATE,
-    eventIngested: new Date(Date.now() - 5 * 60_000).toISOString(),
+    eventIngested: new Date(Date.now() - ingestedAgoMinutes * 60_000).toISOString(),
     event: { kind: 'asset', category: ['iam'], type: ['user'] },
     integrationFields: {
       user: { email: userEmail },
@@ -253,12 +256,16 @@ apiTest.describe(
         await triggerMaintainerRun(apiClient, internalHeaders, MAINTAINER_ID, { sync: true });
 
         // The write 404s rather than minting a manager entity from a foreign key.
+        // Both assertions are needed: assertNoRelationshipId maps a missing
+        // document to [], so on its own it would also pass if the maintainer had
+        // created an empty manager entity.
         await assertNoRelationshipId(
           esClient,
           RELATIONSHIP_KEY,
           absentManagerEntityId,
           reportEntityId
         );
+        await assertEntityDoesNotExist(esClient, absentManagerEntityId);
       }
     );
 
@@ -335,8 +342,72 @@ apiTest.describe(
         const ids = await getRelationshipIds(esClient, RELATIONSHIP_KEY, managerEntityId);
         expect(ids).toStrictEqual([reportEntityId]);
 
-        // The id-keyed actor has no entity; its write 404s and must produce nothing.
+        // The id-keyed actor has no entity; its write 404s and must produce
+        // nothing — neither a relationship nor an entity minted from the id.
         await assertNoRelationshipId(esClient, RELATIONSHIP_KEY, managerIdEntityId, reportEntityId);
+        await assertEntityDoesNotExist(esClient, managerIdEntityId);
+      }
+    );
+
+    apiTest(
+      'follows a manager change instead of reporting to both managers',
+      async ({ apiClient, esClient }) => {
+        // The integration re-ingests the full inventory every poll, so a worker
+        // who changes managers has snapshots naming each. Grouping all snapshots
+        // would put the report under BOTH managers, and because writes are
+        // additive that stale edge would never be retracted.
+        const runId = randomUUID().slice(0, 8);
+        const oldManagerEmail = `old.mgr.${runId}@example.com`;
+        const newManagerEmail = `new.mgr.${runId}@example.com`;
+        const reportEmail = `moved.${runId}@example.com`;
+        const oldManagerEntityId = `user:${oldManagerEmail}@${NAMESPACE}`;
+        const newManagerEntityId = `user:${newManagerEmail}@${NAMESPACE}`;
+        const reportEntityId = `user:${reportEmail}@${NAMESPACE}`;
+
+        for (const [entityId, email] of [
+          [oldManagerEntityId, oldManagerEmail],
+          [newManagerEntityId, newManagerEmail],
+          [reportEntityId, reportEmail],
+        ]) {
+          await seedUserEntity(esClient, {
+            entityId,
+            namespace: NAMESPACE,
+            email,
+            entitySource: ENTITY_SOURCE,
+          });
+        }
+
+        // Two snapshots of the same worker: the older names the previous manager.
+        await seedWorkdayRow(esClient, {
+          userEmail: reportEmail,
+          managerEmail: oldManagerEmail,
+          ingestedAgoMinutes: 60,
+        });
+        await seedWorkdayRow(esClient, {
+          userEmail: reportEmail,
+          managerEmail: newManagerEmail,
+          ingestedAgoMinutes: 5,
+        });
+
+        await triggerMaintainerRun(apiClient, internalHeaders, MAINTAINER_ID, { sync: true });
+
+        await waitForRelationshipIds(
+          esClient,
+          RELATIONSHIP_KEY,
+          newManagerEntityId,
+          reportEntityId
+        );
+        expect(
+          await getRelationshipIds(esClient, RELATIONSHIP_KEY, newManagerEntityId)
+        ).toStrictEqual([reportEntityId]);
+
+        // The previous manager must not keep the report.
+        await assertNoRelationshipId(
+          esClient,
+          RELATIONSHIP_KEY,
+          oldManagerEntityId,
+          reportEntityId
+        );
       }
     );
   }

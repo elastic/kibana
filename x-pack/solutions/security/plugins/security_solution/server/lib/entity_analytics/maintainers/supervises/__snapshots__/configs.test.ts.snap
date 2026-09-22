@@ -99,15 +99,16 @@ FROM logs-workday.user-__namespace__
  _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
  targetEntityId = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
 TRUE, _euid_branch_1_formula, NULL))
+| WHERE COALESCE(targetEntityId, \\"\\") != \\"\\"
 | EVAL managerKey = CASE(workday.user.Manager_Email IS NULL, workday.user.Manager_ID, workday.user.Manager_ID IS NULL, workday.user.Manager_Email, MV_APPEND(workday.user.Manager_Email, workday.user.Manager_ID))
+| STATS managerKey = LAST(managerKey, event.ingested) BY targetEntityId
 | MV_EXPAND managerKey
 | EVAL actorUserId = CONCAT(\\"user:\\", managerKey, \\"@workday\\")
 | WHERE COALESCE(actorUserId, \\"\\") != \\"\\"
     AND actorUserId != \\"user:@workday\\"
     AND actorUserId RLIKE \\".+:.+@.+\\"
-    AND COALESCE(targetEntityId, \\"\\") != \\"\\"
 | STATS supervises = VALUES(targetEntityId) BY actorUserId
-| LIMIT 3500"
+| LIMIT 7000"
 `;
 
 exports[`SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots workday: targets-per-actor ES|QL with watermark is locked 1`] = `
@@ -137,13 +138,14 @@ exports[`SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots workday: t
  _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
  targetEntityId = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
 TRUE, _euid_branch_1_formula, NULL))
+| WHERE COALESCE(targetEntityId, \\"\\") != \\"\\"
 | EVAL managerKey = CASE(workday.user.Manager_Email IS NULL, workday.user.Manager_ID, workday.user.Manager_ID IS NULL, workday.user.Manager_Email, MV_APPEND(workday.user.Manager_Email, workday.user.Manager_ID))
+| STATS managerKey = LAST(managerKey, event.ingested) BY targetEntityId
 | MV_EXPAND managerKey
 | EVAL actorUserId = CONCAT(\\"user:\\", managerKey, \\"@workday\\")
 | WHERE COALESCE(actorUserId, \\"\\") != \\"\\"
     AND actorUserId != \\"user:@workday\\"
     AND actorUserId RLIKE \\".+:.+@.+\\"
-    AND COALESCE(targetEntityId, \\"\\") != \\"\\"
 | STATS supervises = VALUES(targetEntityId) BY actorUserId
-| LIMIT 3500"
+| LIMIT 7000"
 `;

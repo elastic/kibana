@@ -384,10 +384,52 @@ describe('workday (log-inverted) supervises config', () => {
     expect(JSON.stringify(config.compositeAggAdditionalFilters)).not.toContain('@timestamp');
   });
 
+  describe('actor expansion vs the Step 2 row cap', () => {
+    // `MV_EXPAND managerKey` can turn one composite bucket (Manager_Email,
+    // Manager_ID) into two distinct actorUserId groups. Composite paging is
+    // one-way, so any grouped row the LIMIT discards is never revisited and
+    // those managers' reports are silently never written.
+    const actorFieldCount = 2;
+
+    it('caps Step 2 rows above the Step 1 page size, not at it', () => {
+      const query = getWorkdayConfig().esqlQueryOverride('default');
+      const limit = Number(/\| LIMIT (\d+)/.exec(query)?.[1]);
+
+      expect(limit).toBeGreaterThanOrEqual(COMPOSITE_PAGE_SIZE * actorFieldCount);
+      // Guards the specific regression: reusing COMPOSITE_PAGE_SIZE here would
+      // drop up to half the actors on a saturated page.
+      expect(limit).not.toBe(COMPOSITE_PAGE_SIZE);
+    });
+
+    it('scales the cap with every field unioned into the actor key', () => {
+      // If a third manager identifier is ever unioned into managerKey, a bucket
+      // can expand threefold and this cap has to grow with it.
+      const query = getWorkdayConfig().esqlQueryOverride('default');
+      const limit = Number(/\| LIMIT (\d+)/.exec(query)?.[1]);
+      const expandedFields = ['workday.user.Manager_Email', 'workday.user.Manager_ID'].filter(
+        (field) => query.includes(`MV_APPEND(${field}`) || query.includes(`, ${field})`)
+      );
+
+      expect(expandedFields).toHaveLength(actorFieldCount);
+      expect(limit).toBe(COMPOSITE_PAGE_SIZE * expandedFields.length);
+    });
+
+    it('keeps the Step 1 page size at the engine default', () => {
+      // Only the Step 2 cap compensates for expansion; widening Step 1 instead
+      // would change how many actors the engine discovers per iteration.
+      const query = buildActorDiscoveryQuery(getWorkdayConfig(), undefined) as {
+        aggs: { users: { composite: { size: number } } };
+      };
+      expect(query.aggs.users.composite.size).toBe(COMPOSITE_PAGE_SIZE);
+    });
+  });
+
   describe('first run vs incremental', () => {
     it('scans the full inventory when there is no watermark', () => {
       const config = getWorkdayConfig();
-      expect(config.esqlQueryOverride('default')).not.toContain('event.ingested');
+      // `event.ingested` still appears as the latest-snapshot sort key; what must
+      // be absent on a first run is a time *filter* on it.
+      expect(config.esqlQueryOverride('default')).not.toContain('event.ingested >=');
       expect(JSON.stringify(config.compositeAggAdditionalFilters)).not.toContain('event.ingested');
     });
 
