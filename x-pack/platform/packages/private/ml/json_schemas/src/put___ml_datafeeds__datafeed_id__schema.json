@@ -30,6 +30,10 @@
       "description": "If a real-time datafeed has never seen any data (including during any initial training period), it automatically\nstops and closes the associated job after this many real-time searches return no documents. In other words,\nit stops after `frequency` times `max_empty_searches` of real-time operation. If not set, a datafeed with no\nend time that sees no data remains started until it is explicitly stopped. By default, it is not set.",
       "type": "number"
     },
+    "max_consecutive_extraction_failures": {
+      "description": "The maximum number of consecutive real-time data extraction failures the datafeed tolerates before it automatically stops itself, leaving the associated job open. The consecutive-failure counter resets on any cycle that extracts successfully, including empty-data cycles. If not set, the threshold defaults to roughly one day's worth of searches based on the datafeed `frequency` (floored at 1). Set to `-1` to disable auto-stop and retry indefinitely. Values of `0` or less than `-1` are rejected.",
+      "type": "number"
+    },
     "project_routing": {
       "description": "A Lucene-style expression that limits which linked projects the datafeed\nsearches when cross-project search is enabled. Examples: `_alias:_origin`,\n`_alias:prod-*`. If omitted, searches all linked projects within the cross-project\nsearch scope. Rejected when CPS is not enabled for datafeeds.",
       "type": "string"
