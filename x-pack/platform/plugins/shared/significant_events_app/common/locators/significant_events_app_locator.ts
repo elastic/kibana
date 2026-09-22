@@ -24,7 +24,7 @@ export type SignificantEventsAppTab =
 
 /**
  * Builds locations for management tabs and the standalone Settings page.
- * Other tab values and query parameters map to the `/{tab}` route.
+ * Query parameters apply only to management tabs on the `/{tab}` route.
  */
 export interface SignificantEventsAppLocatorParams extends SerializableRecord {
   tab?: SignificantEventsAppTab;
@@ -51,6 +51,14 @@ export class SignificantEventsAppLocatorDefinition
     tab = 'streams',
     ...query
   }: SignificantEventsAppLocatorParams) => {
+    if (tab === 'settings') {
+      return {
+        app: SIGNIFICANT_EVENTS_APP_ID,
+        path: `/${tab}`,
+        state: {},
+      };
+    }
+
     const searchParams = new URLSearchParams();
     for (const [key, value] of Object.entries(query)) {
       if (value == null) {
