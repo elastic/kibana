@@ -27,7 +27,6 @@ import {
   type IssueMatch,
   type MatchedIssue,
 } from './match_issues';
-import { moduleLabelForPath } from './module_label';
 import { groupIntoSuites, type FlakySuite } from './suites';
 
 /**
@@ -64,8 +63,6 @@ export interface ReportFlakySuiteIssuesOptions {
   maxNewIssues: number;
   dryRun: boolean;
   dashboardUrl?: string;
-  /** Module named in the title of a new issue; defaults to the owning `kibana.jsonc`. */
-  moduleLabel?: (filePath: string) => string | undefined;
 }
 
 export interface IssueRef {
@@ -225,7 +222,6 @@ export const reportFlakySuiteIssues = async (
   options: ReportFlakySuiteIssuesOptions
 ): Promise<FlakySuiteIssuesSummary> => {
   const { report, github, log, githubRepo, closedSince, maxNewIssues, dryRun } = options;
-  const moduleLabel = options.moduleLabel ?? moduleLabelForPath;
   const suites = groupIntoSuites(report.flaky, report.files);
   log.info(
     `${report.flaky.length} flaky tests in ${suites.length} suites${dryRun ? ' (dry run)' : ''}`
@@ -259,7 +255,7 @@ export const reportFlakySuiteIssues = async (
       record({ action: 'skipped', ...ref, reason: 'max-new-issues' });
       return;
     }
-    const title = flakySuiteIssueTitle(suite, moduleLabel(suite.filePath));
+    const title = flakySuiteIssueTitle(suite);
     const body = renderFlakySuiteIssueBody(suite, {
       report,
       dashboardUrl: options.dashboardUrl,

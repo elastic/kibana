@@ -123,21 +123,16 @@ const multiTestReport = () => {
 };
 
 describe('flakySuiteIssueTitle', () => {
-  it('names the module, the framework and the suite title', () => {
+  it('names the framework and the suite title', () => {
     const { suite } = singleTestReport();
-    expect(flakySuiteIssueTitle(suite, 'Synthetics')).toBe(
-      'Flaky Scout suite [Synthetics]: Default status alert'
-    );
+    expect(flakySuiteIssueTitle(suite)).toBe('Flaky Scout suite: Default status alert');
   });
 
   it('cuts a suite title that would push the issue title past what GitHub accepts', () => {
     const { suite } = singleTestReport();
-    const title = flakySuiteIssueTitle(
-      { ...suite, suiteTitle: 'nested '.repeat(60).trim() },
-      'Synthetics'
-    );
+    const title = flakySuiteIssueTitle({ ...suite, suiteTitle: 'nested '.repeat(60).trim() });
     expect(title).toHaveLength(256);
-    expect(title.startsWith('Flaky Scout suite [Synthetics]: nested nested')).toBe(true);
+    expect(title.startsWith('Flaky Scout suite: nested nested')).toBe(true);
     expect(title.endsWith('…')).toBe(true);
   });
 

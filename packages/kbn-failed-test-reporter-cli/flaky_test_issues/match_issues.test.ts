@@ -72,7 +72,7 @@ describe('describeIssue', () => {
       describeIssue(
         githubIssue({
           number: 4,
-          title: 'Flaky Scout suite [Synthetics]: default status alert',
+          title: 'Flaky Scout suite: default status alert',
           body: `text\n\n<!-- kibanaCiData = {"flaky-test-suite":{"suite.filePath":"${SUITE_PATH}"}} -->`,
         })
       )
@@ -81,7 +81,7 @@ describe('describeIssue', () => {
       describeIssue(githubIssue({ number: 5, title: `Flaky FTR test suite: ${SUITE_PATH}` }))
     ).toMatchObject({ suiteFilePath: SUITE_PATH, testName: undefined });
     expect(
-      describeIssue(githubIssue({ number: 6, title: 'Flaky Scout suite [Lens]: two words' }))
+      describeIssue(githubIssue({ number: 6, title: 'Flaky Scout suite: two words' }))
     ).toMatchObject({ suiteFilePath: undefined });
   });
 

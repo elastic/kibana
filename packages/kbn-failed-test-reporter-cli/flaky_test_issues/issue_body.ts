@@ -51,8 +51,6 @@ const MAX_HEADLINE_BRANCHES = 2;
 
 export interface FlakySuiteIssueContext {
   report: FlakyTestReport;
-  /** `[<Module>]` title prefix, e.g. `Lens`; omitted when undefined. */
-  moduleLabel?: string;
   /** Dashboard with the live numbers, linked from the headline when given. */
   dashboardUrl?: string;
   /** Numbers of issues that mention the suite's file without being about it. */
@@ -144,14 +142,12 @@ export const flakySuiteIssueMetadata = (
   'report.history': [snapshot(suite, report)],
 });
 
-/** `Flaky Scout suite [Lens]: Lens ESQL dashboard inline editing`; the module is left out when unknown. */
+/** `Flaky Scout suite: Lens ESQL dashboard inline editing`, or the file name without a suite title. */
 export const flakySuiteIssueTitle = (
-  suite: Pick<FlakySuite, 'filePath' | 'framework' | 'suiteTitle'>,
-  moduleLabel?: string
+  suite: Pick<FlakySuite, 'filePath' | 'framework' | 'suiteTitle'>
 ): string => {
   const subject = suite.suiteTitle ?? Path.basename(suite.filePath);
-  const module = moduleLabel ? ` [${moduleLabel}]` : '';
-  const lead = `Flaky ${FRAMEWORK_LABELS[suite.framework].short} suite${module}: `;
+  const lead = `Flaky ${FRAMEWORK_LABELS[suite.framework].short} suite: `;
   // Nested describe blocks can join into a subject longer than GitHub accepts for a title
   const room = MAX_TITLE_LENGTH - lead.length;
   return lead + (subject.length > room ? `${subject.slice(0, room - 1)}…` : subject);
