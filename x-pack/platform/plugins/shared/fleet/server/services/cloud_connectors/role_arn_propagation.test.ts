@@ -36,6 +36,7 @@ jest.mock('../package_policy', () => ({
     vars: policy.vars,
     ...(policy.package ? { package: policy.package } : {}),
   }),
+  _normalizePackagePolicyKuery: (_savedObjectType: string, kuery: string) => kuery,
 }));
 jest.mock('../agent_policy', () => ({
   agentPolicyService: {
@@ -105,6 +106,9 @@ describe('propagateRoleArnToPackagePolicies', () => {
       version: `Wz${id}-after`,
     }));
     (agentPolicyService.bumpAgentPoliciesByIds as jest.Mock).mockResolvedValue({});
+    soClient.find.mockResolvedValue({ saved_objects: [], total: 0, page: 1, per_page: 100 });
+    soClient.update.mockReset();
+    soClient.update.mockResolvedValue({ version: 'Wz-snapshot-after' });
   });
 
   it('updates every referencing package policy with the new ARN', async () => {
@@ -422,6 +426,92 @@ describe('propagateRoleArnToPackagePolicies', () => {
       { user },
       'default'
     );
+  });
+
+  it('rewrites role_arn on the package-policy rollback snapshot', async () => {
+    mockListReturns([makePolicy('a')]);
+    soClient.find.mockResolvedValue({
+      saved_objects: [
+        {
+          id: 'a:prev',
+          type: 'ingest-package-policies',
+          version: 'Wz-prev',
+          attributes: {
+            latest_revision: false,
+            vars: { account_type: { type: 'text', value: 'single-account' } },
+            inputs: [
+              {
+                type: 'cloudbeat/cis_aws',
+                enabled: true,
+                vars: { role_arn: { type: 'text', value: OLD_ARN } },
+                streams: [],
+              },
+            ],
+          },
+        },
+      ],
+      total: 1,
+      page: 1,
+      per_page: 100,
+    });
+    soClient.update.mockResolvedValue({ id: 'a:prev', version: 'Wz-prev-after' });
+
+    const rollback = await propagateRoleArnToPackagePolicies({
+      soClient,
+      esClient,
+      connectorId: CONNECTOR_ID,
+      newRoleArn: NEW_ARN,
+    });
+
+    const snapshotWrite = soClient.update.mock.calls.find(([, id]) => id === 'a:prev');
+    expect(snapshotWrite?.[2].inputs[0].vars.role_arn.value).toBe(NEW_ARN);
+    expect(snapshotWrite?.[3]).toEqual({ version: 'Wz-prev' });
+
+    soClient.update.mockClear();
+    await rollback!.revert();
+
+    const snapshotRevert = soClient.update.mock.calls.find(([, id]) => id === 'a:prev');
+    expect(snapshotRevert?.[2].inputs[0].vars.role_arn.value).toBe(OLD_ARN);
+    expect(snapshotRevert?.[3]).toEqual({ version: 'Wz-prev-after' });
+  });
+
+  it('reverts active policies when a rollback snapshot update fails', async () => {
+    mockListReturns([makePolicy('a')]);
+    soClient.find.mockResolvedValue({
+      saved_objects: [
+        {
+          id: 'a:prev',
+          version: 'Wz-prev',
+          attributes: {
+            latest_revision: false,
+            inputs: [
+              {
+                type: 'cloudbeat/cis_aws',
+                enabled: true,
+                vars: { role_arn: { type: 'text', value: OLD_ARN } },
+                streams: [],
+              },
+            ],
+          },
+        },
+      ],
+      total: 1,
+    });
+    soClient.update.mockRejectedValue(new Error('snapshot boom'));
+
+    await expect(
+      propagateRoleArnToPackagePolicies({
+        soClient,
+        esClient,
+        connectorId: CONNECTOR_ID,
+        newRoleArn: NEW_ARN,
+      })
+    ).rejects.toBeInstanceOf(CloudConnectorRoleArnPropagationError);
+
+    const revertCalls = (packagePolicyService.update as jest.Mock).mock.calls.filter(
+      ([, , , update]) => update.inputs[0].vars.role_arn.value === OLD_ARN
+    );
+    expect(revertCalls.map(([, , id]) => id)).toEqual(['a']);
   });
 
   it('rollback handle throws with revertFailed when a snapshot restore fails', async () => {
