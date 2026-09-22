@@ -8,7 +8,11 @@
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
-import { createImpactAttachmentType, MAX_IMPACTED_ENTITIES } from './impact';
+import {
+  createImpactAttachmentType,
+  MAX_IMPACTED_ENTITIES,
+  type ImpactAttachmentData,
+} from './impact';
 
 describe('createImpactAttachmentType', () => {
   const attachmentType = createImpactAttachmentType();
@@ -67,8 +71,9 @@ describe('createImpactAttachmentType', () => {
       });
       expect(result.valid).toBe(true);
       if (result.valid) {
-        expect(result.data.entities[0].alert_count).toBe(3);
-        expect(result.data.entities[0].verdicts.true_positive).toBe(2);
+        const data = result.data as ImpactAttachmentData;
+        expect(data.entities[0].alert_count).toBe(3);
+        expect(data.entities[0].verdicts.true_positive).toBe(2);
       }
     });
 
