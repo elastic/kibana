@@ -46,7 +46,10 @@ test.describe(
       });
 
       await test.step('metric filters to current extent when filter is enabled', async () => {
-        await pageObjects.dashboard.clickPanelAction(FILTER_BY_MAP_EXTENT_ACTION, 'document example');
+        await pageObjects.dashboard.clickPanelAction(
+          FILTER_BY_MAP_EXTENT_ACTION,
+          'document example'
+        );
         await pageObjects.lens.setEuiSwitch(FILTER_BY_MAP_EXTENT_SWITCH, true);
         await page.keyboard.press('Escape');
         await pageObjects.dashboard.waitForRenderComplete();
@@ -60,7 +63,10 @@ test.describe(
       });
 
       await test.step('metric returns to all records when filter is disabled', async () => {
-        await pageObjects.dashboard.clickPanelAction(FILTER_BY_MAP_EXTENT_ACTION, 'document example');
+        await pageObjects.dashboard.clickPanelAction(
+          FILTER_BY_MAP_EXTENT_ACTION,
+          'document example'
+        );
         await pageObjects.lens.setEuiSwitch(FILTER_BY_MAP_EXTENT_SWITCH, false);
         await page.keyboard.press('Escape');
         await pageObjects.dashboard.waitForRenderComplete();

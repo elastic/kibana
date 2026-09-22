@@ -86,10 +86,7 @@ test.describe(
         expect(hasJoinFilter).toBe(true);
       });
 
-      test('should trigger url drilldown action when clicked', async ({
-        page,
-        pageObjects,
-      }) => {
+      test('should trigger url drilldown action when clicked', async ({ page, pageObjects }) => {
         await pageObjects.dashboard.openDashboardWithId(TOOLTIP_FILTER_ACTION_DASHBOARD_ID);
         await pageObjects.maps.lockTooltipAtPosition(200, -200);
 
