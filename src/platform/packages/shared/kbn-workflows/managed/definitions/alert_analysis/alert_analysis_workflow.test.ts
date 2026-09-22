@@ -1162,20 +1162,20 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
       condition: string;
     };
 
-    expect(evaluateExpression(engine, accumulateGate.condition, { inputs: { calledByWorker: true } })).toBe(
-      true
-    );
+    expect(
+      evaluateExpression(engine, accumulateGate.condition, { inputs: { calledByWorker: true } })
+    ).toBe(true);
     expect(
       evaluateExpression(engine, accumulateGate.condition, { inputs: { calledByWorker: false } })
     ).toBe(false);
     expect(evaluateExpression(engine, accumulateGate.condition, { inputs: {} })).toBe(false);
 
-    expect(evaluateExpression(engine, summaryGate.condition, { inputs: { calledByWorker: true } })).toBe(
-      true
-    );
-    expect(evaluateExpression(engine, overrideGate.condition, { inputs: { calledByWorker: true } })).toBe(
-      true
-    );
+    expect(
+      evaluateExpression(engine, summaryGate.condition, { inputs: { calledByWorker: true } })
+    ).toBe(true);
+    expect(
+      evaluateExpression(engine, overrideGate.condition, { inputs: { calledByWorker: true } })
+    ).toBe(true);
   });
 
   it('builds an output verdict keyed on the real alert id, with unknown entity defaults', () => {
