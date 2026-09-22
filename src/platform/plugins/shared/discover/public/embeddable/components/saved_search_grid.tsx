@@ -26,7 +26,7 @@ import { DiscoverGrid } from '../../components/discover_grid';
 import { DiscoverGridFlyout } from '../../components/discover_grid_flyout';
 import { SavedSearchEmbeddableBase } from './saved_search_embeddable_base';
 import { TotalDocuments } from '../../application/main/components/total_documents/total_documents';
-import { useProfileAccessor } from '../../context_awareness';
+import { useProfileAccessor, type CellRenderersSearchContext } from '../../context_awareness';
 
 export interface InlineEditing {
   isActive: boolean;
@@ -50,6 +50,7 @@ interface DiscoverGridEmbeddableProps extends Omit<UnifiedDataTableProps, 'sampl
   initialDocViewerTabId: string | undefined;
   docViewerRef: React.RefObject<DocViewerApi>;
   setExpandedDoc?: (doc: DataTableRecord | undefined, options?: { initialTabId?: string }) => void;
+  searchContext?: CellRenderersSearchContext;
   flyoutMenuTrailingActions?: EuiFlyoutMenuAction[];
 }
 
@@ -60,6 +61,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
     enableDocumentViewer,
     inlineEditing,
     interceptedWarnings,
+    searchContext,
     flyoutMenuTrailingActions,
     ...gridProps
   } = props;
@@ -133,12 +135,16 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         rowHeightState: gridProps.rowHeightState,
         configRowHeight: props.configRowHeight,
       }),
+      searchContext,
+      isDataLoading: props.loadingState === DiscoverGridLoadingState.loading,
     });
   }, [
     getCellRenderersAccessor,
     props.dataView,
     props.services.storage,
     props.configRowHeight,
+    props.loadingState,
+    searchContext,
     gridProps.dataGridDensityState,
     gridProps.rowHeightState,
   ]);
