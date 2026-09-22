@@ -10115,7 +10115,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Apply a partial update to an existing action policy. Fields not present in the body are left unchanged.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-action-policies.
+        Apply a partial update to an existing action policy. Fields not present in the body are left unchanged.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-action-policies AND read_alerting-v2-rules.
       operationId: patch-alerting-v2-action-policies-id
       parameters:
         - description: A required header to protect against CSRF attacks
