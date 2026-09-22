@@ -42,6 +42,14 @@ export class CommonPageObject extends FtrService {
   private readonly defaultTryTimeout = this.config.get('timeouts.try');
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
 
+  private async waitForAppMount(appUrl: string) {
+    if (!new URL(appUrl).pathname.includes('/app/')) {
+      return;
+    }
+
+    await this.find.byCssSelector('.kbnAppWrapper[aria-busy="false"]', 6 * this.defaultFindTimeout);
+  }
+
   private getUrlWithoutPort(urlStr: string) {
     const url = new URL(urlStr);
     url.port = '';
@@ -177,6 +185,8 @@ export class CommonPageObject extends FtrService {
         }
       }
     });
+
+    await this.waitForAppMount(appUrl);
   }
 
   /**
@@ -391,7 +401,7 @@ export class CommonPageObject extends FtrService {
       if (!skipUrlValidation) {
         // Poll until the URL stops changing. No upfront sleep: if the URL has
         // already settled we return immediately; the retry service's built-in
-        // 502ms delay provides spacing between checks when it is still moving.
+        // delay provides spacing between checks when it is still moving.
         await this.retry.tryForTime(this.defaultFindTimeout, async () => {
           const currentUrl = await this.browser.getCurrentUrl();
           this.log.debug('in navigateTo url = ' + currentUrl);
@@ -402,6 +412,8 @@ export class CommonPageObject extends FtrService {
         });
       }
     });
+
+    await this.waitForAppMount(appUrl);
   }
 
   async waitUntilUrlIncludes(path: string) {
