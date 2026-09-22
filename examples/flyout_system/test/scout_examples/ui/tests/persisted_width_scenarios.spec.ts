@@ -11,7 +11,6 @@ import type { ScoutPage } from '@kbn/scout';
 import { test } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
-const EUI_SIBLING_CLAMP_FIX = 'https://github.com/elastic/eui/pull/10075';
 const NO_WIDTH = '(none)';
 
 const toggle = (page: ScoutPage, label: string) =>
@@ -33,41 +32,33 @@ test.describe(
       await expect(storedWidth(page)).toHaveText(NO_WIDTH);
     });
 
-    // eslint-disable-next-line playwright/no-skipped-test -- fails until elastic/eui#10075 ships in Kibana
-    test.skip(
-      'second system push flyout opens at the width stored by resizing the first',
-      {
-        annotation: {
-          type: 'skip',
-          description: `Fails on Kibana main: EUI clamps the new main flyout against the previous main as if it were a sibling, so Q opens narrower than the stored width. Fixed by ${EUI_SIBLING_CLAMP_FIX}.`,
-        },
-      },
-      async ({ page }) => {
-        await toggle(page, 'Persisted push P').click();
-        const flyoutP = systemFlyout(page, 'Persisted push P');
-        await expect(flyoutP).toBeVisible();
-        await expect(renderedWidth(page, 'Persisted push P')).toContainText('px');
+    test('second system push flyout opens at the width stored by resizing the first', async ({
+      page,
+    }) => {
+      await toggle(page, 'Persisted push P').click();
+      const flyoutP = systemFlyout(page, 'Persisted push P');
+      await expect(flyoutP).toBeVisible();
+      await expect(renderedWidth(page, 'Persisted push P')).toContainText('px');
 
-        // Drag P's left edge to roughly 70% of the viewport. The clamp only bites once P is wider
-        // than the space EUI leaves next to a sibling (90% of the viewport minus P's width).
-        const viewportWidth = await page.evaluate(() => window.innerWidth);
-        const handle = flyoutP.locator('[data-test-subj="euiResizableButton"]');
-        const handleBox = await handle.boundingBox();
-        if (!handleBox) throw new Error('Resize handle of Persisted push P is not rendered');
-        const handleY = handleBox.y + handleBox.height / 2;
-        await page.mouse.move(handleBox.x + handleBox.width / 2, handleY);
-        await page.mouse.down();
-        await page.mouse.move(viewportWidth * 0.3, handleY, { steps: 10 });
-        await page.mouse.up();
+      // Drag P's left edge to roughly 70% of the viewport. The clamp only bites once P is wider
+      // than the space EUI leaves next to a sibling (90% of the viewport minus P's width).
+      const viewportWidth = await page.evaluate(() => window.innerWidth);
+      const handle = flyoutP.locator('[data-test-subj="euiResizableButton"]');
+      const handleBox = await handle.boundingBox();
+      if (!handleBox) throw new Error('Resize handle of Persisted push P is not rendered');
+      const handleY = handleBox.y + handleBox.height / 2;
+      await page.mouse.move(handleBox.x + handleBox.width / 2, handleY);
+      await page.mouse.down();
+      await page.mouse.move(viewportWidth * 0.3, handleY, { steps: 10 });
+      await page.mouse.up();
 
-        await expect(storedWidth(page)).not.toHaveText(NO_WIDTH);
-        const resizedWidth = await renderedWidth(page, 'Persisted push P').innerText();
-        expect(parseInt(resizedWidth, 10)).toBeGreaterThan(viewportWidth * 0.45);
+      await expect(storedWidth(page)).not.toHaveText(NO_WIDTH);
+      const resizedWidth = await renderedWidth(page, 'Persisted push P').innerText();
+      expect(parseInt(resizedWidth, 10)).toBeGreaterThan(viewportWidth * 0.45);
 
-        await toggle(page, 'Persisted push Q').click();
-        await expect(systemFlyout(page, 'Persisted push Q')).toBeVisible();
-        await expect(renderedWidth(page, 'Persisted push Q')).toHaveText(resizedWidth);
-      }
-    );
+      await toggle(page, 'Persisted push Q').click();
+      await expect(systemFlyout(page, 'Persisted push Q')).toBeVisible();
+      await expect(renderedWidth(page, 'Persisted push Q')).toHaveText(resizedWidth);
+    });
   }
 );

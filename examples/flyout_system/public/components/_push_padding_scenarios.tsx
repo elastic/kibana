@@ -237,7 +237,7 @@ const SCENARIOS: Scenario[] = [
     title: 'Two standalone push flyouts, close oldest first (elastic/eui#9788)',
     steps:
       'Open Standalone A, open Standalone B, close A, close B. Expected: padding back to (none). Bug: padding stays and the "Stranded padding" badge appears.',
-    status: 'failing',
+    status: 'passing',
     resolution: { text: 'Fixed by', href: EUI_PUSH_PADDING_PR, linkText: 'elastic/eui#10063' },
   },
   {
@@ -250,16 +250,16 @@ const SCENARIOS: Scenario[] = [
     title: 'Standalone push + system push, close standalone first',
     steps:
       'Open Standalone A, open System push C, close A. Expected: C is active and the page stays pushed. Bug: padding drops to (none) while C is open.',
-    status: 'failing',
+    status: 'passing',
     resolution: { text: 'Fixed by', href: EUI_PUSH_PADDING_PR, linkText: 'elastic/eui#10063' },
   },
   {
     title: 'Standalone push under a system overlay',
     steps:
       'Open Standalone A, open System overlay E, close E. Expected: A keeps its padding the whole time. Bug: padding is cleared when E closes while A is still open.',
-    status: 'failing',
+    status: 'passing',
     resolution: {
-      text: 'Needs the resetPushOffsetIfIdle workaround in system_flyout_service.tsx removed once Kibana picks up',
+      text: 'Fixed by',
       href: EUI_PUSH_PADDING_PR,
       linkText: 'elastic/eui#10063',
     },
@@ -268,7 +268,7 @@ const SCENARIOS: Scenario[] = [
     title: 'Resize a backgrounded push flyout while another push flyout is active',
     steps:
       'Open Standalone A, open System push C, then drag-resize A. Expected: padding keeps following C, the active flyout. Bug: padding jumps to the width of A, and closing A afterwards leaves C unpushed.',
-    status: 'failing',
+    status: 'passing',
     resolution: { text: 'Fixed by', href: EUI_PUSH_PADDING_PR, linkText: 'elastic/eui#10063' },
   },
   {
@@ -281,7 +281,7 @@ const SCENARIOS: Scenario[] = [
     title: 'Two system push sessions (multi-root), close oldest first',
     steps:
       'Open System push C, open System push D, close C. Expected: D stays open and pushed, closing D ends at (none). Bug: D disappears because closing a backgrounded main closes the foreground session (elastic/eui#10061).',
-    status: 'failing',
+    status: 'passing',
     resolution: {
       text: 'Fixed by',
       href: EUI_BACKGROUNDED_MAIN_PR,
