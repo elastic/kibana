@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
+  EuiLoadingSpinner,
   EuiPanel,
   useEuiTheme,
   EuiText,
@@ -24,14 +25,31 @@ import {
   type Investigation,
   type RecommendedAction,
 } from '../../types';
-import { EMPTY_CONVERSATION_QUEUE } from './translations';
+import {
+  CONVERSATION_QUEUE_COUNT_LOADING,
+  EMPTY_CONVERSATION_QUEUE,
+  LOADING_CONVERSATION_QUEUE,
+} from './translations';
 import { ConversationCard, type ConversationsActionsGroupProps } from '../conversation_card';
 import { type BaseActionsProps } from '../actions';
 
 interface ConversationQueueProps {
-  briefingId: string;
   briefingType: RecommendedAction;
   briefingList: Investigation[];
+  /**
+   * Size of the whole bucket on the server, not the row count — a collapsed or
+   * partially loaded section still has to say how big it is. A spinner stands in
+   * until the first response, since 0 would read as empty and then jump.
+   */
+  count?: number;
+  /**
+   * Controlled, because the caller drives its fetch from the open state and a second
+   * copy inside EuiAccordion would drift from it.
+   */
+  isOpen: boolean;
+  onToggle: (isOpen: boolean) => void;
+  /** Open and waiting on its first rows. */
+  isLoading?: boolean;
   onClickAction: BaseActionsProps['onClickAction'];
   onClickCard: (id: Investigation['id']) => void;
   onOpenChat: (id: Investigation['id']) => void;
@@ -65,9 +83,12 @@ const StyledAccordion = styled(EuiAccordion)`
 
 export const ConversationQueue = memo<ConversationQueueProps>(
   ({
-    briefingId,
     briefingType,
     briefingList,
+    count,
+    isOpen,
+    onToggle,
+    isLoading = false,
     isFiltered = false,
     onClickAction,
     onClickCard,
@@ -90,16 +111,17 @@ export const ConversationQueue = memo<ConversationQueueProps>(
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiBadge color={CONVERSATION_CATEGORY_COLORS[briefingType]}>
-            {briefingList.length}
-          </EuiBadge>
+          {count === undefined ? (
+            <EuiLoadingSpinner size="s" aria-label={CONVERSATION_QUEUE_COUNT_LOADING} />
+          ) : (
+            <EuiBadge color={CONVERSATION_CATEGORY_COLORS[briefingType]}>{count}</EuiBadge>
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     );
 
     return (
       <EuiPanel
-        key={briefingId}
         borderRadius="none"
         css={{
           cursor: 'pointer',
@@ -109,9 +131,14 @@ export const ConversationQueue = memo<ConversationQueueProps>(
         hasBorder
       >
         <StyledAccordion
-          id={`conversation-container-${briefingId}`}
+          id={`conversation-container-${briefingType}`}
           buttonContent={buttonContent}
-          initialIsOpen
+          forceState={isOpen ? 'open' : 'closed'}
+          onToggle={onToggle}
+          isLoading={isLoading}
+          // EuiAccordion only swaps the children for the message when this is truthy;
+          // `isLoading` alone just adds a class.
+          isLoadingMessage={LOADING_CONVERSATION_QUEUE}
           paddingSize="none"
           buttonProps={{
             css: css`

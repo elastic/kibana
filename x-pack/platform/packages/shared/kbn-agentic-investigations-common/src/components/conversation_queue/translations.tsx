@@ -15,3 +15,13 @@ export const EMPTY_CONVERSATION_QUEUE = Object.freeze({
     defaultMessage: 'No events match the current filter.',
   }),
 });
+
+export const LOADING_CONVERSATION_QUEUE = i18n.translate(
+  'xpack.alertzero.conversationQueue.loadingBucket',
+  { defaultMessage: 'Loading events…' }
+);
+
+export const CONVERSATION_QUEUE_COUNT_LOADING = i18n.translate(
+  'xpack.alertzero.conversationQueue.countLoading',
+  { defaultMessage: 'Loading count' }
+);

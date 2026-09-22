@@ -29,3 +29,12 @@ export interface ProposalsPageResponse {
   proposals: ProposalItem[];
   total: number;
 }
+
+/** `size: 0` asks for the group's `total` without paying for its rows. */
+export interface ProposalsPageParams {
+  size: number;
+  from: number;
+}
+
+/** Mirrors the proposals service cap; beyond it paging needs `search_after`. */
+export const MAX_QUEUE_PAGE_SIZE = 100;

@@ -16,6 +16,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/public/mocks';
 import { useApproveProposal, useDismissProposal } from '@kbn/agentic-investigations-plugin/public';
 import { useProposalsByCategory, useClosedProposals } from '../../hooks/use_proposals_api';
+import { CATEGORY_PAGE_SIZE, CLOSED_PAGE_SIZE } from './queue/use_queue_section';
 import { useProposalChartsSummary } from '../../hooks/use_proposal_charts_summary';
 import type { ProposalItem } from '../../../common/proposals/list';
 import { ConversationsPage } from './conversations_page';
@@ -39,19 +40,29 @@ const mockUseProposalChartsSummary = useProposalChartsSummary as jest.Mock;
 const mockUseApproveProposal = useApproveProposal as jest.Mock;
 const mockUseDismissProposal = useDismissProposal as jest.Mock;
 
-/** Fans a category→proposals map across the per-category and closed page hooks. */
+/**
+ * Fans a category→proposals map across the per-category and closed page hooks.
+ * `total` is the whole bucket and `proposals` only what `size` asked for: the badge
+ * reads the first and the rows the second, so the fake must not conflate them.
+ */
 const mockProposals = (groups: Record<string, ProposalItem[]>) => {
-  mockUseProposalsByCategory.mockImplementation((category: string) => {
-    const proposals = groups[category] ?? [];
-    return { data: { proposals, total: proposals.length }, isLoading: false, error: undefined };
-  });
-  const closed = groups.closed ?? [];
-  mockUseClosedProposals.mockReturnValue({
-    data: { proposals: closed, total: closed.length },
+  const page = (all: ProposalItem[], size: number) => ({
+    data: { proposals: all.slice(0, size), total: all.length },
     isLoading: false,
+    isFetching: false,
     error: undefined,
   });
+
+  mockUseProposalsByCategory.mockImplementation((category: string, { size }: { size: number }) =>
+    page(groups[category] ?? [], size)
+  );
+  mockUseClosedProposals.mockImplementation(({ size }: { size: number }) =>
+    page(groups.closed ?? [], size)
+  );
 };
+
+/** The Closed accordion starts collapsed, so its rows need an expand first. */
+const expandClosed = () => fireEvent.click(screen.getByRole('button', { name: /Closed/ }));
 
 /** The header count comes from the charts-summary scalar, not from the pages above. */
 const mockOpenCount = (currentOpen: number) =>
@@ -366,6 +377,7 @@ describe('ConversationsPage decisions', () => {
     mockProposals({ closed: [{ ...actionProposal, decidedAt: '2024-01-02T00:00:00Z' }] });
 
     renderPage('/');
+    expandClosed();
     fireEvent.click(screen.getByRole('button', { name: 'Open actions menu' }));
 
     // Asserted inside the open menu, since that is now the only place the decision
@@ -393,8 +405,64 @@ describe('ConversationsPage decisions', () => {
 
     renderPage('/');
 
-    // Closed rows are still rendered, but they are not work: the header must not read
+    // Closed holds rows, but they are not work: the header must not read
     // "0 actions need you" beside them.
     expect(screen.getByText('No events found')).toBeInTheDocument();
+  });
+});
+
+describe('ConversationsPage queue sections', () => {
+  const closedProposal = { ...proposal, id: 'prop-c', decidedAt: '2024-01-02T00:00:00Z' };
+
+  it('starts Closed collapsed and asks for no rows', () => {
+    mockProposals({ closed: [closedProposal] });
+
+    renderPage('/');
+
+    expect(mockUseClosedProposals).toHaveBeenCalledWith({ size: 0, from: 0 });
+    expect(screen.queryByText(closedProposal.conversationTitle!)).not.toBeInTheDocument();
+  });
+
+  it('shows the bucket total on a collapsed section, which has loaded no rows', () => {
+    mockProposals({ closed: [closedProposal, { ...closedProposal, id: 'prop-d' }] });
+
+    renderPage('/');
+
+    expect(screen.getByRole('button', { name: /Closed/ })).toHaveTextContent('2');
+  });
+
+  it('fetches rows once Closed is expanded', () => {
+    mockProposals({ closed: [closedProposal] });
+
+    renderPage('/');
+    expandClosed();
+
+    expect(mockUseClosedProposals).toHaveBeenLastCalledWith({ size: CLOSED_PAGE_SIZE, from: 0 });
+    expect(screen.getByText(closedProposal.conversationTitle!)).toBeInTheDocument();
+  });
+
+  it('drops back to no rows when Closed is collapsed again', () => {
+    mockProposals({ closed: [closedProposal] });
+
+    renderPage('/');
+    expandClosed();
+    expandClosed();
+
+    expect(mockUseClosedProposals).toHaveBeenLastCalledWith({ size: 0, from: 0 });
+  });
+
+  it('counts the whole bucket, not the page, on an open section', () => {
+    const many = Array.from({ length: CATEGORY_PAGE_SIZE + 5 }, (_, i) => ({
+      ...proposal,
+      id: `prop-${i}`,
+      category: 'respond',
+    }));
+    mockProposals({ respond: many });
+
+    renderPage('/');
+
+    expect(screen.getByRole('button', { name: /Respond/ })).toHaveTextContent(
+      String(CATEGORY_PAGE_SIZE + 5)
+    );
   });
 });

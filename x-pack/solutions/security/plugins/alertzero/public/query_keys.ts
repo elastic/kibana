@@ -6,6 +6,7 @@
  */
 
 import { queryKeys as platformQueryKeys } from '@kbn/agentic-investigations-plugin/public';
+import type { ProposalsPageParams } from '../common/proposals/list';
 
 export const queryKeys = {
   /**
@@ -16,11 +17,16 @@ export const queryKeys = {
   proposals: {
     chartsSummary: (windowHours: number, bucketMinutes: number) =>
       [...platformQueryKeys.proposals.all, 'charts-summary', windowHours, bucketMinutes] as const,
-    /** Pending proposals for one action category — drives a queue accordion. */
-    byCategory: (category: string) =>
-      [...platformQueryKeys.proposals.all, 'by-category', category] as const,
+    /**
+     * Pending proposals for one action category — drives a queue accordion. The page
+     * params are part of the key: a collapsed accordion asks for `size: 0`, and that
+     * response must not shadow the rows an expanded one fetches.
+     */
+    byCategory: (category: string, page: ProposalsPageParams) =>
+      [...platformQueryKeys.proposals.all, 'by-category', category, page] as const,
     /** Proposals decided in the last 72 h — drives the closed queue accordion. */
-    closed: () => [...platformQueryKeys.proposals.all, 'closed'] as const,
+    closed: (page: ProposalsPageParams) =>
+      [...platformQueryKeys.proposals.all, 'closed', page] as const,
   },
   watches: {
     all: ['alertzero', 'watches'] as const,
