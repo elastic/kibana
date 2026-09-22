@@ -36,8 +36,8 @@ export interface ValidateSpecAction {
 
 export type VegaAction = ResolveEsqlAction | AuthorSpecAction | ValidateSpecAction;
 
-export const isGenerateEsqlAction = (action: VegaAction): action is ResolveEsqlAction =>
-  action.type === 'generate_esql';
+export const isResolveEsqlAction = (action: VegaAction): action is ResolveEsqlAction =>
+  action.type === 'resolve_esql';
 
 export const isAuthorSpecAction = (action: VegaAction): action is AuthorSpecAction =>
   action.type === 'author_spec';

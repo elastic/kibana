@@ -78,7 +78,7 @@ describe('runResolveEsqlNode', () => {
     expect(result).toEqual({
       esqlQuery: PROVIDED_QUERY,
       columns: COLUMNS,
-      actions: [{ type: 'generate_esql', success: true, query: PROVIDED_QUERY, columns: COLUMNS }],
+      actions: [{ type: 'resolve_esql', success: true, query: PROVIDED_QUERY, columns: COLUMNS }],
     });
   });
 
@@ -94,9 +94,7 @@ describe('runResolveEsqlNode', () => {
     expect(result).toEqual({
       esqlQuery: PROVIDED_QUERY,
       columns: undefined,
-      actions: [
-        { type: 'generate_esql', success: true, query: PROVIDED_QUERY, columns: undefined },
-      ],
+      actions: [{ type: 'resolve_esql', success: true, query: PROVIDED_QUERY, columns: undefined }],
     });
   });
 
@@ -119,7 +117,7 @@ describe('runResolveEsqlNode', () => {
     expect(result).toEqual({
       esqlQuery: PROVIDED_QUERY,
       columns: COLUMNS,
-      actions: [{ type: 'generate_esql', success: true, query: PROVIDED_QUERY, columns: COLUMNS }],
+      actions: [{ type: 'resolve_esql', success: true, query: PROVIDED_QUERY, columns: COLUMNS }],
     });
   });
 
@@ -131,7 +129,7 @@ describe('runResolveEsqlNode', () => {
     expect(result).toEqual({
       esqlQuery: '',
       columns: undefined,
-      actions: [{ type: 'generate_esql', success: false, error: 'no such index [logs-*]' }],
+      actions: [{ type: 'resolve_esql', success: false, error: 'no such index [logs-*]' }],
     });
   });
 
@@ -146,7 +144,7 @@ describe('runResolveEsqlNode', () => {
     expect(result).toEqual({
       esqlQuery: '',
       columns: undefined,
-      actions: [{ type: 'generate_esql', success: false, error: 'connector unavailable' }],
+      actions: [{ type: 'resolve_esql', success: false, error: 'connector unavailable' }],
     });
   });
 });

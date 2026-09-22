@@ -23,7 +23,7 @@ import {
   VALIDATE_SPEC_NODE,
   FINALIZE_NODE,
   MAX_RETRY_ATTEMPTS,
-  isGenerateEsqlAction,
+  isResolveEsqlAction,
   isAuthorSpecAction,
   isValidateSpecAction,
   type VegaAction,
@@ -277,14 +277,14 @@ export const createVegaGraph = async (
 
     // Surface an ES|QL resolution failure (an unexecutable query that was never
     // authored into a spec) so the caller gets the real root cause.
-    const lastGenerate = [...state.actions].reverse().find(isGenerateEsqlAction);
-    if (lastGenerate && !lastGenerate.success) {
+    const lastResolve = [...state.actions].reverse().find(isResolveEsqlAction);
+    if (lastResolve && !lastResolve.success) {
       return {
         spec: null,
         title: null,
         authoringNote: null,
         error: `Could not resolve a valid ES|QL query for the visualization: ${
-          lastGenerate.error ?? 'Unknown error'
+          lastResolve.error ?? 'Unknown error'
         }`,
       };
     }
@@ -301,8 +301,8 @@ export const createVegaGraph = async (
   // A query that could not be resolved/executed must not be authored into a
   // spec (the spec would only fail at render), so route straight to finalize.
   const afterResolveEsqlRouter = (state: VegaState): string => {
-    const lastGenerate = [...state.actions].reverse().find(isGenerateEsqlAction);
-    if (!lastGenerate?.success) {
+    const lastResolve = [...state.actions].reverse().find(isResolveEsqlAction);
+    if (!lastResolve?.success) {
       logger.warn('ES|QL resolution failed; finalizing without authoring a Vega spec');
       return FINALIZE_NODE;
     }

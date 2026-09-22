@@ -22,7 +22,7 @@ import {
   type Action,
   type GenerateConfigAction,
   type ValidateConfigAction,
-  isGenerateEsqlAction,
+  isResolveEsqlAction,
   isGenerateConfigAction,
   isValidateConfigAction,
 } from './actions_lens';
@@ -140,7 +140,7 @@ export const createVisualizationGraph = async (
   // prompt never binds columns, so skip the column probe entirely.
   const resolveEsqlNode = (state: VisualizationState) => {
     if (state.preserveESQL) {
-      const action: Action = { type: 'generate_esql', success: true, query: state.esqlQuery };
+      const action: Action = { type: 'resolve_esql', success: true, query: state.esqlQuery };
       return { esqlQuery: state.esqlQuery, actions: [action] };
     }
     return runResolveEsqlNode({
@@ -319,14 +319,14 @@ export const createVisualizationGraph = async (
   // Node: Finalize - extract outputs from actions
   const finalizeNode = async (state: VisualizationState) => {
     const lastValidateAction = [...state.actions].reverse().find(isValidateConfigAction);
-    const lastGenerateEsqlAction = [...state.actions].reverse().find(isGenerateEsqlAction);
+    const lastResolveEsqlAction = [...state.actions].reverse().find(isResolveEsqlAction);
 
     // Surface an ES|QL resolution failure (a query that was never generated, so
     // no config was attempted) so the caller gets the real root cause.
     const esqlError =
-      lastGenerateEsqlAction && !lastGenerateEsqlAction.success
+      lastResolveEsqlAction && !lastResolveEsqlAction.success
         ? `Could not resolve a valid ES|QL query for the visualization: ${
-            lastGenerateEsqlAction.error ?? 'Unknown error'
+            lastResolveEsqlAction.error ?? 'Unknown error'
           }`
         : null;
 
@@ -334,7 +334,7 @@ export const createVisualizationGraph = async (
       validatedConfig: lastValidateAction?.success ? lastValidateAction.config : null,
       authoringNote: lastValidateAction?.success ? lastValidateAction.authoringNote ?? null : null,
       error: lastValidateAction?.success ? null : lastValidateAction?.error || esqlError,
-      esqlQuery: lastGenerateEsqlAction?.query || state.esqlQuery,
+      esqlQuery: lastResolveEsqlAction?.query || state.esqlQuery,
     };
   };
 
@@ -365,8 +365,8 @@ export const createVisualizationGraph = async (
   // straight to finalize with the ES|QL error instead of burning config
   // generation retries.
   const afterResolveEsqlRouter = (state: VisualizationState): string => {
-    const lastGenerateEsqlAction = [...state.actions].reverse().find(isGenerateEsqlAction);
-    if (!lastGenerateEsqlAction?.success) {
+    const lastResolveEsqlAction = [...state.actions].reverse().find(isResolveEsqlAction);
+    if (!lastResolveEsqlAction?.success) {
       logger.warn('ES|QL resolution failed; finalizing without generating a config');
       return 'finalize';
     }

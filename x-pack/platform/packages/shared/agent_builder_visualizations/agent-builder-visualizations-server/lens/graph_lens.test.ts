@@ -536,7 +536,7 @@ describe('createVisualizationGraph', () => {
     expect(finalState.actions).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          type: 'generate_esql',
+          type: 'resolve_esql',
           success: true,
           query: existingQuery,
         }),

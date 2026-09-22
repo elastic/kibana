@@ -343,7 +343,7 @@ describe('createVegaGraph', () => {
     expect(JSON.stringify(invoke.mock.calls[0][0])).toContain('No column information is available');
     expect(state.actions).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ type: 'generate_esql', success: true, query: PROVIDED_ESQL }),
+        expect.objectContaining({ type: 'resolve_esql', success: true, query: PROVIDED_ESQL }),
       ])
     );
     expect(state.error).toBeNull();

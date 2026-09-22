@@ -18,7 +18,7 @@ import { generateVisualizationEsql } from './generate_visualization_esql';
 
 /** Graph action emitted by the shared resolve-ES|QL node, part of both the Lens and Vega action unions. */
 export interface ResolveEsqlAction {
-  type: 'generate_esql';
+  type: 'resolve_esql';
   success: boolean;
   query?: string;
   /** Result columns of the executed query, used to inform config/spec authoring and validation. */
@@ -78,7 +78,7 @@ const probeEsqlColumns = async (
 /**
  * Shared Lens/Vega graph node: keep a provided or stored query and probe it for
  * columns, otherwise generate one (whose schema run already yields columns).
- * Either outcome is mapped onto a generate_esql action.
+ * Either outcome is mapped onto a resolve_esql action.
  */
 export const runResolveEsqlNode = async ({
   esqlQuery,
@@ -96,7 +96,7 @@ export const runResolveEsqlNode = async ({
     return {
       esqlQuery,
       columns,
-      actions: [{ type: 'generate_esql', success: true, query: esqlQuery, columns }],
+      actions: [{ type: 'resolve_esql', success: true, query: esqlQuery, columns }],
     };
   }
 
@@ -117,14 +117,14 @@ export const runResolveEsqlNode = async ({
     if (generated.query) {
       logger.debug(`Generated ES|QL query: ${generated.query}`);
       action = {
-        type: 'generate_esql',
+        type: 'resolve_esql',
         success: true,
         query: generated.query,
         columns: generated.columns,
       };
     } else {
       action = {
-        type: 'generate_esql',
+        type: 'resolve_esql',
         success: false,
         error: generated.error ?? 'No queries generated',
       };
@@ -132,7 +132,7 @@ export const runResolveEsqlNode = async ({
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     logger.error(`Failed to resolve ES|QL query: ${errorMessage}`);
-    action = { type: 'generate_esql', success: false, error: errorMessage };
+    action = { type: 'resolve_esql', success: false, error: errorMessage };
   }
 
   return {

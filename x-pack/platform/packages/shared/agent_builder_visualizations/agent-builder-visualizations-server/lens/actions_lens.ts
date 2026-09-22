@@ -28,8 +28,8 @@ export interface ValidateConfigAction {
 
 export type Action = ResolveEsqlAction | GenerateConfigAction | ValidateConfigAction;
 
-export function isGenerateEsqlAction(action: Action): action is ResolveEsqlAction {
-  return action.type === 'generate_esql';
+export function isResolveEsqlAction(action: Action): action is ResolveEsqlAction {
+  return action.type === 'resolve_esql';
 }
 
 export function isGenerateConfigAction(action: Action): action is GenerateConfigAction {
