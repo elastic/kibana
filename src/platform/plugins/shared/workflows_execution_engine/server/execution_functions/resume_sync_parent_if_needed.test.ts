@@ -248,6 +248,27 @@ describe('resumeSyncParentIfNeeded', () => {
     expect(mockMarkFailed).not.toHaveBeenCalled();
   });
 
+  it('does not fail-close the parent when cancel has already been requested', async () => {
+    const { internalResumeWorkflowExecution, workflowExecutionRepository, ...repos } = createDeps();
+    internalResumeWorkflowExecution.mockRejectedValue(new Error('not found'));
+    (workflowExecutionRepository.getWorkflowExecutionById as jest.Mock).mockResolvedValue({
+      id: parentExecId,
+      status: ExecutionStatus.WAITING_FOR_CHILD,
+      cancelRequested: true,
+    });
+
+    await resumeSyncParentIfNeeded({
+      childExecution: createChild(),
+      spaceId,
+      internalResumeWorkflowExecution,
+      workflowExecutionRepository,
+      logger,
+      ...repos,
+    });
+
+    expect(mockMarkFailed).not.toHaveBeenCalled();
+  });
+
   it('does not resume a non-terminal child', async () => {
     const { internalResumeWorkflowExecution, ...repos } = createDeps();
 

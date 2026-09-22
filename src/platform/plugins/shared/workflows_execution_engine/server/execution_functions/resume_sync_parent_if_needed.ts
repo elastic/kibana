@@ -169,6 +169,10 @@ async function failClosedIfParentStillWaiting({
       return;
     }
 
+    if (parent.cancelRequested) {
+      return;
+    }
+
     if (!stepExecutionRepository) {
       logger.error(
         `Cannot fail-close parent ${parentExecId} after child ${childExecutionId} completion: ` +
