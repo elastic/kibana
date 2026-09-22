@@ -8,6 +8,8 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
+import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
 import { PROFILE_STATE_URL_KEY } from '../../../../../../common/constants';
 import { DISCOVER_TABS_LOCAL_STORAGE_KEY } from '../constants';
 import type { PaginationLocators } from './pagination';
@@ -24,6 +26,12 @@ import type { ShareHelper } from './share_helper';
 import { createShareHelper } from './share_helper';
 import type { GridSettings } from './grid_settings';
 import { createGridSettings } from './grid_settings';
+
+/**
+ * The app scroll container is offset for as long as a push flyout is open, so with none open the
+ * offset is back to zero. See `grid_global_app_style` for the rule this resolves against.
+ */
+const NO_PUSH_OFFSET = '0px';
 
 export class MetricsExperiencePage {
   public readonly container: Locator;
@@ -46,6 +54,7 @@ export class MetricsExperiencePage {
   public readonly chromeHeader: Locator;
 
   private readonly page: ScoutPage;
+  private readonly appScrollContainer: Locator;
 
   constructor(page: ScoutPage) {
     this.page = page;
@@ -68,6 +77,7 @@ export class MetricsExperiencePage {
     this.gridSettings = createGridSettings(page);
     this.fullscreenButton = page.testSubj.locator('metricsExperienceToolbarFullScreen');
     this.chromeHeader = page.testSubj.locator('kbnChromeLayoutHeader');
+    this.appScrollContainer = page.locator(`#${APP_MAIN_SCROLL_CONTAINER_ID}`);
   }
 
   public getCardByIndex(index: number): Locator {
@@ -255,5 +265,15 @@ export class MetricsExperiencePage {
       },
       [DISCOVER_TABS_LOCAL_STORAGE_KEY, field] as const
     );
+  }
+
+  /** Asserts an open push flyout is pushing the grid aside rather than overlaying it. */
+  public async expectPushFlyoutOffset(): Promise<void> {
+    await expect(this.appScrollContainer).not.toHaveCSS('padding-inline-end', NO_PUSH_OFFSET);
+  }
+
+  /** Asserts no push flyout offset is stranded on the layout, i.e. no gap beside the grid. */
+  public async expectNoPushFlyoutOffset(): Promise<void> {
+    await expect(this.appScrollContainer).toHaveCSS('padding-inline-end', NO_PUSH_OFFSET);
   }
 }

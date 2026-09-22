@@ -14,11 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { EmbeddableComponentProps } from '@kbn/lens-plugin/public';
 import { ACTION_INSPECT_PANEL, type QuickActionIds } from '@kbn/embeddable-plugin/public';
-import {
-  DiscoverFlyouts,
-  dismissAllFlyoutsExceptFor,
-  type MetricsGridSettings,
-} from '@kbn/discover-utils';
+import { DiscoverFlyouts, type MetricsGridSettings } from '@kbn/discover-utils';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { getFieldSearchMatchingHighlight } from '@kbn/field-utils';
 import { stableStringify } from '@kbn/std';
@@ -26,6 +22,7 @@ import type { Dimension, UnifiedMetricsGridProps, ParsedMetricItem } from '../..
 import type { ChartSize } from '../../chart';
 import { Chart } from '../../chart';
 import { MetricInsightsFlyout } from '../../flyout';
+import { openAfterDismissingOtherFlyouts } from '../../flyout/utils';
 import { EmptyState } from '../../empty_state/empty_state';
 import { useGridNavigation } from '../../../hooks/use_grid_navigation';
 import { FieldsMetadataProvider } from '../../../context/fields_metadata';
@@ -173,13 +170,14 @@ export const MetricsGrid = ({
 
   const handleViewDetails = useCallback(
     (index: number, esqlQuery: string, metricItem: ParsedMetricItem) => {
-      dismissAllFlyoutsExceptFor(DiscoverFlyouts.metricInsights);
-      onFlyoutStateChange({
-        gridPosition: index,
-        metricUniqueKey: getMetricUniqueKey(metricItem),
-        esqlQuery,
-        selectedTabId: 'overview',
-      });
+      openAfterDismissingOtherFlyouts(DiscoverFlyouts.metricInsights, () =>
+        onFlyoutStateChange({
+          gridPosition: index,
+          metricUniqueKey: getMetricUniqueKey(metricItem),
+          esqlQuery,
+          selectedTabId: 'overview',
+        })
+      );
     },
     [onFlyoutStateChange]
   );

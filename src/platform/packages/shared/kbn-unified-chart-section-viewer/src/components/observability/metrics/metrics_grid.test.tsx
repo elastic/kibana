@@ -20,7 +20,7 @@ import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/publ
 import type { UnifiedHistogramFetch$ } from '@kbn/unified-histogram/types';
 import type { UnifiedMetricsGridProps } from '../../../types';
 import { createESQLQuery } from '../../../common/utils';
-import { dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
+import { openAfterDismissingOtherFlyouts } from '../../flyout/utils';
 import {
   MetricsExperienceStateProvider,
   useMetricsExperienceState,
@@ -42,9 +42,12 @@ jest.mock('@kbn/discover-utils', () => {
     METRICS_GRID_SETTINGS_DEFAULTS,
     METRICS_GRID_SIMPLE_AGGREGATIONS,
     METRICS_GRID_SORT_DEFAULTS,
-    dismissAllFlyoutsExceptFor: jest.fn(),
   };
 });
+
+jest.mock('../../flyout/utils/open_after_dismissing_other_flyouts', () => ({
+  openAfterDismissingOtherFlyouts: jest.fn((_flyout: string, open: () => void) => open()),
+}));
 
 jest.mock('@elastic/eui', () => {
   const actual = jest.requireActual('@elastic/eui');
@@ -617,7 +620,7 @@ describe('MetricsGrid', () => {
   });
 
   describe('flyout dismissal on view details', () => {
-    it('should call dismissAllFlyoutsExceptFor with metricInsights when handleViewDetails is triggered', () => {
+    it('should open the insights flyout through the other flyouts being dismissed first', () => {
       renderMetricsGrid();
 
       // Get the onViewDetails callback passed to the first Chart
@@ -627,20 +630,20 @@ describe('MetricsGrid', () => {
       const firstChartProps = chartCalls[0][0];
       expect(firstChartProps.onViewDetails).toBeDefined();
 
-      // Clear mock to isolate calls from handleViewDetails vs flyout mount useEffect
-      (dismissAllFlyoutsExceptFor as jest.Mock).mockClear();
+      (openAfterDismissingOtherFlyouts as jest.Mock).mockClear();
 
       // Trigger the onViewDetails callback
       act(() => {
         firstChartProps.onViewDetails();
       });
 
-      // Verify dismissAllFlyoutsExceptFor was called from handleViewDetails
-      // AND from the flyout's useEffect on mount (2 calls total).
-      // The first call is the early dismissal in handleViewDetails (before flyout mounts),
-      // the second is the safety-net useEffect inside MetricInsightsFlyout.
-      expect(dismissAllFlyoutsExceptFor).toHaveBeenCalledTimes(2);
-      expect(dismissAllFlyoutsExceptFor).toHaveBeenCalledWith('metricInsights');
+      // The flyout must only be opened by the sequencing helper, so it never mounts while
+      // another push flyout still owns the shared offset.
+      expect(openAfterDismissingOtherFlyouts).toHaveBeenCalledTimes(1);
+      expect(openAfterDismissingOtherFlyouts).toHaveBeenCalledWith(
+        'metricInsights',
+        expect.any(Function)
+      );
     });
   });
 

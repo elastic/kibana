@@ -285,6 +285,7 @@ spaceTest.describe(
 
           await expect(gridSettings.flyout).toBeHidden();
           await expect(flyout.container).toBeVisible();
+          await metricsExperience.expectPushFlyoutOffset();
         });
 
         await spaceTest.step('closing the surviving flyout leaves both closed', async () => {
@@ -292,7 +293,27 @@ spaceTest.describe(
 
           await expect(flyout.container).toBeHidden();
           await expect(gridSettings.flyout).toBeHidden();
+          await metricsExperience.expectNoPushFlyoutOffset();
         });
+      }
+    );
+
+    spaceTest(
+      'leaves no gap after closing the configuration opened from the inspector',
+      async ({ page, pageObjects }) => {
+        const { metricsExperience, inspector } = pageObjects;
+        const { gridSettings } = metricsExperience;
+
+        await page.setViewportSize(testData.PUSH_FLYOUT_VIEWPORT);
+
+        await metricsExperience.openInspectorFlyout(0);
+        await inspector.panel.waitFor({ state: 'visible' });
+
+        await gridSettings.open();
+        await expect(inspector.panel).toBeHidden();
+
+        await gridSettings.cancel();
+        await metricsExperience.expectNoPushFlyoutOffset();
       }
     );
   }
