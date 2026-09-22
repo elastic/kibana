@@ -18,11 +18,32 @@ describe('permissions', () => {
       ['all'],
       ['assign'],
       ['createComment'],
+      ['reopenCase'],
       ['manageTemplates'],
     ];
 
     it('returns true if the user has only read permissions', async () => {
       expect(isReadOnlyPermissions(readCasesPermissions())).toBe(true);
+    });
+
+    it('returns false if the user has read and reopenCase permissions', async () => {
+      expect(
+        isReadOnlyPermissions(
+          buildCasesPermissions({
+            read: true,
+            reopenCase: true,
+            create: false,
+            update: false,
+            delete: false,
+            push: false,
+            assign: false,
+            createComment: false,
+            manageTemplates: false,
+            settings: false,
+            connectors: false,
+          })
+        )
+      ).toBe(false);
     });
 
     it('returns false if the user has read and manageTemplates permissions', async () => {

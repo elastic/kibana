@@ -875,6 +875,30 @@ describe('AllCasesListGeneric', () => {
         }
       });
 
+      it('should enable the checkboxes when the user has read + reopenCase', async () => {
+        renderWithTestingProviders(<AllCasesList />, {
+          wrapperProps: {
+            permissions: buildCasesPermissions({
+              read: true,
+              reopenCase: true,
+              create: false,
+              update: false,
+              delete: false,
+              push: false,
+              assign: false,
+              createComment: false,
+              manageTemplates: false,
+            }),
+          },
+        });
+
+        expect(await screen.findByTestId('checkboxSelectAll')).toBeEnabled();
+
+        for (const theCase of defaultGetCases.data.cases) {
+          expect(await screen.findByTestId(`checkboxSelectRow-${theCase.id}`)).toBeEnabled();
+        }
+      });
+
       it('should disable the checkboxes when the user has read + manageTemplates but no bulk-action permissions', async () => {
         renderWithTestingProviders(<AllCasesList />, {
           wrapperProps: {
