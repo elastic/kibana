@@ -49,7 +49,7 @@ export default function canvasCustomElementTest({
       await canvas.fillOutCustomElementForm('My New Element', 'An excellent new element');
 
       // wait for the custom element success toast notif
-      await testSubjects.exists('canvasCustomElementCreate-success', {
+      await testSubjects.waitForExists('canvasCustomElementCreate-success', {
         timeout: 30000,
       });
     });

@@ -448,7 +448,7 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async expectUnsavedChangesNotificationExists(timeout: number | undefined = undefined) {
-    await this.testSubjects.exists(UNSAVED_CHANGES_NOTIFICATION, { timeout });
+    await this.testSubjects.waitForExists(UNSAVED_CHANGES_NOTIFICATION, { timeout });
   }
 
   public async clickNewDashboard(
@@ -668,7 +668,7 @@ export class DashboardPageObject extends FtrService {
     dashboardTitle: string,
     saveOptions: Omit<SaveDashboardOptions, 'saveAsNew'> = { waitDialogIsClosed: true }
   ) {
-    const isSaveModalOpen = await this.testSubjects.exists('savedObjectSaveModal', {
+    const isSaveModalOpen = await this.testSubjects.waitForExists('savedObjectSaveModal', {
       timeout: 2000,
     });
 
@@ -993,7 +993,7 @@ export class DashboardPageObject extends FtrService {
   public async getNotLoadedVisualizations(vizList: string[]) {
     const checkList = [];
     for (const name of vizList) {
-      const isPresent = await this.testSubjects.exists(
+      const isPresent = await this.testSubjects.waitForExists(
         `embeddablePanelHeading-${name.replace(/\s+/g, '')}`,
         { timeout: 10000 }
       );

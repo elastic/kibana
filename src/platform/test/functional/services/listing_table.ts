@@ -77,7 +77,7 @@ export class ListingTableService extends FtrService {
   });
 
   private async getSearchFilter() {
-    if (await this.testSubjects.exists('tableListSearchBox', { timeout: 1000 })) {
+    if (await this.testSubjects.waitForExists('tableListSearchBox', { timeout: 1000 })) {
       return this.testSubjects.find('tableListSearchBox');
     }
     return this.testSubjects.find(CONTENT_LIST_SEARCH_BOX);
@@ -137,12 +137,14 @@ export class ListingTableService extends FtrService {
     }
 
     await this.retry.try(async () => {
-      if (await this.testSubjects.exists('listingTable-isLoaded', { timeout: 1000 })) {
+      if (await this.testSubjects.waitForExists('listingTable-isLoaded', { timeout: 1000 })) {
         return true;
       }
       // Content List keeps its table mounted behind a loading skeleton.
-      if (await this.testSubjects.exists(CONTENT_LIST_TABLE, { timeout: 1000 })) {
-        if (!(await this.testSubjects.exists(CONTENT_LIST_TABLE_SKELETON, { timeout: 1000 }))) {
+      if (await this.testSubjects.waitForExists(CONTENT_LIST_TABLE, { timeout: 1000 })) {
+        if (
+          !(await this.testSubjects.waitForExists(CONTENT_LIST_TABLE_SKELETON, { timeout: 1000 }))
+        ) {
           return true;
         }
       }
@@ -194,7 +196,7 @@ export class ListingTableService extends FtrService {
 
   public async openTagPopover(): Promise<void> {
     this.log.debug('ListingTable.openTagPopover');
-    if (await this.testSubjects.exists('tagFilterPopoverButton', { timeout: 1000 })) {
+    if (await this.testSubjects.waitForExists('tagFilterPopoverButton', { timeout: 1000 })) {
       await this.tagPopoverToggle.open();
       return;
     }
@@ -203,7 +205,7 @@ export class ListingTableService extends FtrService {
 
   public async closeTagPopover(): Promise<void> {
     this.log.debug('ListingTable.closeTagPopover');
-    if (await this.testSubjects.exists('tagFilterPopoverButton', { timeout: 1000 })) {
+    if (await this.testSubjects.waitForExists('tagFilterPopoverButton', { timeout: 1000 })) {
       await this.tagPopoverToggle.close();
       return;
     }
@@ -348,7 +350,7 @@ export class ListingTableService extends FtrService {
     await this.searchForItemWithName(name);
     await this.retry.try(async () => {
       let matches: number;
-      if (await this.testSubjects.exists(CONTENT_LIST_TABLE, { timeout: 1000 })) {
+      if (await this.testSubjects.waitForExists(CONTENT_LIST_TABLE, { timeout: 1000 })) {
         // Content List item links carry no per-item subject; match on exact text.
         const links = await this.testSubjects.findAll(CONTENT_LIST_ITEM_LINK);
         const texts = await Promise.all(links.map((link) => link.getVisibleText()));
@@ -364,7 +366,7 @@ export class ListingTableService extends FtrService {
   }
 
   public async clickDeleteSelected() {
-    if (await this.testSubjects.exists('deleteSelectedItems', { timeout: 1000 })) {
+    if (await this.testSubjects.waitForExists('deleteSelectedItems', { timeout: 1000 })) {
       await this.testSubjects.click('deleteSelectedItems');
       return;
     }
@@ -400,7 +402,7 @@ export class ListingTableService extends FtrService {
    */
   public async clickItemLink(appName: AppName, name: string) {
     const legacySubj = `${PREFIX_MAP[appName]}ListingTitleLink-${name.split(' ').join('-')}`;
-    if (await this.testSubjects.exists(legacySubj, { timeout: 1000 })) {
+    if (await this.testSubjects.waitForExists(legacySubj, { timeout: 1000 })) {
       await this.testSubjects.click(legacySubj);
       return;
     }
@@ -432,11 +434,11 @@ export class ListingTableService extends FtrService {
    */
   public async clickNewButton(): Promise<void> {
     await this.retry.try(async () => {
-      if (await this.testSubjects.exists('newItemButton', { timeout: 1000 })) {
+      if (await this.testSubjects.waitForExists('newItemButton', { timeout: 1000 })) {
         await this.testSubjects.click('newItemButton');
         return;
       }
-      if (await this.testSubjects.exists('app-menu-overflow-button', { timeout: 1000 })) {
+      if (await this.testSubjects.waitForExists('app-menu-overflow-button', { timeout: 1000 })) {
         await this.testSubjects.click('app-menu-overflow-button');
         await this.testSubjects.click('newItemButton');
         return;

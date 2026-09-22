@@ -192,7 +192,9 @@ export default function ({ getService, getPageObjects }) {
         });
 
         it('should show a toast when alerts are created successfully', async () => {
-          expect(await testSubjects.exists('alertsCreatedToast', { timeout: 10000 })).to.be(true);
+          expect(await testSubjects.waitForExists('alertsCreatedToast', { timeout: 10000 })).to.be(
+            true
+          );
         });
 
         it('should show badges when entering setup mode', async () => {
