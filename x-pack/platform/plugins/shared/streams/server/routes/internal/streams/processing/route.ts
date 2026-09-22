@@ -78,21 +78,22 @@ function countDSLSteps(steps: StreamlangStep[], acc: number): number {
   return acc;
 }
 
-const boundedStreamlangDSLSchema = z.preprocess((val) => {
-  if (!rawNestingDepthOk(val, 0)) {
-    throw new Error(
-      `Processing DSL exceeds maximum nesting depth of ${MAX_DSL_NESTING_DEPTH}`
-    );
-  }
-  return val;
-}, streamlangDSLSchema.superRefine((val, ctx) => {
-  if (countDSLSteps(val.steps, 0) > MAX_DSL_STEPS_TOTAL) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: `Processing DSL exceeds maximum of ${MAX_DSL_STEPS_TOTAL} total steps`,
-    });
-  }
-}));
+const boundedStreamlangDSLSchema = z.preprocess(
+  (val) => {
+    if (!rawNestingDepthOk(val, 0)) {
+      throw new Error(`Processing DSL exceeds maximum nesting depth of ${MAX_DSL_NESTING_DEPTH}`);
+    }
+    return val;
+  },
+  streamlangDSLSchema.superRefine((val, ctx) => {
+    if (countDSLSteps(val.steps, 0) > MAX_DSL_STEPS_TOTAL) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `Processing DSL exceeds maximum of ${MAX_DSL_STEPS_TOTAL} total steps`,
+      });
+    }
+  })
+);
 
 const paramsSchema = z.object({
   path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
