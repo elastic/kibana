@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiDataGridSelectors } from '@elastic/eui-test-helpers';
 import type { Locator } from '../../..';
 import type { ScoutPage } from '..';
 import { expect } from '..';
-import { dataGridHeaderCellContentSelector } from './utils/eui_selectors';
+import { euiSelectors } from '../eui_components';
 
 const IN_TABLE_SEARCH_BUTTON_TEST_SUBJ = 'startInTableSearchButton';
 const IN_TABLE_SEARCH_INPUT_TEST_SUBJ = 'inTableSearchInput';
@@ -33,7 +32,10 @@ export class DataGrid {
   }
 
   private async readHeaderLabels(scope: Locator, limit: number): Promise<string[]> {
-    const headerCellContent = scope.locator(dataGridHeaderCellContentSelector());
+    const headerCell = euiSelectors.dataGrid.HEADER_CELL_SELECTOR;
+    const headerCellContent = scope.locator(
+      `${headerCell}:not(${headerCell}--controlColumn) ${headerCell}__content`
+    );
 
     const labels = await headerCellContent.allInnerTexts();
     return labels
@@ -346,7 +348,7 @@ export class DataGrid {
   async getNumberOfSelectedRowsOnCurrentPage(): Promise<number> {
     return this.page
       .locator(
-        `${EuiDataGridSelectors.ROW_SELECTOR} [data-gridcell-column-id="select"] input[type="checkbox"]:checked`
+        `${euiSelectors.dataGrid.ROW_SELECTOR} [data-gridcell-column-id="select"] input[type="checkbox"]:checked`
       )
       .count();
   }
