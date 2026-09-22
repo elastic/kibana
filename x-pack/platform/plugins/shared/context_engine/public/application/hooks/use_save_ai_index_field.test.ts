@@ -26,6 +26,7 @@ const aiIndex: GetAiIndexResponse = {
 describe('toProperties', () => {
   it('strips server-managed fields and derived trace queries', () => {
     expect(toProperties(aiIndex)).toEqual({
+      memory_enabled: true,
       dest: aiIndex.dest,
       automations: [],
       sources: [{ type: 'esql', value: 'FROM logs-*' }],
