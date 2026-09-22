@@ -319,7 +319,7 @@ export class TimeBuckets {
     // If the format shows time but not date, and the time range spans multiple
     // calendar days in the display timezone, prepend the date — otherwise the
     // same HH:mm value appears on multiple days and rows look like duplicates.
-    if (this.hasBounds() && /[Hh]/.test(format) && !/D/.test(format)) {
+    if (this.hasBounds() && /[Hhk]/.test(format) && !/D/.test(format)) {
       const rawTz = this._timeBucketConfig['dateFormat:tz'];
       const tz = !rawTz || rawTz === 'Browser' ? moment.tz.guess() : rawTz;
       const lbInTz = moment.tz(this._lb!.valueOf(), tz);

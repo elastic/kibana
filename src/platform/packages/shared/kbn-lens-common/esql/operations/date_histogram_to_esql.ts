@@ -50,7 +50,7 @@ export const getDateHistogramSerializedFormat: GetSerializedFormatFn<
   }
 
   const absDateRange = convertToAbsoluteDateRange(dateRange, new Date());
-  if (/[Hh]/.test(pattern) && !/D/.test(pattern)) {
+  if (/[Hhk]/.test(pattern) && !/D/.test(pattern)) {
     const rawTz = uiSettings?.get<string>('dateFormat:tz');
     const tz = !rawTz || rawTz === 'Browser' ? moment.tz.guess() : rawTz;
     const fromInTz = moment.tz(absDateRange.fromDate, tz);

@@ -90,6 +90,28 @@ describe('getDateHistogramSerializedFormat', () => {
     expect(result).toEqual({ id: 'date', params: { pattern: 'HH:mm' } });
   });
 
+  test('prepends date when format uses kk (1-24 hour) and range crosses midnight', () => {
+    const rulesWithKk: Array<[string, string]> = [
+      ...scaledRules.slice(0, 2),
+      ['PT1M', 'kk:mm'],
+    ];
+    const settingsWithKk = {
+      get: (key: string) => {
+        if (key === 'dateFormat') return 'YYYY-MM-DD';
+        if (key === 'dateFormat:scaled') return rulesWithKk;
+        if (key === 'dateFormat:tz') return 'UTC';
+      },
+    } as any;
+    const result = getDateHistogramSerializedFormat(
+      column,
+      column,
+      indexPattern,
+      settingsWithKk,
+      { fromDate: '2020-03-25T23:00:00.000Z', toDate: '2020-03-26T01:00:00.000Z' }
+    );
+    expect(result).toEqual({ id: 'date', params: { pattern: 'YYYY-MM-DD kk:mm' } });
+  });
+
   test('does not prepend date when format already contains a date token', () => {
     const rulesWithDate: Array<[string, string]> = [
       ...scaledRules.slice(0, 2),

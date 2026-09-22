@@ -204,6 +204,30 @@ describe('TimeBuckets', () => {
     expect(format).toEqual('HH:mm');
   });
 
+  test('getScaledDateFormat - prepends date when format uses kk (1-24 hour) and range crosses midnight', () => {
+    const config: TimeBucketsConfig = {
+      ...timeBucketConfig,
+      'histogram:maxBars': 1000,
+      'dateFormat:scaled': [
+        ['', 'HH:mm:ss.SSS'],
+        ['PT1S', 'HH:mm:ss'],
+        ['PT1M', 'kk:mm'],
+        ['PT1H', 'YYYY-MM-DD HH:mm'],
+        ['P1DT', 'YYYY-MM-DD'],
+        ['P1YT', 'YYYY'],
+      ],
+    };
+    const timeBuckets = new TimeBuckets(config);
+    // 23:00–01:00 UTC crosses midnight.
+    timeBuckets.setBounds({
+      min: moment.tz('2020-03-25T23:00:00', 'UTC'),
+      max: moment.tz('2020-03-26T01:00:00', 'UTC'),
+    });
+    timeBuckets.setInterval('20m');
+    const format = timeBuckets.getScaledDateFormat();
+    expect(format).toEqual('YYYY-MM-DD kk:mm');
+  });
+
   test('allows days but throws error on weeks', () => {
     const timeBuckets = new TimeBuckets(timeBucketConfig);
     timeBuckets.setInterval('14d');
