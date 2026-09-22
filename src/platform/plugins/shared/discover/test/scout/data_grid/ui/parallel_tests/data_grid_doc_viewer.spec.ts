@@ -119,7 +119,7 @@ spaceTest.describe('Discover data grid - doc viewer', { tag: tags.stateful.all }
     }
   );
 
-  spaceTest('adds and removes columns from the detail panel', async ({ pageObjects }) => {
+  spaceTest('adds and removes columns from the detail panel', async ({ page, pageObjects }) => {
     const fields = ['_id', '_index', 'agent'];
 
     await pageObjects.docViewer.openAndWaitForFlyout({ rowIndex: 0 });
@@ -134,6 +134,11 @@ spaceTest.describe('Discover data grid - doc viewer', { tag: tags.stateful.all }
         `column ${field} should appear in the grid after adding it from the flyout`
       ).toBeVisible();
     }
+
+    const { violations } = await page.checkA11y({
+      include: ['[data-test-subj="discoverDocTable"]'],
+    });
+    expect(violations).toStrictEqual([]);
 
     // Calling the same toggle again removes the column.
     for (const field of fields) {
