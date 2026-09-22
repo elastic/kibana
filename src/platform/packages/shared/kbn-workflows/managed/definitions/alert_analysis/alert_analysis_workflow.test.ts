@@ -1032,4 +1032,380 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW render-level tests', () => {
     expect(output).toContain('process.code_signature.trusted: false');
     expect(output).toContain('process.parent.code_signature.trusted: false');
   });
+
+  it('includes batch_summary instructions only when calledByWorker is true', () => {
+    const template = getMessageTemplate();
+    const batchAlerts = [
+      {
+        _id: 'alert-1',
+        event: {},
+        user: {},
+        host: {},
+        process: {},
+        file: {},
+        source: {},
+        destination: {},
+        network: {},
+        url: {},
+        dns: {},
+        cloud: {},
+        kibana: { alert: {} },
+        aws: {},
+        azure: {},
+        gcp: {},
+      },
+    ];
+
+    const standalone = engine.parseAndRenderSync(template, {
+      ...makeRenderContext(batchAlerts),
+      inputs: { calledByWorker: false },
+    });
+    expect(standalone).not.toContain('batch_summary');
+
+    const worker = engine.parseAndRenderSync(template, {
+      ...makeRenderContext(batchAlerts),
+      inputs: { calledByWorker: true },
+    });
+    expect(worker).toContain('batch_summary');
+  });
+});
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Liquid execution: evaluate Worker-path expressions the way the engine does
+// (evalValueSync / recursive render). Full workflow runtime needs Kibana
+// connectors; these pin the Liquid contracts that decide what a Worker receives.
+// ──────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Mirrors WorkflowTemplatingEngine.evaluateExpression: drop the leading `$`,
+ * then take everything between the first `{{` and the last `}}`.
+ */
+const evaluateExpression = (
+  engine: ReturnType<typeof createWorkflowLiquidEngine>,
+  template: string,
+  context: Record<string, unknown>
+): unknown => {
+  const open = template.indexOf('{{');
+  const close = template.lastIndexOf('}}');
+  return engine.evalValueSync(template.substring(open + 2, close).trim(), context);
+};
+
+/**
+ * Mirrors WorkflowTemplatingEngine.renderValueRecursively for step `with` payloads.
+ */
+const renderValueRecursively = (
+  engine: ReturnType<typeof createWorkflowLiquidEngine>,
+  value: unknown,
+  context: Record<string, unknown>
+): unknown => {
+  if (value === null || value === undefined) {
+    return value;
+  }
+
+  if (typeof value === 'string') {
+    return value.startsWith('${{') && value.endsWith('}}')
+      ? evaluateExpression(engine, value.substring(1), context)
+      : engine.parseAndRenderSync(value, context);
+  }
+
+  if (Array.isArray(value)) {
+    return value.map((item) => renderValueRecursively(engine, item, context));
+  }
+
+  if (typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>).map(([key, item]) => [
+        key,
+        renderValueRecursively(engine, item, context),
+      ])
+    );
+  }
+
+  return value;
+};
+
+const createMockOutputVerdict = (
+  overrides: Partial<{
+    alert_id: string;
+    classification: string;
+    confidence_score: number;
+    rationale: string;
+    contributing_factors: string[];
+    host_name: string;
+    user_name: string;
+  }> = {}
+) => ({
+  alert_id: 'alert-1',
+  classification: 'true_positive',
+  confidence_score: 0.9,
+  rationale: 'suspicious',
+  contributing_factors: ['c2 url'],
+  host_name: 'host-a',
+  user_name: 'user-a',
+  ...overrides,
+});
+
+describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () => {
+  const workflow = parse(SECURITY_ALERT_ANALYSIS_WORKFLOW.yaml) as {
+    steps: unknown[];
+  };
+  const engine = createWorkflowLiquidEngine();
+
+  it('evaluates calledByWorker gates as booleans for Worker vs standalone', () => {
+    const accumulateGate = findStepByName(workflow.steps, 'accumulate_worker_output_verdict') as {
+      condition: string;
+    };
+    const summaryGate = findStepByName(workflow.steps, 'build_grouped_counts_summary_gate') as {
+      condition: string;
+    };
+    const overrideGate = findStepByName(workflow.steps, 'apply_caller_input_overrides') as {
+      condition: string;
+    };
+
+    expect(evaluateExpression(engine, accumulateGate.condition, { inputs: { calledByWorker: true } })).toBe(
+      true
+    );
+    expect(
+      evaluateExpression(engine, accumulateGate.condition, { inputs: { calledByWorker: false } })
+    ).toBe(false);
+    expect(evaluateExpression(engine, accumulateGate.condition, { inputs: {} })).toBe(false);
+
+    expect(evaluateExpression(engine, summaryGate.condition, { inputs: { calledByWorker: true } })).toBe(
+      true
+    );
+    expect(evaluateExpression(engine, overrideGate.condition, { inputs: { calledByWorker: true } })).toBe(
+      true
+    );
+  });
+
+  it('builds an output verdict keyed on the real alert id, with unknown entity defaults', () => {
+    const buildStep = findStepByName(workflow.steps, 'build_output_verdict') as {
+      with: { output_verdict: Record<string, unknown> };
+    };
+
+    const rendered = renderValueRecursively(engine, buildStep.with.output_verdict, {
+      foreach: { item: { _id: 'real-alert-id', host: {}, user: {} } },
+      variables: {
+        alert_verdict: {
+          classification: 'false_positive',
+          confidence_score: 0.82,
+          rationale: 'signed installer',
+          contributing_factors: ['vendor signature'],
+        },
+      },
+    }) as Record<string, unknown>;
+
+    expect(rendered).toEqual({
+      alert_id: 'real-alert-id',
+      classification: 'false_positive',
+      confidence_score: 0.82,
+      rationale: 'signed installer',
+      contributing_factors: ['vendor signature'],
+      host_name: 'unknown',
+      user_name: 'unknown',
+    });
+  });
+
+  it('pushes the built verdict onto output_verdicts for the caller', () => {
+    const accumulateStep = findStepByName(workflow.steps, 'accumulate_output_verdict') as {
+      with: { output_verdicts: string };
+    };
+    const existing = [createMockOutputVerdict({ alert_id: 'alert-0' })];
+    const next = createMockOutputVerdict({
+      alert_id: 'alert-1',
+      classification: 'false_positive',
+      host_name: 'host-b',
+    });
+
+    const result = evaluateExpression(engine, accumulateStep.with.output_verdicts, {
+      variables: { output_verdicts: existing, output_verdict: next },
+    });
+
+    expect(result).toEqual([...existing, next]);
+  });
+
+  it('emits workflow.output counts and fields from accumulated Worker verdicts', () => {
+    const outputStep = findStepByName(workflow.steps, 'emit_workflow_output') as {
+      with: Record<string, unknown>;
+    };
+    const verdicts = [
+      createMockOutputVerdict({
+        alert_id: 'a1',
+        classification: 'true_positive',
+        host_name: 'host-a',
+        user_name: 'user-a',
+      }),
+      createMockOutputVerdict({
+        alert_id: 'a2',
+        classification: 'false_positive',
+        host_name: 'host-a',
+        user_name: 'user-b',
+      }),
+      createMockOutputVerdict({
+        alert_id: 'a3',
+        classification: 'inconclusive',
+        host_name: 'host-b',
+        user_name: 'user-a',
+      }),
+    ];
+
+    const rendered = renderValueRecursively(engine, outputStep.with, {
+      variables: {
+        output_verdicts: verdicts,
+        auto_close_ids: ['a2'],
+        grouped_counts_summary: ' 2 alert(s) for host host-a classified as true positive.',
+        generated_summary: 'Hosts look compromised.',
+        resolved_connector_id: 'connector-1',
+        agent_id: 'elastic-ai-agent',
+        impacted_entities: [{ entity_type: 'host', name: 'host-a' }],
+        impacted_entities_truncated: 'false',
+      },
+    }) as Record<string, unknown>;
+
+    expect(rendered.verdicts).toEqual(verdicts);
+    expect(rendered.true_positive_count).toBe(1);
+    expect(rendered.false_positive_count).toBe(1);
+    expect(rendered.inconclusive_count).toBe(1);
+    expect(rendered.auto_closed_ids).toEqual(['a2']);
+    expect(rendered.grouped_counts_summary).toContain('host-a');
+    expect(rendered.generated_summary).toBe('Hosts look compromised.');
+    expect(rendered.connector_id).toBe('connector-1');
+    expect(rendered.agent_id).toBe('elastic-ai-agent');
+    expect(rendered.impacted_entities).toEqual([{ entity_type: 'host', name: 'host-a' }]);
+    expect(rendered.impacted_entities_truncated).toBe('false');
+  });
+
+  it('renders a deterministic grouped_counts_summary from output_verdicts', () => {
+    const summaryStep = findStepByName(workflow.steps, 'build_grouped_counts_summary') as {
+      with: { grouped_counts_summary: string };
+    };
+    const verdicts = [
+      createMockOutputVerdict({
+        alert_id: 'a1',
+        classification: 'true_positive',
+        host_name: 'ws-1',
+      }),
+      createMockOutputVerdict({
+        alert_id: 'a2',
+        classification: 'true_positive',
+        host_name: 'ws-1',
+      }),
+      createMockOutputVerdict({
+        alert_id: 'a3',
+        classification: 'false_positive',
+        host_name: 'dc-1',
+      }),
+    ];
+
+    const summary = engine.parseAndRenderSync(summaryStep.with.grouped_counts_summary, {
+      variables: { output_verdicts: verdicts },
+    });
+
+    expect(summary).toContain('2 alert(s) for host ws-1 classified as true positive.');
+    expect(summary).toContain('1 alert(s) for host dc-1 classified as false positive.');
+  });
+
+  it('builds host and user impact entity rows with per-verdict counts', () => {
+    const hostStep = findStepByName(workflow.steps, 'build_host_entity') as {
+      with: { current_entity: Record<string, unknown> };
+    };
+    const userStep = findStepByName(workflow.steps, 'build_user_entity') as {
+      with: { current_entity: Record<string, unknown> };
+    };
+    const verdicts = [
+      createMockOutputVerdict({
+        alert_id: 'a1',
+        classification: 'true_positive',
+        host_name: 'ws-1',
+        user_name: 'alice',
+      }),
+      createMockOutputVerdict({
+        alert_id: 'a2',
+        classification: 'false_positive',
+        host_name: 'ws-1',
+        user_name: 'alice',
+      }),
+    ];
+
+    const hostEntity = renderValueRecursively(engine, hostStep.with.current_entity, {
+      foreach: { item: 'ws-1' },
+      variables: { output_verdicts: verdicts },
+    });
+    const userEntity = renderValueRecursively(engine, userStep.with.current_entity, {
+      foreach: { item: 'alice' },
+      variables: { output_verdicts: verdicts },
+    });
+
+    expect(hostEntity).toEqual({
+      entity_type: 'host',
+      name: 'ws-1',
+      alert_count: 2,
+      verdicts: { true_positive: 1, false_positive: 1, inconclusive: 0 },
+    });
+    expect(userEntity).toEqual({
+      entity_type: 'user',
+      name: 'alice',
+      alert_count: 2,
+      verdicts: { true_positive: 1, false_positive: 1, inconclusive: 0 },
+    });
+  });
+
+  it('caps impacted_entities at 50 and flags truncation', () => {
+    const capStep = findStepByName(workflow.steps, 'cap_impacted_entities') as {
+      with: { impacted_entities_truncated: string; impacted_entities: string };
+    };
+    const entities = Array.from({ length: 55 }, (_, i) => ({
+      entity_type: 'host',
+      name: `host-${i}`,
+    }));
+
+    const truncatedFlag = engine.parseAndRenderSync(capStep.with.impacted_entities_truncated, {
+      variables: { impacted_entities: entities },
+    });
+    const capped = evaluateExpression(engine, capStep.with.impacted_entities, {
+      variables: { impacted_entities: entities },
+    }) as unknown[];
+
+    expect(truncatedFlag.trim()).toBe('true');
+    expect(capped).toHaveLength(50);
+    expect(capped[0]).toEqual({ entity_type: 'host', name: 'host-0' });
+    expect(capped[49]).toEqual({ entity_type: 'host', name: 'host-49' });
+  });
+
+  it('applies autoCloseEnabled only when the caller explicitly provides it', () => {
+    const presenceGate = findStepByName(workflow.steps, 'set_auto_close_enabled_if_provided') as {
+      condition: string;
+      steps: Array<{ with: { auto_close_enabled: string } }>;
+    };
+
+    expect(
+      evaluateExpression(engine, presenceGate.condition, {
+        inputs: { autoCloseEnabled: false },
+      })
+    ).toBe(true);
+    expect(
+      evaluateExpression(engine, presenceGate.condition, {
+        inputs: {},
+      })
+    ).toBe(false);
+
+    const applied = evaluateExpression(engine, presenceGate.steps[0].with.auto_close_enabled, {
+      inputs: { autoCloseEnabled: false },
+    });
+    expect(applied).toBe(false);
+  });
+
+  it('joins compact batch_summaries into generated_summary', () => {
+    const summaryStep = findStepByName(workflow.steps, 'build_generated_summary') as {
+      with: { generated_summary: string };
+    };
+
+    const rendered = engine.parseAndRenderSync(summaryStep.with.generated_summary, {
+      variables: {
+        batch_summaries: ['Hosts look like malware.', null, 'Users look like admins.'],
+      },
+    });
+
+    expect(rendered).toBe('Hosts look like malware. Users look like admins.');
+  });
 });
