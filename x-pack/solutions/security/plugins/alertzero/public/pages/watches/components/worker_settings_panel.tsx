@@ -91,20 +91,11 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
       ? workerScheduleCadenceLabel(settings.scheduleInterval)
       : undefined;
   const controlsDisabled = settingsLocked || isSaving;
-  const executionsHref = useMemo(() => {
-    if (!worker.workflowId) {
-      return undefined;
-    }
-    // Workflows has no URL locator. A missing app registration hides the link instead of crashing
-    // the Watch page; the detail page explains itself when the user lacks managed-workflow read.
-    try {
-      return application.getUrlForApp(WORKFLOWS_APP_ID, {
+  const executionsHref = worker.workflowId
+    ? application.getUrlForApp(WORKFLOWS_APP_ID, {
         path: `/${encodeURIComponent(worker.workflowId)}?tab=executions`,
-      });
-    } catch {
-      return undefined;
-    }
-  }, [application, worker.workflowId]);
+      })
+    : undefined;
   const CustomSettings = getWorkerCustomSettingsComponent(worker.id);
   const autonomyIntro = getAutonomyLevelCards(worker.id)?.intro;
 

@@ -17,7 +17,8 @@ import {
 import { WorkerSettingsPanel } from './worker_settings_panel';
 
 const WORKER_ID = SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID;
-const WORKFLOW_ID = `${WORKER_ID}-default`;
+/** Not `<workerId>-<spaceId>`, so a client that rebuilds that convention fails this test. */
+const WORKFLOW_ID = 'opaque-installed-workflow';
 
 const createWorker = (workflowId: string | null): Worker => ({
   id: WORKER_ID,
@@ -77,7 +78,11 @@ describe('WorkerSettingsPanel view executions link', () => {
     expect(link).toHaveAttribute('href', `/app/workflows/${WORKFLOW_ID}?tab=executions`);
     expect(link).toHaveAttribute('target', '_blank');
     expect(link).toHaveAttribute('rel', 'noopener noreferrer');
-    expect(link.querySelector('[data-euiicon-type="external"]')).toBeInTheDocument();
+    const markup = link.innerHTML;
+    expect(markup.indexOf('View executions')).toBeGreaterThanOrEqual(0);
+    expect(markup.indexOf('data-euiicon-type="external"')).toBeGreaterThan(
+      markup.indexOf('View executions')
+    );
     expect(link.parentElement?.nextElementSibling).toContainElement(enabledSwitch);
     expect(core.application.getUrlForApp).toHaveBeenCalledWith('workflows', {
       path: `/${WORKFLOW_ID}?tab=executions`,
