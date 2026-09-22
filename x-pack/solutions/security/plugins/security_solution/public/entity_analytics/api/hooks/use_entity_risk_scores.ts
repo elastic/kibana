@@ -66,6 +66,7 @@ export const useEntityRiskScores = <T extends EntityType>(
 
   const { data: resolutionGroup } = useResolutionGroup(entityId ?? '', {
     enabled: Boolean(entityId),
+    executionContext,
   });
   const hasResolutionGroup = (resolutionGroup?.group_size ?? 0) > 1;
   const resolutionTargetEntityId = useMemo(
