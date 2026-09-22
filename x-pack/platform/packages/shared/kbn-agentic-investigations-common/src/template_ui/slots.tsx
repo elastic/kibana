@@ -11,6 +11,7 @@ import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser'
 import {
   ConversationDetailsFlyoutHeader,
   ConversationDetailsFlyoutFooter,
+  type ConversationDetailsFlyoutFooterProps,
   AttachmentsTab,
   OverviewTab,
   TimelineTab,
@@ -51,11 +52,13 @@ export const HeaderSlot = ({ conversation }: InvestigationSlotProps) => (
 
 export interface FooterSlotProps extends InvestigationSlotProps {
   onOpenChat: () => void;
+  onOpenEscalation?: ConversationDetailsFlyoutFooterProps['onOpenEscalation'];
 }
 
-export const FooterSlot = ({ conversation, onOpenChat }: FooterSlotProps) => (
+export const FooterSlot = ({ conversation, onOpenChat, onOpenEscalation }: FooterSlotProps) => (
   <ConversationDetailsFlyoutFooter
     investigation={conversationToInvestigation(conversation)}
     onOpenChat={onOpenChat}
+    onOpenEscalation={onOpenEscalation}
   />
 );
