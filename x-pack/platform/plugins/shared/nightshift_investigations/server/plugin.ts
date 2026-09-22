@@ -26,6 +26,7 @@ import { NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER } from './lib/managed_
 import { installInvestigationWorkflow } from './lib/managed_workflows/install_investigation_workflow';
 import { installCortexWorkflows } from './lib/managed_workflows/install_cortex_workflows';
 import { installInvestigationAgent } from './lib/install_investigation_agent';
+import { installDeductiveInvestigationAgent } from './lib/install_deductive_investigation_agent';
 import { createInvestigationAvailability } from './create_investigation_availability';
 import { nightshiftInvestigationsRouteRepository } from './routes';
 import { isInvestigationAvailable } from './is_investigation_available';
@@ -280,12 +281,28 @@ export class NightshiftInvestigationsPlugin
     // agent exists wherever an investigation runs. This narrower install exists so the agent is
     // visible and editable in the Agent Builder UI before the first investigation ever runs.
     if (plugins.agentBuilder) {
+      const { agentBuilder } = plugins;
       void installInvestigationAgent({
-        agentBuilder: plugins.agentBuilder,
+        agentBuilder,
         spaceId: DEFAULT_SPACE_ID,
         availability: this.getInvestigationAvailability(),
       }).catch((err) => {
         this.logger.error(`Failed to install investigation agent in default space: ${err.message}`);
+      });
+
+      // Availability for a persisted agent is held in memory and only registered by `ensure`, so
+      // an agent that is merely persisted is listed with no gate at all. The deductive agent is
+      // otherwise only ensured once an investigation runs, which cannot happen while the feature
+      // is off — without this call it would stay visible after a restart with `nightshift.enabled`
+      // disabled.
+      void installDeductiveInvestigationAgent({
+        agentBuilder,
+        spaceId: DEFAULT_SPACE_ID,
+        availability: this.getInvestigationAvailability(),
+      }).catch((err) => {
+        this.logger.error(
+          `Failed to install deductive investigation agent in default space: ${err.message}`
+        );
       });
     }
 

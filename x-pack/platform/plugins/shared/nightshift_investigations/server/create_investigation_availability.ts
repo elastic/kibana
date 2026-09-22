@@ -16,7 +16,7 @@ type InvestigationAvailabilityDeps = Omit<
 const UNAVAILABLE: AvailabilityResult = {
   status: 'unavailable',
   reason: 'Investigations are not available in this environment.',
-};
+} as const;
 
 /**
  * Agent Builder availability for the investigation agents and their tools. Without it these
@@ -32,7 +32,7 @@ export const createInvestigationAvailability = ({
 }: {
   getDeps: () => InvestigationAvailabilityDeps | undefined;
 }): AvailabilityConfig => ({
-  cacheMode: 'space',
+  cacheMode: 'none',
   handler: async ({ request, spaceId }) => {
     const deps = getDeps();
     if (!deps) {
