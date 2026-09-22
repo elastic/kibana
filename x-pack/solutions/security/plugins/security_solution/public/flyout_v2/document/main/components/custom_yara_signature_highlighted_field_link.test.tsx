@@ -51,6 +51,7 @@ const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
 const mockGetInstance = CustomYaraSignaturesApiClient.getInstance as jest.Mock;
 
 const ENTRY_ID = '123-456';
+const ITEM_ID = 'artifact-item-id';
 const SIGNATURE_NOT_FOUND_TOOLTIP = 'YARA signature does not exist.';
 
 const getArtifactMock = jest.fn();
@@ -97,7 +98,7 @@ describe('isCustomYaraSignatureHighlightedField', () => {
 describe('CustomYaraSignatureHighlightedFieldLink', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    getArtifactMock.mockResolvedValue({ id: ENTRY_ID });
+    getArtifactMock.mockResolvedValue({ id: ENTRY_ID, item_id: ITEM_ID });
     mockGetInstance.mockReturnValue({ get: getArtifactMock });
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
     mockUseUserPrivileges.mockReturnValue(getUserPrivilegesMockDefaultValue());
@@ -110,7 +111,7 @@ describe('CustomYaraSignatureHighlightedFieldLink', () => {
     expect(getArtifactMock).toHaveBeenCalledWith(undefined, ENTRY_ID);
     expect(link).toHaveAttribute(
       'href',
-      expect.stringContaining(getCustomYaraSignaturesListPath({ show: 'view', itemId: ENTRY_ID }))
+      expect.stringContaining(getCustomYaraSignaturesListPath({ show: 'view', itemId: ITEM_ID }))
     );
     expect(getByTestId('cysChild')).toBeInTheDocument();
   });

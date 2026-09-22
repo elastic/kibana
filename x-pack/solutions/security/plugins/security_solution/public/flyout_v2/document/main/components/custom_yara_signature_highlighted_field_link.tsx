@@ -97,28 +97,25 @@ export const CustomYaraSignatureHighlightedFieldLink: FC<
     isCustomYaraSignaturesEnabled && canReadCustomYaraSignatures && Boolean(entryId);
   const apiClient = useMemo(() => CustomYaraSignaturesApiClient.getInstance(http), [http]);
 
-  const { isSuccess, error } = useGetArtifact(apiClient, undefined, entryId, {
+  const { isSuccess, error, data } = useGetArtifact(apiClient, undefined, entryId, {
     enabled: shouldFetchArtifact,
     retry: false,
     // History keeps earlier alert flyouts mounted, so window focus would refetch every one of them.
     refetchOnWindowFocus: false,
   });
+  const itemId = data?.item_id;
 
   const { toRoutePath, toRouteUrl } = useMemo(() => {
-    if (!entryId) {
+    if (!itemId) {
       return { toRoutePath: '', toRouteUrl: '' };
     }
 
-    const path = getCustomYaraSignaturesListPath({
-      show: 'view',
-      // todo: we need `id` here
-      itemId: entryId,
-    });
+    const path = getCustomYaraSignaturesListPath({ show: 'view', itemId });
     return {
       toRoutePath: path,
       toRouteUrl: getAppUrl({ path }),
     };
-  }, [entryId, getAppUrl]);
+  }, [getAppUrl, itemId]);
 
   const navigateToCustomYaraSignatures = useNavigateByRouterEventHandler(toRoutePath);
   const onClick = useCallback(
@@ -160,7 +157,7 @@ export const CustomYaraSignatureHighlightedFieldLink: FC<
     );
   }
 
-  if (!isSuccess) {
+  if (!isSuccess || !itemId) {
     return <>{children}</>;
   }
 
