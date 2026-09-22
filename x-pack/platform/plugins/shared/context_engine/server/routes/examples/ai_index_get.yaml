@@ -1,0 +1,45 @@
+responses:
+  200:
+    content:
+      application/json:
+        examples:
+          getAiIndexResponseExample:
+            description: "Example response returning an AI Index by id"
+            value:
+              id: customer_support
+              description: Knowledge about customer support cases.
+              managed: false
+              dest:
+                type: data_stream
+                value: ai-index-ds-customer-support
+              automations:
+                - type: workflow
+                  value: 8f1c2d3e-4b5a-6c7d-8e9f-0a1b2c3d4e5f
+              sources:
+                - type: esql
+                  value: FROM support-cases | LIMIT 100
+              traces:
+                - type: elastic_agent
+                  value: support_agent
+                  query: FROM traces-* | WHERE agent.id == "support_agent"
+              date_created: "2026-09-22T12:00:00.000Z"
+              date_modified: "2026-09-22T12:00:00.000Z"
+  404:
+    content:
+      application/json:
+        examples:
+          notFoundExample:
+            description: "No AI Index with the given id exists in the current space"
+            value:
+              statusCode: 404
+              error: Not Found
+              message: "AI index 'customer_support' not found"
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X GET "https://${KIBANA_URL}/api/context_engine/ai_index/customer_support" \
+        -H "Authorization: ApiKey ${API_KEY}"
+  - lang: Console
+    source: |
+      GET kbn:/api/context_engine/ai_index/customer_support

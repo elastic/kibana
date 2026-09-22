@@ -1,0 +1,68 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        queryAiIndicesRequestExample:
+          description: "Example ES|QL query with a named parameter and a row limit"
+          value:
+            query: FROM ai-index-* | WHERE type == ?type | KEEP title, type | LIMIT 10
+            params:
+              type: faq
+            limit: 10
+responses:
+  200:
+    content:
+      application/json:
+        examples:
+          queryAiIndicesResponseExample:
+            description: "Example response with column metadata and matching rows"
+            value:
+              columns:
+                - name: title
+                  type: keyword
+                - name: type
+                  type: keyword
+              values:
+                - ["How to reset a password", "faq"]
+                - ["Billing cycle explained", "faq"]
+  400:
+    content:
+      application/json:
+        examples:
+          invalidQueryExample:
+            description: "The ES|QL query could not be parsed"
+            value:
+              statusCode: 400
+              error: Bad Request
+              message: "parsing_exception: line 1:1: mismatched input 'SELECT' expecting {'explain', 'from', 'row', 'show'}"
+  403:
+    content:
+      application/json:
+        examples:
+          forbiddenExample:
+            description: "The caller lacks Elasticsearch index privileges"
+            value:
+              statusCode: 403
+              error: Forbidden
+              message: "security_exception: action [indices:data/read/esql] is unauthorized"
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X POST "https://${KIBANA_URL}/api/context_engine/ai_index/_query" \
+        -H "Authorization: ApiKey ${API_KEY}" \
+        -H "kbn-xsrf: true" \
+        -H "Content-Type: application/json" \
+        -d '{
+          "query": "FROM ai-index-* | WHERE type == ?type | KEEP title, type | LIMIT 10",
+          "params": { "type": "faq" },
+          "limit": 10
+        }'
+  - lang: Console
+    source: |
+      POST kbn:/api/context_engine/ai_index/_query
+      {
+        "query": "FROM ai-index-* | WHERE type == ?type | KEEP title, type | LIMIT 10",
+        "params": { "type": "faq" },
+        "limit": 10
+      }

@@ -1,0 +1,57 @@
+responses:
+  200:
+    content:
+      application/json:
+        examples:
+          describeAiIndexResponseExample:
+            description: "Example response with a context block for an agent"
+            value:
+              response: |
+                AI Index: customer_support
+                Knowledge about customer support cases.
+
+                Query target: FROM ai-index-ds-customer-support
+
+                Fields: title (keyword), content (semantic_text), type (keyword), tags (keyword)
+
+                Example queries:
+                  FROM ai-index-ds-customer-support | WHERE type == "faq" | LIMIT 10
+  400:
+    content:
+      application/json:
+        examples:
+          tooLargeExample:
+            description: "The description response exceeded the size limit"
+            value:
+              statusCode: 400
+              error: Bad Request
+              message: "Describe response exceeded the maximum size of 1048576 bytes"
+  403:
+    content:
+      application/json:
+        examples:
+          forbiddenExample:
+            description: "The caller lacks Elasticsearch index privileges"
+            value:
+              statusCode: 403
+              error: Forbidden
+              message: "security_exception: action [indices:admin/mappings/fields/get] is unauthorized"
+  404:
+    content:
+      application/json:
+        examples:
+          notFoundExample:
+            description: "No AI Index with the given id exists in the current space"
+            value:
+              statusCode: 404
+              error: Not Found
+              message: "AI index 'customer_support' not found"
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X GET "https://${KIBANA_URL}/api/context_engine/ai_index/customer_support/_describe" \
+        -H "Authorization: ApiKey ${API_KEY}"
+  - lang: Console
+    source: |
+      GET kbn:/api/context_engine/ai_index/customer_support/_describe
