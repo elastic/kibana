@@ -26,6 +26,7 @@ dependsOn:
   - '@kbn/jest-serializers'
   - '@kbn/journeys'
   - '@kbn/repo-info'
+  - '@kbn/repo-packages'
   - '@kbn/scout-reporting'
 tags:
   - shared-common

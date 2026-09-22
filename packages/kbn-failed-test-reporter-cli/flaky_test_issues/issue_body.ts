@@ -8,7 +8,7 @@
  */
 
 import Path from 'path';
-import { rankTests, type FlakyTestEntry, type FlakyTestReport } from '@kbn/scout-reporting';
+import { type FlakyTestReport } from '@kbn/scout-reporting';
 import { getIssueMetadata, updateIssueMetadata } from '../failed_tests_reporter/issue_metadata';
 import {
   branchesByFailedBuilds,
@@ -38,7 +38,6 @@ const LEGACY_TITLE_PATTERN = /^Flaky\b.*\btest suite:\s*(\S+\.[jt]sx?)\s*$/;
 /** Namespace of the hidden `kibanaCiData` block at the end of the issue body and comments. */
 export const FLAKY_TEST_SUITE_METADATA_PREFIX = 'flaky-test-suite';
 
-const RANK_TIERS = [5, 10, 20, 30, 50, 100];
 const MAX_TEST_ROWS = 15;
 const MAX_DISTINCT_FAILURES = 2;
 /** GitHub rejects longer issue titles with a 422. */
@@ -49,6 +48,8 @@ const MAX_HEADLINE_BRANCHES = 2;
 
 export interface FlakySuiteIssueContext {
   report: FlakyTestReport;
+  /** Owning module of the suite's file, e.g. `Management`; the opening names no area without it. */
+  area?: string;
   /** Dashboard with the live numbers, linked from the headline when given. */
   dashboardUrl?: string;
   /** Numbers of issues that mention the suite's file without being about it. */
@@ -151,19 +152,6 @@ export const flakySuiteIssueTitle = (
   return lead + (subject.length > room ? `${subject.slice(0, room - 1)}…` : subject);
 };
 
-/** `in the top 30 flakiest tests`: the tier the suite's worst test falls in, over the whole report. */
-export const rankTierLabel = (worst: FlakyTestEntry, report: FlakyTestReport): string => {
-  const index = rankTests(report.flaky).findIndex((test) => test.testId === worst.testId);
-  const rank = index === -1 ? Number.POSITIVE_INFINITY : index + 1;
-  const tier = RANK_TIERS.find((size) => rank <= size);
-  if (tier) {
-    return `top ${tier} flakiest tests`;
-  }
-  const { totalFlaky } = report.summary;
-  const total = totalFlaky >= report.thresholds.maxTests ? `${totalFlaky}+` : String(totalFlaky);
-  return `the ${total} flakiest tests`;
-};
-
 /** `` `main` `` or `` `main` and `9.2` ``: the branches that fail materially. */
 const headlineBranches = (suite: FlakySuite): string | undefined => {
   // Only the branches the report's thresholds were met on; every branch for reports without them
@@ -214,27 +202,54 @@ const flakyRate = (suite: FlakySuite): string | undefined => {
     : rate;
 };
 
-/** The facts a reader needs first, one per bullet. */
+/**
+ * `` `kibana-pull-request` (1 of 895 builds) `` for every pipeline outside the report scope the
+ * suite failed on, a preview of the breakdown further down.
+ */
+const otherPipelines = (suite: FlakySuite, report: FlakyTestReport): string | undefined => {
+  const inScope = new Set(report.scope.pipelines);
+  const others = suite.byPipeline.filter(
+    (stats) => !inScope.has(stats.pipeline) && stats.failedBuilds > 0
+  );
+  if (others.length === 0) {
+    return undefined;
+  }
+  return others
+    .map(
+      (stats) =>
+        `${inlineCode(stats.pipeline)} (${stats.failedBuilds} of ${plural(stats.builds, 'build')})`
+    )
+    .join(', ');
+};
+
+/** One sentence saying what this is, then the facts a reader needs first, one per bullet. */
 const overview = (suite: FlakySuite, ctx: FlakySuiteIssueContext): string => {
-  const { report, dashboardUrl } = ctx;
+  const { report, area, dashboardUrl } = ctx;
+  const opening =
+    `We identified a flaky test suite${area ? ` in the **${area}** area` : ''}: it passes most ` +
+    'of the time and fails intermittently in CI.';
   const rate = flakyRate(suite);
   // Older reports do not record the qualifying branch; name the branches failing most instead
   const branches = rate === undefined ? headlineBranches(suite) : undefined;
+  const { pipelines } = report.scope;
   const bullets = [
     rate && `**Flaky rate:** ${rate}`,
     branches && `**Failing on:** ${branches}`,
-    `**Rank:** ${rankTierLabel(suite.tests[0], report)} on ${formatPipelines(report)}`,
-    `**Window:** last ${plural(report.window.lookbackDays, 'day')}, ${formatDateRange(
-      report.window.from,
-      report.window.to
-    )}`,
+    `**${pipelines.length === 1 ? 'Pipeline' : 'Pipelines'}:** ` +
+      `${pipelines.length > 0 ? formatPipelines(report) : 'all pipelines'}, last ` +
+      `${plural(report.window.lookbackDays, 'day')} (${formatDateRange(
+        report.window.from,
+        report.window.to
+      )})`,
+    otherPipelines(suite, report) && `**Also failed on:** ${otherPipelines(suite, report)}`,
     skippedNote(suite),
     dashboardUrl && `**Dashboard:** [latest stats](${dashboardUrl})`,
   ];
-  return bullets
+  const list = bullets
     .filter((bullet): bullet is string => typeof bullet === 'string')
     .map((bullet) => `- ${bullet}`)
     .join('\n');
+  return `${opening}\n\n${list}`;
 };
 
 const blobLink = (repoRelativePath: string): string =>

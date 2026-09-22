@@ -1,9 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`renderFlakySuiteIssueBody renders a multi-test suite with distinct failures, a skipped note and related issues 1`] = `
-"- **Flaky rate:** **10%** of builds on \`main\` (49 of 509), for the flakiest of 3 tests
-- **Rank:** top 30 flakiest tests on \`kibana-on-merge\`
-- **Window:** last 7 days, 2–9 Sep 2026
+"We identified a flaky test suite: it passes most of the time and fails intermittently in CI.
+
+- **Flaky rate:** **10%** of builds on \`main\` (49 of 509), for the flakiest of 3 tests
+- **Pipeline:** \`kibana-on-merge\`, last 7 days (2–9 Sep 2026)
 - **Latest run:** skipped on \`main\` since 2026-09-09
 
 ### Suite Details
@@ -46,9 +47,11 @@ Possibly related: #7, #8.
 `;
 
 exports[`renderFlakySuiteIssueBody renders a single-test suite with a dashboard link 1`] = `
-"- **Flaky rate:** **10%** of builds on \`main\` (49 of 509)
-- **Rank:** top 5 flakiest tests on \`kibana-on-merge\`
-- **Window:** last 7 days, 2–9 Sep 2026
+"We identified a flaky test suite: it passes most of the time and fails intermittently in CI.
+
+- **Flaky rate:** **10%** of builds on \`main\` (49 of 509)
+- **Pipeline:** \`kibana-on-merge\`, last 7 days (2–9 Sep 2026)
+- **Also failed on:** \`kibana-pull-request\` (70 of 661 builds), \`kibana-elasticsearch-snapshot-verify\` (1 of 5 builds)
 - **Dashboard:** [latest stats](https://dashboard.example)
 
 ### Suite Details

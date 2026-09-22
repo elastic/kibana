@@ -27,6 +27,7 @@ import {
   type IssueMatch,
   type MatchedIssue,
 } from './match_issues';
+import { moduleLabelForPath } from './module_label';
 import { groupIntoSuites, type FlakySuite } from './suites';
 
 /**
@@ -63,6 +64,8 @@ export interface ReportFlakySuiteIssuesOptions {
   maxNewIssues: number;
   dryRun: boolean;
   dashboardUrl?: string;
+  /** Area named in the opening of a new issue; defaults to the module owning the file. */
+  moduleLabel?: (filePath: string) => string | undefined;
 }
 
 export interface IssueRef {
@@ -222,6 +225,7 @@ export const reportFlakySuiteIssues = async (
   options: ReportFlakySuiteIssuesOptions
 ): Promise<FlakySuiteIssuesSummary> => {
   const { report, github, log, githubRepo, closedSince, maxNewIssues, dryRun } = options;
+  const moduleLabel = options.moduleLabel ?? moduleLabelForPath;
   const suites = groupIntoSuites(report.flaky, report.files);
   log.info(
     `${report.flaky.length} flaky tests in ${suites.length} suites${dryRun ? ' (dry run)' : ''}`
@@ -258,6 +262,7 @@ export const reportFlakySuiteIssues = async (
     const title = flakySuiteIssueTitle(suite);
     const body = renderFlakySuiteIssueBody(suite, {
       report,
+      area: moduleLabel(suite.filePath),
       dashboardUrl: options.dashboardUrl,
       relatedIssues: related.map(({ issue }) => issue.number),
     });

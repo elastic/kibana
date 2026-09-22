@@ -9,7 +9,6 @@
 
 import {
   flakySuiteIssueTitle,
-  rankTierLabel,
   readFlakySuiteIssueMetadata,
   readSuiteFilePathFromTitle,
   renderFlakySuiteIssueBody,
@@ -161,42 +160,28 @@ describe('readSuiteFilePathFromTitle', () => {
   });
 });
 
-describe('rankTierLabel', () => {
-  it('names the smallest top-N tier the worst test falls in', () => {
-    const { suite, report } = singleTestReport();
-    expect(rankTierLabel(suite.tests[0], report)).toBe('top 5 flakiest tests');
-
-    const multi = multiTestReport();
-    expect(rankTierLabel(multi.suite.tests[0], multi.report)).toBe('top 30 flakiest tests');
-  });
-
-  it('falls back to the report total beyond the top 100', () => {
-    const many = Array.from({ length: 120 }, (_, index) =>
-      flakyTest({ testId: `t${index}`, failedBuilds: 200 - index })
-    );
-    const report = flakyReport(many);
-    expect(rankTierLabel(many[119], report)).toBe('the 120 flakiest tests');
-    expect(
-      rankTierLabel(many[119], { ...report, thresholds: { ...report.thresholds, maxTests: 120 } })
-    ).toBe('the 120+ flakiest tests');
-  });
-});
-
 describe('renderFlakySuiteIssueBody', () => {
-  it('opens with an overview: rate on the qualifying branch, rank, window', () => {
+  it('opens with a sentence naming the area, then the rate, pipeline and other pipelines', () => {
     const single = singleTestReport();
-    expect(renderFlakySuiteIssueBody(single.suite, { report: single.report })).toContain(
+    expect(
+      renderFlakySuiteIssueBody(single.suite, { report: single.report, area: 'Synthetics' })
+    ).toContain(
       [
+        'We identified a flaky test suite in the **Synthetics** area: it passes most of the time and fails intermittently in CI.',
+        '',
         '- **Flaky rate:** **10%** of builds on `main` (49 of 509)',
-        '- **Rank:** top 5 flakiest tests on `kibana-on-merge`',
-        '- **Window:** last 7 days, 2–9 Sep 2026',
+        '- **Pipeline:** `kibana-on-merge`, last 7 days (2–9 Sep 2026)',
+        '- **Also failed on:** `kibana-pull-request` (70 of 661 builds), `kibana-elasticsearch-snapshot-verify` (1 of 5 builds)',
         '',
         '### Suite Details',
       ].join('\n')
     );
+    expect(renderFlakySuiteIssueBody(single.suite, { report: single.report })).toContain(
+      'We identified a flaky test suite: it passes'
+    );
     const multi = multiTestReport();
     expect(renderFlakySuiteIssueBody(multi.suite, { report: multi.report })).toContain(
-      '(49 of 509), for the flakiest of 3 tests\n- **Rank:**'
+      '(49 of 509), for the flakiest of 3 tests\n- **Pipeline:**'
     );
   });
 
