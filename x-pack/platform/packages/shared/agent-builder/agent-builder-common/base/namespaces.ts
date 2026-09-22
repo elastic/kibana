@@ -16,6 +16,7 @@ export const internalNamespaces = {
   platformStreams: 'platform.streams',
   platformSignificantEvents: 'platform.sig_events', // intentionally abbreviated
   platformContextEngine: 'platform.context_engine',
+  platformCustomApps: 'platform.custom_apps',
   filestore: 'filestore',
   attachments: 'attachments',
   observability: 'observability',
@@ -40,6 +41,7 @@ export const protectedNamespaces: string[] = [
   internalNamespaces.platformStreams,
   internalNamespaces.platformSignificantEvents,
   internalNamespaces.platformContextEngine,
+  internalNamespaces.platformCustomApps, // Owned by the custom_apps plugin
   internalNamespaces.search,
   internalNamespaces.security,
   internalNamespaces.streams,

@@ -12,11 +12,14 @@ import {
   EuiCallOut,
   EuiLoadingSpinner,
   EuiPageTemplate,
+  EuiSuperDatePicker,
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
+import type { TimeRange } from '@kbn/es-query';
 import { isLayoutEqual } from '@kbn/grid-layout';
 import type { GridLayoutData } from '@kbn/grid-layout';
 import type { A2uiMessage } from '@kbn/a2ui-renderer';
+import { CustomAppServicesProvider } from '../catalog';
 import type { CustomAppDefinition } from '../../common/app_definition';
 import { getPanelIds } from '../../common/app_definition';
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../common/constants';
@@ -60,6 +63,8 @@ export function CustomAppPage({ core, client, appId, onNavigateToList }: CustomA
   const [editingPanelId, setEditingPanelId] = useState<string | undefined>();
   const [loadError, setLoadError] = useState<string | undefined>();
   const [isSaving, setIsSaving] = useState(false);
+  // One time range for the whole page; every chart panel reads it from context.
+  const [timeRange, setTimeRange] = useState<TimeRange>({ from: 'now-7d', to: 'now' });
 
   useEffect(() => {
     let cancelled = false;
@@ -190,6 +195,14 @@ export function CustomAppPage({ core, client, appId, onNavigateToList }: CustomA
         pageTitle={definition.title}
         description={definition.description}
         rightSideItems={[
+          <EuiSuperDatePicker
+            key="time"
+            start={timeRange.from}
+            end={timeRange.to}
+            onTimeChange={({ start, end }) => setTimeRange({ from: start, to: end })}
+            showUpdateButton={false}
+            width="auto"
+          />,
           isEditing ? (
             <EuiButton
               key="save"
@@ -233,14 +246,16 @@ export function CustomAppPage({ core, client, appId, onNavigateToList }: CustomA
           <EuiCallOut announceOnMount size="s" color="warning" title="You have unsaved changes" />
         )}
 
-        <CustomAppGrid
-          definition={definition}
-          isEditing={isEditing}
-          onLayoutChange={onLayoutChange}
-          onAction={onAction}
-          onEditPanel={setEditingPanelId}
-          onRemovePanel={removePanel}
-        />
+        <CustomAppServicesProvider services={{ timeRange }}>
+          <CustomAppGrid
+            definition={definition}
+            isEditing={isEditing}
+            onLayoutChange={onLayoutChange}
+            onAction={onAction}
+            onEditPanel={setEditingPanelId}
+            onRemovePanel={removePanel}
+          />
+        </CustomAppServicesProvider>
       </EuiPageTemplate.Section>
 
       {editingPanelId && (

@@ -25,6 +25,12 @@
     "@kbn/grid-layout",
     "@kbn/a2ui-renderer",
     "@kbn/a2ui-eui-catalog",
+    "@kbn/embeddable-plugin",
+    "@kbn/lens-common",
+    "@kbn/presentation-publishing",
+    "@kbn/es-query",
+    "@kbn/agent-builder-server",
+    "@kbn/agent-builder-common",
     "@kbn/code-editor",
     "@kbn/react-kibana-context-render"
   ]

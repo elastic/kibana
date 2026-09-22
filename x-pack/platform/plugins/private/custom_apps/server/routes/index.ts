@@ -6,38 +6,21 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { CoreSetup, SavedObject } from '@kbn/core/server';
-import { customAppDefinitionSchema } from '../../common/app_definition';
-import type { CustomAppDefinition } from '../../common/app_definition';
+import type { CoreSetup } from '@kbn/core/server';
 import { API_BASE_PATH, CUSTOM_APP_SAVED_OBJECT_TYPE } from '../../common/constants';
-
-interface CustomAppAttributes {
-  title: string;
-  description?: string;
-  appJSON: string;
-}
-
-function toResponse(object: SavedObject<CustomAppAttributes>) {
-  return {
-    id: object.id,
-    updatedAt: object.updated_at,
-    definition: JSON.parse(object.attributes.appJSON) as CustomAppDefinition,
-  };
-}
-
-function toAttributes(definition: CustomAppDefinition): CustomAppAttributes {
-  return {
-    title: definition.title,
-    description: definition.description,
-    appJSON: JSON.stringify(definition),
-  };
-}
+import {
+  createCustomApp,
+  InvalidCustomAppError,
+  listCustomApps,
+  toCustomApp,
+  updateCustomApp,
+} from '../custom_app_service';
+import type { CustomAppAttributes } from '../custom_app_service';
 
 /**
- * The body is validated twice on write: `schema.object` at the HTTP boundary to
- * keep the route contract honest, then the zod definition schema to reject a
- * malformed app before it reaches storage. The second is what protects us from
- * an agent writing something the renderer cannot load.
+ * `schema.object` keeps the route contract honest at the HTTP boundary; the
+ * definition itself is validated in the service, which is also what the Agent
+ * Builder tool goes through.
  */
 const definitionBody = schema.object({}, { unknowns: 'allow' });
 
@@ -59,28 +42,10 @@ export function registerRoutes(core: CoreSetup) {
   const access = 'internal' as const;
 
   router.get(
-    {
-      path: API_BASE_PATH,
-      validate: false,
-      security,
-      options: { access },
-    },
+    { path: API_BASE_PATH, validate: false, security, options: { access } },
     async (context, request, response) => {
       const client = (await context.core).savedObjects.client;
-      const found = await client.find<CustomAppAttributes>({
-        type: CUSTOM_APP_SAVED_OBJECT_TYPE,
-        perPage: 200,
-      });
-      return response.ok({
-        body: {
-          items: found.saved_objects.map((object) => ({
-            id: object.id,
-            title: object.attributes.title,
-            description: object.attributes.description,
-            updatedAt: object.updated_at,
-          })),
-        },
-      });
+      return response.ok({ body: { items: await listCustomApps(client) } });
     }
   );
 
@@ -97,28 +62,22 @@ export function registerRoutes(core: CoreSetup) {
         CUSTOM_APP_SAVED_OBJECT_TYPE,
         request.params.id
       );
-      return response.ok({ body: toResponse(object) });
+      return response.ok({ body: toCustomApp(object) });
     }
   );
 
   router.post(
-    {
-      path: API_BASE_PATH,
-      validate: { body: definitionBody },
-      security,
-      options: { access },
-    },
+    { path: API_BASE_PATH, validate: { body: definitionBody }, security, options: { access } },
     async (context, request, response) => {
-      const parsed = customAppDefinitionSchema.safeParse(request.body);
-      if (!parsed.success) {
-        return response.badRequest({ body: { message: parsed.error.message } });
-      }
       const client = (await context.core).savedObjects.client;
-      const object = await client.create<CustomAppAttributes>(
-        CUSTOM_APP_SAVED_OBJECT_TYPE,
-        toAttributes(parsed.data)
-      );
-      return response.ok({ body: toResponse(object) });
+      try {
+        return response.ok({ body: await createCustomApp(client, request.body) });
+      } catch (error) {
+        if (error instanceof InvalidCustomAppError) {
+          return response.badRequest({ body: { message: error.message } });
+        }
+        throw error;
+      }
     }
   );
 
@@ -130,17 +89,17 @@ export function registerRoutes(core: CoreSetup) {
       options: { access },
     },
     async (context, request, response) => {
-      const parsed = customAppDefinitionSchema.safeParse(request.body);
-      if (!parsed.success) {
-        return response.badRequest({ body: { message: parsed.error.message } });
-      }
       const client = (await context.core).savedObjects.client;
-      await client.update<CustomAppAttributes>(
-        CUSTOM_APP_SAVED_OBJECT_TYPE,
-        request.params.id,
-        toAttributes(parsed.data)
-      );
-      return response.ok({ body: { id: request.params.id, definition: parsed.data } });
+      try {
+        return response.ok({
+          body: await updateCustomApp(client, request.params.id, request.body),
+        });
+      } catch (error) {
+        if (error instanceof InvalidCustomAppError) {
+          return response.badRequest({ body: { message: error.message } });
+        }
+        throw error;
+      }
     }
   );
 

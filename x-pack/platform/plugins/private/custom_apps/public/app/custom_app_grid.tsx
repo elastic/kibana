@@ -10,8 +10,8 @@ import { GridLayout } from '@kbn/grid-layout';
 import type { GridLayoutData } from '@kbn/grid-layout';
 import { A2uiSurface, MessageProcessor } from '@kbn/a2ui-renderer';
 import type { A2uiMessage, ResolvedActionEvent } from '@kbn/a2ui-renderer';
-import { euiCatalog } from '@kbn/a2ui-eui-catalog';
 import { EuiCallOut, EuiText } from '@elastic/eui';
+import { customAppCatalog } from '../catalog';
 import type { CustomAppDefinition } from '../../common/app_definition';
 import { GRID_SETTINGS } from '../../common/constants';
 import { CustomAppPanel } from './custom_app_panel';
@@ -68,7 +68,7 @@ export function CustomAppGrid({
             {surface ? (
               <A2uiSurface
                 surface={surface}
-                catalog={euiCatalog}
+                catalog={customAppCatalog}
                 onAction={onAction}
                 renderUnknown={(componentType) => (
                   <EuiCallOut

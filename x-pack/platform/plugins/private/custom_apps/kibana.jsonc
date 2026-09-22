@@ -14,8 +14,13 @@
       "xpack",
       "custom_apps"
     ],
-    "requiredPlugins": [],
-    "optionalPlugins": [],
+    "requiredPlugins": [
+      "embeddable",
+      "lens"
+    ],
+    "optionalPlugins": [
+      "agentBuilder"
+    ],
     "requiredBundles": []
   }
 }
