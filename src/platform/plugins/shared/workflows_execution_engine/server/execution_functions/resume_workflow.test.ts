@@ -46,6 +46,74 @@ const mockWorkflowExecutionLoop = workflowExecutionLoop as jest.MockedFunction<
 const mockWorkflowExecutionEngine = workflowsExecutionEngineMock.createStart();
 
 describe('resumeWorkflow', () => {
+  it('finalizes pending steps before publishing an identity failure', async () => {
+    jest.clearAllMocks();
+    const dependencies = mockContextDependencies();
+    jest.spyOn(dependencies.coreStart.security.serviceAccounts, 'isEnabled').mockReturnValue(true);
+    jest
+      .spyOn(dependencies.coreStart.security.serviceAccounts, 'withScopedRequestForWorkload')
+      .mockRejectedValue(
+        new Error('The workload binding does not match the expected service account.')
+      );
+    const workflowExecutionRepository = new WorkflowExecutionRepository(
+      createMockWorkflowDataClient()
+    );
+    jest.spyOn(workflowExecutionRepository, 'updateWorkflowExecution').mockResolvedValue(undefined);
+    jest.spyOn(workflowExecutionRepository, 'getWorkflowExecutionById').mockResolvedValue({
+      isTestRun: false,
+      context: {},
+      yaml: '',
+      scopeStack: [],
+      createdAt: '2026-09-22T00:00:00Z',
+      startedAt: '2026-09-22T00:00:00Z',
+      finishedAt: '',
+      error: null,
+      cancelRequested: false,
+      duration: 0,
+      id: 'run-identity-failure',
+      workflowId: 'workflow',
+      spaceId: 'default',
+      status: ExecutionStatus.WAITING_FOR_INPUT,
+      workflowDefinition: {
+        version: '1',
+        name: 'Identity test',
+        enabled: true,
+        triggers: [{ type: 'manual' }],
+        steps: [],
+        settings: { run_as: 'account-a' },
+      },
+    });
+    const stepExecutionRepository = createMockStepExecutionRepository();
+    stepExecutionRepository.markNonTerminalStepsFailed.mockImplementation(async () => {
+      expect(workflowExecutionRepository.updateWorkflowExecution).not.toHaveBeenCalled();
+    });
+
+    await expect(
+      resumeWorkflow({
+        workflowRunId: 'run-identity-failure',
+        spaceId: 'default',
+        signal: new AbortController().signal,
+        dependencies,
+        logger: createMockLogger(),
+        config: createMockWorkflowExecutionEngineConfig(),
+        fakeRequest: createFakeKibanaRequest(),
+        workflowsExecutionEngine: mockWorkflowExecutionEngine,
+        workflowExecutionRepository,
+        stepExecutionRepository,
+      })
+    ).rejects.toThrow('expected service account');
+
+    expect(stepExecutionRepository.markNonTerminalStepsFailed).toHaveBeenCalledWith(
+      'run-identity-failure',
+      expect.objectContaining({ type: 'ServiceAccountExecutionError' })
+    );
+    expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
+      expect.objectContaining({ status: ExecutionStatus.FAILED, finishedAt: expect.any(String) })
+    );
+    expect(mockSetupDependencies).not.toHaveBeenCalled();
+    expect(mockWorkflowExecutionLoop).not.toHaveBeenCalled();
+  });
+
   describe('terminal state and resume gating', () => {
     const workflowRunId = 'run-1';
     const spaceId = 'default';

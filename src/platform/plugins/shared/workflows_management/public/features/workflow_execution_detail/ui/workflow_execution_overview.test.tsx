@@ -82,6 +82,18 @@ describe('WorkflowExecutionOverview', () => {
     expect(screen.getByText('sa-proof')).toBeInTheDocument();
   });
 
+  it('shows the persisted end time when execution fails before context is updated', () => {
+    const stepExecution = createMockStepExecution({
+      status: ExecutionStatus.FAILED,
+      finishedAt: '2024-01-15T10:35:50.456Z',
+      input: {},
+    });
+    renderWithIntl(<WorkflowExecutionOverview stepExecution={stepExecution} />);
+    expect(
+      screen.queryByText((content, element) => element?.tagName === 'STRONG' && content === '-')
+    ).not.toBeInTheDocument();
+  });
+
   describe('rendering', () => {
     it('should render the component with execution data', () => {
       const stepExecution = createMockStepExecution();

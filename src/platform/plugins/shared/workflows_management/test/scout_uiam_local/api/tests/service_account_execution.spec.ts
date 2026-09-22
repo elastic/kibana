@@ -242,6 +242,11 @@ apiTest.describe(
       await resume(apiClient, paused);
       const execution = await wait(apiClient, paused.executionId, 'failed');
       expect(execution.error?.message).toContain('expected service account');
+      expect(typeof execution.finishedAt).toBe('string');
+      const approval = execution.stepExecutions?.find((step) => step.stepId === 'approval');
+      expect(approval?.status).toBe('failed');
+      expect(typeof approval?.finishedAt).toBe('string');
+      expect(approval?.error?.type).toBe('ServiceAccountExecutionError');
       expect(
         execution.stepExecutions?.some(
           (step) => step.stepId === 'authenticate' && step.status === 'completed'

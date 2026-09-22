@@ -260,14 +260,17 @@ export const runWorkflow = async (
     );
   } catch (error) {
     if (!enteredExecution && execution.workflowDefinition?.settings?.run_as) {
+      const executionError = {
+        type: 'ServiceAccountExecutionError',
+        message: error instanceof Error ? error.message : String(error),
+      };
+      // Finalize steps before publishing the terminal execution status that stops UI polling.
+      await params.stepExecutionRepository.markNonTerminalStepsFailed(execution.id, executionError);
       await params.workflowExecutionRepository.updateWorkflowExecution({
         id: execution.id,
         status: ExecutionStatus.FAILED,
         finishedAt: new Date().toISOString(),
-        error: {
-          type: 'ServiceAccountExecutionError',
-          message: error instanceof Error ? error.message : String(error),
-        },
+        error: executionError,
       });
     }
     throw error;

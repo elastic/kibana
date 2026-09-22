@@ -89,7 +89,7 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
       | undefined;
     const isTestRun = executionData?.isTestRun === true;
     const executionStarted = stepExecution.startedAt;
-    const executionEnded = context?.now as string | undefined;
+    const executionEnded = stepExecution.finishedAt || (context?.now as string | undefined);
 
     return (
       <EuiPanel

@@ -187,6 +187,7 @@ export function buildOverviewStepExecutionFromContext(
     status: workflowExecution.status,
     stepExecutionIndex: 0,
     startedAt: workflowExecution.startedAt,
+    finishedAt: workflowExecution.finishedAt,
     input: contextData as JsonValue,
     scopeStack: [],
     workflowRunId: workflowExecution.id,
