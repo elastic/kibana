@@ -20,7 +20,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest } from '../fixtures';
+import { getPageA11yViolations, spaceTest } from '../fixtures';
 
 /** Wide enough for the push flyout. Matches the FTR `browser.setWindowSize(1600, 1200)`. */
 const PUSH_VIEWPORT = { width: 1600, height: 1200 };
@@ -200,6 +200,13 @@ spaceTest.describe(
           exclude: [FIELDS_GRID_SCROLL_CONTAINER],
         });
         expect(violations).toStrictEqual([]);
+
+        // The push flyout does not trap focus, so the page behind it stays
+        // interactive and is resized around it. The flyout portals outside the
+        // page root, so this second scan covers that layout rather than
+        // repeating the one above. The overlay step below needs no equivalent:
+        // that variant traps focus and leaves the page inert.
+        expect(await getPageA11yViolations(page)).toStrictEqual([]);
       });
 
       await spaceTest.step('overlay flyout', async () => {
