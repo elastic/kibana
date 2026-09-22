@@ -9,7 +9,7 @@
  * Explicit allow-list of the public surface (single entry, single source of truth).
  *
  * Prefer named `export { … } from '…'` over `export *`. Star re-exports defeat
- * `@kbn/optimizer` tree-shaking: importing a few constants from the plugin
+ * `@kbn/rspack-optimizer` tree-shaking: importing a few constants from the plugin
  * entry can otherwise drag Zod schemas into page-load JS.
  */
 
@@ -27,7 +27,9 @@ export {
   ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
   ALERTZERO_ACTIONS_URL,
   ALERTZERO_ACTIONS_LIST_TOOL_ID,
-  ALERTZERO_PROPOSALS_URL,
+  ALERTZERO_PROPOSALS_CATEGORY_URL,
+  ALERTZERO_PROPOSALS_CLOSED_URL,
+  ALERTZERO_PROPOSALS_REVISE_TOOL_ID,
   ALERTZERO_THIN_AGENT_ID,
   ALERTZERO_WATCHES_URL,
   ALERTZERO_WATCH_URL_TEMPLATE,
@@ -109,6 +111,7 @@ export {
   coverageFromSchedule,
   createCatalogWatchPlaceholder,
   isOnDutyNow,
+  resolveWatchAccent,
 } from './impl/watches/watch_helpers';
 export type {
   CatalogWatchId,

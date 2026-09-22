@@ -8521,7 +8521,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Creates an action policy with a server-generated identifier. To create or replace an action policy with a client-supplied identifier, use PUT /api/alerting/v2/action_policies/.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-action-policies AND read_alerting-v2-rules.
+        Creates an action policy with a server-generated identifier. To create or replace an action policy with a client-supplied identifier, use PUT /api/alerting/v2/action_policies/{id}/.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-action-policies AND read_alerting-v2-rules.
       operationId: post-alerting-v2-action-policies
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -10022,21 +10022,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the user does not have the required privileges to perform the request.
-        '404':
-          content:
-            application/json:
-              examples:
-                actionPolicyNotFound:
-                  summary: Indicates an action policy with the given ID does not exist.
-                  value:
-                    code: ACTION_POLICY_NOT_FOUND
-                    details:
-                      action_policy_id: action-policy-1
-                    error: Not Found
-                    message: Action policy with ID "action-policy-1" not found
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates an action policy with the given ID does not exist.
         '409':
           content:
             application/json:
@@ -10808,7 +10793,7 @@ paths:
             type: string
       responses:
         '204':
-          description: Returns the action policy with the updated API key.
+          description: The API key of the action policy was updated successfully.
         '400':
           content:
             application/json:
@@ -13013,7 +12998,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Creates a rule with a server-generated identifier. To create or replace a rule with a client-supplied identifier, use PUT /api/alerting/v2/rules/.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-rules.
+        Creates a rule with a server-generated identifier. To create or replace a rule with a client-supplied identifier, use PUT /api/alerting/v2/rules/{id}/.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-rules.
       operationId: post-alerting-v2-rules
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -15170,21 +15155,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the user does not have the required privileges to perform the request.
-        '404':
-          content:
-            application/json:
-              examples:
-                ruleNotFound:
-                  summary: No rule exists for the given ID
-                  value:
-                    code: RULE_NOT_FOUND
-                    details:
-                      rule_id: rule-1
-                    error: Not Found
-                    message: Rule with id "rule-1" not found
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates a rule with the given ID does not exist.
         '409':
           content:
             application/json:
@@ -15611,7 +15581,7 @@ paths:
             minLength: 1
             type: string
       responses:
-        '204':
+        '202':
           description: The rule run was triggered successfully.
         '400':
           content:
@@ -73531,6 +73501,156 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
+  /api/security/entity_store/history_snapshot/disable:
+    put:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/entity_store/history_snapshot/disable</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Disable the Entity Store history snapshot task for this space so it no longer creates snapshot indices. Existing snapshot indices remain unless you set `clearHistorySnapshots` to `true`. Returns 404 if the Entity Store is not installed in the current space.<br/><br/>[Required authorization] Route required privileges: securitySolution.
+      operationId: put-security-entity-store-history-snapshot-disable
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              disableAndClear:
+                summary: Disable and clear snapshot indices
+                value:
+                  clearHistorySnapshots: true
+              disableOnly:
+                summary: Disable without clearing
+                value: {}
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                clearHistorySnapshots:
+                  default: false
+                  description: When `true`, deletes existing history snapshot indices for this space in the background after the task is disabled. The response returns immediately and does not wait for deletion to finish. Deletion failures are logged and are not returned to the caller. If the task is already disabled, the request succeeds and does not delete indices. Defaults to `false`.
+                  type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                disableSuccessExample:
+                  description: The Entity Store history snapshot task was disabled.
+                  summary: History snapshot task disabled
+                  value:
+                    ok: true
+          description: Indicates a successful response.
+        '404':
+          content:
+            application/json:
+              examples:
+                notInstalledExample:
+                  description: The Entity Store history snapshot task cannot be disabled because the entity store is not installed.
+                  summary: Entity store not installed
+                  value:
+                    error: Not Found
+                    message: Entity store is not installed
+                    statusCode: 404
+          description: Entity store is not installed.
+      summary: Disable the history snapshot task
+      tags:
+        - Security entity store
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl -X PUT -H "kbn-xsrf: true" -H "Content-Type: application/json" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -d '{}' \
+              "${KIBANA_URL}/api/security/entity_store/history_snapshot/disable"
+        - label: Disable and clear indices
+          lang: curl
+          source: |
+            curl -X PUT -H "kbn-xsrf: true" -H "Content-Type: application/json" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -d '{"clearHistorySnapshots":true}' \
+              "${KIBANA_URL}/api/security/entity_store/history_snapshot/disable"
+        - lang: Console
+          source: |
+            PUT kbn://api/security/entity_store/history_snapshot/disable
+            {}
+        - label: Disable and clear indices
+          lang: Console
+          source: |
+            PUT kbn://api/security/entity_store/history_snapshot/disable
+            {
+              "clearHistorySnapshots": true
+            }
+      x-state: Generally available
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/security/entity_store/history_snapshot/enable:
+    put:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/entity_store/history_snapshot/enable</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Enable the Entity Store history snapshot task for this space. After a successful enable, Kibana schedules an immediate snapshot run. If that immediate run fails, the response is still 200 and the task remains enabled for the next scheduled interval. If the task is already enabled, the request succeeds and does not start an extra run. Returns 404 if the Entity Store is not installed in the current space.<br/><br/>[Required authorization] Route required privileges: securitySolution.
+      operationId: put-security-entity-store-history-snapshot-enable
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                enableSuccessExample:
+                  description: The Entity Store history snapshot task was enabled.
+                  summary: History snapshot task enabled
+                  value:
+                    ok: true
+          description: Indicates a successful response.
+        '404':
+          content:
+            application/json:
+              examples:
+                notInstalledExample:
+                  description: The Entity Store history snapshot task cannot be enabled because the entity store is not installed.
+                  summary: Entity store not installed
+                  value:
+                    error: Not Found
+                    message: Entity store is not installed
+                    statusCode: 404
+          description: Entity store is not installed.
+      summary: Enable the history snapshot task
+      tags:
+        - Security entity store
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl -X PUT -H "kbn-xsrf: true" -H "Authorization: ApiKey ${API_KEY}" \
+              "${KIBANA_URL}/api/security/entity_store/history_snapshot/enable"
+        - lang: Console
+          source: |
+            PUT kbn://api/security/entity_store/history_snapshot/enable
+      x-state: Generally available
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
   /api/security/entity_store/install:
     post:
       description: |-
@@ -120193,10 +120313,11 @@ components:
               properties:
                 placement:
                   default: before
-                  description: Label placement relative to the secondary metric value (before or after). Ignored when the label is not visible.
+                  description: 'How the secondary metric name is shown: before the value, after the value, or in a tooltip. Ignored when the label is not visible.'
                   enum:
                     - before
                     - after
+                    - tooltip
                   type: string
                 visible:
                   default: false
@@ -139746,6 +139867,8 @@ components:
       properties:
         ecs_mapping:
           $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
+        enabled:
+          $ref: '#/components/schemas/Security_Osquery_API_QueryEnabled'
         id:
           $ref: '#/components/schemas/Security_Osquery_API_QueryId'
         platform:
@@ -139754,6 +139877,8 @@ components:
           $ref: '#/components/schemas/Security_Osquery_API_Query'
         removed:
           $ref: '#/components/schemas/Security_Osquery_API_Removed'
+        result_type:
+          $ref: '#/components/schemas/Security_Osquery_API_ResultType'
         snapshot:
           $ref: '#/components/schemas/Security_Osquery_API_Snapshot'
         version:
@@ -139802,8 +139927,12 @@ components:
               $ref: '#/components/schemas/Security_Osquery_API_Enabled'
             interval:
               $ref: '#/components/schemas/Security_Osquery_API_PackInterval'
+            min_osquery_version:
+              $ref: '#/components/schemas/Security_Osquery_API_MinOsqueryVersion'
             name:
               $ref: '#/components/schemas/Security_Osquery_API_PackName'
+            platform:
+              $ref: '#/components/schemas/Security_Osquery_API_PackPlatform'
             policy_ids:
               $ref: '#/components/schemas/Security_Osquery_API_PolicyIds'
             queries:
@@ -139813,6 +139942,8 @@ components:
                 properties:
                   ecs_mapping:
                     $ref: '#/components/schemas/Security_Osquery_API_ECSMappingArray'
+                  enabled:
+                    $ref: '#/components/schemas/Security_Osquery_API_QueryEnabled'
                   id:
                     type: string
                   interval:
@@ -139823,6 +139954,8 @@ components:
                     type: string
                   removed:
                     type: boolean
+                  result_type:
+                    $ref: '#/components/schemas/Security_Osquery_API_ResultType'
                   rrule_schedule:
                     $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfig'
                   schedule_type:
@@ -139834,6 +139967,8 @@ components:
                   version:
                     type: string
               type: array
+            result_type:
+              $ref: '#/components/schemas/Security_Osquery_API_ResultType'
             rrule_schedule:
               $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfig'
             saved_object_id:
@@ -140136,12 +140271,18 @@ components:
           $ref: '#/components/schemas/Security_Osquery_API_Enabled'
         interval:
           $ref: '#/components/schemas/Security_Osquery_API_PackInterval'
+        min_osquery_version:
+          $ref: '#/components/schemas/Security_Osquery_API_MinOsqueryVersion'
         name:
           $ref: '#/components/schemas/Security_Osquery_API_PackName'
+        platform:
+          $ref: '#/components/schemas/Security_Osquery_API_PackPlatform'
         policy_ids:
           $ref: '#/components/schemas/Security_Osquery_API_PolicyIds'
         queries:
           $ref: '#/components/schemas/Security_Osquery_API_ObjectQueries'
+        result_type:
+          $ref: '#/components/schemas/Security_Osquery_API_ResultType'
         rrule_schedule:
           $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfig'
         schedule_type:
@@ -140198,12 +140339,18 @@ components:
               $ref: '#/components/schemas/Security_Osquery_API_Enabled'
             interval:
               $ref: '#/components/schemas/Security_Osquery_API_PackInterval'
+            min_osquery_version:
+              $ref: '#/components/schemas/Security_Osquery_API_MinOsqueryVersion'
             name:
               $ref: '#/components/schemas/Security_Osquery_API_PackName'
+            platform:
+              $ref: '#/components/schemas/Security_Osquery_API_PackPlatform'
             policy_ids:
               $ref: '#/components/schemas/Security_Osquery_API_PolicyIds'
             queries:
               $ref: '#/components/schemas/Security_Osquery_API_ObjectQueries'
+            result_type:
+              $ref: '#/components/schemas/Security_Osquery_API_ResultType'
             rrule_schedule:
               $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfig'
             saved_object_id:
@@ -140779,6 +140926,8 @@ components:
               $ref: '#/components/schemas/Security_Osquery_API_Enabled'
             interval:
               $ref: '#/components/schemas/Security_Osquery_API_PackInterval'
+            min_osquery_version:
+              $ref: '#/components/schemas/Security_Osquery_API_MinOsqueryVersion'
             name:
               $ref: '#/components/schemas/Security_Osquery_API_PackName'
             namespaces:
@@ -140786,6 +140935,8 @@ components:
               items:
                 type: string
               type: array
+            platform:
+              $ref: '#/components/schemas/Security_Osquery_API_PackPlatform'
             policy_ids:
               $ref: '#/components/schemas/Security_Osquery_API_PolicyIds'
             queries:
@@ -140793,6 +140944,8 @@ components:
             read_only:
               description: Whether the pack is read-only (true for prebuilt packs).
               type: boolean
+            result_type:
+              $ref: '#/components/schemas/Security_Osquery_API_ResultType'
             rrule_schedule:
               $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfig'
             saved_object_id:
@@ -140869,8 +141022,12 @@ components:
                 $ref: '#/components/schemas/Security_Osquery_API_Enabled'
               interval:
                 $ref: '#/components/schemas/Security_Osquery_API_PackInterval'
+              min_osquery_version:
+                $ref: '#/components/schemas/Security_Osquery_API_MinOsqueryVersion'
               name:
                 $ref: '#/components/schemas/Security_Osquery_API_PackName'
+              platform:
+                $ref: '#/components/schemas/Security_Osquery_API_PackPlatform'
               policy_ids:
                 $ref: '#/components/schemas/Security_Osquery_API_PolicyIds'
               queries:
@@ -140880,6 +141037,8 @@ components:
                   properties:
                     ecs_mapping:
                       $ref: '#/components/schemas/Security_Osquery_API_ECSMappingArray'
+                    enabled:
+                      $ref: '#/components/schemas/Security_Osquery_API_QueryEnabled'
                     id:
                       type: string
                     interval:
@@ -140890,6 +141049,8 @@ components:
                       type: string
                     removed:
                       type: boolean
+                    result_type:
+                      $ref: '#/components/schemas/Security_Osquery_API_ResultType'
                     rrule_schedule:
                       $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfig'
                     schedule_type:
@@ -140904,6 +141065,8 @@ components:
               read_only:
                 description: Whether the pack is read-only (true for prebuilt packs).
                 type: boolean
+              result_type:
+                $ref: '#/components/schemas/Security_Osquery_API_ResultType'
               rrule_schedule:
                 $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfig'
               saved_object_id:
@@ -141340,6 +141503,15 @@ components:
           required:
             - sourceType
             - source
+    Security_Osquery_API_MinOsqueryVersion:
+      description: Minimum osquery version required to run this pack or query. Formatted as a semver string, e.g. `"5.10.0"`.
+      example: 5.10.0
+      maxLength: 64
+      minLength: 1
+      type: string
+    Security_Osquery_API_MinOsqueryVersionOrUndefined:
+      $ref: '#/components/schemas/Security_Osquery_API_MinOsqueryVersion'
+      nullable: true
     Security_Osquery_API_ObjectQueries:
       additionalProperties:
         $ref: '#/components/schemas/Security_Osquery_API_ObjectQueriesItem'
@@ -141350,6 +141522,8 @@ components:
       properties:
         ecs_mapping:
           $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
+        enabled:
+          $ref: '#/components/schemas/Security_Osquery_API_QueryEnabled'
         id:
           $ref: '#/components/schemas/Security_Osquery_API_QueryId'
         interval:
@@ -141363,6 +141537,8 @@ components:
           $ref: '#/components/schemas/Security_Osquery_API_Query'
         removed:
           $ref: '#/components/schemas/Security_Osquery_API_Removed'
+        result_type:
+          $ref: '#/components/schemas/Security_Osquery_API_ResultType'
         rrule_schedule:
           $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfig'
         saved_query_id:
@@ -141399,6 +141575,15 @@ components:
       description: The pack name.
       example: my_pack
       type: string
+    Security_Osquery_API_PackPlatform:
+      description: Pack-level platform restriction. To specify multiple platforms, use commas. For example, `linux,darwin`.
+      example: linux,darwin
+      maxLength: 256
+      minLength: 1
+      type: string
+    Security_Osquery_API_PackPlatformOrUndefined:
+      $ref: '#/components/schemas/Security_Osquery_API_PackPlatform'
+      nullable: true
     Security_Osquery_API_PageOrUndefined:
       description: The page number to return. The default is 1.
       example: 1
@@ -141431,6 +141616,10 @@ components:
       description: The SQL query you want to run.
       example: select * from uptime;
       type: string
+    Security_Osquery_API_QueryEnabled:
+      description: Whether this query is enabled. When false, the query is omitted from the Fleet policy. Default is true.
+      example: true
+      type: boolean
     Security_Osquery_API_QueryId:
       description: The ID of the query.
       example: 3c42c847-eb30-4452-80e0-728584042334
@@ -141444,6 +141633,20 @@ components:
       type: boolean
     Security_Osquery_API_RemovedOrUndefined:
       $ref: '#/components/schemas/Security_Osquery_API_Removed'
+      nullable: true
+    Security_Osquery_API_ResultType:
+      description: |
+        Controls the result document type emitted by osquerybeat for this pack or query.
+        - `snapshot`: Full table snapshot on every scheduled run (default).
+        - `differential`: Rows added or removed since the previous run.
+        - `differential_added_only`: Only rows added since the previous run (no removals).
+      enum:
+        - snapshot
+        - differential
+        - differential_added_only
+      type: string
+    Security_Osquery_API_ResultTypeOrUndefined:
+      $ref: '#/components/schemas/Security_Osquery_API_ResultType'
       nullable: true
     Security_Osquery_API_RRuleScheduleConfig:
       description: |
@@ -141686,12 +141889,18 @@ components:
           $ref: '#/components/schemas/Security_Osquery_API_Enabled'
         interval:
           $ref: '#/components/schemas/Security_Osquery_API_PackInterval'
+        min_osquery_version:
+          $ref: '#/components/schemas/Security_Osquery_API_MinOsqueryVersion'
         name:
           $ref: '#/components/schemas/Security_Osquery_API_PackName'
+        platform:
+          $ref: '#/components/schemas/Security_Osquery_API_PackPlatform'
         policy_ids:
           $ref: '#/components/schemas/Security_Osquery_API_PolicyIds'
         queries:
           $ref: '#/components/schemas/Security_Osquery_API_ObjectQueries'
+        result_type:
+          $ref: '#/components/schemas/Security_Osquery_API_ResultType'
         rrule_schedule:
           $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfig'
         schedule_type:
@@ -141745,12 +141954,18 @@ components:
               $ref: '#/components/schemas/Security_Osquery_API_Enabled'
             interval:
               $ref: '#/components/schemas/Security_Osquery_API_PackInterval'
+            min_osquery_version:
+              $ref: '#/components/schemas/Security_Osquery_API_MinOsqueryVersion'
             name:
               $ref: '#/components/schemas/Security_Osquery_API_PackName'
+            platform:
+              $ref: '#/components/schemas/Security_Osquery_API_PackPlatform'
             policy_ids:
               $ref: '#/components/schemas/Security_Osquery_API_PolicyIds'
             queries:
               $ref: '#/components/schemas/Security_Osquery_API_ObjectQueries'
+            result_type:
+              $ref: '#/components/schemas/Security_Osquery_API_ResultType'
             rrule_schedule:
               $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfig'
             saved_object_id:
