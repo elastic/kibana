@@ -9,6 +9,7 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 import type { SandboxCallContext } from './tool_utils';
+import type { ResolveConnectorCredentials } from './connector_credentials';
 import { writeConnectorManifest } from './connector_manifest';
 import { writeElasticManifest } from './elastic_manifest';
 
@@ -22,14 +23,29 @@ import { writeElasticManifest } from './elastic_manifest';
 export const createSandboxWorkspaceManager = ({
   getDeps,
   telemetryConnectorId,
+  resolveConnectorCredentials,
   logger,
 }: {
   getDeps: () => { actions?: ActionsPluginStart };
   /** When set, `/workspace/elastic.md` is (re-)seeded alongside the connector manifest. */
   telemetryConnectorId?: string;
+  /** Detects whether the telemetry connector carries basic-auth or API-key secrets. */
+  resolveConnectorCredentials?: ResolveConnectorCredentials;
   logger: Logger;
 }) => {
   const lastConnectorIds = new Map<SandboxSession, string>();
+
+  // The manifest documents env var names only; resolved secret values are never written.
+  const getTelemetryAuth = async (
+    connectorId: string,
+    callContext: SandboxCallContext
+  ): Promise<'basic' | 'apiKey'> => {
+    if (!resolveConnectorCredentials) return 'apiKey';
+    const credentials = await resolveConnectorCredentials(connectorId, callContext);
+    if ('errorMessage' in credentials) return 'apiKey';
+    const { CONNECTOR_SECRET_USER: user, CONNECTOR_SECRET_PASSWORD: password } = credentials.env;
+    return user && password ? 'basic' : 'apiKey';
+  };
 
   return {
     async ensureWorkspaceReady({
@@ -58,7 +74,8 @@ export const createSandboxWorkspaceManager = ({
 
       if (telemetryConnectorId) {
         try {
-          await writeElasticManifest({ session, connectorId: telemetryConnectorId, logger });
+          const auth = await getTelemetryAuth(telemetryConnectorId, callContext);
+          await writeElasticManifest({ session, connectorId: telemetryConnectorId, auth, logger });
         } catch (err) {
           logger.warn(`Elastic manifest write failed: ${(err as Error).message}`);
         }
