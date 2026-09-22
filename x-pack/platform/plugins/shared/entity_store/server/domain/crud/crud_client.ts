@@ -43,7 +43,6 @@ import {
   type SearchEntitiesV2Result,
 } from '../search_entities/search_entities';
 import { type WorkflowEmitTarget, WorkflowEventPublisher } from './workflow_event_publisher';
-import { inspect } from 'util';
 
 const RETRY_ON_CONFLICT = 3;
 
@@ -327,6 +326,29 @@ export class CRUDClient {
       configurable: true,
       writable: true,
     });
+
+    const baseClearRelationshipIds = this.clearRelationshipIds.bind(this);
+    const tracedClearRelationshipIds = (params: {
+      entitySource: string;
+      relationshipKey: string;
+      signal?: AbortSignal;
+    }): Promise<{ updated: number; total: number }> =>
+      runWithSpan({
+        name: 'entityStore.crud.clear_relationship_ids',
+        namespace,
+        attributes: {
+          'entity_store.crud.operation': 'clear_relationship_ids',
+          'entity_store.entity_source': params.entitySource,
+          'entity_store.relationship_key': params.relationshipKey,
+        },
+        cb: () => baseClearRelationshipIds(params),
+      });
+
+    Object.defineProperty(this, 'clearRelationshipIds', {
+      value: tracedClearRelationshipIds,
+      configurable: true,
+      writable: true,
+    });
   }
 
   private async assertInstalled(): Promise<void> {
@@ -458,7 +480,6 @@ export class CRUDClient {
     const previousDocs = await this.eventPublisher.maybeGetExistingDocs(
       emitTargets.map(({ doc }) => doc)
     );
-    console.log("operations1", inspect(operations, { depth: null, colors: true, maxStringLength: null }));
     this.logger.debug(`Bulk updating ${objects.length} entities`);
     const resp = await this.esClient.bulk({
       index: await this.latestIndexName(),
