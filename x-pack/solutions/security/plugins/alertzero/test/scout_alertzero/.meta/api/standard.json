@@ -1,0 +1,112 @@
+{
+  "sha1": "",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "8690582d6196782-54de36385c98f53",
+      "title": "GET /internal/alertzero/actions — action catalog returns the full installed action catalog when no categories param is sent",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/alertzero/test/scout_alertzero/api/tests/list_actions.spec.ts",
+        "line": 33,
+        "column": 32
+      }
+    },
+    {
+      "id": "8690582d6196782-9a9725a16d823f1",
+      "title": "GET /internal/alertzero/actions — action catalog filters to a single category and excludes every action outside it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/alertzero/test/scout_alertzero/api/tests/list_actions.spec.ts",
+        "line": 65,
+        "column": 16
+      }
+    },
+    {
+      "id": "8690582d6196782-80800f8dde8f263",
+      "title": "GET /internal/alertzero/actions — action catalog treats multiple categories as an OR-set across both repeated and comma-joined params",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/alertzero/test/scout_alertzero/api/tests/list_actions.spec.ts",
+        "line": 91,
+        "column": 9
+      }
+    },
+    {
+      "id": "8690582d6196782-4b7af2e6327d732",
+      "title": "GET /internal/alertzero/actions — action catalog returns an empty catalog with 200 for a category no installed action declares",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/alertzero/test/scout_alertzero/api/tests/list_actions.spec.ts",
+        "line": 124,
+        "column": 21
+      }
+    },
+    {
+      "id": "8690582d6196782-9424337374afe24",
+      "title": "GET /internal/alertzero/actions — action catalog ignores an empty categories param and returns the full catalog",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/alertzero/test/scout_alertzero/api/tests/list_actions.spec.ts",
+        "line": 138,
+        "column": 16
+      }
+    },
+    {
+      "id": "8690582d6196782-2d70cf5474db685",
+      "title": "GET /internal/alertzero/actions — action catalog rejects more than 20 categories with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/alertzero/test/scout_alertzero/api/tests/list_actions.spec.ts",
+        "line": 152,
+        "column": 9
+      }
+    },
+    {
+      "id": "8690582d6196782-f115cca387c4d43",
+      "title": "GET /internal/alertzero/actions — action catalog rejects an authenticated caller without the alertzero read privilege with 403",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/alertzero/test/scout_alertzero/api/tests/list_actions.spec.ts",
+        "line": 172,
+        "column": 9
+      }
+    },
+    {
+      "id": "8690582d6196782-d3d6cb14359236a",
+      "title": "GET /internal/alertzero/actions — action catalog rejects an unauthenticated request with 401",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/alertzero/test/scout_alertzero/api/tests/list_actions.spec.ts",
+        "line": 175,
+        "column": 16
+      }
+    }
+  ]
+}
