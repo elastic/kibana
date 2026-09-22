@@ -72,39 +72,25 @@ export class PiiRegexWorkerService {
     failureMode: PiiDetectionFailureMode = 'block'
   ): Promise<PiiRegexMatch[]> {
     const re2Only = !this.enabled;
-    const effectivePayload =
-      failureMode === 'allow_unsafe' ? this.filterRules(payload, re2Only) : payload;
+    const { effectivePayload, originalRuleIndices } =
+      failureMode === 'allow_unsafe'
+        ? this.filterRules(payload, re2Only)
+        : { effectivePayload: payload, originalRuleIndices: undefined };
 
     try {
-      if (!this.enabled) {
-        return runSync(effectivePayload);
-      }
-      if (!this.worker) {
-        throw new Error('PII regex worker pool was not initialized');
-      }
+      const results = !this.enabled
+        ? runSync(effectivePayload)
+        : await this.runInWorker(effectivePayload);
 
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), this.config.taskTimeout.asMilliseconds());
-
-      try {
-        return await this.worker.run(effectivePayload, { signal: controller.signal });
-      } catch (err) {
-        if (err instanceof Error && err.name === 'AbortError') {
-          throw new Error(
-            `PII regex detection task timed out after ${this.config.taskTimeout.asMilliseconds()}ms`
-          );
-        }
-        // Piscina does not expose a stable error code; match on the message
-        // (verified against piscina@5.3.1 dist/errors.js TaskQueueAtLimit).
-        if (err instanceof Error && err.message === 'Task queue is at limit') {
-          throw new Error(
-            `PII regex detection rejected: worker queue at capacity (maxQueue=${this.config.maxQueue})`
-          );
-        }
-        throw err;
-      } finally {
-        clearTimeout(timer);
+      // filterRules compacts the rules array; remap ruleIndex back to the caller's
+      // original payload so precedence and lookups stay correct.
+      if (originalRuleIndices === undefined) {
+        return results;
       }
+      return results.map((match) => ({
+        ...match,
+        ruleIndex: originalRuleIndices[match.ruleIndex],
+      }));
     } catch (err) {
       if (failureMode === 'allow_unsafe') {
         // Only infrastructure failures reach here (timeout, saturation, worker crash).
@@ -118,23 +104,59 @@ export class PiiRegexWorkerService {
     }
   }
 
+  private async runInWorker(payload: PiiRegexWorkerTaskPayload): Promise<PiiRegexMatch[]> {
+    if (!this.worker) {
+      throw new Error('PII regex worker pool was not initialized');
+    }
+
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), this.config.taskTimeout.asMilliseconds());
+
+    try {
+      return await this.worker.run(payload, { signal: controller.signal });
+    } catch (err) {
+      if (err instanceof Error && err.name === 'AbortError') {
+        throw new Error(
+          `PII regex detection task timed out after ${this.config.taskTimeout.asMilliseconds()}ms`
+        );
+      }
+      // Piscina does not expose a stable error code; match on the message
+      // (verified against piscina@5.3.1 dist/errors.js TaskQueueAtLimit).
+      if (err instanceof Error && err.message === 'Task queue is at limit') {
+        throw new Error(
+          `PII regex detection rejected: worker queue at capacity (maxQueue=${this.config.maxQueue})`
+        );
+      }
+      throw err;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
   private filterRules(
     payload: PiiRegexWorkerTaskPayload,
     re2Only: boolean
-  ): PiiRegexWorkerTaskPayload {
-    const safeRules = payload.rules.filter((rule) => {
+  ): { effectivePayload: PiiRegexWorkerTaskPayload; originalRuleIndices: number[] } {
+    const safeRules: PiiRegexWorkerTaskPayload['rules'][number][] = [];
+    const originalRuleIndices: number[] = [];
+
+    payload.rules.forEach((rule, index) => {
       try {
         compileRule(rule.pattern, re2Only);
-        return true;
+        safeRules.push(rule);
+        originalRuleIndices.push(index);
       } catch (err) {
         this.logger.warn('PII regex rule skipped: pattern could not be compiled', {
           entityClass: rule.entityClass,
           error: err,
         });
-        return false;
       }
     });
-    return { ...payload, rules: safeRules };
+
+    return {
+      effectivePayload: { ...payload, rules: safeRules },
+      originalRuleIndices,
+    };
   }
 
   async stop(): Promise<void> {

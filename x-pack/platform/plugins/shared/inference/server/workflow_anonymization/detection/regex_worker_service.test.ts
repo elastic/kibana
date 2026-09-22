@@ -108,14 +108,48 @@ describe('PiiRegexWorkerService', () => {
         'allow_unsafe'
       );
 
-      // The bad rule is skipped; the good IP rule still fires
+      // The bad rule is skipped; the good IP rule still fires with its original index
       expect(results).toHaveLength(1);
-      expect(results[0]).toMatchObject({ entityClass: 'IP', matchValue: '10.0.0.1' });
+      expect(results[0]).toMatchObject({
+        entityClass: 'IP',
+        matchValue: '10.0.0.1',
+        ruleIndex: 1,
+      });
       expect(logger.warn).toHaveBeenCalledWith(
         'PII regex rule skipped: pattern could not be compiled',
         expect.objectContaining({ entityClass: 'BAD' })
       );
       expect(logger.error).not.toHaveBeenCalled();
+    });
+
+    it('preserves original ruleIndex when a skipped rule sits between valid rules', async () => {
+      service = new PiiRegexWorkerService(createTestConfig(), logger);
+      const results = await service.run(
+        {
+          rules: [
+            { entityClass: 'IP', pattern: '\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b' },
+            { entityClass: 'BAD', pattern: '(unclosed' },
+            {
+              entityClass: 'EMAIL',
+              pattern: '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}',
+            },
+          ],
+          records: [{ content: '10.0.0.1 and user@example.com' }],
+        },
+        'allow_unsafe'
+      );
+
+      expect(results).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ entityClass: 'IP', ruleIndex: 0, matchValue: '10.0.0.1' }),
+          expect.objectContaining({
+            entityClass: 'EMAIL',
+            ruleIndex: 2,
+            matchValue: 'user@example.com',
+          }),
+        ])
+      );
+      expect(results).toHaveLength(2);
     });
 
     it('returns [] when every rule is invalid', async () => {
