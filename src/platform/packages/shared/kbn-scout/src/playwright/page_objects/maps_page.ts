@@ -184,7 +184,23 @@ export class MapsPage {
     await this.page.testSubj.locator('longitudeInput').fill(lon.toString());
     await this.page.testSubj.locator('zoomInput').fill(zoom.toString());
     await this.page.testSubj.click('submitViewButton');
-    await this.waitForRenderComplete();
+    await this.waitForMapPanAndZoom();
+  }
+
+  async waitForMapPanAndZoom() {
+    let prevView: { lat: number; lon: number; zoom: number } | undefined;
+    await expect
+      .poll(
+        async () => {
+          const currentView = await this.getView();
+          const stable = prevView !== undefined && JSON.stringify(prevView) === JSON.stringify(currentView);
+          prevView = currentView;
+          return stable;
+        },
+        { timeout: DEFAULT_MAP_LOADING_TIMEOUT, intervals: [1000] }
+      )
+      .toBe(true);
+    await this.waitForLayersToLoad();
   }
 
   async getView(): Promise<{ lat: number; lon: number; zoom: number }> {
