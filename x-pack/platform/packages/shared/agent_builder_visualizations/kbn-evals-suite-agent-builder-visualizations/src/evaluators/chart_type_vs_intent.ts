@@ -232,7 +232,7 @@ export function createChartTypeVsIntentEvaluator<
       const gold = expectedChartFormExtractor(expected);
       if (!gold) {
         return {
-          score: 1,
+          score: null,
           label: 'skipped',
           explanation: 'No expected chart form declared for this example.',
         };

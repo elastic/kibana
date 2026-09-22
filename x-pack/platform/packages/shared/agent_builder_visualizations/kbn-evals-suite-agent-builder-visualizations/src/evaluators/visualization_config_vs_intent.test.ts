@@ -47,7 +47,7 @@ describe('createVisualizationConfigVsIntentEvaluator', () => {
       visualizations: [{ esql: GOLD_QUERY, chartType: 'xy' }],
     });
 
-    expect(result.score).toBe(1);
+    expect(result.score).toBeNull();
     expect(result.label).toBe('skipped');
   });
 
@@ -57,7 +57,7 @@ describe('createVisualizationConfigVsIntentEvaluator', () => {
       config: { data_source: { type: 'esql', query: GOLD_QUERY } },
     });
 
-    expect(result.score).toBe(1);
+    expect(result.score).toBeNull();
     expect(result.label).toBe('skipped');
   });
 

@@ -36,7 +36,7 @@ export function createRendererVsIntentEvaluator<
       const expectedRenderer = expectedRendererExtractor(expected);
       if (!expectedRenderer) {
         return {
-          score: 1,
+          score: null,
           label: 'skipped',
           explanation: 'No expected renderer declared for this example.',
         };

@@ -65,7 +65,7 @@ export function createVisualizationConfigVsIntentEvaluator<
       const goldConfig = expectedConfigExtractor(expected);
       if (!goldConfig || !hasStructuralGoldConfig(goldConfig)) {
         return {
-          score: 1,
+          score: null,
           label: 'skipped',
           explanation: 'No structural gold config declared for this example.',
         };
@@ -121,7 +121,7 @@ export function createVisualizationConfigVsIntentEvaluator<
 
       if (checkedLeaves === 0) {
         return {
-          score: 1,
+          score: null,
           label: 'skipped',
           explanation:
             'Gold config declares only chart type / mark / data source, which other evaluators score.',

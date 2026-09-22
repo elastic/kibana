@@ -81,7 +81,7 @@ describe('createChartTypeVsIntentEvaluator', () => {
       visualizations: [{ esql: 'FROM a', chartType: 'xy' }],
     });
 
-    expect(result.score).toBe(1);
+    expect(result.score).toBeNull();
     expect(result.label).toBe('skipped');
   });
 
