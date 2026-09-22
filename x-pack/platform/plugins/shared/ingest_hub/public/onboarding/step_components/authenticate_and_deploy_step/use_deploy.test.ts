@@ -1620,7 +1620,7 @@ describe('useDeploy — cleanup orchestration', () => {
     // pendingCleanupPolicyIds to be set.
     mockCleanupAgentlessPolicies.mockResolvedValue({ toDelete: ['policy-VPC'], toUpdate: [] });
     setupMocks({
-      selectedServiceIds: [],  // vpcflow deselected
+      selectedServiceIds: [], // vpcflow deselected
       detectAndReviewStep: {
         pendingCleanupPolicyIds: {},
         policyIdsByInstance: { vpcflow: 'policy-VPC' },
