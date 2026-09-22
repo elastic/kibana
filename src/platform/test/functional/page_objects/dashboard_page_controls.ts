@@ -468,7 +468,7 @@ export class DashboardPageControls extends FtrService {
 
     const selectableListItems = await availableOptions.findByClassName('euiSelectableList__list');
     const list = await selectableListItems.findByCssSelector(`ul[role="listbox"]`);
-    await selectableListItems.focus();
+    await list.focus();
     const suggestions: { [key: string]: number } = {};
     while (Object.keys(suggestions).length < optionsCount) {
       await this.browser.pressKeys(this.browser.keys.ARROW_DOWN);
