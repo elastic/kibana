@@ -142,7 +142,14 @@ export class DatastreamInitializer implements IResourceInitializer {
         const props = index.mappings?.properties;
         if (props && 'episode' in props) {
           const episode = props.episode;
-          if (episode && 'properties' in episode) return true;
+          if (episode && 'properties' in episode) {
+            // A post-migration mapping keeps `episode.*` as alias fields pointing at
+            // `alert.*`. If `episode.id` is already an alias, the migration already
+            // ran and we must not wipe again.
+            const idField = episode.properties?.id;
+            if (idField && 'type' in idField && idField.type === 'alias') return false;
+            return true;
+          }
         }
       }
       return false;

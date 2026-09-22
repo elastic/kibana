@@ -175,4 +175,116 @@ describe('DatastreamInitializer', () => {
       })
     );
   });
+
+  describe('maybeDestroyForMigration', () => {
+    const migrationDefinition: ResourceDefinition = {
+      key: 'data_stream:.alerting-test',
+      dataStreamName: '.alerting-test',
+      version: 7,
+      mappings: {
+        dynamic: false,
+        properties: {
+          '@timestamp': { type: 'date' },
+        },
+      },
+      lifecycle: {},
+      destroyOnVersionBelow: 7,
+    };
+
+    const mockDeployedTemplate = (version: number) => {
+      esClient.indices.getIndexTemplate.mockResolvedValueOnce({
+        index_templates: [
+          {
+            name: '.alerting-test',
+            index_template: {
+              index_patterns: ['.alerting-test*'],
+              composed_of: [],
+              _meta: { version, previousVersions: [] },
+            },
+          },
+        ],
+      });
+    };
+
+    it('destroys the data stream when deployed version < destroyOnVersionBelow and episode has real (non-alias) sub-fields', async () => {
+      mockDeployedTemplate(6);
+      esClient.indices.getMapping.mockResolvedValueOnce({
+        '.ds-.alerting-test-000001': {
+          mappings: {
+            properties: {
+              episode: {
+                properties: {
+                  id: { type: 'keyword' as const },
+                  status: { type: 'keyword' as const },
+                },
+              },
+            },
+          },
+        },
+      });
+      esClient.indices.deleteDataStream.mockResolvedValueOnce({ acknowledged: true });
+
+      const initializer = new DatastreamInitializer(mockLogger, esClient, migrationDefinition);
+      await initializer.initialize();
+
+      expect(esClient.indices.deleteDataStream).toHaveBeenCalledWith({ name: '.alerting-test' });
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('one-time destructive migration')
+      );
+    });
+
+    it('skips the wipe when episode.id is already an alias (handles hand-migrated clusters)', async () => {
+      mockDeployedTemplate(6);
+      esClient.indices.getMapping.mockResolvedValueOnce({
+        '.ds-.alerting-test-000001': {
+          mappings: {
+            properties: {
+              episode: {
+                properties: {
+                  id: { type: 'alias' as const, path: 'alert.id' },
+                  status: { type: 'alias' as const, path: 'alert.status' },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const initializer = new DatastreamInitializer(mockLogger, esClient, migrationDefinition);
+      await initializer.initialize();
+
+      expect(esClient.indices.deleteDataStream).not.toHaveBeenCalled();
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        expect.stringContaining('episode field is not a legacy object')
+      );
+    });
+
+    it('skips the wipe when deployed version >= destroyOnVersionBelow (migration already ran)', async () => {
+      mockDeployedTemplate(7);
+
+      const initializer = new DatastreamInitializer(mockLogger, esClient, migrationDefinition);
+      await initializer.initialize();
+
+      expect(esClient.indices.getMapping).not.toHaveBeenCalled();
+      expect(esClient.indices.deleteDataStream).not.toHaveBeenCalled();
+    });
+
+    it('skips migration entirely when destroyOnVersionBelow is not set', async () => {
+      const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
+      await initializer.initialize();
+
+      expect(esClient.indices.getMapping).not.toHaveBeenCalled();
+      expect(esClient.indices.deleteDataStream).not.toHaveBeenCalled();
+    });
+
+    it('skips migration when the index template does not exist (fresh install)', async () => {
+      // Empty array: no deployed version found → deployedVersion stays undefined → returns early.
+      esClient.indices.getIndexTemplate.mockResolvedValueOnce({ index_templates: [] });
+
+      const initializer = new DatastreamInitializer(mockLogger, esClient, migrationDefinition);
+      await initializer.initialize();
+
+      expect(esClient.indices.deleteDataStream).not.toHaveBeenCalled();
+    });
+  });
 });
