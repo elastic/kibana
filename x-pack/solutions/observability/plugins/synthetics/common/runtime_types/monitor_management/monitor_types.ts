@@ -39,8 +39,7 @@ const PrivateLocationCodec = zodAsIoTs(privateLocationSchema);
 const NameSpaceString = zodAsIoTs(nameSpaceSchema);
 const TimeoutString = zodAsIoTs(timeoutSchema);
 const InlineScriptString = zodAsIoTs(inlineScriptSchema);
-const getNonEmptyStringCodec = (fieldName: string) =>
-  zodAsIoTs(nonEmptyStringSchema(fieldName));
+const getNonEmptyStringCodec = (fieldName: string) => zodAsIoTs(nonEmptyStringSchema(fieldName));
 
 const ScheduleCodec = t.interface({
   number: t.string,

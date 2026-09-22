@@ -18,9 +18,7 @@ export const zodAsIoTs = <S extends z.ZodType>(
     (input): input is SchemaOutput<S> => schema.safeParse(input).success,
     (input, context) => {
       const result = schema.safeParse(input);
-      return result.success
-        ? t.success(result.data as SchemaOutput<S>)
-        : t.failure(input, context);
+      return result.success ? t.success(result.data as SchemaOutput<S>) : t.failure(input, context);
     },
     t.identity
   );
