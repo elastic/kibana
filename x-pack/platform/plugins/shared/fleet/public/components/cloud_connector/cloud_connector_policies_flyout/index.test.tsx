@@ -807,6 +807,67 @@ describe('CloudConnectorPoliciesFlyout', () => {
         },
       });
     });
+
+    const rerenderFlyout = (
+      rerender: (ui: React.ReactElement) => void,
+      cloudConnectorVars: typeof defaultProps.cloudConnectorVars
+    ) => {
+      rerender(
+        <I18nProvider>
+          <QueryClientProvider client={queryClient}>
+            <CloudConnectorPoliciesFlyout
+              {...defaultProps}
+              provider="aws"
+              cloudConnectorVars={cloudConnectorVars}
+            />
+          </QueryClientProvider>
+        </I18nProvider>
+      );
+    };
+
+    it('adopts a stored Role ARN that changes while the field is untouched', () => {
+      const { rerender } = renderFlyout({
+        provider: 'aws',
+        cloudConnectorVars: {
+          role_arn: { type: 'text', value: 'arn:aws:iam::123456789012:role/Existing' },
+        },
+      });
+
+      rerenderFlyout(rerender, {
+        role_arn: { type: 'text', value: 'arn:aws:iam::123456789012:role/Rotated' },
+      });
+
+      expect(screen.getByTestId(ROLE_ARN_FIELD_TEST_SUBJECTS.INPUT)).toHaveValue(
+        'arn:aws:iam::123456789012:role/Rotated'
+      );
+      expect(
+        screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.FOOTER_SAVE_BUTTON)
+      ).toBeDisabled();
+    });
+
+    it('keeps a Role ARN the user edited when the stored value changes', () => {
+      const { rerender } = renderFlyout({
+        provider: 'aws',
+        cloudConnectorVars: {
+          role_arn: { type: 'text', value: 'arn:aws:iam::123456789012:role/Existing' },
+        },
+      });
+
+      fireEvent.change(screen.getByTestId(ROLE_ARN_FIELD_TEST_SUBJECTS.INPUT), {
+        target: { value: 'arn:aws:iam::123456789012:role/NewRole' },
+      });
+
+      rerenderFlyout(rerender, {
+        role_arn: { type: 'text', value: 'arn:aws:iam::123456789012:role/Rotated' },
+      });
+
+      expect(screen.getByTestId(ROLE_ARN_FIELD_TEST_SUBJECTS.INPUT)).toHaveValue(
+        'arn:aws:iam::123456789012:role/NewRole'
+      );
+      expect(
+        screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.FOOTER_SAVE_BUTTON)
+      ).toBeEnabled();
+    });
   });
 
   describe('delete cloud connector', () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useRef } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -123,6 +123,17 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
   // `editedRoleArn` stays trimmed because `RoleArnField` trims on input; seed the initial state
   // trimmed as well so the first render's "changed" check compares like against like.
   const [editedRoleArn, setEditedRoleArn] = useState(existingRoleArn);
+  // A connector refresh can change the stored ARN while this flyout stays open. Follow that
+  // value when the field still matches the previous baseline. A value the user has edited
+  // (diverged from that baseline) is left alone.
+  const roleArnBaselineRef = useRef(existingRoleArn);
+  if (roleArnBaselineRef.current !== existingRoleArn) {
+    const previousBaseline = roleArnBaselineRef.current;
+    roleArnBaselineRef.current = existingRoleArn;
+    if (editedRoleArn === previousBaseline) {
+      setEditedRoleArn(existingRoleArn);
+    }
+  }
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
