@@ -7,6 +7,7 @@
 
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
@@ -1351,6 +1352,7 @@ describe('CloudConnectorService', () => {
       beforeEach(() => {
         mockSoClient.get.mockResolvedValue({
           id: connectorId,
+          version: 'Wz-cc-version',
           attributes: {
             name: 'Test',
             namespace: '*',
@@ -1387,6 +1389,46 @@ describe('CloudConnectorService', () => {
         );
       });
 
+      it('passes the connector OCC version on the post-fan-out write', async () => {
+        await service.update(
+          mockSoClient,
+          connectorId,
+          { vars: { role_arn: { type: 'text', value: newArn } } },
+          { esClient: mockEsClient }
+        );
+
+        expect(mockSoClient.update).toHaveBeenCalledWith(
+          CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+          connectorId,
+          expect.objectContaining({
+            verification_status: 'pending',
+          }),
+          { version: 'Wz-cc-version' }
+        );
+      });
+
+      it('rolls back policies when the connector write conflicts (OCC)', async () => {
+        const rollback = { policyCount: 1, revert: jest.fn().mockResolvedValue(undefined) };
+        propagateRoleArnToPackagePoliciesMock.mockResolvedValueOnce(rollback);
+        mockSoClient.update.mockRejectedValueOnce(
+          SavedObjectsErrorHelpers.createConflictError(
+            CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+            connectorId
+          )
+        );
+
+        await expect(
+          service.update(
+            mockSoClient,
+            connectorId,
+            { vars: { role_arn: { type: 'text', value: newArn } } },
+            { esClient: mockEsClient }
+          )
+        ).rejects.toThrow(/conflict/i);
+
+        expect(rollback.revert).toHaveBeenCalledTimes(1);
+      });
+
       it('is a no-op when the incoming role_arn equals the stored one', async () => {
         await service.update(
           mockSoClient,
@@ -1413,7 +1455,8 @@ describe('CloudConnectorService', () => {
             verification_status: 'pending',
             verification_started_at: null,
             verification_failed_at: null,
-          })
+          }),
+          { version: 'Wz-cc-version' }
         );
       });
 
@@ -1521,7 +1564,9 @@ describe('CloudConnectorService', () => {
           revertFailed: ['policy-stuck'],
         });
         expect(propagationError.message).toMatch(/write-failed/i);
-        expect(propagationError.message).toMatch(/policy-stuck|Failed to update role ARN|roll back/i);
+        expect(propagationError.message).toMatch(
+          /policy-stuck|Failed to update role ARN|roll back/i
+        );
       });
 
       it('throws when a role ARN change is requested without an esClient', async () => {

@@ -53,6 +53,7 @@ import {
 
 import { appContextService } from './app_context';
 import { propagateRoleArnToPackagePolicies } from './cloud_connectors';
+import type { RoleArnPropagationRollback } from './cloud_connectors';
 import { validatePolicyNamespaceForSpace } from './spaces/policy_namespaces';
 import { extractSecretIdsFromCloudConnectorVars } from './secrets/cloud_connector';
 import { deleteSecrets } from './secrets/common';
@@ -481,8 +482,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
             : cloudConnectorUpdate.vars;
       }
 
-      let roleArnRollback: Awaited<ReturnType<typeof propagateRoleArnToPackagePolicies>> =
-        undefined;
+      let roleArnRollback: RoleArnPropagationRollback | undefined;
       if (roleArnChanged) {
         if (!esClient) {
           logger.error(
@@ -505,11 +505,22 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
 
       let updatedSavedObject;
       try {
-        updatedSavedObject = await soClient.update<CloudConnectorSOAttributes>(
-          CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
-          cloudConnectorId,
-          updateAttributes
-        );
+        // OCC: the fan-out can take long enough for a concurrent connector edit to land. Without
+        // the version from the opening get(), that edit is silently overwritten — and we would
+        // keep the policies on the new ARN while another writer already changed the connector.
+        updatedSavedObject =
+          existingCloudConnector.version !== undefined
+            ? await soClient.update<CloudConnectorSOAttributes>(
+                CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+                cloudConnectorId,
+                updateAttributes,
+                { version: existingCloudConnector.version }
+              )
+            : await soClient.update<CloudConnectorSOAttributes>(
+                CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+                cloudConnectorId,
+                updateAttributes
+              );
       } catch (writeError) {
         if (roleArnRollback) {
           logger.error(
