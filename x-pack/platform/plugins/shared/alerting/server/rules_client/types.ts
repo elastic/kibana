@@ -15,7 +15,6 @@ import type {
   UiSettingsServiceStart,
   AnalyticsServiceStart,
 } from '@kbn/core/server';
-import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
 import type { ActionsClient, ActionsAuthorization } from '@kbn/actions-plugin/server';
 import type {
   GrantAPIKeyResult as SecurityPluginGrantAPIKeyResult,
@@ -41,6 +40,7 @@ import type { GetAlertIndicesAlias } from '../lib';
 import type { AlertsService } from '../alerts_service';
 import type { BackfillClient } from '../backfill_client/backfill_client';
 import type { IScopedChangeTrackingService } from './lib/change_tracking';
+import type { ApiKeyType } from '../task_runner/types';
 
 export type {
   BulkEditOperation,
@@ -85,7 +85,10 @@ export interface RulesClientContext {
   readonly minimumScheduleInterval: AlertingRulesConfig['minimumScheduleInterval'];
   readonly maxScheduledPerMinute: AlertingRulesConfig['maxScheduledPerMinute'];
   readonly minimumScheduleIntervalInMs: number;
-  readonly createAPIKey: (name: string) => Promise<CreateAPIKeyResult>;
+  readonly createAPIKey: (
+    name: string,
+    refresh?: boolean | 'wait_for'
+  ) => Promise<CreateAPIKeyResult>;
   readonly getActionsClient: () => Promise<ActionsClient>;
   readonly actionsAuthorization: ActionsAuthorization;
   readonly getEventLogClient: () => Promise<IEventLogClient>;
@@ -124,8 +127,8 @@ export interface RulesClientContext {
   readonly isSystemAction: (actionId: string) => boolean;
   readonly uiSettings: UiSettingsServiceStart;
   readonly shouldGrantUiam?: boolean;
+  readonly apiKeyType?: ApiKeyType;
   readonly isServerless: boolean;
-  readonly featureFlags: FeatureFlagsStart;
   /**
    * Used to report EBT events (e.g. rule create telemetry). Optional on the context so the
    * many hand-constructed test contexts across the codebase aren't forced to wire it. In

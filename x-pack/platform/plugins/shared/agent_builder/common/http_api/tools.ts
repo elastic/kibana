@@ -277,3 +277,29 @@ export interface ValidateNamespaceResponse {
   isValid: boolean;
   conflictingNamespaces: string[];
 }
+
+/** Lightweight connector summary returned by the agent-scoped list endpoint. */
+export interface AgentConnectorSummary {
+  id: string;
+  name: string;
+  type: string;
+  description: string;
+}
+
+export type ListAgentConnectorsResponse = AgentConnectorSummary[];
+
+/** A single sub-action with its human-readable parameter schema string. */
+export interface AgentConnectorSubActionDetail {
+  name: string;
+  description: string;
+  params: string;
+}
+
+/** Full connector detail returned by the sub-actions endpoint. */
+export interface AgentConnectorDetailResponse {
+  id: string;
+  name: string;
+  type: string;
+  description: string;
+  subActions: AgentConnectorSubActionDetail[];
+}

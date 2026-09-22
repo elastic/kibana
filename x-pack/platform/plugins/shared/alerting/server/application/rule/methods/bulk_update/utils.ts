@@ -176,6 +176,7 @@ export const prepareUpdate = async <Params extends RuleParams>({
       shouldUpdateApiKey: originalRule.enabled,
       errorMessage: 'Error updating rule: could not create API key',
       apiKeyOwnership: { apiKeyCreatedByUser: originalRule.apiKeyCreatedByUser },
+      refresh: false,
     });
 
     const newKeys: ApiKeyEntry = {
@@ -187,12 +188,12 @@ export const prepareUpdate = async <Params extends RuleParams>({
       apiKeys.set(id, newKeys);
     }
 
-    const tagsWithUiamCheck = await addMissingUiamKeyTagIfNeeded(
+    const tagsWithUiamCheck = addMissingUiamKeyTagIfNeeded(
       data.tags,
       apiKeyAttributes.uiamApiKey,
-      apiKeyAttributes.apiKeyCreatedByUser,
       context.isServerless,
-      context.featureFlags
+      context.shouldGrantUiam,
+      context.apiKeyType
     );
 
     const notifyWhen = getRuleNotifyWhenType(data.notifyWhen ?? null, data.throttle ?? null);

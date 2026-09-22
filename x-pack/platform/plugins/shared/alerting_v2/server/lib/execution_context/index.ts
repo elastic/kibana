@@ -9,6 +9,7 @@ export { CancellationScope } from './cancellation_scope';
 export {
   RuleExecutionCancellationError,
   isRuleExecutionCancellationError,
+  toRuleExecutionCancellationError,
 } from './cancellation_error';
 export {
   AbortSignalExecutionContext,

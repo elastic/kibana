@@ -5,25 +5,28 @@
  * 2.0.
  */
 
-import { RESOLUTION_RULE_IDS } from '../../../../../../common/domain/resolution_rules/constants';
 import { RESOLUTION_RULE_KINDS } from '../../../../../../common/domain/resolution_rules/constants';
 import type { RegisterEntityMaintainerConfig } from '../../../../../tasks/entity_maintainers/types';
+import { resolveLatestEntitiesIndexName } from '../../../../asset_manager/resolve_entity_store_indices';
 import { ResolutionClient } from '../../..';
-import type { AutomatedResolutionState, PerRuleState } from './types';
+import {
+  AUTOMATED_RESOLUTION_STATE_VERSION,
+  type AutomatedResolutionState,
+  type PerRuleState,
+} from './types';
 import { migrate } from './migrate';
 import { RESOLUTION_RULE_CONFIGS } from '../..';
-import { runEmailRuleResolution } from './run';
+import { runEsqlMatcherRule } from '../../matcher';
 import { runRelatedUserAliasResolution } from '../related_user_alias_resolution';
 
 export const MAINTAINER_ID = 'automated-resolution';
 
 const EMPTY_RULE_STATE: PerRuleState = { lastProcessedTimestamp: null, lastRun: null };
 
-// Initial state for a brand-new task: an empty map. Per-rule state is persisted by
-// task-manager between runs (surviving restarts and upgrades); a rule with no
-// persisted entry runs a full scan on its first execution, then records its
-// watermark for subsequent runs.
-const createInitialState = (): AutomatedResolutionState => ({ rules: {} });
+const createInitialState = (): AutomatedResolutionState => ({
+  version: AUTOMATED_RESOLUTION_STATE_VERSION,
+  rules: {},
+});
 
 export const automatedResolutionMaintainerConfig: RegisterEntityMaintainerConfig = {
   id: MAINTAINER_ID,
@@ -40,8 +43,16 @@ export const automatedResolutionMaintainerConfig: RegisterEntityMaintainerConfig
     const effectiveRules = new Map(
       (await resolutionRulesClient.getEffectiveRules()).map((rule) => [rule.id, rule])
     );
+    const mutatedIds = new Set<string>();
+    let backfillStarted = false;
+    const index = await resolveLatestEntitiesIndexName(esClient, namespace);
 
     for (const ruleConfig of RESOLUTION_RULE_CONFIGS) {
+      if (signal.aborted) {
+        logger.debug(`Aborted automated-resolution before rule '${ruleConfig.id}'`);
+        break;
+      }
+
       const effectiveRule = effectiveRules.get(ruleConfig.id);
       if (!effectiveRule?.enabled) {
         logger.debug(`Skipping disabled resolution rule '${ruleConfig.id}'`);
@@ -49,19 +60,32 @@ export const automatedResolutionMaintainerConfig: RegisterEntityMaintainerConfig
       }
 
       const ruleState = state.rules[ruleConfig.id] ?? EMPTY_RULE_STATE;
+      const isMatcherBackfill =
+        Boolean(ruleConfig.matcher) && ruleState.lastProcessedTimestamp == null;
+      if (isMatcherBackfill) {
+        if (backfillStarted) {
+          logger.debug(
+            `Deferring full-scan of resolution rule '${ruleConfig.id}'; another matcher is backfilling this tick`
+          );
+          continue;
+        }
+        backfillStarted = true;
+      }
+
       try {
-        if (ruleConfig.kind === RESOLUTION_RULE_KINDS.SAME_FIELD) {
-          if (ruleConfig.id === RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH) {
-            rules[ruleConfig.id] = await runEmailRuleResolution({
-              state: ruleState,
-              namespace,
-              esClient,
-              logger,
-              resolutionClient,
-              signal,
-              telemetry,
-            });
-          }
+        if (ruleConfig.matcher) {
+          rules[ruleConfig.id] = await runEsqlMatcherRule({
+            state: ruleState,
+            namespace,
+            esClient,
+            logger,
+            resolutionClient,
+            signal,
+            telemetry,
+            spec: ruleConfig.matcher,
+            ruleId: ruleConfig.id,
+            mutatedIds,
+          });
         } else if (ruleConfig.kind === RESOLUTION_RULE_KINDS.RELATED_USER_ALIAS_RESOLUTION) {
           rules[ruleConfig.id] = await runRelatedUserAliasResolution({
             state: ruleState,
@@ -72,7 +96,14 @@ export const automatedResolutionMaintainerConfig: RegisterEntityMaintainerConfig
             signal,
             telemetry,
           });
+        } else {
+          logger.warn(
+            `Skipping resolution rule '${ruleConfig.id}': no matcher spec and unrecognized kind '${ruleConfig.kind}'`
+          );
+          continue;
         }
+
+        await esClient.indices.refresh({ index });
       } catch (error) {
         logger.warn(`Resolution rule '${ruleConfig.id}' failed: ${error}`);
       }

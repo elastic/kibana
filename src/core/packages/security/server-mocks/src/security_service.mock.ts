@@ -8,6 +8,7 @@
  */
 
 import type {
+  CoreServiceAccountsService,
   SecurityServiceSetup,
   SecurityServiceStart,
   SecurityRequestHandlerContext,
@@ -23,11 +24,24 @@ import type { MockAuthenticatedUserProps } from '@kbn/core-security-common/mocks
 import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
 import { lazyObject } from '@kbn/lazy-object';
 
+const createServiceAccountsStartMock = (): jest.MockedObjectDeep<CoreServiceAccountsService> =>
+  lazyObject({
+    isEnabled: jest.fn().mockReturnValue(false),
+    create: jest.fn(),
+    bindWorkload: jest.fn(),
+    unbindWorkload: jest.fn(),
+    getWorkloadBinding: jest.fn().mockResolvedValue(null),
+    withScopedRequestForWorkload: jest.fn(),
+  });
+
 const createSetupMock = () => {
   const mock: jest.Mocked<SecurityServiceSetup> = lazyObject({
     registerSecurityDelegate: jest.fn(),
     acquireFakeRequestEnricher: jest.fn().mockReturnValue(jest.fn()),
     fips: { isEnabled: jest.fn() },
+    serviceAccounts: lazyObject({
+      registerWorkloadType: jest.fn(),
+    }),
   });
 
   return mock;
@@ -45,9 +59,7 @@ const createStartMock = (): SecurityStartMock => {
       apiKeys: apiKeysMock.create(),
     }),
     audit: auditServiceMock.create(),
-    serviceAccounts: lazyObject({
-      isEnabled: jest.fn().mockReturnValue(false),
-    }),
+    serviceAccounts: createServiceAccountsStartMock(),
   });
 
   return mock;
@@ -61,6 +73,9 @@ const createInternalSetupMock = () => {
     registerSecurityDelegate: jest.fn(),
     acquireFakeRequestEnricher: jest.fn().mockReturnValue(jest.fn()),
     fips: { isEnabled: jest.fn() },
+    serviceAccounts: lazyObject({
+      registerWorkloadType: jest.fn(),
+    }),
     uiam: {
       getElasticsearchClientAuthentication: jest.fn(uiam.getElasticsearchClientAuthentication),
     },
@@ -84,7 +99,7 @@ const createInternalStartMock = (): InternalSecurityStartMock => {
     }),
     audit: auditServiceMock.create(),
     serviceAccounts: lazyObject({
-      isEnabled: jest.fn().mockReturnValue(false),
+      asScopedToPlugin: jest.fn().mockImplementation(createServiceAccountsStartMock),
     }),
   });
 
@@ -132,6 +147,7 @@ const createRequestHandlerContextMock = () => {
 export const securityServiceMock = {
   create: createServiceMock,
   createSetup: createSetupMock,
+  createServiceAccounts: createServiceAccountsStartMock,
   createStart: createStartMock,
   createInternalSetup: createInternalSetupMock,
   createInternalStart: createInternalStartMock,

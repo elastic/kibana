@@ -18,7 +18,10 @@ import { ALLOWED_ACTION_REQUEST_TAGS } from '../constants';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { ExperimentalFeatures } from '../../../../../common';
-import type { EndpointAppContextService } from '../../../endpoint_app_context_services';
+import type {
+  EndpointAppContextService,
+  ScopedEndpointServices,
+} from '../../../endpoint_app_context_services';
 
 describe('fetchActionRequests()', () => {
   let esClientMock: ElasticsearchClientMock;
@@ -486,18 +489,25 @@ describe('fetchActionRequests()', () => {
   describe('and CPS is enabled', () => {
     let readEsClientMock: ElasticsearchClientMock;
     let request: ReturnType<typeof httpServerMock.createKibanaRequest>;
+    let scoped: ScopedEndpointServices;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       readEsClientMock = elasticsearchServiceMock.createElasticsearchClient();
       applyActionListEsSearchMock(readEsClientMock);
 
       const endpointService =
         fetchOptions.endpointService as jest.Mocked<EndpointAppContextService>;
-      endpointService.isCpsEnabled.mockReturnValue(true);
-      endpointService.getReadEsClient.mockReturnValue(readEsClientMock);
+      endpointService.isCpsActive.mockResolvedValue(true);
+      endpointService.getReadEsClient.mockResolvedValue(readEsClientMock);
 
       request = httpServerMock.createKibanaRequest();
-      fetchOptions.scoped = endpointService.asScoped(request);
+      scoped = await endpointService.asScoped(request);
+    });
+
+    // Kept separate from the async hook above so the shared `fetchOptions` is only ever mutated
+    // synchronously; assigning it after an `await` is what `require-atomic-updates` guards against.
+    beforeEach(() => {
+      fetchOptions.scoped = scoped;
     });
 
     it('should read as the request user so the search can fan out to linked projects', async () => {

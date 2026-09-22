@@ -7,7 +7,7 @@
 
 import { createHash } from 'crypto';
 import type { Logger } from '@kbn/core/server';
-import { castArray, omit } from 'lodash';
+import { castArray } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import { ApiMessageCode } from '@kbn/cloud-security-posture-common/types/graph/latest';
 import type {
@@ -24,13 +24,14 @@ import type {
 } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import type { Writable } from '@kbn/utility-types';
 import { ENTITY_RELATIONSHIP_LABELS } from '@kbn/cloud-security-posture-common/constants';
-import { GRAPH_ACTOR_EUID_SOURCE_FIELDS } from './constants';
 import {
   type EventEdge,
   type EventEsqlRow,
   type RelationshipEdge,
   type RelationshipEsqlRow,
   type EntityRecord,
+  type RiskScoreRange,
+  type AssetCriticalityCount,
   NON_ENRICHED_ENTITY_TYPE_PLURAL,
   NON_ENRICHED_ENTITY_TYPE_SINGULAR,
 } from './types';
@@ -41,8 +42,11 @@ import {
   addValuesToSet,
   filterDocDataToIds,
   rebuildDocData,
+  aggregateRiskScore,
+  aggregateAssetCriticality,
 } from './utils';
 import type { EntityEnrichmentFields } from './fetch_entity_enrichment';
+import { isKnownAssetCriticalityLevel } from './asset_criticality_levels';
 
 interface ConnectorEdges {
   source: string;
@@ -126,6 +130,14 @@ export const parseRecords = (
           entitySubType: entity.sub_type,
           entityName: entity.name,
           docData: entity.docData ? castArray(entity.docData) : [],
+          // A standalone entity node always represents exactly one entity, so the range
+          // collapses to a single value and the distribution to a single entry.
+          riskScore:
+            entity.riskScore != null ? { min: entity.riskScore, max: entity.riskScore } : undefined,
+          assetCriticality:
+            entity.assetCriticality != null && isKnownAssetCriticalityLevel(entity.assetCriticality)
+              ? [{ level: entity.assetCriticality, count: 1 }]
+              : undefined,
         },
         ctx.logger
       );
@@ -220,10 +232,22 @@ const createEntityNode = (
     entityName?: string | string[] | null;
     docData?: Array<string | null> | string;
     hostIps?: string[];
+    riskScore?: RiskScoreRange;
+    assetCriticality?: AssetCriticalityCount[];
   },
   logger?: Logger
 ): void => {
-  const { nodeId, idsCount, entityType, entitySubType, entityName, docData, hostIps } = params;
+  const {
+    nodeId,
+    idsCount,
+    entityType,
+    entitySubType,
+    entityName,
+    docData,
+    hostIps,
+    riskScore,
+    assetCriticality,
+  } = params;
   const EXPAND_DOT_NOTATION = false;
 
   if (nodesMap[nodeId] !== undefined) return;
@@ -235,17 +259,16 @@ const createEntityNode = (
     ? parseDocumentsData(logger, docData)
     : undefined;
 
+  // The `all` bucket (event.module / event.dataset / data_stream.dataset) is kept: the client
+  // feeds sourceFields to the Entity Store's EUID filter builder, which derives the entity's
+  // namespace from those fields. Without them the emitted filter matches the same identity in
+  // every namespace — e.g. `user.email: alice@example.com` would match the gcp, okta and
+  // entra_id entities alike, which are three distinct entities.
   documentsData?.forEach((doc) => {
-    if (doc.entity?.sourceFields) {
-      const currentlySupportedSourceFields = omit(
-        doc.entity.sourceFields,
-        GRAPH_ACTOR_EUID_SOURCE_FIELDS.all
-      );
+    if (doc.entity?.sourceFields && EXPAND_DOT_NOTATION) {
       (doc as Writable<typeof doc>).entity = {
         ...doc.entity,
-        sourceFields: EXPAND_DOT_NOTATION
-          ? expandDotNotation(currentlySupportedSourceFields)
-          : currentlySupportedSourceFields,
+        sourceFields: expandDotNotation(doc.entity.sourceFields),
       };
     }
   });
@@ -258,6 +281,8 @@ const createEntityNode = (
     ...deriveEntityAttributesFromType(resolvedType),
     ...(idsCount > 1 ? { count: idsCount } : {}),
     ...(hostIps && hostIps.length > 0 ? { ips: hostIps } : {}),
+    ...(riskScore ? { riskScore } : {}),
+    ...(assetCriticality && assetCriticality.length > 0 ? { assetCriticality } : {}),
   };
 };
 
@@ -277,6 +302,8 @@ const createGroupedActorAndTargetNodes = (
     actorEntitySubType,
     actorEntityName,
     actorHostIps,
+    actorRiskScore,
+    actorAssetCriticality,
     targetNodeId,
     targetIdsCount,
     targetsDocData,
@@ -284,6 +311,8 @@ const createGroupedActorAndTargetNodes = (
     targetEntitySubType,
     targetEntityName,
     targetHostIps,
+    targetRiskScore,
+    targetAssetCriticality,
   } = record;
 
   // Create actor entity node
@@ -297,6 +326,8 @@ const createGroupedActorAndTargetNodes = (
       entityName: actorEntityName,
       docData: actorsDocData,
       hostIps: actorHostIps ? castArray(actorHostIps) : [],
+      riskScore: actorRiskScore,
+      assetCriticality: actorAssetCriticality,
     },
     logger
   );
@@ -315,6 +346,8 @@ const createGroupedActorAndTargetNodes = (
         entityName: targetEntityName,
         docData: targetsDocData,
         hostIps: targetHostIps ? castArray(targetHostIps) : [],
+        riskScore: targetRiskScore,
+        assetCriticality: targetAssetCriticality,
       },
       logger
     );
@@ -466,6 +499,8 @@ const processRelationshipRecord = (record: RelationshipEdge, context: ParseConte
       entityName: record.actorEntityName,
       docData: record.actorsDocData,
       hostIps: record.actorHostIps ? castArray(record.actorHostIps) : [],
+      riskScore: record.actorRiskScore,
+      assetCriticality: record.actorAssetCriticality,
     },
     context.logger
   );
@@ -480,6 +515,8 @@ const processRelationshipRecord = (record: RelationshipEdge, context: ParseConte
       entityName: record.targetEntityName,
       docData: record.targetsDocData,
       hostIps: record.targetHostIps ? castArray(record.targetHostIps) : [],
+      riskScore: record.targetRiskScore,
+      assetCriticality: record.targetAssetCriticality,
     },
     context.logger
   );
@@ -1109,6 +1146,8 @@ export const regroupEvents = (
       actorEntityName:
         actorNames.length === 0 ? null : actorNames.length === 1 ? actorNames[0] : actorNames,
       actorHostIps: actorHostIps.length > 0 ? actorHostIps : undefined,
+      actorRiskScore: aggregateRiskScore(actorEntityIds, enrichmentMap),
+      actorAssetCriticality: aggregateAssetCriticality(actorEntityIds, enrichmentMap),
       actorsDocData: [...group.actorsDocData],
       targetNodeId,
       targetIdsCount: targetEntityIds.length,
@@ -1117,6 +1156,8 @@ export const regroupEvents = (
       targetEntityName:
         targetNames.length === 0 ? null : targetNames.length === 1 ? targetNames[0] : targetNames,
       targetHostIps: targetHostIps.length > 0 ? targetHostIps : undefined,
+      targetRiskScore: aggregateRiskScore(targetEntityIds, enrichmentMap),
+      targetAssetCriticality: aggregateAssetCriticality(targetEntityIds, enrichmentMap),
       targetsDocData: [...group.targetsDocData],
     };
   });
@@ -1338,6 +1379,8 @@ export const regroupRelationships = (
           ? actorNames[0]
           : actorNames,
       actorHostIps: actorHostIps.length > 0 ? actorHostIps : undefined,
+      actorRiskScore: aggregateRiskScore(actorIds, enrichmentMap),
+      actorAssetCriticality: aggregateAssetCriticality(actorIds, enrichmentMap),
       actorsDocData: [...group.actorsDocData],
       targetNodeId,
       targetIdsCount: targetIds.length,
@@ -1346,6 +1389,8 @@ export const regroupRelationships = (
       targetEntityName:
         targetNames.length === 0 ? null : targetNames.length === 1 ? targetNames[0] : targetNames,
       targetHostIps: targetHostIps.length > 0 ? targetHostIps : undefined,
+      targetRiskScore: aggregateRiskScore(targetIds, enrichmentMap),
+      targetAssetCriticality: aggregateAssetCriticality(targetIds, enrichmentMap),
       targetsDocData: [...group.targetsDocData],
       relationship: group.relationship,
       relationshipNodeId,
@@ -1356,10 +1401,14 @@ export const regroupRelationships = (
 };
 
 /**
- * Rebuilds targetsDocData for each relationship using entity store enrichment.
- * actorsDocData is intentionally left unchanged: relationship actor docData is already
- * built inline in the ES|QL query with full entity metadata (the actor IS the
- * entity-store source row). Only target entities need TypeScript-side enrichment.
+ * Rebuilds actorsDocData and targetsDocData for each relationship using entity store
+ * enrichment.
+ *
+ * The relationship query builds actor docData inline (the actor IS the entity-store source
+ * row), but it is still rebuilt here so the actor side gets the same per-entity treatment as
+ * every other path — notably `sourceFields` unioning and the unknown-criticality filtering
+ * applied in `rebuildDocData`. Without this, relationship actors were the only entities in
+ * the API missing risk score / criticality under `documentsData`.
  */
 export const enrichRelationshipDocData = (
   relationships: RelationshipEdge[],
@@ -1367,13 +1416,11 @@ export const enrichRelationshipDocData = (
 ): RelationshipEdge[] => {
   return relationships.map((rel) => ({
     ...rel,
+    actorsDocData: rebuildDocData(rel.actorsDocData, enrichmentMap),
     targetsDocData: rebuildDocData(rel.targetsDocData, enrichmentMap),
   }));
 };
 
-/**
- * Applies enrichment to entity records from the entity store.
- */
 export const enrichEntityRecords = (
   records: EntityRecord[],
   enrichmentMap: Map<string, EntityEnrichmentFields>
@@ -1386,6 +1433,11 @@ export const enrichEntityRecords = (
       name: enrichment.name ?? record.name,
       type: enrichment.type ?? record.type,
       sub_type: enrichment.subType ?? record.sub_type,
+      // Rebuilt through the shared path so this docData gets the same treatment as every
+      // other entity document — in particular the unknown-criticality filtering applied via
+      // the enrichment map. The entities query serializes these fields itself, so this is a
+      // normalization pass rather than the only source of them.
+      docData: record.docData ? rebuildDocData(record.docData, enrichmentMap)[0] : record.docData,
     };
   });
 };

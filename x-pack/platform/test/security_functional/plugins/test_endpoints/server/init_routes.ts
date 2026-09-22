@@ -11,6 +11,7 @@ import { schema } from '@kbn/config-schema';
 import type {
   CoreSetup,
   CoreStart,
+  ElasticsearchClient,
   KibanaRequest,
   PluginInitializerContext,
 } from '@kbn/core/server';
@@ -34,6 +35,8 @@ export function initRoutes(
   core: CoreSetup<PluginStartDependencies>
 ) {
   const logger = initializerContext.logger.get();
+  // Capture once — reading esClient.openPointInTime on disable would recapture the mock.
+  let unpatchedOpenPointInTime: ElasticsearchClient['openPointInTime'] | undefined;
 
   const authenticationAppOptions = { simulateUnauthorized: false };
   core.http.resources.register(
@@ -622,6 +625,56 @@ export function initRoutes(
 
   router.post(
     {
+      path: '/session/_refresh_session_index',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: false,
+    },
+    async (context, request, response) => {
+      const [coreStart] = await core.getStartServices();
+      await coreStart.elasticsearch.client.asInternalUser.indices.refresh({
+        index: '.kibana_security_session*',
+        expand_wildcards: 'all',
+        ignore_unavailable: true,
+      });
+      return response.ok();
+    }
+  );
+
+  router.post(
+    {
+      path: '/session/_remove_created_at',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: {
+        body: schema.object({
+          ids: schema.arrayOf(schema.string({ maxLength: 1024 }), { maxSize: 100 }),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      const { ids } = request.body;
+      const [coreStart] = await core.getStartServices();
+      await coreStart.elasticsearch.client.asInternalUser.updateByQuery({
+        index: '.kibana_security_session*',
+        script: 'ctx._source.remove("createdAt")',
+        query: { ids: { values: ids } },
+        refresh: true,
+      });
+      return response.ok();
+    }
+  );
+
+  router.post(
+    {
       path: '/simulate_point_in_time_failure',
       security: {
         authc: {
@@ -639,7 +692,8 @@ export function initRoutes(
     },
     async (context, request, response) => {
       const esClient = (await context.core).elasticsearch.client.asInternalUser;
-      const originalOpenPointInTime = esClient.openPointInTime;
+      const originalOpenPointInTime = unpatchedOpenPointInTime ?? esClient.openPointInTime;
+      unpatchedOpenPointInTime = originalOpenPointInTime;
 
       if (request.body.simulateOpenPointInTimeFailure) {
         // @ts-expect-error
@@ -872,6 +926,40 @@ export function initRoutes(
         return response.ok({ body: await scopedClient.asCurrentUser.security.authenticate() });
       } catch (err) {
         logger.error(`Failed to authenticate to ES with UIAM API Key: ${err}`, err);
+        return response.customError({
+          statusCode: 500,
+          body: { message: err.message },
+        });
+      }
+    }
+  );
+
+  // Mints an ephemeral UIAM token for Kibana's own identity (`authc.systemIdentity`), the
+  // credential Kibana presents to cross-region Elastic services such as the Nightshift Relay.
+  router.post(
+    {
+      path: '/test_endpoints/uiam/system_identity/_token',
+      validate: false,
+      security: {
+        authc: { enabled: false, reason: "Test endpoint exercising Kibana's own UIAM identity" },
+        authz: { enabled: false, reason: "Test endpoint exercising Kibana's own UIAM identity" },
+      },
+    },
+    async (context, request, response) => {
+      try {
+        // The system identity lives on the security plugin's contract, not on Core's.
+        const [, { security }] = await core.getStartServices();
+
+        if (!security.authc.systemIdentity) {
+          return response.badRequest({
+            body: { message: 'UIAM system identity is not available' },
+          });
+        }
+
+        const token = await security.authc.systemIdentity.createEphemeralToken();
+        return response.ok({ body: { token } });
+      } catch (err) {
+        logger.error(`Failed to create a system identity token: ${err}`, err);
         return response.customError({
           statusCode: 500,
           body: { message: err.message },
