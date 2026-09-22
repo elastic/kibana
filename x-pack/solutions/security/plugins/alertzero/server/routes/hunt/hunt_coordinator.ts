@@ -102,7 +102,9 @@ export const registerHuntCoordinatorRoute = ({
             tier2_when,
             max_tier2_sample_events,
             trigger,
-            technology,
+            // A workflow caller renders an unset input as null; both mean "resolve
+            // from the environment".
+            technology: technology ?? undefined,
             // The Worker fan-out supplies a run id so one sweep's children share it,
             // which is what the packaging barrier and conclusion dedupe key off. Only
             // mint one when the caller has no sweep to tie the run to.

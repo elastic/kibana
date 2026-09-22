@@ -35,10 +35,12 @@ paths:
                     caller has no sweep to tie the run to.
                 technology:
                   $ref: '../components/hunt.schema.yaml#/components/schemas/HuntTechnology'
+                  nullable: true
                   description: >-
-                    Pins the hunt to one technology's index scope. Omit it and the
-                    coordinator resolves every known technology and hunts the ones
-                    whose required indices exist in the space.
+                    Pins the hunt to one technology's index scope. Omit it (or send
+                    null, which is what a workflow template renders for an unset
+                    input) and the coordinator resolves every known technology and
+                    hunts the ones whose required indices exist in the space.
                 text:
                   type: string
                   maxLength: 200000
