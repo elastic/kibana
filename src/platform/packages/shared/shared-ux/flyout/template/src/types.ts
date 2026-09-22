@@ -202,13 +202,6 @@ export type FlyoutFooterMenuPanel = Omit<
   content?: never;
 };
 
-/**
- * Trigger button props the template sets itself, so a consumer value would be discarded.
- *
- * `onClick` is always `togglePopover`; `isSelected` is excluded because it applies
- * `aria-pressed`, which describes a toggle button — a popover trigger uses `aria-expanded`
- * instead, which EUI sets automatically; `aria-haspopup` is always `"dialog"`.
- */
 type MenuTriggerOwnedProps =
   | 'children'
   | 'color'

@@ -15,7 +15,8 @@ import { secondaryActionPart } from './part';
 /** Declarative `FlyoutTemplate.Footer.SecondaryAction`. */
 export const SecondaryAction =
   secondaryActionPart.createComponent<FlyoutFooterSecondaryActionProps>({
-    resolve: ({ label, ...buttonProps }) => React.createElement(EuiButtonEmpty, buttonProps, label),
+    resolve: ({ label, ...buttonProps }) =>
+      React.createElement(EuiButtonEmpty, { ...buttonProps, color: 'primary', size: 'm' }, label),
   });
 
 SecondaryAction.displayName = 'FlyoutTemplate.Footer.SecondaryAction';

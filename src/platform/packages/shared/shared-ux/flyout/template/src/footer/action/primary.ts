@@ -15,7 +15,11 @@ import { primaryActionPart } from './part';
 /** Declarative `FlyoutTemplate.Footer.PrimaryAction`. */
 export const PrimaryAction = primaryActionPart.createComponent<FlyoutFooterPrimaryActionProps>({
   resolve: ({ label, ...buttonProps }) =>
-    React.createElement(EuiButton, { ...buttonProps, fill: true }, label),
+    React.createElement(
+      EuiButton,
+      { ...buttonProps, color: 'primary', size: 'm', fill: true },
+      label
+    ),
 });
 
 PrimaryAction.displayName = 'FlyoutTemplate.Footer.PrimaryAction';
