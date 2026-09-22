@@ -93,6 +93,8 @@ const buildTechniqueShould = (techniques: string[]): Array<Record<string, unknow
     ? []
     : [{ terms: { 'kibana.alert.rule.threat.technique.id': techniques } }];
 
+const DATA_STREAM_BACKING_PREFIX = '.ds-';
+
 export const emptyHuntForThreatResult = (
   status: HuntForThreatResult['status'],
   resolvedIocs: HuntIoc[],
@@ -206,8 +208,14 @@ export const huntForThreat = async (
   const requiredPatterns = scope.required.map(
     (pattern) => new RegExp(`^${pattern.split('*').map(escapeRegExp).join('.*')}$`)
   );
-  const matchesRequired = (index: string): boolean =>
-    requiredPatterns.some((pattern) => pattern.test(index));
+  // A data stream's documents report their backing index (`.ds-logs-aws.cloudtrail-default-2026.09.01-000001`),
+  // which would never match `logs-aws.*` literally, so strip the backing prefix before testing.
+  const matchesRequired = (index: string): boolean => {
+    const concrete = index.startsWith(DATA_STREAM_BACKING_PREFIX)
+      ? index.slice(DATA_STREAM_BACKING_PREFIX.length)
+      : index;
+    return requiredPatterns.some((pattern) => pattern.test(concrete));
+  };
 
   const response = await esClient.search({
     index: searchIndices,
