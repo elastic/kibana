@@ -218,7 +218,7 @@ export class AssetManagerClient {
         namespace: this.namespace,
         error: getErrorMessage(error),
       });
-      this.logger.error('Error during entity store init:', { error });
+      this.logger.error(`Error during entity store init: ${getErrorMessage(error)}`);
       throw error;
     }
   }
@@ -266,7 +266,7 @@ export class AssetManagerClient {
         });
       }
     } catch (error) {
-      this.logger.get(type).error(`Error starting extract entity task for type ${type}:`, { error });
+      this.logger.get(type).error(`Error starting extract entity task for type ${type}: ${getErrorMessage(error)}`);
       if (hasPriorityExtractionGate(type)) {
         // Starting is all or nothing: leaving one process scheduled without the other would
         // silently extract half the logs. Removal is idempotent, so this is safe whichever step
@@ -317,7 +317,7 @@ export class AssetManagerClient {
         ...(hasPriorityExtractionGate(type) ? { nonPriorityStatus: ENGINE_STATUS.STOPPED } : {}),
       });
     } catch (error) {
-      this.logger.get(type).error(`Error stopping extract entity task for type ${type}:`, { error });
+      this.logger.get(type).error(`Error stopping extract entity task for type ${type}: ${getErrorMessage(error)}`);
       // Mirror the nonPriorityStatus into ERROR so it does not stay as STARTED while the engine
       // itself is in ERROR state.
       await this.engineDescriptorClient.update(type, {
