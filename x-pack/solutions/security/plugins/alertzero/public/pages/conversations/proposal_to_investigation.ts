@@ -15,16 +15,11 @@ import { CLOSED_GROUP_KEY } from '../../../common/proposals/list';
  * Category an action declares → queue bucket. Keyed loosely because a category is an
  * arbitrary keyword (`actionCategorySchema` is a bounded string, not an enum), so an
  * action can declare one this page has never heard of.
- *
- * `tune` is retained for back-compatibility only: the shipped catalog now declares
- * `configure` directly, but proposals created before that snapshot their category at
- * creation and are never re-scored.
  */
 const CATEGORY_TO_BUCKET: Record<string, RecommendedAction> = {
   respond: 'respond',
   investigate: 'investigate',
   configure: 'configure',
-  tune: 'configure',
 };
 
 /**
@@ -112,6 +107,7 @@ export const proposalToInvestigation = (proposal: ProposalItem): Investigation =
     // recordId is repurposed to carry the proposal id into the ⋮ modal system.
     // The page renders dismiss/assign modals only if modalState.recordId is set.
     recordId: proposal.id,
+    conversationId: proposal.conversationId,
     summary: proposal.comment,
     primaryActionLabel: proposal.action?.name,
     // `conversationAssignees` is an array but `Investigation.assignee` is singular,
