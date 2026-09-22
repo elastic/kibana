@@ -15,7 +15,7 @@ spaceTest.describe('Dashboard search session lifecycle', { tag: '@local-stateful
 
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     const objects = await scoutSpace.savedObjects.load(
-      'src/platform/plugins/shared/data/test/scout_data_plugin/ui/fixtures/dashboard_with_filter.json'
+      'src/platform/plugins/shared/dashboard/test/scout_data_plugin/ui/fixtures/dashboard_with_filter.json'
     );
     const dashboard = objects.find(
       ({ type, title }) => type === 'dashboard' && title === 'dashboard with filter'
