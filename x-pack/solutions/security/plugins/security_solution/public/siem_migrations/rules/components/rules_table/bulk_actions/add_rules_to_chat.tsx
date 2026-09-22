@@ -13,9 +13,9 @@ import type { RuleMigrationRule } from '../../../../../../common/siem_migrations
 import type { RuleMigrationStats } from '../../../types';
 import { useAgentBuilderAvailability } from '../../../../../agent_builder/hooks/use_agent_builder_availability';
 import { useAgentBuilderAttachment } from '../../../../../agent_builder/hooks/use_agent_builder_attachment';
+import { useReportAddToChat } from '../../../../../agent_builder/hooks/use_report_add_to_chat';
 import { SecurityAgentBuilderAttachments } from '../../../../../../common/constants';
 import { WithMissingPrivilegesTooltip } from '../../../../common/components/missing_privileges';
-import { useKibana } from '../../../../../common/lib/kibana/use_kibana';
 
 const AGENT_MODE_REQUIRED_TOOLTIP = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.bulkAddToChatButton.agentModeRequiredTooltip',
@@ -39,9 +39,7 @@ const AddRulesToChatButtonInner: React.FC<AddRulesToChatButtonInnerProps> = ({
   selectedRules,
 }) => {
   const { hasAgentBuilderPrivilege, isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
-  const {
-    services: { siemMigrations },
-  } = useKibana();
+  const reportAddToChat = useReportAddToChat();
 
   const N = selectedRules.length;
   const migrationId = migrationStats.id;
@@ -79,14 +77,10 @@ const AddRulesToChatButtonInner: React.FC<AddRulesToChatButtonInnerProps> = ({
   });
 
   const handleClick = () => {
-    const statuses = [...new Set(selectedRules.map((r) => r.translation_result).filter(Boolean))];
-    siemMigrations.rules.telemetry.reportAddRulesToChat({
-      migrationId,
-      vendor,
-      item_type: 'rule',
-      count: N,
-      statuses,
-      source: 'bulk',
+    reportAddToChat({
+      pathway: 'translated_rules_bulk',
+      attachments: ['rule_migration_items'],
+      item_count: N > 0 ? N : migrationStats.items.total,
     });
     openAgentBuilderFlyout();
   };

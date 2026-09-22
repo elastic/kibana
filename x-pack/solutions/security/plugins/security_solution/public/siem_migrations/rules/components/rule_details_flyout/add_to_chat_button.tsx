@@ -12,9 +12,9 @@ import { i18n } from '@kbn/i18n';
 import type { RuleMigrationRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { NewAgentBuilderAttachment } from '../../../../agent_builder/components/new_agent_builder_attachment';
 import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
+import { useReportAddToChat } from '../../../../agent_builder/hooks/use_report_add_to_chat';
 import { WithMissingPrivilegesTooltip } from '../../../common/components/missing_privileges';
 import { useMigrationRuleAttachment } from './use_migration_rule_attachment';
-import { useKibana } from '../../../../common/lib/kibana/use_kibana';
 
 const ADD_TO_CHAT_LABEL = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.addToChatButton.label',
@@ -42,9 +42,7 @@ const AddMigrationRuleToChatButtonInner: React.FC<AddMigrationRuleToChatButtonIn
 }) => {
   const { hasAgentBuilderPrivilege, isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
   const { openAgentBuilderFlyout } = useMigrationRuleAttachment(rule);
-  const {
-    services: { siemMigrations },
-  } = useKibana();
+  const reportAddToChat = useReportAddToChat();
 
   if (!isAgentChatExperienceEnabled) {
     return (
@@ -67,13 +65,9 @@ const AddMigrationRuleToChatButtonInner: React.FC<AddMigrationRuleToChatButtonIn
   }
 
   const handleClick = () => {
-    siemMigrations.rules.telemetry.reportAddRulesToChat({
-      migrationId: rule.migration_id,
-      vendor: rule.original_rule.vendor,
-      item_type: 'rule',
-      count: 1,
-      statuses: rule.translation_result ? [rule.translation_result] : [],
-      source: 'flyout',
+    reportAddToChat({
+      pathway: 'translated_rules_flyout',
+      attachments: ['rule_migration_items'],
     });
     openAgentBuilderFlyout();
   };

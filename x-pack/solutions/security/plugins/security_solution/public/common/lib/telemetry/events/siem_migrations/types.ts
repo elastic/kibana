@@ -81,7 +81,6 @@ export enum SiemMigrationsRuleEventTypes {
    * When a translated rules are bulk installed
    */
   TranslatedBulkInstall = 'siem_migrations_translated_rule_bulk_install',
-  AddRulesToChat = 'siem_migrations_add_rules_to_chat',
 }
 
 export interface BaseResultActionParams {
@@ -187,16 +186,6 @@ export interface ReportTranslatedItemBulkInstallActionParams {
   count: number;
 }
 
-export interface ReportAddRulesToChatActionParams {
-  eventName: string;
-  migrationId: string;
-  vendor?: string;
-  item_type: 'rule';
-  count: number;
-  statuses: string[];
-  source: 'flyout' | 'bulk';
-}
-
 export interface SiemMigrationsTelemetryEventsMap {
   [SiemMigrationsRuleEventTypes.SetupConnectorSelected]: ReportSetupConnectorSelectedActionParams;
   [SiemMigrationsRuleEventTypes.SetupMigrationOpenNew]: ReportSetupMigrationOpenNewActionParams;
@@ -212,7 +201,6 @@ export interface SiemMigrationsTelemetryEventsMap {
   [SiemMigrationsRuleEventTypes.TranslatedItemUpdate]: ReportTranslatedItemUpdateActionParams;
   [SiemMigrationsRuleEventTypes.TranslatedItemInstall]: ReportTranslatedItemInstallActionParams;
   [SiemMigrationsRuleEventTypes.TranslatedBulkInstall]: ReportTranslatedItemBulkInstallActionParams;
-  [SiemMigrationsRuleEventTypes.AddRulesToChat]: ReportAddRulesToChatActionParams;
   [SiemMigrationsDashboardEventTypes.SetupConnectorSelected]: ReportSetupConnectorSelectedActionParams;
   [SiemMigrationsDashboardEventTypes.SetupMigrationOpenNew]: ReportSetupMigrationOpenNewActionParams;
   [SiemMigrationsDashboardEventTypes.SetupMigrationOpenResources]: ReportSetupMigrationOpenResourcesActionParams;
