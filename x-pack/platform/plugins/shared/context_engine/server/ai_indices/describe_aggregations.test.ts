@@ -82,7 +82,24 @@ describe('describeAiIndexAggregations', () => {
       allow_partial_search_results: false,
       size: 0,
       track_total_hits: false,
-      query: buildAiIndexSpaceFilter('team-a'),
+      query: {
+        bool: {
+          filter: [
+            buildAiIndexSpaceFilter('team-a'),
+            {
+              bool: {
+                must_not: [
+                  {
+                    terms: {
+                      type: ['memory.session', 'memory.session_fact'],
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      },
       aggs: {
         types: {
           terms: {

@@ -12,6 +12,8 @@ import { describeAiIndexFields } from './describe_fields';
 import { buildExampleQueries } from './example_queries';
 import type { AiIndexField, AiIndexTagCount } from './types';
 
+const MEMORY_KI_TYPES = new Set(['memory.session', 'memory.session_fact']);
+
 export interface DescribeAiIndexParams {
   esClient: ElasticsearchClient;
   aiIndex: AiIndexHttpItem;
@@ -51,7 +53,7 @@ const countsSection = (heading: string, counts: Array<[key: string, count: numbe
 const kiTypeCountsSection = (counts: KiTypeCount[]): string[] =>
   countsSection(
     'Knowledge item types',
-    counts.map(({ type, count }) => [type, count])
+    counts.filter(({ type }) => !MEMORY_KI_TYPES.has(type)).map(({ type, count }) => [type, count])
   );
 
 const tagCountsSection = (counts: AiIndexTagCount[]): string[] =>
