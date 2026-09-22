@@ -59,7 +59,10 @@
     "@kbn/eslint/no_constructor_args_in_property_initializers": "error",
     "@kbn/eslint/no_this_in_property_initializers": "error",
     "@kbn/eslint/no_conditional_saved_object_type_registration": "error",
-    "@kbn/eslint/no_unsafe_console": "error"
+    "@kbn/eslint/no_unsafe_console": "error",
+    "@kbn/eslint/no_unsafe_dynamic_http_path": "warn",
+    "@kbn/eslint/no_wrapped_error_in_logger": "error",
+    "@kbn/eslint/no_npx_playwright": "error"
   },
 
   // oxlint's parser rejects TypeScript grammar errors (TS1016: required parameter after an

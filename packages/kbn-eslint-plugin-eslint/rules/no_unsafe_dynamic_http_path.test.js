@@ -9,7 +9,7 @@
 
 const { RuleTester } = require('eslint');
 const dedent = require('dedent');
-const rule = require('./no_unsafe_dynamic_http_path');
+const rule = require('../oxlint_plugin').rules.no_unsafe_dynamic_http_path;
 
 const ruleTester = new RuleTester({
   parser: require.resolve('@typescript-eslint/parser'),
