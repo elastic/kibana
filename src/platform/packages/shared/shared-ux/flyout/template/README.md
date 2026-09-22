@@ -27,7 +27,7 @@ import { FlyoutTemplate } from '@kbn/flyout-template';
 
 ## Root props
 
-The root accepts all `EuiFlyoutProps` except `children`, `flyoutMenuDisplayMode`, and `ref`, as well as any `data-*` attributes. `size` defaults to `m` and `session` defaults to `start`. `flyoutMenuDisplayMode` is always `auto` and cannot be overridden. When `flyoutMenuProps` is set, the template derives a `title` from the string `FlyoutTemplate.Header` title and merges it before forwarding. An explicit `flyoutMenuProps.title` overrides this. `aria-label` and `aria-labelledby` are both accepted, but the template resolves them against the header title rather than forwarding them untouched — see [Behavior](#behavior).
+The root accepts every `EuiFlyoutProps` prop, as well as any `data-*` attributes, with three exceptions: `children` instead names the declarative zones, `flyoutMenuDisplayMode` is fixed to `auto`, and `ref` is not forwarded. `size` defaults to `m` and `session` defaults to `start`. When `flyoutMenuProps` is set, the template derives a `title` from the string `FlyoutTemplate.Header` title and merges it before forwarding. An explicit `flyoutMenuProps.title` overrides this. `aria-label` and `aria-labelledby` are both accepted, but the template resolves them against the header title rather than forwarding them untouched — see [Behavior](#behavior).
 
 Tab selection props also live on the root: `selectedTabId` (controlled), `defaultSelectedTabId` (uncontrolled initial), and `onTabChange` (called on every tab click either way). See [Tabs](#tabs) below.
 
