@@ -70,6 +70,7 @@ export type ManagementId =
   | 'roles'
   | 'rollup_jobs'
   | 'search_sessions'
+  | 'service_accounts'
   | 'settings'
   | 'snapshot_restore'
   | 'spaces'
