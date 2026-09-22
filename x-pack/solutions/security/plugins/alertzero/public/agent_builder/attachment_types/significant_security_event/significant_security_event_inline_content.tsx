@@ -38,14 +38,16 @@ import {
 } from '../navigation';
 import { EntityChip } from '../entity_chip';
 import { IocBadge, OPEN_ALERT_DETAILS_LABEL, OPEN_IN_DISCOVER_LABEL } from '../shared/ioc_badge';
-import { SectionHeading } from '../shared/section_heading';
-import { DateTime } from '../shared/date_time';
-import { CompactStat } from '../shared/compact_stat';
-import { HollowBadgeList } from '../shared/badge_list';
-import { AttachmentEmptyState } from '../shared/attachment_empty_state';
+import {
+  SectionHeading,
+  DateTime,
+  CompactStat,
+  HollowBadgeList,
+  AttachmentEmptyState,
+  buildMitreTechniqueUrl,
+} from '../shared/primitives';
 import { LabeledBadgeTable, type LabeledBadgeTableRow } from '../shared/labeled_badge_table';
 import { formatPercent } from '../shared/severity';
-import { buildMitreTechniqueUrl } from '../shared/mitre_url';
 import { parseSignificantSecurityEventData } from './types';
 import type {
   HuntResult,

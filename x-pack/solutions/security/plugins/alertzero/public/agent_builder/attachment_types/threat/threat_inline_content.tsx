@@ -31,12 +31,14 @@ import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachmen
 import type { AttachmentNavigationDeps } from '../navigation';
 import { buildDiscoverThreatReportNestedIocUrl } from '../navigation';
 import { IocBadge, OPEN_IN_DISCOVER_LABEL } from '../shared/ioc_badge';
-import { SectionHeading } from '../shared/section_heading';
-import { CompactStat } from '../shared/compact_stat';
-import { HollowBadgeList } from '../shared/badge_list';
-import { AttachmentEmptyState } from '../shared/attachment_empty_state';
+import {
+  SectionHeading,
+  CompactStat,
+  HollowBadgeList,
+  AttachmentEmptyState,
+  buildMitreTechniqueUrl,
+} from '../shared/primitives';
 import { LabeledBadgeTable } from '../shared/labeled_badge_table';
-import { buildMitreTechniqueUrl } from '../shared/mitre_url';
 import {
   THREAT_REPORT_API_PATH,
   THREAT_REPORT_API_VERSION,

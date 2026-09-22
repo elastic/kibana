@@ -30,8 +30,7 @@ import { IocBadge, OPEN_IN_DISCOVER_LABEL } from '../shared/ioc_badge';
 import { LabeledBadgeTable } from '../shared/labeled_badge_table';
 import type { LabeledBadgeTableRow } from '../shared/labeled_badge_table';
 import { DIAMOND_VERTICES, formatPercent } from '../shared/severity';
-import { SectionHeading } from '../shared/section_heading';
-import { AttachmentEmptyState } from '../shared/attachment_empty_state';
+import { SectionHeading, AttachmentEmptyState } from '../shared/primitives';
 import { parseHuntCorrelationData } from './types';
 import type { Anchor, DiamondScore, HuntCorrelationAttachment } from './types';
 
