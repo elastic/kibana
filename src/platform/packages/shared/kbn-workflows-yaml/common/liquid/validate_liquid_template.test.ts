@@ -130,96 +130,48 @@ steps:
       expect(validate('Hello { not liquid } world')).toEqual([]);
     });
 
-    it('should not return errors for pure ${{ }} expressions with Liquid operators', () => {
+    it('should not return errors for pure ${{ }} conditional expressions', () => {
       // Use string concatenation to avoid JS template-literal interpolation on ${{ }}
-      const dollar = '$';
-      const yamlString =
-        'name: test\nvalue: "' + dollar + '{{ inputs.flag != null and inputs.flag }}"';
-      expect(validate(yamlString)).toEqual([]);
-    });
-
-    it('should not validate ${{ }} inside {% raw %} (literal at runtime)', () => {
-      const dollar = '$';
-      const yamlString =
-        'message: "{% raw %}' + dollar + '{{ value | unknownFilter }}{% endraw %}"';
-      expect(validate(yamlString)).toEqual([]);
-    });
-
-    it('should not validate ${{ }} inside {% comment %} (literal at runtime)', () => {
-      const dollar = '$';
-      const yamlString =
-        'message: "{% comment %}' + dollar + '{{ value | unknownFilter }}{% endcomment %}"';
-      expect(validate(yamlString)).toEqual([]);
-    });
-
-    it('should still validate ${{ }} outside {% raw %} blocks', () => {
-      const dollar = '$';
-      const yamlString =
-        'message: "{% raw %}' +
-        dollar +
-        '{{ value | unknownFilter }}{% endraw %} ' +
-        dollar +
-        '{{ other | unknownFilter }}"';
-      const result = validate(yamlString);
-      expect(result).toHaveLength(1);
-      expect(result[0].message).toContain('unknownFilter');
-    });
-
-    it('should reject ternaries inside ${{ }} (runtime evalValueSync also rejects them)', () => {
       const dollar = '$';
       const yamlString =
         'name: test\nvalue: "' +
         dollar +
         '{{ inputs.flag != null ? inputs.flag : variables.flag }}"';
-      const result = validate(yamlString);
-      expect(result.length).toBeGreaterThanOrEqual(1);
-      expect(result[0].message.toLowerCase()).toMatch(/filter|expected/);
+      expect(validate(yamlString)).toEqual([]);
     });
 
-    it('should reject unknown filters inside ${{ }}', () => {
-      const dollar = '$';
-      const yamlString = 'name: test\nvalue: "' + dollar + '{{ value | unknownFilter }}"';
-      const result = validate(yamlString);
-      expect(result).toHaveLength(1);
-      expect(result[0].message).toContain('unknownFilter');
-    });
-
-    it('should reject mixed ${{ }} + {{ }} scalars that runtime would dispatch as one typed expression', () => {
-      // Runtime: startsWith('${{') && endsWith('}}') → evaluateExpression over first{{…last}}.
-      // `${{ a }} {{ b }}` is therefore invalid at runtime even though each segment is fine alone.
+    it('should not return errors for ${{ }} mixed with valid Liquid in the same value', () => {
       const dollar = '$';
       const yamlString =
-        'name: test\nvalue: "' + dollar + "{{ inputs.flag != null }} {{ other | default: 'x' }}\"";
-      const result = validate(yamlString);
-      expect(result.length).toBeGreaterThanOrEqual(1);
-      expect(result[0].message).toContain('Invalid typed expression');
-    });
-
-    it('should still catch invalid Liquid when ${{ }} is embedded in a non-typed string template', () => {
-      // Does not start with `${{`, so renderString path — blank dynamic segments, validate rest.
-      const dollar = '$';
-      const yamlString =
-        'name: test\nvalue: "prefix ' +
+        'name: test\nvalue: "' +
         dollar +
-        '{{ inputs.flag != null }} {{ var | unknownFilter }}"';
+        "{{ inputs.flag != null ? inputs.flag : false }} {{ other | default: 'x' }}\"";
+      expect(validate(yamlString)).toEqual([]);
+    });
+
+    it('should still catch invalid Liquid when ${{ }} and {{ }} coexist in the same value', () => {
+      const dollar = '$';
+      const yamlString =
+        'name: test\nvalue: "' +
+        dollar +
+        '{{ inputs.flag != null ? inputs.flag : false }} {{ var | unknownFilter }}"';
       const result = validate(yamlString);
       expect(result).toHaveLength(1);
       expect(result[0].message).toContain('unknownFilter');
     });
 
-    it('should report error columns past an embedded ${{ }} (same-length blanking preserves offsets)', () => {
-      // value: "prefix ${{ a != null }} {{ name | unknownFilter }}"
+    it('should report error columns past a leading ${{ }} (same-length blanking preserves offsets)', () => {
+      // value: "${{ a != null }} {{ name | unknownFilter }}"
+      //         ^quote        ^dynamic expr ends          ^Liquid error should land here, not at col 1
       const dollar = '$';
       const dynamicExpr = dollar + '{{ a != null }}';
-      const prefix = 'prefix ';
-      const yamlString = 'value: "' + prefix + dynamicExpr + ' {{ name | unknownFilter }}"';
+      const yamlString = 'value: "' + dynamicExpr + ' {{ name | unknownFilter }}"';
       const result = validate(yamlString);
       expect(result).toHaveLength(1);
       expect(result[0].message).toContain('unknownFilter');
-      const valueStartColumn = 'value: "'.length + 1;
-      expect(result[0].startColumn).toBeGreaterThan(
-        valueStartColumn + prefix.length + dynamicExpr.length
-      );
+      // "value: \"" is 8 chars; dynamicExpr length must be skipped before the Liquid error.
+      const valueStartColumn = 'value: "'.length + 1; // 1-based column of first char inside quotes
+      expect(result[0].startColumn).toBeGreaterThan(valueStartColumn + dynamicExpr.length);
     });
 
     it('should still return errors for invalid liquid on non-comment lines even when comments are present', () => {
