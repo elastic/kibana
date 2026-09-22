@@ -22,6 +22,7 @@
     "@kbn/core-http-browser",
     "@kbn/app-header",
     "@kbn/deeplinks-security",
+    "@kbn/deeplinks-workflows",
     "@kbn/spaces-plugin",
     "@kbn/workflows",
     "@kbn/workflows-yaml",
@@ -49,6 +50,9 @@
     "@kbn/core-application-browser",
     "@kbn/test-jest-helpers",
     "@kbn/ui-callout",
-    "@kbn/core-http-browser-mocks"
+    "@kbn/core-http-browser-mocks",
+    "@kbn/user-profile-components",
+    "@kbn/shared-ux-error-boundary",
+    "@kbn/react-kibana-mount"
   ]
 }

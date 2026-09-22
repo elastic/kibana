@@ -307,6 +307,10 @@ export type LensComponentProps = Simplify<
        * Optional search terms to highlight in the panel title
        */
       titleHighlight?: string | string[];
+      /**
+       * Callback invoked with the Lens embeddable API once it is available
+       */
+      onApiAvailable?: (api: unknown) => void;
     }
 >;
 

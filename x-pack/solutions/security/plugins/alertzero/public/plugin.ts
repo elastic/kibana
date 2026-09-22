@@ -21,9 +21,15 @@ import {
   ALERTZERO_APP_PATH,
   TEMPLATE_ID_INVESTIGATION,
 } from '@kbn/alertzero-common';
+import {
+  AGENTIC_INVESTIGATIONS_PLUGIN_ID,
+  ESCALATIONS_UI_CAPABILITY_MANAGE,
+} from '@kbn/agentic-investigations-plugin/common';
+import React from 'react';
 import { registerAgenticInvestigationTemplateUI } from '@kbn/agentic-investigations-common';
 import { getAlertZeroDeepLinks } from './deep_links';
 import { registerAlertZeroAttachmentTypesUI } from './agent_builder/attachment_types';
+import { EscalationModalBoundary } from './pages/conversations/escalation_modal_boundary';
 import type {
   AlertZeroClientConfig,
   AlertZeroPublicSetup,
@@ -96,11 +102,61 @@ export class AlertZeroPublicPlugin
       return {};
     }
 
+    // Lazy-load the entire escalation modal subtree — only resolved when the modal is first opened.
+    // This keeps KibanaContextProvider, QueryClient, and ConnectedEscalationModal (plus all their
+    // EUI and hook dependencies) out of alertzero's main chunk.
+    const LazyEscalationModal = React.lazy(async () => {
+      const [
+        { KibanaContextProvider },
+        { QueryClient, QueryClientProvider },
+        { ConnectedEscalationModal },
+      ] = await Promise.all([
+        import('@kbn/kibana-react-plugin/public'),
+        import('@kbn/react-query'),
+        import('./pages/conversations/connected_escalation_modal'),
+      ]);
+
+      // Both `flyoutQueryClient` and `stableServices` are created once inside the lazy factory
+      // so they are stable across renders. KibanaContextProvider compares `services` by reference;
+      // a spread inside the component body would create a new object on every render and
+      // cause all consumers to re-render unnecessarily.
+      const flyoutQueryClient = new QueryClient();
+      const stableServices = { ...core, ...startDeps };
+
+      const WrappedModal: React.FC<React.ComponentProps<typeof ConnectedEscalationModal>> = (
+        props
+      ) =>
+        React.createElement(
+          KibanaContextProvider,
+          { services: stableServices },
+          React.createElement(
+            QueryClientProvider,
+            { client: flyoutQueryClient },
+            React.createElement(ConnectedEscalationModal, props)
+          )
+        );
+
+      return { default: WrappedModal };
+    });
+
+    const canManageEscalations =
+      core.application.capabilities[AGENTIC_INVESTIGATIONS_PLUGIN_ID]?.[
+        ESCALATIONS_UI_CAPABILITY_MANAGE
+      ] === true;
+
     registerAgenticInvestigationTemplateUI({
       conversationTemplates: startDeps.agentBuilder.conversationTemplates,
       templateId: TEMPLATE_ID_INVESTIGATION,
       name: INVESTIGATION_TEMPLATE_NAME,
       icon: 'securitySignalDetected',
+      renderEscalationModal: canManageEscalations
+        ? (props) =>
+            React.createElement(
+              EscalationModalBoundary,
+              null,
+              React.createElement(LazyEscalationModal, props)
+            )
+        : undefined,
     });
 
     // `spaceId` is derived synchronously from the base path rather than awaited from
