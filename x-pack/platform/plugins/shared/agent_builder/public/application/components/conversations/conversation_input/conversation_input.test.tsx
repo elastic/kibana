@@ -113,7 +113,19 @@ jest.mock('../../../hooks/use_experimental_features', () => ({
   useExperimentalFeatures: jest.fn(),
 }));
 jest.mock('@kbn/agent-builder-browser', () => ({
-  ConversationInputShell: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  ConversationInputShell: ({
+    children,
+    isDisabled,
+    'data-test-subj': testSubj,
+  }: {
+    children: React.ReactNode;
+    isDisabled?: boolean;
+    'data-test-subj'?: string;
+  }) => (
+    <div data-test-subj={testSubj} aria-disabled={isDisabled}>
+      {children}
+    </div>
+  ),
   formatAgentBuilderErrorMessage: (error: Error) => error.message,
 }));
 
@@ -311,6 +323,23 @@ describe('ConversationInput', () => {
       jest.advanceTimersByTime(200);
       expect(editorController.focus).not.toHaveBeenCalled();
       jest.useRealTimers();
+    });
+  });
+
+  describe('sending a message without the agent', () => {
+    it('greys out and disables the input while the post is in flight', () => {
+      mockedUseSendUserMessage.mockReturnValue({
+        mutateAsync: sendUserMessage,
+        isLoading: true,
+      } as never);
+
+      render(<ConversationInput />);
+
+      // The shell paints the disabled background off this attribute; the editor is mocked here.
+      expect(screen.getByTestId('agentBuilderConversationInputForm')).toHaveAttribute(
+        'aria-disabled',
+        'true'
+      );
     });
   });
 
