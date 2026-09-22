@@ -42,14 +42,6 @@ export class CommonPageObject extends FtrService {
   private readonly defaultTryTimeout = this.config.get('timeouts.try');
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
 
-  private async waitForAppMount(appUrl: string) {
-    if (!new URL(appUrl).pathname.includes('/app/')) {
-      return;
-    }
-
-    await this.find.byCssSelector('.kbnAppWrapper[aria-busy="false"]', 6 * this.defaultFindTimeout);
-  }
-
   private getUrlWithoutPort(urlStr: string) {
     const url = new URL(urlStr);
     url.port = '';
@@ -186,7 +178,6 @@ export class CommonPageObject extends FtrService {
       }
     });
 
-    await this.waitForAppMount(appUrl);
   }
 
   /**
@@ -413,7 +404,6 @@ export class CommonPageObject extends FtrService {
       }
     });
 
-    await this.waitForAppMount(appUrl);
   }
 
   async waitUntilUrlIncludes(path: string) {
