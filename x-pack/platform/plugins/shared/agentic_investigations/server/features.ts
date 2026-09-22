@@ -45,50 +45,30 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
     privileges: {
       all: {
         app: [],
-        api: [PROPOSALS_API_PRIVILEGE_READ, PROPOSALS_API_PRIVILEGE_MANAGE],
+        // Impact rides on the feature itself: an investigation always has one,
+        // so All and Read grant it together with the rest of the feature.
+        api: [
+          PROPOSALS_API_PRIVILEGE_READ,
+          PROPOSALS_API_PRIVILEGE_MANAGE,
+          IMPACT_API_PRIVILEGE_READ,
+          IMPACT_API_PRIVILEGE_MANAGE,
+        ],
         savedObject: { all: [], read: [] },
-        ui: [PROPOSALS_UI_CAPABILITY_SHOW, PROPOSALS_UI_CAPABILITY_DECIDE],
+        ui: [
+          PROPOSALS_UI_CAPABILITY_SHOW,
+          PROPOSALS_UI_CAPABILITY_DECIDE,
+          IMPACT_UI_CAPABILITY_SHOW,
+          IMPACT_UI_CAPABILITY_MANAGE,
+        ],
       },
       read: {
         app: [],
-        api: [PROPOSALS_API_PRIVILEGE_READ],
+        api: [PROPOSALS_API_PRIVILEGE_READ, IMPACT_API_PRIVILEGE_READ],
         savedObject: { all: [], read: [] },
-        ui: [PROPOSALS_UI_CAPABILITY_SHOW],
+        ui: [PROPOSALS_UI_CAPABILITY_SHOW, IMPACT_UI_CAPABILITY_SHOW],
       },
     },
     subFeatures: [
-      {
-        name: i18n.translate('xpack.agenticInvestigations.impactSubFeatureName', {
-          defaultMessage: 'Impact',
-        }),
-        privilegeGroups: [
-          {
-            groupType: 'mutually_exclusive',
-            privileges: [
-              {
-                id: 'impact_all',
-                name: i18n.translate('xpack.agenticInvestigations.impactSubFeatureAll', {
-                  defaultMessage: 'All',
-                }),
-                includeIn: 'all',
-                api: [IMPACT_API_PRIVILEGE_READ, IMPACT_API_PRIVILEGE_MANAGE],
-                savedObject: { all: [], read: [] },
-                ui: [IMPACT_UI_CAPABILITY_SHOW, IMPACT_UI_CAPABILITY_MANAGE],
-              },
-              {
-                id: 'impact_read',
-                name: i18n.translate('xpack.agenticInvestigations.impactSubFeatureRead', {
-                  defaultMessage: 'Read',
-                }),
-                includeIn: 'read',
-                api: [IMPACT_API_PRIVILEGE_READ],
-                savedObject: { all: [], read: [] },
-                ui: [IMPACT_UI_CAPABILITY_SHOW],
-              },
-            ],
-          },
-        ],
-      },
       {
         name: i18n.translate('xpack.agenticInvestigations.escalationsSubFeatureName', {
           defaultMessage: 'Escalations',

@@ -23,6 +23,13 @@ export const IMPACT_UI_CAPABILITY_MANAGE = 'manageImpact' as const;
 export const MAX_IMPACT_CONVERSATION_IDS = 1000;
 
 /**
+ * Bound on conversation and space ids forwarded to Elasticsearch. Matches the
+ * HTTP schema so an in-process caller cannot exceed the request size the route
+ * already rejects.
+ */
+export const MAX_IMPACT_ID_LENGTH = 256;
+
+/**
  * Stable entity id (Entity Store id, or a Knowledge Indicator `feature_id` when
  * that is the only identity). Display name is separate and optional.
  */

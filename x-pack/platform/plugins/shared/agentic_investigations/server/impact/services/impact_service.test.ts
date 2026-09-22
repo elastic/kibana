@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { MAX_ENTITY_IDS, MAX_IMPACT_CONVERSATION_IDS } from '../../../common/impact/constants';
+import {
+  MAX_ENTITY_IDS,
+  MAX_IMPACT_CONVERSATION_IDS,
+  MAX_IMPACT_ID_LENGTH,
+} from '../../../common/impact/constants';
 import type { ImpactDocument, ImpactStorageClient } from '../storage/impact_storage';
 import { ImpactInvalidRequestError, ImpactNotFoundError } from './errors';
 import { ImpactService } from './impact_service';
@@ -229,6 +233,36 @@ describe('ImpactService', () => {
       await expect(service.listByConversationIds(ids, SPACE_ID)).rejects.toBeInstanceOf(
         ImpactInvalidRequestError
       );
+      expect(storage.search).not.toHaveBeenCalled();
+    });
+
+    it('refuses a conversation id longer than the id bound', async () => {
+      const storage = createStorage();
+      const service = createService(storage);
+
+      await expect(
+        service.listByConversationIds(['a'.repeat(MAX_IMPACT_ID_LENGTH + 1)], SPACE_ID)
+      ).rejects.toBeInstanceOf(ImpactInvalidRequestError);
+      expect(storage.search).not.toHaveBeenCalled();
+    });
+
+    it('refuses an empty conversation id', async () => {
+      const storage = createStorage();
+      const service = createService(storage);
+
+      await expect(service.listByConversationIds([''], SPACE_ID)).rejects.toBeInstanceOf(
+        ImpactInvalidRequestError
+      );
+      expect(storage.search).not.toHaveBeenCalled();
+    });
+
+    it('refuses a space id longer than the id bound', async () => {
+      const storage = createStorage();
+      const service = createService(storage);
+
+      await expect(
+        service.listByConversationIds([CONVERSATION_ID], 's'.repeat(MAX_IMPACT_ID_LENGTH + 1))
+      ).rejects.toBeInstanceOf(ImpactInvalidRequestError);
       expect(storage.search).not.toHaveBeenCalled();
     });
   });

@@ -14,6 +14,7 @@ export {
   MAX_ENTITY_IDS,
   MAX_ENTITY_NAME_LENGTH,
   MAX_IMPACT_CONVERSATION_IDS,
+  MAX_IMPACT_ID_LENGTH,
 } from './constants';
 
 export {

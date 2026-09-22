@@ -36,16 +36,16 @@ Adding an entity means adding a directory in each of the three, an entity barrel
 
 ## Privileges
 
-One Kibana feature, `agenticInvestigations`, shown in the Roles and Spaces pickers as **Agentic Investigations**. Proposal privileges are declared inline on the feature:
+One Kibana feature, `agenticInvestigations`, shown in the Roles and Spaces pickers as **Agentic Investigations**. Proposal and Impact privileges are declared inline on the feature:
 
 | Feature privilege | API | UI |
-| ----------------- | ------------------------------------ | ------------------------------------ |
-| `all`             | `read_proposals`, `manage_proposals` | `showProposals`, `decideProposals`   |
-| `read`            | `read_proposals`                     | `showProposals`                      |
+| ----------------- | -------------------------------------------------------------------- | ------------------------------------------------------------ |
+| `all`             | `read_proposals`, `manage_proposals`, `read_impact`, `manage_impact` | `showProposals`, `decideProposals`, `showImpact`, `manageImpact` |
+| `read`            | `read_proposals`, `read_impact`                                      | `showProposals`, `showImpact`                                |
 
-So `read` can see the queue but cannot decide it. **Impact** and **Escalations** are sub-features pulled up through `includeIn` rather than more inline privileges. `all` includes Impact All (`read_impact`, `manage_impact`, `showImpact`, `manageImpact`) and Escalations All (`read_escalations`, `manage_escalations`, `showEscalations`, `manageEscalations`); `read` includes Impact Read and Escalations Read. A role can also grant either sub-feature on its own. The feature carries `minimumLicense: 'enterprise'`.
+So `read` can see the queue but cannot decide it. **Impact** is inline on those same privileges, because an investigation always has one. `all` includes `read_impact`, `manage_impact`, `showImpact`, and `manageImpact`; `read` includes `read_impact` and `showImpact`. **Escalations** stay a sub-feature pulled up through `includeIn`. `all` includes Escalations All (`read_escalations`, `manage_escalations`, `showEscalations`, `manageEscalations`); `read` includes Escalations Read. A role can also grant Escalations on its own. The feature carries `minimumLicense: 'enterprise'`.
 
-**Note:** `minimal_all` and `minimal_read` are **not** equivalent to `all` and `read`. Sub-feature privileges are included in the base privilege levels through `includeIn: 'all'` / `includeIn: 'read'` — but `minimal_all` and `minimal_read` only grant sub-features marked `groupType: 'independent'` when the user holds them explicitly. Any new entity should follow the same pattern: put its capabilities in a sub-feature with `includeIn` rather than in additional inline privileges.
+**Note:** `minimal_all` and `minimal_read` are **not** equivalent to `all` and `read`. Sub-feature privileges are included in the base privilege levels through `includeIn: 'all'` / `includeIn: 'read'` — but `minimal_all` and `minimal_read` only grant sub-features marked `groupType: 'independent'` when the user holds them explicitly. A separable entity should follow that pattern. Impact stays on the base privileges, because an investigation always includes it.
 
 ### Three questions, three places
 

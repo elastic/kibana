@@ -12,6 +12,7 @@ import {
   AGENTIC_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER_ID,
   AGENTIC_INVESTIGATIONS_PLUGIN_ID,
 } from '../common/constants';
+import { IMPACT_UI_CAPABILITY_MANAGE, IMPACT_UI_CAPABILITY_SHOW } from '../common/impact/constants';
 import {
   PROPOSALS_UI_CAPABILITY_DECIDE,
   PROPOSALS_UI_CAPABILITY_SHOW,
@@ -140,74 +141,60 @@ describe('AgenticInvestigationsPlugin', () => {
       );
     });
 
-    it('grants the proposals capabilities from the top-level all privilege', () => {
+    it('grants proposal and impact capabilities from the top-level all privilege', () => {
       const { features } = setupPlugin();
       const { privileges } = registeredFeature(features);
 
       expect(privileges.all.api).toEqual([
         PROPOSALS_API_PRIVILEGE_READ,
         PROPOSALS_API_PRIVILEGE_MANAGE,
+        IMPACT_API_PRIVILEGE_READ,
+        IMPACT_API_PRIVILEGE_MANAGE,
       ]);
       expect(privileges.all.ui).toEqual([
         PROPOSALS_UI_CAPABILITY_SHOW,
         PROPOSALS_UI_CAPABILITY_DECIDE,
+        IMPACT_UI_CAPABILITY_SHOW,
+        IMPACT_UI_CAPABILITY_MANAGE,
       ]);
     });
 
-    it('withholds manage and decide from read, so a reader cannot decide', () => {
+    it('withholds manage and decide from read, so a reader cannot decide or attach impact', () => {
       const { features } = setupPlugin();
       const { privileges } = registeredFeature(features);
 
-      expect(privileges.read.api).toEqual([PROPOSALS_API_PRIVILEGE_READ]);
-      expect(privileges.read.ui).toEqual([PROPOSALS_UI_CAPABILITY_SHOW]);
+      expect(privileges.read.api).toEqual([
+        PROPOSALS_API_PRIVILEGE_READ,
+        IMPACT_API_PRIVILEGE_READ,
+      ]);
+      expect(privileges.read.ui).toEqual([PROPOSALS_UI_CAPABILITY_SHOW, IMPACT_UI_CAPABILITY_SHOW]);
     });
 
-    it('pulls impact capabilities up through a sub-feature rather than more inline privileges', () => {
+    it('registers only the escalations sub-feature', () => {
       const { features } = setupPlugin();
       const { subFeatures } = registeredFeature(features);
 
-      expect(subFeatures).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            privilegeGroups: [
-              expect.objectContaining({
-                groupType: 'mutually_exclusive',
-                privileges: [
-                  expect.objectContaining({
-                    id: 'impact_all',
-                    includeIn: 'all',
-                    api: [IMPACT_API_PRIVILEGE_READ, IMPACT_API_PRIVILEGE_MANAGE],
-                  }),
-                  expect.objectContaining({
-                    id: 'impact_read',
-                    includeIn: 'read',
-                    api: [IMPACT_API_PRIVILEGE_READ],
-                  }),
-                ],
-              }),
-            ],
-          }),
-          expect.objectContaining({
-            privilegeGroups: [
-              expect.objectContaining({
-                groupType: 'mutually_exclusive',
-                privileges: [
-                  expect.objectContaining({
-                    id: 'escalations_all',
-                    includeIn: 'all',
-                    api: [ESCALATIONS_API_PRIVILEGE_READ, ESCALATIONS_API_PRIVILEGE_MANAGE],
-                  }),
-                  expect.objectContaining({
-                    id: 'escalations_read',
-                    includeIn: 'read',
-                    api: [ESCALATIONS_API_PRIVILEGE_READ],
-                  }),
-                ],
-              }),
-            ],
-          }),
-        ])
-      );
+      expect(subFeatures).toEqual([
+        expect.objectContaining({
+          privilegeGroups: [
+            expect.objectContaining({
+              groupType: 'mutually_exclusive',
+              privileges: [
+                expect.objectContaining({
+                  id: 'escalations_all',
+                  includeIn: 'all',
+                  api: [ESCALATIONS_API_PRIVILEGE_READ, ESCALATIONS_API_PRIVILEGE_MANAGE],
+                }),
+                expect.objectContaining({
+                  id: 'escalations_read',
+                  includeIn: 'read',
+                  api: [ESCALATIONS_API_PRIVILEGE_READ],
+                }),
+              ],
+            }),
+          ],
+        }),
+      ]);
     });
 
     it('registers as a managed workflow owner, or the startup sweep deletes our workflows', () => {

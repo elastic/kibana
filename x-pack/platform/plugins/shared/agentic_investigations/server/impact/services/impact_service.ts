@@ -7,7 +7,11 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { ProposalUser } from '../../../common/proposals/proposal';
-import { MAX_ENTITY_IDS, MAX_IMPACT_CONVERSATION_IDS } from '../../../common/impact/constants';
+import {
+  MAX_ENTITY_IDS,
+  MAX_IMPACT_CONVERSATION_IDS,
+  MAX_IMPACT_ID_LENGTH,
+} from '../../../common/impact/constants';
 import type { AttachImpactRequest, Impact, ImpactEntity } from '../../../common/impact/impact';
 import { ImpactInvalidRequestError, ImpactNotFoundError } from './errors';
 import type { ImpactDocument, ImpactStorageClient } from '../storage/impact_storage';
@@ -84,6 +88,10 @@ export class ImpactService {
         `conversationIds may not exceed ${MAX_IMPACT_CONVERSATION_IDS}`
       );
     }
+    assertBoundedId(spaceId, 'spaceId');
+    for (const conversationId of ids) {
+      assertBoundedId(conversationId, 'conversationId');
+    }
 
     const response = await this.deps.storage.search({
       track_total_hits: false,
@@ -131,6 +139,14 @@ export class ImpactService {
     return toImpact(hit._id, hit._source as ImpactDocument);
   }
 }
+
+const assertBoundedId = (value: string, field: string): void => {
+  if (value.length < 1 || value.length > MAX_IMPACT_ID_LENGTH) {
+    throw new ImpactInvalidRequestError(
+      `${field} must be between 1 and ${MAX_IMPACT_ID_LENGTH} characters`
+    );
+  }
+};
 
 const uniqueIds = (ids: string[]): string[] => {
   const seen = new Set<string>();
