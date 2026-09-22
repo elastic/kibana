@@ -253,7 +253,17 @@ export class EventLogClient implements IEventLogClient {
     params: SoftDeleteByQueryParams
   ): Promise<estypes.UpdateByQueryResponse> {
     softDeleteByQuerySchema.validate(params);
-    return this.esContext.esAdapter.softDeleteByQuery(params);
+    const namespace = await this.getNamespace();
+    const namespaceFilter: estypes.QueryDslQueryContainer =
+      namespace === undefined
+        ? { bool: { must_not: { exists: { field: 'kibana.saved_objects.namespace' } } } }
+        : { term: { 'kibana.saved_objects.namespace': { value: namespace } } };
+    const scopedQuery: estypes.QueryDslQueryContainer = {
+      bool: {
+        must: [params.query, namespaceFilter],
+      },
+    };
+    return this.esContext.esAdapter.softDeleteByQuery({ ...params, query: scopedQuery });
   }
 
   public async findEventsBySavedObjectIdsSearchAfter(

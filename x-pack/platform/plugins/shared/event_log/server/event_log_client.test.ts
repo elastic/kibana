@@ -287,9 +287,19 @@ describe('EventLogStart', () => {
       field: 'kibana.alert.rule.gap.deleted' as const,
     };
 
-    test('delegates to the adapter when params are valid', async () => {
+    test('delegates to the adapter with namespace scoping injected', async () => {
       await eventLogClient.softDeleteByQuery(validParams);
-      expect(esContext.esAdapter.softDeleteByQuery).toHaveBeenCalledWith(validParams);
+      expect(esContext.esAdapter.softDeleteByQuery).toHaveBeenCalledWith({
+        ...validParams,
+        query: {
+          bool: {
+            must: [
+              validParams.query,
+              { bool: { must_not: { exists: { field: 'kibana.saved_objects.namespace' } } } },
+            ],
+          },
+        },
+      });
     });
 
     test.each([

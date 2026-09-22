@@ -32,18 +32,16 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export interface SoftDeleteGapsByQueryParams {
   ruleIds: string[];
-  spaceId: string;
   eventLogClient: IEventLogClient;
   logger: Logger;
 }
 
-const buildGapQuery = (ruleIds: string[], spaceId: string): estypes.QueryDslQueryContainer => ({
+const buildGapQuery = (ruleIds: string[]): estypes.QueryDslQueryContainer => ({
   bool: {
     must: [
       { term: { 'event.action': GAP_EVENT_ACTION } },
       { term: { 'event.provider': GAP_EVENT_PROVIDER } },
       { terms: { 'rule.id': ruleIds } },
-      { term: { 'kibana.space_ids': spaceId } },
     ],
     must_not: [{ term: { [GAP_DELETED_FIELD]: true } }],
   },
@@ -70,12 +68,10 @@ const isIncomplete = (response: estypes.UpdateByQueryResponse): boolean =>
 
 const softDeleteChunk = async ({
   ruleIdChunk,
-  spaceId,
   eventLogClient,
   logger,
 }: {
   ruleIdChunk: string[];
-  spaceId: string;
   eventLogClient: IEventLogClient;
   logger: Logger;
 }): Promise<void> => {
@@ -85,7 +81,7 @@ const softDeleteChunk = async ({
       () =>
         eventLogClient.softDeleteByQuery({
           field: GAP_DELETED_FIELD,
-          query: buildGapQuery(ruleIdChunk, spaceId),
+          query: buildGapQuery(ruleIdChunk),
         })
     );
 
@@ -108,13 +104,12 @@ const softDeleteChunk = async ({
 
 export const softDeleteGapsByQuery = async ({
   ruleIds,
-  spaceId,
   eventLogClient,
   logger,
 }: SoftDeleteGapsByQueryParams): Promise<void> => {
   for (const ruleIdChunk of chunk(ruleIds, MAX_RULE_IDS_PER_QUERY)) {
     try {
-      await softDeleteChunk({ ruleIdChunk, spaceId, eventLogClient, logger });
+      await softDeleteChunk({ ruleIdChunk, eventLogClient, logger });
     } catch (err) {
       // A client-side timeout aborts the request, but Elasticsearch runs the
       // update to completion server-side, so this is not a failure to act on.

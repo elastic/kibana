@@ -38,7 +38,6 @@ describe('softDeleteGapsByQuery', () => {
   test('calls softDeleteByQuery with the gap query and the gap.deleted field', async () => {
     await softDeleteGapsByQuery({
       ruleIds: ['rule-1', 'rule-2'],
-      spaceId: 'default',
       eventLogClient,
       logger,
     });
@@ -52,7 +51,6 @@ describe('softDeleteGapsByQuery', () => {
             { term: { 'event.action': 'gap' } },
             { term: { 'event.provider': 'alerting' } },
             { terms: { 'rule.id': ['rule-1', 'rule-2'] } },
-            { term: { 'kibana.space_ids': 'default' } },
           ],
           must_not: [{ term: { 'kibana.alert.rule.gap.deleted': true } }],
         },
@@ -63,7 +61,7 @@ describe('softDeleteGapsByQuery', () => {
   test('chunks rule IDs at 10,000 per call', async () => {
     const ruleIds = Array.from({ length: 15_000 }, (_, i) => `rule-${i}`);
 
-    await softDeleteGapsByQuery({ ruleIds, spaceId: 'default', eventLogClient, logger });
+    await softDeleteGapsByQuery({ ruleIds, eventLogClient, logger });
 
     expect(eventLogClient.softDeleteByQuery).toHaveBeenCalledTimes(2);
     expect(getChunkRuleIds(0)).toHaveLength(10_000);
@@ -71,7 +69,7 @@ describe('softDeleteGapsByQuery', () => {
   });
 
   test('sends no call for an empty rule id list', async () => {
-    await softDeleteGapsByQuery({ ruleIds: [], spaceId: 'default', eventLogClient, logger });
+    await softDeleteGapsByQuery({ ruleIds: [], eventLogClient, logger });
 
     expect(eventLogClient.softDeleteByQuery).not.toHaveBeenCalled();
   });
@@ -82,7 +80,7 @@ describe('softDeleteGapsByQuery', () => {
       .mockRejectedValueOnce(new Error('boom'))
       .mockResolvedValueOnce(okResponse);
 
-    await softDeleteGapsByQuery({ ruleIds, spaceId: 'default', eventLogClient, logger });
+    await softDeleteGapsByQuery({ ruleIds, eventLogClient, logger });
 
     expect(eventLogClient.softDeleteByQuery).toHaveBeenCalledTimes(2);
     expect(logger.error).toHaveBeenCalledWith(
@@ -96,7 +94,7 @@ describe('softDeleteGapsByQuery', () => {
     eventLogClient.softDeleteByQuery.mockRejectedValue(new Error('boom'));
 
     await expect(
-      softDeleteGapsByQuery({ ruleIds: ['rule-1'], spaceId: 'default', eventLogClient, logger })
+      softDeleteGapsByQuery({ ruleIds: ['rule-1'], eventLogClient, logger })
     ).resolves.toBeUndefined();
   });
 
@@ -109,7 +107,6 @@ describe('softDeleteGapsByQuery', () => {
 
     await softDeleteGapsByQuery({
       ruleIds: ['rule-1'],
-      spaceId: 'default',
       eventLogClient,
       logger,
     });
@@ -121,7 +118,6 @@ describe('softDeleteGapsByQuery', () => {
   test('logs a debug summary on the happy path', async () => {
     await softDeleteGapsByQuery({
       ruleIds: ['rule-1'],
-      spaceId: 'default',
       eventLogClient,
       logger,
     });
@@ -142,7 +138,6 @@ describe('softDeleteGapsByQuery', () => {
 
     await softDeleteGapsByQuery({
       ruleIds: ['rule-1'],
-      spaceId: 'default',
       eventLogClient,
       logger,
     });
@@ -161,7 +156,6 @@ describe('softDeleteGapsByQuery', () => {
 
     await softDeleteGapsByQuery({
       ruleIds: ['rule-1'],
-      spaceId: 'default',
       eventLogClient,
       logger,
     });
@@ -190,7 +184,6 @@ describe('softDeleteGapsByQuery', () => {
 
       const pending = softDeleteGapsByQuery({
         ruleIds: ['rule-1'],
-        spaceId: 'default',
         eventLogClient,
         logger,
       });
@@ -210,7 +203,6 @@ describe('softDeleteGapsByQuery', () => {
 
       const pending = softDeleteGapsByQuery({
         ruleIds: ['rule-1'],
-        spaceId: 'default',
         eventLogClient,
         logger,
       });
@@ -230,7 +222,6 @@ describe('softDeleteGapsByQuery', () => {
 
       const pending = softDeleteGapsByQuery({
         ruleIds: ['rule-1'],
-        spaceId: 'default',
         eventLogClient,
         logger,
       });
