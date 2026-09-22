@@ -82,7 +82,7 @@ const customContentHasDataField = z
   .nullable()
   .optional()
   .describe(
-    '(optional) Whether the panel shows live Elasticsearch values. Omit or true: generate a query from "query" when esql is omitted. Pass false only when the panel has no data at all — a banner, a legend, an explanatory note. false always wins: it yields a data-free panel even when an esql is passed alongside it. Never pass false to get past a failed query generation; fix the index or fields and retry instead.'
+    '(optional) Whether the panel shows live Elasticsearch values. Omit or true: generate a query from "query" when esql is omitted. Pass false only when the panel has no data at all — a banner, a legend, an explanatory note. A supplied esql always means data: it wins over false. Never pass false to get past a failed query generation; fix the index or fields and retry instead.'
   );
 
 const attachmentHasDataField = z
@@ -90,7 +90,7 @@ const attachmentHasDataField = z
   .nullable()
   .optional()
   .describe(
-    '(optional, custom content only) Omit to keep the panel\'s current data state. true: ensure the panel has data — keeps the stored query, generating one from "query" only when the panel has none. false: drop the stored query so the panel has no data; it wins even when an esql is passed alongside it. Ignored for Lens and Vega. Never pass false to get past a failed query generation.'
+    '(optional, custom content only) Omit to keep the panel\'s current data state. true: ensure the panel has data — keeps the stored query, generating one from "query" only when the panel has none. false: drop the stored query so the panel has no data. A supplied esql always means data: it wins over false. Ignored for Lens and Vega. Never pass false to get past a failed query generation.'
   );
 
 const requiredChartTypeField = z
@@ -210,13 +210,13 @@ type CreateVisualizationTarget = z.output<typeof targetSchema>;
 
 /**
  * Flattens the discriminated `target` into the handful of values the handler works with.
- * Leftover `esql: null` is treated as omitted (generate / keep), not as "no data".
+ * Leftover `esql: null` or `esql: ""` is treated as omitted (generate / keep), not as "no data".
  */
 const readTarget = (target: CreateVisualizationTarget) => ({
   attachmentId: target.type === 'attachment' ? target.attachment_id : undefined,
   requestedRenderer: target.type === 'attachment' ? undefined : target.type,
   chartType: target.type === 'custom_content' ? undefined : target.chartType,
-  esql: target.esql ?? undefined,
+  esql: target.esql || undefined,
   hasData:
     target.type === 'custom_content' || target.type === 'attachment'
       ? target.has_data ?? undefined
@@ -239,13 +239,13 @@ const resolveCustomContentEsql = async ({
   existingEsql: string | undefined;
   generate: () => Promise<string>;
 }): Promise<string | undefined> => {
-  // has_data is the explicit data on/off switch, so false always yields a data-free
-  // panel — it wins over an esql passed alongside it.
+  // A supplied query is the strongest signal that the panel has data, so it wins over
+  // a has_data: false passed alongside it.
+  if (esql) {
+    return esql;
+  }
   if (hasData === false) {
     return undefined;
-  }
-  if (esql !== undefined) {
-    return esql;
   }
   if (!existingData) {
     return generate();

@@ -746,11 +746,11 @@ describe('createVisualizationTool handler', () => {
       expect(data.esql).toBeUndefined();
     });
 
-    // has_data is the explicit data on/off switch: false wins over an esql passed
-    // alongside it instead of silently producing a data panel.
-    it('yields a data-free panel when has_data: false is passed together with an esql', async () => {
+    // A supplied query is the strongest signal that the panel has data, so it wins
+    // over a has_data: false passed alongside it.
+    it('keeps the supplied esql when has_data: false is passed together with it', async () => {
       const { result, attachments } = await runHandler({
-        query: 'a welcome banner',
+        query: 'a status board per host',
         target: customContentTarget({
           esql: 'FROM logs | STATS count() BY host',
           has_data: false,
@@ -759,14 +759,25 @@ describe('createVisualizationTool handler', () => {
 
       expect(mockGenerateEsql).not.toHaveBeenCalled();
       expect(mockResolveTemplate).toHaveBeenCalledWith(
-        expect.objectContaining({ esqlQuery: undefined })
+        expect.objectContaining({ esqlQuery: 'FROM logs | STATS count() BY host' })
       );
       expect(attachments.add).toHaveBeenCalledWith(
         expect.objectContaining({
-          data: expect.not.objectContaining({ esql: expect.anything() }),
+          data: expect.objectContaining({ esql: 'FROM logs | STATS count() BY host' }),
         })
       );
-      expect(result.results[0].data.esql).toBeUndefined();
+      expect(result.results[0].data.esql).toBe('FROM logs | STATS count() BY host');
+    });
+
+    it('treats an empty esql as omitted and generates a query', async () => {
+      const { result } = await runHandler({
+        query: 'a status board per host',
+        index: 'logs-*',
+        target: customContentTarget({ esql: '' }),
+      });
+
+      expect(mockGenerateEsql).toHaveBeenCalledTimes(1);
+      expect(result.results[0].data.esql).toBe('FROM logs | STATS count() BY host');
     });
 
     const dataAttachment = () => {
@@ -888,10 +899,10 @@ describe('createVisualizationTool handler', () => {
       expect(data.esql).toBeUndefined();
     });
 
-    it('drops the query when an update passes has_data: false together with an esql', async () => {
+    it('replaces the query when an update passes has_data: false together with an esql', async () => {
       const { result, attachments } = await runHandler(
         {
-          query: 'turn this into a plain banner',
+          query: 'show error counts instead',
           target: attachmentTarget('att-1', {
             esql: 'FROM logs | STATS errors = COUNT() BY host',
             has_data: false,
@@ -902,15 +913,18 @@ describe('createVisualizationTool handler', () => {
 
       expect(mockGenerateEsql).not.toHaveBeenCalled();
       expect(mockResolveTemplate).toHaveBeenCalledWith(
-        expect.objectContaining({ esqlQuery: undefined, hasExistingQuery: false })
+        expect.objectContaining({
+          esqlQuery: 'FROM logs | STATS errors = COUNT() BY host',
+          hasExistingQuery: false,
+        })
       );
       expect(attachments.update).toHaveBeenCalledWith(
         'att-1',
         expect.objectContaining({
-          data: expect.not.objectContaining({ esql: expect.anything() }),
+          data: expect.objectContaining({ esql: 'FROM logs | STATS errors = COUNT() BY host' }),
         })
       );
-      expect(result.results[0].data.esql).toBeUndefined();
+      expect(result.results[0].data.esql).toBe('FROM logs | STATS errors = COUNT() BY host');
     });
 
     const dataFreeAttachment = () => {
