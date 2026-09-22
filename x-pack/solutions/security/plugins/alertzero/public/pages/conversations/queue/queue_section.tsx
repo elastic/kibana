@@ -41,6 +41,8 @@ export const QueueSection = ({
     isOpen,
     onToggle,
     loadingRows,
+    hasLoadError,
+    hasCountError,
     remaining,
     canLoadMore,
     loadMore,
@@ -80,6 +82,8 @@ export const QueueSection = ({
       isOpen={isOpen}
       onToggle={onToggle}
       loadingRows={loadingRows}
+      isError={hasLoadError}
+      isCountUnavailable={hasCountError}
       remaining={canLoadMore ? remaining : 0}
       onShowMore={loadMore}
       isLoadingMore={isLoadingMore}

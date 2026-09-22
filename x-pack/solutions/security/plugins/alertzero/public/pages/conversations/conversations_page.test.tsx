@@ -562,6 +562,41 @@ describe('ConversationsPage queue sections', () => {
     });
   });
 
+  it('reports a failed section without letting its neighbours vouch for it', () => {
+    // The review this fixes: an aggregate across all four queries let a healthy
+    // `respond` suppress a broken `investigate`, which then read as simply empty.
+    mockProposals({ respond: [proposal] });
+    mockUseProposalsByCategory.mockImplementation((category: string) =>
+      category === 'investigate'
+        ? {
+            data: undefined,
+            fetchNextPage: jest.fn(),
+            hasNextPage: undefined,
+            isFetchingNextPage: false,
+            isInitialLoading: false,
+            error: new Error('boom'),
+          }
+        : {
+            data: {
+              pages: [{ proposals: category === 'respond' ? [proposal] : [], total: 1 }],
+              pageParams: [undefined],
+            },
+            fetchNextPage: jest.fn(),
+            hasNextPage: false,
+            isFetchingNextPage: false,
+            isInitialLoading: false,
+            error: undefined,
+          }
+    );
+
+    renderPage('/');
+
+    expect(screen.getByTestId('conversationQueueError-investigate')).toBeInTheDocument();
+    // The healthy neighbour still renders its rows rather than being blanked with it.
+    expect(screen.getByText(proposal.conversationTitle!)).toBeInTheDocument();
+    expect(screen.queryByTestId('conversationQueueError-respond')).not.toBeInTheDocument();
+  });
+
   it('scaffolds only as many rows as the bucket holds, not a whole page', () => {
     // The count read already said the bucket holds 3, so a 25-row scaffold would
     // promise rows that are never coming.

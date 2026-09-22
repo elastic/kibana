@@ -16,6 +16,15 @@ export const EMPTY_CONVERSATION_QUEUE = Object.freeze({
   }),
 });
 
+export const CONVERSATION_QUEUE_ERROR = Object.freeze({
+  title: i18n.translate('xpack.alertzero.conversationQueue.loadErrorTitle', {
+    defaultMessage: 'Unable to load events',
+  }),
+  body: i18n.translate('xpack.alertzero.conversationQueue.loadErrorBody', {
+    defaultMessage: 'Something went wrong while fetching events for this category.',
+  }),
+});
+
 export const LOADING_CONVERSATION_QUEUE = i18n.translate(
   'xpack.alertzero.conversationQueue.loadingBucket',
   { defaultMessage: 'Loading events…' }

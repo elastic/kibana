@@ -11,9 +11,6 @@ export const QUEUE_PAGE_INFO = Object.freeze({
   pageTitle: i18n.translate('xpack.alertzero.queue.pageTitle', {
     defaultMessage: 'AlertZero - Proposals queue',
   }),
-  loadError: i18n.translate('xpack.alertzero.queue.loadError', {
-    defaultMessage: 'Unable to load the investigation queue.',
-  }),
 });
 
 /** Keyed by the HTTP status the proposals route returns for a refused decision. */

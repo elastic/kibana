@@ -11,6 +11,8 @@ import {
   EuiAccordion,
   EuiBadge,
   EuiButtonEmpty,
+  EuiEmptyPrompt,
+  EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
@@ -28,6 +30,7 @@ import {
 } from '../../types';
 import {
   CONVERSATION_QUEUE_COUNT_LOADING,
+  CONVERSATION_QUEUE_ERROR,
   EMPTY_CONVERSATION_QUEUE,
   showMoreAriaLabel,
   showMoreLabel,
@@ -57,6 +60,14 @@ interface ConversationQueueProps {
    * the bucket size, so the scaffold is as long as the list is about to be.
    */
   loadingRows?: number;
+  /**
+   * This section's rows failed to load and it has nothing cached, so the failure
+   * replaces them. Per section: one bucket failing must not read as empty just
+   * because its neighbours loaded.
+   */
+  isError?: boolean;
+  /** The count read failed, so the badge stands down rather than spinning forever. */
+  isCountUnavailable?: boolean;
   /** Rows Show more can still load. The footer hides at 0. */
   remaining?: number;
   onShowMore?: () => void;
@@ -105,6 +116,8 @@ export const ConversationQueue = memo<ConversationQueueProps>(
     isOpen,
     onToggle,
     loadingRows = 0,
+    isError = false,
+    isCountUnavailable = false,
     remaining = 0,
     onShowMore,
     isLoadingMore = false,
@@ -144,7 +157,7 @@ export const ConversationQueue = memo<ConversationQueueProps>(
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          {count === undefined ? (
+          {isCountUnavailable ? null : count === undefined ? (
             <EuiLoadingSpinner size="s" aria-label={CONVERSATION_QUEUE_COUNT_LOADING} />
           ) : (
             <EuiBadge color={CONVERSATION_CATEGORY_COLORS[briefingType]}>{count}</EuiBadge>
@@ -239,9 +252,28 @@ export const ConversationQueue = memo<ConversationQueueProps>(
             </EuiFlexGroup>
           ) : null}
 
+          {/* Rows win over a failure: a refetch that fails over readable rows must not
+              replace them. No retry control either — the queue polls, so a transient
+              failure clears itself within the minute. */}
+          {loadingRows === 0 && isError && rows.length === 0 && isOpen ? (
+            <EuiEmptyPrompt
+              data-test-subj={`conversationQueueError-${briefingType}`}
+              color="danger"
+              paddingSize="m"
+              icon={<EuiIcon type="error" size="l" color="danger" aria-hidden={true} />}
+              title={<h4>{CONVERSATION_QUEUE_ERROR.title}</h4>}
+              titleSize="xs"
+              body={
+                <EuiText size="xs" color="subdued">
+                  {CONVERSATION_QUEUE_ERROR.body}
+                </EuiText>
+              }
+            />
+          ) : null}
+
           {/* Only meaningful for a section someone is looking at; rendering it mid-collapse
-              is what made the empty copy flash. */}
-          {loadingRows === 0 && rows.length === 0 && isOpen ? (
+              is what made the empty copy flash. A failed section is not an empty one. */}
+          {loadingRows === 0 && !isError && rows.length === 0 && isOpen ? (
             <EuiPanel>
               <EuiText size="xs" color="subdued">
                 {isFiltered

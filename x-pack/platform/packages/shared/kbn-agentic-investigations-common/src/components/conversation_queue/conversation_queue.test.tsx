@@ -144,6 +144,38 @@ describe('ConversationQueue', () => {
     });
   });
 
+  describe('failure', () => {
+    it('says it could not load, rather than showing an empty category', () => {
+      renderQueue({ isError: true, briefingList: [], count: undefined });
+
+      expect(screen.getByText('Unable to load events')).toBeInTheDocument();
+      expect(screen.queryByText('No events in this category.')).not.toBeInTheDocument();
+    });
+
+    it('keeps rows readable when a refetch fails over them', () => {
+      // The caller only raises isError with nothing cached, so rows plus an error is
+      // not a state it produces — but the rows must win if it ever is.
+      renderQueue({ isError: true, briefingList: [investigation], count: 1 });
+
+      expect(screen.getByText(investigation.title)).toBeInTheDocument();
+      expect(screen.queryByText('Unable to load events')).not.toBeInTheDocument();
+    });
+
+    it('stands the badge down when the count itself failed', () => {
+      renderQueue({ isCountUnavailable: true, count: undefined });
+
+      // Otherwise the badge spins forever waiting for a total that is never coming.
+      expect(screen.queryByLabelText('Loading count')).not.toBeInTheDocument();
+      expect(trigger()).toHaveTextContent('Respond');
+    });
+
+    it('stays quiet while closed', () => {
+      renderQueue({ isError: true, isOpen: false, briefingList: [] });
+
+      expect(screen.queryByText('Unable to load events')).not.toBeInTheDocument();
+    });
+  });
+
   it('scaffolds one placeholder per incoming row rather than a single spinner', () => {
     renderQueue({ loadingRows: 4, briefingList: [] });
 

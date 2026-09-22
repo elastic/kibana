@@ -44,7 +44,14 @@ export interface QueueSection {
    * Bounded by the page about to arrive, so the scaffold matches the list.
    */
   loadingRows: number;
-  error: unknown;
+  /**
+   * The rows failed with nothing cached behind them. Judged per section and against
+   * this section's own cache: aggregating across the queue let a neighbour's success
+   * mask a failure, and a failed refetch must not blank rows still worth reading.
+   */
+  hasLoadError: boolean;
+  /** The count failed, so this section cannot say how big it is. */
+  hasCountError: boolean;
   /** Rows Show more can still reach. Labels the control; `canLoadMore` gates it. */
   remaining: number;
   canLoadMore: boolean;
@@ -102,7 +109,8 @@ const useSection = (
     isOpen,
     onToggle,
     loadingRows: pagesQuery.isInitialLoading ? Math.min(total ?? firstPageSize, firstPageSize) : 0,
-    error: countQuery.error ?? pagesQuery.error,
+    hasLoadError: Boolean(pagesQuery.error) && proposals.length === 0,
+    hasCountError: Boolean(countQuery.error) && total === undefined,
     remaining: Math.max(Math.min(total ?? 0, MAX_QUEUE_REACH) - proposals.length, 0),
     // hasNextPage is the authority, so the control is never offered when a click
     // would fetch nothing; `remaining` only labels it.

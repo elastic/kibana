@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import {
   type ConversationsActionsGroupProps,
   type BaseActionsProps,
@@ -47,11 +47,6 @@ const decisionErrorMessage = (error: unknown): string => {
 export const ConversationsPage: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   const { sections, proposalsById, investigations: conversations } = useQueueSections();
-
-  // An error only counts once nothing is cached, so a failed refetch does not
-  // blank a queue that is still readable.
-  const loadError =
-    sections.some(({ error }) => error) && sections.every(({ total }) => total === undefined);
 
   const approve = useApproveProposal();
   const dismiss = useDismissProposal();
@@ -236,12 +231,6 @@ export const ConversationsPage: React.FC = () => {
             onSurfaceFilterChange={setSurfaceFilter}
           />
         </EuiFlexItem>
-
-        {loadError ? (
-          <EuiFlexItem grow={false}>
-            <EuiEmptyPrompt iconType="warning" title={<h2>{QUEUE_PAGE_INFO.loadError}</h2>} />
-          </EuiFlexItem>
-        ) : null}
 
         {/* Every bucket is rendered, empty or not: the accordions are the page's structure,
             so one disappearing would move the others as the queue drains. */}
