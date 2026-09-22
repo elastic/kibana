@@ -116,7 +116,7 @@ const paramsSchema = z.object({
             .record(z.string().max(PROCESSOR_TYPE_NAME_MAX_LENGTH), z.any())
             .superRefine((val, ctx) => {
               // Ingest processor objects normally have exactly one key (the processor type).
-              if (Object.keys(val).length > 1) {
+              if (Object.keys(val).length !== 1) {
                 ctx.addIssue({
                   code: z.ZodIssueCode.custom,
                   message: 'A processor object must have exactly one key (the processor type)',
