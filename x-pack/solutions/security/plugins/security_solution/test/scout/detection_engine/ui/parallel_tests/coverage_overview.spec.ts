@@ -5,25 +5,19 @@
  * 2.0.
  */
 
-// Tests the Coverage Overview MITRE ATT&CK matrix with the managed MITRE source
-// (xpack.mitreAttack.managedSourceEnabled=true). Synthetic entities at version 99.0
-// are seeded by global.setup.ts so the managed API returns only the fixture set,
-// making assertions independent of real MITRE artifact version bumps.
-//
-// NOTE: This suite intentionally lives in scout_managed_mitre rather than the
-// default scout/ directory because `xpack.mitreAttack.managedSourceEnabled` is a
-// boot-time flag (not dynamicConfig) that must be set before Kibana starts. Once the
-// flag defaults to true and the legacy static blob is removed, merge this spec into
-// the default scout UI suite and delete this directory.
+// Tests the Coverage Overview MITRE ATT&CK matrix against the managed MITRE source,
+// which is the default (xpack.mitreAttack.managedSourceEnabled defaults to true).
+// Synthetic entities at version 99.0 are seeded by global.setup.ts so the managed API
+// returns only the fixture set, making assertions independent of real MITRE artifact
+// version bumps.
 
-import { spaceTest } from '@kbn/scout-security';
+import { spaceTest, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 import { SEEDED_TACTIC_ALPHA, SEEDED_TACTIC_BETA } from '../fixtures/mitre_fixtures';
-import { LOCAL_MANAGED_MITRE_TAGS } from '../fixtures/tags';
 
 spaceTest.describe(
   'Coverage Overview — managed MITRE source',
-  { tag: LOCAL_MANAGED_MITRE_TAGS },
+  { tag: tags.stateful.classic },
   () => {
     spaceTest.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsPlatformEngineer();
