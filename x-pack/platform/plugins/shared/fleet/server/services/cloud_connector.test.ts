@@ -6,7 +6,7 @@
  */
 
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { AuthenticatedUser, ElasticsearchClient } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
@@ -1404,6 +1404,21 @@ describe('CloudConnectorService', () => {
             verification_status: 'pending',
           }),
           { version: 'Wz-cc-version' }
+        );
+      });
+
+      it('forwards the request user into the role ARN fan-out', async () => {
+        const user = { username: 'sean' } as AuthenticatedUser;
+
+        await service.update(
+          mockSoClient,
+          connectorId,
+          { vars: { role_arn: { type: 'text', value: newArn } } },
+          { esClient: mockEsClient, user }
+        );
+
+        expect(propagateRoleArnToPackagePoliciesMock).toHaveBeenCalledWith(
+          expect.objectContaining({ user })
         );
       });
 

@@ -201,12 +201,13 @@ export const updateCloudConnectorHandler: FleetRequestHandler<
 
   try {
     logger.info(`Updating cloud connector ${cloudConnectorId}`);
+    const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
     const result = await cloudConnectorService.update(
       internalSoClient,
       cloudConnectorId,
       // Type cast is safe: schema validation ensures structure, service validates vars against CloudConnectorVars
       request.body as Partial<UpdateCloudConnectorRequest>,
-      { esClient }
+      { esClient, user }
     );
     logger.info(`Successfully updated cloud connector ${cloudConnectorId}`);
     const body: UpdateCloudConnectorResponse = {

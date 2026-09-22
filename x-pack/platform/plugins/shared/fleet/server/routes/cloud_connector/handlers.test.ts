@@ -137,11 +137,37 @@ describe('verifyCloudConnectorIacKeyHandler', () => {
 
 describe('updateCloudConnectorHandler', () => {
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
+  const mockUser = { username: 'sean' };
 
   beforeEach(() => {
     jest.clearAllMocks();
     response = httpServerMock.createResponseFactory();
     jest.spyOn(appContextService, 'getLogger').mockReturnValue(loggingSystemMock.createLogger());
+    jest.spyOn(appContextService, 'getSecurityCore').mockReturnValue({
+      authc: { getCurrentUser: jest.fn().mockReturnValue(mockUser) },
+    } as any);
+  });
+
+  it('passes the current user into cloudConnectorService.update', async () => {
+    mockedUpdate.mockResolvedValueOnce({ id: 'cc-1' } as any);
+    const request = httpServerMock.createKibanaRequest({
+      params: { cloudConnectorId: 'cc-1' },
+      body: {
+        vars: { role_arn: { type: 'text', value: 'arn:aws:iam::123456789012:role/New' } },
+      },
+    });
+
+    await updateCloudConnectorHandler(buildUpdateContext(), request, response);
+
+    expect(mockedUpdate).toHaveBeenCalledWith(
+      {},
+      'cc-1',
+      expect.objectContaining({
+        vars: { role_arn: { type: 'text', value: 'arn:aws:iam::123456789012:role/New' } },
+      }),
+      expect.objectContaining({ user: mockUser })
+    );
+    expect(response.ok).toHaveBeenCalled();
   });
 
   it('surfaces CloudConnectorRoleArnPropagationError as 500 with detail', async () => {

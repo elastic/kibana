@@ -38,6 +38,11 @@ jest.mock('../../services/app_context', () => ({
         debug: jest.fn(),
       }),
     }),
+    getSecurityCore: jest.fn().mockReturnValue({
+      authc: {
+        getCurrentUser: jest.fn().mockReturnValue({ username: 'test-user' }),
+      },
+    }),
     getConfig: jest.fn().mockReturnValue({
       internal: {
         fleetServerStandalone: false,
@@ -825,7 +830,7 @@ describe('Cloud Connector API', () => {
         {
           name: 'updated-aws-connector',
         },
-        { esClient: expect.any(Object) }
+        expect.objectContaining({ esClient: expect.any(Object), user: { username: 'test-user' } })
       );
 
       expect(response.ok).toHaveBeenCalledWith({
@@ -877,7 +882,7 @@ describe('Cloud Connector API', () => {
         {
           name: 'updated-azure-connector',
         },
-        { esClient: expect.any(Object) }
+        expect.objectContaining({ esClient: expect.any(Object), user: { username: 'test-user' } })
       );
 
       expect(response.ok).toHaveBeenCalledWith({
@@ -924,7 +929,7 @@ describe('Cloud Connector API', () => {
         {
           vars: updatedVars,
         },
-        { esClient: expect.any(Object) }
+        expect.objectContaining({ esClient: expect.any(Object), user: { username: 'test-user' } })
       );
 
       expect(response.ok).toHaveBeenCalledWith({
@@ -978,7 +983,7 @@ describe('Cloud Connector API', () => {
         {
           vars: updatedVars,
         },
-        { esClient: expect.any(Object) }
+        expect.objectContaining({ esClient: expect.any(Object), user: { username: 'test-user' } })
       );
 
       expect(response.ok).toHaveBeenCalledWith({
@@ -1030,7 +1035,7 @@ describe('Cloud Connector API', () => {
           name: 'fully-updated-connector',
           vars: updatedVars,
         },
-        { esClient: expect.any(Object) }
+        expect.objectContaining({ esClient: expect.any(Object), user: { username: 'test-user' } })
       );
 
       expect(response.ok).toHaveBeenCalledWith({
@@ -1086,7 +1091,7 @@ describe('Cloud Connector API', () => {
           name: 'fully-updated-azure-connector',
           vars: updatedVars,
         },
-        { esClient: expect.any(Object) }
+        expect.objectContaining({ esClient: expect.any(Object), user: { username: 'test-user' } })
       );
 
       expect(response.ok).toHaveBeenCalledWith({
@@ -1211,7 +1216,7 @@ describe('Cloud Connector API', () => {
         expect.any(Object), // internalSoClient
         'connector-123',
         {},
-        { esClient: expect.any(Object) }
+        expect.objectContaining({ esClient: expect.any(Object), user: { username: 'test-user' } })
       );
 
       expect(response.ok).toHaveBeenCalledWith({

@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  SavedObjectsClientContract,
+  AuthenticatedUser,
+} from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import pMap from 'p-map';
@@ -26,6 +30,8 @@ interface PropagateArgs {
   esClient: ElasticsearchClient;
   connectorId: string;
   newRoleArn: string;
+  /** When set, package-policy updates record this user instead of `updated_by: system`. */
+  user?: AuthenticatedUser;
 }
 
 interface PolicyPlan {
@@ -91,6 +97,7 @@ export const propagateRoleArnToPackagePolicies = async ({
   esClient,
   connectorId,
   newRoleArn,
+  user,
 }: PropagateArgs): Promise<RoleArnPropagationRollback | undefined> => {
   const logger = appContextService.getLogger().get('propagateRoleArnToPackagePolicies');
   const spaceId = soClient.getCurrentNamespace() ?? DEFAULT_SPACE_ID;
@@ -184,7 +191,7 @@ export const propagateRoleArnToPackagePolicies = async ({
       },
       // Policies sharing an agent policy would each read-modify-write the same `revision`
       // concurrently; the whole fan-out is bumped once below instead.
-      { bumpRevision: false }
+      { bumpRevision: false, ...(user !== undefined ? { user } : {}) }
     );
 
   /**

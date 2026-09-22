@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger, ElasticsearchClient } from '@kbn/core/server';
+import type { Logger, ElasticsearchClient, AuthenticatedUser } from '@kbn/core/server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 
 import { isIamRoleArn } from '../../common/services/cloud_connectors';
@@ -418,7 +418,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
     soClient: SavedObjectsClientContract,
     cloudConnectorId: string,
     cloudConnectorUpdate: Partial<UpdateCloudConnectorRequest>,
-    options?: { esClient?: ElasticsearchClient }
+    options?: { esClient?: ElasticsearchClient; user?: AuthenticatedUser }
   ): Promise<CloudConnector> {
     const logger = this.getLogger('update');
 
@@ -470,6 +470,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       const newRoleArn = incomingAwsVars?.role_arn?.value;
       const roleArnChanged = isAws && typeof newRoleArn === 'string' && newRoleArn !== oldRoleArn;
       const esClient = options?.esClient;
+      const user = options?.user;
 
       if (cloudConnectorUpdate.vars) {
         // Role ARN edits (API or flyout) may send only `{ role_arn }`. A wholesale replace would
@@ -497,6 +498,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
           esClient,
           connectorId: cloudConnectorId,
           newRoleArn,
+          user,
         });
         updateAttributes.verification_status = 'pending';
         updateAttributes.verification_started_at = null;

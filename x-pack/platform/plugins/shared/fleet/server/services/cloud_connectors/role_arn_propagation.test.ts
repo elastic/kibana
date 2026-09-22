@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AuthenticatedUser } from '@kbn/core/server';
 import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
@@ -245,6 +246,27 @@ describe('propagateRoleArnToPackagePolicies', () => {
       ['agent-shared'],
       {},
       'default'
+    );
+  });
+
+  it('threads the request user into package-policy updates', async () => {
+    mockListReturns([makePolicy('a')]);
+    const user = { username: 'sean' } as AuthenticatedUser;
+
+    await propagateRoleArnToPackagePolicies({
+      soClient,
+      esClient,
+      connectorId: CONNECTOR_ID,
+      newRoleArn: NEW_ARN,
+      user,
+    });
+
+    expect(packagePolicyService.update).toHaveBeenCalledWith(
+      soClient,
+      esClient,
+      'a',
+      expect.any(Object),
+      expect.objectContaining({ bumpRevision: false, user })
     );
   });
 
