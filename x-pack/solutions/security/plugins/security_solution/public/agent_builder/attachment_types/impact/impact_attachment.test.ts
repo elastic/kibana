@@ -9,10 +9,10 @@ import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
 import { createImpactAttachmentDefinition } from './impact_attachment';
 import type { ImpactAttachment, ImpactAttachmentData } from './types';
 
-const makeAttachment = (data: ImpactAttachmentData): ImpactAttachment => ({
+const makeAttachment = (data: Partial<ImpactAttachmentData>): ImpactAttachment => ({
   id: 'test',
   type: SecurityAgentBuilderAttachments.impact,
-  data,
+  data: { entities: [], ...data },
 });
 
 const hostEntity = {

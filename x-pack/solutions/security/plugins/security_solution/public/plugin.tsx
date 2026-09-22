@@ -372,9 +372,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       registerAttackDiscoveryVerdictAttachment({
         attachments: plugins.agentBuilder.attachments,
       });
-      // Same as the server type: the Alert Triage Worker always writes
-      // `security.impact`. Gating the UI on endpointForensicAnalysisSkill left
-      // the investigation Attachments tab with only the alerts ID list.
+      // Unconditional: the Alert Triage Worker (PR 3) writes `security.impact`,
+      // so registration must not race allow-list/setup.
       registerImpactAttachment({
         attachments: plugins.agentBuilder.attachments,
       });

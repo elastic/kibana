@@ -17,7 +17,7 @@ import {
 } from './impact_inline_content';
 import type { ImpactAttachment, ImpactAttachmentData } from './types';
 
-const renderContent = (data: ImpactAttachmentData) => {
+const renderContent = (data: Partial<ImpactAttachmentData> | ImpactAttachmentData) => {
   const props = {
     attachment: {
       id: 'att-1',

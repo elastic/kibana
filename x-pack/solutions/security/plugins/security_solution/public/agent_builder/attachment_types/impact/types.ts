@@ -7,26 +7,14 @@
 
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { SecurityAgentBuilderAttachments } from '../../../../common/constants';
+import type {
+  ImpactAttachmentData,
+  ImpactedEntity,
+  ImpactVerdictCounts,
+} from '../../../../common/agent_builder/impact_attachment';
 
-export interface ImpactVerdictCounts {
-  true_positive: number;
-  false_positive: number;
-  inconclusive: number;
-}
-
-export interface ImpactedEntity {
-  entity_type: 'host' | 'user';
-  name: string;
-  alert_count: number;
-  verdicts: ImpactVerdictCounts;
-}
-
-export interface ImpactAttachmentData {
-  attachmentLabel?: string;
-  entities?: ImpactedEntity[];
-  total_alert_count?: number;
-  truncated?: boolean;
-}
+export type { ImpactAttachmentData, ImpactedEntity, ImpactVerdictCounts };
+export { MAX_IMPACTED_ENTITIES } from '../../../../common/agent_builder/impact_attachment';
 
 export type ImpactAttachment = Attachment<
   typeof SecurityAgentBuilderAttachments.impact,
