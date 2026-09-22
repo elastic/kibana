@@ -75,18 +75,22 @@ export class DatastreamInitializer implements IResourceInitializer {
   /**
    * One-time destructive migration. Runs before DataStreamClient.initialize().
    *
-   * Gate 1 (version): if the deployed template version is below `destroyOnVersionBelow`,
-   * the mapping is stale and old documents are incompatible with the new schema.
-   * Once version >= threshold is deployed this gate is permanently false.
+   * Reads the live mapping and checks whether `episode.id` is still a real object field.
+   * If so, the data stream is wiped: converting a real object field to an alias cannot be
+   * done in place (ES rejects the mapping change) and @kbn/data-streams never rolls over.
    *
-   * Gate 2 (field type): confirms `episode` is still a real object field rather than an
-   * alias, guarding against hand-migrations and mapping-read failures (returns false on error).
+   * The check is mapping-shape-based rather than version-based so that it remains correct
+   * even if another PR increments the template version before this migration ships.
+   * It is idempotent: once `episode.id` is an alias the gate never fires again.
+   *
+   * Skips safely on errors (returns false), including fresh installs where neither the
+   * template nor the data stream exists yet.
    */
   private async maybeDestroyForMigration(): Promise<void> {
-    const { destroyOnVersionBelow, dataStreamName } = this.resourceDefinition;
-    if (destroyOnVersionBelow == null) return;
+    const { episodeToAlertMigration, dataStreamName } = this.resourceDefinition;
+    if (!episodeToAlertMigration) return;
 
-    // Gate 1: read the deployed template version.
+    // Read the deployed template version for logging and for fast-path on fresh install.
     let deployedVersion: number | undefined;
     try {
       const { index_templates: templates } = await this.esClient.indices.getIndexTemplate({
@@ -104,20 +108,18 @@ export class DatastreamInitializer implements IResourceInitializer {
       return;
     }
 
-    if (deployedVersion === undefined || deployedVersion >= destroyOnVersionBelow) return;
-
-    // Gate 2: confirm the data stream still has the legacy `episode` object field.
+    // Check the live mapping: if episode.id is already an alias the migration already ran.
     if (!(await this.hasLegacyEpisodeObjectField(dataStreamName))) {
       this.logger.info(
-        `[alerting_v2] ${dataStreamName}: template v${deployedVersion} < v${destroyOnVersionBelow} ` +
-          `but episode field is not a legacy object; skipping wipe.`
+        `[alerting_v2] ${dataStreamName}: episode.id is already an alias field; migration already ran, skipping wipe.`
       );
       return;
     }
 
     this.logger.warn(
       `[alerting_v2] ${dataStreamName}: one-time destructive migration — ` +
-        `deployed template v${deployedVersion} predates the episode→alert field rename (v${destroyOnVersionBelow}). ` +
+        `episode.id is a real object field in the deployed template (v${deployedVersion ?? 'unknown'}), ` +
+        `predating the episode→alert field rename. ` +
         `Wiping data stream; all rule-events history is lost. ` +
         `This fires exactly once; subsequent restarts skip this path. ` +
         `To trigger manually: POST /internal/alerting/v2/_reset_data_streams`

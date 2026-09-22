@@ -188,7 +188,7 @@ describe('DatastreamInitializer', () => {
         },
       },
       lifecycle: {},
-      destroyOnVersionBelow: 7,
+      episodeToAlertMigration: true,
     };
 
     const mockDeployedTemplate = (version: number) => {
@@ -255,21 +255,37 @@ describe('DatastreamInitializer', () => {
 
       expect(esClient.indices.deleteDataStream).not.toHaveBeenCalled();
       expect(mockLogger.info).toHaveBeenCalledWith(
-        expect.stringContaining('episode field is not a legacy object')
+        expect.stringContaining('episode.id is already an alias field')
       );
     });
 
-    it('skips the wipe when deployed version >= destroyOnVersionBelow (migration already ran)', async () => {
+    it('wipes when episode is still a real object field even if the deployed template version equals the current version (version collision fix)', async () => {
+      // Another PR could increment to the same version without the field rename.
+      // The gate must rely on mapping shape, not version number, to handle this correctly.
       mockDeployedTemplate(7);
+      esClient.indices.getMapping.mockResolvedValueOnce({
+        '.ds-.alerting-test-000001': {
+          mappings: {
+            properties: {
+              episode: {
+                properties: {
+                  id: { type: 'keyword' as const },
+                  status: { type: 'keyword' as const },
+                },
+              },
+            },
+          },
+        },
+      });
+      esClient.indices.deleteDataStream.mockResolvedValueOnce({ acknowledged: true });
 
       const initializer = new DatastreamInitializer(mockLogger, esClient, migrationDefinition);
       await initializer.initialize();
 
-      expect(esClient.indices.getMapping).not.toHaveBeenCalled();
-      expect(esClient.indices.deleteDataStream).not.toHaveBeenCalled();
+      expect(esClient.indices.deleteDataStream).toHaveBeenCalledWith({ name: '.alerting-test' });
     });
 
-    it('skips migration entirely when destroyOnVersionBelow is not set', async () => {
+    it('skips migration entirely when episodeToAlertMigration is not set', async () => {
       const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
       await initializer.initialize();
 
@@ -277,9 +293,11 @@ describe('DatastreamInitializer', () => {
       expect(esClient.indices.deleteDataStream).not.toHaveBeenCalled();
     });
 
-    it('skips migration when the index template does not exist (fresh install)', async () => {
-      // Empty array: no deployed version found → deployedVersion stays undefined → returns early.
+    it('skips migration on fresh install (no deployed template, no data stream)', async () => {
+      // Empty template array → deployedVersion stays undefined → proceeds to Gate 2.
+      // Gate 2 finds no episode field in the mapping → no wipe.
       esClient.indices.getIndexTemplate.mockResolvedValueOnce({ index_templates: [] });
+      esClient.indices.getMapping.mockResolvedValueOnce({});
 
       const initializer = new DatastreamInitializer(mockLogger, esClient, migrationDefinition);
       await initializer.initialize();

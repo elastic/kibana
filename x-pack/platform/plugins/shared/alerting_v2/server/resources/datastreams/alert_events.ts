@@ -122,5 +122,5 @@ export const getAlertEventsResourceDefinition = (): ResourceDefinition => ({
   version: ALERT_EVENTS_DATA_STREAM_VERSION,
   mappings,
   lifecycle: {},
-  destroyOnVersionBelow: ALERT_EVENTS_DATA_STREAM_VERSION,
+  episodeToAlertMigration: true,
 });

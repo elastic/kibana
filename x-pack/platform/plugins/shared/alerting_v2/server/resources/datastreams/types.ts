@@ -15,12 +15,13 @@ export interface ResourceDefinition {
   mappings: MappingsDefinition;
   lifecycle: IndicesDataStreamLifecycleWithRollover;
   /**
-   * When set: if a data stream exists with a deployed index-template version strictly below
-   * this number AND the `episode` field is still mapped as a real object (not an alias), the
-   * data stream is wiped and reinitialized on startup.
+   * When true: on startup, checks whether `episode.id` is still a real object field in the
+   * live mapping. If so, the data stream is wiped and reinitialized — the episode→alert field
+   * rename cannot be applied in place because ES rejects object→alias mapping changes.
    *
-   * One-time only: once the deployed version reaches `version` this condition can never be
-   * true again. Use only for schema renames that have no in-place migration path.
+   * The check is idempotent: once `episode.id` is an alias the gate never fires again,
+   * regardless of deployed template version. This also prevents false-positives if another
+   * PR increments the version number before this migration ships.
    */
-  destroyOnVersionBelow?: number;
+  episodeToAlertMigration?: true;
 }
