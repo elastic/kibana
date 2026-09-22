@@ -1,0 +1,634 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type {
+  MatrixColumnConfig,
+  MatrixCompositeConfig,
+  MatrixConfig,
+  MatrixModelConfig,
+  MatrixTokenCostConfig,
+} from './load_matrix_config';
+import type { AggregatedEvaluatorScore, AggregatedModelScores } from './query_matrix_scores';
+import { detectSaturatedEvaluators, saturatedEvaluatorNames } from './evaluator_saturation';
+import type { EvaluatorSaturation } from './evaluator_saturation';
+
+/** A single matrix cell: either a numeric 0-10 score or "Not recommended". */
+export type MatrixCell =
+  /** `selfJudged` marks a score graded by the model itself (allowed via `allowSelfJudged`); consumers must disclose it. */
+  | { kind: 'score'; value: number; selfJudged?: boolean }
+  | { kind: 'not-recommended' }
+  /** The model ran, but every score was rejected by judge policy. */
+  | { kind: 'excluded'; reason: 'self-judged' | 'non-eis-judge' | 'same-family'; docs: number }
+  /** Too few scored columns for an aggregate (`config.minCoverage`); only produced for `Overall`. */
+  | { kind: 'insufficient-coverage'; covered: number; required: number }
+  /** A cell-relevant evaluator errored on every example, so the mean would rest on the survivors. */
+  | { kind: 'insufficient-evaluators'; evaluators: string[] }
+  | { kind: 'missing' };
+
+/** Synthetic id for the legacy single "Overall" column. */
+export const OVERALL_COLUMN_ID = '__overall__';
+
+/** A column as rendered, left-to-right, including derived composite columns. */
+export interface MatrixDisplayColumn {
+  id: string;
+  label: string;
+  group?: string;
+  kind: 'base' | 'composite' | 'overall';
+}
+
+export interface MatrixRow {
+  modelId: string;
+  modelLabel: string;
+  openSource: boolean;
+  /** Column/composite id -> cell. */
+  cells: Record<string, MatrixCell>;
+  overall: MatrixCell;
+  /** Deterministic code/contract evaluator mean on the same 0–10 scale. */
+  capability?: MatrixCell;
+  /** Judged evaluator mean on the same 0–10 scale. */
+  judgedQuality?: MatrixCell;
+  /** Base columns with a scored cell out of all base columns. */
+  coverage: { covered: number; total: number };
+  /** Distinct commits this row's scores were produced against (suites run on independent schedules). */
+  commitShas?: string[];
+  /** 1-based tier; rows within a tier are statistically tied. */
+  tier?: number;
+}
+
+/** Aggregated token magnitudes for one (model, column) pair, in native units. */
+export interface TokenCostCell {
+  /** Base column id (matches `MatrixDisplayColumn.id`). */
+  columnId: string;
+  inputTokens?: TokenStat;
+  outputTokens?: TokenStat;
+  /** Sum of the input + output means. */
+  totalMean: number;
+}
+
+export interface TokenStat {
+  mean: number;
+  min: number;
+  max: number;
+  count: number;
+}
+
+export interface TokenCostModel {
+  modelId: string;
+  modelLabel: string;
+  openSource: boolean;
+  cells: TokenCostCell[];
+}
+
+export interface Matrix {
+  columns: Array<{ id: string; label: string; group?: string }>;
+  composites: Array<{ id: string; label: string; group?: string }>;
+  /** Full ordered render list (base + composite + legacy overall). */
+  displayColumns: MatrixDisplayColumn[];
+  overallLabel: string;
+  /** Per-evaluator ranking power; `saturated` ones are excluded from Overall when the config opts in. */
+  evaluatorSaturation: EvaluatorSaturation[];
+  proprietary: MatrixRow[];
+  openSource: MatrixRow[];
+  /** Present only when the config opts into the token axis. */
+  tokenCost?: { models: TokenCostModel[] };
+}
+
+const roundTo = (value: number, decimals: number): number => {
+  const factor = 10 ** decimals;
+  return Math.round(value * factor) / factor;
+};
+
+const matchesModel = (modelConfig: MatrixModelConfig, modelId: string): boolean =>
+  modelConfig.id === modelId || (modelConfig.matchIds?.includes(modelId) ?? false);
+
+const isExcludedEvaluator = (evaluatorName: string, excluded: readonly string[]): boolean =>
+  excluded.some((entry) => evaluatorName.startsWith(entry));
+
+const toCell = (
+  value: number,
+  config: MatrixConfig,
+  { selfJudged = false }: { selfJudged?: boolean } = {}
+): MatrixCell =>
+  value <= config.notRecommendedBelow
+    ? { kind: 'not-recommended' }
+    : { kind: 'score', value, ...(selfJudged ? { selfJudged: true } : {}) };
+
+/** Sample count doubles as the aggregation weight; zero-count evaluators still count once. */
+const weightOf = (evaluator: AggregatedEvaluatorScore): number =>
+  evaluator.count > 0 ? evaluator.count : 1;
+
+/** Yields every evaluator contributing to a column, applying the suite/dataset filters. */
+function* columnEvaluators(
+  modelScores: AggregatedModelScores,
+  column: MatrixColumnConfig
+): Generator<AggregatedEvaluatorScore> {
+  const suiteSet = new Set(column.suites);
+  // `examplePrefixes` map to the synthetic `prefix:<name>` datasets produced by queryMatrixScores.
+  const datasetSet = column.examplePrefixes
+    ? new Set(column.examplePrefixes.map((prefix) => `prefix:${prefix}`))
+    : column.datasetIds
+    ? new Set(column.datasetIds)
+    : undefined;
+
+  for (const suite of modelScores.suites) {
+    if (suiteSet.has(suite.suiteId)) {
+      for (const dataset of suite.datasets) {
+        if (!datasetSet || datasetSet.has(dataset.datasetId)) {
+          yield* dataset.evaluators;
+        }
+      }
+    }
+  }
+}
+
+const columnErroredOutEvaluators = (
+  modelScores: AggregatedModelScores,
+  column: MatrixColumnConfig
+): string[] => {
+  const suiteSet = new Set(column.suites);
+  const datasetSet = column.examplePrefixes
+    ? new Set(column.examplePrefixes.map((prefix) => `prefix:${prefix}`))
+    : column.datasetIds
+    ? new Set(column.datasetIds)
+    : undefined;
+
+  const names = new Set<string>();
+  for (const suite of modelScores.suites) {
+    if (suiteSet.has(suite.suiteId)) {
+      for (const dataset of suite.datasets) {
+        if (!datasetSet || datasetSet.has(dataset.datasetId)) {
+          for (const name of dataset.erroredOutEvaluators ?? []) {
+            names.add(name);
+          }
+        }
+      }
+    }
+  }
+  return [...names];
+};
+
+/**
+ * Weighted mean (by sample count) of the evaluator scores mapped to a column.
+ * Returns `undefined` when no scores contribute.
+ */
+const computeColumnMean = (
+  modelScores: AggregatedModelScores,
+  column: MatrixColumnConfig,
+  excludeEvaluators: readonly string[],
+  includeEvaluator?: (evaluator: AggregatedEvaluatorScore) => boolean
+): number | undefined => {
+  const evaluatorSet = column.evaluators ? new Set(column.evaluators) : undefined;
+
+  let weightedSum = 0;
+  let totalCount = 0;
+
+  for (const evaluator of columnEvaluators(modelScores, column)) {
+    if (!includeEvaluator || includeEvaluator(evaluator)) {
+      // Without an allowlist, the exclusion list drops raw-magnitude evaluators that would break the 0-10 scale.
+      const skip = evaluatorSet
+        ? !evaluatorSet.has(evaluator.evaluatorName)
+        : isExcludedEvaluator(evaluator.evaluatorName, excludeEvaluators);
+      if (!skip) {
+        const weight = weightOf(evaluator);
+        weightedSum += evaluator.mean * weight;
+        totalCount += weight;
+      }
+    }
+  }
+
+  return totalCount === 0 ? undefined : weightedSum / totalCount;
+};
+
+const buildCell = (
+  mean: number | undefined,
+  column: MatrixColumnConfig,
+  config: MatrixConfig,
+  {
+    selfJudged = false,
+    excludedSelfJudged = 0,
+    erroredOutEvaluators = [],
+  }: { selfJudged?: boolean; excludedSelfJudged?: number; erroredOutEvaluators?: string[] } = {}
+): MatrixCell => {
+  if (mean === undefined) {
+    return excludedSelfJudged > 0
+      ? { kind: 'excluded', reason: 'self-judged', docs: excludedSelfJudged }
+      : { kind: 'missing' };
+  }
+
+  // Only evaluators that count toward this cell matter; excluded metrics (e.g. Latency) are ignored.
+  const erroredOut = erroredOutEvaluators.filter(
+    (name) =>
+      column.evaluators?.includes(name) ?? !isExcludedEvaluator(name, config.excludeEvaluators)
+  );
+  if (erroredOut.length > 0) {
+    return { kind: 'insufficient-evaluators', evaluators: erroredOut };
+  }
+
+  const scale = column.scale ?? config.defaultScale;
+  return toCell(roundTo(mean * scale, config.decimals), config, { selfJudged });
+};
+
+const CONTRACT_EVALUATORS = new Set([
+  'ExpectedToolCalled',
+  'FinalAnswerPresent',
+  'MinExpectedSteps',
+  'SkillInvoked',
+]);
+
+const axisCell = (
+  modelScores: AggregatedModelScores,
+  config: MatrixConfig,
+  includeEvaluator: (evaluator: AggregatedEvaluatorScore) => boolean
+): MatrixCell => {
+  const cells = config.columns.map((column) => ({
+    cell: buildCell(
+      computeColumnMean(modelScores, column, config.excludeEvaluators, includeEvaluator),
+      column,
+      config,
+      { erroredOutEvaluators: columnErroredOutEvaluators(modelScores, column) }
+    ),
+    weight: config.overall.mode === 'weighted' ? column.weight : 1,
+  }));
+  return aggregateCells(cells, config);
+};
+
+/** Weighted mean of computed cells; missing/excluded sources are skipped, "Not recommended" counts as 0 when configured. */
+const aggregateCells = (
+  sources: Array<{ cell: MatrixCell | undefined; weight: number }>,
+  config: MatrixConfig
+): MatrixCell => {
+  let weightedSum = 0;
+  let totalWeight = 0;
+  let hasAnyData = false;
+
+  for (const { cell, weight } of sources) {
+    if (cell && cell.kind !== 'missing' && cell.kind !== 'excluded') {
+      hasAnyData = true;
+
+      if (
+        cell.kind === 'not-recommended' ||
+        cell.kind === 'insufficient-coverage' ||
+        cell.kind === 'insufficient-evaluators'
+      ) {
+        if (config.notRecommendedCountsAsZeroInOverall && cell.kind === 'not-recommended') {
+          totalWeight += weight;
+        }
+      } else {
+        weightedSum += cell.value * weight;
+        totalWeight += weight;
+      }
+    }
+  }
+
+  if (!hasAnyData || totalWeight === 0) {
+    return { kind: 'missing' };
+  }
+
+  return toCell(roundTo(weightedSum / totalWeight, config.decimals), config);
+};
+
+const computeOverall = (cells: Record<string, MatrixCell>, config: MatrixConfig): MatrixCell =>
+  aggregateCells(
+    config.columns.map((column) => ({
+      cell: cells[column.id],
+      weight: config.overall.mode === 'weighted' ? column.weight : 1,
+    })),
+    config
+  );
+
+const computeComposite = (
+  cells: Record<string, MatrixCell>,
+  composite: MatrixCompositeConfig,
+  config: MatrixConfig
+): MatrixCell =>
+  aggregateCells(
+    composite.from.map((refId) => ({ cell: cells[refId], weight: 1 })),
+    config
+  );
+
+/** Resolves the left-to-right render order of base + composite (+ overall) columns. */
+const buildDisplayColumns = (config: MatrixConfig): MatrixDisplayColumn[] => {
+  const baseById = new Map(config.columns.map((column) => [column.id, column]));
+  const compositeById = new Map(config.composites.map((composite) => [composite.id, composite]));
+
+  const declared: MatrixDisplayColumn[] = config.layout
+    ? config.layout.map((id): MatrixDisplayColumn => {
+        const base = baseById.get(id);
+        if (base) {
+          return { id, label: base.label, group: base.group, kind: 'base' };
+        }
+        const composite = compositeById.get(id);
+        if (composite) {
+          return { id, label: composite.label, group: composite.group, kind: 'composite' };
+        }
+        throw new Error(`Matrix config "layout" references unknown column/composite id: "${id}"`);
+      })
+    : [
+        ...config.columns.map(
+          (column): MatrixDisplayColumn => ({
+            id: column.id,
+            label: column.label,
+            group: column.group,
+            kind: 'base',
+          })
+        ),
+        ...config.composites.map(
+          (composite): MatrixDisplayColumn => ({
+            id: composite.id,
+            label: composite.label,
+            group: composite.group,
+            kind: 'composite',
+          })
+        ),
+      ];
+
+  return config.showOverall
+    ? [...declared, { id: OVERALL_COLUMN_ID, label: config.overall.label, kind: 'overall' }]
+    : declared;
+};
+
+/** Aggregates token evaluators for one (model, column) pair in native units, keeping the min/max spread. */
+const computeTokenStat = (
+  modelScores: AggregatedModelScores,
+  column: MatrixColumnConfig,
+  evaluatorPrefix: string
+): TokenStat | undefined => {
+  let weightedSum = 0;
+  let totalCount = 0;
+  let min = Number.POSITIVE_INFINITY;
+  let max = Number.NEGATIVE_INFINITY;
+
+  for (const evaluator of columnEvaluators(modelScores, column)) {
+    if (evaluator.evaluatorName.startsWith(evaluatorPrefix)) {
+      const weight = weightOf(evaluator);
+      weightedSum += evaluator.mean * weight;
+      totalCount += weight;
+      // Stats payloads may omit the per-experiment extremes; the mean is the only bound then.
+      min = Math.min(min, evaluator.min ?? evaluator.mean);
+      max = Math.max(max, evaluator.max ?? evaluator.mean);
+    }
+  }
+
+  if (totalCount === 0) {
+    return undefined;
+  }
+
+  return { mean: weightedSum / totalCount, min, max, count: totalCount };
+};
+
+const buildTokenCost = (
+  config: MatrixConfig,
+  tokenConfig: MatrixTokenCostConfig,
+  resolveScores: (modelConfig: MatrixModelConfig) => AggregatedModelScores | undefined
+): { models: TokenCostModel[] } => {
+  const columnIds = tokenConfig.columns;
+  const tokenColumns = columnIds
+    ? config.columns.filter((column) => columnIds.includes(column.id))
+    : config.columns;
+
+  const models: TokenCostModel[] = [];
+
+  for (const modelConfig of config.models) {
+    const modelScores = resolveScores(modelConfig);
+    if (modelScores) {
+      const cells: TokenCostCell[] = [];
+      for (const column of tokenColumns) {
+        const inputTokens = computeTokenStat(modelScores, column, tokenConfig.inputEvaluator);
+        const outputTokens = computeTokenStat(modelScores, column, tokenConfig.outputEvaluator);
+        if (inputTokens || outputTokens) {
+          cells.push({
+            columnId: column.id,
+            inputTokens,
+            outputTokens,
+            totalMean: (inputTokens?.mean ?? 0) + (outputTokens?.mean ?? 0),
+          });
+        }
+      }
+
+      if (cells.length > 0) {
+        models.push({
+          modelId: modelConfig.id,
+          modelLabel: modelConfig.label,
+          openSource: modelConfig.openSource,
+          cells,
+        });
+      }
+    }
+  }
+
+  return { models };
+};
+
+/** Groups rows into tiers: a new tier starts once the drop from the tier leader exceeds the combined 95% interval. */
+const assignTiers = (rows: MatrixRow[], config: MatrixConfig): MatrixRow[] => {
+  const sd = config.overall.runStdev;
+  if (!sd) {
+    return rows;
+  }
+  const threshold = 2 * 1.96 * sd;
+  let tier = 1;
+  let leader: number | undefined;
+  return rows.map((row) => {
+    const value = row.overall.kind === 'score' ? row.overall.value : undefined;
+    if (value === undefined) {
+      return row;
+    }
+    if (leader === undefined) {
+      leader = value;
+    } else if (leader - value > threshold) {
+      tier += 1;
+      leader = value;
+    }
+    return { ...row, tier };
+  });
+};
+
+/** Distinct commits behind one model's scores, newest experiment first. */
+export const rowCommitShas = (
+  modelScores: AggregatedModelScores | undefined
+): string[] | undefined => {
+  if (!modelScores) {
+    return undefined;
+  }
+  const ordered = [...modelScores.suites].sort((a, b) =>
+    String(b.timestamp ?? '').localeCompare(String(a.timestamp ?? ''))
+  );
+  const shas = ordered.map((suite) => suite.commitSha).filter((sha): sha is string => !!sha);
+  const unique = [...new Set(shas)];
+  return unique.length ? unique : undefined;
+};
+
+const buildMatrixRow = (
+  modelConfig: MatrixModelConfig,
+  modelScores: AggregatedModelScores,
+  config: MatrixConfig,
+  excludeEvaluators: readonly string[]
+): MatrixRow => {
+  const cells: Record<string, MatrixCell> = {};
+  for (const column of config.columns) {
+    const columnSuites = new Set(column.suites);
+    cells[column.id] = buildCell(
+      computeColumnMean(modelScores, column, excludeEvaluators),
+      column,
+      config,
+      {
+        selfJudged: modelScores.suites.some(
+          (suite) => columnSuites.has(suite.suiteId) && suite.selfJudged === true
+        ),
+        excludedSelfJudged: modelScores.suites
+          .filter((suite) => columnSuites.has(suite.suiteId))
+          .reduce((total, suite) => total + (suite.excludedSelfJudged ?? 0), 0),
+        erroredOutEvaluators: columnErroredOutEvaluators(modelScores, column),
+      }
+    );
+  }
+
+  // Declared order, so a later composite can reference an earlier one.
+  for (const composite of config.composites) {
+    cells[composite.id] = computeComposite(cells, composite, config);
+  }
+
+  const scoredColumns = config.columns.filter((c) => cells[c.id].kind === 'score').length;
+  const overall = computeOverall(cells, config);
+
+  return {
+    modelId: modelConfig.id,
+    modelLabel: modelConfig.label,
+    openSource: modelConfig.openSource,
+    cells,
+    overall:
+      config.minCoverage > 0 && scoredColumns < config.minCoverage
+        ? { kind: 'insufficient-coverage', covered: scoredColumns, required: config.minCoverage }
+        : overall,
+    capability: axisCell(modelScores, config, (evaluator) =>
+      CONTRACT_EVALUATORS.has(
+        evaluator.evaluatorName.replace(/^Skill Invoked \([^)]+\)$/, 'SkillInvoked')
+      )
+    ),
+    judgedQuality: axisCell(
+      modelScores,
+      config,
+      (evaluator) =>
+        !CONTRACT_EVALUATORS.has(
+          evaluator.evaluatorName.replace(/^Skill Invoked \([^)]+\)$/, 'SkillInvoked')
+        )
+    ),
+    coverage: {
+      covered: scoredColumns,
+      total: config.columns.length,
+    },
+    commitShas: rowCommitShas(modelScores),
+  };
+};
+
+/** Pure transform from aggregated eval scores + config into a renderable matrix. */
+export const buildMatrix = (
+  aggregated: AggregatedModelScores[],
+  config: MatrixConfig,
+  log?: { warning: (message: string) => void }
+): Matrix => {
+  const byModelId = new Map(aggregated.map((entry) => [entry.modelId, entry]));
+  const resolveScores = (modelConfig: MatrixModelConfig) =>
+    byModelId.get(modelConfig.id) ??
+    aggregated.find((entry) => matchesModel(modelConfig, entry.modelId));
+
+  const saturation = config.overall.excludeSaturatedEvaluators
+    ? detectSaturatedEvaluators(aggregated)
+    : [];
+  const saturatedNames = saturatedEvaluatorNames(saturation);
+  const excludeEvaluators =
+    saturatedNames.size > 0
+      ? [...config.excludeEvaluators, ...saturatedNames]
+      : config.excludeEvaluators;
+
+  const proprietary: MatrixRow[] = [];
+  const openSource: MatrixRow[] = [];
+
+  for (const modelConfig of config.models) {
+    const modelScores = resolveScores(modelConfig);
+    if (modelScores) {
+      const row = buildMatrixRow(modelConfig, modelScores, config, excludeEvaluators);
+      (modelConfig.openSource ? openSource : proprietary).push(row);
+    }
+  }
+
+  // Rank by the final composite (e.g. Overall Score) when composites exist,
+  // otherwise by the legacy Overall column.
+  const primaryId =
+    config.composites.length > 0
+      ? config.composites[config.composites.length - 1].id
+      : OVERALL_COLUMN_ID;
+
+  const sortValue = (row: MatrixRow): number => {
+    const cell = primaryId === OVERALL_COLUMN_ID ? row.overall : row.cells[primaryId];
+    return cell && cell.kind === 'score' ? cell.value : -1;
+  };
+
+  const sortByPrimaryDesc = (a: MatrixRow, b: MatrixRow): number => sortValue(b) - sortValue(a);
+
+  const allRows = [...proprietary, ...openSource];
+  if (log && allRows.length > 0) {
+    for (const column of config.columns) {
+      const scored = allRows.filter((row) => row.cells[column.id]?.kind === 'score').length;
+      if (scored > 0 && scored < allRows.length / 2) {
+        log.warning(
+          `Column "${column.label}" has scores for only ${scored} of ${allRows.length} models -- too sparse to rank, and the models that did run it are averaged over a different column set than the rest. Check whether the suite is scheduled in the weekly pipeline before reading these cells as model differences.`
+        );
+      }
+    }
+
+    const shaByRow = allRows
+      .map((row) => ({ label: row.modelLabel, shas: row.commitShas ?? [] }))
+      .filter((entry) => entry.shas.length > 0);
+    const distinctShas = new Set(shaByRow.flatMap((entry) => entry.shas));
+    if (distinctShas.size > 1) {
+      const sample = shaByRow
+        .slice(0, 6)
+        .map((entry) => `${entry.label}=${entry.shas.map((sha) => sha.slice(0, 12)).join('+')}`)
+        .join(', ');
+      log.warning(
+        `Matrix spans ${distinctShas.size} commits across ${
+          shaByRow.length
+        } scored rows -- rows were graded against different codebases and are only loosely comparable. ${sample}${
+          shaByRow.length > 6 ? ', ...' : ''
+        }`
+      );
+    }
+
+    const scoredCells = allRows.reduce(
+      (sum, row) =>
+        sum + config.columns.filter((column) => row.cells[column.id]?.kind === 'score').length,
+      0
+    );
+    if (scoredCells === 0) {
+      log.warning(
+        `No column produced a single scored cell across ${allRows.length} models. The per-prefix score fetch returned nothing usable -- do NOT publish this run. Check that the scores route still returns the fields the verdict ladder reads before blaming the models.`
+      );
+    }
+  }
+
+  return {
+    columns: config.columns.map((column) => ({
+      id: column.id,
+      label: column.label,
+      group: column.group,
+    })),
+    composites: config.composites.map((composite) => ({
+      id: composite.id,
+      label: composite.label,
+      group: composite.group,
+    })),
+    displayColumns: buildDisplayColumns(config),
+    overallLabel: config.overall.label,
+    evaluatorSaturation: saturation,
+    proprietary: assignTiers(proprietary.sort(sortByPrimaryDesc), config),
+    openSource: assignTiers(openSource.sort(sortByPrimaryDesc), config),
+    ...(config.tokenCost
+      ? { tokenCost: buildTokenCost(config, config.tokenCost, resolveScores) }
+      : {}),
+  };
+};
