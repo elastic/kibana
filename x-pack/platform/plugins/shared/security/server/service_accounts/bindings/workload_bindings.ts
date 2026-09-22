@@ -18,7 +18,7 @@ import type {
 import type { CheckPrivilegesWithRequest } from '@kbn/security-plugin-types-server';
 
 import type { WorkloadBindingCoordinates } from './binding_saved_object';
-import { resolveWorkloadBinder } from './resolve_workload_binder';
+import { bestEffortUserProfileIdResolver, resolveWorkloadBinder } from './resolve_workload_binder';
 import type { WorkloadBindingStore } from './workload_binding_store';
 import type { AuthenticatedUser, SecurityLicense } from '../../../common';
 import { getDetailedErrorMessage } from '../../errors';
@@ -136,7 +136,10 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
       workloadId,
       serviceAccountId,
       spaceId: this.getSpaceId(request),
-      boundBy: await resolveWorkloadBinder(user, () => this.resolveUserProfileId(request)),
+      boundBy: await resolveWorkloadBinder(
+        user,
+        bestEffortUserProfileIdResolver(this.getCurrentUserProfileId, request, this.logger)
+      ),
       boundAt: new Date().toISOString(),
       // Fresh per bind, so no two generations of a binding share one. This does not make a
       // rebind irreversible; see the attribute's own note.
@@ -245,23 +248,6 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
       // Ends the credential's life with the execution: a request that outlives its bracket (kept
       // on a singleton, captured in a closure) is never re-credentialed and expires for good.
       this.backend.releaseFakeRequest(request);
-    }
-  }
-
-  /**
-   * Best-effort: attribution is worth an extra lookup, but never worth failing a bind the
-   * caller is otherwise entitled to make.
-   */
-  private async resolveUserProfileId(request: KibanaRequest): Promise<string | undefined> {
-    try {
-      return (await this.getCurrentUserProfileId(request)) ?? undefined;
-    } catch (e) {
-      this.logger.debug(
-        `Could not resolve a user profile for the principal binding a service account: ${getDetailedErrorMessage(
-          e
-        )}`
-      );
-      return undefined;
     }
   }
 
