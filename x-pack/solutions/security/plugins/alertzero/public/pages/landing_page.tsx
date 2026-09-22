@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { useWorkers } from '../hooks/use_workers_api';
 import {
@@ -16,11 +16,41 @@ import { ConversationsPage } from './conversations';
 import { OnboardingPage } from './onboarding';
 
 export const LandingPage: React.FC = () => {
+  // Latched to true once the queue decision is known, which disables the count
+  // queries so they stop polling after navigation (LandingPage stays mounted).
+  const [queueDecided, setQueueDecided] = useState(false);
+
   const workers = useWorkers();
-  const respond = useProposalsByCategoryCount('respond', true);
-  const investigate = useProposalsByCategoryCount('investigate', true);
-  const configure = useProposalsByCategoryCount('configure', true);
-  const closed = useClosedProposalsCount(true);
+  const respond = useProposalsByCategoryCount('respond', !queueDecided);
+  const investigate = useProposalsByCategoryCount('investigate', !queueDecided);
+  const configure = useProposalsByCategoryCount('configure', !queueDecided);
+  const closed = useClosedProposalsCount(!queueDecided);
+
+  // Positive signals are checked before isLoading so a known result (enabled
+  // worker, existing proposals, error) renders the queue immediately without
+  // waiting for any sibling query that is still in flight.
+  const hasEnabledWorker = workers.data?.workers.some((w) => w.enabled) ?? false;
+  const hasProposals =
+    (respond.data?.total ?? 0) > 0 ||
+    (investigate.data?.total ?? 0) > 0 ||
+    (configure.data?.total ?? 0) > 0 ||
+    (closed.data?.total ?? 0) > 0;
+  const hasAnyError =
+    workers.error != null ||
+    respond.error != null ||
+    investigate.error != null ||
+    configure.error != null ||
+    closed.error != null;
+
+  const showQueue = queueDecided || hasAnyError || hasEnabledWorker || hasProposals;
+
+  useEffect(() => {
+    if (showQueue) setQueueDecided(true);
+  }, [showQueue]);
+
+  if (showQueue) {
+    return <ConversationsPage />;
+  }
 
   const isLoading =
     workers.isLoading ||
@@ -37,23 +67,6 @@ export const LandingPage: React.FC = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
     );
-  }
-
-  const hasAnyError =
-    workers.error != null ||
-    respond.error != null ||
-    investigate.error != null ||
-    configure.error != null ||
-    closed.error != null;
-  const hasEnabledWorker = workers.data?.workers.some((w) => w.enabled) ?? false;
-  const hasProposals =
-    (respond.data?.total ?? 0) > 0 ||
-    (investigate.data?.total ?? 0) > 0 ||
-    (configure.data?.total ?? 0) > 0 ||
-    (closed.data?.total ?? 0) > 0;
-
-  if (hasAnyError || hasEnabledWorker || hasProposals) {
-    return <ConversationsPage />;
   }
 
   return <OnboardingPage />;

@@ -159,6 +159,34 @@ describe('LandingPage', () => {
     expect(document.querySelector('[class*="euiLoadingSpinner"]')).toBeInTheDocument();
   });
 
+  it('shows the queue immediately when workers loaded with an enabled worker even if proposals are still loading', () => {
+    mockUseWorkers.mockReturnValue(workersResult([{ enabled: true }]));
+    mockUseProposalsByCategoryCount.mockReturnValue(
+      proposalsResult(0, { isLoading: true, data: undefined })
+    );
+
+    renderPage();
+
+    expect(screen.getByTestId('conversations-page')).toBeInTheDocument();
+    expect(document.querySelector('[class*="euiLoadingSpinner"]')).not.toBeInTheDocument();
+  });
+
+  it('shows the queue immediately on error even if sibling queries are still loading', () => {
+    mockUseWorkers.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      error: new Error('network error'),
+    });
+    mockUseProposalsByCategoryCount.mockReturnValue(
+      proposalsResult(0, { isLoading: true, data: undefined })
+    );
+
+    renderPage();
+
+    expect(screen.getByTestId('conversations-page')).toBeInTheDocument();
+    expect(document.querySelector('[class*="euiLoadingSpinner"]')).not.toBeInTheDocument();
+  });
+
   it('shows a loading spinner while proposals are loading', () => {
     mockUseProposalsByCategoryCount.mockReturnValue(
       proposalsResult(0, { isLoading: true, data: undefined })
