@@ -70,29 +70,31 @@ export function ErrorGroupOverview() {
   );
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="l">
-      {/* ── Failed transaction rate — always visible. Kept outside the showApmSection
-           conditional because failed-transaction data is independent of APM error docs:
-           a service can have failing HTTP responses with zero error documents. Hiding it
-           alongside the error charts would silently remove a chart the user may rely on. ── */}
-      <EuiFlexItem>
-        <FailedTransactionRateChart kuery={kuery} />
-      </EuiFlexItem>
-
-      {/* ── APM errors section ── */}
-      {showApmSection && (
+    <ChartPointerEventContextProvider>
+      <EuiFlexGroup direction="column" gutterSize="l">
+        {/* ── Failed transaction rate — always visible. Kept outside the showApmSection
+             conditional because failed-transaction data is independent of APM error docs:
+             a service can have failing HTTP responses with zero error documents. Hiding it
+             alongside the error charts would silently remove a chart the user may rely on.
+             ChartPointerEventContextProvider wraps the whole column so the pointer position
+             is shared between this chart and ErrorDistribution regardless of which is shown. ── */}
         <EuiFlexItem>
-          <EuiAccordion
-            id="apm-errors-accordion"
-            data-test-subj="apmErrorsSection"
-            initialIsOpen={true}
-            buttonContent={apmSectionTitle}
-            paddingSize="none"
-          >
-            <EuiSpacer size="s" />
-            <EuiFlexGroup direction="column" gutterSize="s">
-              <EuiFlexItem>
-                <ChartPointerEventContextProvider>
+          <FailedTransactionRateChart kuery={kuery} />
+        </EuiFlexItem>
+
+        {/* ── APM errors section ── */}
+        {showApmSection && (
+          <EuiFlexItem>
+            <EuiAccordion
+              id="apm-errors-accordion"
+              data-test-subj="apmErrorsSection"
+              initialIsOpen={true}
+              buttonContent={apmSectionTitle}
+              paddingSize="none"
+            >
+              <EuiSpacer size="s" />
+              <EuiFlexGroup direction="column" gutterSize="s">
+                <EuiFlexItem>
                   <EuiPanel hasBorder={true}>
                     <ErrorDistribution
                       fetchStatus={errorDistributionStatus}
@@ -113,37 +115,37 @@ export function ErrorGroupOverview() {
                       }}
                     />
                   </EuiPanel>
-                </ChartPointerEventContextProvider>
-              </EuiFlexItem>
+                </EuiFlexItem>
 
-              <EuiFlexItem>
-                {/* No inner title — the accordion button above already says "APM errors". */}
-                <EuiPanel hasBorder={true}>
-                  <EuiSpacer size="xs" />
-                  <ErrorGroupList
-                    serviceName={serviceName}
-                    comparisonEnabled={comparisonEnabled}
-                    initialPageSize={10}
-                    tableCaption={chartTitle}
-                  />
-                </EuiPanel>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiAccordion>
+                <EuiFlexItem>
+                  {/* No inner title — the accordion button above already says "APM errors". */}
+                  <EuiPanel hasBorder={true}>
+                    <EuiSpacer size="xs" />
+                    <ErrorGroupList
+                      serviceName={serviceName}
+                      comparisonEnabled={comparisonEnabled}
+                      initialPageSize={10}
+                      tableCaption={chartTitle}
+                    />
+                  </EuiPanel>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiAccordion>
+          </EuiFlexItem>
+        )}
+
+        {/* ── Errors from logs section ── */}
+        <EuiFlexItem>
+          <ErrorsFromLogsSection
+            serviceName={serviceName}
+            environment={environment}
+            kuery={kuery}
+            rangeFrom={rangeFrom}
+            rangeTo={rangeTo}
+            {...errorsFromLogs}
+          />
         </EuiFlexItem>
-      )}
-
-      {/* ── Errors from logs section ── */}
-      <EuiFlexItem>
-        <ErrorsFromLogsSection
-          serviceName={serviceName}
-          environment={environment}
-          kuery={kuery}
-          rangeFrom={rangeFrom}
-          rangeTo={rangeTo}
-          {...errorsFromLogs}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      </EuiFlexGroup>
+    </ChartPointerEventContextProvider>
   );
 }

@@ -26,7 +26,7 @@ export function ServiceOverviewErrorsTable({ serviceName, onLoadTable }: Props) 
   const { environment, kuery, rangeFrom, rangeTo } = query;
 
   const { logsIndexPattern } = useLogsIndexPattern();
-  const { rows: logRows, hasRows: hasLogRows } = useServiceErrorsFromLogs({
+  const { rows: logRows, hasRows: hasLogRows, isLoading: isLogRowsLoading } = useServiceErrorsFromLogs({
     serviceName,
     environment,
     kuery,
@@ -42,10 +42,10 @@ export function ServiceOverviewErrorsTable({ serviceName, onLoadTable }: Props) 
     defaultMessage: 'Errors from logs',
   });
 
-  // Only supply emptyStateContent when logs actually has rows. When it doesn't,
-  // ErrorGroupList falls through to its own ManagedTable with the styled
-  // "No errors found" empty state — the same visual as before this feature existed.
-  const emptyStateContent = hasLogRows ? (
+  // Guard on both isLoading and hasRows: during an in-flight logs fetch hasRows is false,
+  // so without the isLoading guard the APM table would flash "No errors found" before the
+  // logs response arrives. Only swap in the logs table once the fetch has settled with rows.
+  const emptyStateContent = !isLogRowsLoading && hasLogRows ? (
     <ErrorsFromLogsTable
       items={logRows}
       rangeFrom={rangeFrom}
