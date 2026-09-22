@@ -16,7 +16,7 @@ import type { CorpusProfile } from './types';
  * The invariant tests in `ground_truth.test.ts` verify that no label is a substring of
  * another and that nothing is simultaneously relevant and a trap.
  */
-const MESSAGE_CLASSES = {
+export const MESSAGE_CLASSES = {
   /**
    * Postgres pool exhaustion and connection rejection.
    *
@@ -89,7 +89,7 @@ const MESSAGE_CLASSES = {
   ],
 } as const;
 
-const QUERIES: readonly EvalQuery[] = [
+export const QUERIES: readonly EvalQuery[] = [
   // --- Semantic queries ---
 
   {

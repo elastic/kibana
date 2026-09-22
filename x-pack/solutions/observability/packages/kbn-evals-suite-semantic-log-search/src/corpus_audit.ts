@@ -6,9 +6,9 @@
  */
 
 import { execSync, spawnSync } from 'child_process';
-import path from 'path';
 import type { Client } from '@elastic/elasticsearch';
 import type { HttpHandler } from '@kbn/core/public';
+import { REPO_ROOT } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { CorpusProfile } from './corpora';
 import { allLabels } from './corpora';
@@ -35,8 +35,13 @@ interface AuditParams {
   log: ToolingLog;
 }
 
-/** Sampled per label; only used to confirm the substring is really there. */
-const SAMPLES_PER_LABEL = 5;
+/**
+ * Sampled per label during audit. Raised from 5 to 20 to reduce the chance of a
+ * false "missing" report for a label that phrase-matches but happens not to appear
+ * in the top-5 hits ordered by score. The substring re-confirmation uses the same
+ * predicate as the evaluators, so a label found in any of these samples is valid.
+ */
+const SAMPLES_PER_LABEL = 20;
 
 /**
  * Counts how many documents carry each ground truth label.
@@ -98,33 +103,51 @@ export const auditCorpus = async ({ esClient, corpus, log }: AuditParams): Promi
 };
 
 /**
- * Seeds the corpus when `auditCorpus` finds no documents in the target index.
+ * Seeds the corpus when the audit shows it is absent or contains data from a
+ * different corpus (missing labels for the requested one).
  *
- * Executes the corpus's `setupCommand` via `bash -c` from the Kibana repo root.
+ * Executes the corpus's `setupCommand` via `bash -c` from the Kibana repo root,
+ * after substituting the ES and Kibana base URLs from environment variables:
+ *
+ *   ES_URL      — defaults to http://elastic:changeme@localhost:9220
+ *   KIBANA_URL  — defaults to http://elastic:changeme@localhost:5620
+ *
  * Returns `true` when seeding was performed, `false` when the corpus was already
- * present (no seeding needed).
+ * present with all labels accounted for (no seeding needed).
  *
  * Propagates errors — the caller should fall through to `assertCorpusIsLabelled`
  * so that a failed seed produces the same diagnostic as a missing corpus.
  */
-export const seedCorpusIfAbsent = (
+export const seedCorpusIfNeeded = (
   priorAudit: CorpusAudit,
   corpus: CorpusProfile,
   log: ToolingLog
 ): boolean => {
-  if (priorAudit.totalDocuments > 0) {
+  // Skip only when the index is non-empty AND every label is present. This
+  // covers two cases where seeding is necessary:
+  // 1. Empty index (no data at all).
+  // 2. Non-empty index with a different corpus's data (labels are missing).
+  if (priorAudit.totalDocuments > 0 && priorAudit.missing.length === 0) {
     return false;
   }
 
-  log.info(`Corpus "${corpus.target}" is empty — seeding with:\n\n${corpus.setupCommand}\n`);
+  const reason =
+    priorAudit.totalDocuments === 0
+      ? `Corpus "${corpus.target}" is empty`
+      : `Corpus "${corpus.target}" has ${priorAudit.missing.length} missing labels (previous corpus data?)`;
 
-  // Resolve the Kibana repo root relative to this file's compiled location.
-  // __dirname resolves to the compiled `target/` directory; walk up to the package root
-  // and then four levels to the repo root (pkg → packages → observability → solutions → x-pack → kibana).
-  const pkgRoot = path.resolve(__dirname, '..', '..', '..', '..', '..', '..', '..', '..');
+  // Substitute Scout-standard env vars so seeding works off the configured
+  // stack rather than hardcoded localhost URLs.
+  const esUrl = process.env.ES_URL ?? 'http://elastic:changeme@localhost:9220';
+  const kibanaUrl = process.env.KIBANA_URL ?? 'http://elastic:changeme@localhost:5620';
+  const cmd = corpus.setupCommand
+    .replace(/http:\/\/elastic:changeme@localhost:9220/g, esUrl)
+    .replace(/http:\/\/elastic:changeme@localhost:5620/g, kibanaUrl);
 
-  const result = spawnSync('bash', ['-c', corpus.setupCommand], {
-    cwd: pkgRoot,
+  log.info(`${reason} — seeding with:\n\n${cmd}\n`);
+
+  const result = spawnSync('bash', ['-c', cmd], {
+    cwd: REPO_ROOT,
     stdio: 'inherit',
     timeout: 5 * 60 * 1000,
   });
@@ -132,7 +155,7 @@ export const seedCorpusIfAbsent = (
   if (result.status !== 0) {
     throw new Error(
       `Corpus seeding failed (exit ${result.status ?? 'signal'}). ` +
-        `Run the command manually to diagnose:\n\n${corpus.setupCommand}\n`
+        `Run the command manually to diagnose:\n\n${cmd}\n`
     );
   }
 

@@ -42,7 +42,16 @@ export interface CorpusProfile {
   /** Grade threshold; messages below this are not counted as relevant. */
   readonly relevanceThreshold: RelevanceGrade;
 
-  /** Patterns requested from the tool, wider than k so recall has room to measure. */
+  /**
+   * Uniform candidate budget applied to both the semantic and keyword arms by the
+   * eval client after parsing. The semantic tool is server-side limited to this
+   * value; the keyword tool returns up to ~60 categories (two `categorize_text`
+   * aggs at `size: 30`) and is capped client-side so Recall cannot be inflated by
+   * giving one arm more surface area.
+   *
+   * Must satisfy `k <= maxPatterns <= 20` (20 is the `get_logs_semantic` schema
+   * ceiling). Validated by `ground_truth.test.ts` for every registered corpus.
+   */
   readonly maxPatterns: number;
 }
 

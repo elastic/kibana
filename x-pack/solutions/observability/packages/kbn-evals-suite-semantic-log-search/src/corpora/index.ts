@@ -7,6 +7,7 @@
 
 import { sigeventsFraudCheckRedisHerring } from './fraud_check_redis_herring';
 import { sigeventsPostgresTimeout } from './sigevents_postgres_timeout';
+import { sigeventsPostgresTimeoutScale } from './sigevents_postgres_timeout_scale';
 import type { CorpusProfile } from './types';
 
 export type { CorpusProfile } from './types';
@@ -18,6 +19,7 @@ export { allLabels } from './types';
  */
 export const CORPORA: Readonly<Record<string, CorpusProfile>> = {
   [sigeventsPostgresTimeout.id]: sigeventsPostgresTimeout,
+  [sigeventsPostgresTimeoutScale.id]: sigeventsPostgresTimeoutScale,
   [sigeventsFraudCheckRedisHerring.id]: sigeventsFraudCheckRedisHerring,
 };
 

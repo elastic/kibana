@@ -112,22 +112,31 @@ const executeTool = async ({
     log.warning(`${toolId} warnings: ${warnings.join('; ')}`);
   }
 
-  const patterns = toPatterns(data);
+  const parsedPatterns = toPatterns(data);
 
   // Guard against field-name drift: if the tool reported matching documents but
   // we parsed zero patterns, the response format has likely changed.
-  if (patterns.length === 0 && totalCount > 0) {
+  // Run before the cap so the guard still sees the raw parse.
+  if (parsedPatterns.length === 0 && totalCount > 0) {
     throw new Error(
       `${toolId} reported ${totalCount} matching documents but returned no parseable patterns ` +
         `— the tool response format may have changed (looked for data.patterns / data.categories).`
     );
   }
 
+  // Apply a uniform cap across both arms. The semantic arm is server-side capped
+  // at corpus.maxPatterns; the keyword arm has no server-side limit (get_logs
+  // returns up to 60 categories across two aggs). Capping here enforces the same
+  // candidate budget so Recall cannot be inflated by giving one arm more surface area.
+  const returnedBeforeCap = parsedPatterns.length;
+  const patterns = parsedPatterns.slice(0, corpus.maxPatterns);
+
   return {
     patterns,
     totalCount,
     warnings,
     latencyMs,
+    returnedBeforeCap,
   };
 };
 

@@ -136,3 +136,77 @@ export const distinctRelevantMessagesAtK = (
  */
 export const topRelevanceScore = (patterns: readonly RetrievedPattern[]): number | null =>
   patterns[0]?.relevanceScore ?? null;
+
+/**
+ * R-Precision: relevant results in the top R, divided by R, where R is the
+ * number of relevant labels for the query at the given threshold.
+ *
+ * Unlike Precision@K (which divides by the fixed K), R-Precision is normalised
+ * to the number of answers that exist, so a "literal" query with 1 relevant label
+ * can score 1.0 with a single correct result. Returns null when the query has no
+ * relevant labels.
+ *
+ * This is the right metric for literal queries (`#6117` §4's "literal queries stay
+ * at P = 1.0" criterion) because those queries have only 1–2 correct answers,
+ * making Precision@10 structurally incapable of reaching 1.0.
+ */
+export const rPrecision = (
+  patterns: readonly RetrievedPattern[],
+  query: EvalQuery,
+  threshold: RelevanceGrade
+): number | null => {
+  const r = relevantLabels(query, threshold).length;
+  if (r === 0) return null;
+  return relevantAtK(patterns, query, r, threshold) / r;
+};
+
+/**
+ * Normalised Discounted Cumulative Gain at K.
+ *
+ * Uses `gradeOf(message, query)` as the gain, so grade-2 answers score higher
+ * than grade-1 answers in position. The ideal DCG is computed from the query's
+ * own graded list (grade-2 labels first, then grade-1, truncated to k), so the
+ * score reflects both coverage and ordering.
+ *
+ * Returns null when the query has no relevant labels (the ideal DCG would be 0).
+ */
+export const ndcgAtK = (
+  patterns: readonly RetrievedPattern[],
+  query: EvalQuery,
+  k: number,
+  threshold: RelevanceGrade
+): number | null => {
+  const gainLog2 = (rank: number) => Math.log2(rank + 2); // log₂(i+2), 1-indexed → +2
+
+  const dcg = patterns
+    .slice(0, k)
+    .reduce((sum, candidate, idx) => sum + gradeOf(candidate.message, query) / gainLog2(idx), 0);
+
+  // Build ideal ranking: grade-2 labels first, then grade-1, fill the rest with 0.
+  const idealGains = query.graded
+    .slice()
+    .sort((a, b) => b.grade - a.grade)
+    .flatMap(({ grade, matches }) => matches.map(() => grade as number))
+    .slice(0, k);
+
+  const idealDcg = idealGains.reduce((sum, gain, idx) => sum + gain / gainLog2(idx), 0);
+
+  if (idealDcg === 0) return null;
+  return dcg / idealDcg;
+};
+
+/**
+ * Mean Reciprocal Rank (one query): the reciprocal rank of the first result at
+ * or above `threshold`. Returns 0 when no relevant result appears in the full
+ * list.
+ */
+export const reciprocalRank = (
+  patterns: readonly RetrievedPattern[],
+  query: EvalQuery,
+  threshold: RelevanceGrade
+): number => {
+  const rank = patterns.findIndex(
+    (candidate) => gradeOf(candidate.message, query) >= threshold
+  );
+  return rank === -1 ? 0 : 1 / (rank + 1);
+};

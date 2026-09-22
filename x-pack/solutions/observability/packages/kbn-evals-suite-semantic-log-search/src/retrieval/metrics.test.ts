@@ -9,8 +9,11 @@ import { CORPORA } from '../corpora';
 import type { RetrievedPattern } from './types';
 import {
   distinctRelevantMessagesAtK,
+  ndcgAtK,
   precisionAtK,
+  rPrecision,
   recallOfLabels,
+  reciprocalRank,
   relevantAtK,
   topRelevanceScore,
   trapsAtK,
@@ -143,6 +146,75 @@ describe('distinctRelevantMessagesAtK', () => {
   it('collapses repeats of the same message', () => {
     const results = [relevant(0), relevant(0), relevant(1)];
     expect(distinctRelevantMessagesAtK(results, connectionFailures, 20, 2)).toBe(2);
+  });
+});
+
+describe('rPrecision', () => {
+  // connectionFailures has 8 grade-2 labels (3 postgres + 3 network + 2 kafka),
+  // so R = 8. A single relevant result in position 1 → 1/8.
+  it('divides by the number of relevant labels, not K', () => {
+    const results = [relevant(0)];
+    const r = corpus.messageClasses.postgresPoolFailure.length +
+      corpus.messageClasses.networkConnectivityFailure.length +
+      corpus.messageClasses.kafkaBrokerFailure.length;
+    expect(rPrecision(results, connectionFailures, 2)).toBeCloseTo(1 / r);
+  });
+
+  it('reaches 1.0 for a literal query with one correct answer', () => {
+    // literal_econnrefused has 1 grade-2 label: 'outbound connection refused'
+    const literalQuery = corpus.queries.find((q) => q.id === 'literal_econnrefused')!;
+    const correct = pattern(corpus.messageClasses.networkConnectivityFailure[0]); // 'outbound connection refused'
+    expect(rPrecision([correct], literalQuery, 2)).toBe(1.0);
+  });
+
+  it('returns null when the query has no relevant labels', () => {
+    // Construct a query with no graded entries
+    const emptyQuery = { ...connectionFailures, graded: [] };
+    expect(rPrecision([relevant(0)], emptyQuery, 2)).toBeNull();
+  });
+});
+
+describe('ndcgAtK', () => {
+  it('returns 1.0 when the ideal order is achieved', () => {
+    // All grade-2 labels for connection_failures at the top
+    const allGrade2 = [
+      ...corpus.messageClasses.postgresPoolFailure,
+      ...corpus.messageClasses.networkConnectivityFailure,
+      ...corpus.messageClasses.kafkaBrokerFailure,
+    ].map((msg) => pattern(msg));
+    // With all grade-2 at the top, nDCG should be 1.0
+    const score = ndcgAtK(allGrade2, connectionFailures, allGrade2.length, 2);
+    expect(score).toBeCloseTo(1.0);
+  });
+
+  it('scores lower when relevant results are buried', () => {
+    // Relevant result at position 3 (0-indexed 2) vs position 1 (0-indexed 0)
+    const buryLast = [trap(0), trap(1), relevant(0)];
+    const ideal = [relevant(0), trap(0), trap(1)];
+    const buried = ndcgAtK(buryLast, connectionFailures, 3, 2);
+    const idealScore = ndcgAtK(ideal, connectionFailures, 3, 2);
+    expect(buried).not.toBeNull();
+    expect(idealScore).not.toBeNull();
+    expect(buried!).toBeLessThan(idealScore!);
+  });
+
+  it('returns null when the query has no relevant labels', () => {
+    const emptyQuery = { ...connectionFailures, graded: [] };
+    expect(ndcgAtK([relevant(0)], emptyQuery, 5, 2)).toBeNull();
+  });
+});
+
+describe('reciprocalRank', () => {
+  it('returns 1 when the first result is relevant', () => {
+    expect(reciprocalRank([relevant(0)], connectionFailures, 2)).toBe(1);
+  });
+
+  it('returns 1/2 when the second result is the first relevant', () => {
+    expect(reciprocalRank([trap(0), relevant(0)], connectionFailures, 2)).toBeCloseTo(0.5);
+  });
+
+  it('returns 0 when no relevant result is found', () => {
+    expect(reciprocalRank([trap(0), trap(1)], connectionFailures, 2)).toBe(0);
   });
 });
 

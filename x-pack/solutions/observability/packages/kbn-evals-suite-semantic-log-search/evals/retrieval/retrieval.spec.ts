@@ -12,7 +12,7 @@ import {
   assertSemanticSearchAvailable,
   auditCorpus,
   logRunManifest,
-  seedCorpusIfAbsent,
+  seedCorpusIfNeeded,
 } from '../../src/corpus_audit';
 import { datasetForArm } from '../../src/datasets';
 import { countSanityEvaluator, retrievalEvaluators } from '../../src/retrieval/evaluators';
@@ -43,7 +43,7 @@ evaluate.describe(
 
     evaluate.beforeAll(async ({ esClient, log }) => {
       let audit = await auditCorpus({ esClient, corpus, log });
-      if (seedCorpusIfAbsent(audit, corpus, log)) {
+      if (seedCorpusIfNeeded(audit, corpus, log)) {
         audit = await auditCorpus({ esClient, corpus, log });
       }
       assertCorpusIsLabelled(audit, corpus);

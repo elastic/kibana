@@ -7,6 +7,7 @@
 
 import type { ESQLRow, ESQLSearchResponse } from '@kbn/es-types';
 import type { LogPattern } from '../../../../../common/services/semantic_log_search/types';
+import { MAX_SAMPLE_LENGTH } from '../../constants';
 import { CATEGORIZE_COLUMNS, MESSAGE_FIELD } from './columns';
 
 // ES|QL responds columnar: resolve name → position once so rows can be read by column name.
@@ -45,6 +46,7 @@ export function parseEsqlPatternResponse(
 
     const sampleMessage = cell(row, CATEGORIZE_COLUMNS.sample);
     const score = cell(row, CATEGORIZE_COLUMNS.score);
+    const sample = sampleMessage ? String(sampleMessage).slice(0, MAX_SAMPLE_LENGTH) : '';
 
     return [
       {
@@ -53,7 +55,7 @@ export function parseEsqlPatternResponse(
         count: Number(count),
         firstSeen,
         lastSeen,
-        sample: { [MESSAGE_FIELD]: sampleMessage ? String(sampleMessage) : '' },
+        sample: { [MESSAGE_FIELD]: sample },
         ...(typeof score === 'number' ? { relevanceScore: score } : {}),
       },
     ];

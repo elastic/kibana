@@ -46,6 +46,14 @@ export const DEFAULT_RANK_WINDOW = 500;
 export const MAX_RERANK_INPUT_LENGTH = 2000;
 
 /**
+ * Maximum characters of a pattern's representative sample returned to the caller.
+ * Raw log lines and stack traces run to multiple KB, so an unbounded sample would put an
+ * unbounded response behind a bounded request. Matches `MAX_RERANK_INPUT_LENGTH`, which already
+ * truncates the text the reranker sees, so capping here cannot change ranking.
+ */
+export const MAX_SAMPLE_LENGTH = 2000;
+
+/**
  * Transport timeout for the cheap document-count probe that runs before categorization.
  * Short by design: if the cluster cannot count within 5 s, the 30 s categorization would certainly time out.
  * https://github.com/elastic/kibana/blob/e17aba0bc993/x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/identify_ki_queries.ts#L84

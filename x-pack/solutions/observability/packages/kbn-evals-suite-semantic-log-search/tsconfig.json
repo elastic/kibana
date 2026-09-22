@@ -10,7 +10,7 @@
     "@kbn/agent-builder-common",
     "@kbn/core",
     "@kbn/evals",
-    "@kbn/scout",
+    "@kbn/repo-info",
     "@kbn/tooling-log"
   ]
 }

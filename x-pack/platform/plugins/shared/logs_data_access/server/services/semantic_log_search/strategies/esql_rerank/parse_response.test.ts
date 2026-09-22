@@ -6,6 +6,7 @@
  */
 
 import type { ESQLSearchResponse } from '@kbn/es-types';
+import { MAX_SAMPLE_LENGTH } from '../../constants';
 import { parseEsqlPatternResponse } from './parse_response';
 
 describe('parseEsqlPatternResponse', () => {
@@ -55,6 +56,45 @@ describe('parseEsqlPatternResponse', () => {
       lastSeen: '2024-01-01T06:00:00.000Z',
       sample: { message: 'User admin logged in' },
     });
+  });
+
+  it('caps the returned sample at MAX_SAMPLE_LENGTH', () => {
+    // A bounded request must not produce an unbounded response: raw log lines and stack traces
+    // run to multiple KB, and the caller has no way to ask for less.
+    const longMessage = 'x'.repeat(MAX_SAMPLE_LENGTH + 500);
+    const response: ESQLSearchResponse = {
+      columns: [
+        { name: 'count', type: 'long' },
+        { name: 'first_seen', type: 'date' },
+        { name: 'last_seen', type: 'date' },
+        { name: 'sample', type: 'keyword' },
+        { name: 'pattern', type: 'keyword' },
+      ],
+      values: [
+        [10, '2024-01-01T00:00:00.000Z', '2024-01-01T01:00:00.000Z', longMessage, 'Long pattern'],
+      ],
+    };
+
+    const patterns = parseEsqlPatternResponse(response);
+
+    expect(patterns[0].sample.message).toHaveLength(MAX_SAMPLE_LENGTH);
+  });
+
+  it('leaves a sample shorter than the cap untouched', () => {
+    const response: ESQLSearchResponse = {
+      columns: [
+        { name: 'count', type: 'long' },
+        { name: 'first_seen', type: 'date' },
+        { name: 'last_seen', type: 'date' },
+        { name: 'sample', type: 'keyword' },
+        { name: 'pattern', type: 'keyword' },
+      ],
+      values: [
+        [10, '2024-01-01T00:00:00.000Z', '2024-01-01T01:00:00.000Z', 'short message', 'Pattern'],
+      ],
+    };
+
+    expect(parseEsqlPatternResponse(response)[0].sample.message).toBe('short message');
   });
 
   it('filters out rows missing required columns', () => {

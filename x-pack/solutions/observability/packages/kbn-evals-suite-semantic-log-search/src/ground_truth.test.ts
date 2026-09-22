@@ -40,6 +40,15 @@ const assertProfileIsConsistent = (corpus: CorpusProfile) => {
     });
   });
 
+  describe('corpus constants', () => {
+    it('satisfies k <= maxPatterns <= 20', () => {
+      // 20 is the get_logs_semantic tool's schema ceiling. A profile with maxPatterns > 20
+      // is rejected at runtime with no compile-time signal.
+      expect(corpus.k).toBeLessThanOrEqual(corpus.maxPatterns);
+      expect(corpus.maxPatterns).toBeLessThanOrEqual(20);
+    });
+  });
+
   describe('queries', () => {
     it.each(corpus.queries.map((query) => [query.id, query] as const))(
       '%s never grades a trap as relevant',

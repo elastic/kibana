@@ -1353,6 +1353,7 @@ x-pack/solutions/observability/packages/kbn-alerts-grouping @elastic/response-op
 x-pack/solutions/observability/packages/kbn-apm-embeddable-common @elastic/obs-signals-traces-team
 x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigations @elastic/nightshift-context-and-research-team @elastic/nightshift-investigations-team
 x-pack/solutions/observability/packages/kbn-evals-suite-observability-ai @elastic/nightshift-context-and-research-team
+x-pack/solutions/observability/packages/kbn-evals-suite-semantic-log-search @elastic/obs-signals-logs-team
 x-pack/solutions/observability/packages/kbn-evals-suite-significant-events @elastic/nightshift-sre-agent-team
 x-pack/solutions/observability/packages/kbn-genai-cli @elastic/nightshift-context-and-research-team
 x-pack/solutions/observability/packages/kbn-observability-schema @elastic/obs-signals-traces-team

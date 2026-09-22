@@ -18,6 +18,10 @@ allowed to use.
 the loop. `evals/agent` goes through `converse`, which is where token cost, latency and answer
 quality become measurable. Each arm gets exactly one tool to isolate the retrieval comparison.
 
+**Candidate budget**: both arms receive the same number of patterns (`maxPatterns`, default 20).
+The semantic tool is server-side capped at that value; the keyword tool returns up to ~60 categories
+and is capped client-side so Recall cannot be inflated by giving one arm more surface area.
+
 ## Corpus profiles
 
 The suite supports multiple corpora. Each corpus is defined in `src/corpora/` as a `CorpusProfile`:
@@ -28,13 +32,30 @@ The suite supports multiple corpora. Each corpus is defined in `src/corpora/` as
 - **Queries**: the questions to ask, with graded ground truth and lexical traps.
 - **Parameters**: `k`, `relevanceThreshold`, and `maxPatterns` for the metrics.
 
+### Registered corpora
+
+| Id | Description |
+|---|---|
+| `sigevents_postgres_timeout` | Small corpus (~2h of `postgres_timeout`, < 50k docs). Exercises the single-pass CATEGORIZE branch. |
+| `sigevents_postgres_timeout_scale` | Scale corpus (same labels, `baseRate=10`, > 50k docs). Exercises the two-pass head/rare CATEGORIZE branch that production runs. |
+| `sigevents_fraud_check_redis_herring` | Redis/fraud corpus with different message classes and semantic traps. |
+
+**Why two postgres_timeout profiles?** The service's `collectCandidates` function has two code
+paths chosen by document count. Above 50,000 documents it runs a two-pass head/rare procedure
+that contains all the logic guarding a known failure (capping by frequency deleted rare patterns,
+taking relevance 2/10 → 0/10). The small corpus exercises the simpler single-pass path; the scale
+corpus exercises the path production actually runs.
+
+After seeding the scale corpus, verify that `logRunManifest`'s `documents:` line reports **> 50,000**
+before drawing conclusions from its results.
+
 ### Selecting a corpus
 
 By default, the suite uses `sigevents_postgres_timeout`. To use a different corpus, set
 `SEMANTIC_LOG_CORPUS` to its id:
 
 ```bash
-SEMANTIC_LOG_CORPUS=my_corpus node scripts/evals run --suite semantic-log-search ...
+SEMANTIC_LOG_CORPUS=sigevents_postgres_timeout_scale node scripts/evals run --suite semantic-log-search ...
 ```
 
 If the id is invalid, the suite fails with the list of registered corpora.
@@ -45,7 +66,7 @@ If the id is invalid, the suite fails with the list of registered corpora.
    `sigevents_postgres_timeout.ts` as a template.
 2. Register it in `src/corpora/index.ts` by adding it to `CORPORA`.
 3. Run `node scripts/jest x-pack/solutions/observability/packages/kbn-evals-suite-semantic-log-search`
-   to verify that labels are unique and queries are consistent.
+   to verify that labels are unique, queries are consistent, and `k <= maxPatterns <= 20`.
 4. Generate the corpus against a running cluster and run the audit to confirm that every label exists:
    ```bash
    SEMANTIC_LOG_CORPUS=my_corpus node scripts/evals run --suite semantic-log-search --grep "retrieval"
@@ -71,7 +92,7 @@ Two consequences are worth stating plainly:
   arms; it is not an absolute measure of coverage.
 - **Labels are applied to each pattern's sample message**, which is one arbitrary representative of
   a group. `Weighted Precision@K` exists to counterbalance this: it weights each result by how many
-  documents it covers, so a pattern covering 40.000 documents does not count the same as one
+  documents it covers, so a pattern covering 40,000 documents does not count the same as one
   covering 50.
 
 `src/ground_truth.test.ts` asserts that no label is a substring of another and that nothing is both
@@ -79,27 +100,38 @@ relevant and a trap. Those two properties are what keep the metrics meaningful.
 
 ## Metrics
 
+All metrics apply to both the `keyword` and `semantic` arms under identical conditions (same corpus,
+same `maxPatterns` candidate budget).
+
 | Metric | Direction | Notes |
 |---|---|---|
-| `Precision@K` | maximize | Divides by K, not by the number of results returned |
-| `Weighted Precision@K` | maximize | Weighted by documents covered |
-| `Recall` | maximize | Over the labelled set |
+| `Precision@K` | maximize | Divides by K (not by results returned); cannot be inflated by returning fewer patterns |
+| `Weighted Precision@K` | maximize | Precision weighted by documents covered per pattern; requires population-scale counts |
+| `Recall` | maximize | Over the labelled set; no K cutoff because one pattern maps to 0–n labels |
 | `Hard Negatives@K` | minimize | Lexical traps in the top K |
 | `Distinct Relevant Messages@K` | maximize | The metric the parent issue's acceptance criteria use |
+| `R-Precision` | maximize | Precision@R where R = number of correct answers; the right metric for literal queries (can reach 1.0) |
+| `nDCG@K` | maximize | Normalised DCG using graded relevance (grade 2 > grade 1 > 0) |
+| `MRR` | maximize | Reciprocal rank of the first relevant result |
+| `Top Relevance Score` | neutral | The reranker's logit for the top pattern; calibrates the "nothing relevant" threshold |
+| `Retrieval Latency` | minimize | Wall-clock fetch-to-parsed; the decisive M1→M2 comparison point |
+| `Count Sanity` | minimize | Flags counts that are too high (lifetime counters) or too low (raw sampled `doc_count`) |
 | `Used Log Tool` | neutral | Agent arms: verifies each arm is configured correctly |
 | `Relevant Messages Cited` | maximize | Agent arms: coverage of the answer, not its quality |
 | `Input Tokens` / `Output Tokens` / `Latency` / `Tool Calls` | minimize | From `@kbn/evals` trace-based evaluators |
 
 ## Running it
 
-`beforeAll` seeds the corpus automatically if the target index is empty and then audits every label.
-If the seed command fails (ES unreachable, synthtrace not built), the run fails with the command to
-run manually. If the corpus is present but labels are missing (scenario or seed changed), it fails
-with the list of missing labels.
+`beforeAll` seeds the corpus automatically when the target index is empty **or** when it contains
+data from a different corpus (missing labels). It then audits every label.
 
-The semantic arm additionally checks that `.rerank-v1-elasticsearch` is available. Without it
-the service returns `{ status: 'unavailable' }` and every metric reports zero — which is
-indistinguishable from a real quality regression.
+If the seed command fails (ES unreachable, synthtrace not built), the run fails with the command
+to run manually. If the corpus is present but labels are missing (scenario or seed changed), it
+fails with the list of missing labels.
+
+The semantic arm additionally checks that the service can serve requests before running any
+experiment. If the service returns warnings and no patterns, the run fails with the service's own
+explanation. The `.rerank-v1-elasticsearch` check in `logRunManifest` is provenance, not a gate.
 
 ```bash
 # Boot the stack and run the suite (--judge is required even for retrieval-only runs)
@@ -114,11 +146,25 @@ node scripts/evals run --suite semantic-log-search --grep "retrieval" --project 
 # Run a specific corpus
 SEMANTIC_LOG_CORPUS=sigevents_fraud_check_redis_herring node scripts/evals run --suite semantic-log-search --project <connector-id> --judge <connector-id>
 
+# Run the scale corpus (exercises the two-pass CATEGORIZE path)
+SEMANTIC_LOG_CORPUS=sigevents_postgres_timeout_scale node scripts/evals run --suite semantic-log-search --project <connector-id> --judge <connector-id>
+
+# Closure runs: pin repetitions and report spread, not just means
+node scripts/evals run --suite semantic-log-search --repetitions 3 --project <connector-id> --judge <connector-id>
+
 # Compare two runs
 node scripts/evals compare <execution-id-a> <execution-id-b>
 ```
 
-To seed the corpus manually (for example, if the Scout ES port differs from the default 9220):
+**URL override**: the seeding command uses `http://elastic:changeme@localhost:9220` and `:5620` by
+default. Override with `ES_URL` and `KIBANA_URL` env vars:
+
+```bash
+ES_URL=http://elastic:changeme@localhost:9220 KIBANA_URL=http://elastic:changeme@localhost:5620 \
+  node scripts/evals run --suite semantic-log-search ...
+```
+
+To seed the corpus manually:
 
 ```bash
 node scripts/synthtrace sigevents \
@@ -138,3 +184,8 @@ node scripts/jest --config x-pack/solutions/observability/packages/kbn-evals-sui
 
 - **The keyword arm's KQL is synthesised** by `toKeywordFilter`, which stands in for what a user
   would type. A different synthesis would move its numbers.
+- **Corpus breadth**: 2 distinct profiles (3 total), all from the `claims` mock app. The `sigevents`
+  scenario ships 8 mock apps × ~7 incident scenarios — a broader corpus would strengthen the claim.
+- **Tool conflict not measured**: `get_logs_semantic` is registered unconditionally alongside
+  `get_logs`. When the agent has both tools available, the routing question is not yet evaluated.
+  This is the parent issue's (`observability-dev#6117`) own named open question.
