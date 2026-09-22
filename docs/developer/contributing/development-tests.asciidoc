@@ -33,7 +33,7 @@ Kibana primarily uses Jest for unit testing. Each plugin or package defines a `j
 
 [source,bash]
 ----
-yarn jest --config src/platform/plugins/shared/dashboard/jest.config.js
+pnpm exec jest --config src/platform/plugins/shared/dashboard/jest.config.js
 ----
 
 A script is available to provide a better user experience when testing while navigating throughout the repository. To run the tests within your current working directory, use `pnpm test:jest`. Like the Jest CLI, you can also supply a path to determine which tests to run.
