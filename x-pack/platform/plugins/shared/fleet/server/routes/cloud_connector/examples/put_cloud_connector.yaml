@@ -57,3 +57,14 @@ responses:
               statusCode: 409
               error: 'Conflict'
               message: 'Saved object [fleet-cloud-connector/cloud-connector-id-1] conflict'
+  403:
+    description: 'Forbidden'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Role ARN fan-out requires integration-policy write permission'
+            value:
+              statusCode: 403
+              error: 'Forbidden'
+              message: 'Role ARN updates require permission to write integration policies.'

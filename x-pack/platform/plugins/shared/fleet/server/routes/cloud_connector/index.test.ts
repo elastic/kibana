@@ -87,6 +87,7 @@ describe('Cloud Connector API', () => {
           create: jest.fn(),
           find: jest.fn(),
         },
+        authz: { integrations: { writeIntegrationPolicies: true } },
       }),
       core: Promise.resolve({
         elasticsearch: {
@@ -830,7 +831,11 @@ describe('Cloud Connector API', () => {
         {
           name: 'updated-aws-connector',
         },
-        expect.objectContaining({ esClient: expect.any(Object), user: { username: 'test-user' } })
+        expect.objectContaining({
+          esClient: expect.any(Object),
+          user: { username: 'test-user' },
+          canWriteIntegrationPolicies: true,
+        })
       );
 
       expect(response.ok).toHaveBeenCalledWith({
@@ -882,7 +887,11 @@ describe('Cloud Connector API', () => {
         {
           name: 'updated-azure-connector',
         },
-        expect.objectContaining({ esClient: expect.any(Object), user: { username: 'test-user' } })
+        expect.objectContaining({
+          esClient: expect.any(Object),
+          user: { username: 'test-user' },
+          canWriteIntegrationPolicies: true,
+        })
       );
 
       expect(response.ok).toHaveBeenCalledWith({
@@ -929,7 +938,11 @@ describe('Cloud Connector API', () => {
         {
           vars: updatedVars,
         },
-        expect.objectContaining({ esClient: expect.any(Object), user: { username: 'test-user' } })
+        expect.objectContaining({
+          esClient: expect.any(Object),
+          user: { username: 'test-user' },
+          canWriteIntegrationPolicies: true,
+        })
       );
 
       expect(response.ok).toHaveBeenCalledWith({
@@ -983,7 +996,11 @@ describe('Cloud Connector API', () => {
         {
           vars: updatedVars,
         },
-        expect.objectContaining({ esClient: expect.any(Object), user: { username: 'test-user' } })
+        expect.objectContaining({
+          esClient: expect.any(Object),
+          user: { username: 'test-user' },
+          canWriteIntegrationPolicies: true,
+        })
       );
 
       expect(response.ok).toHaveBeenCalledWith({
@@ -1035,7 +1052,11 @@ describe('Cloud Connector API', () => {
           name: 'fully-updated-connector',
           vars: updatedVars,
         },
-        expect.objectContaining({ esClient: expect.any(Object), user: { username: 'test-user' } })
+        expect.objectContaining({
+          esClient: expect.any(Object),
+          user: { username: 'test-user' },
+          canWriteIntegrationPolicies: true,
+        })
       );
 
       expect(response.ok).toHaveBeenCalledWith({
@@ -1091,7 +1112,11 @@ describe('Cloud Connector API', () => {
           name: 'fully-updated-azure-connector',
           vars: updatedVars,
         },
-        expect.objectContaining({ esClient: expect.any(Object), user: { username: 'test-user' } })
+        expect.objectContaining({
+          esClient: expect.any(Object),
+          user: { username: 'test-user' },
+          canWriteIntegrationPolicies: true,
+        })
       );
 
       expect(response.ok).toHaveBeenCalledWith({
@@ -1216,7 +1241,11 @@ describe('Cloud Connector API', () => {
         expect.any(Object), // internalSoClient
         'connector-123',
         {},
-        expect.objectContaining({ esClient: expect.any(Object), user: { username: 'test-user' } })
+        expect.objectContaining({
+          esClient: expect.any(Object),
+          user: { username: 'test-user' },
+          canWriteIntegrationPolicies: true,
+        })
       );
 
       expect(response.ok).toHaveBeenCalledWith({

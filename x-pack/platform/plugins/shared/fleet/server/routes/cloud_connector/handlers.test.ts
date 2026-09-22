@@ -8,7 +8,7 @@
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
-import { CloudConnectorRoleArnPropagationError } from '../../errors';
+import { CloudConnectorRoleArnPropagationError, FleetUnauthorizedError } from '../../errors';
 import { appContextService } from '../../services/app_context';
 import { cloudConnectorService } from '../../services';
 import { verifyCloudConnectorIacKey } from '../../services/cloud_connectors';
@@ -31,9 +31,12 @@ const mockedUpdate = jest.mocked(cloudConnectorService.update);
 
 const buildContext = () => ({ fleet: Promise.resolve({ internalSoClient: {} }) } as any);
 
-const buildUpdateContext = () =>
+const buildUpdateContext = (canWriteIntegrationPolicies = true) =>
   ({
-    fleet: Promise.resolve({ internalSoClient: {} }),
+    fleet: Promise.resolve({
+      internalSoClient: {},
+      authz: { integrations: { writeIntegrationPolicies: canWriteIntegrationPolicies } },
+    }),
     core: Promise.resolve({
       elasticsearch: {
         client: {
@@ -165,7 +168,7 @@ describe('updateCloudConnectorHandler', () => {
       expect.objectContaining({
         vars: { role_arn: { type: 'text', value: 'arn:aws:iam::123456789012:role/New' } },
       }),
-      expect.objectContaining({ user: mockUser })
+      expect.objectContaining({ user: mockUser, canWriteIntegrationPolicies: true })
     );
     expect(response.ok).toHaveBeenCalled();
   });
@@ -219,6 +222,35 @@ describe('updateCloudConnectorHandler', () => {
       statusCode: 409,
       body: {
         message: expect.stringMatching(/conflict/i),
+      },
+    });
+  });
+
+  it('surfaces a missing integration-policy write as 403', async () => {
+    mockedUpdate.mockRejectedValueOnce(
+      new FleetUnauthorizedError(
+        'Role ARN updates require permission to write integration policies.'
+      )
+    );
+    const request = httpServerMock.createKibanaRequest({
+      params: { cloudConnectorId: 'cc-1' },
+      body: {
+        vars: { role_arn: { type: 'text', value: 'arn:aws:iam::123456789012:role/New' } },
+      },
+    });
+
+    await updateCloudConnectorHandler(buildUpdateContext(false), request, response);
+
+    expect(mockedUpdate).toHaveBeenCalledWith(
+      {},
+      'cc-1',
+      expect.any(Object),
+      expect.objectContaining({ canWriteIntegrationPolicies: false })
+    );
+    expect(response.customError).toHaveBeenCalledWith({
+      statusCode: 403,
+      body: {
+        message: 'Role ARN updates require permission to write integration policies.',
       },
     });
   });

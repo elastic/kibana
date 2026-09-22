@@ -1448,6 +1448,32 @@ describe('CloudConnectorService', () => {
         expect(rollback.revert).toHaveBeenCalledTimes(1);
       });
 
+      it('rejects a Role ARN change without integration-policy write and does not fan out', async () => {
+        await expect(
+          service.update(
+            mockSoClient,
+            connectorId,
+            { vars: { role_arn: { type: 'text', value: newArn } } },
+            { esClient: mockEsClient, canWriteIntegrationPolicies: false }
+          )
+        ).rejects.toThrow(/write integration policies/);
+
+        expect(propagateRoleArnToPackagePoliciesMock).not.toHaveBeenCalled();
+        expect(mockSoClient.update).not.toHaveBeenCalled();
+      });
+
+      it('still allows a connector-only edit without integration-policy write', async () => {
+        await service.update(
+          mockSoClient,
+          connectorId,
+          { name: 'renamed' },
+          { esClient: mockEsClient, canWriteIntegrationPolicies: false }
+        );
+
+        expect(propagateRoleArnToPackagePoliciesMock).not.toHaveBeenCalled();
+        expect(mockSoClient.update).toHaveBeenCalled();
+      });
+
       it('is a no-op when the incoming role_arn equals the stored one', async () => {
         await service.update(
           mockSoClient,

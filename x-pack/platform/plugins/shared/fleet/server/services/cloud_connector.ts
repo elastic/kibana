@@ -52,6 +52,7 @@ import {
   CloudConnectorInvalidVarsError,
   CloudConnectorDeleteError,
   CloudConnectorRoleArnPropagationError,
+  FleetUnauthorizedError,
   rethrowIfInstanceOrWrap,
   getErrorMessage,
 } from '../errors';
@@ -423,7 +424,16 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
     soClient: SavedObjectsClientContract,
     cloudConnectorId: string,
     cloudConnectorUpdate: Partial<UpdateCloudConnectorRequest>,
-    options?: { esClient?: ElasticsearchClient; user?: AuthenticatedUser }
+    options?: {
+      esClient?: ElasticsearchClient;
+      user?: AuthenticatedUser;
+      /**
+       * Set by the HTTP handler from the caller's Fleet authz. Omitted by internal callers
+       * (package-policy create) that already passed integration-policy write. `false` blocks a
+       * Role ARN change; connector-only edits are unaffected.
+       */
+      canWriteIntegrationPolicies?: boolean;
+    }
   ): Promise<CloudConnector> {
     const logger = this.getLogger('update');
 
@@ -476,6 +486,12 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       const roleArnChanged = isAws && typeof newRoleArn === 'string' && newRoleArn !== oldRoleArn;
       const esClient = options?.esClient;
       const user = options?.user;
+
+      if (roleArnChanged && options?.canWriteIntegrationPolicies === false) {
+        throw new FleetUnauthorizedError(
+          'Role ARN updates require permission to write integration policies.'
+        );
+      }
 
       if (cloudConnectorUpdate.vars) {
         // Role ARN edits (API or flyout) may send only `{ role_arn }`. A wholesale replace would
@@ -575,6 +591,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       logger.error(`Failed to update cloud connector: ${getErrorMessage(error)}`);
       if (
         error instanceof CloudConnectorRoleArnPropagationError ||
+        error instanceof FleetUnauthorizedError ||
         SavedObjectsErrorHelpers.isConflictError(error)
       ) {
         // Keep the saved-object conflict intact so the route can return 409. Wrapping it as a

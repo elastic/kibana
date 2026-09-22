@@ -231,6 +231,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
               body: genericErrorResponse,
               description: 'A bad request.',
             },
+            403: {
+              body: genericErrorResponse,
+              description: 'The caller cannot write integration policies.',
+            },
             409: {
               body: genericErrorResponse,
               description: 'A conflict occurred.',

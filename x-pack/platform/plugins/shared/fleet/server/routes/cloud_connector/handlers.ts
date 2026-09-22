@@ -36,7 +36,11 @@ import type {
   GetCloudConnectorUsageRequestSchema,
   VerifyCloudConnectorIacKeyRequestSchema,
 } from '../../types/rest_spec/cloud_connector';
-import { CloudConnectorRoleArnPropagationError, FleetError } from '../../errors';
+import {
+  CloudConnectorRoleArnPropagationError,
+  FleetError,
+  FleetUnauthorizedError,
+} from '../../errors';
 
 import { verifyCloudConnectorIacKey } from '../../services/cloud_connectors';
 
@@ -207,7 +211,11 @@ export const updateCloudConnectorHandler: FleetRequestHandler<
       cloudConnectorId,
       // Type cast is safe: schema validation ensures structure, service validates vars against CloudConnectorVars
       request.body as Partial<UpdateCloudConnectorRequest>,
-      { esClient, user }
+      {
+        esClient,
+        user,
+        canWriteIntegrationPolicies: fleetContext.authz.integrations.writeIntegrationPolicies,
+      }
     );
     logger.info(`Successfully updated cloud connector ${cloudConnectorId}`);
     const body: UpdateCloudConnectorResponse = {
@@ -233,6 +241,15 @@ export const updateCloudConnectorHandler: FleetRequestHandler<
       logger.error(`Cloud connector ${cloudConnectorId} update conflicted`, error);
       return response.customError({
         statusCode: 409,
+        body: {
+          message: error.message,
+        },
+      });
+    }
+    if (error instanceof FleetUnauthorizedError) {
+      logger.error(`Cloud connector ${cloudConnectorId} Role ARN update was not authorized`, error);
+      return response.customError({
+        statusCode: 403,
         body: {
           message: error.message,
         },
