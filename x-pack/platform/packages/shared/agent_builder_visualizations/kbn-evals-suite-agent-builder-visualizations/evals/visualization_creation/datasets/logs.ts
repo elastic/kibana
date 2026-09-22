@@ -33,14 +33,21 @@ export const LOGS_EXAMPLES: VisualizationDatasetExample[] = withDataSource('logs
     question:
       'Create a bar chart of the number of requests by response code in kibana_sample_data_logs.',
     seriesType: ['bar', 'bar_horizontal'],
-    query: categoricalQuery({ index: INDEX, metrics: [REQUEST_COUNT], groupBy: 'response.keyword' }),
+    query: categoricalQuery(
+      index: INDEX,
+      metrics: [REQUEST_COUNT],
+      groupBy: 'response.keyword',
+    }),
     x: 'response.keyword',
     y: [REQUEST_COUNT.alias],
   }),
   metricExample({
     question:
       'Create a single metric visualization showing the total number of requests in kibana_sample_data_logs.',
-    query: totalsQuery({ index: INDEX, metrics: [{ alias: 'Total Requests', expression: 'COUNT(*)' }] }),
+    query: totalsQuery(
+      index: INDEX,
+      metrics: [{ alias: 'Total Requests', expression: 'COUNT(*)' }],
+    }),
     metrics: ['Total Requests'],
   }),
   xyExample({
@@ -53,7 +60,11 @@ export const LOGS_EXAMPLES: VisualizationDatasetExample[] = withDataSource('logs
   partitionExample({
     question: 'Create a pie chart of request counts by response code in kibana_sample_data_logs.',
     type: 'pie',
-    query: categoricalQuery({ index: INDEX, metrics: [REQUEST_COUNT], groupBy: 'response.keyword' }),
+    query: categoricalQuery(
+      index: INDEX,
+      metrics: [REQUEST_COUNT],
+      groupBy: 'response.keyword',
+    }),
     metrics: [REQUEST_COUNT.alias],
     groupBy: ['response.keyword'],
   }),
@@ -61,13 +72,21 @@ export const LOGS_EXAMPLES: VisualizationDatasetExample[] = withDataSource('logs
     question:
       'Create a horizontal bar chart of the top operating systems by request count in kibana_sample_data_logs.',
     seriesType: 'bar_horizontal',
-    query: categoricalQuery({ index: INDEX, metrics: [REQUEST_COUNT], groupBy: 'machine.os.keyword' }),
+    query: categoricalQuery(
+      index: INDEX,
+      metrics: [REQUEST_COUNT],
+      groupBy: 'machine.os.keyword',
+    }),
     x: 'machine.os.keyword',
     y: [REQUEST_COUNT.alias],
   }),
   tagCloudExample({
     question: 'Create a tag cloud of file extensions by request count in kibana_sample_data_logs.',
-    query: categoricalQuery({ index: INDEX, metrics: [REQUEST_COUNT], groupBy: 'extension.keyword' }),
+    query: categoricalQuery(
+      index: INDEX,
+      metrics: [REQUEST_COUNT],
+      groupBy: 'extension.keyword',
+    }),
     metric: REQUEST_COUNT.alias,
     tagBy: 'extension.keyword',
   }),
