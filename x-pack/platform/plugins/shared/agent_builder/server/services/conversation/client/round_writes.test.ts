@@ -162,6 +162,83 @@ describe('reconcileEvents', () => {
       'r1::execution_failed',
     ]);
   });
+
+  describe('interrupted blocks', () => {
+    it('keeps an interrupted exec_0 block absent from the caller rounds (stale stored rounds)', () => {
+      const r0 = completedRound({ id: 'r0', started_at: T0 });
+      const result = reconcileEvents({
+        ...conversation,
+        rounds: [r0],
+        events: [...roundToEvents(r0, conversation), ...failedBlock()],
+      });
+      expect(ids(result)).toEqual(
+        expect.arrayContaining([
+          'r1::user_message',
+          'r1::execution_started',
+          'r1::execution_failed',
+        ])
+      );
+    });
+
+    it('still drops a completed round the caller removed from rounds', () => {
+      const r0 = completedRound({ id: 'r0', started_at: T0 });
+      const r1 = completedRound({ id: 'r1', started_at: T1 });
+      const result = reconcileEvents({
+        ...conversation,
+        rounds: [r0],
+        events: [...roundToEvents(r0, conversation), ...roundToEvents(r1, conversation)],
+      });
+      expect(ids(result).some((id) => id.startsWith('r1::'))).toBe(false);
+    });
+
+    it('keeps a block whose exec_0 paused and exec_1 was interrupted (last terminal is interrupted)', () => {
+      const r0 = completedRound({ id: 'r0', started_at: T0 });
+      const paused = roundToEvents(
+        createRound({
+          id: 'r2',
+          started_at: T0,
+          status: ConversationRoundStatus.awaitingPrompt,
+          pending_prompts: [],
+        }),
+        conversation
+      );
+      const resumeFailed = [
+        {
+          id: 'r2::prompt_response::1',
+          type: TimelineEventType.promptResponse,
+          created_at: T1,
+          actor: { type: 'user', id: 'u1' },
+          data: { prompt_requested_event_id: 'r2::execution_terminated', responses: {} },
+        },
+        {
+          id: 'r2::execution::1::execution_started',
+          type: TimelineEventType.executionStarted,
+          created_at: T1,
+          actor: agentActor(conversation),
+          execution_id: 'r2::execution::1',
+          trigger_event_id: 'r2::prompt_response::1',
+          data: { trigger_type: 'prompt_response' },
+        },
+        {
+          id: 'r2::execution::1::execution_failed',
+          type: TimelineEventType.executionFailed,
+          created_at: T1,
+          actor: agentActor(conversation),
+          execution_id: 'r2::execution::1',
+          trigger_event_id: 'r2::prompt_response::1',
+          data: { time_to_last_token: 1, error: { code: 'internalError', message: 'boom' } },
+        },
+      ] as ConversationEvent[];
+      const result = reconcileEvents({
+        ...conversation,
+        rounds: [r0],
+        events: [...roundToEvents(r0, conversation), ...paused, ...resumeFailed],
+      });
+      expect(ids(result)).toEqual(
+        expect.arrayContaining(['r2::execution_terminated', 'r2::execution::1::execution_failed'])
+      );
+    });
+  });
 });
 
 describe('reconcileAttachments', () => {

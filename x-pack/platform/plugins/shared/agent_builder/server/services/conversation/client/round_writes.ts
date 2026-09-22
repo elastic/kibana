@@ -14,12 +14,13 @@ import type {
 } from '@kbn/agent-builder-common';
 import {
   CONVERSATION_EVENT_ID_DELIMITER,
+  TimelineEventType,
   createAttachmentPermanentDeleteBlockedError,
+  lastExecutionTerminal,
   parseExecutionId,
 } from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { isAttachmentReferencedInRounds } from '../../attachments/attachment_guards';
-import { eventsToRounds } from './events_to_rounds';
 import { isRoundDerivedEventId, roundToEvents } from './rounds_to_events';
 
 /** True when a round's stored timeline spans more than one execution (a HITL resume). */
@@ -77,15 +78,24 @@ const eventsForKnownRound = (
 };
 
 /**
+ * A stored block absent from the caller's `rounds` is dropped only when its last execution ended
+ * with an outcome (`execution_terminated`): a completed or paused round the caller deliberately
+ * removed. Blocks with no terminal (in progress) and blocks whose last terminal is interrupted are
+ * always carried through — a caller whose stored `rounds` predate the fold has never seen them.
+ */
+const isRemovableBlock = (block: ConversationEvent[]): boolean =>
+  lastExecutionTerminal(block)?.type === TimelineEventType.executionTerminated;
+
+/**
  * Rebuilds round-derived events on a rounds-path write, preserving resumed executions, additive
- * events and stored round blocks that cannot be expressed as a round.
+ * events and stored round blocks the caller cannot have removed on purpose.
  *
  * Stored blocks are emitted at their stored position. A block whose round is in `rounds` follows
  * the per-round rule ({@link eventsForKnownRound}). A block whose round is *not* in `rounds` is
- * kept untouched when it does not fold into a round (an in-progress round, or an execution that
- * failed or was aborted before producing an outcome) and dropped when it does fold — the caller's
- * `rounds` is authoritative for rounds it deliberately removed. Rounds with no stored block yet
- * are appended in `rounds` order. Additive events are re-inserted by `created_at`.
+ * dropped only when {@link isRemovableBlock} — the caller's `rounds` is authoritative for the
+ * completed or paused rounds it deliberately removed — and kept untouched otherwise. Rounds with
+ * no stored block yet are appended in `rounds` order. Additive events are re-inserted by
+ * `created_at`.
  */
 export const reconcileEvents = (merged: Conversation): ConversationEvent[] => {
   const stored = merged.events ?? [];
@@ -98,7 +108,7 @@ export const reconcileEvents = (merged: Conversation): ConversationEvent[] => {
     const round = roundsById.get(roundId);
     if (round) {
       roundDerived.push(...eventsForKnownRound(round, block, merged));
-    } else if (eventsToRounds(block).length === 0) {
+    } else if (!isRemovableBlock(block)) {
       roundDerived.push(...block);
     }
   }
