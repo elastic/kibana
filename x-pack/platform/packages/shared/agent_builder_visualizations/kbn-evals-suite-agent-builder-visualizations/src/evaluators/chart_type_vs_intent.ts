@@ -12,6 +12,7 @@ import { executeUntilValid } from '@kbn/inference-prompt-utils';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { z } from '@kbn/zod/v4';
 import type { ExtractedVisualization } from '../extract_visualization';
+import { skippedResult } from '../evaluator_utils';
 import type { GoldChartForm } from './gold_visualization_config';
 
 export const CHART_TYPE_VS_INTENT_EVALUATOR_NAME = 'Chart Type vs Intent';
@@ -231,11 +232,7 @@ export function createChartTypeVsIntentEvaluator<
     evaluate: async ({ input, output, expected }): Promise<EvaluationResult> => {
       const gold = expectedChartFormExtractor(expected);
       if (!gold) {
-        return {
-          score: null,
-          label: 'skipped',
-          explanation: 'No expected chart form declared for this example.',
-        };
+        return skippedResult('No expected chart form declared for this example.');
       }
 
       let visualizations: ExtractedVisualization[];

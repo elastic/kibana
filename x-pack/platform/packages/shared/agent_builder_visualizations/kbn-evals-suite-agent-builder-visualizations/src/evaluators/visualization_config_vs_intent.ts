@@ -7,6 +7,7 @@
 
 import type { EvaluationResult, Evaluator, Example, TaskOutput } from '@kbn/evals';
 import type { ExtractedVisualization } from '../extract_visualization';
+import { skippedResult } from '../evaluator_utils';
 import {
   extractGoldQuery,
   hasStructuralGoldConfig,
@@ -64,11 +65,7 @@ export function createVisualizationConfigVsIntentEvaluator<
     evaluate: async ({ output, expected }): Promise<EvaluationResult> => {
       const goldConfig = expectedConfigExtractor(expected);
       if (!goldConfig || !hasStructuralGoldConfig(goldConfig)) {
-        return {
-          score: null,
-          label: 'skipped',
-          explanation: 'No structural gold config declared for this example.',
-        };
+        return skippedResult('No structural gold config declared for this example.');
       }
 
       let visualizations: ExtractedVisualization[];
@@ -120,12 +117,9 @@ export function createVisualizationConfigVsIntentEvaluator<
       const mismatches = details.flatMap((detail) => detail.mismatches);
 
       if (checkedLeaves === 0) {
-        return {
-          score: null,
-          label: 'skipped',
-          explanation:
-            'Gold config declares only chart type / mark / data source, which other evaluators score.',
-        };
+        return skippedResult(
+          'Gold config declares only chart type / mark / data source, which other evaluators score.'
+        );
       }
 
       return {
