@@ -41,6 +41,11 @@ describe('OASDIFF_RULE_POLICY', () => {
     expect(isReportOnlyRule('response-body-one-of-added')).toBe(true);
   });
 
+  it('demotes an added response enum value to report-only', () => {
+    expect(isReportOnlyRule('response-property-enum-value-added')).toBe(true);
+    expect(isPromotedRule('response-property-enum-value-added')).toBe(false);
+  });
+
   it('leaves unlisted rules to oasdiff', () => {
     expect(getRulePolicy('api-removed-without-deprecation')).toBeUndefined();
     expect(isPromotedRule('api-removed-without-deprecation')).toBe(false);
