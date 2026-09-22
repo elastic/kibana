@@ -44,6 +44,7 @@ const PackResultTypeFieldComponent: React.FC<PackResultTypeFieldProps> = ({
     (): Array<EuiSuperSelectOption<PackResultTypeOption>> => [
       {
         value: EMPTY_VALUE,
+        'data-test-subj': 'resultTypeOption-none',
         inputDisplay: (
           <FormattedMessage
             id="xpack.osquery.pack.form.packResultTypeField.noDefaultLabel"

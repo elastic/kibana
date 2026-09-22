@@ -23,6 +23,7 @@ import { isResultType, type ResultType } from '../../common/result_type';
 
 export const SNAPSHOT_OPTION: EuiSuperSelectOption<ResultType> = {
   value: 'snapshot',
+  'data-test-subj': 'resultTypeOption-snapshot',
   inputDisplay: (
     <FormattedMessage
       id="xpack.osquery.pack.queryFlyoutForm.resultsTypeField.snapshotValueLabel"
@@ -33,6 +34,7 @@ export const SNAPSHOT_OPTION: EuiSuperSelectOption<ResultType> = {
 
 export const DIFFERENTIAL_OPTION: EuiSuperSelectOption<ResultType> = {
   value: 'differential',
+  'data-test-subj': 'resultTypeOption-differential',
   inputDisplay: (
     <FormattedMessage
       id="xpack.osquery.pack.queryFlyoutForm.resultsTypeField.differentialValueLabel"
@@ -43,6 +45,7 @@ export const DIFFERENTIAL_OPTION: EuiSuperSelectOption<ResultType> = {
 
 export const DIFFERENTIAL_ADDED_ONLY_OPTION: EuiSuperSelectOption<ResultType> = {
   value: 'differential_added_only',
+  'data-test-subj': 'resultTypeOption-differential_added_only',
   inputDisplay: (
     <FormattedMessage
       id="xpack.osquery.pack.queryFlyoutForm.resultsTypeField.differentialAddedOnlyLabel"
