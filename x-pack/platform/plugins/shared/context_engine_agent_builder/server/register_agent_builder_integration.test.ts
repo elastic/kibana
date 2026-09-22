@@ -18,6 +18,7 @@ import {
   AI_INDEX_AUTOMATIONS_SKILL_ID,
   AI_INDEX_SOURCES_SKILL_ID,
   KI_RETRIEVAL_SKILL_ID,
+  CONTEXT_ENGINE_SIGNALS_SKILL_ID,
 } from '../common/agent_builder_skills';
 import { SELF_AGENT_ID } from '@kbn/agent-builder-common';
 import type {
@@ -192,6 +193,10 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
       expect.objectContaining({
         id: CONTEXT_ENGINE_SETUP_AGENT_ID,
         type: CONTEXT_ENGINE_SETUP_AGENT_TYPE_ID,
+        availability: expect.objectContaining({
+          cacheMode: 'space',
+          handler: expect.any(Function),
+        }),
         configuration: expect.objectContaining({
           enable_elastic_capabilities: false,
           subagent_ids: [SELF_AGENT_ID],
@@ -200,9 +205,29 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
             AI_INDEX_AUTOMATIONS_SKILL_ID,
             AI_INDEX_SOURCES_SKILL_ID,
             KI_RETRIEVAL_SKILL_ID,
+            CONTEXT_ENGINE_SIGNALS_SKILL_ID,
           ]),
         }),
       })
     );
+  });
+
+  it('hides the agent in spaces where Context Engine is disabled', async () => {
+    const { register } = setup({ aiIndices: [] });
+    const { availability } = register.mock.calls[0][0];
+
+    const unavailable = await availability.handler({
+      uiSettings: { get: jest.fn().mockResolvedValue(false) } as any,
+      request: {} as any,
+      spaceId: 'my-space',
+    });
+    expect(unavailable.status).toBe('unavailable');
+
+    const available = await availability.handler({
+      uiSettings: { get: jest.fn().mockResolvedValue(true) } as any,
+      request: {} as any,
+      spaceId: 'my-space',
+    });
+    expect(available.status).toBe('available');
   });
 });

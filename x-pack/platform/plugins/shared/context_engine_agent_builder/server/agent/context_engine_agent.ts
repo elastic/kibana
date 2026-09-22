@@ -6,17 +6,21 @@
  */
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
-import type { AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
+import type {
+  AgentAvailabilityConfig,
+  AgentTypeDefinition,
+} from '@kbn/agent-builder-server/agents';
 import { SELF_AGENT_ID } from '@kbn/agent-builder-common';
 import { platformCoreTools } from '@kbn/agent-builder-common/tools';
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
+import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import {
   ANALYZE_AND_IMPROVE_SKILL_ID,
   AI_INDEX_AUTOMATIONS_SKILL_ID,
   AI_INDEX_SOURCES_SKILL_ID,
   KI_RETRIEVAL_SKILL_ID,
+  CONTEXT_ENGINE_SIGNALS_SKILL_ID,
 } from '../../common/agent_builder_skills';
-import { CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID } from '../../common/agent_builder_tools';
 import { CONTEXT_ENGINE_SETUP_AGENT_ID } from '../../common/agent_builder_agents';
 import instructions from './instructions/context_engine_setup.md.text';
 
@@ -40,6 +44,19 @@ const contextEngineSetupAgentType = {
   },
 } as const satisfies AgentTypeDefinition;
 
+const contextEngineAgentAvailability: AgentAvailabilityConfig = {
+  cacheMode: 'space',
+  handler: async ({ uiSettings }) => {
+    const enabled = await uiSettings
+      .get<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID)
+      .catch(() => false);
+    if (!enabled) {
+      return { status: 'unavailable', reason: 'Context Engine is disabled in this space.' };
+    }
+    return { status: 'available' };
+  },
+};
+
 export const registerContextEngineAgent = (agentBuilder: AgentBuilderPluginSetup): void => {
   agentBuilder.agents.registerType(contextEngineSetupAgentType);
   agentBuilder.agents.register({
@@ -50,6 +67,7 @@ export const registerContextEngineAgent = (agentBuilder: AgentBuilderPluginSetup
       'Configures AI indices, chooses data sources, and generates workflow automations that ' +
       'populate indices with useful, relevant data.',
     avatar_icon: 'logoElastic',
+    availability: contextEngineAgentAvailability,
     configuration: {
       instructions,
       skill_ids: [
@@ -57,21 +75,17 @@ export const registerContextEngineAgent = (agentBuilder: AgentBuilderPluginSetup
         AI_INDEX_AUTOMATIONS_SKILL_ID,
         AI_INDEX_SOURCES_SKILL_ID,
         KI_RETRIEVAL_SKILL_ID,
+        CONTEXT_ENGINE_SIGNALS_SKILL_ID,
       ],
       tools: [
         {
           tool_ids: [
-            // Platform core tools used across skills
             platformCoreTools.listIndices,
             platformCoreTools.getIndexMapping,
             platformCoreTools.executeEsql,
             platformCoreTools.generateEsql,
-            platformCoreTools.generateWorkflow,
             platformCoreTools.executeWorkflow,
             platformCoreTools.getWorkflowExecutionStatus,
-            // Context Engine save automation tool
-            CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID,
-            // Workflows tools
             `${internalNamespaces.workflows}.get_connectors`,
             `${internalNamespaces.workflows}.get_step_definitions`,
             `${internalNamespaces.workflows}.get_examples`,
