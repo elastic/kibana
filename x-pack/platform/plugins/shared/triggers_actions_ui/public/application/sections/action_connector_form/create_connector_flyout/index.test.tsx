@@ -59,22 +59,21 @@ describe('CreateConnectorFlyout', () => {
     validateParams: jest.fn().mockResolvedValue({ errors: {} }),
   });
 
-  loadActionTypes.mockResolvedValue([
-    {
-      id: actionTypeModel.id,
-      enabled: true,
-      name: 'Test',
-      enabledInConfig: true,
-      enabledInLicense: true,
-      minimumLicenseRequired: 'basic' as const,
-      supportedFeatureIds: ['alerting', 'siem'],
-    },
-  ]);
-
   const actionTypeRegistry = actionTypeRegistryMock.create();
 
   beforeEach(() => {
     jest.clearAllMocks();
+    loadActionTypes.mockResolvedValue([
+      {
+        id: actionTypeModel.id,
+        enabled: true,
+        name: 'Test',
+        enabledInConfig: true,
+        enabledInLicense: true,
+        minimumLicenseRequired: 'basic' as const,
+        supportedFeatureIds: ['alerting', 'siem'],
+      },
+    ]);
     actionTypeRegistry.has.mockReturnValue(true);
     actionTypeRegistry.get.mockReturnValue(actionTypeModel);
     appMockRenderer = createAppMockRenderer();
