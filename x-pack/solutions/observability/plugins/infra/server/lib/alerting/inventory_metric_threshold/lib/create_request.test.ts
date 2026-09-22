@@ -63,11 +63,62 @@ describe('createRequest composite identity', () => {
     await expectCompositeIdField('pod', 'kubernetes.pod.uid', 'ecs');
   });
 
-  it('groups SemConv pods by k8s.pod.uid', async () => {
-    await expectCompositeIdField('pod', 'k8s.pod.uid', 'semconv');
+  it('evaluates a pod rule stored as semconv on kubernetes.pod.uid', async () => {
+    // Leftover semconv on a pod rule evaluates as ecs until the flyout owns Schema.
+    const request = await createRequest(
+      'metrics-*',
+      'pod',
+      'cpu',
+      timerange,
+      10,
+      undefined,
+      condition,
+      undefined,
+      undefined,
+      undefined,
+      'semconv'
+    );
+    const body = JSON.stringify(request);
+
+    expect(body).toContain('"field":"kubernetes.pod.uid"');
+    expect(body).not.toContain('k8s.pod.uid');
+    expect(body).toContain('"event.module":"kubernetes"');
+    expect(body).not.toContain('kubeletstatsreceiver.otel');
+    expect(body).toContain('"docvalue_fields":[]');
   });
 
   it('keeps host.name for SemConv hosts', async () => {
+    const request = await createRequest(
+      'metrics-*',
+      'host',
+      'cpu',
+      timerange,
+      10,
+      undefined,
+      condition,
+      undefined,
+      undefined,
+      undefined,
+      'semconv'
+    );
+
+    expect(JSON.stringify(request)).toContain('hostmetricsreceiver.otel');
     await expectCompositeIdField('host', 'host.name', 'semconv');
+  });
+
+  it('leaves an omitted host schema unfiltered', async () => {
+    const request = await createRequest(
+      'metrics-*',
+      'host',
+      'cpu',
+      timerange,
+      10,
+      undefined,
+      condition
+    );
+    const query = JSON.stringify(request.query);
+
+    expect(query).not.toContain('event.module');
+    expect(query).not.toContain('data_stream.dataset');
   });
 });

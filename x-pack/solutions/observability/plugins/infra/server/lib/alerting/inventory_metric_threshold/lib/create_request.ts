@@ -17,6 +17,7 @@ import type {
 import { parseFilterQuery } from '../../../../utils/serialized_query';
 import { createMetricAggregations } from './create_metric_aggregations';
 import type { InventoryMetricConditions } from '../../../../../common/alerting/metrics';
+import { getInventoryRuleSchema } from '../../../../../common/inventory/get_inventory_rule_schema';
 import { createBucketSelector } from './create_bucket_selector';
 import { KUBERNETES_POD_UID, NUMBER_OF_DOCUMENTS, termsAggField } from '../../common/utils';
 
@@ -57,7 +58,8 @@ export const createRequest = async (
   schema?: DataSchemaFormat
 ): Promise<ESSearchRequest> => {
   const inventoryModels = findInventoryModel(nodeType);
-  const inventoryFields = findInventoryFields(nodeType, schema);
+  const effectiveSchema = getInventoryRuleSchema(nodeType, schema);
+  const inventoryFields = findInventoryFields(nodeType, effectiveSchema);
 
   const composite: estypes.AggregationsCompositeAggregation = {
     size: compositeSize,
@@ -70,7 +72,7 @@ export const createRequest = async (
     nodeType,
     metric,
     customMetric,
-    schema
+    effectiveSchema
   );
   const bucketSelector = createBucketSelector(metric, condition, customMetric);
 
@@ -105,14 +107,14 @@ export const createRequest = async (
       top_hits: {
         size: 1,
         _source:
-          schema === 'semconv'
+          effectiveSchema === 'semconv'
             ? false
             : {
                 includes: allowList,
                 excludes: ADDITIONAL_CONTEXT_BLOCKED_LIST,
               },
         // otel docs don't support _source to select fields, so we use docvalue_fields
-        docvalue_fields: schema === 'semconv' ? allowList : [],
+        docvalue_fields: effectiveSchema === 'semconv' ? allowList : [],
       },
     },
   };
@@ -132,7 +134,9 @@ export const createRequest = async (
               : [parsedFilters]
             : []),
           ...rangeQuery(timerange.from, timerange.to),
-          ...(schema ? inventoryModels.nodeFilter?.({ schema }) ?? [] : []),
+          ...(effectiveSchema
+            ? inventoryModels.nodeFilter?.({ schema: effectiveSchema }) ?? []
+            : []),
         ],
       },
     },
