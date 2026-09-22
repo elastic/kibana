@@ -139,7 +139,7 @@ export const ServiceAccountsTable = ({
         name: i18n.translate('xpack.security.management.serviceAccounts.table.rolesColumn', {
           defaultMessage: 'Roles',
         }),
-        sortable: ({ roles }) => roles.join(','),
+        sortable: ({ roles }) => [...roles].sort().join(','),
         render: (roles: string[]) =>
           roles.length > 0 ? (
             <EuiBadgeGroup gutterSize="xs">
