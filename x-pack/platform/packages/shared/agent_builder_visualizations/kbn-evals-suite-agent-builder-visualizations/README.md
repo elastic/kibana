@@ -75,4 +75,6 @@ This keeps gold and candidate structurally parallel so the equivalence evaluator
 
 ### Host-load fixture
 
-`src/fixtures/host_load_metrics.ts` uses `@kbn/synthtrace` to write Beats `system.load.{1,5,15}` documents into `metrics-system.load-default`. `beforeAll` throws if that stream is missing or empty after seeding.
+`src/fixtures/host_load_metrics.ts` uses `@kbn/synthtrace` to write Beats `system.load.{1,5,15}` documents for host `viz-eval-host` into `metrics-system.load-default`. `beforeAll` throws if that stream is missing or empty after seeding.
+
+Cleanup only removes what the fixture wrote. If the data stream did not exist before seeding, `afterAll` deletes it; if it already existed (a cluster with real Metricbeat data), `afterAll` deletes only the `viz-eval-host` documents and leaves the rest untouched. Seeding into a pre-existing stream logs a warning, since the load averages the agent computes will include the pre-existing documents.

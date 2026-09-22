@@ -8,8 +8,10 @@
 import { getDefaultTimeBounds } from '../evaluators/esql_bind_params';
 import {
   HOST_METRICS_INDEX,
+  HOST_NAME,
   assertHostLoadMetricsReady,
   buildHostLoadEvents,
+  cleanHostLoadMetrics,
 } from './host_load_metrics';
 
 describe('buildHostLoadEvents', () => {
@@ -38,6 +40,46 @@ describe('buildHostLoadEvents', () => {
 
   it('defaults to one document per auto-bucket', () => {
     expect(buildHostLoadEvents({ now })).toHaveLength(75);
+  });
+});
+
+describe('cleanHostLoadMetrics', () => {
+  const createEsClient = () => ({
+    indices: { deleteDataStream: jest.fn().mockResolvedValue({}) },
+    deleteByQuery: jest.fn().mockResolvedValue({}),
+  });
+
+  it('deletes the data stream only when the fixture created it', async () => {
+    const esClient = createEsClient();
+
+    await cleanHostLoadMetrics(esClient as never, { createdDataStream: true });
+
+    expect(esClient.indices.deleteDataStream).toHaveBeenCalledWith({ name: HOST_METRICS_INDEX });
+    expect(esClient.deleteByQuery).not.toHaveBeenCalled();
+  });
+
+  it('removes only the fixture host documents from a pre-existing data stream', async () => {
+    const esClient = createEsClient();
+
+    await cleanHostLoadMetrics(esClient as never, { createdDataStream: false });
+
+    expect(esClient.indices.deleteDataStream).not.toHaveBeenCalled();
+    expect(esClient.deleteByQuery).toHaveBeenCalledWith({
+      index: HOST_METRICS_INDEX,
+      query: { term: { 'host.name': HOST_NAME } },
+      refresh: true,
+    });
+  });
+
+  it('warns instead of throwing when cleanup fails', async () => {
+    const esClient = createEsClient();
+    esClient.indices.deleteDataStream.mockRejectedValue(new Error('boom'));
+    const log = { warning: jest.fn() };
+
+    await expect(
+      cleanHostLoadMetrics(esClient as never, { createdDataStream: true }, log as never)
+    ).resolves.toBeUndefined();
+    expect(log.warning).toHaveBeenCalledWith(expect.stringContaining('boom'));
   });
 });
 

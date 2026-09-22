@@ -14,7 +14,7 @@ import { getDefaultTimeBounds } from '../evaluators/esql_bind_params';
 
 export const HOST_METRICS_INDEX = 'metrics-system.load-default';
 export const HOST_LOAD_DOC_COUNT = 75;
-const HOST_NAME = 'viz-eval-host';
+export const HOST_NAME = 'viz-eval-host';
 
 export function buildHostLoadEvents({
   now = Date.now(),
@@ -61,7 +61,23 @@ export async function assertHostLoadMetricsReady(esClient: Client): Promise<void
   }
 }
 
-export async function seedHostLoadMetrics(esClient: Client, log: ToolingLog): Promise<void> {
+/** What the fixture owns, so cleanup never removes data it did not write. */
+export interface HostLoadFixture {
+  createdDataStream: boolean;
+}
+
+export async function seedHostLoadMetrics(
+  esClient: Client,
+  log: ToolingLog
+): Promise<HostLoadFixture> {
+  const existed = await esClient.indices.exists({ index: HOST_METRICS_INDEX });
+  if (existed) {
+    log.warning(
+      `${HOST_METRICS_INDEX} already exists; seeding ${HOST_NAME} documents alongside its data. ` +
+        'Load averages in the eval window will include the pre-existing documents.'
+    );
+  }
+
   const logger = extendToolingLog(log);
   const { infraEsClient } = new SynthtraceClientsManager({
     client: esClient,
@@ -72,11 +88,29 @@ export async function seedHostLoadMetrics(esClient: Client, log: ToolingLog): Pr
   await infraEsClient.index(Readable.from(buildHostLoadEvents()));
   await assertHostLoadMetricsReady(esClient);
   log.info(`Seeded ${HOST_METRICS_INDEX} with synthtrace host load metrics`);
+
+  return { createdDataStream: !existed };
 }
 
-export async function cleanHostLoadMetrics(esClient: Client, log?: ToolingLog): Promise<void> {
+/**
+ * Removes the data stream when the fixture created it; otherwise deletes only
+ * the fixture's own documents so pre-existing Beats data is left untouched.
+ */
+export async function cleanHostLoadMetrics(
+  esClient: Client,
+  fixture: HostLoadFixture,
+  log?: ToolingLog
+): Promise<void> {
   try {
-    await esClient.indices.deleteDataStream({ name: HOST_METRICS_INDEX });
+    if (fixture.createdDataStream) {
+      await esClient.indices.deleteDataStream({ name: HOST_METRICS_INDEX });
+      return;
+    }
+    await esClient.deleteByQuery({
+      index: HOST_METRICS_INDEX,
+      query: { term: { 'host.name': HOST_NAME } },
+      refresh: true,
+    });
   } catch (error) {
     log?.warning(`Failed to clean ${HOST_METRICS_INDEX}: ${(error as Error).message}`);
   }

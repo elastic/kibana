@@ -7,7 +7,11 @@
 
 import { tags } from '@kbn/evals';
 import { evaluate } from '../../src/evaluate';
-import { cleanHostLoadMetrics, seedHostLoadMetrics } from '../../src/fixtures/host_load_metrics';
+import {
+  cleanHostLoadMetrics,
+  seedHostLoadMetrics,
+  type HostLoadFixture,
+} from '../../src/fixtures/host_load_metrics';
 import { HOST_METRICS_EXAMPLE } from './host_metrics_example';
 
 const GOLDEN_TOOL_PATH = ['load_skill', 'platform.core.create_visualization'];
@@ -16,8 +20,10 @@ evaluate.describe(
   'Agent Builder Visualizations - Standalone Visualization Creation',
   { tag: tags.serverless.search },
   () => {
+    let hostLoadFixture: HostLoadFixture | undefined;
+
     evaluate.beforeAll(async ({ fetch, esClient, log }) => {
-      await Promise.all([
+      [, , hostLoadFixture] = await Promise.all([
         fetch('/api/sample_data/logs', {
           method: 'POST',
           version: '2023-10-31',
@@ -31,7 +37,10 @@ evaluate.describe(
     });
 
     evaluate.afterAll(async ({ esClient, log }) => {
-      await cleanHostLoadMetrics(esClient, log);
+      if (!hostLoadFixture) {
+        return;
+      }
+      await cleanHostLoadMetrics(esClient, hostLoadFixture, log);
     });
 
     evaluate('standalone visualization ES|QL generation', async ({ evaluateDataset }) => {
