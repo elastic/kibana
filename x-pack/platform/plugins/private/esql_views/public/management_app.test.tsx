@@ -91,6 +91,7 @@ describe('ManagementApp', () => {
     fireEvent.click(queryCell);
 
     expect(await screen.findByTestId('esqlViewsQueryPopover')).toHaveTextContent('full_query_end');
+    expect(screen.getByLabelText('Full ES|QL query')).toBeInTheDocument();
   });
 
   it('searches names, descriptions, and queries', async () => {

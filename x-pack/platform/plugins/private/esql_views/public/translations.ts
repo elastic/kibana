@@ -56,6 +56,9 @@ export const translations = {
   showFullQuery: i18n.translate('xpack.esqlViews.managementPage.showFullQuery', {
     defaultMessage: 'Show full query',
   }),
+  fullQueryPopover: i18n.translate('xpack.esqlViews.managementPage.fullQueryPopover', {
+    defaultMessage: 'Full ES|QL query',
+  }),
   emptyTitle: i18n.translate('xpack.esqlViews.managementPage.emptyTitle', {
     defaultMessage: 'No ES|QL views found',
   }),

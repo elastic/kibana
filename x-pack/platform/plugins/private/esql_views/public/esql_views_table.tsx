@@ -33,7 +33,7 @@ const QueryPreview: FunctionComponent<{ query: string }> = ({ query }) => {
 
   return (
     <EuiPopover
-      aria-label={translations.showFullQuery}
+      aria-label={translations.fullQueryPopover}
       button={
         <button
           type="button"
