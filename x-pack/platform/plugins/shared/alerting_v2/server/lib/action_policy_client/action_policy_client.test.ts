@@ -3016,7 +3016,7 @@ describe('ActionPolicyClient', () => {
       updatedAt: '2025-01-01T00:00:00.000Z',
     };
 
-    it('returns catch-all APs for policies with no matcher, along with the space-scoped total', async () => {
+    it('returns catch_all APs for policies with no matcher, along with the space-scoped total', async () => {
       mockSavedObjectsClient.find.mockResolvedValueOnce(
         makeFindResponse(
           [{ id: 'ap-catchall', attributes: { ...baseAttributes, matcher: null } }],
@@ -3027,7 +3027,7 @@ describe('ActionPolicyClient', () => {
       const result = await client.matchActionPolicies({ ruleTags: ['prod'] });
 
       expect(result.items).toHaveLength(1);
-      expect(result.items[0].category).toBe('catch-all');
+      expect(result.items[0].category).toBe('catch_all');
       expect(result.items[0].action_policy.id).toBe('ap-catchall');
       expect(result.total).toBe(150);
       expect(result.evaluated_count).toBe(1);
@@ -3067,7 +3067,7 @@ describe('ActionPolicyClient', () => {
       );
     });
 
-    it('returns catch-all APs for policies whose matcher has neither tags nor an expression', async () => {
+    it('returns catch_all APs for policies whose matcher has neither tags nor an expression', async () => {
       const matcherAttr: ActionPolicySavedObjectAttributes = {
         ...baseAttributes,
         matcher: { tags: [], expression: '  ' },
@@ -3080,11 +3080,11 @@ describe('ActionPolicyClient', () => {
       const result = await client.matchActionPolicies({ ruleTags: ['prod'] });
 
       expect(result.items).toHaveLength(1);
-      expect(result.items[0].category).toBe('catch-all');
+      expect(result.items[0].category).toBe('catch_all');
       expect(result.items[0].action_policy.id).toBe('ap-empty-matcher');
     });
 
-    it('returns catch-all APs even when the rule has no tags', async () => {
+    it('returns catch_all APs even when the rule has no tags', async () => {
       mockSavedObjectsClient.find.mockResolvedValueOnce(
         makeFindResponse([{ id: 'ap-catchall', attributes: { ...baseAttributes, matcher: null } }])
       );
@@ -3092,7 +3092,7 @@ describe('ActionPolicyClient', () => {
       const result = await client.matchActionPolicies({});
 
       expect(result.items).toHaveLength(1);
-      expect(result.items[0].category).toBe('catch-all');
+      expect(result.items[0].category).toBe('catch_all');
     });
 
     it('returns tags APs when the rule tags intersect the matcher tag clause', async () => {
