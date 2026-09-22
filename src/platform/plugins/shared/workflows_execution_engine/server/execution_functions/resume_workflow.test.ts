@@ -173,7 +173,11 @@ describe('resumeWorkflow', () => {
           fakeRequest,
           workflowsExecutionEngine: mockWorkflowExecutionEngine,
           workflowExecutionRepository: new WorkflowExecutionRepository(
-            createMockWorkflowDataClient()
+            Object.assign(createMockWorkflowDataClient(), {
+              getByIds: jest.fn().mockResolvedValue({
+                items: [{ document: { id: workflowRunId, workflowId: 'workflow', spaceId } }],
+              }),
+            })
           ),
           stepExecutionRepository: mockStepExecutionRepositoryForResume,
         });
@@ -229,7 +233,11 @@ describe('resumeWorkflow', () => {
           fakeRequest,
           workflowsExecutionEngine: mockWorkflowExecutionEngine,
           workflowExecutionRepository: new WorkflowExecutionRepository(
-            createMockWorkflowDataClient()
+            Object.assign(createMockWorkflowDataClient(), {
+              getByIds: jest.fn().mockResolvedValue({
+                items: [{ document: { id: workflowRunId, workflowId: 'workflow', spaceId } }],
+              }),
+            })
           ),
           stepExecutionRepository: mockStepExecutionRepositoryForResume,
         });
@@ -519,7 +527,9 @@ describe('resumeWorkflow', () => {
         const reportWorkflowExecution = jest.fn().mockResolvedValue(undefined);
         const meteringService = { reportWorkflowExecution } as unknown as WorkflowsMeteringService;
 
-        workflowExecutionRepository.getWorkflowExecutionById.mockResolvedValue(finalExecution);
+        workflowExecutionRepository.getWorkflowExecutionById
+          .mockResolvedValueOnce({ ...finalExecution, status: ExecutionStatus.WAITING })
+          .mockResolvedValue(finalExecution);
 
         await resumeWorkflowWithDefaults({ meteringService });
 
@@ -534,7 +544,9 @@ describe('resumeWorkflow', () => {
         const reportWorkflowExecution = jest.fn().mockResolvedValue(undefined);
         const meteringService = { reportWorkflowExecution } as unknown as WorkflowsMeteringService;
 
-        workflowExecutionRepository.getWorkflowExecutionById.mockResolvedValue(null);
+        workflowExecutionRepository.getWorkflowExecutionById
+          .mockResolvedValueOnce({ workflowId: 'workflow', spaceId: 'default' })
+          .mockResolvedValue(null);
 
         await resumeWorkflowWithDefaults({ meteringService });
 
@@ -545,9 +557,9 @@ describe('resumeWorkflow', () => {
         const reportWorkflowExecution = jest.fn().mockResolvedValue(undefined);
         const meteringService = { reportWorkflowExecution } as unknown as WorkflowsMeteringService;
 
-        workflowExecutionRepository.getWorkflowExecutionById.mockRejectedValue(
-          new Error('fetch failed')
-        );
+        workflowExecutionRepository.getWorkflowExecutionById
+          .mockResolvedValueOnce({ workflowId: 'workflow', spaceId: 'default' })
+          .mockRejectedValue(new Error('fetch failed'));
 
         await expect(resumeWorkflowWithDefaults({ meteringService })).resolves.toEqual({});
 

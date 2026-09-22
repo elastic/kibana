@@ -23,6 +23,10 @@ import { emitWorkflowExecutionFailedEventIfFailed } from '../lib/emit_workflow_e
 import type { WorkflowsMeteringService } from '../metering';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import {
+  getWorkflowOriginalRequest,
+  withWorkflowExecutionIdentity,
+} from '../service_account_execution';
 import type {
   InternalResumeWorkflowExecution,
   WorkflowsExecutionEnginePluginStart,
@@ -35,7 +39,7 @@ export interface RunWorkflowResult {
   shouldDeleteTask?: boolean;
 }
 
-export async function runWorkflow({
+async function runWorkflowWithRequest({
   workflowRunId,
   spaceId,
   signal,
@@ -224,7 +228,7 @@ export async function runWorkflow({
     workflowRunId,
     spaceId,
     logger,
-    fakeRequest,
+    fakeRequest: getWorkflowOriginalRequest(fakeRequest),
     workflowExecutionRepository,
     internalResumeWorkflowExecution,
     workflowTaskManager,
@@ -232,3 +236,40 @@ export async function runWorkflow({
     cloudSetup: dependencies.cloudSetup,
   });
 }
+
+export const runWorkflow = async (
+  params: Parameters<typeof runWorkflowWithRequest>[0]
+): ReturnType<typeof runWorkflowWithRequest> => {
+  const execution = await params.workflowExecutionRepository.getWorkflowExecutionById(
+    params.workflowRunId,
+    params.spaceId
+  );
+  if (!execution) {
+    throw new Error('Workflow execution not found.');
+  }
+  let enteredExecution = false;
+  try {
+    return await withWorkflowExecutionIdentity(
+      params.dependencies.coreStart,
+      execution,
+      params.fakeRequest,
+      (fakeRequest) => {
+        enteredExecution = true;
+        return runWorkflowWithRequest({ ...params, fakeRequest });
+      }
+    );
+  } catch (error) {
+    if (!enteredExecution && execution.workflowDefinition?.settings?.run_as) {
+      await params.workflowExecutionRepository.updateWorkflowExecution({
+        id: execution.id,
+        status: ExecutionStatus.FAILED,
+        finishedAt: new Date().toISOString(),
+        error: {
+          type: 'ServiceAccountExecutionError',
+          message: error instanceof Error ? error.message : String(error),
+        },
+      });
+    }
+    throw error;
+  }
+};

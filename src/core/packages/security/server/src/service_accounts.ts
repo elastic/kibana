@@ -14,6 +14,7 @@ import type {
   ServiceAccount,
   ServiceAccountWorkloadBinding,
   ServiceAccountWorkloadCoordinates,
+  ServiceAccountWorkloadRequestParams,
   ServiceAccountWorkloadRef,
 } from '@kbn/core-security-common';
 
@@ -81,10 +82,11 @@ export interface CoreServiceAccountsService {
    * and once `fn` settles the request's credential is removed and can never be replaced again, so a
    * request kept past `fn` is refused by Elasticsearch rather than allowed to keep acting.
    *
-   * Rejects when the workload has no binding (a 404), and whenever bindings are unavailable.
+   * Rejects when the workload has no binding (a 404), its account differs from
+   * expectedServiceAccountId (a 403), or bindings are unavailable.
    */
   withScopedRequestForWorkload<T>(
-    params: ServiceAccountWorkloadCoordinates,
+    params: ServiceAccountWorkloadRequestParams,
     fn: (request: KibanaRequest) => Promise<T>
   ): Promise<T>;
 }

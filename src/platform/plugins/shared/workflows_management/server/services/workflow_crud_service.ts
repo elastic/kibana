@@ -39,6 +39,7 @@ import type {
   WorkflowDocumentGetOptions,
   WriteWorkflowDocumentWithOccParams,
 } from './workflow_occ_types';
+import { withWorkflowBindingChange } from './workflow_service_account_binding';
 import {
   WORKFLOW_CHANGE_HISTORY_OBJECT_TYPE,
   WorkflowChangeHistoryAction,
@@ -120,8 +121,6 @@ type SuccessfullyWrittenBulkEntry = BulkWorkflowEntry & {
 };
 
 export class WorkflowCrudService {
-  private indexOccWriter?: OccWriter<WorkflowProperties>;
-
   constructor(private readonly deps: WorkflowCrudDeps) {}
 
   async logWorkflowChangesAfterWrite(params: {
@@ -207,48 +206,73 @@ export class WorkflowCrudService {
     document: WorkflowProperties,
     options?: IndexWorkflowDocumentOptions
   ): Promise<{ seqNo: number; primaryTerm: number }> {
-    const response = await this.deps.workflowStorage.getClient().index({
-      id,
-      document,
-      ...(options?.create ? { op_type: 'create' as const } : {}),
-      ...(options?.ifSeqNo != null && options?.ifPrimaryTerm != null
-        ? { if_seq_no: options.ifSeqNo, if_primary_term: options.ifPrimaryTerm }
-        : {}),
-      refresh: true,
+    const bindings = this.deps.getServiceAccountBindings?.();
+    const accountId = document.definition?.settings?.run_as;
+    const previous =
+      options?.previousDocument ??
+      (bindings && !options?.create
+        ? await this.getWorkflowDocumentSource(id, document.spaceId, {
+            includeDeleted: true,
+            includeGlobal: true,
+          })
+        : null);
+    const write = async () => {
+      const response = await this.deps.workflowStorage.getClient().index({
+        id,
+        document,
+        ...(options?.create ? { op_type: 'create' as const } : {}),
+        ...(options?.ifSeqNo != null && options?.ifPrimaryTerm != null
+          ? { if_seq_no: options.ifSeqNo, if_primary_term: options.ifPrimaryTerm }
+          : {}),
+        refresh: true,
+      });
+
+      if (response._seq_no == null || response._primary_term == null) {
+        throw new Error(
+          `Elasticsearch index response missing seq_no/primary_term for workflow ${id}`
+        );
+      }
+
+      return { seqNo: response._seq_no, primaryTerm: response._primary_term };
+    };
+    if (!accountId && !previous?.definition?.settings?.run_as) return write();
+    if (!bindings) throw new Error('Service account bindings are unavailable.');
+    return withWorkflowBindingChange({
+      bindings,
+      core: this.deps.getCoreStart(),
+      logger: this.deps.logger,
+      workflowId: id,
+      spaceId: document.spaceId,
+      request: options?.request,
+      previousAccountId: previous?.definition?.settings?.run_as,
+      accountId,
+      write,
     });
-
-    if (response._seq_no == null || response._primary_term == null) {
-      throw new Error(
-        `Elasticsearch index response missing seq_no/primary_term for workflow ${id}`
-      );
-    }
-
-    return { seqNo: response._seq_no, primaryTerm: response._primary_term };
   }
 
-  private getIndexOccWriter(): OccWriter<WorkflowProperties> {
-    if (!this.indexOccWriter) {
-      this.indexOccWriter = new OccWriter<WorkflowProperties>({
-        index: async ({ id, document, create, ifSeqNo, ifPrimaryTerm }) =>
-          this.indexWorkflowDocument(id, document, { create, ifSeqNo, ifPrimaryTerm }),
-        logger: this.deps.logger,
-      });
-    }
-    return this.indexOccWriter;
+  private getIndexOccWriter(options?: IndexWorkflowDocumentOptions): OccWriter<WorkflowProperties> {
+    return new OccWriter<WorkflowProperties>({
+      index: async ({ id, document, create, ifSeqNo, ifPrimaryTerm }) =>
+        this.indexWorkflowDocument(id, document, { ...options, create, ifSeqNo, ifPrimaryTerm }),
+      logger: this.deps.logger,
+    });
   }
 
   private getReadModifyWriteOccWriter(
     spaceId: string,
     maxRetries?: number,
-    getOptions?: WorkflowDocumentGetOptions
+    getOptions?: WorkflowDocumentGetOptions,
+    request?: KibanaRequest
   ): OccWriter<WorkflowProperties> {
     const resolvedMaxRetries = maxRetries ?? DEFAULT_MAX_RETRIES;
+    let previousDocument: WorkflowProperties | undefined;
     return new OccWriter<WorkflowProperties>({
       get: async (id) => {
         const document = await this.getWorkflowDocumentWithVersion(id, spaceId, getOptions);
         if (!document) {
           return null;
         }
+        previousDocument = document.source;
         return {
           id,
           source: document.source,
@@ -256,7 +280,13 @@ export class WorkflowCrudService {
         };
       },
       index: async ({ id, document, create, ifSeqNo, ifPrimaryTerm }) =>
-        this.indexWorkflowDocument(id, document, { create, ifSeqNo, ifPrimaryTerm }),
+        this.indexWorkflowDocument(id, document, {
+          create,
+          ifSeqNo,
+          ifPrimaryTerm,
+          request,
+          previousDocument,
+        }),
       logger: this.deps.logger,
       maxRetries: resolvedMaxRetries,
     });
@@ -300,7 +330,7 @@ export class WorkflowCrudService {
     params: WriteWorkflowDocumentWithOccParams
   ): Promise<WorkflowProperties> {
     return this.runOccWrite(id, async () => {
-      const { document } = await this.getIndexOccWriter().write({
+      const { document } = await this.getIndexOccWriter(params).write({
         id,
         document: params.document,
         ifSeqNo: params.ifSeqNo,
@@ -319,7 +349,8 @@ export class WorkflowCrudService {
       const writer = this.getReadModifyWriteOccWriter(
         spaceId,
         params.maxRetries,
-        params.getOptions
+        params.getOptions,
+        params.request
       );
       const { document } = await writer.readModifyWrite({
         id,
@@ -555,6 +586,7 @@ export class WorkflowCrudService {
       baseId,
       isUserSupplied: Boolean(workflow.id),
       document: workflowData,
+      request,
     });
 
     await this.logWorkflowChangesAfterWrite({
@@ -614,14 +646,18 @@ export class WorkflowCrudService {
           triggerDefinitions,
         });
 
-        validWorkflows.push({
-          idx: i,
-          id: prepared.id,
-          baseId: prepared.id,
-          idSource: workflows[i].id ? 'user-supplied' : 'server-generated',
-          workflowData: prepared.workflowData,
-          definition: prepared.definition,
-        });
+        if (prepared.definition?.settings?.run_as && !options?.overwrite) {
+          created.push(await this.createWorkflow(workflows[i], spaceId, request));
+        } else {
+          validWorkflows.push({
+            idx: i,
+            id: prepared.id,
+            baseId: prepared.id,
+            idSource: workflows[i].id ? 'user-supplied' : 'server-generated',
+            workflowData: prepared.workflowData,
+            definition: prepared.definition,
+          });
+        }
       } catch (error) {
         failed.push({
           index: i,
@@ -794,6 +830,7 @@ export class WorkflowCrudService {
 
     let previousVersion: number | undefined;
     const finalData = await this.readModifyWriteWorkflowDocument(id, spaceId, {
+      request,
       getOptions: { includeDeleted: true, includeGlobal: true },
       mutate: (existingSource: WorkflowProperties) => {
         let updatedData: Partial<WorkflowProperties> = {
@@ -952,6 +989,54 @@ export class WorkflowCrudService {
   }
 
   async deleteWorkflows(
+    ids: string[],
+    spaceId: string,
+    options?: { force?: boolean },
+    request?: KibanaRequest
+  ): Promise<DeleteWorkflowsResponse> {
+    const bindings = this.deps.getServiceAccountBindings?.();
+    if (bindings) {
+      const workflows = await this.getWorkflowsByIds(ids, spaceId, { includeDeleted: true });
+      if (workflows.some((workflow) => workflow.definition?.settings?.run_as)) {
+        const result: DeleteWorkflowsResponse = {
+          total: ids.length,
+          deleted: 0,
+          failures: [],
+          successfulIds: [],
+        };
+        for (const id of ids) {
+          const workflow = workflows.find((item) => item.id === id);
+          try {
+            await withWorkflowBindingChange({
+              bindings,
+              core: this.deps.getCoreStart(),
+              logger: this.deps.logger,
+              workflowId: id,
+              spaceId,
+              request,
+              previousAccountId: workflow?.definition?.settings?.run_as,
+              write: async () => {
+                const item = await this.deleteWorkflowDocuments([id], spaceId, options);
+                if (item.deleted !== 1)
+                  throw new Error(item.failures[0]?.error ?? 'Workflow deletion failed.');
+                result.deleted += item.deleted;
+                result.successfulIds?.push(id);
+              },
+            });
+          } catch (error) {
+            result.failures.push({
+              id,
+              error: error instanceof Error ? error.message : String(error),
+            });
+          }
+        }
+        return result;
+      }
+    }
+    return this.deleteWorkflowDocuments(ids, spaceId, options);
+  }
+
+  private async deleteWorkflowDocuments(
     ids: string[],
     spaceId: string,
     options?: { force?: boolean }
@@ -1118,6 +1203,27 @@ export class WorkflowCrudService {
     const occHitById = new Map(occHits.map((hit) => [hit._id, hit]));
 
     const newEntries = entries.filter((entry) => !occHitById.has(entry.id));
+    for (let index = newEntries.length - 1; index >= 0; index--) {
+      const entry = newEntries[index];
+      if (entry.definition?.settings?.run_as) {
+        newEntries.splice(index, 1);
+        try {
+          created.push(
+            await this.createWorkflow(
+              { id: entry.id, yaml: entry.workflowData.yaml },
+              spaceId,
+              params.request
+            )
+          );
+        } catch (error) {
+          failed.push({
+            index: entry.idx,
+            id: entry.id,
+            error: error instanceof Error ? error.message : String(error),
+          });
+        }
+      }
+    }
     const existingEntries = entries.filter((entry) => occHitById.has(entry.id));
     const inSpaceUpdateEntries: BulkWorkflowEntry[] = [];
     const crossSpaceOverwriteEntries: Array<{ entry: BulkWorkflowEntry; occHit: OccWorkflowHit }> =
@@ -1129,7 +1235,16 @@ export class WorkflowCrudService {
         if (this.isExistingWorkflowInTargetSpace(occHit, spaceId)) {
           inSpaceUpdateEntries.push(entry);
         } else {
-          crossSpaceOverwriteEntries.push({ entry, occHit });
+          if (occHit._source.definition?.settings?.run_as || entry.definition?.settings?.run_as) {
+            failed.push({
+              index: entry.idx,
+              id: entry.id,
+              error:
+                'A bound workflow cannot be overwritten across spaces. Create it with a new ID in the destination space.',
+            });
+          } else {
+            crossSpaceOverwriteEntries.push({ entry, occHit });
+          }
         }
       }
     }
@@ -1140,7 +1255,7 @@ export class WorkflowCrudService {
 
     if (newEntries.length > 0) {
       const operations = newEntries.map((entry) => ({
-        index: {
+        create: {
           _id: entry.id,
           document: applyWorkflowVersion(entry.workflowData, undefined),
         },
@@ -1151,9 +1266,9 @@ export class WorkflowCrudService {
       });
 
       for (let itemIndex = 0; itemIndex < bulkResponse.items.length; itemIndex++) {
-        const operation = bulkResponse.items[itemIndex].index;
+        const operation = bulkResponse.items[itemIndex].create;
         const entry = newEntries[itemIndex];
-        const document = operations[itemIndex].index.document;
+        const document = operations[itemIndex].create.document;
 
         if (!operation?.error) {
           created.push(transformStorageDocumentToWorkflowDto(entry.id, document));
@@ -1180,6 +1295,7 @@ export class WorkflowCrudService {
           let previousVersion: number | undefined;
           const document = await this.readModifyWriteWorkflowDocument(entry.id, spaceId, {
             getOptions: bulkOverwriteGetOptions,
+            request: params.request,
             mutate: (existing) => {
               previousVersion = existing.version;
               return this.buildBulkOverwriteDocument(prepared, existing);
@@ -1208,6 +1324,8 @@ export class WorkflowCrudService {
       for (const { entry, occHit } of crossSpaceOverwriteEntries) {
         try {
           const document = await this.writeWorkflowDocumentWithOcc(entry.id, spaceId, {
+            previousDocument: occHit._source,
+            request: params.request,
             document: this.buildBulkOverwriteDocument(entry.workflowData, occHit._source),
             ifSeqNo: occHit.seqNo,
             ifPrimaryTerm: occHit.primaryTerm,
@@ -1300,6 +1418,7 @@ export class WorkflowCrudService {
     baseId: string;
     isUserSupplied: boolean;
     document: WorkflowProperties;
+    request?: KibanaRequest;
   }): Promise<string> {
     const { baseId, isUserSupplied, document } = params;
     let id = params.initialId;
@@ -1307,7 +1426,7 @@ export class WorkflowCrudService {
 
     for (let attempt = 0; attempt <= TOCTOU_MAX_RETRIES; attempt++) {
       try {
-        await this.indexWorkflowDocument(id, document, { create: true });
+        await this.indexWorkflowDocument(id, document, { create: true, request: params.request });
         return id;
       } catch (error) {
         if (!isElasticsearchWriteConflict(error)) {

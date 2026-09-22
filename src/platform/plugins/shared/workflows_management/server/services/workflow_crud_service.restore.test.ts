@@ -9,7 +9,7 @@
 
 import type { ChangeHistoryDocument } from '@kbn/change-history';
 import type { CoreStart } from '@kbn/core/server';
-import { httpServerMock } from '@kbn/core/server/mocks';
+import { httpServerMock, securityServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { UpdatedWorkflowResponseDto } from '@kbn/workflows';
 import { InvalidYamlSchemaError } from '@kbn/workflows-yaml';
@@ -322,6 +322,7 @@ describe('WorkflowCrudService.restoreWorkflowVersion integration', () => {
     } as unknown as WorkflowValidationService;
 
     const deps: WorkflowCrudDeps = {
+      getServiceAccountBindings: () => securityServiceMock.createStart().serviceAccounts,
       logger: loggerMock.create(),
       workflowStorage: { getClient: () => client } as any,
       getSecurity: () =>

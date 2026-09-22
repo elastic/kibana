@@ -66,6 +66,22 @@ const createMockStepExecution = (
 });
 
 describe('WorkflowExecutionOverview', () => {
+  it('separates the triggering user from the service account identity', () => {
+    const stepExecution = createMockStepExecution({
+      input: {
+        execution: {
+          executedBy: 'alice',
+          effectiveIdentity: { type: 'service_account', id: 'sa-proof' },
+        },
+      },
+    });
+    renderWithIntl(<WorkflowExecutionOverview stepExecution={stepExecution} />);
+    expect(screen.getByText('Triggered by')).toBeInTheDocument();
+    expect(screen.getByText('alice')).toBeInTheDocument();
+    expect(screen.getByText('Run as')).toBeInTheDocument();
+    expect(screen.getByText('sa-proof')).toBeInTheDocument();
+  });
+
   describe('rendering', () => {
     it('should render the component with execution data', () => {
       const stepExecution = createMockStepExecution();

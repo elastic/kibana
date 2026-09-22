@@ -66,7 +66,12 @@ export interface MockWorkflowExecutionRepository {
 }
 
 export const createMockWorkflowExecutionRepository = (): MockWorkflowExecutionRepository => ({
-  getWorkflowExecutionById: jest.fn().mockResolvedValue(null),
+  getWorkflowExecutionById: jest.fn().mockResolvedValue({
+    id: 'test-workflow-run-id',
+    workflowId: 'workflow',
+    spaceId: 'default',
+    status: ExecutionStatus.PENDING,
+  }),
   updateWorkflowExecution: jest.fn().mockResolvedValue(undefined),
 });
 

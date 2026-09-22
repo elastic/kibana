@@ -9,6 +9,7 @@
 
 import { errors } from '@elastic/elasticsearch';
 import type { CoreStart } from '@kbn/core/server';
+import { securityServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { EsWorkflow } from '@kbn/workflows';
 import type {
@@ -106,6 +107,7 @@ const makeDeps = (
     deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
   } as unknown as StepExecutionsDataClient;
   const deps: WorkflowCrudDeps = {
+    getServiceAccountBindings: () => securityServiceMock.createStart().serviceAccounts,
     logger: loggerMock.create(),
     workflowStorage: { getClient: () => client } as any,
     getSecurity: () => makeSecurityMock('alice'),
@@ -1081,7 +1083,7 @@ describe('WorkflowCrudService', () => {
           },
         });
       client.bulk.mockResolvedValue({
-        items: [{ index: { _id: 'wf-new', status: 200 } }],
+        items: [{ create: { _id: 'wf-new', status: 201 } }],
       });
       client.index.mockResolvedValue({ result: 'updated', _seq_no: 2, _primary_term: 1 });
 
@@ -1107,11 +1109,11 @@ describe('WorkflowCrudService', () => {
       expect(callArgs.getAction!('wf-existing')).toBe(WorkflowChangeHistoryAction.workflowUpdate);
     });
 
-    it('overwrite=true indexes new workflows with plain bulk index (no OCC metadata)', async () => {
+    it('overwrite=true creates new workflows without replacing concurrent inserts', async () => {
       const { deps, client } = makeDeps();
       client.search.mockResolvedValueOnce({ hits: { hits: [] } });
       client.bulk.mockResolvedValue({
-        items: [{ index: { _id: 'wf-new', status: 200 } }],
+        items: [{ create: { _id: 'wf-new', status: 201 } }],
       });
 
       const service = new WorkflowCrudService(deps);
@@ -1126,7 +1128,7 @@ describe('WorkflowCrudService', () => {
       expect(client.bulk).toHaveBeenCalledWith({
         operations: [
           {
-            index: {
+            create: {
               _id: 'wf-new',
               document: expect.objectContaining({ version: 1 }),
             },
@@ -1134,7 +1136,7 @@ describe('WorkflowCrudService', () => {
         ],
         refresh: 'wait_for',
       });
-      const bulkOp = client.bulk.mock.calls[0][0].operations[0].index;
+      const bulkOp = client.bulk.mock.calls[0][0].operations[0].create;
       expect(bulkOp).not.toHaveProperty('if_seq_no');
       expect(bulkOp).not.toHaveProperty('if_primary_term');
       expect(client.index).not.toHaveBeenCalled();
@@ -1178,7 +1180,7 @@ describe('WorkflowCrudService', () => {
       const { deps, client } = makeDeps();
       client.search.mockResolvedValueOnce({ hits: { hits: [] } });
       client.bulk.mockResolvedValue({
-        items: [{ index: { _id: 'wf-new', status: 200 } }],
+        items: [{ create: { _id: 'wf-new', status: 201 } }],
       });
 
       const service = new WorkflowCrudService(deps);
@@ -1284,7 +1286,7 @@ describe('WorkflowCrudService', () => {
           },
         });
       client.bulk.mockResolvedValue({
-        items: [{ index: { _id: 'wf-new', status: 200 } }],
+        items: [{ create: { _id: 'wf-new', status: 201 } }],
       });
       client.index.mockResolvedValue({ result: 'updated', _seq_no: 3, _primary_term: 1 });
 
@@ -1307,11 +1309,38 @@ describe('WorkflowCrudService', () => {
       );
     });
 
-    it('uses index (overwrite) vs create (no overwrite) based on the option flag', async () => {
+    it('does not overwrite a workflow created after the bulk existence check', async () => {
       const { deps, client } = makeDeps();
       client.search.mockResolvedValue({ hits: { hits: [] } });
       client.bulk.mockResolvedValue({
-        items: [{ index: { _id: 'id-a', status: 200 } }],
+        items: [
+          {
+            create: {
+              _id: 'race',
+              status: 409,
+              error: { type: 'version_conflict_engine_exception', reason: 'already exists' },
+            },
+          },
+        ],
+      });
+      const service = new WorkflowCrudService(deps);
+      const result = await service.bulkCreateWorkflows(
+        [{ id: 'race', yaml: validYaml('Race') }],
+        'default',
+        request,
+        { overwrite: true }
+      );
+      expect(result.created).toHaveLength(0);
+      expect(result.failed).toHaveLength(1);
+      expect(client.bulk.mock.calls[0][0].operations[0]).toHaveProperty('create');
+      expect(client.index).not.toHaveBeenCalled();
+    });
+
+    it('uses conflict-safe create for new IDs even when overwrite is requested', async () => {
+      const { deps, client } = makeDeps();
+      client.search.mockResolvedValue({ hits: { hits: [] } });
+      client.bulk.mockResolvedValue({
+        items: [{ create: { _id: 'id-a', status: 201 } }],
       });
 
       const service = new WorkflowCrudService(deps);
@@ -1320,8 +1349,8 @@ describe('WorkflowCrudService', () => {
       });
 
       const ops = client.bulk.mock.calls[0][0].operations;
-      expect(ops[0]).toHaveProperty('index');
-      expect(ops[0]).not.toHaveProperty('create');
+      expect(ops[0]).toHaveProperty('create');
+      expect(ops[0]).not.toHaveProperty('index');
 
       client.bulk.mockClear();
       client.bulk.mockResolvedValue({

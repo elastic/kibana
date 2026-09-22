@@ -8,6 +8,8 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import Boom from '@hapi/boom';
+import isEqual from 'lodash/isEqual';
 import { schema } from '@kbn/config-schema';
 import type {
   CoreSetup,
@@ -74,6 +76,10 @@ import { createDataClientBundle, type DataClientBundle } from './repositories/da
 import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
 import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
+import {
+  getWorkflowOriginalRequest,
+  WORKFLOW_SERVICE_ACCOUNT_TYPE,
+} from './service_account_execution';
 import { initializeTriggerEventsDataStream, TriggerEventHandler } from './trigger_events';
 import { initializeTriggerEventsClient } from './trigger_events/event_logs';
 import { searchTriggerEventLog as querySearchTriggerEventLog } from './trigger_events/event_logs/trigger_event_log_query';
@@ -244,6 +250,10 @@ export class WorkflowsExecutionEnginePlugin
     const config = this.config;
 
     this.coreSetup = core;
+    core.security.serviceAccounts.registerWorkloadType({
+      type: WORKFLOW_SERVICE_ACCOUNT_TYPE,
+      name: 'Workflow',
+    });
 
     initializeLogsRepositoryDataStream(core.dataStreams);
     initializeTriggerEventsDataStream(core.dataStreams);
@@ -1198,6 +1208,25 @@ export class WorkflowsExecutionEnginePlugin
       authenticatedUser: string | undefined;
       now: Date;
     }): Promise<WorkflowExecutionForInputRendering> => {
+      const serviceAccountId = args.workflow.definition?.settings?.run_as;
+      if (serviceAccountId) {
+        if (!coreStart.security.serviceAccounts.isEnabled())
+          throw Boom.forbidden('Service account execution is disabled.');
+        const spaceId = (args.context.spaceId as string | undefined) || 'default';
+        const saved = await workflowRepository.getWorkflow(args.workflow.id, spaceId);
+        if (!saved || !isEqual(saved.definition, args.workflow.definition)) {
+          throw Boom.badRequest(
+            'Service accounts require an unchanged saved workflow; inline or unsaved YAML cannot run as a service account.'
+          );
+        }
+        const binding = await coreStart.security.serviceAccounts.getWorkloadBinding({
+          workloadType: WORKFLOW_SERVICE_ACCOUNT_TYPE,
+          workloadId: args.workflow.id,
+          spaceId,
+        });
+        if (binding?.serviceAccountId !== serviceAccountId)
+          throw Boom.forbidden('Workflow service account binding does not match.');
+      }
       return buildWorkflowExecutionDocument({
         ...args,
         maxEventChainDepth: this.config.eventDriven.maxChainDepth,
@@ -1279,7 +1308,8 @@ export class WorkflowsExecutionEnginePlugin
       };
     };
 
-    const executeWorkflow: ExecuteWorkflow = async (workflow, context, request) => {
+    const executeWorkflow: ExecuteWorkflow = async (workflow, context, originalRequest) => {
+      const request = getWorkflowOriginalRequest(originalRequest);
       await checkLicense(plugins.licensing);
 
       // AUTO-DETECT: Check if we're already running in a Task Manager context
@@ -1398,7 +1428,8 @@ export class WorkflowsExecutionEnginePlugin
       };
     };
 
-    const scheduleWorkflow: ScheduleWorkflow = async (workflow, context, request) => {
+    const scheduleWorkflow: ScheduleWorkflow = async (workflow, context, originalRequest) => {
+      const request = getWorkflowOriginalRequest(originalRequest);
       await checkLicense(plugins.licensing);
 
       const { workflowExecution } = await createAndPersistWorkflowExecution(
@@ -1452,13 +1483,14 @@ export class WorkflowsExecutionEnginePlugin
 
     const bulkScheduleWorkflow = async (
       items: Array<{ workflow: WorkflowExecutionEngineModel; context: Record<string, unknown> }>,
-      request: KibanaRequest
+      originalRequest: KibanaRequest
     ): Promise<BulkScheduleWorkflowResult> => {
       if (items.length === 0) {
         return [];
       }
 
       await checkLicense(plugins.licensing);
+      const request = getWorkflowOriginalRequest(originalRequest);
 
       const authenticatedUser = await getAuthenticatedUser(
         request,
@@ -1900,6 +1932,7 @@ export class WorkflowsExecutionEnginePlugin
       cancelAllActiveWorkflowExecutions,
       resumeWorkflowExecution,
       triggerEvents,
+      serviceAccountBindings: coreStart.security.serviceAccounts,
       __internalStorage: {
         workflowExecutionsDataClient: this.dataClientBundle.createWorkflowDataClient(),
         stepExecutionsDataClient: this.dataClientBundle.createStepDataClient(),

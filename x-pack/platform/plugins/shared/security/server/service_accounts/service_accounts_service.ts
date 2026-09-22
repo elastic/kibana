@@ -112,6 +112,7 @@ export class ServiceAccountsService {
       const bindingsLogger = this.logger.get('workload-bindings');
       const store = new WorkloadBindingStore({
         client: savedObjects.getUnsafeInternalClient({
+          excludedExtensions: ['spaces'],
           includedHiddenTypes: [SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE],
         }),
         encryptedClient: encryptedSavedObjects.getClient({

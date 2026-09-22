@@ -82,6 +82,14 @@ describe('ServiceAccountsService', () => {
       ).toBeInstanceOf(UiamServiceAccounts);
     });
 
+    it('uses explicit namespaces for the workload binding store', () => {
+      const params = startParams({ serviceAccounts: { enabled: true } });
+      service.start(params);
+      expect(params.savedObjects.getUnsafeInternalClient).toHaveBeenCalledWith(
+        expect.objectContaining({ excludedExtensions: ['spaces'] })
+      );
+    });
+
     it('selects the Elasticsearch backend outside serverless', () => {
       expect(
         service.start(startParams({ serviceAccounts: { enabled: true } }, { isServerless: false }))
