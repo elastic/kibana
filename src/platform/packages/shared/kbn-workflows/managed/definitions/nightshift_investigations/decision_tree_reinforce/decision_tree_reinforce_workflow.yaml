@@ -50,7 +50,9 @@ steps:
       prompt: '{{ inputs.prompt }}'
       response: '{{ inputs.response }}'
       agent_id: '{{ inputs.agent_id }}'
-      tool_calls: '{{ inputs.tool_calls }}'
+      # ${{ }} keeps the array. Liquid `{{ }}` stringifies it as "[object Object]…"
+      # and JSON.parse in preprocess falls back to [], so every round distills from scratch.
+      tool_calls: '${{ inputs.tool_calls }}'
 
   # Nothing else installs this agent: the investigation workflow only ensures the investigator,
   # and this workflow is the sole caller of the reinforcement agent.

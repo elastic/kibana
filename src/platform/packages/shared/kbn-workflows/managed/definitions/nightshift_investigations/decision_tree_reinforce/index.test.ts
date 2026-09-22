@@ -38,9 +38,12 @@ describe('decision tree reinforce workflow', () => {
     ]);
   });
 
+  // ${{ }} passes the array through. Liquid `{{ }}` stringifies it as
+  // "[object Object][object Object]", JSON.parse in preprocess falls back to [],
+  // and extractAccessedTreeIds([]) makes every round distill from scratch.
   it('forwards the investigator tool_calls into the prepare step', () => {
     const [prepare] = workflow.steps;
-    expect(prepare.with?.tool_calls).toBe('{{ inputs.tool_calls }}');
+    expect(prepare.with?.tool_calls).toBe('${{ inputs.tool_calls }}');
   });
 
   it('runs the reinforcement agent on the message the prepare step built', () => {
