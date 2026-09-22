@@ -9,6 +9,7 @@ import {
   platformCoreTools,
   platformCoreCasesTools,
   platformSignificantEventsTools,
+  contextEngineAiIndexTools,
 } from '@kbn/agent-builder-common/tools';
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 import { chatAgentTypeId } from '@kbn/agent-builder-common';
@@ -57,6 +58,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
 
   // Security Solution
   `${internalNamespaces.security}.alertzero.actions.list`,
+  `${internalNamespaces.security}.alertzero.proposals.revise`,
   `${internalNamespaces.security}.entity_risk_score`,
   `${internalNamespaces.security}.create_detection_rule`,
   `${internalNamespaces.security}.run_rule_preview`,
@@ -114,6 +116,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
 
   // Platform – Context Engine
   `${internalNamespaces.platformContextEngine}.save_automation`,
+  ...Object.values(contextEngineAiIndexTools),
 
   // Nightshift – Sandbox
   'nightshift_sandbox_bash',
@@ -347,6 +350,9 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   'security.entity_analytics_dashboard',
   'security.entity_graph',
   'security.entity_risk_score_history',
+  'security.exception',
+  'security.investigation.iocs',
+  'security.investigation.timeline',
   'security.rule',
   'security.siem_readiness',
   // gated behind experimentalFeatures.rulePreviewAttachmentEnabled
@@ -355,6 +361,8 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   // Security Solution – Attack Discovery (discoveries plugin)
   // gated behind the workflows feature flag
   'diagnostic_report',
+  'security.attack_discovery',
+  'security.attack_discovery.verdict',
 
   // Observability
   'observability.ai_insight',

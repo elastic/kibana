@@ -10,6 +10,7 @@
     "apmUiShared": "src/platform/packages/shared/kbn-apm-ui-shared",
     "apmTypes": "x-pack/platform/packages/shared/kbn-apm-types",
     "asCodeExport": "src/platform/packages/shared/as-code/export-flyout-component",
+    "asCodeImport": "src/platform/packages/shared/as-code/import-flyout-component",
     "autocomplete": "x-pack/solutions/security/packages/kbn-securitysolution-autocomplete/src",
     "avcBanner": "src/platform/packages/shared/kbn-avc-banner/src",
     "cases": [

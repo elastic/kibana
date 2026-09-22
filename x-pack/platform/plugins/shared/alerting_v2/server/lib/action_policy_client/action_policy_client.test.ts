@@ -2939,7 +2939,7 @@ describe('ActionPolicyClient', () => {
     });
   });
 
-  describe('matchActionPoliciesForRule', () => {
+  describe('matchActionPolicies', () => {
     const makeFindResponse = (
       items: Array<{
         id: string;
@@ -2985,11 +2985,11 @@ describe('ActionPolicyClient', () => {
         )
       );
 
-      const result = await client.matchActionPoliciesForRule({ ruleTags: ['prod'] });
+      const result = await client.matchActionPolicies({ ruleTags: ['prod'] });
 
       expect(result.items).toHaveLength(1);
       expect(result.items[0].category).toBe('catch-all');
-      expect(result.items[0].actionPolicy.id).toBe('ap-catchall');
+      expect(result.items[0].action_policy.id).toBe('ap-catchall');
       expect(result.total).toBe(150);
       expect(result.evaluated_count).toBe(1);
       expect(result.is_truncated).toBe(true);
@@ -3014,7 +3014,7 @@ describe('ActionPolicyClient', () => {
         )
       );
 
-      const result = await client.matchActionPoliciesForRule({ ruleTags: ['prod'] });
+      const result = await client.matchActionPolicies({ ruleTags: ['prod'] });
 
       expect(result.items).toHaveLength(evaluatedCount);
       expect(result).toMatchObject({
@@ -3038,11 +3038,11 @@ describe('ActionPolicyClient', () => {
         makeFindResponse([{ id: 'ap-empty-matcher', attributes: matcherAttr }])
       );
 
-      const result = await client.matchActionPoliciesForRule({ ruleTags: ['prod'] });
+      const result = await client.matchActionPolicies({ ruleTags: ['prod'] });
 
       expect(result.items).toHaveLength(1);
       expect(result.items[0].category).toBe('catch-all');
-      expect(result.items[0].actionPolicy.id).toBe('ap-empty-matcher');
+      expect(result.items[0].action_policy.id).toBe('ap-empty-matcher');
     });
 
     it('returns catch-all APs even when the rule has no tags', async () => {
@@ -3050,7 +3050,7 @@ describe('ActionPolicyClient', () => {
         makeFindResponse([{ id: 'ap-catchall', attributes: { ...baseAttributes, matcher: null } }])
       );
 
-      const result = await client.matchActionPoliciesForRule({});
+      const result = await client.matchActionPolicies({});
 
       expect(result.items).toHaveLength(1);
       expect(result.items[0].category).toBe('catch-all');
@@ -3066,11 +3066,11 @@ describe('ActionPolicyClient', () => {
         makeFindResponse([{ id: 'ap-matcher', attributes: matcherAttr }])
       );
 
-      const result = await client.matchActionPoliciesForRule({ ruleTags: ['prod'] });
+      const result = await client.matchActionPolicies({ ruleTags: ['prod'] });
 
       expect(result.items).toHaveLength(1);
       expect(result.items[0].category).toBe('tags');
-      expect(result.items[0].actionPolicy.id).toBe('ap-matcher');
+      expect(result.items[0].action_policy.id).toBe('ap-matcher');
     });
 
     it('skips APs whose tag clause does not intersect the rule tags', async () => {
@@ -3083,7 +3083,7 @@ describe('ActionPolicyClient', () => {
         makeFindResponse([{ id: 'ap-no-match', attributes: matcherAttr }])
       );
 
-      const result = await client.matchActionPoliciesForRule({ ruleTags: ['prod'] });
+      const result = await client.matchActionPolicies({ ruleTags: ['prod'] });
 
       expect(result.items).toHaveLength(0);
     });
@@ -3098,7 +3098,7 @@ describe('ActionPolicyClient', () => {
         makeFindResponse([{ id: 'ap-expression', attributes: matcherAttr }])
       );
 
-      const result = await client.matchActionPoliciesForRule({ ruleTags: ['prod'] });
+      const result = await client.matchActionPolicies({ ruleTags: ['prod'] });
 
       expect(result.items).toHaveLength(0);
     });
@@ -3113,11 +3113,11 @@ describe('ActionPolicyClient', () => {
         makeFindResponse([{ id: 'ap-combined', attributes: matcherAttr }])
       );
 
-      const result = await client.matchActionPoliciesForRule({ ruleTags: ['prod', 'infra'] });
+      const result = await client.matchActionPolicies({ ruleTags: ['prod', 'infra'] });
 
       expect(result.items).toHaveLength(1);
       expect(result.items[0].category).toBe('tags');
-      expect(result.items[0].actionPolicy.id).toBe('ap-combined');
+      expect(result.items[0].action_policy.id).toBe('ap-combined');
     });
   });
 });
