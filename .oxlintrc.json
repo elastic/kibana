@@ -67,6 +67,22 @@
   "overrides": [
     {
       "files": [
+        "{src/platform,src/core,x-pack/**}/{plugins,packages}/**/test/scout{_*,}/**/*.ts",
+        "{examples,x-pack/examples}/**/test/scout{_*,}/**/*.ts",
+        "src/core/test/scout{_*,}/**/*.ts",
+        "packages/**/test/scout{_*,}/**/*.ts"
+      ],
+      "excludeFiles": ["src/platform/packages/shared/kbn-scout/test/**"],
+      "rules": {
+        "@kbn/eslint/scout_no_describe_configure": "error",
+        "@kbn/eslint/scout_no_deprecated_tags": "error",
+        "@kbn/eslint/scout_no_at_in_test_titles": "warn",
+        "@kbn/eslint/scout_no_promise_all_with_playwright_apis": "error",
+        "@kbn/eslint/require_include_in_check_a11y": "warn"
+      }
+    },
+    {
+      "files": [
         "x-pack/platform/test/api_integration_deployment_agnostic/apis/**/*.{js,ts}",
         "x-pack/platform/test/api_integration_deployment_agnostic/services/**/*.{js,ts}",
         "x-pack/solutions/**/test/api_integration_deployment_agnostic/apis/**/*.{js,ts}",
