@@ -23,10 +23,16 @@ import { EntitySourceFilter } from './components/entity_source_filter';
 import { useEntitiesListFilters } from './hooks/use_entities_list_filters';
 import { AssetCriticalityFilter } from '../asset_criticality/asset_criticality_filter';
 import { useEntitiesListQuery } from './hooks/use_entities_list_query';
+import { buildExecutionContext } from '../../../common/utils/execution_context';
 import { ENTITIES_LIST_TABLE_ID, rowItems } from './constants';
 import { useEntitiesListColumns } from './hooks/use_entities_list_columns';
 import type { EntitySourceTag } from './types';
 import { useEntityStoreTypes } from '../../hooks/use_enabled_entity_types';
+
+const ENTITIES_LIST_CONTEXT = buildExecutionContext(
+  'entity_analytics:entity_store_management',
+  'entities_list'
+);
 
 export const EntitiesList: React.FC = () => {
   const { deleteQuery, setQuery, isInitializing, from, to } = useGlobalTime();
@@ -80,6 +86,7 @@ export const EntitiesList: React.FC = () => {
           filter,
         },
       }),
+      executionContext: ENTITIES_LIST_CONTEXT,
     }),
     [entityTypes, activePage, limit, sorting.field, sorting.direction, querySkip, filter]
   );
