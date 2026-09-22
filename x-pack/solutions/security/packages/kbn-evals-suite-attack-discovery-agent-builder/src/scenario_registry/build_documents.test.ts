@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AD2_SCENARIO_SEED_LABEL } from './constants';
 import { buildAd2SeedPlan, getAd2ScenarioAlertIds } from './registry';
 
 describe('AD2 scenario registry (clean profile)', () => {
@@ -31,28 +32,56 @@ describe('AD2 scenario registry (clean profile)', () => {
     ).toBe(true);
   });
 
-  it('uses deterministic scenario-registry ids and labels', () => {
+  it('carries the run marker in root tags, the field a retrieval can filter on', () => {
+    const plan = buildAd2SeedPlan({ profile: 'dense', baseTime: fixedBaseTime });
+
+    // `labels` is the cleanup marker; root `tags` is the RETRIEVAL marker — an
+    // ECS keyword field, which is what the live-retrieval datasets scope their
+    // query by. Both carry the run marker: losing it silently turns the dense
+    // profile's exact-population expectation into a count of whatever else is
+    // in the shared alerts index.
+    const tagged = plan.alerts.filter((alert) =>
+      ((alert.source.tags as string[] | undefined) ?? []).includes(plan.runMarker)
+    );
+    expect(tagged).toHaveLength(plan.alerts.length);
+    expect(plan.alerts.length).toBeGreaterThan(0);
+    // The generation marker stays the prefix, so a seeded index is still
+    // greppable as this fixture.
+    expect(plan.runMarker).toContain(AD2_SCENARIO_SEED_LABEL);
+  });
+
+  it('writes the ids the resolver hands the reference discoveries', () => {
     const plan = buildAd2SeedPlan({
       profile: 'clean',
       scenarioKey: 'encoded-powershell',
       baseTime: fixedBaseTime,
     });
+    const resolvedIds = [...getAd2ScenarioAlertIds('encoded-powershell', 'clean', plan.runMarker)];
 
     expect(plan.alerts).toHaveLength(4);
-    expect(plan.alerts[0]?.id).toBe('ad-scenario-encoded-powershell-alert-1');
+    expect(plan.alerts.map((alert) => alert.id)).toEqual(resolvedIds);
     expect(plan.alerts[0]?.source).toMatchObject({
-      labels: {
-        ad_portable_seed: 'ad-scenario-registry-2026-07',
-        ad_test_scenario: 'encoded-powershell',
-      },
+      labels: { ad_portable_seed: plan.runMarker },
+      tags: [plan.runMarker],
       host: { name: 'wks-alice-01' },
     });
-    expect(getAd2ScenarioAlertIds('encoded-powershell')).toEqual([
-      'ad-scenario-encoded-powershell-alert-1',
-      'ad-scenario-encoded-powershell-alert-2',
-      'ad-scenario-encoded-powershell-alert-3',
-      'ad-scenario-encoded-powershell-alert-4',
-    ]);
+
+    // A different run resolves different ids for the same chain: the reference
+    // discoveries of one run cannot name another run's documents.
+    expect([...getAd2ScenarioAlertIds('encoded-powershell', 'clean', 'another-run')]).not.toEqual(
+      resolvedIds
+    );
+
+    // Opaque: an id (or a per-document label) naming the chain is the same
+    // target/noise discriminator a model could read the four real chains out of
+    // the dense population by. See `ids.ts`.
+    const rule = plan.alerts[0]?.source.rule as { id: string };
+    for (const id of [plan.alerts[0]?.id, rule.id]) {
+      expect(id).not.toContain('encoded-powershell');
+    }
+    expect('ad_test_scenario' in (plan.alerts[0]?.source.labels as Record<string, unknown>)).toBe(
+      false
+    );
   });
 
   it('emits network and file raw events for multi-stage chains', () => {
