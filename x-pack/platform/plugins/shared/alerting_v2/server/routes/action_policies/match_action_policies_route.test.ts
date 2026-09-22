@@ -61,7 +61,7 @@ describe('MatchActionPoliciesRoute', () => {
   it('returns client result in the response body', async () => {
     const mocks = createMocks();
     const clientResult = {
-      items: [{ action_policy: { id: 'ap-1', name: 'AP 1' }, category: 'catch-all' }],
+      items: [{ action_policy: { id: 'ap-1', name: 'AP 1' }, category: 'catch_all' }],
       total: 250,
       evaluated_count: 100,
       is_truncated: true,
