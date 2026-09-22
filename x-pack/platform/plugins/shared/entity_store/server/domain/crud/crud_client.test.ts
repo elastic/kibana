@@ -602,6 +602,26 @@ describe('CRUDClient', () => {
     });
   });
 
+  describe('clearRelationshipIds', () => {
+    it('clears the relationship on the resolved latest index', async () => {
+      esClient.indices.exists.mockResolvedValue(true);
+      esClient.updateByQuery.mockResolvedValue({ updated: 3, total: 3 } as never);
+
+      const result = await client.clearRelationshipIds({
+        entitySource: 'workday',
+        relationshipKey: 'supervises',
+      });
+
+      const body = esClient.updateByQuery.mock.calls[0][0] as {
+        query: { bool: { filter: unknown[] } };
+      };
+      expect(body.query.bool.filter).toContainEqual({
+        term: { 'entity.source': 'workday' },
+      });
+      expect(result).toEqual({ updated: 3, total: 3 });
+    });
+  });
+
   describe('risk score trigger emit', () => {
     let emitWorkflowTriggerEvent: jest.Mock;
     let clientWithEmit: CRUDClient;

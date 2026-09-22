@@ -33,6 +33,7 @@ import type { EntityCreatedBy } from '../../../common/domain/definitions/common_
 import { validateAndTransformDoc } from './utils';
 import { buildEntityFromSource } from './entity_from_source';
 import { runWithSpan } from '../../telemetry/traces';
+import { clearRelationshipIdsByEntitySource } from '../../infra/elasticsearch';
 import {
   searchEntitiesV2,
   searchEntitiesV2Batch,
@@ -42,6 +43,7 @@ import {
   type SearchEntitiesV2Result,
 } from '../search_entities/search_entities';
 import { type WorkflowEmitTarget, WorkflowEventPublisher } from './workflow_event_publisher';
+import { inspect } from 'util';
 
 const RETRY_ON_CONFLICT = 3;
 
@@ -456,7 +458,7 @@ export class CRUDClient {
     const previousDocs = await this.eventPublisher.maybeGetExistingDocs(
       emitTargets.map(({ doc }) => doc)
     );
-
+    console.log("operations1", inspect(operations, { depth: null, colors: true, maxStringLength: null }));
     this.logger.debug(`Bulk updating ${objects.length} entities`);
     const resp = await this.esClient.bulk({
       index: await this.latestIndexName(),
@@ -494,6 +496,29 @@ export class CRUDClient {
     }
 
     return errors;
+  }
+
+  /**
+   * Clears `entity.relationships.<relationshipKey>.ids` for every entity from
+   * `entitySource`. Intended for snapshot-source maintainers that repopulate the
+   * relationship from a full scan immediately afterwards.
+   */
+  public async clearRelationshipIds({
+    entitySource,
+    relationshipKey,
+    signal,
+  }: {
+    entitySource: string;
+    relationshipKey: string;
+    signal?: AbortSignal;
+  }): Promise<{ updated: number; total: number }> {
+    await this.assertInstalled();
+    return clearRelationshipIdsByEntitySource(this.esClient, {
+      index: await this.latestIndexName(),
+      entitySource,
+      relationshipKey,
+      signal,
+    });
   }
 
   // createEntity generates EUID and creates the entity in the LATEST index
