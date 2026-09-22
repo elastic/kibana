@@ -68,6 +68,7 @@ pageLoadAssetSize:
   entityStore: 15562
   esql: 29469
   esqlDataGrid: 10209
+  esqlViews: 4666
   esUiShared: 101220
   evals: 9654
   eventAnnotation: 22334
@@ -137,6 +138,7 @@ pageLoadAssetSize:
   newsfeed: 11110
   nightshift: 7911
   nightshiftInvestigations: 5000
+  nightshiftSources: 3928
   noDataPage: 1749
   notificationCenter: 1791
   observability: 116568

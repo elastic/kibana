@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -37,6 +37,8 @@ const FLYOUT_TITLE = i18n.translate('xpack.agentBuilder.conversationDetailsFlyou
 const ERROR_BODY = i18n.translate('xpack.agentBuilder.conversationDetailsFlyout.errorBody', {
   defaultMessage: 'Something went wrong while loading this conversation.',
 });
+
+const POLL_INTERVAL_MS = 5_000;
 
 type ResolvedTab = ConversationTemplateTabDefinition & { id: string };
 
@@ -110,6 +112,7 @@ export interface ConversationDetailsFlyoutContentProps {
   conversation: Conversation;
   conversationTemplatesService: ConversationTemplatesService;
   titleId: string;
+  refetchConversation?: () => Promise<void>;
 }
 
 /** Presentational only — renders whatever conversation it is given; not responsible for data fetching. */
@@ -118,6 +121,7 @@ export const ConversationDetailsFlyoutContent = ({
   conversation,
   conversationTemplatesService,
   titleId,
+  refetchConversation,
 }: ConversationDetailsFlyoutContentProps) => {
   const [selectedTabId, setSelectedTabId] = useState<string | undefined>(undefined);
 
@@ -144,8 +148,24 @@ export const ConversationDetailsFlyoutContent = ({
   return (
     <FlyoutFrame
       titleId={titleId}
-      header={Header && <Header conversation={conversation} isOpenedFromChat={isOpenedFromChat} />}
-      footer={Footer && <Footer conversation={conversation} isOpenedFromChat={isOpenedFromChat} />}
+      header={
+        Header && (
+          <Header
+            conversation={conversation}
+            isOpenedFromChat={isOpenedFromChat}
+            refetchConversation={refetchConversation}
+          />
+        )
+      }
+      footer={
+        Footer && (
+          <Footer
+            conversation={conversation}
+            isOpenedFromChat={isOpenedFromChat}
+            refetchConversation={refetchConversation}
+          />
+        )
+      }
       tabs={
         shouldRenderTabs &&
         tabs.map((entry) => (
@@ -164,6 +184,7 @@ export const ConversationDetailsFlyoutContent = ({
           key={selectedTab.id}
           conversation={conversation}
           isOpenedFromChat={isOpenedFromChat}
+          refetchConversation={refetchConversation}
         />
       )}
     </FlyoutFrame>
@@ -177,7 +198,11 @@ export interface ConversationDetailsFlyoutSnapshotProps {
   titleId: string;
 }
 
-/** Snapshot variant backed by an isolated, per-open query cache. */
+/**
+ * Snapshot variant backed by an isolated, per-open query cache. Opened outside chat, where nothing
+ * else invalidates the conversation, so it polls while open and hands registered content a way to
+ * refetch on demand.
+ */
 export const ConversationDetailsFlyoutSnapshot = ({
   conversationId,
   conversationsService,
@@ -187,11 +212,16 @@ export const ConversationDetailsFlyoutSnapshot = ({
   const {
     data: conversation,
     isLoading,
-    isError,
+    refetch,
   } = useQuery({
     queryKey: ['conversation-details-flyout-snapshot', conversationId],
     queryFn: () => conversationsService.get({ conversationId }),
+    refetchInterval: POLL_INTERVAL_MS,
   });
+
+  const refetchConversation = useCallback(async () => {
+    await refetch();
+  }, [refetch]);
 
   if (isLoading) {
     return (
@@ -201,7 +231,7 @@ export const ConversationDetailsFlyoutSnapshot = ({
     );
   }
 
-  if (isError || !conversation) {
+  if (!conversation) {
     return (
       <FlyoutFrame titleId={titleId}>
         <EuiText size="s" color="danger">
@@ -217,6 +247,7 @@ export const ConversationDetailsFlyoutSnapshot = ({
       conversation={conversation}
       conversationTemplatesService={conversationTemplatesService}
       titleId={titleId}
+      refetchConversation={refetchConversation}
     />
   );
 };
