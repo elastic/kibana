@@ -112,6 +112,7 @@ export {
   coverageFromSchedule,
   createCatalogWatchPlaceholder,
   isOnDutyNow,
+  resolveWatchAccent,
 } from './impl/watches/watch_helpers';
 export type {
   CatalogWatchId,
