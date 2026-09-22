@@ -45,11 +45,6 @@ const wizardContentFromFormValues = (values: CreateDatasetFormValues): DatasetWi
 const MAX_WIDTH_NARROW_PX = 600;
 const MAX_WIDTH_WIDE_PX = 1024;
 
-const getWizardMaxWidth = (stepId: DatasetWizardSection): number => {
-  if (stepId === 'dataset' || stepId === 'settings') return MAX_WIDTH_NARROW_PX;
-  return MAX_WIDTH_WIDE_PX;
-};
-
 export function CreateDatasetWizardPage({
   dataSources,
   existingDataSetNames,
@@ -71,7 +66,6 @@ export function CreateDatasetWizardPage({
   const datasetNameToEdit = initialDataSet?.name;
   const [saveError, setSaveError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const [activeStepId, setActiveStepId] = useState<DatasetWizardSection>('dataset');
   const formDefaultValues = useMemo(
     (): CreateDatasetFormValues =>
       initialDataSet ? dataSetToFormValues(initialDataSet) : emptyDatasetFormValues(),
@@ -155,7 +149,9 @@ export function CreateDatasetWizardPage({
             <div
               style={{
                 width: '100%',
-                maxWidth: getWizardMaxWidth(activeStepId),
+                // Keep navigation controls (Next/Back/Save) aligned consistently across steps.
+                // Individual steps can still constrain their content width as needed.
+                maxWidth: MAX_WIDTH_WIDE_PX,
                 marginInline: 'auto',
               }}
             >
@@ -165,7 +161,6 @@ export function CreateDatasetWizardPage({
                 onSave={onSave}
                 isSaving={isSaving}
                 apiError={apiError}
-                onStepChange={(id) => setActiveStepId(id as DatasetWizardSection)}
                 texts={{
                   save: isEditMode
                     ? createDatasetWizardStrings.saveButton
@@ -177,7 +172,10 @@ export function CreateDatasetWizardPage({
                   label={createDatasetWizardStrings.datasetStepLabel}
                   isRequired
                 >
-                  <div data-test-subj="createDatasetWizardContent">
+                  <div
+                    data-test-subj="createDatasetWizardContent"
+                    style={{ maxWidth: MAX_WIDTH_NARROW_PX, marginInline: 'auto' }}
+                  >
                     <StepDataset
                       dataSources={dataSources}
                       existingDataSetNames={existingDataSetNames}
@@ -191,7 +189,10 @@ export function CreateDatasetWizardPage({
                   id="settings"
                   label={createDatasetWizardStrings.additionalStepLabel}
                 >
-                  <div data-test-subj="createDatasetWizardContent">
+                  <div
+                    data-test-subj="createDatasetWizardContent"
+                    style={{ maxWidth: MAX_WIDTH_NARROW_PX, marginInline: 'auto' }}
+                  >
                     <StepAdditional />
                   </div>
                 </FormWizardStep>
