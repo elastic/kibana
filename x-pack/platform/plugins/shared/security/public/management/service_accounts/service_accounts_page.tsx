@@ -5,20 +5,57 @@
  * 2.0.
  */
 
-import React from 'react';
+import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { ServiceAccountsEmptyPrompt } from './service_accounts_empty_prompt';
+import type { ServiceAccountTableItem } from './service_accounts_table';
+import { ServiceAccountsTable } from './service_accounts_table';
+import type { ServiceAccountsAPIClient } from '../../service_accounts';
 
 export interface ServiceAccountsPageProps {
   canCreate: boolean;
+  serviceAccountsAPIClient: Pick<PublicMethodsOf<ServiceAccountsAPIClient>, 'getAll'>;
   onCreateAccount: () => void;
+  onOpenAccount: (serviceAccount: ServiceAccountTableItem) => void;
+  onOpenWorkloads: (serviceAccount: ServiceAccountTableItem) => void;
+  onDeleteAccount: (serviceAccount: ServiceAccountTableItem) => void;
 }
 
-export const ServiceAccountsPage = ({ canCreate, onCreateAccount }: ServiceAccountsPageProps) => {
+export const ServiceAccountsPage = ({
+  canCreate,
+  serviceAccountsAPIClient,
+  onCreateAccount,
+  onOpenAccount,
+  onOpenWorkloads,
+  onDeleteAccount,
+}: ServiceAccountsPageProps) => {
+  const [serviceAccounts, setServiceAccounts] = useState<ServiceAccountTableItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
+
+  const loadServiceAccounts = useCallback(async () => {
+    setIsLoading(true);
+    setHasError(false);
+
+    try {
+      setServiceAccounts(await serviceAccountsAPIClient.getAll());
+    } catch {
+      setHasError(true);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [serviceAccountsAPIClient]);
+
+  useEffect(() => {
+    loadServiceAccounts();
+  }, [loadServiceAccounts]);
+
   const menu: AppHeaderMenu | undefined = canCreate
     ? {
         primaryActionItem: {
@@ -45,8 +82,57 @@ export const ServiceAccountsPage = ({ canCreate, onCreateAccount }: ServiceAccou
         menu={menu}
         spacing="bleed"
       />
-      <KibanaPageTemplate.Section alignment="center" grow>
-        <ServiceAccountsEmptyPrompt canCreate={canCreate} onCreateAccount={onCreateAccount} />
+      <KibanaPageTemplate.Section
+        alignment={isLoading || hasError || serviceAccounts.length === 0 ? 'center' : 'top'}
+        grow
+      >
+        {isLoading ? (
+          <EuiLoadingSpinner
+            size="l"
+            aria-label={i18n.translate(
+              'xpack.security.management.serviceAccounts.loadingAriaLabel',
+              { defaultMessage: 'Loading service accounts' }
+            )}
+            data-test-subj="serviceAccountsLoading"
+          />
+        ) : hasError ? (
+          <EuiEmptyPrompt
+            color="danger"
+            iconType="warning"
+            title={
+              <h2>
+                {i18n.translate('xpack.security.management.serviceAccounts.loadErrorTitle', {
+                  defaultMessage: 'Unable to load service accounts',
+                })}
+              </h2>
+            }
+            body={
+              <p>
+                {i18n.translate('xpack.security.management.serviceAccounts.loadErrorDescription', {
+                  defaultMessage: 'Try again or contact your administrator.',
+                })}
+              </p>
+            }
+            actions={
+              <EuiButton onClick={loadServiceAccounts} data-test-subj="serviceAccountsRetry">
+                {i18n.translate('xpack.security.management.serviceAccounts.loadErrorRetryButton', {
+                  defaultMessage: 'Try again',
+                })}
+              </EuiButton>
+            }
+            data-test-subj="serviceAccountsLoadError"
+          />
+        ) : serviceAccounts.length === 0 ? (
+          <ServiceAccountsEmptyPrompt canCreate={canCreate} onCreateAccount={onCreateAccount} />
+        ) : (
+          <ServiceAccountsTable
+            serviceAccounts={serviceAccounts}
+            canDelete={canCreate}
+            onOpenAccount={onOpenAccount}
+            onOpenWorkloads={onOpenWorkloads}
+            onDeleteAccount={onDeleteAccount}
+          />
+        )}
       </KibanaPageTemplate.Section>
     </>
   );

@@ -30,6 +30,7 @@ import type { SecurityLicenseFeatures } from '../../common';
 import { licenseMock } from '../../common/licensing/index.mock';
 import type { ConfigType } from '../config';
 import { securityMock } from '../mocks';
+import type { ServiceAccountsAPIClient } from '../service_accounts';
 
 const mockSection = createManagementSectionMock();
 
@@ -122,6 +123,7 @@ describe('ManagementService', () => {
         authc,
         management: managementSetup,
         buildFlavor: 'serverless',
+        serviceAccountsAPIClient: {} as ServiceAccountsAPIClient,
       });
 
       expect(mockUiamSection.registerApp).toHaveBeenCalledTimes(5);
@@ -175,6 +177,7 @@ describe('ManagementService', () => {
         authc,
         management: managementSetup,
         buildFlavor: 'serverless',
+        serviceAccountsAPIClient: {} as ServiceAccountsAPIClient,
       });
 
       expect(serviceAccountsSection.registerApp).toHaveBeenCalledWith({
@@ -303,6 +306,7 @@ describe('ManagementService', () => {
         authc,
         management: managementSetup,
         buildFlavor,
+        serviceAccountsAPIClient: {} as ServiceAccountsAPIClient,
       });
 
       const getMockedApp = (id: string) => {

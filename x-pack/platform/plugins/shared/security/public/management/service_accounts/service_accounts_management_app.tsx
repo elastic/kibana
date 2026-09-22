@@ -23,14 +23,16 @@ import {
   createBreadcrumbsChangeHandler,
 } from '../../components/breadcrumb';
 import type { PluginStartDependencies } from '../../plugin';
+import type { ServiceAccountsAPIClient } from '../../service_accounts';
 
 interface CreateParams {
   getStartServices: StartServicesAccessor<PluginStartDependencies>;
+  serviceAccountsAPIClient: ServiceAccountsAPIClient;
 }
 
 export const serviceAccountsManagementApp = Object.freeze({
   id: 'service_accounts',
-  create({ getStartServices }: CreateParams) {
+  create({ getStartServices, serviceAccountsAPIClient }: CreateParams) {
     const title = i18n.translate('xpack.security.management.serviceAccountsTitle', {
       defaultMessage: 'Service accounts',
     });
@@ -56,7 +58,15 @@ export const serviceAccountsManagementApp = Object.freeze({
               <Breadcrumb text={title} href="/">
                 <ServiceAccountsPage
                   canCreate={canCreate}
+                  serviceAccountsAPIClient={serviceAccountsAPIClient}
                   onCreateAccount={() => history.push('/create')}
+                  onOpenAccount={({ id }) => history.push(`/account/${encodeURIComponent(id)}`)}
+                  onOpenWorkloads={({ id }) =>
+                    history.push(`/account/${encodeURIComponent(id)}/workloads`)
+                  }
+                  onDeleteAccount={({ id }) =>
+                    history.push(`/account/${encodeURIComponent(id)}/delete`)
+                  }
                 />
               </Breadcrumb>
             </Providers>

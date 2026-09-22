@@ -12,12 +12,14 @@ import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/
 import type { Unmount } from '@kbn/management-plugin/public/types';
 
 import { serviceAccountsManagementApp } from './service_accounts_management_app';
+import type { ServiceAccountsAPIClient } from '../../service_accounts';
 
 jest.mock('./service_accounts_page', () => ({
   ServiceAccountsPage: () => 'Service Accounts Page',
 }));
 
 const element = document.body.appendChild(document.createElement('div'));
+const serviceAccountsAPIClient = {} as ServiceAccountsAPIClient;
 
 describe('serviceAccountsManagementApp', () => {
   it('renders the application and sets the breadcrumb', async () => {
@@ -29,14 +31,16 @@ describe('serviceAccountsManagementApp', () => {
 
     let unmount: Unmount = noop;
     await act(async () => {
-      unmount = await serviceAccountsManagementApp.create({ getStartServices }).mount({
-        basePath: '/',
-        element,
-        setBreadcrumbs,
-        history,
-        theme: coreStartMock.theme,
-        theme$: themeServiceMock.createTheme$(),
-      });
+      unmount = await serviceAccountsManagementApp
+        .create({ getStartServices, serviceAccountsAPIClient })
+        .mount({
+          basePath: '/',
+          element,
+          setBreadcrumbs,
+          history,
+          theme: coreStartMock.theme,
+          theme$: themeServiceMock.createTheme$(),
+        });
     });
 
     expect(setBreadcrumbs).toHaveBeenLastCalledWith([{ text: 'Service accounts' }]);
@@ -48,7 +52,10 @@ describe('serviceAccountsManagementApp', () => {
 
   it('registers under id "service_accounts" with order 35', () => {
     const { getStartServices } = coreMock.createSetup();
-    const app = serviceAccountsManagementApp.create({ getStartServices });
+    const app = serviceAccountsManagementApp.create({
+      getStartServices,
+      serviceAccountsAPIClient,
+    });
 
     expect(app.id).toBe('service_accounts');
     expect(app.order).toBe(35);
