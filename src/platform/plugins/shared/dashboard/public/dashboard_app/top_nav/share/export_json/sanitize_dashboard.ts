@@ -7,22 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import { DASHBOARD_INTERNAL_API_PATH } from '../../../../../common/constants';
 import type { DashboardSanitizeResponseBody } from '../../../../../server';
 import { coreServices } from '../../../../services/kibana_services';
 
-export async function sanitizeDashboard(dashboardState: DashboardState) {
+export async function sanitizeDashboard(dashboardState: unknown, signal?: AbortSignal) {
   const result = await coreServices.http.post<DashboardSanitizeResponseBody>(
     `${DASHBOARD_INTERNAL_API_PATH}/_sanitize`,
     {
       version: '1',
       body: JSON.stringify(dashboardState),
+      signal,
     }
   );
 
   return {
     data: result.data,
     warnings: (result.warnings ?? []).map(({ message }) => message),
+    relatedItems: result.related_items ?? [],
+    relatedItemsCount: result.related_items_count ?? result.related_items?.length ?? 0,
   };
 }

@@ -12,6 +12,7 @@ import {
   CHANGE_POINT_TYPES,
   severitySchema,
   MAX_ID_LENGTH,
+  MAX_ASSESSMENT_NOTE_LENGTH,
   triggerFeedbackSchema,
   type ChangePointType,
   type Detection,
@@ -23,6 +24,7 @@ import {
 } from '@kbn/significant-events-schema';
 import { notFound, serverUnavailable } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
+import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import {
   attachInvestigationToEvent,
   type SignificantEventTriggerFeedback,
@@ -34,7 +36,6 @@ import {
 } from '../../../lib/significant_events/events/cleanup_stale_events';
 import { triggerInvestigationWorkflow } from '../../../lib/significant_events/events/trigger_investigation_workflow';
 import { resolveInvestigationStatuses } from '../../../lib/significant_events/events/resolve_investigation_status';
-import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import type { PaginatedResponse } from '../../../lib/significant_events/query_utils';
 import { createServerRoute } from '../../create_server_route';
 import { assertNotPaused } from '../../utils/assert_not_paused';
@@ -95,7 +96,7 @@ const eventsSearchRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
   params: z.object({
@@ -137,7 +138,8 @@ const eventsSearchRoute = createServerRoute({
       ...rest
     } = params.query ?? {};
 
-    return getEventClient().findLatestByCurrentStatePaginated({
+    const eventClient = await getEventClient();
+    return eventClient.findLatestByCurrentStatePaginated({
       ...rest,
       from,
       to,
@@ -160,7 +162,7 @@ const eventsLifecycleRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
   params: z.object({
@@ -178,19 +180,21 @@ const eventsLifecycleRoute = createServerRoute({
 
     await assertSignificantEventsAccess({ server, licensing });
 
-    const { hits: initialHits } = await getEventClient().findByEventUuid(params.path.id);
+    const eventClient = await getEventClient();
+    const { hits: initialHits } = await eventClient.findByEventUuid(params.path.id);
     if (initialHits.length === 0) {
       return { detections: [], events: [] };
     }
 
     const { event_id: eventId } = initialHits[0];
-    const { hits: events } = await getEventClient().findByEventId(eventId);
+    const { hits: events } = await eventClient.findByEventId(eventId);
     if (events.length === 0) {
       return { detections: [], events: [] };
     }
 
     const embedded = collectEmbeddedDetections(events);
-    const { hits: allDetectionHits } = await getDetectionClient().findByIds(
+    const detectionClient = await getDetectionClient();
+    const { hits: allDetectionHits } = await detectionClient.findByIds(
       embedded.map((e) => e.detection_id)
     );
     const hitsByDetectionId = new Map(
@@ -237,7 +241,7 @@ const eventsAttachInvestigationRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -258,7 +262,7 @@ const eventsAttachInvestigationRoute = createServerRoute({
     const { trigger_feedback: triggerFeedback, ...investigation } = params.body;
 
     return attachInvestigationToEvent({
-      eventClient: getEventClient(),
+      eventClient: await getEventClient(),
       eventId: params.path.id,
       investigation,
       triggerFeedback: triggerFeedback as SignificantEventTriggerFeedback | undefined,
@@ -277,7 +281,7 @@ const eventsTriggerInvestigationRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -298,7 +302,8 @@ const eventsTriggerInvestigationRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing });
     await assertNotPaused({ maintenanceService, request });
 
-    const { hits } = await getEventClient().findByEventUuid(params.path.id);
+    const eventClient = await getEventClient();
+    const { hits } = await eventClient.findByEventUuid(params.path.id);
     if (hits.length === 0) {
       throw notFound(`Significant event "${params.path.id}" not found.`);
     }
@@ -320,6 +325,51 @@ const eventsTriggerInvestigationRoute = createServerRoute({
   },
 });
 
+const eventsGetRoute = createServerRoute({
+  endpoint: 'GET /internal/significant_events/events/{id}',
+  options: {
+    access: 'internal',
+    summary: 'Get a significant event',
+    description: 'Fetch the latest version of a single significant event by its event_uuid.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({
+    path: z.object({
+      id: z.string().max(255),
+    }),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+  }): Promise<SignificantEventResponse> => {
+    const { getEventClient, licensing } = await getScopedClients({ request });
+
+    await assertSignificantEventsAccess({ server, licensing });
+
+    const eventClient = await getEventClient();
+    const { hits: uuidHits } = await eventClient.findByEventUuid(params.path.id);
+    if (uuidHits.length === 0) {
+      throw notFound(`Significant event "${params.path.id}" not found.`);
+    }
+
+    const { event_id: eventId } = uuidHits[0];
+    const { hits: versionHits } = await eventClient.findByEventId(eventId);
+    if (versionHits.length === 0) {
+      throw notFound(`Significant event "${params.path.id}" not found.`);
+    }
+
+    const event = versionHits.at(-1)!;
+
+    return event;
+  },
+});
+
 const eventsUpdateRoute = createServerRoute({
   endpoint: 'POST /internal/significant_events/events/{id}/update',
   options: {
@@ -330,16 +380,27 @@ const eventsUpdateRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
     path: z.object({
       id: z.string().max(255),
     }),
-    body: z.object({
-      status: significantEventStatusSchema,
-    }),
+    body: z
+      .object({
+        status: significantEventStatusSchema,
+        assessment_note: z.string().max(MAX_ASSESSMENT_NOTE_LENGTH).optional(),
+      })
+      .superRefine((val, ctx) => {
+        if (val.status === 'dismissed' && !val.assessment_note?.trim()) {
+          ctx.addIssue({
+            code: 'custom',
+            path: ['assessment_note'],
+            message: 'assessment_note is required when dismissing an event',
+          });
+        }
+      }),
   }),
   handler: async ({ params, request, getScopedClients, server }) => {
     const { getEventClient, licensing } = await getScopedClients({ request });
@@ -347,9 +408,10 @@ const eventsUpdateRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing });
 
     return updateSignificantEventStatus({
-      eventClient: getEventClient(),
+      eventClient: await getEventClient(),
       eventUuid: params.path.id,
       status: params.body.status,
+      assessmentNote: params.body.assessment_note,
     });
   },
 });
@@ -363,7 +425,7 @@ const cleanupStaleEventsRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -386,7 +448,7 @@ const cleanupStaleEventsRoute = createServerRoute({
 
     const { rulesClient } = await scopedClients.getSignificantEventsAlertingContext();
     return cleanupStaleEvents({
-      eventClient: getEventClient(),
+      eventClient: await getEventClient(),
       rulesClient,
       candidateRuleIds: params?.body?.candidateRuleIds,
     });
@@ -403,7 +465,7 @@ const investigationStatusesRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
   params: z.object({
@@ -436,6 +498,7 @@ const investigationStatusesRoute = createServerRoute({
 
 export const internalEventsRoutes = {
   ...eventsSearchRoute,
+  ...eventsGetRoute,
   ...eventsLifecycleRoute,
   ...eventsAttachInvestigationRoute,
   ...eventsTriggerInvestigationRoute,

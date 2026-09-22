@@ -73,7 +73,11 @@
     // hoisting, so knip attributes the imports to it; the root declaration then looks unused on
     // CI's partial graph (it traces fine locally with the complete module graph).
     "http2-proxy",
-    "http2-wrapper"
+    "http2-wrapper",
+    // mongodb and mongodb-connection-string-url are loaded via dynamic import() in
+    // @kbn/connector-specs (the MongoDB connector); knip can't trace dynamic imports.
+    "mongodb",
+    "mongodb-connection-string-url"
   ],
   "workspaces": {
     ".": {

@@ -160,6 +160,13 @@ export const allowedExperimentalValues = Object.freeze({
   siemMigrationsDisabled: false,
 
   /**
+   * Enables the v2 rule migration agent graph, which runs pre-built rule matching
+   * (security-team#18589) through a dedicated subgraph that generates its own semantic
+   * queries and calls pre-built rules search as a tool, instead of the v1 one-shot node.
+   */
+  ruleMigrationGraphv2: false,
+
+  /**
    * Enables the Defend Insights Policy Response Failure feature
    */
   defendInsightsPolicyResponseFailure: true,
@@ -272,6 +279,12 @@ export const allowedExperimentalValues = Object.freeze({
    * Shipped dark by default; enable per environment via config.
    */
   endpointForensicAnalysisSkill: false,
+
+  /**
+   * Enables the Elastic Defend Policy Management Agent Builder skill (read-only prose workflows).
+   * Shipped dark by default; enable per environment via config.
+   */
+  elasticDefendPolicyManagementSkill: false,
 
   /**
    * Enables the investigate-rule Agent Builder skill.

@@ -48,11 +48,14 @@ function transformConnectorForExport(
     uiamApiKeyExternal: _uiamApiKeyExternal,
     ...exportAttributes
   } = connector.attributes;
+  const { ingestTokenHash: _ingestTokenHash, ...exportConfig } = (exportAttributes.config ??
+    {}) as Record<string, unknown>;
 
   return {
     ...connector,
     attributes: {
       ...exportAttributes,
+      config: exportConfig,
       secrets: {},
       isMissingSecrets,
       apiKey: null,

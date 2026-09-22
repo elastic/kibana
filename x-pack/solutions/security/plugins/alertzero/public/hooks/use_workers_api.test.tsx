@@ -78,67 +78,6 @@ describe('notifyWorkerUpdateError', () => {
 });
 
 describe('useUpdateWorker', () => {
-  it('sends the revision from the previous queued response, not the stale cache', async () => {
-    const queryClient = new QueryClient({
-      defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
-    });
-    queryClient.setQueryData(queryKeys.workers.list(), { workers: [createWorker()] });
-
-    let resolveEnable: ((worker: Worker) => void) | undefined;
-    const patch = jest.fn((url: string, options: { body: string }) => {
-      const body = JSON.parse(options.body) as { enabled?: boolean; settingsRevision?: number };
-      if (body.enabled === true) {
-        return new Promise((resolve) => {
-          resolveEnable = (worker) => resolve({ worker });
-        });
-      }
-      return Promise.resolve({
-        worker: createWorker({
-          enabled: true,
-          settingsRevision: 3,
-          settings: { workerId: TRIAGE, autonomy: 'assisted' },
-          state: 'ok',
-        }),
-      });
-    });
-
-    const services = {
-      ...coreMock.createStart(),
-      http: { patch },
-    };
-    const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-      <KibanaContextProvider services={services}>
-        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-      </KibanaContextProvider>
-    );
-
-    const { result } = renderHook(() => useUpdateWorker(), { wrapper });
-
-    act(() => {
-      result.current.mutate({ workerId: TRIAGE, patch: { enabled: true } });
-      result.current.mutate({ workerId: TRIAGE, patch: { autonomyLevel: 'assisted' } });
-    });
-
-    await waitFor(() => expect(resolveEnable).toBeDefined());
-    await act(async () => {
-      resolveEnable!(
-        createWorker({
-          enabled: true,
-          settingsRevision: 2,
-          state: 'ok',
-        })
-      );
-    });
-
-    await waitFor(() => expect(patch).toHaveBeenCalledTimes(2));
-
-    const autonomyBody = JSON.parse(patch.mock.calls[1][1].body);
-    expect(autonomyBody).toEqual({
-      autonomyLevel: 'assisted',
-      settingsRevision: 2,
-    });
-  });
-
   const renderUpdateWorker = (worker: Worker, patchImpl: jest.Mock) => {
     const queryClient = new QueryClient({
       defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
@@ -158,23 +97,142 @@ describe('useUpdateWorker', () => {
     settings: { workerId: TRIAGE, autonomy: 'manual', scheduleInterval: '24h' },
   });
 
-  it('treats a schedule-only patch as a settings write and sends the revision', async () => {
+  it("sends the caller's revision as-is instead of the cached one", async () => {
     const patch = jest.fn().mockResolvedValue({
       worker: createWorker({
         settingsRevision: 5,
         settings: { workerId: TRIAGE, autonomy: 'manual', scheduleInterval: '15m' },
       }),
     });
+    // The cache holds revision 4; the draft was built from revision 3 and must say so.
     const { result } = renderUpdateWorker(scheduledWorker, patch);
 
     await act(async () => {
-      result.current.mutate({ workerId: TRIAGE, patch: { scheduleInterval: '15m' } });
+      result.current.mutate({
+        workerId: TRIAGE,
+        patch: { settings: { scheduleInterval: '15m' }, settingsRevision: 3 },
+      });
     });
 
     await waitFor(() => expect(patch).toHaveBeenCalledTimes(1));
     expect(JSON.parse(patch.mock.calls[0][1].body)).toEqual({
-      scheduleInterval: '15m',
-      settingsRevision: 4,
+      settings: { scheduleInterval: '15m' },
+      settingsRevision: 3,
+    });
+  });
+
+  it('leaves the cached Worker untouched while the PATCH is pending and replaces it on success', async () => {
+    let resolvePatch: ((value: { worker: Worker }) => void) | undefined;
+    const patch = jest.fn(
+      () =>
+        new Promise<{ worker: Worker }>((resolve) => {
+          resolvePatch = resolve;
+        })
+    );
+    const cached = createWorker();
+    const { queryClient, result } = renderUpdateWorker(cached, patch);
+
+    act(() => {
+      result.current.mutate({
+        workerId: TRIAGE,
+        patch: { settings: { autonomy: 'assisted' }, settingsRevision: 1 },
+      });
+    });
+    await waitFor(() => expect(patch).toHaveBeenCalledTimes(1));
+
+    expect(queryClient.getQueryData(queryKeys.workers.list())).toEqual({ workers: [cached] });
+
+    const persisted = createWorker({
+      settingsRevision: 2,
+      settings: { workerId: TRIAGE, autonomy: 'assisted' },
+    });
+    await act(async () => {
+      resolvePatch!({ worker: persisted });
+    });
+
+    await waitFor(() =>
+      expect(queryClient.getQueryData(queryKeys.workers.list())).toEqual({ workers: [persisted] })
+    );
+  });
+
+  it('does not roll back a previously saved Worker when a later PATCH fails', async () => {
+    const attackDiscovery = createWorker({
+      id: 'system-security-floor-attack-discovery',
+      name: 'Attack Discovery',
+      settings: {
+        workerId: 'system-security-floor-attack-discovery',
+        autonomy: 'manual',
+        scheduleInterval: '24h',
+      },
+    });
+    const persistedTriage = createWorker({
+      settingsRevision: 2,
+      settings: { workerId: TRIAGE, autonomy: 'assisted' },
+    });
+    const patch = jest
+      .fn()
+      .mockResolvedValueOnce({ worker: persistedTriage })
+      .mockRejectedValueOnce(httpError(503));
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+    });
+    queryClient.setQueryData(queryKeys.workers.list(), {
+      workers: [createWorker(), attackDiscovery],
+    });
+    const services = { ...coreMock.createStart(), http: { patch } };
+    const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+      <KibanaContextProvider services={services}>
+        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      </KibanaContextProvider>
+    );
+    const { result } = renderHook(() => useUpdateWorker(), { wrapper });
+
+    await act(async () => {
+      await result.current.mutateAsync({
+        workerId: TRIAGE,
+        patch: { settings: { autonomy: 'assisted' }, settingsRevision: 1 },
+      });
+    });
+    expect(queryClient.getQueryData(queryKeys.workers.list())).toEqual({
+      workers: [persistedTriage, attackDiscovery],
+    });
+
+    await act(async () => {
+      await expect(
+        result.current.mutateAsync({
+          workerId: attackDiscovery.id,
+          patch: { settings: { scheduleInterval: '1h' }, settingsRevision: 1 },
+        })
+      ).rejects.toThrow('HTTP 503');
+    });
+
+    expect(queryClient.getQueryData(queryKeys.workers.list())).toEqual({
+      workers: [persistedTriage, attackDiscovery],
+    });
+    expect(services.notifications.toasts.addError).toHaveBeenCalledTimes(1);
+  });
+
+  it('sends a null revision for a Worker that is not installed yet', async () => {
+    const uninstalled = createWorker({ settingsRevision: null });
+    const patch = jest.fn().mockResolvedValue({
+      worker: createWorker({
+        settingsRevision: 1,
+        settings: { workerId: TRIAGE, autonomy: 'assisted' },
+      }),
+    });
+    const { result } = renderUpdateWorker(uninstalled, patch);
+
+    await act(async () => {
+      result.current.mutate({
+        workerId: TRIAGE,
+        patch: { settings: { autonomy: 'assisted' }, settingsRevision: null },
+      });
+    });
+
+    await waitFor(() => expect(patch).toHaveBeenCalledTimes(1));
+    expect(JSON.parse(patch.mock.calls[0][1].body)).toEqual({
+      settings: { autonomy: 'assisted' },
+      settingsRevision: null,
     });
   });
 });

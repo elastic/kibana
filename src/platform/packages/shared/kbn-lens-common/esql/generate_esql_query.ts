@@ -9,7 +9,7 @@
 
 import { esql } from '@elastic/esql';
 import { UI_SETTINGS, convertIntervalToEsInterval } from '@kbn/data-plugin/common';
-import { TIME_SYSTEM_PARAMS } from '@kbn/esql-language';
+import { TIME_SYSTEM_PARAMS, escapeEsqlColumnName } from '@kbn/esql-language';
 import moment from 'moment';
 import { partition } from 'lodash';
 import { calculateAuto } from '@kbn/calculate-auto';
@@ -41,6 +41,12 @@ export const extractAggId = (id: string) => id.split('.')[0].split('-')[2];
 // Used for metrics and buckets ES|QL verification
 interface EsqlConversionResult {
   esql: string;
+  /**
+   * Name of the column this fragment produces in the ES|QL result table.
+   * Two Lens columns that resolve to the same output name are the same ES|QL
+   * column, so the fragment is only emitted once.
+   */
+  outputName: string;
 }
 type EsqlConversion = EsqlConversionResult | EsqlQueryFailure;
 const areValidEsqlConversionItems = (
@@ -90,6 +96,26 @@ function getEsqlQueryFailedResult(
 }
 
 /**
+ * Keeps the first fragment for each ES|QL output name. Elasticsearch collapses repeated
+ * expressions into a single result column, so emitting them twice yields a query whose
+ * columns don't match what Lens expects.
+ */
+function dedupeFragmentsByOutputName(conversions: EsqlConversionResult[]): string[] {
+  const seenOutputNames = new Set<string>();
+  const fragments: string[] = [];
+
+  for (const { esql: fragment, outputName } of conversions) {
+    if (seenOutputNames.has(outputName)) {
+      continue;
+    }
+    seenOutputNames.add(outputName);
+    fragments.push(fragment);
+  }
+
+  return fragments;
+}
+
+/**
  * Optional mapping of column IDs to semantic role names.
  * Used to generate more meaningful ES|QL column names.
  * e.g., { 'col-123': 'max_value' } will generate
@@ -108,6 +134,19 @@ const SINGLE_CHAR_INTERVAL: Record<string, string> = {
 } as const;
 
 const DEFAULT_DATE_HISTOGRAM_INTERVAL_MS = moment.duration(1, 'h').as('ms');
+
+/**
+ * Format a name for SORT.
+ * - Field paths (e.g. agent.keyword): per-segment escape — never wrap the whole path.
+ * - Expression/agg output names (e.g. COUNT(bytes)): quote as a single identifier.
+ */
+const quoteEsqlSortField = (name: string): string => {
+  const trimmed = name.trim();
+  if (trimmed.includes('(') || trimmed.includes(')')) {
+    return escapeEsqlColumnName(trimmed, { asExpression: true });
+  }
+  return escapeEsqlColumnName(trimmed);
+};
 
 export function generateEsqlQuery(
   esAggEntries: Array<readonly [string, GenericIndexPatternColumn]>,
@@ -151,6 +190,9 @@ export function generateEsqlQuery(
 
   const hasDateHistogram = esAggEntries.some(([, col]) => col.operationType === 'date_histogram');
 
+  // Maps each ES|QL output column name to the Lens columns reading from it. Several Lens columns
+  // can resolve to the same ES|QL column, so entries are appended rather than replaced, and the
+  // expression is emitted only once.
   const esAggsIdMap: Record<string, OriginalColumn[]> = {};
 
   const [metricEsAggsEntries, bucketEsAggsEntries] = partition(
@@ -185,21 +227,26 @@ export function generateEsqlQuery(
     const format = isColumnFormatted(col) ? col.params?.format : undefined;
 
     // Add to esAggsIdMap so the column can be mapped in text-based layer
-    esAggsIdMap[esAggsId] = createEsAggsIdMapEntry({
-      col,
-      colId,
-      format,
-      layer,
-      indexPattern,
-      uiSettings,
-      dateRange,
-    });
+    esAggsIdMap[esAggsId] = [
+      ...(esAggsIdMap[esAggsId] ?? []),
+      ...createEsAggsIdMapEntry({
+        col,
+        colId,
+        format,
+        layer,
+        indexPattern,
+        uiSettings,
+        dateRange,
+      }),
+    ];
 
     // Generate EVAL statement using composer literal helpers
     staticValueEvals.push(`${esAggsId} = ${esql.num(Number(value))}`);
   });
 
   // Process metrics (excluding static_value which is handled above)
+  // Maps metric column IDs to STATS output names (alias or bare expression) for terms orderBy.
+  const metricOutputNamesByColId = new Map<string, string>();
   const metricsResult: EsqlConversion[] = regularMetricEntries.map(([colId, col]) => {
     // Check for specific unsupported operations before general toESQL check
     if (col.operationType === 'formula') {
@@ -278,17 +325,25 @@ export function generateEsqlQuery(
     // Use the same truthy check as statsMetricFragment so empty string roles map to the bare expression.
     const esAggsIdMapKey = statsColumnAlias ? statsColumnAlias : fullStatsMetricExpression;
 
-    esAggsIdMap[esAggsIdMapKey] = createEsAggsIdMapEntry({
-      col,
-      colId,
-      format,
-      layer,
-      indexPattern,
-      uiSettings,
-      dateRange,
-    });
+    metricOutputNamesByColId.set(colId, esAggsIdMapKey);
 
-    return { esql: statsMetricFragment } satisfies EsqlConversionResult;
+    esAggsIdMap[esAggsIdMapKey] = [
+      ...(esAggsIdMap[esAggsIdMapKey] ?? []),
+      ...createEsAggsIdMapEntry({
+        col,
+        colId,
+        format,
+        layer,
+        indexPattern,
+        uiSettings,
+        dateRange,
+      }),
+    ];
+
+    return {
+      esql: statsMetricFragment,
+      outputName: esAggsIdMapKey,
+    } satisfies EsqlConversionResult;
   });
 
   // Check for metric conversion errors with a type guard
@@ -306,10 +361,14 @@ export function generateEsqlQuery(
   // Process buckets
   const resolvedBucketExprs = new Map<number, string>();
   const bucketsResult: EsqlConversion[] = bucketEsAggsEntries.map(([colId, col], index) => {
-    // Terms conversion is gated; until terms_to_esql lands, eligible columns still fail.
     if (isColumnOfType<TermsIndexPatternColumn>('terms', col)) {
+      if (bucketEsAggsEntries.length !== 1) {
+        return getEsqlQueryFailedResult('terms_not_supported');
+      }
       const termsFailure = getTermsConversionFailure(col, { hasDateHistogram });
-      return getEsqlQueryFailedResult(termsFailure ?? 'terms_not_supported');
+      if (termsFailure) {
+        return getEsqlQueryFailedResult(termsFailure);
+      }
     }
 
     const toESQL = getToEsqlFn(col.operationType);
@@ -395,19 +454,22 @@ export function generateEsqlQuery(
       // 3. Field's default format from data view (buckets don't need fallback)
       undefined;
 
-    esAggsIdMap[esAggsId] = createEsAggsIdMapEntry({
-      col,
-      colId,
-      format,
-      interval: intervalInMs,
-      layer,
-      indexPattern,
-      uiSettings,
-      dateRange,
-      includeSourceField: true,
-    });
+    esAggsIdMap[esAggsId] = [
+      ...(esAggsIdMap[esAggsId] ?? []),
+      ...createEsAggsIdMapEntry({
+        col,
+        colId,
+        format,
+        interval: intervalInMs,
+        layer,
+        indexPattern,
+        uiSettings,
+        dateRange,
+        includeSourceField: true,
+      }),
+    ];
 
-    return { esql: rawResult.template };
+    return { esql: rawResult.template, outputName: esAggsId };
   });
 
   // Check for bucket conversion errors with type guard
@@ -422,9 +484,16 @@ export function generateEsqlQuery(
     return getEsqlQueryFailedResult('function_not_supported');
   }
 
-  // Type assertion after error checks - we know these are all strings now
-  const validMetrics = metricsResult.map((m) => m.esql);
-  const validBuckets = bucketsResult.map((b) => b.esql);
+  // Error checks above narrowed these to successful conversions, so collect their
+  // fragments, keeping one per ES|QL output column
+  const validMetrics = dedupeFragmentsByOutputName(metricsResult);
+  const validBuckets = dedupeFragmentsByOutputName(bucketsResult);
+
+  const singleTermsColumn =
+    bucketEsAggsEntries.length === 1 &&
+    isColumnOfType<TermsIndexPatternColumn>('terms', bucketEsAggsEntries[0][1])
+      ? bucketEsAggsEntries[0][1]
+      : undefined;
 
   if (validBuckets.length > 0) {
     if (validMetrics.length > 0) {
@@ -432,17 +501,47 @@ export function generateEsqlQuery(
       queryParts.push(`STATS ${statsBody}`);
     }
 
-    // Build sort fields, excluding date fields (date_histogram columns)
-    // The first .map() attaches the original index so we can reference
-    // the correct esAggsId in the final string.
-    const sortFields = bucketEsAggsEntries
-      .map(([, col], index) => ({ col, index }))
-      .filter(({ col, index }) => col.dataType !== 'date' && resolvedBucketExprs.has(index))
-      .map(({ index }) => `\`${resolvedBucketExprs.get(index)}\` ASC`);
+    if (singleTermsColumn) {
+      const { orderBy, orderDirection, size } = singleTermsColumn.params;
+      let sortField: string | undefined;
 
-    // Only add SORT clause if there are non-date fields to sort by
-    if (sortFields.length > 0) {
-      queryParts.push(`SORT ${sortFields.join(', ')}`);
+      if (orderBy.type === 'alphabetical') {
+        sortField = resolvedBucketExprs.get(0);
+      } else if (orderBy.type === 'column') {
+        sortField = metricOutputNamesByColId.get(orderBy.columnId);
+        if (!sortField) {
+          return getEsqlQueryFailedResult('terms_order_by_not_supported');
+        }
+      } else {
+        return getEsqlQueryFailedResult('terms_order_by_not_supported');
+      }
+
+      if (!sortField) {
+        return getEsqlQueryFailedResult('terms_not_supported');
+      }
+
+      queryParts.push(`SORT ${quoteEsqlSortField(sortField)} ${orderDirection.toUpperCase()}`);
+      queryParts.push(`LIMIT ${size}`);
+    } else {
+      // Build sort fields, excluding date fields (date_histogram columns).
+      // Buckets that resolved to the same expression are a single ES|QL column, so sort once.
+      const sortExprs: string[] = [];
+      bucketEsAggsEntries.forEach(([, col], index) => {
+        if (col.dataType === 'date') {
+          return;
+        }
+        const bucketExpr = resolvedBucketExprs.get(index);
+        if (bucketExpr === undefined || sortExprs.includes(bucketExpr)) {
+          return;
+        }
+        sortExprs.push(bucketExpr);
+      });
+      const sortFields = sortExprs.map((bucketExpr) => `${quoteEsqlSortField(bucketExpr)} ASC`);
+
+      // Only add SORT clause if there are non-date fields to sort by
+      if (sortFields.length > 0) {
+        queryParts.push(`SORT ${sortFields.join(', ')}`);
+      }
     }
   } else {
     if (validMetrics.length > 0) {

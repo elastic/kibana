@@ -100,7 +100,7 @@ export function createEventTool({
         await assertSignificantEventsAccess({ server, licensing });
 
         const data = await createEventToolHandler({
-          eventClient: getEventClient(),
+          eventClient: await getEventClient(),
           eventInput: toolParams,
         });
 

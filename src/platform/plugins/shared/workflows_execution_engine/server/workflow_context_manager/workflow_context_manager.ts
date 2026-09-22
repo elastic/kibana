@@ -19,7 +19,7 @@ import {
   type WorkflowContext,
 } from '@kbn/workflows';
 import type { GraphNodeUnion } from '@kbn/workflows/graph';
-import { buildWorkflowContext } from './build_workflow_context';
+import { buildWorkflowRenderContext } from './build_workflow_context';
 import type { StepIoService } from './step_io_service';
 import type { ContextDependencies } from './types';
 import type { StepExecutionMetadata, WorkflowExecutionState } from './workflow_execution_state';
@@ -340,7 +340,7 @@ export class WorkflowContextManager {
 
   private buildWorkflowContext(): WorkflowContext {
     const workflowExecution = this.workflowExecutionState.getWorkflowExecution();
-    return buildWorkflowContext(workflowExecution, this.coreStart, this.dependencies);
+    return buildWorkflowRenderContext(workflowExecution, this.coreStart, this.dependencies);
   }
 
   private getRenderingContext(value: unknown): StepContext {

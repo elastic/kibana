@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { InferenceClient } from '@kbn/inference-common';
 import type { Streams } from '@kbn/streams-schema';
@@ -15,7 +15,7 @@ import {
   type GenerateKIQueriesDependencies,
 } from './ki_queries_generation_service';
 import { identifyKIQueries } from './identify_ki_queries';
-
+import { isSignificantEventsFeatureFlagEnabled } from '../feature_flags/is_significant_events_feature_flag_enabled';
 jest.mock('./identify_ki_queries', () => ({
   identifyKIQueries: jest.fn(),
 }));
@@ -30,6 +30,9 @@ jest.mock(
 );
 
 const identifyKIQueriesMock = identifyKIQueries as jest.MockedFunction<typeof identifyKIQueries>;
+const isSignificantEventsFeatureFlagEnabledMock = jest.mocked(
+  isSignificantEventsFeatureFlagEnabled
+);
 
 const definition = { name: 'logs.test' } as Streams.all.Definition;
 
@@ -40,9 +43,6 @@ const makeDeps = (
     getStream: jest.fn().mockResolvedValue(definition),
   } as unknown as GenerateKIQueriesDependencies['streamsClient'],
   inferenceClient: {} as InferenceClient,
-  soClient: {
-    get: jest.fn().mockRejectedValue({ statusCode: 404 }),
-  } as unknown as SavedObjectsClientContract,
   kiClient: {} as never,
   esClient: {} as never,
   streamDataEsClient: {} as never,
@@ -69,6 +69,7 @@ describe('generateKIQueries', () => {
   beforeEach(() => {
     logger = loggerMock.create();
     identifyKIQueriesMock.mockReset();
+    isSignificantEventsFeatureFlagEnabledMock.mockResolvedValue(false);
     identifyKIQueriesMock.mockResolvedValue({
       queries: [
         {
@@ -144,5 +145,14 @@ describe('generateKIQueries', () => {
     expect(identifyKIQueriesMock.mock.calls[0][0]).toEqual(
       expect.objectContaining({ maxDurationMs: 300000, connectorId: 'test-connector' })
     );
+  });
+
+  it('does not pass a system prompt', async () => {
+    await generateKIQueries(
+      { streamName: 'logs.test', connectorId: 'test-connector' },
+      makeDeps({ logger })
+    );
+
+    expect(identifyKIQueriesMock.mock.calls[0][0]).not.toHaveProperty('systemPrompt');
   });
 });
