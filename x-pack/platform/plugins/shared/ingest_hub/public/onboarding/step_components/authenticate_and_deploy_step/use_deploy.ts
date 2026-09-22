@@ -228,9 +228,13 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
             const deletedIds = new Set(cleanupOps.toDelete);
             await updateDeployment(existingDeploymentId, {
               services: selectedServiceIds,
-              packagePolicyIds: Object.values(detectAndReviewStep.policyIdsByInstance).filter(
-                (id) => !deletedIds.has(id)
-              ),
+              packagePolicyIds: [
+                ...new Set(
+                  Object.values(detectAndReviewStep.policyIdsByInstance).filter(
+                    (id) => !deletedIds.has(id)
+                  )
+                ),
+              ],
             });
           }
           return;
