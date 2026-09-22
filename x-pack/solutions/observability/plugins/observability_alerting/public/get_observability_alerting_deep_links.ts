@@ -74,7 +74,7 @@ export const getObservabilityAlertingDeepLinks = (capabilities?: Capabilities): 
     {
       id: OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID,
       title: i18n.translate('xpack.observabilityAlerting.deepLinks.rulesV1Title', {
-        defaultMessage: 'Rules',
+        defaultMessage: 'Rules (V1)',
       }),
       path: OBSERVABILITY_ALERTING_RULES_V1_PATH,
       visibleIn: SEARCHABLE_VISIBLE_IN,
