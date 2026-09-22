@@ -245,7 +245,7 @@ export const createAdManageJobStateTool = (
 
           // Stop datafeed (ignore 404 — may already be stopped or never created)
           try {
-            await jobApi.stopDatafeed({ datafeed_id: datafeedId, body: { force: true } as any });
+            await jobApi.stopDatafeed({ datafeed_id: datafeedId, force: true });
           } catch {
             // datafeed not running or does not exist — proceed
           }

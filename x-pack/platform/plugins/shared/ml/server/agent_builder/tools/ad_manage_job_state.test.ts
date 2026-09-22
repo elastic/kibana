@@ -289,7 +289,7 @@ describe('adManageJobStateTool', () => {
       expect(ml.getJobs).toHaveBeenCalledWith({ job_id: 'scratch-job' });
       expect(ml.stopDatafeed).toHaveBeenCalledWith({
         datafeed_id: 'datafeed-scratch-job',
-        body: { force: true },
+        force: true,
       });
       expect(ml.deleteDatafeed).toHaveBeenCalledWith({ datafeed_id: 'datafeed-scratch-job' });
       expect(ml.deleteJob).toHaveBeenCalledWith({
@@ -330,7 +330,7 @@ describe('adManageJobStateTool', () => {
       expect(mlClient.getJobs).toHaveBeenCalledWith({ job_id: 'scratch-job' });
       expect(mlClient.stopDatafeed).toHaveBeenCalledWith({
         datafeed_id: 'datafeed-scratch-job',
-        body: { force: true },
+        force: true,
       });
       expect(mlClient.deleteDatafeed).toHaveBeenCalledWith({
         datafeed_id: 'datafeed-scratch-job',

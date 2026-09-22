@@ -2,7 +2,11 @@
 
 Use `ml.query_anomalies` and pass the ES|QL below in the `query` parameter. Bind `?param` values via `params`. Never call with an empty argument object — `query` is required; omit the `params` field when unused.
 
-**Time fields:** `.ml-anomalies-*` uses `timestamp`, not `@timestamp`.
+**Time fields:** never use `@timestamp`.
+- Record / bucket / influencer queries use `FROM .ml-anomalies`. Prefer `` `event.ingested` `` for time-range filters; use `timestamp` for the bucket time and for aggregating scores over time. `ml.query_anomalies` falls back to `FROM .ml-anomalies-*` and `timestamp` when the view is not on the cluster.
+- `model_plot`, `model_forecast`, and `model_snapshot` are **not** on the materialized view — query `FROM .ml-anomalies-*` and filter on `timestamp`.
+
+Only `record` / `bucket` / `influencer` fields listed in `esql-read-queries` exist on `.ml-anomalies`. Do not select `causes`, `probability`, `multi_bucket_impact`, or `anomaly_score_explanation.*`.
 
 ---
 
@@ -54,17 +58,17 @@ Find anomalies where the model has significantly changed its assessment due to r
 **Parameters:** `job_id_pattern` (LIKE wildcards), `min_drift` (number, default 20), `start_time`, `end_time`
 
 ```esql
-FROM .ml-anomalies-*
+FROM .ml-anomalies
 | WHERE result_type == "record"
   AND job_id LIKE ?job_id_pattern
-  AND timestamp >= ?start_time
-  AND timestamp <= ?end_time
+  AND `event.ingested` >= ?start_time
+  AND `event.ingested` <= ?end_time
 | EVAL score_drift = initial_record_score - record_score
 | WHERE ABS(score_drift) >= ?min_drift
 | SORT ABS(score_drift) DESC
 | LIMIT 30
-| KEEP job_id, timestamp, initial_record_score, record_score, score_drift,
-       function, field_name, by_field_value, partition_field_value
+| KEEP job_id, timestamp, `event.ingested`, initial_record_score, record_score, score_drift,
+       function, function_description, field_name, by_field_value, partition_field_value
 ```
 
 ---

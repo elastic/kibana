@@ -145,6 +145,98 @@ describe('adCreateJobTool', () => {
       });
     });
 
+    it('operation=estimate_memory maps detector fields to overall cardinality and extra influencers to max-bucket cardinality', async () => {
+      const ml = createMlMock();
+      const search = jest
+        .fn()
+        .mockImplementation(async (request: { aggs?: { card?: unknown } }) => {
+          if (request.aggs?.card && !('buckets' in (request.aggs ?? {}))) {
+            return { aggregations: { card: { value: 42 } } };
+          }
+          return { aggregations: { max_bucket_card: { value: 7 } } };
+        });
+      const analysisConfig = {
+        bucket_span: '15m',
+        detectors: [
+          {
+            function: 'rare',
+            by_field_name: 'user.name',
+            over_field_name: 'host.name',
+            partition_field_name: 'event.dataset',
+          },
+        ],
+        influencers: ['host.name', 'source.ip', 'mlcategory'],
+      };
+      const datafeedQuery = { term: { 'event.category': 'network' } };
+
+      await adCreateJobTool.handler(
+        {
+          operation: 'estimate_memory',
+          job_config: {
+            analysis_config: analysisConfig,
+            data_description: { time_field: '@timestamp' },
+          },
+          datafeed_config: { indices: ['logs-*'], query: datafeedQuery },
+        },
+        createContext(ml, search)
+      );
+
+      const overallFields = search.mock.calls
+        .filter(([request]) => request.aggs?.card && !request.aggs?.buckets)
+        .map(([request]) => request.aggs.card.cardinality.field);
+      expect(overallFields).toEqual(['user.name', 'host.name', 'event.dataset']);
+
+      const maxBucketFields = search.mock.calls
+        .filter(([request]) => request.aggs?.max_bucket_card)
+        .map(([request]) => request.aggs.buckets.aggs.card.cardinality.field);
+      expect(maxBucketFields).toEqual(['source.ip']);
+
+      for (const [request] of search.mock.calls) {
+        expect(request.query).toEqual(datafeedQuery);
+      }
+
+      expect(ml.estimateModelMemory).toHaveBeenCalledWith({
+        body: {
+          analysis_config: analysisConfig,
+          overall_cardinality: {
+            'user.name': 42,
+            'host.name': 42,
+            'event.dataset': 42,
+          },
+          max_bucket_cardinality: { 'source.ip': 7 },
+        },
+      });
+    });
+
+    it('operation=estimate_memory skips cardinality lookups for mlcategory-only fields', async () => {
+      const ml = createMlMock();
+      const search = jest.fn();
+
+      await adCreateJobTool.handler(
+        {
+          operation: 'estimate_memory',
+          job_config: {
+            analysis_config: {
+              detectors: [{ function: 'count', by_field_name: 'mlcategory' }],
+              influencers: ['mlcategory'],
+            },
+          },
+          datafeed_config: { indices: ['logs-*'] },
+        },
+        createContext(ml, search)
+      );
+
+      expect(search).not.toHaveBeenCalled();
+      expect(ml.estimateModelMemory).toHaveBeenCalledWith({
+        body: {
+          analysis_config: {
+            detectors: [{ function: 'count', by_field_name: 'mlcategory' }],
+            influencers: ['mlcategory'],
+          },
+        },
+      });
+    });
+
     it('operation=estimate_memory returns an error when cardinality lookup fails', async () => {
       const ml = createMlMock();
       const search = jest.fn().mockRejectedValue(new Error('index_not_found_exception'));

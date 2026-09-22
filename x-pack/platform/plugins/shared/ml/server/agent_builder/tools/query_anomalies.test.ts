@@ -12,6 +12,9 @@ import {
   createQueryAnomaliesTool,
   extractReferencedIndices,
   isAllowedMlIndex,
+  isMlAnomaliesViewUnavailableError,
+  queryUsesMlAnomaliesView,
+  rewriteMlAnomaliesViewQuery,
   validateMlSystemIndexQuery,
 } from './query_anomalies';
 import { QUERY_ANOMALIES_TOOL_ID } from './tool_ids';
@@ -43,6 +46,10 @@ const createContext = (esClient = createEsClientMock()) =>
 
 describe('extractReferencedIndices', () => {
   it('parses a single FROM index', () => {
+    expect(extractReferencedIndices('FROM .ml-anomalies | LIMIT 10')).toEqual(['.ml-anomalies']);
+  });
+
+  it('parses a wildcard results index pattern', () => {
     expect(extractReferencedIndices('FROM .ml-anomalies-* | LIMIT 10')).toEqual([
       '.ml-anomalies-*',
     ]);
@@ -68,6 +75,7 @@ describe('extractReferencedIndices', () => {
 
 describe('isAllowedMlIndex', () => {
   it.each([
+    '.ml-anomalies',
     '.ml-anomalies-*',
     '.ml-anomalies-shared',
     '.ml-config',
@@ -87,6 +95,10 @@ describe('isAllowedMlIndex', () => {
 
 describe('validateMlSystemIndexQuery', () => {
   it('returns undefined for an allowed query', () => {
+    expect(validateMlSystemIndexQuery('FROM .ml-anomalies | LIMIT 10')).toBeUndefined();
+  });
+
+  it('allows the materialized view and the wildcard results indices', () => {
     expect(validateMlSystemIndexQuery('FROM .ml-anomalies-* | LIMIT 10')).toBeUndefined();
   });
 
@@ -123,6 +135,61 @@ describe('validateMlSystemIndexQuery', () => {
   });
 });
 
+describe('queryUsesMlAnomaliesView', () => {
+  it('detects the exact materialized view', () => {
+    expect(queryUsesMlAnomaliesView('FROM .ml-anomalies | LIMIT 10')).toBe(true);
+  });
+
+  it('does not treat the wildcard or per-job indices as the view', () => {
+    expect(queryUsesMlAnomaliesView('FROM .ml-anomalies-* | LIMIT 10')).toBe(false);
+    expect(queryUsesMlAnomaliesView('FROM .ml-anomalies-shared | LIMIT 10')).toBe(false);
+  });
+
+  it('does not flag unrelated ML indices', () => {
+    expect(queryUsesMlAnomaliesView('FROM .ml-config | LIMIT 10')).toBe(false);
+  });
+});
+
+describe('rewriteMlAnomaliesViewQuery', () => {
+  it('rewrites the view to the wildcard and maps event.ingested to timestamp', () => {
+    const rewritten = rewriteMlAnomaliesViewQuery(`FROM .ml-anomalies
+| WHERE result_type == "record"
+  AND \`event.ingested\` >= ?start_time
+  AND event.ingested <= ?end_time
+| KEEP job_id, timestamp, \`event.ingested\``);
+
+    expect(rewritten).toContain('FROM .ml-anomalies-*');
+    expect(rewritten).not.toMatch(/FROM \.ml-anomalies\n/);
+    expect(rewritten).not.toContain('event.ingested');
+    expect(rewritten).toContain('AND timestamp >= ?start_time');
+    expect(rewritten).toContain('AND timestamp <= ?end_time');
+    expect(rewritten).toContain('KEEP job_id, timestamp');
+    expect(rewritten).not.toMatch(/timestamp,\s*timestamp/);
+  });
+
+  it('does not rewrite .ml-anomalies-* or .ml-anomalies-shared', () => {
+    expect(rewriteMlAnomaliesViewQuery('FROM .ml-anomalies-* | LIMIT 10')).toBe(
+      'FROM .ml-anomalies-* | LIMIT 10'
+    );
+    expect(rewriteMlAnomaliesViewQuery('FROM .ml-anomalies-shared | LIMIT 10')).toBe(
+      'FROM .ml-anomalies-shared | LIMIT 10'
+    );
+  });
+});
+
+describe('isMlAnomaliesViewUnavailableError', () => {
+  it('matches unknown-index failures', () => {
+    expect(isMlAnomaliesViewUnavailableError(new Error('Unknown index [.ml-anomalies]'))).toBe(
+      true
+    );
+    expect(isMlAnomaliesViewUnavailableError(new Error('index_not_found_exception'))).toBe(true);
+  });
+
+  it('does not match unrelated failures', () => {
+    expect(isMlAnomaliesViewUnavailableError(new Error('parsing_exception'))).toBe(false);
+  });
+});
+
 describe('queryAnomaliesTool', () => {
   it('has the correct ID and type', () => {
     expect(queryAnomaliesTool.id).toBe(QUERY_ANOMALIES_TOOL_ID);
@@ -143,6 +210,10 @@ describe('queryAnomaliesTool', () => {
     expect(queryAnomaliesTool.description).toMatch(/esql-read-queries/i);
     expect(queryAnomaliesTool.description).toMatch(/esql-metadata-queries/i);
     expect(queryAnomaliesTool.description).toMatch(/esql-score-queries/i);
+    expect(queryAnomaliesTool.description).toMatch(/FROM \.ml-anomalies /);
+    expect(queryAnomaliesTool.description).toMatch(/materialized view/i);
+    expect(queryAnomaliesTool.description).toMatch(/causes/);
+    expect(queryAnomaliesTool.description).toMatch(/older ES versions/i);
   });
 
   describe('handler', () => {
@@ -183,7 +254,7 @@ describe('queryAnomaliesTool', () => {
       const esClient = createEsClientMock();
       const context = createContext(esClient);
       const query =
-        'FROM .ml-anomalies-* | WHERE job_id LIKE ?job_id_pattern AND record_score >= ?min_score';
+        'FROM .ml-anomalies | WHERE job_id LIKE ?job_id_pattern AND record_score >= ?min_score';
 
       await queryAnomaliesTool.handler(
         { query, params: { job_id_pattern: 'web-*', min_score: 75 }, limit: 100 },
@@ -270,6 +341,90 @@ describe('queryAnomaliesTool', () => {
       expect(standardResult.results[0].type).toBe(ToolResultType.error);
       expect(standardResult.results[0].data.message).toBe(
         'Error executing ES|QL query: parsing_exception'
+      );
+    });
+
+    it('keeps FROM .ml-anomalies when the materialized view probe succeeds', async () => {
+      const tool = createQueryAnomaliesTool(resolveMlCapabilities);
+      const esClient = createEsClientMock();
+      const context = createContext(esClient);
+      const query =
+        'FROM .ml-anomalies | WHERE result_type == "record" AND `event.ingested` >= ?start_time';
+
+      await tool.handler(
+        { query, params: { start_time: '2024-01-01T00:00:00Z' }, limit: 100 },
+        context
+      );
+
+      expect(esClient.asInternalUser.esql.query).toHaveBeenCalledTimes(2);
+      expect(esClient.asInternalUser.esql.query.mock.calls[0][0].query).toMatch(
+        /FROM \.ml-anomalies\s*\n\| LIMIT 0/
+      );
+      expect(esClient.asInternalUser.esql.query.mock.calls[1][0].query).toContain(
+        'FROM .ml-anomalies |'
+      );
+      expect(esClient.asInternalUser.esql.query.mock.calls[1][0].query).toContain(
+        '`event.ingested`'
+      );
+    });
+
+    it('falls back to .ml-anomalies-* when the materialized view is unavailable', async () => {
+      const tool = createQueryAnomaliesTool(resolveMlCapabilities);
+      const esClient = createEsClientMock();
+      esClient.asInternalUser.esql.query
+        .mockRejectedValueOnce(new Error('Unknown index [.ml-anomalies]'))
+        .mockResolvedValueOnce({
+          columns: [{ name: 'job_id', type: 'keyword' }],
+          values: [['my-job']],
+        });
+      const context = createContext(esClient);
+      const query = `FROM .ml-anomalies
+| WHERE result_type == "record"
+  AND \`event.ingested\` >= ?start_time`;
+
+      const result = await tool.handler(
+        { query, params: { start_time: '2024-01-01T00:00:00Z' }, limit: 50 },
+        context
+      );
+
+      expect(esClient.asInternalUser.esql.query).toHaveBeenCalledTimes(2);
+      const executedQuery = esClient.asInternalUser.esql.query.mock.calls[1][0].query as string;
+      expect(executedQuery).toContain('FROM .ml-anomalies-*');
+      expect(executedQuery).not.toMatch(/FROM \.ml-anomalies\n/);
+      expect(executedQuery).toContain('timestamp >= ?start_time');
+      expect(executedQuery).not.toContain('event.ingested');
+
+      const standardResult = result as {
+        results: Array<{ type: string; data?: { esql?: string } }>;
+      };
+      expect(standardResult.results).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            type: ToolResultType.query,
+            data: expect.objectContaining({
+              esql: expect.stringContaining('FROM .ml-anomalies-*'),
+            }),
+          }),
+        ])
+      );
+    });
+
+    it('does not probe when the query already uses .ml-anomalies-*', async () => {
+      const tool = createQueryAnomaliesTool(resolveMlCapabilities);
+      const esClient = createEsClientMock();
+      const context = createContext(esClient);
+
+      await tool.handler(
+        {
+          query: 'FROM .ml-anomalies-* | WHERE result_type == "model_plot" | LIMIT 10',
+          limit: 100,
+        },
+        context
+      );
+
+      expect(esClient.asInternalUser.esql.query).toHaveBeenCalledTimes(1);
+      expect(esClient.asInternalUser.esql.query.mock.calls[0][0].query).toContain(
+        'FROM .ml-anomalies-*'
       );
     });
   });

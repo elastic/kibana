@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { createErrorResult } from '@kbn/agent-builder-server';
+import { MLCATEGORY } from '@kbn/ml-anomaly-utils';
 import type { ResolveMlCapabilities } from '@kbn/ml-common-types/capabilities';
 import { VALIDATION_STATUS } from '@kbn/ml-validators';
 import type { MlLicense } from '../../../common/license';
@@ -156,15 +158,15 @@ export const createAdCreateJobTool = (
             ? (analysisConfigObj.detectors as Array<Record<string, unknown>>)
             : [];
 
-          // Collect split fields that require cardinality estimates
-          const partitionByFields = new Set<string>();
-          const overFields = new Set<string>();
-          for (const det of detectors) {
-            if (typeof det.partition_field_name === 'string')
-              partitionByFields.add(det.partition_field_name);
-            if (typeof det.by_field_name === 'string') partitionByFields.add(det.by_field_name);
-            if (typeof det.over_field_name === 'string') overFields.add(det.over_field_name);
-          }
+          // `_estimate_model_memory` wants overall cardinality for by/over/partition
+          // fields, and max-bucket cardinality only for influencers that are not
+          // already covered by those detector fields. `mlcategory` is produced by
+          // categorization and has no cardinality in the source data.
+          const overallCardinalityFields = collectOverallCardinalityFields(detectors);
+          const influencerCardinalityFields = collectInfluencerCardinalityFields(
+            analysisConfigObj.influencers,
+            overallCardinalityFields
+          );
 
           // Auto-fetch cardinality from source indices when split fields are present
           // and cardinality was not explicitly provided by the caller
@@ -175,19 +177,22 @@ export const createAdCreateJobTool = (
             | Record<string, number>
             | undefined;
 
+          const datafeedConfigObj = datafeedConfig as Record<string, unknown> | undefined;
           const indices =
-            datafeedConfig && Array.isArray((datafeedConfig as Record<string, unknown>).indices)
-              ? ((datafeedConfig as Record<string, unknown>).indices as string[])
+            datafeedConfigObj && Array.isArray(datafeedConfigObj.indices)
+              ? (datafeedConfigObj.indices as string[])
               : undefined;
+          const datafeedQuery = getDatafeedQuery(datafeedConfigObj);
 
           if (indices && indices.length > 0) {
-            if (partitionByFields.size > 0 && !resolvedOverallCardinality) {
+            if (overallCardinalityFields.size > 0 && !resolvedOverallCardinality) {
               resolvedOverallCardinality = {};
-              for (const field of partitionByFields) {
+              for (const field of overallCardinalityFields) {
                 try {
                   const result = await esClient.asCurrentUser.search({
                     index: indices,
                     size: 0,
+                    ...(datafeedQuery ? { query: datafeedQuery } : {}),
                     aggs: { card: { cardinality: { field } } },
                   });
                   const cardinality = (result.aggregations?.card as { value?: number } | undefined)
@@ -215,7 +220,7 @@ export const createAdCreateJobTool = (
               }
             }
 
-            if (overFields.size > 0 && !resolvedMaxBucketCardinality) {
+            if (influencerCardinalityFields.size > 0 && !resolvedMaxBucketCardinality) {
               resolvedMaxBucketCardinality = {};
               const dataDesc = jobConfigObj.data_description as Record<string, unknown> | undefined;
               const timeField =
@@ -225,11 +230,12 @@ export const createAdCreateJobTool = (
                   ? analysisConfigObj.bucket_span
                   : '15m';
 
-              for (const field of overFields) {
+              for (const field of influencerCardinalityFields) {
                 try {
                   const result = await esClient.asCurrentUser.search({
                     index: indices,
                     size: 0,
+                    ...(datafeedQuery ? { query: datafeedQuery } : {}),
                     aggs: {
                       buckets: {
                         date_histogram: { field: timeField, fixed_interval: bucketSpan },
@@ -544,6 +550,61 @@ export const createAdCreateJobTool = (
     }
   },
 });
+
+const isCardinalityField = (field: unknown): field is string =>
+  typeof field === 'string' && field.length > 0 && field !== MLCATEGORY;
+
+/** Detector split fields that `_estimate_model_memory` reads from `overall_cardinality`. */
+const collectOverallCardinalityFields = (
+  detectors: Array<Record<string, unknown>>
+): Set<string> => {
+  const fields = new Set<string>();
+  for (const detector of detectors) {
+    for (const fieldName of [
+      detector.by_field_name,
+      detector.over_field_name,
+      detector.partition_field_name,
+    ]) {
+      if (isCardinalityField(fieldName)) {
+        fields.add(fieldName);
+      }
+    }
+  }
+  return fields;
+};
+
+/**
+ * Influencer fields that still need `max_bucket_cardinality`. Fields already
+ * sent as overall cardinality are omitted, matching the job wizard estimator.
+ */
+const collectInfluencerCardinalityFields = (
+  influencers: unknown,
+  overallCardinalityFields: ReadonlySet<string>
+): Set<string> => {
+  const influencerList = Array.isArray(influencers)
+    ? influencers
+    : influencers === undefined
+    ? []
+    : [influencers];
+  const fields = new Set<string>();
+  for (const influencer of influencerList) {
+    if (isCardinalityField(influencer) && !overallCardinalityFields.has(influencer)) {
+      fields.add(influencer);
+    }
+  }
+  return fields;
+};
+
+/** Datafeed query DSL, when present, so cardinality is measured on the filtered source. */
+const getDatafeedQuery = (
+  datafeedConfig: Record<string, unknown> | undefined
+): estypes.QueryDslQueryContainer | undefined => {
+  const query = datafeedConfig?.query;
+  if (query === null || typeof query !== 'object' || Array.isArray(query)) {
+    return undefined;
+  }
+  return query as estypes.QueryDslQueryContainer;
+};
 
 /**
  * `validateDatafeedPreview` documents `previewDatafeed` as `{ body: unknown[] }`
