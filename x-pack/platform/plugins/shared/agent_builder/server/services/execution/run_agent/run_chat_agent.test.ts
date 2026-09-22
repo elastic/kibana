@@ -39,9 +39,10 @@ import {
 import { createAgentGraph } from './graph';
 import { createPromptFactory } from './prompts';
 import { createImageResolver } from './utils/image_resolver';
-import { RunStepTracker } from './run_step_tracker';
+import { RunTracker } from './run_tracker';
 import { steps as nodeNames } from './constants';
-import { stepUpdates } from './step_state';
+import { applyStepUpdates, stepUpdates } from './step_state';
+import { createRootStateChunkEvent } from '../../../test_utils/graph_stream';
 import type { StateType } from './state';
 
 // the real fold, so resume tests exercise the actual pending-turn detection
@@ -451,19 +452,12 @@ describe('runDefaultAgentMode', () => {
       createAgentGraphMock.mockReturnValue({
         streamEvents: jest.fn(() => ({
           async *[Symbol.asyncIterator]() {
-            // The research node records a tool call before the run blows up.
-            yield {
-              event: 'on_chain_end',
-              name: nodeNames.researchAgent,
-              run_id: 'run-1',
-              tags: [],
-              metadata: {
-                graphName: 'default-agent-builder-agent',
-                langgraph_node: nodeNames.researchAgent,
-                langgraph_checkpoint_ns: `${nodeNames.researchAgent}:1`,
-              },
-              data: { output: { steps: [stepUpdates.appendToolCall(toolCallStep)] } },
-            };
+            // The research node records a tool call before the run blows up: LangGraph streams the
+            // state after that super-step as a root `values` chunk.
+            yield createRootStateChunkEvent('default-agent-builder-agent', {
+              steps: applyStepUpdates([], [stepUpdates.appendToolCall(toolCallStep)]),
+              toolRenderState: { 'call-1': { toolName: 'my_tool', kind: 'server' } },
+            });
             // progress observed by the tool manager's emitter, never drained by the graph
             const emit = context.toolManager.setEventEmitter.mock.calls[0][0];
             emit({
@@ -582,7 +576,9 @@ describe('runDefaultAgentMode', () => {
       );
 
       const graphParams = createAgentGraphMock.mock.calls[0][0];
-      expect(graphParams.toolExecutionBuffer).toBeInstanceOf(RunStepTracker);
+      expect(graphParams.toolExecutionBuffer).toBeInstanceOf(RunTracker);
+      // the root `on_chain_stream` chunks must carry the full state (see `RunTracker`)
+      expect((streamEvents.mock.calls[0] as unknown[])[1]).toMatchObject({ streamMode: 'values' });
       expect(graphParams.todoStateManager).toBe(context.todoStateManager);
       // fresh run: starts at init with no pending calls
       const command = initialCommand(streamEvents);
@@ -709,8 +705,8 @@ describe('runDefaultAgentMode', () => {
       const command = initialCommand(streamEvents);
       expect(command.update).toMatchObject({ steps: new Overwrite([pausedCall, compaction]) });
       // the tracker attributes the compaction step to this execution, not to the paused one
-      const tracker = createAgentGraphMock.mock.calls[0][0].toolExecutionBuffer as RunStepTracker;
-      expect(tracker.getSteps()).toEqual([pausedCall, compaction]);
+      const tracker = createAgentGraphMock.mock.calls[0][0].toolExecutionBuffer as RunTracker;
+      expect(tracker.latestState().steps).toEqual([pausedCall, compaction]);
       expect(tracker.executionProjection()).toEqual([
         expect.objectContaining({ tool_call_id: 'call-1' }),
         compaction,

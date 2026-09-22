@@ -16,7 +16,7 @@ import type { AgentEventEmitter } from '@kbn/agent-builder-server';
 import type { ToolManager } from '@kbn/agent-builder-server/runner';
 import { createAgentGraph } from './graph';
 import type { PromptFactory } from './prompts';
-import { RunStepTracker, type ToolExecutionBuffer } from './run_step_tracker';
+import { RunTracker, type ToolExecutionBuffer } from './run_tracker';
 import type { StateType } from './state';
 import type { ProcessedConversation } from './utils/prepare_conversation';
 
@@ -389,12 +389,13 @@ describe('createAgentGraph', () => {
     expect(config.cacheControl).toBeUndefined();
   });
 
-  it('keeps the run step tracker converged with the final graph state over a real event stream', async () => {
-    // Feeds the tracker from the real `streamEvents` stream, the way `run_chat_agent` does, over a run
-    // with a retried empty response, two parallel tool calls and a second cycle. The tracker's mirror
-    // (used when the stream throws) must land on exactly what the graph's reducer produced.
-    const graphName = 'convergence-test-graph';
-    const tracker = new RunStepTracker({ graphName });
+  it('streams the full state as root on_chain_stream chunks in values mode, matching the final state', async () => {
+    // Pins what `RunTracker` relies on: with `streamMode: 'values'` passed to `streamEvents`, each
+    // root `on_chain_stream` chunk is the bare graph state after a super-step, and the last one is
+    // deep-equal to the root `on_chain_end` output. Runs a retried empty response, two parallel tool
+    // calls and a second cycle, feeding the tracker exactly as `run_chat_agent` does.
+    const graphName = 'values-mode-test-graph';
+    const tracker = new RunTracker({ graphName });
     const { graph, researchInvoke } = createTestGraph({ toolExecutionBuffer: tracker });
     const toolResult = (data: Record<string, unknown>) => ({
       results: [{ type: 'other', data }],
@@ -424,15 +425,25 @@ describe('createAgentGraph', () => {
     mockToolNodeOnce([
       new ToolMessage({ tool_call_id: 'c3', content: 'r3', artifact: toolResult({ n: 3 }) }),
     ]);
-    tracker.seed([], { execution: 'fresh', pendingToolCallIds: [] });
+    tracker.seed({ steps: [] });
 
     let finalState: StateType | undefined;
+    const chunkStepCounts: number[] = [];
     const stream = graph.streamEvents(
       { cycleLimit: 5 },
-      { version: 'v2', runName: graphName, metadata: { graphName }, recursionLimit: 50 }
+      {
+        version: 'v2',
+        streamMode: 'values',
+        runName: graphName,
+        metadata: { graphName },
+        recursionLimit: 50,
+      }
     );
     for await (const event of stream) {
       tracker.observeGraphEvent(event);
+      if (event.event === 'on_chain_stream' && event.name === graphName) {
+        chunkStepCounts.push((event.data.chunk as StateType).steps.length);
+      }
       if (event.event === 'on_chain_end' && event.name === graphName) {
         finalState = event.data.output as StateType;
       }
@@ -446,12 +457,55 @@ describe('createAgentGraph', () => {
       ConversationRoundStepType.reasoning,
       ConversationRoundStepType.toolCall,
     ]);
-    expect(finalState!.steps[4]).toMatchObject({
-      tool_call_id: 'c3',
-      results: [{ data: { n: 3 } }],
-    });
-    expect(tracker.getSteps()).toEqual(finalState!.steps);
-    expect(tracker.snapshotSteps()).toEqual(finalState!.steps);
+    // one full state per super-step, growing as the run progresses
+    expect(chunkStepCounts).toEqual([...chunkStepCounts].sort((a, b) => a - b));
+    expect(chunkStepCounts.at(-1)).toBe(5);
+    // the last chunk is the final state
+    expect(tracker.latestState()).toEqual(finalState);
+    expect(tracker.latestState().steps).toEqual(finalState!.steps);
     expect(tracker.executionProjection()).toEqual(finalState!.steps);
+  });
+
+  it('fails a mid-run tool error but streams the state as of the last completed super-step', async () => {
+    const graphName = 'values-mode-failure-graph';
+    const tracker = new RunTracker({ graphName });
+    const { graph, researchInvoke } = createTestGraph({ toolExecutionBuffer: tracker });
+    researchInvoke
+      .mockResolvedValueOnce(
+        new AIMessage({ content: 'a', tool_calls: [{ id: 'c1', name: 'my_tool', args: {} }] })
+      )
+      .mockResolvedValueOnce(
+        new AIMessage({ content: 'b', tool_calls: [{ id: 'c2', name: 'my_tool', args: {} }] })
+      );
+    mockToolNodeOnce([
+      new ToolMessage({ tool_call_id: 'c1', content: 'r1', artifact: { results: [] } }),
+    ]);
+    const { ToolNode } = jest.requireMock('@langchain/langgraph/prebuilt');
+    ToolNode.mockImplementationOnce(() => ({
+      invoke: jest.fn().mockRejectedValue(new Error('boom')),
+    }));
+    tracker.seed({ steps: [] });
+
+    const stream = graph.streamEvents(
+      { cycleLimit: 5 },
+      { version: 'v2', streamMode: 'values', runName: graphName, recursionLimit: 50 }
+    );
+    await expect(
+      (async () => {
+        for await (const event of stream) {
+          tracker.observeGraphEvent(event);
+        }
+      })()
+    ).rejects.toThrow('boom');
+
+    // the state after researchAgent: c2 pending, c1 resolved, nothing from the failed executeTool
+    const latest = tracker.latestState();
+    expect(latest.steps.map((s) => (s.type === 'tool_call' ? s.tool_call_id : s.type))).toEqual([
+      'reasoning',
+      'c1',
+      'reasoning',
+      'c2',
+    ]);
+    expect(tracker.executionProjection()).toEqual(latest.steps);
   });
 });

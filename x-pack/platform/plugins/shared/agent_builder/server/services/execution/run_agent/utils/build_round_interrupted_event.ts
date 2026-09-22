@@ -21,15 +21,15 @@ import type {
   AttachmentStateManager,
 } from '@kbn/agent-builder-server/attachments';
 import { mergeAttachmentRefs } from '../../../conversation/client/migrate_attachments';
-import type { RunStepTracker } from '../run_step_tracker';
+import type { RunTracker } from '../run_tracker';
 import { buildAttachmentEvents } from './add_round_complete_event';
 import { formatAttachmentsMetadata } from './attachment_presentation';
 import type { PendingTurn } from './conversation_turn';
 import { buildInterruptedRound } from './round_summary';
 
 export interface BuildRoundInterruptedEventParams {
-  /** Mirror of the run's steps so far (see `RunStepTracker`). */
-  tracker: RunStepTracker;
+  /** The latest graph state the stream carried and the out-of-band tool events (see `RunTracker`). */
+  tracker: RunTracker;
   /** The runner's round id (a resume keeps the pending round's id for persistence). */
   roundId: string;
   /** The turn being resumed, when this execution is a HITL resume. */

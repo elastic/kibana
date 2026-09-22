@@ -41,7 +41,6 @@ import type { StateType } from './state';
 import { steps, tags } from './constants';
 import type { InternalEvent } from './events';
 import { createFinalStateEvent } from './events';
-import { isRootGraphNodeEnd } from './run_step_tracker';
 import type { RunStepUpdate } from './step_state';
 import type { ResearchOutcome, ToolOutcome, ToolRenderStateUpdate } from './transient_state';
 
@@ -106,6 +105,26 @@ const stepUpdatesToEvents = (
 };
 
 const stripStepType = ({ type, ...execution }: BackgroundAgentCompleteStep) => execution;
+
+const NODE_NAMES: ReadonlySet<string> = new Set(Object.values(steps));
+
+/**
+ * True for the `on_chain_end` of one of *our* nodes running in the *root* graph of this run.
+ * Node names are reused by nested graphs (a sub-agent runs this same graph; tool-internal graphs
+ * have their own names) and inherited metadata is not enough to tell them apart, so this checks:
+ * - `metadata.graphName`,
+ * - `event.name === metadata.langgraph_node` (the node's own run, not a runnable inside it — the
+ *   same test LangGraph uses in its stream handlers),
+ * - a single-segment `langgraph_checkpoint_ns` (LangGraph joins nested namespaces with `|`; any
+ *   graph invoked under one of our nodes with an inherited config gets a `parent|child` namespace).
+ */
+const isRootGraphNodeEnd = (event: LangchainStreamEvent, graphName: string): boolean => {
+  if (event.event !== 'on_chain_end' || !NODE_NAMES.has(event.name)) return false;
+  if (!matchGraphName(event, graphName)) return false;
+  const { langgraph_node: node, langgraph_checkpoint_ns: namespace } = event.metadata ?? {};
+  if (node !== event.name) return false;
+  return typeof namespace !== 'string' || !namespace.includes('|');
+};
 
 export const convertGraphEvents = ({
   graphName,

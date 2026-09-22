@@ -6,10 +6,8 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { isEqual } from 'lodash';
 import type { OperatorFunction } from 'rxjs';
 import { map, merge, shareReplay, toArray } from 'rxjs';
-import type { Logger } from '@kbn/core/server';
 import type {
   RoundCompleteEvent,
   RoundInput,
@@ -45,7 +43,7 @@ import { getCurrentTraceId } from '../../../../tracing';
 import { userMessageActor } from '../../../conversation/client/rounds_to_events';
 import type { ConvertedEvents } from '../convert_graph_events';
 import { isFinalStateEvent } from '../events';
-import type { RunStepTracker } from '../run_step_tracker';
+import type { RunTracker } from '../run_tracker';
 import type { StateType } from '../state';
 import { persistableSteps } from '../step_state';
 import { formatAttachmentsMetadata } from './attachment_presentation';
@@ -96,7 +94,6 @@ export const buildAttachmentEvents = ({
 export const addRoundCompleteEvent = ({
   pendingTurn,
   tracker,
-  logger,
   userInput,
   origin,
   author,
@@ -116,9 +113,8 @@ export const addRoundCompleteEvent = ({
 }: {
   /** The turn being resumed, when this execution is a HITL resume. */
   pendingTurn: PendingTurn | undefined;
-  /** Mirror of the graph's steps, with the out-of-band tool events LangGraph never saw. */
-  tracker: RunStepTracker;
-  logger: Logger;
+  /** The out-of-band tool events LangGraph never saw and the resume seed (see `RunTracker`). */
+  tracker: RunTracker;
   userInput: RoundInput;
   /**
    * External origin that initiated this execution. Stamps `origin.type` on newly created
@@ -169,7 +165,7 @@ export const addRoundCompleteEvent = ({
         map<SourceEvents[], RoundCompleteEvent>((events) => {
           const attachmentRefs = attachmentStateManager.getAccessedRefs();
           const finalGraphState = getFinalGraphState(events);
-          const fullSteps = resolveRoundSteps({ tracker, finalGraphState, logger });
+          const fullSteps = resolveRoundSteps({ tracker, finalGraphState });
 
           let round: ConversationRound;
           let resumeExecution: { follow_up_round: ConversationRound } | undefined;
@@ -177,6 +173,7 @@ export const addRoundCompleteEvent = ({
             const resumed = resumeRound({
               pendingTurn,
               tracker,
+              finalGraphState,
               fullSteps,
               events,
               input: userInput,
@@ -267,33 +264,23 @@ const getFinalGraphState = (events: SourceEvents[]): StateType => {
 };
 
 /**
- * The round's full steps: the final graph `steps` channel (authoritative) plus what LangGraph never
- * saw (progress on a call interrupted by a prompt, an unconsumed `todo_write`), minus the
- * runtime-only browser / dedicated-lifecycle calls.
+ * The round's full steps: the final graph `steps` channel plus what LangGraph never saw (progress on
+ * a call interrupted by a prompt, an unconsumed `todo_write`), minus the runtime-only browser /
+ * dedicated-lifecycle calls.
  */
 const resolveRoundSteps = ({
   tracker,
   finalGraphState,
-  logger,
 }: {
-  tracker: RunStepTracker;
+  tracker: RunTracker;
   finalGraphState: StateType;
-  logger: Logger;
-}): ConversationRoundStep[] => {
-  // The mirror is what the interruption path and the resume projection persist from; drift means
-  // one of them would differ from what the graph actually did.
-  if (!isEqual(tracker.getSteps(), finalGraphState.steps)) {
-    logger.warn('[run_chat_agent] run step tracker diverged from the final graph state');
-  }
-  return persistableSteps(
-    tracker.snapshotSteps(finalGraphState.steps),
-    finalGraphState.toolRenderState
-  );
-};
+}): ConversationRoundStep[] =>
+  persistableSteps(tracker.attachUnseen(finalGraphState.steps), finalGraphState.toolRenderState);
 
 const resumeRound = ({
   pendingTurn,
   tracker,
+  finalGraphState,
   fullSteps,
   events,
   input,
@@ -305,7 +292,8 @@ const resumeRound = ({
   configurationOverrides,
 }: {
   pendingTurn: PendingTurn;
-  tracker: RunStepTracker;
+  tracker: RunTracker;
+  finalGraphState: StateType;
   fullSteps: ConversationRoundStep[];
   events: SourceEvents[];
   input: RoundInput;
@@ -326,7 +314,7 @@ const resumeRound = ({
   // The resume execution (exec_k): the steps this execution owns — the resolved paused calls (with
   // only the progression observed since the pause), the new steps and a rewritten todos step.
   const followUpRound = createRound({
-    steps: tracker.executionProjection(),
+    steps: tracker.executionProjection(finalGraphState),
     events,
     input,
     startTime,

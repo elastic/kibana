@@ -6,7 +6,6 @@
  */
 
 import { firstValueFrom, of, toArray } from 'rxjs';
-import type { Logger } from '@kbn/core/server';
 import {
   ChatEventType,
   CONVERSATION_SCHEMA_VERSION,
@@ -34,7 +33,7 @@ import {
 import { createEmptyConversation, createRound } from '../../../../test_utils/conversations';
 import type { ConvertedEvents } from '../convert_graph_events';
 import { createFinalStateEvent } from '../events';
-import { RunStepTracker } from '../run_step_tracker';
+import { RunTracker } from '../run_tracker';
 import type { StateType } from '../state';
 import { applyStepUpdates, stepUpdates, type RunStepUpdate } from '../step_state';
 import { fromEs, toEs } from '../../../conversation/client/converters';
@@ -54,33 +53,57 @@ const confirmPrompt: PromptRequest = {
   message: 'm',
 };
 
-/** A pending turn folded from a conversation holding the given paused round, plus a seeded tracker. */
+/**
+ * A run as the graph leaves it: the tracker (seed and out-of-band events) plus the steps the graph's
+ * reducer produced from the applied updates — what the `FinalStateEvent` carries.
+ */
+interface TestRun {
+  tracker: RunTracker;
+  steps: ConversationRoundStep[];
+  apply(updates: RunStepUpdate[]): void;
+}
+
+const testRun = (tracker: RunTracker, steps: ConversationRoundStep[]): TestRun => {
+  const run: TestRun = {
+    tracker,
+    steps,
+    apply(updates) {
+      run.steps = applyStepUpdates(run.steps, updates);
+    },
+  };
+  return run;
+};
+
+/** A pending turn folded from a conversation holding the given paused round, plus the resumed run. */
 const pendingTurnFor = (
   pendingRound: ConversationRound,
   conversation: Conversation = createEmptyConversation()
-): { pendingTurn: PendingTurn; tracker: RunStepTracker } => {
+): { pendingTurn: PendingTurn; run: TestRun } => {
   const pendingTurn = getPendingTurn({ ...conversation, rounds: [pendingRound] });
   if (!pendingTurn) {
     throw new Error('expected a pending turn');
   }
   const pendingToolCallIds = pendingTurn.state?.agent.nodes.map((node) => node.tool_call_id) ?? [];
-  const tracker = new RunStepTracker({ graphName: 'g' });
-  tracker.seed(pendingTurn.steps, { execution: 'resume', pendingToolCallIds });
-  return { pendingTurn, tracker };
+  const tracker = new RunTracker({ graphName: 'g' });
+  tracker.seed({
+    steps: pendingTurn.steps,
+    inherited: { steps: pendingTurn.steps, pendingToolCallIds },
+  });
+  return { pendingTurn, run: testRun(tracker, pendingTurn.steps) };
 };
 
-const freshTracker = (seed: ConversationRoundStep[] = []) => {
-  const tracker = new RunStepTracker({ graphName: 'g' });
-  tracker.seed(seed, { execution: 'fresh', pendingToolCallIds: [] });
-  return tracker;
+const freshRun = (seed: ConversationRoundStep[] = []): TestRun => {
+  const tracker = new RunTracker({ graphName: 'g' });
+  tracker.seed({ steps: seed });
+  return testRun(tracker, seed);
 };
 
-/** The graph's final state as `FinalStateEvent` carries it, mirroring the tracker's steps. */
-const finalState = (tracker: RunStepTracker, overrides: Partial<StateType> = {}): ConvertedEvents =>
+/** The graph's final state as `FinalStateEvent` carries it. */
+const finalState = (run: TestRun, overrides: Partial<StateType> = {}): ConvertedEvents =>
   createFinalStateEvent({
     currentCycle: 0,
     errorCount: 0,
-    steps: tracker.getSteps(),
+    steps: run.steps,
     toolRenderState: {},
     ...overrides,
   } as StateType) as ConvertedEvents;
@@ -88,8 +111,7 @@ const finalState = (tracker: RunStepTracker, overrides: Partial<StateType> = {})
 describe('addRoundCompleteEvent', () => {
   const createDeps = () => ({
     pendingTurn: undefined,
-    tracker: freshTracker(),
-    logger: { warn: jest.fn() } as unknown as Logger,
+    tracker: freshRun().tracker,
     getConversationState: jest.fn(() => ({})),
     modelProvider: {
       getUsageStats: jest.fn(() => ({ calls: [] })),
@@ -112,8 +134,7 @@ describe('addRoundCompleteEvent', () => {
       data: { message_id: 'm', message_content: content },
     } as ConvertedEvents);
 
-  const completedRunEvents = (tracker: RunStepTracker = freshTracker()) =>
-    of(finalState(tracker), messageComplete());
+  const completedRunEvents = (run: TestRun = freshRun()) => of(finalState(run), messageComplete());
 
   describe('attachment events', () => {
     const typeDefs = {
@@ -265,7 +286,7 @@ describe('addRoundCompleteEvent', () => {
     };
 
     const events = await firstValueFrom(
-      of(finalState(freshTracker()), messageCompleteEvent as ConvertedEvents).pipe(
+      of(finalState(freshRun()), messageCompleteEvent as ConvertedEvents).pipe(
         addRoundCompleteEvent({
           ...createDeps(),
           userInput: { message: '@agent summarize this' },
@@ -299,7 +320,7 @@ describe('addRoundCompleteEvent', () => {
     };
 
     const events = await firstValueFrom(
-      of(finalState(freshTracker()), messageCompleteEvent as ConvertedEvents).pipe(
+      of(finalState(freshRun()), messageCompleteEvent as ConvertedEvents).pipe(
         addRoundCompleteEvent({
           ...createDeps(),
           modelProvider: {
@@ -347,14 +368,14 @@ describe('addRoundCompleteEvent', () => {
       },
       pending_prompts: [confirmPrompt],
     });
-    const { pendingTurn, tracker } = pendingTurnFor(pendingRound);
+    const { pendingTurn, run } = pendingTurnFor(pendingRound);
 
     const events = await firstValueFrom(
-      of(finalState(tracker), messageComplete()).pipe(
+      of(finalState(run), messageComplete()).pipe(
         addRoundCompleteEvent({
           ...createDeps(),
           pendingTurn,
-          tracker,
+          tracker: run.tracker,
           userInput: { message: 'continue' },
           origin: {
             type: ConversationOriginType.Slack,
@@ -410,11 +431,11 @@ describe('addRoundCompleteEvent', () => {
         },
       },
     });
-    const { pendingTurn, tracker } = pendingTurnFor(pendingRound);
+    const { pendingTurn, run } = pendingTurnFor(pendingRound);
 
     const resolved = { tool_result_id: 'res-1', type: ToolResultType.other, data: 'resolved' };
     // What `executeTool` emits for the re-run call: its result and the progress observed since.
-    tracker.apply([
+    run.apply([
       stepUpdates.resolveToolCall({
         toolCallId: 'call-1',
         toolId: 'my_tool',
@@ -426,7 +447,7 @@ describe('addRoundCompleteEvent', () => {
 
     const events = await firstValueFrom(
       of(
-        finalState(tracker, { currentCycle: 1 }),
+        finalState(run, { currentCycle: 1 }),
         {
           type: ChatEventType.toolResult,
           data: { tool_call_id: 'call-1', tool_id: 'my_tool', results: [resolved] },
@@ -436,7 +457,7 @@ describe('addRoundCompleteEvent', () => {
         addRoundCompleteEvent({
           ...createDeps(),
           pendingTurn,
-          tracker,
+          tracker: run.tracker,
           userInput: { message: '' },
           startTime: new Date('2026-01-01T00:05:00.000Z'),
         }),
@@ -503,7 +524,7 @@ describe('addRoundCompleteEvent', () => {
     };
 
     const events = await firstValueFrom(
-      of(finalState(freshTracker()), messageCompleteEvent as ConvertedEvents).pipe(
+      of(finalState(freshRun()), messageCompleteEvent as ConvertedEvents).pipe(
         addRoundCompleteEvent({
           ...createDeps(),
           userInput: { message: 'Hello' },
@@ -542,19 +563,19 @@ describe('addRoundCompleteEvent', () => {
         attachment_context: 'Original attachment metadata',
       },
     });
-    const { pendingTurn, tracker } = pendingTurnFor(pendingRound);
+    const { pendingTurn, run } = pendingTurnFor(pendingRound);
     attachmentStateManager.clearAccessTracking();
     await attachmentStateManager.add(
       { id: 'new', type: 'text', data: { content: 'second' }, description: 'New note' },
       'user'
     );
     const events = await firstValueFrom(
-      of(finalState(tracker, { currentCycle: 1 }), messageComplete('Read both notes')).pipe(
+      of(finalState(run, { currentCycle: 1 }), messageComplete('Read both notes')).pipe(
         addRoundCompleteEvent({
           ...createDeps(),
           attachmentStateManager,
           pendingTurn,
-          tracker,
+          tracker: run.tracker,
           userInput: { message: 'Read this too' },
           startTime: new Date('2026-01-01T00:05:00.000Z'),
         }),
@@ -619,7 +640,7 @@ describe('addRoundCompleteEvent', () => {
     };
 
     const events = await firstValueFrom(
-      of(finalState(freshTracker()), messageCompleteEvent as ConvertedEvents).pipe(
+      of(finalState(freshRun()), messageCompleteEvent as ConvertedEvents).pipe(
         addRoundCompleteEvent({
           ...createDeps(),
           attachmentStateManager,
@@ -674,7 +695,7 @@ describe('addRoundCompleteEvent', () => {
     };
 
     const events = await firstValueFrom(
-      of(finalState(freshTracker()), messageCompleteEvent as ConvertedEvents).pipe(
+      of(finalState(freshRun()), messageCompleteEvent as ConvertedEvents).pipe(
         addRoundCompleteEvent({
           ...createDeps(),
           attachmentStateManager,
@@ -706,7 +727,7 @@ describe('addRoundCompleteEvent', () => {
     };
 
     const events = await firstValueFrom(
-      of(finalState(freshTracker()), messageCompleteEvent as ConvertedEvents).pipe(
+      of(finalState(freshRun()), messageCompleteEvent as ConvertedEvents).pipe(
         addRoundCompleteEvent({
           ...createDeps(),
           attachmentStateManager,
@@ -741,7 +762,7 @@ describe('addRoundCompleteEvent', () => {
     };
 
     const events = await firstValueFrom(
-      of(finalState(freshTracker()), messageCompleteEvent as ConvertedEvents).pipe(
+      of(finalState(freshRun()), messageCompleteEvent as ConvertedEvents).pipe(
         addRoundCompleteEvent({
           ...createDeps(),
           attachmentStateManager,
@@ -773,16 +794,16 @@ describe('addRoundCompleteEvent', () => {
         relevance_note: 'fits',
       },
     ];
-    const tracker = freshTracker([createRelevantSkillsStep({ skills, source: 'implicit' })]);
-    tracker.apply([
+    const run = freshRun([createRelevantSkillsStep({ skills, source: 'implicit' })]);
+    run.apply([
       stepUpdates.append({ type: ConversationRoundStepType.reasoning, reasoning: 'thinking' }),
     ]);
 
     const events = await firstValueFrom(
-      completedRunEvents(tracker).pipe(
+      completedRunEvents(run).pipe(
         addRoundCompleteEvent({
           ...createDeps(),
-          tracker,
+          tracker: run.tracker,
           userInput: { message: 'do a thing' },
           startTime: new Date('2026-01-01T00:00:00.000Z'),
         }),
@@ -799,7 +820,7 @@ describe('addRoundCompleteEvent', () => {
     ]);
   });
 
-  it('drops runtime-only tool calls and keeps the todos step, converging with the final graph state', async () => {
+  it('drops runtime-only tool calls and keeps the todos step from the final graph state', async () => {
     const serverCall: ToolCallStep = {
       type: ConversationRoundStepType.toolCall,
       tool_call_id: 'srv',
@@ -834,18 +855,15 @@ describe('addRoundCompleteEvent', () => {
         todos: [{ content: 'x', status: 'pending' }],
       }),
     ];
-    const tracker = freshTracker();
-    tracker.apply(updates);
-    const graphSteps = applyStepUpdates([], updates);
-    expect(tracker.getSteps()).toEqual(graphSteps);
+    const run = freshRun();
+    run.apply(updates);
 
-    const logger = { warn: jest.fn() } as unknown as Logger;
     const events = await firstValueFrom(
       of(
         createFinalStateEvent({
           currentCycle: 1,
           errorCount: 0,
-          steps: graphSteps,
+          steps: run.steps,
           toolRenderState: {
             srv: { toolName: 'my_tool', kind: 'server' },
             brw: { toolName: 'browser_open_tab', kind: 'browser' },
@@ -855,8 +873,7 @@ describe('addRoundCompleteEvent', () => {
       ).pipe(
         addRoundCompleteEvent({
           ...createDeps(),
-          tracker,
-          logger,
+          tracker: run.tracker,
           userInput: { message: 'go' },
           startTime: new Date('2026-01-01T00:00:00.000Z'),
         }),
@@ -874,13 +891,11 @@ describe('addRoundCompleteEvent', () => {
       ConversationRoundStepType.askUserQuestion,
       ConversationRoundStepType.updateTodos,
     ]);
-    expect(logger.warn).not.toHaveBeenCalled();
   });
 
-  it('persists the final graph steps and warns when the tracker diverged from them', async () => {
-    const tracker = freshTracker();
-    const logger = { warn: jest.fn() } as unknown as Logger;
-    const graphOnly = { type: ConversationRoundStepType.reasoning, reasoning: 'unseen' };
+  it('persists the final graph steps: the tracker holds no mirror of the run', async () => {
+    const run = freshRun();
+    const graphOnly = { type: ConversationRoundStepType.reasoning, reasoning: 'from the graph' };
     const events = await firstValueFrom(
       of(
         createFinalStateEvent({
@@ -893,16 +908,13 @@ describe('addRoundCompleteEvent', () => {
       ).pipe(
         addRoundCompleteEvent({
           ...createDeps(),
-          tracker,
-          logger,
+          tracker: run.tracker,
           userInput: { message: 'go' },
           startTime: new Date('2026-01-01T00:00:00.000Z'),
         }),
         toArray()
       )
     );
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('diverged'));
-    // the graph state is authoritative for the round's steps; the mirror is only a fallback
     const roundComplete = events.find(isRoundCompleteEvent)!;
     expect(roundComplete.data.round.steps).toEqual([graphOnly]);
   });
@@ -972,20 +984,22 @@ describe('addRoundCompleteEvent', () => {
       throw new Error('expected a pending turn');
     }
     expect(pendingTurn.compatRound.model_usage).toEqual(usage(2, 30, 15));
-    const tracker = new RunStepTracker({ graphName: 'g' });
-    tracker.seed(pendingTurn.steps, { execution: 'resume', pendingToolCallIds: [] });
-    tracker.apply([
-      stepUpdates.append({ type: ConversationRoundStepType.reasoning, reasoning: 'r2' }),
-    ]);
+    const tracker = new RunTracker({ graphName: 'g' });
+    tracker.seed({
+      steps: pendingTurn.steps,
+      inherited: { steps: pendingTurn.steps, pendingToolCallIds: [] },
+    });
+    const run = testRun(tracker, pendingTurn.steps);
+    run.apply([stepUpdates.append({ type: ConversationRoundStepType.reasoning, reasoning: 'r2' })]);
 
     // exec 2: the second resume, adding an attachment ref, usage and configuration overrides.
     const startTime = new Date('2026-01-01T00:02:00.000Z');
     const events = await firstValueFrom(
-      of(finalState(tracker, { currentCycle: 2 }), messageComplete('final')).pipe(
+      of(finalState(run, { currentCycle: 2 }), messageComplete('final')).pipe(
         addRoundCompleteEvent({
           ...createDeps(),
           pendingTurn,
-          tracker,
+          tracker: run.tracker,
           attachmentStateManager: {
             getAccessedRefs: jest.fn(() => [{ attachment_id: 'a3', version: 1 }]),
             getAll: jest.fn(() => []),

@@ -16,8 +16,9 @@ import {
   type ToolCallStep,
 } from '@kbn/agent-builder-common';
 import type { ModelProvider } from '@kbn/agent-builder-server/runner';
-import { RunStepTracker } from '../run_step_tracker';
-import { stepUpdates } from '../step_state';
+import { createRootStateChunkEvent } from '../../../../test_utils/graph_stream';
+import { RunTracker, type RunSeed } from '../run_tracker';
+import { applyStepUpdates, stepUpdates, type RunStepUpdate } from '../step_state';
 import { buildInterruptedRound } from './round_summary';
 
 jest.mock('../../../../tracing', () => ({
@@ -59,19 +60,30 @@ const carriedTodos: ConversationRoundStep = {
 const modelProvider = (calls: unknown[] = []) =>
   ({ getUsageStats: () => ({ calls }) } as unknown as ModelProvider);
 
-const freshTracker = (seed: ConversationRoundStep[] = []) => {
-  const tracker = new RunStepTracker({ graphName: 'g' });
-  tracker.seed(seed, { execution: 'fresh', pendingToolCallIds: [] });
-  return tracker;
+/** A tracker seeded as `run_chat_agent` does; `ran` feeds it the state the graph would have streamed. */
+const trackerFor = (seed: RunSeed) => {
+  const tracker = new RunTracker({ graphName: 'g' });
+  tracker.seed(seed);
+  return {
+    tracker,
+    ran: (updates: RunStepUpdate[]) =>
+      tracker.observeGraphEvent(
+        createRootStateChunkEvent('g', {
+          steps: applyStepUpdates(seed.steps, updates),
+          toolRenderState: seed.toolRenderState ?? {},
+        })
+      ),
+  };
 };
+const freshTracker = (steps: ConversationRoundStep[] = []) => trackerFor({ steps });
 
 describe('buildInterruptedRound', () => {
   const startTime = new Date('2026-01-01T00:00:00.000Z');
   const endTime = new Date('2026-01-01T00:00:02.500Z');
 
   it('builds the steps and the partial summary for a fresh round', () => {
-    const tracker = freshTracker([relevantSkills, carriedTodos]);
-    tracker.apply([stepUpdates.appendToolCall(toolCall('A'))]);
+    const { tracker, ran } = freshTracker([relevantSkills, carriedTodos]);
+    ran([stepUpdates.appendToolCall(toolCall('A'))]);
 
     const { steps, summary } = buildInterruptedRound({
       tracker,
@@ -104,9 +116,23 @@ describe('buildInterruptedRound', () => {
     });
   });
 
+  it('falls back to the seeded steps when the stream failed before any state was streamed', () => {
+    const { tracker } = freshTracker([relevantSkills, carriedTodos]);
+
+    const { steps } = buildInterruptedRound({
+      tracker,
+      startTime,
+      endTime,
+      modelProvider: modelProvider(),
+      mainConnectorId: 'main',
+    });
+
+    expect(steps).toEqual([relevantSkills, carriedTodos]);
+  });
+
   it('omits configuration_overrides when absent', () => {
     const { steps, summary } = buildInterruptedRound({
-      tracker: freshTracker(),
+      tracker: freshTracker().tracker,
       startTime,
       endTime,
       modelProvider: modelProvider(),
@@ -123,8 +149,8 @@ describe('buildInterruptedRound', () => {
   });
 
   it('includes progress recorded for a call that never resolved', () => {
-    const tracker = freshTracker();
-    tracker.apply([stepUpdates.appendToolCall(toolCall('A'))]);
+    const { tracker, ran } = freshTracker();
+    ran([stepUpdates.appendToolCall(toolCall('A'))]);
     tracker.recordEvent({
       type: ChatEventType.toolProgress,
       data: { tool_call_id: 'A', tool_id: 'tool-A', message: 'halfway' },
@@ -144,8 +170,8 @@ describe('buildInterruptedRound', () => {
   });
 
   it('includes a todo_write observed after the last node output', () => {
-    const tracker = freshTracker([carriedTodos]);
-    tracker.apply([stepUpdates.append(reasoning('planning'))]);
+    const { tracker, ran } = freshTracker([carriedTodos]);
+    ran([stepUpdates.append(reasoning('planning'))]);
     tracker.recordEvent({
       type: ChatEventType.toolUi,
       data: {
@@ -174,12 +200,12 @@ describe('buildInterruptedRound', () => {
   });
 
   it('on a resume, only owns the resolved paused calls and the new steps', () => {
-    const tracker = new RunStepTracker({ graphName: 'g' });
-    tracker.seed([relevantSkills, toolCall('done', [result('done')]), toolCall('paused')], {
-      execution: 'resume',
-      pendingToolCallIds: ['paused'],
+    const inherited = [relevantSkills, toolCall('done', [result('done')]), toolCall('paused')];
+    const { tracker, ran } = trackerFor({
+      steps: inherited,
+      inherited: { steps: inherited, pendingToolCallIds: ['paused'] },
     });
-    tracker.apply([
+    ran([
       stepUpdates.resolveToolCall({
         toolCallId: 'paused',
         toolId: 'tool-paused',

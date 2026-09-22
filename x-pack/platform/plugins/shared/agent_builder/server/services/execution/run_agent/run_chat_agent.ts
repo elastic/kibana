@@ -61,7 +61,7 @@ import { DEFAULT_MAX_TOOL_RESULT_TOKENS } from './utils/tool_result_guardrail';
 import { compactConversation } from './utils/conversation_compactor';
 import { createAgentGraph } from './graph';
 import { convertGraphEvents } from './convert_graph_events';
-import { RunStepTracker } from './run_step_tracker';
+import { RunTracker } from './run_tracker';
 import { applyStepUpdates, stepUpdates } from './step_state';
 import { buildRoundInterruptedEvent } from './utils/build_round_interrupted_event';
 import { emitRoundInterruptedOnError } from './utils/emit_round_interrupted_on_error';
@@ -193,9 +193,9 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 
   logger.debug(`Running chat agent with connector: ${model.connector.name}, runId: ${runId}`);
 
-  // Mirrors the graph's steps from the stream and buffers the out-of-band tool events (progress,
-  // todos writes) LangGraph never sees; the source of the persisted steps.
-  const tracker = new RunStepTracker({ graphName: chatAgentGraphName });
+  // Holds what LangGraph does not: the seed, the latest streamed state (for persistence when the
+  // stream throws) and the out-of-band tool events (progress, todos writes) LangGraph never sees.
+  const tracker = new RunTracker({ graphName: chatAgentGraphName });
 
   // ReplaySubject so events emitted before subscription (e.g. compaction) are
   // replayed to late subscribers when the merged stream is subscribed to.
@@ -422,6 +422,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     }),
     {
       version: 'v2',
+      // root `on_chain_stream` chunks carry the full state after each super-step (see `RunTracker`)
+      streamMode: 'values',
       signal: abortSignal,
       runName: chatAgentGraphName,
       metadata: {
@@ -496,7 +498,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     addRoundCompleteEvent({
       pendingTurn,
       tracker,
-      logger,
       userInput: processedInput,
       origin,
       author,
@@ -630,7 +631,7 @@ const createInitializerCommand = ({
   toolManager: ToolManager;
   promptManager: PromptManager;
   eventEmitter: AgentEventEmitterFn;
-  tracker: RunStepTracker;
+  tracker: RunTracker;
   compactionResult?: CompactedConversation;
   relevantSkillsSelection?: RelevantSkillSelection;
   initialTodos?: TodoItem[];
@@ -641,7 +642,7 @@ const createInitializerCommand = ({
       relevantSkillsSelection,
       initialTodos,
     });
-    tracker.seed(preExecutionSteps, { execution: 'fresh', pendingToolCallIds: [] });
+    tracker.seed({ steps: preExecutionSteps });
     const update: StateUpdate = { cycleLimit, steps: new Overwrite(preExecutionSteps) };
     return new Command({ update, goto: steps.init });
   }
@@ -656,17 +657,21 @@ const createInitializerCommand = ({
   for (const id of init.consumedPromptIds) {
     promptManager.delete(id);
   }
-  // The inherited steps are seeded, then this execution's own bookkeeping (a compaction step, if
-  // compaction ran) is applied on top so the tracker attributes it to the resume execution. The
-  // paused turn already carries its relevant-skills and todos steps.
+  // The graph starts from the inherited steps plus this execution's own bookkeeping (a compaction
+  // step, if compaction ran); only the inherited ones are excluded from the resume execution's
+  // persisted steps. The paused turn already carries its relevant-skills and todos steps.
   const ownUpdates = createPreExecutionSteps({ compactionResult }).map((step) =>
     stepUpdates.append(step)
   );
-  tracker.seed(init.steps, { execution: 'resume', pendingToolCallIds: init.pendingToolCallIds });
-  tracker.apply(ownUpdates);
+  const initialSteps = applyStepUpdates(init.steps, ownUpdates);
+  tracker.seed({
+    steps: initialSteps,
+    toolRenderState: init.toolRenderState,
+    inherited: { steps: init.steps, pendingToolCallIds: init.pendingToolCallIds },
+  });
   const update: StateUpdate = {
     cycleLimit,
-    steps: new Overwrite(applyStepUpdates(init.steps, ownUpdates)),
+    steps: new Overwrite(initialSteps),
     pendingToolCallIds: init.pendingToolCallIds,
     researchOutcome: init.researchOutcome,
     toolRenderState: init.toolRenderState,

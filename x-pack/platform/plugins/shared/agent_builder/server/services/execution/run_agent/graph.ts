@@ -41,7 +41,7 @@ import { StateAnnotation, toCurrentRun } from './state';
 import { processResearchResponse, processToolNodeResponse } from './response_processing';
 import { createAnswerAgentStructured } from './answer_agent_structured';
 import { countNonTodosSteps, stepUpdates, type RunStepUpdate } from './step_state';
-import type { ToolExecutionBuffer } from './run_step_tracker';
+import type { ToolExecutionBuffer } from './run_tracker';
 import type { SubagentTracker } from './subagent_tracker';
 import type { ProcessedConversation } from './utils/prepare_conversation';
 

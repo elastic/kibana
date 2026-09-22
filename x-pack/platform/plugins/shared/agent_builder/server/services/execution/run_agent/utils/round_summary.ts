@@ -13,7 +13,7 @@ import type {
 import type { RoundModelUsageStats } from '@kbn/agent-builder-common/chat';
 import type { ModelProvider, ModelProviderStats } from '@kbn/agent-builder-server/runner';
 import { getCurrentTraceId } from '../../../../tracing';
-import type { RunStepTracker } from '../run_step_tracker';
+import type { RunTracker } from '../run_tracker';
 
 export const getModelUsage = (
   stats: ModelProviderStats,
@@ -47,8 +47,9 @@ export const getModelUsage = (
 
 /**
  * Steps and partial run summary of an execution that did not complete. The steps are the ones this
- * execution owns (fresh: everything; resume: the resolved paused calls and the new steps), including
- * tool progress and a `todo_write` the graph never got to fold in.
+ * execution owns (fresh: everything; resume: the resolved paused calls and the new steps), projected
+ * from the latest graph state the stream carried, including tool progress and a `todo_write` the
+ * graph never got to fold in.
  */
 export const buildInterruptedRound = ({
   tracker,
@@ -58,7 +59,7 @@ export const buildInterruptedRound = ({
   mainConnectorId,
   configurationOverrides,
 }: {
-  tracker: RunStepTracker;
+  tracker: RunTracker;
   startTime: Date;
   endTime: Date;
   modelProvider: ModelProvider;

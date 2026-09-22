@@ -17,8 +17,8 @@ import { AgentPromptType } from '@kbn/agent-builder-common/agents/prompts';
 import type { ModelProvider } from '@kbn/agent-builder-server/runner';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { createEmptyConversation, createRound } from '../../../../test_utils/conversations';
-import { RunStepTracker } from '../run_step_tracker';
-import { stepUpdates } from '../step_state';
+import { createRootStateChunkEvent } from '../../../../test_utils/graph_stream';
+import { RunTracker } from '../run_tracker';
 import { buildRoundInterruptedEvent } from './build_round_interrupted_event';
 import { getPendingTurn } from './conversation_turn';
 
@@ -53,10 +53,13 @@ describe('buildRoundInterruptedEvent', () => {
     progression: [],
   };
 
+  /** A fresh run whose graph streamed one state: a single pending tool call. */
   const freshTracker = () => {
-    const tracker = new RunStepTracker({ graphName: 'g' });
-    tracker.seed([], { execution: 'fresh', pendingToolCallIds: [] });
-    tracker.apply([stepUpdates.appendToolCall(toolCall)]);
+    const tracker = new RunTracker({ graphName: 'g' });
+    tracker.seed({ steps: [] });
+    tracker.observeGraphEvent(
+      createRootStateChunkEvent('g', { steps: [toolCall], toolRenderState: {} })
+    );
     return tracker;
   };
 
@@ -154,8 +157,12 @@ describe('buildRoundInterruptedEvent', () => {
     if (!pendingTurn) {
       throw new Error('expected a pending turn');
     }
-    const tracker = new RunStepTracker({ graphName: 'g' });
-    tracker.seed(pendingTurn.steps, { execution: 'resume', pendingToolCallIds: ['c1'] });
+    // the resume failed before the graph streamed any state: the tracker falls back to the seed
+    const tracker = new RunTracker({ graphName: 'g' });
+    tracker.seed({
+      steps: pendingTurn.steps,
+      inherited: { steps: pendingTurn.steps, pendingToolCallIds: ['c1'] },
+    });
 
     const change = {
       kind: 'added',
