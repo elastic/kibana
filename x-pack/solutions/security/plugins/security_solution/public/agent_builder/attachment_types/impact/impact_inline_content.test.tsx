@@ -54,8 +54,8 @@ describe('ImpactInlineContent', () => {
     expect(screen.getByTestId(IMPACT_ATTACHMENT_TEST_ID)).toBeInTheDocument();
     expect(screen.getByText('WKSTN-01')).toBeInTheDocument();
     expect(screen.getByText('jdoe')).toBeInTheDocument();
-    expect(screen.getByText('host')).toBeInTheDocument();
-    expect(screen.getByText('user')).toBeInTheDocument();
+    expect(screen.getByText('Host')).toBeInTheDocument();
+    expect(screen.getByText('User')).toBeInTheDocument();
   });
 
   it('renders column headers', () => {

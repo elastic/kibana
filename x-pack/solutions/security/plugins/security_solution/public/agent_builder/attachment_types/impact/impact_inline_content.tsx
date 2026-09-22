@@ -76,6 +76,21 @@ const parseTruncation = (
   };
 };
 
+const formatEntityType = (entityType: string): string => {
+  switch (entityType) {
+    case 'host':
+      return i18n.translate('xpack.securitySolution.agentBuilder.impact.entityTypeHost', {
+        defaultMessage: 'Host',
+      });
+    case 'user':
+      return i18n.translate('xpack.securitySolution.agentBuilder.impact.entityTypeUser', {
+        defaultMessage: 'User',
+      });
+    default:
+      return entityType;
+  }
+};
+
 const COLUMNS: Array<EuiBasicTableColumn<EntityRow>> = [
   {
     field: 'entity_type',
@@ -83,6 +98,7 @@ const COLUMNS: Array<EuiBasicTableColumn<EntityRow>> = [
       defaultMessage: 'Type',
     }),
     width: '5em',
+    render: (entityType: string) => formatEntityType(entityType),
   },
   {
     field: 'name',
