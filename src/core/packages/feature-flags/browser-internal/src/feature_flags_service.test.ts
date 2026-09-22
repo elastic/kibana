@@ -348,6 +348,32 @@ describe('FeatureFlagsService Browser', () => {
       expect(result.current).toBe(false);
     });
 
+    test('useBooleanValue uses the synchronous evaluation when the flag or fallback changes', () => {
+      jest
+        .spyOn(featureFlagsClient, 'getBooleanValue')
+        .mockImplementation((flagName: string, fallback: boolean) =>
+          flagName === 'my-flag' ? false : fallback
+        );
+
+      const seen: boolean[] = [];
+      const { rerender } = renderHook(
+        ({ flagName, fallback }: { flagName: string; fallback: boolean }) => {
+          const value = startContract.useBooleanValue(flagName, fallback);
+          seen.push(value);
+          return value;
+        },
+        { initialProps: { flagName: 'my-flag', fallback: false } }
+      );
+
+      expect(seen).toEqual([false]);
+
+      rerender({ flagName: 'other-flag', fallback: true });
+      expect(seen).toEqual([false, true]);
+
+      rerender({ flagName: 'other-flag', fallback: false });
+      expect(seen).toEqual([false, true, false]);
+    });
+
     test('useBooleanValue honors config overrides on the first render', () => {
       const { result } = renderHook(() =>
         startContract.useBooleanValue('my-overridden-flag', false)

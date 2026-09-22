@@ -24,7 +24,7 @@ import { useMemo } from 'react';
 import type { Observable } from 'rxjs';
 import { filter, map, merge, startWith, Subject } from 'rxjs';
 import { get } from 'lodash';
-import { useObservable } from '@kbn/use-observable';
+import { useObservable, type ValueObservable } from '@kbn/use-observable';
 import { buildPath } from '@kbn/core-http-browser';
 
 /**
@@ -66,7 +66,18 @@ const getFeatureFlagValueType = (value: FeatureFlagValue): FeatureFlagValueType 
   return 'string';
 };
 
-/** Subscribes to a flag and seeds the first render from the synchronous evaluation. */
+/** Lets useObservable reseed during render when the flag or fallback changes. */
+function withSyncValue<T extends FeatureFlagValue>(
+  source$: Observable<T>,
+  readValue: () => T
+): ValueObservable<T> {
+  return {
+    subscribe: (listener) => source$.subscribe(listener),
+    getValue: readValue,
+  };
+}
+
+/** Subscribes to a flag and reads the synchronous evaluation on each render that changes arguments. */
 function useFeatureFlagValue<T extends FeatureFlagValue>(
   flagName: string,
   fallbackValue: T,
@@ -74,14 +85,11 @@ function useFeatureFlagValue<T extends FeatureFlagValue>(
   getValue: (flagName: string, fallbackValue: T) => T
 ): T {
   const value$ = useMemo(
-    () => getValue$(flagName, fallbackValue),
-    [getValue$, flagName, fallbackValue]
+    () =>
+      withSyncValue(getValue$(flagName, fallbackValue), () => getValue(flagName, fallbackValue)),
+    [getValue$, getValue, flagName, fallbackValue]
   );
-  const initialValue = useMemo(
-    () => getValue(flagName, fallbackValue),
-    [getValue, flagName, fallbackValue]
-  );
-  return useObservable(value$, initialValue);
+  return useObservable(value$);
 }
 
 export class FeatureFlagsService {

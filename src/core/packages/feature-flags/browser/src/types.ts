@@ -164,7 +164,7 @@ export interface FeatureFlagsStart {
 
   /**
    * React hook that subscribes to a boolean flag.
-   * The first render uses the synchronous evaluation, then the value updates when the flag or the evaluation context changes.
+   * The render uses the synchronous evaluation for the current flag and fallback, then the value updates when the flag or the evaluation context changes.
    *
    * Call it during render. `getBooleanValue$` builds a new observable on every call, and this hook memoizes that subscription.
    * @param flagName The flag ID to evaluate
@@ -183,7 +183,7 @@ export interface FeatureFlagsStart {
 
   /**
    * React hook that subscribes to a string flag.
-   * The first render uses the synchronous evaluation, then the value updates when the flag or the evaluation context changes.
+   * The render uses the synchronous evaluation for the current flag and fallback, then the value updates when the flag or the evaluation context changes.
    *
    * Call it during render. `getStringValue$` builds a new observable on every call, and this hook memoizes that subscription.
    * @param flagName The flag ID to evaluate
@@ -202,7 +202,7 @@ export interface FeatureFlagsStart {
 
   /**
    * React hook that subscribes to a number flag.
-   * The first render uses the synchronous evaluation, then the value updates when the flag or the evaluation context changes.
+   * The render uses the synchronous evaluation for the current flag and fallback, then the value updates when the flag or the evaluation context changes.
    *
    * Call it during render. `getNumberValue$` builds a new observable on every call, and this hook memoizes that subscription.
    * @param flagName The flag ID to evaluate
