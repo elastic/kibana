@@ -37,7 +37,7 @@ test.describe('Workflow access dialog', { tag: tags.stateful.classic }, () => {
           },
         }
       );
-      expect(response.statusCode).toBe(200);
+      expect(response.statusCode, JSON.stringify(response.body)).toBe(200);
     }
   });
 
@@ -68,6 +68,9 @@ test.describe('Workflow access dialog', { tag: tags.stateful.classic }, () => {
     await expect(editor.accessMode).toContainText('Public');
     await expect(page.getByText('Owner (you)', { exact: true })).toBeVisible();
     await expect(page.getByText('test editor', { exact: true })).toBeVisible();
+    expect(
+      (await page.checkA11y({ include: ['[aria-labelledby="workflowAccessTitle"]'] })).violations
+    ).toStrictEqual([]);
     await editor.setAccessMode('private');
     await editor.addAccessUser('test viewer');
     await editor.setAccessRole('elastic_viewer', 'executor');
@@ -80,6 +83,9 @@ test.describe('Workflow access dialog', { tag: tags.stateful.classic }, () => {
     ).toBeVisible();
     await editor.setAccessRole('elastic_viewer', 'viewer');
     await expect(page.getByText('Owner (you)', { exact: true })).toBeVisible();
+    expect(
+      (await page.checkA11y({ include: ['[aria-labelledby="workflowAccessTitle"]'] })).violations
+    ).toStrictEqual([]);
     await page.screenshot({
       path: testInfo.outputPath('workflow_access.png'),
       animations: 'disabled',
@@ -143,6 +149,18 @@ test.describe('Workflow access dialog', { tag: tags.stateful.classic }, () => {
         enabled,
         permissions: { execute: true, edit: false },
       });
+      await expect
+        .poll(async () => {
+          const history = await page.request.get(
+            `${new URL(page.url()).origin}/s/${
+              scoutSpace.id
+            }/api/workflows/workflow/${workflowId}/executions`,
+            { headers: { 'elastic-api-version': '2023-10-31' } }
+          );
+          expect(history.status()).toBe(200);
+          return (await history.json()).results.map(({ status }: { status: string }) => status);
+        })
+        .toStrictEqual(['completed']);
     });
   }
 });

@@ -849,6 +849,27 @@ export class WorkflowExecutionQueryService {
    */
   async getWaitingStepExecutionId(executionId: string, spaceId: string): Promise<string | null> {
     try {
+      const { items } = await this.deps.workflowExecutionsDataClient.getByIds([executionId], {
+        sourceIncludes: ['spaceId', 'stepExecutionIds'],
+      });
+      const execution = items[0]?.document;
+      if (!execution || execution.spaceId !== spaceId) return null;
+      if (execution.stepExecutionIds) {
+        const { items: steps } = await this.deps.stepExecutionsDataClient.getByIds(
+          execution.stepExecutionIds,
+          { sourceIncludes: ['id', 'spaceId', 'workflowRunId', 'stepType', 'status', 'finishedAt'] }
+        );
+        return (
+          steps.findLast(
+            ({ document: step }) =>
+              step.spaceId === spaceId &&
+              step.workflowRunId === executionId &&
+              (step.stepType === 'waitForInput' || step.stepType === 'waitForApproval') &&
+              step.status === 'waiting_for_input' &&
+              !step.finishedAt
+          )?.document.id ?? null
+        );
+      }
       const response = (await this.deps.stepExecutionsDataClient.search({
         query: {
           bool: {

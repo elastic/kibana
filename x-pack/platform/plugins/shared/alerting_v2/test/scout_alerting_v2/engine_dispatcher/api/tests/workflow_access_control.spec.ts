@@ -100,7 +100,7 @@ steps:
               name: `Policy ACL ${accessMode}`,
               description: 'Checks workflow access under the policy API key',
               destinations: [{ type: 'workflow', id: workflowId }],
-              matcher: { expression: `rule.tags: "${workflowId}"` },
+              matcher: { tags: [workflowId] },
               grouping_mode: 'per_episode',
               throttle: { strategy: 'every_time' },
             },

@@ -11,12 +11,14 @@ import { randomUUID } from 'node:crypto';
 import { apiTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
+import { deleteTestExecutions } from '../../fixtures/delete_test_executions';
 
 apiTest.describe('Workflow access control', { tag: tags.stateful.classic }, () => {
   const spaceId = `workflow-acl-${randomUUID()}`;
   const ownerUsername = `workflow-owner-${randomUUID()}`;
   const readerUsername = `workflow-reader-${randomUUID()}`;
   let workflowId: string;
+  const unsavedExecutionIds: string[] = [];
   let readerProfileId: string;
   let ownerHeaders: Record<string, string>;
   let readerHeaders: Record<string, string>;
@@ -92,6 +94,7 @@ steps:
   });
 
   apiTest.afterAll(async ({ apiClient, kbnClient, esClient }) => {
+    await deleteTestExecutions(esClient, spaceId, unsavedExecutionIds);
     if (workflowId) {
       expect(
         await apiClient.delete(
@@ -368,7 +371,7 @@ steps:
               .poll(
                 async () => {
                   const parent = await apiClient.get(
-                    `s/${spaceId}/api/workflows/executions/${result.body.workflowExecutionId}`,
+                    `s/${spaceId}/api/workflows/workflow/${parentId}/executions`,
                     { headers: readerHeaders }
                   );
                   expect(parent).toHaveStatusCode(200);
@@ -378,7 +381,10 @@ steps:
                   );
                   expect(children).toHaveStatusCode(200);
                   return {
-                    parent: parent.body.status,
+                    parent: parent.body.results.find(
+                      (execution: WorkflowExecutionDto) =>
+                        execution.id === result.body.workflowExecutionId
+                    )?.status,
                     children: children.body.results.map((execution: WorkflowExecutionDto) => ({
                       status: execution.status,
                       isTestRun: execution.isTestRun,
@@ -391,16 +397,36 @@ steps:
                 parent: 'completed',
                 children: [{ status: 'completed', isTestRun }],
               });
+            expect(
+              await apiClient.put(`s/${spaceId}/internal/workflows/${childId}/access_control`, {
+                headers: ownerHeaders,
+                body: {
+                  access_mode: isTestRun ? 'private' : 'public',
+                  entries: isTestRun
+                    ? [{ type: 'user', id: readerProfileId, role: 'executor' }]
+                    : [],
+                },
+              })
+            ).toHaveStatusCode(200);
+            const childrenPath = `s/${spaceId}/api/workflows/executions/${result.body.workflowExecutionId}/children`;
+            const beforeDelete = await apiClient.get(childrenPath, { headers: readerHeaders });
+            expect(beforeDelete).toHaveStatusCode(200);
+            expect(beforeDelete.body).toHaveLength(stepType === 'workflow.execute' ? 1 : 0);
+            expect(
+              await apiClient.delete(`s/${spaceId}/api/workflows/workflow/${childId}`, {
+                headers: ownerHeaders,
+              })
+            ).toHaveStatusCode(200);
+            const afterDelete = await apiClient.get(childrenPath, { headers: readerHeaders });
+            expect(afterDelete).toHaveStatusCode(200);
+            expect(afterDelete.body).toStrictEqual(beforeDelete.body);
           } finally {
             for (const id of createdIds.reverse()) {
-              expect(
-                await apiClient.delete(
-                  `s/${spaceId}/api/workflows/workflow/${id}?force=true&acknowledgeAclLoss=true`,
-                  {
-                    headers: ownerHeaders,
-                  }
-                )
-              ).toHaveStatusCode(200);
+              const deleted = await apiClient.delete(
+                `s/${spaceId}/api/workflows/workflow/${id}?force=true&acknowledgeAclLoss=true`,
+                { headers: ownerHeaders }
+              );
+              expect(deleted, JSON.stringify(deleted.body)).toHaveStatusCode(200);
             }
           }
         }
@@ -593,6 +619,16 @@ steps:
           ).toHaveStatusCode(200);
           for (const callerHeaders of [ownerHeaders, readerHeaders, bobHeaders]) {
             const allowed = mode === 'public' || callerHeaders !== bobHeaders;
+            const steps = await apiClient.get(
+              `s/${spaceId}/api/workflows/executions/${executionId}/steps`,
+              { headers: callerHeaders }
+            );
+            expect(steps).toHaveStatusCode(allowed ? 200 : 403);
+            expect(steps.body.results).toStrictEqual(
+              allowed
+                ? [expect.objectContaining({ stepId: 'message', status: 'completed' })]
+                : undefined
+            );
             const status = await apiClient.post(`s/${spaceId}/api/agent_builder/tools/_execute`, {
               headers: callerHeaders,
               body: {
@@ -622,6 +658,100 @@ steps:
       } finally {
         await esClient.security.deleteUser({ username: bob });
       }
+    }
+  );
+
+  apiTest(
+    'resumes private executions through Agent Builder and reads the resulting state',
+    async ({ apiClient }) => {
+      const workflowPath = `s/${spaceId}/api/workflows/workflow/${workflowId}`;
+      const accessPath = `s/${spaceId}/internal/workflows/${workflowId}/access_control`;
+      expect(
+        await apiClient.put(workflowPath, {
+          headers: ownerHeaders,
+          body: {
+            yaml: yaml.replace(
+              'steps:',
+              `steps:
+  - name: approve
+    type: waitForInput
+    with:
+      message: Approve execution`
+            ),
+          },
+        })
+      ).toHaveStatusCode(200);
+      for (const callerHeaders of [ownerHeaders, readerHeaders]) {
+        expect(
+          await apiClient.put(accessPath, {
+            headers: ownerHeaders,
+            body: { access_mode: 'private', entries: [] },
+          })
+        ).toHaveStatusCode(200);
+        const run = await apiClient.post(`${workflowPath}/run`, {
+          headers: ownerHeaders,
+          body: { inputs: {} },
+        });
+        expect(run).toHaveStatusCode(200);
+        const executionId = run.body.workflowExecutionId;
+        const executionPath = `s/${spaceId}/api/workflows/executions/${executionId}`;
+        await expect
+          .poll(
+            async () => {
+              const execution = await apiClient.get(executionPath, { headers: ownerHeaders });
+              expect(execution).toHaveStatusCode(200);
+              return execution.body.status;
+            },
+            { timeout: 60000 }
+          )
+          .toBe('waiting_for_input');
+        const resumeBody = {
+          tool_id: 'platform.core.resume_workflow_execution',
+          tool_params: { executionId, input: {} },
+        };
+        const denied = await apiClient.post(`s/${spaceId}/api/agent_builder/tools/_execute`, {
+          headers: readerHeaders,
+          body: resumeBody,
+        });
+        expect(denied).toHaveStatusCode(200);
+        expect(denied.body.results[0].type).toBe('error');
+        expect(
+          await apiClient.put(accessPath, {
+            headers: ownerHeaders,
+            body: {
+              access_mode: 'private',
+              entries: [{ type: 'user', id: readerProfileId, role: 'executor' }],
+            },
+          })
+        ).toHaveStatusCode(200);
+        const resumed = await apiClient.post(`s/${spaceId}/api/agent_builder/tools/_execute`, {
+          headers: callerHeaders,
+          body: resumeBody,
+        });
+        expect(resumed).toHaveStatusCode(200);
+        expect(resumed.body.results[0]).toMatchObject({
+          type: 'other',
+          data: { resumed: true, execution: { execution_id: executionId } },
+        });
+        expect(resumed.body.results[0].data.execution.status).not.toBe('unknown');
+        await expect
+          .poll(
+            async () => {
+              const history = await apiClient.get(`${workflowPath}/executions`, {
+                headers: callerHeaders,
+              });
+              expect(history).toHaveStatusCode(200);
+              return history.body.results.find(
+                (execution: WorkflowExecutionDto) => execution.id === executionId
+              )?.status;
+            },
+            { timeout: 60000 }
+          )
+          .toBe('completed');
+      }
+      expect(
+        await apiClient.put(workflowPath, { headers: ownerHeaders, body: { yaml } })
+      ).toHaveStatusCode(200);
     }
   );
 
@@ -799,6 +929,7 @@ steps:
       body: { workflowYaml: yaml, inputs: {} },
     });
     expect(run).toHaveStatusCode(200);
+    unsavedExecutionIds.push(run.body.workflowExecutionId);
     const executionPath = `s/${spaceId}/api/workflows/executions/${run.body.workflowExecutionId}`;
     await expect
       .poll(
