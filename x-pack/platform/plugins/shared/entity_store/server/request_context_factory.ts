@@ -100,8 +100,10 @@ export async function createRequestHandlerContext({
   const historySnapshotClient = new HistorySnapshotClient({
     logger,
     esClient,
+    internalEsClient: core.elasticsearch.client.asInternalUser,
     namespace,
     globalStateClient,
+    taskManager: taskManagerStart,
   });
 
   return {
