@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Router } from '@kbn/shared-ux-router';
@@ -52,7 +52,7 @@ describe('OnboardingPage', () => {
     const button = screen.getByRole('button', { name: 'Configure Watches' });
     expect(button).toBeInTheDocument();
 
-    button.click();
+    fireEvent.click(button);
 
     expect(history.location.pathname).toBe('/watches');
   });

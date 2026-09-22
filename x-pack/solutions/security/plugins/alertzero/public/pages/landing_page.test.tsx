@@ -34,14 +34,16 @@ jest.mock('../hooks/use_alertzero_doc_title', () => ({ useAlertZeroDocTitle: jes
 const mockUseWorkers = useWorkers as jest.Mock;
 const mockUseProposalsByCategory = useProposalsByCategory as jest.Mock;
 
-const workersResult = (workers: Array<{ enabled: boolean }>, overrides = {}) => ({
+type QueryOverrides = Partial<{ data: unknown; isLoading: boolean; isFetching: boolean; error: Error | undefined }>;
+
+const workersResult = (workers: Array<{ enabled: boolean }>, overrides: QueryOverrides = {}) => ({
   data: { workers: workers.map((w, i) => ({ id: `w-${i}`, ...w })) },
   isLoading: false,
   error: undefined,
   ...overrides,
 });
 
-const proposalsResult = (total: number, overrides = {}) => ({
+const proposalsResult = (total: number, overrides: QueryOverrides = {}) => ({
   data: { proposals: [], total },
   isLoading: false,
   error: undefined,
@@ -127,6 +129,15 @@ describe('LandingPage', () => {
 
   it('renders nothing while loading', () => {
     mockUseWorkers.mockReturnValue(workersResult([], { isLoading: true, data: undefined }));
+
+    renderPage();
+
+    expect(screen.queryByText('Get started with AlertZero')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('conversations-page')).not.toBeInTheDocument();
+  });
+
+  it('renders nothing while proposals are loading', () => {
+    mockUseProposalsByCategory.mockReturnValue(proposalsResult(0, { isLoading: true, data: undefined }));
 
     renderPage();
 

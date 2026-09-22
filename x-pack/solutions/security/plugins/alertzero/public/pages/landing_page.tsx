@@ -22,10 +22,9 @@ export const LandingPage: React.FC = () => {
 
   const hasAnyError = workers.error != null || respond.error != null || investigate.error != null;
   const hasEnabledWorker = workers.data?.workers.some((w) => w.enabled) ?? false;
-  const hasInvestigations =
-    (respond.data?.total ?? 0) > 0 || (investigate.data?.total ?? 0) > 0;
+  const hasProposals = (respond.data?.total ?? 0) > 0 || (investigate.data?.total ?? 0) > 0;
 
-  if (hasAnyError || hasEnabledWorker || hasInvestigations) {
+  if (hasAnyError || hasEnabledWorker || hasProposals) {
     return <ConversationsPage />;
   }
 
