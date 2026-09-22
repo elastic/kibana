@@ -31,6 +31,7 @@ import { QUEUE_PAGE_INFO, DECISION_ERRORS } from './translations';
 import { ProposalsTrendChartRow } from '../../components/proposals_trend_chart';
 import { DismissProposalModal } from '../../components/pending_proposals/dismiss_proposal_modal';
 import { useQueueSections } from './queue/use_queue_sections';
+import { useDropDecidedProposal } from './queue/use_drop_decided_proposal';
 import { QueueSection } from './queue/queue_section';
 
 /**
@@ -50,6 +51,7 @@ export const ConversationsPage: React.FC = () => {
 
   const approve = useApproveProposal();
   const dismiss = useDismissProposal();
+  const dropDecided = useDropDecidedProposal();
   const [surfaceFilter, setSurfaceFilter] = useState<string | null>(null);
   useAlertZeroDocTitle(QUEUE_PAGE_INFO.pageTitle);
 
@@ -124,10 +126,16 @@ export const ConversationsPage: React.FC = () => {
     (proposal: ProposalItem) => {
       approve.mutate(
         { id: proposal.id, body: { actionInput: proposal.actionInput } },
-        { onSuccess: closeApproval, onError: onDecisionError }
+        {
+          onSuccess: () => {
+            void dropDecided(proposal.id);
+            closeApproval();
+          },
+          onError: onDecisionError,
+        }
       );
     },
-    [approve, closeApproval, onDecisionError]
+    [approve, closeApproval, dropDecided, onDecisionError]
   );
 
   // Dismissing is a decision with a reason, so the approval modal hands off to the dismiss
@@ -148,12 +156,18 @@ export const ConversationsPage: React.FC = () => {
         onConfirm={({ dismissReason, rationale }) =>
           dismiss.mutate(
             { id: recordId, body: { dismissReason, rationale } },
-            { onSuccess: onClose, onError: onDecisionError }
+            {
+              onSuccess: () => {
+                void dropDecided(recordId);
+                onClose();
+              },
+              onError: onDecisionError,
+            }
           )
         }
       />
     ),
-    [dismiss, onDecisionError]
+    [dismiss, dropDecided, onDecisionError]
   );
 
   const onClickRecommendedAction: ConversationsActionsGroupProps['onClickRecommendedAction'] =

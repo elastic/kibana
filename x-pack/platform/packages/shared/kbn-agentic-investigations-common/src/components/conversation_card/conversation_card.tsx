@@ -48,13 +48,15 @@ export const ConversationCard = memo<ConversationCardProps>(
 
     return (
       <EuiPanel
-        paddingSize="l"
+        paddingSize="none"
         role="button"
         tabIndex={0}
         aria-label={investigation.title}
         aria-current={isSelected || undefined}
         borderRadius="none"
         css={{
+          // Asymmetric by design — off EUI's padding scale, which has no 20px step.
+          padding: '20px 16px 24px 24px',
           cursor: 'pointer',
           borderBottom: hasBorder ? `1px solid ${euiTheme.colors.disabled}` : 'none',
           borderRadius: hasBorder ? 'none' : `0 0 ${euiTheme.size.s} ${euiTheme.size.s}`,
