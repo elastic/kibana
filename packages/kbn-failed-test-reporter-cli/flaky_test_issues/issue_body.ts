@@ -48,8 +48,6 @@ const MAX_HEADLINE_BRANCHES = 2;
 
 export interface FlakySuiteIssueContext {
   report: FlakyTestReport;
-  /** Owning module of the suite's file, e.g. `Management`; a row of the details when known. */
-  area?: string;
   /** Dashboard with the live numbers, linked from the headline when given. */
   dashboardUrl?: string;
   /** Numbers of issues that mention the suite's file without being about it. */
@@ -254,10 +252,9 @@ const overview = (suite: FlakySuite, ctx: FlakySuiteIssueContext): string => {
 const blobLink = (repoRelativePath: string): string =>
   `[${inlineCode(repoRelativePath)}](${KIBANA_BLOB_URL}/${repoRelativePath})`;
 
-const suiteDetails = (suite: FlakySuite, area: string | undefined): string => {
+const suiteDetails = (suite: FlakySuite): string => {
   const framework = FRAMEWORK_LABELS[suite.framework].long;
   const rows: string[][] = [
-    ...(area ? [['**Area**', area]] : []),
     ['**File**', blobLink(suite.filePath)],
     [
       '**Framework**',
@@ -369,7 +366,7 @@ export const renderFlakySuiteIssueBody = (
 ): string => {
   const sections = [
     overview(suite, ctx),
-    suiteDetails(suite, ctx.area),
+    suiteDetails(suite),
     '### Flaky Tests',
     testsTable(suite.tests, {
       withTestId: true,

@@ -163,9 +163,7 @@ describe('readSuiteFilePathFromTitle', () => {
 describe('renderFlakySuiteIssueBody', () => {
   it('opens by naming the suite, then the rate, pipeline and other pipelines', () => {
     const single = singleTestReport();
-    expect(
-      renderFlakySuiteIssueBody(single.suite, { report: single.report, area: 'Synthetics' })
-    ).toContain(
+    expect(renderFlakySuiteIssueBody(single.suite, { report: single.report })).toContain(
       [
         'The `Default status alert` suite appears to be flaky:',
         '',
@@ -175,11 +173,8 @@ describe('renderFlakySuiteIssueBody', () => {
         '',
         '| Field | Value |',
         '|---|---|',
-        '| **Area** | Synthetics |',
+        '| **File** |',
       ].join('\n')
-    );
-    expect(renderFlakySuiteIssueBody(single.suite, { report: single.report })).not.toContain(
-      '**Area**'
     );
     const multi = multiTestReport();
     expect(renderFlakySuiteIssueBody(multi.suite, { report: multi.report })).toContain(
