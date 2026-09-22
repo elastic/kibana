@@ -9,7 +9,9 @@
     ]
   },
   "include": [
-    "**/*.ts"
+    "**/*.ts",
+    "**/*.d.ts",
+    "**/*.text"
   ],
   "exclude": [
     "target/**/*"
