@@ -10,27 +10,9 @@ import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result'
 import type { EvaluationResult, Evaluator, Example, TaskOutput } from '@kbn/evals';
 import type { ExtractedVisualization } from '../extract_visualization';
 import { substituteEsqlBindParams } from './esql_bind_params';
+import { isNumericColumn, type EsqlColumn } from './esql_column_types';
 
 export const CHART_COMPATIBLE_RESULT_EVALUATOR_NAME = 'Chart Compatible Result';
-
-interface EsqlColumn {
-  name: string;
-  type: string;
-}
-
-const NUMERIC_TYPES = new Set([
-  'integer',
-  'long',
-  'double',
-  'float',
-  'unsigned_long',
-  'number',
-  'half_float',
-  'scaled_float',
-]);
-
-const isNumericColumn = (column: EsqlColumn): boolean =>
-  NUMERIC_TYPES.has(column.type.toLowerCase());
 
 const resolveChartType = (
   visualization: ExtractedVisualization,

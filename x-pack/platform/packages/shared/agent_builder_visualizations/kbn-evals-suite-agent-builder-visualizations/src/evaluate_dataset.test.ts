@@ -96,6 +96,7 @@ describe('createEvaluateDataset', () => {
       ['Renderer vs Intent', 'CODE'],
       ['Visualization Config Validity', 'CODE'],
       ['Visualization Config vs Intent', 'CODE'],
+      ['Column Binding Integrity', 'CODE'],
       ['Chart Compatible Result', 'CODE'],
       ['trajectory', 'CODE'],
       ['Input tokens', 'CODE'],

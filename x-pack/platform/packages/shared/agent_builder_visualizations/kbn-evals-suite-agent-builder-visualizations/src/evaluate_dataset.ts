@@ -26,6 +26,7 @@ import {
   type ExtractedVisualization,
 } from './extract_visualization';
 import { createChartCompatibleResultEvaluator } from './evaluators/chart_compatible_result';
+import { createColumnBindingIntegrityEvaluator } from './evaluators/column_binding_integrity';
 import {
   createChartIntentJudge,
   createChartTypeVsIntentEvaluator,
@@ -182,6 +183,14 @@ export function createEvaluateDataset({
     expectedConfigExtractor: (expected) => expected?.config,
   });
 
+  const columnBindingIntegrityEvaluator = createColumnBindingIntegrityEvaluator<
+    VisualizationDatasetExample,
+    VisualizationAgentTaskOutput
+  >({
+    esClient,
+    visualizationExtractor,
+  });
+
   const chartCompatibleResultEvaluator = createChartCompatibleResultEvaluator<
     VisualizationDatasetExample,
     VisualizationAgentTaskOutput
@@ -231,6 +240,7 @@ export function createEvaluateDataset({
       rendererVsIntentEvaluator,
       visualizationConfigValidityEvaluator,
       visualizationConfigVsIntentEvaluator,
+      columnBindingIntegrityEvaluator,
       chartCompatibleResultEvaluator,
       trajectoryEvaluator,
       ...Object.values(evaluators.traceBasedEvaluators).map(useAgentTraceId),

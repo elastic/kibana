@@ -14,6 +14,7 @@ Per [issue #277136](https://github.com/elastic/kibana/issues/277136), "correct" 
 - **Renderer vs Intent** (`CODE`) — `renderer` matches when the example declares `lens` or `vega` (skipped otherwise).
 - **Visualization Config Validity** (`CODE`) — Lens configs parse against the chart-type ESQL schema; Vega-Lite specs parse as JSON with a visual root.
 - **Visualization Config vs Intent** (`CODE`) — generated Lens/Vega config matches the gold partial Config API: column roles (alias-tolerant), Vega encoding fields, and any plain values the gold spells out. Scored as the fraction of gold leaf assertions that hold, with each mismatch listed in metadata, so one wrong field does not zero the example. `type` and `mark` are left to the Chart Type vs Intent judge; column alias wording is always ignored.
+- **Column Binding Integrity** (`CODE`) — every column the Lens config binds to a role (`x`, `y[]`, `metrics[]`, `breakdown_by`, `group_by`, …) or that a Vega encoding references exists in the executed ES|QL result, and measure roles bind numeric columns. Catches configs that parse against the schema but point at columns the query never produces. Scored as the fraction of bindings that resolve.
 - **Chart Compatible Result** (`CODE`) — executed ES|QL column shape fits the chart type (e.g. `xy` needs a dimension + numeric measure).
 - **Trajectory** — the agent routed the request to `load_skill` → `platform.core.create_visualization`.
 - **Trace-based** — tokens / latency / tool-call counts from OTel spans.

@@ -1,0 +1,238 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { EvaluationResult, Evaluator, Example, TaskOutput } from '@kbn/evals';
+import type { ExtractedVisualization } from '../extract_visualization';
+import { substituteEsqlBindParams } from './esql_bind_params';
+import { isNumericColumn, type EsqlColumn } from './esql_column_types';
+
+export const COLUMN_BINDING_INTEGRITY_EVALUATOR_NAME = 'Column Binding Integrity';
+
+export type BindingRole = 'measure' | 'dimension' | 'other';
+
+export interface ColumnBinding {
+  /** Dotted path inside the config, e.g. `layers[0].y[1]` or `spec.encoding.x`. */
+  path: string;
+  column: string;
+  role: BindingRole;
+}
+
+export type BindingStatus = 'ok' | 'missing' | 'non_numeric_measure';
+
+export interface BindingCheck extends ColumnBinding {
+  status: BindingStatus;
+  columnType?: string;
+}
+
+// Lens Config API keys whose ES|QL column must be numeric for the chart to render a value.
+const MEASURE_KEYS = new Set(['y', 'metric', 'metrics']);
+// Keys that bucket or split the data; any column type is acceptable.
+const DIMENSION_KEYS = new Set([
+  'x',
+  'breakdown_by',
+  'group_by',
+  'tag_by',
+  'rows',
+  'columns',
+  'split_metrics_by',
+]);
+const SKIP_KEYS = new Set(['data_source']);
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const roleForKey = (key: string): BindingRole => {
+  if (MEASURE_KEYS.has(key)) {
+    return 'measure';
+  }
+  return DIMENSION_KEYS.has(key) ? 'dimension' : 'other';
+};
+
+const stripBackticks = (name: string): string => name.replace(/`/g, '');
+
+/**
+ * Every column the config binds to a chart role. Lens bindings are `{ column }`
+ * objects under role keys; Vega bindings are `encoding.<channel>.field`.
+ */
+export function collectColumnBindings(visualization: ExtractedVisualization): ColumnBinding[] {
+  const config = visualization.visualization ?? {};
+  if (visualization.renderer === 'vega') {
+    return collectVegaBindings(config.spec);
+  }
+  const bindings: ColumnBinding[] = [];
+  walkLens(config, '', 'other', bindings);
+  return bindings;
+}
+
+function walkLens(
+  value: unknown,
+  path: string,
+  role: BindingRole,
+  bindings: ColumnBinding[]
+): void {
+  if (Array.isArray(value)) {
+    value.forEach((item, index) => walkLens(item, `${path}[${index}]`, role, bindings));
+    return;
+  }
+  if (!isRecord(value)) {
+    return;
+  }
+  if (typeof value.column === 'string' && value.column.trim().length > 0) {
+    bindings.push({ path, column: value.column, role });
+    return;
+  }
+  for (const [key, child] of Object.entries(value)) {
+    if (SKIP_KEYS.has(key)) {
+      continue;
+    }
+    walkLens(child, path ? `${path}.${key}` : key, roleForKey(key), bindings);
+  }
+}
+
+function collectVegaBindings(spec: unknown): ColumnBinding[] {
+  if (typeof spec !== 'string') {
+    return [];
+  }
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(spec);
+  } catch {
+    return [];
+  }
+  if (!isRecord(parsed) || !isRecord(parsed.encoding)) {
+    return [];
+  }
+  return Object.entries(parsed.encoding).flatMap(([channel, definition]) =>
+    isRecord(definition) && typeof definition.field === 'string'
+      ? [{ path: `spec.encoding.${channel}`, column: definition.field, role: 'other' as const }]
+      : []
+  );
+}
+
+/** Resolves each binding against the executed result columns. */
+export function checkColumnBindings(
+  bindings: ColumnBinding[],
+  columns: EsqlColumn[]
+): BindingCheck[] {
+  const byName = new Map(columns.map((column) => [stripBackticks(column.name), column]));
+  return bindings.map((binding) => {
+    const column = byName.get(stripBackticks(binding.column));
+    if (!column) {
+      return { ...binding, status: 'missing' };
+    }
+    if (binding.role === 'measure' && !isNumericColumn(column)) {
+      return { ...binding, status: 'non_numeric_measure', columnType: column.type };
+    }
+    return { ...binding, status: 'ok', columnType: column.type };
+  });
+}
+
+const describeFailure = (check: BindingCheck): string =>
+  check.status === 'missing'
+    ? `${check.path}: column "${check.column}" is not in the query result`
+    : `${check.path}: measure "${check.column}" is ${check.columnType}, not numeric`;
+
+/**
+ * CODE evaluator: executes each visualization's ES|QL and checks that every
+ * column the Lens config (or Vega encoding) binds to exists in the result, and
+ * that measure roles bind numeric columns. Catches configs that parse against
+ * the schema but reference columns the query never produces.
+ */
+export function createColumnBindingIntegrityEvaluator<
+  TExample extends Example = Example,
+  TTaskOutput extends TaskOutput = TaskOutput
+>(config: {
+  esClient: ElasticsearchClient;
+  visualizationExtractor: (output: TTaskOutput) => ExtractedVisualization[];
+  name?: string;
+}): Evaluator<TExample, TTaskOutput> {
+  const { esClient, visualizationExtractor, name = COLUMN_BINDING_INTEGRITY_EVALUATOR_NAME } =
+    config;
+
+  return {
+    name,
+    kind: 'CODE',
+    direction: 'maximize',
+    evaluate: async ({ output }): Promise<EvaluationResult> => {
+      let visualizations: ExtractedVisualization[];
+      try {
+        visualizations = visualizationExtractor(output);
+      } catch (err) {
+        return {
+          score: 0,
+          label: 'error',
+          explanation: `Visualization extractor threw: ${(err as Error).message}`,
+        };
+      }
+
+      if (visualizations.length === 0) {
+        return {
+          score: 0,
+          label: 'no-visualization',
+          explanation: 'No visualization produced to check column bindings.',
+        };
+      }
+
+      const details = await Promise.all(
+        visualizations.map(async (visualization, index) => {
+          const bindings = collectColumnBindings(visualization);
+          if (bindings.length === 0) {
+            // Nothing to resolve (e.g. a layered Vega spec); leave it to Config Validity.
+            return {
+              index,
+              score: 1,
+              bindings: [] as BindingCheck[],
+              failures: [] as string[],
+              note: 'no column bindings found',
+            };
+          }
+          try {
+            const response = await esClient.esql.query({
+              query: substituteEsqlBindParams(visualization.esql),
+            });
+            const checks = checkColumnBindings(bindings, (response.columns ?? []) as EsqlColumn[]);
+            const failures = checks.filter((check) => check.status !== 'ok').map(describeFailure);
+            return {
+              index,
+              score: (checks.length - failures.length) / checks.length,
+              bindings: checks,
+              failures,
+            };
+          } catch (err) {
+            return {
+              index,
+              score: 0,
+              bindings: [] as BindingCheck[],
+              failures: [`ES|QL execution failed: ${(err as Error).message}`],
+            };
+          }
+        })
+      );
+
+      const score = details.reduce((sum, detail) => sum + detail.score, 0) / details.length;
+      const failures = details.flatMap((detail) => detail.failures);
+      const checked = details.reduce((sum, detail) => sum + detail.bindings.length, 0);
+
+      return {
+        score,
+        label: score === 1 ? 'bound' : score === 0 ? 'unbound' : 'partial',
+        explanation:
+          score === 1
+            ? `All ${checked} column binding(s) resolve to result columns of the right kind.`
+            : `${checked - failures.length}/${checked} column binding(s) resolve. ${failures.join(
+                '; '
+              )}`,
+        metadata: {
+          checkedBindings: checked,
+          totalVisualizations: details.length,
+          visualizations: details,
+        },
+      };
+    },
+  };
+}
