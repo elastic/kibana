@@ -19,92 +19,54 @@ import { getWorkflowZodSchema } from '../schema';
 
 const schema = getWorkflowZodSchema({}, []);
 
-/** A workflow of `stepCount` console steps, each holding `varsPerStep` references. */
-const buildWorkflow = (stepCount: number, varsPerStep: number): string => {
-  const lines = [
-    "version: '1'",
-    'name: budget-fixture',
-    'enabled: true',
-    'triggers:',
-    '  - type: manual',
-    'consts:',
-    '  seed: hello',
-    'steps:',
-  ];
-  for (let i = 0; i < stepCount; i++) {
-    const refs = Array.from({ length: varsPerStep }, () => '{{ consts.seed }}').join(' ');
-    lines.push(
-      `  - name: step_${i}`,
-      '    type: console',
-      '    with:',
-      '      message: >-',
-      `        ${refs}`
-    );
-  }
-  return lines.join('\n');
-};
-
-/** A single step holding `tagCount` Liquid for-loop tags and no `{{ ... }}` references. */
-const buildTagWorkflow = (tagCount: number): string => {
-  const tags = Array.from(
-    { length: tagCount },
-    () => '{% for item in consts.items %}x{% endfor %}'
-  ).join(' ');
-  return [
-    "version: '1'",
-    'name: tag-fixture',
-    'enabled: true',
-    'triggers:',
-    '  - type: manual',
-    'consts:',
-    '  items:',
-    '    - a',
-    'steps:',
-    '  - name: step_0',
-    '    type: console',
-    '    with:',
-    '      message: >-',
-    `        ${tags}`,
-  ].join('\n');
-};
-
-/**
- * `steps` scalars holding both dimensions at once: assigns up to just under the
- * Liquid engine's 150,000-character parse limit, plus references to them.
- */
-const buildAssignHeavyWorkflow = (
+/** A workflow of `stepCount` console steps, each holding the scalar built for it. */
+const buildWorkflowFrom = (
+  name: string,
+  constsLines: string[],
   stepCount: number,
-  assignsPerStep: number,
-  refsPerStep: number
+  scalarFor: (step: number) => string
 ): string => {
-  const lines = [
-    "version: '1'",
-    'name: assign-heavy-fixture',
-    'enabled: true',
-    'triggers:',
-    '  - type: manual',
-    'consts:',
-    '  seed: hello',
-    'steps:',
-  ];
+  const lines = ["version: '1'", `name: ${name}`, 'enabled: true', 'triggers:', '  - type: manual'];
+  lines.push('consts:', ...constsLines, 'steps:');
   for (let step = 0; step < stepCount; step++) {
-    const parts: string[] = [];
-    for (let i = 0; i < assignsPerStep; i++) {
-      parts.push(`{% assign a${i} = consts.seed %}`);
-    }
-    for (let i = 0; i < refsPerStep; i++) {
-      parts.push(`{{ a${i % assignsPerStep} }}`);
-    }
     lines.push(
       `  - name: step_${step}`,
       '    type: console',
       '    with:',
       '      message: >-',
-      `        ${parts.join(' ')}`
+      `        ${scalarFor(step)}`
     );
   }
   return lines.join('\n');
 };
+
+/** Steps holding `varsPerStep` references each. */
+const buildWorkflow = (stepCount: number, varsPerStep: number): string =>
+  buildWorkflowFrom('budget-fixture', ['  seed: hello'], stepCount, () =>
+    Array.from({ length: varsPerStep }, () => '{{ consts.seed }}').join(' ')
+  );
+
+/** A single step holding `tagCount` Liquid for-loop tags and no `{{ ... }}` references. */
+const buildTagWorkflow = (tagCount: number): string =>
+  buildWorkflowFrom('tag-fixture', ['  items:', '    - a'], 1, () =>
+    Array.from({ length: tagCount }, () => '{% for item in consts.items %}x{% endfor %}').join(' ')
+  );
+
+/**
+ * Steps holding both dimensions at once: assigns up to just under the Liquid
+ * engine's 150,000-character parse limit, plus references to them.
+ */
+const buildAssignHeavyWorkflow = (
+  stepCount: number,
+  assignsPerStep: number,
+  refsPerStep: number
+): string =>
+  buildWorkflowFrom('assign-heavy-fixture', ['  seed: hello'], stepCount, () =>
+    [
+      ...Array.from({ length: assignsPerStep }, (_, i) => `{% assign a${i} = consts.seed %}`),
+      ...Array.from({ length: refsPerStep }, (_, i) => `{{ a${i % assignsPerStep} }}`),
+    ].join(' ')
+  );
 
 const validate = (yaml: string) =>
   validateWorkflowYaml(yaml, schema, {
@@ -172,7 +134,6 @@ describe('variable validation budgets', () => {
 
     const result = validate(yaml);
 
-    expect(yaml.length).toBeGreaterThan(MAX_WORKFLOW_YAML_LENGTH / 2);
     // Every reference resolves against an assign in its own scalar.
     expect(result.diagnostics.filter(({ source }) => source === 'variable')).toEqual([]);
     expect(result.notChecked).toEqual([

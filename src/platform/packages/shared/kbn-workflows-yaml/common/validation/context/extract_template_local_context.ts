@@ -376,12 +376,7 @@ let nextIndexId = 1;
 const MAX_CACHED_TEMPLATES = 16;
 const indexCache = new LRUCache<string, TemplateLocalIndex>({ max: MAX_CACHED_TEMPLATES });
 
-/** Cache contents, for tests that assert eviction. */
-export function getTemplateLocalIndexCacheEntries(): number {
-  return indexCache.size;
-}
-
-/** Whether one template is currently cached, for tests. */
+/** Whether one template is currently cached, for tests that assert eviction. */
 export function hasCachedTemplateLocalIndex(templateString: string): boolean {
   return indexCache.has(templateString);
 }
@@ -421,12 +416,6 @@ function getTemplateLocalIndex(templateString: string): TemplateLocalIndex {
     return cached;
   }
   const index = buildTemplateLocalIndex(templateString);
-  // A template the engine refused to parse has nothing to keep, and keying an
-  // empty index by a string of any size is how this cache would exceed its
-  // ceiling.
-  // A template the engine refused to parse has nothing to keep, and keying an
-  // empty index by a string of any size is how this cache would exceed its
-  // ceiling.
   // A template the engine refused to parse has nothing to keep, and keying an
   // empty index by a string of any size is how this cache would exceed its
   // ceiling.

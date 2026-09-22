@@ -272,24 +272,21 @@ export function extendContextWithTemplateLocals(
   baseSchema: typeof DynamicStepContextSchema,
   templateString: string,
   offsetInTemplate: number,
-  schemaCache?: TemplateLocalSchemaCache
+  schemaCache: TemplateLocalSchemaCache = createTemplateLocalSchemaCache()
 ): typeof DynamicStepContextSchema {
   const { assignVars, captureNames, forLoopScopes, signature } = getTemplateLocalContext(
     templateString,
     offsetInTemplate
   );
 
-  let bySignature: Map<string, typeof DynamicStepContextSchema> | undefined;
-  if (schemaCache) {
-    bySignature = schemaCache.get(baseSchema);
-    if (!bySignature) {
-      bySignature = new Map();
-      schemaCache.set(baseSchema, bySignature);
-    }
-    const cached = bySignature.get(signature);
-    if (cached) {
-      return cached;
-    }
+  let bySignature = schemaCache.get(baseSchema);
+  if (!bySignature) {
+    bySignature = new Map();
+    schemaCache.set(baseSchema, bySignature);
+  }
+  const cached = bySignature.get(signature);
+  if (cached) {
+    return cached;
   }
 
   const extension: Record<string, z.ZodType> = {};
@@ -326,7 +323,7 @@ export function extendContextWithTemplateLocals(
         // dynamic and not reflected in the static type.
         (baseSchema.extend(extension) as typeof DynamicStepContextSchema);
 
-  bySignature?.set(signature, extended);
+  bySignature.set(signature, extended);
   return extended;
 }
 

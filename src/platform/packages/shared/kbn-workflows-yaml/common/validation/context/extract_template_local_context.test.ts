@@ -11,7 +11,6 @@ import {
   forLoopScopesContainingOffset,
   getAllForLoopScopes,
   getTemplateLocalContext,
-  getTemplateLocalIndexCacheEntries,
   hasCachedTemplateLocalIndex,
   isLiquidRangeLiteral,
   resolveAssignChain,
@@ -352,12 +351,16 @@ describe('template index cache', () => {
   const templateOfSize = (chars: number, marker: string) =>
     `{% assign ${marker} = "x" %}`.padEnd(chars, ' ');
 
-  it('keeps at most the cap in templates', () => {
-    for (let i = 0; i < MAX_CACHED_TEMPLATES * 2; i++) {
-      getTemplateLocalContext(templateOfSize(100, `m${i}`), 0);
+  it('evicts the oldest template once the cap is reached', () => {
+    const oldest = templateOfSize(100, 'oldest');
+    getTemplateLocalContext(oldest, oldest.length);
+    expect(hasCachedTemplateLocalIndex(oldest)).toBe(true);
+
+    for (let i = 0; i < MAX_CACHED_TEMPLATES; i++) {
+      getTemplateLocalContext(templateOfSize(100, `later${i}`), 0);
     }
 
-    expect(getTemplateLocalIndexCacheEntries()).toBeLessThanOrEqual(MAX_CACHED_TEMPLATES);
+    expect(hasCachedTemplateLocalIndex(oldest)).toBe(false);
   });
 
   it('does not cache a template the Liquid engine refuses to parse', () => {
@@ -368,13 +371,5 @@ describe('template index cache', () => {
     getTemplateLocalContext(huge, 0);
 
     expect(hasCachedTemplateLocalIndex(huge)).toBe(false);
-  });
-
-  it('caches a template the engine does parse', () => {
-    const parsed = templateOfSize(100, 'parsed');
-
-    getTemplateLocalContext(parsed, parsed.length);
-
-    expect(hasCachedTemplateLocalIndex(parsed)).toBe(true);
   });
 });
