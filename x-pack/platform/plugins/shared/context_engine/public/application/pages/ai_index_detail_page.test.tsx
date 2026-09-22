@@ -517,9 +517,8 @@ describe('AiIndexDetailPage', () => {
     expect(screen.getByTestId('contextTracesAutoImproveSwitch')).toBeInTheDocument();
   });
 
-  it('hides the feedback loop panel entirely when the feature flag is off', async () => {
-    // The panel has no trace-source picker anymore, so there is nothing to show when the
-    // feedback loop feature is disabled — the whole panel is hidden.
+  it('hides only the feedback loop controls when the feature flag is off', async () => {
+    // The panel still shows the Agent traces editor; only the AutoImprove controls are hidden.
     mockUseFeedbackLoopEnabled.mockReturnValue(false);
 
     const services = createServices();
@@ -529,7 +528,7 @@ describe('AiIndexDetailPage', () => {
 
     await waitForAiIndexDetailLoaded();
 
-    expect(screen.queryByTestId('contextTracesPanel')).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextTracesPanel')).toBeInTheDocument();
     expect(screen.queryByTestId('contextTracesAutoImproveSwitch')).not.toBeInTheDocument();
   });
 
@@ -582,7 +581,7 @@ describe('AiIndexDetailPage', () => {
     renderWithProviders(services);
 
     await waitForAiIndexDetailLoaded();
-    expect(services.http.get).toHaveBeenCalledTimes(1);
+    expect(countAiIndexFetches(services)).toBe(1);
 
     fireEvent.click(screen.getByTestId('contextAddTracesButton'));
 
@@ -615,7 +614,7 @@ describe('AiIndexDetailPage', () => {
     await waitFor(() => {
       expect(screen.queryByTestId('contextTraceAgentComboBox')).not.toBeInTheDocument();
     });
-    expect(services.http.get).toHaveBeenCalledTimes(2);
+    expect(countAiIndexFetches(services)).toBe(2);
   });
 
   it('edits the description and refetches the AI index', async () => {
