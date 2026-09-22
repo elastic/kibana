@@ -138,6 +138,33 @@ steps:
       expect(validate(yamlString)).toEqual([]);
     });
 
+    it('should not validate ${{ }} inside {% raw %} (literal at runtime)', () => {
+      const dollar = '$';
+      const yamlString =
+        'message: "{% raw %}' + dollar + '{{ value | unknownFilter }}{% endraw %}"';
+      expect(validate(yamlString)).toEqual([]);
+    });
+
+    it('should not validate ${{ }} inside {% comment %} (literal at runtime)', () => {
+      const dollar = '$';
+      const yamlString =
+        'message: "{% comment %}' + dollar + '{{ value | unknownFilter }}{% endcomment %}"';
+      expect(validate(yamlString)).toEqual([]);
+    });
+
+    it('should still validate ${{ }} outside {% raw %} blocks', () => {
+      const dollar = '$';
+      const yamlString =
+        'message: "{% raw %}' +
+        dollar +
+        '{{ value | unknownFilter }}{% endraw %} ' +
+        dollar +
+        '{{ other | unknownFilter }}"';
+      const result = validate(yamlString);
+      expect(result).toHaveLength(1);
+      expect(result[0].message).toContain('unknownFilter');
+    });
+
     it('should reject ternaries inside ${{ }} (runtime evalValueSync also rejects them)', () => {
       const dollar = '$';
       const yamlString =
