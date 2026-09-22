@@ -13,6 +13,7 @@ export {
 } from './src/components/actions/base_actions';
 
 export { ConversationCard } from './src/components/conversation_card/conversation_card';
+export { ConversationCardCompact } from './src/components/conversation_card/conversation_card_compact';
 export { ConversationMetaInfo } from './src/components/conversation_card/conversation_meta_info';
 export { TemplateBadge } from './src/components/conversation_card/template_badge';
 export { type ConversationsActionsGroupProps } from './src/components/conversation_card/actions_group';
@@ -57,7 +58,7 @@ export {
   CONVERSATION_CATEGORY_COLORS,
 } from './src/types/queue';
 
-export { BlastRadius } from './src/components/filters/blast_radius/blast_radius';
+export { Impact } from './src/components/filters/impact/impact';
 
 export { BaseActionModal } from './src/components/modals/base_action_modal';
 export { AssignActionModal } from './src/components/modals/assign_action_modal';
@@ -76,9 +77,15 @@ export {
   type ApprovalAction,
   type AlwaysAllowOption,
 } from './src/components/modals/approval_modal/approval_content';
-export { type BlastRadiusItemProps } from './src/components/modals/approval_modal/blast_radius_item';
 export {
-  BlastRadiusSection,
-  type BlastRadiusContent,
-  type BlastRadiusSectionProps,
-} from './src/components/modals/approval_modal/blast_radius_section';
+  getProposalTone,
+  isProposalExpired,
+} from './src/components/modals/approval_modal/proposal_helpers';
+export { toActionImpactItems } from './src/components/modals/approval_modal/to_action_impact_items';
+export type { ApprovalProposal } from './src/components/modals/approval_modal/types';
+export { type ActionImpactItemProps } from './src/components/modals/approval_modal/action_impact_item';
+export {
+  type EscalationModalMode,
+  type EscalationIncidentSummary,
+} from './src/components/modals/escalation_modal';
+export { type EscalationModalRenderProps } from './src/components/modals/investigation_action_modals';
