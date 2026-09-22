@@ -29,6 +29,17 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.
           ],
         }),
       });
+      await expect
+        .poll(
+          async () =>
+            (
+              await fetch<{ available: boolean }>(
+                '/internal/nightshift/investigations/availability'
+              )
+            ).available,
+          { timeout: 60_000 }
+        )
+        .toBe(true);
       const [experiment] = await executorClient.runExperiment(
         {
           name: 'Nightshift ungraded investigation traces',
