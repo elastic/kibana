@@ -88,10 +88,8 @@ export const createReadonlyAttachmentType = <T>({
         if (value.length <= maxContentLength) {
           return { type: 'text', value };
         }
-        // Belt-and-suspenders: the schema's per-field max lengths and array caps bound a
-        // valid payload, but at their maximum they can still combine to exceed
-        // maxContentLength. Hard-truncate rather than let an oversized representation
-        // reach the model unbounded.
+        // The schema's per-field max lengths and array caps bound a valid payload, but at
+        // their maximum they can still combine to exceed maxContentLength.
         const truncationNotice = `\n\n[truncated: representation exceeded ${maxContentLength} characters]`;
         return {
           type: 'text',

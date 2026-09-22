@@ -9,4 +9,4 @@ export { createSignificantSecurityEventAttachmentDefinition } from './significan
 export type {
   SignificantSecurityEventAttachment,
   SignificantSecurityEventAttachmentData,
-} from './types';
+} from './view_model';

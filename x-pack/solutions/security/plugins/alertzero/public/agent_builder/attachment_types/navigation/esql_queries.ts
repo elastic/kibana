@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { groupBy } from 'lodash';
+
 export const DEFAULT_ALERTS_INDEX = '.alerts-security.alerts' as const;
 export const THREAT_REPORTS_INDEX_PATTERN = '.kibana-threat-reports*' as const;
 /** Best-effort default for IOC Discover lookups when no index pattern is provided. */
@@ -65,25 +67,18 @@ const buildDocRefsLookupEsql = ({
    */
   idField?: string;
 }): string | undefined => {
-  const byIndex = new Map<string, string[]>();
-  for (const ref of refs) {
-    const index = ref.index.trim();
-    const id = ref.id.trim();
-    if (!index || !id) {
-      continue;
-    }
-    const ids = byIndex.get(index) ?? [];
-    ids.push(id);
-    byIndex.set(index, ids);
-  }
+  const validRefs = refs
+    .map((ref) => ({ id: ref.id.trim(), index: ref.index.trim() }))
+    .filter((ref) => ref.id && ref.index);
 
-  if (byIndex.size === 0) {
+  if (validRefs.length === 0) {
     return undefined;
   }
 
-  const indices = [...byIndex.keys()];
+  const byIndex = groupBy(validRefs, (ref) => ref.index);
+  const indices = Object.keys(byIndex);
   const perIndexClauses = indices.map((index) => {
-    const quotedIds = quoteEsqlList(uniqueNonEmpty(byIndex.get(index) ?? []));
+    const quotedIds = quoteEsqlList(uniqueNonEmpty(byIndex[index].map((ref) => ref.id)));
     const idFieldClause = idField ? `${idField} IN (${quotedIds}) OR ` : '';
     return `(_index == ${quoteEsqlIdentifier(index)} AND (${idFieldClause}_id IN (${quotedIds})))`;
   });
@@ -142,12 +137,9 @@ export const buildThreatReportLookupEsql = ({
 }: {
   reportId: string;
   spaceId: string;
-}): string => {
-  const escapedReportId = escapeEsqlString(reportId);
-  return `FROM ${quoteEsqlIdentifier(
-    THREAT_REPORTS_INDEX_PATTERN
-  )} METADATA _id | WHERE _id == "${escapedReportId}" AND ${buildThreatReportSpaceWhere(spaceId)}`;
-};
+}): string =>
+  // Single-id IN (...) is equivalent to an _id == comparison for Discover's purposes.
+  buildThreatReportsInEsql({ reportIds: [reportId], spaceId })!;
 
 export const buildThreatReportsInEsql = ({
   reportIds,
@@ -191,12 +183,16 @@ export const buildEntityLookupEsql = ({
 };
 
 /**
- * Hunt correlation actor anchors live on threat reports, not ECS logs fields.
+ * ES|QL lookup for a hunt correlation anchor field on threat reports (actor names,
+ * ioc_set_hash). Both anchor kinds query the same index with a single field/value
+ * equality plus the space filter; only the field differs.
  */
-export const buildActorLookupEsql = ({
+export const buildThreatReportFieldLookupEsql = ({
+  field,
   value,
   spaceId,
 }: {
+  field: string;
   value: string;
   spaceId: string;
 }): string | undefined => {
@@ -206,11 +202,22 @@ export const buildActorLookupEsql = ({
 
   return `FROM ${quoteEsqlIdentifier(
     THREAT_REPORTS_INDEX_PATTERN
-  )} | WHERE ${buildFieldEqualityWhere(
-    ['extracted.threat_actors'],
-    value
-  )} AND ${buildThreatReportSpaceWhere(spaceId)}`;
+  )} | WHERE ${buildFieldEqualityWhere([field], value)} AND ${buildThreatReportSpaceWhere(
+    spaceId
+  )}`;
 };
+
+/**
+ * Hunt correlation actor anchors live on threat reports, not ECS logs fields.
+ */
+export const buildActorLookupEsql = ({
+  value,
+  spaceId,
+}: {
+  value: string;
+  spaceId: string;
+}): string | undefined =>
+  buildThreatReportFieldLookupEsql({ field: 'extracted.threat_actors', value, spaceId });
 
 /**
  * ES|QL lookup for hunt correlation `ioc_set_hash` anchors on threat reports.
@@ -223,15 +230,5 @@ export const buildThreatReportIocSetHashLookupEsql = ({
 }: {
   value: string;
   spaceId: string;
-}): string | undefined => {
-  if (!value.trim()) {
-    return undefined;
-  }
-
-  return `FROM ${quoteEsqlIdentifier(
-    THREAT_REPORTS_INDEX_PATTERN
-  )} | WHERE ${buildFieldEqualityWhere(
-    ['extracted.ioc_set_hash'],
-    value
-  )} AND ${buildThreatReportSpaceWhere(spaceId)}`;
-};
+}): string | undefined =>
+  buildThreatReportFieldLookupEsql({ field: 'extracted.ioc_set_hash', value, spaceId });

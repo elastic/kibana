@@ -200,7 +200,7 @@ The payload contains:
   These are NOT Discover IOCs by default (technology/threat/risk labels). Do not invent logs-* field mappings from \`type\`.
 - entities: ECS \`{ field, value }\` refs (allowlisted entity fields only)
 - alerts: \`{ alert_id, index, timestamp? }\` — always include the concrete alerts index
-- events: \`{ event_id, source_index, timestamp?, matched? }\` — matched names the IOC or technique that produced the hit
+- events: \`{ event_id, source_index, timestamp?, matched? }\` — matched names the IOC or technique that produced the hit; source_index must be the hit's concrete _index (the .ds-... backing name for a data stream), never the data stream or alias searched
 - timeline: an ordered sequence of (at, what) entries describing what happened
 - hunt_result: structured Tier 1 / Tier 2 findings (status, counts, per-index hit detail, resolved IOCs, Tier 2 behaviors). Prefer these numbers over evidence_for/evidence_against when both are present.
 - hypothesis_tested, evidence_for, evidence_against: the hunt's working hypothesis and its analyst narrative on top of hunt_result
@@ -216,12 +216,6 @@ export const createSignificantSecurityEventAttachmentType = (): AttachmentTypeDe
     formatForAgent: formatSignificantSecurityEventForAgent,
     describePayload,
     renderNoun: 'event card',
-    // The schema's own field caps (50-entry arrays across security_knowledge_indicators,
-    // entities, alerts, events, timeline, evidence_for/against, each carrying up to
-    // 2048-char string fields, plus a 20-entry Tier 1/Tier 2 hunt_result) can combine on
-    // a maximally-sized valid payload to well over 100K characters. Size generously for
-    // realistic payloads; the base helper's hard-truncate fallback (see
-    // create_readonly_attachment_type.ts) still applies for the pathological worst case,
-    // so the representation degrades instead of growing unbounded.
+    // Worst case across the schema's field/array caps: well over 100K characters.
     maxContentLength: 150_000,
   });

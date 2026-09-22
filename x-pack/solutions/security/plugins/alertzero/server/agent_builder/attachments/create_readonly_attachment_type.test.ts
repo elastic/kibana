@@ -7,9 +7,9 @@
 
 import { z } from '@kbn/zod/v4';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
-import type { TextAttachmentRepresentation } from '@kbn/agent-builder-server/attachments';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { createReadonlyAttachmentType } from './create_readonly_attachment_type';
+import { formatToText } from './test_utils';
 
 const fixtureSchema = z.object({
   attachmentLabel: z.string().optional(),
@@ -58,18 +58,9 @@ describe('createReadonlyAttachmentType', () => {
 
   describe('format', () => {
     it('calls formatForAgent with the parsed data', async () => {
-      const attachment: Attachment<string, unknown> = {
-        id: 'test-id',
-        type: 'test.fixture',
-        data: { value: 'ok' },
-      };
+      const value = await formatToText(attachmentType, formatContext, { value: 'ok' });
 
-      const formatted = await attachmentType.format(attachment, formatContext);
-      const representation = formatted.getRepresentation
-        ? await formatted.getRepresentation()
-        : { type: 'text', value: '' };
-
-      expect((representation as TextAttachmentRepresentation).value).toBe('fixture: ok');
+      expect(value).toBe('fixture: ok');
     });
 
     it('throws a message naming the attachment id when data is invalid', () => {
@@ -86,18 +77,8 @@ describe('createReadonlyAttachmentType', () => {
 
     it('hard-truncates the representation when it exceeds maxContentLength', async () => {
       const longValue = 'x'.repeat(500);
-      const attachment: Attachment<string, unknown> = {
-        id: 'test-id',
-        type: 'test.fixture',
-        data: { value: longValue },
-      };
+      const value = await formatToText(attachmentType, formatContext, { value: longValue });
 
-      const formatted = await attachmentType.format(attachment, formatContext);
-      const representation = formatted.getRepresentation
-        ? await formatted.getRepresentation()
-        : { type: 'text', value: '' };
-
-      const value = (representation as TextAttachmentRepresentation).value;
       expect(value.length).toBeLessThanOrEqual(100);
       expect(value).toContain('[truncated: representation exceeded 100 characters]');
     });

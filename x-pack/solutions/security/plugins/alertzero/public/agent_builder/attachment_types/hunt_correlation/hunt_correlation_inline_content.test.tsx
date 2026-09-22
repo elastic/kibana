@@ -14,17 +14,22 @@ import {
   HUNT_CORRELATION_ATTACHMENT_SUMMARY_TEST_ID,
   HUNT_CORRELATION_ATTACHMENT_EMPTY_TEST_ID,
 } from './hunt_correlation_inline_content';
-import type { HuntCorrelationAttachment } from './types';
+import type { HuntCorrelationAttachment } from './view_model';
 import {
   buildActorLookupEsql,
   buildDiscoverThreatReportNestedIocUrl,
   buildThreatReportIocSetHashLookupEsql,
   buildThreatReportLookupEsql,
 } from '../navigation';
-import { createMockShare, createMockNavigation } from '../test_utils';
+import {
+  buildAttachment as buildAttachmentGeneric,
+  createMockShare,
+  createMockNavigation,
+  renderProps as renderPropsGeneric,
+} from '../test_utils';
 
 const buildAttachment = (data: HuntCorrelationAttachment['data']): HuntCorrelationAttachment =>
-  ({ id: 'att-1', type: 'security.hunt_correlation', data } as HuntCorrelationAttachment);
+  buildAttachmentGeneric('security.hunt_correlation', data);
 
 const mockShare = createMockShare();
 
@@ -33,11 +38,7 @@ const defaultNavigation = createMockNavigation();
 const renderProps = (
   attachment: HuntCorrelationAttachment,
   navigation: typeof defaultNavigation & { share?: SharePluginStart } = defaultNavigation
-) => ({
-  attachment,
-  navigation,
-  isSidebar: false,
-});
+) => renderPropsGeneric(attachment, navigation);
 
 const baseData: HuntCorrelationAttachment['data'] = {
   anchors: [

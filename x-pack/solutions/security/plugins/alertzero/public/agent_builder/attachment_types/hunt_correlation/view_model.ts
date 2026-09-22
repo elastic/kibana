@@ -19,6 +19,11 @@ export type HuntCorrelationAttachment = Attachment<string, HuntCorrelationAttach
 export type Anchor = HuntCorrelationAttachmentData['anchors'][number];
 export type DiamondScore = HuntCorrelationAttachmentData['diamond_scores'][number];
 
+export const OPEN_RELATED_REPORTS_LABEL = i18n.translate(
+  'xpack.alertzero.agentBuilder.attachments.huntCorrelation.openRelatedReports',
+  { defaultMessage: 'Open related reports in Discover' }
+);
+
 /** Validates a raw attachment payload against the shared zod schema. */
 export const parseHuntCorrelationData = (
   candidate: unknown
@@ -35,11 +40,9 @@ export const parseHuntCorrelationData = (
 export const buildHuntCorrelationActionButtons = ({
   parsed,
   navigation,
-  label,
 }: {
   parsed: HuntCorrelationAttachmentData | undefined;
   navigation: AttachmentNavigationDeps;
-  label: string;
 }): ActionButton[] => {
   if (!parsed) {
     return [];
@@ -51,7 +54,7 @@ export const buildHuntCorrelationActionButtons = ({
       ? buildThreatReportsInEsql({ reportIds, spaceId: navigation.spaceId })
       : undefined;
 
-  return buildDiscoverActionButton({ share: navigation.share, esql, label });
+  return buildDiscoverActionButton({ share: navigation.share, esql, label: OPEN_RELATED_REPORTS_LABEL });
 };
 
 const ABOVE_THRESHOLD_LABEL = i18n.translate(

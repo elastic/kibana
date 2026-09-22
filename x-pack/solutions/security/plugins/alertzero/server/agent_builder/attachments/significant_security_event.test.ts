@@ -5,13 +5,9 @@
  * 2.0.
  */
 
-import type { Attachment } from '@kbn/agent-builder-common/attachments';
-import type { TextAttachmentRepresentation } from '@kbn/agent-builder-server/attachments';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
-import {
-  createSignificantSecurityEventAttachmentType,
-  SIGNIFICANT_SECURITY_EVENT_ATTACHMENT_ID,
-} from './significant_security_event';
+import { createSignificantSecurityEventAttachmentType } from './significant_security_event';
+import { formatToText } from './test_utils';
 
 const validPayload = {
   attachmentLabel: 'Significant Security Event',
@@ -67,37 +63,16 @@ describe('createSignificantSecurityEventAttachmentType', () => {
 
   describe('format', () => {
     it('returns a text representation quoting the title, severity, and timeline', async () => {
-      const attachment: Attachment<string, unknown> = {
-        id: 'test-id',
-        type: SIGNIFICANT_SECURITY_EVENT_ATTACHMENT_ID,
-        data: validPayload,
-      };
+      const value = await formatToText(attachmentType, formatContext, validPayload);
 
-      const formatted = await attachmentType.format(attachment, formatContext);
-      const representation = formatted.getRepresentation
-        ? await formatted.getRepresentation()
-        : { type: 'text', value: '' };
-
-      expect(representation.type).toBe('text');
-      const value = (representation as TextAttachmentRepresentation).value;
       expect(value).toContain(validPayload.title);
       expect(value).toContain('high');
       expect(value).toContain('RDP session established');
     });
 
     it('includes indicators, structured entities, evidence, and the evaluation record ref', async () => {
-      const attachment: Attachment<string, unknown> = {
-        id: 'test-id',
-        type: SIGNIFICANT_SECURITY_EVENT_ATTACHMENT_ID,
-        data: validPayload,
-      };
+      const value = await formatToText(attachmentType, formatContext, validPayload);
 
-      const formatted = await attachmentType.format(attachment, formatContext);
-      const representation = formatted.getRepresentation
-        ? await formatted.getRepresentation()
-        : { type: 'text', value: '' };
-
-      const value = (representation as TextAttachmentRepresentation).value;
       expect(value).toContain('technique: T1021 [T1021] (confidence 0.9)');
       expect(value).toContain('host.name: srv-01');
       expect(value).toContain('user.name: jdoe');
@@ -108,85 +83,57 @@ describe('createSignificantSecurityEventAttachmentType', () => {
     });
 
     it('includes the report_id so the agent can tie the event back to its threat report', async () => {
-      const attachment: Attachment<string, unknown> = {
-        id: 'test-id',
-        type: SIGNIFICANT_SECURITY_EVENT_ATTACHMENT_ID,
-        data: validPayload,
-      };
+      const value = await formatToText(attachmentType, formatContext, validPayload);
 
-      const formatted = await attachmentType.format(attachment, formatContext);
-      const representation = formatted.getRepresentation
-        ? await formatted.getRepresentation()
-        : { type: 'text', value: '' };
-
-      const value = (representation as TextAttachmentRepresentation).value;
       expect(value).toContain(`Threat report: ${validPayload.report_id}`);
     });
 
     it('surfaces matched IOC and technique evidence on formatted events', async () => {
-      const attachment: Attachment<string, unknown> = {
-        id: 'test-id',
-        type: SIGNIFICANT_SECURITY_EVENT_ATTACHMENT_ID,
-        data: {
-          ...validPayload,
-          events: [
-            {
-              event_id: 'evt-1',
-              source_index: 'logs-endpoint.events.process-default',
-              matched: { ioc: { type: 'ip', value: '203.0.113.5' }, field: 'destination.ip' },
-            },
-            {
-              event_id: 'evt-2',
-              source_index: 'logs-endpoint.events.network-default',
-              matched: { technique_id: 'T1021', field: 'process.command_line' },
-            },
-            {
-              event_id: 'evt-3',
-              source_index: 'logs-endpoint.events.file-default',
-            },
-          ],
-        },
-      };
+      const value = await formatToText(attachmentType, formatContext, {
+        ...validPayload,
+        events: [
+          {
+            event_id: 'evt-1',
+            source_index: '.ds-logs-endpoint.events.process-default-2026.09.22-000001',
+            matched: { ioc: { type: 'ip', value: '203.0.113.5' }, field: 'destination.ip' },
+          },
+          {
+            event_id: 'evt-2',
+            source_index: '.ds-logs-endpoint.events.network-default-2026.09.22-000001',
+            matched: { technique_id: 'T1021', field: 'process.command_line' },
+          },
+          {
+            event_id: 'evt-3',
+            source_index: '.ds-logs-endpoint.events.file-default-2026.09.22-000001',
+          },
+        ],
+      });
 
-      const formatted = await attachmentType.format(attachment, formatContext);
-      const representation = formatted.getRepresentation
-        ? await formatted.getRepresentation()
-        : { type: 'text', value: '' };
-
-      const value = (representation as TextAttachmentRepresentation).value;
       expect(value).toContain(
-        '  evt-1 (logs-endpoint.events.process-default) [matched: ioc 203.0.113.5 on destination.ip]'
+        '  evt-1 (.ds-logs-endpoint.events.process-default-2026.09.22-000001) [matched: ioc 203.0.113.5 on destination.ip]'
       );
       expect(value).toContain(
-        '  evt-2 (logs-endpoint.events.network-default) [matched: technique T1021 on process.command_line]'
+        '  evt-2 (.ds-logs-endpoint.events.network-default-2026.09.22-000001) [matched: technique T1021 on process.command_line]'
       );
-      expect(value).toContain('  evt-3 (logs-endpoint.events.file-default)');
-      expect(value).not.toContain('evt-3 (logs-endpoint.events.file-default) [matched');
+      expect(value).toContain('  evt-3 (.ds-logs-endpoint.events.file-default-2026.09.22-000001)');
+      expect(value).not.toContain(
+        'evt-3 (.ds-logs-endpoint.events.file-default-2026.09.22-000001) [matched'
+      );
     });
 
     it('renders maps_to_proposal details when present', async () => {
-      const attachment: Attachment<string, unknown> = {
-        id: 'test-id',
-        type: SIGNIFICANT_SECURITY_EVENT_ATTACHMENT_ID,
-        data: {
-          ...validPayload,
-          maps_to_proposal: {
-            category: 'containment',
-            impact: 'Isolate affected hosts',
-            confidence: 0.7,
-            actionWorkflowId: 'workflow-1',
-            actionInput: { endpoint_ids: 'abc-123', force: true },
-            manual_remediation: ['Rotate the compromised key'],
-          },
+      const value = await formatToText(attachmentType, formatContext, {
+        ...validPayload,
+        maps_to_proposal: {
+          category: 'containment',
+          impact: 'Isolate affected hosts',
+          confidence: 0.7,
+          actionWorkflowId: 'workflow-1',
+          actionInput: { endpoint_ids: 'abc-123', force: true },
+          manual_remediation: ['Rotate the compromised key'],
         },
-      };
+      });
 
-      const formatted = await attachmentType.format(attachment, formatContext);
-      const representation = formatted.getRepresentation
-        ? await formatted.getRepresentation()
-        : { type: 'text', value: '' };
-
-      const value = (representation as TextAttachmentRepresentation).value;
       expect(value).toContain('Maps to proposal:');
       expect(value).toContain('Category: containment');
       expect(value).toContain('Impact: Isolate affected hosts');
@@ -198,18 +145,12 @@ describe('createSignificantSecurityEventAttachmentType', () => {
     });
 
     it('surfaces the truncation note when the payload was truncated', async () => {
-      const attachment: Attachment<string, unknown> = {
-        id: 'test-id',
-        type: SIGNIFICANT_SECURITY_EVENT_ATTACHMENT_ID,
-        data: { ...validPayload, truncated: true, truncated_original_count: 120 },
-      };
+      const value = await formatToText(attachmentType, formatContext, {
+        ...validPayload,
+        truncated: true,
+        truncated_original_count: 120,
+      });
 
-      const formatted = await attachmentType.format(attachment, formatContext);
-      const representation = formatted.getRepresentation
-        ? await formatted.getRepresentation()
-        : { type: 'text', value: '' };
-
-      const value = (representation as TextAttachmentRepresentation).value;
       expect(value).toContain('truncated from 120 original entries');
     });
   });
@@ -298,18 +239,8 @@ describe('createSignificantSecurityEventAttachmentType', () => {
         },
       };
 
-      const attachment: Attachment<string, unknown> = {
-        id: 'test-id',
-        type: SIGNIFICANT_SECURITY_EVENT_ATTACHMENT_ID,
-        data: maxSizePayload,
-      };
+      const value = await formatToText(attachmentType, formatContext, maxSizePayload);
 
-      const formatted = await attachmentType.format(attachment, formatContext);
-      const representation = formatted.getRepresentation
-        ? await formatted.getRepresentation()
-        : { type: 'text', value: '' };
-
-      const value = (representation as TextAttachmentRepresentation).value;
       expect(value.length).toBeLessThanOrEqual(attachmentType.maxContentLength ?? Infinity);
     });
   });

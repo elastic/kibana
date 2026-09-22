@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { Attachment } from '@kbn/agent-builder-common/attachments';
-import type { TextAttachmentRepresentation } from '@kbn/agent-builder-server/attachments';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { createThreatAttachmentType, THREAT_ATTACHMENT_ID } from './threat';
+import { formatToText } from './test_utils';
 
 describe('createThreatAttachmentType', () => {
   const attachmentType = createThreatAttachmentType();
@@ -88,7 +87,7 @@ describe('createThreatAttachmentType', () => {
       expect(result.valid).toBe(false);
     });
 
-    it('does not accept a revision field (dropped per plan decision)', async () => {
+    it('rejects unknown fields', async () => {
       const result = await attachmentType.validate({
         attachmentLabel: 'Threat Report',
         report_id: 'report-1',
@@ -105,25 +104,14 @@ describe('createThreatAttachmentType', () => {
 
   describe('format', () => {
     it('returns a text representation including the report id and fallback fields', async () => {
-      const attachment: Attachment<string, unknown> = {
-        id: 'test-id',
-        type: THREAT_ATTACHMENT_ID,
-        data: {
-          attachmentLabel: 'Threat Report',
-          report_id: 'report-1',
-          title: 'APT99 campaign report',
-          severity: 'critical',
-          source: 'seeded',
-        },
-      };
+      const value = await formatToText(attachmentType, formatContext, {
+        attachmentLabel: 'Threat Report',
+        report_id: 'report-1',
+        title: 'APT99 campaign report',
+        severity: 'critical',
+        source: 'seeded',
+      });
 
-      const formatted = await attachmentType.format(attachment, formatContext);
-      const representation = formatted.getRepresentation
-        ? await formatted.getRepresentation()
-        : { type: 'text', value: '' };
-
-      expect(representation.type).toBe('text');
-      const value = (representation as TextAttachmentRepresentation).value;
       expect(value).toContain('report-1');
       expect(value).toContain('APT99 campaign report');
       expect(value).toContain('critical');
@@ -131,18 +119,11 @@ describe('createThreatAttachmentType', () => {
     });
 
     it('omits optional fallback lines when they are absent', async () => {
-      const attachment: Attachment<string, unknown> = {
-        id: 'test-id',
-        type: THREAT_ATTACHMENT_ID,
-        data: { attachmentLabel: 'Threat Report', report_id: 'report-1' },
-      };
+      const value = await formatToText(attachmentType, formatContext, {
+        attachmentLabel: 'Threat Report',
+        report_id: 'report-1',
+      });
 
-      const formatted = await attachmentType.format(attachment, formatContext);
-      const representation = formatted.getRepresentation
-        ? await formatted.getRepresentation()
-        : { type: 'text', value: '' };
-
-      const value = (representation as TextAttachmentRepresentation).value;
       expect(value).not.toContain('Title:');
       expect(value).not.toContain('Severity:');
       expect(value).not.toContain('Source:');
@@ -160,24 +141,14 @@ describe('createThreatAttachmentType', () => {
 
   describe('max-size payload', () => {
     it('keeps the representation within maxContentLength at the schema max sizes', async () => {
-      const attachment: Attachment<string, unknown> = {
-        id: 'test-id',
-        type: THREAT_ATTACHMENT_ID,
-        data: {
-          attachmentLabel: 'Threat Report',
-          report_id: 'r'.repeat(512),
-          title: 't'.repeat(512),
-          severity: 'critical' as const,
-          source: 's'.repeat(256),
-        },
-      };
+      const value = await formatToText(attachmentType, formatContext, {
+        attachmentLabel: 'Threat Report',
+        report_id: 'r'.repeat(512),
+        title: 't'.repeat(512),
+        severity: 'critical' as const,
+        source: 's'.repeat(256),
+      });
 
-      const formatted = await attachmentType.format(attachment, formatContext);
-      const representation = formatted.getRepresentation
-        ? await formatted.getRepresentation()
-        : { type: 'text', value: '' };
-
-      const value = (representation as TextAttachmentRepresentation).value;
       expect(value.length).toBeLessThanOrEqual(attachmentType.maxContentLength ?? Infinity);
       expect(value).not.toContain('[truncated:');
     });

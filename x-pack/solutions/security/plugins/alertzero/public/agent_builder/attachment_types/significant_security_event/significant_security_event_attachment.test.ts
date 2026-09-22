@@ -7,7 +7,7 @@
 
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { createSignificantSecurityEventAttachmentDefinition } from './significant_security_event_attachment';
-import type { SignificantSecurityEventAttachment } from './types';
+import type { SignificantSecurityEventAttachment } from './view_model';
 import { createMockShare, createMockNavigation } from '../test_utils';
 
 describe('createSignificantSecurityEventAttachmentDefinition', () => {
@@ -109,16 +109,23 @@ describe('createSignificantSecurityEventAttachmentDefinition', () => {
     const eventButtons = getButtons({
       ...baseData,
       events: [
-        { event_id: 'evt-1', source_index: 'logs-endpoint.events.process-default' },
-        { event_id: 'evt-2', source_index: 'logs-endpoint.events.network-default' },
+        {
+          event_id: 'evt-1',
+          source_index: '.ds-logs-endpoint.events.process-default-2026.09.22-000001',
+        },
+        {
+          event_id: 'evt-2',
+          source_index: '.ds-logs-endpoint.events.network-default-2026.09.22-000001',
+        },
       ],
     });
     expect(eventButtons).toHaveLength(1);
     expect(eventButtons?.[0].label).toBe('Open events in Discover');
     expect(decodeURIComponent(eventButtons?.[0].href ?? '')).toContain(
-      'FROM "logs-endpoint.events.process-default", "logs-endpoint.events.network-default" ' +
-        'METADATA _id, _index | WHERE (_index == "logs-endpoint.events.process-default" AND ' +
-        '(_id IN ("evt-1"))) OR (_index == "logs-endpoint.events.network-default" AND (_id IN ("evt-2")))'
+      'FROM ".ds-logs-endpoint.events.process-default-2026.09.22-000001", ' +
+        '".ds-logs-endpoint.events.network-default-2026.09.22-000001" ' +
+        'METADATA _id, _index | WHERE (_index == ".ds-logs-endpoint.events.process-default-2026.09.22-000001" AND ' +
+        '(_id IN ("evt-1"))) OR (_index == ".ds-logs-endpoint.events.network-default-2026.09.22-000001" AND (_id IN ("evt-2")))'
     );
 
     const alertButtons = getButtons({
@@ -135,7 +142,7 @@ describe('createSignificantSecurityEventAttachmentDefinition', () => {
     expect(
       getButtonsWithShare({
         ...baseData,
-        events: [{ event_id: 'evt-1', source_index: 'logs-default' }],
+        events: [{ event_id: 'evt-1', source_index: '.ds-logs-default-2026.09.22-000001' }],
       })
     ).toEqual([]);
     expect(getButtons({ severity: 'high' })).toEqual([]);

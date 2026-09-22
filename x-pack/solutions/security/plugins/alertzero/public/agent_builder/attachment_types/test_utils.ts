@@ -6,6 +6,7 @@
  */
 
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { Attachment } from '@kbn/agent-builder-common/attachments';
 
 /**
  * Minimal SharePluginStart stub for attachment renderer/definition tests: resolves any
@@ -42,3 +43,20 @@ export const createMockNavigation = <T extends object = {}>(
     prependPath: (path: string) => path,
     ...overrides,
   } as { spaceId: string; prependPath: (path: string) => string } & T);
+
+/** Builds a minimal typed Attachment fixture for a given attachment type id and data shape. */
+export const buildAttachment = <TType extends string, TData>(
+  type: TType,
+  data: TData,
+  id = 'att-1'
+): Attachment<TType, TData> => ({ id, type, data } as Attachment<TType, TData>);
+
+/** Builds the props an inline-content renderer expects, with an optional navigation override. */
+export const renderProps = <TType extends string, TData, TNav extends object>(
+  attachment: Attachment<TType, TData>,
+  navigation: TNav = createMockNavigation() as unknown as TNav
+) => ({
+  attachment,
+  navigation,
+  isSidebar: false,
+});

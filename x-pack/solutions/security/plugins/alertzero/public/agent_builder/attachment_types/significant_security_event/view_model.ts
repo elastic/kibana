@@ -6,12 +6,24 @@
  */
 
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
-import type { ActionButton } from '@kbn/agent-builder-browser/attachments';
+import type { ActionButton, HeaderBadge } from '@kbn/agent-builder-browser/attachments';
+import { i18n } from '@kbn/i18n';
 import type { AttachmentNavigationDeps } from '../navigation';
 import { buildAlertsLookupEsql, buildEventsLookupEsql } from '../navigation';
-import { buildDiscoverActionButton } from '../shared/attachment_definition_helpers';
+import { buildDiscoverActionButton, joinSubtitle } from '../shared/attachment_definition_helpers';
+import { formatPercent, severityBadgeColor } from '../shared/severity';
 import { significantSecurityEventAttachmentDataSchema } from '../../../../common/significant_security_event_schema';
 import type { SignificantSecurityEventAttachmentData } from '../../../../common/significant_security_event_schema';
+
+export const OPEN_EVENTS_LABEL = i18n.translate(
+  'xpack.alertzero.agentBuilder.attachments.sse.openEventsInDiscover',
+  { defaultMessage: 'Open events in Discover' }
+);
+
+export const OPEN_ALERTS_LABEL = i18n.translate(
+  'xpack.alertzero.agentBuilder.attachments.sse.openAlertsInDiscover',
+  { defaultMessage: 'Open alerts in Discover' }
+);
 
 export type { SignificantSecurityEventAttachmentData } from '../../../../common/significant_security_event_schema';
 
@@ -47,6 +59,46 @@ export const parseSignificantSecurityEventData = (
   return result.success ? result.data : undefined;
 };
 
+export const HUNT_FINDING_BADGE_LABEL = i18n.translate(
+  'xpack.alertzero.agentBuilder.attachments.sse.typeBadge',
+  { defaultMessage: 'Hunt finding' }
+);
+
+const FROM_REPORT_LABEL = (reportId: string) =>
+  i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.subtitleFromReport', {
+    defaultMessage: 'From {reportId}',
+    values: { reportId },
+  });
+
+/**
+ * The header badges and subtitle for an SSE attachment, shared between `getHeader` (the
+ * platform chrome header) and inline content's fallback headline (rendered instead, when the
+ * header has no action buttons and so does not render at all). Both must show the same
+ * severity/status/confidence, or an analyst sees a different picture depending on whether
+ * the attachment has a Discover exit.
+ */
+export const buildSignificantSecurityEventHeadline = (
+  parsed: SignificantSecurityEventAttachmentData | undefined,
+  data: { source_watch?: string; capability?: string } | undefined
+): { subtitle?: string; badges: HeaderBadge[] } => {
+  const subtitle = parsed?.report_id
+    ? joinSubtitle(FROM_REPORT_LABEL(parsed.report_id), parsed.capability)
+    : joinSubtitle(data?.source_watch, data?.capability);
+
+  const badges: HeaderBadge[] = [{ label: HUNT_FINDING_BADGE_LABEL, color: 'primary' }];
+  if (parsed?.severity) {
+    badges.push({ label: parsed.severity, color: severityBadgeColor(parsed.severity) });
+  }
+  if (parsed?.status) {
+    badges.push({ label: parsed.status, color: 'hollow' });
+  }
+  if (parsed?.confidence != null) {
+    badges.push({ label: formatPercent(parsed.confidence), color: 'hollow' });
+  }
+
+  return { ...(subtitle ? { subtitle } : {}), badges };
+};
+
 /**
  * The single Discover exit the SSE header offers: all of its referenced events at once, or
  * its alerts when it carries no events. Shared with inline content, which renders the
@@ -56,13 +108,9 @@ export const parseSignificantSecurityEventData = (
 export const buildSignificantSecurityEventActionButtons = ({
   parsed,
   navigation,
-  openEventsLabel,
-  openAlertsLabel,
 }: {
   parsed: SignificantSecurityEventAttachmentData | undefined;
   navigation: AttachmentNavigationDeps;
-  openEventsLabel: string;
-  openAlertsLabel: string;
 }): ActionButton[] => {
   if (!parsed) {
     return [];
@@ -72,10 +120,10 @@ export const buildSignificantSecurityEventActionButtons = ({
   const alerts = parsed.alerts ?? [];
   const exit =
     events.length > 0
-      ? { esql: buildEventsLookupEsql({ events }), label: openEventsLabel }
+      ? { esql: buildEventsLookupEsql({ events }), label: OPEN_EVENTS_LABEL }
       : {
           esql: buildAlertsLookupEsql({ alerts, spaceId: navigation.spaceId }),
-          label: openAlertsLabel,
+          label: OPEN_ALERTS_LABEL,
         };
 
   return buildDiscoverActionButton({

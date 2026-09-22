@@ -15,18 +15,19 @@ import {
   SSE_ATTACHMENT_TEST_ID,
   SSE_ATTACHMENT_EMPTY_TEST_ID,
 } from './significant_security_event_inline_content';
-import type { SignificantSecurityEventAttachment } from './types';
+import type { SignificantSecurityEventAttachment } from './view_model';
 import { buildEntityLookupEsql, buildEventLookupEsql } from '../navigation';
-import { createMockShare, createMockNavigation } from '../test_utils';
+import {
+  buildAttachment as buildAttachmentGeneric,
+  createMockShare,
+  createMockNavigation,
+  renderProps as renderPropsGeneric,
+} from '../test_utils';
 
 const buildAttachment = (
   data: SignificantSecurityEventAttachment['data']
 ): SignificantSecurityEventAttachment =>
-  ({
-    id: 'att-1',
-    type: 'security.significant_security_event',
-    data,
-  } as SignificantSecurityEventAttachment);
+  buildAttachmentGeneric('security.significant_security_event', data);
 
 const mockShare = createMockShare();
 
@@ -35,11 +36,7 @@ const defaultNavigation = createMockNavigation();
 const renderProps = (
   attachment: SignificantSecurityEventAttachment,
   navigation: typeof defaultNavigation & { share?: SharePluginStart } = defaultNavigation
-) => ({
-  attachment,
-  navigation,
-  isSidebar: false,
-});
+) => renderPropsGeneric(attachment, navigation);
 
 const baseData = {
   title: 'Suspicious lateral movement',
@@ -71,7 +68,11 @@ const huntResult = {
     status: 'environment_hits_found' as const,
     counts: { total_hits: 12, returned_hits: 12, affected_hosts: 2, affected_users: 3 },
     per_index: [
-      { index: 'logs-endpoint.events.process-default', hit_count: 8, required: true },
+      {
+        index: '.ds-logs-endpoint.events.process-default-2026.09.22-000001',
+        hit_count: 8,
+        required: true,
+      },
       { index: 'logs-endpoint.events.network-default', hit_count: 4, required: false },
     ],
     resolved_iocs: [],
@@ -120,7 +121,7 @@ describe('SignificantSecurityEventInlineContent', () => {
         {...renderProps(
           buildAttachment({
             ...baseData,
-            events: [{ event_id: 'evt-1', source_index: 'logs-default' }],
+            events: [{ event_id: 'evt-1', source_index: '.ds-logs-default-2026.09.22-000001' }],
           }),
           { ...defaultNavigation, share: createMockShare() }
         )}
@@ -130,35 +131,89 @@ describe('SignificantSecurityEventInlineContent', () => {
     expect(screen.queryByText('high (0.8)')).not.toBeInTheDocument();
   });
 
-  it('does not render the evidence/indicators summary footer', () => {
-    renderWithI18n(
-      <SignificantSecurityEventInlineContent {...renderProps(buildAttachment(baseData))} />
-    );
-    expect(
-      screen.queryByText('Evidence for: 2 · Evidence against: 0 · Indicators: 1')
-    ).not.toBeInTheDocument();
-  });
+  const emptySectionCases: Array<{
+    name: string;
+    data: Partial<SignificantSecurityEventAttachment['data']>;
+    assert: () => void;
+  }> = [
+    {
+      name: 'timeline',
+      data: { timeline: [] },
+      assert: () => {
+        expect(
+          screen.queryByTestId('alertzeroSignificantSecurityEventTimeline')
+        ).not.toBeInTheDocument();
+        expect(screen.queryByText('Timeline')).not.toBeInTheDocument();
+      },
+    },
+    {
+      name: 'entities',
+      data: { entities: [] },
+      assert: () => expect(screen.queryByText('Entities')).not.toBeInTheDocument(),
+    },
+    {
+      name: 'indicators',
+      data: { security_knowledge_indicators: [] },
+      assert: () =>
+        expect(
+          screen.queryByTestId('alertzeroSignificantSecurityEventIndicators')
+        ).not.toBeInTheDocument(),
+    },
+    {
+      name: 'events accordion',
+      data: { events: [], alerts: [] },
+      assert: () =>
+        expect(
+          screen.queryByTestId('alertzeroSignificantSecurityEventEventsAccordion')
+        ).not.toBeInTheDocument(),
+    },
+    {
+      name: 'alerts',
+      data: { alerts: [], events: [], timeline: [], evidence_for: [] },
+      assert: () => expect(screen.queryByRole('list')).not.toBeInTheDocument(),
+    },
+    {
+      name: 'evidence',
+      data: { evidence_for: [], evidence_against: [] },
+      assert: () => {
+        expect(screen.queryByText('Evidence for')).not.toBeInTheDocument();
+        expect(screen.queryByText('Evidence against')).not.toBeInTheDocument();
+      },
+    },
+    {
+      name: 'proposal',
+      data: { maps_to_proposal: {} },
+      assert: () =>
+        expect(screen.queryByTestId('alertzeroSignificantSecurityEventProposal')).toBeNull(),
+    },
+    {
+      name: 'hunt_result',
+      data: {},
+      assert: () => expect(screen.queryByText('Hunt result')).not.toBeInTheDocument(),
+    },
+    {
+      name: 'tier2',
+      data: {
+        hunt_result: (() => {
+          const { tier2, ...tier1Only } = huntResult;
+          return tier1Only;
+        })(),
+      },
+      assert: () => expect(screen.queryByText('Lateral movement via RDP')).not.toBeInTheDocument(),
+    },
+  ];
 
-  it('renders nothing for the timeline section when there are no entries', () => {
-    renderWithI18n(
-      <SignificantSecurityEventInlineContent
-        {...renderProps(buildAttachment({ ...baseData, timeline: [] }))}
-      />
-    );
-    expect(
-      screen.queryByTestId('alertzeroSignificantSecurityEventTimeline')
-    ).not.toBeInTheDocument();
-    expect(screen.queryByText('Timeline')).not.toBeInTheDocument();
-  });
-
-  it('renders nothing for the entities section when entities is empty', () => {
-    renderWithI18n(
-      <SignificantSecurityEventInlineContent
-        {...renderProps(buildAttachment({ ...baseData, entities: [] }))}
-      />
-    );
-    expect(screen.queryByText('Entities')).not.toBeInTheDocument();
-  });
+  it.each(emptySectionCases)(
+    'renders nothing for the $name section when empty',
+    ({ data, assert }) => {
+      renderWithI18n(
+        <SignificantSecurityEventInlineContent
+          {...renderProps(buildAttachment({ ...baseData, ...data }))}
+        />
+      );
+      assert();
+    }
+  );
 
   it('renders entity refs as Discover links on the exact ECS field', () => {
     const entities = [
@@ -303,22 +358,11 @@ describe('SignificantSecurityEventInlineContent', () => {
     expect(mitreBadge).toHaveAttribute('target', '_blank');
   });
 
-  it('renders nothing for indicators when the list is empty', () => {
-    renderWithI18n(
-      <SignificantSecurityEventInlineContent
-        {...renderProps(buildAttachment({ ...baseData, security_knowledge_indicators: [] }))}
-      />
-    );
-    expect(
-      screen.queryByTestId('alertzeroSignificantSecurityEventIndicators')
-    ).not.toBeInTheDocument();
-  });
-
   it('renders a Discover link for an event when share returns a URL, inside the collapsed events accordion', async () => {
     const user = userEvent.setup();
     const event = {
       event_id: 'evt-1',
-      source_index: 'logs-endpoint.events.process-default',
+      source_index: '.ds-logs-endpoint.events.process-default-2026.09.22-000001',
     };
     const expectedEsql = buildEventLookupEsql({
       index: event.source_index,
@@ -357,7 +401,7 @@ describe('SignificantSecurityEventInlineContent', () => {
     const user = userEvent.setup();
     const event = {
       event_id: 'evt-plain',
-      source_index: 'logs-endpoint.events.process-default',
+      source_index: '.ds-logs-endpoint.events.process-default-2026.09.22-000001',
     };
 
     renderWithI18n(
@@ -376,44 +420,6 @@ describe('SignificantSecurityEventInlineContent', () => {
     expect(screen.queryByLabelText('Open in Discover')).not.toBeInTheDocument();
   });
 
-  it('renders nothing for the events accordion when there are no events or alerts', () => {
-    renderWithI18n(
-      <SignificantSecurityEventInlineContent
-        {...renderProps(buildAttachment({ ...baseData, events: [], alerts: [] }))}
-      />
-    );
-    expect(
-      screen.queryByTestId('alertzeroSignificantSecurityEventEventsAccordion')
-    ).not.toBeInTheDocument();
-  });
-
-  it('renders nothing for alerts when the list is empty', () => {
-    renderWithI18n(
-      <SignificantSecurityEventInlineContent
-        {...renderProps(
-          buildAttachment({
-            ...baseData,
-            alerts: [],
-            events: [],
-            timeline: [],
-            evidence_for: [],
-          })
-        )}
-      />
-    );
-    expect(screen.queryByRole('list')).not.toBeInTheDocument();
-  });
-
-  it('renders nothing for evidence sections when both are empty', () => {
-    renderWithI18n(
-      <SignificantSecurityEventInlineContent
-        {...renderProps(buildAttachment({ ...baseData, evidence_for: [], evidence_against: [] }))}
-      />
-    );
-    expect(screen.queryByText('Evidence for')).not.toBeInTheDocument();
-    expect(screen.queryByText('Evidence against')).not.toBeInTheDocument();
-  });
-
   it('renders the evidence for section when populated', () => {
     renderWithI18n(
       <SignificantSecurityEventInlineContent {...renderProps(buildAttachment(baseData))} />
@@ -424,13 +430,6 @@ describe('SignificantSecurityEventInlineContent', () => {
   });
 
   describe('hunt result', () => {
-    it('renders nothing when hunt_result is absent', () => {
-      renderWithI18n(
-        <SignificantSecurityEventInlineContent {...renderProps(buildAttachment(baseData))} />
-      );
-      expect(screen.queryByText('Hunt result')).not.toBeInTheDocument();
-    });
-
     it('renders total hits, affected hosts/users stats, and the time range', () => {
       renderWithI18n(
         <SignificantSecurityEventInlineContent
@@ -462,16 +461,6 @@ describe('SignificantSecurityEventInlineContent', () => {
       expect(screen.getByText('TA0008')).toBeInTheDocument();
       expect(screen.getAllByText('75%').length).toBeGreaterThan(0);
     });
-
-    it('renders no tier2 table when tier2 is absent', () => {
-      const { tier2, ...tier1Only } = huntResult;
-      renderWithI18n(
-        <SignificantSecurityEventInlineContent
-          {...renderProps(buildAttachment({ ...baseData, hunt_result: tier1Only }))}
-        />
-      );
-      expect(screen.queryByText('Lateral movement via RDP')).not.toBeInTheDocument();
-    });
   });
 
   describe('timeline', () => {
@@ -482,18 +471,6 @@ describe('SignificantSecurityEventInlineContent', () => {
       expect(screen.getByTestId('alertzeroSignificantSecurityEventTimeline')).toBeInTheDocument();
       expect(screen.getByText('RDP session opened')).toBeInTheDocument();
     });
-
-    it('renders nothing (no heading) when the timeline is empty', () => {
-      renderWithI18n(
-        <SignificantSecurityEventInlineContent
-          {...renderProps(buildAttachment({ ...baseData, timeline: [] }))}
-        />
-      );
-      expect(screen.queryByText('Timeline')).not.toBeInTheDocument();
-      expect(
-        screen.queryByTestId('alertzeroSignificantSecurityEventTimeline')
-      ).not.toBeInTheDocument();
-    });
   });
 
   describe('events accordion', () => {
@@ -503,7 +480,12 @@ describe('SignificantSecurityEventInlineContent', () => {
           {...renderProps(
             buildAttachment({
               ...baseData,
-              events: [{ event_id: 'evt-1', source_index: 'logs-endpoint.events.process-default' }],
+              events: [
+                {
+                  event_id: 'evt-1',
+                  source_index: '.ds-logs-endpoint.events.process-default-2026.09.22-000001',
+                },
+              ],
             })
           )}
         />
@@ -524,7 +506,12 @@ describe('SignificantSecurityEventInlineContent', () => {
           {...renderProps(
             buildAttachment({
               ...baseData,
-              events: [{ event_id: 'evt-1', source_index: 'logs-endpoint.events.process-default' }],
+              events: [
+                {
+                  event_id: 'evt-1',
+                  source_index: '.ds-logs-endpoint.events.process-default-2026.09.22-000001',
+                },
+              ],
             })
           )}
         />
@@ -565,15 +552,6 @@ describe('SignificantSecurityEventInlineContent', () => {
     expect(screen.getByText('wf-isolate-host', { exact: false })).toBeInTheDocument();
     expect(screen.getByText('Rotate the affected credentials')).toBeInTheDocument();
     expect(screen.getByText('Isolate host-1')).toBeInTheDocument();
-  });
-
-  it('renders nothing for the proposal section when maps_to_proposal has no fields set', () => {
-    renderWithI18n(
-      <SignificantSecurityEventInlineContent
-        {...renderProps(buildAttachment({ ...baseData, maps_to_proposal: {} }))}
-      />
-    );
-    expect(screen.queryByTestId('alertzeroSignificantSecurityEventProposal')).toBeNull();
   });
 
   it('renders a proposal carrying only actionInput', () => {
@@ -699,7 +677,7 @@ describe('SignificantSecurityEventInlineContent', () => {
           {...renderProps(
             buildAttachment({
               ...baseData,
-              events: [{ event_id: 'evt-1', source_index: 'logs-default' }],
+              events: [{ event_id: 'evt-1', source_index: '.ds-logs-default-2026.09.22-000001' }],
             }),
             { ...defaultNavigation, share: createMockShare() }
           )}

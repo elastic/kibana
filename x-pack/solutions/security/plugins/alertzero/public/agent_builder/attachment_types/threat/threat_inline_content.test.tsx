@@ -19,11 +19,11 @@ import {
 import { threatAttachmentQueryClient } from './query_client';
 import type { ThreatAttachment } from './types';
 import { buildDiscoverThreatReportNestedIocUrl } from '../navigation';
-import { createMockShare } from '../test_utils';
+import { buildAttachment as buildAttachmentGeneric, createMockShare } from '../test_utils';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 
 const buildAttachment = (data: ThreatAttachment['data']): ThreatAttachment =>
-  ({ id: 'att-1', type: 'security.threat', data } as ThreatAttachment);
+  buildAttachmentGeneric('security.threat', data);
 
 const mockShare = createMockShare();
 

@@ -6,25 +6,23 @@
  */
 
 /**
- * Event `source_index` values are workflow-authored and flow straight into a Discover
- * `FROM` clause, so they carry the same trust problem the `alerts[]` refs had. Alerts were
- * fixed by pinning every ref to the current space's alias, but events legitimately span
- * many different data streams, so there is no single index to pin them to. Constrain the
- * shape instead: a concrete, non-hidden, single index that cannot reach across spaces.
+ * Constrain `source_index` to a concrete, non-hidden, single index that cannot reach across
+ * spaces. Event `source_index` values are workflow-authored and flow straight into a
+ * Discover `FROM` clause, so they carry the same trust problem the `alerts[]` refs had, but
+ * events legitimately span many different data streams, so there is no single index to pin
+ * them to.
+ *
+ * Writers MUST populate `source_index` from the hit's `_index` (for a data stream, that is
+ * the concrete `.ds-...` backing index), never from the data stream or alias name that was
+ * searched. `_index` on a data-stream hit already reports the backing name, so this is a
+ * matter of not overriding it.
  */
-
-/** Alert aliases are space-scoped and must be reached through the pinned alerts exits. */
-const ALERTS_INDEX_PREFIX = '.alerts-';
-const PREVIEW_ALERTS_INDEX_PREFIX = '.preview.alerts-';
-const INTERNAL_ALERTS_INDEX_PREFIX = '.internal.alerts-';
 
 /**
  * Backing indices of ordinary data streams. A search hit against a data stream reports its
  * concrete backing name in `_index` (e.g. `.ds-logs-endpoint.events.process-default-...`),
  * and the contract says `source_index` carries that concrete source, so these have to be
- * allowed even though they start with a dot. They are still a single concrete index, and
- * the alerts prefixes below are checked against the undotted remainder so an alerts backing
- * index cannot sneak through this door.
+ * allowed even though they start with a dot. They are still a single concrete index.
  */
 const DATA_STREAM_BACKING_PREFIX = '.ds-';
 
@@ -34,7 +32,7 @@ const DATA_STREAM_BACKING_PREFIX = '.ds-';
  * - wildcards (`*`, `?`) — would fan out past the intended source
  * - comma lists and remote-cluster refs (`,`, `:`) — multiple targets in one expression
  * - hidden/system indices (leading `.`), except `.ds-` backing indices — includes every
- *   alerts alias variant
+ *   alerts alias variant, since alias names still start with `.` after the `.ds-` strip
  * - `-` exclusions and leading `+` — index-expression operators, not a plain name
  * - path traversal / whitespace — never valid in an index name
  */
@@ -65,16 +63,9 @@ export const isAllowedEventSourceIndex = (value: string): boolean => {
     return false;
   }
 
-  // Hidden and system indices, which covers the alerts aliases explicitly called out below.
+  // Hidden and system indices, which covers every alerts alias variant (they all start
+  // with `.`).
   if (bare.startsWith('.')) {
-    return false;
-  }
-
-  if (
-    bare.startsWith(ALERTS_INDEX_PREFIX) ||
-    bare.startsWith(PREVIEW_ALERTS_INDEX_PREFIX) ||
-    bare.startsWith(INTERNAL_ALERTS_INDEX_PREFIX)
-  ) {
     return false;
   }
 

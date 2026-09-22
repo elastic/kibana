@@ -101,7 +101,7 @@ describe('esql_queries', () => {
 
   it('builds threat report lookup ES|QL scoped to the current space and global sentinel', () => {
     expect(buildThreatReportLookupEsql({ reportId: 'default:fp1', spaceId: 'soc' })).toBe(
-      'FROM ".kibana-threat-reports*" METADATA _id | WHERE _id == "default:fp1" AND ' +
+      'FROM ".kibana-threat-reports*" METADATA _id | WHERE _id IN ("default:fp1") AND ' +
         'space_id IN ("soc", "*")'
     );
   });
@@ -127,19 +127,19 @@ describe('esql_queries', () => {
     expect(buildEntityLookupEsql({ field: 'user.name', value: '  ' })).toBeUndefined();
   });
 
-  it('builds actor lookup ES|QL against threat report actors', () => {
-    expect(buildActorLookupEsql({ value: 'APT-99', spaceId: 'soc' })).toBe(
-      'FROM ".kibana-threat-reports*" | WHERE extracted.threat_actors == "APT-99" AND ' +
+  it.each([
+    ['actor', buildActorLookupEsql, 'extracted.threat_actors', 'APT-99'] as const,
+    [
+      'ioc_set_hash',
+      buildThreatReportIocSetHashLookupEsql,
+      'extracted.ioc_set_hash',
+      'set-hash-1',
+    ] as const,
+  ])('builds threat report %s lookup ES|QL', (_kind, build, field, value) => {
+    expect(build({ value, spaceId: 'soc' })).toBe(
+      `FROM ".kibana-threat-reports*" | WHERE ${field} == "${value}" AND ` +
         'space_id IN ("soc", "*")'
     );
-    expect(buildActorLookupEsql({ value: '  ', spaceId: 'soc' })).toBeUndefined();
-  });
-
-  it('builds threat report ioc_set_hash lookup ES|QL', () => {
-    expect(buildThreatReportIocSetHashLookupEsql({ value: 'set-hash-1', spaceId: 'soc' })).toBe(
-      'FROM ".kibana-threat-reports*" | WHERE extracted.ioc_set_hash == "set-hash-1" AND ' +
-        'space_id IN ("soc", "*")'
-    );
-    expect(buildThreatReportIocSetHashLookupEsql({ value: '  ', spaceId: 'soc' })).toBeUndefined();
+    expect(build({ value: '  ', spaceId: 'soc' })).toBeUndefined();
   });
 });

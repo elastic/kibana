@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { Attachment } from '@kbn/agent-builder-common/attachments';
-import type { TextAttachmentRepresentation } from '@kbn/agent-builder-server/attachments';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import {
   createHuntCorrelationAttachmentType,
   HUNT_CORRELATION_ATTACHMENT_ID,
 } from './hunt_correlation';
+import { formatToText } from './test_utils';
 
 const validPayload = {
   attachmentLabel: 'Hunt Correlation',
@@ -121,19 +120,8 @@ describe('createHuntCorrelationAttachmentType', () => {
 
   describe('format', () => {
     it('returns a text representation grouping anchors by kind and listing diamond scores', async () => {
-      const attachment: Attachment<string, unknown> = {
-        id: 'test-id',
-        type: HUNT_CORRELATION_ATTACHMENT_ID,
-        data: validPayload,
-      };
+      const value = await formatToText(attachmentType, formatContext, validPayload);
 
-      const formatted = await attachmentType.format(attachment, formatContext);
-      const representation = formatted.getRepresentation
-        ? await formatted.getRepresentation()
-        : { type: 'text', value: '' };
-
-      expect(representation.type).toBe('text');
-      const value = (representation as TextAttachmentRepresentation).value;
       expect(value).toContain('hash: abc123');
       expect(value).toContain('infrastructure: report-42 (score 0.75)');
       expect(value).toContain('anchor_match=0.8, diamond_vertex=0.6');
@@ -168,18 +156,8 @@ describe('createHuntCorrelationAttachmentType', () => {
         self_match_excluded: true as const,
       };
 
-      const attachment: Attachment<string, unknown> = {
-        id: 'test-id',
-        type: HUNT_CORRELATION_ATTACHMENT_ID,
-        data: maxSizePayload,
-      };
+      const value = await formatToText(attachmentType, formatContext, maxSizePayload);
 
-      const formatted = await attachmentType.format(attachment, formatContext);
-      const representation = formatted.getRepresentation
-        ? await formatted.getRepresentation()
-        : { type: 'text', value: '' };
-
-      const value = (representation as TextAttachmentRepresentation).value;
       expect(value.length).toBeLessThanOrEqual(attachmentType.maxContentLength ?? Infinity);
     });
   });

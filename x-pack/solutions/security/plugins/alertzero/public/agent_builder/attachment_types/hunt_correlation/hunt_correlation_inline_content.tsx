@@ -34,13 +34,12 @@ import { LabeledBadgeTable } from '../shared/labeled_badge_table';
 import type { LabeledBadgeTableRow } from '../shared/labeled_badge_table';
 import { DIAMOND_VERTICES, formatPercent } from '../shared/severity';
 import { SectionHeading, AttachmentEmptyState } from '../shared/primitives';
-import { hasChromeHeaderForActions } from '../shared/attachment_definition_helpers';
 import {
   buildHuntCorrelationActionButtons,
   buildHuntCorrelationSummary,
   parseHuntCorrelationData,
-} from './types';
-import type { Anchor, DiamondScore, HuntCorrelationAttachment } from './types';
+} from './view_model';
+import type { Anchor, DiamondScore, HuntCorrelationAttachment } from './view_model';
 
 export interface HuntCorrelationInlineContentProps
   extends AttachmentRenderProps<HuntCorrelationAttachment> {
@@ -221,14 +220,7 @@ export const HuntCorrelationInlineContent: React.FC<HuntCorrelationInlineContent
   ];
 
   const summary = buildHuntCorrelationSummary(parsed);
-  const hasChromeHeader = hasChromeHeaderForActions(
-    buildHuntCorrelationActionButtons({
-      parsed,
-      navigation,
-      // The label only affects button text, not whether a button exists.
-      label: '',
-    })
-  );
+  const hasChromeHeader = buildHuntCorrelationActionButtons({ parsed, navigation }).length > 0;
 
   return (
     <EuiPanel

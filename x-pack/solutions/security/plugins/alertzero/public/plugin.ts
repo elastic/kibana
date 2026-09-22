@@ -159,12 +159,7 @@ export class AlertZeroPublicPlugin
         : undefined,
     });
 
-    // `spaceId` is derived synchronously from the base path rather than awaited from
-    // `spaces.getActiveSpace()`, so registration no longer waits on a round trip before it
-    // starts. The registrars themselves still resolve lazily (`await import(...)` keeps these
-    // renderers out of the initial bundle), so this stays a floating promise, and the registry
-    // is a plain Map with no subscription: a definition arriving after a conversation renders
-    // shows as `null` for the rest of that view.
+    // Space id comes from the base path so registration starts synchronously.
     const { spaceId } = getSpaceIdFromPath(
       core.http.basePath.get(),
       core.http.basePath.serverBasePath

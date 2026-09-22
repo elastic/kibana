@@ -48,12 +48,12 @@ import {
   buildMitreTechniqueUrl,
 } from '../shared/primitives';
 import { LabeledBadgeTable, type LabeledBadgeTableRow } from '../shared/labeled_badge_table';
-import { formatPercent, severityBadgeColor } from '../shared/severity';
-import { hasChromeHeaderForActions } from '../shared/attachment_definition_helpers';
+import { formatPercent } from '../shared/severity';
 import {
   buildSignificantSecurityEventActionButtons,
+  buildSignificantSecurityEventHeadline,
   parseSignificantSecurityEventData,
-} from './types';
+} from './view_model';
 import type {
   HuntResult,
   MapsToProposal,
@@ -62,7 +62,7 @@ import type {
   SignificantSecurityEventRef,
   SecurityKnowledgeIndicator,
   TimelineEntry,
-} from './types';
+} from './view_model';
 
 export interface SignificantSecurityEventInlineContentProps
   extends AttachmentRenderProps<SignificantSecurityEventAttachment> {
@@ -74,6 +74,7 @@ export const SSE_ATTACHMENT_EMPTY_TEST_ID = 'alertzeroSignificantSecurityEventAt
 export const SSE_ATTACHMENT_HEADLINE_TEST_ID = 'alertzeroSignificantSecurityEventHeadline';
 
 const HYPOTHESIS_ACCORDION_THRESHOLD = 160;
+const EVIDENCE_BULLET_LIMIT = 5;
 
 /**
  * Tier 1 and Tier 2 outcome labels. These are required schema fields and they carry the
@@ -109,7 +110,6 @@ const TIER2_STATUS_LABELS: Record<NonNullable<HuntResult['tier2']>['status'], st
     { defaultMessage: 'Behaviors proposed' }
   ),
 };
-const EVIDENCE_BULLET_LIMIT = 5;
 
 const cellStyles = css`
   overflow-wrap: anywhere;
@@ -488,6 +488,7 @@ interface Tier2TableRow {
 
 const HuntResultSection: React.FC<{ huntResult: HuntResult }> = ({ huntResult }) => {
   const { tier1, tier2 } = huntResult;
+  const isSampled = tier1.counts.returned_hits < tier1.counts.total_hits;
   const distributionStats = tier1.per_index.map((row, index) => ({
     key: row.index,
     count: row.hit_count,
@@ -618,7 +619,7 @@ const HuntResultSection: React.FC<{ huntResult: HuntResult }> = ({ huntResult })
         <EuiFlexItem grow={false}>
           <CompactStat
             title={
-              tier1.counts.returned_hits < tier1.counts.total_hits
+              isSampled
                 ? i18n.translate(
                     'xpack.alertzero.agentBuilder.attachments.sse.huntResultReturnedOfTotal',
                     {
@@ -632,7 +633,7 @@ const HuntResultSection: React.FC<{ huntResult: HuntResult }> = ({ huntResult })
                 : tier1.counts.total_hits
             }
             description={
-              tier1.counts.returned_hits < tier1.counts.total_hits
+              isSampled
                 ? i18n.translate(
                     'xpack.alertzero.agentBuilder.attachments.sse.huntResultHitsSampled',
                     { defaultMessage: 'Hits (sampled)' }
@@ -837,14 +838,11 @@ export const SignificantSecurityEventInlineContent: React.FC<
 
   const hasEvents = (parsed.events ?? []).length > 0;
 
-  const hasChromeHeader = hasChromeHeaderForActions(
-    buildSignificantSecurityEventActionButtons({
-      parsed,
-      navigation,
-      // Labels only affect button text, not whether a button exists.
-      openEventsLabel: '',
-      openAlertsLabel: '',
-    })
+  const hasChromeHeader =
+    buildSignificantSecurityEventActionButtons({ parsed, navigation }).length > 0;
+  const { badges: fallbackBadges } = buildSignificantSecurityEventHeadline(
+    parsed,
+    attachment?.data
   );
 
   return (
@@ -863,15 +861,11 @@ export const SignificantSecurityEventInlineContent: React.FC<
                 <strong>{parsed.title}</strong>
               </EuiText>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBadge color={severityBadgeColor(parsed.severity)}>{parsed.severity}</EuiBadge>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBadge color="hollow">{parsed.status}</EuiBadge>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBadge color="hollow">{formatPercent(parsed.confidence)}</EuiBadge>
-            </EuiFlexItem>
+            {fallbackBadges.map((badge, index) => (
+              <EuiFlexItem grow={false} key={`${badge.label}-${index}`}>
+                <EuiBadge color={badge.color}>{badge.label}</EuiBadge>
+              </EuiFlexItem>
+            ))}
           </EuiFlexGroup>
           <EuiSpacer size="s" />
         </>

@@ -53,7 +53,10 @@ const eventRefSchema = z.object({
     .string()
     .min(1)
     .max(256)
-    .refine(isAllowedEventSourceIndex, { message: EVENT_SOURCE_INDEX_ERROR }),
+    .refine(isAllowedEventSourceIndex, { message: EVENT_SOURCE_INDEX_ERROR })
+    .describe(
+      "Concrete backing index from the hit's _index (for data streams, the .ds-... name), not the data stream or alias name"
+    ),
   timestamp: z.string().datetime().optional(),
   matched: z
     .object({
@@ -144,22 +147,14 @@ export const huntResultSchema = z
     tier1: huntResultTier1Schema,
     tier2: huntResultTier2Schema.optional(),
   })
-  // The Tier 1 status names its own outcome, so a status that says nothing was found while
-  // the counts say otherwise is a producer bug. The renderer would show both the status and
-  // the contradicting counts, and the agent formatter would repeat it.
+  // The Tier 1 status names its own outcome, so a status that disagrees with the counts is a
+  // producer bug: the renderer would show both the status and the contradicting counts, and
+  // the agent formatter would repeat it.
   .refine(
     (result) =>
-      result.tier1.status === 'environment_hits_found' || result.tier1.counts.total_hits === 0,
+      (result.tier1.status === 'environment_hits_found') === result.tier1.counts.total_hits > 0,
     {
-      message: 'tier1.status reports no hits but tier1.counts.total_hits is nonzero',
-      path: ['tier1', 'status'],
-    }
-  )
-  .refine(
-    (result) =>
-      result.tier1.status !== 'environment_hits_found' || result.tier1.counts.total_hits > 0,
-    {
-      message: 'tier1.status is environment_hits_found but tier1.counts.total_hits is zero',
+      message: 'tier1.status and tier1.counts.total_hits disagree on whether hits were found',
       path: ['tier1', 'status'],
     }
   )

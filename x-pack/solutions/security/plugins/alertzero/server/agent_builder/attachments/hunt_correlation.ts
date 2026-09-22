@@ -6,6 +6,7 @@
  */
 
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import { groupBy } from 'lodash';
 import { ALERTZERO_ATTACHMENT_TYPES } from '../../../common/constants';
 import {
   huntCorrelationAttachmentDataSchema,
@@ -21,14 +22,9 @@ const formatHuntCorrelationForAgent = (data: HuntCorrelationAttachmentData): str
   if (data.anchors.length === 0) {
     lines.push('  no anchors recorded');
   } else {
-    const anchorsByKind = new Map<string, string[]>();
-    for (const anchor of data.anchors) {
-      const values = anchorsByKind.get(anchor.kind) ?? [];
-      values.push(anchor.value);
-      anchorsByKind.set(anchor.kind, values);
-    }
-    for (const [kind, values] of anchorsByKind) {
-      lines.push(`  ${kind}: ${values.join(', ')}`);
+    const anchorsByKind = groupBy(data.anchors, (anchor) => anchor.kind);
+    for (const [kind, anchors] of Object.entries(anchorsByKind)) {
+      lines.push(`  ${kind}: ${anchors.map((anchor) => anchor.value).join(', ')}`);
     }
   }
 
@@ -68,10 +64,6 @@ export const createHuntCorrelationAttachmentType = (): AttachmentTypeDefinition 
     formatForAgent: formatHuntCorrelationForAgent,
     describePayload,
     renderNoun: 'correlation table',
-    // Worst case: 50 anchors (2048-char values, grouped into a single kind on one
-    // line) plus 100 diamond_scores rows (512-char related_report_id each) comes to
-    // roughly 157K characters; round up for headroom. The base helper's hard-truncate
-    // fallback (see create_readonly_attachment_type.ts) still applies if this is ever
-    // exceeded, so oversized payloads degrade instead of failing.
+    // Worst case: 50 anchors plus 100 diamond_scores rows, roughly 157K characters.
     maxContentLength: 175_000,
   });

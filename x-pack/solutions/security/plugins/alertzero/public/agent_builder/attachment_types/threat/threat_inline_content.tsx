@@ -90,10 +90,6 @@ const fetchThreatReport = async ({
     { version: THREAT_REPORT_API_VERSION, method: 'GET', signal }
   );
 
-const sectionHeading = (id: string, defaultMessage: string) => (
-  <SectionHeading>{i18n.translate(id, { defaultMessage })}</SectionHeading>
-);
-
 /** Small `EuiPopover`-based "+N" overflow for a badge list capped at `IOC_VISIBLE_LIMIT`. */
 const IocOverflowBadge: React.FC<{ hiddenCount: number; children: React.ReactNode }> = ({
   hiddenCount,
@@ -195,10 +191,11 @@ const renderExternalReferencesSection = (liveData: ThreatReportApiResponse): Rea
   }
   return (
     <div key="external-refs">
-      {sectionHeading(
-        'xpack.alertzero.agentBuilder.attachments.threat.externalReferences',
-        'External references'
-      )}
+      <SectionHeading>
+        {i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.externalReferences', {
+          defaultMessage: 'External references',
+        })}
+      </SectionHeading>
       <EuiText size="s">
         <ul>
           {externalRefsWithUrl.map((ref, index) => (
@@ -229,7 +226,11 @@ const renderIocsSection = (
   const iocsByType = groupBy(liveData.extracted.iocs, (ioc) => ioc.type);
   return (
     <div key="iocs">
-      {sectionHeading('xpack.alertzero.agentBuilder.attachments.threat.iocs', 'Indicators')}
+      <SectionHeading>
+        {i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.iocs', {
+          defaultMessage: 'Indicators',
+        })}
+      </SectionHeading>
       <LabeledBadgeTable
         testSubj="alertzeroThreatAttachmentIocTable"
         caption={i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.iocTableCaption', {
@@ -317,7 +318,11 @@ const renderDiamondSection = (liveData: ThreatReportApiResponse): React.ReactNod
   );
   return (
     <div key="diamond">
-      {sectionHeading('xpack.alertzero.agentBuilder.attachments.threat.diamond', 'Diamond model')}
+      <SectionHeading>
+        {i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.diamond', {
+          defaultMessage: 'Diamond model',
+        })}
+      </SectionHeading>
       <EuiBasicTable<DiamondVertexRow>
         compressed
         tableLayout="auto"
@@ -447,7 +452,11 @@ const renderEvidenceSection = (liveData: ThreatReportApiResponse): React.ReactNo
   }
   return (
     <div key="evidence">
-      {sectionHeading('xpack.alertzero.agentBuilder.attachments.threat.evidence', 'Evidence')}
+      <SectionHeading>
+        {i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.evidence', {
+          defaultMessage: 'Evidence',
+        })}
+      </SectionHeading>
       <EuiFlexGroup gutterSize="m" wrap responsive={false}>
         {stats.map((stat, index) => (
           <EuiFlexItem grow={false} key={index}>
@@ -459,33 +468,39 @@ const renderEvidenceSection = (liveData: ThreatReportApiResponse): React.ReactNo
   );
 };
 
-const renderHeadlineSection = (liveData: ThreatReportApiResponse): React.ReactNode => {
-  const title = liveData.content?.title;
-  const severityLevel = liveData.severity?.level;
-  const sourceName = liveData.source?.name;
-
-  if (!title && !severityLevel && !sourceName) {
+const ThreatHeadline = ({
+  title,
+  severity,
+  source,
+  testSubj,
+}: {
+  title?: string;
+  severity?: string;
+  source?: string;
+  testSubj: string;
+}): React.ReactNode => {
+  if (!title && !severity && !source) {
     return null;
   }
 
   return (
-    <div key="headline" data-test-subj="alertzeroThreatAttachmentHeadline">
+    <div key="headline" data-test-subj={testSubj}>
       {title && (
         <EuiText size="s">
           <strong>{title}</strong>
         </EuiText>
       )}
-      {(severityLevel || sourceName) && (
+      {(severity || source) && (
         <EuiFlexGroup gutterSize="s" wrap responsive={false}>
-          {severityLevel && (
+          {severity && (
             <EuiFlexItem grow={false}>
-              <EuiBadge color={severityBadgeColor(severityLevel)}>{severityLevel}</EuiBadge>
+              <EuiBadge color={severityBadgeColor(severity)}>{severity}</EuiBadge>
             </EuiFlexItem>
           )}
-          {sourceName && (
+          {source && (
             <EuiFlexItem grow={false}>
               <EuiText size="xs" color="subdued">
-                {sourceName}
+                {source}
               </EuiText>
             </EuiFlexItem>
           )}
@@ -494,6 +509,15 @@ const renderHeadlineSection = (liveData: ThreatReportApiResponse): React.ReactNo
     </div>
   );
 };
+
+const renderHeadlineSection = (liveData: ThreatReportApiResponse): React.ReactNode => (
+  <ThreatHeadline
+    title={liveData.content?.title}
+    severity={liveData.severity?.level}
+    source={liveData.source?.name}
+    testSubj="alertzeroThreatAttachmentHeadline"
+  />
+);
 
 const renderEnrichedSections = ({
   liveData,
@@ -621,45 +645,39 @@ const ThreatAttachmentInlineContentInner: React.FC<ThreatAttachmentInlineContent
                     compressed
                     type="column"
                     data-test-subj={THREAT_ATTACHMENT_CAPTURED_FIELDS_TEST_ID}
-                    listItems={[
-                      ...(data.title
-                        ? [
-                            {
-                              title: i18n.translate(
-                                'xpack.alertzero.agentBuilder.attachments.threat.capturedTitle',
-                                { defaultMessage: 'Title' }
-                              ),
-                              description: data.title,
-                            },
-                          ]
-                        : []),
-                      ...(data.severity
-                        ? [
-                            {
-                              title: i18n.translate(
-                                'xpack.alertzero.agentBuilder.attachments.threat.capturedSeverity',
-                                { defaultMessage: 'Severity' }
-                              ),
-                              description: (
-                                <EuiBadge color={severityBadgeColor(data.severity)}>
-                                  {data.severity}
-                                </EuiBadge>
-                              ),
-                            },
-                          ]
-                        : []),
-                      ...(data.source
-                        ? [
-                            {
-                              title: i18n.translate(
-                                'xpack.alertzero.agentBuilder.attachments.threat.capturedSource',
-                                { defaultMessage: 'Source' }
-                              ),
-                              description: data.source,
-                            },
-                          ]
-                        : []),
-                    ]}
+                    listItems={(
+                      [
+                        [
+                          i18n.translate(
+                            'xpack.alertzero.agentBuilder.attachments.threat.capturedTitle',
+                            { defaultMessage: 'Title' }
+                          ),
+                          data.title,
+                        ],
+                        [
+                          i18n.translate(
+                            'xpack.alertzero.agentBuilder.attachments.threat.capturedSeverity',
+                            { defaultMessage: 'Severity' }
+                          ),
+                          data.severity ? (
+                            <EuiBadge color={severityBadgeColor(data.severity)}>
+                              {data.severity}
+                            </EuiBadge>
+                          ) : undefined,
+                        ],
+                        [
+                          i18n.translate(
+                            'xpack.alertzero.agentBuilder.attachments.threat.capturedSource',
+                            { defaultMessage: 'Source' }
+                          ),
+                          data.source,
+                        ],
+                      ] as Array<[string, React.ReactNode]>
+                    )
+                      .filter(
+                        (entry): entry is [string, NonNullable<React.ReactNode>] => entry[1] != null
+                      )
+                      .map(([title, description]) => ({ title, description }))}
                   />
                 </>
               )}

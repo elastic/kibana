@@ -49,8 +49,6 @@ export const createThreatAttachmentType = (): AttachmentTypeDefinition =>
     formatForAgent: formatThreatForAgent,
     describePayload,
     renderNoun: 'threat pill',
-    // A handful of short scalar fields (report_id/title/severity/source, all capped at
-    // 512 chars or less): the platform's 10 000-character default has ample headroom
-    // even at the schema's max sizes (worst case observed: ~1.2K chars).
+    // Worst case observed at the schema's max sizes: ~1.2K characters.
     maxContentLength: 10_000,
   });

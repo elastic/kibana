@@ -7,7 +7,7 @@
 
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import { createHuntCorrelationAttachmentDefinition } from './hunt_correlation_attachment';
-import type { HuntCorrelationAttachment } from './types';
+import type { HuntCorrelationAttachment } from './view_model';
 import { buildThreatReportsInEsql } from '../navigation';
 import { createMockShare, createMockNavigation } from '../test_utils';
 

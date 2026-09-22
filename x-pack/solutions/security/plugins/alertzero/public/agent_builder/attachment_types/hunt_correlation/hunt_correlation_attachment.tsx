@@ -14,18 +14,13 @@ import {
   buildHuntCorrelationActionButtons,
   buildHuntCorrelationSummary,
   parseHuntCorrelationData,
-} from './types';
-import type { HuntCorrelationAttachment } from './types';
+} from './view_model';
+import type { HuntCorrelationAttachment } from './view_model';
 import type { HuntCorrelationInlineContentProps } from './hunt_correlation_inline_content';
 
 const DEFAULT_LABEL = i18n.translate(
   'xpack.alertzero.agentBuilder.attachments.huntCorrelation.label',
   { defaultMessage: 'Hunt Correlation' }
-);
-
-const OPEN_RELATED_REPORTS_LABEL = i18n.translate(
-  'xpack.alertzero.agentBuilder.attachments.huntCorrelation.openRelatedReports',
-  { defaultMessage: 'Open related reports in Discover' }
 );
 
 const LazyHuntCorrelationInlineContent = lazyInlineContent<HuntCorrelationInlineContentProps>(
@@ -69,6 +64,5 @@ export const createHuntCorrelationAttachmentDefinition = ({
     buildHuntCorrelationActionButtons({
       parsed: parseHuntCorrelationData(attachment?.data),
       navigation,
-      label: OPEN_RELATED_REPORTS_LABEL,
     }),
 });

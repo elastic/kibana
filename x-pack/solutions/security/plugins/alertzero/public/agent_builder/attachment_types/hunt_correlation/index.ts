@@ -6,4 +6,4 @@
  */
 
 export { createHuntCorrelationAttachmentDefinition } from './hunt_correlation_attachment';
-export type { HuntCorrelationAttachment, HuntCorrelationAttachmentData } from './types';
+export type { HuntCorrelationAttachment, HuntCorrelationAttachmentData } from './view_model';

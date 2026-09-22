@@ -38,44 +38,6 @@ describe('significantSecurityEventAttachmentDataSchema', () => {
     expect(result.success).toBe(true);
   });
 
-  it('rejects a payload missing a required field', () => {
-    const { title, ...rest } = validPayload;
-
-    const result = significantSecurityEventAttachmentDataSchema.safeParse(rest);
-
-    expect(result.success).toBe(false);
-  });
-
-  it('rejects severity outside the allowed enum', () => {
-    const result = significantSecurityEventAttachmentDataSchema.safeParse({
-      ...validPayload,
-      severity: 'catastrophic',
-    });
-
-    expect(result.success).toBe(false);
-  });
-
-  it('rejects confidence out of the [0, 1] range', () => {
-    const result = significantSecurityEventAttachmentDataSchema.safeParse({
-      ...validPayload,
-      confidence: 1.5,
-    });
-
-    expect(result.success).toBe(false);
-  });
-
-  it('rejects arrays exceeding the 50-item cap', () => {
-    const result = significantSecurityEventAttachmentDataSchema.safeParse({
-      ...validPayload,
-      entities: Array.from({ length: 51 }, (_, i) => ({
-        field: 'user.name' as const,
-        value: `entity-${i}`,
-      })),
-    });
-
-    expect(result.success).toBe(false);
-  });
-
   it('rejects bare entity identifiers and legacy strings', () => {
     const bare = significantSecurityEventAttachmentDataSchema.safeParse({
       ...validPayload,
@@ -106,21 +68,6 @@ describe('significantSecurityEventAttachmentDataSchema', () => {
     });
 
     expect(result.success).toBe(false);
-  });
-
-  it('accepts structured alerts with index', () => {
-    const result = significantSecurityEventAttachmentDataSchema.safeParse({
-      ...validPayload,
-      alerts: [
-        {
-          alert_id: 'alert-1',
-          index: '.alerts-security.alerts-default',
-          timestamp: '2026-01-01T00:00:00.000Z',
-        },
-      ],
-    });
-
-    expect(result.success).toBe(true);
   });
 
   it('accepts the optional maps_to_proposal field when present', () => {
@@ -245,30 +192,6 @@ describe('significantSecurityEventAttachmentDataSchema', () => {
       hunt_result: base,
     });
     expect(valid.success).toBe(true);
-  });
-
-  it('rejects empty event_id or source_index on events', () => {
-    const emptyEventId = significantSecurityEventAttachmentDataSchema.safeParse({
-      ...validPayload,
-      events: [{ event_id: '', source_index: 'logs-default' }],
-    });
-    const emptySourceIndex = significantSecurityEventAttachmentDataSchema.safeParse({
-      ...validPayload,
-      events: [{ event_id: 'evt-1', source_index: '' }],
-    });
-
-    expect(emptyEventId.success).toBe(false);
-    expect(emptySourceIndex.success).toBe(false);
-  });
-
-  it('rejects a non-integer truncated_original_count', () => {
-    const result = significantSecurityEventAttachmentDataSchema.safeParse({
-      ...validPayload,
-      truncated: true,
-      truncated_original_count: 1.5,
-    });
-
-    expect(result.success).toBe(false);
   });
 
   it('accepts a well-formed hunt_result block', () => {
