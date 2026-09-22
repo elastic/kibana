@@ -9,6 +9,8 @@ import React, { useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import {
   EuiAccordion,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
@@ -215,33 +217,46 @@ export const CostEstimate = () => {
         grow={false}
         data-test-subj="significantEventsCostSection"
       >
-        <EuiPanel
-          hasShadow={false}
-          color="subdued"
-          paddingSize="none"
-          css={{ paddingInline: euiTheme.size.m }}
-        >
+        <EuiPanel hasShadow={false} color="subdued" paddingSize="none">
           <EuiAccordion
             id="significantEventsCostAccordion"
             initialIsOpen={false}
+            buttonElement="div"
+            arrowProps={{ css: { marginInlineStart: euiTheme.size.m } }}
             buttonProps={{
               paddingSize: 'm',
               css: { flexGrow: 0, inlineSize: 'auto' },
               'data-test-subj': 'significantEventsCostAccordionButton',
             }}
             buttonContent={
-              <EuiTitle size="xs">
-                <h3>
-                  {i18n.translate('xpack.significantEventsApp.settings.costEstimate.sectionTitle', {
-                    defaultMessage: 'Approximate inference cost across all spaces',
-                  })}
-                </h3>
-              </EuiTitle>
+              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size="xs">
+                    <h3>
+                      {i18n.translate(
+                        'xpack.significantEventsApp.settings.costEstimate.sectionTitle',
+                        {
+                          defaultMessage: 'Approximate inference cost across all spaces',
+                        }
+                      )}
+                    </h3>
+                  </EuiTitle>
+                </EuiFlexItem>
+                <EuiFlexItem
+                  grow={false}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                  }}
+                >
+                  <CostHeaderActions data={cost.data} />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             }
-            extraAction={<CostHeaderActions data={cost.data} />}
             data-test-subj="significantEventsCostAccordion"
           >
-            <EuiPanel hasShadow={false}>{renderBody()}</EuiPanel>
+            <EuiPanel hasShadow={false} borderRadius="none">
+              {renderBody()}
+            </EuiPanel>
           </EuiAccordion>
         </EuiPanel>
       </EuiPanel>
