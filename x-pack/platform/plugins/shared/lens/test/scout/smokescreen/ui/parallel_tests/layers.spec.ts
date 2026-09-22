@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { addDataLayer, createLogstashLensEditorSuiteSetup, spaceTest } from '../fixtures';
 
 // Chart switcher list is virtualized; always pass an explicit `search` so the target row is rendered.
 
-spaceTest.describe('Lens layers', { tag: '@local-stateful-classic' }, () => {
+spaceTest.describe('Lens layers', { tag: tags.deploymentAgnostic }, () => {
   const suiteSetup = createLogstashLensEditorSuiteSetup();
 
   spaceTest.beforeAll(suiteSetup.beforeAll);

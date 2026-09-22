@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { createLogstashLensEditorSuiteSetup, spaceTest, testData } from '../fixtures';
 
 // Every chart switch passes an explicit `search` label: the switcher list is virtualized, and
 // its filter keeps whatever was typed last, so filtering makes the target option deterministic.
 
-spaceTest.describe('Lens chart switching from scratch', { tag: '@local-stateful-classic' }, () => {
+spaceTest.describe('Lens chart switching from scratch', { tag: tags.deploymentAgnostic }, () => {
   // These charts are built in the editor, so the suite only needs the Logstash data view
   // and an empty Lens editor per test — no saved-object fixtures.
   const suiteSetup = createLogstashLensEditorSuiteSetup();

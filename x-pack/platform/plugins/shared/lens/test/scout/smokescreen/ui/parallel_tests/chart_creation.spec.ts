@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { getImportedSavedObjectId, spaceTest, testData } from '../fixtures';
 
 const NEW_CHART_TITLE = 'A fancy lens test';
 
-spaceTest.describe('Lens chart creation', { tag: '@local-stateful-classic' }, () => {
+spaceTest.describe('Lens chart creation', { tag: tags.deploymentAgnostic }, () => {
   let xyVisId: string;
 
   spaceTest.beforeAll(async ({ scoutSpace }) => {

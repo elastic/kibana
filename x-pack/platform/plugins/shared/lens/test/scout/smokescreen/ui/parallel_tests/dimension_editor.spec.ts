@@ -6,6 +6,7 @@
  */
 
 import { NULL_PLACEHOLDER } from '@kbn/field-formats-common';
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   createLogstashLensEditorSuiteSetup,
@@ -20,7 +21,7 @@ const LONG_DIMENSION_LABEL =
 /** Three percentiles of the same field, which Lens has to collapse into one `percentiles` agg. */
 const PERCENTILE_VALUES = [90, 95.5, 99.9] as const;
 
-spaceTest.describe('Lens dimension editor', { tag: '@local-stateful-classic' }, () => {
+spaceTest.describe('Lens dimension editor', { tag: tags.deploymentAgnostic }, () => {
   const suiteSetup = createLogstashLensEditorSuiteSetup({
     loadLensArchives: true,
     skipEmptyLensOpen: true,
