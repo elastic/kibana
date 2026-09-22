@@ -10,7 +10,6 @@ import { apiTest } from '../fixtures';
 import { SCHEDULE_TAGS } from '../fixtures/constants';
 import {
   deleteAllWorkflowSchedules,
-  enableWorkflowsFeatureFlag,
   getGenerateApi,
   getMonitoringApis,
   getSimpleGenerateBody,
@@ -28,9 +27,10 @@ apiTest.describe('Workflow schedule API - RBAC', { tag: SCHEDULE_TAGS }, () => {
   let adminHeaders: Record<string, string>;
   let viewerHeaders: Record<string, string>;
   let monitorHeaders: Record<string, string>;
+  let spaceId: string;
 
-  apiTest.beforeAll(async ({ apiServices, kbnClient, samlAuth }) => {
-    await enableWorkflowsFeatureFlag({ apiServices, kbnClient });
+  apiTest.beforeAll(async ({ samlAuth, scheduleSpace }) => {
+    spaceId = scheduleSpace.id;
 
     const adminCredentials = await samlAuth.asInteractiveUser('admin');
     adminHeaders = { ...adminCredentials.cookieHeader };
@@ -65,13 +65,13 @@ apiTest.describe('Workflow schedule API - RBAC', { tag: SCHEDULE_TAGS }, () => {
   });
 
   apiTest.afterEach(async ({ discoveriesApi }) => {
-    await deleteAllWorkflowSchedules(discoveriesApi, adminHeaders);
+    await deleteAllWorkflowSchedules(discoveriesApi, adminHeaders, spaceId);
   });
 
   apiTest(
     'should return 403 when unauthorized user creates a schedule',
     async ({ discoveriesApi }) => {
-      const apis = getWorkflowSchedulesApis(discoveriesApi, viewerHeaders);
+      const apis = getWorkflowSchedulesApis(discoveriesApi, viewerHeaders, spaceId);
 
       const response = await apis.createSchedule(getSimpleWorkflowSchedule());
       const body = response.body as { error?: string; message?: string };
@@ -84,8 +84,8 @@ apiTest.describe('Workflow schedule API - RBAC', { tag: SCHEDULE_TAGS }, () => {
   apiTest(
     'should return 403 when unauthorized user updates a schedule',
     async ({ discoveriesApi }) => {
-      const adminApis = getWorkflowSchedulesApis(discoveriesApi, adminHeaders);
-      const viewerApis = getWorkflowSchedulesApis(discoveriesApi, viewerHeaders);
+      const adminApis = getWorkflowSchedulesApis(discoveriesApi, adminHeaders, spaceId);
+      const viewerApis = getWorkflowSchedulesApis(discoveriesApi, viewerHeaders, spaceId);
 
       const createResult = await adminApis.createSchedule(getSimpleWorkflowSchedule());
       expect(createResult).toHaveStatusCode(200);
@@ -114,8 +114,8 @@ apiTest.describe('Workflow schedule API - RBAC', { tag: SCHEDULE_TAGS }, () => {
   apiTest(
     'should return 403 when unauthorized user deletes a schedule',
     async ({ discoveriesApi }) => {
-      const adminApis = getWorkflowSchedulesApis(discoveriesApi, adminHeaders);
-      const viewerApis = getWorkflowSchedulesApis(discoveriesApi, viewerHeaders);
+      const adminApis = getWorkflowSchedulesApis(discoveriesApi, adminHeaders, spaceId);
+      const viewerApis = getWorkflowSchedulesApis(discoveriesApi, viewerHeaders, spaceId);
 
       const createResult = await adminApis.createSchedule(getSimpleWorkflowSchedule());
       expect(createResult).toHaveStatusCode(200);
@@ -132,8 +132,8 @@ apiTest.describe('Workflow schedule API - RBAC', { tag: SCHEDULE_TAGS }, () => {
   apiTest(
     'should return 403 when unauthorized user enables a schedule',
     async ({ discoveriesApi }) => {
-      const adminApis = getWorkflowSchedulesApis(discoveriesApi, adminHeaders);
-      const viewerApis = getWorkflowSchedulesApis(discoveriesApi, viewerHeaders);
+      const adminApis = getWorkflowSchedulesApis(discoveriesApi, adminHeaders, spaceId);
+      const viewerApis = getWorkflowSchedulesApis(discoveriesApi, viewerHeaders, spaceId);
 
       const createResult = await adminApis.createSchedule(
         getSimpleWorkflowSchedule({ enabled: false })
@@ -152,8 +152,8 @@ apiTest.describe('Workflow schedule API - RBAC', { tag: SCHEDULE_TAGS }, () => {
   apiTest(
     'should return 403 when unauthorized user disables a schedule',
     async ({ discoveriesApi }) => {
-      const adminApis = getWorkflowSchedulesApis(discoveriesApi, adminHeaders);
-      const viewerApis = getWorkflowSchedulesApis(discoveriesApi, viewerHeaders);
+      const adminApis = getWorkflowSchedulesApis(discoveriesApi, adminHeaders, spaceId);
+      const viewerApis = getWorkflowSchedulesApis(discoveriesApi, viewerHeaders, spaceId);
 
       const createResult = await adminApis.createSchedule(
         getSimpleWorkflowSchedule({ enabled: true })
@@ -177,7 +177,7 @@ apiTest.describe('Workflow schedule API - RBAC', { tag: SCHEDULE_TAGS }, () => {
   apiTest(
     'should return 403 when unauthorized user generates discoveries',
     async ({ discoveriesApi }) => {
-      const viewerApi = getGenerateApi(discoveriesApi, viewerHeaders);
+      const viewerApi = getGenerateApi(discoveriesApi, viewerHeaders, spaceId);
 
       const response = await viewerApi.generate(getSimpleGenerateBody());
       const body = response.body as { error?: string; message?: string };
@@ -196,7 +196,7 @@ apiTest.describe('Workflow schedule API - RBAC', { tag: SCHEDULE_TAGS }, () => {
   apiTest(
     'should authorize a workflows-read user to read execution tracking',
     async ({ apiClient }) => {
-      const monitorApis = getMonitoringApis(apiClient, monitorHeaders);
+      const monitorApis = getMonitoringApis(apiClient, monitorHeaders, spaceId);
 
       const { statusCode } = await monitorApis.getExecutionTracking(UNKNOWN_EXECUTION_ID);
 
@@ -205,7 +205,7 @@ apiTest.describe('Workflow schedule API - RBAC', { tag: SCHEDULE_TAGS }, () => {
   );
 
   apiTest('should authorize a workflows-read user to read pipeline data', async ({ apiClient }) => {
-    const monitorApis = getMonitoringApis(apiClient, monitorHeaders);
+    const monitorApis = getMonitoringApis(apiClient, monitorHeaders, spaceId);
 
     const { statusCode } = await monitorApis.getPipelineData(
       UNKNOWN_WORKFLOW_ID,

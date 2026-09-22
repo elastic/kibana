@@ -9,9 +9,9 @@ import { globalTeardownHook } from '@kbn/scout-security';
 import { disableWorkflowsFeatureFlag } from '../fixtures/helpers';
 
 globalTeardownHook(
-  'Revert the Attack Discovery workflows feature flag and Advanced Setting',
-  async ({ apiServices, kbnClient, log }) => {
-    log.debug('[teardown] disabling the Attack Discovery workflows surface');
-    await disableWorkflowsFeatureFlag({ apiServices, kbnClient });
+  'Revert the Attack Discovery workflows feature flag',
+  async ({ apiServices, log }) => {
+    log.debug('[teardown] disabling the Attack Discovery workflows feature flag');
+    await disableWorkflowsFeatureFlag({ apiServices });
   }
 );

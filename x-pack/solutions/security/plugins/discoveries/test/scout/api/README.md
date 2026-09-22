@@ -99,8 +99,9 @@ test/scout/api/
 | `getSimplePublicSchedule()` | Returns a minimal valid public schedule body |
 | `getWorkflowSchedulesApis()` | Wraps all 7 internal schedule routes with auth headers |
 | `getPublicSchedulesApis()` | Wraps public schedule routes with auth and version headers |
-| `enableWorkflowsFeatureFlag()` | Enables the `securitySolution.attackDiscoveryWorkflowsEnabled` feature flag and the `securitySolution:enableAttackDiscoveryWorkflows` advanced (UI) setting so the internal routes are reachable |
+| `enableWorkflowsFeatureFlag()` | Enables the process-wide `securitySolution.attackDiscoveryWorkflowsEnabled` feature flag; called once from `tests/global.setup.ts` |
 | `disableWorkflowsFeatureFlag()` | Reverts `enableWorkflowsFeatureFlag()`; called once from `tests/global.teardown.ts` |
+| `scheduleSpace` fixture | Per-worker Kibana space with the `securitySolution:enableAttackDiscoveryWorkflows` advanced setting enabled; every spec creates, lists and deletes schedules in it so cleanup never touches other suites |
 | `deleteAllWorkflowSchedules()` | Cleans up all internal schedules for test isolation |
 | `deleteAllPublicSchedules()` | Cleans up all public schedules for test isolation |
 
@@ -126,7 +127,7 @@ node scripts/playwright test --config x-pack/solutions/security/plugins/discover
 
 | Symptom | Likely cause | Fix |
 |---------|--------------|-----|
-| All specs return 404 | Feature flag or `securitySolution:enableAttackDiscoveryWorkflows` advanced setting not enabled in the Scout server | Confirm `enableWorkflowsFeatureFlag()` ran in `beforeAll` |
+| All specs return 404 | Feature flag or `securitySolution:enableAttackDiscoveryWorkflows` advanced setting not enabled in the Scout server | Confirm the `setup-*` project ran `tests/global.setup.ts` and the `scheduleSpace` fixture enabled the setting in its space |
 | `isolation.spec.ts` flaky | Cleanup didn't drain both APIs between tests | Run `deleteAllWorkflowSchedules()` AND `deleteAllPublicSchedules()` in `afterEach` |
 | Tag missing on schedule create | Internal API short-circuited before the data client applied the tag | Verify the route went through `createScheduleDataClient` with `applyTags: [ATTACK_DISCOVERY_SCHEDULE_TAG]` |
 | RBAC test passes a write that should 403 | Viewer role mis-mapped or the advanced setting is off | Check the role used by the test fixture; check the `securitySolution:securityAttackDiscoverySchedulesEnabled` setting state |

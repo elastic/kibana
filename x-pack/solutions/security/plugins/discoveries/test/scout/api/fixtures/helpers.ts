@@ -6,7 +6,7 @@
  */
 
 import { INTERNAL_API_HEADERS, PUBLIC_API_HEADERS } from '@kbn/scout-security';
-import type { ApiClientFixture, KbnClient, KibanaRole } from '@kbn/scout-security';
+import type { ApiClientFixture, KibanaRole } from '@kbn/scout-security';
 import type { DiscoveriesApi } from '@kbn/security-solution-test-api-clients/scout';
 import type { CreateAttackDiscoveryScheduleRequestBodyInput } from '@kbn/discoveries-schemas/schemas/routes/post/schedules/create_schedule_route.gen';
 import type { FindAttackDiscoverySchedulesRequestQueryInput } from '@kbn/discoveries-schemas/schemas/routes/get/schedules/find_schedules_route.gen';
@@ -15,7 +15,6 @@ import type { UpdateAttackDiscoveryScheduleRequestBodyInput } from '@kbn/discove
 import {
   ATTACK_DISCOVERY_WORKFLOWS_FEATURE_FLAG,
   COMMON_HEADERS,
-  ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING,
   MONITORING_ROUTES,
   PUBLIC_SCHEDULE_ROUTES,
 } from './constants';
@@ -31,41 +30,36 @@ export interface CoreApiSettingsFixture {
 }
 
 /**
- * Enables the AD 2.0 workflows surface so the internal API routes (`_generate`, schedules,
- * monitoring) become reachable. The routes are gated twice (see `isWorkflowsEnabledForSpace`): the
- * global `securitySolution.attackDiscoveryWorkflowsEnabled` feature flag AND the per-space
- * `securitySolution:enableAttackDiscoveryWorkflows` Advanced Setting, which defaults to `false`.
- * Without both, the routes fall through to `404 Not Found` via `assertWorkflowsEnabled`.
+ * Enables the process-wide `securitySolution.attackDiscoveryWorkflowsEnabled` feature flag so the
+ * AD 2.0 internal API routes (`_generate`, schedules, monitoring) become reachable. The routes are
+ * gated twice (see `isWorkflowsEnabledForSpace`): this flag AND the per-space
+ * `securitySolution:enableAttackDiscoveryWorkflows` Advanced Setting, which the `scheduleSpace`
+ * fixture enables in the worker's own space. Without both, the routes fall through to
+ * `404 Not Found` via `assertWorkflowsEnabled`.
  *
- * Call this in `beforeAll` before exercising any internal route.
+ * Called once from `global.setup.ts`.
  */
 export const enableWorkflowsFeatureFlag = async ({
   apiServices,
-  kbnClient,
 }: {
   apiServices: CoreApiSettingsFixture;
-  kbnClient: KbnClient;
 }): Promise<void> => {
   await apiServices.core.settings({
     'feature_flags.overrides': {
       [ATTACK_DISCOVERY_WORKFLOWS_FEATURE_FLAG]: true,
     },
   });
-  await kbnClient.uiSettings.update({ [ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING]: true });
 };
 
 /**
- * Reverts `enableWorkflowsFeatureFlag`. The feature flag override is process-wide and the Advanced
- * Setting is persisted in the default space, so both outlive any single spec and leak into other
- * suites sharing the Kibana instance. Call it from `global.teardown.ts`, not from `afterAll`, so it
- * runs once after every spec file has finished.
+ * Reverts `enableWorkflowsFeatureFlag`. The override is process-wide, so it outlives any single spec
+ * and would leak into other suites sharing the Kibana instance. Called once from
+ * `global.teardown.ts`, after every spec file has finished.
  */
 export const disableWorkflowsFeatureFlag = async ({
   apiServices,
-  kbnClient,
 }: {
   apiServices: CoreApiSettingsFixture;
-  kbnClient: KbnClient;
 }): Promise<void> => {
   // `null` removes the key from the dynamic config overrides instead of pinning it to `false`
   await apiServices.core.settings({
@@ -73,7 +67,6 @@ export const disableWorkflowsFeatureFlag = async ({
       [ATTACK_DISCOVERY_WORKFLOWS_FEATURE_FLAG]: null,
     },
   });
-  await kbnClient.uiSettings.unset(ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING);
 };
 
 /**
@@ -165,14 +158,15 @@ export const getSimplePublicSchedule = (
 
 /**
  * Convenience wrapper around the internal schedule API routes, backed by the generated
- * `discoveriesApi` Scout client. Encapsulates auth headers for cleaner test code. Bodies stay loosely
- * typed on purpose so negative tests can send invalid payloads.
+ * `discoveriesApi` Scout client. Encapsulates auth headers and the target space for cleaner test
+ * code. Bodies stay loosely typed on purpose so negative tests can send invalid payloads.
  */
 export const getWorkflowSchedulesApis = (
   discoveriesApi: DiscoveriesApi,
-  headers: Record<string, string>
+  headers: Record<string, string>,
+  spaceId: string
 ) => {
-  const options = { headers: { ...headers, ...COMMON_HEADERS } };
+  const options = { headers: { ...headers, ...COMMON_HEADERS }, kibanaSpace: spaceId };
 
   return {
     createSchedule: (body: Record<string, unknown>) =>
@@ -228,8 +222,12 @@ export const getSimpleGenerateBody = (
  * Convenience wrapper around the internal ad-hoc generation route, backed by the generated
  * `discoveriesApi` Scout client.
  */
-export const getGenerateApi = (discoveriesApi: DiscoveriesApi, headers: Record<string, string>) => {
-  const options = { headers: { ...headers, ...COMMON_HEADERS } };
+export const getGenerateApi = (
+  discoveriesApi: DiscoveriesApi,
+  headers: Record<string, string>,
+  spaceId: string
+) => {
+  const options = { headers: { ...headers, ...COMMON_HEADERS }, kibanaSpace: spaceId };
 
   return {
     generate: (body: Record<string, unknown>) =>
@@ -244,18 +242,22 @@ export const getGenerateApi = (discoveriesApi: DiscoveriesApi, headers: Record<s
  * execute), so a workflows-read caller can monitor executions without being
  * able to trigger them.
  */
-export const getMonitoringApis = (apiClient: ApiClientFixture, headers: Record<string, string>) => {
+export const getMonitoringApis = (
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>,
+  spaceId: string
+) => {
   const defaultHeaders = { ...headers, ...COMMON_HEADERS, ...INTERNAL_API_HEADERS };
 
   return {
     getExecutionTracking: (executionId: string) =>
-      apiClient.get(MONITORING_ROUTES.EXECUTION_TRACKING(executionId), {
+      apiClient.get(`s/${spaceId}/${MONITORING_ROUTES.EXECUTION_TRACKING(executionId)}`, {
         headers: defaultHeaders,
         responseType: 'json',
       }),
 
     getPipelineData: (workflowId: string, executionId: string) =>
-      apiClient.get(MONITORING_ROUTES.PIPELINE_DATA(workflowId, executionId), {
+      apiClient.get(`s/${spaceId}/${MONITORING_ROUTES.PIPELINE_DATA(workflowId, executionId)}`, {
         headers: defaultHeaders,
         responseType: 'json',
       }),
@@ -310,14 +312,15 @@ export const getPublicSchedulesApis = (
 };
 
 /**
- * Deletes all workflow schedules created during test runs.
- * Call this in afterAll/afterEach for test isolation.
+ * Deletes every workflow schedule in the given space. Only ever pointed at the worker's own
+ * `scheduleSpace`, so it cannot touch schedules owned by other suites. Call this in `afterEach`.
  */
 export const deleteAllWorkflowSchedules = async (
   discoveriesApi: DiscoveriesApi,
-  headers: Record<string, string>
+  headers: Record<string, string>,
+  spaceId: string
 ): Promise<void> => {
-  const apis = getWorkflowSchedulesApis(discoveriesApi, headers);
+  const apis = getWorkflowSchedulesApis(discoveriesApi, headers, spaceId);
   const findResult = await apis.findSchedules({ per_page: 100 });
   const schedules = findResult.body.data ?? [];
 

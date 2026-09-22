@@ -10,7 +10,6 @@ import { apiTest } from '../fixtures';
 import { SCHEDULE_TAGS } from '../fixtures/constants';
 import {
   deleteAllWorkflowSchedules,
-  enableWorkflowsFeatureFlag,
   getScheduleAdminRoleDescriptor,
   getSimpleWorkflowSchedule,
   getWorkflowSchedulesApis,
@@ -18,20 +17,21 @@ import {
 
 apiTest.describe('Workflow schedule API - delete', { tag: SCHEDULE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
+  let spaceId: string;
 
-  apiTest.beforeAll(async ({ apiServices, kbnClient, samlAuth }) => {
-    await enableWorkflowsFeatureFlag({ apiServices, kbnClient });
+  apiTest.beforeAll(async ({ samlAuth, scheduleSpace }) => {
+    spaceId = scheduleSpace.id;
 
     const credentials = await samlAuth.asInteractiveUser(getScheduleAdminRoleDescriptor());
     defaultHeaders = { ...credentials.cookieHeader };
   });
 
   apiTest.afterEach(async ({ discoveriesApi }) => {
-    await deleteAllWorkflowSchedules(discoveriesApi, defaultHeaders);
+    await deleteAllWorkflowSchedules(discoveriesApi, defaultHeaders, spaceId);
   });
 
   apiTest('should delete a schedule', async ({ discoveriesApi }) => {
-    const apis = getWorkflowSchedulesApis(discoveriesApi, defaultHeaders);
+    const apis = getWorkflowSchedulesApis(discoveriesApi, defaultHeaders, spaceId);
 
     const createResult = await apis.createSchedule(getSimpleWorkflowSchedule());
     expect(createResult).toHaveStatusCode(200);
@@ -47,7 +47,7 @@ apiTest.describe('Workflow schedule API - delete', { tag: SCHEDULE_TAGS }, () =>
   });
 
   apiTest('should return 404 when deleting non-existent schedule', async ({ discoveriesApi }) => {
-    const apis = getWorkflowSchedulesApis(discoveriesApi, defaultHeaders);
+    const apis = getWorkflowSchedulesApis(discoveriesApi, defaultHeaders, spaceId);
 
     const response = await apis.deleteSchedule('non-existent-id-12345');
     const body = response.body as { message?: string };
