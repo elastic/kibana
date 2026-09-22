@@ -8,11 +8,14 @@
 import type { Logger } from '@kbn/core/server';
 import type { InferenceClient } from '@kbn/inference-common';
 import {
+  CORTEX_EDIT_ACTIONS,
   CORTEX_ENTITY_TYPES,
+  type CortexEditAction,
   type CortexEntityType,
   type CortexPageStatus,
   type CortexPageSummary,
 } from '../../common/cortex';
+import type { AppliedCortexEdit, CortexTelemetry } from '../telemetry';
 import type { CortexPageStore } from './page_store';
 import { canonicalizeSlug, slugFromCortexId, toCortexKiId } from './page_store';
 
@@ -20,7 +23,7 @@ const MAX_TRANSCRIPT_CHARS = 12_000;
 const MAX_PROPOSALS = 8;
 
 export interface CortexEditProposal {
-  action: 'upsert' | 'corroborate' | 'archive';
+  action: CortexEditAction;
   entity_type: CortexEntityType;
   slug: string;
   title: string;
@@ -37,8 +40,8 @@ export type ProposeCortexEdits = (input: {
 const isEntityType = (value: unknown): value is CortexEntityType =>
   typeof value === 'string' && (CORTEX_ENTITY_TYPES as readonly string[]).includes(value);
 
-const isAction = (value: unknown): value is CortexEditProposal['action'] =>
-  value === 'upsert' || value === 'corroborate' || value === 'archive';
+const isAction = (value: unknown): value is CortexEditAction =>
+  typeof value === 'string' && (CORTEX_EDIT_ACTIONS as readonly string[]).includes(value);
 
 const normalizeSlug = (value: string): string =>
   value
@@ -149,7 +152,7 @@ Rules:
             items: {
               type: 'object',
               properties: {
-                action: { type: 'string', enum: ['upsert', 'corroborate', 'archive'] },
+                action: { type: 'string', enum: [...CORTEX_EDIT_ACTIONS] },
                 entity_type: { type: 'string', enum: [...CORTEX_ENTITY_TYPES] },
                 slug: { type: 'string' },
                 title: { type: 'string' },
@@ -178,19 +181,23 @@ Rules:
 export const applyCortexEdits = async ({
   store,
   edits,
+  telemetry,
   logger,
 }: {
   store: CortexPageStore;
   edits: CortexEditProposal[];
+  telemetry: CortexTelemetry;
   logger: Logger;
 }): Promise<void> => {
   const { pages } = await store.list();
+  const applied: AppliedCortexEdit[] = [];
   for (const edit of edits) {
     const slug = resolveSlug(edit, pages);
     const id = toCortexKiId(edit.entity_type, slug);
     if (edit.action === 'corroborate') {
       const updated = await store.corroborate(id);
       if (updated) {
+        applied.push({ action: 'corroborate', entityType: edit.entity_type });
         logger.info(`Corroborated Cortex page ${id}`);
       }
       continue;
@@ -199,6 +206,7 @@ export const applyCortexEdits = async ({
     if (edit.action === 'archive') {
       const updated = await store.archive(id);
       if (updated) {
+        applied.push({ action: 'archive', entityType: edit.entity_type });
         logger.info(`Archived Cortex page ${id}`);
       }
       continue;
@@ -219,8 +227,11 @@ export const applyCortexEdits = async ({
           : edit.status ?? existing?.status ?? 'tentative',
       corroborations: existing?.corroborations,
     });
+    applied.push({ action: 'upsert', entityType: edit.entity_type });
     logger.info(`Upserted Cortex page ${id}`);
   }
+
+  telemetry.reportEditsApplied(applied);
 };
 
 export const optimizeCortex = async ({
@@ -228,12 +239,14 @@ export const optimizeCortex = async ({
   proposeEdits,
   userMessage,
   assistantMessage,
+  telemetry,
   logger,
 }: {
   store: CortexPageStore;
   proposeEdits: ProposeCortexEdits;
   userMessage: string;
   assistantMessage: string;
+  telemetry: CortexTelemetry;
   logger: Logger;
 }): Promise<void> => {
   await store.pruneDuplicates();
@@ -252,5 +265,5 @@ export const optimizeCortex = async ({
     return;
   }
 
-  await applyCortexEdits({ store, edits, logger });
+  await applyCortexEdits({ store, edits, telemetry, logger });
 };

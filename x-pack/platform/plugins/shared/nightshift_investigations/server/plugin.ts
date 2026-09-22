@@ -32,6 +32,7 @@ import { triggerInvestigationStepDefinition } from './step_definitions/trigger_i
 import { cortexHydrateStepDefinition } from './step_definitions/cortex_hydrate';
 import { cortexOptimizeStepDefinition } from './step_definitions/cortex_optimize';
 import { createCortexStore, registerCortexAiIndex } from './cortex/register_cortex';
+import { registerCortexTelemetryEvents } from './telemetry';
 import { createTriggerEmitter, type TriggerEmitter } from './workflows/triggers/emit';
 import { registerInvestigationsWorkflowTriggers } from './workflows/triggers/register_triggers';
 import { registerInvestigationAgentType } from './agents/investigation';
@@ -100,6 +101,7 @@ export class NightshiftInvestigationsPlugin
     this.cortexEnabled = this.ctx.config.get().cortex.enabled;
     if (this.cortexEnabled) {
       registerCortexAiIndex(plugins.contextEngine, this.logger.get('cortex'));
+      registerCortexTelemetryEvents(core.analytics);
     }
 
     core.savedObjects.registerType(nightshiftInvestigationSavedObjectType);
@@ -199,6 +201,7 @@ export class NightshiftInvestigationsPlugin
           plugins.workflowsExtensions.registerStepDefinition(
             cortexHydrateStepDefinition({
               getSandboxStart: () => this.sandboxStart,
+              analytics: core.analytics,
               logger: this.logger.get('cortex'),
             })
           );
@@ -206,6 +209,7 @@ export class NightshiftInvestigationsPlugin
             cortexOptimizeStepDefinition({
               getInference: () => this.inference,
               getSearchInferenceEndpoints: () => this.searchInferenceEndpoints,
+              analytics: core.analytics,
               logger: this.logger.get('cortex'),
             })
           );

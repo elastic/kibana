@@ -6,6 +6,7 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
+import { coreMock } from '@kbn/core/server/mocks';
 import type { SandboxPluginStart, SandboxSession } from '@kbn/sandbox-plugin/server';
 import { hydrateCortexWorkspace } from '../cortex/register_cortex';
 import { cortexHydrateStepDefinition } from './cortex_hydrate';
@@ -18,6 +19,7 @@ describe('cortexHydrateStepDefinition', () => {
   const esClient = { search: jest.fn() };
   const getScopedEsClient = jest.fn().mockReturnValue(esClient);
   const mockSession = { writeFiles: jest.fn(), mkdirs: jest.fn() } as unknown as SandboxSession;
+  const analytics = coreMock.createSetup().analytics;
 
   const makeSandboxStart = (): SandboxPluginStart => ({
     getSession: jest.fn(),
@@ -50,6 +52,7 @@ describe('cortexHydrateStepDefinition', () => {
     const sandboxStart = makeSandboxStart();
     const definition = cortexHydrateStepDefinition({
       getSandboxStart: () => sandboxStart,
+      analytics,
       logger: loggerMock.create(),
     });
 
@@ -61,6 +64,8 @@ describe('cortexHydrateStepDefinition', () => {
       esClient,
       spaceId: 'default',
       signal: expect.any(AbortSignal),
+      analytics,
+      conversationId: 'conv-1',
       logger: expect.anything(),
     });
     expect(result).toEqual({ output: { conversation_id: 'conv-1' } });
@@ -72,6 +77,7 @@ describe('cortexHydrateStepDefinition', () => {
     const sandboxStart = makeSandboxStart();
     const definition = cortexHydrateStepDefinition({
       getSandboxStart: () => sandboxStart,
+      analytics,
       logger: loggerMock.create(),
     });
 
@@ -87,6 +93,7 @@ describe('cortexHydrateStepDefinition', () => {
   it('throws when the sandbox is not configured', async () => {
     const definition = cortexHydrateStepDefinition({
       getSandboxStart: () => undefined,
+      analytics,
       logger: loggerMock.create(),
     });
 
