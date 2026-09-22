@@ -15,7 +15,7 @@ import type { TimeRange } from '@kbn/es-query';
 import type { RefreshInterval } from '@kbn/data-service-server';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { areRefreshIntervalsDifferent, areTimeRangesDifferent } from './lib/diff_time_picker_vals';
-import type { TimefilterConfig, InputTimeRange, TimeRangeBounds } from './types';
+import type { TimefilterConfig, SetTimeInput, TimeRangeBounds } from './types';
 import type { NowProviderInternalContract } from '../../now_provider';
 import { calculateBounds, getAbsoluteTimeRange, getTime, getRelativeTime } from '../../../common';
 import type { TimeHistoryContract } from './time_history';
@@ -139,13 +139,13 @@ export class Timefilter {
    * @property {string|moment} time.from
    * @property {string|moment} time.to
    */
-  public setTime = (time: Partial<InputTimeRange>) => {
+  public setTime = (time: SetTimeInput) => {
     const current = this.getTime();
-    const mode = 'mode' in time ? time.mode : undefined;
+    const nextMode = 'mode' in time ? time.mode : current.mode;
     const newTime: TimeRange = {
       from: moment.isMoment(time.from) ? time.from.toISOString() : time.from ?? current.from,
       to: moment.isMoment(time.to) ? time.to.toISOString() : time.to ?? current.to,
-      ...(mode !== undefined ? { mode } : current.mode ? { mode: current.mode } : {}),
+      ...(nextMode !== undefined ? { mode: nextMode } : {}),
     };
     if (areTimeRangesDifferent(current, newTime)) {
       this._time = newTime;
