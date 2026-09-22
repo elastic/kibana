@@ -51,7 +51,7 @@ test.describe(
       });
     });
 
-    test('loads the default tab and links back to Nightshift', async ({ page }) => {
+    test('loads and redirects / to /streams tab by default', async ({ page }) => {
       await page.gotoApp('significant_events');
       await expect(page).toHaveURL(/\/app\/significant_events\/streams/, { timeout: 60_000 });
 
@@ -61,16 +61,9 @@ test.describe(
       await expect(page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title)).toHaveText(
         'Nightshift Management'
       );
-
-      const nightshiftBackLink = page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.back);
-      await expect(nightshiftBackLink).toBeVisible();
-      await nightshiftBackLink.click();
-
-      await expect(page).toHaveURL(/\/app\/nightshift/);
-      await expect(page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title)).toHaveText('Nightshift');
     });
 
-    test('renders navigation tabs and links to Settings', async ({ page }) => {
+    test('renders navigation tabs and links to Settings', async ({ page, pageObjects }) => {
       await page.gotoApp('significant_events/streams');
       const tabBar = page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.tabs);
       await expect(tabBar).toBeVisible({ timeout: 60_000 });
@@ -85,9 +78,7 @@ test.describe(
         await expect(tabBar.getByRole('tab', { name: label })).toBeVisible();
       }
 
-      const settingsLink = page.testSubj.locator('significantEventsSettingsLink');
-      await expect(settingsLink).toBeVisible();
-      await settingsLink.click();
+      await pageObjects.appMenu.clickItem('significantEventsSettingsLink');
 
       await expect(page).toHaveURL(/\/app\/significant_events\/settings/);
       await expect(page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title)).toHaveText('Settings');

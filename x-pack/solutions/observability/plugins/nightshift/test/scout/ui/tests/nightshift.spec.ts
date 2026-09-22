@@ -52,21 +52,13 @@ test.describe(
       });
     });
 
-    test('links to Significant Events management and settings', async ({ page }) => {
+    test('links to Settings', async ({ page, pageObjects }) => {
       await page.gotoApp('nightshift');
       await expect(page.testSubj.locator('nightshiftPage')).toBeVisible({ timeout: 60_000 });
       await expect(page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.root)).toHaveCount(1);
       await expect(page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title)).toHaveText('Nightshift');
 
-      const managementLink = page.testSubj.locator('nightshiftManagementLink');
-      await expect(managementLink).toBeVisible();
-      await managementLink.click();
-      await expect(page).toHaveURL(/\/app\/significant_events\/streams/);
-
-      await page.gotoApp('nightshift');
-      const settingsLink = page.testSubj.locator('nightshiftSettingsLink');
-      await expect(settingsLink).toBeVisible();
-      await settingsLink.click();
+      await pageObjects.appMenu.clickItem('nightshiftSettingsLink');
       await expect(page).toHaveURL(/\/app\/significant_events\/settings/);
     });
   }
