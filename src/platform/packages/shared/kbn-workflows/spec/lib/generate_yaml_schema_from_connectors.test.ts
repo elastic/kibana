@@ -337,6 +337,38 @@ describe('generateYamlSchemaFromConnectors', () => {
       expect(omitted.data).toMatchObject({ steps: [{ with: { tags: [] } }] });
     });
 
+    it('preserves factory-backed defaults across repeated parses', () => {
+      // Zod v4 evaluates `def.defaultValue` on every read. Capturing that value once while
+      // rebuilding the field would freeze a single factory result into every subsequent parse.
+      let callCount = 0;
+      const connector: ConnectorContractUnion = {
+        summary: 'FactoryDef',
+        description: null,
+        type: 'factory.def.step',
+        paramsSchema: z.object({
+          tags: z.array(z.string()).default(() => {
+            callCount += 1;
+            return [`tag-${callCount}`];
+          }),
+          query: z.string(),
+        }),
+        outputSchema: z.unknown(),
+      };
+      const schema = generateYamlSchemaFromConnectors([connector]);
+      const parseOmitted = () =>
+        schema.safeParse({
+          ...BASE_WORKFLOW,
+          steps: [{ name: 's', type: 'factory.def.step', with: { query: 'q' } }],
+        });
+
+      const first = parseOmitted();
+      const second = parseOmitted();
+      expect(first.success).toBe(true);
+      expect(second.success).toBe(true);
+      expect(first.data).toMatchObject({ steps: [{ with: { tags: ['tag-1'] } }] });
+      expect(second.data).toMatchObject({ steps: [{ with: { tags: ['tag-2'] } }] });
+    });
+
     describe.each([
       ['.optional().default()', () => z.array(z.string()).optional().default(['fallback'])],
       ['.default().optional()', () => z.array(z.string()).default(['fallback']).optional()],

@@ -180,8 +180,13 @@ const LIQUID_TEMPLATE_SCHEMA = z
   .regex(WHOLE_VALUE_TEMPLATE_EXPRESSION_REGEX)
   .max(TEMPLATE_EXPRESSION_MAX_LENGTH);
 
-/** A `.optional()` / `.default()` layer stripped off a params field so it can be replayed verbatim. */
-type FieldWrapper = { kind: 'optional' } | { kind: 'default'; value: unknown };
+/**
+ * A `.optional()` / `.default()` layer stripped off a params field so it can be replayed verbatim.
+ * Defaults keep a getter rather than a captured value: in Zod v4, `def.defaultValue` evaluates a
+ * factory (or shallow-clones a static value) on every read, so reading it once at unwrap time would
+ * freeze that result into every subsequent parse.
+ */
+type FieldWrapper = { kind: 'optional' } | { kind: 'default'; getValue: () => unknown };
 
 /**
  * Strips the `.optional()` / `.default()` layers off a params field, returning the wrapped type
@@ -191,11 +196,12 @@ function unwrapFieldWrappers(field: z.ZodType): { inner: z.ZodType; wrappers: Fi
   const wrappers: FieldWrapper[] = [];
   let inner = field;
   while (inner instanceof z.ZodOptional || inner instanceof z.ZodDefault) {
-    wrappers.push(
-      inner instanceof z.ZodOptional
-        ? { kind: 'optional' }
-        : { kind: 'default', value: inner.def.defaultValue }
-    );
+    if (inner instanceof z.ZodOptional) {
+      wrappers.push({ kind: 'optional' });
+    } else {
+      const zodDefault = inner;
+      wrappers.push({ kind: 'default', getValue: () => zodDefault.def.defaultValue });
+    }
     inner = inner.unwrap() as z.ZodType;
   }
   return { inner, wrappers };
@@ -208,8 +214,10 @@ function unwrapFieldWrappers(field: z.ZodType): { inner: z.ZodType; wrappers: Fi
  */
 function rewrapField(field: z.ZodType, wrappers: FieldWrapper[]): z.ZodType {
   // `wrappers` is outermost-first, so replay it back-to-front to end up with the same stack.
+  // Pass `getValue` itself into `.default()` so Zod invokes the original supplier per parse.
   return wrappers.reduceRight<z.ZodType>(
-    (acc, wrapper) => (wrapper.kind === 'optional' ? acc.optional() : acc.default(wrapper.value)),
+    (acc, wrapper) =>
+      wrapper.kind === 'optional' ? acc.optional() : acc.default(wrapper.getValue),
     field
   );
 }
