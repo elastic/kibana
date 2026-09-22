@@ -142,9 +142,9 @@ export class ListingTableService extends FtrService {
   }
 
   public async waitUntilTableIsLoaded() {
-    if (await this.find.existsByCssSelector(TABLE_LOADING_SELECTOR, 1000)) {
+    if (await this.find.existsByCssSelector(TABLE_LOADING_SELECTOR, 0)) {
       await this.retry.try(async () => {
-        if (await this.find.existsByCssSelector(TABLE_LOADING_SELECTOR, 100)) {
+        if (await this.find.existsByCssSelector(TABLE_LOADING_SELECTOR, 0)) {
           throw new Error('Waiting for table loading to finish');
         }
       });

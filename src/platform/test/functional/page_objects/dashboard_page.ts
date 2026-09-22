@@ -694,8 +694,8 @@ export class DashboardPageObject extends FtrService {
     dashboardTitle: string,
     saveOptions: Omit<SaveDashboardOptions, 'saveAsNew'> = { waitDialogIsClosed: true }
   ) {
-    const isSaveModalOpen = await this.testSubjects.waitForExists('savedObjectSaveModal', {
-      timeout: 2000,
+    const isSaveModalOpen = await this.testSubjects.exists('savedObjectSaveModal', {
+      timeout: 0,
     });
 
     if (!isSaveModalOpen) {

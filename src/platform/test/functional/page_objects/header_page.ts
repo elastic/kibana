@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { FtrService } from '../ftr_provider_context';
 
-const LOADING_INDICATOR_STABILITY_MS = 300;
+const LOADING_INDICATOR_APPEARANCE_TIMEOUT_MS = 300;
 
 export class HeaderPageObject extends FtrService {
   private readonly config = this.ctx.getService('config');
@@ -66,18 +65,18 @@ export class HeaderPageObject extends FtrService {
   }
 
   public async awaitGlobalLoadingIndicatorHidden() {
-    await this.retry.tryForTime(this.defaultFindTimeout * 10, async () => {
-      await this.testSubjects.existOrFail('globalLoadingIndicator-hidden', {
-        allowHidden: true,
-        timeout: this.defaultFindTimeout * 10,
-      });
+    // The loading indicator is debounced by 250ms. Give an in-flight request one complete
+    // debounce window to make it visible, but do not delay after a visible load has completed.
+    const loadingIndicatorAppeared = await this.testSubjects.exists('globalLoadingIndicator', {
+      timeout: LOADING_INDICATOR_APPEARANCE_TIMEOUT_MS,
+    });
+    if (!loadingIndicatorAppeared) {
+      return;
+    }
 
-      // The loading indicator is debounced by 250ms. Require it to remain hidden for one
-      // complete debounce window so we do not return just before an in-flight request appears.
-      await setTimeoutAsync(LOADING_INDICATOR_STABILITY_MS);
-      if (await this.testSubjects.exists('globalLoadingIndicator', { timeout: 0 })) {
-        throw new Error('Global loading indicator became visible');
-      }
+    await this.testSubjects.existOrFail('globalLoadingIndicator-hidden', {
+      allowHidden: true,
+      timeout: this.defaultFindTimeout * 10,
     });
   }
 
