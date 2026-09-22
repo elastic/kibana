@@ -43,6 +43,7 @@ describe('createSignificantSecurityEventAttachmentDefinition', () => {
       subtitle: 'From ti-report-1 · lateral-movement-detector',
       badges: [
         { label: 'Hunt finding', color: 'primary' },
+        { label: 'high', color: 'danger' },
         { label: 'open', color: 'hollow' },
         { label: '80%', color: 'hollow' },
       ],

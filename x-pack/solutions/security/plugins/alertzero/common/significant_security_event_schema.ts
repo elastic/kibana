@@ -134,15 +134,43 @@ const huntResultTier2Schema = z.object({
   behaviors: z.array(huntResultTier2BehaviorSchema).max(20),
 });
 
-export const huntResultSchema = z.object({
-  has_confirmed_hit: z.boolean(),
-  time_range: z.object({
-    from: z.string().datetime(),
-    to: z.string().datetime(),
-  }),
-  tier1: huntResultTier1Schema,
-  tier2: huntResultTier2Schema.optional(),
-});
+export const huntResultSchema = z
+  .object({
+    has_confirmed_hit: z.boolean(),
+    time_range: z.object({
+      from: z.string().datetime(),
+      to: z.string().datetime(),
+    }),
+    tier1: huntResultTier1Schema,
+    tier2: huntResultTier2Schema.optional(),
+  })
+  // The Tier 1 status names its own outcome, so a status that says nothing was found while
+  // the counts say otherwise is a producer bug. The renderer would show both the status and
+  // the contradicting counts, and the agent formatter would repeat it.
+  .refine(
+    (result) =>
+      result.tier1.status === 'environment_hits_found' || result.tier1.counts.total_hits === 0,
+    {
+      message: 'tier1.status reports no hits but tier1.counts.total_hits is nonzero',
+      path: ['tier1', 'status'],
+    }
+  )
+  .refine(
+    (result) =>
+      result.tier1.status !== 'environment_hits_found' || result.tier1.counts.total_hits > 0,
+    {
+      message: 'tier1.status is environment_hits_found but tier1.counts.total_hits is zero',
+      path: ['tier1', 'status'],
+    }
+  )
+  // A hunt that found no searchable terms or no hits cannot also have confirmed one.
+  .refine(
+    (result) => !result.has_confirmed_hit || result.tier1.status === 'environment_hits_found',
+    {
+      message: 'has_confirmed_hit is true but tier1 found no environment hits',
+      path: ['has_confirmed_hit'],
+    }
+  );
 
 /** Cap serialized actionInput so arbitrary JSON values cannot grow without limit. */
 const ACTION_INPUT_MAX_SERIALIZED_BYTES = 32_768;

@@ -145,6 +145,8 @@ describe('significantSecurityEventAttachmentDataSchema', () => {
       'remote:logs-default',
       '-logs-default',
       'logs default',
+      '.ds-.alerts-security.alerts-default',
+      '.ds-',
     ];
 
     for (const sourceIndex of rejected) {
@@ -160,6 +162,54 @@ describe('significantSecurityEventAttachmentDataSchema', () => {
       events: [{ event_id: 'evt-1', source_index: 'logs-endpoint.events.process-default' }],
     });
     expect(allowed.success).toBe(true);
+
+    // A hit against a data stream reports its concrete backing index in `_index`, and the
+    // contract says `source_index` carries that concrete source, so `.ds-` must pass even
+    // though it starts with a dot.
+    const dataStreamBacking = significantSecurityEventAttachmentDataSchema.safeParse({
+      ...validPayload,
+      events: [
+        {
+          event_id: 'evt-1',
+          source_index: '.ds-logs-endpoint.events.process-default-2026.09.22-000001',
+        },
+      ],
+    });
+    expect(dataStreamBacking.success).toBe(true);
+  });
+
+  it('rejects hunt results whose status contradicts its counts', () => {
+    // Each Tier 1 status names its own outcome, so a status that says nothing was found
+    // alongside nonzero counts (or the reverse) renders as two contradicting claims.
+    const contradictions = [
+      { status: 'no_environment_hits' as const, total: 4, confirmed: false },
+      { status: 'no_searchable_terms' as const, total: 4, confirmed: false },
+      { status: 'environment_hits_found' as const, total: 0, confirmed: false },
+      // Confirmed a hit while Tier 1 reports it could not search anything.
+      { status: 'no_searchable_terms' as const, total: 0, confirmed: true },
+    ];
+
+    for (const { status, total, confirmed } of contradictions) {
+      const result = significantSecurityEventAttachmentDataSchema.safeParse({
+        ...validPayload,
+        hunt_result: {
+          has_confirmed_hit: confirmed,
+          time_range: { from: '2026-01-01T00:00:00Z', to: '2026-01-02T00:00:00Z' },
+          tier1: {
+            status,
+            counts: {
+              total_hits: total,
+              returned_hits: total,
+              affected_hosts: 0,
+              affected_users: 0,
+            },
+            per_index: [],
+            resolved_iocs: [],
+          },
+        },
+      });
+      expect([status, total, confirmed, result.success]).toEqual([status, total, confirmed, false]);
+    }
   });
 
   it('rejects a hunt result whose returned hits exceed its total hits', () => {

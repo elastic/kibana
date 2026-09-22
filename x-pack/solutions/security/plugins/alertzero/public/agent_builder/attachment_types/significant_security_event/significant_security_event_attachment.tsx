@@ -9,7 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { AttachmentUIDefinition, HeaderBadge } from '@kbn/agent-builder-browser/attachments';
 import type { AttachmentNavigationDeps } from '../navigation';
-import { formatPercent } from '../shared/severity';
+import { formatPercent, severityBadgeColor } from '../shared/severity';
 import { joinSubtitle, lazyInlineContent } from '../shared/attachment_definition_helpers';
 import {
   buildSignificantSecurityEventActionButtons,
@@ -114,6 +114,11 @@ export const createSignificantSecurityEventAttachmentDefinition = ({
       : joinSubtitle(data?.source_watch, data?.capability);
 
     const badges: HeaderBadge[] = [{ label: HUNT_FINDING_BADGE_LABEL, color: 'primary' }];
+    // Severity is required, and inline content only renders its headline when this header is
+    // absent, so leaving severity out here hides it on every actionable SSE.
+    if (parsed?.severity) {
+      badges.push({ label: parsed.severity, color: severityBadgeColor(parsed.severity) });
+    }
     if (parsed?.status) {
       badges.push({ label: parsed.status, color: 'hollow' });
     }

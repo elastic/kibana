@@ -629,7 +629,19 @@ describe('SignificantSecurityEventInlineContent', () => {
             hunt_result: {
               ...huntResult,
               has_confirmed_hit: false,
-              tier1: { ...huntResult.tier1, status: 'no_searchable_terms' as const },
+              tier1: {
+                ...huntResult.tier1,
+                status: 'no_searchable_terms' as const,
+                // The schema now ties status to counts, so a hunt that found nothing must
+                // carry zero counts to be a valid payload.
+                counts: {
+                  ...huntResult.tier1.counts,
+                  total_hits: 0,
+                  returned_hits: 0,
+                  affected_hosts: 0,
+                  affected_users: 0,
+                },
+              },
             },
           })
         )}
