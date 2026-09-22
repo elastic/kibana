@@ -15,7 +15,7 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
  * alternatives (`'bar'` or `['bar', 'bar_horizontal']`).
  */
 export type GoldPartial<T> = T extends ReadonlyArray<infer U>
-  ? Array<GoldPartial<U>>
+  ? ReadonlyArray<GoldPartial<U>>
   : T extends object
   ? {
       [K in keyof T]?: K extends 'type' ? GoldTypeAlternatives<T[K]> : GoldPartial<T[K]>;
