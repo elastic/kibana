@@ -5,7 +5,16 @@
  * 2.0.
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  QueryDslQueryContainer,
+  Sort,
+  SortResults,
+} from '@elastic/elasticsearch/lib/api/types';
+import {
+  EXPERIMENT_EXAMPLES_PAGE_SIZE,
+  MAX_EXAMPLES_PER_DATASET,
+  MAX_SCORES_PER_QUERY,
+} from '../constants';
 import { DEFAULT_SPACE_ID } from './spaces';
 
 // ---------------------------------------------------------------------------
@@ -15,6 +24,11 @@ import { DEFAULT_SPACE_ID } from './spaces';
 interface ExperimentFilterOptions {
   suiteId?: string;
   modelId?: string;
+  filterField?: 'experiment_id' | 'metadata.execution_id';
+  spaceId?: string;
+}
+
+interface DatasetExampleFilterOptions {
   filterField?: 'experiment_id' | 'metadata.execution_id';
   spaceId?: string;
 }
@@ -155,7 +169,7 @@ export const buildExampleScoresQuery = (
 export const buildDatasetExampleScoresQuery = (
   datasetId: string,
   experimentId: string,
-  options?: { filterField?: 'experiment_id' | 'metadata.execution_id'; spaceId?: string }
+  options?: DatasetExampleFilterOptions
 ): { bool: { must: Array<Record<string, unknown>> } } => {
   const field = options?.filterField ?? 'experiment_id';
   const must: Array<Record<string, unknown>> = [
@@ -166,6 +180,112 @@ export const buildDatasetExampleScoresQuery = (
     must.push(buildSpaceFilter(options.spaceId));
   }
   return { bool: { must } };
+};
+
+// ---------------------------------------------------------------------------
+// Paginated experiment examples
+// ---------------------------------------------------------------------------
+
+export const EXPERIMENT_EXAMPLE_PAGE_FIELDS = ['example.id', 'example.index'] as const;
+
+export const EXPERIMENT_EXAMPLE_SUMMARY_FIELDS = [
+  '@timestamp',
+  'example.id',
+  'example.index',
+  'task.repetition_index',
+  'task.trace_id',
+  'evaluator.name',
+  'evaluator.score',
+  'evaluator.label',
+  'evaluator.trace_id',
+  'evaluator.model.id',
+  'evaluator.model.family',
+  'evaluator.model.provider',
+] as const;
+
+export const EXPERIMENT_EXAMPLE_PAGE_SORT: Sort = [
+  { 'example.index': { order: 'asc' as const, missing: '_last' as const } },
+  { 'example.id': { order: 'asc' as const } },
+];
+
+export const EXPERIMENT_EXAMPLE_SUMMARY_SORT: Sort = [
+  { 'example.index': { order: 'asc' as const, missing: '_last' as const } },
+  { 'example.id': { order: 'asc' as const } },
+  { 'evaluator.name': { order: 'asc' as const } },
+  { 'task.repetition_index': { order: 'asc' as const } },
+  { _shard_doc: { order: 'asc' as const } },
+];
+
+interface DatasetExamplesPageSearch {
+  query: ReturnType<typeof buildDatasetExampleScoresQuery>;
+  from: number;
+  size: typeof EXPERIMENT_EXAMPLES_PAGE_SIZE;
+  _source: false;
+  fields: string[];
+  collapse: { field: 'example.id' };
+  sort: typeof EXPERIMENT_EXAMPLE_PAGE_SORT;
+  aggs: {
+    total_examples: {
+      cardinality: { field: 'example.id'; precision_threshold: typeof MAX_EXAMPLES_PER_DATASET };
+    };
+  };
+  track_total_hits: false;
+}
+
+/** Builds the collapsed search that resolves one fixed page of distinct examples. */
+export const buildDatasetExamplesPageSearch = (
+  datasetId: string,
+  experimentId: string,
+  page: number,
+  options?: DatasetExampleFilterOptions
+): DatasetExamplesPageSearch => ({
+  query: buildDatasetExampleScoresQuery(datasetId, experimentId, options),
+  from: (page - 1) * EXPERIMENT_EXAMPLES_PAGE_SIZE,
+  size: EXPERIMENT_EXAMPLES_PAGE_SIZE,
+  _source: false,
+  fields: [...EXPERIMENT_EXAMPLE_PAGE_FIELDS],
+  collapse: { field: 'example.id' },
+  sort: EXPERIMENT_EXAMPLE_PAGE_SORT,
+  aggs: {
+    total_examples: {
+      cardinality: {
+        field: 'example.id',
+        precision_threshold: MAX_EXAMPLES_PER_DATASET,
+      },
+    },
+  },
+  track_total_hits: false,
+});
+
+interface DatasetExampleSummariesSearch {
+  query: { bool: { must: Array<Record<string, unknown>> } };
+  size: typeof MAX_SCORES_PER_QUERY;
+  _source: false;
+  fields: string[];
+  sort: typeof EXPERIMENT_EXAMPLE_SUMMARY_SORT;
+  search_after?: SortResults;
+  track_total_hits: false;
+}
+
+/** Builds one bounded batch of compact score summaries for a resolved example page. */
+export const buildDatasetExampleSummariesSearch = (
+  datasetId: string,
+  experimentId: string,
+  exampleIds: string[],
+  options?: DatasetExampleFilterOptions & { searchAfter?: SortResults }
+): DatasetExampleSummariesSearch => {
+  const query = buildDatasetExampleScoresQuery(datasetId, experimentId, options);
+  query.bool.must.push({ terms: { 'example.id': exampleIds } });
+
+  return {
+    query,
+    size: MAX_SCORES_PER_QUERY,
+    _source: false,
+    fields: [...EXPERIMENT_EXAMPLE_SUMMARY_FIELDS],
+    sort: EXPERIMENT_EXAMPLE_SUMMARY_SORT,
+    ...(options?.searchAfter ? { search_after: options.searchAfter } : {}),
+    track_total_hits: false,
+  };
 };
 
 // ---------------------------------------------------------------------------

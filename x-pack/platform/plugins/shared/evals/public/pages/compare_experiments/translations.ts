@@ -150,6 +150,13 @@ export const FLYOUT_TABLE_CAPTION = i18n.translate(
   }
 );
 
+export const FLYOUT_PAGINATION_ARIA_LABEL = i18n.translate(
+  'xpack.evals.compareExperiments.flyout.paginationAriaLabel',
+  {
+    defaultMessage: 'Per-example comparison pages',
+  }
+);
+
 export const FLYOUT_COLUMN_EXAMPLE = i18n.translate(
   'xpack.evals.compareExperiments.flyout.columnExample',
   { defaultMessage: 'Example' }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, type MouseEvent } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent } from 'react';
 import {
   EuiAccordion,
   EuiBasicTable,
@@ -32,7 +32,7 @@ import {
 import { css } from '@emotion/css';
 import { useParams, useHistory, useLocation } from 'react-router-dom';
 import { isHttpFetchError } from '@kbn/core-http-browser';
-import type { EvaluatorStats } from '@kbn/evals-common';
+import { EXPERIMENT_EXAMPLES_PAGE_SIZE, type EvaluatorStats } from '@kbn/evals-common';
 import { TraceWaterfall, useTraceSpans } from '@kbn/llm-trace-waterfall';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import {
@@ -78,7 +78,7 @@ interface DatasetStatsAccordionProps {
   onDatasetToggle: (datasetId: string, isOpen: boolean) => void;
 }
 
-const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
+export const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
   experimentId,
   executionId,
   group,
@@ -92,15 +92,48 @@ const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
   onDatasetToggle,
 }) => {
   const history = useHistory();
+  const [page, setPage] = useState(1);
   const {
     data: datasetExamples,
     isLoading: examplesLoading,
     error: examplesError,
     refetch: refetchExamples,
   } = useExperimentDatasetExamples(experimentId, isOpen ? group.datasetId : '', executionId, {
+    page,
     refetchInterval: isRunning ? RUN_POLL_INTERVAL_MS : false,
     staleTime: isRunning ? 0 : undefined,
   });
+  const { data: datasetExamplePreviews } = useExperimentDatasetExamples(
+    experimentId,
+    isOpen ? group.datasetId : '',
+    executionId,
+    { page, includePreviews: true }
+  );
+
+  const examplesWithPreviews = useMemo(() => {
+    const previewsByExampleId = new Map(
+      (datasetExamplePreviews?.examples ?? []).map(({ example_id: exampleId, preview }) => [
+        exampleId,
+        preview,
+      ])
+    );
+    return (datasetExamples?.examples ?? []).map((example) => {
+      const preview = previewsByExampleId.get(example.example_id);
+      return preview ? { ...example, preview } : example;
+    });
+  }, [datasetExamplePreviews?.examples, datasetExamples?.examples]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [experimentId, group.datasetId]);
+
+  const wasOpenForPaginationRef = useRef(isOpen);
+  useEffect(() => {
+    if (!wasOpenForPaginationRef.current && isOpen) {
+      setPage(1);
+    }
+    wasOpenForPaginationRef.current = isOpen;
+  }, [isOpen]);
 
   // When the run settles and polling stops, pull the final example set once in case the last poll
   // fired just before the last example's scores were indexed.
@@ -165,8 +198,15 @@ const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
           <EuiLoadingSpinner size="m" />
         ) : (
           <ExampleScoresTable
-            examples={datasetExamples?.examples ?? []}
+            experimentId={experimentId}
+            datasetId={group.datasetId}
+            executionId={executionId}
+            examples={examplesWithPreviews}
+            page={datasetExamples?.page ?? page}
+            perPage={datasetExamples?.per_page ?? EXPERIMENT_EXAMPLES_PAGE_SIZE}
+            total={datasetExamples?.total ?? 0}
             selectedExampleId={selectedExampleId}
+            onPageChange={setPage}
             onTraceClick={onTraceClick}
           />
         )}

@@ -20,6 +20,7 @@ import {
   EuiLink,
   EuiLoadingSpinner,
   EuiPageSection,
+  EuiPagination,
   EuiPanel,
   EuiSpacer,
   EuiStat,
@@ -33,7 +34,11 @@ import { css } from '@emotion/css';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import { useHistory, useLocation } from 'react-router-dom';
 import { TraceWaterfall, useTraceSpans } from '@kbn/llm-trace-waterfall';
-import type { Direction, PairedTTestResult } from '@kbn/evals-common';
+import {
+  EXPERIMENT_EXAMPLES_PAGE_SIZE,
+  type Direction,
+  type PairedTTestResult,
+} from '@kbn/evals-common';
 import {
   useCompareExperiments,
   useEvalsTraceFetcher,
@@ -261,7 +266,7 @@ const ExperimentHeader: React.FC<{
   );
 };
 
-const ExampleDrilldownFlyout: React.FC<{
+export const ExampleDrilldownFlyout: React.FC<{
   baselineExperimentId: string;
   targetExperimentId: string;
   datasetId: string;
@@ -283,6 +288,7 @@ const ExampleDrilldownFlyout: React.FC<{
   onClose,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const [page, setPage] = useState(1);
   const [selectedTraceId, setSelectedTraceId] = useState<string | null>(null);
   const fetchTrace = useEvalsTraceFetcher();
   const {
@@ -294,83 +300,84 @@ const ExampleDrilldownFlyout: React.FC<{
   const { data: baselineExamples, isLoading: loadingBaseline } = useExperimentDatasetExamples(
     baselineExperimentId,
     datasetId,
-    baselineExecutionId
+    baselineExecutionId,
+    { page }
   );
   const { data: targetExamples, isLoading: loadingTarget } = useExperimentDatasetExamples(
     targetExperimentId,
     datasetId,
-    targetExecutionId
+    targetExecutionId,
+    { page }
   );
 
   const pairs: ExampleScorePair[] = useMemo(() => {
     if (!baselineExamples?.examples || !targetExamples?.examples) return [];
 
-    interface TargetScoreEntry {
-      score: number | null | undefined;
-      traceId: string | null;
-    }
-    const targetScoresByExample = new Map<string, Map<string, TargetScoreEntry>>();
-    for (const ex of targetExamples.examples) {
-      const scoresByKey = new Map<string, TargetScoreEntry>();
-      for (const score of ex.scores) {
-        const key = `${score.evaluator.name}|${score.task.repetition_index}`;
-        scoresByKey.set(key, {
-          score: score.evaluator.score,
-          traceId: score.task.trace_id ?? null,
-        });
-      }
-      targetScoresByExample.set(ex.example_id, scoresByKey);
-    }
-
-    const result: ExampleScorePair[] = [];
-    const coveredTargetExamples = new Set<string>();
-
+    const pairsByKey = new Map<string, ExampleScorePair>();
     for (const ex of baselineExamples.examples) {
-      const targetScores = targetScoresByExample.get(ex.example_id);
       for (const score of ex.scores) {
         if (score.evaluator.name !== evaluatorName) continue;
-        coveredTargetExamples.add(ex.example_id);
-        const key = `${score.evaluator.name}|${score.task.repetition_index}`;
-        const targetEntry = targetScores?.get(key);
-        result.push({
+        const key = `${ex.example_id}|${score.task.repetition_index}`;
+        pairsByKey.set(key, {
           exampleId: ex.example_id,
           exampleIndex: ex.example_index,
           evaluatorName: score.evaluator.name,
           repetitionIndex: score.task.repetition_index,
           scoreBaseline: score.evaluator.score,
-          scoreTarget: targetEntry?.score ?? null,
+          scoreTarget: null,
           traceIdBaseline: score.task.trace_id ?? null,
-          traceIdTarget: targetEntry?.traceId ?? null,
+          traceIdTarget: null,
         });
       }
     }
 
     for (const ex of targetExamples.examples) {
-      if (coveredTargetExamples.has(ex.example_id)) continue;
       for (const score of ex.scores) {
         if (score.evaluator.name !== evaluatorName) continue;
-        result.push({
-          exampleId: ex.example_id,
-          exampleIndex: ex.example_index,
-          evaluatorName: score.evaluator.name,
-          repetitionIndex: score.task.repetition_index,
-          scoreBaseline: null,
-          scoreTarget: score.evaluator.score,
-          traceIdBaseline: null,
-          traceIdTarget: score.task.trace_id ?? null,
-        });
+        const key = `${ex.example_id}|${score.task.repetition_index}`;
+        const baselinePair = pairsByKey.get(key);
+        pairsByKey.set(
+          key,
+          baselinePair
+            ? {
+                ...baselinePair,
+                exampleIndex: baselinePair.exampleIndex ?? ex.example_index,
+                scoreTarget: score.evaluator.score,
+                traceIdTarget: score.task.trace_id ?? null,
+              }
+            : {
+                exampleId: ex.example_id,
+                exampleIndex: ex.example_index,
+                evaluatorName: score.evaluator.name,
+                repetitionIndex: score.task.repetition_index,
+                scoreBaseline: null,
+                scoreTarget: score.evaluator.score,
+                traceIdBaseline: null,
+                traceIdTarget: score.task.trace_id ?? null,
+              }
+        );
       }
     }
 
-    return result.sort((a, b) => {
+    return Array.from(pairsByKey.values()).sort((a, b) => {
       const indexDiff = (a.exampleIndex ?? 0) - (b.exampleIndex ?? 0);
       if (indexDiff !== 0) return indexDiff;
+      const idDiff = a.exampleId.localeCompare(b.exampleId);
+      if (idDiff !== 0) return idDiff;
       return a.repetitionIndex - b.repetitionIndex;
     });
   }, [baselineExamples, targetExamples, evaluatorName]);
 
   const isLoading = loadingBaseline || loadingTarget;
   const hasRepetitions = useMemo(() => pairs.some((p) => p.repetitionIndex > 0), [pairs]);
+  const pageCount = Math.max(
+    Math.ceil(
+      (baselineExamples?.total ?? 0) / (baselineExamples?.per_page ?? EXPERIMENT_EXAMPLES_PAGE_SIZE)
+    ),
+    Math.ceil(
+      (targetExamples?.total ?? 0) / (targetExamples?.per_page ?? EXPERIMENT_EXAMPLES_PAGE_SIZE)
+    )
+  );
 
   const flyoutColumns: Array<EuiBasicTableColumn<ExampleScorePair>> = useMemo(
     () => [
@@ -529,6 +536,17 @@ const ExampleDrilldownFlyout: React.FC<{
                 };
               }}
             />
+          )}
+          {pageCount > 1 && (
+            <>
+              <EuiSpacer size="m" />
+              <EuiPagination
+                aria-label={i18n.FLYOUT_PAGINATION_ARIA_LABEL}
+                pageCount={pageCount}
+                activePage={page - 1}
+                onPageClick={(pageIndex) => setPage(pageIndex + 1)}
+              />
+            </>
           )}
         </EuiFlyoutBody>
       </EuiFlyout>
@@ -981,6 +999,7 @@ export const CompareExperimentsPage: React.FC = () => {
 
       {flyoutState && (
         <ExampleDrilldownFlyout
+          key={`${baselineId}|${targetId}|${flyoutState.datasetId}|${flyoutState.evaluatorName}`}
           baselineExperimentId={baselineId}
           targetExperimentId={targetId}
           datasetId={flyoutState.datasetId}

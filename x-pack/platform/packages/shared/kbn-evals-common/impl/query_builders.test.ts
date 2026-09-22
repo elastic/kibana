@@ -9,6 +9,8 @@ import {
   buildExperimentFilterQuery,
   buildExampleScoresQuery,
   buildDatasetExampleScoresQuery,
+  buildDatasetExamplesPageSearch,
+  buildDatasetExampleSummariesSearch,
   buildSpaceFilter,
   buildStatsAggregation,
   parseStatsAggregationResponse,
@@ -117,6 +119,99 @@ describe('query_builders', () => {
       });
       expect(query.bool.must).toHaveLength(3);
       expect(query.bool.must[2]).toEqual(buildSpaceFilter('default'));
+    });
+  });
+
+  describe('buildDatasetExamplesPageSearch', () => {
+    it('uses a fixed 25-item offset and a precise bounded cardinality total', () => {
+      expect(buildDatasetExamplesPageSearch('dataset-123', 'experiment-123', 2)).toEqual({
+        query: {
+          bool: {
+            must: [
+              { term: { 'example.dataset.id': 'dataset-123' } },
+              { term: { experiment_id: 'experiment-123' } },
+            ],
+          },
+        },
+        from: 25,
+        size: 25,
+        _source: false,
+        fields: ['example.id', 'example.index'],
+        collapse: { field: 'example.id' },
+        sort: [
+          { 'example.index': { order: 'asc', missing: '_last' } },
+          { 'example.id': { order: 'asc' } },
+        ],
+        aggs: {
+          total_examples: {
+            cardinality: { field: 'example.id', precision_threshold: 10000 },
+          },
+        },
+        track_total_hits: false,
+      });
+    });
+  });
+
+  describe('buildDatasetExampleSummariesSearch', () => {
+    it('requests only compact mapped fields with a stable score sort', () => {
+      const search = buildDatasetExampleSummariesSearch(
+        'dataset-123',
+        'execution-123',
+        ['example-26'],
+        {
+          filterField: 'metadata.execution_id',
+          spaceId: 'marketing',
+          searchAfter: [26, 'example-26', 'quality', 0, 'score-10000'],
+        }
+      );
+
+      expect(search).toEqual({
+        query: {
+          bool: {
+            must: [
+              { term: { 'example.dataset.id': 'dataset-123' } },
+              { term: { 'metadata.execution_id': 'execution-123' } },
+              buildSpaceFilter('marketing'),
+              { terms: { 'example.id': ['example-26'] } },
+            ],
+          },
+        },
+        size: 10000,
+        _source: false,
+        fields: [
+          '@timestamp',
+          'example.id',
+          'example.index',
+          'task.repetition_index',
+          'task.trace_id',
+          'evaluator.name',
+          'evaluator.score',
+          'evaluator.label',
+          'evaluator.trace_id',
+          'evaluator.model.id',
+          'evaluator.model.family',
+          'evaluator.model.provider',
+        ],
+        sort: [
+          { 'example.index': { order: 'asc', missing: '_last' } },
+          { 'example.id': { order: 'asc' } },
+          { 'evaluator.name': { order: 'asc' } },
+          { 'task.repetition_index': { order: 'asc' } },
+          { _shard_doc: { order: 'asc' } },
+        ],
+        search_after: [26, 'example-26', 'quality', 0, 'score-10000'],
+        track_total_hits: false,
+      });
+
+      expect(search.fields).not.toEqual(
+        expect.arrayContaining([
+          'example.input',
+          'example.metadata',
+          'task.output',
+          'evaluator.explanation',
+          'evaluator.metadata',
+        ])
+      );
     });
   });
 
