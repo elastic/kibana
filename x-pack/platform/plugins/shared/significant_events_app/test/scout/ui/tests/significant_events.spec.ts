@@ -63,7 +63,7 @@ test.describe(
       );
     });
 
-    test('renders navigation tabs', async ({ page }) => {
+    test('renders navigation tabs and links to Settings', async ({ page }) => {
       await page.gotoApp('significant_events/streams');
       const tabBar = page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.tabs);
       await expect(tabBar).toBeVisible({ timeout: 60_000 });
@@ -77,6 +77,13 @@ test.describe(
       ]) {
         await expect(tabBar.getByRole('tab', { name: label })).toBeVisible();
       }
+
+      const settingsLink = page.testSubj.locator('significantEventsSettingsLink');
+      await expect(settingsLink).toBeVisible();
+      await settingsLink.click();
+
+      await expect(page).toHaveURL(/\/app\/significant_events\/settings/);
+      await expect(page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title)).toHaveText('Settings');
     });
 
     test('shows the not-enabled empty prompt when the feature flag is disabled', async ({

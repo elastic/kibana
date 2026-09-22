@@ -7,7 +7,7 @@
 
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
-import { APP_HEADER_TEST_SUBJECTS, getAppMenuItemTestSubj } from '@kbn/app-header';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
 import { test } from '../fixtures';
 
@@ -55,9 +55,9 @@ test.describe(
     test('navigates between Significant Events, Nightshift, and settings', async ({ page }) => {
       await page.gotoApp('significant_events/streams');
 
-      const nightshiftButton = page.testSubj.locator(getAppMenuItemTestSubj('nightshift'));
-      await expect(nightshiftButton).toBeVisible({ timeout: 60_000 });
-      await nightshiftButton.click();
+      const nightshiftBackLink = page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.back);
+      await expect(nightshiftBackLink).toBeVisible({ timeout: 60_000 });
+      await nightshiftBackLink.click();
 
       await expect(page).toHaveURL(/\/app\/nightshift/, { timeout: 60_000 });
       await expect(page.testSubj.locator('nightshiftPage')).toBeVisible({ timeout: 60_000 });
