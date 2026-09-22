@@ -42,6 +42,8 @@ export function getInlineCompletionsProvider(
         emptyResult: { items: [] },
       });
     }) satisfies monaco.languages.InlineCompletionsProvider['provideInlineCompletions'],
-    disposeInlineCompletions: () => {},
+    disposeInlineCompletions: () => {
+      // noop, we already dispose hanging completion promises leveraging {@link createCancellableCallbacks}
+    },
   };
 }
