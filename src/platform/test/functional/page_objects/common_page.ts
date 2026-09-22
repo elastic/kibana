@@ -148,10 +148,6 @@ export class CommonPageObject extends FtrService {
         await this.browser.get(appUrl, insertTimestamp);
       }
 
-      // accept alert if it pops up
-      const alert = await this.browser.getAlert();
-      await alert?.accept();
-
       const currentUrl = shouldLoginIfPrompted
         ? await this.loginIfPrompted(appUrl, insertTimestamp, disableWelcomePrompt)
         : await this.browser.getCurrentUrl();
@@ -327,9 +323,6 @@ export class CommonPageObject extends FtrService {
         // since we're using hash URLs, always reload first to force re-render
         this.log.debug('navigate to: ' + appUrl);
         await this.browser.get(appUrl, insertTimestamp);
-        // accept alert if it pops up
-        const alert = await this.browser.getAlert();
-        await alert?.accept();
         // A timestamp makes browser.get() perform a full navigation even when the app URL is
         // unchanged. Without one, refresh explicitly preserves the previous reload behavior.
         if (!insertTimestamp) {
