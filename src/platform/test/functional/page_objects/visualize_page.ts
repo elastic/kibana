@@ -81,7 +81,7 @@ export class VisualizePageObject extends FtrService {
     if (await this.find.existsByCssSelector('.euiOverlayMask', 250)) {
       return false;
     }
-    if (!(await this.testSubjects.waitForExists(APP_HEADER_TEST_SUBJECTS.back, { timeout: 500 }))) {
+    if (!(await this.testSubjects.exists(APP_HEADER_TEST_SUBJECTS.back))) {
       return false;
     }
     const ariaLabel = await this.testSubjects.getAttribute(
@@ -399,7 +399,7 @@ export class VisualizePageObject extends FtrService {
   public async ensureSavePanelOpen() {
     this.log.debug('ensureSavePanelOpen');
     await this.header.waitUntilLoadingHasFinished();
-    const isOpen = await this.testSubjects.waitForExists('savedObjectSaveModal', { timeout: 5000 });
+    const isOpen = await this.testSubjects.exists('savedObjectSaveModal');
     if (!isOpen) {
       await this.appMenu.clickMenuItem('visualizeSaveButton');
     }

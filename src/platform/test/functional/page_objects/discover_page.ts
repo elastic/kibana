@@ -217,7 +217,7 @@ export class DiscoverPageObject extends FtrService {
       await this.testSubjects.click(`dashboard-picker-option-${existing}`);
     }
     await this.clickConfirmSavedSearch();
-    if (await this.testSubjects.waitForExists('appLeaveConfirmModal', { timeout: 1000 })) {
+    if (await this.testSubjects.exists('appLeaveConfirmModal')) {
       await this.testSubjects.click('confirmModalConfirmButton');
     }
     await this.header.waitUntilLoadingHasFinished();

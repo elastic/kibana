@@ -32,7 +32,7 @@ export class TimeToVisualizePageObject extends FtrService {
   private readonly retry = this.ctx.getService('retry');
 
   public async ensureSaveModalIsOpen() {
-    await this.testSubjects.waitForExists('savedObjectSaveModal', { timeout: 5000 });
+    await this.testSubjects.exists('savedObjectSaveModal');
   }
 
   public async ensureDashboardOptionsAreDisabled() {

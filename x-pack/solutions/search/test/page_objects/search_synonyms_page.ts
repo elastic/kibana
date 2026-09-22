@@ -23,9 +23,7 @@ export function SearchSynonymsPageProvider({ getService }: FtrProviderContext) {
       },
       async expectSynonymsGetStartedPageComponentsToExist() {
         await retry.tryForTime(10000, async () => {
-          if (
-            !(await testSubjects.waitForExists(this.TEST_IDS.GET_STARTED_BUTTON, { timeout: 2000 }))
-          ) {
+          if (!(await testSubjects.exists(this.TEST_IDS.GET_STARTED_BUTTON))) {
             await browser.refresh();
             throw new Error(`${this.TEST_IDS.GET_STARTED_BUTTON} not visible`);
           }

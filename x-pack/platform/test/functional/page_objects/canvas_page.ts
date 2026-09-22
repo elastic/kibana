@@ -135,9 +135,7 @@ export function CanvasPageProvider({ getService, getPageObjects }: FtrProviderCo
     async expectNoAddElementButton() {
       log.debug('CanvasPage.expectNoAddElementButton');
       // Ensure page is fully loaded first by waiting for the refresh button
-      const refreshPopoverExists = await testSubjects.waitForExists('canvas-refresh-control', {
-        timeout: 20000,
-      });
+      const refreshPopoverExists = await testSubjects.exists('canvas-refresh-control');
       expect(refreshPopoverExists).to.be(true);
 
       await testSubjects.missingOrFail('add-element-button');

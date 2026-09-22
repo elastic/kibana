@@ -154,11 +154,7 @@ export class BrowserAuthService extends FtrService {
       return;
     }
 
-    if (
-      !(await this.testSubjects.waitForExists(HOME_WELCOME_INTERSTITIAL_TEST_SUBJ, {
-        timeout: 2_500,
-      }))
-    ) {
+    if (!(await this.testSubjects.exists(HOME_WELCOME_INTERSTITIAL_TEST_SUBJ))) {
       return;
     }
 

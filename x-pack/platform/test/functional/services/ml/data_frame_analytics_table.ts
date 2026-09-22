@@ -221,7 +221,7 @@ export function MachineLearningDataFrameAnalyticsTableProvider({
     ) {
       const shouldNotBeDisplayed = shouldBeDisplayed === false;
       if (shouldNotBeDisplayed) {
-        if (await testSubjects.waitForExists('mlNoDataFrameAnalyticsFound', { timeout: 1000 })) {
+        if (await testSubjects.exists('mlNoDataFrameAnalyticsFound')) {
           // no jobs at all, no other assertion needed
           return;
         }
