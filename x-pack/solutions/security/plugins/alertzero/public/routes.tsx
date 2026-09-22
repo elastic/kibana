@@ -14,9 +14,9 @@ import {
   NAV_STREAMS,
   NAV_THREAT_HUNT,
 } from './components/app_chrome/translations';
-import { ConversationsPage } from './pages/conversations';
 import { SettingsPage } from './pages/settings';
 import { WatchesRoutes } from './pages/watches/routes';
+import { LandingPage } from './pages/landing_page';
 
 /**
  * Top-level route table. A section with more than one page owns its own sub-routes — see
@@ -28,7 +28,7 @@ import { WatchesRoutes } from './pages/watches/routes';
  */
 export const AlertZeroRoutes: React.FC = () => (
   <Routes>
-    <Route path="/" exact component={ConversationsPage} />
+    <Route path="/" exact component={LandingPage} />
     <Route path="/alerts" render={() => <PlaceholderPage title={NAV_ALERTS} />} />
     <Route path="/attacks" render={() => <PlaceholderPage title={NAV_ATTACKS} />} />
     <Route path="/threat-hunt" render={() => <PlaceholderPage title={NAV_THREAT_HUNT} />} />
