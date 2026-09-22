@@ -57,11 +57,14 @@ export const createProposalStepOutputSchema = z.object({
   /** Comes from the action's metadata, so absent on a proposal with no action. */
   category: z.string().optional(),
   /**
-   * The action declares `approvalPolicy: always-gate`, so it must never be
-   * auto-approved however the caller's autonomy resolved. Emitted already
-   * reduced to a boolean rather than as the policy itself: the gating
-   * workflow combines it with two other terms in a Liquid condition, and
-   * Liquid has neither operator precedence nor parentheses.
+   * Hold the decision for a human however the caller's autonomy resolved,
+   * either because the action declares `approvalPolicy: always-gate` or
+   * because its metadata did not resolve at all — an unreadable policy is
+   * taken as the restrictive one rather than the permissive one.
+   *
+   * Emitted already reduced to a boolean rather than as the policy itself:
+   * the gating workflow combines it with two other terms in a Liquid
+   * condition, and Liquid has neither operator precedence nor parentheses.
    */
   alwaysGate: z.boolean(),
   /**

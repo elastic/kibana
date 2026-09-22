@@ -190,8 +190,9 @@ steps:
       #   2. there is no action to run — autonomy governs whether an *action*
       #      may run without a human, and approval is a non-action proposal's
       #      entire lifecycle, so the flag is deliberately ignored;
-      #   3. the action declares `approvalPolicy: always-gate`, which outranks
-      #      whatever autonomy the caller resolved.
+      #   3. the action declares `approvalPolicy: always-gate`, or its metadata
+      #      could not be read at all — either way the action is not confirmed
+      #      safe to run unattended, which outranks the caller's autonomy.
       #
       # Every term is `or`, never mixed with `and`: Liquid has no operator
       # precedence and no parentheses, so a mixed expression would not bind the

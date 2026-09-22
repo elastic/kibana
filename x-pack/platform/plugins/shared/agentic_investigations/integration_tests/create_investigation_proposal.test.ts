@@ -375,6 +375,18 @@ describe('create-investigation-proposal workflow execution', () => {
       expect(fixture.onlyProposal().decision).toBeUndefined();
     });
 
+    it('should gate when the action metadata could not be read at all', async () => {
+      fixture.failActionLookup();
+
+      await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID, autoApprove: true });
+
+      // Creation swallows the read failure, so an unreadable policy is
+      // indistinguishable from a permissive one — a transient outage must not
+      // be what lets an action run unattended.
+      expect(fixture.executionStatus()).toBe(ExecutionStatus.WAITING_FOR_INPUT);
+      expect(fixture.onlyProposal().decision).toBeUndefined();
+    });
+
     it('should skip the gate for an autonomy-dependent action', async () => {
       fixture.setActionMetadata({
         name: 'Create rule',

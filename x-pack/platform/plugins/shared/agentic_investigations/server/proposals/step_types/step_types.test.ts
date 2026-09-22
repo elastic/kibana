@@ -202,6 +202,7 @@ describe('proposals.createProposal step', () => {
       id: 'proposal-1',
       status: 'pending',
       category: 'tune',
+      action: { name: 'Create rule' },
       expiresAt: '2026-09-04T00:00:00.000Z',
     });
     const { definition } = createDefinition(create);
@@ -254,18 +255,40 @@ describe('proposals.createProposal step', () => {
   it.each([
     ['autonomy-dependent', { name: 'Create rule', approvalPolicy: 'autonomy-dependent' }],
     ['no declared policy', { name: 'Create rule' }],
-    ['no action at all', undefined],
-  ])('should leave alwaysGate false for %s', async (_label, action) => {
-    // Only `always-gate` overrides the caller; everything else leaves the
-    // decision to the autonomy the caller already resolved.
+  ])('should leave alwaysGate false for an action with %s', async (_label, action) => {
+    // Only `always-gate` overrides the caller; a resolved action that declares
+    // anything else leaves the decision to the autonomy already resolved.
     const create = jest.fn().mockResolvedValue({ id: 'p', status: 'pending', action });
     const { definition } = createDefinition(create);
 
     const result = await definition.handler(
-      createContext({ conversationId: 'conv-1', comment: 'Tune the noisy rule' })
+      createContext({
+        conversationId: 'conv-1',
+        comment: 'Tune the noisy rule',
+        actionWorkflowId: 'system-alertzero-action-create-rule',
+      })
     );
 
     expect(result.output?.alwaysGate).toBe(false);
+  });
+
+  it('should fail closed on alwaysGate when the action metadata did not resolve', async () => {
+    // `create` swallows a workflow read failure and invalid `actionMetadata`
+    // alike, so both reach the handler as no metadata at all. Reading that as
+    // "no always-gate policy" would run an action whose author forbade it on
+    // nothing more than a transient lookup error.
+    const create = jest.fn().mockResolvedValue({ id: 'p', status: 'pending', action: undefined });
+    const { definition } = createDefinition(create);
+
+    const result = await definition.handler(
+      createContext({
+        conversationId: 'conv-1',
+        comment: 'Tune the noisy rule',
+        actionWorkflowId: 'system-alertzero-action-create-rule',
+      })
+    );
+
+    expect(result.output?.alwaysGate).toBe(true);
   });
 
   it('should pass a blank optional input to the service as an omission', async () => {
