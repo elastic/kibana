@@ -71,3 +71,4 @@ magic-string
 graphql
 @cfworker/json-schema
 bump-cli
+@oxlint/plugins
