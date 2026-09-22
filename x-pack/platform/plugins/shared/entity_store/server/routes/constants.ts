@@ -32,4 +32,5 @@ export const LogExtractionInstallParams = LogExtractionOverride;
 export type HistorySnapshotBodyParams = z.infer<typeof HistorySnapshotBodyParams>;
 export const HistorySnapshotBodyParams = HistorySnapshotState.pick({
   frequency: true,
+  retentionDays: true,
 }).partial();
