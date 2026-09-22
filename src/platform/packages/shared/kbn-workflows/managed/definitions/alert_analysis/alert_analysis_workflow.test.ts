@@ -1350,6 +1350,36 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
     });
   });
 
+  it('truncates host_name and user_name to the workflow.output 512-char limit', () => {
+    const buildStep = findStepByName(workflow.steps, 'build_output_verdict') as {
+      with: { output_verdict: Record<string, unknown> };
+    };
+    expect(String(buildStep.with.output_verdict.host_name)).toContain("truncate: 512, ''");
+    expect(String(buildStep.with.output_verdict.user_name)).toContain("truncate: 512, ''");
+
+    const longName = 'n'.repeat(600);
+    const rendered = renderValueRecursively(engine, buildStep.with.output_verdict, {
+      foreach: {
+        item: {
+          _id: 'real-alert-id',
+          host: { name: longName },
+          user: { name: longName },
+        },
+      },
+      variables: {
+        alert_verdict: {
+          classification: 'true_positive',
+          confidence_score: 0.9,
+          rationale: 'c2',
+          contributing_factors: ['url'],
+        },
+      },
+    }) as Record<string, unknown>;
+
+    expect(rendered.host_name).toBe('n'.repeat(512));
+    expect(rendered.user_name).toBe('n'.repeat(512));
+  });
+
   it('pushes the built verdict onto output_verdicts for the caller', () => {
     const accumulateStep = findStepByName(workflow.steps, 'accumulate_output_verdict') as {
       with: { output_verdicts: string };
