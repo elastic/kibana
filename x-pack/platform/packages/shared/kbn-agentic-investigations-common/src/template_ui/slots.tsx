@@ -7,13 +7,10 @@
 
 import React from 'react';
 import type { Conversation } from '@kbn/agent-builder-common';
-import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
 import {
   ConversationDetailsFlyoutHeader,
   ConversationDetailsFlyoutFooter,
-  AttachmentsTab,
   OverviewTab,
-  TimelineTab,
 } from '../components/details';
 import { conversationToInvestigation } from './conversation_to_investigation';
 
@@ -30,19 +27,6 @@ interface InvestigationSlotProps {
 
 export const OverviewSlot = ({ conversation }: InvestigationSlotProps) => (
   <OverviewTab investigation={conversationToInvestigation(conversation)} />
-);
-
-export const TimelineSlot = ({ conversation }: InvestigationSlotProps) => (
-  <TimelineTab events={conversationToInvestigation(conversation).events} />
-);
-
-export interface AttachmentsSlotProps {
-  conversation: Conversation;
-  attachmentsService: AttachmentServiceStartContract;
-}
-
-export const AttachmentsSlot = ({ conversation, attachmentsService }: AttachmentsSlotProps) => (
-  <AttachmentsTab conversation={conversation} attachmentsService={attachmentsService} />
 );
 
 export const HeaderSlot = ({ conversation }: InvestigationSlotProps) => (
