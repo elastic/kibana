@@ -253,7 +253,7 @@ rest. `{%- for x in ... -%}` loops build the `content` block, and `{%- assign x 
 | `size` | Length, for a `data.set` a condition can read |
 | `default: 'value'` | Fall back when a field is missing |
 | `last`, `first` | The last row of a result and the first column of it; how a cursor advances from a page |
-| `replace: '"', '\"'` | Escape a value being interpolated into an ES\|QL string literal |
+| `replace: '\\', '\\\\' \| replace: '"', '\\"'` | Escape a value being interpolated into an ES\|QL string literal: backslashes first, then quotes |
 | `slugify` | Normalise a value used in a `ki_id` |
 | `times`, `round` | Format a number for a description |
 
@@ -264,8 +264,10 @@ the mapping is almost always a missing backtick.
 
 Escaping matters more than it looks: an entity value interpolated raw into
 `WHERE field == "{{ ... }}"` breaks the query the moment a value contains a quote, and the failure
-lands on whichever entity happens to carry one. The entity template runs every value through
-`replace` before it reaches a query.
+lands on whichever entity happens to carry one. The unit template runs every unit key through
+`replace: '\\', '\\\\' | replace: '"', '\\"'` before it reaches a query, the pagination cursor
+included. Write the arguments exactly so: LiquidJS reads backslash escapes inside a quoted argument,
+so `'\"'` is a bare quote and a `replace` written with it does nothing.
 
 ## Templates and shapes for each strategy
 

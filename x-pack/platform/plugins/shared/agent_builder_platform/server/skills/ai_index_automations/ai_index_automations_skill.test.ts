@@ -253,6 +253,35 @@ describe('aiIndexAutomationsSkill', () => {
     );
   });
 
+  it('escapes a unit key for ES|QL in the per-unit queries and in the pagination cursor', async () => {
+    const template = parsedTemplate(UNIT_PROFILE_TEMPLATE_NAME);
+    const discovery = stepNamed(template, 'discover_units').with?.query as string;
+    const unitEscaped = stepNamed(template, 'unit_context').with?.unit_escaped as string;
+    // LiquidJS reads backslash escapes inside string literals, so a filter argument written as
+    // '\"' is a bare quote and the replace does nothing. Render for real to catch that.
+    const liquid = new Liquid();
+    const key = 'Contoso "Pro" 15\\in';
+    const esqlLiteral = 'Contoso \\"Pro\\" 15\\\\in';
+
+    const escapedUnit = await liquid.parseAndRender(unitEscaped, { foreach: { item: [key] } });
+    const rendered = await liquid.parseAndRender(discovery, {
+      consts: { unit_index: 'sales', unit_key: 'ProductKey' },
+      variables: { cursor: key },
+    });
+
+    expect(escapedUnit).toBe(esqlLiteral);
+    // A raw quote in the cursor would end the string literal and break every page after it.
+    expect(rendered).toContain(`ProductKey > "${esqlLiteral}"`);
+  });
+
+  it('documents the escape as LiquidJS reads it, with backslashes escaped first', () => {
+    const { content } = aiIndexAutomationsSkill;
+
+    expect(content).not.toContain(`| \`replace: '"', '\\"'\` |`);
+    expect(content).toContain(`\`replace: '\\\\', '\\\\\\\\' | replace: '"', '\\\\"'\``);
+    expect(content).toMatch(/LiquidJS reads backslash escapes inside a quoted argument/);
+  });
+
   describe('KI provenance in the templates', () => {
     // Id-like provenance moved to top-level `references`; `expires_at` is top-level too.
     const MOVED_ATTRIBUTES = [

@@ -105,7 +105,7 @@ steps:
         with:
           query: |
             FROM {{ consts.unit_index }}
-            | WHERE {{ consts.unit_key }} IS NOT NULL AND {{ consts.unit_key }} > "{{ variables.cursor }}"
+            | WHERE {{ consts.unit_key }} IS NOT NULL AND {{ consts.unit_key }} > "{{ variables.cursor | replace: '\\', '\\\\' | replace: '"', '\\"' }}"
             {{ consts.discovery_filter }}
             | STATS doc_count = COUNT(*), last_seen = MAX({{ consts.freshness_field }}) BY {{ consts.unit_key }}
             | SORT {{ consts.unit_key }} ASC
@@ -124,7 +124,10 @@ steps:
             type: data.set
             with:
               unit: "{{ foreach.item[0] }}"
-              unit_escaped: "{{ foreach.item[0] | replace: '\"', '\\\"' }}"
+              # The key as an ES|QL string literal body: backslashes first, then quotes. LiquidJS
+              # reads backslash escapes inside a quoted argument, so '\\' is one backslash.
+              unit_escaped: >-
+                {{ foreach.item[0] | replace: '\\', '\\\\' | replace: '"', '\\"' }}
               unit_doc_count: "{{ foreach.item[1] }}"
               unit_last_seen: "{{ foreach.item[2] }}"
               ki_id: "unit-{{ foreach.item[0] | slugify }}"
