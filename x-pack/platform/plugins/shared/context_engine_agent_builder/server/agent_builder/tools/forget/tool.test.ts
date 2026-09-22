@@ -120,7 +120,7 @@ describe('forget tool', () => {
     const tool = createTool();
 
     expect(tool.id).toBe(CONTEXT_ENGINE_FORGET_TOOL_ID);
-    expect(tool.availability?.cacheMode).toBe('space');
+    expect(tool.availability?.cacheMode).toBe('none');
     expect(tool.schema.safeParse(params).success).toBe(true);
     expect(tool.schema.safeParse({ aiIndexId: 'support' }).success).toBe(false);
     expect(tool.schema.shape.aiIndexId.description).toContain(
