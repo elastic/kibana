@@ -361,7 +361,7 @@ describe('output handler', () => {
         mockResponse as any
       );
 
-      expect(outputService.get).toHaveBeenCalledWith('output1');
+      expect(outputService.get).toHaveBeenCalledWith(undefined, 'output1');
       expect(outputService.getAgentAndPolicyCountForOutput).toHaveBeenCalled();
       expect(res).toEqual({ body: { agentPolicyCount: 3, agentCount: 7 } });
     });

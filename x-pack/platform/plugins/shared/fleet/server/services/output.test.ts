@@ -2875,7 +2875,7 @@ describe('Output Service', () => {
         ?.kuery as string;
       expect(kuery).toContain('monitoring_output_id:"output-test"');
       expect(kuery).toContain('data_output_id:"output-test"');
-      expect(kuery).not.toContain('not fleet-agent-policies.data_output_id:*');
+      expect(kuery).not.toContain('not ingest-agent-policies.data_output_id:*');
       expect(result).toEqual({ agentPolicyCount: 1, agentCount: 4 });
     });
 
@@ -2887,7 +2887,7 @@ describe('Output Service', () => {
 
       const kuery = mockedAgentPolicyService.fetchAllAgentPolicyIds.mock.calls[0][1]
         ?.kuery as string;
-      expect(kuery).toContain('not fleet-agent-policies.data_output_id:*');
+      expect(kuery).toContain('not ingest-agent-policies.data_output_id:*');
     });
 
     it('adds is_default_monitoring fallback clause for default monitoring output', async () => {
@@ -2899,8 +2899,8 @@ describe('Output Service', () => {
 
       const kuery = mockedAgentPolicyService.fetchAllAgentPolicyIds.mock.calls[0][1]
         ?.kuery as string;
-      expect(kuery).toContain('not fleet-agent-policies.monitoring_output_id:*');
-      expect(kuery).not.toContain('not fleet-agent-policies.data_output_id:*');
+      expect(kuery).toContain('not ingest-agent-policies.monitoring_output_id:*');
+      expect(kuery).not.toContain('not ingest-agent-policies.data_output_id:*');
     });
 
     it('includes package-policy-derived policy IDs', async () => {
