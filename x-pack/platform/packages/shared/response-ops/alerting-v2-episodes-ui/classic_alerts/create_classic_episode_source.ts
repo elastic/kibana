@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { getRuleDetailsRoute, triggersActionsRoute } from '@kbn/rule-data-utils';
+import {
+  getRuleDetailsRoute,
+  STACK_MANAGEMENT_RULES_HOST,
+  type LocatorHost,
+} from '@kbn/rule-data-utils';
 import type { EpisodeDataSource } from '../types/episode_data_source';
 import { classicActionExtensions } from './action_extensions';
 import { fetchClassicAlertsAsEpisodes } from './apis/fetch_classic_episodes';
@@ -18,10 +22,12 @@ import { classicAlertQueryKeys } from './query_keys';
 
 export interface CreateClassicEpisodeSourceOptions {
   ruleTypeIds: string[];
+  host?: LocatorHost;
 }
 
 export const createClassicEpisodeSource = ({
   ruleTypeIds,
+  host = STACK_MANAGEMENT_RULES_HOST,
 }: CreateClassicEpisodeSourceOptions): EpisodeDataSource => ({
   id: CLASSIC_EPISODE_SOURCE_ID,
   queryKeyPrefix: classicAlertQueryKeys.all(),
@@ -73,6 +79,6 @@ export const createClassicEpisodeSource = ({
 
   actionExtensions: classicActionExtensions,
 
-  // TODO: Update to observability rule details route once obs navigation changes land.
-  getRuleDetailsHref: (ruleId) => `${triggersActionsRoute}${getRuleDetailsRoute(ruleId)}`,
+  getRuleDetailsHref: (ruleId) =>
+    `/app/${host.app}${host.pathPrefix}${getRuleDetailsRoute(ruleId)}`,
 });
