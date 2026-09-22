@@ -36,7 +36,6 @@ export const toFormState = (response: ActionPolicyResponse): ActionPolicyFormSta
   return {
     name: response.name,
     description: response.description,
-    tags: response.tags ?? [],
     matcher: response.matcher ?? null,
     groupingMode,
     groupBy: response.group_by ?? [],
@@ -53,7 +52,6 @@ export const toCreatePayload = (state: ActionPolicyFormState): CreateActionPolic
     name: state.name,
     description: state.description,
     grouping_mode: state.groupingMode,
-    ...(state.tags.length > 0 ? { tags: state.tags } : {}),
     ...(matcher ? { matcher } : {}),
     ...(state.groupingMode === 'per_field' && state.groupBy.length > 0
       ? { group_by: state.groupBy }
@@ -72,7 +70,6 @@ export const toUpdatePayload = (
     name: state.name,
     description: state.description,
     grouping_mode: state.groupingMode,
-    tags: state.tags.length > 0 ? state.tags : null,
     matcher: normalizeMatcher(state.matcher),
     group_by: state.groupingMode === 'per_field' && state.groupBy.length > 0 ? state.groupBy : null,
     throttle: buildThrottle(state),
