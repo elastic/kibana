@@ -405,7 +405,6 @@ export class ActionPolicyClient {
     const evaluatedCount = allPolicies.items.length;
     return {
       items,
-      total: allPolicies.total,
       evaluated_count: evaluatedCount,
       is_truncated: allPolicies.total > evaluatedCount,
     };

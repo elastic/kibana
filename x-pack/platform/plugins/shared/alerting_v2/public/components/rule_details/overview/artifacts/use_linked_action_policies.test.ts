@@ -7,9 +7,10 @@
 
 import { renderHook } from '@testing-library/react';
 import type { MatchedActionPolicy } from '@kbn/alerting-v2-schemas';
+import type { UseMatchedActionPoliciesResult } from '@kbn/alerting-v2-rule-form';
 import { useLinkedActionPolicies } from './use_linked_action_policies';
 
-const mockUseMatchedActionPolicies = jest.fn();
+const mockUseMatchedActionPolicies = jest.fn<UseMatchedActionPoliciesResult, [unknown]>();
 const mockHttp = { fake: 'http-start-contract' };
 
 jest.mock('@kbn/alerting-v2-rule-form', () => ({
@@ -56,7 +57,6 @@ describe('useLinkedActionPolicies', () => {
       isLoading: false,
       error: null,
       items: [],
-      total: 0,
       evaluatedCount: 0,
       isTruncated: false,
     });
@@ -77,7 +77,6 @@ describe('useLinkedActionPolicies', () => {
         buildItem('tags', { id: 'filtered-1' }),
         buildItem('tags', { id: 'filtered-2' }),
       ],
-      total: 3,
       evaluatedCount: 3,
       isTruncated: false,
     });
@@ -98,7 +97,6 @@ describe('useLinkedActionPolicies', () => {
       error: null,
       items: [buildItem('tags'), buildItem('tags')],
       evaluatedCount: 2,
-      total: 3,
       isTruncated: true,
     });
 
@@ -114,7 +112,6 @@ describe('useLinkedActionPolicies', () => {
       isLoading: true,
       error: null,
       items: [],
-      total: 0,
       evaluatedCount: 0,
       isTruncated: false,
     });
@@ -129,7 +126,6 @@ describe('useLinkedActionPolicies', () => {
       isLoading: false,
       error: new Error('network error'),
       items: [],
-      total: 0,
       evaluatedCount: 0,
       isTruncated: false,
     });
