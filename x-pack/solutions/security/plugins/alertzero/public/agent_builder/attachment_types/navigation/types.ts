@@ -18,9 +18,8 @@ export interface AttachmentNavigationDeps {
    */
   prependPath: (path: string) => string;
   /**
-   * `core.application.getUrlForApp`. Optional: absent in older callers and in
-   * tests that don't need Security entity-page links, in which case host/user
-   * chips fall back to their Discover ES|QL link.
+   * `core.application.getUrlForApp`. Optional: when absent (e.g. tests that don't need
+   * Security entity-page links), host/user chips fall back to their Discover ES|QL link.
    */
   getUrlForApp?: ApplicationStart['getUrlForApp'];
 }

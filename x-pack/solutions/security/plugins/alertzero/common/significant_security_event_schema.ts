@@ -166,8 +166,8 @@ const mapsToProposalSchema = z
   .optional();
 
 /**
- * Hunt-owned Significant Security Event payload, per the D39 field table
- * (docs/working-groups/dark-watch/artifacts/mvp-slice.md:541-561).
+ * Hunt-owned Significant Security Event payload: the finding a watch surfaces when its
+ * hunt confirms a hit, plus the context needed to render and act on it without a live fetch.
  */
 export const significantSecurityEventAttachmentDataSchema = alertZeroAttachmentDataSchema.extend({
   title: z.string().min(1).max(512),

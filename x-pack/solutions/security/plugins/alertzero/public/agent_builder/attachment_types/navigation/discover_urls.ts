@@ -73,7 +73,7 @@ export const buildAlertDetailsUrl = ({
 /**
  * Security entity detail page URL for a `host.*` or `user.*` chip. Returns
  * `undefined` for `service.*` fields (no Security entity page exists for
- * services) and when `getUrlForApp` isn't wired (older callers, tests), so
+ * services) and when `getUrlForApp` isn't wired (e.g. tests), so
  * the caller can fall back to its Discover ES|QL link.
  */
 export const buildSecurityEntityUrl = ({
