@@ -13,19 +13,33 @@ import { securityAttachmentDataSchema } from './security_attachment_data_schema'
 /** Maximum number of entities in one attachment; the Worker must cap and set truncated=true. */
 export const MAX_IMPACTED_ENTITIES = 50;
 
+/**
+ * Accepts a native number or a Liquid `{{ }}` numeric string (e.g. `"3"`).
+ * Rejects JS-coercible junk (`null`, `true`/`false`, `""`) that `z.coerce.number()` would
+ * silently turn into 0/1.
+ */
+const liquidNonNegativeInt = z.union([
+  z.number().int().min(0).max(100_000),
+  z
+    .string()
+    .regex(/^\d+$/, 'Expected a non-negative integer string')
+    .transform((value) => Number(value))
+    .pipe(z.number().int().min(0).max(100_000)),
+]);
+
 const impactVerdictCountsSchema = z.object({
-  // z.coerce.number() is deliberate: Liquid {{ }} yields strings, only ${{ }} preserves numbers;
-  // without coercion a {{ }} typo fails validation silently at runtime.
-  true_positive: z.coerce.number().int().min(0).max(100_000).default(0),
-  false_positive: z.coerce.number().int().min(0).max(100_000).default(0),
-  inconclusive: z.coerce.number().int().min(0).max(100_000).default(0),
+  // Liquid {{ }} yields strings; only ${{ }} preserves numbers. Use liquidNonNegativeInt
+  // (not z.coerce.number) so blank/boolean/null fail validation instead of becoming 0/1.
+  true_positive: liquidNonNegativeInt.default(0),
+  false_positive: liquidNonNegativeInt.default(0),
+  inconclusive: liquidNonNegativeInt.default(0),
 });
 
 const impactedEntitySchema = z.object({
   entity_type: z.enum(['host', 'user']),
   /** 'unknown' is a real value emitted by the sub-workflow when the alert lacked the field. */
   name: z.string().min(1).max(1024),
-  alert_count: z.coerce.number().int().min(0).max(100_000),
+  alert_count: liquidNonNegativeInt,
   verdicts: impactVerdictCountsSchema,
 });
 
@@ -33,7 +47,7 @@ export type ImpactedEntity = z.infer<typeof impactedEntitySchema>;
 
 export const impactAttachmentDataSchema = securityAttachmentDataSchema.extend({
   entities: z.array(impactedEntitySchema).max(MAX_IMPACTED_ENTITIES),
-  total_alert_count: z.coerce.number().int().min(0).max(100_000).optional(),
+  total_alert_count: liquidNonNegativeInt.optional(),
   /** True when the entity list was capped to MAX_IMPACTED_ENTITIES before attaching.
    *  Accepts native boolean or the Liquid-rendered strings "true"/"false". */
   truncated: z

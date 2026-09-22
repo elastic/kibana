@@ -66,6 +66,31 @@ describe('createImpactAttachmentType', () => {
         ],
       });
       expect(result.valid).toBe(true);
+      if (result.valid) {
+        expect(result.data.entities[0].alert_count).toBe(3);
+        expect(result.data.entities[0].verdicts.true_positive).toBe(2);
+      }
+    });
+
+    it('rejects null / boolean / blank count values that coerce.number would accept', async () => {
+      for (const badCount of [null, true, false, '']) {
+        const result = await attachmentType.validate({
+          entities: [{ ...validEntity, alert_count: badCount }],
+        });
+        expect(result.valid).toBe(false);
+      }
+
+      for (const badVerdict of [null, true, false, '']) {
+        const result = await attachmentType.validate({
+          entities: [
+            {
+              ...validEntity,
+              verdicts: { true_positive: badVerdict, false_positive: 0, inconclusive: 0 },
+            },
+          ],
+        });
+        expect(result.valid).toBe(false);
+      }
     });
 
     it('accepts a truncated payload with the flag set (native boolean)', async () => {
