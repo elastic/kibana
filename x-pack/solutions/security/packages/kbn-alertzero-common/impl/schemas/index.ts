@@ -60,14 +60,8 @@ export {
   IndexScopeWindow,
   ResolvedIndexScope,
 } from './components/hunt.gen';
-export {
-  HuntForThreatRequestBody,
-  HuntForThreatResponse,
-} from './hunt/hunt_for_threat_route.gen';
-export {
-  HuntReadinessRequestQuery,
-  HuntReadinessResponse,
-} from './hunt/hunt_readiness_route.gen';
+export { HuntForThreatRequestBody, HuntForThreatResponse } from './hunt/hunt_for_threat_route.gen';
+export { HuntReadinessRequestQuery, HuntReadinessResponse } from './hunt/hunt_readiness_route.gen';
 export {
   HuntBehaviorArticleContext,
   HuntBehaviorIoc,
@@ -85,13 +79,3 @@ export {
   HuntCoordinatorResponse,
   HuntCoordinatorStatus,
 } from './hunt/hunt_coordinator_route.gen';
-export {
-  AnchorIoc,
-  AnchorItem,
-  AnchorSet,
-  CorrelateRequestBody,
-  CorrelateResponse,
-  CorrelationEngineStatus,
-  HuntCorrelationAttachmentData,
-  HuntCorrelationAttachmentThresholds,
-} from './hunt/correlate_route.gen';

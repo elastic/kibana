@@ -11,14 +11,12 @@ import { registerHuntForThreatRoute } from './hunt_for_threat';
 import { registerHuntBehaviorRoute } from './hunt_behavior';
 import { registerCandidatesRoute } from './candidates';
 import { registerHuntCoordinatorRoute } from './hunt_coordinator';
-import { registerCorrelateRoute } from './correlate';
 
-/** Registers the hunt routes (readiness, Tier 1, Tier 2, coordinator, candidates, correlate). */
+/** Registers the hunt routes (readiness, Tier 1, Tier 2, coordinator, candidates). */
 export const registerHuntRoutes = (deps: RouteDependencies): void => {
   registerHuntReadinessRoute(deps);
   registerHuntForThreatRoute(deps);
   registerHuntBehaviorRoute(deps);
   registerCandidatesRoute(deps);
   registerHuntCoordinatorRoute(deps);
-  registerCorrelateRoute(deps);
 };
