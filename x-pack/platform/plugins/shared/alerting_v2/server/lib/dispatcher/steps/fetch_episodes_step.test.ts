@@ -153,7 +153,9 @@ describe('FetchEpisodesStep', () => {
 
     const otherError = new errors.ResponseError({
       statusCode: 400,
-      body: { error: { type: 'illegal_argument_exception', reason: 'field [foo] is not supported' } },
+      body: {
+        error: { type: 'illegal_argument_exception', reason: 'field [foo] is not supported' },
+      },
     } as DiagnosticResult);
 
     mockEsClient.esql.query.mockRejectedValueOnce(otherError);
