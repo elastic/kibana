@@ -33,6 +33,7 @@ import type {
   CloudConnectorSecretReference,
 } from '../../common/types/models/cloud_connector';
 
+import { CloudConnectorRoleArnPropagationError } from '../errors';
 import { CloudConnectorService } from './cloud_connector';
 import { appContextService } from './app_context';
 import { propagateRoleArnToPackagePolicies } from './cloud_connectors';
@@ -1491,6 +1492,38 @@ describe('CloudConnectorService', () => {
           2,
           expect.objectContaining({ soClient: mockSoClient, newRoleArn: oldArn })
         );
+      });
+
+      it('surfaces updateFailed/revertFailed when post-write rollback itself fails', async () => {
+        mockSoClient.update.mockRejectedValueOnce(new Error('write-failed'));
+        const rollbackError = new CloudConnectorRoleArnPropagationError(
+          'Failed to update role ARN on 1 package policy',
+          { updateFailed: ['policy-stuck'], revertFailed: [] }
+        );
+        propagateRoleArnToPackagePoliciesMock
+          .mockResolvedValueOnce(undefined)
+          .mockRejectedValueOnce(rollbackError);
+
+        let caught: unknown;
+        try {
+          await service.update(
+            mockSoClient,
+            connectorId,
+            { vars: { role_arn: { type: 'text', value: newArn } } },
+            { esClient: mockEsClient }
+          );
+        } catch (err) {
+          caught = err;
+        }
+
+        expect(caught).toBeInstanceOf(CloudConnectorRoleArnPropagationError);
+        const propagationError = caught as CloudConnectorRoleArnPropagationError;
+        expect(propagationError.detail).toEqual({
+          updateFailed: ['policy-stuck'],
+          revertFailed: [],
+        });
+        expect(propagationError.message).toMatch(/write-failed/i);
+        expect(propagationError.message).toMatch(/policy-stuck|Failed to update role ARN/i);
       });
 
       it('throws when a role ARN change is requested without an esClient', async () => {

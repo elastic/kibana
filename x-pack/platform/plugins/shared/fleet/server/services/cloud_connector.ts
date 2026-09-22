@@ -526,6 +526,16 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
               `Revert after failed connector write also failed for ${cloudConnectorId}`,
               revertError
             );
+            // Prefer the structured policy-id lists over the bare SO write error — without
+            // them operators cannot tell which policies are still on the new ARN.
+            if (revertError instanceof CloudConnectorRoleArnPropagationError) {
+              const writeMessage =
+                writeError instanceof Error ? writeError.message : String(writeError);
+              throw new CloudConnectorRoleArnPropagationError(
+                `Cloud connector write failed (${writeMessage}); role ARN rollback also failed: ${revertError.message}`,
+                revertError.detail
+              );
+            }
           }
         }
         throw writeError;
