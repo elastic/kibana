@@ -31,7 +31,11 @@ type SecurityRoutePageWrapperProps = {
   pageName: SecurityPageName;
 } & SecurityRoutePageWrapperOptionProps;
 
-const deprectedPagesWithRedirect = [SecurityPageName.detections];
+const deprectedPagesWithRedirect = [
+  SecurityPageName.detections,
+  // Bookmark URL still registered so the inner route can redirect to the homepage.
+  SecurityPageName.entityAnalytics,
+];
 
 /**
  * This component is created to wrap all the pages in the security solution app.

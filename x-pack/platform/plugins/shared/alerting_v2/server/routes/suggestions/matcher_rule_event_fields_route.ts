@@ -9,16 +9,16 @@ import { Request } from '@kbn/core-di-server';
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import {
   errorResponseSchema,
-  matcherDataFieldsQuerySchema,
-  matcherDataFieldsResponseSchema,
-  type MatcherDataFieldsQuery,
+  ruleEventFieldsQuerySchema,
+  ruleEventFieldsResponseSchema,
+  type RuleEventFieldsQuery,
 } from '@kbn/alerting-v2-schemas';
 import { inject, injectable } from 'inversify';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { MatcherSuggestionsService } from '../../lib/services/matcher_suggestions_service/matcher_suggestions_service';
 import { ALERTING_V2_INTERNAL_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
-import { matcherDataFieldsOasExamples } from './matcher_data_fields_oas_example';
+import { ruleEventFieldsOasExamples } from './rule_event_fields_oas_example';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
 
@@ -33,18 +33,18 @@ export class MatcherRuleEventFieldsRoute extends BaseAlertingRoute {
   };
   static routeOptions = {
     access: 'internal' as const,
-    summary: 'Get matcher data fields suggestions',
-    description: 'Get suggestions for matcher data fields.',
-    oasOperationObject: matcherDataFieldsOasExamples,
+    summary: 'Get rule event fields suggestions',
+    description: 'Get suggestions for rule event fields.',
+    oasOperationObject: ruleEventFieldsOasExamples,
   } as const;
   static schemas = {
     request: {
-      query: matcherDataFieldsQuerySchema,
+      query: ruleEventFieldsQuerySchema,
     },
     response: {
       200: {
-        body: () => matcherDataFieldsResponseSchema,
-        description: 'Returns the available matcher data field names.',
+        body: () => ruleEventFieldsResponseSchema,
+        description: 'Returns the available rule event field names.',
       },
       400: {
         body: () => errorResponseSchema,
@@ -58,7 +58,7 @@ export class MatcherRuleEventFieldsRoute extends BaseAlertingRoute {
   constructor(
     @inject(AlertingRouteContext) ctx: AlertingRouteContext,
     @inject(Request)
-    private readonly request: KibanaRequest<unknown, MatcherDataFieldsQuery, unknown>,
+    private readonly request: KibanaRequest<unknown, RuleEventFieldsQuery, unknown>,
     @inject(MatcherSuggestionsService)
     private readonly suggestionsService: MatcherSuggestionsService
   ) {
@@ -67,7 +67,7 @@ export class MatcherRuleEventFieldsRoute extends BaseAlertingRoute {
 
   protected async execute() {
     const { matcher } = this.request.query ?? {};
-    const fields = await this.suggestionsService.getDataFieldNames(matcher);
+    const fields = await this.suggestionsService.getRuleEventFieldNames(matcher);
     return this.ctx.response.ok({ body: fields });
   }
 }
