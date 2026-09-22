@@ -49,7 +49,8 @@ const enterpriseCollection = (empty: boolean) => ({
 
 // resolveMitreBuckets fetches both frameworks, so the mock answers per framework.
 const makeClient = (empty = false): { client: MitreAttackDataClient; mockList: jest.Mock } => {
-  const mockList = jest.fn(({ framework }: { framework?: string } = {}) =>
+  const mockList = jest.fn();
+  mockList.mockImplementation(({ framework }: { framework?: string } = {}) =>
     Promise.resolve(framework === 'atlas' ? atlasCollection : enterpriseCollection(empty))
   );
   const client: MitreAttackDataClient = { list: mockList, getById: jest.fn() };
@@ -105,7 +106,8 @@ describe('resolveMitreBuckets — managed path', () => {
 
   it('does not poison the cache when list() throws, and retries on the next call', async () => {
     let enterpriseAttempts = 0;
-    const mockList = jest.fn(({ framework }: { framework?: string } = {}) => {
+    const mockList = jest.fn();
+    mockList.mockImplementation(({ framework }: { framework?: string } = {}) => {
       if (framework === 'atlas') {
         return Promise.resolve(atlasCollection);
       }
