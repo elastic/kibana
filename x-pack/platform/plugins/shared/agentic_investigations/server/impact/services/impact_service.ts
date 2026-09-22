@@ -39,9 +39,14 @@ export class ImpactService {
     }
 
     const existing = await this.findByConversationId(params.conversationId, spaceId);
-    if (!existing) {
-      const id = uuidv4();
-      const document: ImpactDocument = {
+    if (entityIds.length === 0) {
+      throw new ImpactInvalidRequestError('entityIds must contain at least one id');
+    }
+    if (entityIds.length > MAX_ENTITY_IDS) {
+      throw new ImpactInvalidRequestError(
+        `entityIds may not exceed ${MAX_ENTITY_IDS} unique ids for a conversation`
+      );
+    }
         spaceId,
         conversationId: params.conversationId,
         entities,
