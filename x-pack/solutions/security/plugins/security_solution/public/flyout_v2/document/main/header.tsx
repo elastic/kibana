@@ -30,6 +30,7 @@ import type { CellActionRenderer } from '../../shared/components/cell_actions';
 import { noopCellActionRenderer } from '../../shared/components/cell_actions';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
+import { useFlyoutSessionContext } from '../../session_context';
 import { ShareUrlIconButton } from '../../shared/components/share_url_icon_button';
 import { SettingsMenu } from '../../shared/components/settings_menu';
 import { useGetFlyoutLink } from '../../../flyout/document_details/right/hooks/use_get_flyout_link';
@@ -83,6 +84,9 @@ export const Header: FC<HeaderProps> = memo(
     // The settings menu (push vs overlay) is a Security Solution feature; it must not appear when
     // this same header is rendered inside Discover.
     const isSecurityApp = useIsInSecurityApp();
+    // Its controls are inert in a child flyout (always an overlay, no persisted width of its own),
+    // so hide the whole gear there rather than showing controls that do nothing.
+    const { isChildFlyout } = useFlyoutSessionContext();
     const isAlert = useMemo(
       () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
       [hit]
@@ -109,7 +113,7 @@ export const Header: FC<HeaderProps> = memo(
             ariaLabel={SHARE_ALERT_LABEL}
             dataTestSubj={DOCUMENT_FLYOUT_HEADER_SHARE_BUTTON_TEST_ID}
           />
-          {isSecurityApp && (
+          {isSecurityApp && !isChildFlyout && (
             <EuiFlexItem grow={false}>
               <SettingsMenu />
             </EuiFlexItem>
