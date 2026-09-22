@@ -6,6 +6,7 @@
  */
 
 import { createHash } from 'node:crypto';
+
 import type { EncryptedSavedObjectTypeRegistration } from './encrypted_saved_objects_service';
 
 /**
@@ -246,7 +247,7 @@ export class EncryptedSavedObjectAttributesDefinition {
     return aadAttributes;
   }
 
-    /**
+  /**
    * Gets a unique hash value based on the ESO type properties
    * @param typeName optional name of the type.
    * @returns string - unique hash for the eso definition, including name if provided
