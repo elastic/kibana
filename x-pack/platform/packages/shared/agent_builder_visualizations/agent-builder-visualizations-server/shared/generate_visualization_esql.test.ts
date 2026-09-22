@@ -86,23 +86,6 @@ describe('generateVisualizationEsql', () => {
     );
   });
 
-  it('forwards additional context to generateEsql', async () => {
-    mockedGenerateEsql.mockResolvedValue({ query: 'FROM logs-*' } as Awaited<
-      ReturnType<typeof generateEsql>
-    >);
-
-    await generateVisualizationEsql({
-      ...params,
-      additionalContext: 'A provided ES|QL query failed to execute',
-    });
-
-    expect(mockedGenerateEsql).toHaveBeenCalledWith(
-      expect.objectContaining({
-        additionalContext: 'A provided ES|QL query failed to execute',
-      })
-    );
-  });
-
   it('appends renderer-specific extra instructions to the shared ones', async () => {
     mockedGenerateEsql.mockResolvedValue({ query: 'FROM logs-*' } as Awaited<
       ReturnType<typeof generateEsql>
@@ -210,25 +193,6 @@ describe('generateVisualizationEsql', () => {
       expect(fallbackCall.additionalContext).toContain(
         'FROM logs-* | STATS c = COUNT() BY status.keyword'
       );
-      expect(fallbackCall.additionalContext).toContain('Unknown column [status.keyword]');
-    });
-
-    it('keeps caller additional context on the default-model fallback', async () => {
-      mockedGenerateEsql
-        .mockResolvedValueOnce({
-          error: 'Unknown column [status.keyword]',
-        } as Awaited<ReturnType<typeof generateEsql>>)
-        .mockResolvedValueOnce({
-          query: 'FROM logs-* | STATS c = COUNT() BY status',
-        } as Awaited<ReturnType<typeof generateEsql>>);
-
-      await generateVisualizationEsql({
-        ...params,
-        additionalContext: 'A provided ES|QL query failed to execute',
-      });
-
-      const fallbackCall = mockedGenerateEsql.mock.calls[1][0];
-      expect(fallbackCall.additionalContext).toContain('A provided ES|QL query failed to execute');
       expect(fallbackCall.additionalContext).toContain('Unknown column [status.keyword]');
     });
 

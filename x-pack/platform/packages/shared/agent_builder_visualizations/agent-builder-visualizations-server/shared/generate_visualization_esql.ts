@@ -53,11 +53,6 @@ interface GenerateVisualizationEsqlParams {
    * Vega's stricter time-range-filtering requirements.
    */
   extraInstructions?: string;
-  /**
-   * Extra generation context, e.g. a provided query that failed the schema
-   * probe. Forwarded to generateEsql so the model can correct it.
-   */
-  additionalContext?: string;
 }
 
 /**
@@ -127,7 +122,6 @@ export const generateVisualizationEsql = async ({
   esClient,
   timeRange,
   extraInstructions,
-  additionalContext,
 }: GenerateVisualizationEsqlParams): Promise<GeneratedVisualizationEsql> => {
   const instructions = buildEsqlAdditionalInstructions(index);
   const requestParams = {
@@ -141,7 +135,6 @@ export const generateVisualizationEsql = async ({
       : instructions,
     execute: 'schema' as const,
     ...(timeRange ? { timeRange } : {}),
-    ...(additionalContext ? { additionalContext } : {}),
   };
 
   const response = await generateEsql({ ...requestParams, modelProvider, maxRetries: 2 });
@@ -162,9 +155,7 @@ export const generateVisualizationEsql = async ({
     ...requestParams,
     model: defaultModel,
     maxRetries: 1,
-    additionalContext: [additionalContext, buildFallbackContext(response.query, error)]
-      .filter(Boolean)
-      .join('\n'),
+    additionalContext: buildFallbackContext(response.query, error),
   });
   const fallbackError = fallbackResponse.error ?? findTargetError(fallbackResponse.query, index);
 

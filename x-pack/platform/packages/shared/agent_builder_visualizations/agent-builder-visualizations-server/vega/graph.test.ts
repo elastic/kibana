@@ -9,7 +9,6 @@ import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server'
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { generateEsql, executeEsql } from '@kbn/agent-builder-genai-utils';
-import { createEsqlResponseError } from '../shared/esql_response_error.mock';
 import { VEGA_LITE_SCHEMA } from './normalize_spec';
 import { createVegaGraph } from './graph';
 
@@ -81,12 +80,7 @@ describe('createVegaGraph', () => {
   });
 
   const run = async (
-    input: {
-      esqlQuery?: string;
-      existingSpec?: string;
-      existingEsql?: string;
-      preserveESQL?: boolean;
-    } = {}
+    input: { esqlQuery?: string; existingSpec?: string; existingEsql?: string } = {}
   ) => {
     const graph = await createVegaGraph(modelProvider, logger, events, esClient);
     return graph.invoke({
@@ -94,7 +88,6 @@ describe('createVegaGraph', () => {
       index: undefined,
       existingSpec: input.existingSpec,
       existingEsql: input.existingEsql,
-      preserveESQL: input.preserveESQL,
       esqlQuery: input.esqlQuery ?? '',
       currentAttempt: 0,
       actions: [],
@@ -335,51 +328,26 @@ describe('createVegaGraph', () => {
     expect(JSON.parse(state.spec!).mark).toBe('arc');
   });
 
-  it('regenerates a corrected query when the provided ES|QL fails to execute', async () => {
+  it('keeps a provided query and infers fields from its text when the probe fails', async () => {
+    mockedExecuteEsql.mockRejectedValue(new Error('circuit_breaking_exception'));
     invoke.mockResolvedValue(asCodeBlock({ mark: 'bar' }));
-    // The provided query throws (an invalid, agent-invented query); generation
-    // then supplies a runnable query and its schema-probe columns.
-    mockedExecuteEsql.mockRejectedValueOnce(
-      createEsqlResponseError(
-        'verification_exception',
-        'second argument of [half_ms * 1ms] must be [numeric]'
-      )
-    );
-    mockedGenerateEsql.mockResolvedValue({
-      query: GENERATED_ESQL,
-      results: { columns: [{ name: 'count', type: 'long' }], values: [] },
-    } as Awaited<ReturnType<typeof generateEsql>>);
 
     const state = await run({ esqlQuery: PROVIDED_ESQL });
 
-    // A bad provided query is routed through the self-correcting generator
-    // instead of aborting, so we still produce a working chart.
-    expect(mockedGenerateEsql).toHaveBeenCalledTimes(1);
-    expect(mockedExecuteEsql).toHaveBeenCalledTimes(1);
+    // The probe is best-effort: a failure only costs column information and
+    // never discards or regenerates the query.
+    expect(mockedExecuteEsql).toHaveBeenCalledWith(
+      expect.objectContaining({ query: PROVIDED_ESQL, dropNullColumns: false, limit: 1 })
+    );
+    expect(mockedGenerateEsql).not.toHaveBeenCalled();
+    expect(JSON.stringify(invoke.mock.calls[0][0])).toContain('No column information is available');
+    expect(state.actions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'generate_esql', success: true, query: PROVIDED_ESQL }),
+      ])
+    );
     expect(state.error).toBeNull();
-    expect(JSON.parse(state.spec!).data.url.query).toBe(GENERATED_ESQL);
-  });
-
-  it('aborts only after both the provided query and regeneration fail to execute', async () => {
-    mockedExecuteEsql.mockRejectedValue(
-      createEsqlResponseError(
-        'verification_exception',
-        'second argument of [half_ms * 1ms] must be [numeric]'
-      )
-    );
-    mockedGenerateEsql.mockResolvedValue({
-      error: 'verification_exception: second argument of [half_ms * 1ms] must be [numeric]',
-    } as Awaited<ReturnType<typeof generateEsql>>);
-
-    const state = await run({ esqlQuery: PROVIDED_ESQL });
-
-    // The provided query is discarded and regeneration is attempted (low-effort
-    // model, then default-model fallback); when that also fails, we abort.
-    expect(mockedGenerateEsql).toHaveBeenCalledTimes(2);
-    expect(invoke).not.toHaveBeenCalled();
-    expect(state.spec).toBeNull();
-    expect(state.error).toContain('Could not resolve a valid ES|QL query');
-    expect(state.error).toContain('verification_exception');
+    expect(JSON.parse(state.spec!).data.url.query).toBe(PROVIDED_ESQL);
   });
 
   it('aborts when generateEsql exhausts its retries and returns an error', async () => {
@@ -405,32 +373,5 @@ describe('createVegaGraph', () => {
     expect(state.spec).toBeNull();
     expect(state.error).toEqual(expect.any(String));
     expect(invoke).toHaveBeenCalledTimes(3);
-  });
-
-  it('authors an appearance-only edit without regenerating ES|QL when the probe fails', async () => {
-    mockedExecuteEsql.mockRejectedValue(new Error('verification_exception'));
-    mockedGenerateEsql.mockResolvedValue({
-      error: 'verification_exception',
-    } as Awaited<ReturnType<typeof generateEsql>>);
-    invoke.mockResolvedValue(asCodeBlock({ mark: 'bar' }));
-
-    const state = await run({ esqlQuery: PROVIDED_ESQL, preserveESQL: true });
-
-    expect(mockedExecuteEsql).toHaveBeenCalledWith(
-      expect.objectContaining({ query: PROVIDED_ESQL, dropNullColumns: false, limit: 1 })
-    );
-    expect(mockedGenerateEsql).not.toHaveBeenCalled();
-    expect(JSON.stringify(invoke.mock.calls[0][0])).toContain('No column information is available');
-    expect(state.actions).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          type: 'generate_esql',
-          success: true,
-          query: PROVIDED_ESQL,
-        }),
-      ])
-    );
-    expect(state.error).toBeNull();
-    expect(JSON.parse(state.spec!).data.url.query).toBe(PROVIDED_ESQL);
   });
 });

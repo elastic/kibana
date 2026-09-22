@@ -83,11 +83,10 @@ export const buildLensConfig = async ({
   const schema = getSchemaForChartType(selectedChartType);
   const graph = await createVisualizationGraph(modelProvider, logger, events, esClient);
 
-  // A provided ES|QL query is handed to the graph as-is: its resolve node
-  // executes the query (which subsumes syntax validation) and regenerates a
-  // corrected one when execution fails. It therefore supersedes preserving
-  // the existing query, which is only ever kept verbatim when it is the one
-  // recovered from the configuration being edited.
+  // A provided ES|QL query is handed to the graph as-is and only probed for
+  // its result columns. It therefore supersedes preserving the existing query,
+  // which is only ever kept verbatim when it is the one recovered from the
+  // configuration being edited.
   if (preserveESQL && esql) {
     logger.warn(
       'Both an ES|QL query and preserveESQL were given; the provided query takes precedence and the existing one is not preserved.'

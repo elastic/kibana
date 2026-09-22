@@ -5,29 +5,44 @@
  * 2.0.
  */
 
+import { executeEsql } from '@kbn/agent-builder-genai-utils';
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
-import { probeEsqlColumns, resolveEsqlForAuthoring } from './resolve_esql_for_authoring';
+import { generateVisualizationEsql } from './generate_visualization_esql';
 import { runResolveEsqlNode } from './run_resolve_esql_node';
 
-jest.mock('./resolve_esql_for_authoring', () => ({
-  resolveEsqlForAuthoring: jest.fn(),
-  probeEsqlColumns: jest.fn(),
+jest.mock('@kbn/agent-builder-genai-utils', () => ({
+  executeEsql: jest.fn(),
+  buildTimeRangeParams: jest.fn((range?: { from: string; to: string }) =>
+    range ? [{ _tstart: range.from }, { _tend: range.to }] : undefined
+  ),
+  DEFAULT_ESQL_TIME_RANGE: { from: 'now-24h', to: 'now' },
 }));
 
-const mockedResolve = jest.mocked(resolveEsqlForAuthoring);
-const mockedProbe = jest.mocked(probeEsqlColumns);
+jest.mock('./generate_visualization_esql', () => ({
+  generateVisualizationEsql: jest.fn(),
+}));
 
-const COLUMNS = [{ name: 'count', type: 'long' as const }];
+const mockedExecuteEsql = jest.mocked(executeEsql);
+const mockedGenerate = jest.mocked(generateVisualizationEsql);
+
+const COLUMNS = [
+  { name: 'count', type: 'long' as const },
+  { name: 'status', type: 'keyword' as const },
+];
+
 const logger = { debug: jest.fn(), warn: jest.fn(), error: jest.fn() } as unknown as Logger;
 const events = {} as ToolEventEmitter;
 const modelProvider = {} as ModelProvider;
-const esClient = { asCurrentUser: {} } as IScopedClusterClient;
+const asCurrentUser = { name: 'current-user' };
+const esClient = { asCurrentUser } as unknown as IScopedClusterClient;
+
+const PROVIDED_QUERY = 'FROM logs-* | STATS count = COUNT(*) BY status';
 
 const params = {
-  esqlQuery: 'FROM logs-* | STATS count = COUNT(*)',
-  nlQuery: 'count logs',
+  esqlQuery: PROVIDED_QUERY,
+  nlQuery: 'count logs by status',
   index: 'logs-*',
   existingQueries: ['FROM logs-*'],
   extraInstructions: 'vega-rules',
@@ -39,37 +54,59 @@ const params = {
 
 describe('runResolveEsqlNode', () => {
   beforeEach(() => {
-    mockedResolve.mockReset();
-    mockedProbe.mockReset();
+    mockedExecuteEsql.mockReset();
+    mockedGenerate.mockReset();
+    jest.mocked(logger.warn).mockClear();
     jest.mocked(logger.error).mockClear();
   });
 
-  it('keeps the stored query and only probes its columns on appearance-only edits', async () => {
-    mockedProbe.mockResolvedValue(COLUMNS);
+  it('probes a provided query for columns with the schema request shape and does not generate', async () => {
+    mockedExecuteEsql.mockResolvedValue({ columns: COLUMNS, values: [] } as Awaited<
+      ReturnType<typeof executeEsql>
+    >);
 
-    const result = await runResolveEsqlNode({ ...params, preserveESQL: true });
+    const result = await runResolveEsqlNode(params);
 
-    expect(mockedResolve).not.toHaveBeenCalled();
-    expect(mockedProbe).toHaveBeenCalledWith(params.esqlQuery, esClient, logger);
+    expect(mockedExecuteEsql).toHaveBeenCalledWith({
+      query: PROVIDED_QUERY,
+      dropNullColumns: false,
+      limit: 1,
+      params: [{ _tstart: 'now-24h' }, { _tend: 'now' }],
+      esClient: asCurrentUser,
+    });
+    expect(mockedGenerate).not.toHaveBeenCalled();
     expect(result).toEqual({
-      esqlQuery: params.esqlQuery,
+      esqlQuery: PROVIDED_QUERY,
       columns: COLUMNS,
+      actions: [{ type: 'generate_esql', success: true, query: PROVIDED_QUERY, columns: COLUMNS }],
+    });
+  });
+
+  it('keeps a provided query without columns when the probe fails', async () => {
+    mockedExecuteEsql.mockRejectedValue(new Error('verification_exception: unknown column foo'));
+
+    const result = await runResolveEsqlNode(params);
+
+    expect(mockedGenerate).not.toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('verification_exception: unknown column foo')
+    );
+    expect(result).toEqual({
+      esqlQuery: PROVIDED_QUERY,
+      columns: undefined,
       actions: [
-        { type: 'generate_esql', success: true, query: params.esqlQuery, columns: COLUMNS },
+        { type: 'generate_esql', success: true, query: PROVIDED_QUERY, columns: undefined },
       ],
     });
   });
 
-  it('maps a resolved query and columns onto a generate_esql action', async () => {
-    mockedResolve.mockResolvedValue({
-      query: 'FROM logs-* | STATS count = COUNT(*) BY status',
-      columns: COLUMNS,
-    });
+  it('generates a query when none is provided and trusts its schema-run columns', async () => {
+    mockedGenerate.mockResolvedValue({ query: PROVIDED_QUERY, columns: COLUMNS });
 
-    const result = await runResolveEsqlNode(params);
+    const result = await runResolveEsqlNode({ ...params, esqlQuery: '' });
 
-    expect(mockedResolve).toHaveBeenCalledWith({
-      providedQuery: params.esqlQuery,
+    expect(mockedExecuteEsql).not.toHaveBeenCalled();
+    expect(mockedGenerate).toHaveBeenCalledWith({
       nlQuery: params.nlQuery,
       index: params.index,
       existingQueries: params.existingQueries,
@@ -80,21 +117,14 @@ describe('runResolveEsqlNode', () => {
       esClient,
     });
     expect(result).toEqual({
-      esqlQuery: 'FROM logs-* | STATS count = COUNT(*) BY status',
+      esqlQuery: PROVIDED_QUERY,
       columns: COLUMNS,
-      actions: [
-        {
-          type: 'generate_esql',
-          success: true,
-          query: 'FROM logs-* | STATS count = COUNT(*) BY status',
-          columns: COLUMNS,
-        },
-      ],
+      actions: [{ type: 'generate_esql', success: true, query: PROVIDED_QUERY, columns: COLUMNS }],
     });
   });
 
-  it('maps a resolve error onto a failed generate_esql action', async () => {
-    mockedResolve.mockResolvedValue({ error: 'no such index [logs-*]' });
+  it('maps a generation error onto a failed generate_esql action', async () => {
+    mockedGenerate.mockResolvedValue({ error: 'no such index [logs-*]' });
 
     const result = await runResolveEsqlNode({ ...params, esqlQuery: '' });
 
@@ -105,16 +135,16 @@ describe('runResolveEsqlNode', () => {
     });
   });
 
-  it('maps a thrown resolve error onto a failed generate_esql action', async () => {
-    mockedResolve.mockRejectedValue(new Error('connector unavailable'));
+  it('maps a thrown generation error onto a failed generate_esql action', async () => {
+    mockedGenerate.mockRejectedValue(new Error('connector unavailable'));
 
-    const result = await runResolveEsqlNode(params);
+    const result = await runResolveEsqlNode({ ...params, esqlQuery: '' });
 
     expect(logger.error).toHaveBeenCalledWith(
       'Failed to resolve ES|QL query: connector unavailable'
     );
     expect(result).toEqual({
-      esqlQuery: params.esqlQuery,
+      esqlQuery: '',
       columns: undefined,
       actions: [{ type: 'generate_esql', success: false, error: 'connector unavailable' }],
     });
