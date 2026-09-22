@@ -2988,7 +2988,7 @@ describe('ActionPolicyClient', () => {
       const result = await client.matchActionPolicies({ ruleTags: ['prod'] });
 
       expect(result.items).toHaveLength(1);
-      expect(result.items[0].category).toBe('catch-all');
+      expect(result.items[0].category).toBe('catch_all');
       expect(result.items[0].action_policy.id).toBe('ap-catchall');
       expect(result.total).toBe(150);
       expect(result.evaluated_count).toBe(1);
@@ -3041,7 +3041,7 @@ describe('ActionPolicyClient', () => {
       const result = await client.matchActionPolicies({ ruleTags: ['prod'] });
 
       expect(result.items).toHaveLength(1);
-      expect(result.items[0].category).toBe('catch-all');
+      expect(result.items[0].category).toBe('catch_all');
       expect(result.items[0].action_policy.id).toBe('ap-empty-matcher');
     });
 
@@ -3053,7 +3053,7 @@ describe('ActionPolicyClient', () => {
       const result = await client.matchActionPolicies({});
 
       expect(result.items).toHaveLength(1);
-      expect(result.items[0].category).toBe('catch-all');
+      expect(result.items[0].category).toBe('catch_all');
     });
 
     it('returns tags APs when the rule tags intersect the matcher tag clause', async () => {

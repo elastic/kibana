@@ -351,14 +351,14 @@ export const getRootEsqlQuery = (query: Query): string =>
 
 /** State transition (optional, alert-only) */
 
-export const stateTransitionOperatorSchema = z.enum(['AND', 'OR']);
+export const stateTransitionOperatorSchema = z.enum(['and', 'or']);
 
 export const stateTransitionSchema = z
   .object({
     pending_operator: stateTransitionOperatorSchema
       .optional()
       .describe(
-        'The operator that combines `pending_count` and `pending_timeframe`. `AND` requires both. `OR` requires either.'
+        'The operator that combines `pending_count` and `pending_timeframe`. `and` requires both. `or` requires either.'
       ),
     pending_count: z
       .number()
@@ -373,7 +373,7 @@ export const stateTransitionSchema = z
     recovering_operator: stateTransitionOperatorSchema
       .optional()
       .describe(
-        'The operator that combines `recovering_count` and `recovering_timeframe`. `AND` requires both. `OR` requires either.'
+        'The operator that combines `recovering_count` and `recovering_timeframe`. `and` requires both. `or` requires either.'
       ),
     recovering_count: z
       .number()

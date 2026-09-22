@@ -33,8 +33,8 @@ const QUERY_OVERFLOW_HEIGHT = 240;
  * Possible outputs:
  *  - count only:     "After 3 matches"
  *  - timeframe only: "After 5 min"
- *  - both (OR):      "After 3 matches or 5 min"
- *  - both (AND):     "After 3 matches and 5 min"
+ *  - both (or):      "After 3 matches or 5 min"
+ *  - both (and):     "After 3 matches and 5 min"
  */
 const formatDelay = ({
   count,
@@ -51,7 +51,7 @@ const formatDelay = ({
   const hasTimeframe = timeframe != null;
 
   if (hasCount && hasTimeframe) {
-    const connector = operator === 'AND' ? AND_OPERATOR_LABEL : OR_OPERATOR_LABEL;
+    const connector = operator === 'and' ? AND_OPERATOR_LABEL : OR_OPERATOR_LABEL;
 
     return i18n.translate('xpack.alertingV2.ruleDetails.delayCountAndTimeframe', {
       defaultMessage: 'After {countPart} {connector} {timeframePart}',

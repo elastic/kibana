@@ -230,7 +230,7 @@
     },
     {
       "id": "e747878cbda0163-2460e798459b606",
-      "title": "Director transitions recovering -> inactive via recovering_timeframe when recovering_operator is OR",
+      "title": "Director transitions recovering -> inactive via recovering_timeframe when recovering_operator is or",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -244,7 +244,7 @@
     },
     {
       "id": "e747878cbda0163-7182c84cbe7c68a",
-      "title": "Director keeps the latest episode in recovering when only recovering_timeframe is met under recovering_operator AND",
+      "title": "Director keeps the latest episode in recovering when only recovering_timeframe is met under recovering_operator and",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -258,7 +258,7 @@
     },
     {
       "id": "e747878cbda0163-5c5ce4414752b37",
-      "title": "Director keeps the latest episode in pending when only pending_timeframe is met under pending_operator AND",
+      "title": "Director keeps the latest episode in pending when only pending_timeframe is met under pending_operator and",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -272,7 +272,7 @@
     },
     {
       "id": "e747878cbda0163-7faf6350097a4dc",
-      "title": "Director transitions pending -> active under pending_operator AND when both count and timeframe are met",
+      "title": "Director transitions pending -> active under pending_operator and when both count and timeframe are met",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",

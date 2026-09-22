@@ -568,10 +568,10 @@ describe('rule template create-rule schema coupling', () => {
                       "type": "integer",
                     },
                     "pending_operator": Object {
-                      "description": "The operator that combines \`pending_count\` and \`pending_timeframe\`. \`AND\` requires both. \`OR\` requires either.",
+                      "description": "The operator that combines \`pending_count\` and \`pending_timeframe\`. \`and\` requires both. \`or\` requires either.",
                       "enum": Array [
-                        "AND",
-                        "OR",
+                        "and",
+                        "or",
                       ],
                       "type": "string",
                     },
@@ -587,10 +587,10 @@ describe('rule template create-rule schema coupling', () => {
                       "type": "integer",
                     },
                     "recovering_operator": Object {
-                      "description": "The operator that combines \`recovering_count\` and \`recovering_timeframe\`. \`AND\` requires both. \`OR\` requires either.",
+                      "description": "The operator that combines \`recovering_count\` and \`recovering_timeframe\`. \`and\` requires both. \`or\` requires either.",
                       "enum": Array [
-                        "AND",
-                        "OR",
+                        "and",
+                        "or",
                       ],
                       "type": "string",
                     },

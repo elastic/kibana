@@ -54,7 +54,7 @@ export const MatchedPolicyReason = ({ category, matcher, ruleTags }: Props) => {
   const trimmedExpression = matcher?.expression?.trim() || null;
   const matcherTags = matcher?.tags?.length ? matcher.tags : null;
 
-  const isCatchAll = category === 'catch-all';
+  const isCatchAll = category === 'catch_all';
 
   if (isCatchAll) {
     return (

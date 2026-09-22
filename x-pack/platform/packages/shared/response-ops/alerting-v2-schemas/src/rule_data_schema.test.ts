@@ -67,10 +67,10 @@ describe('createRuleDataSchema', () => {
         recovery_strategy: 'no_breach',
         grouping: { fields: ['host.name'] },
         state_transition: {
-          pending_operator: 'AND',
+          pending_operator: 'and',
           pending_count: 3,
           pending_timeframe: '10m',
-          recovering_operator: 'OR',
+          recovering_operator: 'or',
           recovering_count: 5,
           recovering_timeframe: '15m',
         },
@@ -85,10 +85,10 @@ describe('createRuleDataSchema', () => {
           recovery_strategy: 'no_breach',
           grouping: { fields: ['host.name'] },
           state_transition: {
-            pending_operator: 'AND',
+            pending_operator: 'and',
             pending_count: 3,
             pending_timeframe: '10m',
-            recovering_operator: 'OR',
+            recovering_operator: 'or',
             recovering_count: 5,
             recovering_timeframe: '15m',
           },
@@ -697,14 +697,14 @@ describe('createRuleDataSchema', () => {
       const result = createRuleDataSchema.parse({
         ...validCreateData,
         state_transition: {
-          pending_operator: 'AND',
+          pending_operator: 'and',
           pending_count: 2,
           pending_timeframe: '10m',
         },
       });
 
       expect(result.state_transition).toEqual({
-        pending_operator: 'AND',
+        pending_operator: 'and',
         pending_count: 2,
         pending_timeframe: '10m',
       });
@@ -715,14 +715,14 @@ describe('createRuleDataSchema', () => {
         ...validCreateData,
         recovery_strategy: 'no_breach',
         state_transition: {
-          recovering_operator: 'OR',
+          recovering_operator: 'or',
           recovering_count: 5,
           recovering_timeframe: '15m',
         },
       });
 
       expect(result.state_transition).toEqual({
-        recovering_operator: 'OR',
+        recovering_operator: 'or',
         recovering_count: 5,
         recovering_timeframe: '15m',
       });
