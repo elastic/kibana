@@ -92,7 +92,12 @@ triggers:
           description: Agent Builder agent id. Overrides the uiSettings-derived agentId.
         tagPrefix:
           type: string
-          description: Tag prefix for workflow tags. Overrides the uiSettings tagPrefix.
+          maxLength: 256
+          pattern: '^(?=.*[a-zA-Z0-9])[a-zA-Z0-9._-]+$'
+          description: >
+            Tag prefix for workflow tags. Overrides the uiSettings tagPrefix.
+            Same length/pattern constraints as the uiSettings value (interpolated into
+            filter expressions).
         connectorIdByFeature:
           type: string
           minLength: 1
