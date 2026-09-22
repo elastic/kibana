@@ -13,7 +13,6 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { PROJECT_ROUTING_ALL } from '@kbn/cps-server-utils';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/server';
 import { NIGHTSHIFT_FEATURE_ID } from '@kbn/nightshift-shared';
@@ -36,13 +35,11 @@ const createSourcesClient = (
   request: KibanaRequest,
   logger: Logger
 ): SourcesClient => {
-  // The hidden type is not on the Nightshift feature's savedObject lists, so the saved objects
-  // security extension would reject everyone but superusers. Route authz (or the engine's own
-  // equivalent) is the access check; `getSourcesClient` does not re-check Nightshift privileges.
-  // The spaces extension stays on so every call is scoped to the request's space.
+  // Hidden types are left out of the scoped client unless named. Nightshift `all` / `read`
+  // grant this type, so the security extension authorizes the call and writes the audit event.
+  // `configure_nightshift` does not include it. The spaces extension stays on.
   const soClient = core.savedObjects.getScopedClient(request, {
     includedHiddenTypes: [NIGHTSHIFT_SOURCE_SO_TYPE],
-    excludedExtensions: [SECURITY_EXTENSION_ID],
   });
 
   // Views live in the origin project. Validation and health probes read the data behind a

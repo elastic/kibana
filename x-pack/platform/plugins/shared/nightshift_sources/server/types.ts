@@ -14,9 +14,9 @@ export type NightshiftSourcesServerSetup = void;
 
 export interface NightshiftSourcesServerStart {
   /**
-   * Same client the HTTP routes use. Does not re-check `read_nightshift` / `manage_nightshift`;
-   * the hidden type excludes the saved-objects security extension, so the caller must already
-   * be authorized (a Nightshift-privileged route, not a weaker handler).
+   * Same client the HTTP routes use. The saved-objects security extension authorizes each call
+   * against the Nightshift feature (`all` can write `nightshift-source`, `read` can read it)
+   * and emits the audit event. `configure_nightshift` cannot use it.
    */
   getSourcesClient: GetSourcesClient;
 }

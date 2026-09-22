@@ -35,11 +35,11 @@ on the public start contract through `getClient()`.
 ## Engine access
 
 `start.getSourcesClient({ request })` is how other Nightshift plugins talk to the catalog
-without going through HTTP. It returns the same client the routes use and does not re-check
-`read_nightshift` / `manage_nightshift`. The hidden saved-object type already excludes the
-security extension, so a check here would not restore SO authorization (that path rejects
-everyone but superusers). Call it from a route that already requires those privileges.
-`create` and `update` parse the same wire schemas as HTTP, so a blank title still 400s.
+without going through HTTP. It returns the same client the routes use. The saved-objects
+security extension authorizes each call against the Nightshift feature (`all` can write
+`nightshift-source`, `read` can read it) and emits the audit event. `configure_nightshift`
+does not include the type. `create` and `update` parse the same wire schemas as HTTP, so a
+blank title still 400s.
 
 ## Query validation
 
@@ -145,8 +145,9 @@ project type in `config/serverless.yml` and back on for Observability Complete i
   orphaned `$.nightshift.sources.<spaceId>.*` views yet. ES|QL views are cluster-global; the
   Spaces boundary is the saved object. The space id in the view name is for privilege patterns,
   not ES isolation.
-- The saved objects security extension is excluded for this hidden type, so saved-object-level
-  audit events are not emitted; HTTP audit events still are.
+- Saved-object audit events cover catalog reads and writes, including `getSourcesClient`.
+  Creating or deleting the ES|QL view is an Elasticsearch call, so it is not one of those
+  events. HTTP audit events still cover the `/internal/nightshift/sources` routes.
 - Views show up in the ES|QL editor's source suggestions under their
   `$.nightshift.sources.<spaceId>.<slug>` name.
 
