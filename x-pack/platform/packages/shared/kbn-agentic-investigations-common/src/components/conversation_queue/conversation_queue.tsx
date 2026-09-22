@@ -18,7 +18,12 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { CONVERSATION_QUEUE_LABELS, type Investigation, type RecommendedAction } from '../../types';
+import {
+  CONVERSATION_CATEGORY_COLORS,
+  CONVERSATION_QUEUE_LABELS,
+  type Investigation,
+  type RecommendedAction,
+} from '../../types';
 import { EMPTY_CONVERSATION_QUEUE } from './translations';
 import { ConversationCard, type ConversationsActionsGroupProps } from '../conversation_card';
 import { type BaseActionsProps } from '../actions';
@@ -85,7 +90,9 @@ export const ConversationQueue = memo<ConversationQueueProps>(
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiBadge color="hollow">{briefingList.length}</EuiBadge>
+          <EuiBadge color={CONVERSATION_CATEGORY_COLORS[briefingType]}>
+            {briefingList.length}
+          </EuiBadge>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
