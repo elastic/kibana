@@ -217,6 +217,15 @@ describe('parseOasdiff', () => {
     ]);
   });
 
+  it('keeps a report-only rule when oasdiff reports it as a warning', () => {
+    const [change] = parseOasdiff([
+      entry({ id: 'response-property-one-of-added', text: 'added variant', level: 2 }),
+    ]);
+
+    expect(change.reportOnly).toBe(true);
+    expect(change.policyReason).toEqual(expect.any(String));
+  });
+
   it('includes promoted warning IDs at level 2', () => {
     const result = parseOasdiff([
       entry({ id: 'request-property-removed', level: 2 }),

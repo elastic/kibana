@@ -8,7 +8,7 @@
  */
 
 import type { BreakingChange } from './breaking_rules';
-import { getRulePolicy, isPromotedRule } from './rule_policy';
+import { getRulePolicy, isPromotedRule, isReportOnlyRule } from './rule_policy';
 
 export interface OasdiffEntry {
   id: string;
@@ -32,9 +32,10 @@ const ID_TO_TYPE: Readonly<Record<string, BreakingChange['type']>> = {
   'kbn:request-additional-properties-tightened': 'request_body_tightened',
 };
 
-// Warning-level (level 2) rules promoted to blocking, and error-level rules
-// demoted to report-only, both come from the declared policy in `rule_policy.ts`.
-const isIncluded = ({ id, level }: OasdiffEntry): boolean => level >= 3 || isPromotedRule(id);
+// Errors are included on oasdiff's own level. Warnings are included only when the
+// declared policy promotes them or keeps them as report-only.
+const isIncluded = ({ id, level }: OasdiffEntry): boolean =>
+  level >= 3 || isPromotedRule(id) || isReportOnlyRule(id);
 
 const mapEntryToBreakingChange = ({
   id,

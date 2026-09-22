@@ -10,13 +10,13 @@
 /**
  * What Kibana does with an oasdiff rule, regardless of the level oasdiff gives it.
  * `blocking` treats a warning-level rule as a breaking change. `report_only` keeps
- * an error-level rule in the report without gating the build.
+ * the rule in the report without gating the build, whatever level oasdiff gave it.
  */
 export type RuleDisposition = 'blocking' | 'report_only';
 
 export interface RulePolicyEntry {
   disposition: RuleDisposition;
-  /** Why Kibana overrides oasdiff here. Surfaced in the report so the call is auditable. */
+  /** Why Kibana overrides oasdiff here. A report-only reason is included with the change. */
   reason: string;
 }
 
