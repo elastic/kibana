@@ -56,6 +56,20 @@ const trimDescription = (node: JsonSchemaNode): JsonSchemaNode => {
   return node;
 };
 
+/**
+ * Drops metadata the model does not need: the draft URI, display titles and
+ * `additionalProperties: false`, which the prompt states once as a rule and
+ * the zod validator enforces anyway. Only metadata-shaped values are removed,
+ * so a chart property that happens to be named `title` is kept.
+ */
+const isSchemaMetadata = (key: string, value: unknown): boolean =>
+  (key === '$schema' && typeof value === 'string') ||
+  (key === 'title' && typeof value === 'string') ||
+  (key === 'additionalProperties' && value === false);
+
+const dropSchemaMetadata = (node: JsonSchemaNode): JsonSchemaNode =>
+  Object.fromEntries(Object.entries(node).filter(([key, value]) => !isSchemaMetadata(key, value)));
+
 const dropSystemOwnedProperties = (node: JsonSchemaNode): JsonSchemaNode => {
   const { properties, required } = node;
   if (!isSchemaNode(properties)) {
@@ -118,7 +132,7 @@ const dropUnreachableDefs = (schema: JsonSchemaNode): JsonSchemaNode => {
 
 const toPromptSchema = (schema: z.ZodType): object => {
   const jsonSchema = mapSchemaNodes(z.toJSONSchema(schema), (node) =>
-    dropSystemOwnedProperties(trimDescription(node))
+    dropSystemOwnedProperties(dropSchemaMetadata(trimDescription(node)))
   ) as JsonSchemaNode;
   return dropUnreachableDefs(jsonSchema);
 };
