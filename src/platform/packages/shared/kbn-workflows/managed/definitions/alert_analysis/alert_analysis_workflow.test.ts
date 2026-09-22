@@ -690,6 +690,20 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     // space-level true and close FPs inside the sub-workflow. An explicit input still wins
     // via the presence gate below (`| default:` would swallow false).
     expect(setStep.with.auto_close_enabled).toBe(false);
+    expect(setStep.with.auto_close_confidence_score_max_threshold).toBeUndefined();
+    const collapseMaxGate = findStepByName(
+      overrideStep.steps,
+      'collapse_max_threshold_if_min_provided'
+    ) as {
+      type: string;
+      condition: string;
+      steps: Array<{ with: Record<string, number> }>;
+    };
+    expect(collapseMaxGate.type).toBe('if');
+    expect(collapseMaxGate.condition).toBe(
+      '${{ inputs.autoCloseConfidenceScoreMinThreshold != null }}'
+    );
+    expect(collapseMaxGate.steps[0].with.auto_close_confidence_score_max_threshold).toBe(1);
     const autoCloseGate = findStepByName(
       overrideStep.steps,
       'set_auto_close_enabled_if_provided'
@@ -697,8 +711,6 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(autoCloseGate.type).toBe('if');
     expect(autoCloseGate.condition).toBe('${{ inputs.autoCloseEnabled != null }}');
     expect(autoCloseGate.steps[0].with.auto_close_enabled).toBe('${{ inputs.autoCloseEnabled }}');
-    // Max threshold collapsed to 1 so the Worker's min threshold acts as a floor only
-    expect(setStep.with.auto_close_confidence_score_max_threshold).toBe(1);
     // String fields use Liquid | default: (safe because empty string is the only falsy edge case
     // and neither field would be intentionally set to "")
     expect(setStep.with.agent_id).toBe('{{ inputs.agentId | default: variables.agent_id }}');
@@ -712,9 +724,8 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
   });
 
   // `workflow.execute` hands the child only `inputs` — a child run has no trigger event —
-  // so without a caller-supplied alert set the workflow reads an absent `event.alerts`,
-  // counts zero pending alerts, skips the whole analysis and returns empty verdicts. It
-  // reports success while doing nothing, which is why this is asserted rather than assumed.
+  // so without a caller-supplied alert set the Worker path would read zero alerts. That
+  // used to complete with empty output; it now fails via workflow.fail (asserted below).
   it('analyses a caller-supplied alert set, falling back to the trigger event', () => {
     // Caller inputs are declared on the manual trigger (AlertRuleTriggerSchema strips inputs).
     const manualTrigger = (
@@ -787,6 +798,32 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
       ({ name }) => name !== 'set_alert_set'
     );
     expect(JSON.stringify(stepsWithoutResolver)).not.toContain('event.alerts');
+  });
+
+  it('fails the Worker path when alerts is missing or empty instead of completing empty', () => {
+    const missingGate = findStepByName(workflow.steps, 'require_caller_alerts_present') as {
+      type: string;
+      condition: string;
+      steps: Array<{ name: string; type: string; with: { message: string } }>;
+    };
+    expect(missingGate.type).toBe('if');
+    expect(missingGate.condition).toBe(
+      '${{ inputs.calledByWorker == true and inputs.alerts == null }}'
+    );
+    expect(missingGate.steps[0].type).toBe('workflow.fail');
+    expect(missingGate.steps[0].with.message).toContain('alerts');
+
+    const emptyGate = findStepByName(workflow.steps, 'require_caller_alerts_nonempty') as {
+      type: string;
+      condition: string;
+      steps: Array<{ name: string; type: string; with: { message: string } }>;
+    };
+    expect(emptyGate.type).toBe('if');
+    expect(emptyGate.condition).toBe(
+      '${{ inputs.calledByWorker == true and inputs.alerts.size == 0 }}'
+    );
+    expect(emptyGate.steps[0].type).toBe('workflow.fail');
+    expect(emptyGate.steps[0].with.message).toContain('empty array');
   });
 
   // The model echoes the alert id back with each verdict, and that echo is only safe as a
@@ -1245,7 +1282,37 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
     ).toBe(true);
   });
 
-  it('builds an output verdict keyed on the real alert id, with unknown entity defaults', () => {
+  it('evaluates Worker alerts presence/emptiness gates for fail-loud path', () => {
+    const missingGate = findStepByName(workflow.steps, 'require_caller_alerts_present') as {
+      condition: string;
+    };
+    const emptyGate = findStepByName(workflow.steps, 'require_caller_alerts_nonempty') as {
+      condition: string;
+    };
+
+    expect(
+      evaluateExpression(engine, missingGate.condition, {
+        inputs: { calledByWorker: true, alerts: null },
+      })
+    ).toBe(true);
+    expect(
+      evaluateExpression(engine, missingGate.condition, {
+        inputs: { calledByWorker: true, alerts: [{ _id: 'a1' }] },
+      })
+    ).toBe(false);
+    expect(
+      evaluateExpression(engine, emptyGate.condition, {
+        inputs: { calledByWorker: true, alerts: [] },
+      })
+    ).toBe(true);
+    expect(
+      evaluateExpression(engine, emptyGate.condition, {
+        inputs: { calledByWorker: true, alerts: [{ _id: 'a1' }] },
+      })
+    ).toBe(false);
+  });
+
+  it('builds an output verdict keyed on the real alert id, with __missing__ entity defaults', () => {
     const buildStep = findStepByName(workflow.steps, 'build_output_verdict') as {
       with: { output_verdict: Record<string, unknown> };
     };
@@ -1268,8 +1335,8 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
       confidence_score: 0.82,
       rationale: 'signed installer',
       contributing_factors: ['vendor signature'],
-      host_name: 'unknown',
-      user_name: 'unknown',
+      host_name: '__missing__',
+      user_name: '__missing__',
     });
   });
 
@@ -1460,6 +1527,28 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
       inputs: { autoCloseEnabled: false },
     });
     expect(applied).toBe(false);
+  });
+
+  it('collapses max auto-close threshold to 1 only when min threshold input is provided', () => {
+    const collapseGate = findStepByName(
+      workflow.steps,
+      'collapse_max_threshold_if_min_provided'
+    ) as {
+      condition: string;
+      steps: Array<{ with: { auto_close_confidence_score_max_threshold: number } }>;
+    };
+
+    expect(
+      evaluateExpression(engine, collapseGate.condition, {
+        inputs: { autoCloseConfidenceScoreMinThreshold: 0.7 },
+      })
+    ).toBe(true);
+    expect(
+      evaluateExpression(engine, collapseGate.condition, {
+        inputs: {},
+      })
+    ).toBe(false);
+    expect(collapseGate.steps[0].with.auto_close_confidence_score_max_threshold).toBe(1);
   });
 
   it('joins compact batch_summaries into generated_summary', () => {

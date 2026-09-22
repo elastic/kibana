@@ -56,23 +56,26 @@ export type AlertAnalysisWorkflowSettings = z.infer<typeof AlertAnalysisWorkflow
 // Per-alert verdict emitted in the workflow.output block; matches the output_verdicts
 // accumulator shape built by the classify_alert_batches loop (Worker path) and the
 // standalone all_verdicts pairing key (alert_id is the real foreach.item._id).
+// String max lengths align with the YAML outputs schema and the agent prompt's terse
+// rationale / contributing_factors guidance (with headroom for model overrun).
 export const AlertAnalysisVerdict = z.object({
-  alert_id: z.string(),
+  alert_id: z.string().max(512),
   classification: z.enum(['true_positive', 'false_positive', 'inconclusive']),
   confidence_score: z.number().min(0).max(1),
-  rationale: z.string(),
+  rationale: z.string().max(500),
   // Required by the ai.agent schema; at most 3 short phrases naming the strongest signals.
-  contributing_factors: z.array(z.string()).max(3),
-  // Entity fields carried for Worker grouping / security.impact; defaulted to "unknown"
-  // in YAML when the alert document has no host/user name.
-  host_name: z.string(),
-  user_name: z.string(),
+  contributing_factors: z.array(z.string().max(100)).max(3),
+  // Entity fields carried for Worker grouping / security.impact; defaulted to "__missing__"
+  // in YAML when the alert document has no host/user name (avoids colliding with a real
+  // ECS name "unknown").
+  host_name: z.string().max(512),
+  user_name: z.string().max(512),
 });
 export type AlertAnalysisVerdict = z.infer<typeof AlertAnalysisVerdict>;
 
 export const AlertAnalysisImpactedEntity = z.object({
   entity_type: z.enum(['host', 'user']),
-  name: z.string(),
+  name: z.string().max(512),
   alert_count: z.number().int().min(0),
   verdicts: z.object({
     true_positive: z.number().int().min(0),
@@ -85,56 +88,58 @@ export type AlertAnalysisImpactedEntity = z.infer<typeof AlertAnalysisImpactedEn
 // Structured output block emitted by the workflow when invoked by a caller (Worker path).
 // Also available on the standalone path — accumulators are always initialised so the output
 // is well-formed even when the analysis_enabled guard short-circuits.
-export const AlertAnalysisWorkflowOutput = z
-  .object({
-    verdicts: z.array(AlertAnalysisVerdict),
-    false_positive_count: z.number().int().min(0),
-    true_positive_count: z.number().int().min(0),
-    inconclusive_count: z.number().int().min(0),
-    auto_closed_ids: z.array(z.string()),
-    grouped_counts_summary: z.string(),
-    generated_summary: z.string(),
-    connector_id: z.string(),
-    agent_id: z.string(),
-    impacted_entities: z.array(AlertAnalysisImpactedEntity).max(50),
-    // YAML emits the boolean as a string ("true" / "false") from Liquid.
-    impacted_entities_truncated: z.string(),
-  })
-  .superRefine(
-    ({ verdicts, false_positive_count, true_positive_count, inconclusive_count }, ctx) => {
-      const expectedFalsePositive = verdicts.filter(
-        ({ classification }) => classification === 'false_positive'
-      ).length;
-      const expectedTruePositive = verdicts.filter(
-        ({ classification }) => classification === 'true_positive'
-      ).length;
-      const expectedInconclusive = verdicts.filter(
-        ({ classification }) => classification === 'inconclusive'
-      ).length;
+// Object schema is exported separately so contract-sync tests can read `.shape` after
+// `.superRefine()` wraps the refined schema.
+export const AlertAnalysisWorkflowOutputFields = z.object({
+  verdicts: z.array(AlertAnalysisVerdict),
+  false_positive_count: z.number().int().min(0),
+  true_positive_count: z.number().int().min(0),
+  inconclusive_count: z.number().int().min(0),
+  auto_closed_ids: z.array(z.string().max(512)),
+  grouped_counts_summary: z.string().max(10000),
+  generated_summary: z.string().max(2000),
+  connector_id: z.string().max(512),
+  agent_id: z.string().max(64),
+  impacted_entities: z.array(AlertAnalysisImpactedEntity).max(50),
+  // YAML Liquid emits the boolean as a string ("true" / "false").
+  impacted_entities_truncated: z.enum(['true', 'false']),
+});
 
-      if (false_positive_count !== expectedFalsePositive) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: `false_positive_count (${false_positive_count}) does not match verdicts with classification false_positive (${expectedFalsePositive})`,
-          path: ['false_positive_count'],
-        });
-      }
-      if (true_positive_count !== expectedTruePositive) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: `true_positive_count (${true_positive_count}) does not match verdicts with classification true_positive (${expectedTruePositive})`,
-          path: ['true_positive_count'],
-        });
-      }
-      if (inconclusive_count !== expectedInconclusive) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: `inconclusive_count (${inconclusive_count}) does not match verdicts with classification inconclusive (${expectedInconclusive})`,
-          path: ['inconclusive_count'],
-        });
-      }
+export const AlertAnalysisWorkflowOutput = AlertAnalysisWorkflowOutputFields.superRefine(
+  ({ verdicts, false_positive_count, true_positive_count, inconclusive_count }, ctx) => {
+    const expectedFalsePositive = verdicts.filter(
+      ({ classification }) => classification === 'false_positive'
+    ).length;
+    const expectedTruePositive = verdicts.filter(
+      ({ classification }) => classification === 'true_positive'
+    ).length;
+    const expectedInconclusive = verdicts.filter(
+      ({ classification }) => classification === 'inconclusive'
+    ).length;
+
+    if (false_positive_count !== expectedFalsePositive) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `false_positive_count (${false_positive_count}) does not match verdicts with classification false_positive (${expectedFalsePositive})`,
+        path: ['false_positive_count'],
+      });
     }
-  );
+    if (true_positive_count !== expectedTruePositive) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `true_positive_count (${true_positive_count}) does not match verdicts with classification true_positive (${expectedTruePositive})`,
+        path: ['true_positive_count'],
+      });
+    }
+    if (inconclusive_count !== expectedInconclusive) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `inconclusive_count (${inconclusive_count}) does not match verdicts with classification inconclusive (${expectedInconclusive})`,
+        path: ['inconclusive_count'],
+      });
+    }
+  }
+);
 export type AlertAnalysisWorkflowOutput = z.infer<typeof AlertAnalysisWorkflowOutput>;
 
 // Shared min<max threshold check, applied via `.refine()` by every settings schema (a refined

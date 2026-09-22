@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+import { SECURITY_ALERT_ANALYSIS_WORKFLOW } from '@kbn/workflows/managed';
+import { parse } from 'yaml';
 import {
   AlertAnalysisWorkflowOutput,
+  AlertAnalysisWorkflowOutputFields,
   AlertAnalysisWorkflowSettings,
   isThresholdRangeValid,
 } from './alert_analysis_workflow';
@@ -173,5 +176,65 @@ describe('AlertAnalysisWorkflowOutput', () => {
         inconclusive_count: 0,
       }).success
     ).toBe(false);
+  });
+
+  it('rejects non-canonical impacted_entities_truncated values', () => {
+    expect(
+      AlertAnalysisWorkflowOutput.safeParse({
+        ...sampleOutput,
+        impacted_entities_truncated: 'yes',
+      }).success
+    ).toBe(false);
+  });
+
+  it('rejects when rationale exceeds 500 characters', () => {
+    expect(
+      AlertAnalysisWorkflowOutput.safeParse({
+        ...sampleOutput,
+        verdicts: [
+          {
+            ...sampleOutput.verdicts[0],
+            rationale: 'x'.repeat(501),
+          },
+        ],
+        true_positive_count: 1,
+        false_positive_count: 0,
+        inconclusive_count: 0,
+      }).success
+    ).toBe(false);
+  });
+});
+
+describe('AlertAnalysisWorkflowOutput YAML sync', () => {
+  it('keeps Zod output keys and truncated enum aligned with the managed YAML schema', () => {
+    const workflow = parse(SECURITY_ALERT_ANALYSIS_WORKFLOW.yaml) as {
+      outputs: {
+        required: string[];
+        properties: Record<
+          string,
+          {
+            enum?: string[];
+            maxItems?: number;
+            items?: {
+              required?: string[];
+              properties?: Record<string, { maxLength?: number; maxItems?: number }>;
+            };
+            maxLength?: number;
+          }
+        >;
+      };
+    };
+
+    const zodKeys = Object.keys(AlertAnalysisWorkflowOutputFields.shape).sort();
+    const yamlKeys = Object.keys(workflow.outputs.properties).sort();
+    expect(yamlKeys).toEqual(zodKeys);
+    expect([...workflow.outputs.required].sort()).toEqual(zodKeys);
+
+    expect(workflow.outputs.properties.impacted_entities_truncated.enum).toEqual(['true', 'false']);
+    expect(workflow.outputs.properties.impacted_entities.maxItems).toBe(50);
+    expect(workflow.outputs.properties.verdicts.items?.properties?.rationale?.maxLength).toBe(500);
+    expect(
+      workflow.outputs.properties.verdicts.items?.properties?.contributing_factors?.maxItems
+    ).toBe(3);
   });
 });
