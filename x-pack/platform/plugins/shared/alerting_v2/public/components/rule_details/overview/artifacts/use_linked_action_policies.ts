@@ -29,7 +29,7 @@ export const useLinkedActionPolicies = (tags: string[]): UseLinkedActionPolicies
 
   return {
     totalCount: items.length,
-    catchAllCount: items.filter((item) => item.category === 'catch-all').length,
+    catchAllCount: items.filter((item) => item.category === 'catch_all').length,
     matchingCriteriaCount: items.filter((item) => item.category === 'tags').length,
     evaluatedCount,
     isCountTruncated: isTruncated,
