@@ -218,7 +218,7 @@ export class AssetManagerClient {
         namespace: this.namespace,
         error: getErrorMessage(error),
       });
-      this.logger.error('Error during entity store init:', error);
+      this.logger.error('Error during entity store init:', { error });
       throw error;
     }
   }
@@ -266,7 +266,7 @@ export class AssetManagerClient {
         });
       }
     } catch (error) {
-      this.logger.get(type).error(`Error starting extract entity task for type ${type}:`, error);
+      this.logger.get(type).error(`Error starting extract entity task for type ${type}:`, { error });
       if (hasPriorityExtractionGate(type)) {
         // Starting is all or nothing: leaving one process scheduled without the other would
         // silently extract half the logs. Removal is idempotent, so this is safe whichever step
@@ -287,7 +287,9 @@ export class AssetManagerClient {
    * same task id, so covering `priority` also covers the single process.
    */
   private async removeExtractionTasks(type: EntityType) {
-    await Promise.all(
+    // Use allSettled so a failure removing one task does not skip the other and does not swallow
+    // the original error that triggered rollback in start() or stop().
+    const results = await Promise.allSettled(
       ([EXTRACTION_MODE.priority, EXTRACTION_MODE.nonPriority] as const).map((extractionMode) =>
         stopExtractEntityTask({
           taskManager: this.taskManager,
@@ -298,6 +300,13 @@ export class AssetManagerClient {
         })
       )
     );
+    for (const result of results) {
+      if (result.status === 'rejected') {
+        this.logger.error(
+          `Failed to remove an extraction task for ${type}: ${(result.reason as Error).message}`
+        );
+      }
+    }
   }
 
   public async stop(type: EntityType) {
@@ -308,8 +317,13 @@ export class AssetManagerClient {
         ...(hasPriorityExtractionGate(type) ? { nonPriorityStatus: ENGINE_STATUS.STOPPED } : {}),
       });
     } catch (error) {
-      this.logger.get(type).error(`Error stopping extract entity task for type ${type}:`, error);
-      await this.engineDescriptorClient.update(type, { status: ENGINE_STATUS.ERROR });
+      this.logger.get(type).error(`Error stopping extract entity task for type ${type}:`, { error });
+      // Mirror the nonPriorityStatus into ERROR so it does not stay as STARTED while the engine
+      // itself is in ERROR state.
+      await this.engineDescriptorClient.update(type, {
+        status: ENGINE_STATUS.ERROR,
+        ...(hasPriorityExtractionGate(type) ? { nonPriorityStatus: ENGINE_STATUS.ERROR } : {}),
+      });
       throw error;
     }
   }

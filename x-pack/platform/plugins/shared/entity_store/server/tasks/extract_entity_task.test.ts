@@ -14,9 +14,15 @@ jest.mock('./should_delete_orphaned_task', () => ({
   shouldDeleteOrphanedEntityStoreTask: jest.fn().mockResolvedValue(false),
 }));
 jest.mock('./factories', () => ({ createLogsExtractionClient: jest.fn() }));
+jest.mock('../domain/config', () => ({
+  getMergedConfig: jest.fn().mockReturnValue({ frequency: '1m' }),
+}));
 
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { isDualProcessEnabled } from '../infra/feature_flags';
+import { shouldDeleteOrphanedEntityStoreTask } from './should_delete_orphaned_task';
 import { createLogsExtractionClient } from './factories';
+import { getMergedConfig } from '../domain/config';
 import {
   getExtractEntityTaskConfig,
   getExtractEntityTaskId,
@@ -25,6 +31,8 @@ import {
 } from './extract_entity_task';
 import type * as types from '../types';
 import { EXTRACTION_MODE } from '../../common/domain/definitions/entity_schema';
+import { ENGINE_STATUS } from '../domain/constants';
+import { EngineDescriptorTypeName } from '../domain/saved_objects';
 
 const createTaskInstance = (schedule?: ConcreteTaskInstance['schedule']): ConcreteTaskInstance =>
   ({
@@ -180,6 +188,200 @@ describe('feature flag gates non-priority execution', () => {
 
     expect(mockCreateClient).toHaveBeenCalledWith(
       expect.objectContaining({ extractionMode: EXTRACTION_MODE.priority })
+    );
+  });
+});
+
+describe('non-priority task orphan cleanup', () => {
+  const mockIsDualProcessEnabled = isDualProcessEnabled as jest.MockedFunction<
+    typeof isDualProcessEnabled
+  >;
+  const mockShouldDeleteOrphanedTask = shouldDeleteOrphanedEntityStoreTask as jest.MockedFunction<
+    typeof shouldDeleteOrphanedEntityStoreTask
+  >;
+  const mockCreateClient = createLogsExtractionClient as jest.MockedFunction<
+    typeof createLogsExtractionClient
+  >;
+
+  const runNonPriorityTask = async (flagEnabled: boolean, isOrphaned: boolean) => {
+    jest.clearAllMocks();
+    mockIsDualProcessEnabled.mockResolvedValue(flagEnabled);
+    mockShouldDeleteOrphanedTask.mockResolvedValue(isOrphaned);
+
+    const definitions: Record<string, { createTaskRunner: Function }> = {};
+    registerExtractEntityTasks({
+      taskManager: {
+        registerTaskDefinitions: (defs: Record<string, { createTaskRunner: Function }>) =>
+          Object.assign(definitions, defs),
+      } as unknown as TaskManagerSetupContract,
+      logger: loggerMock.create(),
+      entityTypes: ['user'],
+      core: {
+        getStartServices: jest.fn().mockResolvedValue([{ featureFlags: {} }]),
+      } as unknown as types.EntityStoreCoreSetup,
+      isServerless: false,
+    });
+
+    const definition = definitions['entity_store:v2:extract_entity_non_priority_task:user'];
+    return definition
+      .createTaskRunner({
+        taskInstance: { id: 'task-id', state: { namespace: 'default' } },
+        fakeRequest: {},
+        signal: new AbortController().signal,
+      })
+      .run();
+  };
+
+  it('returns shouldDeleteTask when orphaned and the flag is off', async () => {
+    const result = await runNonPriorityTask(false, true);
+
+    expect(result).toEqual(expect.objectContaining({ shouldDeleteTask: true }));
+    expect(mockCreateClient).not.toHaveBeenCalled();
+  });
+
+  it('returns empty state (no delete) when not orphaned and the flag is off', async () => {
+    const result = await runNonPriorityTask(false, false);
+
+    expect(result).not.toHaveProperty('shouldDeleteTask');
+    expect(mockCreateClient).not.toHaveBeenCalled();
+  });
+});
+
+describe('bootstrapNonPriorityTask', () => {
+  const mockIsDualProcessEnabled = isDualProcessEnabled as jest.MockedFunction<
+    typeof isDualProcessEnabled
+  >;
+  const mockGetMergedConfig = getMergedConfig as jest.MockedFunction<typeof getMergedConfig>;
+  const mockCreateClient = createLogsExtractionClient as jest.MockedFunction<
+    typeof createLogsExtractionClient
+  >;
+
+  const makeDescriptorSo = (
+    status: string,
+    logExtractionConfig?: Record<string, unknown>
+  ) => ({
+    id: `${EngineDescriptorTypeName}-user-default`,
+    type: EngineDescriptorTypeName,
+    attributes: {
+      type: 'user',
+      status,
+      nonPriorityStatus: ENGINE_STATUS.STOPPED,
+      logExtractionConfig: logExtractionConfig ?? null,
+      logExtractionState: {
+        checkpointTimestamp: null,
+        paginationId: null,
+        lastExecutionTimestamp: null,
+        sliceEndTimestamp: null,
+      },
+      versionState: { version: '2', state: 'running', isMigratedFromV1: false },
+      error: null,
+    },
+    references: [],
+    score: 0,
+  });
+
+  const runPriorityTask = async ({
+    engineStatus,
+    mergedFrequency = '1m',
+    logExtractionConfig,
+  }: {
+    engineStatus: string;
+    mergedFrequency?: string;
+    logExtractionConfig?: Record<string, unknown>;
+  }) => {
+    jest.clearAllMocks();
+    mockIsDualProcessEnabled.mockResolvedValue(true);
+    mockGetMergedConfig.mockReturnValue({ frequency: mergedFrequency } as ReturnType<
+      typeof getMergedConfig
+    >);
+    mockCreateClient.mockResolvedValue({
+      logsExtractionClient: {
+        extractLogs: jest.fn().mockResolvedValue({ success: true, isRemote: false, count: 0 }),
+        getMergedConfigForType: jest.fn().mockResolvedValue({ frequency: '1m' }),
+      },
+    } as unknown as Awaited<ReturnType<typeof createLogsExtractionClient>>);
+
+    const mockEnsureScheduled = jest.fn().mockResolvedValue(undefined);
+    const soClient = savedObjectsClientMock.create();
+    soClient.find.mockResolvedValue({
+      saved_objects: [makeDescriptorSo(engineStatus, logExtractionConfig)],
+      total: 1,
+      per_page: 10,
+      page: 1,
+    });
+
+    const definitions: Record<string, { createTaskRunner: Function }> = {};
+    registerExtractEntityTasks({
+      taskManager: {
+        registerTaskDefinitions: (defs: Record<string, { createTaskRunner: Function }>) =>
+          Object.assign(definitions, defs),
+      } as unknown as TaskManagerSetupContract,
+      logger: loggerMock.create(),
+      entityTypes: ['user'],
+      core: {
+        getStartServices: jest.fn().mockResolvedValue([
+          {
+            featureFlags: {},
+            savedObjects: { createInternalRepository: jest.fn().mockReturnValue(soClient) },
+          },
+          { taskManager: { ensureScheduled: mockEnsureScheduled } },
+        ]),
+      } as unknown as types.EntityStoreCoreSetup,
+      isServerless: false,
+    });
+
+    const definition = definitions['entity_store:v2:extract_entity_task:user'];
+    await definition
+      .createTaskRunner({
+        taskInstance: { id: 'task-id', state: { namespace: 'default' } },
+        fakeRequest: {},
+        signal: new AbortController().signal,
+      })
+      .run();
+
+    return { mockEnsureScheduled, soClient };
+  };
+
+  it('does not schedule the non-priority task when the engine is stopped', async () => {
+    const { mockEnsureScheduled } = await runPriorityTask({
+      engineStatus: ENGINE_STATUS.STOPPED,
+    });
+
+    expect(mockEnsureScheduled).not.toHaveBeenCalled();
+  });
+
+  it('schedules the non-priority task when the engine is started', async () => {
+    const { mockEnsureScheduled } = await runPriorityTask({
+      engineStatus: ENGINE_STATUS.STARTED,
+    });
+
+    expect(mockEnsureScheduled).toHaveBeenCalledTimes(1);
+  });
+
+  it('uses the merged config frequency as the task schedule interval', async () => {
+    const { mockEnsureScheduled } = await runPriorityTask({
+      engineStatus: ENGINE_STATUS.STARTED,
+      mergedFrequency: '5m',
+    });
+
+    expect(mockEnsureScheduled).toHaveBeenCalledWith(
+      expect.objectContaining({ schedule: { interval: '5m' } }),
+      expect.anything()
+    );
+  });
+
+  it('passes the engine logExtractionConfig to getMergedConfig', async () => {
+    const logExtractionConfig = { frequency: '3m' };
+    await runPriorityTask({
+      engineStatus: ENGINE_STATUS.STARTED,
+      logExtractionConfig,
+    });
+
+    expect(mockGetMergedConfig).toHaveBeenCalledWith(
+      'user',
+      {},
+      logExtractionConfig,
+      EXTRACTION_MODE.nonPriority
     );
   });
 });

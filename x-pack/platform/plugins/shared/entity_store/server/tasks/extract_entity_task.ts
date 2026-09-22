@@ -34,6 +34,7 @@ import { EngineDescriptorTypeName, EngineDescriptorClient } from '../domain/save
 import { wrapTaskRun } from '../telemetry/traces';
 import { entityStoreMetrics } from '../monitor/metrics';
 import { shouldDeleteOrphanedEntityStoreTask } from './should_delete_orphaned_task';
+import { getMergedConfig } from '../domain/config';
 
 /** The priority and single processes share one task; non-priority has its own so the two can run
  * on independent schedules and be started, stopped and monitored separately. */
@@ -102,17 +103,6 @@ async function bootstrapNonPriorityTask({
   try {
     const [coreStart, pluginsStart] = await core.getStartServices();
 
-    await pluginsStart.taskManager.ensureScheduled(
-      {
-        id: getExtractEntityTaskId(entityType, namespace, EXTRACTION_MODE.nonPriority),
-        taskType: `${getExtractEntityTaskConfig(EXTRACTION_MODE.nonPriority).type}:${entityType}`,
-        schedule: { interval: getExtractEntityTaskConfig(EXTRACTION_MODE.nonPriority).interval! },
-        state: { namespace },
-        params: {},
-      },
-      { request: fakeRequest }
-    );
-
     const soClient = coreStart.savedObjects.createInternalRepository([EngineDescriptorTypeName]);
     const engineDescriptorClient = new EngineDescriptorClient(
       soClient as unknown as SavedObjectsClientContract,
@@ -121,6 +111,31 @@ async function bootstrapNonPriorityTask({
       true
     );
     const descriptor = await engineDescriptorClient.findOrThrow(entityType);
+
+    // Skip scheduling for stopped engines: stop()/uninstall() remove both tasks and this tick
+    // must not recreate the non-priority one.
+    if (descriptor.status !== ENGINE_STATUS.STARTED) {
+      return;
+    }
+
+    // Use the merged config so a custom frequency is not overwritten with the static default.
+    const { frequency } = getMergedConfig(
+      entityType,
+      {},
+      descriptor.logExtractionConfig,
+      EXTRACTION_MODE.nonPriority
+    );
+
+    await pluginsStart.taskManager.ensureScheduled(
+      {
+        id: getExtractEntityTaskId(entityType, namespace, EXTRACTION_MODE.nonPriority),
+        taskType: `${getExtractEntityTaskConfig(EXTRACTION_MODE.nonPriority).type}:${entityType}`,
+        schedule: { interval: frequency },
+        state: { namespace },
+        params: {},
+      },
+      { request: fakeRequest }
+    );
 
     if (descriptor.nonPriorityStatus === null || descriptor.nonPriorityStatus === undefined) {
       await engineDescriptorClient.update(entityType, {
@@ -164,18 +179,8 @@ async function runTask({
   const [coreStart] = await core.getStartServices();
   const dualProcessEnabled = await isDualProcessEnabled(coreStart.featureFlags);
 
-  // The task definitions are registered unconditionally, so the flag is read per run: it can be
-  // flipped while a task is already scheduled. Non-priority extraction only exists in dual-process
-  // mode, so with the flag off this run does nothing rather than falling back to another mode.
-  if (registeredExtractionMode === EXTRACTION_MODE.nonPriority && !dualProcessEnabled) {
-    return { state: currentState };
-  }
-
-  const extractionMode =
-    registeredExtractionMode === EXTRACTION_MODE.nonPriority
-      ? registeredExtractionMode
-      : resolveExtractionMode(dualProcessEnabled, entityType);
-
+  // Orphan check runs before the dual-process gate so an uninstalled store can still self-delete
+  // a stranded non-priority task even when the flag is off.
   if (
     await shouldDeleteOrphanedEntityStoreTask({
       coreStart,
@@ -188,6 +193,18 @@ async function runTask({
       shouldDeleteTask: true,
     };
   }
+
+  // The task definitions are registered unconditionally, so the flag is read per run: it can be
+  // flipped while a task is already scheduled. Non-priority extraction only exists in dual-process
+  // mode, so with the flag off this run does nothing rather than falling back to another mode.
+  if (registeredExtractionMode === EXTRACTION_MODE.nonPriority && !dualProcessEnabled) {
+    return { state: currentState };
+  }
+
+  const extractionMode =
+    registeredExtractionMode === EXTRACTION_MODE.nonPriority
+      ? registeredExtractionMode
+      : resolveExtractionMode(dualProcessEnabled, entityType);
 
   if (!fakeRequest) {
     logger.error(`No fake request found, skipping extract entity task`);

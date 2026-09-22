@@ -587,6 +587,61 @@ describe('AssetManagerClient', () => {
         expect(attrs).not.toHaveProperty('nonPriorityStatus');
       }
     });
+
+    it('stop completes even when one task removal fails', async () => {
+      // First stopExtractEntityTask call (priority) succeeds; second (nonPriority) fails.
+      mockStopExtractEntityTask
+        .mockResolvedValueOnce(undefined)
+        .mockRejectedValueOnce(new Error('task removal failed'));
+
+      await expect(createDualProcessClient().stop('user')).resolves.not.toThrow();
+
+      // Both tasks were attempted.
+      expect(mockStopExtractEntityTask).toHaveBeenCalledTimes(2);
+      // The descriptor is still updated to STOPPED after the partial failure.
+      expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith(
+        'user',
+        expect.objectContaining({ status: ENGINE_STATUS.STOPPED })
+      );
+    });
+
+    it('attempts both task removals even when the first one fails', async () => {
+      mockStopExtractEntityTask
+        .mockRejectedValueOnce(new Error('priority task removal failed'))
+        .mockResolvedValueOnce(undefined);
+
+      await createDualProcessClient().stop('user');
+
+      expect(mockStopExtractEntityTask).toHaveBeenCalledTimes(2);
+    });
+
+    it('stop sets nonPriorityStatus to error when the operation fails for a dual-capable type', async () => {
+      // Make the STOPPED update throw so the catch block runs.
+      mockEngineDescriptorClient.update.mockRejectedValueOnce(new Error('update failed'));
+
+      await expect(createDualProcessClient().stop('user')).rejects.toThrow('update failed');
+
+      const errorUpdate = mockEngineDescriptorClient.update.mock.calls.find(
+        ([, attrs]) => attrs.status === ENGINE_STATUS.ERROR
+      );
+      expect(errorUpdate).toBeDefined();
+      expect(errorUpdate![1]).toMatchObject({
+        status: ENGINE_STATUS.ERROR,
+        nonPriorityStatus: ENGINE_STATUS.ERROR,
+      });
+    });
+
+    it('stop does not set nonPriorityStatus when the operation fails for a type without a priority gate', async () => {
+      mockEngineDescriptorClient.update.mockRejectedValueOnce(new Error('update failed'));
+
+      await expect(createDualProcessClient().stop('host')).rejects.toThrow('update failed');
+
+      const errorUpdate = mockEngineDescriptorClient.update.mock.calls.find(
+        ([, attrs]) => attrs.status === ENGINE_STATUS.ERROR
+      );
+      expect(errorUpdate).toBeDefined();
+      expect(errorUpdate![1]).not.toHaveProperty('nonPriorityStatus');
+    });
   });
 });
 
