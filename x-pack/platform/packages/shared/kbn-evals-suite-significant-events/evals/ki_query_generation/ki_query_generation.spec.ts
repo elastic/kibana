@@ -14,12 +14,12 @@ import {
 } from '@kbn/nightshift-ai';
 import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
 import { tags } from '@kbn/scout';
-import { connectorToInference, getConnectorDefaultModel } from '@kbn/inference-common';
 
 import {
   getCurrentTraceId,
   createSpanLatencyEvaluator,
   createChatCallsEvaluator,
+  buildModelFromConnector,
 } from '@kbn/evals';
 import { getSourcesForStream, getStreamSamplingSource, type Streams } from '@kbn/streams-schema';
 import type { Feature } from '@kbn/significant-events-schema';
@@ -36,8 +36,6 @@ import {
   deleteTemporaryReplayIndices,
   ensureStreamsEnabled,
   loadKIFeaturesFromSnapshot,
-  replayIntoManagedStream,
-  SIGEVENTS_SNAPSHOT_RUN,
   SIGEVENTS_WIRED_ROOTS,
 } from '../../src/data_generators/replay';
 import { evaluate } from '../../src/evaluate';
@@ -45,13 +43,17 @@ import { createEvalSignificantEventSearchTool } from '../../src/tools/significan
 import { createKIQueryGenerationEvaluators } from '../../src/evaluators/ki_query_generation';
 import {
   getActiveDatasets,
+  hasExplicitDatasetSelection,
   MANAGED_STREAM_NAME,
   MANAGED_STREAM_SEARCH_PATTERN,
   resolveScenarioSnapshotSource,
-  snapshotCatalogKey,
   type KIQueryGenerationScenario,
 } from '../../src/datasets';
-import { buildAvailableSnapshotsBySource } from '../shared';
+import {
+  buildAvailableSnapshotsBySource,
+  hasAvailableSnapshot,
+  replayDatasetIntoManagedStream,
+} from '../shared';
 import { KI_FEATURE_SOURCES_TO_RUN } from './resolve_ki_sources';
 import { resolveMaxSteps } from './resolve_max_steps';
 import {
@@ -75,17 +77,10 @@ const TRUST_UPSTREAM = process.env.SIGEVENTS_TRUST_UPSTREAM === 'true';
 
 const EMPTY_DATASTREAM_MAX_STEPS = 4;
 
-const resolveConnectorModel = (connector: Parameters<typeof connectorToInference>[0]): string => {
-  try {
-    return getConnectorDefaultModel(connectorToInference(connector)) ?? connector.id;
-  } catch {
-    return connector.id;
-  }
-};
-
 evaluate.describe('KI query generation', { tag: tags.serverless.observability.complete }, () => {
   const scenarioResolution = resolveQueryGenerationDatasets(getActiveDatasets());
   const activeDatasets = scenarioResolution.datasets;
+  const failOnMissingSnapshot = hasExplicitDatasetSelection(process.env.SIGEVENTS_DATASET);
   const availableSnapshotsBySource = new Map<string, Set<string>>();
 
   assertQueryGenerationDatasetSafety(scenarioResolution, TRUST_UPSTREAM);
@@ -128,14 +123,15 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
               snapshotSource: scenario.snapshot_source,
             });
 
-            const availableSnapshots =
-              availableSnapshotsBySource.get(snapshotCatalogKey(source.gcs)) ?? new Set();
-
-            if (!availableSnapshots.has(source.snapshotName)) {
-              log.info(
-                `Snapshot "${source.snapshotName}" not found in run "${SIGEVENTS_SNAPSHOT_RUN}" ` +
-                  `(source: ${source.gcs.bucket}/${source.gcs.basePathPrefix}) - skipping`
-              );
+            if (
+              !hasAvailableSnapshot({
+                availableSnapshotsBySource,
+                source,
+                datasetId: dataset.id,
+                failOnMissingSnapshot,
+                log,
+              })
+            ) {
               continue;
             }
 
@@ -184,12 +180,12 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
               continue;
             }
 
-            const stats = await replayIntoManagedStream(
+            const stats = await replayDatasetIntoManagedStream({
               esClient,
               log,
-              source.snapshotName,
-              source.gcs
-            );
+              dataset,
+              source,
+            });
 
             if (stats.created === 0) {
               throw new Error(
@@ -351,7 +347,7 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                   }
                   await apiServices.streams.disable().catch(() => {});
                   await apiServices.streams.enable();
-                  await replayIntoManagedStream(esClient, log, source.snapshotName, source.gcs);
+                  await replayDatasetIntoManagedStream({ esClient, log, dataset, source });
                   await esClient.indices.refresh({ index: MANAGED_STREAM_SEARCH_PATTERN });
                   lastReplayedSnapshot = source.snapshotName;
                 }
@@ -466,8 +462,8 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                   evaluator_names: evaluatorsList.map((evaluator) => evaluator.name),
                   effective_max_steps: effectiveMaxSteps,
                   repetitions,
-                  generation_model: resolveConnectorModel(connector),
-                  judge_model: resolveConnectorModel(evaluationConnector),
+                  generation_model: buildModelFromConnector(connector).id,
+                  judge_model: buildModelFromConnector(evaluationConnector).id,
                 })}`
               );
 
@@ -546,8 +542,8 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
             evaluator_names: emptyDatastreamEvaluators.map((evaluator) => evaluator.name),
             effective_max_steps: EMPTY_DATASTREAM_MAX_STEPS,
             repetitions,
-            generation_model: resolveConnectorModel(connector),
-            judge_model: resolveConnectorModel(evaluationConnector),
+            generation_model: buildModelFromConnector(connector).id,
+            judge_model: buildModelFromConnector(evaluationConnector).id,
           })}`
         );
 

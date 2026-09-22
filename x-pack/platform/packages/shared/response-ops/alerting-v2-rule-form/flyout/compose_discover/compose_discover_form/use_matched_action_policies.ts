@@ -7,11 +7,8 @@
 
 import type { HttpStart } from '@kbn/core-http-browser';
 import { useQuery } from '@kbn/react-query';
-import type {
-  MatchActionPoliciesForRuleResponse,
-  MatchedActionPolicy,
-} from '@kbn/alerting-v2-schemas';
-import { ALERTING_V2_INTERNAL_ACTION_POLICY_API_PATH } from '@kbn/alerting-v2-constants';
+import type { MatchActionPoliciesResponse, MatchedActionPolicy } from '@kbn/alerting-v2-schemas';
+import { ALERTING_V2_INTERNAL_ACTION_POLICY_MATCH_API_PATH } from '@kbn/alerting-v2-constants';
 
 interface UseMatchedActionPoliciesParams {
   http: HttpStart;
@@ -36,10 +33,10 @@ export const useMatchedActionPolicies = ({
   const { isLoading, error, data } = useQuery({
     queryKey: ['matchedActionPolicies', tags],
     queryFn: () =>
-      http.fetch<MatchActionPoliciesForRuleResponse>(
-        `${ALERTING_V2_INTERNAL_ACTION_POLICY_API_PATH}/_match_for_rule`,
-        { method: 'POST', body: JSON.stringify(body) }
-      ),
+      http.fetch<MatchActionPoliciesResponse>(ALERTING_V2_INTERNAL_ACTION_POLICY_MATCH_API_PATH, {
+        method: 'POST',
+        body: JSON.stringify(body),
+      }),
     keepPreviousData: true,
     refetchOnWindowFocus: false,
   });
