@@ -141,6 +141,8 @@ apiTest.describe(
                 id: configId,
                 [ConfigKey.CONFIG_ID]: configId,
                 [ConfigKey.PARAMS]: submittedParams,
+                // Browser codec requires urls; journey monitors send the empty default.
+                [ConfigKey.URLS]: '',
               },
               responseType: 'json',
             }
