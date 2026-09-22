@@ -38,12 +38,21 @@ export const buildEntitiesWithAnomaliesCountQuery = (
     parts.push(`| EVAL ${euid.esql.getEuidEvaluation(entityType, `${entityType}_euid`)}`);
   }
 
-  parts.push(`| EVAL entity.id = COALESCE(${ENTITY_TYPES.map((t) => `${t}_euid`).join(', ')})`);
+  // Build derived_euids as multi-value so a multi-typed anomaly record contributes all
+  // entity types — consistent with the alerts pipeline. Nulls filtered after MV_EXPAND.
+  const euidVars = ENTITY_TYPES.map((t) => `${t}_euid`);
+  const nestedMvAppend = euidVars
+    .slice(0, -1)
+    .reduceRight((inner, v) => `MV_APPEND(${v}, ${inner})`, euidVars[euidVars.length - 1]);
+  parts.push(`| EVAL derived_euids = ${nestedMvAppend}`);
+  parts.push(`| MV_EXPAND derived_euids`);
+  parts.push(`| EVAL entity.id = derived_euids`);
   parts.push(`| WHERE entity.id IS NOT NULL`);
 
-  parts.push(`| RENAME @timestamp AS event_timestamp`);
+  // Deduplicate to one row per entity before the LOOKUP JOIN — reduces join cardinality
+  // from O(anomaly records) to O(distinct entities). @timestamp dropped here; no rename needed.
+  parts.push(`| STATS BY entity.id`);
   parts.push(`| LOOKUP JOIN ${entitiesIndexName} ON entity.id`);
-  parts.push(`| RENAME event_timestamp AS @timestamp`);
 
   parts.push(`| WHERE entity.name IS NOT NULL`);
   parts.push(...entityFilterClauses);
