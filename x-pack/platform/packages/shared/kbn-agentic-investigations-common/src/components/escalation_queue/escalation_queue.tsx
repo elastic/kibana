@@ -10,11 +10,11 @@ import styled from '@emotion/styled';
 import {
   EuiAccordion,
   EuiBadge,
+  EuiButtonEmpty,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
-  EuiTablePagination,
   EuiText,
   EuiTitle,
   useEuiTheme,
@@ -31,14 +31,15 @@ interface EscalationQueueProps {
   renderAssignees: (escalation: EscalationQueueItem) => React.ReactNode;
   /**
    * Total number of escalations in this bucket on the server.
-   * Used for the header badge and for rendering pagination.
-   * Defaults to `escalations.length` when not supplied (no pagination rendered).
+   * Used for the header badge and for the "Show more (N)" button.
+   * Defaults to `escalations.length` when not supplied (no button rendered).
    */
   totalItemCount?: number;
-  /** 0-based current page index. */
-  pageIndex?: number;
-  pageSize?: number;
-  onPageChange?: (page: number) => void;
+  /**
+   * Called when the user clicks "Show more". The page is responsible for
+   * fetching the next page and appending results to `escalations`.
+   */
+  onLoadMore?: () => void;
   /** If set, renders an inline error state in place of the item list. */
   error?: Error | null;
 }
@@ -60,24 +61,15 @@ const StyledAccordion = styled(EuiAccordion)`
 /**
  * One collapsible group of escalation rows — Open or Closed.
  *
- * Pagination is per-bucket: each group manages its own page state independently.
- * The badge always shows `totalItemCount` so it reflects the server total, not
- * the rendered page length.
+ * Results accumulate as the user clicks "Show more": the badge always shows the
+ * server total while the list grows one page at a time.
  */
 export const EscalationQueue = memo<EscalationQueueProps>(
-  ({
-    status,
-    escalations,
-    renderAssignees,
-    totalItemCount,
-    pageIndex = 0,
-    pageSize = 50,
-    onPageChange,
-    error,
-  }) => {
+  ({ status, escalations, renderAssignees, totalItemCount, onLoadMore, error }) => {
     const { euiTheme } = useEuiTheme();
     const serverTotal = totalItemCount ?? escalations.length;
-    const showPagination = onPageChange !== undefined && serverTotal > pageSize;
+    const remaining = serverTotal - escalations.length;
+    const showLoadMore = onLoadMore !== undefined && remaining > 0;
 
     const buttonContent = (
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -92,7 +84,7 @@ export const EscalationQueue = memo<EscalationQueueProps>(
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          {/* Show the server total so the badge reflects the full bucket, not just the current page. */}
+          {/* Show the server total so the badge reflects the full bucket, not just loaded items. */}
           <EuiBadge color="hollow">{serverTotal}</EuiBadge>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -119,21 +111,27 @@ export const EscalationQueue = memo<EscalationQueueProps>(
                 <EuiFlexItem key={escalation.id} grow={false}>
                   <EscalationCard
                     escalation={escalation}
-                    hasBorder={i < escalations.length - 1}
+                    hasBorder={i < escalations.length - 1 || showLoadMore}
                     renderAssignees={renderAssignees}
                   />
                 </EuiFlexItem>
               ))}
             </EuiFlexGroup>
-            {showPagination && (
-              <EuiPanel paddingSize="m" hasBorder={false} hasShadow={false}>
-                <EuiTablePagination
-                  pageCount={Math.ceil(serverTotal / pageSize)}
-                  activePage={pageIndex}
-                  onChangePage={onPageChange}
-                  itemsPerPage={pageSize}
-                  showPerPageOptions={false}
-                />
+            {showLoadMore && (
+              <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false}>
+                <EuiFlexGroup justifyContent="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      iconType="chevronSingleDown"
+                      iconSide="left"
+                      size="s"
+                      onClick={onLoadMore}
+                      data-test-subj={`escalationQueueLoadMore-${status}`}
+                    >
+                      {ESCALATION_QUEUE_LABELS.showMore(remaining)}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </EuiPanel>
             )}
           </>

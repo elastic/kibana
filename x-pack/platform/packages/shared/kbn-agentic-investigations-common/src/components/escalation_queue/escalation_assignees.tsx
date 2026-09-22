@@ -67,9 +67,8 @@ export const EscalationAssignees = memo<EscalationAssigneesProps>(
     const handleChange = useCallback(
       (newSelected: UserProfileWithAvatar[]) => {
         onChange(newSelected);
-        closePopover();
       },
-      [onChange, closePopover]
+      [onChange]
     );
 
     const avatarStack =

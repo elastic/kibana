@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiEmptyPrompt,
@@ -46,12 +46,36 @@ export const EscalationsPage: React.FC = () => {
   // Capability check: only render the assignee picker when the user can manage escalations.
   const canManage = application.capabilities.agenticInvestigations?.manageEscalations === true;
 
-  // Per-bucket page state (0-based). Each bucket paginates independently.
-  const [openPage, setOpenPage] = useState(0);
-  const [closedPage, setClosedPage] = useState(0);
+  // Per-bucket current page (1-based). Incremented by "Show more"; never reset here.
+  const [openPage, setOpenPage] = useState(1);
+  const [closedPage, setClosedPage] = useState(1);
 
-  const openQuery = useListEscalations({ status: 'open', page: openPage + 1 });
-  const closedQuery = useListEscalations({ status: 'closed', page: closedPage + 1 });
+  const openQuery = useListEscalations({ status: 'open', page: openPage });
+  const closedQuery = useListEscalations({ status: 'closed', page: closedPage });
+
+  // Accumulated items: each "Show more" appends the next page to the list.
+  // The response's `pagination.page` is used to detect a reset (page 1) vs. an append.
+  const [openItems, setOpenItems] = useState<EscalationQueueItem[]>([]);
+  const [closedItems, setClosedItems] = useState<EscalationQueueItem[]>([]);
+
+  useEffect(() => {
+    if (!openQuery.data) return;
+    const newItems = openQuery.data.results.map(escalationToQueueItem);
+    setOpenItems((prev) =>
+      openQuery.data!.pagination.page === 1 ? newItems : [...prev, ...newItems]
+    );
+    // openQuery.data is the only dep: fires when React Query delivers a new page.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openQuery.data]);
+
+  useEffect(() => {
+    if (!closedQuery.data) return;
+    const newItems = closedQuery.data.results.map(escalationToQueueItem);
+    setClosedItems((prev) =>
+      closedQuery.data!.pagination.page === 1 ? newItems : [...prev, ...newItems]
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [closedQuery.data]);
 
   const isLoading = openQuery.isLoading || closedQuery.isLoading;
   const hasAnyData = openQuery.data ?? closedQuery.data;
@@ -59,15 +83,6 @@ export const EscalationsPage: React.FC = () => {
   // Per-bucket errors are passed into each EscalationQueue.
   const bothFailed = openQuery.error && closedQuery.error;
   const pageError = bothFailed && !hasAnyData ? (openQuery.error as Error) : null;
-
-  const openItems = useMemo(
-    () => (openQuery.data?.results ?? []).map(escalationToQueueItem),
-    [openQuery.data]
-  );
-  const closedItems = useMemo(
-    () => (closedQuery.data?.results ?? []).map(escalationToQueueItem),
-    [closedQuery.data]
-  );
 
   // Collect all assignee uids across both groups for a single bulk profile fetch.
   const allAssigneeUids = useMemo(() => {
@@ -141,8 +156,11 @@ export const EscalationsPage: React.FC = () => {
           isSuggestionsLoading={suggestQuery.isLoading}
           // Disable the picker while the bulk profile fetch is still in flight to prevent
           // a change that would silently drop unresolved UIDs from the replace-in-full list.
-          isProfilesLoading={profilesQuery.isLoading}
-          canManage={canManage}
+          // `isFetching` (not `isLoading`) is used here: React Query v4 sets `isLoading: true`
+          // even for disabled queries that have no data (e.g. when there are no assignee UIDs),
+          // which would permanently grey out the button for unassigned escalations.
+          isProfilesLoading={profilesQuery.isFetching}
+          canManage={canManage && escalation.status !== 'closed'}
           onSearchChange={setSearchTerm}
           onChange={(newSelected) => handleAssigneesChange(escalation.id, newSelected)}
         />
@@ -200,9 +218,7 @@ export const EscalationsPage: React.FC = () => {
                 status="open"
                 escalations={openItems}
                 totalItemCount={openQuery.data?.pagination.total}
-                pageIndex={openPage}
-                pageSize={50}
-                onPageChange={setOpenPage}
+                onLoadMore={() => setOpenPage((p) => p + 1)}
                 error={openQuery.error as Error | null}
                 renderAssignees={renderAssignees}
               />
@@ -212,9 +228,7 @@ export const EscalationsPage: React.FC = () => {
                 status="closed"
                 escalations={closedItems}
                 totalItemCount={closedQuery.data?.pagination.total}
-                pageIndex={closedPage}
-                pageSize={50}
-                onPageChange={setClosedPage}
+                onLoadMore={() => setClosedPage((p) => p + 1)}
                 error={closedQuery.error as Error | null}
                 renderAssignees={renderAssignees}
               />

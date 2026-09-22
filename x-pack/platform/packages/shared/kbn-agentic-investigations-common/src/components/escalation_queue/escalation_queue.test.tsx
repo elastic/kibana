@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen } from '@testing-library/react';
+import { screen, fireEvent } from '@testing-library/react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import type { EscalationQueueItem } from './types';
 import { EscalationQueue } from './escalation_queue';
@@ -75,5 +75,48 @@ describe('EscalationQueue', () => {
   it('shows 0 in the count badge for an empty list', () => {
     renderQueue('closed', []);
     expect(screen.getByText('0')).toBeInTheDocument();
+  });
+
+  it('shows "Show more (N)" when the server total exceeds loaded items', () => {
+    renderWithKibanaRenderContext(
+      <EscalationQueue
+        status="open"
+        escalations={[openItem]}
+        totalItemCount={51}
+        onLoadMore={jest.fn()}
+        renderAssignees={() => <span />}
+      />
+    );
+    // 1 item loaded, 51 total → 50 remaining
+    expect(screen.getByTestId('escalationQueueLoadMore-open')).toBeInTheDocument();
+    expect(screen.getByText('Show more (50)')).toBeInTheDocument();
+  });
+
+  it('calls onLoadMore when the "Show more" button is clicked', () => {
+    const onLoadMore = jest.fn();
+    renderWithKibanaRenderContext(
+      <EscalationQueue
+        status="open"
+        escalations={[openItem]}
+        totalItemCount={10}
+        onLoadMore={onLoadMore}
+        renderAssignees={() => <span />}
+      />
+    );
+    fireEvent.click(screen.getByTestId('escalationQueueLoadMore-open'));
+    expect(onLoadMore).toHaveBeenCalledTimes(1);
+  });
+
+  it('hides "Show more" when all items are already loaded', () => {
+    renderWithKibanaRenderContext(
+      <EscalationQueue
+        status="open"
+        escalations={[openItem]}
+        totalItemCount={1}
+        onLoadMore={jest.fn()}
+        renderAssignees={() => <span />}
+      />
+    );
+    expect(screen.queryByTestId('escalationQueueLoadMore-open')).not.toBeInTheDocument();
   });
 });

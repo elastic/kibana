@@ -123,32 +123,42 @@ beforeEach(() => {
 
 afterEach(() => jest.clearAllMocks());
 
-/** Sets up both list queries — open and closed — with the given results. */
+/**
+ * Sets up both list queries — open and closed — with the given results.
+ *
+ * The result objects are created once outside `mockImplementation` so that
+ * every call during a render cycle returns the same reference. If the mock
+ * returned a new object on each call, the `useEffect([openQuery.data])` in
+ * EscalationsPage would fire on every render and cause an infinite loop.
+ */
 const mockBothQueues = (
   open: object[] = [],
   closed: object[] = [],
   opts: { isLoading?: boolean; error?: Error; openTotal?: number; closedTotal?: number } = {}
 ) => {
-  mockUseListEscalations.mockImplementation(({ status }: { status: string }) => {
-    if (status === 'open') {
-      return {
-        data: {
+  const openResult = {
+    data: opts.isLoading
+      ? undefined
+      : {
           results: open,
           pagination: { total: opts.openTotal ?? open.length, page: 1, per_page: 50 },
         },
-        isLoading: opts.isLoading ?? false,
-        error: opts.error ?? null,
-      };
-    }
-    return {
-      data: {
-        results: closed,
-        pagination: { total: opts.closedTotal ?? closed.length, page: 1, per_page: 50 },
-      },
-      isLoading: opts.isLoading ?? false,
-      error: opts.error ?? null,
-    };
-  });
+    isLoading: opts.isLoading ?? false,
+    error: opts.error ?? null,
+  };
+  const closedResult = {
+    data: opts.isLoading
+      ? undefined
+      : {
+          results: closed,
+          pagination: { total: opts.closedTotal ?? closed.length, page: 1, per_page: 50 },
+        },
+    isLoading: opts.isLoading ?? false,
+    error: opts.error ?? null,
+  };
+  mockUseListEscalations.mockImplementation(({ status }: { status: string }) =>
+    status === 'open' ? openResult : closedResult
+  );
 };
 
 describe('EscalationsPage', () => {
@@ -247,6 +257,18 @@ describe('EscalationsPage', () => {
     expect(core.notifications.toasts.addSuccess).toHaveBeenCalledWith('Assignees updated');
   });
 
+  it('renders the assignee widget as read-only for closed escalations regardless of canManage', () => {
+    mockBothQueues([], [closedEscalation]);
+    renderPage();
+
+    // Closed bucket accordion is collapsed by default; open it by clicking the heading.
+    // getByRole avoids ambiguity with the per-card "Closed" status badge.
+    fireEvent.click(screen.getByRole('heading', { name: 'Closed' }));
+
+    expect(screen.getByTestId('mock-assignees-readonly-esc-closed-1')).toBeInTheDocument();
+    expect(screen.queryByTestId('mock-assign-esc-closed-1')).not.toBeInTheDocument();
+  });
+
   it('renders the assignee widget as read-only when manageEscalations is false', () => {
     mockBothQueues([openEscalation], []);
     renderPage({ capabilities: { showEscalations: true, manageEscalations: false } });
@@ -266,25 +288,31 @@ describe('EscalationsPage', () => {
     expect(screen.getByText('75')).toBeInTheDocument();
   });
 
+  it('renders a "Show more" button when there are more items than loaded', () => {
+    mockBothQueues([openEscalation], [], { openTotal: 75 });
+    renderPage();
+
+    // 1 loaded, 75 total → "Show more (74)"
+    expect(screen.getByTestId('escalationQueueLoadMore-open')).toBeInTheDocument();
+    expect(screen.getByText('Show more (74)')).toBeInTheDocument();
+  });
+
   it('shows an inline error for a failing bucket without hiding the other bucket', () => {
-    mockUseListEscalations.mockImplementation(({ status }: { status: string }) => {
-      if (status === 'open') {
-        return {
-          data: {
-            results: [openEscalation],
-            pagination: { total: 1, page: 1, per_page: 50 },
-          },
-          isLoading: false,
-          error: null,
-        };
-      }
-      // Closed query fails.
-      return {
-        data: undefined,
-        isLoading: false,
-        error: new Error('Closed query failed'),
-      };
-    });
+    // Build stable result objects outside mockImplementation to prevent reference
+    // churn from triggering the useEffect([query.data]) on every render.
+    const openResult = {
+      data: { results: [openEscalation], pagination: { total: 1, page: 1, per_page: 50 } },
+      isLoading: false,
+      error: null,
+    };
+    const closedResult = {
+      data: undefined,
+      isLoading: false,
+      error: new Error('Closed query failed'),
+    };
+    mockUseListEscalations.mockImplementation(({ status }: { status: string }) =>
+      status === 'open' ? openResult : closedResult
+    );
     renderPage();
 
     // Open bucket is still visible.
