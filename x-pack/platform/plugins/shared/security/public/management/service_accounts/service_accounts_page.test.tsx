@@ -21,6 +21,10 @@ describe('ServiceAccountsPage', () => {
     canCreate = true,
     serviceAccounts = [],
     loadError,
+    nextPage,
+    nextServiceAccounts = [],
+    nextResponseCursor,
+    loadMoreError,
   }: {
     canCreate?: boolean;
     serviceAccounts?: Array<{
@@ -31,30 +35,46 @@ describe('ServiceAccountsPage', () => {
       hasCredential: boolean;
     }>;
     loadError?: Error;
+    nextPage?: string;
+    nextServiceAccounts?: Array<{
+      id: string;
+      name: string;
+      roles: string[];
+      enabled: boolean;
+      hasCredential: boolean;
+    }>;
+    nextResponseCursor?: string;
+    loadMoreError?: Error;
   } = {}) => {
-    const callbacks = {
-      onCreateAccount: jest.fn(),
-      onOpenAccount: jest.fn(),
-      onOpenWorkloads: jest.fn(),
-      onDeleteAccount: jest.fn(),
-    };
-    const getAll = jest.fn(
-      loadError ? () => Promise.reject(loadError) : () => Promise.resolve(serviceAccounts)
-    );
+    const onCreateAccount = jest.fn();
+    const list = jest.fn();
+    if (loadError) {
+      list.mockRejectedValue(loadError);
+    } else {
+      list.mockResolvedValueOnce({ serviceAccounts, nextPage });
+      if (loadMoreError) {
+        list.mockRejectedValueOnce(loadMoreError);
+      } else if (nextPage) {
+        list.mockResolvedValueOnce({
+          serviceAccounts: nextServiceAccounts,
+          nextPage: nextResponseCursor,
+        });
+      }
+    }
 
     renderWithI18n(
       <EuiProvider>
         <MockAppHeaderProvider>
           <ServiceAccountsPage
             canCreate={canCreate}
-            serviceAccountsAPIClient={{ getAll }}
-            {...callbacks}
+            serviceAccountsAPIClient={{ list }}
+            onCreateAccount={onCreateAccount}
           />
         </MockAppHeaderProvider>
       </EuiProvider>
     );
 
-    return { ...callbacks, getAll };
+    return { onCreateAccount, list };
   };
 
   it('starts account creation from the page action', async () => {
@@ -76,8 +96,8 @@ describe('ServiceAccountsPage', () => {
     );
   });
 
-  it('renders loaded accounts and forwards table actions', async () => {
-    const callbacks = renderPage({
+  it('renders loaded accounts without unavailable follow-up actions', async () => {
+    renderPage({
       serviceAccounts: [
         {
           id: 'account-id',
@@ -90,21 +110,42 @@ describe('ServiceAccountsPage', () => {
     });
 
     expect(await screen.findByTestId('serviceAccountsTable')).toBeVisible();
-
-    await user.click(screen.getByTestId('serviceAccountName-account-id'));
-    expect(callbacks.onOpenAccount).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 'account-id' })
-    );
-
-    await user.click(screen.getByTestId('serviceAccountDelete-account-id'));
-    expect(callbacks.onDeleteAccount).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 'account-id' })
-    );
+    expect(screen.queryByRole('link')).not.toBeInTheDocument();
+    expect(screen.queryByText('Actions')).not.toBeInTheDocument();
   });
 
-  it('hides delete actions without the save capability', async () => {
+  it('loads the next cursor page on demand', async () => {
+    const { list } = renderPage({
+      serviceAccounts: [
+        {
+          id: 'first-id',
+          name: 'first-account',
+          roles: ['viewer'],
+          enabled: true,
+          hasCredential: true,
+        },
+      ],
+      nextPage: 'next-page',
+      nextServiceAccounts: [
+        {
+          id: 'second-id',
+          name: 'second-account',
+          roles: ['editor'],
+          enabled: true,
+          hasCredential: true,
+        },
+      ],
+    });
+
+    await user.click(await screen.findByTestId('serviceAccountsLoadMore'));
+
+    expect(await screen.findByText('second-account')).toBeVisible();
+    expect(list).toHaveBeenNthCalledWith(1, { limit: 100 });
+    expect(list).toHaveBeenNthCalledWith(2, { limit: 100, after: 'next-page' });
+  });
+
+  it('keeps loaded accounts visible when the next cursor page fails', async () => {
     renderPage({
-      canCreate: false,
       serviceAccounts: [
         {
           id: 'account-id',
@@ -114,18 +155,52 @@ describe('ServiceAccountsPage', () => {
           hasCredential: true,
         },
       ],
+      nextPage: 'next-page',
+      loadMoreError: new Error('Unavailable'),
     });
 
-    expect(await screen.findByTestId('serviceAccountsTable')).toBeVisible();
-    expect(screen.queryByTestId('serviceAccountDelete-account-id')).not.toBeInTheDocument();
+    await user.click(await screen.findByTestId('serviceAccountsLoadMore'));
+
+    expect(await screen.findByText('Unable to load more service accounts.')).toBeVisible();
+    expect(screen.getByText('nightshift-relay')).toBeVisible();
+  });
+
+  it('rejects a repeated cursor without appending a duplicate page', async () => {
+    renderPage({
+      serviceAccounts: [
+        {
+          id: 'account-id',
+          name: 'nightshift-relay',
+          roles: ['viewer'],
+          enabled: true,
+          hasCredential: true,
+        },
+      ],
+      nextPage: 'repeated-page',
+      nextServiceAccounts: [
+        {
+          id: 'duplicate-id',
+          name: 'duplicate-account',
+          roles: ['viewer'],
+          enabled: true,
+          hasCredential: true,
+        },
+      ],
+      nextResponseCursor: 'repeated-page',
+    });
+
+    await user.click(await screen.findByTestId('serviceAccountsLoadMore'));
+
+    expect(await screen.findByText('Unable to load more service accounts.')).toBeVisible();
+    expect(screen.queryByText('duplicate-account')).not.toBeInTheDocument();
   });
 
   it('retries after a loading error', async () => {
-    const { getAll } = renderPage({ loadError: new Error('Unavailable') });
+    const { list } = renderPage({ loadError: new Error('Unavailable') });
 
     expect(await screen.findByTestId('serviceAccountsLoadError')).toBeVisible();
     await user.click(screen.getByTestId('serviceAccountsRetry'));
 
-    await waitFor(() => expect(getAll).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(list).toHaveBeenCalledTimes(2));
   });
 });

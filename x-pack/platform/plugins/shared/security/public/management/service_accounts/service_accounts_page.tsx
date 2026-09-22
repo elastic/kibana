@@ -20,41 +20,74 @@ import type { ServiceAccountsAPIClient } from '../../service_accounts';
 
 export interface ServiceAccountsPageProps {
   canCreate: boolean;
-  serviceAccountsAPIClient: Pick<PublicMethodsOf<ServiceAccountsAPIClient>, 'getAll'>;
+  serviceAccountsAPIClient: Pick<PublicMethodsOf<ServiceAccountsAPIClient>, 'list'>;
   onCreateAccount: () => void;
-  onOpenAccount: (serviceAccount: ServiceAccountTableItem) => void;
-  onOpenWorkloads: (serviceAccount: ServiceAccountTableItem) => void;
-  onDeleteAccount: (serviceAccount: ServiceAccountTableItem) => void;
 }
 
 export const ServiceAccountsPage = ({
   canCreate,
   serviceAccountsAPIClient,
   onCreateAccount,
-  onOpenAccount,
-  onOpenWorkloads,
-  onDeleteAccount,
 }: ServiceAccountsPageProps) => {
   const [serviceAccounts, setServiceAccounts] = useState<ServiceAccountTableItem[]>([]);
+  const [nextPage, setNextPage] = useState<string>();
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasError, setHasError] = useState(false);
+  const [hasLoadMoreError, setHasLoadMoreError] = useState(false);
 
-  const loadServiceAccounts = useCallback(async () => {
-    setIsLoading(true);
-    setHasError(false);
+  const loadServiceAccounts = useCallback(
+    async (after?: string) => {
+      const isLoadingNextPage = after !== undefined;
+      if (isLoadingNextPage) {
+        setIsLoadingMore(true);
+        setHasLoadMoreError(false);
+      } else {
+        setIsLoading(true);
+        setHasError(false);
+      }
 
-    try {
-      setServiceAccounts(await serviceAccountsAPIClient.getAll());
-    } catch {
-      setHasError(true);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [serviceAccountsAPIClient]);
+      try {
+        const response = await serviceAccountsAPIClient.list({
+          limit: 100,
+          ...(after !== undefined ? { after } : {}),
+        });
+        if (isLoadingNextPage && response.nextPage === after) {
+          throw new Error('Service account pagination returned a repeated cursor.');
+        }
+
+        setServiceAccounts((currentServiceAccounts) =>
+          isLoadingNextPage
+            ? [...currentServiceAccounts, ...response.serviceAccounts]
+            : response.serviceAccounts
+        );
+        setNextPage(response.nextPage);
+      } catch {
+        if (isLoadingNextPage) {
+          setHasLoadMoreError(true);
+        } else {
+          setHasError(true);
+        }
+      } finally {
+        if (isLoadingNextPage) {
+          setIsLoadingMore(false);
+        } else {
+          setIsLoading(false);
+        }
+      }
+    },
+    [serviceAccountsAPIClient]
+  );
 
   useEffect(() => {
     loadServiceAccounts();
   }, [loadServiceAccounts]);
+
+  const loadMoreServiceAccounts = useCallback(() => {
+    if (nextPage !== undefined) {
+      loadServiceAccounts(nextPage);
+    }
+  }, [loadServiceAccounts, nextPage]);
 
   const menu: AppHeaderMenu | undefined = canCreate
     ? {
@@ -114,7 +147,10 @@ export const ServiceAccountsPage = ({
               </p>
             }
             actions={
-              <EuiButton onClick={loadServiceAccounts} data-test-subj="serviceAccountsRetry">
+              <EuiButton
+                onClick={() => loadServiceAccounts()}
+                data-test-subj="serviceAccountsRetry"
+              >
                 {i18n.translate('xpack.security.management.serviceAccounts.loadErrorRetryButton', {
                   defaultMessage: 'Try again',
                 })}
@@ -127,10 +163,10 @@ export const ServiceAccountsPage = ({
         ) : (
           <ServiceAccountsTable
             serviceAccounts={serviceAccounts}
-            canDelete={canCreate}
-            onOpenAccount={onOpenAccount}
-            onOpenWorkloads={onOpenWorkloads}
-            onDeleteAccount={onDeleteAccount}
+            hasMore={nextPage !== undefined}
+            isLoadingMore={isLoadingMore}
+            hasLoadMoreError={hasLoadMoreError}
+            onLoadMore={loadMoreServiceAccounts}
           />
         )}
       </KibanaPageTemplate.Section>

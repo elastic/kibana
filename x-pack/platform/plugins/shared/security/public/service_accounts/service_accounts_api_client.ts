@@ -52,25 +52,4 @@ export class ServiceAccountsAPIClient {
       },
     });
   }
-
-  public async getAll(): Promise<ServiceAccountDirectoryEntry[]> {
-    const serviceAccounts: ServiceAccountDirectoryEntry[] = [];
-    const visitedCursors = new Set<string>();
-    let after: string | undefined;
-
-    do {
-      const response = await this.list({ limit: 100, ...(after ? { after } : {}) });
-      serviceAccounts.push(...response.serviceAccounts);
-      after = response.nextPage;
-
-      if (after && visitedCursors.has(after)) {
-        throw new Error('Service account pagination returned a repeated cursor.');
-      }
-      if (after) {
-        visitedCursors.add(after);
-      }
-    } while (after);
-
-    return serviceAccounts;
-  }
 }

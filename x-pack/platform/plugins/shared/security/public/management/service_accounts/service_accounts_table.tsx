@@ -10,15 +10,15 @@ import {
   EuiAvatar,
   EuiBadge,
   EuiBadgeGroup,
-  EuiButtonIcon,
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
-  EuiLink,
+  EuiSpacer,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -34,10 +34,10 @@ export interface ServiceAccountTableItem extends ServiceAccountDirectoryEntry {
 
 export interface ServiceAccountsTableProps {
   serviceAccounts: ServiceAccountTableItem[];
-  canDelete: boolean;
-  onOpenAccount: (serviceAccount: ServiceAccountTableItem) => void;
-  onOpenWorkloads: (serviceAccount: ServiceAccountTableItem) => void;
-  onDeleteAccount: (serviceAccount: ServiceAccountTableItem) => void;
+  hasMore: boolean;
+  isLoadingMore: boolean;
+  hasLoadMoreError: boolean;
+  onLoadMore: () => void;
 }
 
 const unavailableValue = (
@@ -72,13 +72,11 @@ const getCreatorLabel = (creator?: ServiceAccountDirectoryCreator) => {
 
 export const ServiceAccountsTable = ({
   serviceAccounts,
-  canDelete,
-  onOpenAccount,
-  onOpenWorkloads,
-  onDeleteAccount,
+  hasMore,
+  isLoadingMore,
+  hasLoadMoreError,
+  onLoadMore,
 }: ServiceAccountsTableProps) => {
-  const [, setSelection] = useState<ServiceAccountTableItem[]>([]);
-
   const roleOptions = useMemo(
     () =>
       Array.from(new Set(serviceAccounts.flatMap(({ roles }) => roles)))
@@ -127,14 +125,6 @@ export const ServiceAccountsTable = ({
           defaultMessage: 'Name',
         }),
         sortable: true,
-        render: (name: string, serviceAccount) => (
-          <EuiLink
-            data-test-subj={`serviceAccountName-${serviceAccount.id}`}
-            onClick={() => onOpenAccount(serviceAccount)}
-          >
-            {name}
-          </EuiLink>
-        ),
       },
       {
         field: 'description',
@@ -149,6 +139,7 @@ export const ServiceAccountsTable = ({
         name: i18n.translate('xpack.security.management.serviceAccounts.table.rolesColumn', {
           defaultMessage: 'Roles',
         }),
+        sortable: ({ roles }) => roles.join(','),
         render: (roles: string[]) =>
           roles.length > 0 ? (
             <EuiBadgeGroup gutterSize="xs">
@@ -173,7 +164,7 @@ export const ServiceAccountsTable = ({
           return (
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiAvatar name={label} size="s" />
+                <EuiAvatar aria-hidden={true} name={label} size="s" />
               </EuiFlexItem>
               <EuiFlexItem>{label}</EuiFlexItem>
             </EuiFlexGroup>
@@ -185,7 +176,7 @@ export const ServiceAccountsTable = ({
         name: i18n.translate('xpack.security.management.serviceAccounts.table.workloadsColumn', {
           defaultMessage: 'Workloads',
         }),
-        render: (workloadCount: number | undefined, serviceAccount) =>
+        render: (workloadCount: number | undefined) =>
           workloadCount === undefined ? (
             <EuiToolTip
               content={i18n.translate(
@@ -196,77 +187,72 @@ export const ServiceAccountsTable = ({
               {unavailableValue}
             </EuiToolTip>
           ) : (
-            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiBadge color="primary">{workloadCount}</EuiBadge>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiLink onClick={() => onOpenWorkloads(serviceAccount)}>
-                  {i18n.translate('xpack.security.management.serviceAccounts.table.viewWorkloads', {
-                    defaultMessage: 'View',
-                  })}
-                </EuiLink>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <EuiBadge color="primary">{workloadCount}</EuiBadge>
           ),
       },
-      {
-        name: i18n.translate('xpack.security.management.serviceAccounts.table.actionsColumn', {
-          defaultMessage: 'Actions',
-        }),
-        width: '80px',
-        align: 'right',
-        actions: [
-          {
-            render: (serviceAccount) =>
-              canDelete ? (
-                <EuiToolTip
-                  content={i18n.translate(
-                    'xpack.security.management.serviceAccounts.table.deleteAction',
-                    {
-                      defaultMessage: 'Delete {name}',
-                      values: { name: serviceAccount.name },
-                    }
-                  )}
-                >
-                  <EuiButtonIcon
-                    aria-label={i18n.translate(
-                      'xpack.security.management.serviceAccounts.table.deleteActionAriaLabel',
-                      {
-                        defaultMessage: 'Delete service account {name}',
-                        values: { name: serviceAccount.name },
-                      }
-                    )}
-                    color="danger"
-                    iconType="trash"
-                    onClick={() => onDeleteAccount(serviceAccount)}
-                    data-test-subj={`serviceAccountDelete-${serviceAccount.id}`}
-                  />
-                </EuiToolTip>
-              ) : (
-                <></>
-              ),
-          },
-        ],
-      },
     ],
-    [canDelete, onDeleteAccount, onOpenAccount, onOpenWorkloads]
+    []
   );
 
   return (
-    <EuiInMemoryTable
-      itemId="id"
-      tableCaption={i18n.translate('xpack.security.management.serviceAccounts.table.tableCaption', {
-        defaultMessage: 'Service accounts',
-      })}
-      rowHeader="name"
-      columns={columns}
-      items={serviceAccounts}
-      pagination={{ initialPageSize: 10, pageSizeOptions: [10, 25, 50] }}
-      search={search}
-      selection={{ onSelectionChange: setSelection }}
-      sorting={{ sort: { field: 'name', direction: 'asc' } }}
-      data-test-subj="serviceAccountsTable"
-    />
+    <>
+      <EuiInMemoryTable
+        itemId="id"
+        tableCaption={i18n.translate(
+          'xpack.security.management.serviceAccounts.table.tableCaption',
+          {
+            defaultMessage: 'Service accounts',
+          }
+        )}
+        rowHeader="name"
+        columns={columns}
+        items={serviceAccounts}
+        pagination={{ initialPageSize: 10, pageSizeOptions: [10, 25, 50] }}
+        search={search}
+        sorting={{ sort: { field: 'name', direction: 'asc' } }}
+        data-test-subj="serviceAccountsTable"
+      />
+      {(hasMore || hasLoadMoreError) && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+            <EuiFlexItem>
+              <EuiText color={hasLoadMoreError ? 'danger' : 'subdued'} size="s">
+                {hasLoadMoreError
+                  ? i18n.translate(
+                      'xpack.security.management.serviceAccounts.table.loadMoreError',
+                      { defaultMessage: 'Unable to load more service accounts.' }
+                    )
+                  : i18n.translate(
+                      'xpack.security.management.serviceAccounts.table.loadedAccountsNotice',
+                      {
+                        defaultMessage:
+                          'Search and filters currently include {count, plural, one {# loaded account} other {# loaded accounts}}.',
+                        values: { count: serviceAccounts.length },
+                      }
+                    )}
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                onClick={onLoadMore}
+                isLoading={isLoadingMore}
+                data-test-subj="serviceAccountsLoadMore"
+              >
+                {hasLoadMoreError
+                  ? i18n.translate(
+                      'xpack.security.management.serviceAccounts.table.retryLoadMoreButton',
+                      { defaultMessage: 'Try again' }
+                    )
+                  : i18n.translate(
+                      'xpack.security.management.serviceAccounts.table.loadMoreButton',
+                      { defaultMessage: 'Load more' }
+                    )}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      )}
+    </>
   );
 };

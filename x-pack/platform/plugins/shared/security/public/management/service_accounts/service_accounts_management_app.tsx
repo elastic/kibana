@@ -60,13 +60,6 @@ export const serviceAccountsManagementApp = Object.freeze({
                   canCreate={canCreate}
                   serviceAccountsAPIClient={serviceAccountsAPIClient}
                   onCreateAccount={() => history.push('/create')}
-                  onOpenAccount={({ id }) => history.push(`/account/${encodeURIComponent(id)}`)}
-                  onOpenWorkloads={({ id }) =>
-                    history.push(`/account/${encodeURIComponent(id)}/workloads`)
-                  }
-                  onDeleteAccount={({ id }) =>
-                    history.push(`/account/${encodeURIComponent(id)}/delete`)
-                  }
                 />
               </Breadcrumb>
             </Providers>

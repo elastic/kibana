@@ -37,38 +37,39 @@ describe('ServiceAccountsTable', () => {
     hasCredential: true,
   };
 
-  const renderTable = () => {
-    const callbacks = {
-      onOpenAccount: jest.fn(),
-      onOpenWorkloads: jest.fn(),
-      onDeleteAccount: jest.fn(),
-    };
+  const renderTable = ({
+    hasMore = false,
+    hasLoadMoreError = false,
+  }: {
+    hasMore?: boolean;
+    hasLoadMoreError?: boolean;
+  } = {}) => {
+    const onLoadMore = jest.fn();
 
     renderWithI18n(
       <EuiProvider>
         <ServiceAccountsTable
           serviceAccounts={[firstAccount, secondAccount]}
-          canDelete={true}
-          {...callbacks}
+          hasMore={hasMore}
+          isLoadingMore={false}
+          hasLoadMoreError={hasLoadMoreError}
+          onLoadMore={onLoadMore}
         />
       </EuiProvider>
     );
 
-    return callbacks;
+    return { onLoadMore };
   };
 
-  it('renders directory metadata and forwards row actions', async () => {
-    const callbacks = renderTable();
+  it('renders directory metadata without unavailable follow-up actions', () => {
+    renderTable();
 
     expect(screen.getByText('Executes nightshift workflows')).toBeVisible();
     expect(screen.getByText('viewer')).toBeVisible();
     expect(screen.getByText('Night Operator')).toBeVisible();
-
-    await user.click(screen.getByText('View'));
-    expect(callbacks.onOpenWorkloads).toHaveBeenCalledWith(firstAccount);
-
-    await user.click(screen.getByTestId('serviceAccountDelete-first-id'));
-    expect(callbacks.onDeleteAccount).toHaveBeenCalledWith(firstAccount);
+    expect(screen.queryByRole('link')).not.toBeInTheDocument();
+    expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
+    expect(screen.queryByText('Actions')).not.toBeInTheDocument();
   });
 
   it('filters accounts by free text', async () => {
@@ -78,5 +79,23 @@ describe('ServiceAccountsTable', () => {
 
     expect(await screen.findByText('incident-responder')).toBeVisible();
     expect(screen.queryByText('nightshift-relay')).not.toBeInTheDocument();
+  });
+
+  it('loads the next cursor page on demand', async () => {
+    const { onLoadMore } = renderTable({ hasMore: true });
+
+    expect(
+      screen.getByText('Search and filters currently include 2 loaded accounts.')
+    ).toBeVisible();
+    await user.click(screen.getByTestId('serviceAccountsLoadMore'));
+
+    expect(onLoadMore).toHaveBeenCalledTimes(1);
+  });
+
+  it('offers to retry when loading the next cursor page fails', () => {
+    renderTable({ hasLoadMoreError: true });
+
+    expect(screen.getByText('Unable to load more service accounts.')).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Try again' })).toBeVisible();
   });
 });
