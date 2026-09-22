@@ -5,28 +5,19 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
+import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { searchByAnchors } from './search_by_anchors';
 
-const logger = {
-  debug: jest.fn(),
-  warn: jest.fn(),
-  error: jest.fn(),
-  info: jest.fn(),
-} as unknown as import('@kbn/core/server').Logger;
+const logger = loggingSystemMock.createLogger();
 
-const buildMockEsClient = (
-  hits: Array<{ _id: string; _score?: number; _source?: Record<string, unknown> }> = [],
-  total = 0
-): jest.Mocked<Pick<ElasticsearchClient, 'search'>> => ({
-  search: jest.fn().mockResolvedValue({
-    hits: { hits, total: { value: total, relation: 'eq' } },
-  }),
-});
+const emptySearchResponse = {
+  hits: { hits: [], total: { value: 0, relation: 'eq' as const } },
+};
 
 describe('searchByAnchors', () => {
   it('returns empty when no discriminating anchors', async () => {
-    const esClient = buildMockEsClient() as unknown as ElasticsearchClient;
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.search.mockResolvedValue(emptySearchResponse);
     const result = await searchByAnchors(esClient, logger, 'default', {
       anchors: {
         iocs: [{ type: 'domain', value: 'example.com' }], // noise domain
@@ -40,7 +31,8 @@ describe('searchByAnchors', () => {
   });
 
   it('queries when hash IOC is present', async () => {
-    const esClient = buildMockEsClient([], 0) as unknown as ElasticsearchClient;
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.search.mockResolvedValue(emptySearchResponse);
     await searchByAnchors(esClient, logger, 'default', {
       anchors: {
         iocs: [
@@ -55,7 +47,8 @@ describe('searchByAnchors', () => {
   });
 
   it('excludes self-match when source_report_id provided', async () => {
-    const esClient = buildMockEsClient([], 0) as unknown as ElasticsearchClient;
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.search.mockResolvedValue(emptySearchResponse);
     await searchByAnchors(esClient, logger, 'default', {
       source_report_id: 'rpt-self',
       anchors: {
@@ -67,7 +60,8 @@ describe('searchByAnchors', () => {
   });
 
   it('returns anchor_summary with correct counts', async () => {
-    const esClient = buildMockEsClient([], 0) as unknown as ElasticsearchClient;
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.search.mockResolvedValue(emptySearchResponse);
     const result = await searchByAnchors(esClient, logger, 'default', {
       anchors: {
         iocs: [
