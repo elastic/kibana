@@ -1192,24 +1192,19 @@ describe('Workload Identity template URLs', () => {
       expect(result).toBe(LEGACY_TEMPLATE_URL);
     });
 
-    it('returns undefined when the URL carries a placeholder this Kibana does not know', () => {
+    it('leaves everything that is not a known token untouched, including upper-case values', () => {
+      const url = `${LEGACY_TEMPLATE_URL}&capabilities=CAPABILITY_NAMED_IAM&param_LogLevel=INFO`;
+
       expect(
         getCloudConnectorRemoteRoleTemplate({
           cloud: echQaCloud,
           accountType: SINGLE_ACCOUNT,
-          iacTemplateUrl: `${WII_TEMPLATE_URL}&param_ElasticAccountAlias=ACCOUNT_ALIAS`,
+          iacTemplateUrl: url,
         })
-      ).toBeUndefined();
-      expect(
-        getCloudConnectorRemoteRoleTemplate({
-          cloud: echQaCloud,
-          accountType: SINGLE_ACCOUNT,
-          iacTemplateUrl: `${LEGACY_TEMPLATE_URL}&param_Something=NEW_TOKEN`,
-        })
-      ).toBeUndefined();
+      ).toBe(url);
     });
 
-    it('does not mistake mixed-case parameter names or encoded paths for placeholders', () => {
+    it('substitutes ACCOUNT_TYPE inside an encoded ARM template path', () => {
       const armUrl =
         'https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Felastic%2Fcloudbeat%2Fmain%2Fdeploy%2Fazure%2FARM-for-ACCOUNT_TYPE.json';
 
