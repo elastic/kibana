@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiToolTip } from '@elastic/eui';
-import { AiButton } from '@kbn/shared-ux-ai-components';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { RuleMigrationRule } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { RuleMigrationStats } from '../../../types';
 import { useAgentBuilderAvailability } from '../../../../../agent_builder/hooks/use_agent_builder_availability';
 import { useAgentBuilderAttachment } from '../../../../../agent_builder/hooks/use_agent_builder_attachment';
-import { useReportAddToChat } from '../../../../../agent_builder/hooks/use_report_add_to_chat';
+import { NewAgentBuilderAttachment } from '../../../../../agent_builder/components/new_agent_builder_attachment';
+import type { AgentBuilderAddToChatTelemetry } from '../../../../../agent_builder/hooks/use_report_add_to_chat';
 import { SecurityAgentBuilderAttachments } from '../../../../../../common/constants';
 import { WithMissingPrivilegesTooltip } from '../../../../common/components/missing_privileges';
+import { AddToChatPlaceholderButton } from '../../../../common/components/add_to_chat_placeholder_button';
 
 const AGENT_MODE_REQUIRED_TOOLTIP = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.bulkAddToChatButton.agentModeRequiredTooltip',
@@ -39,21 +39,18 @@ const AddRulesToChatButtonInner: React.FC<AddRulesToChatButtonInnerProps> = ({
   selectedRules,
 }) => {
   const { hasAgentBuilderPrivilege, isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
-  const reportAddToChat = useReportAddToChat();
 
   const N = selectedRules.length;
   const migrationId = migrationStats.id;
   const vendor = selectedRules[0]?.original_rule?.vendor;
 
-  const buttonLabel =
-    N > 0
-      ? i18n.translate(
-        'xpack.securitySolution.siemMigrations.rules.bulkAddToChatButton.labelWithCount',
-        { defaultMessage: 'Add to chat ({count})', values: { count: N } }
-      )
-      : i18n.translate('xpack.securitySolution.siemMigrations.rules.bulkAddToChatButton.label', {
-        defaultMessage: 'Add to chat',
-      });
+  const buttonLabel = i18n.translate(
+    'xpack.securitySolution.siemMigrations.rules.bulkAddToChatButton.label',
+    {
+      defaultMessage: '{count, plural, =0 {Add to chat} other {Add to chat ({count})}}',
+      values: { count: N },
+    }
+  );
 
   const attachmentLabel = vendor
     ? `[${vendor}] ${migrationStats.name} (${N > 0 ? `${N} rules` : 'all rules'})`
@@ -76,44 +73,40 @@ const AddRulesToChatButtonInner: React.FC<AddRulesToChatButtonInnerProps> = ({
     autoSendInitialMessage: true,
   });
 
-  const handleClick = () => {
-    reportAddToChat({
+  const telemetry = useMemo<AgentBuilderAddToChatTelemetry>(
+    () => ({
       pathway: 'translated_rules_bulk',
       attachments: ['rule_migration_items'],
       item_count: N > 0 ? N : migrationStats.items.total,
-    });
-    openAgentBuilderFlyout();
-  };
+    }),
+    [N, migrationStats.items.total]
+  );
 
   if (!isAgentChatExperienceEnabled) {
     return (
-      <EuiToolTip content={AGENT_MODE_REQUIRED_TOOLTIP}>
-        <AiButton variant="empty" iconType="productAgent" isDisabled>
-          {buttonLabel}
-        </AiButton>
-      </EuiToolTip>
+      <AddToChatPlaceholderButton
+        label={buttonLabel}
+        tooltipContent={AGENT_MODE_REQUIRED_TOOLTIP}
+      />
     );
   }
 
   if (!hasAgentBuilderPrivilege) {
     return (
-      <EuiToolTip content={AGENT_BUILDER_NO_PRIVILEGE_TOOLTIP}>
-        <AiButton variant="empty" iconType="productAgent" isDisabled>
-          {buttonLabel}
-        </AiButton>
-      </EuiToolTip>
+      <AddToChatPlaceholderButton
+        label={buttonLabel}
+        tooltipContent={AGENT_BUILDER_NO_PRIVILEGE_TOOLTIP}
+      />
     );
   }
 
   return (
-    <AiButton
-      variant="empty"
-      iconType="productAgent"
-      onClick={handleClick}
-      isDisabled={!isAuthorized}
-    >
-      {buttonLabel}
-    </AiButton>
+    <NewAgentBuilderAttachment
+      label={buttonLabel}
+      onClick={openAgentBuilderFlyout}
+      disabled={!isAuthorized}
+      telemetry={telemetry}
+    />
   );
 };
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export * from './add_to_chat_placeholder_button';
 export * from './bulk_actions';
 export * from './column_header';
 export * from './empty_migration';

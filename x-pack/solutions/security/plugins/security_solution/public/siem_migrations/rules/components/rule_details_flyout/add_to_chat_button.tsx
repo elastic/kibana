@@ -6,14 +6,13 @@
  */
 
 import React from 'react';
-import { EuiToolTip } from '@elastic/eui';
-import { AiButton } from '@kbn/shared-ux-ai-components';
 import { i18n } from '@kbn/i18n';
 import type { RuleMigrationRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { NewAgentBuilderAttachment } from '../../../../agent_builder/components/new_agent_builder_attachment';
+import type { AgentBuilderAddToChatTelemetry } from '../../../../agent_builder/hooks/use_report_add_to_chat';
 import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
-import { useReportAddToChat } from '../../../../agent_builder/hooks/use_report_add_to_chat';
 import { WithMissingPrivilegesTooltip } from '../../../common/components/missing_privileges';
+import { AddToChatPlaceholderButton } from '../../../common/components/add_to_chat_placeholder_button';
 import { useMigrationRuleAttachment } from './use_migration_rule_attachment';
 
 const ADD_TO_CHAT_LABEL = i18n.translate(
@@ -31,6 +30,11 @@ const AGENT_BUILDER_NO_PRIVILEGE_TOOLTIP = i18n.translate(
   { defaultMessage: "You don't have permission to use Agent Builder" }
 );
 
+const ADD_TO_CHAT_TELEMETRY: AgentBuilderAddToChatTelemetry = {
+  pathway: 'translated_rules_flyout',
+  attachments: ['rule_migration_items'],
+};
+
 interface AddMigrationRuleToChatButtonInnerProps {
   isAuthorized: boolean;
   rule: RuleMigrationRule;
@@ -42,37 +46,32 @@ const AddMigrationRuleToChatButtonInner: React.FC<AddMigrationRuleToChatButtonIn
 }) => {
   const { hasAgentBuilderPrivilege, isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
   const { openAgentBuilderFlyout } = useMigrationRuleAttachment(rule);
-  const reportAddToChat = useReportAddToChat();
 
   if (!isAgentChatExperienceEnabled) {
     return (
-      <EuiToolTip content={AGENT_MODE_REQUIRED_TOOLTIP}>
-        <AiButton variant="empty" iconType="productAgent" isDisabled>
-          {ADD_TO_CHAT_LABEL}
-        </AiButton>
-      </EuiToolTip>
+      <AddToChatPlaceholderButton
+        label={ADD_TO_CHAT_LABEL}
+        tooltipContent={AGENT_MODE_REQUIRED_TOOLTIP}
+      />
     );
   }
 
   if (!hasAgentBuilderPrivilege) {
     return (
-      <EuiToolTip content={AGENT_BUILDER_NO_PRIVILEGE_TOOLTIP}>
-        <AiButton variant="empty" iconType="productAgent" isDisabled>
-          {ADD_TO_CHAT_LABEL}
-        </AiButton>
-      </EuiToolTip>
+      <AddToChatPlaceholderButton
+        label={ADD_TO_CHAT_LABEL}
+        tooltipContent={AGENT_BUILDER_NO_PRIVILEGE_TOOLTIP}
+      />
     );
   }
 
-  const handleClick = () => {
-    reportAddToChat({
-      pathway: 'translated_rules_flyout',
-      attachments: ['rule_migration_items'],
-    });
-    openAgentBuilderFlyout();
-  };
-
-  return <NewAgentBuilderAttachment onClick={handleClick} disabled={!isAuthorized} />;
+  return (
+    <NewAgentBuilderAttachment
+      onClick={openAgentBuilderFlyout}
+      disabled={!isAuthorized}
+      telemetry={ADD_TO_CHAT_TELEMETRY}
+    />
+  );
 };
 
 export const AddMigrationRuleToChatButton = WithMissingPrivilegesTooltip(

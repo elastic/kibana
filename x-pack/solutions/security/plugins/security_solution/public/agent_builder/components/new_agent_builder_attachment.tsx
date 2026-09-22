@@ -34,6 +34,11 @@ export interface NewAgentBuilderAttachmentProps {
    */
   disabled?: boolean;
   /**
+   * Optionally override the button text.
+   * @default 'Add to chat'
+   */
+  label?: string;
+  /**
    * Telemetry data for tracking "Add to Chat" clicks
    */
   telemetry?: AgentBuilderAddToChatTelemetry;
@@ -48,6 +53,7 @@ export const NewAgentBuilderAttachment = memo(function NewAgentBuilderAttachment
   onClick,
   size = 'm',
   disabled = false,
+  label,
   telemetry: telemetryData,
 }: NewAgentBuilderAttachmentProps) {
   const { hasAgentBuilderPrivilege, isAgentChatExperienceEnabled, hasValidAgentBuilderLicense } =
@@ -56,16 +62,14 @@ export const NewAgentBuilderAttachment = memo(function NewAgentBuilderAttachment
 
   const handleClick = useCallback(() => {
     if (telemetryData) {
-      reportAddToChatClick({
-        pathway: telemetryData.pathway,
-        attachments: telemetryData.attachments,
-      });
+      reportAddToChatClick(telemetryData);
     }
     onClick();
   }, [onClick, reportAddToChatClick, telemetryData]);
 
   const isDisabled = disabled || !hasValidAgentBuilderLicense;
   const shouldShowLicenseTooltip = !hasValidAgentBuilderLicense;
+  const buttonLabel = label ?? i18n.ADD_TO_CHAT;
 
   if (!hasAgentBuilderPrivilege || !isAgentChatExperienceEnabled) {
     return null;
@@ -73,7 +77,7 @@ export const NewAgentBuilderAttachment = memo(function NewAgentBuilderAttachment
 
   const button = (
     <AiButton
-      aria-label={i18n.ADD_TO_CHAT}
+      aria-label={buttonLabel}
       variant="empty"
       data-test-subj="newAgentBuilderAttachment"
       onClick={handleClick}
@@ -81,7 +85,7 @@ export const NewAgentBuilderAttachment = memo(function NewAgentBuilderAttachment
       iconType="productAgent"
       isDisabled={isDisabled}
     >
-      {i18n.ADD_TO_CHAT}
+      {buttonLabel}
     </AiButton>
   );
 
