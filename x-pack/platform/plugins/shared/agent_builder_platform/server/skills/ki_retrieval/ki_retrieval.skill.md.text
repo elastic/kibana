@@ -24,11 +24,6 @@ Use `platform.core.list_indices` to discover which ones exist.
 | `attributes` | flattened | Structured keyword-queryable metadata (status, themes, entity names, etc.). `attributes.esql` is the canonical location for a KI's runnable ES\|QL — see below. |
 | `spaces` | keyword | Optional — Kibana spaces a KI belongs to; absent means visible from every space. Filter via the `filter` parameter of `execute_esql`, never `WHERE` (see Space scoping) |
 
-**Memory entries** — AI indices with memory enabled also contain `memory.session` and
-`memory.session_fact` KIs written by agents. Unless the task specifically calls for memory,
-exclude both types from ordinary KI retrieval. See [Memory](#memory) below when the task does
-call for memory.
-
 Semantic sub-fields use **dot notation**: `content.semantic`, `title.semantic`, `description.semantic`.
 
 ### `attributes.esql` — a KI's runnable ES|QL
@@ -129,7 +124,6 @@ to deduplicate across branches.
 
 ```esql
 FROM ai-index-* METADATA _id, _index, _score
-| WHERE type IS NULL OR (type != "memory.session" AND type != "memory.session_fact")
 | FORK
     ( WHERE content:"<query>" OR title:"<query>" OR description:"<query>"          | SORT _score DESC | LIMIT 20 )
     ( WHERE content.semantic:"<query>" OR title.semantic:"<query>" OR description.semantic:"<query>" | SORT _score DESC | LIMIT 20 )
@@ -157,7 +151,6 @@ keyword-only is a valid alternative:
 
 ```esql
 FROM ai-index-* METADATA _id, _index, _score
-| WHERE type IS NULL OR (type != "memory.session" AND type != "memory.session_fact")
 | WHERE content:"<query>" OR title:"<query>" OR description:"<query>"
 | SORT _score DESC, _id ASC
 | KEEP title, description, content, type, tags
@@ -181,23 +174,6 @@ FROM ai-index-* METADATA _id, _index, _score
 ```
 
 Replace `type == "index_metadata"` with any combination of `type` or `tags` filters.
-
----
-
-## Memory
-
-Do not assume that an AI index accepts or contains memory. Use `describe_ai_index` to identify
-memory-enabled indices and the destination to query. The `describe_ai_index` output includes the
-exact recall ES|QL for both cross-session and session-scoped retrieval when memory is enabled —
-copy from there rather than constructing queries yourself.
-
-Memory documents use two types:
-
-- `memory.session_fact` — a granular fact learned during a conversation.
-- `memory.session` — a broader synthesis of a conversation.
-
-The `platform.context_engine.remember` tool description governs when to write memory. Adopter
-instructions govern what is worth remembering. This skill covers retrieval only.
 
 ---
 

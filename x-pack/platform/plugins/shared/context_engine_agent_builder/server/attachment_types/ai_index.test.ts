@@ -12,11 +12,7 @@ import {
   ANALYZE_AND_IMPROVE_SKILL_ID,
   KI_RETRIEVAL_SKILL_ID,
 } from '../../common/agent_builder_skills';
-import {
-  CONTEXT_ENGINE_FORGET_TOOL_ID,
-  CONTEXT_ENGINE_REMEMBER_TOOL_ID,
-  CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID,
-} from '../../common/agent_builder_tools';
+import { CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID } from '../../common/agent_builder_tools';
 import { createAiIndexAttachmentType } from './ai_index';
 
 describe('createAiIndexAttachmentType', () => {
@@ -39,11 +35,7 @@ describe('createAiIndexAttachmentType', () => {
   it('registers the expected attachment type id', () => {
     expect(attachmentType.id).toBe('platform.context_engine.ai_index');
     expect(attachmentType.isReadonly).toBe(true);
-    expect(attachmentType.getTools?.()).toEqual([
-      CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID,
-      CONTEXT_ENGINE_REMEMBER_TOOL_ID,
-      CONTEXT_ENGINE_FORGET_TOOL_ID,
-    ]);
+    expect(attachmentType.getTools?.()).toEqual([CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID]);
   });
 
   it('validates attachment data', async () => {
@@ -64,16 +56,6 @@ describe('createAiIndexAttachmentType', () => {
     expect(description).toContain(AI_INDEX_AUTOMATIONS_SKILL_ID);
     expect(description).toContain(AI_INDEX_SOURCES_SKILL_ID);
     expect(description).toContain(CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID);
-  });
-
-  it('tells the agent to write memory proactively when the index is memory-enabled', () => {
-    const description = attachmentType.getAgentDescription?.();
-
-    expect(description).toContain('Memory: enabled');
-    expect(description).toContain(CONTEXT_ENGINE_REMEMBER_TOOL_ID);
-    expect(description).toContain(CONTEXT_ENGINE_FORGET_TOOL_ID);
-    expect(description).toMatch(/without waiting to be asked/);
-    expect(description).toMatch(/describe_ai_index/);
   });
 
   it('carries the interaction choreography the skills leave out', () => {
@@ -185,7 +167,6 @@ describe('createAiIndexAttachmentType', () => {
     if (representation?.type !== 'text') {
       throw new Error('expected a text representation');
     }
-    expect(representation.value).toContain('Memory: not enabled');
     expect(representation.value).toContain('Destination: data_stream "ai-index-ds-my-ai-index"');
     expect(representation.value).toContain('Sources: esql:FROM tickets');
     expect(representation.value).toContain('Existing automations (workflow ids): wf-1');

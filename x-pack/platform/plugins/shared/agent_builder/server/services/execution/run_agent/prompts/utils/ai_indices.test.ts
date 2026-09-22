@@ -137,14 +137,4 @@ describe('getAiIndicesInstructions', () => {
     expect(instructions).not.toContain('ignore_unmapped');
     expect(instructions).not.toContain('verbatim');
   });
-
-  it('falls back to execute_esql and describe_ai_index when query_ai_indices is not available', () => {
-    const instructions = render({ hasQueryAiIndicesTools: false });
-
-    expect(instructions).toContain('execute_esql');
-    expect(instructions).toContain('describe_ai_index');
-    expect(instructions).not.toContain('query_ai_indices');
-    expect(instructions).not.toContain('list_ai_indices');
-    expect(instructions).not.toContain('Do not query AI Indices with `execute_esql`');
-  });
 });

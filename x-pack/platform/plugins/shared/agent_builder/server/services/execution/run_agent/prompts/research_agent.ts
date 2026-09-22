@@ -103,7 +103,6 @@ const getAgentSystemMessage = async ({
   renderers,
   processedConversation,
   conversationTemplates,
-  toolManager,
 }: ResearchAgentPromptParams): Promise<string> => {
   const conversationTemplateId = processedConversation.template_id;
   const conversationMetadata = processedConversation.metadata as
@@ -186,8 +185,6 @@ ${getAiIndicesInstructions({
   enabled: experimentalFeatures.aiIndices,
   catalog: aiIndexCatalog ?? [],
   spaceId,
-  hasQueryAiIndicesTools:
-    toolManager.getExecutable('platform.context_engine.query_ai_indices') !== undefined,
 })}
 
 ## INSTRUCTIONS
