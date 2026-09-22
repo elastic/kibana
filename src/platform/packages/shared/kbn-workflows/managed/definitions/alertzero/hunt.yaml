@@ -90,7 +90,7 @@ steps:
           with:
             status: failed
             stage: hunt_coordinator
-            reason: "${{ steps.run_hunt_coordinator.error.message }}"
+            reason: "{{ steps.run_hunt_coordinator.error.message }}"
 
   # Populated only when Tier 1 confirmed a hit: one entry per confirmed
   # technique (a single report-scoped entry when Tier 2 produced none). No
@@ -206,7 +206,7 @@ steps:
         source: "${{ variables.evidence_script }}"
         params:
           space_id: "{{ workflow.spaceId }}"
-          last_hunted_at: "{{ execution.startedAt }}"
+          last_hunted_at: '{{ execution.startedAt | date: "%Y-%m-%dT%H:%M:%S.%LZ", "UTC" }}'
           last_hunt_status: "{{ variables.last_hunt_status }}"
           last_hunt_run_id: "{{ inputs.runId }}"
           last_hunt_event_hit_count: "${{ variables.last_hunt_event_hit_count }}"
@@ -231,4 +231,4 @@ steps:
     with:
       status: "{{ variables.result_status }}"
       stage: hunt
-      reason: "${{ steps.run_hunt_coordinator.error.message | default: nil }}"
+      reason: "{{ steps.run_hunt_coordinator.error.message }}"
