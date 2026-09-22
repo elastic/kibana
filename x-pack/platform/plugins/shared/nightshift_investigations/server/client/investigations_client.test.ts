@@ -133,9 +133,6 @@ const createMockRepository = (): jest.Mocked<InvestigationRepository> => ({
   get: jest.fn().mockResolvedValue(undefined),
   update: jest.fn().mockResolvedValue(undefined),
   find: jest.fn().mockResolvedValue(findResult([])),
-  countBySeverity: jest
-    .fn()
-    .mockResolvedValue({ '80-critical': 0, '60-high': 0, '40-medium': 0, '20-low': 0 }),
 });
 
 beforeEach(() => {

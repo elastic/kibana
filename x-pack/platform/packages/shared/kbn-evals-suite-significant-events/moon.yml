@@ -37,8 +37,8 @@ dependsOn:
   - '@kbn/std'
   - '@kbn/streamlang'
   - '@kbn/significant-events-plugin'
+  - '@kbn/nightshift-shared'
   - '@kbn/repo-info'
-  - '@kbn/test'
 tags:
   - functional-tests
   - package

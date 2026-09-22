@@ -114,6 +114,7 @@ const mockKibana = () => {
         },
       },
       observabilityAIAssistant: observabilityAIAssistantPluginMock.createStartContract(),
+      inspector: { open: jest.fn() },
       share: {
         url: {
           locators: {

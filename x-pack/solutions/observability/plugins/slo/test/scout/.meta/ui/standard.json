@@ -1,5 +1,5 @@
 {
-  "sha1": "44ac1dd1c4ac0de1f8d4e7369c63837d5f14d707",
+  "sha1": "b01a94d3b20a80287f2b902a253d59f55ee38216",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -48,8 +48,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/annotation_list.spec.ts",
-        "line": 32,
-        "column": 13
+        "line": 31,
+        "column": 18
       }
     },
     {
@@ -65,7 +65,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/annotation_list.spec.ts",
         "line": 44,
-        "column": 76
+        "column": 10
       }
     },
     {
@@ -80,7 +80,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/annotation_list.spec.ts",
-        "line": 61,
+        "line": 60,
         "column": 18
       }
     },

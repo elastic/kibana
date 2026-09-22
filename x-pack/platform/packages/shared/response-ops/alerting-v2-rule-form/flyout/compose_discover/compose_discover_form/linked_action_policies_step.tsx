@@ -98,7 +98,7 @@ export const LinkedActionPoliciesStep = ({ http }: Props) => {
             <EuiText size="s" color="subdued">
               <p>{matchingSubtext}</p>
             </EuiText>
-            {items.map(({ actionPolicy, category }) => {
+            {items.map(({ action_policy: actionPolicy, category }) => {
               const editLabel = getEditLabel(actionPolicy.name);
               return (
                 <EuiFlexItem key={actionPolicy.id}>
