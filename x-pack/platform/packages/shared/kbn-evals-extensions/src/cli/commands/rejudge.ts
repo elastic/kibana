@@ -214,7 +214,7 @@ export const rejudgeCmd: Command<any> = {
       --suite            Suite id selecting the jury (evaluator set) to recompute.
                          Defaults to the jury matching the dataset's reference adapter.
       --from-matrix      scores.debug.json from a rendered matrix; re-judges
-                         exactly the executions that matrix published
+                         the same executions that matrix published
       --execution-id     Re-judge specific execution ids (comma separated).
       --models           Restrict to these model ids (comma separated).
       --blind            Strip model identity before judging.

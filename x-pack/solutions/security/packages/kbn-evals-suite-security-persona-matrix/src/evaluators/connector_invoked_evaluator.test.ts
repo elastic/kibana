@@ -60,8 +60,8 @@ describe('ConnectorInvoked evaluator', () => {
     expect(result.metadata).toMatchObject({ connectorPresent: true, stepPresent: true });
   });
 
-  // The mutation that matters: this is exactly the false-green the evaluator
-  // exists to catch. ExpectedToolCalled scores this 1.0; we must score it 0.
+  // The mutation that matters: ExpectedToolCalled scores this case 1.0, while the
+  // ConnectorInvoked evaluator must score it 0.
   it('scores 0 when the Slack step is removed from the workflow', async () => {
     const result = await run({ messages: [{ message: WORKFLOW_WITHOUT_SLACK }] });
     expect(result.score).toBe(0);

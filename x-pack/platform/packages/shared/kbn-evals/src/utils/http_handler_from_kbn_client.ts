@@ -79,10 +79,8 @@ export function httpHandlerFromKbnClient({
     const maxRetries = Number(process.env.KBN_EVALS_HTTP_RETRIES ?? '0') || 0;
     // 500 belongs here: EIS surfaces transient upstream provider faults as a
     // Kibana 500 ("Received a server error status code for request from inference
-    // entity id [...] status [500]"), not a 502/503. Observed 2026-09-02: a
-    // provider-side blip failed 21/21 examples on two independent VMs at the same
-    // repetition and discarded two good repetitions with them. These are retryable
-    // by nature — a non-retryable 500 just fails again and costs one extra call.
+    // entity id [...] status [500]"), not a 502/503. Such a blip is retryable by
+    // nature — a non-retryable 500 just fails again and costs one extra call.
     const retryStatuses = new Set([429, 500, 502, 503, 504]);
     // Transport-level deaths, which arrive with no HTTP status at all.
     const RETRYABLE_TRANSPORT_ERRORS =
@@ -125,9 +123,8 @@ export function httpHandlerFromKbnClient({
     // 1198s, so too tight a bound aborts healthy work and the retry aborts again.
     //
     // Default to a bound rather than 0. With no bound no AbortController is created,
-    // so nothing can ever abort and attempt 4 parks forever: measured 2026-09-02 at
-    // concurrency 1, 2 and 5 alike (Kibana 0.0% CPU, zero established sockets),
-    // which is what ruled concurrency out as the cause.
+    // so nothing can ever abort and a stalled attempt parks the worker forever,
+    // independent of concurrency.
     const DEFAULT_REQUEST_TIMEOUT_MS = 1_500_000;
     const rawTimeout = process.env.KBN_EVALS_HTTP_TIMEOUT_MS;
     const requestTimeoutMs =
@@ -193,9 +190,7 @@ export function httpHandlerFromKbnClient({
 
         // A dead transport carries no HTTP status: kbnClient surfaces it as
         // `Status: N/A, Cause: fetch failed` (undici) or a bare socket errno.
-        // Those are exactly the blips a long sweep must survive -- glm-5-2 lost
-        // 19 of 21 examples 58 minutes in when Kibana stopped answering and
-        // every remaining example failed this way. Retry them like a 503, but
+        // Those are the blips a long sweep must survive. Retry them like a 503, but
         // stay narrow: a status-less TypeError from our own code is a bug, not
         // a blip, and must still fail fast.
         const transportCause = `${error.message ?? ''} ${

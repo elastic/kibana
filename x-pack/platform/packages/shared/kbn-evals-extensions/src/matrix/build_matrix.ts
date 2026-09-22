@@ -679,8 +679,6 @@ export const buildMatrix = (
     // A column only a handful of models ever ran still contributes to their
     // Overall, so those models are averaged over a different set of columns
     // than everyone else -- and the column itself cannot rank anything.
-    // Measured 2026-09-01: attack-discovery 4/20, both migrations columns 1/20,
-    // all three pipeline gaps rather than model failures.
     for (const column of config.columns) {
       const scored = allRows.filter((row) => row.cells[column.id]?.kind === 'score').length;
       if (scored > 0 && scored < allRows.length / 2) {

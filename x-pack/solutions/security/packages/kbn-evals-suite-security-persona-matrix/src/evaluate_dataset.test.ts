@@ -56,7 +56,7 @@ describe('path contract classification', () => {
     expect(isRankablePathContract(undefined)).toBe(true);
   });
 
-  it('marks every measured 0/5 hunt example as a probe', () => {
+  it('marks every hunt example as a probe', () => {
     const probePrefixes = [
       'alert-analysis-',
       'entity-analytics-',
@@ -503,8 +503,6 @@ describe('task output shape', () => {
     // `messageSource`. If the task drops that tag, every stored cell looks like
     // a genuine closing answer and mid-run narration ("I will now preview the
     // detection rule...") is scored as if it were the model's final response.
-    // Measured 2026-09-07: 0 of 2422 Sep-4+ detection-rule-edit score docs
-    // carried messageSource, because taskOutput never forwarded it.
     const log = buildLog();
     let capturedTask: ((example: unknown) => Promise<unknown>) | undefined;
 

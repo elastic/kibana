@@ -32,7 +32,7 @@ describe('analyzeSaturation', () => {
   // Precedence regression: a saturated column can ALSO have judgeSpread >=
   // modelSpread, because a ceiling squeezes the model spread toward zero.
   // Testing judge noise first would then report 'judge-noise' for a column no
-  // rejudge can fix -- exactly the wrong instruction.
+  // rejudge can fix.
   it('reports saturation, not judge noise, when a ceiling squeezes the model spread', () => {
     const cells = [
       { modelId: 'a', cellKey: 'x', scoresByJudge: judges(1, 1, 1) },

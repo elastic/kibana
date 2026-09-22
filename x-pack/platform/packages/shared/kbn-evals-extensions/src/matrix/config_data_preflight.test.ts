@@ -58,10 +58,9 @@ const scores = (suiteId: string, ageDays: number): AggregatedModelScores[] => [
 ];
 
 describe('warnOnDataAboutToLeaveLookback', () => {
-  // The migrations columns are pinned to a branch whose newest run is 34 days
-  // old against a 45-day window. Nothing is wrong today and nothing will fail
-  // loudly on 2026-09-13 either: the columns will simply go blank, exactly the
-  // silent-blanking failure this module exists to catch.
+  // A column pinned to a branch whose newest run is inside the window but close
+  // to falling out goes blank with no error -- the silent blanking this module
+  // exists to catch.
   it('warns when a suite is inside the window but close to falling out', () => {
     const { warnings, log } = collectWarnings();
 

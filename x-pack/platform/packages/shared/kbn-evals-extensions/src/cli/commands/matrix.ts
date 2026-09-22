@@ -59,10 +59,8 @@ export const matrixScoreQuery = (
     'prefixesBySuite' | 'scoring' | 'branchBySuite' | 'scoringBySuite' | 'asOf'
   > & {
     /**
-     * Required (though nullable) so a caller that forgets it fails to compile.
-     * An optional `asOf` was silently dropped at the command call site once
-     * already: the flag parsed, selection ignored it, and the matrix published
-     * exactly the runs the cutoff existed to exclude.
+     * Required (though nullable) so a caller that forgets it fails to compile:
+     * an optional `asOf` lets a call site parse the flag and then ignore it.
      */
     asOf: number | undefined;
   }

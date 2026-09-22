@@ -370,7 +370,7 @@ const processExampleBatch = (
  *
  * The per-experiment scores route (`getExperimentScores`) strips unbounded
  * fields (`task.output`, `example.input`, `example.metadata`) from responses,
- * which are exactly the fields the trace detail needs. This function instead
+ * which are precisely the fields the trace detail needs. This function instead
  * uses the per-example scores route (`getExampleScores`), which returns full
  * documents, and filters client-side by model and execution.
  *
@@ -599,8 +599,7 @@ export const queryMatrixTraces = async (
   // Completeness gate. Per-cell failures are deliberately swallowed above so one
   // bad example cannot abort a report — but that also means a TOTAL fetch
   // failure is silent, and the matrix renders every trace card empty while the
-  // score columns look perfect. Measured 2026-08-29: 442/442 cells hollow with
-  // no error surfaced. Fetching nothing at all is never a valid outcome.
+  // score columns look perfect. Fetching nothing at all is never a valid outcome.
   const fetchedCells = [...exampleScores.values()].filter((docs) => docs.length > 0).length;
   if (pairs.length > 0 && fetchedCells === 0) {
     log.warning(

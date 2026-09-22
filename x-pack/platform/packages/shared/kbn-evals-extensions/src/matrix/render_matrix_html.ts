@@ -501,8 +501,7 @@ const renderModelCard = (
           const column = config.columns.find((c) => c.id === col.id);
           // Per-VARIANT cards: a category column aggregates a/b/c variants, so
           // render one expandable card per variant that has a trace, not just
-          // the first-wins representative. Without this, 2/3 of the suite's
-          // 21 prompts are invisible in the report.
+          // the first-wins representative.
           const variantTraces: Array<{ label: string; trace: MatrixTraceEntry | undefined }> = [];
           if (column?.examplePrefixes?.length) {
             for (const p of column.examplePrefixes) {

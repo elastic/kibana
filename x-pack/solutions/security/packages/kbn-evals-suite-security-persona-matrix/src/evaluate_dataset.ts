@@ -199,8 +199,8 @@ export const createPersonaMatrixFinalAnswerPresentEvaluator = (): Evaluator => (
  * (possibly non-empty) answer but performed fewer tool calls than the example
  * declares in `expectedTools`. Distinct from FinalAnswerPresent (which only
  * checks that *some* text exists) — a model can write a confident answer having
- * called nothing, which is exactly the premature-termination failure mode seen
- * in the original sweep (~90 runs finished in <3 steps).
+ * called nothing, which is the premature-termination failure mode this
+ * evaluator exists to catch.
  *
  * Scores 1 when the run made at least `expectedTools.length` tool calls,
  * otherwise 0. N/A when the example declares no expectedTools (nothing to

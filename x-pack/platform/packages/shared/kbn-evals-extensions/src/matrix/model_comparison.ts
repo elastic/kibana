@@ -210,8 +210,8 @@ const isSeparated = (result: { low: number; high: number }): boolean =>
 /**
  * Group models into tiers, splitting only where a paired test separates a model
  * from the current tier's weakest member. Within a tier order is alphabetical,
- * never by an insignificant decimal -- sorting inside a tie is exactly the
- * false precision this replaces.
+ * never by an insignificant decimal -- sorting inside a tie would assert
+ * precision the paired test does not support.
  */
 export const buildTiers = (
   observations: readonly ModelObservation[],
@@ -287,7 +287,7 @@ export const buildTiers = (
  *
  * Reports every model within `tolerance` of the best mean rather than a single
  * winner: with three prompts per family, naming one winner would overstate the
- * evidence in exactly the way the `Overall` column already does.
+ * evidence, the same way the `Overall` column already does.
  */
 export const buildFamilyRecommendations = (
   observations: readonly ModelObservation[],

@@ -99,10 +99,8 @@ function computeDelayMs({
 
 // 500 is included deliberately. EIS surfaces transient upstream provider faults
 // as a Kibana 500 ("Received a server error status code for request from inference
-// entity id [...] status [500]"), not a 502/503. Observed 2026-09-02: 27 such 500s
-// per model failed 21/21 examples on two independent VMs at the same repetition,
-// destroying two good repetitions with them. A genuinely non-retryable 500 just
-// fails again and costs one extra call; a transient one costs a whole sweep.
+// entity id [...] status [500]"), not a 502/503. A genuinely non-retryable 500
+// just fails again and costs one extra call; a transient one costs a whole sweep.
 const RETRYABLE_SERVER_STATUSES = new Set<number>([500, 502, 503, 504]);
 
 function isRetryable(error: any): { retry: boolean; retryAfterMs?: number } {

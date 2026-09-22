@@ -82,9 +82,8 @@ describe('httpHandlerFromKbnClient transport retries', () => {
     expect(refused).toHaveBeenCalledTimes(1);
   });
   it('retries an EIS-shaped 500 and still refuses a 501', async () => {
-    // EIS surfaces transient upstream provider faults as a Kibana 500, not a 503.
-    // On 2026-09-02 this exact shape failed 21/21 examples on two VMs at the same
-    // repetition because 500 was absent from retryStatuses.
+    // EIS surfaces transient upstream provider faults as a Kibana 500, not a 503,
+    // so 500 belongs in the retryable set alongside them.
     const ok = { data: {}, status: 200, statusText: 'OK', headers: {} };
     const eisFault = jest
       .fn()
