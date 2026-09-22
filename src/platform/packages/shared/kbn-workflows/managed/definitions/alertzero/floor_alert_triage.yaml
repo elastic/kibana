@@ -540,7 +540,6 @@ steps:
             comment: >-
               {{ variables.fp_candidate_ids | size }} alert(s) from rule "{{ event.rule.name }}" were classified as false positives at or above the configured confidence floor ({{ consts.worker_settings.autoCloseConfidenceScoreMinThreshold }}).
               Approving this proposal will close them with workflow_reason=false_positive.
-              Investigation: /s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.create_investigation.output.conversation_id }}
             actionWorkflowId: system-alertzero-action-close-alerts-fp
             actionInput:
               alertIds: "${{ variables.fp_candidate_ids }}"
