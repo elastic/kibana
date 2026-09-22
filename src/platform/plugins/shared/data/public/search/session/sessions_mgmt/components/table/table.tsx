@@ -9,6 +9,7 @@
 
 import type { EuiBasicTableColumn, EuiSearchBarProps } from '@elastic/eui';
 import { EuiButton, EuiInMemoryTable } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
 import moment from 'moment';
@@ -38,6 +39,8 @@ interface Props {
   kibanaVersion: string;
   searchUsageCollector: SearchUsageCollector;
   hideRefreshButton?: boolean;
+  onRefreshReady?: (refresh: () => void) => void;
+  onRefreshLoadingChange?: (isLoading: boolean) => void;
   appId?: string;
   onBackgroundSearchOpened?: BackgroundSearchOpenedHandler;
   getColumns?: (params: {
@@ -65,6 +68,8 @@ export function SearchSessionsMgmtTable({
   kibanaVersion,
   searchUsageCollector,
   hideRefreshButton = false,
+  onRefreshReady,
+  onRefreshLoadingChange,
   getColumns = getDefaultColumns,
   appId,
   onBackgroundSearchOpened,
@@ -140,6 +145,14 @@ export function SearchSessionsMgmtTable({
     }
   }, [api, refreshInterval, locators, appId]);
 
+  useEffect(() => {
+    onRefreshReady?.(doRefresh);
+  }, [doRefresh, onRefreshReady]);
+
+  useEffect(() => {
+    onRefreshLoadingChange?.(debouncedIsLoading);
+  }, [debouncedIsLoading, onRefreshLoadingChange]);
+
   // initial data load
   useEffect(() => {
     doRefresh();
@@ -211,6 +224,9 @@ export function SearchSessionsMgmtTable({
     <EuiInMemoryTable<UISession>
       {...props}
       id={SEARCH_SESSIONS_TABLE_ID}
+      tableCaption={i18n.translate('data.mgmt.searchSessions.table.tableCaption', {
+        defaultMessage: 'Search sessions',
+      })}
       data-test-subj={SEARCH_SESSIONS_TABLE_ID}
       rowProps={(searchSession: UISession) => ({
         'data-test-subj': `searchSessionsRow`,

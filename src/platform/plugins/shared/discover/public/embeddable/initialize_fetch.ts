@@ -28,7 +28,6 @@ import type {
   PublishesTitle,
   PublishesSavedObjectId,
   PublishesDataLoading,
-  PublishesBlockingError,
 } from '@kbn/presentation-publishing';
 import { apiHasExecutionContext, apiHasParentApi, fetch$ } from '@kbn/presentation-publishing';
 import type { PublishesWritableTimeRange } from '@kbn/presentation-publishing/interfaces/fetch/publishes_unified_search';
@@ -49,7 +48,6 @@ import { isFieldStatsMode } from './utils/is_field_stats_mode';
 
 type SavedSearchPartialFetchApi = PublishesSavedSearch &
   PublishesSavedObjectId &
-  PublishesBlockingError &
   PublishesDataLoading &
   PublishesDataViews &
   PublishesTitle &
@@ -135,7 +133,8 @@ export function initializeFetch({
   scopedProfilesManager,
   refreshTrigger$,
   setDataLoading,
-  setBlockingError,
+  setSearchError,
+  setApproximationApplied,
 }: {
   api: SavedSearchPartialFetchApi;
   stateManager: SearchEmbeddableStateManager;
@@ -143,7 +142,8 @@ export function initializeFetch({
   scopedProfilesManager: ScopedProfilesManager;
   refreshTrigger$: BehaviorSubject<void>;
   setDataLoading: (dataLoading: boolean | undefined) => void;
-  setBlockingError: (error: Error | undefined) => void;
+  setSearchError: (error: Error | undefined) => void;
+  setApproximationApplied: (value: boolean | undefined) => void;
 }) {
   const inspectorAdapters = { requests: new RequestAdapter() };
   let abortController: AbortController | undefined;
@@ -163,7 +163,7 @@ export function initializeFetch({
       switchMap(async ([fetchContext, savedSearch, dataViews]) => {
         const dataView = dataViews?.length ? dataViews[0] : undefined;
 
-        setBlockingError(undefined);
+        setSearchError(undefined);
         if (!dataView || !savedSearch.searchSource) {
           return;
         }
@@ -225,6 +225,7 @@ export function initializeFetch({
               searchSessionId,
               esqlVariables: getRelevantESQLVariables(savedSearch, fetchContext.esqlVariables),
               projectRouting: fetchContext.projectRouting,
+              esqlApproximation: fetchContext.isApproximate,
             });
             return {
               columnsMeta: result.esqlQueryColumns
@@ -232,6 +233,7 @@ export function initializeFetch({
                 : undefined,
               rows: result.records,
               hitCount: result.records.length,
+              approximationApplied: result.approximationApplied,
               fetchContext,
             };
           }
@@ -284,7 +286,7 @@ export function initializeFetch({
     .subscribe((next) => {
       setDataLoading(false);
       if (!next || Object.hasOwn(next, 'error')) {
-        setBlockingError(next?.error);
+        setSearchError(next?.error);
         return;
       }
 
@@ -297,9 +299,14 @@ export function initializeFetch({
       if (Object.hasOwn(next, 'columnsMeta')) {
         stateManager.columnsMeta.next(next.columnsMeta);
       }
+      setApproximationApplied(next.approximationApplied);
     });
 
-  return () => {
-    fetchSubscription.unsubscribe();
+  return {
+    cleanup: () => fetchSubscription.unsubscribe(),
+    cancelRequests: () => {
+      abortController?.abort();
+      abortController = undefined;
+    },
   };
 }

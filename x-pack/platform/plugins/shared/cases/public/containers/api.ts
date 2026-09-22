@@ -16,7 +16,7 @@ import type {
   CasePatchRequest,
   CasePostRequest,
   CaseResolveResponse,
-  CasesFindResponse,
+  CasesSearchResponse,
   CaseUserActionStatsResponse,
   GetCaseConnectorsResponse,
   SingleCaseMetricsResponse,
@@ -25,8 +25,8 @@ import type {
   AddObservableRequest,
   UpdateObservableRequest,
   UserActionInternalFindResponse,
+  UserActionFindRequestSources,
   FindCasesContainingAllAlertsResponse,
-  BulkAddObservablesRequest,
   FindCasesContainingAllDocumentsRequest,
   UpdateSummary,
   CasesPatchResponse,
@@ -64,7 +64,6 @@ import {
   getCaseUpdateObservableUrl,
   getCaseDeleteObservableUrl,
   getCaseSimilarCasesUrl,
-  getBulkCreateObservablesUrl,
 } from '../../common/api';
 import {
   CASE_REPORTERS_URL,
@@ -113,23 +112,21 @@ import {
   constructCustomFieldsFilter,
   decodeFindAllAttachedAlertsResponse,
 } from './utils';
-import { decodeCasesFindResponse, decodeCasesSimilarResponse } from '../api/decoders';
+import { decodeCasesSearchResponse, decodeCasesSimilarResponse } from '../api/decoders';
 import { DEFAULT_FROM_DATE, DEFAULT_TO_DATE } from './constants';
 
 export const resolveCase = async ({
   caseId,
   signal,
-  mode = 'legacy',
 }: {
   caseId: string;
   signal?: AbortSignal;
-  mode?: 'legacy' | 'unified';
 }): Promise<ResolvedCase> => {
   const response = await KibanaServices.get().http.fetch<CaseResolveResponse>(
     `${getCaseDetailsUrl(caseId)}/resolve`,
     {
       method: 'GET',
-      query: { includeComments: true, mode },
+      query: { includeComments: true },
       signal,
     }
   );
@@ -232,6 +229,9 @@ export const findCaseUserActions = async (
     sortOrder: 'asc' | 'desc';
     page: number;
     perPage: number;
+    search?: string;
+    authors?: string[];
+    sources?: UserActionFindRequestSources[];
   },
   signal?: AbortSignal
 ): Promise<InternalFindCaseUserActions> => {
@@ -240,6 +240,9 @@ export const findCaseUserActions = async (
     sortOrder: params.sortOrder,
     page: params.page,
     perPage: params.perPage,
+    ...(params.search ? { search: params.search } : {}),
+    ...(params.authors?.length ? { authors: params.authors } : {}),
+    ...(params.sources?.length ? { sources: params.sources } : {}),
   };
 
   const response = await KibanaServices.get().http.fetch<UserActionInternalFindResponse>(
@@ -339,7 +342,7 @@ export const getCases = async ({
     ...queryParams,
   };
 
-  const response = await KibanaServices.get().http.fetch<CasesFindResponse>(
+  const response = await KibanaServices.get().http.fetch<CasesSearchResponse>(
     `${CASES_INTERNAL_URL}/_search`,
     {
       method: 'POST',
@@ -348,7 +351,7 @@ export const getCases = async ({
     }
   );
 
-  return convertAllCasesToCamel(decodeCasesFindResponse(response));
+  return convertAllCasesToCamel(decodeCasesSearchResponse(response));
 };
 
 export const postCase = async ({
@@ -705,21 +708,6 @@ export const deleteObservable = async (
     method: 'DELETE',
     signal,
   });
-};
-
-export const bulkPostObservables = async (
-  request: BulkAddObservablesRequest,
-  signal?: AbortSignal
-): Promise<CaseUI> => {
-  const response = await KibanaServices.get().http.fetch<Case>(
-    getBulkCreateObservablesUrl(request.caseId),
-    {
-      method: 'POST',
-      body: JSON.stringify({ caseId: request.caseId, observables: request.observables }),
-      signal,
-    }
-  );
-  return convertCaseToCamelCase(decodeCaseResponse(response));
 };
 
 export const getSimilarCases = async ({

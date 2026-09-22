@@ -23,6 +23,7 @@ import type {
   BrushTriggerEvent,
   ClickTriggerEvent,
   MultiClickTriggerEvent,
+  AnnotationClickTriggerEvent,
 } from '@kbn/charts-plugin/public';
 import type { ChartSizeEvent } from '@kbn/chart-expressions-common';
 import type { Reference } from '@kbn/content-management-utils';
@@ -108,9 +109,9 @@ interface AddLayerButtonProps<T> {
   isInlineEditing?: boolean;
 }
 
-interface VisualizationStateFromContextChangeProps {
-  suggestions: Suggestion[];
-  context: VisualizeEditorContext;
+interface VisualizationStateFromContextChangeProps<T = unknown> {
+  suggestions: Array<Suggestion<T>>;
+  context: VisualizeEditorContext<T extends LensConfiguration ? T : LensConfiguration>;
 }
 
 export type AddLayerFunction<T = unknown> = (
@@ -184,6 +185,7 @@ export type TriggerEvent =
   | BrushTriggerEvent
   | ClickTriggerEvent
   | MultiClickTriggerEvent
+  | AnnotationClickTriggerEvent
   | LensTableRowContextMenuEvent
   | LensAlertRulesEvent;
 
@@ -197,6 +199,7 @@ export interface ILensInterpreterRenderHandlers extends IInterpreterRenderHandle
     event:
       | ClickTriggerEvent
       | BrushTriggerEvent
+      | AnnotationClickTriggerEvent
       | LensEditEvent<LensEditSupportedActions>
       | LensTableRowContextMenuEvent
       | ChartSizeEvent
@@ -516,7 +519,7 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
   getRenderEventCounters?: (state: T) => string[];
 
   getSuggestionFromConvertToLensContext?: (
-    props: VisualizationStateFromContextChangeProps
+    props: VisualizationStateFromContextChangeProps<T>
   ) => Suggestion<T> | undefined;
 
   isEqual?: (

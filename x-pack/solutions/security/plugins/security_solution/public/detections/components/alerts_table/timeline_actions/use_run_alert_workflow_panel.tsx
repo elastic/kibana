@@ -9,11 +9,31 @@ import React, { useMemo } from 'react';
 
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { useWorkflowsCapabilities, useWorkflowsUIEnabledSetting } from '@kbn/workflows-ui';
+import {
+  RunWorkflowPanel,
+  useWorkflowsCapabilities,
+  useWorkflowsUIEnabledSetting,
+} from '@kbn/workflows-ui';
+import type { WorkflowListItemDto } from '@kbn/workflows';
+import type { WorkflowSelectorVisibility } from '@kbn/workflows-ui';
 import type { AlertTableContextMenuItem } from '../types';
 import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
+import { RUN_ALERT_WORKFLOW_ACTION_ID } from '../../../../common/constants/action_ids';
 import * as i18n from '../translations';
-import { RunWorkflowPanel } from './run_workflow_panel';
+
+// Server-side: include managed workflows tagged for the rule_action selector (e.g. the alert
+// analysis workflow). Module-scoped so the object reference is stable across renders.
+const ALERT_WORKFLOW_VISIBILITY: WorkflowSelectorVisibility = { selectors: ['rule_action'] };
+
+// Client-side: of the server-returned set, further narrow to unmanaged workflows (always shown)
+// and managed workflows that declare an alert trigger. Module-scoped for stable reference.
+const isAlertWorkflow = (w: WorkflowListItemDto) =>
+  !w.managed || (w.definition?.triggers ?? []).some((t) => t.type === 'alert');
+
+// Sort alert-trigger workflows to the top. Module-scoped so the reference is stable across renders.
+const sortAlertWorkflow = (a: WorkflowListItemDto, b: WorkflowListItemDto) =>
+  Number((b.definition?.triggers ?? []).some((t) => t.type === 'alert')) -
+  Number((a.definition?.triggers ?? []).some((t) => t.type === 'alert'));
 
 export interface AlertWorkflowsPanelProps {
   /** Array of alert ids and their respective indices */
@@ -41,8 +61,9 @@ export const AlertWorkflowsPanel = ({ alertIds, onClose, onExecute }: AlertWorkf
   return (
     <RunWorkflowPanel
       inputs={inputs}
-      sortTriggerType="alert"
-      executeButtonTestSubj="execute-alert-workflow-button"
+      visibility={ALERT_WORKFLOW_VISIBILITY}
+      sortWorkflow={sortAlertWorkflow}
+      filterWorkflow={isAlertWorkflow}
       onClose={onClose}
       onExecute={onExecute}
     />
@@ -52,7 +73,6 @@ export const AlertWorkflowsPanel = ({ alertIds, onClose, onExecute }: AlertWorkf
 export const RUN_WORKFLOW_PANEL_ID = 'RUN_WORKFLOW_PANEL_ID';
 export const RUN_WORKFLOW_BULK_PANEL_ID = 'BULK_RUN_WORKFLOW_PANEL_ID';
 export const RUN_WORKFLOWS_PANEL_WIDTH = 400;
-
 export interface UseRunAlertWorkflowPanelProps {
   /** ECS document for the selected alert row. */
   ecsRowData: Ecs;
@@ -83,7 +103,7 @@ export const useRunAlertWorkflowPanel = ({
       {
         'aria-label': i18n.CONTEXT_MENU_RUN_WORKFLOW,
         'data-test-subj': 'run-workflow-action',
-        key: 'run-workflow-action',
+        key: RUN_ALERT_WORKFLOW_ACTION_ID,
         name: i18n.CONTEXT_MENU_RUN_WORKFLOW,
         panel: RUN_WORKFLOW_PANEL_ID,
       },

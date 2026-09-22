@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import type { Filter } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { BulkActionsConfig } from '@kbn/response-ops-alerts-table/types';
@@ -19,7 +19,6 @@ import {
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import type { PageScope } from '../../../../data_view_manager/constants';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import { useBrowserFields } from '../../../../data_view_manager/hooks/use_browser_fields';
 import type { CustomBulkAction } from '../../../../../common/types';
@@ -31,10 +30,10 @@ import { useTimelineEventsHandler } from '../../../../timelines/containers';
 import type { State } from '../../../../common/store/types';
 import { INVESTIGATE_BULK_IN_TIMELINE } from '../translations';
 import type { Direction } from '../../../../../common/search_strategy';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { globalFiltersQuerySelector } from '../../../../common/store/inputs/selectors';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useSendBulkToTimeline } from './use_send_bulk_to_timeline';
+import { BULK_INVESTIGATE_IN_TIMELINE_ACTION_ID } from '../../../../common/constants/action_ids';
 
 const { setEventsLoading } = dataTableActions;
 
@@ -67,43 +66,19 @@ export const useAddBulkToTimelineAction = ({
   scopeId,
 }: UseAddBulkToTimelineActionProps) => {
   const [disableActionOnSelectAll, setDisabledActionOnSelectAll] = useState(false);
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-
-  const { dataView: experimentalDataView } = useDataView(scopeId);
-  const experimentalBrowserFields = useBrowserFields(scopeId);
-  const experimentalSelectedPatterns = useSelectedPatterns(scopeId);
 
   const {
     timelinePrivileges: { read: canReadTimelines },
   } = useUserPrivileges();
 
-  const {
-    browserFields: oldBrowserFields,
-    dataViewId: oldDataViewId,
-    sourcererDataView: oldSourcererDataViewSpec,
-    // important to get selectedPatterns from useSourcererDataView
-    // in order to include the exclude filters in the search that are not stored in the timeline
-    selectedPatterns: oldSelectedPatterns,
-  } = useSourcererDataView(scopeId);
-
-  const runtimeMappings = useMemo(() => {
-    return newDataViewPickerEnabled
-      ? (experimentalDataView.getRuntimeMappings() as RunTimeMappings)
-      : (oldSourcererDataViewSpec.runtimeFieldMap as RunTimeMappings);
-  }, [newDataViewPickerEnabled, experimentalDataView, oldSourcererDataViewSpec.runtimeFieldMap]);
-
-  const dataViewId = useMemo(
-    () => (newDataViewPickerEnabled ? experimentalDataView.id ?? '' : oldDataViewId),
-    [experimentalDataView.id, newDataViewPickerEnabled, oldDataViewId]
+  const { dataView } = useDataView(scopeId);
+  const browserFields = useBrowserFields(dataView);
+  const selectedPatterns = useSelectedPatterns(dataView);
+  const runtimeMappings = useMemo(
+    () => dataView.getRuntimeMappings() as RunTimeMappings,
+    [dataView]
   );
-  const browserFields = useMemo(
-    () => (newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields),
-    [experimentalBrowserFields, newDataViewPickerEnabled, oldBrowserFields]
-  );
-  const selectedPatterns = useMemo(
-    () => (newDataViewPickerEnabled ? experimentalSelectedPatterns : oldSelectedPatterns),
-    [experimentalSelectedPatterns, newDataViewPickerEnabled, oldSelectedPatterns]
-  );
+  const dataViewId = useMemo(() => dataView.id ?? '', [dataView.id]);
 
   const dispatch = useDispatch();
   const { uiSettings } = useKibana().services;
@@ -132,20 +107,13 @@ export const useAddBulkToTimelineAction = ({
     return combineQueries({
       config: esQueryConfig,
       dataProviders: [],
-      dataViewSpec: oldSourcererDataViewSpec,
-      dataView: experimentalDataView,
+      dataView,
       filters: combinedFilters,
       kqlQuery: { query: '', language: 'kuery' },
       browserFields,
       kqlMode: 'filter',
     });
-  }, [
-    esQueryConfig,
-    oldSourcererDataViewSpec,
-    experimentalDataView,
-    combinedFilters,
-    browserFields,
-  ]);
+  }, [esQueryConfig, dataView, combinedFilters, browserFields]);
 
   const filterQuery = useMemo(() => {
     if (!combinedQuery) return '';
@@ -241,10 +209,12 @@ export const useAddBulkToTimelineAction = ({
         ? [
             {
               label: investigateInTimelineTitle,
-              key: 'add-bulk-to-timeline',
+              key: BULK_INVESTIGATE_IN_TIMELINE_ACTION_ID,
               'data-test-subj': 'investigate-bulk-in-timeline',
               disableOnQuery: disableActionOnSelectAll,
               onClick: onActionClick,
+              icon: 'timeline' as const,
+              groupId: 'timeline' as const,
             },
           ]
         : [],

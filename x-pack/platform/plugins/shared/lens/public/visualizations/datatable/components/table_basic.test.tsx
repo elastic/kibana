@@ -149,7 +149,7 @@ describe('DatatableComponent', () => {
     const props: DatatableRenderProps = {
       data,
       args,
-      formatFactory: () => ({ convert: (x) => x, reactConvert: (x) => x } as IFieldFormat),
+      formatFactory: () => ({ convertToText: (x) => x, convertToReact: (x) => x } as IFieldFormat),
       dispatchEvent: onDispatchEvent,
       getType: jest.fn().mockReturnValue({
         type: 'buckets',
@@ -468,6 +468,33 @@ describe('DatatableComponent', () => {
     ]);
   });
 
+  test('it normalizes unsupported center alignment for progress columns at render time', () => {
+    renderDatatableComponent({
+      args: {
+        ...args,
+        columns: [
+          { columnId: 'a', alignment: 'center', type: 'lens_datatable_column', colorMode: 'none' },
+          { columnId: 'b', alignment: 'center', type: 'lens_datatable_column', colorMode: 'none' },
+          {
+            columnId: 'c',
+            alignment: 'center',
+            type: 'lens_datatable_column',
+            colorMode: 'progress',
+            fillStyle: JSON.stringify({ fillMode: 'single' }),
+          },
+        ],
+      },
+    });
+
+    const alignmentsClassNames = screen
+      .getAllByTestId('lnsTableCellContent')
+      .map((cell) => cell.className);
+
+    expect(alignmentsClassNames[0]).toBe('lnsTableCell--center');
+    expect(alignmentsClassNames[1]).toBe('lnsTableCell--center');
+    expect(alignmentsClassNames[2]).toContain('lnsTableCell--right');
+  });
+
   test('it adds default alignment data to context', () => {
     renderDatatableComponent({
       args: {
@@ -765,7 +792,7 @@ describe('DatatableComponent', () => {
 
           renderDatatableComponent();
 
-          expect(getCellColorFn).toBeCalledTimes(2); // 2 initial renders of table
+          expect(getCellColorFn).toHaveBeenCalledTimes(2); // 2 initial renders of table
         });
 
         test('caches getCellColorFn by columnId with transpose columns', () => {
@@ -792,7 +819,7 @@ describe('DatatableComponent', () => {
             },
           });
 
-          expect(getCellColorFn).toBeCalledTimes(2); // 2 initial renders of table
+          expect(getCellColorFn).toHaveBeenCalledTimes(2); // 2 initial renders of table
         });
       });
 

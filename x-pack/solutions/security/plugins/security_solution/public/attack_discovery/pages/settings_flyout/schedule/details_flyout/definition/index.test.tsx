@@ -6,28 +6,21 @@
  */
 
 import React from 'react';
-import { act, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 
 import { ScheduleDefinition } from '.';
 import { useCreateDataView } from '../../../../../../common/hooks/use_create_data_view';
 import { TestProviders } from '../../../../../../common/mock';
-import { useSourcererDataView } from '../../../../../../sourcerer/containers';
 import { mockAttackDiscoverySchedule } from '../../../../mock/mock_attack_discovery_schedule';
 import { useIsExperimentalFeatureEnabled } from '../../../../../../common/hooks/use_experimental_features';
 
 jest.mock('../../../../../../common/hooks/use_create_data_view');
-jest.mock('../../../../../../sourcerer/containers');
 jest.mock('../../../../../../common/hooks/use_experimental_features');
 
 const mockUseCreateDataView = useCreateDataView as jest.MockedFunction<typeof useCreateDataView>;
-const mockUseSourcererDataView = useSourcererDataView as jest.MockedFunction<
-  typeof useSourcererDataView
->;
 
 const renderComponent = async (schedule = mockAttackDiscoverySchedule) => {
-  await act(() => {
-    render(<TestProviders>{<ScheduleDefinition schedule={schedule} />}</TestProviders>);
-  });
+  render(<TestProviders>{<ScheduleDefinition schedule={schedule} />}</TestProviders>);
 };
 
 describe('ScheduleDefinition', () => {
@@ -39,10 +32,6 @@ describe('ScheduleDefinition', () => {
       getIndexPattern: () => 'logstash-*',
       fields: [{ name: '_type' }],
     } as unknown as jest.Mocked<ReturnType<typeof useCreateDataView>>);
-    mockUseSourcererDataView.mockReturnValue({
-      sourcererDataView: {},
-      loading: false,
-    } as unknown as jest.Mocked<ReturnType<typeof useSourcererDataView>>);
   });
 
   it('should render definition title', async () => {

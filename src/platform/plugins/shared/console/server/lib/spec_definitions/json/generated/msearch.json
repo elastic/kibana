@@ -30,6 +30,7 @@
         "query_then_fetch",
         "dfs_query_then_fetch"
       ],
+      "_slice": "",
       "typed_keys": "__flag__"
     },
     "methods": [

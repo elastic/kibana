@@ -12,7 +12,8 @@ import type { SkillsService, WritableSkillsStore } from '@kbn/agent-builder-serv
 /**
  * Resolves the set of skills available to an agent based on its configuration:
  * - Explicitly selected skills via `skill_ids` (fetched with bulkGet)
- * - All built-in skills when `enable_elastic_capabilities` is true
+ * - Built-in skills when `enable_elastic_capabilities` is true, excluding any
+ *   marked `excludeFromElasticCapabilities` (those remain reachable via `skill_ids`)
  * - Additional skills from assigned plugins via `additionalSkillIds`
  *
  * Returns the merged, deduplicated list.
@@ -48,7 +49,7 @@ export const resolveAgentSkills = async ({
 
   const merged = new Map(explicitSkillsMap);
   for (const skill of builtinSkills) {
-    if (!merged.has(skill.id)) {
+    if (!skill.excludeFromElasticCapabilities && !merged.has(skill.id)) {
       merged.set(skill.id, skill);
     }
   }

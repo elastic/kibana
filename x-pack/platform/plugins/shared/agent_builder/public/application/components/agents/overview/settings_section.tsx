@@ -14,13 +14,20 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
+  EuiIconTip,
+  EuiSkeletonText,
   EuiSpacer,
   EuiText,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { labels } from '../../../utils/i18n';
+import { useIsContextEngineEnabled } from '../../../hooks/use_is_context_engine_enabled';
+import { useAgentAiIndicesById } from '../../../hooks/ai_indices/use_agent_ai_indices_by_id';
+import { AiIndicesWarningsPanel } from '../ai_indices/ai_indices_warnings_panel';
 
 const { agentOverview: overviewLabels } = labels;
 
@@ -42,8 +49,10 @@ export interface SettingsSectionProps {
   currentInstructions: string;
   showWorkflowSection: boolean;
   workflowIds: string[];
+  postExecutionWorkflowIds: string[];
   canEditAgent: boolean;
   onOpenEditFlyout: () => void;
+  agentId: string;
 }
 
 export const SettingsSection: React.FC<SettingsSectionProps> = ({
@@ -51,16 +60,30 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
   currentInstructions,
   showWorkflowSection,
   workflowIds,
+  postExecutionWorkflowIds,
   canEditAgent,
   onOpenEditFlyout,
+  agentId,
 }) => {
   const { euiTheme } = useEuiTheme();
-
+  const isContextEngineEnabled = useIsContextEngineEnabled();
+  const {
+    aiIndices: agentAiIndices,
+    warnings: aiIndicesWarnings,
+    isLoading: isLoadingAgentAiIndices,
+  } = useAgentAiIndicesById(agentId, { enabled: isContextEngineEnabled });
+  const aiIndicesSummary = agentAiIndices
+    .map(({ id, is_default: isDefault }) =>
+      isDefault ? labels.aiIndices.defaultIndexBadge(id) : id
+    )
+    .join(', ');
+  const hasAiIndices = isLoadingAgentAiIndices || Boolean(aiIndicesSummary);
   const textDisabledStyles = css`
     color: ${euiTheme.colors.textDisabled};
   `;
 
   const hasWorkflows = workflowIds.length > 0;
+  const hasPostExecutionWorkflows = postExecutionWorkflowIds.length > 0;
 
   return (
     <>
@@ -83,6 +106,13 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
             description={overviewLabels.customInstructionsSubtitle}
             textAlign="left"
             onClick={canEditAgent ? onOpenEditFlyout : undefined}
+            {...(canEditAgent
+              ? getEbtProps({
+                  element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                  action: AGENT_BUILDER_UI_EBT.action.agentOverview.EDIT_DETAILS,
+                  detail: AGENT_BUILDER_UI_EBT.entity.AGENT,
+                })
+              : {})}
             footer={
               !currentInstructions && canEditAgent ? (
                 <EuiButtonEmpty
@@ -126,6 +156,13 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
             description={overviewLabels.agentSettingsCardSubtitle}
             textAlign="left"
             onClick={canEditAgent ? onOpenEditFlyout : undefined}
+            {...(canEditAgent
+              ? getEbtProps({
+                  element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                  action: AGENT_BUILDER_UI_EBT.action.agentOverview.EDIT_DETAILS,
+                  detail: AGENT_BUILDER_UI_EBT.entity.AGENT,
+                })
+              : {})}
             css={css`
               height: 100%;
               .euiCard__content p {
@@ -209,6 +246,110 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
                         >
                           {hasWorkflows ? overviewLabels.enabledBadge : overviewLabels.notSetBadge}
                         </EuiBadge>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+
+                  <EuiHorizontalRule margin="none" />
+
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                      <EuiFlexItem grow>
+                        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                          <EuiFlexItem grow={false}>
+                            <EuiText
+                              size="s"
+                              color={
+                                hasPostExecutionWorkflows
+                                  ? 'textPrimary'
+                                  : euiTheme.colors.textDisabled
+                              }
+                            >
+                              {overviewLabels.postExecutionWorkflowTitle}
+                            </EuiText>
+                          </EuiFlexItem>
+                          <EuiFlexItem
+                            grow={false}
+                            css={hasPostExecutionWorkflows ? undefined : textDisabledStyles}
+                          >
+                            <EuiIcon type="info" size="s" aria-hidden={true} />
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiBadge
+                          color={hasPostExecutionWorkflows ? 'success' : 'default'}
+                          data-test-subj="agentOverviewPostExecutionWorkflowsBadge"
+                        >
+                          {hasPostExecutionWorkflows
+                            ? overviewLabels.enabledBadge
+                            : overviewLabels.notSetBadge}
+                        </EuiBadge>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                </>
+              )}
+
+              {/* AI indices row */}
+              {isContextEngineEnabled && (
+                <>
+                  <EuiHorizontalRule margin="none" />
+
+                  {aiIndicesWarnings && aiIndicesWarnings.length > 0 && (
+                    <>
+                      <EuiFlexItem grow={false}>
+                        <AiIndicesWarningsPanel
+                          warnings={aiIndicesWarnings}
+                          data-test-subj="agentOverviewAiIndicesWarnings"
+                        />
+                      </EuiFlexItem>
+                      <EuiHorizontalRule margin="none" />
+                    </>
+                  )}
+
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                      <EuiFlexItem grow>
+                        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                          <EuiFlexItem grow={false}>
+                            <EuiText
+                              size="s"
+                              color={hasAiIndices ? 'textPrimary' : euiTheme.colors.textDisabled}
+                            >
+                              {overviewLabels.aiIndicesTitle}
+                            </EuiText>
+                          </EuiFlexItem>
+                          <EuiFlexItem
+                            grow={false}
+                            css={hasAiIndices ? undefined : textDisabledStyles}
+                          >
+                            <EuiIconTip
+                              type="info"
+                              size="s"
+                              content={overviewLabels.aiIndicesTooltip}
+                            />
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        {isLoadingAgentAiIndices ? (
+                          <EuiSkeletonText
+                            lines={1}
+                            css={css`
+                              inline-size: calc(${euiTheme.size.xxl} * 3);
+                            `}
+                            data-test-subj="agentOverviewAiIndicesLoading"
+                          />
+                        ) : aiIndicesSummary ? (
+                          <EuiText size="s" data-test-subj="agentOverviewAiIndices">
+                            {aiIndicesSummary}
+                          </EuiText>
+                        ) : (
+                          <EuiBadge color="default" data-test-subj="agentOverviewAiIndices">
+                            {overviewLabels.notSetBadge}
+                          </EuiBadge>
+                        )}
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   </EuiFlexItem>

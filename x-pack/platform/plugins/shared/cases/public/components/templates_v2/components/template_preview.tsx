@@ -5,30 +5,39 @@
  * 2.0.
  */
 
-import React, { useMemo, useRef } from 'react';
-import { EuiHorizontalRule, EuiText, EuiSpacer } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import { EuiAccordion, EuiEmptyPrompt, EuiHorizontalRule, EuiText, EuiSpacer } from '@elastic/eui';
 import { useFormContext, useWatch } from 'react-hook-form';
-import { load as parseYaml } from 'js-yaml';
-import type { z } from '@kbn/zod/v4';
+import { parse as parseYaml } from 'yaml';
+import type {
+  TemplateSettings,
+  ParsedTemplateDefinition,
+} from '../../../../common/types/domain/template/v1';
 import { ParsedTemplateDefinitionSchema } from '../../../../common/types/domain/template/v1';
+import type { CaseConnectorWithoutName } from '../../../../common/types/domain_zod/connector/v1';
 import { TemplateFieldRenderer } from '../field_types/field_renderer';
-import { TemplateMetadataPreview } from './template_metadata_preview';
-import { useParentTemplateDefinition } from '../hooks/use_parent_template_definition';
-import { mergeTemplateDefinitions } from '../utils/merge_template_definitions';
+import { TemplateCaseDefaultsForm } from './template_case_defaults_form';
 import * as i18n from '../translations';
-
-type ParsedTemplateDefinition = z.infer<typeof ParsedTemplateDefinitionSchema>;
+import { normalizeTemplateCaseDefaultsForValidation } from '../utils/normalize_template_case_defaults';
+import type { OnCaseDefaultChange } from '../case_default_fields';
 
 interface TemplatePreviewProps {
+  settings?: TemplateSettings;
+  connector?: CaseConnectorWithoutName;
   onFieldDefaultChange?: (fieldName: string, value: string, control: string) => void;
+  onCaseDefaultChange?: OnCaseDefaultChange;
 }
 
-export const TemplatePreview: React.FC<TemplatePreviewProps> = ({ onFieldDefaultChange }) => {
+const TemplatePreviewComponent: React.FC<TemplatePreviewProps> = ({
+  settings,
+  connector,
+  onFieldDefaultChange,
+  onCaseDefaultChange,
+}) => {
   const { control } = useFormContext();
   const values = useWatch({ control, defaultValue: { definition: '' } });
 
-  // Store the last valid parsed template
-  const lastValidTemplateRef = useRef<ParsedTemplateDefinition | null>(null);
+  const isEmpty = !values.definition || values.definition.trim() === '';
 
   const parsedTemplate = useMemo(() => {
     try {
@@ -54,7 +63,9 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({ onFieldDefault
         } as const;
       }
 
-      return ParsedTemplateDefinitionSchema.safeParse(parsedDefinition);
+      return ParsedTemplateDefinitionSchema.safeParse(
+        normalizeTemplateCaseDefaultsForValidation(parsedDefinition)
+      );
     } catch (error: unknown) {
       if (error instanceof Error) {
         return {
@@ -76,62 +87,92 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({ onFieldDefault
     }
   }, [values.definition]);
 
-  if (parsedTemplate.success && parsedTemplate.data) {
-    lastValidTemplateRef.current = parsedTemplate.data;
+  // Nothing entered yet: neutral empty state.
+  if (isEmpty) {
+    return (
+      <EuiEmptyPrompt
+        data-test-subj="templatePreviewEmpty"
+        iconType="eye"
+        color="subdued"
+        paddingSize="m"
+        titleSize="xs"
+        title={<h3>{i18n.PREVIEW_EMPTY_TITLE}</h3>}
+        body={<p>{i18n.PREVIEW_EMPTY_BODY}</p>}
+      />
+    );
   }
 
-  // Use last valid template if current parsing failed
-  const parsedTemplateData = parsedTemplate.success
-    ? parsedTemplate.data
-    : lastValidTemplateRef.current;
-
-  const { definition: parentDefinition } = useParentTemplateDefinition(parsedTemplateData?.extends);
-
-  const effectiveTemplate = useMemo(() => {
-    if (!parsedTemplateData) {
-      return null;
-    }
-    if (parentDefinition) {
-      return mergeTemplateDefinitions(parentDefinition, parsedTemplateData);
-    }
-    return parsedTemplateData;
-  }, [parsedTemplateData, parentDefinition]);
-
-  const parentFieldNames = useMemo(
-    () =>
-      new Set(
-        (parentDefinition?.fields ?? [])
-          .map((f) => f.name)
-          .filter((name): name is string => typeof name === 'string')
-      ),
-    [parentDefinition]
-  );
-
-  if (!effectiveTemplate) {
-    return null;
+  // Definition present but not parseable: the errors prevent rendering the fields,
+  // so surface a clear, actionable error instead of a stale or blank panel.
+  if (!parsedTemplate.success || !parsedTemplate.data) {
+    return (
+      <EuiEmptyPrompt
+        data-test-subj="templatePreviewError"
+        iconType="warning"
+        color="warning"
+        paddingSize="m"
+        titleSize="xs"
+        title={<h3>{i18n.PREVIEW_UNAVAILABLE_TITLE}</h3>}
+        body={<p>{i18n.PREVIEW_UNAVAILABLE_BODY}</p>}
+      />
+    );
   }
+
+  const parsedTemplateData = parsedTemplate.data;
+  const previewDefinition: ParsedTemplateDefinition = {
+    ...parsedTemplateData,
+    settings: settings ?? parsedTemplateData.settings,
+    connector: connector ?? parsedTemplateData.connector,
+  };
 
   return (
     <div>
-      <TemplateMetadataPreview parsedTemplate={effectiveTemplate} />
+      <EuiAccordion
+        id="templatePreviewCaseDefaults"
+        initialIsOpen
+        buttonContent={
+          <EuiText size="xs" color="subdued">
+            <strong>{i18n.CASE_DEFAULTS_SECTION_TITLE}</strong>
+          </EuiText>
+        }
+        data-test-subj="templatePreviewCaseDefaultsAccordion"
+      >
+        <EuiSpacer size="s" />
+        <TemplateCaseDefaultsForm
+          parsedTemplate={previewDefinition}
+          onChange={onCaseDefaultChange}
+        />
+      </EuiAccordion>
 
-      {effectiveTemplate.fields.length > 0 && (
+      {previewDefinition.fields.length > 0 && (
         <>
           <EuiHorizontalRule margin="m" />
-          <EuiText size="xs" color="subdued">
-            <strong>{i18n.TEMPLATE_FIELDS_LABEL}</strong>
-          </EuiText>
-          <EuiSpacer size="s" />
-          <TemplateFieldRenderer
-            parsedTemplate={effectiveTemplate}
-            onFieldDefaultChange={onFieldDefaultChange}
-            parentFieldNames={parentFieldNames}
-            parentTemplateName={parentDefinition?.name ?? parsedTemplateData?.extends}
-          />
+          <EuiAccordion
+            id="templatePreviewFields"
+            initialIsOpen
+            buttonContent={
+              <EuiText size="xs" color="subdued">
+                <strong>{i18n.TEMPLATE_FIELDS_LABEL}</strong>
+              </EuiText>
+            }
+            data-test-subj="templatePreviewFieldsAccordion"
+          >
+            <EuiSpacer size="s" />
+            <TemplateFieldRenderer
+              parsedTemplate={previewDefinition}
+              onFieldDefaultChange={onFieldDefaultChange}
+            />
+          </EuiAccordion>
         </>
       )}
     </div>
   );
 };
 
-TemplatePreview.displayName = 'TemplatePreview';
+TemplatePreviewComponent.displayName = 'TemplatePreview';
+
+/**
+ * Memoized so template-details (metadata) edits — which don't change `settings`, `connector`, or the
+ * watched `definition` — never re-render this heavier YAML-backed preview (async user/tag lookups).
+ */
+export const TemplatePreview = React.memo(TemplatePreviewComponent);

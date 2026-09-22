@@ -14,14 +14,44 @@ import { getHandlerWrapper } from '../wrap_handler';
 import { internalApiPath } from '../../../common/constants';
 import { apiPrivileges } from '../../../common/features';
 import { getSSEResponseHeaders } from '../utils';
+import { filterLegacyApiEvents } from '../converse_helpers';
 
 export function registerInternalExecutionRoutes({
+  coreSetup,
   router,
   getInternalServices,
-  coreSetup,
   logger,
 }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
+
+  router.get(
+    {
+      path: `${internalApiPath}/executions/_find`,
+      security: {
+        authz: {
+          requiredPrivileges: [apiPrivileges.readAgentBuilder],
+        },
+      },
+      options: { access: 'internal' },
+      validate: {
+        query: schema.object({
+          metadataKey: schema.string({ minLength: 1, maxLength: 512 }),
+          metadataValue: schema.string({ minLength: 1, maxLength: 1024 }),
+        }),
+      },
+    },
+    wrapHandler(async (context, request, response) => {
+      const { execution: executionService } = getInternalServices();
+      const { metadataKey, metadataValue } = request.query;
+
+      const executions = await executionService.findExecutions(request, {
+        filter: { metadata: { [metadataKey]: metadataValue } },
+        size: 1,
+      });
+
+      return response.ok({ body: { executionId: executions[0]?.executionId ?? null } });
+    })
+  );
 
   router.get(
     {
@@ -42,8 +72,6 @@ export function registerInternalExecutionRoutes({
       },
     },
     wrapHandler(async (context, request, response) => {
-      const [, { cloud }] = await coreSetup.getStartServices();
-      const isCloud = cloud?.isCloudEnabled ?? false;
       const { execution: executionService } = getInternalServices();
       const { executionId } = request.params;
       const { since } = request.query;
@@ -53,14 +81,63 @@ export function registerInternalExecutionRoutes({
         abortController.abort();
       });
 
-      const events$ = executionService.followExecution(executionId, { since });
+      const events$ = executionService
+        .followExecution(executionId, { since })
+        .pipe(filterLegacyApiEvents());
       return response.ok({
-        headers: getSSEResponseHeaders(isCloud),
+        headers: getSSEResponseHeaders(),
         body: observableIntoEventSourceStream(events$ as unknown as Observable<ServerSentEvent>, {
           signal: abortController.signal,
           logger,
         }),
       });
+    })
+  );
+
+  router.post(
+    {
+      path: `${internalApiPath}/executions/{executionId}/abort`,
+      security: {
+        authz: {
+          requiredPrivileges: [apiPrivileges.readAgentBuilder],
+        },
+      },
+      options: { access: 'internal' },
+      validate: {
+        params: schema.object({
+          executionId: schema.string(),
+        }),
+        query: schema.object({
+          /**
+           * By default the call returns once the interruption is recorded on the conversation, so a
+           * client that re-reads the conversation afterwards sees the aborted execution. Pass
+           * `false` to return right after the abort is requested.
+           */
+          wait_for_terminal: schema.boolean({ defaultValue: true }),
+        }),
+      },
+    },
+    wrapHandler(async (context, request, response) => {
+      const { execution: executionService } = getInternalServices();
+      const { executionId } = request.params;
+      const { wait_for_terminal: waitForTerminal } = request.query;
+
+      const [coreStart] = await coreSetup.getStartServices();
+      const user = coreStart.security.authc.getCurrentUser(request);
+      const { acknowledged, terminalPersisted } = await executionService.abortExecution(
+        executionId,
+        {
+          reason: {
+            source: 'api',
+            ...(user
+              ? { actor: { id: user.profile_uid ?? user.username, username: user.username } }
+              : {}),
+          },
+          waitForTerminal,
+        }
+      );
+
+      return response.ok({ body: { acknowledged, terminal_persisted: terminalPersisted } });
     })
   );
 }

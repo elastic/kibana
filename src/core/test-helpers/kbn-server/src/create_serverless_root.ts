@@ -59,7 +59,7 @@ export function createTestServerlessInstances({
    *  - `remote_cluster_server.enabled=true`
    *
    * Equivalent to running:
-   *  `yarn es serverless --projectType observability --uiam --kill --clean \
+   *  `pnpm es serverless --projectType observability --uiam --kill --clean \
    *    -E serverless.cross_project.enabled=true -E remote_cluster_server.enabled=true`
    *
    * @default false
@@ -76,13 +76,13 @@ export function createTestServerlessInstances({
    */
   esArgs?: string[];
   /**
-   * The serverless project type to run (`yarn es serverless --projectType`).
+   * The serverless project type to run (`pnpm es serverless --projectType`).
    *
    * Defaults to `es` for existing tests.
    */
   projectType?: ServerlessProjectType;
 } = {}): TestServerlessUtils {
-  adjustTimeout?.(150_000);
+  adjustTimeout?.(300_000);
 
   const esUtils = createServerlessES({
     enableCPS,
@@ -96,7 +96,7 @@ export function createTestServerlessInstances({
     if (!hasCpsKey) {
       set(kibana.settings, 'cps.cpsEnabled', enableCPS);
     }
-    // Match the default `yarn es serverless --uiam` setup, but allow tests to override
+    // Match the default `pnpm es serverless --uiam` setup, but allow tests to override
     // auth by pre-setting `elasticsearch.username/password` (e.g. use `system_indices_superuser`).
     const existingEsSettings = (kibana.settings as any).elasticsearch ?? {};
     set(kibana.settings, 'elasticsearch.hosts', [`https://localhost:${esTestConfig.getPort()}`]);
@@ -162,7 +162,11 @@ function createServerlessES({
     esTestConfig.getESServerlessImage()
   );
   const baseArgs = enableCPS
-    ? ['serverless.cross_project.enabled=true', 'remote_cluster_server.enabled=true']
+    ? [
+        'serverless.cross_project.enabled=true',
+        'remote_cluster_server.enabled=true',
+        'es.full_project_routing_feature_flag_enabled=true',
+      ]
     : [];
 
   return {

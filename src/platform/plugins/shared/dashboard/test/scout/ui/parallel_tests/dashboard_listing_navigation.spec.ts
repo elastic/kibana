@@ -39,7 +39,7 @@ spaceTest.describe(
           'clicking create new dashboard button navigates to the editor',
           async () => {
             await pageObjects.dashboard.goto();
-            await page.testSubj.click('newItemButton');
+            await page.testSubj.click('dashboardListingCreateButton');
             await expect(page.testSubj.locator('dashboardAddTopNavButton')).toBeVisible({
               timeout: 20_000,
             });
@@ -48,7 +48,7 @@ spaceTest.describe(
 
         await spaceTest.step('navigating back to listing page from a new dashboard', async () => {
           await page.goBack();
-          await expect(page.testSubj.locator('newItemButton')).toBeVisible();
+          await expect(page.testSubj.locator('dashboardListingCreateButton')).toBeVisible();
         });
       }
     );
@@ -57,7 +57,7 @@ spaceTest.describe(
       'saving a dashboard and returning to the listing page shows it',
       async ({ page, pageObjects }) => {
         await pageObjects.dashboard.goto();
-        await page.testSubj.click('newItemButton');
+        await page.testSubj.click('dashboardListingCreateButton');
         await expect(page.testSubj.locator('dashboardAddTopNavButton')).toBeVisible({
           timeout: 20_000,
         });

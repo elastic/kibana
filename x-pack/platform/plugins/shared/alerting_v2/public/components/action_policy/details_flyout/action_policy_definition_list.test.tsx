@@ -28,7 +28,7 @@ jest.mock('@kbn/core-di-browser', () => ({
   },
 }));
 
-jest.mock('./badge_list', () => ({
+jest.mock('../badge_list', () => ({
   BadgeList: ({ items }: { items: string[] }) => (
     <span data-test-subj="mockBadgeList">{items.join(', ')}</span>
   ),
@@ -41,16 +41,19 @@ jest.mock('./destination_row', () => ({
 }));
 
 jest.mock('../labels', () => ({
+  DISPATCH_PER_LABEL: 'Dispatch per',
+  FREQUENCY_LABEL: 'Frequency',
+  GROUP_BY_LABEL: 'Group by',
   getGroupingModeLabel: (mode: string | undefined) => mode ?? 'Not configured',
-  getThrottleStrategyLabel: (strategy: string | undefined) => strategy ?? 'Not configured',
+  getFrequencyLabel: (throttle: { strategy?: string } | null | undefined) =>
+    throttle?.strategy ?? 'Not configured',
 }));
 
 const defaultProps: ActionPolicyDefinitionListProps = {
   policy: {
     description: 'A test description',
-    tags: ['tag-a', 'tag-b'],
-    matcher: 'rule.id: "abc"',
-    groupingMode: 'per_episode',
+    matcher: { tags: ['abc'] },
+    grouping_mode: 'per_episode',
     destinations: [
       { type: 'workflow', id: 'wf-1' },
       { type: 'workflow', id: 'wf-2' },
@@ -65,8 +68,6 @@ describe('ActionPolicyDefinitionList', () => {
 
     expect(screen.getByText('Description')).toBeDefined();
     expect(screen.getByText('A test description')).toBeDefined();
-    expect(screen.getByText('Tags')).toBeDefined();
-    expect(screen.getByText('tag-a, tag-b')).toBeDefined();
     expect(screen.getByText('Matcher')).toBeDefined();
     expect(screen.getByText('Dispatch per')).toBeDefined();
     expect(screen.getByText('Frequency')).toBeDefined();
@@ -86,8 +87,8 @@ describe('ActionPolicyDefinitionList', () => {
     renderWithI18n({
       policy: {
         ...defaultProps.policy,
-        groupingMode: 'per_field',
-        groupBy: ['host.name', 'service.name'],
+        grouping_mode: 'per_field',
+        group_by: ['host.name', 'service.name'],
       },
     });
 
@@ -96,7 +97,7 @@ describe('ActionPolicyDefinitionList', () => {
   });
 
   it('does not render Group by when groupingMode is not per_field', () => {
-    renderWithI18n({ policy: { ...defaultProps.policy, groupingMode: 'per_episode' } });
+    renderWithI18n({ policy: { ...defaultProps.policy, grouping_mode: 'per_episode' } });
 
     expect(screen.queryByText('Group by')).toBeNull();
   });
@@ -107,9 +108,10 @@ describe('ActionPolicyDefinitionList', () => {
     expect(screen.getAllByTestId('mockDestinationRow')).toHaveLength(2);
   });
 
-  it('renders frequency interval when present', () => {
+  it('renders the frequency label', () => {
     renderWithI18n(defaultProps);
 
-    expect(screen.getByText(/Every 5m/)).toBeDefined();
+    // mock resolves strategy to its key; on_status_change is the fixture strategy
+    expect(screen.getByText('on_status_change')).toBeDefined();
   });
 });

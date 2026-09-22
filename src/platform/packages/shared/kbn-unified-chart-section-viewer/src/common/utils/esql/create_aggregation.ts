@@ -12,8 +12,21 @@ import { synth, BasicPrettyPrinter } from '@elastic/esql';
 import type { ESQLAstExpression } from '@elastic/esql/types';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { FunctionNames } from '@kbn/esql-language';
+import {
+  METRICS_GRID_SETTINGS_DEFAULTS,
+  type MetricsGridSettings,
+  type SimpleAggregation,
+} from '@kbn/discover-utils';
 import { isLegacyHistogram } from '../legacy_histogram';
 import { resolveConflictingFieldTypes } from './resolve_conflicting_field_types';
+import { HISTOGRAM_PERCENTILE_VALUES } from '../../../components/flyout/metrics_grid_settings_flyout/constants';
+
+const GAUGE_OVER_TIME_FN: Record<SimpleAggregation, FunctionNames> = {
+  [FunctionNames.AVG]: FunctionNames.AVG_OVER_TIME,
+  [FunctionNames.MIN]: FunctionNames.MIN_OVER_TIME,
+  [FunctionNames.MAX]: FunctionNames.MAX_OVER_TIME,
+  [FunctionNames.SUM]: FunctionNames.SUM_OVER_TIME,
+};
 
 /**
  * Gets the appropriate casting function name for a field type.
@@ -49,6 +62,10 @@ function applyCastIfNeeded(types: ES_FIELD_TYPES[], field: ESQLAstExpression): E
   return field;
 }
 
+function resolvePercentileValue(settings: MetricsGridSettings): number {
+  return HISTOGRAM_PERCENTILE_VALUES[settings.histogramPercentile];
+}
+
 /**
  * Builds an ES|QL aggregation expression AST node using `synth.exp` template
  * literals. Accepts any expression node -- a resolved column (`synth.col`) or
@@ -59,17 +76,47 @@ function buildAggregationNode(
   types: ES_FIELD_TYPES[],
   instrument: MappingTimeSeriesMetricType,
   field: ESQLAstExpression,
-  customFunction?: string
+  customFunction?: string,
+  gridSettings?: MetricsGridSettings
 ): ESQLAstExpression | undefined {
   const resolvedField = applyCastIfNeeded(types, field);
+  const settings = gridSettings ?? METRICS_GRID_SETTINGS_DEFAULTS;
   const primaryType = types[0];
-  if (customFunction) return synth.exp`${synth.kwd(customFunction)}(${resolvedField})`;
-  if (isLegacyHistogram(primaryType, instrument))
-    return synth.exp`PERCENTILE(TO_TDIGEST(${resolvedField}), ${95})`;
-  if (primaryType === 'exponential_histogram' || primaryType === 'tdigest')
-    return synth.exp`PERCENTILE(${resolvedField}, ${95})`;
-  if (instrument === 'counter') return synth.exp`SUM(RATE(${resolvedField}))`;
-  return synth.exp`AVG(${resolvedField})`;
+
+  if (customFunction) {
+    return synth.exp`${synth.kwd(customFunction)}(${resolvedField})`;
+  }
+
+  if (isLegacyHistogram(primaryType, instrument)) {
+    const percentile = resolvePercentileValue(settings);
+    return synth.exp`${synth.kwd(
+      FunctionNames.PERCENTILE.toUpperCase()
+    )}(TO_TDIGEST(${resolvedField}), ${percentile})`;
+  }
+
+  if (primaryType === 'exponential_histogram' || primaryType === 'tdigest') {
+    const percentile = resolvePercentileValue(settings);
+    return synth.exp`${synth.kwd(
+      FunctionNames.PERCENTILE.toUpperCase()
+    )}(${resolvedField}, ${percentile})`;
+  }
+
+  if (instrument === 'counter') {
+    const fn = settings.counterAggregation.toUpperCase();
+    return synth.exp`${synth.kwd(fn)}(RATE(${resolvedField}))`;
+  }
+
+  const gaugeAggregation =
+    settings.gaugeAggregation in GAUGE_OVER_TIME_FN
+      ? settings.gaugeAggregation
+      : METRICS_GRID_SETTINGS_DEFAULTS.gaugeAggregation;
+  const fn = gaugeAggregation.toUpperCase();
+  if (instrument === 'gauge') {
+    const overTimeFn = GAUGE_OVER_TIME_FN[gaugeAggregation].toUpperCase();
+    return synth.exp`${synth.kwd(fn)}(${synth.kwd(overTimeFn)}(${resolvedField}))`;
+  }
+
+  return synth.exp`${synth.kwd(fn)}(${resolvedField})`;
 }
 
 /**
@@ -78,7 +125,8 @@ function buildAggregationNode(
  * - For legacy histogram (field type + instrument both histogram): `PERCENTILE(TO_TDIGEST(...), 95)`
  * - For `histogram` instrument: `PERCENTILE(..., 95)` if type is `exponential_histogram` or `tdigest`
  * - `SUM(RATE(...))` for counter instruments
- * - `AVG(...)` for other metric types
+ * - `AVG(AVG_OVER_TIME(...))` for gauge instruments
+ * - `AVG(...)` for other metric types that fall through (e.g. traces latency)
  *
  * When multiple field types are present (from different backing indices with conflicting mappings),
  * the aggregation will wrap the field in an appropriate casting function (e.g., TO_DOUBLE) to resolve the ambiguity.
@@ -91,6 +139,7 @@ function buildAggregationNode(
  * @param metricName - The actual name of the metric field to aggregate.
  * @param placeholderName - The name of the placeholder to use in the template.
  * @param customFunction - Optional custom aggregation function to use for default case.
+ * @param gridSettings - Optional per-`metric_type` aggregation overrides (counter/gauge/histogram).
  * @returns The ES|QL aggregation string.
  */
 export function createMetricAggregation({
@@ -99,15 +148,17 @@ export function createMetricAggregation({
   metricName,
   placeholderName = 'metricName',
   customFunction,
+  gridSettings,
 }: {
   types: ES_FIELD_TYPES[];
   instrument: MappingTimeSeriesMetricType;
   metricName?: string;
   placeholderName?: string;
   customFunction?: string;
+  gridSettings?: MetricsGridSettings;
 }): string {
   const field = metricName ? synth.col(metricName.split('.')) : synth.dpar(placeholderName);
-  const node = buildAggregationNode(types, instrument, field, customFunction);
+  const node = buildAggregationNode(types, instrument, field, customFunction, gridSettings);
   if (!node) {
     return '';
   }

@@ -11,7 +11,7 @@ import type { EsWorkflowExecution, ExecutionStatus } from '@kbn/workflows';
 import { getInputsFromDefinition } from '@kbn/workflows/spec/lib/field_conversion';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { mockContextDependencies } from '../../execution_functions/__mock__/context_dependencies';
-import { buildWorkflowContext } from '../build_workflow_context';
+import { buildWorkflowContext, buildWorkflowRenderContext } from '../build_workflow_context';
 
 jest.mock('../../utils', () => ({
   getKibanaUrl: jest.fn().mockReturnValue('http://localhost:5601'),
@@ -130,6 +130,68 @@ describe('buildWorkflowContext', () => {
       expect(context.execution.executedBy).toBe('system');
       expect(context.execution.triggeredBy).toBe('scheduled');
     });
+
+    it('should expose accumulated token usage so it is queryable via {{ execution.usage }}', () => {
+      const execution: EsWorkflowExecution = {
+        ...baseExecution,
+        usage: { inputTokens: 45305, outputTokens: 289, cachedTokens: 12000, totalTokens: 45594 },
+      };
+
+      const context = buildWorkflowContext(execution, undefined, dependencies);
+
+      expect(context.execution.usage).toEqual({
+        inputTokens: 45305,
+        outputTokens: 289,
+        cachedTokens: 12000,
+        totalTokens: 45594,
+      });
+    });
+
+    it('should leave execution.usage undefined when no step reported usage', () => {
+      const execution: EsWorkflowExecution = {
+        ...baseExecution,
+        usage: undefined,
+      };
+
+      const context = buildWorkflowContext(execution, undefined, dependencies);
+
+      expect(context.execution.usage).toBeUndefined();
+    });
+
+    it('should include workflow document version in workflow context when present on execution', () => {
+      const execution: EsWorkflowExecution = {
+        ...baseExecution,
+        version: 7,
+      };
+
+      const context = buildWorkflowContext(execution, undefined, dependencies);
+
+      expect(context.workflow.version).toBe(7);
+    });
+
+    it('should omit workflow document version from workflow context when absent on execution', () => {
+      const context = buildWorkflowContext(baseExecution, undefined, dependencies);
+
+      expect(context.workflow).not.toHaveProperty('version');
+    });
+
+    it('should not expose context.hitl links from persisted execution context', () => {
+      const execution: EsWorkflowExecution = {
+        ...baseExecution,
+        context: {
+          hitl: {
+            externalFormLink:
+              'http://localhost:5601/api/workflows/executions/ex-1/steps/step-1/resume/external/form?token=abc',
+            externalQueryLink:
+              'http://localhost:5601/api/workflows/executions/ex-1/steps/step-1/resume/external?token=abc',
+          },
+        },
+      };
+
+      const context = buildWorkflowContext(execution, undefined, dependencies);
+
+      expect(context.context?.hitl).toBeUndefined();
+    });
   });
 
   describe('input default values', () => {
@@ -151,6 +213,62 @@ describe('buildWorkflowContext', () => {
 
       expect(context.inputs).toEqual({
         inputWithDefault: 'defaultValue',
+      });
+    });
+
+    it('should leave templated default input values raw when inputs are not provided', () => {
+      setInputsSchema({
+        properties: {
+          inputWithDefault: { type: 'string', default: '{{ consts.default_input }}' },
+        },
+      });
+
+      const execution: EsWorkflowExecution = {
+        ...baseExecution,
+        workflowDefinition: {
+          ...baseExecution.workflowDefinition,
+          consts: {
+            default_input: 'renderedValue',
+          },
+        },
+        context: {
+          inputs: {},
+        },
+      };
+
+      const context = buildWorkflowContext(execution, undefined, dependencies);
+
+      expect(context.inputs).toEqual({
+        inputWithDefault: '{{ consts.default_input }}',
+      });
+    });
+
+    it('should leave provided templated input values raw', () => {
+      setInputsSchema({
+        properties: {
+          inputWithDefault: { type: 'string', default: 'defaultValue' },
+        },
+      });
+
+      const execution: EsWorkflowExecution = {
+        ...baseExecution,
+        workflowDefinition: {
+          ...baseExecution.workflowDefinition,
+          consts: {
+            default_input: 'renderedValue',
+          },
+        },
+        context: {
+          inputs: {
+            inputWithDefault: '{{ consts.default_input }}',
+          },
+        },
+      };
+
+      const context = buildWorkflowContext(execution, undefined, dependencies);
+
+      expect(context.inputs).toEqual({
+        inputWithDefault: '{{ consts.default_input }}',
       });
     });
 
@@ -520,6 +638,107 @@ describe('buildWorkflowContext', () => {
       const context = buildWorkflowContext(execution, undefined, dependencies);
 
       expect(context.metadata).toEqual({ agent_id: 'from-execution' });
+    });
+  });
+
+  describe('event.inputs aliasing for manual triggers', () => {
+    it('does not persist a minted event when inputs exist and no event was stored', () => {
+      setInputsSchema({
+        type: 'object',
+        properties: { severity: { type: 'string', default: 'medium' } },
+        required: [],
+        additionalProperties: false,
+      });
+      const execution: EsWorkflowExecution = {
+        ...baseExecution,
+        spaceId: 'default',
+        context: { inputs: { severity: 'high' } },
+      };
+
+      const result = buildWorkflowContext(execution, undefined, dependencies);
+
+      expect(result.event).toBeUndefined();
+      expect(result.inputs).toEqual({ severity: 'high' });
+    });
+
+    it('aliases event.inputs from fully-defaulted inputs when no event is persisted', () => {
+      setInputsSchema({
+        type: 'object',
+        properties: { severity: { type: 'string', default: 'medium' } },
+        required: [],
+        additionalProperties: false,
+      });
+      const execution: EsWorkflowExecution = {
+        ...baseExecution,
+        spaceId: 'default',
+        context: { inputs: { severity: 'high' } },
+      };
+
+      const result = buildWorkflowRenderContext(execution, undefined, dependencies);
+
+      expect((result.event as Record<string, unknown>).inputs).toEqual({ severity: 'high' });
+      expect((result.event as Record<string, unknown>).spaceId).toBe('default');
+    });
+
+    it('includes default-filled fields in event.inputs even when raw inputs is empty', () => {
+      setInputsSchema({
+        type: 'object',
+        properties: { severity: { type: 'string', default: 'medium' } },
+        required: [],
+        additionalProperties: false,
+      });
+      const execution: EsWorkflowExecution = {
+        ...baseExecution,
+        context: { inputs: {} },
+      };
+
+      const result = buildWorkflowRenderContext(execution, undefined, dependencies);
+
+      expect((result.event as Record<string, unknown>).inputs).toEqual({ severity: 'medium' });
+    });
+
+    it('does not mint an event when context is empty and there are no inputs', () => {
+      const execution: EsWorkflowExecution = {
+        ...baseExecution,
+        context: {},
+      };
+
+      const result = buildWorkflowRenderContext(execution, undefined, dependencies);
+
+      expect(result.event).toBeUndefined();
+      expect(result.inputs).toBeUndefined();
+    });
+
+    it('does not alias event.inputs for non-manual triggers that have a real event', () => {
+      const alertEvent = { type: 'alert', alerts: [{ id: 'a1' }], spaceId: 'default' };
+      const execution: EsWorkflowExecution = {
+        ...baseExecution,
+        context: { event: alertEvent, inputs: { ticketId: 'T-1' } },
+      };
+
+      const result = buildWorkflowRenderContext(execution, undefined, dependencies);
+
+      expect(result.event).toEqual(alertEvent);
+      expect((result.event as Record<string, unknown>).inputs).toBeUndefined();
+    });
+
+    it('merges event.inputs into a previously-synthesized manual event for backwards compat', () => {
+      setInputsSchema({
+        type: 'object',
+        properties: { severity: { type: 'string', default: 'medium' } },
+        required: [],
+        additionalProperties: false,
+      });
+      const oldSynthesizedEvent = { type: 'manual', inputs: {}, spaceId: 'default' };
+      const execution: EsWorkflowExecution = {
+        ...baseExecution,
+        context: { event: oldSynthesizedEvent, inputs: {} },
+      };
+
+      const result = buildWorkflowRenderContext(execution, undefined, dependencies);
+
+      // event.inputs is refreshed to the defaulted value, not the stale empty object
+      expect((result.event as Record<string, unknown>).inputs).toEqual({ severity: 'medium' });
     });
   });
 });

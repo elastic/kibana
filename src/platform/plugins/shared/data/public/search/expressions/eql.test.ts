@@ -12,7 +12,6 @@ import type { MockedKeys } from '@kbn/utility-types-jest';
 import type { EqlExpressionFunctionDefinition } from '../../../common/search/expressions';
 import type { StartServicesAccessor } from '@kbn/core/public';
 import type { DataPublicPluginStart, DataStartDependencies } from '../../types';
-import { of } from 'rxjs';
 
 jest.mock('@kbn/i18n', () => {
   return {
@@ -45,7 +44,9 @@ describe('eql', () => {
       },
       {
         search: {
-          search: jest.fn((params: any) => of({ rawResponse: params })),
+          eql: jest.fn(async (params: any) => ({
+            rawResponse: params,
+          })),
         },
       },
     ];

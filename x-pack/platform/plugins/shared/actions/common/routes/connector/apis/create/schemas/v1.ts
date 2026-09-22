@@ -23,19 +23,22 @@ export const createConnectorRequestParamsSchema = schema.maybe(
   })
 );
 
-export const createConnectorRequestBodySchema = schema.object({
-  name: schema.string({
-    validate: validateEmptyStrings,
-    meta: { description: 'The display name for the connector.' },
-  }),
-  connector_type_id: schema.string({
-    validate: validateEmptyStrings,
-    meta: { description: 'The type of connector.' },
-  }),
-  config: schema.recordOf(schema.string(), schema.any({ validate: validateEmptyStrings }), {
-    defaultValue: {},
-  }),
-  secrets: schema.recordOf(schema.string(), schema.any({ validate: validateEmptyStrings }), {
-    defaultValue: {},
-  }),
-});
+export const createConnectorRequestBodySchema = schema.object(
+  {
+    name: schema.string({
+      validate: validateEmptyStrings,
+      meta: { description: 'The display name for the connector.' },
+    }),
+    connector_type_id: schema.string({
+      validate: validateEmptyStrings,
+      meta: { description: 'The type of connector.' },
+    }),
+    config: schema.recordOf(schema.string(), schema.any({ validate: validateEmptyStrings }), {
+      defaultValue: {},
+    }),
+    secrets: schema.recordOf(schema.string(), schema.any({ validate: validateEmptyStrings }), {
+      defaultValue: {},
+    }),
+  },
+  { meta: { id: 'new_connector' } }
+);

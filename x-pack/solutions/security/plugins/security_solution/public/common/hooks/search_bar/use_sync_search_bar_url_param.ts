@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { useMemo, useEffect } from 'react';
 import type { Filter, Query } from '@kbn/es-query';
 import { isEmpty } from 'lodash/fp';

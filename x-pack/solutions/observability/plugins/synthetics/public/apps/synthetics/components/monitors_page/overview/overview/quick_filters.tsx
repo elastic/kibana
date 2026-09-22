@@ -9,6 +9,13 @@ import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup } from '@elastic/eui';
 import { useOverviewStatusState } from '../../hooks/use_overview_status';
 import { useGetUrlParams, useUrlParams } from '../../../../hooks';
+import {
+  STATUS_DISABLED_LABEL,
+  STATUS_DOWN_LABEL,
+  STATUS_PENDING_LABEL,
+  STATUS_STALE_LABEL,
+  STATUS_UP_LABEL,
+} from '../../common/monitor_filters/filter_labels';
 
 export const QuickFilters = () => {
   const { statusFilter } = useGetUrlParams();
@@ -22,21 +29,27 @@ export const QuickFilters = () => {
   const statusButtons = [
     {
       id: 'up',
-      label: UP_LABEL,
+      label: STATUS_UP_LABEL,
     },
     {
       id: 'down',
-      label: DOWN_LABEL,
+      label: STATUS_DOWN_LABEL,
     },
     {
       id: 'disabled',
-      label: DISABLED_LABEL,
+      label: STATUS_DISABLED_LABEL,
     },
   ];
   if (status?.pending && status?.pending > 0) {
     statusButtons.push({
       id: 'pending',
-      label: PENDING_LABEL,
+      label: STATUS_PENDING_LABEL,
+    });
+  }
+  if (status?.stale && status?.stale > 0) {
+    statusButtons.push({
+      id: 'stale',
+      label: STATUS_STALE_LABEL,
     });
   }
   return (
@@ -51,19 +64,3 @@ export const QuickFilters = () => {
     />
   );
 };
-
-const DOWN_LABEL = i18n.translate('xpack.synthetics.overview.status.filters.down', {
-  defaultMessage: 'Down',
-});
-
-const UP_LABEL = i18n.translate('xpack.synthetics.overview.status.filters.up', {
-  defaultMessage: 'Up',
-});
-
-const DISABLED_LABEL = i18n.translate('xpack.synthetics.overview.status.filters.disabled', {
-  defaultMessage: 'Disabled',
-});
-
-const PENDING_LABEL = i18n.translate('xpack.synthetics.overview.status.filters.pending', {
-  defaultMessage: 'Pending',
-});

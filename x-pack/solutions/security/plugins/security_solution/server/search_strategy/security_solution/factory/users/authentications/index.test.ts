@@ -40,7 +40,7 @@ describe('authentications search strategy', () => {
 
       expect(() => {
         authentications.buildDsl(overSizeOptions);
-      }).toThrowError(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
+      }).toThrow(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
     });
   });
 

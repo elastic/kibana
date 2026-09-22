@@ -16,14 +16,20 @@ import type {
 import { ChatEventType, isToolCallStep } from '@kbn/agent-builder-common';
 import type { AgentEventEmitterFn } from '@kbn/agent-builder-server';
 import { estimateTokens } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
-import type { ProcessedConversation, ProcessedConversationRound } from './prepare_conversation';
-import type { ContextBudget } from './context_budget';
+import type { ConversationRoundStep } from '@kbn/agent-builder-common';
+import type { ProcessedConversation } from './prepare_conversation';
 import {
-  estimateConversationTokens,
-  estimateRoundTokens,
-  shouldTriggerCompaction,
-} from './context_budget';
-import { convertPreviousRounds } from './to_langchain_messages';
+  groupTimelineFailedExecutions,
+  groupTimelineRounds,
+  sliceTimelineRounds,
+  type TimelineRound,
+} from './context_timeline';
+import { survivingFailedEntryTokens } from './estimate_conversation_tokens';
+import type { ProcessedTimelineEvent } from './context_timeline';
+import type { ContextBudget } from './context_budget';
+import { shouldTriggerCompaction } from './context_budget';
+import { prepareMessages } from './to_langchain_messages';
+import { serializeCompactionSummary } from './compaction_serialize';
 import { llmCompactionSchema, COMPACTION_SYSTEM_PROMPT } from './compaction_schema';
 import type { LlmCompactionOutput } from './compaction_schema';
 
@@ -40,6 +46,18 @@ export interface CompactConversationOptions {
   processedConversation: ProcessedConversation;
   chatModel: InferenceChatModel;
   contextBudget: ContextBudget;
+  /**
+   * Per-round token counts for the rounds of `processedConversation.timeline`, in round order.
+   * Computed once upstream so the trigger, before/after reporting, and hard truncation
+   * all share the same summarization-aware estimate.
+   */
+  perRoundTokenCounts: number[];
+  /**
+   * Token estimate of each failed execution surfaced on the timeline, keyed by its user message
+   * id (see `estimateFailedEntryTokens`). Failed entries are rendered in the prompt like rounds,
+   * so the ones surviving a cut enter every comparison and every reported figure.
+   */
+  failedEntryTokenCounts?: Map<string, number>;
   existingSummary?: CompactionSummary;
   logger: Logger;
   abortSignal?: AbortSignal;
@@ -57,51 +75,6 @@ export interface CompactedConversation {
   /** Number of rounds that were summarized or removed */
   summarizedRoundCount?: number;
 }
-
-/**
- * Serializes CompactionStructuredData into a formatted text block
- * suitable for injection into the LLM prompt.
- */
-export const serializeCompactionSummary = (data: CompactionStructuredData): string => {
-  const parts: string[] = [];
-
-  parts.push(`## Conversation Summary (compacted from previous rounds)`);
-  parts.push(`**User Intent:** ${data.user_intent}`);
-  parts.push(`**Discussion Summary:** ${data.discussion_summary}`);
-
-  if (data.key_topics.length > 0) {
-    parts.push(`**Key Topics:** ${data.key_topics.join(', ')}`);
-  }
-
-  if (data.entities.length > 0) {
-    const entityLines = data.entities.map((e) => `- ${e.type}: ${e.name}`).join('\n');
-    parts.push(`**Entities:**\n${entityLines}`);
-  }
-
-  if (data.tool_calls_summary.length > 0) {
-    const toolLines = data.tool_calls_summary
-      .map((tc) => `- [${tc.tool_id}] ${tc.params_summary}`)
-      .join('\n');
-    parts.push(`**Tool Call History:**\n${toolLines}`);
-  }
-
-  if (data.outcomes_and_decisions.length > 0) {
-    const outcomeLines = data.outcomes_and_decisions.map((o) => `- ${o}`).join('\n');
-    parts.push(`**Outcomes & Decisions:**\n${outcomeLines}`);
-  }
-
-  if (data.agent_actions.length > 0) {
-    const actionLines = data.agent_actions.map((a) => `- ${a}`).join('\n');
-    parts.push(`**Agent Actions:**\n${actionLines}`);
-  }
-
-  if (data.unanswered_questions.length > 0) {
-    const questionLines = data.unanswered_questions.map((q) => `- ${q}`).join('\n');
-    parts.push(`**Unanswered Questions:**\n${questionLines}`);
-  }
-
-  return parts.join('\n\n');
-};
 
 // ---------------------------------------------------------------------------
 // Programmatic extraction helpers
@@ -139,7 +112,7 @@ const summarizeParams = (params: Record<string, unknown>): string => {
  * structured output so new entity types can be added without code changes.
  */
 export const extractProgrammaticSummary = (
-  rounds: ProcessedConversationRound[]
+  rounds: Array<{ steps: ConversationRoundStep[] }>
 ): {
   tool_calls_summary: CompactionToolCallSummary[];
   agent_actions: string[];
@@ -183,16 +156,27 @@ export const compactConversation = async ({
   processedConversation,
   chatModel,
   contextBudget,
+  perRoundTokenCounts,
+  failedEntryTokenCounts = new Map<string, number>(),
   existingSummary,
   logger,
   abortSignal,
   eventEmitter,
 }: CompactConversationOptions): Promise<CompactedConversation> => {
-  const { previousRounds } = processedConversation;
+  /** Failed-entry tokens surviving a cut at round `start` of the given timeline. */
+  const failedTokens = (timeline: ProcessedTimelineEvent[], start: number): number =>
+    survivingFailedEntryTokens(timeline, start, failedEntryTokenCounts);
 
   // Under threshold: apply existing summary if present (so the LLM sees
   // the compacted view) but don't report a new compaction event.
-  if (!shouldTriggerCompaction(previousRounds, contextBudget, existingSummary)) {
+  if (
+    !shouldTriggerCompaction(
+      perRoundTokenCounts,
+      contextBudget,
+      existingSummary,
+      failedTokens(processedConversation.timeline, existingSummary?.summarized_round_count ?? 0)
+    )
+  ) {
     if (existingSummary) {
       const compacted = applyExistingSummary(processedConversation, existingSummary);
       return {
@@ -204,10 +188,12 @@ export const compactConversation = async ({
     return { processedConversation, compactionTriggered: false };
   }
 
-  const rawTokens = estimateConversationTokens(previousRounds);
+  const rawTokens =
+    sumTokens(perRoundTokenCounts) + failedTokens(processedConversation.timeline, 0);
   const effectiveTokens = existingSummary
     ? existingSummary.token_count +
-      estimateConversationTokens(previousRounds.slice(existingSummary.summarized_round_count))
+      sumTokens(perRoundTokenCounts.slice(existingSummary.summarized_round_count)) +
+      failedTokens(processedConversation.timeline, existingSummary.summarized_round_count)
     : rawTokens;
   logger.info(
     `Compaction triggered: ${effectiveTokens} effective tokens (${rawTokens} raw) exceeds threshold of ${contextBudget.triggerThreshold}`
@@ -230,9 +216,13 @@ export const compactConversation = async ({
   );
 
   if (summarizationResult.summary) {
+    // Remaining rounds are the suffix after the summarized prefix, so their counts
+    // are perRoundTokenCounts sliced at summarized_round_count; the summarized timeline is
+    // already sliced, so its surviving failed entries are counted from its start.
     const afterTokens =
-      estimateConversationTokens(summarizationResult.processedConversation.previousRounds) +
-      summarizationResult.summary.token_count;
+      sumTokens(perRoundTokenCounts.slice(summarizationResult.summary.summarized_round_count)) +
+      summarizationResult.summary.token_count +
+      failedTokens(summarizationResult.processedConversation.timeline, 0);
     if (afterTokens <= contextBudget.historyBudget) {
       logger.debug(
         `Summarization sufficient: ${afterTokens} tokens (budget: ${contextBudget.historyBudget})`
@@ -256,12 +246,19 @@ export const compactConversation = async ({
     }
   }
 
-  // Hard truncation fallback
-  const truncated = applyHardTruncation(summarizationResult.processedConversation, contextBudget);
+  // Hard truncation fallback. When summarization produced a summary only the recent
+  // (suffix) rounds remain, so truncate over their counts; otherwise the full set.
+  const postSummaryCounts = summarizationResult.summary
+    ? perRoundTokenCounts.slice(summarizationResult.summary.summarized_round_count)
+    : perRoundTokenCounts;
+  const truncation = applyHardTruncation(
+    summarizationResult.processedConversation,
+    postSummaryCounts,
+    contextBudget,
+    failedEntryTokenCounts
+  );
   // Account for the summary tokens (if present) so the reported total is accurate.
-  const truncatedTokens =
-    estimateConversationTokens(truncated.previousRounds) +
-    (summarizationResult.summary?.token_count ?? 0);
+  const truncatedTokens = truncation.tokens + (summarizationResult.summary?.token_count ?? 0);
   logger.debug('Applied hard truncation fallback');
 
   eventEmitter?.({
@@ -273,7 +270,7 @@ export const compactConversation = async ({
   });
 
   return {
-    processedConversation: truncated,
+    processedConversation: truncation.conversation,
     summary: summarizationResult.summary,
     compactionTriggered: true,
     tokensBefore: rawTokens,
@@ -281,6 +278,8 @@ export const compactConversation = async ({
     summarizedRoundCount: summarizationResult.summary?.summarized_round_count ?? 0,
   };
 };
+
+const sumTokens = (counts: number[]): number => counts.reduce((total, count) => total + count, 0);
 
 // ---------------------------------------------------------------------------
 // Internal helpers
@@ -292,7 +291,7 @@ const applyExistingSummary = (
 ): ProcessedConversation => {
   return {
     ...conversation,
-    previousRounds: conversation.previousRounds.slice(summary.summarized_round_count),
+    timeline: sliceTimelineRounds(conversation.timeline, summary.summarized_round_count),
     compactionSummary: summary,
   };
 };
@@ -315,15 +314,15 @@ const summarizeOlderRounds = async (
   existingSummary?: CompactionSummary,
   abortSignal?: AbortSignal
 ): Promise<{ processedConversation: ProcessedConversation; summary?: CompactionSummary }> => {
-  const { previousRounds } = conversation;
+  const previousRounds = groupTimelineRounds(conversation.timeline);
   const preserveCount = Math.min(PRESERVED_RECENT_ROUNDS, previousRounds.length);
 
   if (previousRounds.length <= preserveCount) {
     return { processedConversation: conversation };
   }
 
-  const roundsToSummarize = previousRounds.slice(0, previousRounds.length - preserveCount);
-  const recentRounds = previousRounds.slice(previousRounds.length - preserveCount);
+  const summarizeCount = previousRounds.length - preserveCount;
+  const roundsToSummarize = previousRounds.slice(0, summarizeCount);
 
   // Phase 1: programmatic extraction from all older rounds (deterministic, not expensive)
   const programmatic = extractProgrammaticSummary(roundsToSummarize);
@@ -360,7 +359,7 @@ const summarizeOlderRounds = async (
     return {
       processedConversation: {
         ...conversation,
-        previousRounds: recentRounds,
+        timeline: sliceTimelineRounds(conversation.timeline, summarizeCount),
         compactionSummary: summary,
       },
       summary,
@@ -378,12 +377,12 @@ const summarizeOlderRounds = async (
  *
  * When an existing summary is provided, only the rounds beyond its coverage
  * are sent as raw history. The existing summary is injected as a prior context
- * block via convertPreviousRounds so the LLM can build on it without
+ * block via prepareMessages so the LLM can build on it without
  * re-processing already-summarized rounds.
  */
 const generateLlmSummary = async (
   conversation: ProcessedConversation,
-  roundsToSummarize: ProcessedConversationRound[],
+  roundsToSummarize: Array<TimelineRound<ProcessedConversation['timeline'][number]>>,
   programmatic: {
     tool_calls_summary: CompactionToolCallSummary[];
     agent_actions: string[];
@@ -396,14 +395,12 @@ const generateLlmSummary = async (
   // This avoids re-processing stale rounds and prevents the summarizer call
   // from overflowing the context window on second+ compactions.
   const alreadySummarizedCount = existingSummary?.summarized_round_count ?? 0;
-  const newRounds = roundsToSummarize.slice(alreadySummarizedCount);
-
   const tempConversation: ProcessedConversation = {
     ...conversation,
-    previousRounds: newRounds,
+    timeline: roundsToSummarize.slice(alreadySummarizedCount).flatMap((round) => round.events),
   };
 
-  const historyMessages = await convertPreviousRounds({
+  const historyMessages = await prepareMessages({
     conversation: tempConversation,
     compactionSummary: existingSummary,
   });
@@ -431,31 +428,50 @@ const generateLlmSummary = async (
 };
 
 /**
- * Drop oldest rounds one by one until the conversation
- * fits within the history budget. Always preserves at least
- * the most recent rounds.
+ * Drop oldest rounds one by one until the conversation fits within the history budget, always
+ * preserving at least the most recent rounds. `perRoundCounts` is index-aligned with the
+ * timeline's rounds. Failed entries surviving each cut are counted too; if the prompt still
+ * exceeds the budget at the preserved-rounds floor, failed entries are dropped oldest-first
+ * (whole bundles, never summarised) until it fits or none remain.
  */
 const applyHardTruncation = (
   conversation: ProcessedConversation,
-  budget: ContextBudget
-): ProcessedConversation => {
-  const { previousRounds } = conversation;
-  let currentTokens = estimateConversationTokens(previousRounds);
+  perRoundCounts: number[],
+  budget: ContextBudget,
+  failedEntryTokenCounts: Map<string, number>
+): { conversation: ProcessedConversation; tokens: number } => {
+  const roundTokensFrom = (start: number) => sumTokens(perRoundCounts.slice(start));
+  const totalAt = (start: number) =>
+    roundTokensFrom(start) +
+    survivingFailedEntryTokens(conversation.timeline, start, failedEntryTokenCounts);
 
+  let currentTokens = totalAt(0);
   if (currentTokens <= budget.historyBudget) {
-    return conversation;
+    return { conversation, tokens: currentTokens };
   }
 
-  const minStart = previousRounds.length - PRESERVED_RECENT_ROUNDS;
+  const minStart = groupTimelineRounds(conversation.timeline).length - PRESERVED_RECENT_ROUNDS;
   let start = 0;
-
   while (start < minStart && currentTokens > budget.historyBudget) {
-    currentTokens -= estimateRoundTokens(previousRounds[start]);
     start++;
+    currentTokens = totalAt(start);
   }
 
-  return {
-    ...conversation,
-    previousRounds: previousRounds.slice(start),
-  };
+  let timeline = sliceTimelineRounds(conversation.timeline, start);
+  if (currentTokens > budget.historyBudget) {
+    // At the floor: shed failed entries, oldest first, until the prompt fits.
+    const failed = groupTimelineFailedExecutions(timeline).sort((left, right) =>
+      left.userMessage.created_at.localeCompare(right.userMessage.created_at)
+    );
+    for (const entry of failed) {
+      if (currentTokens <= budget.historyBudget) {
+        break;
+      }
+      const dropped = new Set(entry.events.map((event) => event.id));
+      timeline = timeline.filter((event) => !dropped.has(event.id));
+      currentTokens -= failedEntryTokenCounts.get(entry.userMessage.id) ?? 0;
+    }
+  }
+
+  return { conversation: { ...conversation, timeline }, tokens: currentTokens };
 };

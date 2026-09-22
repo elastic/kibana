@@ -1,0 +1,317 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useState, useCallback, useEffect, useRef } from 'react';
+import {
+  EuiAccordion,
+  EuiButton,
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiLink,
+  EuiSkeletonText,
+  EuiSpacer,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnDangerCallout, KbnSuccessCallout } from '@kbn/ui-callout';
+
+import type { CloudSetupForCloudConnector } from '../types';
+
+import type { AccountType } from '../../../types';
+import type {
+  IacPolicyTemplateSelection,
+  RenderIacTemplateIntegration,
+} from '../../../../common/types/rest_spec/iac_provisioner';
+import {
+  CLOUD_CONNECTOR_TEMPLATE_GENERATION_ERROR_CALLOUT_TEST_SUBJ,
+  CLOUD_CONNECTOR_TEMPLATE_UP_TO_DATE_CALLOUT_TEST_SUBJ,
+} from '../../../../common/services/cloud_connectors/test_subjects';
+import { useGetCloudConnectors } from '../hooks/use_get_cloud_connectors';
+import { CloudConnectorTabs, type CloudConnectorTab } from '../cloud_connector_tabs';
+import { CloudConnectorSelector } from '../form/cloud_connector_selector';
+import { CloudConnectorNameField } from '../form/cloud_connector_name_field';
+import { CloudFormationCloudCredentialsGuide } from '../aws_cloud_connector/aws_cloud_formation_guide';
+import { getCloudConnectorNameError } from '../utils';
+import { TABS } from '../constants';
+import { useCreateCloudConnector } from '../hooks/use_create_cloud_connector';
+import { useCloudConnectorTemplate } from '../hooks/use_cloud_connector_template';
+import { hasPendingIacConfirm } from '../../../hooks/use_request/pending_cloud_connector_iac';
+
+export interface AwsIdentityFederationSetupProps {
+  accountType?: AccountType;
+  packageName?: string;
+  policyTemplates?: IacPolicyTemplateSelection[];
+  /** Multi-package render payload; takes precedence over packageName + policyTemplates. */
+  integrations?: RenderIacTemplateIntegration[];
+  cloud?: CloudSetupForCloudConnector;
+  iacTemplateUrl?: string;
+  hasInvalidRequiredVars?: boolean;
+  isEditPage?: boolean;
+  initialConnectorId?: string;
+  onReadyChange?: (isReady: boolean) => void;
+  onConnectorIdChange?: (connectorId: string | undefined, connectorName?: string) => void;
+}
+
+export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProps> = ({
+  accountType = 'single-account',
+  packageName,
+  policyTemplates,
+  integrations,
+  cloud,
+  iacTemplateUrl,
+  hasInvalidRequiredVars = false,
+  isEditPage = false,
+  initialConnectorId,
+  onReadyChange,
+  onConnectorIdChange,
+}) => {
+  const { data: cloudConnectors = [], isLoading: isLoadingConnectors } = useGetCloudConnectors({
+    cloudProvider: 'aws',
+    accountType,
+    packageName,
+  });
+
+  const [selectedTabId, setSelectedTabId] = useState<string>(TABS.NEW_CONNECTION);
+  const [roleArn, setRoleArn] = useState('');
+  const [connectorName, setConnectorName] = useState('');
+  const [selected, setSelected] = useState<{ id: string; name?: string } | undefined>(
+    initialConnectorId ? { id: initialConnectorId } : undefined
+  );
+
+  const hasSetInitialTab = useRef(false);
+  useEffect(() => {
+    if (hasSetInitialTab.current) return;
+    if (isEditPage) {
+      setSelectedTabId(TABS.EXISTING_CONNECTION);
+      hasSetInitialTab.current = true;
+    } else if (cloudConnectors.length > 0) {
+      setSelectedTabId(TABS.EXISTING_CONNECTION);
+      hasSetInitialTab.current = true;
+    }
+  }, [cloudConnectors.length, isEditPage]);
+
+  // When opening an edit page with an initialConnectorId the name isn't available yet — resolve
+  // it from the connector list once loaded, without overwriting a name already set by a user action.
+  useEffect(() => {
+    if (!selected?.id || selected.name) return;
+    const match = cloudConnectors.find((c) => c.id === selected.id);
+    if (match) setSelected({ id: match.id, name: match.name });
+  }, [cloudConnectors, selected]);
+
+  // A selection made in this component always carries its name, so an id without a name can only
+  // be the initialConnectorId seed whose name is still being resolved above. Hold the emission
+  // until it lands, otherwise consumers persist an id with no name and render an empty summary.
+  const isAwaitingInitialName = !!selected?.id && !selected.name && isLoadingConnectors;
+
+  useEffect(() => {
+    onReadyChange?.(!!selected?.id);
+    if (isAwaitingInitialName) return;
+    onConnectorIdChange?.(selected?.id, selected?.name);
+  }, [selected, isAwaitingInitialName, onReadyChange, onConnectorIdChange]);
+
+  const {
+    launchButtonProps,
+    isDisabled: isLaunchDisabled,
+    isGeneratingTemplate,
+    templateGenerationError,
+    templateAlreadyCurrent,
+    iacConfirm,
+  } = useCloudConnectorTemplate({
+    cloud,
+    accountType: accountType || 'single-account',
+    iacTemplateUrl,
+    packageName,
+    policyTemplates,
+    integrations,
+  });
+
+  const { mutate: createConnector, isLoading: isCreating } = useCreateCloudConnector(
+    (connector) => {
+      setSelected({ id: connector.id, name: connector.name });
+      setSelectedTabId(TABS.EXISTING_CONNECTION);
+      setRoleArn('');
+      setConnectorName('');
+    }
+  );
+
+  const handleCreate = useCallback(() => {
+    createConnector({
+      name: connectorName,
+      cloudProvider: 'aws',
+      accountType,
+      vars: {
+        role_arn: { value: roleArn, type: 'text' },
+      },
+      ...(hasPendingIacConfirm(iacConfirm) ? iacConfirm : {}),
+    });
+  }, [createConnector, connectorName, accountType, roleArn, iacConfirm]);
+
+  const roleArnInvalid = hasInvalidRequiredVars && !roleArn;
+  const isCreateDisabled = !roleArn || !!getCloudConnectorNameError(connectorName);
+
+  if (isLoadingConnectors) {
+    return <EuiSkeletonText lines={4} data-test-subj="awsIdentityFederationSetup-loading" />;
+  }
+
+  const handleTabClick = (tab: { id: string }) => {
+    setSelectedTabId(tab.id);
+    if (tab.id === TABS.NEW_CONNECTION) {
+      setSelected(undefined);
+    }
+  };
+
+  const tabs: CloudConnectorTab[] = [
+    {
+      id: TABS.NEW_CONNECTION,
+      name: (
+        <FormattedMessage
+          id="xpack.fleet.awsIdentityFederationSetup.newIdentityTab"
+          defaultMessage="New Identity"
+        />
+      ),
+      content: (
+        <>
+          <EuiSpacer size="m" />
+          <CloudConnectorNameField
+            value={connectorName}
+            onChange={(name) => setConnectorName(name)}
+            data-test-subj="awsIdentityFederationSetup-connectorName"
+          />
+          <EuiSpacer size="m" />
+          <EuiAccordion
+            id="awsIdentityFederationGuide"
+            buttonContent={
+              <EuiLink>
+                <FormattedMessage
+                  id="xpack.fleet.awsIdentityFederationSetup.stepsToAssumeRole"
+                  defaultMessage="Steps to assume role"
+                />
+              </EuiLink>
+            }
+            paddingSize="l"
+          >
+            <CloudFormationCloudCredentialsGuide accountType={accountType} />
+          </EuiAccordion>
+          <EuiSpacer size="l" />
+          <EuiButton
+            iconSide="left"
+            iconType="rocket"
+            isLoading={isGeneratingTemplate}
+            isDisabled={isLaunchDisabled}
+            onClick={'onClick' in launchButtonProps ? launchButtonProps.onClick : undefined}
+            href={'href' in launchButtonProps ? launchButtonProps.href : undefined}
+            target={'target' in launchButtonProps ? launchButtonProps.target : undefined}
+            data-test-subj="awsIdentityFederationSetup-launchCloudFormation"
+          >
+            <FormattedMessage
+              id="xpack.fleet.awsIdentityFederationSetup.launchCloudFormation"
+              defaultMessage="Launch CloudFormation"
+            />
+          </EuiButton>
+          {templateGenerationError && (
+            <>
+              <EuiSpacer size="m" />
+              <KbnDangerCallout
+                announceOnMount
+                data-test-subj={CLOUD_CONNECTOR_TEMPLATE_GENERATION_ERROR_CALLOUT_TEST_SUBJ}
+                title={templateGenerationError}
+                size="s"
+              />
+            </>
+          )}
+          {templateAlreadyCurrent && (
+            <>
+              <EuiSpacer size="m" />
+              <KbnSuccessCallout
+                announceOnMount
+                data-test-subj={CLOUD_CONNECTOR_TEMPLATE_UP_TO_DATE_CALLOUT_TEST_SUBJ}
+                title={templateAlreadyCurrent}
+                size="s"
+              />
+            </>
+          )}
+          <EuiSpacer size="m" />
+          <EuiFormRow
+            label={i18n.translate('xpack.fleet.awsIdentityFederationSetup.roleArnLabel', {
+              defaultMessage: 'Role ARN',
+            })}
+            isInvalid={roleArnInvalid}
+            error={
+              roleArnInvalid
+                ? i18n.translate('xpack.fleet.awsIdentityFederationSetup.roleArnRequired', {
+                    defaultMessage: 'Role ARN is required',
+                  })
+                : undefined
+            }
+            fullWidth
+          >
+            <EuiFieldText
+              fullWidth
+              value={roleArn}
+              isInvalid={roleArnInvalid}
+              onChange={(e) => setRoleArn(e.target.value)}
+              data-test-subj="awsIdentityFederationSetup-roleArn"
+            />
+          </EuiFormRow>
+          <EuiSpacer size="l" />
+          <EuiFlexGroup justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                isLoading={isCreating}
+                isDisabled={isCreateDisabled}
+                onClick={handleCreate}
+                data-test-subj="awsIdentityFederationSetup-createButton"
+              >
+                <FormattedMessage
+                  id="xpack.fleet.awsIdentityFederationSetup.createButton"
+                  defaultMessage="Create Identity"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      ),
+    },
+    {
+      id: TABS.EXISTING_CONNECTION,
+      name: (
+        <FormattedMessage
+          id="xpack.fleet.awsIdentityFederationSetup.existingIdentityTab"
+          defaultMessage="Existing Identity"
+        />
+      ),
+      content: (
+        <CloudConnectorSelector
+          provider="aws"
+          cloudConnectorId={selected?.id}
+          credentials={selected?.id ? { cloudConnectorId: selected.id } : {}}
+          setCredentials={(creds) => {
+            if (creds.cloudConnectorId) {
+              setSelected({ id: creds.cloudConnectorId, name: creds.name });
+            }
+          }}
+          accountType={accountType}
+          packageName={packageName}
+        />
+      ),
+    },
+  ];
+
+  return (
+    <CloudConnectorTabs
+      tabs={tabs}
+      selectedTabId={selectedTabId}
+      onTabClick={handleTabClick}
+      isEditPage={isEditPage}
+      cloudProvider="aws"
+      cloudConnectorsCount={cloudConnectors.length}
+    />
+  );
+};

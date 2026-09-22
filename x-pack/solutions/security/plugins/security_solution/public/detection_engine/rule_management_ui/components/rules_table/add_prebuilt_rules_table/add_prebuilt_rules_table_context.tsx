@@ -27,7 +27,7 @@ import * as i18n from './translations';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { RULES_TABLE_INITIAL_PAGE_SIZE } from '../constants';
 import type { PaginationOptions } from '../../../../rule_management/logic';
-import type { PrebuiltRuleAssetsSortItem } from '../../../../../../common/api/detection_engine/prebuilt_rules/common/prebuilt_rule_assets_sort';
+import type { PrebuiltRuleAssetsSortItem } from '../../../../../../common/api/detection_engine/prebuilt_rules/review_rule_installation/review_rule_installation_route.gen';
 
 export interface AddPrebuiltRulesTableState {
   /**

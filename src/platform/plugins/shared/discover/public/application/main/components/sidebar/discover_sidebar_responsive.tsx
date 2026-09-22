@@ -11,7 +11,13 @@ import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } 
 import type { UiCounterMetricType } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexItem, EuiHideFor, useEuiTheme } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHideFor,
+  useEuiTheme,
+  useIsWithinBreakpoints,
+} from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 import type { BehaviorSubject } from 'rxjs';
 import { of } from 'rxjs';
@@ -42,6 +48,7 @@ import { useDiscoverCustomization } from '../../../../customizations';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import {
   internalStateActions,
+  useAppStateSelector,
   useCurrentTabAction,
   useCurrentTabSelector,
   useDataViewsForPicker,
@@ -362,6 +369,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     [onRemoveField]
   );
 
+  const isMobile = useIsWithinBreakpoints(['xs', 's']);
   const isSidebarCollapsed = useObservable(
     unifiedFieldListSidebarContainerApi?.sidebarVisibility.isCollapsed$ ?? of(false),
     false
@@ -375,6 +383,15 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   }, [isSidebarCollapsed, unifiedFieldListSidebarContainerApi, sidebarToggleState$]);
 
   const dispatch = useInternalStateDispatch();
+  const hideSidebar = useAppStateSelector((state) => state.hideSidebar ?? false);
+
+  useEffect(() => {
+    const visibility = unifiedFieldListSidebarContainerApi?.sidebarVisibility;
+    if (visibility && visibility.isCollapsed$.getValue() !== hideSidebar) {
+      visibility.toggle(hideSidebar, false);
+    }
+  }, [hideSidebar, unifiedFieldListSidebarContainerApi]);
+
   const fieldListUiState = useCurrentTabSelector((state) => state.uiState.fieldList);
   const setFieldListUiState = useCurrentTabAction(internalStateActions.setFieldListUiState);
   const onInitialStateChange = useCallback(
@@ -410,7 +427,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       gutterSize="none"
       css={css`
         height: 100%;
-        display: ${isSidebarCollapsed ? 'none' : 'flex'};
+        display: ${isSidebarCollapsed && !isMobile ? 'none' : 'flex'};
         // Make Discover's field list background distinguished for the "new chrome"
         background-color: ${chromeStyle === 'project'
           ? euiTheme.colors.backgroundBasePlain

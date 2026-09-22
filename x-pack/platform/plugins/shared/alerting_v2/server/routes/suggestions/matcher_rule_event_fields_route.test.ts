@@ -1,0 +1,62 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import type { MatcherSuggestionsService } from '../../lib/services/matcher_suggestions_service/matcher_suggestions_service';
+import { createRouteDependencies } from '../test_utils';
+import { MatcherRuleEventFieldsRoute } from './matcher_rule_event_fields_route';
+
+const createSuggestionsService = (): jest.Mocked<MatcherSuggestionsService> =>
+  ({
+    getRuleEventFieldNames: jest.fn(),
+    getSuggestions: jest.fn(),
+  } as unknown as jest.Mocked<MatcherSuggestionsService>);
+
+describe('MatcherRuleEventFieldsRoute', () => {
+  it('calls getDataFieldNames with undefined when no matcher query param is provided', async () => {
+    const { ctx } = createRouteDependencies();
+    const request = httpServerMock.createKibanaRequest({ query: {} });
+    const suggestionsService = createSuggestionsService();
+    suggestionsService.getRuleEventFieldNames.mockResolvedValue(['data.host.name']);
+
+    const route = new MatcherRuleEventFieldsRoute(ctx, request, suggestionsService);
+
+    await route.handle();
+
+    expect(suggestionsService.getRuleEventFieldNames).toHaveBeenCalledWith(undefined);
+    expect(ctx.response.ok).toHaveBeenCalledWith({ body: ['data.host.name'] });
+  });
+
+  it('forwards the matcher query param to getDataFieldNames', async () => {
+    const { ctx } = createRouteDependencies();
+    const request = httpServerMock.createKibanaRequest({
+      query: { matcher: 'episode_id: "abc"' },
+    });
+    const suggestionsService = createSuggestionsService();
+    suggestionsService.getRuleEventFieldNames.mockResolvedValue([]);
+
+    const route = new MatcherRuleEventFieldsRoute(ctx, request, suggestionsService);
+
+    await route.handle();
+
+    expect(suggestionsService.getRuleEventFieldNames).toHaveBeenCalledWith('episode_id: "abc"');
+    expect(ctx.response.ok).toHaveBeenCalledWith({ body: [] });
+  });
+
+  it('returns customError when the service throws', async () => {
+    const { ctx } = createRouteDependencies();
+    const request = httpServerMock.createKibanaRequest({ query: {} });
+    const suggestionsService = createSuggestionsService();
+    suggestionsService.getRuleEventFieldNames.mockRejectedValue(new Error('boom'));
+
+    const route = new MatcherRuleEventFieldsRoute(ctx, request, suggestionsService);
+
+    await route.handle();
+
+    expect(ctx.response.customError).toHaveBeenCalledTimes(1);
+  });
+});

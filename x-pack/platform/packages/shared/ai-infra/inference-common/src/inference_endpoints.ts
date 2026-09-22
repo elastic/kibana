@@ -6,6 +6,25 @@
  */
 
 /**
+ * Version of the internal inference endpoint HTTP API (`/internal/_inference/*`).
+ */
+export const INFERENCE_ENDPOINT_INTERNAL_API_VERSION = '1';
+
+export interface InferenceEndpointRequestBody {
+  config: {
+    inferenceId: string;
+    provider: string;
+    taskType: string;
+    providerConfig?: Record<string, unknown>;
+    taskTypeConfig?: Record<string, unknown>;
+    headers?: Record<string, string>;
+  };
+  secrets: {
+    providerSecrets?: Record<string, unknown>;
+  };
+}
+
+/**
  * Constants for all default (preconfigured) inference endpoints.
  */
 export const defaultInferenceEndpoints = {
@@ -15,6 +34,8 @@ export const defaultInferenceEndpoints = {
   MULTILINGUAL_E5_SMALL: '.multilingual-e5-small-elasticsearch',
   KIBANA_DEFAULT_CHAT_COMPLETION: '.anthropic-claude-4.6-sonnet-chat_completion',
   OPENAI_GPT_5_2: '.openai-gpt-5.2-chat_completion',
+  OPENAI_GPT_5_4: '.openai-gpt-5.4-chat_completion',
+  OPENAI_GPT_OSS_120B: '.openai-gpt-oss-120b-chat_completion',
   ANTHROPIC_CLAUDE_4_6_OPUS: '.anthropic-claude-4.6-opus-chat_completion',
   ANTHROPIC_CLAUDE_4_6_SONNET: '.anthropic-claude-4.6-sonnet-chat_completion',
 } as const;
@@ -39,6 +60,21 @@ export const elasticModelIds = {
   RainbowSprinkles: 'rainbow-sprinkles',
 } as const;
 
+export interface CspRegion {
+  csp: string;
+  region: string;
+  geo?: string;
+  region_display_name?: string;
+}
+
+/** A region entry that carries only a geographic zone with no CSP/region detail. */
+export interface GeoOnlyRegion {
+  geo: string;
+}
+
+/** Union of all region entry shapes returned by the EIS metadata.regions field. */
+export type EisRegion = CspRegion | GeoOnlyRegion;
+
 export type EisInferenceEndpointMetadata = {
   heuristics?: {
     properties?: string[];
@@ -50,4 +86,6 @@ export type EisInferenceEndpointMetadata = {
     name?: string;
     model_creator?: string;
   } & Record<string, unknown>;
+  regions?: EisRegion[];
+  denied_by_region_policy?: boolean;
 } & Record<string, unknown>;

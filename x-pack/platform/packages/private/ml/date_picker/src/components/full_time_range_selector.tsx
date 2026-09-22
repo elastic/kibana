@@ -64,6 +64,10 @@ export interface FullTimeRangeSelectorProps {
    */
   query?: QueryDslQueryContainer;
   /**
+   * Optional project routing to use for resolving the full time range.
+   */
+  projectRouting?: string;
+  /**
    * Optional callback.
    * @param value - The time field range response.
    */
@@ -90,6 +94,7 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
     timefilter,
     dataView,
     query,
+    projectRouting: projectRoutingProp,
     disabled,
     callback,
     apiPath,
@@ -105,7 +110,7 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
   // wrapper around setFullTimeRange to allow for the calling of the optional callBack prop
   const setRange = useCallback(async () => {
     try {
-      const projectRouting = cps?.cpsManager?.getProjectRouting();
+      const projectRouting = projectRoutingProp ?? cps?.cpsManager?.getProjectRouting();
       const fullTimeRange = await setFullTimeRange(
         timefilter,
         dataView,
@@ -138,6 +143,7 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
     toasts,
     http,
     query,
+    projectRoutingProp,
     showFrozenDataTierChoice,
     frozenDataPreference,
     apiPath,
@@ -224,6 +230,11 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
     }
   }, [frozenDataPreference, showFrozenDataTierChoice]);
 
+  const moreOptionsLabel = i18n.translate(
+    'xpack.ml.datePicker.fullTimeRangeSelector.moreOptionsButtonAriaLabel',
+    { defaultMessage: 'More options' }
+  );
+
   return (
     <EuiFlexGroup responsive={false} gutterSize="s">
       <EuiToolTip content={buttonTooltip}>
@@ -249,19 +260,16 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
               }
             )}
             button={
-              <EuiButtonIcon
-                data-test-subj="mlDatePickerButtonDataTierOptions"
-                display="base"
-                size="m"
-                iconType="boxesVertical"
-                aria-label={i18n.translate(
-                  'xpack.ml.datePicker.fullTimeRangeSelector.moreOptionsButtonAriaLabel',
-                  {
-                    defaultMessage: 'More options',
-                  }
-                )}
-                onClick={onButtonClick}
-              />
+              <EuiToolTip content={moreOptionsLabel} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  data-test-subj="mlDatePickerButtonDataTierOptions"
+                  display="base"
+                  size="m"
+                  iconType="boxesVertical"
+                  aria-label={moreOptionsLabel}
+                  onClick={onButtonClick}
+                />
+              </EuiToolTip>
             }
             isOpen={isPopoverOpen}
             closePopover={closePopover}

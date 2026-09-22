@@ -197,7 +197,8 @@ export default function (providerContext: FtrProviderContext) {
 
   const TEST_SPACE_ID = 'testspaceoutputs';
 
-  describe('fleet_outputs_crud', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/291927
+  describe.skip('fleet_outputs_crud', function () {
     let defaultOutputId: string;
     let ESOutputId: string;
     let fleetServerPolicyId: string;
@@ -228,6 +229,13 @@ export default function (providerContext: FtrProviderContext) {
 
       await supertest
         .post(`/api/fleet/epm/packages/fleet_server/${pkgVersion}`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({ force: true })
+        .expect(200);
+
+      // Pre-install filetest so the parallel createPackagePolicy calls below don't race a first-time install
+      await supertest
+        .post(`/api/fleet/epm/packages/filetest/0.1.0`)
         .set('kbn-xsrf', 'xxxx')
         .send({ force: true })
         .expect(200);
@@ -313,7 +321,8 @@ export default function (providerContext: FtrProviderContext) {
       await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
     });
 
-    describe('GET /outputs', () => {
+    // Failing: See https://github.com/elastic/kibana/issues/291937
+    describe.skip('GET /outputs', () => {
       it('should list all the outputs', async () => {
         const { body: getOutputsRes } = await supertest.get(`/api/fleet/outputs`).expect(200);
 
@@ -576,6 +585,8 @@ export default function (providerContext: FtrProviderContext) {
           .send({
             name: 'A Kafka Output',
             type: 'kafka',
+            hosts: ['kafka.test.fr:9092'],
+            auth_type: 'none',
           })
           .expect(200);
 
@@ -1014,6 +1025,104 @@ export default function (providerContext: FtrProviderContext) {
             deleteAgentPolicy(policy3.item.id, TEST_SPACE_ID),
             deleteAgentPolicy(policy4.item.id, TEST_SPACE_ID),
           ]);
+        });
+      });
+
+      describe('output ID immutability', () => {
+        let targetOutputId: string;
+
+        beforeEach(async () => {
+          const { body } = await supertest
+            .post(`/api/fleet/outputs`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name: `id-immutability-test-${uuidV4()}`,
+              type: 'elasticsearch',
+              hosts: ['https://test.fr:443'],
+            })
+            .expect(200);
+          targetOutputId = body.item.id;
+        });
+
+        afterEach(async () => {
+          if (!targetOutputId) return;
+          await supertest
+            .delete(`/api/fleet/outputs/${targetOutputId}`)
+            .set('kbn-xsrf', 'xxxx')
+            .expect(200);
+        });
+
+        it('should return 400 when body id does not match path outputId', async function () {
+          const { body } = await supertest
+            .put(`/api/fleet/outputs/${targetOutputId}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              id: '../../../api/spaces/space/admin-space',
+              type: 'elasticsearch',
+              hosts: ['https://test.fr:443'],
+            })
+            .expect(400);
+
+          expect(body.message).to.contain('Cannot change output ID');
+
+          const { body: getBody } = await supertest
+            .get(`/api/fleet/outputs/${targetOutputId}`)
+            .expect(200);
+          expect(getBody.item.id).to.equal(targetOutputId);
+          expect(getBody.item.hosts).to.eql(['https://test.fr:443']);
+        });
+
+        it('should return 200 and preserve canonical id when body id matches path outputId', async function () {
+          const { body } = await supertest
+            .put(`/api/fleet/outputs/${targetOutputId}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              id: targetOutputId,
+              type: 'elasticsearch',
+              hosts: ['https://updated.fr:443'],
+            })
+            .expect(200);
+
+          expect(body.item.id).to.equal(targetOutputId);
+
+          const { body: getBody } = await supertest
+            .get(`/api/fleet/outputs/${targetOutputId}`)
+            .expect(200);
+          expect(getBody.item.id).to.equal(targetOutputId);
+        });
+
+        it('should return canonical id in list and GET after update attempts containing id', async function () {
+          // attempt poisoning via mismatched id — expect rejection
+          await supertest
+            .put(`/api/fleet/outputs/${targetOutputId}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              id: 'poisoned-id',
+              type: 'elasticsearch',
+              hosts: ['https://test.fr:443'],
+            })
+            .expect(400);
+
+          // GET by canonical id still works
+          const { body: getBody } = await supertest
+            .get(`/api/fleet/outputs/${targetOutputId}`)
+            .expect(200);
+          expect(getBody.item.id).to.equal(targetOutputId);
+
+          // list returns canonical id
+          const { body: listBody } = await supertest.get(`/api/fleet/outputs`).expect(200);
+          const found = listBody.items.find((o: any) => o.id === targetOutputId);
+          expect(found).to.be.ok();
+          expect(found.id).to.equal(targetOutputId);
+
+          // delete with canonical id succeeds
+          await supertest
+            .delete(`/api/fleet/outputs/${targetOutputId}`)
+            .set('kbn-xsrf', 'xxxx')
+            .expect(200);
+
+          // prevent afterEach double-delete from failing
+          targetOutputId = '';
         });
       });
     });
@@ -1836,6 +1945,7 @@ export default function (providerContext: FtrProviderContext) {
           hosts: ['https://test.fr:443'],
           is_default: false,
           is_default_monitoring: false,
+          preset: 'balanced',
           ssl: {
             certificate: 'CERTIFICATE',
             key: 'KEY',

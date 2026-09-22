@@ -5,21 +5,31 @@
  * 2.0.
  */
 
+import type { KbnClient } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
-import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
 import { test, testData } from '../fixtures';
+
+const { DYNAMIC_SETTINGS_DEFAULTS } = testData;
+
+const resetUptimeSettings = async (kbnClient: KbnClient) => {
+  await kbnClient
+    .request({
+      method: 'PUT',
+      path: '/api/uptime/settings',
+      body: DYNAMIC_SETTINGS_DEFAULTS,
+    })
+    .catch(() => {});
+};
 
 test.describe('Uptime settings page', { tag: ['@local-stateful-classic'] }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects, kbnClient }) => {
     await browserAuth.loginAsPrivilegedUser();
-    await kbnClient
-      .request({
-        method: 'PUT',
-        path: '/api/uptime/settings',
-        body: DYNAMIC_SETTINGS_DEFAULTS,
-      })
-      .catch(() => {});
+    await resetUptimeSettings(kbnClient);
     await pageObjects.uptimeApp.navigateToOverview(testData.DEFAULT_NAVIGATION_SEARCH);
+  });
+
+  test.afterEach(async ({ kbnClient }) => {
+    await resetUptimeSettings(kbnClient);
   });
 
   test('changing index pattern setting is reflected elsewhere in UI', async ({ pageObjects }) => {

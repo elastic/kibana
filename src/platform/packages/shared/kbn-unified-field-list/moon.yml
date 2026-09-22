@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/unified-field-list'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/kibana-data-discovery'
+  defaultOwner: '@elastic/kibana-discover'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/unified-field-list'
   description: Moon project for @kbn/unified-field-list
   channel: ''
-  owner: '@elastic/kibana-data-discovery'
+  owner: '@elastic/kibana-discover'
   sourceRoot: src/platform/packages/shared/kbn-unified-field-list
 dependsOn:
   - '@kbn/i18n'
@@ -49,6 +49,8 @@ dependsOn:
   - '@kbn/restorable-state'
   - '@kbn/css-utils'
   - '@kbn/field-formats-common'
+  - '@kbn/ebt-click'
+  - '@kbn/scout'
 tags:
   - shared-browser
   - package
@@ -60,6 +62,7 @@ fileGroups:
   src:
     - '*.ts'
     - src/**/*
+    - test/**/*
     - __mocks__/**/*.ts
     - '!target/**/*'
   jest-config:

@@ -29,7 +29,7 @@ export interface ShareUrlIconButtonProps {
 }
 
 /**
- * Share icon that copies a URL to the clipboard (EuiCopy + EuiButtonIcon).
+ * Link icon that copies a URL to the clipboard (EuiCopy + EuiButtonIcon).
  */
 export const ShareUrlIconButton = memo(
   ({ url, tooltip, ariaLabel, dataTestSubj }: ShareUrlIconButtonProps) => {
@@ -42,14 +42,16 @@ export const ShareUrlIconButton = memo(
         <EuiToolTip content={tooltip}>
           <EuiCopy textToCopy={url}>
             {(copy) => (
-              <EuiButtonIcon
-                iconType="share"
-                color="text"
-                aria-label={ariaLabel}
-                data-test-subj={dataTestSubj}
-                onClick={copy}
-                onKeyDown={copy}
-              />
+              <EuiToolTip content={ariaLabel} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  iconType="link"
+                  color="text"
+                  aria-label={ariaLabel}
+                  data-test-subj={dataTestSubj}
+                  onClick={copy}
+                  onKeyDown={copy}
+                />
+              </EuiToolTip>
             )}
           </EuiCopy>
         </EuiToolTip>

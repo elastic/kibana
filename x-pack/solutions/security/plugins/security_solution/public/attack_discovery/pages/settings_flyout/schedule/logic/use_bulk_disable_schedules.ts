@@ -14,6 +14,8 @@ import { bulkDisableAttackDiscoverySchedules } from '../api';
 import { useInvalidateGetAttackDiscoverySchedule } from './use_get_schedule';
 import { useInvalidateFindAttackDiscoverySchedule } from './use_find_schedules';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
+import { useKibana } from '../../../../../common/lib/kibana';
+import { AttackDiscoverySchedulesEventTypes } from '../../../../../common/lib/telemetry';
 
 export const BULK_DISABLE_ATTACK_DISCOVERY_SCHEDULES_MUTATION_KEY = [
   'POST',
@@ -25,6 +27,9 @@ interface BulkDisableAttackDiscoverySchedulesParams {
 }
 
 export const useBulkDisableAttackDiscoverySchedules = () => {
+  const {
+    services: { telemetry },
+  } = useKibana();
   const { addError, addSuccess } = useAppToasts();
 
   const invalidateGetAttackDiscoverySchedule = useInvalidateGetAttackDiscoverySchedule();
@@ -40,9 +45,17 @@ export const useBulkDisableAttackDiscoverySchedules = () => {
       ids.forEach(invalidateGetAttackDiscoverySchedule);
       invalidateFindAttackDiscoverySchedule();
       addSuccess(i18n.DISABLE_ATTACK_DISCOVERY_SCHEDULES_SUCCESS(ids.length));
+      telemetry.reportEvent(AttackDiscoverySchedulesEventTypes.BulkStatusUpdateSuccess, {
+        status: 'disabled',
+        count: ids.length,
+      });
     },
     onError: (error, { ids }) => {
       addError(error, { title: i18n.DISABLE_ATTACK_DISCOVERY_SCHEDULES_FAILURE(ids.length) });
+      telemetry.reportEvent(AttackDiscoverySchedulesEventTypes.BulkStatusUpdateFailed, {
+        status: 'disabled',
+        count: ids.length,
+      });
     },
   });
 };

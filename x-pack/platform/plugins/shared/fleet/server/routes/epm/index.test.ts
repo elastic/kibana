@@ -6,6 +6,7 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { asSpaceId } from '@kbn/core-spaces-common';
 
 import type { FleetRequestHandlerContext } from '../..';
 
@@ -143,7 +144,7 @@ describe('schema validation', () => {
           },
         ],
       },
-      installed_kibana_space_id: 'space',
+      installed_kibana_space_id: asSpaceId('space'),
       install_format_schema_version: '1.0.0',
       verification_key_id: null,
       experimental_data_stream_features: [

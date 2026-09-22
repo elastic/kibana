@@ -17,7 +17,7 @@ The parent task will provide:
 - workflow run URL
 - repository, always `elastic/kibana`
 
-Create exactly one isolated git worktree for the target branch from the already-fetched target branch ref. Use a branch/worktree name that starts with `backport/` and includes the source PR number and target branch. Place the worktree under `/tmp/gh-aw-worktrees`, using a path like `/tmp/gh-aw-worktrees/wt-<source PR number>-<target branch>`.
+Create exactly one isolated git worktree for the target branch from the already-fetched target branch ref. The git branch name must be exactly `backport/<target-branch>/pr-<source-pr-number>`, for example `backport/9.4/pr-123456`. Place the worktree under `/tmp/gh-aw-worktrees`, using a path like `/tmp/gh-aw-worktrees/wt-<source PR number>-<target branch>`.
 
 Never create a worktree, full repository copy, or package install output under `/tmp/gh-aw`. That directory is uploaded as workflow artifacts.
 
@@ -40,10 +40,13 @@ If the cherry-pick has conflicts:
    - the target branch version of the file.
 3. Resolve only files involved in the conflict. Do not edit unrelated files. If a conflict represents a deletion, use `git rm <file>` instead of leaving an empty file behind.
 4. For package or lockfile conflicts:
-   - Apply the source PR dependency/version intent to the target branch's package manifest.
+   - Apply only the source PR dependency/version intent to the target branch's package manifest.
+   - For dependency-only Renovate PRs, infer intent from the PR body and from `git diff <source merge commit SHA>^ <source merge commit SHA> -- package.json`, not from the entire incoming conflict block. Preserve unrelated target-branch dependency versions that only appear because they are adjacent in the conflicted block.
+   - Treat same-major dependency updates as mechanical, even when the target branch is on an older minor version. For example, updating an existing `1.20.x` package to the source PR's `1.24.x` target is still a same-major dependency update, not a structural conflict.
+   - Return `needs manual backport` for dependency conflicts only when a source PR package is missing from the target branch, the source PR changes a package across majors, or the package/version intent cannot be verified from the PR body and source commit diff.
    - Never manually resolve lockfile conflicts.
-   - Run `yarn kbn bootstrap` when a lockfile conflict exists or package conflict resolution requires dependency regeneration.
-   - Do not edit lockfiles that were not part of the conflict unless `yarn kbn bootstrap` updates them as part of dependency regeneration.
+   - Run `pnpm kbn bootstrap` when a lockfile conflict exists or package conflict resolution requires dependency regeneration.
+   - Do not edit lockfiles that were not part of the conflict unless `pnpm kbn bootstrap` updates them as part of dependency regeneration.
 5. If a conflict is structural, semantic, or requires product judgment that cannot be verified from the source and target branch context, abort the cherry-pick, leave the worktree for logs, and return `needs manual backport` with the conflicted files and reason.
 6. After resolving, verify no conflict markers remain with a worktree search for `<<<<<<<`, `=======`, and `>>>>>>>`.
 7. Stage only the resolved cherry-pick files.
@@ -100,7 +103,7 @@ Return a short structured result:
 Rules:
 
 - Never run `node scripts/backport`.
-- Never run `git push`; `create_pull_request` handles the staged PR request.
+- Never run `git push`; `create_pull_request` handles the PR request.
 - Never call `create_pull_request` without the `base` field or retry with a different base.
 - Never create draft PRs, placeholder PRs, manual-resolution PRs, or PRs that preserve conflict markers.
 - Never use a custom PR body. The body must match the Backport body template above exactly.

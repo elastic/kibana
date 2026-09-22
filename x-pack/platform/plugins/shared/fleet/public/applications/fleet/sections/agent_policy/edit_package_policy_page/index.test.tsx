@@ -26,7 +26,7 @@ import {
   useGetPackagePolicies,
   sendBulkGetAgentPoliciesForRq,
 } from '../../../hooks';
-import { useGetOnePackagePolicy } from '../../../../integrations/hooks';
+import { useGetOnePackagePolicyQuery } from '../../../../integrations/hooks';
 
 import { ExperimentalFeaturesService } from '../../../services';
 
@@ -35,6 +35,7 @@ import { EditPackagePolicyPage } from '.';
 type MockFn = jest.MockedFunction<any>;
 
 let lastStepConfigureProps: any;
+let lastLayoutProps: any;
 
 jest.mock('../../../../../services/use_yaml', () => ({
   useYaml: () => require('yaml'),
@@ -201,7 +202,7 @@ jest.mock('../../../hooks', () => {
 jest.mock('../../../../integrations/hooks', () => {
   return {
     ...jest.requireActual('../../../../integrations/hooks'),
-    useGetOnePackagePolicy: jest.fn(),
+    useGetOnePackagePolicyQuery: jest.fn(),
     useConfirmForceInstall: jest.fn(),
   };
 });
@@ -213,6 +214,20 @@ jest.mock('../create_package_policy_page/components', () => {
     StepConfigurePackagePolicy: jest.fn((props) => {
       lastStepConfigureProps = props;
       return (actual as any).StepConfigurePackagePolicy(props);
+    }),
+  };
+});
+
+jest.mock('../create_package_policy_page/single_page_layout/components', () => {
+  const { createElement } = jest.requireActual('react');
+  const { CreatePackagePolicySinglePageLayout: ActualLayout } = jest.requireActual(
+    '../create_package_policy_page/single_page_layout/components/layout'
+  );
+  return {
+    ...jest.requireActual('../create_package_policy_page/single_page_layout/components'),
+    CreatePackagePolicySinglePageLayout: jest.fn((props) => {
+      lastLayoutProps = props;
+      return createElement(ActualLayout, props);
     }),
   };
 });
@@ -291,13 +306,12 @@ describe('edit package policy page', () => {
     (renderResult = testRenderer.render(<EditPackagePolicyPage />, { legacyRoot: true }));
 
   beforeEach(() => {
-    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
-      enableVarGroups: true,
-    } as any);
     testRenderer = createFleetTestRendererMock();
     lastStepConfigureProps = undefined;
+    lastLayoutProps = undefined;
+    (useUIExtension as MockFn).mockReset();
 
-    (useGetOnePackagePolicy as MockFn).mockReturnValue({
+    (useGetOnePackagePolicyQuery as MockFn).mockReturnValue({
       data: {
         item: mockPackagePolicy,
       },
@@ -456,6 +470,25 @@ describe('edit package policy page', () => {
     });
   });
 
+  it('passes useWidePageLayout from the replace-define-step extension to the layout', async () => {
+    (useUIExtension as MockFn).mockImplementation((_packageName: string, view: string) => {
+      if (view === 'package-policy-replace-define-step') {
+        return {
+          view,
+          useWidePageLayout: true,
+          Component: React.lazy(TestComponent),
+        };
+      }
+      return undefined;
+    });
+
+    render();
+
+    await waitFor(() => {
+      expect(lastLayoutProps?.useWidePageLayout).toBe(true);
+    });
+  });
+
   it("throws when both 'package-policy-edit' and 'package-policy-replace-define-step' are defined", async () => {
     (useUIExtension as MockFn)
       .mockReturnValueOnce({
@@ -544,7 +577,7 @@ describe('edit package policy page', () => {
 
   it('should not show confirmation modal if package is on agentless policy', async () => {
     (sendBulkGetAgentPoliciesForRq as MockFn).mockResolvedValue({ data: [{ agents: 1 }] });
-    (useGetOnePackagePolicy as MockFn).mockReturnValue({
+    (useGetOnePackagePolicyQuery as MockFn).mockReturnValue({
       data: {
         item: mockPackagePolicyAgentless,
       },
@@ -594,7 +627,7 @@ describe('edit package policy page', () => {
   it('passes existing var_group selections to configure step', async () => {
     const varGroupSelections = { auth_method: 'oauth' };
 
-    (useGetOnePackagePolicy as MockFn).mockReturnValueOnce({
+    (useGetOnePackagePolicyQuery as MockFn).mockReturnValueOnce({
       data: {
         item: { ...mockPackagePolicy, var_group_selections: varGroupSelections },
       },
@@ -793,6 +826,36 @@ describe('edit package policy page', () => {
           })
         )
       );
+    });
+  });
+
+  describe('agentless policies UI kill switch', () => {
+    it('skips the package-policy read when the isAgentless hint is set and the switch is on', async () => {
+      jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
+        enableAgentlessPoliciesUI: true,
+      } as any);
+      testRenderer.history.push('?isAgentless=true');
+      render();
+
+      await waitFor(() => {
+        expect(useGetOnePackagePolicyQuery).toHaveBeenCalledWith('nginx-1', { enabled: false });
+      });
+    });
+
+    it('ignores the isAgentless hint and keeps the package-policy read when the switch is off', async () => {
+      jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
+        enableAgentlessPoliciesUI: false,
+      } as any);
+      testRenderer.history.push('?isAgentless=true');
+      render();
+
+      await waitFor(() => {
+        expect(useGetOnePackagePolicyQuery).toHaveBeenCalledWith('nginx-1', { enabled: true });
+      });
+      // The form then loads through the legacy package-policy read path.
+      await waitFor(() => {
+        expect(renderResult.getByDisplayValue('nginx-1')).toBeInTheDocument();
+      });
     });
   });
 });

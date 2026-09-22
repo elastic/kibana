@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { AllRequiredCondition, AnyRequiredCondition, Privileges } from '@kbn/core-http-server';
+
 export enum AuthzOptOutReason {
   DelegateToESClient = 'Route delegates authorization to the scoped ES client',
   DelegateToSOClient = 'Route delegates authorization to the scoped SO client',
@@ -50,3 +52,41 @@ export const unwindNestedSecurityPrivileges = <
 
     return acc;
   }, []);
+
+/**
+ * Splits a route `Privileges` config into flattened anyRequired / allRequired privilege names.
+ * Top-level string entries are treated as allRequired (same as route authz enforcement).
+ */
+export const groupSecurityPrivileges = (
+  privileges: Privileges
+): { anyRequired: string[]; allRequired: string[] } => {
+  const anyRequired: string[] = [];
+  const allRequired: string[] = [];
+
+  for (const privilege of privileges) {
+    if (typeof privilege === 'string') {
+      allRequired.push(privilege);
+    } else {
+      if (privilege.anyRequired) {
+        anyRequired.push(
+          ...unwindNestedSecurityPrivileges<AnyRequiredCondition>(privilege.anyRequired)
+        );
+      }
+      if (privilege.allRequired) {
+        allRequired.push(
+          ...unwindNestedSecurityPrivileges<AllRequiredCondition>(privilege.allRequired)
+        );
+      }
+    }
+  }
+
+  return { anyRequired, allRequired };
+};
+
+/**
+ * Flattens a route `Privileges` config into a single list of privilege name strings.
+ */
+export const flattenSecurityPrivileges = (privileges: Privileges): string[] => {
+  const { anyRequired, allRequired } = groupSecurityPrivileges(privileges);
+  return [...allRequired, ...anyRequired];
+};

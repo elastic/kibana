@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
 
 import {
   EuiBasicTable,
-  EuiButtonEmpty,
-  EuiCallOut,
   EuiFlyout,
   EuiButton,
   EuiCodeBlock,
@@ -28,9 +26,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 
-import yaml from 'js-yaml';
+import { stringify } from 'yaml';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { LoadingState } from '../../monitors_page/overview/overview/monitor_detail_flyout';
 import type {
@@ -48,6 +47,12 @@ import {
   updateMonitorAPI,
 } from '../../../state/monitor_management/api';
 import { kibanaService } from '../../../../../utils/kibana_service';
+import {
+  FORMATTED_CONFIG_DESCRIPTION,
+  INSPECT_MONITOR_LABEL,
+  VALID_CONFIG_LABEL,
+  useRegisterInspectMonitorHeader,
+} from '../../monitor_add_edit/inspect_monitor_header';
 
 interface InspectorProps {
   isValid: boolean;
@@ -57,6 +62,7 @@ interface InspectorProps {
 
 export const MonitorInspect = ({ isValid, monitorFields, isEditFlow = false }: InspectorProps) => {
   const { isDev } = useSyntheticsSettingsContext();
+  const registerHeader = useRegisterInspectMonitorHeader();
 
   const [hideParams, setHideParams] = useState(() => !isDev);
   const [asJson, setAsJson] = useState(false);
@@ -73,6 +79,22 @@ export const MonitorInspect = ({ isValid, monitorFields, isEditFlow = false }: I
     setIsInspecting(() => !isInspecting);
     setIsFlyoutVisible(() => !isFlyoutVisible);
   };
+
+  useEffect(() => {
+    if (!registerHeader) {
+      return;
+    }
+    registerHeader({
+      open: () => {
+        setIsInspecting(true);
+        setIsFlyoutVisible(true);
+      },
+      isValid,
+    });
+    return () => {
+      registerHeader(null);
+    };
+  }, [isValid, registerHeader]);
 
   const { data, loading, error } = useFetcher(() => {
     if (isInspecting) {
@@ -161,17 +183,19 @@ export const MonitorInspect = ({ isValid, monitorFields, isEditFlow = false }: I
   }
   return (
     <>
-      <EuiToolTip content={isValid ? FORMATTED_CONFIG_DESCRIPTION : VALID_CONFIG_LABEL}>
-        <EuiButton
-          disabled={!isValid}
-          data-test-subj="syntheticsMonitorInspectShowFlyoutExampleButton"
-          onClick={onButtonClick}
-          iconType="inspect"
-          iconSide="left"
-        >
-          {INSPECT_MONITOR_LABEL}
-        </EuiButton>
-      </EuiToolTip>
+      {registerHeader ? null : (
+        <EuiToolTip content={isValid ? FORMATTED_CONFIG_DESCRIPTION : VALID_CONFIG_LABEL}>
+          <EuiButton
+            disabled={!isValid}
+            data-test-subj="syntheticsMonitorInspectShowFlyoutExampleButton"
+            onClick={onButtonClick}
+            iconType="inspect"
+            iconSide="left"
+          >
+            {INSPECT_MONITOR_LABEL}
+          </EuiButton>
+        </EuiToolTip>
+      )}
 
       {flyout}
     </>
@@ -262,25 +286,21 @@ const PackagePolicyLinksTable = ({
       <EuiSpacer size="s" />
       {hasMissingReferences && (
         <>
-          <EuiCallOut
+          <KbnWarningCallout
             title={MISSING_REFERENCES_TITLE}
-            color="warning"
-            iconType="warning"
             size="s"
             announceOnMount
             data-test-subj="syntheticsPackagePolicyMissingReferencesCallout"
-          >
-            <p>{MISSING_REFERENCES_DESCRIPTION}</p>
-            <EuiButtonEmpty
-              size="s"
-              color="warning"
-              isLoading={isMigrating}
-              onClick={handleMigrate}
-              data-test-subj="syntheticsPackagePolicyMigrateButton"
-            >
-              {MIGRATE_LABEL}
-            </EuiButtonEmpty>
-          </EuiCallOut>
+            text={MISSING_REFERENCES_DESCRIPTION}
+            actionProps={{
+              primary: {
+                isLoading: isMigrating,
+                onClick: handleMigrate,
+                'data-test-subj': 'syntheticsPackagePolicyMigrateButton',
+                children: MIGRATE_LABEL,
+              },
+            }}
+          />
           <EuiSpacer size="s" />
         </>
       )}
@@ -321,7 +341,7 @@ const formatContent = (result: MonitorInspectResponse, asJson: boolean) => {
 
   const data = { publicConfig: firstResult ?? {}, privateConfig: compiledConfig ?? {} };
   if (!asJson) {
-    return yaml.dump(data);
+    return stringify(data);
   }
 
   return JSON.stringify(data, null, 2);
@@ -331,19 +351,6 @@ const CONFIG_LABEL = i18n.translate('xpack.synthetics.monitorInspect.configLabel
   defaultMessage: 'Configuration',
 });
 
-const VALID_CONFIG_LABEL = i18n.translate(
-  'xpack.synthetics.monitorInspect.formattedConfigLabel.valid',
-  {
-    defaultMessage: 'Only valid form configurations can be inspected.',
-  }
-);
-
-const FORMATTED_CONFIG_DESCRIPTION = i18n.translate(
-  'xpack.synthetics.monitorInspect.formattedConfigLabel.description',
-  {
-    defaultMessage: 'View formatted configuration for this monitor.',
-  }
-);
 const CLOSE_LABEL = i18n.translate('xpack.synthetics.monitorInspect.closeLabel', {
   defaultMessage: 'Close',
 });
@@ -351,13 +358,6 @@ const CLOSE_LABEL = i18n.translate('xpack.synthetics.monitorInspect.closeLabel',
 export const SOURCE_CODE_LABEL = i18n.translate('xpack.synthetics.monitorInspect.sourceCodeLabel', {
   defaultMessage: 'Source code',
 });
-
-export const INSPECT_MONITOR_LABEL = i18n.translate(
-  'xpack.synthetics.monitorInspect.inspectLabel',
-  {
-    defaultMessage: 'Inspect configuration',
-  }
-);
 
 const HIDE_PARAMS = i18n.translate('xpack.synthetics.monitorInspect.hideParams', {
   defaultMessage: 'Hide parameter values',

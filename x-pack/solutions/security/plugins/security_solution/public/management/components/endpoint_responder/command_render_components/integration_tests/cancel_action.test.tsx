@@ -14,12 +14,15 @@ import {
 import React from 'react';
 import { getEndpointConsoleCommands } from '../../lib/console_commands_definition';
 import { responseActionsHttpMocks } from '../../../../mocks/response_actions_http_mocks';
-import { enterConsoleCommand } from '../../../console/mocks';
+import { enterConsoleCommand, getConsoleSelectorsAndActionMock } from '../../../console/mocks';
 import { waitFor } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import type { getEndpointAuthzInitialState } from '../../../../../../common/endpoint/service/authz';
 import { getEndpointAuthzInitialStateMock } from '../../../../../../common/endpoint/service/authz/mocks';
-import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
+import type {
+  EndpointCapabilities,
+  ResponseActionAgentType,
+} from '../../../../../../common/endpoint/service/response_actions/constants';
 import {
   ENDPOINT_CAPABILITIES,
   RESPONSE_ACTION_AGENT_TYPE,
@@ -58,6 +61,8 @@ describe('When using cancel action from response actions console', () => {
   let mockedContext: AppContextTestRender;
   let user: UserEvent;
   let apiMocks: ReturnType<typeof responseActionsHttpMocks>;
+  let endpointCapabilities: EndpointCapabilities[];
+  let consoleMockUtils: ReturnType<typeof getConsoleSelectorsAndActionMock>;
 
   // Simplified render function with minimal setup
   const renderConsole = async (
@@ -71,8 +76,8 @@ describe('When using cancel action from response actions console', () => {
             'data-test-subj': 'test',
             commands: getEndpointConsoleCommands({
               agentType,
+              endpointCapabilities,
               endpointAgentId: 'a.b.c',
-              endpointCapabilities: [...ENDPOINT_CAPABILITIES],
               endpointPrivileges: {
                 ...getEndpointAuthzInitialStateMock(),
                 loading: false,
@@ -85,6 +90,7 @@ describe('When using cancel action from response actions console', () => {
       />
     );
 
+    consoleMockUtils = getConsoleSelectorsAndActionMock(renderResult, user);
     const consoleManagerMockAccess = getConsoleManagerMockRenderResultQueriesAndActions(
       user,
       renderResult
@@ -107,6 +113,7 @@ describe('When using cancel action from response actions console', () => {
   beforeEach(() => {
     user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     mockedContext = createAppRootMockRenderer();
+    endpointCapabilities = [...ENDPOINT_CAPABILITIES];
 
     // Set default experimental flags
     mockedContext.setExperimentalFlag({
@@ -196,6 +203,22 @@ describe('When using cancel action from response actions console', () => {
         expect(renderResult.getByTestId('cancel-action-arg-0')).toBeTruthy();
       });
     });
+
+    if (agentType === 'endpoint') {
+      it('should have a --force argument available', async () => {
+        const renderResult = await renderConsole(agentType);
+        await enterConsoleCommand(renderResult, user, 'cancel --help');
+
+        expect(renderResult.getByTestId('test-commandUsage').textContent).toContain('--force');
+      });
+    } else {
+      it('should NOT have a --force argument available', async () => {
+        const renderResult = await renderConsole(agentType);
+        await enterConsoleCommand(renderResult, user, 'cancel --help');
+
+        expect(renderResult.getByTestId('test-commandUsage').textContent).not.toContain('--force');
+      });
+    }
   });
 
   describe.each(UNSUPPORTED_AGENT_TYPES)('Unsupported agent type: %s', (agentType) => {
@@ -239,8 +262,18 @@ describe('When using cancel action from response actions console', () => {
   });
 
   describe('and agent type is endpoint', () => {
-    it('should display help panel "+" button disabled if Endpoint does not support runscript', async () => {
-      //
+    it('should display help panel "+" button disabled if Endpoint does not support cancel', async () => {
+      endpointCapabilities = ENDPOINT_CAPABILITIES.filter((capability) => capability !== 'cancel');
+      const renderResult = await renderConsole('endpoint');
+      consoleMockUtils.openHelpPanel();
+
+      expect(
+        (
+          renderResult.getByTestId(
+            'test-commandList-Responseactions-cancel-addToInput'
+          ) as HTMLButtonElement
+        ).disabled
+      ).toBe(true);
     });
   });
 

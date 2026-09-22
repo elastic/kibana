@@ -18,11 +18,15 @@ import { MAJOR_VERSION } from '../../../../common';
 import { useAppContext } from '../../app_context';
 import { MappingsEditor } from './mappings_editor';
 import { MappingsEditorProvider } from './mappings_editor_context';
-import { createKibanaReactContext } from './shared_imports';
-import { UseField } from './shared_imports';
+import { createKibanaReactContext, documentationService, UseField } from './shared_imports';
 import { getFieldConfig } from './lib';
+import { loadSyntheticSourceStatus } from '../../services/api';
 
 jest.mock('@kbn/code-editor');
+
+jest.mock('../../services/api', () => ({
+  loadSyntheticSourceStatus: jest.fn(),
+}));
 
 jest.mock('./components/document_fields/field_parameters/type_parameter', () => {
   const sharedImports = jest.requireActual('./shared_imports');
@@ -152,6 +156,7 @@ jest.mock('../component_templates/component_templates_context', () => ({
 
 const { GlobalFlyoutProvider } = GlobalFlyout;
 const mockUseAppContext = useAppContext as unknown as jest.MockedFunction<typeof useAppContext>;
+const loadSyntheticSourceStatusMock = jest.mocked(loadSyntheticSourceStatus);
 const docLinks = docLinksServiceMock.createStartContract();
 const kibanaVersion = new SemVer(MAJOR_VERSION);
 const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
@@ -162,27 +167,24 @@ const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
 });
 const defaultAppContext = {
   config: { enableMappingsSourceFieldSection: true },
-  canUseSyntheticSource: true,
+  hasAtLeastEnterpriseLicense: true,
 };
 
-type MappingsEditorTestProps = Omit<
-  ComponentProps<typeof MappingsEditor>,
-  'docLinks' | 'esNodesPlugins'
->;
+type MappingsEditorTestProps = Omit<ComponentProps<typeof MappingsEditor>, 'docLinks'>;
 
-const renderMappingsEditor = (
+const getMappingsEditorElement = (
   props: Partial<MappingsEditorTestProps>,
   ctx: unknown = defaultAppContext
 ) => {
   mockUseAppContext.mockReturnValue(ctx as unknown as ReturnType<typeof useAppContext>);
-  const { onChange, ...restProps } = props;
+  const { onChange, esNodesPlugins, ...restProps } = props;
   const mergedProps = {
     ...restProps,
     docLinks,
-    esNodesPlugins: [],
+    esNodesPlugins: esNodesPlugins ?? [],
     onChange: onChange ?? (() => undefined),
   } satisfies ComponentProps<typeof MappingsEditor>;
-  return render(
+  return (
     <I18nProvider>
       <KibanaReactContextProvider>
         <MappingsEditorProvider>
@@ -195,7 +197,24 @@ const renderMappingsEditor = (
   );
 };
 
+const renderMappingsEditor = (
+  props: Partial<MappingsEditorTestProps>,
+  ctx: unknown = defaultAppContext
+) => {
+  const rendered = render(getMappingsEditorElement(props, ctx));
+
+  return {
+    ...rendered,
+    rerenderMappingsEditor: (nextProps: Partial<MappingsEditorTestProps>) =>
+      rendered.rerender(getMappingsEditorElement(nextProps, ctx)),
+  };
+};
+
 describe('Mappings editor', () => {
+  beforeAll(() => {
+    documentationService.setup(docLinks);
+  });
+
   describe('core', () => {
     interface TestMappings {
       dynamic?: boolean;
@@ -219,7 +238,7 @@ describe('Mappings editor', () => {
       props: Partial<MappingsEditorProps>,
       ctx: unknown = {
         config: { enableMappingsSourceFieldSection: true },
-        canUseSyntheticSource: true,
+        hasAtLeastEnterpriseLicense: true,
       }
     ) => {
       return renderMappingsEditor({ onChange: onChangeHandler, ...props }, ctx);
@@ -350,6 +369,9 @@ describe('Mappings editor', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
+      loadSyntheticSourceStatusMock.mockResolvedValue({
+        syntheticSourceFallbackToStoredSource: false,
+      });
       onChangeHandler = jest.fn();
     });
 
@@ -441,7 +463,7 @@ describe('Mappings editor', () => {
         config: {
           enableMappingsSourceFieldSection: false,
         },
-        canUseSyntheticSource: false,
+        hasAtLeastEnterpriseLicense: false,
       };
 
       test('should have 4 tabs (fields, runtime, template, advanced settings)', async () => {
@@ -457,6 +479,48 @@ describe('Mappings editor', () => {
           'Dynamic templates',
           'Advanced options',
         ]);
+      });
+
+      test('passes installed node plugins to the advanced configuration form', async () => {
+        setup({
+          value: defaultMappings,
+          onChange: onChangeHandler,
+          esNodesPlugins: ['mapper-size'],
+        });
+        await screen.findByTestId('mappingsEditor');
+
+        await selectTab('advanced');
+
+        expect(screen.getByTestId('sizeEnabledToggle')).toBeInTheDocument();
+      });
+
+      test("doesn't substitute an installed node plugin when the plugin list is empty", async () => {
+        setup({
+          value: defaultMappings,
+          onChange: onChangeHandler,
+          esNodesPlugins: [],
+        });
+        await screen.findByTestId('mappingsEditor');
+
+        await selectTab('advanced');
+
+        expect(screen.queryByTestId('sizeEnabledToggle')).not.toBeInTheDocument();
+      });
+
+      test('updates the advanced configuration form when node plugins finish loading', async () => {
+        const props = {
+          value: defaultMappings,
+          onChange: onChangeHandler,
+          esNodesPlugins: [],
+        };
+        const { rerenderMappingsEditor } = setup(props);
+        await screen.findByTestId('mappingsEditor');
+        await selectTab('advanced');
+        expect(screen.queryByTestId('sizeEnabledToggle')).not.toBeInTheDocument();
+
+        rerenderMappingsEditor({ ...props, esNodesPlugins: ['mapper-size'] });
+
+        expect(screen.getByTestId('sizeEnabledToggle')).toBeInTheDocument();
       });
 
       const openCreateFieldForm = async () => {
@@ -559,7 +623,7 @@ describe('Mappings editor', () => {
         config: {
           enableMappingsSourceFieldSection: true,
         },
-        canUseSyntheticSource: true,
+        hasAtLeastEnterpriseLicense: true,
       };
 
       beforeEach(() => {
@@ -736,7 +800,6 @@ describe('Mappings editor', () => {
               ...updatedMappings.properties,
               [newField.name]: {
                 inference_id: defaultInferenceEndpoints.ELSER,
-                reference_field: '',
                 type: 'semantic_text',
               },
             },
@@ -771,9 +834,12 @@ describe('Mappings editor', () => {
             ...updatedMappings,
             properties: {
               ...updatedMappings.properties,
+              title: {
+                type: 'text',
+                copy_to: ['someNewField'],
+              },
               [newField.name]: {
                 inference_id: defaultInferenceEndpoints.ELSER,
-                reference_field: 'title',
                 type: 'semantic_text',
               },
             },
@@ -808,7 +874,7 @@ describe('Mappings editor', () => {
         });
 
         (['logsdb', 'time_series'] as const).forEach((indexMode) => {
-          it(`defaults to 'synthetic' with ${indexMode} index mode prop when 'canUseSyntheticSource' is set to true`, async () => {
+          it(`defaults to 'synthetic' with ${indexMode} index mode prop when the license allows it and fallback is disabled`, async () => {
             setup(
               {
                 value: { ...defaultMappings, _source: undefined },
@@ -828,20 +894,45 @@ describe('Mappings editor', () => {
             });
           });
 
-          it(`defaults to 'standard' with ${indexMode} index mode prop when 'canUseSyntheticSource' is set to true`, async () => {
+          it(`defaults to 'stored' with ${indexMode} index mode prop when the license does not allow synthetic source`, async () => {
             setup(
               {
                 value: { ...defaultMappings, _source: undefined },
                 onChange: onChangeHandler,
                 indexMode,
               },
-              { ...ctx, canUseSyntheticSource: false }
+              { ...ctx, hasAtLeastEnterpriseLicense: false }
             );
 
             await screen.findByTestId('mappingsEditor');
 
             await selectTab('advanced');
 
+            const sourceValueButton = screen.getByTestId('sourceValueField');
+            expect(sourceValueButton.textContent).toContain('Stored _source');
+          });
+
+          it(`defaults to 'stored' with ${indexMode} index mode prop when fallback to stored source is enabled`, async () => {
+            loadSyntheticSourceStatusMock.mockResolvedValue({
+              syntheticSourceFallbackToStoredSource: true,
+            });
+
+            setup(
+              {
+                value: { ...defaultMappings, _source: undefined },
+                onChange: onChangeHandler,
+                indexMode,
+              },
+              ctx
+            );
+
+            await screen.findByTestId('mappingsEditor');
+
+            await selectTab('advanced');
+
+            await waitFor(() => {
+              expect(loadSyntheticSourceStatusMock).toHaveBeenCalled();
+            });
             const sourceValueButton = screen.getByTestId('sourceValueField');
             expect(sourceValueButton.textContent).toContain('Stored _source');
           });

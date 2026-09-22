@@ -14,7 +14,8 @@ exports[`<KibanaPrivileges> renders without crashing 1`] = `
         class="euiTitle emotion-euiTitle-m"
       >
         <span
-          class="css-t0tl5b-CollapsiblePanelTitle"
+          aria-hidden="true"
+          class="css-1196zwi-CollapsiblePanelTitle"
           data-euiicon-type="logoKibana"
         />
          

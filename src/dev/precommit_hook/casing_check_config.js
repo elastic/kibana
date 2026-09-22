@@ -44,6 +44,8 @@ export const IGNORE_PATTERNS = [
 
   // Required to match the name in the docs.elastic.dev repo.
   'dev_docs/nav-kibana-dev.docnav.json',
+  'dev_docs/url-mapping.json',
+  'dev_docs/url-mapping-full.json',
 
   // ecs templates
   '**/ecs/fields/**/*',
@@ -73,7 +75,9 @@ export const IGNORE_PATTERNS = [
   'x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/complete/product_docs/**/*',
 ];
 
-export const KEBAB_CASE_PATTERNS = ['docs/**/*'];
+// Docset paths become URL slugs, so both documentation trees follow the docs convention rather
+// than Kibana's. `docs-dev` holds the internal-only docset published to codex.elastic.dev.
+export const KEBAB_CASE_PATTERNS = ['docs/**/*', 'docs-dev', 'docs-dev/**/*'];
 
 /**
  * Contains the logic that decides what is the expected casing for each Kibana resource (folders, files)

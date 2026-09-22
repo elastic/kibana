@@ -19,9 +19,9 @@ import { ExecutionStatus, WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows';
 import type { Logger } from '@kbn/logging';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { IUiSettingsClient } from '@kbn/core/server';
+import { executeWorkflow } from '@kbn/agent-builder-tools-base/workflows';
 import type { InternalStartServices } from '../../services/types';
 import { getCurrentSpaceId } from '../../utils/spaces';
-import { executeWorkflow } from '../../services/workflow/execute_workflow';
 import type { BeforeAgentWorkflowOutput } from './types';
 import type { AgentsServiceStart } from '../../services/agents';
 import {
@@ -91,7 +91,10 @@ export async function runBeforeAgentWorkflows({
   for (const workflowId of workflowIds) {
     const result = await executeWorkflow({
       workflowId,
-      workflowParams: { prompt: currentNextInput.message ?? '' },
+      workflowParams: {
+        prompt: currentNextInput.message ?? '',
+        ...(context.conversationId ? { conversation_id: context.conversationId } : {}),
+      },
       request: context.request,
       spaceId,
       workflowApi,
@@ -156,7 +159,11 @@ async function getWorkflowIds(
   if (context.agentId) {
     const registry = await agents.getRegistry({ request: context.request });
     const agent = await registry.get(context.agentId);
-    agentWorkflowIds = agent?.configuration?.workflow_ids ?? [];
+    const configuration = await agents.resolveAgentConfiguration({
+      agent,
+      request: context.request,
+    });
+    agentWorkflowIds = configuration.workflow_ids ?? [];
   }
 
   return mergePreExecutionWorkflowIds(globalWorkflowIds, agentWorkflowIds);

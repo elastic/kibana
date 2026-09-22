@@ -6,8 +6,7 @@
  */
 
 import type { Document, YAMLMap } from 'yaml';
-import { parseDocument, isMap, isSeq, isScalar } from 'yaml';
-import { load as parseYaml } from 'js-yaml';
+import { parse as parseYaml, parseDocument, isMap, isSeq, isScalar } from 'yaml';
 
 import type { z } from '@kbn/zod/v4';
 import type { UserPickerDefaultSchema } from '../../../../common/types/domain/template/fields';
@@ -15,6 +14,7 @@ import type { UserPickerDefaultSchema } from '../../../../common/types/domain/te
 export type FieldDefaultValue =
   | string
   | number
+  | boolean
   | string[]
   | z.infer<typeof UserPickerDefaultSchema>;
 
@@ -94,7 +94,7 @@ export const updateYamlFieldDefault = (
   }
 
   try {
-    // First validate with js-yaml that the field exists
+    // First validate that the field exists
     const parsed = parseYaml(yaml) as ParsedDefinition;
     if (!parsed || typeof parsed !== 'object' || !Array.isArray(parsed.fields)) {
       return yaml;

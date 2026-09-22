@@ -99,6 +99,24 @@ export class EsqlServiceTestbed {
     });
   }
 
+  public async setupClosedLookupIndex() {
+    const client = this.esClient();
+
+    await client.indices.create({
+      index: 'closed_lookup_index',
+      settings: {
+        'index.mode': 'lookup',
+      },
+      mappings: {
+        properties: {
+          field1: { type: 'keyword' },
+        },
+      },
+    });
+
+    await client.indices.close({ index: 'closed_lookup_index' });
+  }
+
   public async setupTimeseriesIndices() {
     const client = this.esClient();
 
@@ -146,5 +164,13 @@ export class EsqlServiceTestbed {
 
   public readonly POST = (path: string) => {
     return request.post(this.kibana!.root, path).set('x-elastic-internal-origin', 'esql-test');
+  };
+
+  public readonly PUT = (path: string) => {
+    return request.put(this.kibana!.root, path).set('x-elastic-internal-origin', 'esql-test');
+  };
+
+  public readonly DELETE = (path: string) => {
+    return request.delete(this.kibana!.root, path).set('x-elastic-internal-origin', 'esql-test');
   };
 }

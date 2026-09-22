@@ -84,8 +84,20 @@ export const configSchema = schema.object({
   }),
   maxEphemeralActionsPerAlert: schema.maybe(schema.number()),
   enableFrameworkAlerts: schema.boolean({ defaultValue: true }),
+  alertsService: schema.object({
+    // Field limit applied to alerts-as-data (.alerts-*) indices, their index
+    // templates and component templates. Raise this above the alert mapping's
+    // field count to avoid the framework's reset-then-increase churn against
+    // Elasticsearch. Keep the default in sync with `TOTAL_FIELDS_LIMIT`.
+    totalFieldsLimit: schema.number({ defaultValue: 2800, min: 2500, max: 5000 }),
+    // When enabled, alerts-as-data resource installation is coordinated across
+    // Kibana nodes with a cluster-wide lock so only one node installs at a time,
+    // reducing concurrent requests to Elasticsearch on startup. Installation
+    // remains idempotent, so disabling this only removes the coordination.
+    coordinateInstallation: schema.boolean({ defaultValue: true }),
+  }),
   ruleChangeTracking: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
+    enabled: schema.boolean({ defaultValue: true }),
     scope: schema.arrayOf(ruleChangeTrackingSolutions, { defaultValue: ['security'] }),
   }),
   cancelAlertsOnRuleTimeout: schema.boolean({ defaultValue: true }),
@@ -117,7 +129,7 @@ export type AlertingConfig = TypeOf<typeof configSchema>;
 export type RulesConfig = TypeOf<typeof rulesSchema>;
 export type AlertingRulesConfig = Pick<
   AlertingConfig['rules'],
-  'minimumScheduleInterval' | 'maxScheduledPerMinute' | 'run'
+  'minimumScheduleInterval' | 'maxScheduledPerMinute' | 'run' | 'apiKeyType'
 > & {
   isUsingSecurity: boolean;
 };

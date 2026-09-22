@@ -79,6 +79,17 @@ export function registerValueSuggestionsRoute(router: IRouter, config$: Observab
           return response.ok({ body });
         } catch (e) {
           const kbnErr = getKbnServerError(e);
+
+          // When an index is not found for _terms_enum request
+          // * serverless: elasticsearch returns 200 and 'terms: []'
+          // * cloud: elasticsearch returns 404
+          //
+          // To keep kibana route consistent between environments
+          // route returns 200 with no suggestions when a 404 is encountered
+          if (kbnErr.statusCode === 404) {
+            return response.ok({ body: [] });
+          }
+
           return reportServerError(response, kbnErr);
         }
       }

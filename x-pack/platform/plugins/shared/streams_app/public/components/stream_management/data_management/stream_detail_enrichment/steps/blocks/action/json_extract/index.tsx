@@ -19,6 +19,7 @@ import {
   EuiSpacer,
   EuiSuperSelect,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useController, useFieldArray, useFormContext } from 'react-hook-form';
@@ -276,17 +277,25 @@ const ExtractionField = ({ index, onRemove, canRemove }: ExtractionFieldProps) =
         />
       </EuiFormRow>
       <div css={{ alignSelf: 'center' }}>
-        <EuiButtonIcon
-          iconType="trash"
-          color="danger"
-          onClick={onRemove}
-          disabled={!canRemove}
-          aria-label={i18n.translate(
+        <EuiToolTip
+          content={i18n.translate(
             'xpack.streams.streamDetailView.managementTab.enrichment.processor.jsonExtractRemoveExtraction',
             { defaultMessage: 'Remove extraction' }
           )}
-          data-test-subj={`streamsAppJsonExtractRemoveExtractionButton-${index}`}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            iconType="trash"
+            color="danger"
+            onClick={onRemove}
+            disabled={!canRemove}
+            aria-label={i18n.translate(
+              'xpack.streams.streamDetailView.managementTab.enrichment.processor.jsonExtractRemoveExtraction',
+              { defaultMessage: 'Remove extraction' }
+            )}
+            data-test-subj={`streamsAppJsonExtractRemoveExtractionButton-${index}`}
+          />
+        </EuiToolTip>
       </div>
     </>
   );

@@ -11,8 +11,13 @@ import { MONITOR_STATUS_ENUM } from '../../../../../../common/constants/monitor_
 import type {
   EncryptedSyntheticsMonitor,
   OverviewStatusMetaData,
+  SelectedSyntheticsMonitor,
 } from '../../../../../../common/runtime_types';
 
+// `isBrowserType` is a misnomer kept for backwards compatibility — it really
+// controls "show the journey-style Succeeded/Failed labels instead of the
+// reachability-style Up/Down labels". API journeys produce success/fail
+// results through synthexec, so callers pass true for them too.
 export const BadgeStatus = ({
   status,
   isBrowserType,
@@ -50,10 +55,12 @@ export const MonitorStatus = ({
 }: {
   loading?: boolean;
   compressed?: boolean;
-  monitor: EncryptedSyntheticsMonitor;
+  monitor: EncryptedSyntheticsMonitor | SelectedSyntheticsMonitor;
   status?: string;
 }) => {
-  const isBrowserType = monitor.type === 'browser';
+  // API journeys share the success/fail semantics of browser journeys; both
+  // should render "Succeeded"/"Failed" rather than "Up"/"Down".
+  const isBrowserType = monitor.type === 'browser' || monitor.type === 'api';
   const loadingContent = loading && !monitor;
 
   return (
@@ -84,6 +91,10 @@ const FAILED_LABEL = i18n.translate('xpack.synthetics.monitorStatus.failedLabel'
 
 const PENDING_LABEL = i18n.translate('xpack.synthetics.monitorStatus.pendingLabel', {
   defaultMessage: 'Pending',
+});
+
+const STALE_LABEL = i18n.translate('xpack.synthetics.monitorStatus.staleLabel', {
+  defaultMessage: 'Stale',
 });
 
 const SUCCESS_LABEL = i18n.translate('xpack.synthetics.monitorStatus.succeededLabel', {
@@ -120,6 +131,11 @@ const badgeMapping: Record<string, BadgeData> = {
     color: 'default',
     dataTestSubj: 'monitorLatestStatusPending',
     labels: { default: PENDING_LABEL },
+  },
+  stale: {
+    color: 'warning',
+    dataTestSubj: 'monitorLatestStatusStale',
+    labels: { default: STALE_LABEL },
   },
   up: {
     color: 'success',

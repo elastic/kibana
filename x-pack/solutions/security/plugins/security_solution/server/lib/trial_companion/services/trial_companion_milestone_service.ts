@@ -205,10 +205,10 @@ export class TrialCompanionMilestoneServiceImpl implements TrialCompanionMilesto
         title: TASK_TITLE,
         timeout: TIMEOUT,
         maxAttempts: 1,
-        createTaskRunner: ({ abortController }: RunContext) => {
+        createTaskRunner: ({ signal }: RunContext) => {
           return {
             run: async () => {
-              await this.refreshMilestones(abortController.signal);
+              await this.refreshMilestones(signal);
             },
 
             cancel: async () => {

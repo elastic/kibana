@@ -8,14 +8,6 @@
 import expect from '@kbn/expect';
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import {
-  DOCUMENT_SOURCE,
-  createEsDocument,
-} from '../../../../../spaces_only/tests/alerting/create_test_data';
-import type { Space } from '../../../../../common/types';
-import { Space1, SuperuserAtSpace1, UserAtSpaceScenarios } from '../../../../scenarios';
-import { getUrlPrefix, getEventLog, ObjectRemover } from '../../../../../common/lib';
-import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
-import {
   activeO11yAlertsOlderThan90,
   activeSecurityAlertsOlderThan90,
   activeStackAlertsOlderThan90,
@@ -23,7 +15,15 @@ import {
   inactiveSecurityAlertsOlderThan90,
   inactiveStackAlertsOlderThan90,
   getTestAlertDocs,
-} from './alert_deletion_test_utils';
+} from '@kbn/alerting-api-integration-helpers';
+import {
+  DOCUMENT_SOURCE,
+  createEsDocument,
+} from '../../../../../spaces_only/tests/alerting/create_test_data';
+import type { Space } from '../../../../../common/types';
+import { Space1, SuperuserAtSpace1, UserAtSpaceScenarios } from '../../../../scenarios';
+import { getUrlPrefix, getEventLog, ObjectRemover } from '../../../../../common/lib';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 export default function previewAlertDeletionTests({ getService }: FtrProviderContext) {
   const retry = getService('retry');

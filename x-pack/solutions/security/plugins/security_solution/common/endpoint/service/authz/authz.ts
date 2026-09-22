@@ -15,7 +15,7 @@ import {
   CANCELLABLE_RESPONSE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ,
 } from '../response_actions/constants';
 import type { LicenseService } from '../../../license';
-import type { EndpointAuthz } from '../../types/authz';
+import type { EndpointAuthz, EndpointAuthzKeyList } from '../../types/authz';
 import type { MaybeImmutable } from '../../types';
 
 /**
@@ -115,6 +115,9 @@ export const calculateEndpointAuthz = (
   const canReadScriptsLibrary = hasAuth('readScriptsManagement');
   const canWriteScriptsLibrary = hasAuth('writeScriptsManagement');
 
+  const canReadCustomYaraSignatures = hasAuth('readCustomYaraSignatures');
+  const canWriteCustomYaraSignatures = hasAuth('writeCustomYaraSignatures');
+
   // These are currently tied to the superuser role on ESS and the admin role on Serverless
   const canReadAdminData = hasSuperuserPrivileges;
   const canWriteAdminData = hasSuperuserPrivileges;
@@ -141,7 +144,7 @@ export const calculateEndpointAuthz = (
     canReadEndpointList,
     canWritePolicyManagement,
     canReadPolicyManagement,
-    canWriteActionsLogManagement,
+    canWriteActionsLogManagement: canWriteActionsLogManagement && isEnterpriseLicense,
     canReadActionsLogManagement: canReadActionsLogManagement && isEnterpriseLicense,
     canAccessEndpointActionsLogManagement: canReadActionsLogManagement && isPlatinumPlusLicense,
     canReadWorkflowInsights: canReadWorkflowInsights && isEnterpriseLicense,
@@ -184,6 +187,8 @@ export const calculateEndpointAuthz = (
     canReadEventFilters,
     canReadEndpointExceptions,
     canWriteEndpointExceptions,
+    canReadCustomYaraSignatures: canReadCustomYaraSignatures && isEnterpriseLicense,
+    canWriteCustomYaraSignatures: canWriteCustomYaraSignatures && isEnterpriseLicense,
     canManageGlobalArtifacts,
 
     // ---------------------------------------------------------
@@ -266,7 +271,39 @@ export const getEndpointAuthzInitialState = (): EndpointAuthz => {
     canWriteAdminData: false,
     canReadScriptsLibrary: false,
     canWriteScriptsLibrary: false,
+    canReadCustomYaraSignatures: false,
+    canWriteCustomYaraSignatures: false,
   };
+};
+
+export interface EndpointAuthzRequirement {
+  all?: EndpointAuthzKeyList;
+  any?: EndpointAuthzKeyList;
+}
+
+export const ENDPOINT_METADATA_LIST_REQUIRED_AUTHZ: EndpointAuthzRequirement = {
+  all: ['canReadSecuritySolution'],
+};
+
+export const ENDPOINT_POLICY_READ_REQUIRED_AUTHZ: EndpointAuthzRequirement = {
+  all: ['canReadPolicyManagement'],
+};
+
+export const ENDPOINT_POLICY_AND_METADATA_READ_REQUIRED_AUTHZ: EndpointAuthzRequirement = {
+  all: ['canReadPolicyManagement', 'canReadSecuritySolution'],
+};
+
+export const satisfiesEndpointAuthzRequirement = (
+  authz: EndpointAuthz,
+  requirement: EndpointAuthzRequirement
+): boolean => {
+  const needAll = requirement.all ?? [];
+  const needAny = requirement.any ?? [];
+
+  return (
+    needAll.every((key) => authz[key]) &&
+    (needAny.length === 0 || needAny.some((key) => authz[key]))
+  );
 };
 
 /**

@@ -7,15 +7,20 @@
 
 import { BehaviorSubject } from 'rxjs';
 
+import type { BuildFlavor } from '@kbn/config';
 import { coreMock } from '@kbn/core/public/mocks';
 import type {
   DefinedSections,
   ManagementApp,
   ManagementSetup,
 } from '@kbn/management-plugin/public';
-import { createManagementSectionMock } from '@kbn/management-plugin/public/mocks';
+import {
+  createManagementSectionMock,
+  managementPluginMock,
+} from '@kbn/management-plugin/public/mocks';
 
 import { apiKeysManagementApp } from './api_keys';
+import { applicationConnectionsManagementApp } from './application_connections';
 import { ManagementService } from './management_service';
 import { roleMappingsManagementApp } from './role_mappings';
 import { rolesManagementApp } from './roles';
@@ -27,13 +32,24 @@ import { securityMock } from '../mocks';
 
 const mockSection = createManagementSectionMock();
 
+const createConfigMock = (overrides: Partial<ConfigType> = {}): ConfigType => ({
+  loginAssistanceMessage: '',
+  showInsecureClusterWarning: false,
+  sameSiteCookies: undefined,
+  roleManagementEnabled: true,
+  ui: {
+    userManagementEnabled: true,
+    roleMappingManagementEnabled: true,
+  },
+  ...overrides,
+});
+
 describe('ManagementService', () => {
   describe('setup()', () => {
     it('properly registers security section and its applications', () => {
       const { fatalErrors, getStartServices } = coreMock.createSetup();
       const { authc } = securityMock.createSetup();
       const license = licenseMock.create();
-
       const managementSetup: ManagementSetup = {
         sections: {
           register: jest.fn(() => mockSection),
@@ -80,6 +96,61 @@ describe('ManagementService', () => {
         order: 40,
         title: 'Role Mappings',
       });
+      expect(mockSection.registerApp).not.toHaveBeenCalledWith(
+        expect.objectContaining({ id: applicationConnectionsManagementApp.id })
+      );
+    });
+
+    it('registers Application Connections app when UIAM is enabled', () => {
+      const mockUiamSection = createManagementSectionMock();
+      const { fatalErrors, getStartServices } = coreMock.createSetup();
+      const { authc } = securityMock.createSetup();
+      authc.isUIAMEnabled.mockReturnValue(true);
+      const license = licenseMock.create();
+      const managementSetup = managementPluginMock.createSetupContract();
+      managementSetup.sections.section.security = mockUiamSection;
+
+      const service = new ManagementService(createConfigMock());
+      service.setup({
+        getStartServices,
+        license,
+        fatalErrors,
+        authc,
+        management: managementSetup,
+        buildFlavor: 'serverless',
+      });
+
+      expect(mockUiamSection.registerApp).toHaveBeenCalledTimes(5);
+      expect(mockUiamSection.registerApp).toHaveBeenCalledWith({
+        id: applicationConnectionsManagementApp.id,
+        mount: expect.any(Function),
+        order: 25,
+        title: 'Application connections',
+      });
+    });
+
+    it('does not register Application Connections app when UIAM is disabled, even on serverless', () => {
+      const mockServerlessSection = createManagementSectionMock();
+      const { fatalErrors, getStartServices } = coreMock.createSetup();
+      const { authc } = securityMock.createSetup();
+      authc.isUIAMEnabled.mockReturnValue(false);
+      const license = licenseMock.create();
+      const managementSetup = managementPluginMock.createSetupContract();
+      managementSetup.sections.section.security = mockServerlessSection;
+
+      const service = new ManagementService(createConfigMock());
+      service.setup({
+        getStartServices,
+        license,
+        fatalErrors,
+        authc,
+        management: managementSetup,
+        buildFlavor: 'serverless',
+      });
+
+      expect(mockServerlessSection.registerApp).not.toHaveBeenCalledWith(
+        expect.objectContaining({ id: applicationConnectionsManagementApp.id })
+      );
     });
 
     it('Users, Roles, and Role Mappings are not registered when their config settings are set to false', () => {
@@ -87,7 +158,6 @@ describe('ManagementService', () => {
       const { fatalErrors, getStartServices } = coreMock.createSetup();
       const { authc } = securityMock.createSetup();
       const license = licenseMock.create();
-
       const managementSetup: ManagementSetup = {
         sections: {
           register: jest.fn(() => mockSectionWithConfig),
@@ -117,7 +187,6 @@ describe('ManagementService', () => {
         buildFlavor: 'traditional',
       });
 
-      // Only API Keys app should be registered
       expect(mockSectionWithConfig.registerApp).toHaveBeenCalledTimes(1);
       expect(mockSectionWithConfig.registerApp).not.toHaveBeenCalledWith({
         id: 'users',
@@ -147,10 +216,19 @@ describe('ManagementService', () => {
   });
 
   describe('start()', () => {
-    function startService(
-      initialFeatures: Partial<SecurityLicenseFeatures>,
-      canManageSecurity: boolean = true
-    ) {
+    interface StartServiceOptions {
+      initialFeatures: Partial<SecurityLicenseFeatures>;
+      canManageSecurity?: boolean;
+      buildFlavor?: BuildFlavor;
+      isUIAMEnabled?: boolean;
+    }
+
+    function startService({
+      initialFeatures,
+      canManageSecurity = true,
+      buildFlavor = 'traditional',
+      isUIAMEnabled = false,
+    }: StartServiceOptions) {
       const { fatalErrors, getStartServices } = coreMock.createSetup();
 
       const licenseSubject = new BehaviorSubject<SecurityLicenseFeatures>(
@@ -180,17 +258,19 @@ describe('ManagementService', () => {
         registerAutoOpsStatusHook: jest.fn(),
       };
 
+      const { authc } = securityMock.createSetup();
+      authc.isUIAMEnabled.mockReturnValue(isUIAMEnabled);
+
       service.setup({
         getStartServices: getStartServices as any,
         license,
         fatalErrors,
-        authc: securityMock.createSetup().authc,
+        authc,
         management: managementSetup,
-        buildFlavor: 'traditional',
+        buildFlavor,
       });
 
       const getMockedApp = (id: string) => {
-        // All apps are enabled by default.
         let enabled = true;
         return {
           id,
@@ -205,13 +285,17 @@ describe('ManagementService', () => {
           }),
         } as unknown as jest.Mocked<ManagementApp>;
       };
-      mockSection.getApp = jest.fn().mockImplementation((id) => mockApps.get(id));
       const mockApps = new Map<string, jest.Mocked<ManagementApp>>([
         [usersManagementApp.id, getMockedApp(usersManagementApp.id)],
         [rolesManagementApp.id, getMockedApp(rolesManagementApp.id)],
         [apiKeysManagementApp.id, getMockedApp(apiKeysManagementApp.id)],
         [roleMappingsManagementApp.id, getMockedApp(roleMappingsManagementApp.id)],
+        [
+          applicationConnectionsManagementApp.id,
+          getMockedApp(applicationConnectionsManagementApp.id),
+        ],
       ] as Array<[string, jest.Mocked<ManagementApp>]>);
+      mockSection.getApp = jest.fn().mockImplementation((id) => mockApps.get(id));
 
       service.start({
         capabilities: {
@@ -221,6 +305,7 @@ describe('ManagementService', () => {
               roles: canManageSecurity,
               role_mappings: canManageSecurity,
               api_keys: canManageSecurity,
+              [applicationConnectionsManagementApp.id]: canManageSecurity,
             },
           },
           navLinks: {},
@@ -236,94 +321,162 @@ describe('ManagementService', () => {
       };
     }
 
+    // Apps that are license-gated only. Application Connections is excluded
+    // because it has an additional UIAM gate on top of `showLinks`.
+    const LICENSE_GATED_APP_IDS = [
+      usersManagementApp.id,
+      rolesManagementApp.id,
+      apiKeysManagementApp.id,
+      roleMappingsManagementApp.id,
+    ];
+
     it('does not do anything if `showLinks` is `true` at `start`', () => {
-      const { mockApps } = startService({ showLinks: true, showRoleMappingsManagement: true });
-      for (const [, mockApp] of mockApps) {
+      const { mockApps } = startService({
+        initialFeatures: { showLinks: true, showRoleMappingsManagement: true },
+      });
+      for (const appId of LICENSE_GATED_APP_IDS) {
+        const mockApp = mockApps.get(appId)!;
         expect(mockApp.enable).not.toHaveBeenCalled();
         expect(mockApp.disable).not.toHaveBeenCalled();
         expect(mockApp.enabled).toBe(true);
       }
     });
 
-    it('disables all apps if `showLinks` is `false` at `start`', () => {
-      const { mockApps } = startService({ showLinks: false, showRoleMappingsManagement: true });
-      for (const [, mockApp] of mockApps) {
-        expect(mockApp.enabled).toBe(false);
+    it('disables all license-gated apps if `showLinks` is `false` at `start`', () => {
+      const { mockApps } = startService({
+        initialFeatures: { showLinks: false, showRoleMappingsManagement: true },
+      });
+      for (const appId of LICENSE_GATED_APP_IDS) {
+        expect(mockApps.get(appId)!.enabled).toBe(false);
       }
     });
 
     it('disables only Role Mappings app if `showLinks` is `true`, but `showRoleMappingsManagement` is `false` at `start`', () => {
-      const { mockApps } = startService({ showLinks: true, showRoleMappingsManagement: false });
-      for (const [appId, mockApp] of mockApps) {
-        expect(mockApp.enabled).toBe(appId !== roleMappingsManagementApp.id);
+      const { mockApps } = startService({
+        initialFeatures: { showLinks: true, showRoleMappingsManagement: false },
+      });
+      for (const appId of LICENSE_GATED_APP_IDS) {
+        expect(mockApps.get(appId)!.enabled).toBe(appId !== roleMappingsManagementApp.id);
       }
     });
 
-    it('apps are disabled if `showLinks` changes after `start`', () => {
+    it('license-gated apps are disabled if `showLinks` changes after `start`', () => {
       const { mockApps, updateFeatures } = startService({
-        showLinks: true,
-        showRoleMappingsManagement: true,
+        initialFeatures: { showLinks: true, showRoleMappingsManagement: true },
       });
-      for (const [, mockApp] of mockApps) {
-        expect(mockApp.enabled).toBe(true);
+      for (const appId of LICENSE_GATED_APP_IDS) {
+        expect(mockApps.get(appId)!.enabled).toBe(true);
       }
 
       updateFeatures({ showLinks: false, showRoleMappingsManagement: false });
 
-      for (const [, mockApp] of mockApps) {
-        expect(mockApp.enabled).toBe(false);
+      for (const appId of LICENSE_GATED_APP_IDS) {
+        expect(mockApps.get(appId)!.enabled).toBe(false);
       }
     });
 
     it('apps are disabled if capabilities are false', () => {
-      const { mockApps } = startService(
-        {
+      const { mockApps } = startService({
+        initialFeatures: {
           showLinks: true,
           showRoleMappingsManagement: true,
         },
-        false
-      );
-      for (const [, mockApp] of mockApps) {
-        expect(mockApp.enabled).toBe(false);
+        canManageSecurity: false,
+      });
+      for (const appId of LICENSE_GATED_APP_IDS) {
+        expect(mockApps.get(appId)!.enabled).toBe(false);
       }
     });
 
     it('role mappings app is disabled if `showRoleMappingsManagement` changes after `start`', () => {
       const { mockApps, updateFeatures } = startService({
-        showLinks: true,
-        showRoleMappingsManagement: true,
+        initialFeatures: { showLinks: true, showRoleMappingsManagement: true },
       });
-      for (const [, mockApp] of mockApps) {
-        expect(mockApp.enabled).toBe(true);
+      for (const appId of LICENSE_GATED_APP_IDS) {
+        expect(mockApps.get(appId)!.enabled).toBe(true);
       }
 
       updateFeatures({ showLinks: true, showRoleMappingsManagement: false });
 
-      for (const [appId, mockApp] of mockApps) {
-        expect(mockApp.enabled).toBe(appId !== roleMappingsManagementApp.id);
+      for (const appId of LICENSE_GATED_APP_IDS) {
+        expect(mockApps.get(appId)!.enabled).toBe(appId !== roleMappingsManagementApp.id);
       }
     });
 
     it('apps are re-enabled if `showLinks` eventually transitions to `true` after `start`', () => {
       const { mockApps, updateFeatures } = startService({
-        showLinks: true,
-        showRoleMappingsManagement: true,
+        initialFeatures: { showLinks: true, showRoleMappingsManagement: true },
       });
-      for (const [, mockApp] of mockApps) {
-        expect(mockApp.enabled).toBe(true);
+      for (const appId of LICENSE_GATED_APP_IDS) {
+        expect(mockApps.get(appId)!.enabled).toBe(true);
       }
 
       updateFeatures({ showLinks: false, showRoleMappingsManagement: false });
 
-      for (const [, mockApp] of mockApps) {
-        expect(mockApp.enabled).toBe(false);
+      for (const appId of LICENSE_GATED_APP_IDS) {
+        expect(mockApps.get(appId)!.enabled).toBe(false);
       }
 
       updateFeatures({ showLinks: true, showRoleMappingsManagement: true });
 
-      for (const [, mockApp] of mockApps) {
-        expect(mockApp.enabled).toBe(true);
+      for (const appId of LICENSE_GATED_APP_IDS) {
+        expect(mockApps.get(appId)!.enabled).toBe(true);
       }
+    });
+
+    describe('Application Connections app (UIAM gate)', () => {
+      it('is not enabled when UIAM is disabled', () => {
+        const { mockApps } = startService({
+          initialFeatures: { showLinks: true, showRoleMappingsManagement: true },
+          isUIAMEnabled: false,
+        });
+        // App is never added to the status array when UIAM is disabled, so it
+        // stays at its default mock-enabled state and is never touched by the
+        // service. We only assert that it was neither enabled nor disabled.
+        const app = mockApps.get(applicationConnectionsManagementApp.id)!;
+        expect(app.enable).not.toHaveBeenCalled();
+        expect(app.disable).not.toHaveBeenCalled();
+      });
+
+      it('is enabled when UIAM is enabled and `showLinks` is true', () => {
+        const { mockApps } = startService({
+          initialFeatures: { showLinks: true, showRoleMappingsManagement: true },
+          isUIAMEnabled: true,
+        });
+        expect(mockApps.get(applicationConnectionsManagementApp.id)!.enabled).toBe(true);
+      });
+
+      it('is disabled when `showLinks` is false', () => {
+        const { mockApps } = startService({
+          initialFeatures: { showLinks: false, showRoleMappingsManagement: true },
+          isUIAMEnabled: true,
+        });
+        expect(mockApps.get(applicationConnectionsManagementApp.id)!.enabled).toBe(false);
+      });
+
+      it('toggles reactively when `showLinks` changes after `start`', () => {
+        const { mockApps, updateFeatures } = startService({
+          initialFeatures: { showLinks: false, showRoleMappingsManagement: true },
+          isUIAMEnabled: true,
+        });
+        const app = mockApps.get(applicationConnectionsManagementApp.id)!;
+        expect(app.enabled).toBe(false);
+
+        updateFeatures({ showLinks: true, showRoleMappingsManagement: true });
+        expect(app.enabled).toBe(true);
+
+        updateFeatures({ showLinks: false, showRoleMappingsManagement: true });
+        expect(app.enabled).toBe(false);
+      });
+
+      it('is disabled when the user lacks management capability, even with UIAM enabled', () => {
+        const { mockApps } = startService({
+          initialFeatures: { showLinks: true, showRoleMappingsManagement: true },
+          canManageSecurity: false,
+          isUIAMEnabled: true,
+        });
+        expect(mockApps.get(applicationConnectionsManagementApp.id)!.enabled).toBe(false);
+      });
     });
   });
 });

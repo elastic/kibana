@@ -65,7 +65,17 @@ ${formatConnectorsBlock(prefetched.connectors)}
 - Use \`{{ event }}\`, \`{{ inputs.* }}\`, \`{{ steps.<name>.output.* }}\` for
   Liquid templating. NEVER use \`{{ triggers.event }}\` or \`{{ trigger.event }}\`.
 
+- Whenever a step references \`{{ inputs.<name> }}\`, you MUST declare that input
+  under the \`manual\` trigger's \`inputs.properties\`. Add it to \`inputs.required\`
+  unless it has a sensible \`default\`. Never reference an input you have not declared.
+
 - Prefer connector-based steps over raw HTTP for integrations like Slack, Jira, PagerDuty, etc.
+
+- When indexing into Elasticsearch, add a time field only if the document records
+  something that happened at a point in time — never for static or reference data.
+  Name it \`@timestamp\` and render it with \`{{ now | date_to_xmlschema }}\`; bare
+  \`{{ now }}\` maps as \`text\` instead of \`date\`. Never hardcode a \`Z\` suffix, as
+  the \`date\` filter formats in the server's local time zone.
 
 ## Providing your final response
 

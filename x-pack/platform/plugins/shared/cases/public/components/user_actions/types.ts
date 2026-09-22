@@ -7,6 +7,7 @@
 
 import type { EuiCommentProps, EuiThemeComputed } from '@elastic/eui';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import type { CasesPermissions } from '../../../common/ui/types';
 import type { UserActionTypes } from '../../../common/types/domain';
 import type {
   CaseUI,
@@ -16,11 +17,8 @@ import type {
   CaseUserActionsStats,
   CasesConfigurationUI,
 } from '../../containers/types';
-import type { CasesNavigation } from '../links';
 import type { UNSUPPORTED_ACTION_TYPES } from './constants';
 import type { OnUpdateFields } from '../case_view/types';
-import type { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
-import type { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
 import type { UnifiedAttachmentTypeRegistry } from '../../client/attachment_framework/unified_attachment_registry';
 import type { CurrentUserProfile } from '../types';
 import type { UserActivityParams } from '../user_actions_activity_bar/types';
@@ -31,7 +29,6 @@ export interface UserActionTreeProps {
   currentUserProfile: CurrentUserProfile;
   data: CaseUI;
   casesConfiguration: CasesConfigurationUI;
-  actionsNavigation?: ActionsNavigation;
   onUpdateField: ({ key, value, onSuccess, onError }: OnUpdateFields) => void;
   statusActionButton: JSX.Element | null;
   attachActionButton?: JSX.Element | null;
@@ -51,9 +48,8 @@ export interface UserActionBuilderArgs {
   casesConfiguration: CasesConfigurationUI;
   userProfiles: Map<string, UserProfileWithAvatar>;
   currentUserProfile: CurrentUserProfile;
-  externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
-  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
+  permissions: CasesPermissions;
   caseConnectors: CaseConnectors;
   userAction: UserActionUI;
   attachments: AttachmentUIV2[];
@@ -61,7 +57,6 @@ export interface UserActionBuilderArgs {
   manageMarkdownEditIds: string[];
   selectedOutlineCommentId: string;
   loadingCommentIds: string[];
-  actionsNavigation?: ActionsNavigation;
   handleOutlineComment: (id: string) => void;
   handleDeleteComment: (id: string, successToasterTitle: string) => void;
   euiTheme: EuiThemeComputed<{}>;
@@ -72,8 +67,6 @@ export type UserActionBuilder = (args: UserActionBuilderArgs) => {
 };
 
 export type UserActionBuilderMap = Record<SupportedUserActionTypes, UserActionBuilder>;
-
-export type ActionsNavigation = CasesNavigation<string, 'configurable'>;
 
 interface Signal {
   rule: {

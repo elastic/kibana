@@ -7,7 +7,13 @@
 
 import type { FC } from 'react';
 import React, { useCallback, useState } from 'react';
-import { EuiButtonEmpty, EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiText,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 
 import * as i18n from './translations';
 
@@ -18,6 +24,7 @@ export interface ErrorsPopoverProps {
 
 export const ErrorsPopover: FC<ErrorsPopoverProps> = ({ ariaLabel, errors }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const popoverTitleId = useGeneratedHtmlId();
 
   const handleToggle = useCallback(() => {
     setIsOpen(!isOpen);
@@ -30,6 +37,7 @@ export const ErrorsPopover: FC<ErrorsPopoverProps> = ({ ariaLabel, errors }) => 
   return (
     <EuiPopover
       data-test-subj="eql-validation-errors-popover"
+      aria-labelledby={popoverTitleId}
       button={
         <EuiButtonEmpty
           data-test-subj="eql-validation-errors-popover-button"
@@ -47,7 +55,7 @@ export const ErrorsPopover: FC<ErrorsPopoverProps> = ({ ariaLabel, errors }) => 
       anchorPosition="downCenter"
     >
       <div data-test-subj="eql-validation-errors-popover-content">
-        <EuiPopoverTitle>{i18n.EQL_VALIDATION_ERRORS_TITLE}</EuiPopoverTitle>
+        <EuiPopoverTitle id={popoverTitleId}>{i18n.EQL_VALIDATION_ERRORS_TITLE}</EuiPopoverTitle>
         {errors.map((message, idx) => (
           <EuiText key={idx}>{message}</EuiText>
         ))}

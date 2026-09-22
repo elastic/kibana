@@ -69,6 +69,34 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     /**
+     * Navigate directly to the editor for a saved Lens visualization by id and
+     * wait for the rendered chart to settle. Prefer this over going through
+     * the visualize listing page (search + click) when the saved object id is
+     * known (e.g. fixture-loaded visualizations).
+     *
+     * @param id - the saved object id of the Lens visualization
+     * @param visDataTestSubj - the chart container `data-test-subj`.
+     *   example: `xyVisChart` (line/bar/area), `partitionVisChart`
+     *   (pie/treemap/donut), `mtrVis` (new metric), `legacyMtrVis` (legacy
+     *   metric), `heatmapChart`, `lnsVisualizationContainer` (datatable).
+     */
+    async openEditor(id: string, visDataTestSubj: string) {
+      await common.navigateToApp('lens', { hash: `#/edit/${id}` });
+      await this.waitForVisualization(visDataTestSubj);
+    },
+
+    /**
+     * Navigate directly to a new Lens editor, skipping the visualize
+     * listing page and the visualization-type selection modal. Prefer this
+     * over `visualize.navigateToNewVisualization() + visualize.clickVisType('lens')`
+     * when the test builds a chart from scratch.
+     */
+    async openNewEditor() {
+      await common.navigateToApp('lens');
+      await testSubjects.existOrFail('lnsApp', { timeout: 10000 });
+    },
+
+    /**
      * Move the date filter to the specified time range, defaults to
      * a range that has data in our dataset.
      */
@@ -217,8 +245,19 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       } else {
         await this.selectOperation(opts.operation, opts.isPreviousIncompatible);
       }
-      if (opts.field) {
-        await this.selectOptionFromComboBox('indexPattern-dimension-field', opts.field);
+      const field = opts.field;
+      if (field) {
+        await this.selectOptionFromComboBox('indexPattern-dimension-field', field);
+        // Close too early discards the operation→field transition. Do not wait on the
+        // combobox input: setElement types `field` as a filter before the option is
+        // clicked. data-selected-field is the committed option display name and
+        // updates only after insertOrReplaceColumn. Independent of aria-invalid
+        // (incompleteOperation / CCS). Compare exactly — labels are case-sensitive.
+        await retry.waitFor('field selection to commit', async () => {
+          const fieldCombo = await testSubjects.find('indexPattern-dimension-field');
+          const committedLabel = (await fieldCombo.getAttribute('data-selected-field')) ?? '';
+          return committedLabel === field;
+        });
       }
 
       if (opts.formula) {
@@ -589,6 +628,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         )[dimensionIndex];
         await dimensionEditor.click();
       });
+      await retry.waitFor('dimension editor flyout to open', async () =>
+        this.isDimensionEditorOpen()
+      );
     },
 
     /**
@@ -628,10 +670,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         ? `lns-indexPatternDimension-${operation} incompatible`
         : `lns-indexPatternDimension-${operation}`;
       async function getAriaPressed() {
-        const operationSelectorContainer = await testSubjects.find(operationSelector);
-        await testSubjects.click(operationSelector);
-        const ariaPressed = await operationSelectorContainer.getAttribute('aria-pressed');
-        return ariaPressed;
+        await testSubjects.click(`${operationSelector}-label`);
+        const operationButton = await testSubjects.find(operationSelector);
+        return await operationButton.getAttribute('aria-pressed');
       }
 
       // adding retry here as it seems that there is a flakiness of the operation click
@@ -795,17 +836,29 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
 
       await testSubjects.click('confirmSaveSavedObjectButton');
-      await retry.waitForWithTimeout('Save modal to disappear', 5000, () =>
-        testSubjects
-          .missingOrFail('confirmSaveSavedObjectButton')
-          .then(() => true)
-          .catch(() => false)
-      );
+      await common.waitForSaveModalToClose();
     },
 
     /**
      * Save the current Lens visualization.
      */
+    async openSaveOptionsIfNeeded() {
+      if (await testSubjects.exists('lnsApp_saveButton')) {
+        return;
+      }
+      const secondarySubjects = [
+        'lnsApp_saveAndReturnButton-secondary-button',
+        'lnsApp_replaceInDashboardButton-secondary-button',
+        'lnsApp_replaceInCanvasButton-secondary-button',
+      ];
+      for (const subject of secondarySubjects) {
+        if (await testSubjects.exists(subject)) {
+          await testSubjects.click(subject);
+          return;
+        }
+      }
+    },
+
     async save(
       title: string,
       saveAsNew?: boolean,
@@ -816,6 +869,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       description?: string
     ) {
       await header.waitUntilLoadingHasFinished();
+      await this.openSaveOptionsIfNeeded();
       await testSubjects.click('lnsApp_saveButton');
 
       await this.saveModal(
@@ -844,7 +898,22 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async editDimensionLabel(label: string) {
-      await testSubjects.setValue('name-input', label, { clearWithKeyboard: true });
+      // NameInput sits in the Appearance block at the bottom of the flyout and
+      // remounts when the column label commits (DebouncedInput key). Wait for it
+      // to exist, then type+assert in one retry so a remount cannot leave the
+      // wait looking at a detached node.
+      await retry.waitFor('name-input to exist', async () =>
+        testSubjects.exists('name-input', { timeout: 1000 })
+      );
+      await retry.try(async () => {
+        await testSubjects.setValue('name-input', label, { clearWithKeyboard: true });
+        expect(
+          await testSubjects.getAttribute('name-input', 'value', {
+            findTimeout: 2000,
+            tryTimeout: 5000,
+          })
+        ).to.eql(label);
+      });
     },
     async editDimensionFormat(format: string, options?: { decimals?: number; prefix?: string }) {
       await this.selectOptionFromComboBox('indexPattern-dimension-format', format);
@@ -1367,9 +1436,21 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
     },
 
-    async setTableDynamicColoring(coloringType: 'none' | 'cell' | 'text' | 'badge') {
-      const label = coloringType.charAt(0).toUpperCase() + coloringType.slice(1);
-      await this.selectOptionFromComboBox('lnsDatatable_dynamicColoring_groups', label);
+    async setTableDynamicColoring(coloringType: 'none' | 'cell' | 'text' | 'badge' | 'progress') {
+      // The "Cell decoration" combo box label diverges from the stored value
+      // (the `cell` value is surfaced as "Background"), so map explicitly rather
+      // than title-casing the stored value.
+      const labelByColoringType: Record<typeof coloringType, string> = {
+        none: 'None',
+        cell: 'Background',
+        text: 'Text',
+        badge: 'Badge',
+        progress: 'Progress bar',
+      };
+      await this.selectOptionFromComboBox(
+        'lnsDatatable_dynamicColoring_groups',
+        labelByColoringType[coloringType]
+      );
     },
 
     async openPalettePanel() {
@@ -1587,7 +1668,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       if (inViewMode) {
         await dashboard.switchToEditMode();
       }
-      await dashboardAddPanel.clickCreateNewLink();
+      await dashboardAddPanel.clickAddLensPanel();
 
       if (!ignoreTimeFilter) {
         await this.goToTimeRange();
@@ -1971,37 +2052,15 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return testSubjects.exists('lnsEmptySizeRatioOption');
     },
 
-    settingsMenuOpen() {
-      return testSubjects.exists('lnsApp__settingsMenu');
-    },
-
-    async openSettingsMenu() {
-      if (await this.settingsMenuOpen()) return;
-
-      await testSubjects.click('lnsApp_settingsButton');
-    },
-
-    async closeSettingsMenu() {
-      if (await this.settingsMenuOpen()) {
-        await testSubjects.click('lnsApp_settingsButton');
-      }
-    },
-
     async enableAutoApply() {
-      await this.openSettingsMenu();
-
       return testSubjects.setEuiSwitch('lnsToggleAutoApply', 'check');
     },
 
     async disableAutoApply() {
-      await this.openSettingsMenu();
-
       return testSubjects.setEuiSwitch('lnsToggleAutoApply', 'uncheck');
     },
 
     async getAutoApplyEnabled() {
-      await this.openSettingsMenu();
-
       return testSubjects.isEuiSwitchChecked('lnsToggleAutoApply');
     },
 
@@ -2098,18 +2157,40 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async clickShareButton() {
+      if (await testSubjects.exists('lnsApp_shareButton')) {
+        return await testSubjects.click('lnsApp_shareButton');
+      }
+      if (await testSubjects.exists('app-menu-overflow-button')) {
+        await testSubjects.click('app-menu-overflow-button');
+      }
       return await testSubjects.click('lnsApp_shareButton');
     },
 
     async clickExportButton() {
+      if (await testSubjects.exists('lnsApp_exportButton')) {
+        return await testSubjects.click('lnsApp_exportButton');
+      }
+      if (await testSubjects.exists('app-menu-overflow-button')) {
+        await testSubjects.click('app-menu-overflow-button');
+      }
       return await testSubjects.click('lnsApp_exportButton');
     },
 
     async isShareable() {
+      if (!(await testSubjects.exists('lnsApp_shareButton'))) {
+        if (await testSubjects.exists('app-menu-overflow-button')) {
+          await testSubjects.click('app-menu-overflow-button');
+        }
+      }
       return await testSubjects.isEnabled('lnsApp_shareButton');
     },
 
-    isExportActionEnabled() {
+    async isExportActionEnabled() {
+      if (!(await testSubjects.exists('lnsApp_exportButton'))) {
+        if (await testSubjects.exists('app-menu-overflow-button')) {
+          await testSubjects.click('app-menu-overflow-button');
+        }
+      }
       return testSubjects.isEnabled('lnsApp_exportButton');
     },
 
@@ -2162,7 +2243,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         return isExportPopoverOpen;
       });
 
-      await testSubjects.click(`exportMenuItem-${label}`);
+      await testSubjects.clickWhenNotDisabled(`exportMenuItem-${label}`);
     },
 
     async getUrl() {
@@ -2308,12 +2389,21 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       );
     },
 
+    /** Returns `undefined` when the name is hidden, as the chart omits the element for an empty label. */
     async getSecondaryMetricLabel(tile?: WebElementWrapper) {
       const ECH_SECONDARY_METRIC_LABEL_SELECTOR = '.echSecondaryMetric__label';
-      const label = tile
-        ? await this.getMetricElementIfExists(ECH_SECONDARY_METRIC_LABEL_SELECTOR, tile)
-        : await find.byCssSelector(ECH_SECONDARY_METRIC_LABEL_SELECTOR);
-      return label ? label.getAttribute('innerText') : undefined;
+      if (tile) {
+        const label = await this.getMetricElementIfExists(
+          ECH_SECONDARY_METRIC_LABEL_SELECTOR,
+          tile
+        );
+        return label ? label.getAttribute('innerText') : undefined;
+      }
+      if (!(await find.existsByCssSelector(ECH_SECONDARY_METRIC_LABEL_SELECTOR))) {
+        return undefined;
+      }
+      const label = await find.byCssSelector(ECH_SECONDARY_METRIC_LABEL_SELECTOR);
+      return label.getAttribute('innerText');
     },
 
     async hasSecondaryMetricBadge(tile?: WebElementWrapper) {

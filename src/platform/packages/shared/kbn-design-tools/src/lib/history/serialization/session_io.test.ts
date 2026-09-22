@@ -176,5 +176,87 @@ describe('session_io scroll offset', () => {
       expect(session.el.style.left).toBe('100px');
       expect(session.el.style.top).toBe('243px');
     });
+
+    it('should keep root width auto on import for no-wrap text edits', async () => {
+      createScrollContainer(0, 0);
+      const registry = new ElementRegistry();
+
+      const state = makeMinimalExport(
+        { scroll: { x: 0, y: 0 } },
+        {
+          outerHTML:
+            '<span data-devtool-managed=""><span class="txt" style="white-space:nowrap">Saved</span></span>',
+          inlineStyles: 'position: fixed; left: 100px; top: 200px; width: 80px; height: 40px;',
+          textEdits: [
+            {
+              parentPath: { selector: 'body', fingerprint: '' },
+              parentRelativeSelector: '.txt',
+              childIndex: 0,
+              original: 'Saved',
+              current: 'Saved aaaaaaaaa',
+            },
+          ],
+        }
+      );
+
+      await importState(state, registry);
+
+      const session = [...registry.values()][0];
+      expect(session.el.style.getPropertyValue('width')).toBe('');
+      expect(session.el.style.getPropertyValue('height')).toBe('');
+      expect(session.el.textContent).toContain('Saved aaaaaaaaa');
+    });
+
+    it('should keep root auto dimensions on import for no-wrap text style-only edits', async () => {
+      createScrollContainer(0, 0);
+      const registry = new ElementRegistry();
+
+      const state = makeMinimalExport(
+        { scroll: { x: 0, y: 0 } },
+        {
+          outerHTML:
+            '<span data-devtool-managed=""><span class="txt" style="white-space:nowrap">Saved</span></span>',
+          inlineStyles: 'position: fixed; left: 100px; top: 200px; width: 80px; height: 40px;',
+          textEdits: [],
+          styleEdits: [
+            {
+              targetPath: { selector: 'body', fingerprint: '' },
+              relativeSelector: '.txt',
+              property: 'font-size',
+              original: '',
+              originalPriority: '',
+              current: '20px',
+              currentPriority: 'important',
+            },
+            {
+              targetPath: { selector: 'body', fingerprint: '' },
+              relativeSelector: '',
+              property: 'width',
+              original: '80px',
+              originalPriority: 'important',
+              current: '',
+              currentPriority: '',
+            },
+            {
+              targetPath: { selector: 'body', fingerprint: '' },
+              relativeSelector: '',
+              property: 'height',
+              original: '40px',
+              originalPriority: 'important',
+              current: '',
+              currentPriority: '',
+            },
+          ],
+        }
+      );
+
+      await importState(state, registry);
+
+      const session = [...registry.values()][0];
+      expect(session.el.style.getPropertyValue('width')).toBe('');
+      expect(session.el.style.getPropertyValue('height')).toBe('');
+      const txt = session.el.querySelector('.txt') as HTMLElement;
+      expect(txt.style.getPropertyValue('font-size')).toBe('20px');
+    });
   });
 });

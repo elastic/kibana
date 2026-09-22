@@ -13,7 +13,7 @@ export const COMMON_HEADERS = {
 
 export const API_AGENT_BUILDER = '/api/agent_builder';
 export const INTERNAL_AGENT_BUILDER = '/internal/agent_builder';
-export const INTERNAL_AGENT_CONTEXT_LAYER = '/internal/agent_context_layer';
+export const INTERNAL_AGENT_BUILDER_SML = '/internal/agent_builder_sml';
 
 /** Public Agent Builder HTTP APIs use this Elastic API version header. */
 export const ELASTIC_API_VERSION = '2023-10-31';
@@ -29,3 +29,6 @@ export const CHAT_CONVERSATIONS_INDEX = '.chat-conversations';
 
 /** Matches `chatSystemIndex('agents')` from `@kbn/agent-builder-server`. */
 export const CHAT_AGENTS_INDEX = '.chat-agents';
+
+/** Agent executions system index (`agentExecutionIndexName` = `chatSystemIndex('agent-executions')`). */
+export const AGENT_EXECUTIONS_INDEX = '.chat-agent-executions';

@@ -180,6 +180,9 @@ export function SloItemActions({
 
   return (
     <EuiPopover
+      aria-label={i18n.translate('xpack.slo.sloItemActions.popoverAriaLabel', {
+        defaultMessage: 'SLO item actions',
+      })}
       anchorPosition="downLeft"
       button={btnProps ? <IconPanel>{btn}</IconPanel> : btn}
       panelPaddingSize="m"
@@ -319,7 +322,7 @@ export function SloItemActions({
               data-test-subj="sloActionsAddToDashboard"
             >
               {i18n.translate('xpack.slo.item.actions.addToDashboard', {
-                defaultMessage: 'Add to Dashboard',
+                defaultMessage: 'Add to dashboard',
               })}
             </EuiContextMenuItem>
           ) : (

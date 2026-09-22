@@ -19,3 +19,9 @@ export {
   transformMonitoring as transformMonitoringV1,
   transformFlapping as transformFlappingV1,
 } from './transform_rule_to_rule_response/v1';
+
+export { transformRuleToRuleResponseInternal } from './transform_rule_to_rule_response_internal/latest';
+export {
+  transformRuleToRuleResponseInternal as transformRuleToRuleResponseInternalV1,
+  transformRuleActions as transformRuleActionsInternalV1,
+} from './transform_rule_to_rule_response_internal/v1';

@@ -6,8 +6,8 @@
  */
 
 import type { SavedObject } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import expect from '@kbn/expect';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 import type { CopyResponse } from '@kbn/spaces-plugin/server/lib/copy_to_spaces';
 
 import type {

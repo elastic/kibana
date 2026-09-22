@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/content-packs-schema'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/obs-onboarding-team'
+  defaultOwner: '@elastic/streams-ui'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/content-packs-schema'
   description: Moon project for @kbn/content-packs-schema
   channel: ''
-  owner: '@elastic/obs-onboarding-team'
+  owner: '@elastic/streams-ui'
   sourceRoot: x-pack/platform/packages/shared/kbn-content-packs-schema
 dependsOn:
   - '@kbn/esql-utils'

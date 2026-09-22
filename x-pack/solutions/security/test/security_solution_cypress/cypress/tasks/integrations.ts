@@ -9,18 +9,11 @@ import {
   ADD_INTEGRATION_BTN,
   MODAL_CONFIRMATION_TITLE,
   SAVE_AND_CONTINUE_BTN,
-  SKIP_AGENT_INSTALLATION_BTN,
 } from '../screens/integrations';
 
 export const installIntegration = () => {
   cy.get(ADD_INTEGRATION_BTN).click();
   cy.url({ timeout: 60000 }).should('include', '/add-integration');
-  cy.url().then((url) => {
-    const isMultiPageLayout = url.includes('useMultiPageLayout');
-    if (isMultiPageLayout) {
-      cy.get(SKIP_AGENT_INSTALLATION_BTN, { timeout: 30000 }).click();
-    }
-  });
 
   cy.get(SAVE_AND_CONTINUE_BTN, { timeout: 30000 })
     .should('be.visible')

@@ -11,6 +11,7 @@ import React from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import type { ContentListItem } from '@kbn/content-list-provider';
 import { i18n } from '@kbn/i18n';
+import { CONTENT_LIST_TEST_SUBJECTS } from '@kbn/content-list-common';
 import type { ColumnBuilderContext } from '../types';
 import { column } from '../part';
 import { getColumnLayoutProps, pickAttribute, type ColumnLayoutProps } from '../layout';
@@ -23,7 +24,7 @@ import { CreatedByCell } from './created_by_cell';
  * column header *and* the filter button, correcting the legacy
  * `TableListView` mismatch where the column said `'Creator'` but the filter
  * said `'Created by'`. Translators in `de-DE.json` / `fr-FR.json` /
- * `ja-JP.json` / `zh-CN.json` get fresh entries for this key — see the
+ * `ja-JP.json` / `pt-BR.json` / `zh-CN.json` get fresh entries for this key — see the
  * package README's "Naming and translation backfill" notes before changing
  * the wording.
  */
@@ -81,7 +82,7 @@ export const buildCreatedByColumn = (
     // never free-form text — center it horizontally in the column so it
     // doesn't visually float to the left of the header.
     align: 'center',
-    'data-test-subj': 'content-list-table-column-createdBy',
+    'data-test-subj': CONTENT_LIST_TEST_SUBJECTS.columnCreatedBy,
     render: (value: string | undefined, record: ContentListItem) => {
       return <CreatedByCell createdBy={value} managed={!!record.managed} />;
     },

@@ -11,12 +11,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { isEqual } from 'lodash';
 import type { Query } from '@kbn/es-query';
 import type {
+  ColumnBuildHints,
   FieldBasedIndexPatternColumn,
-  FormattedIndexPatternColumn,
   GenericIndexPatternColumn,
-  ReferenceBasedIndexPatternColumn,
-  TextBasedLayerColumn,
-  LastValueIndexPatternColumn,
   FormBasedLayer,
   FormBasedPersistedState,
   IndexPattern,
@@ -129,15 +126,6 @@ export const generateMissingFieldMessage = (
   ],
 });
 
-export function getSafeName(name: string, indexPattern: IndexPattern | undefined): string {
-  const field = indexPattern?.getFieldByName(name);
-  return field
-    ? field.displayName
-    : i18n.translate('xpack.lens.indexPattern.missingFieldLabel', {
-        defaultMessage: 'Missing field',
-      });
-}
-
 function areDecimalsValid(inputValue: string | number, digits: number) {
   const [, decimals = ''] = `${inputValue}`.split('.');
   return decimals.length <= digits;
@@ -163,11 +151,40 @@ export function isValidNumber(
   );
 }
 
-export function isColumnOfType<C extends GenericIndexPatternColumn>(
-  type: C['operationType'],
-  column: GenericIndexPatternColumn
-): column is C {
-  return column.operationType === type;
+/**
+ * Checks if partial column hints match a specific operation type.
+ * Use this in `buildColumn` implementations when working with `previousColumn`
+ * which is typed as `ColumnBuildHints` (partial metadata, not a full column).
+ *
+ * Unlike `isColumnOfType`, this does NOT narrow the type - it only returns a boolean.
+ * Use `getBooleanParam` or `getNumberParam` to safely extract typed params.
+ */
+export function hasOperationType(column: ColumnBuildHints | undefined, type: string): boolean {
+  return column?.operationType === type;
+}
+
+/**
+ * Safely extracts a boolean param from column hints.
+ * Returns `undefined` if the param doesn't exist or isn't a boolean.
+ */
+export function getBooleanParam(
+  column: ColumnBuildHints | undefined,
+  paramName: string
+): boolean | undefined {
+  const value = column?.params?.[paramName];
+  return typeof value === 'boolean' ? value : undefined;
+}
+
+/**
+ * Safely extracts a number param from column hints.
+ * Returns `undefined` if the param doesn't exist or isn't a number.
+ */
+export function getNumberParam(
+  column: ColumnBuildHints | undefined,
+  paramName: string
+): number | undefined {
+  const value = column?.params?.[paramName];
+  return typeof value === 'number' ? value : undefined;
 }
 
 export const isColumn = (
@@ -179,22 +196,8 @@ export const isColumn = (
   return 'operationType' in setter;
 };
 
-export function isColumnFormatted(
-  column: GenericIndexPatternColumn | TextBasedLayerColumn
-): column is FormattedIndexPatternColumn | TextBasedLayerColumn {
-  return Boolean(
-    'params' in column &&
-      (column as FormattedIndexPatternColumn).params &&
-      'format' in (column as FormattedIndexPatternColumn).params!
-  );
-}
-
-export function getFormatFromPreviousColumn(
-  previousColumn: GenericIndexPatternColumn | ReferenceBasedIndexPatternColumn | undefined
-) {
-  return previousColumn?.dataType === 'number' &&
-    isColumnFormatted(previousColumn) &&
-    previousColumn.params
+export function getFormatFromPreviousColumn(previousColumn: ColumnBuildHints | undefined) {
+  return previousColumn?.dataType === 'number' && previousColumn.params?.format
     ? { format: previousColumn.params.format }
     : undefined;
 }
@@ -213,13 +216,14 @@ export function comparePreviousColumnFilter(filter: Query | undefined, field: st
 }
 
 export function getFilter(
-  previousColumn: GenericIndexPatternColumn | undefined,
+  previousColumn: ColumnBuildHints | undefined,
   columnParams: { kql?: string | undefined; lucene?: string | undefined } | undefined
 ) {
   let filter = previousColumn?.filter;
   if (
     previousColumn &&
-    isColumnOfType<LastValueIndexPatternColumn>('last_value', previousColumn) &&
+    previousColumn.operationType === 'last_value' &&
+    previousColumn.sourceField &&
     comparePreviousColumnFilter(filter, previousColumn.sourceField)
   ) {
     return;

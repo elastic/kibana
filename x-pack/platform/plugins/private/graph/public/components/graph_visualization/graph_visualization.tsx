@@ -153,6 +153,7 @@ export function GraphVisualization({
                     edgeClick(edge);
                   }}
                   className="gphEdge gphEdge--clickable"
+                  data-test-subj="graphClickableEdge"
                   style={{ strokeWidth: Math.max(edge.width, 15) }}
                   css={[
                     styles.edge(euiThemeContext),
@@ -191,6 +192,7 @@ export function GraphVisualization({
                     cx={kx}
                     cy={ky}
                     r={node.scaledSize}
+                    data-test-subj="graphNodeCircle"
                     css={[
                       css`
                         fill: ${node.color};

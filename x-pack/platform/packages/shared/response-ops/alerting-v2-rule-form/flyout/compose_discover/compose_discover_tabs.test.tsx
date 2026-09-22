@@ -7,28 +7,49 @@
 
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
-import { ComposeDiscoverTabs } from './compose_discover_tabs';
+import { I18nProvider } from '@kbn/i18n-react';
+import {
+  ComposeDiscoverTabs,
+  isAlertTabDisabled,
+  resolveActiveQueryTab,
+} from './compose_discover_tabs';
 
 jest.mock('@kbn/code-editor', () => {
   const ReactActual = jest.requireActual('react');
 
   return {
     ESQL_LANG_ID: 'esql',
+    monaco: {
+      KeyMod: { CtrlCmd: 2048 },
+      KeyCode: { KeyI: 39 },
+      editor: { EditorOption: { fontInfo: 0 } },
+    },
     CodeEditor: ({
       value,
       languageId,
       editorDidMount,
+      options,
     }: {
       value: string;
       languageId: string;
       editorDidMount?: (editor: unknown) => void;
+      options?: { theme?: string };
     }) => {
       ReactActual.useEffect(() => {
-        editorDidMount?.({ getModel: () => ({ id: value }) });
+        editorDidMount?.({
+          getModel: () => ({ id: value }),
+          getContentHeight: () => 40,
+          onDidContentSizeChange: () => ({ dispose: () => {} }),
+          addAction: () => ({ dispose: () => {} }),
+        });
       }, [editorDidMount, value]);
 
       return (
-        <pre data-language-id={languageId} data-test-subj="codeEditorMock">
+        <pre
+          data-language-id={languageId}
+          data-theme={options?.theme}
+          data-test-subj="codeEditorMock"
+        >
           {value}
         </pre>
       );
@@ -62,7 +83,7 @@ describe('ComposeDiscoverTabs', () => {
       <ComposeDiscoverTabs
         {...defaultProps}
         activeTab="recovery"
-        tabConfig={{ type: 'base-recovery' }}
+        tabs={['recovery']}
         onAlertEditorMount={onAlertEditorMount}
         onRecoveryEditorMount={onRecoveryEditorMount}
       />
@@ -79,7 +100,7 @@ describe('ComposeDiscoverTabs', () => {
       <ComposeDiscoverTabs
         {...defaultProps}
         activeTab="alert"
-        tabConfig={{ type: 'base-alert' }}
+        tabs={['base', 'alert']}
         onAlertEditorMount={jest.fn()}
         onRecoveryEditorMount={jest.fn()}
       />
@@ -91,5 +112,105 @@ describe('ComposeDiscoverTabs', () => {
         expect.objectContaining({ dataset: expect.objectContaining({ languageId: 'esql' }) }),
       ])
     );
+    for (const editor of screen.getAllByTestId('codeEditorMock')) {
+      expect(editor).toHaveAttribute('data-theme', 'esql');
+    }
+  });
+
+  it('disables the alert tab when the base query is empty', () => {
+    render(
+      <I18nProvider>
+        <ComposeDiscoverTabs
+          {...defaultProps}
+          baseQuery=""
+          activeTab="base"
+          tabs={['base', 'alert']}
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.getByTestId('composeDiscoverTab-alert')).toBeDisabled();
+    expect(screen.getByTestId('composeDiscoverTab-base')).not.toBeDisabled();
+  });
+
+  it('enables the alert tab when the base query is populated', () => {
+    render(
+      <I18nProvider>
+        <ComposeDiscoverTabs {...defaultProps} activeTab="base" tabs={['base', 'alert']} />
+      </I18nProvider>
+    );
+
+    expect(screen.getByTestId('composeDiscoverTab-alert')).not.toBeDisabled();
+  });
+
+  it('does not select the alert tab when it is disabled', () => {
+    const onTabChange = jest.fn();
+
+    render(
+      <I18nProvider>
+        <ComposeDiscoverTabs
+          {...defaultProps}
+          baseQuery=""
+          activeTab="base"
+          tabs={['base', 'alert']}
+          onTabChange={onTabChange}
+        />
+      </I18nProvider>
+    );
+
+    screen.getByTestId('composeDiscoverTab-alert').click();
+
+    expect(onTabChange).not.toHaveBeenCalledWith('alert');
+  });
+
+  it('switches to the base tab when alert is active without a base query', async () => {
+    const onTabChange = jest.fn();
+
+    render(
+      <I18nProvider>
+        <ComposeDiscoverTabs
+          {...defaultProps}
+          baseQuery=""
+          activeTab="alert"
+          tabs={['base', 'alert']}
+          onTabChange={onTabChange}
+        />
+      </I18nProvider>
+    );
+
+    await waitFor(() => {
+      expect(onTabChange).toHaveBeenCalledWith('base');
+    });
+  });
+});
+
+describe('isAlertTabDisabled', () => {
+  it('returns true when alert tab is shown and base query is empty', () => {
+    expect(isAlertTabDisabled(['base', 'alert'], '')).toBe(true);
+    expect(isAlertTabDisabled(['base', 'alert'], '   ')).toBe(true);
+  });
+
+  it('returns false when base query is populated or alert tab is absent', () => {
+    expect(isAlertTabDisabled(['base', 'alert'], 'FROM logs-*')).toBe(false);
+    expect(isAlertTabDisabled(['recovery'], '')).toBe(false);
+  });
+
+  it('allows the alert tab for standalone queries with breach content', () => {
+    expect(
+      isAlertTabDisabled(['base', 'alert'], {
+        format: 'standalone',
+        breach: { query: 'FROM kbn*' },
+      })
+    ).toBe(false);
+  });
+});
+
+describe('resolveActiveQueryTab', () => {
+  it('returns base when alert is active but disabled', () => {
+    expect(resolveActiveQueryTab(['base', 'alert'], 'alert', '')).toBe('base');
+  });
+
+  it('preserves alert when base query exists', () => {
+    expect(resolveActiveQueryTab(['base', 'alert'], 'alert', 'FROM logs-*')).toBe('alert');
   });
 });

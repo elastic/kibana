@@ -7,11 +7,15 @@
 
 import type { FC } from 'react';
 import React, { useEffect } from 'react';
-import type { RouteComponentProps } from 'react-router-dom';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { useHistory, type RouteComponentProps } from 'react-router-dom';
+import { parse } from 'query-string';
+import { i18n } from '@kbn/i18n';
 
-import { EuiButtonEmpty, EuiCallOut, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
+import { EuiPageTemplate, EuiSpacer } from '@elastic/eui';
+import { AppHeader } from '@kbn/app-header';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
+import { TRANSFORM_FUNCTION, type TransformFunction } from '../../../../common/constants';
 import { useDocumentationLinks } from '../../hooks/use_documentation_links';
 import { useSearchItems } from '../../hooks/use_search_items';
 import { breadcrumbService, docTitleService, BREADCRUMB_SECTION } from '../../services/navigation';
@@ -19,31 +23,39 @@ import { CapabilitiesWrapper } from '../../components/capabilities_wrapper';
 
 import { Wizard } from './components/wizard';
 
-type Props = RouteComponentProps<{ savedObjectId: string }>;
-export const CreateTransformSection: FC<Props> = ({ match }) => {
+type Props = RouteComponentProps<{ savedObjectId?: string }>;
+
+const getInitialTransformFunction = (search: string): TransformFunction => {
+  const { transformFunction } = parse(search, { sort: false });
+  return transformFunction === TRANSFORM_FUNCTION.LATEST
+    ? TRANSFORM_FUNCTION.LATEST
+    : TRANSFORM_FUNCTION.PIVOT;
+};
+
+export const CreateTransformSection: FC<Props> = ({ location, match }) => {
   // Set breadcrumb and page title
   useEffect(() => {
     breadcrumbService.setBreadcrumbs(BREADCRUMB_SECTION.CREATE_TRANSFORM);
     docTitleService.setTitle('createTransform');
   }, []);
 
+  const history = useHistory();
   const { esTransform } = useDocumentationLinks();
 
-  const { error: searchItemsError, searchItems } = useSearchItems(match.params.savedObjectId);
-
-  const docsLink = (
-    <EuiButtonEmpty
-      href={esTransform}
-      target="_blank"
-      iconType="question"
-      data-test-subj="documentationLink"
-    >
-      <FormattedMessage
-        id="xpack.transform.transformsWizard.transformDocsLinkText"
-        defaultMessage="Transform docs"
-      />
-    </EuiButtonEmpty>
-  );
+  const initialTransformFunction = getInitialTransformFunction(location.search);
+  const pageTitle =
+    initialTransformFunction === TRANSFORM_FUNCTION.LATEST
+      ? i18n.translate('xpack.transform.transformsWizard.createLatestTransformTitle', {
+          defaultMessage: 'Create latest transform',
+        })
+      : i18n.translate('xpack.transform.transformsWizard.createPivotTransformTitle', {
+          defaultMessage: 'Create pivot transform',
+        });
+  const {
+    error: searchItemsError,
+    searchItems,
+    setSavedObjectId,
+  } = useSearchItems(match.params.savedObjectId);
 
   return (
     <CapabilitiesWrapper
@@ -54,16 +66,16 @@ export const CreateTransformSection: FC<Props> = ({ match }) => {
         'canStartStopTransform',
       ]}
     >
-      <EuiPageTemplate.Header
-        pageTitle={
-          <FormattedMessage
-            id="xpack.transform.transformsWizard.createTransformTitle"
-            defaultMessage="Create transform"
-          />
-        }
-        rightSideItems={[docsLink]}
-        bottomBorder
-        paddingSize={'none'}
+      <AppHeader
+        title={pageTitle}
+        back={{
+          href: history.createHref({ pathname: '/' }),
+          label: i18n.translate('xpack.transform.transformList.transformTitle', {
+            defaultMessage: 'Transforms',
+          }),
+        }}
+        docLink={esTransform}
+        spacing="bleed"
       />
 
       <EuiSpacer size="l" />
@@ -71,16 +83,15 @@ export const CreateTransformSection: FC<Props> = ({ match }) => {
       <EuiPageTemplate.Section data-test-subj="transformPageCreateTransform" paddingSize={'none'}>
         {searchItemsError !== undefined && (
           <>
-            <EuiCallOut
-              announceOnMount={false}
-              title={searchItemsError}
-              color="danger"
-              iconType="warning"
-            />
+            <KbnDangerCallout announceOnMount={false} title={searchItemsError} />
             <EuiSpacer size="l" />
           </>
         )}
-        {searchItems !== undefined && <Wizard searchItems={searchItems} />}
+        <Wizard
+          initialTransformFunction={initialTransformFunction}
+          searchItems={searchItems}
+          setSavedObjectId={setSavedObjectId}
+        />
       </EuiPageTemplate.Section>
     </CapabilitiesWrapper>
   );

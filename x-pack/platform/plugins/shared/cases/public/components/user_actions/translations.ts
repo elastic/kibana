@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ActionSourceTypes, type ActionSourceType } from '../../../common/types/domain';
 
 export * from '../case_view/translations';
 
@@ -28,20 +29,6 @@ export const COPY_REFERENCE_LINK = i18n.translate('xpack.cases.caseView.copyComm
 export const MOVE_TO_ORIGINAL_COMMENT = i18n.translate('xpack.cases.caseView.moveToCommentAria', {
   defaultMessage: 'Highlight the referenced comment',
 });
-
-export const ISOLATED_HOST = i18n.translate('xpack.cases.caseView.isolatedHost', {
-  defaultMessage: 'submitted isolate request on host',
-});
-
-export const RELEASED_HOST = i18n.translate('xpack.cases.caseView.releasedHost', {
-  defaultMessage: 'submitted release request on host',
-});
-
-export const OTHER_ENDPOINTS = (endpoints: number): string =>
-  i18n.translate('xpack.cases.caseView.otherEndpoints', {
-    values: { endpoints },
-    defaultMessage: ` and {endpoints} {endpoints, plural, =1 {other} other {others}}`,
-  });
 
 export const CANCEL_BUTTON = i18n.translate('xpack.cases.caseView.delete.cancel', {
   defaultMessage: 'Cancel',
@@ -74,9 +61,12 @@ export const UNSAVED_DRAFT_DESCRIPTION = i18n.translate(
   }
 );
 
-export const SHOW_MORE = i18n.translate('xpack.cases.caseView.userActions.showMore', {
-  defaultMessage: 'Show more',
-});
+export const RESUME_EDITING_DESCRIPTION = i18n.translate(
+  'xpack.cases.caseView.description.resumeEditing',
+  {
+    defaultMessage: 'Resume editing',
+  }
+);
 
 export const CREATE_CASE = i18n.translate('xpack.cases.caseView.userActions.createCase', {
   defaultMessage: 'Created case',
@@ -148,6 +138,12 @@ export const APPLIED_TEMPLATE_LABEL = i18n.translate(
   { defaultMessage: 'applied template' }
 );
 
+export const APPLIED_NAMED_TEMPLATE_LABEL = (name: string) =>
+  i18n.translate('xpack.cases.caseView.userActions.appliedNamedTemplateLabel', {
+    values: { name },
+    defaultMessage: 'applied {name} template',
+  });
+
 export const REMOVED_TEMPLATE_LABEL = i18n.translate(
   'xpack.cases.caseView.userActions.removedTemplateLabel',
   { defaultMessage: 'removed applied template' }
@@ -158,3 +154,104 @@ export const SYNCED_ALERTS_WITH_CLOSE_REASON = (count: number) =>
     values: { count },
     defaultMessage: 'and synced {count, plural, =1 {# alert} other {# alerts}} with close reason',
   });
+
+const ACTION_SOURCE_KIND_LABELS: Record<ActionSourceType, string> = {
+  [ActionSourceTypes.agent]: i18n.translate(
+    'xpack.cases.caseView.userActions.actionSource.agentLabel',
+    {
+      defaultMessage: 'Agent',
+    }
+  ),
+  [ActionSourceTypes.workflow]: i18n.translate(
+    'xpack.cases.caseView.userActions.actionSource.workflowLabel',
+    {
+      defaultMessage: 'Workflow',
+    }
+  ),
+  [ActionSourceTypes.rule]: i18n.translate(
+    'xpack.cases.caseView.userActions.actionSource.ruleLabel',
+    {
+      defaultMessage: 'Rule',
+    }
+  ),
+  [ActionSourceTypes.attack]: i18n.translate(
+    'xpack.cases.caseView.userActions.actionSource.attackDiscoveryLabel',
+    {
+      defaultMessage: 'Attack Discovery',
+    }
+  ),
+  [ActionSourceTypes.api]: i18n.translate(
+    'xpack.cases.caseView.userActions.actionSource.apiLabel',
+    {
+      defaultMessage: 'API',
+    }
+  ),
+  [ActionSourceTypes.user]: i18n.translate(
+    'xpack.cases.caseView.userActions.actionSource.userLabel',
+    {
+      defaultMessage: 'User',
+    }
+  ),
+};
+
+export const getActionSourceKindLabel = (type: ActionSourceType): string =>
+  ACTION_SOURCE_KIND_LABELS[type];
+
+export const MORE_ACTIVITIES = (count: number) =>
+  i18n.translate('xpack.cases.caseView.redesign.userActions.moreActivities', {
+    values: { count },
+    defaultMessage: '{count} more {count, plural, =1 {activity} other {activities}}',
+  });
+
+export const SHOW_MORE_ACTIVITIES_ARIA = i18n.translate(
+  'xpack.cases.caseView.redesign.userActions.showMoreActivitiesAria',
+  { defaultMessage: 'Show more activities' }
+);
+
+export const NO_SEARCH_RESULTS_TITLE = i18n.translate(
+  'xpack.cases.caseView.redesign.userActions.noSearchResults.title',
+  {
+    defaultMessage: 'No results match your search criteria',
+  }
+);
+
+export const NO_SEARCH_RESULTS_BODY = i18n.translate(
+  'xpack.cases.caseView.redesign.userActions.noSearchResults.body',
+  {
+    defaultMessage: 'Try modifying your search or filters.',
+  }
+);
+
+export const COLLAPSE_ACTIVITY = i18n.translate(
+  'xpack.cases.caseView.redesign.userActions.collapseActivity',
+  { defaultMessage: 'Collapse activity' }
+);
+
+export const EXPAND_ACTIVITY = i18n.translate(
+  'xpack.cases.caseView.redesign.userActions.expandActivity',
+  { defaultMessage: 'Expand activity' }
+);
+
+export const COLLAPSE_ALL_ACTIVITIES = i18n.translate(
+  'xpack.cases.caseView.redesign.userActions.collapseAllActivities',
+  { defaultMessage: 'Collapse all' }
+);
+
+export const EXPAND_ALL_ACTIVITIES = i18n.translate(
+  'xpack.cases.caseView.redesign.userActions.expandAllActivities',
+  { defaultMessage: 'Expand all' }
+);
+
+export const SHOW_MORE_ACTIVITY = i18n.translate(
+  'xpack.cases.casesRedesign.userActions.showMoreActivity',
+  {
+    defaultMessage: 'Show more',
+  }
+);
+
+export const NOTHING_TO_COLLAPSE = i18n.translate(
+  'xpack.cases.caseView.redesign.userActions.nothingToCollapse',
+  {
+    defaultMessage: 'No comments or attachments to collapse',
+  }
+);

@@ -63,22 +63,15 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
       await kibanaServer.importExport.load(fixtureDirs.lensDefault);
     });
 
-    after(async () => {
-      await esNode.unload(esArchive);
-      await timePicker.resetDefaultAbsoluteRangeViaUiSettings();
-      await kibanaServer.importExport.unload(fixtureDirs.lensBasic);
-      await kibanaServer.importExport.unload(fixtureDirs.lensDefault);
-      await kibanaServer.savedObjects.cleanStandardList();
-    });
-
     if (config.get('esTestCluster.ccs')) {
-      loadTestFile(require.resolve('./smokescreen'));
-    } else {
-      // total run time ~16 min
-      loadTestFile(require.resolve('./smokescreen')); // 12m 12s
-      loadTestFile(require.resolve('./ad_hoc_data_view')); // 3m 40s
-      loadTestFile(require.resolve('./multiple_data_views'));
-      loadTestFile(require.resolve('./inspector'));
+      // Chart style settings, layers, chart switching and the dimension editor moved to Scout
+      // for the non-CCS run (see x-pack/platform/plugins/shared/lens/test/scout/smokescreen).
+      // They stay here for CCS because Scout cannot target a real remote cluster yet.
+      // Ticket: https://github.com/elastic/apps-dx/issues/44
+      loadTestFile(require.resolve('./chart_style_settings'));
+      loadTestFile(require.resolve('./layers'));
+      loadTestFile(require.resolve('./chart_switching'));
+      loadTestFile(require.resolve('./dimension_editor'));
     }
   });
 };

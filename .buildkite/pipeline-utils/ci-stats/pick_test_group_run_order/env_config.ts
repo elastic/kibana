@@ -7,8 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MAX_MINUTES, RETRIES, PREVENT_SELECTIVE_TESTS_LABEL } from './const';
+import { MAX_MINUTES, RETRIES, PREVENT_SELECTIVE_TESTS_LABEL } from './const.ts';
 import { collectEnvFromLabels, getRequiredEnv } from '#pipeline-utils';
+import {
+  ftrTestChannel,
+  ftrTestChannels,
+} from '#pipeline-utils/ci-stats/pick_test_group_run_order/test_channels';
 
 const VALID_SOLUTIONS = ['observability', 'search', 'security', 'workplaceai', 'vectordb'];
 const VALID_LIMIT_CONFIG_TYPES = ['unit', 'integration', 'functional'];
@@ -52,6 +56,9 @@ export function loadRunOrderConfig() {
     limitConfigType: parseLimitConfigType(),
     limitSolutions: parseLimitSolutions(),
     ftrConfigPatterns: parseCsvEnv('FTR_CONFIG_PATTERNS'),
+    ftrTestChannels: new Set(
+      parseCsvEnv('FTR_TEST_CHANNELS')?.map(ftrTestChannel.fromString) || ftrTestChannels.default
+    ),
 
     functionalMinimumIsolationMin: parseOptionalFloatEnv('FUNCTIONAL_MINIMUM_ISOLATION_MIN'),
 
@@ -74,12 +81,18 @@ export function loadRunOrderConfig() {
       : ({} as Record<string, string>),
     envFromLabels: collectEnvFromLabels(),
 
-    // default true on PRs
+    // true on PRs and merge-queue builds; MERGE_QUEUE_MERGE_BASE is the fallback
+    // when GITHUB_PR_MERGE_BASE is absent (merge queue groups have no PR number)
     useSelectiveTesting:
-      Boolean(process.env.GITHUB_PR_NUMBER) &&
+      (Boolean(process.env.GITHUB_PR_NUMBER) || Boolean(process.env.MERGE_QUEUE_MERGE_BASE)) &&
       !(parseCsvEnv('GITHUB_PR_LABELS') ?? []).includes(PREVENT_SELECTIVE_TESTS_LABEL),
-    prMergeBase: process.env.GITHUB_PR_MERGE_BASE || undefined,
+    selectiveMergeBase:
+      process.env.GITHUB_PR_MERGE_BASE || process.env.MERGE_QUEUE_MERGE_BASE || undefined,
     prNumber: process.env.GITHUB_PR_NUMBER || undefined,
+
+    allowZeroConfigMatches: ['true', 'yes', '1'].includes(
+      process.env.ALLOW_ZERO_JEST_OR_FTR_CONFIGS?.toLowerCase() || 'false'
+    ),
   } as const;
 }
 

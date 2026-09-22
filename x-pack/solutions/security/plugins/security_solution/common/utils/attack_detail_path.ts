@@ -14,5 +14,10 @@ export const buildAttackDetailPath = ({
 }: {
   attackId: string;
   index: string;
-  timestamp: string;
-}) => `${ATTACK_DETAILS_REDIRECT_PATH}/${attackId}?index=${index}&timestamp=${timestamp}`;
+  timestamp?: string | null;
+}) => {
+  const timestampQuery = timestamp ? `&timestamp=${encodeURIComponent(timestamp)}` : '';
+  return `${ATTACK_DETAILS_REDIRECT_PATH}/${encodeURIComponent(
+    attackId
+  )}?index=${encodeURIComponent(index)}${timestampQuery}`;
+};

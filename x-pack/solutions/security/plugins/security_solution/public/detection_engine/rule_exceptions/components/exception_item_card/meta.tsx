@@ -100,6 +100,7 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
             closePopover={onCloseRulesPopover}
             data-test-subj={`${dataTestSubj}-rulesPopover`}
             id={'rulesPopover'}
+            aria-label={i18n.AFFECTED_RULES_POPOVER_ARIA_LABEL}
           >
             <EuiContextMenuPanel css={referenceLinksContainerStyles} items={itemActions} />
           </EuiPopover>
@@ -135,6 +136,7 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
               closePopover={onClosListsPopover}
               data-test-subj={`${dataTestSubj}-listsPopover`}
               id={'listsPopover'}
+              aria-label={i18n.AFFECTED_LIST_POPOVER_ARIA_LABEL}
             >
               <EuiContextMenuPanel
                 css={referenceLinksContainerStyles}

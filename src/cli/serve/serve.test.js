@@ -85,6 +85,7 @@ describe('applyConfigOverrides', () => {
 
   it('alters config to enable SAML Mock IdP and UIAM in serverless dev mode', () => {
     expect(applyConfigOverrides({}, { dev: true, serverless: true, uiam: true }, {}, {})).toEqual({
+      csp: { form_action: ['https://localhost:8444'] },
       elasticsearch: {
         hosts: ['https://localhost:9200'],
         serviceAccountToken: kibanaDevServiceAccount.token,

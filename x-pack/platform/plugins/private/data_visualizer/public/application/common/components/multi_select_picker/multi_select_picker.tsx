@@ -137,6 +137,8 @@ export const MultiSelectPicker: FC<{
           />
         </EuiPopoverTitle>
         <div
+          role="listbox"
+          aria-label={title}
           css={
             cssStyles?.filterItemContainer ??
             css`

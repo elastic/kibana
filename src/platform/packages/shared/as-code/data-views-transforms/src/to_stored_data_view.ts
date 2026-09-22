@@ -11,12 +11,17 @@ import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import {
   AS_CODE_DATA_VIEW_REFERENCE_TYPE,
   type AsCodeDataView,
+  type AsCodeSavedDataView,
 } from '@kbn/as-code-data-views-schema';
 import {
   toStoredFieldAttributes,
   toStoredFieldFormats,
   toStoredRuntimeFields,
 } from './to_stored_fields';
+
+// Function overrides to better type the return value depending on the input type
+export function toStoredDataView(dataView: AsCodeDataView): string | DataViewSpec;
+export function toStoredDataView(dataView: AsCodeSavedDataView): DataViewSpec;
 
 /**
  * Convert an as-code data view back to a stored search-source `index` value
@@ -25,8 +30,11 @@ import {
  * @param dataView As-code `data_source` value from classic tab state
  * @returns Value suitable for `SerializedSearchSourceFields.index`
  */
-export function toStoredDataView(dataView: AsCodeDataView): string | DataViewSpec {
-  if (dataView.type === AS_CODE_DATA_VIEW_REFERENCE_TYPE) return dataView.ref_id;
+export function toStoredDataView(
+  dataView: AsCodeDataView | AsCodeSavedDataView
+): string | DataViewSpec {
+  if ('type' in dataView && dataView.type === AS_CODE_DATA_VIEW_REFERENCE_TYPE)
+    return dataView.ref_id;
 
   const runtimeFieldMap = toStoredRuntimeFields(dataView.field_settings);
   const fieldFormats = toStoredFieldFormats(dataView.field_settings);
@@ -35,8 +43,31 @@ export function toStoredDataView(dataView: AsCodeDataView): string | DataViewSpe
   return {
     title: dataView.index_pattern,
     ...(dataView.time_field !== undefined && { timeFieldName: dataView.time_field }),
+    ...(dataView.allow_hidden_indices !== undefined && {
+      allowHidden: dataView.allow_hidden_indices,
+    }),
     ...(runtimeFieldMap && Object.keys(runtimeFieldMap).length > 0 && { runtimeFieldMap }),
     ...(fieldFormats && Object.keys(fieldFormats).length > 0 && { fieldFormats }),
     ...(fieldAttrs && Object.keys(fieldAttrs).length > 0 && { fieldAttrs }),
+    ...(dataView.name && { name: dataView.name }),
+    ...(dataView.field_filters !== undefined && {
+      sourceFilters: dataView.field_filters.map((filter) => ({ value: filter })),
+    }),
+    ...getSavedDataViewFields(dataView),
+  };
+}
+
+function isSavedDataView(
+  dataView: AsCodeDataView | AsCodeSavedDataView
+): dataView is AsCodeSavedDataView {
+  return 'id' in dataView;
+}
+
+function getSavedDataViewFields(
+  dataView: AsCodeDataView | AsCodeSavedDataView
+): Partial<DataViewSpec> {
+  if (!isSavedDataView(dataView)) return {};
+  return {
+    id: dataView.id,
   };
 }

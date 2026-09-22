@@ -7,15 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ALERT_DISPLAY_NAME = i18n.translate(
-  'xpack.securitySolution.cases.alertAttachment.displayName',
-  { defaultMessage: 'Alert' }
-);
-
-export const ALERT_AVATAR_ARIA_LABEL = i18n.translate(
-  'xpack.securitySolution.cases.alertAttachment.avatarAriaLabel',
-  { defaultMessage: 'alert' }
-);
+export const ALERT_DISPLAY_NAME = i18n.translate('xpack.securitySolution.cases.alert.displayName', {
+  defaultMessage: 'Alerts',
+});
 
 export const ALERT_COMMENT_LABEL_TITLE = i18n.translate(
   'xpack.securitySolution.cases.alertAttachment.alertCommentLabelTitle',
@@ -44,7 +38,7 @@ export const REMOVED_ALERTS_LABEL_TITLE = (totalAlerts: number) =>
     values: { totalAlerts },
   });
 
-export const DELETE_ALERTS_SUCCESS_TITLE = (totalAlerts: number) =>
+export const DELETE_ALERTS_SUCCESS_TOAST = (totalAlerts: number) =>
   i18n.translate('xpack.securitySolution.cases.alertAttachment.deleteAlertsSuccessTitle', {
     defaultMessage:
       'Deleted {totalAlerts, plural, =1 {one} other {{totalAlerts}}} {totalAlerts, plural, =1 {alert} other {alerts}}',

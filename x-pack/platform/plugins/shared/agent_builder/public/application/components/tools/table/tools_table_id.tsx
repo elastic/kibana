@@ -16,6 +16,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ToolDefinition } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import React from 'react';
 import { useToolsActions } from '../../../context/tools_provider';
 import { labels } from '../../../utils/i18n';
@@ -35,7 +37,13 @@ export const ToolIdWithDescription = ({ tool }: ToolIdWithDescriptionProps) => {
 
   return (
     <EuiFlexGroup direction="column" gutterSize="xs" css={css({ minWidth: 0 })}>
-      <EuiLink href={!tool.readonly ? getEditToolUrl(tool.id) : getViewToolUrl(tool.id)}>
+      <EuiLink
+        href={!tool.readonly ? getEditToolUrl(tool.id) : getViewToolUrl(tool.id)}
+        {...getEbtProps({
+          element: AGENT_BUILDER_UI_EBT.element.pageContent,
+          action: AGENT_BUILDER_UI_EBT.action.globalManagement.MANAGE_ENTITY_VIEW,
+        })}
+      >
         <EuiText size="s" css={toolIdStyle}>
           {tool.id}
         </EuiText>

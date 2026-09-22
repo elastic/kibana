@@ -7,6 +7,8 @@
 
 import { screen, within, waitFor, fireEvent } from '@testing-library/react';
 import { EuiComboBoxTestHarness } from '@kbn/test-eui-helpers';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 
 import { MAX_NODE_CONNECTIONS } from '../../../common/constants';
 import {
@@ -32,14 +34,17 @@ describe('Create Remote cluster', () => {
   describe('on component mount', () => {
     test('should have the title of the page set correctly', async () => {
       renderAdd();
-      expect(await screen.findByTestId('remoteClusterPageTitle')).toHaveTextContent(
+      expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
         'Add remote cluster'
       );
     });
 
     test('should have a link to the documentation', async () => {
       renderAdd();
-      expect(await screen.findByTestId('remoteClusterDocsButton')).toBeInTheDocument();
+      await openAppMenuOverflow();
+      expect(
+        await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.menuDocumentation)
+      ).toBeInTheDocument();
     });
 
     describe('Setup Trust', () => {

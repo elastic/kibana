@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ActionContext } from '../../connector_spec';
+import type { ActionContext, AuthTypeDef } from '../../connector_spec';
+import { generateSecretsSchemaFromSpec } from '../../lib/generate_secrets_schema_from_spec';
 import { GoogleCalendar } from './google_calendar';
 
 const API_BASE = 'https://www.googleapis.com/calendar/v3';
@@ -33,10 +34,31 @@ describe('GoogleCalendar', () => {
     expect(GoogleCalendar.metadata.displayName).toBe('Google Calendar');
     expect(GoogleCalendar.metadata.minimumLicense).toBe('enterprise');
     expect(GoogleCalendar.metadata.supportedFeatureIds).toContain('workflows');
+    expect(GoogleCalendar.metadata.supportedFeatureIds).toContain('contextEngine');
   });
 
-  it('should support bearer auth', () => {
-    expect(GoogleCalendar.auth?.types).toContain('bearer');
+  it('should support ears auth type as first visible option', () => {
+    const visibleTypes = GoogleCalendar.auth?.types.filter(
+      (t) => typeof t === 'string' || !(t as AuthTypeDef).isLegacy
+    );
+    expect(visibleTypes?.[0]).toEqual(expect.objectContaining({ type: 'ears' }));
+  });
+
+  it('bearer auth is hidden (not shown in picker) but retained for existing connectors', () => {
+    const bearerDef = GoogleCalendar.auth?.types.find(
+      (t): t is AuthTypeDef => typeof t === 'object' && t.type === 'bearer'
+    );
+    expect(bearerDef).toBeDefined();
+    expect(bearerDef?.isLegacy).toBe(true);
+  });
+
+  it('existing connectors with bearer auth still pass schema validation', () => {
+    const schema = generateSecretsSchemaFromSpec(GoogleCalendar.auth, {
+      isEarsEnabled: true,
+      isEarsExperimentalEnabled: true,
+    });
+    const result = schema.safeParse({ authType: 'bearer', token: 'some-legacy-token' });
+    expect(result.success).toBe(true);
   });
 
   it('should support oauth_authorization_code with correct Google defaults', () => {
@@ -380,24 +402,20 @@ describe('GoogleCalendar', () => {
   });
 
   describe('test handler', () => {
-    it('should return ok: true on successful connection', async () => {
+    const testSpec = GoogleCalendar.test;
+
+    it('should return {} on successful connection', async () => {
       mockClient.get.mockResolvedValue({ status: 200, data: { items: [] } });
 
-      const result = await GoogleCalendar.test?.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
-      expect(result).toEqual({
-        ok: true,
-        message: 'Successfully connected to Google Calendar API',
-      });
+      expect(result).toEqual({});
     });
 
-    it('should return ok: false on error', async () => {
+    it('should throw on error', async () => {
       mockClient.get.mockRejectedValue(new Error('Unauthorized'));
 
-      const result = await GoogleCalendar.test?.handler(mockContext);
-
-      expect(result).toMatchObject({ ok: false });
-      expect((result as { message: string }).message).toContain('Unauthorized');
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
   });
 });

@@ -87,6 +87,8 @@ import {
   BulkNamespaceCustomizationRequestSchema,
   BulkNamespaceCustomizationResponseSchema,
   InstallRuleAssetsRequestSchema,
+  NamespacePreflightCheckRequestSchema,
+  NamespacePreflightCheckResponseSchema,
 } from '../../types';
 import type { FleetConfigType } from '../../config';
 import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
@@ -117,6 +119,7 @@ import {
   rollbackAvailableCheckHandler,
   bulkRollbackAvailableCheckHandler,
   reviewUpgradeHandler,
+  namespacePreflightCheckHandler,
 } from './handlers';
 import { getFileHandler } from './file_handler';
 import {
@@ -132,6 +135,7 @@ import {
   postBulkNamespaceCustomizationHandler,
 } from './bulk_handler';
 import { deletePackageDatastreamAssetsHandler } from './package_datastream_assets_handler';
+import { getIlmPoliciesHandler } from './ilm_policies_handler';
 
 const MAX_FILE_SIZE_BYTES = 104857600; // 100MB
 
@@ -1195,6 +1199,37 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     );
 
   router.versioned
+    .post({
+      path: EPM_API_ROUTES.NAMESPACE_PREFLIGHT_CHECK_PATTERN,
+      security: INSTALL_PACKAGES_SECURITY,
+      access: 'internal',
+      summary: `Check for pre-existing index template conflicts before namespace opt-in`,
+      description:
+        `Runs a non-mutating pre-flight check to detect index templates that would ` +
+        `conflict with the Fleet-managed namespace index templates for the given namespaces. ` +
+        `Does not modify any saved objects or ES resources.`,
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: {
+          request: NamespacePreflightCheckRequestSchema,
+          response: {
+            200: {
+              body: () => NamespacePreflightCheckResponseSchema,
+              description: 'OK: A successful request.',
+            },
+            400: {
+              body: genericErrorResponse,
+              description: 'A bad request.',
+            },
+          },
+        },
+      },
+      namespacePreflightCheckHandler
+    );
+
+  router.versioned
     .get({
       path: EPM_API_ROUTES.BULK_UNINSTALL_INFO_PATTERN,
       security: INSTALL_PACKAGES_SECURITY,
@@ -1296,7 +1331,6 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       bulkInstallPackagesFromRegistryHandler
     );
 
-  // Only allow upload for superuser
   router.versioned
     .post({
       path: EPM_API_ROUTES.INSTALL_BY_UPLOAD_PATTERN,
@@ -1310,7 +1344,17 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       },
       security: INSTALL_PACKAGES_SECURITY,
       summary: `Install a package by upload`,
-      description: `Install a package by uploading a .zip or .tar.gz archive (max 100MB). Only available to superusers.`,
+      description: `Install a package by uploading a .zip or .tar.gz archive (max 100MB).
+
+Archives that contain Kibana assets requiring additional privileges are subject to a preflight authorization check before the package is installed. Privileges are checked in every space the package will be installed into.
+
+The following asset types require the corresponding Kibana API privilege:
+
+- \`security_rule\`: \`rules-all\`
+- \`security_rule\` with type \`machine_learning\`: \`rules-all\` and \`ml:canCreateJob\`
+- \`security_ai_prompt\`: \`elasticAssistant\`
+
+If any required privilege is missing, the request returns 403 and no assets are written. To learn more, refer to [Upload an integration to Kibana](https://www.elastic.co/docs/extend/integrations/upload-new-integration).`,
     })
     .addVersion(
       {
@@ -1328,6 +1372,11 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
             },
             400: {
               description: 'A bad request.',
+              body: genericErrorResponse,
+            },
+            403: {
+              description:
+                'Forbidden. The caller lacks a Kibana API privilege required by an asset in the archive.',
               body: genericErrorResponse,
             },
           },
@@ -1643,8 +1692,8 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     .delete({
       path: EPM_API_ROUTES.PACKAGES_DATASTREAM_ASSETS,
       security: INSTALL_PACKAGES_SECURITY,
-      summary: `Delete assets for an input package`,
-      description: `Delete datastream assets for a specific input package, by data stream name.`,
+      summary: `Delete assets for a package`,
+      description: `Delete datastream assets for a specific package, by data stream name.`,
       options: {
         tags: ['oas-tag:Elastic Package Manager (EPM)'],
       },
@@ -1867,4 +1916,34 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
         bulkRollbackAvailableCheckHandler
       );
   }
+
+  router.versioned
+    .get({
+      path: EPM_API_ROUTES.ILM_POLICIES_PATTERN,
+      security: READ_PACKAGE_INFO_SECURITY,
+      summary: `Get available ILM policies`,
+      description: `Returns the list of user-created ILM policies and whether the current user has the \`manage_ilm\` cluster privilege.`,
+      options: {
+        tags: ['internal', 'oas-tag:Elastic Package Manager (EPM)'],
+        availability: {
+          since: '9.5.0',
+          stability: 'experimental',
+        },
+      },
+      access: 'internal',
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: {
+          request: {},
+          response: {
+            200: {
+              description: 'OK: A successful request.',
+            },
+          },
+        },
+      },
+      getIlmPoliciesHandler
+    );
 };

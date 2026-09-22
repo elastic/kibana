@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import type { NewPackagePolicyInput, PackageInfo } from '../types';
+import type { NewPackagePolicyInput, PackageInfo, RegistryDataStream } from '../types';
+
+import { DATASET_VAR_NAME } from '../constants';
 
 import {
   packageToPackagePolicy,
   packageToPackagePolicyInputs,
   getInputEffectiveName,
+  dataStreamUsesOtelInput,
 } from './package_to_package_policy';
 import { AWS_PACKAGE } from './fixtures/aws_package';
 
@@ -157,6 +160,72 @@ describe('Fleet - packageToPackagePolicy', () => {
         policy_template: 'nginx',
         enabled: true,
       });
+    });
+
+    it('scopes streams per policy template for input packages with multiple templates sharing an input type', () => {
+      const result = packageToPackagePolicyInputs({
+        ...mockPackage,
+        type: 'input',
+        name: 'aws_cloudwatch',
+        policy_templates: [
+          { name: 'ec2', type: 'metrics', input: 'otelcol', title: 'EC2', description: 'EC2' },
+          { name: 'rds', type: 'metrics', input: 'otelcol', title: 'RDS', description: 'RDS' },
+        ],
+      } as unknown as PackageInfo);
+
+      expect(result).toHaveLength(2);
+
+      // Each template's input must only carry its own data stream, not every template's.
+      // Before the fix every input received one stream per template, duplicating the
+      // data_stream.dataset var once for each policy template in the package.
+      expect(result[0].policy_template).toBe('ec2');
+      expect(result[0].streams).toHaveLength(1);
+      expect(result[0].streams[0].data_stream.dataset).toBe('aws_cloudwatch.ec2');
+      expect(result[0].streams[0].vars?.[DATASET_VAR_NAME]).toBeDefined();
+
+      expect(result[1].policy_template).toBe('rds');
+      expect(result[1].streams).toHaveLength(1);
+      expect(result[1].streams[0].data_stream.dataset).toBe('aws_cloudwatch.rds');
+      expect(result[1].streams[0].vars?.[DATASET_VAR_NAME]).toBeDefined();
+    });
+
+    it('does not leak template-specific vars across input templates sharing an input type', () => {
+      // In input packages each policy template's vars become stream-level vars on its
+      // synthesized data stream, so unscoped stream resolution leaked one template's vars
+      // (not just data_stream.dataset) into the other templates.
+      const result = packageToPackagePolicyInputs({
+        ...mockPackage,
+        type: 'input',
+        name: 'aws_cloudwatch',
+        policy_templates: [
+          {
+            name: 'ec2',
+            type: 'metrics',
+            input: 'otelcol',
+            title: 'EC2',
+            description: 'EC2',
+            vars: [{ name: 'region', type: 'text', title: 'Region' }],
+          },
+          {
+            name: 'lambda',
+            type: 'metrics',
+            input: 'otelcol',
+            title: 'Lambda',
+            description: 'Lambda',
+            vars: [{ name: 'function_name', type: 'text', title: 'Function name' }],
+          },
+        ],
+      } as unknown as PackageInfo);
+
+      expect(result).toHaveLength(2);
+
+      const ec2VarNames = Object.keys(result[0].streams[0].vars ?? {});
+      expect(ec2VarNames).toContain('region');
+      expect(ec2VarNames).not.toContain('function_name');
+
+      const lambdaVarNames = Object.keys(result[1].streams[0].vars ?? {});
+      expect(lambdaVarNames).toContain('function_name');
+      expect(lambdaVarNames).not.toContain('region');
     });
 
     it('does not set name when registry input has no id', () => {
@@ -673,5 +742,65 @@ describe('Fleet - packageToPackagePolicy', () => {
         )
       ).toMatchSnapshot();
     });
+  });
+});
+
+describe('dataStreamUsesOtelInput', () => {
+  const makePackageInfo = (
+    inputs: Array<{ name?: string; type: string }>
+  ): Pick<PackageInfo, 'policy_templates'> => ({
+    policy_templates: [
+      {
+        name: 'otel',
+        title: 'OTel template',
+        description: '',
+        inputs,
+      } as any,
+    ],
+  });
+
+  const makeDataStream = (inputRef: string): Pick<RegistryDataStream, 'streams'> => ({
+    streams: [{ input: inputRef, title: 'stream' } as any],
+  });
+
+  it('returns true when stream.input is "otelcol" directly (regression)', () => {
+    const pkgInfo = makePackageInfo([{ type: 'otelcol' }]);
+    expect(dataStreamUsesOtelInput(pkgInfo, makeDataStream('otelcol'))).toBe(true);
+  });
+
+  it('returns true when stream.input matches the name of an otelcol input (named input case)', () => {
+    const pkgInfo = makePackageInfo([
+      { name: 'otel_logs', type: 'otelcol' },
+      { name: 'otel_metrics', type: 'otelcol' },
+    ]);
+    expect(dataStreamUsesOtelInput(pkgInfo, makeDataStream('otel_logs'))).toBe(true);
+    expect(dataStreamUsesOtelInput(pkgInfo, makeDataStream('otel_metrics'))).toBe(true);
+  });
+
+  it('returns false when stream.input is a named input of a non-otelcol type (regression)', () => {
+    const pkgInfo = makePackageInfo([{ name: 'my_logfile', type: 'logfile' }]);
+    expect(dataStreamUsesOtelInput(pkgInfo, makeDataStream('my_logfile'))).toBe(false);
+  });
+
+  it('returns false when stream.input matches a name that exists but on a non-otelcol input', () => {
+    const pkgInfo = makePackageInfo([{ name: 'otel_logs', type: 'logfile' }]);
+    expect(dataStreamUsesOtelInput(pkgInfo, makeDataStream('otel_logs'))).toBe(false);
+  });
+
+  it('returns false when there are no streams', () => {
+    const pkgInfo = makePackageInfo([{ name: 'otel_logs', type: 'otelcol' }]);
+    expect(dataStreamUsesOtelInput(pkgInfo, { streams: [] })).toBe(false);
+    expect(dataStreamUsesOtelInput(pkgInfo, {})).toBe(false);
+  });
+
+  it('does not crash when policy_templates is absent and returns false for non-otelcol streams', () => {
+    // policy_templates absent/empty — no named inputs to resolve; direct 'otelcol' still matches
+    expect(dataStreamUsesOtelInput({}, makeDataStream('otelcol'))).toBe(true);
+    expect(dataStreamUsesOtelInput({ policy_templates: [] }, makeDataStream('otelcol'))).toBe(true);
+    // A named reference that can't be resolved (no policy_templates) → false
+    expect(dataStreamUsesOtelInput({}, makeDataStream('some_named_input'))).toBe(false);
+    expect(
+      dataStreamUsesOtelInput({ policy_templates: [] }, makeDataStream('some_named_input'))
+    ).toBe(false);
   });
 });

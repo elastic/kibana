@@ -12,7 +12,7 @@ import {
   titleComparators,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
+import { initializeStateApi } from '@kbn/presentation-publishing';
 import { BehaviorSubject, map, merge, skip } from 'rxjs';
 import { APM_ALERTING_FAILED_TRANSACTIONS_CHART_EMBEDDABLE } from '@kbn/apm-embeddable-common';
 import type { EmbeddableApmAlertingVizProps } from '../types';
@@ -40,8 +40,10 @@ export const getApmAlertingFailedTransactionsChartEmbeddableFactory = (deps: Emb
       const kuery$ = new BehaviorSubject(state.kuery);
       const filters$ = new BehaviorSubject(state.filters);
 
-      function serializeState(): EmbeddableApmAlertingVizProps {
-        return {
+      const stateApi = initializeStateApi<EmbeddableApmAlertingVizProps>({
+        parentApi,
+        uuid,
+        serializeState: () => ({
           ...titleManager.getLatestState(),
           serviceName: serviceName$.getValue(),
           transactionType: transactionType$.getValue(),
@@ -53,13 +55,7 @@ export const getApmAlertingFailedTransactionsChartEmbeddableFactory = (deps: Emb
           alert: alert$.getValue(),
           kuery: kuery$.getValue(),
           filters: filters$.getValue(),
-        };
-      }
-
-      const unsavedChangesApi = initializeUnsavedChanges<EmbeddableApmAlertingVizProps>({
-        parentApi,
-        uuid,
-        serializeState,
+        }),
         anyStateChange$: merge(
           titleManager.anyStateChange$,
           serviceName$.pipe(
@@ -116,25 +112,24 @@ export const getApmAlertingFailedTransactionsChartEmbeddableFactory = (deps: Emb
           kuery: 'referenceEquality',
           filters: 'referenceEquality',
         }),
-        onReset: (lastSaved) => {
-          titleManager.reinitializeState(lastSaved);
-          serviceName$.next(lastSaved?.serviceName ?? '');
-          transactionType$.next(lastSaved?.transactionType);
-          transactionName$.next(lastSaved?.transactionName);
-          environment$.next(lastSaved?.environment);
-          rangeFrom$.next(lastSaved?.rangeFrom);
-          rangeTo$.next(lastSaved?.rangeTo);
-          rule$.next(lastSaved?.rule as EmbeddableApmAlertingVizProps['rule']);
-          alert$.next(lastSaved?.alert as EmbeddableApmAlertingVizProps['alert']);
-          kuery$.next(lastSaved?.kuery);
-          filters$.next(lastSaved?.filters);
+        applySerializedState: (nextState) => {
+          titleManager.reinitializeState(nextState);
+          serviceName$.next(nextState.serviceName ?? '');
+          transactionType$.next(nextState.transactionType);
+          transactionName$.next(nextState.transactionName);
+          environment$.next(nextState.environment);
+          rangeFrom$.next(nextState.rangeFrom);
+          rangeTo$.next(nextState.rangeTo);
+          rule$.next(nextState.rule as EmbeddableApmAlertingVizProps['rule']);
+          alert$.next(nextState.alert as EmbeddableApmAlertingVizProps['alert']);
+          kuery$.next(nextState.kuery);
+          filters$.next(nextState.filters);
         },
       });
 
       const api = finalizeApi({
         ...titleManager.api,
-        ...unsavedChangesApi,
-        serializeState,
+        ...stateApi,
       });
 
       return {

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import type { AlertingAuthorization } from '../../../../authorization';
@@ -27,7 +28,6 @@ import type { ConstructorOptions } from '../../../../rules_client';
 import { RulesClient } from '../../../../rules_client';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { gapFillStatus, gapStatus } from '../../../../../common';
-import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
 import { getSchedulerContextInternal } from '../../auto_fill_scheduler/methods/utils';
 
 jest.mock('../../auto_fill_scheduler/methods/utils', () => ({
@@ -68,6 +68,7 @@ describe('getRuleIdsWithGaps', () => {
     eventLogClient = eventLogClientMock.create();
 
     rulesClientParams = {
+      request: httpServerMock.createKibanaRequest(),
       taskManager,
       ruleTypeRegistry,
       unsecuredSavedObjectsClient,
@@ -96,7 +97,6 @@ describe('getRuleIdsWithGaps', () => {
       connectorAdapterRegistry: new ConnectorAdapterRegistry(),
       uiSettings: uiSettingsServiceMock.createStartContract(),
       eventLogger,
-      featureFlags: coreFeatureFlagsMock.createStart(),
       isServerless: false,
     } as jest.Mocked<ConstructorOptions>;
 

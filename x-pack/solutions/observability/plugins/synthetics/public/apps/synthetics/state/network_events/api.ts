@@ -6,7 +6,7 @@
  */
 
 import type { SyntheticsNetworkEventsApiResponse } from '../../../../../common/runtime_types';
-import { SyntheticsNetworkEventsApiResponseType } from '../../../../../common/runtime_types';
+import { SyntheticsNetworkEventsApiResponseType } from '../../../../../common/runtime_types/zod/network_events';
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import { apiService } from '../../../../utils/api_service';
 import type { FetchNetworkEventsParams } from './actions';
@@ -19,6 +19,8 @@ export async function fetchNetworkEvents(
     {
       checkGroup: params.checkGroup,
       stepIndex: params.stepIndex,
+      ...(params.remoteName ? { remoteName: params.remoteName } : {}),
+      ...(params.timestamp ? { timestamp: params.timestamp } : {}),
     },
     SyntheticsNetworkEventsApiResponseType
   )) as SyntheticsNetworkEventsApiResponse;

@@ -7,13 +7,14 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter, Logger } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import { PLUGIN_ID } from '../../../common';
 import {
   API_VERSIONS,
   ACTIONS_INDEX,
   ACTION_RESPONSES_DATA_STREAM_INDEX,
+  OSQUERY_INTEGRATION_NAME,
 } from '../../../common/constants';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
@@ -25,6 +26,7 @@ import type {
 import { buildLiveActionsQuery } from './query_live_actions_dsl';
 import { buildScheduledResponsesQuery } from './query_scheduled_responses_dsl';
 import { hasConnectedRemoteClusters, prefixIndexPatternsWithCcs } from '../../utils/ccs_utils';
+import { getReadEsClient } from '../../utils/get_read_es_client';
 import { mergeRows } from './merge_rows';
 import { decodeCursor, encodeCursor, computePaginationCursors } from './cursor_utils';
 import { processLiveHistory } from './process_live_history';
@@ -91,10 +93,17 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
         },
       },
       async (context, request, response) => {
+        // Hoisted above the `try` so the error paths below can report which read routing was in
+        // effect; the catch block is what surfaces an authorization failure on a fanned-out read.
+        let cpsActive = false;
+
         try {
-          const coreContext = await context.core;
-          const esClient = coreContext.elasticsearch.client.asInternalUser;
-          const ccsEnabled = await hasConnectedRemoteClusters(esClient);
+          cpsActive = await osqueryContext.isCpsActive(request);
+          const [coreStart] = await osqueryContext.getStartServices();
+          const clusterClient = coreStart.elasticsearch.client;
+          const internalEsClient = clusterClient.asInternalUser;
+          const readEsClient = getReadEsClient(clusterClient, request, cpsActive);
+          const ccsEnabled = await hasConnectedRemoteClusters(internalEsClient);
 
           const spaceId = osqueryContext?.service?.getActiveSpace
             ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID
@@ -146,6 +155,24 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
           // Fetch all packs once — used for both kuery filtering and
           // resolving query names on scheduled rows.
           const packSOs = includeScheduled ? await getPacksForSpace(spaceScopedClient) : [];
+          let integrationNamespaces: string[] | undefined;
+
+          if (includeLive && osqueryContext?.service?.getIntegrationNamespaces) {
+            try {
+              const namespaceMap = await osqueryContext.service.getIntegrationNamespaces(
+                [OSQUERY_INTEGRATION_NAME],
+                spaceScopedClient,
+                logger
+              );
+              const osqueryNamespaces = namespaceMap[OSQUERY_INTEGRATION_NAME];
+              integrationNamespaces =
+                osqueryNamespaces && osqueryNamespaces.length > 0 ? osqueryNamespaces : undefined;
+
+              logger.debug(`Retrieved integration namespaces: ${JSON.stringify(namespaceMap)}`);
+            } catch (err) {
+              logger.warn(`Failed to resolve integration namespaces: ${(err as Error).message}`);
+            }
+          }
 
           let packIdsForQuery: string[] | undefined;
           let scheduleIdsForQuery: string[] | undefined;
@@ -183,6 +210,7 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
                 startDate,
                 endDate,
                 sortDirection,
+                cpsActive,
               })
             : undefined;
 
@@ -190,7 +218,7 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
 
           const [actionsResult, scheduledResult] = await Promise.all([
             actionsQuery
-              ? esClient.search(
+              ? readEsClient.search(
                   {
                     index: prefixIndexPatternsWithCcs(`${ACTIONS_INDEX}*`, ccsEnabled),
                     ...actionsQuery,
@@ -199,7 +227,7 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
                 )
               : Promise.resolve({ hits: { hits: [] } }),
             scheduledQuery
-              ? esClient
+              ? readEsClient
                   .search(
                     {
                       index: prefixIndexPatternsWithCcs(
@@ -211,12 +239,19 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
                     { ignore: [404] }
                   )
                   .catch((err) => {
-                    // Graceful degradation: if the osquery integration has not been
-                    // upgraded yet, `planned_schedule_time` may be mapped as `keyword`
-                    // instead of `date`, which makes the `max` aggregation fail.
-                    // Return empty scheduled results until the integration is updated.`````
+                    // Graceful degradation is only intended for one case: if the osquery
+                    // integration has not been upgraded yet, `planned_schedule_time` may be
+                    // mapped as `keyword` instead of `date`, which makes the `max`
+                    // aggregation fail with a 400. Anything else — notably a 403 when the
+                    // caller cannot read the fanned-out indices — has to surface, because
+                    // returning empty here is indistinguishable from "no scheduled history".
+                    const statusCode = (err as { statusCode?: number }).statusCode;
+                    if (statusCode !== 400) {
+                      throw err;
+                    }
+
                     logger.warn(
-                      `Scheduled query aggregation failed (likely outdated integration mappings): ${err.message}`
+                      `Scheduled query aggregation failed, likely outdated integration mappings (spaceId: ${spaceId}, cpsActive: ${cpsActive}): ${err.message}`
                     );
 
                     return emptyScheduledResult;
@@ -229,7 +264,11 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
           const { liveRows: filteredLiveRows, sortValuesMap } = await processLiveHistory({
             liveHits,
             osqueryContext,
+            request,
             spaceId,
+            integrationNamespaces,
+            ccsEnabled,
+            cpsActive,
             logger,
           });
 
@@ -276,12 +315,14 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
 
           return response.ok({ body });
         } catch (err) {
-          const error = err as Error;
-          logger.error(`Failed to fetch unified history: ${error.message}`);
+          const error = err as Error & { statusCode?: number };
+          logger.error(
+            `Failed to fetch unified history (cpsActive: ${cpsActive}, indices: ${ACTIONS_INDEX}* and ${ACTION_RESPONSES_DATA_STREAM_INDEX}-*): ${error.message}`
+          );
 
           return response.customError({
-            statusCode: 500,
-            body: { message: 'Failed to fetch query history' },
+            statusCode: error.statusCode ?? 500,
+            body: { message: error.message || 'Failed to fetch query history' },
           });
         }
       }

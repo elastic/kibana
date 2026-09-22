@@ -7,7 +7,11 @@
 
 import { renderHook, act } from '@testing-library/react';
 import { Subject } from 'rxjs';
-import { useFilterUrlSync } from './use_filter_url_sync';
+import {
+  parseMapOrientationFromAppState,
+  parseViewFiltersFromAppState,
+  useFilterUrlSync,
+} from './use_filter_url_sync';
 
 const mockGet = jest.fn();
 const mockSet = jest.fn();
@@ -62,12 +66,12 @@ describe('useFilterUrlSync', () => {
     );
   });
 
-  it('does not call setAppFilters when _a has no filters', () => {
+  it('clears inherited app filters when _a has no filters', () => {
     mockGet.mockReturnValue(null);
 
     renderHook(() => useFilterUrlSync());
 
-    expect(mockFilterManager.setAppFilters).not.toHaveBeenCalled();
+    expect(mockFilterManager.setAppFilters).toHaveBeenCalledWith([]);
   });
 
   it('writes filterManager app filters back to _a.filters on updates (excluding environment)', () => {
@@ -157,5 +161,38 @@ describe('useFilterUrlSync', () => {
     const { result } = renderHook(() => useFilterUrlSync());
 
     expect(result.current.getRestoredControlSelections()).toBeUndefined();
+  });
+});
+
+describe('parseViewFiltersFromAppState', () => {
+  it('restores known connection filters and drops unknown values', () => {
+    expect(
+      parseViewFiltersFromAppState({
+        viewFilters: {
+          connectionFilter: ['orphaned', 'not-a-real-filter'],
+          alertStatusFilter: ['active'],
+        },
+      })
+    ).toEqual({
+      alertStatusFilter: ['active'],
+      sloStatusFilter: [],
+      connectionFilter: ['orphaned'],
+      anomalySeverityFilter: [],
+    });
+  });
+
+  it('returns undefined when all filter arrays are empty after validation', () => {
+    expect(
+      parseViewFiltersFromAppState({
+        viewFilters: { connectionFilter: ['bogus'] },
+      })
+    ).toBeUndefined();
+  });
+});
+
+describe('parseMapOrientationFromAppState', () => {
+  it('accepts vertical and rejects unknown values', () => {
+    expect(parseMapOrientationFromAppState({ mapOrientation: 'vertical' })).toBe('vertical');
+    expect(parseMapOrientationFromAppState({ mapOrientation: 'diagonal' })).toBeUndefined();
   });
 });

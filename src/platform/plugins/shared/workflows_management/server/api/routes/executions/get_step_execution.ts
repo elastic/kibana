@@ -10,9 +10,17 @@
 import path from 'path';
 import { schema } from '@kbn/config-schema';
 import type { RouteDependencies } from '../types';
-import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
+import {
+  API_VERSION,
+  AVAILABILITY,
+  MAX_WORKFLOW_ENTITY_ID_LENGTH,
+  OAS_TAG,
+} from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
-import { WORKFLOW_EXECUTION_READ_SECURITY } from '../utils/route_security';
+import {
+  assertCanReadManagedWorkflowExecution,
+  WORKFLOW_EXECUTION_READ_WITH_MANAGED_SECURITY,
+} from '../utils/route_security';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
 export function registerGetStepExecutionRoute({ router, api, spaces }: RouteDependencies) {
@@ -20,7 +28,7 @@ export function registerGetStepExecutionRoute({ router, api, spaces }: RouteDepe
     .get({
       path: '/api/workflows/executions/{executionId}/step/{stepExecutionId}',
       access: 'public',
-      security: WORKFLOW_EXECUTION_READ_SECURITY,
+      security: WORKFLOW_EXECUTION_READ_WITH_MANAGED_SECURITY,
       summary: 'Get a step execution',
       description: 'Retrieve details of a single step execution within a workflow execution.',
       options: {
@@ -37,8 +45,14 @@ export function registerGetStepExecutionRoute({ router, api, spaces }: RouteDepe
         validate: {
           request: {
             params: schema.object({
-              executionId: schema.string({ meta: { description: 'Workflow execution ID.' } }),
-              stepExecutionId: schema.string({ meta: { description: 'Step execution ID.' } }),
+              executionId: schema.string({
+                maxLength: MAX_WORKFLOW_ENTITY_ID_LENGTH,
+                meta: { description: 'Workflow execution ID.' },
+              }),
+              stepExecutionId: schema.string({
+                maxLength: MAX_WORKFLOW_ENTITY_ID_LENGTH,
+                meta: { description: 'Step execution ID.' },
+              }),
             }),
           },
         },
@@ -46,9 +60,17 @@ export function registerGetStepExecutionRoute({ router, api, spaces }: RouteDepe
       withAvailabilityCheck(async (context, request, response) => {
         try {
           const { executionId, stepExecutionId } = request.params;
+          const spaceId = spaces.getSpaceId(request);
+          const workflowExecution = await api.getWorkflowExecution(executionId, spaceId, {
+            omitStepExecutions: true,
+          });
+          if (!workflowExecution) {
+            return response.notFound();
+          }
+          assertCanReadManagedWorkflowExecution(request, workflowExecution);
           const stepExecution = await api.getStepExecution(
             { executionId, id: stepExecutionId },
-            spaces.getSpaceId(request)
+            spaceId
           );
           if (!stepExecution) {
             return response.notFound();

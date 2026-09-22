@@ -7,6 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const EVENT_DISPLAY_NAME = i18n.translate('xpack.securitySolution.cases.event.displayName', {
+  defaultMessage: 'Events',
+});
+
 export const DATA_VIEW_ERROR = i18n.translate('xpack.securitySolution.caseEvents.dataViewError', {
   defaultMessage: 'Data View Error',
 });
@@ -25,16 +29,6 @@ export const NO_EVENTS_TITLE = i18n.translate('xpack.securitySolution.caseEvents
   defaultMessage: 'No Events Found',
 });
 
-export const ADD_TO_NEW_CASE = i18n.translate('xpack.securitySolution.caseEvents.addToNewCase', {
-  defaultMessage: 'Add to new case',
-});
-
-export const ADD_TO_EXISTING_CASE = i18n.translate(
-  'xpack.securitySolution.caseEvents.addToExistingCase',
-  {
-    defaultMessage: 'Add to existing case',
-  }
-);
 export const EVENT_COMMENT_LABEL_TITLE = i18n.translate(
   'xpack.securitySolution.cases.eventAttachment.eventCommentLabelTitle',
   {
@@ -68,7 +62,7 @@ export const REMOVED_EVENTS_LABEL_TITLE = (eventCount: number) =>
     values: { eventCount },
   });
 
-export const DELETE_EVENTS_SUCCESS_TITLE = (totalEvents: number) =>
+export const DELETE_EVENTS_SUCCESS_TOAST = (totalEvents: number) =>
   i18n.translate('xpack.securitySolution.cases.eventAttachment.deleteEventsSuccessTitle', {
     defaultMessage:
       'Deleted {totalEvents, plural, =1 {one} other {{totalEvents}}} {totalEvents, plural, =1 {event} other {events}}',

@@ -37,11 +37,11 @@ import {
   switchMap,
   tap,
 } from 'rxjs';
+import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import { dataService } from '../services/kibana_services';
 import { logger } from '../services/logger';
 import { GLOBAL_STATE_STORAGE_KEY } from '../utils/urls';
-import type { DashboardCreationOptions } from './types';
-import type { DashboardState } from '../../common';
+import type { DashboardApi, DashboardCreationOptions } from './types';
 import { cleanFiltersForSerialize } from './clean_filters_for_serialize';
 
 export const COMPARE_DEBOUNCE = 100;
@@ -51,6 +51,7 @@ export function initializeUnifiedSearchManager(
   timeRestore$: PublishingSubject<boolean>,
   waitForPanelsToLoad$: Observable<void>,
   getLastSavedState: () => DashboardState | undefined,
+  userActivity$: DashboardApi['userActivity$'],
   creationOptions?: DashboardCreationOptions
 ) {
   const {

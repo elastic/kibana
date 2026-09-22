@@ -8,10 +8,11 @@
 import { useQuery } from '@kbn/react-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { normalizeTags } from '@kbn/alerting-v2-utils';
 import type { AlertEpisodeGroupAction } from '../types/action';
 import { fetchGroupActions } from '../apis/fetch_group_actions';
+import { QUERY_STALE_TIME } from '../constants';
 import { queryKeys } from '../query_keys';
-import { normalizeTags } from '../utils/normalize_tags';
 import { useSpaceId } from './use_space_id';
 
 export interface UseFetchGroupActionsOptions {
@@ -28,6 +29,7 @@ export const useFetchGroupActions = ({ groupHashes, services }: UseFetchGroupAct
       fetchGroupActions({ spaceId, groupHashes, abortSignal: signal, expressions }),
     enabled: groupHashes.length > 0,
     keepPreviousData: true,
+    staleTime: QUERY_STALE_TIME,
     select: (rows) => {
       const map = new Map<string, AlertEpisodeGroupAction>();
       for (const row of rows) {

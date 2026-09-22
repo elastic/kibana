@@ -68,9 +68,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('lnsLayerSettings');
       // annotations settings have only ignore filters
       await testSubjects.click('lns-layerSettings-ignoreGlobalFilters');
-      expect(
-        await testSubjects.exists('lns-layerPanel-0 > lnsChangeIndexPatternIgnoringFilters')
-      ).to.be(true);
+      await testSubjects.existOrFail('lns-layerPanel-0 > lnsChangeIndexPatternIgnoringFilters');
       await testSubjects.click('lns-indexPattern-dimensionContainerBack');
     });
 
@@ -170,13 +168,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should switch to pie chart and have layer settings available', async () => {
-      await retry.try(async () => {
-        // click on the tab navigation left button 10 times to make the first tab visible
-        for (let i = 0; i < 10; i++) {
-          await testSubjects.click('unifiedTabs_tabsBar_scrollLeftBtn');
-        }
-        await lens.ensureLayerTabIsActive(0);
-      });
+      await lens.ensureLayerTabIsActive(0);
+
       await lens.switchToVisualization('pie');
       // layer settings still available
       // open the panel

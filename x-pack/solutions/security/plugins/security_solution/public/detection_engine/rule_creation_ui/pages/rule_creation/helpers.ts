@@ -53,6 +53,8 @@ import type {
 import { DataSourceType, AlertSuppressionDurationType } from '../../../common/types';
 import type {
   RuleCreateProps,
+  RuleResponse,
+  ThreatMatchRuleUpdateProps,
   AlertSuppression,
   RequiredFieldInput,
   SeverityMapping,
@@ -693,6 +695,20 @@ export const formatRule = <T>(
     formatScheduleStepData(scheduleData),
     formatActionsStepData(actionsData, actionTypeRegistry),
   ]) as unknown as T;
+
+/**
+ * concurrent_searches/items_per_search are API-only fields with no UI controls
+ * (see #276203), so they never round-trip through the define step form. On
+ * rule edit, merge them back in directly from the previously loaded rule
+ * rather than routing them through form state, since the edit form saves via
+ * a full-replace PUT.
+ */
+export const getApiOnlyThreatMatchFields = (
+  rule: RuleResponse
+): Pick<ThreatMatchRuleUpdateProps, 'concurrent_searches' | 'items_per_search'> =>
+  rule.type === 'threat_match'
+    ? { concurrent_searches: rule.concurrent_searches, items_per_search: rule.items_per_search }
+    : {};
 
 export const formatPreviewRule = ({
   defineRuleData,

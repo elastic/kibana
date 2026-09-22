@@ -7,6 +7,7 @@
 
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { AnyToolTypeDefinition } from './definitions';
 import { getEsqlToolType } from './esql';
 import { getIndexSearchToolType, type IndexSearchToolTypeDeps } from './index_search';
@@ -16,10 +17,12 @@ import { getMcpToolType } from './mcp';
 
 export const getToolTypeDefinitions = ({
   workflowsManagement,
+  security,
   actions,
   indexSearchDeps,
 }: {
   workflowsManagement?: WorkflowsServerPluginSetup;
+  security: SecurityPluginStart | undefined;
   actions: ActionsPluginStart;
   indexSearchDeps: IndexSearchToolTypeDeps;
 }): AnyToolTypeDefinition[] => {
@@ -27,7 +30,7 @@ export const getToolTypeDefinitions = ({
     getBuiltinToolType(),
     getEsqlToolType(),
     getIndexSearchToolType(indexSearchDeps),
-    getWorkflowToolType({ workflowsManagement }),
+    getWorkflowToolType({ workflowsManagement, security }),
     getMcpToolType({ actions }),
   ];
   return toolTypes;

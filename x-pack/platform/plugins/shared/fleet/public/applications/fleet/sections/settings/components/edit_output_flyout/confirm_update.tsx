@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import type { Output } from '../../../../types';
 import type { useConfirmModal } from '../../hooks/use_confirm_modal';
@@ -77,10 +78,8 @@ const ConfirmDescription: React.FunctionComponent<ConfirmDescriptionProps> = ({
     {output.type === 'logstash' ? (
       <>
         <EuiSpacer size="s" />
-        <EuiCallOut
+        <KbnWarningCallout
           announceOnMount
-          iconType="warning"
-          color="warning"
           size="m"
           title={
             <FormattedMessage
@@ -88,12 +87,13 @@ const ConfirmDescription: React.FunctionComponent<ConfirmDescriptionProps> = ({
               defaultMessage="Logstash output for agent integration is not supported for fleet server and synthetics."
             />
           }
-        >
-          <FormattedMessage
-            id="xpack.fleet.settings.updateOutput.warningMessage"
-            defaultMessage="Fleet server and synthetics policies will keep using the existing ES output."
-          />
-        </EuiCallOut>{' '}
+          text={
+            <FormattedMessage
+              id="xpack.fleet.settings.updateOutput.warningMessage"
+              defaultMessage="Fleet server and synthetics policies will keep using the existing ES output."
+            />
+          }
+        />
       </>
     ) : null}
   </>

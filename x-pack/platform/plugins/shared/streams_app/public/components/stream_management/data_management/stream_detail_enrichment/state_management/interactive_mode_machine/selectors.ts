@@ -6,7 +6,7 @@
  */
 
 import { isActionBlock } from '@kbn/streamlang';
-import { createSelector } from 'reselect';
+import { createSelector } from 'reselect-v4';
 import { isStepUnderEdit } from '../steps_state_machine';
 import type { InteractiveModeContext } from './types';
 

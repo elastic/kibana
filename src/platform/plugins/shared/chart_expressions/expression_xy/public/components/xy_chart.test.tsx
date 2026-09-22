@@ -17,6 +17,7 @@ import type {
   PointStyle,
   AreaSeriesStyle,
   LineSeriesStyle,
+  PartialTheme,
 } from '@elastic/charts';
 import {
   AreaSeries,
@@ -38,7 +39,7 @@ import {
   Tooltip,
   LegendValue,
 } from '@elastic/charts';
-import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { ESQL_TABLE_TYPE, getAggsFormats } from '@kbn/data-plugin/common';
@@ -85,6 +86,7 @@ const onClickValue = jest.fn();
 const onClickMultiValue = jest.fn();
 const layerCellValueActions: LayerCellValueActions = [];
 const onSelectRange = jest.fn();
+const onAnnotationClick = jest.fn();
 
 describe('XYChart component', () => {
   let formatFactorySpy: jest.Mock;
@@ -155,9 +157,9 @@ describe('XYChart component', () => {
 
     formatFactorySpy = jest.fn((mapping?: SerializedFieldFormat) => {
       const fieldFormat = fieldFormatsRegistry.deserialize(mapping);
-      const originalConvert = fieldFormat.convert?.bind(fieldFormat) ?? ((v: unknown) => v);
+      const originalConvert = fieldFormat.convertToText?.bind(fieldFormat) ?? ((v: unknown) => v);
       convertSpy = jest.fn((value) => originalConvert(value));
-      fieldFormat.convert = convertSpy as typeof fieldFormat.convert;
+      fieldFormat.convertToText = convertSpy as typeof fieldFormat.convertToText;
       return fieldFormat;
     });
 
@@ -176,6 +178,7 @@ describe('XYChart component', () => {
       onClickMultiValue,
       layerCellValueActions,
       onSelectRange,
+      onAnnotationClick,
       syncColors: false,
       syncTooltips: false,
       syncCursor: true,
@@ -238,7 +241,7 @@ describe('XYChart component', () => {
                   source: 'esaggs',
                   sourceParams: {
                     type: 'date_histogram',
-                    params: {},
+                    params: { used_interval: '1d' },
                     appliedTimeRange: {
                       from: '2019-01-02T05:00:00.000Z',
                       to: '2019-01-03T05:00:00.000Z',
@@ -452,7 +455,7 @@ describe('XYChart component', () => {
                   source: 'esaggs',
                   sourceParams: {
                     type: 'date_histogram',
-                    params: {},
+                    params: { used_interval: '1d' },
                     appliedTimeRange: {
                       from: '2021-04-22T12:00:00.000Z',
                       to: '2021-04-24T12:00:00.000Z',
@@ -940,6 +943,63 @@ describe('XYChart component', () => {
     });
   });
 
+  describe('area fill in area chart', () => {
+    const getAreaStyle = ({
+      areaFill,
+      fillOpacity,
+      isStacked = false,
+    }: {
+      areaFill?: 'solid' | 'gradient';
+      fillOpacity?: number;
+      isStacked?: boolean;
+    }) => {
+      const { args } = sampleArgs();
+      const component = shallow(
+        <XYChart
+          {...defaultProps}
+          args={{
+            ...args,
+            areaFill,
+            fillOpacity,
+            layers: [{ ...(args.layers[0] as DataLayerConfig), seriesType: 'area', isStacked }],
+          }}
+        />
+      );
+      const areaSeries = component.find(DataLayers).dive().find(AreaSeries).at(0);
+      return (areaSeries.prop('areaSeriesStyle') as AreaSeriesStyle).area;
+    };
+
+    test('applies gradient fill when areaFill is gradient', () => {
+      const areaStyle = getAreaStyle({ areaFill: 'gradient', fillOpacity: 0.5 });
+
+      expect(areaStyle?.gradient).toEqual(
+        expect.objectContaining({
+          type: 'linear',
+          stops: expect.any(Array),
+        })
+      );
+      expect(areaStyle?.opacity).toBe(0.5);
+    });
+
+    test('does not apply gradient when areaFill is solid', () => {
+      const areaStyle = getAreaStyle({ areaFill: 'solid', fillOpacity: 0.5 });
+
+      expect(areaStyle?.gradient).toBeUndefined();
+      expect(areaStyle?.opacity).toBe(0.5);
+    });
+
+    test('applies fill opacity', () => {
+      const areaStyle = getAreaStyle({ fillOpacity: 0.5 });
+      expect(areaStyle?.gradient).toBeUndefined();
+      expect(areaStyle?.opacity).toBe(0.5);
+    });
+
+    test('does not apply area styling when both areaFill and fillOpacity are omitted', () => {
+      const areaStyle = getAreaStyle({});
+      expect(areaStyle).toBeUndefined();
+    });
+  });
+
   test('applies point radius to the chart', () => {
     const pointsRadius = 10;
     const { args } = sampleArgs();
@@ -1048,6 +1108,54 @@ describe('XYChart component', () => {
     expect(barSeries.at(0).prop('yAccessors')).toEqual(['a']);
     expect(barSeries.at(1).prop('yAccessors')).toEqual(['b']);
     expect(component.find(Settings).prop('rotation')).toEqual(90);
+  });
+
+  describe('adds bar width safeguard on sparse categorical charts', () => {
+    const getBarRectStyle = (rows: DatatableRow[], xScaleType: 'ordinal' | 'time' = 'ordinal') => {
+      const component = shallow(
+        <XYChart
+          {...defaultProps}
+          args={createArgsWithLayers({
+            ...sampleLayer,
+            seriesType: 'bar',
+            xAccessor: 'b',
+            xScaleType,
+            table: createSampleDatatableWithRows(rows),
+          })}
+        />
+      );
+      const [themeOverrides] = component.find(Settings).prop('theme') as PartialTheme[];
+      return themeOverrides.barSeriesStyle?.rect;
+    };
+
+    test('caps bar width at 50% of the band for a single category', () => {
+      const rect = getBarRectStyle([{ v: 1, b: 'A' }]);
+      expect(rect?.widthPixel).toBe(400);
+      expect(rect?.widthRatio).toBe(0.5);
+    });
+
+    test('caps bar width at 90% of the band for two categories', () => {
+      const rect = getBarRectStyle([
+        { v: 1, b: 'A' },
+        { v: 2, b: 'B' },
+      ]);
+      expect(rect?.widthPixel).toBe(400);
+      expect(rect?.widthRatio).toBe(0.9);
+    });
+
+    test('only caps the pixel width for three or more categories', () => {
+      const rect = getBarRectStyle([
+        { v: 1, b: 'A' },
+        { v: 2, b: 'B' },
+        { v: 3, b: 'C' },
+      ]);
+      expect(rect).toEqual({ widthPixel: 400 });
+    });
+
+    test('does not cap bar width on non-categorical x axes', () => {
+      const rect = getBarRectStyle([{ v: 1, d: 1652034840000 }], 'time');
+      expect(rect).toBeUndefined();
+    });
   });
 
   test('it renders regular bar empty placeholder for no results', () => {
@@ -2263,7 +2371,7 @@ describe('XYChart component', () => {
     const localConvertSpy = jest.fn((x) => x);
     const getFormatSpy = jest.fn();
     getFormatSpy.mockReturnValue({
-      convert: localConvertSpy,
+      convertToText: localConvertSpy,
       params: jest.fn(() => ({})),
     });
 
@@ -3062,7 +3170,7 @@ describe('XYChart component', () => {
 
     const getCustomFormatSpy = jest.fn();
     getCustomFormatSpy.mockReturnValue({
-      convert: jest.fn((x) => Boolean(x)),
+      convertToText: jest.fn((x) => Boolean(x)),
       params: jest.fn(() => ({})),
     });
 
@@ -3109,7 +3217,7 @@ describe('XYChart component', () => {
       label: 'Event range',
       type: 'manual_range_event_annotation' as const,
     };
-    const configToRowHelper = (config: EventAnnotationOutput) => {
+    const configToRowHelper = (config: EventAnnotationOutput): DatatableRow => {
       return {
         ...config,
         timebucket: 1647591917100,
@@ -3253,6 +3361,75 @@ describe('XYChart component', () => {
         fill: getResolvedAnnotationColor({ color: undefined, isDarkMode: true, isRange: true }),
         opacity: 1,
       });
+    });
+
+    test('onAnnotationClick returns original annotation ids for line and range markers', () => {
+      const { args } = sampleArgsWithAnnotations([
+        createLayerWithAnnotations([defaultLineStaticAnnotation, defaultRangeStaticAnnotation]),
+      ]);
+      const wrapper = mount(<XYChart {...defaultProps} args={args} />);
+      const lineId = wrapper.find(LineAnnotation).first().prop('id') as string;
+      const rangeId = wrapper.find(RectAnnotation).last().prop('id') as string;
+
+      wrapper.find(Settings).first().prop('onAnnotationClick')!({
+        lines: [{ id: lineId, datum: { dataValue: defaultLineStaticAnnotation.time } }],
+        rects: [
+          {
+            id: rangeId,
+            datum: { coordinates: { x0: 1, x1: 2, y0: null, y1: null } },
+          },
+        ],
+      });
+
+      expect(onAnnotationClick).toHaveBeenCalledWith({
+        annotations: [
+          {
+            id: 'annotation',
+            type: 'point',
+            time: defaultLineStaticAnnotation.time,
+            label: 'Annotation',
+          },
+          {
+            id: 'range_annotation',
+            type: 'range',
+            time: defaultRangeStaticAnnotation.time,
+            endTime: defaultRangeStaticAnnotation.endTime,
+            label: 'Event range',
+          },
+        ],
+      });
+    });
+
+    test('onAnnotationClick includes query extra fields', () => {
+      const { args } = sampleArgsWithAnnotations();
+      args.annotations.datatable.rows = [
+        {
+          ...configToRowHelper(defaultLineStaticAnnotation),
+          'field:kibana.alert.uuid': 'alert-1',
+        },
+      ];
+      const wrapper = mount(<XYChart {...defaultProps} args={args} />);
+      const lineId = wrapper.find(LineAnnotation).first().prop('id') as string;
+
+      wrapper.find(Settings).first().prop('onAnnotationClick')!({
+        lines: [{ id: lineId, datum: { dataValue: defaultLineStaticAnnotation.time } }],
+        rects: [],
+      });
+
+      expect(onAnnotationClick).toHaveBeenCalledWith({
+        annotations: [
+          expect.objectContaining({
+            id: 'annotation',
+            extras: { 'kibana.alert.uuid': 'alert-1' },
+          }),
+        ],
+      });
+    });
+
+    test('onAnnotationClick is not set on non-interactive mode', () => {
+      const { args } = sampleArgsWithAnnotations();
+      const wrapper = mount(<XYChart {...defaultProps} interactive={false} args={args} />);
+      expect(wrapper.find(Settings).first().prop('onAnnotationClick')).toBeUndefined();
     });
   });
 

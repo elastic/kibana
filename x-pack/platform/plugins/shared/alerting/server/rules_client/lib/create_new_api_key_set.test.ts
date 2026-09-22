@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import {
   savedObjectsClientMock,
   loggingSystemMock,
   savedObjectsRepositoryMock,
   uiSettingsServiceMock,
-  coreFeatureFlagsMock,
 } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
@@ -36,6 +36,7 @@ const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 
 const kibanaVersion = 'v8.0.0';
 const rulesClientParams: jest.Mocked<RulesClientContext> = {
+  request: httpServerMock.createKibanaRequest(),
   taskManager,
   ruleTypeRegistry,
   unsecuredSavedObjectsClient,
@@ -53,7 +54,6 @@ const rulesClientParams: jest.Mocked<RulesClientContext> = {
   maxScheduledPerMinute: 10000,
   minimumScheduleInterval: { value: '1m', enforce: false },
   minimumScheduleIntervalInMs: 1,
-  fieldsToExcludeFromPublicApi: [],
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
   cloneAPIKey: jest.fn(),
@@ -64,7 +64,6 @@ const rulesClientParams: jest.Mocked<RulesClientContext> = {
   backfillClient: backfillClientMock.create(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
   isSystemAction: jest.fn(),
-  featureFlags: coreFeatureFlagsMock.createStart(),
   isServerless: false,
 };
 
@@ -120,6 +119,25 @@ describe('createNewAPIKeySet', () => {
       apiKeyOwner: 'test',
     });
     expect(rulesClientParams.createAPIKey).toHaveBeenCalledTimes(1);
+    expect(rulesClientParams.createAPIKey).toHaveBeenCalledWith(
+      'Alerting: 123/rule-name',
+      undefined
+    );
+  });
+
+  test('forwards refresh to createAPIKey when provided', async () => {
+    rulesClientParams.createAPIKey.mockResolvedValueOnce({
+      apiKeysEnabled: true,
+      result: { id: '123', name: '123', api_key: 'abc' },
+    });
+    await createNewAPIKeySet(rulesClientParams, {
+      id: attributes.alertTypeId,
+      ruleName: attributes.name,
+      username,
+      shouldUpdateApiKey: true,
+      refresh: false,
+    });
+    expect(rulesClientParams.createAPIKey).toHaveBeenCalledWith('Alerting: 123/rule-name', false);
   });
 
   test('should get api key from the request if the user is authenticated using api keys', async () => {

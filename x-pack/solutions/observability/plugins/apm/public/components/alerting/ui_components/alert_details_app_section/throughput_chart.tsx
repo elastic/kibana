@@ -7,10 +7,10 @@
 
 import type { ReactElement } from 'react';
 import React from 'react';
-import type { Theme } from '@elastic/charts';
+import type { SettingsSpec, Theme } from '@elastic/charts';
 import type { BoolQuery } from '@kbn/es-query';
-import type { RecursivePartial } from '@elastic/eui';
-import { EuiFlexItem, EuiPanel, EuiFlexGroup, EuiTitle, EuiIconTip } from '@elastic/eui';
+import type { EuiPanelProps, RecursivePartial } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiTitle, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { TopAlert } from '@kbn/observability-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -24,8 +24,11 @@ import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_prefe
 import { ApmDocumentType } from '../../../../../common/document_type';
 import { asExactTransactionRate } from '../../../../../common/utils/formatters';
 import { TransactionTypeSelect } from './transaction_type_select';
-import { RED_METRICS_CHART_ELEMENT, RedMetricsChartActions } from './red_metrics_chart_actions';
+import { APM_CHART_EBT_ELEMENTS } from '../../../shared/charts/ebt_constants';
+import { RedMetricsChartActions } from './red_metrics_chart_actions';
 import { useGetChartAlertAnnotations } from './use_get_chart_alert_annotations';
+import { AnomalyChartPanel } from './anomaly_chart_panel';
+import { AnomalySeverityBadge, type AnomalyChartInfo } from './anomaly_severity_badge';
 
 const INITIAL_STATE = {
   currentPeriod: [],
@@ -50,11 +53,18 @@ export function ThroughputChart({
   filters,
   customAlertEvaluationThreshold,
   threshold,
+  anomaly,
   ruleTypeId,
   compact,
   showAlertAnnotations,
+  showChartActions = true,
+  chartId = 'throughput',
+  panelPaddingSize,
+  chartSettings,
 }: {
-  alert: TopAlert;
+  // Optional so the chart can render outside an alert context (e.g. the service flyout);
+  // without it the alert annotations are simply omitted.
+  alert?: TopAlert;
   transactionType?: string;
   transactionTypes?: string[];
   setTransactionType?: (transactionType: string) => void;
@@ -71,11 +81,23 @@ export function ThroughputChart({
   filters?: BoolQuery;
   customAlertEvaluationThreshold?: number;
   threshold?: ReactElement;
+  anomaly?: AnomalyChartInfo;
   ruleTypeId?: ApmRuleType;
   /** When true, hide the threshold side panel even if `threshold` is provided. */
   compact?: boolean;
   /** When set, overrides the default annotation behavior (which is keyed off `threshold`). */
   showAlertAnnotations?: boolean;
+  /** When false, hide the "Open" chart actions popover. */
+  showChartActions?: boolean;
+  /**
+   * Elastic Charts id, which also names the tooltip portal. Hosts that restyle
+   * tooltip portals by id (e.g. the service flyout) need a distinct value.
+   */
+  chartId?: string;
+  /** Panel padding, for hosts with narrow chart columns (e.g. the service flyout). */
+  panelPaddingSize?: EuiPanelProps['paddingSize'];
+  /** Elastic Charts settings overrides, e.g. to hide synced-cursor tooltips in narrow hosts. */
+  chartSettings?: Partial<SettingsSpec>;
 }) {
   const {
     services: { uiSettings },
@@ -166,8 +188,10 @@ export function ThroughputChart({
 
   return (
     <EuiFlexItem>
-      <EuiPanel hasBorder={true}>
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+      <AnomalyChartPanel anomalyScore={anomaly?.score} paddingSize={panelPaddingSize}>
+        {/* wrap moves the controls onto their own line in narrow hosts (e.g. the
+            service flyout) instead of shrinking the title below its own width */}
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
           <EuiFlexItem grow={false}>
             <EuiTitle size="xs">
               <h2>
@@ -177,6 +201,11 @@ export function ThroughputChart({
               </h2>
             </EuiTitle>
           </EuiFlexItem>
+          {anomaly && (
+            <EuiFlexItem grow={false}>
+              <AnomalySeverityBadge severity={anomaly.severity} score={anomaly.score} />
+            </EuiFlexItem>
+          )}
 
           <EuiFlexItem grow={false}>
             <EuiIconTip
@@ -195,24 +224,27 @@ export function ThroughputChart({
               />
             </EuiFlexItem>
           )}
-          <EuiFlexItem>
-            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <RedMetricsChartActions
-                  queryParams={{
-                    serviceName,
-                    environment,
-                    transactionName,
-                    transactionType,
-                    kuery,
-                  }}
-                  timeRange={{ from: start, to: end }}
-                  ruleTypeId={ruleTypeId}
-                  element={RED_METRICS_CHART_ELEMENT.THROUGHPUT}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
+          {showChartActions && (
+            <EuiFlexItem>
+              <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <RedMetricsChartActions
+                    queryParams={{
+                      serviceName,
+                      environment,
+                      transactionName,
+                      transactionType,
+                      kuery,
+                    }}
+                    timeRange={{ from: start, to: end }}
+                    ruleTypeId={ruleTypeId}
+                    element={APM_CHART_EBT_ELEMENTS.THROUGHPUT}
+                    anomaly={anomaly}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
         <EuiFlexGroup direction="row" gutterSize="m">
           {!!threshold && !compact && (
@@ -222,7 +254,7 @@ export function ThroughputChart({
           )}
           <EuiFlexItem grow={!!threshold && !compact ? 5 : undefined}>
             <TimeseriesChart
-              id="throughput"
+              id={chartId}
               height={200}
               annotations={alertAnnotations}
               comparisonEnabled={comparisonEnabled}
@@ -232,11 +264,11 @@ export function ThroughputChart({
               timeseries={timeseriesThroughput}
               yLabelFormat={asExactTransactionRate}
               timeZone={timeZone}
-              settings={CHART_SETTINGS}
+              settings={{ ...CHART_SETTINGS, ...chartSettings }}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiPanel>
+      </AnomalyChartPanel>
     </EuiFlexItem>
   );
 }

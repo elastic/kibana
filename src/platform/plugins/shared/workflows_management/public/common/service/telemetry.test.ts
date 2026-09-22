@@ -36,6 +36,9 @@ import {
 
 const extractWorkflowMetadataMock = jest.mocked(extractWorkflowMetadata);
 const extractStepInfoFromWorkflowYamlMock = jest.mocked(extractStepInfoFromWorkflowYaml);
+const { extractWorkflowMetadata: extractWorkflowMetadataActual } = jest.requireActual(
+  '../lib/telemetry/utils/extract_workflow_metadata'
+) as typeof import('../lib/telemetry/utils/extract_workflow_metadata');
 
 const createMockTelemetryClient = (): TelemetryServiceClient => ({
   reportEvent: jest.fn(),
@@ -54,6 +57,7 @@ const createMockValidationResult = (
     severity: 'error',
     message: 'Test error',
     owner: 'yaml',
+    ruleId: 'schemaViolation',
     ...overrides,
   } as YamlValidationResult);
 
@@ -201,22 +205,8 @@ describe('WorkflowsBaseTelemetry', () => {
 
     it('includes concurrency fields when present in metadata', () => {
       extractWorkflowMetadataMock.mockReturnValueOnce({
-        enabled: false,
-        stepCount: 0,
-        connectorTypes: [],
-        stepTypes: [],
-        stepTypeCounts: {},
-        triggerTypes: [],
-        inputCount: 0,
-        constCount: 0,
-        triggerCount: 0,
-        hasTriggerConditions: false,
-        hasTriggerWorkflowEventsIgnore: false,
-        hasTriggerWorkflowEventsAllow: false,
-        hasTriggerWorkflowEventsAvoidLoop: false,
+        ...extractWorkflowMetadataActual(null),
         settingsUsed: ['concurrency'],
-        hasDescription: false,
-        tagCount: 0,
         concurrencyMax: 10,
         concurrencyStrategy: 'drop',
       });
@@ -370,6 +360,52 @@ describe('WorkflowsBaseTelemetry', () => {
         expect.objectContaining({
           isBulkAction: true,
           bulkActionCount: 5,
+        })
+      );
+    });
+
+    it('includes hasCustomEventTrigger on enable/disable when workflowDefinition is provided', () => {
+      telemetry.reportWorkflowUpdated({
+        workflowId: 'wf-1',
+        workflowUpdate: { enabled: true },
+        workflowDefinition: {
+          triggers: [{ type: 'scheduled' }, { type: 'cases.created' }],
+        } as Partial<WorkflowYaml>,
+        hasValidationErrors: false,
+        validationErrorCount: 0,
+        origin: 'workflow_list',
+      });
+
+      expect(mockClient.reportEvent).toHaveBeenCalledWith(
+        WorkflowLifecycleEventTypes.WorkflowEnabledStateChanged,
+        expect.objectContaining({
+          hasCustomEventTrigger: true,
+          origin: 'workflow_list',
+        })
+      );
+    });
+
+    it('does not report hasCustomEventTrigger true on enable/disable when workflowDefinition is omitted', () => {
+      telemetry.reportWorkflowUpdated({
+        workflowId: 'wf-1',
+        workflowUpdate: { enabled: true },
+        hasValidationErrors: false,
+        validationErrorCount: 0,
+        origin: 'workflow_list',
+      });
+
+      expect(mockClient.reportEvent).toHaveBeenCalledWith(
+        WorkflowLifecycleEventTypes.WorkflowEnabledStateChanged,
+        expect.objectContaining({
+          workflowId: 'wf-1',
+          enabled: true,
+          origin: 'workflow_list',
+        })
+      );
+      expect(mockClient.reportEvent).toHaveBeenCalledWith(
+        WorkflowLifecycleEventTypes.WorkflowEnabledStateChanged,
+        expect.not.objectContaining({
+          hasCustomEventTrigger: true,
         })
       );
     });
@@ -788,7 +824,8 @@ describe('WorkflowsBaseTelemetry', () => {
         inputCount: 2,
         editorType: 'both',
         origin: 'workflow_detail',
-        triggerTab: 'alert',
+        triggerTab: 'event',
+        hasCustomEventTrigger: true,
       });
 
       expect(mockClient.reportEvent).toHaveBeenCalledWith(
@@ -800,7 +837,8 @@ describe('WorkflowsBaseTelemetry', () => {
           inputCount: 2,
           editorType: 'both',
           origin: 'workflow_detail',
-          triggerTab: 'alert',
+          triggerTab: 'event',
+          hasCustomEventTrigger: true,
           result: 'success',
         })
       );
@@ -1238,12 +1276,14 @@ describe('WorkflowsBaseTelemetry', () => {
       const validationResults: YamlValidationResult[] = [
         createMockValidationResult({
           owner: 'yaml',
+          ruleId: 'schemaViolation',
           message: 'Invalid field',
           startLineNumber: 1,
           startColumn: 1,
         }),
         createMockValidationResult({
           owner: 'step-name-validation',
+          ruleId: 'duplicateStepName',
           message: 'Duplicate step name',
           startLineNumber: 5,
           startColumn: 3,
@@ -1273,6 +1313,38 @@ describe('WorkflowsBaseTelemetry', () => {
       expect(eventData.errorTypes).toEqual(
         expect.arrayContaining(['yaml', 'step-name-validation'])
       );
+      expect(eventData.ruleIds).toEqual(
+        expect.arrayContaining(['schemaViolation', 'duplicateStepName'])
+      );
+    });
+
+    it('deduplicates on rule id, so a reworded message does not re-report', () => {
+      const reported = createMockValidationResult({
+        owner: 'yaml',
+        ruleId: 'schemaViolation',
+        message: 'Invalid field',
+        startLineNumber: 1,
+        startColumn: 1,
+      });
+      const reworded = createMockValidationResult({
+        owner: 'yaml',
+        ruleId: 'schemaViolation',
+        message: 'Champ invalide',
+        startLineNumber: 1,
+        startColumn: 1,
+      });
+
+      telemetry.reportWorkflowValidationError({
+        workflowId: 'wf-1',
+        validationResults: [reported],
+      });
+      expect(mockClient.reportEvent).toHaveBeenCalledTimes(1);
+
+      telemetry.reportWorkflowValidationError({
+        workflowId: 'wf-1',
+        validationResults: [reworded],
+      });
+      expect(mockClient.reportEvent).toHaveBeenCalledTimes(1);
     });
 
     it('does not report when there are no error-severity results', () => {
@@ -1280,6 +1352,7 @@ describe('WorkflowsBaseTelemetry', () => {
         createMockValidationResult({
           severity: 'warning',
           owner: 'yaml',
+          ruleId: 'schemaViolation',
           message: 'Some warning',
         }),
       ];
@@ -1296,6 +1369,7 @@ describe('WorkflowsBaseTelemetry', () => {
       const validationResults: YamlValidationResult[] = [
         createMockValidationResult({
           owner: 'yaml',
+          ruleId: 'schemaViolation',
           message: 'Invalid field',
           startLineNumber: 1,
           startColumn: 1,
@@ -1322,6 +1396,7 @@ describe('WorkflowsBaseTelemetry', () => {
     it('reports again after a previously reported error is resolved and reappears', () => {
       const errorResult = createMockValidationResult({
         owner: 'yaml',
+        ruleId: 'schemaViolation',
         message: 'Invalid field',
         startLineNumber: 1,
         startColumn: 1,
@@ -1354,12 +1429,14 @@ describe('WorkflowsBaseTelemetry', () => {
     it('reports new errors even when some old ones are still present', () => {
       const error1 = createMockValidationResult({
         owner: 'yaml',
+        ruleId: 'schemaViolation',
         message: 'Error 1',
         startLineNumber: 1,
         startColumn: 1,
       });
       const error2 = createMockValidationResult({
         owner: 'step-name-validation',
+        ruleId: 'duplicateStepName',
         message: 'Error 2',
         startLineNumber: 5,
         startColumn: 3,
@@ -1391,6 +1468,7 @@ describe('WorkflowsBaseTelemetry', () => {
       const validationResults: YamlValidationResult[] = [
         createMockValidationResult({
           owner: 'yaml',
+          ruleId: 'schemaViolation',
           message: 'Error',
           startLineNumber: 1,
           startColumn: 1,
@@ -1416,6 +1494,7 @@ describe('WorkflowsBaseTelemetry', () => {
       const validationResults: YamlValidationResult[] = [
         createMockValidationResult({
           owner: 'yaml',
+          ruleId: 'schemaViolation',
           message: 'Error',
         }),
       ];
@@ -1433,6 +1512,7 @@ describe('WorkflowsBaseTelemetry', () => {
       const validationResults: YamlValidationResult[] = [
         createMockValidationResult({
           owner: 'yaml',
+          ruleId: 'schemaViolation',
           message: 'Error',
         }),
       ];
@@ -1445,6 +1525,170 @@ describe('WorkflowsBaseTelemetry', () => {
       const eventData = call[1];
       expect(eventData).not.toHaveProperty('editorType');
       expect(eventData).not.toHaveProperty('origin');
+    });
+  });
+
+  describe('reportWorkflowExecutionsPageViewed', () => {
+    it('reports the executions page view', () => {
+      telemetry.reportWorkflowExecutionsPageViewed();
+
+      expect(mockClient.reportEvent).toHaveBeenCalledWith(
+        WorkflowUIEventTypes.WorkflowExecutionsPageViewed,
+        expect.objectContaining({
+          eventName: workflowEventNames[WorkflowUIEventTypes.WorkflowExecutionsPageViewed],
+        })
+      );
+      expect(mockClient.reportEvent).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('reportWorkflowExecutionsFilterApplied', () => {
+    it('reports a filter with multiple active slots', () => {
+      telemetry.reportWorkflowExecutionsFilterApplied({
+        filterTypes: ['status', 'workflowId'],
+      });
+
+      expect(mockClient.reportEvent).toHaveBeenCalledWith(
+        WorkflowUIEventTypes.WorkflowExecutionsFilterApplied,
+        expect.objectContaining({
+          eventName: workflowEventNames[WorkflowUIEventTypes.WorkflowExecutionsFilterApplied],
+          filterTypes: ['status', 'workflowId'],
+        })
+      );
+    });
+
+    it('reports a filter with a time range', () => {
+      telemetry.reportWorkflowExecutionsFilterApplied({
+        filterTypes: ['timeRange'],
+      });
+
+      expect(mockClient.reportEvent).toHaveBeenCalledWith(
+        WorkflowUIEventTypes.WorkflowExecutionsFilterApplied,
+        expect.objectContaining({
+          filterTypes: ['timeRange'],
+        })
+      );
+    });
+
+    it('reports a filter with a KQL query', () => {
+      telemetry.reportWorkflowExecutionsFilterApplied({
+        filterTypes: ['query'],
+      });
+
+      expect(mockClient.reportEvent).toHaveBeenCalledWith(
+        WorkflowUIEventTypes.WorkflowExecutionsFilterApplied,
+        expect.objectContaining({
+          filterTypes: ['query'],
+        })
+      );
+    });
+
+    it('reports a filter with no active slots', () => {
+      telemetry.reportWorkflowExecutionsFilterApplied({ filterTypes: [] });
+
+      expect(mockClient.reportEvent).toHaveBeenCalledWith(
+        WorkflowUIEventTypes.WorkflowExecutionsFilterApplied,
+        expect.objectContaining({
+          filterTypes: [],
+        })
+      );
+    });
+  });
+
+  describe('reportWorkflowExecutionsSearchUsed', () => {
+    it('reports search used when query is non-empty', () => {
+      telemetry.reportWorkflowExecutionsSearchUsed({ hasQuery: true });
+
+      expect(mockClient.reportEvent).toHaveBeenCalledWith(
+        WorkflowUIEventTypes.WorkflowExecutionsSearchUsed,
+        expect.objectContaining({
+          eventName: workflowEventNames[WorkflowUIEventTypes.WorkflowExecutionsSearchUsed],
+          hasQuery: true,
+        })
+      );
+    });
+
+    it('reports search used when query is empty', () => {
+      telemetry.reportWorkflowExecutionsSearchUsed({ hasQuery: false });
+
+      expect(mockClient.reportEvent).toHaveBeenCalledWith(
+        WorkflowUIEventTypes.WorkflowExecutionsSearchUsed,
+        expect.objectContaining({
+          hasQuery: false,
+        })
+      );
+    });
+  });
+
+  describe('reportWorkflowExecutionsDetailOpened', () => {
+    it('reports the execution ID when the detail flyout is opened', () => {
+      telemetry.reportWorkflowExecutionsDetailOpened({ executionId: 'exec-123' });
+
+      expect(mockClient.reportEvent).toHaveBeenCalledWith(
+        WorkflowUIEventTypes.WorkflowExecutionsDetailOpened,
+        expect.objectContaining({
+          eventName: workflowEventNames[WorkflowUIEventTypes.WorkflowExecutionsDetailOpened],
+          executionId: 'exec-123',
+        })
+      );
+    });
+  });
+
+  describe('reportWorkflowExecutionsStepExpanded', () => {
+    it('reports the step type when a step node is expanded', () => {
+      telemetry.reportWorkflowExecutionsStepExpanded({ stepType: 'http' });
+
+      expect(mockClient.reportEvent).toHaveBeenCalledWith(
+        WorkflowUIEventTypes.WorkflowExecutionsStepExpanded,
+        expect.objectContaining({
+          eventName: workflowEventNames[WorkflowUIEventTypes.WorkflowExecutionsStepExpanded],
+          stepType: 'http',
+        })
+      );
+    });
+
+    it('reports the step type for container nodes', () => {
+      telemetry.reportWorkflowExecutionsStepExpanded({ stepType: 'foreach-iteration' });
+
+      expect(mockClient.reportEvent).toHaveBeenCalledWith(
+        WorkflowUIEventTypes.WorkflowExecutionsStepExpanded,
+        expect.objectContaining({
+          stepType: 'foreach-iteration',
+        })
+      );
+    });
+  });
+
+  describe('reportWorkflowExecutionsOpenInEditorClicked', () => {
+    it('reports a click from the table row actions menu', () => {
+      telemetry.reportWorkflowExecutionsOpenInEditorClicked({
+        workflowId: 'wf-1',
+        origin: 'table_actions',
+      });
+
+      expect(mockClient.reportEvent).toHaveBeenCalledWith(
+        WorkflowUIEventTypes.WorkflowExecutionsOpenInEditorClicked,
+        expect.objectContaining({
+          eventName: workflowEventNames[WorkflowUIEventTypes.WorkflowExecutionsOpenInEditorClicked],
+          workflowId: 'wf-1',
+          origin: 'table_actions',
+        })
+      );
+    });
+
+    it('reports a click from the flyout footer actions menu', () => {
+      telemetry.reportWorkflowExecutionsOpenInEditorClicked({
+        workflowId: 'wf-2',
+        origin: 'flyout_actions',
+      });
+
+      expect(mockClient.reportEvent).toHaveBeenCalledWith(
+        WorkflowUIEventTypes.WorkflowExecutionsOpenInEditorClicked,
+        expect.objectContaining({
+          workflowId: 'wf-2',
+          origin: 'flyout_actions',
+        })
+      );
     });
   });
 });

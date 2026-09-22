@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux-v7';
 import { camelCase } from 'lodash';
 import { cloneSubgraphs } from '../../lib/clone_subgraphs';
 import { useNotifyService } from '../../services';

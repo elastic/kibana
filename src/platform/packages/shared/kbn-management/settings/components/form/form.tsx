@@ -77,19 +77,18 @@ export const Form = (props: FormProps) => {
 
   const onFieldChange: OnFieldChangeFn = (id, change) => {
     if (!change) {
-      const { [id]: unsavedChange, ...rest } = unsavedChanges;
-      setUnsavedChanges(rest);
+      setUnsavedChanges(({ [id]: _removed, ...rest }) => rest);
       return;
     }
 
-    setUnsavedChanges({
-      ...unsavedChanges,
+    setUnsavedChanges((prev) => ({
+      ...prev,
       [id]: {
         ...change,
         scope,
         needsReload: fields.find((field) => field.id === id)?.requiresPageReload ?? false,
       },
-    });
+    }));
   };
 
   const categorizedFields = categorizeFields(fields);

@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { LoopBreakNode, WorkflowGraph } from '@kbn/workflows/graph';
+import type { LoopBreakNode } from '@kbn/workflows/graph';
 import { isLoopEnterScope } from './is_loop_enter_scope';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { StepExecutionRuntimeFactory } from '../../workflow_context_manager/step_execution_runtime_factory';
 import type { StepIoService } from '../../workflow_context_manager/step_io_service';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { RuntimeGraphView } from '../../workflow_context_manager/workflow_runtime_graph';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
 import type { NodeImplementation } from '../node_implementation';
 
@@ -24,7 +25,7 @@ export class LoopBreakNodeImpl implements NodeImplementation {
     private workflowLogger: IWorkflowEventLogger,
     private stepExecutionRuntimeFactory: StepExecutionRuntimeFactory,
     private stepIoService: StepIoService,
-    private workflowGraph: WorkflowGraph
+    private workflowGraph: RuntimeGraphView
   ) {}
 
   public run(): void {
@@ -44,6 +45,12 @@ export class LoopBreakNodeImpl implements NodeImplementation {
     );
     const innerStepIds = this.workflowGraph.getInnerStepIds(this.node.loopStepId);
     this.stepIoService.evictStaleLoopOutputs(innerStepIds);
+    // Release the loop's pinned source. A normal loop exit goes through
+    // exit-foreach/exit-while which unpins; `loop.break` short-circuits that
+    // path, so without this the source stays pinned for the rest of the
+    // execution (memory leak, and it can shield a later step's output from
+    // eviction). Idempotent — safe even if the loop never pinned anything.
+    this.stepIoService.unpinForeachScope(this.node.loopStepId);
     this.workflowLogger.logDebug(
       `Evicted stale in-memory outputs for ${innerStepIds.size} inner step(s) of loop "${this.node.loopStepId}" after break`,
       { workflow: { step_id: this.node.stepId } }

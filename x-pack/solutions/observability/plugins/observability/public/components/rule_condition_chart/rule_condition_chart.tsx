@@ -396,7 +396,6 @@ export function RuleConditionChart({
       type: 'formula',
       value: formula,
       label: label ?? formula,
-      groupBy,
       format: {
         id: formatId,
         params: {
@@ -445,11 +444,15 @@ export function RuleConditionChart({
         }
       : undefined;
 
-    if (groupBy && groupBy?.length) {
+    const groupByFields = Array.isArray(groupBy) ? groupBy : groupBy ? [groupBy] : [];
+    if (groupByFields.length > 0) {
+      const [primaryGroupBy, ...secondaryFields] = groupByFields;
       xYDataLayerOptions.breakdown = {
         type: 'topValues',
-        field: groupBy[0],
+        field: primaryGroupBy,
         size: 3,
+        ...(secondaryFields.length > 0 ? { secondaryFields } : {}),
+        accuracyMode: false,
         orderBy: orderParams,
       };
     }

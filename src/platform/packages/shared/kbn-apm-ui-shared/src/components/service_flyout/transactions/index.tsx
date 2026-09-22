@@ -1,0 +1,203 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import React, { useCallback, useMemo, useState } from 'react';
+import { EuiLink, EuiText } from '@elastic/eui';
+import type { HttpStart } from '@kbn/core-http-browser';
+import type { DocLinksStart, NotificationsStart } from '@kbn/core/public';
+import type { LatencyAggregationType } from '@kbn/apm-types';
+import {
+  SERVICE_ALERTS_LOCATOR_ID,
+  SERVICE_TRANSACTIONS_LOCATOR_ID,
+  TRANSACTION_DETAILS_BY_NAME_LOCATOR,
+  type ServiceAlertsLocatorParams,
+  type ServiceTransactionsLocatorParams,
+  type TransactionDetailsByNameParams,
+} from '@kbn/deeplinks-observability';
+import { EBT_CLICK_ACTIONS } from '@kbn/ebt-click';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { TransactionGroup } from '../../transactions_table/types';
+import { TransactionsTable } from '../../transactions_table';
+import { SERVICE_FLYOUT_TRANSACTIONS_EBT_ELEMENTS } from './ebt_constants';
+import { useServiceFlyoutTransactionData } from './hooks/use_service_flyout_transaction_data';
+
+const getMaxGroupsTooltip = (docsHref: string) => (
+  <EuiText size="s" style={{ maxWidth: 448 }}>
+    <FormattedMessage
+      id="apmUiShared.serviceFlyout.transactions.maxGroupsTooltip"
+      defaultMessage="The cardinality of APM data being collected is too high. Please review {docs} to mitigate the situation."
+      values={{
+        docs: (
+          <EuiLink data-test-subj="apmMaxGroupsTooltipDocsLink" href={docsHref} target="_blank">
+            {i18n.translate('apmUiShared.serviceFlyout.transactions.maxGroupsDocsLink', {
+              defaultMessage: 'docs',
+            })}
+          </EuiLink>
+        ),
+      }}
+    />
+  </EuiText>
+);
+
+interface ServiceFlyoutTransactionsSectionProps {
+  docLinks: DocLinksStart;
+  http: HttpStart;
+  notifications: NotificationsStart;
+  serviceName: string;
+  environment: string;
+  start: string;
+  end: string;
+  transactionType?: string;
+  latencyAggregationType?: LatencyAggregationType;
+  locators?: SharePluginStart['url']['locators'];
+  refreshToken?: number;
+  onTransactionClick?: (item: TransactionGroup) => void;
+  /** When set with onTransactionClick, drives the expand/collapse icon state. */
+  isTransactionExpanded?: (item: TransactionGroup) => boolean;
+  projectRouting?: string;
+}
+
+export function ServiceFlyoutTransactionsSection({
+  docLinks,
+  http,
+  notifications,
+  serviceName,
+  environment,
+  start,
+  end,
+  transactionType,
+  latencyAggregationType,
+  locators,
+  refreshToken,
+  onTransactionClick,
+  isTransactionExpanded,
+  projectRouting,
+}: ServiceFlyoutTransactionsSectionProps) {
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const { items, isLoading, isSparklineLoading, maxCountExceeded, hasActiveAlerts, error } =
+    useServiceFlyoutTransactionData({
+      http,
+      notifications,
+      serviceName,
+      environment,
+      start,
+      end,
+      transactionType,
+      latencyAggregationType,
+      searchQuery,
+      refreshToken,
+      projectRouting,
+    });
+
+  const openInTransactionsLocator = locators?.get<ServiceTransactionsLocatorParams>(
+    SERVICE_TRANSACTIONS_LOCATOR_ID
+  );
+  const transactionDetailLocator = locators?.get<TransactionDetailsByNameParams>(
+    TRANSACTION_DETAILS_BY_NAME_LOCATOR
+  );
+  const serviceAlertsLocator = locators?.get<ServiceAlertsLocatorParams>(SERVICE_ALERTS_LOCATOR_ID);
+
+  const openInTransactionsHref = openInTransactionsLocator?.getRedirectUrl({
+    serviceName,
+    environment,
+    rangeFrom: start,
+    rangeTo: end,
+    transactionType,
+    latencyAggregationType,
+  });
+
+  const getTransactionDetailHref = useCallback(
+    (item: TransactionGroup) =>
+      transactionDetailLocator?.getRedirectUrl({
+        serviceName,
+        transactionName: item.name,
+        environment,
+        rangeFrom: start,
+        rangeTo: end,
+      }),
+    [transactionDetailLocator, serviceName, environment, start, end]
+  );
+
+  const getAlertsBadgeHref = useCallback(
+    (item: TransactionGroup) =>
+      serviceAlertsLocator?.getRedirectUrl({
+        serviceName,
+        transactionName: item.name,
+        transactionType: item.transactionType,
+        rangeFrom: start,
+        rangeTo: end,
+      }),
+    [serviceAlertsLocator, serviceName, start, end]
+  );
+
+  const maxGroupsTooltip = useMemo(
+    () => getMaxGroupsTooltip(docLinks.links.apm.troubleshootingTooManyTransactions),
+    [docLinks]
+  );
+
+  return (
+    <TransactionsTable
+      data-test-subj="serviceFlyoutSection-transactions"
+      errorMessage={
+        error
+          ? i18n.translate('apmUiShared.serviceFlyout.transactions.dataSourceError', {
+              defaultMessage: 'Failed to load transaction data',
+            })
+          : undefined
+      }
+      items={items}
+      isLoading={isLoading}
+      isSparklineLoading={isSparklineLoading}
+      maxCountExceeded={maxCountExceeded}
+      latencyAggregationType={latencyAggregationType}
+      columns={[
+        'name',
+        ...(hasActiveAlerts ? (['alerts'] as const) : []),
+        'latency',
+        'throughput',
+        'errorRate',
+      ]}
+      headerActions={
+        openInTransactionsHref
+          ? [
+              {
+                label: i18n.translate('apmUiShared.serviceFlyout.transactions.openInApm', {
+                  defaultMessage: 'Open in APM',
+                }),
+                href: openInTransactionsHref,
+                ebt: {
+                  action: EBT_CLICK_ACTIONS.OPEN_IN_APM,
+                  element: SERVICE_FLYOUT_TRANSACTIONS_EBT_ELEMENTS.HEADER,
+                },
+              },
+            ]
+          : undefined
+      }
+      showMaxTransactionGroupsExceededWarning
+      remainingTransactionsCellTooltipContent={maxGroupsTooltip}
+      columnInteractions={{
+        name: {
+          // Hosts with nested tx flyouts pass onTransactionClick; others keep the APM deep link.
+          ...(onTransactionClick
+            ? { onClick: onTransactionClick, isExpanded: isTransactionExpanded }
+            : { href: getTransactionDetailHref }),
+          ebt: { element: SERVICE_FLYOUT_TRANSACTIONS_EBT_ELEMENTS.ROW_NAME },
+        },
+        alerts: {
+          href: getAlertsBadgeHref,
+          ebt: { element: SERVICE_FLYOUT_TRANSACTIONS_EBT_ELEMENTS.ROW_ALERTS_BADGE },
+        },
+      }}
+      onSearchQueryChange={setSearchQuery}
+    />
+  );
+}

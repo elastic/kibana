@@ -20,6 +20,7 @@ import {
 } from '@kbn/es-query';
 import { appendWhereClauseToESQLQuery } from '@kbn/esql-utils';
 import {
+  buildExistsFilter,
   buildSimpleExistFilter,
   buildSimpleNumberRangeFilter,
   buildPhraseFilter,
@@ -141,7 +142,7 @@ export const createFilter = async (
 
 const createFilterFromRawColumnsESQL = async (
   column: DatatableColumn,
-  value: string | number | boolean | (string | number | boolean)[]
+  value: string | number | boolean | (string | number | boolean)[] | null | undefined
 ) => {
   const indexPattern = column?.meta?.sourceParams?.indexPattern as string | undefined;
 
@@ -166,9 +167,23 @@ const createFilterFromRawColumnsESQL = async (
     return [];
   }
 
-  // Avoid index phrase filter when output column name collides with an index field
-  if (column.isComputedColumn === true && column.name === fieldName) {
+  // A computed column (e.g. EVAL bytes = bytes * 2) can have the same name as a real,
+  // filterable field, so the check above isn't enough: fieldName would resolve to that
+  // unrelated field, but the value shown is the computed one, not the raw field's value.
+  if (
+    column.isComputedColumn === true &&
+    column.meta?.sourceParams?.isSourceFieldFilterable !== true
+  ) {
     return [];
+  }
+
+  // Only null/undefined mean "no value" here. ES|QL rows never contain the MISSING_TOKEN
+  // sentinel (it is injected by the DSL terms agg), so a literal "__missing__" string is a
+  // real document value and must produce a phrase filter, not a negated exists filter.
+  if (value == null) {
+    const existsFilter = buildExistsFilter(field, dataView);
+    existsFilter.meta.negate = true;
+    return [existsFilter];
   }
 
   // Match phrase or phrases filter based on whether value is an array
@@ -199,9 +214,12 @@ export const createFilterESQL = async (
   }
   const { indexPattern, sourceField, operationType, interval } = sourceParams;
 
-  const value = rowIndex > -1 ? table.rows[rowIndex][column.id] : null;
-  if (value == null) {
+  if (rowIndex === -1) {
     return [];
+  }
+  const value = table.rows[rowIndex][column.id];
+  if (value == null) {
+    return !operationType ? await createFilterFromRawColumnsESQL(column, value) : [];
   }
 
   const filters: Filter[] = [];

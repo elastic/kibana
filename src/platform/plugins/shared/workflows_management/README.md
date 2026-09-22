@@ -36,6 +36,15 @@ uiSettings.overrides:
   workflows:ui:enabled: false
 ```
 
+Experimental Workflows features are gated behind a separate Advanced Setting:
+
+```yml
+uiSettings.overrides:
+  workflows:experimentalFeatures: true
+  workflows:ui:executionGraph:enabled: true
+  workflows:ui:showExecutor:enabled: true
+```
+
 If running in Serverless or Cloud dev environments, you can disable it via API:
 
 ```bash
@@ -46,6 +55,19 @@ POST kbn://internal/kibana/settings
    }
 }
 ```
+
+### Workflow graph viewer
+
+The read-only graph viewer is disabled by default.
+
+Enable the Workflow Experimental flag in Advanced Settings, then enable in `kibana.yml` the following flag:
+
+```yml
+uiSettings.overrides:
+  workflows:ui:visualEditor:enabled: true
+```
+
+Restart Kibana after changing this value. In the workflow editor, open the actions menu (⌘K / Ctrl+K) and look under **Commands** for **Toggle graph editor** (or search for `graph`).
 
 ---
 
@@ -222,6 +244,9 @@ These routes use `access: internal` and are **not** included in the public OpenA
 | GET | `/internal/workflows/config` | Execution engine feature flags for the plugin. |
 | POST | `/internal/workflows/disable` | Disable all workflows (administrative). |
 | POST | `/api/workflows/validate` | Validate a workflow YAML definition without saving. |
+| GET | `/internal/workflows/library/templates` | List Workflow Template Library catalog rows (optional `solution` / `category` / `search` filters). Gated by the `workflowsManagement:library:enabled` global uiSetting; returns `503` when off. |
+| GET | `/internal/workflows/library/templates/{slug}` | Get the parsed template body (metadata + workflow body + raw YAML) for a catalog slug. `404` when the slug is missing, `503` when the library is disabled. |
+| GET | `/internal/workflows/library/health` | Diagnostic — returns the cache's `sourceMode`, `lastRefreshAt`, and `lastError`. Not gated by the library toggle so admins can reach it while the feature is off. |
 
 ---
 
@@ -299,8 +324,8 @@ workflows_management/
 ### Local Development
 
 1. Enable the feature flag in `kibana.dev.yml`
-2. Start Elasticsearch: `yarn es snapshot`
-3. Start Kibana: `yarn start`
+2. Start Elasticsearch: `pnpm es snapshot`
+3. Start Kibana: `pnpm start`
 4. Navigate to `/app/workflows`
 
 ### Event-driven custom trigger `on` options
@@ -316,15 +341,15 @@ Registered (non-built-in) triggers may set optional flags under `triggers[].on` 
 
 ```bash
 # Run unit tests
-yarn test:jest src/platform/plugins/shared/workflows_management
+pnpm test:jest src/platform/plugins/shared/workflows_management
 # Running a specific test
-yarn test:jest -- $path # (e.g. src/platform/plugins/shared/workflows_management/public/widgets/workflow_yaml_editor/lib/snippets/insert_trigger_snippet.test.ts)
+pnpm test:jest -- $path # (e.g. src/platform/plugins/shared/workflows_management/public/widgets/workflow_yaml_editor/lib/snippets/insert_trigger_snippet.test.ts)
 
 # Run integration tests
-yarn test:jest_integration src/platform/plugins/shared/workflows_management
+pnpm test:jest_integration src/platform/plugins/shared/workflows_management
 
 # Run FTR tests (if available)
-yarn test:ftr --config x-pack/test/workflows_management_api_integration/config.ts
+pnpm test:ftr --config x-pack/test/workflows_management_api_integration/config.ts
 ```
 
 ### Authentication & Authorization

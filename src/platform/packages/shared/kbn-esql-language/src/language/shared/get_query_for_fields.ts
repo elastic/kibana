@@ -8,7 +8,8 @@
  */
 
 import type { ESQLAstQueryExpression, ESQLAstForkCommand } from '@elastic/esql/types';
-import { EDITOR_MARKER } from '../../commands/definitions/constants';
+import { getBracketsToClose } from '../../commands/definitions/utils/ast';
+import { endsWithComma } from '../../commands/definitions/utils/regex';
 import { expandEvals } from './expand_evals';
 
 /**
@@ -22,7 +23,7 @@ import { expandEvals } from './expand_evals';
  * IMPORTANT: the AST nodes in the new query still reference locations in the original query text
  *
  * @param queryString The original query string
- * @param commands
+ * @param root
  * @returns
  */
 export function getQueryForFields(
@@ -50,8 +51,10 @@ export function getQueryForFields(
   }
 
   if (lastCommand && lastCommand.name === 'eval') {
-    const endsWithComma = queryString.replace(EDITOR_MARKER, '').trim().endsWith(',');
-    if (lastCommand.args.length > 1 || endsWithComma) {
+    const hasTrailingSeparatorComma =
+      getBracketsToClose(queryString).length === 0 && endsWithComma(queryString);
+
+    if (lastCommand.args.length > 1 || hasTrailingSeparatorComma) {
       /**
        * If we get here, we know that we have a multi-expression EVAL statement.
        *
@@ -65,7 +68,7 @@ export function getQueryForFields(
        * Simplified:     FROM lolz | EVAL foo = 1 | EVAL bar = foo + 1 | EVAL baz = bar + 1
        */
       const expanded = expandEvals(commands);
-      const newCommands = expanded.slice(0, endsWithComma ? undefined : -1);
+      const newCommands = expanded.slice(0, hasTrailingSeparatorComma ? undefined : -1);
       return { ...root, commands: newCommands };
     }
   }

@@ -35,9 +35,6 @@ export function registerContextFunction({
     async ({ connectorId, messages, screenContexts, chat }, signal) => {
       const { request, plugins } = resources;
       const { analytics } = await plugins.core.start();
-      const actionsClient = await (
-        await plugins.actions.start()
-      ).getActionsClientWithRequest(request);
 
       async function getContext() {
         const screenDescription = compact(
@@ -64,10 +61,8 @@ export function registerContextFunction({
           return { content };
         }
 
-        const connector = await actionsClient.get({
-          id: connectorId,
-          throwIfSystemAction: true,
-        });
+        const inferenceStart = await plugins.inference.start();
+        const connector = await inferenceStart.getConnectorById(connectorId, request);
 
         const { llmScores, relevantDocuments, suggestions } = await recallAndScore({
           recall: client.recall,

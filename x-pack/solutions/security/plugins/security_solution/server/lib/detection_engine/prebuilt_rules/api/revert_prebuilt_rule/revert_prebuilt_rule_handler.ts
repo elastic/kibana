@@ -70,7 +70,9 @@ export const revertPrebuiltRuleHandler = async (
 
     const { rulesToRevert, skipped } = filterOutNonRevertableRules([ruleResponse]);
 
-    const prebuiltRuleAssets = await ruleAssetsClient.fetchAssetsByVersion(rulesToRevert);
+    const { assets: prebuiltRuleAssets } = await ruleAssetsClient.fetchAssetsByVersion(
+      rulesToRevert
+    );
     const ruleVersionsMap = zipRuleVersions(rulesToRevert, [], prebuiltRuleAssets); // We use base versions as target param as we are reverting rules
     const revertableRules: RuleTriad[] = [];
 

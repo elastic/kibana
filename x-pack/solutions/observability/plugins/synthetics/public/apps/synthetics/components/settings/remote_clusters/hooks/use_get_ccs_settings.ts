@@ -12,20 +12,29 @@ import { SYNTHETICS_API_URLS } from '../../../../../../../common/constants';
 import { apiService } from '../../../../../../utils/api_service';
 import { SyntheticsRefreshContext } from '../../../../contexts';
 
-export const DEFAULT_CCS_SETTINGS: SyntheticsCCSSettings = {
+export interface CCSSettingsWithSpaces extends SyntheticsCCSSettings {
+  // Spaces the settings are currently shared with. Empty when no settings document exists yet
+  // (the server will anchor a new document to the current space on first save).
+  spaces: string[];
+}
+
+export const DEFAULT_CCS_SETTINGS: CCSSettingsWithSpaces = {
   useAllRemoteClusters: false,
   selectedRemoteClusters: [],
+  spaces: [],
 };
 
-const fetchCCSSettings = async (): Promise<SyntheticsCCSSettings> => {
+export const fetchCCSSettings = async (): Promise<CCSSettingsWithSpaces> => {
   try {
-    const dynamicSettings = await apiService.get<{
+    const settings = await apiService.get<{
       useAllRemoteClusters?: boolean;
       selectedRemoteClusters?: string[];
-    }>(SYNTHETICS_API_URLS.DYNAMIC_SETTINGS);
+      spaces?: string[];
+    }>(SYNTHETICS_API_URLS.MULTI_SPACE_SETTINGS);
     return {
-      useAllRemoteClusters: dynamicSettings.useAllRemoteClusters ?? false,
-      selectedRemoteClusters: dynamicSettings.selectedRemoteClusters ?? [],
+      useAllRemoteClusters: settings.useAllRemoteClusters ?? false,
+      selectedRemoteClusters: settings.selectedRemoteClusters ?? [],
+      spaces: settings.spaces ?? [],
     };
   } catch (e) {
     return DEFAULT_CCS_SETTINGS;

@@ -9,12 +9,12 @@
 
 /* eslint-disable no-console */
 import { Client } from '@elastic/elasticsearch';
+import { EvaluationIndices } from '@kbn/evals-common';
 
 const ES_URL = process.env.EVALUATIONS_ES_URL ?? 'http://elastic:changeme@localhost:9220';
-const INDEX = 'kibana-evaluations';
 
 interface EvalDoc {
-  run_id: string;
+  metadata?: { execution_id?: string };
   example: {
     id: string;
     index: number;
@@ -55,7 +55,7 @@ async function main() {
 
   if (!runId || runId === '--help') {
     await listRecentRuns(client);
-    console.log('\nUsage: npx ts-node scripts/inspect_eval_run.ts <run_id> [mode]');
+    console.log('\nUsage: npx ts-node scripts/inspect_eval_run.ts <execution_id> [mode]');
     console.log('Modes: summary (default), failures, compare, conversations, efficiency');
     await client.close();
     return;
@@ -86,15 +86,15 @@ async function main() {
 
 async function listRecentRuns(client: Client) {
   const response = await client.search({
-    index: INDEX,
+    index: EvaluationIndices.SCORES,
     size: 0,
     aggs: {
       runs: {
-        terms: { field: 'run_id', size: 10, order: { latest: 'desc' } },
+        terms: { field: 'metadata.execution_id', size: 10, order: { latest: 'desc' } },
         aggs: {
           latest: { max: { field: '@timestamp' } },
           models: { terms: { field: 'task.model.id' } },
-          doc_count_agg: { value_count: { field: 'run_id' } },
+          doc_count_agg: { value_count: { field: 'metadata.execution_id' } },
         },
       },
     },
@@ -110,13 +110,13 @@ async function listRecentRuns(client: Client) {
 }
 
 async function fetchDocs(client: Client, runId: string, extraFilter?: object): Promise<EvalDoc[]> {
-  const must: object[] = [{ term: { run_id: runId } }];
+  const must: object[] = [{ term: { 'metadata.execution_id': runId } }];
   if (extraFilter) {
     must.push(extraFilter);
   }
 
   const response = await client.search<EvalDoc>({
-    index: INDEX,
+    index: EvaluationIndices.SCORES,
     size: 1000,
     query: { bool: { must } },
     sort: [
@@ -132,7 +132,7 @@ async function fetchDocs(client: Client, runId: string, extraFilter?: object): P
 async function showSummary(client: Client, runId: string) {
   const docs = await fetchDocs(client, runId);
   if (docs.length === 0) {
-    console.log(`No results for run_id: ${runId}`);
+    console.log(`No results for execution_id: ${runId}`);
     return;
   }
 
@@ -183,7 +183,7 @@ async function showFailures(client: Client, runId: string) {
   });
 
   if (docs.length === 0) {
-    console.log(`No failures for run_id: ${runId}`);
+    console.log(`No failures for execution_id: ${runId}`);
     return;
   }
 
@@ -230,7 +230,7 @@ async function showModelComparison(client: Client, runId: string) {
     console.log(`Only ${modelIds.length} model(s) found. Compare needs 2+ models in the same run.`);
     console.log('Models found:', modelIds.join(', '));
     console.log(
-      '\nTo compare across runs, query two run_ids separately and use the "failures" mode.'
+      '\nTo compare across runs, query two execution_ids separately and use the "failures" mode.'
     );
     return;
   }
@@ -331,7 +331,7 @@ async function showEfficiency(client: Client, runId: string) {
   });
 
   if (efficiencyDocs.length === 0) {
-    console.log(`No Efficiency results for run_id: ${runId}`);
+    console.log(`No Efficiency results for execution_id: ${runId}`);
     return;
   }
 

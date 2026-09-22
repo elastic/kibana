@@ -13,8 +13,17 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./export_rules_ess'));
     loadTestFile(require.resolve('./import_export_rules'));
     loadTestFile(require.resolve('./import_rules'));
+    loadTestFile(require.resolve('./import_rules_with_exceptions'));
+    loadTestFile(require.resolve('./import_rules_with_actions'));
     loadTestFile(require.resolve('./import_rules_with_overwrite'));
+    loadTestFile(require.resolve('./import_rules_conflicts'));
+    loadTestFile(require.resolve('./import_rules_response_actions'));
     loadTestFile(require.resolve('./import_rules_ess'));
     loadTestFile(require.resolve('./import_connectors'));
+    loadTestFile(require.resolve('./import_rules_at_batch_boundary'));
+    loadTestFile(require.resolve('./import_rules_overwrite_at_batch_boundary'));
+    loadTestFile(require.resolve('./import_rules_concurrent'));
+    loadTestFile(require.resolve('./import_rules_by_type'));
+    loadTestFile(require.resolve('./import_rules_identity'));
   });
 }

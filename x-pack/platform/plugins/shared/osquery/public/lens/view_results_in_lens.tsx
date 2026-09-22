@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiButtonIcon, EuiContextMenuItem, EuiToolTip } from '@elastic/eui';
 import type {
   PersistedIndexPatternLayer,
   PieVisualizationState,
@@ -18,6 +18,8 @@ import { DOCUMENT_FIELD_NAME as RECORDS_FIELD } from '@kbn/lens-plugin/common/co
 import { FilterStateStore } from '@kbn/es-query';
 import { ViewResultsActionButtonType } from '../live_queries/form/pack_queries_status_table';
 import type { LogsDataView } from '../common/hooks/use_logs_data_view';
+import type { DateWindowResult } from '../common/pack_view_date_window';
+import { isScheduledExecution } from '../common/is_scheduled_execution';
 import { useKibana } from '../common/lib/kibana';
 import { useLogsDataView } from '../common/hooks/use_logs_data_view';
 
@@ -26,9 +28,10 @@ interface ViewResultsInLensActionProps {
   buttonType: ViewResultsActionButtonType;
   endDate?: string;
   startDate?: string;
-  mode?: string;
+  mode?: DateWindowResult['mode'];
   scheduleId?: string;
   executionCount?: number;
+  onMenuItemClick?: () => void;
 }
 
 const ViewResultsInLensActionComponent: React.FC<ViewResultsInLensActionProps> = ({
@@ -39,17 +42,18 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInLensActionProps> =
   mode,
   scheduleId,
   executionCount,
+  onMenuItemClick,
 }) => {
   const lensService = useKibana().services.lens;
   const isLensAvailable = lensService?.canUseEditor();
   const { data: logsDataView } = useLogsDataView({ skip: !actionId, checkOnly: true });
 
   const handleClick = useCallback(
-    (event: any) => {
+    (event: React.MouseEvent) => {
       event.preventDefault();
 
       if (logsDataView) {
-        const isScheduled = !!scheduleId && executionCount != null;
+        const isScheduled = isScheduledExecution(scheduleId, executionCount);
         const defaultFrom = isScheduled ? 'now-7d' : 'now-1d';
         lensService?.navigateToPrefilledEditor(
           {
@@ -57,7 +61,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInLensActionProps> =
             time_range: {
               from: startDate ?? defaultFrom,
               to: endDate ?? 'now',
-              mode: mode ?? (startDate || endDate) ? 'absolute' : 'relative',
+              mode: mode ?? (startDate || endDate ? 'absolute' : 'relative'),
             },
             attributes: isScheduled
               ? getLensAttributes(logsDataView, { scheduleId, executionCount })
@@ -73,10 +77,26 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInLensActionProps> =
     [actionId, endDate, executionCount, lensService, logsDataView, mode, scheduleId, startDate]
   );
 
+  const handleMenuItemClick = useCallback(
+    (event: React.MouseEvent) => {
+      handleClick(event);
+      onMenuItemClick?.();
+    },
+    [handleClick, onMenuItemClick]
+  );
+
   const isDisabled = useMemo(() => !actionId || !logsDataView, [actionId, logsDataView]);
 
   if (!isLensAvailable) {
     return null;
+  }
+
+  if (buttonType === ViewResultsActionButtonType.menuItem) {
+    return (
+      <EuiContextMenuItem icon="lensApp" onClick={handleMenuItemClick} disabled={isDisabled}>
+        {VIEW_IN_LENS}
+      </EuiContextMenuItem>
+    );
   }
 
   if (buttonType === ViewResultsActionButtonType.button) {
@@ -170,9 +190,11 @@ export function getLensAttributes(
       }
     : undefined;
 
+  const resultsIdentifier = scheduleId ?? actionId;
+
   return {
     visualizationType: 'lnsPie',
-    title: `Action ${actionId} results`,
+    title: `Action ${resultsIdentifier} results`,
     references: [
       {
         id: logsDataView.id,

@@ -7,7 +7,6 @@
 
 import { type KibanaExecutionContext } from '@kbn/core/public';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
-import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type {
   GetStateType,
   LensInternalApi,
@@ -17,6 +16,7 @@ import type {
 } from '@kbn/lens-common';
 import type { LensApi } from '@kbn/lens-common-2';
 import {
+  apiPublishesApproximation,
   apiPublishesProjectRouting,
   apiPublishesUnifiedSearch,
   fetch$,
@@ -50,7 +50,13 @@ import {
   updateAttributesWithAnnotation,
 } from './helper';
 import { addLog } from './logger';
-import { apiHasLensComponentCallbacks, apiHasUserMessages } from './type_guards';
+import {
+  apiHasLensComponentCallbacks,
+  apiHasUserMessages,
+  hasTablesAdapter,
+  isPartialInspectorAdapters,
+  type OnDataCallback,
+} from './type_guards';
 import type { LensEmbeddableStartServices } from './types';
 import { buildUserMessagesHelpers } from './user_messages/api';
 
@@ -82,6 +88,10 @@ function getSearchContext(parentApi: unknown) {
     ? parentApi
     : { projectRouting$: undefined };
 
+  const { isApproximate$ } = apiPublishesApproximation(parentApi)
+    ? parentApi
+    : { isApproximate$: new BehaviorSubject(false) };
+
   return {
     filters: unifiedSearch$.filters$.getValue(),
     query: unifiedSearch$.query$.getValue(),
@@ -91,6 +101,7 @@ function getSearchContext(parentApi: unknown) {
       ? parentApi.esqlVariables$.getValue()
       : undefined,
     projectRouting: projectRouting$?.getValue(),
+    isApproximate: isApproximate$.getValue(),
   };
 }
 
@@ -106,7 +117,8 @@ export function loadEmbeddableData(
   parentApi: unknown,
   internalApi: LensInternalApi,
   services: LensEmbeddableStartServices,
-  metaInfo?: SharingSavedObjectProps
+  metaInfo?: SharingSavedObjectProps,
+  setApproximationApplied?: (value: boolean | undefined) => void
 ) {
   const { onLoad, onBeforeBadgesRender, ...callbacks } = apiHasLensComponentCallbacks(parentApi)
     ? parentApi
@@ -160,6 +172,16 @@ export function loadEmbeddableData(
   ) {
     addLog(`Embeddable reload reason: ${sourceId}`);
 
+    const currentAbortController = internalApi.expressionAbortController$.getValue();
+
+    // If the current controller is already aborted, create a fresh one for this reload
+    // This happens when cancelRequests() was called before this reload started
+    let activeController = currentAbortController;
+    if (currentAbortController.signal.aborted) {
+      activeController = new AbortController();
+      internalApi.updateAbortController(activeController);
+    }
+
     resetMessages();
 
     // reset the render on reload
@@ -181,7 +203,10 @@ export function loadEmbeddableData(
           type: 'lens',
           name: lastState.attributes.visualizationType ?? '',
           id: uuid || 'new',
-          description: lastState.attributes.title || lastState.title || '',
+          // Prefer the panel-level title when it is set, falling back to the
+          // chart's own title. With the `lens.apiFormat` path the chart title is
+          // stripped from the wire format, so the panel title is the source of truth.
+          description: lastState.title ?? lastState.attributes.title ?? '',
           url: `${services.coreStart.application.getUrlForApp('lens')}${getEditPath(
             lastState.ref_id
           )}`,
@@ -196,16 +221,27 @@ export function loadEmbeddableData(
       }
     };
 
-    const onDataCallback = (adapters: Partial<DefaultInspectorAdapters> | undefined) => {
-      internalApi.updateVisualizationContext({
-        activeData: adapters?.tables?.tables,
-      });
+    // _data (expression result) is unused — Lens only needs the inspector adapters.
+    // The signature OnDataCallback is used for consistency with the expressions plugin.
+    const onDataCallback: OnDataCallback = (_data, adapters) => {
+      const tables = hasTablesAdapter(adapters) ? adapters.tables?.tables : undefined;
+      internalApi.updateVisualizationContext({ activeData: tables });
+      if (setApproximationApplied) {
+        const approximationApplied = tables
+          ? Object.values(tables).some((t) => t.meta?.approximationApplied)
+          : undefined;
+        setApproximationApplied(approximationApplied || undefined);
+      }
 
       // data has loaded
       internalApi.updateDataLoading(false);
       // The third argument here is an observable to let the
       // consumer to be notified on data change
-      onLoad?.(false, adapters, api.dataLoading$);
+      onLoad?.(
+        false,
+        isPartialInspectorAdapters(adapters) ? adapters : undefined,
+        api.dataLoading$
+      );
 
       api.loadViewUnderlyingData();
 
@@ -234,7 +270,6 @@ export function loadEmbeddableData(
       services
     );
 
-    // Go concurrently: build the expression and fetch the dataViews
     const [{ params, abortController, ...rest }, dataViewIds] = await Promise.all([
       getExpressionRendererParams(currentState, {
         searchContext,
@@ -247,7 +282,7 @@ export function loadEmbeddableData(
         renderMode: getRenderMode(parentApi),
         services,
         searchSessionId: api.searchSessionId$.getValue(),
-        abortController: internalApi.expressionAbortController$.getValue(),
+        abortController: activeController,
         getExecutionContext,
         logError: getLogError(getExecutionContext),
         addUserMessages,
@@ -283,8 +318,6 @@ export function loadEmbeddableData(
     if (params?.expression != null && !hasBlockingErrors) {
       internalApi.updateExpressionParams(params);
     }
-
-    internalApi.updateAbortController(abortController);
   }
 
   // Build a custom operator to be resused for various observables

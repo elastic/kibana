@@ -17,6 +17,7 @@ import {
   EuiLink,
   EuiPopover,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
@@ -178,16 +179,23 @@ export function SpanLinksTable({ items }: Props) {
               defaultMessage: 'Actions',
             })}
             button={
-              <EuiButtonIcon
-                data-test-subj="apmColumnsButton"
-                aria-label={i18n.translate('xpack.apm.spanLinks.table.actions.edit.ariaLabel', {
+              <EuiToolTip
+                content={i18n.translate('xpack.apm.spanLinks.table.actions.edit.ariaLabel', {
                   defaultMessage: 'Edit',
                 })}
-                iconType="boxesVertical"
-                onClick={() => {
-                  setIdActionMenuOpen(id);
-                }}
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  data-test-subj="apmColumnsButton"
+                  aria-label={i18n.translate('xpack.apm.spanLinks.table.actions.edit.ariaLabel', {
+                    defaultMessage: 'Edit',
+                  })}
+                  iconType="boxesVertical"
+                  onClick={() => {
+                    setIdActionMenuOpen(id);
+                  }}
+                />
+              </EuiToolTip>
             }
             isOpen={idActionMenuOpen === id}
             closePopover={() => {

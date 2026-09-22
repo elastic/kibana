@@ -8,7 +8,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { map } from 'rxjs';
+import { combineLatest, distinctUntilChanged, map, switchMap } from 'rxjs';
 import { Navigation as NavigationComponent } from '@kbn/ui-side-navigation';
 import classnames from 'classnames';
 import type { SolutionId } from '@kbn/core-chrome-browser';
@@ -18,6 +18,7 @@ import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
 import { useBasePath } from '../../../shared/chrome_hooks';
 import type { NavigationItems } from './to_navigation_items';
 import { toNavigationItems } from './to_navigation_items';
+import { joinNavigationContent, resolveLinksContent } from './resolve_navigation_content';
 import { PanelStateManager } from './panel_state_manager';
 
 export interface ChromeNavigationProps {
@@ -28,21 +29,22 @@ export interface ChromeNavigationProps {
 
 export const Navigation = (props: ChromeNavigationProps) => {
   const state = useNavigationItems();
+  const onCustomizeNavigation = useCustomizeNavigation();
 
   if (!state) {
     return null;
   }
 
-  const { navItems, logoItem, activeItemId, solutionId } = state;
+  const { navItems, activeItemId, solutionId } = state;
 
   return (
     <KibanaSectionErrorBoundary sectionName={'Navigation'} maxRetries={3}>
       <NavigationComponent
         items={navItems}
-        logo={logoItem}
         isCollapsed={props.isCollapsed}
         setWidth={props.setWidth}
         onToggleCollapsed={props.onToggleCollapsed}
+        onCustomizeNavigation={onCustomizeNavigation}
         activeItemId={activeItemId}
         data-test-subj={classnames(`${solutionId}SideNav`, 'projectSideNav', 'projectSideNavV2')}
       />
@@ -60,13 +62,45 @@ const useNavigationItems = (): (NavigationItems & { solutionId: SolutionId }) | 
 
   const items$ = useMemo(() => {
     const panelStateManager = new PanelStateManager(basePath.get());
-    return chrome.project.getNavigation$().pipe(
+    const navigation$ = chrome.project.getNavigation$();
+    const registeredLinks$ = chrome.project.getRegisteredNavigationLinks$();
+
+    const tree$ = navigation$.pipe(
+      map(({ navigationTree }) => navigationTree),
+      distinctUntilChanged()
+    );
+
+    const navigationItems$ = navigation$.pipe(
       map((nav) => ({
-        ...toNavigationItems(nav.navigationTree, nav.activeNodes, panelStateManager),
+        tree: nav.navigationTree,
         solutionId: nav.solutionId,
+        items: toNavigationItems(
+          nav.navigationTree,
+          nav.activeNodes,
+          nav.overflowItemIds,
+          panelStateManager
+        ),
       }))
     );
+
+    const resolvedLinks$ = combineLatest([
+      tree$,
+      registeredLinks$.pipe(distinctUntilChanged()),
+    ]).pipe(
+      switchMap(([tree, registrations]) =>
+        resolveLinksContent(tree, registrations).pipe(map((resolved) => ({ tree, resolved })))
+      )
+    );
+
+    return joinNavigationContent(navigationItems$, resolvedLinks$);
   }, [chrome, basePath]);
 
   return useObservable(items$, null);
+};
+
+const useCustomizeNavigation = (): (() => void) | undefined => {
+  const chrome = useChromeService();
+  const handler$ = useMemo(() => chrome.project.getCustomizeNavigationHandler$(), [chrome]);
+  const handler = useObservable(handler$, null);
+  return handler ?? undefined;
 };

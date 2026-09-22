@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createSelector } from 'reselect';
+import { createSelector } from 'reselect-v4';
 import { flattenObject } from '@kbn/object-utils';
 import type { FlattenRecord } from '@kbn/streams-schema';
 import { isEqual } from 'lodash';

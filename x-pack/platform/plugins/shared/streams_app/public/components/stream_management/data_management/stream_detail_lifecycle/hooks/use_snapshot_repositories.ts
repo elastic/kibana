@@ -24,6 +24,7 @@ export const useSnapshotRepositories = ({
   } = useKibana();
   const [refreshCounter, setRefreshCounter] = useState(0);
   const [repositories, setRepositories] = useState<string[]>([]);
+  const [defaultRepository, setDefaultRepository] = useState<string | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [hasFetched, setHasFetched] = useState(false);
@@ -39,7 +40,10 @@ export const useSnapshotRepositories = ({
       setIsLoading(true);
       setError(null);
       try {
-        const response = await streamsRepositoryClient.fetch(
+        const response: {
+          repositories: Array<{ name: string; type: string }>;
+          default_repository?: string;
+        } = await streamsRepositoryClient.fetch(
           'GET /internal/streams/lifecycle/_snapshot_repositories',
           { signal: abortController.signal }
         );
@@ -47,12 +51,14 @@ export const useSnapshotRepositories = ({
           .map((repo) => repo.name)
           .sort((a, b) => a.localeCompare(b));
         setRepositories(repoNames);
+        setDefaultRepository(response.default_repository);
       } catch (e) {
         if (abortController.signal.aborted) {
           return;
         }
         setError(e as Error);
         setRepositories([]);
+        setDefaultRepository(undefined);
       } finally {
         if (!abortController.signal.aborted) {
           setHasFetched(true);
@@ -74,6 +80,7 @@ export const useSnapshotRepositories = ({
 
   return {
     repositories,
+    defaultRepository,
     hasFetched,
     isLoading,
     error,

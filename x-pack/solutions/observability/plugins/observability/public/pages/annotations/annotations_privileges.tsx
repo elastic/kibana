@@ -58,7 +58,7 @@ function Unprivileged({ unprivilegedIndices }: { unprivilegedIndices: string[] }
     <EuiEmptyPrompt
       data-test-subj="syntheticsUnprivileged"
       color="plain"
-      icon={<EuiIcon type="logoObservability" size="xl" />}
+      icon={<EuiIcon aria-hidden={true} type="logoObservability" size="xl" />}
       title={
         <h2>
           <FormattedMessage

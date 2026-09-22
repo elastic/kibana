@@ -25,12 +25,14 @@ export interface ConnectorSpecWireResponse {
     is_technical_preview?: boolean;
   };
   schema: Record<string, unknown>;
+  is_testable: boolean;
 }
 
 /** Client-side connector spec after normalising API casing. */
 export interface ConnectorSpecResponse {
   metadata: ConnectorMetadata;
   schema: Record<string, unknown>;
+  isTestable: boolean;
 }
 
 export function transformConnectorSpecResponse(
@@ -59,5 +61,6 @@ export function transformConnectorSpecResponse(
       ...(isTechnicalPreview !== undefined ? { isTechnicalPreview } : {}),
     },
     schema: wire.schema,
+    isTestable: wire.is_testable,
   };
 }

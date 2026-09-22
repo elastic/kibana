@@ -16,11 +16,9 @@ import { getDefaultQuery } from '../helpers';
 import { useKibana } from '../../../common/lib/kibana';
 import { TestProviders } from '../../../common/mock';
 import { SCHEDULE_TAB_ID, SETTINGS_TAB_ID } from './constants';
-import { useSourcererDataView } from '../../../sourcerer/containers';
 
 jest.mock('../../../common/hooks/use_experimental_features');
 jest.mock('../../../common/lib/kibana');
-jest.mock('../../../sourcerer/containers');
 jest.mock('react-router-dom', () => ({
   matchPath: jest.fn(),
   useLocation: jest.fn().mockReturnValue({
@@ -51,6 +49,7 @@ const mockFilter = {
 
 const createMockProps = (overrides = {}) => ({
   connectorId: 'test-connector-id',
+  defaultSelectedTabId: SETTINGS_TAB_ID,
   end: undefined,
   filters: undefined,
   localStorageAttackDiscoveryMaxAlerts: undefined,
@@ -71,16 +70,17 @@ const createMockProps = (overrides = {}) => ({
 const defaultProps = createMockProps();
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-const mockUseSourcererDataView = useSourcererDataView as jest.MockedFunction<
-  typeof useSourcererDataView
->;
 
 const setupMocks = (overrides = {}) => {
   mockUseKibana.mockReturnValue({
     services: {
+      featureFlags: {
+        getBooleanValue: jest.fn().mockResolvedValue(false),
+      },
       lens: {
         EmbeddableComponent: () => <div data-test-subj="mockEmbeddableComponent" />,
       },
+      telemetry: { reportEvent: jest.fn() },
       uiSettings: {
         get: jest.fn(),
       },
@@ -91,11 +91,6 @@ const setupMocks = (overrides = {}) => {
       },
     },
   } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
-
-  mockUseSourcererDataView.mockReturnValue({
-    sourcererDataView: {},
-    loading: false,
-  } as unknown as jest.Mocked<ReturnType<typeof useSourcererDataView>>);
 };
 
 const renderComponent = (props = defaultProps) => {

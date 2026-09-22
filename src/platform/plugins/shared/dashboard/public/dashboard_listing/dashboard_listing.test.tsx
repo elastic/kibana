@@ -19,12 +19,21 @@ import { render, waitFor, act } from '@testing-library/react';
  */
 import { TabbedTableListView } from '@kbn/content-management-tabbed-table-list-view';
 
+import { coreServices } from '../services/kibana_services';
 import { DashboardListing } from './dashboard_listing';
 import type { DashboardListingProps, DashboardListingTab } from './types';
 
 jest.mock('@kbn/content-management-tabbed-table-list-view', () => ({
   __esModule: true,
   TabbedTableListView: jest.fn().mockReturnValue(null),
+}));
+
+const mockAppHeader = jest.fn().mockReturnValue(null);
+jest.mock('@kbn/app-header', () => ({
+  __esModule: true,
+  get AppHeader() {
+    return mockAppHeader;
+  },
 }));
 
 const renderDashboardListing = (
@@ -50,6 +59,7 @@ const mockTabbedTableListView = TabbedTableListView as jest.Mock;
 
 beforeEach(() => {
   jest.clearAllMocks();
+  (coreServices.application.capabilities as any).dashboard_v2.createNew = true;
 });
 
 test('renders TabbedTableListView with correct title and dashboards tab', () => {
@@ -58,7 +68,6 @@ test('renders TabbedTableListView with correct title and dashboards tab', () => 
   expect(mockTabbedTableListView).toHaveBeenCalledTimes(1);
   const props = mockTabbedTableListView.mock.calls[0][0];
   expect(props).toMatchObject({
-    title: 'Dashboards',
     headingId: 'dashboardListingHeading',
   });
   expect(props.tabs[0]).toMatchObject({ id: 'dashboards', title: 'Dashboards' });
@@ -141,3 +150,24 @@ test('falls back to dashboards tab when URL has invalid activeTab', () => {
   const props = mockTabbedTableListView.mock.calls[0][0];
   expect(props.activeTabId).toBe('dashboards');
 });
+
+test.each([
+  [false, false],
+  [true, true],
+])(
+  'shows import dashboard menu item only when dashboard_v2.createNew is %s',
+  (createNew, shouldBePresent) => {
+    (coreServices.application.capabilities as any).dashboard_v2.createNew = createNew;
+    renderDashboardListing();
+
+    const appHeaderProps = mockAppHeader.mock.calls[mockAppHeader.mock.calls.length - 1][0];
+    const importItem = appHeaderProps?.menu?.items?.find(
+      (item: { testId: string }) => item.testId === 'dashboardListingImportButton'
+    );
+    if (shouldBePresent) {
+      expect(importItem).toBeDefined();
+    } else {
+      expect(importItem).toBeUndefined();
+    }
+  }
+);

@@ -22,7 +22,7 @@ const getStackTrace = (error: unknown) => {
 const labels = {
   description: i18n.translate('xpack.agentBuilder.round.error.generic.description', {
     defaultMessage:
-      'Something in the query caused the model to freeze mid-thought. Performance debugging can be broad - try narrowing your question. See the error log below for specifics.',
+      'An error occurred while processing your request. See the error log below for details.',
   }),
 };
 

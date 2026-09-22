@@ -89,7 +89,7 @@ describe('mute alert instance', () => {
 
     expect(auditLoggerMock.log).toHaveBeenCalledTimes(1);
     expect(authorizationMock.ensureAuthorized).toHaveBeenCalledTimes(1);
-    expect(actionsAuthorizationMock.ensureAuthorized).toHaveBeenCalledTimes(1);
+    expect(actionsAuthorizationMock.ensureAuthorized).not.toHaveBeenCalled();
     expect(ruleTypeRegistryMock.ensureRuleTypeEnabled).toHaveBeenCalledTimes(1);
     expect(getAlertIndicesAliasMock).toHaveBeenCalledTimes(1);
     expect(alertsServiceMock.isExistingAlert).not.toHaveBeenCalled();
@@ -153,7 +153,7 @@ describe('mute alert instance', () => {
 
     expect(auditLoggerMock.log).toHaveBeenCalledTimes(1);
     expect(authorizationMock.ensureAuthorized).toHaveBeenCalledTimes(1);
-    expect(actionsAuthorizationMock.ensureAuthorized).toHaveBeenCalledTimes(1);
+    expect(actionsAuthorizationMock.ensureAuthorized).not.toHaveBeenCalled();
     expect(ruleTypeRegistryMock.ensureRuleTypeEnabled).toHaveBeenCalledTimes(1);
     expect(getAlertIndicesAliasMock).toHaveBeenCalledTimes(2);
     expect(alertsServiceMock.isExistingAlert).toHaveBeenCalledTimes(1);

@@ -17,6 +17,7 @@ import {
   EuiContextMenu,
   EuiPopover,
   EuiSkeletonRectangle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { RouterLinkProps } from '@kbn/router-utils/src/get_router_link_props';
@@ -66,13 +67,14 @@ export function IntegrationActionsMenu({
   } = useIntegrationActions();
 
   const actionButton = (
-    <EuiButtonIcon
-      title={integrationActionsText}
-      aria-label={integrationActionsText}
-      iconType="boxesVertical"
-      onClick={handleToggleMenu}
-      data-test-subj="datasetQualityDetailsIntegrationActionsButton"
-    />
+    <EuiToolTip content={integrationActionsText} disableScreenReaderOutput>
+      <EuiButtonIcon
+        aria-label={integrationActionsText}
+        iconType="boxesVertical"
+        onClick={handleToggleMenu}
+        data-test-subj="datasetQualityDetailsIntegrationActionsButton"
+      />
+    </EuiToolTip>
   );
 
   const MenuActionItem = ({

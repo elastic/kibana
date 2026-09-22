@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { useDocumentDetailsContext } from '../../shared/context';
 import type { IdentityFields } from '../../shared/utils';
 import {
@@ -19,11 +19,26 @@ import {
 import { UserDetails } from './user_details';
 import { HostDetails } from './host_details';
 import { ENTITIES_DETAILS_TEST_ID } from './test_ids';
-import { useUiSetting } from '../../../../common/lib/kibana';
 import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_entity_from_store';
 import type { GetFieldsData } from '../../shared/hooks/use_get_fields_data';
+import type { CspInsightLeftPanelSubTab } from '../../../entity_details/shared/components/left_panel/left_panel_header';
+import type { EntityTableLinkRenderer } from '../../../entity_details/shared/components/entity_table/types';
 
 export const ENTITIES_TAB_ID = 'entity';
+
+export interface EntitySectionOverrides {
+  /** Called when the user clicks to preview the entity in a side panel instead of navigating away. */
+  onPreviewEntity?: () => void;
+  /** Called when the user clicks a tab that opens a CSP insight sub-panel. */
+  onShowDetailsPanel?: (subTab: CspInsightLeftPanelSubTab) => void;
+  /** Custom renderer for entity link fields; receives the field name, raw value, and optional children. */
+  linkRenderer?: EntityTableLinkRenderer;
+}
+
+export interface EntitySectionOverrideBuilders {
+  buildUserOverrides?: (entity: { name: string; entityId?: string }) => EntitySectionOverrides;
+  buildHostOverrides?: (entity: { name: string; entityId?: string }) => EntitySectionOverrides;
+}
 
 const resolveUserDisplayForEntities = (
   identityFields: IdentityFields | undefined,
@@ -31,20 +46,13 @@ const resolveUserDisplayForEntities = (
 ): string | undefined =>
   resolveUserNameForEntityInsightsWithFallback(identityFields, getFieldsData);
 
-const resolveHostDisplayForEntities = (
-  identityFields: IdentityFields | undefined,
-  getFieldsData: GetFieldsData,
-  entityStoreV2Enabled: boolean,
-  hostNameFromStore: string | undefined
-): string | undefined => {
-  const fromDocument = resolveHostNameForEntityInsightsWithFallback(identityFields, getFieldsData);
-  return entityStoreV2Enabled ? fromDocument ?? hostNameFromStore : fromDocument;
-};
-
 /**
  * Entities displayed in the document details expandable flyout left section under the Insights tab
  */
-export const EntitiesDetails: React.FC = () => {
+export const EntitiesDetails: React.FC<EntitySectionOverrideBuilders> = ({
+  buildUserOverrides,
+  buildHostOverrides,
+}) => {
   const { getFieldsData, scopeId, dataAsNestedObject } = useDocumentDetailsContext();
   const timestamp = getField(getFieldsData('@timestamp'));
 
@@ -57,8 +65,6 @@ export const EntitiesDetails: React.FC = () => {
     'host',
     dataAsNestedObject
   ) as IdentityFields;
-
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
 
   /**
    * User EUID extraction applies postAggFilter (e.g. non-IDP path needs host.id), so many ECS docs
@@ -76,36 +82,62 @@ export const EntitiesDetails: React.FC = () => {
     entityId: userEntityId,
     identityFields: userEntityIdentifiers ?? legacyUserIdentityForStore,
     entityType: 'user',
-    skip:
-      !entityStoreV2Enabled ||
-      (userEntityIdentifiers == null && legacyUserIdentityForStore == null),
+    skip: userEntityIdentifiers == null && legacyUserIdentityForStore == null,
   });
+
+  /**
+   * Host EUID extraction can return nothing when the entity store EUID API is still loading
+   * (it is imported lazily) or when the document is not fully populated. Mirror the user
+   * handling: resolve the display name from the document and use it for store lookup when
+   * EUID returns nothing.
+   */
+  const resolvedHostNameFromDocument = resolveHostNameForEntityInsightsWithFallback(
+    hostEntityIdentifiers,
+    getFieldsData
+  );
+  const legacyHostIdentityForStore =
+    resolvedHostNameFromDocument != null && resolvedHostNameFromDocument !== ''
+      ? ({ 'host.name': resolvedHostNameFromDocument } as IdentityFields)
+      : undefined;
 
   const hostEntityId = euidApi?.euid.getEuidFromObject('host', dataAsNestedObject);
   const hostEntityFromStore = useEntityFromStore({
     entityId: hostEntityId,
-    identityFields: hostEntityIdentifiers ?? undefined,
+    identityFields: hostEntityIdentifiers ?? legacyHostIdentityForStore,
     entityType: 'host',
-    skip: !hostEntityIdentifiers || !entityStoreV2Enabled,
+    skip: hostEntityIdentifiers == null && legacyHostIdentityForStore == null,
   });
 
   const hostRecord = hostEntityFromStore.entityRecord;
   const hostNameFromStore =
     hostRecord != null && 'host' in hostRecord ? hostRecord.host?.name : undefined;
 
-  const resolvedHostName = resolveHostDisplayForEntities(
-    hostEntityIdentifiers,
-    getFieldsData,
-    entityStoreV2Enabled,
-    hostNameFromStore
-  );
+  const resolvedHostName = resolvedHostNameFromDocument ?? hostNameFromStore;
 
   const userDisplayName = userEntityFromStore.entityRecord?.entity?.name ?? resolvedUserName;
   const hostDisplayName = hostEntityFromStore.entityRecord?.entity?.name ?? resolvedHostName;
 
+  const userStoreEntityId = userEntityFromStore?.entityRecord?.entity?.id;
+  const hostStoreEntityId = hostEntityFromStore?.entityRecord?.entity?.id;
+
+  const userOverrides = useMemo(
+    () =>
+      userDisplayName != null
+        ? buildUserOverrides?.({ name: userDisplayName, entityId: userStoreEntityId })
+        : undefined,
+    [buildUserOverrides, userDisplayName, userStoreEntityId]
+  );
+
+  const hostOverrides = useMemo(
+    () =>
+      hostDisplayName != null
+        ? buildHostOverrides?.({ name: hostDisplayName, entityId: hostStoreEntityId })
+        : undefined,
+    [buildHostOverrides, hostDisplayName, hostStoreEntityId]
+  );
+
   const showUserDetails = timestamp != null && userDisplayName != null;
-  const showHostDetails =
-    hostEntityIdentifiers != null && timestamp != null && hostDisplayName != null;
+  const showHostDetails = timestamp != null && hostDisplayName != null;
   const showDetails = showUserDetails || showHostDetails;
 
   return (
@@ -125,9 +157,10 @@ export const EntitiesDetails: React.FC = () => {
               <EuiSpacer size="s" />
               <UserDetails
                 userName={userDisplayName}
-                entityId={userEntityFromStore?.entityRecord?.entity?.id}
+                entityId={userStoreEntityId}
                 timestamp={timestamp}
                 scopeId={scopeId}
+                {...userOverrides}
               />
             </EuiFlexItem>
           )}
@@ -145,10 +178,11 @@ export const EntitiesDetails: React.FC = () => {
 
               <HostDetails
                 hostName={hostDisplayName}
-                entityId={hostEntityFromStore?.entityRecord?.entity?.id}
+                entityId={hostStoreEntityId}
                 timestamp={timestamp}
                 scopeId={scopeId}
-                hostEntityFromStoreResult={entityStoreV2Enabled ? hostEntityFromStore : undefined}
+                hostEntityFromStoreResult={hostEntityFromStore}
+                {...hostOverrides}
               />
             </EuiFlexItem>
           )}

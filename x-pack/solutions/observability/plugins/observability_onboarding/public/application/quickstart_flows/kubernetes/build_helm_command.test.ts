@@ -34,33 +34,16 @@ describe('buildHelmCommand', () => {
     expect(command).toContain('--set kubernetes.enabled=true');
     expect(command).toContain('--set outputs.default.type=ESPlainAuthAPI');
     expect(command).not.toContain('_write_to_logs_streams');
+    expect(command).not.toContain('raw_index');
+    expect(command).not.toContain('logs.ecs');
   });
 
-  it('does not include wired streams config when useWiredStreams is false', () => {
-    const command = buildHelmCommand({
-      ...baseParams,
-      useWiredStreams: false,
-    });
+  it('formats the command as the existing copyable one-line command', () => {
+    const command = buildHelmCommand(baseParams);
 
-    expect(command).not.toContain('_write_to_logs_streams');
-  });
-
-  it('does not include wired streams config when useWiredStreams is undefined', () => {
-    const command = buildHelmCommand({
-      ...baseParams,
-      useWiredStreams: undefined,
-    });
-
-    expect(command).not.toContain('_write_to_logs_streams');
-  });
-
-  it('includes wired streams config when useWiredStreams is true', () => {
-    const command = buildHelmCommand({
-      ...baseParams,
-      useWiredStreams: true,
-    });
-
-    expect(command).toContain("--set 'outputs.default._write_to_logs_streams=true'");
+    expect(command).not.toContain('\n');
+    expect(command).toContain('helm repo add elastic https://helm.elastic.co/ &&');
+    expect(command).toContain('helm repo update elastic &&');
   });
 
   it('disables metrics when metricsEnabled is false', () => {
@@ -72,19 +55,6 @@ describe('buildHelmCommand', () => {
     expect(command).toContain('--set kubernetes.state.enabled=false');
     expect(command).toContain('--set kubernetes.metrics.enabled=false');
     expect(command).toContain('--set kubernetes.apiserver.enabled=false');
-  });
-
-  it('combines wired streams and disabled metrics correctly', () => {
-    const command = buildHelmCommand({
-      ...baseParams,
-      metricsEnabled: false,
-      useWiredStreams: true,
-    });
-
-    expect(command).toContain('--set kubernetes.state.enabled=false');
-    expect(command).toContain('--set kubernetes.metrics.enabled=false');
-    expect(command).toContain('--set kubernetes.apiserver.enabled=false');
-    expect(command).toContain("--set 'outputs.default._write_to_logs_streams=true'");
   });
 
   it('escapes forward slashes in elasticsearch URL', () => {

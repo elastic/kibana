@@ -148,8 +148,12 @@ export const isDisabledFailureStore = (input: FailureStore): input is FailureSto
   return isSchema(disabledFailureStoreSchema, input);
 };
 
+// Elasticsearch responses include the failure store configuration on the data stream,
+// but the client's `IndicesDataStream` type either omits it or types it with a different
+// shape. This models the fields we rely on. The property is optional so a raw
+// `IndicesDataStream` is directly assignable, avoiding type assertions at call sites.
 export type DataStreamWithFailureStore = IndicesDataStream & {
-  failure_store: {
+  failure_store?: {
     enabled?: boolean;
     lifecycle?: {
       enabled?: boolean;

@@ -37,6 +37,18 @@ describe('createTemplateUserActionBuilder', () => {
     expect(screen.getByText('applied template')).toBeInTheDocument();
   });
 
+  it('renders "applied <name> template" when the payload carries the template name', () => {
+    const userAction = getUserAction('template', UserActionActions.update, {
+      type: 'template',
+      payload: { template: { id: 'tmpl-1', version: 3, name: 'Mike Case Connector Template' } },
+    });
+
+    const builder = createTemplateUserActionBuilder({ ...builderArgs, userAction });
+    renderWithTestingProviders(<EuiCommentList comments={builder.build()} />);
+
+    expect(screen.getByText('applied Mike Case Connector Template template')).toBeInTheDocument();
+  });
+
   it('renders "removed applied template" when template is null', () => {
     const userAction = getUserAction('template', UserActionActions.update, {
       type: 'template',

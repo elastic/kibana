@@ -6,6 +6,7 @@
  */
 
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
+import { escapeQuotes } from '@kbn/es-query';
 
 import { SO_SEARCH_LIMIT } from '../../common';
 import { getAgentsByKuery } from '../services/agents';
@@ -27,7 +28,7 @@ export const getAllFleetServerAgents = async (
   } catch (error) {
     throw new Error(error.message);
   }
-  const agentPoliciesIds = packagePolicyData?.items.flatMap((item) => item.policy_id);
+  const agentPoliciesIds = packagePolicyData?.items.flatMap((item) => item.policy_ids);
 
   if (agentPoliciesIds.length === 0) {
     return [];
@@ -38,7 +39,9 @@ export const getAllFleetServerAgents = async (
     agentsResponse = await getAgentsByKuery(esClient, soClient, {
       showInactive: false,
       perPage: SO_SEARCH_LIMIT,
-      kuery: `${AGENTS_PREFIX}.policy_id:${agentPoliciesIds.map((id) => `"${id}"`).join(' or ')}`,
+      kuery: `${AGENTS_PREFIX}.policy_id:${agentPoliciesIds
+        .map((id) => `"${escapeQuotes(id)}"`)
+        .join(' or ')}`,
     });
   } catch (error) {
     throw new Error(error.message);

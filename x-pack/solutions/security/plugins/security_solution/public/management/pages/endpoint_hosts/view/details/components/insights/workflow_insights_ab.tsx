@@ -51,6 +51,12 @@ export const WorkflowInsightsAB = ({ endpointId }: WorkflowInsightsABProps) => {
     setIsUserScanLoading(false);
   }, [endpointId]);
 
+  const { data: insights, refetch: refetchInsights } = useFetchInsightsAB({
+    endpointId,
+    scanTimestamp,
+    insightTypes: AB_INSIGHT_TYPES,
+  });
+
   // Mount poll success: no scan running, go idle. Insights are fetched independently.
   const onMountPollSuccess = useCallback(() => {
     setIsScanRunning(false);
@@ -62,17 +68,19 @@ export const WorkflowInsightsAB = ({ endpointId }: WorkflowInsightsABProps) => {
     setIsScanRunning(false);
   }, []);
 
-  // User-triggered scan: pending returned empty — scan complete
-  const onScanPollSuccess = useCallback(() => {
+  // User-triggered scan: pending returned empty — scan complete.
+  const onScanPollSuccess = useCallback(async () => {
     setIsScanRunning(false);
+    await refetchInsights();
     setIsUserScanLoading(false);
     setScanCompleted(true);
-  }, []);
+  }, [refetchInsights]);
 
-  // User-triggered scan: only terminal executions remain — scan failed
+  // User-triggered scan: only terminal executions remain — scan failed.
   const onScanPollFailure = useCallback(
-    (failureReasons: string[]) => {
+    async (failureReasons: string[]) => {
       setIsScanRunning(false);
+      await refetchInsights();
       setIsUserScanLoading(false);
       setScanCompleted(true);
       setScanFailed(true);
@@ -81,7 +89,7 @@ export const WorkflowInsightsAB = ({ endpointId }: WorkflowInsightsABProps) => {
         text: failureReasons.length > 0 ? failureReasons.join('; ') : undefined,
       });
     },
-    [toasts]
+    [refetchInsights, toasts]
   );
 
   const { data: pendingData } = useFetchPendingScans({
@@ -102,13 +110,11 @@ export const WorkflowInsightsAB = ({ endpointId }: WorkflowInsightsABProps) => {
   );
   const showScanLoading = isUserScanLoading || (isScanRunning && !!hasPendingActive);
 
-  // Always fetch insights on mount to display previous scan results.
-  // Also refetches when scanTimestamp changes (after a new scan completes).
-  const { data: insights } = useFetchInsightsAB({
-    endpointId,
-    scanTimestamp,
-    insightTypes: AB_INSIGHT_TYPES,
-  });
+  useEffect(() => {
+    if (hasPendingActive && !userTriggeredScan) {
+      setUserTriggeredScan(true);
+    }
+  }, [hasPendingActive, userTriggeredScan]);
 
   const { mutate: triggerScan, isLoading: isTriggerLoading } = useTriggerScanAB({
     onSuccess: ({ executions, failures }) => {

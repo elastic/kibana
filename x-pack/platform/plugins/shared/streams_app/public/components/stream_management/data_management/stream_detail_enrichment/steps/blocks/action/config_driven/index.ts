@@ -9,10 +9,12 @@ import { appendProcessorConfig } from './configs/append';
 import { renameProcessorConfig } from './configs/rename';
 import { removeByPrefixProcessorConfig } from './configs/remove_by_prefix';
 import { removeProcessorConfig } from './configs/remove';
+import { uriPartsProcessorConfig } from './configs/uri_parts';
 
 export const configDrivenProcessors = {
   rename: renameProcessorConfig,
   append: appendProcessorConfig,
   remove_by_prefix: removeByPrefixProcessorConfig,
   remove: removeProcessorConfig,
+  uri_parts: uriPartsProcessorConfig,
 };

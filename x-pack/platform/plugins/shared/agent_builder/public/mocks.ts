@@ -9,6 +9,9 @@ import { BehaviorSubject, EMPTY } from 'rxjs';
 import type {
   AgentsServiceStartContract,
   AttachmentServiceStartContract,
+  ConversationsServiceStartContract,
+  ConversationTemplateServiceStartContract,
+  RendererServiceStartContract,
   ToolServiceStartContract,
 } from '@kbn/agent-builder-browser';
 import type {
@@ -24,17 +27,24 @@ const createSetupContractMock = (): jest.Mocked<AgentBuilderPluginSetup> => {
 
 export type AgentsServiceStartContractMock = jest.Mocked<AgentsServiceStartContract>;
 export type AttachmentServiceStartContractMock = jest.Mocked<AttachmentServiceStartContract>;
+export type ConversationTemplateServiceStartContractMock =
+  jest.Mocked<ConversationTemplateServiceStartContract>;
+export type RendererServiceStartContractMock = jest.Mocked<RendererServiceStartContract>;
+export type ConversationsServiceStartContractMock = jest.Mocked<ConversationsServiceStartContract>;
 export type ToolServiceStartContractMock = jest.Mocked<ToolServiceStartContract>;
 
 export type AgentBuilderPluginStartMock = jest.Mocked<AgentBuilderPluginStart> & {
   agents: AgentsServiceStartContractMock;
   attachments: AttachmentServiceStartContractMock;
+  conversationTemplates: ConversationTemplateServiceStartContractMock;
+  renderers: RendererServiceStartContractMock;
   tools: ToolServiceStartContractMock;
 };
 
 const createAgentStartMock = (): AgentsServiceStartContractMock => {
   return {
     list: jest.fn(),
+    addSkillToAgent: jest.fn(),
   };
 };
 
@@ -42,6 +52,30 @@ const createAttachmentStartMock = (): AttachmentServiceStartContractMock => {
   return {
     addAttachmentType: jest.fn(),
     getAttachmentUiDefinition: jest.fn(),
+    getClient: jest.fn(() => ({
+      create: jest.fn(),
+      get: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      list: jest.fn().mockResolvedValue({ results: [], total_token_estimate: 0 }),
+    })),
+  };
+};
+
+const createConversationTemplatesStartMock = (): ConversationTemplateServiceStartContractMock => {
+  return {
+    registerTab: jest.fn(),
+    getTab: jest.fn(),
+    registerTemplateUIDefinition: jest.fn(),
+    getTemplateUIDefinition: jest.fn(),
+  };
+};
+
+const createRendererStartMock = (): RendererServiceStartContractMock => {
+  return {
+    register: jest.fn(),
+    getRendererUiDefinition: jest.fn(),
+    hasRenderer: jest.fn(),
   };
 };
 
@@ -54,11 +88,18 @@ const createToolStartMock = (): ToolServiceStartContractMock => {
   };
 };
 
+const createConversationsStartMock = (): ConversationsServiceStartContractMock => {
+  return { addEvents: jest.fn() };
+};
+
 const createStartContractMock = (): AgentBuilderPluginStartMock => {
   return {
     agents: createAgentStartMock(),
     attachments: createAttachmentStartMock(),
+    conversationTemplates: createConversationTemplatesStartMock(),
+    renderers: createRendererStartMock(),
     tools: createToolStartMock(),
+    conversations: createConversationsStartMock(),
     events: {
       chat$: EMPTY,
       getChatEvents$: jest.fn().mockReturnValue(EMPTY),
@@ -78,8 +119,15 @@ const createStartContractMock = (): AgentBuilderPluginStartMock => {
       };
     }),
     addAttachment: jest.fn(),
+    openConversationDetails: jest.fn().mockResolvedValue(jest.fn()),
+    removeAttachment: jest.fn(),
     updateAttachmentOrigin: jest.fn(),
+    getAgentBuilderAccess: jest.fn().mockResolvedValue({
+      hasRequiredLicense: true,
+      hasLlmConnector: true,
+    }),
     EmbeddableConversation: () => null,
+    EmbeddableConversationInput: () => null,
   };
 };
 

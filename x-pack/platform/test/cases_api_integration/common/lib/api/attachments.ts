@@ -15,7 +15,7 @@ import type { Case } from '@kbn/cases-plugin/common';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import type {
   BulkGetAttachmentsResponse,
-  AttachmentRequest,
+  AttachmentRequestV2,
   BulkCreateAttachmentsRequest,
   BulkCreateAttachmentsRequestV2,
   AttachmentPatchRequest,
@@ -62,7 +62,7 @@ export const createComment = async ({
 }: {
   supertest: SuperTest.Agent;
   caseId: string;
-  params: AttachmentRequest;
+  params: AttachmentRequestV2;
   auth?: { user: User; space: string | null } | null;
   expectedHttpCode?: number;
   headers?: Record<string, string | string[]>;

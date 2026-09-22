@@ -224,7 +224,7 @@ export const TracingProjectsListPage: React.FC = () => {
         />
       ) : !isLoading && projects.length === 0 ? (
         <EuiEmptyPrompt
-          iconType="editorStrike"
+          iconType="textStrike"
           title={<h3>{i18n.NO_PROJECTS_TITLE}</h3>}
           body={<p>{i18n.NO_PROJECTS_BODY}</p>}
         />

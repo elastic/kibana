@@ -9,11 +9,8 @@ import type { Observable } from 'rxjs';
 import { defer } from 'rxjs';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { httpResponseIntoObservable } from '@kbn/sse-utils-client';
-import type { ChatEvent, AgentCapabilities } from '@kbn/agent-builder-common';
-import {
-  getKibanaDefaultAgentCapabilities,
-  type PromptResponse,
-} from '@kbn/agent-builder-common/agents';
+import type { ChatEvent } from '@kbn/agent-builder-common';
+import { type PromptResponse } from '@kbn/agent-builder-common/agents';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import { publicApiPath, internalApiPath } from '../../../common/constants';
@@ -27,8 +24,9 @@ interface BaseConverseParams {
   agentId?: string;
   connectorId?: string;
   conversationId: string;
+  executionId: string;
   browserApiTools?: BrowserApiToolMetadata[];
-  capabilities?: AgentCapabilities;
+  projectRouting?: string;
 }
 
 export type ChatParams = BaseConverseParams & {
@@ -40,13 +38,14 @@ export type ResumeRoundParams = BaseConverseParams & {
   prompts: Record<string, PromptResponse>;
 };
 
-export type RegenerateParams = BaseConverseParams;
-
 /**
  * Wire payload for `converse()` with `conversation_id` narrowed to required. Every
  * Agent Builder UI caller passes a client-generated UUID before chat fires.
  */
-type ConversePayload = ChatRequestBodyPayload & { conversation_id: string };
+type ConversePayload = ChatRequestBodyPayload & {
+  conversation_id: string;
+  execution_id: string;
+};
 
 export class ChatService {
   private readonly http: HttpSetup;
@@ -62,10 +61,11 @@ export class ChatService {
       input: params.input,
       agent_id: params.agentId,
       conversation_id: params.conversationId,
+      execution_id: params.executionId,
       connector_id: params.connectorId,
-      capabilities: params.capabilities ?? getKibanaDefaultAgentCapabilities(),
       attachments: params.attachments,
       browser_api_tools: params.browserApiTools ?? [],
+      project_routing: params.projectRouting,
     });
   }
 
@@ -76,21 +76,11 @@ export class ChatService {
     return this.converse(params.signal, {
       agent_id: params.agentId,
       conversation_id: params.conversationId,
+      execution_id: params.executionId,
       connector_id: params.connectorId,
-      capabilities: params.capabilities ?? getKibanaDefaultAgentCapabilities(),
       prompts: params.prompts,
       browser_api_tools: params.browserApiTools ?? [],
-    });
-  }
-
-  regenerate(params: RegenerateParams): Observable<ChatEvent> {
-    return this.converse(params.signal, {
-      agent_id: params.agentId,
-      conversation_id: params.conversationId,
-      connector_id: params.connectorId,
-      capabilities: params.capabilities ?? getKibanaDefaultAgentCapabilities(),
-      browser_api_tools: params.browserApiTools ?? [],
-      action: 'regenerate',
+      project_routing: params.projectRouting,
     });
   }
 
@@ -106,6 +96,10 @@ export class ChatService {
       httpResponseIntoObservable<ChatEvent>(),
       unwrapAgentBuilderErrors()
     );
+  }
+
+  async abort(executionId: string): Promise<void> {
+    await this.http.post(`${internalApiPath}/executions/${executionId}/abort`);
   }
 
   private converse(signal: AbortSignal | undefined, payload: ConversePayload) {

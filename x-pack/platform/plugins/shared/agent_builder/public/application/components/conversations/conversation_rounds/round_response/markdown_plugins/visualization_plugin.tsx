@@ -6,6 +6,9 @@
  */
 import React from 'react';
 import { EuiCode, EuiText } from '@elastic/eui';
+import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { HttpStart } from '@kbn/core-http-browser';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { ConversationRoundStep } from '@kbn/agent-builder-common';
 import {
   type EsqlResults,
@@ -16,10 +19,13 @@ import {
   visualizationElement,
   type VisualizationElementAttributes,
 } from '@kbn/agent-builder-common/tools/custom_rendering';
+import {
+  VisualizeESQL,
+  InlineVisualization,
+  type VisualizationServices,
+} from '@kbn/agent-builder-visualizations';
 
 import type { AgentBuilderStartDependencies } from '../../../../../../types';
-import { VisualizeESQL } from '../../../../tools/esql/visualize_esql';
-import { VisualizeLens } from '../../../../tools/esql/visualize_lens';
 import { createTagParser, findToolResult } from './utils';
 
 export const visualizationTagParser = createTagParser({
@@ -28,12 +34,6 @@ export const visualizationTagParser = createTagParser({
     toolResultId: extractAttr(value, visualizationElement.attributes.toolResultId),
     chartType: extractAttr(value, visualizationElement.attributes.chartType),
   }),
-  assignAttributes: (node, attributes) => {
-    node.type = visualizationElement.tagName;
-    node.toolResultId = attributes.toolResultId;
-    node.chartType = attributes.chartType;
-    delete node.value;
-  },
   createNode: (attributes, position) => ({
     type: visualizationElement.tagName,
     toolResultId: attributes.toolResultId,
@@ -43,14 +43,34 @@ export const visualizationTagParser = createTagParser({
 });
 
 export function createVisualizationRenderer({
+  application,
+  http,
+  uiSettings,
   startDependencies,
   stepsFromCurrentRound,
   stepsFromPrevRounds,
 }: {
+  application: ApplicationStart;
+  http: HttpStart;
+  uiSettings: IUiSettingsClient;
   startDependencies: AgentBuilderStartDependencies;
   stepsFromCurrentRound: ConversationRoundStep[];
   stepsFromPrevRounds: ConversationRoundStep[];
 }) {
+  const services: VisualizationServices = {
+    application,
+    lens: startDependencies.lens,
+    dataViews: startDependencies.dataViews,
+    uiActions: startDependencies.uiActions,
+    unifiedSearch: startDependencies.unifiedSearch,
+    embeddable: startDependencies.embeddable,
+    customContent: {
+      http,
+      uiSettings,
+      search: startDependencies.data.search.search,
+    },
+  };
+
   return (props: VisualizationElementAttributes) => {
     const { toolResultId, chartType } = props;
 
@@ -88,16 +108,29 @@ export function createVisualizationRenderer({
       return <EuiText>Unable to find visualization for {ToolResultAttribute}.</EuiText>;
     }
 
-    // Handle visualization result (pre-built Lens config)
+    // Handle visualization result (pre-built Lens config, Vega spec or custom content).
     if (toolResult.type === 'visualization') {
-      const { visualization, time_range: visTimeRange } = toolResult.data;
+      const { data } = toolResult;
+
+      // A custom content result carries no template on purpose — the markup lives in the
+      // attachment. Rendering it here would show the panel's own "create your panel"
+      // empty state inside the answer, so point at the supported path instead.
+      if (data.renderer === 'custom_content') {
+        return (
+          <EuiText>
+            Custom content cannot be rendered with the {visualizationElement.tagName} element. Use{' '}
+            <EuiCode>{`<render_attachment id="…" version="…" />`}</EuiCode> instead.
+          </EuiText>
+        );
+      }
+
       return (
-        <VisualizeLens
-          lensConfig={visualization}
-          dataViews={startDependencies.dataViews}
-          lens={startDependencies.lens}
-          uiActions={startDependencies.uiActions}
-          timeRange={visTimeRange}
+        <InlineVisualization
+          services={services}
+          renderer={data.renderer}
+          visualization={data.visualization}
+          esql={data.esql}
+          timeRange={data.time_range}
         />
       );
     }
@@ -110,9 +143,7 @@ export function createVisualizationRenderer({
 
     return (
       <VisualizeESQL
-        lens={startDependencies.lens}
-        dataViews={startDependencies.dataViews}
-        uiActions={startDependencies.uiActions}
+        services={services}
         esqlQuery={query}
         esqlColumns={columns}
         preferredChartType={chartType}

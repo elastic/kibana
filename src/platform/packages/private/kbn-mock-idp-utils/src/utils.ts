@@ -34,6 +34,7 @@ import {
   MOCK_IDP_ROLE_MAPPING_NAME,
   MOCK_IDP_SP_BASE_URL,
   MOCK_IDP_UIAM_COSMOS_DB_ACCESS_KEY,
+  MOCK_IDP_UIAM_PROJECT_TYPES,
   MOCK_IDP_UIAM_SIGNING_SECRET,
 } from './constants';
 import { seedTestApiKey, seedTestUser } from './cosmos_db_seeder';
@@ -98,6 +99,11 @@ export async function createSAMLResponse(options: {
   authnRequestId?: string;
   /** SP entity ID for AudienceRestriction (required by UIAM, optional for ES) */
   spEntityId?: string;
+  /**
+   * AssertionConsumerService URL used for the assertion `Recipient` and response `Destination`.
+   * Defaults to Kibana's SAML callback. Pass an explicit value for external SPs (e.g. UIAM).
+   */
+  acsUrl?: string;
   username: string;
   full_name?: string;
   email?: string;
@@ -112,6 +118,8 @@ export async function createSAMLResponse(options: {
         refreshTokenLifetimeSec?: number;
       };
 }) {
+  const acsUrl = options.acsUrl ?? `${MOCK_IDP_SP_BASE_URL}/api/security/saml/callback`;
+
   const issueInstant = new Date().toISOString();
   const notOnOrAfter = new Date(Date.now() + 3600 * 1000).toISOString();
 
@@ -145,7 +153,7 @@ export async function createSAMLResponse(options: {
         <saml:SubjectConfirmation Method="urn:oasis:names:tc:SAML:2.0:cm:bearer">
           <saml:SubjectConfirmationData NotOnOrAfter="${notOnOrAfter}" ${
     options.authnRequestId ? `InResponseTo="${options.authnRequestId}"` : ''
-  } Recipient="${MOCK_IDP_SP_BASE_URL}/api/security/saml/callback" />
+  } Recipient="${acsUrl}" />
         </saml:SubjectConfirmation>
       </saml:Subject>${conditionsXml}
       <saml:AuthnStatement AuthnInstant="${issueInstant}" SessionIndex="4464894646681600">
@@ -229,7 +237,7 @@ export async function createSAMLResponse(options: {
     `
     <samlp:Response xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" ID="_bdf1d51245ed0f71aa23" Version="2.0" IssueInstant="${issueInstant}" ${
       options.authnRequestId ? `InResponseTo="${options.authnRequestId}"` : ''
-    } Destination="${MOCK_IDP_SP_BASE_URL}/api/security/saml/callback">
+    } Destination="${acsUrl}">
       <saml:Issuer xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">${MOCK_IDP_ENTITY_ID}</saml:Issuer>
       <samlp:Status>
         <samlp:StatusCode Value="urn:oasis:names:tc:SAML:2.0:status:Success"/>
@@ -268,7 +276,7 @@ export async function ensureSAMLRoleMapping(client: Client) {
 }
 
 export function generateCosmosDBApiRequestHeaders(
-  httpVerb: 'POST' | 'PUT',
+  httpVerb: 'POST' | 'PUT' | 'DELETE',
   resourceType: 'dbs' | 'colls' | 'docs',
   resourceId: string
 ) {
@@ -385,15 +393,17 @@ export async function createUiamSessionTokens({
         platform: [],
         organization: [],
         user: [],
-        project: [
-          {
+        // One grant per project type so the session can reach cross-project (CPS) linked
+        // projects of any type, not just the type of the Kibana instance being logged in to.
+        project: [...new Set([projectType, ...MOCK_IDP_UIAM_PROJECT_TYPES])].map(
+          (grantedProjectType) => ({
             role_id: 'cloud-role-id',
             organization_id: organizationId,
-            project_type: projectType,
+            project_type: grantedProjectType,
             application_roles: roles,
             project_scope: { scope: 'all' },
-          },
-        ],
+          })
+        ),
       },
 
       nbf: iat,
@@ -444,7 +454,7 @@ export async function createUiamSessionTokens({
 export async function createUiamOAuthAccessToken({
   username,
   organizationId,
-  projectType,
+  projectType: rawProjectType,
   roles,
   audience,
   fullName,
@@ -460,6 +470,7 @@ export async function createUiamOAuthAccessToken({
   email?: string;
   accessTokenLifetimeSec?: number;
 }) {
+  const projectType = normalizeProjectType(rawProjectType);
   const iat = Math.floor(Date.now() / 1000);
 
   const givenName = fullName ? fullName.split(' ')[0] : 'Test';
@@ -501,15 +512,17 @@ export async function createUiamOAuthAccessToken({
         platform: [],
         organization: [],
         user: [],
-        project: [
-          {
+        // One grant per project type so the session can reach cross-project (CPS) linked
+        // projects of any type, not just the type of the Kibana instance being logged in to.
+        project: [...new Set([projectType, ...MOCK_IDP_UIAM_PROJECT_TYPES])].map(
+          (grantedProjectType) => ({
             role_id: 'cloud-role-id',
             organization_id: organizationId,
-            project_type: projectType,
+            project_type: grantedProjectType,
             application_roles: roles,
             project_scope: { scope: 'all' },
-          },
-        ],
+          })
+        ),
       },
 
       nbf: iat,

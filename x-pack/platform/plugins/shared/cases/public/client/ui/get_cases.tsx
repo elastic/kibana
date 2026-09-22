@@ -14,23 +14,17 @@ import { CasesProvider } from '../../components/cases_context';
 type GetCasesPropsInternal = CasesProps & CasesContextProps;
 export type GetCasesProps = Omit<
   GetCasesPropsInternal,
-  | 'externalReferenceAttachmentTypeRegistry'
-  | 'persistableStateAttachmentTypeRegistry'
-  | 'unifiedAttachmentTypeRegistry'
-  | 'getFilesClient'
+  'unifiedAttachmentTypeRegistry' | 'getFilesClient'
 >;
 
 const CasesRoutesLazy: React.FC<CasesProps> = lazy(() => import('../../components/app/routes'));
 
 export const getCasesLazy = ({
-  externalReferenceAttachmentTypeRegistry,
-  persistableStateAttachmentTypeRegistry,
   unifiedAttachmentTypeRegistry,
   getFilesClient,
   owner,
   permissions,
   basePath,
-  actionsNavigation,
   refreshRef,
   timelineIntegration,
   features,
@@ -38,8 +32,6 @@ export const getCasesLazy = ({
 }: GetCasesPropsInternal) => (
   <CasesProvider
     value={{
-      externalReferenceAttachmentTypeRegistry,
-      persistableStateAttachmentTypeRegistry,
       unifiedAttachmentTypeRegistry,
       getFilesClient,
       owner,
@@ -50,11 +42,7 @@ export const getCasesLazy = ({
     }}
   >
     <Suspense fallback={<EuiLoadingSpinner />}>
-      <CasesRoutesLazy
-        actionsNavigation={actionsNavigation}
-        refreshRef={refreshRef}
-        timelineIntegration={timelineIntegration}
-      />
+      <CasesRoutesLazy refreshRef={refreshRef} timelineIntegration={timelineIntegration} />
     </Suspense>
   </CasesProvider>
 );

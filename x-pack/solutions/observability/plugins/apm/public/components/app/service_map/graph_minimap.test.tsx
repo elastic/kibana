@@ -21,6 +21,23 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
+jest.mock('../../../context/apm_plugin/use_apm_plugin_context', () => ({
+  useApmPluginContext: () => ({
+    core: {
+      docLinks: {
+        links: {
+          apm: {
+            supportedServiceMaps:
+              'https://www.elastic.co/guide/en/kibana/current/service-maps.html',
+            supportedServiceMapsLegend:
+              'https://www.elastic.co/guide/en/kibana/current/service-maps.html#service-maps-legend',
+          },
+        },
+      },
+    },
+  }),
+}));
+
 jest.mock('./use_keyboard_navigation', () => ({
   useKeyboardNavigation: jest.fn(() => ({
     screenReaderAnnouncement: '',
@@ -51,7 +68,6 @@ jest.mock('@xyflow/react', () => {
         <div
           data-test-subj={props['data-test-subj'] as string}
           aria-label={props.ariaLabel as string}
-          data-position={props.position as string}
           data-pannable={String(props.pannable)}
           data-zoomable={String(props.zoomable)}
         />
@@ -59,7 +75,17 @@ jest.mock('@xyflow/react', () => {
     },
     useNodesState: jest.fn((initialNodes: unknown) => [initialNodes, jest.fn()]),
     useEdgesState: jest.fn((initialEdges: unknown) => [initialEdges, jest.fn()]),
-    useReactFlow: jest.fn(() => ({ fitView: jest.fn() })),
+    useStore: jest.fn((selector: (state: { width: number; height: number }) => unknown) =>
+      selector({ width: 1200, height: 600 })
+    ),
+    useReactFlow: jest.fn(() => ({
+      fitView: jest.fn(),
+      zoomIn: jest.fn(),
+      zoomOut: jest.fn(),
+      setCenter: jest.fn(),
+      getNodes: jest.fn(() => []),
+      getNodesBounds: jest.fn(() => ({ x: 0, y: 0, width: 0, height: 0 })),
+    })),
   };
 });
 
@@ -83,7 +109,7 @@ jest.mock('./popover', () => ({
 }));
 
 jest.mock('../../shared/service_map/layout', () => ({
-  applyDagreLayout: jest.fn((nodes: unknown) => nodes),
+  applyServiceMapLayout: jest.fn((nodes: unknown) => nodes),
 }));
 
 const createMockServiceNode = (id: string, label: string): ServiceMapNode => ({
@@ -137,15 +163,14 @@ describe('ServiceMapGraph - MiniMap', () => {
     expect(screen.getByTestId('serviceMapMinimap')).toBeInTheDocument();
   });
 
-  it('is positioned at bottom-right', () => {
+  it('positions the minimap in the bottom-right', () => {
     render(
       <ReactFlowProvider>
         <ServiceMapGraph {...defaultProps} />
       </ReactFlowProvider>
     );
 
-    const minimap = screen.getByTestId('serviceMapMinimap');
-    expect(minimap).toHaveAttribute('data-position', 'bottom-right');
+    expect(mockMinimapProps.position).toBe('bottom-right');
   });
 
   it('is pannable and zoomable', () => {
@@ -207,6 +232,42 @@ describe('ServiceMapGraph - MiniMap', () => {
     expect(reactFlow).toContainElement(minimap);
     expect(reactFlow).toContainElement(controls);
     expect(reactFlow).toContainElement(background);
+  });
+
+  describe('when isEmbedded', () => {
+    it('hides the minimap and options toggle in a normal embedded panel', () => {
+      render(
+        <ReactFlowProvider>
+          <ServiceMapGraph {...defaultProps} isEmbedded />
+        </ReactFlowProvider>
+      );
+
+      expect(screen.queryByTestId('serviceMapMinimap')).toBeNull();
+      expect(screen.queryByTestId('serviceMapOptionsPanelToggle')).toBeNull();
+    });
+
+    it('shows the minimap and options toggle when the panel is maximized (showEmbeddedControls)', () => {
+      render(
+        <ReactFlowProvider>
+          <ServiceMapGraph {...defaultProps} isEmbedded showEmbeddedControls />
+        </ReactFlowProvider>
+      );
+
+      expect(screen.getByTestId('serviceMapMinimap')).toBeInTheDocument();
+      expect(screen.getByTestId('serviceMapOptionsPanelToggle')).toBeInTheDocument();
+    });
+
+    it('auto-expands the quick-filters panel when maximized so users immediately see the controls', () => {
+      render(
+        <ReactFlowProvider>
+          <ServiceMapGraph {...defaultProps} isEmbedded showEmbeddedControls />
+        </ReactFlowProvider>
+      );
+
+      // The options panel itself (not just the toggle) should be visible without the user
+      // having to click anything.
+      expect(screen.getByTestId('serviceMapOptionsPanel')).toBeInTheDocument();
+    });
   });
 
   describe('nodeColor', () => {

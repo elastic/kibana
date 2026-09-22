@@ -8,8 +8,10 @@
 import { useState } from 'react';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { FindRulesResponse } from '@kbn/alerting-v2-schemas';
-import { ALERTING_V2_RULE_API_PATH } from '@kbn/alerting-v2-constants';
 import useAsync from 'react-use/lib/useAsync';
+import { fetchRulesByIds } from '../apis/fetch_rules_by_ids';
+import { fetchFromSource } from '../utils/fetch_from_sources';
+import { useAdditionalEpisodesDataSource } from '../context/episode_data_source_context';
 
 export interface UseAlertingRulesCacheOptions {
   ruleIds: string[];
@@ -22,33 +24,52 @@ type Rule = FindRulesResponse['items'][number];
 
 /**
  * Provides a rules cache by id, fetching uncached rules
- * with the minimum number of bulk requests possible.
+ * with the minimum number of find requests possible.
  * Returns rulesCache as state so consumers re-render when rules are loaded.
  */
 export const useAlertingRulesCache = ({ ruleIds, services }: UseAlertingRulesCacheOptions) => {
+  const additionalEpisodesDataSource = useAdditionalEpisodesDataSource();
   const [rulesCache, setRulesCache] = useState<Record<string, Rule>>({});
+  const [missingRuleIds, setMissingRuleIds] = useState<ReadonlySet<string>>(new Set());
 
   const { loading, error } = useAsync(async () => {
-    const uncachedIds = ruleIds.filter((id) => !rulesCache[id]);
+    const uncachedIds = ruleIds.filter((id) => !rulesCache[id] && !missingRuleIds.has(id));
 
     if (uncachedIds.length === 0) {
       return;
     }
 
-    const rulesResponse = await services.http.get<FindRulesResponse>(
-      `${ALERTING_V2_RULE_API_PATH}/_bulk`,
-      {
-        query: { ids: uncachedIds },
-      }
-    );
+    const v2Rules = await fetchRulesByIds({ http: services.http, ids: uncachedIds });
+    const resolvedByV2 = new Set(v2Rules.map((rule) => rule.id));
+    const unresolvedIds = uncachedIds.filter((id) => !resolvedByV2.has(id));
+
+    const { results: sourceRules } = unresolvedIds.length
+      ? await fetchFromSource(additionalEpisodesDataSource, (source) =>
+          source.resolveRules?.({ services, ids: unresolvedIds })
+        )
+      : { results: [] };
+
+    const rules = [...v2Rules, ...sourceRules.flat()];
+    const returnedRuleIds = new Set(rules.map((rule) => rule.id));
+
     setRulesCache((prev) => {
       const next = { ...prev };
-      rulesResponse.items.forEach((rule) => {
+      rules.forEach((rule) => {
         next[rule.id] = rule;
       });
       return next;
     });
-  }, [ruleIds, services.http]);
+
+    setMissingRuleIds((prev) => {
+      const next = new Set(prev);
+      uncachedIds.forEach((id) => {
+        if (!returnedRuleIds.has(id)) {
+          next.add(id);
+        }
+      });
+      return next;
+    });
+  }, [ruleIds, services.http, additionalEpisodesDataSource]);
 
   return {
     rulesCache,

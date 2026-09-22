@@ -9,7 +9,7 @@
 
 import React from 'react';
 import type { FC } from 'react';
-import { EuiButtonIcon, EuiTitle, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiTitle, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
@@ -31,21 +31,28 @@ export const Header: FC<HeaderProps> = ({ title, 'aria-describedby': ariaDescrib
     background: ${euiTheme.colors.backgroundBasePlain};
     border-radius: ${euiTheme.border.radius.medium};
     display: flex;
-    gap: ${euiTheme.size.s};
+    gap: ${euiTheme.size.xs};
     ${headerStyle}
   `;
 
   return (
     <div css={titleStyle}>
-      <EuiButtonIcon
-        aria-describedby={ariaDescribedBy}
-        aria-label={i18n.translate('kbnUI.sideNavigation.goBackButtonIconAriaLabel', {
+      <EuiToolTip
+        content={i18n.translate('kbnUI.sideNavigation.goBackButtonIconAriaLabel', {
           defaultMessage: 'Go back',
         })}
-        color="text"
-        iconType="chevronSingleLeft"
-        onClick={goBack}
-      />
+        disableScreenReaderOutput
+      >
+        <EuiButtonIcon
+          aria-describedby={ariaDescribedBy}
+          aria-label={i18n.translate('kbnUI.sideNavigation.goBackButtonIconAriaLabel', {
+            defaultMessage: 'Go back',
+          })}
+          color="text"
+          iconType="chevronSingleLeft"
+          onClick={goBack}
+        />
+      </EuiToolTip>
       {title && (
         <EuiTitle size="xs">
           <h4>{title}</h4>

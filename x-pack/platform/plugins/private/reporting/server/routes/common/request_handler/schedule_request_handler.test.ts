@@ -64,7 +64,6 @@ const fakeRawRequest: FakeRawRequest = {
   headers: {
     authorization: `ApiKey skdjtq4u543yt3rhewrh`,
   },
-  path: '/',
 };
 
 describe('Handle request to schedule', () => {
@@ -819,17 +818,7 @@ describe('Handle request to schedule', () => {
         await handler.getJobParams();
       } catch (err) {
         expect(err.statusCode).toBe(400);
-        expect(err.body).toMatchInlineSnapshot(`
-          "invalid params: [
-            {
-              \\"code\\": \\"custom\\",
-              \\"path\\": [
-                \\"browserTimezone\\"
-              ],
-              \\"message\\": \\"Invalid timezone\\"
-            }
-          ]"
-        `);
+        expect(err.body).toEqual('invalid params: browserTimezone: Invalid timezone');
       }
     });
 

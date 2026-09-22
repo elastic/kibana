@@ -13,7 +13,7 @@ import type { Logger } from '@kbn/logging';
 import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
 import { once } from 'lodash';
 import type { RelatedSavedObjects } from '@kbn/actions-plugin/server/lib';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { stringify } from '../../../../utils/stringify';
 import { ResponseActionsClientError, ResponseActionsConnectorNotConfiguredError } from '../errors';
 

@@ -17,6 +17,7 @@ import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { discoverServiceMock } from '../__mocks__/services';
 import { initializeFetch } from './initialize_fetch';
 import { getMockedSearchApi } from './__mocks__/get_mocked_api';
+import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../context_awareness';
 
 describe('initialize fetch', () => {
   const searchSource = createSearchSourceMock({ index: dataViewMock });
@@ -45,9 +46,11 @@ describe('initialize fetch', () => {
       discoverServices: discoverServiceMock,
       scopedProfilesManager: discoverServiceMock.profilesManager.createScopedProfilesManager({
         scopedEbtManager: discoverServiceMock.ebtManager.createScopedEBTManager(),
+        toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
       }),
       refreshTrigger$,
       ...setters,
+      setApproximationApplied: jest.fn(),
     });
     await waitOneTick();
   });
@@ -83,7 +86,7 @@ describe('initialize fetch', () => {
   });
 
   it('should catch and emit error', async () => {
-    expect(mockedApi.blockingError$.getValue()).toBeUndefined();
+    expect(mockedApi.searchError$.getValue()).toBeUndefined();
     searchSource.fetch$ = jest.fn().mockImplementation(
       () =>
         new Observable(() => {
@@ -92,8 +95,8 @@ describe('initialize fetch', () => {
     );
     mockedApi.savedSearch$.next(savedSearch);
     await waitOneTick();
-    expect(mockedApi.blockingError$.getValue()).toBeDefined();
-    expect(mockedApi.blockingError$.getValue()?.message).toBe('Search failed');
+    expect(mockedApi.searchError$.getValue()).toBeDefined();
+    expect(mockedApi.searchError$.getValue()?.message).toBe('Search failed');
   });
 
   it('should correctly handle aborted requests', async () => {

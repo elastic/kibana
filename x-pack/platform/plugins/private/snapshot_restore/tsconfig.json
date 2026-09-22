@@ -12,6 +12,7 @@
     "../../../../../typings/**/*",
   ],
   "kbn_references": [
+    "@kbn/app-header",
     "@kbn/core",
     "@kbn/licensing-plugin",
     "@kbn/features-plugin",
@@ -37,6 +38,8 @@
     "@kbn/react-kibana-context-render",
     "@kbn/licensing-types",
     "@kbn/core-http-browser",
+    "@kbn/scout",
+    "@kbn/ui-callout"
   ],
   "exclude": [
     "target/**/*",

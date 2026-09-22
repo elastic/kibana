@@ -14,6 +14,7 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiTitle,
+  type EuiFlyoutProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -23,13 +24,13 @@ interface Props {
   title: string;
   body: string;
   onClose: () => void;
+  type?: EuiFlyoutProps['type'];
 }
 
-export const EntityNotFoundFlyout = ({ title, body, onClose }: Props) => (
+export const EntityNotFoundFlyout = ({ title, body, onClose, type = 'push' }: Props) => (
   <EuiFlyout
-    type="push"
+    type={type}
     size="s"
-    ownFocus
     onClose={onClose}
     aria-labelledby={FLYOUT_TITLE_ID}
     data-test-subj="entityNotFoundFlyout"

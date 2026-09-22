@@ -22,16 +22,19 @@ import {
 import { RollupInterval } from '../../../../common/rollup';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import { environmentQuery } from '../../../../common/utils/environment_query';
 
 export async function getTransactionByName({
   transactionName,
   serviceName,
+  environment,
   apmEventClient,
   start,
   end,
 }: {
   transactionName: string;
   serviceName: string;
+  environment?: string;
   apmEventClient: APMEventClient;
   start: number;
   end: number;
@@ -64,6 +67,7 @@ export async function getTransactionByName({
           { term: { [TRANSACTION_NAME]: transactionName } },
           { term: { [SERVICE_NAME]: serviceName } },
           ...rangeQuery(start, end),
+          ...(environment ? environmentQuery(environment) : []),
         ]),
       },
     },

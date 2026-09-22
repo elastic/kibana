@@ -68,6 +68,8 @@ export interface NewCloudConnectorFormProps {
   accountType?: AccountType;
   /** IaC template URL from var_group selection for generating cloud connector setup instructions. */
   iacTemplateUrl?: string;
+  /** Stored template digest from the linked cloud connector. */
+  templateSha?: string;
 }
 
 // Define the interface for connector options
@@ -111,16 +113,13 @@ export interface CloudConnectorFormProps {
   accountType?: AccountType;
   /** IaC template URL from var_group selection for generating cloud connector setup instructions. */
   iacTemplateUrl?: string;
+  /** Stored template digest from the linked cloud connector. */
+  templateSha?: string;
 }
 
 export type CloudSetupForCloudConnector = Pick<
   CloudSetup,
-  | 'isCloudEnabled'
-  | 'cloudId'
-  | 'cloudHost'
-  | 'deploymentUrl'
-  | 'serverless'
-  | 'isServerlessEnabled'
+  'isCloudEnabled' | 'cloudId' | 'deploymentUrl' | 'serverless' | 'isServerlessEnabled'
 >;
 
 export interface GetCloudConnectorRemoteRoleTemplateParams {

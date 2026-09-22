@@ -6,23 +6,34 @@
  */
 
 import { tags } from '@kbn/scout';
-import { getCurrentTraceId, createSpanLatencyEvaluator } from '@kbn/evals';
-import type { GcsConfig } from '../../src/data_generators/replay';
 import {
-  SIGEVENTS_SNAPSHOT_RUN,
-  cleanSignificantEventsDataStreams,
-  listAvailableSnapshots,
-  replaySignificantEventsSnapshot,
-} from '../../src/data_generators/replay';
+  getCurrentTraceId,
+  createChatCallsEvaluator,
+  createSpanLatencyEvaluator,
+} from '@kbn/evals';
+import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
+import type { GcsConfig } from '../../src/data_generators/replay';
+import { cleanSignificantEventsDataStreams } from '../../src/data_generators/replay';
 import { evaluate } from '../../src/evaluate';
 import {
   getActiveDatasets,
+  hasExplicitDatasetSelection,
   resolveScenarioSnapshotSource,
-  snapshotCatalogKey,
   MANAGED_STREAM_SEARCH_PATTERN,
   type KIFeatureExclusionScenario,
 } from '../../src/datasets';
 import { createExcludeSemanticEvaluator } from '../../src/evaluators/ki_feature_exclusion/evaluators';
+import {
+  initialFeatureCountEvaluator,
+  followUpReturnedCountEvaluator,
+  followUpRetainedCountEvaluator,
+} from '../../src/evaluators/ki_feature_exclusion/feature_counts';
+import { createReportedTokenEvaluators } from '../../src/evaluators/reported_tokens';
+import {
+  buildAvailableSnapshotsBySource,
+  hasAvailableSnapshot,
+  replayDatasetSnapshot,
+} from '../shared';
 import { runExcludeExperiment } from './run_exclude_experiment';
 
 evaluate.describe.configure({ timeout: 1_200_000 });
@@ -32,25 +43,44 @@ evaluate.describe(
   { tag: tags.serverless.observability.complete },
   () => {
     const activeDatasets = getActiveDatasets();
+    const failOnMissingSnapshot = hasExplicitDatasetSelection(process.env.SIGEVENTS_DATASET);
     const availableSnapshotsBySource = new Map<string, Set<string>>();
 
-    evaluate.beforeAll(async ({ esClient, log }) => {
-      const uniqueCatalogSources = new Map<string, GcsConfig>();
-      for (const dataset of activeDatasets) {
-        for (const scenario of dataset.kiFeatureExclusion ?? []) {
-          const source = resolveScenarioSnapshotSource({
-            scenarioId: scenario.input.scenario_id,
-            datasetGcs: dataset.gcs,
-            snapshotSource: scenario.snapshot_source,
-          });
-          uniqueCatalogSources.set(snapshotCatalogKey(source.gcs), source.gcs);
-        }
-      }
+    evaluate.beforeAll(async ({ esClient, kbnClient, log, uiSettings }) => {
+      await uiSettings.set({ 'agentBuilder:experimentalFeatures': true });
+      await kbnClient.request({
+        path: '/internal/core/_settings',
+        method: 'PUT',
+        headers: { 'elastic-api-version': '1' },
+        body: {
+          'feature_flags.overrides': {
+            [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: true,
+          },
+        },
+      });
+      log.info('Enabled significant events availability feature flag');
 
-      for (const [catalogSourceKey, gcs] of uniqueCatalogSources.entries()) {
-        const availableSnapshots = await listAvailableSnapshots(esClient, log, gcs);
-        availableSnapshotsBySource.set(catalogSourceKey, new Set(availableSnapshots));
-      }
+      const snapshots = await buildAvailableSnapshotsBySource(
+        activeDatasets,
+        (dataset) => dataset.kiFeatureExclusion ?? [],
+        esClient,
+        log
+      );
+      snapshots.forEach((v, k) => availableSnapshotsBySource.set(k, v));
+    });
+
+    evaluate.afterAll(async ({ kbnClient, uiSettings }) => {
+      await uiSettings.unset('agentBuilder:experimentalFeatures');
+      await kbnClient.request({
+        path: '/internal/core/_settings',
+        method: 'PUT',
+        headers: { 'elastic-api-version': '1' },
+        body: {
+          'feature_flags.overrides': {
+            [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: null,
+          },
+        },
+      });
     });
 
     for (const dataset of activeDatasets) {
@@ -66,14 +96,15 @@ evaluate.describe(
               snapshotSource: scenario.snapshot_source,
             });
 
-            const available =
-              availableSnapshotsBySource.get(snapshotCatalogKey(source.gcs)) ?? new Set();
-
-            if (!available.has(source.snapshotName)) {
-              log.info(
-                `Snapshot "${source.snapshotName}" not found in run "${SIGEVENTS_SNAPSHOT_RUN}" ` +
-                  `(source: ${source.gcs.bucket}/${source.gcs.basePathPrefix}) - skipping`
-              );
+            if (
+              !hasAvailableSnapshot({
+                availableSnapshotsBySource,
+                source,
+                datasetId: dataset.id,
+                failOnMissingSnapshot,
+                log,
+              })
+            ) {
               continue;
             }
 
@@ -93,11 +124,12 @@ evaluate.describe(
           async ({
             esClient,
             inferenceClient,
+            fetch,
+            connector,
             evaluationConnector,
             evaluators,
             traceEsClient,
             log,
-            logger,
             executorClient,
           }) => {
             const evaluatorInferenceClient = inferenceClient.bindTo({
@@ -108,14 +140,16 @@ evaluate.describe(
 
             await executorClient.runExperiment(
               {
-                dataset: {
-                  name: `sigevents: KI feature exclusion (${dataset.id})`,
-                  description: `[${dataset.id}] KI feature exclusion across scenarios`,
-                  examples: availableScenarios.map((scenario) => ({
-                    id: `${scenario.input.scenario_id}:exclude-${scenario.input.exclude_count}`,
-                    input: scenario.input,
-                  })),
-                },
+                datasets: [
+                  {
+                    name: `sigevents: KI feature exclusion (${dataset.id})`,
+                    description: `[${dataset.id}] KI feature exclusion across scenarios`,
+                    examples: availableScenarios.map((scenario) => ({
+                      id: `${scenario.input.scenario_id}:exclude-${scenario.input.exclude_count}`,
+                      input: scenario.input,
+                    })),
+                  },
+                ],
                 concurrency: 1,
                 task: async ({ input }: { input: KIFeatureExclusionScenario['input'] }) => {
                   const exampleId = `${input.scenario_id}:exclude-${input.exclude_count}`;
@@ -126,12 +160,7 @@ evaluate.describe(
 
                   if (source.snapshotName !== lastReplayedSnapshot) {
                     await cleanSignificantEventsDataStreams(esClient, log);
-                    await replaySignificantEventsSnapshot(
-                      esClient,
-                      log,
-                      source.snapshotName,
-                      source.gcs
-                    );
+                    await replayDatasetSnapshot({ esClient, log, dataset, source });
                     await esClient.indices.refresh({ index: MANAGED_STREAM_SEARCH_PATTERN });
                     lastReplayedSnapshot = source.snapshotName;
                   }
@@ -140,8 +169,8 @@ evaluate.describe(
                     esClient,
                     excludeCount: input.exclude_count,
                     followUpRuns: input.follow_up_runs,
-                    inferenceClient,
-                    logger,
+                    fetch,
+                    connectorId: connector.id,
                     sampleSize: input.sample_document_count,
                     log,
                   });
@@ -151,10 +180,15 @@ evaluate.describe(
               },
               [
                 createExcludeSemanticEvaluator({ inferenceClient: evaluatorInferenceClient }),
+                initialFeatureCountEvaluator,
+                followUpReturnedCountEvaluator,
+                followUpRetainedCountEvaluator,
+                ...createReportedTokenEvaluators(),
                 evaluators.traceBasedEvaluators.inputTokens,
                 evaluators.traceBasedEvaluators.outputTokens,
                 evaluators.traceBasedEvaluators.cachedTokens,
-                createSpanLatencyEvaluator({ traceEsClient, log, spanName: 'ChatComplete' }),
+                createChatCallsEvaluator({ traceEsClient, log }),
+                createSpanLatencyEvaluator({ traceEsClient, log, operationName: 'chat' }),
               ]
             );
           }

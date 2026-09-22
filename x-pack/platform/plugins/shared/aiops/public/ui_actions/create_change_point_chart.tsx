@@ -14,8 +14,8 @@ import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '@kbn/aiops-change-point-detection/constants';
 
+import type { ChangePointChartEmbeddableState } from '@kbn/aiops-server-schemas/embeddables/change_point_chart';
 import type { ChangePointChartActionContext } from './change_point_action_context';
-import type { ChangePointEmbeddableState } from '../../common/embeddables/change_point_chart/types';
 import type { AiopsCoreSetup } from '../types';
 import { canUseAiops } from '../capabilities';
 
@@ -62,6 +62,7 @@ export function createAddChangePointChartAction(
       openLazyFlyout({
         core: coreStart,
         parentApi: context.embeddable,
+        returnFocus: context.returnFocus,
         flyoutProps: {
           'data-test-subj': 'aiopsChangePointChartEmbeddableInitializer',
           'aria-labelledby': 'changePointConfig',
@@ -76,7 +77,7 @@ export function createAddChangePointChartAction(
               coreStart={coreStart}
               pluginStart={pluginStart}
               onConfirm={(initialState) => {
-                presentationContainerParent.addNewPanel<ChangePointEmbeddableState>({
+                presentationContainerParent.addNewPanel<ChangePointChartEmbeddableState>({
                   panelType: EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
                   serializedState: initialState,
                 });
