@@ -3445,9 +3445,6 @@ importers:
       '@kbn/securitysolution-lists-common':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-securitysolution-lists-common
-      '@kbn/securitysolution-mitre-catalog':
-        specifier: workspace:*
-        version: link:x-pack/solutions/security/packages/kbn-securitysolution-mitre-catalog
       '@kbn/securitysolution-rules':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-securitysolution-rules
@@ -9755,8 +9752,6 @@ importers:
   x-pack/solutions/security/packages/kbn-securitysolution-list-utils: {}
 
   x-pack/solutions/security/packages/kbn-securitysolution-lists-common: {}
-
-  x-pack/solutions/security/packages/kbn-securitysolution-mitre-catalog: {}
 
   x-pack/solutions/security/packages/kbn-securitysolution-t-grid: {}
 
