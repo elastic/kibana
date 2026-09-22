@@ -54,6 +54,7 @@ describe('registerSkills', () => {
     );
     expect(skill.content).toContain('Do not run queries by default');
     expect(skill.content).toContain(`call \`${internalTools.askUserQuestion}\` on its own`);
+    expect(skill.content).toContain('"How would you like to enhance this dashboard?"');
     expect(skill.content).toContain('"Appearance and content" and "Appearance only"');
     expect(skill.content).toContain('Ask even when you found no gaps');
     expect(skill.content).toContain('Content mode is the default');
