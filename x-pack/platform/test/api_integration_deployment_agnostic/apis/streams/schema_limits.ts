@@ -155,14 +155,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await kibanaServer.uiSettings.update({
           [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: true,
         });
-        await kibanaServer.uiSettings.waitForEventualCacheRefresh();
       });
 
       after(async () => {
         await kibanaServer.uiSettings.update({
           [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: false,
         });
-        await kibanaServer.uiSettings.waitForEventualCacheRefresh();
       });
 
       it('rejects name longer than MAX_STREAM_NAME_LENGTH with 400', async () => {

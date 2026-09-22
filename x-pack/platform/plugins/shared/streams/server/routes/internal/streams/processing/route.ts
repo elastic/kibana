@@ -70,7 +70,6 @@ function countDSLSteps(steps: StreamlangStep[], acc: number): number {
     if (++acc > MAX_DSL_STEPS_TOTAL) return acc;
     if (isConditionBlock(step)) {
       acc = countDSLSteps(step.condition.steps, acc);
-      if (step.condition.else) acc = countDSLSteps(step.condition.else, acc);
     }
   }
   return acc;
