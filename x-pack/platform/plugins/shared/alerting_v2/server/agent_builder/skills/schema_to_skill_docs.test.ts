@@ -340,10 +340,10 @@ describe('schema_to_skill_docs', () => {
       expect(doc).toContain('##### `pending`');
       expect(doc).toContain('##### `recovering`');
       expect(doc).toContain(
-        '| `count` | integer | optional | Number of consecutive matches required before the alert becomes `active`. `0` skips the `pending` phase. (min: 0, max: 1000) |'
+        '| `count` | integer | optional | Consecutive matches required before the alert episode becomes `active`. Set to `0` to open it on the first match. (min: 0, max: 1000) |'
       );
       expect(doc).toContain(
-        '| `count` | integer | optional | Number of consecutive recoveries required before the alert becomes `inactive`. `0` skips the `recovering` phase. (min: 0, max: 1000) |'
+        '| `count` | integer | optional | Consecutive recoveries required before the alert episode becomes `inactive`. Set to `0` to close it on the first recovery. (min: 0, max: 1000) |'
       );
     });
 
@@ -351,7 +351,7 @@ describe('schema_to_skill_docs', () => {
       const doc = generateRuleOperationsDoc();
       expect(doc).toContain('##### `query`');
       expect(doc).toContain(
-        '| `breach` | object | optional | Breach condition appended to `base`. Omit to treat every row returned by `base` as a breach. |'
+        '| `breach` | object | optional | Optional ES\\|QL clause appended to `query.base`. If omitted, every row from `query.base` is a match. |'
       );
     });
 
@@ -470,10 +470,12 @@ describe('schema_to_skill_docs', () => {
 
     it('renders the single query shape as an object with its own field table', () => {
       const doc = generateRuleSchemaDoc();
-      expect(doc).toContain('| `query` | object | required | Detection query configuration. |');
+      expect(doc).toContain(
+        '| `query` | object | required | ES\\|QL query the rule evaluates. `base` is required. `breach` is an optional clause appended to it. |'
+      );
       expect(doc).toContain('## Query');
       expect(doc).toContain(
-        '| `base` | string | required | The detection query, and the only place a `FROM` lives. Time filters are applied automatically via the lookback window. (min length: 1, max length: 10000) |'
+        '| `base` | string | required | ES\\|QL query that specifies the data to evaluate. Must include a `FROM` clause. Kibana applies the time filter from `schedule.lookback` using `time_field`. (min length: 1, max length: 10000) |'
       );
       expect(doc).not.toContain('format: "composed"');
       expect(doc).not.toContain('format: "standalone"');

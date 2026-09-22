@@ -137,19 +137,19 @@ export const esqlQuerySegmentSchema = z
 const breachSchema = z
   .object({
     segment: esqlQuerySegmentSchema.describe(
-      'A clause appended to `query.base`, for example `WHERE avg_cpu > 0.85`.'
+      "ES|QL clause appended to `query.base`, for example `WHERE avg_cpu > 0.85`. Don't include a `FROM` clause."
     ),
   })
   .strict()
   .describe(
-    'Breach condition appended to `base`. Omit to treat every row returned by `base` as a breach.'
+    'Optional ES|QL clause appended to `query.base`. If omitted, every row from `query.base` is a match.'
   )
   .meta({ id: 'alerting_rule_breach' });
 
 export const querySchema = z
   .object({
     base: esqlQuerySchema.describe(
-      'The detection query, and the only place a `FROM` lives. Time filters are applied automatically via the lookback window.'
+      'ES|QL query that specifies the data to evaluate. Must include a `FROM` clause. Kibana applies the time filter from `schedule.lookback` using `time_field`.'
     ),
     breach: breachSchema.optional(),
   })
@@ -167,7 +167,9 @@ export const querySchema = z
       }
     }
   })
-  .describe('Detection query configuration.')
+  .describe(
+    'ES|QL query the rule evaluates. `base` is required. `breach` is an optional clause appended to it.'
+  )
   .meta({ id: 'alerting_rule_query' });
 
 export type Query = z.infer<typeof querySchema>;
@@ -183,36 +185,42 @@ export const recoverySchema = z
     z
       .object({ strategy: z.literal(recoveryStrategy.no_breach) })
       .strict()
-      .describe('Recovers a group when it stops appearing in the breach results.')
+      .describe(
+        'Recovers the alert episode when its group no longer appears in the breach results.'
+      )
       .meta({ id: 'alerting_rule_recovery_no_breach' }),
     z
       .object({
         strategy: z.literal(recoveryStrategy.condition),
         segment: esqlQuerySegmentSchema.describe(
-          'A clause appended to `query.base`, for example `WHERE avg_cpu < 0.60`.'
+          "ES|QL clause appended to `query.base`, for example `WHERE avg_cpu < 0.60`. Don't include a `FROM` clause."
         ),
       })
       .strict()
       .describe(
-        'Recovers a group when `query.base` plus this segment returns it. Requires `query.breach`.'
+        'Recovers the alert episode when `query.base` plus `segment` returns the group. Requires `query.breach`.'
       )
       .meta({ id: 'alerting_rule_recovery_condition' }),
     z
       .object({
         strategy: z.literal(recoveryStrategy.query),
-        query: esqlQuerySchema.describe('Full ES|QL query for recovery detection.'),
+        query: esqlQuerySchema.describe(
+          'Independent ES|QL query, including its own `FROM` clause. A matching group recovers the alert episode.'
+        ),
       })
       .strict()
-      .describe('Recovers a group when this independent query returns it.')
+      .describe('Recovers the alert episode when this separate query returns the group.')
       .meta({ id: 'alerting_rule_recovery_query' }),
     z
       .object({ strategy: z.literal(recoveryStrategy.manual) })
       .strict()
-      .describe('Never recovers automatically. Only user actions close the episode.')
+      .describe(
+        'Does not recover automatically. Close the alert episode with a user action. `state_transition.recovering` has no effect.'
+      )
       .meta({ id: 'alerting_rule_recovery_manual' }),
   ])
   .describe(
-    'How an alert recovers. Required when `kind` is `alert`, and not allowed when `kind` is `signal`.'
+    'When an alert episode recovers. Required when `kind` is `alert`. Not allowed when `kind` is `signal`.'
   )
   .meta({ id: 'alerting_rule_recovery' });
 
@@ -225,7 +233,7 @@ export const noDataStrategy = noDataStrategySchema.enum;
 export type NoDataStrategy = z.infer<typeof noDataStrategySchema>;
 
 const NO_DATA_PRESENCE_QUERY_DESCRIPTION =
-  'Presence query. When omitted, `query.base` decides whether a group has data.';
+  'Optional ES|QL query that checks whether a group has data. If omitted, `query.base` is used.';
 
 /**
  * A no-data mode that classifies absence, and therefore may carry a presence
@@ -249,23 +257,25 @@ export const noDataSchema = z
     z
       .object({ strategy: z.literal(noDataStrategy.ignore) })
       .strict()
-      .describe('Never checks for presence. Runs where a group is absent are not classified.')
+      .describe(
+        'Does not check whether a group still has data. Missing groups do not produce `no_data` events.'
+      )
       .meta({ id: 'alerting_rule_no_data_ignore' }),
     classifyingNoDataSchema(
       noDataStrategy.keep_last,
-      "Keeps the episode's previous status when the rule finds no data."
+      "Holds the alert episode's current status when the rule finds no data."
     ),
     classifyingNoDataSchema(
       noDataStrategy.resolve,
-      'Marks the episode `inactive` the first time the rule finds no data.'
+      'Closes the alert episode the first time the rule finds no data for a group.'
     ),
     classifyingNoDataSchema(
       noDataStrategy.alert,
-      'Marks the episode `active` when the rule finds no data.'
+      'Opens an alert episode when the rule finds no data for a group.'
     ),
   ])
   .describe(
-    'What the rule does when it finds no data for a group. Required when `kind` is `alert`, and not allowed when `kind` is `signal`.'
+    'What the rule does when a group has no data. Required when `kind` is `alert`. Not allowed when `kind` is `signal`.'
   )
   .meta({ id: 'alerting_rule_no_data' });
 
@@ -365,7 +375,7 @@ const stateTransitionPhaseSchema = ({
       operator: stateTransitionOperatorSchema
         .optional()
         .describe(
-          'The operator that combines `count` and `timeframe`. `AND` requires both, `OR` requires either. Only allowed when both are set.'
+          'When both `count` and `timeframe` are set, `AND` requires both and `OR` requires either. Allowed only when both fields are present.'
         ),
     })
     .strict()
@@ -385,24 +395,28 @@ export const stateTransitionSchema = z
   .object({
     pending: stateTransitionPhaseSchema({
       countDescription:
-        'Number of consecutive matches required before the alert becomes `active`. `0` skips the `pending` phase.',
-      timeframeDescription: 'Time window used with `count`, for example `5m` or `15m`.',
+        'Consecutive matches required before the alert episode becomes `active`. Set to `0` to open it on the first match.',
+      timeframeDescription:
+        'Duration the condition must hold, for example `5m`. Combine with `count` using `operator`.',
       metaId: 'alerting_rule_state_transition_pending',
     })
       .optional()
-      .describe('Gating for the `breached` → `active` transition.'),
+      .describe('Delay before a match opens an alert episode.'),
     recovering: stateTransitionPhaseSchema({
       countDescription:
-        'Number of consecutive recoveries required before the alert becomes `inactive`. `0` skips the `recovering` phase.',
-      timeframeDescription: 'Time window used with `count`, for example `5m` or `15m`.',
+        'Consecutive recoveries required before the alert episode becomes `inactive`. Set to `0` to close it on the first recovery.',
+      timeframeDescription:
+        'Duration the condition must hold, for example `5m`. Combine with `count` using `operator`.',
       metaId: 'alerting_rule_state_transition_recovering',
     })
       .optional()
-      .describe('Gating for the `recovered` → `inactive` transition.'),
+      .describe(
+        'Delay before a recovered match closes the alert episode. Has no effect when `recovery.strategy` is `manual`.'
+      ),
   })
   .strict()
   .describe(
-    'Consecutive-match or time requirements before an alert becomes `active` or `inactive`. Applies only when `kind` is `alert`.'
+    'Specifies how many consecutive matches, or how long a condition must hold, before an alert episode becomes `active` or `inactive`. Allowed only when `kind` is `alert`.'
   )
   .meta({ id: 'alerting_rule_state_transition' });
 
@@ -486,8 +500,7 @@ const artifactsSchema = z
 /** Create rule API schema */
 
 const TIME_FIELD_DESCRIPTION =
-  'Document field used as the event time when applying the lookback window.';
-const TIME_FIELD_CREATE_DESCRIPTION = `${TIME_FIELD_DESCRIPTION} Defaults to \`@timestamp\`.`;
+  'Document field Kibana uses with `schedule.lookback` to time-filter `query.base`.';
 const TIME_FIELD_UPDATE_DESCRIPTION = `${TIME_FIELD_DESCRIPTION} If omitted, the existing value is kept.`;
 
 /**
@@ -504,7 +517,7 @@ export const createRuleDataBaseSchema = z
       .min(1)
       .max(128)
       .default(DEFAULT_TIME_FIELD)
-      .describe(TIME_FIELD_CREATE_DESCRIPTION),
+      .describe(TIME_FIELD_DESCRIPTION),
     schedule: scheduleSchema,
     query: querySchema,
     recovery: recoverySchema.optional(),

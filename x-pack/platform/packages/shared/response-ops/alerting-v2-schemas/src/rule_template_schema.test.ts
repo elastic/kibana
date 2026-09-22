@@ -259,10 +259,10 @@ describe('rule template create-rule schema coupling', () => {
             },
             "alerting_rule_breach": Object {
               "additionalProperties": false,
-              "description": "Breach condition appended to \`base\`. Omit to treat every row returned by \`base\` as a breach.",
+              "description": "Optional ES|QL clause appended to \`query.base\`. If omitted, every row from \`query.base\` is a match.",
               "properties": Object {
                 "segment": Object {
-                  "description": "A clause appended to \`query.base\`, for example \`WHERE avg_cpu > 0.85\`.",
+                  "description": "ES|QL clause appended to \`query.base\`, for example \`WHERE avg_cpu > 0.85\`. Don't include a \`FROM\` clause.",
                   "maxLength": 10000,
                   "minLength": 1,
                   "type": "string",
@@ -336,7 +336,7 @@ describe('rule template create-rule schema coupling', () => {
               "type": "object",
             },
             "alerting_rule_no_data": Object {
-              "description": "What the rule does when it finds no data for a group. Required when \`kind\` is \`alert\`, and not allowed when \`kind\` is \`signal\`.",
+              "description": "What the rule does when a group has no data. Required when \`kind\` is \`alert\`. Not allowed when \`kind\` is \`signal\`.",
               "oneOf": Array [
                 Object {
                   "$ref": "#/definitions/alerting_rule_no_data_ignore",
@@ -354,10 +354,10 @@ describe('rule template create-rule schema coupling', () => {
             },
             "alerting_rule_no_data_alert": Object {
               "additionalProperties": false,
-              "description": "Marks the episode \`active\` when the rule finds no data.",
+              "description": "Opens an alert episode when the rule finds no data for a group.",
               "properties": Object {
                 "query": Object {
-                  "description": "Presence query. When omitted, \`query.base\` decides whether a group has data.",
+                  "description": "Optional ES|QL query that checks whether a group has data. If omitted, \`query.base\` is used.",
                   "maxLength": 10000,
                   "minLength": 1,
                   "type": "string",
@@ -374,7 +374,7 @@ describe('rule template create-rule schema coupling', () => {
             },
             "alerting_rule_no_data_ignore": Object {
               "additionalProperties": false,
-              "description": "Never checks for presence. Runs where a group is absent are not classified.",
+              "description": "Does not check whether a group still has data. Missing groups do not produce \`no_data\` events.",
               "properties": Object {
                 "strategy": Object {
                   "const": "ignore",
@@ -388,10 +388,10 @@ describe('rule template create-rule schema coupling', () => {
             },
             "alerting_rule_no_data_keep_last": Object {
               "additionalProperties": false,
-              "description": "Keeps the episode's previous status when the rule finds no data.",
+              "description": "Holds the alert episode's current status when the rule finds no data.",
               "properties": Object {
                 "query": Object {
-                  "description": "Presence query. When omitted, \`query.base\` decides whether a group has data.",
+                  "description": "Optional ES|QL query that checks whether a group has data. If omitted, \`query.base\` is used.",
                   "maxLength": 10000,
                   "minLength": 1,
                   "type": "string",
@@ -408,10 +408,10 @@ describe('rule template create-rule schema coupling', () => {
             },
             "alerting_rule_no_data_resolve": Object {
               "additionalProperties": false,
-              "description": "Marks the episode \`inactive\` the first time the rule finds no data.",
+              "description": "Closes the alert episode the first time the rule finds no data for a group.",
               "properties": Object {
                 "query": Object {
-                  "description": "Presence query. When omitted, \`query.base\` decides whether a group has data.",
+                  "description": "Optional ES|QL query that checks whether a group has data. If omitted, \`query.base\` is used.",
                   "maxLength": 10000,
                   "minLength": 1,
                   "type": "string",
@@ -428,10 +428,10 @@ describe('rule template create-rule schema coupling', () => {
             },
             "alerting_rule_query": Object {
               "additionalProperties": false,
-              "description": "Detection query configuration.",
+              "description": "ES|QL query the rule evaluates. \`base\` is required. \`breach\` is an optional clause appended to it.",
               "properties": Object {
                 "base": Object {
-                  "description": "The detection query, and the only place a \`FROM\` lives. Time filters are applied automatically via the lookback window.",
+                  "description": "ES|QL query that specifies the data to evaluate. Must include a \`FROM\` clause. Kibana applies the time filter from \`schedule.lookback\` using \`time_field\`.",
                   "maxLength": 10000,
                   "minLength": 1,
                   "type": "string",
@@ -450,7 +450,7 @@ describe('rule template create-rule schema coupling', () => {
               "type": "object",
             },
             "alerting_rule_recovery": Object {
-              "description": "How an alert recovers. Required when \`kind\` is \`alert\`, and not allowed when \`kind\` is \`signal\`.",
+              "description": "When an alert episode recovers. Required when \`kind\` is \`alert\`. Not allowed when \`kind\` is \`signal\`.",
               "oneOf": Array [
                 Object {
                   "$ref": "#/definitions/alerting_rule_recovery_no_breach",
@@ -468,10 +468,10 @@ describe('rule template create-rule schema coupling', () => {
             },
             "alerting_rule_recovery_condition": Object {
               "additionalProperties": false,
-              "description": "Recovers a group when \`query.base\` plus this segment returns it. Requires \`query.breach\`.",
+              "description": "Recovers the alert episode when \`query.base\` plus \`segment\` returns the group. Requires \`query.breach\`.",
               "properties": Object {
                 "segment": Object {
-                  "description": "A clause appended to \`query.base\`, for example \`WHERE avg_cpu < 0.60\`.",
+                  "description": "ES|QL clause appended to \`query.base\`, for example \`WHERE avg_cpu < 0.60\`. Don't include a \`FROM\` clause.",
                   "maxLength": 10000,
                   "minLength": 1,
                   "type": "string",
@@ -489,7 +489,7 @@ describe('rule template create-rule schema coupling', () => {
             },
             "alerting_rule_recovery_manual": Object {
               "additionalProperties": false,
-              "description": "Never recovers automatically. Only user actions close the episode.",
+              "description": "Does not recover automatically. Close the alert episode with a user action. \`state_transition.recovering\` has no effect.",
               "properties": Object {
                 "strategy": Object {
                   "const": "manual",
@@ -503,7 +503,7 @@ describe('rule template create-rule schema coupling', () => {
             },
             "alerting_rule_recovery_no_breach": Object {
               "additionalProperties": false,
-              "description": "Recovers a group when it stops appearing in the breach results.",
+              "description": "Recovers the alert episode when its group no longer appears in the breach results.",
               "properties": Object {
                 "strategy": Object {
                   "const": "no_breach",
@@ -517,10 +517,10 @@ describe('rule template create-rule schema coupling', () => {
             },
             "alerting_rule_recovery_query": Object {
               "additionalProperties": false,
-              "description": "Recovers a group when this independent query returns it.",
+              "description": "Recovers the alert episode when this separate query returns the group.",
               "properties": Object {
                 "query": Object {
-                  "description": "Full ES|QL query for recovery detection.",
+                  "description": "Independent ES|QL query, including its own \`FROM\` clause. A matching group recovers the alert episode.",
                   "maxLength": 10000,
                   "minLength": 1,
                   "type": "string",
@@ -558,7 +558,7 @@ describe('rule template create-rule schema coupling', () => {
             },
             "alerting_rule_state_transition": Object {
               "additionalProperties": false,
-              "description": "Consecutive-match or time requirements before an alert becomes \`active\` or \`inactive\`. Applies only when \`kind\` is \`alert\`.",
+              "description": "Specifies how many consecutive matches, or how long a condition must hold, before an alert episode becomes \`active\` or \`inactive\`. Allowed only when \`kind\` is \`alert\`.",
               "properties": Object {
                 "pending": Object {
                   "allOf": Array [
@@ -566,7 +566,7 @@ describe('rule template create-rule schema coupling', () => {
                       "$ref": "#/definitions/alerting_rule_state_transition_pending",
                     },
                   ],
-                  "description": "Gating for the \`breached\` → \`active\` transition.",
+                  "description": "Delay before a match opens an alert episode.",
                 },
                 "recovering": Object {
                   "allOf": Array [
@@ -574,7 +574,7 @@ describe('rule template create-rule schema coupling', () => {
                       "$ref": "#/definitions/alerting_rule_state_transition_recovering",
                     },
                   ],
-                  "description": "Gating for the \`recovered\` → \`inactive\` transition.",
+                  "description": "Delay before a recovered match closes the alert episode. Has no effect when \`recovery.strategy\` is \`manual\`.",
                 },
               },
               "type": "object",
@@ -583,13 +583,13 @@ describe('rule template create-rule schema coupling', () => {
               "additionalProperties": false,
               "properties": Object {
                 "count": Object {
-                  "description": "Number of consecutive matches required before the alert becomes \`active\`. \`0\` skips the \`pending\` phase.",
+                  "description": "Consecutive matches required before the alert episode becomes \`active\`. Set to \`0\` to open it on the first match.",
                   "maximum": 1000,
                   "minimum": 0,
                   "type": "integer",
                 },
                 "operator": Object {
-                  "description": "The operator that combines \`count\` and \`timeframe\`. \`AND\` requires both, \`OR\` requires either. Only allowed when both are set.",
+                  "description": "When both \`count\` and \`timeframe\` are set, \`AND\` requires both and \`OR\` requires either. Allowed only when both fields are present.",
                   "enum": Array [
                     "AND",
                     "OR",
@@ -597,7 +597,7 @@ describe('rule template create-rule schema coupling', () => {
                   "type": "string",
                 },
                 "timeframe": Object {
-                  "description": "Time window used with \`count\`, for example \`5m\` or \`15m\`.",
+                  "description": "Duration the condition must hold, for example \`5m\`. Combine with \`count\` using \`operator\`.",
                   "maxLength": 32,
                   "type": "string",
                 },
@@ -608,13 +608,13 @@ describe('rule template create-rule schema coupling', () => {
               "additionalProperties": false,
               "properties": Object {
                 "count": Object {
-                  "description": "Number of consecutive recoveries required before the alert becomes \`inactive\`. \`0\` skips the \`recovering\` phase.",
+                  "description": "Consecutive recoveries required before the alert episode becomes \`inactive\`. Set to \`0\` to close it on the first recovery.",
                   "maximum": 1000,
                   "minimum": 0,
                   "type": "integer",
                 },
                 "operator": Object {
-                  "description": "The operator that combines \`count\` and \`timeframe\`. \`AND\` requires both, \`OR\` requires either. Only allowed when both are set.",
+                  "description": "When both \`count\` and \`timeframe\` are set, \`AND\` requires both and \`OR\` requires either. Allowed only when both fields are present.",
                   "enum": Array [
                     "AND",
                     "OR",
@@ -622,7 +622,7 @@ describe('rule template create-rule schema coupling', () => {
                   "type": "string",
                 },
                 "timeframe": Object {
-                  "description": "Time window used with \`count\`, for example \`5m\` or \`15m\`.",
+                  "description": "Duration the condition must hold, for example \`5m\`. Combine with \`count\` using \`operator\`.",
                   "maxLength": 32,
                   "type": "string",
                 },
@@ -700,7 +700,7 @@ describe('rule template create-rule schema coupling', () => {
             },
             "time_field": Object {
               "default": "@timestamp",
-              "description": "Document field used as the event time when applying the lookback window. Defaults to \`@timestamp\`.",
+              "description": "Document field Kibana uses with \`schedule.lookback\` to time-filter \`query.base\`.",
               "maxLength": 128,
               "minLength": 1,
               "type": "string",

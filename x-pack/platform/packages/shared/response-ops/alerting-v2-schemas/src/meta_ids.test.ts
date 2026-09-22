@@ -204,7 +204,9 @@ describe('alerting v2 OAS component ids', () => {
     // querySchema is defined as `.describe(...).meta({ id })`; the description must survive
     // the merge so the generated OAS component keeps its documentation.
     const meta = getMeta(querySchema);
-    expect(meta.description).toBe('Detection query configuration.');
+    expect(meta.description).toBe(
+      'ES|QL query the rule evaluates. `base` is required. `breach` is an optional clause appended to it.'
+    );
     expect(meta.id).toBe('alerting_rule_query');
   });
 
