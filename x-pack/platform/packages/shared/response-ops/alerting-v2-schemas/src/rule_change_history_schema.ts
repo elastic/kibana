@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { queryIntSchema } from './common';
+import { ESTIMATED_COUNT_NOTE, queryIntSchema } from './common';
 import {
   ID_MAX_LENGTH,
   RULE_CHANGE_HISTORY_DEFAULT_PER_PAGE,
@@ -89,7 +89,11 @@ export type RuleChangeHistoryListItem = z.infer<typeof ruleChangeHistoryListItem
 
 export const listRuleChangeHistoryResponseSchema = z.object({
   items: z.array(ruleChangeHistoryListItemSchema),
-  total: z.number().int().nonnegative(),
+  total: z
+    .number()
+    .int()
+    .nonnegative()
+    .describe(`The number of change events matching the query. ${ESTIMATED_COUNT_NOTE}`),
 });
 export type ListRuleChangeHistoryResponse = z.infer<typeof listRuleChangeHistoryResponseSchema>;
 

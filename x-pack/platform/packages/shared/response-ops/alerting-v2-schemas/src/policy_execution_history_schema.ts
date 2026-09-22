@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { arrayOrSingleSchema, queryIntSchema } from './common';
+import { arrayOrSingleSchema, ESTIMATED_COUNT_NOTE, queryIntSchema } from './common';
 import {
   ID_MAX_LENGTH,
   MAX_SEARCH_LENGTH,
@@ -159,8 +159,8 @@ export const policyExecutionHistoryItemSchema = z
 export type PolicyExecutionHistoryItem = z.infer<typeof policyExecutionHistoryItemSchema>;
 
 export const searchMatchCountsSchema = z.object({
-  policies: z.number().describe('Total policies matching the search.'),
-  rules: z.number().describe('Total rules matching the search.'),
+  policies: z.number().describe(`Policies matching the search. ${ESTIMATED_COUNT_NOTE}`),
+  rules: z.number().describe(`Rules matching the search. ${ESTIMATED_COUNT_NOTE}`),
   cap: z.number().describe('Maximum number of policy/rule ids the server uses as a filter.'),
 });
 export type SearchMatchCounts = z.infer<typeof searchMatchCountsSchema>;
@@ -171,7 +171,11 @@ export const listPolicyExecutionHistoryResponseSchema = z
     page: z.number().int().min(1),
     // Allows 0 for count-only reads (per_page=0), unlike the rule executions response.
     per_page: z.number().int().min(0),
-    total: z.number().int().nonnegative(),
+    total: z
+      .number()
+      .int()
+      .nonnegative()
+      .describe(`The number of action policy events matching the query. ${ESTIMATED_COUNT_NOTE}`),
     search_matches: searchMatchCountsSchema
       .nullable()
       .describe(

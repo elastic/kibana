@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { arrayOrSingleSchema, queryIntSchema } from './common';
+import { arrayOrSingleSchema, ESTIMATED_COUNT_NOTE, queryIntSchema } from './common';
 import {
   ID_MAX_LENGTH,
   EXECUTION_HISTORY_MAX_PER_PAGE,
@@ -110,7 +110,11 @@ export type RuleExecutionView = z.infer<typeof ruleExecutionViewSchema>;
 export const listRuleExecutionsResponseSchema = z
   .object({
     items: z.array(ruleExecutionViewSchema),
-    total: z.number().int().nonnegative(),
+    total: z
+      .number()
+      .int()
+      .nonnegative()
+      .describe(`The number of rule executions matching the query. ${ESTIMATED_COUNT_NOTE}`),
     page: z.number().int().min(1),
     per_page: z.number().int().min(1),
   })

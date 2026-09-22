@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { durationSchema } from './common';
+import { durationSchema, ESTIMATED_COUNT_NOTE } from './common';
 import {
   groupingModeSchema,
   actionPolicyDestinationSchema,
@@ -68,7 +68,9 @@ export type ActionPolicyResponse = z.infer<typeof actionPolicyResponseSchema>;
 export const findActionPoliciesResponseSchema = z
   .object({
     items: z.array(actionPolicyResponseSchema).describe('The list of action policies.'),
-    total: z.number().describe('The total number of action policies matching the query.'),
+    total: z
+      .number()
+      .describe(`The number of action policies matching the query. ${ESTIMATED_COUNT_NOTE}`),
     page: z.number().describe('The current page number.'),
     per_page: z.number().describe('The number of action policies per page.'),
   })

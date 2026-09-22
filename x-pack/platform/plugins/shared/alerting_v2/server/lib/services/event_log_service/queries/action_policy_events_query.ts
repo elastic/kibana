@@ -95,8 +95,8 @@ export const buildFindActionPolicyEventsQuery = (
  * Authorization is intentionally *not* enforced at this layer. The route
  * privilege (`executionHistory.read`) is the sole gate; see spec §6.4.
  *
- * `track_total_hits: true` is set so callers see precise counts (the list
- * `total` and the "new events since" badge depend on exact totals).
+ * `track_total_hits: true` is set for the "new events since" badge, which counts
+ * unseen events and would visibly saturate at the default 10,000.
  */
 const buildBaseActionPolicyEventsQuery = (
   params: BuildActionPolicyEventsQueryParams

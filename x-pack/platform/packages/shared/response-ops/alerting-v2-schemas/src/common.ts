@@ -32,6 +32,13 @@ const durationSchema = z
  */
 const tagsSchema = z.array(z.string().min(1).max(MAX_TAG_LENGTH)).max(MAX_TAGS);
 
+/**
+ * Caveat appended to every count in a list response: Elasticsearch stops counting hits at
+ * 10,000 unless the read opts into an exact count, and no read promises to keep doing so.
+ */
+const ESTIMATED_COUNT_NOTE =
+  'This count is an estimate: results above 10,000 may be reported as 10,000.';
+
 /** Response shape of the tag endpoints: the unique tags, wrapped in an object. */
 export const tagsResponseSchema = z
   .object({
@@ -83,4 +90,11 @@ const queryIntSchema = ({ min, max }: { min: number; max: number }) =>
     z.number().int().min(min).max(max)
   );
 
-export { durationSchema, tagsSchema, optionalWithDescription, arrayOrSingleSchema, queryIntSchema };
+export {
+  durationSchema,
+  tagsSchema,
+  optionalWithDescription,
+  arrayOrSingleSchema,
+  queryIntSchema,
+  ESTIMATED_COUNT_NOTE,
+};

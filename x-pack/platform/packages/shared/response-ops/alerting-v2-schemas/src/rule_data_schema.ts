@@ -13,7 +13,13 @@ import {
   composeEsqlQuery,
   validateComposedEsqlQuery,
 } from './validation';
-import { durationSchema, queryIntSchema, tagsResponseSchema, tagsSchema } from './common';
+import {
+  durationSchema,
+  ESTIMATED_COUNT_NOTE,
+  queryIntSchema,
+  tagsResponseSchema,
+  tagsSchema,
+} from './common';
 import {
   MAX_CONSECUTIVE_BREACHES,
   MAX_DESCRIPTION_LENGTH,
@@ -817,7 +823,7 @@ export type FindRulesRequest = z.infer<typeof findRulesRequestSchema>;
 export const findRulesResponseSchema = z
   .object({
     items: z.array(ruleResponseSchema).describe('The list of rules.'),
-    total: z.number().describe('The total number of rules matching the query.'),
+    total: z.number().describe(`The number of rules matching the query. ${ESTIMATED_COUNT_NOTE}`),
     page: z.number().describe('The current page number.'),
     per_page: z.number().describe('The number of rules per page.'),
   })
