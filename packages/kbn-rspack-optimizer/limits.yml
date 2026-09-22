@@ -66,7 +66,7 @@ pageLoadAssetSize:
   embeddableAlertsTable: 1536
   enterpriseSearch: 28188
   entityStore: 2252
-  esql: 306
+  esql: 341
   esqlDataGrid: 215
   esqlViews: 1205
   esUiShared: 2284
@@ -206,7 +206,7 @@ pageLoadAssetSize:
   stackConnectors: 63548
   streams: 4563
   streamsApp: 55882
-  synthetics: 18443
+  synthetics: 20839
   telemetry: 20586
   telemetryManagementSection: 1738
   timelines: 1409
