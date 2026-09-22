@@ -34,13 +34,17 @@ paths:
                     conclusion dedupe key off. The route mints one only when the
                     caller has no sweep to tie the run to.
                 technology:
-                  $ref: '../components/hunt.schema.yaml#/components/schemas/HuntTechnology'
+                  type: string
+                  maxLength: 64
                   nullable: true
                   description: >-
-                    Pins the hunt to one technology's index scope. Omit it (or send
-                    null, which is what a workflow template renders for an unset
-                    input) and the coordinator resolves every known technology and
-                    hunts the ones whose required indices exist in the space.
+                    One of the HuntTechnology values to pin the hunt to that
+                    technology's index scope. Omit it, or send null or an empty
+                    string (a workflow renders an unset input as ""), and the
+                    coordinator resolves every known technology and hunts the ones
+                    whose required indices exist in the space. Any other value is a
+                    400. Kept a plain string because a workflow caller cannot omit
+                    the key.
                 text:
                   type: string
                   maxLength: 200000
