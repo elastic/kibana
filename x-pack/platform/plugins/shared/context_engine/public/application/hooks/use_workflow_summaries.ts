@@ -16,8 +16,8 @@ export interface WorkflowSummary {
 }
 
 const is403 = (error: unknown): boolean => {
-  if (error instanceof Error && 'statusCode' in error) {
-    return (error as Error & { statusCode: number }).statusCode === 403;
+  if (error instanceof Error && 'response' in error) {
+    return (error as Error & { response?: Response }).response?.status === 403;
   }
   return false;
 };
