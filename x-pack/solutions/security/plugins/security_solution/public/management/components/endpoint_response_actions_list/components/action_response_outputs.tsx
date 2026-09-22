@@ -71,6 +71,7 @@ export const ActionResponseOutputs = memo<ActionResponseOutputsProps>(
               wasSuccessful: action.wasSuccessful,
               isCompleted: action.isCompleted,
               completedAt: action.completedAt,
+              wasCanceled: action.wasCanceled,
             };
             const hostStatusMessage = !isCompleted
               ? OUTPUT_MESSAGES.isPending(consoleCommandName)
