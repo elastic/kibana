@@ -636,8 +636,6 @@ async function installPackageWithStateMachine(options: {
     packageInstallContext,
     retryFromLastState,
     useStreaming,
-    keepFailedInstallation,
-    automaticInstall,
     installedAsDependencyOf,
     skipDependencyCheck,
     authorizedSpaces,
