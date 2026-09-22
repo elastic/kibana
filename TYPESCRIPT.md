@@ -99,7 +99,7 @@ export { metadata };
 
 1. See if types exist for this module and can be installed, by doing something like:
 
-`pnpm add -D @types/markdown-it@8.4.1`
+`pnpm add -Dw @types/markdown-it@8.4.1`
 
 Use the version number that we have installed in package.json. This may not always work, and you might get something like:
 

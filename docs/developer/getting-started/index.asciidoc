@@ -38,7 +38,13 @@ you can switch to the correct version when using nvm by running:
 nvm use
 ----
 
-Install the latest version of https://classic.yarnpkg.com/en/docs/install[yarn v1].
+Enable pnpm via corepack (bundled with Node.js) and activate the version pinned in `package.json` `engines.pnpm`:
+
+[source,bash]
+----
+corepack enable
+corepack prepare pnpm@11.27.0 --activate
+----
 
 Bootstrap {kib} and install all the dependencies:
 
@@ -87,11 +93,11 @@ a consistent state when problems arise. If you need to run this command often, c
 this form to provide feedback: https://ela.st/yarn-kbn-clean
 
 If you have failures during `pnpm kbn bootstrap` you may have some
-corrupted packages in your yarn cache which you can clean with:
+corrupted packages in your pnpm store which you can clean with:
 
 [source,bash]
 ----
-yarn cache clean
+pnpm store prune
 ----
 
 [discrete]

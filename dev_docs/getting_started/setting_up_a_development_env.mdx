@@ -33,6 +33,13 @@ Install the version of Node.js listed in the `.node-version` file. This can be a
 nvm use
 ```
 
+Then enable pnpm via corepack (bundled with Node.js) and activate the version pinned in `package.json` `engines.pnpm`:
+
+```sh
+corepack enable
+corepack prepare pnpm@11.27.0 --activate
+```
+
 Finally, bootstrap Kibana and install all of the remaining dependencies:
 
 ```sh
