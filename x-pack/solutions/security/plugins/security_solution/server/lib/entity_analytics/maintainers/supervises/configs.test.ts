@@ -443,5 +443,23 @@ describe('workday (log-inverted) supervises config', () => {
       const config = getWorkdayConfig('2026-09-01T00:00:00.000Z');
       expect(config.esqlQueryOverride('default')).not.toContain('2026-09-01T00:00:00.000Z');
     });
+
+    it('resets its relationships before each run', () => {
+      // Workday re-emits the full inventory every poll, so a manager change must
+      // remove the previous edge. The engine cannot retract, so the config clears
+      // and repopulates instead.
+      expect(getWorkdayConfig().resetRelationshipsBeforeRun).toEqual({
+        entitySource: 'workday',
+      });
+    });
+
+    it('leaves the IDP configs additive', () => {
+      // Okta and Entra read raw_identifiers off the entity index, which is already
+      // current-state; they have no stale-edge problem to solve and must not be
+      // cleared.
+      for (const config of buildSupervisesConfigs().filter((c) => c.id !== 'workday')) {
+        expect(config.resetRelationshipsBeforeRun).toBeUndefined();
+      }
+    });
   });
 });

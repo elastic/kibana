@@ -105,6 +105,7 @@ function buildSupervisesEsqlQuery(
 const WORKDAY_MANAGER_EMAIL_FIELD = 'workday.user.Manager_Email';
 const WORKDAY_MANAGER_ID_FIELD = 'workday.user.Manager_ID';
 const WORKDAY_NAMESPACE = 'workday';
+const WORKDAY_ENTITY_SOURCE = 'workday';
 /**
  * Step 2 row cap for the Workday config.
  *
@@ -260,6 +261,11 @@ function buildWorkdaySupervisesConfig(
     // recently-hired workers. Replaced by the event.ingested window below.
     disableLookbackWindow: true,
     validateTargetIds: true,
+    // Workday re-emits the complete inventory each poll, so absence from the
+    // newest snapshot means the relationship ended. The engine cannot retract
+    // (#292358), so clear this source's supervises edges and repopulate from
+    // the current scan instead.
+    resetRelationshipsBeforeRun: { entitySource: WORKDAY_ENTITY_SOURCE },
     compositeAggAdditionalFilters: [
       // Duplicates the actor-presence filter that `buildActorDiscoveryQuery` already
       // derives from `customActor.fields` (exists AND != "" per field, minimum_should_match 1).
