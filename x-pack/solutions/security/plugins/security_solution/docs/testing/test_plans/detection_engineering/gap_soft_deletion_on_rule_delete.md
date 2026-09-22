@@ -218,10 +218,11 @@ And the malformed documents are left untouched rather than failing the update_by
 **Automation**: 6 unit tests.
 
 ```Gherkin
-Given a caller passes a field that is not a dot-delimited path of [a-zA-Z0-9_] segments
+Given a caller passes a field that is not in the allowed list
 When softDeleteByQuery is called
 Then it throws before issuing any request to Elasticsearch
 ```
 
-> The field is interpolated into Painless source, so the guard exists to make script
-> injection through this platform contract impossible.
+> The field is interpolated into Painless source, so the schema uses an explicit
+> allowlist (`schema.oneOf([schema.literal(...)])`) rather than a regex pattern.
+> New soft-delete fields require adding a new literal to the allowlist.
