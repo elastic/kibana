@@ -22,6 +22,8 @@ import { CssLang, CSS_LANG_ID } from './css';
 import { HJsonLang, HJSON_LANG_ID } from './hjson';
 import { PromQLLang, PROMQL_LANG_ID } from './promql';
 
+export { createInterruptibleLanguageProvider } from '../helpers';
+
 // export all language ids
 export {
   XJSON_LANG_ID,
