@@ -65,12 +65,12 @@ oasdiff detects these as breaking:
 
 ### Rule policy
 
-oasdiff decides what changed. `src/diff/rule_policy.ts` decides what that means for Kibana, so the call is declared once instead of being re-argued per PR. Every entry carries a reason, and that reason is rendered with the change.
+oasdiff decides what changed. `src/diff/rule_policy.ts` decides what that means for Kibana, so the call is declared once instead of being re-argued per PR. Every entry carries a reason. A report-only reason is rendered with the change in the CI log and the PR comment. Blocking reasons are the ones in the table below.
 
 Two dispositions:
 
 - **`blocking`** — a warning-level oasdiff rule treated as a breaking change. These are the ⚠️ rows above.
-- **`report_only`** — an error-level oasdiff rule that stays in the report but does not gate the check.
+- **`report_only`** — stays in the report and does not gate the check, whatever level oasdiff assigned. The rows below are error-level today.
 
 Rules that are not in the table keep oasdiff's own level: error gates, warning is dropped.
 
@@ -154,7 +154,7 @@ Tier and rule policy are independent. A stable-tier change still doesn't gate wh
 
 ### CI notifications
 
-CI posts (or updates) a PR comment whenever there is anything to report, **regardless of whether the check fails** (the check can exit 0 with nothing gating, e.g. when every gating break is allowlisted or only experimental changes were found). The comment groups changes by stability tier, with experimental changes in a clearly labeled **non-blocking** section. When there is nothing to report, no comment is posted.
+CI posts (or updates) a PR comment whenever there is anything to report, **regardless of whether the check fails** (the check can exit 0 with nothing gating, e.g. when every gating break is allowlisted, only experimental changes were found, or only report-only rules matched). The comment groups gating changes by stability tier. Experimental changes and report-only rules each appear in their own non-blocking section. When there is nothing to report, no comment is posted.
 
 ## Usage
 
