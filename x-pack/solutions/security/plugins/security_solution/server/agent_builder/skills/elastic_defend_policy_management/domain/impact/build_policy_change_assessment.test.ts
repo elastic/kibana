@@ -32,11 +32,15 @@ const capabilities = (
   serverless: false,
 });
 
-const createPolicy = (storedConfig: PolicyConfig) => {
+const createPolicy = (
+  storedConfig: PolicyConfig,
+  overrides: Parameters<FleetPackagePolicyGenerator['generateEndpointPackagePolicy']>[0] = {}
+) => {
   const packagePolicy = generator.generateEndpointPackagePolicy({
     id: 'policy-1',
     name: 'Endpoint Policy',
     version: 'WzEsMV0=',
+    ...overrides,
   });
   const policyEntry = packagePolicy.inputs[0]?.config?.policy;
   if (policyEntry == null) {
@@ -135,5 +139,16 @@ describe('buildPolicyChangeAssessment', () => {
     expect(assessment.globalBlockers).toEqual([
       { reason: 'device_control_notification_requires_deny_all' },
     ]);
+  });
+
+  it('adds one global blocker when the source package policy is managed', () => {
+    const assessment = buildPolicyChangeAssessment(
+      createPolicy(policyFactory(), { is_managed: true }),
+      [{ op: 'set_field', path: 'windows.malware.mode', value: ProtectionModes.detect }],
+      capabilities()
+    );
+
+    expect(assessment.changes[0]?.eligibility).toEqual({ eligible: true });
+    expect(assessment.globalBlockers).toEqual([{ reason: 'managed_policy_not_writable' }]);
   });
 });

@@ -1663,6 +1663,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     this.keepPolicyIdInSync(packagePolicyUpdate);
     await preflightCheckPackagePolicy(soClient, packagePolicyUpdate);
 
+    const { version } = packagePolicyUpdate;
     let enrichedPackagePolicy: UpdatePackagePolicy;
     let secretReferences: SecretReference[] | undefined;
     let secretsToDelete: SecretReference[] | undefined;
@@ -1732,7 +1733,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     // spaceIds is a runtime field; strip it so it cannot leak into SO attributes
     const {
-      version,
+      version: _version,
       id: _id,
       spaceIds: _spaceIds,
       ...restOfPackagePolicyInit

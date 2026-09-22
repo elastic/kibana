@@ -69,17 +69,19 @@ const wrapReadonly = (soClient: SavedObjectsClientContract): SavedObjectsClientC
     },
   });
 
-export const createRequestScopedReadonlySoClient = async ({
+export const createRequestScopedSoClient = async ({
   getStartServices,
   request,
+  readonly,
 }: {
   getStartServices: StartServicesAccessor;
   request: KibanaRequest;
+  readonly: boolean;
 }): Promise<SavedObjectsClientContract> => {
   const [coreStart] = await getStartServices();
   const soClient = coreStart.savedObjects.getScopedClient(request, {
     excludedExtensions: [SECURITY_EXTENSION_ID],
   });
 
-  return wrapReadonly(soClient);
+  return readonly ? wrapReadonly(soClient) : soClient;
 };

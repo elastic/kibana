@@ -9,16 +9,21 @@ import { escapeQuotes } from '@kbn/es-query';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { FLEET_ENDPOINT_PACKAGE, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { PolicyConfig } from '../../../../../common/endpoint/types';
+import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
 import {
   createEndpointPolicySnapshot,
   type EndpointPolicyIdentity,
 } from '../domain/endpoint_policy_snapshot';
 import {
   normalizeEndpointPolicy,
+  type EndpointPolicyBaseline,
+  type EndpointPolicyBaselinePreset,
   type NormalizedEndpointPolicy,
 } from '../domain/normalized_endpoint_policy';
+import type { PolicyRef } from '../domain/input_schemas';
 import type { NormalizedPolicyConfig } from '../domain/normalized_policy_config';
 import type { PolicyAccessContext } from './access_context';
+import { readPolicyBaseline } from './read_policy_baseline';
 import {
   InvalidEndpointPolicyError,
   PolicyAmbiguousNameError,
@@ -32,11 +37,14 @@ const NAME_LOOKUP_PER_PAGE = 11;
 export type PolicyIdentity = EndpointPolicyIdentity;
 
 export type EndpointPolicyRead = Readonly<{
+  kind: 'policy';
   policy: PolicyIdentity;
   storedConfig: PolicyConfig;
   normalizedConfig: NormalizedPolicyConfig;
   normalizedHash: string;
 }>;
+
+export type EndpointPolicyComparisonSide = EndpointPolicyRead | EndpointPolicyBaseline;
 
 export const ensureResolvedInCurrentSpace = async (
   access: PolicyAccessContext,
@@ -130,9 +138,27 @@ export const getEndpointPolicy = async (
   const normalized = await getNormalizedEndpointPolicy(access, args);
 
   return {
+    kind: 'policy',
     policy: normalized.snapshot.identity,
     storedConfig: normalized.storedConfig,
     normalizedConfig: normalized.normalizedConfig,
     normalizedHash: normalized.normalizedHash,
   };
+};
+
+export const getEndpointPolicyBaseline = (
+  endpointAppContextService: EndpointAppContextService,
+  preset: EndpointPolicyBaselinePreset
+): EndpointPolicyBaseline => readPolicyBaseline(endpointAppContextService, { preset });
+
+export const resolveEndpointPolicyReference = async (
+  access: PolicyAccessContext,
+  endpointAppContextService: EndpointAppContextService,
+  reference: PolicyRef
+): Promise<EndpointPolicyComparisonSide> => {
+  if (reference.type === 'policy') {
+    return getEndpointPolicy(access, { idOrName: reference.idOrName });
+  }
+
+  return getEndpointPolicyBaseline(endpointAppContextService, reference.preset);
 };

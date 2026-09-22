@@ -4473,6 +4473,50 @@ describe('Package policy service', () => {
       );
     });
 
+    it('should preserve the caller version through a successful packagePolicyUpdate callback', async () => {
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const mockPackagePolicy = {
+        ...createPackagePolicyMock(),
+        inputs: [],
+        version: 'caller-version',
+      };
+      const updateCallback = jest.fn(async (policy) => policy);
+
+      appContextService.addExternalCallback('packagePolicyUpdate', updateCallback);
+
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test-package-policy',
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            references: [],
+            attributes: mockPackagePolicy,
+          },
+        ],
+      });
+      soClient.update.mockResolvedValue({
+        id: 'test-package-policy',
+        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        references: [],
+        attributes: mockPackagePolicy,
+      });
+
+      await packagePolicyService.update(
+        soClient,
+        esClient,
+        'test-package-policy',
+        mockPackagePolicy
+      );
+
+      expect(soClient.update).toHaveBeenCalledWith(
+        LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        'test-package-policy',
+        expect.anything(),
+        expect.objectContaining({ version: 'caller-version' })
+      );
+    });
+
     it('should rethrow packagePolicyUpdate callback errors with apiPassThrough', async () => {
       const soClient = createSavedObjectClientMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;

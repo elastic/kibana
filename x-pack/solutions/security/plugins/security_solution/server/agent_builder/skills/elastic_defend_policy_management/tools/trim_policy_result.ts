@@ -306,6 +306,7 @@ type PolicyIdentityStringKey =
   | 'name'
   | 'description'
   | 'version'
+  | 'creationPreset'
   | 'updatedAt'
   | 'updatedBy'
   | 'packageVersion';
@@ -327,6 +328,7 @@ const IDENTITY_STRING_KEYS = [
   'name',
   'description',
   'version',
+  'creationPreset',
   'updatedAt',
   'updatedBy',
   'packageVersion',

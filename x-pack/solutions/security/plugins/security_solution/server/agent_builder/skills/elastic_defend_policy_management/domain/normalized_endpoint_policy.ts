@@ -10,6 +10,7 @@ import { hashPolicyConfig } from './hash_policy_config';
 import type { EndpointPolicySnapshot } from './endpoint_policy_snapshot';
 import type { NormalizedPolicyConfig } from './normalized_policy_config';
 import { normalize } from './normalize_policy_config';
+import type { PolicyCreateEndpointConfig } from '../../../../fleet_integration/types';
 
 export type EndpointPolicySummary = Readonly<{
   windowsProtectionModes: Readonly<{
@@ -37,6 +38,23 @@ export type NormalizedEndpointPolicy = Readonly<{
   summary: EndpointPolicySummary;
 }>;
 
+export type EndpointPolicyBaselinePreset = PolicyCreateEndpointConfig['endpointConfig']['preset'];
+
+export type PolicyBaselineEnvironment = Readonly<{
+  license: string;
+  cloud: boolean;
+  telemetryOptedIn: boolean | 'unresolved';
+}>;
+
+export type EndpointPolicyBaseline = Readonly<{
+  kind: 'baseline';
+  preset: EndpointPolicyBaselinePreset;
+  environment: PolicyBaselineEnvironment;
+  normalizedConfig: NormalizedPolicyConfig;
+  normalizedHash: string;
+  summary: EndpointPolicySummary;
+}>;
+
 const extractStoredConfig = (snapshot: EndpointPolicySnapshot): PolicyConfig => {
   const endpointInput = snapshot.source.inputs.find((input) => input.type === 'endpoint');
   const policyValue = endpointInput?.config?.policy?.value;
@@ -49,7 +67,7 @@ const extractStoredConfig = (snapshot: EndpointPolicySnapshot): PolicyConfig => 
   return policyValue as PolicyConfig;
 };
 
-const summarizeEndpointPolicy = (config: NormalizedPolicyConfig): EndpointPolicySummary => ({
+export const summarizeEndpointPolicy = (config: NormalizedPolicyConfig): EndpointPolicySummary => ({
   windowsProtectionModes: {
     malware: config.windows.malware.mode,
     ransomware: config.windows.ransomware.mode,

@@ -25,6 +25,10 @@ import {
   createAssessPolicyChangeTool,
 } from './tools/assess_policy_change';
 import { LIST_POLICIES_TOOL_ID, createListPoliciesTool } from './tools/list_policies';
+import {
+  APPLY_POLICY_CHANGE_TOOL_ID,
+  createApplyPolicyChangeTool,
+} from './tools/apply_policy_change';
 
 export const ELASTIC_DEFEND_POLICY_MANAGEMENT_SKILL_ID = 'elastic-defend-policy-management';
 
@@ -40,7 +44,8 @@ export const createElasticDefendPolicyManagementSkill = ({
     name: ELASTIC_DEFEND_POLICY_MANAGEMENT_SKILL_ID,
     basePath: 'skills/security/endpoint',
     description:
-      'Use for Elastic Defend integration policy decisions and inspection, including malware, ransomware, memory threat, and behavior protection; ' +
+      'Use for Elastic Defend integration policy decisions, inspection, and applying a confirmed bounded policy change, ' +
+      'including malware, ransomware, memory threat, and behavior protection; ' +
       'detect and prevent modes; event collection and advanced settings; policy baselines and comparisons; proposed configuration changes; ' +
       'policy-level rollout planning; and aggregate assigned-versus-applied counts for a named policy. ' +
       'Apply this scope separately to each task in a combined request.',
@@ -55,11 +60,12 @@ Load when the user is **deciding** what an Elastic Defend policy should be:
 - Comparing policies
 - Reading current assigned-versus-applied rollout status
 - Assessing the impact of a proposed change
+- Applying a previously assessed tier-1 change after user confirmation
 - Planning a rollout
 
-This skill is read-only. Live list, get, compare, rollout status, and proposed-change assessment are
-available in the current space. Follow Never state a number that did not come from a tool for
-counts. Follow Hand off advanced writes to the UI for writes.
+Live list, get, compare, rollout status, and proposed-change assessment are available in the current
+space. A confirmed tier-1 change may be applied only through the gated apply workflow below. Follow
+Never state a number that did not come from a tool for counts.
 
 ## When not to use this skill
 
@@ -81,12 +87,12 @@ is outside this skill. Do not recommend, compare, assess, or plan those objects 
 Across every answer, a concise boundary statement in user-facing language is allowed. You may state that a host prerequisite, artifact object, or broken-host diagnosis is not a package-policy setting, and you may invite the user to ask about it as a separate question. Do not name an internal skill identifier in an answer to the user. Do not prescribe MDM or approval steps, host-prerequisite procedures, or artifact-object selection or tradeoff advice.
 
 ### Never name a setting from memory
-Call the field-reference tool before asserting a setting exists. Do not invent a path, a default, or a legal value.
+Call the field-reference tool before asserting a setting exists. Do not invent a path, a default, or a legal value. Values restated from a returned baseline config or a returned compare row with a baseline side need no additional field-reference lookup; all other setting assertions retain their grounding requirements.
 
 ### Call integration_knowledge before describing behaviour
 Behaviour or tradeoff grounding applies only when behaviour or tradeoffs are requested or
 required by a guided workflow: explain-a-setting, detect-to-prevent, staged rollout, or recommend or audit a baseline. An
-exact proposed-change assessment is governed by the assess-only proposed-change workflow and is assess-only. When field-reference returns \`entry.documentation\`, restate that short registry documentation. Field-reference \`longFormGuidance: not_retrieved_by_this_tool\` means this tool did not retrieve long-form guidance; it is not unavailable after Integration Knowledge retrieval and must not substitute for that retrieval. Long-form behaviour and tradeoffs still require retrieved Integration Knowledge. When
+exact proposed-change assessment-report is governed by the assess-only proposed-change workflow and is assess-only. When field-reference returns \`entry.documentation\`, restate that short registry documentation. Field-reference \`longFormGuidance: not_retrieved_by_this_tool\` means this tool did not retrieve long-form guidance; it is not unavailable after Integration Knowledge retrieval and must not substitute for that retrieval. Long-form behaviour and tradeoffs still require retrieved Integration Knowledge. When
 documentation is missing for a requested or workflow-required
 behaviour or tradeoff, call \`${platformCoreTools.integrationKnowledge}\` before describing
 behaviour or tradeoffs. Validate each behaviour, tradeoff, and recipe sentence against that
@@ -100,7 +106,7 @@ No ungrounded numbers — counts, defaults, percentages, or version floors that 
 a tool. Assert an index or data-stream name, a field name, or a field value such as an event code
 only when the user supplied it or a tool or retrieved knowledge returned it this turn.
 Rollout-status counts come only from the rollout-status tool. Enrolled-agent counts come from the
-assess tool (blast radius) or the list usage mode (per-policy classification). Do not infer them from
+assess tool (blast radius), the list usage mode (per-policy classification), or apply's returned enrollment (a handler-preparation observation which may differ from the confirmation card). Do not infer them from
 get or compare. Do not combine enrolled-agent counts with rollout-status populations. Rollout status is
 not enrollment. Classify used, unused, or undetermined from the list usage mode's enrolled-agent
 evidence. When the tool returns undetermined, say undetermined. An item without a returned
@@ -108,22 +114,22 @@ classification is undetermined. Never infer usage from rollout-status
 metadata or a tool error. Never fabricate a proposed change to obtain assess.
 
 ### Restate only returned live-read facts
-For get, compare, rollout status, and assess, reports may restate returned identities, rows, paths,
-and values. Boolean, mode, and path-name restatements are allowed categories. A boolean, mode,
+For get, including baseline get, compare, including a returned compare row with a baseline side, rollout status, assess, and apply, reports may restate returned identities, rows, paths,
+and values. Apply may restate returned before, after, requestedChanges, sideEffects, residual, and enrollment. \`requestedChanges\` are the assessed and confirmed proposal rows submitted to Fleet and \`sideEffects\` are assessment-predicted effects; neither proves final state. \`after\` and \`residual\` describe the policy Fleet returned. Boolean, mode, and path-name restatements are allowed categories. A boolean, mode,
 or path name does not entail its behavioural meaning. Before answering, remove any provider,
 other-product, blocking, coverage, warning, eligibility, or other consequence not explicitly
 returned.
 
 ### Disclose partiality when a result is truncated
-Whenever a returned truncation marker is true, state that the displayed result is partial and do not claim completeness, unchanged state, a no-op, or the absence of an undisplayed path beyond the returned rows. When \`name_string_truncated\` is true, later get, compare, rollout status, or assess \`idOrName\` calls must pass \`policy.id\`, not the presented \`name\`; the truncated name is not an exact stored name.
+Whenever a returned truncation marker is true, state that the displayed result is partial and do not claim completeness, unchanged state, a no-op, or the absence of an undisplayed path beyond the returned rows. When \`name_string_truncated\` is true, later get, compare, rollout status, or assess \`idOrName\` calls must pass \`policy.id\`, not the presented \`name\`; apply \`idOrName\` calls have the same stable-id requirement; the truncated name is not an exact stored name.
 
 ### Hand off advanced writes to the UI
 For an advanced setting the user wants to change: explain it, state the tradeoff, give the exact
 key and suggested value from retrieved documentation, and hand off advanced writes to the UI. Do
-not apply the change. Writes are unavailable and must not be inferred. This skill has no write tool.
+not apply advanced settings. Advanced writes are unavailable and must not be inferred; use the UI handoff.
 
 ### Keep OS tuning inside package-policy guidance
-For an OS-tuning or baseline answer, use current-turn Integration Knowledge only for package-policy guidance and use the field-reference result for exact setting existence, defaults, and legal values. Do not compose host prerequisites, installation or permission steps, troubleshooting, incident remediation, artifact or exception guidance, or deployment-role taxonomies into the answer. A retrieved related-troubleshooting section is routing context, not policy-setting guidance. If retrieved sources conflict or do not support a claim, omit the disputed claim and state that grounded guidance is unavailable. Keep each OS section to supported settings, values, behavior, and tradeoffs.
+For an OS-tuning or baseline answer, use current-turn Integration Knowledge only for package-policy guidance and use the field-reference result for exact setting existence, defaults, and legal values. Values restated from a returned baseline config or a returned compare row with a baseline side need no additional field-reference lookup; all other setting assertions retain their grounding requirements. Do not compose host prerequisites, installation or permission steps, troubleshooting, incident remediation, artifact or exception guidance, or deployment-role taxonomies into the answer. A retrieved related-troubleshooting section is routing context, not policy-setting guidance. If retrieved sources conflict or do not support a claim, omit the disputed claim and state that grounded guidance is unavailable. Keep each OS section to supported settings, values, behavior, and tradeoffs.
 
 ### Report rollout status as a closed counts-only result
 For a current assigned-versus-applied rollout-status request, call \`${GET_POLICY_ROLLOUT_STATUS_TOOL_ID}\` once for the user-named policy. Do not call list, get, compare, assess, field-reference, Integration Knowledge, or search unless the user explicitly requests a separate workflow. If the rollout-status call fails, report that rollout status is unavailable without substituting another population or tool.
@@ -133,7 +139,7 @@ Treat a successful rollout-status result as a closed counts-only report. Copy \`
 ## Workflows
 
 ### Ground in documentation
-When the question is not an exact proposed-change assessment answered by the assess-only proposed-change workflow, call
+When the question is not an exact proposed-change assessment answered by the assess-only proposed-change workflow or a later requested apply, call
 \`${platformCoreTools.integrationKnowledge}\` with one concrete query built from this turn's user
 text and live-tool evidence (protection family, OS, prevent vs detect, event collection,
 performance, observed mode). Split one protection family, OS, or workflow per call. Do not add a
@@ -157,12 +163,7 @@ still occur and must not be composed into guidance; state in user-facing languag
 outside package-policy configuration and invite a separate question. Follow Call
 integration_knowledge before describing behaviour for named-setting misses.
 
-When the user asks to recommend or audit an environment-appropriate baseline, retrieve integration
-knowledge using protection-family, OS, and protection-mode vocabulary. Ground the recommendation or
-audit in retrieved package-policy best-practice guidance — setting, OS, and protection-mode
-tradeoffs — composed with live policy facts from \`${GET_POLICY_TOOL_ID}\` when the user named a
-policy to audit, and with registry facts from \`${GET_POLICY_FIELD_REFERENCE_TOOL_ID}\` before
-asserting any setting exists. When retrieval is empty or off-topic, say guidance is unavailable.
+When the user asks to recommend or audit an environment-appropriate baseline, resolve a supported named preset; otherwise use the audited policy's supported returned \`creationPreset\`; otherwise ask for a supported preset. Never default or promote an unknown or truncated preset. Call \`${GET_POLICY_TOOL_ID}\` for a recommendation, or \`${COMPARE_POLICIES_TOOL_ID}\` for the named live policy against that baseline for an audit. A baseline is this deployment's product-defined default, not generic best practice. Retrieve Integration Knowledge using protection-family, OS, and protection-mode vocabulary only for tailoring and tradeoffs; report returned baseline settings and compare rows only. Disclose \`telemetryOptedIn: 'unresolved'\` when returned. When telemetryOptedIn is unresolved, do not describe global_telemetry_enabled as this deployment's resolved default. Values restated from a returned baseline config or a returned compare row with a baseline side need no additional field-reference lookup; all other setting assertions retain their grounding requirements. When retrieval is empty or off-topic, say guidance is unavailable.
 
 ### Orient with the policy model
 Windows, macOS, and Linux setting trees are independent. List posture is compact protection
@@ -170,20 +171,21 @@ modes plus global telemetry, not event collection. Compare normalized posture eq
 the normalized policy except meta paths and popup messages; cosmetic popup text is not part of
 that equality. Settings have kinds returned by the field-reference tool. Look up advanced keys
 like any other setting. Exact paths, defaults, and legal values require the field-reference tool
-or retrieved documentation and must not be inferred.
+or retrieved documentation and must not be inferred. Values restated from a returned baseline config or a returned compare row with a baseline side need no additional field-reference lookup; all other setting assertions retain their grounding requirements.
 
-### Use live list, get, compare, rollout status, or assess when the user named a policy, explicitly asked to compare policies, explicitly asked for current rollout status, requested a bounded proposed-change assessment, or asked a used, unused, or undetermined usage question
+### Use policy tools for a bounded policy, baseline, or requested apply workflow
 Call the matching live tool only when the user already named the policy, explicitly asked to compare
-policies, explicitly asked for current rollout status, or requested a bounded proposed-change assessment.
+policies, explicitly asked for current rollout status, requested a bounded proposed-change assessment,
+requested a deployment baseline for a supported named preset, or requested apply after a successful matching assessment.
 A used, unused, or undetermined usage question — for a named policy or current-space-wide — routes to
 \`${LIST_POLICIES_TOOL_ID}\` with \`includeEndpointUsage: true\`. Setting existence still requires the
-field-reference tool. Follow Hand off advanced writes to the UI when the user asks to apply a change.
+field-reference tool. Values restated from a returned baseline config or a returned compare row with a baseline side need no additional field-reference lookup; all other setting assertions retain their grounding requirements. For tier-1 apply requests, follow Apply a confirmed tier-1 change. For advanced writes, follow Hand off advanced writes to the UI.
 
 ### Assess a proposed change before reporting impact
 If the user asks what a bounded proposed change would do to a policy, call only
-\`${ASSESS_POLICY_CHANGE_TOOL_ID}\` for the report. An exact proposed-change report is assess-only.
-After a successful assess call, the assess result is the sole source of report facts. Do not call
-\`${platformCoreTools.integrationKnowledge}\`, search, or an extra inline tool. Report the required
+\`${ASSESS_POLICY_CHANGE_TOOL_ID}\` for the assessment-report phase. An exact proposed-change assessment-report is assess-only.
+After a successful assess call, the assess result is the sole source of assessment-report facts. Do not call
+\`${platformCoreTools.integrationKnowledge}\`, search, or an extra inline tool during that assessment-report phase. Report the required
 fields accurately. Follow Restate only returned live-read facts.
 The report must include assess-returned \`requestedOperations\` and \`requestedImpact\`.
 \`requestedImpact\` is the requested-intent impact and is distinct from \`expandedChanges\` and
@@ -199,10 +201,16 @@ enrolled-agent headline only when that key is present; if it is absent, say the 
 unavailable. Never sum status keys, substitute another key, infer zero, drop keys, or collapse
 omitted keys into an all-others-are-zero sentence. Do not add paths, defaults, other-protection
 states, or alert-field claims that the assess result did not return. Restate per-path eligibility only as the assess tool computed it; do not infer eligibility. Report returned global blockers once as whole-policy blockers; do not attribute them to unrelated changed paths or reinterpret them as per-path eligibility.
-Never claim a change is safe, unsafe, recommended, ready to apply, or unchanged since assessment.
+In the assessment-report phase, never claim a change is safe, unsafe, recommended, ready to apply, or unchanged since assessment.
 
-### Advanced change request
-Follow Hand off advanced writes to the UI.
+### Apply a confirmed tier-1 change
+After a successful assessment, if the user requests applying the same policy operations in this conversation, call \`${APPLY_POLICY_CHANGE_TOOL_ID}\` with that assessment's version, never its revision and never a replacement get version. Every apply invocation requires a successful preview and fresh user confirmation before the handler can write. A user request to apply only if they confirm is a request to start this gated flow: call the apply tool so it presents the confirmation card; do not ask for or wait for a separate free-text confirmation. The write can occur only after the user accepts that card. Do not apply advanced settings: follow Hand off advanced writes to the UI. Agent-policy assignments remain Fleet-owned and outside this skill.
+
+The assessment report is assess-only and uses no extra inline or knowledge tool; that restriction ends when the user subsequently requests the gated apply. Apply is not a readiness or rollout claim.
+
+Always report returned before and after version and revision. Report returned requestedChanges, sideEffects, residual, and apply enrollment as observed facts only. \`requestedChanges\` are the assessed and confirmed proposal rows submitted to Fleet and \`sideEffects\` are assessment-predicted effects; neither proves final state, while \`after\` and \`residual\` describe the policy Fleet returned. Report returned rows and values only, disclose independent section and per-value truncation, and never reconstruct historical residuals from a later get. Do not claim safe, unsafe, recommended, ready, or host rollout. Unchanged since assessment is allowed only after a successful apply whose before.version matches the assessed expected version, and only for that pre-write interval.
+
+A version_conflict means this apply invocation made no write. Report the conflict and stop the apply workflow. Do not reassess, call apply again, or present another confirmation card unless the user makes a new request to apply after seeing the conflict. That later request requires a new successful assessment and fresh confirmation. A write_unverified outcome is unknown; any observed identity is current identity, not success or attribution. Read the original policy id and reassess only to report current observed state; if that read fails, stop. Do not call apply again or present another confirmation card unless the user then makes a new request to apply. Never retry automatically.
 
 ### Guided detect-to-prevent and staged rollout
 Search \`${platformCoreTools.integrationKnowledge}\` semantically using detect versus prevent,
@@ -211,16 +219,15 @@ and phased assignment vocabulary. Do not add a type filter. Treat off-topic retr
 and say grounded guidance is unavailable. Follow Call integration_knowledge before describing
 behaviour for claim-level grounding.
 
-An exact proposed-change assessment is the assess-only proposed-change workflow only: the assess result is the sole source of report facts, with no
-integration-knowledge call, no search, no extra inline tool. It is assess-only and governed by the assess-only proposed-change workflow.
+An exact proposed-change assessment-report is the assess-only proposed-change workflow only: the assess result is the sole source of assessment-report facts, with no
+integration-knowledge call, no search, no extra inline tool. That assessment-report phase is assess-only and governed by the assess-only proposed-change workflow.
 For a readiness question, call \`${ASSESS_POLICY_CHANGE_TOOL_ID}\` for the proposed prevent change to surface eligibility and coupling, and ground qualitative progression in retrieved knowledge. A readiness-only or staged-rollout planning question must not call \`${GET_POLICY_ROLLOUT_STATUS_TOOL_ID}\` and must not use rollout-status facts. Rollout status is not a readiness signal and must not be presented as one. If the user separately and explicitly asks current assigned-versus-applied status in the same request, that is a distinct phase governed by rollout-status population rules; rollout-status facts are never readiness evidence.
 For a combined assessment-and-guidance request, complete the assess-only proposed-change workflow as a separate assessment phase and include a
 separate guidance phase grounded in retrieved integration knowledge. In the guidance phase, assess
 \`from\` is the live current state and assess \`to\` is proposed only. Do not describe \`to\` as current,
 applied, in effect, or the rollout starting point. The staged sequence starts from assess \`from\`.
 
-Users execute policy and assignment changes in the Elastic Defend policy UI. Do not apply a
-change. Keep protection-mode transition, cohort assignment, and artifact freshness distinct.
+Users execute advanced policy settings and assignment changes in the Elastic Defend policy UI. The confirmed tier-1 apply workflow may write only the assessed policy change. Keep protection-mode transition, cohort assignment, and artifact freshness distinct.
 Omit unsourced defaults, counts, percentages, durations, intervals, and artifact or exception-list names.
 Never emit field names, paths, rollout-status health, or applied-state verdicts.
 Restate assess-returned eligibility only as the assess tool computed it; do not infer deployment eligibility from retrieved documentation.
@@ -231,14 +238,15 @@ Every guidance phase must state in user-facing language that broken-host, missed
 
 - Example: \`Move us from detect to prevent safely with a staged rollout across host cohorts.\` The user supplied neither a policy identity nor a protection family. Policy-specific work requires user-supplied policy identity and protection family or families. If either is absent, request it and stop. While unbounded, do not call list, get, compare, field-reference, assess, or rollout status to supply the bounds. Do not adopt the first, sole, or fixture policy, and do not infer a protection family from policy contents. Integration knowledge and asking the user are allowed.
 - Example: when the user supplies a policy identity and a protection family, such as a named policy and malware protection, existing bounded workflow and tool-selection rules apply.
-- When the user named a policy, explicitly asked to compare policies, explicitly asked for current rollout status, requested explain-a-setting, asked a used, unused, or undetermined usage question for a named policy or current-space-wide, or supplied both guided-workflow bounds:
-  - Call \`${GET_POLICY_FIELD_REFERENCE_TOOL_ID}\` before asserting a setting exists. A \`found: false\` \`unknown_path\` result is a fact: that lookup is unknown. A found result — including an OS-less remainder or protection-key expansion — is a known setting identity, not a miss. Existence checks still require this tool when live list, get, or compare are also used. When the tool returns \`entry.documentation\`, restate that short registry documentation. Follow Call integration_knowledge before describing behaviour.
+- When the user named a policy, supplied a supported preset, explicitly asked to compare policies, explicitly asked for current rollout status, requested explain-a-setting, asked a used, unused, or undetermined usage question for a named policy or current-space-wide, supplied both guided-workflow bounds, or requested the gated apply after a successful matching assessment:
+  - Call \`${GET_POLICY_FIELD_REFERENCE_TOOL_ID}\` before asserting a setting exists. A \`found: false\` \`unknown_path\` result is a fact: that lookup is unknown. A found result — including an OS-less remainder or protection-key expansion — is a known setting identity, not a miss. Existence checks still require this tool when live list, get, or compare are also used. Values restated from a returned baseline config or a returned compare row with a baseline side need no additional field-reference lookup; all other setting assertions retain their grounding requirements. When the tool returns \`entry.documentation\`, restate that short registry documentation. Follow Call integration_knowledge before describing behaviour.
   - Call \`${LIST_POLICIES_TOOL_ID}\` to page through live policies in the current space. For a used, unused, or undetermined usage question — named policy or current-space-wide — call it with \`includeEndpointUsage: true\`.
-  - Call \`${GET_POLICY_TOOL_ID}\` to read one live policy by id or name. Follow Restate only returned live-read facts.
-  - Call \`${COMPARE_POLICIES_TOOL_ID}\` to compare two live policies. Follow Restate only returned live-read facts.
+  - Call \`${GET_POLICY_TOOL_ID}\` to read one live policy by id or name, or to retrieve a deployment baseline for a supported preset. Follow Restate only returned live-read facts.
+  - Call \`${COMPARE_POLICIES_TOOL_ID}\` to compare live policies and/or a deployment baseline. Follow Restate only returned live-read facts.
   - Call \`${GET_POLICY_ROLLOUT_STATUS_TOOL_ID}\` for current assigned-versus-applied rollout status: out-of-date revision-coverage host counts and current-revision policy-response needs-attention counts for one current-space policy. Out-of-date counts cover readable united endpoint hosts whose canonical assignment id matches this policy's current agent-policy ids on the request-scoped CPS/CCS surface. Needs-attention counts cover latest policy responses only for the bounded assignment-matched agents obtained from those current United hosts at the current package revision, whose actions have failure or warning status. For \`current_revision_responses\`, \`undetermined_hosts\` counts returned latest-response hits with missing or invalid required fields; assignment-matched agents with no response document are not included. Do not claim coverage of every response document at that revision. \`unclassified_overflow_hosts\` and \`upstream_unclassified_hosts\` are unclassified United truncation signals. Do not add overflowed hosts or treat them as out-of-date, needs-attention, or undetermined. Staged-rollout planning and readiness questions do not call this tool. Broken-host, missed-check-in, and failed-response diagnosis is a separate troubleshooting task. Follow Restate only returned live-read facts. Follow Never state a number that did not come from a tool.
-  - Call \`${ASSESS_POLICY_CHANGE_TOOL_ID}\` to assess a bounded proposed change in the current space. Required before reporting proposed-change impact. For an exact proposed-change assessment, after a successful assess call the report is assess-only: do not call \`${platformCoreTools.integrationKnowledge}\`, do not call search, do not call an extra inline tool. Exact proposed-change reports are governed by the assess-only proposed-change workflow. Follow Restate only returned live-read facts.
-- Prefer \`${platformCoreTools.integrationKnowledge}\` for setting behaviour and tradeoffs on explain-a-setting, detect-to-prevent, staged rollout, and baseline recommend or audit questions. Do not call it for an exact proposed-change assessment.
+  - Call \`${ASSESS_POLICY_CHANGE_TOOL_ID}\` to assess a bounded proposed change in the current space. Required before reporting proposed-change impact. For the assessment-report phase, after a successful assess call do not call \`${platformCoreTools.integrationKnowledge}\`, search, or an extra inline tool. The later requested apply is a separate gated phase.
+  - Call \`${APPLY_POLICY_CHANGE_TOOL_ID}\` only after a successful matching assessment and a user request to apply; pass the assessment version and require fresh confirmation. Follow the apply recovery rules above.
+- Prefer \`${platformCoreTools.integrationKnowledge}\` for setting behaviour and tradeoffs on explain-a-setting, detect-to-prevent, staged rollout, and baseline recommend or audit questions. Do not call it for an exact proposed-change assessment-report.
 `,
     getRegistryTools: () => [platformCoreTools.integrationKnowledge],
     getInlineTools: () => [
@@ -248,5 +256,6 @@ Every guidance phase must state in user-facing language that broken-host, missed
       createComparePoliciesTool({ endpointAppContextService, getStartServices }),
       createGetPolicyRolloutStatusTool({ endpointAppContextService, getStartServices }),
       createAssessPolicyChangeTool({ endpointAppContextService, getStartServices }),
+      createApplyPolicyChangeTool({ endpointAppContextService, getStartServices }),
     ],
   });
