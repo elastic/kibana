@@ -96,6 +96,7 @@ export const EsqlViewsTable: FunctionComponent<EsqlViewsTableProps> = ({
   isLoading,
   onReload,
 }) => {
+  const [isSearchActive, setIsSearchActive] = useState(false);
   const columns = useMemo<Array<EuiBasicTableColumn<EsqlView>>>(
     () => [
       {
@@ -125,6 +126,14 @@ export const EsqlViewsTable: FunctionComponent<EsqlViewsTableProps> = ({
 
   const search = useMemo<EuiInMemoryTableProps<EsqlView>['search']>(
     () => ({
+      onChange: ({ queryText, error: searchError }) => {
+        if (searchError) {
+          return false;
+        }
+
+        setIsSearchActive(queryText.trim().length > 0);
+        return true;
+      },
       box: {
         incremental: true,
         placeholder: translations.searchPlaceholder,
@@ -173,11 +182,19 @@ export const EsqlViewsTable: FunctionComponent<EsqlViewsTableProps> = ({
       data-test-subj="esqlViewsTable"
       tableCaption={translations.tableCaption}
       noItemsMessage={
-        <EuiEmptyPrompt
-          iconType="inspect"
-          title={<h2>{translations.emptyTitle}</h2>}
-          body={<p>{translations.emptyDescription}</p>}
-        />
+        isSearchActive ? (
+          <EuiEmptyPrompt
+            data-test-subj="esqlViewsNoSearchResults"
+            iconType="magnify"
+            title={<h2>{translations.noSearchResultsTitle}</h2>}
+          />
+        ) : (
+          <EuiEmptyPrompt
+            iconType="inspect"
+            title={<h2>{translations.emptyTitle}</h2>}
+            body={<p>{translations.emptyDescription}</p>}
+          />
+        )
       }
       tableLayout="fixed"
       responsiveBreakpoint={false}

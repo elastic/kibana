@@ -123,6 +123,25 @@ describe('ManagementApp', () => {
     expect(screen.getByText('orders-view')).toBeInTheDocument();
   });
 
+  it('distinguishes an empty search result from an empty views list', async () => {
+    const client = createClient();
+    client.getViews.mockResolvedValue({
+      views: [{ name: 'logs-view', query: 'FROM logs-*' }],
+    });
+
+    renderApp(client);
+    await screen.findByText('logs-view');
+
+    fireEvent.change(screen.getByTestId('esqlViewsSearch'), {
+      target: { value: 'missing-view' },
+    });
+
+    expect(await screen.findByTestId('esqlViewsNoSearchResults')).toHaveTextContent(
+      'No views match your search'
+    );
+    expect(screen.queryByText('No ES|QL views found')).not.toBeInTheDocument();
+  });
+
   it('paginates the complete client-side result', async () => {
     const client = createClient();
     client.getViews.mockResolvedValue({

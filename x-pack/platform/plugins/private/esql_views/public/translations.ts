@@ -53,4 +53,7 @@ export const translations = {
   emptyDescription: i18n.translate('xpack.esqlViews.managementPage.emptyDescription', {
     defaultMessage: 'Create an ES|QL view to see it here.',
   }),
+  noSearchResultsTitle: i18n.translate('xpack.esqlViews.managementPage.noSearchResultsTitle', {
+    defaultMessage: 'No views match your search',
+  }),
 };
