@@ -246,6 +246,13 @@ export function LensEditConfigurationFlyout({
     setESQLQueryState(state);
   }, []);
 
+  const onESQLResultsAccordionToggle = useCallback((isOpen: boolean) => {
+    if (isOpen) {
+      setIsLayerAccordionOpen(false);
+      setIsSuggestionsAccordionOpen(false);
+    }
+  }, []);
+
   const onApply = useCallback(async () => {
     if (visualization.activeId == null || !currentAttributes) {
       return;
@@ -505,6 +512,9 @@ export function LensEditConfigurationFlyout({
             parentApi={parentApi}
             panelId={panelId}
             onTextBasedQueryStateChange={onTextBasedQueryStateChange}
+            isESQLResultsAccordionOpen={isESQLResultsAccordionOpen}
+            setIsESQLResultsAccordionOpen={setIsESQLResultsAccordionOpen}
+            onESQLResultsAccordionToggle={onESQLResultsAccordionToggle}
           />
         </FlyoutWrapper>
       </>
@@ -651,6 +661,9 @@ export function LensEditConfigurationFlyout({
                     panelId={panelId}
                     editorContainer={editorContainer.current || undefined}
                     onTextBasedQueryStateChange={onTextBasedQueryStateChange}
+                    isESQLResultsAccordionOpen={isESQLResultsAccordionOpen}
+                    setIsESQLResultsAccordionOpen={setIsESQLResultsAccordionOpen}
+                    onESQLResultsAccordionToggle={onESQLResultsAccordionToggle}
                   />
                 </>
               </EuiAccordion>

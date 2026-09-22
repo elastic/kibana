@@ -12,17 +12,24 @@ import {
   EuiTitle,
   EuiAccordion,
   EuiSpacer,
+  EuiFlexGroup,
   EuiFlexItem,
   EuiNotificationBadge,
+  EuiLoadingSpinner,
   useEuiTheme,
+  type UseEuiTheme,
 } from '@elastic/eui';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { AggregateQuery } from '@kbn/es-query';
 import { ESQLDataGrid } from '@kbn/esql-datagrid/public';
 import type { ESQLDataGridAttrs } from './helpers';
 
+export type ESQLDataGridAccordionStatus = 'loading' | 'ready' | 'error';
+
 interface ESQLDataGridAccordionProps {
   isAccordionOpen: boolean;
-  dataGridAttrs: ESQLDataGridAttrs;
+  dataGridAttrs?: ESQLDataGridAttrs;
+  status: ESQLDataGridAccordionStatus;
   query: AggregateQuery;
   isTableView: boolean;
   isApproximate: boolean;
@@ -33,6 +40,7 @@ interface ESQLDataGridAccordionProps {
 export const ESQLDataGridAccordion = ({
   isAccordionOpen,
   dataGridAttrs,
+  status,
   query,
   isTableView,
   isApproximate,
@@ -40,13 +48,28 @@ export const ESQLDataGridAccordion = ({
   onAccordionToggleCb,
 }: ESQLDataGridAccordionProps) => {
   const onAccordionToggle = useCallback(
-    (status: boolean) => {
+    (openStatus: boolean) => {
       setIsAccordionOpen(!isAccordionOpen);
-      onAccordionToggleCb(status);
+      onAccordionToggleCb(openStatus);
     },
     [isAccordionOpen, onAccordionToggleCb, setIsAccordionOpen]
   );
   const { euiTheme } = useEuiTheme();
+  const styles = useMemoCss(componentStyles);
+
+  const extraAction = (
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+      {status === 'loading' && (
+        <EuiLoadingSpinner size="m" css={styles.loadingBadge} />
+      )}
+      {(dataGridAttrs || status === 'error') && (
+        <EuiNotificationBadge size="m" color="subdued">
+          {dataGridAttrs ? dataGridAttrs.rows.length : '—'}
+        </EuiNotificationBadge>
+      )}
+    </EuiFlexGroup>
+  );
+
   return (
     <EuiFlexItem
       grow={isAccordionOpen ? 1 : false}
@@ -95,18 +118,14 @@ export const ESQLDataGridAccordion = ({
         initialIsOpen={isAccordionOpen}
         forceState={isAccordionOpen ? 'open' : 'closed'}
         onToggle={onAccordionToggle}
-        extraAction={
-          <EuiNotificationBadge size="m" color="subdued">
-            {dataGridAttrs.rows.length}
-          </EuiNotificationBadge>
-        }
+        extraAction={extraAction}
       >
-        {isAccordionOpen && (
+        {isAccordionOpen && dataGridAttrs && (
           <>
             <ESQLDataGrid
-              rows={dataGridAttrs?.rows}
-              columns={dataGridAttrs?.columns}
-              dataView={dataGridAttrs?.dataView}
+              rows={dataGridAttrs.rows}
+              columns={dataGridAttrs.columns}
+              dataView={dataGridAttrs.dataView}
               query={query}
               flyoutType="overlay"
               isTableView={isTableView}
@@ -117,7 +136,26 @@ export const ESQLDataGridAccordion = ({
             <EuiSpacer />
           </>
         )}
+        {isAccordionOpen && status === 'loading' && !dataGridAttrs && (
+          <EuiFlexItem
+            css={css`
+              align-items: center;
+              justify-content: center;
+              padding: ${euiTheme.size.m};
+            `}
+          >
+            <EuiLoadingSpinner size="m" />
+          </EuiFlexItem>
+        )}
       </EuiAccordion>
     </EuiFlexItem>
   );
+};
+
+const componentStyles = {
+  loadingBadge: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      inlineSize: euiTheme.size.l,
+      blockSize: euiTheme.size.l,
+    }),
 };

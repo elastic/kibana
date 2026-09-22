@@ -54,6 +54,9 @@ export interface LensConfigPanelBaseProps {
   editorContainer?: HTMLElement;
   /** Callback to report text-based query state changes */
   onTextBasedQueryStateChange?: (state: TextBasedQueryState) => void;
+  isESQLResultsAccordionOpen?: boolean;
+  setIsESQLResultsAccordionOpen?: (flag: boolean) => void;
+  onESQLResultsAccordionToggle?: (isOpen: boolean) => void;
 }
 
 export interface ConfigPanelWrapperProps extends LensConfigPanelBaseProps {

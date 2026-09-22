@@ -32,7 +32,10 @@ import { getSuggestions } from '../../../app_plugin/shared/edit_on_the_fly/helpe
 import { useESQLVariables } from '../../../app_plugin/shared/edit_on_the_fly/use_esql_variables';
 import { MAX_NUM_OF_COLUMNS } from '../../../datasources/text_based/utils';
 import type { LayerPanelProps } from './types';
-import { ESQLDataGridAccordion } from '../../../app_plugin/shared/edit_on_the_fly/esql_data_grid_accordion';
+import {
+  ESQLDataGridAccordion,
+  type ESQLDataGridAccordionStatus,
+} from '../../../app_plugin/shared/edit_on_the_fly/esql_data_grid_accordion';
 import { useInitializeChart } from './use_initialize_chart';
 import { useEditorFrameService } from '../../editor_frame_service_context';
 
@@ -57,6 +60,9 @@ export type ESQLEditorProps = Simplify<
     | 'dataLoading$'
     | 'parentApi'
     | 'onTextBasedQueryStateChange'
+    | 'isESQLResultsAccordionOpen'
+    | 'setIsESQLResultsAccordionOpen'
+    | 'onESQLResultsAccordionToggle'
   >
 >;
 
@@ -84,6 +90,9 @@ export function ESQLEditor({
   setCurrentAttributes,
   updateSuggestion,
   onTextBasedQueryStateChange,
+  isESQLResultsAccordionOpen: isESQLResultsAccordionOpenProp,
+  setIsESQLResultsAccordionOpen: setIsESQLResultsAccordionOpenProp,
+  onESQLResultsAccordionToggle,
 }: ESQLEditorProps) {
   // recomputed every render but only read by the useRef/useState initializers
   // below — do not hoist into a memo, later renders intentionally ignore it
@@ -100,12 +109,16 @@ export function ESQLEditor({
 
   const [errors, setErrors] = useState<Error[]>([]);
   const [submittedQuery, setSubmittedQuery] = useState<AggregateQuery | Query>(initialQuery);
-  const [isLayerAccordionOpen, setIsLayerAccordionOpen] = useState(true);
   const [suggestsLimitedColumns, setSuggestsLimitedColumns] = useState(false);
   const [isVisualizationLoading, setIsVisualizationLoading] = useState(false);
   const [dataGridAttrs, setDataGridAttrs] = useState<ESQLDataGridAttrs | undefined>(undefined);
-  const [isSuggestionsAccordionOpen, setIsSuggestionsAccordionOpen] = useState(false);
-  const [isESQLResultsAccordionOpen, setIsESQLResultsAccordionOpen] = useState(false);
+  const [dataGridStatus, setDataGridStatus] = useState<ESQLDataGridAccordionStatus>('loading');
+  const dataGridAttrsRef = useRef<ESQLDataGridAttrs | undefined>(undefined);
+  const [internalResultsAccordionOpen, setInternalResultsAccordionOpen] = useState(false);
+  const isESQLResultsAccordionOpen =
+    isESQLResultsAccordionOpenProp ?? internalResultsAccordionOpen;
+  const setIsESQLResultsAccordionOpen =
+    setIsESQLResultsAccordionOpenProp ?? setInternalResultsAccordionOpen;
   const [isInitialized, setIsInitialized] = useState(false);
 
   const currentAttributes = useCurrentAttributes({
@@ -149,9 +162,23 @@ export function ESQLEditor({
     }
   }, [isDataLoading, layerId]);
 
+  const applyDataGridAttrs = useCallback((attrs: ESQLDataGridAttrs) => {
+    dataGridAttrsRef.current = attrs;
+    setDataGridAttrs(attrs);
+    setDataGridStatus('ready');
+  }, []);
+
+  const applyPreviewErrors = useCallback((previewErrors: Error[]) => {
+    setErrors(previewErrors);
+    if (!dataGridAttrsRef.current) {
+      setDataGridStatus('error');
+    }
+  }, []);
+
   const runQuery = useCallback(
     async (q: AggregateQuery, abortController?: AbortController, shouldUpdateAttrs?: boolean) => {
       setErrors([]);
+      setDataGridStatus('loading');
       const attrs = await getSuggestions(
         q,
         data,
@@ -160,9 +187,9 @@ export function ESQLEditor({
         datasourceMap,
         visualizationMap,
         adHocDataViews,
-        setErrors,
+        applyPreviewErrors,
         abortController,
-        setDataGridAttrs,
+        applyDataGridAttrs,
         esqlVariables,
         shouldUpdateAttrs,
         currentAttributesRef.current,
@@ -194,6 +221,8 @@ export function ESQLEditor({
       adHocDataViews,
       esqlVariables,
       isApproximate,
+      applyPreviewErrors,
+      applyDataGridAttrs,
       setCurrentAttributes,
       updateSuggestion,
     ]
@@ -235,6 +264,8 @@ export function ESQLEditor({
 
     const abortController = new AbortController();
 
+    setDataGridStatus('loading');
+
     getSuggestions(
       lastSubmittedQuery,
       data,
@@ -245,7 +276,7 @@ export function ESQLEditor({
       adHocDataViews,
       undefined,
       abortController,
-      setDataGridAttrs,
+      applyDataGridAttrs,
       esqlVariables,
       false,
       currentAttributesRef.current,
@@ -267,6 +298,7 @@ export function ESQLEditor({
     datasourceMap,
     visualizationMap,
     adHocDataViews,
+    applyDataGridAttrs,
   ]);
 
   if (!isOfAggregateQueryType(query)) {
@@ -293,24 +325,18 @@ export function ESQLEditor({
         attributes={attributes}
         parentApi={parentApi}
       />
-      {dataGridAttrs ? (
-        <ESQLDataGridAccordion
-          dataGridAttrs={dataGridAttrs}
-          isAccordionOpen={isESQLResultsAccordionOpen}
-          isTableView={visualization.activeId !== 'lnsDatatable'}
-          isApproximate={isApproximate}
-          setIsAccordionOpen={setIsESQLResultsAccordionOpen}
-          query={query}
-          onAccordionToggleCb={(status) => {
-            if (status && isSuggestionsAccordionOpen) {
-              setIsSuggestionsAccordionOpen(!status);
-            }
-            if (status && isLayerAccordionOpen) {
-              setIsLayerAccordionOpen(!status);
-            }
-          }}
-        />
-      ) : null}
+      <ESQLDataGridAccordion
+        dataGridAttrs={dataGridAttrs}
+        status={dataGridStatus}
+        isAccordionOpen={isESQLResultsAccordionOpen}
+        isTableView={visualization.activeId !== 'lnsDatatable'}
+        isApproximate={isApproximate}
+        setIsAccordionOpen={setIsESQLResultsAccordionOpen}
+        query={query}
+        onAccordionToggleCb={(openStatus) => {
+          onESQLResultsAccordionToggle?.(openStatus);
+        }}
+      />
     </>
   );
 
