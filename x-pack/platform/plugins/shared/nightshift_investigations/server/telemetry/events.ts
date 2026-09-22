@@ -9,8 +9,7 @@ import type { EventTypeOpts, RootSchema } from '@kbn/core/server';
 
 export const NIGHTSHIFT_SEMANTIC_MEMORY_MATERIALIZED_EVENT =
   'nightshift-semantic-memory-materialized';
-export const NIGHTSHIFT_SEMANTIC_MEMORY_OPTIMIZED_EVENT =
-  'nightshift-semantic-memory-optimized';
+export const NIGHTSHIFT_SEMANTIC_MEMORY_OPTIMIZED_EVENT = 'nightshift-semantic-memory-optimized';
 
 export type NightshiftMemoryTelemetryOutcome = 'success' | 'failure';
 
@@ -99,11 +98,17 @@ const materializedSchema: RootSchema<SemanticMemoryMaterializedEvent> = {
   },
   pod_reset: {
     type: 'boolean',
-    _meta: { description: 'Whether the sandbox workspace was reset before materialize.', optional: true },
+    _meta: {
+      description: 'Whether the sandbox workspace was reset before materialize.',
+      optional: true,
+    },
   },
   notification_chars: {
     type: 'long',
-    _meta: { description: 'Character count of the generated model-context fragment.', optional: true },
+    _meta: {
+      description: 'Character count of the generated model-context fragment.',
+      optional: true,
+    },
   },
 };
 
