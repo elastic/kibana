@@ -103,8 +103,7 @@ import {
   checkUploadPackageAssetPrivileges,
   parsePackageAndCollectSignals,
 } from './upload_preflight_authz';
-export { PACKAGES_TO_INSTALL_WITH_STREAMING } from './streaming_packages';
-import { PACKAGES_TO_INSTALL_WITH_STREAMING } from './streaming_packages';
+export const PACKAGES_TO_INSTALL_WITH_STREAMING = ['security_detection_engine'];
 import { shouldIncludePackageWithDatastreamTypes } from './exclude_datastreams_helper';
 import { mergeIsDependencyOf } from './dependencies';
 
