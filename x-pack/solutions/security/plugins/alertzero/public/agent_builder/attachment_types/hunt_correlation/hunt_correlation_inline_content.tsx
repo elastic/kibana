@@ -19,15 +19,16 @@ import { i18n } from '@kbn/i18n';
 import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
 import type { AttachmentNavigationDeps } from '../navigation';
 import {
+  buildActorLookupEsql,
   buildDiscoverEsqlUrl,
   buildDiscoverThreatReportNestedIocUrl,
   buildThreatReportIocSetHashLookupEsql,
   buildThreatReportLookupEsql,
 } from '../navigation';
-import { EntityChip } from '../entity_chip';
 import { IocBadge } from '../shared/ioc_badge';
 import { LabeledBadgeTable } from '../shared/labeled_badge_table';
 import type { LabeledBadgeTableRow } from '../shared/labeled_badge_table';
+import { formatPercent } from '../shared/severity';
 import { parseHuntCorrelationData } from './types';
 import type { Anchor, DiamondScore, HuntCorrelationAttachment } from './types';
 
@@ -83,11 +84,12 @@ const renderAnchorValue = ({
   navigation: AttachmentNavigationDeps;
 }): React.ReactNode => {
   if (kind === 'actor') {
+    const esql = buildActorLookupEsql({ value });
     return (
-      <EntityChip
-        entity={value}
-        kindOverride="actor"
-        share={navigation.share}
+      <IocBadge
+        value={value}
+        index={index}
+        discoverHref={esql ? buildDiscoverEsqlUrl({ share: navigation.share, esql }) : undefined}
         testSubj={`alertzeroHuntCorrelationActorChip-${index}`}
       />
     );
@@ -189,22 +191,7 @@ export const HuntCorrelationInlineContent: React.FC<HuntCorrelationInlineContent
       (vertex): EuiBasicTableColumn<DiamondScoreRow> => ({
         field: 'scoresByVertex',
         name: vertex,
-        nameTooltip:
-          diamondVertexThreshold !== undefined
-            ? (() => {
-                const vertexThresholdTooltip = i18n.translate(
-                  'xpack.alertzero.agentBuilder.attachments.huntCorrelation.vertexThresholdTooltip',
-                  {
-                    defaultMessage: 'Threshold {threshold}',
-                    values: { threshold: diamondVertexThreshold },
-                  }
-                );
-                return {
-                  content: vertexThresholdTooltip,
-                  iconProps: { 'aria-label': vertexThresholdTooltip },
-                };
-              })()
-            : undefined,
+        width: '7em',
         render: (_value: unknown, row: DiamondScoreRow) => {
           const score = row.scoresByVertex[vertex];
           if (score === undefined) {
@@ -224,7 +211,7 @@ export const HuntCorrelationInlineContent: React.FC<HuntCorrelationInlineContent
               size="s"
               max={1}
               value={score}
-              valueText
+              valueText={formatPercent(score)}
               color={isAboveThreshold ? 'success' : 'subdued'}
             />
           );
@@ -286,7 +273,24 @@ export const HuntCorrelationInlineContent: React.FC<HuntCorrelationInlineContent
             'xpack.alertzero.agentBuilder.attachments.huntCorrelation.diamondScores',
             { defaultMessage: 'Diamond scores' }
           )}
-        </strong>
+        </strong>{' '}
+        {diamondVertexThreshold !== undefined &&
+          (() => {
+            const vertexThresholdTooltip = i18n.translate(
+              'xpack.alertzero.agentBuilder.attachments.huntCorrelation.vertexThresholdTooltip',
+              {
+                defaultMessage: 'Vertex threshold {threshold}',
+                values: { threshold: diamondVertexThreshold },
+              }
+            );
+            return (
+              <EuiIconTip
+                content={vertexThresholdTooltip}
+                aria-label={vertexThresholdTooltip}
+                position="right"
+              />
+            );
+          })()}
       </EuiText>
       {diamondScoreRows.length === 0 ? (
         <EuiText size="s" color="subdued">
@@ -297,6 +301,8 @@ export const HuntCorrelationInlineContent: React.FC<HuntCorrelationInlineContent
         </EuiText>
       ) : (
         <EuiBasicTable<DiamondScoreRow>
+          tableLayout="auto"
+          responsiveBreakpoint={false}
           tableCaption={i18n.translate(
             'xpack.alertzero.agentBuilder.attachments.huntCorrelation.diamondScoresTableCaption',
             { defaultMessage: 'Diamond model correlation scores' }

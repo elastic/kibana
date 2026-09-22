@@ -262,7 +262,7 @@ describe('SignificantSecurityEventInlineContent', () => {
     expect(
       screen.getByTestId('alertzeroSignificantSecurityEventIndicator-technique-0')
     ).toHaveTextContent('T1021 (90%)');
-    expect(screen.getByTestId('alertzeroSignificantSecurityEventIndicatorIocs')).toHaveTextContent(
+    expect(screen.getByTestId('alertzeroSignificantSecurityEventIndicators')).toHaveTextContent(
       '203.0.113.4'
     );
     expect(
@@ -275,9 +275,9 @@ describe('SignificantSecurityEventInlineContent', () => {
       <SignificantSecurityEventInlineContent {...renderProps(buildAttachment(baseData))} />
     );
 
-    const mitreLink = screen.getByTestId('alertzeroSignificantSecurityEventIndicatorMitreLink-0');
-    expect(mitreLink).toHaveAttribute('href', 'https://attack.mitre.org/techniques/T1021/');
-    expect(mitreLink).toHaveAttribute('target', '_blank');
+    const mitreBadge = screen.getByTestId('alertzeroSignificantSecurityEventIndicator-technique-0');
+    expect(mitreBadge).toHaveAttribute('href', 'https://attack.mitre.org/techniques/T1021/');
+    expect(mitreBadge).toHaveAttribute('target', '_blank');
   });
 
   it('renders nothing for indicators when the list is empty', () => {
@@ -287,7 +287,7 @@ describe('SignificantSecurityEventInlineContent', () => {
       />
     );
     expect(
-      screen.queryByTestId('alertzeroSignificantSecurityEventIndicatorIocs')
+      screen.queryByTestId('alertzeroSignificantSecurityEventIndicators')
     ).not.toBeInTheDocument();
   });
 

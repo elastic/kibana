@@ -66,10 +66,6 @@ const isHttpExternalUrl = (url: string): boolean => {
   }
 };
 
-const cellStyles = css`
-  overflow-wrap: anywhere;
-`;
-
 const clampedSummaryStyles = css`
   overflow-wrap: anywhere;
   display: -webkit-box;
@@ -334,56 +330,88 @@ const renderEnrichedSections = ({
     );
   }
 
-  if (liveData.ttps?.tactics.length || liveData.ttps?.techniques.length) {
+  if (
+    liveData.ttps?.tactics.length ||
+    liveData.ttps?.techniques.length ||
+    liveData.regions?.length ||
+    liveData.categories?.length
+  ) {
+    const listItems: Array<{ title: string; description: React.ReactElement }> = [];
+    if (liveData.ttps?.tactics.length) {
+      listItems.push({
+        title: i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.tactics', {
+          defaultMessage: 'Tactics',
+        }),
+        description: (
+          <EuiBadgeGroup gutterSize="xs">
+            {liveData.ttps.tactics.map((tactic) => (
+              <EuiBadge key={tactic} color="hollow">
+                {tactic}
+              </EuiBadge>
+            ))}
+          </EuiBadgeGroup>
+        ),
+      });
+    }
+    if (liveData.ttps?.techniques.length) {
+      listItems.push({
+        title: i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.techniques', {
+          defaultMessage: 'Techniques',
+        }),
+        description: (
+          <EuiBadgeGroup gutterSize="xs">
+            {liveData.ttps.techniques.map((technique) => (
+              <EuiBadge
+                key={technique}
+                color="hollow"
+                href={buildMitreTechniqueUrl(technique)}
+                target="_blank"
+                rel="noopener noreferrer"
+                iconType="external"
+                iconSide="right"
+              >
+                {technique}
+              </EuiBadge>
+            ))}
+          </EuiBadgeGroup>
+        ),
+      });
+    }
+    if (liveData.regions?.length) {
+      listItems.push({
+        title: i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.regions', {
+          defaultMessage: 'Regions',
+        }),
+        description: (
+          <EuiBadgeGroup gutterSize="xs">
+            {liveData.regions.map((region) => (
+              <EuiBadge key={region} color="hollow">
+                {region}
+              </EuiBadge>
+            ))}
+          </EuiBadgeGroup>
+        ),
+      });
+    }
+    if (liveData.categories?.length) {
+      listItems.push({
+        title: i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.categories', {
+          defaultMessage: 'Categories',
+        }),
+        description: (
+          <EuiBadgeGroup gutterSize="xs">
+            {liveData.categories.map((category) => (
+              <EuiBadge key={category} color="hollow">
+                {category}
+              </EuiBadge>
+            ))}
+          </EuiBadgeGroup>
+        ),
+      });
+    }
     sections.push(
-      <div key="ttps">
-        {sectionHeading('xpack.alertzero.agentBuilder.attachments.threat.ttps', 'TTPs')}
-        <LabeledBadgeTable
-          testSubj="alertzeroThreatAttachmentTtpTable"
-          caption={i18n.translate(
-            'xpack.alertzero.agentBuilder.attachments.threat.ttpTableCaption',
-            { defaultMessage: 'Tactics and techniques' }
-          )}
-          rows={[
-            ...(liveData.ttps.tactics.length > 0
-              ? [
-                  {
-                    id: 'tactics',
-                    label: i18n.translate(
-                      'xpack.alertzero.agentBuilder.attachments.threat.tactics',
-                      { defaultMessage: 'Tactics' }
-                    ),
-                    values: liveData.ttps.tactics.map((tactic) => (
-                      <EuiBadge key={tactic} color="hollow">
-                        {tactic}
-                      </EuiBadge>
-                    )),
-                  },
-                ]
-              : []),
-            ...(liveData.ttps.techniques.length > 0
-              ? [
-                  {
-                    id: 'techniques',
-                    label: i18n.translate(
-                      'xpack.alertzero.agentBuilder.attachments.threat.techniques',
-                      { defaultMessage: 'Techniques' }
-                    ),
-                    values: liveData.ttps.techniques.map((technique) => (
-                      <EuiLink
-                        key={technique}
-                        href={buildMitreTechniqueUrl(technique)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <EuiBadge color="hollow">{technique}</EuiBadge>
-                      </EuiLink>
-                    )),
-                  },
-                ]
-              : []),
-          ]}
-        />
+      <div key="ttps-geo-categories">
+        <EuiDescriptionList type="column" compressed listItems={listItems} />
       </div>
     );
   }
@@ -402,6 +430,8 @@ const renderEnrichedSections = ({
         {sectionHeading('xpack.alertzero.agentBuilder.attachments.threat.diamond', 'Diamond model')}
         <EuiBasicTable<ThreatReportDiamondVertex>
           compressed
+          tableLayout="auto"
+          responsiveBreakpoint={false}
           tableCaption={i18n.translate(
             'xpack.alertzero.agentBuilder.attachments.threat.diamondTableCaption',
             { defaultMessage: 'Diamond model signals' }
@@ -413,13 +443,16 @@ const renderEnrichedSections = ({
               name: i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.vertex', {
                 defaultMessage: 'Vertex',
               }),
+              width: '9em',
             },
             {
               field: 'signal',
               name: i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.signal', {
                 defaultMessage: 'Signal',
               }),
-              render: (signal?: string) => <span css={cellStyles}>{signal}</span>,
+              width: '6em',
+              render: (signal?: string) =>
+                signal ? <EuiBadge color="hollow">{signal}</EuiBadge> : null,
             },
             {
               field: 'summary',
@@ -512,57 +545,23 @@ const renderEnrichedSections = ({
       sections.push(
         <div key="evidence">
           {sectionHeading('xpack.alertzero.agentBuilder.attachments.threat.evidence', 'Evidence')}
-          <EuiFlexGroup gutterSize="l" wrap responsive={false}>
+          <EuiFlexGroup gutterSize="m" wrap responsive={false}>
             {stats.map((stat, index) => (
               <EuiFlexItem grow={false} key={index}>
-                <EuiStat title={stat.title} description={stat.description} titleSize="xs" reverse />
+                <EuiStat
+                  titleElement="span"
+                  descriptionElement="span"
+                  titleSize="s"
+                  textAlign="left"
+                  title={stat.title}
+                  description={stat.description}
+                />
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>
         </div>
       );
     }
-  }
-
-  if (liveData.regions?.length || liveData.categories?.length) {
-    const listItems: Array<{ title: string; description: React.ReactElement }> = [];
-    if (liveData.regions?.length) {
-      listItems.push({
-        title: i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.regions', {
-          defaultMessage: 'Regions',
-        }),
-        description: (
-          <EuiBadgeGroup gutterSize="xs">
-            {liveData.regions.map((region) => (
-              <EuiBadge key={region} color="hollow">
-                {region}
-              </EuiBadge>
-            ))}
-          </EuiBadgeGroup>
-        ),
-      });
-    }
-    if (liveData.categories?.length) {
-      listItems.push({
-        title: i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.categories', {
-          defaultMessage: 'Categories',
-        }),
-        description: (
-          <EuiBadgeGroup gutterSize="xs">
-            {liveData.categories.map((category) => (
-              <EuiBadge key={category} color="hollow">
-                {category}
-              </EuiBadge>
-            ))}
-          </EuiBadgeGroup>
-        ),
-      });
-    }
-    sections.push(
-      <div key="geo-categories">
-        <EuiDescriptionList type="column" compressed listItems={listItems} />
-      </div>
-    );
   }
 
   if (sections.length === 0) {

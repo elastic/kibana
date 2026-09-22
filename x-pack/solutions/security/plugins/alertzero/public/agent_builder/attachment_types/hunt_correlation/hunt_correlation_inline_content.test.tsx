@@ -273,8 +273,8 @@ describe('HuntCorrelationInlineContent', () => {
     expect(screen.getAllByText('n/a')).toHaveLength(3);
   });
 
-  it('shows a vertex threshold tooltip on the diamond score column headers', () => {
+  it('shows a vertex threshold tooltip beside the Diamond scores heading', () => {
     render(<HuntCorrelationInlineContent {...renderProps(buildAttachment(baseData))} />);
-    expect(screen.getAllByText('Threshold 0.6').length).toBeGreaterThan(0);
+    expect(screen.getByText('Vertex threshold 0.6')).toBeInTheDocument();
   });
 });

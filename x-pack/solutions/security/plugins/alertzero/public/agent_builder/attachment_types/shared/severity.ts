@@ -18,8 +18,8 @@ export const SEVERITY_BADGE_COLOR: Record<'low' | 'medium' | 'high' | 'critical'
 export const severityBadgeColor = (level?: string): string =>
   (level && SEVERITY_BADGE_COLOR[level as keyof typeof SEVERITY_BADGE_COLOR]) || 'hollow';
 
-/** Formats a 0..1 confidence value as a percentage string, e.g. 0.9 -> "90%". */
-export const formatConfidencePercent = (value: number): string =>
+/** Formats a 0..1 fraction as a percentage string, e.g. 0.9 -> "90%". */
+export const formatPercent = (value: number): string =>
   i18n.translate('xpack.alertzero.agentBuilder.attachments.shared.confidencePercent', {
     defaultMessage: '{value, number, percent}',
     values: { value },

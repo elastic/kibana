@@ -14,6 +14,7 @@ import {
   EuiBasicTable,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHealth,
   EuiInMemoryTable,
   EuiPanel,
   EuiProgress,
@@ -22,8 +23,7 @@ import {
   EuiText,
   EuiTimeline,
   EuiTimelineItem,
-  EuiTitle,
-  useEuiTheme,
+  euiPaletteColorBlind,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -40,8 +40,8 @@ import {
 } from '../navigation';
 import { EntityChip } from '../entity_chip';
 import { IocBadge } from '../shared/ioc_badge';
-import { LabeledBadgeTable } from '../shared/labeled_badge_table';
-import { formatConfidencePercent } from '../shared/severity';
+import { LabeledBadgeTable, type LabeledBadgeTableRow } from '../shared/labeled_badge_table';
+import { formatPercent } from '../shared/severity';
 import { buildMitreTechniqueUrl } from '../shared/mitre_url';
 import { parseSignificantSecurityEventData } from './types';
 import type {
@@ -75,14 +75,10 @@ const paginationListStyles = css`
   }
 `;
 
-const VIS_COLOR_COUNT = 10;
+const visColorPalette = euiPaletteColorBlind();
 
-/** Cycles through `euiTheme.colors.vis.euiColorVis0..9` for distribution bar segments. */
-const useVisColorCycle = () => {
-  const { euiTheme } = useEuiTheme();
-  const visColors = euiTheme.colors.vis as unknown as Record<string, string>;
-  return (index: number) => visColors[`euiColorVis${index % VIS_COLOR_COUNT}`];
-};
+/** Cycles through the EUI color-blind-safe palette for distribution bar segments. */
+const visColorAt = (index: number) => visColorPalette[index % visColorPalette.length];
 
 const EventRows: React.FC<{
   events: SignificantSecurityEventRef[];
@@ -148,6 +144,8 @@ const EventRows: React.FC<{
       items={sortedEvents}
       columns={columns}
       compressed
+      tableLayout="auto"
+      responsiveBreakpoint={false}
       pagination={{ initialPageSize: 5, pageSizeOptions: [5, 10, 25] }}
     />
   );
@@ -162,8 +160,18 @@ const AlertList: React.FC<{
   }
 
   return (
-    <EuiText size="s">
-      <ul>
+    <div data-test-subj="alertzeroSignificantSecurityEventAlerts">
+      <EuiText size="s">
+        <strong>
+          <FormattedMessage
+            id="xpack.alertzero.agentBuilder.attachments.sse.alertsHeading"
+            defaultMessage="{count, plural, one {# alert} other {# alerts}}"
+            values={{ count: alerts.length }}
+          />
+        </strong>
+      </EuiText>
+      <EuiSpacer size="xs" />
+      <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
         {alerts.map((alert) => {
           const href = buildAlertDetailsUrl({
             prependPath: navigation.prependPath,
@@ -173,32 +181,27 @@ const AlertList: React.FC<{
             timestamp: alert.timestamp,
           });
           return (
-            <li key={`${alert.index}:${alert.alert_id}`}>
+            <EuiFlexItem grow={false} key={`${alert.index}:${alert.alert_id}`}>
               <IocBadge
                 value={alert.alert_id}
                 index={0}
                 alertDetailsHref={href}
                 testSubj={`alertzeroSignificantSecurityEventAlertLink-${alert.alert_id}`}
               />
-            </li>
+            </EuiFlexItem>
           );
         })}
-      </ul>
-    </EuiText>
+      </EuiFlexGroup>
+    </div>
   );
 };
 
 /**
  * Taxonomy labels only, per `significant_security_event_schema.ts`: not
  * Discover IOCs, so this never links into `logs-*` (do not invent field
- * mappings from `type`). Split by type instead of one flat bulleted list:
- * `ioc` and `technique` are what the hunt coordinator actually emits today
- * (`sse_mapper.ts`'s `buildSecurityKnowledgeIndicators`), and each has a
- * distinct shape worth a distinct treatment. The IOC bucket renders as a
- * `LabeledBadgeTable` (one row per IOC type) to match the Threat Report
- * design; techniques and the fallback bucket keep their prior list/badge
- * rendering since neither maps cleanly onto that two-column shape (a
- * documented deviation from the "match Threat Report" instruction).
+ * mappings from `type`). Single `LabeledBadgeTable`: one row per IOC type,
+ * one `Techniques` row, and one row per remaining indicator type, matching
+ * the Threat Report Indicators shape.
  */
 const IndicatorList: React.FC<{
   indicators: SecurityKnowledgeIndicator[];
@@ -221,7 +224,7 @@ const IndicatorList: React.FC<{
     iocsByType.set(iocType, bucket);
   }
 
-  const iocRows = [...iocsByType.entries()].map(([iocType, group]) => ({
+  const rows: LabeledBadgeTableRow[] = [...iocsByType.entries()].map(([iocType, group]) => ({
     id: iocType,
     label: iocType,
     values: (
@@ -238,88 +241,87 @@ const IndicatorList: React.FC<{
     ),
   }));
 
-  return (
-    <>
-      {iocIndicators.length > 0 && (
-        <div data-test-subj="alertzeroSignificantSecurityEventIndicatorIocs">
-          <LabeledBadgeTable
-            rows={iocRows}
-            caption={i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.indicatorsIocs', {
-              defaultMessage: 'IOCs',
-            })}
-          />
-        </div>
-      )}
-
-      {techniqueIndicators.length > 0 && (
-        <div
-          data-test-subj="alertzeroSignificantSecurityEventIndicatorTechniques"
-          css={{ marginTop: 8, marginBottom: 8 }}
-        >
-          <EuiText size="xs" color="subdued">
-            {i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.indicatorsTechniques', {
-              defaultMessage: 'Techniques',
-            })}
-          </EuiText>
-          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
-            {techniqueIndicators.map((indicator, index) => {
-              const mitreUrl = indicator.technique_id
-                ? buildMitreTechniqueUrl(indicator.technique_id)
-                : undefined;
-              const badge = (
-                <EuiBadge
-                  color="hollow"
-                  data-test-subj={`alertzeroSignificantSecurityEventIndicator-technique-${index}`}
-                >
-                  <span css={cellStyles}>
-                    {indicator.value}
-                    {indicator.confidence != null
-                      ? ` (${formatConfidencePercent(indicator.confidence)})`
-                      : ''}
-                  </span>
-                </EuiBadge>
-              );
-              return (
-                <EuiFlexItem grow={false} key={`${indicator.type}-${indicator.value}-${index}`}>
-                  {mitreUrl ? (
-                    <a
-                      href={mitreUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      data-test-subj={`alertzeroSignificantSecurityEventIndicatorMitreLink-${index}`}
-                    >
-                      {badge}
-                    </a>
-                  ) : (
-                    badge
-                  )}
-                </EuiFlexItem>
-              );
-            })}
-          </EuiFlexGroup>
-        </div>
-      )}
-
-      {otherIndicators.length > 0 && (
-        <EuiText size="s">
-          <ul>
-            {otherIndicators.map((indicator, index) => (
-              <li
+  if (techniqueIndicators.length > 0) {
+    rows.push({
+      id: 'technique',
+      label: i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.indicatorsTechniques', {
+        defaultMessage: 'Techniques',
+      }),
+      values: (
+        <>
+          {techniqueIndicators.map((indicator, index) => {
+            const mitreUrl = indicator.technique_id
+              ? buildMitreTechniqueUrl(indicator.technique_id)
+              : undefined;
+            const linkProps = mitreUrl
+              ? { href: mitreUrl, target: '_blank', rel: 'noopener noreferrer', iconType: 'popout' }
+              : {};
+            return (
+              <EuiBadge
                 key={`${indicator.type}-${indicator.value}-${index}`}
-                data-test-subj={`alertzeroSignificantSecurityEventIndicator-${indicator.type}-${index}`}
+                color="hollow"
+                iconSide="right"
+                data-test-subj={`alertzeroSignificantSecurityEventIndicator-technique-${index}`}
+                {...linkProps}
               >
                 <span css={cellStyles}>
-                  {indicator.type}: {indicator.value}
-                  {indicator.confidence != null
-                    ? ` (${formatConfidencePercent(indicator.confidence)})`
-                    : ''}
+                  {indicator.value}
+                  {indicator.confidence != null ? ` (${formatPercent(indicator.confidence)})` : ''}
                 </span>
-              </li>
-            ))}
-          </ul>
-        </EuiText>
-      )}
-    </>
+              </EuiBadge>
+            );
+          })}
+        </>
+      ),
+    });
+  }
+
+  const otherByType = new Map<string, SecurityKnowledgeIndicator[]>();
+  for (const indicator of otherIndicators) {
+    const bucket = otherByType.get(indicator.type) ?? [];
+    bucket.push(indicator);
+    otherByType.set(indicator.type, bucket);
+  }
+  for (const [indicatorType, group] of otherByType.entries()) {
+    rows.push({
+      id: indicatorType,
+      label: indicatorType,
+      values: (
+        <>
+          {group.map((indicator, index) => (
+            <EuiBadge
+              key={`${indicator.type}-${indicator.value}-${index}`}
+              color="hollow"
+              data-test-subj={`alertzeroSignificantSecurityEventIndicator-${indicator.type}-${index}`}
+            >
+              <span css={cellStyles}>
+                {indicator.value}
+                {indicator.confidence != null ? ` (${formatPercent(indicator.confidence)})` : ''}
+              </span>
+            </EuiBadge>
+          ))}
+        </>
+      ),
+    });
+  }
+
+  return (
+    <div data-test-subj="alertzeroSignificantSecurityEventIndicators">
+      <EuiText size="s">
+        <strong>
+          {i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.indicators', {
+            defaultMessage: 'Indicators',
+          })}
+        </strong>
+      </EuiText>
+      <EuiSpacer size="xs" />
+      <LabeledBadgeTable
+        rows={rows}
+        caption={i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.indicatorsCaption', {
+          defaultMessage: 'Indicators',
+        })}
+      />
+    </div>
   );
 };
 
@@ -391,7 +393,7 @@ const TimelineSection: React.FC<{ timeline: TimelineEntry[] }> = ({ timeline }) 
           })}
         </strong>
       </EuiText>
-      <EuiTimeline data-test-subj="alertzeroSignificantSecurityEventTimeline">
+      <EuiTimeline gutterSize="m" data-test-subj="alertzeroSignificantSecurityEventTimeline">
         {timeline.map((entry, index) => (
           <EuiTimelineItem icon="clock" verticalAlign="top" key={`${entry.at}-${index}`}>
             <EuiText size="xs" color="subdued">
@@ -418,7 +420,6 @@ interface Tier2TableRow {
 }
 
 const HuntResultSection: React.FC<{ huntResult: ParsedHuntResult }> = ({ huntResult }) => {
-  const visColorAt = useVisColorCycle();
   const { tier1, tier2 } = huntResult;
   const distributionStats = tier1.perIndex.map((row, index) => ({
     key: row.index,
@@ -435,14 +436,17 @@ const HuntResultSection: React.FC<{ huntResult: ParsedHuntResult }> = ({ huntRes
         defaultMessage: 'Technique',
       }),
       render: (techniqueId: string) => (
-        <a
+        <EuiBadge
+          color="hollow"
           href={buildMitreTechniqueUrl(techniqueId)}
           target="_blank"
-          rel="noreferrer"
+          rel="noopener noreferrer"
+          iconType="external"
+          iconSide="right"
           data-test-subj={`alertzeroSignificantSecurityEventHuntResultTechniqueLink-${techniqueId}`}
         >
-          <EuiBadge color="hollow">{techniqueId}</EuiBadge>
-        </a>
+          {techniqueId}
+        </EuiBadge>
       ),
     },
     {
@@ -472,13 +476,9 @@ const HuntResultSection: React.FC<{ huntResult: ParsedHuntResult }> = ({ huntRes
       name: i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.huntResultConfidence', {
         defaultMessage: 'Confidence',
       }),
+      width: '8em',
       render: (confidence: number) => (
-        <EuiProgress
-          size="s"
-          value={confidence}
-          max={1}
-          valueText={formatConfidencePercent(confidence)}
-        />
+        <EuiProgress size="s" value={confidence} max={1} valueText={formatPercent(confidence)} />
       ),
     },
   ];
@@ -493,49 +493,14 @@ const HuntResultSection: React.FC<{ huntResult: ParsedHuntResult }> = ({ huntRes
 
   return (
     <div data-test-subj="alertzeroSignificantSecurityEventHuntResult">
-      <EuiTitle size="xxs">
-        <h4>
+      <EuiText size="s">
+        <strong>
           {i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.huntResultTitle', {
             defaultMessage: 'Hunt result',
           })}
-        </h4>
-      </EuiTitle>
+        </strong>
+      </EuiText>
       <EuiSpacer size="xs" />
-      <EuiFlexGroup gutterSize="l" responsive={false} wrap>
-        <EuiFlexItem grow={false}>
-          <EuiStat
-            titleSize="xs"
-            reverse
-            title={tier1.counts.totalHits}
-            description={i18n.translate(
-              'xpack.alertzero.agentBuilder.attachments.sse.huntResultTotalHits',
-              { defaultMessage: 'Total hits' }
-            )}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiStat
-            titleSize="xs"
-            reverse
-            title={tier1.counts.affectedHosts}
-            description={i18n.translate(
-              'xpack.alertzero.agentBuilder.attachments.sse.huntResultAffectedHosts',
-              { defaultMessage: 'Affected hosts' }
-            )}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiStat
-            titleSize="xs"
-            reverse
-            title={tier1.counts.affectedUsers}
-            description={i18n.translate(
-              'xpack.alertzero.agentBuilder.attachments.sse.huntResultAffectedUsers',
-              { defaultMessage: 'Affected users' }
-            )}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
       <EuiText size="xs" color="subdued">
         <FormattedDate
           value={huntResult.timeRange.from}
@@ -553,14 +518,67 @@ const HuntResultSection: React.FC<{ huntResult: ParsedHuntResult }> = ({ huntRes
         />{' '}
         <FormattedTime value={huntResult.timeRange.to} />
       </EuiText>
+      <EuiSpacer size="s" />
+      <EuiFlexGroup gutterSize="m" responsive={false} wrap>
+        <EuiFlexItem grow={false}>
+          <EuiStat
+            titleElement="span"
+            descriptionElement="span"
+            titleSize="s"
+            textAlign="left"
+            title={tier1.counts.totalHits}
+            description={i18n.translate(
+              'xpack.alertzero.agentBuilder.attachments.sse.huntResultTotalHits',
+              { defaultMessage: 'Total hits' }
+            )}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiStat
+            titleElement="span"
+            descriptionElement="span"
+            titleSize="s"
+            textAlign="left"
+            title={tier1.counts.affectedHosts}
+            description={i18n.translate(
+              'xpack.alertzero.agentBuilder.attachments.sse.huntResultAffectedHosts',
+              { defaultMessage: 'Affected hosts' }
+            )}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiStat
+            titleElement="span"
+            descriptionElement="span"
+            titleSize="s"
+            textAlign="left"
+            title={tier1.counts.affectedUsers}
+            description={i18n.translate(
+              'xpack.alertzero.agentBuilder.attachments.sse.huntResultAffectedUsers',
+              { defaultMessage: 'Affected users' }
+            )}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
       {distributionStats.length > 0 && (
         <>
           <EuiSpacer size="s" />
           <DistributionBar
             stats={distributionStats}
+            hideLastTooltip
             data-test-subj="alertzeroSignificantSecurityEventHuntResultDistributionBar"
           />
+          <EuiSpacer size="xs" />
+          <EuiFlexGroup gutterSize="m" wrap responsive={false}>
+            {distributionStats.map((stat) => (
+              <EuiFlexItem grow={false} key={stat.key}>
+                <EuiHealth color={stat.color} textSize="xs">
+                  {stat.label} ({stat.count})
+                </EuiHealth>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
           <EuiText size="xs" color="subdued">
             <FormattedMessage
               id="xpack.alertzero.agentBuilder.attachments.sse.huntResultDistributionSummary"
@@ -576,6 +594,9 @@ const HuntResultSection: React.FC<{ huntResult: ParsedHuntResult }> = ({ huntRes
           <EuiSpacer size="s" />
           <EuiBasicTable<Tier2TableRow>
             compressed
+            tableLayout="auto"
+            responsiveBreakpoint={false}
+            rowHeader="techniqueId"
             tableCaption={i18n.translate(
               'xpack.alertzero.agentBuilder.attachments.sse.huntResultBehaviorsTableCaption',
               { defaultMessage: 'Hunt result behaviors' }
@@ -598,8 +619,8 @@ export const SignificantSecurityEventInlineContent: React.FC<
     return (
       <EuiPanel
         hasShadow={false}
-        hasBorder
-        paddingSize="m"
+        hasBorder={false}
+        paddingSize="s"
         data-test-subj={SSE_ATTACHMENT_EMPTY_TEST_ID}
       >
         <EuiText size="s" color="subdued">
@@ -648,11 +669,22 @@ export const SignificantSecurityEventInlineContent: React.FC<
           <EuiFlexGroup alignItems="center" gutterSize="xs" wrap responsive={false}>
             {parsed.runId && (
               <EuiFlexItem grow={false}>
-                <IocBadge
-                  value={parsed.runId}
-                  index={0}
-                  testSubj="alertzeroSignificantSecurityEventRunId"
-                />
+                <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="xs" color="subdued">
+                      {i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.runId', {
+                        defaultMessage: 'Run id:',
+                      })}
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <IocBadge
+                      value={parsed.runId}
+                      index={0}
+                      testSubj="alertzeroSignificantSecurityEventRunId"
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </EuiFlexItem>
             )}
             {parsed.reportId && (

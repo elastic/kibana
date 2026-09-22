@@ -12,7 +12,7 @@ import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import type { AttachmentUIDefinition, HeaderBadge } from '@kbn/agent-builder-browser/attachments';
 import type { AttachmentNavigationDeps } from '../navigation';
 import { buildAlertsLookupEsql, buildDiscoverEsqlUrl, buildEventsLookupEsql } from '../navigation';
-import { severityBadgeColor, formatConfidencePercent } from '../shared/severity';
+import { severityBadgeColor, formatPercent } from '../shared/severity';
 import { parseSignificantSecurityEventData } from './types';
 import type { SignificantSecurityEventAttachment } from './types';
 
@@ -68,7 +68,7 @@ export const createSignificantSecurityEventAttachmentDefinition = ({
     }
     if (parsed?.confidence != null) {
       badges.push({
-        label: formatConfidencePercent(parsed.confidence),
+        label: formatPercent(parsed.confidence),
         color: 'hollow',
         ...(parsed.huntResult?.hasConfirmedHit ? { iconType: 'securitySignalDetected' } : {}),
       });

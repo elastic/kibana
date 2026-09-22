@@ -77,7 +77,7 @@ export const LabeledBadgeTable: React.FC<LabeledBadgeTableProps> = ({
           css={wrappingCellCss}
         >
           {React.Children.map(values, (child, index) => (
-            <EuiFlexItem grow={false} key={index}>
+            <EuiFlexItem grow={false} key={index} css={{ minWidth: 0, maxWidth: '100%' }}>
               {child}
             </EuiFlexItem>
           ))}
