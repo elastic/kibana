@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { EuiFlexGridProps } from '@elastic/eui';
 import { EuiFlexGrid, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -170,17 +170,40 @@ export const MetricsGrid = ({
 
   const handleViewDetails = useCallback(
     (index: number, esqlQuery: string, metricItem: ParsedMetricItem) => {
-      openAfterDismissingOtherFlyouts(DiscoverFlyouts.metricInsights, () =>
-        onFlyoutStateChange({
-          gridPosition: index,
-          metricUniqueKey: getMetricUniqueKey(metricItem),
-          esqlQuery,
-          selectedTabId: 'overview',
-        })
-      );
+      onFlyoutStateChange({
+        gridPosition: index,
+        metricUniqueKey: getMetricUniqueKey(metricItem),
+        esqlQuery,
+        selectedTabId: 'overview',
+      });
     },
     [onFlyoutStateChange]
   );
+
+  const hasFlyoutToOpen = Boolean(flyoutData) && isTabSelected;
+  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+
+  // Push flyouts share one inline offset on the app scroll container, so this one only mounts once
+  // the others have unmounted. Keyed on whether a flyout is owed rather than on `flyoutData`, so
+  // switching metrics while the flyout is open does not dismiss and remount it. This covers both
+  // View details and a tab restoring its `flyoutState` when it becomes active.
+  useEffect(() => {
+    if (!hasFlyoutToOpen) {
+      setIsFlyoutOpen(false);
+      return;
+    }
+
+    let isCurrent = true;
+    openAfterDismissingOtherFlyouts(DiscoverFlyouts.metricInsights, () => {
+      if (isCurrent) {
+        setIsFlyoutOpen(true);
+      }
+    });
+
+    return () => {
+      isCurrent = false;
+    };
+  }, [hasFlyoutToOpen]);
 
   const handleCloseFlyout = useCallback(() => {
     if (!flyoutState) {
@@ -272,7 +295,7 @@ export const MetricsGrid = ({
           })}
         </EuiFlexGrid>
       </A11yGridWrapper>
-      {flyoutData && isTabSelected && (
+      {flyoutData && isFlyoutOpen && (
         <MetricInsightsFlyout
           metricItem={flyoutData.metricItem}
           esqlQuery={flyoutData.esqlQuery}

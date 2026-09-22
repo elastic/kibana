@@ -10,6 +10,9 @@
 import { expect } from '@kbn/scout/ui';
 import { spaceTest, testData, DEFAULT_TIME_RANGE } from '../fixtures';
 
+/** The app scroll container is offset while a push flyout is open, so with none open it is zero. */
+const NO_PUSH_OFFSET = '0px';
+
 spaceTest.describe(
   'Metrics in Discover - Grid Settings',
   { tag: testData.METRICS_EXPERIENCE_TAGS },
@@ -278,6 +281,12 @@ spaceTest.describe(
 
           await expect(flyout.container).toBeHidden();
           await expect(gridSettings.flyout).toBeVisible();
+          // The outgoing insights flyout must not clear the offset the surviving configuration
+          // owns, otherwise it overlays the grid instead of pushing it aside.
+          await expect(metricsExperience.appScrollContainer).not.toHaveCSS(
+            'padding-inline-end',
+            NO_PUSH_OFFSET
+          );
         });
 
         await spaceTest.step('opening the insights flyout closes the configuration', async () => {
@@ -285,7 +294,10 @@ spaceTest.describe(
 
           await expect(gridSettings.flyout).toBeHidden();
           await expect(flyout.container).toBeVisible();
-          await metricsExperience.expectPushFlyoutOffset();
+          await expect(metricsExperience.appScrollContainer).not.toHaveCSS(
+            'padding-inline-end',
+            NO_PUSH_OFFSET
+          );
         });
 
         await spaceTest.step('closing the surviving flyout leaves both closed', async () => {
@@ -293,7 +305,10 @@ spaceTest.describe(
 
           await expect(flyout.container).toBeHidden();
           await expect(gridSettings.flyout).toBeHidden();
-          await metricsExperience.expectNoPushFlyoutOffset();
+          await expect(metricsExperience.appScrollContainer).toHaveCSS(
+            'padding-inline-end',
+            NO_PUSH_OFFSET
+          );
         });
       }
     );
@@ -313,7 +328,10 @@ spaceTest.describe(
         await expect(inspector.panel).toBeHidden();
 
         await gridSettings.cancel();
-        await metricsExperience.expectNoPushFlyoutOffset();
+        await expect(metricsExperience.appScrollContainer).toHaveCSS(
+          'padding-inline-end',
+          NO_PUSH_OFFSET
+        );
       }
     );
   }

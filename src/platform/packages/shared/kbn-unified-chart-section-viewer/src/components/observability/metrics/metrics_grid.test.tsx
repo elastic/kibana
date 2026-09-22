@@ -619,7 +619,7 @@ describe('MetricsGrid', () => {
     });
   });
 
-  describe('flyout dismissal on view details', () => {
+  describe('flyout dismissal before opening', () => {
     it('should open the insights flyout through the other flyouts being dismissed first', () => {
       renderMetricsGrid();
 
@@ -644,6 +644,54 @@ describe('MetricsGrid', () => {
         'metricInsights',
         expect.any(Function)
       );
+    });
+
+    it('keeps a restored flyout unmounted until the other flyouts have been dismissed', () => {
+      let openFlyout: (() => void) | undefined;
+      (openAfterDismissingOtherFlyouts as jest.Mock).mockImplementationOnce(
+        (_flyout: string, open: () => void) => {
+          openFlyout = open;
+        }
+      );
+
+      const initialFlyoutState: FlyoutState = {
+        gridPosition: 1,
+        metricUniqueKey: `${metricItems[1].indexName}::${metricItems[1].metricName}`,
+        esqlQuery: 'FROM metrics-* | STATS AVG(system.memory.utilization) BY TBUCKET(100)',
+        selectedTabId: 'overview',
+      };
+
+      const { queryByTestId, rerender } = render(
+        <MetricsGridWithRestorableState
+          {...defaultProps}
+          discoverFetch$={discoverFetch$}
+          profileId="test-profile"
+          initialState={{ flyoutState: initialFlyoutState }}
+          isTabSelected={false}
+        />
+      );
+
+      expect(openAfterDismissingOtherFlyouts).not.toHaveBeenCalled();
+
+      rerender(
+        <MetricsGridWithRestorableState
+          {...defaultProps}
+          discoverFetch$={discoverFetch$}
+          profileId="test-profile"
+          initialState={{ flyoutState: initialFlyoutState }}
+          isTabSelected={true}
+        />
+      );
+
+      expect(openAfterDismissingOtherFlyouts).toHaveBeenCalledWith(
+        'metricInsights',
+        expect.any(Function)
+      );
+      expect(queryByTestId('metricsExperienceFlyout')).not.toBeInTheDocument();
+
+      act(() => openFlyout?.());
+
+      expect(queryByTestId('metricsExperienceFlyout')).toBeInTheDocument();
     });
   });
 
