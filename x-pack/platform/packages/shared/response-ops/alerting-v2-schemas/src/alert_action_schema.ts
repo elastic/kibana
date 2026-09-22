@@ -96,8 +96,8 @@ const tagEpisodeActionSchema = z
   .object({
     action_type: z
       .literal(ALERT_EPISODE_ACTION_TYPE.TAG)
-      .describe('Adds tags to an alerting episode.'),
-    tags: tagsSchema.describe('List of tags to add to the episode.'),
+      .describe("Replaces an alerting episode's tags."),
+    tags: tagsSchema.describe("Replaces the episode's tags. Send `[]` to clear."),
   })
   .strict()
   .meta({ id: 'alerting_tag_episode_action' });
