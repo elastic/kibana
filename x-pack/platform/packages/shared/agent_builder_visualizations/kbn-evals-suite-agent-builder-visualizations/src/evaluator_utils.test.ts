@@ -78,6 +78,18 @@ describe('withLowScoreLogging', () => {
     expect(message).toContain('trace-123');
   });
 
+  it('logs the follow-up turn for edit examples', async () => {
+    const log = buildLog();
+
+    await withLowScoreLogging(buildEvaluator(0), log).evaluate({
+      ...params,
+      input: { question: 'Create a metric.', followUp: 'Make it a pie.' },
+    });
+
+    const [message] = (log.warning as jest.Mock).mock.calls[0];
+    expect(message).toContain('Follow-up:   Make it a pie.');
+  });
+
   it('stays quiet for a full score and for a skipped null score', async () => {
     const log = buildLog();
 

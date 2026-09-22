@@ -64,7 +64,9 @@ export const withLowScoreLogging = <
     }
 
     const output = (params.output ?? {}) as LoggableOutput;
-    const question = (params.input as { question?: string } | undefined)?.question;
+    const input = params.input as { question?: string; followUp?: string } | undefined;
+    const question = input?.question;
+    const followUp = input?.followUp;
     const visualizations = output.visualizations ?? [];
     const errors = output.errors ?? [];
     const traceId = output.agentTraceId ?? output.traceId;
@@ -72,6 +74,7 @@ export const withLowScoreLogging = <
     const sections = [
       `\n━━━━━━ LOW SCORE: ${evaluator.name} = ${result.score} ━━━━━━`,
       question ? `Question:    ${question}` : undefined,
+      followUp ? `Follow-up:   ${followUp}` : undefined,
       result.label ? `Label:       ${result.label}` : undefined,
       `Explanation: ${result.explanation ?? '(none)'}`,
       `--- Gold ---\n${formatValue(params.expected)}`,

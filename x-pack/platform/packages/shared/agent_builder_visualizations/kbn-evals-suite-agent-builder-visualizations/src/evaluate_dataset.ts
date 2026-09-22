@@ -98,6 +98,12 @@ export type VisualizationAgentEvaluator = Evaluator<
   VisualizationAgentTaskOutput
 >;
 
+/** The full user intent for judges: the opening request plus any follow-up edit. */
+export const describeRequest = (input: VisualizationDatasetExample['input']): string =>
+  [input?.question, input?.followUp ? `Follow-up: ${input.followUp}` : undefined]
+    .filter((part): part is string => Boolean(part))
+    .join('\n');
+
 export type EvaluateDataset = ({
   dataset,
 }: {
@@ -177,7 +183,7 @@ export function createEvaluateDataset({
     VisualizationAgentTaskOutput
   >({
     visualizationExtractor,
-    questionExtractor: (input) => input?.question ?? '',
+    questionExtractor: describeRequest,
     expectedChartFormExtractor: (expected) => extractGoldChartForm(expected),
     judge: createChartIntentJudge({ inferenceClient, log }),
   });

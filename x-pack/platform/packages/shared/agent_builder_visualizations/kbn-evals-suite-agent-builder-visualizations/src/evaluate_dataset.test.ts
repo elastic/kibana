@@ -14,7 +14,7 @@ import type {
 } from '@kbn/evals';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { createEvaluateDataset } from './evaluate_dataset';
+import { createEvaluateDataset, describeRequest } from './evaluate_dataset';
 
 const buildEvaluator = (name: string): Evaluator => ({
   name,
@@ -240,5 +240,17 @@ describe('createEvaluateDataset', () => {
     const innerEvaluate = deps.evaluators.traceBasedEvaluators.latency.evaluate as jest.Mock;
     const [[params]] = innerEvaluate.mock.calls;
     expect(params.output.traceId).toBe('agent-trace');
+  });
+});
+
+describe('describeRequest', () => {
+  it('returns the question alone for single-turn examples', () => {
+    expect(describeRequest({ question: 'Create a bar chart.' })).toBe('Create a bar chart.');
+  });
+
+  it('appends the follow-up so judges see the edited intent', () => {
+    expect(
+      describeRequest({ question: 'Create a metric.', followUp: 'Show it as a pie instead.' })
+    ).toBe('Create a metric.\nFollow-up: Show it as a pie instead.');
   });
 });
