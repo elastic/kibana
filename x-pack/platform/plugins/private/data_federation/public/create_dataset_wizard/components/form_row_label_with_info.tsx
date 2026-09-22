@@ -28,7 +28,7 @@ export function FormRowLabelWithInfo({
     >
       <EuiFlexItem grow={false}>{label}</EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiIconTip type="iInCircle" content={infoText} aria-label={infoIconAriaLabel} />
+        <EuiIconTip content={infoText} aria-label={infoIconAriaLabel} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
