@@ -23,9 +23,11 @@ import {
   seedUserEntity,
   waitForResolution,
   assertNotResolved,
+  assertSidRuleWatermarked,
   triggerMaintainerRun,
   ingestDoc,
   forceLogExtraction,
+  normalizeKeywordList,
   setupLogsTestDataStream,
   teardownLogsTestDataStream,
 } from '../../../common/fixtures/helpers';
@@ -658,7 +660,6 @@ apiTest.describe('Automated resolution integration tests', { tag: ENTITY_STORE_T
         sync: true,
       });
       await assertNotResolved(esClient, csEntity);
-      await assertNotResolved(esClient, adEntity);
     }
   );
 
@@ -729,7 +730,6 @@ apiTest.describe('Automated resolution integration tests', { tag: ENTITY_STORE_T
         sync: true,
       });
       await assertNotResolved(esClient, m365Entity);
-      await assertNotResolved(esClient, entraEntity);
     }
   );
 
@@ -797,8 +797,8 @@ apiTest.describe('Automated resolution integration tests', { tag: ENTITY_STORE_T
     await triggerMaintainerRun(apiClient, internalHeaders, 'automated-resolution', {
       sync: true,
     });
+    await assertSidRuleWatermarked(apiClient, internalHeaders, esClient);
     await assertNotResolved(esClient, windowsEntity);
-    await assertNotResolved(esClient, adEntity);
   });
 
   apiTest('Well-known SIDs on local entities are not bridged', async ({ apiClient, esClient }) => {
@@ -823,6 +823,7 @@ apiTest.describe('Automated resolution integration tests', { tag: ENTITY_STORE_T
     await triggerMaintainerRun(apiClient, internalHeaders, 'automated-resolution', {
       sync: true,
     });
+    await assertSidRuleWatermarked(apiClient, internalHeaders, esClient);
     await assertNotResolved(esClient, localEntity);
     await assertNotResolved(esClient, adEntity);
   });
@@ -852,7 +853,7 @@ apiTest.describe('Automated resolution integration tests', { tag: ENTITY_STORE_T
       await triggerMaintainerRun(apiClient, internalHeaders, 'automated-resolution', {
         sync: true,
       });
-      await assertNotResolved(esClient, localA);
+      await assertSidRuleWatermarked(apiClient, internalHeaders, esClient);
       await assertNotResolved(esClient, localB);
     }
   );
@@ -887,6 +888,10 @@ apiTest.describe('Automated resolution integration tests', { tag: ENTITY_STORE_T
         );
         expect(extraction.statusCode).toBe(200);
 
+        let extractedSource:
+          | { entity?: { namespace?: string }; user?: { id?: unknown } }
+          | undefined;
+
         await expect
           .poll(
             async () => {
@@ -895,11 +900,15 @@ apiTest.describe('Automated resolution integration tests', { tag: ENTITY_STORE_T
                 query: { term: { 'entity.id': localEntity } },
                 size: 1,
               });
-              return response.hits.hits.length;
+              extractedSource = response.hits.hits[0]?._source as typeof extractedSource;
+              return extractedSource;
             },
             { timeout: 30_000, intervals: [200] }
           )
-          .toBe(1);
+          .toBeDefined();
+
+        expect(extractedSource?.entity?.namespace).toBe('local');
+        expect(normalizeKeywordList(extractedSource?.user?.id)).toStrictEqual([sid]);
 
         await seedUserEntity(esClient, {
           entityId: adEntity,

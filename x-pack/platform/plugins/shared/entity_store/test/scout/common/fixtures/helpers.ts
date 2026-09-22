@@ -10,7 +10,11 @@ import type { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { EntityStoreStatusResponseBody } from '../../../../server/routes/apis/status';
 import { hashEuid } from '../../../../common/domain/euid';
-import type { EntityType } from '../../../../common';
+import {
+  RESOLUTION_RULE_IDS,
+  type EntityType,
+  type GetEntityMaintainersResponse,
+} from '../../../../common';
 
 import {
   ENTITY_STORE_ROUTES,
@@ -64,6 +68,13 @@ export const clearEntityStoreIndices = async (esClient: EsClient) => {
  * Use this instead of importing Scout's ApiClient type.
  */
 export interface ForceLogExtractionApiClient {
+  get(
+    url: string,
+    options: {
+      headers: Record<string, string>;
+      responseType: 'json';
+    }
+  ): Promise<{ statusCode: number; body: unknown }>;
   post(
     url: string,
     options: {
@@ -117,6 +128,7 @@ export const setupLogsTestDataStream = async (esClient: EsClient) => {
 };
 
 export const teardownLogsTestDataStream = async (esClient: EsClient) => {
+  await esClient.indices.deleteDataStream({ name: LOGS_TEST_INDEX }).catch(() => {});
   await esClient.indices
     .deleteIndexTemplate({ name: 'entity-store-test-logs-override' })
     .catch(() => {});
@@ -370,6 +382,55 @@ export const triggerMaintainerRun = async (
     }
 
     throw new Error(`Failed to trigger maintainer run '${maintainerId}': ${body}`);
+  }
+};
+
+const readSidRuleWatermark = async (
+  apiClient: ForceLogExtractionApiClient,
+  headers: Record<string, string>
+): Promise<string | null | undefined> => {
+  const response = await apiClient.get(
+    `${ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_GET}?ids=automated-resolution`,
+    { headers, responseType: 'json' }
+  );
+  expect(response.statusCode).toBe(200);
+  const maintainer = (response.body as GetEntityMaintainersResponse).maintainers.find(
+    (item) => item.id === 'automated-resolution'
+  );
+  const rules = (
+    maintainer?.customState as {
+      rules?: Record<string, { lastProcessedTimestamp?: string | null }>;
+    } | null
+  )?.rules;
+  return rules?.[RESOLUTION_RULE_IDS.WINDOWS_SID_BRIDGE]?.lastProcessedTimestamp;
+};
+
+/**
+ * Fails if the SID matcher has not run, so negative asserts are not vacuous.
+ */
+export const assertSidRuleWatermarked = async (
+  apiClient: ForceLogExtractionApiClient,
+  headers: Record<string, string>,
+  esClient: EsClient
+): Promise<void> => {
+  await seedUserEntity(esClient, {
+    entityId: 'sid-rule-watermark-control',
+    namespace: 'active_directory',
+    email: 'sid-rule-watermark-control@sid.example',
+    userId: 'S-1-5-21-9-8-7-6501',
+  });
+
+  if (typeof (await readSidRuleWatermark(apiClient, headers)) !== 'string') {
+    await triggerMaintainerRun(apiClient, headers, 'automated-resolution', { sync: true });
+  }
+
+  const watermark = await readSidRuleWatermark(apiClient, headers);
+  if (typeof watermark !== 'string') {
+    throw new Error(
+      `windows_sid_bridge lastProcessedTimestamp is ${JSON.stringify(
+        watermark
+      )} — the SID matcher did not run. Negative asserts would be vacuous.`
+    );
   }
 };
 
