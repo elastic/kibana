@@ -298,27 +298,36 @@ describe('POST /internal/evals/evaluators/_test', () => {
     expect(awaitTraceReadyMock.mock.calls[0][0].esClient).toBe(asCurrentUser);
   });
 
-  it('leaves no draft template behind in the global Mustache cache', async () => {
-    const { handler, context } = setup();
-    // A draft is unique per keystroke and never stored, so anything it renders is dead
-    // weight in a cache that never evicts on its own. The sentinel stands in for those
-    // entries, since the templates a run caches are an implementation detail.
-    Mustache.templateCache?.set('sentinel', 'cached');
+  it('does not retain the draft it rendered', async () => {
+    // A draft is unique per keystroke and never stored, so caching one retains ~18KB that
+    // nothing will read again. Rendering here stands in for the inference client, which
+    // renders judge prompts through the same process-wide cache.
+    const { handler, context } = setup({
+      prompt: jest.fn(async () => {
+        Mustache.render(JUDGE.prompt, { agent_response: 'answer' });
+        return { content: '{"quality": 1}', toolCalls: [] };
+      }),
+    });
 
     await handler(context, request(), kibanaResponseFactory);
 
-    expect(Mustache.templateCache?.get('sentinel')).toBeUndefined();
+    expect(Mustache.templateCache?.get(`${JUDGE.prompt}:{{:}}`)).toBeUndefined();
   });
 
-  it('clears the cache even when execution fails', async () => {
+  it('releases the draft when execution fails', async () => {
     const { handler, context } = setup({
       prompt: jest.fn().mockRejectedValue(new AbortError(new Error('offline'))),
     });
+    // Nothing else may be evicted: flushing the shared cache would make every unrelated
+    // prompt in the process re-parse.
     Mustache.templateCache?.set('sentinel', 'cached');
 
     await handler(context, request(), kibanaResponseFactory);
 
-    expect(Mustache.templateCache?.get('sentinel')).toBeUndefined();
+    expect(Mustache.templateCache?.get('sentinel')).toBe('cached');
+    // The hold is gone, so this text is cacheable again like any other template.
+    Mustache.render(JUDGE.prompt, { agent_response: 'answer' });
+    expect(Mustache.templateCache?.get(`${JUDGE.prompt}:{{:}}`)).toBeDefined();
   });
 
   it('uses the same strict trace shape for evaluator request schemas', () => {
