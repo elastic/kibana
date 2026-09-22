@@ -31,7 +31,11 @@ Install the version of Node.js listed in the `.node-version` file. This can be a
 nvm use
 ```
 
-Install the latest version of [yarn v1](https://classic.yarnpkg.com/en/docs/install).
+Enable pnpm via corepack (bundled with Node.js; the version is pinned in `package.json` `engines.pnpm`):
+
+```bash
+corepack enable
+```
 
 Bootstrap {{kib}} and install all the dependencies:
 
@@ -64,10 +68,10 @@ Running this command is only necessary in rare circumstance where you need to re
 ::::
 
 
-If you have failures during `pnpm kbn bootstrap` you may have some corrupted packages in your yarn cache which you can clean with:
+If you have failures during `pnpm kbn bootstrap` you may have some corrupted packages in your pnpm store which you can clean with:
 
 ```bash
-yarn cache clean
+pnpm store prune
 ```
 
 
@@ -84,7 +88,7 @@ yarn cache clean
 Run the latest {{es}} snapshot. Specify an optional license with the `--license` flag.
 
 ```bash
-yarn es snapshot --license trial
+pnpm es snapshot --license trial
 ```
 
 `trial` will give you access to all capabilities.

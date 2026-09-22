@@ -13,7 +13,7 @@ pnpm start
 
 Now you can point your web browser to [http://localhost:5601](http://localhost:5601) and start using {{kib}}! When running `pnpm start`, {{kib}} will also log that it is listening on port 5603 due to the base path proxy, but you should still access {{kib}} on port 5601.
 
-By default, you can log in with username `elastic` and password `changeme`. See the `--help` options on `yarn es <command>` if you’d like to configure a different password.
+By default, you can log in with username `elastic` and password `changeme`. See the `--help` options on `pnpm es <command>` if you’d like to configure a different password.
 
 
 ## Unsupported URL Type [_unsupported_url_type]
@@ -48,5 +48,5 @@ To run Kibana with an alternate yml file, use the `--config` option to specify t
 
 ## Setting Up SSL [_setting_up_ssl]
 
-{{kib}} includes self-signed certificates that can be used for development purposes in the browser and for communicating with {{es}}: `pnpm start --ssl` & `yarn es snapshot --ssl`.
+{{kib}} includes self-signed certificates that can be used for development purposes in the browser and for communicating with {{es}}: `pnpm start --ssl` & `pnpm es snapshot --ssl`.
 
