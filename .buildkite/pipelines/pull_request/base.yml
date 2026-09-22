@@ -1,5 +1,7 @@
 env:
   KBN_ES_SNAPSHOT_USE_CACHED: 'true'
+  USE_CITADEL_PROXY: 'true'
+  DISABLE_ALL_BOOTSTRAP_CACHE: 'true'
 
 steps:
   - command: .buildkite/scripts/steps/build_kibana.sh
