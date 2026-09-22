@@ -9,11 +9,7 @@ import { esql, BasicPrettyPrinter } from '@elastic/esql';
 import type { LatestSourceWhereCondition } from '../significant_events/latest_source_query';
 import { SPACE_IDS, TIMESTAMP } from './fields';
 
-/**
- * Strict space predicate for knowledge indicator reads. Unlike `fromIndexForSpace`
- * there is no `IS NULL` fallback: legacy documents without `kibana.space_ids` are
- * deliberately invisible until the `_reset` route removes them.
- */
+/** Matches `kibana.space_ids` exactly. Documents missing the field do not match. */
 export const inSpace = (space: string): LatestSourceWhereCondition =>
   esql.exp`${esql.col(SPACE_IDS)} == ${esql.str(space)}`;
 

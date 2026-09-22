@@ -127,11 +127,6 @@ export interface ResetSignificantEventsDeps {
 
 /**
  * One-time cleanup for clusters that may still contain experimental alerting v1 state.
- * Removes all KIs, linked v1/v2 backing rules, and orphaned documents in
- * `.alerts-streams.alerts-default` before re-onboarding on Alerting v2.
- *
- * Cluster-wide by design: KI/rule enumeration and the v1 alerts delete are NOT space-scoped,
- * so this affects every space, not just the caller's.
  *
  * TODO: Remove after the time-boxed follow-up to nightshift-program#651 confirms that no
  * supported upgrade path can contain Significant Events v1 rules or alerts.
@@ -162,10 +157,8 @@ export const resetSignificantEvents = async ({
     await resetStreamKnowledgeIndicators({ streamName, kiClient, ruleIds, logger });
   }
 
-  // Intentionally cluster-wide: this reset wipes v1 alerts across ALL spaces, not just the
-  // caller's. `.alerts-streams.alerts-default` is a shared, space-partitioned index, but the
-  // reset is a one-time cluster-level v1 orphan cleanup, so `match_all` (no
-  // `kibana.space_ids` filter) is deliberate and mirrors the cluster-wide KI/rule cleanup above.
+  // `.alerts-streams.alerts-default` is shared across spaces, so `match_all` wipes v1 alerts
+  // everywhere. KI and rule deletion above follows `kiClient`.
   const alertsDeleteResponse = await esClient.deleteByQuery(
     {
       index: V1_ALERTS_INDEX,

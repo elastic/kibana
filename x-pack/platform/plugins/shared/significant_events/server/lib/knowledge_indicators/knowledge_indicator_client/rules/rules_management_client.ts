@@ -109,10 +109,7 @@ export interface IRulesManagementClient {
    */
   findStreamNamesWithOwnedRules(): Promise<string[]>;
 
-  /**
-   * Every rule id carrying a tag that starts with `prefix`, in the space the
-   * client is bound to. Used by the cluster-wide reset.
-   */
+  /** Every rule id carrying a tag that starts with `prefix`, in the client's space. */
   findRuleIdsByTagPrefix(prefix: RuleOwnershipTagPrefix): Promise<string[]>;
 }
 

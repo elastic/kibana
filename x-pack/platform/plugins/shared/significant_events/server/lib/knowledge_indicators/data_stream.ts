@@ -165,9 +165,6 @@ export const knowledgeIndicatorsDataStream: DataStreamDefinition<
   StoredKnowledgeIndicator & Record<string, unknown>
 > = {
   name: KNOWLEDGE_INDICATORS_DATA_STREAM,
-  // v3: keyed by `source.id` and space-scoped via `kibana.space_ids`. `stream.name` is gone from
-  // the definition; mapping updates are additive, so existing backing indices keep it mapped and
-  // legacy documents stay intact until the `_reset` route wipes them.
   version: 3,
   hidden: true,
   template: {

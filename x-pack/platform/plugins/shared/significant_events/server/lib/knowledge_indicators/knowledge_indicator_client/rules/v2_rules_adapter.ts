@@ -62,12 +62,8 @@ const OWNED_SOURCE_TAGS_SIZE = 10000;
 /**
  * Wraps alerting_v2 `RulesClientApi` to implement IRulesManagementClient.
  *
- * create/update handle their own 409/404 fallbacks internally so QueryClient does not
+ * create/update handle their own 409/404 fallbacks internally so QueryRuleOrchestrator does not
  * need to know Alerting v2's retry semantics.
- *
- * Space context: the adapter inherits the space of the `RulesClientApi` it wraps.
- * Regular KI traffic obtains it for the request space; the cluster-wide reset
- * builds one adapter per space.
  */
 export class RulesAdapterV2 implements IRulesManagementClient {
   private readonly rulesClient: RulesAdapterV2Params['rulesClient'];

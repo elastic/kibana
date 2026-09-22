@@ -150,10 +150,7 @@ export class IndicatorReader {
    * signals an empty active set for the requested types. `shouldIdentifyFeatures`
    * relies on this in two ways: a `null` inferred result forces re-identification
    * (empty or user-wiped set), while the computed-type timestamp drives the
-   * recency throttle. Note that this probe does **not** filter on `expires_at`,
-   * so it includes durable (`expires_at IS NULL`) revisions that keep-alive
-   * re-stamps — callers that need a keep-alive-immune signal must scope to types
-   * that are always expiring (e.g. `COMPUTED_FEATURE_TYPES`).
+   * recency throttle.
    */
   async getLatestRevisionTimestamp(
     sourceId: string,
