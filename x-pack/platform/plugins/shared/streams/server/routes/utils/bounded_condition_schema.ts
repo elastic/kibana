@@ -12,12 +12,15 @@ import { BINARY_OPERATORS } from '@kbn/streamlang';
 // Bounds for HTTP input validation.
 // conditionSchema from @kbn/streamlang uses bare z.string() and unbounded
 // z.lazy() recursion for and/or/not nesting.
-const COND_STR_MAX = 256;
+const COND_FIELD_MAX = 256; // field names are identifiers
+const COND_VAL_MAX = 65535; // comparison values are arbitrary document values (messages, URLs, …)
 const COND_ARR_MAX = 50;
 const COND_DEPTH = 5;
 
+// Comparison operands (eq, contains, startsWith, range members, …) can be arbitrary
+// document values and need a document-string-sized bound, not an identifier-sized one.
 const boundedStringOrNumberOrBoolean = z.union([
-  z.string().max(COND_STR_MAX),
+  z.string().max(COND_VAL_MAX),
   z.number(),
   z.boolean(),
 ]);
@@ -35,7 +38,7 @@ const boundedRangeCondition = z.strictObject({
 const boundedFilterCondition = z.union([
   z
     .strictObject({
-      field: z.string().nonempty().max(COND_STR_MAX),
+      field: z.string().nonempty().max(COND_FIELD_MAX),
       eq: boundedStringOrNumberOrBoolean.optional(),
       neq: boundedStringOrNumberOrBoolean.optional(),
       lt: boundedStringOrNumberOrBoolean.optional(),
@@ -52,7 +55,7 @@ const boundedFilterCondition = z.union([
       message: 'At least one operator must be specified',
     }),
   z.strictObject({
-    field: z.string().nonempty().max(COND_STR_MAX),
+    field: z.string().nonempty().max(COND_FIELD_MAX),
     exists: z.boolean().optional(),
   }),
 ]);
