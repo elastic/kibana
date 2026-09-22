@@ -66,7 +66,7 @@ pageLoadAssetSize:
   embeddableAlertsTable: 1536
   enterpriseSearch: 28188
   entityStore: 2252
-  esql: 306
+  esql: 341
   esqlDataGrid: 215
   esqlViews: 1205
   esUiShared: 2284
@@ -138,6 +138,7 @@ pageLoadAssetSize:
   newsfeed: 10708
   nightshift: 2362
   nightshiftInvestigations: 9405
+  nightshiftSources: 3928
   noDataPage: 630
   notificationCenter: 600
   observability: 4071
@@ -205,7 +206,7 @@ pageLoadAssetSize:
   stackConnectors: 63548
   streams: 4563
   streamsApp: 55882
-  synthetics: 18443
+  synthetics: 20839
   telemetry: 20586
   telemetryManagementSection: 1738
   timelines: 1409
