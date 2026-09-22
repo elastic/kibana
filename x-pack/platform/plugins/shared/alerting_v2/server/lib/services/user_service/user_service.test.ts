@@ -33,4 +33,23 @@ describe('UserService', () => {
 
     await expect(userService.getCurrentUserProfileUid()).resolves.toBeNull();
   });
+
+  it('returns the current actor carrying the profile uid', async () => {
+    const { userService, userProfileService } = createUserService();
+
+    await expect(userService.getCurrentActor()).resolves.toEqual({
+      profile_uid: 'elastic_profile_uid',
+    });
+
+    expect(userProfileService.getCurrentProfileId).toHaveBeenCalledWith({
+      request: expect.anything(),
+    });
+  });
+
+  it('returns a null actor when the profile is not found', async () => {
+    const { userService, userProfileService } = createUserService();
+    userProfileService.getCurrentProfileId.mockResolvedValue(null);
+
+    await expect(userService.getCurrentActor()).resolves.toBeNull();
+  });
 });

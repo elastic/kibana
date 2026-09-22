@@ -17,8 +17,6 @@ import {
   testData,
 } from '../fixtures';
 
-const MAX_OWNER_LENGTH = 256;
-
 apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
   let writerCredentials: RoleApiCredentials;
   let writerHeaders: Record<string, string>;
@@ -453,21 +451,6 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
       const response = await apiClient.patch(getRuleUrl(created.id), {
         headers: writerHeaders,
         body: { metadata: { description: 'a'.repeat(MAX_DESCRIPTION_LENGTH + 1) } },
-      });
-      expect(response).toHaveStatusCode(400);
-      expect(response.body.code).toBe('BAD_REQUEST');
-    }
-  );
-
-  apiTest(
-    'validation: should reject body when metadata.owner exceeds the maximum length',
-    async ({ apiClient, apiServices }) => {
-      const created = await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({ metadata: { name: 'rule-with-long-owner' } })
-      );
-      const response = await apiClient.patch(getRuleUrl(created.id), {
-        headers: writerHeaders,
-        body: { metadata: { owner: 'a'.repeat(MAX_OWNER_LENGTH + 1) } },
       });
       expect(response).toHaveStatusCode(400);
       expect(response.body.code).toBe('BAD_REQUEST');

@@ -69,8 +69,8 @@ apiTest.describe('Get action policy API', { tag: '@local-stateful-classic' }, ()
       expect(response.body.throttle).toStrictEqual({ interval: '10m' });
       expect(new Date(response.body.created_at).toISOString()).toBe(response.body.created_at);
       expect(new Date(response.body.updated_at).toISOString()).toBe(response.body.updated_at);
-      expect(typeof response.body.auth.owner).toBe('string');
-      expect(response.body.auth.apiKey).toBeUndefined();
+      // API key ownership is server-side only and must never be exposed over the wire.
+      expect(response.body.auth).toBeUndefined();
     }
   );
 

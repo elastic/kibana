@@ -41,6 +41,26 @@ export const tagsResponseSchema = z
 
 export type TagsResponse = z.infer<typeof tagsResponseSchema>;
 
+/**
+ * Identity that performed a write, reported on `created_by` / `updated_by`.
+ *
+ * A user profile ID is recorded rather than a username because usernames and
+ * full names change while a profile ID does not. The object shape (rather than a
+ * bare ID) leaves room to describe identities that have no profile, such as
+ * service accounts, without another breaking change.
+ *
+ * Deliberately not `.strict()`: additional identity fields are expected to be
+ * added, and older clients should tolerate them.
+ */
+export const actorSchema = z
+  .object({
+    profile_uid: z.string().describe('User profile ID of the actor.'),
+  })
+  .describe('Identity that performed the write.')
+  .meta({ id: 'alerting_actor' });
+
+export type Actor = z.infer<typeof actorSchema>;
+
 /** Make a schema optional while preserving its `.describe()` metadata. */
 const optionalWithDescription = <T extends z.ZodType>(schema: T) => {
   const optional = schema.optional();

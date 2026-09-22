@@ -18,8 +18,6 @@ import {
   testData,
 } from '../fixtures';
 
-const MAX_OWNER_LENGTH = 256;
-
 apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
   let writerCredentials: RoleApiCredentials;
   let writerHeaders: Record<string, string>;
@@ -243,20 +241,6 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
             name: 'long-description',
             description: 'a'.repeat(MAX_DESCRIPTION_LENGTH + 1),
           },
-        }),
-      });
-      expect(response).toHaveStatusCode(400);
-      expect(response.body.code).toBe('BAD_REQUEST');
-    }
-  );
-
-  apiTest(
-    'validation: should reject body when metadata.owner exceeds the maximum length',
-    async ({ apiClient }) => {
-      const response = await apiClient.put(getRuleUrl('any-id'), {
-        headers: writerHeaders,
-        body: buildCreateRuleData({
-          metadata: { name: 'long-owner', owner: 'a'.repeat(MAX_OWNER_LENGTH + 1) },
         }),
       });
       expect(response).toHaveStatusCode(400);
