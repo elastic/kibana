@@ -637,6 +637,8 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
     return <ConnectorRulesList connector={connector} />;
   }, [connector]);
 
+  const savedConnector = formConnector ?? connector;
+
   // This specific logic can be removed once inference connectors are no longer experimental. Tracked here https://github.com/elastic/kibana/issues/244985
   const isExperimental: boolean | undefined = useMemo(() => {
     if (
@@ -652,8 +654,8 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
   return (
     <>
       <FlyoutHeader
-        isPreconfigured={connector.isPreconfigured}
-        connectorName={connector.name}
+        isPreconfigured={savedConnector.isPreconfigured}
+        connectorName={savedConnector.name}
         connectorTypeDesc={
           actionTypeModel?.selectMessagePreconfigured || actionTypeModel?.selectMessage || ''
         }
