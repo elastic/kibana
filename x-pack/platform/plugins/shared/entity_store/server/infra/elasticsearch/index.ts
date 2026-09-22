@@ -19,6 +19,7 @@ export { chunkByUrlLength } from './chunk_by_url_length';
 export type { ReindexOptions, ReindexResult } from './reindex';
 export { updateByQueryWithScript } from './ingest';
 export type { UpdateByQueryWithScriptOptions } from './ingest';
+export { clearRelationshipIdsByEntitySource } from './entity_relationships';
 export { waitForTaskToComplete } from './wait_for_task';
 export type { WaitForTaskOptions } from './wait_for_task';
 export { retryOnConflict } from './retry_on_conflict';
