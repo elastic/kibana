@@ -27,6 +27,9 @@ import {
  */
 const hostIp = getEdrRealFleetHostIp();
 
+const isDefaultFleetAdvertiseArg = (arg: string): boolean =>
+  arg.startsWith('--xpack.fleet.fleetServerHosts=') || arg.startsWith('--xpack.fleet.outputs=');
+
 export const servers: ScoutServerConfig = {
   ...defaultConfig,
 
@@ -42,7 +45,7 @@ export const servers: ScoutServerConfig = {
   kbnTestServer: {
     ...defaultConfig.kbnTestServer,
     serverArgs: [
-      ...defaultConfig.kbnTestServer.serverArgs,
+      ...defaultConfig.kbnTestServer.serverArgs.filter((arg) => !isDefaultFleetAdvertiseArg(arg)),
       `--xpack.fleet.fleetServerHosts=${JSON.stringify([
         {
           id: 'default-fleet-server',
@@ -51,6 +54,8 @@ export const servers: ScoutServerConfig = {
           host_urls: [`https://${hostIp}:${EDR_REAL_FLEET_SERVER_PORT}`],
         },
       ])}`,
+      // Advertise ES via outputs only. Fleet rejects agents.elasticsearch.host
+      // when a default output is already defined here.
       `--xpack.fleet.outputs=${JSON.stringify([
         {
           id: 'es-default-output',
@@ -61,8 +66,6 @@ export const servers: ScoutServerConfig = {
           hosts: [`http://${hostIp}:${EDR_REAL_FLEET_ES_PORT}`],
         },
       ])}`,
-      `--xpack.fleet.agents.fleet_server.hosts=["https://${hostIp}:${EDR_REAL_FLEET_SERVER_PORT}"]`,
-      `--xpack.fleet.agents.elasticsearch.host=http://${hostIp}:${EDR_REAL_FLEET_ES_PORT}`,
     ],
   },
 };
