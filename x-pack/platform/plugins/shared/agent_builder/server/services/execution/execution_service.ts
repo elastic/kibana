@@ -197,7 +197,13 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     }
 
     // After the record, so an idempotency-key replay is recognised before a second message lands.
-    if (conversationParams && target && this.shouldPersistRoundInput(conversationParams, target)) {
+    // A resume continues a round that is already open, so it does not write a new message.
+    if (
+      conversationParams &&
+      target &&
+      conversationParams.storeConversation !== false &&
+      !isPendingResumeConversation(target.conversation)
+    ) {
       await persistUserMessage({
         conversation: target.conversation,
         conversationClient: target.conversationClient,
@@ -668,16 +674,6 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     });
 
     return { conversation, conversationClient };
-  }
-
-  /** A resume continues a round that is already open, so it does not write a new message. */
-  private shouldPersistRoundInput(
-    params: ConversationExecutionParams,
-    { conversation }: ConversationTarget
-  ): boolean {
-    const { storeConversation = true } = params;
-
-    return storeConversation && !isPendingResumeConversation(conversation);
   }
 
   /**

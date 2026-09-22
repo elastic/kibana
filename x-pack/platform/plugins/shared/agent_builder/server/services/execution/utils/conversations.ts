@@ -522,10 +522,10 @@ export const persistExecutionInterruption = async (
     };
 
     if (!isResume) {
-      // Rebuilt with the exact inputs `persistRoundInput` used, so id, actor and created_at match
+      // Rebuilt with the exact inputs `persistUserMessage` used, so id, actor and created_at match
       // the receipt-time event; only `data` is upgraded to the processed input when known.
       const receiptInput: RoundInput = {
-        message: input.message ?? '',
+        message: input.message?.trim() ?? '',
         ...(input.attachment_refs ? { attachment_refs: input.attachment_refs } : {}),
       };
       const userMessage = userMessageEvent(
