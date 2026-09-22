@@ -20,7 +20,8 @@ interface BuildVegaConfigParams {
   existingSpec?: string;
   /**
    * Keep the ES|QL query recovered from `existingSpec` instead of regenerating
-   * one. The edit then only re-authors the spec around it.
+   * one. The edit then only re-authors the spec around it. Ignored when `esql`
+   * is provided, since a provided query always takes precedence.
    */
   preserveESQL?: boolean;
   /** Optional chart-type hint for the intended visual form (Vega authors free-form). */
@@ -63,7 +64,15 @@ export const buildVegaConfig = async ({
 }: BuildVegaConfigParams): Promise<BuildVegaConfigResult> => {
   // A caller-provided ES|QL query is handed to the graph as-is: its resolve
   // node executes the query (which subsumes syntax validation) and regenerates
-  // a corrected one when execution fails.
+  // a corrected one when execution fails. It therefore supersedes preserving
+  // the existing query, which is only ever kept verbatim when it is the one
+  // recovered from the spec being edited.
+  if (preserveESQL && esql) {
+    logger.warn(
+      'Both an ES|QL query and preserveESQL were given; the provided query takes precedence and the existing one is not preserved.'
+    );
+  }
+  const keepsExistingEsql = preserveESQL && !esql;
 
   // On edit, recover the ES|QL embedded in the existing spec and pass it to the
   // graph as context (not as the query to reuse). The graph modifies it when the
@@ -75,7 +84,7 @@ export const buildVegaConfig = async ({
   if (existingEsql) {
     logger.debug('Recovered ES|QL from the existing Vega spec to seed this edit');
   }
-  if (preserveESQL && !existingEsql) {
+  if (keepsExistingEsql && !existingEsql) {
     throw new Error(
       'Preserving the ES|QL query requires an existing Vega spec with a recoverable ES|QL query.'
     );
@@ -89,10 +98,10 @@ export const buildVegaConfig = async ({
     existingSpec,
     existingEsql,
     chartType,
-    preserveESQL,
+    preserveESQL: keepsExistingEsql,
     // Preserving ES|QL reuses the recovered query as the trusted query: the
     // graph only probes it for columns and re-authors the spec around it.
-    esqlQuery: esql || (preserveESQL ? existingEsql : '') || '',
+    esqlQuery: esql || (keepsExistingEsql ? existingEsql : '') || '',
     currentAttempt: 0,
     actions: [],
     spec: null,

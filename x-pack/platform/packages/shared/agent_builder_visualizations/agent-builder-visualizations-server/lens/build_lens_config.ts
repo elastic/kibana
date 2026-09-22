@@ -37,7 +37,8 @@ interface BuildLensConfigParams {
   parsedExistingConfig?: VisualizationConfig | null;
   /**
    * Keep the existing ES|QL query and column bindings of
-   * `parsedExistingConfig` instead of regenerating the query.
+   * `parsedExistingConfig` instead of regenerating the query. Ignored when
+   * `esql` is provided, since a provided query always takes precedence.
    */
   preserveESQL?: boolean;
   /**
@@ -84,12 +85,20 @@ export const buildLensConfig = async ({
 
   // A provided ES|QL query is handed to the graph as-is: its resolve node
   // executes the query (which subsumes syntax validation) and regenerates a
-  // corrected one when execution fails.
+  // corrected one when execution fails. It therefore supersedes preserving
+  // the existing query, which is only ever kept verbatim when it is the one
+  // recovered from the configuration being edited.
+  if (preserveESQL && esql) {
+    logger.warn(
+      'Both an ES|QL query and preserveESQL were given; the provided query takes precedence and the existing one is not preserved.'
+    );
+  }
+  const keepsExistingEsql = preserveESQL && !esql;
 
   // Preserving ES|QL reuses the existing query. The graph re-pins every
   // layer's own data_source, so the first query only seeds the prompt.
-  const [existingEsql] = preserveESQL ? getExistingEsqlQueries(parsedExistingConfig) : [];
-  if (preserveESQL && !existingEsql) {
+  const [existingEsql] = keepsExistingEsql ? getExistingEsqlQueries(parsedExistingConfig) : [];
+  if (keepsExistingEsql && !existingEsql) {
     throw new Error(
       'Preserving the ES|QL query requires an existing ES|QL-backed Lens configuration.'
     );
@@ -102,7 +111,7 @@ export const buildLensConfig = async ({
     schema,
     existingConfig,
     parsedExistingConfig,
-    preserveESQL,
+    preserveESQL: keepsExistingEsql,
     applyChartRules,
     esqlQuery: esql || existingEsql || '',
     currentAttempt: 0,
