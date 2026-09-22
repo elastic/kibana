@@ -893,14 +893,16 @@ describe('Gitlab connector', () => {
 
     it('rejects when both projectId and groupId are provided', () => {
       expect(() =>
-        Gitlab.actions.searchCode.input.parse({ search: 'foo', projectId: '123', groupId: 'my-group' })
+        Gitlab.actions.searchCode.input.parse({
+          search: 'foo',
+          projectId: '123',
+          groupId: 'my-group',
+        })
       ).toThrow();
     });
 
     it('rejects ref without projectId', () => {
-      expect(() =>
-        Gitlab.actions.searchCode.input.parse({ search: 'foo', ref: 'main' })
-      ).toThrow();
+      expect(() => Gitlab.actions.searchCode.input.parse({ search: 'foo', ref: 'main' })).toThrow();
     });
   });
 
