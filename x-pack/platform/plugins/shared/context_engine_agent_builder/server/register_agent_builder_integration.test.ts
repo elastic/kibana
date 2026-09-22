@@ -67,6 +67,7 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
     const agentBuilder = {
       agents: {
         register,
+        registerType: jest.fn(),
         registerAiIndexResolver: jest.fn((registered: AiIndexResolver) => {
           resolver = registered;
         }),
