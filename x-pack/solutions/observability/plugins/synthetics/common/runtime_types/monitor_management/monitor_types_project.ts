@@ -24,7 +24,11 @@ export {
   ProjectMonitorsResponseCodec,
 };
 
-export type ProjectMonitor = SchemaOutput<typeof ProjectMonitorCodec>;
+// io-ts typed `schedule` as `string | number`. The zod codec only accepts
+// `number | '10s' | '30s'`, so the public alias keeps the wider static type.
+export type ProjectMonitor = Omit<SchemaOutput<typeof ProjectMonitorCodec>, 'schedule'> & {
+  schedule: string | number;
+};
 export type LegacyProjectMonitorsRequest = SchemaOutput<typeof LegacyProjectMonitorsRequestCodec>;
 export type ProjectMonitorsRequest = SchemaOutput<typeof ProjectMonitorsRequestCodec>;
 export type ProjectMonitorMetaData = SchemaOutput<typeof ProjectMonitorMetaDataCodec>;

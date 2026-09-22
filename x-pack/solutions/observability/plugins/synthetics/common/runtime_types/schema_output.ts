@@ -7,13 +7,26 @@
 
 import type { z } from '@kbn/zod';
 
-/** Drops the string index signature `z.looseObject` adds, so aliases name only known fields. */
+type IndexKey<K> = string extends K ? true : number extends K ? true : false;
+
+type SpecificKeys<T> = {
+  [K in keyof T]: IndexKey<K> extends true ? never : K;
+}[keyof T];
+
+/**
+ * Drops the `{ [k: string]: unknown }` catchall `z.looseObject` adds.
+ * A real `z.record` has no named keys, so its index signature stays.
+ */
 type KnownKeys<T> = T extends string | number | boolean | bigint | symbol | null | undefined
   ? T
   : T extends readonly (infer U)[]
   ? Array<KnownKeys<U>>
   : T extends object
-  ? { [K in keyof T as string extends K ? never : K]: KnownKeys<T[K]> }
+  ? [SpecificKeys<T>] extends [never]
+    ? string extends keyof T
+      ? Record<string, KnownKeys<T[string]>>
+      : { [K in keyof T]: KnownKeys<T[K]> }
+    : { [K in keyof T as IndexKey<K> extends true ? never : K]: KnownKeys<T[K]> }
   : T;
 
 export type SchemaOutput<S extends z.ZodType> = KnownKeys<z.output<S>>;

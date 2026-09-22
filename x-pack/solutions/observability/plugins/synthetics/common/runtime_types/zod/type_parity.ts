@@ -125,9 +125,8 @@ import type {
 } from '../monitor_management/synthetics_params';
 import type * as zodParams from './synthetics_params';
 
-// Re-exported codecs are already zod, so they have no `_A`. Compare KnownKeys
-// of both outputs. Codecs that are still io-ts keep the `t.TypeOf` side.
-type OutputOf<T> = T extends { readonly _tag: string; readonly _A: infer A }
+// io-ts codecs carry `_A`/`_O`/`_I`. Re-exported codecs are zod and do not.
+type OutputOf<T> = T extends { readonly _A: infer A; readonly _O: unknown; readonly _I: unknown }
   ? A
   : T extends z.ZodType
   ? KnownKeys<z.output<T>>
