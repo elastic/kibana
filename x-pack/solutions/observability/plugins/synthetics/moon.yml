@@ -144,7 +144,6 @@ dependsOn:
   - '@kbn/ui-callout'
   - '@kbn/app-header'
   - '@kbn/app-menu'
-  - '@kbn/securitysolution-io-ts-utils'
 tags:
   - plugin
   - prod
