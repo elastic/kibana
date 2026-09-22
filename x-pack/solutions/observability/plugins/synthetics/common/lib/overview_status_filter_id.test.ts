@@ -56,6 +56,23 @@ describe('toOverviewStatusFilterId', () => {
       })
     ).toEqual({ monitorQueryId: 'shared' });
   });
+
+  it('keeps linked-cluster locations on the local id without changing its key', () => {
+    const id = toOverviewStatusFilterId({
+      monitorQueryId: 'shared',
+      remote: { remoteName: 'cluster-east' },
+      locations: [loc, { id: 'eu-west', label: 'EU West', status: 'down' }],
+      linkedRemoteLocations: [{ remoteName: 'cluster-east', locationId: 'eu-west' }],
+    });
+
+    expect(id).toEqual({
+      monitorQueryId: 'shared',
+      linkedRemoteLocations: [{ remoteName: 'cluster-east', locationId: 'eu-west' }],
+    });
+    expect(overviewStatusFilterIdKey(id)).toEqual(
+      overviewStatusFilterIdKey({ monitorQueryId: 'shared' })
+    );
+  });
 });
 
 describe('overviewStatusFilterIdKey', () => {
@@ -93,6 +110,29 @@ describe('groupOverviewStatusFilterIds', () => {
     ).toEqual([
       { remoteName: 'cluster-east', locationId: 'us-east', queryIds: ['a', 'b'] },
       { remoteName: 'cluster-west', locationId: 'us-east', queryIds: ['a'] },
+    ]);
+  });
+
+  it('merges linked remote locations onto the shared local group', () => {
+    expect(
+      groupOverviewStatusFilterIds([
+        {
+          monitorQueryId: 'a',
+          linkedRemoteLocations: [{ remoteName: 'cluster-east', locationId: 'priv' }],
+        },
+        {
+          monitorQueryId: 'b',
+          linkedRemoteLocations: [{ remoteName: 'cluster-east', locationId: 'priv-b' }],
+        },
+      ])
+    ).toEqual([
+      {
+        queryIds: ['a', 'b'],
+        linkedRemoteLocations: [
+          { remoteName: 'cluster-east', locationId: 'priv' },
+          { remoteName: 'cluster-east', locationId: 'priv-b' },
+        ],
+      },
     ]);
   });
 });

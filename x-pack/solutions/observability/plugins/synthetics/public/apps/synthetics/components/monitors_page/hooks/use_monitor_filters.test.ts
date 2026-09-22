@@ -454,6 +454,140 @@ describe('useMonitorIdFilter', () => {
     );
   });
 
+  it('does not put a remote _index qualifier on the alert identity filter', () => {
+    paramSpy.mockReturnValue({ statusFilter: 'down' } as any);
+    selSPy.mockReturnValue({
+      status: {
+        allIds: [
+          {
+            monitorQueryId: 'shared-id',
+            remoteName: 'cluster-east',
+            locationId: 'us-east-1',
+          },
+        ],
+        downIds: [
+          {
+            monitorQueryId: 'shared-id',
+            remoteName: 'cluster-east',
+            locationId: 'us-east-1',
+          },
+        ],
+      },
+    });
+
+    const { result } = renderHook(() => useMonitorIdFilter({ forAlerts: true }), {
+      wrapper: WrappedHelper,
+    });
+
+    expect(result.current).toEqual({
+      bool: {
+        filter: [
+          { terms: { 'monitor.id': ['shared-id'] } },
+          { term: { 'observer.name': 'us-east-1' } },
+        ],
+      },
+    });
+    expect(JSON.stringify(result.current)).not.toContain('_index');
+  });
+
+  it('keeps ping index qualification off alert documents in the shared chart filter', () => {
+    paramSpy.mockReturnValue({ statusFilter: 'down' } as any);
+    selSPy.mockReturnValue({
+      status: {
+        downIds: [
+          {
+            monitorQueryId: 'shared-id',
+            remoteName: 'cluster-east',
+            locationId: 'us-east-1',
+          },
+        ],
+      },
+    });
+
+    const { result } = renderHook(() => useMonitorIdFilter({ forChart: true }), {
+      wrapper: WrappedHelper,
+    });
+
+    expect(result.current).toEqual({
+      bool: {
+        should: [
+          {
+            bool: {
+              filter: [
+                {
+                  bool: {
+                    filter: [
+                      { terms: { 'monitor.id': ['shared-id'] } },
+                      { wildcard: { _index: 'cluster-east:*' } },
+                      { term: { 'observer.name': 'us-east-1' } },
+                    ],
+                  },
+                },
+              ],
+              must_not: [{ exists: { field: 'kibana.alert.uuid' } }],
+            },
+          },
+          {
+            bool: {
+              filter: [
+                {
+                  bool: {
+                    filter: [
+                      { terms: { 'monitor.id': ['shared-id'] } },
+                      { term: { 'observer.name': 'us-east-1' } },
+                    ],
+                  },
+                },
+                { exists: { field: 'kibana.alert.uuid' } },
+              ],
+            },
+          },
+        ],
+        minimum_should_match: 1,
+      },
+    });
+  });
+
+  it('allows a linked-cluster location of a local monitor without excluding every CCS index', () => {
+    paramSpy.mockReturnValue({ statusFilter: 'down' } as any);
+    selSPy.mockReturnValue({
+      status: {
+        downIds: [
+          {
+            monitorQueryId: 'local-1',
+            linkedRemoteLocations: [{ remoteName: 'cluster-east', locationId: 'private-loc' }],
+          },
+        ],
+      },
+    });
+
+    const { result } = renderHook(() => useMonitorIdFilter(), { wrapper: WrappedHelper });
+
+    expect(result.current).toEqual({
+      bool: {
+        filter: [
+          { terms: { 'monitor.id': ['local-1'] } },
+          {
+            bool: {
+              should: [
+                { bool: { must_not: [{ wildcard: { _index: '*:*' } }] } },
+                {
+                  bool: {
+                    filter: [
+                      { wildcard: { _index: 'cluster-east:*' } },
+                      { term: { 'observer.name': 'private-loc' } },
+                    ],
+                  },
+                },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        ],
+      },
+    });
+  });
+
   it('scopes a remote-cluster selection to the API allIds instead of the full CCS data view', () => {
     paramSpy.mockReturnValue({ remoteNames: ['cluster-east'] } as any);
     selSPy.mockReturnValue({

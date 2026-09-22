@@ -36,6 +36,7 @@ import {
 import {
   getOverviewConfigKey,
   isRunStale,
+  mergeLinkedRemoteLocations,
   overviewStatusFilterIdKey,
   toOverviewStatusFilterId,
 } from '../../../common/lib';
@@ -72,7 +73,21 @@ const allIdsIncludingStatusBuckets = (
 ): OverviewStatusFilterId[] => {
   const ids = new Map<string, OverviewStatusFilterId>();
   const add = (id: OverviewStatusFilterId) => {
-    ids.set(overviewStatusFilterIdKey(id), id);
+    const key = overviewStatusFilterIdKey(id);
+    const existing = ids.get(key);
+    if (!existing) {
+      ids.set(key, id);
+      return;
+    }
+    const linkedRemoteLocations = mergeLinkedRemoteLocations(
+      existing.linkedRemoteLocations,
+      id.linkedRemoteLocations
+    );
+    ids.set(key, {
+      ...existing,
+      ...id,
+      ...(linkedRemoteLocations ? { linkedRemoteLocations } : {}),
+    });
   };
   for (const monitorQueryId of savedObjectIds) {
     add({ monitorQueryId });
@@ -88,6 +103,33 @@ const allIdsIncludingStatusBuckets = (
 const toStatusFilterIds = (
   configs: Record<string, OverviewStatusMetaData>
 ): OverviewStatusFilterId[] => Object.values(configs).map(toOverviewStatusFilterId);
+
+const savedObjectFilterId = (
+  monitorQueryId: string,
+  buckets: Array<Record<string, OverviewStatusMetaData>>
+): OverviewStatusFilterId => {
+  for (const bucket of buckets) {
+    for (const config of Object.values(bucket)) {
+      if (config.monitorQueryId === monitorQueryId) {
+        return toOverviewStatusFilterId(config);
+      }
+    }
+  }
+  return { monitorQueryId };
+};
+
+const addLinkedRemoteLocation = (
+  meta: OverviewStatusMetaData,
+  remoteName: string | undefined,
+  locationId: string
+) => {
+  if (!remoteName) {
+    return;
+  }
+  meta.linkedRemoteLocations = mergeLinkedRemoteLocations(meta.linkedRemoteLocations, [
+    { remoteName, locationId },
+  ]);
+};
 
 interface LocationStatusEntry {
   status: string;
@@ -213,14 +255,12 @@ export class OverviewStatusService {
     const { up, down, upConfigs, downConfigs, pendingConfigs, staleConfigs, disabledConfigs } =
       processed;
 
-    // `statusFilter=stale|pending` paginates from these buckets *before* the
-    // client can promote pending-before-window monitors. Run that promotion
-    // here so a Stale click does not page an empty in-window stale set.
+    // Any status filter paginates from one bucket, so a pending-before-window
+    // monitor is dropped from the page before the client can promote it.
+    // Classify first so the counts and unpaginated ids stay in sync while
+    // Up/Down/Disabled is selected, not only after a Stale or Pending click.
     const statusFilter = params.statusFilter;
-    if (
-      this.shouldApplyFreshnessGuard() &&
-      (statusFilter === MONITOR_STATUS_ENUM.STALE || statusFilter === MONITOR_STATUS_ENUM.PENDING)
-    ) {
+    if (this.shouldApplyFreshnessGuard() && statusFilter) {
       await this.promotePendingFromPriorWindow(pendingConfigs, staleConfigs);
       pending = Object.values(pendingConfigs).length;
       stale = Object.values(staleConfigs).length;
@@ -235,15 +275,13 @@ export class OverviewStatusService {
       projectMonitorsCount,
     } = processMonitors(allConfigs, this.filterData?.locationIds);
 
+    const statusBuckets = [upConfigs, downConfigs, pendingConfigs, staleConfigs, disabledConfigs];
+    // Schedule filters omit ping-synthesized rows, but a saved-object monitor
+    // can still have a location stored on a linked cluster. Keep that on the
+    // id so the chart does not treat the row as local-index-only.
     const allIds = isEmpty(params.schedules)
-      ? allIdsIncludingStatusBuckets(savedObjectIds, [
-          upConfigs,
-          downConfigs,
-          pendingConfigs,
-          staleConfigs,
-          disabledConfigs,
-        ])
-      : savedObjectIds.map((monitorQueryId) => ({ monitorQueryId }));
+      ? allIdsIncludingStatusBuckets(savedObjectIds, statusBuckets)
+      : savedObjectIds.map((monitorQueryId) => savedObjectFilterId(monitorQueryId, statusBuckets));
 
     if (!isPaginated) {
       return {
@@ -1209,6 +1247,7 @@ export class OverviewStatusService {
           locations: [location],
           overallStatus: status,
         };
+        addLinkedRemoteLocation(meta, remote?.remoteName, monLocation.id);
         switch (status) {
           case MONITOR_STATUS_ENUM.DOWN:
             down += 1;
@@ -1228,6 +1267,7 @@ export class OverviewStatusService {
           const existingMeta =
             downConfigs[meta.configId] || upConfigs[meta.configId] || pendingConfigs[meta.configId];
           existingMeta.locations.push(location);
+          addLinkedRemoteLocation(existingMeta, remote?.remoteName, monLocation.id);
           // check if urls is missing from existing meta and update it
           if (!existingMeta.urls && meta.urls) {
             existingMeta.urls = meta.urls;

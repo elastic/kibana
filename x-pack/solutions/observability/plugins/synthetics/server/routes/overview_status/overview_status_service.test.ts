@@ -1617,6 +1617,57 @@ describe('current status route', () => {
       );
     });
 
+    it('keeps a local monitor linked-cluster location on schedule-filtered allIds', async () => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+
+      esClient.search.mockResponseOnce(
+        getEsResponse({
+          buckets: [
+            {
+              key: { monitorId: 'id2', locationId: japanLoc.id },
+              status: {
+                key: japanLoc.id,
+                top: [{ metrics: { 'monitor.status': 'up' }, sort: ['2022-09-15T16:19:16.724Z'] }],
+              },
+            },
+            {
+              key: { monitorId: 'id2', locationId: germanyLoc.id },
+              status: {
+                key: germanyLoc.id,
+                top: [
+                  {
+                    metrics: {
+                      'monitor.status': 'down',
+                      _index: 'cluster-east:synthetics-http-default',
+                    },
+                    sort: ['2022-09-15T16:20:00.000Z'],
+                  },
+                ],
+              },
+            },
+          ],
+        })
+      );
+
+      const routeContext: any = {
+        request: { query: { schedules: ['1'] } },
+        syntheticsEsClient,
+        server: {
+          isElasticsearchServerless: false,
+        },
+      };
+
+      const overviewStatusService = new OverviewStatusService(routeContext);
+      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue(testMonitors as any);
+
+      const result = await overviewStatusService.getOverviewStatus();
+
+      expect(result.allIds.find((id) => id.monitorQueryId === 'id2')).toEqual({
+        monitorQueryId: 'id2',
+        linkedRemoteLocations: [{ remoteName: 'cluster-east', locationId: germanyLoc.id }],
+      });
+    });
+
     it('discovers CPS linked-project monitors that have no local saved object', async () => {
       const { esClient, syntheticsEsClient } = getUptimeESMockClient();
 
@@ -2670,6 +2721,54 @@ describe('current status route', () => {
           expect(
             result.pendingIds.map((id: { monitorQueryId: string }) => id.monitorQueryId)
           ).toEqual(expect.arrayContaining(['id2']));
+        });
+
+        it('classifies pending-before-window as stale when a non-pending status is selected', async () => {
+          const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+          const priorTs = moment().subtract(3, 'hours').toISOString();
+          // Up pagination never returns the pending configs, so the client
+          // cannot promote them. The unpaginated stale/pending ids still have
+          // to reflect the prior-window classification.
+          esClient.search.mockResponseOnce(getEsResponse({ buckets: [] })).mockResponseOnce(
+            getEsResponse({
+              buckets: [
+                {
+                  key: { monitorId: 'id1', locationId: japanLoc.id },
+                  status: {
+                    key: japanLoc.id,
+                    top: [{ metrics: { 'monitor.status': 'up' }, sort: [priorTs] }],
+                  },
+                },
+              ],
+            })
+          );
+
+          const overviewStatusService = new OverviewStatusService(
+            buildRouteContext(
+              {
+                dateRangeStart: 'now-24h',
+                dateRangeEnd: 'now',
+                page: 1,
+                perPage: 20,
+                statusFilter: 'up',
+              },
+              syntheticsEsClient
+            )
+          );
+          overviewStatusService.getMonitorConfigs = jest
+            .fn()
+            .mockResolvedValue(testMonitors as any);
+
+          const result = await overviewStatusService.getOverviewStatus();
+          if (!result.configs || !result.staleIds || !result.pendingIds) {
+            throw new Error('expected a paginated overview status');
+          }
+
+          expect(result.configs).toEqual([]);
+          expect(result.stale).toBe(1);
+          expect(result.pending).toBe(1);
+          expect(result.staleIds).toEqual([{ monitorQueryId: 'id1' }]);
+          expect(result.pendingIds.map((id) => id.monitorQueryId)).toEqual(['id2']);
         });
 
         it("keeps a stale run's last-known status when inspecting a historical window", async () => {

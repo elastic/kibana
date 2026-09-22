@@ -101,9 +101,10 @@ export function useOverviewAlertsAnnotations(): AnnotationLayerConfig[] | undefi
       {
         dataView: alertsDataView,
         annotations: [annotation],
-        // Lets the chart's `dslFilters` (the `terms` clause on `monitor.id`
-        // from `useMonitorIdFilter` — status, search, schedules) reach this
-        // layer too, instead of the default `ignoreGlobalFilters: true`.
+        // Lets the chart's `dslFilters` (monitor identity for status, search,
+        // and schedules) reach this layer too, instead of the default
+        // `ignoreGlobalFilters: true`. The ping `_index` qualifier in that
+        // filter is gated off alert documents — they live in local `.alerts-*`.
         // Ping-only search (`getQueryFilters`' `urls`/`hosts` `query_string`)
         // is deliberately *not* in those `dslFilters`; it would match nothing
         // on this data view and wipe the markers. Free-text search is already

@@ -78,28 +78,79 @@ const idsForStatusFilter = (
   }
 };
 
+// Alert docs are local `.alerts-*` and never carry `kibana.alert.uuid` on a
+// ping. The chart's global DSL is shared with the annotation layer, so the
+// ping `_index` qualifier has to be gated on the absence of that field.
+const ALERT_DOCUMENT_FIELD = 'kibana.alert.uuid';
+
+const localLinkedIndexQualifier = (
+  linkedRemoteLocations: NonNullable<OverviewStatusFilterId['linkedRemoteLocations']>
+): estypes.QueryDslQueryContainer => {
+  const locationsByRemote = new Map<string, string[]>();
+  for (const { remoteName, locationId } of linkedRemoteLocations) {
+    const locationIds = locationsByRemote.get(remoteName);
+    if (locationIds) {
+      if (!locationIds.includes(locationId)) {
+        locationIds.push(locationId);
+      }
+    } else {
+      locationsByRemote.set(remoteName, [locationId]);
+    }
+  }
+
+  return {
+    bool: {
+      should: [
+        { bool: { must_not: [{ wildcard: { _index: '*:*' } }] } },
+        ...[...locationsByRemote.entries()].map(([remoteName, locationIds]) => ({
+          bool: {
+            filter: [
+              { wildcard: { _index: `${remoteName}:*` } },
+              locationIds.length === 1
+                ? { term: { 'observer.name': locationIds[0] } }
+                : { terms: { 'observer.name': locationIds } },
+            ],
+          },
+        })),
+      ],
+      minimum_should_match: 1,
+    },
+  };
+};
+
 const groupFilterClause = ({
   remoteName,
   locationId,
   queryIds,
+  linkedRemoteLocations,
+  qualifyIndex,
 }: {
   remoteName?: string;
   locationId?: string;
   queryIds: string[];
+  linkedRemoteLocations?: OverviewStatusFilterId['linkedRemoteLocations'];
+  qualifyIndex: boolean;
 }): estypes.QueryDslQueryContainer => {
   const filter: estypes.QueryDslQueryContainer[] = [{ terms: { 'monitor.id': queryIds } }];
-  if (remoteName) {
+  if (qualifyIndex && remoteName) {
     filter.push({ wildcard: { _index: `${remoteName}:*` } });
   }
   filter.push(...getHeartbeatLocationFilter({ field: 'observer.name', value: locationId }));
 
-  if (remoteName) {
+  if (!qualifyIndex || remoteName) {
     return filter.length === 1 ? filter[0] : { bool: { filter } };
   }
 
   // Local/Heartbeat ids are not unique across linked clusters. The overview
   // chart searches `synthetics-*,*:synthetics-*`, so a bare `monitor.id` terms
-  // query would also match a remote copy of the same id.
+  // query would also match a remote copy of the same id. A location that
+  // belongs to the local monitor but was stored on a linked cluster is allowed
+  // through; every other CCS index stays excluded.
+  if (linkedRemoteLocations?.length) {
+    filter.push(localLinkedIndexQualifier(linkedRemoteLocations));
+    return { bool: { filter } };
+  }
+
   return {
     bool: {
       filter,
@@ -108,12 +159,17 @@ const groupFilterClause = ({
   };
 };
 
-const monitorIdQuery = (ids: OverviewStatusFilterId[]): estypes.QueryDslQueryContainer => {
+const monitorIdQuery = (
+  ids: OverviewStatusFilterId[],
+  qualifyIndex: boolean
+): estypes.QueryDslQueryContainer => {
   if (!ids.length) {
     return { terms: { 'monitor.id': [NO_MATCHING_MONITOR_ID] } };
   }
 
-  const clauses = groupOverviewStatusFilterIds(ids).map(groupFilterClause);
+  const clauses = groupOverviewStatusFilterIds(ids).map((group) =>
+    groupFilterClause({ ...group, qualifyIndex })
+  );
 
   if (clauses.length === 1) {
     return clauses[0];
@@ -168,9 +224,44 @@ export const useOverviewMonitorFilterIds = (): OverviewStatusFilterId[] | undefi
   return undefined;
 };
 
-export const useMonitorIdFilter = (): estypes.QueryDslQueryContainer | undefined => {
+const combinePingAndAlertMonitorIdQueries = (
+  pingQuery: estypes.QueryDslQueryContainer,
+  alertQuery: estypes.QueryDslQueryContainer
+): estypes.QueryDslQueryContainer => ({
+  bool: {
+    should: [
+      {
+        bool: {
+          filter: [pingQuery],
+          must_not: [{ exists: { field: ALERT_DOCUMENT_FIELD } }],
+        },
+      },
+      {
+        bool: {
+          filter: [alertQuery, { exists: { field: ALERT_DOCUMENT_FIELD } }],
+        },
+      },
+    ],
+    minimum_should_match: 1,
+  },
+});
+
+export const useMonitorIdFilter = (options?: {
+  forAlerts?: boolean;
+  forChart?: boolean;
+}): estypes.QueryDslQueryContainer | undefined => {
   const ids = useOverviewMonitorFilterIds();
-  return ids ? monitorIdQuery(ids) : undefined;
+  if (!ids) {
+    return undefined;
+  }
+  if (options?.forAlerts) {
+    return monitorIdQuery(ids, false);
+  }
+  const pingQuery = monitorIdQuery(ids, true);
+  if (options?.forChart) {
+    return combinePingAndAlertMonitorIdQueries(pingQuery, monitorIdQuery(ids, false));
+  }
+  return pingQuery;
 };
 
 /**

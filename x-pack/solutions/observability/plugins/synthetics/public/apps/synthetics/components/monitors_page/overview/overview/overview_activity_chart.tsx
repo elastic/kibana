@@ -96,7 +96,9 @@ export const OverviewActivityChart = () => {
   // `query_string` (`urls`, `hosts`, …): that clause is ANDed onto the
   // alerts annotation layer (`ignoreGlobalFilters: false`) and matches
   // nothing there. `monitor.id` exists on both pings and alerts.
-  const monitorIdFilter = useMonitorIdFilter();
+  // `forChart` keeps the ping `_index` qualifier off alert documents. This
+  // filter is global, and the annotation layer opts into it.
+  const monitorIdFilter = useMonitorIdFilter({ forChart: true });
   const dslFilters = useMemo(
     () => (monitorIdFilter ? [monitorIdFilter] : undefined),
     [monitorIdFilter]

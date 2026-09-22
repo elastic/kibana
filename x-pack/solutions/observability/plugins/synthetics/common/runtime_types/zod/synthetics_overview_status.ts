@@ -67,6 +67,9 @@ export const OverviewStatusMetaDataCodec = z.looseObject({
   urls: z.string().optional(),
   maintenanceWindows: z.array(z.string()).optional(),
   remote: remoteMonitorInfoSchema.optional(),
+  linkedRemoteLocations: z
+    .array(z.object({ remoteName: z.string(), locationId: z.string() }))
+    .optional(),
   origin: MonitorOriginCodec.optional(),
 });
 
@@ -74,6 +77,9 @@ export const OverviewStatusFilterIdCodec = z.looseObject({
   monitorQueryId: z.string(),
   remoteName: z.string().optional(),
   locationId: z.string().optional(),
+  linkedRemoteLocations: z
+    .array(z.object({ remoteName: z.string(), locationId: z.string() }))
+    .optional(),
 });
 
 export const OverviewStatusCodec = z.looseObject({

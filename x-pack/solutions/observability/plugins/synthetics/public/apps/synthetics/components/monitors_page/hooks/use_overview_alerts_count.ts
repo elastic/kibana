@@ -37,7 +37,9 @@ export function useOverviewAlertsCount({ from, to }: Props) {
   // clause the way the rest of `alertsFilters` is handled. Free-text search
   // is already in this `monitor.id` terms clause (overview API all-field
   // match); a `monitor.name` wildcard on top would drop tag/URL/location hits.
-  const monitorIdFilter = useMonitorIdFilter();
+  // Alert docs live in the local `.alerts-*` indices. The ping query's
+  // `_index` qualifier matches none of them.
+  const monitorIdFilter = useMonitorIdFilter({ forAlerts: true });
   // Spaces are a security boundary for alert data. `useKibanaSpace` reports
   // `loading: false` with `space: undefined` both before the first resolve
   // *and* if the lookup fails — checking `loading` alone would treat a failed

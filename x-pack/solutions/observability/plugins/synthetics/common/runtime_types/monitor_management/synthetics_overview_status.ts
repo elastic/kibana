@@ -36,6 +36,14 @@ export const OverviewPingCodec = t.intersection([
   }),
 ]);
 
+// A location of a local saved-object monitor whose winning ping was stored on
+// a linked cluster. The row stays local (`monitorQueryId` only); this is how
+// the chart can include that ping without matching every remote copy.
+export const LinkedRemoteLocationCodec = t.interface({
+  remoteName: t.string,
+  locationId: t.string,
+});
+
 export const OverviewStatusFilterIdCodec = t.intersection([
   t.interface({
     monitorQueryId: t.string,
@@ -46,6 +54,7 @@ export const OverviewStatusFilterIdCodec = t.intersection([
     // filter on one location of a shared `monitorQueryId` would also match
     // that monitor's Up pings at another location (and vice versa).
     locationId: t.string,
+    linkedRemoteLocations: t.array(LinkedRemoteLocationCodec),
   }),
 ]);
 
@@ -97,6 +106,7 @@ export const OverviewStatusMetaDataCodec = t.intersection([
     urls: t.string,
     maintenanceWindows: t.array(t.string),
     remote: remoteMonitorInfoSchema,
+    linkedRemoteLocations: t.array(LinkedRemoteLocationCodec),
     // Provenance for monitors that have no Synthetics saved object and are
     // therefore read-only in the app. `heartbeat` marks a monitor discovered
     // purely from local ping data (Heartbeat / Elastic Agent autodiscovery),
