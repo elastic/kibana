@@ -11,6 +11,7 @@ import {
   MAX_AI_INDEX_DESCRIBE_TYPE_COUNTS,
 } from '../../common/constants';
 import type { KiTypeCount } from '../../common/http_api/ai_indices';
+import { MEMORY_KI_TYPES } from '../../common/memory';
 import { buildAiIndexSpaceFilter } from '../../common/space_filter';
 import type { AiIndexField, AiIndexTagCount } from './types';
 
@@ -72,7 +73,28 @@ export const describeAiIndexAggregations = async ({
     allow_partial_search_results: false,
     size: 0,
     track_total_hits: false,
-    query: buildAiIndexSpaceFilter(spaceId),
+    query: {
+      bool: {
+        filter: [
+          buildAiIndexSpaceFilter(spaceId),
+          ...(hasType
+            ? [
+                {
+                  bool: {
+                    must_not: [
+                      {
+                        terms: {
+                          [KI_TYPE_FIELD]: [...MEMORY_KI_TYPES],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ]
+            : []),
+        ],
+      },
+    },
     aggs: {
       ...(hasType && {
         types: {
