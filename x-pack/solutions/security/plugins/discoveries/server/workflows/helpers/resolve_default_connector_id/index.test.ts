@@ -8,6 +8,7 @@
 import type { IUiSettingsClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
+import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 
 import { resolveDefaultConnectorId } from '.';
 
@@ -31,8 +32,165 @@ describe('resolveDefaultConnectorId', () => {
     getDefaultConnector: mockGetDefaultConnector,
   } as unknown as InferenceServerStart;
 
+  const mockFeaturesGet = jest.fn();
+  const mockGetForFeature = jest.fn();
+  const mockSearchInferenceEndpoints = {
+    endpoints: { getForFeature: mockGetForFeature },
+    features: { get: mockFeaturesGet },
+  } as unknown as SearchInferenceEndpointsPluginStart;
+
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  describe('when featureId names a registered chat completion feature', () => {
+    beforeEach(() => {
+      mockFeaturesGet.mockReturnValue({ taskType: 'chat_completion' });
+      mockGetForFeature.mockResolvedValue({ endpoints: [{ connectorId: 'tier-connector' }] });
+      mockUiSettingsGet.mockResolvedValue('configured-connector');
+    });
+
+    it('returns the connector configured for the feature', async () => {
+      const result = await resolveDefaultConnectorId({
+        featureId: 'alertzero_reasoning',
+        inference: mockInference,
+        logger: mockLogger,
+        request: mockRequest,
+        searchInferenceEndpoints: mockSearchInferenceEndpoints,
+        uiSettingsClient: mockUiSettingsClient,
+      });
+
+      expect(result).toBe('tier-connector');
+    });
+
+    it('passes the request to getForFeature', async () => {
+      await resolveDefaultConnectorId({
+        featureId: 'alertzero_reasoning',
+        inference: mockInference,
+        logger: mockLogger,
+        request: mockRequest,
+        searchInferenceEndpoints: mockSearchInferenceEndpoints,
+        uiSettingsClient: mockUiSettingsClient,
+      });
+
+      expect(mockGetForFeature).toHaveBeenCalledWith('alertzero_reasoning', mockRequest, {
+        onlyReturnConfigured: true,
+      });
+    });
+
+    // The tier is deliberately above the cluster-wide default in the resolution
+    // order, so a configured default must not win over an operator's tier choice.
+    it('takes precedence over genAiSettings:defaultAIConnector', async () => {
+      await resolveDefaultConnectorId({
+        featureId: 'alertzero_reasoning',
+        inference: mockInference,
+        logger: mockLogger,
+        request: mockRequest,
+        searchInferenceEndpoints: mockSearchInferenceEndpoints,
+        uiSettingsClient: mockUiSettingsClient,
+      });
+
+      expect(mockUiSettingsGet).not.toHaveBeenCalled();
+    });
+  });
+
+  // A tier belonging to a disabled plugin is never registered, which is the common
+  // case rather than an edge one. Deferring to `getForFeature` there would shadow
+  // the configured default with its own fallbacks.
+  describe('when featureId is not usable', () => {
+    beforeEach(() => {
+      mockUiSettingsGet.mockResolvedValue('configured-connector');
+    });
+
+    it('falls through to the configured default when the feature is not registered', async () => {
+      mockFeaturesGet.mockReturnValue(undefined);
+
+      const result = await resolveDefaultConnectorId({
+        featureId: 'alertzero_reasoning',
+        inference: mockInference,
+        logger: mockLogger,
+        request: mockRequest,
+        searchInferenceEndpoints: mockSearchInferenceEndpoints,
+        uiSettingsClient: mockUiSettingsClient,
+      });
+
+      expect(result).toBe('configured-connector');
+    });
+
+    it('does not call getForFeature when the feature is not registered', async () => {
+      mockFeaturesGet.mockReturnValue(undefined);
+
+      await resolveDefaultConnectorId({
+        featureId: 'alertzero_reasoning',
+        inference: mockInference,
+        logger: mockLogger,
+        request: mockRequest,
+        searchInferenceEndpoints: mockSearchInferenceEndpoints,
+        uiSettingsClient: mockUiSettingsClient,
+      });
+
+      expect(mockGetForFeature).not.toHaveBeenCalled();
+    });
+
+    it('falls through when the searchInferenceEndpoints plugin is unavailable', async () => {
+      const result = await resolveDefaultConnectorId({
+        featureId: 'alertzero_reasoning',
+        inference: mockInference,
+        logger: mockLogger,
+        request: mockRequest,
+        uiSettingsClient: mockUiSettingsClient,
+      });
+
+      expect(result).toBe('configured-connector');
+    });
+
+    it('falls through when the feature is not a chat completion feature', async () => {
+      mockFeaturesGet.mockReturnValue({ taskType: 'text_embedding' });
+
+      const result = await resolveDefaultConnectorId({
+        featureId: 'alertzero_reasoning',
+        inference: mockInference,
+        logger: mockLogger,
+        request: mockRequest,
+        searchInferenceEndpoints: mockSearchInferenceEndpoints,
+        uiSettingsClient: mockUiSettingsClient,
+      });
+
+      expect(result).toBe('configured-connector');
+    });
+
+    it('warns when the feature is not a chat completion feature', async () => {
+      mockFeaturesGet.mockReturnValue({ taskType: 'text_embedding' });
+
+      await resolveDefaultConnectorId({
+        featureId: 'alertzero_reasoning',
+        inference: mockInference,
+        logger: mockLogger,
+        request: mockRequest,
+        searchInferenceEndpoints: mockSearchInferenceEndpoints,
+        uiSettingsClient: mockUiSettingsClient,
+      });
+
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        'Ignoring feature_id alertzero_reasoning: task type is text_embedding, not chat_completion'
+      );
+    });
+
+    it('falls through when the feature resolves no endpoints', async () => {
+      mockFeaturesGet.mockReturnValue({ taskType: 'chat_completion' });
+      mockGetForFeature.mockResolvedValue({ endpoints: [] });
+
+      const result = await resolveDefaultConnectorId({
+        featureId: 'alertzero_reasoning',
+        inference: mockInference,
+        logger: mockLogger,
+        request: mockRequest,
+        searchInferenceEndpoints: mockSearchInferenceEndpoints,
+        uiSettingsClient: mockUiSettingsClient,
+      });
+
+      expect(result).toBe('configured-connector');
+    });
   });
 
   describe('when genAiSettings:defaultAIConnector is configured', () => {
