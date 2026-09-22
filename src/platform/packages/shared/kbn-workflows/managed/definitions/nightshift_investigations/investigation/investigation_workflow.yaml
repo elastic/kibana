@@ -1,8 +1,8 @@
 version: '1'
 name: Nightshift Investigation
 description: >
-  General-purpose investigation. Ensures the investigator agent exists, persists
-  the run, calls the agent with the caller's prompt, then writes the result back.
+  General-purpose root cause investigation. One agent investigates available signals,
+  including logs, traces, metrics, and topology, then produces a structured conclusion.
 enabled: true
 settings:
   timeout: '60m'
@@ -21,13 +21,13 @@ triggers:
       properties:
         message:
           type: string
-          description: The prompt to investigate.
+          description: Description of the issue or event to investigate.
         title:
           type: string
           maxLength: 512
           description: >
-            Short human-readable headline for the investigation. Shown in the investigations list
-            and details flyout from the moment the run starts, so never an id or UUID.
+            Short human-readable headline for the investigation (for example, an event title or
+            alert rule name). Never an ID or UUID.
         stream_names:
           type: array
           items:
@@ -46,11 +46,16 @@ triggers:
       additionalProperties: false
 
 steps:
+  # Investigation agents are per-space documents. Ensuring the agent here covers direct and manual
+  # workflow executions as well as client starts; it is idempotent and preserves existing edits.
+  # It runs before persistence and lifecycle emission so an unavailable agent leaves no stale run.
   - name: ensure_investigation_agent
     type: nightshift.ensureInvestigationAgent
     with:
       agent_id: nightshift.investigation
 
+  # Creates the record if needed before lifecycle emission, so a running investigation is always
+  # visible. The server derives attributes from the execution document; retries cover startup races.
   - name: persist_investigation_started
     type: kibana.request
     with:
@@ -79,6 +84,9 @@ steps:
   - name: investigate
     type: ai.agent
     agent-id: nightshift.investigation
+    # Keep these inference identifiers in sync with @kbn/significant-events-schema
+    # inference_feature_ids.ts (SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID /
+    # SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID).
     connector-id-by-feature: 'significant_events_investigation'
     plugin-id: 'significant_events_investigation'
     aggregate-by: 'significant_events'
@@ -86,6 +94,7 @@ steps:
     public-conversation: true
     timeout: 1800s
     with:
+      # Correlates the workflow and generated agent executions for live progress lookup.
       metadata:
         workflow_execution_id: '{{ execution.id }}'
       message: |
@@ -95,6 +104,10 @@ steps:
         Related streams:
         {% for stream in inputs.stream_names %}- {{ stream }}
         {% endfor %}
+        {% endif %}
+
+        {% if inputs.context and inputs.context.size > 0 and inputs.context.source != 'alert' %}
+        Additional context: {{ inputs.context | json }}
         {% endif %}
       schema:
         type: object
@@ -129,6 +142,11 @@ steps:
                   maxLength: 10000
                 evidence:
                   type: array
+                  description: >
+                    What this hypothesis' verdict rests on — at most 3 entries. Every hypothesis
+                    that ends "confirmed" or "dismissed" must carry at least one. Only cite ES|QL
+                    you actually executed, verbatim, with the absolute window it ran over; never
+                    invent a query.
                   maxItems: 3
                   items:
                     type: object
@@ -136,11 +154,16 @@ steps:
                       description:
                         type: string
                         maxLength: 10000
+                        description: What was observed and why it decided this hypothesis.
                       esql_query:
                         type: string
                         maxLength: 10000
+                        description: The exact ES|QL query executed to gather this evidence, when one was run.
                       time_range:
                         type: object
+                        description: >
+                          Absolute ISO 8601 window esql_query was evaluated over. Set it whenever
+                          esql_query is set — without it the query cannot be opened in Discover.
                         properties:
                           from:
                             type: string
@@ -153,22 +176,37 @@ steps:
                           - to
                       code:
                         type: object
+                        description: The source file backing this evidence, when you read code.
                         properties:
                           source:
                             type: string
                             enum: [github_connector, code_search]
+                            description: >
+                              How you read this file — not where the code appears to be hosted.
+                              "code_search" if you read it through Semantic Code Search;
+                              "github_connector" if you called a GitHub connector. A repository
+                              named like a GitHub project is not evidence of either.
                           repo:
                             type: string
                             maxLength: 255
+                            description: Repository in owner/name form, for example elastic/kibana.
                           path:
                             type: string
                             maxLength: 512
+                            description: Repository-relative file path.
                           host:
                             type: string
                             maxLength: 255
+                            description: >
+                              Hostname the code can be browsed on, copied from the origin of a URL
+                              the tool returned (for example, github.com). Never guess it from the
+                              repository name — omit it if the tool reported no URL.
                           ref:
                             type: string
                             maxLength: 255
+                            description: >
+                              Commit SHA the file was read at, copied from the tool response. Omit
+                              it rather than substituting a branch name.
                         required:
                           - source
                           - repo
@@ -182,9 +220,17 @@ steps:
           conclusion:
             type: string
             maxLength: 10000
+            description: >
+              The mechanism/root-cause narrative, as plain prose — no Markdown headings or bullet
+              lists. Actionable steps belong in recommendations, not here.
           severity:
             type: string
             enum: ['80-critical', '60-high', '40-medium', '20-low']
+            description: >
+              How severe the investigated situation is, rated from what this investigation confirmed:
+              whether the affected operation fails, degrades, or still completes, and how broad the
+              impact is. Set it for every investigation from your own findings rather than copying a
+              severity supplied by the trigger.
           recommendations:
             type: array
             description: >
@@ -223,6 +269,13 @@ steps:
                 - confidence
           blind_spots:
             type: array
+            description: >
+              Actionable knowledge gaps discovered during this investigation — data sources that were
+              missing or inaccessible and would have helped diagnose the issue. Each item names the
+              missing data source and states why the gap mattered. Do not include incident-specific
+              observations; reduce the finding to what data source is missing and why it matters.
+              Score how strongly closing each gap would materially improve the investigation, sort by
+              confidence descending, and return only the 3 strongest items.
             maxItems: 3
             items:
               type: object
@@ -238,15 +291,21 @@ steps:
                   type: number
                   minimum: 0
                   maximum: 1
+                  description: How strongly the findings support that closing this gap would materially improve the investigation.
                 description:
                   type: string
                   maxLength: 10000
+                  description: Why this gap mattered to the investigation.
               required:
                 - title
                 - confidence
                 - description
           impact:
             type: object
+            description: >
+              Structured account of affected services or components. Prefer service-level entries.
+              Each entity may carry one evidence artifact; prefer an ES|QL query with an absolute
+              ISO 8601 time window so the UI can render a chart. Omit only when no signals establish impact.
             properties:
               entities:
                 type: array
@@ -260,14 +319,21 @@ steps:
                     type:
                       type: string
                       maxLength: 255
+                      description: >
+                        Entity category. Default to "service". Use "host", "database", and so on
+                        only when no service-level entity applies.
                     feature_id:
                       type: string
                       maxLength: 255
+                      description: Knowledge Indicator feature_id when this entity came from one.
                     stream_name:
                       type: string
                       maxLength: 255
                     evidence:
                       type: object
+                      description: >
+                        One artifact linking this entity to the investigation. Prefer esql_query and
+                        an absolute ISO 8601 time_range so the UI can render a chart; description is a short label.
                       properties:
                         description:
                           type: string
@@ -321,6 +387,8 @@ steps:
     on-failure:
       continue: true
 
+  # Writes the completed structured output. It is idempotent because progress reporting may have
+  # already marked the record running; retrying avoids silently losing a completed result.
   - name: persist_investigation_completed
     type: kibana.request
     if: '${{ steps.investigate.error == null }}'
@@ -346,6 +414,8 @@ steps:
         delay: 5s
         strategy: exponential
 
+  # Writes failure status when the agent step errors. Retry before continuing so the failure event
+  # is still emitted even when the record cannot be updated.
   - name: persist_investigation_failed
     type: kibana.request
     if: '${{ steps.investigate.error != null }}'

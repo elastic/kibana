@@ -14,7 +14,7 @@ interface WorkflowStep {
   name: string;
   type?: string;
   if?: string;
-  with?: { method?: string; path?: string; body?: Record<string, unknown> };
+  with?: { method?: string; path?: string; message?: string; body?: Record<string, unknown> };
   'on-failure'?: unknown;
   steps?: WorkflowStep[];
   else?: WorkflowStep[];
@@ -78,6 +78,7 @@ describe('Nightshift investigation workflow', () => {
         impact: '${{ steps.investigate.output.structured_output.impact }}',
       })
     );
+    expect(requireStep('investigate').with?.message).toContain('{{ inputs.context | json }}');
   });
 
   it('space-scopes the path of every kibana.request step', () => {
