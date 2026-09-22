@@ -17,10 +17,12 @@ import {
   EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
 import { MAX_AI_INDEX_DESCRIPTION_LENGTH } from '../../../../common/constants';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
 import { useSaveAiIndexDescription } from '../../hooks/use_save_ai_index_description';
 
@@ -78,6 +80,10 @@ export const DescriptionPanel = ({
               onClick={startEditing}
               isDisabled={aiIndex === undefined}
               data-test-subj="contextEditDescriptionButton"
+              {...getEbtProps({
+                element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPage,
+                action: CONTEXT_ENGINE_UI_EBT.action.description.EDIT,
+              })}
             >
               <FormattedMessage
                 id="xpack.contextEngine.aiIndexDetail.description.editButton"
@@ -113,6 +119,10 @@ export const DescriptionPanel = ({
                 onClick={() => setIsEditing(false)}
                 isDisabled={isSaving}
                 data-test-subj="contextDescriptionCancelButton"
+                {...getEbtProps({
+                  element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPage,
+                  action: CONTEXT_ENGINE_UI_EBT.action.description.CANCEL,
+                })}
               >
                 <FormattedMessage
                   id="xpack.contextEngine.aiIndexDetail.description.cancelButton"
@@ -127,6 +137,10 @@ export const DescriptionPanel = ({
                 onClick={handleSave}
                 isLoading={isSaving}
                 data-test-subj="contextDescriptionSaveButton"
+                {...getEbtProps({
+                  element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPage,
+                  action: CONTEXT_ENGINE_UI_EBT.action.description.SAVE,
+                })}
               >
                 <FormattedMessage
                   id="xpack.contextEngine.aiIndexDetail.description.saveButton"

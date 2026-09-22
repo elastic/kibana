@@ -11,6 +11,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import { TraceSelector } from './trace_selector';
 
 const mockUseAgentBuilderAgents = jest.fn();
@@ -24,13 +25,22 @@ jest.mock('../../hooks/use_search_data_streams', () => ({
   useSearchDataStreams: () => mockUseSearchDataStreams(),
 }));
 
-const renderSelector = (props: React.ComponentProps<typeof TraceSelector>) => {
+const defaultEbtElement = CONTEXT_ENGINE_UI_EBT.element.aiIndexCreatePage;
+
+const withDefaultEbt = (
+  props: Omit<React.ComponentProps<typeof TraceSelector>, 'ebtElement'>
+): React.ComponentProps<typeof TraceSelector> => ({
+  ebtElement: defaultEbtElement,
+  ...props,
+});
+
+const renderSelector = (props: Omit<React.ComponentProps<typeof TraceSelector>, 'ebtElement'>) => {
   const services = coreMock.createStart();
   return render(
     <I18nProvider>
       <EuiProvider>
         <KibanaContextProvider services={services}>
-          <TraceSelector {...props} />
+          <TraceSelector {...withDefaultEbt(props)} />
         </KibanaContextProvider>
       </EuiProvider>
     </I18nProvider>

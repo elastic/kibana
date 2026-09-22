@@ -21,10 +21,12 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
 import { MAX_AI_INDEX_DESCRIPTION_LENGTH } from '../../../common/constants';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../common/telemetry';
 import type { AiIndexType } from '../../../common/http_api/ai_indices';
 import { TraceSelector, type EditableAiIndexTrace } from '../components/trace_selector';
 import { useCreateAiIndex } from '../hooks/use_create_ai_index';
@@ -121,6 +123,7 @@ export const CreateAiIndexPage = () => {
           event.preventDefault();
           navigateToContextEngine(CONTEXT_ENGINE_PATHS.landing);
         }}
+        element={CONTEXT_ENGINE_UI_EBT.element.aiIndexCreatePage}
         pageTitle={createPageTitle}
         description={createPageDescription}
       />
@@ -227,7 +230,11 @@ export const CreateAiIndexPage = () => {
             </p>
           </EuiText>
           <EuiSpacer size="m" />
-          <TraceSelector value={trace} onChange={setTrace} />
+          <TraceSelector
+            value={trace}
+            onChange={setTrace}
+            ebtElement={CONTEXT_ENGINE_UI_EBT.element.aiIndexCreatePage}
+          />
         </EuiPanel>
 
         <EuiSpacer size="l" />
@@ -259,6 +266,13 @@ export const CreateAiIndexPage = () => {
                   checked={storageType === option.type}
                   onChange={() => setStorageType(option.type)}
                   data-test-subj={`contextAiIndexStorageType-${option.type}`}
+                  {...getEbtProps({
+                    element: CONTEXT_ENGINE_UI_EBT.element.aiIndexCreatePage,
+                    action:
+                      option.type === 'index'
+                        ? CONTEXT_ENGINE_UI_EBT.action.aiIndexCreate.SELECT_STORAGE_INDEX
+                        : CONTEXT_ENGINE_UI_EBT.action.aiIndexCreate.SELECT_STORAGE_DATA_STREAM,
+                  })}
                   label={
                     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                       <EuiFlexItem grow={false}>
@@ -296,6 +310,10 @@ export const CreateAiIndexPage = () => {
               onClick={createAndContinue}
               isLoading={isCreating}
               isDisabled={dest === undefined}
+              {...getEbtProps({
+                element: CONTEXT_ENGINE_UI_EBT.element.aiIndexCreatePage,
+                action: CONTEXT_ENGINE_UI_EBT.action.aiIndexCreate.CREATE,
+              })}
             >
               {i18n.translate('xpack.contextEngine.createAiIndex.continueButton', {
                 defaultMessage: 'Create AI index',

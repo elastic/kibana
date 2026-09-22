@@ -15,8 +15,10 @@ import {
   EuiTabs,
   EuiTitle,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo, useState } from 'react';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import { useDataConnectors } from '../../hooks/use_data_connectors';
 import { getSourceDisplay } from '../source_display';
 import { SourceRow } from '../source_row';
@@ -103,6 +105,10 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
             ) : undefined
           }
           data-test-subj="contextSourcePickerTab-esql"
+          {...getEbtProps({
+            element: CONTEXT_ENGINE_UI_EBT.element.aiIndexEditFlyout,
+            action: CONTEXT_ENGINE_UI_EBT.action.sources.TAB_ESQL,
+          })}
         >
           <FormattedMessage
             id="xpack.contextEngine.sourcePicker.tabs.esql"
@@ -119,6 +125,10 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
             ) : undefined
           }
           data-test-subj="contextSourcePickerTab-connectors"
+          {...getEbtProps({
+            element: CONTEXT_ENGINE_UI_EBT.element.aiIndexEditFlyout,
+            action: CONTEXT_ENGINE_UI_EBT.action.sources.TAB_CONNECTORS,
+          })}
         >
           <FormattedMessage
             id="xpack.contextEngine.sourcePicker.tabs.connectors"

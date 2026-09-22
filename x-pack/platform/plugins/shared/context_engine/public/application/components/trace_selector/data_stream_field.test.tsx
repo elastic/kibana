@@ -11,6 +11,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import { DataStreamField } from './data_stream_field';
 
 interface UseSearchDataStreamsArgs {
@@ -30,13 +31,22 @@ const defaultHookResult = {
   isError: false,
 };
 
-const renderField = (props: React.ComponentProps<typeof DataStreamField>) => {
+const defaultEbtElement = CONTEXT_ENGINE_UI_EBT.element.aiIndexCreatePage;
+
+const withDefaultEbt = (
+  props: Omit<React.ComponentProps<typeof DataStreamField>, 'ebtElement'>
+): React.ComponentProps<typeof DataStreamField> => ({
+  ebtElement: defaultEbtElement,
+  ...props,
+});
+
+const renderField = (props: Omit<React.ComponentProps<typeof DataStreamField>, 'ebtElement'>) => {
   const services = coreMock.createStart();
   const view = render(
     <I18nProvider>
       <EuiProvider>
         <KibanaContextProvider services={services}>
-          <DataStreamField {...props} />
+          <DataStreamField {...withDefaultEbt(props)} />
         </KibanaContextProvider>
       </EuiProvider>
     </I18nProvider>

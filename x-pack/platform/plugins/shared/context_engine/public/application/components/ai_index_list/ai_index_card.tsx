@@ -20,10 +20,12 @@ import {
   EuiTextBlockTruncate,
   EuiToolTip,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import React, { useState } from 'react';
 import type { AiIndexHttpItem } from '../../../../common/http_api/ai_indices';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import { AI_INDEX_TYPE_LABEL } from './labels';
 
 const AiIndexCardFooter = ({ aiIndex }: { aiIndex: AiIndexHttpItem }) => (
@@ -67,6 +69,11 @@ export const AiIndexCard = ({ aiIndex, href, onDeleteClick }: AiIndexCardProps) 
   return (
     <EuiCard
       data-test-subj="contextAiIndexCard"
+      {...getEbtProps({
+        element: CONTEXT_ENGINE_UI_EBT.element.aiIndexListPage,
+        action: CONTEXT_ENGINE_UI_EBT.action.aiIndexList.OPEN_CARD,
+        detail: aiIndex.id,
+      })}
       textAlign="left"
       titleSize="xs"
       titleElement="h4"
@@ -110,6 +117,11 @@ export const AiIndexCard = ({ aiIndex, href, onDeleteClick }: AiIndexCardProps) 
                     data-test-subj="contextAiIndexCardActionsButton"
                     aria-label={actionsAriaLabel}
                     onClick={openActionsMenu}
+                    {...getEbtProps({
+                      element: CONTEXT_ENGINE_UI_EBT.element.aiIndexListPage,
+                      action: CONTEXT_ENGINE_UI_EBT.action.aiIndexList.CARD_ACTIONS_MENU,
+                      detail: aiIndex.id,
+                    })}
                   />
                 </EuiToolTip>
               }
@@ -130,6 +142,11 @@ export const AiIndexCard = ({ aiIndex, href, onDeleteClick }: AiIndexCardProps) 
                         : undefined
                     }
                     data-test-subj="contextAiIndexCardDeleteAction"
+                    {...getEbtProps({
+                      element: CONTEXT_ENGINE_UI_EBT.element.aiIndexListPage,
+                      action: CONTEXT_ENGINE_UI_EBT.action.aiIndexList.DELETE,
+                      detail: aiIndex.id,
+                    })}
                     onClick={(event) => {
                       event.preventDefault();
                       event.stopPropagation();

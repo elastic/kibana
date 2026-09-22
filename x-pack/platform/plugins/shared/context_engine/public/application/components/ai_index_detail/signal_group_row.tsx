@@ -15,8 +15,10 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import type { SignalGroup } from '../../../../common/http_api/signals';
 import { tagLabel, tagDescription } from './signal_format';
 
@@ -40,6 +42,11 @@ export const SignalGroupRow = ({ group, onView }: SignalGroupRowProps) => (
     paddingSize="m"
     data-test-subj="contextSignalGroupRow"
     onClick={onView}
+    {...getEbtProps({
+      element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPage,
+      action: CONTEXT_ENGINE_UI_EBT.action.signals.VIEW_GROUP,
+      detail: group.tag,
+    })}
   >
     <EuiFlexGroup alignItems="flexStart" gutterSize="m" responsive={false}>
       <EuiFlexItem>
@@ -74,6 +81,11 @@ export const SignalGroupRow = ({ group, onView }: SignalGroupRowProps) => (
             onView();
           }}
           data-test-subj="contextSignalGroupViewDetailsButton"
+          {...getEbtProps({
+            element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPage,
+            action: CONTEXT_ENGINE_UI_EBT.action.signals.VIEW_GROUP,
+            detail: group.tag,
+          })}
         >
           {i18n.translate('xpack.contextEngine.aiIndexDetail.signals.groupViewDetailsButton', {
             defaultMessage: 'View details',

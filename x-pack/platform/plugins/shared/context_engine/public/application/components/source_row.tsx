@@ -6,9 +6,11 @@
  */
 
 import { EuiBadge, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import type { ReactNode } from 'react';
 import React from 'react';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../common/telemetry';
 import { ItemRow } from './item_row';
 
 interface SourceRowProps {
@@ -51,6 +53,11 @@ export const SourceRow = ({
               onClick={onRemove}
               aria-label={removeLabel}
               data-test-subj="contextRemoveSourceButton"
+              {...getEbtProps({
+                element: CONTEXT_ENGINE_UI_EBT.element.aiIndexEditFlyout,
+                action: CONTEXT_ENGINE_UI_EBT.action.sources.REMOVE_SOURCE,
+                detail: label,
+              })}
             />
           </EuiToolTip>
         ) : undefined

@@ -6,18 +6,24 @@
  */
 
 import { EuiComboBox, EuiFormRow, type EuiComboBoxOptionOption } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo } from 'react';
+import type { ContextEngineUiEbt } from '../../../../common/telemetry';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import { useAgentBuilderAgents } from '../../hooks/use_agent_builder_agents';
 import { useKibana } from '../../hooks/use_kibana';
 import type { EditableAiIndexTrace } from './types';
 
+type ContextEngineEbtElement = ContextEngineUiEbt['element'][keyof ContextEngineUiEbt['element']];
+
 interface ElasticAgentFieldProps {
   value: EditableAiIndexTrace | undefined;
   onChange: (trace: EditableAiIndexTrace | undefined) => void;
+  ebtElement: ContextEngineEbtElement;
 }
 
-export const ElasticAgentField = ({ value, onChange }: ElasticAgentFieldProps) => {
+export const ElasticAgentField = ({ value, onChange, ebtElement }: ElasticAgentFieldProps) => {
   const { agents, isLoading, error } = useAgentBuilderAgents();
   const {
     services: { notifications },
@@ -75,6 +81,10 @@ export const ElasticAgentField = ({ value, onChange }: ElasticAgentFieldProps) =
           defaultMessage: 'Agent trace source',
         })}
         data-test-subj="contextTraceAgentComboBox"
+        {...getEbtProps({
+          element: ebtElement,
+          action: CONTEXT_ENGINE_UI_EBT.action.traces.SELECT_AGENT,
+        })}
       />
     </EuiFormRow>
   );
