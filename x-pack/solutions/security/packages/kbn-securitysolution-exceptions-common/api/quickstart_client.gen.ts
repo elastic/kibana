@@ -109,7 +109,7 @@ all rules before retrying.
 The reference check is provided by the Security Solution plugin and requires the
 caller to have detection rule read access. A caller who holds the `exceptions` Kibana
 privilege but lacks detection rule read access will receive a per-list error for every
-non-artifact list in the request, even when no rules reference those lists, because
+list in the request, even when no rules reference those lists, because
 the endpoint cannot verify the absence of references. The list is not deleted in
 that case.
 
