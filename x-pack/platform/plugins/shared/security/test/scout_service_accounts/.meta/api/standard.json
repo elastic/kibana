@@ -1,0 +1,112 @@
+{
+  "sha1": "2265e93f12068a31cad0975f27e0e1a3a43ce37f",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "9c74fe5c346746e-196d8e231090b17",
+      "title": "Create Elasticsearch service accounts creates the account, mints its token, and reports only the id and name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
+        "line": 125,
+        "column": 5
+      }
+    },
+    {
+      "id": "9c74fe5c346746e-898df34d70c19e3",
+      "title": "Create Elasticsearch service accounts assigns the roles the caller asked for",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
+        "line": 151,
+        "column": 15
+      }
+    },
+    {
+      "id": "9c74fe5c346746e-495a95e38265d82",
+      "title": "Create Elasticsearch service accounts refuses a name that is already taken",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
+        "line": 175,
+        "column": 7
+      }
+    },
+    {
+      "id": "9c74fe5c346746e-5a2b3236aa81fd6",
+      "title": "Create Elasticsearch service accounts rejects a name that could escape the Elasticsearch path",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
+        "line": 191,
+        "column": 60
+      }
+    },
+    {
+      "id": "9c74fe5c346746e-0a5d0fc0a66f02c",
+      "title": "Create Elasticsearch service accounts API-key caller: falls back to `superuser` when the roles cannot be derived",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
+        "line": 218,
+        "column": 25
+      }
+    },
+    {
+      "id": "9c74fe5c346746e-eec3d266a2e3611",
+      "title": "Create Elasticsearch service accounts API-key caller: creates the account when the roles are named explicitly",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
+        "line": 247,
+        "column": 25
+      }
+    },
+    {
+      "id": "9c74fe5c346746e-3ddff7a9140419f",
+      "title": "Create Elasticsearch service accounts API-key caller: refuses a key without `manage_security`",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
+        "line": 282,
+        "column": 14
+      }
+    },
+    {
+      "id": "9c74fe5c346746e-033d4aebedccb22",
+      "title": "Create Elasticsearch service accounts refuses a caller without `manage_security`",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
+        "line": 310,
+        "column": 49
+      }
+    }
+  ]
+}

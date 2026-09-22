@@ -78,6 +78,17 @@ export const buildConnectorEnv = ({
     if (envValue.length >= MIN_REDACTABLE_SECRET_LENGTH) secretValues.push(envValue);
   }
 
+  // HTTP ES connectors store `Authorization: ApiKey …` in secretHeaders, not `password`.
+  const authorization = (secrets.secretHeaders as { Authorization?: string } | undefined)
+    ?.Authorization;
+  if (typeof authorization === 'string' && authorization.startsWith('ApiKey ')) {
+    const apiKey = authorization.slice('ApiKey '.length);
+    if (env.CONNECTOR_SECRET_PASSWORD === undefined) {
+      env.CONNECTOR_SECRET_PASSWORD = apiKey;
+    }
+    if (apiKey.length >= MIN_REDACTABLE_SECRET_LENGTH) secretValues.push(apiKey);
+  }
+
   return { env, secretValues };
 };
 
@@ -155,10 +166,13 @@ export const createConnectorCredentialResolver =
       `Injecting credentials for connector ${connectorId} into a single sandbox command`
     );
 
+    // Config comes from the in-memory connector, not from `get()`: the actions client omits
+    // config for preconfigured connectors unless they opt in with `exposeConfig`, which would
+    // also publish it over the HTTP API. Authorization above already gated this read.
     return buildConnectorEnv({
       connectorId,
       actionTypeId: connector.actionTypeId,
-      config: connector.config ?? {},
+      config: inMemoryConnector.config ?? connector.config ?? {},
       secrets: inMemoryConnector.secrets ?? {},
     });
   };
