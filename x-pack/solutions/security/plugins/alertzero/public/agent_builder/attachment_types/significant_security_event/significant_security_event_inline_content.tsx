@@ -37,7 +37,7 @@ import {
   buildThreatReportLookupEsql,
 } from '../navigation';
 import { EntityChip } from '../entity_chip';
-import { IocBadge, OPEN_ALERT_DETAILS_LABEL, OPEN_IN_DISCOVER_LABEL } from '../shared/ioc_badge';
+import { IocBadge, OPEN_ALERT_DETAILS_LABEL, discoverAction } from '../shared/ioc_badge';
 import {
   SectionHeading,
   DateTime,
@@ -110,9 +110,7 @@ const EventRows: React.FC<{
         return (
           <IocBadge
             value={event.event_id}
-            action={
-              href ? { href, iconType: 'discoverApp', label: OPEN_IN_DISCOVER_LABEL } : undefined
-            }
+            action={discoverAction(href)}
             testSubj={`alertzeroSignificantSecurityEventEventLink-${event.event_id}`}
           />
         );
@@ -650,15 +648,12 @@ export const SignificantSecurityEventInlineContent: React.FC<
                   <EuiFlexItem grow={false}>
                     <IocBadge
                       value={parsed.report_id}
-                      action={(() => {
-                        const href = buildDiscoverEsqlUrl({
+                      action={discoverAction(
+                        buildDiscoverEsqlUrl({
                           share: navigation.share,
                           esql: buildThreatReportLookupEsql({ reportId: parsed.report_id }),
-                        });
-                        return href
-                          ? { href, iconType: 'discoverApp', label: OPEN_IN_DISCOVER_LABEL }
-                          : undefined;
-                      })()}
+                        })
+                      )}
                       testSubj="alertzeroSignificantSecurityEventReportLink"
                     />
                   </EuiFlexItem>

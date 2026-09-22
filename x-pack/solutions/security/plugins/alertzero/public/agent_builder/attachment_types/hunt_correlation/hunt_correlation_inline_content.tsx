@@ -26,7 +26,7 @@ import {
   buildThreatReportIocSetHashLookupEsql,
   buildThreatReportLookupEsql,
 } from '../navigation';
-import { IocBadge, OPEN_IN_DISCOVER_LABEL } from '../shared/ioc_badge';
+import { IocBadge, discoverAction } from '../shared/ioc_badge';
 import { LabeledBadgeTable } from '../shared/labeled_badge_table';
 import type { LabeledBadgeTableRow } from '../shared/labeled_badge_table';
 import { DIAMOND_VERTICES, formatPercent } from '../shared/severity';
@@ -85,7 +85,7 @@ const renderAnchorValue = ({
       <IocBadge
         value={value}
         index={index}
-        action={href ? { href, iconType: 'discoverApp', label: OPEN_IN_DISCOVER_LABEL } : undefined}
+        action={discoverAction(href)}
         testSubj={`alertzeroHuntCorrelationActorChip-${index}`}
       />
     );
@@ -106,13 +106,7 @@ const renderAnchorValue = ({
     });
     return (
       <span data-test-subj={`alertzeroHuntCorrelationAnchorLink-${kind}-${index}`}>
-        <IocBadge
-          value={value}
-          index={index}
-          action={
-            href ? { href, iconType: 'discoverApp', label: OPEN_IN_DISCOVER_LABEL } : undefined
-          }
-        />
+        <IocBadge value={value} index={index} action={discoverAction(href)} />
       </span>
     );
   }
@@ -121,11 +115,7 @@ const renderAnchorValue = ({
   const href = esql ? buildDiscoverEsqlUrl({ share: navigation.share, esql }) : undefined;
   return (
     <span data-test-subj={`alertzeroHuntCorrelationAnchorLink-${kind}-${index}`}>
-      <IocBadge
-        value={value}
-        index={index}
-        action={href ? { href, iconType: 'discoverApp', label: OPEN_IN_DISCOVER_LABEL } : undefined}
-      />
+      <IocBadge value={value} index={index} action={discoverAction(href)} />
     </span>
   );
 };
@@ -185,9 +175,7 @@ export const HuntCorrelationInlineContent: React.FC<HuntCorrelationInlineContent
         return (
           <IocBadge
             value={relatedReportId}
-            action={
-              href ? { href, iconType: 'discoverApp', label: OPEN_IN_DISCOVER_LABEL } : undefined
-            }
+            action={discoverAction(href)}
             testSubj={`alertzeroHuntCorrelationRelatedReportLink-${relatedReportId}`}
           />
         );

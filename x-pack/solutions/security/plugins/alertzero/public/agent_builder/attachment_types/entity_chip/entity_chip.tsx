@@ -11,7 +11,7 @@ import { EuiAvatar, EuiFlexGroup, EuiFlexItem, useEuiTheme, type IconType } from
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import { buildDiscoverEsqlUrl, buildEntityLookupEsql, buildSecurityEntityUrl } from '../navigation';
-import { IocBadge, OPEN_ENTITY_PAGE_LABEL, OPEN_IN_DISCOVER_LABEL } from '../shared/ioc_badge';
+import { IocBadge, OPEN_ENTITY_PAGE_LABEL, discoverAction } from '../shared/ioc_badge';
 import type {
   AttachmentEntityField,
   AttachmentEntityRef,
@@ -94,9 +94,7 @@ export const EntityChip: React.FC<EntityChipProps> = ({
             action={
               securityEntityHref
                 ? { href: securityEntityHref, iconType: 'user', label: OPEN_ENTITY_PAGE_LABEL }
-                : discoverHref
-                ? { href: discoverHref, iconType: 'discoverApp', label: OPEN_IN_DISCOVER_LABEL }
-                : undefined
+                : discoverAction(discoverHref)
             }
             testSubj={testSubj ?? 'alertzeroEntityChipLink'}
           />

@@ -30,7 +30,7 @@ import { QueryClientProvider, useQuery } from '@kbn/react-query';
 import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
 import type { AttachmentNavigationDeps } from '../navigation';
 import { buildDiscoverThreatReportNestedIocUrl } from '../navigation';
-import { IocBadge, OPEN_IN_DISCOVER_LABEL } from '../shared/ioc_badge';
+import { IocBadge, discoverAction } from '../shared/ioc_badge';
 import {
   SectionHeading,
   CompactStat,
@@ -155,13 +155,7 @@ const IocTypeValues: React.FC<{
     const tooltipContent = [ioc.tier, ioc.severity].filter(Boolean).join(', ');
     const badge = (
       <span data-test-subj={`alertzeroThreatAttachmentIocLink-${type}-${index}`}>
-        <IocBadge
-          value={ioc.value ?? ''}
-          index={index}
-          action={
-            href ? { href, iconType: 'discoverApp', label: OPEN_IN_DISCOVER_LABEL } : undefined
-          }
-        />
+        <IocBadge value={ioc.value ?? ''} index={index} action={discoverAction(href)} />
       </span>
     );
     return (

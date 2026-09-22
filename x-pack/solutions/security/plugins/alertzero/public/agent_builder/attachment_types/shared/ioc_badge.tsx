@@ -30,6 +30,14 @@ export interface IocBadgeAction {
   label: string;
 }
 
+/**
+ * `IocBadgeAction` for "Open in Discover", or `undefined` when there is no href to link to.
+ * Every discover-link call site across the attachment renderers needs this same
+ * `href ? { ... } : undefined` guard; this is the one place that repeats it.
+ */
+export const discoverAction = (href: string | undefined): IocBadgeAction | undefined =>
+  href ? { href, iconType: 'discoverApp', label: OPEN_IN_DISCOVER_LABEL } : undefined;
+
 export interface IocBadgeProps {
   value: string;
   index?: number;

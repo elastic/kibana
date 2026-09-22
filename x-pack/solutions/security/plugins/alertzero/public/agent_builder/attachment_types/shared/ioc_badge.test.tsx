@@ -7,7 +7,21 @@
 
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { IocBadge } from './ioc_badge';
+import { IocBadge, discoverAction } from './ioc_badge';
+
+describe('discoverAction', () => {
+  it('returns an Open in Discover action for a defined href', () => {
+    expect(discoverAction('https://kbn.test/discover')).toEqual({
+      href: 'https://kbn.test/discover',
+      iconType: 'discoverApp',
+      label: 'Open in Discover',
+    });
+  });
+
+  it('returns undefined when there is no href', () => {
+    expect(discoverAction(undefined)).toBeUndefined();
+  });
+});
 
 describe('IocBadge', () => {
   it('renders the value', () => {
