@@ -1789,7 +1789,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         // The no-data popover can open late after navigation and cover the layer header.
         await timePicker.ensureHiddenNoDataPopover();
         // Hover over the tab to make the layer actions button visible
-        const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]', 1000);
+        const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]', 0);
         if (tabs[index]) {
           await tabs[index].moveMouseTo();
         }
@@ -1806,6 +1806,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async ensureLayerTabIsActive(index: number = 0) {
+      if (await testSubjects.exists(`lns-layerPanel-${index}`, { timeout: 0 })) {
+        return;
+      }
+
       const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]', 1000);
 
       if (tabs[index]) {
