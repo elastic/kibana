@@ -23,6 +23,7 @@ import type { DeployGroup } from './deploy_groups';
 import { toSOServiceVars } from './package_inputs';
 import { useOnboardingSO } from './use_onboarding_so';
 import { cleanupAgentlessPolicies } from './policy_cleanup';
+import type { PolicyCleanupOps } from './policy_cleanup';
 
 export {
   getRegionFieldName,
@@ -113,6 +114,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
       const isInitialDeploy = instanceIds === undefined;
 
       let groupsToDeploy: DeployGroup[];
+      let cleanupOps: PolicyCleanupOps = { toDelete: [], toUpdate: [] };
 
       if (isInitialDeploy) {
         // Restrict each group to members not already tracked — an already-deployed instance
@@ -162,7 +164,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
         onContinue();
 
         if (hasPendingCleanup) {
-          await cleanupAgentlessPolicies({
+          cleanupOps = await cleanupAgentlessPolicies({
             pendingCleanupPolicyIds: detectAndReviewStep.pendingCleanupPolicyIds ?? {},
             currentPolicyIdsByInstance: detectAndReviewStep.policyIdsByInstance,
             instances: serviceSettings?.instances ?? [],
@@ -254,10 +256,8 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
       const mergedFailed = [...previouslyFailed, ...newFailed];
 
       // Update SO with deploy outcome (best-effort).
-      // pendingCleanupPolicyIds were cleaned up in Fleet above; exclude them from the SO record.
-      const cleanedUpPolicyIds = new Set(
-        Object.values(detectAndReviewStep.pendingCleanupPolicyIds ?? {})
-      );
+      // Only exclude deleted policy IDs; updated policies keep the same ID and remain active.
+      const deletedPolicyIds = new Set(cleanupOps.toDelete);
       if (onboardingDeploymentId) {
         await updateDeployment(onboardingDeploymentId, {
           serviceVars: toSOServiceVars(
@@ -269,7 +269,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
               Object.values({
                 ...detectAndReviewStep.policyIdsByInstance,
                 ...policyIdsByInstance,
-              }).filter((id) => !cleanedUpPolicyIds.has(id))
+              }).filter((id) => !deletedPolicyIds.has(id))
             ),
           ],
           status: mergedFailed.length === 0 ? 'succeeded' : 'failed',

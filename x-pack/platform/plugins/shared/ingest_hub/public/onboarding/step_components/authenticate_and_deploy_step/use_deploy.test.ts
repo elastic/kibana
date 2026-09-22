@@ -42,6 +42,10 @@ jest.mock('@kbn/fleet-plugin/public', () => ({
   sendUpdateCloudOnboardingDeployment: jest.fn(),
 }));
 
+jest.mock('./policy_cleanup', () => ({
+  cleanupAgentlessPolicies: jest.fn(),
+}));
+
 jest.mock('../../use_aws_service_matrix', () => {
   const { AWS_SERVICES_STATIC, buildAwsServiceMatrix } = jest.requireActual(
     '../../aws_service_matrix'
@@ -152,8 +156,10 @@ import { useAwsServicesMap } from '../../use_aws_service_matrix';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { useHistory, useParams } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { cleanupAgentlessPolicies } from './policy_cleanup';
 
 const mockSendCreateAgentlessPolicy = sendCreateAgentlessPolicy as jest.Mock;
+const mockCleanupAgentlessPolicies = cleanupAgentlessPolicies as jest.Mock;
 const mockSendGetPackageInfoByKey = sendGetPackageInfoByKey as jest.Mock;
 const mockSendCreateCloudOnboardingDeployment = sendCreateCloudOnboardingDeployment as jest.Mock;
 const mockSendUpdateCloudOnboardingDeployment = sendUpdateCloudOnboardingDeployment as jest.Mock;
@@ -1497,5 +1503,134 @@ describe('toSOServiceVars', () => {
     expect(result.unknown_svc.varsByDataStream.unknown_svc.varsByInput['aws-s3'].regions).toBe(
       'us-east-1,eu-west-1'
     );
+  });
+});
+
+// ─── useDeploy — cleanup orchestration ──────────────────────────────────────
+
+describe('useDeploy — cleanup orchestration', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    // Default: cleanup returns no-op ops.
+    mockCleanupAgentlessPolicies.mockResolvedValue({ toDelete: [], toUpdate: [] });
+  });
+
+  it('calls cleanupAgentlessPolicies and clears pendingCleanupPolicyIds when cleanup is pending', async () => {
+    setupMocks({
+      selectedServiceIds: [],
+      detectAndReviewStep: {
+        pendingCleanupPolicyIds: { instA: 'policy-A' },
+        policyIdsByInstance: {},
+        serviceStatuses: {},
+        failedInstances: [],
+      },
+    });
+    const onContinue = jest.fn();
+    const updateDetectAndReviewStep = (mockUseOnboardingFlow() as ReturnType<
+      typeof mockUseOnboardingFlow
+    >).updateDetectAndReviewStep as jest.Mock;
+
+    const { result } = renderHook(() => useDeploy({ onContinue }));
+
+    await act(async () => {
+      await result.current.handleDeploy();
+    });
+
+    expect(mockCleanupAgentlessPolicies).toHaveBeenCalledTimes(1);
+    const cleanupCall = mockCleanupAgentlessPolicies.mock.calls[0][0];
+    expect(cleanupCall.pendingCleanupPolicyIds).toEqual({ instA: 'policy-A' });
+
+    expect(updateDetectAndReviewStep).toHaveBeenCalledWith(
+      expect.objectContaining({ pendingCleanupPolicyIds: {} })
+    );
+  });
+
+  it('skips cleanupAgentlessPolicies when pendingCleanupPolicyIds is empty', async () => {
+    setupMocks({
+      selectedServiceIds: ['ec2'],
+      detectAndReviewStep: { pendingCleanupPolicyIds: {}, policyIdsByInstance: {} },
+    });
+
+    const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+
+    await act(async () => {
+      await result.current.handleDeploy();
+    });
+
+    expect(mockCleanupAgentlessPolicies).not.toHaveBeenCalled();
+  });
+
+  it('cleanup-only path: no new targets but pending cleanup → calls cleanup and returns without deploying', async () => {
+    setupMocks({
+      selectedServiceIds: [],
+      detectAndReviewStep: {
+        pendingCleanupPolicyIds: { instA: 'policy-A' },
+        policyIdsByInstance: {},
+        serviceStatuses: {},
+        failedInstances: [],
+      },
+    });
+
+    const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+
+    await act(async () => {
+      await result.current.handleDeploy();
+    });
+
+    expect(mockCleanupAgentlessPolicies).toHaveBeenCalledTimes(1);
+    // No agentless policy creation should fire.
+    expect(mockSendCreateAgentlessPolicy).not.toHaveBeenCalled();
+  });
+
+  it('excludes only deleted policy IDs (not updated ones) from packagePolicyIds in SO update', async () => {
+    // policy-B is updated (survivors remain) and must stay in the SO record.
+    // policy-A is deleted and must be excluded.
+    mockCleanupAgentlessPolicies.mockResolvedValue({
+      toDelete: ['policy-A'],
+      toUpdate: [{ policyId: 'policy-B', survivingInstanceIds: ['instB'] }],
+    });
+
+    setupMocks({
+      selectedServiceIds: ['ec2'],
+      detectAndReviewStep: {
+        pendingCleanupPolicyIds: { instA: 'policy-A', instB: 'policy-B' },
+        policyIdsByInstance: { instB: 'policy-B' },
+        onboardingDeploymentId: 'so-dep-123',
+      },
+    });
+
+    mockSendCreateAgentlessPolicy.mockResolvedValue({ item: { id: 'policy-EC2' } });
+
+    const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+
+    await act(async () => {
+      await result.current.handleDeploy();
+    });
+
+    expect(mockSendUpdateCloudOnboardingDeployment).toHaveBeenCalled();
+    const updateBody = mockSendUpdateCloudOnboardingDeployment.mock.calls[0][1];
+    expect(updateBody.packagePolicyIds).not.toContain('policy-A');
+    expect(updateBody.packagePolicyIds).toContain('policy-B');
+  });
+
+  it('does not call cleanupAgentlessPolicies on retry (instanceIds provided)', async () => {
+    setupMocks({
+      selectedServiceIds: ['ec2'],
+      detectAndReviewStep: {
+        pendingCleanupPolicyIds: { instA: 'policy-A' },
+        policyIdsByInstance: { ec2: 'policy-EC2' },
+        serviceStatuses: { ec2: 'error' },
+        failedInstances: ['ec2'],
+      },
+    });
+    mockSendCreateAgentlessPolicy.mockResolvedValue({ data: { item: { id: 'policy-EC2' } } });
+
+    const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+
+    await act(async () => {
+      await result.current.handleDeploy(['ec2']);
+    });
+
+    expect(mockCleanupAgentlessPolicies).not.toHaveBeenCalled();
   });
 });

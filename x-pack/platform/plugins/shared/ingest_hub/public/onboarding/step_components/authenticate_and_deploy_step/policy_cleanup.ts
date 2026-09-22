@@ -113,13 +113,14 @@ interface CleanupAgentlessOpts extends BuildPolicyBodyOpts {
 /**
  * Delete or update agentless (managed_integration) policies for removed services.
  * Best-effort: individual failures are logged but do not block the deploy.
+ * Returns the ops so callers can distinguish deleted vs updated policy IDs.
  */
-export async function cleanupAgentlessPolicies(opts: CleanupAgentlessOpts): Promise<void> {
+export async function cleanupAgentlessPolicies(
+  opts: CleanupAgentlessOpts
+): Promise<PolicyCleanupOps> {
   const { pendingCleanupPolicyIds, currentPolicyIdsByInstance } = opts;
-  const { toDelete, toUpdate } = computePolicyCleanupOps(
-    pendingCleanupPolicyIds,
-    currentPolicyIdsByInstance
-  );
+  const ops = computePolicyCleanupOps(pendingCleanupPolicyIds, currentPolicyIdsByInstance);
+  const { toDelete, toUpdate } = ops;
 
   await Promise.allSettled([
     ...toDelete.map((policyId) =>
@@ -135,6 +136,8 @@ export async function cleanupAgentlessPolicies(opts: CleanupAgentlessOpts): Prom
       })
     ),
   ]);
+
+  return ops;
 }
 
 async function updateAgentlessPolicy(
