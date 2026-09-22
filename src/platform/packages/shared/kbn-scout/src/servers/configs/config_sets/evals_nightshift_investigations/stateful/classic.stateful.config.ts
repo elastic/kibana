@@ -51,7 +51,6 @@ const createInvestigationConfig = (): ScoutServerConfig => {
   }
   const sandboxConfig = {
     ...(exporterArg ? { 'telemetry.tracing.exporters': exporters } : {}),
-    'xpack.agentBuilder.tracing.exporters': exporters.flatMap(({ http }) => (http ? [http] : [])),
     'xpack.sandbox': {
       enabled: true,
       host: process.env.SANDBOX_API_HOST ?? 'localhost',

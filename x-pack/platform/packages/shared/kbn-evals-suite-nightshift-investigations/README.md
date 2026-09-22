@@ -56,6 +56,7 @@ settings unset for isolated conversations. Provisioning the sandbox is a separat
 Use an existing evaluations profile with a model endpoint and a results/trace destination:
 
 ```bash
+node scripts/evals stop
 NIGHTSHIFT_DATASETS=trace-only node scripts/evals start \
   --suite nightshift-investigations --profile golden \
   --model openrouter-anthropic-claude-sonnet-4-6 \
@@ -123,9 +124,12 @@ investigation, conversation and trace IDs for sharing. Inspect them in the evalu
 Historical full-grader runs are not acceptance evidence for this runner. Graders, native trace
 metrics, automatic provisioning and generalized CI defaults are deferred.
 
-Use `node scripts/evals stop` before switching between smoke and trace-only selections so the
-native CLI starts Scout with the intended environment. Plain `start` and CI keep the original
-smoke selection and `evals_tracing` behavior, without requiring sandbox credentials.
+Stop and restart the managed stack before switching between smoke and trace-only selections,
+changing any `SANDBOX_*` variable, or changing certificate/key file contents. The native CLI caches
+Scout by config-set name and does not detect those startup inputs; automatic freshness detection
+is a separate follow-up. Use `evals run` to repeat a run with unchanged startup settings. Plain
+`start` and CI keep the original smoke selection and `evals_tracing` behavior, without requiring
+sandbox credentials.
 
 ## Two kinds of dataset
 
