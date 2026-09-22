@@ -68,6 +68,44 @@ const buildTagWorkflow = (tagCount: number): string => {
   ].join('\n');
 };
 
+/**
+ * `steps` scalars holding both dimensions at once: assigns up to just under the
+ * Liquid engine's 150,000-character parse limit, plus references to them.
+ */
+const buildAssignHeavyWorkflow = (
+  stepCount: number,
+  assignsPerStep: number,
+  refsPerStep: number
+): string => {
+  const lines = [
+    "version: '1'",
+    'name: assign-heavy-fixture',
+    'enabled: true',
+    'triggers:',
+    '  - type: manual',
+    'consts:',
+    '  seed: hello',
+    'steps:',
+  ];
+  for (let step = 0; step < stepCount; step++) {
+    const parts: string[] = [];
+    for (let i = 0; i < assignsPerStep; i++) {
+      parts.push(`{% assign a${i} = consts.seed %}`);
+    }
+    for (let i = 0; i < refsPerStep; i++) {
+      parts.push(`{{ a${i % assignsPerStep} }}`);
+    }
+    lines.push(
+      `  - name: step_${step}`,
+      '    type: console',
+      '    with:',
+      '      message: >-',
+      `        ${parts.join(' ')}`
+    );
+  }
+  return lines.join('\n');
+};
+
 const validate = (yaml: string) =>
   validateWorkflowYaml(yaml, schema, {
     variableValidationRegistry: createMockWorkflowContextRegistry(),
@@ -122,6 +160,24 @@ describe('variable validation budgets', () => {
     const result = validate(buildTagWorkflow(MAX_FOR_LOOP_SCOPES_FOR_VARIABLE_VALIDATION));
 
     expect(result.notChecked).toBeUndefined();
+  });
+
+  it('handles both dimensions at once without a further budget', () => {
+    // References at the cap and, behind each one, a scalar of assigns just
+    // under the Liquid engine's own 150,000-character parse limit. That limit
+    // is what bounds the assign dimension: a larger scalar does not parse, so
+    // no template locals are extracted from it at all. Measures ~190 ms and
+    // ~11 MiB at the route body limit.
+    const yaml = buildAssignHeavyWorkflow(7, 4000, 143);
+
+    const result = validate(yaml);
+
+    expect(yaml.length).toBeGreaterThan(MAX_WORKFLOW_YAML_LENGTH / 2);
+    // Every reference resolves against an assign in its own scalar.
+    expect(result.diagnostics.filter(({ source }) => source === 'variable')).toEqual([]);
+    expect(result.notChecked).toEqual([
+      `Variable validation is partial: the workflow has more than ${MAX_VARIABLES_FOR_VARIABLE_VALIDATION} variable references, so the rest of it was not checked.`,
+    ]);
   });
 
   it('does not exhaust the heap on a workflow at the route body limit', () => {
