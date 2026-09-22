@@ -67,7 +67,10 @@ ruleTester.run('@kbn/eslint/no_unsafe_hash', rule, {
        import { createHash } from 'crypto';
        createHash('sha1');
       `,
-      filename: path.resolve(KIBANA_ROOT, 'packages/kbn-optimizer/src/common/dll_manifest.ts'),
+      filename: path.resolve(
+        KIBANA_ROOT,
+        'src/core/packages/test-helpers/so-type-serializer/src/get_migration_hash.ts'
+      ),
     },
   ],
 
@@ -170,7 +173,10 @@ ruleTester.run('@kbn/eslint/no_unsafe_hash', rule, {
        import { createHash } from 'crypto';
        createHash('md5');
       `,
-      filename: path.resolve(KIBANA_ROOT, 'packages/kbn-optimizer/src/common/dll_manifest.ts'),
+      filename: path.resolve(
+        KIBANA_ROOT,
+        'src/core/packages/test-helpers/so-type-serializer/src/get_migration_hash.ts'
+      ),
       errors: [
         {
           line: 2,

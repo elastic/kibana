@@ -15,7 +15,7 @@ import { availableParallelism } from 'os';
 
 import { globby } from 'globby';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { runBuild } from '@kbn/rspack-optimizer';
+import { runBuild, reportOptimizerTimings, type BuildOptions } from '@kbn/rspack-optimizer';
 import { asyncForEachWithLimit } from '@kbn/std';
 
 import type { Task } from '../lib';
@@ -23,13 +23,10 @@ import { write } from '../lib';
 
 const brotliCompressAsync = promisify(zlib.brotliCompress);
 
-// [rspack-transition] This task replaces BuildKibanaPlatformPlugins when
-// KBN_USE_RSPACK=true. When the legacy optimizer is removed, rename this
-// to BuildBundles and delete the conditional in build_distributables.ts.
-export const BuildRspackBundles: Task = {
-  description: 'Building distributable versions of Kibana bundles with RSPack',
+export const BuildBundles: Task = {
+  description: 'Building distributable versions of Kibana bundles',
   async run(buildConfig, log, build) {
-    const result = await runBuild({
+    const buildOptions: BuildOptions = {
       repoRoot: REPO_ROOT,
       outputRoot: build.resolvePath(),
       dist: true,
@@ -39,7 +36,11 @@ export const BuildRspackBundles: Task = {
       examples: buildConfig.pluginSelector.examples,
       testPlugins: buildConfig.pluginSelector.testPlugins,
       log,
-    });
+    };
+
+    const startTime = Date.now();
+    const result = await runBuild(buildOptions);
+    await reportOptimizerTimings(log, buildOptions, result, Date.now() - startTime);
 
     if (!result.success) {
       throw new Error(`RSPack build failed: ${result.errors?.join(', ') ?? 'unknown error'}`);

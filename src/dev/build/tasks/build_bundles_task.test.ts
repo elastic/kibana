@@ -14,12 +14,13 @@ import Path from 'path';
 import { ToolingLog } from '@kbn/tooling-log';
 import { runBuild } from '@kbn/rspack-optimizer';
 
-import { BuildRspackBundles } from './build_rspack_bundles_task';
+import { BuildBundles } from './build_bundles_task';
 import { Build, write } from '../lib';
 import { getMockConfig } from '../lib/__mocks__/get_config';
 
 jest.mock('@kbn/rspack-optimizer', () => ({
   runBuild: jest.fn(),
+  reportOptimizerTimings: jest.fn().mockResolvedValue(undefined),
 }));
 
 jest.mock('globby', () => ({ globby: jest.fn() }));
@@ -53,7 +54,7 @@ const { globby: mockedGlobby } = jest.requireMock('globby') as {
 };
 const mockedWrite = write as jest.MockedFunction<typeof write>;
 
-describe('BuildRspackBundles', () => {
+describe('BuildBundles', () => {
   const log = new ToolingLog();
   const config = getMockConfig();
   const build = new Build(config);
@@ -85,7 +86,7 @@ describe('BuildRspackBundles', () => {
     mockedGlobby.mockResolvedValue([]);
     mockReadFile.mockResolvedValueOnce('{}');
 
-    await BuildRspackBundles.run(config, log, build);
+    await BuildBundles.run(config, log, build);
 
     expect(mockedRunBuild).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -106,7 +107,7 @@ describe('BuildRspackBundles', () => {
       errors: ['module not found', 'syntax error'],
     });
 
-    await expect(BuildRspackBundles.run(config, log, build)).rejects.toThrow(
+    await expect(BuildBundles.run(config, log, build)).rejects.toThrow(
       'RSPack build failed: module not found, syntax error'
     );
     expect(mockedGlobby).not.toHaveBeenCalled();
@@ -124,7 +125,7 @@ describe('BuildRspackBundles', () => {
       return Buffer.from('bundle-bytes');
     });
 
-    await BuildRspackBundles.run(config, log, build);
+    await BuildBundles.run(config, log, build);
 
     expect(mockedGlobby).toHaveBeenCalledWith(['**/*.js'], {
       cwd: Path.resolve(tmpDir, 'target/public/bundles'),
@@ -139,7 +140,7 @@ describe('BuildRspackBundles', () => {
     mockedGlobby.mockResolvedValue([]);
     mockReadFile.mockResolvedValueOnce(JSON.stringify(metricsPayload));
 
-    await BuildRspackBundles.run(config, log, build);
+    await BuildBundles.run(config, log, build);
 
     expect(mockReadFile).toHaveBeenCalledWith(metricsPath(), 'utf-8');
     expect(mockedWrite).toHaveBeenCalledWith(
@@ -153,7 +154,7 @@ describe('BuildRspackBundles', () => {
     mockedGlobby.mockResolvedValue([]);
     mockReadFile.mockResolvedValueOnce('{}');
 
-    await BuildRspackBundles.run(config, log, build);
+    await BuildBundles.run(config, log, build);
 
     expect(mockUnlink).toHaveBeenCalledWith(metricsPath());
     expect(mockRm).toHaveBeenCalledWith(entryWrappersPath(), {
