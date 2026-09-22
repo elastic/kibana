@@ -136,14 +136,9 @@ export const createVisualizationGraph = async (
 ) => {
   const defaultModel = await modelProvider.getDefaultModel();
 
-  // An appearance-only edit keeps each layer's existing data_source and the
-  // prompt never binds columns, so skip the column probe entirely.
-  const resolveEsqlNode = (state: VisualizationState) => {
-    if (state.preserveESQL) {
-      const action: Action = { type: 'resolve_esql', success: true, query: state.esqlQuery };
-      return { esqlQuery: state.esqlQuery, actions: [action] };
-    }
-    return runResolveEsqlNode({
+  const resolveEsqlNode = (state: VisualizationState) =>
+    runResolveEsqlNode({
+      preserveESQL: state.preserveESQL,
       esqlQuery: state.esqlQuery,
       nlQuery: state.nlQuery,
       // On edit, seed generation with the existing per-layer queries so a
@@ -156,7 +151,6 @@ export const createVisualizationGraph = async (
       logger,
       esClient,
     });
-  };
 
   // Node: Generate configuration
   const generateConfigNode = async (state: VisualizationState) => {

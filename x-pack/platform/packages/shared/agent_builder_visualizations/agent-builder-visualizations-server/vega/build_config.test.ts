@@ -172,6 +172,7 @@ describe('buildVegaConfig', () => {
       expect(invoke.mock.calls[0][0]).toMatchObject({
         esqlQuery: PROVIDED_ESQL,
         existingEsql: PROVIDED_ESQL,
+        preserveESQL: true,
       });
     });
 
@@ -196,7 +197,7 @@ describe('buildVegaConfig', () => {
       await edit(newEsql);
 
       // The caller query wins, but the recovered query is still threaded as
-      // context so the graph has the prior shape available.
+      // context so the graph can regenerate from the prior shape if it fails.
       expect(invoke.mock.calls[0][0]).toMatchObject({
         esqlQuery: newEsql,
         existingEsql: PROVIDED_ESQL,

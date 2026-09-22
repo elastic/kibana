@@ -10,6 +10,7 @@ import { generateEsql, executeEsql } from '@kbn/agent-builder-genai-utils';
 import type { ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
+import { createEsqlResponseError } from '../shared/esql_response_error.mock';
 import { createVisualizationGraph } from './graph_lens';
 import type { VisualizationConfig } from './types';
 
@@ -122,12 +123,21 @@ describe('createVisualizationGraph', () => {
     expect(prompt).not.toContain('No column information is available');
   });
 
-  it('keeps a provided query and infers fields from its text when the probe fails', async () => {
-    mockedExecuteEsql.mockRejectedValueOnce(new Error('circuit_breaking_exception'));
+  it('regenerates esql when the provided query fails to execute', async () => {
+    mockedExecuteEsql.mockRejectedValueOnce(
+      createEsqlResponseError('verification_exception', 'Unknown column [missing_field]')
+    );
+    mockedGenerateEsql.mockResolvedValue({
+      query: 'FROM logs-* | STATS count = COUNT(*)',
+      results: { columns: EXECUTED_COLUMNS, values: [] },
+    } as Awaited<ReturnType<typeof generateEsql>>);
 
-    const model = createMockModel();
-    const graph = await createVisualizationGraph(model as never, logger, events, esClient);
-    const esqlQuery = 'FROM logs-* | STATS count = COUNT(*)';
+    const graph = await createVisualizationGraph(
+      createMockModel() as never,
+      logger,
+      events,
+      esClient
+    );
 
     const finalState = await graph.invoke({
       nlQuery: 'Count logs',
@@ -136,20 +146,15 @@ describe('createVisualizationGraph', () => {
       schema: {},
       existingConfig: undefined,
       parsedExistingConfig: null,
-      esqlQuery,
+      esqlQuery: 'FROM logs-* | STATS broken = COUNT(*) BY missing_field',
       currentAttempt: 0,
       actions: [],
       validatedConfig: null,
       error: null,
     });
 
-    expect(mockedGenerateEsql).not.toHaveBeenCalled();
-    expect(finalState.esqlQuery).toBe(esqlQuery);
-    expect(finalState.error).toBeNull();
-    const prompt = JSON.stringify(
-      (await model.getDefaultModel()).chatModel.invoke.mock.calls[0][0]
-    );
-    expect(prompt).toContain('No column information is available');
+    expect(mockedGenerateEsql).toHaveBeenCalled();
+    expect(finalState.esqlQuery).toBe('FROM logs-* | STATS count = COUNT(*)');
   });
 
   it('binds generateEsql result columns into the config prompt', async () => {
@@ -495,7 +500,12 @@ describe('createVisualizationGraph', () => {
     );
   });
 
-  it('authors an appearance-only edit without probing or regenerating ES|QL', async () => {
+  it('authors an appearance-only edit without regenerating ES|QL when the probe fails', async () => {
+    mockedExecuteEsql.mockRejectedValue(new Error('verification_exception'));
+    mockedGenerateEsql.mockResolvedValue({
+      error: 'verification_exception',
+    } as Awaited<ReturnType<typeof generateEsql>>);
+
     const existingQuery = 'FROM logs-* | STATS count = COUNT(*)';
     const parsedExistingConfig = {
       type: 'metric',
@@ -531,7 +541,9 @@ describe('createVisualizationGraph', () => {
       error: null,
     });
 
-    expect(mockedExecuteEsql).not.toHaveBeenCalled();
+    expect(mockedExecuteEsql).toHaveBeenCalledWith(
+      expect.objectContaining({ query: existingQuery, dropNullColumns: false, limit: 1 })
+    );
     expect(mockedGenerateEsql).not.toHaveBeenCalled();
     expect(finalState.actions).toEqual(
       expect.arrayContaining([

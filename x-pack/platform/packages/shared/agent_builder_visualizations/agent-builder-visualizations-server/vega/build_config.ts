@@ -45,7 +45,7 @@ interface BuildVegaConfigResult {
 
 /**
  * Orchestrate Vega-Lite spec generation: optionally reuse a caller-provided
- * ES|QL query (probed for its result columns, never regenerated), on
+ * ES|QL query (dropped if it fails validation so the graph regenerates one), on
  * edits seed generation with the query recovered from the existing spec so the
  * graph can modify it when the instruction needs different data, run the
  * generation graph, and surface a clear error if no spec is produced.
@@ -62,10 +62,11 @@ export const buildVegaConfig = async ({
   events,
   esClient,
 }: BuildVegaConfigParams): Promise<BuildVegaConfigResult> => {
-  // A caller-provided ES|QL query is handed to the graph as-is and only probed
-  // for its result columns. It therefore supersedes preserving the existing
-  // query, which is only ever kept verbatim when it is the one recovered from
-  // the spec being edited.
+  // A caller-provided ES|QL query is handed to the graph as-is: its resolve
+  // node executes the query (which subsumes syntax validation) and regenerates
+  // a corrected one when execution fails. It therefore supersedes preserving
+  // the existing query, which is only ever kept verbatim when it is the one
+  // recovered from the spec being edited.
   if (preserveESQL && esql) {
     logger.warn(
       'Both an ES|QL query and preserveESQL were given; the provided query takes precedence and the existing one is not preserved.'
@@ -97,6 +98,7 @@ export const buildVegaConfig = async ({
     existingSpec,
     existingEsql,
     chartType,
+    preserveESQL: keepsExistingEsql,
     // Preserving ES|QL reuses the recovered query as the trusted query: the
     // graph only probes it for columns and re-authors the spec around it.
     esqlQuery: esql || (keepsExistingEsql ? existingEsql : '') || '',

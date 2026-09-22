@@ -95,6 +95,7 @@ const VegaStateAnnotation = Annotation.Root({
   existingSpec: Annotation<string | undefined>(),
   /** Query recovered from the spec being edited, used as context to (re)generate. */
   existingEsql: Annotation<string | undefined>(),
+  preserveESQL: Annotation<boolean>(),
   chartType: Annotation<SupportedChartType | undefined>(),
   // internal
   esqlQuery: Annotation<string>(),
@@ -130,6 +131,7 @@ export const createVegaGraph = async (
 
   const resolveEsqlNode = (state: VegaState) =>
     runResolveEsqlNode({
+      preserveESQL: state.preserveESQL,
       esqlQuery: state.esqlQuery,
       nlQuery: state.nlQuery,
       // On edit, seed generation with the query recovered from the existing

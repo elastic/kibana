@@ -6,15 +6,11 @@
  */
 
 import type { EsqlEsqlColumnInfo } from '@elastic/elasticsearch/lib/api/types';
-import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
-import type { Logger } from '@kbn/logging';
-import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import {
-  buildTimeRangeParams,
-  DEFAULT_ESQL_TIME_RANGE,
-  executeEsql,
-} from '@kbn/agent-builder-genai-utils';
-import { generateVisualizationEsql } from './generate_visualization_esql';
+  probeEsqlColumns,
+  resolveEsqlForAuthoring,
+  type ResolveEsqlForAuthoringParams,
+} from './resolve_esql_for_authoring';
 
 /** Graph action emitted by the shared resolve-ES|QL node, part of both the Lens and Vega action unions. */
 export interface ResolveEsqlAction {
@@ -26,17 +22,15 @@ export interface ResolveEsqlAction {
   error?: string;
 }
 
-export interface RunResolveEsqlNodeParams {
-  /** Caller-provided or stored query, used as-is. Empty falls through to generation. */
+export interface RunResolveEsqlNodeParams
+  extends Omit<ResolveEsqlForAuthoringParams, 'providedQuery'> {
+  /**
+   * Appearance-only restyle: keep `esqlQuery` verbatim and never regenerate
+   * it. The query is still probed for result columns, tolerating failure.
+   */
+  preserveESQL?: boolean;
+  /** Caller-provided or stored query. Empty falls through to generation. */
   esqlQuery: string;
-  nlQuery: string;
-  index: string | undefined;
-  existingQueries?: readonly string[];
-  extraInstructions?: string;
-  modelProvider: ModelProvider;
-  events: ToolEventEmitter;
-  logger: Logger;
-  esClient: IScopedClusterClient;
 }
 
 export interface RunResolveEsqlNodeResult {
@@ -46,41 +40,12 @@ export interface RunResolveEsqlNodeResult {
 }
 
 /**
- * Best-effort column probe for a query that is used as-is. Runs the same
- * request shape as generateEsql `execute: 'schema'` (LIMIT 1, keep all-null
- * columns), binding `?_tstart`/`?_tend` to {@link DEFAULT_ESQL_TIME_RANGE}.
- * A failed probe only costs column information: authoring then infers fields
- * from the query text, and the query itself is never discarded or regenerated.
- */
-const probeEsqlColumns = async (
-  query: string,
-  esClient: IScopedClusterClient,
-  logger: Logger
-): Promise<EsqlEsqlColumnInfo[] | undefined> => {
-  try {
-    const { columns } = await executeEsql({
-      query,
-      params: buildTimeRangeParams(DEFAULT_ESQL_TIME_RANGE),
-      limit: 1,
-      dropNullColumns: false,
-      esClient: esClient.asCurrentUser,
-    });
-    return columns;
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    logger.warn(
-      `Could not probe ES|QL query for columns (${errorMessage}); authoring will infer fields from the query text`
-    );
-    return undefined;
-  }
-};
-
-/**
- * Shared Lens/Vega graph node: keep a provided or stored query and probe it for
- * columns, otherwise generate one (whose schema run already yields columns).
- * Either outcome is mapped onto a resolve_esql action.
+ * Shared Lens/Vega graph node: on appearance-only edits keep the stored query
+ * and only probe it for columns, otherwise resolve a query; either outcome is
+ * mapped onto a resolve_esql action.
  */
 export const runResolveEsqlNode = async ({
+  preserveESQL = false,
   esqlQuery,
   nlQuery,
   index,
@@ -91,7 +56,9 @@ export const runResolveEsqlNode = async ({
   logger,
   esClient,
 }: RunResolveEsqlNodeParams): Promise<RunResolveEsqlNodeResult> => {
-  if (esqlQuery) {
+  if (preserveESQL) {
+    // Vega re-authors the whole spec, so it still needs the executed column
+    // names/types; a failed probe must not fail or regenerate the stored query.
     const columns = await probeEsqlColumns(esqlQuery, esClient, logger);
     return {
       esqlQuery,
@@ -102,33 +69,27 @@ export const runResolveEsqlNode = async ({
 
   let action: ResolveEsqlAction;
   try {
-    logger.debug('Generating ES|QL query for visualization');
-    const generated = await generateVisualizationEsql({
+    const resolved = await resolveEsqlForAuthoring({
+      providedQuery: esqlQuery,
       nlQuery,
+      index,
       existingQueries,
       extraInstructions,
-      index,
       modelProvider,
       events,
       logger,
       esClient,
     });
 
-    if (generated.query) {
-      logger.debug(`Generated ES|QL query: ${generated.query}`);
-      action = {
-        type: 'resolve_esql',
-        success: true,
-        query: generated.query,
-        columns: generated.columns,
-      };
-    } else {
-      action = {
-        type: 'resolve_esql',
-        success: false,
-        error: generated.error ?? 'No queries generated',
-      };
-    }
+    action =
+      'error' in resolved
+        ? { type: 'resolve_esql', success: false, error: resolved.error }
+        : {
+            type: 'resolve_esql',
+            success: true,
+            query: resolved.query,
+            columns: resolved.columns,
+          };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     logger.error(`Failed to resolve ES|QL query: ${errorMessage}`);
