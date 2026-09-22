@@ -1810,9 +1810,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
           }
 
           if (splitButtonExists) {
-            await testSubjects.click(`lnsLayerSplitButton--${index}`);
+            await testSubjects.clickWhenNotDisabledWithoutRetry(`lnsLayerSplitButton--${index}`);
           }
-          await testSubjects.click(`lnsLayerRemove--${index}`);
+          // Let intercepted clicks reach the outer retry so its recovery can dismiss a
+          // late-opening popover and retry from freshly queried layer actions.
+          await testSubjects.clickWhenNotDisabledWithoutRetry(`lnsLayerRemove--${index}`);
           if (await testSubjects.exists('lnsLayerRemoveModal')) {
             await testSubjects.exists('lnsLayerRemoveConfirmButton');
             await testSubjects.click('lnsLayerRemoveConfirmButton');
