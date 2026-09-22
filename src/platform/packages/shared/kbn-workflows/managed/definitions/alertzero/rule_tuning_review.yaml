@@ -684,6 +684,10 @@ steps:
         {% when "threshold" %}
         Current threshold value: {{ steps.fetch_rule.output.threshold.value }}
         Proposed threshold value: {{ steps.diagnose_rule.output.structured_output.proposed_threshold_value }}
+        {% if steps.diagnose_rule.output.structured_output.proposed_threshold_field != nil %}
+        Current threshold field: {{ steps.fetch_rule.output.threshold.field | json }}
+        Proposed threshold field: {{ steps.diagnose_rule.output.structured_output.proposed_threshold_field | json }}
+        {% endif %}
         {% if steps.diagnose_rule.output.structured_output.proposed_threshold_cardinality %}
         Proposed threshold cardinality:
         {% for entry in steps.diagnose_rule.output.structured_output.proposed_threshold_cardinality %}
