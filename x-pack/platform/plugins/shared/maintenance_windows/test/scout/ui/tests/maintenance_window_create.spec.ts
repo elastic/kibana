@@ -241,8 +241,8 @@ test.describe('Maintenance window create form', { tag: tags.stateful.classic }, 
     await expect(page.testSubj.locator('alertingV2ScopedQuerySwitch')).toBeChecked();
 
     // Episodes KQL must be restored.
-    await expect(
-      page.testSubj.locator('maintenanceWindowAlertingV2FilterInput')
-    ).toContainText('episode_id: "test-episode"');
+    await expect(page.testSubj.locator('maintenanceWindowAlertingV2FilterInput')).toContainText(
+      'episode_id: "test-episode"'
+    );
   });
 });
