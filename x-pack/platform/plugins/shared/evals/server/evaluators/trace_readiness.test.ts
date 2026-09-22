@@ -445,6 +445,34 @@ describe('awaitTraceReady', () => {
     expect(extractProfilesEvidenceMock).toHaveBeenCalledTimes(2);
   });
 
+  it('returns requested-profile evidence that arrives during final diagnostics extraction', async () => {
+    extractEvidenceMock.mockResolvedValue(buildExtraction(EMPTY_ROUND));
+    extractProfilesEvidenceMock.mockResolvedValue([
+      buildProfileExtraction('elastic-inference', READY_ROUND),
+    ]);
+
+    await expect(run()).resolves.toEqual(
+      expect.objectContaining({
+        profile: 'elastic-inference',
+        round: READY_ROUND,
+        readiness: 'best_effort',
+      })
+    );
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('best-effort'));
+  });
+
+  it("does not use another profile's evidence found during final diagnostics extraction", async () => {
+    extractEvidenceMock.mockResolvedValue(buildExtraction(EMPTY_ROUND));
+    extractProfilesEvidenceMock.mockResolvedValue([
+      buildProfileExtraction('elastic-inference', EMPTY_ROUND),
+      buildProfileExtraction('otel-genai-events', READY_ROUND),
+    ]);
+
+    await expect(run()).rejects.toEqual(
+      expect.objectContaining({ kind: 'unresolvable', profiles: expect.any(Array) })
+    );
+  });
+
   it('returns best-effort after a late baseline reset', async () => {
     const changedRound: EvidenceRound = {
       ...READY_ROUND,

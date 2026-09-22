@@ -251,6 +251,19 @@ export const awaitTraceReady = async (
             );
           },
         }));
+      const requestedProfileEvidence = request.profile
+        ? profiles.find(({ profile }) => profile === request.profile)
+        : undefined;
+      if (requestedProfileEvidence && hasResolvedEvidence(requestedProfileEvidence.round)) {
+        log.warn(
+          `Trace ${traceAccessor.traceId} did not reach ${request.mode} readiness within the budget; returning best-effort evidence for profile "${requestedProfileEvidence.profile}"`
+        );
+        return {
+          ...requestedProfileEvidence,
+          readiness: 'best_effort',
+        };
+      }
+
       const probes = toInstrumentationProfileProbes(profiles);
       const requestedProfile = request.profile ? ` for profile "${request.profile}"` : '';
       throw new TraceReadinessError(
