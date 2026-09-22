@@ -233,7 +233,12 @@ describe('InternalHttpSelfScopedClient', () => {
           message:
             "Kibana self HTTP call failed: GET https://kibana.example.com: fetch failed: Hostname/IP does not match certificate's altnames",
           name: 'HttpSelfFetchError',
-          cause: expect.objectContaining({ message: 'fetch failed', cause: tlsCause }),
+          cause: expect.objectContaining({
+            message: 'fetch failed',
+            cause: expect.objectContaining({
+              message: "Hostname/IP does not match certificate's altnames",
+            }),
+          }),
         }),
         http: { request: { method: 'GET' } },
         labels: {
@@ -274,6 +279,31 @@ describe('InternalHttpSelfScopedClient', () => {
     const serializedLog = JSON.stringify((log.error as jest.Mock).mock.calls);
     expect(serializedLog).not.toContain('secret-query');
     expect(serializedLog).not.toContain('raw-id');
+    expect(serializedLog).not.toContain('nope');
+  });
+
+  it('keeps the HTTP status when the error body cannot be parsed', async () => {
+    const { log, self } = createClient();
+    (global.fetch as jest.Mock).mockResolvedValueOnce(
+      new Response('{not-json', {
+        status: 502,
+        headers: { 'content-type': 'application/json' },
+      })
+    );
+
+    await expect(self.asScoped(createRequest()).fetch('/api/status')).rejects.toThrow(
+      'Kibana self HTTP call failed: GET https://kibana.example.com → 502'
+    );
+    expect(log.error).toHaveBeenCalledWith(
+      'Kibana scoped self HTTP call failed',
+      expect.objectContaining({
+        http: { request: { method: 'GET' }, response: { status_code: 502 } },
+        labels: expect.objectContaining({
+          self_http_target_origin: 'https://kibana.example.com',
+          self_http_status_class: '5xx',
+        }),
+      })
+    );
   });
 
   it('builds a local URL from server info when publicBaseUrl is absent', async () => {

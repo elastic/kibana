@@ -100,6 +100,7 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
 
     const fetchOptions = { ...options, path };
     let request = this.createRequest(path, options);
+    let response: Response | undefined;
     this.logAttempt(request.method, options.target);
     const cleanup: Array<() => void> = [];
 
@@ -116,7 +117,7 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
       const maxRedirects = this.params.getHttpConfig().selfHttp.maxRedirects ?? 0;
       const followed = await followSameOriginRedirects(request, fetchInit, maxRedirects);
       request = followed.request;
-      const response = followed.response;
+      response = followed.response;
 
       if (options.rawResponse) {
         return { fetchOptions, request, response };
@@ -142,11 +143,12 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
       const selfError = isHttpSelfFetchError(error)
         ? error
         : createHttpSelfFetchError(
-            `Kibana self HTTP call failed: ${describeSelfCall(request)}: ${describeErrorCause(
-              error
-            )}`,
+            `Kibana self HTTP call failed: ${describeSelfCall(
+              request,
+              response
+            )}: ${describeErrorCause(error)}`,
             request,
-            undefined,
+            response,
             undefined,
             error
           );
@@ -176,7 +178,7 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
     const errorCode = getErrorCode(error);
 
     this.params.log.error('Kibana scoped self HTTP call failed', {
-      error,
+      error: projectLoggedError(error),
       http: {
         request: { method: error.request.method },
         ...(statusCode !== undefined ? { response: { status_code: statusCode } } : {}),
@@ -397,6 +399,26 @@ const getErrorCode = (error: unknown): string | undefined => {
     current = current.cause;
   }
   return undefined;
+};
+
+interface LoggedErrorProjection {
+  name: string;
+  message: string;
+  stack?: string;
+  cause?: LoggedErrorProjection;
+}
+
+const projectLoggedError = (error: Error, depth = 0): LoggedErrorProjection => {
+  const cause =
+    depth < 3 && error.cause instanceof Error
+      ? projectLoggedError(error.cause, depth + 1)
+      : undefined;
+  return {
+    name: error.name,
+    message: error.message,
+    ...(error.stack ? { stack: error.stack } : {}),
+    ...(cause ? { cause } : {}),
+  };
 };
 
 const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308]);
