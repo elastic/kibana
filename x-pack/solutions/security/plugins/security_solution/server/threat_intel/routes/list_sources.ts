@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   LIST_SOURCES_API_PATH,
@@ -14,6 +13,12 @@ import {
   THREAT_REPORTS_INDEX_PATTERN,
   APPROVED_SOURCE_IDS,
   resolveCatalogSourceUrl,
+  listSourcesBodySchema,
+  listSourcesResponseSchema,
+  updateSourceBodySchema,
+  updateSourceResponseSchema,
+  sourceIdParamsSchema,
+  type ListSourcesItem,
 } from '../../../common/threat_intel';
 import {
   buildSpaceFilterTerms,
@@ -27,16 +32,6 @@ import { rejectUntilBootstrapped } from './lib/bootstrap_ready';
 import { ensureIndicatorAliasForSpace } from '../setup/indicator_alias';
 import type { RouteRegistrationDeps } from '.';
 
-const listBodySchema = schema.object({
-  size: schema.maybe(schema.number({ min: 1, max: 500 })),
-  time_range: schema.maybe(
-    schema.object({
-      from: schema.string({ maxLength: 64 }),
-      to: schema.string({ maxLength: 64 }),
-    })
-  ),
-});
-
 interface ThreatIntelSourceDoc {
   name?: string;
   adapter_type?: string;
@@ -45,24 +40,6 @@ interface ThreatIntelSourceDoc {
   created_at?: string;
   updated_at?: string;
   space_id?: string;
-}
-
-export interface ListSourcesItem {
-  source_id: string;
-  name?: string;
-  adapter_type?: string;
-  enabled?: boolean;
-  url?: string;
-  tags?: string[];
-  created_at?: string;
-  updated_at?: string;
-  space_id?: string;
-  /** Count of threat reports attributed to this source name. */
-  report_count: number;
-  /** Latest `lineage.ingested_at` across reports for this source. */
-  last_ingested_at?: string;
-  /** Sum of `evidence.alert_hits_total` across reports for this source. */
-  env_hits_total: number;
 }
 
 interface SourceReportStats {
@@ -294,7 +271,10 @@ export const registerListSourcesRoute = ({
     .addVersion(
       {
         version: '1',
-        validate: { request: { body: listBodySchema } },
+        validate: {
+          request: { body: listSourcesBodySchema },
+          response: { 200: { body: () => listSourcesResponseSchema } },
+        },
       },
       async (context, request, response) => {
         const notReady = await rejectUntilBootstrapped(getBootstrapReady, response);
@@ -364,19 +344,6 @@ export const registerListSourcesRoute = ({
     );
 };
 
-/**
- * The only field an operator can change on an approved source. The catalog is
- * fixed, so name, URL, adapter type, tags, and vendor are not mutable — a strict
- * `schema.object` rejects any other key with a 400.
- */
-export const updateSourceBodySchema = schema.object({
-  enabled: schema.boolean(),
-});
-
-const sourceIdParamsSchema = schema.object({
-  sourceId: schema.string({ minLength: 1, maxLength: 256 }),
-});
-
 export const registerUpdateSourceRoute = ({
   router,
   logger,
@@ -394,6 +361,7 @@ export const registerUpdateSourceRoute = ({
         version: '1',
         validate: {
           request: { params: sourceIdParamsSchema, body: updateSourceBodySchema },
+          response: { 200: { body: () => updateSourceResponseSchema } },
         },
       },
       async (context, request, response) => {
