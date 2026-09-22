@@ -87,8 +87,11 @@ apiTest.describe(
       expect([200, 201]).toContain(installResponse.statusCode);
 
       // Wait for all engine components to finish provisioning before seeding —
-      // the `running` status flips before the latest alias is ready.
-      await waitForEntityStoreRunning(apiClient, defaultHeaders);
+      // the `running` status flips before the latest alias is ready. The explicit
+      // timeout matters: `apiTest.setTimeout` above applies to tests, not hooks,
+      // so this poll must outlast Playwright's 60s hook default or provisioning
+      // four engines on a loaded CI agent surfaces as an opaque hook timeout.
+      await waitForEntityStoreRunning(apiClient, defaultHeaders, 150_000);
 
       const initResponse = await apiClient.post(
         ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_INIT,

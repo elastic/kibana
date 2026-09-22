@@ -21,11 +21,16 @@ import {
  * Polls until the entity store status is `running` AND every engine component
  * shows `installed: true`. The plain `running` status flips before backing
  * indices are ready, causing races in tests that seed immediately after install.
+ *
+ * Defaults to 150s: provisioning four engines' backing indices routinely exceeds
+ * 60s on a loaded CI agent, and callers run this inside a `beforeAll` configured
+ * for 180s — the poll must give up before the hook does, so the failure names the
+ * missing components instead of surfacing as an opaque hook timeout.
  */
 export const waitForEntityStoreRunning = async (
   apiClient: MaintainerApiClient,
   headers: Record<string, string>,
-  timeoutMs = 60_000
+  timeoutMs = 150_000
 ): Promise<void> => {
   const start = Date.now();
   let lastStatus: string | undefined;

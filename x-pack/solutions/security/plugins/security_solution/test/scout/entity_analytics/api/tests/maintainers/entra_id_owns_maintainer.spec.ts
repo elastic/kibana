@@ -118,8 +118,11 @@ apiTest.describe(
       expect([200, 201]).toContain(installResponse.statusCode);
 
       // The `running` status flips before the latest alias is ready, so seeding
-      // immediately after install races entity-store initialization.
-      await waitForEntityStoreRunning(apiClient, defaultHeaders);
+      // immediately after install races entity-store initialization. The explicit
+      // timeout matters: `apiTest.setTimeout` above applies to tests, not hooks,
+      // so this poll must outlast Playwright's 60s hook default or provisioning
+      // four engines on a loaded CI agent surfaces as an opaque hook timeout.
+      await waitForEntityStoreRunning(apiClient, defaultHeaders, 150_000);
 
       // Schedules the maintainer task records, matching the raw_identifiers
       // suites. `runSync` persists run state against that task afterwards.
