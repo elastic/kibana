@@ -14,10 +14,7 @@ import { createMemoryHistory } from 'history';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { useWorkers } from '../hooks/use_workers_api';
-import {
-  useProposalsByCategoryCount,
-  useClosedProposalsCount,
-} from '../hooks/use_proposals_api';
+import { useProposalsByCategoryCount, useClosedProposalsCount } from '../hooks/use_proposals_api';
 import { LandingPage } from './landing_page';
 
 jest.mock('../hooks/use_workers_api');
@@ -210,7 +207,9 @@ describe('LandingPage', () => {
   });
 
   it('shows a loading spinner while closed proposals are loading', () => {
-    mockUseClosedProposalsCount.mockReturnValue(proposalsResult(0, { isLoading: true, data: undefined }));
+    mockUseClosedProposalsCount.mockReturnValue(
+      proposalsResult(0, { isLoading: true, data: undefined })
+    );
 
     renderPage();
 

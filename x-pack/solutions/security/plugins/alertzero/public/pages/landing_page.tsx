@@ -8,10 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { useWorkers } from '../hooks/use_workers_api';
-import {
-  useProposalsByCategoryCount,
-  useClosedProposalsCount,
-} from '../hooks/use_proposals_api';
+import { useProposalsByCategoryCount, useClosedProposalsCount } from '../hooks/use_proposals_api';
 import { ConversationsPage } from './conversations';
 import { OnboardingPage } from './onboarding';
 
