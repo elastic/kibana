@@ -7,25 +7,25 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
+import type {
+  HuntBehaviorArticleContext,
+  HuntCoordinatorStatus,
+  HuntForThreatResult,
+  HuntIoc,
+  HuntTechnology,
+} from '@kbn/alertzero-common';
 import { resolveIndexScope } from './common/resolve_index_scope';
-import { huntForThreat } from './tier1/hunt_for_threat';
-import type { HuntForThreatResult } from './tier1/types';
-import type { HuntTechnology } from './common/types';
-import type { HuntIoc } from './tier1/types';
+import { huntForThreat, emptyHuntForThreatResult } from './tier1/hunt_for_threat';
 import { huntBehavior } from './tier2/hunt_behavior';
-import type { HuntBehaviorResult, HuntBehaviorArticleContext } from './tier2/types';
-
-// NO findings persistence — per plan.md Phase 6, Task 6.5.
-// NO call to writeHuntFeedback — the coordinator returns completedSuccessfully for the caller.
-
-export type HuntCoordinatorStatus = 'tier1_only' | 'tier1_and_tier2' | 'tier2_only_skipped';
+import type { HuntBehaviorResult } from './tier2/types';
 
 export type HuntCoordinatorTier2SkipReason =
   | 'configured_never'
   | 'no_inference'
   | 'no_environment_hits'
   | 'no_report_text'
-  | 'no_searchable_input';
+  | 'no_searchable_input'
+  | 'tier2_failed';
 
 export interface HuntCoordinatorParams {
   report_id?: string;
@@ -62,8 +62,7 @@ export interface HuntCoordinatorResult {
   next_step: string;
   /**
    * True when the run completed without hard errors. The calling workflow checks
-   * this to decide whether to write hunt feedback — the coordinator itself never
-   * writes feedback (plan.md Phase 6, Task 6.6).
+   * this before writing hunt evidence; the coordinator itself never writes feedback.
    */
   completedSuccessfully: boolean;
 }
@@ -139,9 +138,8 @@ export const huntCoordinator = async (
     runId,
   } = params;
 
-  // Resolve index scope — use the first technology available; in production the
-  // coordinator is called per-report and the technology is resolved from the report.
-  // For now default to aws_iam as the primary technology (plan.md:175).
+  // Resolve index scope. For now defaults to aws_iam; in production the coordinator
+  // is called per-report and technology is resolved from the report.
   let scope;
   try {
     scope = await resolveIndexScope({
@@ -152,25 +150,21 @@ export const huntCoordinator = async (
   } catch (err) {
     logger.warn(`hunt_coordinator: scope resolution failed — ${(err as Error).message}`);
     // Return a degraded result rather than hard-failing.
+    const emptyTier1: HuntCoordinatorTier1 = {
+      tier: 1,
+      ...emptyHuntForThreatResult(
+        'no_searchable_terms',
+        [],
+        [],
+        timeRange ?? { from: 'now-24h', to: 'now' },
+        `Index scope resolution failed: ${(err as Error).message}`
+      ),
+    };
     return {
       status: 'tier1_only',
       report_id: reportId,
       runId,
-      tier1: {
-        tier: 1,
-        status: 'no_searchable_terms',
-        hasConfirmedHit: false,
-        searchedIocs: 0,
-        searchedTechniques: 0,
-        resolvedIocs: [],
-        resolvedTechniques: [],
-        timeRange: timeRange ?? { from: 'now-24h', to: 'now' },
-        counts: { totalHits: 0, returnedHits: 0, affectedHosts: 0, affectedUsers: 0 },
-        hits: [],
-        affectedAssets: { hosts: [], users: [], services: [] },
-        perIndex: [],
-        message: `Index scope resolution failed: ${(err as Error).message}`,
-      },
+      tier1: emptyTier1,
       tier2_skipped_reason: 'no_searchable_input',
       message: `Scope resolution failed: ${(err as Error).message}`,
       next_step: 'Verify the technology index patterns are configured correctly.',
@@ -189,35 +183,47 @@ export const huntCoordinator = async (
 
   const tier1: HuntCoordinatorTier1 = { ...tier1Raw, tier: 1 };
 
+  const tier1Only = ({
+    reason,
+    message,
+    nextStep,
+    completedSuccessfully,
+  }: {
+    reason: HuntCoordinatorTier2SkipReason;
+    message: string;
+    nextStep: string;
+    completedSuccessfully: boolean;
+  }): HuntCoordinatorResult => ({
+    status: 'tier1_only',
+    report_id: reportId,
+    runId,
+    tier1,
+    tier2_skipped_reason: reason,
+    message,
+    next_step: nextStep,
+    completedSuccessfully,
+  });
+
   const skipReason = decideTier2Skip(tier2When, tier1Raw);
   if (skipReason) {
-    return {
-      status: 'tier1_only',
-      report_id: reportId,
-      runId,
-      tier1,
-      tier2_skipped_reason: skipReason,
+    return tier1Only({
+      reason: skipReason,
       message: `Tier 1: ${tier1Raw.status}. Tier 2 skipped (${skipReason}).`,
-      next_step:
+      nextStep:
         tier1Raw.status === 'environment_hits_found'
           ? 'Tier 1 matched. Re-run with tier2_when: "always" for behavioral rule proposals.'
           : 'No environment matches. Consider widening time_range.',
       completedSuccessfully: true,
-    };
+    });
   }
 
   if (!model) {
-    return {
-      status: 'tier1_only',
-      report_id: reportId,
-      runId,
-      tier1,
-      tier2_skipped_reason: 'no_inference',
+    return tier1Only({
+      reason: 'no_inference',
       message: `Tier 1: ${tier1Raw.status}. Tier 2 skipped (no GenAI connector).`,
-      next_step:
-        'Tier 2 requires a GenAI connector. Configure one via Stack Management → Connectors.',
+      nextStep: 'Tier 2 requires a GenAI connector. Configure one via Stack Management → Connectors.',
       completedSuccessfully: true,
-    };
+    });
   }
 
   if (!text) {
@@ -244,26 +250,19 @@ export const huntCoordinator = async (
         text,
         report_id: reportId,
         llm_confidence_threshold: llmThreshold,
-        iocs: iocs.map((ioc) => ({
-          type: ioc.type as import('./tier2/types').HuntBehaviorIocType,
-          value: ioc.value,
-        })),
+        iocs: iocs.map((ioc) => ({ type: ioc.type, value: ioc.value })),
         article_context: articleContext,
       },
       esClient
     );
   } catch (err) {
     logger.warn(`hunt_coordinator: tier2 huntBehavior failed — ${(err as Error).message}`);
-    return {
-      status: 'tier1_only',
-      report_id: reportId,
-      runId,
-      tier1,
-      tier2_skipped_reason: 'no_report_text',
+    return tier1Only({
+      reason: 'tier2_failed',
       message: `Tier 1: ${tier1Raw.status}. Tier 2 failed: ${(err as Error).message}`,
-      next_step: 'Tier 2 LLM call failed. Check connector configuration and retry.',
+      nextStep: 'Tier 2 LLM call failed. Check connector configuration and retry.',
       completedSuccessfully: false,
-    };
+    });
   }
 
   const tier2: HuntCoordinatorTier2 = { ...tier2Raw, tier: 2 };

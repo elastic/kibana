@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { API_VERSIONS, CandidatesRequestBody, INTERNAL_API_ACCESS } from '@kbn/alertzero-common';
+import {
+  API_VERSIONS,
+  CandidatesRequestBody,
+  CandidatesResponse,
+  INTERNAL_API_ACCESS,
+} from '@kbn/alertzero-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERTZERO_API_PRIVILEGE_READ, HUNT_INTERNAL_ROUTE_BASE } from '../../../common/constants';
 import { buildCandidateQuery } from '../../services/watches/hunt/common/build_candidate_query';
@@ -75,7 +80,7 @@ export const registerCandidatesRoute = ({
             );
           };
 
-          const result = await buildCandidateQuery(
+          const body: CandidatesResponse = await buildCandidateQuery(
             esClient,
             logger,
             {
@@ -87,7 +92,7 @@ export const registerCandidatesRoute = ({
             readOpenProposalConversationIds
           );
 
-          return response.ok({ body: result });
+          return response.ok({ body });
         } catch (err) {
           logger.error(`candidates route failed: ${(err as Error).message}`);
           return response.customError({

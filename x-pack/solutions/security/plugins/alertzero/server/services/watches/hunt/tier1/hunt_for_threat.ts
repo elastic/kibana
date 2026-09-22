@@ -9,10 +9,10 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type {
   AffectedAsset,
   HuntForThreatHit,
-  HuntForThreatParams,
   HuntForThreatResult,
   HuntIoc,
-} from './types';
+} from '@kbn/alertzero-common';
+import type { HuntForThreatParams } from './types';
 
 const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
@@ -21,11 +21,9 @@ const termClause = (field: string, value: string): Record<string, unknown> => ({
 });
 
 /**
- * Ported verbatim from mustard's `buildIocShould` (`hunt_for_threat.ts:106-168`):
- * the per-IOC `should` clause across every ECS field the value might
- * reasonably land in, not narrowed by event source since the same IOC type
- * can appear in several ECS slots depending on which integration produced
- * the document.
+ * Per-IOC `should` clause across every ECS field the value might reasonably
+ * land in, not narrowed by event source since the same IOC type can appear
+ * in several ECS slots depending on which integration produced the document.
  */
 const buildIocShould = (iocs: HuntIoc[]): Array<Record<string, unknown>> => {
   const clauses: Array<Record<string, unknown>> = [];
@@ -90,13 +88,12 @@ const buildIocShould = (iocs: HuntIoc[]): Array<Record<string, unknown>> => {
   return clauses;
 };
 
-/** Ported verbatim from mustard's `buildTechniqueShould` (`hunt_for_threat.ts:171-174`). */
 const buildTechniqueShould = (techniques: string[]): Array<Record<string, unknown>> =>
   techniques.length === 0
     ? []
     : [{ terms: { 'kibana.alert.rule.threat.technique.id': techniques } }];
 
-const emptyResult = (
+export const emptyHuntForThreatResult = (
   status: HuntForThreatResult['status'],
   resolvedIocs: HuntIoc[],
   resolvedTechniques: string[],
@@ -160,20 +157,15 @@ const classifyIdentityType = (
 };
 
 /**
- * Tier 1 deterministic hunt: search the scope A2 resolved for a report's
- * IOCs and/or ATT&CK technique IDs (lifted from mustard's
- * `hunt_for_threat.ts`, 379 lines, plan.md Phase 3). The one adaptation:
- * the index list comes from `params.scope` (A2) rather than the hardcoded
- * `HUNT_FOR_THREAT_INDEX_PATTERNS` allow-list — everything about the query
- * shape is proven and stays as-is.
+ * Tier 1 deterministic hunt: searches the resolved scope for a report's IOCs
+ * and/or ATT&CK technique IDs. The index list comes from `params.scope` rather
+ * than a hardcoded allow-list.
  *
- * The hit bar (hunt-watch-implementation.md:42): a hit requires at least
- * one confirmed event match in a *required* pattern inside the window. A
- * match only in an optional pattern (including the alerts pattern), or
- * outside the window, does not set `hasConfirmedHit` — it can still show
- * up in `hits`/`counts`/`perIndex` for context, but the coordinator (F3)
- * and the `evidence[]` writer (F4, now the managed-workflow evidence step,
- * not a service) must only treat `hasConfirmedHit` as evidence.
+ * Hit bar: at least one confirmed match in a *required* index pattern inside
+ * the window. A match only in an optional pattern (including the alerts
+ * pattern), or outside the window, does not set `hasConfirmedHit`. It can
+ * still appear in `hits`/`counts`/`perIndex` for context, but only
+ * `hasConfirmedHit` is treated as evidence by the coordinator.
  */
 export const huntForThreat = async (
   esClient: ElasticsearchClient,
@@ -190,7 +182,7 @@ export const huntForThreat = async (
   const should = [...iocShould, ...techniqueShould];
 
   if (should.length === 0) {
-    return emptyResult(
+    return emptyHuntForThreatResult(
       'no_searchable_terms',
       iocs,
       techniques,
@@ -201,17 +193,16 @@ export const huntForThreat = async (
     );
   }
 
-  // `required` and `optional` (which already includes the space-derived
-  // alerts pattern, see A2) are searched together with `ignore_unavailable`
-  // and `allow_no_indices` (mustard `hunt_for_threat.ts:283-285`): a scope
-  // that reached this point already passed A2's blocked/degraded gate, so
-  // the search itself never needs to distinguish required from optional —
-  // that distinction only matters for the hit bar below.
+  // `required` and `optional` (which already includes the space-derived alerts
+  // pattern) are searched together with `ignore_unavailable` and `allow_no_indices`.
+  // A scope reaching this point already passed the blocked/degraded gate, so the
+  // search never needs to distinguish required from optional; that distinction only
+  // matters for the hit bar below.
   const searchIndices = [...scope.required, ...scope.optional];
   // `perIndex` buckets on `_index`, which is a concrete index/data-stream name
-  // (e.g. `logs-aws.cloudtrail-default`), never the wildcard pattern it
-  // resolved from (e.g. `logs-aws.*`) — so the required check below needs
-  // pattern matching, not set membership.
+  // (e.g. `logs-aws.cloudtrail-default`), never the wildcard pattern it resolved
+  // from (e.g. `logs-aws.*`), so the required check below needs pattern matching,
+  // not set membership.
   const requiredPatterns = scope.required.map(
     (pattern) => new RegExp(`^${pattern.split('*').map(escapeRegExp).join('.*')}$`)
   );

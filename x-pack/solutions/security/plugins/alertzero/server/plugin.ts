@@ -202,9 +202,7 @@ export class AlertZeroPlugin
     });
 
     this.huntServices = {
-      getScopedConversationClient: plugins.agentBuilder.conversations.getScopedClient,
       getProposalsService: plugins.proposals.getProposalsService,
-      getAiIndexService: plugins.contextEngine.getAiIndexService,
       getInference: () => plugins.inference,
       getSearchInferenceEndpoints: () => plugins.searchInferenceEndpoints,
     };

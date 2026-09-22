@@ -5,40 +5,14 @@
  * 2.0.
  */
 
+import type {
+  HuntBehaviorArticleContext,
+  HuntBehaviorIoc,
+  HuntBehaviorStatus,
+} from '@kbn/alertzero-common';
+
 /** Severity level for a proposed behavioral rule. */
 export type SeverityLevel = 'critical' | 'high' | 'medium' | 'low';
-
-/**
- * IOC type used in the behavioral extraction params (mirrors Tier 1's
- * `HuntIocType`). Kept as `string` rather than that literal union: these
- * IOCs are threaded through from the route body (`hunt_behavior_route.gen.ts`,
- * generated from a plain `type: string` schema) as verbatim context for the
- * grounded ES|QL prompt, not re-validated against Tier 1's ECS field map.
- */
-export type HuntBehaviorIocType = string;
-
-export interface HuntBehaviorIoc {
-  type: HuntBehaviorIocType;
-  value: string;
-}
-
-/**
- * Optional Tier 1 environment-hit context passed by the coordinator after an
- * IOC lookup matches. Lets the Tier 2 extractor refine behavioral candidates
- * against the actual entities seen in the customer environment.
- */
-export interface HuntBehaviorArticleContext {
-  matched_indices?: string[];
-  affected_hosts?: string[];
-  affected_users?: string[];
-  sample_events?: string[];
-  time_range?: { from: string; to: string };
-  proposed_atomic_rules?: Array<{
-    rule_name: string;
-    ioc_type: string;
-    ioc_value: string;
-  }>;
-}
 
 export interface HuntBehaviorParams {
   text: string;
@@ -63,11 +37,6 @@ export interface ValidatedBehavior {
   severity: SeverityLevel;
   risk_score: number;
 }
-
-export type HuntBehaviorStatus =
-  | 'no_behaviors_found'
-  | 'no_behaviors_validated'
-  | 'behaviors_proposed';
 
 export interface HuntBehaviorResult {
   status: HuntBehaviorStatus;

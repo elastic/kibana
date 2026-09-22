@@ -201,7 +201,6 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         agenticInvestigations: {
           getImpactClient: jest.fn(),
         },
-        contextEngine: { getAiIndexService: jest.fn() },
         inference: {},
       } as never);
 
@@ -228,7 +227,6 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         agenticInvestigations: {
           getImpactClient: jest.fn(),
         },
-        contextEngine: { getAiIndexService: jest.fn() },
         inference: {},
       } as never);
 

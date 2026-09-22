@@ -17,9 +17,8 @@ import {
   ESQL_GENERATION_PROMPT,
 } from './extraction_contract';
 import { toIndexedBehaviors } from './indexed_behaviors';
+import type { HuntBehaviorArticleContext, HuntBehaviorIoc } from '@kbn/alertzero-common';
 import type {
-  HuntBehaviorArticleContext,
-  HuntBehaviorIoc,
   HuntBehaviorParams,
   HuntBehaviorResult,
   SeverityLevel,
@@ -112,7 +111,7 @@ const buildGroundedEsqlHeader = (b: {
   tactic_ids: string[];
 }): string =>
   [
-    `// Generated from threat_intel.hunt_behavior — grounded in the report's extracted`,
+    `// Generated from hunt.hunt_behavior — grounded in the report's extracted`,
     `// IOCs/behaviors. Review the FROM clause and artifact values before enabling.`,
     `// rule_name: ${b.rule_name}`,
     `// severity: ${b.severity}  risk_score: ${b.risk_score}`,
@@ -351,56 +350,35 @@ export const huntBehavior = async (
   for (const candidate of candidates) {
     const technique = techniqueById.get(candidate.technique_id);
     const subtechnique = technique ? undefined : subtechniqueById.get(candidate.technique_id);
-
-    if (technique) {
-      const tacticIds = tacticsToIds(technique.tactics);
-      const severity = severityFromConfidence(candidate.llm_confidence);
-      validated.push({
-        ...candidate,
-        confidence: candidate.llm_confidence,
-        technique_name: technique.name,
-        reference: technique.reference,
-        tactic_ids: tacticIds,
-        proposed_esql_rule: proposedEsqlRule({
-          technique_id: candidate.technique_id,
-          technique_name: technique.name,
-          tactic_ids: tacticIds,
-          evidence_quote: candidate.evidence_quote,
-          confidence: candidate.llm_confidence,
-          severity,
-          report_id: reportId,
-        }),
-        rule_name: sanitizeRuleName(candidate.technique_id, technique.name, reportId),
-        severity,
-        risk_score: severityToRiskScore(severity),
-      });
-    } else if (subtechnique) {
-      const tacticIds = tacticsToIds(subtechnique.tactics);
-      const severity = severityFromConfidence(candidate.llm_confidence);
-      validated.push({
-        ...candidate,
-        confidence: candidate.llm_confidence,
-        technique_name: subtechnique.name,
-        reference: subtechnique.reference,
-        tactic_ids: tacticIds,
-        parent_technique_id: subtechnique.techniqueId,
-        proposed_esql_rule: proposedEsqlRule({
-          technique_id: candidate.technique_id,
-          technique_name: subtechnique.name,
-          parent_technique_id: subtechnique.techniqueId,
-          tactic_ids: tacticIds,
-          evidence_quote: candidate.evidence_quote,
-          confidence: candidate.llm_confidence,
-          severity,
-          report_id: reportId,
-        }),
-        rule_name: sanitizeRuleName(candidate.technique_id, subtechnique.name, reportId),
-        severity,
-        risk_score: severityToRiskScore(severity),
-      });
-    } else {
+    const entry = technique ?? subtechnique;
+    if (!entry) {
       droppedIds.push(candidate.technique_id);
+      continue;
     }
+    const tacticIds = tacticsToIds(entry.tactics);
+    const severity = severityFromConfidence(candidate.llm_confidence);
+    const parentTechniqueId = subtechnique?.techniqueId;
+    validated.push({
+      ...candidate,
+      confidence: candidate.llm_confidence,
+      technique_name: entry.name,
+      reference: entry.reference,
+      tactic_ids: tacticIds,
+      ...(parentTechniqueId ? { parent_technique_id: parentTechniqueId } : {}),
+      proposed_esql_rule: proposedEsqlRule({
+        technique_id: candidate.technique_id,
+        technique_name: entry.name,
+        tactic_ids: tacticIds,
+        evidence_quote: candidate.evidence_quote,
+        confidence: candidate.llm_confidence,
+        severity,
+        report_id: reportId,
+        ...(parentTechniqueId ? { parent_technique_id: parentTechniqueId } : {}),
+      }),
+      rule_name: sanitizeRuleName(candidate.technique_id, entry.name, reportId),
+      severity,
+      risk_score: severityToRiskScore(severity),
+    });
   }
 
   if (validated.length > 0) {

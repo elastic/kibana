@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { API_VERSIONS, CorrelateRequestBody, INTERNAL_API_ACCESS } from '@kbn/alertzero-common';
+import {
+  API_VERSIONS,
+  CorrelateRequestBody,
+  CorrelateResponse,
+  INTERNAL_API_ACCESS,
+} from '@kbn/alertzero-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERTZERO_API_PRIVILEGE_READ, HUNT_INTERNAL_ROUTE_BASE } from '../../../common/constants';
 import { runCorrelationEngine } from '../../services/watches/hunt/correlation/correlation_engine';
@@ -23,7 +28,7 @@ export const registerCorrelateRoute = ({ router, logger, getSpaceId }: RouteDepe
           requiredPrivileges: [ALERTZERO_API_PRIVILEGE_READ],
         },
       },
-      summary: 'Run E7 anchor correlation engine against the threat-reports data stream',
+      summary: 'Run anchor correlation engine against the threat-reports data stream',
     })
     .addVersion(
       {
@@ -40,19 +45,11 @@ export const registerCorrelateRoute = ({ router, logger, getSpaceId }: RouteDepe
           const esClient = (await context.core).elasticsearch.client.asCurrentUser;
           const { source_report_id, anchors, size } = request.body;
 
-          const result = await runCorrelationEngine(esClient, logger, spaceId, {
+          const body: CorrelateResponse = await runCorrelationEngine(esClient, logger, spaceId, {
             source_report_id,
             anchors,
             size,
           });
-
-          // `toAttachmentData` is the `security.hunt_correlation` payload
-          // (PR 1, kibana#291882); PR 3b's `correlation.yaml` writes it
-          // verbatim via `ai.attachment.add`. It is not serialisable as a
-          // function, so it is invoked and its result folded in as
-          // `attachment_data`, then dropped from the spread.
-          const { toAttachmentData, ...rest } = result;
-          const body = { ...rest, attachment_data: toAttachmentData() };
           return response.ok({ body });
         } catch (err) {
           logger.error(`correlate route failed: ${(err as Error).message}`);
