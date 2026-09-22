@@ -12,6 +12,8 @@ import { GOLDEN_TOOL_PATH } from './golden_tool_path';
 export interface ExampleMetadata {
   chartFamily: ChartFamily;
   dataSource?: DataSource;
+  /** Config API features the gold pins beyond the basic column roles. */
+  configFeatures?: ConfigFeature[];
   [key: string]: unknown;
 }
 
@@ -28,6 +30,13 @@ export type ChartFamily =
   | 'query_only';
 
 export type DataSource = 'logs' | 'ecommerce' | 'host_metrics';
+
+export type ConfigFeature = 'breakdown_by' | 'secondary_metric' | 'multi_series';
+
+const features = (list: Array<ConfigFeature | false>): { configFeatures?: ConfigFeature[] } => {
+  const present = list.filter((feature): feature is ConfigFeature => feature !== false);
+  return present.length === 0 ? {} : { configFeatures: present };
+};
 
 /** Stamps the data source onto every example of a dataset file. */
 export const withDataSource = (
@@ -76,9 +85,12 @@ export const timeSeriesQuery = ({
   index,
   metrics,
   timeField = '@timestamp',
-}: QuerySource): string =>
+  splitBy,
+}: QuerySource & { splitBy?: string }): string =>
   `FROM ${index}
-| STATS ${statsList(metrics)} BY \`Time Bucket\` = BUCKET(${timeField}, 75, ?_tstart, ?_tend)`;
+| STATS ${statsList(metrics)} BY \`Time Bucket\` = BUCKET(${timeField}, 75, ?_tstart, ?_tend)${
+    splitBy === undefined ? '' : `, ${splitBy}`
+  }`;
 
 /** Single-row totals for metric and gauge charts. */
 export const totalsQuery = ({ index, metrics, timeField = '@timestamp' }: QuerySource): string =>
@@ -99,19 +111,33 @@ export const xyExample = ({
   query,
   x,
   y,
+  breakdownBy,
 }: {
   question: string;
   seriesType: XySeriesType | readonly XySeriesType[];
   query: string;
   x: string;
   y: string[];
+  /** Column that splits each series, e.g. one line per response code. */
+  breakdownBy?: string;
 }): VisualizationDatasetExample => ({
   input: { question },
-  metadata: { chartFamily: 'xy' },
+  metadata: {
+    chartFamily: 'xy',
+    ...features([breakdownBy !== undefined && 'breakdown_by', y.length > 1 && 'multi_series']),
+  },
   output: {
     config: {
       type: 'xy',
-      layers: [{ type: seriesType, data_source: esql(query), x: column(x), y: y.map(column) }],
+      layers: [
+        {
+          type: seriesType,
+          data_source: esql(query),
+          x: column(x),
+          y: y.map(column),
+          ...(breakdownBy === undefined ? {} : { breakdown_by: column(breakdownBy) }),
+        },
+      ],
     },
     goldenToolPath: GOLDEN_TOOL_PATH,
   },
@@ -121,15 +147,30 @@ export const metricExample = ({
   question,
   query,
   metrics,
+  breakdownBy,
 }: {
   question: string;
   query: string;
+  /** Primary metric first; a second entry is the secondary metric. */
   metrics: string[];
+  /** Column that renders one metric tile per value. */
+  breakdownBy?: string;
 }): VisualizationDatasetExample => ({
   input: { question },
-  metadata: { chartFamily: 'metric' },
+  metadata: {
+    chartFamily: 'metric',
+    ...features([
+      breakdownBy !== undefined && 'breakdown_by',
+      metrics.length > 1 && 'secondary_metric',
+    ]),
+  },
   output: {
-    config: { type: 'metric', data_source: esql(query), metrics: metrics.map(column) },
+    config: {
+      type: 'metric',
+      data_source: esql(query),
+      metrics: metrics.map(column),
+      ...(breakdownBy === undefined ? {} : { breakdown_by: column(breakdownBy) }),
+    },
     goldenToolPath: GOLDEN_TOOL_PATH,
   },
 });

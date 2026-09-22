@@ -31,6 +31,16 @@ export const ECOMMERCE_EXAMPLES: VisualizationDatasetExample[] = withDataSource(
     query: totalsQuery({ index: INDEX, metrics: [TOTAL_REVENUE], timeField: TIME_FIELD }),
     metrics: [TOTAL_REVENUE.alias],
   }),
+  metricExample({
+    question:
+      'Create a metric visualization of total revenue in kibana_sample_data_ecommerce with the order count as a secondary metric.',
+    query: totalsQuery({
+      index: INDEX,
+      metrics: [TOTAL_REVENUE, ORDER_COUNT],
+      timeField: TIME_FIELD,
+    }),
+    metrics: [TOTAL_REVENUE.alias, ORDER_COUNT.alias],
+  }),
   partitionExample({
     question: 'Create a pie chart of order counts by category in kibana_sample_data_ecommerce.',
     type: 'pie',

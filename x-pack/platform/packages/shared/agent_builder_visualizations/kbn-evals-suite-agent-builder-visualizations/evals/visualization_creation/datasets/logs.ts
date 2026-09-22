@@ -105,6 +105,45 @@ export const LOGS_EXAMPLES: VisualizationDatasetExample[] = withDataSource('logs
     query: totalsQuery({ index: INDEX, metrics: [AVERAGE_BYTES] }),
     metric: AVERAGE_BYTES.alias,
   }),
+  // --- Config API surface beyond basic column roles ---
+  xyExample({
+    question:
+      'Create a line chart of request count over time in kibana_sample_data_logs, with one line per response code.',
+    seriesType: 'line',
+    query: timeSeriesQuery({
+      index: INDEX,
+      metrics: [REQUEST_COUNT],
+      splitBy: 'response.keyword',
+    }),
+    x: TIME_BUCKET_COLUMN,
+    y: [REQUEST_COUNT.alias],
+    breakdownBy: 'response.keyword',
+  }),
+  xyExample({
+    question:
+      'Create a stacked bar chart of total bytes by operating system in kibana_sample_data_logs, stacked by response code.',
+    seriesType: 'bar_stacked',
+    query: categoricalQuery({
+      index: INDEX,
+      metrics: [TOTAL_BYTES],
+      groupBy: 'machine.os.keyword, response.keyword',
+      limit: 50,
+    }),
+    x: 'machine.os.keyword',
+    y: [TOTAL_BYTES.alias],
+    breakdownBy: 'response.keyword',
+  }),
+  metricExample({
+    question:
+      'Show the number of requests per operating system in kibana_sample_data_logs as metric tiles, one per OS.',
+    query: categoricalQuery({
+      index: INDEX,
+      metrics: [REQUEST_COUNT],
+      groupBy: 'machine.os.keyword',
+    }),
+    metrics: [REQUEST_COUNT.alias],
+    breakdownBy: 'machine.os.keyword',
+  }),
   // Multi-series over time is valid as Lens xy or Vega; score ES|QL
   // equivalence rather than forcing a single renderer/chart_type.
   queryOnlyExample({

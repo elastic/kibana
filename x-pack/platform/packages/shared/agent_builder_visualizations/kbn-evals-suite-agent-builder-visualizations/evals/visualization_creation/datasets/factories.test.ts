@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { categoricalQuery, timeSeriesQuery, totalsQuery, xyExample } from './factories';
+import {
+  categoricalQuery,
+  metricExample,
+  timeSeriesQuery,
+  totalsQuery,
+  xyExample,
+} from './factories';
 import { GOLDEN_TOOL_PATH } from './golden_tool_path';
 
 const REQUEST_COUNT = { alias: 'Request Count', expression: 'COUNT(*)' };
@@ -37,6 +43,17 @@ describe('gold query factories', () => {
 | STATS \`Total Revenue\` = SUM(taxful_total_price) BY \`Time Bucket\` = BUCKET(order_date, 75, ?_tstart, ?_tend)`);
   });
 
+  it('appends a split column to the time series BY clause', () => {
+    expect(
+      timeSeriesQuery({
+        index: 'kibana_sample_data_logs',
+        metrics: [REQUEST_COUNT],
+        splitBy: 'response.keyword',
+      })
+    ).toBe(`FROM kibana_sample_data_logs
+| STATS \`Request Count\` = COUNT(*) BY \`Time Bucket\` = BUCKET(@timestamp, 75, ?_tstart, ?_tend), response.keyword`);
+  });
+
   it('builds a single-row totals query', () => {
     expect(totalsQuery({ index: 'kibana_sample_data_logs', metrics: [REQUEST_COUNT] })).toBe(
       `FROM kibana_sample_data_logs
@@ -58,6 +75,7 @@ describe('xyExample', () => {
 
     expect(example).toEqual({
       input: { question: 'q' },
+      metadata: { chartFamily: 'xy' },
       output: {
         config: {
           type: 'xy',
@@ -73,5 +91,48 @@ describe('xyExample', () => {
         goldenToolPath: GOLDEN_TOOL_PATH,
       },
     });
+  });
+
+  it('adds breakdown_by and records breakdown and multi-series features', () => {
+    const example = xyExample({
+      question: 'q',
+      seriesType: 'line',
+      query: 'FROM a',
+      x: 'Time Bucket',
+      y: ['a', 'b'],
+      breakdownBy: 'response.keyword',
+    });
+
+    expect(example.metadata).toEqual({
+      chartFamily: 'xy',
+      configFeatures: ['breakdown_by', 'multi_series'],
+    });
+    expect(example.output?.config).toEqual(
+      expect.objectContaining({
+        layers: [expect.objectContaining({ breakdown_by: { column: 'response.keyword' } })],
+      })
+    );
+  });
+});
+
+describe('metricExample', () => {
+  it('records secondary metric and breakdown features in metadata', () => {
+    const example = metricExample({
+      question: 'q',
+      query: 'FROM a',
+      metrics: ['Total', 'Count'],
+      breakdownBy: 'os',
+    });
+
+    expect(example.metadata).toEqual({
+      chartFamily: 'metric',
+      configFeatures: ['breakdown_by', 'secondary_metric'],
+    });
+    expect(example.output?.config).toEqual(
+      expect.objectContaining({
+        metrics: [{ column: 'Total' }, { column: 'Count' }],
+        breakdown_by: { column: 'os' },
+      })
+    );
   });
 });

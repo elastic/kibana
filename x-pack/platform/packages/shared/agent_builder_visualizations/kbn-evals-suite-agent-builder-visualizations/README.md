@@ -35,13 +35,13 @@ node scripts/evals run --suite agent-builder-visualizations
 
 ## Dataset
 
-Seed examples live in `evals/visualization_creation/datasets/`, one file per data source, concatenated by `datasets/index.ts` (~17 prompts):
+Seed examples live in `evals/visualization_creation/datasets/`, one file per data source, concatenated by `datasets/index.ts` (~21 prompts):
 
-- **logs** (`kibana_sample_data_logs`): xy (bar/line/horizontal/multi-series), metric, gauge, pie, tag_cloud, data_table, heatmap, treemap, plus one Vega-Lite scatter
-- **ecommerce** (`kibana_sample_data_ecommerce`): metric / pie / xy over `order_date` + numeric revenue/quantity fields
+- **logs** (`kibana_sample_data_logs`): xy (bar/line/horizontal/stacked/multi-series), metric (single and per-OS tiles via `breakdown_by`), gauge, pie, tag_cloud, data_table, heatmap, treemap, a line split by response code via `breakdown_by`, plus one Vega-Lite scatter
+- **ecommerce** (`kibana_sample_data_ecommerce`): metric (including a primary + secondary metric), pie, xy over `order_date` + numeric revenue/quantity fields
 - **host metrics** (synthtrace Beats load fixture): multi-series load averages on `metrics-system.load-default`
 
-Each positive example carries a partial Lens Config API gold (`config`): chart `type`, layer type / column roles, and ground-truth ES|QL nested in `data_source.query`. Examples are built with the factories in `datasets/factories.ts` (`xyExample`, `metricExample`, `partitionExample`, …) over the query builders `categoricalQuery`, `timeSeriesQuery`, and `totalsQuery`, so adding an example is one call and every gold query follows the same idiom by construction. Every example carries `metadata.chartFamily` (set by its factory) and `metadata.dataSource` (set per dataset file), so golden-cluster results can be sliced by chart family or data source instead of only by suite average.|QL nested in `data_source.query`. Negatives / recovery / multi-turn edits are still follow-ups.
+Each positive example carries a partial Lens Config API gold (`config`): chart `type`, layer type / column roles, and ground-truth ES|QL nested in `data_source.query`. Examples are built with the factories in `datasets/factories.ts` (`xyExample`, `metricExample`, `partitionExample`, …) over the query builders `categoricalQuery`, `timeSeriesQuery`, and `totalsQuery`, so adding an example is one call and every gold query follows the same idiom by construction. Every example carries `metadata.chartFamily` (set by its factory), `metadata.dataSource` (set per dataset file), and, when the gold pins Config API surface beyond basic column roles, `metadata.configFeatures` (`breakdown_by`, `secondary_metric`, `multi_series`), so golden-cluster results can be sliced by chart family or data source instead of only by suite average.|QL nested in `data_source.query`. Negatives / recovery / multi-turn edits are still follow-ups.
 
 ### What a gold `config` can assert
 
