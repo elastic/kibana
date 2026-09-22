@@ -12,6 +12,7 @@ import {
   AGENTIC_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER_ID,
   AGENTIC_INVESTIGATIONS_PLUGIN_ID,
 } from '../common/constants';
+import { IMPACT_UI_CAPABILITY_MANAGE, IMPACT_UI_CAPABILITY_SHOW } from '../common/impact/constants';
 import {
   PROPOSALS_UI_CAPABILITY_DECIDE,
   PROPOSALS_UI_CAPABILITY_SHOW,
@@ -20,6 +21,7 @@ import {
   CheckDecidePrivilegesStepId,
   CloneProposalStepId,
   CreateProposalStepId,
+  GetLatestRevisionStepId,
   GetProposalStepId,
   UpdateProposalStepId,
 } from '../common/proposals/step_types';
@@ -32,6 +34,10 @@ import {
 import { registerRoutes } from './proposals/routes/register_routes';
 import { registerImpactRoutes } from './impact/routes/register_routes';
 import { IMPACT_API_PRIVILEGE_MANAGE, IMPACT_API_PRIVILEGE_READ } from './impact/constants';
+import {
+  ESCALATIONS_API_PRIVILEGE_MANAGE,
+  ESCALATIONS_API_PRIVILEGE_READ,
+} from './escalations/constants';
 
 jest.mock('./proposals/managed_workflows/initialize_managed_workflows', () => ({
   initializeManagedWorkflows: jest.fn().mockResolvedValue(undefined),
@@ -60,31 +66,57 @@ const setupPlugin = () => {
   };
   const workflowsManagement = { management: { getWorkflow: jest.fn() } };
 
+  const agentBuilder = {
+    attachments: { registerType: jest.fn() },
+  };
+  // agentBuilderPlatform is a required dep for ordering; it exposes no API used at setup time.
+  const agentBuilderPlatform = {};
+
   plugin.setup(
     coreSetup as never,
     {
       features,
+      agentBuilder,
+      agentBuilderPlatform,
       workflowsExtensions,
       workflowsManagement,
     } as never
   );
 
-  return { plugin, coreSetup, features, workflowsExtensions, workflowsManagement };
+  return { plugin, coreSetup, features, agentBuilder, workflowsExtensions, workflowsManagement };
 };
 
 const startPlugin = (plugin: AgenticInvestigationsPlugin) => {
   const coreStart = coreMock.createStart();
   const workflowsExtensions = { initManagedWorkflowsClient: jest.fn() };
+  const agentBuilder = {
+    conversations: {
+      getScopedClient: jest.fn().mockReturnValue({
+        get: jest.fn(),
+        bulkGet: jest.fn(),
+        list: jest.fn(),
+        search: jest.fn(),
+        create: jest.fn(),
+        patchMetadata: jest.fn(),
+        update: jest.fn(),
+      }),
+    },
+    conversationTemplates: {
+      get: jest.fn().mockResolvedValue(undefined),
+      list: jest.fn().mockResolvedValue([]),
+    },
+  };
 
   const contract = plugin.start(
     coreStart as never,
     {
       workflowsExtensions,
       spaces: undefined,
+      agentBuilder,
     } as never
   );
 
-  return { coreStart, contract, workflowsExtensions };
+  return { coreStart, contract, workflowsExtensions, agentBuilder };
 };
 
 /** The single registered feature config, for assertions on its shape. */
@@ -109,29 +141,36 @@ describe('AgenticInvestigationsPlugin', () => {
       );
     });
 
-    it('grants the proposals capabilities from the top-level all privilege', () => {
+    it('grants proposal and impact capabilities from the top-level all privilege', () => {
       const { features } = setupPlugin();
       const { privileges } = registeredFeature(features);
 
       expect(privileges.all.api).toEqual([
         PROPOSALS_API_PRIVILEGE_READ,
         PROPOSALS_API_PRIVILEGE_MANAGE,
+        IMPACT_API_PRIVILEGE_READ,
+        IMPACT_API_PRIVILEGE_MANAGE,
       ]);
       expect(privileges.all.ui).toEqual([
         PROPOSALS_UI_CAPABILITY_SHOW,
         PROPOSALS_UI_CAPABILITY_DECIDE,
+        IMPACT_UI_CAPABILITY_SHOW,
+        IMPACT_UI_CAPABILITY_MANAGE,
       ]);
     });
 
-    it('withholds manage and decide from read, so a reader cannot decide', () => {
+    it('withholds manage and decide from read, so a reader cannot decide or attach impact', () => {
       const { features } = setupPlugin();
       const { privileges } = registeredFeature(features);
 
-      expect(privileges.read.api).toEqual([PROPOSALS_API_PRIVILEGE_READ]);
-      expect(privileges.read.ui).toEqual([PROPOSALS_UI_CAPABILITY_SHOW]);
+      expect(privileges.read.api).toEqual([
+        PROPOSALS_API_PRIVILEGE_READ,
+        IMPACT_API_PRIVILEGE_READ,
+      ]);
+      expect(privileges.read.ui).toEqual([PROPOSALS_UI_CAPABILITY_SHOW, IMPACT_UI_CAPABILITY_SHOW]);
     });
 
-    it('pulls impact capabilities up through a sub-feature rather than more inline privileges', () => {
+    it('registers only the escalations sub-feature', () => {
       const { features } = setupPlugin();
       const { subFeatures } = registeredFeature(features);
 
@@ -142,14 +181,14 @@ describe('AgenticInvestigationsPlugin', () => {
               groupType: 'mutually_exclusive',
               privileges: [
                 expect.objectContaining({
-                  id: 'impact_all',
+                  id: 'escalations_all',
                   includeIn: 'all',
-                  api: [IMPACT_API_PRIVILEGE_READ, IMPACT_API_PRIVILEGE_MANAGE],
+                  api: [ESCALATIONS_API_PRIVILEGE_READ, ESCALATIONS_API_PRIVILEGE_MANAGE],
                 }),
                 expect.objectContaining({
-                  id: 'impact_read',
+                  id: 'escalations_read',
                   includeIn: 'read',
-                  api: [IMPACT_API_PRIVILEGE_READ],
+                  api: [ESCALATIONS_API_PRIVILEGE_READ],
                 }),
               ],
             }),
@@ -179,6 +218,7 @@ describe('AgenticInvestigationsPlugin', () => {
         CheckDecidePrivilegesStepId,
         GetProposalStepId,
         CloneProposalStepId,
+        GetLatestRevisionStepId,
       ]);
     });
 
@@ -208,13 +248,15 @@ describe('AgenticInvestigationsPlugin', () => {
       expect(initializeManagedWorkflows).toHaveBeenCalledTimes(1);
     });
 
-    it('exposes the proposals and impact services for in-process callers', () => {
+    it('exposes proposals, a request-scoped impact client, and escalations for in-process callers', () => {
       const { plugin } = setupPlugin();
 
       const { contract } = startPlugin(plugin);
 
       expect(contract.getProposalsService()).toBeDefined();
-      expect(contract.getImpactService()).toBeDefined();
+      expect(contract.getImpactClient).toEqual(expect.any(Function));
+      expect(contract.getProposalPrivileges()).toBeDefined();
+      expect(contract.getEscalationsService()).toBeDefined();
     });
   });
 

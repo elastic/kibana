@@ -20,6 +20,7 @@ const baseProposal: ProposalItem = {
   origin: 'worker',
   createdAt: '2026-09-10T10:00:00.000Z',
   expired: false,
+  conversationAssignees: [],
 };
 
 describe('proposalToInvestigation', () => {
@@ -58,7 +59,6 @@ describe('proposalToInvestigation', () => {
       ['respond', 'respond'],
       ['investigate', 'investigate'],
       ['configure', 'configure'],
-      ['tune', 'configure'], // legacy mapping
     ] as const)('category %s → bucket %s', (category, expected) => {
       const result = proposalToInvestigation({ ...baseProposal, category });
       expect(result.recommendedAction).toBe(expected);
@@ -137,6 +137,25 @@ describe('proposalToInvestigation', () => {
     it('recordId equals the proposal id', () => {
       const result = proposalToInvestigation(baseProposal);
       expect(result.recordId).toBe(baseProposal.id);
+    });
+  });
+
+  describe('assignee', () => {
+    // `Investigation.assignee` is singular because the flyout header renders one avatar.
+    it('takes the first assignee', () => {
+      const result = proposalToInvestigation({
+        ...baseProposal,
+        conversationAssignees: ['first.analyst', 'second.analyst'],
+      });
+      expect(result.assignee).toBe('first.analyst');
+    });
+
+    it('is null when nobody is assigned', () => {
+      const result = proposalToInvestigation({
+        ...baseProposal,
+        conversationAssignees: [],
+      });
+      expect(result.assignee).toBeNull();
     });
   });
 

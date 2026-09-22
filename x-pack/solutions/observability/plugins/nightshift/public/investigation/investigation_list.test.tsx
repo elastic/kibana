@@ -6,53 +6,102 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import type { ListInvestigationItem } from '@kbn/nightshift-investigations-plugin/common';
+import type { InvestigationSectionState } from '../hooks/use_investigation_sections';
 import { InvestigationList } from './investigation_list';
 
-const renderList = ({
-  isInitialLoading = false,
-  page = 1,
-  onPageChange = jest.fn(),
-}: {
-  isInitialLoading?: boolean;
-  page?: number;
-  onPageChange?: (page: number) => void;
-} = {}) =>
+const investigation: ListInvestigationItem = {
+  investigation_id: 'investigation-1',
+  title: 'Checkout errors',
+  status: 'completed',
+  created_at: '2026-09-11T09:00:00.000Z',
+  subject: { type: 'significant_event', id: 'event-1', summary: 'Investigate checkout errors' },
+  summary: 'Checkout errors are elevated',
+  severity: '80-critical',
+};
+
+const makeSection = (
+  id: InvestigationSectionState['id'],
+  overrides: Partial<InvestigationSectionState> = {}
+): InvestigationSectionState => ({
+  id,
+  investigations: [],
+  total: 0,
+  hasMore: false,
+  isInitialLoading: false,
+  isFetchingNextPage: false,
+  isFetching: false,
+  isPreviousData: false,
+  error: null,
+  fetchNextPage: jest.fn(),
+  refetch: jest.fn(),
+  ...overrides,
+});
+
+const renderSections = (sections: InvestigationSectionState[]) =>
   render(
     <I18nProvider>
-      <InvestigationList
-        investigations={[]}
-        total={0}
-        isInitialLoading={isInitialLoading}
-        page={page}
-        onPageChange={onPageChange}
-      />
+      <InvestigationList sections={sections} />
     </I18nProvider>
   );
 
 describe('InvestigationList', () => {
-  it('shows a skeleton instead of the empty state during the initial load', () => {
-    renderList({ isInitialLoading: true });
+  it('keeps skeletons visible while a section is loading', () => {
+    renderSections([
+      makeSection('80-critical', { isInitialLoading: true }),
+      makeSection('60-high'),
+    ]);
 
-    expect(screen.getByTestId('nightshiftInvestigationListSkeleton')).toBeInTheDocument();
-    expect(screen.queryByTestId('nightshiftInvestigationsCount')).not.toBeInTheDocument();
-    expect(screen.queryByText('No investigations found')).not.toBeInTheDocument();
+    expect(
+      screen.getByTestId('nightshiftInvestigationSectionSkeleton-80-critical')
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftInvestigationSection-60-high')).not.toBeInTheDocument();
   });
 
-  it('shows the empty state after an empty initial response', () => {
-    renderList();
+  it('hides a resolved empty section', () => {
+    renderSections([
+      makeSection('80-critical', { investigations: [investigation], total: 1 }),
+      makeSection('60-high'),
+    ]);
 
-    expect(screen.queryByTestId('nightshiftInvestigationListSkeleton')).not.toBeInTheDocument();
-    expect(screen.getByTestId('nightshiftInvestigationsCount')).toHaveTextContent('0');
-    expect(screen.getByText('No investigations found')).toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftInvestigationSection-80-critical')).toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftInvestigationSection-60-high')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftInvestigationsEmpty')).not.toBeInTheDocument();
   });
 
-  it('allows returning from an empty later page', () => {
-    const onPageChange = jest.fn();
-    renderList({ page: 2, onPageChange });
+  it('keeps an empty section that failed to load so it can be retried', () => {
+    renderSections([makeSection('80-critical', { error: new Error('Network unavailable') })]);
 
-    fireEvent.click(screen.getByTestId('nightshiftInvestigationsPrevPageButton'));
-    expect(onPageChange).toHaveBeenCalledWith(1);
+    expect(screen.getByTestId('nightshiftInvestigationSection-80-critical')).toBeInTheDocument();
+    expect(
+      screen.getByTestId('nightshiftInvestigationSectionRetry-80-critical')
+    ).toBeInTheDocument();
+  });
+
+  it('shows a single empty state when every section is empty', () => {
+    renderSections([makeSection('in-progress'), makeSection('80-critical')]);
+
+    expect(screen.getByTestId('nightshiftInvestigationsEmpty')).toHaveTextContent(
+      'No investigations found'
+    );
+    expect(
+      screen.queryByTestId('nightshiftInvestigationSection-in-progress')
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('nightshiftInvestigationSection-80-critical')
+    ).not.toBeInTheDocument();
+  });
+
+  it('renders in progress first and failed last', () => {
+    renderSections([
+      makeSection('in-progress', { investigations: [investigation], total: 1 }),
+      makeSection('80-critical', { investigations: [investigation], total: 1 }),
+      makeSection('failed', { investigations: [investigation], total: 1 }),
+    ]);
+
+    const titles = screen.getAllByRole('heading').map((heading) => heading.textContent);
+    expect(titles).toEqual(['In progress', 'Critical', 'Failed & cancelled']);
   });
 });

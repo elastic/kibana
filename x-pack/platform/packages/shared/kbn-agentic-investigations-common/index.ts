@@ -13,6 +13,7 @@ export {
 } from './src/components/actions/base_actions';
 
 export { ConversationCard } from './src/components/conversation_card/conversation_card';
+export { ConversationCardCompact } from './src/components/conversation_card/conversation_card_compact';
 export { ConversationMetaInfo } from './src/components/conversation_card/conversation_meta_info';
 export { TemplateBadge } from './src/components/conversation_card/template_badge';
 export { type ConversationsActionsGroupProps } from './src/components/conversation_card/actions_group';
@@ -27,12 +28,6 @@ export {
   ConversationDetailsFlyoutFooter,
   type ConversationDetailsFlyoutFooterProps,
 } from './src/components/details/flyout_footer';
-export {
-  InvestigationDetailsFlyout,
-  type InvestigationDetailsFlyoutProps,
-  INVESTIGATION_FLYOUT_TABS,
-  type InvestigationFlyoutTab,
-} from './src/components/details/investigation_details_flyout';
 export {
   InvestigationHeaderBlocks,
   type InvestigationHeaderBlocksProps,
@@ -52,7 +47,7 @@ export {
   type RegisterAgenticInvestigationTemplateUIOptions,
   getInvestigationTabIds,
 } from './src/template_ui/register';
-export type { InvestigationLoader } from './src/template_ui/investigation_slot';
+export { conversationToInvestigation } from './src/template_ui/conversation_to_investigation';
 
 export { getEmptyValue, getActionButtonIconProps, isDecided } from './src/components/helpers';
 
@@ -82,9 +77,15 @@ export {
   type ApprovalAction,
   type AlwaysAllowOption,
 } from './src/components/modals/approval_modal/approval_content';
+export {
+  getProposalTone,
+  isProposalExpired,
+} from './src/components/modals/approval_modal/proposal_helpers';
+export { toActionImpactItems } from './src/components/modals/approval_modal/to_action_impact_items';
+export type { ApprovalProposal } from './src/components/modals/approval_modal/types';
 export { type ActionImpactItemProps } from './src/components/modals/approval_modal/action_impact_item';
 export {
-  ActionImpactSection,
-  type ActionImpactContent,
-  type ActionImpactSectionProps,
-} from './src/components/modals/approval_modal/action_impact_section';
+  type EscalationModalMode,
+  type EscalationIncidentSummary,
+} from './src/components/modals/escalation_modal';
+export { type EscalationModalRenderProps } from './src/components/modals/investigation_action_modals';
