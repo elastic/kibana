@@ -20,7 +20,7 @@ spec:
     spec:
       env:
         # Set a channel and flip to 'true' once the report has an owning channel
-        KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'false'
+        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'false'
         # Inputs of .buildkite/scripts/steps/report_flaky_tests.sh. Schedules may override
         # them to produce different reports (other pipelines, consistently failing tests, ...).
         FLAKY_TESTS_PIPELINES: 'kibana-on-merge'

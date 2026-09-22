@@ -26,7 +26,7 @@ spec:
         EVAL_PREEMPTIBLE: '0'
         # Publish eval results back to the PR as a distinct commit status (context
         # `kibana-evals`), using the same mechanism as kibana-pr and kibana-on-merge.
-        KIBANA_GITHUB_BUILD_COMMIT_STATUS_ENABLED: 'true'
+        ELASTIC_GITHUB_BUILD_COMMIT_STATUS_ENABLED: 'true'
         GITHUB_BUILD_COMMIT_STATUS_CONTEXT: kibana-evals
       allow_rebuilds: true
       branch_configuration: ''

@@ -240,7 +240,7 @@ function getMaxPromotionAgeHours(): number {
 function sendSlackNotification(message: string): void {
   const channel = process.env.SLACK_NOTIFICATIONS_CHANNEL;
 
-  if (DRY_RUN || process.env.KIBANA_SLACK_NOTIFICATIONS_ENABLED !== 'true' || !channel) {
+  if (DRY_RUN || process.env.ELASTIC_SLACK_NOTIFICATIONS_ENABLED !== 'true' || !channel) {
     console.log(`Not sending slack message (DRY_RUN=${DRY_RUN}, channel=${channel}):\n${message}`);
     return;
   }
