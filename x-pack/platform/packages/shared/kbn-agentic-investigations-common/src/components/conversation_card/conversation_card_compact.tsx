@@ -19,6 +19,9 @@ import type { BaseActionsProps } from '../actions';
 import { ConversationsActionsGroup } from './actions_group';
 import { ConversationMetaInfo } from './conversation_meta_info';
 
+/** Fixed, so a longer age does not push the titles out of line. Fits "59 minutes ago". */
+const AGE_COLUMN_WIDTH = '7.5rem';
+
 interface ConversationCardCompactProps {
   investigation: Investigation;
   hasBorder: boolean;
@@ -83,7 +86,7 @@ export const ConversationCardCompact = memo<ConversationCardCompactProps>(
         }}
       >
         <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} css={{ inlineSize: AGE_COLUMN_WIDTH }}>
             <ConversationMetaInfo createdAt={investigation.createdAt} />
           </EuiFlexItem>
           <EuiFlexItem grow={true}>
@@ -100,7 +103,10 @@ export const ConversationCardCompact = memo<ConversationCardCompactProps>(
             >
               <strong>{investigation.title}</strong>
               {investigation.primaryActionLabel ? (
-                <EuiTextColor color="subdued" css={{ paddingInlineStart: euiTheme.size.s }}>
+                <EuiTextColor
+                  color="subdued"
+                  css={{ fontSize: '0.75rem', paddingInlineStart: euiTheme.size.s }}
+                >
                   {investigation.primaryActionLabel}
                 </EuiTextColor>
               ) : null}
@@ -108,7 +114,7 @@ export const ConversationCardCompact = memo<ConversationCardCompactProps>(
           </EuiFlexItem>
           {outcome ? (
             <EuiFlexItem grow={false}>
-              <EuiText size="s" color="subdued">
+              <EuiText size="xs" color="subdued">
                 {outcome}
               </EuiText>
             </EuiFlexItem>
