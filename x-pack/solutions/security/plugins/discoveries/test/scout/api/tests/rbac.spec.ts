@@ -23,6 +23,7 @@ import {
 // route-level authorization succeeded without seeding a real execution.
 const UNKNOWN_EXECUTION_ID = 'unknown-execution-id';
 const UNKNOWN_WORKFLOW_ID = 'unknown-workflow-id';
+const UNKNOWN_EXECUTION_MESSAGE = `Execution ${UNKNOWN_EXECUTION_ID} not found in event log`;
 
 apiTest.describe('Workflow schedule API - RBAC', { tag: SCHEDULE_TAGS }, () => {
   let adminHeaders: Record<string, string>;
@@ -193,26 +194,27 @@ apiTest.describe('Workflow schedule API - RBAC', { tag: SCHEDULE_TAGS }, () => {
   // workflows-read caller is AUTHORIZED to monitor executions even though it
   // cannot trigger them (see the `_generate` 403 above). Route-level
   // authorization therefore does not reject the request; for an execution id
-  // that does not exist the handler resolves to `404 Not Found`.
+  // that does not exist the handler resolves to `404 Not Found`. The message
+  // is asserted too, because the feature gate and an invalid path also answer
+  // 404 and would otherwise pass without ever reaching the handler.
   apiTest(
     'should authorize a workflows-read user to read execution tracking',
     async ({ apiClient }) => {
       const monitorApis = getMonitoringApis(apiClient, monitorHeaders, spaceId);
 
-      const { statusCode } = await monitorApis.getExecutionTracking(UNKNOWN_EXECUTION_ID);
+      const response = await monitorApis.getExecutionTracking(UNKNOWN_EXECUTION_ID);
 
-      expect(statusCode).toBe(404);
+      expect(response).toHaveStatusCode(404);
+      expect(response.body).toMatchObject({ message: UNKNOWN_EXECUTION_MESSAGE });
     }
   );
 
   apiTest('should authorize a workflows-read user to read pipeline data', async ({ apiClient }) => {
     const monitorApis = getMonitoringApis(apiClient, monitorHeaders, spaceId);
 
-    const { statusCode } = await monitorApis.getPipelineData(
-      UNKNOWN_WORKFLOW_ID,
-      UNKNOWN_EXECUTION_ID
-    );
+    const response = await monitorApis.getPipelineData(UNKNOWN_WORKFLOW_ID, UNKNOWN_EXECUTION_ID);
 
-    expect(statusCode).toBe(404);
+    expect(response).toHaveStatusCode(404);
+    expect(response.body).toMatchObject({ message: UNKNOWN_EXECUTION_MESSAGE });
   });
 });
