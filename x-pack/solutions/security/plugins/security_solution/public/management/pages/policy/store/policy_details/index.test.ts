@@ -294,7 +294,11 @@ describe('policy details: ', () => {
                       security: true,
                     },
                     malware: { mode: 'prevent', blocklist: true, on_write_scan: true },
-                    memory_protection: { mode: 'off', supported: false },
+                    memory_protection: {
+                      mode: 'off',
+                      supported: false,
+                      custom_yara_signatures: false,
+                    },
                     behavior_protection: {
                       mode: 'off',
                       supported: false,
@@ -350,7 +354,11 @@ describe('policy details: ', () => {
                       enabled: false,
                       usb_storage: 'audit',
                     },
-                    memory_protection: { mode: 'off', supported: false },
+                    memory_protection: {
+                      mode: 'off',
+                      supported: false,
+                      custom_yara_signatures: false,
+                    },
                     ransomware: { mode: 'off', supported: false },
                     popup: {
                       malware: {
@@ -396,7 +404,11 @@ describe('policy details: ', () => {
                       supported: false,
                       reputation_service: false,
                     },
-                    memory_protection: { mode: 'off', supported: false },
+                    memory_protection: {
+                      mode: 'off',
+                      supported: false,
+                      custom_yara_signatures: false,
+                    },
                     popup: {
                       malware: {
                         enabled: true,
