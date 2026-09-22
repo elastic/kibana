@@ -10,8 +10,8 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { huntCoordinator } from './hunt_coordinator';
 
 jest.mock('./common/resolve_index_scope', () => ({
-  resolveIndexScope: jest.fn().mockResolvedValue({
-    technology: 'aws_iam',
+  resolveHuntScope: jest.fn().mockResolvedValue({
+    technologies: ['aws_iam'],
     status: 'ok',
     required: ['logs-aws.cloudtrail-*'],
     optional: [],
@@ -22,6 +22,7 @@ jest.mock('./common/resolve_index_scope', () => ({
 }));
 
 jest.mock('./tier1/hunt_for_threat', () => ({
+  ...jest.requireActual('./tier1/hunt_for_threat'),
   huntForThreat: jest.fn().mockResolvedValue({
     status: 'no_environment_hits',
     hasConfirmedHit: false,
@@ -114,6 +115,130 @@ describe('huntCoordinator', () => {
       // no text
     });
     expect(result.tier2_skipped_reason).toBe('no_report_text');
+  });
+
+  it('forwards an explicit technology to scope resolution', async () => {
+    const { resolveHuntScope: mockScope } = jest.requireMock('./common/resolve_index_scope');
+    await huntCoordinator(esClient, undefined, logger, {
+      spaceId: 'default',
+      trigger: 'scheduled',
+      runId: 'run-5',
+      technology: 'fortigate',
+    });
+    expect(mockScope).toHaveBeenCalledWith(
+      expect.objectContaining({ spaceId: 'default', technology: 'fortigate' })
+    );
+  });
+
+  it('reports the technologies the scope resolved to', async () => {
+    const result = await huntCoordinator(esClient, undefined, logger, {
+      spaceId: 'default',
+      trigger: 'scheduled',
+      runId: 'run-6',
+    });
+    expect(result.technologies).toEqual(['aws_iam']);
+  });
+
+  it('echoes the caller-supplied runId', async () => {
+    const result = await huntCoordinator(esClient, undefined, logger, {
+      spaceId: 'default',
+      trigger: 'scheduled',
+      runId: 'run-from-worker',
+    });
+    expect(result.runId).toBe('run-from-worker');
+  });
+
+  describe('when the scope is blocked', () => {
+    let result: Awaited<ReturnType<typeof huntCoordinator>>;
+
+    beforeEach(async () => {
+      const { resolveHuntScope: mockScope } = jest.requireMock('./common/resolve_index_scope');
+      const { huntForThreat: mockT1 } = jest.requireMock('./tier1/hunt_for_threat');
+      mockT1.mockClear();
+      mockScope.mockResolvedValueOnce({
+        technologies: [],
+        status: 'blocked',
+        required: ['logs-aws.*', 'logs-fortinet.*'],
+        optional: [],
+        missing: ['logs-aws.*', 'logs-fortinet.*'],
+        window: { from: 'now-24h', to: 'now' },
+        rowLimit: 100,
+      });
+      result = await huntCoordinator(esClient, undefined, logger, {
+        spaceId: 'default',
+        trigger: 'scheduled',
+        runId: 'run-7',
+      });
+    });
+
+    it('returns a blocked status instead of a clean one', () => {
+      expect(result.status).toBe('blocked');
+    });
+
+    it('does not report the run as completed, so no hunt evidence is written', () => {
+      expect(result.completedSuccessfully).toBe(false);
+    });
+
+    it('names the skip reason', () => {
+      expect(result.tier2_skipped_reason).toBe('scope_blocked');
+    });
+
+    it('marks Tier 1 as scope_blocked rather than no hits', () => {
+      expect(result.tier1.status).toBe('scope_blocked');
+    });
+
+    it('never runs Tier 1', () => {
+      const { huntForThreat: mockT1 } = jest.requireMock('./tier1/hunt_for_threat');
+      expect(mockT1).not.toHaveBeenCalled();
+    });
+  });
+
+  it('skips Tier 2 with configured_never and still completes', async () => {
+    const result = await huntCoordinator(esClient, undefined, logger, {
+      spaceId: 'default',
+      trigger: 'scheduled',
+      runId: 'run-8',
+      tier2_when: 'never',
+    });
+    expect(result).toEqual(
+      expect.objectContaining({
+        tier2_skipped_reason: 'configured_never',
+        completedSuccessfully: true,
+      })
+    );
+  });
+
+  it('fails the run when Tier 2 throws', async () => {
+    const { huntForThreat: mockT1 } = jest.requireMock('./tier1/hunt_for_threat');
+    const { huntBehavior: mockT2 } = jest.requireMock('./tier2/hunt_behavior');
+    mockT1.mockResolvedValueOnce({
+      status: 'environment_hits_found',
+      hasConfirmedHit: true,
+      searchedIocs: 1,
+      searchedTechniques: 0,
+      resolvedIocs: [],
+      resolvedTechniques: [],
+      timeRange: { from: 'now-24h', to: 'now' },
+      counts: { totalHits: 1, returnedHits: 1, affectedHosts: 0, affectedUsers: 0 },
+      hits: [],
+      affectedAssets: { hosts: [], users: [], services: [] },
+      perIndex: [],
+    });
+    mockT2.mockRejectedValueOnce(new Error('connector down'));
+    const mockModel = {} as import('@kbn/agent-builder-server').ScopedModel;
+
+    const result = await huntCoordinator(esClient, mockModel, logger, {
+      spaceId: 'default',
+      trigger: 'scheduled',
+      runId: 'run-9',
+      text: 'report text',
+    });
+    expect(result).toEqual(
+      expect.objectContaining({
+        tier2_skipped_reason: 'tier2_failed',
+        completedSuccessfully: false,
+      })
+    );
   });
 
   it('never writes feedback — completedSuccessfully is the caller signal', async () => {
