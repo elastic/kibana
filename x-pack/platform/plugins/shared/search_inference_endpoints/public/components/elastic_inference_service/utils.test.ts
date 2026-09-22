@@ -15,7 +15,7 @@ import {
   filterGroupedModels,
   TASK_TYPE_CATEGORY,
   TASK_TYPE_DISPLAY_NAME,
-  TASK_TYPE_FILTERS,
+  MODEL_TYPE_FILTERS,
   type GroupedModel,
   type TaskTypeCategory,
 } from '../../utils/eis_utils';
@@ -66,9 +66,9 @@ describe('utils', () => {
     });
   });
 
-  describe('TASK_TYPE_FILTERS', () => {
+  describe('MODEL_TYPE_FILTERS', () => {
     it('covers all expected categories in order', () => {
-      expect(TASK_TYPE_FILTERS.map((f) => f.category)).toEqual(['LLM', 'Embedding', 'Rerank']);
+      expect(MODEL_TYPE_FILTERS.map((f) => f.key)).toEqual(['LLM', 'Embedding', 'Rerank']);
     });
   });
 
