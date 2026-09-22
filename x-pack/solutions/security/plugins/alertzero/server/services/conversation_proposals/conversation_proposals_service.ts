@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { SortCombinations } from '@elastic/elasticsearch/lib/api/types';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { MetadataFieldValue } from '@kbn/agent-builder-common';
@@ -33,6 +34,18 @@ const readAssignees = (value: MetadataFieldValue | undefined): string[] => {
 /** Fixed window for the closed-proposals queue: decisions older than this are not shown. */
 const CLOSED_DECIDED_WITHIN_HOURS = 72;
 
+/**
+ * Breaks every tie the timestamps leave, so a row cannot move between two offset
+ * pages and be shown twice or skipped. Unique per live proposal: `create` roots a
+ * chain at its own id, `revise` numbers it, and the one other pair that shares both
+ * — an original and its clone — never appear together, since both queues exclude
+ * superseded records.
+ */
+const TIEBREAKER: SortCombinations[] = [
+  { rootProposalId: { order: 'asc' } },
+  { revision: { order: 'asc' } },
+];
+
 export class ConversationProposalsService {
   constructor(
     private readonly proposalsService: ProposalsService,
@@ -50,7 +63,7 @@ export class ConversationProposalsService {
     const { proposals, total } = await this.proposalsService.list(
       { category, status: 'pending', excludeSuperseded: true, excludeExpired: false, size, from },
       spaceId,
-      [{ createdAt: { order: 'desc' as const } }]
+      [{ createdAt: { order: 'desc' as const } }, ...TIEBREAKER]
     );
 
     const conversations = await this.fetchConversations(
@@ -76,7 +89,11 @@ export class ConversationProposalsService {
         from,
       },
       spaceId,
-      [{ decidedAt: { order: 'desc' as const } }, { createdAt: { order: 'desc' as const } }]
+      [
+        { decidedAt: { order: 'desc' as const } },
+        { createdAt: { order: 'desc' as const } },
+        ...TIEBREAKER,
+      ]
     );
 
     const conversations = await this.fetchConversations(
