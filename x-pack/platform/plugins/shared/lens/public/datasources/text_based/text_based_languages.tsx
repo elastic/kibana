@@ -658,8 +658,22 @@ export function getTextBasedDatasource({
     },
 
     cloneLayer(state, layerId, newLayerId, getNewId) {
+      const layer = state.layers[layerId];
+      if (!layer) {
+        return state;
+      }
       return {
         ...state,
+        layers: {
+          ...state.layers,
+          [newLayerId]: {
+            ...layer,
+            columns: layer.columns.map((column) => ({
+              ...column,
+              columnId: getNewId(column.columnId),
+            })),
+          },
+        },
       };
     },
 

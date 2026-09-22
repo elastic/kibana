@@ -68,6 +68,91 @@ export const getAllColumns = (
   });
 };
 
+/**
+ * Rebinds existing layer columns (and their dimension mappings) to the columns
+ * returned by a changed layer query, so configured dimensions survive query edits.
+ *
+ * Tie-breaking order per query column, each existing column used at most once:
+ * 1. exact match — same `fieldName` as the query column id/name
+ * 2. positional match — existing column at the same index, if the meta type matches
+ * 3. first unused existing column with the same meta type (best-effort: with
+ *    multiple same-type dimensions this can rebind a semantically unrelated
+ *    field; preserving the dimension is preferred over dropping it)
+ *
+ * Query columns with no match produce fresh columns keyed by the query column id.
+ *
+ * `preferredColumnIds` (typically the columns bound to configured dimensions)
+ * win ties within the exact-match and type-match tiers, so orphan duplicates
+ * with the same fieldName cannot shadow a dimension-bound column.
+ */
+export const reconcileQueryColumns = (
+  existingColumns: TextBasedLayerColumn[],
+  columnsFromQuery: DatatableColumn[],
+  preferredColumnIds: Set<string> = new Set()
+): TextBasedLayerColumn[] => {
+  const usedColumnIds = new Set<string>();
+  const findPreferredFirst = (
+    predicate: (column: TextBasedLayerColumn) => boolean
+  ): TextBasedLayerColumn | undefined =>
+    existingColumns.find(
+      (column) => preferredColumnIds.has(column.columnId) && predicate(column)
+    ) ?? existingColumns.find(predicate);
+
+  return columnsFromQuery.map((queryColumn, index) => {
+    const queryFieldName = queryColumn.variable ? `??${queryColumn.variable}` : queryColumn.id;
+    const exactMatch = findPreferredFirst(
+      (column) =>
+        !usedColumnIds.has(column.columnId) &&
+        (column.fieldName === queryFieldName ||
+          column.fieldName === queryColumn.id ||
+          column.fieldName === queryColumn.name)
+    );
+    const positionalMatch = existingColumns[index];
+    // A positional match must not shadow an unused dimension-bound column of the
+    // same type (e.g. on a duplicated layer, an orphan duplicate at the query
+    // column's index would otherwise win over the bound column and the bound
+    // dimension would be reported as missing).
+    const unusedPreferredTypeMatchExists = existingColumns.some(
+      (column) =>
+        preferredColumnIds.has(column.columnId) &&
+        !usedColumnIds.has(column.columnId) &&
+        column.meta?.type === queryColumn.meta?.type
+    );
+    const compatiblePositionalMatch =
+      positionalMatch &&
+      !usedColumnIds.has(positionalMatch.columnId) &&
+      positionalMatch.meta?.type === queryColumn.meta?.type &&
+      (preferredColumnIds.has(positionalMatch.columnId) || !unusedPreferredTypeMatchExists)
+        ? positionalMatch
+        : undefined;
+    const compatibleMatch = findPreferredFirst(
+      (column) =>
+        !usedColumnIds.has(column.columnId) && column.meta?.type === queryColumn.meta?.type
+    );
+    const existingColumn = exactMatch ?? compatiblePositionalMatch ?? compatibleMatch;
+
+    if (!existingColumn) {
+      return {
+        columnId: queryColumn.id,
+        fieldName: queryFieldName,
+        label: queryColumn.name,
+        meta: queryColumn.meta,
+        ...(queryColumn.variable ? { variable: queryColumn.variable } : {}),
+      };
+    }
+
+    usedColumnIds.add(existingColumn.columnId);
+    const { variable, ...restOfExistingColumn } = existingColumn;
+    return {
+      ...restOfExistingColumn,
+      fieldName: queryFieldName,
+      label: existingColumn.customLabel ? existingColumn.label : queryColumn.name,
+      meta: queryColumn.meta,
+      ...(queryColumn.variable ? { variable: queryColumn.variable } : {}),
+    };
+  });
+};
+
 export const isNumeric = (column: TextBasedLayerColumn | DatatableColumn) =>
   column?.meta?.type === 'number';
 

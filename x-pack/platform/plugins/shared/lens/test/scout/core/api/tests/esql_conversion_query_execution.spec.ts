@@ -65,7 +65,7 @@ const generateQueryForCase = (conversionCase: EsqlConversionCase): string => {
 const EXECUTABLE_CASES = Object.entries(buildEsqlConversionCasesByGroup()).flatMap(
   ([group, cases]) =>
     cases.flatMap((conversionCase) =>
-      conversionCase.expected.success
+      conversionCase.expected.success && !conversionCase.skipApiExecution
         ? [
             {
               group,
