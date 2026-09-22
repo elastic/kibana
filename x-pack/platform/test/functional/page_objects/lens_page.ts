@@ -198,7 +198,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async addFieldToTooltip(fieldName: string) {
       const lastIndex = (
-        await find.allByCssSelector('[data-test-subj^="lnsXY-annotation-tooltip-field-picker"]')
+        await find.allByCssSelector('[data-test-subj^="lnsXY-annotation-tooltip-field-picker"]', 0)
       ).length;
       await retry.try(async () => {
         await testSubjects.click('lnsXY-annotation-tooltip-add_field');
