@@ -56,6 +56,9 @@ const isEligibleEndpoint = (endpoint: InferenceInferenceEndpointInfo): boolean =
   if (!(meta.heuristics?.properties ?? []).includes('kibana-connector')) {
     return false;
   }
+  if ((meta.heuristics?.properties ?? []).includes('ocr-only')) {
+    return false;
+  }
   if (meta.heuristics?.end_of_life_date) {
     return false;
   }

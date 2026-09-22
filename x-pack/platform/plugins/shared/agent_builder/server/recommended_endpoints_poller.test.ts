@@ -138,6 +138,24 @@ describe('deriveRecommendations', () => {
       expect(result?.recommended).toBeUndefined();
     });
 
+    it('excludes endpoints with ocr-only property', () => {
+      const result = deriveRecommendations([
+        makeEndpoint(SONNET, {
+          capability: 'capable',
+          family: 'claude-sonnet',
+          properties: ['kibana-connector', 'ocr-only'],
+          releaseDate: '2025-01-01',
+        }),
+        makeEndpoint(HAIKU, {
+          capability: 'efficient',
+          family: 'claude-haiku',
+          releaseDate: '2025-01-01',
+        }),
+      ]);
+      expect(result?.recommended).toBeUndefined();
+      expect(result?.fast).toContain(HAIKU);
+    });
+
     it('excludes endpoints with end_of_life_date set', () => {
       const result = deriveRecommendations([
         makeEndpoint(SONNET, {
