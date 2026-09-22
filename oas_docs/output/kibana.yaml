@@ -112091,7 +112091,6 @@ components:
           type: object
           properties:
             enabled:
-              default: true
               description: Whether the maintenance window applies to alerting v1 alerts.
               type: boolean
             query:
@@ -112110,7 +112109,6 @@ components:
           type: object
           properties:
             enabled:
-              default: true
               description: Whether the maintenance window applies to alerting v2 episodes.
               type: boolean
             query:
