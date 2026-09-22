@@ -85,7 +85,7 @@ export { toActionImpactItems } from './src/components/modals/approval_modal/to_a
 export type { ApprovalProposal } from './src/components/modals/approval_modal/types';
 export { type ActionImpactItemProps } from './src/components/modals/approval_modal/action_impact_item';
 export {
-  ActionImpactSection,
-  type ActionImpactContent,
-  type ActionImpactSectionProps,
-} from './src/components/modals/approval_modal/action_impact_section';
+  type EscalationModalMode,
+  type EscalationIncidentSummary,
+} from './src/components/modals/escalation_modal';
+export { type EscalationModalRenderProps } from './src/components/modals/investigation_action_modals';
