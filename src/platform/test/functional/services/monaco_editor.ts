@@ -7,12 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { monaco } from '@kbn/monaco';
 import expect from '@kbn/expect';
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 // Defined inline to avoid importing @kbn/code-editor which loads browser globals (Node.js incompatible).
 // Must stay in sync with KBN_A11Y_HANDLE_ESCAPE_ACTION_ID in @kbn/code-editor/src/code_editor.tsx.
 const KBN_A11Y_HANDLE_ESCAPE_ACTION_ID = 'kbn.a11y.handleEscape' as const;
 import { FtrService } from '../ftr_provider_context';
+
+declare global {
+  interface Window {
+    MonacoEnvironment: {
+      monaco?: typeof monaco;
+    };
+  }
+}
 
 export class MonacoEditorService extends FtrService {
   private readonly retry = this.ctx.getService('retry');
@@ -244,22 +253,41 @@ export class MonacoEditorService extends FtrService {
    * change events. Use this when a test depends on incremental change listeners (e.g. live
    * validation as you type). For bulk content, prefer `appendToCodeEditor` which is faster.
    */
-  public async simulateTyping(testSubjId: string, text: string) {
+  public async simulateTyping(
+    testSubjId: string,
+    text: string,
+    options?: Partial<{
+      delay: number;
+    }>
+  ): Promise<void> {
     await this.waitCodeEditorReady(testSubjId);
     await this.browser.execute(
-      (id: string, textToType: string) => {
+      async ({
+        id,
+        textToType,
+        typingSimulationOptions,
+      }: {
+        id: string;
+        textToType: string;
+        typingSimulationOptions?: Partial<{
+          delay: number;
+        }>;
+      }) => {
         const container = document.querySelector(`[data-test-subj="${id}"]`);
         const editor = window.MonacoEnvironment?.monaco?.editor
           ?.getEditors()
           ?.find((e: any) => container?.contains(e.getDomNode()));
-        if (!editor) return;
+        if (!editor) throw new Error(`Monaco editor not found for test subject: "${id}"`);
         editor.focus();
+        const delay = typingSimulationOptions?.delay ?? 0;
         for (let i = 0; i < textToType.length; i++) {
+          if (delay > 0) {
+            await new Promise((resolve) => setTimeout(resolve, delay));
+          }
           editor.trigger('keyboard', 'type', { text: textToType[i] });
         }
       },
-      testSubjId,
-      text
+      { id: testSubjId, textToType: text, typingSimulationOptions: options }
     );
   }
 

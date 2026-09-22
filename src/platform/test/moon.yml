@@ -72,6 +72,7 @@ dependsOn:
   - '@kbn/ui-actions-plugin'
   - '@kbn/deeplinks-analytics'
   - '@kbn/core-chrome-browser-components'
+  - '@kbn/monaco'
 tags:
   - test-helper
   - package

@@ -75,5 +75,6 @@
     "@kbn/ui-actions-plugin",
     "@kbn/deeplinks-analytics",
     "@kbn/core-chrome-browser-components",
+    "@kbn/monaco",
   ]
 }
