@@ -49,7 +49,6 @@ exports[`Table should render normally 1`] = `
           </EuiButton>
         </EuiToolTip>,
         <EuiPopover
-          anchorPosition="downLeft"
           aria-label="Export options"
           button={
             <EuiButton
@@ -65,12 +64,7 @@ exports[`Table should render normally 1`] = `
             </EuiButton>
           }
           closePopover={[Function]}
-          display="inline-block"
-          hasArrow={false}
           isOpen={false}
-          ownFocus={true}
-          panelPaddingSize="m"
-          repositionToCrossAxis={true}
         >
           <EuiFormRow
             label={

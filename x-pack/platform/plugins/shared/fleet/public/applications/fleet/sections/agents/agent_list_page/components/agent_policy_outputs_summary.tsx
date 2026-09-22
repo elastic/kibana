@@ -78,24 +78,26 @@ export const AgentPolicyOutputsSummary: React.FC<{
 
       {data?.integrations && data?.integrations.length >= 1 && !isMonitoring && (
         <EuiFlexItem grow={false}>
-          <EuiBadge
-            color="hollow"
-            data-test-subj="outputsIntegrationsNumberBadge"
-            onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-            onClickAriaLabel="Open output integrations popover"
-          >
-            <FormattedMessage
-              id="xpack.fleet.AgentPolicyOutputsSummary.popover.countBadge"
-              defaultMessage="{count} more"
-              values={{
-                count: `+${data?.integrations.length}`,
-              }}
-            />
-          </EuiBadge>
           <EuiPopover
             aria-label={i18n.translate('xpack.fleet.agentPolicyOutputsSummary.popoverAriaLabel', {
               defaultMessage: 'Output integrations',
             })}
+            button={
+              <EuiBadge
+                color="hollow"
+                data-test-subj="outputsIntegrationsNumberBadge"
+                onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+                onClickAriaLabel="Open output integrations popover"
+              >
+                <FormattedMessage
+                  id="xpack.fleet.AgentPolicyOutputsSummary.popover.countBadge"
+                  defaultMessage="{count} more"
+                  values={{
+                    count: `+${data?.integrations.length}`,
+                  }}
+                />
+              </EuiBadge>
+            }
             data-test-subj="outputPopover"
             isOpen={isPopoverOpen}
             closePopover={closePopover}

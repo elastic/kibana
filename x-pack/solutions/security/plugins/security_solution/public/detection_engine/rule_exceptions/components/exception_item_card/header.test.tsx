@@ -79,6 +79,11 @@ describe('ExceptionItemCardHeader', () => {
     expect(handleEdit).toHaveBeenCalled();
 
     wrapper
+      .find('button[data-test-subj="exceptionItemHeader-actionButton"]')
+      .at(0)
+      .simulate('click');
+
+    wrapper
       .find('button[data-test-subj="exceptionItemHeader-actionItem-delete"]')
       .simulate('click');
     expect(handleDelete).toHaveBeenCalled();

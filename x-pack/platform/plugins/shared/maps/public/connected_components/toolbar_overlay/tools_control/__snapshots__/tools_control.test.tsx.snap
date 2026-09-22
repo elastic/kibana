@@ -31,13 +31,9 @@ exports[`Should render cancel button when drawing 1`] = `
       }
       closePopover={[Function]}
       data-test-subj="mapToolsControlPopover"
-      display="inline-block"
-      hasArrow={false}
       id="toolsControlPopover"
       isOpen={false}
-      ownFocus={true}
       panelPaddingSize="none"
-      repositionToCrossAxis={true}
     >
       <EuiContextMenuClass
         initialPanelId={0}
@@ -138,13 +134,9 @@ exports[`renders 1`] = `
   }
   closePopover={[Function]}
   data-test-subj="mapToolsControlPopover"
-  display="inline-block"
-  hasArrow={false}
   id="toolsControlPopover"
   isOpen={false}
-  ownFocus={true}
   panelPaddingSize="none"
-  repositionToCrossAxis={true}
 >
   <EuiContextMenuClass
     initialPanelId={0}

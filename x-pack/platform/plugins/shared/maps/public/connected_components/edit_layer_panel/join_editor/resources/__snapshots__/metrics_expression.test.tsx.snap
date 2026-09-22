@@ -13,15 +13,11 @@ exports[`Should render default props 1`] = `
     />
   }
   closePopover={[Function]}
-  display="inline-block"
-  hasArrow={false}
   id="metricsPopover"
   initialFocus="body"
   isOpen={false}
   ownFocus={true}
-  panelPaddingSize="m"
   repositionOnScroll={true}
-  repositionToCrossAxis={true}
 >
   <div
     style={
@@ -74,15 +70,11 @@ exports[`Should render metrics expression for metrics 1`] = `
     />
   }
   closePopover={[Function]}
-  display="inline-block"
-  hasArrow={false}
   id="metricsPopover"
   initialFocus="body"
   isOpen={false}
   ownFocus={true}
-  panelPaddingSize="m"
   repositionOnScroll={true}
-  repositionToCrossAxis={true}
 >
   <div
     style={

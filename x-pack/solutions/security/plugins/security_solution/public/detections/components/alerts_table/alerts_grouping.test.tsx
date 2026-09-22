@@ -563,7 +563,7 @@ describe('GroupedAlertsTable', () => {
       },
     });
 
-    const { getByTestId } = render(
+    const { findByTestId, getByTestId } = render(
       <TestProviders store={store}>
         <GroupedAlertsTable {...testProps} />
       </TestProviders>
@@ -584,8 +584,7 @@ describe('GroupedAlertsTable', () => {
     });
 
     // Change to host.name
-    fireEvent.click(getByTestId('group-selector-dropdown'));
-    fireEvent.click(getByTestId('panel-host.name'));
+    fireEvent.click(await findByTestId('panel-host.name'));
 
     await waitFor(() => {
       expect(mockedTelemetry.reportEvent).toHaveBeenCalledWith(

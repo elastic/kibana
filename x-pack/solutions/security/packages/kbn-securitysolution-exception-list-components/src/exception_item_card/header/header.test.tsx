@@ -38,6 +38,7 @@ describe('ExceptionItemCardHeader', () => {
     fireEvent.click(wrapper.getByTestId('exceptionItemHeaderActionItemedit'));
     expect(handleEdit).toHaveBeenCalled();
 
+    fireEvent.click(wrapper.getByTestId('exceptionItemHeaderButtonIcon'));
     fireEvent.click(wrapper.getByTestId('exceptionItemHeaderActionItemdelete'));
     expect(handleDelete).toHaveBeenCalled();
   });

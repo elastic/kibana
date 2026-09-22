@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { screen, within, fireEvent, waitForElementToBeRemoved } from '@testing-library/react';
+import { screen, within, fireEvent, waitFor } from '@testing-library/react';
 
 export class EuiSuperSelectTestHarness {
   #testId: string;
@@ -144,7 +144,11 @@ export class EuiSuperSelectTestHarness {
     fireEvent.click(option);
 
     // Ensure the dropdown is closed before continuing (prevents race conditions)
-    await waitForElementToBeRemoved(listbox);
+    await waitFor(() => {
+      if (document.body.contains(listbox)) {
+        throw new Error('Expected SuperSelect listbox to close');
+      }
+    });
   }
 
   /**
@@ -167,6 +171,10 @@ export class EuiSuperSelectTestHarness {
 
     fireEvent.click(option);
 
-    await waitForElementToBeRemoved(listbox);
+    await waitFor(() => {
+      if (document.body.contains(listbox)) {
+        throw new Error('Expected SuperSelect listbox to close');
+      }
+    });
   }
 }

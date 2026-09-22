@@ -83,7 +83,7 @@ describe('Smoke test cloning an existing rollup job from job list', () => {
     const contextMenu = await screen.findByTestId('jobActionContextMenu');
     fireEvent.click(within(contextMenu).getByText('Clone job'));
 
-    expect(contextMenu).toBeInTheDocument();
+    expect(contextMenu).not.toBeInTheDocument();
     expect(history.location.pathname).toBe(`/create`);
   });
 });

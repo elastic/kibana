@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { screen, fireEvent, within, waitForElementToBeRemoved } from '@testing-library/react';
+import { screen, fireEvent, within, waitFor } from '@testing-library/react';
 import type { Phase } from '../../../common/types';
 
 const createSetDownsampleIntervalAction =
@@ -21,7 +21,7 @@ const createSetDownsampleIntervalAction =
 
       const filterOption = await screen.findByTestId(`filter-option-${units}`);
       fireEvent.click(filterOption);
-      await waitForElementToBeRemoved(filterOption);
+      await waitFor(() => expect(filterOption).not.toBeInTheDocument());
     }
   };
 

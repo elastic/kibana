@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiExpression,
@@ -81,6 +81,10 @@ export const ThresholdExpression = ({
   const [numRequiredThresholds, setNumRequiredThresholds] = useState<number>(
     comparators[thresholdComparator].requiredValues
   );
+  const thresholdRef = useRef(threshold);
+  useLayoutEffect(() => {
+    thresholdRef.current = threshold;
+  }, [threshold]);
   const hasThresholdError = Boolean(
     (errors.threshold0 && errors.threshold0.length) ||
       (errors.threshold1 && errors.threshold1.length)
@@ -105,7 +109,8 @@ export const ThresholdExpression = ({
   useEffect(() => {
     const updateThresholdValue = comparators[comparator].requiredValues !== numRequiredThresholds;
     if (updateThresholdValue) {
-      const thresholdValues = threshold.slice(0, comparators[comparator].requiredValues);
+      const thresholdValues = thresholdRef.current.slice(0, comparators[comparator].requiredValues);
+      thresholdRef.current = thresholdValues;
       onChangeSelectedThreshold(thresholdValues);
       setNumRequiredThresholds(comparators[comparator].requiredValues);
     }
@@ -207,12 +212,13 @@ export const ThresholdExpression = ({
                       onChange={(e) => {
                         const { value } = e.target;
                         const thresholdVal = value !== '' ? parseFloat(value) : undefined;
-                        const newThreshold = [...threshold];
+                        const newThreshold = [...thresholdRef.current];
                         if (thresholdVal !== undefined) {
                           newThreshold[i] = thresholdVal;
                         } else {
                           delete newThreshold[i];
                         }
+                        thresholdRef.current = newThreshold;
                         onChangeSelectedThreshold(newThreshold);
                       }}
                     />

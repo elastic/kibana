@@ -122,6 +122,7 @@ describe('SettingsMenu', () => {
         JSON.stringify({ [PUSH_VS_OVERLAY_LOCAL_STORAGE]: 'push' })
       );
 
+      getByTestId(SETTINGS_MENU_BUTTON_TEST_ID).click();
       getByTestId(SETTINGS_MENU_FLYOUT_TYPE_BUTTON_GROUP_OVERLAY_TEST_ID).click();
 
       expect(localStorage.getItem(EXPANDABLE_FLYOUT_LOCAL_STORAGE)).toEqual(

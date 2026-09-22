@@ -501,6 +501,6 @@ describe('Rule Definition', () => {
 
     await userEvent.click(screen.getByTestId('ruleSettingsFlappingTitleTooltipButton'));
 
-    expect(screen.queryByTestId('ruleSettingsFlappingTooltipTitle')).not.toBeVisible();
+    expect(screen.queryByTestId('ruleSettingsFlappingTooltipTitle')).not.toBeInTheDocument();
   });
 });

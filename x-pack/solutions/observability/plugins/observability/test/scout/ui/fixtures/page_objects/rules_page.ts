@@ -665,18 +665,29 @@ export class RulesPage {
    */
   async setThreshold(comparator: string, thresholds: [number] | [number, number]) {
     await this.page.testSubj.click(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.THRESHOLD_POPOVER);
-    await this.page.testSubj
-      .locator(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.COMPARATOR_SELECT)
-      .selectOption(comparator);
-    await this.page.testSubj.fill(
-      CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.THRESHOLD_INPUT_0,
-      String(thresholds[0])
+    const comparatorSelect = this.page.testSubj.locator(
+      CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.COMPARATOR_SELECT
     );
-    if (thresholds.length === 2) {
-      await this.page.testSubj.fill(
-        CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.THRESHOLD_INPUT_1,
-        String(thresholds[1])
-      );
+    await comparatorSelect.selectOption(comparator);
+    await expect(comparatorSelect).toHaveValue(comparator);
+
+    const secondThresholdInput =
+      thresholds.length === 2
+        ? this.page.testSubj.locator(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.THRESHOLD_INPUT_1)
+        : undefined;
+    if (secondThresholdInput) {
+      await expect(secondThresholdInput).toBeVisible();
+    }
+
+    const firstThresholdInput = this.page.testSubj.locator(
+      CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.THRESHOLD_INPUT_0
+    );
+    await firstThresholdInput.fill(String(thresholds[0]));
+    await expect(firstThresholdInput).toHaveValue(String(thresholds[0]));
+
+    if (secondThresholdInput) {
+      await secondThresholdInput.fill(String(thresholds[1]));
+      await expect(secondThresholdInput).toHaveValue(String(thresholds[1]));
     }
     await this.closeExpressionPopover('Threshold');
   }

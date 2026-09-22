@@ -74,7 +74,7 @@ describe('Conversations', () => {
     expect(screen.getByText('Conversation 1')).toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId(VIEW_CONVERSATIONS_BUTTON_TEST_ID));
-    expect(screen.queryByText('Conversation 1')).not.toBeVisible();
+    expect(screen.queryByText('Conversation 1')).not.toBeInTheDocument();
   });
 
   it('calls showAssistantOverlay when a conversation is selected', () => {

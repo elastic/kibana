@@ -2,7 +2,6 @@
 
 exports[`GroupsFilterPopover renders correctly against snapshot 1`] = `
 <EuiPopover
-  anchorPosition="downLeft"
   aria-label="Groups"
   button={
     <EuiFilterButton
@@ -18,13 +17,10 @@ exports[`GroupsFilterPopover renders correctly against snapshot 1`] = `
     </EuiFilterButton>
   }
   closePopover={[Function]}
-  display="inline-block"
-  hasArrow={false}
   isOpen={false}
   ownFocus={true}
   panelPaddingSize="none"
   repositionOnScroll={true}
-  repositionToCrossAxis={true}
 >
   <EuiFilterSelectItemComponent
     key="0-auditbeat"

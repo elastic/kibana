@@ -105,6 +105,27 @@ describe('threshold expression', () => {
     expect(onChangeSelectedThresholdComparator).toHaveBeenCalled();
   });
 
+  it('preserves the first bound when both range inputs change before props update', async () => {
+    const user = userEvent.setup();
+    const onChangeSelectedThreshold = jest.fn();
+
+    renderWithIntl(
+      <ThresholdExpression
+        thresholdComparator="between"
+        threshold={[100, 150]}
+        errors={{ threshold0: [], threshold1: [] }}
+        onChangeSelectedThreshold={onChangeSelectedThreshold}
+        onChangeSelectedThresholdComparator={jest.fn()}
+      />
+    );
+
+    await user.click(screen.getByTestId('thresholdPopover'));
+    fireEvent.change(screen.getByTestId('alertThresholdInput0'), { target: { value: '200' } });
+    fireEvent.change(screen.getByTestId('alertThresholdInput1'), { target: { value: '250' } });
+
+    expect(onChangeSelectedThreshold).toHaveBeenLastCalledWith([200, 250]);
+  });
+
   it('renders threshold unit correctly', async () => {
     renderWithIntl(
       <ThresholdExpression
