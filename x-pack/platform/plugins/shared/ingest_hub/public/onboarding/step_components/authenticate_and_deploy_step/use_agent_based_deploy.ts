@@ -215,6 +215,9 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
           : failed;
 
         // ── SO update (best-effort) ───────────────────────────────────────────
+        // The SO tracks current desired state, not a frozen deploy snapshot. Refreshing
+        // services/serviceVars here means a resume after a Back→add-service→Next sequence
+        // restores the complete service set, not just what was deployed first.
         if (onboardingDeploymentId) {
           await updateDeployment(onboardingDeploymentId, {
             ...(resolvedAgentPolicyIds.length ? { agentPolicyIds: resolvedAgentPolicyIds } : {}),
@@ -226,6 +229,11 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
                 })
               ),
             ],
+            services: selectedServiceIds,
+            serviceVars: toSOServiceVars(storedServiceVars, servicesMap ?? new Map()) as Record<
+              string,
+              Record<string, unknown>
+            >,
             status: mergedFailed.length === 0 ? 'succeeded' : 'failed',
           });
         }

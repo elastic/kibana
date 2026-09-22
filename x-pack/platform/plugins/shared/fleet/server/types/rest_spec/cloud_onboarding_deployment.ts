@@ -270,6 +270,16 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
     ),
     deploymentName: schema.maybe(schema.string({ maxLength: 255 })),
     serviceVars: schema.maybe(RequestServiceVarsSchema),
+    services: schema.maybe(
+      schema.arrayOf(schema.string({ minLength: 1 }), {
+        minSize: 1,
+        maxSize: 1000,
+        meta: {
+          description:
+            'Current service set for this deployment. Refreshed on each successful deploy so resume after an incremental service addition restores all deployed services.',
+        },
+      })
+    ),
     attemptCount: schema.maybe(
       schema.number({ min: 1, meta: { description: 'Incremented by callers performing a retry.' } })
     ),

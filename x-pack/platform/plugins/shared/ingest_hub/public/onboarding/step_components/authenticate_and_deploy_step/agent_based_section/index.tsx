@@ -7,7 +7,8 @@
 
 import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EuiLoadingSpinner, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
-import { KbnDangerCallout } from '@kbn/ui-callout';
+import { useLocation } from 'react-router-dom';
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -64,6 +65,10 @@ export function AgentBasedSection({
   failedInstances,
   deployErrors,
 }: AgentBasedSectionProps) {
+  const location = useLocation();
+  // True when the wizard was opened via ?deploymentId=<id> (resume / edit mode).
+  const isEditMode = new URLSearchParams(location.search).has('deploymentId');
+
   const { agentBasedDeployment, setAgentBasedDeployment } = useOnboardingFlow();
   const {
     agentHostsMode,
@@ -202,10 +207,15 @@ export function AgentBasedSection({
 
   // ── Next-button readiness ─────────────────────────────────────────────────
   // Tells the parent step whether its Next button should be enabled.
+  // Note: the isPolicyCreated branch is intentionally NOT guarded by isCredentialReady.
+  // Hydration deliberately avoids seeding agentPolicyId (commit 76e342a), so isPolicyCreated
+  // is false on resume and this branch is unreachable via ?deploymentId=. Fixing the
+  // agentHostsMode branch (below) is sufficient to prevent the credential-omission bug on resume.
+  // The isPolicyCreated case covers new-policy mode only, after the flyout has created the policy.
   const isNextReady = isPolicyCreated
     ? true // policy exists; Next will attach package policies to it
     : agentHostsMode === 'existing'
-    ? selectedAgentPolicyIds.length > 0
+    ? selectedAgentPolicyIds.length > 0 && isCredentialReady
     : !isPolicyNameLoading && isPolicyFormValid && isCredentialReady;
 
   const onNextReadyChangeRef = useRef(onNextReadyChange);
@@ -297,6 +307,25 @@ export function AgentBasedSection({
           {(!isPolicyCreated || agentHostsMode === 'existing') && (
             <>
               <EuiSpacer size="m" />
+
+              {/* Resume callout — credentials are never persisted; user must re-enter them. */}
+              {isEditMode && !isCredentialReady && (
+                <>
+                  <KbnWarningCallout
+                    announceOnMount
+                    size="s"
+                    title={i18n.translate(
+                      'xpack.ingestHub.authenticateAndDeployStep.agentBasedSection.resumeCredentialsCallout',
+                      {
+                        defaultMessage:
+                          'Credentials aren’t saved between sessions — re-enter them to continue.',
+                      }
+                    )}
+                    data-test-subj="agentBasedSection-resumeCredentialsCallout"
+                  />
+                  <EuiSpacer size="m" />
+                </>
+              )}
 
               {/* Credential method selector */}
               <CredentialMethodSelector

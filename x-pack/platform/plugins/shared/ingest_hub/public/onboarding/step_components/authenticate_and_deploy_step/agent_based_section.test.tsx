@@ -11,6 +11,10 @@ import { I18nProvider } from '@kbn/i18n-react';
 
 // ─── Mocks ──────────────────────────────────────────────────────────────────
 
+jest.mock('react-router-dom', () => ({
+  useLocation: jest.fn(),
+}));
+
 jest.mock('@kbn/fleet-plugin/public', () => ({
   LazyAgentEnrollmentFlyout: jest.fn(),
   LazyAwsStaticKeysForm: jest.fn(),
@@ -37,6 +41,9 @@ import {
   agentPolicyFormValidation,
 } from '@kbn/fleet-plugin/public';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
+import { useLocation } from 'react-router-dom';
+
+const mockUseLocation = useLocation as jest.Mock;
 
 const MockAgentEnrollmentFlyout = LazyAgentEnrollmentFlyout as unknown as jest.Mock;
 const MockStaticKeysForm = LazyAwsStaticKeysForm as unknown as jest.Mock;
@@ -62,6 +69,12 @@ interface OnboardingFlowOptions {
     | 'assume_role';
   withSysMonitoring?: boolean;
   setAgentBasedDeployment?: jest.Mock;
+  /** Persisted role ARN — seeds isCredentialReady:true for assume_role */
+  roleArn?: string;
+  /** Persisted credential profile name — seeds isCredentialReady:true for shared_credentials */
+  credentialProfileName?: string;
+  /** Whether the URL contains ?deploymentId= (resume/edit mode) */
+  isEditMode?: boolean;
 }
 
 function setupMocks({
@@ -72,7 +85,11 @@ function setupMocks({
   agentCredentialMethod = 'direct_access_keys',
   withSysMonitoring = undefined,
   setAgentBasedDeployment = jest.fn(),
+  roleArn = undefined,
+  credentialProfileName = undefined,
+  isEditMode = false,
 }: OnboardingFlowOptions = {}) {
+  mockUseLocation.mockReturnValue({ search: isEditMode ? '?deploymentId=dep-test' : '' });
   MockAgentEnrollmentFlyout.mockImplementation((props: any) => (
     <div data-test-subj="agent-enrollment-flyout">
       {props.hideIncomingDataStep && <span data-test-subj="flyout-hideIncomingDataStep" />}
@@ -121,6 +138,8 @@ function setupMocks({
       selectedAgentPolicyIds,
       agentCredentialMethod,
       withSysMonitoring,
+      roleArn,
+      credentialProfileName,
     },
     setAgentBasedDeployment,
   });
@@ -129,6 +148,7 @@ function setupMocks({
 interface RenderOptions {
   serviceCount?: number;
   onDeploy?: jest.Mock;
+  onNextReadyChange?: jest.Mock;
   isDeploying?: boolean;
   isDone?: boolean;
   hasFailed?: boolean;
@@ -138,12 +158,14 @@ interface RenderOptions {
 
 function renderSection(props: RenderOptions = {}) {
   const onDeploy = props.onDeploy ?? jest.fn();
+  const onNextReadyChange = props.onNextReadyChange;
   return render(
     <I18nProvider>
       <React.Suspense fallback={null}>
         <AgentBasedSection
           serviceCount={props.serviceCount ?? 2}
           onDeploy={onDeploy}
+          onNextReadyChange={onNextReadyChange}
           isDeploying={props.isDeploying ?? false}
           isDone={props.isDone ?? false}
           hasFailed={props.hasFailed ?? false}
@@ -412,6 +434,141 @@ describe('AgentBasedSection', () => {
       expect(screen.getByTestId('agentBasedSection-addAnotherAgentButton')).toBeInTheDocument();
       const radios = screen.getAllByRole('radio');
       radios.forEach((radio) => expect(radio).toBeDisabled());
+    });
+  });
+
+  // §A — Resume credential gate and callout
+  describe('Next readiness — resume in existing mode', () => {
+    it('direct_access_keys: Next is disabled on resume until credentials entered', async () => {
+      const onNextReadyChange = jest.fn();
+      setupMocks({
+        agentHostsMode: 'existing',
+        selectedAgentPolicyIds: ['p1'],
+        agentCredentialMethod: 'direct_access_keys',
+        isEditMode: true,
+      });
+      renderSection({ onNextReadyChange });
+      await waitFor(() => {
+        // Last call must be false — policies selected but no credentials yet
+        expect(onNextReadyChange.mock.calls.at(-1)?.[0]).toBe(false);
+      });
+      // Simulate credential form signalling ready
+      fireEvent.click(screen.getByText('mark-credential-ready'));
+      await waitFor(() => {
+        expect(onNextReadyChange.mock.calls.at(-1)?.[0]).toBe(true);
+      });
+    });
+
+    it('temporary_keys: Next is disabled on resume until credentials entered', async () => {
+      const onNextReadyChange = jest.fn();
+      setupMocks({
+        agentHostsMode: 'existing',
+        selectedAgentPolicyIds: ['p1'],
+        agentCredentialMethod: 'temporary_keys',
+        isEditMode: true,
+      });
+      renderSection({ onNextReadyChange });
+      await waitFor(() => {
+        expect(onNextReadyChange.mock.calls.at(-1)?.[0]).toBe(false);
+      });
+      fireEvent.click(screen.getByText('mark-temp-credential-ready'));
+      await waitFor(() => {
+        expect(onNextReadyChange.mock.calls.at(-1)?.[0]).toBe(true);
+      });
+    });
+
+    it('assume_role with persisted roleArn: Next is enabled immediately on resume', async () => {
+      const onNextReadyChange = jest.fn();
+      setupMocks({
+        agentHostsMode: 'existing',
+        selectedAgentPolicyIds: ['p1'],
+        agentCredentialMethod: 'assume_role',
+        roleArn: 'arn:aws:iam::123456789012:role/MyRole',
+        isEditMode: true,
+      });
+      renderSection({ onNextReadyChange });
+      await waitFor(() => {
+        expect(onNextReadyChange.mock.calls.at(-1)?.[0]).toBe(true);
+      });
+    });
+
+    it('shared_credentials with persisted credentialProfileName: Next is enabled immediately on resume', async () => {
+      const onNextReadyChange = jest.fn();
+      setupMocks({
+        agentHostsMode: 'existing',
+        selectedAgentPolicyIds: ['p1'],
+        agentCredentialMethod: 'shared_credentials',
+        credentialProfileName: 'my-profile',
+        isEditMode: true,
+      });
+      renderSection({ onNextReadyChange });
+      await waitFor(() => {
+        expect(onNextReadyChange.mock.calls.at(-1)?.[0]).toBe(true);
+      });
+    });
+
+    it('no policies selected: Next remains disabled even when credentials are ready', async () => {
+      const onNextReadyChange = jest.fn();
+      setupMocks({
+        agentHostsMode: 'existing',
+        selectedAgentPolicyIds: [],
+        agentCredentialMethod: 'direct_access_keys',
+        isEditMode: true,
+      });
+      renderSection({ onNextReadyChange });
+      fireEvent.click(screen.getByText('mark-credential-ready'));
+      await waitFor(() => {
+        expect(onNextReadyChange.mock.calls.at(-1)?.[0]).toBe(false);
+      });
+    });
+
+    it('shows resume callout when in edit mode and credentials not ready', async () => {
+      setupMocks({
+        agentHostsMode: 'existing',
+        selectedAgentPolicyIds: ['p1'],
+        agentCredentialMethod: 'direct_access_keys',
+        isEditMode: true,
+      });
+      renderSection();
+      await waitFor(() => {
+        expect(
+          screen.getByTestId('agentBasedSection-resumeCredentialsCallout')
+        ).toBeInTheDocument();
+      });
+    });
+
+    it('hides resume callout once credentials are entered', async () => {
+      setupMocks({
+        agentHostsMode: 'existing',
+        selectedAgentPolicyIds: ['p1'],
+        agentCredentialMethod: 'direct_access_keys',
+        isEditMode: true,
+      });
+      renderSection();
+      await waitFor(() =>
+        expect(screen.getByTestId('agentBasedSection-resumeCredentialsCallout')).toBeInTheDocument()
+      );
+      fireEvent.click(screen.getByText('mark-credential-ready'));
+      await waitFor(() => {
+        expect(
+          screen.queryByTestId('agentBasedSection-resumeCredentialsCallout')
+        ).not.toBeInTheDocument();
+      });
+    });
+
+    it('does not show resume callout outside edit mode', async () => {
+      setupMocks({
+        agentHostsMode: 'existing',
+        selectedAgentPolicyIds: ['p1'],
+        agentCredentialMethod: 'direct_access_keys',
+        isEditMode: false,
+      });
+      renderSection();
+      await waitFor(() => {
+        expect(
+          screen.queryByTestId('agentBasedSection-resumeCredentialsCallout')
+        ).not.toBeInTheDocument();
+      });
     });
   });
 

@@ -281,6 +281,88 @@ describe('useAgentBasedDeploy — SO persistence', () => {
     expect(mockUpdateDeployment).not.toHaveBeenCalled();
   });
 
+  // services/serviceVars refresh on success-path update
+  it('success-path update includes services and serviceVars so SO stays current after incremental additions', async () => {
+    mockCreateDeployment.mockResolvedValue('so-id-refresh');
+    // Simulate: service A already deployed, now deploying service A+B (B is new).
+    mockUseOnboardingFlow.mockReturnValue({
+      servicesStep: { selectedServiceIds: ['serviceA', 'serviceB'], dataFormat: 'ecs' as const },
+      authenticateAndDeployStep: {},
+      detectAndReviewStep: {
+        policyIdsByInstance: { serviceA: 'pkg-A' },
+        onboardingDeploymentId: 'so-id-refresh',
+      },
+      updateDetectAndReviewStep: jest.fn(),
+      getLatestFailedInstances: jest.fn().mockReturnValue([]),
+      awsServicesMap: new Map(),
+      agentBasedDeployment: {
+        agentHostsMode: 'existing' as const,
+        agentPolicyId: 'existing-policy-id',
+        selectedAgentPolicyIds: ['existing-policy-id'],
+      },
+      setAgentBasedDeployment: jest.fn(),
+    });
+    mockBuildAgentBasedTargets.mockReturnValue([groupB]); // only B deploys
+    mockDeployToExistingAgentPolicies.mockResolvedValue({
+      packagePolicyIdsByInstance: { serviceB: 'pkg-B' },
+      failedInstances: [],
+      errorsByInstance: {},
+    });
+
+    const { result } = renderHook(() => useAgentBasedDeploy());
+    await act(async () => {
+      await result.current.handleDeploy();
+    });
+
+    // The update must carry the FULL service list, not just the newly deployed one.
+    expect(mockUpdateDeployment).toHaveBeenCalledWith(
+      'so-id-refresh',
+      expect.objectContaining({
+        services: ['serviceA', 'serviceB'],
+        serviceVars: expect.any(Object),
+        status: 'succeeded',
+      })
+    );
+  });
+
+  // catch-path update must be status-only (no services/serviceVars)
+  it('catch-path update is status-only — unexpected throw does not widen the SO with partial services', async () => {
+    mockCreateDeployment.mockResolvedValue(null);
+    // Set up with a pre-existing SO id so the catch update fires.
+    mockUseOnboardingFlow.mockReturnValue({
+      servicesStep: { selectedServiceIds: ['serviceA'], dataFormat: 'ecs' as const },
+      authenticateAndDeployStep: {},
+      detectAndReviewStep: {
+        policyIdsByInstance: {},
+        onboardingDeploymentId: 'so-id-catch',
+      },
+      updateDetectAndReviewStep: jest.fn(),
+      getLatestFailedInstances: jest.fn().mockReturnValue([]),
+      awsServicesMap: new Map(),
+      agentBasedDeployment: {
+        agentHostsMode: 'existing' as const,
+        agentPolicyId: 'existing-policy-id',
+        selectedAgentPolicyIds: ['existing-policy-id'],
+      },
+      setAgentBasedDeployment: jest.fn(),
+    });
+    mockBuildAgentBasedTargets.mockReturnValue([groupA]);
+    // Make the deploy function throw to exercise the catch block.
+    mockDeployToExistingAgentPolicies.mockRejectedValue(new Error('unexpected network failure'));
+
+    const { result } = renderHook(() => useAgentBasedDeploy());
+    await act(async () => {
+      await result.current.handleDeploy();
+    });
+
+    expect(mockUpdateDeployment).toHaveBeenCalledTimes(1);
+    const [, payload] = mockUpdateDeployment.mock.calls[0];
+    expect(payload).toHaveProperty('status', 'failed');
+    // Regression guard: catch path must NOT carry services or serviceVars.
+    expect(payload).not.toHaveProperty('services');
+    expect(payload).not.toHaveProperty('serviceVars');
+  });
+
   it('partial retry status uses merged failure set, not just current-call failures', async () => {
     mockCreateDeployment.mockResolvedValue(null);
     makeFlowMock({ agentHostsMode: 'existing', policyIdsByInstance: { serviceA: 'pkg-A' } });
