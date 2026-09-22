@@ -158,7 +158,7 @@
     "@elastic/elasticsearch": "9.5.0",
     "@elastic/ems-client": "8.7.0",
     "@elastic/esql": "4.25.0",
-    "@elastic/eui": "file:./elastic_eui_122.0.0_flyout_fixes_2.tgz",
+    "@elastic/eui": "file:./elastic_eui_122.0.0_flyout_fixes_3.tgz",
     "@elastic/eui-illustrations": "1.1.0",
     "@elastic/eui-theme-borealis": "8.0.0",
     "@elastic/filesaver": "1.1.2",
