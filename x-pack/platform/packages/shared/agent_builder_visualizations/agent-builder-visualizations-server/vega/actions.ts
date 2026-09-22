@@ -5,16 +5,9 @@
  * 2.0.
  */
 
-import type { EsqlEsqlColumnInfo } from '@elastic/elasticsearch/lib/api/types';
+import type { ResolveEsqlAction } from '../shared/run_resolve_esql_node';
 
-export interface GenerateEsqlAction {
-  type: 'generate_esql';
-  success: boolean;
-  query?: string;
-  /** Result columns of the executed query, used to inform spec authoring/validation. */
-  columns?: EsqlEsqlColumnInfo[];
-  error?: string;
-}
+export type GenerateEsqlAction = ResolveEsqlAction;
 
 export interface AuthorSpecAction {
   type: 'author_spec';

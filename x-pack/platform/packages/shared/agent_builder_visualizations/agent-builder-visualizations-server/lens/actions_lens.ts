@@ -5,16 +5,10 @@
  * 2.0.
  */
 
-import type { EsqlEsqlColumnInfo } from '@elastic/elasticsearch/lib/api/types';
+import type { ResolveEsqlAction } from '../shared/run_resolve_esql_node';
 import type { VisualizationConfig } from './types';
 
-export interface GenerateEsqlAction {
-  type: 'generate_esql';
-  success: boolean;
-  query?: string;
-  columns?: EsqlEsqlColumnInfo[];
-  error?: string;
-}
+export type GenerateEsqlAction = ResolveEsqlAction;
 
 export interface GenerateConfigAction {
   type: 'generate_config';

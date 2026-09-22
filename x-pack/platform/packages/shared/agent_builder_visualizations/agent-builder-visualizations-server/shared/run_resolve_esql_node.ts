@@ -11,11 +11,12 @@ import {
   type ResolveEsqlForAuthoringParams,
 } from './resolve_esql_for_authoring';
 
-/** Graph action emitted by the shared resolve-ES|QL node. */
+/** Graph action emitted by the shared resolve-ES|QL node; Lens and Vega alias it as GenerateEsqlAction. */
 export interface ResolveEsqlAction {
   type: 'generate_esql';
   success: boolean;
   query?: string;
+  /** Result columns of the executed query, used to inform config/spec authoring and validation. */
   columns?: EsqlEsqlColumnInfo[];
   error?: string;
 }
