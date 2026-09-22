@@ -577,7 +577,10 @@ Grants:
 
 - Write/read `.evaluation-scores*` (results)
 - Write/read `traces-*` (OTLP traces)
+- Read evidence events from `logs-*`, restricted by document-level security
 - Write/read/delete `.evaluation-dataset*` (managed datasets)
 - Kibana `evals` feature privilege (`all`)
+
+The log-event allowlist is embedded in the API key. Regenerate existing keys when support for a new log-backed instrumentation profile or event name is added.
 
 With `--profile dev-vault`, these keys are read from Vault automatically.
