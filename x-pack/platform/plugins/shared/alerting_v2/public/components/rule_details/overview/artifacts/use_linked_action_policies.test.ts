@@ -25,9 +25,9 @@ const RULE_TAGS = ['prod'];
 
 const buildItem = (
   category: MatchedActionPolicy['category'],
-  overrides: Partial<MatchedActionPolicy['actionPolicy']> = {}
+  overrides: Partial<MatchedActionPolicy['action_policy']> = {}
 ): MatchedActionPolicy => ({
-  actionPolicy: {
+  action_policy: {
     id: 'policy-1',
     name: 'Policy',
     description: '',
@@ -45,7 +45,7 @@ const buildItem = (
     updatedBy: 'user',
     updatedAt: '2026-01-01T00:00:00.000Z',
     ...overrides,
-  } as MatchedActionPolicy['actionPolicy'],
+  } as MatchedActionPolicy['action_policy'],
   category,
 });
 

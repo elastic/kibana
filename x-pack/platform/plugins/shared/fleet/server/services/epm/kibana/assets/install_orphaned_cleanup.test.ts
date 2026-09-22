@@ -26,6 +26,7 @@ import { KibanaSavedObjectType } from '../../../../../common/types/models/epm';
 import { KibanaAssetType } from '../../../../types';
 
 import type { Installation } from '../../../../../common/types';
+
 import type { ArchiveAsset } from './install';
 import { deleteOrphanedMultipleIsolatedAssets } from './install';
 
@@ -93,7 +94,7 @@ const makeInstalledPkg = (
   } as SavedObject<Installation>);
 
 const makeFindResult = (
-  objects: Array<{ id: string; type: string; originId?: string }>,
+  objects: Array<{ id: string; type: string; originId?: string; managed?: boolean }>,
   total?: number
 ) => ({
   total: total ?? objects.length,
@@ -103,6 +104,9 @@ const makeFindResult = (
     id: o.id,
     type: o.type,
     ...(o.originId !== undefined && { originId: o.originId }),
+    // Default to managed:true — Fleet always writes its objects with managed=true.
+    // Tests that simulate user copies can pass managed:false explicitly.
+    managed: o.managed ?? true,
     attributes: {},
     references: [],
     score: 1,

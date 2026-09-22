@@ -17,7 +17,7 @@ import {
   isConversationUpdatedEvent,
   isRoundCompleteEvent,
   type Conversation,
-  type TimelineEvent,
+  type ConversationEvent,
 } from '@kbn/agent-builder-common';
 import { createLlmProxy, type LlmProxy } from '@kbn/ftr-llm-proxy';
 import type {
@@ -104,7 +104,7 @@ const userMessagesOfFinalAnswerFor = (
     .map((message) => contentText(message.content));
 };
 
-const eventsOfExecution = (conversation: Conversation, executionId: string): TimelineEvent[] =>
+const eventsOfExecution = (conversation: Conversation, executionId: string): ConversationEvent[] =>
   (conversation.events ?? []).filter((event) => event.execution_id === executionId);
 
 apiTest.describe(
