@@ -100,20 +100,27 @@ export const PerOsProtectionMasterToggle = memo(
 
         // The three OS branches take identical writes, and TypeScript rejects a union-indexed
         // write unless the value satisfies every protection at once. This view narrows each OS to
-        // the fields the toggle owns: the branches stay optional, so a policy stored before one of
-        // them existed gains a complete, license-valid branch here instead of throwing.
+        // the fields the toggle owns.
+        //
+        // Merge over the seed rather than short-circuiting on an existing object: the advanced
+        // settings field creates a partial branch of its own, so `{ mode }` with no `supported`
+        // is a real stored shape and reusing it as-is fails license validation on save.
         for (const os of osList) {
           const osPolicy = updatedPolicy[os] as MutableOsProtectionBranches;
 
-          const protectionBranch: MutableProtectionBranch =
-            osPolicy[protection] ?? createProtectionBranch(protection, nextMode, isPlatinumPlus);
-          protectionBranch.mode = nextMode;
+          const protectionBranch: MutableProtectionBranch = {
+            ...createProtectionBranch(protection, nextMode, isPlatinumPlus),
+            ...osPolicy[protection],
+            mode: nextMode,
+          };
           osPolicy[protection] = protectionBranch;
 
           if (isPlatinumPlus) {
-            const popupBranch = osPolicy.popup[protection] ?? createPopupBranch(protection, value);
-            popupBranch.enabled = value;
-            osPolicy.popup[protection] = popupBranch;
+            osPolicy.popup[protection] = {
+              ...createPopupBranch(protection, value),
+              ...osPolicy.popup[protection],
+              enabled: value,
+            };
 
             if (protection === 'behavior_protection') {
               protectionBranch.reputation_service = value;

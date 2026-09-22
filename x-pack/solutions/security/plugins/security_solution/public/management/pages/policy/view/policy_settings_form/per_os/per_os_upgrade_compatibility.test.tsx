@@ -226,4 +226,33 @@ describe('per-OS form upgrade compatibility with 9.4 policies', () => {
       message: DefaultPolicyNotificationMessage,
     });
   });
+
+  // The 9.4 advanced field creates `mac.ransomware` on its own, so the branch can exist while
+  // still missing `supported`. The master toggle has to complete it, not reuse it as found.
+  it('completes a partial macOS ransomware branch when the master toggle is switched on', async () => {
+    const onChange = jest.fn();
+    policy = unsetPolicyFeaturesAccordingToLicenseLevel(policy, Platinum);
+    policy.windows.ransomware.mode = ProtectionModes.off;
+    // @ts-expect-error reproducing the shape the advanced settings field writes
+    policy.mac.ransomware = { mode: ProtectionModes.off };
+
+    renderResult = mockedContext.render(
+      <PerOsRansomwareProtectionCard
+        policy={policy}
+        onChange={onChange}
+        mode="edit"
+        data-test-subj={testSubjects.perOsRansomware.card}
+      />
+    );
+
+    await userEvent.click(
+      renderResult.getByTestId(testSubjects.perOsRansomware.enableDisableSwitch)
+    );
+
+    const { updatedPolicy } = onChange.mock.calls.at(-1)![0];
+    expect(updatedPolicy.mac.ransomware.supported).toBe(
+      policyFactoryWithSupportedFeatures().mac.ransomware.supported
+    );
+    expect(isEndpointPolicyValidForLicense(updatedPolicy, Platinum)).toBe(true);
+  });
 });
