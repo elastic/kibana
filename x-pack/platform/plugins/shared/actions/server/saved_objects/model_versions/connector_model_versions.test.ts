@@ -213,6 +213,66 @@ describe('Connector Model Versions', () => {
       });
     });
 
+    it('backfills true when encrypted inbound identity is already stored', () => {
+      const backfillChange = version4.changes.find((change) => change.type === 'data_backfill');
+      const backfillFn =
+        backfillChange && backfillChange.type === 'data_backfill'
+          ? backfillChange.backfillFn
+          : undefined;
+      const mockDocument = {
+        id: 'dual-with-identity',
+        type: 'action',
+        attributes: {
+          actionTypeId: '.datadog',
+          name: 'legacy dual',
+          isMissingSecrets: false,
+          config: {},
+          secrets: '{}',
+          apiKey: 'ciphertext-api-key',
+          uiamApiKey: null,
+        },
+        references: [],
+      };
+
+      expect(backfillFn!(mockDocument, context)).toEqual({
+        ...mockDocument,
+        attributes: {
+          ...mockDocument.attributes,
+          hasInboundEventIdentity: true,
+        },
+      });
+    });
+
+    it('backfills true when only a UIAM inbound identity is stored', () => {
+      const backfillChange = version4.changes.find((change) => change.type === 'data_backfill');
+      const backfillFn =
+        backfillChange && backfillChange.type === 'data_backfill'
+          ? backfillChange.backfillFn
+          : undefined;
+      const mockDocument = {
+        id: 'dual-with-uiam',
+        type: 'action',
+        attributes: {
+          actionTypeId: '.datadog',
+          name: 'legacy dual',
+          isMissingSecrets: false,
+          config: {},
+          secrets: '{}',
+          apiKey: null,
+          uiamApiKey: 'ciphertext-uiam-key',
+        },
+        references: [],
+      };
+
+      expect(backfillFn!(mockDocument, context)).toEqual({
+        ...mockDocument,
+        attributes: {
+          ...mockDocument.attributes,
+          hasInboundEventIdentity: true,
+        },
+      });
+    });
+
     it('does not overwrite an existing presence flag', () => {
       const backfillChange = version4.changes.find((change) => change.type === 'data_backfill');
       const backfillFn =

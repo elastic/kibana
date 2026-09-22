@@ -91,7 +91,6 @@ const InboundEventsFormSectionComponent: React.FC<InboundEventsFormSectionProps>
       <InboundSectionTitle />
       <UseField<boolean>
         path="isInboundEventsEnabled"
-        defaultValue={false}
         config={{ type: FIELD_TYPES.TOGGLE, defaultValue: false }}
       >
         {(field) => (

@@ -278,11 +278,14 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     return undefined;
   }, [actionType, createdInboundConnector, isClusterInboundEventsEnabled]);
 
+  const beforeCloseRef = useRef<() => void>(() => undefined);
+
   const onFlyoutClose = useCallback(() => {
     if (connectorToTest && isFormModified) {
       setShowConfirmModal(true);
       return;
     }
+    beforeCloseRef.current();
     onClose();
   }, [connectorToTest, isFormModified, onClose]);
 
@@ -306,6 +309,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
           onCloseAttempt={onFlyoutClose}
           showConfirmModal={showConfirmModal}
           onConfirmModalCancel={() => setShowConfirmModal(false)}
+          beforeCloseRef={beforeCloseRef}
         />
       </EuiFlyout>
     );

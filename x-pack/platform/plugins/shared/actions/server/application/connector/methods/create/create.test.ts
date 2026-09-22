@@ -479,6 +479,7 @@ describe('create()', () => {
           isMissingSecrets: false,
           config: { foo: 'bar' },
           secrets: { apiKey: 'secret' },
+          hasInboundEventIdentity: false,
         },
         { id: 'mock-saved-object-id' }
       );
@@ -651,6 +652,7 @@ describe('create()', () => {
           },
           secrets: {},
           authMode: 'shared',
+          hasInboundEventIdentity: false,
         },
         { id: 'mock-saved-object-id' }
       );
@@ -711,6 +713,7 @@ describe('create()', () => {
           config: {},
           secrets: { authType: 'oauth_authorization_code' },
           authMode: 'per-user',
+          hasInboundEventIdentity: false,
         },
         { id: 'mock-saved-object-id' }
       );
@@ -761,6 +764,7 @@ describe('create()', () => {
           isMissingSecrets: false,
           config: {},
           secrets: {},
+          hasInboundEventIdentity: false,
         },
         { id: 'mock-saved-object-id' }
       );

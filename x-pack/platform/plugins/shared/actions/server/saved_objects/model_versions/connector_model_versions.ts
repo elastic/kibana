@@ -15,6 +15,10 @@ import {
 } from '../schemas/raw_connector';
 import { actionEncryptedRegistrationV2, actionEncryptedRegistrationV3 } from '../action_encryption';
 
+/** Ciphertext is still on the raw migration document. A normal get strips these. */
+const storedIdentityPresent = (value: unknown): boolean =>
+  typeof value === 'string' && value.length > 0;
+
 export const connectorModelVersions = (
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ): SavedObjectsModelVersionMap => ({
@@ -67,9 +71,14 @@ export const connectorModelVersions = (
           if (doc.attributes.hasInboundEventIdentity !== undefined) {
             return doc;
           }
+          // Pre-v4 connectors stored identity only as encrypted apiKey / uiamApiKey.
+          // Marking every document false would report inbound off while the credential still works.
+          const hasInboundEventIdentity =
+            storedIdentityPresent(doc.attributes.apiKey) ||
+            storedIdentityPresent(doc.attributes.uiamApiKey);
           return {
             ...doc,
-            attributes: { ...doc.attributes, hasInboundEventIdentity: false },
+            attributes: { ...doc.attributes, hasInboundEventIdentity },
           };
         },
       },

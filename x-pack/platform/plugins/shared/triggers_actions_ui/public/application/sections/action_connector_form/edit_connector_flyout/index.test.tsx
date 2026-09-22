@@ -427,12 +427,20 @@ describe('EditConnectorFlyout', () => {
     expect(appMockRenderer.coreStart.http.post).toHaveBeenCalledWith(
       expect.stringContaining('_rotate_event_token')
     );
+    expect(await screen.findByTestId('inbound-ingress-ingest-token')).toHaveValue('once-token');
+    expect(screen.queryByTestId('inbound-events-save-to-generate')).not.toBeInTheDocument();
+    expect(onConnectorUpdated).not.toHaveBeenCalled();
+    expect(onClose).not.toHaveBeenCalled();
+
+    await userEvent.click(screen.getByTestId('edit-connector-flyout-close-btn'));
+
     expect(onConnectorUpdated).toHaveBeenCalledWith(
       expect.objectContaining({
         isInboundEventsEnabled: true,
         secrets: { ingestToken: 'once-token' },
       })
     );
+    expect(onClose).toHaveBeenCalled();
   });
 
   it('disables the buttons when there are error on the form', async () => {

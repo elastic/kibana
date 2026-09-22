@@ -162,6 +162,10 @@ describe('ConnectorFormFields', () => {
 
     beforeEach(() => {
       appMockRenderer.coreStart.actions.isInboundEventsEnabled = true;
+      appMockRenderer.coreStart.application.capabilities = {
+        ...appMockRenderer.coreStart.application.capabilities,
+        actions: { save: true, show: true, execute: true },
+      };
     });
 
     it('shows inbound then outbound with the receive-events switch off', async () => {

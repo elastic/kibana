@@ -74,6 +74,7 @@ interface EditConnectorFlyoutContentProps extends EditConnectorFlyoutProps {
   onCloseAttempt: () => void;
   showConfirmModal: boolean;
   onConfirmModalCancel: () => void;
+  beforeCloseRef: React.MutableRefObject<() => void>;
 }
 
 const getConnectorWithoutSecrets = (
@@ -176,6 +177,7 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
   onCloseAttempt,
   showConfirmModal,
   onConfirmModalCancel,
+  beforeCloseRef,
 }) => {
   const confirmModalTitleId = useGeneratedHtmlId();
 
@@ -236,6 +238,11 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
 
   const [isEdit, setIsEdit] = useState<boolean>(true);
   const [isSaved, setIsSaved] = useState<boolean>(false);
+  // One-time ingest token. Parents unmount the flyout from onConnectorUpdated, so notify on close.
+  const [revealedInboundConnector, setRevealedInboundConnector] = useState<ActionConnector | null>(
+    null
+  );
+  const hasHandledInboundEnableRef = useRef(false);
   const { preSubmitValidator, submit, isValid: isFormValid, isSubmitting } = formState;
   const hasErrors = isFormValid === false;
   const isSaving = isUpdatingConnector || isSubmitting || isExecutingConnector || isRotating;
@@ -257,27 +264,31 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
   const isTestable = actionTypeModel?.isTestable ?? actionTypeRegistry.has(connector.actionTypeId);
 
   const inboundSettingsContent = useMemo(() => {
-    if (isInboundIngressConnector(connector) && !connectorTypeIsDual(connector.actionTypeId)) {
+    const inboundConnector = revealedInboundConnector ?? connector;
+    if (
+      isInboundIngressConnector(inboundConnector) &&
+      !connectorTypeIsDual(inboundConnector.actionTypeId)
+    ) {
       return (
         <InboundIngressCredentials
-          connector={connector}
-          allowRotate={canSave && !connector.isPreconfigured}
+          connector={inboundConnector}
+          allowRotate={canSave && !inboundConnector.isPreconfigured}
         />
       );
     }
-    if (connectorTypeIsDual(connector.actionTypeId) && isClusterInboundEventsEnabled) {
-      if (connector.isInboundEventsEnabled === true) {
+    if (connectorTypeIsDual(inboundConnector.actionTypeId) && isClusterInboundEventsEnabled) {
+      if (inboundConnector.isInboundEventsEnabled === true) {
         return (
           <InboundIngressCredentials
-            connector={connector}
-            allowRotate={canSave && !connector.isPreconfigured}
+            connector={inboundConnector}
+            allowRotate={canSave && !inboundConnector.isPreconfigured}
           />
         );
       }
       return <InboundEventsSaveToGenerateCallout />;
     }
     return undefined;
-  }, [canSave, connector, isClusterInboundEventsEnabled]);
+  }, [canSave, connector, isClusterInboundEventsEnabled, revealedInboundConnector]);
 
   // Delay the spinner so quick spec loads don't flash a loading state.
   const [showLoadingSpinner, setShowLoadingSpinner] = useState(false);
@@ -395,12 +406,15 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
 
         let nextConnector = updatedConnector;
         const justEnabledInbound =
+          !hasHandledInboundEnableRef.current &&
           shouldRotateInboundAfterSave({
             actionTypeId: connector.actionTypeId,
             isInboundEventsEnabled,
-          }) && connector.isInboundEventsEnabled !== true;
+          }) &&
+          connector.isInboundEventsEnabled !== true;
 
         if (justEnabledInbound) {
+          hasHandledInboundEnableRef.current = true;
           try {
             const rotated = await rotateIngress(updatedConnector.id);
             nextConnector = {
@@ -410,9 +424,8 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
           } catch {
             // Danger toast is shown by the rotate hook. Inbound is on; user can rotate.
           }
-        }
-
-        if (onConnectorUpdated) {
+          setRevealedInboundConnector(nextConnector);
+        } else if (!hasHandledInboundEnableRef.current && onConnectorUpdated) {
           onConnectorUpdated(nextConnector);
         }
         setIsSaved(true);
@@ -436,6 +449,24 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
     rotateIngress,
     onFormModifiedChange,
   ]);
+
+  const notifyRevealedInboundConnector = useCallback(() => {
+    if (revealedInboundConnector && onConnectorUpdated) {
+      onConnectorUpdated(revealedInboundConnector);
+    }
+  }, [onConnectorUpdated, revealedInboundConnector]);
+
+  const handleDiscardAndClose = useCallback(() => {
+    notifyRevealedInboundConnector();
+    onClose();
+  }, [notifyRevealedInboundConnector, onClose]);
+
+  useEffect(() => {
+    beforeCloseRef.current = notifyRevealedInboundConnector;
+    return () => {
+      beforeCloseRef.current = () => undefined;
+    };
+  }, [beforeCloseRef, notifyRevealedInboundConnector]);
 
   useEffect(() => {
     isMounted.current = true;
@@ -619,7 +650,7 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
           onCancel={() => {
             onConfirmModalCancel();
           }}
-          onConfirm={onClose}
+          onConfirm={handleDiscardAndClose}
           cancelButtonText={i18n.translate(
             'xpack.triggersActionsUI.sections.confirmConnectorEditClose.cancelButtonLabel',
             {
@@ -654,12 +685,14 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
 }) => {
   const [isFormModified, setIsFormModified] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const beforeCloseRef = useRef<() => void>(() => undefined);
 
   const onFlyoutClose = useCallback(() => {
     if (isFormModified) {
       setShowConfirmModal(true);
       return;
     }
+    beforeCloseRef.current();
     onClose();
   }, [isFormModified, onClose]);
 
@@ -683,6 +716,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
         onCloseAttempt={onFlyoutClose}
         showConfirmModal={showConfirmModal}
         onConfirmModalCancel={() => setShowConfirmModal(false)}
+        beforeCloseRef={beforeCloseRef}
       />
     </EuiFlyout>
   );

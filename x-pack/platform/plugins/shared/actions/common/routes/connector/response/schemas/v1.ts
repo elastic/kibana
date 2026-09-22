@@ -83,6 +83,7 @@ export const getConnectorResponseSchema = (includeInboundEventsField: boolean) =
 
 /** Get-all connectors response schema; omit `is_inbound_events_enabled` unless inbound events are enabled. */
 export const getGetAllConnectorsResponseSchema = (includeInboundEventsField: boolean) =>
+  // codeql[js/kibana/unbounded-array-in-schema] Response schema for the connector list; Kibana builds the array, it is not request input
   schema.arrayOf(
     getConnectorResponseSchema(includeInboundEventsField).extends(referencedByCountField, {
       meta: { id: 'connector_response_with_references_count' },
