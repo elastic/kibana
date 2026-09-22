@@ -6,8 +6,7 @@
  */
 
 import type { KibanaRequest, SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
-import { isSavedObjectErrorResult } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 
@@ -239,7 +238,7 @@ export async function checkUploadPackageAssetPrivileges({
               chunk.map((id) => ({ type: KibanaSavedObjectType.securityRule, id }))
             );
             for (const so of bulkResult.saved_objects) {
-              if (isSavedObjectErrorResult(so)) {
+              if (so.error) {
                 if (so.error.statusCode !== 404) {
                   // Unexpected error — fail closed.
                   hasMlRules = true;
