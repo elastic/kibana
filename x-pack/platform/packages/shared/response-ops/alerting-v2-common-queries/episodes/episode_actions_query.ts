@@ -16,6 +16,7 @@ export interface EpisodeActionRow {
   last_ack_action: string | null;
   last_assignee_uid: string | null;
   last_ack_actor: string | null;
+  last_deactivate_action: string | null;
   last_deactivate_actor: string | null;
 }
 
@@ -30,7 +31,7 @@ export const buildEpisodeActionsQuery = (
     esql.from(ALERT_ACTIONS_DATA_STREAM)
       .where`space_id == ${spaceId}`
       .where`episode_id IN (${episodeIdLiterals})`
-      .where`action_type IN ("ack", "unack", "assign", "deactivate")`
+      .where`action_type IN ("ack", "unack", "assign", "deactivate", "activate")`
       .pipe`EVAL
         ack_action = CASE(action_type IN ("ack", "unack"), action_type, null),
         assignee_value = CASE(action_type == "assign", assignee_uid, null),
@@ -40,8 +41,9 @@ export const buildEpisodeActionsQuery = (
         last_ack_action = LAST(ack_action, @timestamp),
         last_assignee_uid = LAST(assignee_value, @timestamp),
         last_ack_actor = LAST(ack_actor, @timestamp),
+        last_deactivate_action = LAST(action_type, @timestamp) WHERE action_type IN ("deactivate", "activate"),
         last_deactivate_actor = LAST(deactivate_actor, @timestamp)
         BY episode_id, rule_id, group_hash`
-      .keep('episode_id', 'rule_id', 'group_hash', 'last_ack_action', 'last_assignee_uid', 'last_ack_actor', 'last_deactivate_actor')
+      .keep('episode_id', 'rule_id', 'group_hash', 'last_ack_action', 'last_assignee_uid', 'last_ack_actor', 'last_deactivate_action', 'last_deactivate_actor')
   );
 };

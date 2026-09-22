@@ -12,7 +12,13 @@ import { parseEpisodeDataJson } from '@kbn/alerting-v2-utils';
 import { useFetchEpisodeQuery } from '../../hooks/use_fetch_episode_query';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { useAlertingEpisodeSourceDataView } from '../../hooks/use_alerting_episode_source_data_view';
-import { isRuleError, isRuleForbidden, isRuleLoaded, isRuleNotFound } from '../../types/rule_state';
+import {
+  isRuleError,
+  isRuleForbidden,
+  isRuleLoaded,
+  isRuleLoading,
+  isRuleNotFound,
+} from '../../types/rule_state';
 import { getNonEmptyGroupingFields } from '../../utils/episode_grouping_data';
 import { AlertingEpisodeGroupingTags } from '../grouping/alerting_episode_grouping_tags';
 import { getPanelTitleSize } from './panel_title_sizes';
@@ -53,7 +59,7 @@ export const AlertEpisodeGroupingSection = ({
     http: services.http,
   });
 
-  if (isLoading) {
+  if (isLoading || isRuleLoading(ruleState)) {
     return (
       <EuiPanel hasBorder paddingSize="m" data-test-subj="alertingV2EpisodeGroupingSectionLoading">
         <EuiSkeletonRectangle width="100%" height={20} />

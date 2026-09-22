@@ -395,6 +395,7 @@ describe('AlertEpisodeDetailsFlyout', () => {
         lastAckAction: ALERT_EPISODE_ACTION_TYPE.ACK,
         lastAssigneeUid: null,
         lastAckActor: 'user-acker',
+        lastDeactivateAction: null,
         lastDeactivateActor: null,
       },
     });
@@ -417,6 +418,7 @@ describe('AlertEpisodeDetailsFlyout', () => {
         lastAckAction: null,
         lastAssigneeUid: null,
         lastAckActor: null,
+        lastDeactivateAction: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
         lastDeactivateActor: 'user-resolver',
       },
       groupAction: {
@@ -438,16 +440,26 @@ describe('AlertEpisodeDetailsFlyout', () => {
     expect(screen.getByText('user-resolver')).toBeInTheDocument();
   });
 
-  it('shows the resolved-by info block when the episode is resolved before group actions load', () => {
+  it('does not show the resolved-by info block when the latest episode action reopened it', () => {
     mockUseEpisodeDetailsHeaderData.mockReturnValue({
       ...baseHeaderData,
       status: ALERT_EPISODE_STATUS.INACTIVE,
+      episodeAction: {
+        episodeId: 'ep-1',
+        ruleId: 'rule-1',
+        groupHash: 'gh-1',
+        lastAckAction: null,
+        lastAssigneeUid: null,
+        lastAckActor: null,
+        lastDeactivateAction: ALERT_EPISODE_ACTION_TYPE.ACTIVATE,
+        lastDeactivateActor: 'previous-resolver',
+      },
       groupAction: undefined,
     });
 
     render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
 
-    expect(screen.getByText('Resolved by')).toBeInTheDocument();
+    expect(screen.queryByText('Resolved by')).not.toBeInTheDocument();
   });
 
   it('shows who snoozed the episode in an info block', () => {

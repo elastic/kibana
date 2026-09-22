@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { ALERT_EPISODE_ACTION_TYPE, ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
+import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { AlertEpisodeOverviewList } from './overview_list';
 
@@ -49,7 +49,6 @@ const baseProps = {
   triggeredAt: '2024-01-01T00:00:00.000Z',
   durationMs: 5000,
   assigneeUid: 'user-1',
-  status: ALERT_EPISODE_STATUS.ACTIVE,
   episodeAction: undefined,
   groupAction: undefined,
   userProfile: mockUserProfile,
@@ -160,6 +159,7 @@ describe('AlertEpisodeOverviewList', () => {
             lastAckAction: ALERT_EPISODE_ACTION_TYPE.ACK,
             lastAssigneeUid: null,
             lastAckActor: 'user-acker',
+            lastDeactivateAction: null,
             lastDeactivateActor: null,
           }}
         />
@@ -177,7 +177,6 @@ describe('AlertEpisodeOverviewList', () => {
       <I18nProvider>
         <AlertEpisodeOverviewList
           {...baseProps}
-          status={ALERT_EPISODE_STATUS.INACTIVE}
           episodeAction={{
             episodeId: 'ep-1',
             ruleId: 'rule-1',
@@ -185,6 +184,7 @@ describe('AlertEpisodeOverviewList', () => {
             lastAckAction: null,
             lastAssigneeUid: null,
             lastAckActor: null,
+            lastDeactivateAction: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
             lastDeactivateActor: 'user-resolver',
           }}
           groupAction={{
@@ -209,18 +209,27 @@ describe('AlertEpisodeOverviewList', () => {
     ).toBeInTheDocument();
   });
 
-  it('renders the resolved-by row when the episode is resolved before group actions load', () => {
+  it('does not render the resolved-by row when the latest episode action reopened it', () => {
     render(
       <I18nProvider>
         <AlertEpisodeOverviewList
           {...baseProps}
-          status={ALERT_EPISODE_STATUS.INACTIVE}
+          episodeAction={{
+            episodeId: 'ep-1',
+            ruleId: 'rule-1',
+            groupHash: 'gh-1',
+            lastAckAction: null,
+            lastAssigneeUid: null,
+            lastAckActor: null,
+            lastDeactivateAction: ALERT_EPISODE_ACTION_TYPE.ACTIVATE,
+            lastDeactivateActor: 'previous-resolver',
+          }}
           groupAction={undefined}
         />
       </I18nProvider>
     );
 
-    expect(screen.getByText('Resolved by')).toBeInTheDocument();
+    expect(screen.queryByText('Resolved by')).not.toBeInTheDocument();
   });
 
   it('renders the snoozed-by and snoozed-until rows when the group is snoozed', () => {

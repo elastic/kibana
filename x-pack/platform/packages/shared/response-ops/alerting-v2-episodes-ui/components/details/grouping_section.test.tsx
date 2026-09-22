@@ -121,6 +121,18 @@ describe('AlertEpisodeGroupingSection', () => {
     expect(screen.getByTestId('alertingV2EpisodeGroupingSectionLoading')).toBeInTheDocument();
   });
 
+  it('keeps the loading panel while the rule is loading', async () => {
+    runEsqlAsyncSearchMock.mockResolvedValue(
+      mockEpisodeSearchResult({ 'service.name': 'checkout' })
+    );
+    mockHttp.get.mockImplementation(() => new Promise(() => {}));
+
+    renderSection();
+
+    await waitFor(() => expect(mockHttp.get).toHaveBeenCalled());
+    expect(screen.getByTestId('alertingV2EpisodeGroupingSectionLoading')).toBeInTheDocument();
+  });
+
   it('renders an error when the episode query fails', async () => {
     runEsqlAsyncSearchMock.mockRejectedValue(new Error('boom'));
 

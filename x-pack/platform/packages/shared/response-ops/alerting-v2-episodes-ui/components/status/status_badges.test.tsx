@@ -92,6 +92,7 @@ describe('AlertEpisodeStatusBadges', () => {
           lastAckAction: ALERT_EPISODE_ACTION_TYPE.ACK,
           lastAssigneeUid: null,
           lastAckActor: null,
+          lastDeactivateAction: null,
           lastDeactivateActor: null,
         }}
       />
@@ -111,6 +112,7 @@ describe('AlertEpisodeStatusBadges', () => {
           lastAckAction: ALERT_EPISODE_ACTION_TYPE.ACK,
           lastAssigneeUid: null,
           lastAckActor: null,
+          lastDeactivateAction: null,
           lastDeactivateActor: null,
         }}
       />
