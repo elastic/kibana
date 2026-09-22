@@ -89,9 +89,9 @@
       "id": "significant-events",
       "name": "Significant Events",
       "slackChannel": "#significant-events-alerts",
-      "configPath": "x-pack/platform/packages/shared/kbn-evals-suite-significant-events/playwright.config.ts",
+      "configPath": "x-pack/solutions/observability/packages/kbn-evals-suite-significant-events/playwright.config.ts",
       "tags": [
-        "platform",
+        "observability",
         "significant-events"
       ],
       "ciLabels": [
