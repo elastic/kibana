@@ -26,13 +26,19 @@ paths:
               properties:
                 report_id:
                   type: string
-                runId:
+                run_id:
                   type: string
                   description: >-
                     Run id supplied by the Worker fan-out so every child of one
                     sweep shares it, which is what the packaging barrier and the
                     conclusion dedupe key off. The route mints one only when the
                     caller has no sweep to tie the run to.
+                technology:
+                  $ref: '../components/hunt.schema.yaml#/components/schemas/HuntTechnology'
+                  description: >-
+                    Pins the hunt to one technology's index scope. Omit it and the
+                    coordinator resolves every known technology and hunts the ones
+                    whose required indices exist in the space.
                 text:
                   type: string
                   maxLength: 200000
@@ -81,6 +87,7 @@ paths:
                 required:
                   - status
                   - runId
+                  - technologies
                   - tier1
                   - message
                   - next_step
@@ -92,6 +99,13 @@ paths:
                     type: string
                   runId:
                     type: string
+                  technologies:
+                    type: array
+                    description: >-
+                      Technologies whose indices the hunt ran against. Empty when
+                      the scope was blocked.
+                    items:
+                      $ref: '../components/hunt.schema.yaml#/components/schemas/HuntTechnology'
                   tier1:
                     allOf:
                       - $ref: '../components/hunt.schema.yaml#/components/schemas/HuntForThreatResult'
@@ -215,4 +229,4 @@ components:
   schemas:
     HuntCoordinatorStatus:
       type: string
-      enum: [tier1_only, tier1_and_tier2, tier2_only_skipped]
+      enum: [blocked, tier1_only, tier1_and_tier2, tier2_only_skipped]
