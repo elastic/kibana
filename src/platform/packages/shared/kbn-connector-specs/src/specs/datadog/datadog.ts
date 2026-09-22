@@ -120,18 +120,35 @@ function formatDatadogError(action: string, error: unknown): Error {
 const joinCsv = (values: string[] | undefined): string | undefined =>
   values && values.length > 0 ? values.join(',') : undefined;
 
-const handleDatadogEvents = async (ctx: ConnectorIngressContext): Promise<HandleEventsResult> => ({
-  type: 'emit',
-  events: [
-    {
-      eventId: DATADOG_ALERT_EVENT_ID,
-      correlationKey: uuidv4(),
-      payload: {
-        body: ctx.rawBody,
+const hasAlertIdentity = (
+  rawBody: unknown
+): rawBody is Record<'monitor_id' | 'scopes', unknown> => {
+  if (typeof rawBody !== 'object' || rawBody === null || Array.isArray(rawBody)) {
+    return false;
+  }
+
+  const { monitor_id: monitorId, scopes } = rawBody as Record<string, unknown>;
+  return monitorId !== undefined && monitorId !== null && scopes !== undefined && scopes !== null;
+};
+
+const handleDatadogEvents = async (ctx: ConnectorIngressContext): Promise<HandleEventsResult> => {
+  if (!hasAlertIdentity(ctx.rawBody)) {
+    return { type: 'emit', events: [] };
+  }
+
+  return {
+    type: 'emit',
+    events: [
+      {
+        eventId: DATADOG_ALERT_EVENT_ID,
+        correlationKey: uuidv4(),
+        payload: {
+          body: ctx.rawBody,
+        },
       },
-    },
-  ],
-});
+    ],
+  };
+};
 
 export const Datadog: ConnectorSpec = {
   metadata: {

@@ -11,9 +11,15 @@ import { parse } from 'yaml';
 import { DATADOG_ALERT_TRANSLATION_WORKFLOW } from '.';
 import DATADOG_ALERT_TRANSLATION_YAML from './datadog_alert_translation.yaml';
 import { ALL_CONNECTOR_IDS } from '../../../common/constants';
+import { createWorkflowLiquidEngine } from '../../../common/utils';
 
 describe('Datadog alert translation managed workflow', () => {
   const workflow = parse(DATADOG_ALERT_TRANSLATION_YAML);
+  const alertStatusTemplate = workflow.steps[0].with.alert_status;
+  const renderAlertStatus = (alertTransition: string): string =>
+    createWorkflowLiquidEngine().parseAndRenderSync(alertStatusTemplate, {
+      event: { body: { alert_transition: alertTransition } },
+    });
 
   it('is not billable', () => {
     expect(DATADOG_ALERT_TRANSLATION_WORKFLOW.billable).toBe(false);
@@ -41,14 +47,14 @@ describe('Datadog alert translation managed workflow', () => {
             type: 'alerting.create_alert',
             with: expect.objectContaining({
               source: 'datadog',
-              fingerprint: `{{ event.body.monitor_id }}:{{ event.body.scopes | default: "${ALL_CONNECTOR_IDS}" }}`,
+              fingerprint: '{{ event.body.monitor_id }}:{{ event.body.scopes }}',
               alert_status:
-                '{% if event.body.alert_transition == "Recovered" %}inactive{% else %}active{% endif %}',
+                '{% assign transition_prefix = event.body.alert_transition | slice: 0, 9 %}{% if transition_prefix == "Recovered" %}inactive{% else %}active{% endif %}',
               data: expect.objectContaining({
                 rule_name: '{{ event.body.title }}',
                 monitor_id: '{{ event.body.monitor_id }}',
                 alert_url: '{{ event.body.url }}',
-                message: '{{ event.body.body }}',
+                message: '{{ event.body.message }}',
                 priority: '{{ event.body.severity }}',
               }),
             }),
@@ -57,5 +63,16 @@ describe('Datadog alert translation managed workflow', () => {
         ],
       })
     );
+  });
+
+  it.each(['Recovered', 'Recovered from Warn', 'Recovered from No Data'])(
+    'maps the %s transition to inactive',
+    (alertTransition) => {
+      expect(renderAlertStatus(alertTransition)).toBe('inactive');
+    }
+  );
+
+  it('maps other transitions to active', () => {
+    expect(renderAlertStatus('Triggered')).toBe('active');
   });
 });

@@ -127,7 +127,11 @@ describe('Datadog', () => {
     });
 
     it('emits the raw webhook body with a correlation key', async () => {
-      const rawBody = { monitor_id: '123', alert_transition: 'Triggered' };
+      const rawBody = {
+        monitor_id: '123',
+        scopes: 'host:web-01',
+        alert_transition: 'Triggered',
+      };
       const result = expectEmit(await events.handleEvents(createContext(rawBody)));
 
       expect(result.events).toEqual([
@@ -140,8 +144,20 @@ describe('Datadog', () => {
       expect(validateEmittedEvents(events.definitions, result.events)).toEqual({ ok: true });
     });
 
+    it.each([
+      { monitor_id: '123' },
+      { scopes: 'host:web-01' },
+      { monitor_id: null, scopes: 'host:web-01' },
+      { monitor_id: '123', scopes: null },
+    ])('does not emit an alert without monitor_id and scopes: %p', async (rawBody) => {
+      await expect(events.handleEvents(createContext(rawBody))).resolves.toEqual({
+        type: 'emit',
+        events: [],
+      });
+    });
+
     it('assigns a distinct correlation key to each request', async () => {
-      const context = createContext({ alert_id: '123' });
+      const context = createContext({ monitor_id: '123', scopes: 'host:web-01' });
       const first = expectEmit(await events.handleEvents(context));
       const second = expectEmit(await events.handleEvents(context));
 

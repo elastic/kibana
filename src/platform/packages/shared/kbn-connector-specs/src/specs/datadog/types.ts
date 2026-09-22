@@ -35,7 +35,7 @@ export type DatadogSite = (typeof DATADOG_SITES)[number];
 export const DatadogReceivedEventSchema = z.object({
   body: z
     .object({
-      body: z.unknown().optional(),
+      message: z.unknown().optional(),
       last_updated: z.unknown().optional(),
       event_type: z.unknown().optional(),
       title: z.unknown().optional(),

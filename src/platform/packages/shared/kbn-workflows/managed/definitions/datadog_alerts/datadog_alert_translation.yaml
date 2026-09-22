@@ -9,13 +9,13 @@ steps:
     type: alerting.create_alert
     with:
       source: datadog
-      fingerprint: '{{ event.body.monitor_id }}:{{ event.body.scopes | default: "*" }}'
-      alert_status: '{% if event.body.alert_transition == "Recovered" %}inactive{% else %}active{% endif %}'
+      fingerprint: "{{ event.body.monitor_id }}:{{ event.body.scopes }}"
+      alert_status: '{% assign transition_prefix = event.body.alert_transition | slice: 0, 9 %}{% if transition_prefix == "Recovered" %}inactive{% else %}active{% endif %}'
       data:
         rule_name: "{{ event.body.title }}"
         monitor_id: "{{ event.body.monitor_id }}"
         transition: "{{ event.body.alert_transition }}"
-        message: "{{ event.body.body }}"
+        message: "{{ event.body.message }}"
         alert_url: "{{ event.body.url }}"
         priority: "{{ event.body.severity }}"
         tags: "{{ event.body.tags }}"

@@ -35,7 +35,7 @@ Use this JSON payload in the Datadog webhook configuration. Do not enable form e
 
 ```json
 {
-  "body": "$EVENT_MSG",
+  "message": "$EVENT_MSG",
   "last_updated": "$LAST_UPDATED",
   "event_type": "$EVENT_TYPE",
   "title": "$EVENT_TITLE",
