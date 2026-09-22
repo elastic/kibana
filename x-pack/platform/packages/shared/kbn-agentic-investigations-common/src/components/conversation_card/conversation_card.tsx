@@ -28,6 +28,8 @@ interface ConversationCardProps {
   onClickAction: BaseActionsProps['onClickAction'];
   onClickCard: (id: Investigation['id']) => void;
   onOpenChat: (id: Investigation['id']) => void;
+  /** URL for this card's chat, so its control renders as a link. */
+  chatHref?: string;
 }
 
 export const ConversationCard = memo<ConversationCardProps>(
@@ -39,6 +41,7 @@ export const ConversationCard = memo<ConversationCardProps>(
     onClickAction,
     onClickCard,
     onOpenChat,
+    chatHref,
   }) => {
     const { euiTheme } = useEuiTheme();
 
@@ -103,6 +106,7 @@ export const ConversationCard = memo<ConversationCardProps>(
               onClickRecommendedAction={onClickRecommendedAction}
               onClickAction={onClickAction}
               onOpenChat={() => onOpenChat(investigation.id)}
+              chatHref={chatHref}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

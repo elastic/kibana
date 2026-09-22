@@ -16,7 +16,7 @@ import { registerAgentBuilderAttachments } from './attachments/register_attachme
 /**
  * Registers the significant events agent-builder tools and attachments at setup.
  *
- * These are intentionally left registered regardless of the `streams.significantEventsAvailable`
+ * These are intentionally left registered regardless of the `nightshift.enabled`
  * flag: their registration APIs are setup-only and cannot be driven dynamically once `start()`
  * has run, so they rely on request-time gating instead. Skills, which support start-phase
  * registration, are gated by the availability flag from `start()` (see `registerSignificantEventsSkills`).

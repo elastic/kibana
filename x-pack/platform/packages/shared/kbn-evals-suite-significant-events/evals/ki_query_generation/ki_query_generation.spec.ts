@@ -12,7 +12,7 @@ import {
   type AnalysisTarget,
   type ExistingQuerySummary,
 } from '@kbn/nightshift-ai';
-import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
+import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import { tags } from '@kbn/scout';
 
 import {
@@ -36,8 +36,6 @@ import {
   deleteTemporaryReplayIndices,
   ensureStreamsEnabled,
   loadKIFeaturesFromSnapshot,
-  replayIntoManagedStream,
-  SIGEVENTS_SNAPSHOT_RUN,
   SIGEVENTS_WIRED_ROOTS,
 } from '../../src/data_generators/replay';
 import { evaluate } from '../../src/evaluate';
@@ -45,13 +43,17 @@ import { createEvalSignificantEventSearchTool } from '../../src/tools/significan
 import { createKIQueryGenerationEvaluators } from '../../src/evaluators/ki_query_generation';
 import {
   getActiveDatasets,
+  hasExplicitDatasetSelection,
   MANAGED_STREAM_NAME,
   MANAGED_STREAM_SEARCH_PATTERN,
   resolveScenarioSnapshotSource,
-  snapshotCatalogKey,
   type KIQueryGenerationScenario,
 } from '../../src/datasets';
-import { buildAvailableSnapshotsBySource } from '../shared';
+import {
+  buildAvailableSnapshotsBySource,
+  hasAvailableSnapshot,
+  replayDatasetIntoManagedStream,
+} from '../shared';
 import { KI_FEATURE_SOURCES_TO_RUN } from './resolve_ki_sources';
 import { resolveMaxSteps } from './resolve_max_steps';
 import {
@@ -78,6 +80,7 @@ const EMPTY_DATASTREAM_MAX_STEPS = 4;
 evaluate.describe('KI query generation', { tag: tags.serverless.observability.complete }, () => {
   const scenarioResolution = resolveQueryGenerationDatasets(getActiveDatasets());
   const activeDatasets = scenarioResolution.datasets;
+  const failOnMissingSnapshot = hasExplicitDatasetSelection(process.env.SIGEVENTS_DATASET);
   const availableSnapshotsBySource = new Map<string, Set<string>>();
 
   assertQueryGenerationDatasetSafety(scenarioResolution, TRUST_UPSTREAM);
@@ -91,7 +94,7 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
       headers: { 'elastic-api-version': '1' },
       body: {
         'feature_flags.overrides': {
-          [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: true,
+          [NIGHTSHIFT_ENABLED_FLAG]: true,
         },
       },
     });
@@ -104,6 +107,19 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
       log
     );
     snapshots.forEach((v, k) => availableSnapshotsBySource.set(k, v));
+  });
+
+  evaluate.afterAll(async ({ kbnClient }) => {
+    await kbnClient.request({
+      path: '/internal/core/_settings',
+      method: 'PUT',
+      headers: { 'elastic-api-version': '1' },
+      body: {
+        'feature_flags.overrides': {
+          [NIGHTSHIFT_ENABLED_FLAG]: null,
+        },
+      },
+    });
   });
 
   for (const dataset of activeDatasets) {
@@ -120,14 +136,15 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
               snapshotSource: scenario.snapshot_source,
             });
 
-            const availableSnapshots =
-              availableSnapshotsBySource.get(snapshotCatalogKey(source.gcs)) ?? new Set();
-
-            if (!availableSnapshots.has(source.snapshotName)) {
-              log.info(
-                `Snapshot "${source.snapshotName}" not found in run "${SIGEVENTS_SNAPSHOT_RUN}" ` +
-                  `(source: ${source.gcs.bucket}/${source.gcs.basePathPrefix}) - skipping`
-              );
+            if (
+              !hasAvailableSnapshot({
+                availableSnapshotsBySource,
+                source,
+                datasetId: dataset.id,
+                failOnMissingSnapshot,
+                log,
+              })
+            ) {
               continue;
             }
 
@@ -176,12 +193,12 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
               continue;
             }
 
-            const stats = await replayIntoManagedStream(
+            const stats = await replayDatasetIntoManagedStream({
               esClient,
               log,
-              source.snapshotName,
-              source.gcs
-            );
+              dataset,
+              source,
+            });
 
             if (stats.created === 0) {
               throw new Error(
@@ -343,7 +360,7 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                   }
                   await apiServices.streams.disable().catch(() => {});
                   await apiServices.streams.enable();
-                  await replayIntoManagedStream(esClient, log, source.snapshotName, source.gcs);
+                  await replayDatasetIntoManagedStream({ esClient, log, dataset, source });
                   await esClient.indices.refresh({ index: MANAGED_STREAM_SEARCH_PATTERN });
                   lastReplayedSnapshot = source.snapshotName;
                 }
