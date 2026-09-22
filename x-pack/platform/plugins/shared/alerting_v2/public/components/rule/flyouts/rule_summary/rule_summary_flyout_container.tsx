@@ -6,8 +6,9 @@
  */
 
 import React, { useState } from 'react';
-import { useService } from '@kbn/core-di-browser';
+import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
+import { useFetchSourceRule } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_source_rule';
 import { useFetchRule } from '../../../../hooks/use_fetch_rule';
 import { useDeleteRule } from '../../../../hooks/use_delete_rule';
 import { useToggleRuleEnabled } from '../../../../hooks/use_toggle_rule_enabled';
@@ -21,33 +22,68 @@ import { useRuleChangeHistoryModal } from '../../modals/change_history';
 import { EntityNotFoundFlyout } from '../../../entity_not_found_flyout';
 import { LoadingFlyout } from '../../../loading_flyout';
 import { RuleSummaryFlyout } from './rule_summary_flyout';
+import { SourceRuleSummaryFlyout } from '../source_rule_summary_flyout';
 
 interface Props {
   ruleId: string;
+  sourceRuleInfo?: { category?: string };
+  cachedRule?: RuleApiResponse;
   onClose: () => void;
   onEdit: (rule: RuleApiResponse) => void;
   onClone: (rule: RuleApiResponse) => void;
 }
 
-export const RuleSummaryFlyoutContainer = ({ ruleId, onClose, onEdit, onClone }: Props) => {
+export const RuleSummaryFlyoutContainer = ({
+  ruleId,
+  sourceRuleInfo,
+  cachedRule,
+  onClose,
+  onEdit,
+  onClone,
+}: Props) => {
+  const isSourceRule = sourceRuleInfo !== undefined;
   const [ruleToDelete, setRuleToDelete] = useState<RuleApiResponse | null>(null);
   const [ruleToUpdateApiKey, setRuleToUpdateApiKey] = useState<RuleApiResponse | null>(null);
   const canWrite = useService(UserCapabilities).canWrite('rules');
+  const http = useService(CoreStart('http'));
 
-  const { data: rule, isLoading, isError } = useFetchRule(ruleId);
+  const { data: rule, isLoading, isError } = useFetchRule(isSourceRule ? undefined : ruleId);
   const { mutate: deleteRule, isLoading: isDeleting } = useDeleteRule();
   const { mutate: toggleRuleEnabled, isLoading: isToggling } = useToggleRuleEnabled();
   const { mutate: runRule } = useRunRule();
   const { mutate: updateRuleApiKey, isLoading: isUpdatingApiKey } = useBulkUpdateRuleApiKey();
   const { openChangeHistory, changeHistoryModal } = useRuleChangeHistoryModal();
 
-  if (isLoading) {
-    return <LoadingFlyout onClose={onClose} />;
+  const {
+    rule: sourceRule,
+    ruleDetailsHref: sourceRuleDetailsHref,
+    isLoading: isLoadingSourceRule,
+    isError: isSourceRuleError,
+  } = useFetchSourceRule({
+    ruleId: isSourceRule ? ruleId : undefined,
+    http,
+    initialRule: isSourceRule ? cachedRule : undefined,
+  });
+
+  if ((!isSourceRule && isLoading) || (isSourceRule && isLoadingSourceRule)) {
+    return <LoadingFlyout type="overlay" onClose={onClose} />;
   }
 
-  if (isError || !rule) {
+  if (isSourceRule && sourceRule) {
+    return (
+      <SourceRuleSummaryFlyout
+        rule={sourceRule}
+        ruleCategory={sourceRuleInfo?.category}
+        ruleDetailsHref={sourceRuleDetailsHref}
+        onClose={onClose}
+      />
+    );
+  }
+
+  if (isSourceRule || isSourceRuleError || isError || !rule) {
     return (
       <EntityNotFoundFlyout
+        type="overlay"
         title={i18n.translate('xpack.alertingV2.rule.summaryFlyout.notFoundTitle', {
           defaultMessage: 'Rule not found',
         })}
@@ -65,7 +101,6 @@ export const RuleSummaryFlyoutContainer = ({ ruleId, onClose, onEdit, onClone }:
         rule={rule}
         canWrite={canWrite}
         isToggleLoading={isToggling}
-        ownFocus={false}
         session="start"
         onClose={onClose}
         onEdit={onEdit}
