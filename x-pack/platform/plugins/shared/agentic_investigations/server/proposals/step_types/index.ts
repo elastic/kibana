@@ -12,6 +12,7 @@ import type { ProposalPrivilegesChecker } from '../services/check_proposal_privi
 import { getCheckDecidePrivilegesStepDefinition } from './check_decide_privileges_step';
 import { getCloneProposalStepDefinition } from './clone_proposal_step';
 import { getCreateProposalStepDefinition } from './create_proposal_step';
+import { getGetLatestRevisionStepDefinition } from './get_latest_revision_step';
 import { getGetProposalStepDefinition } from './get_proposal_step';
 import { getUpdateProposalStepDefinition } from './update_proposal_step';
 
@@ -41,10 +42,14 @@ export const registerStepDefinitions = ({
   workflowsExtensions.registerStepDefinition(
     getCloneProposalStepDefinition({ getProposalsService, privileges })
   );
+  workflowsExtensions.registerStepDefinition(
+    getGetLatestRevisionStepDefinition({ getProposalsService, privileges })
+  );
 };
 
 export { getCheckDecidePrivilegesStepDefinition } from './check_decide_privileges_step';
 export { getCloneProposalStepDefinition } from './clone_proposal_step';
 export { getCreateProposalStepDefinition } from './create_proposal_step';
+export { getGetLatestRevisionStepDefinition } from './get_latest_revision_step';
 export { getGetProposalStepDefinition } from './get_proposal_step';
 export { getUpdateProposalStepDefinition } from './update_proposal_step';

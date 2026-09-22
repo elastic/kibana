@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
+import type { AttachmentUIDefinition, HeaderBadge } from '@kbn/agent-builder-browser/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { isAwaitingDecision } from '../../../common';
 import { PROPOSAL_WITHOUT_ACTION_LABEL } from '../translations';
@@ -15,8 +15,8 @@ import type {
   ProposalWithMetadata,
   PROPOSAL_ATTACHMENT_TYPE,
   ProposalDecision,
-  ProposalStatus,
   ProposalImpact,
+  ProposalStatus,
 } from '../../../common';
 import { ProposalApprovalCard } from '../components/proposal_approval_card';
 
@@ -53,6 +53,13 @@ const STATUS_BADGE_LABELS: Record<ProposalStatus, string> = {
   // `no_action` describes the absence of an outcome, so the decision is what
   // the badge reports instead — see DECISION_BADGE_LABELS.
   no_action: '',
+  // A revised proposal (elastic/security-team#19289) is not itself an
+  // outcome — the badge for a superseded row points at whichever revision
+  // replaced it instead, so this label is a fallback that should rarely render.
+  superseded: i18n.translate(
+    'xpack.agenticInvestigations.proposals.attachments.statusBadge.superseded',
+    { defaultMessage: 'Superseded' }
+  ),
 };
 
 /** Badge color map for how far a proposal got. */
@@ -63,6 +70,7 @@ const STATUS_BADGE_COLORS: Record<ProposalStatus, string> = {
   failed: 'danger',
   expired: 'danger',
   no_action: 'default',
+  superseded: 'default',
 };
 
 /** Translated labels for what an analyst concluded. */
@@ -94,7 +102,7 @@ export const createProposalAttachmentDefinition =
 
     getHeader: ({ attachment }) => {
       const { data } = attachment;
-      const badges = [];
+      const badges: HeaderBadge[] = [];
 
       // Status badge — suppressed while awaiting a decision (the card footer
       // shows the actions instead). `data.expired` is the computed flag for a
@@ -133,7 +141,7 @@ export const createProposalAttachmentDefinition =
             values: { impact: data.impact },
           }
         ),
-        color: IMPACT_BADGE_COLORS[data.impact] ?? 'default',
+        color: IMPACT_BADGE_COLORS[data.impact],
       });
 
       // Confidence badge

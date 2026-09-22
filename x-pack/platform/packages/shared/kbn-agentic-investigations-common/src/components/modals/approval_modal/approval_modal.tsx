@@ -7,13 +7,11 @@
 
 import React, { memo, useMemo } from 'react';
 import { css } from '@emotion/react';
-import { EuiModal, useEuiTheme } from '@elastic/eui';
+import { EuiModal, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
 import type { Investigation } from '../../../types';
 import { getActionButtonIconProps } from '../../helpers';
 import { ApprovalContent } from './approval_content';
 import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
-
-const TITLE_ID = 'approvalModalTitle';
 
 export interface ApprovalModalProps {
   alwaysAllow?: {
@@ -37,6 +35,7 @@ export const ApprovalModal = memo<ApprovalModalProps>(
     'data-test-subj': dataTestSubj,
   }) => {
     const { euiTheme } = useEuiTheme();
+    const titleId = useGeneratedHtmlId({ prefix: 'approvalModalHeader' });
 
     const title = selectedRecommendedActionConversation?.primaryActionLabel ?? '';
 
@@ -53,7 +52,7 @@ export const ApprovalModal = memo<ApprovalModalProps>(
 
     return (
       <EuiModal
-        aria-labelledby={TITLE_ID}
+        aria-labelledby={titleId}
         onClose={onClose}
         css={css({ maxWidth: 560, width: '100%', borderRadius: euiTheme.size.m })}
         data-test-subj={dataTestSubj}
@@ -62,11 +61,11 @@ export const ApprovalModal = memo<ApprovalModalProps>(
           title={title}
           tone={tone}
           iconType={recommendedActionIconProps.type}
-          blastRadius={{
+          actionImpact={{
             variant: 'description',
             description: selectedRecommendedActionConversation?.summary ?? '',
           }}
-          titleId={TITLE_ID}
+          titleId={titleId}
           warningLabel={APPROVAL_MODAL_TRANSLATIONS.warningLabel}
           alwaysAllow={alwaysAllow}
           primaryAction={{
