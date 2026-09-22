@@ -13,9 +13,10 @@ import { Gitlab } from './gitlab';
 const mockGet = jest.fn();
 const mockPost = jest.fn();
 const mockPut = jest.fn();
+const mockDelete = jest.fn();
 
 const mockContext = {
-  client: { get: mockGet, post: mockPost, put: mockPut },
+  client: { get: mockGet, post: mockPost, put: mockPut, delete: mockDelete },
   log: {},
   config: { apiUrl: 'https://gitlab.com/api/v4' },
 } as unknown as ActionContext;
@@ -47,6 +48,7 @@ describe('Gitlab connector', () => {
     mockGet.mockResolvedValue(pageResponse([]));
     mockPost.mockResolvedValue({ data: {} });
     mockPut.mockResolvedValue({ data: {} });
+    mockDelete.mockResolvedValue({ data: {} });
   });
 
   // =========================================================================
@@ -778,6 +780,273 @@ describe('Gitlab connector', () => {
       expect(() =>
         Gitlab.actions.getMergeRequest.input.parse({ projectId: '123', mrIid: 'abc' })
       ).toThrow();
+    });
+  });
+
+  // =========================================================================
+  // Additional read actions (from listGroups onwards)
+  // =========================================================================
+
+  describe('listGroups', () => {
+    it('calls GET /groups with pagination params', async () => {
+      mockGet.mockResolvedValue(pageResponse([{ id: 1, name: 'elastic' }]));
+      const input = parse('listGroups', {});
+      const result = await Gitlab.actions.listGroups.handler(mockContext, input as never);
+      expect(mockGet).toHaveBeenCalledWith(
+        `${BASE}/groups`,
+        expect.objectContaining({ params: expect.objectContaining({ page: 1 }) })
+      );
+      expect(result).toMatchObject({ values: [{ id: 1, name: 'elastic' }] });
+    });
+
+    it('passes search and top_level_only filters', async () => {
+      const input = parse('listGroups', { search: 'el', topLevelOnly: true });
+      await Gitlab.actions.listGroups.handler(mockContext, input as never);
+      expect(mockGet).toHaveBeenCalledWith(
+        `${BASE}/groups`,
+        expect.objectContaining({
+          params: expect.objectContaining({ search: 'el', top_level_only: true }),
+        })
+      );
+    });
+  });
+
+  describe('getCommit', () => {
+    it('calls GET /repository/commits/:sha and returns data', async () => {
+      const commit = { id: 'abc123', message: 'fix', author_name: 'Alice' };
+      mockGet.mockResolvedValueOnce({ data: commit }).mockResolvedValueOnce({ data: [] });
+      const input = parse('getCommit', { projectId: '123', sha: 'abc123' });
+      const result = await Gitlab.actions.getCommit.handler(mockContext, input as never);
+      expect(mockGet).toHaveBeenCalledWith(expect.stringContaining('/repository/commits/abc123'));
+      expect(result).toMatchObject({ id: 'abc123' });
+    });
+
+    it('skips diffs when includeDiff is false', async () => {
+      const commit = { id: 'abc123', message: 'fix' };
+      mockGet.mockResolvedValueOnce({ data: commit });
+      const input = parse('getCommit', { projectId: '123', sha: 'abc123', includeDiff: false });
+      await Gitlab.actions.getCommit.handler(mockContext, input as never);
+      expect(mockGet).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('listTags', () => {
+    it('calls GET /repository/tags with pagination', async () => {
+      mockGet.mockResolvedValue(pageResponse([{ name: 'v1.0' }]));
+      const input = parse('listTags', { projectId: '123' });
+      const result = await Gitlab.actions.listTags.handler(mockContext, input as never);
+      expect(mockGet).toHaveBeenCalledWith(
+        expect.stringContaining('/repository/tags'),
+        expect.anything()
+      );
+      expect(result).toMatchObject({ values: [{ name: 'v1.0' }] });
+    });
+  });
+
+  describe('listLabels', () => {
+    it('calls GET /labels', async () => {
+      mockGet.mockResolvedValue(pageResponse([{ id: 1, name: 'bug' }]));
+      const input = parse('listLabels', { projectId: '123' });
+      const result = await Gitlab.actions.listLabels.handler(mockContext, input as never);
+      expect(mockGet).toHaveBeenCalledWith(expect.stringContaining('/labels'), expect.anything());
+      expect(result).toMatchObject({ values: [{ name: 'bug' }] });
+    });
+  });
+
+  describe('searchCode', () => {
+    it('uses project-scoped search URL when projectId is provided', async () => {
+      mockGet.mockResolvedValue(pageResponse([{ filename: 'index.ts' }]));
+      const input = parse('searchCode', { projectId: '123', search: 'foo' });
+      await Gitlab.actions.searchCode.handler(mockContext, input as never);
+      expect(mockGet).toHaveBeenCalledWith(
+        expect.stringContaining('/projects/123/search'),
+        expect.anything()
+      );
+    });
+
+    it('falls back to instance search when no projectId or groupId', async () => {
+      mockGet.mockResolvedValue(pageResponse([]));
+      const input = parse('searchCode', { search: 'foo' });
+      await Gitlab.actions.searchCode.handler(mockContext, input as never);
+      expect(mockGet).toHaveBeenCalledWith(`${BASE}/search`, expect.anything());
+    });
+  });
+
+  describe('getPipeline', () => {
+    it('calls GET /pipelines/:id and returns data', async () => {
+      const pipeline = { id: 99, status: 'success' };
+      mockGet.mockResolvedValue({ data: pipeline });
+      const input = parse('getPipeline', { projectId: '123', pipelineId: 99 });
+      const result = await Gitlab.actions.getPipeline.handler(mockContext, input as never);
+      expect(mockGet).toHaveBeenCalledWith(expect.stringContaining('/pipelines/99'));
+      expect(result).toMatchObject({ id: 99, status: 'success' });
+    });
+  });
+
+  describe('listJobs', () => {
+    it('calls GET /pipelines/:id/jobs with pagination', async () => {
+      mockGet.mockResolvedValue(pageResponse([{ id: 5, name: 'build' }]));
+      const input = parse('listJobs', { projectId: '123', pipelineId: 99 });
+      const result = await Gitlab.actions.listJobs.handler(mockContext, input as never);
+      expect(mockGet).toHaveBeenCalledWith(
+        expect.stringContaining('/pipelines/99/jobs'),
+        expect.anything()
+      );
+      expect(result).toMatchObject({ values: [{ id: 5 }] });
+    });
+  });
+
+  describe('getJobArtifact', () => {
+    it('fetches job log (trace) with tail Range header and keepEnd slice', async () => {
+      const longLog = 'a'.repeat(30000);
+      mockGet.mockResolvedValue({
+        data: longLog,
+        headers: { 'content-range': 'bytes 10000-29999/30000' },
+      });
+      const input = parse('getJobArtifact', { projectId: '123', jobId: 7 });
+      const result = await Gitlab.actions.getJobArtifact.handler(mockContext, input as never);
+      expect(mockGet).toHaveBeenCalledWith(
+        expect.stringContaining('/jobs/7/trace'),
+        expect.objectContaining({ headers: expect.objectContaining({ Range: 'bytes=-20000' }) })
+      );
+      expect(result.truncated).toBe(true);
+      expect(result.totalLength).toBe(30000);
+      expect(result.content.length).toBeLessThanOrEqual(20000);
+    });
+
+    it('fetches artifact file with leading Range header', async () => {
+      mockGet.mockResolvedValue({ data: 'file content', headers: {} });
+      const input = parse('getJobArtifact', {
+        projectId: '123',
+        jobId: 7,
+        artifactPath: 'report.txt',
+      });
+      const result = await Gitlab.actions.getJobArtifact.handler(mockContext, input as never);
+      expect(mockGet).toHaveBeenCalledWith(
+        expect.stringContaining('/jobs/7/artifacts/report.txt'),
+        expect.objectContaining({ headers: expect.objectContaining({ Range: 'bytes=0-19999' }) })
+      );
+      expect(result.truncated).toBe(false);
+      expect(result.content).toBe('file content');
+    });
+
+    it('reports not truncated when content is within maxLength', async () => {
+      mockGet.mockResolvedValue({ data: 'short log', headers: {} });
+      const input = parse('getJobArtifact', { projectId: '123', jobId: 7 });
+      const result = await Gitlab.actions.getJobArtifact.handler(mockContext, input as never);
+      expect(result.truncated).toBe(false);
+      expect(result.content).toBe('short log');
+    });
+  });
+
+  describe('listPipelineSchedules', () => {
+    it('calls GET /pipeline_schedules', async () => {
+      mockGet.mockResolvedValue(pageResponse([{ id: 1, description: 'nightly' }]));
+      const input = parse('listPipelineSchedules', { projectId: '123' });
+      const result = await Gitlab.actions.listPipelineSchedules.handler(
+        mockContext,
+        input as never
+      );
+      expect(mockGet).toHaveBeenCalledWith(
+        expect.stringContaining('/pipeline_schedules'),
+        expect.anything()
+      );
+      expect(result).toMatchObject({ values: [{ description: 'nightly' }] });
+    });
+  });
+
+  describe('listEnvironments', () => {
+    it('calls GET /environments', async () => {
+      mockGet.mockResolvedValue(pageResponse([{ id: 1, name: 'production' }]));
+      const input = parse('listEnvironments', { projectId: '123' });
+      const result = await Gitlab.actions.listEnvironments.handler(mockContext, input as never);
+      expect(mockGet).toHaveBeenCalledWith(
+        expect.stringContaining('/environments'),
+        expect.anything()
+      );
+      expect(result).toMatchObject({ values: [{ name: 'production' }] });
+    });
+  });
+
+  describe('listDeployments', () => {
+    it('calls GET /deployments with optional filters', async () => {
+      mockGet.mockResolvedValue(pageResponse([{ id: 10, environment: { name: 'production' } }]));
+      const input = parse('listDeployments', {
+        projectId: '123',
+        environment: 'production',
+        status: 'success',
+      });
+      const result = await Gitlab.actions.listDeployments.handler(mockContext, input as never);
+      expect(mockGet).toHaveBeenCalledWith(
+        expect.stringContaining('/deployments'),
+        expect.objectContaining({
+          params: expect.objectContaining({ environment: 'production', status: 'success' }),
+        })
+      );
+      expect(result).toMatchObject({ values: [{ id: 10 }] });
+    });
+  });
+
+  // =========================================================================
+  // Additional write/destroy actions
+  // =========================================================================
+
+  describe('approveMergeRequest', () => {
+    it('calls POST /merge_requests/:iid/approve', async () => {
+      mockPost.mockResolvedValue({ data: { approved: true } });
+      const input = parse('approveMergeRequest', { projectId: '123', mrIid: '15' });
+      const result = await Gitlab.actions.approveMergeRequest.handler(mockContext, input as never);
+      expect(mockPost).toHaveBeenCalledWith(
+        expect.stringContaining('/merge_requests/15/approve'),
+        expect.anything()
+      );
+      expect(result).toMatchObject({ approved: true });
+    });
+  });
+
+  describe('cancelPipeline', () => {
+    it('calls POST /pipelines/:id/cancel', async () => {
+      mockPost.mockResolvedValue({ data: { id: 99, status: 'canceled' } });
+      const input = parse('cancelPipeline', { projectId: '123', pipelineId: 99 });
+      const result = await Gitlab.actions.cancelPipeline.handler(mockContext, input as never);
+      expect(mockPost).toHaveBeenCalledWith(
+        expect.stringContaining('/pipelines/99/cancel'),
+        expect.anything()
+      );
+      expect(result).toMatchObject({ status: 'canceled' });
+    });
+  });
+
+  describe('retryPipeline', () => {
+    it('calls POST /pipelines/:id/retry', async () => {
+      mockPost.mockResolvedValue({ data: { id: 100, status: 'running' } });
+      const input = parse('retryPipeline', { projectId: '123', pipelineId: 99 });
+      const result = await Gitlab.actions.retryPipeline.handler(mockContext, input as never);
+      expect(mockPost).toHaveBeenCalledWith(
+        expect.stringContaining('/pipelines/99/retry'),
+        expect.anything()
+      );
+      expect(result).toMatchObject({ status: 'running' });
+    });
+  });
+
+  describe('deleteFile', () => {
+    it('calls DELETE /repository/files/:path and returns confirmation', async () => {
+      mockDelete.mockResolvedValue({ data: {} });
+      const input = parse('deleteFile', {
+        projectId: '123',
+        filePath: 'src/index.ts',
+        branch: 'main',
+        commitMessage: 'remove file',
+      });
+      const result = await Gitlab.actions.deleteFile.handler(mockContext, input as never);
+      expect(mockDelete).toHaveBeenCalledWith(
+        expect.stringContaining('/repository/files/src%2Findex.ts'),
+        expect.objectContaining({
+          data: expect.objectContaining({ branch: 'main', commit_message: 'remove file' }),
+        })
+      );
+      expect(result).toMatchObject({ deleted: true, filePath: 'src/index.ts', branch: 'main' });
     });
   });
 });

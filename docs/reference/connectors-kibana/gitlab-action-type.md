@@ -106,6 +106,51 @@ The GitLab connector exposes the following actions:
 `triggerPipeline`
 :   Trigger a new CI/CD pipeline in a GitLab project on the specified branch or tag. Returns the created pipeline ID and initial status. Optionally pass pipeline variables.
 
+`listGroups`
+:   List GitLab groups the authenticated user is a member of. Optionally filter by name/path or restrict to top-level groups. Returns paginated results with group IDs and paths.
+
+`getCommit`
+:   Fetch a single commit by SHA, branch name, or tag. Returns author, message, and timestamps. Optionally includes per-file diffs (up to 100 files); set `includeDiff: false` for metadata only.
+
+`listTags`
+:   List repository tags for a project. Optionally filter by name and control sort order.
+
+`listLabels`
+:   List labels defined on a project. Optionally filter by name or description.
+
+`searchCode`
+:   Search for code (blobs) across a project, group, or the whole instance. Supports GitLab code search syntax (`filename:`, `path:`, `extension:` filters). Group- and instance-scoped search requires Advanced Search (Premium/Ultimate).
+
+`getPipeline`
+:   Fetch details and status of a single CI/CD pipeline by its numeric ID.
+
+`listJobs`
+:   List jobs for a specific pipeline. Optionally filter by job status (for example, `["failed"]`). Returns job IDs needed for `getJobArtifact`.
+
+`getJobArtifact`
+:   Return the job log (trace) or a specific file from the job artifacts archive. Omit `artifactPath` to retrieve the log (returns the trailing portion); provide it to retrieve a file (returns the leading portion). Output is truncated to `maxLength` characters (default 20 000).
+
+`listPipelineSchedules`
+:   List pipeline schedules for a project. Optionally filter to only `active` or `inactive` schedules.
+
+`listEnvironments`
+:   List deployment environments for a project. Optionally filter by name and state (`available`, `stopping`, `stopped`).
+
+`listDeployments`
+:   List deployments for a project. Filter by environment name, status, or time range. Useful for checking when a version was deployed to production.
+
+`approveMergeRequest`
+:   Approve a merge request. Optionally provide `sha` to guard against approving a version that has changed since you last reviewed it. Requires GitLab Premium/Ultimate for enforced approvals.
+
+`cancelPipeline`
+:   Cancel a running CI/CD pipeline. Returns the updated pipeline object. Has no effect if the pipeline is already finished.
+
+`retryPipeline`
+:   Retry failed jobs in a finished CI/CD pipeline. Creates a new pipeline run for the failed jobs. Returns the updated pipeline object.
+
+`deleteFile`
+:   Delete a file from a repository branch by committing a deletion. Pass `lastCommitId` (from `getFile`) to detect concurrent modifications.
+
 ## Get API credentials [gitlab-api-credentials]
 
 The GitLab connector supports two authentication methods.

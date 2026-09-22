@@ -845,14 +845,22 @@ export const Gitlab: ConnectorSpec = {
           url = `${projectBase}/jobs/${input.jobId}/trace`;
           keepEnd = true;
         }
+        // Use an HTTP Range header to limit how much GitLab sends before Axios buffers it.
+        // For traces (keepEnd) we want the tail: "bytes=-N". For artifacts: "bytes=0-(N-1)".
+        // If GitLab ignores Range (200 instead of 206) the slice below is the fallback.
+        const rangeHeader = keepEnd ? `bytes=-${maxLength}` : `bytes=0-${maxLength - 1}`;
         const response = await ctx.client.get(url, {
           responseType: 'text',
           transformResponse: [(data: unknown) => data],
+          headers: { Range: rangeHeader },
         });
         const text =
           typeof response.data === 'string' ? response.data : JSON.stringify(response.data);
-        const truncated = keepEnd ? text.slice(-maxLength) : text.slice(0, maxLength);
-        return { content: truncated, truncated: text.length > maxLength, totalLength: text.length };
+        // content-range: "bytes <start>-<end>/<total>" — present when GitLab honored the Range request
+        const contentRange = response.headers?.['content-range'] as string | undefined;
+        const totalLength = contentRange ? parseInt(contentRange.split('/')[1], 10) : text.length;
+        const content = keepEnd ? text.slice(-maxLength) : text.slice(0, maxLength);
+        return { content, truncated: totalLength > maxLength, totalLength };
       },
     },
 
