@@ -20,3 +20,4 @@ export const ASSISTANT_USERNAME = i18n.translate(
     defaultMessage: 'Assistant',
   }
 );
+

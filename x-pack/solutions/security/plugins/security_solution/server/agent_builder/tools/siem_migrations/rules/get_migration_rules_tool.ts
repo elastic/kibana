@@ -43,49 +43,58 @@ const SORT_FIELDS = [
 // dropped — a deliberate divergence called out in the plan). Sort fields are narrowed to the
 // server's allow-list so an invalid value cannot cause a silent fallback.
 const schema = GetRuleMigrationRulesRequestQuery.extend({
-  migration_id: NonEmptyString.describe('The id of the rule migration whose rules to retrieve.'),
+  migration_id: NonEmptyString.describe('REQUIRED. The id of the rule migration whose rules to retrieve.'),
   page: z.coerce
     .number()
     .int()
     .min(0)
     .default(0)
-    .describe('Zero-based page number (0 = first page).'),
+    .describe('OPTIONAL. Zero-based page number. Defaults to 0 — omit unless paginating past the first page.'),
   per_page: z.coerce
     .number()
     .int()
     .min(1)
     .max(200)
     .default(50)
-    .describe('Number of rules per page (1-200).'),
-  search_term: z.string().max(500).optional(),
-  ids: z.array(NonEmptyString).max(200).optional(),
+    .describe('OPTIONAL. Number of rules per page (1-200). Defaults to 50 — omit unless you need a different page size.'),
+  search_term: z.string().max(500).optional().describe('OPTIONAL. Free-text search term to filter rules by name or content. Omit entirely if not searching by text — do not pass an empty string.'),
+  ids: z.array(NonEmptyString).max(200).optional().describe('OPTIONAL. Fetch specific rules by their ids. Omit entirely if not filtering by id — do not pass an empty array. When provided, no other filter param is needed.'),
   sort_field: z
     .enum(SORT_FIELDS)
     .optional()
     .describe(
-      `Field to sort by. One of: ${SORT_FIELDS.join(', ')}. ` +
-        'Defaults to translation_result (desc) when not supplied — matching the Kibana UI.'
+      `OPTIONAL. Field to sort by. One of: ${SORT_FIELDS.join(', ')}. ` +
+      'Defaults to translation_result (desc) — omit unless you need a different sort order.'
     ),
+  sort_direction: z.enum(['asc', 'desc']).optional().describe('OPTIONAL. Sort direction: asc or desc. Defaults to desc — omit unless you need ascending order.'),
+  is_prebuilt: z.boolean().optional().describe('OPTIONAL. true = only rules with a prebuilt match; false = only rules without one. Omit entirely when not filtering by this condition.'),
+  is_installed: z.boolean().optional().describe('OPTIONAL. true = installed rules only; false = not-yet-installed only. Omit entirely when not filtering by this condition.'),
+  is_fully_translated: z.boolean().optional().describe('OPTIONAL. true = fully translated rules only; false = exclude fully translated. Omit entirely when not filtering by this condition.'),
+  is_partially_translated: z.boolean().optional().describe('OPTIONAL. true = partially translated rules only; false = exclude partially translated. Omit entirely when not filtering by this condition.'),
+  is_untranslatable: z.boolean().optional().describe('OPTIONAL. true = untranslatable rules only; false = exclude untranslatable. Omit entirely when not filtering by this condition.'),
+  is_failed: z.boolean().optional().describe('OPTIONAL. true = failed-translation rules only; false = exclude failed. Omit entirely when not filtering by this condition.'),
+  is_missing_index: z.boolean().optional().describe('OPTIONAL. true = rules missing a required index only; false = exclude those. Omit entirely when not filtering by this condition.'),
 });
 
 const buildPath = (migrationId: string): string =>
   SIEM_RULE_MIGRATION_RULES_PATH.replace('{migration_id}', encodeURIComponent(migrationId));
 
-// Project each RuleMigrationRule down to the fields the agent actually needs. The full rule
-// carries the original query + translated ES|QL + LLM comments — dumping those into the model
-// context is wasteful and noisy. Keep id + titles + prebuilt id + translation result + status.
 const projectRule = (rule: GetRuleMigrationRulesResponse['data'][number]) => ({
   id: rule.id,
   original_rule: {
     title: rule.original_rule.title,
     vendor: rule.original_rule.vendor,
+    query: rule.original_rule.query,
+    query_language: rule.original_rule.query_language,
   },
   elastic_rule: rule.elastic_rule
     ? {
-        title: rule.elastic_rule.title,
-        prebuilt_rule_id: rule.elastic_rule.prebuilt_rule_id,
-        integration_ids: rule.elastic_rule.integration_ids,
-      }
+      title: rule.elastic_rule.title,
+      prebuilt_rule_id: rule.elastic_rule.prebuilt_rule_id,
+      integration_ids: rule.elastic_rule.integration_ids,
+      query: rule.elastic_rule.query,
+      query_language: rule.elastic_rule.query_language,
+    }
     : undefined,
   translation_result: rule.translation_result,
   status: rule.status,
@@ -111,10 +120,9 @@ export const getMigrationRulesTool = (
     availability: createSiemMigrationAvailability(core, productFeaturesService, logger),
     description: `List the rules in an Automatic Rule Migration with their translation result and status.
 
-Supports filtering by translation result, installed/prebuilt, search term, or explicit ids.
-Pagination is zero-based.
+Only include the parameters you actually need. Boolean filter fields (is_fully_translated, is_failed, etc.) filter when set — omit them entirely when you are not filtering by that condition. Omit search_term and ids when not in use (do not pass empty strings or empty arrays). Omit pagination and sort params unless you need non-default values.
 
-Returns projected fields only (id, original title, vendor, translated title, prebuilt rule id, integration ids, translation result, status) — not full rule bodies.
+Returns: id, original rule (title, vendor, query, query_language), translated elastic rule (title, prebuilt rule id, integration ids, ES|QL query, query language), translation result, status.
 
 Read-only.`,
     schema,

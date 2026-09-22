@@ -97,6 +97,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.siem_migration.stop_rule_migration`,
   `${internalNamespaces.security}.siem_migration.update_rule_migration`,
   `${internalNamespaces.security}.siem_migration.delete_rule_migration`,
+  `${internalNamespaces.security}.siem_migration.update_translated_rule`,
   `${internalNamespaces.security}.alert-triage`,
 
   // Streams
@@ -249,6 +250,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'automatic-migration-rules-stop-migration',
   'automatic-migration-rules-update-migration',
   'automatic-migration-rules-delete-migration',
+  'automatic-migration-rules-update-translated-rule',
   'attack-discovery-alert-retrieval-builder',
   'attack-discovery-generator',
   'attack-discovery-workflow-troubleshooting',
@@ -354,6 +356,8 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   'security.siem_readiness',
   // gated behind experimentalFeatures.rulePreviewAttachmentEnabled
   'security.rule.preview',
+  // gated behind !siemMigrationsDisabled && siemRuleMigrationsAgentBuilderEnabled
+  'security.siem_migration.rule_migration_items',
 
   // Security Solution – Attack Discovery (discoveries plugin)
   // gated behind the workflows feature flag

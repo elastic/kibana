@@ -13,4 +13,5 @@ export const RULE_MIGRATION_SKILLS = {
   DELETE: 'automatic-migration-rules-delete-migration',
   // Not yet registered — skill is implemented in PR 3 of 4.
   INSTALL: 'automatic-migration-rules-install-rules',
+  UPDATE_TRANSLATED_RULE: 'automatic-migration-rules-update-translated-rule', // registered
 } as const;

@@ -8,6 +8,7 @@
 import type { RootSchema } from '@kbn/core/public';
 import type {
   BaseResultActionParams,
+  ReportAddRulesToChatActionParams,
   SiemMigrationsTelemetryEvent,
   SiemMigrationsTelemetryEventsMap,
 } from './types';
@@ -43,6 +44,7 @@ export const siemMigrationEventNames = {
   [SiemMigrationsDashboardEventTypes.TranslatedItemInstall]: 'Install translated dashboard',
   [SiemMigrationsRuleEventTypes.TranslatedBulkInstall]: 'Bulk install translated rules',
   [SiemMigrationsDashboardEventTypes.TranslatedBulkInstall]: 'Bulk install translated dashboards',
+  [SiemMigrationsRuleEventTypes.AddRulesToChat]: 'Add Rules to Chat',
 };
 
 const baseResultActionSchema: RootSchema<BaseResultActionParams> = {
@@ -328,6 +330,38 @@ const eventSchemas: SiemMigrationsTelemetryEventSchemas = {
       },
     },
   },
+
+  [SiemMigrationsRuleEventTypes.AddRulesToChat]: {
+    ...eventNameSchema,
+    migrationId: {
+      type: 'keyword',
+      _meta: { description: 'The migration id', optional: false },
+    },
+    vendor: {
+      type: 'keyword',
+      _meta: { description: 'The vendor of the original rules', optional: true },
+    },
+    item_type: {
+      type: 'keyword',
+      _meta: { description: 'The type of item added to chat', optional: false },
+    },
+    count: {
+      type: 'integer',
+      _meta: { description: 'Number of rules added to chat', optional: false },
+    },
+    statuses: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: { description: 'Translation result status', optional: false },
+      },
+      _meta: { description: 'Translation result statuses of added rules', optional: false },
+    },
+    source: {
+      type: 'keyword',
+      _meta: { description: 'Where the Add to Chat action was triggered from', optional: false },
+    },
+  } as RootSchema<ReportAddRulesToChatActionParams>,
 
   [SiemMigrationsDashboardEventTypes.SetupConnectorSelected]: {
     ...eventNameSchema,

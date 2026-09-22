@@ -338,6 +338,27 @@ export const registerEntityRiskScoreHistoryAttachment = ({
 };
 
 /**
+ * Registers the `security.siem_migration.rule_migration_items` attachment renderer (chip label only).
+ * No rich renderer needed — the attachment label is pre-built by the client.
+ */
+export const registerSiemMigrationRuleItemsAttachment = (
+  attachments: AttachmentServiceStartContract
+): void => {
+  attachments.addAttachmentType<UnknownAttachmentWithLabel>(
+    SecurityAgentBuilderAttachments.ruleMigrationItems,
+    {
+      getLabel: (attachment) =>
+        attachment?.data?.attachmentLabel ??
+        i18n.translate(
+          'xpack.securitySolution.agentBuilder.ruleMigrationItemsAttachment.label',
+          { defaultMessage: 'Migration Rules' }
+        ),
+      getIcon: () => 'productAgent',
+    }
+  );
+};
+
+/**
  * Registers the `security.rulePreview` attachment renderer (inline alert table showing
  * preview results). Dynamically imports {@link ./rule_preview_attachment} so the heavy
  * transitive deps (SecuritySolutionFlyout, RulePreviewAlertsTable, sourcerer, etc.)

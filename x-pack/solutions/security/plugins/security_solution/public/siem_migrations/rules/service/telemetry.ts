@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { SiemMigrationsRuleEventTypes } from '../../../common/lib/telemetry/events/siem_migrations/types';
+import {
+  SiemMigrationsRuleEventTypes,
+  type ReportAddRulesToChatActionParams,
+} from '../../../common/lib/telemetry/events/siem_migrations/types';
+import { siemMigrationEventNames } from '../../../common/lib/telemetry/events/siem_migrations';
 import { SiemBaseMigrationsTelemetry } from '../../common/service/telemetry';
 import type { TelemetryServiceStart } from '../../../common/lib/telemetry';
 
@@ -13,4 +17,11 @@ export class SiemRulesMigrationsTelemetry extends SiemBaseMigrationsTelemetry {
   constructor(telemetryService: TelemetryServiceStart) {
     super(telemetryService, SiemMigrationsRuleEventTypes);
   }
+
+  reportAddRulesToChat = (params: Omit<ReportAddRulesToChatActionParams, 'eventName'>): void => {
+    this.telemetryService.reportEvent(SiemMigrationsRuleEventTypes.AddRulesToChat, {
+      eventName: siemMigrationEventNames[SiemMigrationsRuleEventTypes.AddRulesToChat],
+      ...params,
+    });
+  };
 }

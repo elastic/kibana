@@ -1,0 +1,88 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { EuiToolTip } from '@elastic/eui';
+import { AiButton } from '@kbn/shared-ux-ai-components';
+import { i18n } from '@kbn/i18n';
+import type { RuleMigrationRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import { NewAgentBuilderAttachment } from '../../../../agent_builder/components/new_agent_builder_attachment';
+import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
+import { WithMissingPrivilegesTooltip } from '../../../common/components/missing_privileges';
+import { useMigrationRuleAttachment } from './use_migration_rule_attachment';
+import { useKibana } from '../../../../common/lib/kibana/use_kibana';
+
+const ADD_TO_CHAT_LABEL = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.addToChatButton.label',
+  { defaultMessage: 'Add to chat' }
+);
+
+const AGENT_MODE_REQUIRED_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.addToChatButton.agentModeRequiredTooltip',
+  { defaultMessage: 'Switch to Agent mode to use Add to Chat' }
+);
+
+const AGENT_BUILDER_NO_PRIVILEGE_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.addToChatButton.noPrivilegeTooltip',
+  { defaultMessage: "You don't have permission to use Agent Builder" }
+);
+
+interface AddMigrationRuleToChatButtonInnerProps {
+  isAuthorized: boolean;
+  rule: RuleMigrationRule;
+}
+
+const AddMigrationRuleToChatButtonInner: React.FC<AddMigrationRuleToChatButtonInnerProps> = ({
+  isAuthorized,
+  rule,
+}) => {
+  const { hasAgentBuilderPrivilege, isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
+  const { openAgentBuilderFlyout } = useMigrationRuleAttachment(rule);
+  const {
+    services: { siemMigrations },
+  } = useKibana();
+
+  if (!isAgentChatExperienceEnabled) {
+    return (
+      <EuiToolTip content={AGENT_MODE_REQUIRED_TOOLTIP}>
+        <AiButton variant="empty" iconType="productAgent" isDisabled>
+          {ADD_TO_CHAT_LABEL}
+        </AiButton>
+      </EuiToolTip>
+    );
+  }
+
+  if (!hasAgentBuilderPrivilege) {
+    return (
+      <EuiToolTip content={AGENT_BUILDER_NO_PRIVILEGE_TOOLTIP}>
+        <AiButton variant="empty" iconType="productAgent" isDisabled>
+          {ADD_TO_CHAT_LABEL}
+        </AiButton>
+      </EuiToolTip>
+    );
+  }
+
+  const handleClick = () => {
+    siemMigrations.rules.telemetry.reportAddRulesToChat({
+      migrationId: rule.migration_id,
+      vendor: rule.original_rule.vendor,
+      item_type: 'rule',
+      count: 1,
+      statuses: rule.translation_result ? [rule.translation_result] : [],
+      source: 'flyout',
+    });
+    openAgentBuilderFlyout();
+  };
+
+  return <NewAgentBuilderAttachment onClick={handleClick} disabled={!isAuthorized} />;
+};
+
+export const AddMigrationRuleToChatButton = WithMissingPrivilegesTooltip(
+  AddMigrationRuleToChatButtonInner,
+  'rule',
+  'minimum'
+);

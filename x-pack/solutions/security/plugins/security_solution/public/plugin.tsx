@@ -91,6 +91,7 @@ import {
   registerEntityGraphAttachment,
   registerRuleAttachment,
   registerRulePreviewAttachment,
+  registerSiemMigrationRuleItemsAttachment,
 } from './agent_builder/attachment_types';
 import type { SecurityCanvasEmbeddedBundle } from './agent_builder/components/security_redux_embedded_provider';
 import { registerWorkflowSteps } from './workflows/step_types';
@@ -359,6 +360,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       }
 
       registerAttachmentUiDefinitions(plugins.agentBuilder.attachments);
+      registerSiemMigrationRuleItemsAttachment(plugins.agentBuilder.attachments);
       if (this.experimentalFeatures.aiRuleCreationEnabled) {
         registerRuleAttachment({
           attachments: plugins.agentBuilder.attachments,

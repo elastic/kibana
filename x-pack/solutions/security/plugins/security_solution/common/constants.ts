@@ -755,6 +755,7 @@ export enum SecurityAgentBuilderAttachments {
   entityRiskScoreHistory = 'security.entity_risk_score_history',
   rule = 'security.rule',
   rulePreview = 'security.rule.preview',
+  ruleMigrationItems = 'security.siem_migration.rule_migration_items',
 }
 
 export const SECURITY_RULE_ATTACHMENT_ID = 'ai-rule-creation';

@@ -25,6 +25,7 @@ import type { RelatedIntegration, RuleResponse } from '../../../../../common/api
 import { isMigrationPrebuiltRule } from '../../../../../common/siem_migrations/rules/utils';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { type RuleMigrationRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import { AddMigrationRuleToChatButton } from '../rule_details_flyout/add_to_chat_button';
 import { useMigrationRulesTableColumns } from '../../hooks/use_migration_rules_table_columns';
 import { useMigrationRuleDetailsFlyout } from '../../hooks/use_migration_rule_preview_flyout';
 import { useInstallMigrationRule } from '../../logic/use_install_migration_rule';
@@ -294,6 +295,9 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
           migrationRule.translation_result === MigrationTranslationResult.FULL;
         return (
           <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <AddMigrationRuleToChatButton rule={migrationRule} />
+            </EuiFlexItem>
             <EuiFlexItem>
               <EuiButton
                 disabled={!canMigrationRuleBeInstalled}
@@ -429,6 +433,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
                   <EuiFlexItem grow={false}>
                     <BulkActions
                       isTableLoading={isRulesLoading}
+                      migrationStats={migrationStats}
                       translationStats={translationStats}
                       selectedRules={selectedMigrationRules}
                       setMissingIndexPatternFlyoutOpen={openMissingIndexPatternFlyout}
