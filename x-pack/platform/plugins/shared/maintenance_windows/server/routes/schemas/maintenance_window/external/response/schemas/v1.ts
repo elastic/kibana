@@ -77,23 +77,32 @@ export const maintenanceWindowResponseSchema = schema.object(
           // acts as the discriminator: `enabled: false` means the window does not apply to
           // alerting v1 alerts (e.g. a v2-only window). When `enabled` is absent, clients should
           // treat it as `true` for backward compatibility.
-          alerting: schema.object({
-            enabled: schema.maybe(
-              schema.boolean({
-                meta: {
-                  description: 'Whether the maintenance window applies to alerting v1 alerts.',
-                },
-              })
-            ),
-            query: schema.object({
-              kql: schema.string({
-                meta: {
-                  description:
-                    'A filter written in Kibana Query Language (KQL). Only alerts matching this query will be suppressed by the maintenance window.',
-                },
+          alerting: schema.object(
+            {
+              enabled: schema.maybe(
+                schema.boolean({
+                  meta: {
+                    description:
+                      'Whether this maintenance window applies to Alerting V1 alerts. If omitted, is treated as `true`.',
+                  },
+                })
+              ),
+              query: schema.object({
+                kql: schema.string({
+                  meta: {
+                    description:
+                      'A filter written in Kibana Query Language (KQL). Only alerts matching this query will be suppressed by the maintenance window.',
+                  },
+                }),
               }),
-            }),
-          }),
+            },
+            {
+              meta: {
+                description:
+                  'Settings that control how this maintenance window affects Alerting V1 alerts, including an optional KQL filter. Always returned when scope is returned. Check `enabled` to see whether the maintenance window affects these alerts.',
+              },
+            }
+          ),
           alerting_v2: schema.maybe(
             schema.object(
               {
@@ -101,7 +110,7 @@ export const maintenanceWindowResponseSchema = schema.object(
                   schema.boolean({
                     meta: {
                       description:
-                        'Whether the maintenance window applies to alerting v2 episodes.',
+                        'Whether the maintenance window applies to Alerting V2 alert episodes. If omitted, is treated as `true`.',
                     },
                   })
                 ),
@@ -111,7 +120,7 @@ export const maintenanceWindowResponseSchema = schema.object(
                       maxLength: MAX_KQL_LENGTH,
                       meta: {
                         description:
-                          'A filter written in Kibana Query Language (KQL). Only matching alerting v2 episodes will be suppressed.',
+                          "A KQL filter that limits which Alerting V2 alert episodes this maintenance window affects. Matching alert episodes don't send notifications while the window is active. If query isn't returned, the window affects all Alerting V2 alert episodes.",
                       },
                     }),
                   })
@@ -120,7 +129,7 @@ export const maintenanceWindowResponseSchema = schema.object(
               {
                 meta: {
                   description:
-                    'Scope configuration for alerting v2. When present, the maintenance window applies to alerting v2 episodes.',
+                    "Settings that control how this maintenance window affects Alerting V2 alerting episodes, including an optional KQL filter. If you omit `alerting_v2`, the maintenance window doesn't affect Alerting V2 alert episodes.",
                 },
               }
             )

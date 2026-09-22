@@ -24,7 +24,8 @@ export const maintenanceWindowScopeSchemaV1 = schema.object(
           enabled: schema.maybe(
             schema.boolean({
               meta: {
-                description: 'Whether the maintenance window applies to alerting v1 alerts.',
+                description:
+                  'Whether this maintenance window applies to Alerting V1 alerts. If omitted, is treated as `true`.',
               },
             })
           ),
@@ -34,7 +35,7 @@ export const maintenanceWindowScopeSchemaV1 = schema.object(
                 maxLength: 10000,
                 meta: {
                   description:
-                    'A filter written in Kibana Query Language (KQL). Only alerts matching this query will be suppressed by the maintenance window.',
+                    "A KQL filter that limits which Alerting V1 alerts this maintenance window affects. Matching alerts don't run rule actions while the window is active. If you omit query, the window affects all alerts.",
                 },
               }),
             })
@@ -43,7 +44,7 @@ export const maintenanceWindowScopeSchemaV1 = schema.object(
         {
           meta: {
             description:
-              'Scope configuration for alerting v1. When present, the maintenance window applies to alerting v1 alerts. An absent `alerting` key means this MW does not apply to alerting v1.',
+              "Settings that control how this maintenance window affects Alerting V1 alerts, including an optional KQL filter. If you include `scope` but omit `alerting`, the maintenance window doesn't affect these alerts.",
           },
         }
       )
@@ -56,7 +57,8 @@ export const maintenanceWindowScopeSchemaV1 = schema.object(
           enabled: schema.maybe(
             schema.boolean({
               meta: {
-                description: 'Whether the maintenance window applies to alerting v2 episodes.',
+                description:
+                  'Whether this maintenance window affects Alerting V2 alert episodes. Defaults to `true`.',
               },
             })
           ),
@@ -66,7 +68,7 @@ export const maintenanceWindowScopeSchemaV1 = schema.object(
                 maxLength: MAX_KQL_LENGTH,
                 meta: {
                   description:
-                    'A filter written in Kibana Query Language (KQL). Evaluated in memory against the alerting v2 episode context (episode_id, episode_status, rule.*, data.*). Only matching episodes will be suppressed.',
+                    "A KQL filter that limits which Alerting V2 alert episodes this maintenance window affects. You can filter on `episode_id`, `episode_status`, `group_hash`, `last_event_timestamp`, `severity`, and `data.*`. Matching episodes don't send notifications while the window is active. If you omit query, the window affects all Alerting V2 alert episodes.",
                 },
               }),
             })
@@ -75,7 +77,7 @@ export const maintenanceWindowScopeSchemaV1 = schema.object(
         {
           meta: {
             description:
-              'Scope configuration for alerting v2. When present, the maintenance window applies to alerting v2 episodes. An absent `alerting_v2` key means this MW does not apply to alerting v2.',
+              "Settings that control how this maintenance window affects Alerting V2 alerting episodes, including an optional KQL filter. If you omit `alerting_v2`, the maintenance window doesn't affect Alerting V2 alert episodes.",
           },
         }
       )
