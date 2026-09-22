@@ -827,21 +827,61 @@ steps:
 
       - match: schedule
         steps:
+          # Split on which fields were actually proposed so the action only
+          # receives the proposed keys and leaves the other field untouched,
+          # rather than sending a stale snapshot of the unproposed field.
           - name: propose_schedule
-            type: workflow.execute
-            with:
-              workflow-id: system-create-investigation-proposal
-              inputs:
-                conversationId: "{{ steps.create_investigation.output.conversation_id }}"
-                comment: "{{ steps.compose_proposal.output.comment }}"
-                actionWorkflowId: system-alertzero-action-edit-rule
-                actionInput:
-                  id: "{{ inputs.rule_uuid }}"
-                  interval: "{% if steps.diagnose_rule.output.structured_output.proposed_interval %}{{ steps.diagnose_rule.output.structured_output.proposed_interval }}{% else %}{{ steps.fetch_rule.output.interval }}{% endif %}"
-                  from: "{% if steps.diagnose_rule.output.structured_output.proposed_from %}{{ steps.diagnose_rule.output.structured_output.proposed_from }}{% else %}{{ steps.fetch_rule.output.from }}{% endif %}"
-                impact: medium
-                confidence: "{{ steps.diagnose_rule.output.structured_output.confidence | default: 'medium' }}"
-                autoApprove: false
+            type: switch
+            expression: "{% if steps.diagnose_rule.output.structured_output.proposed_interval and steps.diagnose_rule.output.structured_output.proposed_from %}both{% elsif steps.diagnose_rule.output.structured_output.proposed_interval %}interval{% else %}from{% endif %}"
+            cases:
+              - match: interval
+                steps:
+                  - name: propose_interval_only
+                    type: workflow.execute
+                    with:
+                      workflow-id: system-create-investigation-proposal
+                      inputs:
+                        conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                        comment: "{{ steps.compose_proposal.output.comment }}"
+                        actionWorkflowId: system-alertzero-action-edit-rule
+                        actionInput:
+                          id: "{{ inputs.rule_uuid }}"
+                          interval: "{{ steps.diagnose_rule.output.structured_output.proposed_interval }}"
+                        impact: medium
+                        confidence: "{{ steps.diagnose_rule.output.structured_output.confidence | default: 'medium' }}"
+                        autoApprove: false
+              - match: from
+                steps:
+                  - name: propose_from_only
+                    type: workflow.execute
+                    with:
+                      workflow-id: system-create-investigation-proposal
+                      inputs:
+                        conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                        comment: "{{ steps.compose_proposal.output.comment }}"
+                        actionWorkflowId: system-alertzero-action-edit-rule
+                        actionInput:
+                          id: "{{ inputs.rule_uuid }}"
+                          from: "{{ steps.diagnose_rule.output.structured_output.proposed_from }}"
+                        impact: medium
+                        confidence: "{{ steps.diagnose_rule.output.structured_output.confidence | default: 'medium' }}"
+                        autoApprove: false
+            default:
+              - name: propose_both_schedule
+                type: workflow.execute
+                with:
+                  workflow-id: system-create-investigation-proposal
+                  inputs:
+                    conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                    comment: "{{ steps.compose_proposal.output.comment }}"
+                    actionWorkflowId: system-alertzero-action-edit-rule
+                    actionInput:
+                      id: "{{ inputs.rule_uuid }}"
+                      interval: "{{ steps.diagnose_rule.output.structured_output.proposed_interval }}"
+                      from: "{{ steps.diagnose_rule.output.structured_output.proposed_from }}"
+                    impact: medium
+                    confidence: "{{ steps.diagnose_rule.output.structured_output.confidence | default: 'medium' }}"
+                    autoApprove: false
 
     # Same gate without an action: the analyst carries the change out
     # themselves, so approval is the whole lifecycle. The default arm, so a
