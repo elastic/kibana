@@ -40,11 +40,11 @@ jest.mock('@kbn/agentic-investigations-common', () => ({
     primaryAction,
     secondaryActions,
     tone,
-    blastRadius,
+    actionImpact,
   }: {
     children?: React.ReactNode;
     tone?: string;
-    blastRadius?: { variant: string; items: Array<{ id: string; text?: string }> };
+    actionImpact?: { variant: string; items: Array<{ id: string; text?: string }> };
     primaryAction?: {
       label: string;
       onClick: () => void;
@@ -78,10 +78,10 @@ jest.mock('@kbn/agentic-investigations-common', () => ({
           {a.label}
         </button>
       ))}
-      {/* Surfaced so the tone and the blast-radius rows are observable: the real
+      {/* Surfaced so the tone and the action-impact rows are observable: the real
           component renders them as props rather than as children. */}
-      {blastRadius?.items?.map((item) => (
-        <div key={item.id} data-test-subj={`blast-radius-${item.id}`}>
+      {actionImpact?.items?.map((item) => (
+        <div key={item.id} data-test-subj={`action-impact-${item.id}`}>
           {item.text}
         </div>
       ))}
@@ -208,7 +208,7 @@ describe('ProposalApprovalCard', () => {
       const { getByTestId } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
 
       expect(getByTestId('approval-content')).toHaveAttribute('data-tone', 'danger');
-      expect(getByTestId('blast-radius-impact')).toHaveTextContent('high impact');
+      expect(getByTestId('action-impact-impact')).toHaveTextContent('high impact');
     });
 
     it("falls back to the action's impact when the proposal sets none", () => {
@@ -224,7 +224,7 @@ describe('ProposalApprovalCard', () => {
       const { getByTestId } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
 
       expect(getByTestId('approval-content')).toHaveAttribute('data-tone', 'danger');
-      expect(getByTestId('blast-radius-impact')).toHaveTextContent('critical impact');
+      expect(getByTestId('action-impact-impact')).toHaveTextContent('critical impact');
     });
   });
 
