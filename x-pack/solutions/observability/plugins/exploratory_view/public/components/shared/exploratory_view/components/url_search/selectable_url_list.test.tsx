@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { fireEvent, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
+import { fireEvent, waitFor } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import * as fetcherHook from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
 
@@ -106,7 +106,6 @@ describe('SelectableUrlList', () => {
       charCode: 27,
     });
 
-    // wait for title of popover to be removed
-    await waitForElementToBeRemoved(() => queryByText(I18LABELS.getSearchResultsLabel(0)));
+    expect(queryByText(I18LABELS.getSearchResultsLabel(0))).not.toBeInTheDocument();
   });
 });

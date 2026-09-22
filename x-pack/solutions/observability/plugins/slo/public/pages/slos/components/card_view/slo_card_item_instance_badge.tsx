@@ -31,6 +31,7 @@ export function SLOCardItemInstanceBadge({ slo }: Props) {
           defaultMessage: 'All instance IDs',
         })}
         isOpen={isPopoverOpen}
+        closePopover={() => setIsPopoverOpen(false)}
         button={
           <EuiBadge
             onClick={() => {

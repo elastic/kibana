@@ -6,6 +6,7 @@
  */
 
 import { EuiPopover, EuiPortal, useEuiTheme } from '@elastic/eui';
+import type { EuiPopoverRef } from '@elastic/eui';
 import type { MouseEvent } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactFlowInstance, Viewport } from '@xyflow/react';
@@ -141,7 +142,7 @@ export function MapPopover({
   clearKueryOnNavigation,
 }: MapPopoverProps) {
   const { euiTheme } = useEuiTheme();
-  const popoverRef = useRef<EuiPopover>(null);
+  const popoverRef = useRef<EuiPopoverRef>(null);
   const reactFlowInstance = useReactFlow();
   const [diagnosticFlyoutSelection, setDiagnosticFlyoutSelection] =
     useState<ServiceMapSelection | null>(null);

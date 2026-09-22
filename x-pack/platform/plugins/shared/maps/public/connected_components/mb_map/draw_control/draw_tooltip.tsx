@@ -9,6 +9,7 @@ import _ from 'lodash';
 import type { RefObject } from 'react';
 import React, { Component } from 'react';
 import { EuiPopover, EuiText } from '@elastic/eui';
+import type { EuiPopoverRef } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { DRAW_SHAPE } from '../../../../common/constants';
@@ -27,7 +28,7 @@ interface State {
 }
 
 export class DrawTooltip extends Component<Props, State> {
-  private readonly _popoverRef: RefObject<EuiPopover> = React.createRef();
+  private readonly _popoverRef: RefObject<EuiPopoverRef> = React.createRef();
   private _isMounted = false;
 
   state: State = {
