@@ -10,7 +10,11 @@ import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
 import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
-import { IMPACT_ATTACHMENT_TEST_ID, ImpactInlineContent } from './impact_inline_content';
+import {
+  IMPACT_ATTACHMENT_TEST_ID,
+  IMPACT_ATTACHMENT_TRUNCATED_TEST_ID,
+  ImpactInlineContent,
+} from './impact_inline_content';
 import type { ImpactAttachment, ImpactAttachmentData } from './types';
 
 const renderContent = (data: ImpactAttachmentData) => {
@@ -108,5 +112,34 @@ describe('ImpactInlineContent', () => {
 
     expect(screen.getByText('WKSTN-01')).toBeInTheDocument();
     expect(screen.queryByText('svc-1')).not.toBeInTheDocument();
+  });
+
+  it('does not show a truncation notice when truncated is false or absent', () => {
+    renderContent({ entities: [hostRow] });
+
+    expect(screen.queryByTestId(IMPACT_ATTACHMENT_TRUNCATED_TEST_ID)).not.toBeInTheDocument();
+  });
+
+  it('shows a truncation notice when truncated is true', () => {
+    renderContent({ entities: [hostRow, userRow], truncated: true });
+
+    expect(screen.getByTestId(IMPACT_ATTACHMENT_TRUNCATED_TEST_ID)).toBeInTheDocument();
+    expect(screen.getByText('Impact list truncated')).toBeInTheDocument();
+    expect(
+      screen.getByText(/Showing 2 entities; additional impacted entities were omitted\./)
+    ).toBeInTheDocument();
+  });
+
+  it('includes total alert count in the truncation notice when provided', () => {
+    renderContent({
+      entities: [hostRow],
+      truncated: true,
+      total_alert_count: 120,
+    });
+
+    expect(screen.getByTestId(IMPACT_ATTACHMENT_TRUNCATED_TEST_ID)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Showing 1 entity\. The full batch includes 120 alerts\./)
+    ).toBeInTheDocument();
   });
 });
