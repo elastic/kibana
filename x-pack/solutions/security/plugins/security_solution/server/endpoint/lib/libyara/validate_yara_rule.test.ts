@@ -420,10 +420,37 @@ rule ${module}Check {
         const first = await validateYaraRule(source);
         const second = await validateYaraRule(source);
         expect(second).toEqual(first);
+        expect(second).not.toBe(first);
         expect(first.rules).toEqual([{ identifier: 'CacheHit', meta: {}, duplicateMeta: [] }]);
       });
 
       expect(validateCalls).toBe(1);
+    });
+
+    it('returns a fresh copy so caller mutations do not leak into later validations', async () => {
+      const source = 'rule CacheIsolation { meta: os = "Windows" condition: true }';
+
+      const first = await validateYaraRule(source);
+      first.errorCount++;
+      first.errors.push({
+        severity: 'error',
+        message: 'meta.os "Windows" does not match Linux',
+        line: 1,
+      });
+      first.rules[0].meta.os = 'Linux';
+
+      const second = await validateYaraRule(source);
+
+      expect(second).not.toBe(first);
+      expect(second.errors).not.toBe(first.errors);
+      expect(second.rules).not.toBe(first.rules);
+      expect(second.errors).toEqual([]);
+      expect(second.errorCount).toBe(0);
+      expect(second.rules).toEqual([
+        { identifier: 'CacheIsolation', meta: { os: 'Windows' }, duplicateMeta: [] },
+      ]);
+      expect(first.errorCount).toBe(1);
+      expect(first.rules[0].meta.os).toBe('Linux');
     });
 
     it('compiles distinct sources separately', async () => {
