@@ -274,7 +274,7 @@ describe('getAlertsNavPanel', () => {
       });
 
       expect(getSectionByTitle(core, 'Rule Management')?.children).toEqual([
-        { link: 'observabilityAlerting:rules-v1' },
+        { link: 'observabilityAlerting:rules-v1', title: 'Rules' },
       ]);
     });
 
