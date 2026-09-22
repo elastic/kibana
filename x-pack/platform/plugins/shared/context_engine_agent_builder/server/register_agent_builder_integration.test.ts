@@ -44,11 +44,14 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
     };
 
     const list = jest.fn().mockResolvedValue(aiIndices);
+    const getAiIndexDataReadService = jest.fn().mockReturnValue({ list });
+    const asCurrentUser = {};
+    const asScoped = jest.fn().mockReturnValue({ asCurrentUser });
     const coreSetup = {
       getStartServices: jest.fn().mockResolvedValue([
-        {},
+        { elasticsearch: { client: { asScoped } } },
         {
-          contextEngine: { getAiIndexService: () => ({ list }) },
+          contextEngine: { getAiIndexDataReadService },
           security,
         },
         {},
@@ -74,10 +77,38 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
     });
 
     if (!resolver) {
-      throw new Error('Expected an AI index resolver to be registered');
+      throw new Error('Expected an AI Index resolver to be registered');
     }
-    return { resolver, list, security, checkPrivileges };
+    return {
+      resolver,
+      list,
+      getAiIndexDataReadService,
+      asScoped,
+      asCurrentUser,
+      security,
+      checkPrivileges,
+    };
   };
+
+  it('registers the tools with a Context Engine start accessor', async () => {
+    const { getAiIndexDataReadService } = setup({ aiIndices: [] });
+    const { registerAgentBuilderTools } = jest.requireMock('./agent_builder/tools');
+
+    const [{ getContextEngineStart }] = registerAgentBuilderTools.mock.calls.at(-1);
+
+    await expect(getContextEngineStart()).resolves.toEqual({ getAiIndexDataReadService });
+  });
+
+  it('reads readable AI Indices as the requesting user through the data read service', async () => {
+    const { resolver, getAiIndexDataReadService, asScoped, asCurrentUser } = setup({
+      aiIndices: [],
+    });
+
+    await resolver({ ids: ['my-custom'], request });
+
+    expect(asScoped).toHaveBeenCalledWith(request);
+    expect(getAiIndexDataReadService).toHaveBeenCalledWith({ esClient: asCurrentUser, request });
+  });
 
   it('registers a resolver mapping registry items to id, esqlTarget (dest.value) and description', async () => {
     const { resolver } = setup({
@@ -95,18 +126,16 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
     ]);
   });
 
-  it('filters the registry to the requested ids', async () => {
+  it('asks the service for the requested ids only, so just those are probed', async () => {
     const { resolver, list } = setup({
-      aiIndices: [
-        { id: 'wanted', dest: { type: 'index', value: 'idx-wanted' } },
-        { id: 'other', dest: { type: 'data_stream', value: 'ds-other' } },
-      ],
+      aiIndices: [{ id: 'wanted', dest: { type: 'index', value: 'idx-wanted' } }],
     });
 
     expect(await resolver({ ids: ['wanted', 'unknown'], request })).toEqual([
       { id: 'wanted', esqlTarget: 'idx-wanted' },
     ]);
     expect(list).toHaveBeenCalledTimes(1);
+    expect(list).toHaveBeenCalledWith(['wanted', 'unknown']);
   });
 
   it('checks the Context Engine read privilege for the request before disclosing details', async () => {

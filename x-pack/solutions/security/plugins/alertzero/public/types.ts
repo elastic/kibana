@@ -11,15 +11,13 @@ import type { WorkflowsPublicPluginStart } from '@kbn/workflows-management-plugi
 
 export interface AlertZeroClientConfig {
   enabled: boolean;
-  ui: {
-    useMockData: boolean;
-  };
 }
 
 export type AlertZeroSetupDependencies = Record<string, never>;
 
 export interface AlertZeroStartDependencies {
-  agentBuilder?: AgentBuilderPluginStart;
+  /** Required plugin, see `requiredPlugins` in kibana.jsonc. */
+  agentBuilder: AgentBuilderPluginStart;
   spaces?: SpacesPluginStart;
   workflowsManagement?: WorkflowsPublicPluginStart;
 }

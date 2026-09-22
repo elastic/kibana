@@ -361,20 +361,108 @@
       "prUrl": "https://github.com/elastic/kibana/pull/288179"
     },
     {
-      "path": "/api/alerting/v2/action_policies/_match_for_rule",
-      "method": "post",
-      "reason": "Intentional: action policy 'matcher' changed from a KQL query string to a structured object ({ tags, expression }). Alerting v2 action policies are experimental and have no external consumers.",
-      "approvedBy": "@elastic/response-ops",
-      "oasdiffId": "response-property-type-changed",
-      "prUrl": "https://github.com/elastic/kibana/pull/288179"
+      "path": "/api/alerting/v2/action_policies",
+      "method": "get",
+      "reason": "Intentional: 'tags' removed from the action policy response schema. Tags are still stored on the saved object, so the field can be re-exposed later without a migration. Alerting v2 action policies are experimental and have no external consumers.",
+      "approvedBy": "@elastic/rna-project-team",
+      "oasdiffId": "response-required-property-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/291176"
     },
     {
-      "path": "/api/alerting/v2/action_policies/_match_for_rule",
+      "path": "/api/alerting/v2/action_policies",
+      "method": "get",
+      "reason": "Intentional: 'tags' removed from the action policy request schema. Alerting v2 action policies are experimental and have no external consumers.",
+      "approvedBy": "@elastic/rna-project-team",
+      "oasdiffId": "request-parameter-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/291176"
+    },
+    {
+      "path": "/api/alerting/v2/action_policies",
       "method": "post",
-      "reason": "Intentional: 'rule.id' and 'rule.name' removed from the request body. Matching no longer evaluates KQL over rule fields; it intersects the rule's tags with the structured matcher's tag clause. Alerting v2 action policies are experimental and have no external consumers.",
-      "approvedBy": "@elastic/response-ops",
+      "reason": "Intentional: 'tags' removed from the action policy response schema. Tags are still stored on the saved object, so the field can be re-exposed later without a migration. Alerting v2 action policies are experimental and have no external consumers.",
+      "approvedBy": "@elastic/rna-project-team",
+      "oasdiffId": "response-required-property-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/291176"
+    },
+    {
+      "path": "/api/alerting/v2/action_policies",
+      "method": "post",
+      "reason": "Intentional: 'tags' removed from the action policy request schema. Alerting v2 action policies are experimental and have no external consumers.",
+      "approvedBy": "@elastic/rna-project-team",
       "oasdiffId": "request-property-removed",
-      "prUrl": "https://github.com/elastic/kibana/pull/288179"
+      "prUrl": "https://github.com/elastic/kibana/pull/291176"
+    },
+    {
+      "path": "/api/alerting/v2/action_policies/{id}",
+      "method": "get",
+      "reason": "Intentional: 'tags' removed from the action policy response schema. Tags are still stored on the saved object, so the field can be re-exposed later without a migration. Alerting v2 action policies are experimental and have no external consumers.",
+      "approvedBy": "@elastic/rna-project-team",
+      "oasdiffId": "response-required-property-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/291176"
+    },
+    {
+      "path": "/api/alerting/v2/action_policies/{id}",
+      "method": "put",
+      "reason": "Intentional: 'tags' removed from the action policy response schema. Tags are still stored on the saved object, so the field can be re-exposed later without a migration. Alerting v2 action policies are experimental and have no external consumers.",
+      "approvedBy": "@elastic/rna-project-team",
+      "oasdiffId": "response-required-property-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/291176"
+    },
+    {
+      "path": "/api/alerting/v2/action_policies/{id}",
+      "method": "put",
+      "reason": "Intentional: 'tags' removed from the action policy request schema. Alerting v2 action policies are experimental and have no external consumers.",
+      "approvedBy": "@elastic/rna-project-team",
+      "oasdiffId": "request-property-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/291176"
+    },
+    {
+      "path": "/api/alerting/v2/action_policies/{id}",
+      "method": "patch",
+      "reason": "Intentional: 'tags' removed from the action policy response schema. Tags are still stored on the saved object, so the field can be re-exposed later without a migration. Alerting v2 action policies are experimental and have no external consumers.",
+      "approvedBy": "@elastic/rna-project-team",
+      "oasdiffId": "response-required-property-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/291176"
+    },
+    {
+      "path": "/api/alerting/v2/action_policies/{id}",
+      "method": "patch",
+      "reason": "Intentional: 'tags' removed from the action policy request schema. Alerting v2 action policies are experimental and have no external consumers.",
+      "approvedBy": "@elastic/rna-project-team",
+      "oasdiffId": "request-property-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/291176"
+    },
+    {
+      "path": "/api/alerting/v2/action_policies/{id}/_enable",
+      "method": "post",
+      "reason": "Intentional: 'tags' removed from the action policy response schema. Tags are still stored on the saved object, so the field can be re-exposed later without a migration. Alerting v2 action policies are experimental and have no external consumers.",
+      "approvedBy": "@elastic/rna-project-team",
+      "oasdiffId": "response-required-property-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/291176"
+    },
+    {
+      "path": "/api/alerting/v2/action_policies/{id}/_disable",
+      "method": "post",
+      "reason": "Intentional: 'tags' removed from the action policy response schema. Tags are still stored on the saved object, so the field can be re-exposed later without a migration. Alerting v2 action policies are experimental and have no external consumers.",
+      "approvedBy": "@elastic/rna-project-team",
+      "oasdiffId": "response-required-property-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/291176"
+    },
+    {
+      "path": "/api/alerting/v2/action_policies/{id}/_snooze",
+      "method": "post",
+      "reason": "Intentional: 'tags' removed from the action policy response schema. Tags are still stored on the saved object, so the field can be re-exposed later without a migration. Alerting v2 action policies are experimental and have no external consumers.",
+      "approvedBy": "@elastic/rna-project-team",
+      "oasdiffId": "response-required-property-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/291176"
+    },
+    {
+      "path": "/api/alerting/v2/action_policies/{id}/_unsnooze",
+      "method": "post",
+      "reason": "Intentional: 'tags' removed from the action policy response schema. Tags are still stored on the saved object, so the field can be re-exposed later without a migration. Alerting v2 action policies are experimental and have no external consumers.",
+      "approvedBy": "@elastic/rna-project-team",
+      "oasdiffId": "response-required-property-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/291176"
     },
     {
       "path": "/api/detection_engine/rules",

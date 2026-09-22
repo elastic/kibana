@@ -49,6 +49,7 @@
     "xpack.ecsDataQualityDashboard": "solutions/security/plugins/ecs_data_quality_dashboard",
     "xpack.endpoint": "plugins/endpoint",
     "xpack.enterpriseSearch": "solutions/search/plugins/enterprise_search",
+    "xpack.esqlViews": "platform/plugins/private/esql_views",
     "xpack.evals": "platform/plugins/shared/evals",
     "xpack.failureStoreModal": "platform/packages/shared/kbn-failure-store-modal",
     "xpack.features": "platform/plugins/shared/features",
@@ -190,6 +191,7 @@
     "@kbn/translations-plugin/translations/zh-CN.json",
     "@kbn/translations-plugin/translations/ja-JP.json",
     "@kbn/translations-plugin/translations/fr-FR.json",
-    "@kbn/translations-plugin/translations/de-DE.json"
+    "@kbn/translations-plugin/translations/de-DE.json",
+    "@kbn/translations-plugin/translations/pt-BR.json"
   ]
 }
