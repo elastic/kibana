@@ -65,8 +65,10 @@ NIGHTSHIFT_DATASETS=trace-only node scripts/evals start \
 The native framework still requires an evaluation endpoint in its configuration; the command
 reuses the target endpoint for that metadata. This suite never invokes an LLM evaluator or judge.
 The CODE evaluator `ungraded_placeholder` always returns one, uses neutral direction, and states
-that no quality evaluation was performed. Errors, missing reports, incomplete traces, missing
+that no quality evaluation was performed. Execution errors, missing reports, incomplete traces, missing
 examples or missing persisted scores fail independent acceptance checks even if that score is one.
+Recovered tool errors remain visible in the evidence. Trace acceptance checks their complete
+payloads, including model calls rejected by schema validation before tool execution.
 
 The default [synthetic file](evals/investigation/synthetic.json) contains two public fictional
 incidents. Their questions contain all evidence and request a sandbox calculation, so no telemetry

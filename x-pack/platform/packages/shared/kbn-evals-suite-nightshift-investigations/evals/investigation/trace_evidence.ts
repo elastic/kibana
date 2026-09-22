@@ -8,6 +8,8 @@
 import assert from 'assert';
 import { isDeepStrictEqual } from 'util';
 import { isToolCallStep, ToolResultType } from '@kbn/agent-builder-common';
+import { isErrorResult } from '@kbn/agent-builder-common/tools';
+import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
 import type { ConversationRound, ToolResult } from '@kbn/agent-builder-common';
 import { parseJsonAttr } from '@kbn/inference-tracing';
 import type {
@@ -81,9 +83,71 @@ export const assertAgentTrace = (
   const toolCalls = rounds.flatMap(({ steps }) => steps.filter(isToolCallStep));
   assert(toolCalls.length > 0, 'Investigation must include tool calls');
   for (const { tool_call_id: callId, tool_id: toolId, params, results } of toolCalls) {
+    const modelCalls = responses.flatMap(({ parts }) =>
+      parts.filter(
+        (part) =>
+          part.type === 'tool_call' && part.id === callId && part.name === sanitizeToolId(toolId)
+      )
+    );
     const span = attributes.find(
       (candidate) =>
         candidate['gen_ai.tool.call.id'] === callId && candidate['gen_ai.tool.name'] === toolId
+    );
+    // Schema rejection happens before execute_tool; its attempted call and error live in LLM messages.
+    if (
+      !span &&
+      results.length > 0 &&
+      results.every(isErrorResult) &&
+      results.every(({ data }) =>
+        data.message.startsWith('Error: Received tool input did not match expected schema')
+      )
+    ) {
+      assert(
+        modelCalls.some((part) => {
+          if (part.type !== 'tool_call') return false;
+          const attempted = parseJsonAttr<object>(part.arguments);
+          return attempted !== null && typeof attempted === 'object' && !Array.isArray(attempted);
+        }),
+        `Agent trace must retain the rejected call ${callId}`
+      );
+      assert(
+        inputMessages.some(
+          ({ role, parts }) =>
+            role === 'assistant' &&
+            parts.some(
+              (part) =>
+                part.type === 'tool_call' &&
+                part.id === callId &&
+                isDeepStrictEqual(parseJsonAttr(part.arguments), params)
+            )
+        ),
+        `Agent trace must retain rejected arguments for ${callId}`
+      );
+      assert(
+        results.every(({ data }) =>
+          inputMessages.some(
+            ({ role, parts }) =>
+              role === 'tool' &&
+              parts.some(
+                (part) =>
+                  part.type === 'tool_call_response' &&
+                  part.id === callId &&
+                  parseJsonAttr<{ response: string }>(part.response)?.response?.includes(
+                    data.message
+                  )
+              )
+          )
+        ),
+        `Agent trace must retain the validation error for ${callId}`
+      );
+      continue;
+    }
+    assert(
+      modelCalls.some(
+        (part) =>
+          part.type === 'tool_call' && isDeepStrictEqual(parseJsonAttr(part.arguments), params)
+      ),
+      `Agent trace must retain the model tool call ${callId}`
     );
     assert(span, `Agent trace must include tool call ${callId}`);
     assert.deepStrictEqual(

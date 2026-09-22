@@ -16,6 +16,12 @@ const toolCall = {
   params: { command: 'python calculate.py' },
   results: [{ tool_result_id: 'result', type: ToolResultType.other, data: { stdout: '30%' } }],
 } satisfies ToolCallStep;
+const toolCallPart = {
+  type: 'tool_call',
+  id: toolCall.tool_call_id,
+  name: toolCall.tool_id,
+  arguments: JSON.stringify(toolCall.params),
+};
 
 const attributes = [
   {
@@ -25,7 +31,7 @@ const attributes = [
     'gen_ai.output.messages': JSON.stringify([
       {
         role: 'assistant',
-        parts: [{ type: 'text', content: 'Timeouts increased after the change.' }],
+        parts: [{ type: 'text', content: 'Timeouts increased after the change.' }, toolCallPart],
       },
     ]),
     'gen_ai.system_instructions': JSON.stringify([
@@ -206,6 +212,7 @@ it('accepts structured final responses exported as tool-call arguments', () => {
                   name: 'structuredResponse',
                   arguments: '{ "conclusion": "Timeouts increased." }',
                 },
+                toolCallPart,
               ],
             },
           ]),
@@ -220,3 +227,100 @@ it('accepts structured final responses exported as tool-call arguments', () => {
     )
   ).not.toThrow();
 });
+
+it.each(['missing', 'redacted'])(
+  'rejects %s intermediate model tool calls despite complete final and execution evidence',
+  (mode) => {
+    expect(() =>
+      assertAgentTrace(
+        [
+          {
+            ...attributes[0],
+            'gen_ai.output.messages': JSON.stringify([
+              {
+                role: 'assistant',
+                parts: [
+                  { type: 'text', content: expected.rounds[0].response.message },
+                  ...(mode === 'missing' ? [] : [{ ...toolCallPart, arguments: '"[REDACTED]"' }]),
+                ],
+              },
+            ]),
+          },
+        ],
+        expected
+      )
+    ).toThrow();
+  }
+);
+
+const validationError = 'Error: Received tool input did not match expected schema: missing summary';
+
+it.each([
+  ['matching', '{}', validationError, '{"bad":"input"}', validationError, true],
+  [
+    'changed arguments',
+    '{"unexpected":true}',
+    validationError,
+    '{"bad":"input"}',
+    validationError,
+    false,
+  ],
+  ['redacted result', '{}', '[REDACTED]', '{"bad":"input"}', validationError, false],
+  ['missing result', '{}', '', '{"bad":"input"}', validationError, false],
+  ['redacted original call', '{}', validationError, '"[REDACTED]"', validationError, false],
+  ['missing original call', '{}', validationError, '', validationError, false],
+  ['ordinary tool failure', '{}', 'Sandbox unavailable', '{}', 'Sandbox unavailable', false],
+])(
+  'checks pre-execution validation errors in LLM messages: %s',
+  (_name, args, error, attempted, storedError, accepted) => {
+    const rejectedCall = {
+      ...toolCall,
+      tool_call_id: 'rejected',
+      params: {},
+      results: [
+        { tool_result_id: 'error', type: ToolResultType.error, data: { message: storedError } },
+      ],
+    };
+    const tracedMessages = {
+      'gen_ai.output.messages': JSON.stringify([
+        {
+          role: 'assistant',
+          parts: [
+            {
+              type: 'tool_call',
+              id: 'rejected',
+              name: toolCall.tool_id,
+              arguments: attempted,
+            },
+          ],
+        },
+      ]),
+      'gen_ai.input.messages': JSON.stringify([
+        {
+          role: 'assistant',
+          parts: [{ type: 'tool_call', id: 'rejected', name: toolCall.tool_id, arguments: args }],
+        },
+        {
+          role: 'tool',
+          parts: [
+            {
+              type: 'tool_call_response',
+              id: 'rejected',
+              response: JSON.stringify({ response: `<tool_result>${error}</tool_result>` }),
+            },
+          ],
+        },
+      ]),
+    };
+    const check = () =>
+      assertAgentTrace([...attributes, tracedMessages], {
+        ...expected,
+        rounds: [{ ...expected.rounds[0], steps: [toolCall, rejectedCall] }],
+      });
+    if (accepted) {
+      expect(check).not.toThrow();
+    } else {
+      expect(check).toThrow();
+    }
+  }
+);
