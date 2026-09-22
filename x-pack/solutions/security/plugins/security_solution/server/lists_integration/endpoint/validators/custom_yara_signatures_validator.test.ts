@@ -320,9 +320,7 @@ describe('YARA Signatures API validations', () => {
         .catch((err) => err);
 
       expect(error).toBeInstanceOf(EndpointArtifactExceptionValidationError);
-      expect(error.message).toContain(
-        'Unable to validate YARA rule due to an internal error. Please try again later.'
-      );
+      expect(error.message).toContain('Unable to validate YARA rule due to an internal error.');
       expect(error.message).not.toContain('memory access out of bounds');
       expect(error.getStatusCode()).toBe(500);
 

@@ -12,10 +12,9 @@ import type {
   YaraCompiledRule,
   YaraCompiledRuleMeta,
   YaraDiagnostic,
-  YaraMetaKeyOfInterest,
   YaraValidateResult,
 } from './types';
-import { YARA_META_KEYS_OF_INTEREST } from './constants';
+import { YaraMetaKeyOfInterest } from '../../../../common/endpoint/types';
 
 let logger: Logger | undefined;
 
@@ -190,7 +189,7 @@ export const loadYaraValidateModule = async (): Promise<YaraValidateModule> => {
 };
 
 const isYaraMetaKeyOfInterest = (value: string): value is YaraMetaKeyOfInterest =>
-  YARA_META_KEYS_OF_INTEREST.some((key) => key === value);
+  Object.values(YaraMetaKeyOfInterest).includes(value as YaraMetaKeyOfInterest);
 
 const parseOptionalString = (value: string | undefined): string | undefined =>
   typeof value === 'string' ? value : undefined;

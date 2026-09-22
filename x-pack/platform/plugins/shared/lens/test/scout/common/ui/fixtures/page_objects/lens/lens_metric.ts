@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ScoutPage } from '@kbn/scout';
+import type { Locator, ScoutPage } from '@kbn/scout';
 import { normalizeComputedColor, parseInlineStyle } from './lens_editor_helpers';
 
 /**
@@ -29,24 +29,36 @@ export class LensMetric {
   readonly trendline;
 
   constructor(private readonly page: ScoutPage) {
-    this.metricTilesLocator = this.page.locator(
-      '[data-test-subj="mtrVis"] .echChart li:not([role="presentation"])'
-    );
-    this.secondaryMetricBadge = this.page.locator('[data-test-subj="mtrVis"] .echBadge__content');
-    this.secondaryMetricLabel = this.page.locator(
-      '[data-test-subj="mtrVis"] .echSecondaryMetric__label'
-    );
-    this.metricProgressBar = this.page.locator(
-      '[data-test-subj="mtrVis"] .echSingleMetricProgress'
-    );
+    this.metricTilesLocator = this.metricTiles();
+    this.secondaryMetricBadge = this.metricRoot().locator('.echBadge__content');
+    this.secondaryMetricLabel = this.metricRoot().locator('.echSecondaryMetric__label');
+    this.metricProgressBar = this.progressBar();
     this.legacyMetricLabel = this.page.testSubj.locator('metric_label');
     this.legacyMetricValue = this.page.testSubj.locator('metric_value');
-    this.trendline = this.page.locator('[data-test-subj="mtrVis"] .echSingleMetricSparkline');
+    this.trendline = this.metricRoot().locator('.echSingleMetricSparkline');
+  }
+
+  /** Root `[data-test-subj="mtrVis"]` locator, optionally limited to a dashboard panel. */
+  private metricRoot(scope?: Locator): Locator {
+    return (scope ?? this.page).locator('[data-test-subj="mtrVis"]');
+  }
+
+  /** Metric tiles currently rendered, optionally limited to a dashboard panel. */
+  metricTiles(scope?: Locator): Locator {
+    return this.metricRoot(scope).locator('.echChart li:not([role="presentation"])');
+  }
+
+  /**
+   * Progress bar for the metric vis, optionally limited to a dashboard panel. Lands in a render
+   * pass after `waitForVisualization`; wait on this locator before snapshotting tile data.
+   */
+  progressBar(scope?: Locator): Locator {
+    return this.metricRoot(scope).locator('.echSingleMetricProgress');
   }
 
   /** Returns locators for each Elastic Charts metric tile currently rendered. */
-  getMetricTiles() {
-    return this.metricTilesLocator.all();
+  getMetricTiles(scope?: Locator) {
+    return this.metricTiles(scope).all();
   }
 
   /**
@@ -63,10 +75,13 @@ export class LensMetric {
     await tiles[index].click();
   }
 
-  /** Reads the current state of every metric tile inside `[data-test-subj="mtrVis"]`. */
-  async getMetricVisualizationData() {
-    const tiles = await this.getMetricTiles();
-    const showingBar = (await this.metricProgressBar.count()) > 0;
+  /**
+   * Reads the current state of every metric tile inside `[data-test-subj="mtrVis"]`.
+   * Pass `scope` (e.g. a dashboard panel locator) when multiple metric visualizations are on the page.
+   */
+  async getMetricVisualizationData(scope?: Locator) {
+    const tiles = await this.getMetricTiles(scope);
+    const showingBar = (await this.progressBar(scope).count()) > 0;
 
     const data = [];
     for (const tile of tiles) {

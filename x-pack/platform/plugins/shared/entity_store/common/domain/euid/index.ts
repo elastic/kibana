@@ -34,5 +34,11 @@ export {
   applyFieldEvaluations,
   getIdentityFieldEvaluationsFromDefinition,
 } from './field_evaluations';
-export { getEuidSourceFields, type IdentitySourceFields } from './identity_fields';
+export {
+  getEuidSourceFields,
+  getEuidNamespaceSourceFields,
+  getEuidNamespaceSourcePrefix,
+  type IdentitySourceFields,
+  type NamespaceSourceFields,
+} from './identity_fields';
 export { hashEuid, HASH_ALG } from './hash_euid';

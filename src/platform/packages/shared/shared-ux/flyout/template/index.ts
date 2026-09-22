@@ -8,6 +8,11 @@
  */
 
 export { FlyoutTemplate } from './src/flyout_template';
+export { useFlyoutClose } from './src/context';
+
+/** @internal Openers only: hands `FlyoutTemplate` the root props it must render with. */
+export { FlyoutTemplateManagedProvider } from './src/context';
+export type { FlyoutTemplateManaged } from './src/context';
 
 export type {
   FlyoutTemplateProps,

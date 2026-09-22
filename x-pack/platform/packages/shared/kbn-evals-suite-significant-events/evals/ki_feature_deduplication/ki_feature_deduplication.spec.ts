@@ -7,8 +7,6 @@
 
 import type { ToolCallback, ToolDefinition } from '@kbn/inference-common';
 import {
-  EMPTY_TOKENS,
-  formatRawDocument,
   identifyFeatures,
   sumTokens,
   toPreviouslyIdentifiedFeature,
@@ -27,13 +25,11 @@ import {
   type Evaluator,
   type Example,
 } from '@kbn/evals';
+import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
+import { compactInferenceDocuments } from '@kbn/significant-events-plugin/server';
 import { FeatureAccumulator, type BaseFeature, mergeFeature } from '@kbn/significant-events-schema';
 import type { GcsConfig } from '../../src/data_generators/replay';
-import {
-  SIGEVENTS_SNAPSHOT_RUN,
-  cleanSignificantEventsDataStreams,
-  replaySignificantEventsSnapshot,
-} from '../../src/data_generators/replay';
+import { cleanSignificantEventsDataStreams } from '../../src/data_generators/replay';
 import { evaluate } from '../../src/evaluate';
 import {
   createSemanticUniquenessEvaluator,
@@ -43,15 +39,20 @@ import {
 import { createReportedTokenEvaluators } from '../../src/evaluators/reported_tokens';
 import {
   getActiveDatasets,
+  hasExplicitDatasetSelection,
   MANAGED_STREAM_NAME,
   MANAGED_STREAM_SEARCH_PATTERN,
   resolveScenarioSnapshotSource,
-  snapshotCatalogKey,
   type KIFeatureExtractionScenario,
   type KIFeatureDeduplicationScenario,
 } from '../../src/datasets';
-import { buildAvailableSnapshotsBySource } from '../shared';
+import {
+  buildAvailableSnapshotsBySource,
+  hasAvailableSnapshot,
+  replayDatasetSnapshot,
+} from '../shared';
 import { collectSampleDocuments } from '../ki_feature_extraction/collect_sample_documents';
+import { runFeatureIdentificationAgent } from '../../src/run_feature_identification_agent';
 
 interface AvailableDeduplicationScenario {
   scenario: KIFeatureDeduplicationScenario;
@@ -168,9 +169,23 @@ evaluate.describe(
   { tag: tags.serverless.observability.complete },
   () => {
     const activeDatasets = getActiveDatasets();
+    const failOnMissingSnapshot = hasExplicitDatasetSelection(process.env.SIGEVENTS_DATASET);
     const availableSnapshotsBySource = new Map<string, Set<string>>();
 
-    evaluate.beforeAll(async ({ esClient, log }) => {
+    evaluate.beforeAll(async ({ esClient, kbnClient, log, uiSettings }) => {
+      await uiSettings.set({ 'agentBuilder:experimentalFeatures': true });
+      await kbnClient.request({
+        path: '/internal/core/_settings',
+        method: 'PUT',
+        headers: { 'elastic-api-version': '1' },
+        body: {
+          'feature_flags.overrides': {
+            [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: true,
+          },
+        },
+      });
+      log.info('Enabled significant events availability feature flag');
+
       const snapshots = await buildAvailableSnapshotsBySource(
         activeDatasets,
         (dataset) => dataset.kiFeatureDeduplication,
@@ -178,6 +193,20 @@ evaluate.describe(
         log
       );
       snapshots.forEach((v, k) => availableSnapshotsBySource.set(k, v));
+    });
+
+    evaluate.afterAll(async ({ kbnClient, uiSettings }) => {
+      await uiSettings.unset('agentBuilder:experimentalFeatures');
+      await kbnClient.request({
+        path: '/internal/core/_settings',
+        method: 'PUT',
+        headers: { 'elastic-api-version': '1' },
+        body: {
+          'feature_flags.overrides': {
+            [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: null,
+          },
+        },
+      });
     });
 
     for (const dataset of activeDatasets) {
@@ -203,14 +232,15 @@ evaluate.describe(
               snapshotSource: scenario.snapshot_source,
             });
 
-            const available =
-              availableSnapshotsBySource.get(snapshotCatalogKey(source.gcs)) ?? new Set();
-
-            if (!available.has(source.snapshotName)) {
-              log.info(
-                `Snapshot "${source.snapshotName}" not found in run "${SIGEVENTS_SNAPSHOT_RUN}" ` +
-                  `(source: ${source.gcs.bucket}/${source.gcs.basePathPrefix}) - skipping`
-              );
+            if (
+              !hasAvailableSnapshot({
+                availableSnapshotsBySource,
+                source,
+                datasetId: dataset.id,
+                failOnMissingSnapshot,
+                log,
+              })
+            ) {
               continue;
             }
 
@@ -228,10 +258,11 @@ evaluate.describe(
           'KI feature deduplication',
           async ({
             esClient,
-            inferenceClient,
+            fetch,
+            connector,
             evaluators,
             evaluationConnector,
-            logger,
+            inferenceClient,
             executorClient,
             traceEsClient,
             log,
@@ -281,12 +312,7 @@ evaluate.describe(
                   }
                   if (source.snapshotName !== lastReplayedSnapshot) {
                     await cleanSignificantEventsDataStreams(esClient, log);
-                    await replaySignificantEventsSnapshot(
-                      esClient,
-                      log,
-                      source.snapshotName,
-                      source.gcs
-                    );
+                    await replayDatasetSnapshot({ esClient, log, dataset, source });
                     await esClient.indices.refresh({ index: MANAGED_STREAM_SEARCH_PATTERN });
                     lastReplayedSnapshot = source.snapshotName;
                   }
@@ -305,9 +331,7 @@ evaluate.describe(
                   const accumulated = new FeatureAccumulator();
                   const mergeEvents = [];
                   const fingerprintOnlyMergeEvents = [];
-                  // Deduplication identifies once per iteration, so provider
-                  // token counts are summed to match the trace-derived totals.
-                  let tokensUsed = EMPTY_TOKENS;
+                  let tokensUsed = sumTokens({});
 
                   for (let i = 0; i < input.iterations; i++) {
                     const sampledHits = await collectSampleDocuments({
@@ -315,32 +339,26 @@ evaluate.describe(
                       scenario: extractionScenario,
                       log,
                     });
-                    const sampleDocuments = sampledHits.flatMap((hit) => {
-                      const document = formatRawDocument({ hit });
-                      return document ? [document] : [];
-                    });
+                    const sampleDocuments = compactInferenceDocuments(sampledHits);
 
                     const previouslyIdentifiedFeatures = accumulated
                       .getAll()
                       .map(toPreviouslyIdentifiedFeature);
 
-                    const { features: identifiedFeatures, tokensUsed: iterationTokens } =
-                      await identifyFeatures({
-                        target: {
-                          id: input.stream_name,
-                          name: input.stream_name,
-                          sources: [input.stream_name, `${input.stream_name}.*`],
-                          samplingSource: input.stream_name,
-                        } satisfies AnalysisTarget,
-                        sampleDocuments,
-                        systemPrompt: featuresPrompt,
-                        inferenceClient,
-                        logger,
-                        signal: new AbortController().signal,
-                        previouslyIdentifiedFeatures,
-                      });
+                    const iterationResult = await runFeatureIdentificationAgent({
+                      fetch,
+                      log,
+                      streamName: MANAGED_STREAM_NAME,
+                      connectorId: connector.id,
+                      sampleDocuments,
+                      previouslyIdentifiedFeatures,
+                    });
 
-                    tokensUsed = sumTokens({ accumulated: tokensUsed, added: iterationTokens });
+                    const identifiedFeatures = iterationResult.features;
+                    tokensUsed = sumTokens({
+                      accumulated: tokensUsed,
+                      added: iterationResult.tokensUsed,
+                    });
 
                     iterations.push({
                       features: identifiedFeatures,
@@ -369,8 +387,8 @@ evaluate.describe(
                     mergeEvents,
                     fingerprintOnlyMergeEvents,
                     finalFeatures: accumulated.getAll(),
-                    traceId: getCurrentTraceId(),
                     tokens_used: tokensUsed,
+                    traceId: getCurrentTraceId(),
                   };
                 },
               },

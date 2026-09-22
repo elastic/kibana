@@ -95,7 +95,10 @@ const resolveApiKeyOwnerProfileUid = async ({
 
     return response.api_keys?.[0]?.profile_uid;
   } catch (error) {
-    if (error instanceof errors.ResponseError && error.statusCode === 403) {
+    if (
+      error instanceof errors.ResponseError &&
+      (error.statusCode === 403 || error.statusCode === 404)
+    ) {
       return undefined;
     }
     throw error;

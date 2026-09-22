@@ -19,5 +19,12 @@ export type {
   ActionButton,
   AttachmentPreviewState,
   AttachmentLifecycleParams,
+  AttachmentBrowserClient,
+  ListAttachmentsResult,
+  CreateAttachmentArgs,
+  GetAttachmentArgs,
+  UpdateAttachmentArgs,
+  DeleteAttachmentArgs,
+  ListAttachmentsArgs,
 } from './contract';
 export { ActionButtonType } from './contract';

@@ -19,7 +19,6 @@ import { attachmentDataToActionPolicyPayload } from '@kbn/alerting-v2-utils';
 import { ActionPolicyDefinitionList } from '../../components/action_policy/details_flyout/action_policy_definition_list';
 import { paths } from '../../constants';
 import { ActionPoliciesApi } from '../../services/action_policies_api';
-import { RulesApi } from '../../services/rules_api';
 import type { ActionPolicyAttachment } from './action_policy_attachment_definition';
 
 const EMPTY_VALUE = '-';
@@ -36,7 +35,6 @@ export const ActionPolicyCanvasContent = ({
   updateOrigin,
 }: ActionPolicyCanvasContentProps) => {
   const actionPoliciesApi = useService(ActionPoliciesApi);
-  const rulesApi = useService(RulesApi);
   const workflowApi = useService(WorkflowApi);
   const application = useService(CoreStart('application'));
   const basePath = useService(CoreStart('http')).basePath;
@@ -51,7 +49,7 @@ export const ActionPolicyCanvasContent = ({
   const [dependenciesReady, setDependenciesReady] = useState<boolean | null>(null);
 
   useEffect(() => {
-    const checks: Array<Promise<{ workflow?: boolean; rule?: boolean }>> = [];
+    const checks: Array<Promise<{ workflow?: boolean }>> = [];
     const abortController = new AbortController();
 
     const workflowDestinations = (data.destinations ?? []).filter((d) => d.type === 'workflow');
@@ -64,16 +62,6 @@ export const ActionPolicyCanvasContent = ({
       );
     }
 
-    const linkedRuleId = extractRuleIdFromMatcher(data.matcher);
-    if (linkedRuleId) {
-      checks.push(
-        rulesApi
-          .getRule(linkedRuleId, abortController.signal)
-          .then(() => ({ rule: true }))
-          .catch(() => ({ rule: false }))
-      );
-    }
-
     if (checks.length === 0) {
       setDependenciesReady(true);
       return;
@@ -83,14 +71,14 @@ export const ActionPolicyCanvasContent = ({
 
     Promise.all(checks).then((results) => {
       if (!abortController.signal.aborted) {
-        setDependenciesReady(results.every((result) => result.workflow || result.rule));
+        setDependenciesReady(results.every((result) => result.workflow));
       }
     });
 
     return () => {
       abortController.abort();
     };
-  }, [workflowApi, rulesApi, data.destinations, data.matcher]);
+  }, [workflowApi, data.destinations]);
 
   const hasDraftDependencies = dependenciesReady !== true;
 
@@ -187,6 +175,7 @@ export const ActionPolicyCanvasContent = ({
         icon: 'external',
         type: ActionButtonType.OVERFLOW,
         handler: () => {
+          // TODO: migrate to actionPolicyLocators.navigateSync once agent_builder is wrapped in LocatorProvider
           application.navigateToUrl(basePath.prepend(paths.actionPolicyEdit(data.id)));
         },
       },
@@ -213,15 +202,4 @@ export const ActionPolicyCanvasContent = ({
       <ActionPolicyDefinitionList policy={data} />
     </EuiPanel>
   );
-};
-
-/**
- * Extracts a rule ID from a KQL matcher string if it contains a `rule.id` clause.
- * Supports both quoted (`rule.id: "abc"`) and unquoted (`rule.id: abc`) values.
- * Returns `undefined` when the matcher is absent or doesn't reference `rule.id`.
- */
-const extractRuleIdFromMatcher = (matcher: string | null | undefined): string | undefined => {
-  if (!matcher) return undefined;
-  const match = matcher.match(/rule\.id\s*:\s*"?([^"\s]+)"?/);
-  return match?.[1];
 };

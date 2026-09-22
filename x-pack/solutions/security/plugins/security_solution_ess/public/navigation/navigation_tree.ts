@@ -34,7 +34,7 @@ export const createNavigationTree = (
     link: 'agent_builder' as AppDeepLinkId,
   };
   const contextEngineLink = {
-    icon: 'sparkles',
+    icon: 'tableSparkles',
     link: 'context_engine' as AppDeepLinkId,
   };
 
@@ -46,14 +46,14 @@ export const createNavigationTree = (
         link: 'inbox' as AppDeepLinkId,
         icon: 'mail',
       },
-      // PND body (nodes omitted when xpack.pnd.enabled is false)
-      ...defaultNavigationTree.pnd(),
+      // AlertZero body (nodes omitted when xpack.alertzero.enabled is false)
+      ...defaultNavigationTree.alertZero(),
       {
         link: 'discover',
         icon: 'productDiscover',
       },
       defaultNavigationTree.dashboards(),
-      ...defaultNavigationTree.pndSecondary(),
+      ...defaultNavigationTree.alertZeroSecondary(),
       defaultNavigationTree.rules(),
       services.uiSettings.get(
         ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
@@ -179,6 +179,7 @@ export const createNavigationTree = (
               { link: 'management:transform' },
               { link: 'management:rollup_jobs' },
               { link: 'management:data_federation' },
+              { link: 'management:esql_views' },
               { link: 'management:data_quality' },
             ],
           },

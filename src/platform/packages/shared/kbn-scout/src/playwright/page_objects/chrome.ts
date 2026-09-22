@@ -22,6 +22,15 @@ export class Chrome {
   private readonly nextChromeHeader: Locator;
   private readonly searchButton: Locator;
 
+  public readonly nav = {
+    hoverPrimaryItemById: async (id: string): Promise<void> => {
+      await this.navItemInPrimaryById(id).hover();
+    },
+    getPopoverItemById: (id: string): Locator => {
+      return this.page.testSubj.locator(`kbnChromeNav-popoverItem-${id}`);
+    },
+  };
+
   constructor(private readonly page: ScoutPage) {
     this.layoutNavigation = page.testSubj.locator('kbnChromeLayoutNavigation');
     this.primaryNavigation = page.testSubj.locator('kbnChromeNav-primaryNavigation');

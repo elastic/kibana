@@ -7,8 +7,6 @@
 
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { ActionPoliciesApi } from './action_policies_api';
-import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
-import { ALERTING_V2_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH } from '@kbn/alerting-v2-constants';
 
 describe('ActionPoliciesApi', () => {
   const http = httpServiceMock.createStartContract();
@@ -27,7 +25,7 @@ describe('ActionPoliciesApi', () => {
 
       await api.upsertActionPolicy('policy-1', payload);
 
-      expect(http.put).toHaveBeenCalledWith(`${ALERTING_V2_ACTION_POLICY_API_PATH}/policy-1`, {
+      expect(http.put).toHaveBeenCalledWith(`${'/api/alerting/v2/action_policies'}/policy-1`, {
         body: JSON.stringify(payload),
       });
     });
@@ -40,7 +38,7 @@ describe('ActionPoliciesApi', () => {
 
       await api.createActionPolicy(payload);
 
-      expect(http.post).toHaveBeenCalledWith(ALERTING_V2_ACTION_POLICY_API_PATH, {
+      expect(http.post).toHaveBeenCalledWith('/api/alerting/v2/action_policies', {
         body: JSON.stringify(payload),
       });
     });
@@ -53,7 +51,7 @@ describe('ActionPoliciesApi', () => {
 
       await api.updateActionPolicy('policy-1', payload);
 
-      expect(http.patch).toHaveBeenCalledWith(`${ALERTING_V2_ACTION_POLICY_API_PATH}/policy-1`, {
+      expect(http.patch).toHaveBeenCalledWith(`${'/api/alerting/v2/action_policies'}/policy-1`, {
         body: JSON.stringify(payload),
       });
     });
@@ -65,7 +63,7 @@ describe('ActionPoliciesApi', () => {
 
       await api.getActionPolicy('policy-1');
 
-      expect(http.get).toHaveBeenCalledWith(`${ALERTING_V2_ACTION_POLICY_API_PATH}/policy-1`);
+      expect(http.get).toHaveBeenCalledWith(`${'/api/alerting/v2/action_policies'}/policy-1`);
     });
   });
 
@@ -75,7 +73,7 @@ describe('ActionPoliciesApi', () => {
 
       await api.deleteActionPolicy('policy-1');
 
-      expect(http.delete).toHaveBeenCalledWith(`${ALERTING_V2_ACTION_POLICY_API_PATH}/policy-1`);
+      expect(http.delete).toHaveBeenCalledWith(`${'/api/alerting/v2/action_policies'}/policy-1`);
     });
   });
 
@@ -85,16 +83,19 @@ describe('ActionPoliciesApi', () => {
 
       await api.fetchRuleEventFields();
 
-      expect(http.get).toHaveBeenCalledWith(ALERTING_V2_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH, {});
+      expect(http.get).toHaveBeenCalledWith(
+        '/internal/alerting/v2/suggestions/rule_event_fields',
+        {}
+      );
     });
 
     it('forwards the trimmed matcher as a query parameter', async () => {
       http.get.mockResolvedValue([]);
 
-      await api.fetchRuleEventFields('  rule.id : "abc"  ');
+      await api.fetchRuleEventFields('  episode_id: "abc"  ');
 
-      expect(http.get).toHaveBeenCalledWith(ALERTING_V2_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH, {
-        query: { matcher: 'rule.id : "abc"' },
+      expect(http.get).toHaveBeenCalledWith('/internal/alerting/v2/suggestions/rule_event_fields', {
+        query: { matcher: 'episode_id: "abc"' },
       });
     });
 
@@ -103,7 +104,10 @@ describe('ActionPoliciesApi', () => {
 
       await api.fetchRuleEventFields('   ');
 
-      expect(http.get).toHaveBeenCalledWith(ALERTING_V2_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH, {});
+      expect(http.get).toHaveBeenCalledWith(
+        '/internal/alerting/v2/suggestions/rule_event_fields',
+        {}
+      );
     });
 
     it('returns the response payload from the HTTP layer', async () => {
@@ -112,29 +116,6 @@ describe('ActionPoliciesApi', () => {
       const result = await api.fetchRuleEventFields();
 
       expect(result).toEqual(['data.host.name', 'data.count']);
-    });
-  });
-
-  describe('fetchTags', () => {
-    it('GET /action_policies/tags with wrapped response', async () => {
-      http.get.mockResolvedValue({ tags: ['production', 'staging'] });
-
-      const result = await api.fetchTags();
-
-      expect(http.get).toHaveBeenCalledWith(`${ALERTING_V2_ACTION_POLICY_API_PATH}/tags`, {
-        query: { search: undefined },
-      });
-      expect(result).toEqual({ tags: ['production', 'staging'] });
-    });
-
-    it('forwards search param in the query', async () => {
-      http.get.mockResolvedValue({ tags: ['production'] });
-
-      await api.fetchTags({ search: 'prod' });
-
-      expect(http.get).toHaveBeenCalledWith(`${ALERTING_V2_ACTION_POLICY_API_PATH}/tags`, {
-        query: { search: 'prod' },
-      });
     });
   });
 });

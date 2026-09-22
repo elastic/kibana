@@ -15,8 +15,6 @@
   ],
   "exclude": ["target/**/*"],
   "kbn_references": [
-    "@kbn/agent-builder-elastic-ai-index-ki-types",
-    "@kbn/deeplinks-observability",
     "@kbn/config-schema",
     "@kbn/core-pricing-common",
     "@kbn/core",
@@ -61,7 +59,6 @@
     "@kbn/global-search-plugin",
     "@kbn/fields-metadata-plugin",
     "@kbn/otel-semantic-conventions",
-    "@kbn/nightshift-ai",
     "@kbn/streams-ai",
     "@kbn/spaces-plugin",
     "@kbn/usage-collection-plugin",
@@ -88,6 +85,7 @@
     "@kbn/elastic-agent-utils",
     "@kbn/sample-log-parser",
     "@kbn/workflows-extensions",
-    "@kbn/agent-builder-sml-plugin"
+    "@kbn/agent-builder-sml-plugin",
+    "@kbn/server-http-tools"
   ]
 }

@@ -170,9 +170,26 @@ describe('composeFormToCreateRequest', () => {
     expect(result.state_transition).toBeUndefined();
   });
 
-  it('maps state_transition for immediate delay mode', () => {
+  it('maps state_transition for immediate delay mode (recovery disabled omits recovering_count)', () => {
     const result = composeFormToCreateRequest(baseFormValues);
+    expect(result.state_transition).toEqual({ pending_count: 0 });
+  });
+
+  it('emits recovering_count: 0 for immediate delay mode when recovery is enabled', () => {
+    const values: FormValues = { ...baseFormValues, recoveryStrategy: 'no_breach' };
+    const result = composeFormToCreateRequest(values);
     expect(result.state_transition).toEqual({ pending_count: 0, recovering_count: 0 });
+  });
+
+  it('omits recovering fields when recovery_strategy is "none" even if recovering values are set', () => {
+    const values: FormValues = {
+      ...baseFormValues,
+      recoveryStrategy: 'none',
+      stateTransitionRecoveryDelayMode: 'recoveries',
+      stateTransition: { recoveringCount: 3 },
+    };
+    const result = composeFormToCreateRequest(values);
+    expect(result.state_transition).toEqual({ pending_count: 0 });
   });
 
   it('maps state_transition for breaches delay mode', () => {
