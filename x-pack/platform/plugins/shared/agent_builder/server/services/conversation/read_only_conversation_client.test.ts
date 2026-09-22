@@ -62,6 +62,38 @@ describe('createConversationPublicClient', () => {
     expect(result).toEqual(listResult);
   });
 
+  it('delegates search() to the internal conversation client', async () => {
+    const conversations = [createEmptyConversation({ id: 'conv-1' })].map(
+      ({ rounds, ...withoutRounds }) => withoutRounds
+    );
+    const searchResult = { results: conversations, total: conversations.length };
+    internalClient.search.mockResolvedValue(searchResult);
+
+    const options = {
+      query: 'payment',
+      filter: 'attachment_type: alert',
+      sort: { field: 'created_at', order: 'desc' },
+    } as const;
+    const result = await publicClient.search(options);
+
+    expect(internalClient.search).toHaveBeenCalledWith(options);
+    expect(result).toEqual(searchResult);
+  });
+
+  it('delegates bulkGet() to the internal conversation client', async () => {
+    const conversations = new Map(
+      [createEmptyConversation({ id: 'conv-1' }), createEmptyConversation({ id: 'conv-2' })].map(
+        ({ rounds, ...withoutRounds }) => [withoutRounds.id, withoutRounds]
+      )
+    );
+    internalClient.bulkGet.mockResolvedValue(conversations);
+
+    const result = await publicClient.bulkGet(['conv-1', 'conv-2']);
+
+    expect(internalClient.bulkGet).toHaveBeenCalledWith(['conv-1', 'conv-2']);
+    expect(result).toEqual(conversations);
+  });
+
   describe('create()', () => {
     beforeEach(() => {
       internalClient.exists.mockResolvedValue(false);
@@ -120,10 +152,19 @@ describe('createConversationPublicClient', () => {
     });
   });
 
-  it('does not expose update, delete, upsertRound, or exists methods', () => {
+  it('does not expose delete, upsertRound, or exists methods', () => {
     const clientKeys = Object.keys(publicClient);
-    expect(clientKeys).toEqual(expect.arrayContaining(['get', 'list', 'create']));
-    expect(clientKeys).not.toContain('update');
+    expect(clientKeys).toEqual(
+      expect.arrayContaining([
+        'get',
+        'bulkGet',
+        'list',
+        'search',
+        'create',
+        'patchMetadata',
+        'update',
+      ])
+    );
     expect(clientKeys).not.toContain('delete');
     expect(clientKeys).not.toContain('upsertRound');
     expect(clientKeys).not.toContain('exists');

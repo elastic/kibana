@@ -1,6 +1,5 @@
 {
-  "sha1": "03025d35987457c2a6b266cab00c5f7daeb1a3dd",
-  "testChannels": [
+  "sha1": "9f9ac25073834fa9531a8cd251493968b7cbd927",  "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
@@ -876,8 +875,8 @@
       }
     },
     {
-      "id": "4ca74a7cb4b63d9-a2185e41470e473",
-      "title": "Create action policy API matcher: scopes a policy to a single rule via a rule.id matcher",
+      "id": "4ca74a7cb4b63d9-6a490d0881c3b4e",
+      "title": "Create action policy API matcher: scopes a policy to a single rule via tags",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -897,8 +896,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/create_action_policy.spec.ts",
-        "line": 163,
-        "column": 17
+        "line": 170,
+        "column": 14
       }
     },
     {
@@ -910,8 +909,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/create_action_policy.spec.ts",
-        "line": 178,
-        "column": 24
+        "line": 181,
+        "column": 7
       }
     },
     {
@@ -923,8 +922,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/create_action_policy.spec.ts",
-        "line": 188,
-        "column": 16
+        "line": 191,
+        "column": 13
       }
     },
     {
@@ -936,8 +935,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/create_action_policy.spec.ts",
-        "line": 196,
-        "column": 88
+        "line": 200,
+        "column": 49
       }
     },
     {
@@ -949,8 +948,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/create_action_policy.spec.ts",
-        "line": 208,
-        "column": 49
+        "line": 213,
+        "column": 24
       }
     },
     {
@@ -962,8 +961,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/create_action_policy.spec.ts",
-        "line": 219,
-        "column": 11
+        "line": 223,
+        "column": 16
       }
     },
     {
@@ -975,8 +974,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/create_action_policy.spec.ts",
-        "line": 229,
-        "column": 5
+        "line": 234,
+        "column": 22
       }
     },
     {
@@ -988,8 +987,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/create_action_policy.spec.ts",
-        "line": 235,
-        "column": 7
+        "line": 243,
+        "column": 11
       }
     },
     {
@@ -1001,8 +1000,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/create_action_policy.spec.ts",
-        "line": 244,
-        "column": 57
+        "line": 250,
+        "column": 12
       }
     },
     {
@@ -1014,8 +1013,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/create_action_policy.spec.ts",
-        "line": 262,
-        "column": 14
+        "line": 268,
+        "column": 89
       }
     },
     {
@@ -1027,8 +1026,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/create_action_policy.spec.ts",
-        "line": 272,
-        "column": 26
+        "line": 277,
+        "column": 7
       }
     },
     {
@@ -1040,8 +1039,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/create_action_policy.spec.ts",
-        "line": 288,
-        "column": 25
+        "line": 295,
+        "column": 14
       }
     },
     {
@@ -1053,8 +1052,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/create_action_policy.spec.ts",
-        "line": 301,
-        "column": 52
+        "line": 308,
+        "column": 12
       }
     },
     {
@@ -1066,8 +1065,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/create_action_policy.spec.ts",
-        "line": 313,
-        "column": 24
+        "line": 316,
+        "column": 8
       }
     },
     {
@@ -1079,8 +1078,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/create_action_policy.spec.ts",
-        "line": 323,
-        "column": 49
+        "line": 327,
+        "column": 36
       }
     },
     {
@@ -1092,8 +1091,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/create_action_policy.spec.ts",
-        "line": 335,
-        "column": 16
+        "line": 338,
+        "column": 13
       }
     },
     {
@@ -1105,8 +1104,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/create_action_policy.spec.ts",
-        "line": 345,
-        "column": 90
+        "line": 349,
+        "column": 49
       }
     },
     {
@@ -1118,8 +1117,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/create_action_policy.spec.ts",
-        "line": 355,
-        "column": 79
+        "line": 359,
+        "column": 21
       }
     },
     {
@@ -1131,8 +1130,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/create_action_policy.spec.ts",
-        "line": 367,
-        "column": 81
+        "line": 371,
+        "column": 49
       }
     },
     {
@@ -1144,8 +1143,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/create_action_policy.spec.ts",
-        "line": 380,
-        "column": 69
+        "line": 384,
+        "column": 21
       }
     },
     {
@@ -1157,8 +1156,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/create_action_policy.spec.ts",
-        "line": 391,
-        "column": 5
+        "line": 396,
+        "column": 22
       }
     },
     {
@@ -1170,8 +1169,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/create_action_policy.spec.ts",
-        "line": 402,
-        "column": 12
+        "line": 407,
+        "column": 99
       }
     },
     {
@@ -1183,8 +1182,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/create_action_policy.spec.ts",
-        "line": 412,
-        "column": 7
+        "line": 421,
+        "column": 5
       }
     },
     {
@@ -1196,8 +1195,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/create_action_policy.spec.ts",
-        "line": 423,
-        "column": 15
+        "line": 427,
+        "column": 55
       }
     },
     {
@@ -1209,8 +1208,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/create_action_policy.spec.ts",
-        "line": 435,
-        "column": 22
+        "line": 438,
+        "column": 64
       }
     },
     {
@@ -1513,175 +1512,6 @@
       }
     },
     {
-      "id": "498e09452faf9b5-e037f77b7ffc210",
-      "title": "Get action policy tags API tags: should return an empty tags array when no action policies exist",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/get_action_policy_tags.spec.ts",
-        "line": 42,
-        "column": 31
-      }
-    },
-    {
-      "id": "498e09452faf9b5-bb003b9a6ed34b5",
-      "title": "Get action policy tags API tags: should return tags in a wrapped { tags } response shape",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/get_action_policy_tags.spec.ts",
-        "line": 51,
-        "column": 5
-      }
-    },
-    {
-      "id": "498e09452faf9b5-154eca43385b2df",
-      "title": "Get action policy tags API search: should return only tags matching the prefix",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/get_action_policy_tags.spec.ts",
-        "line": 62,
-        "column": 43
-      }
-    },
-    {
-      "id": "498e09452faf9b5-ad18396f55b9289",
-      "title": "Get action policy tags API search: should treat an empty search value as no search",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/get_action_policy_tags.spec.ts",
-        "line": 81,
-        "column": 30
-      }
-    },
-    {
-      "id": "498e09452faf9b5-74b158f0d816a65",
-      "title": "Get action policy tags API search: should escape regex special characters in the prefix",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/get_action_policy_tags.spec.ts",
-        "line": 103,
-        "column": 72
-      }
-    },
-    {
-      "id": "498e09452faf9b5-04bc9256a303337",
-      "title": "Get action policy tags API search: should escape Elasticsearch-only regexp operators in the prefix",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/get_action_policy_tags.spec.ts",
-        "line": 121,
-        "column": 62
-      }
-    },
-    {
-      "id": "498e09452faf9b5-11e9a5534da9960",
-      "title": "Get action policy tags API cap: should return at most 20 tags",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/get_action_policy_tags.spec.ts",
-        "line": 155,
-        "column": 67
-      }
-    },
-    {
-      "id": "498e09452faf9b5-9114b6e17c1dc0c",
-      "title": "Get action policy tags API sort: should return the most-used tags before less-used ones",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/get_action_policy_tags.spec.ts",
-        "line": 176,
-        "column": 5
-      }
-    },
-    {
-      "id": "498e09452faf9b5-4180931f4614f3a",
-      "title": "Get action policy tags API validation: should return 400 when search exceeds the maximum length",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/get_action_policy_tags.spec.ts",
-        "line": 199,
-        "column": 30
-      }
-    },
-    {
-      "id": "498e09452faf9b5-843b9132d55ad3d",
-      "title": "Get action policy tags API validation: should return 400 when unknown query parameters are sent",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/get_action_policy_tags.spec.ts",
-        "line": 210,
-        "column": 5
-      }
-    },
-    {
-      "id": "498e09452faf9b5-f39b2583d150f14",
-      "title": "Get action policy tags API authorization: should return 200 for a user with read-only action policy privileges",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/get_action_policy_tags.spec.ts",
-        "line": 215,
-        "column": 14
-      }
-    },
-    {
-      "id": "498e09452faf9b5-817de199776431a",
-      "title": "Get action policy tags API authorization: should return 200 for a user with full action policy privileges",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/get_action_policy_tags.spec.ts",
-        "line": 228,
-        "column": 14
-      }
-    },
-    {
-      "id": "498e09452faf9b5-14fc100b0c79593",
-      "title": "Get action policy tags API authorization: should return 403 for a user without action policy privileges",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/get_action_policy_tags.spec.ts",
-        "line": 244,
-        "column": 18
-      }
-    },
-    {
       "id": "e406d6ead70c4b8-4110715f02797d7",
       "title": "Get action policy API get: returns full action policy by id with all schema fields populated",
       "expectedStatus": "passed",
@@ -1690,7 +1520,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/get_action_policy.spec.ts",
-        "line": 32,
+        "line": 31,
         "column": 31
       }
     },
@@ -1703,20 +1533,20 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/get_action_policy.spec.ts",
-        "line": 72,
+        "line": 71,
         "column": 18
       }
     },
     {
-      "id": "e406d6ead70c4b8-8f33e9d66a96a4d",
-      "title": "Get action policy API get: returns the rule.id matcher for a rule-scoped policy",
+      "id": "e406d6ead70c4b8-84109325e038e0f",
+      "title": "Get action policy API get: returns the tags matcher for a tag-scoped policy",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/get_action_policy.spec.ts",
-        "line": 97,
+        "line": 96,
         "column": 23
       }
     },
@@ -1729,8 +1559,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/get_action_policy.spec.ts",
-        "line": 119,
-        "column": 18
+        "line": 115,
+        "column": 51
       }
     },
     {
@@ -1742,8 +1572,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/get_action_policy.spec.ts",
-        "line": 127,
-        "column": 84
+        "line": 125,
+        "column": 16
       }
     },
     {
@@ -1755,8 +1585,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/get_action_policy.spec.ts",
-        "line": 136,
-        "column": 11
+        "line": 132,
+        "column": 86
       }
     },
     {
@@ -1768,8 +1598,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/get_action_policy.spec.ts",
-        "line": 147,
-        "column": 23
+        "line": 143,
+        "column": 43
       }
     },
     {
@@ -1782,7 +1612,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/get_action_policy.spec.ts",
         "line": 159,
-        "column": 4
+        "column": 23
       }
     },
     {
@@ -1794,8 +1624,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/list_action_policies.spec.ts",
-        "line": 72,
-        "column": 30
+        "line": 62,
+        "column": 47
       }
     },
     {
@@ -1807,8 +1637,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/list_action_policies.spec.ts",
-        "line": 86,
-        "column": 5
+        "line": 74,
+        "column": 14
       }
     },
     {
@@ -1820,8 +1650,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/list_action_policies.spec.ts",
-        "line": 128,
-        "column": 43
+        "line": 121,
+        "column": 11
       }
     },
     {
@@ -1833,8 +1663,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/list_action_policies.spec.ts",
-        "line": 156,
-        "column": 58
+        "line": 147,
+        "column": 12
       }
     },
     {
@@ -1846,8 +1676,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/list_action_policies.spec.ts",
-        "line": 165,
-        "column": 5
+        "line": 155,
+        "column": 63
       }
     },
     {
@@ -1859,8 +1689,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/list_action_policies.spec.ts",
-        "line": 173,
-        "column": 12
+        "line": 166,
+        "column": 16
       }
     },
     {
@@ -1872,8 +1702,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/list_action_policies.spec.ts",
-        "line": 185,
-        "column": 9
+        "line": 178,
+        "column": 94
       }
     },
     {
@@ -1885,60 +1715,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/list_action_policies.spec.ts",
-        "line": 199,
-        "column": 97
-      }
-    },
-    {
-      "id": "896355e7cc70574-402632abd09e68b",
-      "title": "List action policies API filter by tags: by a single tag (string)",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/list_action_policies.spec.ts",
-        "line": 216,
-        "column": 12
-      }
-    },
-    {
-      "id": "896355e7cc70574-6d4dcf1beaecae4",
-      "title": "List action policies API filter by tags: by multiple tags (array)",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/list_action_policies.spec.ts",
-        "line": 228,
-        "column": 93
-      }
-    },
-    {
-      "id": "896355e7cc70574-d25c410c5a895e3",
-      "title": "List action policies API filter by tags: returns empty when no policies match",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/list_action_policies.spec.ts",
-        "line": 241,
-        "column": 11
-      }
-    },
-    {
-      "id": "896355e7cc70574-abec28c63349d80",
-      "title": "List action policies API filter by tags: accepts a single tag wrapped in array",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/list_action_policies.spec.ts",
-        "line": 254,
-        "column": 5
+        "line": 191,
+        "column": 25
       }
     },
     {
@@ -1950,8 +1728,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/list_action_policies.spec.ts",
-        "line": 266,
-        "column": 14
+        "line": 208,
+        "column": 21
       }
     },
     {
@@ -1963,8 +1741,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/list_action_policies.spec.ts",
-        "line": 284,
-        "column": 11
+        "line": 221,
+        "column": 5
       }
     },
     {
@@ -1976,8 +1754,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/list_action_policies.spec.ts",
-        "line": 298,
-        "column": 57
+        "line": 237,
+        "column": 11
       }
     },
     {
@@ -1989,8 +1767,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/list_action_policies.spec.ts",
-        "line": 310,
-        "column": 5
+        "line": 248,
+        "column": 17
       }
     },
     {
@@ -2002,7 +1780,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/list_action_policies.spec.ts",
-        "line": 322,
+        "line": 260,
         "column": 12
       }
     },
@@ -2015,7 +1793,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/list_action_policies.spec.ts",
-        "line": 338,
+        "line": 276,
         "column": 12
       }
     },
@@ -2028,8 +1806,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/list_action_policies.spec.ts",
-        "line": 349,
-        "column": 12
+        "line": 287,
+        "column": 6
       }
     },
     {
@@ -2041,8 +1819,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/list_action_policies.spec.ts",
-        "line": 359,
-        "column": 63
+        "line": 298,
+        "column": 50
       }
     },
     {
@@ -2054,7 +1832,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/list_action_policies.spec.ts",
-        "line": 368,
+        "line": 306,
         "column": 12
       }
     },
@@ -2067,8 +1845,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/list_action_policies.spec.ts",
-        "line": 374,
-        "column": 7
+        "line": 312,
+        "column": 63
       }
     },
     {
@@ -2080,8 +1858,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/list_action_policies.spec.ts",
-        "line": 381,
-        "column": 49
+        "line": 320,
+        "column": 21
       }
     },
     {
@@ -2093,8 +1871,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/list_action_policies.spec.ts",
-        "line": 391,
-        "column": 18
+        "line": 329,
+        "column": 7
       }
     },
     {
@@ -2106,8 +1884,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/list_action_policies.spec.ts",
-        "line": 399,
-        "column": 77
+        "line": 338,
+        "column": 22
       }
     },
     {
@@ -2119,34 +1897,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/list_action_policies.spec.ts",
-        "line": 406,
-        "column": 90
-      }
-    },
-    {
-      "id": "896355e7cc70574-77a2e93d13c043a",
-      "title": "List action policies API validation: rejects more than the maximum number of tags",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/list_action_policies.spec.ts",
-        "line": 417,
-        "column": 11
-      }
-    },
-    {
-      "id": "896355e7cc70574-6d08f436657bdfd",
-      "title": "List action policies API validation: rejects tag over the maximum length",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/list_action_policies.spec.ts",
-        "line": 425,
-        "column": 61
+        "line": 345,
+        "column": 74
       }
     },
     {
@@ -2158,7 +1910,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/list_action_policies.spec.ts",
-        "line": 431,
+        "line": 354,
         "column": 5
       }
     },
@@ -2171,7 +1923,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/list_action_policies.spec.ts",
-        "line": 435,
+        "line": 358,
         "column": 49
       }
     },
@@ -2184,8 +1936,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/list_action_policies.spec.ts",
-        "line": 443,
-        "column": 17
+        "line": 365,
+        "column": 81
       }
     },
     {
@@ -2860,20 +2612,20 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/upsert_action_policy.spec.ts",
-        "line": 33,
+        "line": 32,
         "column": 31
       }
     },
     {
-      "id": "2fa1e7a47503ebc-e94c3316a3e1ecf",
-      "title": "Upsert action policy API matcher: scopes a policy to a single rule via a rule.id matcher on create-via-PUT",
+      "id": "2fa1e7a47503ebc-fc46c0e66c2ae27",
+      "title": "Upsert action policy API matcher: scopes a policy to rules via tags on create-via-PUT",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/upsert_action_policy.spec.ts",
-        "line": 55,
+        "line": 54,
         "column": 14
       }
     },
@@ -2886,8 +2638,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/upsert_action_policy.spec.ts",
-        "line": 75,
-        "column": 62
+        "line": 70,
+        "column": 21
       }
     },
     {
@@ -2899,8 +2651,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/upsert_action_policy.spec.ts",
-        "line": 116,
-        "column": 14
+        "line": 110,
+        "column": 75
       }
     },
     {
@@ -2912,7 +2664,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/upsert_action_policy.spec.ts",
-        "line": 143,
+        "line": 136,
         "column": 51
       }
     },
@@ -2925,8 +2677,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/upsert_action_policy.spec.ts",
-        "line": 159,
-        "column": 43
+        "line": 155,
+        "column": 22
       }
     },
     {
@@ -2938,8 +2690,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/upsert_action_policy.spec.ts",
-        "line": 173,
-        "column": 16
+        "line": 169,
+        "column": 6
       }
     },
     {
@@ -2951,8 +2703,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/upsert_action_policy.spec.ts",
-        "line": 191,
-        "column": 56
+        "line": 185,
+        "column": 16
       }
     },
     {
@@ -2964,8 +2716,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/upsert_action_policy.spec.ts",
-        "line": 204,
-        "column": 63
+        "line": 198,
+        "column": 16
       }
     },
     {
@@ -2977,8 +2729,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/upsert_action_policy.spec.ts",
-        "line": 211,
-        "column": 7
+        "line": 207,
+        "column": 5
       }
     },
     {
@@ -2990,8 +2742,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/upsert_action_policy.spec.ts",
-        "line": 220,
-        "column": 33
+        "line": 213,
+        "column": 7
       }
     },
     {
@@ -3003,8 +2755,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/upsert_action_policy.spec.ts",
-        "line": 229,
-        "column": 49
+        "line": 222,
+        "column": 57
       }
     },
     {
@@ -3016,8 +2768,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/upsert_action_policy.spec.ts",
-        "line": 237,
-        "column": 88
+        "line": 231,
+        "column": 21
       }
     },
     {
@@ -3029,8 +2781,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/upsert_action_policy.spec.ts",
-        "line": 249,
-        "column": 49
+        "line": 243,
+        "column": 7
       }
     },
     {
@@ -3042,8 +2794,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/upsert_action_policy.spec.ts",
-        "line": 259,
-        "column": 64
+        "line": 254,
+        "column": 11
       }
     },
     {
@@ -3055,8 +2807,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/upsert_action_policy.spec.ts",
-        "line": 275,
-        "column": 24
+        "line": 268,
+        "column": 51
       }
     },
     {
@@ -3068,8 +2820,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/upsert_action_policy.spec.ts",
-        "line": 289,
-        "column": 22
+        "line": 282,
+        "column": 49
       }
     },
     {
@@ -3081,8 +2833,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/upsert_action_policy.spec.ts",
-        "line": 297,
-        "column": 12
+        "line": 293,
+        "column": 11
       }
     },
     {
@@ -3094,8 +2846,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/upsert_action_policy.spec.ts",
-        "line": 306,
-        "column": 19
+        "line": 299,
+        "column": 8
       }
     }
   ]

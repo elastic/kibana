@@ -46,6 +46,7 @@ const SELECTORS = {
 type NameVisibility = NonNullable<MetricVisualizationState['secondaryNameVisibility']>;
 
 const NAME_VISIBILITY_TITLES: Record<NameVisibility, string> = {
+  tooltip: 'Tooltip',
   hidden: 'Hide',
   before: 'Before',
   after: 'After',

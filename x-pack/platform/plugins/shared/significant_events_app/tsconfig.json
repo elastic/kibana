@@ -40,7 +40,6 @@
     "@kbn/kibana-react-plugin",
     "@kbn/licensing-plugin",
     "@kbn/management-settings-ids",
-    "@kbn/nightshift-shared",
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/react-hooks",
     "@kbn/react-query",
@@ -52,11 +51,13 @@
     "@kbn/stack-connectors-plugin",
     "@kbn/streamlang",
     "@kbn/nightshift-ai",
+    "@kbn/nightshift-investigations-plugin",
     "@kbn/streams-plugin",
     "@kbn/streams-schema",
     "@kbn/typed-react-router-config",
     "@kbn/unified-search-plugin",
     "@kbn/utility-types",
-    "@kbn/ui-callout"
+    "@kbn/ui-callout",
+    "@kbn/nightshift-shared"
   ]
 }

@@ -51,26 +51,32 @@ export const createStepHandlerContext = ({
 export const createWorkflowStepConversationClientMock = (
   overrides: Partial<{
     get: jest.Mock;
+    bulkGet: jest.Mock;
     list: jest.Mock;
+    search: jest.Mock;
     patchMetadata: jest.Mock;
     create: jest.Mock;
     exists: jest.Mock;
   }> = {}
 ) => {
   const get = overrides.get ?? jest.fn();
+  const bulkGet = overrides.bulkGet ?? jest.fn().mockResolvedValue(new Map());
   const list = overrides.list ?? jest.fn();
+  const search = overrides.search ?? jest.fn();
   const patchMetadata = overrides.patchMetadata ?? jest.fn();
   const create = overrides.create ?? jest.fn();
   const exists = overrides.exists ?? jest.fn().mockResolvedValue(false);
   const getConversationClient = jest.fn().mockResolvedValue({
     get,
+    bulkGet,
     list,
+    search,
     patchMetadata,
     create,
     exists,
   } as unknown as ConversationClient);
 
-  return { get, list, patchMetadata, create, exists, getConversationClient };
+  return { get, bulkGet, list, search, patchMetadata, create, exists, getConversationClient };
 };
 
 export const createWorkflowStepAgentRegistryMock = (

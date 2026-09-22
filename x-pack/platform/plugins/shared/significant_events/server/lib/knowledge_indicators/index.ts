@@ -24,5 +24,4 @@ export {
   isStoredFeatureKnowledgeIndicator,
   isStoredQueryKnowledgeIndicator,
 } from './data_stream';
-export { initializeKnowledgeIndicatorsTemplate } from './initialize_template';
 export { KI_TYPE_FEATURE, KI_TYPE_QUERY, type KnowledgeIndicatorType } from './fields';

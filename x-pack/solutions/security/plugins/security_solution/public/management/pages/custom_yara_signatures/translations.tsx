@@ -88,6 +88,18 @@ export const CUSTOM_YARA_SIGNATURES_PAGE_LABELS: ArtifactListPageLabels = {
       defaultMessage: 'Add YARA signature',
     }
   ),
+  flyoutCreateAndEnableSubmitButtonLabel: i18n.translate(
+    'xpack.securitySolution.customYaraSignatures.list.flyoutCreateAndEnableSubmitButtonLabel',
+    {
+      defaultMessage: 'Create & enable signature',
+    }
+  ),
+  flyoutCreateWithoutEnablingSubmitButtonLabel: i18n.translate(
+    'xpack.securitySolution.customYaraSignatures.list.flyoutCreateWithoutEnablingSubmitButtonLabel',
+    {
+      defaultMessage: 'Create signature without enabling',
+    }
+  ),
   flyoutCreateSubmitSuccess: ({ name }) =>
     i18n.translate('xpack.securitySolution.customYaraSignatures.list.flyoutCreateSubmitSuccess', {
       defaultMessage: '"{name}" has been added to your custom YARA signatures list.',

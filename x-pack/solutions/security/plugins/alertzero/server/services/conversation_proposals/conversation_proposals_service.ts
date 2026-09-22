@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-// TODO(elastic/search-team#15972): replace N individual get() calls with a bulk API once it lands.
-
-import { asyncMapWithLimit } from '@kbn/std';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
@@ -15,6 +12,7 @@ import type {
   ProposalWithMetadata,
   ProposalsQuery,
 } from '@kbn/agentic-investigations-plugin/common';
+import { isAwaitingDecision } from '@kbn/agentic-investigations-plugin/common';
 import {
   CLOSED_GROUP_KEY,
   type ProposalGroups,
@@ -24,7 +22,8 @@ import {
 
 type ProposalsService = ReturnType<AgenticInvestigationsPluginStart['getProposalsService']>;
 
-const CONCURRENCY_LIMIT = 10;
+/** Conversation-derived fields merged onto a proposal on read. Both absent when unreadable. */
+type ConversationDecoration = Pick<ProposalItem, 'conversationTitle' | 'conversationAgentId'>;
 
 export class ConversationProposalsService {
   constructor(
@@ -39,35 +38,43 @@ export class ConversationProposalsService {
     spaceId: string
   ): Promise<GetProposalsListResponse> {
     const { proposals, truncated } = await this.proposalsService.listByWindow(
-      { includeStatuses: ['pending'], decidedWithinHours: query.windowHours },
+      {
+        decidedWithinHours: query.windowHours,
+        // One live proposal per subject: a retried action leaves the failed
+        // attempt behind pointing at its replacement.
+        excludeSuperseded: true,
+        excludeExpired: false,
+      },
       spaceId
     );
 
-    const titles = await this.getTitles(
+    const conversations = await this.getConversations(
       proposals.map((p) => p.conversationId),
       request
     );
 
-    const groups = this.groupProposals(proposals, titles);
+    const groups = this.groupProposals(proposals, conversations);
     const total = Object.values(groups).reduce((sum, items) => sum + items.length, 0);
     return { groups, total, truncated };
   }
 
   private groupProposals(
     proposals: ProposalWithMetadata[],
-    titles: Map<string, string>
+    conversations: Map<string, ConversationDecoration>
   ): ProposalGroups {
     const groups: ProposalGroups = { [CLOSED_GROUP_KEY]: [] };
 
     for (const proposal of proposals) {
       const item: ProposalItem = {
         ...proposal,
-        ...(titles.has(proposal.conversationId)
-          ? { conversationTitle: titles.get(proposal.conversationId) }
-          : {}),
+        ...conversations.get(proposal.conversationId),
       };
 
-      if (proposal.decidedAt) {
+      // Anything not awaiting is closed, including a proposal that expired
+      // unanswered — it carries no decision but nobody can act on it either.
+      // `executing` counts as closed too: the human already approved and the
+      // action is running, so re-offering it would invite a second decision.
+      if (!isAwaitingDecision(proposal)) {
         groups[CLOSED_GROUP_KEY].push(item);
       } else if (proposal.category) {
         if (!groups[proposal.category]) {
@@ -85,28 +92,28 @@ export class ConversationProposalsService {
     return groups;
   }
 
-  private async getTitles(
+  private async getConversations(
     conversationIds: string[],
     request: KibanaRequest
-  ): Promise<Map<string, string>> {
+  ): Promise<Map<string, ConversationDecoration>> {
     const uniqueIds = [...new Set(conversationIds)];
     const client = await this.agentBuilder.conversations.getScopedClient({ request });
 
-    const pairs = await asyncMapWithLimit(uniqueIds, CONCURRENCY_LIMIT, async (id) => {
-      try {
-        const conversation = await client.get(id);
-        if (!conversation.title) return undefined;
-        return [id, conversation.title] as [string, string];
-      } catch (err) {
-        this.logger.debug(`Could not resolve title for conversation [${id}]: ${err}`);
-        return undefined;
-      }
-    });
-
-    const map = new Map<string, string>();
-    for (const pair of pairs) {
-      if (pair) map.set(pair[0], pair[1]);
+    // Decoration only: if the bulk read fails, still return the proposals list without it.
+    try {
+      const conversations = await client.bulkGet(uniqueIds);
+      return new Map(
+        [...conversations].map(([id, { title, agent_id: agentId }]) => [
+          id,
+          {
+            ...(title ? { conversationTitle: title } : {}),
+            ...(agentId ? { conversationAgentId: agentId } : {}),
+          },
+        ])
+      );
+    } catch (err) {
+      this.logger.debug(`Could not resolve conversations: ${err}`);
+      return new Map();
     }
-    return map;
   }
 }

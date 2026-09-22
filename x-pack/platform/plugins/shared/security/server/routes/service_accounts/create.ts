@@ -42,7 +42,9 @@ export function defineCreateServiceAccountRoute({
           return response.notFound(unavailable('the feature is disabled'));
         }
 
-        return response.ok({ body: await serviceAccounts.create(request, request.body) });
+        return response.ok({
+          body: await serviceAccounts.backend.create(request, request.body),
+        });
       } catch (error) {
         return response.customError(wrapIntoCustomErrorResponse(error));
       }

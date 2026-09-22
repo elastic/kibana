@@ -39,7 +39,6 @@ describe('registerGetProposalsRoute', () => {
     const deps: Partial<RouteDependencies> = {
       router,
       logger,
-      config: { enabled: true, ui: { useMockData: false } } as RouteDependencies['config'],
       getSpaceId: () => 'default',
       getConversationProposalsService: () => service,
     };

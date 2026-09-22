@@ -13,7 +13,7 @@ import {
   createBadRequestError,
   AgentExecutionMode,
   isExecutionStartedEvent,
-  isExecutionTerminatedEvent,
+  isExecutionTerminalEvent,
   isRoundCompleteEvent,
 } from '@kbn/agent-builder-common';
 import type {
@@ -30,9 +30,7 @@ import { validateSkillIds } from '../services/agents/persisted/client/utils/skil
 import type { RouteDependencies } from './types';
 
 export const filterLegacyApiEvents = (): MonoTypeOperatorFunction<ChatEvent> =>
-  filter(
-    (event: ChatEvent) => !isExecutionStartedEvent(event) && !isExecutionTerminatedEvent(event)
-  );
+  filter((event: ChatEvent) => !isExecutionStartedEvent(event) && !isExecutionTerminalEvent(event));
 
 export const filterEventsNativeApiEvents = (): MonoTypeOperatorFunction<ChatEvent> =>
   filter((event: ChatEvent) => !isRoundCompleteEvent(event));
@@ -52,12 +50,6 @@ export interface ResolvedExecutionOptions {
 export const getConverseHelpers = ({
   getInternalServices,
 }: Pick<RouteDependencies, 'getInternalServices'>) => {
-  const validateAction = (payload: ChatRequestBodyPayload) => {
-    if (payload.action === 'regenerate' && !payload.conversation_id) {
-      throw createBadRequestError('conversation_id is required when action is regenerate');
-    }
-  };
-
   const resolveConnectorIdFromPayload = (payload: ChatRequestBodyPayload): string | undefined => {
     try {
       return resolveConnectorOrInferenceId({
@@ -138,7 +130,6 @@ export const getConverseHelpers = ({
       read_only: readOnly,
       browser_api_tools: browserApiTools,
       configuration_overrides: configurationOverrides,
-      action,
       project_routing: projectRouting,
       reasoning_level: reasoningLevel,
     } = payload;
@@ -164,7 +155,6 @@ export const getConverseHelpers = ({
         callback,
         browserApiTools,
         configurationOverrides,
-        action,
         projectRouting,
         reasoningLevel,
         nextInput: {
@@ -176,5 +166,5 @@ export const getConverseHelpers = ({
     });
   };
 
-  return { validateAction, validateConfigurationOverrides, executeAgent };
+  return { validateConfigurationOverrides, executeAgent };
 };

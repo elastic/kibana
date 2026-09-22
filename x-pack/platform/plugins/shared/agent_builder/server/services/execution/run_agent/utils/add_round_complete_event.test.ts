@@ -12,6 +12,8 @@ import {
   ConversationRoundStatus,
   ConversationRoundStepType,
   ConversationOriginType,
+  EventActorType,
+  TimelineEventType,
   isRoundCompleteEvent,
   isRelevantSkillsStep,
   type ChatEvent,
@@ -45,7 +47,158 @@ describe('addRoundCompleteEvent', () => {
     attachmentStateManager: {
       getAccessedRefs: jest.fn(() => []),
       getAll: jest.fn(() => []),
+      drainChanges: jest.fn(() => []),
     } as unknown as AttachmentStateManager,
+    chatInputChanges: [],
+    agentId: 'agent-1',
+    conversation: undefined,
+  });
+
+  const completedRunEvents = () =>
+    of(
+      createFinalStateEvent({ currentCycle: 0, errorCount: 0 } as never) as ConvertedEvents,
+      {
+        type: ChatEventType.messageComplete,
+        data: { message_id: 'm', message_content: 'Done' },
+      } as ConvertedEvents
+    );
+
+  describe('attachment events', () => {
+    const typeDefs = {
+      getTypeDefinition: (type: string) => ({
+        id: type,
+        validate: (input: unknown) => ({ valid: true as const, data: input }),
+        format: () => ({ getRepresentation: () => ({ type: 'text' as const, value: '' }) }),
+      }),
+    };
+
+    it('emits chat_input and execution attachment events with actors and the round execution id', async () => {
+      const attachmentStateManager = createAttachmentStateManager([], typeDefs);
+      // Changes made by tools during the round: still sitting in the state manager's log.
+      await attachmentStateManager.add(
+        { id: 'tool-made', type: 'text', data: { content: 'from a tool' } },
+        'agent'
+      );
+      // Changes made by the incoming message: already drained by run_chat_agent after prepareConversation.
+      const chatInputChanges = [
+        {
+          kind: 'added' as const,
+          attachment_id: 'user-sent',
+          attachment_type: 'text',
+          current_version: 1,
+        },
+      ];
+
+      const events = await firstValueFrom(
+        completedRunEvents().pipe(
+          addRoundCompleteEvent({
+            ...createDeps(),
+            attachmentStateManager,
+            chatInputChanges,
+            agentId: 'agent-1',
+            pendingRound: undefined,
+            roundId: 'round-1',
+            userInput: { message: 'here is a file' },
+            author: { id: 'profile-1', username: 'jane' },
+            startTime: new Date('2026-01-01T00:00:00.000Z'),
+          }),
+          toArray()
+        )
+      );
+
+      const roundComplete = events.find(isRoundCompleteEvent);
+      const attachmentEvents = roundComplete!.data.attachment_events!;
+      expect(attachmentEvents).toHaveLength(2);
+
+      expect(attachmentEvents[0]).toMatchObject({
+        type: TimelineEventType.attachmentAdded,
+        execution_id: 'round-1::execution',
+        actor: { type: EventActorType.user, id: 'profile-1', username: 'jane' },
+        data: {
+          attachment_id: 'user-sent',
+          attachment_type: 'text',
+          current_version: 1,
+          render_inline: false,
+          source: 'chat_input',
+        },
+      });
+      expect(attachmentEvents[1]).toMatchObject({
+        type: TimelineEventType.attachmentAdded,
+        execution_id: 'round-1::execution',
+        actor: { type: EventActorType.agent, id: 'agent-1' },
+        data: {
+          attachment_id: 'tool-made',
+          attachment_type: 'text',
+          current_version: 1,
+          render_inline: false,
+          source: 'execution',
+        },
+      });
+      // uuid ids, never round-derived
+      expect(attachmentEvents[0].id).not.toContain('::');
+      // the log was drained by the operator
+      expect(attachmentStateManager.drainChanges()).toEqual([]);
+    });
+
+    it('uses an external actor for chat_input events when the round has an origin', async () => {
+      const attachmentStateManager = createAttachmentStateManager([], typeDefs);
+      const events = await firstValueFrom(
+        completedRunEvents().pipe(
+          addRoundCompleteEvent({
+            ...createDeps(),
+            attachmentStateManager,
+            chatInputChanges: [
+              {
+                kind: 'added',
+                attachment_id: 'slack-file',
+                attachment_type: 'text',
+                current_version: 1,
+              },
+            ],
+            agentId: 'agent-1',
+            pendingRound: undefined,
+            roundId: 'round-1',
+            userInput: { message: 'from slack' },
+            origin: {
+              type: ConversationOriginType.Slack,
+              external_conversation_id: 'team:T123/channel:C123/thread:1',
+              author: { id: 'U123', username: 'jane' },
+            },
+            author: { id: 'U123', username: 'jane' },
+            startTime: new Date('2026-01-01T00:00:00.000Z'),
+          }),
+          toArray()
+        )
+      );
+
+      const [event] = events.find(isRoundCompleteEvent)!.data.attachment_events!;
+      expect(event.actor).toEqual({
+        type: EventActorType.external,
+        id: 'U123',
+        username: 'jane',
+        origin: { type: ConversationOriginType.Slack },
+      });
+    });
+
+    it('omits attachment_events when nothing changed', async () => {
+      const attachmentStateManager = createAttachmentStateManager([], typeDefs);
+      const events = await firstValueFrom(
+        completedRunEvents().pipe(
+          addRoundCompleteEvent({
+            ...createDeps(),
+            attachmentStateManager,
+            chatInputChanges: [],
+            agentId: 'agent-1',
+            pendingRound: undefined,
+            userInput: { message: 'hi' },
+            startTime: new Date('2026-01-01T00:00:00.000Z'),
+          }),
+          toArray()
+        )
+      );
+
+      expect(events.find(isRoundCompleteEvent)!.data.attachment_events).toBeUndefined();
+    });
   });
 
   it('stamps origin type and author on the round for new rounds', async () => {

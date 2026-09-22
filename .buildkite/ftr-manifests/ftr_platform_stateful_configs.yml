@@ -79,9 +79,7 @@ enabled:
   - src/platform/test/functional/apps/dashboard/group6/config.ts
   - src/platform/test/functional/apps/dashboard/esql_controls/config.ts
   - src/platform/test/functional/apps/discover/ccs_compatibility/config.ts
-  - src/platform/test/functional/apps/discover/esql_2/config.ts
   - src/platform/test/functional/apps/discover/group10/config.ts
-  - src/platform/test/functional/apps/discover/context_awareness/config.ts
   - src/platform/test/functional/apps/getting_started/config.ts
   - src/platform/test/functional/apps/management/group1/config.ts
   - src/platform/test/functional/apps/management/group2/config.ts
@@ -120,6 +118,7 @@ enabled:
   - x-pack/platform/test/localization/config.fr_fr.ts
   - x-pack/platform/test/localization/config.zh_cn.ts
   - x-pack/platform/test/localization/config.de_de.ts
+  - x-pack/platform/test/localization/config.pt_br.ts
   - x-pack/platform/test/alerting_api_integration/basic/config.ts
   - x-pack/platform/test/alerting_api_integration/security_and_spaces/group1/config.ts
   - x-pack/platform/test/alerting_api_integration/security_and_spaces/group2/config.ts
@@ -202,7 +201,6 @@ enabled:
   - x-pack/platform/test/functional/apps/aiops/config.ts
   - x-pack/platform/test/functional/apps/dashboard/group1/config.ts
   - x-pack/platform/test/functional/apps/dashboard/group3/config.ts
-  - x-pack/platform/test/functional/apps/discover/group3/config.ts
   - x-pack/platform/test/functional/apps/lens/group1/config.ts
   - x-pack/platform/test/functional/apps/lens/group2/config.ts
   - x-pack/platform/test/functional/apps/lens/group8/config.ts
@@ -328,7 +326,6 @@ enabled:
   - x-pack/platform/test/api_integration/apis/cases/config.ts
   - x-pack/platform/test/api_integration/apis/cloud/config.ts
   - x-pack/platform/test/api_integration/apis/cloud/saml.config.ts
-  - x-pack/platform/test/api_integration/apis/console/config.ts
   - x-pack/platform/test/api_integration/apis/anonymization/config.ts
   - x-pack/platform/test/api_integration/apis/features/config.ts
   - x-pack/platform/test/api_integration/apis/es/config.ts

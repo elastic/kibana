@@ -16,6 +16,7 @@ import {
   ProposalInvalidActionInputError,
   ProposalNotFoundError,
 } from './errors';
+import type { ReleaseGateParams } from './proposals_service';
 import { ProposalsService } from './proposals_service';
 
 const SPACE_ID = 'default';
@@ -49,6 +50,7 @@ const baseDocument = (overrides: Partial<ProposalDocument> = {}): ProposalDocume
 
 /** The full query shape, so a test only states the filters it cares about. */
 const listQuery = (overrides: Partial<ListProposalsQuery> = {}): ListProposalsQuery => ({
+  excludeSuperseded: false,
   excludeExpired: false,
   size: 50,
   from: 0,
@@ -69,12 +71,14 @@ const createStorage = (document?: ProposalDocument) => {
   const hits = document ? [searchHit(document)] : [];
   return {
     index: jest.fn().mockResolvedValue({ _id: 'proposal-1' }),
+    delete: jest.fn().mockResolvedValue({ acknowledged: true, result: 'deleted' }),
     search: jest.fn().mockResolvedValue({
       hits: { hits, total: { value: hits.length } },
     }),
     esql: jest.fn().mockResolvedValue(emptyEsql()),
   } as unknown as jest.Mocked<ProposalsStorageClient> & {
     index: jest.Mock;
+    delete: jest.Mock;
     search: jest.Mock;
     esql: jest.Mock;
   };
@@ -127,10 +131,11 @@ const createService = (
   };
 };
 
-const decisionContext = () => ({
+const releaseParams = (overrides: Partial<ReleaseGateParams> = {}): ReleaseGateParams => ({
+  approved: true,
   spaceId: SPACE_ID,
   request: httpServerMock.createKibanaRequest(),
-  user: analyst('analyst'),
+  ...overrides,
 });
 
 describe('ProposalsService', () => {
@@ -246,7 +251,6 @@ describe('ProposalsService', () => {
           conversationId: 'conv-1',
           comment: 'Contain the host',
           actionWorkflowId: 'system-alertzero-action-create-rule',
-          impact: 'low',
           confidence: 'high',
           origin: 'worker',
         },
@@ -260,7 +264,7 @@ describe('ProposalsService', () => {
       });
     });
 
-    it('should take impact from the action metadata rather than the caller', async () => {
+    it('should prefer the caller impact over the action metadata', async () => {
       const storage = createStorage();
       const workflowsApi = createWorkflowsApi();
       workflowsApi.getWorkflow.mockResolvedValue({
@@ -275,8 +279,34 @@ describe('ProposalsService', () => {
           conversationId: 'conv-1',
           comment: 'Tune the noisy rule',
           actionWorkflowId: 'system-alertzero-action-create-rule',
-          // Impact is intrinsic to the action, so the action's own value wins.
-          impact: 'low',
+          // A caller that states the impact knows the situation the proposal
+          // came out of, which the action's own metadata cannot.
+          impact: 'critical',
+          confidence: 'medium',
+          origin: 'worker',
+        },
+        { spaceId: SPACE_ID }
+      );
+
+      expect(proposal.impact).toBe('critical');
+      expect(proposal.category).toBe('tune');
+    });
+
+    it('should fall back to the action impact when the caller omits one', async () => {
+      const storage = createStorage();
+      const workflowsApi = createWorkflowsApi();
+      workflowsApi.getWorkflow.mockResolvedValue({
+        definition: {
+          consts: { actionMetadata: { name: 'Create rule', category: 'tune', impact: 'high' } },
+        },
+      });
+      const { service } = createService(storage, workflowsApi);
+
+      const proposal = await service.create(
+        {
+          conversationId: 'conv-1',
+          comment: 'Tune the noisy rule',
+          actionWorkflowId: 'system-alertzero-action-create-rule',
           confidence: 'medium',
           origin: 'worker',
         },
@@ -284,10 +314,9 @@ describe('ProposalsService', () => {
       );
 
       expect(proposal.impact).toBe('high');
-      expect(proposal.category).toBe('tune');
     });
 
-    it('should keep the caller impact when the action declares none', async () => {
+    it('should default impact to low when neither the caller nor the action supplies one', async () => {
       const storage = createStorage();
       const workflowsApi = createWorkflowsApi();
       workflowsApi.getWorkflow.mockResolvedValue({
@@ -300,14 +329,94 @@ describe('ProposalsService', () => {
           conversationId: 'conv-1',
           comment: 'Tune the noisy rule',
           actionWorkflowId: 'system-alertzero-action-create-rule',
-          impact: 'critical',
           confidence: 'medium',
           origin: 'worker',
         },
         { spaceId: SPACE_ID }
       );
 
-      expect(proposal.impact).toBe('critical');
+      // impactRank is the queue's primary sort key, so it always has a value.
+      expect(proposal.impact).toBe('low');
+      const [[indexArgs]] = storage.index.mock.calls;
+      expect(indexArgs.document.impactRank).toBe(3);
+    });
+
+    it('should treat a blank caller value as absent rather than as a value', async () => {
+      // A workflow reaches this through Liquid, which renders an absent input
+      // as `''` — and `??` cannot tell that from a real value. Unblanked, the
+      // caller always wins with an empty string: the action's own metadata is
+      // never consulted, no default fires, and the queue drops a proposal it
+      // cannot group by category.
+      const storage = createStorage();
+      const workflowsApi = createWorkflowsApi();
+      workflowsApi.getWorkflow.mockResolvedValue({
+        definition: { consts: { actionMetadata: { name: 'Create rule', category: 'tune' } } },
+      });
+      const { service } = createService(storage, workflowsApi);
+
+      const proposal = await service.create(
+        {
+          conversationId: 'conv-1',
+          comment: 'Tune the noisy rule',
+          actionWorkflowId: 'system-alertzero-action-create-rule',
+          impact: '' as never,
+          category: '' as never,
+          confidence: '' as never,
+          origin: 'worker',
+        },
+        { spaceId: SPACE_ID }
+      );
+
+      expect(proposal.category).toBe('tune');
+      expect(proposal.impact).toBe('low');
+      // Required on the stored document, so a blank resolves to the default
+      // rather than to an omission.
+      expect(proposal.confidence).toBe('medium');
+    });
+
+    it('should prefer the caller category over the action metadata', async () => {
+      const storage = createStorage();
+      const workflowsApi = createWorkflowsApi();
+      workflowsApi.getWorkflow.mockResolvedValue({
+        definition: { consts: { actionMetadata: { name: 'Create rule', category: 'tune' } } },
+      });
+      const { service } = createService(storage, workflowsApi);
+
+      const proposal = await service.create(
+        {
+          conversationId: 'conv-1',
+          comment: 'Tune the noisy rule',
+          actionWorkflowId: 'system-alertzero-action-create-rule',
+          category: 'contain',
+          confidence: 'medium',
+          origin: 'worker',
+        },
+        { spaceId: SPACE_ID }
+      );
+
+      expect(proposal.category).toBe('contain');
+    });
+
+    it('should give a proposal with no action the category its caller supplied', async () => {
+      const storage = createStorage();
+      const { service, workflowsApi } = createService(storage);
+
+      // The only way such a proposal gets one: there is no action metadata to
+      // resolve it from, and consumers group the queue by category — so
+      // without this it would have nowhere to appear.
+      const proposal = await service.create(
+        {
+          conversationId: 'conv-1',
+          comment: 'Rotate the credentials by hand, then approve',
+          category: 'contain',
+          confidence: 'high',
+          origin: 'worker',
+        },
+        { spaceId: SPACE_ID }
+      );
+
+      expect(proposal.category).toBe('contain');
+      expect(workflowsApi.getWorkflow).not.toHaveBeenCalled();
     });
 
     it('should leave the category unset when the action declares no metadata', async () => {
@@ -380,38 +489,29 @@ describe('ProposalsService', () => {
     });
   });
 
-  describe('approve', () => {
-    it('should record the decision before resuming the gate', async () => {
+  describe('releaseGate', () => {
+    it('should release the gate without writing anything', async () => {
       const storage = createStorage(baseDocument());
       const { service, workflowsApi } = createService(storage);
-      const callOrder: string[] = [];
-      storage.index.mockImplementation(async () => {
-        callOrder.push('index');
-      });
-      workflowsApi.resumeWorkflowExecution.mockImplementation(async () => {
-        callOrder.push('resume');
-        return { resumedBy: 'analyst' };
-      });
 
-      const proposal = await service.approve(
+      const proposal = await service.releaseGate(
         'proposal-1',
-        { actionInput: { name: 'Suspicious PowerShell' } },
-        decisionContext()
+        releaseParams({ actionInput: { name: 'Suspicious PowerShell' } })
       );
 
-      expect(proposal.status).toBe('approved');
-      expect(proposal.decidedBy).toEqual(
-        expect.objectContaining({ username: 'analyst', profileUid: 'analyst-uid' })
-      );
-      expect(proposal.decidedAt).toEqual(expect.any(String));
-      expect(callOrder).toEqual(['index', 'resume']);
+      // The decision is written by the workflow behind the gate, so there is
+      // nothing durable here to roll back when a resume fails.
+      expect(storage.index).not.toHaveBeenCalled();
+      expect(workflowsApi.resumeWorkflowExecution).toHaveBeenCalled();
+      expect(proposal.decision).toBeUndefined();
+      expect(proposal.status).toBe('pending');
     });
 
     it('should resume with the explicitly resolved waitForApproval step execution id', async () => {
       const storage = createStorage(baseDocument());
       const { service, workflowsApi } = createService(storage);
 
-      await service.approve('proposal-1', {}, decisionContext());
+      await service.releaseGate('proposal-1', releaseParams());
 
       expect(workflowsApi.resumeWorkflowExecution).toHaveBeenCalledWith(
         EXECUTION_ID,
@@ -422,14 +522,18 @@ describe('ProposalsService', () => {
       );
     });
 
-    it('should guard the write with the loaded sequence number', async () => {
+    it('should release down the negative branch for a dismissal', async () => {
       const storage = createStorage(baseDocument());
-      const { service } = createService(storage);
+      const { service, workflowsApi } = createService(storage);
 
-      await service.approve('proposal-1', {}, decisionContext());
+      await service.releaseGate('proposal-1', releaseParams({ approved: false }));
 
-      expect(storage.index).toHaveBeenCalledWith(
-        expect.objectContaining({ if_seq_no: 7, if_primary_term: 1 })
+      expect(workflowsApi.resumeWorkflowExecution).toHaveBeenCalledWith(
+        EXECUTION_ID,
+        SPACE_ID,
+        { approved: false },
+        expect.anything(),
+        expect.anything()
       );
     });
 
@@ -438,36 +542,77 @@ describe('ProposalsService', () => {
       const { service, workflowsApi } = createService(storage);
 
       await expect(
-        service.approve(
+        service.releaseGate(
           'proposal-1',
-          { actionInput: { name: 'something else' } },
-          decisionContext()
+          releaseParams({ actionInput: { name: 'something else' } })
         )
       ).rejects.toBeInstanceOf(ProposalConflictError);
 
-      expect(storage.index).not.toHaveBeenCalled();
       expect(workflowsApi.resumeWorkflowExecution).not.toHaveBeenCalled();
     });
 
+    it('should accept an approval whose action input matches under a different key order', async () => {
+      const storage = createStorage(
+        baseDocument({ actionInput: { name: 'PowerShell', tag: 'a' } })
+      );
+      const { service, workflowsApi } = createService(storage);
+
+      await service.releaseGate(
+        'proposal-1',
+        releaseParams({ actionInput: { tag: 'a', name: 'PowerShell' } })
+      );
+
+      expect(workflowsApi.resumeWorkflowExecution).toHaveBeenCalled();
+    });
+
+    it('should not compare the action input on a dismissal', async () => {
+      const storage = createStorage(baseDocument());
+      const { service, workflowsApi } = createService(storage);
+
+      // Dismissing does not run the action, so a stale rendering of its input
+      // is not a reason to refuse the decision.
+      await service.releaseGate(
+        'proposal-1',
+        releaseParams({ approved: false, actionInput: { name: 'something else' } })
+      );
+
+      expect(workflowsApi.resumeWorkflowExecution).toHaveBeenCalled();
+    });
+
     it('should reject when another actor already decided', async () => {
-      const storage = createStorage(baseDocument({ status: 'approved' }));
+      const storage = createStorage(baseDocument({ decision: 'approved' }));
       const { service } = createService(storage);
 
-      await expect(service.approve('proposal-1', {}, decisionContext())).rejects.toBeInstanceOf(
+      await expect(service.releaseGate('proposal-1', releaseParams())).rejects.toBeInstanceOf(
         ProposalConflictError
       );
     });
 
-    it('should surface a losing concurrency race as a conflict', async () => {
-      const storage = createStorage(baseDocument());
-      const { service } = createService(storage);
-      storage.index.mockRejectedValue(
-        Object.assign(new Error('version conflict'), {
-          statusCode: 409,
+    it('should allow a decision while the status is still pending behind the gate', async () => {
+      // An approved proposal stays at `pending` until the post-gate steps run,
+      // so the guard has to read the decision rather than the status.
+      const storage = createStorage(baseDocument({ status: 'pending', decision: undefined }));
+      const { service, workflowsApi } = createService(storage);
+
+      await service.releaseGate('proposal-1', releaseParams());
+
+      expect(workflowsApi.resumeWorkflowExecution).toHaveBeenCalled();
+    });
+
+    it('should reject a proposal the workflow already settled without a decision', async () => {
+      // Attempt exhaustion and a failure before anyone decided both settle the
+      // record as `expired` with no decision on it, and can do so long before
+      // the deadline — so the date check alone would still read it as live.
+      const storage = createStorage(
+        baseDocument({
+          status: 'expired',
+          decision: undefined,
+          expiresAt: '2099-01-01T00:00:00.000Z',
         })
       );
+      const { service } = createService(storage);
 
-      await expect(service.approve('proposal-1', {}, decisionContext())).rejects.toBeInstanceOf(
+      await expect(service.releaseGate('proposal-1', releaseParams())).rejects.toBeInstanceOf(
         ProposalConflictError
       );
     });
@@ -476,7 +621,7 @@ describe('ProposalsService', () => {
       const storage = createStorage(baseDocument({ expiresAt: '2020-01-01T00:00:00.000Z' }));
       const { service } = createService(storage);
 
-      await expect(service.approve('proposal-1', {}, decisionContext())).rejects.toBeInstanceOf(
+      await expect(service.releaseGate('proposal-1', releaseParams())).rejects.toBeInstanceOf(
         ProposalExpiredError
       );
     });
@@ -490,18 +635,22 @@ describe('ProposalsService', () => {
         stepExecutions: [],
       });
 
-      await expect(service.approve('proposal-1', {}, decisionContext())).rejects.toBeInstanceOf(
+      await expect(service.releaseGate('proposal-1', releaseParams())).rejects.toBeInstanceOf(
         ProposalConflictError
       );
     });
 
-    it('should skip the resume for a proposal with no waiting execution', async () => {
+    it('should refuse a proposal with no gate execution rather than report success', async () => {
+      // Only the gate workflow's create step makes a proposal, and it stamps
+      // its own execution id — but a record without one could never be
+      // decided, since the decision is written behind the gate. Answering the
+      // caller with a 200 would be the worst of the options.
       const storage = createStorage(baseDocument({ workflowExecutionId: undefined }));
       const { service, workflowsApi } = createService(storage);
 
-      const proposal = await service.approve('proposal-1', {}, decisionContext());
-
-      expect(proposal.status).toBe('approved');
+      await expect(service.releaseGate('proposal-1', releaseParams())).rejects.toBeInstanceOf(
+        ProposalConflictError
+      );
       expect(workflowsApi.resumeWorkflowExecution).not.toHaveBeenCalled();
     });
 
@@ -509,99 +658,135 @@ describe('ProposalsService', () => {
       const storage = createStorage();
       const { service } = createService(storage);
 
-      await expect(service.approve('missing', {}, decisionContext())).rejects.toBeInstanceOf(
+      await expect(service.releaseGate('missing', releaseParams())).rejects.toBeInstanceOf(
         ProposalNotFoundError
       );
     });
-
-    it('should accept an approval whose action input matches under a different key order', async () => {
-      const storage = createStorage(
-        baseDocument({ actionInput: { name: 'PowerShell', tag: 'a' } })
-      );
-      const { service, workflowsApi } = createService(storage);
-
-      const proposal = await service.approve(
-        'proposal-1',
-        { actionInput: { tag: 'a', name: 'PowerShell' } },
-        decisionContext()
-      );
-
-      expect(proposal.status).toBe('approved');
-      expect(workflowsApi.resumeWorkflowExecution).toHaveBeenCalled();
-    });
-
-    it('should record the resume failure on the proposal when the gate cannot be released', async () => {
-      const storage = createStorage(baseDocument());
-      const { service, workflowsApi } = createService(storage);
-      workflowsApi.resumeWorkflowExecution.mockRejectedValue(new Error('resume exploded'));
-
-      await expect(service.approve('proposal-1', {}, decisionContext())).rejects.toThrow(
-        'resume exploded'
-      );
-
-      expect(storage.index).toHaveBeenCalledTimes(2);
-      expect(storage.index.mock.calls[1][0].document).toEqual(
-        expect.objectContaining({ status: 'failed', executionError: 'resume exploded' })
-      );
-    });
-
-    it('should keep the resume failure when recording it also fails', async () => {
-      const storage = createStorage(baseDocument());
-      const { service, workflowsApi, logger } = createService(storage);
-      workflowsApi.resumeWorkflowExecution.mockRejectedValue(new Error('resume exploded'));
-      storage.index
-        .mockResolvedValueOnce({ _id: 'proposal-1' })
-        .mockRejectedValueOnce(new Error('index unavailable'));
-
-      await expect(service.approve('proposal-1', {}, decisionContext())).rejects.toThrow(
-        'resume exploded'
-      );
-
-      expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('index unavailable'));
-    });
   });
 
-  describe('dismiss', () => {
-    it('should record the structured reason and release the gate negatively', async () => {
+  describe('releaseGate annotations', () => {
+    it('should write only the reason and the rationale', async () => {
       const storage = createStorage(baseDocument());
-      const { service, workflowsApi } = createService(storage);
+      const { service } = createService(storage);
 
-      const proposal = await service.dismiss(
+      await service.releaseGate(
         'proposal-1',
-        { dismissReason: 'low_value', rationale: 'Noise, not worth a rule' },
-        decisionContext()
+        releaseParams({
+          approved: false,
+          dismissReason: 'low_value',
+          rationale: 'Noise, not worth a rule',
+        })
       );
 
-      expect(proposal.status).toBe('dismissed');
-      expect(proposal.dismissReason).toBe('low_value');
-      expect(proposal.rationale).toBe('Noise, not worth a rule');
-      expect(workflowsApi.resumeWorkflowExecution).toHaveBeenCalledWith(
-        EXECUTION_ID,
-        SPACE_ID,
-        { approved: false },
-        expect.anything(),
-        expect.anything()
+      const [[indexArgs]] = storage.index.mock.calls;
+      expect(indexArgs.document).toEqual(
+        expect.objectContaining({
+          dismissReason: 'low_value',
+          rationale: 'Noise, not worth a rule',
+          // The decision is the workflow's to write, not the route's.
+          status: 'pending',
+        })
+      );
+      expect(indexArgs.document.decision).toBeUndefined();
+      expect(indexArgs.document.decidedAt).toBeUndefined();
+    });
+
+    it('should guard the write with the loaded sequence number', async () => {
+      const storage = createStorage(baseDocument());
+      const { service } = createService(storage);
+
+      await service.releaseGate('proposal-1', releaseParams({ rationale: 'Looks right' }));
+
+      expect(storage.index).toHaveBeenCalledWith(
+        expect.objectContaining({ if_seq_no: 7, if_primary_term: 1 })
       );
     });
 
-    it('should log and surface a gate that could not be released', async () => {
+    it('should not write at all when neither annotation was supplied', async () => {
       const storage = createStorage(baseDocument());
-      const { service, workflowsApi, logger } = createService(storage);
-      workflowsApi.resumeWorkflowExecution.mockRejectedValue(new Error('resume exploded'));
+      const { service } = createService(storage);
+
+      await service.releaseGate('proposal-1', releaseParams());
+
+      expect(storage.index).not.toHaveBeenCalled();
+    });
+
+    it('should leave nothing written when the action input no longer matches', async () => {
+      const storage = createStorage(baseDocument());
+      const { service, workflowsApi } = createService(storage);
 
       await expect(
-        service.dismiss('proposal-1', { dismissReason: 'low_value' }, decisionContext())
-      ).rejects.toThrow('resume exploded');
+        service.releaseGate(
+          'proposal-1',
+          releaseParams({
+            actionInput: { name: 'something else' },
+            rationale: 'Looks right',
+          })
+        )
+      ).rejects.toBeInstanceOf(ProposalConflictError);
 
-      // Terminal already, so the only trace of the parked gate is the log.
-      expect(storage.index).toHaveBeenCalledTimes(1);
-      expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('resume exploded'));
+      // Every refusal precedes the annotation, so a rejected approval cannot
+      // leave a rationale behind for a decision that never happened.
+      expect(storage.index).not.toHaveBeenCalled();
+      expect(workflowsApi.resumeWorkflowExecution).not.toHaveBeenCalled();
+    });
+
+    it('should leave nothing written when someone else already decided', async () => {
+      const storage = createStorage(baseDocument({ decision: 'approved' }));
+      const { service } = createService(storage);
+
+      await expect(
+        service.releaseGate(
+          'proposal-1',
+          releaseParams({ approved: false, dismissReason: 'low_value' })
+        )
+      ).rejects.toBeInstanceOf(ProposalConflictError);
+      expect(storage.index).not.toHaveBeenCalled();
+    });
+
+    it('should surface a losing concurrency race as a conflict', async () => {
+      const storage = createStorage(baseDocument());
+      const { service } = createService(storage);
+      storage.index.mockRejectedValue(
+        Object.assign(new Error('version conflict'), { statusCode: 409 })
+      );
+
+      await expect(
+        service.releaseGate(
+          'proposal-1',
+          releaseParams({ approved: false, dismissReason: 'low_value' })
+        )
+      ).rejects.toBeInstanceOf(ProposalConflictError);
     });
   });
 
   describe('update', () => {
-    it('should move the proposal to a terminal execution state', async () => {
-      const storage = createStorage(baseDocument({ status: 'approved' }));
+    it('should record the decision and stamp who and when', async () => {
+      const storage = createStorage(baseDocument());
+      const { service } = createService(storage);
+
+      // The decision and its status land in one call: `approved` + `pending` is
+      // not a legal pair, so an approval always says what happens next.
+      const proposal = await service.update(
+        {
+          id: 'proposal-1',
+          decision: 'approved',
+          status: 'executing',
+          decidedBy: analyst('analyst'),
+        },
+        SPACE_ID
+      );
+
+      expect(proposal.decision).toBe('approved');
+      expect(proposal.decidedBy).toEqual(
+        expect.objectContaining({ username: 'analyst', profileUid: 'analyst-uid' })
+      );
+      // Stamped by the service, so the recorded moment is the moment written.
+      expect(proposal.decidedAt).toEqual(expect.any(String));
+    });
+
+    it('should move an approved proposal to a terminal execution state', async () => {
+      const storage = createStorage(baseDocument({ decision: 'approved', status: 'executing' }));
       const { service } = createService(storage);
 
       const proposal = await service.update({ id: 'proposal-1', status: 'succeeded' }, SPACE_ID);
@@ -609,20 +794,189 @@ describe('ProposalsService', () => {
       expect(proposal.status).toBe('succeeded');
     });
 
-    it.each(['succeeded', 'failed', 'dismissed'] as const)(
-      'should refuse to move a proposal that already settled as %s',
-      async (settled) => {
-        const storage = createStorage(baseDocument({ status: settled }));
+    it.each([
+      ['succeeded', 'failed'],
+      ['failed', 'succeeded'],
+      ['expired', 'no_action'],
+      ['no_action', 'succeeded'],
+    ] as const)(
+      'should refuse to move a proposal that already settled as %s to %s',
+      async (settled, target) => {
+        const storage = createStorage(baseDocument({ decision: 'approved', status: settled }));
         const { service } = createService(storage);
 
         // A late on-failure handler must not rewrite an outcome that already
         // happened, so the guard lives here rather than in the workflow YAML.
+        // The target differs from the settled status on purpose: re-writing the
+        // same one is the idempotent case, covered separately below.
         await expect(
-          service.update({ id: 'proposal-1', status: 'failed' }, SPACE_ID)
+          service.update({ id: 'proposal-1', status: target }, SPACE_ID)
         ).rejects.toThrow(ProposalConflictError);
         expect(storage.index).not.toHaveBeenCalled();
       }
     );
+
+    it('should stamp decidedAt when the workflow settles a proposal nobody decided', async () => {
+      const storage = createStorage(baseDocument());
+      const { service } = createService(storage);
+
+      // `chartsSummary` reads `decidedAt` as the "closed" event. A malfunction
+      // settling a proposal `expired` while its deadline is still in the future
+      // would otherwise read as open until that deadline arrived.
+      const proposal = await service.update({ id: 'proposal-1', status: 'expired' }, SPACE_ID);
+
+      expect(proposal.decidedAt).toEqual(expect.any(String));
+      // Settled, but nobody decided it.
+      expect(proposal.decision).toBeUndefined();
+      expect(proposal.decidedBy).toBeUndefined();
+    });
+
+    it('should not stamp decidedAt while the proposal is still awaiting', async () => {
+      const storage = createStorage(baseDocument());
+      const { service } = createService(storage);
+
+      const proposal = await service.update({ id: 'proposal-1', rationale: 'Noted' }, SPACE_ID);
+
+      expect(proposal.decidedAt).toBeUndefined();
+    });
+
+    it('should never move decidedAt once it is set', async () => {
+      const storage = createStorage(
+        baseDocument({
+          decision: 'approved',
+          status: 'executing',
+          decidedAt: '2026-09-02T00:00:00.000Z',
+        })
+      );
+      const { service } = createService(storage);
+
+      const proposal = await service.update({ id: 'proposal-1', status: 'succeeded' }, SPACE_ID);
+
+      // Write-once: the moment it stopped awaiting does not change because the
+      // action later finished.
+      expect(proposal.decidedAt).toBe('2026-09-02T00:00:00.000Z');
+    });
+
+    it('should accept re-writing the same terminal status, so the failure handler is idempotent', async () => {
+      const storage = createStorage(baseDocument({ decision: 'approved', status: 'failed' }));
+      const { service } = createService(storage);
+
+      // Reachable on the normal failure path: the loop records `failed`, the
+      // clone then throws, and the workflow-level handler records `failed`
+      // again. Refusing that would replace the real error with a conflict
+      // about recording it.
+      const proposal = await service.update(
+        { id: 'proposal-1', status: 'failed', executionError: 'clone unavailable' },
+        SPACE_ID
+      );
+
+      expect(proposal.status).toBe('failed');
+      expect(proposal.executionError).toBe('clone unavailable');
+    });
+
+    it('should reject a decision written without the status it implies', async () => {
+      const storage = createStorage(baseDocument());
+      const { service } = createService(storage);
+
+      // `approved` + `pending` is not a legal pair, so an approval has to say
+      // what happens next in the same call.
+      await expect(
+        service.update({ id: 'proposal-1', decision: 'approved' }, SPACE_ID)
+      ).rejects.toThrow(ProposalConflictError);
+      expect(storage.index).not.toHaveBeenCalled();
+    });
+
+    it('should refuse to move a proposal to superseded, which only revise() establishes', async () => {
+      const storage = createStorage(baseDocument());
+      const { service } = createService(storage);
+
+      // A terminal row with no successor would still read as live.
+      await expect(
+        service.update({ id: 'proposal-1', status: 'superseded' }, SPACE_ID)
+      ).rejects.toThrow(ProposalConflictError);
+      expect(storage.index).not.toHaveBeenCalled();
+    });
+
+    it('should accept a dismissal written with its status in one call', async () => {
+      const storage = createStorage(baseDocument());
+      const { service } = createService(storage);
+
+      const proposal = await service.update(
+        { id: 'proposal-1', decision: 'dismissed', status: 'no_action' },
+        SPACE_ID
+      );
+
+      expect(proposal.decision).toBe('dismissed');
+      expect(proposal.status).toBe('no_action');
+    });
+
+    it('should refuse to overwrite a decision that was already recorded', async () => {
+      const storage = createStorage(baseDocument({ decision: 'approved', status: 'pending' }));
+      const { service } = createService(storage);
+
+      // Independent of the status guard: this proposal is still `pending`, so
+      // only the decision's own immutability can refuse a second approver.
+      await expect(
+        service.update({ id: 'proposal-1', decision: 'dismissed' }, SPACE_ID)
+      ).rejects.toThrow(ProposalConflictError);
+      expect(storage.index).not.toHaveBeenCalled();
+    });
+
+    it('should still annotate a proposal whose status already settled', async () => {
+      const storage = createStorage(baseDocument({ decision: 'approved', status: 'failed' }));
+      const { service } = createService(storage);
+
+      // Only status transitions and the decision are guarded, which is what
+      // lets `clone` mark a failed original as superseded.
+      const proposal = await service.update(
+        { id: 'proposal-1', rationale: 'Retried as a new proposal' },
+        SPACE_ID
+      );
+
+      expect(proposal.rationale).toBe('Retried as a new proposal');
+      expect(proposal.status).toBe('failed');
+    });
+
+    it.each([
+      [undefined, 'pending'],
+      [undefined, 'expired'],
+      ['dismissed', 'no_action'],
+      ['approved', 'no_action'],
+      ['approved', 'executing'],
+      ['approved', 'succeeded'],
+      ['approved', 'failed'],
+    ] as const)('should accept the valid pair %s + %s', async (decision, status) => {
+      const storage = createStorage(baseDocument({ decision, status: 'pending' }));
+      const { service } = createService(storage);
+
+      const proposal = await service.update({ id: 'proposal-1', status }, SPACE_ID);
+
+      expect(proposal.status).toBe(status);
+      expect(proposal.decision).toBe(decision);
+    });
+
+    it.each([
+      [undefined, 'executing'],
+      [undefined, 'succeeded'],
+      [undefined, 'failed'],
+      [undefined, 'no_action'],
+      ['dismissed', 'executing'],
+      ['dismissed', 'succeeded'],
+      ['dismissed', 'failed'],
+      ['dismissed', 'expired'],
+      ['approved', 'expired'],
+    ] as const)('should reject the invalid pair %s + %s', async (decision, status) => {
+      const storage = createStorage(baseDocument({ decision, status: 'pending' }));
+      const { service } = createService(storage);
+
+      // `dismissed` + `executing` would claim an action is running for a
+      // proposal that was declined; `expired` means nobody answered, which a
+      // decision contradicts.
+      await expect(service.update({ id: 'proposal-1', status }, SPACE_ID)).rejects.toThrow(
+        ProposalConflictError
+      );
+      expect(storage.index).not.toHaveBeenCalled();
+    });
 
     it('should refuse a blank id without issuing an unsearchable ids query', async () => {
       const storage = createStorage(baseDocument());
@@ -630,7 +984,7 @@ describe('ProposalsService', () => {
 
       // An on-failure handler that fires before creation succeeded resolves its
       // template to ''. Elasticsearch would answer with an opaque shard failure.
-      await expect(service.update({ id: '', status: 'failed' }, SPACE_ID)).rejects.toBeInstanceOf(
+      await expect(service.update({ id: '', status: 'expired' }, SPACE_ID)).rejects.toBeInstanceOf(
         ProposalNotFoundError
       );
 
@@ -638,16 +992,621 @@ describe('ProposalsService', () => {
     });
 
     it('should keep the failure detail when the action failed', async () => {
-      const storage = createStorage(baseDocument({ status: 'executing' }));
+      const storage = createStorage(baseDocument({ decision: 'approved', status: 'executing' }));
       const { service } = createService(storage);
 
       const proposal = await service.update(
-        { id: 'proposal-1', status: 'failed', executionError: 'gate timed out' },
+        { id: 'proposal-1', status: 'failed', executionError: 'action exploded' },
         SPACE_ID
       );
 
       expect(proposal.status).toBe('failed');
-      expect(proposal.executionError).toBe('gate timed out');
+      expect(proposal.executionError).toBe('action exploded');
+    });
+
+    it('should leave untouched fields alone rather than clearing them', async () => {
+      const storage = createStorage(
+        baseDocument({ decision: 'approved', status: 'executing', rationale: 'Looks right' })
+      );
+      const { service } = createService(storage);
+
+      const proposal = await service.update({ id: 'proposal-1', status: 'succeeded' }, SPACE_ID);
+
+      expect(proposal.rationale).toBe('Looks right');
+    });
+  });
+
+  describe('clone', () => {
+    it('should inherit the deadline and creation time from the original', async () => {
+      const storage = createStorage(
+        baseDocument({
+          decision: 'approved',
+          status: 'failed',
+          createdAt: '2026-09-01T00:00:00.000Z',
+          expiresAt: '2026-09-04T00:00:00.000Z',
+        })
+      );
+      const { service } = createService(storage);
+
+      const cloneId = await service.clone({ id: 'proposal-1' }, SPACE_ID);
+
+      const [[cloneArgs]] = storage.index.mock.calls;
+      expect(cloneArgs.id).toBe(cloneId);
+      expect(cloneArgs.op_type).toBe('create');
+      // The deadline belongs to the analyst, not the attempt: restarting it
+      // would let a chain of retries outlive any deadline the queue showed.
+      expect(cloneArgs.document).toMatchObject({
+        createdAt: '2026-09-01T00:00:00.000Z',
+        expiresAt: '2026-09-04T00:00:00.000Z',
+      });
+    });
+
+    it('should carry the subject over and reset the decision', async () => {
+      const storage = createStorage(
+        baseDocument({
+          decision: 'approved',
+          status: 'failed',
+          decidedBy: analyst('analyst'),
+          decidedAt: '2026-09-02T00:00:00.000Z',
+          executionError: 'action exploded',
+          rationale: 'Looks right',
+        })
+      );
+      const { service } = createService(storage);
+
+      await service.clone({ id: 'proposal-1' }, SPACE_ID);
+
+      const [[cloneArgs]] = storage.index.mock.calls;
+      expect(cloneArgs.document).toMatchObject({
+        conversationId: 'conv-1',
+        comment: 'Tune the noisy rule',
+        actionWorkflowId: 'system-alertzero-action-create-rule',
+        actionInput: { name: 'Suspicious PowerShell' },
+        impact: 'low',
+        confidence: 'medium',
+        category: 'tune',
+        origin: 'worker',
+        status: 'pending',
+        // The clone points at the same still-parked gate execution, so
+        // approving it resumes that execution rather than stranding.
+        workflowExecutionId: EXECUTION_ID,
+      });
+      expect(cloneArgs.document.decision).toBeUndefined();
+      expect(cloneArgs.document.decidedBy).toBeUndefined();
+      expect(cloneArgs.document.decidedAt).toBeUndefined();
+      expect(cloneArgs.document.executionError).toBeUndefined();
+      expect(cloneArgs.document.rationale).toBeUndefined();
+    });
+
+    it('should mark the original as superseded by the clone', async () => {
+      const storage = createStorage(baseDocument({ decision: 'approved', status: 'failed' }));
+      const { service } = createService(storage);
+
+      const cloneId = await service.clone(
+        { id: 'proposal-1', executionError: 'action exploded' },
+        SPACE_ID
+      );
+
+      const [, [supersedeArgs]] = storage.index.mock.calls;
+      expect(supersedeArgs.id).toBe('proposal-1');
+      // Permitted on a proposal that already settled as `failed`, because
+      // neither the status nor the decision moves here.
+      expect(supersedeArgs.document).toMatchObject({
+        supersededBy: cloneId,
+        status: 'failed',
+        executionError: 'action exploded',
+      });
+    });
+
+    it('should refuse to clone a proposal that was already superseded', async () => {
+      const storage = createStorage(
+        baseDocument({ decision: 'approved', status: 'failed', supersededBy: 'proposal-2' })
+      );
+      const { service } = createService(storage);
+
+      // Overwriting the pointer would orphan the first clone: it would stay
+      // live and undecided with nothing referring to it.
+      await expect(service.clone({ id: 'proposal-1' }, SPACE_ID)).rejects.toBeInstanceOf(
+        ProposalConflictError
+      );
+      expect(storage.index).not.toHaveBeenCalled();
+    });
+
+    it('should create the clone before marking the original, so a lost race shows both', async () => {
+      const storage = createStorage(baseDocument({ decision: 'approved', status: 'failed' }));
+      const { service } = createService(storage);
+      storage.index
+        .mockResolvedValueOnce({ _id: 'clone' })
+        .mockRejectedValueOnce(Object.assign(new Error('version conflict'), { statusCode: 409 }));
+
+      await expect(service.clone({ id: 'proposal-1' }, SPACE_ID)).rejects.toBeInstanceOf(
+        ProposalConflictError
+      );
+
+      // Marking first would leave a pointer to a clone that does not exist,
+      // hiding the original with nothing live in its place.
+      const [[cloneArgs]] = storage.index.mock.calls;
+      expect(cloneArgs.op_type).toBe('create');
+      expect(cloneArgs.id).not.toBe('proposal-1');
+    });
+
+    it('should throw when the original does not exist in the space', async () => {
+      const storage = createStorage();
+      const { service } = createService(storage);
+
+      await expect(service.clone({ id: 'missing' }, SPACE_ID)).rejects.toBeInstanceOf(
+        ProposalNotFoundError
+      );
+    });
+
+    // Reachable as a registered step, so any workflow could otherwise re-open
+    // a settled proposal as `pending` and hide the real one behind
+    // `supersededBy`. A failed action is the only thing there is to re-offer.
+    it.each([
+      ['a proposal nobody has decided', { decision: undefined, status: 'pending' as const }],
+      [
+        'an approval that has not run yet',
+        { decision: 'approved' as const, status: 'executing' as const },
+      ],
+      ['an action that succeeded', { decision: 'approved' as const, status: 'succeeded' as const }],
+      ['a dismissal', { decision: 'dismissed' as const, status: 'no_action' as const }],
+      ['an expired proposal', { decision: undefined, status: 'expired' as const }],
+    ])('should refuse to clone %s', async (_label, overrides) => {
+      const storage = createStorage(baseDocument(overrides));
+      const { service } = createService(storage);
+
+      await expect(service.clone({ id: 'proposal-1' }, SPACE_ID)).rejects.toBeInstanceOf(
+        ProposalConflictError
+      );
+      expect(storage.index).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('revise', () => {
+    it('creates a new pending revision and marks the original superseded', async () => {
+      const storage = createStorage(baseDocument());
+      const { service } = createService(storage);
+
+      const result = await service.revise(
+        { id: 'proposal-1', comment: 'Tightened the match' },
+        SPACE_ID
+      );
+
+      expect(result).toEqual({ proposalId: expect.any(String), revision: 2 });
+      expect(result.proposalId).not.toBe('proposal-1');
+
+      expect(storage.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: result.proposalId,
+          op_type: 'create',
+          document: expect.objectContaining({
+            rootProposalId: 'proposal-1',
+            supersedes: 'proposal-1',
+            revision: 2,
+            status: 'pending',
+            comment: 'Tightened the match',
+            supersededBy: undefined,
+            decision: undefined,
+          }),
+        })
+      );
+      expect(storage.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'proposal-1',
+          document: expect.objectContaining({
+            status: 'superseded',
+            supersededBy: result.proposalId,
+          }),
+        })
+      );
+    });
+
+    it('creates the new revision before marking the original, mirroring clone()', async () => {
+      const storage = createStorage(baseDocument());
+      const { service } = createService(storage);
+
+      await service.revise({ id: 'proposal-1' }, SPACE_ID);
+
+      const newRevisionCallOrder = storage.index.mock.invocationCallOrder[0];
+      const supersedeCallOrder = storage.index.mock.invocationCallOrder[1];
+      expect(newRevisionCallOrder).toBeLessThan(supersedeCallOrder);
+    });
+
+    it('inherits createdAt and expiresAt from the original unchanged', async () => {
+      const storage = createStorage(
+        baseDocument({
+          createdAt: '2026-09-01T00:00:00.000Z',
+          expiresAt: '2099-01-01T00:00:00.000Z',
+        })
+      );
+      const { service } = createService(storage);
+
+      await service.revise({ id: 'proposal-1' }, SPACE_ID);
+
+      expect(storage.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            createdAt: '2026-09-01T00:00:00.000Z',
+            expiresAt: '2099-01-01T00:00:00.000Z',
+          }),
+        })
+      );
+    });
+
+    it('carries rootProposalId forward unchanged across a multi-hop chain', async () => {
+      // Revision 3 of a chain whose root is proposal-1 — revising it must not
+      // start a new root, only extend the existing chain.
+      const storage = createStorage(
+        baseDocument({ rootProposalId: 'proposal-1', supersedes: 'proposal-2', revision: 3 })
+      );
+      const { service } = createService(storage);
+
+      const result = await service.revise({ id: 'proposal-3' }, SPACE_ID);
+
+      expect(result.revision).toBe(4);
+      expect(storage.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            rootProposalId: 'proposal-1',
+            supersedes: 'proposal-3',
+            revision: 4,
+          }),
+        })
+      );
+    });
+
+    it('treats an undefined revision on the original as revision 1 (pre-existing records)', async () => {
+      const storage = createStorage(
+        baseDocument({ revision: undefined, rootProposalId: undefined })
+      );
+      const { service } = createService(storage);
+
+      const result = await service.revise({ id: 'proposal-1' }, SPACE_ID);
+
+      expect(result.revision).toBe(2);
+      expect(storage.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({ rootProposalId: 'proposal-1', revision: 2 }),
+        })
+      );
+    });
+
+    it('rejects revising a proposal that is already superseded', async () => {
+      const storage = createStorage(
+        baseDocument({ status: 'superseded', supersededBy: 'proposal-2' })
+      );
+      const { service } = createService(storage);
+
+      await expect(service.revise({ id: 'proposal-1' }, SPACE_ID)).rejects.toBeInstanceOf(
+        ProposalConflictError
+      );
+      expect(storage.index).not.toHaveBeenCalled();
+    });
+
+    it('rejects revising a proposal that already has a decision', async () => {
+      const storage = createStorage(baseDocument({ decision: 'approved', status: 'executing' }));
+      const { service } = createService(storage);
+
+      await expect(service.revise({ id: 'proposal-1' }, SPACE_ID)).rejects.toBeInstanceOf(
+        ProposalConflictError
+      );
+      expect(storage.index).not.toHaveBeenCalled();
+    });
+
+    it('rejects revising a proposal past its decision deadline, even though its status still reads pending', async () => {
+      const storage = createStorage(baseDocument({ expiresAt: '2020-01-01T00:00:00.000Z' }));
+      const { service } = createService(storage);
+
+      await expect(service.revise({ id: 'proposal-1' }, SPACE_ID)).rejects.toBeInstanceOf(
+        ProposalExpiredError
+      );
+      expect(storage.index).not.toHaveBeenCalled();
+    });
+
+    it('rejects revising a proposal that is not pending (e.g. executing)', async () => {
+      const storage = createStorage(baseDocument({ status: 'executing' }));
+      const { service } = createService(storage);
+
+      await expect(service.revise({ id: 'proposal-1' }, SPACE_ID)).rejects.toBeInstanceOf(
+        ProposalConflictError
+      );
+      expect(storage.index).not.toHaveBeenCalled();
+    });
+
+    it('does not resume or release the waitForApproval gate', async () => {
+      const storage = createStorage(baseDocument());
+      const { service, workflowsApi } = createService(storage);
+
+      await service.revise({ id: 'proposal-1' }, SPACE_ID);
+
+      expect(workflowsApi.resumeWorkflowExecution).not.toHaveBeenCalled();
+    });
+
+    it('merges an actionInput override over the original instead of replacing it', async () => {
+      const storage = createStorage(
+        baseDocument({ actionInput: { name: 'Suspicious PowerShell', severity: 'medium' } })
+      );
+      const { service } = createService(storage);
+
+      await service.revise({ id: 'proposal-1', actionInput: { severity: 'high' } }, SPACE_ID);
+
+      // The stored input keeps the keys the caller did not mention: a
+      // replacement would silently drop `name`, which the action requires.
+      expect(storage.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            actionInput: { name: 'Suspicious PowerShell', severity: 'high' },
+          }),
+        })
+      );
+    });
+
+    it('validates the merged actionInput against the original action workflow', async () => {
+      const storage = createStorage(
+        baseDocument({ actionInput: { name: 'Suspicious PowerShell' } })
+      );
+      const workflowsApi = createWorkflowsApi();
+      workflowsApi.getWorkflow.mockResolvedValue({
+        definition: {
+          consts: { actionMetadata: { name: 'Create rule', category: 'tune' } },
+          triggers: [
+            {
+              type: 'manual',
+              inputs: {
+                properties: {
+                  actionInput: {
+                    type: 'object',
+                    properties: { name: { type: 'string' } },
+                    required: ['name'],
+                  },
+                },
+              },
+            },
+          ],
+        },
+      });
+      const { service } = createService(storage, workflowsApi);
+
+      // The original input was valid; only the override makes it unrunnable.
+      // Caught here rather than after the analyst approves the revision.
+      await expect(
+        service.revise({ id: 'proposal-1', actionInput: { name: 123 } }, SPACE_ID)
+      ).rejects.toThrow(ProposalInvalidActionInputError);
+      expect(storage.index).not.toHaveBeenCalled();
+    });
+
+    it('recomputes the sort ranks when the rating overrides change', async () => {
+      const storage = createStorage(
+        baseDocument({ impact: 'low', confidence: 'medium', impactRank: 3, confidenceRank: 1 })
+      );
+      const { service } = createService(storage);
+
+      await service.revise({ id: 'proposal-1', impact: 'critical', confidence: 'low' }, SPACE_ID);
+
+      // Without the recompute the revision would read `critical` while still
+      // sorting as `low`, because the queue orders on the rank mirrors.
+      expect(storage.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            impact: 'critical',
+            confidence: 'low',
+            impactRank: 0,
+            confidenceRank: 2,
+          }),
+        })
+      );
+    });
+
+    it('keeps the inherited rating rank when only the other rating is overridden', async () => {
+      const storage = createStorage(
+        baseDocument({ impact: 'low', confidence: 'medium', impactRank: 3, confidenceRank: 1 })
+      );
+      const { service } = createService(storage);
+
+      await service.revise({ id: 'proposal-1', confidence: 'high' }, SPACE_ID);
+
+      expect(storage.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            impact: 'low',
+            confidence: 'high',
+            impactRank: 3,
+            confidenceRank: 0,
+          }),
+        })
+      );
+    });
+
+    it('retires the revision it created when the predecessor write loses its race', async () => {
+      const storage = createStorage(baseDocument());
+      const { service } = createService(storage);
+      storage.index
+        .mockResolvedValueOnce({ _id: 'revision-1' })
+        .mockRejectedValueOnce(Object.assign(new Error('version conflict'), { statusCode: 409 }));
+
+      await expect(service.revise({ id: 'proposal-1' }, SPACE_ID)).rejects.toBeInstanceOf(
+        ProposalConflictError
+      );
+
+      // The losing side must not leave a live, unreferenced second head behind.
+      const createdId = storage.index.mock.calls[0][0].id;
+      expect(storage.delete).toHaveBeenCalledWith({ id: createdId });
+    });
+
+    it('leaves the created revision in place when the predecessor write fails ambiguously', async () => {
+      const storage = createStorage(baseDocument());
+      const { service } = createService(storage);
+      storage.index
+        .mockResolvedValueOnce({ _id: 'revision-1' })
+        .mockRejectedValueOnce(new Error('connection reset'));
+
+      // A non-conflict failure does not prove the predecessor write did not land,
+      // so the ambiguous case keeps both rows rather than risk orphaning it.
+      await expect(service.revise({ id: 'proposal-1' }, SPACE_ID)).rejects.toThrow(
+        'connection reset'
+      );
+      expect(storage.delete).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getLatestRevision', () => {
+    it('returns the proposal itself when it is the live revision', async () => {
+      const storage = createStorage(baseDocument({ rootProposalId: 'proposal-1', revision: 1 }));
+      const { service } = createService(storage);
+
+      const result = await service.getLatestRevision('proposal-1', SPACE_ID);
+
+      expect(result).toEqual({
+        proposalId: 'proposal-1',
+        revision: 1,
+        status: 'pending',
+        decision: undefined,
+        actionInput: { name: 'Suspicious PowerShell' },
+      });
+    });
+
+    it('resolves to the current live revision when asked about an older, superseded one', async () => {
+      // The hit's document determines the "live" answer regardless of which id in
+      // the chain was asked about — this is what makes the query O(1).
+      const rootDocument = baseDocument({
+        rootProposalId: 'proposal-1',
+        supersededBy: 'proposal-2',
+      });
+      const liveDocument = baseDocument({
+        rootProposalId: 'proposal-1',
+        supersedes: 'proposal-1',
+        revision: 2,
+        status: 'pending',
+        // Deliberately different from the root's: a caller resolving the head has to
+        // run these parameters, not the ones the analyst revised away.
+        actionInput: { name: 'Revised PowerShell' },
+      });
+      const storage = createStorage(rootDocument);
+      // Dispatch on the query, not call order, so the asked-about row and the head
+      // are genuinely different documents: answering both with the head would let a
+      // read of the wrong document pass unnoticed.
+      storage.search.mockImplementation(async (request: { query?: unknown }) => {
+        const filter =
+          (
+            request.query as
+              | {
+                  bool?: {
+                    filter?: Array<{ term?: Record<string, unknown>; ids?: { values: string[] } }>;
+                  };
+                }
+              | undefined
+          )?.bool?.filter ?? [];
+        const asksForRoot = filter.some((clause) => clause.term?.rootProposalId !== undefined);
+        const askedForId = filter.find((clause) => clause.ids !== undefined)?.ids?.values[0];
+
+        if (asksForRoot) {
+          return { hits: { hits: [searchHit(liveDocument, 'proposal-2')], total: { value: 1 } } };
+        }
+        return askedForId === 'proposal-2'
+          ? { hits: { hits: [searchHit(liveDocument, 'proposal-2')], total: { value: 1 } } }
+          : { hits: { hits: [searchHit(rootDocument, 'proposal-1')], total: { value: 1 } } };
+      });
+      const { service } = createService(storage);
+
+      const result = await service.getLatestRevision('proposal-1', SPACE_ID);
+
+      expect(result).toEqual({
+        proposalId: 'proposal-2',
+        revision: 2,
+        status: 'pending',
+        decision: undefined,
+        actionInput: { name: 'Revised PowerShell' },
+      });
+      expect(storage.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: expect.objectContaining({
+            bool: expect.objectContaining({
+              filter: expect.arrayContaining([{ term: { rootProposalId: 'proposal-1' } }]),
+              must_not: [{ exists: { field: 'supersededBy' } }],
+            }),
+          }),
+        })
+      );
+    });
+
+    it('falls back to the asked-about proposal if the chain query finds no live revision', async () => {
+      const document = baseDocument({ rootProposalId: 'proposal-1', revision: 1 });
+      const storage = createStorage(document);
+      // First call is the internal load(); second is the chain query — only
+      // the chain query should come back empty, otherwise this is testing a
+      // different failure (load() itself finding nothing).
+      storage.search
+        .mockResolvedValueOnce({
+          hits: { hits: [searchHit(document, 'proposal-1')], total: { value: 1 } },
+        })
+        .mockResolvedValueOnce({ hits: { hits: [], total: { value: 0 } } });
+      const { service } = createService(storage);
+
+      const result = await service.getLatestRevision('proposal-1', SPACE_ID);
+
+      expect(result).toEqual({
+        proposalId: 'proposal-1',
+        revision: 1,
+        status: 'pending',
+        decision: undefined,
+        actionInput: { name: 'Suspicious PowerShell' },
+      });
+    });
+
+    it('follows supersededBy pointers for a chain written before rootProposalId existed', async () => {
+      // No `rootProposalId` on either row: the term query cannot find this
+      // chain, so the pointer walk is the only way to the live head.
+      const legacyRoot = baseDocument({ supersededBy: 'proposal-2' });
+      const live = baseDocument({
+        supersedes: 'proposal-1',
+        revision: 2,
+        status: 'pending',
+        actionInput: { name: 'Revised PowerShell' },
+      });
+      const storage = createStorage(legacyRoot);
+      // Dispatch on the query, not call order. A legacy row carries no
+      // `rootProposalId`, so the chain query answers empty and the pointer walk is
+      // forced; answering it elsewhere would pass without the walk ever running.
+      interface QueryClause {
+        term?: Record<string, unknown>;
+        ids?: { values: string[] };
+      }
+      const queryFilter = (request: { query?: unknown }): QueryClause[] =>
+        (request.query as { bool?: { filter?: QueryClause[] } } | undefined)?.bool?.filter ?? [];
+      storage.search.mockImplementation(async (request) => {
+        const filter = queryFilter(request);
+        if (filter.some((clause) => clause.term?.rootProposalId !== undefined)) {
+          return { hits: { hits: [], total: { value: 0 } } };
+        }
+        const requestedId = filter.find((clause) => clause.ids !== undefined)?.ids?.values[0];
+        return requestedId === 'proposal-2'
+          ? { hits: { hits: [searchHit(live, 'proposal-2')], total: { value: 1 } } }
+          : { hits: { hits: [searchHit(legacyRoot, 'proposal-1')], total: { value: 1 } } };
+      });
+      const { service } = createService(storage);
+
+      const result = await service.getLatestRevision('proposal-1', SPACE_ID);
+
+      // Answering with the stale member would hand a parked gate an id whose
+      // decision write `update()` then refuses.
+      expect(result).toEqual({
+        proposalId: 'proposal-2',
+        revision: 2,
+        status: 'pending',
+        decision: undefined,
+        actionInput: { name: 'Revised PowerShell' },
+      });
+      // The successor is reached by following its pointer, not by the root
+      // term — a chain query for this row would be an empty answer.
+      expect(storage.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: {
+            bool: {
+              filter: [{ ids: { values: ['proposal-2'] } }, { term: { spaceId: SPACE_ID } }],
+            },
+          },
+        })
+      );
     });
   });
 
@@ -756,6 +1715,57 @@ describe('ProposalsService', () => {
       expect(JSON.stringify(searchArgs.query.bool.filter)).not.toContain('expiresAt');
     });
 
+    it('should express awaiting a decision as the pending status alone', async () => {
+      const storage = createStorage(baseDocument());
+      const { service } = createService(storage);
+
+      await service.list(listQuery({ status: 'pending' }), SPACE_ID);
+
+      // `pending` is only ever valid while undecided, so no separate
+      // decision-absence clause is needed to say "awaiting".
+      const [[searchArgs]] = storage.search.mock.calls;
+      expect(searchArgs.query.bool.filter).toEqual(
+        expect.arrayContaining([{ term: { status: 'pending' } }])
+      );
+      expect(JSON.stringify(searchArgs.query.bool.filter)).not.toContain('decision');
+    });
+
+    it('should filter by decision when one is requested', async () => {
+      const storage = createStorage(baseDocument());
+      const { service } = createService(storage);
+
+      await service.list(listQuery({ decision: 'dismissed' }), SPACE_ID);
+
+      const [[searchArgs]] = storage.search.mock.calls;
+      expect(searchArgs.query.bool.filter).toEqual(
+        expect.arrayContaining([{ term: { decision: 'dismissed' } }])
+      );
+    });
+
+    it('should drop superseded proposals so a retried chain shows only its head', async () => {
+      const storage = createStorage(baseDocument());
+      const { service } = createService(storage);
+
+      await service.list(listQuery({ excludeSuperseded: true }), SPACE_ID);
+
+      const [[searchArgs]] = storage.search.mock.calls;
+      expect(searchArgs.query.bool.filter).toEqual(
+        expect.arrayContaining([{ bool: { must_not: { exists: { field: 'supersededBy' } } } }])
+      );
+    });
+
+    it('should not filter on decision or supersession by default', async () => {
+      const storage = createStorage(baseDocument());
+      const { service } = createService(storage);
+
+      await service.list(listQuery(), SPACE_ID);
+
+      const [[searchArgs]] = storage.search.mock.calls;
+      const filter = JSON.stringify(searchArgs.query.bool.filter);
+      expect(filter).not.toContain('decision');
+      expect(filter).not.toContain('supersededBy');
+    });
+
     it('should not leak the storage-only sort ranks into the response', async () => {
       const storage = createStorage(baseDocument());
       const { service } = createService(storage);
@@ -769,11 +1779,12 @@ describe('ProposalsService', () => {
 
   describe('listByWindow', () => {
     const activityQuery = (decidedWithinHours = 24) => ({
-      includeStatuses: ['pending' as const],
       decidedWithinHours,
+      excludeSuperseded: true,
+      excludeExpired: false,
     });
 
-    it('includes pending proposals regardless of age', async () => {
+    it('includes proposals awaiting a decision regardless of age', async () => {
       const storage = createStorage(baseDocument({ status: 'pending' }));
       const { service } = createService(storage);
 
@@ -782,7 +1793,7 @@ describe('ProposalsService', () => {
       expect(proposals).toHaveLength(1);
     });
 
-    it('queries with a should disjunction covering pending and decided-within-window', async () => {
+    it('unions awaiting with decided-within-window', async () => {
       const storage = createStorage(baseDocument());
       const { service } = createService(storage);
 
@@ -790,14 +1801,62 @@ describe('ProposalsService', () => {
 
       const [[searchArgs]] = storage.search.mock.calls;
       const { bool } = searchArgs.query;
-      expect(bool.filter).toEqual(expect.arrayContaining([{ term: { spaceId: SPACE_ID } }]));
       expect(bool.minimum_should_match).toBe(1);
-      expect(bool.should).toEqual(
-        expect.arrayContaining([
-          { terms: { status: ['pending'] } },
-          { range: { decidedAt: { gte: 'now-48h' } } },
-        ])
+      // `pending` is only ever valid while undecided, so the status is the
+      // whole awaiting condition.
+      expect(bool.should).toEqual([
+        { term: { status: 'pending' } },
+        { range: { decidedAt: { gte: 'now-48h' } } },
+      ]);
+    });
+
+    it('applies the shared filters exactly as list does', async () => {
+      const storage = createStorage(baseDocument());
+      const { service } = createService(storage);
+
+      await service.listByWindow(
+        { ...activityQuery(), conversationId: 'conv-1', excludeExpired: true },
+        SPACE_ID
       );
+      await service.list(
+        listQuery({ conversationId: 'conv-1', excludeExpired: true, excludeSuperseded: true }),
+        SPACE_ID
+      );
+
+      // Both reads translate the vocabulary through the same builder, so a
+      // filter cannot come to mean one thing here and another there.
+      const [[windowArgs], [listArgs]] = storage.search.mock.calls;
+      expect(windowArgs.query.bool.filter).toEqual(listArgs.query.bool.filter);
+    });
+
+    it('drops superseded proposals so a retried chain appears once', async () => {
+      const storage = createStorage(baseDocument());
+      const { service } = createService(storage);
+
+      await service.listByWindow(activityQuery(), SPACE_ID);
+
+      const [[searchArgs]] = storage.search.mock.calls;
+      expect(searchArgs.query.bool.filter).toEqual(
+        expect.arrayContaining([{ bool: { must_not: { exists: { field: 'supersededBy' } } } }])
+      );
+    });
+
+    it('reaches a recently expired proposal through the decided leg, not the awaiting one', async () => {
+      // `update` stamps `decidedAt` when it settles a proposal nobody decided,
+      // so an expired one does match the decided-recently leg — deliberately,
+      // because "you missed this" is activity worth surfacing. It carries no
+      // decision, so a consumer has to classify on the status rather than the
+      // decision or it lands back in the open queue.
+      const storage = createStorage(baseDocument());
+      const { service } = createService(storage);
+
+      await service.listByWindow(activityQuery(), SPACE_ID);
+
+      const [[searchArgs]] = storage.search.mock.calls;
+      expect(searchArgs.query.bool.should).toEqual([
+        { term: { status: 'pending' } },
+        { range: { decidedAt: { gte: 'now-24h' } } },
+      ]);
     });
 
     it('returns truncated=true when total exceeds the cap', async () => {
@@ -975,6 +2034,25 @@ describe('ProposalsService', () => {
 
       for (const query of issuedQueries(storage)) {
         expect(query).not.toMatch(/expiresAt\s*>\s*NOW\(\)/i);
+      }
+    });
+
+    /**
+     * The regression this guards: a superseded proposal has no `decidedAt` —
+     * being revised is not a decision — and inherits its predecessor's
+     * `expiresAt`, so without this term the anchor, opens and expiries queries
+     * all count it as still open alongside the revision that replaced it.
+     */
+    it('should exclude superseded proposals from every query', async () => {
+      const storage = createStorage();
+      const { service } = createService(storage);
+
+      await service.chartsSummary(chartsQuery, SPACE_ID);
+
+      const queries = issuedQueries(storage);
+      expect(queries).toHaveLength(4);
+      for (const query of queries) {
+        expect(query).toMatch(/supersededBy\s+IS\s+NULL/i);
       }
     });
 

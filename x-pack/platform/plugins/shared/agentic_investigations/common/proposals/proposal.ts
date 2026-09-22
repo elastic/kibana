@@ -11,16 +11,30 @@ import { z } from '@kbn/zod/v4';
 import { MAX_CHARTS_SUMMARY_BUCKETS } from './constants';
 
 /**
- * A proposal terminates at `approved` when it carries no action; only
- * action-bearing proposals reach the execution states.
+ * What a human concluded. Absent until someone decides, which is what makes
+ * "awaiting a decision" answerable regardless of the surface that decided.
+ * Immutable once set.
+ */
+export const proposalDecisionSchema = z.enum(['approved', 'dismissed']);
+export type ProposalDecision = z.infer<typeof proposalDecisionSchema>;
+
+/**
+ * Where the proposal got to, independent of what was decided. `no_action`
+ * means a human answered and nothing will execute — a dismissal, or an
+ * approval of a proposal that carries no action; without it both would sit at
+ * `pending` forever, indistinguishable from awaiting. `expired` means nobody
+ * answered in time, so `dismissed` no longer does double duty for "declined"
+ * and "deadline passed".
  */
 export const proposalStatusSchema = z.enum([
   'pending',
-  'approved',
   'executing',
   'succeeded',
   'failed',
-  'dismissed',
+  'expired',
+  'no_action',
+  /** Replaced by a revision, not rejected — distinct from `dismissed`/`no_action`. */
+  'superseded',
 ]);
 export type ProposalStatus = z.infer<typeof proposalStatusSchema>;
 
@@ -60,7 +74,7 @@ export type DismissReason = z.infer<typeof dismissReasonSchema>;
 const MAX_ID_LENGTH = 256;
 const MAX_NAME_LENGTH = 256;
 /** Markdown shown to a human, so it needs room without being unbounded. */
-const MAX_COMMENT_LENGTH = 8192;
+export const MAX_COMMENT_LENGTH = 8192;
 const MAX_RATIONALE_LENGTH = 4096;
 const MAX_ERROR_LENGTH = 4096;
 /** ISO 8601 timestamps; generous enough for any offset notation. */
@@ -68,7 +82,7 @@ const MAX_TIMESTAMP_LENGTH = 64;
 /** An action's input is opaque to us, so cap its breadth rather than its shape. */
 const MAX_ACTION_INPUT_KEYS = 100;
 
-const boundedActionInput = z
+export const boundedActionInput = z
   .record(z.string().max(MAX_NAME_LENGTH), z.unknown())
   .refine((value) => Object.keys(value).length <= MAX_ACTION_INPUT_KEYS, {
     message: `actionInput may not exceed ${MAX_ACTION_INPUT_KEYS} keys`,
@@ -111,6 +125,20 @@ export const proposalSchema = z.object({
   actionInput: boundedActionInput.optional(),
 
   status: proposalStatusSchema,
+  /** Absent while the proposal is still awaiting a human. */
+  decision: proposalDecisionSchema.optional(),
+  /**
+   * Set when this proposal was replaced — by a retry after a failed action, or
+   * by an analyst-requested revision. Points at the successor so the queue can
+   * show one live proposal per subject rather than every attempt.
+   */
+  supersededBy: z.string().max(MAX_ID_LENGTH).optional(),
+  /** First proposal in the chain; equal to `id` on the root and never rewritten. */
+  rootProposalId: z.string().max(MAX_ID_LENGTH).optional(),
+  /** Exactly one hop back, where `rootProposalId` is the first hop. Absent on the root. */
+  supersedes: z.string().max(MAX_ID_LENGTH).optional(),
+  /** 1-based position in the chain. Not incremented by `clone()`: a retry is not a revision. */
+  revision: z.number().int().min(1).optional(),
   /** Snapshotted from the triggering context at creation; never re-scored. */
   impact: proposalImpactSchema,
   confidence: proposalConfidenceSchema,
@@ -148,7 +176,18 @@ export const createProposalRequestSchema = z.object({
   comment: z.string().max(MAX_COMMENT_LENGTH),
   actionWorkflowId: z.string().max(MAX_ID_LENGTH).optional(),
   actionInput: boundedActionInput.optional(),
-  impact: proposalImpactSchema.default('low'),
+  /**
+   * Optional rather than defaulted so "the caller omitted it" stays
+   * distinguishable from "the caller said low": a supplied impact takes
+   * precedence over the action's own, and only a genuine omission falls back.
+   */
+  impact: proposalImpactSchema.optional(),
+  /**
+   * Overrides the action's own declared category, and is the only way a
+   * proposal carrying no action gets one at all — consumers group the queue by
+   * category, so without it a non-action proposal has nowhere to appear.
+   */
+  category: proposalCategorySchema.optional(),
   confidence: proposalConfidenceSchema.default('medium'),
   origin: proposalOriginSchema.default('worker'),
   expiresAt: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
@@ -181,14 +220,34 @@ export type DismissProposalRequest = z.infer<typeof dismissProposalRequestSchema
 export const MAX_PROPOSALS_PAGE_SIZE = 100;
 export const MAX_PROPOSALS_PAGE_OFFSET = 10_000 - MAX_PROPOSALS_PAGE_SIZE;
 
-export const listProposalsQuerySchema = z.object({
+/**
+ * The filter vocabulary every read shares, applied as a conjunction. Both list
+ * shapes understand all of it identically; they differ only in how they page
+ * and in whether they union a second set on top.
+ *
+ * "Awaiting a human" is `status: 'pending'` and needs no filter of its own:
+ * `pending` is only ever valid while undecided, so the status already says it.
+ * The complementary query — "no human ever answered", which also takes in
+ * `expired` — is not expressible here, because nothing needs it yet.
+ */
+export const proposalFiltersSchema = z.object({
   status: proposalStatusSchema.optional(),
+  decision: proposalDecisionSchema.optional(),
   conversationId: z.string().max(MAX_ID_LENGTH).optional(),
+  /** Drops proposals that were replaced, so a chain shows only its live head. */
+  excludeSuperseded: z.stringbool().default(false),
   /**
-   * Drops proposals whose decision deadline has passed. Off by default so the
-   * list stays a faithful view of the index; the decision queue turns it on.
+   * Drops proposals whose deadline has passed, by date rather than by status.
+   * Distinct from `status: 'expired'`: between the deadline passing and the
+   * gate workflow settling the record there is task lag during which it still
+   * reads `pending`, and a queue wants it gone for that whole interval. Off by
+   * default so the list stays a faithful view of the index.
    */
   excludeExpired: z.stringbool().default(false),
+});
+export type ProposalFilters = z.infer<typeof proposalFiltersSchema>;
+
+export const listProposalsQuerySchema = proposalFiltersSchema.extend({
   size: z.coerce.number().int().min(1).max(MAX_PROPOSALS_PAGE_SIZE).default(50),
   from: z.coerce.number().int().min(0).max(MAX_PROPOSALS_PAGE_OFFSET).default(0),
 });
@@ -213,12 +272,11 @@ export interface ProposalsListResponse {
 }
 
 /**
- * Parameters for `listByWindow`. Callers declare which statuses to include in
- * the "pending" leg of the query rather than having the platform hardcode them,
- * keeping AlertZero-specific semantics out of platform code.
+ * Parameters for `listByWindow`: the shared filters, plus how far back to reach
+ * for decisions. The union of "awaiting" and "recently decided" is what the
+ * shape *is*, so it is not a flag.
  */
-export interface ListByWindowQuery {
-  includeStatuses: ProposalStatus[];
+export interface ListByWindowQuery extends ProposalFilters {
   decidedWithinHours: number;
 }
 
@@ -258,8 +316,17 @@ export interface ProposalChartsSummaryResponse {
   buckets: ProposalChartsSummaryBucket[];
 }
 
-/** Terminal states: a decided or executed proposal can no longer be acted on. */
-export const isDecided = (status: ProposalStatus): boolean => status !== 'pending';
+/**
+ * Whether a human can still act on this proposal.
+ *
+ * Reads the status, not the decision: `pending` is the only status valid while
+ * undecided *and* unsettled, so it is the whole condition. The decision is the
+ * wrong axis here because an `expired` proposal has none either — it was
+ * settled by a deadline rather than a person — and treating that as "still
+ * open" puts a decision nobody can make back in the queue.
+ */
+export const isAwaitingDecision = (proposal: Pick<Proposal, 'status'>): boolean =>
+  proposal.status === 'pending';
 
 export const isExpired = (proposal: Pick<Proposal, 'expiresAt'>, now = Date.now()): boolean => {
   if (!proposal.expiresAt) {

@@ -205,15 +205,37 @@ export const getProviderOptions = (models: GroupedModel[]): MultiSelectFilterOpt
   }));
 };
 
+export interface EisDisplayOptions {
+  showOutsideRegionPreferences: boolean;
+  showEndOfLifeModels: boolean;
+  showPreviewModels: boolean;
+}
+
+export const DEFAULT_EIS_DISPLAY_OPTIONS: EisDisplayOptions = {
+  showOutsideRegionPreferences: false,
+  showEndOfLifeModels: false,
+  showPreviewModels: false,
+};
+
 export interface FilterCriteria {
   searchQuery: string;
   selectedTaskTypes: Set<TaskTypeCategory>;
   selectedProviders: string[];
+  showOutsideRegionPreferences?: boolean;
+  showEndOfLifeModels?: boolean;
+  showPreviewModels?: boolean;
 }
 
 export const filterGroupedModels = (
   models: GroupedModel[],
-  { searchQuery, selectedTaskTypes, selectedProviders }: FilterCriteria
+  {
+    searchQuery,
+    selectedTaskTypes,
+    selectedProviders,
+    showOutsideRegionPreferences = false,
+    showEndOfLifeModels = false,
+    showPreviewModels = false,
+  }: FilterCriteria
 ): GroupedModel[] => {
   const q = searchQuery.toLowerCase();
 
@@ -230,6 +252,20 @@ export const filterGroupedModels = (
         return false;
       }
       if (selectedProviders.length > 0 && !selectedProviders.includes(m.modelCreator)) {
+        return false;
+      }
+      if (!showOutsideRegionPreferences) {
+        const isOutsideRegionPreferences = m.endpoints.some(
+          (endpoint) => endpoint.metadata?.denied_by_region_policy === true
+        );
+        if (isOutsideRegionPreferences) {
+          return false;
+        }
+      }
+      if (!showEndOfLifeModels && m.modelStatus === EisModelStatus.DeprecatedEOL) {
+        return false;
+      }
+      if (!showPreviewModels && m.modelStatus === EisModelStatus.Preview) {
         return false;
       }
       return true;

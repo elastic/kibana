@@ -1,0 +1,168 @@
+version: "1"
+name: Isolate host
+description: >
+  AlertZero action: isolates one or more Elastic Defend endpoints from the
+  network. Executed by the investigation proposal gate once an analyst
+  approves, so the response action is attributed to the approver.
+enabled: true
+tags:
+  # Generic tag every action workflow carries, so the catalog can be
+  # discovered by tag rather than a hardcoded list.
+  - action
+  - alertzero
+consts:
+  # Self-describing catalog metadata, read back by the catalog when a
+  # proposal referencing this workflow is created or rendered. Metadata has
+  # to live under `consts`: unknown top-level keys are stripped by the schema.
+  actionMetadata:
+    name: Isolate host
+    description: Isolates Elastic Defend endpoints from the network. Only Elastic Defend retains connectivity.
+    category: contain
+    impact: high
+    reversible: true
+    approvalPolicy: always-gate
+  actionLabel: Host isolation
+  # Sentinel id used only to probe Actions-log privilege before isolating.
+  # A 404 means the privilege is present; anything else must fail closed.
+  privilege_probe_action_id: "00000000-0000-0000-0000-000000000000"
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        actionInput:
+          type: object
+          description: >
+            Isolate fields. Every action workflow takes a single `actionInput`
+            object so the generic gate workflow never needs to know an
+            action's parameter names.
+          properties:
+            endpoint_ids:
+              type: array
+              minItems: 1
+              maxItems: 250
+              items:
+                type: string
+                minLength: 1
+                maxLength: 256
+              description: Elastic Defend agent IDs (agent.id) of the endpoints to isolate.
+            comment:
+              type: string
+              maxLength: 30000
+              description: Optional comment explaining why these hosts are being isolated.
+          required:
+            - endpoint_ids
+      required:
+        - actionInput
+      additionalProperties: false
+outputs:
+  - name: action_id
+    type: string
+  - name: status
+    type: string
+  - name: was_successful
+    type: boolean
+  - name: message
+    type: string
+steps:
+  # GET details requires Actions log (Platinum+); isolate only needs Host
+  # isolation. Probe the same route the poll uses so a missing privilege fails
+  # before the host is touched. kibana.request throws `HTTP <status>: …`.
+  - name: probe_action_details
+    type: kibana.request
+    on-failure:
+      continue: true
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/api/endpoint/action/{{ consts.privilege_probe_action_id }}"
+      headers:
+        kbn-xsrf: "true"
+        elastic-api-version: "2023-10-31"
+
+  # Separate step: Liquid cannot read a variable written by the same data.set.
+  - name: capture_probe_status
+    type: data.set
+    with:
+      probe_http_status: "{{ steps.probe_action_details.error.message | slice: 0, 8 }}"
+
+  - name: fail_if_cannot_poll
+    type: if
+    condition: '${{ steps.probe_action_details.error != blank and variables.probe_http_status != "HTTP 404" }}'
+    steps:
+      - name: missing_actions_log_privilege
+        type: workflow.fail
+        with:
+          message: >
+            Cannot wait for isolate completion: GET /api/endpoint/action/{id}
+            failed ({{ steps.probe_action_details.error.message }}). The
+            approver needs the Actions log privilege in addition to Host
+            isolation.
+
+  # POST queues the command; 200 means accepted, not that the host is isolated.
+  # kibana.request is sent verbatim, so the path is prefixed with the executing space.
+  # No retries: the API is non-idempotent — each POST creates a new action ID.
+  - name: dispatch
+    type: kibana.request
+    with:
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/api/endpoint/action/isolate"
+      headers:
+        kbn-xsrf: "true"
+        elastic-api-version: "2023-10-31"
+        Content-Type: application/json
+      body:
+        endpoint_ids: "${{ inputs.actionInput.endpoint_ids }}"
+        comment: "{{ inputs.actionInput.comment }}"
+        agent_type: endpoint
+
+  # Poll until the endpoint reports completion
+  # 10s interval, 60 attempts, 10 minutes. Do-while: the first GET always runs.
+  - name: poll
+    type: while
+    condition: "${{ steps.poll_status.output.data.isCompleted != true }}"
+    max-iterations:
+      limit: 60
+      on-limit: fail
+    timeout: 10m
+    steps:
+      - name: poll_status
+        type: kibana.request
+        on-failure:
+          retry:
+            max-attempts: 3
+            delay: 5s
+        with:
+          method: GET
+          path: "/s/{{ workflow.spaceId }}/api/endpoint/action/{{ steps.dispatch.output.data.id }}"
+          headers:
+            kbn-xsrf: "true"
+            elastic-api-version: "2023-10-31"
+      - name: wait_if_pending
+        type: if
+        condition: "${{ steps.poll_status.output.data.isCompleted != true }}"
+        steps:
+          - name: poll_delay
+            type: wait
+            with:
+              duration: 10s
+
+  # `workflow.execute` declares its output as unknown, so the parent falls back
+  # to a heuristic read of the last step unless the child emits explicitly.
+  # Fail the workflow when the endpoint-side action did not succeed so the
+  # proposal gate's on-failure path fires instead of record_success.
+  - name: emit_result
+    type: if
+    condition: "${{ steps.poll_status.output.data.wasSuccessful == true }}"
+    steps:
+      - name: emit_success
+        type: workflow.output
+        status: completed
+        with:
+          action_id: "{{ steps.poll_status.output.data.id }}"
+          status: "{{ steps.poll_status.output.data.status }}"
+          was_successful: true
+          message: "{{ consts.actionLabel }} completed successfully. Action ID: {{ steps.poll_status.output.data.id }}"
+    else:
+      - name: emit_failure
+        type: workflow.fail
+        with:
+          message: "{{ consts.actionLabel }} failed. Action ID: {{ steps.poll_status.output.data.id }}"

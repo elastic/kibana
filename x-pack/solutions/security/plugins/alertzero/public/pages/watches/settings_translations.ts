@@ -15,12 +15,11 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  SYSTEM_SECURITY_WATCH_DARK_ID,
+  SYSTEM_SECURITY_WATCH_HUNT_ID,
   SYSTEM_SECURITY_WATCH_DEEP_ID,
   SYSTEM_SECURITY_WATCH_DETECTION_ID,
   SYSTEM_SECURITY_WATCH_FLOOR_ID,
   SYSTEM_SECURITY_WATCH_OFFICER_ID,
-  type WorkerScheduleUnit,
 } from '@kbn/alertzero-common';
 
 /* -------------------------------------------------------------------------- */
@@ -32,6 +31,26 @@ export const ENABLED_SWITCH_LABEL = i18n.translate(
   {
     defaultMessage: 'Enabled',
   }
+);
+
+export const SAVE_WATCH_SETTINGS = i18n.translate(
+  'xpack.alertzero.watches.settings.saveWatchSettings',
+  { defaultMessage: 'Save' }
+);
+
+export const DISCARD_WATCH_SETTINGS = i18n.translate(
+  'xpack.alertzero.watches.settings.discardWatchSettings',
+  { defaultMessage: 'Discard' }
+);
+
+export const WORKER_SETTINGS_SAVE_ERROR = i18n.translate(
+  'xpack.alertzero.watches.settings.worker.saveError',
+  { defaultMessage: 'Could not save this Worker. Other saved changes were kept.' }
+);
+
+export const WATCH_SETTINGS_INVALID = i18n.translate(
+  'xpack.alertzero.watches.settings.invalidDrafts',
+  { defaultMessage: 'Fix invalid settings before saving.' }
 );
 
 /* -------------------------------------------------------------------------- */
@@ -165,60 +184,15 @@ export const AUTONOMY_RANGE_ARIA_LABEL = i18n.translate(
   { defaultMessage: 'Autonomy level' }
 );
 
-/* -------------------------------------------------------------------------- */
-/* Schedule interval                                                          */
-/* -------------------------------------------------------------------------- */
-
-export const SCHEDULE_INTERVAL_LABEL = i18n.translate(
-  'xpack.alertzero.watches.settings.scheduleInterval.label',
-  { defaultMessage: 'Run every' }
+export const AUTONOMY_FIXED_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.autonomy.fixedLabel',
+  { defaultMessage: 'Autonomy level' }
 );
 
-export const SCHEDULE_INTERVAL_HELP_TEXT = i18n.translate(
-  'xpack.alertzero.watches.settings.scheduleInterval.helpText',
-  { defaultMessage: 'How often this Worker runs. Applies to this Worker only.' }
+export const AUTONOMY_FIXED_HELP = i18n.translate(
+  'xpack.alertzero.watches.settings.autonomy.fixedHelp',
+  { defaultMessage: 'This Worker supports a single autonomy level.' }
 );
-
-export const SCHEDULE_INTERVAL_NUMBER_ARIA_LABEL = i18n.translate(
-  'xpack.alertzero.watches.settings.scheduleInterval.numberAriaLabel',
-  { defaultMessage: 'Schedule interval' }
-);
-
-export const SCHEDULE_INTERVAL_UNIT_ARIA_LABEL = i18n.translate(
-  'xpack.alertzero.watches.settings.scheduleInterval.unitAriaLabel',
-  { defaultMessage: 'Schedule interval unit' }
-);
-
-const SCHEDULE_UNIT_MINUTE = (intervalValue: string) =>
-  i18n.translate('xpack.alertzero.watches.settings.scheduleInterval.unit.minute', {
-    defaultMessage: '{intervalValue, plural, one {minute} other {minutes}}',
-    values: { intervalValue },
-  });
-
-const SCHEDULE_UNIT_HOUR = (intervalValue: string) =>
-  i18n.translate('xpack.alertzero.watches.settings.scheduleInterval.unit.hour', {
-    defaultMessage: '{intervalValue, plural, one {hour} other {hours}}',
-    values: { intervalValue },
-  });
-
-const SCHEDULE_UNIT_DAY = (intervalValue: string) =>
-  i18n.translate('xpack.alertzero.watches.settings.scheduleInterval.unit.day', {
-    defaultMessage: '{intervalValue, plural, one {day} other {days}}',
-    values: { intervalValue },
-  });
-
-/** Pluralised unit label, matching how the Attack Discovery schedule form reads its unit select. */
-export const scheduleUnitLabel = (unit: WorkerScheduleUnit, intervalValue: number): string => {
-  const value = String(intervalValue);
-  switch (unit) {
-    case 'm':
-      return SCHEDULE_UNIT_MINUTE(value);
-    case 'h':
-      return SCHEDULE_UNIT_HOUR(value);
-    case 'd':
-      return SCHEDULE_UNIT_DAY(value);
-  }
-};
 
 /* -------------------------------------------------------------------------- */
 /* Triggers                                                                   */
@@ -667,7 +641,7 @@ const WATCH_INTROS: Record<string, string> = {
         'Watch grouping for investigation hand-off. No Workers are attached yet. Settings, when added, will belong to each Worker, not to this Watch.',
     }
   ),
-  [SYSTEM_SECURITY_WATCH_DARK_ID]: i18n.translate('xpack.alertzero.watches.settings.intro.dark', {
+  [SYSTEM_SECURITY_WATCH_HUNT_ID]: i18n.translate('xpack.alertzero.watches.settings.intro.hunt', {
     defaultMessage:
       'Groups the Continuous Threat Hunt Worker. Findings arrive as reviewable evidence. Settings below belong to that Worker, not to this Watch.',
   }),
@@ -685,3 +659,77 @@ const WATCH_INTROS: Record<string, string> = {
 };
 
 export const watchIntro = (watchId: string): string | undefined => WATCH_INTROS[watchId];
+
+/* -------------------------------------------------------------------------- */
+/* Worker settings layout (autonomy cards, trigger row)                       */
+/* -------------------------------------------------------------------------- */
+
+export const AUTONOMY_ACTOR_WORKER = i18n.translate(
+  'xpack.alertzero.watches.settings.autonomy.actor.worker',
+  { defaultMessage: 'Worker' }
+);
+
+export const AUTONOMY_ACTOR_YOU = i18n.translate(
+  'xpack.alertzero.watches.settings.autonomy.actor.you',
+  { defaultMessage: 'You' }
+);
+
+export const AUTONOMY_RADIOGROUP_ARIA_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.autonomy.radiogroupAriaLabel',
+  { defaultMessage: 'Autonomy level' }
+);
+
+export const scheduleUnitDays = (amount: number) =>
+  i18n.translate('xpack.alertzero.watches.settings.trigger.unit.days', {
+    defaultMessage: '{amount, plural, one {day} other {days}}',
+    values: { amount },
+  });
+
+export const scheduleUnitHours = (amount: number) =>
+  i18n.translate('xpack.alertzero.watches.settings.trigger.unit.hours', {
+    defaultMessage: '{amount, plural, one {hour} other {hours}}',
+    values: { amount },
+  });
+
+export const scheduleUnitMinutes = (amount: number) =>
+  i18n.translate('xpack.alertzero.watches.settings.trigger.unit.minutes', {
+    defaultMessage: '{amount, plural, one {minute} other {minutes}}',
+    values: { amount },
+  });
+
+export const TRIGGER_AMOUNT_ARIA_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.trigger.amountAriaLabel',
+  { defaultMessage: 'Interval amount' }
+);
+
+export const TRIGGER_EVERY = i18n.translate('xpack.alertzero.watches.settings.trigger.every', {
+  defaultMessage: 'Every',
+});
+
+export const TRIGGER_HELP_TEXT = i18n.translate(
+  'xpack.alertzero.watches.settings.trigger.helpText',
+  { defaultMessage: 'How often this Worker runs. Applies to this Worker only.' }
+);
+
+export const TRIGGER_LABEL = i18n.translate('xpack.alertzero.watches.settings.trigger.label', {
+  defaultMessage: 'Trigger',
+});
+
+export const TRIGGER_UNIT_ARIA_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.trigger.unitAriaLabel',
+  { defaultMessage: 'Interval unit' }
+);
+
+export const WORKERS_EMPTY_BODY = i18n.translate(
+  'xpack.alertzero.watches.settings.workers.empty.body',
+  {
+    defaultMessage: 'This Watch has no Workers yet.',
+  }
+);
+
+export const WORKERS_EMPTY_TITLE = i18n.translate(
+  'xpack.alertzero.watches.settings.workers.empty.title',
+  {
+    defaultMessage: 'No Workers in this Watch',
+  }
+);
