@@ -53,7 +53,7 @@ describe('MatchedPolicyReason', () => {
     expect(screen.queryByTestId('matchedPolicyReasonExpression')).not.toBeInTheDocument();
   });
 
-  it('renders a tags badge with the matched tag count', () => {
+  it('renders a tags icon when the policy matches by tags', () => {
     renderComponent({
       category: 'tags',
       matcher: { tags: ['env:prod', 'team:sre'] },
@@ -61,9 +61,21 @@ describe('MatchedPolicyReason', () => {
     });
 
     expect(screen.getByTestId('matchedPolicyReasonTags')).toBeInTheDocument();
-    // Intersection: only env:prod matches → count = 1
-    expect(screen.getByText('Tags (1)')).toBeInTheDocument();
     expect(screen.queryByTestId('matchedPolicyReasonCatchAll')).not.toBeInTheDocument();
+  });
+
+  it('exposes the matched tags via the tags icon aria-label', () => {
+    renderComponent({
+      category: 'tags',
+      matcher: { tags: ['env:prod', 'team:sre'] },
+      ruleTags: ['env:prod', 'other'],
+    });
+
+    // Intersection: only env:prod matches
+    expect(screen.getByTestId('matchedPolicyReasonTags')).toHaveAttribute(
+      'aria-label',
+      'Matching rule tags: env:prod'
+    );
   });
 
   it('falls back to showing all matcher tags when the rule carries none', () => {
@@ -73,8 +85,11 @@ describe('MatchedPolicyReason', () => {
       ruleTags: [],
     });
 
-    // Fallback: show all matcher tags (count = 2)
-    expect(screen.getByText('Tags (2)')).toBeInTheDocument();
+    // Fallback: show all matcher tags
+    expect(screen.getByTestId('matchedPolicyReasonTags')).toHaveAttribute(
+      'aria-label',
+      'Matching rule tags: env:prod, team:sre'
+    );
   });
 
   it('renders an expression badge', () => {
@@ -109,7 +124,7 @@ describe('MatchedPolicyReason', () => {
     expect(await screen.findByText('Applies to every rule.')).toBeInTheDocument();
   });
 
-  it('shows the matched tags in the tags badge tooltip', async () => {
+  it('shows the matched tags in the tags icon tooltip', async () => {
     renderComponent({
       category: 'tags',
       matcher: { tags: ['env:prod', 'team:sre'] },
