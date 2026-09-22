@@ -22,6 +22,7 @@ const attachmentType = createReadonlyAttachmentType({
   formatForAgent: (data) => `fixture: ${data.value}`,
   describePayload: 'The payload contains: value.',
   renderNoun: 'fixture widget',
+  maxContentLength: 100,
 });
 
 describe('createReadonlyAttachmentType', () => {
@@ -81,6 +82,24 @@ describe('createReadonlyAttachmentType', () => {
       expect(() => attachmentType.format(attachment, formatContext)).toThrow(
         'Invalid test.fixture attachment data for attachment test-id'
       );
+    });
+
+    it('hard-truncates the representation when it exceeds maxContentLength', async () => {
+      const longValue = 'x'.repeat(500);
+      const attachment: Attachment<string, unknown> = {
+        id: 'test-id',
+        type: 'test.fixture',
+        data: { value: longValue },
+      };
+
+      const formatted = await attachmentType.format(attachment, formatContext);
+      const representation = formatted.getRepresentation
+        ? await formatted.getRepresentation()
+        : { type: 'text', value: '' };
+
+      const value = (representation as TextAttachmentRepresentation).value;
+      expect(value.length).toBeLessThanOrEqual(100);
+      expect(value).toContain('[truncated: representation exceeded 100 characters]');
     });
   });
 

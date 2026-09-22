@@ -222,4 +222,77 @@ describe('createSignificantSecurityEventAttachmentType', () => {
       expect(description).toContain('<render_attachment id="ATTACHMENT_ID" version="VERSION" />');
     });
   });
+
+  describe('max-size payload', () => {
+    it('keeps the representation within maxContentLength at the schema max sizes', async () => {
+      const maxSizePayload = {
+        ...validPayload,
+        title: 't'.repeat(512),
+        hypothesis_tested: 'h'.repeat(4000),
+        security_knowledge_indicators: Array.from({ length: 50 }, () => ({
+          type: 'ioc' as const,
+          value: 'v'.repeat(2048),
+          ioc: { type: 'hash' as const, value: 'h'.repeat(2048) },
+        })),
+        entities: Array.from({ length: 50 }, () => ({
+          field: 'host.name' as const,
+          value: 'e'.repeat(2048),
+        })),
+        alerts: Array.from({ length: 50 }, () => ({
+          alert_id: 'a'.repeat(512),
+          index: 'i'.repeat(256),
+        })),
+        events: Array.from({ length: 50 }, () => ({
+          event_id: 'e'.repeat(512),
+          source_index: 'i'.repeat(256),
+        })),
+        timeline: Array.from({ length: 50 }, () => ({
+          at: '2026-01-01T00:00:00Z',
+          what: 'w'.repeat(2000),
+        })),
+        evidence_for: Array.from({ length: 50 }, () => 'f'.repeat(2000)),
+        evidence_against: Array.from({ length: 50 }, () => 'a'.repeat(2000)),
+        hunt_result: {
+          has_confirmed_hit: true,
+          time_range: { from: '2026-01-01T00:00:00Z', to: '2026-01-02T00:00:00Z' },
+          tier1: {
+            status: 'environment_hits_found' as const,
+            counts: { total_hits: 1, returned_hits: 1, affected_hosts: 1, affected_users: 1 },
+            per_index: Array.from({ length: 20 }, () => ({
+              index: 'i'.repeat(256),
+              hit_count: 1,
+              required: true,
+            })),
+            resolved_iocs: Array.from({ length: 50 }, () => ({
+              type: 'hash' as const,
+              value: 'h'.repeat(2048),
+            })),
+          },
+          tier2: {
+            status: 'behaviors_proposed' as const,
+            behaviors: Array.from({ length: 20 }, () => ({
+              technique_id: 't'.repeat(32),
+              tactic_ids: Array.from({ length: 20 }, () => 'x'.repeat(32)),
+              confidence: 0.9,
+              rule_name: 'r'.repeat(256),
+            })),
+          },
+        },
+      };
+
+      const attachment: Attachment<string, unknown> = {
+        id: 'test-id',
+        type: SIGNIFICANT_SECURITY_EVENT_ATTACHMENT_ID,
+        data: maxSizePayload,
+      };
+
+      const formatted = await attachmentType.format(attachment, formatContext);
+      const representation = formatted.getRepresentation
+        ? await formatted.getRepresentation()
+        : { type: 'text', value: '' };
+
+      const value = (representation as TextAttachmentRepresentation).value;
+      expect(value.length).toBeLessThanOrEqual(attachmentType.maxContentLength ?? Infinity);
+    });
+  });
 });

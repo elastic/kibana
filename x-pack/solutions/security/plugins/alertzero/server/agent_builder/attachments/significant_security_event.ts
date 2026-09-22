@@ -201,4 +201,12 @@ export const createSignificantSecurityEventAttachmentType = (): AttachmentTypeDe
     formatForAgent: formatSignificantSecurityEventForAgent,
     describePayload,
     renderNoun: 'event card',
+    // The schema's own field caps (50-entry arrays across security_knowledge_indicators,
+    // entities, alerts, events, timeline, evidence_for/against, each carrying up to
+    // 2048-char string fields, plus a 20-entry Tier 1/Tier 2 hunt_result) can combine on
+    // a maximally-sized valid payload to well over 100K characters. Size generously for
+    // realistic payloads; the base helper's hard-truncate fallback (see
+    // create_readonly_attachment_type.ts) still applies for the pathological worst case,
+    // so the representation degrades instead of growing unbounded.
+    maxContentLength: 150_000,
   });

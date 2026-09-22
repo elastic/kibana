@@ -68,4 +68,10 @@ export const createHuntCorrelationAttachmentType = (): AttachmentTypeDefinition 
     formatForAgent: formatHuntCorrelationForAgent,
     describePayload,
     renderNoun: 'correlation table',
+    // Worst case: 50 anchors (2048-char values, grouped into a single kind on one
+    // line) plus 100 diamond_scores rows (512-char related_report_id each) comes to
+    // roughly 157K characters; round up for headroom. The base helper's hard-truncate
+    // fallback (see create_readonly_attachment_type.ts) still applies if this is ever
+    // exceeded, so oversized payloads degrade instead of failing.
+    maxContentLength: 175_000,
   });

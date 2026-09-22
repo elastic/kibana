@@ -45,18 +45,29 @@ export const createReadonlyAttachmentType = <T>({
   formatForAgent,
   describePayload,
   renderNoun,
+  maxContentLength,
 }: {
   id: string;
   schema: z.ZodType<T>;
   formatForAgent: (data: T) => string;
   describePayload: string;
   renderNoun: string;
+  /**
+   * Overrides the platform's `DEFAULT_MAX_CONTENT_LENGTH` (10 000 characters) for this
+   * attachment type. Each Hunt Watch type's `formatForAgent` bounds the number of items it
+   * renders from its largest arrays, but the schema's own per-field max lengths still allow
+   * a valid payload to exceed 10 000 characters; callers must size this to the type's own
+   * bounded worst case (see the type's own `*.ts` file for the accompanying max-size-payload
+   * test) rather than leaving it unset.
+   */
+  maxContentLength: number;
 }): AttachmentTypeDefinition => ({
   id,
   // System-produced: the agent must not create or update these via the
   // attachment_add/update tools. Also gates the attachment_read path, which only
   // invokes format() for readonly types.
   isReadonly: true,
+  maxContentLength,
   validate: (input) => {
     const parseResult = schema.safeParse(input);
     if (parseResult.success) {
@@ -71,7 +82,21 @@ export const createReadonlyAttachmentType = <T>({
     }
     const data = parseResult.data;
     return {
-      getRepresentation: () => ({ type: 'text', value: formatForAgent(data) }),
+      getRepresentation: () => {
+        const value = formatForAgent(data);
+        if (value.length <= maxContentLength) {
+          return { type: 'text', value };
+        }
+        // Belt-and-suspenders: formatForAgent bounds the item counts it renders from
+        // each array, but the schema's own per-field max lengths can still combine to
+        // exceed maxContentLength on a maximally-sized valid payload. Hard-truncate
+        // rather than let an oversized representation reach the model unbounded.
+        const truncationNotice = `\n\n[truncated: representation exceeded ${maxContentLength} characters]`;
+        return {
+          type: 'text',
+          value: value.slice(0, maxContentLength - truncationNotice.length) + truncationNotice,
+        };
+      },
     };
   },
   getAgentDescription: () => `

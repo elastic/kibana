@@ -240,6 +240,29 @@ describe('SignificantSecurityEventInlineContent', () => {
     ).toBeInTheDocument();
   });
 
+  it('renders the structured ioc value, not the generic label, when they differ', () => {
+    const data = {
+      ...baseData,
+      security_knowledge_indicators: [
+        {
+          type: 'ioc' as const,
+          value: 'Known malicious infrastructure',
+          ioc: { type: 'ip' as const, value: '203.0.113.5' },
+        },
+      ],
+    };
+    renderWithI18n(
+      <SignificantSecurityEventInlineContent {...renderProps(buildAttachment(data))} />
+    );
+
+    expect(screen.getByTestId('alertzeroSignificantSecurityEventIndicators')).toHaveTextContent(
+      '203.0.113.5'
+    );
+    expect(
+      screen.getByTestId('alertzeroSignificantSecurityEventIndicators')
+    ).not.toHaveTextContent('Known malicious infrastructure');
+  });
+
   it('links a technique indicator to its MITRE ATT&CK reference', () => {
     renderWithI18n(
       <SignificantSecurityEventInlineContent {...renderProps(buildAttachment(baseData))} />

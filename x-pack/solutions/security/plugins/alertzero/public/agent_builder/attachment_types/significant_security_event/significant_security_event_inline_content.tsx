@@ -247,7 +247,7 @@ const IndicatorList: React.FC<{
         {group.map((indicator, index) => (
           <IocBadge
             key={`${indicator.type}-${indicator.value}-${index}`}
-            value={indicator.value}
+            value={indicator.ioc?.value ?? indicator.value}
             index={index}
             testSubj={`alertzeroSignificantSecurityEventIndicator-ioc-${index}`}
           />

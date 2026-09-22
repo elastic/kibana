@@ -134,4 +134,37 @@ describe('createHuntCorrelationAttachmentType', () => {
       expect(description).toContain('self_match_excluded');
     });
   });
+
+  describe('max-size payload', () => {
+    it('keeps the representation within maxContentLength at the schema max sizes', async () => {
+      const maxSizePayload = {
+        attachmentLabel: 'Hunt Correlation',
+        anchors: Array.from({ length: 50 }, (_, i) => ({
+          kind: 'hash' as const,
+          value: 'a'.repeat(2048),
+        })),
+        diamond_scores: Array.from({ length: 100 }, (_, i) => ({
+          vertex: 'infrastructure' as const,
+          related_report_id: 'r'.repeat(512),
+          score: 1,
+        })),
+        thresholds: { anchor_match: 0.8, diamond_vertex: 0.6 },
+        self_match_excluded: true as const,
+      };
+
+      const attachment: Attachment<string, unknown> = {
+        id: 'test-id',
+        type: HUNT_CORRELATION_ATTACHMENT_ID,
+        data: maxSizePayload,
+      };
+
+      const formatted = await attachmentType.format(attachment, formatContext);
+      const representation = formatted.getRepresentation
+        ? await formatted.getRepresentation()
+        : { type: 'text', value: '' };
+
+      const value = (representation as TextAttachmentRepresentation).value;
+      expect(value.length).toBeLessThanOrEqual(attachmentType.maxContentLength ?? Infinity);
+    });
+  });
 });
