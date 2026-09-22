@@ -9,7 +9,6 @@
 
 import deepEqual from 'fast-deep-equal';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { distinctUntilChanged, map } from 'rxjs';
 import UseUnmount from 'react-use/lib/useUnmount';
 
 import type { EuiBreadcrumb, UseEuiTheme } from '@elastic/eui';
@@ -30,12 +29,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import type { TopNavMenuBadgeProps, TopNavMenuProps } from '@kbn/navigation-plugin/public';
-import {
-  apiPublishesEsqlUsage,
-  combineCompatibleChildrenApis,
-  type PublishesEsqlUsage,
-  useBatchedPublishingSubjects,
-} from '@kbn/presentation-publishing';
+import { useHasEsqlPanel, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 import { AppHeader, ChromeAppHeaderRegistration } from '@kbn/app-header';
 import type {
@@ -74,7 +68,7 @@ import { getFullEditPath } from '../utils/urls';
 import { DashboardFavoritesProvider } from './dashboard_favorite_button';
 import { LegacyDashboardHeader } from './legacy_dashboard_header';
 import { DashboardControlsRenderer } from '../dashboard_controls_renderer';
-import { usePrettifyDashboardAction } from '../dashboard_app/prettify/use_prettify_dashboard_action';
+import { useEnhanceDashboardAction } from '../dashboard_app/enhance/use_enhance_dashboard_action';
 
 export interface InternalDashboardTopNavProps {
   customLeadingBreadCrumbs?: EuiBreadcrumb[];
@@ -188,6 +182,8 @@ export function InternalDashboardTopNav({
     unpublishedTimeslice,
     publishedEsqlVariables,
     unpublishedEsqlVariables,
+    dataLoading,
+    canCancel,
   ] = useBatchedPublishingSubjects(
     dashboardApi.dataViews$,
     dashboardApi.fullScreenMode$,
@@ -202,7 +198,9 @@ export function InternalDashboardTopNav({
     dashboardApi.publishedTimeslice$,
     dashboardApi.unpublishedTimeslice$,
     dashboardInternalApi.publishedEsqlVariables$,
-    dashboardInternalApi.unpublishedEsqlVariables$
+    dashboardInternalApi.unpublishedEsqlVariables$,
+    dashboardApi.dataLoading$,
+    dashboardApi.canCancel$
   );
 
   const hasUnpublishedFilters = useMemo(() => {
@@ -215,21 +213,7 @@ export function InternalDashboardTopNav({
     return !deepEqual(publishedEsqlVariables, unpublishedEsqlVariables);
   }, [publishedEsqlVariables, unpublishedEsqlVariables]);
 
-  const [hasEsqlPanel, setHasEsqlPanel] = useState(false);
-  useEffect(() => {
-    const subscription = combineCompatibleChildrenApis<PublishesEsqlUsage, boolean[]>(
-      dashboardApi,
-      'usesEsql$',
-      apiPublishesEsqlUsage,
-      []
-    )
-      .pipe(
-        map((usesEsqlValues) => usesEsqlValues.some(Boolean)),
-        distinctUntilChanged()
-      )
-      .subscribe(setHasEsqlPanel);
-    return () => subscription.unsubscribe();
-  }, [dashboardApi]);
+  const hasEsqlPanel = useHasEsqlPanel(dashboardApi);
 
   const [savedQueryId, setSavedQueryId] = useState<string | undefined>();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -397,17 +381,20 @@ export function InternalDashboardTopNav({
   }, [visibilityProps.showDatePicker, allDataViews]);
 
   const shareAction = useDashboardShareAction({ redirectTo });
-  const prettifyAction = usePrettifyDashboardAction(dashboardApi);
+  const enhanceAction = useEnhanceDashboardAction(dashboardApi);
   const experimentalDashboardAiAction = useMemo(
     () =>
-      viewMode === 'edit' && prettifyAction
+      viewMode === 'edit' && enhanceAction
         ? {
             onClick: () => {
-              void prettifyAction.execute();
+              void enhanceAction.execute();
             },
+            tooltip: i18n.translate('dashboard.topNav.enhanceButtonTooltip', {
+              defaultMessage: 'Improve the content and style of your dashboard using AI',
+            }),
           }
         : undefined,
-    [viewMode, prettifyAction]
+    [viewMode, enhanceAction]
   );
 
   const { viewModeTopNavConfig, editModeTopNavConfig } = useDashboardMenuItems({
@@ -553,6 +540,8 @@ export function InternalDashboardTopNav({
           hasDirtyState={
             hasUnpublishedFilters || hasUnpublishedTimeslice || hasUnpublishedVariables
           }
+          isLoading={dataLoading ?? false}
+          onCancel={canCancel ? dashboardApi.cancelAllRequests : undefined}
           useBackgroundSearchButton={
             dataService.search.isBackgroundSearchEnabled &&
             getDashboardCapabilities().storeSearchSession

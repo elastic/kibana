@@ -1,5 +1,5 @@
 {
-  "sha1": "f38230c7a17fee668a3250e466a9e15a0ca0fc4c",
+  "sha1": "d60dee66472401f4c420097cae939b668eb9e14e",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -176,7 +176,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_table_configuration.spec.ts",
-        "line": 140,
+        "line": 139,
         "column": 7
       }
     },
@@ -192,7 +192,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_table_configuration.spec.ts",
-        "line": 143,
+        "line": 142,
         "column": 15
       }
     },
@@ -208,7 +208,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_table_configuration.spec.ts",
-        "line": 147,
+        "line": 146,
         "column": 13
       }
     },
@@ -224,8 +224,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_table_configuration.spec.ts",
-        "line": 163,
-        "column": 7
+        "line": 158,
+        "column": 13
       }
     },
     {
@@ -240,7 +240,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_table_configuration.spec.ts",
-        "line": 163,
+        "line": 162,
         "column": 24
       }
     },
@@ -533,8 +533,8 @@
       }
     },
     {
-      "id": "3d30f1f27e8f75f-13c366bfc2c5cd4",
-      "title": "Observability alerts - add to case (all privileges) renders the case options in the row actions menu",
+      "id": "3d30f1f27e8f75f-b5e5985d163c94d",
+      "title": "Observability alerts - add to case (all privileges) renders the case action in the row actions menu",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -549,8 +549,8 @@
       }
     },
     {
-      "id": "3d30f1f27e8f75f-92c49a4a4bc87de",
-      "title": "Observability alerts - add to case (all privileges) opens the create-case flyout from \"Add to new case\"",
+      "id": "3d30f1f27e8f75f-3e2ef3be56728e7",
+      "title": "Observability alerts - add to case (all privileges) opens the create-case flyout from the case selector",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -560,24 +560,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/cases/add_to_case.all.spec.ts",
-        "line": 34,
-        "column": 10
-      }
-    },
-    {
-      "id": "3d30f1f27e8f75f-329e97db5764fcf",
-      "title": "Observability alerts - add to case (all privileges) opens the existing-cases modal from \"Add to existing case\"",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/cases/add_to_case.all.spec.ts",
-        "line": 37,
-        "column": 13
+        "line": 32,
+        "column": 7
       }
     },
     {

@@ -25,8 +25,8 @@ export const ACTIONS_TRANSLATIONS = Object.freeze({
     assign: i18n.translate('xpack.alertzero.baseActions.assign', {
       defaultMessage: 'Assign',
     }),
-    dismiss: i18n.translate('xpack.alertzero.baseActions.dismiss', {
-      defaultMessage: 'Dismiss',
+    close: i18n.translate('xpack.alertzero.baseActions.closeInvestigation', {
+      defaultMessage: 'Close investigation',
     }),
   },
   tooltips: {

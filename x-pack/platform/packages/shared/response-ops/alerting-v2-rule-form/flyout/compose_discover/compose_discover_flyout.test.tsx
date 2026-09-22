@@ -49,10 +49,6 @@ jest.mock('./compose_discover_form/details_and_artifacts_step', () => ({
   DetailsAndArtifactsStep: () => null,
 }));
 
-jest.mock('./compose_discover_form/notifications_step', () => ({
-  NotificationsStep: () => null,
-}));
-
 jest.mock('./compose_discover_form/linked_action_policies_step', () => ({
   LinkedActionPoliciesStep: () => null,
 }));
@@ -131,7 +127,6 @@ interface SandboxFlyoutMockProps {
   onApply?: () => void;
   onClose: () => void;
   helpText?: React.ReactNode;
-  headerActions?: React.ReactNode;
 }
 
 let sandboxFlyoutProps: SandboxFlyoutMockProps | undefined;
@@ -148,7 +143,6 @@ jest.mock('./query_sandbox_flyout', () => ({
     return (
       <div data-test-subj="composeDiscoverChildMock">
         <div data-test-subj="mockSandboxHelpText">{props.helpText}</div>
-        <div data-test-subj="mockSandboxHeaderActions">{props.headerActions}</div>
         {props.onTimeFieldChange ? (
           <select
             data-test-subj="querySandboxTimeField"
@@ -568,6 +562,27 @@ describe('ComposeDiscoverFlyout', () => {
       expect(mockComposeDiscoverForm).toHaveBeenCalledWith(
         expect.objectContaining({ isEditing: false })
       );
+    });
+
+    it('treats the cloned query as committed', () => {
+      renderFlyout({
+        mode: 'clone',
+        rule: {
+          id: 'rule-1',
+          kind: 'signal',
+          enabled: true,
+          metadata: { name: 'CPU high', version: 1, owner: 'test', tags: [] },
+          time_field: '@timestamp',
+          schedule: { every: '1m', lookback: '5m' },
+          query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+          created_by: 'test',
+          created_at: '2026-01-01T00:00:00Z',
+          updated_by: 'test',
+          updated_at: '2026-01-01T00:00:00Z',
+        },
+      });
+
+      expect(getLatestFormProps().state.queryCommitted).toBe(true);
     });
   });
 

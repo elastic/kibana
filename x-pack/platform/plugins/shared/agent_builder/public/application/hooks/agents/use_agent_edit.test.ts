@@ -91,6 +91,14 @@ describe('useAgentEdit submit (create/clone branch)', () => {
     });
   });
 
+  it('defaults a brand-new agent to no connectors', () => {
+    const { result } = renderHook(() =>
+      useAgentEdit({ onSaveSuccess: jest.fn(), onSaveError: jest.fn() })
+    );
+
+    expect(result.current.state.configuration.connector_ids).toEqual([]);
+  });
+
   it('strips access control entries, created_by and avatar_icon from the create payload when cloning', async () => {
     const cloneData: AgentEditState = {
       id: 'cloned-agent',

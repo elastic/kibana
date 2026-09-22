@@ -33,6 +33,7 @@ import type {
 } from '../../../common/runtime_types';
 import {
   ConfigKey,
+  MonitorTypeEnum,
   SourceType,
   type SyntheticsPrivateLocations,
 } from '../../../common/runtime_types';
@@ -248,8 +249,12 @@ export class SyntheticsPrivateLocation {
         newPolicy.condition = null;
       }
       if (testRunId) {
+        // Cleanup TTL is keyed off this name: browser = 15m, lightweight = 2m.
+        // API journeys share synthexec with browser and can exceed 2m.
         newPolicy.name =
-          config.type === 'browser' ? BROWSER_TEST_NOW_RUN : LIGHTWEIGHT_TEST_NOW_RUN;
+          config.type === MonitorTypeEnum.BROWSER || config.type === MonitorTypeEnum.API
+            ? BROWSER_TEST_NOW_RUN
+            : LIGHTWEIGHT_TEST_NOW_RUN;
       } else {
         newPolicy.name = this.getPolicyName(config, locName);
       }
