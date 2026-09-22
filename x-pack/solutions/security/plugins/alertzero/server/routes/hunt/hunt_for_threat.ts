@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import {
-  API_VERSIONS,
-  HuntForThreatRequestBody,
-  HuntForThreatResponse,
-  INTERNAL_API_ACCESS,
-} from '@kbn/alertzero-common';
+import type { HuntForThreatResponse } from '@kbn/alertzero-common';
+import { API_VERSIONS, HuntForThreatRequestBody, INTERNAL_API_ACCESS } from '@kbn/alertzero-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERTZERO_API_PRIVILEGE_READ, HUNT_INTERNAL_ROUTE_BASE } from '../../../common/constants';
 import { resolveIndexScope } from '../../services/watches/hunt/common/resolve_index_scope';

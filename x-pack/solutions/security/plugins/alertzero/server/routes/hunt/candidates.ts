@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import {
-  API_VERSIONS,
-  CandidatesRequestBody,
-  CandidatesResponse,
-  INTERNAL_API_ACCESS,
-} from '@kbn/alertzero-common';
+import type { CandidatesResponse } from '@kbn/alertzero-common';
+import { API_VERSIONS, CandidatesRequestBody, INTERNAL_API_ACCESS } from '@kbn/alertzero-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERTZERO_API_PRIVILEGE_READ, HUNT_INTERNAL_ROUTE_BASE } from '../../../common/constants';
 import { buildCandidateQuery } from '../../services/watches/hunt/common/build_candidate_query';

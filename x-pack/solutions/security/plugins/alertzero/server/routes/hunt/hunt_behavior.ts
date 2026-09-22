@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import type { HuntBehaviorResponse } from '@kbn/alertzero-common';
 import {
   ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
   API_VERSIONS,
   HuntBehaviorRequestBody,
-  HuntBehaviorResponse,
   INTERNAL_API_ACCESS,
 } from '@kbn/alertzero-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
