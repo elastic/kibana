@@ -41,13 +41,18 @@ import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
 import { useProposalsByCategory, useClosedProposals } from '../../hooks/use_proposals_api';
 import { useOpenInChat } from '../../hooks/use_open_in_chat';
 import { useConversationsUrlParams } from './conversations_url_params';
-import { ConnectedEscalationModal } from './connected_escalation_modal';
 import { useInvestigationDetails } from './use_investigation_details';
 import { QUEUE_PAGE_INFO, DECISION_ERRORS } from './translations';
 import { ProposalsTrendChartRow } from '../../components/proposals_trend_chart';
 import { DismissProposalModal } from '../../components/pending_proposals/dismiss_proposal_modal';
 import type { ProposalItem } from '../../../common/proposals/list';
 import { proposalToInvestigation } from './proposal_to_investigation';
+
+// Lazy-loaded so that the escalation modal tree (React Query hooks, form components,
+// translations, and user-profile API) stays out of alertzero's main chunk.
+const LazyConnectedEscalationModal = React.lazy(() =>
+  import('./connected_escalation_modal').then((m) => ({ default: m.ConnectedEscalationModal }))
+);
 
 /**
  * The proposals route distinguishes why a decision was refused — 410 the deadline passed,
@@ -200,7 +205,11 @@ export const ConversationsPage: React.FC = () => {
   );
 
   const renderEscalationModal = useCallback(
-    (props: EscalationModalRenderProps) => <ConnectedEscalationModal {...props} />,
+    (props: EscalationModalRenderProps) => (
+      <React.Suspense fallback={null}>
+        <LazyConnectedEscalationModal {...props} />
+      </React.Suspense>
+    ),
     []
   );
 
