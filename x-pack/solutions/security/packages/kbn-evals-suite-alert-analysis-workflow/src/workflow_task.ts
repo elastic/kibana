@@ -39,8 +39,12 @@ const isAgentStep = (step: WorkflowStepExecutionDto): boolean =>
 
 /** One verdict, as the workflow's `ai.agent` step is schema-constrained to return it. */
 interface Verdict {
-  /** The alert id the model echoes back, used to pair a verdict with its alert. */
+  /**
+   * Alert id the model echoes back. The agent schema names this `id` (matched in
+   * `apply_verdicts` via `where: 'id'`); older replies/docs may still use `alert_id`.
+   */
   id?: string;
+  alert_id?: string;
   classification?: Classification;
   confidence_score?: number;
   rationale?: string;
@@ -84,18 +88,23 @@ const isTerminal = (status: ExecutionStatus): boolean => TerminalExecutionStatus
  * the result), and both report status `completed`, so we cannot key off status alone: scan every
  * agent-step record and return the first verdict we find for the alert.
  *
+ * The agent schema keys the alert as `id` (see alert_analysis_workflow.yaml); `alert_id` is only
+ * introduced later when `apply_verdicts` builds the caller-facing `output_verdicts`. Match either.
+ *
  * We seed one alert per run, so the batch the workflow builds holds exactly that alert; the id is
  * still matched explicitly rather than taking `verdicts[0]`, so a run that somehow classified a
  * different alert is reported as "no verdict" instead of being graded against the wrong alert.
  */
-const readAgentVerdict = (
+export const readAgentVerdict = (
   stepExecutions: WorkflowStepExecutionDto[],
   alertId: string
 ): Verdict | undefined => {
   const agentSteps = stepExecutions.filter(isAgentStep);
   for (const step of agentSteps) {
     const output = step.output as { structured_output?: StructuredOutput } | null | undefined;
-    const verdict = output?.structured_output?.verdicts?.find(({ id }) => id === alertId);
+    const verdict = output?.structured_output?.verdicts?.find(
+      ({ id, alert_id }) => id === alertId || alert_id === alertId
+    );
     if (verdict?.classification) {
       return verdict;
     }
