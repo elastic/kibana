@@ -10,6 +10,7 @@ import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import type { SignificantEventsAvailabilityResponse } from '../../../../common';
 import { createServerRoute } from '../../create_server_route';
 import { getSignificantEventsAvailability } from '../../utils/assert_significant_events_access';
+import { getSignificantEventsUserPrivileges } from '../../../lib/privileges';
 
 const availabilityRoute = createServerRoute({
   endpoint: 'GET /internal/significant_events/availability',
@@ -30,9 +31,21 @@ const availabilityRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<SignificantEventsAvailabilityResponse> => {
-    const { licensing } = await getScopedClients({ request });
+    const { licensing, scopedClusterClient, isSecurityEnabled } = await getScopedClients({
+      request,
+    });
 
-    return getSignificantEventsAvailability({ server, licensing });
+    const availability = await getSignificantEventsAvailability({ server, licensing });
+    if (!availability.available) {
+      return availability;
+    }
+
+    const privileges = await getSignificantEventsUserPrivileges({
+      esClient: scopedClusterClient.asCurrentUser,
+      isSecurityEnabled,
+    });
+
+    return { available: true, privileges };
   },
 });
 

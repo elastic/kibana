@@ -34,10 +34,17 @@ describe('createKiIdentificationStartTool', () => {
       getState: jest.fn().mockResolvedValue('enabled'),
     };
 
+    // Security disabled resolves to full access, so the preflight write gate passes.
+    const getScopedClients = (async () => ({
+      scopedClusterClient: { asCurrentUser: {} },
+      isSecurityEnabled: false,
+    })) as never;
+
     const tool = createKiIdentificationStartTool({
       telemetry: telemetry as never,
       streamsKIsOnboardingClient,
       maintenanceService: maintenanceService as never,
+      getScopedClients,
     });
     const context = createMockToolContext();
 
