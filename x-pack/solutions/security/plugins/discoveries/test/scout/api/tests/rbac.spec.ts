@@ -10,6 +10,7 @@ import { apiTest } from '../fixtures';
 import { SCHEDULE_TAGS } from '../fixtures/constants';
 import {
   deleteAllWorkflowSchedules,
+  getAlertsIndexPatternForSpace,
   getGenerateApi,
   getMonitoringApis,
   getSimpleGenerateBody,
@@ -73,7 +74,7 @@ apiTest.describe('Workflow schedule API - RBAC', { tag: SCHEDULE_TAGS }, () => {
     async ({ discoveriesApi }) => {
       const apis = getWorkflowSchedulesApis(discoveriesApi, viewerHeaders, spaceId);
 
-      const response = await apis.createSchedule(getSimpleWorkflowSchedule());
+      const response = await apis.createSchedule(getSimpleWorkflowSchedule(spaceId));
       const body = response.body as { error?: string; message?: string };
 
       expect(response).toHaveStatusCode(403);
@@ -87,7 +88,7 @@ apiTest.describe('Workflow schedule API - RBAC', { tag: SCHEDULE_TAGS }, () => {
       const adminApis = getWorkflowSchedulesApis(discoveriesApi, adminHeaders, spaceId);
       const viewerApis = getWorkflowSchedulesApis(discoveriesApi, viewerHeaders, spaceId);
 
-      const createResult = await adminApis.createSchedule(getSimpleWorkflowSchedule());
+      const createResult = await adminApis.createSchedule(getSimpleWorkflowSchedule(spaceId));
       expect(createResult).toHaveStatusCode(200);
       const createdId = (createResult.body as Record<string, unknown>).id as string;
 
@@ -95,7 +96,7 @@ apiTest.describe('Workflow schedule API - RBAC', { tag: SCHEDULE_TAGS }, () => {
         actions: [],
         name: 'Hacked name',
         params: {
-          alerts_index_pattern: '.alerts-security.alerts-default',
+          alerts_index_pattern: getAlertsIndexPatternForSpace(spaceId),
           api_config: {
             action_type_id: '.gen-ai',
             connector_id: 'test-connector-id',
@@ -117,7 +118,7 @@ apiTest.describe('Workflow schedule API - RBAC', { tag: SCHEDULE_TAGS }, () => {
       const adminApis = getWorkflowSchedulesApis(discoveriesApi, adminHeaders, spaceId);
       const viewerApis = getWorkflowSchedulesApis(discoveriesApi, viewerHeaders, spaceId);
 
-      const createResult = await adminApis.createSchedule(getSimpleWorkflowSchedule());
+      const createResult = await adminApis.createSchedule(getSimpleWorkflowSchedule(spaceId));
       expect(createResult).toHaveStatusCode(200);
       const createdId = (createResult.body as Record<string, unknown>).id as string;
 
@@ -136,7 +137,7 @@ apiTest.describe('Workflow schedule API - RBAC', { tag: SCHEDULE_TAGS }, () => {
       const viewerApis = getWorkflowSchedulesApis(discoveriesApi, viewerHeaders, spaceId);
 
       const createResult = await adminApis.createSchedule(
-        getSimpleWorkflowSchedule({ enabled: false })
+        getSimpleWorkflowSchedule(spaceId, { enabled: false })
       );
       expect(createResult).toHaveStatusCode(200);
       const createdId = (createResult.body as Record<string, unknown>).id as string;
@@ -156,7 +157,7 @@ apiTest.describe('Workflow schedule API - RBAC', { tag: SCHEDULE_TAGS }, () => {
       const viewerApis = getWorkflowSchedulesApis(discoveriesApi, viewerHeaders, spaceId);
 
       const createResult = await adminApis.createSchedule(
-        getSimpleWorkflowSchedule({ enabled: true })
+        getSimpleWorkflowSchedule(spaceId, { enabled: true })
       );
       expect(createResult).toHaveStatusCode(200);
       const createdId = (createResult.body as Record<string, unknown>).id as string;
@@ -179,7 +180,7 @@ apiTest.describe('Workflow schedule API - RBAC', { tag: SCHEDULE_TAGS }, () => {
     async ({ discoveriesApi }) => {
       const viewerApi = getGenerateApi(discoveriesApi, viewerHeaders, spaceId);
 
-      const response = await viewerApi.generate(getSimpleGenerateBody());
+      const response = await viewerApi.generate(getSimpleGenerateBody(spaceId));
       const body = response.body as { error?: string; message?: string };
 
       expect(response).toHaveStatusCode(403);

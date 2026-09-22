@@ -45,9 +45,9 @@ apiTest.describe('Workflow schedule API - find', { tag: SCHEDULE_TAGS }, () => {
   apiTest('should return all created schedules', async ({ discoveriesApi }) => {
     const apis = getWorkflowSchedulesApis(discoveriesApi, defaultHeaders, spaceId);
 
-    await apis.createSchedule(getSimpleWorkflowSchedule({ name: 'Schedule A' }));
-    await apis.createSchedule(getSimpleWorkflowSchedule({ name: 'Schedule B' }));
-    await apis.createSchedule(getSimpleWorkflowSchedule({ name: 'Schedule C' }));
+    await apis.createSchedule(getSimpleWorkflowSchedule(spaceId, { name: 'Schedule A' }));
+    await apis.createSchedule(getSimpleWorkflowSchedule(spaceId, { name: 'Schedule B' }));
+    await apis.createSchedule(getSimpleWorkflowSchedule(spaceId, { name: 'Schedule C' }));
 
     // Schedules are Alerting rules backed by saved objects, so a create is not
     // guaranteed to be searchable immediately (index refresh lag). Wait until
@@ -74,9 +74,9 @@ apiTest.describe('Workflow schedule API - find', { tag: SCHEDULE_TAGS }, () => {
   apiTest('should sort by name ascending', async ({ discoveriesApi }) => {
     const apis = getWorkflowSchedulesApis(discoveriesApi, defaultHeaders, spaceId);
 
-    await apis.createSchedule(getSimpleWorkflowSchedule({ name: 'Charlie' }));
-    await apis.createSchedule(getSimpleWorkflowSchedule({ name: 'Alpha' }));
-    await apis.createSchedule(getSimpleWorkflowSchedule({ name: 'Bravo' }));
+    await apis.createSchedule(getSimpleWorkflowSchedule(spaceId, { name: 'Charlie' }));
+    await apis.createSchedule(getSimpleWorkflowSchedule(spaceId, { name: 'Alpha' }));
+    await apis.createSchedule(getSimpleWorkflowSchedule(spaceId, { name: 'Bravo' }));
 
     // Wait until all three are searchable before asserting order (index refresh
     // lag; see the pagination test).
@@ -102,9 +102,9 @@ apiTest.describe('Workflow schedule API - find', { tag: SCHEDULE_TAGS }, () => {
   apiTest('should sort by name descending', async ({ discoveriesApi }) => {
     const apis = getWorkflowSchedulesApis(discoveriesApi, defaultHeaders, spaceId);
 
-    await apis.createSchedule(getSimpleWorkflowSchedule({ name: 'Charlie' }));
-    await apis.createSchedule(getSimpleWorkflowSchedule({ name: 'Alpha' }));
-    await apis.createSchedule(getSimpleWorkflowSchedule({ name: 'Bravo' }));
+    await apis.createSchedule(getSimpleWorkflowSchedule(spaceId, { name: 'Charlie' }));
+    await apis.createSchedule(getSimpleWorkflowSchedule(spaceId, { name: 'Alpha' }));
+    await apis.createSchedule(getSimpleWorkflowSchedule(spaceId, { name: 'Bravo' }));
 
     // Wait until all three are searchable before asserting order (index refresh
     // lag; see the pagination test).
@@ -131,7 +131,7 @@ apiTest.describe('Workflow schedule API - find', { tag: SCHEDULE_TAGS }, () => {
     const apis = getWorkflowSchedulesApis(discoveriesApi, defaultHeaders, spaceId);
 
     for (let i = 1; i <= 5; i++) {
-      await apis.createSchedule(getSimpleWorkflowSchedule({ name: `Schedule ${i}` }));
+      await apis.createSchedule(getSimpleWorkflowSchedule(spaceId, { name: `Schedule ${i}` }));
     }
 
     // Schedules are Alerting rules backed by saved objects, so a create is not

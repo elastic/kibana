@@ -33,7 +33,7 @@ apiTest.describe('Workflow schedule API - delete', { tag: SCHEDULE_TAGS }, () =>
   apiTest('should delete a schedule', async ({ discoveriesApi }) => {
     const apis = getWorkflowSchedulesApis(discoveriesApi, defaultHeaders, spaceId);
 
-    const createResult = await apis.createSchedule(getSimpleWorkflowSchedule());
+    const createResult = await apis.createSchedule(getSimpleWorkflowSchedule(spaceId));
     expect(createResult).toHaveStatusCode(200);
     const createdId = (createResult.body as Record<string, unknown>).id as string;
 

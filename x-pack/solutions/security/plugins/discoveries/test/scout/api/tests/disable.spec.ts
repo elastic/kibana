@@ -33,7 +33,9 @@ apiTest.describe('Workflow schedule API - disable', { tag: SCHEDULE_TAGS }, () =
   apiTest('should disable an enabled schedule', async ({ discoveriesApi }) => {
     const apis = getWorkflowSchedulesApis(discoveriesApi, defaultHeaders, spaceId);
 
-    const createResult = await apis.createSchedule(getSimpleWorkflowSchedule({ enabled: true }));
+    const createResult = await apis.createSchedule(
+      getSimpleWorkflowSchedule(spaceId, { enabled: true })
+    );
     expect(createResult).toHaveStatusCode(200);
     const createdId = (createResult.body as Record<string, unknown>).id as string;
 

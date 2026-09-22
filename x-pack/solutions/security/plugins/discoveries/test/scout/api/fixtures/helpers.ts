@@ -103,17 +103,25 @@ export const getScheduleAdminRoleDescriptor = (): KibanaRole => ({
 });
 
 /**
- * Returns a minimal valid workflow schedule body for creating a schedule
+ * Returns the space-specific security alerts index the create, update and generate routes require
+ * in `alerts_index_pattern` (see the server's `assertAlertsIndexPatternInSpace`).
+ */
+export const getAlertsIndexPatternForSpace = (spaceId: string): string =>
+  `.alerts-security.alerts-${spaceId}`;
+
+/**
+ * Returns a minimal valid workflow schedule body for creating a schedule in the given space
  * via the internal API. Matches the AttackDiscoveryScheduleCreateProps schema.
  */
 export const getSimpleWorkflowSchedule = (
+  spaceId: string,
   overrides: Record<string, unknown> = {}
 ): Record<string, unknown> => ({
   actions: [],
   enabled: false,
   name: 'Test workflow schedule',
   params: {
-    alerts_index_pattern: '.alerts-security.alerts-default',
+    alerts_index_pattern: getAlertsIndexPatternForSpace(spaceId),
     api_config: {
       action_type_id: '.gen-ai',
       connector_id: 'test-connector-id',
@@ -188,13 +196,14 @@ export const getWorkflowSchedulesApis = (
 
 /**
  * Returns a minimal valid ad-hoc generation body for the internal `_generate`
- * route. Matches the PostGenerateRequestBody schema (required: alerts index
+ * route in the given space. Matches the PostGenerateRequestBody schema (required: alerts index
  * pattern + api_config).
  */
 export const getSimpleGenerateBody = (
+  spaceId: string,
   overrides: Record<string, unknown> = {}
 ): Record<string, unknown> => ({
-  alerts_index_pattern: '.alerts-security.alerts-default',
+  alerts_index_pattern: getAlertsIndexPatternForSpace(spaceId),
   api_config: {
     action_type_id: '.gen-ai',
     connector_id: 'test-connector-id',

@@ -32,7 +32,7 @@ apiTest.describe('Workflow schedule API - get', { tag: SCHEDULE_TAGS }, () => {
 
   apiTest('should get a schedule by id', async ({ discoveriesApi }) => {
     const apis = getWorkflowSchedulesApis(discoveriesApi, defaultHeaders, spaceId);
-    const scheduleBody = getSimpleWorkflowSchedule();
+    const scheduleBody = getSimpleWorkflowSchedule(spaceId);
 
     const createResult = await apis.createSchedule(scheduleBody);
     expect(createResult).toHaveStatusCode(200);
