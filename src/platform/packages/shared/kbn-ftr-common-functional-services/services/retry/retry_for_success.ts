@@ -50,6 +50,8 @@ interface Options<T> {
   initialDelay?: number;
 }
 
+export const DEFAULT_RETRY_DELAY = 100;
+
 export async function retryForSuccess<T>(log: ToolingLog, options: Options<T>) {
   const {
     description,
@@ -59,7 +61,7 @@ export async function retryForSuccess<T>(log: ToolingLog, options: Options<T>) {
     onFailureBlock,
     onFailure = defaultOnFailure(methodName),
     accept = returnTrue,
-    retryDelay = 502,
+    retryDelay = DEFAULT_RETRY_DELAY,
     retryCount,
     initialDelay,
   } = options;
