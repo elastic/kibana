@@ -6,16 +6,28 @@
  */
 
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import type { ListPolicyExecutionHistoryResponse } from '@kbn/alerting-v2-schemas';
 import {
   ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH,
   ALERTING_V2_EXECUTION_HISTORY_RULES_API_PATH,
 } from '../constants';
 import { ExecutionHistoryApi } from './execution_history_api';
 
+const buildResponse = (
+  overrides: Partial<ListPolicyExecutionHistoryResponse> = {}
+): ListPolicyExecutionHistoryResponse => ({
+  items: [],
+  page: 1,
+  per_page: 50,
+  total: 0,
+  search_matches: null,
+  ...overrides,
+});
+
 describe('ExecutionHistoryApi', () => {
   const buildApi = () => {
     const http = httpServiceMock.createStartContract();
-    http.get.mockResolvedValue({ items: [], page: 1, perPage: 50, total: 0 });
+    http.get.mockResolvedValue(buildResponse());
     const api = new ExecutionHistoryApi(http);
     return { api, http };
   };
@@ -91,12 +103,7 @@ describe('ExecutionHistoryApi', () => {
 
   it('returns the response from http.get', async () => {
     const { api, http } = buildApi();
-    const fakeResponse = {
-      items: [{ dispatched_at: '2026-05-05T10:00:00Z' }],
-      page: 2,
-      perPage: 25,
-      total: 137,
-    };
+    const fakeResponse = buildResponse({ page: 2, per_page: 25, total: 137 });
     http.get.mockResolvedValueOnce(fakeResponse);
 
     await expect(api.listActionPolicyExecutions({ page: 2, per_page: 25 })).resolves.toEqual(

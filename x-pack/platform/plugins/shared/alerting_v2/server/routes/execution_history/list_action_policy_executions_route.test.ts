@@ -7,25 +7,42 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import type { ActionPolicyExecutionHistoryClient } from '../../lib/action_policy_execution_history_client';
+import type { PolicyExecutionHistoryItem } from '@kbn/alerting-v2-schemas';
+import type {
+  ActionPolicyExecutionHistoryClient,
+  ListExecutionHistoryResult,
+} from '../../lib/action_policy_execution_history_client';
 import { createRouteDependencies } from '../test_utils';
 import {
   ListActionPolicyExecutionsRoute,
   toListExecutionHistoryArgs,
 } from './list_action_policy_executions_route';
 
+const item: PolicyExecutionHistoryItem = {
+  dispatched_at: '2026-05-05T10:00:00.000Z',
+  policy: { id: 'policy-1', name: 'My Policy' },
+  rules: [{ id: 'rule-1', name: 'My Rule' }],
+  total_rule_count: 1,
+  outcome: 'dispatched',
+  episode_count: 1,
+  action_group_count: 1,
+  workflows: [],
+};
+
+const emptyResult: ListExecutionHistoryResult = {
+  items: [],
+  page: 1,
+  perPage: 100,
+  total: 0,
+  searchMatches: null,
+};
+
 const createMocks = () => {
   const deps = createRouteDependencies();
   const executionHistoryClient: jest.Mocked<
     Pick<ActionPolicyExecutionHistoryClient, 'listExecutionHistory'>
   > = {
-    listExecutionHistory: jest.fn().mockResolvedValue({
-      items: [],
-      page: 1,
-      perPage: 100,
-      total: 0,
-      searchMatches: null,
-    }),
+    listExecutionHistory: jest.fn().mockResolvedValue(emptyResult),
   };
   return { deps, executionHistoryClient };
 };
@@ -124,14 +141,14 @@ describe('ListActionPolicyExecutionsRoute', () => {
 
   it('maps the client result onto the snake_case response body', async () => {
     const mocks = createMocks();
-    const clientResult = {
-      items: [{ id: 'x' }],
+    const clientResult: ListExecutionHistoryResult = {
+      items: [item],
       page: 4,
       perPage: 25,
       total: 137,
       searchMatches: null,
     };
-    mocks.executionHistoryClient.listExecutionHistory.mockResolvedValue(clientResult as any);
+    mocks.executionHistoryClient.listExecutionHistory.mockResolvedValue(clientResult);
 
     const request = httpServerMock.createKibanaRequest();
     const route = buildRoute(request as unknown as KibanaRequest, mocks);
@@ -140,7 +157,7 @@ describe('ListActionPolicyExecutionsRoute', () => {
 
     const okCall = (mocks.deps.response.ok as jest.Mock).mock.calls[0][0];
     expect(okCall.body).toEqual({
-      items: [{ id: 'x' }],
+      items: [item],
       page: 4,
       per_page: 25,
       total: 137,

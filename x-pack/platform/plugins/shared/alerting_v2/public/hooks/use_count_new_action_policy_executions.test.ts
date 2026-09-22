@@ -27,7 +27,9 @@ const createWrapper = () => {
 };
 
 describe('useCountNewActionPolicyExecutions', () => {
-  const mockListActionPolicyExecutions = jest.fn();
+  const mockListActionPolicyExecutions: jest.MockedFunction<
+    ExecutionHistoryApi['listActionPolicyExecutions']
+  > = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -43,9 +45,9 @@ describe('useCountNewActionPolicyExecutions', () => {
     mockListActionPolicyExecutions.mockResolvedValue({
       items: [],
       page: 1,
-      perPage: 0,
+      per_page: 0,
       total: 7,
-      searchMatches: null,
+      search_matches: null,
     });
 
     renderHook(
@@ -74,9 +76,9 @@ describe('useCountNewActionPolicyExecutions', () => {
     const fakeResponse = {
       items: [],
       page: 1,
-      perPage: 0,
+      per_page: 0,
       total: 42,
-      searchMatches: null,
+      search_matches: null,
     };
     mockListActionPolicyExecutions.mockResolvedValue(fakeResponse);
 

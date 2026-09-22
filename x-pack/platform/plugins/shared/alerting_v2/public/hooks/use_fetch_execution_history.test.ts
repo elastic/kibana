@@ -9,6 +9,7 @@ import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useService } from '@kbn/core-di-browser';
+import type { PolicyExecutionHistoryItem } from '@kbn/alerting-v2-schemas';
 import { ExecutionHistoryApi } from '../services/execution_history_api';
 import { executionHistoryKeys } from './query_key_factory';
 import {
@@ -19,6 +20,17 @@ import {
 jest.mock('@kbn/core-di-browser');
 
 const mockUseService = useService as jest.MockedFunction<typeof useService>;
+
+const item: PolicyExecutionHistoryItem = {
+  dispatched_at: '2026-05-05T10:00:00.000Z',
+  policy: { id: 'policy-1', name: 'My Policy' },
+  rules: [{ id: 'rule-1', name: 'My Rule' }],
+  total_rule_count: 1,
+  outcome: 'dispatched',
+  episode_count: 1,
+  action_group_count: 1,
+  workflows: [],
+};
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
@@ -31,7 +43,9 @@ const createWrapper = () => {
 };
 
 describe('useFetchExecutionHistory', () => {
-  const mockListActionPolicyExecutions = jest.fn();
+  const mockListActionPolicyExecutions: jest.MockedFunction<
+    ExecutionHistoryApi['listActionPolicyExecutions']
+  > = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -47,9 +61,9 @@ describe('useFetchExecutionHistory', () => {
     mockListActionPolicyExecutions.mockResolvedValue({
       items: [],
       page: 2,
-      perPage: 25,
+      per_page: 25,
       total: 0,
-      searchMatches: null,
+      search_matches: null,
     });
 
     renderHook(
@@ -72,11 +86,11 @@ describe('useFetchExecutionHistory', () => {
 
   it('returns data from the API on success', async () => {
     const fakeResponse = {
-      items: [{ dispatched_at: '2026-05-05T10:00:00Z' }],
+      items: [item],
       page: 1,
-      perPage: 50,
+      per_page: 50,
       total: 1,
-      searchMatches: null,
+      search_matches: null,
     };
     mockListActionPolicyExecutions.mockResolvedValue(fakeResponse);
 
@@ -104,9 +118,9 @@ describe('useFetchExecutionHistory', () => {
     mockListActionPolicyExecutions.mockResolvedValue({
       items: [],
       page: 1,
-      perPage: 50,
+      per_page: 50,
       total: 0,
-      searchMatches: null,
+      search_matches: null,
     });
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     const wrapper = ({ children }: { children: React.ReactNode }) =>
@@ -118,9 +132,9 @@ describe('useFetchExecutionHistory', () => {
     expect(queryClient.getQueryData(executionHistoryKeys.list({ page: 3, perPage: 25 }))).toEqual({
       items: [],
       page: 1,
-      perPage: 50,
+      per_page: 50,
       total: 0,
-      searchMatches: null,
+      search_matches: null,
     });
   });
 
@@ -128,9 +142,9 @@ describe('useFetchExecutionHistory', () => {
     mockListActionPolicyExecutions.mockResolvedValue({
       items: [],
       page: 1,
-      perPage: 50,
+      per_page: 50,
       total: 0,
-      searchMatches: null,
+      search_matches: null,
     });
 
     const { rerender } = renderHook(
