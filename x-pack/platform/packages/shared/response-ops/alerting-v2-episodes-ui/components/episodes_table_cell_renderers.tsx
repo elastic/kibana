@@ -27,6 +27,7 @@ import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 import { DURATION_LOWER_BOUND_FIELD } from '@kbn/alerting-v2-common-queries';
 import { parseEpisodeDataJson } from '@kbn/alerting-v2-utils';
 import type { EpisodeActionState, EpisodeStatusGroupAction } from '../types/action';
+import { isNativeV2Rule, isSourceEpisode, type AlertEpisode } from '../queries/episodes_query';
 import { AlertingEpisodeGroupingTags } from './grouping/alerting_episode_grouping_tags';
 import { AlertEpisodeStatusBadges } from './status/status_badges';
 import { TagBadges } from './actions/tags';
@@ -40,6 +41,26 @@ type CellRendererProps = Parameters<CustomCellRenderer[string]>[0];
 
 /** Characters of the rule id shown when a rule has no name to display. */
 const SHORT_RULE_ID_LENGTH = 7;
+
+const getEpisodeGroupingFromRow = (
+  row: CellRendererProps['row'],
+  ruleGroupingFields: readonly string[] = []
+): { groupingFields: readonly string[]; groupingData: Record<string, unknown> } => {
+  const episode = row.flattened as unknown as AlertEpisode;
+
+  if (isSourceEpisode(episode)) {
+    const sourceGrouping = episode.source_grouping ?? {};
+    return {
+      groupingFields: Object.keys(sourceGrouping),
+      groupingData: sourceGrouping,
+    };
+  }
+
+  return {
+    groupingFields: ruleGroupingFields,
+    groupingData: parseEpisodeDataJson(episode.episode_data),
+  };
+};
 
 export const EpisodeStatusCell = ({ row, columnId }: CellRendererProps) => {
   const status = row.flattened[columnId] as AlertEpisodeStatus;
@@ -128,13 +149,13 @@ export interface EpisodeRuleCellProps extends CellRendererProps {
   rulesCache: Record<string, Rule>;
   isLoadingRules: boolean;
   rowHeight: number;
-  /** Builds the href of the rule details page for a rule id. */
-  getRuleDetailsHref: (ruleId: string) => string;
+  /** Builds the href of the rule details page for a rule id. Omit when there is no details route. */
+  getRuleDetailsHref: (ruleId: string, isSourceRule?: boolean) => string | undefined;
   /**
    * Called when the rule name is clicked, for hosts that show the rule somewhere on the page
    * instead of navigating to it. Modified and non-left clicks still follow the link.
    */
-  onRuleNameClick?: (ruleId: string) => void;
+  onRuleNameClick?: (ruleId: string, sourceRuleInfo?: { category?: string }) => void;
   /** Source data views keyed by rule id, used to format grouping values via `fieldFormats`. */
   sourceDataViewsByRule?: Map<string, DataView>;
 }
@@ -180,7 +201,23 @@ export const EpisodeRuleCell = ({
     const displayName = dataRuleName ?? eventRuleName;
 
     if (displayName) {
-      return <span css={nameCss}>{displayName}</span>;
+      const { groupingFields, groupingData } = getEpisodeGroupingFromRow(row);
+      return (
+        <span data-test-subj="episodeRuleCell">
+          <span css={nameCss}>{displayName}</span>
+          {groupingFields.length > 0 ? (
+            <>
+              {' '}
+              <AlertingEpisodeGroupingTags
+                inline
+                fields={groupingFields}
+                data={groupingData}
+                data-test-subj="episodeRuleCellGroupingTags"
+              />
+            </>
+          ) : null}
+        </span>
+      );
     }
 
     if (!ruleId) {
@@ -250,17 +287,30 @@ export const EpisodeRuleCell = ({
     );
   }
 
-  const episodeData = parseEpisodeDataJson(row.flattened.episode_data);
-  const groupingFields = rule.grouping?.fields ?? [];
+  const { groupingFields, groupingData } = getEpisodeGroupingFromRow(
+    row,
+    rule.grouping?.fields ?? []
+  );
   const showQuery = rowHeight !== ROWS_HEIGHT_OPTIONS.single;
-  const detailsHref = getRuleDetailsHref(ruleId);
+  const episode = row.flattened as unknown as AlertEpisode;
+  // `source_id` means the row came from a source fetch, not that the rule is classic. Mixed
+  // rows (classic alert, native v2 rule) keep the v2 href and flyout.
+  const sourceRuleInfo =
+    isSourceEpisode(episode) && !isNativeV2Rule(rule)
+      ? { category: episode.rule_category }
+      : undefined;
   // The href stays on the link either way, so opening the rule page in a new tab keeps working.
+  const detailsHref = getRuleDetailsHref(ruleId, !!sourceRuleInfo) || undefined;
   const nameLinkProps = onRuleNameClick
-    ? getRouterLinkProps({ href: detailsHref, onClick: () => onRuleNameClick(ruleId) })
+    ? getRouterLinkProps({
+        href: detailsHref,
+        onClick: () => onRuleNameClick(ruleId, sourceRuleInfo),
+      })
     : { href: detailsHref };
 
   return (
     <span data-test-subj="episodeRuleCell">
+      {/* eslint-disable-next-line @elastic/eui/require-href-for-link -- source rules may have no details route */}
       <EuiLink {...nameLinkProps} css={nameCss} data-test-subj="episodeRuleCellNameLink">
         {rule.metadata.name}
       </EuiLink>
@@ -270,7 +320,7 @@ export const EpisodeRuleCell = ({
           <AlertingEpisodeGroupingTags
             inline
             fields={groupingFields}
-            data={episodeData}
+            data={groupingData}
             dataView={sourceDataViewsByRule?.get(ruleId)}
             data-test-subj="episodeRuleCellGroupingTags"
           />
