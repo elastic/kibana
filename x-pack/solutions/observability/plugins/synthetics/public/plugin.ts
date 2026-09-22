@@ -241,12 +241,18 @@ export class SyntheticsPlugin
   public start(coreStart: CoreStart, pluginsStart: ClientPluginsStart): void {
     const { triggersActionsUi } = pluginsStart;
 
-    if (
-      coreStart.featureFlags.getBooleanValue(
+    let syntheticsCpsEnabled = OBSERVABILITY_SYNTHETICS_CPS_ENABLED_DEFAULT;
+    coreStart.featureFlags
+      .getBooleanValue$(
         OBSERVABILITY_SYNTHETICS_CPS_ENABLED_FEATURE_FLAG,
         OBSERVABILITY_SYNTHETICS_CPS_ENABLED_DEFAULT
       )
-    ) {
+      .subscribe((enabled) => {
+        syntheticsCpsEnabled = enabled;
+      })
+      .unsubscribe();
+
+    if (syntheticsCpsEnabled) {
       pluginsStart.cps?.cpsManager?.registerAppAccess(
         'synthetics',
         getSyntheticsProjectPickerAccess
