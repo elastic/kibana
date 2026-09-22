@@ -250,6 +250,7 @@ export const GetCloudOnboardingDeploymentsByConnectorIdRequestSchema = {
   params: schema.object({
     connectorId: schema.string({
       minLength: 1,
+      maxLength: 255,
       meta: { description: 'The fleet-cloud-connector ID to list deployments for.' },
     }),
   }),
