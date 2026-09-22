@@ -126,11 +126,14 @@ const expectPanelLinks = async (nav: ObservabilityNavigation, visible: readonly 
 
   await nav.openPanelById(ALERTS_PANEL_ID);
 
-  for (const deepLinkId of ALL_PANEL_LINKS) {
+  for (const deepLinkId of visible) {
     const item = nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, deepLinkId);
-    if (visible.includes(deepLinkId)) {
-      await expect(item).toBeVisible({ timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS });
-    } else {
+    await expect(item).toBeVisible({ timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS });
+  }
+
+  for (const deepLinkId of ALL_PANEL_LINKS) {
+    if (!visible.includes(deepLinkId)) {
+      const item = nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, deepLinkId);
       await expect(item).not.toBeVisible();
     }
   }
@@ -215,6 +218,9 @@ test.describe(
       await expect(nav.sidePanel(settingsPanelId)).toBeVisible({
         timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
       });
+      await expect(
+        nav.navItemInPanelById(settingsPanelId, 'management:triggersActionsConnectors')
+      ).toBeVisible({ timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS });
       await expect(nav.navItemInPanelById(settingsPanelId, 'alerting_v2_panel')).not.toBeVisible();
       await expect(
         nav.sidePanel(settingsPanelId).getByText('Alerting V2 Preview', { exact: true })

@@ -18,7 +18,6 @@ export class Chrome {
   public readonly logo: Locator;
   public readonly searchInput: Locator;
   public readonly searchNoResults: Locator;
-  public readonly searchOptions: Locator;
 
   private readonly nextChromeHeader: Locator;
   private readonly searchButton: Locator;
@@ -45,7 +44,6 @@ export class Chrome {
     this.logo = page.testSubj.locator('nav-header-logo');
     this.searchInput = page.testSubj.locator('nav-search-input');
     this.searchNoResults = page.getByRole('status').getByTestId('nav-search-no-results');
-    this.searchOptions = page.getByTestId('nav-search-option');
     this.nextChromeHeader = page.testSubj.locator('chromeNextGlobalHeader');
     this.searchButton = page.testSubj.locator('chromeNextGlobalHeaderSearchButton');
   }
@@ -68,10 +66,6 @@ export class Chrome {
 
   getSearchOptionByUrl(url: string): Locator {
     return this.page.locator(`[data-test-subj="nav-search-option"][url="${url}"]`);
-  }
-
-  getSearchOptionByTitle(title: string): Locator {
-    return this.searchOptions.filter({ hasText: title });
   }
 
   navItemInPrimaryById(id: string): Locator {
