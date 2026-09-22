@@ -62,10 +62,9 @@ describe('useRiskScoreHistory', () => {
   });
 
   it('omits context when the caller does not supply executionContext', async () => {
-    renderHook(
-      () => useRiskScoreHistory({ entityType: 'user', entityId: 'user-1' }),
-      { wrapper: TestWrapper }
-    );
+    renderHook(() => useRiskScoreHistory({ entityType: 'user', entityId: 'user-1' }), {
+      wrapper: TestWrapper,
+    });
 
     await waitFor(() => expect(mockFetchRiskScoreHistory).toHaveBeenCalled());
     const [callArg] = mockFetchRiskScoreHistory.mock.calls[0];
