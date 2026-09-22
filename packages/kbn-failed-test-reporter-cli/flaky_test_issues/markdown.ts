@@ -73,11 +73,6 @@ export const formatDateRange = (from: Date, to: Date): string => {
 export const formatPipelines = (report: FlakyTestReport): string =>
   report.scope.pipelines.map(inlineCode).join(', ');
 
-/** `on \`kibana-on-merge\` in the last 7 days (3–10 Sep 2026)` */
-export const formatWindow = (report: FlakyTestReport): string =>
-  `on ${formatPipelines(report)} in the last ${plural(report.window.lookbackDays, 'day')} ` +
-  `(${formatDateRange(report.window.from, report.window.to)})`;
-
 export type BranchFailures = Pick<FlakyTestBranchStats, 'branch' | 'builds' | 'failedBuilds'>;
 
 /**

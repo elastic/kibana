@@ -11,17 +11,17 @@ import Path from 'path';
 import { rankTests, type FlakyTestEntry, type FlakyTestReport } from '@kbn/scout-reporting';
 import { getIssueMetadata, updateIssueMetadata } from '../failed_tests_reporter/issue_metadata';
 import {
-  BUILDKITE_ORG_URL,
-  FRAMEWORK_LABELS,
-  KIBANA_BLOB_URL,
   branchesByFailedBuilds,
+  BUILDKITE_ORG_URL,
   codeBlock,
   formatBuildLink,
   formatDateRange,
   formatFailureMessage,
   formatPercent,
-  formatWindow,
+  formatPipelines,
+  FRAMEWORK_LABELS,
   inlineCode,
+  KIBANA_BLOB_URL,
   plural,
   shortTitle,
   table,
@@ -157,11 +157,11 @@ export const rankTierLabel = (worst: FlakyTestEntry, report: FlakyTestReport): s
   const rank = index === -1 ? Number.POSITIVE_INFINITY : index + 1;
   const tier = RANK_TIERS.find((size) => rank <= size);
   if (tier) {
-    return `in the top ${tier} flakiest tests`;
+    return `top ${tier} flakiest tests`;
   }
   const { totalFlaky } = report.summary;
   const total = totalFlaky >= report.thresholds.maxTests ? `${totalFlaky}+` : String(totalFlaky);
-  return `among the ${total} flakiest tests`;
+  return `the ${total} flakiest tests`;
 };
 
 /** `` `main` `` or `` `main` and `9.2` ``: the branches that fail materially. */
@@ -191,39 +191,50 @@ const skippedNote = (suite: FlakySuite): string | undefined => {
     return undefined;
   }
   const since = latestRun.timestamp.toISOString().slice(0, 10);
-  return `Latest run on ${inlineCode(latestRun.branch)} was skipped (${since}).`;
+  return `**Latest run:** skipped on ${inlineCode(latestRun.branch)} since ${since}`;
 };
 
 /**
- * `fails in **3% of builds on \`9.5\`** (4 of 122)`: the rate of the worst test on the branch it
- * qualified on, the number the thresholds were checked against. Reports written before that
- * branch was recorded name the branches failing most instead.
+ * `**3%** of builds on \`9.5\` (4 of 122)`: the rate of the worst test on the branch it qualified
+ * on, the number the thresholds were checked against. Absent for reports written before that
+ * branch was recorded.
  */
-const headlineRate = (suite: FlakySuite): string => {
-  const [worst] = suite.tests;
-  const { flakiestBranch } = worst;
+const flakyRate = (suite: FlakySuite): string | undefined => {
+  const { flakiestBranch } = suite.tests[0];
   if (!flakiestBranch) {
-    const branches = headlineBranches(suite);
-    return `fails frequently${branches ? ` on ${branches}` : ''}`;
+    return undefined;
   }
   const rate =
-    `**${formatPercent(flakiestBranch.buildFailRate)} of builds on ` +
-    `${inlineCode(flakiestBranch.branch)}** (${flakiestBranch.failedBuilds} of ${
+    `**${formatPercent(flakiestBranch.buildFailRate)}** of builds on ` +
+    `${inlineCode(flakiestBranch.branch)} (${flakiestBranch.failedBuilds} of ${
       flakiestBranch.builds
     })`;
-  return suite.tests.length > 1 ? `whose flakiest test fails in ${rate}` : `fails in ${rate}`;
+  return suite.tests.length > 1
+    ? `${rate}, for the flakiest of ${plural(suite.tests.length, 'test')}`
+    : rate;
 };
 
-const headline = (suite: FlakySuite, ctx: FlakySuiteIssueContext): string => {
+/** The facts a reader needs first, one per bullet. */
+const overview = (suite: FlakySuite, ctx: FlakySuiteIssueContext): string => {
   const { report, dashboardUrl } = ctx;
-  const dashboard = dashboardUrl ? ` — [dashboard with latest stats](${dashboardUrl})` : '';
-  return [
-    `A **flaky** test suite ${headlineRate(suite)}: ${rankTierLabel(suite.tests[0], report)} ` +
-      `${formatWindow(report)}${dashboard}.`,
+  const rate = flakyRate(suite);
+  // Older reports do not record the qualifying branch; name the branches failing most instead
+  const branches = rate === undefined ? headlineBranches(suite) : undefined;
+  const bullets = [
+    rate && `**Flaky rate:** ${rate}`,
+    branches && `**Failing on:** ${branches}`,
+    `**Rank:** ${rankTierLabel(suite.tests[0], report)} on ${formatPipelines(report)}`,
+    `**Window:** last ${plural(report.window.lookbackDays, 'day')}, ${formatDateRange(
+      report.window.from,
+      report.window.to
+    )}`,
     skippedNote(suite),
-  ]
-    .filter((part) => part !== undefined)
-    .join(' ');
+    dashboardUrl && `**Dashboard:** [latest stats](${dashboardUrl})`,
+  ];
+  return bullets
+    .filter((bullet): bullet is string => typeof bullet === 'string')
+    .map((bullet) => `- ${bullet}`)
+    .join('\n');
 };
 
 const blobLink = (repoRelativePath: string): string =>
@@ -342,7 +353,7 @@ export const renderFlakySuiteIssueBody = (
   ctx: FlakySuiteIssueContext
 ): string => {
   const sections = [
-    headline(suite, ctx),
+    overview(suite, ctx),
     '### Suite Details',
     suiteDetails(suite),
     '### Flaky Tests',

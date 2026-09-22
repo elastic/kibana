@@ -164,10 +164,10 @@ describe('readSuiteFilePathFromTitle', () => {
 describe('rankTierLabel', () => {
   it('names the smallest top-N tier the worst test falls in', () => {
     const { suite, report } = singleTestReport();
-    expect(rankTierLabel(suite.tests[0], report)).toBe('in the top 5 flakiest tests');
+    expect(rankTierLabel(suite.tests[0], report)).toBe('top 5 flakiest tests');
 
     const multi = multiTestReport();
-    expect(rankTierLabel(multi.suite.tests[0], multi.report)).toBe('in the top 30 flakiest tests');
+    expect(rankTierLabel(multi.suite.tests[0], multi.report)).toBe('top 30 flakiest tests');
   });
 
   it('falls back to the report total beyond the top 100', () => {
@@ -175,31 +175,35 @@ describe('rankTierLabel', () => {
       flakyTest({ testId: `t${index}`, failedBuilds: 200 - index })
     );
     const report = flakyReport(many);
-    expect(rankTierLabel(many[119], report)).toBe('among the 120 flakiest tests');
+    expect(rankTierLabel(many[119], report)).toBe('the 120 flakiest tests');
     expect(
       rankTierLabel(many[119], { ...report, thresholds: { ...report.thresholds, maxTests: 120 } })
-    ).toBe('among the 120+ flakiest tests');
+    ).toBe('the 120+ flakiest tests');
   });
 });
 
 describe('renderFlakySuiteIssueBody', () => {
-  it('opens with the rate of the worst test on the branch it qualified on', () => {
+  it('opens with an overview: rate on the qualifying branch, rank, window', () => {
     const single = singleTestReport();
     expect(renderFlakySuiteIssueBody(single.suite, { report: single.report })).toContain(
-      'A **flaky** test suite fails in **10% of builds on `main`** (49 of 509): in the top'
+      [
+        '- **Flaky rate:** **10%** of builds on `main` (49 of 509)',
+        '- **Rank:** top 5 flakiest tests on `kibana-on-merge`',
+        '- **Window:** last 7 days, 2–9 Sep 2026',
+        '',
+        '### Suite Details',
+      ].join('\n')
     );
     const multi = multiTestReport();
     expect(renderFlakySuiteIssueBody(multi.suite, { report: multi.report })).toContain(
-      'A **flaky** test suite whose flakiest test fails in **'
+      '(49 of 509), for the flakiest of 3 tests\n- **Rank:**'
     );
   });
 
   it('names the branches failing most when the report has no qualifying branch', () => {
     const { report } = singleTestReport();
     const [suite] = groupIntoSuites([flakyTest({ flakiestBranch: undefined })]);
-    expect(renderFlakySuiteIssueBody(suite, { report })).toContain(
-      'A **flaky** test suite fails frequently on `main`: in the top'
-    );
+    expect(renderFlakySuiteIssueBody(suite, { report })).toContain('- **Failing on:** `main`\n');
   });
 
   it('renders a single-test suite with a dashboard link', () => {
