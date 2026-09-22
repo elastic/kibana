@@ -503,7 +503,7 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async getCreateDashboardPromptExists() {
-    return this.testSubjects.exists('emptyListPrompt');
+    return this.testSubjects.waitForExists('emptyListPrompt', { timeout: 2000 });
   }
 
   public async isSettingsOpen() {

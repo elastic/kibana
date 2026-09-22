@@ -868,7 +868,9 @@ export class DiscoverPageObject extends FtrService {
         await this.testSubjects.click('app-menu-overflow-button');
       });
 
-      if (await this.testSubjects.exists('select-text-based-language-btn')) {
+      if (
+        await this.testSubjects.waitForExists('select-text-based-language-btn', { timeout: 2000 })
+      ) {
         await this.testSubjects.click('select-text-based-language-btn');
         await this.header.waitUntilLoadingHasFinished();
         await this.waitUntilSearchingHasFinished();
