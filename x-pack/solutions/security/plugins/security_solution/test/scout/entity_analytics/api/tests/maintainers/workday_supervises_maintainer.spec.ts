@@ -410,5 +410,150 @@ apiTest.describe(
         );
       }
     );
+
+    apiTest(
+      'moves the report to the new manager when the worker is reassigned',
+      async ({ apiClient, esClient }) => {
+        // Two runs, not two snapshots: run 1 establishes the edge, run 2 must
+        // remove it. Only the pre-run reset can do that — additive writes never
+        // retract.
+        const runId = randomUUID().slice(0, 8);
+        const oldManagerEmail = `reassign.old.${runId}@example.com`;
+        const newManagerEmail = `reassign.new.${runId}@example.com`;
+        const reportEmail = `reassign.report.${runId}@example.com`;
+        const oldManagerEntityId = `user:${oldManagerEmail}@${NAMESPACE}`;
+        const newManagerEntityId = `user:${newManagerEmail}@${NAMESPACE}`;
+        const reportEntityId = `user:${reportEmail}@${NAMESPACE}`;
+
+        for (const [entityId, email] of [
+          [oldManagerEntityId, oldManagerEmail],
+          [newManagerEntityId, newManagerEmail],
+          [reportEntityId, reportEmail],
+        ]) {
+          await seedUserEntity(esClient, {
+            entityId,
+            namespace: NAMESPACE,
+            email,
+            entitySource: ENTITY_SOURCE,
+          });
+        }
+
+        // Run 1: reports to the old manager.
+        await seedWorkdayRow(esClient, {
+          userEmail: reportEmail,
+          managerEmail: oldManagerEmail,
+        });
+        await triggerMaintainerRun(apiClient, internalHeaders, MAINTAINER_ID, { sync: true });
+        await waitForRelationshipIds(
+          esClient,
+          RELATIONSHIP_KEY,
+          oldManagerEntityId,
+          reportEntityId
+        );
+
+        // Run 2: Workday now reports a different manager.
+        await esClient.deleteByQuery({
+          index: LOG_INDEX,
+          query: { match_all: {} },
+          refresh: true,
+          ignore_unavailable: true,
+        });
+        await seedWorkdayRow(esClient, {
+          userEmail: reportEmail,
+          managerEmail: newManagerEmail,
+        });
+        await triggerMaintainerRun(apiClient, internalHeaders, MAINTAINER_ID, { sync: true });
+
+        await waitForRelationshipIds(
+          esClient,
+          RELATIONSHIP_KEY,
+          newManagerEntityId,
+          reportEntityId
+        );
+        // The point of the whole feature: the old edge is gone.
+        await assertNoRelationshipId(
+          esClient,
+          RELATIONSHIP_KEY,
+          oldManagerEntityId,
+          reportEntityId
+        );
+      }
+    );
+
+    apiTest('drops the report when the worker is unassigned', async ({ apiClient, esClient }) => {
+      const runId = randomUUID().slice(0, 8);
+      const managerEmail = `unassign.mgr.${runId}@example.com`;
+      const reportEmail = `unassign.report.${runId}@example.com`;
+      const managerEntityId = `user:${managerEmail}@${NAMESPACE}`;
+      const reportEntityId = `user:${reportEmail}@${NAMESPACE}`;
+
+      for (const [entityId, email] of [
+        [managerEntityId, managerEmail],
+        [reportEntityId, reportEmail],
+      ]) {
+        await seedUserEntity(esClient, {
+          entityId,
+          namespace: NAMESPACE,
+          email,
+          entitySource: ENTITY_SOURCE,
+        });
+      }
+
+      await seedWorkdayRow(esClient, { userEmail: reportEmail, managerEmail });
+      await triggerMaintainerRun(apiClient, internalHeaders, MAINTAINER_ID, { sync: true });
+      await waitForRelationshipIds(esClient, RELATIONSHIP_KEY, managerEntityId, reportEntityId);
+
+      // Workday now reports the worker with no manager at all.
+      await esClient.deleteByQuery({
+        index: LOG_INDEX,
+        query: { match_all: {} },
+        refresh: true,
+        ignore_unavailable: true,
+      });
+      await seedWorkdayRow(esClient, { userEmail: reportEmail });
+      await triggerMaintainerRun(apiClient, internalHeaders, MAINTAINER_ID, { sync: true });
+
+      await assertNoRelationshipId(esClient, RELATIONSHIP_KEY, managerEntityId, reportEntityId);
+    });
+
+    apiTest(
+      'keeps a manager who still has reports after the reset',
+      async ({ apiClient, esClient }) => {
+        // Guards the obvious failure mode of a reset: clearing without
+        // repopulating.
+        const runId = randomUUID().slice(0, 8);
+        const managerEmail = `keep.mgr.${runId}@example.com`;
+        const firstReport = `keep.first.${runId}@example.com`;
+        const secondReport = `keep.second.${runId}@example.com`;
+        const managerEntityId = `user:${managerEmail}@${NAMESPACE}`;
+        const firstEntityId = `user:${firstReport}@${NAMESPACE}`;
+        const secondEntityId = `user:${secondReport}@${NAMESPACE}`;
+
+        for (const [entityId, email] of [
+          [managerEntityId, managerEmail],
+          [firstEntityId, firstReport],
+          [secondEntityId, secondReport],
+        ]) {
+          await seedUserEntity(esClient, {
+            entityId,
+            namespace: NAMESPACE,
+            email,
+            entitySource: ENTITY_SOURCE,
+          });
+        }
+
+        await seedWorkdayRow(esClient, { userEmail: firstReport, managerEmail });
+        await seedWorkdayRow(esClient, { userEmail: secondReport, managerEmail });
+        await triggerMaintainerRun(apiClient, internalHeaders, MAINTAINER_ID, { sync: true });
+        await waitForRelationshipIds(esClient, RELATIONSHIP_KEY, managerEntityId, firstEntityId);
+
+        // Second run over unchanged data must end in the same state.
+        await triggerMaintainerRun(apiClient, internalHeaders, MAINTAINER_ID, { sync: true });
+
+        await waitForRelationshipIds(esClient, RELATIONSHIP_KEY, managerEntityId, firstEntityId);
+        const ids = await getRelationshipIds(esClient, RELATIONSHIP_KEY, managerEntityId);
+        expect(ids.sort()).toStrictEqual([firstEntityId, secondEntityId].sort());
+      }
+    );
   }
 );
