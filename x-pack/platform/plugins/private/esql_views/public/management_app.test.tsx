@@ -179,6 +179,21 @@ describe('ManagementApp', () => {
     expect(await screen.findByTestId('esqlViewsUnsupported')).toBeInTheDocument();
   });
 
+  it.each([401, 403])(
+    'shows a non-retryable permission error for HTTP %i responses',
+    async (statusCode) => {
+      const client = createClient();
+      client.getViews.mockRejectedValue(createClientError('Forbidden', statusCode));
+
+      renderApp(client);
+
+      expect(await screen.findByTestId('esqlViewsPermissionDenied')).toHaveTextContent(
+        'You do not have permission to view ES|QL views. Contact your administrator.'
+      );
+      expect(screen.queryByTestId('esqlViewsRetryButton')).not.toBeInTheDocument();
+    }
+  );
+
   it('retries initial loading errors', async () => {
     const client = createClient();
     client.getViews
@@ -255,5 +270,23 @@ describe('ManagementApp', () => {
     expect(await screen.findByText('Reload failed')).toBeInTheDocument();
     expect(screen.getByTestId('esqlViewsTable')).toBeInTheDocument();
     expect(client.getViews).toHaveBeenCalledTimes(2);
+  });
+
+  it('replaces loaded views with the permission error when a reload is forbidden', async () => {
+    const client = createClient();
+    client.getViews
+      .mockResolvedValueOnce({
+        views: [{ name: 'first-view', query: 'ROW value = 1' }],
+      })
+      .mockRejectedValueOnce(createClientError('Forbidden', 403));
+
+    renderApp(client);
+
+    expect(await screen.findByText('first-view')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('esqlViewsReloadButton'));
+
+    expect(await screen.findByTestId('esqlViewsPermissionDenied')).toBeInTheDocument();
+    expect(screen.queryByTestId('esqlViewsTable')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('esqlViewsRetryButton')).not.toBeInTheDocument();
   });
 });

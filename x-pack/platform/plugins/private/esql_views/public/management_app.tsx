@@ -45,6 +45,16 @@ export const ManagementApp: FunctionComponent<ManagementAppProps> = ({
         body={<p>{translations.unsupportedDescription}</p>}
       />
     );
+  } else if (status === 'permissionDenied') {
+    content = (
+      <EuiEmptyPrompt
+        data-test-subj="esqlViewsPermissionDenied"
+        color="danger"
+        iconType="lock"
+        title={<h2>{translations.permissionDeniedTitle}</h2>}
+        body={<p>{translations.permissionDeniedDescription}</p>}
+      />
+    );
   } else if (status === 'error') {
     content = (
       <EuiEmptyPrompt

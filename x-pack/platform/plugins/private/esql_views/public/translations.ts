@@ -20,6 +20,15 @@ export const translations = {
   unsupportedDescription: i18n.translate('xpack.esqlViews.managementPage.unsupportedDescription', {
     defaultMessage: 'This Elasticsearch cluster does not support ES|QL views.',
   }),
+  permissionDeniedTitle: i18n.translate('xpack.esqlViews.managementPage.permissionDeniedTitle', {
+    defaultMessage: 'Insufficient permissions',
+  }),
+  permissionDeniedDescription: i18n.translate(
+    'xpack.esqlViews.managementPage.permissionDeniedDescription',
+    {
+      defaultMessage: 'You do not have permission to view ES|QL views. Contact your administrator.',
+    }
+  ),
   errorTitle: i18n.translate('xpack.esqlViews.managementPage.errorTitle', {
     defaultMessage: 'Unable to load ES|QL views',
   }),

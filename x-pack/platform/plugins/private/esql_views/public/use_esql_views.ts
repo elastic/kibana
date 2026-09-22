@@ -9,7 +9,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { EsqlView } from '@kbn/esql-types';
 import type { EsqlViewsClient } from '@kbn/esql-utils';
 
-type LoadStatus = 'loading' | 'success' | 'error' | 'unsupported';
+type LoadStatus = 'loading' | 'success' | 'error' | 'unsupported' | 'permissionDenied';
 
 interface EsqlViewsState {
   views: EsqlView[];
@@ -18,9 +18,17 @@ interface EsqlViewsState {
   isLoading: boolean;
 }
 
+const getErrorStatusCode = (error: Error): unknown =>
+  'statusCode' in error ? error.statusCode : undefined;
+
 const isUnsupportedError = (error: Error): boolean => {
-  const statusCode = 'statusCode' in error ? error.statusCode : undefined;
+  const statusCode = getErrorStatusCode(error);
   return statusCode === 404 || statusCode === 501;
+};
+
+const isPermissionDeniedError = (error: Error): boolean => {
+  const statusCode = getErrorStatusCode(error);
+  return statusCode === 401 || statusCode === 403;
 };
 
 export const useEsqlViews = (client: EsqlViewsClient) => {
@@ -60,16 +68,27 @@ export const useEsqlViews = (client: EsqlViewsClient) => {
       } catch (error) {
         if (!signal?.aborted && requestId === requestCount.current) {
           const requestError = error instanceof Error ? error : new Error(String(error));
-          setState((currentState) =>
-            currentState.status === 'success'
-              ? { ...currentState, error: requestError, isLoading: false }
-              : {
-                  views: [],
-                  status: isUnsupportedError(requestError) ? 'unsupported' : 'error',
-                  error: requestError,
-                  isLoading: false,
-                }
-          );
+          setState((currentState) => {
+            if (isPermissionDeniedError(requestError)) {
+              return {
+                views: [],
+                status: 'permissionDenied',
+                error: requestError,
+                isLoading: false,
+              };
+            }
+
+            if (currentState.status === 'success') {
+              return { ...currentState, error: requestError, isLoading: false };
+            }
+
+            return {
+              views: [],
+              status: isUnsupportedError(requestError) ? 'unsupported' : 'error',
+              error: requestError,
+              isLoading: false,
+            };
+          });
         }
       }
     },
