@@ -18,13 +18,7 @@ import type { AgentEventEmitterFn } from '@kbn/agent-builder-server';
 import { estimateTokens } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
 import type { ConversationRoundStep } from '@kbn/agent-builder-common';
 import type { ProcessedConversation } from './prepare_conversation';
-import {
-  groupTimelineFailedExecutions,
-  groupTimelineRounds,
-  sliceTimelineRounds,
-  type TimelineRound,
-} from './context_timeline';
-import { survivingFailedEntryTokens } from './estimate_conversation_tokens';
+import { dropTimelineRounds, groupTimelineRounds, type TimelineRound } from './context_timeline';
 import type { ProcessedTimelineEvent } from './context_timeline';
 import type { ContextBudget } from './context_budget';
 import { shouldTriggerCompaction } from './context_budget';
@@ -52,12 +46,6 @@ export interface CompactConversationOptions {
    * all share the same summarization-aware estimate.
    */
   perRoundTokenCounts: number[];
-  /**
-   * Token estimate of each failed execution surfaced on the timeline, keyed by its user message
-   * id (see `estimateFailedEntryTokens`). Failed entries are rendered in the prompt like rounds,
-   * so the ones surviving a cut enter every comparison and every reported figure.
-   */
-  failedEntryTokenCounts?: Map<string, number>;
   existingSummary?: CompactionSummary;
   logger: Logger;
   abortSignal?: AbortSignal;
@@ -157,26 +145,14 @@ export const compactConversation = async ({
   chatModel,
   contextBudget,
   perRoundTokenCounts,
-  failedEntryTokenCounts = new Map<string, number>(),
   existingSummary,
   logger,
   abortSignal,
   eventEmitter,
 }: CompactConversationOptions): Promise<CompactedConversation> => {
-  /** Failed-entry tokens surviving a cut at round `start` of the given timeline. */
-  const failedTokens = (timeline: ProcessedTimelineEvent[], start: number): number =>
-    survivingFailedEntryTokens(timeline, start, failedEntryTokenCounts);
-
   // Under threshold: apply existing summary if present (so the LLM sees
   // the compacted view) but don't report a new compaction event.
-  if (
-    !shouldTriggerCompaction(
-      perRoundTokenCounts,
-      contextBudget,
-      existingSummary,
-      failedTokens(processedConversation.timeline, existingSummary?.summarized_round_count ?? 0)
-    )
-  ) {
+  if (!shouldTriggerCompaction(perRoundTokenCounts, contextBudget, existingSummary)) {
     if (existingSummary) {
       const compacted = applyExistingSummary(processedConversation, existingSummary);
       return {
@@ -188,12 +164,10 @@ export const compactConversation = async ({
     return { processedConversation, compactionTriggered: false };
   }
 
-  const rawTokens =
-    sumTokens(perRoundTokenCounts) + failedTokens(processedConversation.timeline, 0);
+  const rawTokens = sumTokens(perRoundTokenCounts);
   const effectiveTokens = existingSummary
     ? existingSummary.token_count +
-      sumTokens(perRoundTokenCounts.slice(existingSummary.summarized_round_count)) +
-      failedTokens(processedConversation.timeline, existingSummary.summarized_round_count)
+      sumTokens(perRoundTokenCounts.slice(existingSummary.summarized_round_count))
     : rawTokens;
   logger.info(
     `Compaction triggered: ${effectiveTokens} effective tokens (${rawTokens} raw) exceeds threshold of ${contextBudget.triggerThreshold}`
@@ -217,12 +191,10 @@ export const compactConversation = async ({
 
   if (summarizationResult.summary) {
     // Remaining rounds are the suffix after the summarized prefix, so their counts
-    // are perRoundTokenCounts sliced at summarized_round_count; the summarized timeline is
-    // already sliced, so its surviving failed entries are counted from its start.
+    // are perRoundTokenCounts sliced at summarized_round_count.
     const afterTokens =
       sumTokens(perRoundTokenCounts.slice(summarizationResult.summary.summarized_round_count)) +
-      summarizationResult.summary.token_count +
-      failedTokens(summarizationResult.processedConversation.timeline, 0);
+      summarizationResult.summary.token_count;
     if (afterTokens <= contextBudget.historyBudget) {
       logger.debug(
         `Summarization sufficient: ${afterTokens} tokens (budget: ${contextBudget.historyBudget})`
@@ -254,8 +226,7 @@ export const compactConversation = async ({
   const truncation = applyHardTruncation(
     summarizationResult.processedConversation,
     postSummaryCounts,
-    contextBudget,
-    failedEntryTokenCounts
+    contextBudget
   );
   // Account for the summary tokens (if present) so the reported total is accurate.
   const truncatedTokens = truncation.tokens + (summarizationResult.summary?.token_count ?? 0);
@@ -285,13 +256,27 @@ const sumTokens = (counts: number[]): number => counts.reduce((total, count) => 
 // Internal helpers
 // ---------------------------------------------------------------------------
 
+/** The timeline minus its first `count` rounds (index semantics; replaced by coverage sets in the compaction-coverage change). */
+const dropFirstRounds = (
+  timeline: ProcessedTimelineEvent[],
+  count: number
+): ProcessedTimelineEvent[] =>
+  dropTimelineRounds(
+    timeline,
+    new Set(
+      groupTimelineRounds(timeline)
+        .slice(0, count)
+        .map((round) => round.id)
+    )
+  );
+
 const applyExistingSummary = (
   conversation: ProcessedConversation,
   summary: CompactionSummary
 ): ProcessedConversation => {
   return {
     ...conversation,
-    timeline: sliceTimelineRounds(conversation.timeline, summary.summarized_round_count),
+    timeline: dropFirstRounds(conversation.timeline, summary.summarized_round_count),
     compactionSummary: summary,
   };
 };
@@ -359,7 +344,7 @@ const summarizeOlderRounds = async (
     return {
       processedConversation: {
         ...conversation,
-        timeline: sliceTimelineRounds(conversation.timeline, summarizeCount),
+        timeline: dropFirstRounds(conversation.timeline, summarizeCount),
         compactionSummary: summary,
       },
       summary,
@@ -430,22 +415,16 @@ const generateLlmSummary = async (
 /**
  * Drop oldest rounds one by one until the conversation fits within the history budget, always
  * preserving at least the most recent rounds. `perRoundCounts` is index-aligned with the
- * timeline's rounds. Failed entries surviving each cut are counted too; if the prompt still
- * exceeds the budget at the preserved-rounds floor, failed entries are dropped oldest-first
- * (whole bundles, never summarised) until it fits or none remain.
+ * timeline's rounds.
  */
 const applyHardTruncation = (
   conversation: ProcessedConversation,
   perRoundCounts: number[],
-  budget: ContextBudget,
-  failedEntryTokenCounts: Map<string, number>
+  budget: ContextBudget
 ): { conversation: ProcessedConversation; tokens: number } => {
   const roundTokensFrom = (start: number) => sumTokens(perRoundCounts.slice(start));
-  const totalAt = (start: number) =>
-    roundTokensFrom(start) +
-    survivingFailedEntryTokens(conversation.timeline, start, failedEntryTokenCounts);
 
-  let currentTokens = totalAt(0);
+  let currentTokens = roundTokensFrom(0);
   if (currentTokens <= budget.historyBudget) {
     return { conversation, tokens: currentTokens };
   }
@@ -454,24 +433,11 @@ const applyHardTruncation = (
   let start = 0;
   while (start < minStart && currentTokens > budget.historyBudget) {
     start++;
-    currentTokens = totalAt(start);
+    currentTokens = roundTokensFrom(start);
   }
 
-  let timeline = sliceTimelineRounds(conversation.timeline, start);
-  if (currentTokens > budget.historyBudget) {
-    // At the floor: shed failed entries, oldest first, until the prompt fits.
-    const failed = groupTimelineFailedExecutions(timeline).sort((left, right) =>
-      left.userMessage.created_at.localeCompare(right.userMessage.created_at)
-    );
-    for (const entry of failed) {
-      if (currentTokens <= budget.historyBudget) {
-        break;
-      }
-      const dropped = new Set(entry.events.map((event) => event.id));
-      timeline = timeline.filter((event) => !dropped.has(event.id));
-      currentTokens -= failedEntryTokenCounts.get(entry.userMessage.id) ?? 0;
-    }
-  }
-
-  return { conversation: { ...conversation, timeline }, tokens: currentTokens };
+  return {
+    conversation: { ...conversation, timeline: dropFirstRounds(conversation.timeline, start) },
+    tokens: currentTokens,
+  };
 };

@@ -10,6 +10,7 @@ import {
   ChatEventType,
   ConversationRoundStatus,
   ConversationRoundStepType,
+  TimelineEventType,
 } from '@kbn/agent-builder-common';
 import type { CompactionStructuredData, CompactionSummary } from '@kbn/agent-builder-common';
 import type { AgentEventEmitterFn } from '@kbn/agent-builder-server';
@@ -17,14 +18,15 @@ import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachme
 import { estimateTokens } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
 import type { ProcessedConversation } from './prepare_conversation';
 import {
+  abortedExec0Timeline,
+  failedExec0Timeline,
   roundsOfTimeline,
   timelineFromRounds,
   type ProcessedConversationRound,
 } from '../../../../test_utils/timeline';
 import type { ContextBudget } from './context_budget';
 import { compactConversation, extractProgrammaticSummary } from './conversation_compactor';
-import { estimateFailedEntryTokens } from './estimate_conversation_tokens';
-import type { ProcessedTimelineEvent } from './context_timeline';
+import { groupTimelineRounds, type ProcessedTimelineEvent } from './context_timeline';
 import { serializeCompactionSummary } from './compaction_serialize';
 
 const mockLogger: Logger = {
@@ -634,41 +636,27 @@ describe('compactConversation', () => {
     });
   });
 
-  describe('failed executions', () => {
+  describe('interrupted rounds', () => {
     const at = (minute: number) => `2026-01-01T00:${String(minute).padStart(2, '0')}:00.000Z`;
 
-    const failedEntry = (
+    /** A raw interrupted round processed for the agent (`attachments: []` on the user message). */
+    const interruptedRound = (
       id: string,
       minute: number,
-      messageLength: number
+      interruption: 'failed' | 'aborted',
+      messageLength = 10
     ): ProcessedTimelineEvent[] =>
-      [
-        {
-          id: `${id}::user_message`,
-          type: 'user_message',
-          created_at: at(minute),
-          actor: { type: 'user', id: 'u1' },
-          data: { message: `failed ${id}: ${'x'.repeat(messageLength)}`, attachments: [] },
-        },
-        {
-          id: `${id}::execution_started`,
-          type: 'execution_started',
-          created_at: at(minute),
-          actor: { type: 'agent', id: 'a' },
-          execution_id: `${id}::execution`,
-          trigger_event_id: `${id}::user_message`,
-          data: { trigger_type: 'user_message' },
-        },
-        {
-          id: `${id}::execution_failed`,
-          type: 'execution_failed',
-          created_at: at(minute),
-          actor: { type: 'agent', id: 'a' },
-          execution_id: `${id}::execution`,
-          trigger_event_id: `${id}::user_message`,
-          data: { time_to_last_token: 1, error: { code: 'internalError', message: 'boom' } },
-        },
-      ] as unknown as ProcessedTimelineEvent[];
+      (interruption === 'failed'
+        ? failedExec0Timeline(id, [], at(minute))
+        : abortedExec0Timeline(id, at(minute))
+      ).map((event) =>
+        event.type === TimelineEventType.userMessage
+          ? {
+              ...event,
+              data: { message: `hello ${id} ${'x'.repeat(messageLength)}`, attachments: [] },
+            }
+          : event
+      ) as ProcessedTimelineEvent[];
 
     const roundAt = (id: string, minute: number, messageLength = 10, toolResults = 0) => ({
       ...createMockRound(id, messageLength, toolResults),
@@ -680,167 +668,69 @@ describe('compactConversation', () => {
       timeline,
     });
 
-    const entryIds = (timeline: ProcessedTimelineEvent[]) =>
-      Array.from(new Set(timeline.map((event) => event.id.split('::')[0])));
+    const roundIds = (timeline: ProcessedTimelineEvent[]) =>
+      groupTimelineRounds(timeline).map((round) => round.id);
 
-    const sum = (counts: number[]) => counts.reduce((total, count) => total + count, 0);
-
-    it('triggers compaction on failed-entry tokens alone and reports them in token_count_before', async () => {
-      const timeline = [
-        ...timelineFromRounds([roundAt('r1', 0), roundAt('r2', 1), roundAt('r3', 2)]),
-        ...failedEntry('f', 3, 20_000),
-      ];
-      const conversation = conversationOf(timeline);
-      const perRoundTokenCounts = countsFor(conversation);
-      const failedEntryTokenCounts = estimateFailedEntryTokens(timeline);
-      const failedTokens = failedEntryTokenCounts.get('f::user_message')!;
-      const budget: ContextBudget = {
-        totalBudget: 200_000,
-        historyBudget: 150_000,
-        triggerThreshold: sum(perRoundTokenCounts) + 100, // rounds alone stay under
-      };
-      const eventEmitter = jest.fn() as jest.MockedFn<AgentEventEmitterFn>;
-
-      const result = await compactConversation({
-        processedConversation: conversation,
-        perRoundTokenCounts,
-        failedEntryTokenCounts,
-        chatModel: createMockChatModel(),
-        contextBudget: budget,
-        logger: mockLogger,
-        eventEmitter,
-      });
-
-      expect(result.compactionTriggered).toBe(true);
-      expect(result.tokensBefore).toBe(sum(perRoundTokenCounts) + failedTokens);
-      expect(eventEmitter).toHaveBeenCalledWith({
-        type: ChatEventType.compactionStarted,
-        data: { token_count_before: sum(perRoundTokenCounts) + failedTokens },
-      });
-    });
-
-    it('does not trigger without the failed-entry term', async () => {
-      const timeline = [
-        ...timelineFromRounds([roundAt('r1', 0), roundAt('r2', 1), roundAt('r3', 2)]),
-        ...failedEntry('f', 3, 20_000),
-      ];
-      const conversation = conversationOf(timeline);
-      const perRoundTokenCounts = countsFor(conversation);
-
-      const result = await compactConversation({
-        processedConversation: conversation,
-        perRoundTokenCounts,
-        chatModel: createMockChatModel(),
-        contextBudget: {
-          totalBudget: 200_000,
-          historyBudget: 150_000,
-          triggerThreshold: sum(perRoundTokenCounts) + 100,
-        },
-        logger: mockLogger,
-      });
-
-      expect(result.compactionTriggered).toBe(false);
-    });
-
-    it('keeps Round A → Failed F → Round B order after summarization and counts F in token_count_after', async () => {
-      // r1, r2 summarized; r3, F, r4 preserved (F is newer than r3, the first kept round)
-      const timeline = [
-        ...timelineFromRounds([
-          roundAt('r1', 0, 2000, 3),
-          roundAt('r2', 1, 2000, 3),
-          roundAt('r3', 2, 200),
-        ]),
-        ...failedEntry('f', 3, 400),
-        ...timelineFromRounds([roundAt('r4', 4, 200)]),
-      ];
-      const conversation = conversationOf(timeline);
-      const perRoundTokenCounts = countsFor(conversation);
-      const failedEntryTokenCounts = estimateFailedEntryTokens(timeline);
-      const failedTokens = failedEntryTokenCounts.get('f::user_message')!;
-      const eventEmitter = jest.fn() as jest.MockedFn<AgentEventEmitterFn>;
-
-      const result = await compactConversation({
-        processedConversation: conversation,
-        perRoundTokenCounts,
-        failedEntryTokenCounts,
-        chatModel: createMockChatModel(),
-        contextBudget: { totalBudget: 500_000, historyBudget: 400_000, triggerThreshold: 100 },
-        logger: mockLogger,
-        eventEmitter,
-      });
-
-      expect(result.compactionTriggered).toBe(true);
-      expect(result.summary?.summarized_round_count).toBe(2);
-      expect(entryIds(result.processedConversation.timeline)).toEqual(['r3', 'f', 'r4']);
-      const expectedAfter =
-        sum(perRoundTokenCounts.slice(2)) + result.summary!.token_count + failedTokens;
-      expect(result.tokensAfter).toBe(expectedAfter);
-      expect(eventEmitter).toHaveBeenCalledWith({
-        type: ChatEventType.compactionCompleted,
-        data: { token_count_after: expectedAfter, summarized_round_count: 2 },
-      });
-    });
-
-    it('drops a failed entry older than the cut when summarizing', async () => {
-      // F sits between r1 and r2: it is older than r3 (the first kept round) and is dropped
+    it('counts, summarises and preserves interrupted rounds like completed ones', async () => {
+      // r1 completed, r2 failed exec_0, r3 completed, r4 aborted exec_0
       const timeline = [
         ...timelineFromRounds([roundAt('r1', 0, 2000, 3)]),
-        ...failedEntry('f', 1, 400),
-        ...timelineFromRounds([
-          roundAt('r2', 2, 2000, 3),
-          roundAt('r3', 3, 200),
-          roundAt('r4', 4, 200),
-        ]),
+        ...interruptedRound('r2', 1, 'failed', 2000),
+        ...timelineFromRounds([roundAt('r3', 2, 200)]),
+        ...interruptedRound('r4', 3, 'aborted'),
       ];
       const conversation = conversationOf(timeline);
+      const chatModel = createMockChatModel();
 
       const result = await compactConversation({
         processedConversation: conversation,
         perRoundTokenCounts: countsFor(conversation),
-        failedEntryTokenCounts: estimateFailedEntryTokens(timeline),
-        chatModel: createMockChatModel(),
+        chatModel,
         contextBudget: { totalBudget: 500_000, historyBudget: 400_000, triggerThreshold: 100 },
         logger: mockLogger,
       });
 
-      expect(entryIds(result.processedConversation.timeline)).toEqual(['r3', 'r4']);
+      expect(result.compactionTriggered).toBe(true);
+      // r1 and r2 summarised (PRESERVED_RECENT_ROUNDS = 2 keeps r3, r4)
+      expect(result.summary?.summarized_round_count).toBe(2);
+      expect(roundIds(result.processedConversation.timeline)).toEqual(['r3', 'r4']);
+      const summariserInput = chatModel.withStructuredOutput.mock.results[0].value.invoke.mock
+        .calls[0][0] as Array<[string, string] | { content: unknown }>;
+      const texts = summariserInput.map((message) =>
+        Array.isArray(message) ? message[1] : String(message.content)
+      );
+      expect(texts.some((text) => text.includes('hello r2'))).toBe(true);
+      expect(texts.some((text) => text.includes('<system_notice>'))).toBe(true);
     });
 
-    it('hard truncation sheds failed entries oldest-first at the preserved-rounds floor until the prompt fits', async () => {
-      // tiny rounds; two failed entries newer than every round: a big old one and a small new one
+    it('hard truncation drops the oldest rounds first and stops at the floor, whatever their kind', async () => {
       const timeline = [
-        ...timelineFromRounds([roundAt('r1', 0), roundAt('r2', 1), roundAt('r3', 2)]),
-        ...failedEntry('fBig', 3, 20_000),
-        ...failedEntry('fSmall', 4, 400),
+        ...interruptedRound('r1', 0, 'failed', 2000),
+        ...timelineFromRounds([roundAt('r2', 1, 2000, 3)]),
+        ...interruptedRound('r3', 2, 'aborted', 2000),
+        ...timelineFromRounds([roundAt('r4', 3, 2000, 3)]),
       ];
       const conversation = conversationOf(timeline);
       const perRoundTokenCounts = countsFor(conversation);
-      const failedEntryTokenCounts = estimateFailedEntryTokens(timeline);
-      const smallTokens = failedEntryTokenCounts.get('fSmall::user_message')!;
       const failingChatModel = {
         withStructuredOutput: jest.fn().mockReturnValue({
           invoke: jest.fn().mockRejectedValue(new Error('llm down')),
         }),
       } as any;
-      const historyBudget = sum(perRoundTokenCounts.slice(1)) + smallTokens + 10;
 
       const result = await compactConversation({
         processedConversation: conversation,
         perRoundTokenCounts,
-        failedEntryTokenCounts,
         chatModel: failingChatModel,
-        contextBudget: { totalBudget: historyBudget * 2, historyBudget, triggerThreshold: 100 },
+        // still over budget at the floor: the two most recent rounds are kept anyway
+        contextBudget: { totalBudget: 200, historyBudget: 100, triggerThreshold: 50 },
         logger: mockLogger,
       });
 
       expect(result.compactionTriggered).toBe(true);
       expect(result.summary).toBeUndefined();
-      const ids = entryIds(result.processedConversation.timeline);
-      expect(ids).not.toContain('fBig');
-      expect(ids).toContain('fSmall');
-      expect(result.tokensAfter).toBeLessThanOrEqual(historyBudget);
-      // the two most recent rounds are always preserved
-      expect(ids).toEqual(expect.arrayContaining(['r2', 'r3']));
+      expect(roundIds(result.processedConversation.timeline)).toEqual(['r3', 'r4']);
+      expect(result.tokensAfter).toBe(perRoundTokenCounts[2] + perRoundTokenCounts[3]);
     });
   });
 });

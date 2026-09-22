@@ -41,8 +41,6 @@ import {
   getPendingTurn,
   createPreExecutionSteps,
   estimatePerRoundTokens,
-  estimateFailedEntryTokens,
-  survivingFailedEntryTokens,
   type PendingTurn,
 } from './utils';
 import { registerInternalTools } from './tools/register_internal_tools';
@@ -319,10 +317,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     toolManager,
     toolRegistry,
   });
-  const failedEntryTokenCounts = estimateFailedEntryTokens(processedConversation.timeline);
-  const conversationTokenEstimate =
-    perRoundTokenCounts.reduce((sum, count) => sum + count, 0) +
-    survivingFailedEntryTokens(processedConversation.timeline, 0, failedEntryTokenCounts);
+  const conversationTokenEstimate = perRoundTokenCounts.reduce((sum, count) => sum + count, 0);
 
   // Create unified result transformer for tool result optimization
   const resultTransformer = createResultTransformer({
@@ -343,7 +338,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     chatModel: model.chatModel,
     contextBudget,
     perRoundTokenCounts,
-    failedEntryTokenCounts,
     existingSummary: conversation?.state?.compaction_summary,
     logger,
     abortSignal,
