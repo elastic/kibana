@@ -29,7 +29,7 @@ import { escalationQueryKeys } from '../query_keys';
  * Uses the `all` root key to sweep every status/search/page variant.
  */
 const invalidateEscalations = (queryClient: ReturnType<typeof useQueryClient>) => {
-  void queryClient.invalidateQueries({ queryKey: escalationQueryKeys.escalations.all });
+  void queryClient.invalidateQueries({ queryKey: escalationQueryKeys.all });
 };
 
 /** Lists escalations, optionally filtered by status/page/perPage and with debounced search. */
@@ -49,7 +49,7 @@ export const useListEscalations = ({
   useDebounce(() => setDebouncedSearch(searchQuery), 300, [searchQuery]);
 
   return useQuery({
-    queryKey: escalationQueryKeys.escalations.list(status, page, perPage, debouncedSearch),
+    queryKey: escalationQueryKeys.list(status, page, perPage, debouncedSearch),
     queryFn: async (): Promise<ListEscalationsResponse> =>
       services.http.get<ListEscalationsResponse>(ESCALATIONS_INTERNAL_URL, {
         version: AGENTIC_INVESTIGATIONS_API_VERSION,

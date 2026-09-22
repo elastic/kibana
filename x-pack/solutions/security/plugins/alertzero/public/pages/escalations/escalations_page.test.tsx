@@ -16,8 +16,8 @@ import { coreMock } from '@kbn/core/public/mocks';
 import {
   useListEscalations,
   useUpdateEscalation,
-  useEscalationUserProfiles,
-  useSuggestEscalationAssignees,
+  useUserProfiles,
+  useSuggestUserProfiles,
 } from '@kbn/agentic-investigations-plugin/public';
 import { EscalationsPage } from './escalations_page';
 
@@ -25,8 +25,8 @@ jest.mock('@kbn/agentic-investigations-plugin/public', () => ({
   ...jest.requireActual('@kbn/agentic-investigations-plugin/public'),
   useListEscalations: jest.fn(),
   useUpdateEscalation: jest.fn(),
-  useEscalationUserProfiles: jest.fn(),
-  useSuggestEscalationAssignees: jest.fn(),
+  useUserProfiles: jest.fn(),
+  useSuggestUserProfiles: jest.fn(),
 }));
 
 // Replace EscalationAssignees with a minimal stub: clicking the "assign" button calls
@@ -69,8 +69,8 @@ jest.mock('../../hooks/use_alertzero_doc_title', () => ({
 
 const mockUseListEscalations = useListEscalations as jest.Mock;
 const mockUseUpdateEscalation = useUpdateEscalation as jest.Mock;
-const mockUseEscalationUserProfiles = useEscalationUserProfiles as jest.Mock;
-const mockUseSuggestEscalationAssignees = useSuggestEscalationAssignees as jest.Mock;
+const mockUseUserProfiles = useUserProfiles as jest.Mock;
+const mockUseSuggestUserProfiles = useSuggestUserProfiles as jest.Mock;
 
 const openEscalation = {
   id: 'esc-open-1',
@@ -117,8 +117,8 @@ const renderPage = (overrides: { capabilities?: object } = {}) => {
 
 beforeEach(() => {
   mockUseUpdateEscalation.mockReturnValue({ mutate: updateMutate });
-  mockUseEscalationUserProfiles.mockReturnValue({ data: [], isLoading: false });
-  mockUseSuggestEscalationAssignees.mockReturnValue({ data: [], isLoading: false });
+  mockUseUserProfiles.mockReturnValue({ data: [], isLoading: false });
+  mockUseSuggestUserProfiles.mockReturnValue({ data: [], isLoading: false });
 });
 
 afterEach(() => jest.clearAllMocks());

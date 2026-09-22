@@ -23,8 +23,8 @@ import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import {
   useListEscalations,
   useUpdateEscalation,
-  useEscalationUserProfiles,
-  useSuggestEscalationAssignees,
+  useUserProfiles,
+  useSuggestUserProfiles,
 } from '@kbn/agentic-investigations-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
@@ -117,7 +117,7 @@ export const EscalationsPage: React.FC = () => {
     return Array.from(uids);
   }, [openItems, closedItems]);
 
-  const profilesQuery = useEscalationUserProfiles({ uids: allAssigneeUids });
+  const profilesQuery = useUserProfiles({ uids: allAssigneeUids });
   const profilesByUid = useMemo(() => {
     const map = new Map<string, UserProfileWithAvatar>();
     for (const profile of profilesQuery.data ?? []) {
@@ -128,7 +128,7 @@ export const EscalationsPage: React.FC = () => {
 
   // Per-popover search term. One popover is open at a time, so a single term suffices.
   const [searchTerm, setSearchTerm] = useState('');
-  const suggestQuery = useSuggestEscalationAssignees(searchTerm);
+  const suggestQuery = useSuggestUserProfiles(searchTerm, { size: 20, enabled: canManage });
 
   const updateEscalation = useUpdateEscalation();
 

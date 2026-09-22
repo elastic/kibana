@@ -69,7 +69,7 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
       isError: isEscalationsError,
       error: escalationsError,
       refetch: refetchEscalations,
-    } = useListEscalations(incidentSearch);
+    } = useListEscalations({ searchQuery: incidentSearch });
     const createEscalation = useCreateEscalation();
     const addToEscalation = useAddToEscalation();
 

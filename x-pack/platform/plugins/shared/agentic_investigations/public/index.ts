@@ -36,12 +36,11 @@ export {
   useUpdateEscalation,
 } from './escalations/hooks/use_escalations_api';
 
-export {
-  useEscalationUserProfiles,
-  useSuggestEscalationAssignees,
-} from './escalations/hooks/use_escalation_user_profiles';
-
 export { escalationQueryKeys } from './escalations/query_keys';
 
-export { useCurrentUserProfile } from './user_profiles/hooks/use_current_user_profile';
-export { useSuggestUserProfiles } from './user_profiles/hooks/use_suggest_user_profiles';
+export {
+  useCurrentUserProfile,
+  useSuggestUserProfiles,
+  useUserProfiles,
+  userProfileQueryKeys,
+} from './user_profiles';
