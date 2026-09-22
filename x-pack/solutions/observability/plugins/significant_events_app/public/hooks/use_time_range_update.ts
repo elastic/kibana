@@ -13,12 +13,12 @@ import type { TimeRange } from '@kbn/es-query';
  * Hook that provides a function to update time range in the URL.
  *
  * This modifies only the rangeFrom/rangeTo query params while preserving
- * all other existing params. Works on any route.
+ * all other existing params on management routes.
  *
  * Uses history.replace (not push) to avoid triggering useUnsavedChangesPrompt
  * when changing time range while editing forms.
  *
- * Note: Global timefilter is synced from URL at app level by DateRangeRedirect.
+ * Note: Global timefilter is synced from the `/{tab}` route by DateRangeRedirect.
  * This hook only handles URL persistence.
  */
 export function useTimeRangeUpdate() {

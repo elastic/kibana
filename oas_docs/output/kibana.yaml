@@ -10125,7 +10125,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Apply a partial update to an existing action policy. Fields not present in the body are left unchanged.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-action-policies.
+        Apply a partial update to an existing action policy. Fields not present in the body are left unchanged.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-action-policies AND read_alerting-v2-rules.
       operationId: patch-alerting-v2-action-policies-id
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -14210,7 +14210,7 @@ paths:
                     - rule-1
                     - rule-2
             schema:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_get_rules_request'
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_by_ids_request'
       responses:
         '200':
           content:
@@ -44145,7 +44145,7 @@ paths:
                           type: string
                           x-state: Experimental; added in 9.6.0
                         iac_deployment_id:
-                          description: Identifier of the last CloudFormation stack deployed for this connector.
+                          description: ARN of the last CloudFormation stack deployed for this connector (`arn:<partition>:cloudformation:<region>:<account>:stack/<name>/<id>`).
                           maxLength: 2048
                           minLength: 1
                           type: string
@@ -44302,7 +44302,7 @@ paths:
                   type: string
                   x-state: Experimental; added in 9.6.0
                 iac_deployment_id:
-                  description: Identifier of the last CloudFormation stack deployed for this connector.
+                  description: ARN of the last CloudFormation stack deployed for this connector (`arn:<partition>:cloudformation:<region>:<account>:stack/<name>/<id>`).
                   maxLength: 2048
                   minLength: 1
                   type: string
@@ -44409,7 +44409,7 @@ paths:
                         type: string
                         x-state: Experimental; added in 9.6.0
                       iac_deployment_id:
-                        description: Identifier of the last CloudFormation stack deployed for this connector.
+                        description: ARN of the last CloudFormation stack deployed for this connector (`arn:<partition>:cloudformation:<region>:<account>:stack/<name>/<id>`).
                         maxLength: 2048
                         minLength: 1
                         type: string
@@ -44653,7 +44653,7 @@ paths:
                         type: string
                         x-state: Experimental; added in 9.6.0
                       iac_deployment_id:
-                        description: Identifier of the last CloudFormation stack deployed for this connector.
+                        description: ARN of the last CloudFormation stack deployed for this connector (`arn:<partition>:cloudformation:<region>:<account>:stack/<name>/<id>`).
                         maxLength: 2048
                         minLength: 1
                         type: string
@@ -44805,7 +44805,7 @@ paths:
                   type: string
                   x-state: Experimental; added in 9.6.0
                 iac_deployment_id:
-                  description: Identifier of the last CloudFormation stack deployed for this connector.
+                  description: ARN of the last CloudFormation stack deployed for this connector (`arn:<partition>:cloudformation:<region>:<account>:stack/<name>/<id>`).
                   maxLength: 2048
                   minLength: 1
                   type: string
@@ -44908,7 +44908,7 @@ paths:
                         type: string
                         x-state: Experimental; added in 9.6.0
                       iac_deployment_id:
-                        description: Identifier of the last CloudFormation stack deployed for this connector.
+                        description: ARN of the last CloudFormation stack deployed for this connector (`arn:<partition>:cloudformation:<region>:<account>:stack/<name>/<id>`).
                         maxLength: 2048
                         minLength: 1
                         type: string
@@ -148942,22 +148942,6 @@ components:
       required:
         - match_count
         - sample
-    Kibana_HTTP_APIs_alerting_bulk_get_rules_request:
-      additionalProperties: false
-      type: object
-      properties:
-        ids:
-          description: Rule identifiers to retrieve. The response preserved this order.
-          items:
-            description: A rule identifier.
-            maxLength: 150
-            minLength: 1
-            type: string
-          maxItems: 100
-          minItems: 1
-          type: array
-      required:
-        - ids
     Kibana_HTTP_APIs_alerting_bulk_get_rules_response:
       additionalProperties: false
       type: object

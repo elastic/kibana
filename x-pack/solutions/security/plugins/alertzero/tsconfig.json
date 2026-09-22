@@ -22,6 +22,7 @@
     "@kbn/core-http-browser",
     "@kbn/app-header",
     "@kbn/deeplinks-security",
+    "@kbn/deeplinks-workflows",
     "@kbn/spaces-plugin",
     "@kbn/workflows",
     "@kbn/workflows-yaml",
