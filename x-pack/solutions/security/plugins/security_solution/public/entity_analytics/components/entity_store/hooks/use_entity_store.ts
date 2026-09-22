@@ -140,14 +140,11 @@ export const useDeleteEntityStoreMutation = ({ onSuccess }: { onSuccess?: () => 
   const queryClient = useQueryClient();
   const { deleteEntityStore } = useEntityStoreRoutes();
 
-  return useMutation(
-    () => deleteEntityStore(ENTITY_STORE_DELETE_CONTEXT),
-    {
-      mutationKey: DELETE_ENTITY_STORE_KEY,
-      onSuccess: () => {
-        queryClient.refetchQueries({ queryKey: ENTITY_STORE_STATUS });
-        onSuccess?.();
-      },
-    }
-  );
+  return useMutation(() => deleteEntityStore(ENTITY_STORE_DELETE_CONTEXT), {
+    mutationKey: DELETE_ENTITY_STORE_KEY,
+    onSuccess: () => {
+      queryClient.refetchQueries({ queryKey: ENTITY_STORE_STATUS });
+      onSuccess?.();
+    },
+  });
 };
