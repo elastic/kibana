@@ -110,7 +110,6 @@ export const useInvestigateAlert = ({
     if (!alertId || !investigationsClient || isInvestigating) return;
 
     setIsStarting(true);
-    onInvestigate?.();
     try {
       await investigationsClient.fetch('POST /internal/nightshift/investigations', {
         signal: null,
@@ -124,6 +123,7 @@ export const useInvestigateAlert = ({
         }),
       });
       await queryClient.invalidateQueries(statusQueryKey);
+      onInvestigate?.();
     } catch (error) {
       services?.notifications?.toasts?.addDanger({
         title: i18n.translate('xpack.observability.alerts.investigationFailed', {

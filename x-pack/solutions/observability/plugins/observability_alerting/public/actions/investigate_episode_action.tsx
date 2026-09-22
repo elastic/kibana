@@ -59,6 +59,10 @@ export const InvestigateEpisodeMenuItem = ({
     onInvestigate: handleInvestigateSuccess,
   });
 
+  const onInvestigateClick = useCallback(async () => {
+    await handleInvestigate();
+  }, [handleInvestigate]);
+
   if (!showInvestigateAction && !viewInvestigationUrl) {
     return null;
   }
@@ -80,7 +84,7 @@ export const InvestigateEpisodeMenuItem = ({
         <EuiContextMenuItem
           data-test-subj="investigateAlert"
           disabled={isInvestigating}
-          onClick={handleInvestigate}
+          onClick={onInvestigateClick}
         >
           {investigateActionLabel}
         </EuiContextMenuItem>
