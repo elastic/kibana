@@ -13,11 +13,6 @@ import {
 } from '@kbn/connector-specs';
 import { i18n } from '@kbn/i18n';
 
-export const hasInboundEventIdentityAttributes = (attributes: {
-  apiKey?: string | null;
-  uiamApiKey?: string | null;
-}): boolean => Boolean(attributes.apiKey || attributes.uiamApiKey);
-
 /**
  * Dual “on” follows last-saver identity. Inbound-only is always on.
  * The ingest credential is minted later by rotate, not by enable.
@@ -37,19 +32,19 @@ export const resolveInboundEventsEnabled = ({
 
 export const shouldMintInboundIdentity = ({
   actionTypeId,
-  inboundEventsEnabled,
+  isInboundEventsEnabled,
 }: {
   actionTypeId: string;
-  inboundEventsEnabled: boolean;
+  isInboundEventsEnabled: boolean;
 }): boolean => {
   if (connectorTypeIsInboundOnly(actionTypeId)) {
     return true;
   }
-  return connectorTypeIsDual(actionTypeId) && inboundEventsEnabled;
+  return connectorTypeIsDual(actionTypeId) && isInboundEventsEnabled;
 };
 
 /**
- * Rejects `inbound_events_enabled` on types that are not dual.
+ * Rejects `is_inbound_events_enabled` on types that are not dual.
  * Inbound-only stays always-on by omitting the field.
  */
 export const assertInboundEventsToggleAllowed = ({
@@ -123,7 +118,7 @@ export const attachInboundEventsEnabled = <T extends { id: string; actionTypeId:
     }
     return {
       ...connector,
-      inboundEventsEnabled: resolveInboundEventsEnabled({
+      isInboundEventsEnabled: resolveInboundEventsEnabled({
         actionTypeId: connector.actionTypeId,
         hasIdentity: connectorIdsWithIdentity.has(connector.id),
       }),

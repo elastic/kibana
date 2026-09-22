@@ -108,6 +108,7 @@ const ConnectorFormComponent: React.FC<Props> = ({
         registerPreSubmitValidator={registerPreSubmitValidator}
         authMode={connector.authMode}
         settingsContent={settingsContent}
+        savedIsInboundEventsEnabled={connector.isInboundEventsEnabled === true}
       />
       <EuiSpacer size="m" />
       <EncryptedFieldsCallout isEdit={isEdit} isMissingSecrets={connector.isMissingSecrets} />

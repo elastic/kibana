@@ -30,8 +30,7 @@ import {
 import {
   assertInboundEventsToggleAllowed,
   resolveCreateInboundEventsEnabled,
-  shouldMintInboundIdentity,
-} from '../../../../inbound/instance_inbound_events';
+} from '../../../../inbound/inbound_events_enabled';
 
 export async function create({
   context,
@@ -40,7 +39,7 @@ export async function create({
     name,
     config,
     secrets,
-    inboundEventsEnabled: requestedInboundEventsEnabled,
+    isInboundEventsEnabled: requestedInboundEventsEnabled,
   },
   options,
 }: ConnectorCreateParams): Promise<Connector> {
@@ -92,6 +91,10 @@ export async function create({
   }
 
   ensureNotKibanaManagedAuthType({ actionTypeId, secrets, config });
+  assertInboundEventsToggleAllowed({
+    actionTypeId,
+    requestedEnabled: requestedInboundEventsEnabled,
+  });
 
   const actionType = context.actionTypeRegistry.get(actionTypeId);
   const configurationUtilities = context.actionTypeRegistry.getUtils();
@@ -158,15 +161,11 @@ export async function create({
         )
       : validatedActionTypeConfig;
 
-  assertInboundEventsToggleAllowed({
+  const isInboundEventsEnabled = resolveCreateInboundEventsEnabled({
     actionTypeId,
     requestedEnabled: requestedInboundEventsEnabled,
   });
-  const inboundEventsEnabled = resolveCreateInboundEventsEnabled({
-    actionTypeId,
-    requestedEnabled: requestedInboundEventsEnabled,
-  });
-  const identityAttributes = shouldMintInboundIdentity({ actionTypeId, inboundEventsEnabled })
+  const identityAttributes = isInboundEventsEnabled
     ? await mintInboundEventIdentityAttributes(context, {
         connectorId: id,
         actionTypeId,
@@ -185,6 +184,7 @@ export async function create({
           secrets: validatedActionTypeSecrets,
           ...(authMode !== undefined ? { authMode } : {}),
           ...(identityAttributes ? toRawActionIdentityAttributes(identityAttributes) : {}),
+          hasInboundEventIdentity: Boolean(identityAttributes),
         },
         { id }
       )
@@ -256,6 +256,6 @@ export async function create({
     isDeprecated: isConnectorDeprecated(result.attributes),
     isConnectorTypeDeprecated: context.actionTypeRegistry.isDeprecated(actionTypeId),
     ...(result.attributes.authMode !== undefined ? { authMode: result.attributes.authMode } : {}),
-    ...(connectorTypeHasInboundEvents(actionTypeId) ? { inboundEventsEnabled } : {}),
+    ...(connectorTypeHasInboundEvents(actionTypeId) ? { isInboundEventsEnabled } : {}),
   };
 }

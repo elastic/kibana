@@ -174,4 +174,66 @@ describe('Connector Model Versions', () => {
       ).toBe(mockDocument);
     });
   });
+
+  describe('version 4', () => {
+    const version4 = versions['4'] as SavedObjectsFullModelVersion;
+    const context: SavedObjectModelTransformationContext = {
+      log: {
+        get: () => ({ debug: jest.fn(), info: jest.fn(), warn: jest.fn() }),
+      } as unknown as Logger,
+      modelVersion: 4,
+      namespaceType: 'single',
+    };
+
+    it('backfills the unencrypted inbound identity presence flag', () => {
+      const backfillChange = version4.changes.find((change) => change.type === 'data_backfill');
+      const backfillFn =
+        backfillChange && backfillChange.type === 'data_backfill'
+          ? backfillChange.backfillFn
+          : undefined;
+      const mockDocument = {
+        id: 'old-connector',
+        type: 'action',
+        attributes: {
+          actionTypeId: '.datadog',
+          name: 'legacy',
+          isMissingSecrets: false,
+          config: {},
+          secrets: '{}',
+        },
+        references: [],
+      };
+
+      expect(backfillFn!(mockDocument, context)).toEqual({
+        ...mockDocument,
+        attributes: {
+          ...mockDocument.attributes,
+          hasInboundEventIdentity: false,
+        },
+      });
+    });
+
+    it('does not overwrite an existing presence flag', () => {
+      const backfillChange = version4.changes.find((change) => change.type === 'data_backfill');
+      const backfillFn =
+        backfillChange && backfillChange.type === 'data_backfill'
+          ? backfillChange.backfillFn
+          : undefined;
+      const mockDocument = {
+        id: 'enabled-connector',
+        type: 'action',
+        attributes: {
+          actionTypeId: '.datadog',
+          name: 'enabled',
+          isMissingSecrets: false,
+          config: {},
+          secrets: '{}',
+          hasInboundEventIdentity: true,
+        },
+        references: [],
+      };
+
+      expect(backfillFn!(mockDocument, context)).toBe(mockDocument);
+    });
+  });
 });

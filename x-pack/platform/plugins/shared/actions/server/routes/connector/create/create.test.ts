@@ -15,8 +15,12 @@ import { errors as esErrors } from '@elastic/elasticsearch';
 import { type DiagnosticResult } from '@elastic/elasticsearch';
 import { omit } from 'lodash';
 import { actionsClientMock } from '../../../actions_client/actions_client.mock';
-import { createConnectorRequestBodySchemaV1 } from '../../../../common/routes/connector/apis/create';
+import {
+  createConnectorRequestBodySchemaV1,
+  getCreateConnectorRequestBodySchemaV1,
+} from '../../../../common/routes/connector/apis/create';
 import { createMockConnector } from '../../../application/connector/mocks';
+import { actionsConfigMock } from '../../../actions_config.mock';
 
 jest.mock('../../verify_access_and_context', () => ({
   verifyAccessAndContext: jest.fn(),
@@ -27,14 +31,19 @@ beforeEach(() => {
   (verifyAccessAndContext as jest.Mock).mockImplementation((license, handler) => handler);
 });
 
+const setupRoute = ({ inboundEventsFeatureEnabled = false } = {}) => {
+  const licenseState = licenseStateMock.create();
+  const router = httpServiceMock.createRouter();
+  const actionsConfigUtils = actionsConfigMock.create();
+  actionsConfigUtils.isInboundEventsEnabled.mockReturnValue(inboundEventsFeatureEnabled);
+  createConnectorRoute(router, licenseState, actionsConfigUtils);
+  const [config, handler] = router.post.mock.calls[0];
+  return { licenseState, router, config, handler };
+};
+
 describe('createConnectorRoute', () => {
   it('creates an action with proper parameters', async () => {
-    const licenseState = licenseStateMock.create();
-    const router = httpServiceMock.createRouter();
-
-    createConnectorRoute(router, licenseState);
-
-    const [config, handler] = router.post.mock.calls[0];
+    const { config, handler } = setupRoute();
 
     expect(config.path).toMatchInlineSnapshot(`"/api/actions/connector/{id?}"`);
 
@@ -103,10 +112,7 @@ describe('createConnectorRoute', () => {
   });
 
   it('Returns error message to kibana on error', async () => {
-    const licenseState = licenseStateMock.create();
-    const router = httpServiceMock.createRouter();
-    createConnectorRoute(router, licenseState);
-    const [config, handler] = router.post.mock.calls[0];
+    const { config, handler } = setupRoute();
     expect(config.path).toMatchInlineSnapshot(`"/api/actions/connector/{id?}"`);
 
     const actionsClient = actionsClientMock.create();
@@ -157,12 +163,7 @@ describe('createConnectorRoute', () => {
   });
 
   it('ensures the license allows creating actions', async () => {
-    const licenseState = licenseStateMock.create();
-    const router = httpServiceMock.createRouter();
-
-    createConnectorRoute(router, licenseState);
-
-    const [, handler] = router.post.mock.calls[0];
+    const { licenseState, handler } = setupRoute();
 
     const actionsClient = actionsClientMock.create();
     actionsClient.create.mockResolvedValueOnce(
@@ -192,16 +193,11 @@ describe('createConnectorRoute', () => {
   });
 
   it('ensures the license check prevents creating actions', async () => {
-    const licenseState = licenseStateMock.create();
-    const router = httpServiceMock.createRouter();
-
     (verifyAccessAndContext as jest.Mock).mockImplementation(() => async () => {
       throw new Error('OMG');
     });
 
-    createConnectorRoute(router, licenseState);
-
-    const [, handler] = router.post.mock.calls[0];
+    const { handler } = setupRoute();
 
     const actionsClient = actionsClientMock.create();
     actionsClient.create.mockResolvedValueOnce(
@@ -228,11 +224,8 @@ describe('createConnectorRoute', () => {
     await expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
   });
 
-  it('forwards inbound_events_enabled', async () => {
-    const licenseState = licenseStateMock.create();
-    const router = httpServiceMock.createRouter();
-    createConnectorRoute(router, licenseState);
-    const [, handler] = router.post.mock.calls[0];
+  it('forwards is_inbound_events_enabled when the inbound events flag is on', async () => {
+    const { handler } = setupRoute({ inboundEventsFeatureEnabled: true });
 
     const actionsClient = actionsClientMock.create();
     actionsClient.create.mockResolvedValueOnce(
@@ -240,7 +233,7 @@ describe('createConnectorRoute', () => {
         id: '1',
         name: 'Datadog prod',
         actionTypeId: '.dual',
-        inboundEventsEnabled: true,
+        isInboundEventsEnabled: true,
       })
     );
 
@@ -252,7 +245,7 @@ describe('createConnectorRoute', () => {
           connector_type_id: '.dual',
           config: {},
           secrets: {},
-          inbound_events_enabled: true,
+          is_inbound_events_enabled: true,
         },
       },
       ['ok']
@@ -261,11 +254,58 @@ describe('createConnectorRoute', () => {
     await handler(context, req, res);
 
     expect(actionsClient.create).toHaveBeenCalledWith({
-      action: expect.objectContaining({ inboundEventsEnabled: true }),
+      action: expect.objectContaining({ isInboundEventsEnabled: true }),
       options: undefined,
     });
     expect(res.ok).toHaveBeenCalledWith({
-      body: expect.objectContaining({ inbound_events_enabled: true }),
+      body: expect.objectContaining({ is_inbound_events_enabled: true }),
+    });
+  });
+
+  it('rejects is_inbound_events_enabled as unknown when the inbound events flag is off', () => {
+    expect(() =>
+      getCreateConnectorRequestBodySchemaV1(false).validate({
+        name: 'Datadog prod',
+        connector_type_id: '.dual',
+        config: {},
+        secrets: {},
+        is_inbound_events_enabled: true,
+      })
+    ).toThrow(
+      /\[is_inbound_events_enabled\]: Additional properties are not allowed \('is_inbound_events_enabled' was unexpected\)/
+    );
+  });
+
+  it('omits is_inbound_events_enabled from the response when the inbound events flag is off', async () => {
+    const { handler } = setupRoute();
+
+    const actionsClient = actionsClientMock.create();
+    actionsClient.create.mockResolvedValueOnce(
+      createMockConnector({
+        id: '1',
+        name: 'Datadog prod',
+        actionTypeId: '.dual',
+        isInboundEventsEnabled: true,
+      })
+    );
+
+    const [context, req, res] = mockHandlerArguments(
+      { actionsClient },
+      {
+        body: {
+          name: 'Datadog prod',
+          connector_type_id: '.dual',
+          config: {},
+          secrets: {},
+        },
+      },
+      ['ok']
+    );
+
+    await handler(context, req, res);
+
+    expect(res.ok).toHaveBeenCalledWith({
+      body: expect.not.objectContaining({ is_inbound_events_enabled: expect.anything() }),
     });
   });
 
@@ -282,10 +322,7 @@ describe('createConnectorRoute', () => {
   });
 
   it('rejects create when OAuth URLs fail allowedHosts validation (validation error)', async () => {
-    const licenseState = licenseStateMock.create();
-    const router = httpServiceMock.createRouter();
-    createConnectorRoute(router, licenseState);
-    const [, handler] = router.post.mock.calls[0];
+    const { handler } = setupRoute();
 
     const actionsClient = actionsClientMock.create();
     const validationMessage =

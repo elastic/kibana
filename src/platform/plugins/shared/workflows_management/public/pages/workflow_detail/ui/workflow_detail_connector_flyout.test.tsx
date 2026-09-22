@@ -277,6 +277,60 @@ describe('WorkflowDetailConnectorFlyout', () => {
         expect.any(Function)
       );
     });
+
+    it('closes after creating a dual connector with inbound events off', () => {
+      let onConnectorCreatedCallback: ((connector: ActionConnector) => void) | undefined;
+      mockGetAddConnectorFlyout.mockImplementation((config: any) => {
+        onConnectorCreatedCallback = config.onConnectorCreated;
+        return <div data-test-subj="add-connector-flyout" />;
+      });
+
+      const { store } = renderComponent();
+      act(() => {
+        store.dispatch(
+          openCreateConnectorFlyout({
+            connectorType: '.dual',
+          })
+        );
+      });
+
+      act(() => {
+        onConnectorCreatedCallback!({
+          ...mockConnector,
+          actionTypeId: '.dual',
+          isInboundEventsEnabled: false,
+        });
+      });
+
+      expect(store.getState().detail.connectorFlyout.isOpen).toBe(false);
+    });
+
+    it('keeps the flyout open after creating a dual connector with inbound events on', () => {
+      let onConnectorCreatedCallback: ((connector: ActionConnector) => void) | undefined;
+      mockGetAddConnectorFlyout.mockImplementation((config: any) => {
+        onConnectorCreatedCallback = config.onConnectorCreated;
+        return <div data-test-subj="add-connector-flyout" />;
+      });
+
+      const { store } = renderComponent();
+      act(() => {
+        store.dispatch(
+          openCreateConnectorFlyout({
+            connectorType: '.dual',
+          })
+        );
+      });
+
+      act(() => {
+        onConnectorCreatedCallback!({
+          ...mockConnector,
+          actionTypeId: '.dual',
+          isInboundEventsEnabled: true,
+        });
+      });
+
+      expect(store.getState().detail.connectorFlyout.isOpen).toBe(true);
+    });
   });
 
   describe('when editing an existing connector', () => {

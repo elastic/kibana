@@ -22,6 +22,7 @@ import { getAuthMode, isConnectorDeprecated } from '../../lib';
 import type { RawAction, HookServices } from '../../../../types';
 import { tryCatch } from '../../../../lib';
 import {
+  hasInboundEventIdentityAttributes,
   invalidateStoredConnectorEventIdentity,
   loadPreviousConnectorEventIdentity,
   mintInboundEventIdentityAttributes,
@@ -30,11 +31,10 @@ import {
 import { deleteIngressCredentialForConnector } from '../../../../inbound/ingress_credential';
 import {
   assertInboundEventsToggleAllowed,
-  hasInboundEventIdentityAttributes,
   resolveInboundEventsEnabled,
   resolveUpdateInboundEventsEnabled,
   shouldMintInboundIdentity,
-} from '../../../../inbound/instance_inbound_events';
+} from '../../../../inbound/inbound_events_enabled';
 
 const getAuthTypeId = (
   secrets?: Record<string, unknown>,
@@ -85,13 +85,17 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
   const { attributes, references, version } =
     await context.unsecuredSavedObjectsClient.get<RawAction>('action', id);
   const { actionTypeId, authMode } = attributes;
-  const { name, config, secrets, inboundEventsEnabled: requestedInboundEventsEnabled } = action;
+  const { name, config, secrets, isInboundEventsEnabled: requestedInboundEventsEnabled } = action;
 
   const currentAuthMode = authMode ?? 'shared';
   const currentAuthTypeId = getAuthTypeId(attributes.secrets, attributes.config);
   const requestedAuthTypeId = getAuthTypeId(secrets, config);
 
   ensureNotKibanaManagedAuthType({ actionTypeId, secrets, config });
+  assertInboundEventsToggleAllowed({
+    actionTypeId,
+    requestedEnabled: requestedInboundEventsEnabled,
+  });
 
   const requestedAuthMode = inferAuthMode({
     authTypeRegistry: context.authTypeRegistry,
@@ -176,24 +180,20 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
         )
       : validatedActionTypeConfig;
 
-  assertInboundEventsToggleAllowed({
-    actionTypeId,
-    requestedEnabled: requestedInboundEventsEnabled,
-  });
   const previousIdentity = connectorTypeHasInboundEvents(actionTypeId)
     ? await loadPreviousConnectorEventIdentity(context, id)
     : undefined;
   const previouslyEnabled = resolveInboundEventsEnabled({
     actionTypeId,
-    hasIdentity: hasInboundEventIdentityAttributes(previousIdentity ?? {}),
+    hasIdentity: hasInboundEventIdentityAttributes(attributes),
   });
-  const inboundEventsEnabled = resolveUpdateInboundEventsEnabled({
+  const isInboundEventsEnabled = resolveUpdateInboundEventsEnabled({
     actionTypeId,
     requestedEnabled: requestedInboundEventsEnabled,
     previouslyEnabled,
   });
   const shouldDisableInbound =
-    connectorTypeIsDual(actionTypeId) && !inboundEventsEnabled && previouslyEnabled;
+    connectorTypeIsDual(actionTypeId) && !isInboundEventsEnabled && previouslyEnabled;
 
   // Delete credentials first so the hub 404s immediately. If the overwrite then
   // fails, identity is still present and rotate can mint a new token.
@@ -205,7 +205,7 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
     });
   }
 
-  const identityAttributes = shouldMintInboundIdentity({ actionTypeId, inboundEventsEnabled })
+  const identityAttributes = shouldMintInboundIdentity({ actionTypeId, isInboundEventsEnabled })
     ? await mintInboundEventIdentityAttributes(context, {
         connectorId: id,
         actionTypeId,
@@ -230,6 +230,7 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
           config: configForSave,
           secrets: validatedActionTypeSecrets,
           ...(identityAttributes ? toRawActionIdentityAttributes(identityAttributes) : {}),
+          hasInboundEventIdentity: Boolean(identityAttributes),
         },
         omitBy(
           {
@@ -305,6 +306,6 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
     isDeprecated: isConnectorDeprecated(result.attributes),
     isConnectorTypeDeprecated: context.actionTypeRegistry.isDeprecated(actionTypeId),
     authMode: resolvedAuthMode,
-    ...(connectorTypeHasInboundEvents(actionTypeId) ? { inboundEventsEnabled } : {}),
+    ...(connectorTypeHasInboundEvents(actionTypeId) ? { isInboundEventsEnabled } : {}),
   };
 }

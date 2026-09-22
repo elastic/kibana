@@ -10,7 +10,8 @@ import type { GetAllConnectorsResponseV1 } from '../../../../../../common/routes
 import { omitIngestTokenHashFromConfig } from '../../../common_transforms/omit_ingest_token_hash';
 
 export const transformGetAllConnectorsResponse = (
-  results: ConnectorWithExtraFindData[]
+  results: ConnectorWithExtraFindData[],
+  { includeInboundEventsField }: { includeInboundEventsField: boolean }
 ): GetAllConnectorsResponseV1 => {
   return results.map(
     ({
@@ -25,7 +26,7 @@ export const transformGetAllConnectorsResponse = (
       isSystemAction,
       isConnectorTypeDeprecated,
       authMode,
-      inboundEventsEnabled,
+      isInboundEventsEnabled,
     }) => ({
       id,
       name,
@@ -38,8 +39,8 @@ export const transformGetAllConnectorsResponse = (
       is_system_action: isSystemAction,
       is_connector_type_deprecated: isConnectorTypeDeprecated,
       ...(authMode !== undefined ? { auth_mode: authMode } : {}),
-      ...(inboundEventsEnabled !== undefined
-        ? { inbound_events_enabled: inboundEventsEnabled }
+      ...(includeInboundEventsField && isInboundEventsEnabled !== undefined
+        ? { is_inbound_events_enabled: isInboundEventsEnabled }
         : {}),
     })
   );

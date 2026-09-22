@@ -14,26 +14,39 @@ export const updateConnectorParamsSchema = schema.object({
   }),
 });
 
-export const updateConnectorBodySchema = schema.object(
-  {
-    name: schema.string({
-      validate: validateEmptyStrings,
-      meta: { description: 'The display name for the connector.' },
-    }),
-    config: schema.recordOf(schema.string(), schema.any({ validate: validateEmptyStrings }), {
-      defaultValue: {},
-    }),
-    secrets: schema.recordOf(schema.string(), schema.any({ validate: validateEmptyStrings }), {
-      defaultValue: {},
-    }),
-    inbound_events_enabled: schema.maybe(
-      schema.boolean({
-        meta: {
-          description:
-            'Turn receiving inbound events on or off. Omit to keep the current setting. Only valid for connectors that both send and receive.',
-        },
-      })
-    ),
-  },
-  { meta: { id: 'update_connector' } }
-);
+const updateConnectorBodyFields = {
+  name: schema.string({
+    validate: validateEmptyStrings,
+    meta: { description: 'The display name for the connector.' },
+  }),
+  config: schema.recordOf(schema.string(), schema.any({ validate: validateEmptyStrings }), {
+    defaultValue: {},
+  }),
+  secrets: schema.recordOf(schema.string(), schema.any({ validate: validateEmptyStrings }), {
+    defaultValue: {},
+  }),
+};
+
+const isInboundEventsEnabledUpdateField = {
+  is_inbound_events_enabled: schema.maybe(
+    schema.boolean({
+      meta: {
+        description:
+          'Turn receiving inbound events on or off. Omit to keep the current setting. Only valid for connectors that both send and receive.',
+      },
+    })
+  ),
+};
+
+/** Update-connector body schema; omit `is_inbound_events_enabled` unless inbound events are enabled. */
+export const getUpdateConnectorBodySchema = (includeInboundEventsField: boolean) =>
+  schema.object(
+    {
+      ...updateConnectorBodyFields,
+      ...(includeInboundEventsField ? isInboundEventsEnabledUpdateField : {}),
+    },
+    { meta: { id: 'update_connector' } }
+  );
+
+/** Flag-on schema so TypeOf includes the optional field. */
+export const updateConnectorBodySchema = getUpdateConnectorBodySchema(true);

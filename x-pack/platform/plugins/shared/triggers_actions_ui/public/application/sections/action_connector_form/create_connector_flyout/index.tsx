@@ -19,14 +19,13 @@ import {
 } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   AgentBuilderConnectorFeatureId,
   getConnectorCompatibility,
   getConnectorFeatureName,
 } from '@kbn/actions-plugin/common';
 import { isLLMConnectorTypeId } from '@kbn/response-ops-rule-form/src/constants';
-import { connectorTypeHasInboundEvents } from '@kbn/connector-specs';
+import { connectorTypeIsDual, connectorTypeIsInboundOnly } from '@kbn/connector-specs';
 import {
   DEPRECATED_LLM_CONNECTOR_CALLOUT_TITLE,
   DEPRECATED_LLM_CONNECTOR_INFO,
@@ -51,7 +50,8 @@ import { FlyoutHeader } from './header';
 import { FlyoutFooter } from './footer';
 import { UpgradeLicenseCallOut } from './upgrade_license_callout';
 import { InboundIngressCredentials } from '../inbound_ingress_credentials';
-import { isInboundIngressConnector } from '../../../lib/inbound_ingress';
+import { InboundEventsSaveToGenerateCallout } from '../inbound_events_save_to_generate_callout';
+import { shouldRotateInboundAfterSave } from '../../../lib/inbound_ingress';
 import { useRotateInboundIngress } from '../../../hooks/use_rotate_inbound_ingress';
 
 export interface CreateConnectorFlyoutProps {
@@ -76,7 +76,10 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   icon,
   size,
 }) => {
-  const { docLinks } = useKibana().services;
+  const {
+    docLinks,
+    actions: { isInboundEventsEnabled: isClusterInboundEventsEnabled },
+  } = useKibana().services;
   const [allActionTypes, setAllActionTypes] = useState<ActionTypeIndex | undefined>(undefined);
   const [actionType, setActionType] = useState<ActionType | null>(null);
   const [hasActionsUpgradeableByTrial, setHasActionsUpgradeableByTrial] = useState<boolean>(false);
@@ -164,6 +167,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
             isDeprecated: false,
             config: {},
             secrets: {},
+            ...(connectorTypeIsDual(id) ? { isInboundEventsEnabled: false } : {}),
           },
         });
       }
@@ -203,7 +207,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
         onConnectorCreated(createdConnector);
       }
 
-      if (isInboundIngressConnector(createdConnector)) {
+      if (shouldRotateInboundAfterSave(createdConnector)) {
         try {
           const rotated = await rotateIngress(createdConnector.id);
           setCreatedInboundConnector({
@@ -262,30 +266,17 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     if (createdInboundConnector) {
       return <InboundIngressCredentials allowRotate connector={createdInboundConnector} />;
     }
-    if (actionType == null || !connectorTypeHasInboundEvents(actionType.id)) {
+    if (actionType == null) {
       return undefined;
     }
-    return (
-      <EuiCallOut
-        announceOnMount
-        size="s"
-        color="primary"
-        iconType="info"
-        data-test-subj="inbound-ingress-save-to-view-credentials"
-        title={i18n.translate(
-          'xpack.triggersActionsUI.sections.actionConnectorAdd.inboundIngressSaveToViewTitle',
-          {
-            defaultMessage: 'Webhook URL and ingest token',
-          }
-        )}
-      >
-        <FormattedMessage
-          id="xpack.triggersActionsUI.sections.actionConnectorAdd.inboundIngressSaveToViewDescription"
-          defaultMessage="Save this connector to generate the webhook URL and ingest token. The token is shown only once."
-        />
-      </EuiCallOut>
-    );
-  }, [actionType, createdInboundConnector]);
+    if (connectorTypeIsInboundOnly(actionType.id)) {
+      return <InboundEventsSaveToGenerateCallout />;
+    }
+    if (connectorTypeIsDual(actionType.id) && isClusterInboundEventsEnabled) {
+      return <InboundEventsSaveToGenerateCallout />;
+    }
+    return undefined;
+  }, [actionType, createdInboundConnector, isClusterInboundEventsEnabled]);
 
   const onFlyoutClose = useCallback(() => {
     if (connectorToTest && isFormModified) {

@@ -18,6 +18,19 @@ import type { AppMockRenderer } from '../../test_utils';
 import { createAppMockRenderer } from '../../test_utils';
 import { TECH_PREVIEW_LABEL } from '../../translations';
 
+jest.mock('@kbn/connector-specs', () => {
+  const actual = jest.requireActual('@kbn/connector-specs');
+  return {
+    ...actual,
+    connectorTypeIsDual: jest.fn((id: string) => id === '.dual'),
+    connectorTypeIsInboundOnly: jest.fn((id: string) => id === '.inboundWebhook'),
+    connectorTypeHasInboundEvents: jest.fn(
+      (id: string) =>
+        id === '.dual' || id === '.inboundWebhook' || actual.connectorTypeHasInboundEvents(id)
+    ),
+  };
+});
+
 jest.setTimeout(15_000);
 
 const updateConnectorResponse = {
@@ -257,6 +270,169 @@ describe('EditConnectorFlyout', () => {
     expect(screen.getByTestId('inbound-ingress-webhook-url')).toBeInTheDocument();
     expect(screen.getByTestId('inbound-ingress-rotate-btn')).toBeInTheDocument();
     expect(screen.getByTestId('inbound-ingress-token-hidden')).toBeInTheDocument();
+    expect(screen.queryByTestId('inbound-events-enabled-switch')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('connector-outbound-label')).not.toBeInTheDocument();
+  });
+
+  it('shows the receive-events switch off for a dual connector', async () => {
+    const dualConnector = createMockActionConnector({
+      id: 'dd-1',
+      name: 'Datadog',
+      actionTypeId: '.dual',
+      isInboundEventsEnabled: false,
+      config: { testTextField: 'site' },
+      secrets: {},
+    });
+    const dualActionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
+      id: '.dual',
+      actionConnectorFields: lazy(() => import('../connector_mock')),
+      validateParams: (): Promise<GenericValidationResult<unknown>> =>
+        Promise.resolve({ errors: {} }),
+    });
+    actionTypeRegistry.get.mockReturnValue(dualActionTypeModel);
+    appMockRenderer.coreStart.actions.isInboundEventsEnabled = true;
+
+    appMockRenderer.render(
+      <EditConnectorFlyout
+        actionTypeRegistry={actionTypeRegistry}
+        onClose={onClose}
+        connector={dualConnector}
+        onConnectorUpdated={onConnectorUpdated}
+      />
+    );
+
+    expect(await screen.findByTestId('inbound-events-enabled-switch')).not.toBeChecked();
+    expect(screen.getByTestId('connector-inbound-label')).toBeInTheDocument();
+    expect(screen.getByTestId('connector-outbound-label')).toBeInTheDocument();
+    expect(screen.queryByTestId('inbound-ingress-credentials')).not.toBeInTheDocument();
+    expect(await screen.findByTestId('test-connector-text-field')).toBeInTheDocument();
+  });
+
+  it('warns when turning off inbound events on a live dual connector', async () => {
+    const dualConnector = createMockActionConnector({
+      id: 'dd-1',
+      name: 'Datadog',
+      actionTypeId: '.dual',
+      isInboundEventsEnabled: true,
+      config: { testTextField: 'site' },
+      secrets: {},
+    });
+    const dualActionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
+      id: '.dual',
+      actionConnectorFields: lazy(() => import('../connector_mock')),
+      validateParams: (): Promise<GenericValidationResult<unknown>> =>
+        Promise.resolve({ errors: {} }),
+    });
+    actionTypeRegistry.get.mockReturnValue(dualActionTypeModel);
+    appMockRenderer.coreStart.actions.isInboundEventsEnabled = true;
+
+    appMockRenderer.render(
+      <EditConnectorFlyout
+        actionTypeRegistry={actionTypeRegistry}
+        onClose={onClose}
+        connector={dualConnector}
+        onConnectorUpdated={onConnectorUpdated}
+      />
+    );
+
+    expect(await screen.findByTestId('inbound-ingress-credentials')).toBeInTheDocument();
+    await userEvent.click(screen.getByTestId('inbound-events-enabled-switch'));
+    expect(screen.getByTestId('inbound-events-disable-warning')).toHaveTextContent('After save,');
+  });
+
+  it('hides inbound on a dual connector when the cluster flag is off', async () => {
+    const dualConnector = createMockActionConnector({
+      id: 'dd-1',
+      name: 'Datadog',
+      actionTypeId: '.dual',
+      isInboundEventsEnabled: true,
+      config: { testTextField: 'site' },
+      secrets: {},
+    });
+    const dualActionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
+      id: '.dual',
+      actionConnectorFields: lazy(() => import('../connector_mock')),
+      validateParams: (): Promise<GenericValidationResult<unknown>> =>
+        Promise.resolve({ errors: {} }),
+    });
+    actionTypeRegistry.get.mockReturnValue(dualActionTypeModel);
+    appMockRenderer.coreStart.actions.isInboundEventsEnabled = false;
+
+    appMockRenderer.render(
+      <EditConnectorFlyout
+        actionTypeRegistry={actionTypeRegistry}
+        onClose={onClose}
+        connector={dualConnector}
+        onConnectorUpdated={onConnectorUpdated}
+      />
+    );
+
+    expect(await screen.findByTestId('test-connector-text-field')).toBeInTheDocument();
+    expect(screen.queryByTestId('inbound-events-enabled-switch')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('inbound-ingress-credentials')).not.toBeInTheDocument();
+    expect(screen.getByTestId('connector-outbound-label')).toBeInTheDocument();
+  });
+
+  it('rotates once after enabling inbound events on a dual connector', async () => {
+    const dualConnector = createMockActionConnector({
+      id: 'dd-1',
+      name: 'Datadog',
+      actionTypeId: '.dual',
+      isInboundEventsEnabled: false,
+      config: { testTextField: 'site' },
+      secrets: {},
+    });
+    const dualActionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
+      id: '.dual',
+      actionConnectorFields: lazy(() => import('../connector_mock')),
+      validateParams: (): Promise<GenericValidationResult<unknown>> =>
+        Promise.resolve({ errors: {} }),
+    });
+    actionTypeRegistry.get.mockReturnValue(dualActionTypeModel);
+    appMockRenderer.coreStart.actions.isInboundEventsEnabled = true;
+    appMockRenderer.coreStart.http.put = jest.fn().mockResolvedValue({
+      ...updateConnectorResponse,
+      id: 'dd-1',
+      connector_type_id: '.dual',
+      is_inbound_events_enabled: true,
+    });
+    appMockRenderer.coreStart.http.post = jest.fn().mockImplementation((path: string) => {
+      if (String(path).includes('_rotate_event_token')) {
+        return Promise.resolve({ ingest_token: 'once-token' });
+      }
+      return Promise.resolve(executeConnectorResponse);
+    });
+
+    appMockRenderer.render(
+      <EditConnectorFlyout
+        actionTypeRegistry={actionTypeRegistry}
+        onClose={onClose}
+        connector={dualConnector}
+        onConnectorUpdated={onConnectorUpdated}
+      />
+    );
+
+    expect(await screen.findByTestId('inbound-events-enabled-switch')).toBeInTheDocument();
+    await userEvent.click(screen.getByTestId('inbound-events-enabled-switch'));
+    await userEvent.click(screen.getByTestId('edit-connector-flyout-save-btn'));
+
+    await waitFor(() => {
+      expect(appMockRenderer.coreStart.http.put).toHaveBeenCalledWith(
+        expect.stringContaining('/connector/dd-1'),
+        expect.objectContaining({
+          body: expect.stringContaining('"is_inbound_events_enabled":true'),
+        })
+      );
+    });
+    expect(appMockRenderer.coreStart.http.post).toHaveBeenCalledWith(
+      expect.stringContaining('_rotate_event_token')
+    );
+    expect(onConnectorUpdated).toHaveBeenCalledWith(
+      expect.objectContaining({
+        isInboundEventsEnabled: true,
+        secrets: { ingestToken: 'once-token' },
+      })
+    );
   });
 
   it('disables the buttons when there are error on the form', async () => {

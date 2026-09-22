@@ -214,6 +214,7 @@ describe('rotateInboundIngress', () => {
       attributes: {
         ...decryptedInbound.attributes,
         actionTypeId: '.dual',
+        hasInboundEventIdentity: true,
       },
     } as never);
     (actionTypeRegistry.get as jest.Mock).mockReturnValue(
@@ -253,6 +254,7 @@ describe('rotateInboundIngress', () => {
       attributes: {
         ...decryptedInbound.attributes,
         actionTypeId: '.dual',
+        hasInboundEventIdentity: true,
       },
     } as never);
     unsecuredSavedObjectsClient.find.mockResolvedValue({

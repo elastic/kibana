@@ -29,6 +29,7 @@ import type { Option } from 'fp-ts/Option';
 import { none, some } from 'fp-ts/Option';
 import type { ConnectorFormSchema } from '@kbn/alerts-ui-shared';
 import { useActionTypeModel } from '@kbn/alerts-ui-shared/src/common/hooks/use_action_type_model';
+import { connectorTypeIsDual } from '@kbn/connector-specs';
 import { ReadOnlyConnectorMessage } from './read_only';
 import type {
   ActionConnector,
@@ -48,7 +49,13 @@ import { useExecuteConnector } from '../../../hooks/use_execute_connector';
 import { FlyoutHeader } from './header';
 import { FlyoutFooter } from './footer';
 import { InboundIngressCredentials } from '../inbound_ingress_credentials';
-import { isInboundIngressConnector } from '../../../lib/inbound_ingress';
+import { InboundEventsSaveToGenerateCallout } from '../inbound_events_save_to_generate_callout';
+import {
+  isInboundEventsEnabledPayload,
+  isInboundIngressConnector,
+  shouldRotateInboundAfterSave,
+} from '../../../lib/inbound_ingress';
+import { useRotateInboundIngress } from '../../../hooks/use_rotate_inbound_ingress';
 
 export interface EditConnectorFlyoutProps {
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -177,12 +184,14 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
     http,
     uiSettings,
     application: { capabilities },
+    actions: { isInboundEventsEnabled: isClusterInboundEventsEnabled },
   } = useKibana().services;
 
   const isMounted = useRef(false);
   const canSave = hasSaveActionsCapability(capabilities);
   const { isLoading: isUpdatingConnector, updateConnector } = useUpdateConnector();
   const { isLoading: isExecutingConnector, executeConnector } = useExecuteConnector();
+  const { isLoading: isRotating, rotateIngress } = useRotateInboundIngress();
   const [showFormErrors, setShowFormErrors] = useState<boolean>(false);
 
   const [preSubmitValidationErrorMessage, setPreSubmitValidationErrorMessage] =
@@ -229,7 +238,7 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
   const [isSaved, setIsSaved] = useState<boolean>(false);
   const { preSubmitValidator, submit, isValid: isFormValid, isSubmitting } = formState;
   const hasErrors = isFormValid === false;
-  const isSaving = isUpdatingConnector || isSubmitting || isExecutingConnector;
+  const isSaving = isUpdatingConnector || isSubmitting || isExecutingConnector || isRotating;
 
   const {
     actionTypeModel,
@@ -248,16 +257,27 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
   const isTestable = actionTypeModel?.isTestable ?? actionTypeRegistry.has(connector.actionTypeId);
 
   const inboundSettingsContent = useMemo(() => {
-    if (!isInboundIngressConnector(connector)) {
-      return undefined;
+    if (isInboundIngressConnector(connector) && !connectorTypeIsDual(connector.actionTypeId)) {
+      return (
+        <InboundIngressCredentials
+          connector={connector}
+          allowRotate={canSave && !connector.isPreconfigured}
+        />
+      );
     }
-    return (
-      <InboundIngressCredentials
-        connector={connector}
-        allowRotate={canSave && !connector.isPreconfigured}
-      />
-    );
-  }, [canSave, connector]);
+    if (connectorTypeIsDual(connector.actionTypeId) && isClusterInboundEventsEnabled) {
+      if (connector.isInboundEventsEnabled === true) {
+        return (
+          <InboundIngressCredentials
+            connector={connector}
+            allowRotate={canSave && !connector.isPreconfigured}
+          />
+        );
+      }
+      return <InboundEventsSaveToGenerateCallout />;
+    }
+    return undefined;
+  }, [canSave, connector, isClusterInboundEventsEnabled]);
 
   // Delay the spinner so quick spec loads don't flash a loading state.
   const [showLoadingSpinner, setShowLoadingSpinner] = useState(false);
@@ -351,12 +371,17 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
        * At this point the form is valid
        * and there are no pre submit error messages.
        */
-      const { name, config, secrets } = data;
+      const { name, config, secrets, isInboundEventsEnabled } = data;
       const validConnector = {
         id: connector.id,
         name: name ?? '',
         config: config ?? {},
         secrets: secrets ?? {},
+        ...isInboundEventsEnabledPayload(
+          connector.actionTypeId,
+          isInboundEventsEnabled,
+          isClusterInboundEventsEnabled
+        ),
       };
 
       const updatedConnector = await updateConnector(validConnector);
@@ -368,8 +393,27 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
          */
         onFormModifiedChange(false);
 
+        let nextConnector = updatedConnector;
+        const justEnabledInbound =
+          shouldRotateInboundAfterSave({
+            actionTypeId: connector.actionTypeId,
+            isInboundEventsEnabled,
+          }) && connector.isInboundEventsEnabled !== true;
+
+        if (justEnabledInbound) {
+          try {
+            const rotated = await rotateIngress(updatedConnector.id);
+            nextConnector = {
+              ...updatedConnector,
+              secrets: { ingestToken: rotated.ingestToken },
+            } as ActionConnector;
+          } catch {
+            // Danger toast is shown by the rotate hook. Inbound is on; user can rotate.
+          }
+        }
+
         if (onConnectorUpdated) {
-          onConnectorUpdated(updatedConnector);
+          onConnectorUpdated(nextConnector);
         }
         setIsSaved(true);
         setIsEdit(false);
@@ -384,8 +428,12 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
     onConnectorUpdated,
     submit,
     preSubmitValidator,
+    connector.actionTypeId,
     connector.id,
+    connector.isInboundEventsEnabled,
+    isClusterInboundEventsEnabled,
     updateConnector,
+    rotateIngress,
     onFormModifiedChange,
   ]);
 

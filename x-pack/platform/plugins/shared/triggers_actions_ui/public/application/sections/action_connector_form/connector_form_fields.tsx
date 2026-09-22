@@ -10,12 +10,14 @@ import React, { memo, Suspense } from 'react';
 
 import { EuiTitle, EuiSpacer, EuiErrorBoundary } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { connectorTypeIsDual } from '@kbn/connector-specs';
 
 import type { ActionTypeModel, ConnectorValidationFunc } from '../../../types';
 import { SectionLoading } from '../../components/section_loading';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { useKibana } from '../../../common/lib/kibana';
 import { ConnectorFormFieldsGlobal } from './connector_form_fields_global';
+import { InboundEventsFormSection, OutboundSectionTitle } from './inbound_events_form_section';
 
 interface ConnectorFormFieldsProps {
   actionTypeModel: ActionTypeModel | null;
@@ -24,6 +26,8 @@ interface ConnectorFormFieldsProps {
   authMode?: 'shared' | 'per-user';
   /** Optional content rendered under Connector settings (e.g. inbound webhook URL). */
   settingsContent?: ReactNode;
+  /** Saved inbound setting. Used to warn when turning a live dual connector off. */
+  savedIsInboundEventsEnabled?: boolean;
 }
 
 const ConnectorFormFieldsComponent: React.FC<ConnectorFormFieldsProps> = ({
@@ -32,15 +36,45 @@ const ConnectorFormFieldsComponent: React.FC<ConnectorFormFieldsProps> = ({
   registerPreSubmitValidator,
   authMode,
   settingsContent,
+  savedIsInboundEventsEnabled = false,
 }) => {
   const {
     application: { capabilities },
+    actions: { isInboundEventsEnabled: isClusterInboundEventsEnabled },
   } = useKibana().services;
   const canSave = hasSaveActionsCapability(capabilities);
   const FieldsComponent = actionTypeModel?.actionConnectorFields ?? null;
-  const showSettingsSection = FieldsComponent !== null || settingsContent != null;
+  const actionTypeId = actionTypeModel?.id;
+  const isDual = actionTypeId != null && connectorTypeIsDual(actionTypeId);
+  const showDualInbound = isDual && isClusterInboundEventsEnabled;
+  const showSettingsSection =
+    FieldsComponent !== null || settingsContent != null || showDualInbound;
   const showSettingsTitle =
-    settingsContent != null || !Boolean(actionTypeModel?.connectorForm?.hideSettingsTitle);
+    !isDual &&
+    (settingsContent != null || !Boolean(actionTypeModel?.connectorForm?.hideSettingsTitle));
+
+  const fieldsComponent =
+    FieldsComponent !== null ? (
+      <EuiErrorBoundary>
+        <Suspense
+          fallback={
+            <SectionLoading>
+              <FormattedMessage
+                id="xpack.triggersActionsUI.sections.actionConnectorForm.loadingConnectorSettingsDescription"
+                defaultMessage="Loading connector settings…"
+              />
+            </SectionLoading>
+          }
+        >
+          <FieldsComponent
+            readOnly={!canSave}
+            isEdit={isEdit}
+            registerPreSubmitValidator={registerPreSubmitValidator}
+            authMode={authMode}
+          />
+        </Suspense>
+      </EuiErrorBoundary>
+    ) : null;
 
   return (
     <>
@@ -48,6 +82,14 @@ const ConnectorFormFieldsComponent: React.FC<ConnectorFormFieldsProps> = ({
       <EuiSpacer size="m" />
       {showSettingsSection ? (
         <>
+          {showDualInbound ? (
+            <InboundEventsFormSection
+              canSave={canSave}
+              wasLive={savedIsInboundEventsEnabled}
+              settingsContent={settingsContent}
+            />
+          ) : null}
+          {isDual ? <OutboundSectionTitle /> : null}
           {showSettingsTitle ? (
             <>
               <EuiTitle size="xxs" data-test-subj="connector-settings-label">
@@ -61,28 +103,8 @@ const ConnectorFormFieldsComponent: React.FC<ConnectorFormFieldsProps> = ({
               <EuiSpacer size="s" />
             </>
           ) : null}
-          {settingsContent}
-          {FieldsComponent !== null ? (
-            <EuiErrorBoundary>
-              <Suspense
-                fallback={
-                  <SectionLoading>
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.actionConnectorForm.loadingConnectorSettingsDescription"
-                      defaultMessage="Loading connector settings…"
-                    />
-                  </SectionLoading>
-                }
-              >
-                <FieldsComponent
-                  readOnly={!canSave}
-                  isEdit={isEdit}
-                  registerPreSubmitValidator={registerPreSubmitValidator}
-                  authMode={authMode}
-                />
-              </Suspense>
-            </EuiErrorBoundary>
-          ) : null}
+          {!isDual ? settingsContent : null}
+          {fieldsComponent}
         </>
       ) : null}
     </>

@@ -1361,7 +1361,7 @@ describe('create()', () => {
       });
 
       expect(result).not.toHaveProperty('secrets');
-      expect(result.inboundEventsEnabled).toBe(true);
+      expect(result.isInboundEventsEnabled).toBe(true);
     });
 
     test('stores a last-saver API key and leaves spoke secrets unchanged', async () => {
@@ -1378,10 +1378,12 @@ describe('create()', () => {
       const saved = unsecuredSavedObjectsClient.create.mock.calls[0][1] as {
         apiKey?: string;
         uiamApiKey?: string;
+        hasInboundEventIdentity?: boolean;
         secrets: Record<string, unknown>;
       };
 
       expect(saved.apiKey).toBe(encodeApiKey('es-id', 'es-secret'));
+      expect(saved.hasInboundEventIdentity).toBe(true);
       expect(saved.uiamApiKey).toBeUndefined();
       expect(saved.secrets).toEqual({});
       expect(securityService.authc.apiKeys.grantAsInternalUser).toHaveBeenCalled();
@@ -1517,10 +1519,14 @@ describe('create()', () => {
       const actionCreates = unsecuredSavedObjectsClient.create.mock.calls.filter(
         (call) => call[0] === 'action'
       );
-      const saved = actionCreates[0][1] as { apiKey?: string };
+      const saved = actionCreates[0][1] as {
+        apiKey?: string;
+        hasInboundEventIdentity?: boolean;
+      };
       expect(saved.apiKey).toBeUndefined();
+      expect(saved.hasInboundEventIdentity).toBe(false);
       expect(securityService.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
-      expect(result.inboundEventsEnabled).toBe(false);
+      expect(result.isInboundEventsEnabled).toBe(false);
     });
 
     test('mints identity only when enabled', async () => {
@@ -1531,22 +1537,35 @@ describe('create()', () => {
           actionTypeId: '.dual',
           config: {},
           secrets: {},
-          inboundEventsEnabled: true,
+          isInboundEventsEnabled: true,
         },
       });
 
-      expect(result.inboundEventsEnabled).toBe(true);
+      expect(result.isInboundEventsEnabled).toBe(true);
       expect(securityService.authc.apiKeys.grantAsInternalUser).toHaveBeenCalled();
       const saved = unsecuredSavedObjectsClient.create.mock.calls.find(
         (call) => call[0] === 'action'
-      )?.[1] as { apiKey?: string };
+      )?.[1] as { apiKey?: string; hasInboundEventIdentity?: boolean };
       expect(saved.apiKey).toBe(encodeApiKey('es-id', 'es-secret'));
+      expect(saved.hasInboundEventIdentity).toBe(true);
       expect(
         unsecuredSavedObjectsClient.create.mock.calls.every((call) => call[0] === 'action')
       ).toBe(true);
     });
 
     test('rejects the flag on a non-dual type', async () => {
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue(
+        getConnectorType({
+          id: '.slack',
+          preSaveHook,
+          validate: {
+            config: { schema: z.any() },
+            secrets: { schema: z.any() },
+            params: { schema: z.object({}) },
+          },
+        })
+      );
+
       await expect(
         create({
           context: dualContext,
@@ -1555,12 +1574,13 @@ describe('create()', () => {
             actionTypeId: '.slack',
             config: {},
             secrets: {},
-            inboundEventsEnabled: true,
+            isInboundEventsEnabled: true,
           },
         })
       ).rejects.toThrow(
         'Inbound events can only be turned on for connectors that both send and receive.'
       );
+      expect(preSaveHook).not.toHaveBeenCalled();
       expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     });
   });

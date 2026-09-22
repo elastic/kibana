@@ -11,6 +11,7 @@ import {
   rawConnectorSchemaV1,
   rawConnectorSchemaV2,
   rawConnectorSchemaV3,
+  rawConnectorSchemaV4,
 } from '../schemas/raw_connector';
 import { actionEncryptedRegistrationV2, actionEncryptedRegistrationV3 } from '../action_encryption';
 
@@ -58,4 +59,24 @@ export const connectorModelVersions = (
     outputType: actionEncryptedRegistrationV3,
     shouldTransformIfDecryptionFails: true,
   }),
+  '4': {
+    changes: [
+      {
+        type: 'data_backfill',
+        backfillFn: (doc) => {
+          if (doc.attributes.hasInboundEventIdentity !== undefined) {
+            return doc;
+          }
+          return {
+            ...doc,
+            attributes: { ...doc.attributes, hasInboundEventIdentity: false },
+          };
+        },
+      },
+    ],
+    schemas: {
+      create: rawConnectorSchemaV4,
+      forwardCompatibility: rawConnectorSchemaV4.extends({}, { unknowns: 'ignore' }),
+    },
+  },
 });

@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import type { RawAction } from '../../../../types';
 import { resolveInboundEventsSpaceId } from '../../../../inbound/resolve_inbound_events_space_id';
 import { mintIngressCredential } from '../../../../inbound/ingress_credential';
-import { hasInboundEventIdentityAttributes } from '../../../../inbound/instance_inbound_events';
+import { hasInboundEventIdentityAttributes } from '../../../../inbound/event_identity';
 import type { RotateInboundIngressParams, RotateInboundIngressResult } from './types';
 
 export async function rotateInboundIngress({

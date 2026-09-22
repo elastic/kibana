@@ -7,12 +7,11 @@
 
 import {
   assertInboundEventsToggleAllowed,
-  hasInboundEventIdentityAttributes,
   resolveCreateInboundEventsEnabled,
   resolveInboundEventsEnabled,
   resolveUpdateInboundEventsEnabled,
   shouldMintInboundIdentity,
-} from './instance_inbound_events';
+} from './inbound_events_enabled';
 
 jest.mock('@kbn/connector-specs', () => {
   const actual = jest.requireActual('@kbn/connector-specs');
@@ -26,18 +25,6 @@ jest.mock('@kbn/connector-specs', () => {
       (actionTypeId: string) => actionTypeId === '.inboundWebhook' || actionTypeId === '.dual'
     ),
   };
-});
-
-describe('hasInboundEventIdentityAttributes', () => {
-  it('is true when a last-saver key is present', () => {
-    expect(hasInboundEventIdentityAttributes({ apiKey: 'stored' })).toBe(true);
-    expect(hasInboundEventIdentityAttributes({ uiamApiKey: 'uiam' })).toBe(true);
-  });
-
-  it('is false when no identity fields are set', () => {
-    expect(hasInboundEventIdentityAttributes({})).toBe(false);
-    expect(hasInboundEventIdentityAttributes({ apiKey: null, uiamApiKey: null })).toBe(false);
-  });
 });
 
 describe('resolveInboundEventsEnabled', () => {
@@ -63,17 +50,17 @@ describe('resolveInboundEventsEnabled', () => {
 describe('shouldMintInboundIdentity', () => {
   it('is true for inbound-only regardless of the flag', () => {
     expect(
-      shouldMintInboundIdentity({ actionTypeId: '.inboundWebhook', inboundEventsEnabled: false })
+      shouldMintInboundIdentity({ actionTypeId: '.inboundWebhook', isInboundEventsEnabled: false })
     ).toBe(true);
   });
 
   it('is true for dual only when enabled', () => {
-    expect(shouldMintInboundIdentity({ actionTypeId: '.dual', inboundEventsEnabled: true })).toBe(
+    expect(shouldMintInboundIdentity({ actionTypeId: '.dual', isInboundEventsEnabled: true })).toBe(
       true
     );
-    expect(shouldMintInboundIdentity({ actionTypeId: '.dual', inboundEventsEnabled: false })).toBe(
-      false
-    );
+    expect(
+      shouldMintInboundIdentity({ actionTypeId: '.dual', isInboundEventsEnabled: false })
+    ).toBe(false);
   });
 });
 

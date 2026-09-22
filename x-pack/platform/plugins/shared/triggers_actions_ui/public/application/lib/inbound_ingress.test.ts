@@ -7,7 +7,21 @@
 
 import { INBOUND_WEBHOOK_CONNECTOR_TYPE_ID } from '@kbn/connector-specs';
 import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
-import { getInboundIngestToken, isInboundIngressConnector } from './inbound_ingress';
+import {
+  getInboundIngestToken,
+  isInboundEventsEnabledPayload,
+  isInboundIngressConnector,
+  shouldRotateInboundAfterSave,
+} from './inbound_ingress';
+
+jest.mock('@kbn/connector-specs', () => {
+  const actual = jest.requireActual('@kbn/connector-specs');
+  return {
+    ...actual,
+    connectorTypeIsDual: jest.fn((id: string) => id === '.dual'),
+    connectorTypeIsInboundOnly: jest.fn((id: string) => id === '.inboundWebhook'),
+  };
+});
 
 describe('inbound ingress helpers', () => {
   it('treats connectors with inbound events as inbound ingress', () => {
@@ -33,5 +47,29 @@ describe('inbound ingress helpers', () => {
     expect(
       getInboundIngestToken(createMockActionConnector({ secrets: { ingestToken: 'once-token' } }))
     ).toBe('once-token');
+  });
+
+  it('sends isInboundEventsEnabled only for dual types when the cluster flag is on', () => {
+    expect(isInboundEventsEnabledPayload('.dual', true, true)).toEqual({
+      isInboundEventsEnabled: true,
+    });
+    expect(isInboundEventsEnabledPayload('.dual', false, true)).toEqual({
+      isInboundEventsEnabled: false,
+    });
+    expect(isInboundEventsEnabledPayload('.dual', true, false)).toEqual({});
+    expect(isInboundEventsEnabledPayload('.dual', false, false)).toEqual({});
+    expect(isInboundEventsEnabledPayload('.inboundWebhook', true, true)).toEqual({});
+    expect(isInboundEventsEnabledPayload('.http', true, true)).toEqual({});
+  });
+
+  it('rotates after save for inbound-only and enabled dual', () => {
+    expect(shouldRotateInboundAfterSave({ actionTypeId: '.inboundWebhook' })).toBe(true);
+    expect(
+      shouldRotateInboundAfterSave({ actionTypeId: '.dual', isInboundEventsEnabled: true })
+    ).toBe(true);
+    expect(
+      shouldRotateInboundAfterSave({ actionTypeId: '.dual', isInboundEventsEnabled: false })
+    ).toBe(false);
+    expect(shouldRotateInboundAfterSave({ actionTypeId: '.http' })).toBe(false);
   });
 });

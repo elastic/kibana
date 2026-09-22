@@ -22,6 +22,19 @@ jest.mock('../../../lib/action_connector_api', () => ({
   checkConnectorIdAvailability: jest.fn().mockResolvedValue({ isAvailable: true }),
 }));
 
+jest.mock('@kbn/connector-specs', () => {
+  const actual = jest.requireActual('@kbn/connector-specs');
+  return {
+    ...actual,
+    connectorTypeIsDual: jest.fn((id: string) => id === '.dual'),
+    connectorTypeIsInboundOnly: jest.fn((id: string) => id === '.inboundWebhook'),
+    connectorTypeHasInboundEvents: jest.fn(
+      (id: string) =>
+        id === '.dual' || id === '.inboundWebhook' || actual.connectorTypeHasInboundEvents(id)
+    ),
+  };
+});
+
 const { loadActionTypes } = jest.requireMock('../../../lib/action_connector_api');
 
 const createConnectorResponse = {
@@ -790,6 +803,94 @@ describe('CreateConnectorFlyout', () => {
       expect(screen.queryByTestId('inbound-ingress-ingest-token')).not.toBeInTheDocument();
       expect(screen.getByTestId('create-connector-flyout-save-btn')).toBeInTheDocument();
       expect(screen.getByTestId('create-connector-flyout-back-btn')).toBeInTheDocument();
+    });
+  });
+
+  describe('dual inbound events', () => {
+    const dualActionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
+      id: '.dual',
+      actionConnectorFields: lazy(() => import('../connector_mock')),
+      validateParams: jest.fn().mockResolvedValue({ errors: {} }),
+    });
+
+    beforeEach(() => {
+      loadActionTypes.mockResolvedValue([
+        {
+          id: '.dual',
+          enabled: true,
+          name: 'Dual',
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic' as const,
+          supportedFeatureIds: ['alerting'],
+        },
+      ]);
+      actionTypeRegistry.get.mockReturnValue(dualActionTypeModel);
+      appMockRenderer.coreStart.actions.isInboundEventsEnabled = true;
+      appMockRenderer.coreStart.http.post = jest
+        .fn()
+        .mockImplementation((path: string, opts?: { body?: string }) => {
+          if (String(path).includes('_rotate_event_token')) {
+            return Promise.resolve({ ingest_token: 'once-token' });
+          }
+          const body = opts?.body ? JSON.parse(opts.body) : {};
+          return Promise.resolve({
+            ...createConnectorResponse,
+            connector_type_id: '.dual',
+            is_inbound_events_enabled: body.is_inbound_events_enabled === true,
+          });
+        });
+    });
+
+    const fillAndSave = async () => {
+      appMockRenderer.render(
+        <CreateConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          onConnectorCreated={onConnectorCreated}
+          onTestConnector={onTestConnector}
+        />
+      );
+
+      await userEvent.click(await screen.findByTestId('.dual-card'));
+      await waitFor(() => {
+        expect(screen.getByTestId('test-connector-text-field')).toBeInTheDocument();
+      });
+      await userEvent.click(await screen.findByTestId('nameInput'));
+      await userEvent.paste('My dual');
+      await userEvent.click(screen.getByTestId('test-connector-text-field'));
+      await userEvent.paste('My text field');
+    };
+
+    it('does not rotate when inbound events stay off', async () => {
+      await fillAndSave();
+
+      expect(screen.getByTestId('inbound-events-enabled-switch')).not.toBeChecked();
+      await userEvent.click(screen.getByTestId('create-connector-flyout-save-btn'));
+
+      await waitFor(() => {
+        expect(onClose).toHaveBeenCalled();
+      });
+      expect(onConnectorCreated).toHaveBeenCalled();
+      expect(appMockRenderer.coreStart.http.post).not.toHaveBeenCalledWith(
+        expect.stringContaining('_rotate_event_token')
+      );
+    });
+
+    it('rotates and stays open when inbound events are turned on', async () => {
+      await fillAndSave();
+
+      await userEvent.click(screen.getByTestId('inbound-events-enabled-switch'));
+      await userEvent.click(screen.getByTestId('create-connector-flyout-save-btn'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('inbound-ingress-credentials')).toBeInTheDocument();
+      });
+      expect(onClose).not.toHaveBeenCalled();
+      expect(appMockRenderer.coreStart.http.post).toHaveBeenCalledWith(
+        expect.stringContaining('_rotate_event_token')
+      );
+      expect(screen.getByTestId('inbound-ingress-ingest-token')).toHaveValue('once-token');
     });
   });
 

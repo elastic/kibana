@@ -14,10 +14,8 @@ import { isConnectorDeprecated } from '../../lib';
 import type { GetParams } from './types';
 import { connectorFromInMemoryConnector } from '../../lib/connector_from_in_memory_connector';
 import { getAuthMode } from '../../lib/get_auth_mode';
-import {
-  hasInboundEventIdentityAttributes,
-  readInboundEventsEnabled,
-} from '../../../../inbound/instance_inbound_events';
+import { hasInboundEventIdentityAttributes } from '../../../../inbound/event_identity';
+import { readInboundEventsEnabled } from '../../../../inbound/inbound_events_enabled';
 
 export async function get({
   context,
@@ -107,12 +105,12 @@ export async function get({
     context.logger.warn(`Error validating connector: ${connector.id}, ${e}`);
   }
 
-  const inboundEventsEnabled = readInboundEventsEnabled({
+  const isInboundEventsEnabled = readInboundEventsEnabled({
     actionTypeId: connector.actionTypeId,
     hasIdentity,
   });
-  if (inboundEventsEnabled !== undefined) {
-    connector.inboundEventsEnabled = inboundEventsEnabled;
+  if (isInboundEventsEnabled !== undefined) {
+    connector.isInboundEventsEnabled = isInboundEventsEnabled;
   }
 
   return connector;

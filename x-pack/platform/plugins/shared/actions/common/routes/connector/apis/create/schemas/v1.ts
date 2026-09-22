@@ -23,30 +23,43 @@ export const createConnectorRequestParamsSchema = schema.maybe(
   })
 );
 
-export const createConnectorRequestBodySchema = schema.object(
-  {
-    name: schema.string({
-      validate: validateEmptyStrings,
-      meta: { description: 'The display name for the connector.' },
-    }),
-    connector_type_id: schema.string({
-      validate: validateEmptyStrings,
-      meta: { description: 'The type of connector.' },
-    }),
-    config: schema.recordOf(schema.string(), schema.any({ validate: validateEmptyStrings }), {
-      defaultValue: {},
-    }),
-    secrets: schema.recordOf(schema.string(), schema.any({ validate: validateEmptyStrings }), {
-      defaultValue: {},
-    }),
-    inbound_events_enabled: schema.maybe(
-      schema.boolean({
-        meta: {
-          description:
-            'When true, this connector can receive inbound events. Only valid for connectors that both send and receive. Defaults to false. Generate the webhook token after create.',
-        },
-      })
-    ),
-  },
-  { meta: { id: 'new_connector' } }
-);
+const createConnectorRequestBodyFields = {
+  name: schema.string({
+    validate: validateEmptyStrings,
+    meta: { description: 'The display name for the connector.' },
+  }),
+  connector_type_id: schema.string({
+    validate: validateEmptyStrings,
+    meta: { description: 'The type of connector.' },
+  }),
+  config: schema.recordOf(schema.string(), schema.any({ validate: validateEmptyStrings }), {
+    defaultValue: {},
+  }),
+  secrets: schema.recordOf(schema.string(), schema.any({ validate: validateEmptyStrings }), {
+    defaultValue: {},
+  }),
+};
+
+const isInboundEventsEnabledCreateField = {
+  is_inbound_events_enabled: schema.maybe(
+    schema.boolean({
+      meta: {
+        description:
+          'When true, this connector can receive inbound events. Only valid for connectors that both send and receive. Defaults to false. Generate the webhook token after create.',
+      },
+    })
+  ),
+};
+
+/** Create-connector body schema; omit `is_inbound_events_enabled` unless inbound events are enabled. */
+export const getCreateConnectorRequestBodySchema = (includeInboundEventsField: boolean) =>
+  schema.object(
+    {
+      ...createConnectorRequestBodyFields,
+      ...(includeInboundEventsField ? isInboundEventsEnabledCreateField : {}),
+    },
+    { meta: { id: 'new_connector' } }
+  );
+
+/** Flag-on schema so TypeOf includes the optional field. */
+export const createConnectorRequestBodySchema = getCreateConnectorRequestBodySchema(true);

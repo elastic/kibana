@@ -22,11 +22,10 @@ import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit
 import { connectorFromSavedObject, isConnectorDeprecated } from '../../lib';
 import { getAuthMode } from '../../lib/get_auth_mode';
 import type { ConnectorWithExtraFindData } from '../../types';
-import {
-  attachInboundEventsEnabled,
-  hasInboundEventIdentityAttributes,
-} from '../../../../inbound/instance_inbound_events';
+import { hasInboundEventIdentityAttributes } from '../../../../inbound/event_identity';
+import { attachInboundEventsEnabled } from '../../../../inbound/inbound_events_enabled';
 import type { GetAllUnsecuredParams } from './types/params';
+
 interface GetAllHelperOpts {
   auditLogger?: AuditLogger;
   esClient: ElasticsearchClient;

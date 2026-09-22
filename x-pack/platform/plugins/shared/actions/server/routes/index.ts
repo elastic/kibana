@@ -62,11 +62,11 @@ export function defineRoutes(opts: RouteOptions) {
     inboundEvents,
   } = opts;
 
-  createConnectorRoute(router, licenseState);
+  createConnectorRoute(router, licenseState, actionsConfigUtils);
   deleteConnectorRoute(router, licenseState);
-  getConnectorRoute(router, licenseState);
-  getAllConnectorsRoute(router, licenseState);
-  updateConnectorRoute(router, licenseState);
+  getConnectorRoute(router, licenseState, actionsConfigUtils);
+  getAllConnectorsRoute(router, licenseState, actionsConfigUtils);
+  updateConnectorRoute(router, licenseState, actionsConfigUtils);
   listTypesRoute(router, licenseState);
   executeConnectorRoute(router, licenseState);
   getGlobalExecutionLogRoute(router, licenseState);
@@ -77,7 +77,7 @@ export function defineRoutes(opts: RouteOptions) {
   oauthCallbackScriptRoute(router);
   oauthDisconnectRoute(router, licenseState, logger, core, actionsConfigUtils);
   oauthCancelRoute(router, licenseState, logger, core);
-  getAllConnectorsIncludingSystemRoute(router, licenseState);
+  getAllConnectorsIncludingSystemRoute(router, licenseState, actionsConfigUtils);
   connectorAuthStatusRoute(router, licenseState);
   listTypesWithSystemRoute(router, licenseState);
 

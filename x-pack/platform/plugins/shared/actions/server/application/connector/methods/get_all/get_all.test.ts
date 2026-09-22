@@ -667,7 +667,7 @@ describe('getAll()', () => {
       expect(result[0]).not.toHaveProperty('uiamApiKey');
       expect(result[0]).not.toHaveProperty('uiamApiKeyExternal');
       expect(result[0]).not.toHaveProperty('secrets');
-      expect(result[0].inboundEventsEnabled).toBe(true);
+      expect(result[0].isInboundEventsEnabled).toBe(true);
     });
 
     test('reports inbound events off for a dual connector without identity', async () => {
@@ -726,7 +726,7 @@ describe('getAll()', () => {
       });
 
       const result = await actionsClient.getAll();
-      expect(result[0].inboundEventsEnabled).toBe(false);
+      expect(result[0].isInboundEventsEnabled).toBe(false);
     });
 
     test('reports inbound events on for a dual connector with identity', async () => {
@@ -750,7 +750,8 @@ describe('getAll()', () => {
               isMissingSecrets: false,
               config: {},
               secrets: {},
-              apiKey: 'stored-last-saver-key',
+              hasInboundEventIdentity: true,
+              apiKey: 'should-not-enable-from-encrypted-key',
             },
             score: 1,
             references: [],
@@ -786,8 +787,9 @@ describe('getAll()', () => {
       });
 
       const result = await actionsClient.getAll();
-      expect(result[0].inboundEventsEnabled).toBe(true);
+      expect(result[0].isInboundEventsEnabled).toBe(true);
       expect(result[0]).not.toHaveProperty('apiKey');
+      expect(result[0]).not.toHaveProperty('hasInboundEventIdentity');
     });
 
     test('filters out inference connectors without endpoints', async () => {
