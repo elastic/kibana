@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { DEFAULT_TIME_RANGE } from '@kbn/agent-builder-visualizations-common';
 import type { Query, TimeRange } from '@kbn/es-query';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { StatefulSearchBarProps } from '@kbn/unified-search-plugin/public';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-const DEFAULT_TIME_RANGE: TimeRange = { from: 'now-24h', to: 'now' };
 const EMPTY_KUERY_QUERY: Query = { query: '', language: 'kuery' };
 
 const getInitialTimeRange = (timeRange?: TimeRange): TimeRange => ({
