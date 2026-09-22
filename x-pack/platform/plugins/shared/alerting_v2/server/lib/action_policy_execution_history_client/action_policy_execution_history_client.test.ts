@@ -251,25 +251,25 @@ describe('ActionPolicyExecutionHistoryClient', () => {
     });
 
     describe('outcomes filter', () => {
-      it('passes the explicit outcomes array through to the event log service', async () => {
+      it('resolves the outcomes to the event actions they select', async () => {
         const { client, eventLogService } = createMocks();
         const request = httpServerMock.createKibanaRequest();
 
-        await client.listExecutionHistory({ request, outcomes: ['throttled'] });
+        await client.listExecutionHistory({ request, outcomes: ['throttled', 'failure'] });
 
         expect(eventLogService.findActionPolicyExecutionEvents).toHaveBeenCalledWith(
-          expect.objectContaining({ outcomes: ['throttled'] })
+          expect.objectContaining({ actions: ['throttled', 'dispatch_failed'] })
         );
       });
 
-      it('passes undefined outcomes to the service (no narrowing) when not provided', async () => {
+      it('leaves the action filter unset (no narrowing) when no outcome is provided', async () => {
         const { client, eventLogService } = createMocks();
         const request = httpServerMock.createKibanaRequest();
 
         await client.listExecutionHistory({ request });
 
         expect(eventLogService.findActionPolicyExecutionEvents).toHaveBeenCalledWith(
-          expect.objectContaining({ outcomes: undefined })
+          expect.objectContaining({ actions: undefined })
         );
       });
     });

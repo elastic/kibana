@@ -116,7 +116,7 @@ const buildItem = (
   policy: { id: 'policy-1', name: 'My Policy' },
   rules: [{ id: 'rule-1', name: 'My Rule' }],
   total_rule_count: 1,
-  outcome: 'dispatched',
+  outcome: 'success',
   episode_count: 3,
   episodes: [],
   action_group_count: 2,
@@ -204,13 +204,10 @@ describe('EpisodeActionPolicyHistoryTab', () => {
     mockFetchResult();
     renderTab();
 
-    await userEvent.selectOptions(
-      screen.getByTestId('executionHistoryOutcomeFilter'),
-      'dispatched'
-    );
+    await userEvent.selectOptions(screen.getByTestId('executionHistoryOutcomeFilter'), 'success');
 
     expect(mockUseFetchExecutionHistory).toHaveBeenLastCalledWith(
-      expect.objectContaining({ outcomes: ['dispatched'], episodeIds: [EPISODE_ID] })
+      expect.objectContaining({ outcomes: ['success'], episodeIds: [EPISODE_ID] })
     );
   });
 

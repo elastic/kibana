@@ -170,7 +170,7 @@ const buildItem = (
   policy: { id: 'policy-1', name: 'My Policy' },
   rules: [{ id: 'rule-1', name: 'My Rule' }],
   total_rule_count: 1,
-  outcome: 'dispatched',
+  outcome: 'success',
   episode_count: 3,
   episodes: [],
   action_group_count: 2,
@@ -496,10 +496,7 @@ describe('ExecutionHistoryPage', () => {
       renderPage();
       await switchToPoliciesTab();
 
-      await userEvent.selectOptions(
-        screen.getByTestId('executionHistoryOutcomeFilter'),
-        'dispatched'
-      );
+      await userEvent.selectOptions(screen.getByTestId('executionHistoryOutcomeFilter'), 'success');
 
       await waitFor(() => {
         expect(mockUseFetchExecutionHistory).toHaveBeenLastCalledWith({
@@ -507,7 +504,7 @@ describe('ExecutionHistoryPage', () => {
           perPage: 10,
           search: undefined,
           ruleIds: undefined,
-          outcomes: ['dispatched'],
+          outcomes: ['success'],
         });
       });
     });

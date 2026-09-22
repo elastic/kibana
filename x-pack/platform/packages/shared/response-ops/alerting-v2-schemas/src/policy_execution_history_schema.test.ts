@@ -26,7 +26,7 @@ import {
 const validItem = {
   dispatched_at: '2026-06-01T00:00:00.000Z',
   policy: { id: 'policy-1', name: 'My policy' },
-  outcome: 'dispatched' as const,
+  outcome: 'success' as const,
   episode_count: 2,
   action_group_count: 1,
   rules: [{ id: 'rule-1', name: 'Rule 1' }],
@@ -36,17 +36,25 @@ const validItem = {
 
 describe('policy_execution_history_schema', () => {
   describe('policyExecutionOutcomeSchema', () => {
-    it('accepts dispatched', () => {
-      expect(policyExecutionOutcomeSchema.parse('dispatched')).toBe('dispatched');
+    it('accepts success', () => {
+      expect(policyExecutionOutcomeSchema.parse('success')).toBe('success');
     });
 
     it('accepts throttled', () => {
       expect(policyExecutionOutcomeSchema.parse('throttled')).toBe('throttled');
     });
 
+    it('accepts failure', () => {
+      expect(policyExecutionOutcomeSchema.parse('failure')).toBe('failure');
+    });
+
+    it('rejects the stored event.action vocabulary', () => {
+      expect(policyExecutionOutcomeSchema.safeParse('dispatched').success).toBe(false);
+      expect(policyExecutionOutcomeSchema.safeParse('dispatch_failed').success).toBe(false);
+      expect(policyExecutionOutcomeSchema.safeParse('unmatched').success).toBe(false);
+    });
+
     it('rejects outcomes the action policy stream does not emit', () => {
-      expect(policyExecutionOutcomeSchema.safeParse('success').success).toBe(false);
-      expect(policyExecutionOutcomeSchema.safeParse('failure').success).toBe(false);
       expect(policyExecutionOutcomeSchema.safeParse('unknown').success).toBe(false);
       expect(policyExecutionOutcomeSchema.safeParse('').success).toBe(false);
     });
@@ -60,12 +68,12 @@ describe('policy_execution_history_schema', () => {
 
   describe('policyExecutionOutcomeFilterSchema', () => {
     it('accepts a single string and coerces it to an array', () => {
-      expect(policyExecutionOutcomeFilterSchema.parse('dispatched')).toEqual(['dispatched']);
+      expect(policyExecutionOutcomeFilterSchema.parse('success')).toEqual(['success']);
     });
 
-    it('accepts an array of both outcomes', () => {
-      expect(policyExecutionOutcomeFilterSchema.parse(['dispatched', 'throttled'])).toEqual([
-        'dispatched',
+    it('accepts an array of outcomes', () => {
+      expect(policyExecutionOutcomeFilterSchema.parse(['success', 'throttled'])).toEqual([
+        'success',
         'throttled',
       ]);
     });
@@ -75,19 +83,15 @@ describe('policy_execution_history_schema', () => {
     });
 
     it('rejects an invalid outcome value', () => {
-      expect(policyExecutionOutcomeFilterSchema.safeParse(['dispatched', 'skipped']).success).toBe(
+      expect(policyExecutionOutcomeFilterSchema.safeParse(['success', 'skipped']).success).toBe(
         false
       );
     });
 
     it('rejects arrays longer than the number of distinct outcomes', () => {
       expect(
-        policyExecutionOutcomeFilterSchema.safeParse([
-          'dispatched',
-          'throttled',
-          'dispatch_failed',
-          'dispatched',
-        ]).success
+        policyExecutionOutcomeFilterSchema.safeParse(['success', 'throttled', 'failure', 'success'])
+          .success
       ).toBe(false);
     });
   });
@@ -243,15 +247,15 @@ describe('policy_execution_history_schema', () => {
 
     describe('outcomes', () => {
       it('accepts a single string and coerces it to an array', () => {
-        const parsed = listPolicyExecutionHistoryRequestSchema.parse({ outcomes: 'dispatched' });
-        expect(parsed.outcomes).toEqual(['dispatched']);
+        const parsed = listPolicyExecutionHistoryRequestSchema.parse({ outcomes: 'success' });
+        expect(parsed.outcomes).toEqual(['success']);
       });
 
       it('accepts an array of valid outcomes', () => {
         const parsed = listPolicyExecutionHistoryRequestSchema.parse({
-          outcomes: ['dispatched', 'throttled'],
+          outcomes: ['success', 'throttled'],
         });
-        expect(parsed.outcomes).toEqual(['dispatched', 'throttled']);
+        expect(parsed.outcomes).toEqual(['success', 'throttled']);
       });
 
       it('rejects an empty array', () => {
@@ -262,7 +266,7 @@ describe('policy_execution_history_schema', () => {
 
       it('rejects outcome values the action policy stream does not emit', () => {
         expect(
-          listPolicyExecutionHistoryRequestSchema.safeParse({ outcomes: ['success'] }).success
+          listPolicyExecutionHistoryRequestSchema.safeParse({ outcomes: ['dispatched'] }).success
         ).toBe(false);
         expect(
           listPolicyExecutionHistoryRequestSchema.safeParse({ outcomes: ['unknown'] }).success
@@ -392,7 +396,7 @@ describe('policy_execution_history_schema', () => {
         episode_ids: ['episode-x', 'episode-y'],
         search: 'db outage',
         rule_ids: ['rule-x', 'rule-y'],
-        outcomes: ['dispatched', 'throttled'] as const,
+        outcomes: ['success', 'throttled'] as const,
       };
       expect(listPolicyExecutionHistoryRequestSchema.parse(input)).toEqual(input);
     });
@@ -419,8 +423,8 @@ describe('policy_execution_history_schema', () => {
       expect(policyExecutionHistoryItemSchema.safeParse(item).success).toBe(true);
     });
 
-    it('rejects an outcome the item stream does not emit', () => {
-      const item = { ...validItem, outcome: 'success' };
+    it('rejects an outcome outside the API vocabulary', () => {
+      const item = { ...validItem, outcome: 'dispatched' };
       expect(policyExecutionHistoryItemSchema.safeParse(item).success).toBe(false);
     });
 
@@ -533,7 +537,7 @@ describe('policy_execution_history_schema', () => {
     });
 
     it('rejects items that do not conform to the item schema', () => {
-      const badItem = { ...validItem, outcome: 'success' };
+      const badItem = { ...validItem, outcome: 'dispatched' };
       expect(
         listPolicyExecutionHistoryResponseSchema.safeParse({
           items: [badItem],

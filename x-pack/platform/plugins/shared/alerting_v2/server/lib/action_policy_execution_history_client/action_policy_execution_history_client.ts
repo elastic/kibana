@@ -35,6 +35,7 @@ import {
   buildExecutionHistoryItem,
   type NameMaps,
 } from './build_execution_history_item';
+import { toEventActions } from './outcome';
 
 // Default lower bound on the event timestamp when the caller does not pass an
 // explicit `start_time`.
@@ -124,7 +125,7 @@ export class ActionPolicyExecutionHistoryClient {
       endTime,
       page,
       perPage,
-      outcomes,
+      actions: toEventActions(outcomes),
       policyIds: matchingSearchIds.policyIds,
       ruleIds: matchingSearchIds.ruleIds,
       mandatoryRuleIds: ruleIds,

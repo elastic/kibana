@@ -40,7 +40,7 @@ const workflowActionPolicyDestinationSchema = z
     type: z
       .literal(actionPolicyDestinationTypeSchema.enum.workflow)
       .describe('The destination type.'),
-    id: z.string().min(1).max(ID_MAX_LENGTH).describe('The workflow connector identifier.'),
+    id: z.string().min(1).max(ID_MAX_LENGTH).describe('The workflow identifier.'),
   })
   .strict()
   .meta({ id: 'alerting_workflow_action_policy_destination' });

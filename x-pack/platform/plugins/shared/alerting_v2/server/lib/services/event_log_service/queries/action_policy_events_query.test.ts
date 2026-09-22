@@ -68,7 +68,7 @@ describe('action policy events queries', () => {
       );
     });
 
-    it('matches dispatched, throttled, and dispatch_failed when outcomes is omitted', () => {
+    it('matches dispatched, throttled, and dispatch_failed when actions is omitted', () => {
       const filters = filtersOf(buildShared());
       expect(filters).toEqual(
         expect.arrayContaining([
@@ -85,8 +85,8 @@ describe('action policy events queries', () => {
       );
     });
 
-    it('narrows event.action to the provided outcomes', () => {
-      const filters = filtersOf(buildShared({ outcomes: ['throttled'] }));
+    it('narrows event.action to the provided actions', () => {
+      const filters = filtersOf(buildShared({ actions: ['throttled'] }));
       expect(filters).toEqual(
         expect.arrayContaining([{ terms: { 'event.action': ['throttled'] } }])
       );

@@ -24,7 +24,7 @@ const idFilterArraySchema = arrayOrSingleSchema(
   EXECUTION_HISTORY_MAX_RULE_ID_FILTER
 );
 
-export const policyExecutionOutcomeSchema = z.enum(['dispatched', 'throttled', 'dispatch_failed']);
+export const policyExecutionOutcomeSchema = z.enum(['success', 'throttled', 'failure']);
 export type PolicyExecutionOutcome = z.infer<typeof policyExecutionOutcomeSchema>;
 
 export const dispatchFailureReasonSchema = z.enum([
@@ -59,7 +59,7 @@ const sharedFilterFields = {
   outcomes: policyExecutionOutcomeFilterSchema
     .optional()
     .describe(
-      'Outcome filter. When omitted matches all outcomes. Pass one or more of "dispatched", "throttled", "dispatch_failed" to narrow.'
+      'Outcome filter. When omitted matches all outcomes. Pass one or more of "success", "throttled", "failure" to narrow.'
     ),
 };
 

@@ -101,7 +101,7 @@ apiTest.describe(
 
     apiTest('validation: accepts an outcomes array filter', async ({ apiClient }) => {
       const response = await apiClient.get(
-        getListExecutionHistoryUrl({ outcomes: ['dispatched', 'throttled'] }),
+        getListExecutionHistoryUrl({ outcomes: ['success', 'throttled'] }),
         { headers: readerHeaders }
       );
       expect(response).toHaveStatusCode(200);
