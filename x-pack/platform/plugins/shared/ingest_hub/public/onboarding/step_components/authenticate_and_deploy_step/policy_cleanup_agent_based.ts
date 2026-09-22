@@ -15,10 +15,7 @@ import {
 import type { ServiceVars } from '../service_settings_step/use_service_settings';
 import { buildPackageInputs, buildPackageVars, getPackageVarNames } from './package_inputs';
 import type { AgentCredentialVars } from './package_inputs';
-import {
-  computePolicyCleanupOps,
-  resolveSurvivingMembers,
-} from './policy_cleanup';
+import { computePolicyCleanupOps, resolveSurvivingMembers } from './policy_cleanup';
 import type { BuildPolicyBodyOpts, PolicyCleanupOps } from './policy_cleanup';
 
 export interface CleanupAgentBasedOpts extends BuildPolicyBodyOpts {
@@ -35,7 +32,9 @@ export interface CleanupAgentBasedOpts extends BuildPolicyBodyOpts {
  * Returns only the ops that actually succeeded so callers can selectively clear
  * pendingCleanupPolicyIds — a failed cleanup remains staged for retry.
  */
-export async function cleanupAgentBasedPolicies(opts: CleanupAgentBasedOpts): Promise<PolicyCleanupOps> {
+export async function cleanupAgentBasedPolicies(
+  opts: CleanupAgentBasedOpts
+): Promise<PolicyCleanupOps> {
   const { pendingCleanupPolicyIds, currentPolicyIdsByInstance } = opts;
   const planned = computePolicyCleanupOps(pendingCleanupPolicyIds, currentPolicyIdsByInstance);
 
@@ -50,7 +49,10 @@ export async function cleanupAgentBasedPolicies(opts: CleanupAgentBasedOpts): Pr
         })
         .catch((err) => {
           // eslint-disable-next-line no-console
-          console.error(`[ingest_hub] Failed to delete agent-based package policy ${policyId}:`, err);
+          console.error(
+            `[ingest_hub] Failed to delete agent-based package policy ${policyId}:`,
+            err
+          );
         })
     ),
     ...planned.toUpdate.map(({ policyId, survivingInstanceIds }) =>
@@ -60,7 +62,10 @@ export async function cleanupAgentBasedPolicies(opts: CleanupAgentBasedOpts): Pr
         })
         .catch((err) => {
           // eslint-disable-next-line no-console
-          console.error(`[ingest_hub] Failed to update agent-based package policy ${policyId}:`, err);
+          console.error(
+            `[ingest_hub] Failed to update agent-based package policy ${policyId}:`,
+            err
+          );
         })
     ),
   ]);
@@ -135,7 +140,10 @@ async function updateAgentBasedPolicy(
   const { staticKeys } = authenticateAndDeployStep;
   const credentialsAsStaticKeys =
     agentCredentials?.method === 'direct_access_keys'
-      ? { access_key_id: agentCredentials.access_key_id, secret_access_key: agentCredentials.secret_access_key }
+      ? {
+          access_key_id: agentCredentials.access_key_id,
+          secret_access_key: agentCredentials.secret_access_key,
+        }
       : staticKeys;
   const pkgVarNames = getPackageVarNames(pkgInfo as { vars?: Array<{ name: string }> });
   const vars = buildPackageVars(globalRegion, credentialsAsStaticKeys, pkgVarNames);

@@ -58,7 +58,9 @@ const BASE_OPTS = {
 beforeEach(() => {
   jest.clearAllMocks();
   mockGetPackageInfo.mockResolvedValue({ data: { item: { version: '3.0.0', vars: [] } } });
-  mockGetOnePackagePolicy.mockResolvedValue({ data: { item: { name: 'existing-policy-name', namespace: 'existing-ns' } } });
+  mockGetOnePackagePolicy.mockResolvedValue({
+    data: { item: { name: 'existing-policy-name', namespace: 'existing-ns' } },
+  });
   mockDeletePackagePolicy.mockResolvedValue({});
   mockUpdatePackagePolicy.mockResolvedValue({});
 });

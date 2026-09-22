@@ -224,7 +224,10 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
           setIsDeploying(false);
           // Cleanup-only: no new deploys, but deleted policies must be pruned from the SO record.
           const existingDeploymentId = detectAndReviewStep.onboardingDeploymentId;
-          if (existingDeploymentId && (cleanupOps.toDelete.length > 0 || cleanupOps.toUpdate.length > 0)) {
+          if (
+            existingDeploymentId &&
+            (cleanupOps.toDelete.length > 0 || cleanupOps.toUpdate.length > 0)
+          ) {
             const deletedIds = new Set(cleanupOps.toDelete);
             await updateDeployment(existingDeploymentId, {
               services: selectedServiceIds,
