@@ -59,6 +59,7 @@ dependsOn:
   - '@kbn/cloud-security-posture'
   - '@kbn/security-solution-distribution-bar'
   - '@kbn/core-application-browser'
+  - '@kbn/test-jest-helpers'
 tags:
   - plugin
   - prod
