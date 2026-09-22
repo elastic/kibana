@@ -58,7 +58,7 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
       // Audit fields: createdAt/createdBy preserved, updatedAt/updatedBy refreshed.
       expect(response.body.id).toBe(created.id);
       expect(response.body.created_at).toBe(created.created_at);
-      expect(response.body.created_by).toBe(created.created_by);
+      expect(response.body.created_by).toStrictEqual(created.created_by);
       expect(response.body.updated_at).not.toBe(created.updated_at);
       expect(response.body.metadata.version).toBe(created.metadata.version + 1);
     }

@@ -245,7 +245,6 @@ describe('yaml_form_utils', () => {
             name: 'Test Rule',
             enabled: true,
             description: 'A description',
-            owner: undefined,
             tags: undefined,
           },
           timeField: '@timestamp',

@@ -35,9 +35,7 @@ const baseRuleData: RuleAttachmentData = {
     breach: { query: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name' },
   },
   state_transition: null,
-  created_by: { profile_uid: 'elastic' },
   created_at: '2026-04-01T00:00:00.000Z',
-  updated_by: { profile_uid: 'elastic' },
   updated_at: '2026-04-10T00:00:00.000Z',
 };
 

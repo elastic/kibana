@@ -110,7 +110,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
       expect(replaced.body.description).toBe('after replace');
       expect(replaced.body.destinations).toStrictEqual([{ type: 'workflow', id: 'wf-2' }]);
 
-      expect(replaced.body.created_by).toBe(created.created_by);
+      expect(replaced.body.created_by).toStrictEqual(created.created_by);
       expect(replaced.body.created_at).toBe(created.created_at);
 
       expect(replaced.body.updated_at).not.toBe(created.created_at);
