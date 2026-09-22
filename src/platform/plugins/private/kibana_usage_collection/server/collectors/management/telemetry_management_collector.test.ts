@@ -143,6 +143,5 @@ describe('createCollectorFetch', () => {
         item3: '[REDACTED]',
       });
     });
-
   });
 });
