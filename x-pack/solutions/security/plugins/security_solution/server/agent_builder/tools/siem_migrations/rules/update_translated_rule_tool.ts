@@ -40,30 +40,30 @@ const schema = z.object({
     .optional()
     .describe(
       'The corrected ES|QL query. Provide ONLY when the translated query needs to be updated. ' +
-      'Can be combined with new integration_ids, provided the index in the query is created ' +
-      'from those integrations.'
+        'Can be combined with new integration_ids, provided the index in the query is created ' +
+        'from those integrations.'
     ),
   prebuilt_rule: PreBuiltRuleSchema.optional().describe(
     'The correct prebuilt rule id. Provide ONLY when the matched prebuilt rule needs to be ' +
-    'updated. Can be combined with new integration_ids, provided the prebuilt rule relies ' +
-    'on data from those integrations.'
+      'updated. Can be combined with new integration_ids, provided the prebuilt rule relies ' +
+      'on data from those integrations.'
   ),
   integration_ids: z
     .array(z.string().min(1))
     .optional()
     .describe(
       'The correct integration id(s). Provide ONLY when the matched integration(s) need to be ' +
-      'updated. Pass one or more integration ids. Can be combined with a new esql_query or ' +
-      'prebuilt_rule.id that relies on data from these integrations.'
+        'updated. Pass one or more integration ids. Can be combined with a new esql_query or ' +
+        'prebuilt_rule.id that relies on data from these integrations.'
     ),
   comment: z
     .string()
     .min(1)
     .describe(
       'REQUIRED. A markdown explanation of what you changed and why, covering every aspect you ' +
-      "are updating in this call. It is appended to the rule's comment history and shown to the " +
-      'user in the rule details flyout, so write it for that reader. Follow the examples in the ' +
-      'skill instructions for the expected shape.'
+        "are updating in this call. It is appended to the rule's comment history and shown to the " +
+        'user in the rule details flyout, so write it for that reader. Follow the examples in the ' +
+        'skill instructions for the expected shape.'
     ),
 });
 

@@ -79,10 +79,7 @@ export const BulkActions: React.FC<BulkActionsProps> = memo(
         data-test-subj="migrationsBulkActions"
       >
         <EuiFlexItem grow={false}>
-          <AddRulesToChatButton
-            migrationStats={migrationStats}
-            selectedRules={selectedRules}
-          />
+          <AddRulesToChatButton migrationStats={migrationStats} selectedRules={selectedRules} />
         </EuiFlexItem>
         {showUpdateMissingIndexPatternButton && (
           <UpdateMissingIndex
