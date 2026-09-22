@@ -246,8 +246,9 @@ const shortenMetaValue = (value: string): string =>
     : value;
 
 /**
- * Within one artifact entry, each meta field of interest must be either omitted on every rule
- * or set to the same values on every rule. Checked independently per field.
+ * Within one artifact entry, meta.arch and meta.scan_type must each be either omitted on every
+ * rule or set to the same values on every rule. meta.os is excluded: a declared value is already
+ * required to match os_types, so omitting it is equivalent.
  */
 const validateMetaFieldsConsistencyAcrossRules = (
   rules: YaraCompiledRule[],
@@ -260,7 +261,7 @@ const validateMetaFieldsConsistencyAcrossRules = (
 
   const [referenceRule, ...restOfRules] = rules;
 
-  for (const metaKey of Object.values(YaraMetaKeyOfInterest)) {
+  for (const metaKey of [YaraMetaKeyOfInterest.ARCH, YaraMetaKeyOfInterest.SCAN_TYPE]) {
     const referenceValue = unifyMetaFieldValues(referenceRule.meta[metaKey]);
 
     for (const rule of restOfRules) {

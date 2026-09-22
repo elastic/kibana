@@ -880,7 +880,7 @@ export default function ({ getService }: FtrProviderContext) {
                     .expect(400)
                     .expect(anEndpointArtifactError)
                     .expect(
-                      anErrorMessageWith(/Invalid YARA rules \(libyara [0-9.]+\), 7 errors found:/)
+                      anErrorMessageWith(/Invalid YARA rules \(libyara [0-9.]+\), 4 errors found:/)
                     )
                     .expect(
                       anErrorMessageWith(
@@ -901,21 +901,6 @@ export default function ({ getService }: FtrProviderContext) {
                       anErrorMessageWith(
                         /\[line 5\] Invalid "meta.os" value "" on rule "rule4", only "Windows", "Linux" and\/or "MacOS" are allowed in a comma separated list/
                       )
-                    )
-                    .expect(
-                      anErrorMessageWith(
-                        /\[line 3\] Inconsistent "meta.os" across rules in this entry. All rules must omit "meta.os" or use the same value; found "invalid" on rule "rule1" and "macos, windows" on rule "rule2"/
-                      )
-                    )
-                    .expect(
-                      anErrorMessageWith(
-                        /\[line 4\] Inconsistent "meta.os" across rules in this entry. All rules must omit "meta.os" or use the same value; found "invalid" on rule "rule1" and "CheeseOS, Windows" on rule "rule3"/
-                      )
-                    )
-                    .expect(
-                      anErrorMessageWith(
-                        /\[line 5\] Inconsistent "meta.os" across rules in this entry. All rules must omit "meta.os" or use the same value; found "invalid" on rule "rule1" and "" on rule "rule4"/
-                      )
                     );
                 });
 
@@ -934,7 +919,7 @@ export default function ({ getService }: FtrProviderContext) {
                     .expect(400)
                     .expect(anEndpointArtifactError)
                     .expect(
-                      anErrorMessageWith(/Invalid YARA rules \(libyara [0-9.]+\), 5 errors found:/)
+                      anErrorMessageWith(/Invalid YARA rules \(libyara [0-9.]+\), 3 errors found:/)
                     )
                     .expect(
                       anErrorMessageWith(
@@ -950,9 +935,6 @@ export default function ({ getService }: FtrProviderContext) {
                       anErrorMessageWith(
                         /\[line 4\] Invalid "meta.os" value "Windows,Linux " on rule "rule3", only "Windows", "Linux" and\/or "MacOS" are allowed in a comma separated list/
                       )
-                    )
-                    .expect(
-                      anErrorMessageWith(/Inconsistent "meta.os" across rules in this entry/)
                     );
                 });
 
@@ -970,7 +952,7 @@ export default function ({ getService }: FtrProviderContext) {
                     .expect(400)
                     .expect(anEndpointArtifactError)
                     .expect(
-                      anErrorMessageWith(/Invalid YARA rules \(libyara [0-9.]+\), 3 errors found:/)
+                      anErrorMessageWith(/Invalid YARA rules \(libyara [0-9.]+\), 2 errors found:/)
                     )
                     .expect(
                       anErrorMessageWith(
@@ -980,11 +962,6 @@ export default function ({ getService }: FtrProviderContext) {
                     .expect(
                       anErrorMessageWith(
                         /\[line 3\] Invalid "meta.os" value "Windows,Linux, MacOS          \.\.\." on rule "rule2", only "Windows", "Linux" and\/or "MacOS" are allowed in a comma separated list/
-                      )
-                    )
-                    .expect(
-                      anErrorMessageWith(
-                        /\[line 3\] Inconsistent "meta.os" across rules in this entry/
                       )
                     );
                 });
@@ -1004,7 +981,7 @@ export default function ({ getService }: FtrProviderContext) {
                     .expect(400)
                     .expect(anEndpointArtifactError)
                     .expect(
-                      anErrorMessageWith(/Invalid YARA rules \(libyara [0-9.]+\), 5 errors found:/)
+                      anErrorMessageWith(/Invalid YARA rules \(libyara [0-9.]+\), 3 errors found:/)
                     )
                     .expect(
                       anErrorMessageWith(
@@ -1019,16 +996,6 @@ export default function ({ getService }: FtrProviderContext) {
                     .expect(
                       anErrorMessageWith(
                         /\[line 4\] Invalid "meta.os" value "MacOS, Linux, MacOS" on rule "rule3", only "Windows", "Linux" and\/or "MacOS" are allowed in a comma separated list/
-                      )
-                    )
-                    .expect(
-                      anErrorMessageWith(
-                        /\[line 3\] Inconsistent "meta.os" across rules in this entry. All rules must omit "meta.os" or use the same value; found "Windows, Windows" on rule "rule1" and "Linux, Linux, MacOS" on rule "rule2"/
-                      )
-                    )
-                    .expect(
-                      anErrorMessageWith(
-                        /\[line 4\] Inconsistent "meta.os" across rules in this entry. All rules must omit "meta.os" or use the same value; found "Windows, Windows" on rule "rule1" and "Linux, MacOS, MacOS" on rule "rule3"/
                       )
                     );
                 });
@@ -1128,21 +1095,16 @@ export default function ({ getService }: FtrProviderContext) {
                     .expect(400)
                     .expect(anEndpointArtifactError)
                     .expect(
-                      anErrorMessageWith(/Invalid YARA rules \(libyara [0-9.]+\), 2 errors found:/)
+                      anErrorMessageWith(/Invalid YARA rules \(libyara [0-9.]+\), 1 error found:/)
                     )
                     .expect(
                       anErrorMessageWith(
                         /\[line 3\] "meta.os" value "Linux" is different from "os_types" value "windows" on rule "rule2"/
                       )
-                    )
-                    .expect(
-                      anErrorMessageWith(
-                        /\[line 3\] Inconsistent "meta.os" across rules in this entry. All rules must omit "meta.os" or use the same value; found "Windows" on rule "rule1" and "Linux" on rule "rule2"/
-                      )
                     );
                 });
 
-                it('rejects rules when meta.os is set on some rules and omitted on others', async () => {
+                it('accepts rules when meta.os is set on some rules and omitted on others', async () => {
                   await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
                     customYaraSignatureApiCall.path
                   )
@@ -1156,13 +1118,7 @@ export default function ({ getService }: FtrProviderContext) {
                         ['windows']
                       )
                     )
-                    .expect(400)
-                    .expect(anEndpointArtifactError)
-                    .expect(
-                      anErrorMessageWith(
-                        /Invalid YARA rules \(libyara [0-9.]+\), 1 error found: \[line 3\] Inconsistent "meta.os" across rules in this entry. All rules must omit "meta.os" or use the same value; found "Windows" on rule "rule1" and omitted on rule "rule2"/
-                      )
-                    );
+                    .expect(200);
                 });
               });
             });
