@@ -10,7 +10,6 @@ import { loggerMock } from '@kbn/logging-mocks';
 
 import { CloudConnectorRoleArnPropagationError } from '../../errors';
 import { agentPolicyService } from '../agent_policy';
-import { appContextService } from '../app_context';
 import { packagePolicyService } from '../package_policy';
 
 import { propagateRoleArnToPackagePolicies } from './role_arn_propagation';
@@ -45,12 +44,7 @@ jest.mock('../agent_policy', () => ({
 jest.mock('../app_context', () => ({
   appContextService: {
     getLogger: () => loggerMock.create(),
-    getInternalUserSOClientForSpaceId: jest.fn(),
-    getInternalUserSOClientWithoutSpaceExtension: jest.fn(),
   },
-}));
-jest.mock('../spaces/helpers', () => ({
-  getSpaceForPackagePolicy: (policy: { spaceIds?: string[] }) => policy.spaceIds?.[0] ?? 'default',
 }));
 
 const OLD_ARN = 'arn:aws:iam::123456789012:role/Old';
@@ -95,15 +89,11 @@ const mockListReturns = (items: unknown[]) => {
 
 describe('propagateRoleArnToPackagePolicies', () => {
   const soClient = savedObjectsClientMock.create();
-  const spacelessSoClient = savedObjectsClientMock.create();
   const esClient = elasticsearchServiceMock.createInternalClient();
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (appContextService.getInternalUserSOClientForSpaceId as jest.Mock).mockReturnValue(soClient);
-    (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue(
-      spacelessSoClient
-    );
+    soClient.getCurrentNamespace.mockReturnValue('default');
     // Default: a failed update left the SO untouched (still on OLD_ARN), so the post-persist
     // re-read does not pull the plan into the revert set.
     (packagePolicyService.get as jest.Mock).mockImplementation(async (_so, id: string) =>
@@ -119,6 +109,7 @@ describe('propagateRoleArnToPackagePolicies', () => {
     mockListReturns([makePolicy('a'), makePolicy('b')]);
 
     await propagateRoleArnToPackagePolicies({
+      soClient,
       esClient,
       connectorId: CONNECTOR_ID,
       newRoleArn: NEW_ARN,
@@ -172,6 +163,7 @@ describe('propagateRoleArnToPackagePolicies', () => {
     mockListReturns([awsPolicy]);
 
     await propagateRoleArnToPackagePolicies({
+      soClient,
       esClient,
       connectorId: CONNECTOR_ID,
       newRoleArn: NEW_ARN,
@@ -186,10 +178,11 @@ describe('propagateRoleArnToPackagePolicies', () => {
     expect(update.inputs).toEqual(awsPolicy.inputs);
   });
 
-  it('reads package policies from every space', async () => {
+  it('reads and writes package policies through the request-scoped soClient', async () => {
     mockListReturns([]);
 
     await propagateRoleArnToPackagePolicies({
+      soClient,
       esClient,
       connectorId: CONNECTOR_ID,
       newRoleArn: NEW_ARN,
@@ -197,45 +190,38 @@ describe('propagateRoleArnToPackagePolicies', () => {
 
     const [listSoClient, listOptions] = (packagePolicyService.fetchAllItems as jest.Mock).mock
       .calls[0];
-    // The route's client is scoped to the caller's space; a connector is shared across spaces.
-    expect(listSoClient).toBe(spacelessSoClient);
+    // Same client as the PUT that triggered the fan-out — no cross-space internal escalation.
+    expect(listSoClient).toBe(soClient);
     expect(listOptions).toEqual(
       expect.objectContaining({
-        spaceIds: ['*'],
         kuery: `fleet-package-policies.attributes.cloud_connector_id:"${CONNECTOR_ID}"`,
       })
     );
+    expect(listOptions.spaceIds).toBeUndefined();
   });
 
-  it('updates policies in other spaces through their own space client', async () => {
-    mockListReturns([
-      makePolicy('a', OLD_ARN, ['default']),
-      makePolicy('b', OLD_ARN, ['marketing']),
-    ]);
+  it('writes every update through the request-scoped soClient', async () => {
+    mockListReturns([makePolicy('a'), makePolicy('b')]);
 
     await propagateRoleArnToPackagePolicies({
+      soClient,
       esClient,
       connectorId: CONNECTOR_ID,
       newRoleArn: NEW_ARN,
     });
 
     expect(packagePolicyService.update).toHaveBeenCalledTimes(2);
-    expect(appContextService.getInternalUserSOClientForSpaceId).toHaveBeenCalledWith('default');
-    expect(appContextService.getInternalUserSOClientForSpaceId).toHaveBeenCalledWith('marketing');
-    // Each space's agent policies are bumped with a client scoped to that space.
+    for (const call of (packagePolicyService.update as jest.Mock).mock.calls) {
+      expect(call[0]).toBe(soClient);
+    }
     expect(agentPolicyService.bumpAgentPoliciesByIds).toHaveBeenCalledWith(
-      ['agent-a'],
+      ['agent-a', 'agent-b'],
       {},
       'default'
     );
-    expect(agentPolicyService.bumpAgentPoliciesByIds).toHaveBeenCalledWith(
-      ['agent-b'],
-      {},
-      'marketing'
-    );
   });
 
-  it('defers the agent policy revision bump to a single call per space', async () => {
+  it('defers the agent policy revision bump to a single call', async () => {
     // Every policy on a shared agent policy would otherwise race the same `revision` field.
     const shared = [makePolicy('a'), makePolicy('b')].map((policy) => ({
       ...policy,
@@ -244,6 +230,7 @@ describe('propagateRoleArnToPackagePolicies', () => {
     mockListReturns(shared);
 
     await propagateRoleArnToPackagePolicies({
+      soClient,
       esClient,
       connectorId: CONNECTOR_ID,
       newRoleArn: NEW_ARN,
@@ -269,6 +256,7 @@ describe('propagateRoleArnToPackagePolicies', () => {
 
     await expect(
       propagateRoleArnToPackagePolicies({
+        soClient,
         esClient,
         connectorId: CONNECTOR_ID,
         newRoleArn: NEW_ARN,
@@ -288,6 +276,7 @@ describe('propagateRoleArnToPackagePolicies', () => {
     mockListReturns([]);
 
     await propagateRoleArnToPackagePolicies({
+      soClient,
       esClient,
       connectorId: CONNECTOR_ID,
       newRoleArn: NEW_ARN,
@@ -301,6 +290,7 @@ describe('propagateRoleArnToPackagePolicies', () => {
     mockListReturns([policyWithoutPackage]);
 
     await propagateRoleArnToPackagePolicies({
+      soClient,
       esClient,
       connectorId: CONNECTOR_ID,
       newRoleArn: NEW_ARN,
@@ -315,6 +305,7 @@ describe('propagateRoleArnToPackagePolicies', () => {
   it('is a no-op when no policies reference the connector', async () => {
     mockListReturns([]);
     await propagateRoleArnToPackagePolicies({
+      soClient,
       esClient,
       connectorId: CONNECTOR_ID,
       newRoleArn: NEW_ARN,
@@ -329,6 +320,7 @@ describe('propagateRoleArnToPackagePolicies', () => {
     };
     mockListReturns([policyWithoutRoleArn]);
     await propagateRoleArnToPackagePolicies({
+      soClient,
       esClient,
       connectorId: CONNECTOR_ID,
       newRoleArn: NEW_ARN,
@@ -345,6 +337,7 @@ describe('propagateRoleArnToPackagePolicies', () => {
 
     await expect(
       propagateRoleArnToPackagePolicies({
+        soClient,
         esClient,
         connectorId: CONNECTOR_ID,
         newRoleArn: NEW_ARN,
@@ -382,6 +375,7 @@ describe('propagateRoleArnToPackagePolicies', () => {
     let caught: CloudConnectorRoleArnPropagationError | undefined;
     try {
       await propagateRoleArnToPackagePolicies({
+        soClient,
         esClient,
         connectorId: CONNECTOR_ID,
         newRoleArn: NEW_ARN,
@@ -404,6 +398,7 @@ describe('propagateRoleArnToPackagePolicies', () => {
     let caught: CloudConnectorRoleArnPropagationError | undefined;
     try {
       await propagateRoleArnToPackagePolicies({
+        soClient,
         esClient,
         connectorId: CONNECTOR_ID,
         newRoleArn: NEW_ARN,
@@ -435,6 +430,7 @@ describe('propagateRoleArnToPackagePolicies', () => {
     );
     await expect(
       propagateRoleArnToPackagePolicies({
+        soClient,
         esClient,
         connectorId: CONNECTOR_ID,
         newRoleArn: NEW_ARN,
@@ -469,6 +465,7 @@ describe('propagateRoleArnToPackagePolicies', () => {
 
     await expect(
       propagateRoleArnToPackagePolicies({
+        soClient,
         esClient,
         connectorId: CONNECTOR_ID,
         newRoleArn: NEW_ARN,

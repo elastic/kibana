@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import pMap from 'p-map';
 
-import { ALL_SPACES_ID, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../common/constants';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import type { NewPackagePolicy, PackagePolicy } from '../../../common/types';
 import { MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS } from '../../constants';
 import { CloudConnectorRoleArnPropagationError } from '../../errors';
@@ -17,11 +18,11 @@ import { agentPolicyService } from '../agent_policy';
 import { appContextService } from '../app_context';
 import { packagePolicyService, toPackagePolicyUpdate } from '../package_policy';
 import { escapeSearchQueryPhrase } from '../saved_object';
-import { getSpaceForPackagePolicy } from '../spaces/helpers';
 
 import { rewritePolicyRoleArn } from './update_input_vars_with_role_arn';
 
 interface PropagateArgs {
+  soClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
   connectorId: string;
   newRoleArn: string;
@@ -51,7 +52,13 @@ const renderPolicyIds = (ids: string[]): string => {
 };
 
 /**
- * Fan out a new role ARN to every package policy that references this connector.
+ * Fan out a new role ARN to every package policy that references this connector **in the
+ * caller's Kibana space**.
+ *
+ * Connectors are created with the request-scoped SO client and live in that space; the flyout
+ * usage list and package-policy count are space-scoped the same way. Cross-space fan-out via
+ * internal clients would let a caller with Fleet privilege in one space mutate policies in
+ * spaces they cannot manage — so this stays on `soClient` and does not query `spaceIds: ['*']`.
  *
  * Semantics: "policies first, then connector; on any policy failure, revert successful policies."
  * The caller writes the connector AFTER a successful call to this function. Idempotent: policies
@@ -61,18 +68,20 @@ const renderPolicyIds = (ids: string[]): string => {
  * Exit points (in source order):
  *   1. `return` — no package policy references the connector (nothing to do).
  *   2. `return` — policies reference the connector but none carry a `role_arn` variable.
- *   3. `return` — Phase 1 forward writes all succeeded; agent-policy revisions bumped once per
- *      space. Caller is safe to write the connector.
+ *   3. `return` — Phase 1 forward writes all succeeded; agent-policy revisions bumped once.
+ *      Caller is safe to write the connector.
  *   4. `throw`  — Phase 1 had one or more failures; Phase 2 best-effort reverts the successful
  *      ones and throws `CloudConnectorRoleArnPropagationError` carrying `updateFailed` and
  *      `revertFailed` id lists. Caller must NOT write the connector.
  */
 export const propagateRoleArnToPackagePolicies = async ({
+  soClient,
   esClient,
   connectorId,
   newRoleArn,
 }: PropagateArgs): Promise<void> => {
   const logger = appContextService.getLogger().get('propagateRoleArnToPackagePolicies');
+  const spaceId = soClient.getCurrentNamespace() ?? DEFAULT_SPACE_ID;
 
   // Deliberately unfiltered, unlike the browser's `useCloudConnectorUsage`, which hides
   // CLOUD_CONNECTOR_HIDDEN_PACKAGES (the permission verifier) from the count shown before saving:
@@ -82,19 +91,12 @@ export const propagateRoleArnToPackagePolicies = async ({
     connectorId
   )}`;
 
-  // A connector saved object is shared across spaces, so the policies referencing it can live in
-  // any of them. The route's request-scoped client only sees the caller's space, which would
-  // silently skip the rest; each policy is then written back through its own space client.
-  //
   // `fetchAllItems` pages under a Point-In-Time snapshot, so we neither cap at SO_SEARCH_LIMIT
   // (a heavy-usage connector would silently keep the tail on the old ARN) nor race with a
   // concurrent policy edit (the connector write below would then disagree with what got
-  // rewritten here).
+  // rewritten here). Scoped to `soClient`'s space — same visibility as the PUT that triggered us.
   const policies: PackagePolicy[] = [];
-  for await (const page of await packagePolicyService.fetchAllItems(
-    appContextService.getInternalUserSOClientWithoutSpaceExtension(),
-    { kuery, spaceIds: [ALL_SPACES_ID] }
-  )) {
+  for await (const page of await packagePolicyService.fetchAllItems(soClient, { kuery })) {
     policies.push(...page);
   }
 
@@ -134,9 +136,6 @@ export const propagateRoleArnToPackagePolicies = async ({
     } referencing connector ${connectorId}.`
   );
 
-  const soFor = (policy: PackagePolicy) =>
-    appContextService.getInternalUserSOClientForSpaceId(getSpaceForPackagePolicy(policy));
-
   const writePolicyRoleArn = (
     plan: PolicyPlan,
     vars: NewPackagePolicy['vars'],
@@ -144,7 +143,7 @@ export const propagateRoleArnToPackagePolicies = async ({
     version?: string
   ) =>
     packagePolicyService.update(
-      soFor(plan.policy),
+      soClient,
       esClient,
       plan.policy.id,
       {
@@ -157,7 +156,7 @@ export const propagateRoleArnToPackagePolicies = async ({
         ...(version !== undefined ? { version } : {}),
       },
       // Policies sharing an agent policy would each read-modify-write the same `revision`
-      // concurrently; the whole fan-out is bumped once per space below instead.
+      // concurrently; the whole fan-out is bumped once below instead.
       { bumpRevision: false }
     );
 
@@ -167,28 +166,22 @@ export const propagateRoleArnToPackagePolicies = async ({
    * would leave the connector on the old ARN while the policies are on the new one.
    */
   const bumpAgentPolicies = async (bumped: PolicyPlan[]) => {
-    const agentPolicyIdsBySpace = new Map<string, Set<string>>();
+    const agentPolicyIds = new Set<string>();
     for (const { policy } of bumped) {
-      const spaceId = getSpaceForPackagePolicy(policy);
-      const ids = agentPolicyIdsBySpace.get(spaceId) ?? new Set<string>();
       for (const agentPolicyId of policy.policy_ids ?? []) {
-        ids.add(agentPolicyId);
+        agentPolicyIds.add(agentPolicyId);
       }
-      agentPolicyIdsBySpace.set(spaceId, ids);
     }
-
-    for (const [spaceId, ids] of agentPolicyIdsBySpace) {
-      if (ids.size === 0) {
-        continue;
-      }
-      try {
-        await agentPolicyService.bumpAgentPoliciesByIds([...ids].sort(), {}, spaceId);
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        logger.error(
-          `Failed to bump agent policy revisions in space ${spaceId} after the role ARN fan-out for connector ${connectorId}: ${message}`
-        );
-      }
+    if (agentPolicyIds.size === 0) {
+      return;
+    }
+    try {
+      await agentPolicyService.bumpAgentPoliciesByIds([...agentPolicyIds].sort(), {}, spaceId);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      logger.error(
+        `Failed to bump agent policy revisions in space ${spaceId} after the role ARN fan-out for connector ${connectorId}: ${message}`
+      );
     }
   };
 
@@ -224,7 +217,7 @@ export const propagateRoleArnToPackagePolicies = async ({
         updateFailed.push(plan.policy.id);
 
         try {
-          const current = await packagePolicyService.get(soFor(plan.policy), plan.policy.id);
+          const current = await packagePolicyService.get(soClient, plan.policy.id);
           if (current) {
             // `changed: false` means every role_arn already holds newRoleArn — the SO write
             // landed and a later step rejected. Include it in the revert set.

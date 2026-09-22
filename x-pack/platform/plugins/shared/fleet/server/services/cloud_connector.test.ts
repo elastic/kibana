@@ -1378,7 +1378,11 @@ describe('CloudConnectorService', () => {
         );
 
         expect(propagateRoleArnToPackagePoliciesMock).toHaveBeenCalledWith(
-          expect.objectContaining({ connectorId, newRoleArn: newArn })
+          expect.objectContaining({
+            soClient: mockSoClient,
+            connectorId,
+            newRoleArn: newArn,
+          })
         );
       });
 
@@ -1484,7 +1488,7 @@ describe('CloudConnectorService', () => {
         expect(propagateRoleArnToPackagePoliciesMock).toHaveBeenCalledTimes(2);
         expect(propagateRoleArnToPackagePoliciesMock).toHaveBeenNthCalledWith(
           2,
-          expect.objectContaining({ newRoleArn: oldArn })
+          expect.objectContaining({ soClient: mockSoClient, newRoleArn: oldArn })
         );
       });
 

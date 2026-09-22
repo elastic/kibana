@@ -484,6 +484,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
           );
         }
         await propagateRoleArnToPackagePolicies({
+          soClient,
           esClient,
           connectorId: cloudConnectorId,
           newRoleArn,
@@ -508,6 +509,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
           );
           try {
             await propagateRoleArnToPackagePolicies({
+              soClient,
               esClient,
               connectorId: cloudConnectorId,
               newRoleArn: oldRoleArn,
