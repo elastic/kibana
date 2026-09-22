@@ -308,7 +308,8 @@ const failuresByPipeline = (suite: FlakySuite, report: FlakyTestReport): string 
     formatBuildLink(stats.lastFailedBuildUrl, stats.lastFailedAt),
   ]);
   return [
-    '#### Failures by pipeline',
+    '#### Failures by Pipeline',
+    '',
     scope,
     '',
     table(['Pipeline', 'Failed builds', 'Branches', 'Sample failure'], rows),
@@ -327,11 +328,10 @@ export const renderFlakySuiteIssueBody = (
 ): string => {
   const sections = [
     headline(suite, ctx),
-    `### ${FRAMEWORK_LABELS[suite.framework].short} suite`,
-    '#### Flaky tests',
-    testsTable(suite.tests, { withTestId: true, maxRows: MAX_TEST_ROWS }),
-    '#### Suite details',
+    '### Suite Details',
     suiteDetails(suite),
+    '### Flaky Tests',
+    testsTable(suite.tests, { withTestId: true, maxRows: MAX_TEST_ROWS }),
     '### Failures',
     failuresSection(suite),
     failuresByPipeline(suite, ctx.report),

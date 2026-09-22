@@ -3,23 +3,21 @@
 exports[`renderFlakySuiteIssueBody renders a multi-test suite with distinct failures, a skipped note and related issues 1`] = `
 "A **flaky** test suite fails frequently on \`main\`: in the top 30 flakiest tests on \`kibana-on-merge\` in the last 7 days (2–9 Sep 2026). Latest run on \`main\` was skipped (2026-09-09).
 
-### Scout suite
-
-#### Flaky tests
-
-| Test | Failed builds | Flakiest branch | Test ID |
-|---|---|---|---|
-| does not keep a hidden histogram after visiting Dashboard | 23 / 264 (9%) | \`main\` · 20 / 200 | a |
-| reverts breakdown, interval, and visibility on a saved session | 10 / 264 (4%) | \`main\` | b |
-| persists hide/show of the histogram on a saved session | 9 / 264 (3%) | \`main\` | c |
-
-#### Suite details
+### Suite Details
 
 | Field | Value |
 |---|---|
 | **File** | [\`x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/default_status_alert.spec.ts\`](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/default_status_alert.spec.ts) |
 | **Framework** | Scout (Playwright) · [\`x-pack/solutions/observability/plugins/synthetics/test/scout/ui/playwright.config.ts\`](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/synthetics/test/scout/ui/playwright.config.ts) |
 | **Owners** | \`elastic/obs-ux-management-team\`, \`elastic/kibana-data-discovery\`, \`elastic/other-team\` |
+
+### Flaky Tests
+
+| Test | Failed builds | Flakiest branch | Test ID |
+|---|---|---|---|
+| does not keep a hidden histogram after visiting Dashboard | 23 / 264 (9%) | \`main\` · 20 / 200 | a |
+| reverts breakdown, interval, and visibility on a saved session | 10 / 264 (4%) | \`main\` | b |
+| persists hide/show of the histogram on a saved session | 9 / 264 (3%) | \`main\` | c |
 
 ### Failures
 
@@ -47,21 +45,19 @@ Possibly related: #7, #8.
 exports[`renderFlakySuiteIssueBody renders a single-test suite with a dashboard link 1`] = `
 "A **flaky** test suite fails frequently on \`main\`: in the top 5 flakiest tests on \`kibana-on-merge\` in the last 7 days (2–9 Sep 2026) — [dashboard with latest stats](https://dashboard.example).
 
-### Scout suite
-
-#### Flaky tests
-
-| Test | Failed builds | Flakiest branch | Test ID |
-|---|---|---|---|
-| creates default alert, triggers on down status, and recovers | 49 / 509 (10%) | \`main\` | playwright:default_status_alert:creates default alert |
-
-#### Suite details
+### Suite Details
 
 | Field | Value |
 |---|---|
 | **File** | [\`x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/default_status_alert.spec.ts\`](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/default_status_alert.spec.ts) |
 | **Framework** | Scout (Playwright) · [\`x-pack/solutions/observability/plugins/synthetics/test/scout/ui/playwright.config.ts\`](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/synthetics/test/scout/ui/playwright.config.ts) |
 | **Owners** | \`elastic/obs-ux-management-team\` |
+
+### Flaky Tests
+
+| Test | Failed builds | Flakiest branch | Test ID |
+|---|---|---|---|
+| creates default alert, triggers on down status, and recovers | 49 / 509 (10%) | \`main\` | playwright:default_status_alert:creates default alert |
 
 ### Failures
 
@@ -71,7 +67,8 @@ One sampled failure:
 Error: Timed out 30000ms waiting for expect(locator).toBeVisible()
 \`\`\`
 
-#### Failures by pipeline
+#### Failures by Pipeline
+
 2–9 Sep 2026, all branches:
 
 | Pipeline | Failed builds | Branches | Sample failure |
