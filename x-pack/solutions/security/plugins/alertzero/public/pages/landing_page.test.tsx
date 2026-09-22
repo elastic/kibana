@@ -127,22 +127,36 @@ describe('LandingPage', () => {
     expect(screen.getByTestId('conversations-page')).toBeInTheDocument();
   });
 
-  it('renders nothing while loading', () => {
+  it('shows the queue when configure proposals exist', () => {
+    mockUseWorkers.mockReturnValue(workersResult([]));
+    mockUseProposalsByCategory.mockImplementation((category: string) =>
+      proposalsResult(category === 'configure' ? 2 : 0)
+    );
+
+    renderPage();
+
+    expect(screen.getByTestId('conversations-page')).toBeInTheDocument();
+    expect(screen.queryByText('Get started with AlertZero')).not.toBeInTheDocument();
+  });
+
+  it('shows a loading spinner while workers are loading', () => {
     mockUseWorkers.mockReturnValue(workersResult([], { isLoading: true, data: undefined }));
 
     renderPage();
 
     expect(screen.queryByText('Get started with AlertZero')).not.toBeInTheDocument();
     expect(screen.queryByTestId('conversations-page')).not.toBeInTheDocument();
+    expect(document.querySelector('[class*="euiLoadingSpinner"]')).toBeInTheDocument();
   });
 
-  it('renders nothing while proposals are loading', () => {
+  it('shows a loading spinner while proposals are loading', () => {
     mockUseProposalsByCategory.mockReturnValue(proposalsResult(0, { isLoading: true, data: undefined }));
 
     renderPage();
 
     expect(screen.queryByText('Get started with AlertZero')).not.toBeInTheDocument();
     expect(screen.queryByTestId('conversations-page')).not.toBeInTheDocument();
+    expect(document.querySelector('[class*="euiLoadingSpinner"]')).toBeInTheDocument();
   });
 
   it('falls through to the queue on workers fetch error', () => {
