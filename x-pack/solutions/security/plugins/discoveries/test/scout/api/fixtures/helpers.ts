@@ -56,9 +56,9 @@ export const enableWorkflowsFeatureFlag = async ({
 
 /**
  * Reverts `enableWorkflowsFeatureFlag`. The feature flag override is process-wide and the Advanced
- * Setting is persisted in the default space, so both leak into other suites sharing the Kibana
- * instance. Call it from `global.teardown.ts`, not from `afterAll`: spec files run in parallel
- * across workers.
+ * Setting is persisted in the default space, so both outlive any single spec and leak into other
+ * suites sharing the Kibana instance. Call it from `global.teardown.ts`, not from `afterAll`, so it
+ * runs once after every spec file has finished.
  */
 export const disableWorkflowsFeatureFlag = async ({
   apiServices,
@@ -307,16 +307,6 @@ export const getPublicSchedulesApis = (
         responseType: 'json',
       }),
   };
-};
-
-/**
- * Enables the workflow schedules feature flag via kibana advanced settings.
- * Call this in beforeAll to ensure the internal schedule API is available.
- */
-export const enableWorkflowSchedulesFeature = async (kbnClient: KbnClient): Promise<void> => {
-  await kbnClient.uiSettings.update({
-    'securitySolution:securityAttackDiscoverySchedulesEnabled': true,
-  });
 };
 
 /**

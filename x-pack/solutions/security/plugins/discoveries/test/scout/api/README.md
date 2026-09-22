@@ -14,7 +14,6 @@ These tests verify the seven internal schedule routes added in PR 3 and the sche
 | Lifecycle (enable / disable) | `enable.spec.ts`, `disable.spec.ts` |
 | RBAC (403 for unauthorized users) | `rbac.spec.ts` |
 | Tag-based visibility (internal vs public APIs) | `isolation.spec.ts` |
-| Scaffold smoke test | `scaffold_verification.spec.ts` (skipped) |
 
 ## Asymmetric tag-based visibility invariant
 
@@ -67,7 +66,6 @@ test/scout/api/
 │   ├── constants.ts                  # Route paths, headers, ATTACK_DISCOVERY_SCHEDULE_TAG
 │   └── helpers.ts                    # API wrappers, mock data, cleanup utilities
 └── tests/
-    ├── scaffold_verification.spec.ts # Scaffold smoke test (skipped)
     ├── create.spec.ts                # CRUD: create schedule
     ├── get.spec.ts                   # CRUD: get schedule by id
     ├── find.spec.ts                  # CRUD: find/list schedules (pagination, sorting)
@@ -92,7 +90,6 @@ test/scout/api/
 | `disable.spec.ts` | Enabled → disabled state transition; 404 on missing id |
 | `rbac.spec.ts` | 403 for viewer (unauthorized) on every write op (`create`, `update`, `delete`, `enable`, `disable`) |
 | `isolation.spec.ts` | Asymmetric tag invariant: internal API is the superset view; public API excludes tagged schedules |
-| `scaffold_verification.spec.ts` | Skipped scaffold smoke test (kept as a template for new specs) |
 
 ## Test Utilities
 
@@ -102,7 +99,8 @@ test/scout/api/
 | `getSimplePublicSchedule()` | Returns a minimal valid public schedule body |
 | `getWorkflowSchedulesApis()` | Wraps all 7 internal schedule routes with auth headers |
 | `getPublicSchedulesApis()` | Wraps public schedule routes with auth and version headers |
-| `enableWorkflowSchedulesFeature()` | Enables the `securitySolution:securityAttackDiscoverySchedulesEnabled` advanced (UI) setting so the internal schedule routes are reachable |
+| `enableWorkflowsFeatureFlag()` | Enables the `securitySolution.attackDiscoveryWorkflowsEnabled` feature flag and the `securitySolution:enableAttackDiscoveryWorkflows` advanced (UI) setting so the internal routes are reachable |
+| `disableWorkflowsFeatureFlag()` | Reverts `enableWorkflowsFeatureFlag()`; called once from `tests/global.teardown.ts` |
 | `deleteAllWorkflowSchedules()` | Cleans up all internal schedules for test isolation |
 | `deleteAllPublicSchedules()` | Cleans up all public schedules for test isolation |
 
@@ -128,7 +126,7 @@ node scripts/playwright test --config x-pack/solutions/security/plugins/discover
 
 | Symptom | Likely cause | Fix |
 |---------|--------------|-----|
-| All specs return 404 | `securitySolution:securityAttackDiscoverySchedulesEnabled` advanced setting not enabled in the Scout server | Confirm `enableWorkflowSchedulesFeature()` ran in the test setup |
+| All specs return 404 | Feature flag or `securitySolution:enableAttackDiscoveryWorkflows` advanced setting not enabled in the Scout server | Confirm `enableWorkflowsFeatureFlag()` ran in `beforeAll` |
 | `isolation.spec.ts` flaky | Cleanup didn't drain both APIs between tests | Run `deleteAllWorkflowSchedules()` AND `deleteAllPublicSchedules()` in `afterEach` |
 | Tag missing on schedule create | Internal API short-circuited before the data client applied the tag | Verify the route went through `createScheduleDataClient` with `applyTags: [ATTACK_DISCOVERY_SCHEDULE_TAG]` |
 | RBAC test passes a write that should 403 | Viewer role mis-mapped or the advanced setting is off | Check the role used by the test fixture; check the `securitySolution:securityAttackDiscoverySchedulesEnabled` setting state |

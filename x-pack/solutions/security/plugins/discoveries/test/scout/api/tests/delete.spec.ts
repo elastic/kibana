@@ -34,7 +34,7 @@ apiTest.describe('Workflow schedule API - delete', { tag: SCHEDULE_TAGS }, () =>
     const apis = getWorkflowSchedulesApis(discoveriesApi, defaultHeaders);
 
     const createResult = await apis.createSchedule(getSimpleWorkflowSchedule());
-    expect(createResult.statusCode).toBe(200);
+    expect(createResult).toHaveStatusCode(200);
     const createdId = (createResult.body as Record<string, unknown>).id as string;
 
     const { body, statusCode } = await apis.deleteSchedule(createdId);
@@ -43,7 +43,7 @@ apiTest.describe('Workflow schedule API - delete', { tag: SCHEDULE_TAGS }, () =>
     expect((body as Record<string, unknown>).id).toBe(createdId);
 
     const getResult = await apis.getSchedule(createdId);
-    expect(getResult.statusCode).toBe(404);
+    expect(getResult).toHaveStatusCode(404);
   });
 
   apiTest('should return 404 when deleting non-existent schedule', async ({ discoveriesApi }) => {

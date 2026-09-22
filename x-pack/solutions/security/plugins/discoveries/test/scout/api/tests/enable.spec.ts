@@ -34,7 +34,7 @@ apiTest.describe('Workflow schedule API - enable', { tag: SCHEDULE_TAGS }, () =>
     const apis = getWorkflowSchedulesApis(discoveriesApi, defaultHeaders);
 
     const createResult = await apis.createSchedule(getSimpleWorkflowSchedule({ enabled: false }));
-    expect(createResult.statusCode).toBe(200);
+    expect(createResult).toHaveStatusCode(200);
     const createdId = (createResult.body as Record<string, unknown>).id as string;
     expect((createResult.body as Record<string, unknown>).enabled).toBe(false);
 
@@ -44,7 +44,7 @@ apiTest.describe('Workflow schedule API - enable', { tag: SCHEDULE_TAGS }, () =>
     expect((body as Record<string, unknown>).id).toBe(createdId);
 
     const getResult = await apis.getSchedule(createdId);
-    expect(getResult.statusCode).toBe(200);
+    expect(getResult).toHaveStatusCode(200);
     expect((getResult.body as Record<string, unknown>).enabled).toBe(true);
   });
 

@@ -35,7 +35,7 @@ apiTest.describe('Workflow schedule API - get', { tag: SCHEDULE_TAGS }, () => {
     const scheduleBody = getSimpleWorkflowSchedule();
 
     const createResult = await apis.createSchedule(scheduleBody);
-    expect(createResult.statusCode).toBe(200);
+    expect(createResult).toHaveStatusCode(200);
     const createdId = (createResult.body as Record<string, unknown>).id as string;
 
     const { body, statusCode } = await apis.getSchedule(createdId);

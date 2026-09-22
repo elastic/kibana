@@ -88,7 +88,7 @@ apiTest.describe('Workflow schedule API - RBAC', { tag: SCHEDULE_TAGS }, () => {
       const viewerApis = getWorkflowSchedulesApis(discoveriesApi, viewerHeaders);
 
       const createResult = await adminApis.createSchedule(getSimpleWorkflowSchedule());
-      expect(createResult.statusCode).toBe(200);
+      expect(createResult).toHaveStatusCode(200);
       const createdId = (createResult.body as Record<string, unknown>).id as string;
 
       const response = await viewerApis.updateSchedule(createdId, {
@@ -118,7 +118,7 @@ apiTest.describe('Workflow schedule API - RBAC', { tag: SCHEDULE_TAGS }, () => {
       const viewerApis = getWorkflowSchedulesApis(discoveriesApi, viewerHeaders);
 
       const createResult = await adminApis.createSchedule(getSimpleWorkflowSchedule());
-      expect(createResult.statusCode).toBe(200);
+      expect(createResult).toHaveStatusCode(200);
       const createdId = (createResult.body as Record<string, unknown>).id as string;
 
       const response = await viewerApis.deleteSchedule(createdId);
@@ -138,7 +138,7 @@ apiTest.describe('Workflow schedule API - RBAC', { tag: SCHEDULE_TAGS }, () => {
       const createResult = await adminApis.createSchedule(
         getSimpleWorkflowSchedule({ enabled: false })
       );
-      expect(createResult.statusCode).toBe(200);
+      expect(createResult).toHaveStatusCode(200);
       const createdId = (createResult.body as Record<string, unknown>).id as string;
 
       const response = await viewerApis.enableSchedule(createdId);
@@ -158,7 +158,7 @@ apiTest.describe('Workflow schedule API - RBAC', { tag: SCHEDULE_TAGS }, () => {
       const createResult = await adminApis.createSchedule(
         getSimpleWorkflowSchedule({ enabled: true })
       );
-      expect(createResult.statusCode).toBe(200);
+      expect(createResult).toHaveStatusCode(200);
       const createdId = (createResult.body as Record<string, unknown>).id as string;
 
       const response = await viewerApis.disableSchedule(createdId);

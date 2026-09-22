@@ -34,7 +34,7 @@ apiTest.describe('Workflow schedule API - update', { tag: SCHEDULE_TAGS }, () =>
     const apis = getWorkflowSchedulesApis(discoveriesApi, defaultHeaders);
 
     const createResult = await apis.createSchedule(getSimpleWorkflowSchedule());
-    expect(createResult.statusCode).toBe(200);
+    expect(createResult).toHaveStatusCode(200);
     const createdId = (createResult.body as Record<string, unknown>).id as string;
 
     const updateBody = {
@@ -72,7 +72,7 @@ apiTest.describe('Workflow schedule API - update', { tag: SCHEDULE_TAGS }, () =>
     const apis = getWorkflowSchedulesApis(discoveriesApi, defaultHeaders);
 
     const createResult = await apis.createSchedule(getSimpleWorkflowSchedule());
-    expect(createResult.statusCode).toBe(200);
+    expect(createResult).toHaveStatusCode(200);
     const createdId = (createResult.body as Record<string, unknown>).id as string;
 
     const response = await apis.updateSchedule(createdId, {
@@ -120,7 +120,7 @@ apiTest.describe('Workflow schedule API - update', { tag: SCHEDULE_TAGS }, () =>
     const apis = getWorkflowSchedulesApis(discoveriesApi, defaultHeaders);
 
     const createResult = await apis.createSchedule(getSimpleWorkflowSchedule());
-    expect(createResult.statusCode).toBe(200);
+    expect(createResult).toHaveStatusCode(200);
     const createdId = (createResult.body as Record<string, unknown>).id as string;
 
     const updateBody = {

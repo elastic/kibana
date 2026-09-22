@@ -13,5 +13,3 @@ import { securitySolutionApiFixture } from '@kbn/security-solution-test-api-clie
  * top of the default `@kbn/scout-security` API fixtures.
  */
 export const apiTest = mergeTests(baseApiTest, securitySolutionApiFixture);
-
-export { tags } from '@kbn/scout-security';

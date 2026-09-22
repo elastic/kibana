@@ -50,14 +50,8 @@ export const PUBLIC_SCHEDULE_ROUTES = {
 export const SCHEDULE_TAGS = [...tags.stateful.classic, ...tags.serverless.security.complete];
 
 /**
- * Tag used by the internal schedule API to isolate its alerting rules
- * from the public schedule API in elastic_assistant.
- */
-/**
  * Per-space Advanced Setting that, together with the feature flag above, gates the AD 2.0 internal
  * routes. Defined in `@kbn/security-solution-navigation`; inlined to avoid a cross-boundary import.
  */
 export const ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING =
   'securitySolution:enableAttackDiscoveryWorkflows';
-
-export const INTERNAL_SCHEDULE_TAG = 'attack-discovery-schedule';

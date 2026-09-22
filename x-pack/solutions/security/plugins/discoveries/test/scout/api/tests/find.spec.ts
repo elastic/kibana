@@ -54,7 +54,7 @@ apiTest.describe('Workflow schedule API - find', { tag: SCHEDULE_TAGS }, () => {
     // all three are retrievable before asserting (see the pagination test).
     await expect
       .poll(async () => {
-        const found = await apis.findSchedules({ per_page: '100' });
+        const found = await apis.findSchedules({ per_page: 100 });
         return (found.body as { data: unknown[] }).data.length;
       })
       .toBe(3);
@@ -82,7 +82,7 @@ apiTest.describe('Workflow schedule API - find', { tag: SCHEDULE_TAGS }, () => {
     // lag; see the pagination test).
     await expect
       .poll(async () => {
-        const found = await apis.findSchedules({ per_page: '100' });
+        const found = await apis.findSchedules({ per_page: 100 });
         return (found.body as { data: unknown[] }).data.length;
       })
       .toBe(3);
@@ -110,7 +110,7 @@ apiTest.describe('Workflow schedule API - find', { tag: SCHEDULE_TAGS }, () => {
     // lag; see the pagination test).
     await expect
       .poll(async () => {
-        const found = await apis.findSchedules({ per_page: '100' });
+        const found = await apis.findSchedules({ per_page: 100 });
         return (found.body as { data: unknown[] }).data.length;
       })
       .toBe(3);
@@ -140,7 +140,7 @@ apiTest.describe('Workflow schedule API - find', { tag: SCHEDULE_TAGS }, () => {
     // pagination, so the test does not race the refresh.
     await expect
       .poll(async () => {
-        const { body } = await apis.findSchedules({ per_page: '100' });
+        const { body } = await apis.findSchedules({ per_page: 100 });
         return (body as { data: unknown[] }).data.length;
       })
       .toBe(5);
@@ -155,8 +155,8 @@ apiTest.describe('Workflow schedule API - find', { tag: SCHEDULE_TAGS }, () => {
     // return a row on multiple pages (or skip one), making the counts flaky.
     const sortByName = { sort_direction: 'asc', sort_field: 'name' } as const;
 
-    const firstPage = await apis.findSchedules({ ...sortByName, page: '0', per_page: '2' });
-    expect(firstPage.statusCode).toBe(200);
+    const firstPage = await apis.findSchedules({ ...sortByName, page: 0, per_page: 2 });
+    expect(firstPage).toHaveStatusCode(200);
 
     const firstPageBody = firstPage.body as {
       data: unknown[];
@@ -169,15 +169,15 @@ apiTest.describe('Workflow schedule API - find', { tag: SCHEDULE_TAGS }, () => {
     expect(firstPageBody.page).toBe(0);
     expect(firstPageBody.per_page).toBe(2);
 
-    const secondPage = await apis.findSchedules({ ...sortByName, page: '1', per_page: '2' });
-    expect(secondPage.statusCode).toBe(200);
+    const secondPage = await apis.findSchedules({ ...sortByName, page: 1, per_page: 2 });
+    expect(secondPage).toHaveStatusCode(200);
 
     const secondPageBody = secondPage.body as { data: unknown[]; page: number };
     expect(secondPageBody.data).toHaveLength(2);
     expect(secondPageBody.page).toBe(1);
 
-    const thirdPage = await apis.findSchedules({ ...sortByName, page: '2', per_page: '2' });
-    expect(thirdPage.statusCode).toBe(200);
+    const thirdPage = await apis.findSchedules({ ...sortByName, page: 2, per_page: 2 });
+    expect(thirdPage).toHaveStatusCode(200);
 
     const thirdPageBody = thirdPage.body as { data: unknown[] };
     expect(thirdPageBody.data).toHaveLength(1);
