@@ -515,6 +515,25 @@ const AddDataOverlay = ({ onClose }: { readonly onClose: () => void }) => {
   );
 };
 
+/**
+ * Purge all prototype-owned localStorage and sessionStorage keys, then
+ * hard-reload. Every key we write is prefixed with `entityCentricLab.`,
+ * `entityCentricLab_`, or `elasticOn_`, so the wipe is surgical.
+ */
+const resetPrototypeState = (): void => {
+  const prefixes = ['entityCentricLab.', 'entityCentricLab_', 'elasticOn_'];
+  const isOurs = (key: string) => prefixes.some((p) => key.startsWith(p));
+  try {
+    const lsKeys = Object.keys(localStorage).filter(isOurs);
+    for (const key of lsKeys) localStorage.removeItem(key);
+    const ssKeys = Object.keys(sessionStorage).filter(isOurs);
+    for (const key of ssKeys) sessionStorage.removeItem(key);
+  } catch {
+    // Storage unavailable — the reload will still help.
+  }
+  window.location.reload();
+};
+
 const MoreActionsMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
   const button = (
@@ -566,6 +585,20 @@ const MoreActionsMenu = () => {
             {i18n.translate(
               'xpack.streams.entityCentricLab.entities.moreActions.feedback',
               { defaultMessage: 'Feedback' }
+            )}
+          </EuiContextMenuItem>,
+          <EuiHorizontalRule key="sep" margin="none" />,
+          <EuiContextMenuItem
+            key="reset"
+            icon="refresh"
+            onClick={() => {
+              setIsOpen(false);
+              resetPrototypeState();
+            }}
+          >
+            {i18n.translate(
+              'xpack.streams.entityCentricLab.entities.moreActions.reset',
+              { defaultMessage: 'Reset prototype state' }
             )}
           </EuiContextMenuItem>,
         ]}

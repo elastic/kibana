@@ -111,12 +111,14 @@ export const VariationProvider = ({ children }: PropsWithChildren<{}>) => {
   const set = useCallback(
     (dimensionId: string, optionId: string) => {
       writeToStorage(dimensionId, optionId);
-      // When the phase changes, clear persisted bucket metric selections
-      // so the hex map re-defaults to the phase-appropriate metric
-      // (e.g. Alerts for Phase 1, Health for Phase 3).
+      // When the phase changes, clear persisted state that is
+      // phase-specific so the UI re-defaults cleanly:
+      //   - bucket metric selections (Alerts vs Health default)
+      //   - group-by (phase1 has 'alerts' field, phase3 has 'health')
       if (dimensionId === 'phase') {
         try {
           localStorage.removeItem('entityCentricLab.bucketMetricSelection.v4');
+          localStorage.removeItem('entityCentricLab.entitiesGroupBy.v1');
         } catch {
           // ignore
         }
