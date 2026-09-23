@@ -14,7 +14,7 @@ pageLoadAssetSize:
   alertingVTwo: 24358
   alertzero: 17737
   apm: 35746
-  apmShared: 1896
+  apmShared: 2226
   apmSourcesAccess: 1174
   automaticImport: 13257
   banners: 1425
@@ -53,6 +53,7 @@ pageLoadAssetSize:
   dataViewManagement: 1302
   dataViews: 1697
   dataVisualizer: 7461
+  devComments: 1500
   developerToolbar: 1951
   devTools: 4281
   discover: 19917

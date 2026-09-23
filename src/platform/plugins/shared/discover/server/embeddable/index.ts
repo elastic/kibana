@@ -8,8 +8,3 @@
  */
 
 export { createSearchEmbeddableFactory } from './search_embeddable_factory';
-export type {
-  DiscoverSessionEmbeddableByValueState,
-  DiscoverSessionEmbeddableByReferenceState,
-  DiscoverSessionEmbeddableState,
-} from './schema';
