@@ -32,6 +32,14 @@ jest.mock('./agent_based_deploy/agent_policy_name', () => ({
   buildAgentPolicyName: jest.fn().mockResolvedValue('AWS Agent Policy 1'),
 }));
 
+jest.mock('./agent_based_section/shared_credentials_form', () => ({
+  SharedCredentialsForm: jest.fn(),
+}));
+
+jest.mock('./agent_based_section/assume_role_form', () => ({
+  AssumeRoleForm: jest.fn(),
+}));
+
 import {
   LazyAgentEnrollmentFlyout,
   LazyAwsStaticKeysForm,
@@ -42,9 +50,13 @@ import {
 } from '@kbn/fleet-plugin/public';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { useLocation } from 'react-router-dom';
+import { SharedCredentialsForm } from './agent_based_section/shared_credentials_form';
+import { AssumeRoleForm } from './agent_based_section/assume_role_form';
 
 const mockUseLocation = useLocation as jest.Mock;
 
+const MockSharedCredentialsForm = SharedCredentialsForm as unknown as jest.Mock;
+const MockAssumeRoleForm = AssumeRoleForm as unknown as jest.Mock;
 const MockAgentEnrollmentFlyout = LazyAgentEnrollmentFlyout as unknown as jest.Mock;
 const MockStaticKeysForm = LazyAwsStaticKeysForm as unknown as jest.Mock;
 const MockTemporaryKeysForm = LazyAwsTemporaryKeysForm as unknown as jest.Mock;
@@ -124,6 +136,38 @@ function setupMocks({
   MockAgentPolicyIntegrationForm.mockImplementation(() => (
     <div data-test-subj="agent-policy-integration-form" />
   ));
+
+  MockSharedCredentialsForm.mockImplementation(
+    ({
+      onSharedCredentialFileChange,
+      onCredentialProfileNameChange,
+    }: {
+      onSharedCredentialFileChange?: (v: string) => void;
+      onCredentialProfileNameChange?: (v: string) => void;
+    }) => (
+      <div data-test-subj="shared-credentials-form">
+        <button onClick={() => onSharedCredentialFileChange?.('/path/to/creds')}>
+          set-shared-file
+        </button>
+        <button onClick={() => onSharedCredentialFileChange?.('')}>clear-shared-file</button>
+        <button onClick={() => onCredentialProfileNameChange?.('my-profile')}>
+          set-profile-name
+        </button>
+        <button onClick={() => onCredentialProfileNameChange?.('')}>clear-profile-name</button>
+      </div>
+    )
+  );
+
+  MockAssumeRoleForm.mockImplementation(
+    ({ onRoleArnChange }: { onRoleArnChange?: (v: string) => void }) => (
+      <div data-test-subj="assume-role-form">
+        <button onClick={() => onRoleArnChange?.('arn:aws:iam::123:role/MyRole')}>
+          set-role-arn
+        </button>
+        <button onClick={() => onRoleArnChange?.('')}>clear-role-arn</button>
+      </div>
+    )
+  );
 
   // By default, validation returns no errors (form valid).
   mockAgentPolicyFormValidation.mockReturnValue({});
@@ -504,6 +548,45 @@ describe('AgentBasedSection', () => {
       renderSection({ onNextReadyChange });
       await waitFor(() => {
         expect(onNextReadyChange.mock.calls.at(-1)?.[0]).toBe(true);
+      });
+    });
+
+    it('shared_credentials: entering only a profile name (no file) enables Next', async () => {
+      const onNextReadyChange = jest.fn();
+      setupMocks({
+        agentHostsMode: 'existing',
+        selectedAgentPolicyIds: ['p1'],
+        agentCredentialMethod: 'shared_credentials',
+        // No persisted values — form starts empty.
+      });
+      renderSection({ onNextReadyChange });
+      await waitFor(() => {
+        expect(onNextReadyChange.mock.calls.at(-1)?.[0]).toBe(false);
+      });
+      fireEvent.click(screen.getByText('set-profile-name'));
+      await waitFor(() => {
+        expect(onNextReadyChange.mock.calls.at(-1)?.[0]).toBe(true);
+      });
+    });
+
+    it('shared_credentials: clearing the last shared-credential file disables Next', async () => {
+      const onNextReadyChange = jest.fn();
+      setupMocks({
+        agentHostsMode: 'existing',
+        selectedAgentPolicyIds: ['p1'],
+        agentCredentialMethod: 'shared_credentials',
+        // File pre-populated, no profile name.
+      });
+      renderSection({ onNextReadyChange });
+      // Set a file first so Next is enabled.
+      fireEvent.click(screen.getByText('set-shared-file'));
+      await waitFor(() => {
+        expect(onNextReadyChange.mock.calls.at(-1)?.[0]).toBe(true);
+      });
+      // Now clear the file — Next must go back to false (no profile name either).
+      fireEvent.click(screen.getByText('clear-shared-file'));
+      await waitFor(() => {
+        expect(onNextReadyChange.mock.calls.at(-1)?.[0]).toBe(false);
       });
     });
 

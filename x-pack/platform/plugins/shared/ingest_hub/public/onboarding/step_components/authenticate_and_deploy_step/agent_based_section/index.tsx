@@ -401,11 +401,14 @@ export function AgentBasedSection({
                     onSharedCredentialFileChange={(val) => {
                       setAgentBasedDeployment({ sharedCredentialFile: val });
                       notifyCredentialChange('shared_credentials', { sharedFile: val });
-                      setIsCredentialReady(true);
+                      // Recompute from both fields: either one non-empty is sufficient.
+                      setIsCredentialReady(!!(val || persistedCredentialProfileName));
                     }}
                     onCredentialProfileNameChange={(val) => {
                       setAgentBasedDeployment({ credentialProfileName: val });
                       notifyCredentialChange('shared_credentials', { profileName: val });
+                      // Recompute from both fields: either one non-empty is sufficient.
+                      setIsCredentialReady(!!(persistedSharedCredentialFile || val));
                     }}
                   />
                 )}
