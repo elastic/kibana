@@ -59,6 +59,14 @@ describe('extractDatafeed - max_consecutive_extraction_failures', () => {
     expect(result).not.toHaveProperty('max_consecutive_extraction_failures');
   });
 
+  test('omits the field when cleared, preserving an existing value (consistent with frequency)', () => {
+    const result = extractDatafeed(
+      createJob({ max_consecutive_extraction_failures: 5 }),
+      createNewDatafeedData({ datafeedMaxConsecutiveExtractionFailures: '' })
+    );
+    expect(result).not.toHaveProperty('max_consecutive_extraction_failures');
+  });
+
   test('omits the field when unchanged from the existing value', () => {
     const result = extractDatafeed(
       createJob({ max_consecutive_extraction_failures: 5 }),

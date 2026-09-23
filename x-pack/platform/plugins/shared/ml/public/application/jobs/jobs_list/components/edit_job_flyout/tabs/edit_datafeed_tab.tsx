@@ -205,7 +205,7 @@ export const EditDatafeedTab: FC<EditDatafeedTabProps> = ({
           helpText={
             <FormattedMessage
               id="xpack.ml.jobsList.editJobFlyout.datafeed.maxConsecutiveExtractionFailuresHelpText"
-              defaultMessage="The datafeed stops automatically after this many consecutive real-time extraction failures. Leave empty to use the default (approximately one day of searches). Set to -1 to retry indefinitely."
+              defaultMessage="The datafeed stops automatically after this many consecutive real-time extraction failures. When never set, it defaults to approximately one day of searches. Set to -1 to retry indefinitely."
             />
           }
         >
