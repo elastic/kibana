@@ -21,7 +21,7 @@ import { useBreadcrumbs } from '../../common/hooks/use_breadcrumbs';
 import { useRouterNavigate } from '../../common/lib/kibana';
 import { pagePathGetters } from '../../common/page_paths';
 import {
-  fullWidthContentCss,
+  queryResultsContentCss,
   WithHeaderLayout,
   WithoutHeaderLayout,
 } from '../../components/layouts';
@@ -32,6 +32,10 @@ import {
   mapScheduledDetailsToQueryData,
 } from '../../actions/use_scheduled_execution_details';
 import { PackQueriesStatusTable } from '../../live_queries/form/pack_queries_status_table';
+import { PackResultsHeader } from '../../live_queries/form/pack_results_header';
+import { ResultTabs } from '../saved_queries/edit/tabs';
+import { ExportFiltersProvider } from '../../results/export_filters_context';
+import { QueryResultsChromeHeader } from '../live_queries/details/query_results_chrome_header';
 
 const tableWrapperCss = {
   paddingLeft: '10px',
@@ -46,6 +50,7 @@ const ScheduledExecutionDetailsPageComponent = () => {
 
   const executionCount = parseInt(executionCountStr, 10);
   const isValid = !!scheduleId && !isNaN(executionCount);
+  const scheduledQueryIds = useMemo(() => [scheduleId], [scheduleId]);
 
   useBreadcrumbs('history_scheduled_details', {
     scheduleId: scheduleId ?? '',
@@ -159,13 +164,46 @@ const ScheduledExecutionDetailsPageComponent = () => {
   );
 
   if (isHistoryEnabled) {
+    const queryText = data?.queryText ?? '';
+
     return (
-      <WithoutHeaderLayout restrictWidth={false}>
-        <div css={fullWidthContentCss}>
-          {LeftColumn}
-          {content}
-        </div>
-      </WithoutHeaderLayout>
+      <ExportFiltersProvider>
+        {!isLoading && !isError && data ? (
+          <QueryResultsChromeHeader
+            query={queryText}
+            isScheduled
+            packName={data.packName}
+            executionCount={executionCount}
+            timestamp={data.timestamp}
+            actions={
+              <PackResultsHeader
+                actionId={scheduleId}
+                queryIds={scheduledQueryIds}
+                isScheduled
+                scheduleId={scheduleId}
+                executionCount={executionCount}
+                actionsOnly
+                timestamp={data.timestamp}
+              />
+            }
+          />
+        ) : null}
+        <WithoutHeaderLayout restrictWidth={false} flush>
+          <div css={queryResultsContentCss}>
+            {isLoading || isError ? (
+              content
+            ) : (
+              <ResultTabs
+                actionId={scheduleId}
+                startDate={data?.timestamp}
+                scheduleId={scheduleId}
+                executionCount={executionCount}
+                failedAgentsCount={data?.errorCount ?? 0}
+              />
+            )}
+          </div>
+        </WithoutHeaderLayout>
+      </ExportFiltersProvider>
     );
   }
 

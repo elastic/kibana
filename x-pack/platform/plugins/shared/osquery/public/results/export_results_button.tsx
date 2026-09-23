@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, type EuiButtonEmptyProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Filter } from '@kbn/es-query';
 
@@ -27,6 +27,8 @@ interface ExportResultsButtonProps {
   filteredTotal?: number;
   /** Unfiltered total; used when the user opts out of "Only export filtered results". */
   total?: number;
+  size?: EuiButtonEmptyProps['size'];
+  color?: EuiButtonEmptyProps['color'];
 }
 
 const ExportResultsButtonComponent: React.FC<ExportResultsButtonProps> = ({
@@ -39,6 +41,8 @@ const ExportResultsButtonComponent: React.FC<ExportResultsButtonProps> = ({
   activeFilters,
   filteredTotal,
   total,
+  size = 'm',
+  color = 'primary',
 }) => {
   const isExportEnabled = useIsExperimentalFeatureEnabled('exportResults');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -76,7 +80,8 @@ const ExportResultsButtonComponent: React.FC<ExportResultsButtonProps> = ({
   return (
     <>
       <EuiButtonEmpty
-        size="m"
+        size={size}
+        color={color}
         iconType="exportAction"
         onClick={openModal}
         isLoading={isExporting}

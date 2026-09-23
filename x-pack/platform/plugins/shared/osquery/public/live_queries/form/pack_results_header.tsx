@@ -25,6 +25,7 @@ import { useLiveQueryDetails } from '../../actions/use_live_query_details';
 import { useIsExperimentalFeatureEnabled } from '../../common/experimental_features_context';
 import { useKibana } from '../../common/lib/kibana';
 import { ExportResultsButton } from '../../results/export_results_button';
+import { QueryResultsMoreMenu } from './query_results_more_menu';
 import { useExportFilters } from '../../results/export_filters_context';
 import type { AddToTimelineHandler } from '../../types';
 
@@ -48,6 +49,10 @@ interface PackResultsHeadersProps {
   scheduleId?: string;
   executionCount?: number;
   onSaveQuery?: () => void;
+  /** Render only the action cluster, for a chrome header that owns the title. */
+  actionsOnly?: boolean;
+  /** Execution time used to bound View in Discover and Lens. */
+  timestamp?: string;
 }
 
 const resultsHeadingCss = ({ euiTheme }: UseEuiTheme) => ({
@@ -75,6 +80,8 @@ export const PackResultsHeader = React.memo<PackResultsHeadersProps>(
     scheduleId,
     executionCount,
     onSaveQuery,
+    actionsOnly,
+    timestamp,
   }) => {
     const iconProps = useMemo(() => ({ color: 'text', size: 'xs', iconSize: 'l' } as const), []);
     const isHistoryEnabled = useIsExperimentalFeatureEnabled('queryHistoryRework');
@@ -100,6 +107,81 @@ export const PackResultsHeader = React.memo<PackResultsHeadersProps>(
     const handleOpenFlyout = useCallback(() => setIsFlyoutOpen(true), []);
     const handleCloseFlyout = useCallback(() => setIsFlyoutOpen(false), []);
 
+    if (isHistoryEnabled && actionsOnly && actionId) {
+      return (
+        <>
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            {showExport && exportQueryId && (
+              <EuiFlexItem grow={false}>
+                <ExportResultsButton
+                  actionId={exportQueryId}
+                  isLive={!scheduleId}
+                  liveQueryId={actionId}
+                  scheduleId={scheduleId}
+                  executionCount={executionCount}
+                  kuery={exportFilters?.kuery}
+                  activeFilters={exportFilters?.activeFilters}
+                  filteredTotal={exportFilters?.filteredTotal}
+                  total={exportFilters?.total}
+                  size="s"
+                  color="text"
+                />
+              </EuiFlexItem>
+            )}
+            {showAddTags && (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip content={isScheduled ? SCHEDULED_TAGS_DISABLED_LABEL : ADD_TAGS_LABEL}>
+                  <EuiButtonEmpty
+                    size="s"
+                    iconType="tag"
+                    color="text"
+                    onClick={handleOpenFlyout}
+                    isDisabled={isScheduled}
+                    data-test-subj="add-tags-button"
+                  >
+                    {ADD_TAGS_LABEL}
+                  </EuiButtonEmpty>
+                </EuiToolTip>
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false}>
+              <QueryResultsMoreMenu
+                actionId={actionId}
+                agentIds={agentIds}
+                queryIds={queryIds}
+                addToTimeline={addToTimeline}
+                scheduleId={scheduleId}
+                executionCount={executionCount}
+                timestamp={timestamp}
+              />
+            </EuiFlexItem>
+            {onSaveQuery && (
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  color="text"
+                  size="s"
+                  onClick={onSaveQuery}
+                  data-test-subj="save-query-button"
+                >
+                  <FormattedMessage
+                    id="xpack.osquery.packResultsHeader.saveQueryButtonLabel"
+                    defaultMessage="Save query"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+          {isFlyoutOpen && (
+            <AddTagsFlyout
+              actionId={actionId}
+              currentTags={liveQueryDetails?.tags ?? EMPTY_TAGS}
+              onClose={handleCloseFlyout}
+            />
+          )}
+        </>
+      );
+    }
+
     if (isHistoryEnabled) {
       return (
         <>
@@ -109,16 +191,18 @@ export const PackResultsHeader = React.memo<PackResultsHeadersProps>(
             justifyContent="spaceBetween"
             alignItems="center"
           >
-            <EuiFlexItem grow={false}>
-              <EuiText>
-                <h1>
-                  <FormattedMessage
-                    id="xpack.osquery.liveQueryActionResults.results"
-                    defaultMessage="Query results"
-                  />
-                </h1>
-              </EuiText>
-            </EuiFlexItem>
+            {actionsOnly ? null : (
+              <EuiFlexItem grow={false}>
+                <EuiText>
+                  <h1>
+                    <FormattedMessage
+                      id="xpack.osquery.liveQueryActionResults.results"
+                      defaultMessage="Query results"
+                    />
+                  </h1>
+                </EuiText>
+              </EuiFlexItem>
+            )}
             {actionId && (
               <EuiFlexItem grow={false} css={actionsGroupCss}>
                 <EuiFlexGroup gutterSize="s" alignItems="center">
@@ -190,7 +274,7 @@ export const PackResultsHeader = React.memo<PackResultsHeadersProps>(
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
-          <EuiSpacer size={'l'} />
+          {actionsOnly ? null : <EuiSpacer size={'l'} />}
           {isFlyoutOpen && actionId && (
             <AddTagsFlyout
               actionId={actionId}

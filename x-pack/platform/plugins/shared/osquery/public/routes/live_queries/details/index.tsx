@@ -14,6 +14,7 @@ import { useRouterNavigate } from '../../../common/lib/kibana';
 import { useGoBack } from '../../../common/use_go_back';
 import {
   fullWidthContentCss,
+  queryResultsContentCss,
   WithHeaderLayout,
   WithoutHeaderLayout,
 } from '../../../components/layouts';
@@ -23,7 +24,11 @@ import { pagePathGetters } from '../../../common/page_paths';
 import { PackQueriesStatusTable } from '../../../live_queries/form/pack_queries_status_table';
 import { useIsExperimentalFeatureEnabled } from '../../../common/experimental_features_context';
 import { SavedQueryFlyout } from '../../../saved_queries';
+import { ResultTabs } from '../../saved_queries/edit/tabs';
+import { ExportFiltersProvider } from '../../../results/export_filters_context';
+import { PackResultsHeader } from '../../../live_queries/form/pack_results_header';
 import { useSaveQueryFromDetails } from './use_save_query_from_details';
+import { QueryResultsChromeHeader } from './query_results_chrome_header';
 
 const tableWrapperCss = {
   paddingLeft: 0,
@@ -113,6 +118,50 @@ const LiveQueryDetailsPageComponent = () => {
   const savedQueryFlyout = showSavedQueryFlyout ? (
     <SavedQueryFlyout onClose={handleCloseSaveQueryFlyout} defaultValue={savedQueryDefaultValue} />
   ) : null;
+
+  const query = data?.queries?.[0];
+  const singleQueryActionId = query?.action_id;
+  const singleQueryIds = useMemo(
+    () => (singleQueryActionId ? [singleQueryActionId] : []),
+    [singleQueryActionId]
+  );
+  const isSingleQuery = !!data && !data.pack_id && data.queries?.length === 1 && query != null;
+
+  if (isHistoryEnabled && isSingleQuery && data && query) {
+    return (
+      <ExportFiltersProvider>
+        <QueryResultsChromeHeader
+          query={query.query}
+          liveQuery={data}
+          actions={
+            <PackResultsHeader
+              actionId={actionId}
+              queryIds={singleQueryIds}
+              agentIds={data.agents}
+              onSaveQuery={onSaveQuery}
+              actionsOnly
+              timestamp={data['@timestamp']}
+            />
+          }
+        />
+        <WithoutHeaderLayout restrictWidth={false} flush>
+          <div css={queryResultsContentCss}>
+            <ResultTabs
+              actionId={query.action_id}
+              liveQueryActionId={actionId}
+              agentIds={data.agents}
+              startDate={data['@timestamp']}
+              endDate={data.expiration}
+              ecsMapping={query.ecs_mapping}
+              failedAgentsCount={query.failed ?? 0}
+              error={query.error}
+            />
+          </div>
+        </WithoutHeaderLayout>
+        {savedQueryFlyout}
+      </ExportFiltersProvider>
+    );
+  }
 
   if (isHistoryEnabled) {
     return (

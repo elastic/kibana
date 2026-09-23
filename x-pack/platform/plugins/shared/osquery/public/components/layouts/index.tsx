@@ -10,6 +10,7 @@
 export {
   containerCss,
   fullWidthContentCss,
+  queryResultsContentCss,
   fullWidthFormContentCss,
   navCss,
   wrapperCss,

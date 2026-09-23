@@ -7,21 +7,14 @@
 
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiTab,
-  EuiTabs,
-  EuiText,
-} from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
 import { matchPath, useLocation } from 'react-router-dom';
 import { navCss } from './layouts/default';
 import { useRouterNavigate, useKibana } from '../common/lib/kibana';
 import { PAGE_ROUTING_PATHS } from '../common/page_paths';
 import { ManageIntegrationLink } from './manage_integration_link';
+import { OsqueryAppMoreMenu } from './osquery_app_more_menu';
 import { useIsExperimentalFeatureEnabled } from '../common/experimental_features_context';
 import { getHistoryFilters } from '../actions/history_filter_storage';
 
@@ -32,10 +25,14 @@ enum Section {
   SavedQueries = 'saved_queries',
 }
 
+const titleCss = {
+  margin: 0,
+};
+
 const topBarCss = ({ euiTheme }: UseEuiTheme) => ({
   background: euiTheme.colors.body,
   borderBottom: euiTheme.border.thin,
-  padding: `${euiTheme.size.s} ${euiTheme.size.l}`,
+  padding: `${euiTheme.size.s} ${euiTheme.size.m}`,
 });
 
 export const MainNavigation = () => {
@@ -55,6 +52,13 @@ export const MainNavigation = () => {
       ),
     [location.pathname]
   );
+  const isQueryResultsPage = useMemo(
+    () =>
+      [PAGE_ROUTING_PATHS.history_details, PAGE_ROUTING_PATHS.history_scheduled_details].some(
+        (path) => matchPath(location.pathname, { path, exact: true })
+      ),
+    [location.pathname]
+  );
 
   const historySection = isHistoryEnabled ? Section.History : Section.LiveQueries;
   const persistedHistoryQs = isHistoryEnabled ? getHistoryFilters() : '';
@@ -68,6 +72,10 @@ export const MainNavigation = () => {
   const canRunQuery =
     permissions.writeLiveQueries ||
     (permissions.runSavedQueries && (permissions.readSavedQueries || permissions.readPacks));
+
+  if (isHistoryEnabled && isQueryResultsPage) {
+    return null;
+  }
 
   if (isHistoryEnabled) {
     const topBar = (
@@ -84,30 +92,41 @@ export const MainNavigation = () => {
 
     return (
       <>
-        {topBar}
+        {isListView ? null : topBar}
         {isListView && (
           <div css={navCss}>
-            <EuiFlexGroup gutterSize="l" alignItems="center">
+            <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
               <EuiFlexItem>
-                <EuiText>
-                  <h1>
+                <EuiTitle size="s">
+                  <h1 css={titleCss}>
                     <FormattedMessage
                       id="xpack.osquery.appNavigation.title"
                       defaultMessage="Osquery"
                     />
                   </h1>
-                </EuiText>
+                </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton fill {...newQueryNavProps} isDisabled={!canRunQuery}>
-                  <FormattedMessage
-                    id="xpack.osquery.history.newLiveQueryButtonLabel"
-                    defaultMessage="Run query"
-                  />
-                </EuiButton>
+                <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <OsqueryAppMoreMenu />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      color="text"
+                      size="s"
+                      {...newQueryNavProps}
+                      isDisabled={!canRunQuery}
+                    >
+                      <FormattedMessage
+                        id="xpack.osquery.history.newLiveQueryButtonLabel"
+                        defaultMessage="Run query"
+                      />
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
-            <EuiSpacer size="l" />
             <EuiTabs bottomBorder={false}>
               <EuiTab isSelected={section === historySection} {...historyNavProps}>
                 <FormattedMessage

@@ -21,7 +21,14 @@ export const wrapperCss = {
 };
 
 export const fullWidthContentCss = ({ euiTheme }: UseEuiTheme) => ({
-  padding: `${euiTheme.size.l}`,
+  padding: euiTheme.size.m,
+  flex: 1,
+  minWidth: 0,
+});
+
+/** Query-results body under the chrome header: no top padding, 12px on the other sides. */
+export const queryResultsContentCss = ({ euiTheme }: UseEuiTheme) => ({
+  padding: `0 ${euiTheme.size.m} ${euiTheme.size.m}`,
   flex: 1,
   minWidth: 0,
 });
@@ -36,7 +43,7 @@ export const fullWidthFormContentCss = (theme: UseEuiTheme) => ({
 export const navCss = ({ euiTheme }: UseEuiTheme) => ({
   background: euiTheme.colors.emptyShade,
   borderBottom: euiTheme.border.thin,
-  padding: `${euiTheme.size.l} ${euiTheme.size.l} 0 ${euiTheme.size.l}`,
+  padding: `${euiTheme.size.m} ${euiTheme.size.m} 0`,
   '.euiTabs': {
     paddingLeft: '3px',
     marginLeft: '-3px',

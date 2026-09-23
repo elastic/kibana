@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiButtonIcon, EuiContextMenuItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FilterStateStore } from '@kbn/es-query';
 import { useKibana } from '../common/lib/kibana';
@@ -21,6 +21,7 @@ interface ViewResultsInDiscoverActionProps {
   mode?: string;
   scheduleId?: string;
   executionCount?: number;
+  onMenuItemClick?: () => void;
 }
 
 const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverActionProps> = ({
@@ -28,8 +29,10 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
   buttonType,
   endDate,
   startDate,
+  mode,
   scheduleId,
   executionCount,
+  onMenuItemClick,
 }) => {
   const { discover, application } = useKibana().services;
   const locator = discover?.locator;
@@ -107,7 +110,7 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
             ? {
                 to: endDate,
                 from: startDate,
-                mode: 'absolute',
+                mode: mode === 'relative' ? 'relative' : 'absolute',
               }
             : {
                 to: 'now',
@@ -119,10 +122,24 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
     };
 
     getDiscoverUrl();
-  }, [actionId, endDate, executionCount, scheduleId, startDate, locator, logsDataView]);
+  }, [actionId, endDate, executionCount, mode, scheduleId, startDate, locator, logsDataView]);
 
   if (!discoverPermissions.show) {
     return null;
+  }
+
+  if (buttonType === ViewResultsActionButtonType.menuItem) {
+    return (
+      <EuiContextMenuItem
+        icon="discoverApp"
+        href={discoverUrl}
+        target="_blank"
+        onClick={onMenuItemClick}
+        disabled={!actionId || !discoverUrl.length}
+      >
+        {VIEW_IN_DISCOVER}
+      </EuiContextMenuItem>
+    );
   }
 
   if (buttonType === ViewResultsActionButtonType.button) {

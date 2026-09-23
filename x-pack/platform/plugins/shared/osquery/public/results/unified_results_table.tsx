@@ -95,10 +95,11 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
 
   const searchBarWrapperCss = useMemo(
     () => ({
-      padding: `${euiTheme.size.m}`,
-      backgroundColor: euiTheme.colors.body,
+      paddingTop: 0,
+      paddingBottom: euiTheme.size.m,
+      paddingInline: 0,
     }),
-    [euiTheme.size.m, euiTheme.colors.body]
+    [euiTheme.size.m]
   );
 
   const { data: actionResultsData } = useActionResults({

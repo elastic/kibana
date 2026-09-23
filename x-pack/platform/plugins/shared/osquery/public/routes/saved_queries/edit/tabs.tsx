@@ -17,7 +17,9 @@ import type { AddToTimelineHandler } from '../../../types';
 const euiTabbedContentCss = ({ euiTheme }: UseEuiTheme) => ({
   'div.euiTabs': {
     paddingLeft: '8px',
-    background: euiTheme.colors.body,
+  },
+  'div[role="tabpanel"]': {
+    paddingTop: euiTheme.size.m,
   },
 });
 

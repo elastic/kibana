@@ -26,14 +26,16 @@ export const contentCss = {
 interface Props {
   restrictWidth?: number | false;
   children?: React.ReactNode;
+  /** Omit the top spacer when a chrome header already sits above this layout. */
+  flush?: boolean;
 }
 
-export const WithoutHeaderLayout: React.FC<Props> = ({ restrictWidth, children }) => (
+export const WithoutHeaderLayout: React.FC<Props> = ({ restrictWidth, children, flush }) => (
   <Fragment>
     <EuiPage css={pageCss} restrictWidth={restrictWidth === false ? false : restrictWidth || 1200}>
       <EuiPageBody>
         <div css={contentCss}>
-          <EuiSpacer size="m" />
+          {flush ? null : <EuiSpacer size="m" />}
           {children}
         </div>
       </EuiPageBody>
