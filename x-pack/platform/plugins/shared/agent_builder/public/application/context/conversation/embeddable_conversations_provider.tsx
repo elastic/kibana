@@ -25,11 +25,8 @@ import { ConversationStreamService } from '../../../services/events';
 import { useConversationActions } from './use_conversation_actions';
 import { ConversationChangeNotifier } from './conversation_change_notifier';
 import { usePersistedConversationId } from '../../hooks/use_persisted_conversation_id';
-import { AppLeaveContext } from '../app_leave_context';
 import { useEffectiveSpaceDefaultAgent } from '../../hooks/use_space_default_agent';
 import { RedirectLoading } from '../../components/redirects/redirect_loading';
-
-const noopOnAppLeave = () => {};
 
 /**
  * Pins restricted (non-`manageAgents`) users to their space's default agent.
@@ -300,13 +297,11 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       <I18nProvider>
         <QueryClientProvider client={queryClient}>
           <AgentBuilderServicesContext.Provider value={services}>
-            <AppLeaveContext.Provider value={noopOnAppLeave}>
-              <StreamingProvider conversationStreamService={conversationStreamService}>
-                <PinnedConversationProvider baseValue={conversationContextValue}>
-                  {children}
-                </PinnedConversationProvider>
-              </StreamingProvider>
-            </AppLeaveContext.Provider>
+            <StreamingProvider conversationStreamService={conversationStreamService}>
+              <PinnedConversationProvider baseValue={conversationContextValue}>
+                {children}
+              </PinnedConversationProvider>
+            </StreamingProvider>
           </AgentBuilderServicesContext.Provider>
         </QueryClientProvider>
       </I18nProvider>
