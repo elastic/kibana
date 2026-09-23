@@ -47,15 +47,15 @@ export function createVisualizationRenderer({
   http,
   uiSettings,
   startDependencies,
-  stepsFromCurrentRound,
-  stepsFromPrevRounds,
+  stepsFromCurrentTurn,
+  stepsFromPreviousTurns,
 }: {
   application: ApplicationStart;
   http: HttpStart;
   uiSettings: IUiSettingsClient;
   startDependencies: AgentBuilderStartDependencies;
-  stepsFromCurrentRound: ConversationRoundStep[];
-  stepsFromPrevRounds: ConversationRoundStep[];
+  stepsFromCurrentTurn: ConversationRoundStep[];
+  stepsFromPreviousTurns: ConversationRoundStep[];
 }) {
   const services: VisualizationServices = {
     application,
@@ -80,7 +80,7 @@ export function createVisualizationRenderer({
       );
     }
 
-    const steps = [...stepsFromPrevRounds, ...stepsFromCurrentRound];
+    const steps = [...stepsFromPreviousTurns, ...stepsFromCurrentTurn];
 
     const ToolResultAttribute = (
       <EuiCode>
