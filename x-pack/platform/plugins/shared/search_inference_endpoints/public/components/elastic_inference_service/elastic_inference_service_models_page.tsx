@@ -22,7 +22,13 @@ import { ModelDetailFlyout } from '../model_detail_flyout/model_detail_flyout';
 import { DeleteAction } from '../all_inference_endpoints/render_table_columns/render_actions/actions/delete/delete_action';
 import { EisModelsListingProvider } from './eis_models_listing_provider';
 
-export const ElasticInferenceServiceModelsPage = () => {
+interface ElasticInferenceServiceModelsPageProps {
+  onManageRegions?: () => void;
+}
+
+export const ElasticInferenceServiceModelsPage = ({
+  onManageRegions,
+}: ElasticInferenceServiceModelsPageProps) => {
   const {
     services: { application, cloud, cloudConnect },
   } = useKibana();
@@ -102,6 +108,7 @@ export const ElasticInferenceServiceModelsPage = () => {
           onDeleteEndpoint={canManage ? displayDeleteActionItem : undefined}
           onCopyEndpointId={copyContent}
           canManage={canManage}
+          onManageRegions={onManageRegions}
         />
       )}
     </>

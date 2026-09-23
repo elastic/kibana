@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
+import { ApprovalModal } from '@kbn/proposals-ui';
+import type { ApprovalProposal } from '@kbn/proposals-ui';
 import type { Investigation } from '../../types';
 import type { CardActionType } from '../actions/base_actions';
 import type { EscalationModalMode } from './escalation_modal/types';
 import { AssignActionModal } from './assign_action_modal';
 import { BaseActionModal } from './base_action_modal';
-import { ApprovalModal } from './approval_modal/approval_modal';
-import type { ApprovalProposal } from './approval_modal/types';
 import { MODAL_TRANSLATIONS } from './translations';
 
 export interface EscalationModalRenderProps {

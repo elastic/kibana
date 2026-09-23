@@ -8,8 +8,8 @@
  */
 
 import type { ConnectorTypeInfo } from '@kbn/workflows';
+import type { ConnectorIdItem } from '@kbn/workflows-yaml';
 import { validateConnectorIds } from './validate_connector_ids';
-import type { ConnectorIdItem } from '../model/types';
 
 describe('validateConnectorIds', () => {
   const mockConnectorInstance = {
