@@ -545,10 +545,21 @@ describe('WorkersService', () => {
         scheduleInterval: '2h',
         extras: SAVED_EXTRAS,
       });
+      // The saved values are rendered into consts.worker_settings.extras; the sweep inputs
+      // read them from there, so both halves are asserted.
       const yaml = harness.documents.get(`${RULE_TUNING}-${SPACE}`)?.yaml;
-      expect(yaml).toContain('analysis_window_days: 21');
-      expect(yaml).toContain('min_fp_count: 4');
-      expect(yaml).toContain('min_fp_rate_pct: 80');
+      expect(yaml).toContain('analysisWindowDays: 21');
+      expect(yaml).toContain('fpCountThreshold: 4');
+      expect(yaml).toContain('fpRateThresholdPct: 80');
+      expect(yaml).toContain(
+        'analysis_window_days: "${{ consts.worker_settings.extras.analysisWindowDays }}"'
+      );
+      expect(yaml).toContain(
+        'min_fp_count: "${{ consts.worker_settings.extras.fpCountThreshold }}"'
+      );
+      expect(yaml).toContain(
+        'min_fp_rate_pct: "${{ consts.worker_settings.extras.fpRateThresholdPct }}"'
+      );
       expect(yaml).not.toContain('__WORKER_ANALYSIS_WINDOW_DAYS__');
       expect(yaml).not.toContain('__WORKER_FP_COUNT_THRESHOLD__');
       expect(yaml).not.toContain('__WORKER_FP_RATE_THRESHOLD_PCT__');

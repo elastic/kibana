@@ -99,9 +99,9 @@ describe('detection rule workflows', () => {
       expect(calls[0].with?.['workflow-id']).toBe(ALERTZERO_RULE_TUNING_WORKER_WORKFLOW_ID);
       expect(calls[0].with?.inputs).toEqual({
         autonomy_level: '{{ consts.worker_settings.autonomy }}',
-        analysis_window_days: 7,
-        min_fp_count: 10,
-        min_fp_rate_pct: 50,
+        analysis_window_days: '${{ consts.worker_settings.extras.analysisWindowDays }}',
+        min_fp_count: '${{ consts.worker_settings.extras.fpCountThreshold }}',
+        min_fp_rate_pct: '${{ consts.worker_settings.extras.fpRateThresholdPct }}',
       });
     });
 
@@ -125,19 +125,27 @@ describe('detection rule workflows', () => {
       ) as WorkflowYaml;
       const [dispatch] = flattenSteps(rendered.steps as unknown as NestedStep[]);
 
-      expect(dispatch.with?.inputs).toEqual({
-        autonomy_level: '{{ consts.worker_settings.autonomy }}',
-        analysis_window_days: 21,
-        min_fp_count: 4,
-        min_fp_rate_pct: 80,
-      });
-      // The same values are readable off the worker's own consts block.
+      // consts.worker_settings is the single place the saved values are rendered into...
       expect((rendered.consts as Record<string, Record<string, unknown>>).worker_settings).toEqual({
         settingsVersion: 2,
         autonomy: 'assisted',
         scheduleInterval: '6h',
         extras: { analysisWindowDays: 21, fpCountThreshold: 4, fpRateThresholdPct: 80 },
       });
+      // ...and each sweep input resolves from there, so a saved value cannot reach one and
+      // not the other.
+      expect(dispatch.with?.inputs).toEqual({
+        autonomy_level: '{{ consts.worker_settings.autonomy }}',
+        analysis_window_days: '${{ consts.worker_settings.extras.analysisWindowDays }}',
+        min_fp_count: '${{ consts.worker_settings.extras.fpCountThreshold }}',
+        min_fp_rate_pct: '${{ consts.worker_settings.extras.fpRateThresholdPct }}',
+      });
+      // Every path the inputs reference exists on the consts they read from.
+      const extras = (rendered.consts as Record<string, Record<string, unknown>>).worker_settings
+        .extras as Record<string, unknown>;
+      for (const field of ['analysisWindowDays', 'fpCountThreshold', 'fpRateThresholdPct']) {
+        expect(extras).toHaveProperty(field);
+      }
     });
 
     // Boot reconcile re-renders installed documents from persisted values without migrating them,
