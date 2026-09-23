@@ -116,9 +116,9 @@ export function runReportFlakyTestIssuesCli() {
         \`node scripts/scout discover-flaky-tests\` that no issue is about yet, worst suites first
         and up to --max-new-issues per run. Lists every open failed-test issue and the recently
         closed ones in --github-repo and in --tracking-repo, then matches locally. A suite gets no
-        issue when one in --github-repo, open or closed, is about it or one of its tests, or when
-        every one of its tests has an issue in --tracking-repo, a per-test one or one about the
-        suite or its file; a single test without one is enough for the suite issue to be filed.
+        issue when every one of its tests has one in either repository, open or closed, a per-test
+        issue about it or an issue about the suite or its file; a single test without one is
+        enough for the suite issue to be filed.
 
         Examples:
           GITHUB_TOKEN=... node scripts/report_flaky_test_issues --input .scout/flaky_tests.json --dry-run

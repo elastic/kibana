@@ -76,12 +76,12 @@ export interface IssueRef {
 export type SkipReason =
   /** The suite has no issue, but this run already created `maxNewIssues`. */
   | 'max-new-issues'
-  /** An issue in `githubRepo`, open or closed, is already about the suite or one of its tests. */
-  | 'tracked'
   /**
-   * Every test of the suite has an issue in the tracking repository: a per-test issue about it, or
-   * an issue about the suite or its file. A single test without one gets the suite its issue.
+   * Every test of the suite has an issue in `githubRepo`, open or closed: a per-test issue about
+   * it, or an issue about the suite or its file. A single test without one gets the suite its issue.
    */
+  | 'tracked'
+  /** Same, for the tracking repository. */
   | 'tracked-upstream';
 
 /** The suite an action is about; several suites of one file are told apart by their title. */
@@ -211,10 +211,11 @@ export const issueLabels = (suite: FlakySuite, githubRepo: string): string[] => 
 };
 
 /**
- * Files a GitHub `failed-test` issue for every flaky suite of a report that no issue is about
- * yet, worst suites first and at most `maxNewIssues` per run. A suite is left alone when an
- * issue in `githubRepo` or in the tracking repository, open or closed, is about it or one of
- * its tests; issues that merely mention its file are linked from the new issue instead. A
+ * Files a GitHub `failed-test` issue for every flaky suite of a report that no issue tracks yet,
+ * worst suites first and at most `maxNewIssues` per run. A suite is tracked when every one of
+ * its tests has an issue, in `githubRepo` or in the tracking repository, open or closed: an issue
+ * about the suite or its file covers them all, a per-test issue only its own test. Issues about
+ * some of the tests, or merely mentioning the file, are linked from the new issue instead. A
  * failed write is recorded and the run goes on with the next suite.
  */
 export const reportFlakySuiteIssues = async (
@@ -284,7 +285,7 @@ export const reportFlakySuiteIssues = async (
   for (const suite of suites) {
     const ref = suiteRef(suite);
     const matches = findMatchingIssues(suite, candidateIssues(suite, index));
-    const tracked = strongestTracking(matches);
+    const tracked = coveringIssue(suite, index);
     if (tracked) {
       const { issue, match } = tracked;
       log.info(

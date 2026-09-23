@@ -308,6 +308,20 @@ describe('reportFlakySuiteIssues', () => {
       });
     });
 
+    it('files the issue when only some of its tests have an issue, linking those', async () => {
+      const github = createGithubApi([scoutTestIssue(43, 'pw-1')]);
+      const report = flakyReport([
+        trackedTest(),
+        flakyTest({ testId: 'pw-2', title: 'another test' }),
+      ]);
+
+      const summary = await run(github, { report });
+
+      expect(summary.actions[0]).toMatchObject({ action: 'created' });
+      const [, body] = github.createIssue.mock.calls[0];
+      expect(body).toContain('Possibly related: #43.');
+    });
+
     it('records the strongest open match over a stronger closed one', async () => {
       const github = createGithubApi([
         suiteIssue(42, { state: 'closed' }),

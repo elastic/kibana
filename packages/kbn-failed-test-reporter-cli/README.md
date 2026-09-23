@@ -15,13 +15,14 @@ title for form one suite per file), and files one `failed-test` issue per flaky 
 none yet. Run daily by
 the `kibana-report-flaky-tests` pipeline after the report is generated.
 
-For every suite in the report, worst first: when no issue is about it or one of its tests, a suite
-issue is filed, at most `--max-new-issues` (default 10) per run, titled
+For every suite in the report, worst first: when its tests are not all covered by an issue, a
+suite issue is filed, at most `--max-new-issues` (default 10) per run, titled
 `Flaky <Framework> suite: <suite title>` and labelled `failed-test` plus the owning
 teams' labels (in `elastic/kibana` only). The body carries the per-test numbers with the branch
 each test qualified on, the suite details, the most frequent sampled failures and a collapsed
-breakdown by pipeline; issues that merely mention the file are linked as possibly related. A suite
-with an issue, open or closed, is skipped and the issue recorded; commenting on and reopening
+breakdown by pipeline; issues that merely mention the file are linked as possibly related. A suite is
+skipped, and the issue recorded, when every one of its tests has an issue, open or closed, a
+per-test one or one about the suite or its file; commenting on and reopening
 those issues is left to a later iteration, so is the stale `failed-test` sweep closing the issues
 of suites that drop out of the report.
 
