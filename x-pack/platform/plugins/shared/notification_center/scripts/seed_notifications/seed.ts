@@ -9,7 +9,7 @@ import { Client } from '@elastic/elasticsearch';
 import { GET_NOTIFICATIONS_PATH, NOTIFICATION_CENTER_API_VERSION } from '../../common/routes';
 import type { Notification } from '../../common/types';
 import { NOTIFICATION_DATA_STREAM_NAME } from '../../server/storage/notification_data_stream';
-import { READ_ALL_BEFORE_KEY } from '../../server/storage/user_storage';
+import { OVERRIDES_KEY, READ_ALL_BEFORE_KEY } from '../../server/storage/user_storage';
 
 export interface SeedTarget {
   esUrl: string;
@@ -120,11 +120,13 @@ const login = async (target: SeedTarget): Promise<string> => {
     .join('; ');
 };
 
-const readHorizonRequest = async (target: SeedTarget, init: RequestInit): Promise<void> => {
-  const cookie = await login(target);
-  const url = `${target.kibanaUrl}/internal/user_storage/${encodeURIComponent(
-    READ_ALL_BEFORE_KEY
-  )}`;
+const userStorageRequest = async (
+  kibanaUrl: string,
+  cookie: string,
+  key: string,
+  init: RequestInit
+): Promise<void> => {
+  const url = `${kibanaUrl}/internal/user_storage/${encodeURIComponent(key)}`;
   const response = await fetch(url, { ...init, headers: { ...HEADERS, cookie } });
   if (!response.ok) {
     throw new Error(`${url} returned ${response.status}: ${await response.text()}`);
@@ -137,9 +139,18 @@ const readHorizonRequest = async (target: SeedTarget, init: RequestInit): Promis
  * Every fixture is backdated, and the marker is otherwise stamped at `now` the first time that
  * user opens the bell — always after seeding — so the whole chunk would arrive already read.
  */
-export const setReadHorizon = (target: SeedTarget, isoTimestamp: string): Promise<void> =>
-  readHorizonRequest(target, { method: 'PUT', body: JSON.stringify({ value: isoTimestamp }) });
+export const setReadHorizon = async (target: SeedTarget, isoTimestamp: string): Promise<void> => {
+  const cookie = await login(target);
+  await userStorageRequest(target.kibanaUrl, cookie, READ_ALL_BEFORE_KEY, {
+    method: 'PUT',
+    body: JSON.stringify({ value: isoTimestamp }),
+  });
+};
 
-/** Drop the marker, so the next read of the bell stamps a fresh one. */
-export const clearReadHorizon = (target: SeedTarget): Promise<void> =>
-  readHorizonRequest(target, { method: 'DELETE' });
+/** Drop the marker and per-id overrides, so the next bell read stamps a fresh horizon. */
+export const clearReadHorizon = async (target: SeedTarget): Promise<void> => {
+  const cookie = await login(target);
+  for (const key of [READ_ALL_BEFORE_KEY, OVERRIDES_KEY]) {
+    await userStorageRequest(target.kibanaUrl, cookie, key, { method: 'DELETE' });
+  }
+};

@@ -237,7 +237,7 @@ GET /.kibana-notification-center/_search
 
 ## Seeding a local dev stack
 
-`scripts/seed_notifications.js` appends a fixed chunk of notifications to the data stream, so
+`./scripts/seed_notifications.js` appends a fixed chunk of notifications to the data stream, so
 the list route and the bell have something to show without waiting for a real producer.
 
 It is a dev script: it assumes Kibana is already running with
@@ -249,7 +249,7 @@ SEED=x-pack/platform/plugins/shared/notification_center/scripts/seed_notificatio
 
 node $SEED --help
 
-# stateful, as kbn-dev mounts it
+# stateful
 node $SEED --kibana-url http://localhost:5611/kbn --es-url http://localhost:9201 \
   --include-unregistered
 
@@ -266,7 +266,7 @@ stream, and writing first would let Elasticsearch auto-create a plain index unde
 permanently blocking the plugin from creating it.
 
 The credentials are used for both Elasticsearch and Kibana, which is why serverless needs
-`elastic_serverless`: SAML is only the default *UI* provider there, and basic auth still works.
+`elastic_serverless`: SAML is only the default _UI_ provider there, and basic auth still works.
 
 The plugin's `notificationWriteSchema` rejects an unknown `namespace` or `type`. `--include-unregistered`
 writes those directly to the cluster to exercise the read path and the UI against a mixed feed.
@@ -275,7 +275,7 @@ Every fixture is backdated, and a user's catch-up marker is stamped at `now` the
 open the bell — which is always after seeding — so the whole chunk would otherwise arrive already
 read. The script therefore logs in as the Elasticsearch user and backdates that marker to 30 days
 ago, leaving the newer fixtures unread. `--read-horizon` takes an age (`12h`) or a date
-(`2026-09-01`) instead, and `--clean` drops the marker entirely. Read state is per user profile:
+(`2026-09-01`) instead, and `--clean` drops the marker and per-id overrides. Read state is per user profile:
 if you browse Kibana as somebody other than `--es-username`, their bell is unaffected.
 
 ## Running tests

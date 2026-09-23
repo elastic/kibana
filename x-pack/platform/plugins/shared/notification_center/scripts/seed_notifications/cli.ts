@@ -141,7 +141,7 @@ run(
         --es-url <url>           Required. Elasticsearch URL of that Kibana's cluster
         --es-username <user>     Username for both (default: elastic)
         --es-password <pass>     Password for both (default: changeme)
-        --clean                  Empty the data stream, reset the read horizon and exit
+        --clean                  Empty the data stream, reset read state, and exit
         --include-unregistered   Also seed namespaces no plugin has registered yet, plus one
                                  timeseries id. These bypass the producer contract and exist to
                                  exercise the read path and UI against a mixed feed.
