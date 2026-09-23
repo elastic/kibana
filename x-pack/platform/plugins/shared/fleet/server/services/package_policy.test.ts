@@ -1236,6 +1236,15 @@ describe('Package policy service', () => {
         updated_at: '2023-01-01T02:00:00.000Z',
       };
 
+      const storedRoleArn = 'arn:aws:iam::123456789012:role/StoredRole';
+      soClient.get.mockResolvedValue({
+        id: 'existing-connector-id',
+        attributes: {
+          cloudProvider: 'aws',
+          vars: { role_arn: { type: 'text', value: storedRoleArn } },
+        },
+      } as any);
+
       // Mock the cloudConnectorService.update method
       const originalUpdate = cloudConnectorService.update;
       cloudConnectorService.update = jest.fn().mockResolvedValue(updatedCloudConnector);
@@ -1256,7 +1265,7 @@ describe('Package policy service', () => {
           {
             vars: {
               role_arn: {
-                value: 'arn:aws:iam::123456789012:role/UpdatedRole',
+                value: storedRoleArn,
                 type: 'text',
               },
               external_id: {
@@ -1268,12 +1277,83 @@ describe('Package policy service', () => {
               },
             },
           },
-          // Without this the connector service refuses a role ARN change from the wizard: it has
-          // no client to fan the new ARN out to the referencing package policies with.
           { esClient }
         );
+        expect(enrichedPackagePolicy.inputs[0].streams[0].vars.role_arn.value).toBe(storedRoleArn);
       } finally {
         // Restore the original method
+        cloudConnectorService.update = originalUpdate;
+      }
+    });
+
+    it('keeps the stored Role ARN when a new package policy names an existing connector', async () => {
+      const soClient = createSavedObjectClientMock();
+      const storedRoleArn = 'arn:aws:iam::123456789012:role/StoredRole';
+      const enrichedPackagePolicy = {
+        name: 'test-package-policy',
+        supports_cloud_connector: true,
+        cloud_connector_id: 'existing-connector-id',
+        vars: {
+          role_arn: { value: 'arn:aws:iam::123456789012:role/FromTheWizard', type: 'text' },
+        },
+        inputs: [
+          {
+            type: 'aws/metrics',
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: { dataset: 'test', type: 'logs' },
+                vars: {
+                  'aws.role_arn': {
+                    value: 'arn:aws:iam::123456789012:role/FromTheWizard',
+                    type: 'text',
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      } as any;
+      const agentPolicy = {
+        id: 'test',
+        agentless: { cloud_connectors: { enabled: true, target_csp: 'aws' } },
+      } as any;
+
+      soClient.get.mockResolvedValue({
+        id: 'existing-connector-id',
+        attributes: {
+          cloudProvider: 'aws',
+          vars: { role_arn: { type: 'text', value: storedRoleArn } },
+        },
+      } as any);
+      const originalUpdate = cloudConnectorService.update;
+      cloudConnectorService.update = jest.fn().mockResolvedValue({ id: 'existing-connector-id' });
+
+      try {
+        await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
+          soClient,
+          esClient,
+          enrichedPackagePolicy,
+          agentPolicy,
+          mockPackageInfo
+        );
+
+        expect(cloudConnectorService.update).toHaveBeenCalledWith(
+          soClient,
+          'existing-connector-id',
+          {
+            vars: {
+              role_arn: { type: 'text', value: storedRoleArn },
+            },
+          },
+          { esClient }
+        );
+        expect(enrichedPackagePolicy.vars.role_arn.value).toBe(storedRoleArn);
+        expect(enrichedPackagePolicy.inputs[0].streams[0].vars['aws.role_arn'].value).toBe(
+          storedRoleArn
+        );
+      } finally {
         cloudConnectorService.update = originalUpdate;
       }
     });

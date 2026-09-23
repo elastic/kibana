@@ -65,6 +65,7 @@ import {
   DATASET_VAR_NAME,
   LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
   DATA_STREAM_TYPE_VAR_NAME,
   OTEL_COLLECTOR_INPUT_TYPE,
   FLEET_SYNTHETICS_PACKAGE,
@@ -179,6 +180,7 @@ import {
 } from './epm/agent/agent';
 import { escapeSearchQueryPhrase, normalizeKuery } from './saved_object';
 import { appContextService, cloudConnectorService } from '.';
+import { rewritePolicyRoleArn } from './cloud_connectors/update_input_vars_with_role_arn';
 import { removeOldAssets } from './epm/packages/cleanup';
 import type { PackageUpdateEvent, UpdateEventType } from './upgrade_sender';
 import { sendTelemetryEvents } from './upgrade_sender';
@@ -401,6 +403,29 @@ export function _normalizePackagePolicyKuery(savedObjectType: string, kuery: str
  * @todo Remove hardcoded checks for `aws.role_arn` and `aws.credentials.external_id`
  *       and implement the generic Package Spec solution once approved.
  */
+
+/**
+ * Role ARN stored on an existing AWS connector. Missing or unreadable connectors return
+ * undefined so the following update reports that failure instead of inventing an ARN.
+ */
+const readStoredAwsRoleArn = async (
+  soClient: SavedObjectsClientContract,
+  cloudConnectorId: string
+): Promise<string | undefined> => {
+  try {
+    const stored = await soClient.get<{ vars?: AwsCloudConnectorVars }>(
+      CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+      cloudConnectorId
+    );
+    const roleArn = stored?.attributes?.vars?.role_arn?.value;
+    return typeof roleArn === 'string' && roleArn.length > 0 ? roleArn : undefined;
+  } catch (error) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+      return undefined;
+    }
+    throw error;
+  }
+};
 
 const extractPackagePolicyVars = (
   cloudProvider: CloudProvider,
@@ -3666,15 +3691,28 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       return;
     }
 
-    const cloudConnectorVars = extractPackagePolicyVars(
-      cloudProvider,
-      enrichedPackagePolicy,
-      logger
-    );
+    let cloudConnectorVars = extractPackagePolicyVars(cloudProvider, enrichedPackagePolicy, logger);
 
     if (cloudConnectorVars && enrichedPackagePolicy?.supports_cloud_connector) {
       if (enrichedPackagePolicy?.cloud_connector_id) {
-        // Update the existing cloud connector with new vars
+        // Attaching a new integration to an existing identity must not change that identity's
+        // Role ARN. A different ARN on this request is replaced with the stored one, on both the
+        // connector update and the policy about to be saved, so the fan-out never runs here.
+        if (cloudProvider === 'aws') {
+          const storedRoleArn = await readStoredAwsRoleArn(
+            soClient,
+            enrichedPackagePolicy.cloud_connector_id
+          );
+          if (storedRoleArn) {
+            cloudConnectorVars = {
+              ...(cloudConnectorVars as AwsCloudConnectorVars),
+              role_arn: { type: 'text', value: storedRoleArn },
+            };
+            const rewritten = rewritePolicyRoleArn(enrichedPackagePolicy, storedRoleArn);
+            enrichedPackagePolicy.vars = rewritten.vars;
+            enrichedPackagePolicy.inputs = rewritten.inputs;
+          }
+        }
         logger.info(`Updating cloud connector: ${enrichedPackagePolicy.cloud_connector_id}`);
         try {
           const cloudConnector = await cloudConnectorService.update(
@@ -3683,8 +3721,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             {
               vars: cloudConnectorVars,
             },
-            // A role ARN change has to reach the package policies already using this connector;
-            // without a client to do that the connector service refuses the update outright.
             { esClient }
           );
           logger.info(`Successfully updated cloud connector: ${cloudConnector.id}`);
