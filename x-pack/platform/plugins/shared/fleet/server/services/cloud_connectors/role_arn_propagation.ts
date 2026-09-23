@@ -445,14 +445,13 @@ export const propagateRoleArnToPackagePolicies = async ({
   // error we re-read and, if the stored ARN is already the new value, add the plan to
   // `succeeded` so Phase 2 reverts it too.
   //
-  // An optimistic-concurrency conflict is different: this request's write was rejected, and a
-  // re-read that shows the new ARN means another save of the same credential already landed.
-  // Rolling that policy (or the ones this request did write) back to the old ARN would leave
-  // the connector's policies on different credentials. Those policies stay on the new ARN, and
-  // a later connector-write failure must not revert the rest either.
+  // An optimistic-concurrency conflict is different: this request's write was rejected, so a
+  // re-read that shows the new ARN means another writer stored it. Role ARN saves on a connector
+  // are serialized by a lock, so that writer is not a connector save: the policy is not ours to
+  // revert, and if this fan-out is rolled back it is reported as left on the new ARN.
   const updateFailed: string[] = [];
   const succeeded: PolicyPlan[] = [];
-  const adoptedSameTarget: string[] = [];
+  const changedByOtherWriter: string[] = [];
 
   await pMap(
     plans,
@@ -476,7 +475,7 @@ export const propagateRoleArnToPackagePolicies = async ({
           const current = await packagePolicyService.get(soClient, plan.policy.id);
           if (current && policyHoldsRoleArn(current, newRoleArn)) {
             if (isConflict) {
-              adoptedSameTarget.push(plan.policy.id);
+              changedByOtherWriter.push(plan.policy.id);
               return;
             }
             // SO write landed (every role_arn field is already the new value) and a later step
@@ -587,18 +586,9 @@ export const propagateRoleArnToPackagePolicies = async ({
     // exit 4: happy path — caller may write the connector; keep exact snapshots for undo.
     const rollbackPlans = succeeded;
     const rollbackSnapshots = committedSnapshots;
-    const sharedTargetAlreadyStored = adoptedSameTarget.length > 0;
     return {
       policyCount: rollbackPlans.length + rollbackSnapshots.length,
       revert: async () => {
-        if (sharedTargetAlreadyStored) {
-          logger.warn(
-            `Not reverting the Role ARN fan-out for connector ${connectorId}; another update already stored this Role ARN on ${adoptedSameTarget.join(
-              ', '
-            )}. Reverting the policies this request wrote would split credentials across the connector.`
-          );
-          return;
-        }
         logger.warn(
           `Reverting ${rollbackPlans.length} package ${
             rollbackPlans.length === 1 ? 'policy' : 'policies'
@@ -617,7 +607,7 @@ export const propagateRoleArnToPackagePolicies = async ({
           );
         }
 
-        revertFailed.push(...snapshotRevertFailed);
+        revertFailed.push(...snapshotRevertFailed, ...changedByOtherWriter);
         if (revertFailed.length === 0 && !bumpFailed) {
           return;
         }
@@ -651,20 +641,6 @@ export const propagateRoleArnToPackagePolicies = async ({
   }
 
   // ── Phase 2: revert successful forward writes ──────────────────────────────────────────────
-  // Another save already stored this Role ARN on some policies. Restoring the ones this request
-  // wrote would put those back on the old ARN while the others stay on the new one.
-  if (adoptedSameTarget.length > 0) {
-    updateFailed.sort();
-    throw new CloudConnectorRoleArnPropagationError(
-      `Failed to update role ARN on ${updateFailed.length} package ${
-        updateFailed.length === 1 ? 'policy' : 'policies'
-      } for connector ${connectorId} (ids: ${renderPolicyIds(updateFailed)}).` +
-        ` Another update already stored this Role ARN on ${renderPolicyIds(adoptedSameTarget)};` +
-        ` those policies were left unchanged so the connector does not end with two credentials.`,
-      { updateFailed, revertFailed: [], bumpFailed: false }
-    );
-  }
-
   // Best effort: iterates over `succeeded` (plans whose SO holds the new ARN — either a clean
   // Phase 1 success or a post-persist rejection recovered by the re-read above), writing each
   // plan's snapshot back so the connector-still-holds-old-ARN world matches the
@@ -677,6 +653,7 @@ export const propagateRoleArnToPackagePolicies = async ({
   );
 
   const { reverted, revertFailed } = await revertPlans(succeeded);
+  revertFailed.push(...changedByOtherWriter);
 
   // Bump agent policies for the ones we successfully reverted — their package-policy `revision`
   // moved (once forward, once back), so agents need one bump to re-fetch and discard the stale
