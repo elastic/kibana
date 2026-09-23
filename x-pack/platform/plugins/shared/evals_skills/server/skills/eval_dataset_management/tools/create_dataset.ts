@@ -17,9 +17,14 @@ import {
   datasetNameSchema,
   datasetTagsSchema,
   evalsDatasetTools,
+  formatExamplesPreview,
+  formatMaturity,
+  formatTags,
+  inlineCode,
   isDatasetAlreadyExistsError,
   loadDatasetClient,
   otherResult,
+  toConfirmationMessage,
   toErrorResult,
 } from './tool_utils';
 
@@ -47,11 +52,19 @@ export const createDatasetTool = (
   schema,
   confirmation: {
     askUser: 'always',
-    getConfirmation: ({ toolParams }) => ({
+    getConfirmation: ({ toolParams: { name, description, tags, maturity, examples = [] } }) => ({
       title: 'Create evaluation dataset?',
-      message: `This creates dataset "${toolParams.name}" with ${
-        toolParams.examples?.length ?? 0
-      } example(s) in the current space.`,
+      message: toConfirmationMessage([
+        'This creates a dataset in the current space.',
+        [
+          `- **Name:** ${inlineCode(name)}`,
+          `- **Description:** ${inlineCode(description)}`,
+          `- **Tags:** ${formatTags(tags)}`,
+          `- **Maturity:** ${formatMaturity(maturity)}`,
+          `- **Examples:** ${examples.length}`,
+        ].join('\n'),
+        ...formatExamplesPreview(examples),
+      ]),
       confirm_text: 'Create dataset',
       cancel_text: 'Cancel',
     }),

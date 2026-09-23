@@ -82,6 +82,65 @@ export type DatasetClient = ReturnType<
   NonNullable<EvalsPluginStart['datasetService']>['getClient']
 >;
 
+export type DatasetDocument = NonNullable<Awaited<ReturnType<DatasetClient['getMetadata']>>>;
+
+type DatasetExample = z.infer<typeof datasetExampleSchema>;
+
+const MAX_CONFIRMATION_EXAMPLES = 3;
+const MAX_CONFIRMATION_VALUE_LENGTH = 200;
+
+/**
+ * Renders a caller-supplied value as inline code, so it shows verbatim in the
+ * markdown confirmation instead of being interpreted as markup.
+ */
+export const inlineCode = (value: string): string => {
+  const flattened = value.replace(/`/g, "'").replace(/\s+/g, ' ').trim();
+  if (!flattened) {
+    return '_empty_';
+  }
+  const shown =
+    flattened.length > MAX_CONFIRMATION_VALUE_LENGTH
+      ? `${flattened.slice(0, MAX_CONFIRMATION_VALUE_LENGTH)}…`
+      : flattened;
+  return `\`${shown}\``;
+};
+
+export const formatTags = (tags: readonly string[] | undefined): string =>
+  tags?.length ? tags.map(inlineCode).join(', ') : '_none_';
+
+export const formatMaturity = (maturity: string | undefined): string =>
+  maturity ? inlineCode(maturity) : '_not set_';
+
+const formatExampleValue = (value: DatasetExample['input']): string =>
+  value == null ? '_none_' : inlineCode(JSON.stringify(value));
+
+/** Markdown blocks previewing the first few examples and flagging missing expected outputs. */
+export const formatExamplesPreview = (examples: readonly DatasetExample[]): string[] => {
+  if (examples.length === 0) {
+    return [];
+  }
+
+  const shown = examples
+    .slice(0, MAX_CONFIRMATION_EXAMPLES)
+    .map(
+      ({ input, output }, index) =>
+        `${index + 1}. Input: ${formatExampleValue(
+          input
+        )}\n   Expected output: ${formatExampleValue(output)}`
+    );
+  const hidden = examples.length - shown.length;
+  const withoutOutput = examples.filter(({ output }) => output == null).length;
+
+  return [
+    `**First examples:**\n\n${shown.join('\n')}`,
+    ...(hidden > 0 ? [`…and ${hidden} more.`] : []),
+    ...(withoutOutput > 0 ? [`**${withoutOutput} example(s) have no expected output.**`] : []),
+  ];
+};
+
+/** Joins markdown blocks into a confirmation message body. */
+export const toConfirmationMessage = (blocks: readonly string[]): string => blocks.join('\n\n');
+
 const DATASET_ALREADY_EXISTS = 'DatasetAlreadyExistsError';
 
 export const isDatasetAlreadyExistsError = (error: unknown): error is Error =>
@@ -134,4 +193,31 @@ export const loadDatasetClient = async (
   }
 
   return { client: evals.datasetService.getClient({ spaceId }) };
+};
+
+/**
+ * Builds a confirmation that needs to read datasets first. Falls back to
+ * `fallback` when the lookup is refused or fails, so the prompt still shows.
+ */
+export const withDatasetLookup = async <T>(
+  deps: EvalDatasetManagementToolDeps,
+  { request, spaceId }: { request: KibanaRequest; spaceId: string },
+  fallback: T,
+  build: (client: DatasetClient) => Promise<T>
+): Promise<T> => {
+  try {
+    const loaded = await loadDatasetClient(
+      deps,
+      { request, spaceId },
+      'read',
+      'preview an evaluation dataset change'
+    );
+    if ('error' in loaded) {
+      return fallback;
+    }
+    return await build(loaded.client);
+  } catch (error) {
+    deps.logger.debug(`Failed to build a dataset confirmation message: ${error}`);
+    return fallback;
+  }
 };

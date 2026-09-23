@@ -15,10 +15,15 @@ import {
   datasetNameSchema,
   errorResult,
   evalsDatasetTools,
+  formatMaturity,
+  formatTags,
+  inlineCode,
   isDatasetAlreadyExistsError,
   loadDatasetClient,
   otherResult,
+  toConfirmationMessage,
   toErrorResult,
+  withDatasetLookup,
 } from './tool_utils';
 
 const schema = z.object({
@@ -42,9 +47,40 @@ export const copyDatasetTool = (
   schema,
   confirmation: {
     askUser: 'always',
-    getConfirmation: ({ toolParams }) => ({
+    getConfirmation: async ({
+      toolParams: { dataset_id: datasetId, name, description },
+      context,
+    }) => ({
       title: 'Copy evaluation dataset?',
-      message: `This copies dataset "${toolParams.dataset_id}" into a new dataset named "${toolParams.name}" in the current space.`,
+      message: await withDatasetLookup(
+        deps,
+        context,
+        `This copies dataset ${inlineCode(datasetId)} into a new dataset named ${inlineCode(
+          name
+        )} in the current space.`,
+        async (client) => {
+          const source = await client.getMetadata(datasetId);
+          if (!source) {
+            return `Dataset ${inlineCode(
+              datasetId
+            )} was not found in this space, so there is nothing to copy.`;
+          }
+
+          return toConfirmationMessage([
+            `This copies dataset ${inlineCode(source.name)} and its ${
+              source.examples_count
+            } example(s) into a new dataset in the current space.`,
+            [
+              `- **New name:** ${inlineCode(name)}`,
+              `- **Description:** ${inlineCode(description ?? source.description)}${
+                description === undefined ? ' (from the source)' : ''
+              }`,
+              `- **Tags:** ${formatTags(source.tags)} (from the source)`,
+              `- **Maturity:** ${formatMaturity(source.maturity)} (from the source)`,
+            ].join('\n'),
+          ]);
+        }
+      ),
       confirm_text: 'Copy dataset',
       cancel_text: 'Cancel',
     }),

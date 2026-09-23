@@ -25,8 +25,10 @@ const firstResult = (ret: unknown) =>
 
 interface DatasetClientMock {
   get: jest.Mock;
+  getMetadata: jest.Mock;
   create: jest.Mock;
   upsert: jest.Mock;
+  resolveByName: jest.Mock;
   copy: jest.Mock;
   delete: jest.Mock;
 }
@@ -49,8 +51,10 @@ const createDeps = (
 ): { deps: EvalDatasetManagementToolDeps; datasetClient: DatasetClientMock } => {
   const datasetClient: DatasetClientMock = {
     get: jest.fn(),
+    getMetadata: jest.fn(),
     create: jest.fn(),
     upsert: jest.fn(),
+    resolveByName: jest.fn(),
     copy: jest.fn(),
     delete: jest.fn(),
   };
@@ -229,10 +233,43 @@ describe('createDatasetTool', () => {
 
     expect(confirmation).toEqual({
       title: 'Create evaluation dataset?',
-      message: 'This creates dataset "bank" with 1 example(s) in the current space.',
+      message: [
+        'This creates a dataset in the current space.',
+        [
+          '- **Name:** `bank`',
+          '- **Description:** `Banking questions`',
+          '- **Tags:** _none_',
+          '- **Maturity:** _not set_',
+          '- **Examples:** 1',
+        ].join('\n'),
+        '**First examples:**\n\n1. Input: `{"q":"hi"}`\n   Expected output: `{"a":"hello"}`',
+      ].join('\n\n'),
       confirm_text: 'Create dataset',
       cancel_text: 'Cancel',
     });
+  });
+
+  it('previews only the first examples and flags missing expected outputs', async () => {
+    const { deps } = createDeps();
+    const examples = Array.from({ length: 5 }, (_, index) => ({ input: { q: index } }));
+    const confirmation = await confirmationOf(createDatasetTool(deps), { ...input, examples });
+
+    expect(confirmation?.message).toContain('3. Input: `{"q":2}`');
+    expect(confirmation?.message).not.toContain('{"q":3}');
+    expect(confirmation?.message).toContain('…and 2 more.');
+    expect(confirmation?.message).toContain('**5 example(s) have no expected output.**');
+  });
+
+  it('shows caller-supplied values verbatim rather than as markdown', async () => {
+    const { deps } = createDeps();
+    const confirmation = await confirmationOf(createDatasetTool(deps), {
+      ...input,
+      description: 'See `code` and\n[a link](https://example.com)',
+    });
+
+    expect(confirmation?.message).toContain(
+      "- **Description:** `See 'code' and [a link](https://example.com)`"
+    );
   });
 
   it('refuses callers without the manage privilege', async () => {
@@ -267,10 +304,61 @@ describe('upsertDatasetTool', () => {
     expect(result.data).toEqual({ dataset_id: 'd1', added: 2, removed: 1, unchanged: 3 });
   });
 
-  it('warns that an existing example set is replaced', async () => {
-    const { deps } = createDeps();
+  it('compares an existing dataset with the payload', async () => {
+    const { deps, datasetClient } = createDeps();
+    datasetClient.resolveByName.mockResolvedValue({ ...datasetDocument, examples_count: 5 });
+
+    const confirmation = await confirmationOf(upsertDatasetTool(deps), {
+      ...input,
+      tags: ['ESQL'],
+      maturity: 'golden',
+    });
+
+    expect(datasetClient.resolveByName).toHaveBeenCalledWith('bank');
+    expect(confirmation?.title).toBe('Replace evaluation dataset examples?');
+    expect(confirmation?.message).toBe(
+      [
+        'This replaces the examples of dataset `bank` in the current space. It currently has 5 example(s); afterwards it holds exactly the 2 example(s) in this payload.',
+        [
+          '- **Description:** `Banking questions` (unchanged)',
+          '- **Tags:** `esql` (unchanged)',
+          '- **Maturity:** `raw` → `golden`',
+        ].join('\n'),
+        '**Any existing example missing from this payload is removed.**',
+        '**First examples:**\n\n1. Input: `{"q":"hi"}`\n   Expected output: _none_\n2. Input: `{"q":"bye"}`\n   Expected output: _none_',
+        '**2 example(s) have no expected output.**',
+      ].join('\n\n')
+    );
+  });
+
+  it('keeps undeclared tags and maturity as is', async () => {
+    const { deps, datasetClient } = createDeps();
+    datasetClient.resolveByName.mockResolvedValue(datasetDocument);
+
     const confirmation = await confirmationOf(upsertDatasetTool(deps), input);
 
+    expect(confirmation?.message).toContain('- **Tags:** _kept as is_');
+    expect(confirmation?.message).toContain('- **Maturity:** _kept as is_');
+  });
+
+  it('describes an upsert of an unknown name as a create', async () => {
+    const { deps, datasetClient } = createDeps();
+    datasetClient.resolveByName.mockResolvedValue(undefined);
+
+    const confirmation = await confirmationOf(upsertDatasetTool(deps), input);
+
+    expect(confirmation?.title).toBe('Create evaluation dataset?');
+    expect(confirmation?.message).toMatch(/No dataset named `bank` exists in this space/);
+    expect(confirmation?.message).toContain('- **Examples:** 2');
+  });
+
+  it('falls back to a generic replace warning when the preview fails', async () => {
+    const { deps, datasetClient } = createDeps();
+    datasetClient.resolveByName.mockRejectedValue(new Error('boom'));
+
+    const confirmation = await confirmationOf(upsertDatasetTool(deps), input);
+
+    expect(confirmation?.confirm_text).toBe('Upsert dataset');
     expect(confirmation?.message).toMatch(/example set is replaced/);
     expect(confirmation?.message).toMatch(/missing from this payload is removed/);
   });
@@ -325,6 +413,41 @@ describe('copyDatasetTool', () => {
     );
 
     expect(result.data.message).toMatch(/Choose a different name/);
+  });
+
+  it('names the source dataset and what the copy inherits', async () => {
+    const { deps, datasetClient } = createDeps();
+    datasetClient.getMetadata.mockResolvedValue(datasetDocument);
+
+    const confirmation = await confirmationOf(copyDatasetTool(deps), {
+      dataset_id: 'd1',
+      name: 'bank-copy',
+    });
+
+    expect(datasetClient.getMetadata).toHaveBeenCalledWith('d1');
+    expect(confirmation?.message).toBe(
+      [
+        'This copies dataset `bank` and its 1 example(s) into a new dataset in the current space.',
+        [
+          '- **New name:** `bank-copy`',
+          '- **Description:** `Banking questions` (from the source)',
+          '- **Tags:** `esql` (from the source)',
+          '- **Maturity:** `raw` (from the source)',
+        ].join('\n'),
+      ].join('\n\n')
+    );
+  });
+
+  it('says when the source dataset is missing', async () => {
+    const { deps, datasetClient } = createDeps();
+    datasetClient.getMetadata.mockResolvedValue(undefined);
+
+    const confirmation = await confirmationOf(copyDatasetTool(deps), {
+      dataset_id: 'missing',
+      name: 'copy',
+    });
+
+    expect(confirmation?.message).toMatch(/`missing` was not found in this space/);
   });
 });
 
@@ -392,21 +515,61 @@ describe('deleteDatasetTool', () => {
     expect(result.data.message).toBe('Evaluation dataset not found: missing');
   });
 
-  it('describes a permanent delete when that intent is set', async () => {
-    const { deps } = createDeps();
+  it('describes a permanent delete of a dataset only this space holds', async () => {
+    const { deps, datasetClient } = createDeps();
+    datasetClient.getMetadata.mockResolvedValue(datasetDocument);
+
+    const confirmation = await confirmationOf(deleteDatasetTool(deps), { dataset_id: 'd1' });
+
+    expect(confirmation?.message).toBe(
+      'This **permanently deletes** dataset `bank` and its 1 example(s).'
+    );
+  });
+
+  it('describes a detach of a dataset other spaces share', async () => {
+    const { deps, datasetClient } = createDeps();
+    datasetClient.getMetadata.mockResolvedValue({
+      ...datasetDocument,
+      space_ids: ['default', 'marketing'],
+    });
+
+    const confirmation = await confirmationOf(deleteDatasetTool(deps), { dataset_id: 'd1' });
+
+    expect(confirmation?.message).toBe(
+      'This removes dataset `bank` from the current space only. It stays available, with its 1 example(s), in 1 other space(s).'
+    );
+  });
+
+  it('warns up front when the requested intent will be refused', async () => {
+    const { deps, datasetClient } = createDeps();
+    datasetClient.getMetadata.mockResolvedValue(datasetDocument);
+
+    const confirmation = await confirmationOf(deleteDatasetTool(deps), {
+      dataset_id: 'd1',
+      intent: 'unshare',
+    });
+
+    expect(confirmation?.message).toMatch(/^This will be refused: this is the last space/);
+  });
+
+  it('falls back to describing every outcome when the lookup fails', async () => {
+    const { deps, datasetClient } = createDeps();
+    datasetClient.getMetadata.mockRejectedValue(new Error('boom'));
+
+    const confirmation = await confirmationOf(deleteDatasetTool(deps), { dataset_id: 'd1' });
+
+    expect(confirmation?.message).toMatch(/only detached here/);
+    expect(confirmation?.message).toMatch(/examples are deleted/);
+  });
+
+  it('falls back to the intent description when the caller cannot read datasets', async () => {
+    const { deps } = createDeps(securityWith(false) as unknown as Record<string, unknown>);
+
     const confirmation = await confirmationOf(deleteDatasetTool(deps), {
       dataset_id: 'd1',
       intent: 'delete',
     });
 
-    expect(confirmation?.message).toMatch(/permanently deletes/);
-  });
-
-  it('describes a detach-or-delete when no intent is set', async () => {
-    const { deps } = createDeps();
-    const confirmation = await confirmationOf(deleteDatasetTool(deps), { dataset_id: 'd1' });
-
-    expect(confirmation?.message).toMatch(/only detached here/);
-    expect(confirmation?.message).toMatch(/examples are deleted/);
+    expect(confirmation?.message).toMatch(/permanently deletes dataset `d1`/);
   });
 });

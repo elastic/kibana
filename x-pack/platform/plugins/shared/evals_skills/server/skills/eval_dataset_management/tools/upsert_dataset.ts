@@ -16,9 +16,15 @@ import {
   datasetNameSchema,
   datasetTagsSchema,
   evalsDatasetTools,
+  formatExamplesPreview,
+  formatMaturity,
+  formatTags,
+  inlineCode,
   loadDatasetClient,
   otherResult,
+  toConfirmationMessage,
   toErrorResult,
+  withDatasetLookup,
 } from './tool_utils';
 
 const schema = z.object({
@@ -29,6 +35,32 @@ const schema = z.object({
   examples: datasetExamplesSchema.describe(
     'The complete example set. Matched by name: an existing dataset with this name has its examples replaced, and any example missing from this list is removed.'
   ),
+});
+
+type UpsertParams = z.infer<typeof schema>;
+
+const describeNewDataset = ({ name, description, tags, maturity, examples }: UpsertParams) => ({
+  title: 'Create evaluation dataset?',
+  message: toConfirmationMessage([
+    `No dataset named ${inlineCode(name)} exists in this space, so this creates it.`,
+    [
+      `- **Description:** ${inlineCode(description)}`,
+      `- **Tags:** ${formatTags(tags)}`,
+      `- **Maturity:** ${formatMaturity(maturity)}`,
+      `- **Examples:** ${examples.length}`,
+    ].join('\n'),
+    ...formatExamplesPreview(examples),
+  ]),
+});
+
+const describeChange = (current: string, next: string): string =>
+  current === next ? `${next} (unchanged)` : `${current} → ${next}`;
+
+const fallbackConfirmation = ({ name, examples }: UpsertParams) => ({
+  title: 'Replace evaluation dataset examples?',
+  message: `This writes dataset ${inlineCode(name)} with ${
+    examples.length
+  } example(s). If a dataset with that name already exists in this space, its example set is replaced and any example missing from this payload is removed.`,
 });
 
 /**
@@ -45,12 +77,59 @@ export const upsertDatasetTool = (
   schema,
   confirmation: {
     askUser: 'always',
-    getConfirmation: ({ toolParams }) => ({
-      title: 'Replace evaluation dataset examples?',
-      message: `This writes dataset "${toolParams.name}" with ${toolParams.examples.length} example(s). If a dataset with that name already exists in this space, its example set is replaced and any example missing from this payload is removed.`,
-      confirm_text: 'Upsert dataset',
-      cancel_text: 'Cancel',
-    }),
+    getConfirmation: async ({ toolParams, context }) => {
+      const { title, message } = await withDatasetLookup(
+        deps,
+        context,
+        fallbackConfirmation(toolParams),
+        async (client) => {
+          const existing = await client.resolveByName(toolParams.name);
+          if (!existing) {
+            return describeNewDataset(toolParams);
+          }
+
+          const { name, description, tags, maturity, examples } = toolParams;
+
+          return {
+            title: 'Replace evaluation dataset examples?',
+            message: toConfirmationMessage([
+              `This replaces the examples of dataset ${inlineCode(
+                name
+              )} in the current space. It currently has ${
+                existing.examples_count
+              } example(s); afterwards it holds exactly the ${
+                examples.length
+              } example(s) in this payload.`,
+              [
+                `- **Description:** ${describeChange(
+                  inlineCode(existing.description),
+                  inlineCode(description)
+                )}`,
+                `- **Tags:** ${
+                  tags === undefined
+                    ? '_kept as is_'
+                    : describeChange(
+                        formatTags(existing.tags),
+                        formatTags(tags.map((tag) => tag.toLowerCase()))
+                      )
+                }`,
+                `- **Maturity:** ${
+                  maturity === undefined
+                    ? '_kept as is_'
+                    : describeChange(formatMaturity(existing.maturity), formatMaturity(maturity))
+                }`,
+              ].join('\n'),
+              ...(existing.examples_count > 0
+                ? ['**Any existing example missing from this payload is removed.**']
+                : []),
+              ...formatExamplesPreview(examples),
+            ]),
+          };
+        }
+      );
+
+      return { title, message, confirm_text: 'Upsert dataset', cancel_text: 'Cancel' };
+    },
   },
   handler: async ({ name, description, tags, maturity, examples }, { request, spaceId }) => {
     try {
