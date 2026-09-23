@@ -12,6 +12,8 @@ const { eslintCompatPlugin } = require('@oxlint/plugins');
 module.exports = eslintCompatPlugin({
   meta: { name: '@kbn/eslint' },
   rules: {
+    'require-license-header': require('./rules/require_license_header'),
+    'disallow-license-headers': require('./rules/disallow_license_headers'),
     no_async_promise_body: require('./rules/no_async_promise_body'),
     no_async_foreach: require('./rules/no_async_foreach'),
     no_trailing_import_slash: require('./rules/no_trailing_import_slash'),

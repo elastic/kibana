@@ -8,7 +8,7 @@
  */
 
 const { RuleTester } = require('eslint');
-const rule = require('./disallow_license_headers');
+const rule = require('../oxlint_plugin').rules['disallow-license-headers'];
 const dedent = require('dedent');
 
 const ruleTester = new RuleTester({
@@ -140,6 +140,21 @@ ruleTester.run('@kbn/eslint/disallow-license-headers', rule, {
           message: '"licenses[2]" option must only include a single comment',
         },
       ],
+    },
+    // removes matching comment tokens
+    {
+      code: `/* old license */
+console.log('foo')`,
+
+      options: [{ licenses: ['/* old license */'] }],
+      errors: [
+        {
+          message: 'This license header is not allowed in this file.',
+        },
+      ],
+
+      output: `
+console.log('foo')`,
     },
   ],
 });

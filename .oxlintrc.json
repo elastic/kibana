@@ -67,6 +67,286 @@
   "overrides": [
     {
       "files": [
+        "**/*.{js,mjs,ts,tsx}"
+      ],
+      "rules": {
+        "@kbn/eslint/require-license-header": [
+          "error",
+          {
+            "license": "\n/*\n * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one\n * or more contributor license agreements. Licensed under the \"Elastic License\n * 2.0\", the \"GNU Affero General Public License v3.0 only\", and the \"Server Side\n * Public License v 1\"; you may not use this file except in compliance with, at\n * your election, the \"Elastic License 2.0\", the \"GNU Affero General Public\n * License v3.0 only\", or the \"Server Side Public License, v 1\".\n */\n"
+          }
+        ],
+        "@kbn/eslint/disallow-license-headers": [
+          "error",
+          {
+            "licenses": [
+              "\n/*\n * Licensed to Elasticsearch B.V. under one or more contributor\n * license agreements. See the NOTICE file distributed with\n * this work for additional information regarding copyright\n * ownership. Elasticsearch B.V. licenses this file to you under\n * the Apache License, Version 2.0 (the \"License\"); you may\n * not use this file except in compliance with the License.\n * You may obtain a copy of the License at\n *\n *    http://www.apache.org/licenses/LICENSE-2.0\n *\n * Unless required by applicable law or agreed to in writing,\n * software distributed under the License is distributed on an\n * \"AS IS\" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY\n * KIND, either express or implied.  See the License for the\n * specific language governing permissions and limitations\n * under the License.\n */\n",
+              "\n/*\n * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one\n * or more contributor license agreements. Licensed under the Elastic License\n * 2.0 and the Server Side Public License, v 1; you may not use this file except\n * in compliance with, at your election, the Elastic License 2.0 or the Server\n * Side Public License, v 1.\n */\n",
+              "\n/*\n * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one\n * or more contributor license agreements. Licensed under the Elastic License\n * and the Server Side Public License, v 1; you may not use this file except in\n * compliance with, at your election, the Elastic License or the Server Side\n * Public License, v 1.\n */\n",
+              "\n/*\n * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one\n * or more contributor license agreements. Licensed under the Elastic License\n * 2.0; you may not use this file except in compliance with the Elastic License\n * 2.0.\n */\n",
+              "\n/*\n * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one\n * or more contributor license agreements. Licensed under the Elastic License;\n * you may not use this file except in compliance with the Elastic License.\n */\n",
+              "\n/*\n * Elasticsearch B.V licenses this file to you under the MIT License.\n * See `src/platform/packages/shared/kbn-safer-lodash-set/LICENSE` for more information.\n */\n",
+              "\n/*\n * This file is forked from the lodash project (https://lodash.com/),\n * and may include modifications made by Elasticsearch B.V.\n * Elasticsearch B.V. licenses this file to you under the MIT License.\n * See `src/platform/packages/shared/kbn-safer-lodash-set/LICENSE` for more information.\n */\n",
+              "\n/*\n * This file is forked from the DefinitelyTyped project (https://github.com/DefinitelyTyped/DefinitelyTyped),\n * and may include modifications made by Elasticsearch B.V.\n * Elasticsearch B.V. licenses this file to you under the MIT License.\n * See `src/platform/packages/shared/kbn-safer-lodash-set/LICENSE` for more information.\n */\n",
+              "\n/*\n * Elasticsearch B.V licenses this file to you under the MIT License.\n * See `src/platform/packages/private/kbn-handlebars/LICENSE` for more information.\n */\n",
+              "\n/*\n  * This file is forked from the handlebars project (https://github.com/handlebars-lang/handlebars.js),\n  * and may include modifications made by Elasticsearch B.V.\n  * Elasticsearch B.V. licenses this file to you under the MIT License.\n  * See `src/platform/packages/private/kbn-handlebars/LICENSE` for more information.\n  */\n",
+              "\n/*\n  * This file is forked from the venn.js project (https://github.com/benfred/venn.js/),\n  * and may include modifications made by Elasticsearch B.V.\n  * Elasticsearch B.V. licenses this file to you under the MIT License.\n  * See `x-pack/platform/plugins/private/graph/public/components/venn_diagram/vennjs/LICENSE` for more information.\n  */\n"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": [
+        "packages/kbn-eslint-config/**/*.{js,mjs,ts,tsx}",
+        "src/platform/packages/shared/kbn-datemath/**/*.{js,mjs,ts,tsx}"
+      ],
+      "rules": {
+        "@kbn/eslint/require-license-header": [
+          "error",
+          {
+            "license": "\n/*\n * Licensed to Elasticsearch B.V. under one or more contributor\n * license agreements. See the NOTICE file distributed with\n * this work for additional information regarding copyright\n * ownership. Elasticsearch B.V. licenses this file to you under\n * the Apache License, Version 2.0 (the \"License\"); you may\n * not use this file except in compliance with the License.\n * You may obtain a copy of the License at\n *\n *    http://www.apache.org/licenses/LICENSE-2.0\n *\n * Unless required by applicable law or agreed to in writing,\n * software distributed under the License is distributed on an\n * \"AS IS\" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY\n * KIND, either express or implied.  See the License for the\n * specific language governing permissions and limitations\n * under the License.\n */\n"
+          }
+        ],
+        "@kbn/eslint/disallow-license-headers": [
+          "error",
+          {
+            "licenses": [
+              "\n/*\n * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one\n * or more contributor license agreements. Licensed under the \"Elastic License\n * 2.0\", the \"GNU Affero General Public License v3.0 only\", and the \"Server Side\n * Public License v 1\"; you may not use this file except in compliance with, at\n * your election, the \"Elastic License 2.0\", the \"GNU Affero General Public\n * License v3.0 only\", or the \"Server Side Public License, v 1\".\n */\n",
+              "\n/*\n * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one\n * or more contributor license agreements. Licensed under the Elastic License\n * 2.0 and the Server Side Public License, v 1; you may not use this file except\n * in compliance with, at your election, the Elastic License 2.0 or the Server\n * Side Public License, v 1.\n */\n",
+              "\n/*\n * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one\n * or more contributor license agreements. Licensed under the Elastic License\n * and the Server Side Public License, v 1; you may not use this file except in\n * compliance with, at your election, the Elastic License or the Server Side\n * Public License, v 1.\n */\n",
+              "\n/*\n * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one\n * or more contributor license agreements. Licensed under the Elastic License\n * 2.0; you may not use this file except in compliance with the Elastic License\n * 2.0.\n */\n",
+              "\n/*\n * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one\n * or more contributor license agreements. Licensed under the Elastic License;\n * you may not use this file except in compliance with the Elastic License.\n */\n",
+              "\n/*\n * Elasticsearch B.V licenses this file to you under the MIT License.\n * See `src/platform/packages/shared/kbn-safer-lodash-set/LICENSE` for more information.\n */\n",
+              "\n/*\n * This file is forked from the lodash project (https://lodash.com/),\n * and may include modifications made by Elasticsearch B.V.\n * Elasticsearch B.V. licenses this file to you under the MIT License.\n * See `src/platform/packages/shared/kbn-safer-lodash-set/LICENSE` for more information.\n */\n",
+              "\n/*\n * This file is forked from the DefinitelyTyped project (https://github.com/DefinitelyTyped/DefinitelyTyped),\n * and may include modifications made by Elasticsearch B.V.\n * Elasticsearch B.V. licenses this file to you under the MIT License.\n * See `src/platform/packages/shared/kbn-safer-lodash-set/LICENSE` for more information.\n */\n",
+              "\n/*\n * Elasticsearch B.V licenses this file to you under the MIT License.\n * See `src/platform/packages/private/kbn-handlebars/LICENSE` for more information.\n */\n",
+              "\n/*\n  * This file is forked from the handlebars project (https://github.com/handlebars-lang/handlebars.js),\n  * and may include modifications made by Elasticsearch B.V.\n  * Elasticsearch B.V. licenses this file to you under the MIT License.\n  * See `src/platform/packages/private/kbn-handlebars/LICENSE` for more information.\n  */\n",
+              "\n/*\n  * This file is forked from the venn.js project (https://github.com/benfred/venn.js/),\n  * and may include modifications made by Elasticsearch B.V.\n  * Elasticsearch B.V. licenses this file to you under the MIT License.\n  * See `x-pack/platform/plugins/private/graph/public/components/venn_diagram/vennjs/LICENSE` for more information.\n  */\n"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": [
+        "x-pack/**/*.{js,mjs,ts,tsx}"
+      ],
+      "rules": {
+        "@kbn/eslint/require-license-header": [
+          "error",
+          {
+            "license": "\n/*\n * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one\n * or more contributor license agreements. Licensed under the Elastic License\n * 2.0; you may not use this file except in compliance with the Elastic License\n * 2.0.\n */\n"
+          }
+        ],
+        "@kbn/eslint/disallow-license-headers": [
+          "error",
+          {
+            "licenses": [
+              "\n/*\n * Licensed to Elasticsearch B.V. under one or more contributor\n * license agreements. See the NOTICE file distributed with\n * this work for additional information regarding copyright\n * ownership. Elasticsearch B.V. licenses this file to you under\n * the Apache License, Version 2.0 (the \"License\"); you may\n * not use this file except in compliance with the License.\n * You may obtain a copy of the License at\n *\n *    http://www.apache.org/licenses/LICENSE-2.0\n *\n * Unless required by applicable law or agreed to in writing,\n * software distributed under the License is distributed on an\n * \"AS IS\" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY\n * KIND, either express or implied.  See the License for the\n * specific language governing permissions and limitations\n * under the License.\n */\n",
+              "\n/*\n * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one\n * or more contributor license agreements. Licensed under the \"Elastic License\n * 2.0\", the \"GNU Affero General Public License v3.0 only\", and the \"Server Side\n * Public License v 1\"; you may not use this file except in compliance with, at\n * your election, the \"Elastic License 2.0\", the \"GNU Affero General Public\n * License v3.0 only\", or the \"Server Side Public License, v 1\".\n */\n",
+              "\n/*\n * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one\n * or more contributor license agreements. Licensed under the Elastic License\n * 2.0 and the Server Side Public License, v 1; you may not use this file except\n * in compliance with, at your election, the Elastic License 2.0 or the Server\n * Side Public License, v 1.\n */\n",
+              "\n/*\n * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one\n * or more contributor license agreements. Licensed under the Elastic License\n * and the Server Side Public License, v 1; you may not use this file except in\n * compliance with, at your election, the Elastic License or the Server Side\n * Public License, v 1.\n */\n",
+              "\n/*\n * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one\n * or more contributor license agreements. Licensed under the Elastic License;\n * you may not use this file except in compliance with the Elastic License.\n */\n",
+              "\n/*\n * Elasticsearch B.V licenses this file to you under the MIT License.\n * See `src/platform/packages/shared/kbn-safer-lodash-set/LICENSE` for more information.\n */\n",
+              "\n/*\n * This file is forked from the lodash project (https://lodash.com/),\n * and may include modifications made by Elasticsearch B.V.\n * Elasticsearch B.V. licenses this file to you under the MIT License.\n * See `src/platform/packages/shared/kbn-safer-lodash-set/LICENSE` for more information.\n */\n",
+              "\n/*\n * This file is forked from the DefinitelyTyped project (https://github.com/DefinitelyTyped/DefinitelyTyped),\n * and may include modifications made by Elasticsearch B.V.\n * Elasticsearch B.V. licenses this file to you under the MIT License.\n * See `src/platform/packages/shared/kbn-safer-lodash-set/LICENSE` for more information.\n */\n",
+              "\n/*\n * Elasticsearch B.V licenses this file to you under the MIT License.\n * See `src/platform/packages/private/kbn-handlebars/LICENSE` for more information.\n */\n",
+              "\n/*\n  * This file is forked from the handlebars project (https://github.com/handlebars-lang/handlebars.js),\n  * and may include modifications made by Elasticsearch B.V.\n  * Elasticsearch B.V. licenses this file to you under the MIT License.\n  * See `src/platform/packages/private/kbn-handlebars/LICENSE` for more information.\n  */\n",
+              "\n/*\n  * This file is forked from the venn.js project (https://github.com/benfred/venn.js/),\n  * and may include modifications made by Elasticsearch B.V.\n  * Elasticsearch B.V. licenses this file to you under the MIT License.\n  * See `x-pack/platform/plugins/private/graph/public/components/venn_diagram/vennjs/LICENSE` for more information.\n  */\n"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": [
+        "src/platform/packages/shared/kbn-safer-lodash-set/**/*.{js,mjs,ts,tsx}"
+      ],
+      "rules": {
+        "@kbn/eslint/require-license-header": [
+          "error",
+          {
+            "license": "\n/*\n * This file is forked from the lodash project (https://lodash.com/),\n * and may include modifications made by Elasticsearch B.V.\n * Elasticsearch B.V. licenses this file to you under the MIT License.\n * See `src/platform/packages/shared/kbn-safer-lodash-set/LICENSE` for more information.\n */\n"
+          }
+        ],
+        "@kbn/eslint/disallow-license-headers": [
+          "error",
+          {
+            "licenses": [
+              "\n/*\n * Licensed to Elasticsearch B.V. under one or more contributor\n * license agreements. See the NOTICE file distributed with\n * this work for additional information regarding copyright\n * ownership. Elasticsearch B.V. licenses this file to you under\n * the Apache License, Version 2.0 (the \"License\"); you may\n * not use this file except in compliance with the License.\n * You may obtain a copy of the License at\n *\n *    http://www.apache.org/licenses/LICENSE-2.0\n *\n * Unless required by applicable law or agreed to in writing,\n * software distributed under the License is distributed on an\n * \"AS IS\" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY\n * KIND, either express or implied.  See the License for the\n * specific language governing permissions and limitations\n * under the License.\n */\n",
+              "\n/*\n * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one\n * or more contributor license agreements. Licensed under the \"Elastic License\n * 2.0\", the \"GNU Affero General Public License v3.0 only\", and the \"Server Side\n * Public License v 1\"; you may not use this file except in compliance with, at\n * your election, the \"Elastic License 2.0\", the \"GNU Affero General Public\n * License v3.0 only\", or the \"Server Side Public License, v 1\".\n */\n",
+              "\n/*\n * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one\n * or more contributor license agreements. Licensed under the Elastic License\n * 2.0 and the Server Side Public License, v 1; you may not use this file except\n * in compliance with, at your election, the Elastic License 2.0 or the Server\n * Side Public License, v 1.\n */\n",
+              "\n/*\n * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one\n * or more contributor license agreements. Licensed under the Elastic License\n * and the Server Side Public License, v 1; you may not use this file except in\n * compliance with, at your election, the Elastic License or the Server Side\n * Public License, v 1.\n */\n",
+              "\n/*\n * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one\n * or more contributor license agreements. Licensed under the Elastic License\n * 2.0; you may not use this file except in compliance with the Elastic License\n * 2.0.\n */\n",
+              "\n/*\n * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one\n * or more contributor license agreements. Licensed under the Elastic License;\n * you may not use this file except in compliance with the Elastic License.\n */\n",
+              "\n/*\n * Elasticsearch B.V licenses this file to you under the MIT License.\n * See `src/platform/packages/shared/kbn-safer-lodash-set/LICENSE` for more information.\n */\n",
+              "\n/*\n * This file is forked from the DefinitelyTyped project (https://github.com/DefinitelyTyped/DefinitelyTyped),\n * and may include modifications made by Elasticsearch B.V.\n * Elasticsearch B.V. licenses this file to you under the MIT License.\n * See `src/platform/packages/shared/kbn-safer-lodash-set/LICENSE` for more information.\n */\n",
+              "\n/*\n * Elasticsearch B.V licenses this file to you under the MIT License.\n * See `src/platform/packages/private/kbn-handlebars/LICENSE` for more information.\n */\n",
+              "\n/*\n  * This file is forked from the handlebars project (https://github.com/handlebars-lang/handlebars.js),\n  * and may include modifications made by Elasticsearch B.V.\n  * Elasticsearch B.V. licenses this file to you under the MIT License.\n  * See `src/platform/packages/private/kbn-handlebars/LICENSE` for more information.\n  */\n",
+              "\n/*\n  * This file is forked from the venn.js project (https://github.com/benfred/venn.js/),\n  * and may include modifications made by Elasticsearch B.V.\n  * Elasticsearch B.V. licenses this file to you under the MIT License.\n  * See `x-pack/platform/plugins/private/graph/public/components/venn_diagram/vennjs/LICENSE` for more information.\n  */\n"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": [
+        "src/platform/packages/shared/kbn-safer-lodash-set/test/*.{js,mjs,ts,tsx}"
+      ],
+      "rules": {
+        "@kbn/eslint/require-license-header": [
+          "error",
+          {
+            "license": "\n/*\n * Elasticsearch B.V licenses this file to you under the MIT License.\n * See `src/platform/packages/shared/kbn-safer-lodash-set/LICENSE` for more information.\n */\n"
+          }
+        ],
+        "@kbn/eslint/disallow-license-headers": [
+          "error",
+          {
+            "licenses": [
+              "\n/*\n * Licensed to Elasticsearch B.V. under one or more contributor\n * license agreements. See the NOTICE file distributed with\n * this work for additional information regarding copyright\n * ownership. Elasticsearch B.V. licenses this file to you under\n * the Apache License, Version 2.0 (the \"License\"); you may\n * not use this file except in compliance with the License.\n * You may obtain a copy of the License at\n *\n *    http://www.apache.org/licenses/LICENSE-2.0\n *\n * Unless required by applicable law or agreed to in writing,\n * software distributed under the License is distributed on an\n * \"AS IS\" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY\n * KIND, either express or implied.  See the License for the\n * specific language governing permissions and limitations\n * under the License.\n */\n",
+              "\n/*\n * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one\n * or more contributor license agreements. Licensed under the \"Elastic License\n * 2.0\", the \"GNU Affero General Public License v3.0 only\", and the \"Server Side\n * Public License v 1\"; you may not use this file except in compliance with, at\n * your election, the \"Elastic License 2.0\", the \"GNU Affero General Public\n * License v3.0 only\", or the \"Server Side Public License, v 1\".\n */\n",
+              "\n/*\n * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one\n * or more contributor license agreements. Licensed under the Elastic License\n * 2.0 and the Server Side Public License, v 1; you may not use this file except\n * in compliance with, at your election, the Elastic License 2.0 or the Server\n * Side Public License, v 1.\n */\n",
+              "\n/*\n * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one\n * or more contributor license agreements. Licensed under the Elastic License\n * and the Server Side Public License, v 1; you may not use this file except in\n * compliance with, at your election, the Elastic License or the Server Side\n * Public License, v 1.\n */\n",
+              "\n/*\n * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one\n * or more contributor license agreements. Licensed under the Elastic License\n * 2.0; you may not use this file except in compliance with the Elastic License\n * 2.0.\n */\n",
+              "\n/*\n * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one\n * or more contributor license agreements. Licensed under the Elastic License;\n * you may not use this file except in compliance with the Elastic License.\n */\n",
+              "\n/*\n * This file is forked from the lodash project (https://lodash.com/),\n * and may include modifications made by Elasticsearch B.V.\n * Elasticsearch B.V. licenses this file to you under the MIT License.\n * See `src/platform/packages/shared/kbn-safer-lodash-set/LICENSE` for more information.\n */\n",
+              "\n/*\n * This file is forked from the DefinitelyTyped project (https://github.com/DefinitelyTyped/DefinitelyTyped),\n * and may include modifications made by Elasticsearch B.V.\n * Elasticsearch B.V. licenses this file to you under the MIT License.\n * See `src/platform/packages/shared/kbn-safer-lodash-set/LICENSE` for more information.\n */\n",
+              "\n/*\n * Elasticsearch B.V licenses this file to you under the MIT License.\n * See `src/platform/packages/private/kbn-handlebars/LICENSE` for more information.\n */\n",
+              "\n/*\n  * This file is forked from the handlebars project (https://github.com/handlebars-lang/handlebars.js),\n  * and may include modifications made by Elasticsearch B.V.\n  * Elasticsearch B.V. licenses this file to you under the MIT License.\n  * See `src/platform/packages/private/kbn-handlebars/LICENSE` for more information.\n  */\n",
+              "\n/*\n  * This file is forked from the venn.js project (https://github.com/benfred/venn.js/),\n  * and may include modifications made by Elasticsearch B.V.\n  * Elasticsearch B.V. licenses this file to you under the MIT License.\n  * See `x-pack/platform/plugins/private/graph/public/components/venn_diagram/vennjs/LICENSE` for more information.\n  */\n"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": [
+        "src/platform/packages/shared/kbn-safer-lodash-set/**/*.d.ts"
+      ],
+      "rules": {
+        "@kbn/eslint/require-license-header": [
+          "error",
+          {
+            "license": "\n/*\n * This file is forked from the DefinitelyTyped project (https://github.com/DefinitelyTyped/DefinitelyTyped),\n * and may include modifications made by Elasticsearch B.V.\n * Elasticsearch B.V. licenses this file to you under the MIT License.\n * See `src/platform/packages/shared/kbn-safer-lodash-set/LICENSE` for more information.\n */\n"
+          }
+        ],
+        "@kbn/eslint/disallow-license-headers": [
+          "error",
+          {
+            "licenses": [
+              "\n/*\n * Licensed to Elasticsearch B.V. under one or more contributor\n * license agreements. See the NOTICE file distributed with\n * this work for additional information regarding copyright\n * ownership. Elasticsearch B.V. licenses this file to you under\n * the Apache License, Version 2.0 (the \"License\"); you may\n * not use this file except in compliance with the License.\n * You may obtain a copy of the License at\n *\n *    http://www.apache.org/licenses/LICENSE-2.0\n *\n * Unless required by applicable law or agreed to in writing,\n * software distributed under the License is distributed on an\n * \"AS IS\" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY\n * KIND, either express or implied.  See the License for the\n * specific language governing permissions and limitations\n * under the License.\n */\n",
+              "\n/*\n * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one\n * or more contributor license agreements. Licensed under the \"Elastic License\n * 2.0\", the \"GNU Affero General Public License v3.0 only\", and the \"Server Side\n * Public License v 1\"; you may not use this file except in compliance with, at\n * your election, the \"Elastic License 2.0\", the \"GNU Affero General Public\n * License v3.0 only\", or the \"Server Side Public License, v 1\".\n */\n",
+              "\n/*\n * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one\n * or more contributor license agreements. Licensed under the Elastic License\n * 2.0 and the Server Side Public License, v 1; you may not use this file except\n * in compliance with, at your election, the Elastic License 2.0 or the Server\n * Side Public License, v 1.\n */\n",
+              "\n/*\n * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one\n * or more contributor license agreements. Licensed under the Elastic License\n * and the Server Side Public License, v 1; you may not use this file except in\n * compliance with, at your election, the Elastic License or the Server Side\n * Public License, v 1.\n */\n",
+              "\n/*\n * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one\n * or more contributor license agreements. Licensed under the Elastic License\n * 2.0; you may not use this file except in compliance with the Elastic License\n * 2.0.\n */\n",
+              "\n/*\n * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one\n * or more contributor license agreements. Licensed under the Elastic License;\n * you may not use this file except in compliance with the Elastic License.\n */\n",
+              "\n/*\n * Elasticsearch B.V licenses this file to you under the MIT License.\n * See `src/platform/packages/shared/kbn-safer-lodash-set/LICENSE` for more information.\n */\n",
+              "\n/*\n * This file is forked from the lodash project (https://lodash.com/),\n * and may include modifications made by Elasticsearch B.V.\n * Elasticsearch B.V. licenses this file to you under the MIT License.\n * See `src/platform/packages/shared/kbn-safer-lodash-set/LICENSE` for more information.\n */\n",
+              "\n/*\n * Elasticsearch B.V licenses this file to you under the MIT License.\n * See `src/platform/packages/private/kbn-handlebars/LICENSE` for more information.\n */\n",
+              "\n/*\n  * This file is forked from the handlebars project (https://github.com/handlebars-lang/handlebars.js),\n  * and may include modifications made by Elasticsearch B.V.\n  * Elasticsearch B.V. licenses this file to you under the MIT License.\n  * See `src/platform/packages/private/kbn-handlebars/LICENSE` for more information.\n  */\n",
+              "\n/*\n  * This file is forked from the venn.js project (https://github.com/benfred/venn.js/),\n  * and may include modifications made by Elasticsearch B.V.\n  * Elasticsearch B.V. licenses this file to you under the MIT License.\n  * See `x-pack/platform/plugins/private/graph/public/components/venn_diagram/vennjs/LICENSE` for more information.\n  */\n"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": [
+        "src/platform/packages/private/kbn-handlebars/**/*.{js,mjs,ts,tsx}"
+      ],
+      "rules": {
+        "@kbn/eslint/require-license-header": [
+          "error",
+          {
+            "license": "\n/*\n * Elasticsearch B.V licenses this file to you under the MIT License.\n * See `src/platform/packages/private/kbn-handlebars/LICENSE` for more information.\n */\n"
+          }
+        ],
+        "@kbn/eslint/disallow-license-headers": [
+          "error",
+          {
+            "licenses": [
+              "\n/*\n * Licensed to Elasticsearch B.V. under one or more contributor\n * license agreements. See the NOTICE file distributed with\n * this work for additional information regarding copyright\n * ownership. Elasticsearch B.V. licenses this file to you under\n * the Apache License, Version 2.0 (the \"License\"); you may\n * not use this file except in compliance with the License.\n * You may obtain a copy of the License at\n *\n *    http://www.apache.org/licenses/LICENSE-2.0\n *\n * Unless required by applicable law or agreed to in writing,\n * software distributed under the License is distributed on an\n * \"AS IS\" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY\n * KIND, either express or implied.  See the License for the\n * specific language governing permissions and limitations\n * under the License.\n */\n",
+              "\n/*\n * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one\n * or more contributor license agreements. Licensed under the \"Elastic License\n * 2.0\", the \"GNU Affero General Public License v3.0 only\", and the \"Server Side\n * Public License v 1\"; you may not use this file except in compliance with, at\n * your election, the \"Elastic License 2.0\", the \"GNU Affero General Public\n * License v3.0 only\", or the \"Server Side Public License, v 1\".\n */\n",
+              "\n/*\n * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one\n * or more contributor license agreements. Licensed under the Elastic License\n * 2.0 and the Server Side Public License, v 1; you may not use this file except\n * in compliance with, at your election, the Elastic License 2.0 or the Server\n * Side Public License, v 1.\n */\n",
+              "\n/*\n * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one\n * or more contributor license agreements. Licensed under the Elastic License\n * and the Server Side Public License, v 1; you may not use this file except in\n * compliance with, at your election, the Elastic License or the Server Side\n * Public License, v 1.\n */\n",
+              "\n/*\n * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one\n * or more contributor license agreements. Licensed under the Elastic License\n * 2.0; you may not use this file except in compliance with the Elastic License\n * 2.0.\n */\n",
+              "\n/*\n * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one\n * or more contributor license agreements. Licensed under the Elastic License;\n * you may not use this file except in compliance with the Elastic License.\n */\n",
+              "\n/*\n * Elasticsearch B.V licenses this file to you under the MIT License.\n * See `src/platform/packages/shared/kbn-safer-lodash-set/LICENSE` for more information.\n */\n",
+              "\n/*\n * This file is forked from the lodash project (https://lodash.com/),\n * and may include modifications made by Elasticsearch B.V.\n * Elasticsearch B.V. licenses this file to you under the MIT License.\n * See `src/platform/packages/shared/kbn-safer-lodash-set/LICENSE` for more information.\n */\n",
+              "\n/*\n * This file is forked from the DefinitelyTyped project (https://github.com/DefinitelyTyped/DefinitelyTyped),\n * and may include modifications made by Elasticsearch B.V.\n * Elasticsearch B.V. licenses this file to you under the MIT License.\n * See `src/platform/packages/shared/kbn-safer-lodash-set/LICENSE` for more information.\n */\n",
+              "\n/*\n  * This file is forked from the handlebars project (https://github.com/handlebars-lang/handlebars.js),\n  * and may include modifications made by Elasticsearch B.V.\n  * Elasticsearch B.V. licenses this file to you under the MIT License.\n  * See `src/platform/packages/private/kbn-handlebars/LICENSE` for more information.\n  */\n",
+              "\n/*\n  * This file is forked from the venn.js project (https://github.com/benfred/venn.js/),\n  * and may include modifications made by Elasticsearch B.V.\n  * Elasticsearch B.V. licenses this file to you under the MIT License.\n  * See `x-pack/platform/plugins/private/graph/public/components/venn_diagram/vennjs/LICENSE` for more information.\n  */\n"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": [
+        "src/platform/packages/private/kbn-handlebars/src/spec/**/*.{js,mjs,ts,tsx}"
+      ],
+      "rules": {
+        "@kbn/eslint/require-license-header": [
+          "error",
+          {
+            "license": "\n/*\n  * This file is forked from the handlebars project (https://github.com/handlebars-lang/handlebars.js),\n  * and may include modifications made by Elasticsearch B.V.\n  * Elasticsearch B.V. licenses this file to you under the MIT License.\n  * See `src/platform/packages/private/kbn-handlebars/LICENSE` for more information.\n  */\n"
+          }
+        ],
+        "@kbn/eslint/disallow-license-headers": [
+          "error",
+          {
+            "licenses": [
+              "\n/*\n * Licensed to Elasticsearch B.V. under one or more contributor\n * license agreements. See the NOTICE file distributed with\n * this work for additional information regarding copyright\n * ownership. Elasticsearch B.V. licenses this file to you under\n * the Apache License, Version 2.0 (the \"License\"); you may\n * not use this file except in compliance with the License.\n * You may obtain a copy of the License at\n *\n *    http://www.apache.org/licenses/LICENSE-2.0\n *\n * Unless required by applicable law or agreed to in writing,\n * software distributed under the License is distributed on an\n * \"AS IS\" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY\n * KIND, either express or implied.  See the License for the\n * specific language governing permissions and limitations\n * under the License.\n */\n",
+              "\n/*\n * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one\n * or more contributor license agreements. Licensed under the \"Elastic License\n * 2.0\", the \"GNU Affero General Public License v3.0 only\", and the \"Server Side\n * Public License v 1\"; you may not use this file except in compliance with, at\n * your election, the \"Elastic License 2.0\", the \"GNU Affero General Public\n * License v3.0 only\", or the \"Server Side Public License, v 1\".\n */\n",
+              "\n/*\n * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one\n * or more contributor license agreements. Licensed under the Elastic License\n * 2.0 and the Server Side Public License, v 1; you may not use this file except\n * in compliance with, at your election, the Elastic License 2.0 or the Server\n * Side Public License, v 1.\n */\n",
+              "\n/*\n * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one\n * or more contributor license agreements. Licensed under the Elastic License\n * and the Server Side Public License, v 1; you may not use this file except in\n * compliance with, at your election, the Elastic License or the Server Side\n * Public License, v 1.\n */\n",
+              "\n/*\n * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one\n * or more contributor license agreements. Licensed under the Elastic License\n * 2.0; you may not use this file except in compliance with the Elastic License\n * 2.0.\n */\n",
+              "\n/*\n * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one\n * or more contributor license agreements. Licensed under the Elastic License;\n * you may not use this file except in compliance with the Elastic License.\n */\n",
+              "\n/*\n * Elasticsearch B.V licenses this file to you under the MIT License.\n * See `src/platform/packages/shared/kbn-safer-lodash-set/LICENSE` for more information.\n */\n",
+              "\n/*\n * This file is forked from the lodash project (https://lodash.com/),\n * and may include modifications made by Elasticsearch B.V.\n * Elasticsearch B.V. licenses this file to you under the MIT License.\n * See `src/platform/packages/shared/kbn-safer-lodash-set/LICENSE` for more information.\n */\n",
+              "\n/*\n * This file is forked from the DefinitelyTyped project (https://github.com/DefinitelyTyped/DefinitelyTyped),\n * and may include modifications made by Elasticsearch B.V.\n * Elasticsearch B.V. licenses this file to you under the MIT License.\n * See `src/platform/packages/shared/kbn-safer-lodash-set/LICENSE` for more information.\n */\n",
+              "\n/*\n * Elasticsearch B.V licenses this file to you under the MIT License.\n * See `src/platform/packages/private/kbn-handlebars/LICENSE` for more information.\n */\n",
+              "\n/*\n  * This file is forked from the venn.js project (https://github.com/benfred/venn.js/),\n  * and may include modifications made by Elasticsearch B.V.\n  * Elasticsearch B.V. licenses this file to you under the MIT License.\n  * See `x-pack/platform/plugins/private/graph/public/components/venn_diagram/vennjs/LICENSE` for more information.\n  */\n"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": [
+        "x-pack/platform/plugins/private/graph/public/components/venn_diagram/vennjs/**/*.{js,mjs,ts,tsx}"
+      ],
+      "rules": {
+        "@kbn/eslint/require-license-header": [
+          "error",
+          {
+            "license": "\n/*\n  * This file is forked from the venn.js project (https://github.com/benfred/venn.js/),\n  * and may include modifications made by Elasticsearch B.V.\n  * Elasticsearch B.V. licenses this file to you under the MIT License.\n  * See `x-pack/platform/plugins/private/graph/public/components/venn_diagram/vennjs/LICENSE` for more information.\n  */\n"
+          }
+        ],
+        "@kbn/eslint/disallow-license-headers": [
+          "error",
+          {
+            "licenses": [
+              "\n/*\n * Licensed to Elasticsearch B.V. under one or more contributor\n * license agreements. See the NOTICE file distributed with\n * this work for additional information regarding copyright\n * ownership. Elasticsearch B.V. licenses this file to you under\n * the Apache License, Version 2.0 (the \"License\"); you may\n * not use this file except in compliance with the License.\n * You may obtain a copy of the License at\n *\n *    http://www.apache.org/licenses/LICENSE-2.0\n *\n * Unless required by applicable law or agreed to in writing,\n * software distributed under the License is distributed on an\n * \"AS IS\" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY\n * KIND, either express or implied.  See the License for the\n * specific language governing permissions and limitations\n * under the License.\n */\n",
+              "\n/*\n * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one\n * or more contributor license agreements. Licensed under the \"Elastic License\n * 2.0\", the \"GNU Affero General Public License v3.0 only\", and the \"Server Side\n * Public License v 1\"; you may not use this file except in compliance with, at\n * your election, the \"Elastic License 2.0\", the \"GNU Affero General Public\n * License v3.0 only\", or the \"Server Side Public License, v 1\".\n */\n",
+              "\n/*\n * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one\n * or more contributor license agreements. Licensed under the Elastic License\n * 2.0 and the Server Side Public License, v 1; you may not use this file except\n * in compliance with, at your election, the Elastic License 2.0 or the Server\n * Side Public License, v 1.\n */\n",
+              "\n/*\n * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one\n * or more contributor license agreements. Licensed under the Elastic License\n * and the Server Side Public License, v 1; you may not use this file except in\n * compliance with, at your election, the Elastic License or the Server Side\n * Public License, v 1.\n */\n",
+              "\n/*\n * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one\n * or more contributor license agreements. Licensed under the Elastic License\n * 2.0; you may not use this file except in compliance with the Elastic License\n * 2.0.\n */\n",
+              "\n/*\n * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one\n * or more contributor license agreements. Licensed under the Elastic License;\n * you may not use this file except in compliance with the Elastic License.\n */\n",
+              "\n/*\n * Elasticsearch B.V licenses this file to you under the MIT License.\n * See `src/platform/packages/shared/kbn-safer-lodash-set/LICENSE` for more information.\n */\n",
+              "\n/*\n * This file is forked from the lodash project (https://lodash.com/),\n * and may include modifications made by Elasticsearch B.V.\n * Elasticsearch B.V. licenses this file to you under the MIT License.\n * See `src/platform/packages/shared/kbn-safer-lodash-set/LICENSE` for more information.\n */\n",
+              "\n/*\n * This file is forked from the DefinitelyTyped project (https://github.com/DefinitelyTyped/DefinitelyTyped),\n * and may include modifications made by Elasticsearch B.V.\n * Elasticsearch B.V. licenses this file to you under the MIT License.\n * See `src/platform/packages/shared/kbn-safer-lodash-set/LICENSE` for more information.\n */\n",
+              "\n/*\n * Elasticsearch B.V licenses this file to you under the MIT License.\n * See `src/platform/packages/private/kbn-handlebars/LICENSE` for more information.\n */\n",
+              "\n/*\n  * This file is forked from the handlebars project (https://github.com/handlebars-lang/handlebars.js),\n  * and may include modifications made by Elasticsearch B.V.\n  * Elasticsearch B.V. licenses this file to you under the MIT License.\n  * See `src/platform/packages/private/kbn-handlebars/LICENSE` for more information.\n  */\n"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": [
         "{src/platform,src/core,x-pack/**}/{plugins,packages}/**/test/scout{_*,}/**/*.ts",
         "{examples,x-pack/examples}/**/test/scout{_*,}/**/*.ts",
         "src/core/test/scout{_*,}/**/*.ts",
