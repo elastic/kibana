@@ -207,10 +207,10 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
   const columns = useMemo<Array<EuiBasicTableColumn<PolicyRow>>>(
     () => [
       {
-        field: 'id',
+        field: '',
         name: '',
         width: '40px',
-        render: (_id: string, item: PolicyRow) => (
+        render: (item: PolicyRow) => (
           <CheckboxCell
             policyId={item.id}
             policyName={item.name}
@@ -237,17 +237,17 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
         render: (agents: number) => <AgentCountCell count={agents} />,
       },
       {
-        field: 'id',
+        field: '',
         name: '',
         width: '120px',
         align: 'right' as const,
-        render: (id: string) => (
+        render: (item: PolicyRow) => (
           <EuiLink
             href={getUrlForApp(PLUGIN_ID, {
-              path: pagePathGetters.policy_details({ policyId: id })[1],
+              path: pagePathGetters.policy_details({ policyId: item.id })[1],
             })}
             target="_blank"
-            data-test-subj={`viewPolicy-${id}`}
+            data-test-subj={`viewPolicy-${item.id}`}
           >
             <FormattedMessage
               id="xpack.osquery.pack.policyList.viewPolicyLink"
@@ -272,7 +272,6 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
     []
   );
 
-  // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
   const executeQueryOptions = useMemo(() => ({ defaultFields: ['name'] }), []);
 
   // `allPolicies` comes from `Object.entries` over the Fleet response, so
@@ -292,14 +291,14 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
   );
 
   // `useAgentPolicies` uses `initialData: []`, so an empty map alone is not a
-  // settled Fleet response — gate CTA / error / loading on fetch status.
+  // settled Fleet response — gate empty / error / loading on fetch status.
   const hasNoPolicyRows = knownPolicies.length === 0 && orphanPolicies.length === 0;
   const isInitialLoad = isFetching && hasNoPolicyRows && !isError;
   const isLoadError = isError && hasNoPolicyRows;
 
-  // Distinguish in-flight / failed fetch, "Fleet has no policies", and "the
-  // search matched nothing". The Fleet CTA is only for a successful empty
-  // response. Orphan rows alone still populate the table.
+  // Distinguish in-flight / failed fetch, "Fleet has no policies" (copy-only
+  // empty prompt), and "the search matched nothing". Orphan rows alone still
+  // populate the table.
   const emptyMessage = isInitialLoad ? (
     <EuiEmptyPrompt
       title={

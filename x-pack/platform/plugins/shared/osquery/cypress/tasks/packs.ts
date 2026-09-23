@@ -79,13 +79,14 @@ export const changePackActiveStatus = (packName: string) => {
  */
 export const selectPackPolicy = (policyName: string) => {
   cy.getBySel(POLICY_ASSIGNMENT_TABLE).should('exist');
-  cy.getBySel(POLICY_ASSIGNMENT_TABLE).find('input[type="search"]').clear().type(policyName);
+  // EuiInMemoryTable puts data-test-subj on the table node; the search bar is a
+  // sibling under the panel, not a descendant — locate by placeholder instead.
+  cy.get('input[placeholder="Search policies"]').clear().type(policyName);
 
-  cy.contains('.euiTableRow', policyName)
-    .find('input[type="checkbox"]')
-    .should('not.be.disabled')
-    .check();
+  cy.contains('.euiTableRow', policyName).within(() => {
+    cy.get('input[type="checkbox"]').should('not.be.disabled').check().should('be.checked');
+  });
 
   // Clear the filter so later assertions see the full list again.
-  cy.getBySel(POLICY_ASSIGNMENT_TABLE).find('input[type="search"]').clear();
+  cy.get('input[placeholder="Search policies"]').clear();
 };

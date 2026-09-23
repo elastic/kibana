@@ -40,7 +40,8 @@ jest.mock('../../agent_policies', () => ({
 
 jest.mock('@kbn/fleet-plugin/public', () => ({
   pagePathGetters: {
-    policy_details: ({ policyId }: { policyId: string }) => ['', `/fleet/policies/${policyId}`],
+    // Mirrors Fleet pagePathGetters: path segment is `/policies/${id}` (not `/fleet/policies/...`).
+    policy_details: ({ policyId }: { policyId: string }) => ['', `/policies/${policyId}`],
   },
 }));
 
@@ -65,11 +66,12 @@ const FormWrapper: React.FC<WrapperProps> = ({
       ...defaultValues,
     },
   });
+  const { getValues, watch } = methods;
+  const policyIds = watch('policy_ids');
 
-  const values = methods.watch();
   React.useEffect(() => {
-    onFormChange?.(values);
-  });
+    onFormChange?.(getValues());
+  }, [policyIds, onFormChange, getValues]);
 
   return (
     <EuiProvider>
@@ -200,7 +202,7 @@ describe('PolicyAssignmentList', () => {
       render(<FormWrapper />);
       const links = screen.getAllByRole('link', { name: /view policy/i });
       const hrefs = links.map((l) => l.getAttribute('href'));
-      expect(hrefs).toContain('/app/fleet/fleet/policies/policy-1');
+      expect(hrefs).toContain('/app/fleet/policies/policy-1');
     });
 
     it('View policy link is present on unselected rows', () => {
@@ -227,7 +229,7 @@ describe('PolicyAssignmentList', () => {
       fireEvent.change(searchInput, { target: { value: 'no-such-policy' } });
 
       expect(screen.getByText('No policies match your search')).toBeInTheDocument();
-      // The Fleet CTA is only actionable when Fleet genuinely has no policies.
+      // Zero-policies empty copy is only for a successful empty Fleet response.
       expect(screen.queryByText('No agent policies found')).not.toBeInTheDocument();
     });
 
@@ -242,10 +244,41 @@ describe('PolicyAssignmentList', () => {
   });
 
   describe('selection', () => {
-    it('shows selection count', () => {
+    it('shows selection count including enrolled agents', () => {
       render(<FormWrapper defaultValues={{ policy_ids: ['policy-1', 'policy-2'] }} />);
       const countEl = screen.getByTestId('policyAssignmentCount');
-      expect(countEl).toHaveTextContent('2 of 3 selected');
+      // policy-1 (5 agents) + policy-2 (10 agents) = 15
+      expect(countEl).toHaveTextContent('2 of 3 selected | 15 agents enrolled');
+    });
+
+    it('hydrates checkboxes from seeded policy_ids', () => {
+      render(<FormWrapper defaultValues={{ policy_ids: ['policy-1', 'policy-2'] }} />);
+
+      expect(screen.getByRole('checkbox', { name: 'Select policy Alpha Policy' })).toBeChecked();
+      expect(screen.getByRole('checkbox', { name: 'Select policy Beta Policy' })).toBeChecked();
+      expect(
+        screen.getByRole('checkbox', { name: 'Select policy Gamma Policy' })
+      ).not.toBeChecked();
+    });
+
+    it('toggles a single policy id via its row checkbox', () => {
+      const handleChange = jest.fn();
+      render(<FormWrapper onFormChange={handleChange} />);
+
+      const policy2Checkbox = screen.getByRole('checkbox', {
+        name: 'Select policy Beta Policy',
+      });
+      expect(policy2Checkbox).not.toBeChecked();
+
+      fireEvent.click(policy2Checkbox);
+      let lastCall = handleChange.mock.calls[handleChange.mock.calls.length - 1][0];
+      expect(lastCall.policy_ids).toEqual(['policy-2']);
+      expect(policy2Checkbox).toBeChecked();
+
+      fireEvent.click(policy2Checkbox);
+      lastCall = handleChange.mock.calls[handleChange.mock.calls.length - 1][0];
+      expect(lastCall.policy_ids).toEqual([]);
+      expect(policy2Checkbox).not.toBeChecked();
     });
 
     it('select all selects every policy', () => {
@@ -303,20 +336,54 @@ describe('PolicyAssignmentList', () => {
       expect(lastCall.policy_ids).toContain('policy-2');
     });
 
-    it('selection persists across simulated page navigation (form value not pruned)', () => {
-      // This test asserts the form value directly rather than visual state,
-      // because the EUI built-in selection would prune off-page selections.
+    it('selection persists across real page navigation (form value not pruned)', () => {
+      // EUI's built-in table selection would prune off-page rows; our form-owned
+      // checkboxes must keep policy_ids when the selected row leaves the page.
+      const manyPolicies = Object.fromEntries(
+        Array.from({ length: 11 }, (_, i) => {
+          const id = `policy-${String(i + 1).padStart(2, '0')}`;
+
+          return [
+            id,
+            {
+              name: `Policy ${String(i + 1).padStart(2, '0')}`,
+              agents: i + 1,
+              id,
+              description: '',
+            },
+          ];
+        })
+      );
+      mockUseAgentPolicies.mockReturnValue({
+        data: { agentPoliciesById: manyPolicies },
+        isFetching: false,
+        isError: false,
+      });
+
       const handleChange = jest.fn();
       render(
-        <FormWrapper
-          defaultValues={{ policy_ids: ['policy-1', 'policy-3'] }}
-          onFormChange={handleChange}
-        />
+        <FormWrapper defaultValues={{ policy_ids: ['policy-01'] }} onFormChange={handleChange} />
       );
-      // Form value should contain both selections even before any interaction
-      const initialCall = handleChange.mock.calls[0]?.[0];
-      expect(initialCall?.policy_ids).toContain('policy-1');
-      expect(initialCall?.policy_ids).toContain('policy-3');
+
+      const page1Checkbox = screen.getByRole('checkbox', {
+        name: 'Select policy Policy 01',
+      });
+      expect(page1Checkbox).toBeChecked();
+
+      // initialPageSize is 10 — page 2 holds Policy 11
+      fireEvent.click(screen.getByTestId('pagination-button-1'));
+      expect(
+        screen.queryByRole('checkbox', { name: 'Select policy Policy 01' })
+      ).not.toBeInTheDocument();
+      expect(screen.getByRole('checkbox', { name: 'Select policy Policy 11' })).toBeInTheDocument();
+
+      const afterPageChange = handleChange.mock.calls[handleChange.mock.calls.length - 1][0];
+      expect(afterPageChange.policy_ids).toEqual(['policy-01']);
+
+      fireEvent.click(screen.getByTestId('pagination-button-0'));
+      expect(screen.getByRole('checkbox', { name: 'Select policy Policy 01' })).toBeChecked();
+      const afterReturn = handleChange.mock.calls[handleChange.mock.calls.length - 1][0];
+      expect(afterReturn.policy_ids).toEqual(['policy-01']);
     });
 
     it('does not add a shard policy id via checkbox', () => {
