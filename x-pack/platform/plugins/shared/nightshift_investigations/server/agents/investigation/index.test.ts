@@ -62,6 +62,29 @@ describe('Nightshift investigation agent type', () => {
     // Its own prompt, not the significant-events one: it documents the sandbox query path.
     expect(base.instructions).toContain('/workspace/elastic.md');
     expect(base.instructions).not.toContain('platform_core_execute_esql');
+    expect(base.instructions).not.toContain('/workspace/decision-trees/monitors.md');
+  });
+
+  it('hydrates and reinforces decision trees when they are enabled', () => {
+    const base = staticBase(
+      getInvestigationAgentType({
+        sandboxEnabled: true,
+        cortexEnabled: true,
+        decisionTreesEnabled: true,
+      })
+    );
+
+    expect(base.workflow_ids).toEqual([
+      'system-nightshift-cortex-hydrate',
+      'system-nightshift-decision-tree-hydrate',
+    ]);
+    expect(base.post_execution_workflow_ids).toEqual([
+      'system-nightshift-cortex-optimize',
+      'system-nightshift-decision-tree-reinforce',
+    ]);
+    expect(base.instructions).toContain('/workspace/decision-trees/monitors.md');
+    expect(base.instructions).not.toContain('{{decision_trees_load_step}}');
+    expect(base.instructions).not.toContain('{{decision_trees_section}}');
   });
 
   it('drops both cortex workflows when cortex is disabled', () => {

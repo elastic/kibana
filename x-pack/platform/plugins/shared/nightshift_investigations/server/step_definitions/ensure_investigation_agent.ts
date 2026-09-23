@@ -13,10 +13,13 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
+import { NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID } from '../agents/decision_tree_reinforcement';
+import { installDecisionTreeReinforcementAgent } from '../lib/install_decision_tree_reinforcement_agent';
 
 /** Which agent a workflow wants installed. */
 const AGENT_INSTALLERS = {
   [NIGHTSHIFT_INVESTIGATION_AGENT_ID]: installInvestigationAgent,
+  [NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID]: installDecisionTreeReinforcementAgent,
 } as const;
 
 /**
@@ -43,7 +46,7 @@ export const ensureInvestigationAgentStepDefinition = ({
       'Installs an investigation agent in the space this workflow runs in, so any caller can start an investigation without installing it first. Idempotent: an existing agent is left untouched.',
     inputSchema: z.object({
       agent_id: z
-        .enum([NIGHTSHIFT_INVESTIGATION_AGENT_ID])
+        .enum([NIGHTSHIFT_INVESTIGATION_AGENT_ID, NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID])
         .optional()
         .describe(
           `Which investigation agent to install. Defaults to ${NIGHTSHIFT_INVESTIGATION_AGENT_ID}.`

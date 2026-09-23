@@ -8,12 +8,17 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
+import { installDecisionTreeReinforcementAgent } from '../lib/install_decision_tree_reinforcement_agent';
+import { NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID } from '../agents/decision_tree_reinforcement';
 import { ensureInvestigationAgentStepDefinition } from './ensure_investigation_agent';
 
 jest.mock('../lib/install_investigation_agent', () => ({
   installInvestigationAgent: jest.fn().mockResolvedValue(undefined),
 }));
 
+jest.mock('../lib/install_decision_tree_reinforcement_agent', () => ({
+  installDecisionTreeReinforcementAgent: jest.fn().mockResolvedValue(undefined),
+}));
 describe('ensureInvestigationAgentStepDefinition', () => {
   const callKibanaApi = jest.fn().mockResolvedValue(undefined);
   const agentBuilder = { agents: { ensure: jest.fn() } } as never;
@@ -80,6 +85,24 @@ describe('ensureInvestigationAgentStepDefinition', () => {
     });
     expect(result).toEqual({
       output: { space_id: 'space-1', agent_id: NIGHTSHIFT_INVESTIGATION_AGENT_ID },
+    });
+  });
+
+  it('installs the decision-tree reinforcement agent when it is requested', async () => {
+    const result = await run({ agent_id: NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID });
+
+    expect(installDecisionTreeReinforcementAgent).toHaveBeenCalledWith({
+      agentBuilder,
+      spaceId: 'space-1',
+      availability,
+    });
+    expect(installInvestigationAgent).not.toHaveBeenCalled();
+    expect(callKibanaApi).toHaveBeenCalledWith({
+      method: 'GET',
+      path: `/api/agent_builder/agents/${NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID}`,
+    });
+    expect(result).toEqual({
+      output: { space_id: 'space-1', agent_id: NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID },
     });
   });
 });

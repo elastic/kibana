@@ -431,8 +431,8 @@ importers:
         specifier: 1.24.2
         version: 1.24.2(@types/react@18.2.79)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)
       '@elastic/request-converter':
-        specifier: 9.5.1
-        version: 9.5.1
+        specifier: 9.6.0
+        version: 9.6.0
       '@elastic/request-crypto':
         specifier: 2.0.4
         version: 2.0.4
@@ -2791,6 +2791,9 @@ importers:
       '@kbn/nightshift-ai':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-nightshift-ai
+      '@kbn/nightshift-decision-trees':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/kbn-nightshift-decision-trees
       '@kbn/nightshift-investigations-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/nightshift_investigations
@@ -4094,11 +4097,11 @@ importers:
         specifier: 1.5.5
         version: 1.5.5(@aws-sdk/credential-provider-node@3.972.70)(@langchain/core@1.2.3(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.222.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.11.0(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.21.3)(zod@4.4.3))(ws@8.21.3))(@smithy/signature-v4@5.7.3)(ws@8.21.3)
       '@launchdarkly/node-server-sdk':
-        specifier: 9.13.1
-        version: 9.13.1(supports-color@10.2.2)
+        specifier: 9.13.2
+        version: 9.13.2(supports-color@10.2.2)
       '@launchdarkly/openfeature-node-server':
-        specifier: 2.0.0
-        version: 2.0.0(@launchdarkly/node-server-sdk@9.13.1(supports-color@10.2.2))(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))
+        specifier: 2.0.1
+        version: 2.0.1(@launchdarkly/node-server-sdk@9.13.2(supports-color@10.2.2))(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))
       '@loaders.gl/core':
         specifier: 3.4.7
         version: 3.4.7
@@ -9041,6 +9044,8 @@ importers:
 
   x-pack/platform/packages/shared/kbn-nightshift-ai: {}
 
+  x-pack/platform/packages/shared/kbn-nightshift-decision-trees: {}
+
   x-pack/platform/packages/shared/kbn-nightshift-shared: {}
 
   x-pack/platform/packages/shared/kbn-profiler-cli: {}
@@ -11050,11 +11055,11 @@ packages:
       react: '>= 16.8.0 < 20'
       react-dom: '>= 16.8.0 < 20'
 
-  '@elastic/request-converter@9.5.1':
-    resolution: {integrity: sha512-NSepTwUG8uqhcFdDyIZJuNktbeG/Az4bIGSPzqMRg9Q00clQiTORpxfpth1FUWEtGI39xipvIfA1jreWFJEE1w==}
+  '@elastic/request-converter@9.6.0':
+    resolution: {integrity: sha512-NbhcFXPKbyknRekybRTc5NwzHsT4S0GI0g9aFZJwbLyegHEFFRrKXXqmqG1UO00dnhvmNe5EW0ez4KaZuHDIdg==}
     hasBin: true
     peerDependencies:
-      '@elastic/request-converter-dotnet': ~9.5.0
+      '@elastic/request-converter-dotnet': latest
     peerDependenciesMeta:
       '@elastic/request-converter-dotnet':
         optional: true
@@ -12375,19 +12380,19 @@ packages:
   '@launchdarkly/js-sdk-common@2.25.2':
     resolution: {integrity: sha512-l/OJiIGnLS6Qt6J/Lc3KgUXL4vAES5wsxIgNZcw3yCUbDEuTyVR9Qya9Aqy1klg2kF1VsHiY2wvaKimlIZK7+g==}
 
-  '@launchdarkly/js-server-sdk-common@2.20.1':
-    resolution: {integrity: sha512-EJqkXMtr/mIupsBw3PI/nxdmxYPD3kdCwyozgiCz41fG1PXcbT9tlymqNi0znqHGDH99Ru4vSG5YzoP8uqqMZg==}
+  '@launchdarkly/js-server-sdk-common@2.21.0':
+    resolution: {integrity: sha512-/pdv5QW4LqNkBkJDNIxRl2p2LEQ5TA4IBKmTOGOxN2tUre6cE+V6SnYKJOOUotSn7+zmg6M+RXdS2V3OCuMpGA==}
 
-  '@launchdarkly/node-server-sdk@9.13.1':
-    resolution: {integrity: sha512-ZVp0PVxns8K8bH9Wd7vtp3GrvSgZK/F88wixB3yl92/4ytYCjyFIQWh3rtbSByNIXC1Ct92JMvDzyTcZdzUnOQ==}
+  '@launchdarkly/node-server-sdk@9.13.2':
+    resolution: {integrity: sha512-qzq86AzWOZ2I4yhSuLByO9bj0jAq/yNOg65i/jLD408mqUfyGuzz43zMc6sT0BIaETk/4VO4y7NnWJcEJtNeYA==}
 
   '@launchdarkly/openfeature-js-server-common@2.0.0':
     resolution: {integrity: sha512-WfNXSeMcPrsW1IY5lqRLfYvuVls2+qPTfjijsjLLzBEJ2gF0ts4QmecSlzublR3q4hKXSyzVZ57NrN1Jc+KQXg==}
     peerDependencies:
       '@openfeature/server-sdk': ^1.16.0
 
-  '@launchdarkly/openfeature-node-server@2.0.0':
-    resolution: {integrity: sha512-RpIC/3PAv8i6ey6O7Jv+JIpbm+zE6HcYmMeFcDkUaDh1QT1eHfcaYG2Ff1f9xcr7CijDM1naca+bepazsgQ2pw==}
+  '@launchdarkly/openfeature-node-server@2.0.1':
+    resolution: {integrity: sha512-gPYXHSoy4DGDxyfk7rSdDCXUYznIK+O7+lrWS7DMpIMoUNu+78ShzR3WpNm+9rHMRlC1NXVDClP1eeri5qM60A==}
     engines: {node: '>=20'}
     peerDependencies:
       '@launchdarkly/node-server-sdk': ^9.0.0
@@ -28073,7 +28078,7 @@ snapshots:
       - '@types/react'
       - supports-color
 
-  '@elastic/request-converter@9.5.1':
+  '@elastic/request-converter@9.6.0':
     dependencies:
       base64url: 3.0.1
       commander: 12.1.0
@@ -29652,14 +29657,14 @@ snapshots:
 
   '@launchdarkly/js-sdk-common@2.25.2': {}
 
-  '@launchdarkly/js-server-sdk-common@2.20.1':
+  '@launchdarkly/js-server-sdk-common@2.21.0':
     dependencies:
       '@launchdarkly/js-sdk-common': 2.25.2
       semver: 7.5.4
 
-  '@launchdarkly/node-server-sdk@9.13.1(supports-color@10.2.2)':
+  '@launchdarkly/node-server-sdk@9.13.2(supports-color@10.2.2)':
     dependencies:
-      '@launchdarkly/js-server-sdk-common': 2.20.1
+      '@launchdarkly/js-server-sdk-common': 2.21.0
       https-proxy-agent: 7.0.6(supports-color@10.2.2)
       launchdarkly-eventsource: 2.2.0
     transitivePeerDependencies:
@@ -29670,9 +29675,9 @@ snapshots:
       '@launchdarkly/js-sdk-common': 2.25.2
       '@openfeature/server-sdk': 1.23.0(@openfeature/core@1.12.0)
 
-  '@launchdarkly/openfeature-node-server@2.0.0(@launchdarkly/node-server-sdk@9.13.1(supports-color@10.2.2))(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))':
+  '@launchdarkly/openfeature-node-server@2.0.1(@launchdarkly/node-server-sdk@9.13.2(supports-color@10.2.2))(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))':
     dependencies:
-      '@launchdarkly/node-server-sdk': 9.13.1(supports-color@10.2.2)
+      '@launchdarkly/node-server-sdk': 9.13.2(supports-color@10.2.2)
       '@launchdarkly/openfeature-js-server-common': 2.0.0(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))
       '@openfeature/server-sdk': 1.23.0(@openfeature/core@1.12.0)
 

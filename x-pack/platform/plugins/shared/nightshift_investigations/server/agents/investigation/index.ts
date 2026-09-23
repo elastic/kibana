@@ -11,8 +11,11 @@ import { platformSignificantEventsTools } from '@kbn/agent-builder-common/tools'
 import {
   NIGHTSHIFT_CORTEX_HYDRATE_WORKFLOW_ID,
   NIGHTSHIFT_CORTEX_OPTIMIZE_WORKFLOW_ID,
+  NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW_ID,
+  NIGHTSHIFT_DECISION_TREE_REINFORCE_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import instructions from './instructions/investigator.md.text';
+import decisionTreesSection from './instructions/decision_trees.text';
 import { SANDBOX_BASH_TOOL_ID } from '../../tools/sandbox_bash/tool';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from '../../tools/sandbox_bash/view_file_tool';
 import { SANDBOX_STR_REPLACE_TOOL_ID } from '../../tools/sandbox_bash/str_replace_tool';
@@ -33,6 +36,18 @@ export const INVESTIGATION_AGENT_DESCRIPTION =
   'Answers an arbitrary investigation question by reasoning from cluster telemetry it queries ' +
   'inside a sandbox and, when Cortex is enabled, records what it learns in the Nightshift Cortex wiki.';
 
+/** Interpolated only when hydrate will actually write `/workspace/decision-trees/`. */
+const DECISION_TREES_LOAD_STEP =
+  ' Also check `/workspace/decision-trees/monitors.md` for a prior decision tree matching this symptom — see <decision_trees>.';
+
+const fillDecisionTreeInstructions = (includeDecisionTrees: boolean): string =>
+  instructions
+    .replace('{{decision_trees_load_step}}', includeDecisionTrees ? DECISION_TREES_LOAD_STEP : '')
+    .replace(
+      '{{decision_trees_section}}',
+      includeDecisionTrees ? `\n${decisionTreesSection.trimEnd()}\n` : ''
+    );
+
 /**
  * Builds the Nightshift investigation agent type. It works from the sandbox, so it carries a
  * standalone prompt and no Elastic tools. Telemetry is reached through `telemetryConnectorId` as
@@ -41,10 +56,12 @@ export const INVESTIGATION_AGENT_DESCRIPTION =
 export const getInvestigationAgentType = ({
   sandboxEnabled,
   cortexEnabled,
+  decisionTreesEnabled = false,
   telemetryConnectorId,
 }: {
   sandboxEnabled: boolean;
   cortexEnabled: boolean;
+  decisionTreesEnabled?: boolean;
   telemetryConnectorId?: string;
 }): AgentTypeDefinition => ({
   id: NIGHTSHIFT_INVESTIGATION_AGENT_TYPE_ID,
@@ -52,7 +69,7 @@ export const getInvestigationAgentType = ({
   description: INVESTIGATION_AGENT_DESCRIPTION,
   avatar_icon: 'logoElastic',
   baseConfiguration: {
-    instructions,
+    instructions: fillDecisionTreeInstructions(sandboxEnabled && decisionTreesEnabled),
     skill_ids: [],
     tools: [
       {
@@ -64,15 +81,22 @@ export const getInvestigationAgentType = ({
     ],
     enable_elastic_capabilities: false,
     connector_ids: telemetryConnectorId ? [telemetryConnectorId] : [],
-    /**
-     * Cortex hydrate runs as the beforeAgent hook and writes into /workspace, so it needs both
-     * the sandbox and Cortex; without the sandbox the step would throw on every round.
-     */
-    ...(sandboxEnabled && cortexEnabled
-      ? { workflow_ids: [NIGHTSHIFT_CORTEX_HYDRATE_WORKFLOW_ID] }
-      : {}),
-    ...(cortexEnabled
-      ? { post_execution_workflow_ids: [NIGHTSHIFT_CORTEX_OPTIMIZE_WORKFLOW_ID] }
+    ...(() => {
+      const beforeAgentWorkflowIds = [
+        ...(sandboxEnabled && cortexEnabled ? [NIGHTSHIFT_CORTEX_HYDRATE_WORKFLOW_ID] : []),
+        ...(sandboxEnabled && decisionTreesEnabled
+          ? [NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW_ID]
+          : []),
+      ];
+      return beforeAgentWorkflowIds.length ? { workflow_ids: beforeAgentWorkflowIds } : {};
+    })(),
+    ...(cortexEnabled || decisionTreesEnabled
+      ? {
+          post_execution_workflow_ids: [
+            ...(cortexEnabled ? [NIGHTSHIFT_CORTEX_OPTIMIZE_WORKFLOW_ID] : []),
+            ...(decisionTreesEnabled ? [NIGHTSHIFT_DECISION_TREE_REINFORCE_WORKFLOW_ID] : []),
+          ],
+        }
       : {}),
   },
 });
@@ -82,14 +106,21 @@ export const registerInvestigationAgentType = (
   {
     sandboxEnabled,
     cortexEnabled,
+    decisionTreesEnabled = false,
     telemetryConnectorId,
   }: {
     sandboxEnabled: boolean;
     cortexEnabled: boolean;
+    decisionTreesEnabled?: boolean;
     telemetryConnectorId?: string;
   }
 ): void => {
   agentBuilder.agents.registerType(
-    getInvestigationAgentType({ sandboxEnabled, cortexEnabled, telemetryConnectorId })
+    getInvestigationAgentType({
+      sandboxEnabled,
+      cortexEnabled,
+      decisionTreesEnabled,
+      telemetryConnectorId,
+    })
   );
 };

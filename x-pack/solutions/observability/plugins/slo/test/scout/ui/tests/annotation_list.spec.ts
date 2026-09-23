@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout-oblt';
+import { euiSelectors, tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
 
@@ -32,7 +32,7 @@ test.describe(
       await expect(
         page.locator('[data-test-subj="annotation-marker-body"]:has-text("Test annotation")')
       ).toBeVisible();
-      await expect(page.locator('.euiTableRow')).toHaveCount(1);
+      await expect(page.locator(euiSelectors.basicTable.ROW_SELECTOR)).toHaveCount(1);
       await page.locator('.echAnnotation__marker').hover();
       await expect(
         page.locator(
