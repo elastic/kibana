@@ -420,8 +420,11 @@ unique to this attempt. In the templates the indicator is built in a single `dat
 tag goes on that step's `ki.tags` list — the one place all of them read from — not on
 `context-engine.createKi`, which takes the assembled document rather than building it.
 
-That tag is the only handle you will have on what the pilot wrote: when `ki_id` is omitted the
-step generates the ids, so there is nothing else to find them by.
+**Prefix every `ki_id` too.** The templates write with stable ids into the user's real destination,
+so an unprefixed pilot replaces a live indicator on an index and stacks a revision on it on a data
+stream, and the cleanup below would then remove the user's indicator rather than yours. Prefix the
+`ki_id` on `context-engine.createKi` with the same `ce-pilot-<runId>-`, so every id the pilot writes
+is its own. The tag and the prefix are the only handles you will have on what the pilot wrote.
 
 Bound the run to a handful of documents while you are iterating. The templates put that bound in
 `consts` — `max_entities`, `max_documents`, `corpus_filter` — so it is one edit to narrow and one
@@ -466,14 +469,16 @@ are yours to remove and cleanup is not optional — a skipped one leaves junk th
 know to look for. Run a second inline workflow: an `elasticsearch.esql.query` for the tag as above
 ending in `STATS BY id` (a data stream holds one revision per write, so the same `id` can repeat),
 then a `foreach` over the results calling `context-engine.deleteKi` with `ki_id` set to each `id`.
-`deleteKi` resolves `ki_id` against the `id` field, never Elasticsearch's `_id`. Confirm through
-the view, `FROM v-ai-index-<ai_index_id> | MV_EXPAND tags | WHERE tags == "ce-pilot-<runId>" |
-LIMIT 1`, which returns nothing once the cleanup has run; on a data stream the backing store still
-holds the revisions marked deleted. Do this for every `runId` you used, not only the last.
+`deleteKi` resolves `ki_id` against the `id` field, never Elasticsearch's `_id`. The prefix is what
+makes this safe: every `id` under the tag is a pilot write, so nothing the user owned is touched.
+Confirm through the view, `FROM v-ai-index-<ai_index_id> | MV_EXPAND tags | WHERE tags ==
+"ce-pilot-<runId>" | LIMIT 1`, which returns nothing once the cleanup has run; on a data stream the
+backing store still holds the revisions marked deleted. Do this for every `runId` you used, not
+only the last.
 
 **Strip the tag, then hand it back.** Remove the `ce-pilot-*` tag from the indicator's `tags` and
-widen the `consts` bounds back to what the brief specified — the pilot's narrow filter is not the
-automation.
+the `ce-pilot-*` prefix from `ki_id`, and widen the `consts` bounds back to what the brief specified
+— the pilot's narrow filter is not the automation.
 Return the finished YAML in full, a plain-language account of what the workflow does, and what the
 pilot indicators looked like. The last of those is the evidence the reviewer approves on.
 

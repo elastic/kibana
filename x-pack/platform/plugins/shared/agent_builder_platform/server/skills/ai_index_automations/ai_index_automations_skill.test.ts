@@ -337,8 +337,11 @@ describe('aiIndexAutomationsSkill', () => {
       expect(content).toMatch(/cleanup is not optional/);
     });
 
-    it('notes that generated ids leave the tag as the only handle on pilot output', () => {
-      expect(content).toMatch(/when `ki_id` is omitted the\s+step generates the ids/);
+    it('isolates pilot writes by prefixing ki_id with the run tag', () => {
+      expect(content).toMatch(
+        /Prefix the\s+`ki_id` on `context-engine\.createKi` with the same `ce-pilot-<runId>-`/
+      );
+      expect(content).toMatch(/the `ce-pilot-\*` prefix from `ki_id`/);
     });
 
     it('puts the pilot tag where the templates build the indicator, not on the write step', () => {

@@ -241,8 +241,8 @@ steps:
         steps:
           # `ki_id` pairs the index with the source document id, so a re-run replaces that
           # document's KI rather than appending a second copy, and two indices holding the same
-          # document id do not collide. Omit `ki_id` entirely on a data-stream destination, which
-          # rejects it.
+          # document id do not collide. On a data-stream destination the same `ki_id` appends a
+          # revision and the newest one is current.
           - name: create_ki
             type: context-engine.createKi
             with:

@@ -260,7 +260,8 @@ steps:
     condition: "steps.verify_ki.output.passed : true"
     steps:
       # `ki_id` is the index name, so a re-run replaces this profile rather than appending a
-      # second copy. Omit `ki_id` entirely on a data-stream destination, which rejects it.
+      # second copy. On a data-stream destination the same `ki_id` appends a revision and the
+      # newest one is current.
       - name: create_ki
         type: context-engine.createKi
         with:
