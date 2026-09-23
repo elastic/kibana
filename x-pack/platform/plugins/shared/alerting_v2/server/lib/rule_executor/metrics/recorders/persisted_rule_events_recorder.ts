@@ -56,7 +56,7 @@ export class PersistedRuleEventsRecorder implements MetricRecorder {
       if (doc.type === alertEventType.signal) {
         signalsCount += 1;
       }
-      if (newEpisodeIds && doc.episode && newEpisodeIds.has(doc.episode.id)) {
+      if (newEpisodeIds && doc.alert && newEpisodeIds.has(doc.alert.id)) {
         newEpisodesCount += 1;
       }
     }

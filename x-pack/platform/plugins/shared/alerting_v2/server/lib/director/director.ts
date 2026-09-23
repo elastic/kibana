@@ -118,8 +118,8 @@ export class DirectorService {
           logger,
         });
 
-        if (isNewEpisode && alertEvent.episode) {
-          newEpisodeIds.push(alertEvent.episode.id);
+        if (isNewEpisode && alertEvent.alert) {
+          newEpisodeIds.push(alertEvent.alert.id);
         }
 
         return alertEvent;
