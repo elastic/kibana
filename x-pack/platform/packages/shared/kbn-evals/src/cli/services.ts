@@ -27,8 +27,7 @@ interface ServiceEntry {
   /** The serverConfigSet used to start Scout */
   serverConfigSet?: string;
   /**
-   * SHA-256 of the env the service was started with (Scout: TRACING_EXPORTERS,
-   * GCS_CREDENTIALS, NIGHTSHIFT_DATASETS, NIGHTSHIFT_CONCURRENCY; EDOT: ELASTICSEARCH_HOST).
+   * SHA-256 of explicit server env overrides (Scout) or ELASTICSEARCH_HOST (EDOT).
    */
   envHash?: string;
 }
@@ -81,12 +80,7 @@ export const connectorsHash = (): string =>
   ]);
 
 export const scoutEnvHash = (env: Record<string, string> | undefined): string =>
-  hashParts([
-    env?.TRACING_EXPORTERS,
-    env?.GCS_CREDENTIALS,
-    env?.NIGHTSHIFT_DATASETS,
-    env?.NIGHTSHIFT_CONCURRENCY,
-  ]);
+  hashParts([JSON.stringify(Object.entries(env ?? {}).sort(([a], [b]) => a.localeCompare(b)))]);
 
 export const edotEnvHash = (elasticsearchHost: string | undefined): string =>
   hashParts([elasticsearchHost]);
@@ -116,8 +110,11 @@ export const isScoutStale = (
   }
 
   const currentEnvHash = scoutEnvHash(scoutEnv);
-  if ((entry.envHash || scoutEnv?.NIGHTSHIFT_CONCURRENCY) && entry.envHash !== currentEnvHash) {
-    return { stale: true, reason: 'Scout tracing, credentials or investigation settings changed' };
+  if (
+    (entry.envHash || Object.keys(scoutEnv ?? {}).length > 0) &&
+    entry.envHash !== currentEnvHash
+  ) {
+    return { stale: true, reason: 'Scout server environment changed' };
   }
 
   const runningConfigSet = entry.serverConfigSet ?? DEFAULT_SERVER_CONFIG_SET;

@@ -7,6 +7,7 @@
 
 import { spawn } from 'child_process';
 import type { Command } from '@kbn/dev-cli-runner';
+import { readSuiteRunEnv } from '../suite_run_config';
 import { ensureEvalStack } from '../eval_stack';
 import {
   ensureEvalInit,
@@ -33,7 +34,6 @@ export const startCmd: Command<void> = {
     node scripts/evals start --suite agent-builder --model eis-gpt-4.1,eis-claude-4-sonnet
     node scripts/evals start --suite agent-builder --grep "product documentation"
     node scripts/evals start --suite agent-builder --skip-server
-    node scripts/evals start --suite nightshift-investigations --dataset-id <id> --concurrency 16
     node scripts/evals stop
   `,
   flags: evalRunFlags,
@@ -58,6 +58,7 @@ export const startCmd: Command<void> = {
 
     const skipServer = flagsReader.boolean('skip-server');
 
+    const suiteEnv = await readSuiteRunEnv(repoRoot, flagsReader, suite);
     const envOverrides = buildEvalRunEnv({
       evaluationConnectorId,
       requiresEisCcm,
@@ -67,6 +68,8 @@ export const startCmd: Command<void> = {
       flagsReader,
       log,
     });
+
+    Object.assign(envOverrides, suiteEnv.playwright);
 
     log.info('');
     log.info(`Suite:     ${suiteId ?? configPath}`);
@@ -109,6 +112,7 @@ export const startCmd: Command<void> = {
         log,
         profileEnvOverrides: envOverrides,
         serverConfigSet: suite?.serverConfigSet,
+        serverEnv: suiteEnv.server,
         requiresEisCcm,
       });
     }

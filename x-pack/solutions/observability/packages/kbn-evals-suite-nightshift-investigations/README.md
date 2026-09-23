@@ -160,6 +160,11 @@ sandbox credentials.
 
 ## Stored investigation datasets and concurrency
 
+[`run_config.ts`](./run_config.ts) owns the CLI options, defaults, validation, and separate
+Scout/Playwright environment settings. The suite registry points to this module so both
+`start` and `run` resolve it before execution; the shared CLI has no Nightshift-specific logic.
+
+
 Select an existing evaluations dataset directly by its UI ID:
 
 ```bash

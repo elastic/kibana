@@ -9,11 +9,11 @@ import { spawn } from 'child_process';
 import type { Command } from '@kbn/dev-cli-runner';
 import {
   readSpaceIdsFlag,
-  readInvestigationRunEnv,
   resolveEvalSuite,
   resolveEvaluationConnectorId,
   resolveProfileEnvOverrides,
 } from '../run_helpers';
+import { readSuiteRunEnv, suiteOptionNames } from '../suite_run_config';
 import { buildPlaywrightArgs } from './playwright_args';
 
 const formatEnvPrefix = (overrides: Record<string, string>) =>
@@ -39,7 +39,6 @@ export const runSuiteCmd: Command<void> = {
     node scripts/evals run --suite significant-events --grep-invert "KI query generation"
     node scripts/evals run --suite streams --dry-run
     node scripts/evals run --suite streams --space-ids marketing,sales
-    node scripts/evals run --suite nightshift-investigations --dataset-id <id> --concurrency 16
   `,
   flags: {
     string: [
@@ -48,8 +47,7 @@ export const runSuiteCmd: Command<void> = {
       'project',
       'evaluation-connector-id',
       'repetitions',
-      'dataset-id',
-      'concurrency',
+      ...suiteOptionNames,
       'space-ids',
       'grep',
       'grep-invert',
@@ -88,7 +86,7 @@ export const runSuiteCmd: Command<void> = {
         profile: flagsReader.string('profile') ?? undefined,
       });
     Object.assign(envOverrides, profileEnvOverrides);
-    Object.assign(envOverrides, readInvestigationRunEnv(flagsReader, suite?.id));
+    Object.assign(envOverrides, (await readSuiteRunEnv(repoRoot, flagsReader, suite)).playwright);
 
     log.info(`Profiles: datasets=${datasetsProfile ?? 'config'} export=${exportProfile ?? 'none'}`);
 

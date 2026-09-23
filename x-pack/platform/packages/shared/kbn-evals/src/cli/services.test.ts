@@ -79,7 +79,7 @@ describe('isEdotStale', () => {
   });
 });
 
-describe('Scout investigation configuration freshness', () => {
+describe('Scout server configuration freshness', () => {
   let repoRoot: string;
   beforeEach(() => {
     repoRoot = Fs.mkdtempSync(Path.join(Os.tmpdir(), 'kbn-evals-scout-'));
@@ -90,44 +90,51 @@ describe('Scout investigation configuration freshness', () => {
         scout: {
           pid: process.pid,
           connectorsHash: connectorsHash(),
-          serverConfigSet: 'evals_nightshift_investigations',
-          envHash: scoutEnvHash({ NIGHTSHIFT_DATASETS: 'trace-only', NIGHTSHIFT_CONCURRENCY: '2' }),
+          serverConfigSet: 'evals_example',
+          envHash: scoutEnvHash({ EXAMPLE_MODE: 'dataset', EXAMPLE_WORKERS: '2' }),
         },
       })
     );
   });
   afterEach(() => Fs.rmSync(repoRoot, { recursive: true, force: true }));
 
-  it('restarts for changed concurrency so Task Manager gets the new capacity', () => {
+  it('restarts for changed server settings', () => {
     expect(
-      isScoutStale(repoRoot, 'evals_nightshift_investigations', {
-        NIGHTSHIFT_DATASETS: 'trace-only',
-        NIGHTSHIFT_CONCURRENCY: '16',
+      isScoutStale(repoRoot, 'evals_example', {
+        EXAMPLE_MODE: 'dataset',
+        EXAMPLE_WORKERS: '16',
       }).stale
     ).toBe(true);
   });
 
-  it('restarts a legacy stack whose investigation capacity was never recorded', () => {
+  it('restarts a legacy stack whose requested server settings were never recorded', () => {
     const statePath = Path.join(repoRoot, 'target/evals/services.json');
     const state = JSON.parse(Fs.readFileSync(statePath, 'utf8'));
     delete state.scout.envHash;
     Fs.writeFileSync(statePath, JSON.stringify(state));
     expect(
-      isScoutStale(repoRoot, 'evals_nightshift_investigations', {
-        NIGHTSHIFT_DATASETS: 'trace-only',
-        NIGHTSHIFT_CONCURRENCY: '16',
+      isScoutStale(repoRoot, 'evals_example', {
+        EXAMPLE_MODE: 'dataset',
+        EXAMPLE_WORKERS: '16',
       }).stale
     ).toBe(true);
   });
 
-  it('restarts when switching to smoke but reuses a stack when only the stored dataset changes', () => {
-    expect(isScoutStale(repoRoot, 'evals_nightshift_investigations', {}).stale).toBe(true);
+  it('restarts when removing server settings but reuses a matching configuration', () => {
+    expect(isScoutStale(repoRoot, 'evals_example', {}).stale).toBe(true);
     expect(
-      isScoutStale(repoRoot, 'evals_nightshift_investigations', {
-        NIGHTSHIFT_DATASETS: 'trace-only',
-        NIGHTSHIFT_CONCURRENCY: '2',
-        NIGHTSHIFT_DATASET_ID: 'another-dataset',
+      isScoutStale(repoRoot, 'evals_example', {
+        EXAMPLE_MODE: 'dataset',
+        EXAMPLE_WORKERS: '2',
       }).stale
     ).toBe(false);
   });
+});
+
+it('fingerprints environment names and values independently of insertion order', () => {
+  expect(scoutEnvHash({ MODE: 'dataset', WORKERS: '16' })).toBe(
+    scoutEnvHash({ WORKERS: '16', MODE: 'dataset' })
+  );
+  expect(scoutEnvHash({ MODE: 'dataset' })).not.toBe(scoutEnvHash({ OTHER_MODE: 'dataset' }));
+  expect(scoutEnvHash({ MODE: 'dataset' })).not.toBe(scoutEnvHash({ MODE: 'smoke' }));
 });

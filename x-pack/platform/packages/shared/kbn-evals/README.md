@@ -52,11 +52,41 @@ Config files live in `scripts/vault/config.<profile>.json`. The golden cluster p
 | `--grep <pattern>`  | Filter tests by name                                                   |
 | `--repetitions <n>` | Repeat each example N times                                            |
 | `--space-ids <ids>` | Spaces to assign datasets and scores to (the run works from the first) |
-| `--dataset-id <id>` | Existing stored dataset for `nightshift-investigations`; selects trace-only execution |
-| `--concurrency <n>` | Nightshift trace-only concurrency (1–45, default 2); `start` sizes Task Manager capacity |
+| `--dataset-id <id>` | Stored dataset ID, when supported by the selected suite |
+| `--concurrency <n>` | Concurrency, with limits and server capacity defined by the selected suite |
 | `--skip-server`     | Skip EDOT/Scout startup (use existing services)                        |
 | `--skip-init`       | Skip config and connector setup                                        |
 | `--dry-run`         | Print configuration and exit                                           |
+
+#### Suite-owned run configuration
+
+A suite can register an optional `runConfigPath` in `evals.suites.json` (relative to the
+repository root). The module exports `runConfig`, typed as `EvalSuiteRunConfig` from `@kbn/evals`:
+
+```ts
+export const runConfig: EvalSuiteRunConfig = {
+  options: ['dataset-id', 'concurrency'],
+  resolve: ({ options, env }) => {
+    // Validate options and environment defaults here before services start.
+    return {
+      playwright: { EXAMPLE_DATASET_ID: options['dataset-id'] ?? env.EXAMPLE_DATASET_ID ?? 'default' },
+      server: { EXAMPLE_WORKERS: options.concurrency ?? '2' },
+    };
+  },
+};
+```
+
+`start` and `run` pass CLI options and the current environment to the suite resolver.
+Suites opt into the shared `--dataset-id` and `--concurrency` options; unsupported options
+produce an error instead of being silently ignored. The suite owns defaults, validation,
+selection logic, and environment variable names. Keep this module free of service startup
+and other side effects so `--dry-run` can resolve it safely.
+
+Return Playwright overrides in `playwright` and only settings needed by Scout in `server`.
+Both processes still inherit the shell environment. Profile-derived evaluation client
+credentials are not forwarded to Scout; server tracing exporters and GCS credentials are
+forwarded separately. `start` fingerprints all explicit server settings and restarts Scout
+when they change or are removed. Client-only changes do not trigger a restart.
 
 #### EIS connector setup
 

@@ -47,6 +47,7 @@ export interface EvalSuiteMetadata {
   tags?: string[];
   ciLabels?: string[];
   serverConfigSet?: string;
+  runConfigPath?: string;
   shards?: EvalSuiteShard[];
   stepTimeoutInMinutes?: number;
 }
@@ -63,6 +64,7 @@ export interface EvalSuiteDefinition {
   description?: string;
   source: 'metadata' | 'discovery';
   serverConfigSet?: string;
+  runConfigPath?: string;
   shards?: EvalSuiteShard[];
   stepTimeoutInMinutes?: number;
 }
@@ -170,6 +172,7 @@ const normalizeSuite = (
     description: metadata?.description,
     source: metadata ? 'metadata' : 'discovery',
     serverConfigSet: metadata?.serverConfigSet,
+    runConfigPath: metadata?.runConfigPath,
     shards: metadata?.shards,
     stepTimeoutInMinutes: metadata?.stepTimeoutInMinutes,
   };

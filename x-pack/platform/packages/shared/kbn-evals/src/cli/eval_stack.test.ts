@@ -9,12 +9,13 @@ import Fs from 'fs';
 import Os from 'os';
 import Path from 'path';
 import { ToolingLog } from '@kbn/tooling-log';
-import { ensureScout } from './eval_stack';
+import { ensureEvalStack } from './eval_stack';
 import { startService } from './services';
 
 jest.mock('./profiles', () => ({ probeHttp: jest.fn().mockResolvedValue(true) }));
 jest.mock('./services', () => ({
-  isServiceRunning: jest.fn().mockReturnValue(false),
+  isServiceRunning: jest.fn((repoRoot, name) => name === 'edot'),
+  isEdotStale: jest.fn().mockReturnValue({ stale: false }),
   startService: jest.fn(),
   connectorsHash: jest.fn(),
   scoutEnvHash: jest.fn(),
@@ -24,9 +25,8 @@ jest.mock('./services', () => ({
 it('starts Scout with server settings without forwarding evaluation client credentials', async () => {
   const repoRoot = Fs.mkdtempSync(Path.join(Os.tmpdir(), 'evals-scout-env-'));
   const env = {
-    NIGHTSHIFT_DATASETS: 'trace-only',
-    NIGHTSHIFT_CONCURRENCY: '16',
-    NIGHTSHIFT_DATASET_ID: 'stored-dataset',
+    GCS_CREDENTIALS: 'dataset-storage-credentials',
+    TRACING_EXPORTERS: 'server-trace-exporters',
     EVAL_KBN_URL: 'https://results.example.test',
     EVAL_KBN_API_KEY: 'results-client-key',
     TRACING_ES_URL: 'https://traces.example.test',
@@ -45,13 +45,13 @@ it('starts Scout with server settings without forwarding evaluation client crede
   });
 
   try {
-    await ensureScout({
+    await ensureEvalStack({
       repoRoot,
       log: new ToolingLog(),
-      gcsCredentials: 'dataset-storage-credentials',
-      tracingExporters: 'server-trace-exporters',
-      serverConfigSet: 'evals_nightshift_investigations',
-      env,
+      serverConfigSet: 'evals_example',
+      profileEnvOverrides: env,
+      serverEnv: { EXAMPLE_WORKERS: '16' },
+      requiresEisCcm: false,
     });
 
     expect(startService).toHaveBeenCalledWith(
@@ -62,8 +62,7 @@ it('starts Scout with server settings without forwarding evaluation client crede
       expect.any(ToolingLog),
       expect.objectContaining({
         env: {
-          NIGHTSHIFT_DATASETS: 'trace-only',
-          NIGHTSHIFT_CONCURRENCY: '16',
+          EXAMPLE_WORKERS: '16',
           GCS_CREDENTIALS: 'dataset-storage-credentials',
           TRACING_EXPORTERS: 'server-trace-exporters',
         },

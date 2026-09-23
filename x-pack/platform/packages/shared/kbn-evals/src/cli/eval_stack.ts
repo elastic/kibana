@@ -156,7 +156,7 @@ export interface EnsureScoutOptions {
   gcsCredentials: string | undefined;
   tracingExporters: string | undefined;
   serverConfigSet?: string;
-  env?: Record<string, string>;
+  serverEnv?: Record<string, string>;
 }
 
 /**
@@ -169,13 +169,9 @@ export const ensureScout = async ({
   gcsCredentials,
   tracingExporters,
   serverConfigSet = 'evals_tracing',
-  env,
+  serverEnv,
 }: EnsureScoutOptions): Promise<void> => {
-  const scoutEnv: Record<string, string> = {};
-  for (const name of ['NIGHTSHIFT_DATASETS', 'NIGHTSHIFT_CONCURRENCY']) {
-    const value = env?.[name] ?? process.env[name];
-    if (value) scoutEnv[name] = value;
-  }
+  const scoutEnv: Record<string, string> = { ...serverEnv };
   if (gcsCredentials) {
     scoutEnv.GCS_CREDENTIALS = gcsCredentials;
   }
@@ -277,6 +273,7 @@ export interface EnsureEvalStackOptions {
   repoRoot: string;
   log: ToolingLog;
   profileEnvOverrides: Record<string, string>;
+  serverEnv?: Record<string, string>;
   serverConfigSet?: string;
   requiresEisCcm: boolean;
 }
@@ -289,6 +286,7 @@ export const ensureEvalStack = async ({
   repoRoot,
   log,
   profileEnvOverrides,
+  serverEnv,
   serverConfigSet = 'evals_tracing',
   requiresEisCcm,
 }: EnsureEvalStackOptions): Promise<void> => {
@@ -300,7 +298,7 @@ export const ensureEvalStack = async ({
     gcsCredentials: profileEnvOverrides.GCS_CREDENTIALS,
     tracingExporters: profileEnvOverrides.TRACING_EXPORTERS,
     serverConfigSet,
-    env: profileEnvOverrides,
+    serverEnv,
   });
 
   if (requiresEisCcm) {

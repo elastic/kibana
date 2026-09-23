@@ -30,6 +30,7 @@ import {
   isExportProfileImplicitLocal,
 } from './profiles';
 import { readCachedEisConnectors } from './eis_connectors_cache';
+import { suiteOptionNames } from './suite_run_config';
 import { parseSpaceIds } from '../utils/space_ids';
 import {
   runConfigInit,
@@ -369,7 +370,6 @@ export const buildEvalRunEnv = ({
   }
 
   Object.assign(envOverrides, profileEnvOverrides);
-  Object.assign(envOverrides, readInvestigationRunEnv(flagsReader, suite?.id));
 
   if (envOverrides.TRACING_ES_URL) {
     log.info(`Trace evaluators will query: ${envOverrides.TRACING_ES_URL}`);
@@ -396,38 +396,6 @@ export const buildEvalRunEnv = ({
   }
 
   return envOverrides;
-};
-
-/** Resolves Nightshift dataset and concurrency flags before starting either Scout or Playwright. */
-export const readInvestigationRunEnv = (
-  flagsReader: FlagsReader,
-  suiteId?: string
-): Record<string, string> => {
-  const datasetFlag = flagsReader.string('dataset-id');
-  const concurrencyFlag = flagsReader.string('concurrency');
-  if (suiteId !== 'nightshift-investigations') {
-    if (datasetFlag || concurrencyFlag) {
-      throw createFlagError(
-        '--dataset-id and --concurrency require --suite nightshift-investigations'
-      );
-    }
-    return {};
-  }
-  const datasetId = datasetFlag ?? process.env.NIGHTSHIFT_DATASET_ID;
-  const selection = datasetId || concurrencyFlag ? 'trace-only' : process.env.NIGHTSHIFT_DATASETS;
-  if (selection !== 'trace-only') return {};
-  if (datasetId && process.env.NIGHTSHIFT_EXAMPLES_FILE) {
-    throw createFlagError('Choose either --dataset-id or NIGHTSHIFT_EXAMPLES_FILE, not both');
-  }
-  const concurrency = Number(concurrencyFlag ?? process.env.NIGHTSHIFT_CONCURRENCY ?? 2);
-  if (!Number.isInteger(concurrency) || concurrency < 1 || concurrency > 45) {
-    throw createFlagError('--concurrency must be an integer between 1 and 45');
-  }
-  return {
-    NIGHTSHIFT_DATASETS: 'trace-only',
-    NIGHTSHIFT_CONCURRENCY: String(concurrency),
-    ...(datasetId ? { NIGHTSHIFT_DATASET_ID: datasetId } : {}),
-  };
 };
 
 export interface BuildEvalRunArgsOptions {
@@ -484,7 +452,7 @@ export const buildEvalRunArgs = ({
     runArgs.push('--repetitions', repetitions);
   }
 
-  for (const flag of ['dataset-id', 'concurrency']) {
+  for (const flag of suiteOptionNames) {
     const value = flagsReader.string(flag);
     if (value) runArgs.push(`--${flag}`, value);
   }
@@ -508,8 +476,7 @@ export const evalRunFlags: FlagOptions = {
     'evaluation-connector-id',
     'project',
     'repetitions',
-    'dataset-id',
-    'concurrency',
+    ...suiteOptionNames,
     'space-ids',
     'grep',
     'profile',
