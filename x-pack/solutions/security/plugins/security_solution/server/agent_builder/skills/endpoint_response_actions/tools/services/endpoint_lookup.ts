@@ -204,56 +204,67 @@ export function createEndpointLookupService(
     total?: number;
   }
 
+  // Space-check each page as it is fetched: the underlying Fleet API takes
+  // agentIds[], so one call per page keeps the check cheap. A rejected batch
+  // (at least one hidden agent) falls back per-agent WITHIN that page only —
+  // a mixed-visibility page costs page-size checks, not the whole walk.
   const listVisibleFleetCandidates = async (hostName: string): Promise<CandidateCollection> => {
-    const { items, truncated } = await collectPages<FleetCandidate>(async (page) => {
+    const { items, truncated } = await collectPages(async (page) => {
       const response = await fleetServices.agent.listAgents({
         showInactive: true,
         kuery: `local_metadata.host.name: ${escapeKuery(hostName)}`,
         page,
         perPage: LOOKUP_PAGE_SIZE,
       });
+      const pageCandidates = response?.agents ?? [];
 
-      return { items: response?.agents ?? [], total: response?.total };
-    });
+      const pageIds = pageCandidates.map((candidate) => candidate.id);
+      let visibleIds: Set<string>;
+      try {
+        await fleetServices.ensureInCurrentSpace({ agentIds: pageIds });
+        visibleIds = new Set(pageIds);
+      } catch (e) {
+        if (!(e instanceof NotFoundError)) {
+          // A transient Fleet/ES failure is a real error and must propagate
+          // rather than be misreported as "host not found".
+          throw e;
+        }
 
-    // Batched per page: the underlying Fleet API takes agentIds[], so one call
-    // per page keeps the space check cheap enough to walk many pages.
-    const pageIds = items.map((candidate) => candidate.id);
-    let visibleIds: Set<string>;
-    try {
-      await fleetServices.ensureInCurrentSpace({ agentIds: pageIds });
-      visibleIds = new Set(pageIds);
-    } catch (e) {
-      if (!(e instanceof NotFoundError)) {
-        // A transient Fleet/ES failure is a real error and must propagate
-        // rather than be misreported as "host not found".
-        throw e;
-      }
-
-      // At least one agent on the page is not visible in the caller's space.
-      // Re-check one-by-one to keep the individually visible ones.
-      visibleIds = new Set();
-      for (const candidate of items) {
-        try {
-          await fleetServices.ensureInCurrentSpace({ agentIds: [candidate.id] });
-          visibleIds.add(candidate.id);
-        } catch (perAgentError) {
-          if (!(perAgentError instanceof NotFoundError)) {
-            throw perAgentError;
+        // At least one agent on the page is not visible in the caller's
+        // space. Re-check one-by-one to keep the individually visible ones.
+        visibleIds = new Set();
+        for (const candidate of pageCandidates) {
+          try {
+            await fleetServices.ensureInCurrentSpace({ agentIds: [candidate.id] });
+            visibleIds.add(candidate.id);
+          } catch (perAgentError) {
+            if (!(perAgentError instanceof NotFoundError)) {
+              throw perAgentError;
+            }
           }
         }
       }
-    }
 
-    const visible: NormalizedCandidate[] = items
-      .filter((candidate) => visibleIds.has(candidate.id))
-      .map((candidate) => ({
-        agentId: candidate.id,
-        isLive: candidate.status === 'online',
-        status: candidate.status ?? 'unknown',
-        packages: candidate.packages,
-        enrolledAt: candidate.enrolled_at,
-      }));
+      return {
+        items: pageCandidates.filter((candidate) => visibleIds.has(candidate.id)),
+        total: response?.total,
+      };
+    });
+
+    const visible: NormalizedCandidate[] = items.map((candidate) => ({
+      agentId: candidate.id,
+      // Mirror Fleet's own ActiveAgentStatuses: only records that are
+      // definitively gone count as not live — `updating`, `degraded`,
+      // `enrolling` and `error` are active machines, so two same-named agents
+      // in those states must still surface as `ambiguous` rather than one
+      // being silently picked.
+      isLive: !['offline', 'inactive', 'unenrolled', 'uninstalled', 'decommissioned'].includes(
+        candidate.status ?? ''
+      ),
+      status: candidate.status ?? 'unknown',
+      packages: candidate.packages,
+      enrolledAt: candidate.enrolled_at,
+    }));
 
     // `truncated` is safe to keep: it says only "there were more pages", which
     // the caller already learns from the space-filtered candidate list being

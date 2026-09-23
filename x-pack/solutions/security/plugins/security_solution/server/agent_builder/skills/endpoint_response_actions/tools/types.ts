@@ -196,6 +196,14 @@ function boundOutputValue(value: unknown, path: string, depth = 0): BoundedOutpu
   }
 
   if (Array.isArray(value)) {
+    // Depth is checked here as well, not just in the object branch: a deeply
+    // nested array would otherwise recurse past MAX_OUTPUT_DEPTH and can
+    // overflow the stack on endpoint-provided payloads before any size bound
+    // applies. Serialize-and-truncate, same as an over-deep object.
+    if (depth >= MAX_OUTPUT_DEPTH) {
+      return boundOutputValue(JSON.stringify(value) ?? String(value), path, depth + 1);
+    }
+
     const kept = value
       .slice(0, MAX_OUTPUT_ENTRIES_PER_AGENT)
       .map((item, index) => boundOutputValue(item, `${path}[${index}]`, depth + 1));

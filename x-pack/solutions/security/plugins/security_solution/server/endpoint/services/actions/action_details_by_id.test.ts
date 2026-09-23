@@ -185,4 +185,38 @@ describe('When using `getActionDetailsById()', () => {
       endpointAppContextService.getInternalFleetServices().ensureInCurrentSpace
     ).not.toHaveBeenCalled();
   });
+
+  it('fills linked-project hostnames from the scoped metadata index when Fleet cannot resolve them', async () => {
+    const getHostMetadataList = jest.fn().mockResolvedValue({
+      data: [
+        {
+          metadata: {
+            agent: { id: 'agent-a' },
+            host: { hostname: 'linked-host-a' },
+          },
+        },
+      ],
+      total: 1,
+    });
+    (
+      endpointAppContextService.getEndpointMetadataService as jest.Mock
+    ).mockReturnValue({ getHostMetadataList });
+    // Origin Fleet knows nothing about the linked-project agent
+    (
+      endpointAppContextService.getInternalFleetServices().agent.getByIds as jest.Mock
+    ).mockResolvedValue([]);
+
+    const details = await getActionDetailsById(endpointAppContextService, 'default', '123', {
+      scoped: { isCpsRead: () => true } as never,
+    });
+
+    expect(getHostMetadataList).toHaveBeenCalledWith(
+      expect.objectContaining({
+        kuery: 'united.agent.agent.id: ("agent-a")',
+        page: 0,
+      }),
+      expect.anything()
+    );
+    expect(details.hosts).toEqual({ 'agent-a': { name: 'linked-host-a' } });
+  });
 });
