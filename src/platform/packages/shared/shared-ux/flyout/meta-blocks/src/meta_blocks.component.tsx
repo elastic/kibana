@@ -120,31 +120,31 @@ export const MetaBlocks: FunctionComponent<MetaBlocksProps> = ({ items, ...rest 
 
   return (
     <dl css={memoized.list} data-test-subj={rest['data-test-subj'] ?? 'metablocks-container'}>
-      {items.map((item, index) => {
-        const truncatableText = getTruncatableText(item.value);
+      {items.map(({ id, title, value, ...itemProps }, index) => {
+        const truncatableText = getTruncatableText(value);
 
         return (
           // `EuiText` renders a `div`, the one wrapper `dl` accepts around a `dt`/`dd` pair. It
           // keeps each pair a single flex item, which is what makes the row wrap pair by pair.
           <EuiText
-            key={item.id ?? index}
+            key={id ?? index}
+            {...itemProps}
             size="s"
             color="subdued"
             css={memoized.item}
-            data-test-subj={item['data-test-subj']}
           >
-            <dt css={memoized.key}>{item.title}</dt>
+            <dt css={memoized.key}>{title}</dt>
             {truncatableText !== undefined ? (
               <dd css={memoized.truncatedValue}>
                 <span css={memoized.fullTextSizer} aria-hidden>
                   {truncatableText}
                 </span>
                 <span css={memoized.truncationOverlay}>
-                  {renderTruncated(item.value, truncatableText)}
+                  {renderTruncated(value, truncatableText)}
                 </span>
               </dd>
             ) : (
-              <dd css={memoized.value}>{item.value}</dd>
+              <dd css={memoized.value}>{value}</dd>
             )}
           </EuiText>
         );

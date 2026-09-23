@@ -27,9 +27,9 @@ import { FlyoutTemplate } from '@kbn/flyout-template';
 
 ## Root props
 
-The root forwards a fixed subset of `EuiFlyoutProps` — `id`, `hasChildBackground`, `onClose`, `size`, `minWidth`, `maxWidth`, `type`, `paddingSize`, `ownFocus`, `resizable`, `onResize`, `outsideClickCloses`, `focusTrapProps`, `closeButtonProps`, `session`, `historyKey`, `onActive`, `flyoutMenuProps` — plus `aria-label`, `aria-labelledby`, and `data-test-subj`. Anything not in that list is not accepted. `size` defaults to `m` and `session` defaults to `start`; `flyoutMenuDisplayMode` is fixed to `auto` and is not configurable.
+The root accepts every `EuiFlyoutProps` prop, as well as any `data-*` attributes, with three exceptions: `children` instead names the declarative zones, `flyoutMenuDisplayMode` is fixed to `auto`, and `ref` is not forwarded. `size` defaults to `m` and `session` defaults to `start`. When `flyoutMenuProps` is set, the template derives a `title` from the string `FlyoutTemplate.Header` title and merges it before forwarding. An explicit `flyoutMenuProps.title` overrides this. `aria-label` and `aria-labelledby` are both accepted, but the template resolves them against the header title rather than forwarding them untouched — see [Behavior](#behavior).
 
-Tab selection props also live on the root: `selectedTabId` (controlled), `defaultSelectedTabId` (uncontrolled initial), and `onTabChange` (called on every tab click either way). See [`src/header/tab/README.md`](src/header/tab/README.md).
+Tab selection props also live on the root: `selectedTabId` (controlled), `defaultSelectedTabId` (uncontrolled initial), and `onTabChange` (called on every tab click either way). See [Tabs](#tabs) below.
 
 ## Zones
 
@@ -46,11 +46,13 @@ Tab selection props also live on the root: `selectedTabId` (controlled), `defaul
 
 **`FlyoutTemplate.Footer`** renders a primary and secondary action right-aligned inside `EuiFlyoutFooter`, secondary first. If no action is present, the footer is omitted entirely — no default Cancel button is added. Only the first instance of each action is rendered; for `PrimaryActionMenu` specifically, the first instance that actually has panels wins. `PrimaryAction` and `PrimaryActionMenu` are mutually exclusive. An empty `panels` array on `PrimaryActionMenu` counts as absent, so a lone empty menu omits the footer without warning.
 
-- `FlyoutTemplate.Footer.PrimaryAction` — rendered as a filled `EuiButton`. Takes `label`, `onClick`, and optional `id`, `iconType`, `isLoading`, `isDisabled`, `data-test-subj`.
-- `FlyoutTemplate.Footer.SecondaryAction` — rendered as an `EuiButtonEmpty`. Same props as `PrimaryAction`.
+- `FlyoutTemplate.Footer.PrimaryAction` — rendered as a filled `EuiButton`.
+- `FlyoutTemplate.Footer.SecondaryAction` — rendered as an `EuiButtonEmpty`.
 - `FlyoutTemplate.Footer.PrimaryActionMenu` — rendered as a filled `EuiButton` that opens an `EuiContextMenu` in a popover above the footer. See [Primary action menu](#primary-action-menu) below.
 
 All three `label` props are `string`, not `ReactNode`.
+
+`PrimaryAction` and `SecondaryAction` accept `label`, `onClick`, an optional `id`, any `data-*` attributes, and the remaining `EuiButton` props such as `iconType`, `iconSide`, `isLoading`, `isDisabled`, `contentProps`, and `textProps`. Both are typed from EUI's button-only props, so an action always renders a button and the anchor props are not reachable. The template owns appearance and sizing: `children`, `color`, `element`, `fill`, `fullWidth`, `size`, and `buttonRef` are not accepted, and `flush` is not offered on `SecondaryAction`. `PrimaryAction` also takes `minWidth`, which `EuiButtonEmpty` does not support. The `id` is forwarded to the button element.
 
 ### Primary action menu
 
@@ -99,9 +101,9 @@ Behavior:
 | `id` | `string` | Forwarded to the trigger button. |
 | `aria-label` | `string` | Overrides the popover dialog's derived name (`"{label} menu"`). |
 | `data-test-subj` | `string` | Forwarded to the trigger; the popover panel gets `${value}Panel`. |
-| everything else on `EuiButton` | — | Forwarded to the trigger, e.g. `isLoading`, `isDisabled`, `color`, `size`, `className`, `css`, and any `data-*` attribute. |
+| everything else on `EuiButton` | — | Forwarded to the trigger, e.g. `isLoading`, `isDisabled`, `className`, `css`, and any `data-*` attribute. |
 
-The template sets `children`, `fill`, `iconType`, `iconSide`, `element`, `aria-haspopup`, and the click handler on the trigger itself, so those are rejected at the type level rather than silently ignored. `isSelected` is rejected too: it applies `aria-pressed`, which describes a toggle button, whereas a popover trigger is described by the `aria-expanded` EUI already sets. `type` is rejected and pinned to `"button"`, so a trigger placed inside a `<form>` opens the menu without submitting it.
+The template sets `children`, `fill`, `iconType`, `iconSide`, `element`, `aria-haspopup`, and the click handler on the trigger itself, so those are rejected at the type level rather than silently ignored. `color` and `size` are rejected as well, keeping every footer action on one appearance. `isSelected` is rejected too: it applies `aria-pressed`, which describes a toggle button, whereas a popover trigger is described by the `aria-expanded` EUI already sets. `type` is rejected and pinned to `"button"`, so a trigger placed inside a `<form>` opens the menu without submitting it.
 
 ## Behavior
 
@@ -114,7 +116,7 @@ The template sets `children`, `fill`, `iconType`, `iconSide`, `element`, `aria-h
 
 ## Tabs
 
-Pass `tabs` to the root to render a tab bar at the bottom of the header. Each entry takes `id`, `label`, and optional `disabled`, `prepend`, `append`, and `data-test-subj`. Declare a `Body.TabPanel` for each tab id; the template wires the `tab`/`tabpanel` accessibility relationship and mounts only the selected panel.
+Pass `tabs` to the root to render a tab bar at the bottom of the header. Each entry takes an `id` (the logical tab id used to match a `Body.TabPanel`, distinct from the auto-generated DOM `id`) and a `label`. It also accepts any `data-*` attributes and the rest of `EuiTabProps` (such as `disabled`, `prepend`, `append`, `className`, `css`, `aria-label`, `data-test-subj`). The template owns `aria-controls`, `children`, `isSelected`, and `onClick`, so an entry cannot set them: selection derives from the root and clicks route through `onTabChange`. Declare a `Body.TabPanel` for each tab id; the template wires the `tab`/`tabpanel` accessibility relationship and mounts only the selected panel.
 
 ```tsx
 <FlyoutTemplate
