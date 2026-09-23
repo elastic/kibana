@@ -26,9 +26,6 @@ import { useListAiIndices } from '../../../hooks/ai_indices/use_list_ai_indices'
 import { labels } from '../../../utils/i18n';
 import { AiIndicesWarningsPanel } from './ai_indices_warnings_panel';
 
-/** Matches the clamp the Context Engine applies to AI Index descriptions elsewhere. */
-const OPTION_TEXT_LINES = 2;
-
 export const useAiIndices = (agentId?: string) => {
   const {
     aiIndices: availableAiIndices,
@@ -113,9 +110,8 @@ export const AiIndicesFields: React.FC<AiIndicesFieldsProps> = ({
     [aiIndices, inheritedIdSet]
   );
 
-  // The description is stacked under the name rather than appended beside it: the append slot
-  // cannot shrink, so a long description would push the name out of the row. Rows size to their
-  // content, so both are clamped to keep a verbose index from filling the whole list.
+  // Stacked rather than appended beside the name: the append slot cannot shrink, so a long
+  // description would push the name out of the row. Clamped because rows size to their content.
   const renderOption = useCallback(
     (
       { label, value: description }: EuiComboBoxOptionOption<string>,
@@ -126,7 +122,7 @@ export const AiIndicesFields: React.FC<AiIndicesFieldsProps> = ({
         <EuiText size="s">
           <strong>
             <EuiTextBlockTruncate
-              lines={OPTION_TEXT_LINES}
+              lines={2}
               title={label}
               data-test-subj={`agentBuilderAiIndexOptionName-${label}`}
             >
@@ -137,7 +133,7 @@ export const AiIndicesFields: React.FC<AiIndicesFieldsProps> = ({
         {description && (
           <EuiText size="xs" color="subdued">
             <EuiTextBlockTruncate
-              lines={OPTION_TEXT_LINES}
+              lines={2}
               title={description}
               data-test-subj={`agentBuilderAiIndexOptionDescription-${label}`}
             >

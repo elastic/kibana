@@ -267,9 +267,8 @@ describe('AiIndicesSection', () => {
       ).toHaveTextContent(LONG_DESCRIPTION);
     });
 
-    // Rows size to their content, and the list is capped at 200px: without a clamp a single
-    // verbose index would fill the whole dropdown and scroll its own name out of view. jsdom
-    // drops `-webkit-line-clamp`, so the clamp itself is only assertable through its wrapper.
+    // Rows size to their content and the list is capped at 200px, so without a clamp one verbose
+    // index fills the dropdown. jsdom drops `-webkit-line-clamp`; the wrapper is the only proxy.
     it('clamps a long name and description so one option cannot fill the dropdown', async () => {
       mockAvailableAiIndices = [{ id: LONG_ID, description: LONG_DESCRIPTION, managed: false }];
 

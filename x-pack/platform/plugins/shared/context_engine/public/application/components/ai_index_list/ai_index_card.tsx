@@ -81,11 +81,7 @@ export const AiIndexCard = ({ aiIndex, href, onDeleteClick }: AiIndexCardProps) 
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="s" alignItems="baseline" responsive={false}>
               <EuiFlexItem>
-                {/*
-                 * The grid sizes its `1fr` tracks from each card's min-content width, so the id
-                 * has to stay breakable: a title that cannot wrap stretches its column — and the
-                 * whole grid — past the viewport. The clamp keeps it to the original single line.
-                 */}
+                {/* Must stay wrappable: `1fr` grid tracks size to the card's min-content width. */}
                 <EuiTextBlockTruncate
                   lines={1}
                   className="eui-textBreakWord"

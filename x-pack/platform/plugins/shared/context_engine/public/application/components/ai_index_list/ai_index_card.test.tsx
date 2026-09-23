@@ -66,8 +66,7 @@ describe('AiIndexCard', () => {
     );
   });
 
-  // The grid sizes its `1fr` tracks from each card's min-content width, so an id that cannot be
-  // broken stretches its column — and the whole grid — past the viewport.
+  // `1fr` grid tracks size to the card's min-content width, so an unbreakable id stretches the grid.
   it('keeps a long id breakable and clamped to one line', () => {
     const id = 'a'.repeat(256);
 
