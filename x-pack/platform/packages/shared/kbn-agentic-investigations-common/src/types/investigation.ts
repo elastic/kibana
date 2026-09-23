@@ -42,6 +42,8 @@ export interface Investigation {
   priorityScore?: number;
   /** Durable record label shown in Brief (e.g. CASE-2047) */
   recordId?: string;
+  /** The underlying Agent Builder conversation id, required for escalation linking. */
+  conversationId?: string;
   /** Leading proposal CTA label for Brief cards */
   primaryActionLabel?: string;
   events: TimelineEvent[];
