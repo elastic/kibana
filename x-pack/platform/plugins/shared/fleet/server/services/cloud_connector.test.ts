@@ -1698,6 +1698,39 @@ describe('CloudConnectorService', () => {
           expect(otherRollback.revert).toHaveBeenCalledTimes(1);
         });
 
+        it('reverts every space and reports each failure when an earlier space cannot be reverted after the connector write fails', async () => {
+          const currentRollback = {
+            policyCount: 1,
+            revert: jest.fn().mockRejectedValue(
+              new CloudConnectorRoleArnPropagationError('current revert failed', {
+                updateFailed: [],
+                revertFailed: ['p1'],
+                bumpFailed: false,
+              })
+            ),
+          };
+          const otherRollback = {
+            policyCount: 1,
+            revert: jest.fn().mockRejectedValue(
+              new CloudConnectorRoleArnPropagationError('other revert failed', {
+                updateFailed: [],
+                revertFailed: ['p2'],
+                bumpFailed: true,
+              })
+            ),
+          };
+          propagateRoleArnToPackagePoliciesMock
+            .mockResolvedValueOnce(currentRollback)
+            .mockResolvedValueOnce(otherRollback);
+          mockSoClient.update.mockRejectedValueOnce(new Error('connector write failed'));
+
+          await expect(updateSharedRole()).rejects.toMatchObject({
+            detail: { updateFailed: [], revertFailed: ['p1', 'p2'], bumpFailed: true },
+          });
+          expect(currentRollback.revert).toHaveBeenCalledTimes(1);
+          expect(otherRollback.revert).toHaveBeenCalledTimes(1);
+        });
+
         it('reverts spaces already updated when a later space fails', async () => {
           const rollback = { policyCount: 1, revert: jest.fn().mockResolvedValue(undefined) };
           propagateRoleArnToPackagePoliciesMock
@@ -1739,6 +1772,33 @@ describe('CloudConnectorService', () => {
 
           await expect(updateSharedRole()).rejects.toMatchObject({
             detail: { updateFailed: ['p2'], revertFailed: ['p1'] },
+          });
+          expect(mockSoClient.update).not.toHaveBeenCalled();
+        });
+
+        it("keeps the later space's revert and bump failures when reverting an earlier space also fails", async () => {
+          const rollback = {
+            policyCount: 1,
+            revert: jest.fn().mockRejectedValue(
+              new CloudConnectorRoleArnPropagationError('revert failed', {
+                updateFailed: [],
+                revertFailed: ['p1'],
+                bumpFailed: false,
+              })
+            ),
+          };
+          propagateRoleArnToPackagePoliciesMock
+            .mockResolvedValueOnce(rollback)
+            .mockRejectedValueOnce(
+              new CloudConnectorRoleArnPropagationError('space-b failed', {
+                updateFailed: ['p2'],
+                revertFailed: ['p3'],
+                bumpFailed: true,
+              })
+            );
+
+          await expect(updateSharedRole()).rejects.toMatchObject({
+            detail: { updateFailed: ['p2'], revertFailed: ['p3', 'p1'], bumpFailed: true },
           });
           expect(mockSoClient.update).not.toHaveBeenCalled();
         });

@@ -71,6 +71,36 @@ import { validatePolicyNamespaceForSpace } from './spaces/policy_namespaces';
 import { extractSecretIdsFromCloudConnectorVars } from './secrets/cloud_connector';
 import { deleteSecrets } from './secrets/common';
 
+/** Attempts every rollback, even after one fails, and returns the errors of those that failed. */
+const revertEveryRollback = async (
+  rollbacks: RoleArnPropagationRollback[],
+  onRevertError: (revertError: unknown) => void
+): Promise<unknown[]> => {
+  const revertErrors: unknown[] = [];
+  for (const rollback of rollbacks) {
+    try {
+      await rollback.revert();
+    } catch (revertError) {
+      revertErrors.push(revertError);
+      onRevertError(revertError);
+    }
+  }
+  return revertErrors;
+};
+
+const collectRevertFailures = (
+  revertErrors: unknown[]
+): { revertFailed: string[]; bumpFailed: boolean } => {
+  const structured = revertErrors.filter(
+    (revertError): revertError is CloudConnectorRoleArnPropagationError =>
+      revertError instanceof CloudConnectorRoleArnPropagationError
+  );
+  return {
+    revertFailed: structured.flatMap((revertError) => revertError.detail.revertFailed),
+    bumpFailed: structured.some((revertError) => revertError.detail.bumpFailed),
+  };
+};
+
 export const hasIacConfirm = (iac: CloudConnectorIacState | undefined): boolean =>
   Boolean(iac && CLOUD_CONNECTOR_IAC_REQUEST_KEYS.some((key) => iac[key] !== undefined));
 
@@ -570,40 +600,30 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
               }
             }
           } catch (fanOutError) {
-            const revertErrors: unknown[] = [];
-            for (const rollback of rollbacks) {
-              try {
-                await rollback.revert();
-              } catch (revertError) {
-                revertErrors.push(revertError);
-                logger.error(
-                  `Failed to revert a Role ARN fan-out for connector ${cloudConnectorId} after a later space failed`,
+            const revertErrors = await revertEveryRollback(rollbacks, (revertError) =>
+              logger.error(
+                `Failed to revert a Role ARN fan-out for connector ${cloudConnectorId} after a later space failed: ${getErrorMessage(
                   revertError
-                );
-              }
-            }
+                )}`
+              )
+            );
             if (revertErrors.length > 0) {
-              const updateFailed =
+              const fanOutDetail =
                 fanOutError instanceof CloudConnectorRoleArnPropagationError
-                  ? fanOutError.detail.updateFailed
-                  : [];
-              const revertFailed = revertErrors.flatMap((revertError) =>
-                revertError instanceof CloudConnectorRoleArnPropagationError
-                  ? revertError.detail.revertFailed
-                  : []
-              );
+                  ? fanOutError.detail
+                  : undefined;
+              const earlierSpaces = collectRevertFailures(revertErrors);
               const fanOutMessage =
                 fanOutError instanceof Error ? fanOutError.message : String(fanOutError);
               throw new CloudConnectorRoleArnPropagationError(
                 `Role ARN fan-out failed (${fanOutMessage}) and reverting an earlier space also failed`,
                 {
-                  updateFailed,
-                  revertFailed,
-                  bumpFailed: revertErrors.some(
-                    (revertError) =>
-                      revertError instanceof CloudConnectorRoleArnPropagationError &&
-                      revertError.detail.bumpFailed
-                  ),
+                  updateFailed: fanOutDetail?.updateFailed ?? [],
+                  revertFailed: [
+                    ...(fanOutDetail?.revertFailed ?? []),
+                    ...earlierSpaces.revertFailed,
+                  ],
+                  bumpFailed: Boolean(fanOutDetail?.bumpFailed) || earlierSpaces.bumpFailed,
                 }
               );
             }
@@ -613,8 +633,18 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
             roleArnRollback = {
               policyCount: rollbacks.reduce((count, rollback) => count + rollback.policyCount, 0),
               async revert() {
-                for (const rollback of rollbacks) {
-                  await rollback.revert();
+                const revertErrors = await revertEveryRollback(rollbacks, (revertError) =>
+                  logger.error(
+                    `Failed to revert a Role ARN fan-out in one space for connector ${cloudConnectorId}: ${getErrorMessage(
+                      revertError
+                    )}`
+                  )
+                );
+                if (revertErrors.length > 0) {
+                  throw new CloudConnectorRoleArnPropagationError(
+                    `Reverting the Role ARN failed in ${revertErrors.length} of ${rollbacks.length} spaces`,
+                    { updateFailed: [], ...collectRevertFailures(revertErrors) }
+                  );
                 }
               },
             };
