@@ -49,14 +49,13 @@ test.describe(
         await pageObjects.dashboard.waitForRenderComplete();
         await pageObjects.maps.waitForLayersToLoad();
 
-        const numFilters = await pageObjects.filterBar.getFilterCount();
-        expect(numFilters).toBe(1);
+        await expect.poll(() => pageObjects.filterBar.getFilterCount()).toBe(1);
 
-        const hasJoinFilter = await pageObjects.filterBar.hasFilter({
-          field: 'runtime_shape_name',
-          value: 'charlie',
-        });
-        expect(hasJoinFilter).toBe(true);
+        await expect
+          .poll(() =>
+            pageObjects.filterBar.hasFilter({ field: 'runtime_shape_name', value: 'charlie' })
+          )
+          .toBe(true);
       });
     });
 
@@ -70,14 +69,13 @@ test.describe(
       // Assert we landed on the target dashboard with filter from drilldown action
       await expect(pageObjects.dashboard.getAppTitle()).toContainText('map embeddable example');
       await pageObjects.dashboard.waitForRenderComplete();
-      const panelCount = await pageObjects.dashboard.getPanelCount();
-      expect(panelCount).toBe(2);
+      await expect.poll(() => pageObjects.dashboard.getPanelCount()).toBe(2);
 
-      const hasJoinFilter = await pageObjects.filterBar.hasFilter({
-        field: 'runtime_shape_name',
-        value: 'charlie',
-      });
-      expect(hasJoinFilter).toBe(true);
+      await expect
+        .poll(() =>
+          pageObjects.filterBar.hasFilter({ field: 'runtime_shape_name', value: 'charlie' })
+        )
+        .toBe(true);
     });
 
     test('url drilldown action', async ({ page, pageObjects }) => {
