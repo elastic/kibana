@@ -108,6 +108,7 @@ describe('CustomYaraSignatureHighlightedFieldLink', () => {
     const { findByTestId, getByTestId } = renderLink(createHit(ENTRY_ID));
 
     const link = await findByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID);
+    expect(mockGetInstance).toHaveBeenCalled();
     expect(getArtifactMock).toHaveBeenCalledWith(undefined, ENTRY_ID);
     expect(link).toHaveAttribute(
       'href',
@@ -165,6 +166,7 @@ describe('CustomYaraSignatureHighlightedFieldLink', () => {
 
     const { queryByTestId, getByTestId } = renderLink(createHit(ENTRY_ID));
 
+    expect(mockGetInstance).not.toHaveBeenCalled();
     expect(getArtifactMock).not.toHaveBeenCalled();
     expect(queryByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID)).not.toBeInTheDocument();
     expect(getByTestId('cysChild')).toBeInTheDocument();
@@ -181,6 +183,7 @@ describe('CustomYaraSignatureHighlightedFieldLink', () => {
 
     const { queryByTestId, getByTestId } = renderLink(createHit(ENTRY_ID));
 
+    expect(mockGetInstance).not.toHaveBeenCalled();
     expect(getArtifactMock).not.toHaveBeenCalled();
     expect(queryByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID)).not.toBeInTheDocument();
     expect(getByTestId('cysChild')).toBeInTheDocument();
@@ -189,6 +192,7 @@ describe('CustomYaraSignatureHighlightedFieldLink', () => {
   it('renders plain text when entry_id is missing', () => {
     const { queryByTestId, getByTestId } = renderLink(createHit());
 
+    expect(mockGetInstance).not.toHaveBeenCalled();
     expect(getArtifactMock).not.toHaveBeenCalled();
     expect(queryByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID)).not.toBeInTheDocument();
     expect(getByTestId('cysChild')).toBeInTheDocument();

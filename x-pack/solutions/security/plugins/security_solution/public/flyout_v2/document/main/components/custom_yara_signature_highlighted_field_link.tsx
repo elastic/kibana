@@ -89,16 +89,41 @@ export const CustomYaraSignatureHighlightedFieldLink: FC<
     'customYaraSignaturesEnabled'
   );
   const { canReadCustomYaraSignatures } = useUserPrivileges().endpointPrivileges;
-  const { getAppUrl } = useAppUrl();
-  const { euiTheme } = useEuiTheme();
-  const http = useHttp();
   const entryId = getEntryIdFromHit(hit);
   const shouldFetchArtifact =
     isCustomYaraSignaturesEnabled && canReadCustomYaraSignatures && Boolean(entryId);
+
+  if (!shouldFetchArtifact || !entryId) {
+    return <>{children}</>;
+  }
+
+  return (
+    <CustomYaraSignatureHighlightedFieldLinkContent entryId={entryId}>
+      {children}
+    </CustomYaraSignatureHighlightedFieldLinkContent>
+  );
+};
+
+interface CustomYaraSignatureHighlightedFieldLinkContentProps {
+  entryId: string;
+  children: ReactNode;
+}
+
+/**
+ * Fetches the CYS artifact and renders a link (or not-found tooltip).
+ * Mounted only when FF, read privilege, and entry_id are present so that
+ * `CustomYaraSignaturesApiClient.getInstance` does not ensure-create the list
+ * without those checks.
+ */
+const CustomYaraSignatureHighlightedFieldLinkContent: FC<
+  CustomYaraSignatureHighlightedFieldLinkContentProps
+> = ({ entryId, children }) => {
+  const { getAppUrl } = useAppUrl();
+  const { euiTheme } = useEuiTheme();
+  const http = useHttp();
   const apiClient = useMemo(() => CustomYaraSignaturesApiClient.getInstance(http), [http]);
 
   const { isSuccess, error, data } = useGetArtifact(apiClient, undefined, entryId, {
-    enabled: shouldFetchArtifact,
     retry: false,
     // History keeps earlier alert flyouts mounted, so window focus would refetch every one of them.
     refetchOnWindowFocus: false,
@@ -129,10 +154,6 @@ export const CustomYaraSignatureHighlightedFieldLink: FC<
     },
     [navigateToCustomYaraSignatures]
   );
-
-  if (!shouldFetchArtifact) {
-    return <>{children}</>;
-  }
 
   if (isArtifactNotFound(error)) {
     return (
