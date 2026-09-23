@@ -23,8 +23,6 @@ export type { FilterItemsProps } from './filter_bar';
 export type { DataViewPickerProps } from './dataview_picker';
 export type { ApplyGlobalFilterActionContext } from './actions/apply_filter_action/apply_filter_action';
 
-export { PanelLevelFilters } from './panel_level_filters/panel_level_filters';
-export type { PanelLevelFiltersProps } from './panel_level_filters/panel_level_filters';
 export { SearchBar } from './search_bar';
 export { createSearchBar } from './search_bar/create_search_bar';
 export { FilterItem, FilterItems } from './filter_bar';

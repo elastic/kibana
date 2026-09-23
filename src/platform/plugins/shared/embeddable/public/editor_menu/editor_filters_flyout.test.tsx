@@ -12,6 +12,8 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { Filter, Query } from '@kbn/es-query';
 import { BehaviorSubject } from 'rxjs';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { setStubKibanaServices } from '../mocks';
 import type { EditorMenuManager } from './types';
 import { EditorFiltersFlyout } from './editor_filters_flyout';
 
@@ -50,6 +52,17 @@ const renderFlyout = () => {
 };
 
 describe('EditorFiltersFlyout', () => {
+  beforeEach(() => {
+    const start = {
+      ui: {
+        SearchBar: ({ query }: { query?: Query }) => (
+          <span>{typeof query?.query === 'string' ? query.query : ''}</span>
+        ),
+      },
+    } as unknown as UnifiedSearchPublicPluginStart;
+    setStubKibanaServices({ unifiedSearch: start });
+  });
+
   it('saves the staged query and filters', () => {
     const { closeFlyout, setQuery, setFilters } = renderFlyout();
 

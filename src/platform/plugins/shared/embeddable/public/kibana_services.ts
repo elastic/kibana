@@ -23,6 +23,7 @@ export let savedObjectsManagement: EmbeddableStartDependencies['savedObjectsMana
 export let savedObjectsTaggingOss: EmbeddableStartDependencies['savedObjectsTaggingOss'];
 export let contentManagement: EmbeddableStartDependencies['contentManagement'];
 export let licensing: EmbeddableStartDependencies['licensing'];
+export let unifiedSearch: EmbeddableStartDependencies['unifiedSearch'];
 
 const servicesReady$ = new BehaviorSubject(false);
 export const untilPluginStartServicesReady = () => {
@@ -51,6 +52,7 @@ export const setKibanaServices = (
   savedObjectsTaggingOss = deps.savedObjectsTaggingOss;
   contentManagement = deps.contentManagement;
   licensing = deps.licensing;
+  unifiedSearch = deps.unifiedSearch;
 
   servicesReady$.next(true);
 };

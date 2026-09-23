@@ -33,6 +33,11 @@ jest.mock('@kbn/embeddable-plugin/public/kibana_services', () => ({
     notifications: { toasts: { addError: jest.fn() } },
     overlays: { openSystemFlyout: jest.fn() },
   },
+  unifiedSearch: {
+    ui: {
+      SearchBar: () => <div data-test-subj="editorFiltersSearchBar" />,
+    },
+  },
   uiActions: {
     getAction: async (id: string) => {
       const actions = jest.requireActual(
@@ -345,7 +350,7 @@ describe('VegaEditorFlyout', () => {
         const filters = await screen.findByTestId('editorFiltersFlyout');
         expect(within(filters).getByText('Panel level filters')).toBeVisible();
         expect(await within(filters).findByRole('button', { name: 'Save' })).toBeEnabled();
-        expect(within(filters).getByText('No query applied')).toBeVisible();
+        expect(within(filters).getByTestId('editorFiltersSearchBar')).toBeVisible();
         await waitFor(() => expect(screen.queryByRole('textbox')).not.toBeInTheDocument());
         expect(editor.closest('[inert]')).not.toBeNull();
         expect(screen.queryByText('Reformat as HJSON')).not.toBeInTheDocument();

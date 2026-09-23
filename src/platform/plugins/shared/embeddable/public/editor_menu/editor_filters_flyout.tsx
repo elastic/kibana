@@ -25,8 +25,10 @@ import {
   apiPublishesWritableUnifiedSearch,
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
-import { PanelLevelFilters } from '@kbn/unified-search-plugin/public';
+import { unifiedSearch } from '../kibana_services';
 import type { EditorFiltersBodyProps } from './types';
+
+const emptyQuery: Query = { language: 'kuery', query: '' };
 
 const readQuery = (api: unknown): Query | undefined => {
   if (!apiPublishesWritableUnifiedSearch(api)) return undefined;
@@ -82,6 +84,14 @@ export const EditorFiltersFlyout = ({
     };
   }, [closeFlyout, menuManager]);
 
+  const stageQuery = (next: Query | undefined) => {
+    if (!next || typeof next.query !== 'string' || next.query.trim() === '') {
+      setQuery(undefined);
+      return;
+    }
+    setQuery({ language: next.language, query: next.query });
+  };
+
   const save = () => {
     if (apiPublishesWritableUnifiedSearch(api)) {
       api.setQuery(query);
@@ -93,12 +103,28 @@ export const EditorFiltersFlyout = ({
   return (
     <>
       <EuiFlyoutBody data-test-subj="editorFiltersFlyoutBody">
-        <PanelLevelFilters
-          query={query}
+        <unifiedSearch.ui.SearchBar
+          appName="embeddableEditorFilters"
+          query={query ?? emptyQuery}
           filters={filters}
-          dataViews={dataViews}
-          onQueryChange={setQuery}
-          onFiltersChange={setFilters}
+          indexPatterns={dataViews}
+          showQueryInput
+          showFilterBar
+          showDatePicker={false}
+          showSubmitButton={false}
+          showSavedQueryControls={false}
+          isAutoRefreshDisabled
+          useDefaultBehaviors={false}
+          disableSubscribingToGlobalDataServices
+          onQueryChange={({ query: next }) => {
+            stageQuery(next && isOfQueryType(next) ? next : undefined);
+          }}
+          onQuerySubmit={({ query: next }) => {
+            stageQuery(next && isOfQueryType(next) ? next : undefined);
+          }}
+          onFiltersUpdated={setFilters}
+          displayStyle="inPage"
+          dataTestSubj="editorFiltersSearchBar"
         />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

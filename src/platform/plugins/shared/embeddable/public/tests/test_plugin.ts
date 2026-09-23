@@ -19,6 +19,7 @@ import type {
 import type { Query } from '@kbn/es-query';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { EmbeddablePublicPlugin } from '../plugin';
 import type { EmbeddableSetup, EmbeddableStart } from '../types';
 export interface TestPluginReturn {
@@ -70,6 +71,7 @@ export const testPlugin = (
           savedObjectsManagementMock as unknown as SavedObjectsManagementPluginStart,
         usageCollection: { reportUiCounter: jest.fn() },
         contentManagement: contentManagementMock.createStartContract(),
+        unifiedSearch: unifiedSearchPluginMock.createStartContract(),
       });
       return start;
     },

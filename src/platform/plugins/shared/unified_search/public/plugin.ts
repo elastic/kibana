@@ -15,7 +15,7 @@ import {
   ON_APPLY_FILTER,
   UPDATE_FILTER_REFERENCES_TRIGGER,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
-import { setCoreStart, setIndexPatterns, setPanelLevelFiltersServices } from './services';
+import { setCoreStart, setIndexPatterns } from './services';
 import { createSearchBar } from './search_bar/create_search_bar';
 import { createIndexPatternSelect } from './index_pattern_select';
 import type {
@@ -62,17 +62,6 @@ export class UnifiedSearchPublicPlugin
   ): UnifiedSearchPublicPluginStart {
     setCoreStart(core);
     setIndexPatterns(dataViews);
-    setPanelLevelFiltersServices({
-      core,
-      data,
-      dataViews,
-      storage: this.storage,
-      kql: { autocomplete: autocompleteStart },
-      usageCollection: this.usageCollection,
-      cps: crossProjectSearch,
-      esql,
-      licensing,
-    });
 
     /*
      *
