@@ -11,6 +11,7 @@ import type { BoundInferenceClient } from '@kbn/inference-common';
 import { executeUntilValid } from '@kbn/inference-prompt-utils';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { z } from '@kbn/zod/v4';
+import type { VisualizationRenderer } from '@kbn/agent-builder-visualizations-common';
 import type { ExtractedVisualization } from '../extract_visualization';
 import { skippedResult } from '../evaluator_utils';
 import type { GoldChartForm } from './gold_visualization_config';
@@ -23,7 +24,7 @@ export const CHART_TYPE_VS_INTENT_JUDGE_VERSION = 'chart-form-judge-v1';
 /** Chart form the agent produced: Lens chart type, xy series types, Vega mark. */
 export interface ActualChartForm {
   chartType?: string;
-  renderer?: 'lens' | 'vega';
+  renderer?: VisualizationRenderer;
   layerTypes: string[];
   mark?: string;
 }

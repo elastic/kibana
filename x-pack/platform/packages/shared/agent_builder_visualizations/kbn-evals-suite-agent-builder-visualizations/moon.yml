@@ -18,6 +18,7 @@ project:
   sourceRoot: x-pack/platform/packages/shared/agent_builder_visualizations/kbn-evals-suite-agent-builder-visualizations
 dependsOn:
   - '@kbn/agent-builder-common'
+  - '@kbn/agent-builder-visualizations-common'
   - '@kbn/core'
   - '@kbn/esql-language'
   - '@kbn/evals'

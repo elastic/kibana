@@ -67,9 +67,13 @@ const stripBackticks = (name: string): string => name.replace(/`/g, '');
 /**
  * Every column the config binds to a chart role. Lens bindings are `{ column }`
  * objects under role keys; Vega bindings are `encoding.<channel>.field`.
+ * Custom content is an HTML template and binds nothing.
  */
 export function collectColumnBindings(visualization: ExtractedVisualization): ColumnBinding[] {
   const config = visualization.visualization ?? {};
+  if (visualization.renderer === 'custom_content') {
+    return [];
+  }
   if (visualization.renderer === 'vega') {
     return collectVegaBindings(config.spec);
   }

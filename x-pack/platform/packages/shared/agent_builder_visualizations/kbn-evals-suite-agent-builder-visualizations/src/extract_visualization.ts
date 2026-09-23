@@ -6,6 +6,7 @@
  */
 
 import { platformCoreTools } from '@kbn/agent-builder-common';
+import type { VisualizationRenderer } from '@kbn/agent-builder-visualizations-common';
 
 const CREATE_VISUALIZATION_TOOL_ID = platformCoreTools.createVisualization;
 const VISUALIZATION_RESULT_TYPE = 'visualization';
@@ -17,10 +18,20 @@ interface ConverseLikeOutput {
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
+const RENDERERS: ReadonlySet<VisualizationRenderer> = new Set<VisualizationRenderer>([
+  'lens',
+  'vega',
+  'custom_content',
+]);
+
+const isRenderer = (value: unknown): value is VisualizationRenderer =>
+  typeof value === 'string' && RENDERERS.has(value as VisualizationRenderer);
+
 export interface ExtractedVisualization {
   esql: string;
   chartType?: string;
-  renderer?: 'lens' | 'vega';
+  /** Absent on payloads that predate the field; treat as Lens. */
+  renderer?: VisualizationRenderer;
   visualization?: Record<string, unknown> & { spec?: string };
   attachmentId?: string;
 }
@@ -67,7 +78,7 @@ export function extractVisualizations(output: ConverseLikeOutput): ExtractedVisu
       if (typeof chartType === 'string' && chartType.trim().length > 0) {
         extracted.chartType = chartType;
       }
-      if (renderer === 'lens' || renderer === 'vega') {
+      if (isRenderer(renderer)) {
         extracted.renderer = renderer;
       }
       if (isRecord(visualization)) {

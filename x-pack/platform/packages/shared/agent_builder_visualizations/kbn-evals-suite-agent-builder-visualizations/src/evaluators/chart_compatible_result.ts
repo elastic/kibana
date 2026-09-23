@@ -156,6 +156,18 @@ export function createChartCompatibleResultEvaluator<
 
       const details = await Promise.all(
         visualizations.map(async (visualization, index) => {
+          if (visualization.renderer === 'custom_content') {
+            return {
+              index,
+              chartType: visualization.chartType ?? null,
+              renderer: 'custom_content' as const,
+              compatible: false,
+              reason: 'custom_content renders an HTML template; there is no chart to fit',
+              columnCount: 0,
+              rowCount: 0,
+            };
+          }
+
           // Vega is not bound to Lens chart-type shape rules; treat as compatible
           // when the query executes with at least one column.
           if (visualization.renderer === 'vega') {
