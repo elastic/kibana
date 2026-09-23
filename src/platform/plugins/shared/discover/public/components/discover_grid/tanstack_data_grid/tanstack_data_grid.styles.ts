@@ -79,8 +79,10 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
     position: 'relative',
     display: 'flex',
     alignItems: 'flex-start',
-    gap: euiTheme.size.xs,
+    gap: euiTheme.size.xxs,
     padding: 'var(--tsg-cell-padding-v, 4px) var(--tsg-cell-padding-h, 8px)',
+    // Leave room for the absolute resize handle on the trailing edge.
+    paddingInlineEnd: `calc(var(--tsg-cell-padding-h, 8px) + ${RESIZE_HANDLE_WIDTH * 2}px)`,
     fontWeight: euiTheme.font.weight.semiBold,
     fontSize: 'var(--tsg-font-size, 14px)',
     lineHeight: 'var(--tsg-header-line-height, 21px)',
@@ -178,6 +180,9 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
     '&:hover': {
       backgroundColor: euiTheme.components.dataGridRowBackgroundHover,
     },
+    '&:hover .tsg-pinnedCell': {
+      backgroundColor: euiTheme.colors.backgroundBaseInteractiveHover,
+    },
   }),
 
   rowAutoHeight: css({
@@ -191,6 +196,31 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
     '&:hover': {
       backgroundColor: euiTheme.components.dataGridRowBackgroundSelect,
     },
+    '& .tsg-pinnedCell': {
+      backgroundColor: euiTheme.components.dataGridRowBackgroundSelect,
+    },
+  }),
+
+  selectedRow: css({
+    backgroundColor: euiTheme.components.dataGridRowBackgroundSelect,
+    '&:hover': {
+      backgroundColor: euiTheme.components.dataGridRowBackgroundSelect,
+    },
+    '& .tsg-pinnedCell': {
+      backgroundColor: euiTheme.components.dataGridRowBackgroundSelect,
+    },
+  }),
+
+  pinnedCell: css({
+    backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+  }),
+
+  pinnedHeaderCell: css({
+    backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+  }),
+
+  pinnedCellShadow: css({
+    boxShadow: `2px 0 4px -2px ${euiTheme.colors.borderBasePlain}`,
   }),
 
   cell: css({
@@ -311,9 +341,10 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
     cursor: 'pointer',
   }),
 
-  // -- Cell actions (hover overlay) --
+  // -- Cell actions (hover overlay; secondary actions clip, expand always stays) --
   cellWithActions: css({
     position: 'relative',
+    overflow: 'hidden',
     '&:hover .tsg-cellActions, &:focus-within .tsg-cellActions': {
       opacity: 1,
       pointerEvents: 'auto',
@@ -322,10 +353,14 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
 
   cellActions: css({
     position: 'absolute',
-    left: 0,
-    bottom: '100%',
+    top: 0,
+    right: 0,
     display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'stretch',
     gap: euiTheme.size.xxs,
+    maxWidth: '100%',
+    overflow: 'hidden',
     opacity: 0,
     pointerEvents: 'none',
     transition: 'opacity 100ms ease',
@@ -333,24 +368,47 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
     backgroundColor: euiTheme.colors.primary,
     border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.primary}`,
     borderRadius: euiTheme.border.radius.small,
-    borderBottomLeftRadius: 0,
     paddingInline: euiTheme.size.xxs,
-    zIndex: 3,
+    zIndex: 1,
+    boxSizing: 'border-box',
+  }),
+
+  // Filter/copy shrink and clip from the leading edge when the cell is narrow.
+  cellActionsClippable: css({
+    display: 'flex',
+    flex: '1 1 auto',
+    justifyContent: 'flex-end',
+    minWidth: 0,
+    overflow: 'hidden',
+    gap: euiTheme.size.xxs,
+  }),
+
+  cellActionsExpand: css({
+    display: 'flex',
+    flexShrink: 0,
   }),
 
   cellActionButton: css({
     color: 'inherit',
     borderRadius: 0,
+    flexShrink: 0,
   }),
 
-  // -- Cell popover (panel sizing matches EuiDataGrid via panelStyle) --
+  // -- Cell popover (portaled; max size matches EuiDataGrid) --
+  cellPopoverBackdrop: css({
+    position: 'fixed',
+    inset: 0,
+    zIndex: 9999,
+  }),
+
   cellPopoverPanel: css({
     overflow: 'auto',
+    boxSizing: 'border-box',
   }),
 
   cellPopoverPanelWide: css({
     overflow: 'auto',
-    maxInlineSize: 'min(75vw, 600px) !important',
+    boxSizing: 'border-box',
   }),
 
   cellPopoverValue: css({
@@ -390,10 +448,6 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
     boxSizing: 'border-box',
   }),
 
-  selectedRow: css({
-    backgroundColor: `${euiTheme.colors.primary}10`,
-  }),
-
   // -- Column drag reorder --
   headerCellDragging: css({
     opacity: 0.5,
@@ -409,22 +463,29 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
   }),
 
   headerCellWithActions: css({
-    '&:hover [data-test-subj^="dataGridHeaderCellActionButton-"]': {
+    '&:hover .tsg-headerActions, &:focus-within .tsg-headerActions': {
       opacity: 1,
+      pointerEvents: 'auto',
     },
   }),
 
-  headerActionsButton: css({
-    position: 'absolute',
-    insetInlineEnd: euiTheme.size.xs,
-    top: '50%',
-    transform: 'translateY(-50%)',
+  headerActions: css({
+    display: 'flex',
     flexShrink: 0,
+    alignItems: 'center',
     opacity: 0,
-    transition: 'opacity 100ms ease',
-    '&:hover, &:focus': {
-      opacity: 1,
-    },
+    pointerEvents: 'none',
+    transition: `opacity ${euiTheme.animation.fast} ease-in`,
+    zIndex: 2,
+  }),
+
+  headerActionsVisible: css({
+    opacity: 1,
+    pointerEvents: 'auto',
+  }),
+
+  headerActionsButton: css({
+    flexShrink: 0,
   }),
 
   // -- Empty state --
@@ -553,5 +614,12 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
     borderRadius: 2,
     padding: '0 1px',
     outline: `1px solid ${euiTheme.colors.primary}`,
+  }),
+
+  pagination: css({
+    zIndex: 2,
+    flexGrow: 0,
+    flexShrink: 0,
+    paddingTop: euiTheme.size.xs,
   }),
 });

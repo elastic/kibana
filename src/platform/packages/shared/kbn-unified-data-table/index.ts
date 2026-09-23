@@ -28,11 +28,13 @@ export {
   ROWS_HEIGHT_OPTIONS,
   DataGridDensity,
   DEFAULT_PAGINATION_MODE,
+  DEFAULT_ROWS_PER_PAGE,
   defaultTimeColumnWidth,
 } from './src/constants';
 
 export { JSONCodeEditorCommonMemoized } from './src/components/json_code_editor/json_code_editor_common';
 export { SourceDocument } from './src/components/source_document';
+export { UnifiedDataTableFooter } from './src/components/data_table_footer';
 
 export type * from './src/types';
 export * as columnActions from './src/components/actions/columns';

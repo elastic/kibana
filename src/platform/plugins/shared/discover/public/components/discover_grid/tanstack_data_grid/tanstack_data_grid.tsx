@@ -16,9 +16,11 @@ import {
   type ColumnDef,
   type SortingState,
   type ColumnSizingState,
+  type ColumnPinningState,
   type RowData,
   type Row,
   type Cell,
+  type Column,
 } from '@tanstack/react-table';
 import { useVirtualizer, type VirtualItem } from '@tanstack/react-virtual';
 import {
@@ -40,11 +42,14 @@ import {
   EuiHorizontalRule,
   EuiLoadingSpinner,
   EuiNotificationBadge,
+  EuiPanel,
   EuiPopover,
   EuiPopoverFooter,
   EuiPopoverTitle,
+  EuiPortal,
   EuiProgress,
   EuiSwitch,
+  EuiTablePagination,
   EuiText,
   EuiToolTip,
   euiFontSize,
@@ -59,6 +64,7 @@ import type { DataTableRecord, DataTableColumnsMeta, RowControlProps } from '@kb
 import {
   getShouldShowFieldHandler,
   calcFieldCounts,
+  formatFieldValueReact,
   formatFieldValueText,
   canPrependTimeFieldColumn,
   getVisibleColumns,
@@ -89,11 +95,16 @@ import {
   copyRowsAsJsonToClipboard,
   copyRowsAsTextToClipboard,
   getSchemaDetectors,
+  getRowsPerPageOptions,
+  DEFAULT_PAGINATION_MODE,
+  DEFAULT_ROWS_PER_PAGE,
+  UnifiedDataTableFooter,
   type UnifiedDataTableProps,
   type SortOrder,
   type RenderDocumentViewMeta,
   type ValueToStringConverter,
   type DocMap,
+  type DataGridPaginationMode,
 } from '@kbn/unified-data-table';
 import { uniq } from 'lodash';
 import type { AggregateQuery } from '@kbn/es-query';
@@ -179,6 +190,15 @@ export interface TanStackDataGridProps {
   enableComparisonMode?: UnifiedDataTableProps['enableComparisonMode'];
   ariaLabelledBy?: UnifiedDataTableProps['ariaLabelledBy'];
   showFullScreenButton?: UnifiedDataTableProps['showFullScreenButton'];
+
+  isPaginationEnabled?: boolean;
+  paginationMode?: DataGridPaginationMode;
+  rowsPerPageState?: number;
+  rowsPerPageOptions?: number[];
+  onUpdateRowsPerPage?: (rowsPerPage: number) => void;
+  onUpdatePageIndex?: (pageIndex: number) => void;
+  totalHits?: number;
+  onFetchMoreRecords?: () => void;
 }
 
 const DENSITY_ICONS: Record<DataGridDensity, string> = {
@@ -217,22 +237,123 @@ const MAX_SELECTED_DOCS_FOR_COMPARE = 100;
 
 const scrollPositionCache = new Map<string, number>();
 
+/** Extra padding beyond cell padding when double-click auto-fitting a column (#98434). */
+const AUTO_FIT_CONTENT_PADDING_PX = 5;
+const AUTO_FIT_MAX_WIDTH_PX = 600;
+/** Room for sort indicator + header actions in the header cell. */
+const AUTO_FIT_HEADER_CHROME_PX = 48;
+const AUTO_FIT_SAMPLE_ROWS = 2000;
+
+let autoFitMeasureCanvas: HTMLCanvasElement | null = null;
+
+const measureTextWidth = (text: string, font: string): number => {
+  if (typeof document === 'undefined') {
+    return text.length * 8;
+  }
+  if (!autoFitMeasureCanvas) {
+    autoFitMeasureCanvas = document.createElement('canvas');
+  }
+  const context = autoFitMeasureCanvas.getContext('2d');
+  if (!context) {
+    return text.length * 8;
+  }
+  context.font = font;
+  return context.measureText(text).width;
+};
+
+/**
+ * Compute a content-based column width (header + sampled cell values + padding).
+ * Used when double-clicking the column resize handle.
+ */
+const getColumnAutoFitWidth = ({
+  columnId,
+  headerLabel,
+  rows,
+  formatValue,
+  fontSizePx,
+  fontFamily,
+  cellPaddingH,
+  minWidth = MIN_COL_WIDTH,
+  maxWidth = AUTO_FIT_MAX_WIDTH_PX,
+}: {
+  columnId: string;
+  headerLabel: string;
+  rows: DataTableRecord[];
+  formatValue?: (value: unknown) => string;
+  fontSizePx: number;
+  fontFamily: string;
+  cellPaddingH: number;
+  minWidth?: number;
+  maxWidth?: number;
+}): number => {
+  const bodyFont = `${fontSizePx}px ${fontFamily}`;
+  const headerFont = `600 ${fontSizePx}px ${fontFamily}`;
+  let maxContentPx = measureTextWidth(headerLabel, headerFont) + AUTO_FIT_HEADER_CHROME_PX;
+
+  const sampleCount = Math.min(rows.length, AUTO_FIT_SAMPLE_ROWS);
+  for (let index = 0; index < sampleCount; index++) {
+    const raw = rows[index].flattened[columnId];
+    const formatted = formatValue?.(raw) ?? formatCellValue(raw);
+    const firstLine = formatted.split('\n')[0] ?? '';
+    if (!firstLine) {
+      continue;
+    }
+    maxContentPx = Math.max(maxContentPx, measureTextWidth(firstLine, bodyFont));
+  }
+
+  return Math.ceil(
+    Math.min(
+      Math.max(maxContentPx + cellPaddingH * 2 + AUTO_FIT_CONTENT_PADDING_PX, minWidth),
+      maxWidth
+    )
+  );
+};
+
 const formatCellValue = (value: unknown): string => {
   if (value === null || value === undefined) return '-';
-  if (Array.isArray(value)) return value.join(', ');
+  if (Array.isArray(value)) {
+    return value.map((item) => formatCellValue(item)).join(', ');
+  }
   return String(value);
 };
 
-const formatTimestamp = (value: unknown): string => {
-  if (value === null || value === undefined) return '-';
-  if (typeof value === 'string') {
-    try {
-      return new Date(value).toISOString();
-    } catch {
-      return value;
-    }
+/**
+ * Text formatting for find/copy/title. Formats array elements individually (like
+ * convertValueToString / EuiDataGrid React display) instead of JSON.stringify
+ * which produces `["value"]`.
+ */
+const formatFieldValueForText = ({
+  value,
+  fieldFormats,
+  dataView,
+  field,
+}: {
+  value: unknown;
+  fieldFormats: ReturnType<typeof useDiscoverServices>['fieldFormats'];
+  dataView: DataView;
+  field?: ReturnType<DataView['getFieldByName']>;
+}): string => {
+  if (value === null || value === undefined) {
+    return '-';
   }
-  return String(value);
+
+  const values = Array.isArray(value) ? value : [value];
+  return values
+    .map((item) => {
+      if (item === null || item === undefined) {
+        return '-';
+      }
+      if (fieldFormats) {
+        return formatFieldValueText({
+          value: item,
+          fieldFormats,
+          dataView,
+          field: field ?? undefined,
+        });
+      }
+      return formatCellValue(item);
+    })
+    .join(', ');
 };
 
 const filterNullFields = (row: DataTableRecord): DataTableRecord => {
@@ -493,7 +614,7 @@ const parseStatsByColumns = (
   return { byFields, orderedColumns };
 };
 
-// ── Cell Actions: filter in/out, copy, expand ──
+// ── Cell Actions: filter in/out, copy (clippable), expand (always visible) ──
 const CellActions = React.memo(
   ({
     fieldName,
@@ -541,58 +662,62 @@ const CellActions = React.memo(
 
     return (
       <div className="tsg-cellActions" css={styles.cellActions}>
-        {onFilter && (
-          <>
-            <EuiToolTip content="Filter for value" disableScreenReaderOutput>
-              <EuiButtonIcon
-                css={styles.cellActionButton}
-                iconType="plusCircle"
-                aria-label="Filter for value"
-                size="xs"
-                iconSize="s"
-                color="text"
-                onClick={handleFilterIn}
-                data-test-subj="filterForValue"
-              />
-            </EuiToolTip>
-            <EuiToolTip content="Filter out value" disableScreenReaderOutput>
-              <EuiButtonIcon
-                css={styles.cellActionButton}
-                iconType="minusCircle"
-                aria-label="Filter out value"
-                size="xs"
-                iconSize="s"
-                color="text"
-                onClick={handleFilterOut}
-                data-test-subj="filterOutValue"
-              />
-            </EuiToolTip>
-          </>
-        )}
-        <EuiToolTip content="Copy value" disableScreenReaderOutput>
-          <EuiButtonIcon
-            css={styles.cellActionButton}
-            iconType="copy"
-            aria-label="Copy value"
-            size="xs"
-            iconSize="s"
-            color="text"
-            onClick={handleCopy}
-            data-test-subj="copyCellValue"
-          />
-        </EuiToolTip>
-        <EuiToolTip content="Expand cell" disableScreenReaderOutput>
-          <EuiButtonIcon
-            css={styles.cellActionButton}
-            iconType="maximize"
-            aria-label="Expand cell"
-            size="xs"
-            iconSize="s"
-            color="text"
-            onClick={handleExpand}
-            data-test-subj="expandCellValue"
-          />
-        </EuiToolTip>
+        <div css={styles.cellActionsClippable}>
+          {onFilter && (
+            <>
+              <EuiToolTip content="Filter for value" disableScreenReaderOutput>
+                <EuiButtonIcon
+                  css={styles.cellActionButton}
+                  iconType="plusCircle"
+                  aria-label="Filter for value"
+                  size="xs"
+                  iconSize="s"
+                  color="text"
+                  onClick={handleFilterIn}
+                  data-test-subj="filterForValue"
+                />
+              </EuiToolTip>
+              <EuiToolTip content="Filter out value" disableScreenReaderOutput>
+                <EuiButtonIcon
+                  css={styles.cellActionButton}
+                  iconType="minusCircle"
+                  aria-label="Filter out value"
+                  size="xs"
+                  iconSize="s"
+                  color="text"
+                  onClick={handleFilterOut}
+                  data-test-subj="filterOutValue"
+                />
+              </EuiToolTip>
+            </>
+          )}
+          <EuiToolTip content="Copy value" disableScreenReaderOutput>
+            <EuiButtonIcon
+              css={styles.cellActionButton}
+              iconType="copy"
+              aria-label="Copy value"
+              size="xs"
+              iconSize="s"
+              color="text"
+              onClick={handleCopy}
+              data-test-subj="copyCellValue"
+            />
+          </EuiToolTip>
+        </div>
+        <div css={styles.cellActionsExpand}>
+          <EuiToolTip content="Expand cell" disableScreenReaderOutput>
+            <EuiButtonIcon
+              css={styles.cellActionButton}
+              iconType="maximize"
+              aria-label="Expand cell"
+              size="xs"
+              iconSize="s"
+              color="text"
+              onClick={handleExpand}
+              data-test-subj="expandCellValue"
+            />
+          </EuiToolTip>
+        </div>
       </div>
     );
   }
@@ -609,7 +734,7 @@ interface CellPopoverState {
 
 type SetCellPopoverState = (state: CellPopoverState | null) => void;
 
-// ── Cell Popover (EuiPopover — same dimensions as EuiDataGrid) ──
+// ── Cell Popover (ported panel — same dimensions as EuiDataGrid) ──
 const CellPopover = React.memo(
   ({
     fieldName,
@@ -626,30 +751,30 @@ const CellPopover = React.memo(
     styles: ReturnType<typeof getTanStackDataGridStyles>;
   }) => {
     const isWidePopover = fieldName === SOURCE_COLUMN_ID;
-    const anchorRect = cellElement.getBoundingClientRect();
+    const cellRect = cellElement.getBoundingClientRect();
 
-    const onClickOutside = useCallback(
-      (event: MouseEvent | TouchEvent) => {
-        const cellActions = cellElement.querySelector('.tsg-cellActions');
-        if (cellActions?.contains(event.target as Node)) {
-          return;
-        }
-        onClose();
-      },
-      [cellElement, onClose]
-    );
+    const maxInlineSize = isWidePopover
+      ? Math.min(window.innerWidth * 0.75, 600)
+      : Math.min(window.innerWidth * 0.75, Math.max(cellWidth, 400));
+    const maxBlockSize = window.innerHeight * 0.5;
 
-    const onKeyDown = useCallback(
-      (event: React.KeyboardEvent) => {
+    // Prefer below the cell; flip above when there isn't enough room.
+    const spaceBelow = window.innerHeight - cellRect.bottom - 8;
+    const openAbove = spaceBelow < Math.min(160, maxBlockSize) && cellRect.top > spaceBelow;
+    const left = Math.max(8, Math.min(cellRect.left, window.innerWidth - maxInlineSize - 8));
+
+    useEffect(() => {
+      const onKeyDown = (event: KeyboardEvent) => {
         if (event.key === keys.F2 || event.key === keys.ESCAPE) {
           event.preventDefault();
           event.stopPropagation();
           onClose();
           requestAnimationFrame(() => cellElement.focus());
         }
-      },
-      [cellElement, onClose]
-    );
+      };
+      document.addEventListener('keydown', onKeyDown, true);
+      return () => document.removeEventListener('keydown', onKeyDown, true);
+    }, [cellElement, onClose]);
 
     const handleCopy = useCallback(() => {
       navigator.clipboard.writeText(formattedValue);
@@ -665,127 +790,125 @@ const CellPopover = React.memo(
       onClose();
     }, [onFilter, fieldName, value, onClose]);
 
+    const handleBackdropClick = useCallback(
+      (event: React.MouseEvent) => {
+        const cellActions = cellElement.querySelector('.tsg-cellActions');
+        if (cellActions?.contains(event.target as Node)) {
+          return;
+        }
+        onClose();
+      },
+      [cellElement, onClose]
+    );
+
     const closeLabel = i18n.translate('discover.grid.tanStack.closePopover', {
       defaultMessage: 'Close popover',
     });
 
-    const focusTrapProps = useMemo(
-      () => ({
-        onClickOutside,
-        clickOutsideDisables: false,
-      }),
-      [onClickOutside]
-    );
-
-    const panelProps = useMemo(
-      () => ({
-        'data-test-subj': 'euiDataGridExpansionPopover',
-        className: 'euiDataGridRowCell__popover unifiedDataTable__cellPopover',
-        css: isWidePopover ? styles.cellPopoverPanelWide : styles.cellPopoverPanel,
-      }),
-      [isWidePopover, styles.cellPopoverPanel, styles.cellPopoverPanelWide]
-    );
-
     const panelStyle = useMemo(
       () => ({
-        maxInlineSize: isWidePopover
-          ? undefined
-          : `min(75vw, max(${cellWidth}px, 400px))`,
-        maxBlockSize: '50vh' as const,
-      }),
-      [isWidePopover, cellWidth]
-    );
-
-    const anchorStyle = useMemo(
-      () => ({
         position: 'fixed' as const,
-        top: anchorRect.top,
-        left: anchorRect.left,
-        width: cellWidth,
-        height: 0,
-        pointerEvents: 'none' as const,
+        left,
+        maxInlineSize,
+        maxBlockSize,
+        width: 'max-content' as const,
+        minWidth: Math.min(cellWidth, maxInlineSize),
+        zIndex: 10000,
+        ...(openAbove
+          ? { bottom: window.innerHeight - cellRect.top, top: 'auto' as const }
+          : { top: cellRect.bottom, bottom: 'auto' as const }),
       }),
-      [anchorRect.top, anchorRect.left, cellWidth]
+      [left, maxInlineSize, maxBlockSize, cellWidth, openAbove, cellRect.top, cellRect.bottom]
     );
 
     return (
-      <EuiPopover
-        isOpen
-        display="block"
-        hasArrow={false}
-        panelPaddingSize="s"
-        anchorPosition="downLeft"
-        repositionToCrossAxis={false}
-        aria-label={i18n.translate('discover.grid.tanStack.cellPopoverAriaLabel', {
-          defaultMessage: '{fieldName} value',
-          values: { fieldName },
-        })}
-        button={<div aria-hidden style={anchorStyle} />}
-        closePopover={onClose}
-        focusTrapProps={focusTrapProps}
-        panelProps={panelProps}
-        panelStyle={panelStyle}
-        onKeyDown={onKeyDown}
-      >
-        <EuiFlexGroup
-          gutterSize="none"
-          direction="row"
-          responsive={false}
-          data-test-subj="dataTableExpandCellActionPopover"
+      <EuiPortal>
+        <div
+          css={styles.cellPopoverBackdrop}
+          onClick={handleBackdropClick}
+          onKeyDown={(event) => {
+            if (event.key === keys.ENTER || event.key === keys.SPACE || event.key === keys.ESCAPE) {
+              event.preventDefault();
+              onClose();
+            }
+          }}
+          role="button"
+          tabIndex={-1}
+          aria-label={closeLabel}
+        />
+        <EuiPanel
+          paddingSize="s"
+          hasShadow
+          data-test-subj="euiDataGridExpansionPopover"
+          className="euiDataGridRowCell__popover unifiedDataTable__cellPopover"
+          css={[styles.cellPopoverPanel, isWidePopover && styles.cellPopoverPanelWide]}
+          style={panelStyle}
+          role="dialog"
+          aria-label={i18n.translate('discover.grid.tanStack.cellPopoverAriaLabel', {
+            defaultMessage: '{fieldName} value',
+            values: { fieldName },
+          })}
         >
-          <EuiFlexItem>
-            <div
-              className="unifiedDataTable__cellPopoverValue eui-textBreakWord"
-              css={styles.cellPopoverValue}
-              data-test-subj="dataTableExpandCellActionPopoverValue"
-              tabIndex={0}
-            >
-              {formattedValue}
-            </div>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip content={closeLabel} disableScreenReaderOutput>
-              <EuiButtonIcon
-                aria-label={closeLabel}
-                data-test-subj="docTableClosePopover"
-                iconSize="s"
-                iconType="cross"
-                size="xs"
-                onClick={onClose}
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiPopoverFooter>
-          <EuiFlexGroup gutterSize="s" responsive={false} wrap>
-            {onFilter && (
-              <>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty iconType="plusCircle" size="s" onClick={handleFilterIn}>
-                    {i18n.translate('discover.grid.tanStack.filterForValueButtonLabel', {
-                      defaultMessage: 'Filter for',
-                    })}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty iconType="minusCircle" size="s" onClick={handleFilterOut}>
-                    {i18n.translate('discover.grid.tanStack.filterOutValueButtonLabel', {
-                      defaultMessage: 'Filter out',
-                    })}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              </>
-            )}
+          <EuiFlexGroup
+            gutterSize="none"
+            direction="row"
+            responsive={false}
+            data-test-subj="dataTableExpandCellActionPopover"
+          >
+            <EuiFlexItem>
+              <div
+                className="unifiedDataTable__cellPopoverValue eui-textBreakWord"
+                css={styles.cellPopoverValue}
+                data-test-subj="dataTableExpandCellActionPopoverValue"
+                tabIndex={0}
+              >
+                {formattedValue}
+              </div>
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty iconType="copy" size="s" onClick={handleCopy}>
-                {i18n.translate('discover.grid.tanStack.copyValueButtonLabel', {
-                  defaultMessage: 'Copy value',
-                })}
-              </EuiButtonEmpty>
+              <EuiToolTip content={closeLabel} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  aria-label={closeLabel}
+                  data-test-subj="docTableClosePopover"
+                  iconSize="s"
+                  iconType="cross"
+                  size="xs"
+                  onClick={onClose}
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiPopoverFooter>
-      </EuiPopover>
+          <EuiPopoverFooter>
+            <EuiFlexGroup gutterSize="s" responsive={false} wrap>
+              {onFilter && (
+                <>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty iconType="plusCircle" size="s" onClick={handleFilterIn}>
+                      {i18n.translate('discover.grid.tanStack.filterForValueButtonLabel', {
+                        defaultMessage: 'Filter for',
+                      })}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty iconType="minusCircle" size="s" onClick={handleFilterOut}>
+                      {i18n.translate('discover.grid.tanStack.filterOutValueButtonLabel', {
+                        defaultMessage: 'Filter out',
+                      })}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                </>
+              )}
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty iconType="copy" size="s" onClick={handleCopy}>
+                  {i18n.translate('discover.grid.tanStack.copyValueButtonLabel', {
+                    defaultMessage: 'Copy value',
+                  })}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPopoverFooter>
+        </EuiPanel>
+      </EuiPortal>
     );
   }
 );
@@ -836,6 +959,28 @@ const CellPopoverHost = React.memo(function CellPopoverHost({
     />
   );
 });
+
+const CONTROL_COLUMN_IDS = [SELECT_COLUMN_ID, EXPAND_COLUMN_ID] as const;
+
+const getColumnPinningStyle = (
+  column: Column<DataTableRecord, unknown>,
+  { isHeader }: { isHeader?: boolean } = {}
+): React.CSSProperties => {
+  const pinned = column.getIsPinned();
+  if (!pinned) {
+    return {};
+  }
+
+  return {
+    position: 'sticky',
+    left: pinned === 'left' ? column.getStart('left') : undefined,
+    right: pinned === 'right' ? column.getAfter('right') : undefined,
+    zIndex: isHeader ? 3 : 1,
+    width: column.getSize(),
+    flex: '0 0 auto',
+    flexShrink: 0,
+  };
+};
 
 // ── Memoized virtual row ──
 const VirtualRow = React.memo(
@@ -953,19 +1098,33 @@ const VirtualCell = React.memo(
     const isControl = cell.column.columnDef.meta?.isControl;
     const isSelect = cell.column.columnDef.meta?.isSelect;
     const isSummary = cell.column.columnDef.meta?.isSummary;
-    const columnStyle = getColumnStyle({
-      id: cell.column.id,
-      isSummary,
-      isTimestamp: cell.column.columnDef.meta?.isTimestamp,
-    });
+    const isPinned = Boolean(cell.column.getIsPinned());
+    const isLastLeftPinned =
+      cell.column.getIsPinned() === 'left' && cell.column.getIsLastColumn('left');
+    const pinStyle = getColumnPinningStyle(cell.column);
+    const columnStyle = {
+      ...getColumnStyle({
+        id: cell.column.id,
+        isSummary,
+        isTimestamp: cell.column.columnDef.meta?.isTimestamp,
+      }),
+      ...pinStyle,
+    };
 
     if (isControl || isSelect) {
       return (
         <div
-          css={[isSelect ? styles.selectCell : styles.controlCell, isFocused && styles.focusedCell]}
+          className={isPinned ? 'tsg-pinnedCell' : undefined}
+          css={[
+            isSelect ? styles.selectCell : styles.controlCell,
+            isPinned && styles.pinnedCell,
+            isLastLeftPinned && styles.pinnedCellShadow,
+            isFocused && styles.focusedCell,
+          ]}
           style={{
             width: isSelect ? SELECT_COL_WIDTH : cell.column.getSize(),
             flexShrink: 0,
+            ...pinStyle,
           }}
           role="gridcell"
           aria-selected={isSelect ? isRowSelected : undefined}
@@ -993,7 +1152,14 @@ const VirtualCell = React.memo(
 
       return (
         <div
-          css={[styles.summaryCell, styles.expandableCell, isFocused && styles.focusedCell]}
+          className={isPinned ? 'tsg-pinnedCell' : undefined}
+          css={[
+            styles.summaryCell,
+            styles.expandableCell,
+            isPinned && styles.pinnedCell,
+            isLastLeftPinned && styles.pinnedCellShadow,
+            isFocused && styles.focusedCell,
+          ]}
           role="gridcell"
           style={columnStyle}
           tabIndex={0}
@@ -1037,10 +1203,13 @@ const VirtualCell = React.memo(
 
     return (
       <div
+        className={isPinned ? 'tsg-pinnedCell' : undefined}
         css={[
           styles.cell,
           styles.cellWithActions,
           styles.expandableCell,
+          isPinned && styles.pinnedCell,
+          isLastLeftPinned && styles.pinnedCellShadow,
           isFocused && styles.focusedCell,
         ]}
         style={columnStyle}
@@ -1166,6 +1335,14 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
     enableComparisonMode = false,
     ariaLabelledBy = 'documentsAriaLabel',
     showFullScreenButton = true,
+    isPaginationEnabled = true,
+    paginationMode = DEFAULT_PAGINATION_MODE,
+    rowsPerPageState,
+    rowsPerPageOptions,
+    onUpdateRowsPerPage,
+    onUpdatePageIndex,
+    totalHits,
+    onFetchMoreRecords,
   }) => {
     const euiThemeContext = useEuiTheme();
     const { euiTheme } = euiThemeContext;
@@ -1248,8 +1425,72 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
       () => (isFilterActive ? rows.filter((row) => selectedRows.has(row.id)) : rows),
       [isFilterActive, rows, selectedRows]
     );
-    const allSelected =
-      displayedRows.length > 0 && displayedRows.every((row) => selectedRows.has(row.id));
+
+    // ── Pagination (multiPage mirrors EuiDataGrid; only shown when needed) ──
+    const [currentPageIndex, setCurrentPageIndex] = useState(0);
+    const currentPageIndexRef = useRef(currentPageIndex);
+    currentPageIndexRef.current = currentPageIndex;
+
+    const currentPageSize = useMemo(
+      () =>
+        typeof rowsPerPageState === 'number' && rowsPerPageState > 0
+          ? rowsPerPageState
+          : DEFAULT_ROWS_PER_PAGE,
+      [rowsPerPageState]
+    );
+
+    const pageSizeOptions = useMemo(
+      () => rowsPerPageOptions ?? getRowsPerPageOptions(currentPageSize),
+      [rowsPerPageOptions, currentPageSize]
+    );
+
+    const rowCount = displayedRows.length;
+    const pageCount = useMemo(
+      () => Math.max(1, Math.ceil(rowCount / currentPageSize)),
+      [rowCount, currentPageSize]
+    );
+
+    const changeCurrentPageIndex = useCallback(
+      (nextPageIndex: number) => {
+        setCurrentPageIndex(nextPageIndex);
+        onUpdatePageIndex?.(nextPageIndex);
+        parentRef.current?.scrollTo({ top: 0 });
+      },
+      [onUpdatePageIndex]
+    );
+
+    useEffect(() => {
+      const previousPageIndex = currentPageIndexRef.current;
+      const calculatedPageIndex = previousPageIndex > pageCount - 1 ? 0 : previousPageIndex;
+      if (calculatedPageIndex !== previousPageIndex) {
+        changeCurrentPageIndex(calculatedPageIndex);
+      }
+    }, [pageCount, changeCurrentPageIndex]);
+
+    useEffect(() => {
+      lastSelectedRowIndexRef.current = null;
+    }, [currentPageIndex]);
+
+    const isMultiPagePagination = isPaginationEnabled && paginationMode === 'multiPage';
+
+    /** Same rule as EUI `shouldRenderPagination`: hide when fewer rows than the smallest page size. */
+    const shouldShowPagination = useMemo(() => {
+      if (!isMultiPagePagination || rowCount === 0) {
+        return false;
+      }
+      const minSizeOption = [...pageSizeOptions].sort((a, b) => a - b)[0];
+      return !(rowCount < (minSizeOption || currentPageSize));
+    }, [isMultiPagePagination, rowCount, pageSizeOptions, currentPageSize]);
+
+    const pageRows = useMemo(() => {
+      if (!isMultiPagePagination) {
+        return displayedRows;
+      }
+      const start = currentPageIndex * currentPageSize;
+      return displayedRows.slice(start, start + currentPageSize);
+    }, [displayedRows, isMultiPagePagination, currentPageIndex, currentPageSize]);
+
+    const allSelected = pageRows.length > 0 && pageRows.every((row) => selectedRows.has(row.id));
     const someSelected = selectedRows.size > 0 && !allSelected;
 
     const toggleSelectRow = useCallback(
@@ -1262,7 +1503,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
           if (selectRange && previousRowIndex !== null) {
             const startIndex = Math.min(previousRowIndex, rowIndex);
             const endIndex = Math.max(previousRowIndex, rowIndex);
-            displayedRows.slice(startIndex, endIndex + 1).forEach((row) => {
+            pageRows.slice(startIndex, endIndex + 1).forEach((row) => {
               if (shouldSelect) nextSelectedRows.add(row.id);
               else nextSelectedRows.delete(row.id);
             });
@@ -1276,20 +1517,20 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
         });
         lastSelectedRowIndexRef.current = rowIndex;
       },
-      [displayedRows]
+      [pageRows]
     );
 
     const toggleSelectAll = useCallback(() => {
       setSelectedRows((previousSelectedRows) => {
         const nextSelectedRows = new Set(previousSelectedRows);
-        if (displayedRows.every((row) => nextSelectedRows.has(row.id))) {
-          displayedRows.forEach((row) => nextSelectedRows.delete(row.id));
+        if (pageRows.every((row) => nextSelectedRows.has(row.id))) {
+          pageRows.forEach((row) => nextSelectedRows.delete(row.id));
         } else {
-          displayedRows.forEach((row) => nextSelectedRows.add(row.id));
+          pageRows.forEach((row) => nextSelectedRows.add(row.id));
         }
         return nextSelectedRows;
       });
-    }, [displayedRows]);
+    }, [pageRows]);
 
     const clearSelection = useCallback(() => {
       setSelectedRows(new Set());
@@ -1525,6 +1766,32 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
     const onResizeRef = useRef(onResize);
     onResizeRef.current = onResize;
 
+    // ── Column pinning (control columns stay left-pinned; data columns are toggleable) ──
+    const [pinnedDataColumnIds, setPinnedDataColumnIds] = useState<string[]>([]);
+
+    useEffect(() => {
+      const visibleIds = new Set(effectiveColumns);
+      setPinnedDataColumnIds((previous) => {
+        const next = previous.filter((id) => visibleIds.has(id));
+        return next.length === previous.length ? previous : next;
+      });
+    }, [effectiveColumns]);
+
+    const columnPinning = useMemo<ColumnPinningState>(
+      () => ({
+        left: [...CONTROL_COLUMN_IDS, ...pinnedDataColumnIds],
+      }),
+      [pinnedDataColumnIds]
+    );
+
+    const handleTogglePinColumn = useCallback((columnId: string) => {
+      setPinnedDataColumnIds((previous) =>
+        previous.includes(columnId)
+          ? previous.filter((id) => id !== columnId)
+          : [...previous, columnId]
+      );
+    }, []);
+
     // ── Expand doc ──
     const [localExpandedDoc, setLocalExpandedDoc] = useState<DataTableRecord | undefined>();
     const currentExpandedDoc = expandedDoc ?? localExpandedDoc;
@@ -1666,6 +1933,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
         maxSize: SELECT_COL_WIDTH,
         enableResizing: false,
         enableSorting: false,
+        enablePinning: false,
         meta: { isSelect: true },
         cell: function SelectCell({ row }) {
           const record = row.original;
@@ -1702,6 +1970,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
         maxSize: actionsColumnWidth,
         enableResizing: false,
         enableSorting: false,
+        enablePinning: false,
         meta: { isControl: true },
         cell: function ExpandCell({ row }) {
           const record = row.original;
@@ -1795,13 +2064,18 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
 
       if (isSummaryMode) {
         if (showTimeCol && timeFieldName) {
-          const timeField = dataView.getFieldByName(timeFieldName);
-          const formatTimeValue = (value: unknown) => {
-            const timeValue = Array.isArray(value) && value.length === 1 ? value[0] : value;
-            return timeField && fieldFormats
-              ? formatFieldValueText({ value: timeValue, fieldFormats, dataView, field: timeField })
-              : formatTimestamp(timeValue);
-          };
+          const timeField = getDataViewFieldOrCreateFromColumnMeta({
+            dataView,
+            fieldName: timeFieldName,
+            columnMeta: columnsMeta?.[timeFieldName],
+          });
+          const formatTimeValue = (value: unknown) =>
+            formatFieldValueForText({
+              value,
+              fieldFormats,
+              dataView,
+              field: timeField,
+            });
           defs.push({
             id: timeFieldName,
             accessorFn: (r) => r.flattened[timeFieldName],
@@ -1810,9 +2084,19 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
             minSize: MIN_COL_WIDTH,
             enableSorting: false,
             meta: { isTimestamp: true, fieldName: timeFieldName, formatValue: formatTimeValue },
-            cell: ({ getValue }) => (
-              <span css={styles.timestampCell}>{formatTimeValue(getValue())}</span>
-            ),
+            cell: function TimeCell({ getValue, row }) {
+              return (
+                <span css={styles.timestampCell}>
+                  {formatFieldValueReact({
+                    value: getValue(),
+                    hit: row.original.raw,
+                    fieldFormats,
+                    dataView,
+                    field: timeField,
+                  })}
+                </span>
+              );
+            },
           });
         }
 
@@ -1824,20 +2108,18 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
             continue;
           }
           const isTimeField = colId === timeFieldName;
-          const dataViewField = dataView.getFieldByName(colId);
-          const formatValue = (value: unknown) => {
-            const fieldValue =
-              isTimeField && Array.isArray(value) && value.length === 1 ? value[0] : value;
-            if (dataViewField && fieldFormats) {
-              return formatFieldValueText({
-                value: fieldValue,
-                fieldFormats,
-                dataView,
-                field: dataViewField,
-              });
-            }
-            return isTimeField ? formatTimestamp(fieldValue) : formatCellValue(fieldValue);
-          };
+          const dataViewField = getDataViewFieldOrCreateFromColumnMeta({
+            dataView,
+            fieldName: colId,
+            columnMeta: columnsMeta?.[colId],
+          });
+          const formatValue = (value: unknown) =>
+            formatFieldValueForText({
+              value,
+              fieldFormats,
+              dataView,
+              field: dataViewField,
+            });
           const columnSchema = getSchemaByKbnType(dataViewField?.type);
           const columnIsSortable =
             isSortEnabled &&
@@ -1858,12 +2140,16 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
             minSize: MIN_COL_WIDTH,
             enableSorting: columnIsSortable,
             meta: { isTimestamp: isTimeField, fieldName: colId, formatValue },
-            cell: function DataCell({ getValue }) {
-              const val = getValue();
-              const formatted = formatValue(val);
+            cell: function DataCell({ getValue, row }) {
               return (
-                <div css={isTimeField ? styles.timestampCell : undefined} title={formatted}>
-                  {formatted}
+                <div css={isTimeField ? styles.timestampCell : undefined}>
+                  {formatFieldValueReact({
+                    value: getValue(),
+                    hit: row.original.raw,
+                    fieldFormats,
+                    dataView,
+                    field: dataViewField,
+                  })}
                 </div>
               );
             },
@@ -1945,19 +2231,72 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
 
     // ── React Table instance ──
     const table = useReactTable({
-      data: displayedRows,
+      data: pageRows,
       columns: tanstackColumns,
       getCoreRowModel: getCoreRowModel(),
       getSortedRowModel: isSortEnabled && !isSummaryMode ? getSortedRowModel() : undefined,
-      state: { sorting: sortingState, columnSizing },
+      state: { sorting: sortingState, columnSizing, columnPinning },
       onSortingChange: handleSortingChange,
       onColumnSizingChange: handleColumnSizingChange,
       columnResizeMode: 'onChange',
       enableColumnResizing: true,
+      enableColumnPinning: true,
       enableSorting: isSortEnabled && !isSummaryMode,
       enableMultiSort: true,
       manualSorting: false,
     });
+
+    const handleAutoFitColumn = useCallback(
+      (columnId: string) => {
+        const column = table.getColumn(columnId);
+        if (
+          !column ||
+          column.columnDef.meta?.isControl ||
+          column.columnDef.meta?.isSelect ||
+          column.columnDef.meta?.isSummary
+        ) {
+          return;
+        }
+
+        const dataViewField = getDataViewFieldOrCreateFromColumnMeta({
+          dataView,
+          fieldName: columnId,
+          columnMeta: columnsMeta?.[columnId],
+        });
+        const headerLabel = getColumnDisplayName(
+          columnId,
+          dataViewField?.displayName,
+          settings?.columns?.[columnId]?.display ??
+            (typeof column.columnDef.header === 'string' ? column.columnDef.header : undefined),
+          'summary'
+        );
+
+        const nextWidth = getColumnAutoFitWidth({
+          columnId,
+          headerLabel,
+          rows: displayedRows,
+          formatValue: column.columnDef.meta?.formatValue,
+          fontSizePx: densityCfg.fontSize,
+          fontFamily: euiTheme.font.family,
+          cellPaddingH: densityCfg.cellPadding,
+          minWidth: column.columnDef.minSize ?? MIN_COL_WIDTH,
+          maxWidth: Math.min(AUTO_FIT_MAX_WIDTH_PX, Math.floor(window.innerWidth * 0.75)),
+        });
+
+        setColumnSizing((previous) => ({ ...previous, [columnId]: nextWidth }));
+        onResizeRef.current?.({ columnId, width: nextWidth });
+      },
+      [
+        table,
+        displayedRows,
+        dataView,
+        columnsMeta,
+        settings?.columns,
+        densityCfg.fontSize,
+        densityCfg.cellPadding,
+        euiTheme.font.family,
+      ]
+    );
 
     // Persist column width when resize ends
     const headerGroupsRaw = table.getHeaderGroups();
@@ -2001,7 +2340,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
       estimateSize: getRowHeight,
       overscan: OVERSCAN,
       initialOffset: scrollPositionCache.get(scrollKey) ?? 0,
-      getItemKey: (index) => displayedRows[index]?.id ?? index,
+      getItemKey: (index) => pageRows[index]?.id ?? index,
     });
 
     useEffect(() => {
@@ -2815,18 +3154,31 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
                         ? {
                             width: isSelect ? SELECT_COL_WIDTH : header.column.getSize(),
                             flexShrink: 0,
+                            ...getColumnPinningStyle(header.column, { isHeader: true }),
                           }
-                        : getColumnStyle({
-                            id: colId,
-                            isSummary,
-                            isTimestamp: header.column.columnDef.meta?.isTimestamp,
-                          });
+                        : {
+                            ...getColumnStyle({
+                              id: colId,
+                              isSummary,
+                              isTimestamp: header.column.columnDef.meta?.isTimestamp,
+                            }),
+                            ...getColumnPinningStyle(header.column, { isHeader: true }),
+                          };
+                    const isPinnedHeader = Boolean(header.column.getIsPinned());
+                    const isLastLeftPinnedHeader =
+                      header.column.getIsPinned() === 'left' &&
+                      header.column.getIsLastColumn('left');
 
                     if (isSelect) {
                       return (
                         <div
                           key={header.id}
-                          css={styles.selectHeaderCell}
+                          className={isPinnedHeader ? 'tsg-pinnedHeaderCell' : undefined}
+                          css={[
+                            styles.selectHeaderCell,
+                            isPinnedHeader && styles.pinnedHeaderCell,
+                            isLastLeftPinnedHeader && styles.pinnedCellShadow,
+                          ]}
                           style={headerColumnStyle}
                           role="columnheader"
                         >
@@ -2844,9 +3196,12 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
                     return (
                       <div
                         key={header.id}
+                        className={isPinnedHeader ? 'tsg-pinnedHeaderCell' : undefined}
                         css={[
                           isControl ? styles.controlHeaderCell : styles.headerCell,
                           !isControl && !isSelect && styles.headerCellWithActions,
+                          isPinnedHeader && styles.pinnedHeaderCell,
+                          isLastLeftPinnedHeader && styles.pinnedCellShadow,
                           isDraggable && styles.headerCellDraggable,
                           isDragging && styles.headerCellDragging,
                           isDragOver && styles.headerCellDragOver,
@@ -2949,6 +3304,9 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
                                 onSort={onSort}
                                 persistVisibleColumns={persistVisibleColumns}
                                 onResize={onResize}
+                                onAutoFitColumn={handleAutoFitColumn}
+                                onTogglePinColumn={!isSummary ? handleTogglePinColumn : undefined}
+                                isColumnPinned={pinnedDataColumnIds.includes(colId)}
                                 timeFieldName={timeFieldName}
                                 toastNotifications={toastNotifications}
                                 valueToStringConverter={valueToStringConverter}
@@ -2956,6 +3314,8 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
                                 editField={editField}
                                 hasEditDataViewPermission={hasEditDataViewPermission}
                                 headerActionsCss={styles.headerActionsButton}
+                                headerActionsWrapperCss={styles.headerActions}
+                                headerActionsVisibleCss={styles.headerActionsVisible}
                               />
                             )}
                           </>
@@ -3051,6 +3411,46 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
               </span>
             )}
         </div>
+
+        {shouldShowPagination && (
+          <div css={styles.pagination} data-test-subj="tanStackDataGridPagination">
+            <EuiTablePagination
+              aria-controls={dataGridId}
+              activePage={currentPageIndex}
+              itemsPerPage={currentPageSize}
+              itemsPerPageOptions={pageSizeOptions}
+              showPerPageOptions={pageSizeOptions.length > 0}
+              pageCount={pageCount}
+              onChangePage={changeCurrentPageIndex}
+              onChangeItemsPerPage={(nextPageSize) => {
+                onUpdateRowsPerPage?.(nextPageSize);
+                changeCurrentPageIndex(0);
+              }}
+              aria-label={i18n.translate('discover.grid.tanStack.paginationAriaLabel', {
+                defaultMessage: 'Pagination for documents table',
+              })}
+            />
+          </div>
+        )}
+
+        {loadingState !== DataLoadingState.loading &&
+          isPaginationEnabled &&
+          !isFilterActive &&
+          !isCompareActive && (
+            <UnifiedDataTableFooter
+              isLoadingMore={isLoadingMore}
+              rowCount={rowCount}
+              sampleSize={sampleSizeState}
+              pageCount={pageCount}
+              pageIndex={isMultiPagePagination ? currentPageIndex : 0}
+              totalHits={totalHits}
+              onFetchMoreRecords={onFetchMoreRecords}
+              data={data}
+              fieldFormats={fieldFormats}
+              paginationMode={paginationMode}
+              hasScrolledToBottom={true}
+            />
+          )}
 
         {/* Cell popover — isolated so open/close does not re-render the grid */}
         <CellPopoverHost

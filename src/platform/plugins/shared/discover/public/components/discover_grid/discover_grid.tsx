@@ -88,11 +88,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
       }
 
       onChangeStoredGridImplementation(nextImplementation);
-    }, [
-      onChangeGridImplementation,
-      onChangeStoredGridImplementation,
-      resolvedGridImplementation,
-    ]);
+    }, [onChangeGridImplementation, onChangeStoredGridImplementation, resolvedGridImplementation]);
 
     const getRowIndicatorProvider = useProfileAccessor('getRowIndicatorProvider');
     const getRowIndicator = useMemo(() => {
@@ -243,6 +239,14 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
           showKeyboardShortcuts={props.showKeyboardShortcuts}
           ariaLabelledBy={props.ariaLabelledBy}
           showFullScreenButton={props.showFullScreenButton}
+          isPaginationEnabled={props.isPaginationEnabled}
+          paginationMode={paginationModeConfig.paginationMode}
+          rowsPerPageState={props.rowsPerPageState}
+          rowsPerPageOptions={props.rowsPerPageOptions}
+          onUpdateRowsPerPage={props.onUpdateRowsPerPage}
+          onUpdatePageIndex={props.onUpdatePageIndex}
+          totalHits={props.totalHits}
+          onFetchMoreRecords={props.onFetchMoreRecords}
         />
       );
     }

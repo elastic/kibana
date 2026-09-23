@@ -43,6 +43,9 @@ export interface BuildTanStackColumnHeaderActionsParams {
   onSort?: (sort: SortOrder[]) => void;
   persistVisibleColumns: (columns: string[]) => void;
   onResize?: (options: { columnId: string; width: number | undefined }) => void;
+  onAutoFitColumn?: (columnId: string) => void;
+  onTogglePinColumn?: (columnId: string) => void;
+  isColumnPinned?: boolean;
   timeFieldName?: string;
   toastNotifications: ToastsStart;
   valueToStringConverter: ValueToStringConverter;
@@ -157,6 +160,9 @@ export const buildTanStackColumnHeaderActions = ({
   onSort,
   persistVisibleColumns,
   onResize,
+  onAutoFitColumn,
+  onTogglePinColumn,
+  isColumnPinned = false,
   timeFieldName,
   toastNotifications,
   valueToStringConverter,
@@ -218,6 +224,29 @@ export const buildTanStackColumnHeaderActions = ({
     })
   );
 
+  if (onTogglePinColumn) {
+    actions.push(
+      wrapAction(
+        {
+          label: isColumnPinned
+            ? i18n.translate('discover.grid.tanStack.unpinColumnButtonLabel', {
+                defaultMessage: 'Unpin column',
+              })
+            : i18n.translate('discover.grid.tanStack.pinColumnButtonLabel', {
+                defaultMessage: 'Pin column',
+              }),
+          iconType: isColumnPinned ? 'pinFill' : 'pin',
+          iconProps: { size: 'm' },
+          onClick: () => onTogglePinColumn(columnId),
+          'data-test-subj': isColumnPinned
+            ? 'unifiedDataTableUnpinColumn'
+            : 'unifiedDataTablePinColumn',
+        },
+        onActionComplete
+      )
+    );
+  }
+
   if (!isSummaryMode) {
     if (columnIndex > 0) {
       actions.push(
@@ -266,6 +295,23 @@ export const buildTanStackColumnHeaderActions = ({
         )
       );
     }
+  }
+
+  if (onAutoFitColumn) {
+    actions.push(
+      wrapAction(
+        {
+          label: i18n.translate('discover.grid.tanStack.fitColumnToDataButtonLabel', {
+            defaultMessage: 'Fit to data',
+          }),
+          iconType: 'expand',
+          iconProps: { size: 'm' },
+          onClick: () => onAutoFitColumn(columnId),
+          'data-test-subj': 'unifiedDataTableFitToData',
+        },
+        onActionComplete
+      )
+    );
   }
 
   if (onResize && columnWidth > 0) {
@@ -331,6 +377,8 @@ export interface TanStackColumnHeaderActionsProps
   extends Omit<BuildTanStackColumnHeaderActionsParams, 'onActionComplete'> {
   columnDisplayName: string;
   headerActionsCss?: ReturnType<typeof import('@emotion/react').css>;
+  headerActionsWrapperCss?: ReturnType<typeof import('@emotion/react').css>;
+  headerActionsVisibleCss?: ReturnType<typeof import('@emotion/react').css>;
 }
 
 export const TanStackColumnHeaderActions = React.memo(
@@ -338,6 +386,8 @@ export const TanStackColumnHeaderActions = React.memo(
     columnId,
     columnDisplayName,
     headerActionsCss,
+    headerActionsWrapperCss,
+    headerActionsVisibleCss,
     ...buildParams
   }: TanStackColumnHeaderActionsProps) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -362,36 +412,41 @@ export const TanStackColumnHeaderActions = React.memo(
     );
 
     return (
-      <EuiPopover
-        aria-label={actionsButtonLabel}
-        display="block"
-        panelPaddingSize="s"
-        offset={7}
-        anchorPosition="downRight"
-        button={
-          <EuiToolTip content={actionsButtonLabel} disableScreenReaderOutput>
-            <EuiButtonIcon
-              iconType="boxesVertical"
-              iconSize="s"
-              color="text"
-              css={headerActionsCss}
-              aria-label={actionsButtonLabel}
-              onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
-                event.stopPropagation();
-                setIsOpen((open) => !open);
-              }}
-              data-test-subj={`dataGridHeaderCellActionButton-${columnId}`}
-            />
-          </EuiToolTip>
-        }
-        isOpen={isOpen}
-        closePopover={closePopover}
+      <div
+        className="tsg-headerActions"
+        css={[headerActionsWrapperCss, isOpen && headerActionsVisibleCss]}
       >
-        <EuiListGroup
-          listItems={listItems}
-          data-test-subj={`dataGridHeaderCellActionGroup-${columnId}`}
-        />
-      </EuiPopover>
+        <EuiPopover
+          aria-label={actionsButtonLabel}
+          display="block"
+          panelPaddingSize="s"
+          offset={7}
+          anchorPosition="downRight"
+          button={
+            <EuiToolTip content={actionsButtonLabel} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="boxesVertical"
+                iconSize="s"
+                color="text"
+                css={headerActionsCss}
+                aria-label={actionsButtonLabel}
+                onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
+                  event.stopPropagation();
+                  setIsOpen((open) => !open);
+                }}
+                data-test-subj={`dataGridHeaderCellActionButton-${columnId}`}
+              />
+            </EuiToolTip>
+          }
+          isOpen={isOpen}
+          closePopover={closePopover}
+        >
+          <EuiListGroup
+            listItems={listItems}
+            data-test-subj={`dataGridHeaderCellActionGroup-${columnId}`}
+          />
+        </EuiPopover>
+      </div>
     );
   }
 );
