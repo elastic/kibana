@@ -1,5 +1,5 @@
 {
-  "sha1": "13a6222b9b63439a0c7acc365e69239008760344",
+  "sha1": "99b7ba57c7c7528b1efaff5558af7fe26cc89856",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -191,8 +191,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/rollup/test/scout/api/tests/rollup_jobs_crud.spec.ts",
-        "line": 45,
-        "column": 96
+        "line": 56,
+        "column": 11
       }
     },
     {
@@ -204,7 +204,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/rollup/test/scout/api/tests/rollup_jobs_crud.spec.ts",
-        "line": 62,
+        "line": 69,
         "column": 5
       }
     },
@@ -217,7 +217,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/rollup/test/scout/api/tests/rollup_jobs_crud.spec.ts",
-        "line": 68,
+        "line": 75,
         "column": 24
       }
     },
@@ -230,7 +230,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/rollup/test/scout/api/tests/rollup_jobs_crud.spec.ts",
-        "line": 80,
+        "line": 87,
         "column": 17
       }
     },
