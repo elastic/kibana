@@ -208,9 +208,20 @@ export function inspectStep(
             }
           });
         } else {
+          // Compose the branchKey so that on-failure.fallback and
+          // iteration-on-failure.fallback get distinct identities. Without this,
+          // both fallback sequences on a loop step collapse to branchKey='fallback'
+          // (the intermediate on-failure / iteration-on-failure container keys are
+          // overwritten by the nested 'fallback' recursion), merging them into a
+          // single nesting_info rail.
+          const childBranchKey =
+            nestedKeyValue === 'fallback' &&
+            (branchKey === 'on-failure' || branchKey === 'iteration-on-failure')
+              ? `${branchKey}.fallback`
+              : nestedKeyValue;
           Object.assign(
             result,
-            inspectStep(item.value, lineCounter, childParentStepId, nestedKeyValue)
+            inspectStep(item.value, lineCounter, childParentStepId, childBranchKey)
           );
         }
       }

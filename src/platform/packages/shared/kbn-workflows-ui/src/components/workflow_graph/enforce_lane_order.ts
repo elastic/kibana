@@ -361,6 +361,34 @@ export const buildContainerDescendants = (
 };
 
 /**
+ * Returns the **direct member** set for each group: the ids of `innerNodes` and
+ * `bypassLaneNodes` belonging directly to that group, without recursing into
+ * nested containers.
+ *
+ * Used as the `groupMemberIds` argument to `separatePositionedOverlapsInPlace`
+ * so that inner PAVA sweeps only resolve overlaps among direct siblings.
+ * Nested container bodies intentionally overlap with their container node and
+ * must not be separated as peers — pass `buildContainerDescendants` as the
+ * `groupDescendantIds` argument for the outer-exclusion and carry-on-move roles.
+ */
+export const buildContainerMembers = (
+  foreachGroups: readonly ForeachGroup[]
+): Map<string, Set<string>> => {
+  const result = new Map<string, Set<string>>();
+  for (const group of foreachGroups) {
+    const members = new Set<string>();
+    for (const node of group.innerNodes) {
+      members.add(node.id);
+    }
+    for (const node of group.bypassLaneNodes ?? []) {
+      members.add(node.id);
+    }
+    result.set(group.id, members);
+  }
+  return result;
+};
+
+/**
  * Enforce fork lane declaration order across the outer graph and each
  * foreachGroup's inner graph.
  *

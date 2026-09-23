@@ -505,6 +505,19 @@ function transformInternal(
           }
         }
       }
+
+      // Claim synthetic bypass nodes (from unbalanced if/switch inside this
+      // fallback) into the lane's node set. Bypass nodes have no `data.fallbackOf`
+      // so the stamp loop above never reaches them. Without this,
+      // layoutGraphWithLanes classifies them as spine nodes while their sibling
+      // gate nodes are lane nodes — the gate→bypass edge degrades to points:[].
+      // Innermost lane wins: skip any bypass already claimed by a nested lane.
+      const nestedLaneNodeIds = new Set(inner.fallbackLanes.flatMap((l) => l.nodes));
+      for (const bypass of inner.bypassLaneNodes) {
+        if (!nestedLaneNodeIds.has(bypass.id)) {
+          laneNodes.push(bypass.id);
+        }
+      }
       // Stamp foreachGroup inner nodes for minimap tinting — but do NOT add
       // them to laneNodes (they belong to the container's own dagre graph).
       for (const g of inner.foreachGroups) {

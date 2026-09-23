@@ -90,7 +90,7 @@ authoring term (`on-failure.fallback`) and the `handle` entry in CONTEXT.md, whi
 the set as `(then / else / step / fallback)`.
 
 `id="failure"` was also ambiguous with `ChipOutcome = 'none' | 'success' | 'failure'`
-([step_chip_palette.ts](../../../../packages/shared/kbn-workflows-ui/src/components/workflow_graph/step_chip_palette.ts)),
+([step_chip_palette.ts](../../../../../packages/shared/kbn-workflows-ui/src/components/workflow_graph/step_chip_palette.ts)),
 which is an execution-outcome concept in the same directory.
 
 The same named handle is added to `WorkflowGraphForeachGroupNode`; without it, failure edges

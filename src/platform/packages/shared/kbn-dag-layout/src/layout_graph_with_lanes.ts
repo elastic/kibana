@@ -239,9 +239,17 @@ export function layoutGraphWithLanes(
   // formerly built separately) is structurally identical to spineAdj — one map
   // is sufficient.
   const spineAdj = new Map<string, string[]>();
+  // Reverse adjacency: target → sources. Used by §3.5 to exclude any fork-head
+  // candidate that has an external predecessor (i.e. one that is not the fork
+  // source), which dagre placed at a later rank to satisfy that constraint.
+  // Pulling such a target up to the minimum fork-head rank would produce a
+  // same-rank or backward edge from its external predecessor.
+  const spineRevAdj = new Map<string, string[]>();
   for (const e of spineEdges) {
     if (!spineAdj.has(e.source)) spineAdj.set(e.source, []);
     spineAdj.get(e.source)!.push(e.target);
+    if (!spineRevAdj.has(e.target)) spineRevAdj.set(e.target, []);
+    spineRevAdj.get(e.target)!.push(e.source);
   }
 
   // Memoised reachability: avoids repeated BFS for the same fork source in §3.5.
@@ -276,25 +284,34 @@ export function layoutGraphWithLanes(
   // to the minimum main position among them. After this, all fork heads share rank 1
   // and the topology push correctly skips them (they are not successors of the owner).
   //
-  // Guard: only align targets that are mutually exclusive branch heads — i.e. no
-  // target is reachable from a sibling target. In the transitive-successor (shortcut)
-  // shape a→b, a→c, b→c, collapsing c onto b's rank would destroy the non-overlap
-  // guarantee that dagre establishes. The reachability check uses spineAdj above;
-  // the memoised cache keeps the overall cost O(V + E) across the whole loop.
+  // Guards — only align a target when ALL of these hold:
+  //   1. No sibling target is reachable from it (transitive-successor / shortcut
+  //      edge guard). Shape a→b, a→c, b→c: c is reachable from b, so c is excluded
+  //      and the pair is not alignable.
+  //   2. Its sole spine predecessor is the fork source. If a target has an external
+  //      predecessor p→q→c (with a→c also present), dagre placed c at a later rank
+  //      to satisfy p→q→c. Pulling c up to b's rank would make q→c same-rank or
+  //      backward. Only genuine fork heads have exactly one predecessor (the gate).
   const repositionedByAlignment = new Set<string>();
   {
-    for (const [, targets] of spineAdj) {
+    for (const [forkSource, targets] of spineAdj) {
       if (targets.length < 2) continue;
       const targetNodes = targets.flatMap((t) => {
         const n = spineById.get(t);
         return n ? [n] : [];
       });
       if (targetNodes.length < 2) continue;
-      // Filter out any target that is reachable from a sibling target.
-      // Such a target is a transitive successor, not a mutually-exclusive fork head.
-      const alignable = targetNodes.filter(
-        (n) => !targetNodes.some((o) => o.id !== n.id && getTransitiveSuccessors(o.id).has(n.id))
-      );
+      // Guard 1: exclude any target reachable from a sibling target (shortcut edge).
+      // Guard 2: exclude any target whose spine predecessor is not solely the fork source.
+      const alignable = targetNodes.filter((n) => {
+        const reachableFromSibling = targetNodes.some(
+          (o) => o.id !== n.id && getTransitiveSuccessors(o.id).has(n.id)
+        );
+        if (reachableFromSibling) return false;
+        const predecessors = spineRevAdj.get(n.id) ?? [];
+        const hasExternalPredecessor = predecessors.some((p) => p !== forkSource);
+        return !hasExternalPredecessor;
+      });
       if (alignable.length < 2) continue;
       const minMain = Math.min(...alignable.map((n) => mainOf(n, isLR)));
       for (const n of alignable) {

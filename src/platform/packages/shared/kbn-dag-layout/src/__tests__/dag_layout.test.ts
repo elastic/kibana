@@ -1169,3 +1169,140 @@ describe('dagLayout — §3.5 does not collapse shortcut-edge targets (Cycle C)'
     expectNoPairwiseOverlap(laid);
   });
 });
+
+// ── §3.5 guard 2: external-predecessor exclusion ────────────────────────────
+//
+// For the converging shape a→b, a→c, p→q→c: dagre places c at a later rank to
+// satisfy q→c. Without the external-predecessor guard, §3.5 would pull c up to
+// b's rank, making q→c same-rank or backward and potentially overlapping nodes.
+//
+// Fix: a target is only alignable when its sole spine predecessor is the fork
+// source. `c` has two predecessors (a and q), so it is excluded and stays where
+// dagre placed it.
+
+describe('dagLayout — §3.5 does not realign targets with external predecessors (Cycle C2)', () => {
+  it('converging shape a→b, a→c, p→q→c: q→c stays forward and no node overlaps', () => {
+    // a forks to b and c; an independent chain p→q also leads to c.
+    // Without the external-predecessor guard, §3.5 would see both b and c as
+    // targets of a (neither is sibling-reachable from the other) and pull c up
+    // to b's rank. Since q is at the rank before c, pulling c to b's rank (which
+    // is already at q's rank) makes q→c same-rank or backward — a layout
+    // invariant violation.
+    //
+    // With the fix: c has an external predecessor (q), so it is excluded from
+    // alignment. Only b is alignable but alignable.length < 2, so §3.5 skips.
+    // q→c stays forward regardless of where dagre puts b vs c.
+    const nodes = [node('p'), node('q'), node('a'), node('b'), node('c'), node('end')];
+    const edges = [
+      edge('pq', 'p', 'q'),
+      edge('qc', 'q', 'c'),
+      edge('ab', 'a', 'b'),
+      edge('ac', 'a', 'c'),
+      edge('b-end', 'b', 'end'),
+      edge('c-end', 'c', 'end'),
+    ];
+    const { nodes: laid } = dagLayout(nodes, edges, []);
+    const q = findNode(laid, 'q');
+    const c = findNode(laid, 'c');
+
+    // The structural predecessor constraint must be preserved: q→c must be forward
+    // (c strictly below q in TB layout), regardless of where b lands.
+    expect(c.y).toBeGreaterThan(q.y + q.height - 1);
+
+    // No two nodes may overlap.
+    expectNoPairwiseOverlap(laid);
+  });
+
+  it('a→{b,c} with b→c and p→q→c: b and c not collapsed, q→c forward', () => {
+    // Combined: sibling-shortcut (b→c) AND external predecessor (q→c).
+    // §3.5 must exclude c via sibling-reachability (b reaches c), so b and c
+    // don't collapse. The external-predecessor guard provides defense-in-depth
+    // for the q→c constraint even if sibling-reachability were bypassed.
+    const nodes = [node('p'), node('q'), node('a'), node('b'), node('c'), node('end')];
+    const edges = [
+      edge('pq', 'p', 'q'),
+      edge('qc', 'q', 'c'),
+      edge('ab', 'a', 'b'),
+      edge('ac', 'a', 'c'),
+      edge('bc', 'b', 'c'),
+      edge('c-end', 'c', 'end'),
+    ];
+    const { nodes: laid } = dagLayout(nodes, edges, []);
+    const q = findNode(laid, 'q');
+    const b = findNode(laid, 'b');
+    const c = findNode(laid, 'c');
+
+    // c must be below both q and b (it is a transitive successor of both).
+    expect(c.y).toBeGreaterThan(q.y + q.height - 1);
+    expect(c.y).toBeGreaterThan(b.y + b.height - 1);
+    expectNoPairwiseOverlap(laid);
+  });
+});
+
+// ── LR reserved-lane invariants ─────────────────────────────────────────────
+//
+// Every reservedLanes test to this point uses the default 'TB' direction.
+// LR has the main axis on x and the cross axis on y, so:
+//   - "below the spine" means larger y
+//   - "one rankSep after the owner" means larger x
+//   - nested lanes must move monotonically in the +y direction (further down)
+//   - the next spine node must clear the full lane subtree on x
+
+describe('dagLayout — LR direction + reservedLanes invariants', () => {
+  it('lane is below the spine, head one rankSep after owner, nested lane further down', () => {
+    // Spine: start → owner → next
+    // Lane on owner: head → leaf  (depth 0)
+    // Lane on head:  nested-head  (depth 1)
+    //
+    // In LR: main axis = x, cross axis = y.
+    // Expected:
+    //   lane head x ≈ owner.x + owner.width + rankSep  (main: one rank after owner)
+    //   lane head y > owner.y + owner.height            (cross: below spine, +y side)
+    //   nested-head y > head y + head.height            (cross: monotonically further down)
+    //   next.x ≥ leaf.x + leaf.width + rankSep         (next spine node clears lane subtree)
+    const nodeSep = 50;
+    const rankSep = 70;
+    const nodes = [
+      node('start'),
+      node('owner'),
+      node('head'),
+      node('leaf'),
+      node('nested-head'),
+      node('next'),
+    ];
+    const edges = [edge('s-o', 'start', 'owner'), edge('o-n', 'owner', 'next')];
+    const reservedLanes = [
+      { nodeIds: ['head', 'leaf'], depth: 0, ownerId: 'owner' },
+      { nodeIds: ['nested-head'], depth: 1, ownerId: 'head' },
+    ];
+    const { nodes: laid } = dagLayout(nodes, edges, [], {
+      direction: 'LR',
+      nodeSep,
+      rankSep,
+      reservedLanes,
+    });
+
+    const ownerN = findNode(laid, 'owner');
+    const headN = findNode(laid, 'head');
+    const leafN = findNode(laid, 'leaf');
+    const nestedN = findNode(laid, 'nested-head');
+    const nextN = findNode(laid, 'next');
+
+    // Lane head is one rankSep after the owner on the main (x) axis.
+    expect(headN.x).toBeGreaterThanOrEqual(ownerN.x + ownerN.width + rankSep - 1);
+
+    // Lane is in the +y (below) direction relative to the spine.
+    expect(headN.y).toBeGreaterThan(ownerN.y + ownerN.height - 1);
+
+    // Nested lane is further down than the parent lane (monotonically outward).
+    expect(nestedN.y).toBeGreaterThan(headN.y + headN.height - 1);
+
+    // The next spine node clears the full lane subtree on the main (x) axis.
+    const laneXEnd = Math.max(
+      headN.x + headN.width,
+      leafN.x + leafN.width,
+      nestedN.x + nestedN.width
+    );
+    expect(nextN.x).toBeGreaterThanOrEqual(laneXEnd + rankSep - 1);
+  });
+});

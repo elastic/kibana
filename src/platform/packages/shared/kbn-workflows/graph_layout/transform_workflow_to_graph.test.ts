@@ -1122,4 +1122,52 @@ describe('transformWorkflowToGraph — fallback lane', () => {
       }
     }
   });
+
+  it('bypass node from unbalanced if-inside-fallback is claimed into the fallback lane', () => {
+    // Regression for the bug where bypassLaneNodes produced by an if-without-else
+    // inside on-failure.fallback were never added to FallbackLane.nodes.
+    // layoutGraphWithLanes uses lane.nodes to partition the dagre graph — bypass
+    // nodes left out of any lane were classified as spine nodes, making the
+    // gate→bypass edge a boundary edge with points:[].
+    const r = transformWorkflowToGraph(
+      minimal({
+        steps: [
+          {
+            name: 'risky',
+            type: 'http',
+            'on-failure': {
+              fallback: [
+                {
+                  // Unbalanced if: only the `steps` (then) branch, no `else`.
+                  // This synthesizes a `risky-if-else-bypass` bypass node.
+                  name: 'risky-if',
+                  type: 'if',
+                  condition: 'true == true',
+                  steps: [{ name: 'notify', type: 'http' }],
+                },
+              ],
+            },
+          },
+          { name: 'finish', type: 'http' },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+
+    // A bypass node must have been synthesized for the else branch.
+    expect(r.bypassLaneNodes.length).toBeGreaterThan(0);
+    const bypassId = r.bypassLaneNodes.find((n) => n.id.includes('else-bypass'))?.id;
+    expect(bypassId).toBeDefined();
+
+    // The bypass node must be in the fallback lane's node set — not a spine node.
+    const fallbackLane = r.fallbackLanes.find((l) => l.owner === 'risky');
+    expect(fallbackLane).toBeDefined();
+    expect(fallbackLane!.nodes).toContain(bypassId!);
+
+    // It must NOT appear in the top-level bypassLaneNodes once it is claimed
+    // into the lane (the bypass was created inside the lane's transformInternal
+    // call and hoisted to the top-level bypassLaneNodes list — the claim only
+    // affects laneNodes, it does not remove the node from bypassLaneNodes).
+    // This assertion just documents the expected top-level plumbing.
+    expect(r.bypassLaneNodes.some((n) => n.id === bypassId)).toBe(true);
+  });
 });

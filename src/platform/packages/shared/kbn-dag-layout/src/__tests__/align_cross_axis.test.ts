@@ -152,3 +152,74 @@ describe('separatePositionedOverlapsInPlace — PAVA pin demotion (Cycle A)', ()
     });
   });
 });
+
+describe('separatePositionedOverlapsInPlace — nested container sweep membership', () => {
+  // Regression for the bug where the transitive descendant closure was passed as
+  // groupMemberIds, causing PAVA to treat a nested container's body nodes as peers
+  // of the nested container and separate them — pushing the body outside its frame.
+  //
+  // Correct behaviour: only DIRECT members participate in a group's inner sweep.
+  // Transitive descendants are used only for outer-node exclusion and carry-on-move.
+
+  const node = (id: string, x: number, y: number, w: number, h: number): DagPositionedNode => ({
+    id,
+    x,
+    y,
+    width: w,
+    height: h,
+  });
+
+  it('does not push nested-container body nodes outside their container', () => {
+    const nodeSep = 10;
+
+    // Layout:
+    //
+    //  outer-group (x=0, w=400)
+    //    inner-group (x=10, w=180)
+    //      body-a (x=20, w=80)   ← inner-group's body, overlaps inner-group by design
+    //      body-b (x=110, w=80)
+    //    right-node (x=220, w=80) ← direct member of outer-group, sibling of inner-group
+    //
+    // With the transitive closure as sweep membership, PAVA would see
+    // [inner-group, body-a, body-b, right-node] as peers and try to separate them,
+    // pushing body-a or body-b outside inner-group.
+    //
+    // With direct membership, PAVA only sees [inner-group, right-node] as outer-group
+    // peers and [body-a, body-b] as inner-group peers — body-* never compete with
+    // right-node.
+
+    const nodes = [
+      node('outer-group', 0, 0, 400, 200),
+      node('inner-group', 10, 50, 180, 100),
+      node('body-a', 20, 80, 80, 40),
+      node('body-b', 110, 80, 80, 40),
+      node('right-node', 220, 50, 80, 100),
+    ];
+
+    // Direct members: outer-group contains inner-group and right-node.
+    // inner-group contains body-a and body-b.
+    const directMembers = new Map<string, ReadonlySet<string>>([
+      ['outer-group', new Set(['inner-group', 'right-node'])],
+      ['inner-group', new Set(['body-a', 'body-b'])],
+    ]);
+
+    // Transitive descendants: outer-group descends into inner-group's body too.
+    const transitiveClosure = new Map<string, ReadonlySet<string>>([
+      ['outer-group', new Set(['inner-group', 'right-node', 'body-a', 'body-b'])],
+      ['inner-group', new Set(['body-a', 'body-b'])],
+    ]);
+
+    const mutableNodes = nodes.map((n) => ({ ...n }));
+    separatePositionedOverlapsInPlace(mutableNodes, 'x', nodeSep, directMembers, transitiveClosure);
+
+    // body-a must remain inside inner-group (x >= inner-group.x, x+w <= inner-group.x + inner-group.w).
+    const innerGroup = mutableNodes.find((n) => n.id === 'inner-group')!;
+    const bodyA = mutableNodes.find((n) => n.id === 'body-a')!;
+    const bodyB = mutableNodes.find((n) => n.id === 'body-b')!;
+
+    expect(bodyA.x).toBeGreaterThanOrEqual(innerGroup.x - 0.001);
+    expect(bodyA.x + bodyA.width).toBeLessThanOrEqual(innerGroup.x + innerGroup.width + 0.001);
+    expect(bodyB.x).toBeGreaterThanOrEqual(innerGroup.x - 0.001);
+    expect(bodyB.x + bodyB.width).toBeLessThanOrEqual(innerGroup.x + innerGroup.width + 0.001);
+  });
+});

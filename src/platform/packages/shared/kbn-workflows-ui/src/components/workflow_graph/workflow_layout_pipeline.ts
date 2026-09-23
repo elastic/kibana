@@ -12,6 +12,7 @@ import { dagLayout, separatePositionedOverlapsInPlace } from '@kbn/dag-layout';
 import type { LayoutDirection, TransformResult } from '@kbn/workflows';
 import {
   buildContainerDescendants,
+  buildContainerMembers,
   enforceForkBranchCompoundOrder,
   enforceForkLaneOrder,
   enforceTriggerLaneOrder,
@@ -123,11 +124,13 @@ export const computeWorkflowLayout = (
     laid.nodes.map((n) => [n.id, crossAxis === 'x' ? n.x + n.width / 2 : n.y + n.height / 2])
   );
 
-  // Build the transitive descendant closure once for all post-dagre passes.
-  // ForeachGroup.innerNodes holds direct members only; a nested container pushes
-  // its body as a sibling foreachGroups entry, so every pass that moves a
-  // container must carry ALL descendants, not just members (see CONTEXT.md,
-  // "container members vs container descendants").
+  // Build two closure sets for post-dagre passes (see CONTEXT.md,
+  // "container members vs container descendants"):
+  //   - containerMembers: direct members only (for PAVA inner sweeps — nested
+  //     container bodies must not be separated as peers).
+  //   - containerDescendants: transitive closure (for outer-node exclusion,
+  //     carry-on-move, and any pass that moves a container as an opaque unit).
+  const containerMembers = buildContainerMembers(transformed.foreachGroups);
   const containerDescendants = buildContainerDescendants(transformed.foreachGroups);
 
   // Post-dagre pass 1: enforce fork lane declaration order.
@@ -173,11 +176,15 @@ export const computeWorkflowLayout = (
   // output this is expected to be a no-op (verify with the seeded corpus).
 
   // separatePositionedOverlapsInPlace mutates the array in place.
+  // Pass direct members as groupMemberIds (for inner PAVA sweeps) and the
+  // transitive closure as groupDescendantIds (for outer-node exclusion and
+  // carry-on-move) — these two roles require different granularities.
   const repairedNodes = [...triggeredNodes];
   separatePositionedOverlapsInPlace(
     repairedNodes,
     crossAxis,
     WORKFLOW_NODE_SEP,
+    containerMembers,
     containerDescendants
   );
 

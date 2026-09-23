@@ -152,10 +152,12 @@ export interface FallbackLane {
   readonly leaves: readonly string[];
   /**
    * Every node of this lane that lives in `graphId` — including `foreachGroup`
-   * containers, excluding those containers' inner nodes, and excluding nodes
+   * containers and synthetic bypass nodes (from unbalanced `if`/`switch` inside
+   * the fallback), excluding those containers' inner nodes, and excluding nodes
    * claimed by a nested lane at a greater depth. Built from the `fallbackOf`
-   * stamping loop so that exclusivity is a property of the algorithm (the
-   * innermost-wins guard), not a post-hoc assertion.
+   * stamping loop (for step nodes) plus an explicit bypass-claim pass (for
+   * bypass nodes, which carry no `fallbackOf`) so that exclusivity is a property
+   * of the algorithm (the innermost-wins guard), not a post-hoc assertion.
    */
   readonly nodes: readonly string[];
   /**

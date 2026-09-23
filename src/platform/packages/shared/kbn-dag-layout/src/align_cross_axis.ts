@@ -598,10 +598,14 @@ const SEPARATE_OVERLAPS_MAX_ITERS = 10;
  *   replacing array elements when positions change.
  * @param crossAxis - Cross axis ('x' for TB, 'y' for LR).
  * @param nodeSep - Minimum gap between adjacent box borders.
- * @param groupInnerIds - Map from group node id → set of inner node ids.
- *   The outer sweep treats group nodes as opaque boxes and moves inner nodes
- *   when the group moves. The inner sweep then resolves overlaps within each
- *   group body independently. Pass an empty map when there are no groups.
+ * @param groupMemberIds - Map from group node id → **direct** member node ids.
+ *   Used for per-group inner sweeps: PAVA resolves overlaps among direct children
+ *   only. Pass an empty map when there are no groups.
+ * @param groupDescendantIds - Map from group node id → **transitive** descendant
+ *   node ids (defaults to `groupMemberIds` for callers that pass a single map).
+ *   Used for two purposes: (1) excluding descendants from the outer sweep so
+ *   each group is treated as an opaque box; (2) carrying all descendants when a
+ *   group moves. Must be a superset of `groupMemberIds` for each group.
  */
 /**
  * @returns `{ relaxedPinIds }` — node ids whose `crossPinned` flag was demoted
@@ -613,7 +617,8 @@ export const separatePositionedOverlapsInPlace = (
   nodes: DagPositionedNode[],
   crossAxis: CrossAxis,
   nodeSep: number,
-  groupInnerIds: ReadonlyMap<string, ReadonlySet<string>> = new Map()
+  groupMemberIds: ReadonlyMap<string, ReadonlySet<string>> = new Map(),
+  groupDescendantIds: ReadonlyMap<string, ReadonlySet<string>> = groupMemberIds
 ): { relaxedPinIds: string[] } => {
   if (nodes.length < 2) return { relaxedPinIds: [] };
   // Build index: node id → array index.
@@ -641,17 +646,27 @@ export const separatePositionedOverlapsInPlace = (
   };
 
   // Determine which nodes are outer (not inner to any group at this level).
+  // Use the transitive descendant map so deeply-nested nodes are also excluded.
   const innerNodeIdSet = new Set<string>();
-  for (const innerIds of groupInnerIds.values()) {
+  for (const innerIds of groupDescendantIds.values()) {
     for (const id of innerIds) innerNodeIdSet.add(id);
   }
   const outerNodeIds = nodes.map((n) => n.id).filter((id) => !innerNodeIdSet.has(id));
 
-  // Collect per-group inner id lists (only those present in the node array).
+  // Collect per-group direct-member id lists (only those present in the node array).
+  // Only direct members are used for inner sweeps — nested-container body nodes
+  // intentionally overlap with their container, so PAVA must not separate them.
   const groupInnerLists = new Map<string, string[]>();
-  for (const [gid, innerIds] of groupInnerIds) {
-    const present = [...innerIds].filter((id) => idxById.has(id));
+  for (const [gid, memberIds] of groupMemberIds) {
+    const present = [...memberIds].filter((id) => idxById.has(id));
     if (present.length > 0) groupInnerLists.set(gid, present);
+  }
+
+  // Collect per-group transitive descendant lists for carry-on-move.
+  const groupDescendantLists = new Map<string, string[]>();
+  for (const [gid, descendantIds] of groupDescendantIds) {
+    const present = [...descendantIds].filter((id) => idxById.has(id));
+    if (present.length > 0) groupDescendantLists.set(gid, present);
   }
 
   // Track pins that were demoted due to infeasibility (relaxedPinIds collected here).
@@ -716,11 +731,12 @@ export const separatePositionedOverlapsInPlace = (
         const delta = newCross - oldCross;
         setCross(id, newCross);
         anyMoved = true;
-        // Carry inner nodes of any group that moved.
-        const innerIds = groupInnerLists.get(id);
-        if (innerIds) {
-          for (const innerId of innerIds) {
-            setCross(innerId, crossOf(innerId) + delta);
+        // Carry ALL descendants of any group that moved (transitive closure so
+        // nested containers and their bodies move with the outer group).
+        const descendantIds = groupDescendantLists.get(id);
+        if (descendantIds) {
+          for (const descendantId of descendantIds) {
+            setCross(descendantId, crossOf(descendantId) + delta);
           }
         }
       }
