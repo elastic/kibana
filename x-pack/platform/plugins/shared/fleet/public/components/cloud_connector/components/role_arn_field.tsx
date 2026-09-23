@@ -30,7 +30,7 @@ const FIELD_LABEL = i18n.translate('xpack.fleet.cloudConnector.policiesFlyout.ro
 
 const FIELD_HELP = i18n.translate('xpack.fleet.cloudConnector.policiesFlyout.roleArnFieldHelp', {
   defaultMessage:
-    'The IAM role every integration using this identity assumes. Changing it changes how they all authenticate; agents switch to the new role on their next policy update.',
+    'The IAM role every integration using this identity assumes. Changing it changes how they all authenticate. Agents switch to the new role on their next policy update.',
 });
 
 const CALLOUT_TITLE = i18n.translate(
@@ -98,12 +98,12 @@ export const RoleArnField: React.FC<RoleArnFieldProps> = ({
                 affectedPackagePolicyCount === undefined ? (
                   <FormattedMessage
                     id="xpack.fleet.cloudConnector.policiesFlyout.roleArnCalloutUnknownCount"
-                    defaultMessage="This identity is used by other integrations. Saving changes how each of them authenticates to AWS; agents switch to the new role on their next policy check-in. If the new role is not trusted or lacks the required permissions, all of them stop collecting together."
+                    defaultMessage="This identity is used by other integrations. Saving changes how each of them authenticates to AWS. Agents will switch to the new role on their next policy check-in. If the new role is not trusted or lacks the required permissions, all of them stop collecting."
                   />
                 ) : (
                   <FormattedMessage
                     id="xpack.fleet.cloudConnector.policiesFlyout.roleArnCalloutKnownCount"
-                    defaultMessage="This identity is used by {count, plural, one {# package policy} other {# package policies}}. Saving changes how each of them authenticates to AWS; agents switch to the new role on their next policy check-in. If the new role is not trusted or lacks the required permissions, all of them stop collecting together."
+                    defaultMessage="This identity is used by {count, plural, one {# package policy} other {# package policies}}. Saving changes how each of them authenticates to AWS. Agents will switch to the new role on their next policy check-in. If the new role is not trusted or lacks the required permissions, all of them stop collecting."
                     values={{ count: affectedPackagePolicyCount }}
                   />
                 )

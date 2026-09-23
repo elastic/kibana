@@ -75,6 +75,9 @@ describe('RoleArnField', () => {
     expect(screen.getByTestId(ROLE_ARN_FIELD_TEST_SUBJECTS.CALLOUT).textContent).toMatch(
       /3 package policies/
     );
+    expect(screen.getByTestId(ROLE_ARN_FIELD_TEST_SUBJECTS.CALLOUT).textContent).toMatch(
+      /all of them stop collecting/
+    );
   });
 
   it('renders a neutral warning when the count is not yet known', () => {
