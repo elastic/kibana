@@ -13,7 +13,7 @@ import {
 } from '../../../../scout_agent_builder_shared/lib/mcp_server_simulator';
 import {
   createMcpConnectorViaKbn,
-  deleteAllConnectors,
+  deleteConnectorById,
 } from '../../../../scout_agent_builder_shared/lib/connector_kbn';
 import { apiTest } from '../fixtures';
 
@@ -22,7 +22,7 @@ apiTest.describe(
   { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   () => {
     let mcpServer: McpServerSimulator;
-    let connectorId: string;
+    let connectorId: string | undefined;
 
     apiTest.beforeAll(async ({ kbnClient }) => {
       mcpServer = createTestMcpServer();
@@ -32,13 +32,19 @@ apiTest.describe(
     });
 
     apiTest.afterAll(async ({ kbnClient }) => {
-      await deleteAllConnectors(kbnClient);
+      if (connectorId) {
+        await deleteConnectorById(kbnClient, connectorId);
+      }
       await mcpServer.stop();
     });
 
     apiTest(
       'listTools succeeds when server advertises tools with outputSchema',
       async ({ asAdmin }) => {
+        if (!connectorId) {
+          throw new Error('MCP connector was not created');
+        }
+
         const response = await asAdmin.post(
           `/api/actions/connector/${encodeURIComponent(connectorId)}/_execute`,
           {

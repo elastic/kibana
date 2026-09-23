@@ -8,7 +8,10 @@
 import { ToolType } from '@kbn/agent-builder-common';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { createMcpConnectorViaKbn } from '../../../../scout_agent_builder_shared/lib/connector_kbn';
+import {
+  createMcpConnectorViaKbn,
+  deleteConnectorById,
+} from '../../../../scout_agent_builder_shared/lib/connector_kbn';
 import { deleteAllConversationsFromEs } from '../../../../scout_agent_builder_shared/lib/conversations_es';
 import {
   createTestMcpServer,
@@ -27,6 +30,7 @@ test.describe(
     let mcpServer: McpServerSimulator;
     let mcpServerUrl: string;
     let connectorId: string;
+    const ownedConnectorIds: string[] = [];
 
     test.beforeAll(async ({ kbnClient }) => {
       await deleteAllTools(kbnClient);
@@ -35,6 +39,7 @@ test.describe(
       mcpServerUrl = await mcpServer.start();
       const connector = await createMcpConnectorViaKbn(kbnClient, mcpServerUrl);
       connectorId = connector.id;
+      ownedConnectorIds.push(connector.id);
     });
 
     test.beforeEach(async ({ browserAuth }) => {
@@ -43,6 +48,9 @@ test.describe(
 
     test.afterAll(async ({ kbnClient, esClient }) => {
       await deleteAllTools(kbnClient);
+      for (const id of ownedConnectorIds) {
+        await deleteConnectorById(kbnClient, id);
+      }
       try {
         await mcpServer.stop();
       } catch {
@@ -225,6 +233,7 @@ test.describe(
           const errorTestConnector = await createMcpConnectorViaKbn(kbnClient, mcpServerUrl, {
             name: 'scout-error-test-connector',
           });
+          ownedConnectorIds.push(errorTestConnector.id);
 
           await pageObjects.agentBuilder.navigateToToolsLanding();
           await pageObjects.agentBuilder.navigateToNewTool();

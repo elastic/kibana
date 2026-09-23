@@ -15,7 +15,7 @@ import { test as baseTest, apiClientFixture, createLazyPageObject, mergeTests } 
 import { createLlmProxy, type LlmProxy } from '@kbn/ftr-llm-proxy';
 import {
   createGenAiConnectorForProxy,
-  deleteAllConnectors,
+  deleteConnectorById,
 } from '../../../../scout_agent_builder_shared/lib/connector_kbn';
 import { AgentBuilderApp } from './page_objects';
 
@@ -37,11 +37,13 @@ export const test = mergeTests(baseTest, apiClientFixture).extend<
   llmProxy: [
     async ({ log, kbnClient }, use) => {
       const proxy = await createLlmProxy(log);
-      await deleteAllConnectors(kbnClient);
-      await createGenAiConnectorForProxy(kbnClient, proxy);
-      await use(proxy);
-      proxy.close();
-      await deleteAllConnectors(kbnClient);
+      const { id: connectorId } = await createGenAiConnectorForProxy(kbnClient, proxy);
+      try {
+        await use(proxy);
+      } finally {
+        proxy.close();
+        await deleteConnectorById(kbnClient, connectorId);
+      }
     },
     { scope: 'worker', auto: true },
   ],
