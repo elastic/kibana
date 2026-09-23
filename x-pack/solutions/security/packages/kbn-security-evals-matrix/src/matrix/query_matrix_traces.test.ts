@@ -145,6 +145,40 @@ describe('queryMatrixTraces example fetching', () => {
     warning: jest.fn(),
   };
 
+  it('round 8: applies the global scoring policy to suites without an override', async () => {
+    // A self-judged doc (judge == graded model) that per-suite scoringBySuite does not
+    // cover: only the global `config.scoring.excludeSelfJudged` rejects it. Passing
+    // scoringBySuite alone re-admitted it into the trace cards.
+    const selfJudgedDoc = {
+      ...completeDoc('exec-a'),
+      evaluator: { name: 'Correctness', score: 1, model: { id: 'model-x' } },
+    } as unknown as EvaluationScoreDocument;
+    const client = makeClient({ filtered: true });
+    (client.getExampleScores as jest.Mock).mockImplementation(
+      async (_e: string, filters?: { executionId?: string }) => [selfJudgedDoc]
+    );
+    void client;
+    const independent = makeClient({ filtered: true });
+    (independent.getExampleScores as jest.Mock).mockImplementation(async () => [selfJudgedDoc]);
+    const traces = await queryMatrixTraces(
+      independent as never,
+      logStub as never,
+      aggregatedFor('exec-a') as never,
+      undefined,
+      0,
+      new Map(),
+      undefined,
+      undefined,
+      { excludeSelfJudged: true }
+    );
+    // The trace entry (steps) may still exist, but its admitted scores must be
+    // empty: the global policy rejected every score document.
+    for (const entry of Object.values(traces)) {
+      expect(entry.scores).toEqual({});
+    }
+    expect(Object.values(traces).length).toBeGreaterThan(0);
+  });
+
   it('applies configured model aliases to the resolved trace keys', async () => {
     const client = makeClient({ filtered: true });
     const traces = await queryMatrixTraces(

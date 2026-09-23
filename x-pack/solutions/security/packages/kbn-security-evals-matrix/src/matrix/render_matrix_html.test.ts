@@ -882,3 +882,21 @@ describe('round 7 regression: tooltip mins and suite-scoped variants', () => {
     expect(html).not.toContain('alert-analysis-a');
   });
 });
+
+describe('round 8 regression: self-judged disclosure on not-recommended cells', () => {
+  it('marks a failing self-judged cell in HTML', () => {
+    const matrix: Matrix = {
+      ...mockMatrix,
+      proprietary: [
+        {
+          ...mockMatrix.proprietary[0],
+          cells: {
+            alert: { kind: 'not-recommended', selfJudged: true },
+          },
+        },
+      ],
+    };
+    const html = renderMatrixHtml(matrix, mockConfig);
+    expect(html).toContain('fail (self-judged)');
+  });
+});

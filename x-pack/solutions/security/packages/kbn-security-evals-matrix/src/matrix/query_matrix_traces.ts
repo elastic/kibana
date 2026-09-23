@@ -445,7 +445,15 @@ export const queryMatrixTraces = async (
    * consumed, so trace verdicts/cards mirror exactly the admitted-document set the
    * published matrix used.
    */
-  scoringBySuite?: Record<string, ScoringPolicy>
+  scoringBySuite?: Record<string, ScoringPolicy>,
+  /**
+   * The global scoring policy used when a suite has no override. Mirrors
+   * `queryMatrixScores`'s `scoringBySuite?.[suiteId] ?? scoring` fallback: suites
+   * inheriting the global policy have no entry in `scoringBySuite`, and omitting
+   * the fallback here would re-admit exactly the documents the score query
+   * rejected (global `excludeSelfJudged`/`requireEisJudge`).
+   */
+  globalScoring?: ScoringPolicy
 ): Promise<MatrixTraceData> => {
   const traces: MatrixTraceData = {};
 
@@ -653,7 +661,7 @@ export const queryMatrixTraces = async (
         traces,
         examplePrefixes,
         judgeVerdictsOut,
-        scoringBySuite?.[ref.suiteId]
+        scoringBySuite?.[ref.suiteId] ?? globalScoring
       );
       if (!ok) missing.push(exampleId);
     }

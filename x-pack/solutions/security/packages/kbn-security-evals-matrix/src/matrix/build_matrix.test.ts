@@ -1548,3 +1548,88 @@ describe('round 7 review findings', () => {
     expect(matrix.proprietary[0].cells.c1).toMatchObject({ kind: 'score', value: 10 });
   });
 });
+
+describe('round 8 regression: per-column self-judged and exclusion scoping', () => {
+  const cfg = parseMatrixConfig({
+    columns: [
+      { id: 'alert', label: 'Alert', suites: ['suite-a'], examplePrefixes: ['alert'], weight: 1 },
+      { id: 'hunt', label: 'Hunt', suites: ['suite-a'], examplePrefixes: ['hunt'], weight: 1 },
+    ],
+    models: [{ id: 'model-x', label: 'Model X' }],
+  });
+
+  const scores: AggregatedModelScores[] = [
+    {
+      modelId: 'model-x',
+      suites: [
+        {
+          suiteId: 'suite-a',
+          experimentId: 'run-8',
+          // Suite-wide flag: only the alert prefix was self-judged.
+          selfJudged: true,
+          excludedSelfJudged: 0,
+          datasets: [
+            {
+              datasetId: 'prefix:alert',
+              datasetName: 'alert',
+              selfJudged: true,
+              evaluators: [{ evaluatorName: 'correctness', mean: 0.9, count: 10 }],
+            },
+            {
+              datasetId: 'prefix:hunt',
+              datasetName: 'hunt',
+              evaluators: [{ evaluatorName: 'correctness', mean: 0.8, count: 10 }],
+            },
+          ],
+        },
+      ],
+    },
+  ];
+
+  it('labels only the self-judged prefix column as self-judged (R8-2)', () => {
+    const matrix = buildMatrix(scores, cfg);
+    const cells = matrix.proprietary[0].cells;
+    expect(cells.alert).toMatchObject({ kind: 'score', selfJudged: true });
+    expect(cells.hunt).toEqual({
+      kind: 'score',
+      value: cells.hunt.kind === 'score' ? cells.hunt.value : 0,
+    });
+    if (cells.hunt.kind === 'score') {
+      expect('selfJudged' in cells.hunt && cells.hunt.selfJudged).toBeFalsy();
+    }
+  });
+
+  it('scopes exclusion counts to the column datasets, not the suite (R8-3)', () => {
+    const rejected: AggregatedModelScores[] = [
+      {
+        modelId: 'model-x',
+        suites: [
+          {
+            suiteId: 'suite-a',
+            experimentId: 'run-8',
+            // Suite-wide rejection total belongs to the alert prefix only.
+            excludedNonEis: 5,
+            datasets: [
+              {
+                datasetId: 'prefix:alert',
+                datasetName: 'alert',
+                excludedNonEis: 5,
+                evaluators: [],
+              },
+              { datasetId: 'prefix:hunt', datasetName: 'hunt', evaluators: [] },
+            ],
+          },
+        ],
+      },
+    ];
+    const matrix = buildMatrix(rejected, cfg);
+    const alertCell = matrix.proprietary[0].cells.alert;
+    const huntCell = matrix.proprietary[0].cells.hunt;
+    expect(alertCell.kind).toBe('excluded');
+    if (alertCell.kind === 'excluded') {
+      expect(alertCell.reason).toBe('non-eis-judge');
+    }
+    // hunt never ran and has no rejection of its own: missing, not excluded.
+    expect(huntCell.kind).toBe('missing');
+  });
+});

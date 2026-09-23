@@ -753,6 +753,23 @@ describe('scoresByPrefixToDatasets', () => {
     );
   });
 
+  it('round 8: buckets a doc into EVERY matching prefix, not just the first', () => {
+    // `alert-analysis-a` matches both `alert` and `alert-analysis` boundary rules;
+    // find() assigned it to whichever prefix was configured first, silently
+    // emptying the other overlapping column.
+    const datasets = scoresByPrefixToDatasets(
+      [score('alert-analysis-a', 'correctness', 1)],
+      ['alert', 'alert-analysis']
+    );
+    const byId = new Map(datasets.map((d) => [d.datasetId, d]));
+    expect(byId.get('prefix:alert')?.evaluators).toEqual([
+      { evaluatorName: 'correctness', mean: 1, count: 1 },
+    ]);
+    expect(byId.get('prefix:alert-analysis')?.evaluators).toEqual([
+      { evaluatorName: 'correctness', mean: 1, count: 1 },
+    ]);
+  });
+
   it('drops non-quality evaluators using evaluator.direction', () => {
     // Latency is minimize and Tool Calls is neutral; neither is a quality score.
     const withDirection = (id: string, name: string, s: number, direction: string) =>

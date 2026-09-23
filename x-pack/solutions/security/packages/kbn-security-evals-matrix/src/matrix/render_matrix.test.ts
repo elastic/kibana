@@ -418,3 +418,23 @@ describe('round 7 regression: provenance suite branches', () => {
     expect(JSON.parse(rendered.json).provenance.branchBySuite).toEqual({ s1: 'feature-x' });
   });
 });
+
+describe('round 8 regression: self-judged disclosure on not-recommended cells', () => {
+  it('appends the self-judged marker to a failing self-judged cell in CSV and markdown', () => {
+    const withFailingSelfJudged = {
+      ...matrix,
+      proprietary: [
+        {
+          ...matrix.proprietary[0],
+          cells: {
+            triage: { kind: 'score' as const, value: 9.2 },
+            detect: { kind: 'not-recommended' as const, selfJudged: true },
+          },
+        },
+      ],
+    };
+    const { proprietaryCsv, markdown } = renderMatrix(withFailingSelfJudged, config);
+    expect(proprietaryCsv).toContain('Not recommended (self-judged)');
+    expect(markdown).toContain('Not recommended (self-judged)');
+  });
+});

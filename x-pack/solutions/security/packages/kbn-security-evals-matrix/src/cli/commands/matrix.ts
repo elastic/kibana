@@ -372,7 +372,10 @@ export const matrixCmd: Command<void> = {
             .map((model) => [model.id, model.matchIds ?? []])
         ),
         judgeVerdicts,
-        matrixQuery.scoringBySuite
+        matrixQuery.scoringBySuite,
+        // Effective global policy: inherited suites have no per-suite override, and
+        // the trace path must reject the same documents the score query rejected.
+        config.scoring
       );
 
       // Server-fetched traces can come back without steps, so count only the ones that carry steps.

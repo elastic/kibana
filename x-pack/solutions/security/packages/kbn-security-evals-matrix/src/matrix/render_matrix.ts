@@ -55,7 +55,10 @@ const cellToString = (cell: MatrixCell, notRecommendedLabel: string): string => 
       // a reader comparing rows from a CSV export has no other signal.
       return cell.selfJudged ? `${cell.value} (self-judged)` : String(cell.value);
     case 'not-recommended':
-      return notRecommendedLabel;
+      // Same disclosure as numeric cells: a failing self-judged score is a different
+      // claim than an independently judged failure, and CSV/MD readers have no
+      // other signal (the flag is preserved on this cell kind by `toCell`).
+      return cell.selfJudged ? `${notRecommendedLabel} (self-judged)` : notRecommendedLabel;
     case 'excluded':
       return `excluded:${cell.reason}`;
     case 'insufficient-coverage':

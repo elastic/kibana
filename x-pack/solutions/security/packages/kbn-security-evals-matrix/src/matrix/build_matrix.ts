@@ -603,15 +603,26 @@ const buildMatrixRow = (
         0
       );
     const cellExtras = {
-      selfJudged: columnSuitesAll.some((suite) => suite.selfJudged === true),
-      excludedSelfJudged: Math.max(
-        columnSuitesAll.reduce((total, suite) => total + (suite.excludedSelfJudged ?? 0), 0),
-        perDataset((dataset) => dataset.excludedSelfJudged ?? 0)
-      ),
-      excludedNonEis: Math.max(
-        columnSuitesAll.reduce((total, suite) => total + (suite.excludedNonEis ?? 0), 0),
-        perDataset((dataset) => dataset.excludedNonEis ?? 0)
-      ),
+      // Per-column, not suite-wide: only the datasets this column actually reads decide
+      // whether the published cell is self-judged (a suite mixing self-judged `alert`
+      // and independently judged `hunt` prefixes must not label `hunt` self-judged).
+      selfJudged: columnDatasetIds
+        ? columnSuitesAll.some((suite) =>
+            suite.datasets.some(
+              (dataset) => columnDatasetIds.has(dataset.datasetId) && dataset.selfJudged === true
+            )
+          )
+        : columnSuitesAll.some((suite) => suite.selfJudged === true),
+      // Prefix columns read ONLY their own datasets' exclusion counts: the suite-wide
+      // total belongs to the suite as a whole, and applying it via Math.max would
+      // publish a genuinely missing sibling prefix (`hunt` never ran) as
+      // `excluded:non-eis-judge` just because `alert` was fully rejected.
+      excludedSelfJudged: columnDatasetIds
+        ? perDataset((dataset) => dataset.excludedSelfJudged ?? 0)
+        : columnSuitesAll.reduce((total, suite) => total + (suite.excludedSelfJudged ?? 0), 0),
+      excludedNonEis: columnDatasetIds
+        ? perDataset((dataset) => dataset.excludedNonEis ?? 0)
+        : columnSuitesAll.reduce((total, suite) => total + (suite.excludedNonEis ?? 0), 0),
       erroredOutEvaluators: columnErroredOutEvaluators(modelScores, column),
     };
     cells[column.id] = buildCell(

@@ -264,7 +264,9 @@ const cellHtml = (row: MatrixRow, column: MatrixDisplayColumn): string => {
         : `<span class="ok-dot">✓</span> ${cell.value}${selfJudgedBadge}`;
     }
     case 'not-recommended':
-      return `<span class="status err">⛔ fail</span>`;
+      // Mirror the CSV/MD disclosure: a failing self-judged score must be
+      // distinguishable from an independently judged failure in HTML too.
+      return `<span class="status err">⛔ fail${cell.selfJudged ? ' (self-judged)' : ''}</span>`;
     case 'excluded':
       return `<span class="status warn" title="${esc(String(cell.docs))} score(s) rejected: ${esc(
         cell.reason

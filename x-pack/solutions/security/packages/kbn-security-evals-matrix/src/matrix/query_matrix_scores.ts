@@ -57,6 +57,8 @@ export interface AggregatedDatasetScores {
   excludedSelfJudged?: number;
   /** Same as `excludedSelfJudged`, for the non-EIS-judge policy. */
   excludedNonEis?: number;
+  /** True when an admitted score in THIS dataset was self-judged (prefix columns only). */
+  selfJudged?: boolean;
 }
 
 export interface AggregatedSuiteScores {
@@ -121,6 +123,10 @@ export const scoresByPrefixToDatasets = (
   // Per-prefix judge-policy rejections: a column whose every doc was withheld must
   // surface as `excluded:*` even when sibling prefixes in the suite survived.
   const excludedByPrefix = new Map<string, { selfJudged: number; nonEis: number }>();
+  // Per-prefix admission flag: a suite may mix self-judged and independently judged
+  // prefixes, and `cellExtras.selfJudged` must reflect only the datasets a column
+  // actually reads (a suite-wide flag would mislabel an independently judged column).
+  const selfJudgedByPrefix = new Map<string, boolean>();
   const excluded: ExcludedScoreCounts = {
     nonQuality: 0,
     nonEis: 0,
@@ -135,8 +141,13 @@ export const scoresByPrefixToDatasets = (
 
   for (const doc of scores) {
     const exampleId = doc.example?.id ?? '';
-    const prefix = prefixes.find((p) => exampleId === p || exampleId.startsWith(`${p}-`));
-    if (prefix) {
+    // Every configured prefix the example matches, not just the first: `alert` and
+    // `alert-analysis` columns must EACH see `alert-analysis-a`, or column order alone
+    // decides which one renders empty (find() assigned it to the first match only).
+    const matchingPrefixes = prefixes.filter(
+      (p) => exampleId === p || exampleId.startsWith(`${p}-`)
+    );
+    for (const prefix of matchingPrefixes) {
       const evaluatorName = doc.evaluator?.name;
       const direction = (doc.evaluator as { direction?: string } | undefined)?.direction;
       if (evaluatorName) {
@@ -197,6 +208,9 @@ export const scoresByPrefixToDatasets = (
               errTrack.set(evaluatorName, tally);
             }
 
+            if (judgeId && taskModelId && describeJudge(judgeId, taskModelId).selfJudged) {
+              selfJudgedByPrefix.set(prefix, true);
+            }
             let evaluators = byPrefix.get(prefix);
             if (!evaluators) {
               evaluators = new Map();
@@ -241,6 +255,7 @@ export const scoresByPrefixToDatasets = (
         count: agg.count,
       })),
       ...(erroredOut.length > 0 ? { erroredOutEvaluators: erroredOut } : {}),
+      ...(selfJudgedByPrefix.get(prefix) === true ? { selfJudged: true } : {}),
       // Exposed per dataset so buildCell can mark THIS column excluded even when
       // sibling prefixes in the suite kept admissible scores.
       ...(prefixExclusions && prefixExclusions.selfJudged > 0
