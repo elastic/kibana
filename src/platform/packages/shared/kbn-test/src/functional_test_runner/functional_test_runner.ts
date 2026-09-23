@@ -35,11 +35,20 @@ import { reconcileRetryJunitReports } from '../mocha';
 interface FunctionalTestRunnerRunResult {
   failureCount: number;
   failedTestFiles: string[];
+  /** the run stopped before every test ran: external `AbortSignal` or `lifecycle.abort()` */
+  aborted: boolean;
   customTestRunnerResult?: any; // matches main's inferred Promise<any> contract
 }
 
 export class FunctionalTestRunner {
   private readonly esVersion: EsVersion;
+  /**
+   * Whether any attempt of the most recent `run()` stopped before every test ran, either through
+   * the caller's `AbortSignal` or an internal `lifecycle.abort()` such as the first Mocha timeout
+   * under `mochaOpts.abortOnTimeout`. Sticky across retries: a retry only re-runs the files that
+   * failed, so tests an aborted attempt never reached stay unrun even when the retry completes.
+   */
+  public aborted = false;
   constructor(
     private readonly log: ToolingLog,
     private readonly config: Config,
@@ -54,7 +63,9 @@ export class FunctionalTestRunner {
   }
 
   async run(abortSignal?: AbortSignal, retry = 0) {
+    this.aborted = false;
     let result = await this.runWithResult(abortSignal);
+    this.aborted = result.aborted;
 
     if (result.customTestRunnerResult !== undefined) {
       return result.customTestRunnerResult;
@@ -85,6 +96,7 @@ export class FunctionalTestRunner {
       const retryConfig = this.createRetryConfig(result.failedTestFiles);
       const retryRunner = new FunctionalTestRunner(this.log, retryConfig, this.esVersion);
       result = await retryRunner.runWithResult(abortSignal);
+      this.aborted = this.aborted || result.aborted;
       didRetry = true;
     }
 
@@ -144,6 +156,7 @@ export class FunctionalTestRunner {
         return {
           failureCount: 0,
           failedTestFiles: [],
+          aborted: false,
           customTestRunnerResult: (await providers.invokeProviderFn(customTestRunner)) || 0,
         };
       }
@@ -181,6 +194,7 @@ export class FunctionalTestRunner {
         return {
           failureCount: this.simulateMochaDryRun(mocha),
           failedTestFiles: [],
+          aborted: false,
         };
       }
 
@@ -189,6 +203,7 @@ export class FunctionalTestRunner {
         return {
           failureCount: 0,
           failedTestFiles: [],
+          aborted: true,
         };
       }
 
@@ -199,6 +214,7 @@ export class FunctionalTestRunner {
           return {
             failureCount: 0,
             failedTestFiles: [],
+            aborted: true,
           };
         }
       }
@@ -207,13 +223,14 @@ export class FunctionalTestRunner {
       if (ftrTimingEnabled) {
         activateTiming();
       }
-      return await runTests(
+      const testsResult = await runTests(
         lifecycle,
         mocha,
         this.log,
         { abortOnTimeout: this.config.get('mochaOpts.abortOnTimeout') },
         abortSignal
       );
+      return { ...testsResult, aborted: lifecycle.isAborting || abortSignal?.aborted === true };
     });
   }
 

@@ -47,9 +47,16 @@ export interface ScoutFailureTrackingEntry {
   };
 }
 
+/** Errors that fail the Playwright run without belonging to any test (global errors, run timeout). */
+export interface ScoutRunnerErrors {
+  status: string;
+  errors: string[];
+}
+
 export class ScoutFailureTracker {
   private readonly log: ToolingLog;
   private readonly trackingFilePath: string;
+  private readonly runnerErrorsFilePath: string;
   // Keyed by test ID, not a plain array: a test that fails on every retry calls `addFailure`
   // more than once, and this keeps only the last attempt so its GitHub issue is updated once
   // per run rather than once per attempt.
@@ -59,6 +66,7 @@ export class ScoutFailureTracker {
     this.log = log;
     // Use the same runId as the main Scout reporting system for consistency
     this.trackingFilePath = path.join(reportRootPath, `scout-failures-${runId}.ndjson`);
+    this.runnerErrorsFilePath = path.join(reportRootPath, `scout-runner-errors-${runId}.json`);
   }
 
   /**
@@ -118,6 +126,25 @@ export class ScoutFailureTracker {
     this.log.info(
       `Saved ${failuresToSave.length} Scout failures to tracking file: ${this.trackingFilePath}`
     );
+  }
+
+  /**
+   * Save runner-level errors to a sidecar file next to the tracking file. Kept out of the NDJSON
+   * so the GitHub issue reporter does not open issues for them; `check_skipped_on_main` reads it
+   * to refuse forgiving a run whose exit code is not explained by the tracked test failures.
+   *
+   * Always written, even with no errors: it is the last file the reporter produces, so its
+   * presence is what tells the consumer the failure report is complete.
+   */
+  saveRunnerErrors(runnerErrors: ScoutRunnerErrors) {
+    fs.mkdirSync(path.dirname(this.runnerErrorsFilePath), { recursive: true });
+    fs.writeFileSync(this.runnerErrorsFilePath, JSON.stringify(runnerErrors, null, 2), 'utf-8');
+
+    if (runnerErrors.errors.length > 0) {
+      this.log.info(
+        `Saved ${runnerErrors.errors.length} Scout runner error(s) to: ${this.runnerErrorsFilePath}`
+      );
+    }
   }
 
   /**

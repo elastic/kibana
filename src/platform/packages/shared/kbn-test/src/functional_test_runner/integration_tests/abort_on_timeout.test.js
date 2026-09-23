@@ -11,6 +11,9 @@ import { spawnSync } from 'child_process';
 import { resolve } from 'path';
 
 import { REPO_ROOT } from '@kbn/repo-info';
+import { ToolingLog } from '@kbn/tooling-log';
+
+import { EsVersion, FunctionalTestRunner, readConfigFile } from '..';
 
 const SCRIPT = resolve(REPO_ROOT, 'scripts/functional_test_runner.js');
 const TIMEOUT_CONFIG = require.resolve('./__fixtures__/abort_on_timeout/config.js');
@@ -31,6 +34,15 @@ function runFixture(config) {
   return { proc, elapsedMs: Date.now() - startMs };
 }
 
+async function runInProcess(configPath) {
+  const log = new ToolingLog();
+  const esVersion = EsVersion.getDefault();
+  const config = await readConfigFile(log, esVersion, configPath);
+  const ftr = new FunctionalTestRunner(log, config, esVersion);
+  const failureCount = await ftr.run();
+  return { failureCount, aborted: ftr.aborted };
+}
+
 describe('abort on mocha timeout', () => {
   it('aborts the run on the first timeout, skips remaining tests, and fast-fails teardown hooks', () => {
     // baseline run with no hangs, used to isolate process/module-load overhead below
@@ -45,6 +57,14 @@ describe('abort on mocha timeout', () => {
 
     // without the fast-fail, the "after all" hook hangs for the full hookTimeout (3000ms)
     expect(elapsedMs - baseline.elapsedMs).toBeLessThan(1500);
+  }, 30000);
+
+  it('reports the run as aborted so callers can tell the JUnit report is incomplete', async () => {
+    process.env.SCOUT_REPORTER_ENABLED = '0';
+    await expect(runInProcess(TIMEOUT_CONFIG)).resolves.toMatchObject({ aborted: true });
+    await expect(runInProcess(ORDINARY_FAILURE_CONFIG)).resolves.toMatchObject({
+      aborted: false,
+    });
   }, 30000);
 
   it('does NOT abort the run on an ordinary (non-timeout) failure', () => {
