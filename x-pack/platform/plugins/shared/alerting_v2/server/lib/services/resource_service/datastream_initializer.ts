@@ -109,7 +109,9 @@ export class DatastreamInitializer implements IResourceInitializer {
     );
   }
 
-  private buildDataStreamDefinition(): DataStreamDefinition<typeof this.resourceDefinition.mappings> {
+  private buildDataStreamDefinition(): DataStreamDefinition<
+    typeof this.resourceDefinition.mappings
+  > {
     return {
       name: this.resourceDefinition.dataStreamName,
       hidden: true,
