@@ -39,7 +39,7 @@ export const FLAKY_TEST_SUITE_METADATA_PREFIX = 'flaky-test-suite';
 
 const MAX_TEST_ROWS = 15;
 /** Distinct error messages shown in full; a suite with more gets a count of the rest. */
-const MAX_DISTINCT_FAILURES = 3;
+const MAX_DISTINCT_FAILURES = 4;
 /** Test titles labelling an error are cut beyond this many characters. */
 const MAX_LABEL_TITLE_LENGTH = 80;
 /** GitHub rejects longer issue titles with a 422. */
