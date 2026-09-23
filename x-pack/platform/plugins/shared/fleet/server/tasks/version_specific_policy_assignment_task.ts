@@ -502,6 +502,7 @@ export class VersionSpecificPolicyAssignmentTask {
       // This will create the version-specific policies in .fleet-policies index
       await agentPolicyService.deployPolicies(soClient, [parentPolicyId], undefined, {
         agentVersions: versionsToCreate,
+        spaceId: '*',
       });
       // Record every variant deployed this run so Phase 2 does not delete them: Phase 1 skips
       // agents already on the correct variant, so a wrongly-deleted variant is never recreated
@@ -774,6 +775,7 @@ export class VersionSpecificPolicyAssignmentTask {
         try {
           await agentPolicyService.deployPolicies(soClient, [parentId], undefined, {
             agentVersions: versions,
+            spaceId: '*',
           });
         } catch (err) {
           this.logger.error(
