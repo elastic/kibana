@@ -812,7 +812,7 @@ steps:
           - name: propose_threshold
             type: workflow.execute
             with:
-              workflow-id: system-create-investigation-proposal
+              workflow-id: system-create-proposal
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
                 comment: "{{ steps.compose_proposal.output.comment }}"
@@ -832,7 +832,7 @@ steps:
           - name: propose_schedule
             type: workflow.execute
             with:
-              workflow-id: system-create-investigation-proposal
+              workflow-id: system-create-proposal
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
                 comment: "{{ steps.compose_proposal.output.comment }}"
