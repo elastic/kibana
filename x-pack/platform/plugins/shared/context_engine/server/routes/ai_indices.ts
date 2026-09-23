@@ -56,6 +56,7 @@ import {
   AiIndexQueryResponseTooLargeError,
   InvalidAiIndexQueryError,
   InvalidConnectorSourceError,
+  InvalidEsqlSourceError,
   InvalidAiIndexTraceError,
   KiNotFoundError,
 } from '../ai_indices/errors';
@@ -71,6 +72,7 @@ import type { GetAiIndexDataReadServiceParams } from '../types';
 import { getKi } from '../ai_indices/ki_get';
 import { getKis } from '../ai_indices/ki_list';
 import { validateConnectorSources } from '../ai_indices/validate_connector_sources';
+import { validateEsqlSources } from '../ai_indices/validate_esql_sources';
 import { validateTraces } from '../ai_indices/validate_traces';
 import { formatErrorMessage } from '../utils/format_es_error';
 import { resolveSpaceId } from '../utils/resolve_space_id';
@@ -120,6 +122,7 @@ const handleAiIndexError = (error: unknown, response: KibanaResponseFactory, log
   if (
     error instanceof InvalidAiIndexDestError ||
     error instanceof InvalidConnectorSourceError ||
+    error instanceof InvalidEsqlSourceError ||
     error instanceof InvalidAiIndexTraceError ||
     error instanceof AiIndexQueryResponseTooLargeError ||
     error instanceof AiIndexDescribeResponseTooLargeError ||
@@ -229,7 +232,7 @@ export const registerAiIndexRoutes = ({
             400: {
               body: errorResponseSchema,
               description:
-                'The request was invalid, for example a malformed `dest`, or an unresolvable connector source or trace.',
+                'The request was invalid, for example a malformed `dest`, an invalid ES|QL source, or an unresolvable connector source or trace.',
             },
             409: {
               body: errorResponseSchema,
@@ -246,6 +249,7 @@ export const registerAiIndexRoutes = ({
         const auditLogger = security.audit.logger;
         const { id, ...properties } = request.body;
         try {
+          await validateEsqlSources(properties.sources);
           await validateConnectorSources({
             sources: properties.sources,
             actions: await getActions(),
@@ -303,7 +307,7 @@ export const registerAiIndexRoutes = ({
             400: {
               body: errorResponseSchema,
               description:
-                'The request was invalid, for example a malformed `dest`, or an unresolvable connector source or trace.',
+                'The request was invalid, for example a malformed `dest`, an invalid ES|QL source, or an unresolvable connector source or trace.',
             },
             409: {
               body: errorResponseSchema,
@@ -320,6 +324,7 @@ export const registerAiIndexRoutes = ({
         const auditLogger = security.audit.logger;
         const { aiIndexId } = request.params;
         try {
+          await validateEsqlSources(request.body.sources);
           await validateConnectorSources({
             sources: request.body.sources,
             actions: await getActions(),

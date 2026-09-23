@@ -207,7 +207,7 @@ const aiIndexDestSchema = schema.object({
 const aiIndexAutomationSchema = schema.object({
   type: schema.literal('workflow'),
   value: schema.string({
-    minLength: 0,
+    minLength: 1,
     maxLength: MAX_AI_INDEX_AUTOMATION_LENGTH,
     meta: { description: 'The workflow id.' },
   }),
@@ -217,9 +217,11 @@ const aiIndexSourceSchema = schema.oneOf([
   schema.object({
     type: schema.literal('esql'),
     value: schema.string({
-      minLength: 0,
+      minLength: 1,
       maxLength: MAX_AI_INDEX_SOURCE_VALUE_LENGTH,
-      meta: { description: 'The source value; an ES|QL query when `type` is `esql`.' },
+      meta: {
+        description: 'The source value; an ES|QL query when `type` is `esql`. Must be valid ES|QL.',
+      },
     }),
   }),
   schema.object({

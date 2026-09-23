@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import { INTERNAL_API_HEADERS, PUBLIC_API_HEADERS } from '@kbn/scout-security';
-import type { KbnClient, KibanaRole } from '@kbn/scout-security';
+import { INTERNAL_API_HEADERS } from '@kbn/scout-security';
+import type { ApiClientFixture, KibanaRole } from '@kbn/scout-security';
+import type { DiscoveriesApi } from '@kbn/security-solution-test-api-clients/scout';
+import type { CreateAttackDiscoveryScheduleRequestBodyInput } from '@kbn/discoveries-schemas/schemas/routes/post/schedules/create_schedule_route.gen';
+import type { FindAttackDiscoverySchedulesRequestQueryInput } from '@kbn/discoveries-schemas/schemas/routes/get/schedules/find_schedules_route.gen';
+import type { PostGenerateRequestBodyInput } from '@kbn/discoveries-schemas/schemas/routes/post/generate/post_generate.gen';
+import type { UpdateAttackDiscoveryScheduleRequestBodyInput } from '@kbn/discoveries-schemas/schemas/routes/put/schedules/update_schedule_route.gen';
 import {
   ATTACK_DISCOVERY_WORKFLOWS_FEATURE_FLAG,
   COMMON_HEADERS,
-  GENERATE_ROUTE,
   MONITORING_ROUTES,
-  PUBLIC_SCHEDULE_ROUTES,
-  SCHEDULE_ROUTES,
 } from './constants';
 
 /**
@@ -27,18 +29,41 @@ export interface CoreApiSettingsFixture {
 }
 
 /**
- * Enables the AD 2.0 workflows feature flag at runtime so the internal API
- * routes (`_generate`, schedules, monitoring) are reachable. Without this the
- * routes fall through to `404 Not Found` via `assertWorkflowsEnabled`.
+ * Enables the process-wide `securitySolution.attackDiscoveryWorkflowsEnabled` feature flag so the
+ * AD 2.0 internal API routes (`_generate`, schedules, monitoring) become reachable. The routes are
+ * gated twice (see `isWorkflowsEnabledForSpace`): this flag AND the per-space
+ * `securitySolution:enableAttackDiscoveryWorkflows` Advanced Setting, which the `scheduleSpace`
+ * fixture enables in the worker's own space. Without both, the routes fall through to
+ * `404 Not Found` via `assertWorkflowsEnabled`.
  *
- * Call this in `beforeAll` before exercising any internal route.
+ * Called once from `global.setup.ts`.
  */
-export const enableWorkflowsFeatureFlag = async (
-  apiServices: CoreApiSettingsFixture
-): Promise<void> => {
+export const enableWorkflowsFeatureFlag = async ({
+  apiServices,
+}: {
+  apiServices: CoreApiSettingsFixture;
+}): Promise<void> => {
   await apiServices.core.settings({
     'feature_flags.overrides': {
       [ATTACK_DISCOVERY_WORKFLOWS_FEATURE_FLAG]: true,
+    },
+  });
+};
+
+/**
+ * Reverts `enableWorkflowsFeatureFlag`. The override is process-wide, so it outlives any single spec
+ * and would leak into other suites sharing the Kibana instance. Called once from
+ * `global.teardown.ts`, after every spec file has finished.
+ */
+export const disableWorkflowsFeatureFlag = async ({
+  apiServices,
+}: {
+  apiServices: CoreApiSettingsFixture;
+}): Promise<void> => {
+  // `null` removes the key from the dynamic config overrides instead of pinning it to `false`
+  await apiServices.core.settings({
+    'feature_flags.overrides': {
+      [ATTACK_DISCOVERY_WORKFLOWS_FEATURE_FLAG]: null,
     },
   });
 };
@@ -78,54 +103,25 @@ export const getScheduleAdminRoleDescriptor = (): KibanaRole => ({
 });
 
 /**
- * API client shape required by schedule test helpers.
- * Use this instead of importing Scout's ApiClient type directly.
+ * Returns the space-specific security alerts index the create, update and generate routes require
+ * in `alerts_index_pattern` (see the server's `assertAlertsIndexPatternInSpace`).
  */
-export interface ScheduleApiClient {
-  delete(
-    url: string,
-    options: {
-      headers: Record<string, string>;
-      responseType: 'json';
-    }
-  ): Promise<{ body: unknown; statusCode: number }>;
-  get(
-    url: string,
-    options: {
-      headers: Record<string, string>;
-      responseType: 'json';
-    }
-  ): Promise<{ body: unknown; statusCode: number }>;
-  post(
-    url: string,
-    options: {
-      body: unknown;
-      headers: Record<string, string>;
-      responseType: 'json';
-    }
-  ): Promise<{ body: unknown; statusCode: number }>;
-  put(
-    url: string,
-    options: {
-      body: unknown;
-      headers: Record<string, string>;
-      responseType: 'json';
-    }
-  ): Promise<{ body: unknown; statusCode: number }>;
-}
+export const getAlertsIndexPatternForSpace = (spaceId: string): string =>
+  `.alerts-security.alerts-${spaceId}`;
 
 /**
- * Returns a minimal valid workflow schedule body for creating a schedule
+ * Returns a minimal valid workflow schedule body for creating a schedule in the given space
  * via the internal API. Matches the AttackDiscoveryScheduleCreateProps schema.
  */
 export const getSimpleWorkflowSchedule = (
+  spaceId: string,
   overrides: Record<string, unknown> = {}
 ): Record<string, unknown> => ({
   actions: [],
   enabled: false,
   name: 'Test workflow schedule',
   params: {
-    alerts_index_pattern: '.alerts-security.alerts-default',
+    alerts_index_pattern: getAlertsIndexPatternForSpace(spaceId),
     api_config: {
       action_type_id: '.gen-ai',
       connector_id: 'test-connector-id',
@@ -143,103 +139,71 @@ export const getSimpleWorkflowSchedule = (
 });
 
 /**
- * Returns a minimal valid schedule body for the public API.
- * The public API uses camelCase inside api_config and has no workflow_config.
- */
-export const getSimplePublicSchedule = (
-  overrides: Record<string, unknown> = {}
-): Record<string, unknown> => ({
-  actions: [],
-  enabled: false,
-  name: 'Test public schedule',
-  params: {
-    alerts_index_pattern: '.alerts-security.alerts-default',
-    api_config: {
-      actionTypeId: '.gen-ai',
-      connectorId: 'test-connector-id',
-      name: 'Test connector',
-    },
-    size: 20,
-  },
-  schedule: {
-    interval: '24h',
-  },
-  ...overrides,
-});
-
-/**
- * Convenience wrapper around the internal schedule API routes.
- * Encapsulates auth headers and route paths for cleaner test code.
+ * Convenience wrapper around the internal schedule API routes, backed by the generated
+ * `discoveriesApi` Scout client. Encapsulates auth headers and the target space for cleaner test
+ * code. Bodies stay loosely typed on purpose so negative tests can send invalid payloads.
+ *
+ * Every successfully created schedule id is recorded per space so `deleteAllWorkflowSchedules`
+ * can remove it directly instead of relying on the eventually-consistent find route.
  */
 export const getWorkflowSchedulesApis = (
-  apiClient: ScheduleApiClient,
-  headers: Record<string, string>
+  discoveriesApi: DiscoveriesApi,
+  headers: Record<string, string>,
+  spaceId: string
 ) => {
-  const defaultHeaders = { ...headers, ...COMMON_HEADERS, ...INTERNAL_API_HEADERS };
+  const options = { headers: { ...headers, ...COMMON_HEADERS }, kibanaSpace: spaceId };
+  const createdScheduleIds = getCreatedScheduleIds(spaceId);
 
   return {
-    createSchedule: (body: Record<string, unknown>) =>
-      apiClient.post(SCHEDULE_ROUTES.CREATE, {
-        body,
-        headers: defaultHeaders,
-        responseType: 'json',
-      }),
+    createSchedule: async (body: Record<string, unknown>) => {
+      const response = await discoveriesApi.createAttackDiscoverySchedule(
+        { body: body as CreateAttackDiscoveryScheduleRequestBodyInput },
+        options
+      );
+
+      if (response.statusCode === 200) {
+        createdScheduleIds.add(response.body.id);
+      }
+
+      return response;
+    },
 
     deleteSchedule: (id: string) =>
-      apiClient.delete(SCHEDULE_ROUTES.DELETE(id), {
-        headers: defaultHeaders,
-        responseType: 'json',
-      }),
+      discoveriesApi.deleteAttackDiscoverySchedule({ params: { id } }, options),
 
     disableSchedule: (id: string) =>
-      apiClient.post(SCHEDULE_ROUTES.DISABLE(id), {
-        body: {},
-        headers: defaultHeaders,
-        responseType: 'json',
-      }),
+      discoveriesApi.disableAttackDiscoverySchedule({ params: { id } }, options),
 
     enableSchedule: (id: string) =>
-      apiClient.post(SCHEDULE_ROUTES.ENABLE(id), {
-        body: {},
-        headers: defaultHeaders,
-        responseType: 'json',
-      }),
+      discoveriesApi.enableAttackDiscoverySchedule({ params: { id } }, options),
 
     findSchedules: (query: Record<string, unknown> = {}) =>
-      apiClient.get(
-        `${SCHEDULE_ROUTES.FIND}?${new URLSearchParams(
-          query as Record<string, string>
-        ).toString()}`,
-        {
-          headers: defaultHeaders,
-          responseType: 'json',
-        }
+      discoveriesApi.findAttackDiscoverySchedules(
+        { query: query as FindAttackDiscoverySchedulesRequestQueryInput },
+        options
       ),
 
     getSchedule: (id: string) =>
-      apiClient.get(SCHEDULE_ROUTES.GET(id), {
-        headers: defaultHeaders,
-        responseType: 'json',
-      }),
+      discoveriesApi.getAttackDiscoverySchedule({ params: { id } }, options),
 
     updateSchedule: (id: string, body: Record<string, unknown>) =>
-      apiClient.put(SCHEDULE_ROUTES.UPDATE(id), {
-        body,
-        headers: defaultHeaders,
-        responseType: 'json',
-      }),
+      discoveriesApi.updateAttackDiscoverySchedule(
+        { params: { id }, body: body as UpdateAttackDiscoveryScheduleRequestBodyInput },
+        options
+      ),
   };
 };
 
 /**
  * Returns a minimal valid ad-hoc generation body for the internal `_generate`
- * route. Matches the PostGenerateRequestBody schema (required: alerts index
+ * route in the given space. Matches the PostGenerateRequestBody schema (required: alerts index
  * pattern + api_config).
  */
 export const getSimpleGenerateBody = (
+  spaceId: string,
   overrides: Record<string, unknown> = {}
 ): Record<string, unknown> => ({
-  alerts_index_pattern: '.alerts-security.alerts-default',
+  alerts_index_pattern: getAlertsIndexPatternForSpace(spaceId),
   api_config: {
     action_type_id: '.gen-ai',
     connector_id: 'test-connector-id',
@@ -249,18 +213,19 @@ export const getSimpleGenerateBody = (
 });
 
 /**
- * Convenience wrapper around the internal ad-hoc generation route.
+ * Convenience wrapper around the internal ad-hoc generation route, backed by the generated
+ * `discoveriesApi` Scout client.
  */
-export const getGenerateApi = (apiClient: ScheduleApiClient, headers: Record<string, string>) => {
-  const defaultHeaders = { ...headers, ...COMMON_HEADERS, ...INTERNAL_API_HEADERS };
+export const getGenerateApi = (
+  discoveriesApi: DiscoveriesApi,
+  headers: Record<string, string>,
+  spaceId: string
+) => {
+  const options = { headers: { ...headers, ...COMMON_HEADERS }, kibanaSpace: spaceId };
 
   return {
     generate: (body: Record<string, unknown>) =>
-      apiClient.post(GENERATE_ROUTE, {
-        body,
-        headers: defaultHeaders,
-        responseType: 'json',
-      }),
+      discoveriesApi.postGenerate({ body: body as PostGenerateRequestBodyInput }, options),
   };
 };
 
@@ -272,20 +237,21 @@ export const getGenerateApi = (apiClient: ScheduleApiClient, headers: Record<str
  * able to trigger them.
  */
 export const getMonitoringApis = (
-  apiClient: ScheduleApiClient,
-  headers: Record<string, string>
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>,
+  spaceId: string
 ) => {
   const defaultHeaders = { ...headers, ...COMMON_HEADERS, ...INTERNAL_API_HEADERS };
 
   return {
     getExecutionTracking: (executionId: string) =>
-      apiClient.get(MONITORING_ROUTES.EXECUTION_TRACKING(executionId), {
+      apiClient.get(`s/${spaceId}/${MONITORING_ROUTES.EXECUTION_TRACKING(executionId)}`, {
         headers: defaultHeaders,
         responseType: 'json',
       }),
 
     getPipelineData: (workflowId: string, executionId: string) =>
-      apiClient.get(MONITORING_ROUTES.PIPELINE_DATA(workflowId, executionId), {
+      apiClient.get(`s/${spaceId}/${MONITORING_ROUTES.PIPELINE_DATA(workflowId, executionId)}`, {
         headers: defaultHeaders,
         responseType: 'json',
       }),
@@ -293,93 +259,71 @@ export const getMonitoringApis = (
 };
 
 /**
- * Convenience wrapper around the public attack discovery schedule API routes.
- * Used by isolation tests to create/find schedules via the public API.
- */
-export const getPublicSchedulesApis = (
-  apiClient: ScheduleApiClient,
-  headers: Record<string, string>
-) => {
-  const defaultHeaders = {
-    ...headers,
-    ...COMMON_HEADERS,
-    ...PUBLIC_API_HEADERS,
-  };
-
-  return {
-    createSchedule: (body: Record<string, unknown>) =>
-      apiClient.post(PUBLIC_SCHEDULE_ROUTES.CREATE, {
-        body,
-        headers: defaultHeaders,
-        responseType: 'json',
-      }),
-
-    deleteSchedule: (id: string) =>
-      apiClient.delete(PUBLIC_SCHEDULE_ROUTES.DELETE(id), {
-        headers: defaultHeaders,
-        responseType: 'json',
-      }),
-
-    findSchedules: (query: Record<string, unknown> = {}) =>
-      apiClient.get(
-        `${PUBLIC_SCHEDULE_ROUTES.FIND}?${new URLSearchParams(
-          query as Record<string, string>
-        ).toString()}`,
-        {
-          headers: defaultHeaders,
-          responseType: 'json',
-        }
-      ),
-
-    getSchedule: (id: string) =>
-      apiClient.get(PUBLIC_SCHEDULE_ROUTES.GET(id), {
-        headers: defaultHeaders,
-        responseType: 'json',
-      }),
-  };
-};
-
-/**
- * Enables the workflow schedules feature flag via kibana advanced settings.
- * Call this in beforeAll to ensure the internal schedule API is available.
- */
-export const enableWorkflowSchedulesFeature = async (kbnClient: KbnClient): Promise<void> => {
-  await kbnClient.uiSettings.update({
-    'securitySolution:securityAttackDiscoverySchedulesEnabled': true,
-  });
-};
-
-/**
- * Deletes all workflow schedules created during test runs.
- * Call this in afterAll/afterEach for test isolation.
+ * Deletes every workflow schedule in the given space. Only ever pointed at the worker's own
+ * `scheduleSpace`, so it cannot touch schedules owned by other suites. Call this in `afterEach`.
+ *
+ * Schedules created through `getWorkflowSchedulesApis` are deleted by their recorded ids first, so
+ * a schedule that is not yet searchable is still removed. The find sweep afterwards only catches
+ * schedules created outside the wrapper.
  */
 export const deleteAllWorkflowSchedules = async (
-  apiClient: ScheduleApiClient,
-  headers: Record<string, string>
+  discoveriesApi: DiscoveriesApi,
+  headers: Record<string, string>,
+  spaceId: string
 ): Promise<void> => {
-  const apis = getWorkflowSchedulesApis(apiClient, headers);
-  const findResult = await apis.findSchedules({ per_page: '100' });
-  const body = findResult.body as { data?: Array<{ id: string }> };
-  const schedules = body.data ?? [];
+  const apis = getWorkflowSchedulesApis(discoveriesApi, headers, spaceId);
+  const createdScheduleIds = getCreatedScheduleIds(spaceId);
 
-  for (const schedule of schedules) {
-    await apis.deleteSchedule(schedule.id);
+  for (const id of createdScheduleIds) {
+    // 404 means the schedule is already gone, which is the state we want
+    assertCleanupStatus(`delete ${id}`, await apis.deleteSchedule(id), [200, 404]);
+  }
+
+  createdScheduleIds.clear();
+
+  const findResult = await apis.findSchedules({ per_page: 100 });
+  assertCleanupStatus('find', findResult, [200]);
+
+  for (const schedule of findResult.body.data ?? []) {
+    assertCleanupStatus(
+      `delete ${schedule.id}`,
+      await apis.deleteSchedule(schedule.id),
+      [200, 404]
+    );
   }
 };
 
 /**
- * Deletes all public attack discovery schedules created during test runs.
+ * Fails cleanup loudly instead of letting a 4xx/5xx leave stale schedules behind that would break
+ * the count assertions of unrelated specs sharing the worker's space.
  */
-export const deleteAllPublicSchedules = async (
-  apiClient: ScheduleApiClient,
-  headers: Record<string, string>
-): Promise<void> => {
-  const apis = getPublicSchedulesApis(apiClient, headers);
-  const findResult = await apis.findSchedules({ per_page: '100' });
-  const body = findResult.body as { data?: Array<{ id: string }> };
-  const schedules = body.data ?? [];
-
-  for (const schedule of schedules) {
-    await apis.deleteSchedule(schedule.id);
+const assertCleanupStatus = (
+  operation: string,
+  response: { statusCode: number; body: unknown },
+  allowedStatusCodes: number[]
+): void => {
+  if (allowedStatusCodes.includes(response.statusCode)) {
+    return;
   }
+
+  throw new Error(
+    `Schedule cleanup failed on ${operation}: HTTP ${response.statusCode} ${JSON.stringify(
+      response.body
+    )}`
+  );
+};
+
+const createdScheduleIdsBySpace = new Map<string, Set<string>>();
+
+const getCreatedScheduleIds = (spaceId: string): Set<string> => {
+  const existing = createdScheduleIdsBySpace.get(spaceId);
+
+  if (existing) {
+    return existing;
+  }
+
+  const created = new Set<string>();
+  createdScheduleIdsBySpace.set(spaceId, created);
+
+  return created;
 };

@@ -20,7 +20,7 @@ export const installInvestigationAgent = async ({
 }: {
   agentBuilder: AgentBuilderPluginStart;
   spaceId: string;
-  availability?: AgentAvailabilityConfig;
+  availability: AgentAvailabilityConfig;
 }): Promise<void> => {
   await agentBuilder.agents.ensure({
     spaceId,

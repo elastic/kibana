@@ -664,6 +664,7 @@ paths:
           name: id
           required: true
           schema:
+            maxLength: 36
             type: string
       requestBody:
         content:
@@ -158646,9 +158647,11 @@ components:
       properties:
         connector_type_id:
           description: The type of connector.
+          maxLength: 64
           type: string
         name:
           description: The display name for the connector.
+          maxLength: 1024
           type: string
         config:
           additionalProperties: {}
@@ -166716,6 +166719,7 @@ components:
       properties:
         name:
           description: The display name for the connector.
+          maxLength: 1024
           type: string
         config:
           additionalProperties: {}
