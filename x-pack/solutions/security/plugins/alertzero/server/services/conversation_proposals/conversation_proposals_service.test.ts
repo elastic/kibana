@@ -7,9 +7,9 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import type { ProposalWithMetadata } from '@kbn/agentic-investigations-plugin/common';
+import type { ProposalWithMetadata } from '@kbn/proposals-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
-import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
+import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import { ConversationProposalsService } from './conversation_proposals_service';
 
 const makeProposal = (overrides: Partial<ProposalWithMetadata> = {}): ProposalWithMetadata => ({
@@ -30,13 +30,13 @@ const makeProposal = (overrides: Partial<ProposalWithMetadata> = {}): ProposalWi
 const makeProposalsService = (
   proposals: ProposalWithMetadata[] = [],
   { total }: { total?: number } = {}
-): ReturnType<AgenticInvestigationsPluginStart['getProposalsService']> =>
+): ReturnType<ProposalsPluginStart['getProposalsService']> =>
   ({
     list: jest.fn().mockResolvedValue({
       proposals,
       total: total ?? proposals.length,
     }),
-  } as unknown as ReturnType<AgenticInvestigationsPluginStart['getProposalsService']>);
+  } as unknown as ReturnType<ProposalsPluginStart['getProposalsService']>);
 
 /**
  * Builds an Agent Builder mock whose scoped client exposes `bulkGet`.
