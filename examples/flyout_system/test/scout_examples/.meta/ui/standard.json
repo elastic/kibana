@@ -1,5 +1,5 @@
 {
-  "sha1": "6d11782d3d24c2c30df3864ef7f46454dbaf6dd1",
+  "sha1": "9021a35942563dfb649ca62e0282f49e82b1b6c3",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -535,8 +535,8 @@
       }
     },
     {
-      "id": "b1bb19297cb99af-12665fa792434a4",
-      "title": "Flyout System - header collapse accessibility the component header keeps aria-hidden and focusability in agreement during the collapse animation",
+      "id": "b1bb19297cb99af-6894a118a17497c",
+      "title": "Flyout System - header collapse accessibility collapsing the component header dismisses the badge overflow popover",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -549,6 +549,20 @@
       }
     },
     {
+      "id": "b1bb19297cb99af-12665fa792434a4",
+      "title": "Flyout System - header collapse accessibility the component header keeps aria-hidden and focusability in agreement during the collapse animation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/header_collapse_a11y.spec.ts",
+        "line": 133,
+        "column": 19
+      }
+    },
+    {
       "id": "b1bb19297cb99af-1f49068c30c8614",
       "title": "Flyout System - header collapse accessibility a scroll-collapsed component header has no accessibility violations",
       "expectedStatus": "passed",
@@ -558,8 +572,22 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/header_collapse_a11y.spec.ts",
-        "line": 131,
-        "column": 21
+        "line": 152,
+        "column": 29
+      }
+    },
+    {
+      "id": "b1bb19297cb99af-017c523f7dc7e50",
+      "title": "Flyout System - header collapse accessibility the component header swallows the wheel when nothing in the flyout can scroll",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/header_collapse_a11y.spec.ts",
+        "line": 169,
+        "column": 12
       }
     },
     {
@@ -572,8 +600,8 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/header_collapse_a11y.spec.ts",
-        "line": 151,
-        "column": 21
+        "line": 201,
+        "column": 19
       }
     },
     {
@@ -586,8 +614,8 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/header_collapse_a11y.spec.ts",
-        "line": 170,
-        "column": 12
+        "line": 217,
+        "column": 30
       }
     },
     {
@@ -661,8 +689,8 @@
       }
     },
     {
-      "id": "b1bb19297cb99af-da289cba240c6a6",
-      "title": "Flyout System - header collapse accessibility the service header keeps aria-hidden and focusability in agreement during the collapse animation",
+      "id": "b1bb19297cb99af-fa243d4149f3483",
+      "title": "Flyout System - header collapse accessibility collapsing the service header dismisses the badge overflow popover",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -675,6 +703,20 @@
       }
     },
     {
+      "id": "b1bb19297cb99af-da289cba240c6a6",
+      "title": "Flyout System - header collapse accessibility the service header keeps aria-hidden and focusability in agreement during the collapse animation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/header_collapse_a11y.spec.ts",
+        "line": 133,
+        "column": 19
+      }
+    },
+    {
       "id": "b1bb19297cb99af-08e18c8a55d4359",
       "title": "Flyout System - header collapse accessibility a scroll-collapsed service header has no accessibility violations",
       "expectedStatus": "passed",
@@ -684,8 +726,22 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/header_collapse_a11y.spec.ts",
-        "line": 131,
-        "column": 21
+        "line": 152,
+        "column": 29
+      }
+    },
+    {
+      "id": "b1bb19297cb99af-5be486773790384",
+      "title": "Flyout System - header collapse accessibility the service header swallows the wheel when nothing in the flyout can scroll",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/header_collapse_a11y.spec.ts",
+        "line": 169,
+        "column": 12
       }
     },
     {
@@ -698,8 +754,8 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/header_collapse_a11y.spec.ts",
-        "line": 151,
-        "column": 21
+        "line": 201,
+        "column": 19
       }
     },
     {
@@ -712,8 +768,8 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/header_collapse_a11y.spec.ts",
-        "line": 170,
-        "column": 12
+        "line": 217,
+        "column": 30
       }
     },
     {
@@ -726,8 +782,8 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/header_collapse_a11y.spec.ts",
-        "line": 190,
-        "column": 11
+        "line": 215,
+        "column": 24
       }
     },
     {
