@@ -184,6 +184,11 @@ apiTest.describe('Snapshot and Restore - snapshots', { tag: ['@local-stateful-cl
     snapshotName2 = await executeSlmPolicy(esClient, POLICY_NAME_2);
     await waitForSnapshotToFinish(esClient, REPO_NAME_1, snapshotName2);
 
+    await Promise.all([
+      deleteSlmPolicy(esClient, POLICY_NAME_1),
+      deleteSlmPolicy(esClient, POLICY_NAME_2),
+    ]);
+
     for (let i = 0; i < BATCH_SIZE_1; i++) {
       await createSnapshot(esClient, `${BATCH_SNAPSHOT_NAME_1}_${i}`, REPO_NAME_1);
     }
