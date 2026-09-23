@@ -12,7 +12,7 @@ pageLoadAssetSize:
   aiops: 586
   alerting: 8789
   alertingVTwo: 24358
-  alertzero: 10276
+  alertzero: 17737
   apm: 35746
   apmShared: 1896
   apmSourcesAccess: 1174
@@ -112,7 +112,7 @@ pageLoadAssetSize:
   interactiveSetup: 32694
   intercepts: 14374
   kibanaOverview: 1863
-  kibanaReact: 1225
+  kibanaReact: 1618
   kibanaUsageCollection: 529
   kibanaUtils: 2884
   kql: 337

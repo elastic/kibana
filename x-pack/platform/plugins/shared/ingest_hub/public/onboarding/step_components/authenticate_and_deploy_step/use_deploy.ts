@@ -7,6 +7,10 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
+import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import { sendUpdateCloudConnector, sendVerifyCloudConnectorIacKey } from '@kbn/fleet-plugin/public';
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
@@ -20,7 +24,7 @@ import {
   deployGroup,
 } from './deploy_groups';
 import type { DeployGroup } from './deploy_groups';
-import { toSOServiceVars } from './package_inputs';
+import { buildIacIntegrations, toSOServiceVars } from './package_inputs';
 import { useOnboardingSO } from './use_onboarding_so';
 import { cleanupManagedIntegrationsPolicies } from './policy_cleanup_managed_integrations';
 import type { PolicyCleanupOps } from './policy_cleanup';
@@ -39,13 +43,17 @@ export interface UseDeployResult {
   failedInstances: string[];
   handleDeploy: (instanceIds?: string[]) => Promise<void>;
   isAlreadyDeployed: boolean;
+  /** The reconciled instance groups Deploy will create policies for; drives the Federated Identity template set. */
+  deployGroups: DeployGroup[];
 }
 
 export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeployResult {
+  const { services } = useKibana<CoreStart>();
   const { createDeployment, updateDeployment, persistDeploymentId } = useOnboardingSO();
   const {
     servicesStep,
     authenticateAndDeployStep,
+    setPendingIacTemplate,
     detectAndReviewStep,
     updateDetectAndReviewStep,
     removeDeployInstances,
@@ -85,6 +93,73 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
       ),
     [serviceSettings?.instances, selectedServiceIds, servicesMap]
   );
+
+  // The Existing Identity check renders the stack update without touching the connector; the
+  // template's details are written only once every integration it was rendered for is deployed,
+  // so a launch the user abandoned never marks the identity as upgraded. Written only when the
+  // identity AND the integration set match what was launched: enabled inputs live in session
+  // storage and can change after the launch without the flow context noticing, and the rendered
+  // key only covers the set it was rendered for. On a mismatch the details are left in place; the
+  // check on the new set blocks Deploy again if that set needs an update.
+  // Best-effort: a failed write is reported once and not retried from this step, which has no
+  // Deploy left to press after a successful run. The daily upgrade check then reports the
+  // identity as needing an update and the flyout's Update records the key.
+  const persistPendingIacTemplate = useCallback(async () => {
+    const { connectorId, pendingIacTemplate } = authenticateAndDeployStep;
+    if (!connectorId || !pendingIacTemplate || pendingIacTemplate.connectorId !== connectorId) {
+      return;
+    }
+    const deployedIntegrationsKey = JSON.stringify(
+      buildIacIntegrations(
+        deployGroups.flatMap((group) => group.members),
+        serviceSettings?.serviceVars ?? {}
+      )
+    );
+    if (pendingIacTemplate.integrationsKey !== deployedIntegrationsKey) {
+      return;
+    }
+    const {
+      iac_key: iacKey,
+      iac_blueprint_id: blueprintId,
+      iac_blueprint_version: version,
+    } = pendingIacTemplate;
+    try {
+      const { error } = await sendUpdateCloudConnector(connectorId, {
+        iac_key: iacKey,
+        iac_blueprint_id: blueprintId,
+        iac_blueprint_version: version,
+      });
+      if (error) {
+        throw error;
+      }
+      // One comparing re-check, as the flyout's Update does after its write: with the new key
+      // stored it answers `matches` and the server persists `up_to_date`. Without it the identity
+      // keeps advertising an upgrade until the daily task runs. Best-effort: a failed re-check is
+      // not a failed write, so it must not reach the toast below; the daily task covers it.
+      await sendVerifyCloudConnectorIacKey(connectorId, {}).catch(() => undefined);
+      setPendingIacTemplate(undefined);
+    } catch {
+      services.notifications.toasts.addWarning({
+        title: i18n.translate(
+          'xpack.ingestHub.authenticateAndDeployStep.iacTemplateWriteFailed.title',
+          { defaultMessage: 'Template details were not saved on the identity' }
+        ),
+        text: i18n.translate(
+          'xpack.ingestHub.authenticateAndDeployStep.iacTemplateWriteFailed.text',
+          {
+            defaultMessage:
+              "Your integrations were deployed, but Kibana could not record which CloudFormation template this identity uses, so it may be reported as needing an update. You can update it from the identity's details in Fleet.",
+          }
+        ),
+      });
+    }
+  }, [
+    authenticateAndDeployStep,
+    deployGroups,
+    serviceSettings?.serviceVars,
+    services,
+    setPendingIacTemplate,
+  ]);
 
   const isAlreadyDeployed = useMemo(() => {
     if (deployGroups.length === 0) return false;
@@ -178,6 +253,9 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
           !hasPendingCleanup
         ) {
           onContinue();
+          // Everything is already deployed: the only work left is a template-details write that failed
+          // last time.
+          await persistPendingIacTemplate();
           return;
         }
 
@@ -240,6 +318,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
               ],
             });
           }
+          await persistPendingIacTemplate();
           return;
         }
       } else {
@@ -341,6 +420,10 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
         });
       }
 
+      if (mergedFailed.length === 0) {
+        await persistPendingIacTemplate();
+      }
+
       setIsDeploying(false);
       setFailedInstances(mergedFailed);
       updateDetectAndReviewStep({
@@ -374,8 +457,17 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
       dataFormat,
       servicesMap,
       hasEcfServices,
+      persistPendingIacTemplate,
     ]
   );
 
-  return { namespace, setNamespace, isDeploying, failedInstances, handleDeploy, isAlreadyDeployed };
+  return {
+    namespace,
+    setNamespace,
+    isDeploying,
+    failedInstances,
+    handleDeploy,
+    isAlreadyDeployed,
+    deployGroups,
+  };
 }
