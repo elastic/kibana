@@ -35,8 +35,8 @@ jest.mock('../../../context/streaming/streaming_context', () => ({
   useStreamRecord: jest.fn(),
   useConversationStreamService: () => mockStreamService,
 }));
-jest.mock('../conversation_rounds/rounds_screen_reader_status', () => ({
-  RoundsScreenReaderStatus: () => null,
+jest.mock('./screen_reader_status', () => ({
+  TimelineScreenReaderStatus: () => null,
 }));
 jest.mock('../../../hooks/use_conversation_stream', () => ({
   useConversationStream: () => ({ isResuming: false }),

@@ -6,7 +6,7 @@
  */
 
 import { createHash } from 'crypto';
-import type { ProposalUser } from '../../../common/proposals/proposal';
+import type { User } from '../../../common/user';
 import {
   MAX_ENTITY_IDS,
   MAX_IMPACT_CONVERSATION_IDS,
@@ -38,7 +38,7 @@ export class ImpactService {
 
   async attach(
     params: AttachImpactRequest,
-    { spaceId, user }: { spaceId: string; user?: ProposalUser }
+    { spaceId, user }: { spaceId: string; user?: User }
   ): Promise<Impact> {
     const entities = unionEntities(params.entities);
     if (entities.length === 0) {
@@ -127,7 +127,7 @@ export class ImpactService {
     conversationId: string,
     spaceId: string,
     entities: ImpactEntity[],
-    user?: ProposalUser
+    user?: User
   ): Promise<Impact | undefined> {
     const existing = await this.findById(id);
     if (!existing) {
