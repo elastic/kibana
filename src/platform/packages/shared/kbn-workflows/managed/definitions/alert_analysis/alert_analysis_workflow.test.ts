@@ -256,6 +256,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
                 };
               };
             };
+            batch_summary?: { type: string; maxLength: number };
           };
         };
       };
@@ -287,6 +288,8 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(verdicts.items.properties.rationale.maxLength).toBe(500);
     expect(verdicts.items.properties.contributing_factors.maxItems).toBe(3);
     expect(verdicts.items.properties.contributing_factors.items.maxLength).toBe(100);
+    // Bound at the producer so accumulated batch_summaries cannot inflate execution state.
+    expect(agentStep.with.schema.properties.batch_summary?.maxLength).toBe(500);
   });
 
   it('tells the model how to behave in a batch: one verdict per id, judged independently', () => {

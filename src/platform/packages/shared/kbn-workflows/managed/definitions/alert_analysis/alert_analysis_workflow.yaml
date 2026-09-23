@@ -1518,6 +1518,11 @@ steps:
                         - contributing_factors
                   batch_summary:
                     type: string
+                    # Prompt asks ≤45 words; bound at the producer so up to ~20 batch
+                    # summaries cannot inflate execution state before join+truncate.
+                    # 500 chars leaves headroom while staying well under generated_summary's
+                    # 2000-char emit cap (20 × 500 would be truncated at join anyway).
+                    maxLength: 500
                     description: >-
                       Optional 1–2 sentences (≤45 words) grouped by host or user explaining
                       why the batch verdicts came out as they did. Present only when
