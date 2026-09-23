@@ -21,7 +21,6 @@
  */
 
 import type { z } from '@kbn/zod';
-import * as t from 'io-ts';
 import { omit } from 'lodash';
 import { decode } from '../test_helpers/codec_agnostic';
 import {
@@ -62,8 +61,8 @@ const COMMON_REQUIRED_KEYS = [
 interface FieldsCase {
   label: string;
   flavor: 'io-ts' | 'zod';
-  codec: t.Mixed | z.ZodType;
-  exactCodec: t.Mixed | z.ZodType;
+  codec: z.ZodType;
+  exactCodec: z.ZodType;
   valid: MonitorFixture;
   requiredKeys: string[];
   violations: Array<[string, unknown]>;
@@ -73,7 +72,7 @@ type LooseObjectSchema = z.ZodObject<z.ZodRawShape> & { strip: () => z.ZodType }
 
 const ioTsCase = (
   label: string,
-  codec: t.HasProps & t.Mixed,
+  codec: LooseObjectSchema,
   valid: MonitorFixture,
   typeRequiredKeys: string[],
   typeViolations: Array<[string, unknown]>
@@ -81,7 +80,7 @@ const ioTsCase = (
   label,
   flavor: 'io-ts',
   codec,
-  exactCodec: t.exact(codec),
+  exactCodec: codec.strip(),
   valid,
   requiredKeys: [...COMMON_REQUIRED_KEYS, ...typeRequiredKeys].sort(),
   violations: [...commonFieldTypeViolations, ...typeViolations],
@@ -185,7 +184,13 @@ const browserViolations: Array<[string, unknown]> = [
 ];
 
 const cases: FieldsCase[] = [
-  ioTsCase('HTTPFieldsCodec', HTTPFieldsCodec, fullHttpMonitor(), httpRequired, httpViolations),
+  ioTsCase(
+    'HTTPFieldsCodec',
+    HTTPFieldsCodec as LooseObjectSchema,
+    fullHttpMonitor(),
+    httpRequired,
+    httpViolations
+  ),
   zodCase(
     'HTTPFieldsCodec',
     zodMonitor.HTTPFieldsCodec as LooseObjectSchema,
@@ -193,7 +198,13 @@ const cases: FieldsCase[] = [
     httpRequired,
     httpViolations
   ),
-  ioTsCase('TCPFieldsCodec', TCPFieldsCodec, fullTcpMonitor(), tcpRequired, tcpViolations),
+  ioTsCase(
+    'TCPFieldsCodec',
+    TCPFieldsCodec as LooseObjectSchema,
+    fullTcpMonitor(),
+    tcpRequired,
+    tcpViolations
+  ),
   zodCase(
     'TCPFieldsCodec',
     zodMonitor.TCPFieldsCodec as LooseObjectSchema,
@@ -201,7 +212,13 @@ const cases: FieldsCase[] = [
     tcpRequired,
     tcpViolations
   ),
-  ioTsCase('ICMPFieldsCodec', ICMPFieldsCodec, fullIcmpMonitor(), icmpRequired, icmpViolations),
+  ioTsCase(
+    'ICMPFieldsCodec',
+    ICMPFieldsCodec as LooseObjectSchema,
+    fullIcmpMonitor(),
+    icmpRequired,
+    icmpViolations
+  ),
   zodCase(
     'ICMPFieldsCodec',
     zodMonitor.ICMPFieldsCodec as LooseObjectSchema,
@@ -211,7 +228,7 @@ const cases: FieldsCase[] = [
   ),
   ioTsCase(
     'BrowserFieldsCodec',
-    BrowserFieldsCodec,
+    BrowserFieldsCodec as LooseObjectSchema,
     fullBrowserMonitor(),
     browserRequired,
     browserViolations
@@ -310,7 +327,7 @@ describe.each([
   {
     label: 'EncryptedHTTPFieldsCodec',
     flavor: 'io-ts' as const,
-    exactCodec: t.exact(EncryptedHTTPFieldsCodec),
+    exactCodec: (EncryptedHTTPFieldsCodec as LooseObjectSchema).strip(),
     valid: fullHttpMonitor(),
     strippedKeys: [
       ConfigKey.PASSWORD,
@@ -348,7 +365,7 @@ describe.each([
   {
     label: 'EncryptedTCPFieldsCodec',
     flavor: 'io-ts' as const,
-    exactCodec: t.exact(EncryptedTCPFieldsCodec),
+    exactCodec: (EncryptedTCPFieldsCodec as LooseObjectSchema).strip(),
     valid: fullTcpMonitor(),
     strippedKeys: [
       ConfigKey.REQUEST_SEND_CHECK,
@@ -372,7 +389,7 @@ describe.each([
   {
     label: 'EncryptedBrowserFieldsCodec',
     flavor: 'io-ts' as const,
-    exactCodec: t.exact(EncryptedBrowserFieldsCodec),
+    exactCodec: (EncryptedBrowserFieldsCodec as LooseObjectSchema).strip(),
     valid: fullBrowserMonitor(),
     strippedKeys: [
       ConfigKey.PORT,

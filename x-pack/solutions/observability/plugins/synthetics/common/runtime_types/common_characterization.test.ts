@@ -19,9 +19,7 @@
  *     the combined corpus, which catches differences the explicit lists miss
  */
 
-import { NonEmptyArray, NonEmptyString } from '@kbn/securitysolution-io-ts-types';
 import { z } from '@kbn/zod';
-import * as t from 'io-ts';
 import { decode, type DecodeOutcome } from './test_helpers/codec_agnostic';
 import { expectSameOutcome, ioTsCustomMessages, zodMessages } from './test_helpers/parity';
 import {
@@ -37,7 +35,7 @@ interface CodecUnderTest<A> {
   decode: (input: unknown) => DecodeOutcome<A>;
 }
 
-const ioTsCodec = (codec: t.Any | z.ZodType): CodecUnderTest<unknown> => ({
+const ioTsCodec = (codec: z.ZodType): CodecUnderTest<unknown> => ({
   flavor: 'io-ts',
   decode: (input) => decode(codec, input),
 });
@@ -136,7 +134,7 @@ describe.each([ioTsCodec(InlineScriptString), zodCodec(zodCommon.InlineScriptStr
 
 const nonEmptyStringCorpus = { valid: ['x', 'value'], invalid: ['', '   ', 42, null, undefined] };
 
-describe.each([ioTsCodec(NonEmptyString), zodCodec(zodCommon.NonEmptyString)])(
+describe.each([ioTsCodec(zodCommon.NonEmptyString), zodCodec(zodCommon.NonEmptyString)])(
   'NonEmptyString ($flavor)',
   (codec) => {
     it.each(nonEmptyStringCorpus.valid)('accepts %p', (input) => {
@@ -163,7 +161,10 @@ const nonEmptyArrayCorpus = {
   ],
 };
 
-describe.each([ioTsCodec(NonEmptyArray(t.string)), zodCodec(zodCommon.nonEmptyArray(z.string()))])(
+describe.each([
+  ioTsCodec(zodCommon.nonEmptyArray(z.string())),
+  zodCodec(zodCommon.nonEmptyArray(z.string())),
+])(
   'nonEmptyArray ($flavor)',
   (codec) => {
     it.each(asCases(nonEmptyArrayCorpus.valid))('accepts %p', (input) => {
@@ -183,7 +184,7 @@ const nonEmptyArrayOfNonEmptyStringCorpus = {
 };
 
 describe.each([
-  ioTsCodec(NonEmptyArray(NonEmptyString)),
+  ioTsCodec(zodCommon.nonEmptyArray(zodCommon.NonEmptyString)),
   zodCodec(zodCommon.nonEmptyArray(zodCommon.NonEmptyString)),
 ])('nonEmptyArray of NonEmptyString ($flavor)', (codec) => {
   it.each(asCases(nonEmptyArrayOfNonEmptyStringCorpus.valid))('accepts %p', (input) => {
@@ -222,19 +223,19 @@ describe.each([
   },
   {
     label: 'NonEmptyString',
-    ioTs: NonEmptyString,
+    ioTs: zodCommon.NonEmptyString,
     zod: zodCommon.NonEmptyString,
     corpus: nonEmptyStringCorpus,
   },
   {
     label: 'nonEmptyArray',
-    ioTs: NonEmptyArray(t.string),
+    ioTs: zodCommon.nonEmptyArray(z.string()),
     zod: zodCommon.nonEmptyArray(z.string()),
     corpus: nonEmptyArrayCorpus,
   },
   {
     label: 'nonEmptyArray of NonEmptyString',
-    ioTs: NonEmptyArray(NonEmptyString),
+    ioTs: zodCommon.nonEmptyArray(zodCommon.NonEmptyString),
     zod: zodCommon.nonEmptyArray(zodCommon.NonEmptyString),
     corpus: nonEmptyArrayOfNonEmptyStringCorpus,
   },
@@ -277,8 +278,4 @@ describe('custom failure messages', () => {
     expect(zodMessages(zod, input)).toEqual(expected);
   });
 
-  // NonEmptyString reports through the field key, so it carries no custom message.
-  it('NonEmptyString: io-ts supplies no custom message', () => {
-    expect(ioTsCustomMessages(NonEmptyString, '   ')).toEqual([]);
-  });
 });

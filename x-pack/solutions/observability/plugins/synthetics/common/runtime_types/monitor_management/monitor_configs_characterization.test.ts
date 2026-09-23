@@ -16,7 +16,6 @@
  */
 
 import type { z } from '@kbn/zod';
-import type * as t from 'io-ts';
 import { decode, type DecodeOutcome } from '../test_helpers/codec_agnostic';
 import { expectSameOutcome } from '../test_helpers/parity';
 import {
@@ -50,7 +49,7 @@ interface CodecUnderTest<A> {
   decode: (input: unknown) => DecodeOutcome<A>;
 }
 
-const ioTsCodec = <A, O>(codec: t.Type<A, O, unknown>): CodecUnderTest<A> => ({
+const ioTsCodec = <S extends z.ZodType>(codec: S): CodecUnderTest<z.output<S>> => ({
   flavor: 'io-ts',
   decode: (input) => decode(codec, input),
 });
@@ -72,7 +71,7 @@ const asCases = (inputs: unknown[]) => inputs.map((input) => [input]);
 
 interface EnumCase {
   label: string;
-  ioTs: t.Mixed;
+  ioTs: z.ZodType;
   zod: z.ZodType;
   values: string[];
 }
@@ -175,7 +174,7 @@ describe.each(enumCases)('$label', ({ ioTs, zod, values }) => {
  */
 interface ObjectCodecCase {
   label: string;
-  ioTs: t.Mixed;
+  ioTs: z.ZodType;
   zod: z.ZodType;
   corpus: unknown[];
 }

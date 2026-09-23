@@ -6,7 +6,6 @@
  */
 
 import type { z } from '@kbn/zod';
-import type * as t from 'io-ts';
 import { decode } from './codec_agnostic';
 
 /**
@@ -16,14 +15,14 @@ import { decode } from './codec_agnostic';
  * otherwise derives text from the field key, so "does this codec carry a custom
  * message" is itself part of the user-facing contract.
  */
-type EitherCodec = t.Any | z.ZodType;
+type EitherCodec = z.ZodType;
 
 export const ioTsCustomMessages = (codec: EitherCodec, input: unknown): string[] => {
   const result = decode(codec, input);
   if (result.success) {
     return [];
   }
-  return (result.errors as t.Errors)
+  return (result.errors as Array<{ message?: string }>)
     .map((error) => error.message)
     .filter((message): message is string => message != null);
 };
