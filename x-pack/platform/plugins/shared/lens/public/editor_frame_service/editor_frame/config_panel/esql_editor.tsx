@@ -111,9 +111,15 @@ export function ESQLEditor({
   const [submittedQuery, setSubmittedQuery] = useState<AggregateQuery | Query>(initialQuery);
   const [suggestsLimitedColumns, setSuggestsLimitedColumns] = useState(false);
   const [isVisualizationLoading, setIsVisualizationLoading] = useState(false);
-  const [dataGridAttrs, setDataGridAttrs] = useState<ESQLDataGridAttrs | undefined>(undefined);
-  const [dataGridStatus, setDataGridStatus] = useState<ESQLDataGridAccordionStatus>('loading');
-  const dataGridAttrsRef = useRef<ESQLDataGridAttrs | undefined>(undefined);
+  const esqlEditorContext = useESQLEditorContext();
+  const lastPreviewRef = esqlEditorContext?.lastPreviewRef;
+  const [dataGridAttrs, setDataGridAttrs] = useState<ESQLDataGridAttrs | undefined>(
+    () => lastPreviewRef?.current
+  );
+  const [dataGridStatus, setDataGridStatus] = useState<ESQLDataGridAccordionStatus>(() =>
+    lastPreviewRef?.current ? 'ready' : 'loading'
+  );
+  const dataGridAttrsRef = useRef<ESQLDataGridAttrs | undefined>(lastPreviewRef?.current);
   const [internalResultsAccordionOpen, setInternalResultsAccordionOpen] = useState(false);
   const isESQLResultsAccordionOpen =
     isESQLResultsAccordionOpenProp ?? internalResultsAccordionOpen;
@@ -162,11 +168,17 @@ export function ESQLEditor({
     }
   }, [isDataLoading, layerId]);
 
-  const applyDataGridAttrs = useCallback((attrs: ESQLDataGridAttrs) => {
-    dataGridAttrsRef.current = attrs;
-    setDataGridAttrs(attrs);
-    setDataGridStatus('ready');
-  }, []);
+  const applyDataGridAttrs = useCallback(
+    (attrs: ESQLDataGridAttrs) => {
+      dataGridAttrsRef.current = attrs;
+      if (lastPreviewRef) {
+        lastPreviewRef.current = attrs;
+      }
+      setDataGridAttrs(attrs);
+      setDataGridStatus('ready');
+    },
+    [lastPreviewRef]
+  );
 
   const applyPreviewErrors = useCallback((previewErrors: Error[]) => {
     setErrors(previewErrors);

@@ -57,18 +57,12 @@ export const ESQLDataGridAccordion = ({
   const { euiTheme } = useEuiTheme();
   const styles = useMemoCss(componentStyles);
 
-  const extraAction = (
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-      {status === 'loading' && (
-        <EuiLoadingSpinner size="m" css={styles.loadingBadge} />
-      )}
-      {(dataGridAttrs || status === 'error') && (
-        <EuiNotificationBadge size="m" color="subdued">
-          {dataGridAttrs ? dataGridAttrs.rows.length : '—'}
-        </EuiNotificationBadge>
-      )}
-    </EuiFlexGroup>
-  );
+  const extraAction =
+    dataGridAttrs || status === 'error' ? (
+      <EuiNotificationBadge size="m" color="subdued">
+        {dataGridAttrs ? dataGridAttrs.rows.length : '—'}
+      </EuiNotificationBadge>
+    ) : undefined;
 
   return (
     <EuiFlexItem
@@ -98,19 +92,25 @@ export const ESQLDataGridAccordion = ({
           }
         `}
         buttonContent={
-          <EuiTitle
-            size="xxs"
-            css={css`
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            <EuiTitle
+              size="xxs"
+              css={css`
                 padding: 2px;
-              }
-            `}
-          >
-            <h5>
-              {i18n.translate('xpack.lens.config.ESQLQueryResultsTitle', {
-                defaultMessage: 'ES|QL Query Results',
-              })}
-            </h5>
-          </EuiTitle>
+              `}
+            >
+              <h5>
+                {i18n.translate('xpack.lens.config.ESQLQueryResultsTitle', {
+                  defaultMessage: 'ES|QL Query Results',
+                })}
+              </h5>
+            </EuiTitle>
+            <div css={styles.loadingSlot} aria-hidden>
+              {status === 'loading' && (
+                <EuiLoadingSpinner size="m" data-test-subj="ESQLQueryResultsLoading" />
+              )}
+            </div>
+          </EuiFlexGroup>
         }
         buttonProps={{
           paddingSize: 'm',
@@ -153,9 +153,13 @@ export const ESQLDataGridAccordion = ({
 };
 
 const componentStyles = {
-  loadingBadge: ({ euiTheme }: UseEuiTheme) =>
+  loadingSlot: ({ euiTheme }: UseEuiTheme) =>
     css({
       inlineSize: euiTheme.size.l,
       blockSize: euiTheme.size.l,
+      flexShrink: 0,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
     }),
 };

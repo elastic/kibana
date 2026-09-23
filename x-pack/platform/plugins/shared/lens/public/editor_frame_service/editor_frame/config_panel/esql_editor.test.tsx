@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, waitFor } from '@testing-library/react';
+import { act, screen, waitFor } from '@testing-library/react';
 import type { AggregateQuery } from '@kbn/es-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { TypedLensSerializedState } from '@kbn/lens-common';
@@ -18,6 +18,8 @@ import {
 } from '../../../mocks';
 import { EditorFrameServiceProvider } from '../../editor_frame_service_context';
 import { ESQLEditor, type ESQLEditorProps } from './esql_editor';
+import { ESQLEditorContext } from './esql_editor_context';
+import type { ESQLDataGridAttrs } from '../../../app_plugin/shared/edit_on_the_fly/helpers';
 import { getSuggestions } from '../../../app_plugin/shared/edit_on_the_fly/helpers';
 
 // Capture the submit callback that `ESQLEditor` wires into the language
@@ -60,8 +62,13 @@ jest.mock('@kbn/presentation-publishing', () => ({
 
 const getSuggestionsMock = getSuggestions as jest.MockedFunction<typeof getSuggestions>;
 
+jest.mock('@kbn/esql-datagrid/public', () => ({
+  ESQLDataGrid: () => null,
+}));
+
 describe('ESQLEditor', () => {
   const coreStart = coreMock.createStart();
+  const lastPreviewRef: { current: ESQLDataGridAttrs | undefined } = { current: undefined };
 
   const attributes = {
     title: '',
@@ -97,17 +104,22 @@ describe('ESQLEditor', () => {
     } as unknown as ESQLEditorProps;
 
     return renderWithReduxStore(
-      <EditorFrameServiceProvider
-        visualizationMap={mockVisualizationMap()}
-        datasourceMap={mockDatasourceMap()}
+      <ESQLEditorContext.Provider
+        value={{ editorHeightRef: { current: undefined }, lastPreviewRef }}
       >
-        <ESQLEditor {...props} />
-      </EditorFrameServiceProvider>
+        <EditorFrameServiceProvider
+          visualizationMap={mockVisualizationMap()}
+          datasourceMap={mockDatasourceMap()}
+        >
+          <ESQLEditor {...props} />
+        </EditorFrameServiceProvider>
+      </ESQLEditorContext.Provider>
     );
   };
 
   beforeEach(() => {
     capturedOnSubmit = undefined;
+    lastPreviewRef.current = undefined;
     getSuggestionsMock.mockClear();
     getSuggestionsMock.mockResolvedValue(undefined);
   });
@@ -146,5 +158,46 @@ describe('ESQLEditor', () => {
     // Same text again: deduplicated, no new run.
     await act(() => capturedOnSubmit!(query, new AbortController()));
     expect(getSuggestionsMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps last ES|QL preview rows after the editor remounts', async () => {
+    const preview = {
+      rows: [{ a: 1 }, { a: 2 }, { a: 3 }],
+      columns: [],
+      dataView: {},
+    } as unknown as ESQLDataGridAttrs;
+
+    getSuggestionsMock.mockImplementation(async (...args: unknown[]) => {
+      const setDataGridAttrs = args[9] as ((attrs: ESQLDataGridAttrs) => void) | undefined;
+      setDataGridAttrs?.(preview);
+      return undefined;
+    });
+
+    const { unmount } = renderEditor();
+    await waitFor(() => expect(capturedOnSubmit).toBeDefined());
+    await act(() =>
+      capturedOnSubmit!({ esql: 'FROM index1 | STATS maxB = MAX(bytes)' }, new AbortController())
+    );
+    expect(screen.getByTestId('ESQLQueryResults')).toHaveTextContent('3');
+    unmount();
+
+    getSuggestionsMock.mockClear();
+    getSuggestionsMock.mockReturnValue(new Promise(() => {}));
+    renderEditor();
+    expect(screen.getByTestId('ESQLQueryResults')).toHaveTextContent('3');
+    expect(screen.queryByTestId('ESQLQueryResultsLoading')).not.toBeInTheDocument();
+    expect(getSuggestionsMock).not.toHaveBeenCalled();
+
+    await waitFor(() => expect(capturedOnSubmit).toBeDefined());
+    act(() => {
+      void capturedOnSubmit!(
+        { esql: 'FROM index1 | STATS minB = MIN(bytes)' },
+        new AbortController()
+      );
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId('ESQLQueryResults')).toHaveTextContent('3');
+      expect(screen.getByTestId('ESQLQueryResultsLoading')).toBeInTheDocument();
+    });
   });
 });
