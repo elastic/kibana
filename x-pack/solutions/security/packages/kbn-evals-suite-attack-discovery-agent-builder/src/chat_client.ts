@@ -18,31 +18,11 @@ export interface AgentBuilderConverseResponse {
   insights?: AttackDiscovery[] | null;
 }
 
-const parseInsightsFromToolResult = (
-  steps: AgentBuilderConverseResponse['steps'] | undefined
-): AttackDiscovery[] | null => {
-  // Prefer insights from the run tool's attack_discoveries field — this is the
-  // canonical source, immune to message block ordering issues.
-  if (!steps) {
-    return null;
-  }
-  const adStep = steps.find(
-    (
-      step
-    ): step is typeof step & { results?: Array<{ data?: { attack_discoveries?: unknown } }> } =>
-      step.tool_id === 'security.attack-discovery.run' && step.type === 'tool_call'
-  );
-  const discoveries = adStep?.results?.[0]?.data?.attack_discoveries;
-  if (Array.isArray(discoveries) && discoveries.length > 0) {
-    return discoveries as AttackDiscovery[];
-  }
-  return null;
-};
-
 const parseInsightsFromMessage = (message: string): AttackDiscovery[] | null => {
-  // Fallback: extract insights from the last ```json fenced block in the message.
-  // This is fragile — if the model emits a proposed ES|QL rule after the insights
-  // block, this grabs the wrong one. Prefer parseInsightsFromToolResult when available.
+  // Extract insights from the last ```json fenced block in the message.
+  // This is fragile — if the model emits a proposed ES|QL rule after the
+  // insights block, this grabs the wrong one, which is why message and
+  // reasoning steps are scanned BACKWARDS below.
   const matches = message.match(/```json\s*([\s\S]*?)\s*```/g);
   if (!matches || matches.length === 0) {
     return null;
@@ -137,7 +117,6 @@ export class AttackDiscoveryAgentBuilderChatClient {
       errors: [],
       traceId: response.trace_id,
       insights:
-        parseInsightsFromToolResult(response.steps) ??
         parseInsightsFromMessage(response.response.message) ??
         parseInsightsFromSteps(response.steps ?? []),
     };

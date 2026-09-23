@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { AD2_SCENARIO_SEED_LABEL } from '../scenario_registry/constants';
 import { buildAd2SeedPlan } from '../scenario_registry/registry';
 import type { AttackDiscoveryAgentBuilderExample } from '../types';
 
@@ -18,9 +17,6 @@ export const buildFullProfileDiscriminationDataset = (runMarker: string) => {
     runMarker,
   });
 
-  const signalAlertCount =
-    fullProfilePlan.alerts.length - (fullProfilePlan.noiseAlertIds?.length ?? 0);
-
   return {
     name: 'attack-discovery-agent-builder: full profile (noise discrimination)',
     description:
@@ -28,7 +24,15 @@ export const buildFullProfileDiscriminationDataset = (runMarker: string) => {
     examples: [
       {
         input: {
-          question: `Run Attack Discovery by retrieving open alerts seeded with label ${AD2_SCENARIO_SEED_LABEL} from the last twenty-four hours. Return validated discoveries for real attack chains and avoid turning unrelated background or Defender update alerts into discoveries.`,
+          // The seed label is generation-wide: every concurrent scenario-registry
+          // run in the shared alerts index carries it. The run marker is the only
+          // bound that separates this run's 178-alert population from every other
+          // one (the dense live-retrieval example scopes the same way), so the
+          // question asks for it AND the example declares it as `retrievalScope`
+          // — otherwise `evaluate_dataset` credits an unscoped row count as this
+          // fixture's retrieval.
+          question: `Run Attack Discovery by retrieving open alerts with the marker ${runMarker} from the last twenty-four hours. Return validated discoveries for real attack chains and avoid turning unrelated background or Defender update alerts into discoveries.`,
+          retrievalScope: runMarker,
           triageType: 'live-retrieval',
           expectedSkills: ['attack-discovery-generator'],
           expectedToolPath: [
@@ -44,8 +48,16 @@ export const buildFullProfileDiscriminationDataset = (runMarker: string) => {
             'security.attack-discovery.run',
           ],
           expectedWorkflowStages: ['generation', 'validation'],
-          expectedRetrievedAlertCount: signalAlertCount,
-          expectedPassedAlertCount: null,
+          // The FULL seeded population (28 signal + 150 noise): the live
+          // retrieval query is not filtered to signal alerts, so a correct
+          // 178-row retrieval must pass, not fail. The noise IDs below are the
+          // forbidden set for generated discoveries, not alerts that should
+          // vanish from retrieval.
+          expectedRetrievedAlertCount: fullProfilePlan.alerts.length,
+          // Deliberately ABSENT (not `null`): the evaluator contract reads
+          // `null` as "assert the run reports null" — an unwinnable assertion
+          // on any run that passes alerts. Omitting the key leaves the passed
+          // count unscored, the same choice the dense profile makes.
           forbiddenAlertIds: [...(fullProfilePlan.noiseAlertIds ?? [])],
           maxDiscoveryCount: 12,
           minValidatedDiscoveryCount: 1,

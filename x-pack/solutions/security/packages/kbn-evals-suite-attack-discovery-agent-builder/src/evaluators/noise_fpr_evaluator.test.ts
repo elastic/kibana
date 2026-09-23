@@ -97,4 +97,25 @@ describe('noise FPR evaluators', () => {
 
     expect(result.score).toBe(1);
   });
+
+  // `insights` is parsed from model-authored message/reasoning content and
+  // carries no proof that validation ran. A hallucinated fenced insight must
+  // not satisfy the floor — that would let a vacuous FPR pass stand without
+  // any validated discovery.
+  it('MinValidatedDiscovery does not count rendered insights without validation evidence', async () => {
+    const evaluator = createMinValidatedDiscoveryEvaluator();
+    const output = baseOutput();
+    // Remove BOTH validated sources: only the hallucinated insight remains.
+    delete (output.workflow as { validatedDiscoveryCount?: number }).validatedDiscoveryCount;
+    delete (output as { adToolResult?: unknown }).adToolResult;
+
+    const result = await evaluator.evaluate({
+      input: {} as never,
+      output,
+      expected: { expectedToolPath: [], expectedWorkflowStages: [], minValidatedDiscoveryCount: 1 },
+      metadata: { alertCount: 178, fixture: 'full-profile' },
+    });
+
+    expect(result.score).toBe(0);
+  });
 });

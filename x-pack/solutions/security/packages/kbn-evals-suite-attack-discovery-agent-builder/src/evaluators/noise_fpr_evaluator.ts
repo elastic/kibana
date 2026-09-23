@@ -111,11 +111,14 @@ export const createMinValidatedDiscoveryEvaluator = (): Evaluator<
       };
     }
 
+    // A validated discovery is one the pipeline VALIDATED (workflow evidence)
+    // or the AD tool completed and counted. `insights` is parsed from
+    // model-authored message/reasoning content and carries no proof that
+    // validation ran, so a hallucinated fenced insight must NOT satisfy this
+    // floor — the metric guards against a vacuous FPR pass on a run that
+    // never produced a validated discovery.
     const validatedCount =
-      output.workflow.validatedDiscoveryCount ??
-      output.adToolResult?.discoveryCount ??
-      output.insights?.length ??
-      0;
+      output.workflow.validatedDiscoveryCount ?? output.adToolResult?.discoveryCount ?? 0;
 
     if (validatedCount < minValidatedDiscoveryCount) {
       return {

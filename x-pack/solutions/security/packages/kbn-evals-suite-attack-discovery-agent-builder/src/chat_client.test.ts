@@ -176,4 +176,32 @@ describe('AttackDiscoveryAgentBuilderChatClient.converse', () => {
 
     expect(result.insights).toBeNull();
   });
+
+  // Insight-backed evaluators must measure what the agent RENDERED, not the
+  // pipeline's internal return value: if `attack_discoveries` from the run
+  // tool's result fed `insights`, every insight evaluator would pass even when
+  // the agent omitted or altered the discoveries in its response
+  // (`AdToolResult` already covers the tool return separately).
+  it('does not source insights from the AD tool result', async () => {
+    const client = buildClient({
+      response: { message: 'Pipeline status: completed.' },
+      steps: [
+        {
+          type: 'tool_call',
+          tool_id: 'security.attack-discovery.run',
+          results: [
+            {
+              data: {
+                attack_discoveries: [{ title: 'Tool Return', alertIds: ['a1'] }],
+              },
+            },
+          ],
+        },
+      ],
+    });
+
+    const result = await client.converse('run attack discovery');
+
+    expect(result.insights).toBeNull();
+  });
 });
