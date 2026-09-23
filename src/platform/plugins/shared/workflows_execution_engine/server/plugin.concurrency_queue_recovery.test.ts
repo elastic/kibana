@@ -175,7 +175,7 @@ describe('concurrency queue recovery wiring', () => {
       expect.objectContaining({
         workflowRunId,
         spaceId,
-        fakeRequest: expect.anything(),
+        stepExecutionRepository: expect.anything(),
       })
     );
     expect(setCustomTaskRunEventFields).toHaveBeenCalledWith({
