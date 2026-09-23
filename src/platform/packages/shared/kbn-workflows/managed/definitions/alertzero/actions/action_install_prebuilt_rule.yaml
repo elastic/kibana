@@ -38,7 +38,9 @@ triggers:
               maxLength: 512
               description: Signature rule id (`rule_id`) of the prebuilt rule.
             version:
-              type: number
+              # Package versions are integers; a fraction would pass here and only
+              # fail at the install API, after an analyst has approved it.
+              type: integer
               minimum: 1
               description: Package version of the prebuilt rule to install.
           required:
@@ -88,6 +90,32 @@ steps:
     with:
       query: 'alert.attributes.params.ruleId: "{{ inputs.actionInput.rule_id }}"'
 
+  # The install API answers 200 even when it installed nothing (`summary.failed`,
+  # for a version the package no longer carries), and the proposal gate counts any
+  # error-free run as success. Step `if` cannot group with parentheses, so what
+  # landed is computed here and read below as flags.
+  - name: outcome
+    type: data.set
+    with:
+      installed: "${{ steps.install_rule.output.summary.succeeded > 0 or steps.install_rule.output.summary.skipped > 0 }}"
+      enabled: >-
+        ${{ steps.enable_installed_rule.output.succeeded > 0
+          or steps.enable_installed_rule.output.skipped > 0
+          or steps.enable_existing_rule.output.succeeded > 0
+          or steps.enable_existing_rule.output.skipped > 0 }}
+
+  # A rule that is not installed and enabled fails the action, so the gate records
+  # the proposal `failed` and re-offers it instead of reporting `succeeded`.
+  - name: fail_not_applied
+    type: workflow.fail
+    if: "${{ steps.outcome.output.installed != true or steps.outcome.output.enabled != true }}"
+    with:
+      message: >-
+        Prebuilt rule {{ inputs.actionInput.rule_id }} version {{ inputs.actionInput.version }}
+        was not {% if steps.outcome.output.installed != true %}installed{% else %}enabled{% endif %}.
+        Install summary: {{ steps.install_rule.output.summary | json }}
+        {{ steps.install_rule.output.errors | json }}
+
   # `workflow.execute` declares its output as unknown, so the parent falls back
   # to a heuristic read of the last step unless the child emits explicitly.
   - name: emit_result
@@ -95,9 +123,5 @@ steps:
     status: completed
     with:
       id: "{{ steps.install_rule.output.results.created[0].id }}"
-      installed: "${{ steps.install_rule.output.summary.succeeded > 0 or steps.install_rule.output.summary.skipped > 0 }}"
-      enabled: >-
-        ${{ steps.enable_installed_rule.output.succeeded > 0
-          or steps.enable_installed_rule.output.skipped > 0
-          or steps.enable_existing_rule.output.succeeded > 0
-          or steps.enable_existing_rule.output.skipped > 0 }}
+      installed: "${{ steps.outcome.output.installed }}"
+      enabled: "${{ steps.outcome.output.enabled }}"

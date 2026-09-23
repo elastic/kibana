@@ -145,7 +145,7 @@ steps:
           rule_name:
             type: string
           prebuilt_version:
-            type: number
+            type: integer
             description: Version of the matched prebuilt rule. 0 unless the verdict is prebuilt_available.
           rationale:
             type: string

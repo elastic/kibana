@@ -14,6 +14,7 @@ import {
   ALERTZERO_ACTION_INSTALL_PREBUILT_RULE_WORKFLOW,
   ALERTZERO_ACTION_WORKFLOW_IDS,
 } from '..';
+import { createWorkflowLiquidEngine } from '../../../../common/utils';
 
 interface YamlStep {
   name: string;
@@ -56,6 +57,11 @@ const ACTIONS = [
 const parsed = (yaml: string) => parse(yaml) as ActionYaml;
 const stepByName = (yaml: ActionYaml, name: string) =>
   yaml.steps.find((step) => step.name === name);
+
+const evaluateExpression = (expression: string, context: Record<string, unknown>): unknown => {
+  const trimmed = expression.trim();
+  return createWorkflowLiquidEngine().evalValueSync(trimmed.slice(3, -2).trim(), context);
+};
 
 describe('AlertZero action workflows', () => {
   it('is part of the install set', () => {
@@ -129,7 +135,7 @@ describe('AlertZero action workflows', () => {
       const actionInput = trigger?.inputs?.properties?.actionInput;
       expect(actionInput?.required).toEqual(['rule_id', 'version']);
       expect(actionInput?.properties?.version).toEqual(
-        expect.objectContaining({ type: 'number', minimum: 1 })
+        expect.objectContaining({ type: 'integer', minimum: 1 })
       );
 
       const install = stepByName(yaml, 'install_rule');
@@ -157,8 +163,56 @@ describe('AlertZero action workflows', () => {
     it('reports the installed saved-object id to the caller', () => {
       const emit = stepByName(yaml, 'emit_result')?.with as Record<string, string>;
       expect(emit.id).toBe('{{ steps.install_rule.output.results.created[0].id }}');
-      expect(emit.installed).toContain('steps.install_rule.output.summary.succeeded > 0');
-      expect(emit.installed).toContain('steps.install_rule.output.summary.skipped > 0');
+      expect(emit.installed).toBe('${{ steps.outcome.output.installed }}');
+      expect(emit.enabled).toBe('${{ steps.outcome.output.enabled }}');
+    });
+
+    // The install API answers 200 even when it installed nothing, and the gate counts
+    // an error-free run as success, so the action has to fail on what did not land.
+    it.each([
+      ['a fresh install that was enabled', { succeeded: 1 }, { succeeded: 1 }, {}, true, true],
+      [
+        'a rule installed in the meantime and enabled',
+        { skipped: 1 },
+        {},
+        { skipped: 1 },
+        true,
+        true,
+      ],
+      ['an install the API reports as failed', { failed: 1 }, {}, {}, false, false],
+      [
+        'an install whose enable changed nothing',
+        { succeeded: 1 },
+        { succeeded: 0 },
+        {},
+        true,
+        false,
+      ],
+    ])(
+      'computes the outcome of %s',
+      (_scenario, summary, installedEnable, existingEnable, installed, enabled) => {
+        const outcome = stepByName(yaml, 'outcome')?.with as Record<string, string>;
+        const context = {
+          steps: {
+            install_rule: { output: { summary } },
+            enable_installed_rule: { output: installedEnable },
+            enable_existing_rule: { output: existingEnable },
+          },
+        };
+        expect(evaluateExpression(outcome.installed, context)).toBe(installed);
+        expect(evaluateExpression(outcome.enabled, context)).toBe(enabled);
+      }
+    );
+
+    it('fails the action before emitting when the rule is not installed and enabled', () => {
+      const fail = stepByName(yaml, 'fail_not_applied');
+      expect(fail?.type).toBe('workflow.fail');
+      expect(fail?.if).toContain('steps.outcome.output.installed != true');
+      expect(fail?.if).toContain('steps.outcome.output.enabled != true');
+
+      const names = yaml.steps.map(({ name }) => name);
+      expect(names.indexOf('outcome')).toBeLessThan(names.indexOf('fail_not_applied'));
+      expect(names.indexOf('fail_not_applied')).toBeLessThan(names.indexOf('emit_result'));
     });
   });
 });
