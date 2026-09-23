@@ -8,7 +8,6 @@
  */
 
 import type { EuiFlyoutProps } from '@elastic/eui';
-import type { Filter, Query } from '@kbn/es-query';
 import type { BehaviorSubject } from 'rxjs';
 
 /** Read-only view of a subject. Matches `PublishingSubject` without depending on that package. */
@@ -49,30 +48,6 @@ export interface EditorMenuServices {
   trigger?: unknown;
 }
 
-/**
- * Props the flyout body passes to the caller's search bar. Matches the isolated
- * panel search bar: no date picker, no saved queries, and no global data service.
- */
-export interface EditorFlyoutSearchBarProps {
-  appName: string;
-  query: Query;
-  filters?: Filter[];
-  indexPatterns?: object[];
-  showQueryInput?: boolean;
-  showFilterBar?: boolean;
-  showDatePicker?: boolean;
-  showSubmitButton?: boolean;
-  showSavedQueryControls?: boolean;
-  isAutoRefreshDisabled?: boolean;
-  useDefaultBehaviors?: boolean;
-  disableSubscribingToGlobalDataServices?: boolean;
-  onQueryChange?: (payload: { query?: Query }) => void;
-  onQuerySubmit?: (payload: { query?: Query }) => void;
-  onFiltersUpdated?: (filters: Filter[]) => void;
-  displayStyle?: 'inPage';
-  dataTestSubj?: string;
-}
-
 export interface EditorMenuManager {
   readonly historyKey: symbol;
   readonly flyoutId: string;
@@ -89,9 +64,6 @@ export interface EditorMenuManager {
    * The add-panel flow opens the editor flyout before the panel is created.
    */
   setPanelApi: (api: unknown) => void;
-  /** Keeps live query and filter edits when the flyout closes. */
-  commitSession: () => void;
-  isSessionCommitted: () => boolean;
   dispose: () => void;
 }
 

@@ -15,11 +15,9 @@ export {
 export { openLazyModal } from './src/open_lazy_modal';
 export { getPanelContextMenuTriggerId } from './src/focus_helpers';
 export { tracksOverlays, type TracksOverlays } from './src/tracks_overlays';
-export { EditorFlyoutBody } from './src/editor_menu/editor_flyout_body';
 export { initializeEditorMenuManager } from './src/editor_menu/editor_menu_manager';
 export type {
   ActiveEditorMenu,
-  EditorFlyoutSearchBarProps,
   EditorMenuActionContext,
   EditorMenuDescriptor,
   EditorMenuItem,

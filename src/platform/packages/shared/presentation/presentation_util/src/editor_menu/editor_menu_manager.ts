@@ -51,7 +51,6 @@ export const initializeEditorMenuManager = ({
   const historyKey = Symbol('presentationEditor');
   const activeMenu$ = new BehaviorSubject<ActiveEditorMenu | null>(null);
   const panelApi$ = new BehaviorSubject<unknown>(api);
-  let sessionCommitted = false;
   let disposed = false;
 
   const toggle = (menu: ActiveEditorMenu['menu'], anchor: HTMLElement) => {
@@ -129,10 +128,6 @@ export const initializeEditorMenuManager = ({
     setPanelApi: (nextApi) => {
       panelApi$.next(nextApi);
     },
-    commitSession: () => {
-      sessionCommitted = true;
-    },
-    isSessionCommitted: () => sessionCommitted,
     dispose: () => {
       disposed = true;
       activeMenu$.complete();

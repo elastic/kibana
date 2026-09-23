@@ -18,7 +18,7 @@ import type {
   EmbeddablePublicDefinition,
   HasDrilldowns,
 } from '@kbn/embeddable-plugin/public';
-import { openLazySystemFlyout, type EditorFlyoutSearchBarProps } from '@kbn/presentation-util';
+import { openLazySystemFlyout } from '@kbn/presentation-util';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { BehaviorSubject, combineLatest, map, merge, skip, switchMap, tap } from 'rxjs';
 import { isOfQueryType, type AggregateQuery, type Filter, type Query } from '@kbn/es-query';
@@ -271,9 +271,7 @@ export const vegaEmbeddableFactory = (
       return (
         <VegaEditorFlyout
           menuManager={menuManager}
-          SearchBar={({ indexPatterns, ...props }: EditorFlyoutSearchBarProps) => (
-            <deps.SearchBar {...props} indexPatterns={indexPatterns as DataView[]} />
-          )}
+          SearchBar={deps.SearchBar}
           ariaLabelledBy={ariaLabelledBy}
           closeFlyout={closeFlyout}
           initialSpec={initialSpec}

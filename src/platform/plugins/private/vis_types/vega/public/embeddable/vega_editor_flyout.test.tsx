@@ -15,11 +15,8 @@ import userEvent from '@testing-library/user-event';
 import { EuiFlyout, EuiProvider } from '@elastic/eui';
 import type { Filter, Query } from '@kbn/es-query';
 import { I18nProvider } from '@kbn/i18n-react';
-import {
-  initializeEditorMenuManager,
-  type EditorFlyoutSearchBarProps,
-  type EditorMenuServices,
-} from '@kbn/presentation-util';
+import { initializeEditorMenuManager, type EditorMenuServices } from '@kbn/presentation-util';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { core as embeddableCore } from '@kbn/embeddable-plugin/public/kibana_services';
 import hjson from 'hjson';
 import { VegaSpecEditor } from '../components/vega_vis_editor';
@@ -63,21 +60,51 @@ jest.mock('@kbn/code-editor', () => ({
   ),
 }));
 
-const FlyoutSearchBar = ({ onQuerySubmit, onFiltersUpdated }: EditorFlyoutSearchBarProps) => (
+const dateRange = { from: 'now-15m', to: 'now' };
+
+const FlyoutSearchBar: UnifiedSearchPublicPluginStart['ui']['SearchBar'] = ({
+  query,
+  filters,
+  showSubmitButton,
+  onQueryChange,
+  onQuerySubmit,
+  onFiltersUpdated,
+}) => (
   <div data-test-subj="editorFlyoutSearchBar">
+    <span>{typeof query?.query === 'string' ? query.query : ''}</span>
+    <span data-test-subj="filterCount">{filters?.length ?? 0}</span>
+    {showSubmitButton ? <span data-test-subj="querySubmitButton">Update</span> : null}
+    <button
+      type="button"
+      onClick={() =>
+        onQueryChange?.({ dateRange, query: { language: 'kuery', query: 'status:200' } })
+      }
+    >
+      Type query
+    </button>
     <button
       type="button"
       data-test-subj="editorFlyoutSearchBarQuery"
-      onClick={() => onQuerySubmit?.({ query: { language: 'kuery', query: 'status:ok' } })}
+      onClick={() =>
+        onQuerySubmit?.({ dateRange, query: { language: 'kuery', query: 'status:ok' } })
+      }
     >
       Query
     </button>
     <button
       type="button"
       data-test-subj="editorFlyoutSearchBarClearQuery"
-      onClick={() => onQuerySubmit?.({ query: { language: 'kuery', query: '' } })}
+      onClick={() => onQuerySubmit?.({ dateRange, query: { language: 'kuery', query: '' } })}
     >
       Clear query
+    </button>
+    <button
+      type="button"
+      onClick={() =>
+        onQuerySubmit?.({ dateRange, query: { language: 'kuery', query: 'status:200' } })
+      }
+    >
+      Update query
     </button>
     <button
       type="button"
@@ -85,6 +112,12 @@ const FlyoutSearchBar = ({ onQuerySubmit, onFiltersUpdated }: EditorFlyoutSearch
       onClick={() => onFiltersUpdated?.([{ meta: { key: 'status' } }])}
     >
       Filters
+    </button>
+    <button
+      type="button"
+      onClick={() => onFiltersUpdated?.([{ meta: { alias: 'agent' } } as Filter])}
+    >
+      Set filters
     </button>
     <button
       type="button"
@@ -171,27 +204,40 @@ describe('VegaEditorFlyout', () => {
   const renderFlyout = async ({
     isNewPanel = false,
     type = 'push',
-  }: { isNewPanel?: boolean; type?: 'push' | 'overlay' } = {}) => {
+    searchable = true,
+    initialQuery,
+    initialFilters,
+  }: {
+    isNewPanel?: boolean;
+    type?: 'push' | 'overlay';
+    searchable?: boolean;
+    initialQuery?: Query;
+    initialFilters?: Filter[];
+  } = {}) => {
     const closeFlyout = jest.fn();
     const onRevert = jest.fn();
     const onPreview = jest.fn();
     const onSave = jest.fn();
-    const query$ = new BehaviorSubject<Query | undefined>(undefined);
-    const filters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
+    const query$ = new BehaviorSubject<Query | undefined>(initialQuery);
+    const filters$ = new BehaviorSubject<Filter[] | undefined>(initialFilters);
+    const setQuery = jest.fn((query: Query | undefined): void => {
+      query$.next(query);
+    });
+    const setFilters = jest.fn((filters: Filter[] | undefined): void => {
+      filters$.next(filters);
+    });
     const menuManager = initializeEditorMenuManager({
       services: editorMenuServices,
-      api: {
-        filters$,
-        query$,
-        timeRange$: new BehaviorSubject(undefined),
-        setFilters: (filters: Filter[] | undefined): void => {
-          filters$.next(filters);
-        },
-        setQuery: (query: Query | undefined): void => {
-          query$.next(query);
-        },
-        setTimeRange: (): void => undefined,
-      },
+      api: searchable
+        ? {
+            filters$,
+            query$,
+            timeRange$: new BehaviorSubject(undefined),
+            setFilters,
+            setQuery,
+            setTimeRange: (): void => undefined,
+          }
+        : { timeRange$: new BehaviorSubject(undefined) },
       editorType: 'vega',
       title: 'Vega',
       supportedMenus: ['options', 'help'],
@@ -235,7 +281,7 @@ describe('VegaEditorFlyout', () => {
       </I18nProvider>
     );
     await screen.findByRole('textbox', { name: 'Vega spec' });
-    return { closeFlyout, onRevert, onPreview, onSave, unmount, menuManager };
+    return { closeFlyout, onRevert, onPreview, onSave, setFilters, setQuery, unmount };
   };
 
   it('places the search bar below the Vega title and above the spec editor', async () => {
@@ -246,6 +292,71 @@ describe('VegaEditorFlyout', () => {
 
     expect(title.compareDocumentPosition(searchBar)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
     expect(searchBar.compareDocumentPosition(editor)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+
+  it('hides the search bar when the panel cannot write unified search', async () => {
+    await renderFlyout({ searchable: false });
+
+    expect(screen.getByRole('textbox', { name: 'Vega spec' })).toBeVisible();
+    expect(screen.queryByTestId('editorFlyoutSearchBar')).not.toBeInTheDocument();
+  });
+
+  it('writes the query when it is submitted and writes filters immediately', async () => {
+    const { setFilters, setQuery } = await renderFlyout();
+    const user = userEvent.setup();
+
+    expect(screen.getByTestId('querySubmitButton')).toBeVisible();
+
+    await user.click(screen.getByRole('button', { name: 'Type query' }));
+    expect(setQuery).not.toHaveBeenCalled();
+
+    await user.click(screen.getByRole('button', { name: 'Update query' }));
+    expect(setQuery).toHaveBeenCalledWith({ language: 'kuery', query: 'status:200' });
+    expect(screen.getByText('status:200')).toBeVisible();
+
+    await user.click(screen.getByTestId('editorFlyoutSearchBarClearQuery'));
+    expect(setQuery).toHaveBeenCalledWith(undefined);
+
+    await user.click(screen.getByRole('button', { name: 'Set filters' }));
+    expect(setFilters).toHaveBeenCalledWith([{ meta: { alias: 'agent' } }]);
+    expect(screen.getByTestId('filterCount')).toHaveTextContent('1');
+
+    await user.click(screen.getByTestId('editorFlyoutSearchBarClearFilters'));
+    expect(setFilters).toHaveBeenCalledWith(undefined);
+  });
+
+  it('restores the query and filters from when the flyout opened', async () => {
+    const initialFilters = [{ meta: { alias: 'original' } } as Filter];
+    const { setFilters, setQuery, unmount } = await renderFlyout({
+      initialQuery: { language: 'kuery', query: 'host:a' },
+      initialFilters,
+    });
+    const user = userEvent.setup();
+
+    await user.click(screen.getByRole('button', { name: 'Update query' }));
+    await user.click(screen.getByRole('button', { name: 'Set filters' }));
+    setQuery.mockClear();
+    setFilters.mockClear();
+
+    unmount();
+
+    expect(setQuery).toHaveBeenCalledWith({ language: 'kuery', query: 'host:a' });
+    expect(setFilters).toHaveBeenCalledWith(initialFilters);
+  });
+
+  it('keeps live query and filter edits when the flyout is applied', async () => {
+    const { setFilters, setQuery, unmount } = await renderFlyout();
+    const user = userEvent.setup();
+
+    await user.click(screen.getByRole('button', { name: 'Update query' }));
+    await user.click(screen.getByTestId('vegaEditorFlyoutSaveButton'));
+    setQuery.mockClear();
+    setFilters.mockClear();
+
+    unmount();
+
+    expect(setQuery).not.toHaveBeenCalled();
+    expect(setFilters).not.toHaveBeenCalled();
   });
 
   it('enables Preview and Apply and close when the search bar changes', async () => {
@@ -327,7 +438,7 @@ describe('VegaEditorFlyout', () => {
   });
 
   it('saves the current spec, closes, and does not revert on unmount', async () => {
-    const { closeFlyout, menuManager, onPreview, onRevert, onSave, unmount } = await renderFlyout();
+    const { closeFlyout, onPreview, onRevert, onSave, unmount } = await renderFlyout();
     const user = userEvent.setup();
 
     const editor = screen.getByRole('textbox', { name: 'Vega spec' });
@@ -337,7 +448,6 @@ describe('VegaEditorFlyout', () => {
     await user.click(screen.getByTestId('vegaEditorFlyoutSaveButton'));
     expect(onSave).toHaveBeenCalledWith({ format: 'hjson', value: '{ mark: bar }' });
     expect(closeFlyout).toHaveBeenCalledTimes(1);
-    expect(menuManager.isSessionCommitted()).toBe(true);
     // Save persists directly; it does not depend on a prior Preview.
     expect(onPreview).not.toHaveBeenCalled();
 

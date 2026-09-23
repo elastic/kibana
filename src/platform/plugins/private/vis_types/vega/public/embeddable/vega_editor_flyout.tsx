@@ -8,41 +8,61 @@
  */
 
 import React, { Suspense, lazy, useEffect, useRef, useState } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiSkeletonText,
+  EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { EditorMenuManager } from '@kbn/presentation-util';
+import type { QueryState } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { isOfQueryType, type Query } from '@kbn/es-query';
 import {
-  EditorFlyoutBody,
-  type EditorFlyoutSearchBarProps,
-  type EditorMenuManager,
-} from '@kbn/presentation-util';
-import { isOfQueryType, type Filter, type Query } from '@kbn/es-query';
-import {
+  apiPublishesDataViews,
   apiPublishesWritableUnifiedSearch,
   useStateFromPublishingSubject,
   type PublishesWritableUnifiedSearch,
 } from '@kbn/presentation-publishing';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { isEqual } from 'lodash';
 import { VegaEditorMenu } from './vega_editor_menu';
 import type { VegaByValueState } from '../../server';
 
-interface PanelSearchState {
-  query: Query | undefined;
-  filters: Filter[] | undefined;
-}
+type PanelSearch = Omit<QueryState, 'time' | 'refreshInterval'>;
 
-const emptySearch: PanelSearchState = { query: undefined, filters: undefined };
+const emptySearch: PanelSearch = { query: undefined, filters: undefined };
+const emptyQuery: Query = { language: 'kuery', query: '' };
 
-const readPanelSearch = (api: PublishesWritableUnifiedSearch | undefined): PanelSearchState => {
-  if (!api) return emptySearch;
+const bodyCss = css({
+  '.euiFlyoutBody__overflowContent': {
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%',
+    minHeight: 0,
+  },
+});
+
+const searchBarCss = css({
+  flexShrink: 0,
+});
+
+const contentCss = css({
+  display: 'flex',
+  flex: 1,
+  flexDirection: 'column',
+  minHeight: 0,
+});
+
+const readPanelSearch = (api: PublishesWritableUnifiedSearch): PanelSearch => {
   const published = api.query$.getValue();
   let query: Query | undefined;
   if (
@@ -56,7 +76,15 @@ const readPanelSearch = (api: PublishesWritableUnifiedSearch | undefined): Panel
   return { query, filters: filters && filters.length > 0 ? filters : undefined };
 };
 
-const sameSearch = (left: PanelSearchState, right: PanelSearchState): boolean =>
+const readSearchSnapshot = (api: PublishesWritableUnifiedSearch): PanelSearch => {
+  const published = api.query$.getValue();
+  return {
+    query: isOfQueryType(published) ? published : undefined,
+    filters: api.filters$.getValue(),
+  };
+};
+
+const sameSearch = (left: PanelSearch, right: PanelSearch): boolean =>
   isEqual(left.query, right.query) && isEqual(left.filters ?? [], right.filters ?? []);
 
 const VegaSpecEditor = lazy(() =>
@@ -89,7 +117,7 @@ export const VegaEditorFlyout = ({
   onSave,
 }: {
   menuManager: EditorMenuManager;
-  SearchBar: React.ComponentType<EditorFlyoutSearchBarProps>;
+  SearchBar: UnifiedSearchPublicPluginStart['ui']['SearchBar'];
   ariaLabelledBy: string;
   closeFlyout: () => void;
   initialSpec: VegaByValueState['spec'];
@@ -106,13 +134,47 @@ export const VegaEditorFlyout = ({
   const [format, setFormat] = useState<VegaByValueState['spec']['format']>(initialSpec.format);
   const api = useStateFromPublishingSubject(menuManager.panelApi$);
   const searchApi = apiPublishesWritableUnifiedSearch(api) ? api : undefined;
-  const [search, setSearch] = useState<PanelSearchState>(emptySearch);
-  const [previewedSearch, setPreviewedSearch] = useState<PanelSearchState>(emptySearch);
+  const [search, setSearch] = useState<PanelSearch>(emptySearch);
+  const [previewedSearch, setPreviewedSearch] = useState<PanelSearch>(emptySearch);
   const [searchReady, setSearchReady] = useState(false);
-  const openedSearchRef = useRef<PanelSearchState | null>(null);
+  const [dataViews, setDataViews] = useState<DataView[]>([]);
+  const openedSearchRef = useRef<PanelSearch | null>(null);
+  const openedSnapshotRef = useRef<PanelSearch | null>(null);
+  const searchApiRef = useRef(searchApi);
+  searchApiRef.current = searchApi;
+
+  const openedSearch = openedSearchRef.current ?? emptySearch;
+  const searchChanged = searchReady && !sameSearch(search, openedSearch);
+  const searchUnpreviewed = searchReady && !sameSearch(search, previewedSearch);
+  const canPreview = spec !== previewedSpec || searchUnpreviewed;
+  const canSave = isNewPanel || spec !== initialEditorValue || searchChanged;
+
+  // Revert on unmount unless the user saved. A ref holds the latest callback without re-arming the
+  // unmount effect; `saved` suppresses the revert after a successful Save. Declared before the
+  // search subscription so that subscription is torn down before the snapshot is written back.
+  const saved = useRef(false);
+  const onRevertRef = useRef(onRevert);
+  onRevertRef.current = onRevert;
+  useEffect(
+    () => () => {
+      if (saved.current) return;
+      const snapshot = openedSnapshotRef.current;
+      const current = searchApiRef.current;
+      if (snapshot && current) {
+        const query = snapshot.query;
+        current.setQuery(query && isOfQueryType(query) ? query : undefined);
+        current.setFilters(snapshot.filters);
+      }
+      onRevertRef.current();
+    },
+    []
+  );
 
   useEffect(() => {
-    if (!searchApi) return;
+    if (!searchApi) {
+      setDataViews([]);
+      return;
+    }
     const sync = () => {
       const next = readPanelSearch(searchApi);
       setSearch((current) => (sameSearch(current, next) ? current : next));
@@ -120,6 +182,7 @@ export const VegaEditorFlyout = ({
     if (!openedSearchRef.current) {
       const initial = readPanelSearch(searchApi);
       openedSearchRef.current = initial;
+      openedSnapshotRef.current = readSearchSnapshot(searchApi);
       setPreviewedSearch(initial);
       setSearch(initial);
       setSearchReady(true);
@@ -127,40 +190,37 @@ export const VegaEditorFlyout = ({
     sync();
     const querySubscription = searchApi.query$.subscribe(sync);
     const filtersSubscription = searchApi.filters$.subscribe(sync);
+    const dataViewsApi = apiPublishesDataViews(searchApi) ? searchApi : undefined;
+    const dataViewsSubscription = dataViewsApi
+      ? dataViewsApi.dataViews$.subscribe((next) => setDataViews(next ?? []))
+      : undefined;
+    if (dataViewsApi) {
+      setDataViews(dataViewsApi.dataViews$.getValue() ?? []);
+    }
     return () => {
       querySubscription.unsubscribe();
       filtersSubscription.unsubscribe();
+      dataViewsSubscription?.unsubscribe();
     };
   }, [searchApi]);
 
-  const openedSearch = openedSearchRef.current ?? emptySearch;
-  const searchChanged = searchReady && !sameSearch(search, openedSearch);
-  const searchUnpreviewed = searchReady && !sameSearch(search, previewedSearch);
-  const canPreview = spec !== previewedSpec || searchUnpreviewed;
-  const canSave = isNewPanel || spec !== initialEditorValue || searchChanged;
   const previewChanges = () => {
     onPreview(specFromEditor(spec, format));
     setPreviewedSpec(spec);
     setPreviewedSearch(search);
   };
 
-  // Revert on unmount unless the user saved. A ref holds the latest callback without re-arming the
-  // unmount effect; `saved` suppresses the revert after a successful Save.
-  const saved = useRef(false);
-  const onRevertRef = useRef(onRevert);
-  onRevertRef.current = onRevert;
-  useEffect(
-    () => () => {
-      if (!saved.current) {
-        onRevertRef.current();
-      }
-    },
-    []
-  );
+  const applyQuery = (next: Query | undefined) => {
+    if (!searchApi) return;
+    if (!next || typeof next.query !== 'string' || next.query.trim() === '') {
+      searchApi.setQuery(undefined);
+      return;
+    }
+    searchApi.setQuery({ language: next.language, query: next.query });
+  };
 
   const handleSave = () => {
     saved.current = true;
-    menuManager.commitSession();
     onSave(specFromEditor(spec, format));
     closeFlyout();
   };
@@ -171,27 +231,60 @@ export const VegaEditorFlyout = ({
           <h2 id={ariaLabelledBy}>Vega</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
-      <EditorFlyoutBody menuManager={menuManager} SearchBar={SearchBar}>
-        <Suspense
-          fallback={
-            <EuiSkeletonText
-              lines={3}
-              data-test-subj="vegaEditorFlyoutLoading"
-              aria-label={i18n.translate('visTypeVega.dashboard.editorLoadingAriaLabel', {
-                defaultMessage: 'Loading Vega editor',
-              })}
+      <EuiFlyoutBody css={bodyCss} data-test-subj="editorFlyoutBody">
+        {searchApi && (
+          <>
+            <div css={searchBarCss}>
+              <SearchBar
+                appName="vegaEditorFlyout"
+                query={search.query && isOfQueryType(search.query) ? search.query : emptyQuery}
+                filters={search.filters}
+                indexPatterns={dataViews}
+                showQueryInput
+                showFilterBar
+                showDatePicker={false}
+                showSubmitButton
+                showSavedQueryControls={false}
+                isAutoRefreshDisabled
+                useDefaultBehaviors={false}
+                disableSubscribingToGlobalDataServices
+                onQuerySubmit={({ query: next }) => {
+                  applyQuery(next && isOfQueryType(next) ? next : undefined);
+                }}
+                onFiltersUpdated={(next) => {
+                  searchApi.setFilters(next.length > 0 ? next : undefined);
+                }}
+                displayStyle="inPage"
+                dataTestSubj="editorFlyoutSearchBar"
+              />
+            </div>
+            <EuiSpacer size="l" />
+          </>
+        )}
+        <div css={contentCss}>
+          <Suspense
+            fallback={
+              <EuiSkeletonText
+                lines={3}
+                data-test-subj="vegaEditorFlyoutLoading"
+                aria-label={i18n.translate('visTypeVega.dashboard.editorLoadingAriaLabel', {
+                  defaultMessage: 'Loading Vega editor',
+                })}
+              />
+            }
+          >
+            <VegaSpecEditor
+              renderControls={(actions) => (
+                <VegaEditorMenu menuManager={menuManager} {...actions} />
+              )}
+              editorValue={spec}
+              initialFormat={initialSpec.format}
+              onChange={setSpec}
+              onFormatChange={setFormat}
             />
-          }
-        >
-          <VegaSpecEditor
-            renderControls={(actions) => <VegaEditorMenu menuManager={menuManager} {...actions} />}
-            editorValue={spec}
-            initialFormat={initialSpec.format}
-            onChange={setSpec}
-            onFormatChange={setFormat}
-          />
-        </Suspense>
-      </EditorFlyoutBody>
+          </Suspense>
+        </div>
+      </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
