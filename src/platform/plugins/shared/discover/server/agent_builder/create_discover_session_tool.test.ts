@@ -242,6 +242,17 @@ describe('createDiscoverSessionTool', () => {
     expect(createDiscoverSessionTool().description).not.toContain('screen-context');
   });
 
+  it('tells the agent how to handle more than one Discover session', () => {
+    const { description } = createDiscoverSessionTool();
+
+    expect(description).toContain(
+      'When more than one Discover session is active, pass the exact attachment_id'
+    );
+    expect(description).toContain('ask the user which table to update');
+    expect(description).toContain('you may call it once more with one exact listed attachment_id');
+    expect(description).toContain('Do not repeat the same failing call');
+  });
+
   it('uses a create-or-update annotation title', () => {
     expect(createDiscoverSessionTool().annotations?.title).toBe(
       'Create or update Discover session'
@@ -507,7 +518,7 @@ describe('createDiscoverSessionTool updates', () => {
     expect(result.results[0].data.version).toBe(2);
   });
 
-  it('creates a session when attachment_id is omitted and more than one session is active', async () => {
+  it('returns an ambiguity error when attachment_id is omitted and more than one session is active', async () => {
     const attachments = createAttachments();
     attachments.getActive.mockReturnValue([
       { id: 'att-a', type: DISCOVER_SESSION_ATTACHMENT_TYPE },
@@ -516,10 +527,65 @@ describe('createDiscoverSessionTool updates', () => {
 
     const { result } = await runHandler({ esql: UPDATED_ESQL }, { attachments });
 
+    expect(result.results[0].type).toBe(ToolResultType.error);
+    expect(result.results[0].data.message).toContain('att-a');
+    expect(result.results[0].data.message).toContain('att-b');
+    expect(result.results[0].data.message).toContain('ask the user which table to update');
+    expect(result.results[0].data.message).not.toContain('create_new');
+    expect(attachments.update).not.toHaveBeenCalled();
+    expect(attachments.add).not.toHaveBeenCalled();
+  });
+
+  it('returns an ambiguity error when a multi-session update omits esql', async () => {
+    const attachments = createAttachments();
+    attachments.getActive.mockReturnValue([
+      { id: 'att-a', type: DISCOVER_SESSION_ATTACHMENT_TYPE },
+      { id: 'att-b', type: DISCOVER_SESSION_ATTACHMENT_TYPE },
+    ]);
+
+    const { result } = await runHandler({ title: 'Warnings' }, { attachments });
+
+    expect(result.results[0].type).toBe(ToolResultType.error);
+    expect(result.results[0].data.message).toContain('att-a');
+    expect(result.results[0].data.message).toContain('att-b');
+    expect(result.results[0].data.message).not.toContain('esql is required');
+    expect(attachments.update).not.toHaveBeenCalled();
+    expect(attachments.add).not.toHaveBeenCalled();
+  });
+
+  it('returns an ambiguity error when a placeholder attachment_id is passed and more than one session is active', async () => {
+    const attachments = createAttachments();
+    attachments.getActive.mockReturnValue([
+      { id: 'att-a', type: DISCOVER_SESSION_ATTACHMENT_TYPE },
+      { id: 'att-b', type: DISCOVER_SESSION_ATTACHMENT_TYPE },
+    ]);
+
+    const { result } = await runHandler(
+      { attachment_id: 'discover-session', esql: UPDATED_ESQL },
+      { attachments }
+    );
+
+    expect(result.results[0].type).toBe(ToolResultType.error);
+    expect(result.results[0].data.message).toContain('att-a');
+    expect(result.results[0].data.message).toContain('att-b');
+    expect(attachments.update).not.toHaveBeenCalled();
+    expect(attachments.add).not.toHaveBeenCalled();
+  });
+
+  it('creates a session when create_new is true and more than one session is active', async () => {
+    const attachments = createAttachments();
+    attachments.add.mockResolvedValue({ id: 'att-session-3', current_version: 1 });
+    attachments.getActive.mockReturnValue([
+      { id: 'att-a', type: DISCOVER_SESSION_ATTACHMENT_TYPE },
+      { id: 'att-b', type: DISCOVER_SESSION_ATTACHMENT_TYPE },
+    ]);
+
+    const { result } = await runHandler({ create_new: true, esql: UPDATED_ESQL }, { attachments });
+
+    expect(attachments.getActive).not.toHaveBeenCalled();
     expect(attachments.update).not.toHaveBeenCalled();
     expect(attachments.add).toHaveBeenCalled();
-    expect(result.results[0].data.attachment_id).toBe('att-session');
-    expect(result.results[0].data.version).toBe(1);
+    expect(result.results[0].data.attachment_id).toBe('att-session-3');
   });
 
   it('creates a session when a skill-name attachment_id is passed and none exists', async () => {

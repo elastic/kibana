@@ -37,12 +37,13 @@ Lens \`data_table\` is only for aggregated tabular summaries. It is not a substi
 
 1. Ground the index and field names if they are not already in context. Do not invent index or field names.
 2. If creating a new table, call \`${platformCoreTools.generateEsql}\` once to produce a **document** query (\`FROM\` or \`TS\` with \`WHERE\` / \`LIMIT\` as needed). Do not invent ES|QL. Do not use \`STATS\`.
-3. Call \`${platformCoreTools.createDiscoverSession}\` **exactly once**:
+3. Make at most one successful \`${platformCoreTools.createDiscoverSession}\` change per user request:
    - Omit \`attachment_id\` unless a previous result from this tool returned that exact ID.
    - To **create** when the conversation has no Discover session: omit \`attachment_id\`. Pass \`esql\` as the **string** from generateEsql (the \`esql\` field, not the whole tool result). \`title\` is optional. Optional \`time_range\`. Omit \`columns\` unless the user named specific fields — the table then uses a matching Discover profile, or Summary plus time.
-   - If a Discover session already exists, omit \`attachment_id\` to **update** that table. Pass \`create_new: true\` and omit \`attachment_id\` only when the user asked for another table.
+   - If exactly one Discover session exists, omit \`attachment_id\` to **update** that table. Pass \`create_new: true\` and omit \`attachment_id\` only when the user asked for another table.
+   - If more than one Discover session exists, pass the exact \`attachment_id\` from an earlier result of this tool when you know which table to update. If you do not, ask the user which table to update instead of omitting \`attachment_id\`.
    - Call \`${platformCoreTools.generateEsql}\` on update **only** when the user wants a different query. For title or time-range-only changes, omit \`esql\` so the stored query is kept. Pass \`columns\` only when the user named specific fields.
-4. After a successful tool result, **stop calling tools**. Paste the returned \`render\` string into your reply verbatim. Do not construct a \`<render_attachment>\` tag yourself. Do not call \`${platformCoreTools.createDiscoverSession}\` again for the same request.
+4. After a successful tool result, **stop calling tools**. Paste the returned \`render\` string into your reply verbatim. Do not construct a \`<render_attachment>\` tag yourself. If the tool reports that multiple Discover sessions exist, you may call it once more with one exact listed \`attachment_id\` when you can identify the intended table. Do not repeat the same failing call, and do not retry other errors.
 
 Do not paste rows, tab JSON, or vis_context into the conversation. This skill does not execute ES|QL; the Discover table in chat runs the query.
 `,

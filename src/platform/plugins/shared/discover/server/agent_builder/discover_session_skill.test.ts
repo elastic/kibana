@@ -51,5 +51,16 @@ describe('discoverSessionSkill', () => {
     expect(discoverSessionSkill.content).toContain(
       'Omit `columns` unless the user named specific fields'
     );
+    expect(discoverSessionSkill.content).toContain(
+      'If exactly one Discover session exists, omit `attachment_id` to **update** that table.'
+    );
+    expect(discoverSessionSkill.content).toContain(
+      'If more than one Discover session exists, pass the exact `attachment_id`'
+    );
+    expect(discoverSessionSkill.content).toContain('ask the user which table to update');
+    expect(discoverSessionSkill.content).toContain(
+      'you may call it once more with one exact listed `attachment_id`'
+    );
+    expect(discoverSessionSkill.content).toContain('Do not repeat the same failing call');
   });
 });

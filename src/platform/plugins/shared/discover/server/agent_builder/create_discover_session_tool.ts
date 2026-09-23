@@ -500,9 +500,9 @@ export const createDiscoverSessionTool = (): BuiltinToolDefinition<
 
 Pass an ES|QL query that returns documents (FROM or TS with WHERE/LIMIT as needed). Copy the "esql" string from generateEsql into the "esql" parameter — do not wrap it in an object and do not invent ES|QL. Do not use this for aggregations (STATS) or charts; use ${platformCoreTools.createVisualization} instead.
 
-Do not pass attachment_id unless a previous result of this same tool returned that exact id. Never invent an id. Omit attachment_id to create when none exists, or to update the conversation's only Discover session. On update, omit fields you want to keep; pass null for time_range or columns to clear them. esql is required only when creating.
+Do not pass attachment_id unless a previous result of this same tool returned that exact id. Never invent an id. Omit attachment_id to create when none exists, or to update the conversation's only Discover session. When more than one Discover session is active, pass the exact attachment_id of the table to update, or ask the user which table to update if that is unclear. On update, omit fields you want to keep; pass null for time_range or columns to clear them. esql is required only when creating.
 
-Call this tool once per user request. After a successful result, stop calling tools. Paste the returned "render" string into your reply verbatim — do not build the tag yourself. Pass create_new: true and omit attachment_id only when the user asked for another table.
+Make at most one successful change per user request. After a successful result, stop calling tools. Paste the returned "render" string into your reply verbatim — do not build the tag yourself. If this tool reports that multiple Discover sessions exist, you may call it once more with one exact listed attachment_id when you can identify the intended table. Do not repeat the same failing call, and do not retry other errors. Pass create_new: true and omit attachment_id only when the user asked for another table.
 
 This tool does not execute the query. It stores a by-value Discover session (one tab, chart hidden). Do not paste rows, tab JSON, or vis_context into the conversation.`,
     schema: createDiscoverSessionSchema,
@@ -548,6 +548,18 @@ This tool does not execute the query. It stores a by-value Discover session (one
             results: [
               createErrorResult(
                 `Discover session attachment "${unknownId}" not found.${existingHint}`
+              ),
+            ],
+          };
+        }
+
+        if (existingIds.length > 1) {
+          return {
+            results: [
+              createErrorResult(
+                `Multiple Discover sessions exist, so this call cannot choose one. Existing Discover session ids: ${existingIds.join(
+                  ', '
+                )}. If you know which table the user means, call this tool again once with that exact attachment_id. Otherwise ask the user which table to update. Do not repeat this call without an exact attachment_id.`
               ),
             ],
           };
