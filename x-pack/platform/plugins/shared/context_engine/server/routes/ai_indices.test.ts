@@ -48,6 +48,7 @@ import {
   AiIndexConflictError,
   AiIndexDescribeResponseTooLargeError,
   AiIndexNotFoundError,
+  AiIndexNotReadableError,
   AiIndexAlreadyExistsError,
   AiIndexQueryResponseTooLargeError,
   InvalidAiIndexQueryError,
@@ -835,6 +836,19 @@ describe('ai indices routes', () => {
       expect(response.notFound).toHaveBeenCalledWith({
         body: { message: "AI index 'missing' not found" },
       });
+    });
+
+    it('returns 403 when the caller cannot read the backing indices', async () => {
+      readService.describe.mockRejectedValue(
+        new AiIndexNotReadableError('a', 'unauthorized for user')
+      );
+
+      await callRoute('GET', aiIndexDescribePath, { params: { aiIndexId: 'a' } });
+
+      expect(response.forbidden).toHaveBeenCalledWith({
+        body: { message: expect.stringContaining("AI index 'a' is not readable") },
+      });
+      expect(logger.error).not.toHaveBeenCalled();
     });
 
     it('returns 400 when the field metadata exceeds the size cap', async () => {

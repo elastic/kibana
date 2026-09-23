@@ -51,8 +51,9 @@ const isAggregatableKeyword = (fields: AiIndexField[], path: string): boolean =>
 
 /**
  * Space-filtered `terms` counts on `type` / `tags`; each skipped unless an aggregatable keyword.
- * Shard failures error out rather than return undercounts. A 403 (caller lacks `read` on the
- * backing indices) yields no counts instead of failing the whole describe.
+ * Shard failures error out rather than return undercounts. A 403 yields no counts instead of
+ * failing the whole describe; a caller without `read` is turned away by `assertReadableAiIndex`
+ * first, so this is only a backstop for a target whose indices differ in what they grant.
  */
 export const describeAiIndexAggregations = async ({
   esClient,

@@ -22,7 +22,10 @@ import type { AiIndexService } from './service';
 /** Caller-scoped AI-index reads. One instance per request; shared by HTTP routes and agent tools. */
 export interface AiIndexDataReadServiceApi {
   query(request: QueryAiIndicesRequest): Promise<QueryAiIndicesResponse>;
-  /** Throws `AiIndexNotFoundError` for an unknown id. */
+  /**
+   * Throws `AiIndexNotFoundError` for an unknown id, and `AiIndexNotReadableError` when the caller
+   * cannot read the backing store — the same check that decides whether `list` returns it.
+   */
   describe(id: string): Promise<DescribeAiIndexResponse>;
   /**
    * The AI Indices registered in this space whose backing index the caller can read. An empty

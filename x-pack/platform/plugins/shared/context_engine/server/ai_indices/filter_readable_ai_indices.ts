@@ -5,39 +5,15 @@
  * 2.0.
  */
 
-import type { MsearchRequestItem, MsearchResponseItem } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { AiIndexHttpItem } from '../../common/http_api/ai_indices';
+import { readableProbe, readableProbeFailure } from './readable_probe';
 
 interface FilterReadableAiIndicesParams {
   esClient: ElasticsearchClient;
   aiIndices: AiIndexHttpItem[];
   logger: Logger;
 }
-
-/** Strict index options on purpose: `ignore_unavailable` silently drops unreadable indices. */
-const probe = (target: string): MsearchRequestItem[] => [
-  { index: target, allow_partial_search_results: false },
-  { size: 0, terminate_after: 1, track_total_hits: false, query: { match_all: {} } },
-];
-
-/** Single expression only: `existing,missing` is also a 404 and says nothing about `existing`. */
-const isMissingIndex = (target: string, item: MsearchResponseItem): boolean =>
-  !target.includes(',') && 'error' in item && item.error.type === 'index_not_found_exception';
-
-/** Error, timeout, or failed shard; undefined when the probe can be trusted. */
-const failureReason = (item: MsearchResponseItem): string | undefined => {
-  if ('error' in item) {
-    return item.error.reason ?? item.error.type;
-  }
-  if (item.timed_out) {
-    return 'timed out';
-  }
-  if (item._shards.failed > 0) {
-    return `${item._shards.failed} shard(s) failed`;
-  }
-  return undefined;
-};
 
 /**
  * Keeps the AI Indices whose backing index the caller can read. One `msearch` as the caller, one
@@ -53,15 +29,11 @@ export const filterReadableAiIndices = async ({
   }
 
   const { responses } = await esClient.msearch({
-    searches: aiIndices.flatMap(({ dest }) => probe(dest.value)),
+    searches: aiIndices.flatMap(({ dest }) => readableProbe(dest.value)),
   });
 
   return aiIndices.filter((aiIndex, index) => {
-    const response = responses[index];
-    if (isMissingIndex(aiIndex.dest.value, response)) {
-      return true;
-    }
-    const failure = failureReason(response);
+    const failure = readableProbeFailure(aiIndex.dest.value, responses[index]);
     if (failure !== undefined) {
       logger.debug(`AI index '${aiIndex.id}' left out of the list: ${failure}`);
       return false;

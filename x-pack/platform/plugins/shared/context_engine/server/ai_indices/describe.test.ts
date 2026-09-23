@@ -7,14 +7,18 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AiIndexHttpItem } from '../../common/http_api/ai_indices';
+import { assertReadableAiIndex } from './assert_readable_ai_index';
 import { describeAiIndex } from './describe';
 import { describeAiIndexAggregations } from './describe_aggregations';
 import { describeAiIndexFields } from './describe_fields';
+import { AiIndexNotReadableError } from './errors';
 import { buildExampleQueries } from './example_queries';
 
+jest.mock('./assert_readable_ai_index');
 jest.mock('./describe_fields');
 jest.mock('./describe_aggregations');
 
+const assertReadableAiIndexMock = jest.mocked(assertReadableAiIndex);
 const describeAiIndexFieldsMock = jest.mocked(describeAiIndexFields);
 const describeAiIndexAggregationsMock = jest.mocked(describeAiIndexAggregations);
 
@@ -47,6 +51,8 @@ describe('describeAiIndex', () => {
   const params = { esClient, aiIndex, spaceId: 'marketing' };
 
   beforeEach(() => {
+    assertReadableAiIndexMock.mockReset();
+    assertReadableAiIndexMock.mockResolvedValue(undefined);
     describeAiIndexFieldsMock.mockReset();
     describeAiIndexFieldsMock.mockResolvedValue({
       fields,
@@ -67,6 +73,7 @@ describe('describeAiIndex', () => {
   it('renders every section one item per line, keys quoted', async () => {
     const response = await describeAiIndex(params);
 
+    expect(assertReadableAiIndexMock).toHaveBeenCalledWith({ esClient, aiIndex });
     expect(describeAiIndexFieldsMock).toHaveBeenCalledWith({
       esClient,
       target: 'ai-index-idx-support*',
@@ -102,6 +109,17 @@ describe('describeAiIndex', () => {
         exampleQueriesBlock,
       ].join('\n')
     );
+  });
+
+  it('reads nothing when the caller cannot read the backing store', async () => {
+    assertReadableAiIndexMock.mockRejectedValue(
+      new AiIndexNotReadableError('support', 'unauthorized for user')
+    );
+
+    await expect(describeAiIndex(params)).rejects.toThrow(AiIndexNotReadableError);
+
+    expect(describeAiIndexFieldsMock).not.toHaveBeenCalled();
+    expect(describeAiIndexAggregationsMock).not.toHaveBeenCalled();
   });
 
   it('omits the description line when the AI index has none', async () => {
