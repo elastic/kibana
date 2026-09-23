@@ -25,6 +25,7 @@ interface TableVisBasicProps {
   visConfig: TableVisConfig;
   title?: string;
   uiStateProps: TableVisUseUiStateProps;
+  isInteractive?: boolean;
 }
 
 export const TableVisBasic = memo(
@@ -34,9 +35,9 @@ export const TableVisBasic = memo(
     visConfig,
     title,
     uiStateProps: { columnsWidth, sort, setColumnsWidth, setSort },
+    isInteractive = true,
   }: TableVisBasicProps) => {
     const dataGridRef = useRef<EuiDataGridRefProps>(null);
-    console.log();
     const { columns, rows, formattedColumns } = table;
 
     // custom sorting is in place until the EuiDataGrid sorting gets rid of flaws -> https://github.com/elastic/eui/issues/4108
@@ -70,7 +71,8 @@ export const TableVisBasic = memo(
       formattedColumns,
       columnsWidth,
       fireEvent,
-      dataGridRef.current?.closeCellPopover
+      dataGridRef.current?.closeCellPopover,
+      isInteractive
     );
 
     // Pagination config
@@ -115,7 +117,7 @@ export const TableVisBasic = memo(
       },
       [columns, setColumnsWidth]
     );
-    console.log({ visConfig });
+
     return (
       <>
         {title && (

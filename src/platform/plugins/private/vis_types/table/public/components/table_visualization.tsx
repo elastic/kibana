@@ -81,6 +81,7 @@ const TableVisualizationComponent = ({
               table={table}
               visConfig={visConfig}
               uiStateProps={uiStateProps}
+              isInteractive={handlers.isInteractive()}
             />
           ) : (
             <TableVisSplit
