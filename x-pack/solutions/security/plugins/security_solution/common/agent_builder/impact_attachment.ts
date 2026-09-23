@@ -65,7 +65,7 @@ export type ImpactedEntity = z.infer<typeof impactedEntitySchema>;
  */
 export const impactAttachmentDataSchema = z
   .object({
-    attachmentLabel: z.string().optional(),
+    attachmentLabel: z.string().max(1024).optional(),
     entities: z.array(impactedEntitySchema).max(MAX_IMPACTED_ENTITIES),
     total_alert_count: liquidNonNegativeInt.optional(),
     /** True when the entity list was capped to MAX_IMPACTED_ENTITIES before attaching.

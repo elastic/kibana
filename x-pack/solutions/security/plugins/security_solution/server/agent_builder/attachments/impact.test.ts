@@ -166,6 +166,14 @@ describe('createImpactAttachmentType', () => {
       });
       expect(result.valid).toBe(false);
     });
+
+    it('rejects an attachmentLabel longer than 1024 characters', async () => {
+      const result = await attachmentType.validate({
+        entities: [validEntity],
+        attachmentLabel: 'a'.repeat(1025),
+      });
+      expect(result.valid).toBe(false);
+    });
   });
 
   describe('format', () => {
