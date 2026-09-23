@@ -42,6 +42,7 @@ import type { HuntServices } from './services/watches/hunt';
 import { listActionsTool } from './agent_builder_tools/list_actions_tool';
 import { reviseProposalTool } from './agent_builder_tools/revise_proposal_tool';
 import { agentType, ensureAgent, ensureAgentSafe, registerAgentType } from './agent';
+import { registerAttachments } from './agent_builder/attachments/register_attachments';
 
 export class AlertZeroPlugin
   implements
@@ -92,6 +93,7 @@ export class AlertZeroPlugin
 
     registerOwner({ workflowsExtensions });
     registerAgentType(agentBuilder);
+    registerAttachments(agentBuilder);
     registerAlertZeroInferenceFeatures(searchInferenceEndpoints, this.logger.get('inference'));
     // Registered in setup so the builtin tool is available to Agent Builder before
     // the first agent run; the handler resolves the service lazily like the routes do.

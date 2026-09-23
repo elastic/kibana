@@ -56,3 +56,15 @@ export const HUNT_ALERTS_INDEX_PATTERN_PREFIX = '.alerts-security.alerts-' as co
  * writes are always space-scoped to the caller's concrete space, never this sentinel.
  */
 export const HUNT_GLOBAL_SPACE_ID = '*' as const;
+/**
+ * Single source of truth for the Hunt Watch attachment type ids, used by the server
+ * attachment definitions, the client attachment UI definitions, and their tests.
+ */
+export const ALERTZERO_ATTACHMENT_TYPES = {
+  threat: 'security.threat',
+  significantSecurityEvent: 'security.significant_security_event',
+  huntCorrelation: 'security.hunt_correlation',
+} as const;
+
+export type AlertZeroAttachmentType =
+  (typeof ALERTZERO_ATTACHMENT_TYPES)[keyof typeof ALERTZERO_ATTACHMENT_TYPES];
