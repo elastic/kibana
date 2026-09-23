@@ -20962,7 +20962,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Returns a paginated list of reusable field definitions (field library entries) for the given owner. Requires the Cases feature to be enabled in the space.
+        Returns a paginated list of field definitions (field library entries) for the given owner. Requires the Cases feature to be enabled in the space.
       operationId: getCaseFieldDefinitionsDefaultSpace
       parameters:
         - description: |
@@ -20986,24 +20986,10 @@ paths:
           required: false
           schema:
             type: boolean
-        - description: The page number to return. Defaults to 1.
-          in: query
-          name: page
-          required: false
-          schema:
-            default: 1
-            minimum: 1
-            type: integer
-        - description: The number of results per page. Defaults to 20, maximum 100.
-          in: query
-          name: perPage
-          required: false
-          schema:
-            default: 20
-            maximum: 100
-            minimum: 1
-            type: integer
-        - description: The field to sort by.
+        - $ref: '#/components/parameters/Cases_page_index'
+        - $ref: '#/components/parameters/Cases_page_size'
+        - description: |
+            The field to sort by. When omitted, results are sorted by `fieldDefinitionId` ascending and `sortOrder` is ignored.
           in: query
           name: sortField
           required: false
@@ -21060,7 +21046,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Cases_response_4xx'
           description: The user does not have permission to read field definitions for the owner.
-      summary: Get all reusable field definitions
+      summary: Get all field definitions
       tags:
         - cases
       x-state: Technical preview
@@ -21075,7 +21061,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Creates a reusable field definition in the field library. You must have the "Manage templates" sub-privilege for the Cases feature of the owning solution. Requires the Cases feature to be enabled in the space. Use `dry_run=true` to validate the request without writing anything.
+        Creates a field definition in the field library. You must have the "Manage templates" sub-privilege for the Cases feature of the owning solution. Requires the Cases feature to be enabled in the space. Use `dry_run=true` to validate the request without writing anything.
       operationId: createCaseFieldDefinitionDefaultSpace
       parameters:
         - description: |
@@ -21150,7 +21136,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Cases_response_4xx'
           description: A field definition with the same name already exists for the owner.
-      summary: Create a reusable field definition
+      summary: Create a field definition
       tags:
         - cases
       x-state: Technical preview
@@ -21166,7 +21152,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Deletes a reusable field definition. You must have the "Manage templates" sub-privilege for the Cases feature of the owning solution. A field definition cannot be deleted while it is referenced by an active template or linked to an active v1 custom field in the Cases configuration. Requires the Cases feature to be enabled in the space.
+        Deletes a field definition. You must have the "Manage templates" sub-privilege for the Cases feature of the owning solution. A field definition cannot be deleted while it is referenced by an active template or linked to an active custom field in the Cases configuration. Requires the Cases feature to be enabled in the space.
       operationId: deleteCaseFieldDefinitionDefaultSpace
       parameters:
         - $ref: '#/components/parameters/Cases_field_definition_id'
@@ -21210,7 +21196,7 @@ paths:
                 $ref: '#/components/schemas/Cases_response_4xx'
           description: |
             The field definition is referenced by one or more active templates, or is linked to an active custom field in the Cases configuration.
-      summary: Delete a reusable field definition
+      summary: Delete a field definition
       tags:
         - cases
       x-state: Technical preview
@@ -21225,7 +21211,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Returns a single reusable field definition by its ID. Requires the Cases feature to be enabled in the space.
+        Returns a single field definition by its ID. Requires the Cases feature to be enabled in the space.
       operationId: getCaseFieldDefinitionDefaultSpace
       parameters:
         - $ref: '#/components/parameters/Cases_field_definition_id'
@@ -21266,7 +21252,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Cases_response_4xx'
           description: The field definition was not found.
-      summary: Get a reusable field definition by ID
+      summary: Get a field definition by ID
       tags:
         - cases
       x-state: Technical preview
@@ -21281,7 +21267,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Updates editable attributes of a reusable field definition. Server-managed attributes (`displayOrder`, `legacyKey`) are preserved. You must have the "Manage templates" sub-privilege for the Cases feature of the owning solution. A field's `name` and YAML `type` are immutable after creation — an attempt to change either returns `409` with `attributes.code = "field_identity_immutable"` and `attributes.changed` listing which identity attributes were modified. Setting `isGlobal` to `false` when the field is linked to an active v1 custom field in the Cases configuration returns `409`; otherwise demotion is allowed. Requires the Cases feature to be enabled in the space. Use `dry_run=true` to validate the request without writing anything.
+        Updates editable attributes of a field definition. Server-managed attributes (`displayOrder`, `legacyKey`) are preserved. You must have the "Manage templates" sub-privilege for the Cases feature of the owning solution. A field's `name` and YAML `type` are immutable after creation — an attempt to change either returns `409` with `attributes.code = "field_identity_immutable"` and `attributes.changed` listing which identity attributes were modified. Setting `isGlobal` to `false` when the field is linked to an active custom field in the Cases configuration returns `409`; otherwise demotion is allowed. Requires the Cases feature to be enabled in the space. Use `dry_run=true` to validate the request without writing anything.
       operationId: updateCaseFieldDefinitionDefaultSpace
       parameters:
         - $ref: '#/components/parameters/Cases_field_definition_id'
@@ -21396,7 +21382,7 @@ paths:
                   - $ref: '#/components/schemas/Cases_response_4xx'
           description: |
             A field's name or type cannot be changed after creation, or a global field cannot be demoted while linked to an active custom field.
-      summary: Update editable attributes of a reusable field definition
+      summary: Update a field definition
       tags:
         - cases
       x-state: Technical preview
@@ -138579,7 +138565,7 @@ components:
     Cases_field_definition_put_request:
       additionalProperties: false
       description: |
-        The body for updating a reusable field definition.
+        The body for updating a field definition.
 
         Identity constraints: the `name` property must match the `name` key in the YAML `definition`. When `name` is omitted, the server extracts it from the `definition` YAML automatically. A field's `name` and YAML `type` are immutable — an attempt to change either returns `409` with `attributes.code = "field_identity_immutable"` and `attributes.changed` listing which identity attributes were modified.
 
@@ -138603,7 +138589,7 @@ components:
           type: string
         isGlobal:
           description: |
-            When true, this field is rendered in every case for this owner, regardless of the template used. Global fields cannot be demoted (set to false) while they are linked to an active v1 custom field in the Cases configuration.
+            When true, this field is rendered in every case for this owner, regardless of the template used. Global fields cannot be demoted (set to false) while they are linked to an active custom field in the Cases configuration.
           type: boolean
         name:
           description: |
@@ -138623,7 +138609,7 @@ components:
       type: object
     Cases_field_definition_response:
       description: |
-        A reusable field definition from the field library. The `legacyKey` attribute, which is a server-managed link to a migrated v1 custom field, is not included in the public API response.
+        A field definition from the field library. The `legacyKey` attribute, which is a server-managed link to a migrated custom field, is not included in the public API response.
       properties:
         definition:
           description: |
@@ -138664,7 +138650,7 @@ components:
     Cases_field_definition_write_request:
       additionalProperties: false
       description: |
-        The body for creating or updating a reusable field definition.
+        The body for creating or updating a field definition.
 
         Resource limits (enforced on write; a violation returns `400`): an owner may have at most 200 field definitions per space. The `definition` string may not exceed 30000 characters.
 
@@ -138688,7 +138674,7 @@ components:
           type: string
         isGlobal:
           description: |
-            When true, this field is rendered in every case for this owner, regardless of the template used. Global fields cannot be demoted (set to false) while they are linked to an active v1 custom field in the Cases configuration.
+            When true, this field is rendered in every case for this owner, regardless of the template used. Global fields cannot be demoted (set to false) while they are linked to an active custom field in the Cases configuration.
           type: boolean
         name:
           description: |
