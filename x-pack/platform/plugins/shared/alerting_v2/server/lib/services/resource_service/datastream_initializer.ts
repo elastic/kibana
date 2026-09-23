@@ -118,7 +118,9 @@ export class DatastreamInitializer implements IResourceInitializer {
 
     this.logger.warn(
       `[alerting_v2] ${dataStreamName}: one-time destructive migration — ` +
-        `episode.id is a real object field in the deployed template (v${deployedVersion ?? 'unknown'}), ` +
+        `episode.id is a real object field in the deployed template (v${
+          deployedVersion ?? 'unknown'
+        }), ` +
         `predating the episode→alert field rename. ` +
         `Wiping data stream; all rule-events history is lost. ` +
         `This fires exactly once; subsequent restarts skip this path. ` +
