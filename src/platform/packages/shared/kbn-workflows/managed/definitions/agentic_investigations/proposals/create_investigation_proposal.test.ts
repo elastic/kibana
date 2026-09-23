@@ -38,7 +38,15 @@ interface WorkflowStep {
   'iteration-timeout'?: string;
   with?: Record<string, unknown>;
   steps?: WorkflowStep[];
+  /** An `if` step's false branch. Every traversal below has to include it. */
+  else?: WorkflowStep[];
 }
+
+/** Both branches of a step, so nothing in an `else` escapes these assertions. */
+const childrenOf = (step: WorkflowStep): WorkflowStep[] => [
+  ...(step.steps ?? []),
+  ...(step.else ?? []),
+];
 
 interface ParsedWorkflow {
   consts?: Record<string, unknown>;
@@ -56,17 +64,17 @@ interface ParsedWorkflow {
 
 const workflow = parse(CREATE_INVESTIGATION_PROPOSAL_YAML) as ParsedWorkflow;
 
+/** The deadline a caller gets when it does not ask for one. */
+const DEFAULT_EXPIRES_IN = '72h';
+
 const findStep = (steps: WorkflowStep[], name: string): WorkflowStep | undefined => {
   for (const step of steps) {
     if (step.name === name) {
       return step;
     }
-    const nested = step.steps;
-    if (nested) {
-      const match = findStep(nested, name);
-      if (match) {
-        return match;
-      }
+    const match = findStep(childrenOf(step), name);
+    if (match) {
+      return match;
     }
   }
   return undefined;
@@ -74,7 +82,7 @@ const findStep = (steps: WorkflowStep[], name: string): WorkflowStep | undefined
 
 /** Every descendant of a step, so containment can be asserted. */
 const collectNames = (steps: WorkflowStep[]): string[] =>
-  steps.flatMap((step) => [step.name ?? '', ...collectNames(step.steps ?? [])]);
+  steps.flatMap((step) => [step.name ?? '', ...collectNames(childrenOf(step))]);
 
 const gate = () => findStep(workflow.steps, 'await_decision')!;
 const loop = () => findStep(workflow.steps, 'decision_loop')!;
@@ -111,7 +119,7 @@ const BUILT_IN_STEP_SCHEMAS: Record<string, z.ZodType> = {
 /** Every step in the definition, including the failure handler's fallback. */
 const allSteps = (): WorkflowStep[] => {
   const flatten = (steps: WorkflowStep[]): WorkflowStep[] =>
-    steps.flatMap((step) => [step, ...flatten(step.steps ?? [])]);
+    steps.flatMap((step) => [step, ...flatten(childrenOf(step))]);
 
   return [
     ...flatten(workflow.steps),
@@ -124,7 +132,7 @@ const updateProposalSteps = (): WorkflowStep[] => {
   const collect = (steps: WorkflowStep[]): WorkflowStep[] =>
     steps.flatMap((step) => [
       ...(step.type === 'proposals.updateProposal' ? [step] : []),
-      ...collect(step.steps ?? []),
+      ...collect(childrenOf(step)),
     ]);
 
   return [
@@ -196,29 +204,39 @@ describe('create-investigation-proposal workflow', () => {
       expect(gate().timeout).toBe('{{ variables.remaining_seconds }}s');
     });
 
-    it('always creates with a deadline, which the gate timeout now depends on', () => {
-      // `remaining_seconds` only counts down from an `expiresAt`. Without one
-      // it renders negative, and `settle_expired` cannot catch that because it
-      // is gated on `has_deadline` — so the gate would hand an invalid
-      // duration to `assertValidDuration` instead of parking.
+    it('always creates with a deadline, which the gate timeout depends on', () => {
+      // `remaining_seconds` only counts down from an `expiresAt`. The caller
+      // may supply one, but the default has to be a duration the service can
+      // resolve, or the gate has nothing to park against.
       const create = findStep(workflow.steps, 'create_proposal');
+      const expiresIn = String(create?.with?.expiresIn);
 
-      expect(isValidDuration(create?.with?.expiresIn)).toBe(true);
+      expect(expiresIn).toContain('inputs.expiresIn');
+      expect(isValidDuration(DEFAULT_EXPIRES_IN)).toBe(true);
+      expect(expiresIn).toContain(`default: '${DEFAULT_EXPIRES_IN}'`);
     });
 
-    it('keeps the workflow ceiling above the gate budget, so the gate times out first', () => {
-      // The ceiling must never fire first. Its timeout runs no handler at all
-      // — `EnterWorkflowTimeoutZoneNodeImpl.monitor()` marks the execution
-      // TIMED_OUT and `catchError` returns early — whereas the gate's timeout
-      // reaches the workflow-level handler, which settles the record as
-      // `expired`. Every park is bounded by what is left of the deadline, so
-      // that deadline is the gate's whole budget however often it re-parks.
+    it('keeps the ceiling a sentinel, not a bound sized to any particular deadline', () => {
+      // The ceiling runs no handler at all — `EnterWorkflowTimeoutZoneNodeImpl
+      // .monitor()` marks the execution TIMED_OUT and `catchError` returns
+      // early — so a ceiling that can fire before the gate settles strands the
+      // record, which is the outcome this definition exists to prevent. The
+      // engine has no "no timeout", so the only safe value is one far beyond
+      // any deadline a caller would pass. Orders of magnitude, not margin.
       const ceiling = parseDuration(String(workflow.settings?.timeout));
-      const gateBudget = parseDuration(
-        String(findStep(workflow.steps, 'create_proposal')?.with?.expiresIn)
-      );
 
-      expect(ceiling).toBeGreaterThan(gateBudget);
+      expect(ceiling).toBeGreaterThan(parseDuration(DEFAULT_EXPIRES_IN) * 50);
+    });
+
+    it('does not bound the deadline a caller may ask for', () => {
+      // Bounding it would only ever exist to protect the ceiling, and the
+      // ceiling is a sentinel precisely so no such bound is needed.
+      const expiresIn = workflow.triggers.find(({ type }) => type === 'manual')?.inputs?.properties
+        ?.expiresIn as { type?: string; enum?: string[]; maxLength?: number } | undefined;
+
+      expect(expiresIn?.type).toBe('string');
+      expect(expiresIn?.enum).toBeUndefined();
+      expect(expiresIn?.maxLength).toBeUndefined();
     });
 
     it('does not set iteration-timeout, which would truncate the parked gate', () => {
@@ -259,18 +277,21 @@ describe('create-investigation-proposal workflow', () => {
           .map((key) => `${step.name} (${step.type}): ${key}`);
       });
 
-      // Both are load-bearing and both are covered end to end by the plugin's
-      // integration tests: the gate's handler settles an unanswered proposal
-      // as `expired`, and the action's keeps a failed action inside the loop
-      // so it can be cloned and re-offered. Pinned, not removed.
-      // The two settle blocks use the same engine-honoured-but-schema-unmodelled
-      // key on `if` steps: their `on-failure.retry` re-resolves the live head
-      // before rewriting when a revision wins the TOCTOU race against
-      // `record_expiry`/`record_exhaustion`. Same #19315 gap, pinned likewise.
+      // All three are load-bearing and covered end to end by the plugin's
+      // integration tests: the gate's handler keeps an unanswered proposal
+      // inside the loop to be settled as `expired`, the action's keeps a
+      // failed action inside the loop so it can be cloned and re-offered, and
+      // `settle_expired`'s `on-failure.retry` re-resolves the live head when a
+      // revision wins the TOCTOU race against `record_expiry`. Pinned, not
+      // removed.
+      //
+      // `settle_exhausted` used to be a fourth. Its write is best-effort now,
+      // so it carries `on-failure: continue` on `record_exhaustion` instead —
+      // a `proposals.*` step, whose connector-derived schema does model the
+      // key, which is why it does not appear here.
       expect(unmodelled.sort()).toEqual([
         'await_decision (waitForApproval): on-failure',
         'execute_action (workflow.execute): on-failure',
-        'settle_exhausted (if): on-failure',
         'settle_expired (if): on-failure',
       ]);
     });
@@ -282,17 +303,21 @@ describe('create-investigation-proposal workflow', () => {
       expect(loop().condition).toContain('variables.completed');
     });
 
-    it('bounds itself in-loop as well as with max-iterations', () => {
+    it('leaves the loop on max-iterations rather than throwing, and counts it only once', () => {
+      // `ExitWhileNodeImpl` throws on `on-limit: fail`, and a `while` is in
+      // `flowControlStepTypes`, which `handleWorkflowLevelOnFailure` skips —
+      // so that throw would reach no handler and strand the record. `continue`
+      // exits the loop and falls through to `output_result`.
+      //
+      // The budget used to be counted twice: `max-iterations` plus a
+      // hand-rolled `attempts_left` compared in a `settle_exhausted` block,
+      // which existed only because the throw was unreachable. One counter now.
       const maxIterations = loop()['max-iterations'] as { limit?: number; 'on-limit'?: string };
 
-      // `on-limit: fail` alone cannot settle the record: a `while` is a
-      // flow-control step, so it is excluded from the workflow-level
-      // `on-failure` wrapping and its throw reaches no handler. The in-loop
-      // budget check is what actually writes a terminal status.
-      expect(maxIterations.limit).toBe(workflow.consts?.max_attempts);
-      expect(maxIterations['on-limit']).toBe('fail');
-      expect(findStep(workflow.steps, 'settle_exhausted')).toBeDefined();
-      expect(findStep(workflow.steps, 'break_exhausted')?.type).toBe('loop.break');
+      expect(maxIterations['on-limit']).toBe('continue');
+      expect(maxIterations.limit).toBeGreaterThanOrEqual(200);
+      expect(findStep(workflow.steps, 'settle_exhausted')).toBeUndefined();
+      expect(workflow.consts?.max_attempts).toBeUndefined();
     });
 
     it('derives each attempt from the fixed deadline, so a retry cannot extend it', () => {
@@ -303,10 +328,18 @@ describe('create-investigation-proposal workflow', () => {
       expect(String(remaining?.with?.remaining_seconds)).toContain('variables.expires_epoch');
     });
 
-    it('computes the epoch and the difference in separate steps', () => {
-      // Liquid cannot read a variable written by the same `data.set`.
-      expect(findStep(workflow.steps, 'compute_now')?.with?.now_epoch).toBeDefined();
-      expect(findStep(workflow.steps, 'compute_remaining')?.with?.remaining_seconds).toBeDefined();
+    it('reads the clock and subtracts it in one step, on both sides of the gate', () => {
+      // Liquid cannot read a variable written by the same `data.set`, which
+      // used to mean storing `now_epoch` and subtracting it in a second step —
+      // twice over, once each side of the gate. Negating `now` and adding it
+      // needs no intermediate variable.
+      for (const name of ['compute_remaining', 'recompute_remaining']) {
+        expect(String(findStep(workflow.steps, name)?.with?.remaining_seconds)).toContain(
+          'times: -1 | plus: variables.expires_epoch'
+        );
+      }
+      expect(findStep(workflow.steps, 'compute_now')).toBeUndefined();
+      expect(findStep(workflow.steps, 'recompute_now')).toBeUndefined();
     });
 
     it('settles an expired proposal rather than parking on a non-positive duration', () => {
@@ -317,10 +350,19 @@ describe('create-investigation-proposal workflow', () => {
       expect(findStep(workflow.steps, 'break_expired')?.type).toBe('loop.break');
     });
 
-    it('only treats a deadline as passed when the proposal has one', () => {
-      expect(findStep(workflow.steps, 'settle_expired')?.condition).toContain(
-        'variables.has_deadline'
-      );
+    it('carries "no deadline" as a date the loop never reaches, not as a second flag', () => {
+      // A proposal with no `expiresAt` used to need a `has_deadline` guard
+      // paired with every deadline check. Defaulting the epoch to a far-future
+      // date says the same thing arithmetically and keeps both checks a single
+      // comparison.
+      const init = findStep(workflow.steps, 'init_state');
+
+      expect(String(init?.with?.expires_epoch)).toContain('default:');
+      for (const name of ['settle_expired', 'settle_expired_after_gate']) {
+        expect(findStep(workflow.steps, name)?.condition).toBe(
+          '${{ variables.remaining_seconds <= 0 }}'
+        );
+      }
     });
 
     it('avoids mixing and/or in a condition, which Liquid binds unpredictably', () => {
@@ -397,21 +439,29 @@ describe('create-investigation-proposal workflow', () => {
       expect(checkIndex).toBeGreaterThan(body.indexOf('gate_branch'));
       // If a write came first and threw instead, the gate would already be
       // spent and the proposal would strand with no way to retry.
-      for (const branch of ['handle_dismissal', 'approve_without_action', 'approve_with_action']) {
+      for (const branch of [
+        'handle_gate_timeout',
+        'settle_expired_after_gate',
+        'handle_dismissal',
+        'approve_without_action',
+        'approve_with_action',
+      ]) {
         expect(body.indexOf(branch)).toBeGreaterThan(checkIndex);
       }
       // The chain resolve reads the proposal, so it waits for the check too:
       // an unauthorized resumer is re-parked before anything reads on its
       // behalf.
-      expect(body.indexOf('adopt_live_head_after_wait_branch')).toBeGreaterThan(checkIndex);
+      expect(body.indexOf('adopt_live_head_before_writes_branch')).toBeGreaterThan(checkIndex);
     });
 
-    it('only checks when a human answered, since the auto path has no decider', () => {
-      // On the autonomy path the principal is the Worker, which necessarily
-      // holds the privilege — it created the proposal — so the check could
-      // only ever pass, at the cost of a round trip per iteration.
+    it('only checks when someone answered, since neither autonomy nor a timeout has a decider', () => {
+      // `gate_answered` rather than `needs_gate`: on the autonomy path the
+      // principal is the Worker, which necessarily holds the privilege — it
+      // created the proposal — and a timed-out gate has no resumer at all, so
+      // in both cases the check could only ever pass as the workflow runner,
+      // at the cost of a round trip per iteration.
       expect(findStep(workflow.steps, 'authorize_decision')?.condition).toContain(
-        'variables.needs_gate == true'
+        'variables.gate_answered == true'
       );
     });
 
@@ -442,7 +492,10 @@ describe('create-investigation-proposal workflow', () => {
       const body = (loop().steps ?? []).map(({ name }) => name);
 
       expect(body.indexOf('recompute_remaining')).toBeGreaterThan(body.indexOf('gate_branch'));
-      expect(body.indexOf('recompute_remaining')).toBeLessThan(body.indexOf('authorize_decision'));
+      // Both branches that read the recomputed clock come after it.
+      expect(body.indexOf('recompute_remaining')).toBeLessThan(
+        body.indexOf('settle_expired_after_gate')
+      );
     });
 
     it('settles a late decision as expired and breaks', () => {
@@ -451,13 +504,6 @@ describe('create-investigation-proposal workflow', () => {
       expect(settle?.condition).toContain('variables.remaining_seconds <= 0');
       expect(findStep(workflow.steps, 'record_late_expiry')?.with?.status).toBe('expired');
       expect(findStep(workflow.steps, 'break_late_expiry')?.type).toBe('loop.break');
-    });
-
-    it('recomputes in separate steps, since Liquid cannot chain within one', () => {
-      expect(findStep(workflow.steps, 'recompute_now')?.with?.now_epoch).toBeDefined();
-      expect(
-        findStep(workflow.steps, 'recompute_remaining')?.with?.remaining_seconds
-      ).toBeDefined();
     });
   });
 
@@ -469,30 +515,64 @@ describe('create-investigation-proposal workflow', () => {
       expect(gate()['on-failure']?.continue).toBe(true);
     });
 
-    it('settles a timed-out gate as expired before reading its answer', () => {
-      const handle = findStep(workflow.steps, 'handle_gate_timeout');
-      const record = findStep(workflow.steps, 'record_gate_expiry');
-
-      // A timed-out gate answers blank, which `resolve_gate` would record as a
-      // dismissal, so the branch has to come first.
+    it('carries the timeout out of the gate branch as a variable, since the output is evicted', () => {
+      // `handle_gate_timeout` runs past the single adopt, where
+      // `steps.await_decision` is no longer readable, so `resolve_gate` has to
+      // hand the failure on the same way it hands on the answer.
       const gateBranchOrder = (findStep(workflow.steps, 'gate_branch')?.steps ?? []).map(
         ({ name }) => name
       );
-      expect(gateBranchOrder).toEqual(['await_decision', 'handle_gate_timeout', 'resolve_gate']);
-      // The adoption used to sit here, between the wait and everything that
-      // reads or writes the carried id. It now happens on each path that
-      // needs it: the timeout handler adopts before its own write, and the
-      // answered path adopts after the privilege check. Same guarantee - a
-      // revision that landed during the park makes the carried id a
-      // superseded row, which the timeout write and the release route both
-      // refuse - without reading the chain before the resumer is authorized.
-      expect((handle?.steps ?? []).map(({ name }) => name)[0]).toBe(
-        'adopt_live_head_on_timeout_branch'
-      );
+      expect(gateBranchOrder).toEqual(['await_decision', 'resolve_gate']);
 
-      expect(handle?.condition).toContain('steps.await_decision.error != blank');
-      expect(record?.with?.status).toBe('expired');
+      const resolve = findStep(workflow.steps, 'resolve_gate');
+      expect(String(resolve?.with?.gate_timed_out)).toContain('steps.await_decision.error');
+      expect(String(resolve?.with?.gate_error)).toContain('steps.await_decision.error.message');
+
+      // Variables outlive an iteration, so the autonomy branch has to set
+      // every one of them or a later pass reads the gated pass's answer.
+      const auto = findStep(workflow.steps, 'resolve_auto');
+      expect(Object.keys(auto?.with ?? {}).sort()).toEqual(Object.keys(resolve?.with ?? {}).sort());
+    });
+
+    it("puts the autonomy path in the gate step's else, so the two cannot both run", () => {
+      // They were two `if` steps with complementary conditions, which left the
+      // mutual exclusivity to the reader and to whoever edits either condition.
+      const gateStep = findStep(workflow.steps, 'gate_branch');
+
+      expect(gateStep?.condition).toContain('variables.needs_gate == true');
+      expect((gateStep?.else ?? []).map(({ name }) => name)).toEqual(['resolve_auto']);
+      expect(findStep(workflow.steps, 'auto_branch')).toBeUndefined();
+    });
+
+    it('settles a timed-out gate as expired, on the deadline it was parked against', () => {
+      const handle = findStep(workflow.steps, 'handle_gate_timeout');
+
+      expect(handle?.condition).toContain('variables.gate_timed_out == true');
+      expect(findStep(workflow.steps, 'record_gate_expiry')?.with?.status).toBe('expired');
+      expect(
+        String(findStep(workflow.steps, 'record_gate_expiry')?.with?.executionError)
+      ).toContain('variables.gate_error');
       expect(findStep(workflow.steps, 'break_gate_expiry')?.type).toBe('loop.break');
+    });
+
+    it('settles a timeout before the late-decision branch, which would misreport it', () => {
+      // The gate's timeout *is* the time left on the deadline, so every
+      // timeout also satisfies `settle_expired_after_gate`. Checking that
+      // first would swallow every timeout and record that a decision arrived
+      // after the deadline when none arrived at all.
+      const body = (loop().steps ?? []).map(({ name }) => name);
+
+      expect(body.indexOf('handle_gate_timeout')).toBeLessThan(
+        body.indexOf('settle_expired_after_gate')
+      );
+    });
+
+    it('settles a timeout before the dismissal branch, which would invent a decision', () => {
+      // A timed-out gate answers blank, so `gate_approved` is false and
+      // `handle_dismissal` would record a dismissal nobody made.
+      const body = (loop().steps ?? []).map(({ name }) => name);
+
+      expect(body.indexOf('handle_gate_timeout')).toBeLessThan(body.indexOf('handle_dismissal'));
     });
   });
 
@@ -516,67 +596,65 @@ describe('create-investigation-proposal workflow', () => {
       // The gate belongs to the chain, not to one revision: a revision appended
       // while it was parked marks the row this execution created `superseded`,
       // which is terminal, so a decision written on the carried id would be
-      // refused. This is the adoption the dismissal branch used to defer.
-      const resolve = findStep(workflow.steps, 'resolve_live_head_after_wait');
-      const adopt = findStep(workflow.steps, 'adopt_live_head_after_wait');
+      // refused.
+      const resolve = findStep(workflow.steps, 'resolve_live_head_before_writes');
+      const adopt = findStep(workflow.steps, 'adopt_live_head_before_writes');
 
       expect(resolve?.type).toBe('proposals.getLatestRevision');
       expect(String(resolve?.with?.proposalId)).toContain('variables.current_proposal_id');
       expect(String(adopt?.with?.current_proposal_id)).toContain(
-        'steps.resolve_live_head_after_wait.output.proposalId'
+        'steps.resolve_live_head_before_writes.output.proposalId'
       );
       // The input travels with the id: resolving the head but keeping the
       // trigger's input would approve one revision and execute another's.
       expect(String(adopt?.with?.action_input)).toContain(
-        'steps.resolve_live_head_after_wait.output.actionInput'
+        'steps.resolve_live_head_before_writes.output.actionInput'
       );
     });
 
-    it('adopts on each path that writes, before the timeout write and the release call', () => {
-      // A timed-out gate writes `expired` on the carried id, and `resolve_gate`
-      // hands that id to the release route, which refuses a row that is already
-      // `superseded`. Adopting after either would settle the superseded
-      // predecessor — or fail the resume outright. The timeout path adopts
-      // inside its own handler; the answered path adopts in the loop body,
-      // after the privilege check, so no chain read happens on behalf of a
-      // resumer who has not been authorized yet.
-      const timeoutSteps = (findStep(workflow.steps, 'handle_gate_timeout')?.steps ?? []).map(
-        ({ name }) => name
-      );
-      const timeoutAdopt = timeoutSteps.indexOf('adopt_live_head_on_timeout_branch');
-      expect(timeoutAdopt).toBeGreaterThanOrEqual(0);
-      expect(timeoutAdopt).toBeLessThan(timeoutSteps.indexOf('record_gate_expiry'));
-
+    it('routes every post-gate write through that one adopt', () => {
+      // The timeout, autonomy and answered paths each used to carry an adopt
+      // of their own. One placed after the privilege check and before every
+      // branch that writes covers all three, and is the only reason the
+      // branches below it can be read as a plain sequence.
       const body = (loop().steps ?? []).map(({ name }) => name);
-      const answeredAdopt = body.indexOf('adopt_live_head_after_wait_branch');
-      expect(answeredAdopt).toBeGreaterThan(body.indexOf('authorize_decision'));
-      for (const write of ['handle_dismissal', 'approve_without_action', 'approve_with_action']) {
-        expect(body.indexOf(write)).toBeGreaterThan(answeredAdopt);
-      }
+      const adopt = body.indexOf('adopt_live_head_before_writes_branch');
 
-      const expiry = findStep(workflow.steps, 'record_gate_expiry');
-      expect(String(expiry?.with?.proposalId)).toBe('{{ variables.current_proposal_id }}');
+      expect(adopt).toBeGreaterThan(body.indexOf('gate_branch'));
+      expect(adopt).toBeGreaterThan(body.indexOf('auto_branch'));
+      for (const write of [
+        'handle_gate_timeout',
+        'settle_expired_after_gate',
+        'handle_dismissal',
+        'approve_without_action',
+        'approve_with_action',
+      ]) {
+        expect(body.indexOf(write)).toBeGreaterThan(adopt);
+      }
     });
 
-    it('adopts in the auto branch too, for a loop parked by an earlier iteration', () => {
-      const autoSteps = (findStep(workflow.steps, 'auto_branch')?.steps ?? []).map(
-        ({ name }) => name
-      );
-      const adoptIndex = autoSteps.indexOf('adopt_live_head_before_auto_branch');
+    it('keeps exactly two adopt sites in the loop, and none inside a branch that writes', () => {
+      // The count is the simplification: five placements were five chances to
+      // add a write without one. Any new adopt inside a branch means the
+      // sequence above stopped being enough, which is worth noticing.
+      const bodyNames = (loop().steps ?? []).map(({ name }) => name);
+      const adoptsInBody = bodyNames.filter((name) => name?.startsWith('adopt_live_head'));
 
-      expect(adoptIndex).toBeGreaterThanOrEqual(0);
-      expect(adoptIndex).toBeLessThan(autoSteps.indexOf('resolve_auto'));
+      expect(adoptsInBody).toEqual([
+        'adopt_live_head_each_iteration_branch',
+        'adopt_live_head_before_writes_branch',
+      ]);
     });
 
     it('adopts the live head before the first write of an iteration, not only after the gate', () => {
-      // `settle_expired` and `settle_exhausted` are the iteration's earliest
-      // writes. A revision appended between iterations moves the chain head, so
-      // resolving only inside `gate_branch` leaves those two settling a row the
-      // service now refuses -- the run fails and the live revision stays pending.
+      // `settle_expired` is the iteration's earliest write. A revision
+      // appended between iterations moves the chain head, so resolving only
+      // inside `gate_branch` leaves it settling a row the service now refuses
+      // -- the run fails and the live revision stays pending.
       const body = (loop().steps ?? []).map(({ name }) => name);
       const adoptIndex = body.indexOf('adopt_live_head_each_iteration_branch');
       expect(adoptIndex).toBeGreaterThanOrEqual(0);
-      for (const write of ['settle_expired', 'settle_exhausted']) {
+      for (const write of ['settle_expired']) {
         expect(body.indexOf(write)).toBeGreaterThan(adoptIndex);
       }
     });
@@ -629,30 +707,13 @@ describe('create-investigation-proposal workflow', () => {
       expect(String(write?.with?.proposalId)).toContain('variables.current_proposal_id');
     });
 
-    it('settles onto the live head when a revision wins the race to record_exhaustion', () => {
-      const block = findStep(workflow.steps, 'settle_exhausted');
-      const retry = block?.['on-failure']?.retry;
-      expect(retry?.['max-attempts']).toBeGreaterThanOrEqual(2);
-      expect(String(retry?.condition)).toContain('ConflictError');
-      const names = (block?.steps ?? []).map(({ name }) => name);
-      expect(names.indexOf('resolve_live_head_on_exhaustion_conflict')).toBeGreaterThanOrEqual(0);
-      expect(names.indexOf('resolve_live_head_on_exhaustion_conflict')).toBeLessThan(
-        names.indexOf('record_exhaustion')
-      );
-      const adopt = findStep(workflow.steps, 'adopt_live_head_on_exhaustion_conflict');
-      expect(String(adopt?.with?.current_proposal_id)).toContain(
-        'steps.resolve_live_head_on_exhaustion_conflict.output.proposalId'
-      );
-    });
-
     it('does not retry a non-conflict settle failure', () => {
       // Only a ConflictError means "the head moved under us"; a transport or
       // service fault wants the workflow-level fallback, not a blind rewrite.
-      for (const name of ['settle_expired', 'settle_exhausted']) {
-        const retry = findStep(workflow.steps, name)?.['on-failure']?.retry;
-        expect(String(retry?.condition)).toContain('ConflictError');
-        expect(String(retry?.condition)).not.toContain('ApiError');
-      }
+      const retry = findStep(workflow.steps, 'settle_expired')?.['on-failure']?.retry;
+
+      expect(String(retry?.condition)).toContain('ConflictError');
+      expect(String(retry?.condition)).not.toContain('ApiError');
     });
   });
 
@@ -754,9 +815,31 @@ describe('create-investigation-proposal workflow', () => {
 
     it('settles from the carried id, not the create step output that a clone invalidates', () => {
       const fallback = workflow.settings?.['on-failure']?.fallback ?? [];
+      const addressed = fallback.filter((step) => step.with?.proposalId !== undefined);
 
-      for (const step of fallback) {
+      expect(addressed.length).toBeGreaterThan(0);
+      for (const step of addressed) {
         expect(String(step.with?.proposalId)).toContain('variables.current_proposal_id');
+      }
+    });
+
+    it('adopts the live head before settling, or the handler fails the way the loop did', () => {
+      // This is the last thing that can settle the record. A revision landing
+      // during the park leaves the carried id superseded, which `updateProposal`
+      // refuses — so without this the handler throws on the same conflict that
+      // brought it here, and the live revision is left `pending` against an
+      // execution that is already over.
+      const fallback = workflow.settings?.['on-failure']?.fallback ?? [];
+      const names = fallback.map(({ name }) => name);
+      const resolve = findStep(fallback, 'resolve_live_head_on_failure');
+
+      expect(resolve?.type).toBe('proposals.getLatestRevision');
+      expect(
+        String(findStep(fallback, 'adopt_live_head_on_failure')?.with?.current_proposal_id)
+      ).toContain('steps.resolve_live_head_on_failure.output.proposalId');
+
+      for (const write of ['record_failure_after_decision', 'record_expiry_before_decision']) {
+        expect(names.indexOf(write)).toBeGreaterThan(names.indexOf('adopt_live_head_on_failure'));
       }
     });
 

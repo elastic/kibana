@@ -21,6 +21,15 @@ const ACTION_WORKFLOW_ID = 'system-alertzero-action-create-rule';
  * step execution, that `data.set` variables survive a resume, and that every
  * decision/status pair the workflow writes is one the service will accept.
  */
+/**
+ * Hours between `from` and the proposal's recorded deadline. Approximate by
+ * construction: the service stamps `expiresAt` from its own clock a few
+ * milliseconds after the caller reads one, so assertions compare to a
+ * precision, not to an exact boundary.
+ */
+const hoursUntilDeadline = (fixture: ProposalGateFixture, from: number): number =>
+  (Date.parse(fixture.onlyProposal().expiresAt!) - from) / 3_600_000;
+
 describe('create-investigation-proposal workflow execution', () => {
   let fixture: ProposalGateFixture;
 
@@ -42,6 +51,23 @@ describe('create-investigation-proposal workflow execution', () => {
       await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID });
 
       expect(fixture.onlyProposal().expiresAt).toEqual(expect.any(String));
+    });
+
+    it('should default that deadline to 72h when the caller does not ask for one', async () => {
+      const before = Date.now();
+      await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID });
+
+      expect(hoursUntilDeadline(fixture, before)).toBeCloseTo(72, 1);
+    });
+
+    it('should honour a deadline the caller does ask for', async () => {
+      // The gate parks against whatever this resolves to, so a worker that
+      // knows its decision is urgent can shorten the window without the queue
+      // and the gate disagreeing about when it expires.
+      const before = Date.now();
+      await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID, expiresIn: '4h' });
+
+      expect(hoursUntilDeadline(fixture, before)).toBeCloseTo(4, 1);
     });
 
     it('should record the execution so approving resumes the run that created it', async () => {
@@ -192,6 +218,40 @@ describe('create-investigation-proposal workflow execution', () => {
       expect(supersededOriginal.status).toBe('superseded');
       expect(supersededOriginal.supersededBy).toBe(revision.id);
       expect(revision.decision).toBe('approved');
+    });
+
+    // The post-gate settles used to run before the adoption, so a decision
+    // arriving late on a revised chain wrote to the superseded predecessor.
+    // `superseded` is terminal, so the write was refused rather than accepted —
+    // and the workflow-level handler then failed on the same conflict, leaving
+    // the live revision `pending` against an execution that was already over.
+    it('settles the live revision when a decision arrives after the deadline', async () => {
+      await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID });
+      const original = fixture.onlyProposal();
+
+      await fixture.revise({ comment: 'clarified per analyst request' });
+      await fixture.resumeAfterDeadline(true);
+
+      const [predecessor, revision] = fixture.proposals();
+      expect(predecessor.id).toBe(original.id);
+      // Untouched: settling has to land on the head, not resurrect the row it
+      // replaced.
+      expect(predecessor.status).toBe('superseded');
+      // Past the deadline, so the approval is refused rather than run — but it
+      // is the revision that gets settled, and it does get settled.
+      expect(revision.status).toBe('expired');
+      expect(revision.decision).toBeUndefined();
+    });
+
+    it('completes the run rather than stranding it when that decision is late', async () => {
+      await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID });
+
+      await fixture.revise({ comment: 'clarified per analyst request' });
+      await fixture.resumeAfterDeadline(true);
+
+      expect(fixture.executionStatus()).toBe(ExecutionStatus.COMPLETED);
+      // The action must not run: the deadline passed before the answer landed.
+      expect(fixture.stepExecutions('execute_action', 'workflow.execute')).toHaveLength(0);
     });
   });
 

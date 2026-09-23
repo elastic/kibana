@@ -122,6 +122,14 @@ export interface ProposalGateFixture {
   start: (inputs?: Record<string, unknown>) => Promise<void>;
   /** Answers the parked gate as a human would through a resume surface. */
   resume: (approved: boolean, respondedBy?: string) => Promise<void>;
+  /**
+   * The same answer, arriving after the deadline. Reachable because the step
+   * only treats a wake as expired when it carries no `resumeInput`, so a
+   * resume through the platform API or the Inbox is accepted past the
+   * deadline where the HTTP routes would refuse it. That is the only reason
+   * `settle_expired_after_gate` exists.
+   */
+  resumeAfterDeadline: (approved: boolean, respondedBy?: string) => Promise<void>;
   /** Revises the live proposal through the real service while the gate is parked. */
   revise: (overrides: { comment?: string; actionInput?: Record<string, unknown> }) => Promise<void>;
   /**
@@ -173,6 +181,18 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
       ([id, { document }]) => ({ id, ...document } as Proposal & { id: string })
     );
 
+  /** Stages the payload `waitForApproval` reduces a resume to, without waking the run. */
+  const stageResume = (approved: boolean, respondedBy: string) => {
+    const execution = engine.workflowExecutionRepositoryMock.workflowExecutions.get(
+      'fake_workflow_execution_id'
+    )!;
+    // The shape `waitForApproval` reduces a resume payload to. Anything else
+    // a caller sends is discarded by the platform, which is why the route
+    // has to write the dismiss reason itself.
+    execution.context = { ...execution.context, resumeInput: { approved }, resumedBy: respondedBy };
+    engine.workflowExecutionRepositoryMock.workflowExecutions.set(execution.id, execution);
+  };
+
   return {
     engine,
     proposals,
@@ -198,19 +218,20 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
       });
     },
     resume: async (approved, respondedBy = 'analyst') => {
-      const execution = engine.workflowExecutionRepositoryMock.workflowExecutions.get(
-        'fake_workflow_execution_id'
-      )!;
-      // The shape `waitForApproval` reduces a resume payload to. Anything else
-      // a caller sends is discarded by the platform, which is why the route
-      // has to write the dismiss reason itself.
-      execution.context = {
-        ...execution.context,
-        resumeInput: { approved },
-        resumedBy: respondedBy,
-      };
-      engine.workflowExecutionRepositoryMock.workflowExecutions.set(execution.id, execution);
+      stageResume(approved, respondedBy);
       await engine.resumeWorkflow();
+    },
+    resumeAfterDeadline: async (approved, respondedBy = 'analyst') => {
+      stageResume(approved, respondedBy);
+      // Past the deadline, but carrying an answer — so the step accepts the
+      // resume instead of failing the wait, and the loop's own post-gate
+      // deadline check is what has to catch it.
+      jest.useFakeTimers({ now: new Date(Date.now() + GATE_TIMEOUT_MS + 60_000) });
+      try {
+        await engine.resumeWorkflow();
+      } finally {
+        jest.useRealTimers();
+      }
     },
     /**
      * Goes through the real service, the same path the tool and HTTP route take,
