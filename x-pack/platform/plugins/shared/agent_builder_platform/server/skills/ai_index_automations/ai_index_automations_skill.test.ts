@@ -413,7 +413,9 @@ describe('aiIndexAutomationsSkill', () => {
     });
 
     it('has run_automation report a failed start as the final answer, not a retryable task', () => {
-      expect(content).toMatch(/run_automation` reports that the run did not start, that is the answer/);
+      expect(content).toMatch(
+        /run_automation` reports that the run did not start, that is the answer/
+      );
       expect(content).toMatch(/that is the answer, not a task/);
       expect(content).toMatch(/a second attempt doubles it/);
     });
