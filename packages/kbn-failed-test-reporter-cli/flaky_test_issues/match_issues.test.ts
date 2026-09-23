@@ -282,7 +282,7 @@ describe('findMatchingIssues', () => {
     const [jest] = groupIntoSuites([
       flakyTest({ title: 'loads', suiteTitle: 'A', framework: 'jest' }),
     ]);
-    const jestIssue = describeIssue(
+    const jestIssueForA = describeIssue(
       githubIssue({
         number: 51,
         body: updateIssueMetadata(`| Location | ${SUITE_PATH} |`, {
@@ -303,8 +303,10 @@ describe('findMatchingIssues', () => {
     );
 
     // same name, other framework: a mention of the file, not a match of the test
-    expect(findMatchingIssues(playwright, [jestIssue]).map(({ match }) => match)).toEqual(['file']);
-    expect(findMatchingIssues(jest, [jestIssue]).map(({ match }) => match)).toEqual(['test']);
+    expect(findMatchingIssues(playwright, [jestIssueForA]).map(({ match }) => match)).toEqual([
+      'file',
+    ]);
+    expect(findMatchingIssues(jest, [jestIssueForA]).map(({ match }) => match)).toEqual(['test']);
     // no test.type recorded: the name still counts, as before
     expect(findMatchingIssues(playwright, [cypressIssue]).map(({ match }) => match)).toEqual([
       'test',
