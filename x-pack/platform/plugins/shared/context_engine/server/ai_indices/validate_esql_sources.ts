@@ -11,7 +11,7 @@ import { previewQuery } from '../ki_verification/verifiers/esql_attribute';
 import { formatValidationError } from '../ki_verification/verifiers/esql_valid_syntax';
 import { InvalidEsqlSourceError } from './errors';
 
-const validateEsqlSource = async (query: string): Promise<string | undefined> => {
+const validateSingleEsqlSource = async (query: string): Promise<string | undefined> => {
   if (query.trim() === '') {
     return 'ES|QL source value cannot be empty';
   }
@@ -31,7 +31,7 @@ export const validateEsqlSources = async (sources: AiIndexSource[]): Promise<voi
     if (source.type !== 'esql') {
       continue;
     }
-    const failure = await validateEsqlSource(source.value);
+    const failure = await validateSingleEsqlSource(source.value);
     if (failure) {
       failures.push(failure);
     }
