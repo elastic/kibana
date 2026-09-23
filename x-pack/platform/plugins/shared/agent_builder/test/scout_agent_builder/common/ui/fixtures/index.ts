@@ -37,12 +37,15 @@ export const test = mergeTests(baseTest, apiClientFixture).extend<
   llmProxy: [
     async ({ log, kbnClient }, use) => {
       const proxy = await createLlmProxy(log);
-      const { id: connectorId } = await createGenAiConnectorForProxy(kbnClient, proxy);
+      let connectorId: string | undefined;
       try {
+        ({ id: connectorId } = await createGenAiConnectorForProxy(kbnClient, proxy));
         await use(proxy);
       } finally {
         proxy.close();
-        await deleteConnectorById(kbnClient, connectorId);
+        if (connectorId) {
+          await deleteConnectorById(kbnClient, connectorId);
+        }
       }
     },
     { scope: 'worker', auto: true },
