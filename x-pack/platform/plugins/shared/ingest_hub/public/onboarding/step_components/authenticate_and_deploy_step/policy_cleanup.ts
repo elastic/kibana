@@ -86,8 +86,9 @@ export function resolveSurvivingMembers(
   const instanceById = new Map(instances.map((i) => [i.instanceId, i]));
   const members = survivingInstanceIds
     .map((id) => {
-      const inst = instanceById.get(id);
-      if (!inst) return null;
+      // Fall back to a synthetic base instance (instanceId === serviceId) when session-storage
+      // instances are absent — e.g. the user skipped Step 2 or sessions don't overlap.
+      const inst = instanceById.get(id) ?? { instanceId: id, serviceId: id, name: id, isDuplicate: false };
       const service = servicesMap.get(inst.serviceId);
       if (!service) return null;
       return { instance: inst, service };

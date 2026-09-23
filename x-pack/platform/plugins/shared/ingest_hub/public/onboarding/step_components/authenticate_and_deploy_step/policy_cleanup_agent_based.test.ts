@@ -122,6 +122,25 @@ describe('cleanupAgentBasedPolicies', () => {
     expect(mockGetPackageInfo).toHaveBeenCalledWith('aws', '2.5.0');
   });
 
+  it('fires PUT when instances is empty — synthesises base instance from servicesMap', async () => {
+    const service = makeService('vpcflow');
+    mockGetPackageInfo.mockResolvedValue({
+      data: { item: { version: '2.5.0', vars: [], policy_templates: [] } },
+    });
+    const ops = await cleanupAgentBasedPolicies({
+      ...BASE_OPTS,
+      instances: [],
+      servicesMap: new Map([['vpcflow', service]]),
+      // 'removed-svc' is being cleaned up; 'vpcflow' survives in the same policy.
+      pendingCleanupPolicyIds: { 'removed-svc': 'policy-1' },
+      currentPolicyIdsByInstance: { vpcflow: 'policy-1' },
+      selectedAgentPolicyIds: ['agent-policy-1'],
+    });
+    expect(mockUpdatePackagePolicy).toHaveBeenCalled();
+    expect(ops.toUpdate).toHaveLength(1);
+    expect(ops.toUpdate[0].policyId).toBe('policy-1');
+  });
+
   it('swallows individual update failures — does not reject the whole call', async () => {
     const instance = makeInstance('inst-b', 'vpcflow');
     const service = makeService('vpcflow');
