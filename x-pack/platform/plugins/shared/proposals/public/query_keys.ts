@@ -15,4 +15,8 @@ export const queryKeys = {
       [...queryKeys.proposals.all, 'conversation', conversationId] as const,
     detail: (id: string | undefined) => [...queryKeys.proposals.all, 'detail', id] as const,
   },
+  userProfiles: {
+    all: ['proposals', 'userProfiles'] as const,
+    current: () => [...queryKeys.userProfiles.all, 'current'] as const,
+  },
 };

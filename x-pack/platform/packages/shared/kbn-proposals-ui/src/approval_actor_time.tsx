@@ -8,11 +8,9 @@
 import React from 'react';
 import { FormattedRelative, FormattedTime } from '@kbn/i18n-react';
 import { selectUnit } from '@formatjs/intl-utils';
-import type { ApprovalOutcomeStatus } from './approval_outcome';
 
 export interface ApprovalActorTimeProps {
   actorName: string;
-  decisionType?: ApprovalOutcomeStatus;
   /** ISO 8601 timestamp. */
   at: string;
   /**
@@ -32,17 +30,12 @@ const INCREMENTABLE_UNITS: ReadonlyArray<ReturnType<typeof selectUnit>['unit']> 
   'hour',
 ];
 
-export const ApprovalActorTime = ({
-  actorName,
-  decisionType,
-  at,
-  live = false,
-}: ApprovalActorTimeProps) => {
+export const ApprovalActorTime = ({ actorName, at, live = false }: ApprovalActorTimeProps) => {
   const { unit } = selectUnit(new Date(at));
 
   return (
     <>
-      {decisionType && `${decisionType} by `}
+      {`by `}
       <strong>{actorName}</strong>
       {' at '}
       {live ? (
