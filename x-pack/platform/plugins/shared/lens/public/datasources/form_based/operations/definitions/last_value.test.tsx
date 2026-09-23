@@ -600,8 +600,8 @@ describe('last_value', () => {
         ).params.showArrayValues
       ).toBeTruthy();
 
-      // Must be strictly false (not undefined) so the export transform's `?? true`
-      // fallback in fromLastValueLensStateToAPI does not incorrectly output multi_value: true
+      // Must be strictly false (not undefined) so the export transform's `?? false`
+      // fallback in fromLastValueLensStateToAPI correctly outputs multi_value: false
       expect(
         lastValueOperation.buildColumn({
           indexPattern,
@@ -627,7 +627,7 @@ describe('last_value', () => {
       }).params;
 
       // Regression test: previously returned undefined, causing the Dashboard API export
-      // transform (showArrayValues ?? true) to incorrectly emit multi_value: true.
+      // transform (showArrayValues ?? false) to incorrectly emit multi_value: true.
       expect(showArrayValues).toBe(false);
       expect(typeof showArrayValues).toBe('boolean');
     });
