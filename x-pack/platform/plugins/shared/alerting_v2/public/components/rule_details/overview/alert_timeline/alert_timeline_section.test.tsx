@@ -10,7 +10,15 @@ import { act, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { createMockLocators, MockLocatorProvider } from '../../../../test_utils/test_providers';
 import { AlertTimelineSection } from './alert_timeline_section';
-import { AlertingV2EpisodesLocatorDefinition } from '../../../../locators';
+import { AlertingV2EpisodesLocatorDefinition, createAlertingV2HostApp } from '../../../../locators';
+
+const TEST_HOST = createAlertingV2HostApp('test-app', {
+  rules: '/alerting/rules',
+  ruleLibrary: '/alerting/library',
+  episodes: '/alerting/inbox',
+  actionPolicies: '/alerting/action-policies',
+  executionHistory: '/alerting/execution-history',
+});
 
 const mockLocators = createMockLocators();
 
@@ -148,16 +156,19 @@ describe('AlertTimelineSection', () => {
     jest.useRealTimers();
   });
 
-  it('episodes link params resolve to management episodes URL with filters', async () => {
+  it('episodes link params resolve to episodes URL with filters for the bound host', async () => {
     jest.useFakeTimers();
     jest.setSystemTime(new Date('2026-08-14T12:00:00.000Z'));
     renderSection();
 
     const { episodesLocators } = mockLocators;
     const [params] = jest.mocked(episodesLocators.useUrl).mock.calls[0];
-    const location = await AlertingV2EpisodesLocatorDefinition.getLocation(params);
-    expect(location.app).toBe('management');
-    expect(location.path).toMatch(/^\/alertingV2\/episodes\?_a=/);
+    const location = await AlertingV2EpisodesLocatorDefinition.getLocation({
+      ...params,
+      host: TEST_HOST.episodes,
+    });
+    expect(location.app).toBe('test-app');
+    expect(location.path).toMatch(/^\/alerting\/inbox\?_a=/);
     jest.useRealTimers();
   });
 

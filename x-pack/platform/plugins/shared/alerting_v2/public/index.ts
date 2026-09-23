@@ -89,7 +89,6 @@ export type {
 } from './types';
 export type { CreateRuleOptionsFlyoutProps } from './create_rule_options_flyout';
 export type { AlertingV2HostApp, CreateAlertingV2HostApp } from './locator_host';
-export { MANAGEMENT_HOST } from './locator_host';
 export type {
   AlertingV2RulesLocatorParams,
   AlertingV2RuleLibraryLocatorParams,

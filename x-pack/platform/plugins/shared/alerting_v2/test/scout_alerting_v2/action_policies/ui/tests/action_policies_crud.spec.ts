@@ -53,7 +53,6 @@ test.describe(
     test('creates a policy from the form and persists what was typed', async ({
       apiServices,
       browserAuth,
-      page,
       pageObjects,
     }) => {
       await browserAuth.loginWithCustomRole(ALERTING_V2_ACTION_POLICY_FORM_ROLE);
@@ -100,7 +99,6 @@ test.describe(
     test('edits an existing policy without dropping untouched fields', async ({
       apiServices,
       browserAuth,
-      page,
       pageObjects,
     }) => {
       const seeded = await apiServices.alertingV2.actionPolicies.create(

@@ -11,7 +11,18 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { ActionPoliciesArtifactsSubsection } from './action_policies_artifacts_subsection';
 import type { RuleApiResponse } from '../../../../services/rules_api';
 import { createMockLocators, MockLocatorProvider } from '../../../../test_utils/test_providers';
-import { AlertingV2ActionPoliciesLocatorDefinition } from '../../../../locators';
+import {
+  AlertingV2ActionPoliciesLocatorDefinition,
+  createAlertingV2HostApp,
+} from '../../../../locators';
+
+const TEST_HOST = createAlertingV2HostApp('test-app', {
+  rules: '/alerting/rules',
+  ruleLibrary: '/alerting/library',
+  episodes: '/alerting/inbox',
+  actionPolicies: '/alerting/action-policies',
+  executionHistory: '/alerting/execution-history',
+});
 
 const mockLocators = createMockLocators();
 
@@ -178,10 +189,13 @@ describe('ActionPoliciesArtifactsSubsection', () => {
     renderSubsection();
 
     const [params] = jest.mocked(mockLocators.actionPolicyLocators.useUrl).mock.calls[0];
-    const location = await AlertingV2ActionPoliciesLocatorDefinition.getLocation(params);
+    const location = await AlertingV2ActionPoliciesLocatorDefinition.getLocation({
+      ...params,
+      host: TEST_HOST.actionPolicies,
+    });
     expect(location).toMatchObject({
-      app: 'management',
-      path: '/alertingV2/action_policies',
+      app: 'test-app',
+      path: '/alerting/action-policies',
     });
   });
 

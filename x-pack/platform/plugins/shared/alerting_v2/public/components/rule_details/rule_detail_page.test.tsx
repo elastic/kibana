@@ -18,6 +18,15 @@ import { RuleProvider } from './rule_context';
 import type { RuleApiResponse } from '../../services/rules_api';
 import { useRuleAutoAttach } from '@kbn/alerting-v2-browser-shared';
 import { createMockLocators, MockLocatorProvider } from '../../test_utils/test_providers';
+import { createAlertingV2HostApp } from '../../locators';
+
+const TEST_HOST = createAlertingV2HostApp('test-app', {
+  rules: '/alerting/rules',
+  ruleLibrary: '/alerting/library',
+  episodes: '/alerting/inbox',
+  actionPolicies: '/alerting/action-policies',
+  executionHistory: '/alerting/execution-history',
+});
 import { AlertingV2RulesLocatorDefinition } from '../../locators';
 
 const mockLocators = createMockLocators();
@@ -231,14 +240,17 @@ describe('RuleDetailPage', () => {
     expect(backButton).toHaveAttribute('href', '/mock-locator-url');
   });
 
-  it('back link params resolve to management rules list URL', async () => {
+  it('back link params resolve to rules list URL for the bound host', async () => {
     renderPage(baseRule);
 
     const [params] = jest.mocked(mockLocators.rulesLocators.useUrl).mock.calls[0];
-    const location = await AlertingV2RulesLocatorDefinition.getLocation(params);
+    const location = await AlertingV2RulesLocatorDefinition.getLocation({
+      ...params,
+      host: TEST_HOST.rules,
+    });
     expect(location).toMatchObject({
-      app: 'management',
-      path: '/alertingV2/rules',
+      app: 'test-app',
+      path: '/alerting/rules',
     });
   });
 
