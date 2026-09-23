@@ -395,6 +395,36 @@ const version9: SavedObjectsFullModelVersion = {
   },
 };
 
+const engineDescriptorSchemaV10 = engineDescriptorSchemaV9.extends({
+  nonPriorityStatus: schema.nullable(
+    schema.oneOf([
+      schema.literal('installing'),
+      schema.literal('started'),
+      schema.literal('stopped'),
+      schema.literal('updating'),
+      schema.literal('error'),
+    ])
+  ),
+  nonPriorityError: schema.nullable(
+    schema.object({
+      message: schema.string(),
+      action: schema.string(),
+    })
+  ),
+});
+
+// Adds the non-priority process status and error, so its lifecycle and failures are tracked
+// separately from the priority process rather than sharing one field. schema.nullable defaults
+// absent keys to null, so no backfill is needed for version 9 descriptors. Not queried, so no
+// mappings addition.
+const version10: SavedObjectsFullModelVersion = {
+  changes: [],
+  schemas: {
+    create: engineDescriptorSchemaV10,
+    forwardCompatibility: engineDescriptorSchemaV10.extends({}, { unknowns: 'ignore' }),
+  },
+};
+
 export const EngineDescriptorType: SavedObjectsType = {
   name: EngineDescriptorTypeName,
   hidden: false,
@@ -410,6 +440,7 @@ export const EngineDescriptorType: SavedObjectsType = {
     7: version7,
     8: version8,
     9: version9,
+    10: version10,
   },
   hiddenFromHttpApis: true,
 };
