@@ -52,6 +52,8 @@ describe('TransactionDetailFlyoutFooter', () => {
     expect(button).not.toBeDisabled();
     expect(button).toHaveAttribute('href', '/app/discover/traces');
     expect(button).toHaveTextContent('Open traces in Discover');
+    expect(button).toHaveAttribute('data-ebt-action', 'openInDiscover');
+    expect(button).toHaveAttribute('data-ebt-element', 'transactionDetailFlyoutFooter');
   });
 
   it('disables the Discover button while links are loading', () => {
