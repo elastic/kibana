@@ -14,8 +14,8 @@ import {
   CASE_WORKFLOW_ORIGIN_TYPE,
   OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
   OBSERVABLES_WORKFLOW_ORIGIN_TYPE,
-  ALERT_WORKFLOW_ORIGIN_TYPE,
-  ALERTS_WORKFLOW_ORIGIN_TYPE,
+  ATTACHMENT_WORKFLOW_ORIGIN_TYPE,
+  ATTACHMENTS_WORKFLOW_ORIGIN_TYPE,
 } from '../../../common/constants/workflow';
 import type {
   CasesTelemetry,
@@ -114,8 +114,8 @@ export const getWorkflowsTelemetryData = async ({
     case: getOriginCount(CASE_WORKFLOW_ORIGIN_TYPE),
     observable: getOriginCount(OBSERVABLE_WORKFLOW_ORIGIN_TYPE),
     observables: getOriginCount(OBSERVABLES_WORKFLOW_ORIGIN_TYPE),
-    alert: getOriginCount(ALERT_WORKFLOW_ORIGIN_TYPE),
-    alerts: getOriginCount(ALERTS_WORKFLOW_ORIGIN_TYPE),
+    attachment: getOriginCount(ATTACHMENT_WORKFLOW_ORIGIN_TYPE),
+    attachments: getOriginCount(ATTACHMENTS_WORKFLOW_ORIGIN_TYPE),
   };
 
   const originSum = Object.values(originCounts).reduce((s, n) => s + n, 0);
