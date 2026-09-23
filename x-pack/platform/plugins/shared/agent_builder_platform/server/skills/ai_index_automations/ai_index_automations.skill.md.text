@@ -453,7 +453,7 @@ looking for a fault in the workflow that isn't there. Expanding first gives one 
 
 `<destination>` is the `dest.value` from the brief. `FROM ai-index-*` works too when you are unsure
 of it, at the cost of scanning every AI index. Read the backing store here, not the view: the view
-drops `governance` and hides what a cleanup deleted, and you want to see exactly what was written.
+drops `governance`, and you want to see exactly what was written.
 
 Judge those against what the brief asked for. When one step is what is wrong,
 `platform.workflows.workflow_execute_step` runs that step alone out of the inline YAML, so you can
