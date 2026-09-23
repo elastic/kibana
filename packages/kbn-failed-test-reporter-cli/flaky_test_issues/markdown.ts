@@ -154,7 +154,7 @@ export const testsTable = (
     minFailRate,
   }: { withDashboardLinks: boolean; maxRows: number; minFailRate: number }
 ): string => {
-  const header = ['Test', 'Flaky rate by branch'];
+  const header = ['Test', 'Flaky branches'];
   const rows = tests
     .slice(0, maxRows)
     .map((test) => [

@@ -99,7 +99,7 @@ describe('testsTable', () => {
     });
 
     expect(rendered.split('\n')).toHaveLength(6);
-    expect(rendered).toContain('| Test | Flaky rate by branch | Dashboard |');
+    expect(rendered).toContain('| Test | Flaky branches | Dashboard |');
     expect(rendered).toContain(
       `| test \\| 0 | **\`main\` 10% (49 / 509)** | [dashboard](${testDashboardUrl('t0')}) |`
     );

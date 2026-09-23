@@ -174,7 +174,7 @@ describe('renderFlakySuiteIssueBody', () => {
       [
         '1 test in the `Default status alert` suite appears to be flaky:',
         '',
-        '| Test | Flaky rate by branch | Dashboard |',
+        '| Test | Flaky branches | Dashboard |',
       ].join('\n')
     );
     const multi = multiTestReport();
